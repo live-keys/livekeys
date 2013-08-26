@@ -22,6 +22,8 @@ QML_IMPORT_PATH =
 include(qtquickviewer/qtquick2applicationviewer.pri)
 qtcAddDeployment()
 
+QT += widgets
+
 INCLUDEPATH += src/core
 INCLUDEPATH += src/transform
 INCLUDEPATH += src/view
@@ -36,7 +38,8 @@ SOURCES += main.cpp \
 	src/core/QMatTransformation.cpp \
 	src/view/QCursorShape.cpp \
 	src/transform/QChannelSelect.cpp \
-	src/transform/QCanny.cpp
+	src/transform/QCanny.cpp \
+        src/view/QCodeDocument.cpp
 
 HEADERS += \
 	src/core/QMatState.hpp \
@@ -48,4 +51,5 @@ HEADERS += \
 	src/core/QMatTransformation.hpp \
 	src/view/QCursorShape.hpp \
 	src/transform/QChannelSelect.hpp \
-	src/transform/QCanny.hpp
+	src/transform/QCanny.hpp \
+        src/view/QCodeDocument.hpp

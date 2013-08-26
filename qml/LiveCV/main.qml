@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtQuick.Dialogs 1.0
 import Cv 1.0
 
 Rectangle {
@@ -10,6 +11,30 @@ Rectangle {
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+        onNewFile  : {
+            if ( editor.text !== "" && editor.text !== "Rectangle{\n}" )
+                header.questionSave()
+
+        }
+        onOpenFile : {
+            if ( editor.text !== "" && editor.text !== "Rectangle{\n}" )
+                header.questionSave()
+        }
+        onSaveFile : {
+
+        }
+        onFontPlus: if ( editor.font.pixelSize < 24 ) editor.font.pixelSize += 2
+        onFontMinus: if ( editor.font.pixelSize > 10 ) editor.font.pixelSize -= 2
+    }
+
+    FileDialog {
+        id: fileDialog
+        title: "Please choose a file"
+        selectExisting : false
+        visible : false
+        onAccepted: {
+            console.log("You chose: " + fileDialog.fileUrls)
+        }
     }
 
     Rectangle{
@@ -54,6 +79,9 @@ Rectangle {
                     anchors.left: parent.left
                     width : flick.width
                     height : flick.height
+                    Behavior on font.pixelSize {
+                        NumberAnimation { duration: 40 }
+                    }
                 }
 
             }
