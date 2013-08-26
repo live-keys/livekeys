@@ -50,7 +50,7 @@ Rectangle {
 
                 Editor{
                     id : editor
-                    text : "Rectangle{}"
+                    text : "Rectangle{\n}"
                     anchors.left: parent.left
                     width : flick.width
                     height : flick.height
@@ -134,7 +134,6 @@ Rectangle {
                         }
                         if (newItem){
                             error.text = "";
-                            //newItem.anchors.fill = tester;
                             if (tester.item) {
                                 tester.item.destroy();
                             }

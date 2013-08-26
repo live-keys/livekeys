@@ -24,6 +24,7 @@ int main(int argc, char *argv[]){
     qmlRegisterType<QCanny>        ("Cv", 1, 0, "Canny");
 
     QtQuick2ApplicationViewer viewer;
+    viewer.setMinimumSize(QSize(800, 600));
     viewer.setMainQmlFile(QStringLiteral("qml/LiveCV/main.qml"));
     viewer.showExpanded();
 
