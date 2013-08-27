@@ -11,18 +11,46 @@ Rectangle {
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+
+        property string action : ""
+        function saveFileDialog(){
+            fileDialog.selectExisting = false
+            fileDialog.open()
+        }
+        function executeAction(){
+            if ( action === "new" )
+                editor.text = "Rectangle{\n}"
+            else if ( action === "open" ){
+                fileDialog.selectExisting = true
+                fileDialog.open()
+            }
+            action = ""
+        }
+
+        onMessageYes: {
+            saveFile()
+        }
+        onMessageNo: {
+            executeAction()
+        }
         onNewFile  : {
+            action = "new"
             if ( editor.text !== "" && editor.text !== "Rectangle{\n}" )
                 header.questionSave()
-
+            else
+                executeAction()
         }
         onOpenFile : {
+            action = "open"
             if ( editor.text !== "" && editor.text !== "Rectangle{\n}" )
                 header.questionSave()
+            else {
+                executeAction()
+            }
         }
-        onSaveFile : {
+        onSaveFile : saveFileDialog()
 
-        }
+
         onFontPlus: if ( editor.font.pixelSize < 24 ) editor.font.pixelSize += 2
         onFontMinus: if ( editor.font.pixelSize > 10 ) editor.font.pixelSize -= 2
     }
@@ -30,10 +58,16 @@ Rectangle {
     FileDialog {
         id: fileDialog
         title: "Please choose a file"
+        nameFilters: [ "Qml files (*.qml)", "All files (*)" ]
         selectExisting : false
         visible : false
         onAccepted: {
-            console.log("You chose: " + fileDialog.fileUrls)
+            if ( !selectExisting ){
+                codeDocument.saveFile(fileDialog.fileUrl, editor.text)
+                header.executeAction()
+            } else {
+                editor.text = codeDocument.openFile(fileDialog.fileUrl)
+            }
         }
     }
 

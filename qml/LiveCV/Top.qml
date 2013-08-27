@@ -6,7 +6,8 @@ Rectangle {
     height: 35
     color : "#1f262f"
 
-    property bool saveRequired : true
+    signal messageYes()
+    signal messageNo()
 
     signal newFile()
     signal openFile()
@@ -213,7 +214,7 @@ Rectangle {
                 hoverEnabled: true
                 onClicked : {
                     messageBox.visible = false
-                    container.saveFile()
+                    container.messageYes()
                 }
             }
         }
@@ -234,7 +235,10 @@ Rectangle {
                 id : noMArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked : messageBox.visible = false
+                onClicked : {
+                    container.messageNo()
+                    messageBox.visible = false
+                }
             }
         }
     }

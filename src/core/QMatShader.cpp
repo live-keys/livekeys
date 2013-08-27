@@ -1,7 +1,14 @@
 #include "QMatShader.hpp"
-#include "GLES2/gl2.h"
-#include "GLES2/gl2ext.h"
-#include "gl/GLU.h"
+
+// In some versions of gl.h the following 2 defines are missing
+
+#ifndef GL_UNPACK_ROW_LENGTH
+#define GL_UNPACK_ROW_LENGTH              0x0CF2
+#endif
+
+#ifndef GL_UNPACK_ALIGNMENT
+#define GL_UNPACK_ALIGNMENT               0x0CF5
+#endif
 
 QMatShader::QMatShader(){
 }

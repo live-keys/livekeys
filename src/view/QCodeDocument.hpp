@@ -10,9 +10,8 @@ public:
     explicit QCodeDocument(QQuickItem *parent = 0);
 
 public slots:
-    QString openFile(const QString& content);
-    void saveFile(const QString& content) const;
-    void newFile(const QString& content);
+    QString openFile(const QUrl& file);
+    void saveFile(const QUrl &file, const QString& content) const;
     
 private:
     QString m_openedFile;
