@@ -20,7 +20,7 @@ void QMatSource::setFile(const QString &file){
         cv::Mat temp = cv::imread(file.toStdString());
 
         if ( !temp.empty() ){
-            temp.copyTo(*out()->data());
+            temp.copyTo(*output()->data());
             emit outChanged();
             update();
         }

@@ -7,14 +7,14 @@
 class QMatDisplay : public QQuickItem{
 
     Q_OBJECT
-    Q_PROPERTY(QMat* out READ out WRITE setOut NOTIFY outChanged)
+    Q_PROPERTY(QMat* output READ output WRITE setOutput NOTIFY outChanged)
 
 public:
     explicit QMatDisplay(QQuickItem *parent = 0);
     virtual ~QMatDisplay();
 
-    QMat* out();
-    void setOut(QMat* mat);
+    QMat* output();
+    void setOutput(QMat* mat);
 
 signals:
     void outChanged();
@@ -23,16 +23,16 @@ protected:
     virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *);
     
 private:
-    QMat* m_out;
+    QMat* m_output;
 
 };
 
-inline QMat *QMatDisplay::out(){
-    return m_out;
+inline QMat *QMatDisplay::output(){
+    return m_output;
 }
 
-inline void QMatDisplay::setOut(QMat *mat){
-	m_out = mat;
+inline void QMatDisplay::setOutput(QMat *mat){
+    m_output = mat;
 	emit outChanged();
 }
 

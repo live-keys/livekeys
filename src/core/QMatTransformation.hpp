@@ -37,7 +37,7 @@ inline void QMatTransformation::setInputMat(QMat *mat){
 }
 
 inline void QMatTransformation::transform(){
-    transform(*inputMat()->data(), *out()->data());
+    transform(*inputMat()->data(), *output()->data());
     emit outChanged();
     update();
 }

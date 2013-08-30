@@ -41,7 +41,8 @@ SOURCES += main.cpp \
 	src/transform/QCanny.cpp \
         src/view/QCodeDocument.cpp \
     src/transform/QCornerEigenValsAndVecs.cpp \
-    src/core/QCamCapture.cpp
+    src/core/QCamCapture.cpp \
+    src/core/QCaptureContainer.cpp
 
 HEADERS += \
 	src/core/QMatState.hpp \
@@ -56,4 +57,5 @@ HEADERS += \
 	src/transform/QCanny.hpp \
         src/view/QCodeDocument.hpp \
     src/transform/QCornerEigenValsAndVecs.hpp \
-    src/core/QCamCapture.hpp
+    src/core/QCamCapture.hpp \
+    src/core/QCaptureContainer.hpp

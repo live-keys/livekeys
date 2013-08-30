@@ -5,13 +5,13 @@
 
 QMatDisplay::QMatDisplay(QQuickItem *parent) :
     QQuickItem(parent),
-    m_out(new QMat())
+    m_output(new QMat())
 {
     setFlag(ItemHasContents, true);
 }
 
 QMatDisplay::~QMatDisplay(){
-    delete m_out;
+    delete m_output;
 }
 
 QSGNode *QMatDisplay::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *){
@@ -20,7 +20,7 @@ QSGNode *QMatDisplay::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNode
         n = new QMatNode();
 
     QSGGeometry::updateTexturedRectGeometry(n->geometry(), boundingRect(), QRectF(0, 0, 1, 1));
-    static_cast<QSGSimpleMaterial<QMatState>*>(n->material())->state()->mat         = m_out;
+    static_cast<QSGSimpleMaterial<QMatState>*>(n->material())->state()->mat         = m_output;
     static_cast<QSGSimpleMaterial<QMatState>*>(n->material())->state()->textureSync = false;
     n->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
 
