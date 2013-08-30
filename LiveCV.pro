@@ -39,7 +39,9 @@ SOURCES += main.cpp \
 	src/view/QCursorShape.cpp \
 	src/transform/QChannelSelect.cpp \
 	src/transform/QCanny.cpp \
-        src/view/QCodeDocument.cpp
+        src/view/QCodeDocument.cpp \
+    src/transform/QCornerEigenValsAndVecs.cpp \
+    src/core/QCamCapture.cpp
 
 HEADERS += \
 	src/core/QMatState.hpp \
@@ -52,4 +54,6 @@ HEADERS += \
 	src/view/QCursorShape.hpp \
 	src/transform/QChannelSelect.hpp \
 	src/transform/QCanny.hpp \
-        src/view/QCodeDocument.hpp
+        src/view/QCodeDocument.hpp \
+    src/transform/QCornerEigenValsAndVecs.hpp \
+    src/core/QCamCapture.hpp

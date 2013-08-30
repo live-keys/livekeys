@@ -50,7 +50,6 @@ Rectangle {
         }
         onSaveFile : saveFileDialog()
 
-
         onFontPlus: if ( editor.font.pixelSize < 24 ) editor.font.pixelSize += 2
         onFontMinus: if ( editor.font.pixelSize > 10 ) editor.font.pixelSize -= 2
     }

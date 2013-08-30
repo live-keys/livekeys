@@ -12,6 +12,7 @@
 #include "QCursorShape.hpp"
 #include "QCanny.hpp"
 #include "QCodeDocument.hpp"
+#include "QCornerEigenValsAndVecs.hpp"
 
 #include <QDebug>
 
@@ -26,6 +27,8 @@ int main(int argc, char *argv[]){
     qmlRegisterType<QCodeDocument> ("Cv", 1, 0, "Document");
     qmlRegisterType<QChannelSelect>("Cv", 1, 0, "ChannelSelect");
     qmlRegisterType<QCanny>        ("Cv", 1, 0, "Canny");
+
+    qmlRegisterType<QCornerEigenValsAndVecs>("Cv", 1, 0, "CornerEigenValsAndVecs");
 
     QtQuick2ApplicationViewer viewer;
     viewer.setMinimumSize(QSize(800, 600));
