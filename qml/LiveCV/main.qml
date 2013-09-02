@@ -6,6 +6,7 @@ Rectangle {
     width: 1240
     height: 700
     color : "#293039"
+
     Top{
         id : header
         anchors.top : parent.top

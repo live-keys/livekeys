@@ -9,6 +9,7 @@
 #include "QMat.hpp"
 #include "QMatSource.hpp"
 #include "QCamCapture.hpp"
+#include "QVideoCapture.hpp"
 #include "QChannelSelect.hpp"
 #include "QCursorShape.hpp"
 #include "QCanny.hpp"
@@ -29,6 +30,7 @@ int main(int argc, char *argv[]){
     qmlRegisterType<QChannelSelect>("Cv", 1, 0, "ChannelSelect");
     qmlRegisterType<QCanny>        ("Cv", 1, 0, "Canny");
     qmlRegisterType<QCamCapture>   ("Cv", 1, 0, "CamCapture");
+    qmlRegisterType<QVideoCapture> ("Cv", 1, 0, "VideoCapture");
 
     qmlRegisterType<QCornerEigenValsAndVecs>("Cv", 1, 0, "CornerEigenValsAndVecs");
 

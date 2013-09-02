@@ -2,7 +2,9 @@
 #define QCAPTURECONTAINER_HPP
 
 #include <QObject>
-#include "QCamCapture.hpp"
+
+class QCamCaptureThread;
+class QVideoCaptureThread;
 
 /**
  * @brief The QCaptureContainer class
@@ -15,9 +17,10 @@ class QCaptureContainer : public QObject{
 public:
     ~QCaptureContainer();
 
-    QCamCaptureThread* findCapture(int device);
+    QCamCaptureThread*   captureThread(int device);
+    QVideoCaptureThread* captureThread(const QString& file);
 
-    static QCamCaptureThread *instance() const;
+    static QCaptureContainer *instance();
     static void destroyInstance();
     
 signals:
@@ -25,25 +28,26 @@ signals:
 public slots:
 
 private:
-    static QCamCaptureThread* m_instance;
+    static QCaptureContainer* m_instance;
 
     explicit QCaptureContainer(QObject *parent = 0);
     QCaptureContainer(const QCaptureContainer& other);
     QCaptureContainer& operator= (const QCaptureContainer& other);
 
-    QList<QCamCaptureThread*> m_captureThreads;
+    QList<QCamCaptureThread*>   m_camCaptureThreads;
+    QList<QVideoCaptureThread*> m_videoCaptureThreads;
     
 };
 
-inline QCamCaptureThread *QCaptureContainer::instance() const{
+inline QCaptureContainer *QCaptureContainer::instance(){
     if ( m_instance == 0 ){
-        m_instance = new QCamCaptureThread();
+        m_instance = new QCaptureContainer();
         std::atexit(&destroyInstance);
     }
     return m_instance;
 }
 
-void QCaptureContainer::destroyInstance(){
+inline void QCaptureContainer::destroyInstance(){
     delete m_instance;
 }
 

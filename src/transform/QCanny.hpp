@@ -16,10 +16,10 @@ public:
 
     virtual void transform(cv::Mat &in, cv::Mat &out);
 
-    double threshold1() const;
-    double threshold2() const;
-    int apertureSize() const;
-    bool l2gradient() const;
+    double threshold1()  const;
+    double threshold2()  const;
+    int    apertureSize()const;
+    bool   l2gradient()  const;
 
     void setThreshold1( double threshold );
     void setThreshold2( double threshold );

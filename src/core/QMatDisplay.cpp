@@ -10,6 +10,13 @@ QMatDisplay::QMatDisplay(QQuickItem *parent) :
     setFlag(ItemHasContents, true);
 }
 
+QMatDisplay::QMatDisplay(QMat *output, QQuickItem *parent) :
+    QQuickItem(parent),
+    m_output(output)
+{
+    setFlag(ItemHasContents, true);
+}
+
 QMatDisplay::~QMatDisplay(){
     delete m_output;
 }

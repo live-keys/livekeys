@@ -42,7 +42,10 @@ SOURCES += main.cpp \
         src/view/QCodeDocument.cpp \
     src/transform/QCornerEigenValsAndVecs.cpp \
     src/core/QCamCapture.cpp \
-    src/core/QCaptureContainer.cpp
+    src/core/QCaptureContainer.cpp \
+    src/core/QCamCaptureThread.cpp \
+    src/core/QVideoCapture.cpp \
+    src/core/QVideoCaptureThread.cpp
 
 HEADERS += \
 	src/core/QMatState.hpp \
@@ -58,4 +61,7 @@ HEADERS += \
         src/view/QCodeDocument.hpp \
     src/transform/QCornerEigenValsAndVecs.hpp \
     src/core/QCamCapture.hpp \
-    src/core/QCaptureContainer.hpp
+    src/core/QCaptureContainer.hpp \
+    src/core/QCamCaptureThread.hpp \
+    src/core/QVideoCapture.hpp \
+    src/core/QVideoCaptureThread.hpp

@@ -21,6 +21,8 @@ void QMatSource::setFile(const QString &file){
 
         if ( !temp.empty() ){
             temp.copyTo(*output()->data());
+            setImplicitWidth(output()->data()->size().width);
+            setImplicitHeight(output()->data()->size().height);
             emit outChanged();
             update();
         }

@@ -15,7 +15,6 @@ QMatShader::QMatShader(){
 
 bool QMatShader::loadTexture(QMat *mat, int index){
 
-    glGenTextures(1, &m_textures[index]);
     glBindTexture(GL_TEXTURE_2D, m_textures[index]);
 
     // Give texture parameters (scaling and edging options)

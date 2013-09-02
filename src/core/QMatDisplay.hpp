@@ -11,6 +11,7 @@ class QMatDisplay : public QQuickItem{
 
 public:
     explicit QMatDisplay(QQuickItem *parent = 0);
+    QMatDisplay(QMat* output, QQuickItem *parent = 0);
     virtual ~QMatDisplay();
 
     QMat* output();

@@ -56,6 +56,8 @@ inline QList<QByteArray> QMatShader::attributes() const{
     return QList<QByteArray>() << "aVertex" << "aTexCoord";
 }
 
+#include <QTime>
+
 inline void QMatShader::updateState(const QMatState *state, const QMatState *){
 
     if ( state->mat != 0 ){
@@ -64,8 +66,8 @@ inline void QMatShader::updateState(const QMatState *state, const QMatState *){
             if ( state->textureIndex == -1 ){
                 state->textureIndex = m_textures.length();
                 m_textures.append(0);
+                glGenTextures(1, &m_textures[state->textureIndex]);
             }
-
             loadTexture(state->mat, state->textureIndex);
             state->textureSync = true;
         }
