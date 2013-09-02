@@ -35,6 +35,8 @@ private:
     int m_ksize;
     int m_borderType;
 
+    cv::Mat m_mc;
+
 };
 
 inline int QCornerEigenValsAndVecs::blockSize() const{
