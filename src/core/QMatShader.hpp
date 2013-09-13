@@ -56,8 +56,6 @@ inline QList<QByteArray> QMatShader::attributes() const{
     return QList<QByteArray>() << "aVertex" << "aTexCoord";
 }
 
-#include <QTime>
-
 inline void QMatShader::updateState(const QMatState *state, const QMatState *){
 
     if ( state->mat != 0 ){

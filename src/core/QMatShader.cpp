@@ -27,15 +27,20 @@ bool QMatShader::loadTexture(QMat *mat, int index){
 	if ( mat->data()->elemSize() != 0 )
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint)( mat->data()->step / mat->data()->elemSize()) );
 
-    GLint colorFormat = mat->data()->channels() == 3 ? GL_RGB : GL_LUMINANCE;
+    GLint colorFormat = mat->data()->channels() == 3
+            ? GL_RGB  : mat->data()->channels() == 4
+            ? GL_RGB : GL_LUMINANCE;
+
+    qDebug() << "color format : " << mat->data()->channels() << colorFormat;
+    //qDebug() << "mat step : " << mat->data()->cha
 
     glTexImage2D(
          GL_TEXTURE_2D, 0,          // Pyramid level (for mip-mapping) - 0 is the top level
-         colorFormat,                    // Internal colour format to convert to
+         colorFormat,               // Internal colour format to convert to
          mat->data()->cols,         // Width
          mat->data()->rows,         // Height
          0,                         // Border
-         colorFormat,                    // Input image format (i.e. GL_RGB, GL_RGBA, GL_BGR etc.)0x80E0
+         colorFormat,               // Input image format (i.e. GL_RGB, GL_RGBA, GL_BGR etc.)0x80E0
          GL_UNSIGNED_BYTE,          // Image data type
          mat->data()->ptr()         // The actual image data itself
     );

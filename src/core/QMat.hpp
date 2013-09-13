@@ -7,6 +7,18 @@
 class QMat : public QQuickItem{
 
     Q_OBJECT
+    Q_ENUMS(Type)
+
+public:
+    enum Type{
+        CV8U  = CV_8U,
+        CV8S  = CV_8S,
+        CV16U = CV_16U,
+        CV16S = CV_16S,
+        CV32S = CV_32S,
+        CV32F = CV_32F,
+        CV64F = CV_64F
+    };
 
 public:
     explicit QMat(QQuickItem *parent = 0);

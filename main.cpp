@@ -8,6 +8,7 @@
 
 #include "QMat.hpp"
 #include "QMatSource.hpp"
+#include "QMatEmpty.hpp"
 #include "QCamCapture.hpp"
 #include "QVideoCapture.hpp"
 #include "QChannelSelect.hpp"
@@ -26,6 +27,7 @@ int main(int argc, char *argv[]){
     qmlRegisterType<QCursorShape>  ("Cv", 1, 0, "CursorArea");
     qmlRegisterType<QMat>          ("Cv", 1, 0, "Mat");
     qmlRegisterType<QMatSource>    ("Cv", 1, 0, "MatSource");
+    qmlRegisterType<QMatEmpty>     ("Cv", 1, 0, "MatEmpty");
     qmlRegisterType<QCodeDocument> ("Cv", 1, 0, "Document");
     qmlRegisterType<QChannelSelect>("Cv", 1, 0, "ChannelSelect");
     qmlRegisterType<QCanny>        ("Cv", 1, 0, "Canny");

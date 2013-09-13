@@ -45,7 +45,8 @@ SOURCES += main.cpp \
     src/core/QCaptureContainer.cpp \
     src/core/QCamCaptureThread.cpp \
     src/core/QVideoCapture.cpp \
-    src/core/QVideoCaptureThread.cpp
+    src/core/QVideoCaptureThread.cpp \
+    src/core/QMatEmpty.cpp
 
 HEADERS += \
 	src/core/QMatState.hpp \
@@ -64,4 +65,5 @@ HEADERS += \
     src/core/QCaptureContainer.hpp \
     src/core/QCamCaptureThread.hpp \
     src/core/QVideoCapture.hpp \
-    src/core/QVideoCaptureThread.hpp
+    src/core/QVideoCaptureThread.hpp \
+    src/core/QMatEmpty.hpp
