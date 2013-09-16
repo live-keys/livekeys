@@ -27,6 +27,8 @@ public:
     QMat::Type type() const;
     void setType(QMat::Type type);
 
+    void cacheScalarColor();
+
 signals:
     void matSizeChanged();
     void colorChanged();
@@ -64,19 +66,9 @@ inline const QColor &QMatEmpty::color() const{
 inline void QMatEmpty::setColor(const QColor &color){
     if ( m_color != color ){
         m_color = color;
-
-        qDebug() << m_color;
-        qDebug() << m_channels;
-
-        switch ( m_channels ){
-        case 1 : m_colorScalar = cv::Scalar(color.red());break;
-        case 2 : m_colorScalar = cv::Scalar(color.red(), color.green()); break;
-        case 3 : m_colorScalar = cv::Scalar(color.red(), color.green(), color.blue()); break;
-        case 4 : m_colorScalar = cv::Scalar(color.red(), color.green(), color.blue(), color.alpha()); break;
-        }
-
-        emit colorChanged();
+        cacheScalarColor();
         output()->data()->setTo(m_colorScalar);
+        emit colorChanged();
         emit outChanged();
         update();
     }
@@ -89,9 +81,12 @@ inline int QMatEmpty::channels() const{
 inline void QMatEmpty::setChannels(int channels){
     if ( m_channels != channels ){
         m_channels = channels;
-        emit channelsChanged();
+
+        cacheScalarColor();
         output()->data()->create(cv::Size(m_matSize.width(), m_matSize.height()), CV_MAKETYPE(m_type, m_channels));
         output()->data()->setTo(m_colorScalar);
+
+        emit channelsChanged();
         emit outChanged();
         update();
     }
@@ -109,6 +104,15 @@ inline void QMatEmpty::setType(QMat::Type type){
         output()->data()->setTo(m_colorScalar);
         emit outChanged();
         update();
+    }
+}
+
+inline void QMatEmpty::cacheScalarColor(){
+    switch ( m_channels ){
+    case 1 : m_colorScalar = cv::Scalar(m_color.red());break;
+    case 2 : m_colorScalar = cv::Scalar(m_color.red(),  m_color.green()); break;
+    case 3 : m_colorScalar = cv::Scalar(m_color.blue(), m_color.green(), m_color.red()); break;
+    case 4 : m_colorScalar = cv::Scalar(m_color.blue(), m_color.green(), m_color.red(), m_color.alpha()); break;
     }
 }
 

@@ -29,10 +29,7 @@ bool QMatShader::loadTexture(QMat *mat, int index){
 
     GLint colorFormat = mat->data()->channels() == 3
             ? GL_RGB  : mat->data()->channels() == 4
-            ? GL_RGB : GL_LUMINANCE;
-
-    qDebug() << "color format : " << mat->data()->channels() << colorFormat;
-    //qDebug() << "mat step : " << mat->data()->cha
+            ? GL_RGBA : GL_LUMINANCE;
 
     glTexImage2D(
          GL_TEXTURE_2D, 0,          // Pyramid level (for mip-mapping) - 0 is the top level

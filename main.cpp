@@ -9,6 +9,8 @@
 #include "QMat.hpp"
 #include "QMatSource.hpp"
 #include "QMatEmpty.hpp"
+#include "QMatRoi.hpp"
+#include "QMatValues.hpp"
 #include "QCamCapture.hpp"
 #include "QVideoCapture.hpp"
 #include "QChannelSelect.hpp"
@@ -16,6 +18,8 @@
 #include "QCanny.hpp"
 #include "QCodeDocument.hpp"
 #include "QCornerEigenValsAndVecs.hpp"
+#include "QThreshold.hpp"
+#include "QAlphaMerge.hpp"
 
 #include <QDebug>
 
@@ -28,11 +32,15 @@ int main(int argc, char *argv[]){
     qmlRegisterType<QMat>          ("Cv", 1, 0, "Mat");
     qmlRegisterType<QMatSource>    ("Cv", 1, 0, "MatSource");
     qmlRegisterType<QMatEmpty>     ("Cv", 1, 0, "MatEmpty");
+    qmlRegisterType<QMatRoi>       ("Cv", 1, 0, "MatRoi");
+    qmlRegisterType<QMatValues>    ("Cv", 1, 0, "MatValues");
     qmlRegisterType<QCodeDocument> ("Cv", 1, 0, "Document");
     qmlRegisterType<QChannelSelect>("Cv", 1, 0, "ChannelSelect");
     qmlRegisterType<QCanny>        ("Cv", 1, 0, "Canny");
     qmlRegisterType<QCamCapture>   ("Cv", 1, 0, "CamCapture");
     qmlRegisterType<QVideoCapture> ("Cv", 1, 0, "VideoCapture");
+    qmlRegisterType<QThreshold>    ("Cv", 1, 0, "Threshold");
+    qmlRegisterType<QAlphaMerge>   ("Cv", 1, 0, "AlphaMerge");
 
     qmlRegisterType<QCornerEigenValsAndVecs>("Cv", 1, 0, "CornerEigenValsAndVecs");
 

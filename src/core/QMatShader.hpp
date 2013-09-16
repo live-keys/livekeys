@@ -48,7 +48,7 @@ inline const char *QMatShader::fragmentShader() const{
             "void main ()                                               \n"
             "{                                                          \n"
             "   highp vec4 textureColor = texture2D( textures[0], texCoord.st );"
-            "   gl_FragColor = vec4(textureColor.b, textureColor.g, textureColor.r, qt_Opacity);"
+            "   gl_FragColor = vec4(textureColor.b, textureColor.g, textureColor.r, 1.0) * ( qt_Opacity * textureColor.a );"
             "}";
 }
 

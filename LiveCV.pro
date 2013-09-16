@@ -46,7 +46,11 @@ SOURCES += main.cpp \
     src/core/QCamCaptureThread.cpp \
     src/core/QVideoCapture.cpp \
     src/core/QVideoCaptureThread.cpp \
-    src/core/QMatEmpty.cpp
+    src/core/QMatEmpty.cpp \
+    src/transform/QThreshold.cpp \
+    src/transform/QAlphaMerge.cpp \
+    src/core/QMatRoi.cpp \
+    src/core/QMatValues.cpp
 
 HEADERS += \
 	src/core/QMatState.hpp \
@@ -66,4 +70,8 @@ HEADERS += \
     src/core/QCamCaptureThread.hpp \
     src/core/QVideoCapture.hpp \
     src/core/QVideoCaptureThread.hpp \
-    src/core/QMatEmpty.hpp
+    src/core/QMatEmpty.hpp \
+    src/transform/QThreshold.hpp \
+    src/transform/QAlphaMerge.hpp \
+    src/core/QMatRoi.hpp \
+    src/core/QMatValues.hpp

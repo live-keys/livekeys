@@ -12,7 +12,7 @@ class QCanny : public QMatTransformation{
     Q_PROPERTY(bool   l2gradient   READ l2gradient   WRITE setL2gradient   NOTIFY l2gradientChanged)
 
 public:
-    explicit QCanny(QQuickItem *parent = 0);;
+    explicit QCanny(QQuickItem *parent = 0);
 
     virtual void transform(cv::Mat &in, cv::Mat &out);
 
