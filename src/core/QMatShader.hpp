@@ -18,7 +18,7 @@ public:
     void updateState(const QMatState *state, const QMatState *oldState);
     void resolveUniforms();
 
-    bool loadTexture(QMat* mat, int index);
+    bool loadTexture(QMat* mat, int index, bool linearFilter = true);
 
 
 private:
@@ -66,7 +66,7 @@ inline void QMatShader::updateState(const QMatState *state, const QMatState *){
                 m_textures.append(0);
                 glGenTextures(1, &m_textures[state->textureIndex]);
             }
-            loadTexture(state->mat, state->textureIndex);
+            loadTexture(state->mat, state->textureIndex, state->linearFilter);
             state->textureSync = true;
         }
         glActiveTexture(GL_TEXTURE0);

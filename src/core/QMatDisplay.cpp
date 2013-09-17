@@ -3,16 +3,18 @@
 #include "QMatShader.hpp"
 #include <QSGSimpleMaterial>
 
-QMatDisplay::QMatDisplay(QQuickItem *parent) :
-    QQuickItem(parent),
-    m_output(new QMat())
+QMatDisplay::QMatDisplay(QQuickItem *parent)
+    : QQuickItem(parent)
+    , m_output(new QMat())
+    , m_linearFilter(true)
 {
     setFlag(ItemHasContents, true);
 }
 
-QMatDisplay::QMatDisplay(QMat *output, QQuickItem *parent) :
-    QQuickItem(parent),
-    m_output(output)
+QMatDisplay::QMatDisplay(QMat *output, QQuickItem *parent)
+    : QQuickItem(parent)
+    , m_output(output)
+    , m_linearFilter(true)
 {
     setFlag(ItemHasContents, true);
 }
@@ -27,8 +29,10 @@ QSGNode *QMatDisplay::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNode
         n = new QMatNode();
 
     QSGGeometry::updateTexturedRectGeometry(n->geometry(), boundingRect(), QRectF(0, 0, 1, 1));
-    static_cast<QSGSimpleMaterial<QMatState>*>(n->material())->state()->mat         = m_output;
-    static_cast<QSGSimpleMaterial<QMatState>*>(n->material())->state()->textureSync = false;
+    QMatState* state = static_cast<QSGSimpleMaterial<QMatState>*>(n->material())->state();
+    state->mat          = m_output;
+    state->textureSync  = false;
+    state->linearFilter = m_linearFilter;
     n->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
 
     return n;

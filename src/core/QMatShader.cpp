@@ -13,15 +13,17 @@
 QMatShader::QMatShader(){
 }
 
-bool QMatShader::loadTexture(QMat *mat, int index){
+bool QMatShader::loadTexture(QMat *mat, int index, bool linearFilter){
 
     glBindTexture(GL_TEXTURE_2D, m_textures[index]);
 
-    // Give texture parameters (scaling and edging options)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // Texture parameters (scaling and edging options);
+    GLint resizeFilter = linearFilter ? GL_LINEAR : GL_NEAREST;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, resizeFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, resizeFilter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
+
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, (mat->data()->step & 3) ? 1 : 4);
 	if ( mat->data()->elemSize() != 0 )

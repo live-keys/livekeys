@@ -7,6 +7,7 @@ class QMatState{
 
 public:
     QMat* mat;
+    bool  linearFilter;
     mutable int   textureIndex;
     mutable bool  textureSync;
 

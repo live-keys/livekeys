@@ -3,7 +3,8 @@
 QMatState::QMatState():
     mat(0),
     textureIndex(-1),
-    textureSync(false)
+    textureSync(false),
+    linearFilter(true)
 {
 }
 

@@ -52,8 +52,8 @@ inline void QMatEmpty::setMatSize(const QSize &size){
     if ( m_matSize != size ){
         m_matSize = size;
         emit matSizeChanged();
-        output()->data()->create(cv::Size(m_matSize.width(), m_matSize.height()), CV_MAKETYPE(m_type, m_channels));
-        output()->data()->setTo(m_colorScalar);
+        cv::Mat newMat(cv::Size(m_matSize.width(), m_matSize.height()), CV_MAKETYPE(m_type, m_channels), cv::Scalar(m_colorScalar));
+        (*output()->data()) = newMat;
         emit outChanged();
         update();
     }
