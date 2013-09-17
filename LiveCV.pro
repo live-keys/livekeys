@@ -50,7 +50,8 @@ SOURCES += main.cpp \
     src/transform/QThreshold.cpp \
     src/transform/QAlphaMerge.cpp \
     src/core/QMatRoi.cpp \
-    src/core/QMatValues.cpp
+    src/core/QMatRead.cpp \
+    src/core/QMat2DArray.cpp
 
 HEADERS += \
 	src/core/QMatState.hpp \
@@ -74,4 +75,5 @@ HEADERS += \
     src/transform/QThreshold.hpp \
     src/transform/QAlphaMerge.hpp \
     src/core/QMatRoi.hpp \
-    src/core/QMatValues.hpp
+    src/core/QMatRead.hpp \
+    src/core/QMat2DArray.hpp

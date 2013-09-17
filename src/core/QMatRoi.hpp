@@ -51,16 +51,16 @@ inline int QMatRoi::regionY() const{
 inline void QMatRoi::setregionX(int regionX){
     if ( m_regionX != regionX ){
         m_regionX = regionX;
-        emit regionXChanged();
         QMatTransformation::transform();
+        emit regionXChanged();
     }
 }
 
 inline void QMatRoi::setregionY(int regionY){
     if ( m_regionY != regionY ){
         m_regionY = regionY;
-        emit regionYChanged();
         QMatTransformation::transform();
+        emit regionYChanged();
     }
 }
 
@@ -75,16 +75,16 @@ inline int QMatRoi::regionHeight() const{
 inline void QMatRoi::setRegionWidth(int regionWidth){
     if ( m_regionWidth != regionWidth ){
         m_regionWidth = regionWidth;
-        emit regionWidthChanged();
         QMatTransformation::transform();
+        emit regionWidthChanged();
     }
 }
 
 inline void QMatRoi::setRegionHeight(int regionHeight){
     if ( m_regionHeight != regionHeight ){
         m_regionHeight = regionHeight;
-        emit regionHeightChanged();
         QMatTransformation::transform();
+        emit regionHeightChanged();
     }
 }
 

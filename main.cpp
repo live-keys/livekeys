@@ -10,7 +10,8 @@
 #include "QMatSource.hpp"
 #include "QMatEmpty.hpp"
 #include "QMatRoi.hpp"
-#include "QMatValues.hpp"
+#include "QMatRead.hpp"
+#include "QMat2DArray.hpp"
 #include "QCamCapture.hpp"
 #include "QVideoCapture.hpp"
 #include "QChannelSelect.hpp"
@@ -33,7 +34,8 @@ int main(int argc, char *argv[]){
     qmlRegisterType<QMatSource>    ("Cv", 1, 0, "MatSource");
     qmlRegisterType<QMatEmpty>     ("Cv", 1, 0, "MatEmpty");
     qmlRegisterType<QMatRoi>       ("Cv", 1, 0, "MatRoi");
-    qmlRegisterType<QMatValues>    ("Cv", 1, 0, "MatValues");
+    qmlRegisterType<QMatRead>      ("Cv", 1, 0, "MatRead");
+    qmlRegisterType<QMat2DArray>   ("Cv", 1, 0, "Mat2DArray");
     qmlRegisterType<QCodeDocument> ("Cv", 1, 0, "Document");
     qmlRegisterType<QChannelSelect>("Cv", 1, 0, "ChannelSelect");
     qmlRegisterType<QCanny>        ("Cv", 1, 0, "Canny");
