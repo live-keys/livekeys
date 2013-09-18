@@ -21,13 +21,13 @@
 #include "QCornerEigenValsAndVecs.hpp"
 #include "QThreshold.hpp"
 #include "QAlphaMerge.hpp"
+#include "QSobel.hpp"
 
 #include <QDebug>
 
 int main(int argc, char *argv[]){
 
     QGuiApplication app(argc, argv);
-    QCodeDocument document;
 
     qmlRegisterType<QCursorShape>  ("Cv", 1, 0, "CursorArea");
     qmlRegisterType<QMat>          ("Cv", 1, 0, "Mat");
@@ -43,13 +43,16 @@ int main(int argc, char *argv[]){
     qmlRegisterType<QVideoCapture> ("Cv", 1, 0, "VideoCapture");
     qmlRegisterType<QThreshold>    ("Cv", 1, 0, "Threshold");
     qmlRegisterType<QAlphaMerge>   ("Cv", 1, 0, "AlphaMerge");
+    qmlRegisterType<QSobel>        ("Cv", 1, 0, "Sobel");
 
     qmlRegisterType<QCornerEigenValsAndVecs>("Cv", 1, 0, "CornerEigenValsAndVecs");
 
+    QCodeDocument document;
     QtQuick2ApplicationViewer viewer;
     viewer.setMinimumSize(QSize(800, 600));
     viewer.rootContext()->setContextProperty("codeDocument", &document);
     viewer.setMainQmlFile(QStringLiteral("qml/LiveCV/main.qml"));
+    document.setEngine(viewer.engine());
     viewer.showExpanded();
 
     return app.exec();

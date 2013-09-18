@@ -35,7 +35,6 @@ SOURCES += main.cpp \
 	src/core/QMatNode.cpp \
 	src/core/QMatShader.cpp \
 	src/core/QMatDisplay.cpp \
-	src/core/QMatTransformation.cpp \
 	src/view/QCursorShape.cpp \
 	src/transform/QChannelSelect.cpp \
 	src/transform/QCanny.cpp \
@@ -51,7 +50,10 @@ SOURCES += main.cpp \
     src/transform/QAlphaMerge.cpp \
     src/core/QMatRoi.cpp \
     src/core/QMatRead.cpp \
-    src/core/QMat2DArray.cpp
+    src/core/QMat2DArray.cpp \
+    src/transform/QGaussianBlur.cpp \
+    src/core/QMatFilter.cpp \
+    src/transform/QSobel.cpp
 
 HEADERS += \
 	src/core/QMatState.hpp \
@@ -60,7 +62,6 @@ HEADERS += \
 	src/core/QMatNode.hpp \
 	src/core/QMatShader.hpp \
 	src/core/QMatDisplay.hpp \
-	src/core/QMatTransformation.hpp \
 	src/view/QCursorShape.hpp \
 	src/transform/QChannelSelect.hpp \
 	src/transform/QCanny.hpp \
@@ -76,4 +77,7 @@ HEADERS += \
     src/transform/QAlphaMerge.hpp \
     src/core/QMatRoi.hpp \
     src/core/QMatRead.hpp \
-    src/core/QMat2DArray.hpp
+    src/core/QMat2DArray.hpp \
+    src/transform/QGaussianBlur.hpp \
+    src/core/QMatFilter.hpp \
+    src/transform/QSobel.hpp

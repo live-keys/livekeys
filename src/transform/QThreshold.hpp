@@ -1,9 +1,9 @@
 #ifndef QTHRESHOLD_HPP
 #define QTHRESHOLD_HPP
 
-#include "QMatTransformation.hpp"
+#include "QMatFilter.hpp"
 
-class QThreshold : public QMatTransformation{
+class QThreshold : public QMatFilter{
 
     Q_OBJECT
     Q_PROPERTY(double           thresh        READ thresh        WRITE setThresh        NOTIFY threshChanged)
@@ -57,7 +57,7 @@ inline void QThreshold::setThresh(double thresh){
     if ( thresh != m_thresh ){
         m_thresh = thresh;
         emit threshChanged();
-        QMatTransformation::transform();
+        QMatFilter::transform();
     }
 }
 
@@ -69,7 +69,7 @@ inline void QThreshold::setMaxVal(double maxVal){
     if ( m_maxVal != maxVal ){
         m_maxVal = maxVal;
         emit maxValChanged();
-        QMatTransformation::transform();
+        QMatFilter::transform();
     }
 }
 
@@ -81,7 +81,7 @@ inline void QThreshold::setThresholdType(QThreshold::Type type){
     if ( m_type != type ){
         m_type = type;
         emit thresholdTypeChanged();
-        QMatTransformation::transform();
+        QMatFilter::transform();
     }
 }
 

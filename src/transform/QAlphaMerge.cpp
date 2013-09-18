@@ -1,7 +1,7 @@
 #include "QAlphaMerge.hpp"
 
 QAlphaMerge::QAlphaMerge(QQuickItem *parent) :
-    QMatTransformation(parent),
+    QMatFilter(parent),
     m_mask(0)
 {
 }

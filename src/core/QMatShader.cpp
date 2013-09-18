@@ -43,7 +43,7 @@ bool QMatShader::loadTexture(QMat *mat, int index, bool linearFilter){
          GL_UNSIGNED_BYTE,          // Image data type
          mat->data()->ptr()         // The actual image data itself
     );
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    glPixelStorei(GL_UNPACK_ALIGNMENT,  4);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
     return true;

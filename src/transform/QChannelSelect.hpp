@@ -1,9 +1,9 @@
 #ifndef QCHANNELSELECT_HPP
 #define QCHANNELSELECT_HPP
 
-#include "QMatTransformation.hpp"
+#include "QMatFilter.hpp"
 
-class QChannelSelect : public QMatTransformation{
+class QChannelSelect : public QMatFilter{
 
     Q_OBJECT
     Q_PROPERTY(int channel READ channelNo WRITE setChannelNo NOTIFY channelChanged )
@@ -33,7 +33,7 @@ inline void QChannelSelect::setChannelNo(int channel){
     if ( channel != m_channel ){
         m_channel = channel;
         emit channelChanged();
-        QMatTransformation::transform();
+        QMatFilter::transform();
     }
 }
 

@@ -13,7 +13,7 @@ int max_qualityLevel = 100;
 cv::RNG rng(12345);
 
 QCornerEigenValsAndVecs::QCornerEigenValsAndVecs(QQuickItem *parent) :
-    QMatTransformation(parent),
+    QMatFilter(parent),
     m_borderType(cv::BORDER_DEFAULT){
 
 }

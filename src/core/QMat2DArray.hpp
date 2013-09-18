@@ -8,7 +8,7 @@ class QMat2DArray : public QMatDisplay{
 
     Q_OBJECT
     Q_PROPERTY(QVariantList values READ values WRITE setValues NOTIFY valuesChanged)
-    //Q_PROPERTY(QMat::Type   type   READ type   WRITE setType   NOTIFY typeChanged)
+    Q_PROPERTY(QMat::Type   type   READ type   WRITE setType   NOTIFY typeChanged)
 
 public:
     explicit QMat2DArray(QQuickItem *parent = 0);
@@ -17,8 +17,8 @@ public:
     const QVariantList& values() const;
     void setValues( const QVariantList& val );
 
-    /*QMat::Type type() const;
-    void setType(QMat::Type type);*/
+    QMat::Type type() const;
+    void setType(QMat::Type type);
 
     cv::Size assignValues();
 
@@ -32,8 +32,6 @@ private:
 
     cv::Size     m_cachedSize;
 
-    QMat*        m_cachedMat;
-
 };
 
 inline const QVariantList &QMat2DArray::values() const{
@@ -44,15 +42,13 @@ inline void QMat2DArray::setValues(const QVariantList &val){
     if ( val != m_values ){
         m_values     = val;
         m_cachedSize = assignValues();
-
-        setOutput(m_cachedMat);
         emit valuesChanged();
         emit outChanged();
         update();
     }
 }
 
-/*inline QMat::Type QMat2DArray::type() const{
+inline QMat::Type QMat2DArray::type() const{
     return m_type;
 }
 
@@ -66,6 +62,6 @@ inline void QMat2DArray::setType(QMat::Type type){
             update();
         }
     }
-}*/
+}
 
 #endif // QMAT2DARRAY_HPP

@@ -14,9 +14,9 @@ CONFIG_PRO = 1
 
 win32{
 
-	PATH_OPENCV_INCLUDE   = C:/opencv/build/include
-	PATH_OPENCV_LIBRARIES = C:/opencv/build/x64/vc11/lib
-	PATH_OPENCV_DLLS      = C:/opencv/build/x64/vc11/bin
+        PATH_OPENCV_INCLUDE   = D:\WorkProjects\_opencv\include
+        PATH_OPENCV_LIBRARIES = D:\WorkProjects\_opencv\x64_msvc11_lib
+        PATH_OPENCV_DLLS      = D:\WorkProjects\_opencv\x64_msvc11_bin
 
 	debug{
 		VERSION_OPENCV    = 244d

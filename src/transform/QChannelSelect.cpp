@@ -2,7 +2,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 QChannelSelect::QChannelSelect(QQuickItem *parent) :
-    QMatTransformation(parent)
+    QMatFilter(parent)
 {
 }
 

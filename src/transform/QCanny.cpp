@@ -2,9 +2,12 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 QCanny::QCanny(QQuickItem *parent) :
-    QMatTransformation(parent),
+    QMatFilter(parent),
     m_apertureSize(3),
     m_l2gradient(false){
+}
+
+QCanny::~QCanny(){
 }
 
 void QCanny::transform(cv::Mat &in, cv::Mat &out){

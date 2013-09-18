@@ -2,7 +2,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 QThreshold::QThreshold(QQuickItem *parent) :
-    QMatTransformation(parent)
+    QMatFilter(parent)
 {
 }
 

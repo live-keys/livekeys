@@ -1,7 +1,7 @@
 #include "QMatRoi.hpp"
 
 QMatRoi::QMatRoi(QQuickItem *parent) :
-    QMatTransformation(parent)
+    QMatFilter(parent)
 {
 }
 

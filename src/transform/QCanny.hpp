@@ -1,9 +1,9 @@
 #ifndef QCANNY_HPP
 #define QCANNY_HPP
 
-#include "QMatTransformation.hpp"
+#include "QMatFilter.hpp"
 
-class QCanny : public QMatTransformation{
+class QCanny : public QMatFilter{
 
     Q_OBJECT
     Q_PROPERTY(double threshold1   READ threshold1   WRITE setThreshold1   NOTIFY threshold1Changed)
@@ -13,6 +13,7 @@ class QCanny : public QMatTransformation{
 
 public:
     explicit QCanny(QQuickItem *parent = 0);
+    ~QCanny();
 
     virtual void transform(cv::Mat &in, cv::Mat &out);
 
@@ -60,7 +61,7 @@ inline void QCanny::setThreshold1(double threshold){
     if ( m_threshold1 != threshold ){
         m_threshold1 = threshold;
         emit threshold1Changed();
-        QMatTransformation::transform();
+        QMatFilter::transform();
     }
 }
 
@@ -68,7 +69,7 @@ inline void QCanny::setThreshold2(double threshold){
     if ( m_threshold2 != threshold ){
         m_threshold2 = threshold;
         emit threshold2Changed();
-        QMatTransformation::transform();
+        QMatFilter::transform();
     }
 }
 
@@ -76,7 +77,7 @@ inline void QCanny::setApertureSize(int aperture){
     if ( m_apertureSize != aperture ){
         m_apertureSize = aperture;
         emit apertureSizeChanged();
-        QMatTransformation::transform();
+        QMatFilter::transform();
     }
 }
 
@@ -84,12 +85,8 @@ inline void QCanny::setL2gradient(bool gradient){
     if( m_l2gradient != gradient){
         m_l2gradient = gradient;
         emit l2gradientChanged();
-        QMatTransformation::transform();
+        QMatFilter::transform();
     }
 }
-
-
-
-
 
 #endif // QCANNY_HPP

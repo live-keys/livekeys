@@ -1,9 +1,9 @@
 #ifndef QALPHAMERGE_HPP
 #define QALPHAMERGE_HPP
 
-#include "QMatTransformation.hpp"
+#include "QMatFilter.hpp"
 
-class QAlphaMerge : public QMatTransformation{
+class QAlphaMerge : public QMatFilter{
 
     Q_OBJECT
     Q_PROPERTY(QMat* mask READ mask WRITE setMask NOTIFY maskChanged)
@@ -32,7 +32,7 @@ inline QMat *QAlphaMerge::mask(){
 inline void QAlphaMerge::setMask(QMat *mask){
     m_mask = mask;
     emit inChanged();
-    QMatTransformation::transform();
+    QMatFilter::transform();
 }
 
 #endif // QALPHAMERGE_HPP

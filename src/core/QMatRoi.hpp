@@ -1,9 +1,9 @@
 #ifndef QMATROI_HPP
 #define QMATROI_HPP
 
-#include "QMatTransformation.hpp"
+#include "QMatFilter.hpp"
 
-class QMatRoi : public QMatTransformation{
+class QMatRoi : public QMatFilter{
 
     Q_OBJECT
     Q_PROPERTY(int regionX      READ regionX      WRITE setregionX      NOTIFY regionXChanged)
@@ -51,7 +51,7 @@ inline int QMatRoi::regionY() const{
 inline void QMatRoi::setregionX(int regionX){
     if ( m_regionX != regionX ){
         m_regionX = regionX;
-        QMatTransformation::transform();
+        QMatFilter::transform();
         emit regionXChanged();
     }
 }
@@ -59,7 +59,7 @@ inline void QMatRoi::setregionX(int regionX){
 inline void QMatRoi::setregionY(int regionY){
     if ( m_regionY != regionY ){
         m_regionY = regionY;
-        QMatTransformation::transform();
+        QMatFilter::transform();
         emit regionYChanged();
     }
 }
@@ -75,7 +75,7 @@ inline int QMatRoi::regionHeight() const{
 inline void QMatRoi::setRegionWidth(int regionWidth){
     if ( m_regionWidth != regionWidth ){
         m_regionWidth = regionWidth;
-        QMatTransformation::transform();
+        QMatFilter::transform();
         emit regionWidthChanged();
     }
 }
@@ -83,7 +83,7 @@ inline void QMatRoi::setRegionWidth(int regionWidth){
 inline void QMatRoi::setRegionHeight(int regionHeight){
     if ( m_regionHeight != regionHeight ){
         m_regionHeight = regionHeight;
-        QMatTransformation::transform();
+        QMatFilter::transform();
         emit regionHeightChanged();
     }
 }

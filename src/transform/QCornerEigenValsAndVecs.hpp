@@ -2,9 +2,9 @@
 #define QCORNEREIGENVALSANDVECS_HPP
 
 #include <QQuickItem>
-#include "QMatTransformation.hpp"
+#include "QMatFilter.hpp"
 
-class QCornerEigenValsAndVecs : public QMatTransformation{
+class QCornerEigenValsAndVecs : public QMatFilter{
 
     Q_OBJECT
     Q_PROPERTY(int blockSize  READ blockSize  WRITE setBlockSize  NOTIFY blockSizeChanged)
