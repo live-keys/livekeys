@@ -33,7 +33,7 @@ class QMatRead : public QQuickItem{
     Q_PROPERTY(QMat*  input       READ inputMat    WRITE setInputMat    NOTIFY inputChanged)
     Q_PROPERTY(QFont  font        READ font        WRITE setFont        NOTIFY fontChanged)
     Q_PROPERTY(QColor color       READ color       WRITE setColor       NOTIFY colorChanged)
-    Q_PROPERTY(int    numberWidth READ numberWidth WRITE setNumberWidth NOTIFY sizeChanged)
+    Q_PROPERTY(int    numberWidth READ numberWidth WRITE setNumberWidth NOTIFY numberWidthChanged)
     Q_PROPERTY(bool   squareCell  READ squareCell  WRITE setSquareCell  NOTIFY squareCellChanged)
 
 public:
@@ -53,11 +53,13 @@ public:
     void setNumberWidth(int arg);
     void setSquareCell(bool arg);
 
+    void calculateImplicitSize();
+
 signals:
     void inputChanged();
     void fontChanged();
     void colorChanged();
-    void sizeChanged();
+    void numberWidthChanged();
     void squareCellChanged();
 
 protected:
@@ -94,6 +96,7 @@ inline void QMatRead::setFont(const QFont& arg){
     if (m_font != arg) {
         m_font = arg;
         emit fontChanged();
+        calculateImplicitSize();
         update();
     }
 }
@@ -109,7 +112,8 @@ inline void QMatRead::setColor(const QColor& arg){
 inline void QMatRead::setNumberWidth(int arg){
     if (m_numberWidth != arg) {
         m_numberWidth = arg;
-        emit sizeChanged();
+        emit numberWidthChanged();
+        calculateImplicitSize();
         update();
     }
 }
@@ -118,6 +122,7 @@ inline void QMatRead::setSquareCell(bool arg){
     if (m_squareCell != arg) {
         m_squareCell = arg;
         emit squareCellChanged();
+        calculateImplicitSize();
         update();
     }
 }
@@ -127,7 +132,15 @@ inline QMat *QMatRead::inputMat(){
 }
 
 inline void QMatRead::setInputMat(QMat *mat){
-    m_input = mat;
+    if ( mat != m_input ){
+        m_input = mat;
+        calculateImplicitSize();
+    } else {
+        m_input = mat;
+        if ( implicitHeight() == 0 || implicitWidth() == 0){
+            calculateImplicitSize();
+        }
+    }
     emit inputChanged();
     update();
 }
