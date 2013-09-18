@@ -2,7 +2,7 @@
 
 using namespace cv;
 
-template<typename T> Mat* assignValuesHelper(const QVariantList& vmat, QMat* m, QMat::Type type){
+template<typename T> Mat* assignValuesHelper(const QVariantList& vmat, QMat*, QMat::Type type){
     int numberCols = 0;
     Mat* writeMat;
     for( int i = 0; i < vmat.size(); ++i ){

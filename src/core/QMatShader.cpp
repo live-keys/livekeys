@@ -24,10 +24,10 @@ bool QMatShader::loadTexture(QMat *mat, int index, bool linearFilter){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
 
-
+    // Mat step
     glPixelStorei(GL_UNPACK_ALIGNMENT, (mat->data()->step & 3) ? 1 : 4);
 	if ( mat->data()->elemSize() != 0 )
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint)( mat->data()->step / mat->data()->elemSize()) );
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint)( mat->data()->step / mat->data()->elemSize()) );
 
     GLint colorFormat = mat->data()->channels() == 3
             ? GL_RGB  : mat->data()->channels() == 4
@@ -43,6 +43,8 @@ bool QMatShader::loadTexture(QMat *mat, int index, bool linearFilter){
          GL_UNSIGNED_BYTE,          // Image data type
          mat->data()->ptr()         // The actual image data itself
     );
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
     return true;
 }

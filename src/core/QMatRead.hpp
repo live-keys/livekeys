@@ -30,7 +30,11 @@ private:
 class QMatRead : public QQuickItem{
 
     Q_OBJECT
-    Q_PROPERTY(QMat* input READ inputMat WRITE setInputMat NOTIFY inputChanged)
+    Q_PROPERTY(QMat*  input       READ inputMat    WRITE setInputMat    NOTIFY inputChanged)
+    Q_PROPERTY(QFont  font        READ font        WRITE setFont        NOTIFY fontChanged)
+    Q_PROPERTY(QColor color       READ color       WRITE setColor       NOTIFY colorChanged)
+    Q_PROPERTY(int    numberWidth READ numberWidth WRITE setNumberWidth NOTIFY sizeChanged)
+    Q_PROPERTY(bool   squareCell  READ squareCell  WRITE setSquareCell  NOTIFY squareCellChanged)
 
 public:
     explicit QMatRead(QQuickItem *parent = 0);
@@ -39,10 +43,22 @@ public:
     QMat* inputMat();
     void setInputMat(QMat* mat);
 
+    const QFont& font() const;
+    const QColor& color() const;
+    int numberWidth() const;
+    bool squareCell() const;
+
+    void setFont(const QFont &arg);
+    void setColor(const QColor& arg);
+    void setNumberWidth(int arg);
+    void setSquareCell(bool arg);
+
 signals:
     void inputChanged();
-
-public slots:
+    void fontChanged();
+    void colorChanged();
+    void sizeChanged();
+    void squareCellChanged();
 
 protected:
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *);
@@ -51,8 +67,60 @@ private:
     QMatRead(const QMatRead& other);
     QMatRead& operator= (const QMatRead& other);
 
-    QMat*       m_input;
+    QMat*  m_input;
+    QFont  m_font;
+    QColor m_color;
+    int    m_numberWidth;
+    bool   m_squareCell;
 };
+
+inline const QFont& QMatRead::font() const{
+    return m_font;
+}
+
+inline const QColor& QMatRead::color() const{
+    return m_color;
+}
+
+inline int QMatRead::numberWidth() const{
+    return m_numberWidth;
+}
+
+inline bool QMatRead::squareCell() const{
+    return m_squareCell;
+}
+
+inline void QMatRead::setFont(const QFont& arg){
+    if (m_font != arg) {
+        m_font = arg;
+        emit fontChanged();
+        update();
+    }
+}
+
+inline void QMatRead::setColor(const QColor& arg){
+    if (m_color != arg) {
+        m_color = arg;
+        emit colorChanged();
+        update();
+    }
+}
+
+inline void QMatRead::setNumberWidth(int arg){
+    if (m_numberWidth != arg) {
+        m_numberWidth = arg;
+        emit sizeChanged();
+        update();
+    }
+}
+
+inline void QMatRead::setSquareCell(bool arg){
+    if (m_squareCell != arg) {
+        m_squareCell = arg;
+        emit squareCellChanged();
+        update();
+    }
+}
 
 inline QMat *QMatRead::inputMat(){
     return m_input;

@@ -193,25 +193,26 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
 QMatRead::QMatRead(QQuickItem *parent)
     : QQuickItem(parent)
     , m_input(0)
+    , m_font()
+    , m_color("#eee")
+    , m_numberWidth(5)
+    , m_squareCell(false)
 {
     setFlag(ItemHasContents, true);
+    m_font.setFamily("Courier New");
+    m_font.setPixelSize(12);
 }
 
 QMatRead::~QMatRead(){
 }
-
 
 QSGNode *QMatRead::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *){
     QMatReadNode* node = static_cast<QMatReadNode*>(oldNode);
     if (!node)
         node = new QMatReadNode(window());
 
-    QFont font;
-    font.setFamily("Courier New");
-    font.setPixelSize(12);
-
     node->setRect(boundingRect());
-    node->render(m_input, font, QColor("#ffffff"), 5, false);
+    node->render(m_input, m_font, m_color, m_numberWidth, m_squareCell);
 
     return node;
 }
