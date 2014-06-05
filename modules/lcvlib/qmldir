@@ -1,0 +1,3 @@
+module modules.lcvcore
+plugin lcvcore
+

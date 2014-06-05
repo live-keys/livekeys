@@ -2,6 +2,10 @@
 isEmpty(CONFIG_PRO){
 CONFIG_PRO = 1
 
+
+
+win32{
+
 # Configuration for Windows
 # -------------------------
 #
@@ -12,39 +16,76 @@ CONFIG_PRO = 1
 #                         If you're using visual studio, you can set up opencv version according to debug
 #                         or release mode.
 
-win32{
+        PATH_OPENCV_INCLUDE   = $$PWD/opencv/build/include
+        PATH_OPENCV_LIBRARIES = $$PWD/opencv/build/x64/vc11/lib
+        PATH_OPENCV_DLLS      = $$PWD/opencv/build/x64/vc11/bin
+        VERSION_OPENCV        = 249
 
-        PATH_OPENCV_INCLUDE   = D:\WorkProjects\_opencv\include
-        PATH_OPENCV_LIBRARIES = D:\WorkProjects\_opencv\x64_msvc11_lib
-        PATH_OPENCV_DLLS      = D:\WorkProjects\_opencv\x64_msvc11_bin
 
-	debug{
-		VERSION_OPENCV    = 244d
-	}
-	release{
-		VERSION_OPENCV    = 244
-	}
-
+        CONFIG(debug, debug|release){
+            VERSION_OPENCV    = $${VERSION_OPENCV}d
+        }
 
 	INCLUDEPATH += $${PATH_OPENCV_INCLUDE}
 
-	LIBS += -L$${PATH_OPENCV_LIBRARIES}/ \
-		-lopencv_core$${VERSION_OPENCV} \
-		-lopencv_highgui$${VERSION_OPENCV} \
-		-lopencv_imgproc$${VERSION_OPENCV} \
-		-lopencv_features2d$${VERSION_OPENCV} \
-		-lopencv_calib3d$${VERSION_OPENCV} \
-		-lopencv_video$${VERSION_OPENCV}
-
-	opencv_folder.source = $${PATH_OPENCV_DLLS}
-	debug{
-		opencv_folder.target = debug
-	}
-	release{
-		opencv_folder.target = release
-	}
+        CONFIG(debug, debug|release){
+            DLL_DESTINATION   = ../application/debug
+        }
+        CONFIG(release, debug|release){
+            DLL_DESTINATION   = ../application/release
+        }
 	#
 	# DEPLOYMENTFOLDERS += opencv_folder
+
+        # Helper Function to copy dlls
+        defineTest(copyCvDll) {
+                files = $$1
+
+                for(FILE, files) {
+                    DDIR = $${DLL_DESTINATION}
+
+                    # Replace slashes in paths with backslashes for Windows
+                    win32:FILE ~= s,/,\\,g
+                    win32:DDIR ~= s,/,\\,g
+
+                    QMAKE_POST_LINK += $$QMAKE_COPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
+                }
+                export(QMAKE_POST_LINK)
+        }
+
+    # opencv_core
+    LIBS += -L$${PATH_OPENCV_LIBRARIES} -lopencv_core$${VERSION_OPENCV}
+    copyCvDll($${PATH_OPENCV_DLLS}/opencv_core$${VERSION_OPENCV}.dll)
+
+    # opencv_highgui
+    !isEmpty(REQUIRES_CV_HIGHGUI){
+        LIBS += -L$${PATH_OPENCV_LIBRARIES} -lopencv_highgui$${VERSION_OPENCV}
+        copyCvDll($${PATH_OPENCV_DLLS}/opencv_highgui$${VERSION_OPENCV}.dll)
+    }
+
+    # opencv_imgproc
+    !isEmpty(REQUIRES_CV_IMGPROC){
+        LIBS += -L$${PATH_OPENCV_LIBRARIES} -lopencv_imgproc$${VERSION_OPENCV}
+        copyCvDll($${PATH_OPENCV_DLLS}/opencv_imgproc$${VERSION_OPENCV}.dll)
+    }
+
+    # opencv_video
+    !isEmpty(REQUIRES_CV_VIDEO){
+        LIBS += -L$${PATH_OPENCV_LIBRARIES} -lopencv_video$${VERSION_OPENCV}
+        copyCvDll($${PATH_OPENCV_DLLS}/opencv_video$${VERSION_OPENCV}.dll)
+    }
+
+    # opencv_calib3d
+    !isEmpty(REQUIRES_CV_CALIB3D){
+        LIBS += -L$${PATH_OPENCV_LIBRARIES} -lopencv_calib3d$${VERSION_OPENCV}
+        copyCvDll($${PATH_OPENCV_DLLS}/opencv_calib3d$${VERSION_OPENCV}.dll)
+    }
+
+    # opencv_features2d
+    !isEmpty(REQUIRES_CV_FEATURES2D){
+        LIBS += -L$${PATH_OPENCV_LIBRARIES} -lopencv_features2d$${VERSION_OPENCV}
+        copyCvDll($${PATH_OPENCV_DLLS}/opencv_features2d$${VERSION_OPENCV}.dll)
+    }
 }
 
 # Configuration for Unix
@@ -53,9 +94,8 @@ win32{
 # Here it's simpler
 
 unix{
-
-	CONFIG += link_pkgconfig
-	PKGCONFIG += opencv
+    CONFIG += link_pkgconfig
+    PKGCONFIG += opencv
 
 }
 
