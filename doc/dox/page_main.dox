@@ -1,0 +1,27 @@
+/**
+@mainpage Contents
+
+## Compatibility
+
+1. Microsoft Visual Studio 2013
+2. Microsoft Visual Studio 2012
+3. Microsoft Visual Studio 2010
+4. Mingw 4.7
+5. Gcc 4.4 or later
+
+## Dependencies
+
+1. QT5
+2. OpenCV 2.4 or later
+
+## Modules
+
+
+
+## Configuration
+
+All modules are available through qmake projects. The following configuration
+steps are required to set up your application for several platforms.
+
+
+*/

@@ -7,10 +7,29 @@
 class Q_LCV_EXPORT QStateContainerBase{
 
 public:
-    QStateContainerBase();
-    ~QStateContainerBase();
+    QStateContainerBase(){}
+    virtual ~QStateContainerBase(){}
 
 };
+
+class Q_LCV_EXPORT QStateContainerManager{
+
+public:
+    static QStateContainerManager& instance(); // already defined
+
+private:
+    static void cleanStateManager();
+
+    QStateContainerManager();
+    ~QStateContainerManager();
+
+    // disable copy
+    QStateContainerManager(QStateContainerManager const&);
+    QStateContainerManager& operator=(QStateContainerManager const&);
+
+    static QStateContainerManager* m_instance;
+};
+
 
 template<typename T>
 class Q_LCV_EXPORT QStateContainer : public QStateContainerBase{
@@ -21,9 +40,9 @@ public:
 
 private:
     QStateContainer();
+    ~QStateContainer();
 
     QMap<QString, T*> m_states;
-
 
 };
 

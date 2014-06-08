@@ -40,7 +40,7 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 7
+        anchors.leftMargin: 10
         height : parent.height
         Image{
             anchors.verticalCenter: parent.verticalCenter
