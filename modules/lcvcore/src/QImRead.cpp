@@ -14,22 +14,27 @@
 **
 ****************************************************************************/
 
-#include "QMatSource.hpp"
+#include "QImRead.hpp"
 #include "QMatState.hpp"
 #include "QMatNode.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
 #include <QSGSimpleMaterial>
 
-QMatSource::QMatSource(QQuickItem *parent) :
+QImRead::QImRead(QQuickItem *parent) :
     QMatDisplay(parent)
 {
 }
 
-QMatSource::~QMatSource(){
+QImRead::~QImRead(){
 }
 
-void QMatSource::setFile(const QString &file){
+// I have access to window
+// Register event reload on window
+
+void QImRead::setFile(const QString &file){
+    //qDebug() << "set file" << this->w;
+
     if ( file != m_file ){
         m_file = file;
         emit fileChanged();

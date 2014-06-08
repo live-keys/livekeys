@@ -21,14 +21,14 @@
 #include "QMat.hpp"
 #include "QMatDisplay.hpp"
 
-class QMatSource : public QMatDisplay{
+class QImRead : public QMatDisplay{
 
     Q_OBJECT
     Q_PROPERTY(QString file READ file WRITE setFile NOTIFY fileChanged)
 
 public:
-    explicit QMatSource(QQuickItem *parent = 0);
-    ~QMatSource();
+    explicit QImRead(QQuickItem *parent = 0);
+    ~QImRead();
 
     const QString& file() const;
     void setFile(const QString& file);
@@ -41,7 +41,7 @@ private:
     
 };
 
-inline const QString &QMatSource::file() const{
+inline const QString &QImRead::file() const{
     return m_file;
 }
 

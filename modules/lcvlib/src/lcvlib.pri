@@ -5,7 +5,8 @@ HEADERS += \
     $$PWD/QMatFilter.hpp \
     $$PWD/QMatNode.hpp \
     $$PWD/QMatShader.hpp \
-    $$PWD/QMatState.hpp
+    $$PWD/QMatState.hpp \
+    src/QStateContainer.hpp
 
 SOURCES += \
     $$PWD/QMat.cpp \
@@ -13,4 +14,5 @@ SOURCES += \
     $$PWD/QMatFilter.cpp \
     $$PWD/QMatNode.cpp \
     $$PWD/QMatShader.cpp \
-    $$PWD/QMatState.cpp
+    $$PWD/QMatState.cpp \
+    src/QStateContainer.cpp

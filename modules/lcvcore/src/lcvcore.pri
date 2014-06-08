@@ -6,7 +6,7 @@ HEADERS += \
     $$PWD/QMatBuffer.hpp \
     $$PWD/QMatEmpty.hpp \
     $$PWD/QMatDraw.hpp \
-    $$PWD/QMatSource.hpp \
+    $$PWD/QImRead.hpp \
     $$PWD/QMatRead.hpp \
     $$PWD/QMatRoi.hpp \
     $$PWD/QVideoCapture.hpp \
@@ -21,7 +21,7 @@ SOURCES += \
     $$PWD/QMatBuffer.cpp \
     $$PWD/QMatEmpty.cpp \
     $$PWD/QMatDraw.cpp \
-    $$PWD/QMatSource.cpp \
+    $$PWD/QImRead.cpp \
     $$PWD/QMatRead.cpp \
     $$PWD/QMatRoi.cpp \
     $$PWD/QVideoCapture.cpp \
