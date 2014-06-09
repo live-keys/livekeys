@@ -20,9 +20,12 @@ import Cv 1.0
 import "view"
 
 Rectangle {
+    id : root
     width: 1240
     height: 700
     color : "#293039"
+
+    signal beforeCompile()
 
     Top{
         id : header
@@ -216,6 +219,7 @@ Rectangle {
                     onTriggered: {
                         var newItem;
                         try {
+                            root.beforeCompile()
                             newItem = Qt.createQmlObject("import QtQuick 2.0\nimport Cv 1.0\n" + tester.program, tester, "canvas");
                         } catch (err) {
                             error.text = err.qmlErrors[0].lineNumber + ":" + err.qmlErrors[0].message;
