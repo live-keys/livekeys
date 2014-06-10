@@ -6,6 +6,13 @@
 #include <QMap>
 #include <QLinkedList>
 
+//#define QSTATE_CONTAINER_DEBUG_FLAG
+#ifdef QSTATE_CONTAINER_DEBUG_FLAG
+#define QSTATE_CONTAINER_DEBUG(_param) qDebug() << (_param)
+#else
+#define QSTATE_CONTAINER_DEBUG(_param)
+#endif
+
 class QQuickView;
 class QStateContainerBase;
 
@@ -50,7 +57,7 @@ public:
 
 
 template<typename T>
-class Q_LCV_EXPORT QStateContainer : public QStateContainerBase{
+class QStateContainer : public QStateContainerBase{
 
 public:
     static QStateContainer<T> &instance();
@@ -88,6 +95,7 @@ template<typename T> QStateContainer<T> &QStateContainer<T>::instance(){
 template<typename T> void QStateContainer<T>::registerState(const QString &key, T *state){
     m_states[key] = state;
     m_statesActive[key] = true;
+    QSTATE_CONTAINER_DEBUG(QString("Key activated : ") + key);
 }
 
 template<typename T> T *QStateContainer<T>::state(const QString &key){
@@ -95,16 +103,20 @@ template<typename T> T *QStateContainer<T>::state(const QString &key){
     if ( it != m_states.end() ){
         m_statesActive = true;
         it.value()->activate();
+        QSTATE_CONTAINER_DEBUG(QString("Key activated : ") + key);
         return it.value();
     }
     return 0;
 }
 
 template<typename T> void QStateContainer<T>::beforeCompile(){
+    QSTATE_CONTAINER_DEBUG("Before Compile\n--------------");
     for ( QMap<QString, bool>::iterator it = m_statesActive.begin(); it != m_statesActive.end(); ++it ){
         if ( it.value() == true ){
+            QSTATE_CONTAINER_DEBUG(QString("Key deactivated : ") + it.key());
             it.value() = false;
         } else {
+            QSTATE_CONTAINER_DEBUG(QString("Key deleted : ") + it.key());
             QMap<QString, bool>::iterator prev = it;
             ++it;
             delete m_states[prev.key()];

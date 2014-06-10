@@ -24,6 +24,15 @@
 #include <QReadWriteLock>
 #include <QWaitCondition>
 
+
+#define QVIDEO_CAPTURE_THREAD_DEBUG_FLAG
+#ifdef QVIDEO_CAPTURE_THREAD_DEBUG_FLAG
+#define QVIDEO_CAPTURE_THREAD_DEBUG(_param) qDebug() << (_param)
+#else
+#define QVIDEO_CAPTURE_THREAD_DEBUG(_param)
+#endif
+
+
 using namespace cv;
 
 class QVideoCaptureThreadPrivate{
@@ -75,6 +84,7 @@ QVideoCaptureThread::~QVideoCaptureThread(){
     d->condition.wakeOne();
     d->mutex.unlock();
     wait(); // wait till thread finishes
+    QVIDEO_CAPTURE_THREAD_DEBUG( QString("Video capture \"") + m_file + "\" thread released." );
     d->capture->release();
     delete m_timer;
     delete d->inactiveMat;

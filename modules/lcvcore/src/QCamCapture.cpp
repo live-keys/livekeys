@@ -17,6 +17,7 @@
 #include "QCamCapture.hpp"
 #include "QCaptureContainer.hpp"
 #include "QCamCaptureThread.hpp"
+#include "QStateContainer.hpp"
 
 #include <QTimer>
 
