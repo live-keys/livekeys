@@ -6,14 +6,15 @@
 #include <QMap>
 #include <QLinkedList>
 
-//#define QSTATE_CONTAINER_DEBUG_FLAG
+#define QSTATE_CONTAINER_DEBUG_FLAG
 #ifdef QSTATE_CONTAINER_DEBUG_FLAG
 #define QSTATE_CONTAINER_DEBUG(_param) qDebug() << (_param)
 #else
 #define QSTATE_CONTAINER_DEBUG(_param)
 #endif
 
-class QQuickView;
+class QQuickItem;
+class QQuickWindow;
 class QStateContainerBase;
 
 class Q_LCV_EXPORT QStateContainerManager : public QObject{
@@ -21,15 +22,14 @@ class Q_LCV_EXPORT QStateContainerManager : public QObject{
     Q_OBJECT
 
 public:
-    static QStateContainerManager& instance(QQuickView* compiler, QObject* parent = 0);
+    static QStateContainerManager& instance(QQuickItem* compiler, QObject* parent = 0);
+    void registerStateContainer(QStateContainerBase* container);
 
 private:
     static void cleanStateManager();
 
-    QStateContainerManager(QQuickView *view, QObject* parent = 0);
+    QStateContainerManager(QQuickItem *item, QObject* parent = 0);
     ~QStateContainerManager();
-
-    void registerStateContainer(QStateContainerBase* container);
 
     // disable copy
     QStateContainerManager(QStateContainerManager const&);
@@ -39,6 +39,8 @@ private:
 
 public slots:
     void beforeCompile();
+    void afterCompile();
+    void attachWindow(QQuickWindow* window);
 
 private:
     QLinkedList<QStateContainerBase*> m_stateContainerList;
@@ -53,6 +55,7 @@ public:
     virtual ~QStateContainerBase(){}
 
     virtual void beforeCompile() = 0;
+    virtual void afterCompile() = 0;
 };
 
 
@@ -60,15 +63,16 @@ template<typename T>
 class QStateContainer : public QStateContainerBase{
 
 public:
-    static QStateContainer<T> &instance();
+    static QStateContainer<T> &instance(QQuickItem *item);
 
     void registerState(const QString& key, T* state);
     T*   state(const QString& key);
 
     void beforeCompile();
+    void afterCompile();
 
 private:
-    QStateContainer();
+    QStateContainer(QQuickItem* item);
     ~QStateContainer();
 
     // disable copy
@@ -85,15 +89,15 @@ private:
 
 template<typename T> QStateContainer<T>* QStateContainer<T>::m_instance = 0;
 
-template<typename T> QStateContainer<T> &QStateContainer<T>::instance(){
+template<typename T> QStateContainer<T> &QStateContainer<T>::instance(QQuickItem* item){
     if ( m_instance == 0 )
-        m_instance = new QStateContainer<T>();
+        m_instance = new QStateContainer<T>(item);
     return *m_instance;
 }
 
 
 template<typename T> void QStateContainer<T>::registerState(const QString &key, T *state){
-    m_states[key] = state;
+    m_states[key]       = state;
     m_statesActive[key] = true;
     QSTATE_CONTAINER_DEBUG(QString("Key activated : ") + key);
 }
@@ -101,8 +105,7 @@ template<typename T> void QStateContainer<T>::registerState(const QString &key, 
 template<typename T> T *QStateContainer<T>::state(const QString &key){
     QMap<QString, T*>::iterator it = m_states.find(key);
     if ( it != m_states.end() ){
-        m_statesActive = true;
-        it.value()->activate();
+        m_statesActive[it.key()] = true;
         QSTATE_CONTAINER_DEBUG(QString("Key activated : ") + key);
         return it.value();
     }
@@ -110,26 +113,39 @@ template<typename T> T *QStateContainer<T>::state(const QString &key){
 }
 
 template<typename T> void QStateContainer<T>::beforeCompile(){
-    QSTATE_CONTAINER_DEBUG("Before Compile\n--------------");
-    for ( QMap<QString, bool>::iterator it = m_statesActive.begin(); it != m_statesActive.end(); ++it ){
+    QSTATE_CONTAINER_DEBUG("-----Before Compile-----");
+    QMap<QString, bool>::iterator it = m_statesActive.begin();
+    while ( it != m_statesActive.end() ){
         if ( it.value() == true ){
             QSTATE_CONTAINER_DEBUG(QString("Key deactivated : ") + it.key());
             it.value() = false;
-        } else {
-            QSTATE_CONTAINER_DEBUG(QString("Key deleted : ") + it.key());
-            QMap<QString, bool>::iterator prev = it;
-            ++it;
-            delete m_states[prev.key()];
-            m_states.remove(prev.key());
-            m_statesActive.erase(prev);
         }
+        ++it;
     }
 }
 
-template<typename T> QStateContainer<T>::QStateContainer()
+template<typename T> void QStateContainer<T>::afterCompile(){
+    QSTATE_CONTAINER_DEBUG("-----After Compile-----");
+    QMap<QString, bool>::iterator it = m_statesActive.begin();
+    while ( it != m_statesActive.end() ){
+        if ( it.value() == false ){
+            QSTATE_CONTAINER_DEBUG(QString("Key deleted : ") + it.key());
+            QMap<QString, bool>::iterator prev = it;
+            ++it;
+            //delete m_states[prev.key()];
+            m_states.remove(prev.key());
+            m_statesActive.erase(prev);
+        } else {
+            ++it;
+        }
+    }
+    qDebug() << "here";
+}
+
+template<typename T> QStateContainer<T>::QStateContainer(QQuickItem* item)
     : QStateContainerBase(){
 
-    QStateContainerManager::instance().RegisterStateContainer(this);
+    QStateContainerManager::instance(item).registerStateContainer(this);
 }
 
 template<typename T> QStateContainer<T>::~QStateContainer(){

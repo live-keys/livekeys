@@ -26,6 +26,7 @@ Rectangle {
     color : "#293039"
 
     signal beforeCompile()
+    signal afterCompile()
 
     Top{
         id : header
@@ -232,6 +233,7 @@ Rectangle {
                                 tester.item.destroy();
                             }
                             tester.item = newItem;
+                            root.afterCompile()
                         }
                     }
                 }

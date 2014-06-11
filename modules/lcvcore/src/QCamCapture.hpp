@@ -23,16 +23,16 @@ class QCamCaptureThread;
 class QCamCapture : public QMatDisplay{
 
     Q_OBJECT
-    Q_PROPERTY(int    device READ device WRITE setDevice NOTIFY deviceChanged)
-    Q_PROPERTY(bool   paused READ paused WRITE setPaused NOTIFY pausedChanged)
-    Q_PROPERTY(qreal  fps    READ fps    WRITE setFps    NOTIFY fpsChanged)
+    Q_PROPERTY(QString device READ device WRITE setDevice NOTIFY deviceChanged)
+    Q_PROPERTY(bool    paused READ paused WRITE setPaused NOTIFY pausedChanged)
+    Q_PROPERTY(qreal   fps    READ fps    WRITE setFps    NOTIFY fpsChanged)
 
 public:
     explicit QCamCapture(QQuickItem *parent = 0);
     ~QCamCapture();
 
-    int device() const;
-    void setDevice(int device);
+    const QString& device() const;
+    void setDevice(const QString& device);
 
     bool paused() const;
     void setPaused(bool paused);
@@ -54,15 +54,15 @@ private:
     QCamCapture(const QCamCapture& other);
     QCamCapture& operator= (const QCamCapture& other);
 
-    int   m_device;
-    qreal m_fps;
-	QMat* m_restore;
+    QString m_device;
+    qreal   m_fps;
+    QMat*   m_restore;
 
     QCamCaptureThread* m_thread;
 
 };
 
-inline int QCamCapture::device() const{
+inline const QString &QCamCapture::device() const{
     return m_device;
 }
 

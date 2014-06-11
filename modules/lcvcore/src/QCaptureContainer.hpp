@@ -34,7 +34,6 @@ class QCaptureContainer : public QObject{
 public:
     ~QCaptureContainer();
 
-    QCamCaptureThread*   captureThread(int device);
     QVideoCaptureThread* captureThread(const QString& file);
 
     static QCaptureContainer *instance();
@@ -51,7 +50,6 @@ private:
     QCaptureContainer(const QCaptureContainer& other);
     QCaptureContainer& operator= (const QCaptureContainer& other);
 
-    QList<QCamCaptureThread*>   m_camCaptureThreads;
     QList<QVideoCaptureThread*> m_videoCaptureThreads;
     
 };

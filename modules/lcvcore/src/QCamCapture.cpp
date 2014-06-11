@@ -15,7 +15,6 @@
 ****************************************************************************/
 
 #include "QCamCapture.hpp"
-#include "QCaptureContainer.hpp"
 #include "QCamCaptureThread.hpp"
 #include "QStateContainer.hpp"
 
@@ -23,19 +22,27 @@
 
 QCamCapture::QCamCapture(QQuickItem *parent) :
     QMatDisplay(parent),
-    m_device(-1),
+    m_device(""),
     m_fps(1),
     m_thread(0)
 {
     m_restore = output();
 }
 
-void QCamCapture::setDevice(int device){
+void QCamCapture::setDevice(const QString &device){
     if ( m_device != device ){
         m_device = device;
-        if ( m_device  != -1 ){
+        if ( m_device  != "" ){
 
-            m_thread = QCaptureContainer::instance()->captureThread(m_device);
+            QStateContainer<QCamCaptureThread>& stateCont =
+                    QStateContainer<QCamCaptureThread>::instance(this);
+
+            m_thread = stateCont.state(m_device);
+            if ( m_thread == 0 ){
+                m_thread = new QCamCaptureThread(device);
+                stateCont.registerState(m_device, m_thread);
+            }
+
             setOutput(m_thread->output());
             connect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
 

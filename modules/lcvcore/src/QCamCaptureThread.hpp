@@ -28,14 +28,14 @@ class QCamCaptureThread: public QThread{
     Q_OBJECT
 
 public:
-    QCamCaptureThread(int device, QObject* parent = 0);
+    QCamCaptureThread(const QString& device, QObject* parent = 0);
     ~QCamCaptureThread();
 
     QMat*   output();
     QTimer* timer();
-    int     device() const;
     int     captureWidth() const;
     int     captureHeight() const;
+    const QString& device() const;
 
     bool    isCaptureOpened();
 
@@ -55,11 +55,12 @@ protected:
 
 private:
     void initializeMatSize();
+    void openCapture();
 
     QCamCaptureThread(const QCamCaptureThread& other);
     QCamCaptureThread& operator= (const QCamCaptureThread& other);
 
-    int     m_deviceId;
+    QString m_deviceId;
     bool    m_paused;
     QMat*   m_activeMat;
     QTimer* m_timer;
@@ -74,7 +75,7 @@ inline QTimer *QCamCaptureThread::timer(){
     return m_timer;
 }
 
-inline int QCamCaptureThread::device() const{
+inline const QString &QCamCaptureThread::device() const{
     return m_deviceId;
 }
 

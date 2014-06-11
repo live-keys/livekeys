@@ -50,7 +50,7 @@ public:
 
 };
 
-QCamCaptureThread::QCamCaptureThread(int device, QObject *parent) :
+QCamCaptureThread::QCamCaptureThread(const QString& device, QObject *parent) :
     QThread(parent),
     m_deviceId(device),
     m_paused(false),
@@ -60,7 +60,8 @@ QCamCaptureThread::QCamCaptureThread(int device, QObject *parent) :
     Q_D(QCamCaptureThread);
     d->inactiveMat      = new QMat;
     d->inactiveMatReady = false;
-    d->capture          = new VideoCapture(device);
+    d->capture          = new VideoCapture();
+    openCapture();
 
     m_timer             = new QTimer;
     connect(m_timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -73,7 +74,7 @@ QCamCaptureThread::~QCamCaptureThread(){
     d->condition.wakeOne();
     d->mutex.unlock();
     wait(); // wait till thread finishes
-    QCAM_CAPTURE_THREAD_DEBUG(QString("Video capture \"") + QString::number(m_deviceId) + "\" thread released.");
+    QCAM_CAPTURE_THREAD_DEBUG(QString("Video capture \"") + m_deviceId + "\" thread released.");
     d->capture->release();
     delete m_timer;
     delete d->inactiveMat;
@@ -84,7 +85,7 @@ QCamCaptureThread::~QCamCaptureThread(){
 bool QCamCaptureThread::isCaptureOpened(){
     Q_D(QCamCaptureThread);
     if ( !d->capture->isOpened() )
-        d->capture->open(device());
+        d->capture->open(m_deviceId.toStdString());
     return d->capture->isOpened();
 }
 
@@ -143,6 +144,16 @@ void QCamCaptureThread::initializeMatSize(){
             d->height = firstFrame.size().height;
         }
     }
+}
+
+void QCamCaptureThread::openCapture(){
+    Q_D(QCamCaptureThread);
+    bool convertOk;
+    int deviceInt = m_deviceId.toInt(&convertOk);
+    if ( convertOk )
+        d->capture->open(deviceInt);
+    else
+        d->capture->open(m_deviceId.toStdString());
 }
 
 int QCamCaptureThread::captureWidth() const{
