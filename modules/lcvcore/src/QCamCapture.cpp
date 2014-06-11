@@ -106,6 +106,11 @@ bool QCamCapture::paused() const{
 }
 
 QCamCapture::~QCamCapture(){
-    disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
+    QStateContainer<QCamCaptureThread>& stateCont =
+            QStateContainer<QCamCaptureThread>::instance(this);
+    m_thread = stateCont.state(m_device);
+    if (m_thread != 0){
+        disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
+    }
     setOutput(m_restore);
 }

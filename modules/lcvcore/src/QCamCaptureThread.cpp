@@ -74,7 +74,7 @@ QCamCaptureThread::~QCamCaptureThread(){
     d->condition.wakeOne();
     d->mutex.unlock();
     wait(); // wait till thread finishes
-    QCAM_CAPTURE_THREAD_DEBUG(QString("Video capture \"") + m_deviceId + "\" thread released.");
+    QCAM_CAPTURE_THREAD_DEBUG(QString("Cam capture \"") + m_deviceId + "\" thread released.");
     d->capture->release();
     delete m_timer;
     delete d->inactiveMat;
