@@ -73,7 +73,7 @@ QCamCaptureThread::~QCamCaptureThread(){
     d->abord = true;
     d->condition.wakeOne();
     d->mutex.unlock();
-    wait(); // wait till thread finishes
+    wait(); // wait till thread finishes]
     QCAM_CAPTURE_THREAD_DEBUG(QString("Cam capture \"") + m_deviceId + "\" thread released.");
     d->capture->release();
     delete m_timer;
@@ -121,8 +121,9 @@ void QCamCaptureThread::run(){
             qDebug() << "Open CV : No image captured";
 
         d->mutex.lock();
-        if ( d->inactiveMatReady )
-            d->condition.wait(&d_ptr->mutex);
+        if ( d->inactiveMatReady && !d->abord){
+            d->condition.wait(&d->mutex);
+        }
         d->inactiveMatReady = true;
         if ( d->abord ){
             d->mutex.unlock();

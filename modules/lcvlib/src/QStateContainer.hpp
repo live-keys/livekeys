@@ -128,21 +128,17 @@ template<typename T> void QStateContainer<T>::afterCompile(){
     QSTATE_CONTAINER_DEBUG("-----After Compile-----");
     QMap<QString, bool>::iterator it = m_statesActive.begin();
     while ( it != m_statesActive.end() ){
-        qDebug() << it.key() << m_states[it.key()];
         if ( it.value() == false ){
             QMap<QString, bool>::iterator prev = it;
             ++it;
-            qDebug() << "here";
             delete m_states[prev.key()];
             m_states.remove(prev.key());
             QSTATE_CONTAINER_DEBUG(QString("Key deleted : ") + prev.key());
             m_statesActive.erase(prev);
-            qDebug() << "here2";
         } else {
             ++it;
         }
     }
-    qDebug() << "##after compile end.";
 }
 
 template<typename T> QStateContainer<T>::QStateContainer(QQuickItem* item)

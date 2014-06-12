@@ -23,7 +23,7 @@
 QCamCapture::QCamCapture(QQuickItem *parent) :
     QMatDisplay(parent),
     m_device(""),
-    m_fps(1),
+    m_fps(25),
     m_thread(0)
 {
     m_restore = output();
@@ -109,8 +109,7 @@ QCamCapture::~QCamCapture(){
     QStateContainer<QCamCaptureThread>& stateCont =
             QStateContainer<QCamCaptureThread>::instance(this);
     m_thread = stateCont.state(m_device);
-    if (m_thread != 0){
+    if (m_thread != 0)
         disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
-    }
     setOutput(m_restore);
 }
