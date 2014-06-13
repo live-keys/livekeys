@@ -19,6 +19,7 @@
 #include "QVideoCaptureThread.hpp"
 #include "QMatNode.hpp"
 #include "QMatShader.hpp"
+#include "QStateContainer.hpp"
 #include <QSGSimpleMaterial>
 
 #include <QTimer>
@@ -40,7 +41,15 @@ void QVideoCapture::setFile(const QString &file){
         m_file = file;
         if ( QFile::exists(file) ){
 
-            m_thread = QCaptureContainer::instance()->captureThread(m_file);
+            QStateContainer<QVideoCaptureThread>& stateCont =
+                    QStateContainer<QVideoCaptureThread>::instance(this);
+
+            m_thread = stateCont.state(m_file);
+            if ( m_thread == 0 ){
+                m_thread = new QVideoCaptureThread(m_file);
+                stateCont.registerState(m_file, m_thread);
+            }
+
             setOutput(m_thread->output());
             connect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
 
@@ -145,7 +154,11 @@ QSGNode *QVideoCapture::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNo
 }
 
 QVideoCapture::~QVideoCapture(){
-    disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
+    QStateContainer<QVideoCaptureThread>& stateCont =
+        QStateContainer<QVideoCaptureThread>::instance(this);
+    m_thread = stateCont.state(m_file);
+    if (m_thread != 0)
+        disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
     setOutput(m_restore);
     delete m_output;
 }

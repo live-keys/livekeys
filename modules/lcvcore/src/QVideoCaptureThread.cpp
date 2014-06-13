@@ -168,7 +168,7 @@ void QVideoCaptureThread::run(){
             qDebug() << "Open CV : No image captured";
 
         d->mutex.lock();
-        if ( d->inactiveMatReady )
+        if ( d->inactiveMatReady && !d->abord )
             d->condition.wait(&d_ptr->mutex);
         d->inactiveMatReady = true;
         if ( d->abord ){

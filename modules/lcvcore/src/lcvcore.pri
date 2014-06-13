@@ -1,7 +1,6 @@
 HEADERS += \
     $$PWD/QCamCapture.hpp \
-    $$PWD/QCamCaptureThread.hpp \
-    $$PWD/QCaptureContainer.hpp \
+	$$PWD/QCamCaptureThread.hpp \
     $$PWD/QMat2DArray.hpp \
     $$PWD/QMatBuffer.hpp \
     $$PWD/QMatEmpty.hpp \
@@ -15,8 +14,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/QCamCapture.cpp \
-    $$PWD/QCamCaptureThread.cpp \
-    $$PWD/QCaptureContainer.cpp \
+	$$PWD/QCamCaptureThread.cpp \
     $$PWD/QMat2DArray.cpp \
     $$PWD/QMatBuffer.cpp \
     $$PWD/QMatEmpty.cpp \
