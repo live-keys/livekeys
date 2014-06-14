@@ -23,10 +23,13 @@
 TEMPLATE = subdirs
 CONFIG  += ordered
 
+# Required modules
+
 SUBDIRS += $$PWD/application
 SUBDIRS += $$PWD/lcvlib
 
 # Optional build modules
 
 SUBDIRS += $$PWD/lcvcore
+SUBDIRS += $$PWD/lcvimgproc
 

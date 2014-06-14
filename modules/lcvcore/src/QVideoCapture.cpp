@@ -15,7 +15,6 @@
 ****************************************************************************/
 
 #include "QVideoCapture.hpp"
-#include "QCaptureContainer.hpp"
 #include "QVideoCaptureThread.hpp"
 #include "QMatNode.hpp"
 #include "QMatShader.hpp"
