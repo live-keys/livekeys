@@ -25,21 +25,23 @@
 #include "QVideoCapture.hpp"
 #include "QMatDraw.hpp"
 #include "QMatBuffer.hpp"
+#include "QAlphaMerge.hpp"
 
 #include <qqml.h>
 
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
-    qmlRegisterType<QMat>          (uri, 1, 0, "Mat");
-    qmlRegisterType<QImRead>       (uri, 1, 0, "ImRead");
-    qmlRegisterType<QMatEmpty>     (uri, 1, 0, "MatEmpty");
-    qmlRegisterType<QMatRoi>       (uri, 1, 0, "MatRoi");
-    qmlRegisterType<QMatRead>      (uri, 1, 0, "MatRead");
-    qmlRegisterType<QMat2DArray>   (uri, 1, 0, "Mat2DArray");
-    qmlRegisterType<QCamCapture>   (uri, 1, 0, "CamCapture");
-    qmlRegisterType<QVideoCapture> (uri, 1, 0, "VideoCapture");
-    qmlRegisterType<QMatDraw>      (uri, 1, 0, "MatDraw");
-    qmlRegisterType<QMatBuffer>    (uri, 1, 0, "MatBuffer");
+    qmlRegisterType<QMat>(          uri, 1, 0, "Mat");
+    qmlRegisterType<QImRead>(       uri, 1, 0, "ImRead");
+    qmlRegisterType<QMatEmpty>(     uri, 1, 0, "MatEmpty");
+    qmlRegisterType<QMatRoi>(       uri, 1, 0, "MatRoi");
+    qmlRegisterType<QMatRead>(      uri, 1, 0, "MatRead");
+    qmlRegisterType<QMat2DArray>(   uri, 1, 0, "Mat2DArray");
+    qmlRegisterType<QCamCapture>(   uri, 1, 0, "CamCapture");
+    qmlRegisterType<QVideoCapture>( uri, 1, 0, "VideoCapture");
+    qmlRegisterType<QMatDraw>(      uri, 1, 0, "MatDraw");
+    qmlRegisterType<QMatBuffer>(    uri, 1, 0, "MatBuffer");
+    qmlRegisterType<QAlphaMerge>(   uri, 1, 0, "AlphaMerge");
 }
 
 

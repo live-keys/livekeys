@@ -22,14 +22,22 @@
 #include "QHoughLines.hpp"
 #include "QHoughLinesP.hpp"
 #include "QSobel.hpp"
+#include "QCvtColor.hpp"
+#include "QThreshold.hpp"
+#include "QChannelSelect.hpp"
+#include "QStructuringElement.hpp"
 
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
-    qmlRegisterType<QCanny>(         uri, 1, 0, "Canny");
-    qmlRegisterType<QGaussianBlur>(  uri, 1, 0, "GaussianBlur");
-    qmlRegisterType<QHoughLines>(    uri, 1, 0, "HoughLines");
-    qmlRegisterType<QHoughLinesP>(   uri, 1, 0, "HoughLinesP");
-    qmlRegisterType<QSobel>(         uri, 1, 0, "Sobel");
+    qmlRegisterType<QCanny>(              uri, 1, 0, "Canny");
+    qmlRegisterType<QGaussianBlur>(       uri, 1, 0, "GaussianBlur");
+    qmlRegisterType<QHoughLines>(         uri, 1, 0, "HoughLines");
+    qmlRegisterType<QHoughLinesP>(        uri, 1, 0, "HoughLinesP");
+    qmlRegisterType<QSobel>(              uri, 1, 0, "Sobel");
+    qmlRegisterType<QCvtColor>(           uri, 1, 0, "CvtColor");
+    qmlRegisterType<QThreshold>(          uri, 1, 0, "Threshold");
+    qmlRegisterType<QChannelSelect>(      uri, 1, 0, "ChannelSelect");
+    qmlRegisterType<QStructuringElement>( uri, 1, 0, "StructuringElement");
 }
 
 

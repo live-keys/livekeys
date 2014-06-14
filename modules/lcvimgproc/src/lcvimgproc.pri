@@ -4,7 +4,11 @@ HEADERS += \
 	$$PWD/QGaussianBlur.hpp \
 	$$PWD/QHoughLines.hpp \
 	$$PWD/QHoughLinesP.hpp \
-	$$PWD/QSobel.hpp
+	$$PWD/QSobel.hpp \
+	$$PWD/QCvtColor.hpp \
+	$$PWD/QThreshold.hpp \
+	$$PWD/QChannelSelect.hpp \
+	$$PWD/QStructuringElement.hpp
 
 SOURCES += \
 	$$PWD/lcvimgproc_plugin.cpp \
@@ -12,4 +16,9 @@ SOURCES += \
 	$$PWD/QGaussianBlur.cpp \
 	$$PWD/QHoughLines.cpp \
 	$$PWD/QHoughLinesP.cpp \
-	$$PWD/QSobel.cpp
+	$$PWD/QSobel.cpp \
+	$$PWD/QCvtColor.cpp \
+	$$PWD/QThreshold.cpp \
+	$$PWD/QChannelSelect.cpp \
+	$$PWD/QStructuringElement.cpp
+
