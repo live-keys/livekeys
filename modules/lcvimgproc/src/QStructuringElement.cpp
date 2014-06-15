@@ -15,7 +15,7 @@ QMat* QStructuringElement::output() const{
     if ( m_outputDirty )
         *m_output->data() = getStructuringElement(
                 m_shape,
-                Size(ksize.width(), ksize.height()),
+                Size(m_ksize.width(), m_ksize.height()),
                 Point(m_anchor.x(), m_anchor.y()));
 
     return m_output;

@@ -15,18 +15,18 @@ class QStructuringElement : public QQuickItem{
 
     Q_ENUMS(ElementShape)
 
+public:
     enum ElementShape{
         MORPH_RECT    = cv::MORPH_RECT,
         MORPH_ELLIPSE = cv::MORPH_ELLIPSE,
         MORPH_CROSS   = cv::MORPH_CROSS
     };
 
-public:
     QStructuringElement(QQuickItem* parent = 0);
     ~QStructuringElement();
 
-    int shape() const;
-    void setShape(int shape);
+    ElementShape shape() const;
+    void setShape(ElementShape shape);
 
     const QSize& ksize() const;
     void setKsize(const QSize& ksize);
@@ -35,7 +35,7 @@ public:
     void setAnchor(const QPoint& anchor);
 
     QMat* output() const;
-    void setoutput(QMat* output);
+    void setOutput(QMat* output);
 
     void setOutputDirty();
 
@@ -58,7 +58,7 @@ inline void QStructuringElement::setOutputDirty(){
     emit outputChanged();
 }
 
-inline void QStructuringElement::setOutput(QMat*output){
+inline void QStructuringElement::setOutput(QMat* output){
 	if (m_output != output){
         m_output = output;
 		emit outputChanged();
@@ -87,11 +87,11 @@ inline void QStructuringElement::setKsize(const QSize& ksize){
 	}
 }
 
-inline int QStructuringElement::shape() const{
+inline QStructuringElement::ElementShape QStructuringElement::shape() const{
 	return m_shape;
 }
 
-inline void QStructuringElement::setShape(intshape){
+inline void QStructuringElement::setShape(ElementShape shape){
 	if (m_shape != shape){
 		m_shape = shape;
 		emit shapeChanged();
