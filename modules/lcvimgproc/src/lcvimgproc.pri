@@ -9,11 +9,11 @@ HEADERS += \
 	$$PWD/QThreshold.hpp \
 	$$PWD/QChannelSelect.hpp \
 	$$PWD/QStructuringElement.hpp \
-    src/QBlur.hpp \
-    src/QCopyMakeBorder.hpp \
-    src/QDilate.hpp \
-    src/QErode.hpp \
-    src/QFilter2D.hpp
+	$$PWD/QBlur.hpp \
+	$$PWD/QCopyMakeBorder.hpp \
+	$$PWD/QDilate.hpp \
+	$$PWD/QErode.hpp \
+	$$PWD/QFilter2D.hpp
 
 SOURCES += \
 	$$PWD/lcvimgproc_plugin.cpp \
@@ -26,9 +26,9 @@ SOURCES += \
 	$$PWD/QThreshold.cpp \
 	$$PWD/QChannelSelect.cpp \
 	$$PWD/QStructuringElement.cpp \
-    src/QBlur.cpp \
-    src/QCopyMakeBorder.cpp \
-    src/QDilate.cpp \
-    src/QErode.cpp \
-    src/QFilter2D.cpp
+	$$PWD/QBlur.cpp \
+	$$PWD/QCopyMakeBorder.cpp \
+	$$PWD/QDilate.cpp \
+	$$PWD/QErode.cpp \
+	$$PWD/QFilter2D.cpp
 
