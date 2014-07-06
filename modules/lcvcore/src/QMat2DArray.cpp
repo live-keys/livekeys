@@ -54,13 +54,13 @@ QMat2DArray::~QMat2DArray(){
 
 cv::Size QMat2DArray::assignValues(){
     switch(m_type){
-    case CV_8U :  return assignValuesHelper<unsigned char>(m_values, output()->data(), m_type);
-    case CV_8S :  return assignValuesHelper<char>(         m_values, output()->data(), m_type);
-    case CV_16U : return assignValuesHelper<unsigned int>( m_values, output()->data(), m_type);
-    case CV_16S : return assignValuesHelper<int>(          m_values, output()->data(), m_type);
-    case CV_32S : return assignValuesHelper<long>(         m_values, output()->data(), m_type);
-    case CV_32F : return assignValuesHelper<float>(        m_values, output()->data(), m_type);
-    case CV_64F : return assignValuesHelper<double>(       m_values, output()->data(), m_type);
+    case CV_8U :  return assignValuesHelper<unsigned char>(m_values, output()->cvMat(), m_type);
+    case CV_8S :  return assignValuesHelper<char>(         m_values, output()->cvMat(), m_type);
+    case CV_16U : return assignValuesHelper<unsigned int>( m_values, output()->cvMat(), m_type);
+    case CV_16S : return assignValuesHelper<int>(          m_values, output()->cvMat(), m_type);
+    case CV_32S : return assignValuesHelper<long>(         m_values, output()->cvMat(), m_type);
+    case CV_32F : return assignValuesHelper<float>(        m_values, output()->cvMat(), m_type);
+    case CV_64F : return assignValuesHelper<double>(       m_values, output()->cvMat(), m_type);
     }
     return cv::Size(0, 0);
 }

@@ -40,8 +40,8 @@ void QHoughLines::transform(cv::Mat &in, cv::Mat&){
 QSGNode *QHoughLines::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
     Q_D(QHoughLines);
     if ( d->outDirty ){
-        Mat* surface = output()->data();
-        surface->create(inputMat()->data()->size(), CV_8UC4);
+        Mat* surface = output()->cvMat();
+        surface->create(inputMat()->cvMat()->size(), CV_8UC4);
         surface->setTo(Scalar(0, 0, 0, 0));
         for( size_t i = 0; i < d->lines.size(); ++i ){
             float rho = d->lines[i][0], theta = d->lines[i][1];

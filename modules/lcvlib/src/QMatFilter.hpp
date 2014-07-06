@@ -48,14 +48,21 @@ inline QMat *QMatFilter::inputMat(){
 }
 
 inline void QMatFilter::setInputMat(QMat *mat){
+    if ( mat != m_in ){
+        cv::Mat* matData = mat->cvMat();
+        if ( m_in->cvMat()->size() != matData->size() ){
+            setImplicitWidth(matData->cols);
+            setImplicitHeight(matData->rows);
+        }
+    }
     m_in = mat;
     emit inputChanged();
     transform();
 }
 
 inline void QMatFilter::transform(){
-    transform(*inputMat()->data(), *output()->data());
-    emit outChanged();
+    transform(*inputMat()->cvMat(), *output()->cvMat());
+    emit outputChanged();
     update();
 }
 

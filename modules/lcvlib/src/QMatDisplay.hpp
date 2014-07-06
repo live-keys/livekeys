@@ -24,7 +24,7 @@
 class Q_LCV_EXPORT QMatDisplay : public QQuickItem{
 
     Q_OBJECT
-    Q_PROPERTY(QMat* output       READ output       WRITE setOutput       NOTIFY outChanged)
+    Q_PROPERTY(QMat* output       READ output       WRITE setOutput       NOTIFY outputChanged)
     Q_PROPERTY(bool  linearFilter READ linearFilter WRITE setLinearFilter NOTIFY linearFilterChanged)
 
 public:
@@ -39,7 +39,7 @@ public:
     void setLinearFilter(bool filter);
 
 signals:
-    void outChanged();
+    void outputChanged();
     void linearFilterChanged();
 
 protected:
@@ -57,7 +57,7 @@ inline QMat *QMatDisplay::output(){
 
 inline void QMatDisplay::setOutput(QMat *mat){
     m_output = mat;
-    emit outChanged();
+    emit outputChanged();
 }
 
 inline bool QMatDisplay::linearFilter() const{

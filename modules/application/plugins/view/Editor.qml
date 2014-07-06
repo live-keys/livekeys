@@ -14,14 +14,15 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.1
+import Cv 1.0
 
 TextEdit {
     id : editor
     focus : false
     font.family: "Courier New"
     font.pixelSize: 13
-    color : "#fff"
+    color : "#ffffff"
     selectByMouse: true
     mouseSelectionMode: TextEdit.SelectCharacters
     selectionColor: "#3d4856"
@@ -81,4 +82,13 @@ TextEdit {
         editor.text = editor.text.slice(0, clastpos) + "    " + editor.text.slice(clastpos)
         editor.cursorPosition = clastpos + 4
     }
+
+
+    CodeHandler{
+        id : codeH
+        Component.onCompleted: {
+            codeH.target = parent.textDocument
+        }
+    }
+
 }

@@ -9,16 +9,16 @@ CONFIG(debug, debug|release){
     folder_01.source = images
     folder_01.target = debug
     folder_02.source = plugins
-    folder_02.target = debug
-    DEPLOYMENTFOLDERS += folder_01 folder_02
+	folder_02.target = debug
+	DEPLOYMENTFOLDERS += folder_01 folder_02
 }
 
 CONFIG(release, debug|release){
     folder_01.source = images
     folder_01.target = release
     folder_02.source = plugins
-    folder_02.target = release
-    DEPLOYMENTFOLDERS += folder_01 folder_02
+	folder_02.target = release
+	DEPLOYMENTFOLDERS += folder_01 folder_02
 }
 
 # Application Viewer

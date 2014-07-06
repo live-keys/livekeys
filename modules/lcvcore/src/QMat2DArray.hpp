@@ -60,7 +60,7 @@ inline void QMat2DArray::setValues(const QVariantList &val){
         m_values     = val;
         m_cachedSize = assignValues();
         emit valuesChanged();
-        emit outChanged();
+        emit outputChanged();
         update();
     }
 }
@@ -75,7 +75,7 @@ inline void QMat2DArray::setType(QMat::Type type){
         emit typeChanged();
         if ( m_cachedSize != cv::Size(0,0) ){
             assignValues();
-            emit outChanged();
+            emit outputChanged();
             update();
         }
     }

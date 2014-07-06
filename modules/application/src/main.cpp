@@ -19,6 +19,7 @@
 #include "qtquick2applicationviewer.h"
 
 #include "QCodeDocument.hpp"
+#include "QCodeHandler.hpp"
 #include "QCursorShape.hpp"
 
 #include <QDebug>
@@ -28,14 +29,16 @@ int main(int argc, char *argv[]){
 
     QGuiApplication app(argc, argv);
 
-    qmlRegisterType<QCursorShape>  ("Cv", 1, 0, "CursorArea");
-    qmlRegisterType<QCodeDocument> ("Cv", 1, 0, "Document");
+    qmlRegisterType<QCursorShape>(  "Cv", 1, 0, "CursorArea");
+    qmlRegisterType<QCodeDocument>( "Cv", 1, 0, "Document");
+    qmlRegisterType<QCodeHandler>(  "Cv", 1, 0, "CodeHandler");
 
     QCodeDocument document;
     QtQuick2ApplicationViewer viewer;
     viewer.setMinimumSize(QSize(800, 600));
     viewer.rootContext()->setContextProperty("codeDocument", &document);
     viewer.setMainQmlFile(QStringLiteral("plugins/main.qml"));
+    viewer.setTitle("Live CV");
     document.setEngine(viewer.engine());
     viewer.showExpanded();
 

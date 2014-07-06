@@ -21,6 +21,7 @@
 #include "opencv2/core/core.hpp"
 #include "QLCVGlobal.hpp"
 
+class QMatAccess;
 class Q_LCV_EXPORT QMat : public QQuickItem{
 
     Q_OBJECT
@@ -42,15 +43,18 @@ public:
     QMat(cv::Mat *mat, QQuickItem *parent = 0);
     ~QMat();
 
-    cv::Mat* data();
+    cv::Mat* cvMat();
+
+public slots:
+    QMatAccess* data();
 
 public:
-    cv::Mat* m_data;
+    cv::Mat* m_cvmat;
     
 };
 
-inline cv::Mat *QMat::data(){
-    return m_data;
+inline cv::Mat *QMat::cvMat(){
+    return m_cvmat;
 }
 
 #endif // QMAT_HPP

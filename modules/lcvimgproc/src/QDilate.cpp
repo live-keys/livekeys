@@ -24,6 +24,6 @@ void QDilate::transform(cv::Mat &in, cv::Mat &out){
             else
                 borderValue = Scalar(m_borderValue.red());
         }
-        dilate(in, out, *(m_kernel->data()), m_anchorCv, m_iterations, m_borderType, borderValue);
+        dilate(in, out, *(m_kernel->cvMat()), m_anchorCv, m_iterations, m_borderType, borderValue);
     }
 }

@@ -8,7 +8,7 @@ QAlphaMerge::QAlphaMerge(QQuickItem *parent) :
 
 void QAlphaMerge::transform(cv::Mat &in, cv::Mat &out){
     if ( mask() )
-        mergeMask(in, *mask()->data(), out);
+        mergeMask(in, *mask()->cvMat(), out);
 }
 
 void QAlphaMerge::mergeMask(cv::Mat &input, cv::Mat &mask, cv::Mat &output){

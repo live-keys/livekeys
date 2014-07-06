@@ -69,9 +69,9 @@ inline void QMatEmpty::setMatSize(const QSize &size){
         m_matSize = size;
         setImplicitSize(size.width(), size.height());
         emit matSizeChanged();
-        output()->data()->create(cv::Size(m_matSize.width(), m_matSize.height()), CV_MAKETYPE(m_type, m_channels));
-        output()->data()->setTo(m_colorScalar);
-        emit outChanged();
+        output()->cvMat()->create(cv::Size(m_matSize.width(), m_matSize.height()), CV_MAKETYPE(m_type, m_channels));
+        output()->cvMat()->setTo(m_colorScalar);
+        emit outputChanged();
         update();
     }
 }
@@ -84,9 +84,9 @@ inline void QMatEmpty::setColor(const QColor &color){
     if ( m_color != color ){
         m_color = color;
         cacheScalarColor();
-        output()->data()->setTo(m_colorScalar);
+        output()->cvMat()->setTo(m_colorScalar);
         emit colorChanged();
-        emit outChanged();
+        emit outputChanged();
         update();
     }
 }
@@ -100,11 +100,11 @@ inline void QMatEmpty::setChannels(int channels){
         m_channels = channels;
 
         cacheScalarColor();
-        output()->data()->create(cv::Size(m_matSize.width(), m_matSize.height()), CV_MAKETYPE(m_type, m_channels));
-        output()->data()->setTo(m_colorScalar);
+        output()->cvMat()->create(cv::Size(m_matSize.width(), m_matSize.height()), CV_MAKETYPE(m_type, m_channels));
+        output()->cvMat()->setTo(m_colorScalar);
 
         emit channelsChanged();
-        emit outChanged();
+        emit outputChanged();
         update();
     }
 }
@@ -117,9 +117,9 @@ inline void QMatEmpty::setType(QMat::Type type){
     if ( m_type == type ){
         m_type = type;
         emit typeChanged();
-        output()->data()->create(cv::Size(m_matSize.width(), m_matSize.height()), CV_MAKETYPE(m_type, m_channels));
-        output()->data()->setTo(m_colorScalar);
-        emit outChanged();
+        output()->cvMat()->create(cv::Size(m_matSize.width(), m_matSize.height()), CV_MAKETYPE(m_type, m_channels));
+        output()->cvMat()->setTo(m_colorScalar);
+        emit outputChanged();
         update();
     }
 }

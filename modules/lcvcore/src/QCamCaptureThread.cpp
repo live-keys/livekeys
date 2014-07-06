@@ -110,7 +110,7 @@ void QCamCaptureThread::run(){
     Q_D(QCamCaptureThread);
     forever{
         if ( d->capture->grab() ){
-            d->capture->retrieve(*d_ptr->inactiveMat->data());
+            d->capture->retrieve(*d_ptr->inactiveMat->cvMat());
             d->inactiveMatReady = true;
             QMat* tempSwitch;
             tempSwitch      = d->inactiveMat;
@@ -155,6 +155,8 @@ void QCamCaptureThread::openCapture(){
         d->capture->open(deviceInt);
     else
         d->capture->open(m_deviceId.toStdString());
+    if ( d->capture->isOpened() )
+        initializeMatSize();
 }
 
 int QCamCaptureThread::captureWidth() const{

@@ -147,7 +147,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
             text : "-"
-            color : "#bec7ce"
+            color : "#dee7ee"
             font.pixelSize: 24
             font.family: "Arial"
         }
@@ -176,7 +176,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
             text : "+"
-            color : "#bec7ce"
+            color : "#dee7ee"
             font.pixelSize: 24
             font.family: "Arial"
         }

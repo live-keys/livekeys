@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.1
 import QtQuick.Dialogs 1.0
 import Cv 1.0
 import "view"
@@ -69,7 +69,9 @@ Rectangle {
                 executeAction()
             }
         }
-        onSaveFile : saveFileDialog()
+        onSaveFile : {
+            saveFileDialog()
+        }
         onFontPlus: if ( editor.font.pixelSize < 24 ) editor.font.pixelSize += 2
         onFontMinus: if ( editor.font.pixelSize > 10 ) editor.font.pixelSize -= 2
     }
@@ -137,11 +139,17 @@ Rectangle {
 
                 Editor{
                     id : editor
+                    property bool isDirty : false
+
                     text : "Rectangle{\n}"
+                    color : "#eeeeee"
+                    font.family: "Lucida Console, Courier New"
+
                     focus: true
+
                     height : Math.max( flick.height, paintedHeight )
                     width : Math.max( flick.width, paintedWidth )
-                    property bool isDirty : false
+
                     Behavior on font.pixelSize {
                         NumberAnimation { duration: 40 }
                     }
@@ -152,13 +160,17 @@ Rectangle {
             Rectangle{
                 id : errorWrap
                 anchors.bottom: parent.bottom
-                height : 30
+                height : error.text !== '' ? 30 : 0
                 width : parent.width
-                color : "#1c1f23"
+                color : "#141a1a"
+                Behavior on height {
+                    SpringAnimation { spring: 3; damping: 0.1 }
+                }
+
                 Rectangle{
-                    width : 10
+                    width : 14
                     height : parent.height
-                    color : "#401818"
+                    color : "#601818"
                     visible: error.text === "" ? false : true
                 }
                 Text {
@@ -169,7 +181,7 @@ Rectangle {
                     width: parent.width
                     font.pointSize: 25 * editor.fontScale
                     text: ""
-                    color: "#95a0a7"
+                    color: "#c5d0d7"
                 }
             }
 
@@ -182,7 +194,7 @@ Rectangle {
              z : 100
              width : 2
              color : "#1c2228"
-             x : parent.width / 3.4
+             Component.onCompleted: x = parent.width / 3.4
              onXChanged: {
                  viewer.width  = contentWrap.width - x - 2
                  editorWrap.width = x + 2
@@ -203,6 +215,7 @@ Rectangle {
         Rectangle{
             id : viewer
             anchors.left : splitter.right
+            anchors.right: parent.right
             height : parent.height
             color : "#051521"
 
@@ -221,9 +234,9 @@ Rectangle {
                         var newItem;
                         try {
                             root.beforeCompile()
-                            newItem = Qt.createQmlObject("import QtQuick 2.0\nimport Cv 1.0\n" + tester.program, tester, "canvas");
+                            newItem = Qt.createQmlObject("import QtQuick 2.1\n" + tester.program, tester, "canvas");
                         } catch (err) {
-                            error.text = err.qmlErrors[0].lineNumber + ":" + err.qmlErrors[0].message;
+                            error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;
                         }
                         if ( tester.program !== "Rectangle{\n}" )
                             editor.isDirty = true

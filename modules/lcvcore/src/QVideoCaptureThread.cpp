@@ -156,7 +156,7 @@ void QVideoCaptureThread::run(){
         }
 
         if ( d->capture->grab() ){
-            d->capture->retrieve(*d_ptr->inactiveMat->data());
+            d->capture->retrieve(*d_ptr->inactiveMat->cvMat());
             d->inactiveMatReady = true;
             QMat* tempSwitch;
             tempSwitch      = d->inactiveMat;

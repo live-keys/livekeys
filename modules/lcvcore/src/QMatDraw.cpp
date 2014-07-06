@@ -28,12 +28,12 @@ QMatDraw::~QMatDraw(){
 
 void QMatDraw::cleanUp(){
     if ( inputMat() )
-        inputMat()->data()->copyTo(*output()->data());
+        inputMat()->cvMat()->copyTo(*output()->cvMat());
 }
 
 void QMatDraw::line(const QPoint& p1, const QPoint& p2, const QColor& color, int thickness, int lineType, int shift){
     cv::line(
-                *output()->data(),
+                *output()->cvMat(),
                 cv::Point(p1.x(), p1.y()),
                 cv::Point(p2.x(), p2.y()),
                 cv::Scalar( color.blue(), color.green(), color.red(), color.alpha() ),
@@ -41,13 +41,13 @@ void QMatDraw::line(const QPoint& p1, const QPoint& p2, const QColor& color, int
                 lineType,
                 shift
     );
-    emit outChanged();
+    emit outputChanged();
     update();
 }
 
 void QMatDraw::rectangle(const QPoint &p1, const QPoint &p2, const QColor &color, int thickness, int lineType, int shift){
     cv::rectangle(
-                *output()->data(),
+                *output()->cvMat(),
                 cv::Point(p1.x(), p1.y()),
                 cv::Point(p2.x(), p2.y()),
                 cv::Scalar( color.blue(), color.green(), color.red(), color.alpha() ),
@@ -55,13 +55,13 @@ void QMatDraw::rectangle(const QPoint &p1, const QPoint &p2, const QColor &color
                 lineType,
                 shift
     );
-    emit outChanged();
+    emit outputChanged();
     update();
 }
 
 void QMatDraw::circle(const QPoint &center, int radius, const QColor &color, int thickness, int lineType, int shift){
     cv::circle(
-                *output()->data(),
+                *output()->cvMat(),
                 cv::Point(center.x(), center.y()),
                 radius,
                 cv::Scalar( color.blue(), color.green(), color.red(), color.alpha() ),
@@ -69,13 +69,13 @@ void QMatDraw::circle(const QPoint &center, int radius, const QColor &color, int
                 lineType,
                 shift
     );
-    emit outChanged();
+    emit outputChanged();
     update();
 }
 
 void QMatDraw::ellipse(const QPoint &center, const QSize &axes, double angle, double startAngle, double endAngle, const QColor &color, int thickness, int lineType, int shift){
     cv::ellipse(
-                *output()->data(),
+                *output()->cvMat(),
                 cv::Point(center.x(), center.y()),
                 cv::Size(axes.width(), axes.height()),
                 angle,
@@ -86,7 +86,7 @@ void QMatDraw::ellipse(const QPoint &center, const QSize &axes, double angle, do
                 lineType,
                 shift
     );
-    emit outChanged();
+    emit outputChanged();
     update();
 }
 
@@ -105,7 +105,7 @@ void QMatDraw::fillPoly(const QVariantList &points, const QColor &color, int lin
                 }
             }
             cv::fillPoly(
-                        *output()->data(),
+                        *output()->cvMat(),
                         const_cast<const cv::Point**>(pts),
                         npts,
                         points.size(),
@@ -126,7 +126,7 @@ void QMatDraw::fillPoly(const QVariantList &points, const QColor &color, int lin
                 pts[i].y = points[i].toPoint().y();
             }
             cv::fillConvexPoly(
-                        *output()->data(),
+                        *output()->cvMat(),
                         pts,
                         points.size(),
                         cv::Scalar( color.blue(), color.green(), color.red(), color.alpha() ),
@@ -137,6 +137,6 @@ void QMatDraw::fillPoly(const QVariantList &points, const QColor &color, int lin
         }
     }
 
-    emit outChanged();
+    emit outputChanged();
     update();
 }

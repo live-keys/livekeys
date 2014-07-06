@@ -29,22 +29,17 @@ QImRead::QImRead(QQuickItem *parent) :
 QImRead::~QImRead(){
 }
 
-// I have access to window
-// Register event reload on window
-
 void QImRead::setFile(const QString &file){
-    //qDebug() << "set file" << this->w;
-
     if ( file != m_file ){
         m_file = file;
         emit fileChanged();
         cv::Mat temp = cv::imread(file.toStdString());
 
         if ( !temp.empty() ){
-            temp.copyTo(*output()->data());
-            setImplicitWidth(output()->data()->size().width);
-            setImplicitHeight(output()->data()->size().height);
-            emit outChanged();
+            temp.copyTo(*output()->cvMat());
+            setImplicitWidth(output()->cvMat()->size().width);
+            setImplicitHeight(output()->cvMat()->size().height);
+            emit outputChanged();
             update();
         }
     }

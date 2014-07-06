@@ -15,17 +15,22 @@
 ****************************************************************************/
 
 #include "QMat.hpp"
+#include "QMatAccess.hpp"
 
 QMat::QMat(QQuickItem *parent):
     QQuickItem(parent),
-    m_data(new cv::Mat){
+    m_cvmat(new cv::Mat){
 }
 
 QMat::QMat(cv::Mat *mat, QQuickItem *parent):
     QQuickItem(parent),
-    m_data(mat){
+    m_cvmat(mat){
+}
+
+QMatAccess *QMat::data(){
+    return new QMatAccess(this);
 }
 
 QMat::~QMat(){
-    delete m_data;
+    delete m_cvmat;
 }

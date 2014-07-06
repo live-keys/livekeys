@@ -16,6 +16,7 @@
 
 #include "lcvcore_plugin.hpp"
 #include "QMat.hpp"
+#include "QMatAccess.hpp"
 #include "QImRead.hpp"
 #include "QMatEmpty.hpp"
 #include "QMatRoi.hpp"
@@ -32,6 +33,7 @@
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
     qmlRegisterType<QMat>(          uri, 1, 0, "Mat");
+    qmlRegisterType<QMatAccess>(    uri, 1, 0, "MatAccess");
     qmlRegisterType<QImRead>(       uri, 1, 0, "ImRead");
     qmlRegisterType<QMatEmpty>(     uri, 1, 0, "MatEmpty");
     qmlRegisterType<QMatRoi>(       uri, 1, 0, "MatRoi");

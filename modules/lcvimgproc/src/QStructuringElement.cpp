@@ -13,7 +13,7 @@ QStructuringElement::QStructuringElement(QQuickItem *parent)
 
 QMat* QStructuringElement::output() const{
     if ( m_outputDirty )
-        *m_output->data() = getStructuringElement(
+        *m_output->cvMat() = getStructuringElement(
                 m_shape,
                 Size(m_ksize.width(), m_ksize.height()),
                 Point(m_anchor.x(), m_anchor.y()));
