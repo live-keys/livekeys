@@ -32,4 +32,5 @@ SUBDIRS += $$PWD/lcvlib
 
 SUBDIRS += $$PWD/lcvcore
 SUBDIRS += $$PWD/lcvimgproc
+SUBDIRS += $$PWD/lcvvideo
 

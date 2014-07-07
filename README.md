@@ -1,23 +1,16 @@
-Live CV [version 0.1]
-=====================
+# Live CV
 
+**Real Time Computer Vision Coding Environment**
 
- 1. Compatibility
------------------
+Live CV combines the features of QTQuick and Open CV to create an 
+environment for real-time computer vision coding.
 
- * Microsoft Visual Studio 2012
- * Microsoft Visual Studio 2010
- * Mingw 4.7
- * Gcc 4.4
+## Source Dependencies
 
- 2. Dependencies
-----------------
-
- * Qt5
+ * Qt5 or later
  * OpenCv 2.4 or later
 
- 3. Configuration
------------------
+## Compiler Configuration
 
 All modules are available through qmake projects. Configuration deals
 with setting up paths to opencv. To ease this process on windows, the
