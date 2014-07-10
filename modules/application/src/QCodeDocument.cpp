@@ -38,11 +38,11 @@ QString QCodeDocument::openFile(const QUrl &file){
         m_openedFile = fileName;
         setPath(QFileInfo(file).path());
         if ( m_engine ){
-            qDebug() << "Import paths :\ns " << m_engine->importPathList();
+//            qDebug() << "Import paths :\ns " << m_engine->importPathList();
 //            QStringList importPathsTemp = m_importPaths;
 //            importPathsTemp.append(m_path);
 //            m_engine->addImportPath(m_path);
-            //m_engine->setImportPathList(importPathsTemp);
+//            m_engine->setImportPathList(importPathsTemp);
         }
         QString content = in.readAll();
         file.close();

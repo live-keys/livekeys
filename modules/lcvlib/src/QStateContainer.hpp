@@ -78,7 +78,7 @@ template<typename T>
 class QStateContainer : public QStateContainerBase{
 
 public:
-    static QStateContainer<T> &instance(QQuickItem *item);
+    static QStateContainer<T> &instance(QQuickItem *item = 0);
 
     void registerState(const QString& key, T* state);
     T*   state(const QString& key);
