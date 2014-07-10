@@ -17,10 +17,11 @@
 #include "lcvvideo_plugin.hpp"
 
 #include <qqml.h>
+#include "QCalcOpticalFlowPyrLK.hpp"
 
 void LcvvideoPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
-    // qmlRegisterType<QCanny>(              uri, 1, 0, "Canny");
+    qmlRegisterType<QCalcOpticalFlowPyrLK>( uri, 1, 0, "CalcOpticalFlowPyrLK");
 }
 
 
