@@ -29,7 +29,8 @@ QVideoCapture::QVideoCapture(QQuickItem *parent) :
     m_fps(0),
     m_thread(0),
     m_output(new QMat()),
-    m_linearFilter(true)
+    m_linearFilter(true),
+    m_loop(false)
 {
     m_restore = output();
     setFlag(ItemHasContents, true);
@@ -53,9 +54,11 @@ void QVideoCapture::setFile(const QString &file){
             connect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
 
             if ( m_thread->isCaptureOpened() ){
+
                 setImplicitWidth (m_thread->captureWidth());
                 setImplicitHeight(m_thread->captureHeight());
 
+                m_thread->setLoop(m_loop);
                 if ( m_fps == 0 )
                     m_fps = m_thread->captureFps();
 
@@ -69,10 +72,13 @@ void QVideoCapture::setFile(const QString &file){
                         m_thread->timer()->start(1000 / m_fps);
                     }
                 }
+                emit pausedChanged();
                 emit totalFramesChanged();
 
             } else
                 qDebug() << "Open CV error : Could not open capture : " << m_file;
+        } else {
+            qDebug() << "File does not exist : " << file;
         }
         emit fileChanged();
     }
@@ -92,8 +98,20 @@ void QVideoCapture::setFps(qreal fps){
     }
 }
 
+void QVideoCapture::setLoop(bool loop){
+    if ( m_loop != loop ){
+        m_loop = loop;
+        if ( m_thread ){
+            m_thread->setLoop(loop);
+        }
+        emit loopChanged();
+    }
+}
+
 int QVideoCapture::totalFrames() const{
-    return m_thread->totalFrames();
+    if ( m_thread )
+        return m_thread->totalFrames();
+    return 0;
 }
 
 void QVideoCapture::setTotalFrames(int){
@@ -101,7 +119,9 @@ void QVideoCapture::setTotalFrames(int){
 }
 
 int QVideoCapture::currentFrame() const{
-    return m_thread->currentFrame();
+    if ( m_thread )
+        return m_thread->currentFrame();
+    return 0;
 }
 
 void QVideoCapture::seekTo(int frame){

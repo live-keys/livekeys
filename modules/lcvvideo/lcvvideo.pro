@@ -10,7 +10,8 @@ OTHER_FILES = qmldir
 
 DEFINES += Q_LCV
 
-REQUIRES_CV_VIDEO = 1
+REQUIRES_CV_IMGPROC = 1
+REQUIRES_CV_VIDEO   = 1
 
 include($$PWD/src/lcvvideo.pri)
 include($$PWD/../../config.pro)

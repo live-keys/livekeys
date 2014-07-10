@@ -31,6 +31,7 @@ class QVideoCapture : public QQuickItem{
     Q_PROPERTY(qreal   fps          READ fps          WRITE setFps          NOTIFY fpsChanged)
     Q_PROPERTY(int     currentFrame READ currentFrame WRITE seekTo          NOTIFY outChanged)
     Q_PROPERTY(int     totalFrames  READ totalFrames  WRITE setTotalFrames  NOTIFY totalFramesChanged)
+    Q_PROPERTY(bool    loop         READ loop         WRITE setLoop         NOTIFY loopChanged)
 
 public:
     explicit QVideoCapture(QQuickItem *parent = 0);
@@ -56,6 +57,9 @@ public:
     bool linearFilter() const;
     void setLinearFilter(bool filter);
 
+    bool loop() const;
+    void setLoop(bool loop);
+
 public slots:
     void switchMat();
     void seekTo(int frame);
@@ -67,6 +71,7 @@ signals:
     void pausedChanged();
     void fpsChanged();
     void totalFramesChanged();
+    void loopChanged();
 
 protected:
     virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *);
@@ -82,6 +87,7 @@ private:
     QMat*   m_restore;
     QMat*   m_output;
     bool    m_linearFilter;
+    bool    m_loop;
 
     QVideoCaptureThread* m_thread;
 
@@ -114,6 +120,10 @@ inline void QVideoCapture::setLinearFilter(bool filter){
         emit linearFilterChanged();
         update();
     }
+}
+
+inline bool QVideoCapture::loop() const{
+    return m_loop;
 }
 
 #endif // QVideoCapture_HPP

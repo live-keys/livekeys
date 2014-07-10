@@ -50,6 +50,8 @@ public:
 
     void    processNextFrame();
 
+    void    setLoop(bool loop);
+
 signals:
     void inactiveMatChanged();
     void isSeekingChanged();
@@ -76,6 +78,7 @@ private:
     int     m_totalFrames;
     bool    m_isSeeking;
     bool    m_forceSeek;
+    bool    m_loop;
     QMat*   m_activeMat;
     QTimer* m_timer;
 

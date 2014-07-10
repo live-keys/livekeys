@@ -107,6 +107,10 @@ void QVideoCaptureThread::processNextFrame(){
     d->inactiveMatReady = false;
 }
 
+void QVideoCaptureThread::setLoop(bool loop){
+    m_loop = loop;
+}
+
 void QVideoCaptureThread::tick(){
     Q_D(QVideoCaptureThread);
     QMutexLocker lock(&d->mutex);
@@ -164,8 +168,14 @@ void QVideoCaptureThread::run(){
             m_activeMat     = tempSwitch;
             ++m_framePos;
             emit inactiveMatChanged();
-        } else
-            qDebug() << "Open CV : No image captured";
+        } else {
+            if ( m_loop ){
+                qDebug() << "Open CV : No image captured, restarting stream..";
+                d->seekRequest = 0;
+            } else {
+                qDebug() << "Open CV : No image captured.";
+            }
+        }
 
         d->mutex.lock();
         if ( d->inactiveMatReady && !d->abord )

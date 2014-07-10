@@ -31,7 +31,9 @@ TextEdit {
     wrapMode: TextEdit.NoWrap
     onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
     Keys.onPressed: {
-        if ( event.key === Qt.Key_BracketRight && event.modifiers & Qt.ShiftModifier ){
+        if ( (event.key === Qt.Key_BracketRight && (event.modifiers & Qt.ShiftModifier) ) ||
+             (event.key === Qt.Key_BraceRight) ){
+
             event.accepted = true
             if ( cursorPosition > 4 ){
                 var clastpos = cursorPosition
