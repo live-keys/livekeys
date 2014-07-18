@@ -1,6 +1,6 @@
 HEADERS += \
     $$PWD/QCamCapture.hpp \
-	$$PWD/QCamCaptureThread.hpp \
+    $$PWD/QCamCaptureThread.hpp \
     $$PWD/QMat2DArray.hpp \
     $$PWD/QMatBuffer.hpp \
     $$PWD/QMatEmpty.hpp \
@@ -10,12 +10,12 @@ HEADERS += \
     $$PWD/QMatRoi.hpp \
     $$PWD/QVideoCapture.hpp \
     $$PWD/QVideoCaptureThread.hpp \
-	$$PWD/QAlphaMerge.hpp \
-	$$PWD/lcvcore_plugin.hpp
+    $$PWD/QAlphaMerge.hpp \
+    $$PWD/lcvcore_plugin.hpp
 
 SOURCES += \
     $$PWD/QCamCapture.cpp \
-	$$PWD/QCamCaptureThread.cpp \
+    $$PWD/QCamCaptureThread.cpp \
     $$PWD/QMat2DArray.cpp \
     $$PWD/QMatBuffer.cpp \
     $$PWD/QMatEmpty.cpp \
@@ -25,5 +25,5 @@ SOURCES += \
     $$PWD/QMatRoi.cpp \
     $$PWD/QVideoCapture.cpp \
     $$PWD/QVideoCaptureThread.cpp \
-	$$PWD/QAlphaMerge.cpp \
+    $$PWD/QAlphaMerge.cpp \
     $$PWD/lcvcore_plugin.cpp

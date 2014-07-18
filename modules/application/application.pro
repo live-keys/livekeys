@@ -40,3 +40,6 @@ Debug:OBJECTS_DIR = debug/.obj
 Debug:MOC_DIR = debug/.moc
 Debug:RCC_DIR = debug/.rcc
 
+OTHER_FILES += \
+    plugins/lcvcontrols/RegionSelection.qml
+

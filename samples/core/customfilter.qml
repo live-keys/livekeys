@@ -3,9 +3,13 @@ import "lcvimgproc" 1.0
 
 Row{
     
+    // This sample shows how to iterate or 
+    // access values from an image directly
+    // from the qml file and create a custom filter.
+    
     ImRead{
        id : src
-       file : todo
+       file : codeDocument.path + '/../_images/caltech_buildings_DSCN0246.JPG'
        Component.onCompleted : {
            width = width / 4
            height = height / 4
@@ -16,10 +20,11 @@ Row{
         input : src.output
         width : src.width
         height : src.height
-        onInputChanged : {
-            var data = input.data()
-            var rows = 1800
-            var cols = 1326
+        
+        onOutputChanged : {
+            var data = output.data()
+            var rows = data.rows()
+            var cols = data.cols()
             var channels = data.channels()
             var it   = 0;
             
@@ -27,7 +32,7 @@ Row{
             
             for ( var i = 0; i < rows; ++i ){
                 for ( var j = 0; j < cols; ++j ){
-                    if ( vals[i][j * channels] > 100 ){
+                    if ( vals[i][j * channels] > 160 ){
                         vals[i][j * channels + 0] = 200
                         vals[i][j * channels + 1] = 200
                         vals[i][j * channels + 2] = 200
@@ -37,9 +42,6 @@ Row{
             
             
             data.setValues(vals)
-            
-            console.log("It : " + it);
-            console.log(data.ellapsed())
         }
     }
     

@@ -26,6 +26,7 @@
 #include "QThreshold.hpp"
 #include "QChannelSelect.hpp"
 #include "QStructuringElement.hpp"
+#include "QMatResize.hpp"
 
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
@@ -38,6 +39,7 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QThreshold>(          uri, 1, 0, "Threshold");
     qmlRegisterType<QChannelSelect>(      uri, 1, 0, "ChannelSelect");
     qmlRegisterType<QStructuringElement>( uri, 1, 0, "StructuringElement");
+    qmlRegisterType<QMatResize>(          uri, 1, 0, "Resize");
 }
 
 

@@ -53,7 +53,7 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
         setTexture(m_texture);
     }
 
-    if ( image ){
+    if (image){
         m_fbo->bind();
         glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT);

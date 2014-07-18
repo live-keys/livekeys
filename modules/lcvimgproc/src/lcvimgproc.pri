@@ -13,7 +13,8 @@ HEADERS += \
 	$$PWD/QCopyMakeBorder.hpp \
 	$$PWD/QDilate.hpp \
 	$$PWD/QErode.hpp \
-	$$PWD/QFilter2D.hpp
+        $$PWD/QFilter2D.hpp \
+        $$PWD/QMatResize.hpp
 
 SOURCES += \
 	$$PWD/lcvimgproc_plugin.cpp \
@@ -30,5 +31,6 @@ SOURCES += \
 	$$PWD/QCopyMakeBorder.cpp \
 	$$PWD/QDilate.cpp \
 	$$PWD/QErode.cpp \
-	$$PWD/QFilter2D.cpp
+        $$PWD/QFilter2D.cpp \
+        $$PWD/QMatResize.cpp
 
