@@ -199,11 +199,11 @@ Rectangle {
                  viewer.width  = contentWrap.width - x - 2
                  editorWrap.width = x + 2
              }
-             MouseArea {
+             MouseArea{
                 anchors.fill: parent
                 drag.target: splitter
                 drag.axis: Drag.XAxis
-                drag.minimumX: 150
+                drag.minimumX: 2
                 drag.maximumX: contentWrap.width - 150
              }
              CursorArea{

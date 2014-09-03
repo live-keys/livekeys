@@ -20,7 +20,10 @@ using namespace cv;
 
 QFilter2D::QFilter2D(QQuickItem *parent)
     : QMatFilter(parent)
+    , m_kernel(0)
+    , m_ddepth(-1)
     , m_anchorCv(-1, -1)
+    , m_delta(0)
     , m_borderType(BORDER_DEFAULT)
 {
 }
@@ -30,6 +33,9 @@ QFilter2D::~QFilter2D(){
 
 void QFilter2D::transform(cv::Mat &in, cv::Mat &out){
     if ( m_kernel ){
-        filter2D(in, out, m_ddepth, *(m_kernel->cvMat()), m_anchorCv, m_borderType);
+        Mat* m = m_kernel->cvMat();
+        if ( m->cols > 0 || m->rows > 0 ){
+            filter2D(in, out, m_ddepth, *(m_kernel->cvMat()), m_anchorCv, m_delta, m_borderType);
+        }
     }
 }

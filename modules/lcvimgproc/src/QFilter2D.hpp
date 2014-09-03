@@ -74,6 +74,7 @@ inline void QFilter2D::setBorderType(int borderType){
 	if (m_borderType != borderType){
 		m_borderType = borderType;
 		emit borderTypeChanged();
+        QMatFilter::transform();
 	}
 }
 
@@ -85,6 +86,7 @@ inline void QFilter2D::setDelta(double delta){
 	if (m_delta != delta){
 		m_delta = delta;
 		emit deltaChanged();
+        QMatFilter::transform();
 	}
 }
 
@@ -97,6 +99,7 @@ inline void QFilter2D::setAnchor(const QPoint& anchor){
 		m_anchor = anchor;
         m_anchorCv = cv::Point(anchor.x(), anchor.y());
 		emit anchorChanged();
+        QMatFilter::transform();
 	}
 }
 
@@ -105,10 +108,9 @@ inline QMat* QFilter2D::kernel() const{
 }
 
 inline void QFilter2D::setKernel(QMat*kernel){
-	if (m_kernel != kernel){
-		m_kernel = kernel;
-		emit kernelChanged();
-	}
+    m_kernel = kernel;
+    emit kernelChanged();
+    QMatFilter::transform();
 }
 
 inline int QFilter2D::ddepth() const{
@@ -119,6 +121,7 @@ inline void QFilter2D::setDdepth(int ddepth){
 	if (m_ddepth != ddepth){
 		m_ddepth = ddepth;
 		emit ddepthChanged();
+        QMatFilter::transform();
 	}
 }
 
