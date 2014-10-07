@@ -29,9 +29,9 @@ int main(int argc, char *argv[]){
 
     QGuiApplication app(argc, argv);
 
-    qmlRegisterType<QCursorShape>(  "Cv", 1, 0, "CursorArea");
-    qmlRegisterType<QCodeDocument>( "Cv", 1, 0, "Document");
-    qmlRegisterType<QCodeHandler>(  "Cv", 1, 0, "CodeHandler");
+    qmlRegisterType<QCursorShape>( "Cv", 1, 0, "CursorArea");
+    qmlRegisterType<QCodeDocument>("Cv", 1, 0, "Document");
+    qmlRegisterType<QCodeHandler>( "Cv", 1, 0, "CodeHandler");
 
     QCodeDocument document;
     QtQuick2ApplicationViewer viewer;
