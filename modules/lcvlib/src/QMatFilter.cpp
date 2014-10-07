@@ -16,6 +16,10 @@
 
 #include "QMatFilter.hpp"
 
+/**
+ * @brief QMatFilter::QMatFilter
+ * @param parent
+ */
 QMatFilter::QMatFilter(QQuickItem *parent) :
     QMatDisplay(parent),
     m_in(new QMat(this)),
@@ -23,10 +27,15 @@ QMatFilter::QMatFilter(QQuickItem *parent) :
 {
 }
 
+/**
+ * @brief QMatFilter::~QMatFilter
+ */
 QMatFilter::~QMatFilter(){
     delete m_inInternal;
 }
 
-
+/**
+ * @brief QMatFilter::transform
+ */
 void QMatFilter::transform(cv::Mat&, cv::Mat&){
 }

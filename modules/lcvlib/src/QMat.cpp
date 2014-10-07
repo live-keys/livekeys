@@ -17,20 +17,36 @@
 #include "QMat.hpp"
 #include "QMatAccess.hpp"
 
+/**
+ * @brief QMat::QMat
+ * @param parent
+ */
 QMat::QMat(QQuickItem *parent):
     QQuickItem(parent),
     m_cvmat(new cv::Mat){
 }
 
+/**
+ * @brief QMat::QMat
+ * @param mat
+ * @param parent
+ */
 QMat::QMat(cv::Mat *mat, QQuickItem *parent):
     QQuickItem(parent),
     m_cvmat(mat){
 }
 
+/**
+ * @brief QMat::data
+ * @return
+ */
 QMatAccess *QMat::data(){
     return new QMatAccess(this);
 }
 
+/**
+ * @brief QMat::~QMat
+ */
 QMat::~QMat(){
     delete m_cvmat;
 }

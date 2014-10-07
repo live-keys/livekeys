@@ -21,6 +21,21 @@
 #include "QLCVGlobal.hpp"
 #include "QMat.hpp"
 
+/**
+ * @brief Main matrix display class
+ *
+ * @author Dinu SV
+ * @version 1.0.0
+ * @ingroup cpp_core
+ *
+ * Extend this class if you want to have a matrix type item that displays on screen. The display parameter is called <i>output</i>, which
+ * you can access by it's setter( setOutput() ) and getter( output() ).
+ *
+ * Within a QML application, an item might be visible or not, depending if the item's visibility is set to true or false. If the item is
+ * visible, the updatePaintNode() function is called when drawing the element. This can become useful if you have a matrix that requires
+ * refurbishing only if it's displayed on screen. While extending this class, you can override the updatePaintNode() method, and implement
+ * the actual refurbishing in there. This way, if the element is not visible, you can save a few resources when processing the image.
+ */
 class Q_LCV_EXPORT QMatDisplay : public QQuickItem{
 
     Q_OBJECT
@@ -51,19 +66,35 @@ private:
 
 };
 
+/**
+ * @brief QMatDisplay::output
+ * @return
+ */
 inline QMat *QMatDisplay::output(){
     return m_output;
 }
 
+/**
+ * @brief QMatDisplay::setOutput
+ * @param mat
+ */
 inline void QMatDisplay::setOutput(QMat *mat){
     m_output = mat;
     emit outputChanged();
 }
 
+/**
+ * @brief QMatDisplay::linearFilter
+ * @return
+ */
 inline bool QMatDisplay::linearFilter() const{
     return m_linearFilter;
 }
 
+/**
+ * @brief QMatDisplay::setLinearFilter
+ * @param filter
+ */
 inline void QMatDisplay::setLinearFilter(bool filter){
     if ( filter != m_linearFilter ){
         m_linearFilter = filter;

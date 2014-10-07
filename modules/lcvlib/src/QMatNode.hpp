@@ -21,6 +21,12 @@
 #include "QMatState.hpp"
 #include "QLCVGlobal.hpp"
 
+/**
+ * @brief Node containing a matrixs state.
+ * @author Dinu SV
+ * @version 1.0.0
+ * @ingroup cpp_core
+ */
 class Q_LCV_EXPORT QMatNode : public QSGGeometryNode{
 
 public:

@@ -26,9 +26,19 @@
 #define GL_UNPACK_ALIGNMENT               0x0CF5
 #endif
 
+/**
+ * @brief QMatShader::QMatShader
+ */
 QMatShader::QMatShader(){
 }
 
+/**
+ * @brief QMatShader::loadTexture
+ * @param mat
+ * @param index
+ * @param linearFilter
+ * @return
+ */
 bool QMatShader::loadTexture(QMat *mat, int index, bool linearFilter){
 
     glBindTexture(GL_TEXTURE_2D, m_textures[index]);

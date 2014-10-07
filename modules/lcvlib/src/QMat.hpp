@@ -22,12 +22,26 @@
 #include "QLCVGlobal.hpp"
 
 class QMatAccess;
+
+/**
+ * @brief Main matrix qml element.
+ * @author Dinu SV
+ * @version 1.0.0
+ *
+ * This element is intended to be passed around a QML tree structure. You can access it's cv mat value by
+ * using the cvMat() function.
+ *
+ * To access it's pixels, you can use (the matrix access function)[@ref qml_mataccess].
+ */
 class Q_LCV_EXPORT QMat : public QQuickItem{
 
     Q_OBJECT
     Q_ENUMS(Type)
 
 public:
+    /**
+     * @brief QMat type
+     */
     enum Type{
         CV8U  = CV_8U,
         CV8S  = CV_8S,
@@ -53,6 +67,10 @@ public:
     
 };
 
+/**
+ * @brief QMat::cvMat
+ * @return
+ */
 inline cv::Mat *QMat::cvMat(){
     return m_cvmat;
 }

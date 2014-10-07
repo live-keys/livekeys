@@ -16,6 +16,9 @@
 
 #include "QMatState.hpp"
 
+/**
+ * @brief QMatState constructor.
+ */
 QMatState::QMatState():
     mat(0),
     textureIndex(-1),
@@ -24,6 +27,11 @@ QMatState::QMatState():
 {
 }
 
+/**
+ * @brief Compares 2 states.
+ * @param other
+ * @return
+ */
 int QMatState::compare(const QMatState *other) const{
     if ( textureIndex == -1 && other->textureIndex == -1 ){
         if ( mat == other->mat )

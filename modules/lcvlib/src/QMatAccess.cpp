@@ -50,11 +50,20 @@ template<typename T, typename LT> void setValues( QVariantList& values, Mat& m){
 
 }// namespace helpers
 
+/**
+ * @brief QMatAccess::QMatAccess
+ * @param parent
+ */
 QMatAccess::QMatAccess(QQuickItem *parent)
     : QQuickItem(parent)
     , m_mat(0){
 }
 
+/**
+ * @brief QMatAccess::QMatAccess
+ * @param mat
+ * @param parent
+ */
 QMatAccess::QMatAccess(QMat *mat, QQuickItem *parent)
     : QQuickItem(parent)
     , m_mat(mat){
@@ -65,9 +74,15 @@ QMatAccess::QMatAccess(QMat *mat, QQuickItem *parent)
 
 }
 
+/**
+ * @brief QMatAccess::~QMatAccess
+ */
 QMatAccess::~QMatAccess(){
 }
 
+/**
+ * @brief QMatAccess::setUpCache
+ */
 void QMatAccess::setUpCache(){
     Mat* cvmat = m_mat->cvMat();
 
@@ -96,13 +111,20 @@ void QMatAccess::setUpCache(){
     }
 }
 
-
+/**
+ * @brief QMatAccess::values
+ * @return
+ */
 QVariantList QMatAccess::values(){
     if ( m_values.empty() )
         setUpCache();
     return m_values;
 }
 
+/**
+ * @brief QMatAccess::setValues
+ * @param values
+ */
 void QMatAccess::setValues(QVariantList values){
     m_values = values;
 
@@ -131,33 +153,3 @@ void QMatAccess::setValues(QVariantList values){
         break;
     }
 }
-
-
-
-//QMatAccess::QMatAccess(QObject *parent)
-//    : QAbstractListModel(parent)
-//    , m_input(0){
-
-//    m_roles[Data] = "name";
-
-//}
-
-//QMatAccess::QMatAccess(QMat *mat, QObject *parent)
-//    : QAbstractListModel(parent)
-//    , m_input(mat){
-
-//    m_roles[Data] = "name";
-//}
-
-//QVariant QMatAccess::data(const QModelIndex &, int ) const{
-//    return 120;
-//}
-
-//int QMatAccess::rowCount(const QModelIndex &) const{
-//    Mat* cvmat = m_input->cvMat();
-//    return cvmat->rows * cvmat->cols * cvmat->channels();
-//}
-
-//QHash<int, QByteArray> QMatAccess::roleNames() const{
-//        return m_roles;
-//}

@@ -19,6 +19,10 @@
 #include "QMatShader.hpp"
 #include <QSGSimpleMaterial>
 
+/**
+ * @brief QMatDisplay::QMatDisplay
+ * @param parent
+ */
 QMatDisplay::QMatDisplay(QQuickItem *parent)
     : QQuickItem(parent)
     , m_output(new QMat())
@@ -27,6 +31,11 @@ QMatDisplay::QMatDisplay(QQuickItem *parent)
     setFlag(ItemHasContents, true);
 }
 
+/**
+ * @brief QMatDisplay::QMatDisplay
+ * @param output
+ * @param parent
+ */
 QMatDisplay::QMatDisplay(QMat *output, QQuickItem *parent)
     : QQuickItem(parent)
     , m_output(output)
@@ -35,10 +44,18 @@ QMatDisplay::QMatDisplay(QMat *output, QQuickItem *parent)
     setFlag(ItemHasContents, true);
 }
 
+/**
+ * @brief QMatDisplay::~QMatDisplay
+ */
 QMatDisplay::~QMatDisplay(){
     delete m_output;
 }
 
+/**
+ * @brief QMatDisplay::updatePaintNode
+ * @param node
+ * @return
+ */
 QSGNode *QMatDisplay::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *){
     QMatNode *n = static_cast<QMatNode*>(node);
     if (!node)
