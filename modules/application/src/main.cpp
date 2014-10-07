@@ -35,7 +35,6 @@ int main(int argc, char *argv[]){
 
     QCodeDocument document;
     QtQuick2ApplicationViewer viewer;
-    viewer.setMinimumSize(QSize(800, 600));
     viewer.rootContext()->setContextProperty("codeDocument", &document);
     viewer.setMainQmlFile(QStringLiteral("plugins/main.qml"));
     viewer.setTitle("Live CV");

@@ -23,6 +23,7 @@
 #include "QHoughLinesP.hpp"
 #include "QSobel.hpp"
 #include "QCvtColor.hpp"
+#include "QFilter2D.hpp"
 #include "QThreshold.hpp"
 #include "QChannelSelect.hpp"
 #include "QStructuringElement.hpp"
@@ -40,6 +41,7 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QChannelSelect>(      uri, 1, 0, "ChannelSelect");
     qmlRegisterType<QStructuringElement>( uri, 1, 0, "StructuringElement");
     qmlRegisterType<QMatResize>(          uri, 1, 0, "Resize");
+    qmlRegisterType<QFilter2D>(           uri, 1, 0, "Filter2D");
 }
 
 

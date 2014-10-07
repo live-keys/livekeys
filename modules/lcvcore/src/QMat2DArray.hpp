@@ -70,7 +70,7 @@ inline QMat::Type QMat2DArray::type() const{
 }
 
 inline void QMat2DArray::setType(QMat::Type type){
-    if ( m_type == type ){
+    if ( m_type != type ){
         m_type = type;
         emit typeChanged();
         if ( m_cachedSize != cv::Size(0,0) ){
