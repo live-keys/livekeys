@@ -33,7 +33,7 @@ class QQuickWindow;
 class QStateContainerBase;
 
 /**
- * @brief Handles consistent states throughout the application
+ * @brief Handles consistent states throughout the application.
  *
  * @author Dinu SV
  * @version 1.0.0
