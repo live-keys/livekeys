@@ -23,21 +23,27 @@ class QCodeDocument : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(QString path READ path WRITE setPath NOTIFY pathChanged)
+    Q_PROPERTY(QString file READ file WRITE setFile NOTIFY fileChanged)
 
 public:
     explicit QCodeDocument(QQuickItem *parent = 0);
+    
+    const QString& path() const;
+    void setPath(const QString& path);
+
+    const QString& file() const;
+    void setFile(const QString& file);
 
 public slots:
     QString openFile(const QUrl& file);
     void saveFile(const QUrl &file, const QString& content);
-    
-    const QString& path() const;
-    void setPath(const QString& path);
+    void saveFile(const QString& content);
 
     void setEngine(QQmlEngine* engine);
 
 signals:
     void pathChanged();
+    void fileChanged();
 
 private:
     QString     m_path;
@@ -55,6 +61,17 @@ inline void QCodeDocument::setPath(const QString &path){
     if ( m_path != path ){
         m_path = path;
         emit pathChanged();
+    }
+}
+
+inline const QString& QCodeDocument::file() const{
+    return m_openedFile;
+}
+
+inline void QCodeDocument::setFile(const QString& file){
+    if ( m_openedFile != file ){
+        m_openedFile = file;
+        emit fileChanged();
     }
 }
 

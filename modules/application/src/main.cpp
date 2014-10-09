@@ -21,6 +21,7 @@
 #include "QCodeDocument.hpp"
 #include "QCodeHandler.hpp"
 #include "QCursorShape.hpp"
+#include "QLiveCVLog.hpp"
 
 #include <QDebug>
 #include <QDir>
@@ -29,13 +30,17 @@ int main(int argc, char *argv[]){
 
     QGuiApplication app(argc, argv);
 
+    qInstallMessageHandler(&QLiveCVLog::logFunction);
+
     qmlRegisterType<QCursorShape>( "Cv", 1, 0, "CursorArea");
     qmlRegisterType<QCodeDocument>("Cv", 1, 0, "Document");
     qmlRegisterType<QCodeHandler>( "Cv", 1, 0, "CodeHandler");
+    qmlRegisterType<QLiveCVLog>(   "Cv", 1, 0, "MessageLog");
 
     QCodeDocument document;
     QtQuick2ApplicationViewer viewer;
     viewer.rootContext()->setContextProperty("codeDocument", &document);
+    viewer.rootContext()->setContextProperty("lcvlog", QLiveCVLog::instance());
     viewer.setMainQmlFile(QStringLiteral("plugins/main.qml"));
     viewer.setTitle("Live CV");
     document.setEngine(viewer.engine());

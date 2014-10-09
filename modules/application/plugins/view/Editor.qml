@@ -19,16 +19,22 @@ import Cv 1.0
 
 TextEdit {
     id : editor
+
+    signal save()
+
     focus : false
     font.family: "Courier New"
     font.pixelSize: 13
     color : "#ffffff"
+
     selectByMouse: true
     mouseSelectionMode: TextEdit.SelectCharacters
     selectionColor: "#3d4856"
+
     textFormat: TextEdit.PlainText
     text : ""
     wrapMode: TextEdit.NoWrap
+
     onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
     Keys.onPressed: {
         if ( (event.key === Qt.Key_BracketRight && (event.modifiers & Qt.ShiftModifier) ) ||
@@ -45,9 +51,13 @@ TextEdit {
                     cursorPosition = clastpos + 1
                 }
             }
+        } else if ( event.key === Qt.Key_S && (event.modifiers & Qt.ControlModifier ) ){
+            editor.save()
+            event.accepted = true
         } else
             event.accepted = false
     }
+
     Keys.onReturnPressed: {
         event.accepted = true
         var clastpos = cursorPosition

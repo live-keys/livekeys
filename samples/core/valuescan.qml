@@ -6,34 +6,24 @@ Row{
     
     id : root
     
-    property string imagePath : codeDocument.path + '/../_images/caltech_buildings_DSCN0246.JPG'
+    property string imagePath : codeDocument.path + '/../_images/caltech_buildings_DSCN0246_small.JPG'
     
     Rectangle{
         
-        width : sc.width
+        width  : sc.width
         height : sc.height
         
         ImRead{
             id : sc
             file : root.imagePath
-            Component.onCompleted : {
-                width  = width / 4
-                height = height / 4
-            }
             RegionSelection{
                 item : matRoi
                 anchors.fill : parent
             }
 
         }
-        
-        Resize{
-            id : scrs
-            input : sc.output
-            fx : 0.25
-            fy : 0.25
-        }
     }
+    
     Rectangle{
         width : matRoi.width
         height : matRoi.height
@@ -43,12 +33,12 @@ Row{
             id : matRoi
             width : imgval.width
             height : imgval.height
-            regionWidth : 20
+            regionWidth  : 20
             regionHeight : 20
             regionX : 0
             regionY : 0
             linearFilter: false
-            input : scrs.output
+            input : sc.output
         }
     
         MatRead{

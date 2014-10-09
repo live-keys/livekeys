@@ -35,7 +35,7 @@ QString QCodeDocument::openFile(const QUrl &file){
             return QString("Could not open file : ") + fileName;
         }
         QTextStream in(&file);
-        m_openedFile = fileName;
+        setFile(fileName);
         setPath(QFileInfo(file).path());
         if ( m_engine ){
 //            qDebug() << "Import paths :\ns " << m_engine->importPathList();
@@ -64,6 +64,7 @@ void QCodeDocument::saveFile(const QUrl& file, const QString &content){
             stream.flush();
             file.close();
             setPath(QFileInfo(file).path());
+            setFile(fileName);
 //            if ( m_engine ){
 //                QStringList importPathsTemp = m_importPaths;
 //                importPathsTemp.append(m_path);
@@ -71,6 +72,11 @@ void QCodeDocument::saveFile(const QUrl& file, const QString &content){
 //            }
         }
     }
+}
+
+void QCodeDocument::saveFile(const QString& content){
+    if ( m_openedFile != "" )
+        saveFile(m_openedFile, content);
 }
 
 void QCodeDocument::setEngine(QQmlEngine *engine){

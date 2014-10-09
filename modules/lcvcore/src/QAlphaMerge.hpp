@@ -19,9 +19,26 @@
 #include "QMatFilter.hpp"
 
 /**
+ * @page qml_alphamerge AlphaMerge
+ * @ingroup qml_core
+ *
+ * Alpha merge is used to merge an alpha channel to a 1 or 3 channel matrix. The alpha channel is a single channel image or mask that is loaded within the mask
+ * property of this class.
+ *
+ *
+ *
+ * A small usage example is found at [samples/core/alphamerge.qml], where a loaded image is merged with a drawn circle.
+ */
+
+
+/**
  * @brief The QAlphaMerge class
  *
- * Merges according to an alpha channel
+ * @author Dinu SV
+ * @version 1.0.0
+ * @ingroup cpp_core
+ *
+ * Merges an alpha channel.
  *
  * @code
  * QAlphaMerge::maskChanged();

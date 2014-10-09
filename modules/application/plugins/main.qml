@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.1
+import QtQuick 2.2
 import QtQuick.Dialogs 1.0
 import Cv 1.0
 import "view"
@@ -28,13 +28,27 @@ Rectangle {
     signal beforeCompile()
     signal afterCompile()
 
+    LogWindow{
+        id : logWindow
+        visible : false
+        Component.onCompleted: width = root.width
+        text : lcvlog.data
+        onTextChanged: {
+            if ( !visible && text !== "" )
+                header.isLogWindowDirty = true
+        }
+    }
+
     Top{
         id : header
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
 
+        isTextDirty: editor.isDirty
+
         property string action : ""
+
         function saveFileDialog(){
             fileSaveDialog.open()
         }
@@ -72,6 +86,14 @@ Rectangle {
         onSaveFile : {
             saveFileDialog()
         }
+
+        onToggleLogWindow : {
+            if ( !logWindow.visible ){
+                logWindow.show()
+                isLogWindowDirty = false
+            }
+        }
+
         onFontPlus: if ( editor.font.pixelSize < 24 ) editor.font.pixelSize += 2
         onFontMinus: if ( editor.font.pixelSize > 10 ) editor.font.pixelSize -= 2
     }
@@ -140,6 +162,8 @@ Rectangle {
                 Editor{
                     id : editor
                     property bool isDirty : false
+
+                    onSave: codeDocument.saveFile(editor.text)
 
                     text : "Rectangle{\n}"
                     color : "#eeeeee"
@@ -238,8 +262,10 @@ Rectangle {
                         } catch (err) {
                             error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;
                         }
-                        if ( tester.program !== "Rectangle{\n}" )
+                        if ( tester.program !== "Rectangle{\n}" && tester.program !== "" )
                             editor.isDirty = true
+                        else
+                            editor.isDirty = false
                         if (newItem){
                             error.text = "";
                             if (tester.item) {

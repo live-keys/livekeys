@@ -37,11 +37,19 @@ QMat::QMat(cv::Mat *mat, QQuickItem *parent):
 }
 
 /**
- * @brief QMat::data
+ * @brief Returns a mat pixel values access object
  * @return
  */
 QMatAccess *QMat::data(){
     return new QMatAccess(this);
+}
+
+/**
+ * @brief QMat::dataSize
+ * @return
+ */
+QSize QMat::dataSize() const{
+    return QSize(m_cvmat->cols, m_cvmat->rows);
 }
 
 /**

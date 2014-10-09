@@ -54,23 +54,9 @@
  * ImRead{
  *      id : src
  *      file : codeDocument.path + 'sample.jpg'
- *      Component.onCompleted : {
- *           var outputdata = output.data()
- *           var rows       = outputdata.rows()
- *           var cols       = outputdata.cols()
- *           var channels   = outputdata.channels()
- *
- *           var vals = outputdata.values()
- *
- *           for ( var i = 0; i < rows; ++i ){
- *               for ( var j = 0; j < cols; ++j ){
- *                   var b = vals[i][j * channels + 0];
- *                   var g = vals[i][j * channels + 1];
- *                   var r = vals[i][j * channels + 2] = 200
- *                   }
- *               }
- *           }
- *      }
+ * }
+ * MatToGrey{
+ *      input : src.output
  * }
  * @endcode
  */
@@ -111,8 +97,8 @@ inline QMat *QMatFilter::inputMat(){
  * @param mat
  */
 inline void QMatFilter::setInputMat(QMat *mat){
-    if ( implicitWidth() == 0 || implicitHeight() == 0 ){
-        cv::Mat* matData = mat->cvMat();
+    cv::Mat* matData = mat->cvMat();
+    if ( implicitWidth() != matData->cols || implicitHeight() != matData->rows ){
         setImplicitWidth(matData->cols);
         setImplicitHeight(matData->rows);
     }

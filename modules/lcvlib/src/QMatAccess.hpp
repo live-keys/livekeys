@@ -23,7 +23,8 @@
 #include <QAbstractListModel>
 
 /**
- * @page qml_mataccess Accessing a matrixes pixels
+ * @page qml_mataccess MatAccess
+ * @brief Accesses matrix pixels.
  * @ingroup qml_core
  *
  * You can access a matrix's pixels from QML by using the data() function on a matrix element. The data() function returns a matrix data
@@ -46,7 +47,7 @@
  *               for ( var j = 0; j < cols; ++j ){
  *                   var b = vals[i][j * channels + 0];
  *                   var g = vals[i][j * channels + 1];
- *                   var r = vals[i][j * channels + 2] = 200
+ *                   var r = vals[i][j * channels + 2];
  *                   }
  *               }
  *           }
@@ -59,6 +60,20 @@
  *
  * Changing a matrixes values can be done by changing the array returned by the values() function, and then setting it back by using the setValues() function.
  *
+ * @anchor qml_mataccess_properties Properties
+ */
+
+/**
+ * @page lalalal Lala
+ *
+ * @xrefitem qml_mataccess \"Hello1\" \"Hello Description\"
+ * Description of hello.
+ *
+ * @xrefitem qml_mataccess "Hello2" "Hello Description"
+ * Description of hell2o.
+ *
+ * @xrefitem qml_mataccess "Hello3" "Hello Description"
+ * Description of hello2.
  */
 
 

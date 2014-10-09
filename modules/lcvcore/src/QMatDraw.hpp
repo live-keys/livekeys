@@ -55,6 +55,11 @@ inline QMat *QMatDraw::inputMat(){
 }
 
 inline void QMatDraw::setInputMat(QMat *mat){
+    cv::Mat* matData = mat->cvMat();
+    if ( implicitWidth() != matData->cols || implicitHeight() != matData->rows ){
+        setImplicitWidth(matData->cols);
+        setImplicitHeight(matData->rows);
+    }
     m_in = mat;
     cleanUp();
     emit inChanged();

@@ -19,12 +19,23 @@
 
 QStateContainerManager* QStateContainerManager::m_instance = 0;
 
+/**
+ * @brief QStateContainerManager singleton instance
+ * @param item
+ * @param parent
+ * @return
+ */
 QStateContainerManager &QStateContainerManager::instance(QQuickItem *item, QObject* parent){
     if ( m_instance == 0 )
         m_instance = new QStateContainerManager(item, parent);
     return *m_instance;
 }
 
+/**
+ * @brief QStateContainerManager constructor
+ * @param item
+ * @param parent
+ */
 QStateContainerManager::QStateContainerManager(QQuickItem *item, QObject *parent)
     : QObject(parent){
 
@@ -33,16 +44,26 @@ QStateContainerManager::QStateContainerManager(QQuickItem *item, QObject *parent
     connect(item, SIGNAL(windowChanged(QQuickWindow*)), SLOT(attachWindow(QQuickWindow*)));
 }
 
+/**
+ * @brief Calls beforeCompile() on all of its children
+ */
 void QStateContainerManager::beforeCompile(){
     for ( QLinkedList<QStateContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->beforeCompile();
 }
 
+/**
+ * @brief Calls afterCompile() on all of its children
+ */
 void QStateContainerManager::afterCompile(){
     for ( QLinkedList<QStateContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->afterCompile();
 }
 
+/**
+ * @brief Called when the gui initializes a window
+ * @param window
+ */
 void QStateContainerManager::attachWindow(QQuickWindow *window){
     if (window != 0){
         QQuickView* view = qobject_cast<QQuickView*>(window);
@@ -56,21 +77,33 @@ void QStateContainerManager::attachWindow(QQuickWindow *window){
     }
 }
 
+/**
+ * @brief QStateContainerManager destructor
+ */
 QStateContainerManager::~QStateContainerManager(){
     for ( QLinkedList<QStateContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         delete *it;
     m_stateContainerList.clear();
 }
 
+/**
+ * @brief Register a state container to the manager.
+ * @param container
+ */
 void QStateContainerManager::registerStateContainer(QStateContainerBase *container){
     m_stateContainerList.append(container);
 }
 
+/**
+ * @brief Cleanup function.
+ */
 void QStateContainerManager::cleanStateManager() {
     delete m_instance;
     m_instance = 0;
 }
 
-
+/**
+ * @brief QStateContainerBase destructor
+ */
 QStateContainerBase::QStateContainerBase(){
 }
