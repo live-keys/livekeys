@@ -1,0 +1,43 @@
+/**
+
+@page api_states States
+
+Whenever the QML engine recompiles the code, all the QML objects found within the application get destroyed and recreated. This means that
+each time the user modifies something within the document, every object that made progress on the data so far will be reset to it's initial
+value. Take for example a video player item in qml with a brightness parameter. After creating the item and the video starts playing, the
+user would like to adjust the videos brightness, but everytime he modifies the code to do so, the movie starts playing over again. To avoid
+such scenarios, we need to save the opened video file together with it's progress into a separate structure that will be alive throughout
+the course of the application, or until we need it to.
+
+This is where the QStateContainer class comes in. The class itself is actually a singleton template class, where an instance for each
+different type of data contained is created whenever required, and will remain available throughout the lifetime of the application.
+Each instance then contains an array of state objects that can be accessed by a given key. To give a better ideea on how this looks, let's
+consider a VideoPlayer object and a VideoWriter object, both of them requiring their own state objects (a decoder with the opened video
+file and it's progress, and an encoder with an opened file and other info). If we were to register both their states, we would have the
+following structure for the QStateContainer :
+
+ - <b>QStateContainer<VideoDecoder>::instance()</b> : contains 1 VideoDecoder object
+ - <b>QStateContainer<VideoEncoder>::instance()</b> : contains 1 VideoEncoder object
+
+If we were to have another VideoPlayer added by the user, another state would be generated within the QStateContainer<VideoDecoder> instance,
+so the <b>QStateContainer<VideoDecoder>::instance()</b> would now contain 2 VideoDecoder objects. To retrieve each VideoPlayer's own VideoDecoder
+instance from the state container, we need to have a key associated with the decoder. Keep in mind that this key needs to be <b>constant</b>
+between compilations, hence it needs to be given by the user. Sometimes the key itself can be retrieved from one of the variables already given,
+for example, the VideoPlayer has the file path associated with it for playback, hence the VideoDecoder would have the same path, and can be stored
+within the state container under the file-path key. In other cases it is not possible, like for example when using optical flow, the user is required
+to give the key manually. In this case, when the optical flow object needs to have a property exclusively for this purpose, I call the property a
+<b>state id</b>.
+
+## State Object example
+
+To further clarify, let's create a simple example showing how to use the state container. Consider a QML item that counts how many times an input matrix
+has changed it's value. We'll call it QTransformationCounter. The item will need to keep the value of its counter consistent over multiple compilations,
+hence we will need to make use of the QStateContainer class. We will have 3 properties : the input matrix, the transformation count, and the state id.
+The value of the transformation count property will be kept in a different class called QTransformationCounterState, which we will use for the
+QStateContainer instance. So let's see how the class would look like:
+
+*/
+
+
+
+
