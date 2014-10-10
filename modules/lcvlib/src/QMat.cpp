@@ -17,35 +17,62 @@
 #include "QMat.hpp"
 #include "QMatAccess.hpp"
 
-/**
- * @brief QMat::QMat
- * @param parent
+/*!
+  \qmltype Mat
+  \instantiates QMat
+  \inqmlmodule lcvcore
+  \inherits QQuickItem
+  \brief The main element passed around in the QML structure.
+*/
+
+
+/*!
+  \class QMat
+  \inmodule lcvcore_cpp
+  \brief Open cv matrix wrapper.
+
+   The class represents the wrapper for the opencv matrix element to be passed around in the QML structure. To access
+   its cv mat vaue, use the cvMat() function.
+
+   To access it's pixels within qml, use the Mat::data() function.
+ */
+
+
+/*!
+  \brief QMat::QMat
+  \a parent
  */
 QMat::QMat(QQuickItem *parent):
     QQuickItem(parent),
     m_cvmat(new cv::Mat){
 }
 
-/**
- * @brief QMat::QMat
- * @param mat
- * @param parent
+/*!
+  \brief QMat::QMat
+  \a mat
+  \a parent
  */
 QMat::QMat(cv::Mat *mat, QQuickItem *parent):
     QQuickItem(parent),
     m_cvmat(mat){
 }
 
-/**
- * @brief QMat::data
- * @return
+/*!
+  \qmlmethod MatAccess Mat::data()
+
+  Retruns a matrix accessor element to access it's pixels.
+ */
+
+/*!
+  \brief QMat::data
+  \return
  */
 QMatAccess *QMat::data(){
     return new QMatAccess(this);
 }
 
-/**
- * @brief QMat::~QMat
+/*!
+  \brief QMat::~QMat
  */
 QMat::~QMat(){
     delete m_cvmat;

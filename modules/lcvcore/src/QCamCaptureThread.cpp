@@ -50,6 +50,12 @@ public:
 
 };
 
+/*!
+  \class QCamCaptureThread
+  \internal
+  \brief Camera capture thread used by QCamCapture.
+ */
+
 QCamCaptureThread::QCamCaptureThread(const QString& device, QObject *parent) :
     QThread(parent),
     m_deviceId(device),

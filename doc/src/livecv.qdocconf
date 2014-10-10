@@ -1,0 +1,46 @@
+# QDoc is a tool that constantly evolves to suit our needs,
+# and there are some compatibility issues between old and new
+# practices. For that reason, any QDoc configuration file needs to
+# include compat.qdocconf.
+
+#include(compat.qdocconf)
+#include(C:/Qt/Docs/Qt-5.3/global/qt-module-defaults.qdocconf)
+
+project = Live Cv
+description = Live Cv Reference Documentation
+version = 1.0.0
+
+# The headerdirs variable specifies the directories
+# containing the header files associated
+# with the .cpp source files used in the documentation.
+
+headerdirs  = ../../modules
+
+# The sourcedirs variable specifies the
+# directories containing the .cpp or .qdoc
+# files used in the documentation.
+
+sourcedirs  = ../../modules
+
+# The exampledirs variable specifies the directories containing
+# the source code of the example files.
+
+exampledirs = ../../samples
+
+sources.fileextensions = "*.cpp *.qdoc *.mm *.qml"
+headers.fileextensions = "*.h *.ch *.h++ *.hh *.hpp *.hxx"
+examples.fileextensions = "*.cpp *.h *.js *.xq *.svg *.xml *.ui *.qhp *.qhcp *.qml"
+examples.imageextensions = "*.png *.jpeg *.jpg *.gif *.mng"
+
+syntaxhighlighting = true
+
+# The imagedirs variable specifies the
+# directories containing the images used in the documentation.
+
+imagedirs   = ./images
+
+# The outputdir variable specifies the directory
+# where QDoc will put the generated documentation.
+
+outputdir   = ../html
+outputformats = HTML

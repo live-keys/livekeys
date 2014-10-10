@@ -1,0 +1,10 @@
+/*!
+
+  \qmlmodule lcvcore
+
+  \title Live CV QML Core
+
+  This module contains all the main qml elements for Live CV's computer vision code. In comparison to opencv, it is an
+  actual merge between the core and highgui modules.
+
+*/

@@ -18,6 +18,24 @@
 
 using namespace cv;
 
+/*!
+  \qmltype Mat2DArray
+  \instantiates QMat2DArray
+  \inqmlmodule lcvcore
+  \inherits MatDisplay
+  \brief Creates a mat from a 2D javascript array.
+
+  Usage available under samples/core/mat2darray.qml
+
+  \quotefile core/camcapture.qml
+*/
+
+/*!
+   \class QMat2DArray
+   \inmodule lcvcore_cpp
+   \brief Creates a mat from a 2D javascript array.
+ */
+
 template<typename T> cv::Size assignValuesHelper(const QVariantList& vmat, Mat* m, QMat::Type type){
     int numberCols = 0;
     for( int i = 0; i < vmat.size(); ++i ){

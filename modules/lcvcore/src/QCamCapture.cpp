@@ -20,6 +20,29 @@
 
 #include <QTimer>
 
+/*!
+  \qmltype CamCapture
+  \instantiates QCamCapture
+  \inqmlmodule lcvcore
+  \inherits MatDisplay
+  \since 1.0
+  \brief Captures frames from a connected camera
+
+  An example of how to use the cam capture can be found in samples/core/camcapture.qml :
+
+  \quotefile core/camcapture.qml
+*/
+
+/*!
+   \class QCamCapture
+   \inmodule lcvcore_cpp
+   \brief Captures frames from a connected camera.
+ */
+
+/*!
+ * \brief QCamCapture::QCamCapture
+ * \a parent
+ */
 QCamCapture::QCamCapture(QQuickItem *parent) :
     QMatDisplay(parent),
     m_device(""),
@@ -29,6 +52,18 @@ QCamCapture::QCamCapture(QQuickItem *parent) :
     m_restore = output();
 }
 
+/*!
+  \property QCamCapture::device
+  \sa CamCapture::device
+ */
+
+/*!
+  \qmlproperty string CamCapture::device
+
+  This property holds the url to the camera device to be accessed. It can be either a link or a device number.
+  The device number should be given in string form. Ussually, an installed webcam can be accessed by setting
+  the device to '0'.
+ */
 void QCamCapture::setDevice(const QString &device){
     if ( m_device != device ){
         m_device = device;
@@ -68,6 +103,19 @@ void QCamCapture::setDevice(const QString &device){
     }
 }
 
+/*!
+  \property QCamCapture::fps
+  \sa CamCapture::fps
+ */
+
+/*!
+  \qmlproperty real CamCapture::fps
+
+  By default, this is initialized with the camera's given fps. You can change this value if you want faster/slower
+  capture playback, however, setting it faster than the actual camera permits will limit to the camera's maximum
+  rate. This value is not absolute, in fact it depends on a lot of factors like processing time done by Live CV and
+  speed by which frames are delivered.
+ */
 void QCamCapture::setFps(qreal fps){
     if ( fps != m_fps ){
         m_fps = fps;
@@ -82,6 +130,9 @@ void QCamCapture::setFps(qreal fps){
     }
 }
 
+/*!
+   \brief Switches buffers with it's associated thread
+ */
 void QCamCapture::switchMat(){
     if ( m_thread ){
         setOutput(m_thread->output());
@@ -89,6 +140,7 @@ void QCamCapture::switchMat(){
         update();
 	}
 }
+
 
 void QCamCapture::setPaused(bool paused){
     if ( m_thread->paused() != paused ){
@@ -101,10 +153,23 @@ void QCamCapture::setPaused(bool paused){
     }
 }
 
+/*!
+  \property QCamCapture::paused
+  \sa CamCapture::paused
+ */
+
+/*!
+  \qmlproperty bool CamCapture::paused
+
+  This property can be set to true or false, depending if you want to freeze or continue capturing frames from the camera.
+ */
 bool QCamCapture::paused() const{
     return m_thread->paused();
 }
 
+/*!
+  \brief QCamCapture destructor.
+ */
 QCamCapture::~QCamCapture(){
     QStateContainer<QCamCaptureThread>& stateCont =
             QStateContainer<QCamCaptureThread>::instance(this);

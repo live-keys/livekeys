@@ -20,6 +20,60 @@ using namespace cv;
 
 QElapsedTimer timer;
 
+/*!
+  \qmltype MatAccess
+  \instantiates QMatAccess
+  \inqmlmodule lcvcore
+  \inherits QQuickItem
+  \brief Accesses a matrixes pixel values.
+
+  You can access a matrix's pixels from QML by using the data() function on a matrix element. The data() function
+  returns a matrix data accessor type, which can then be used to access the properties of the selected matrix. Here's a
+  how you can access pixel values from a RGB matrix.
+
+  @code
+  ImRead{
+      id : src
+      file : codeDocument.path + 'sample.jpg'
+      Component.onCompleted : {
+           var outputdata = output.data()
+           var rows       = outputdata.rows()
+           var cols       = outputdata.cols()
+           var channels   = outputdata.channels()
+
+           var vals = outputdata.values()
+
+           for ( var i = 0; i < rows; ++i ){
+               for ( var j = 0; j < cols; ++j ){
+                   var b = vals[i][j * channels + 0]; // get the blue channel
+                   var g = vals[i][j * channels + 1]; // get the green channel
+                   var r = vals[i][j * channels + 2]; // get the red channel
+                   }
+               }
+           }
+       }
+  }
+  @endcode
+
+  The rows(), cols() and channels() functions are self explanatory, while for the values() function it's important to
+  note that it returns a 2D array of rows and columns, and that each of channels are merged into the same row.
+
+  Changing a matrixes values can be done by changing the array returned by the values() function, and then setting it
+  back by using the setValues() function.
+
+  A sample on accessing and changing matrixes is available in samples/core/customfilter.qml.
+
+  \quotefile core/customfilter.qml
+
+ */
+
+/*!
+   \class QMatAccess
+   \inmodule lcvcore_cpp
+   \brief Used to access matrix pixel values in QML.
+ */
+
+
 namespace helpers{
 
 template<typename T, typename LT> void cacheValues( Mat& m, QVariantList& output){

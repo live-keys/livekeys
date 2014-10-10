@@ -162,26 +162,15 @@ QCalcOpticalFlowPyrLK::QCalcOpticalFlowPyrLK(QQuickItem *parent)
 
 }
 
-/**
- * @brief QCalcOpticalFlowPyrLK Destructor
- */
 QCalcOpticalFlowPyrLK::~QCalcOpticalFlowPyrLK(){
     delete d_ptr;
 }
 
-/**
- * @brief Add a point
- * @param point
- */
 void QCalcOpticalFlowPyrLK::addPoint(const QPoint& point){
     Q_D(QCalcOpticalFlowPyrLK);
     d->addPoint(Point(point.x(), point.y()));
 }
 
-/**
- * @brief Retrieve the list of points as an array
- * @return
- */
 QList<QPoint> QCalcOpticalFlowPyrLK::points(){
     Q_D(QCalcOpticalFlowPyrLK);
 
@@ -194,28 +183,16 @@ QList<QPoint> QCalcOpticalFlowPyrLK::points(){
     return base;
 }
 
-/**
- * @brief QCalcOpticalFlowPyrLK::totalPoints
- * @return
- */
 int QCalcOpticalFlowPyrLK::totalPoints() const{
     Q_D(const QCalcOpticalFlowPyrLK);
     return (int)d->totalPoints();
 }
 
-/**
- * @brief winsize getter
- * @return
- */
 QSize QCalcOpticalFlowPyrLK::winSize() const{
     Q_D(const QCalcOpticalFlowPyrLK);
     return QSize(d->winSize.width, d->winSize.height);
 }
 
-/**
- * @brief winSize setter
- * @param winSize
- */
 void QCalcOpticalFlowPyrLK::setWinSize(const QSize& winSize){
     Q_D(QCalcOpticalFlowPyrLK);
     if ( d->winSize.width != winSize.width() || d->winSize.height != winSize.height() ){
@@ -224,19 +201,11 @@ void QCalcOpticalFlowPyrLK::setWinSize(const QSize& winSize){
     }
 }
 
-/**
- * @brief maxLevel getter
- * @return
- */
 int QCalcOpticalFlowPyrLK::maxLevel() const{
     Q_D(const QCalcOpticalFlowPyrLK);
     return d->maxLevel;
 }
 
-/**
- * @brief maxLevel setter
- * @param maxLevel
- */
 void QCalcOpticalFlowPyrLK::setMaxLevel(int maxLevel){
     Q_D(QCalcOpticalFlowPyrLK);
     if (d->maxLevel != maxLevel){
@@ -245,19 +214,11 @@ void QCalcOpticalFlowPyrLK::setMaxLevel(int maxLevel){
     }
 }
 
-/**
- * @brief flags getter
- * @return
- */
 int QCalcOpticalFlowPyrLK::flags() const{
     Q_D(const QCalcOpticalFlowPyrLK);
     return d->flags;
 }
 
-/**
- * @brief flags setter
- * @param flags
- */
 void QCalcOpticalFlowPyrLK::setFlags(int flags){
     Q_D(QCalcOpticalFlowPyrLK);
     if (d->flags != flags){
@@ -266,19 +227,11 @@ void QCalcOpticalFlowPyrLK::setFlags(int flags){
     }
 }
 
-/**
- * @brief minEigThreshold getter
- * @return
- */
 double QCalcOpticalFlowPyrLK::minEigThreshold() const{
     Q_D(const QCalcOpticalFlowPyrLK);
     return d->minEigThreshold;
 }
 
-/**
- * @brief minEigThreshold setter
- * @param minEigThreshold
- */
 void QCalcOpticalFlowPyrLK::setMinEigThreshold(double minEigThreshold){
     Q_D(QCalcOpticalFlowPyrLK);
     if ( d->minEigThreshold != minEigThreshold ){
@@ -287,19 +240,11 @@ void QCalcOpticalFlowPyrLK::setMinEigThreshold(double minEigThreshold){
     }
 }
 
-/**
- * @brief Returns the state id.
- * @return
- */
 const QString&QCalcOpticalFlowPyrLK::stateId() const{
     Q_D(const QCalcOpticalFlowPyrLK);
     return d->stateId();
 }
 
-/**
- * @brief Sets the state id.
- * @param id
- */
 void QCalcOpticalFlowPyrLK::setStateId(const QString& id){
     Q_D(QCalcOpticalFlowPyrLK);
     if ( d->stateId() != id ){
@@ -308,21 +253,11 @@ void QCalcOpticalFlowPyrLK::setStateId(const QString& id){
     }
 }
 
-/**
- * @brief Mat transformation function.
- * @param in
- */
 void QCalcOpticalFlowPyrLK::transform(Mat& in, Mat&){
     Q_D(QCalcOpticalFlowPyrLK);
     d->calculateFlow(in);
 }
 
-/**
- * @brief QCalcOpticalFlowPyrLK::updatePaintNode
- * @param node
- * @param nodeData
- * @return
- */
 QSGNode*QCalcOpticalFlowPyrLK::updatePaintNode(QSGNode* node, QQuickItem::UpdatePaintNodeData*nodeData){
     Q_D(QCalcOpticalFlowPyrLK);
     d->draw( *(inputMat()->cvMat()), *(output()->cvMat()) );

@@ -51,6 +51,10 @@ private:
 
 };
 
+/*!
+ * \fn QAlphaMerge::mask
+ * \return
+ */
 inline QMat *QAlphaMerge::mask(){
     return m_mask;
 }

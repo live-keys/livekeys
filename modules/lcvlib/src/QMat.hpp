@@ -23,16 +23,6 @@
 
 class QMatAccess;
 
-/**
- * @brief Main matrix qml element.
- * @author Dinu SV
- * @version 1.0.0
- *
- * This element is intended to be passed around a QML tree structure. You can access it's cv mat value by
- * using the cvMat() function.
- *
- * To access it's pixels, you can use (the matrix access function)[@ref qml_mataccess].
- */
 class Q_LCV_EXPORT QMat : public QQuickItem{
 
     Q_OBJECT
