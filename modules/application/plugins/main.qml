@@ -16,6 +16,7 @@
 
 import QtQuick 2.2
 import QtQuick.Dialogs 1.0
+import QtQuick.Controls 1.1
 import Cv 1.0
 import "view"
 
@@ -45,46 +46,43 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
 
+        property var callback : function(){}
+
         isTextDirty: editor.isDirty
 
         property string action : ""
 
-        function saveFileDialog(){
+        onMessageYes: {
             fileSaveDialog.open()
         }
-        function executeAction(){
-            if ( action === "new" ){
-                editor.text    = "Rectangle{\n}"
-                editor.isDirty = false
-            } else if ( action === "open" ){
-                fileOpenDialog.open()
-            }
-            action = ""
-        }
-
-        onMessageYes: {
-            saveFile()
-        }
         onMessageNo: {
-            executeAction()
+            callback()
+            callback = function(){}
         }
         onNewFile  : {
-            action = "new"
-            if ( editor.isDirty )
-                header.questionSave()
-            else
-                executeAction()
+            if ( editor.isDirty ){
+                callback = function(){
+                    editor.text    = "Rectangle{\n}"
+                    editor.isDirty = false;
+                }
+                questionSave()
+            } else {
+                editor.text    = "Rectangle{\n}"
+                editor.isDirty = false
+            }
         }
         onOpenFile : {
-            if ( editor.isDirty )
-                header.questionSave()
-            else {
-                action = "open"
-                executeAction()
+            if ( editor.isDirty ){
+                callback = function(){
+                    fileOpenDialog.open()
+                }
+                questionSave()
+            } else {
+                fileOpenDialog.open()
             }
         }
         onSaveFile : {
-            saveFileDialog()
+            fileSaveDialog.open()
         }
 
         onToggleLogWindow : {
@@ -119,7 +117,12 @@ Rectangle {
         onAccepted: {
             codeDocument.saveFile(fileSaveDialog.fileUrl, editor.text)
             editor.isDirty = false
-            header.executeAction()
+            header.callback()
+            header.callback = function(){}
+        }
+        onRejected:{
+            header.callback()
+            header.callback = function(){}
         }
     }
 
@@ -147,8 +150,7 @@ Rectangle {
                 contentWidth: editor.paintedWidth
                 contentHeight: editor.paintedHeight
 
-                function ensureVisible(r)
-                {
+                function ensureVisible(r){
                     if (contentX >= r.x)
                         contentX = r.x;
                     else if (contentX+width <= r.x+r.width)
@@ -163,7 +165,12 @@ Rectangle {
                     id : editor
                     property bool isDirty : false
 
-                    onSave: codeDocument.saveFile(editor.text)
+                    onSave: {
+                        if ( codeDocument.file !==  "" )
+                            codeDocument.saveFile(editor.text)
+                        else
+                            fileSaveDialog.open()
+                    }
 
                     text : "Rectangle{\n}"
                     color : "#eeeeee"
@@ -177,6 +184,7 @@ Rectangle {
                     Behavior on font.pixelSize {
                         NumberAnimation { duration: 40 }
                     }
+                    Component.onCompleted: isDirty = false
                 }
 
             }
@@ -248,7 +256,10 @@ Rectangle {
                 anchors.fill: parent
                 property string program: editor.text
                 property variant item
-                onProgramChanged: createTimer.restart()
+                onProgramChanged: {
+                    editor.isDirty = true
+                    createTimer.restart()
+                }
                 Timer {
                     id: createTimer
                     interval: 1000
@@ -262,10 +273,9 @@ Rectangle {
                         } catch (err) {
                             error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;
                         }
-                        if ( tester.program !== "Rectangle{\n}" && tester.program !== "" )
-                            editor.isDirty = true
-                        else
+                        if ( tester.program === "Rectangle{\n}" || tester.program === "" )
                             editor.isDirty = false
+
                         if (newItem){
                             error.text = "";
                             if (tester.item) {

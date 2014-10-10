@@ -21,6 +21,7 @@ win32{
         VERSION_OPENCV        = 249
 
 
+        VERSION_OPENCV_NOD    = $${VERSION_OPENCV}
         CONFIG(debug, debug|release){
             VERSION_OPENCV    = $${VERSION_OPENCV}d
         }
@@ -55,6 +56,10 @@ win32{
     # opencv_core
     LIBS += -L$${PATH_OPENCV_LIBRARIES} -lopencv_core$${VERSION_OPENCV}
     copyCvDll($${PATH_OPENCV_DLLS}/opencv_core$${VERSION_OPENCV}.dll)
+
+    # opencv_ffmpeg
+    LIBS += -L$${PATH_OPENCV_LIBRARIES} -lopencv_core$${VERSION_OPENCV}
+    copyCvDll($${PATH_OPENCV_DLLS}/opencv_ffmpeg$${VERSION_OPENCV_NOD}.dll)
 
     # opencv_highgui
     !isEmpty(REQUIRES_CV_HIGHGUI){
