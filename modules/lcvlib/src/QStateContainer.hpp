@@ -33,7 +33,7 @@ class QQuickWindow;
 class QStateContainerBase;
 
 /**
- * @brief Handles consistent states throughout the application.
+ * @brief Manages state containers and assures their deletion.
  *
  * @author Dinu SV
  * @version 1.0.0
@@ -69,7 +69,13 @@ private:
 
 };
 
-
+/**
+ * @brief Abstract state container type
+ *
+ * @author Dinu SV
+ * @version 1.0.0
+ * @ingroup cpp_core
+ */
 class Q_LCV_EXPORT QStateContainerBase{
 
 public:
@@ -82,6 +88,13 @@ public:
 
 
 template<typename T>
+/**
+ * @brief Actual state container implementation
+ *
+ * @author Dinu SV
+ * @version 1.0.0
+ * @ingroup cpp_core
+ */
 class QStateContainer : public QStateContainerBase{
 
 public:
@@ -111,19 +124,30 @@ private:
 
 template<typename T> QStateContainer<T>* QStateContainer<T>::m_instance = 0;
 
+/**
+ * @brief Singleton instance getter.
+ */
 template<typename T> QStateContainer<T> &QStateContainer<T>::instance(QQuickItem* item){
     if ( m_instance == 0 )
         m_instance = new QStateContainer<T>(item);
     return *m_instance;
 }
 
-
+/**
+ * @brief Register a state.
+ * @param key : The key to register the state by
+ * @param state : The actual state
+ */
 template<typename T> void QStateContainer<T>::registerState(const QString &key, T *state){
     m_states[key]       = state;
     m_statesActive[key] = true;
     QSTATE_CONTAINER_DEBUG(QString("Key activated : ") + key);
 }
 
+/**
+ * @brief Retrieve a registered state.
+ * @return The found state on success. False otherwise.
+ */
 template<typename T> T *QStateContainer<T>::state(const QString &key){
     QMap<QString, T*>::iterator it = m_states.find(key);
     if ( it != m_states.end() ){
@@ -134,6 +158,9 @@ template<typename T> T *QStateContainer<T>::state(const QString &key){
     return 0;
 }
 
+/**
+ * @brief Before compilation routine.
+ */
 template<typename T> void QStateContainer<T>::beforeCompile(){
     QSTATE_CONTAINER_DEBUG("-----Before Compile-----");
     QMap<QString, bool>::iterator it = m_statesActive.begin();
@@ -146,6 +173,9 @@ template<typename T> void QStateContainer<T>::beforeCompile(){
     }
 }
 
+/**
+ * @brief After compilation routine.
+ */
 template<typename T> void QStateContainer<T>::afterCompile(){
     QSTATE_CONTAINER_DEBUG("-----After Compile-----");
     QMap<QString, bool>::iterator it = m_statesActive.begin();
@@ -163,12 +193,19 @@ template<typename T> void QStateContainer<T>::afterCompile(){
     }
 }
 
+/**
+ * @brief QStateContainer constructor
+ * @param item
+ */
 template<typename T> QStateContainer<T>::QStateContainer(QQuickItem* item)
     : QStateContainerBase(){
 
     QStateContainerManager::instance(item).registerStateContainer(this);
 }
 
+/**
+ * @brief QStateContainer destructor
+ */
 template<typename T> QStateContainer<T>::~QStateContainer(){
     for ( QMap<QString, T*>::iterator it = m_states.begin(); it != m_states.end(); ++it )
         delete it.value();

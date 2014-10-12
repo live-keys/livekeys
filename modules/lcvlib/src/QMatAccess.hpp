@@ -55,34 +55,18 @@ private:
 
 };
 
-/**
- * @brief QMatAccess::cols
- * @return
- */
 inline int QMatAccess::cols() const{
     return m_mat->cvMat()->cols;
 }
 
-/**
- * @brief QMatAccess::rows
- * @return
- */
 inline int QMatAccess::rows() const{
     return m_mat->cvMat()->rows;
 }
 
-/**
- * @brief QMatAccess::channels
- * @return
- */
 inline int QMatAccess::channels() const{
     return m_channels;
 }
 
-/**
- * @brief QMatAccess::depth
- * @return
- */
 inline int QMatAccess::depth() const{
     return m_mat->cvMat()->depth();
 }

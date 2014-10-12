@@ -29,9 +29,6 @@ class Q_LCV_EXPORT QMat : public QQuickItem{
     Q_ENUMS(Type)
 
 public:
-    /**
-     * @brief QMat type
-     */
     enum Type{
         CV8U  = CV_8U,
         CV8S  = CV_8S,
@@ -51,16 +48,13 @@ public:
 
 public slots:
     QMatAccess* data();
+    QSize       dataSize() const;
 
 public:
     cv::Mat* m_cvmat;
     
 };
 
-/**
- * @brief QMat::cvMat
- * @return
- */
 inline cv::Mat *QMat::cvMat(){
     return m_cvmat;
 }

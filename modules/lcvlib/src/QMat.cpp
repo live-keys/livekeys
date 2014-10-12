@@ -17,6 +17,7 @@
 #include "QMat.hpp"
 #include "QMatAccess.hpp"
 
+
 /*!
   \qmltype Mat
   \instantiates QMat
@@ -28,7 +29,7 @@
 
 /*!
   \class QMat
-  \inmodule lcvcore_cpp
+  \inmodule lcvlib_cpp
   \brief Open cv matrix wrapper.
 
    The class represents the wrapper for the opencv matrix element to be passed around in the QML structure. To access
@@ -37,10 +38,37 @@
    To access it's pixels within qml, use the Mat::data() function.
  */
 
+/*!
+  \qmlproperty enumeration Mat::Type
+
+  Matrix type. The type can be one of:
+  \list
+  \li Mat.CV8U
+  \li Mat.CV8S
+  \li Mat.CV16U
+  \li Mat.CV16S
+  \li Mat.CV32S
+  \li Mat.CV32F
+  \li Mat.CV64F
+  \endlist
+*/
+
+/*!
+  \enum QMat::Type
+
+  \value CV8U
+  \value CV8S
+  \value CV16U
+  \value CV16S
+  \value CV32S
+  \value CV32F
+  \value CV64F
+ */
 
 /*!
   \brief QMat::QMat
-  \a parent
+
+  Params : \a parent
  */
 QMat::QMat(QQuickItem *parent):
     QQuickItem(parent),
@@ -49,8 +77,8 @@ QMat::QMat(QQuickItem *parent):
 
 /*!
   \brief QMat::QMat
-  \a mat
-  \a parent
+
+  Params : \a mat , \a parent
  */
 QMat::QMat(cv::Mat *mat, QQuickItem *parent):
     QQuickItem(parent),
@@ -60,15 +88,27 @@ QMat::QMat(cv::Mat *mat, QQuickItem *parent):
 /*!
   \qmlmethod MatAccess Mat::data()
 
-  Retruns a matrix accessor element to access it's pixels.
+  Returns a matrix accessor element to access the matrixes pixels.
  */
 
 /*!
-  \brief QMat::data
-  \return
+  \brief Retruns the matrix access element.
  */
 QMatAccess *QMat::data(){
     return new QMatAccess(this);
+}
+
+/*!
+  \qmlmethod Size Mat::dataSize()
+
+  Returns the size of the internal matrix
+ */
+
+/*!
+  \brief Returns the size of the matrix element
+ */
+QSize QMat::dataSize() const{
+    return QSize(m_cvmat->cols, m_cvmat->rows);
 }
 
 /*!
@@ -77,3 +117,9 @@ QMatAccess *QMat::data(){
 QMat::~QMat(){
     delete m_cvmat;
 }
+
+/*!
+  \fn cv::Mat* QMat::cvMat()
+  \brief Returns the contained open cv mat.
+ */
+

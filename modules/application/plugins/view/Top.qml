@@ -22,12 +22,17 @@ Rectangle {
     height: 35
     color : "#1f262f"
 
+    property bool isLogWindowDirty : false
+    property bool isTextDirty      : false
+
     signal messageYes()
     signal messageNo()
 
     signal newFile()
     signal openFile()
     signal saveFile()
+
+    signal toggleLogWindow()
 
     signal fontPlus()
     signal fontMinus()
@@ -77,7 +82,7 @@ Rectangle {
         }
     }
 
-    // Open
+    // Save
 
     Rectangle{
         anchors.left: parent.left
@@ -89,6 +94,18 @@ Rectangle {
             id : saveImage
             anchors.verticalCenter: parent.verticalCenter
             source : "../../images/save.png"
+
+            Rectangle{
+                visible : container.isTextDirty
+                anchors.bottom : parent.bottom
+                anchors.right: parent.right
+                anchors.rightMargin: 4
+                anchors.bottomMargin: 2
+                width : 5
+                height : 5
+                color : "#aabbcc"
+                radius : width * 0.5
+            }
         }
         Rectangle{
             color : "#354253"
@@ -106,7 +123,7 @@ Rectangle {
         }
     }
 
-    // Save
+    // Open
 
     Rectangle{
         anchors.left: parent.left
@@ -135,11 +152,54 @@ Rectangle {
         }
     }
 
+    // Log Window
+
+    Rectangle{
+        anchors.left: parent.left
+        anchors.leftMargin: 310
+        color : "transparent"
+        height : parent.height
+        width : openLog.width
+        Image{
+            id : openLog
+            anchors.verticalCenter: parent.verticalCenter
+            source : "../../images/open.png"
+
+            Rectangle{
+                visible : container.isLogWindowDirty
+                anchors.bottom : parent.bottom
+                anchors.right: parent.right
+                anchors.rightMargin: 1
+                anchors.bottomMargin: 4
+                width : 5
+                height : 5
+                color : "#667799"
+                radius : width * 0.5
+            }
+        }
+        Rectangle{
+            color : "#354253"
+            width : parent.width
+            height : 3
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            visible : openLogMArea.containsMouse
+        }
+
+        MouseArea{
+            id : openLogMArea
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: container.toggleLogWindow()
+        }
+    }
+
+
     // Font Size
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 320
+        anchors.leftMargin: 360
         color : "transparent"
         height : parent.height
         width : 20
@@ -168,7 +228,7 @@ Rectangle {
     }
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 344
+        anchors.leftMargin: 384
         color : "transparent"
         height : parent.height
         width : 20
