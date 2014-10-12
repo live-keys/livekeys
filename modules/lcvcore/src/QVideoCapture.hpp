@@ -74,7 +74,7 @@ signals:
     void loopChanged();
 
 protected:
-    virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *);
+    virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
 
 private:
     void initializeMatSize();

@@ -20,13 +20,6 @@
 #include "QMat.hpp"
 #include "QLCVGlobal.hpp"
 
-/**
- * @brief Mat texture state.
- *
- * @author Dinu SV
- * @version 1.0.0
- * @ingroup cpp_core
- */
 class Q_LCV_EXPORT QMatState{
 
 public:

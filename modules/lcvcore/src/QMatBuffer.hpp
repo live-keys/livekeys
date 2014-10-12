@@ -48,6 +48,7 @@ inline void QMatBuffer::setInputMat(QMat *input){
     input->cvMat()->copyTo(*m_matCurrent->cvMat());
     emit inputChanged();
     setOutput(m_matBuffer);
+    update();
 }
 
 inline QMat *QMatBuffer::inputMat(){

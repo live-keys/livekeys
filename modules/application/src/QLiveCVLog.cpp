@@ -21,6 +21,7 @@ QLiveCVLog::~QLiveCVLog(){
 }
 
 void QLiveCVLog::logMessage(QtMsgType type, const QMessageLogContext&, const QString& msg){
+    m_logMutex.lock();
     switch (type){
     case QtDebugMsg:
         if ( m_logFile.isOpen() )
@@ -43,6 +44,7 @@ void QLiveCVLog::logMessage(QtMsgType type, const QMessageLogContext&, const QSt
         m_data.append("<span style=\"color : #ff0000;\">" + msg + "</span><br/>");
         break;
     }
+    m_logMutex.unlock();
     emit dataChanged();
 }
 

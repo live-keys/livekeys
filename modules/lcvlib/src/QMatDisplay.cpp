@@ -19,9 +19,38 @@
 #include "QMatShader.hpp"
 #include <QSGSimpleMaterial>
 
-/**
- * @brief QMatDisplay::QMatDisplay
- * @param parent
+
+/*!
+  \qmltype MatDisplay
+  \instantiates QMatDisplay
+  \inqmlmodule lcvcore
+  \inherits Item
+  \brief Simple matrix display element.
+
+  This type serves as a base for all other live cv types that require displaying a matrix, which is available in its
+  output property. You can choose wether smoothing occurs when scaling the image for display by enabling linear
+  filtering.
+ */
+
+/*!
+  \class QMatDisplay
+  \inmodule lcvlib_cpp
+  \brief Main matrix display class.
+
+  Extend this class if you want to have a matrix type item that displays on screen. The display parameter is called
+  \b{output}, which you can access by it's setter QMatDisplay::setOutput() and getter QMatDisplay::output().
+
+  Within a QML application, if an item is visible, the updatePaintNode() function is called when drawing the element.
+  This can become useful if you have a matrix that requires extra processing only if it will be displayed on screen.
+  when deriving this class, you can override the QMatDisplay::updatePaintNode() function, and implement the actual
+  refurbishing in there. This way, if the element is not visible, you can save some processing time.
+ */
+
+/*!
+  \brief QMatDisplay constructor
+
+  Parameters:
+  \a parent
  */
 QMatDisplay::QMatDisplay(QQuickItem *parent)
     : QQuickItem(parent)
@@ -31,10 +60,12 @@ QMatDisplay::QMatDisplay(QQuickItem *parent)
     setFlag(ItemHasContents, true);
 }
 
-/**
- * @brief QMatDisplay::QMatDisplay
- * @param output
- * @param parent
+/*!
+  \brief QMatDisplay constructor
+
+  Parameters:
+  \a output
+  \a parent
  */
 QMatDisplay::QMatDisplay(QMat *output, QQuickItem *parent)
     : QQuickItem(parent)
@@ -44,18 +75,48 @@ QMatDisplay::QMatDisplay(QMat *output, QQuickItem *parent)
     setFlag(ItemHasContents, true);
 }
 
-/**
- * @brief QMatDisplay::~QMatDisplay
+/*!
+  \brief QMatDisplay destructor
  */
 QMatDisplay::~QMatDisplay(){
     delete m_output;
 }
 
-/**
- * @brief QMatDisplay::updatePaintNode
- * @param node
- * @return
+
+/*!
+  \property QMatDisplay::output
+  \sa MatDisplay::output
  */
+
+/*!
+  \qmlproperty Mat MatDisplay::output
+
+  This property holds the output element to display on screen.
+ */
+
+
+/*!
+  \property QMatDisplay::linearFilter
+  \sa MatDisplay::linearFilter
+ */
+
+/*!
+  \qmlproperty bool MatDisplay::linearFilter
+
+  If set to true, linear filtering will occur when scaling the image on the screen. Default value is true.
+ */
+
+/*!
+  \fn virtual QSGNode* QMatDisplay::updatePaintNode(QSGNode*, UpdatePaintNodeData*)
+
+  \brief Updates the scene graph node with the set matrix.
+
+  Parameters :
+  \a node
+  \a nodeData
+ */
+
+
 QSGNode *QMatDisplay::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *){
     QMatNode *n = static_cast<QMatNode*>(node);
     if (!node)

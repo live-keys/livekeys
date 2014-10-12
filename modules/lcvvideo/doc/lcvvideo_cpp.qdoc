@@ -1,0 +1,11 @@
+/*!
+
+  \module lcvvideoasdsa_cpp
+
+  \title Live CV Video
+
+  \brief This module contains the cpp implementation of Live CV's video analysis module.
+
+  \sa lcvvideo
+
+*/

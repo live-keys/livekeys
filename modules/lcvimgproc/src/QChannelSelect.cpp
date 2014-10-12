@@ -15,9 +15,12 @@
 ****************************************************************************/
 #include "QChannelSelect.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
 
-QChannelSelect::QChannelSelect(QQuickItem *parent) :
-    QMatFilter(parent)
+QChannelSelect::QChannelSelect(QQuickItem *parent)
+    : QMatFilter(parent)
+    , m_channel(0)
+    , m_channels(3)
 {
 }
 
@@ -31,9 +34,9 @@ void QChannelSelect::transform(cv::Mat &in, cv::Mat &out){
         if ( in.channels() == 1 ){
             in.copyTo(out);
             return;
+        } else if ( in.channels() == 3 ){
+            cv::split(in, m_channels);
+            m_channels[m_channel].copyTo(out);
         }
-        std::vector<cv::Mat> channels(3);
-        cv::split(in, channels);
-        channels[m_channel].copyTo(out);
     }
 }

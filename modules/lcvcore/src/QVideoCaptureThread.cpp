@@ -20,6 +20,7 @@
 #include "opencv2/video/video.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
+#include <QTime>
 #include <QTimer>
 #include <QReadWriteLock>
 #include <QWaitCondition>
@@ -53,6 +54,13 @@ public:
     QWaitCondition condition;
 
 };
+
+
+/*!
+  \class QVideoCaptureThread
+  \internal
+  \brief Internal video capture thread used by QVideoCapture.
+ */
 
 QVideoCaptureThread::QVideoCaptureThread(const QString &file, QObject *parent) :
     QThread(parent),
@@ -132,10 +140,12 @@ void QVideoCaptureThread::seekTo(int frame){
     }
 }
 
-#include <QTime>
 
 void QVideoCaptureThread::run(){
     Q_D(QVideoCaptureThread);
+
+    d->abord = false;
+
     forever{
 
         if ( d->seekRequest != -1 ){
@@ -143,10 +153,10 @@ void QVideoCaptureThread::run(){
                 qDebug() << "Error : Seek is not available for this video.";
             else {
                 if ( d->seekRequest != m_framePos ){
+                    QVIDEO_CAPTURE_THREAD_DEBUG("Seek request");
                     beginSeek();
                     d->capture->set(CV_CAP_PROP_POS_FRAMES, d->seekRequest);
                     m_framePos = (int)d->capture->get(CV_CAP_PROP_POS_FRAMES);
-                    printf( "%d\n", m_framePos );
                     if ( m_framePos != d->seekRequest && m_forceSeek ){
                         d->capture->set(CV_CAP_PROP_POS_FRAMES, 0);
                         int i = 0;
@@ -160,6 +170,7 @@ void QVideoCaptureThread::run(){
         }
 
         if ( d->capture->grab() ){
+
             d->capture->retrieve(*d_ptr->inactiveMat->cvMat());
             d->inactiveMatReady = true;
             QMat* tempSwitch;
@@ -179,8 +190,7 @@ void QVideoCaptureThread::run(){
 
         d->mutex.lock();
         if ( d->inactiveMatReady && !d->abord )
-            d->condition.wait(&d_ptr->mutex);
-        d->inactiveMatReady = true;
+            d->condition.wait(&d->mutex);
         if ( d->abord ){
             d->mutex.unlock();
             return;

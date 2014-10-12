@@ -30,20 +30,20 @@
 
   To read the image, all you need is to specify the location :
 
-  \code
+  \qml
   ImRead{
        file : 'sample.jpg'
   }
-  \endcode
+  \endqml
 
   You can load the image from the location where your qml file is saved by using the path from the codeDocument
   property.
 
-  \code
+  \qml
   ImRead{
        file : codeDocument.path + '/../_images/caltech_buildings_DSCN0246.JPG'
   }
-  \endcode
+  \endqml
 */
 
 /*!

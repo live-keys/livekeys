@@ -21,9 +21,6 @@
 
 class QCamCaptureThread;
 
-/**
- * @brief The QCamCapture is used to capture streams of video
- */
 class QCamCapture : public QMatDisplay{
 
     Q_OBJECT

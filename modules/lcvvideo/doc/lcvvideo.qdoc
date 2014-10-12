@@ -1,0 +1,11 @@
+/*!
+  \qmlmodule lcvvideo
+
+  \title Live CV QML Video
+
+  This module contains elements for motion analysis and object tracking. It resembles open cv's video module.
+
+  \code
+  import "lcvvideo" 1.0
+  \endcode
+*/

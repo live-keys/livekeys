@@ -14,13 +14,17 @@ version = 1.0.0
 # containing the header files associated
 # with the .cpp source files used in the documentation.
 
-headerdirs  = ../../modules
+headerdirs  = \
+    ../../modules \
+    ../qmockup
 
 # The sourcedirs variable specifies the
 # directories containing the .cpp or .qdoc
 # files used in the documentation.
 
-sourcedirs  = ../../modules
+sourcedirs  = \
+    ../../modules \
+    ../qdoc
 
 # The exampledirs variable specifies the directories containing
 # the source code of the example files.

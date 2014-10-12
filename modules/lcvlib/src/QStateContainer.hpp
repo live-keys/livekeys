@@ -32,13 +32,6 @@ class QQuickItem;
 class QQuickWindow;
 class QStateContainerBase;
 
-/**
- * @brief Manages state containers and assures their deletion.
- *
- * @author Dinu SV
- * @version 1.0.0
- * @ingroup cpp_core
- */
 class Q_LCV_EXPORT QStateContainerManager : public QObject{
 
     Q_OBJECT

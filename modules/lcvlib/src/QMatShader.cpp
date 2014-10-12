@@ -26,18 +26,56 @@
 #define GL_UNPACK_ALIGNMENT               0x0CF5
 #endif
 
-/**
- * @brief QMatShader::QMatShader
+/*!
+  \class QMatShader
+  \inmodule lcvlib_cpp
+  \brief Open cv matrix shader.
+ */
+
+/*!
+  \fn const char* QMatShader::vertexShader() const
+  \brief Returns the vertex shader
+ */
+
+/*!
+  \fn const char* QMatShader::fragmentShader() const
+  \brief Returns the fragment shader.
+ */
+
+/*!
+  \fn QList<QByteArray> QMatShader::attributes() const
+  \brief Returns the gl program attributes.
+ */
+
+/*!
+  \fn void QMatShader::updateState(const QMatState *state, const QMatState *oldState)
+  \brief Loads the matrixes texture.
+
+  Parameters:
+  \a state
+  \a oldState
+ */
+
+
+/*!
+  \fn void QMatShader::resolveUniforms()
+  \brief Resolves textureId uniform.
+ */
+
+
+/*!
+  \brief QMatShader constructor
  */
 QMatShader::QMatShader(){
 }
 
-/**
- * @brief QMatShader::loadTexture
- * @param mat
- * @param index
- * @param linearFilter
- * @return
+/*!
+  \brief Loads a matrix texture into the gpu program. Returns true on success, false otherwise.
+
+  Parameters:
+  \a mat
+  \a index
+  \a linearFilter
  */
 bool QMatShader::loadTexture(QMat *mat, int index, bool linearFilter){
 

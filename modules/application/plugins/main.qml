@@ -166,9 +166,10 @@ Rectangle {
                     property bool isDirty : false
 
                     onSave: {
-                        if ( codeDocument.file !==  "" )
+                        if ( codeDocument.file !==  "" ){
                             codeDocument.saveFile(editor.text)
-                        else
+                            editor.isDirty = false
+                        }else
                             fileSaveDialog.open()
                     }
 

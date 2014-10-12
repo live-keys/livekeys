@@ -76,7 +76,7 @@ void QCodeDocument::saveFile(const QUrl& file, const QString &content){
 
 void QCodeDocument::saveFile(const QString& content){
     if ( m_openedFile != "" )
-        saveFile(m_openedFile, content);
+        saveFile(QUrl::fromLocalFile(m_openedFile), content);
 }
 
 void QCodeDocument::setEngine(QQmlEngine *engine){

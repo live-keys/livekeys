@@ -25,7 +25,6 @@
   \instantiates QCamCapture
   \inqmlmodule lcvcore
   \inherits MatDisplay
-  \since 1.0
   \brief Captures frames from a connected camera
 
   An example of how to use the cam capture can be found in samples/core/camcapture.qml :

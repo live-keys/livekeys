@@ -5,6 +5,7 @@
 #include <QString>
 #include <QFile>
 #include <QTextStream>
+#include <QMutex>
 
 class QLiveCVLog : public QObject{
 
@@ -34,6 +35,7 @@ private:
     QString     m_logFilePath;
     QFile       m_logFile;
     QTextStream m_textStream;
+    QMutex      m_logMutex;
 
 };
 

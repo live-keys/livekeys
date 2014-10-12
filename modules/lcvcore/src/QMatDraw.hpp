@@ -31,11 +31,43 @@ public:
 
 public slots:
     void cleanUp();
-    void line(const QPoint& p1, const QPoint& p2, const QColor& color, int thickness = 1, int lineType = 8, int shift = 0);
-    void rectangle(const QPoint& p1, const QPoint& p2, const QColor& color, int thickness = 1, int lineType = 8, int shift = 0);
-    void circle(const QPoint& center, int radius, const QColor& color, int thickness = 1, int lineType = 8, int shift = 0);
-    void ellipse(const QPoint& center, const QSize& axes, double angle, double startAngle, double endAngle, const QColor& color, int thickness = 1, int lineType = 8, int shift = 0 );
-    void fillPoly(const QVariantList& points, const QColor& color, int lineType = 8, int shift = 0, const QPoint& offset = QPoint());
+    void line(
+            const QPoint& p1,
+            const QPoint& p2,
+            const QColor& color,
+            int thickness = 1,
+            int lineType  = 8,
+            int shift     = 0);
+    void rectangle(
+            const QPoint& p1,
+            const QPoint& p2,
+            const QColor& color,
+            int thickness = 1,
+            int lineType  = 8,
+            int shift     = 0);
+    void circle(
+            const QPoint& center,
+            int radius,
+            const QColor& color,
+            int thickness = 1,
+            int lineType  = 8,
+            int shift     = 0);
+    void ellipse(
+            const QPoint& center,
+            const QSize& axes,
+            double angle,
+            double startAngle,
+            double endAngle,
+            const QColor& color,
+            int thickness = 1,
+            int lineType  = 8,
+            int shift     = 0 );
+    void fillPoly(
+            const QVariantList& points,
+            const QColor& color,
+            int lineType = 8,
+            int shift    = 0,
+            const QPoint& offset = QPoint());
 
     QMat* inputMat();
     void setInputMat(QMat* mat);

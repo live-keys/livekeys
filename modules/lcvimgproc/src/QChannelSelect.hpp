@@ -37,6 +37,8 @@ signals:
 
 private:
     int m_channel;
+
+    std::vector<cv::Mat> m_channels;
     
 };
 
