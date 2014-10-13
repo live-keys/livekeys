@@ -19,6 +19,15 @@
 
 QStateContainerManager* QStateContainerManager::m_instance = 0;
 
+
+/**
+ * @brief Manages state containers and assures their deletion.
+ *
+ * @author Dinu SV
+ * @version 1.0.0
+ * @ingroup cpp_core
+ */
+
 /**
  * @brief QStateContainerManager singleton instance
  * @param item

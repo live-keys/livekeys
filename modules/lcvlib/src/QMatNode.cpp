@@ -18,8 +18,14 @@
 #include "QMatShader.hpp"
 #include <QSGSimpleMaterial>
 
-/**
- * @brief QMatNode constructor
+/*!
+  \class QMatNode
+  \inmodule lcvlib_cpp
+  \brief Node containing matrix state.
+ */
+
+/*!
+ * \brief QMatNode constructor
  */
 QMatNode::QMatNode()
     : m_geometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), 4)

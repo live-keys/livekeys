@@ -21,13 +21,61 @@
 
 #include <QSGSimpleMaterial>
 
+/*!
+  \qmltype ImRead
+  \instantiates QImRead
+  \inqmlmodule lcvcore
+  \inherits MatDisplay
+  \brief Read an image from the hard drive.
+
+  To read the image, all you need is to specify the location :
+
+  \qml
+  ImRead{
+       file : 'sample.jpg'
+  }
+  \endqml
+
+  You can load the image from the location where your qml file is saved by using the path from the codeDocument
+  property.
+
+  \qml
+  ImRead{
+       file : codeDocument.path + '/../_images/caltech_buildings_DSCN0246.JPG'
+  }
+  \endqml
+*/
+
+/*!
+   \class QImRead
+   \inmodule lcvcore_cpp
+   \brief Reads an image from the hard drive.
+ */
+
+/*!
+ * \brief QImRead::QImRead
+ * \a parent
+ */
 QImRead::QImRead(QQuickItem *parent) :
     QMatDisplay(parent)
 {
 }
 
+/*!
+ * \brief QImRead::~QImRead
+ */
 QImRead::~QImRead(){
 }
+
+/*!
+ * \qmlproperty string ImRead::file
+ * \brief The path to the file to load.
+ */
+
+/*!
+ * \property QImRead::file
+ * \sa ImRead::file
+ */
 
 void QImRead::setFile(const QString &file){
     if ( file != m_file ){

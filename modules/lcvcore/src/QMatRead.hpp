@@ -80,7 +80,7 @@ signals:
     void squareCellChanged();
 
 protected:
-    QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *);
+    QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *nodeData);
 
 private:
     QMatRead(const QMatRead& other);

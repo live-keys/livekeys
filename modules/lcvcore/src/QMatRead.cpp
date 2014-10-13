@@ -25,6 +25,28 @@
 
 using namespace cv;
 
+/*!
+  \qmltype MatRead
+  \instantiates QMatRead
+  \inqmlmodule lcvcore
+  \inherits Item
+  \brief Displays a matrixes values in text form.
+
+  This element becomes very usefull when debugging result images from algorithms. It can be used in combination
+  with the MatRoi element in order to create a pan-type interaction over a zoomed area in an image. The sample in
+  core/valuescan.qml shows this type of usage in action.
+
+  \quotefile core/valuescan.qml
+
+  An alternative to the above example is to use a flickable area and use the MatRead over a whole image.
+*/
+
+
+/*!
+  \class QMatReadNode
+  \internal
+ */
+
 QMatReadNode::QMatReadNode(QQuickWindow *window)
     : m_fbo(0)
     , m_texture(0)
@@ -80,7 +102,10 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
                 uchar* p = renderSource->ptr<uchar>(i);
                 for ( int j = 0; j < colCells * renderSource->channels(); j += renderSource->channels() ){
                     for ( int ch = 0; ch < renderSource->channels(); ++ch ){
-                        m_painter->drawText( ( j / renderSource->channels() ) * cellWidth + 2, i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2, QString::number(p[j + ch]).mid(0, numberWidth));
+                        m_painter->drawText(
+                                    ( j / renderSource->channels() ) * cellWidth + 2,
+                                    i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2,
+                                    QString::number(p[j + ch]).mid(0, numberWidth));
                     }
                 }
             }
@@ -91,7 +116,10 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
                 char* p = renderSource->ptr<char>(i);
                 for ( int j = 0; j < colCells * renderSource->channels(); j += renderSource->channels() ){
                     for ( int ch = 0; ch < renderSource->channels(); ++ch ){
-                        m_painter->drawText( ( j / renderSource->channels() ) * cellWidth + 2, i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2, QString::number(p[j + ch]).mid(0, numberWidth));
+                        m_painter->drawText(
+                                    ( j / renderSource->channels() ) * cellWidth + 2,
+                                    i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2,
+                                    QString::number(p[j + ch]).mid(0, numberWidth));
                     }
                 }
             }
@@ -102,7 +130,10 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
                 unsigned int* p = renderSource->ptr<unsigned int>(i);
                 for ( int j = 0; j < colCells * renderSource->channels(); j += renderSource->channels() ){
                     for ( int ch = 0; ch < renderSource->channels(); ++ch ){
-                        m_painter->drawText( ( j / renderSource->channels() ) * cellWidth + 2, i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2, QString::number(p[j + ch]).mid(0, numberWidth));
+                        m_painter->drawText(
+                                    ( j / renderSource->channels() ) * cellWidth + 2,
+                                    i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2,
+                                    QString::number(p[j + ch]).mid(0, numberWidth));
                     }
                 }
             }
@@ -113,7 +144,10 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
                 int* p = renderSource->ptr<int>(i);
                 for ( int j = 0; j < colCells * renderSource->channels(); j += renderSource->channels() ){
                     for ( int ch = 0; ch < renderSource->channels(); ++ch ){
-                        m_painter->drawText( ( j / renderSource->channels() ) * cellWidth + 2, i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2, QString::number(p[j + ch]).mid(0, numberWidth));
+                        m_painter->drawText(
+                                    ( j / renderSource->channels() ) * cellWidth + 2,
+                                    i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2,
+                                    QString::number(p[j + ch]).mid(0, numberWidth));
                     }
                 }
             }
@@ -124,7 +158,10 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
                 long* p = renderSource->ptr<long>(i);
                 for ( int j = 0; j < colCells * renderSource->channels(); j += renderSource->channels() ){
                     for ( int ch = 0; ch < renderSource->channels(); ++ch ){
-                        m_painter->drawText( ( j / renderSource->channels() ) * cellWidth + 2, i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2, QString::number(p[j + ch]).mid(0, numberWidth));
+                        m_painter->drawText(
+                                    ( j / renderSource->channels() ) * cellWidth + 2,
+                                    i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2,
+                                    QString::number(p[j + ch]).mid(0, numberWidth));
                     }
                 }
             }
@@ -135,7 +172,10 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
                 float* p = renderSource->ptr<float>(i);
                 for ( int j = 0; j < colCells * renderSource->channels(); j += renderSource->channels() ){
                     for ( int ch = 0; ch < renderSource->channels(); ++ch ){
-                        m_painter->drawText( ( j / renderSource->channels() ) * cellWidth + 2, i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2, QString::number(p[j + ch]).mid(0, numberWidth));
+                        m_painter->drawText(
+                                    ( j / renderSource->channels() ) * cellWidth + 2,
+                                    i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2,
+                                    QString::number(p[j + ch]).mid(0, numberWidth));
                     }
                 }
             }
@@ -146,7 +186,10 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
                 double* p = renderSource->ptr<double>(i);
                 for ( int j = 0; j < colCells * renderSource->channels(); j += renderSource->channels() ){
                     for ( int ch = 0; ch < renderSource->channels(); ++ch ){
-                        m_painter->drawText( ( j / renderSource->channels() ) * cellWidth + 2, i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2, QString::number(p[j + ch]).mid(0, numberWidth));
+                        m_painter->drawText(
+                                    ( j / renderSource->channels() ) * cellWidth + 2,
+                                    i * cellHeight + ( font.pixelSize() + 2 ) * ( ch + 1 ) + 2,
+                                    QString::number(p[j + ch]).mid(0, numberWidth));
                     }
                 }
             }
@@ -159,6 +202,19 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
     }
 }
 
+
+/*!
+   \class QMatRead
+   \inmodule lcvcore_cpp
+   \brief Displays the matrixes values in text form. Uses a scene graph node to display the values.
+ */
+
+/*!
+   \brief QMatRead constructor
+
+   Parameters :
+   \a parent
+ */
 QMatRead::QMatRead(QQuickItem *parent)
     : QQuickItem(parent)
     , m_input(0)
@@ -172,8 +228,84 @@ QMatRead::QMatRead(QQuickItem *parent)
     m_font.setPixelSize(12);
 }
 
+/*!
+   \brief QMatRead destructor
+ */
 QMatRead::~QMatRead(){
 }
+
+
+/*!
+  \property QMatRead::input
+  \sa MatRead::input
+ */
+
+/*!
+  \qmlproperty int MatRead::input
+
+  Input matrix to read.
+ */
+
+
+/*!
+  \property QMatRead::font
+  \sa MatRead::font
+ */
+
+/*!
+  \qmlproperty Font MatRead::font
+
+  Font to use when displaying values. Default is "Courier New" with 12 pixel size.
+ */
+
+
+/*!
+  \property QMatRead::color
+  \sa MatRead::color
+ */
+
+/*!
+  \qmlproperty Color MatRead::color
+
+  Color of the displayed values
+ */
+
+
+/*!
+  \property QMatRead::numberWidth
+  \sa MatRead::numberWidth
+ */
+
+/*!
+  \qmlproperty int MatRead::numberWidth
+
+  Number of digits to display for each number. Default is 3.
+ */
+
+
+/*!
+  \property QMatRead::squareCell
+  \sa MatRead::squareCell
+ */
+
+/*!
+  \qmlproperty bool MatRead::squareCell
+
+  When enabled, each number cell will be resized to a square shape. This is useful if you want to display pixels
+  together with their values. Default is false.
+ */
+
+
+/*!
+  \fn virtual QSGNode* QMatRead::updatePaintNode(QSGNode*, UpdatePaintNodeData*)
+
+  \brief Updates the scene graph node with the generated values.
+
+  Parameters :
+  \a oldNode
+  \a nodeData
+ */
+
 
 QSGNode *QMatRead::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *){
     QMatReadNode* node = static_cast<QMatReadNode*>(oldNode);
@@ -186,6 +318,9 @@ QSGNode *QMatRead::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNode
     return node;
 }
 
+/*!
+   \brief Calculates the implicit size of the matrix by approximating the text size.
+ */
 void QMatRead::calculateImplicitSize(){
     if ( m_input ){
         Mat* renderSource = m_input->cvMat();

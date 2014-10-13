@@ -22,13 +22,6 @@
 #include "QMat.hpp"
 #include "QLCVGlobal.hpp"
 
-/**
- * @brief Matrix shader
- *
- * @author Dinu SV
- * @version 1.0.0
- * @ingroup cpp_core
- */
 class Q_LCV_EXPORT QMatShader : public QSGSimpleMaterialShader<QMatState>{
 
     QSG_DECLARE_SIMPLE_COMPARABLE_SHADER(QMatShader, QMatState)
@@ -51,10 +44,6 @@ private:
 
 };
 
-/**
- * @brief Returns the vertex shader.
- * @return
- */
 inline const char *QMatShader::vertexShader() const{
     return
             "attribute highp vec4 aVertex;                              \n"
@@ -68,10 +57,6 @@ inline const char *QMatShader::vertexShader() const{
             "}";
 }
 
-/**
- * @brief Returns the fragment shader.
- * @return
- */
 inline const char *QMatShader::fragmentShader() const{
     return
             "uniform lowp float qt_Opacity;                             \n"
@@ -84,18 +69,10 @@ inline const char *QMatShader::fragmentShader() const{
             "}";
 }
 
-/**
- * @brief Returns the gl program attributes.
- * @return
- */
 inline QList<QByteArray> QMatShader::attributes() const{
     return QList<QByteArray>() << "aVertex" << "aTexCoord";
 }
 
-/**
- * @brief QMatShader::updateState
- * @param state
- */
 inline void QMatShader::updateState(const QMatState *state, const QMatState *){
 
     if ( state->mat != 0 ){
@@ -115,9 +92,6 @@ inline void QMatShader::updateState(const QMatState *state, const QMatState *){
     }
 }
 
-/**
- * @brief QMatShader::resolveUniforms
- */
 inline void QMatShader::resolveUniforms(){
     m_textureId = program()->uniformLocation("textures[0]");
 }

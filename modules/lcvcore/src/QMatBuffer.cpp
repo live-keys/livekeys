@@ -16,12 +16,50 @@
 
 #include "QMatBuffer.hpp"
 
+/*!
+  \qmltype MatBuffer
+  \instantiates QMatBuffer
+  \inqmlmodule lcvcore
+  \inherits MatDisplay
+  \brief Keeps the previous frame.
+
+  The MatBuffer type is usefull when it comes to video playback and you need to keep reference to a previous frame. The
+  buffer stores the frame for next usage, so by it's output you actually get the last frame that was passed around in
+  the application. A usefull scenario when it comes to use is frame differencing, as in the example under
+  samples/imgproc/framedifference.qml
+
+  \quotefile imgproc/framedifference.qml
+*/
+
+/*!
+   \class QMatBuffer
+   \inmodule lcvcore_cpp
+   \brief Stores the last frame that was passed around in the application.
+ */
+
+/*!
+   \brief QMatBuffer constructor
+   \a parent
+ */
 QMatBuffer::QMatBuffer(QQuickItem *parent)
     : QMatDisplay(parent)
     , m_matBuffer(new QMat)
     , m_matCurrent(new QMat){
 }
 
+/*!
+  \brief QMatBuffer destructor
+ */
 QMatBuffer::~QMatBuffer(){
 }
 
+/*!
+  \property QMatBuffer::input
+  \sa MatBuffer::input
+ */
+
+/*!
+  \qmlproperty QMat MatBuffer::input
+
+  Input matrix to store. Whenever a new input is given, the previous one becomes available as output.
+ */

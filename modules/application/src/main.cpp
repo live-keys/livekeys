@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
 
     QGuiApplication app(argc, argv);
 
-    qInstallMessageHandler(&QLiveCVLog::logFunction);
+    //qInstallMessageHandler(&QLiveCVLog::logFunction);
 
     qmlRegisterType<QCursorShape>( "Cv", 1, 0, "CursorArea");
     qmlRegisterType<QCodeDocument>("Cv", 1, 0, "Document");

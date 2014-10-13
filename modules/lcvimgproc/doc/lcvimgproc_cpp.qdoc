@@ -1,0 +1,11 @@
+/*!
+
+  \module lcvimgproc_cpp
+
+  \title Live CV ImgProc
+
+  \brief This module contains the cpp implementation of the image processing elements from Live CV.
+
+  \sa lcvcore
+
+*/

@@ -1,0 +1,13 @@
+/*!
+
+  \qmlmodule lcvimgproc
+
+  \title Live CV QML Image Processing
+
+  This module contains elements for image processing. It resembles open cv's imgproc module.
+
+  \code
+  import "lcvimproc" 1.0
+  \endcode
+
+*/
