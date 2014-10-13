@@ -19,8 +19,6 @@
 #include "QMatFilter.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-
-//void copyMakeBorder(InputArray src, OutputArray dst, int top, int bottom, int left, int right, int borderType, const Scalar& value=Scalar() )
 class QCopyMakeBorder : public QMatFilter{
 
     Q_OBJECT
@@ -31,7 +29,7 @@ class QCopyMakeBorder : public QMatFilter{
     Q_PROPERTY(int    borderType READ borderType WRITE setBorderType NOTIFY borderTypeChanged)
     Q_PROPERTY(QColor color      READ color      WRITE setColor      NOTIFY colorChanged)
 
-    Q_ENUMS(CvtType)
+    Q_ENUMS(BorderType)
 
 public:
     enum BorderType{

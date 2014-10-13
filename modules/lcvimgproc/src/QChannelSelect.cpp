@@ -17,6 +17,28 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
+/*!
+  \qmltype ChannelSelect
+  \instantiates QChannelSelect
+  \inqmlmodule lcvimgproc
+  \inherits MatFilter
+  \brief Selects an image channel by its index.
+
+  \quotefile imgproc/framedifference.qml
+*/
+
+/*!
+  \class QChannelSelect
+  \inmodule lcvimgproc_cpp
+  \brief Selects an image channel by its index.
+ */
+
+/*!
+  \brief QChannelSelect constructor
+
+  Parameters:
+  \a parent
+ */
 QChannelSelect::QChannelSelect(QQuickItem *parent)
     : QMatFilter(parent)
     , m_channel(0)
@@ -24,9 +46,19 @@ QChannelSelect::QChannelSelect(QQuickItem *parent)
 {
 }
 
+/*!
+  \brief QChannelSelect destructor
+ */
 QChannelSelect::~QChannelSelect(){
 }
 
+/*!
+  \brief Filter function
+
+  Parameters:
+  \param in
+  \param out
+ */
 void QChannelSelect::transform(cv::Mat &in, cv::Mat &out){
     if ( out.channels() == 3 )
         cv::cvtColor(out, out, CV_BGR2GRAY);

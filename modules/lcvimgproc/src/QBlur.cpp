@@ -18,6 +18,30 @@
 
 using namespace cv;
 
+/*!
+  \qmltype Blur
+  \instantiates QBlur
+  \inqmlmodule lcvimgproc
+  \inherits MatFilter
+  \brief Blurs an image using the normalized box filter.
+
+  The function smoothes an image using the normalized box filter.
+
+  \quotefile imgproc/blur.qml
+*/
+
+/*!
+  \class QBlur
+  \inmodule lcvimgproc_cpp
+  \brief Box image blur.
+ */
+
+/*!
+  \brief QBlur constructor
+
+  Parameters :
+  \a parent
+ */
 QBlur::QBlur(QQuickItem *parent)
     : QMatFilter(parent)
     , m_anchor(QPoint(-1, -1))
@@ -25,9 +49,54 @@ QBlur::QBlur(QQuickItem *parent)
 {
 }
 
+/*!
+  \brief QBlur destructor
+ */
 QBlur::~QBlur(){
 }
 
+/*!
+  \property QBlur::ksize
+  \sa Blur::ksize
+ */
+
+/*!
+  \qmlproperty Size Blur::ksize
+
+  Blurring kernel size
+ */
+
+/*!
+  \property QBlur::anchor
+  \sa Blur::anchor
+ */
+
+/*!
+  \qmlproperty Point Blur::anchor
+
+  Anchor point; default value Point(-1,-1) means that the anchor is at the kernel center.
+ */
+
+/*!
+  \property QBlur::borderType
+  \sa Blur::borderType
+ */
+
+/*!
+  \qmlproperty int Blur::borderType
+
+  Border mode used to extrapolate pixels outside of the image.
+
+  \sa CopyMakeBorder::BorderType
+ */
+
+/*!
+  \brief Transformation function
+
+  Parameters :
+  \a in
+  \a out
+ */
 void QBlur::transform(cv::Mat &in, cv::Mat &out){
     blur(in, out, Size(m_ksize.width(), m_ksize.height()), Point(m_anchor.x(), m_anchor.y()), m_borderType);
 }
