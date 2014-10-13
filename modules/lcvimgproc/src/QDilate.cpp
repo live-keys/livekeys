@@ -18,6 +18,28 @@
 
 using namespace cv;
 
+/*!
+  \qmltype Dilate
+  \instantiates QDilate
+  \inqmlmodule lcvimgproc
+  \inherits MatFilter
+  \brief
+
+  \quotefile imgproc/.qml
+*/
+
+/*!
+  \class QDilate
+  \inmodule lcvimgproc_cpp
+  \brief
+ */
+
+/*!
+  \brief QDilate constructor
+
+  Parameters:
+  \a parent
+ */
 QDilate::QDilate(QQuickItem *parent)
     : QMatFilter(parent)
     , m_kernel(0)
@@ -27,9 +49,19 @@ QDilate::QDilate(QQuickItem *parent)
 {
 }
 
+/*!
+  \brief QDilate destructor
+ */
 QDilate::~QDilate(){
 }
 
+/*!
+  \brief Filtering function.
+
+  Parameters:
+  \a in
+  \a out
+ */
 void QDilate::transform(cv::Mat &in, cv::Mat &out){
     if ( m_kernel ){
         Scalar borderValue = morphologyDefaultBorderValue();

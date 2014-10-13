@@ -18,6 +18,28 @@
 
 using namespace cv;
 
+/*!
+  \qmltype GaussianBlur
+  \instantiates QGaussianBlur
+  \inqmlmodule lcvimgproc
+  \inherits MatFilter
+  \brief
+
+  \quotefile imgproc/.qml
+*/
+
+/*!
+  \class QGaussianBlur
+  \inmodule lcvimgproc_cpp
+  \brief
+ */
+
+/*!
+  \brief QGaussianBlur constructor
+
+  Parameters:
+  \a parent
+ */
 QGaussianBlur::QGaussianBlur(QQuickItem *parent)
     : QMatFilter(parent)
     , m_ksize(QSize(3, 3))
@@ -25,9 +47,19 @@ QGaussianBlur::QGaussianBlur(QQuickItem *parent)
 {
 }
 
+/*!
+  \brief QGaussianBlur destructor
+ */
 QGaussianBlur::~QGaussianBlur(){
 }
 
+/*!
+  \brief Filtering function.
+
+  Parameters:
+  \a in
+  \a out
+ */
 void QGaussianBlur::transform(cv::Mat &in, cv::Mat &out){
     GaussianBlur(in, out, cv::Size(m_ksize.width(), m_ksize.height()), m_sigmaX, m_sigmaY, m_borderType);
 }

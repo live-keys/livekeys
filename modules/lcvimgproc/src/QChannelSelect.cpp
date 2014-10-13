@@ -56,8 +56,8 @@ QChannelSelect::~QChannelSelect(){
   \brief Filter function
 
   Parameters:
-  \param in
-  \param out
+  \a in
+  \a out
  */
 void QChannelSelect::transform(cv::Mat &in, cv::Mat &out){
     if ( out.channels() == 3 )

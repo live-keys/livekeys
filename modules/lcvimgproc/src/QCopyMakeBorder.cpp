@@ -18,15 +18,47 @@
 
 using namespace cv;
 
+/*!
+  \qmltype CopyMakeBorder
+  \instantiates QCopyMakeBorder
+  \inqmlmodule lcvimgproc
+  \inherits MatFilter
+  \brief
+
+  \quotefile imgproc/blur.qml
+*/
+
+/*!
+  \class QCopyMakeBorder
+  \inmodule lcvimgproc_cpp
+  \brief
+ */
+
+/*!
+  \brief QCopyMakeBorder constructor
+
+  Parameters:
+  \a parent
+ */
 QCopyMakeBorder::QCopyMakeBorder(QQuickItem *parent)
     : QMatFilter(parent)
     , m_color()
 {
 }
 
+/*!
+  \brief QCopyMakeBorder destructor
+ */
 QCopyMakeBorder::~QCopyMakeBorder(){
 }
 
+/*!
+  \brief Filtering function.
+
+  Parameters:
+  \a in
+  \a out
+ */
 void QCopyMakeBorder::transform(cv::Mat &in, cv::Mat &out){
     Scalar value;
     if ( m_color.isValid() ){
