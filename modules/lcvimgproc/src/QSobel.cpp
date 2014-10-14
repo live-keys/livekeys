@@ -20,15 +20,36 @@
 
 using namespace cv;
 
-/**
- * @brief QSobel::QSobel
- * @param parent
+/*!
+  \qmltype Sobel
+  \instantiates QSobel
+  \inqmlmodule lcvimgproc
+  \inherits MatFilter
+  \brief
+
+  \quotefile imgproc/.qml
+*/
+
+/*!
+  \class QSobel
+  \inmodule lcvimgproc_cpp
+  \brief
+ */
+
+/*!
+  \brief QSobel constructor
+
+  Parameters:
+  \a parent
  */
 QSobel::QSobel(QQuickItem *parent)
     : QMatFilter(parent)
     , m_display(new QMat){
 }
 
+/*!
+  \brief QSobel destructor
+ */
 QSobel::~QSobel(){
     delete m_display;
 }
@@ -42,6 +63,13 @@ QSGNode *QSobel::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData 
     return n;
 }
 
+/*!
+  \brief Filtering function.
+
+  Parameters:
+  \a in
+  \a out
+ */
 void QSobel::transform(cv::Mat &in, cv::Mat &out){
     if ( in.size() != Size(0, 0) )
         Sobel(in, out, m_ddepth, m_xorder, m_yorder, m_ksize, m_scale, m_delta, m_borderType);

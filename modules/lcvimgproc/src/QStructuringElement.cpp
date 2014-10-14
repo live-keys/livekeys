@@ -18,12 +18,42 @@
 
 using namespace cv;
 
+
+/*!
+  \qmltype StructuringElement
+  \instantiates QStructuringElement
+  \inqmlmodule lcvimgproc
+  \inherits Item
+  \brief
+
+  \quotefile imgproc/.qml
+*/
+
+/*!
+  \class QStructuringElement
+  \inmodule lcvimgproc_cpp
+  \brief
+ */
+
+/*!
+  \brief QStructuringElement constructor
+
+  Parameters
+  \a parent
+ */
 QStructuringElement::QStructuringElement(QQuickItem *parent)
     : QQuickItem(parent)
     , m_output(new QMat)
     , m_outputDirty(false)
 {
     setFlag(ItemHasContents, false);
+}
+
+/*!
+  \brief QSobel destructor
+ */
+QStructuringElement::~QStructuringElement(){
+    delete m_output;
 }
 
 QMat* QStructuringElement::output() const{
@@ -34,8 +64,4 @@ QMat* QStructuringElement::output() const{
                 Point(m_anchor.x(), m_anchor.y()));
 
     return m_output;
-}
-
-QStructuringElement::~QStructuringElement(){
-    delete m_output;
 }

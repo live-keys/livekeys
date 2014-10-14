@@ -18,11 +18,40 @@
 
 using namespace cv;
 
+/*!
+  \qmltype CvtColor
+  \instantiates QCvtColor
+  \inqmlmodule lcvimgproc
+  \inherits MatFilter
+  \brief
+
+  \quotefile imgproc/blur.qml
+*/
+
+/*!
+  \class QCvtColor
+  \inmodule lcvimgproc_cpp
+  \brief
+ */
+
+/*!
+  \brief QCvtColor constructor
+
+  Parameters:
+  \a parent
+ */
 QCvtColor::QCvtColor(QQuickItem *parent) :
     QMatFilter(parent)
 {
 }
 
+/*!
+  \brief Filtering function.
+
+  Parameters:
+  \a in
+  \a out
+ */
 void QCvtColor::transform(cv::Mat &in, cv::Mat &out){
     cvtColor(in, out, m_code, m_dstCn);
 }

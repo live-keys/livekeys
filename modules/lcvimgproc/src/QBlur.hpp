@@ -18,11 +18,13 @@
 
 #include <QQuickItem>
 #include "QMatFilter.hpp"
-//void blur(InputArray src, OutputArray dst, Size ksize, QPoint anchor=QPoint(-1,-1), int borderType=BORDER_DEFAULT )
 
 class QBlur : public QMatFilter{
 
     Q_OBJECT
+    Q_PROPERTY(QSize  ksize      READ ksize      WRITE setKsize      NOTIFY ksizeChanged)
+    Q_PROPERTY(QPoint anchor     READ anchor     WRITE setAnchor     NOTIFY anchorChanged)
+    Q_PROPERTY(int    borderType READ borderType WRITE setBorderType NOTIFY borderTypeChanged)
 
 public:
     explicit QBlur(QQuickItem *parent = 0);
@@ -32,8 +34,8 @@ public:
 
 signals:
     void ksizeChanged();
-    void borderTypeChanged();
     void anchorChanged();
+    void borderTypeChanged();
 
 public slots:
 	const QSize& ksize() const;

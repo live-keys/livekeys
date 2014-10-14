@@ -17,6 +17,7 @@
 #include "lcvimgproc_plugin.hpp"
 
 #include <qqml.h>
+#include "QBlur.hpp"
 #include "QCanny.hpp"
 #include "QGaussianBlur.hpp"
 #include "QHoughLines.hpp"
@@ -31,6 +32,7 @@
 
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
+    qmlRegisterType<QBlur>(               uri, 1, 0, "Blur");
     qmlRegisterType<QCanny>(              uri, 1, 0, "Canny");
     qmlRegisterType<QGaussianBlur>(       uri, 1, 0, "GaussianBlur");
     qmlRegisterType<QHoughLines>(         uri, 1, 0, "HoughLines");

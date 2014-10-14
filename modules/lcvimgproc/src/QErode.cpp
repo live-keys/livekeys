@@ -18,6 +18,29 @@
 
 using namespace cv;
 
+/*!
+  \qmltype Erode
+  \instantiates QErode
+  \inqmlmodule lcvimgproc
+  \inherits MatFilter
+  \brief
+
+  \quotefile imgproc/.qml
+*/
+
+/*!
+  \class QErode
+  \inmodule lcvimgproc_cpp
+  \brief
+ */
+
+
+/*!
+  \brief QErode constructor
+
+  Parameters:
+  \a parent
+ */
 QErode::QErode(QQuickItem *parent)
     : QMatFilter(parent)
     , m_kernel(0)
@@ -27,9 +50,19 @@ QErode::QErode(QQuickItem *parent)
 {
 }
 
+/*!
+  \brief QErode destructor
+ */
 QErode::~QErode(){
 }
 
+/*!
+  \brief Filtering function.
+
+  Parameters:
+  \a in
+  \a out
+ */
 void QErode::transform(cv::Mat &in, cv::Mat &out){
     if ( m_kernel ){
         Scalar borderValue = morphologyDefaultBorderValue();

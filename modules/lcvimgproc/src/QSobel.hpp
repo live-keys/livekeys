@@ -63,9 +63,7 @@
  */
 
 //- Sobel operator - QSobel Class
-/**
- * @brief The QSobel class
- */
+
 class QSobel : public QMatFilter{
 
     Q_OBJECT

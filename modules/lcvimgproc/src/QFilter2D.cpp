@@ -18,6 +18,29 @@
 
 using namespace cv;
 
+/*!
+  \qmltype Filter2D
+  \instantiates QFilter2D
+  \inqmlmodule lcvimgproc
+  \inherits MatFilter
+  \brief
+
+  \quotefile imgproc/.qml
+*/
+
+/*!
+  \class QFilter2D
+  \inmodule lcvimgproc_cpp
+  \brief
+ */
+
+
+/*!
+  \brief QFilter2D constructor
+
+  Parameters:
+  \a parent
+ */
 QFilter2D::QFilter2D(QQuickItem *parent)
     : QMatFilter(parent)
     , m_kernel(0)
@@ -28,9 +51,19 @@ QFilter2D::QFilter2D(QQuickItem *parent)
 {
 }
 
+/*!
+  \brief QFilter2D destructor
+ */
 QFilter2D::~QFilter2D(){
 }
 
+/*!
+  \brief Filtering function.
+
+  Parameters:
+  \a in
+  \a out
+ */
 void QFilter2D::transform(cv::Mat &in, cv::Mat &out){
     if ( m_kernel ){
         Mat* m = m_kernel->cvMat();

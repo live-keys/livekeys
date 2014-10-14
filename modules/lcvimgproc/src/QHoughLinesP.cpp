@@ -20,6 +20,23 @@
 using namespace cv;
 using namespace std;
 
+/*!
+  \qmltype HoughLinesP
+  \instantiates QHoughLinesP
+  \inqmlmodule lcvimgproc
+  \inherits MatFilter
+  \brief
+
+  \quotefile imgproc/.qml
+*/
+
+/*!
+  \class QHoughLinesP
+  \inmodule lcvimgproc_cpp
+  \brief
+ */
+
+
 class QHoughLinesPPrivate{
 
 public :
@@ -29,6 +46,12 @@ public :
 
 };
 
+/*!
+  \brief QHoughLinesP constructor
+
+  Parameters:
+  \a parent
+ */
 QHoughLinesP::QHoughLinesP(QQuickItem *parent)
     : QMatFilter(parent)
     , m_rho(1)
@@ -45,10 +68,20 @@ QHoughLinesP::QHoughLinesP(QQuickItem *parent)
     d->outDirty   = false;
 }
 
+/*!
+  \brief QHoughLinesP destructor
+ */
 QHoughLinesP::~QHoughLinesP(){
     delete d_ptr;
 }
 
+/*!
+  \brief Filtering function.
+
+  Parameters:
+  \a in
+  \a out
+ */
 void QHoughLinesP::transform(cv::Mat &in, cv::Mat&){
     Q_D(QHoughLinesP);
     if ( in.size() != Size(0, 0) ){

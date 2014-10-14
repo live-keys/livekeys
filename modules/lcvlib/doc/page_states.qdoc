@@ -21,8 +21,10 @@ them requiring their own state objects (a decoder with the opened video file and
 opened file and other info). If we were to register both their states, we would have the following structure for the
 QStateContainer :
 
- - <b>QStateContainer<VideoDecoder>::instance()</b> : contains 1 VideoDecoder object
- - <b>QStateContainer<VideoEncoder>::instance()</b> : contains 1 VideoEncoder object
+\list
+    \li \b{QStateContainer<VideoDecoder>::instance()} : contains 1 VideoDecoder object
+    \li \b{QStateContainer<VideoEncoder>::instance()} : contains 1 VideoEncoder object
+\endlist
 
 If we were to have another VideoPlayer added by the user, another state would be generated within the
 QStateContainer<VideoDecoder> instance, so the \b{QStateContainer<VideoDecoder>::instance()} would now contain 2
