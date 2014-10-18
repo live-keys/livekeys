@@ -1,0 +1,307 @@
+/*!
+
+\page api_configuration.html
+
+\indexpage Index
+\title
+
+In the \l{Configuration. A simple example}{previous section} I've discussed how to configure and create a simple QML
+item that counts the number of non-zero pixels within a matrix. Within this section I will explain the easiest way to
+display a QMat element on screen, and also how to create a filter with \b{input to output} processing.
+
+A QML item containing a matrix you would like to display on Live CVs canvas, for example an item that opens
+a new image, or changes an existing one, is easily achievable by inheriting \l{QMatDisplay}{QMatDisplays}
+functionality. The QMatDisplay class is actually a QQuickItem that handles the display of a QMat property called
+\b{output}, so this means that by simply setting or working with the output property of QMatDisplay, you would gain
+the ability to display the QMat element on Live CV's canvas.
+
+In addition to QMatDisplays functionality, the QMatFilter implementation adds an \b{input} property and a virtual
+function that would be implement the actual filtering code.
+
+For example, the \l{QMatEmpty}{QMatEmpty} class works directly with the output property. Here's a snippet from its
+setType method for the \l{QMatEmpty::type}{type} property:
+
+\code
+inline void QMatEmpty::setType(QMat::Type type){
+    if ( m_type == type ){
+        m_type = type;
+        emit typeChanged();
+        output()->cvMat()->create(cv::Size(m_matSize.width(), m_matSize.height()), CV_MAKETYPE(m_type, m_channels));
+        output()->cvMat()->setTo(m_colorScalar);
+        emit outputChanged();
+        update();
+    }
+}
+\endcode
+
+After the type is set, the output element gets recreated and an update is called to display the element on screen.
+
+\section1 A filter example.
+
+To simplify the implementation of a filter, the previously mentioned QMatFilter class adds a
+\l{virtual void QMatFilter::transform(cv::Mat& in, cv::Mat& out)}{transform} function to handle the actual filtering.
+So, with that in mind, here's how you can implement a simple filter that transforms a 3 channel BGR image into a Gray
+one :
+
+\code
+#include "QMatFilter.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
+class QBGRToGray : public QMatFilter{
+
+    Q_OBJECT
+
+public:
+    explicit QBGRToGray(QQuickItem *parent = 0) : QMatFilter(parent){}
+
+    virtual void transform(cv::Mat &in, cv::Mat &out){
+        cv::cvtColor(in, out, CV_BGR2GRAY);
+    }
+
+};
+\endcode
+
+The transform function gets called whenever the \l{QMatFilter::input}{QMatFilter::input} element changes. The output
+property is signaled autmatically after the transform function is finished processing.
+
+\section1 Implementing a parameter based filter.
+
+For Open CV functions that have more parameters rather than a single input and output, we need to add them as properties
+to the actual Item. Every time the property changes, we have to signal the QMatFilter that a transformation is required.
+
+I've selected the addWeighted function from Open CV in order to show how would the function be transformed into a QML
+property:
+
+The addWeighted function has the following paramters :
+
+\list
+\li \b{src1}  – First input array.
+\li \b{alpha} – Weight of the first array elements.
+\li \b{src2}  – Second input array of the same size and channel number as src1.
+\li \b{beta}  – Weight of the second array elements.
+\li \b{dst}   – Output array that has the same size and number of channels as the input arrays.
+\li \b{gamma} – Scalar added to each sum.
+\endlist
+
+I have removed the depth (dtype) paramter, since I want to emphasize the actual filter implementation and shorten the
+details. Now, \b{src1} and \b{dst} will be the actual input and output properties, so we need to add the \b{src2} as
+another QMat property, and also the \b{alpha}, \b{beta} and \b{gamma} as real type properties.
+
+We can use the previously created \b{tutorial} plugin and add a new element. Create a new class \b{AddWeighted}. Include
+and extend QMatFilter, and add the following properties :
+
+\code
+Q_PROPERTY(QMat* input2 READ input2 WRITE setInput2 NOTIFY input2Changed)
+Q_PROPERTY(qreal alpha  READ alpha  WRITE setAlpha  NOTIFY alphaChanged)
+Q_PROPERTY(qreal beta   READ beta   WRITE setBeta   NOTIFY betaChanged)
+Q_PROPERTY(qreal gamma  READ gamma  WRITE setGamma  NOTIFY gammaChanged)
+\endcode
+
+Add the setters and getters, and implement the following function :
+
+\code
+// AddWeighted.hpp
+void transform(cv::Mat& in, cv::Mat& out);
+\endcode
+
+\code
+// AddWeighted.cpp
+
+void AddWeighted::transform(cv::Mat& in, cv::Mat& out){
+    cv::Mat* in2 = m_input2->cvMat();
+    if ( in.size() == in2->size() && in.channels() == in2->channels() ){
+        cv::addWeighted(in, m_alpha, *in2, m_beta, m_gamma, out);
+    }
+}
+\endcode
+
+
+The final version will look like the following :
+
+\code
+// AddWeighted.hpp
+
+#include <QMatFilter>
+
+class AddWeighted : public QMatFilter{
+
+    Q_OBJECT
+    Q_PROPERTY(QMat* input2 READ input2 WRITE setInput2 NOTIFY input2Changed)
+    Q_PROPERTY(qreal alpha  READ alpha  WRITE setAlpha  NOTIFY alphaChanged)
+    Q_PROPERTY(qreal beta   READ beta   WRITE setBeta   NOTIFY betaChanged)
+    Q_PROPERTY(qreal gamma  READ gamma  WRITE setGamma  NOTIFY gammaChanged)
+
+public:
+    explicit AddWeighted(QQuickItem *parent = 0);
+    ~AddWeighted();
+
+    void transform(cv::Mat& in, cv::Mat& out);
+
+    QMat* input2();
+    void setInput2(QMat* input2);
+
+    qreal alpha() const;
+    void setAlpha(qreal alpha);
+
+    qreal beta() const;
+    void setBeta(qreal beta);
+
+    qreal gamma() const;
+    void setGamma(qreal gamma);
+
+signals:
+    void input2Changed();
+    void alphaChanged();
+    void betaChanged();
+    void gammaChanged();
+
+private:
+    QMat* m_input2;
+    QMat* m_input2Internal;
+    qreal m_alpha;
+    qreal m_beta;
+    qreal m_gamma;
+
+};
+
+inline QMat* AddWeighted::input2(){
+    return m_input2;
+}
+
+inline void AddWeighted::setInput2(QMat* input2){
+    m_input2 = input2;
+    emit input2Changed();
+
+    QMatFilter::transform();
+}
+
+inline qreal AddWeighted::alpha() const{
+    return m_alpha;
+}
+
+inline void AddWeighted::setAlpha(qreal alpha){
+    if ( m_alpha != alpha ){
+        m_alpha = alpha;
+        emit alphaChanged();
+
+        QMatFilter::transform();
+    }
+}
+
+inline qreal AddWeighted::beta() const{
+    return m_beta;
+}
+
+inline void AddWeighted::setBeta(qreal beta){
+    if ( m_beta != beta ){
+        m_beta = beta;
+        emit betaChanged();
+
+        QMatFilter::transform();
+    }
+}
+
+inline qreal AddWeighted::gamma() const{
+    return m_gamma;
+}
+
+inline void AddWeighted::setGamma(qreal gamma){
+    if ( gamma != m_gamma ){
+        m_gamma = gamma;
+        emit gammaChanged();
+
+        QMatFilter::transform();
+    }
+}
+\endcode
+
+\code
+// AddWeighted.cpp
+
+#include "AddWeighted.hpp"
+
+AddWeighted::AddWeighted(QQuickItem *parent)
+    : QMatFilter(parent)
+    , m_input2(new QMat)
+    , m_input2Internal(m_input2)
+{
+}
+
+AddWeighted::~AddWeighted(){
+    delete m_input2Internal;
+}
+
+void AddWeighted::transform(cv::Mat& in, cv::Mat& out){
+    cv::Mat* in2 = m_input2->cvMat();
+    if ( in.size() == in2->size() && in.channels() == in2->channels() ){
+        cv::addWeighted(in, m_alpha, *in2, m_beta, m_gamma, out);
+    }
+}
+\endcode
+
+Two things to notice is that besides emitting the notifier when the value changes, I also call the
+\l{QMatFilter::transform()}{QMatFilter::transform} function in each of my setters. After handling a few changes, the
+transform() function in turn will call my implemented transform(cv::Mat& in, cv::Mat& out) function. The next thing to
+notice is the m_input2Internal field, which is used to later delete the m_input2 matrix. To avoid checking for null
+matrixes all the time when handling value changes and transformations, I create a new matrix at m_input2 when I
+initialize my object. This avoids null pointers within the QML program as well.
+
+The final touch is to register the AddWeighted type to QML in TutorialPlugin::resiterTypes :
+
+\code
+#include "tutorial_plugin.hpp"
+#include "countnonzeropixels.hpp"
+#include "addweighted.hpp"
+
+#include <qqml.h>
+
+void TutorialPlugin::registerTypes(const char *uri)
+{
+    // @uri plugins.tutorial
+    qmlRegisterType<CountNonZeroPixels>(uri, 1, 0, "CountNonZeroPixels");
+    qmlRegisterType<AddWeighted>(       uri, 1, 0, "AddWeighted");
+}
+\endcode
+
+Compile the code, and place the generated dll into Live CV's plugins/tutorial directory. You can use the following
+test program to test out the filter:
+
+\code
+import 'lcvcore' 1.0
+import "lcvimgproc" 1.0
+import "tutorial" 1.0
+
+Grid{
+
+    columns : 2
+
+    property string imagePath : 'D:/tutorial.JPG'
+
+    ImRead{
+        id : imgSource
+        file : parent.imagePath
+    }
+
+    MatEmpty{
+        id : imgE
+        matSize : imgSource.output.dataSize()
+        channels : 3
+        color : "#997822"
+    }
+
+    AddWeighted{
+        input : imgSource.output
+        input2 : imgE.output
+        alpha : 0.6
+        beta : 0.4
+        gamma : 0
+    }
+
+
+}
+\endcode
+
+The image below shows the end result on creating the filter :
+
+
+

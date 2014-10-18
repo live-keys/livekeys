@@ -19,7 +19,7 @@
 
 #include <qglobal.h>
 
-#ifdef Q_LCV
+#ifndef Q_LCV_STATIC
 #  ifdef Q_LCV_LIB
 #    define Q_LCV_EXPORT Q_DECL_EXPORT
 #  else

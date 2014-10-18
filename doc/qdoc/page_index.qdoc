@@ -9,7 +9,8 @@
 \section1 User Guide
 
 \list
-    \li Installation
+    \li Installation on windows
+    \li Installation on linux
     \li \l {Using Live CV}{Using Live CV}
 
 
@@ -28,14 +29,15 @@
 \section1 Developers Guide
 
 \list
-    \li Building Live CV
     \li Using the API
     \list
-        \li Configuration
-        \li A simple example
+        \li \l {Configuration. A simple example}{Configuration. A simple example}
+        \li \l {Creating a filter}{Creating a filter}
         \li \l {Using states}{Using states}
     \endlist
-    \li Contributing
+
+    \li \l {Building Live CV}{Building Live CV}
+    \li \l {Adding new elements. Contributing}{Adding new elements. Contributing}
 \endlist
 
 
