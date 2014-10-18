@@ -43,6 +43,14 @@ syntaxhighlighting = true
 
 imagedirs   = ./images
 
+# HTML Config
+
+HTML.postheader = "<!--LIVE-CV-HEADER-->"
+
+HTML.postpostheader = "<!--LIVE-CV-POST-HEADER--><ul id=\"secondary-links\"><li><a href=\"index.html\">Index</a></li><li><a href=\"index.html\">QML Modules</a></li><li><a href=\"index.html\">Cpp Modules</a></li></ul>"
+
+HTML.footer = "<!--LIVE-CV-FOOTER-->"
+
 # The outputdir variable specifies the directory
 # where QDoc will put the generated documentation.
 
