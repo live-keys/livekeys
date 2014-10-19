@@ -55,6 +55,67 @@ QDilate::QDilate(QQuickItem *parent)
 QDilate::~QDilate(){
 }
 
+
+/*!
+  \property QDilate::kernel
+  \sa Dilate::kernel
+ */
+
+/*!
+  \qmlproperty Mat Dilate::kernel
+
+  Structuring element used for dilation; if element=Mat(), a  3x3 rectangular structuring element is used.
+ */
+
+
+/*!
+  \property QDilate::anchor
+  \sa Dilate::anchor
+ */
+
+/*!
+  \qmlproperty Point Dilate::anchor
+
+  Position of the anchor within the element; default value (-1, -1) means that the anchor is at the element center.
+ */
+
+/*!
+  \property QDilate::iterations
+  \sa Dilate::iterations
+ */
+
+/*!
+  \qmlproperty int Dilate::iterations
+
+  Number of times dilation is applied.
+ */
+
+/*!
+  \property QDilate::borderType
+  \sa Dilate::borderType
+ */
+
+/*!
+  \qmlproperty int Dilate::borderType
+
+  Pixel extrapolation method.
+
+  \sa CopyMakeBorder::BorderType
+ */
+
+/*!
+  \property QDilate::borderValue
+  \sa Dilate::borderValue
+ */
+
+/*!
+  \qmlproperty color Dilate::borderValue
+
+  Border value in case of a constant border
+
+  \sa CopyMakeBorder::BorderType
+ */
+
 /*!
   \brief Filtering function.
 

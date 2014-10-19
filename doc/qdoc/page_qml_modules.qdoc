@@ -1,0 +1,19 @@
+/*!
+\page qml-modules.html
+
+\indexpage Index
+\title QML Modules
+
+\table
+    \row
+        \li \l {lcvcore}{lcvcore}
+        \li Main computer vision QML elements.
+    \row
+        \li \l {lcvimgproc}{lcvimgproc}
+        \li Image processing module.
+    \row
+        \li \l {lcvvideo}{lcvvideo}
+        \li Video processing module.
+\endtable
+
+*/

@@ -1,12 +1,12 @@
 /*!
-\page api_configuration.html
+\page api-configuration.html
 
 \indexpage Index
 \title Configuration. A simple example
 
 In this tutorial you will see how to use the Live CV API in order to create plugins for Live CV without the need to
-recompile the Live CV code. The Live CV API provides the necessary links in order to create Open CV components
-compatible with QtQuick .
+recompile the code. The Live CV API provides the necessary links in order to create Open CV components
+compatible with QtQuick.
 
 \section1 Build environmnent configuration on different platforms.
 
@@ -22,8 +22,8 @@ to guarantee that things will run smoothely otherwise. So, the following section
 with open cv 249 and Visual Studio 2013.
 
 The first thing required is to download Visual Studio 2013 from microsofts website, then use the online installer for
-Qt which you can download from \li{http://qt.io}{qt.io} to install Qt and link it with Visual Studio. Next, from
-\li{http://opencv.org}{opencv.org}, download opencv version 249 or similar and extract it somewhere on your hard drive.
+Qt which you can download from \l{http://qt.io}{qt.io} to install Qt and link it with Visual Studio. Next, from
+\l{http://opencv.org}{opencv.org}, download opencv version 249 or similar and extract it somewhere on your hard drive.
 You can also build opencv out of the source files by using cmake. There's more documentation on that on opencvs website,
 so I won't go into much detail. What's more important is open cv's lib files, since the actual dll's are already
 available with Live CV application, so we won't be requiring those.

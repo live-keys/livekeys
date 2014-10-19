@@ -1,6 +1,6 @@
 # Live CV
 
-**Real Time Computer Vision Coding Environment**
+**Live Computer Vision Coding Environment**
 
 Website : http://livecv.dinusv.com
 

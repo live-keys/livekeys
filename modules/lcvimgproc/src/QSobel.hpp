@@ -18,50 +18,6 @@
 
 #include "QMatFilter.hpp"
 
-//- Sobel operator - QML Usage
-/**
- * @page imgproc_imgfilter_sobel Sobel
- * Calculates the first, second, third, or mixed image derivatives using an extended Sobel operator.
- * ## Parameters
- *
- *  - input : input image
- *  - output : output image ( same size and number of channels as input image )
- *  - ddepth : output image depth, the following combinations of input depth and ddepth are supproted
- *      - input.depth = QMat.CV8U, ddepth = -1 / QMat.CV16S / QMat.CV32F / QMat.CV64F
- *      - input.depth = QMat.CV16U / QMat.CV16S, ddepth = -1 / QMat.CV32F / QMat.CV64F
- *      - input.depth = QMat.CV32F, ddepth = -1 / QMat.CV32F / QMat.CV64F
- *      - input.depth = QMat.64F, ddepth = -1 / QMat.CV64F
- *    when ddepth = -1, the destination image will have the same depth as the source. In case of 8-bit
- *    input images, it will result in truncated derivatives
- *  - xorder : order of the derivative in x
- *  - yorder : order of the derivative in y
- *  - ksize : size of the extended Sobel kernel; ( must be 1, 3, 5, 7 )
- *  - scale : optional scale factor for the computed derivative values; by default, no scaling is
- *    applied
- *  - delta : optional delta value that is added to the results prior to storing them in 'output'
- *  - borderType : pixel extrapolation method
- *
- * ## Example Usage
- *
- * @code
- * MatSource{
- *      file : "sobel_test.jpg"
- * }
- * CvtColor{
- *
- * }
- * Sobel{
- *      input : cvt.output
- *      ddepth : Mat.CV16S
- *      xorder : 1
- *      yorder : 0
- *      ksize  : 3
- *      scale  : 1
- *      delta : 0
- * }
- * @endcode
- */
-
 //- Sobel operator - QSobel Class
 
 class QSobel : public QMatFilter{

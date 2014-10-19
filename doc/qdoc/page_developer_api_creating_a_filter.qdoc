@@ -1,9 +1,9 @@
 /*!
 
-\page api_configuration.html
+\page api_creating-a-filter.html
 
 \indexpage Index
-\title
+\title Creating a filter
 
 In the \l{Configuration. A simple example}{previous section} I've discussed how to configure and create a simple QML
 item that counts the number of non-zero pixels within a matrix. Within this section I will explain the easiest way to

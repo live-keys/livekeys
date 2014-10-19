@@ -8,46 +8,71 @@
 
 \section1 User Guide
 
-\list
-    \li Installation on windows
-    \li Installation on linux
-    \li \l {Using Live CV}{Using Live CV}
+\table
+    \row
+        \li Installation on windows
+        \li Step by step tutorial on installing and running Live CV on windows.
+    \row
+        \li Installation on linux
+        \li Step by step tutorial on installing and running Live CV on linux.
+    \row
+        \li \l {Using Live CV}{Using Live CV}
+        \li A guide on how to use and write code in Live CV
 
+    \row
+        \li{2, 1} \section2 QML Modules
 
-\endlist
-
-\section2 QML Modules
-
-\list
-    \li \l {lcvcore}{lcvcore}
-    \li \l {lcvimgproc}{lcvimgproc}
-    \li \l {lcvvideo}{lcvvideo}
-\endlist
-
+    \row
+        \li \l {lcvcore}{lcvcore}
+        \li Main computer vision QML elements.
+    \row
+        \li \l {lcvimgproc}{lcvimgproc}
+        \li Image processing module.
+    \row
+        \li \l {lcvvideo}{lcvvideo}
+        \li Video processing module.
+\endtable
 
 
 \section1 Developers Guide
 
-\list
-    \li Using the API
-    \list
+\table
+    \row
+        \li{2, 1} \section2 Using the API
+
+    \row
         \li \l {Configuration. A simple example}{Configuration. A simple example}
+        \li Configuring the Live CV API and building an example.
+    \row
         \li \l {Creating a filter}{Creating a filter}
+        \li Create an element that filters a matrix.
+    \row
         \li \l {Using states}{Using states}
-    \endlist
+        \li Keep consistent data between compilations.
 
-    \li \l {Building Live CV}{Building Live CV}
-    \li \l {Adding new elements. Contributing}{Adding new elements. Contributing}
-\endlist
+    \row
+        \li{2, 1} \section2 Contributing
 
+    \row
+        \li \l {Building Live CV}{Building Live CV}
+        \li Configuring and building Live CV from source code on windows and linux.
 
-\section2 C++ Modules
+    \row
+        \li{2, 1} \section2 C++ Modules
 
-\list
-    \li \l {lcvlib_cpp}{lib}
-    \li \l {lcvcore_cpp}{core}
-    \li \l {lcvimgproc_cpp}{imgproc}
-    \li \l {lcvvideo_cpp}{video}
-\endlist
+    \row
+        \li \l {lcvlib_cpp}{lib}
+        \li The lcvlib or lcvapi module.
+    \row
+        \li \l {lcvcore_cpp}{core}
+        \li The lcvcore module.
+    \row
+        \li \l {lcvimgproc_cpp}{imgproc}
+        \li The lcvimgproc module.
+    \row
+        \li \l {lcvvideo_cpp}{video}
+        \li The lcvvideo module.
+\endtable
+
 
 */

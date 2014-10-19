@@ -53,6 +53,52 @@ QGaussianBlur::QGaussianBlur(QQuickItem *parent)
 QGaussianBlur::~QGaussianBlur(){
 }
 
+
+/*!
+  \property QGaussianBlur::ksize
+  \sa GaussianBlur::ksize
+ */
+
+/*!
+  \qmlproperty size GaussianBlur::ksize
+
+  Gaussian kernel size. ksize.width and ksize.height can differ but they both must be positive and odd. Or, they can be
+  zero’s and then they are computed from sigma.
+ */
+
+/*!
+  \property QGaussianBlur::sigmaX
+  \sa GaussianBlur::sigmaX
+ */
+
+/*!
+  \qmlproperty real GaussianBlur::sigmaX
+
+  Gaussian kernel standard deviation in X direction.
+ */
+
+/*!
+  \property QGaussianBlur::sigmaY
+  \sa GaussianBlur::sigmaY
+ */
+
+/*!
+  \qmlproperty real GaussianBlur::sigmaY
+
+  Gaussian kernel standard deviation in Y direction.
+ */
+
+/*!
+  \property QGaussianBlur::borderType
+  \sa GaussianBlur::borderType
+ */
+
+/*!
+  \qmlproperty int GaussianBlur::borderType
+
+  Pixel extrapolation method (see \l{CopyMakeBorder::BorderType}{CopyMakeBorder::BorderType} for details).
+ */
+
 /*!
   \brief Filtering function.
 

@@ -23,7 +23,9 @@ using namespace cv;
   \instantiates QCopyMakeBorder
   \inqmlmodule lcvimgproc
   \inherits MatFilter
-  \brief
+  \brief Copies the source image into the middle of the destination image.
+
+  The areas to the left, to the right, above and below the copied source image will be filled with extrapolated pixels
 
   \quotefile imgproc/blur.qml
 */
@@ -31,7 +33,7 @@ using namespace cv;
 /*!
   \class QCopyMakeBorder
   \inmodule lcvimgproc_cpp
-  \brief
+  \brief Copies the source image into the middle of the destination image.
  */
 
 /*!
@@ -51,6 +53,104 @@ QCopyMakeBorder::QCopyMakeBorder(QQuickItem *parent)
  */
 QCopyMakeBorder::~QCopyMakeBorder(){
 }
+
+/*!
+  \qmlproperty enumeration CopyMakeBorder::BorderType
+
+  Extrapolation method border type:
+  \list
+  \li CopyMakeBorder.BORDER_REPLICATE
+  \li CopyMakeBorder.BORDER_CONSTANT
+  \li CopyMakeBorder.BORDER_REFLECT
+  \li CopyMakeBorder.BORDER_WRAP
+  \li CopyMakeBorder.BORDER_REFLECT_101
+  \li CopyMakeBorder.BORDER_TRANSPARENT
+  \li CopyMakeBorder.BORDER_DEFAULT
+  \li CopyMakeBorder.BORDER_ISOLATED
+  \endlist
+*/
+
+
+/*!
+  \enum QCopyMakeBorder::BorderType
+
+  \value BORDER_REPLICATE
+  \value BORDER_CONSTANT
+  \value BORDER_REFLECT
+  \value BORDER_WRAP
+  \value BORDER_REFLECT_101
+  \value BORDER_TRANSPARENT
+  \value BORDER_DEFAULT
+  \value BORDER_ISOLATED
+ */
+
+/*!
+  \property QCopyMakeBorder::top
+  \sa CopyMakeBorder::top
+ */
+
+/*!
+  \qmlproperty int CopyMakeBorder::top
+
+  Property specifying how many pixels in the top direction from the source image rectangle to extrapolate.
+ */
+
+/*!
+  \property QCopyMakeBorder::bottom
+  \sa CopyMakeBorder::bottom
+ */
+
+/*!
+  \qmlproperty int CopyMakeBorder::bottom
+
+  Property specifying how many pixels in the bottom direction from the source image rectangle to extrapolate.
+ */
+
+/*!
+  \property QCopyMakeBorder::left
+  \sa CopyMakeBorder::left
+ */
+
+/*!
+  \qmlproperty int CopyMakeBorder::left
+
+  Property specifying how many pixels in the left direction from the source image rectangle to extrapolate.
+ */
+
+/*!
+  \property QCopyMakeBorder::right
+  \sa CopyMakeBorder::top
+ */
+
+/*!
+  \qmlproperty int CopyMakeBorder::right
+
+  Property specifying how many pixels in the right direction from the source image rectangle to extrapolate.
+ */
+
+/*!
+  \property QCopyMakeBorder::borderType
+  \sa CopyMakeBorder::borderType
+ */
+
+/*!
+  \qmlproperty int CopyMakeBorder::borderType
+
+  Border type.
+  \sa CopyMakeBorder::BorderType
+ */
+
+/*!
+  \property QCopyMakeBorder::color
+  \sa CopyMakeBorder::color
+ */
+
+/*!
+  \qmlproperty color CopyMakeBorder::color
+
+  Border value if borderType==CopyMakeBorder.BORDER_CONSTANT.
+  \sa CopyMakeBorder::BorderType
+ */
 
 /*!
   \brief Filtering function.

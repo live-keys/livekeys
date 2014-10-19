@@ -25,7 +25,7 @@ using namespace std;
   \instantiates QHoughLinesP
   \inqmlmodule lcvimgproc
   \inherits MatFilter
-  \brief
+  \brief Finds line segments in a binary image using the probabilistic Hough transform.
 
   \quotefile imgproc/.qml
 */
@@ -33,9 +33,8 @@ using namespace std;
 /*!
   \class QHoughLinesP
   \inmodule lcvimgproc_cpp
-  \brief
+  \brief Finds line segments in a binary image using the probabilistic Hough transform.
  */
-
 
 class QHoughLinesPPrivate{
 
@@ -74,6 +73,84 @@ QHoughLinesP::QHoughLinesP(QQuickItem *parent)
 QHoughLinesP::~QHoughLinesP(){
     delete d_ptr;
 }
+
+
+/*!
+  \property QHoughLinesP::rho
+  \sa HoughLinesP::rho
+ */
+
+/*!
+  \qmlproperty real HoughLinesP::rho
+
+  Distance resolution of the accumulator in pixels.
+ */
+
+/*!
+  \property QHoughLinesP::theta
+  \sa HoughLinesP::theta
+ */
+
+/*!
+  \qmlproperty real HoughLinesP::theta
+
+  Angle resolution of the accumulator in radians.
+ */
+
+/*!
+  \property QHoughLinesP::threshold
+  \sa HoughLinesP::threshold
+ */
+
+/*!
+  \qmlproperty int HoughLinesP::threshold
+
+  Accumulator threshold parameter. Only those lines are returned that get enough votes ( >\texttt{threshold} ).
+ */
+
+/*!
+  \property QHoughLinesP::minLineLength
+  \sa HoughLinesP::minLineLength
+ */
+
+/*!
+  \qmlproperty real HoughLinesP::minLineLength
+
+  Minimum line length. Line segments shorter than that are rejected.
+ */
+
+/*!
+  \property QHoughLinesP::maxLineGap
+  \sa HoughLinesP::maxLineGap
+ */
+
+/*!
+  \qmlproperty real HoughLinesP::maxLineGap
+
+  Maximum allowed gap between points on the same line to link them.
+ */
+
+/*!
+  \property QHoughLinesP::lineColor
+  \sa HoughLinesP::lineColor
+ */
+
+/*!
+  \qmlproperty color HoughLinesP::lineColor
+
+  Color of the lines being drawn.
+ */
+
+/*!
+  \property QHoughLinesP::lineThickness
+  \sa HoughLinesP::lineColor
+ */
+
+/*!
+  \qmlproperty int HoughLinesP::lineThickness
+
+  Thickness of the lines being drawn.
+ */
 
 /*!
   \brief Filtering function.
