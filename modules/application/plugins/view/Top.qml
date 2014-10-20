@@ -163,7 +163,7 @@ Rectangle {
         Image{
             id : openLog
             anchors.verticalCenter: parent.verticalCenter
-            source : "../../images/open.png"
+            source : "../../images/log.png"
 
             Rectangle{
                 visible : container.isLogWindowDirty
