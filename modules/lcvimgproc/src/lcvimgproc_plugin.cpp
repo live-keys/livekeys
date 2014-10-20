@@ -29,6 +29,8 @@
 #include "QChannelSelect.hpp"
 #include "QStructuringElement.hpp"
 #include "QMatResize.hpp"
+#include "QDilate.hpp"
+#include "QErode.hpp"
 
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
@@ -44,6 +46,8 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QStructuringElement>( uri, 1, 0, "StructuringElement");
     qmlRegisterType<QMatResize>(          uri, 1, 0, "Resize");
     qmlRegisterType<QFilter2D>(           uri, 1, 0, "Filter2D");
+    qmlRegisterType<QDilate>(             uri, 1, 0, "Dilate");
+    qmlRegisterType<QErode>(              uri, 1, 0, "Erode");
 }
 
 

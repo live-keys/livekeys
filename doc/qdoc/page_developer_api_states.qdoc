@@ -34,16 +34,206 @@ needs to be given by the user. Sometimes the key itself can be retrieved from on
 for example, the VideoPlayer has the file path associated with it for playback, hence the VideoDecoder would have the
 same path, and can be stored within the state container under the file-path key. In other cases it is not possible,
 like for example when using optical flow, the user is required to give the key manually. In this case, when the optical
-flow object needs to have a property exclusively for this purpose, I call the property a \b{state id}
+flow object needs to have a property exclusively for this purpose, which in my scenarios I call the \b{stateId}.
 
 \section1 State Object example
 
 To further clarify, let's create a simple example showing how to use the state container. Consider a QML item that
-counts how many times an input matrix has changed it's value. We'll call it QTransformationCounter. The item will need
-to keep the value of its counter consistent over multiple compilations, hence we will need to make use of the
-QStateContainer class. We will have 3 properties : the input matrix, the transformation count, and the state id.
-The value of the transformation count property will be kept in a different class called QTransformationCounterState,
-which we will use for the QStateContainer instance. So let's see how the class would look like:
+counts how many times the actual item recompiled, called "CompilationCount". We can use the previously created tutorial
+project, where we can add the class CompilationCount, with the following properties :
+
+\code
+Q_PROPERTY(QString stateId      READ stateId      WRITE setStateId NOTIFY stateIdChanged)
+Q_PROPERTY(int     compilations READ compilations NOTIFY compilationsChanged)
+\endcode
+
+The stateId is required to be given by the user, while the number of compilations is a counter that increments each
+time the object is created. To do that, we need to link to the componentCompleted virtual method implemented from
+QQuickItem:
+
+\code
+void CompilationCount::componentComplete(){
+    QQuickItem::componentComplete();
+
+    if ( m_stateId == "" ){
+        qDebug() << "Undefined state id. Cannot count compilations.";
+        return;
+    }
+
+    QStateContainer<CompilationCountState>& stateContainer =
+            QStateContainer<CompilationCountState>::instance();
+
+    CompilationCountState* ccs = stateContainer.state(m_stateId);
+    if ( !ccs ){
+        ccs = new CompilationCountState;
+        stateContainer.registerState(m_stateId, ccs);
+    }
+    ccs->compilations++;
+    setCompilations(ccs->compilations);
+}
+\endcode
+
+First, we call the QQuickItem's parent method, just like Qt requires us to. Next, we check for the stateId parameter.
+If it hasn't been given, we cannot count the number compilations because we do not have a key to access the compilations
+value by. Then, we retrieve an instance of the CompilationCountState class, which simply holds the number of
+compilations up to this point:
+
+\code
+class CompilationCountState{
+public:
+    CompilationCountState():compilations(0){}
+
+    int compilations;
+};
+\endcode
+
+If there is no such class found, it means that it is the first time this object is compiled, or the first time a state
+has been attributed to it. We create our state and register it by the given key, so we can access it next time. It's
+important to note that if the state is not accessed on the next compilation, it will automatically be deleted. So, if
+you change the stateId within the application, you cannot retrieve it back by simply reverting the key. The final part
+of the function increments the compilation count, and sets its local compilations variable to be accessed whenever
+necessary in QML.
+
+The full class is available below, together with the property setters and getters:
+
+\code
+// compilationcount.hpp
+
+#include <QQuickItem>
+
+class CompilationCount : public QQuickItem{
+
+    Q_OBJECT
+    Q_PROPERTY(QString stateId      READ stateId      WRITE setStateId NOTIFY stateIdChanged)
+    Q_PROPERTY(int     compilations READ compilations NOTIFY compilationsChanged)
+
+public:
+    explicit CompilationCount(QQuickItem *parent = 0);
+
+    const QString& stateId() const;
+    void setStateId(const QString& stateId);
+
+    int compilations() const;
+    void setCompilations(int compilations);
+
+    void componentComplete();
+
+signals:
+    void stateIdChanged();
+    void compilationsChanged();
+
+private:
+    QString m_stateId;
+    int     m_compilations;
+
+};
+
+inline const QString&CompilationCount::stateId() const{
+    return m_stateId;
+}
+
+inline void CompilationCount::setStateId(const QString& stateId){
+    if ( m_stateId != stateId ){
+        m_stateId = stateId;
+        emit stateIdChanged();
+    }
+}
+
+inline int CompilationCount::compilations() const{
+    return m_compilations;
+}
+
+inline void CompilationCount::setCompilations(int compilations){
+    if ( m_compilations != compilations ){
+        m_compilations = compilations;
+        emit compilationsChanged();
+    }
+}
+\endcode
+
+\code
+// compilationcount.cpp
+
+#include "compilationcount.h"
+#include <QStateContainer>
+
+class CompilationCountState{
+public:
+    CompilationCountState():compilations(0){}
+
+    int compilations;
+};
+
+CompilationCount::CompilationCount(QQuickItem *parent)
+    : QQuickItem(parent)
+    , m_compilations(0)
+    , m_stateId("")
+{
+}
+
+void CompilationCount::componentComplete(){
+    QQuickItem::componentComplete();
+
+    if ( m_stateId == "" ){
+        qDebug() << "Undefined state id. Cannot count compilations.";
+        return;
+    }
+
+    QStateContainer<CompilationCountState>& stateContainer =
+            QStateContainer<CompilationCountState>::instance();
+
+    CompilationCountState* ccs = stateContainer.state(m_stateId);
+    if ( !ccs ){
+        ccs = new CompilationCountState;
+        stateContainer.registerState(m_stateId, ccs);
+    }
+    ccs->compilations++;
+    setCompilations(ccs->compilations);
+}
+
+\endcode
+
+Don't forget to register the class to QML:
+
+\code
+#include "tutorial_plugin.hpp"
+#include "countnonzeropixels.hpp"
+#include "addweighted.hpp"
+#include "compilationcount.hpp"
+
+#include <qqml.h>
+
+void TutorialPlugin::registerTypes(const char *uri)
+{
+    // @uri plugins.tutorial
+    qmlRegisterType<CountNonZeroPixels>(uri, 1, 0, "CountNonZeroPixels");
+    qmlRegisterType<AddWeighted>(       uri, 1, 0, "AddWeighted");
+    qmlRegisterType<CompilationCount>(  uri, 1, 0, "CompilationCount");
+}
+\endcode
+
+And here's a snippet of code to test the newly created type:
+
+\code
+import "lcvcore" 1.0
+import "tutorial" 1.0
+
+Rectangle{
+
+    Text{
+        text : "Compilations : " + cc.compilations
+        color : "#fff"
+    }
+    CompilationCount{
+        id : cc
+        stateId : "cc"
+    }
+
+}
+\endcode
+
+By modifying values or changing the text, you will notice the number of compilations increasing.
+
 
 */
 

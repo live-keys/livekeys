@@ -52,6 +52,18 @@ QChannelSelect::QChannelSelect(QQuickItem *parent)
 QChannelSelect::~QChannelSelect(){
 }
 
+
+/*!
+  \property QChannelSelect::channel
+  \sa ChannelSelect::channel
+ */
+
+/*!
+  \qmlproperty int ChannelSelect::channel
+
+  Channel number.
+ */
+
 /*!
   \brief Filter function
 

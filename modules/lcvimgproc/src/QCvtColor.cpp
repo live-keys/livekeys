@@ -46,6 +46,30 @@ QCvtColor::QCvtColor(QQuickItem *parent) :
 }
 
 /*!
+  \property QCvtColor::code
+  \sa CvtColor::code
+ */
+
+/*!
+  \qmlproperty CvtColor::CvtType CvtColor::code
+
+  Color space conversion code.
+ */
+
+/*!
+  \property QCvtColor::dstCn
+  \sa CvtColor::dstCn
+ */
+
+/*!
+  \qmlproperty int CvtColor::dstCn
+
+  Number of channels in the destination image; if the parameter is 0, the number of the channels is derived
+  automatically from input and code.
+ */
+
+
+/*!
   \brief Filtering function.
 
   Parameters:

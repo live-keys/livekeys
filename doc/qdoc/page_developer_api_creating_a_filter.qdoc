@@ -39,9 +39,8 @@ After the type is set, the output element gets recreated and an update is called
 \section1 A filter example.
 
 To simplify the implementation of a filter, the previously mentioned QMatFilter class adds a
-\l{virtual void QMatFilter::transform(cv::Mat& in, cv::Mat& out)}{transform} function to handle the actual filtering.
-So, with that in mind, here's how you can implement a simple filter that transforms a 3 channel BGR image into a Gray
-one :
+\l{QMatFilter}{transform} function to handle the actual filtering. So, with that in mind, here's how you can implement a
+simple filter that transforms a 3 channel BGR image into a gray one :
 
 \code
 #include "QMatFilter.hpp"
@@ -303,5 +302,6 @@ Grid{
 
 The image below shows the end result on creating the filter :
 
+\image api_filter.png
 
-
+*/

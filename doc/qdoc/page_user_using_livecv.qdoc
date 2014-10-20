@@ -8,7 +8,7 @@
 Within this section I will guide you through the basic usage of Live CV. Assuming you have Live CV installed, you can
 start the application by using its executable found in its installation directory. The following view will open up:
 
-\img NEED_TO_PUT_IMAGE
+\image startscreen.jpg
 
 \section1 The header
 
@@ -33,7 +33,14 @@ opens in case of an error. Since not all error messages can be redirected there,
 window, so it's a good ideea either to keep the log window open, or to check its icon, on which a circle appears in case
 new messages pop up :
 
-\img IMAGE WITH ICON
+\table
+\header
+    \li Log Icon
+    \li Log Icon with Message
+\row
+    \li \inlineimage logicon.jpg Log Icon
+    \li \inlineimage logiconmessage.jpg Log Icon with Message
+\endtable
 
 The next 2 buttons deal with increasing or decreasing font size for the editor section.
 
@@ -60,7 +67,7 @@ Text{
 
 As for the computer vision part, it is available under a set of pluginable modules. The main one is
 \l{lcvcore}{lcvcore}, which contains the code elements required for comptuer vision coding. Most of them are available
-through examples you can try out and edit in the \n{samples} directory of your Live CV installation, and the rest are
+through examples you can try out and edit in the \b{samples} directory of your Live CV installation, and the rest are
 documented in the available modules listed on the index page.
 
 The computer vision part of the application is available when importing the \a lcvcore module. The module contains the

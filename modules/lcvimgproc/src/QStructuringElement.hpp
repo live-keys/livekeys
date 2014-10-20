@@ -52,13 +52,14 @@ public:
     QMat* output() const;
     void setOutput(QMat* output);
 
-    void setOutputDirty();
-
 signals:
     void ksizeChanged();
     void shapeChanged();
     void anchorChanged();
     void outputChanged();
+
+private:
+    void setOutputDirty();
 
 private:
     ElementShape m_shape;

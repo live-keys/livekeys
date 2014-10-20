@@ -19,20 +19,18 @@
 
 QStateContainerManager* QStateContainerManager::m_instance = 0;
 
-
-/**
- * @brief Manages state containers and assures their deletion.
- *
- * @author Dinu SV
- * @version 1.0.0
- * @ingroup cpp_core
+/*!
+  \class QStateContainerManager
+  \brief Manages state containers and assures their deletion
+  \inmodule lcvlib_cpp
  */
 
-/**
- * @brief QStateContainerManager singleton instance
- * @param item
- * @param parent
- * @return
+/*!
+  \brief QStateContainerManager singleton instance.
+
+  Parameters:
+  \a item
+  \a parent
  */
 QStateContainerManager &QStateContainerManager::instance(QQuickItem *item, QObject* parent){
     if ( m_instance == 0 )
@@ -40,10 +38,12 @@ QStateContainerManager &QStateContainerManager::instance(QQuickItem *item, QObje
     return *m_instance;
 }
 
-/**
- * @brief QStateContainerManager constructor
- * @param item
- * @param parent
+/*!
+  \brief QStateContainerManager constructor
+
+  Parameters:
+  \a item
+  \a parent
  */
 QStateContainerManager::QStateContainerManager(QQuickItem *item, QObject *parent)
     : QObject(parent){
@@ -53,25 +53,27 @@ QStateContainerManager::QStateContainerManager(QQuickItem *item, QObject *parent
     connect(item, SIGNAL(windowChanged(QQuickWindow*)), SLOT(attachWindow(QQuickWindow*)));
 }
 
-/**
- * @brief Calls beforeCompile() on all of its children
+/*!
+  \brief Calls beforeCompile() on all of its children
  */
 void QStateContainerManager::beforeCompile(){
     for ( QLinkedList<QStateContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->beforeCompile();
 }
 
-/**
- * @brief Calls afterCompile() on all of its children
+/*!
+  \brief Calls afterCompile() on all of its children
  */
 void QStateContainerManager::afterCompile(){
     for ( QLinkedList<QStateContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->afterCompile();
 }
 
-/**
- * @brief Called when the gui initializes a window
- * @param window
+/*!
+  \brief Called when the gui initializes a window
+
+  Parameters:
+  \a window
  */
 void QStateContainerManager::attachWindow(QQuickWindow *window){
     if (window != 0){
@@ -86,8 +88,8 @@ void QStateContainerManager::attachWindow(QQuickWindow *window){
     }
 }
 
-/**
- * @brief QStateContainerManager destructor
+/*!
+  \brief QStateContainerManager destructor
  */
 QStateContainerManager::~QStateContainerManager(){
     for ( QLinkedList<QStateContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
@@ -95,24 +97,56 @@ QStateContainerManager::~QStateContainerManager(){
     m_stateContainerList.clear();
 }
 
-/**
- * @brief Register a state container to the manager.
- * @param container
+/*!
+  \brief Register a state container to the manager.
+
+  Parameters :
+  \a container
  */
 void QStateContainerManager::registerStateContainer(QStateContainerBase *container){
     m_stateContainerList.append(container);
 }
 
-/**
- * @brief Cleanup function.
+/*!
+  \brief Cleanup function.
  */
 void QStateContainerManager::cleanStateManager() {
     delete m_instance;
     m_instance = 0;
 }
 
-/**
- * @brief QStateContainerBase destructor
+/*!
+  \class QStateContainerBase
+  \brief Abstract state container type
+  \inmodule lcvlib_cpp
  */
+
+/*!
+  \fn QStateContainerBase::QStateContainerBase()
+  \brief QStateContainerBase constructor
+ */
+
+/*!
+  \fn QStateContainerBase::~QStateContainerBase()
+  \brief QStateContainerBase virtual destructor
+ */
+
 QStateContainerBase::QStateContainerBase(){
 }
+
+/*!
+  \fn virtual void QStateContainerBase::beforeCompile()
+  \brief Before compile method implementation.
+ */
+
+/*!
+  \fn virtual void QStateContainerBase::afterCompile()
+  \brief After compile method implementation.
+ */
+
+/*!
+  \class QStateContainer
+  \brief Actual state container implementation
+  \inmodule lcvlib_cpp
+ */
+

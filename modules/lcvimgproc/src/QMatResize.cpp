@@ -87,6 +87,34 @@ QMatResize::~QMatResize(){
   Interpolation method.
  */
 
+
+/*!
+  \qmlproperty enumeration Resize::Interpolation
+
+  Interpolation method:
+  \list
+  \li Resize.INTER_NEAREST nearest neighbor interpolation
+  \li Resize.INTER_LINEAR bilinear interpolation
+  \li Resize.INTER_CUBIC bicubic interpolation
+  \li Resize.INTER_AREA area-based (or super) interpolation
+  \li Resize.INTER_LANCZOS4 Lanczos interpolation over 8x8 neighborhood
+  \li Resize.INTER_MAX nearest neighbor interpolation
+  \li Resize.WARP_INVERSE_MAP nearest neighbor interpolation
+  \endlist
+ */
+
+/*!
+  \enum QMatResize::Interpolation
+
+  \value INTER_NEAREST
+  \value INTER_LINEAR
+  \value INTER_CUBIC
+  \value INTER_AREA
+  \value INTER_LANCZOS4
+  \value INTER_MAX
+  \value WARP_INVERSE_MAP
+ */
+
 /*!
   \brief Filtering function.
 

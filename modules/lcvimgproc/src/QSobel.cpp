@@ -27,7 +27,7 @@ using namespace cv;
   \inherits MatFilter
   \brief Calculates the first, second, third, or mixed image derivatives using an extended Sobel operator.
 
-  \quotefile imgproc/.qml
+  \quotefile imgproc/sobeloperator.qml
 */
 
 /*!
@@ -57,11 +57,11 @@ QSobel::~QSobel(){
 
 /*!
   \property QSobel::ddepth
-  \sa QSobel::ddepth
+  \sa Sobel::ddepth
  */
 
 /*!
-  \qmlproperty int QSobel::ddepth
+  \qmlproperty Mat::Type Sobel::ddepth
 
   Output image depth, the following combinations of input depth and ddepth are supproted:
 
@@ -70,7 +70,7 @@ QSobel::~QSobel(){
   \li input.depth = Mat.CV16U / Mat.CV16S, ddepth = -1 / Mat.CV32F / Mat.CV64F
   \li input.depth = Mat.CV32F, ddepth = -1 / Mat.CV32F / Mat.CV64F
   \li input.depth = Mat.64F, ddepth = -1 / Mat.CV64F
-  \listend
+  \endlist
 
   When ddepth = -1, the destination image will have the same depth as the source. In case of 8-bit
   input images, it will result in truncated derivatives
@@ -143,6 +143,16 @@ QSobel::~QSobel(){
   \sa CopyMakeBorder::BorderType
  */
 
+
+/*!
+  \fn virtual QSGNode* QSobel::updatePaintNode(QSGNode*, QQuickItem::UpdatePaintNodeData*)
+
+  \brief Updates the scene graph node with the drawn lines.
+
+  Parameters :
+  \a node
+  \a nodeData
+ */
 
 QSGNode *QSobel::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
     if ( output()->cvMat()->size() != Size(0, 0) )

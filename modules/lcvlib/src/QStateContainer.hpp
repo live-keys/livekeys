@@ -62,13 +62,6 @@ private:
 
 };
 
-/**
- * @brief Abstract state container type
- *
- * @author Dinu SV
- * @version 1.0.0
- * @ingroup cpp_core
- */
 class Q_LCV_EXPORT QStateContainerBase{
 
 public:
@@ -81,13 +74,6 @@ public:
 
 
 template<typename T>
-/**
- * @brief Actual state container implementation
- *
- * @author Dinu SV
- * @version 1.0.0
- * @ingroup cpp_core
- */
 class QStateContainer : public QStateContainerBase{
 
 public:

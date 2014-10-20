@@ -102,14 +102,24 @@ become available for use. So to set up this type of plugin, all we need is to se
 QtCreator offers a template project to build this type of plugin, so lets start from there. To keep this simple, we will
 create a plugin that counts the number of non-zero pixels within an image.
 
-Begin by creating a new project in QtCreator. Choose \b{Libraries} then {Qt Quick 2 Extension Plugin}. Set up the
-location, and put in the name "tutorial" as the project name. Next, select the compiler like you did in the previous
-section. The third step will ask you an object class-name, and an URI. Set up the  object class-name to be
-"CountNonZeroPixels", and \b{make sure you set the URI} to "plugins.tutorial" (or plugins.<module_name> in case you
-named the module differently). This will be required when you load the plugin from Live CV. Go to the last step and
-click Finish. You will notice a project with 2 classes set up. The first is the tutorial_plugin, with a hook method to
-register the types once the plugin loads, and the actual QtQuick item that will do the pixel counting. Now we need to
-set up Open CV and the Live CV API.
+Begin by creating a new project in QtCreator. Choose \b{Libraries} then {Qt Quick 2 Extension Plugin}.
+
+\image api_creating_1.png
+
+Set up the location, and put in the name "tutorial" as the project name.
+
+\image api_creating_2.png
+
+Next, select the compiler like you did in the previous section. The third step will ask you an object class-name, and an
+URI. Set up the  object class-name to be "CountNonZeroPixels", and \b{make sure you set the URI} to "plugins.tutorial"
+(or plugins.<module_name> in case you named the module differently).
+
+\image api_creating_3.png
+
+This will be required when you load the plugin from Live CV. Go to the last step and click Finish. You will notice a
+project with 2 classes set up. The first is the tutorial_plugin, with a hook method to register the types once the
+plugin loads, and the actual QtQuick item that will do the pixel counting. Now we need to set up Open CV and the Live CV
+API.
 
 To set up the API, include the \b{api/pro/lcv.pro} file from your Live CV installation directory into your tutorial.pro
 project file :

@@ -20,15 +20,14 @@ Row{
             file : root.imagePath
         }
         
-        HoughLinesP{
+        
+        HoughLines{
             input : cny.output
             width : sc.width
             height : sc.height
             rho : 0.5
             theta : Math.PI / 180
             threshold : 50
-            lineThickness : 2
-            lineColor : "#00ff00"
         }
     }
         

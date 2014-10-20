@@ -25,7 +25,7 @@ using namespace cv;
   \inherits MatFilter
   \brief
 
-  \quotefile imgproc/.qml
+  \quotefile imgproc/gaussianblur.qml
 */
 
 /*!

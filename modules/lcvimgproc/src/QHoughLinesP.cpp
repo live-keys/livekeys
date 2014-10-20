@@ -27,7 +27,7 @@ using namespace std;
   \inherits MatFilter
   \brief Finds line segments in a binary image using the probabilistic Hough transform.
 
-  \quotefile imgproc/.qml
+  \quotefile imgproc/houghlinesp.qml
 */
 
 /*!
@@ -105,7 +105,7 @@ QHoughLinesP::~QHoughLinesP(){
 /*!
   \qmlproperty int HoughLinesP::threshold
 
-  Accumulator threshold parameter. Only those lines are returned that get enough votes ( >\texttt{threshold} ).
+  Accumulator threshold parameter. Only those lines are returned that get enough votes ( > threshold ).
  */
 
 /*!
@@ -171,6 +171,17 @@ void QHoughLinesP::transform(cv::Mat &in, cv::Mat&){
     d->outDirty   = true;
 }
 
+/*!
+  \fn virtual QSGNode* QHoughLinesP::updatePaintNode(QSGNode*, UpdatePaintNodeData*)
+
+  \brief Updates the scene graph node with the generated lines.
+
+  Parameters :
+  \a node
+  \a nodeData
+ */
+
+
 QSGNode *QHoughLinesP::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
     Q_D(QHoughLinesP);
     if ( d->outDirty ){
@@ -179,7 +190,8 @@ QSGNode *QHoughLinesP::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNod
         surface->setTo(Scalar(0, 0, 0, 0));
         for( size_t i = 0; i < d->lines.size(); ++i ){
             line( *surface, Point(d->lines[i][0], d->lines[i][1]),
-                Point(d->lines[i][2], d->lines[i][3]), Scalar(m_lineColor.blue(), m_lineColor.green(), m_lineColor.red(), 255), m_lineThickness, 8 );
+                Point(d->lines[i][2], d->lines[i][3]),
+                Scalar(m_lineColor.blue(), m_lineColor.green(), m_lineColor.red(), 255), m_lineThickness, 8 );
         }
         d->outDirty = false;
     }

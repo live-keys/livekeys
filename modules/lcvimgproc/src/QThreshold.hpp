@@ -33,7 +33,6 @@ public:
         TRUNC       = 2,
         TOZERO      = 3,
         TOZERO_INV  = 4,
-        MASK        = 7,
         OTSU        = 8
     };
 

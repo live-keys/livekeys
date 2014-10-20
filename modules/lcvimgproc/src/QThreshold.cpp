@@ -55,6 +55,33 @@ QThreshold::~QThreshold()
 }
 
 /*!
+  \qmlproperty enumeration Threshold::Type
+
+  Extrapolation method border type:
+  \list
+  \li Threshold.BINARY if ( input(x, y) > thresh ) output(x, y) = maxVal; else output(x, y) = 0
+  \li Threshold.BINARY_INV if ( input(x, y) > thresh ) output(x, y) = 0; else output(x, y) = maxVal
+  \li Threshold.TRUNC if ( input(x, y) > thresh ) output(x, y) = threshold; else output(x, y) = input(x, y)
+  \li Threshold.TOZERO if ( input(x, y) > thresh ) output(x, y) = input(x, y); else output(x, y) = 0
+  \li Threshold.TOZERO_INV if ( input(x, y) > thresh ) output(x, y) = 0; else output(x, y) = input(x, y)
+  \li Threshold.OTSU The function determines the optimal threshold value using the Otsu’s algorithm and uses it instead
+   of the specified thresh
+  \endlist
+*/
+
+
+/*!
+  \enum QThreshold::Type
+
+  \value BINARY
+  \value BINARY_INV
+  \value TRUNC
+  \value TOZERO
+  \value TOZERO_INV
+  \value OTSU
+ */
+
+/*!
   \property QThreshold::thresh
   \sa Threshold::thresh
  */
@@ -66,23 +93,23 @@ QThreshold::~QThreshold()
  */
 
 /*!
-  \property QThreshold::maxval
-  \sa Threshold::maxval
+  \property QThreshold::maxVal
+  \sa Threshold::maxVal
  */
 
 /*!
-  \qmlproperty int Threshold::maxval
+  \qmlproperty int Threshold::maxVal
 
   Maximum value to use with the THRESH_BINARY and THRESH_BINARY_INV thresholding types.
  */
 
 /*!
-  \property QThreshold::type
-  \sa Threshold::type
+  \property QThreshold::thresholdType
+  \sa Threshold::thresholdType
  */
 
 /*!
-  \qmlproperty Threshold::Type Threshold::type
+  \qmlproperty Threshold::Type Threshold::thresholdType
 
   Maximum value to use with the THRESH_BINARY and THRESH_BINARY_INV thresholding types.
  */
