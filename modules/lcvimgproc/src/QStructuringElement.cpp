@@ -24,7 +24,7 @@ using namespace cv;
   \instantiates QStructuringElement
   \inqmlmodule lcvimgproc
   \inherits Item
-  \brief
+  \brief Creates a structuring element of the specified size and shape for morphological operations.
 
   \quotefile imgproc/erodedilate.qml
 */
@@ -32,7 +32,7 @@ using namespace cv;
 /*!
   \class QStructuringElement
   \inmodule lcvimgproc_cpp
-  \brief
+  \brief Creates a structuring element of the specified size and shape for morphological operations.
  */
 
 /*!

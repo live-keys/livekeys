@@ -23,7 +23,7 @@ using namespace cv;
   \instantiates QErode
   \inqmlmodule lcvimgproc
   \inherits MatFilter
-  \brief
+  \brief Dilates an image by using a specific structuring element.
 
   \quotefile imgproc/erodedilate.qml
 */
@@ -31,7 +31,7 @@ using namespace cv;
 /*!
   \class QErode
   \inmodule lcvimgproc_cpp
-  \brief
+  \brief Dilates an image by using a specific structuring element.
  */
 
 

@@ -2,6 +2,8 @@ import 'lcvcore' 1.0
 import "lcvimgproc" 1.0
 
 Grid{
+    // Calculate movement in a video.
+    
     property string videoPath : codeDocument.path + '/../_videos/amherst-11_2754_3754.avi'    
 
     columns : 2    

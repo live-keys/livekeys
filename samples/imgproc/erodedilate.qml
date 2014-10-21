@@ -3,8 +3,8 @@ import "lcvimgproc" 1.0
 
 Grid{
     
-    // This sample shows the usage of the Blur
-    // element
+    // This sample shows the usage of the erode
+    // and dilate elements
     
     columns: 2
     

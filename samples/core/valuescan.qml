@@ -4,6 +4,8 @@ import "lcvcontrols" 1.0
 
 Row{
     
+    // Scan values and set custom pixels
+    
     id : root
     
     property string imagePath : codeDocument.path + '/../_images/caltech_buildings_DSCN0246_small.JPG'

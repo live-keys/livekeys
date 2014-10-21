@@ -23,7 +23,7 @@ using namespace cv;
   \instantiates QDilate
   \inqmlmodule lcvimgproc
   \inherits MatFilter
-  \brief
+  \brief Erodes an image by using a specific structuring element.
 
   \quotefile imgproc/erodedilate.qml
 */
@@ -31,7 +31,7 @@ using namespace cv;
 /*!
   \class QDilate
   \inmodule lcvimgproc_cpp
-  \brief
+  \brief Erodes an image by using a specific structuring element.
  */
 
 /*!

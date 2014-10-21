@@ -31,6 +31,7 @@
 #include "QMatResize.hpp"
 #include "QDilate.hpp"
 #include "QErode.hpp"
+#include "QCopyMakeBorder.hpp"
 
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
@@ -48,6 +49,7 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QFilter2D>(           uri, 1, 0, "Filter2D");
     qmlRegisterType<QDilate>(             uri, 1, 0, "Dilate");
     qmlRegisterType<QErode>(              uri, 1, 0, "Erode");
+    qmlRegisterType<QCopyMakeBorder>(     uri, 1, 0, "CopyMakeBorder");
 }
 
 

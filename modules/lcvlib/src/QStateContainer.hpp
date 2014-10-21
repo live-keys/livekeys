@@ -21,7 +21,7 @@
 #include <QMap>
 #include <QLinkedList>
 
-#define QSTATE_CONTAINER_DEBUG_FLAG
+//#define QSTATE_CONTAINER_DEBUG_FLAG
 #ifdef QSTATE_CONTAINER_DEBUG_FLAG
 #define QSTATE_CONTAINER_DEBUG(_param) qDebug() << (_param)
 #else

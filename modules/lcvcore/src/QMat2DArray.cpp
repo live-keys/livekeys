@@ -27,7 +27,7 @@ using namespace cv;
 
   Usage available under \b{samples/core/mat2darray.qml}
 
-  \quotefile core/camcapture.qml
+  \quotefile core/mat2darray.qml
 */
 
 /*!

@@ -25,7 +25,7 @@ using namespace cv;
   \inherits MatFilter
   \brief Converts an image with the specified kernel
 
-  \quotefile imgproc/.qml
+  \quotefile imgproc/filter2D.qml
 */
 
 /*!

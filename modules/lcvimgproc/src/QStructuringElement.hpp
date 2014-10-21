@@ -89,6 +89,7 @@ inline void QStructuringElement::setAnchor(const QPoint& anchor){
 	if (m_anchor != anchor){
 		m_anchor = anchor;
         emit anchorChanged();
+        setOutputDirty();
 	}
 }
 
@@ -100,6 +101,7 @@ inline void QStructuringElement::setKsize(const QSize& ksize){
     if (m_ksize != ksize){
         m_ksize = ksize;
         emit ksizeChanged();
+        setOutputDirty();
 	}
 }
 
@@ -111,6 +113,7 @@ inline void QStructuringElement::setShape(ElementShape shape){
 	if (m_shape != shape){
 		m_shape = shape;
 		emit shapeChanged();
+        setOutputDirty();
 	}
 }
 

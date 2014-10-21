@@ -4,6 +4,7 @@ import 'lcvimgproc' 1.0
 Column{
     
     // This sample shows how to resize an image
+    // matrix
     
     id : root
     

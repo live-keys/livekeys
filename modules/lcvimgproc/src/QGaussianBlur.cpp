@@ -23,7 +23,7 @@ using namespace cv;
   \instantiates QGaussianBlur
   \inqmlmodule lcvimgproc
   \inherits MatFilter
-  \brief
+  \brief Blurs an image using a Gaussian filter.
 
   \quotefile imgproc/gaussianblur.qml
 */
@@ -31,7 +31,7 @@ using namespace cv;
 /*!
   \class QGaussianBlur
   \inmodule lcvimgproc_cpp
-  \brief
+  \brief Blurs an image using a Gaussian filter.
  */
 
 /*!

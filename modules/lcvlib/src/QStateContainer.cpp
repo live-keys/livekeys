@@ -150,3 +150,48 @@ QStateContainerBase::QStateContainerBase(){
   \inmodule lcvlib_cpp
  */
 
+/*!
+  \fn QStateContainer::QStateContainer(QQuickItem* item)
+  \brief QStateContainer constructor
+ */
+
+/*!
+  \fn QStateContainer::~QStateContainer()
+  \brief QStateContainer constructor
+ */
+
+/*!
+  \fn QStateContainer& QStateContainer::instance(QQuickItem* item)
+
+  \brief QStateContainer singleton instance getter.
+
+  Parameters :
+  \a item
+ */
+
+/*!
+  \fn virtual void QStateContainer::beforeCompile()
+  \brief Before compile method implementation.
+ */
+
+/*!
+  \fn virtual void QStateContainer::afterCompile()
+  \brief After compile method implementation.
+ */
+
+/*!
+  \fn virtual void QStateContainer::registerState(const QString& key, T* state)
+  \brief Registers an objects state.
+
+  Parameters:
+  \a key
+  \a state
+ */
+
+/*!
+  \fn virtual void QStateContainer::state(const QString& key)
+  \brief Retrieves an objects state. Returns 0 if none was found with that key.
+
+  Parameters:
+  \a key
+ */
