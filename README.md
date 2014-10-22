@@ -3,6 +3,7 @@
 **Live Computer Vision Coding Environment**
 
 Website : http://livecv.dinusv.com
+Version : 1.0.0-beta
 
 Live CV is a computer vision coding environment that displays results in real time. It can be used to interact, link and adjust algorithms in order to create quick solutions within it's domain. 
 
