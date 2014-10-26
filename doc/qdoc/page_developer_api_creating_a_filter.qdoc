@@ -5,18 +5,15 @@
 \indexpage Index
 \title Creating a filter
 
-In the \l{Configuration. A simple example}{previous section} I've discussed how to configure and create a simple QML
-item that counts the number of non-zero pixels within a matrix. Within this section I will explain the easiest way to
-display a QMat element on screen, and also how to create a filter with \b{input to output} processing.
+In the \l{Configuration. A simple example}{previous section} I've described the process of configuring and creating
+a simple QML item using the Live CV API. Within this next part, I will explain the easiest way to display a processed
+matrix on screen and how to create a filter which does \b{input to output} processing.
 
-A QML item containing a matrix you would like to display on Live CVs canvas, for example an item that opens
-a new image, or changes an existing one, is easily achievable by inheriting \l{QMatDisplay}{QMatDisplays}
-functionality. The QMatDisplay class is actually a QQuickItem that handles the display of a QMat property called
-\b{output}, so this means that by simply setting or working with the output property of QMatDisplay, you would gain
-the ability to display the QMat element on Live CV's canvas.
-
-In addition to QMatDisplays functionality, the QMatFilter implementation adds an \b{input} property and a virtual
-function that would be implement the actual filtering code.
+A QML item with a displayable matrix property, like an item that contains an image opened from the hard drive, or an
+item that processes an already opened or created one, internally, is an item that inherits \l{QMatDisplay}{QMatDisplays}
+functionality. QMatDisplay is actually an implementation of QQuickItem that contains a displayable QMat property
+called \b{output}. All items that inherit QMatDisplay can work with this property in order to display their processed
+result.
 
 For example, the \l{QMatEmpty}{QMatEmpty} class works directly with the output property. Here's a snippet from its
 setType method for the \l{QMatEmpty::type}{type} property:
@@ -34,13 +31,15 @@ inline void QMatEmpty::setType(QMat::Type type){
 }
 \endcode
 
-After the type is set, the output element gets recreated and an update is called to display the element on screen.
+After the type is set, the output element is recreated and an update is called to display the element on screen.
+
+In addition to QMatDisplay's functionality, the QMatFilter implementation adds an \b{input} property and a function that
+would be implement the actual filtering code.
 
 \section1 A filter example.
 
-To simplify the implementation of a filter, the previously mentioned QMatFilter class adds a
-\l{QMatFilter}{transform} function to handle the actual filtering. So, with that in mind, here's how you can implement a
-simple filter that transforms a 3 channel BGR image into a gray one :
+The following example shows a simple filter that converts an image to grayscale. We leave the actual assertions to Open
+Cv, and the error handling to layers above the transform function.
 
 \code
 #include "QMatFilter.hpp"
@@ -61,17 +60,17 @@ public:
 \endcode
 
 The transform function gets called whenever the \l{QMatFilter::input}{QMatFilter::input} element changes. The output
-property is signaled autmatically after the transform function is finished processing.
+property changes are signaled automatically after the transform function is finished processing.
 
 \section1 Implementing a parameter based filter.
 
-For Open CV functions that have more parameters rather than a single input and output, we need to add them as properties
-to the actual Item. Every time the property changes, we have to signal the QMatFilter that a transformation is required.
+For Open CV functions that have more parameters rather than a single input and output, we need to consider them as item
+properties. Every time the property changes, we have to signal the QMatFilter that a transformation is required.
 
-I've selected the addWeighted function from Open CV in order to show how would the function be transformed into a QML
-property:
+For this example, I've selected the addWeighted function from Open CV in order to show how would the function be
+transformed into a QML property:
 
-The addWeighted function has the following paramters :
+The addWeighted function has the following parameters :
 
 \list
 \li \b{src1}  – First input array.
@@ -82,7 +81,7 @@ The addWeighted function has the following paramters :
 \li \b{gamma} – Scalar added to each sum.
 \endlist
 
-I have removed the depth (dtype) paramter, since I want to emphasize the actual filter implementation and shorten the
+I have removed the depth (dtype) parameter, since I want to emphasize the actual filter implementation and shorten the
 details. Now, \b{src1} and \b{dst} will be the actual input and output properties, so we need to add the \b{src2} as
 another QMat property, and also the \b{alpha}, \b{beta} and \b{gamma} as real type properties.
 
@@ -243,9 +242,10 @@ Two things to notice is that besides emitting the notifier when the value change
 transform() function in turn will call my implemented transform(cv::Mat& in, cv::Mat& out) function. The next thing to
 notice is the m_input2Internal field, which is used to later delete the m_input2 matrix. To avoid checking for null
 matrixes all the time when handling value changes and transformations, I create a new matrix at m_input2 when I
-initialize my object. This avoids null pointers within the QML program as well.
+initialize my object and keep the reference for further deletion. This avoids null pointers within the QML program as
+well.
 
-The final touch is to register the AddWeighted type to QML in TutorialPlugin::resiterTypes :
+The final touch is to register the AddWeighted type to QML in TutorialPlugin::registerTypes :
 
 \code
 #include "tutorial_plugin.hpp"
@@ -262,8 +262,8 @@ void TutorialPlugin::registerTypes(const char *uri)
 }
 \endcode
 
-Compile the code, and place the generated dll into Live CV's plugins/tutorial directory. You can use the following
-test program to test out the filter:
+Compile the code, and place the generated dll/so file into Live CV's plugins/tutorial directory. You can use the
+following test program to test out the filter:
 
 \code
 import 'lcvcore' 1.0
@@ -300,7 +300,7 @@ Grid{
 }
 \endcode
 
-The image below shows the end result on creating the filter :
+The image below shows the result :
 
 \image api_filter.png
 

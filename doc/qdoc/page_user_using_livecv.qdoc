@@ -70,11 +70,6 @@ As for the computer vision part, it is available under a set of pluginable modul
 through examples you can try out and edit in the \b{samples} directory of your Live CV installation, and the rest are
 documented in the available modules listed on the index page.
 
-The computer vision part of the application is available when importing the \a lcvcore module. The module contains the
-core elements required for computer vision coding. Most of them are available through examples you can try out and edit
-in the \b{samples} directory of your Live CV installation, and the rest are documented in the modules section of the
-\l{index}{index} page. You can try them out or implement your own.
-
 Don't forget that most of the elements are in fact wrappers for Open CV functions and share the same name,
 so if you need more information you can always check the Open CV documentation for that.
 

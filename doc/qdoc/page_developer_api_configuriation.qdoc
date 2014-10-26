@@ -75,7 +75,7 @@ Press CTRL-R and you should see a window with a green background.
 So this was just a short tutorial on linking Open CV with Qt and Visual Studio. If any problems arise, you can always
 check with Open CV or Qts website for a more detailed approach.
 
-If you have these things working properly, you can go to the section
+If you have these things working properly, you can go to the next section.
 
 
 \section2 Configuration on windows with Mingw.
@@ -116,10 +116,10 @@ URI. Set up the  object class-name to be "CountNonZeroPixels", and \b{make sure 
 
 \image api_creating_3.png
 
-This will be required when you load the plugin from Live CV. Go to the last step and click Finish. You will notice a
-project with 2 classes set up. The first is the tutorial_plugin, with a hook method to register the types once the
-plugin loads, and the actual QtQuick item that will do the pixel counting. Now we need to set up Open CV and the Live CV
-API.
+This path will be required by Live CV when it loads the plugin. From here go to the last step and click Finish. You will
+notice a project with 2 c++ classes set up. The first one is the tutorial_plugin class, which contains a hook method to
+register all the plugin types or QML items once the plugin loads, and the actual QtQuick item that will do the pixel
+counting. Now we need to set up Open CV and the Live CV API for this plugin.
 
 To set up the API, include the \b{api/pro/lcv.pro} file from your Live CV installation directory into your tutorial.pro
 project file :
@@ -141,37 +141,45 @@ include(<LIVE_CV_INSTALLATION_DIRECTORY>/api/pro/lcv.pro)
 If your on windows, you're going to have to set up Open CV paths as well before you include the lcv.pro file :
 
 \code
-# PATH_OPENCV_INCLUDE   : Path to opencv include directory ( Example : C:/opencv/build/include )
+#tutorial.pro
 
+EMPLATE = lib
+TARGET = tutorial
+QT += qml quick
+CONFIG += qt plugin
+
+TARGET = $$qtLibraryTarget($$TARGET)
+uri = plugins.tutorial
+
+# PATH_OPENCV_INCLUDE   : Path to opencv include directory ( Example : C:/opencv/build/include )
 PATH_OPENCV_INCLUDE   = C:/opencv/build/include
 
 # PATH_OPENCV_LIBRARIES : Path to opencv libraries directory ( Example : C:/opencv/build/x64/vc11/lib )
-
 PATH_OPENCV_LIBRARIES = C:/opencv/build/x64/vc12/lib
 
 # VERSION_OPENCV        : Version of opencv used
-
 VERSION_OPENCV        = 249
+
+include(<LIVE_CV_INSTALLATION_DIRECTORY>/api/pro/lcv.pro)
 \endcode
 
-The API adds extra items that make the actual link between Open CV and Qt, like for example the QMat element which
-we will be using. So now that we have that included, we can start working on the actual CountNonZeroPixels item.
-We're going to need to set up an input matrix, and an output value of the number of pixels, so we'll need the following
-2 properties:
+The API adds extra items that make the actual link between Open CV and Qt, like for example the QMat element which is a
+wrapper for cv::Mat. Now that we have the project configured, we can start working on the actual CountNonZeroPixels
+item. We're going to need to set up an input matrix, and an output value of the number of pixels, so we'll need the
+following 2 properties:
 
 \code
 Q_PROPERTY(QMat* input         READ input         WRITE setInput         NOTIFY inputChanged)
 Q_PROPERTY(int   nonZeroPixels READ nonZeroPixels NOTIFY nonZeroPixelsChanged)
 \endcode
 
-We also need to include the QMat element at the beginning.
+The QMat element requires us to include the QMat file at the beginning :
 
 \code
 #include <QMat>
 \endcode
 
-After that, we need just have to add the 2 fields, setters, getters and notifiers. The final version will look like
-this :
+Last, we need to add the 2 fields, setters, getters and notifiers, and we have the final version looking like this:
 
 \code
 #include <QQuickItem>
@@ -218,15 +226,15 @@ inline void CountNonZeroPixels::setInput(QMat* input){
 }
 \endcode
 
-In the setInput method, we also calculate the non zero pixels using the cv::CountNonZero method from Open CV. To
+In the setInput method, we calculate the non zero pixels using the cv::CountNonZero method from Open CV. To
 retrieve the actual cv::Mat contents of a QMat, we use the cvMat() getter, which retrieves a pointer to a cv::Mat
 object.
 
-So that's it for the configuration and code part, now we need to build the library and copy it to Live CV.
-Press CTRL-B in QtCreator to build the lib. Go to the \b{plugins} directory in Live CVs installation path, and create
-a directory called "tutorial". Copy the generated lib, together with the \b{qmldir} file, which you can find either
-where your library was built, or in the source directory. You're going to have a structure similar to the other plugins
-found in that directory. Run livecv.exe, and use the following code to test your plugin:
+We can now build the library and link it with Live CV. Press \b{CTRL + B} in QtCreator to build the lib. Go to the
+\b{plugins} directory in Live CVs installation path, and create a directory called "tutorial". Copy the generated lib,
+together with the \b{qmldir} file, which you can find either where your library was built, or in the source directory.
+You're going to have a structure similar to the other plugins found in that directory. Run livecv.exe, and use the
+following code to test your plugin:
 
 \code
 import 'lcvcore' 1.0
@@ -265,7 +273,8 @@ Grid{
 \endcode
 
 Configure the imagePath property to open an image on your hard drive. If you see a text just below your image with
-a large number, then you have succesfully created a Live CV plugin.
+a large number, then you have succesfully created a Live CV plugin that counts the number of non zero pixels in an
+image.
 
 */
 

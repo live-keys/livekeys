@@ -33,8 +33,8 @@ a key associated with the decoder. Keep in mind that this key needs to be \b{con
 needs to be given by the user. Sometimes the key itself can be retrieved from one of the variables already given,
 for example, the VideoPlayer has the file path associated with it for playback, hence the VideoDecoder would have the
 same path, and can be stored within the state container under the file-path key. In other cases it is not possible,
-like for example when using optical flow, the user is required to give the key manually. In this case, when the optical
-flow object needs to have a property exclusively for this purpose, which in my scenarios I call the \b{stateId}.
+like for example when using optical flow, the user is required to give the key manually. In this case, the optical flow
+object needs to have a property exclusively for this purpose, which in my scenarios I call the \b{stateId}.
 
 \section1 State Object example
 
