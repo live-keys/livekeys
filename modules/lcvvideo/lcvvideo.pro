@@ -21,14 +21,15 @@ DEPENDPATH  += $$PWD/../lcvlib/src
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lcvlib/release/ -llcvlib
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lcvlib/debug/ -llcvlib
-else:unix: LIBS += -L$$OUT_PWD/../lcvlib/ -llcvlib
+else:unix: LIBS += -L$$OUT_PWD/../application/ -llcvlib
 
-CONFIG(debug, debug|release){
-        DESTDIR = $$quote(debug/../../application/debug/plugins/lcvvideo)
-}
-CONFIG(release, debug|release){
-        DESTDIR = $$quote(release/../../application/release/plugins/lcvvideo)
-}
+
+# Destination
+
+win32:CONFIG(debug, debug|release): DESTDIR = $$quote($$OUT_PWD/../application/debug/plugins/lcvvideo)
+else:win32:CONFIG(release, debug|release): DESTDIR = $$quote($$OUT_PWD/../application/release/plugins/lcvvideo)
+else:unix: DESTDIR = $$quote($$OUT_PWD/../application/plugins/lcvvideo)
+
 
 !equals(_PRO_FILE_PWD_, $$OUT_PWD) {
     copy_qmldir.target = $$DESTDIR/qmldir

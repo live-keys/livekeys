@@ -25,10 +25,13 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QLibrary>
 
 int main(int argc, char *argv[]){
 
     QGuiApplication app(argc, argv);
+
+    QLibrary(QCoreApplication::applicationDirPath() + "/lcvlib").load();
 
     qInstallMessageHandler(&QLiveCVLog::logFunction);
 

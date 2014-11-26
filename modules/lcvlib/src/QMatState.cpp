@@ -25,11 +25,11 @@
 /*!
   \brief QMatState constructor.
  */
-QMatState::QMatState():
-    mat(0),
-    textureIndex(-1),
-    textureSync(false),
-    linearFilter(true)
+QMatState::QMatState()
+    : mat(0)
+    , linearFilter(true)
+    , textureIndex(-1)
+    , textureSync(false)
 {
 }
 

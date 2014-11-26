@@ -276,12 +276,12 @@ void QCodeJSHighlighter::highlightBlock(const QString &text){
 
     // parsing state
     enum States{
-        Start      = 0,
-        Number     = 1,
-        Identifier = 2,
-        String     = 3,
-        Comment    = 4,
-        Regex      = 5
+        StateStart      = 0,
+        StateNumber     = 1,
+        StateIdentifier = 2,
+        StateString     = 3,
+        StateComment    = 4,
+        StateRegex      = 5
     };
 
     QList<int> bracketPositions;
@@ -290,7 +290,7 @@ void QCodeJSHighlighter::highlightBlock(const QString &text){
     int state        = blockState & 15;
     if (blockState < 0) {
         bracketLevel = 0;
-        state = Start;
+        state = StateStart;
     }
     int start = 0;
     int i     = 0;
@@ -299,29 +299,29 @@ void QCodeJSHighlighter::highlightBlock(const QString &text){
         QChar ch   = (i < text.length())     ? text.at(i) : QChar();
         QChar next = (i < text.length() - 1) ? text.at(i + 1) : QChar();
         switch (state) {
-        case Start:
+        case StateStart:
             start = i;
             if (ch.isSpace()) {
                 ++i;
             } else if (ch.isDigit()) {
                 ++i;
-                state = Number;
+                state = StateNumber;
             } else if (ch.isLetter() || ch == '_') {
                 ++i;
-                state = Identifier;
+                state = StateIdentifier;
             } else if (ch == '\'' || ch == '\"') {
                 ++i;
-                state = String;
+                state = StateString;
             } else if (ch == '/' && next == '*') {
                 ++i;
                 ++i;
-                state = Comment;
+                state = StateComment;
             } else if (ch == '/' && next == '/') {
                 i = text.length();
-                setFormat(start, text.length(), m_colors[ColorComponent::Comment]);
+                setFormat(start, text.length(), m_colors[Comment]);
             } else if (ch == '/' && next != '*') {
                 ++i;
-                state = Regex;
+                state = StateRegex;
             } else {
 
                 if (!QString("(){}[]").contains(ch))
@@ -335,39 +335,39 @@ void QCodeJSHighlighter::highlightBlock(const QString &text){
                         bracketLevel--;
                 }
                 ++i;
-                state = Start;
+                state = StateStart;
             }
             break;
 
-        case Number:
+        case StateNumber:
             if (ch.isSpace() || !ch.isDigit()) {
-                setFormat(start, i - start, m_colors[ColorComponent::Number]);
-                state = Start;
+                setFormat(start, i - start, m_colors[Number]);
+                state = StateStart;
             } else {
                 ++i;
             }
             break;
 
-        case Identifier:
+        case StateIdentifier:
             if (ch.isSpace() || !(ch.isDigit() || ch.isLetter() || ch == '_')) {
                 QString token = text.mid(start, i - start).trimmed();
                 if (m_keywords.contains(token))
                     setFormat(start, i - start, m_colors[Keyword]);
                 else if (m_knownIds.contains(token))
                     setFormat(start, i - start, m_colors[BuiltIn]);
-                state = Start;
+                state = StateStart;
             } else {
                 ++i;
             }
             break;
 
-        case String:
+        case StateString:
             if (ch == text.at(start)) {
                 QChar prev = (i > 0) ? text.at(i - 1) : QChar();
                 if (prev != '\\') {
                     ++i;
-                    setFormat(start, i - start, m_colors[ColorComponent::String]);
-                    state = Start;
+                    setFormat(start, i - start, m_colors[String]);
+                    state = StateStart;
                 } else {
                     ++i;
                 }
@@ -376,24 +376,24 @@ void QCodeJSHighlighter::highlightBlock(const QString &text){
             }
             break;
 
-        case Comment:
+        case StateComment:
             if (ch == '*' && next == '/') {
                 ++i;
                 ++i;
-                setFormat(start, i - start, m_colors[ColorComponent::Comment]);
-                state = Start;
+                setFormat(start, i - start, m_colors[Comment]);
+                state = StateStart;
             } else {
                 ++i;
             }
             break;
 
-        case Regex:
+        case StateRegex:
             if (ch == '/') {
                 QChar prev = (i > 0) ? text.at(i - 1) : QChar();
                 if (prev != '\\') {
                     ++i;
-                    setFormat(start, i - start, m_colors[ColorComponent::String]);
-                    state = Start;
+                    setFormat(start, i - start, m_colors[String]);
+                    state = StateStart;
                 } else {
                     ++i;
                 }
@@ -403,15 +403,15 @@ void QCodeJSHighlighter::highlightBlock(const QString &text){
             break;
 
         default:
-            state = Start;
+            state = StateStart;
             break;
         }
     }
 
-    if (state == Comment)
-        setFormat(start, text.length(), m_colors[ColorComponent::Comment]);
+    if (state == StateComment)
+        setFormat(start, text.length(), m_colors[Comment]);
     else
-        state = Start;
+        state = StateStart;
 
     if (!m_markString.isEmpty()) {
         int pos = 0;

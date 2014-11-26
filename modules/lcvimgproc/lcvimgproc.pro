@@ -6,7 +6,7 @@ CONFIG  += qt plugin
 TARGET = $$qtLibraryTarget($$TARGET)
 uri = plugins.lcvcore
 
-OTHER_FILES = qmldir
+#OTHER_FILES = qmldir
 
 DEFINES += Q_LCV
 
@@ -21,14 +21,14 @@ DEPENDPATH  += $$PWD/../lcvlib/src
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lcvlib/release/ -llcvlib
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lcvlib/debug/ -llcvlib
-else:unix: LIBS += -L$$OUT_PWD/../lcvlib/ -llcvlib
+else:unix: LIBS += -L$$OUT_PWD/../application/ -llcvlib
 
-CONFIG(debug, debug|release){
-	DESTDIR = $$quote(debug/../../application/debug/plugins/lcvimgproc)
-}
-CONFIG(release, debug|release){
-	DESTDIR = $$quote(release/../../application/release/plugins/lcvimgproc)
-}
+# Destination
+
+win32:CONFIG(debug, debug|release): DESTDIR = $$quote($$OUT_PWD/../application/debug/plugins/lcvimgproc)
+else:win32:CONFIG(release, debug|release): DESTDIR = $$quote($$OUT_PWD/../application/release/plugins/lcvimgproc)
+else:unix: DESTDIR = $$quote($$OUT_PWD/../application/plugins/lcvimgproc)
+
 
 !equals(_PRO_FILE_PWD_, $$OUT_PWD) {
     copy_qmldir.target = $$DESTDIR/qmldir

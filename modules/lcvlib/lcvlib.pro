@@ -8,12 +8,11 @@ OTHER_FILES = qmldir
 DEFINES += Q_LCV
 DEFINES += Q_LCV_LIB
 
-CONFIG(debug, debug|release) {
-    DLLDESTDIR += $$quote(debug/../../application/debug)
-}
-CONFIG(release, debug|release) {
-    DLLDESTDIR += $$quote(release/../../application/release)
-}
+# Destination
+
+win32:CONFIG(debug, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../application/debug)
+else:win32:CONFIG(release, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../application/release)
+else:unix: TARGET = $$quote($$OUT_PWD/../application/lcvlib)
 
 include($$PWD/src/lcvlib.pri)
 include($$PWD/../../config.pro)
