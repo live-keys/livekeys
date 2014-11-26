@@ -128,7 +128,7 @@ template<typename T> void QStateContainer<T>::registerState(const QString &key, 
  * @return The found state on success. False otherwise.
  */
 template<typename T> T *QStateContainer<T>::state(const QString &key){
-    QMap<QString, T*>::iterator it = m_states.find(key);
+    typename QMap<QString, T*>::iterator it = m_states.find(key);
     if ( it != m_states.end() ){
         m_statesActive[it.key()] = true;
         QSTATE_CONTAINER_DEBUG(QString("Key activated : ") + key);
@@ -186,7 +186,7 @@ template<typename T> QStateContainer<T>::QStateContainer(QQuickItem* item)
  * @brief QStateContainer destructor
  */
 template<typename T> QStateContainer<T>::~QStateContainer(){
-    for ( QMap<QString, T*>::iterator it = m_states.begin(); it != m_states.end(); ++it )
+    for ( typename QMap<QString, T*>::iterator it = m_states.begin(); it != m_states.end(); ++it )
         delete it.value();
     m_states.clear();
     m_statesActive.clear();

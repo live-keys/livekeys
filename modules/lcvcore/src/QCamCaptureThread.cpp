@@ -20,6 +20,7 @@
 #include "opencv2/video/video.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
+#include <QMutex>
 #include <QTimer>
 #include <QReadWriteLock>
 #include <QWaitCondition>

@@ -59,10 +59,10 @@ QVideoCapture::QVideoCapture(QQuickItem *parent) :
     QQuickItem(parent),
     m_file(""),
     m_fps(0),
-    m_thread(0),
     m_output(new QMat()),
     m_linearFilter(true),
-    m_loop(false)
+    m_loop(false),
+    m_thread(0)
 {
     m_restore = output();
     setFlag(ItemHasContents, true);

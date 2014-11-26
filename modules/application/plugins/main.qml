@@ -214,6 +214,7 @@ Rectangle {
                     width: parent.width
                     font.pointSize: 25 * editor.fontScale
                     text: ""
+                    onTextChanged : console.log(text)
                     color: "#c5d0d7"
                 }
             }
