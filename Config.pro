@@ -16,8 +16,8 @@ win32{
 #                         or release mode.
 
         PATH_OPENCV_INCLUDE   = $$PWD/opencv/build/include
-        PATH_OPENCV_LIBRARIES = $$PWD/opencv/build/x64/vc12/lib
-        PATH_OPENCV_DLLS      = $$PWD/opencv/build/x64/vc12/bin
+        PATH_OPENCV_LIBRARIES = $$PWD/opencv/build/x86/vc12/lib
+        PATH_OPENCV_DLLS      = $$PWD/opencv/build/x86/vc12/bin
         VERSION_OPENCV        = 249
 
 
