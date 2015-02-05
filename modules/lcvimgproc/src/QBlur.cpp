@@ -44,8 +44,8 @@ using namespace cv;
  */
 QBlur::QBlur(QQuickItem *parent)
     : QMatFilter(parent)
-    , m_anchor(QPoint(-1, -1))
     , m_borderType(BORDER_DEFAULT)
+    , m_anchor(QPoint(-1, -1))
 {
 }
 

@@ -20,6 +20,7 @@
 #include "opencv2/video/video.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
+#include <QMutex>
 #include <QTime>
 #include <QTimer>
 #include <QReadWriteLock>
@@ -68,9 +69,9 @@ QVideoCaptureThread::QVideoCaptureThread(const QString &file, QObject *parent) :
     m_paused(false),
     m_framePos(0),
     m_totalFrames(0),
-    m_activeMat(new QMat),
     m_isSeeking(false),
     m_forceSeek(false),
+    m_activeMat(new QMat),
     d_ptr(new QVideoCaptureThreadPrivate)
 {
     Q_D(QVideoCaptureThread);
