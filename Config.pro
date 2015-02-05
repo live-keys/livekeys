@@ -15,11 +15,10 @@ win32{
 #                         If you're using visual studio, you can set up opencv version according to debug
 #                         or release mode.
 
-        PATH_OPENCV_INCLUDE   = $$PWD/opencv/build/include
-        PATH_OPENCV_LIBRARIES = $$PWD/opencv/build/x64/vc12/lib
-        PATH_OPENCV_DLLS      = $$PWD/opencv/build/x64/vc12/bin
-        VERSION_OPENCV        = 249
-
+        PATH_OPENCV_INCLUDE   = $$(OPENCV_DIR)/../../include
+        PATH_OPENCV_LIBRARIES = $$(OPENCV_DIR)/lib
+        PATH_OPENCV_DLLS      = $$(OPENCV_DIR)/bin
+        VERSION_OPENCV        = 2410
 
         CONFIG(debug, debug|release){
             VERSION_OPENCV    = $${VERSION_OPENCV}d
