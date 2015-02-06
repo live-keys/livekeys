@@ -1,11 +1,11 @@
 /*!
-  \qmlmodule lcvvideo
+  \qmlmodule lcvfeatures2d
 
-  \title Live CV QML Video
+  \title Live CV QML Features 2D
 
-  This module contains elements for motion analysis and object tracking. It resembles open cv's video module.
+  This module contains elements for feature detection and matching. It resembles open cv's features 2D module.
 
   \code
-  import "lcvvideo" 1.0
+  import "lcvfeatures2d" 1.0
   \endcode
 */

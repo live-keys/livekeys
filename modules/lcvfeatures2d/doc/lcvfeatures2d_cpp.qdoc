@@ -1,11 +1,11 @@
 /*!
 
-  \module lcvvideo_cpp
+  \module lcvfeatures2d_cpp
 
-  \title Live CV Video
+  \title Live CV Features 2D
 
-  \brief This module contains the cpp implementation of Live CV's video analysis module.
+  \brief This module contains the cpp implementation of Live CV's feature detection module.
 
-  \sa lcvvideo
+  \sa lcvfeatures2d
 
 */
