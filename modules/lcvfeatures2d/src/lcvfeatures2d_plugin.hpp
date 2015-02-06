@@ -14,14 +14,19 @@
 **
 ****************************************************************************/
 
-#include "lcvvideo_plugin.hpp"
+#ifndef LCVFEATURES2D_PLUGIN_H
+#define LCVFEATURES2D_PLUGIN_H
 
-#include <qqml.h>
-#include "QCalcOpticalFlowPyrLK.hpp"
+#include <QQmlExtensionPlugin>
 
-void LcvvideoPlugin::registerTypes(const char *uri){
-    // @uri modules.lcvvideo
-    qmlRegisterType<QCalcOpticalFlowPyrLK>( uri, 1, 0, "CalcOpticalFlowPyrLK");
-}
+class Lcvfeatures2dPlugin : public QQmlExtensionPlugin{
 
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
+
+public:
+    void registerTypes(const char *uri);
+};
+
+#endif // LCVFEATURES2D_PLUGIN_H
 
