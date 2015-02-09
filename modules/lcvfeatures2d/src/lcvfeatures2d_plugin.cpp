@@ -15,12 +15,17 @@
 ****************************************************************************/
 
 #include "lcvfeatures2d_plugin.hpp"
+#include "QKeyPointVector.hpp"
+#include "QFeatureDetector.hpp"
+#include "QFastFeatureDetector.hpp"
 
 #include <qqml.h>
 
 void Lcvfeatures2dPlugin::registerTypes(const char *uri){
     // @uri modules.lcvfeatures2d
-    //qmlRegisterType<QCalcOpticalFlowPyrLK>( uri, 1, 0, "CalcOpticalFlowPyrLK");
+    qmlRegisterType<QKeyPointVector>(     uri, 1, 0, "KeyPointVector");
+    qmlRegisterType<QFeatureDetector>(    uri, 1, 0, "FeatureDetector");
+    qmlRegisterType<QFastFeatureDetector>(uri, 1, 0, "FastFeatureDetector");
 }
 
 
