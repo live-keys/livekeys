@@ -18,14 +18,18 @@
 #include "QKeyPointVector.hpp"
 #include "QFeatureDetector.hpp"
 #include "QFastFeatureDetector.hpp"
+#include "QDescriptorExtractor.hpp"
+#include "QBriefDescriptorExtractor.hpp"
 
 #include <qqml.h>
 
 void Lcvfeatures2dPlugin::registerTypes(const char *uri){
     // @uri modules.lcvfeatures2d
-    qmlRegisterType<QKeyPointVector>(     uri, 1, 0, "KeyPointVector");
-    qmlRegisterType<QFeatureDetector>(    uri, 1, 0, "FeatureDetector");
-    qmlRegisterType<QFastFeatureDetector>(uri, 1, 0, "FastFeatureDetector");
+    qmlRegisterType<QKeyPointVector>(          uri, 1, 0, "KeyPointVector");
+    qmlRegisterType<QFeatureDetector>(         uri, 1, 0, "FeatureDetector");
+    qmlRegisterType<QFastFeatureDetector>(     uri, 1, 0, "FastFeatureDetector");
+    qmlRegisterType<QDescriptorExtractor>(     uri, 1, 0, "DescriptorExtractor");
+    qmlRegisterType<QBriefDescriptorExtractor>(uri, 1, 0, "BriefDescriptorExtractor");
 }
 
 

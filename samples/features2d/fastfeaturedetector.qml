@@ -15,6 +15,10 @@ Row{
     }
     
     FastFeatureDetector{
+        input : imgSource.output
+    }
+    
+    BriefDescriptorExtractor{
     }
     
 }
