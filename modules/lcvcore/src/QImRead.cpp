@@ -79,12 +79,13 @@ QImRead::~QImRead(){
  */
 
 void QImRead::componentComplete(){
+    QQuickItem::componentComplete();
     loadImage();
 }
 
 void QImRead::loadImage(){
     if ( m_file != "" && isComponentComplete() ){
-        cv::Mat temp = cv::imread(file.toStdString(), m_iscolor);
+        cv::Mat temp = cv::imread(m_file.toStdString(), m_iscolor);
         if ( !temp.empty() ){
             temp.copyTo(*output()->cvMat());
             setImplicitWidth(output()->cvMat()->size().width);

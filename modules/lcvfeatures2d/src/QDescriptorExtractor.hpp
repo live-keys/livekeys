@@ -57,7 +57,7 @@ inline QMat*QDescriptorExtractor::inputMat(){
 }
 
 inline void QDescriptorExtractor::setInputMat(QMat* mat){
-    m_in = mat;
+    m_in      = mat;
     m_inDirty = true;
     emit inputChanged();
     if ( m_keypointsDirty )
@@ -69,7 +69,7 @@ inline QKeyPointVector*QDescriptorExtractor::keypoints(){
 }
 
 inline void QDescriptorExtractor::setKeypoints(QKeyPointVector* keypoints){
-    m_keypoints = keypoints;
+    m_keypoints      = keypoints;
     m_keypointsDirty = true;
     emit keypointsChanged();
     if ( m_inDirty )
