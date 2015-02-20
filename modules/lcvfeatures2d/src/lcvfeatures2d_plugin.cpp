@@ -20,6 +20,8 @@
 #include "QFastFeatureDetector.hpp"
 #include "QDescriptorExtractor.hpp"
 #include "QBriefDescriptorExtractor.hpp"
+#include "QDescriptorMatcher.hpp"
+#include "QBruteForceMatcher.hpp"
 
 #include <qqml.h>
 
@@ -30,6 +32,8 @@ void Lcvfeatures2dPlugin::registerTypes(const char *uri){
     qmlRegisterType<QFastFeatureDetector>(     uri, 1, 0, "FastFeatureDetector");
     qmlRegisterType<QDescriptorExtractor>(     uri, 1, 0, "DescriptorExtractor");
     qmlRegisterType<QBriefDescriptorExtractor>(uri, 1, 0, "BriefDescriptorExtractor");
+    qmlRegisterType<QDescriptorMatcher>(       uri, 1, 0, "DescriptorMatcher");
+    qmlRegisterType<QBruteForceMatcher>(       uri, 1, 0, "BruteForceMatcher");
 }
 
 

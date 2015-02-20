@@ -17,6 +17,10 @@ QDescriptorMatcher::~QDescriptorMatcher(){
     delete m_matcher;
 }
 
+QDMatchVector* QDescriptorMatcher::matches(){
+    return m_matches;
+}
+
 void QDescriptorMatcher::add(QMat* descriptors){
     if ( m_matcher ){
         std::vector<cv::Mat> descriptorVector;

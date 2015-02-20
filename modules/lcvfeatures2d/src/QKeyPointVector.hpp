@@ -15,9 +15,11 @@ public:
     std::vector<cv::KeyPoint>& keypoints();
     const std::vector<cv::KeyPoint>& keypoints() const;
 
+public slots:
+    QKeyPointVector* createOwnedObject();
+
 private:
     std::vector<cv::KeyPoint> m_keyPoints;
-
 };
 
 inline const std::vector<cv::KeyPoint>&QKeyPointVector::keypoints() const{

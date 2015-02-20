@@ -12,7 +12,7 @@ namespace cv{
 class QDescriptorMatcher : public QQuickItem{
 
     Q_OBJECT
-    Q_PROPERTY(QMat*          queryDescriptors READ queryDescriptors WRITE setQueryDescriptors NOTIFY queryDescriptorsChanged)
+    Q_PROPERTY(QMat*          queryDescriptors READ queryDescriptors WRITE  setQueryDescriptors NOTIFY queryDescriptorsChanged)
     Q_PROPERTY(QDMatchVector* matches          READ matches          NOTIFY matchesChanged)
 
 public:
@@ -23,8 +23,11 @@ public:
     void setQueryDescriptors(QMat* descriptors);
     QMat* queryDescriptors();
 
+    QDMatchVector* matches();
+
 signals:
-    void descriptorsChanged();
+    void queryDescriptorsChanged();
+    void matchesChanged();
 
 public slots:
     void add(QMat* descriptors);
@@ -39,11 +42,11 @@ private:
     QMat*                  m_queryDescriptors;
 };
 
-void QDescriptorMatcher::setQueryDescriptors(QMat* descriptors){
+inline void QDescriptorMatcher::setQueryDescriptors(QMat* descriptors){
     m_queryDescriptors = descriptors;
 }
 
-QMat* QDescriptorMatcher::queryDescriptors(){
+inline QMat* QDescriptorMatcher::queryDescriptors(){
     return m_queryDescriptors;
 }
 
