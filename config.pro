@@ -8,49 +8,49 @@ win32{
 # Configuration for Windows
 # -------------------------
 #
+# By default, the configuration considers OPENCV_DIR system environment variable is set. If not, you can either modify
+# the following values, or consult the Open CV manual on how to set up Open CV for Visual Studio.
+#
 # PATH_OPENCV_INCLUDE   : Path to opencv include directory ( Example : C:/opencv/include )
 # PATH_OPENCV_LIBRARIES : Path to opencv libraries directory ( Example : C:/opencv/build/x64/vc11/lib )
 # PATH_OPENCV_DLLS      : Path to opencv dll files ( Example : C:/opencv/build/x64/vc11/bin )
-# VERSION_OPENCV        : Version of opencv used. This can become helpful when changing opencv versions.
-#                         If you're using visual studio, you can set up opencv version according to debug
-#                         or release mode.
+# VERSION_OPENCV        : Version of opencv used to link lib files and copy dll files to the build directory.
 
-        PATH_OPENCV_INCLUDE   = $$PWD/opencv/build/include
-        PATH_OPENCV_LIBRARIES = $$PWD/opencv/build/x86/vc12/lib
-        PATH_OPENCV_DLLS      = $$PWD/opencv/build/x86/vc12/bin
-        VERSION_OPENCV        = 249
+    PATH_OPENCV_INCLUDE   = $$(OPENCV_DIR)/../../include
+    PATH_OPENCV_LIBRARIES = $$(OPENCV_DIR)/lib
+    PATH_OPENCV_DLLS      = $$(OPENCV_DIR)/bin
+    VERSION_OPENCV        = 2410
 
+    CONFIG(debug, debug|release){
+        VERSION_OPENCV    = $${VERSION_OPENCV}d
+    }
 
-        CONFIG(debug, debug|release){
-            VERSION_OPENCV    = $${VERSION_OPENCV}d
-        }
+    INCLUDEPATH += $${PATH_OPENCV_INCLUDE}
 
-	INCLUDEPATH += $${PATH_OPENCV_INCLUDE}
+    CONFIG(debug, debug|release){
+        DLL_DESTINATION   = ../application/debug
+    }
+    CONFIG(release, debug|release){
+        DLL_DESTINATION   = ../application/release
+    }
+    #
+    # DEPLOYMENTFOLDERS += opencv_folder
 
-        CONFIG(debug, debug|release){
-            DLL_DESTINATION   = ../application/debug
-        }
-        CONFIG(release, debug|release){
-            DLL_DESTINATION   = ../application/release
-        }
-	#
-	# DEPLOYMENTFOLDERS += opencv_folder
+    # Helper Function to copy dlls
+    defineTest(copyCvDll) {
+            files = $$1
 
-        # Helper Function to copy dlls
-        defineTest(copyCvDll) {
-                files = $$1
+            for(FILE, files) {
+                DDIR = $${DLL_DESTINATION}
 
-                for(FILE, files) {
-                    DDIR = $${DLL_DESTINATION}
+                # Replace slashes in paths with backslashes for Windows
+                win32:FILE ~= s,/,\\,g
+                win32:DDIR ~= s,/,\\,g
 
-                    # Replace slashes in paths with backslashes for Windows
-                    win32:FILE ~= s,/,\\,g
-                    win32:DDIR ~= s,/,\\,g
-
-                    QMAKE_POST_LINK += $$QMAKE_COPY \"$$FILE\" \"$$DDIR\" $$escape_expand(\\n\\t)
-                }
-                export(QMAKE_POST_LINK)
-        }
+                QMAKE_POST_LINK += $$QMAKE_COPY \"$$FILE\" \"$$DDIR\" $$escape_expand(\\n\\t)
+            }
+            export(QMAKE_POST_LINK)
+    }
 
     # opencv_core
     LIBS += -L$${PATH_OPENCV_LIBRARIES} -lopencv_core$${VERSION_OPENCV}
