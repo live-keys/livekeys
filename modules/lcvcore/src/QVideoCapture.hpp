@@ -84,8 +84,8 @@ private:
 
     QString m_file;
     qreal   m_fps;
-    QMat*   m_restore;
     QMat*   m_output;
+    QMat*   m_restore;
     bool    m_linearFilter;
     bool    m_loop;
 

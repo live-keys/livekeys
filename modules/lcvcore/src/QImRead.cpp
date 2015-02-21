@@ -56,8 +56,9 @@
  * \brief QImRead::QImRead
  * \a parent
  */
-QImRead::QImRead(QQuickItem *parent) :
-    QMatDisplay(parent)
+QImRead::QImRead(QQuickItem *parent)
+    : QMatDisplay(parent)
+    , m_iscolor(CV_LOAD_IMAGE_COLOR)
 {
 }
 
@@ -77,12 +78,14 @@ QImRead::~QImRead(){
  * \sa ImRead::file
  */
 
-void QImRead::setFile(const QString &file){
-    if ( file != m_file ){
-        m_file = file;
-        emit fileChanged();
-        cv::Mat temp = cv::imread(file.toStdString());
+void QImRead::componentComplete(){
+    QQuickItem::componentComplete();
+    loadImage();
+}
 
+void QImRead::loadImage(){
+    if ( m_file != "" && isComponentComplete() ){
+        cv::Mat temp = cv::imread(m_file.toStdString(), m_iscolor);
         if ( !temp.empty() ){
             temp.copyTo(*output()->cvMat());
             setImplicitWidth(output()->cvMat()->size().width);

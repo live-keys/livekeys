@@ -17,9 +17,7 @@ Row{
     Canny{
         input: imgSource.output
         threshold1 : 70
-        threshold2 : 210
+        threshold2 : 222
     }
-    
-    
     
 }

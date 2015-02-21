@@ -85,6 +85,12 @@ win32{
         LIBS += -L$${PATH_OPENCV_LIBRARIES} -lopencv_features2d$${VERSION_OPENCV}
         copyCvDll($${PATH_OPENCV_DLLS}/opencv_features2d$${VERSION_OPENCV}.dll)
     }
+
+    # opencv_flann
+    !isEmpty(REQUIRES_CV_FLANN){
+        LIBS += -L$${PATH_OPENCV_LIBRARIES} -lopencv_flann$${VERSION_OPENCV}
+        copyCvDll($${PATH_OPENCV_DLLS}/opencv_flann$${VERSION_OPENCV}.dll)
+    }
 }
 
 # Configuration for Unix

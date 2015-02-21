@@ -55,16 +55,16 @@
   Parameters:
   \a parent
  */
-QVideoCapture::QVideoCapture(QQuickItem *parent) :
-    QQuickItem(parent),
-    m_file(""),
-    m_fps(0),
-    m_output(new QMat()),
-    m_linearFilter(true),
-    m_loop(false),
-    m_thread(0)
+QVideoCapture::QVideoCapture(QQuickItem *parent)
+    : QQuickItem(parent)
+    , m_file("")
+    , m_fps(0)
+    , m_output(new QMat())
+    , m_restore(m_output)
+    , m_linearFilter(true)
+    , m_loop(false)
+    , m_thread(0)
 {
-    m_restore = output();
     setFlag(ItemHasContents, true);
 }
 
@@ -326,6 +326,5 @@ QVideoCapture::~QVideoCapture(){
     m_thread = stateCont.state(m_file);
     if (m_thread != 0)
         disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
-    setOutput(m_restore);
-    delete m_output;
+    delete m_restore;
 }

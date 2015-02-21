@@ -1,0 +1,3 @@
+module plugins.lcvfeatures2d
+plugin lcvfeatures2d
+

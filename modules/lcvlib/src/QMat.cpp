@@ -16,6 +16,7 @@
 
 #include "QMat.hpp"
 #include "QMatAccess.hpp"
+#include <QQmlEngine>
 
 
 /*!
@@ -109,6 +110,13 @@ QMatAccess *QMat::data(){
  */
 QSize QMat::dataSize() const{
     return QSize(m_cvmat->cols, m_cvmat->rows);
+}
+
+QMat* QMat::createOwnedObject(){
+    cv::Mat* ownedObjectInternal = new cv::Mat(*m_cvmat);
+    QMat*    ownedObject         = new QMat(ownedObjectInternal);
+    QQmlEngine::setObjectOwnership(ownedObject, QQmlEngine::JavaScriptOwnership);
+    return ownedObject;
 }
 
 /*!

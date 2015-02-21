@@ -1,0 +1,11 @@
+/*!
+
+  \module lcvfeatures2d_cpp
+
+  \title Live CV Features 2D
+
+  \brief This module contains the cpp implementation of Live CV's feature detection module.
+
+  \sa lcvfeatures2d
+
+*/

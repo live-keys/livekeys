@@ -24,7 +24,19 @@
 class QImRead : public QMatDisplay{
 
     Q_OBJECT
-    Q_PROPERTY(QString file READ file WRITE setFile NOTIFY fileChanged)
+    Q_PROPERTY(QString file     READ file    WRITE setFile    NOTIFY fileChanged)
+    Q_PROPERTY(int     iscolor  READ iscolor WRITE setIscolor NOTIFY iscolorChanged)
+
+    Q_ENUMS(Load)
+
+public:
+    enum Load{
+        CV_LOAD_IMAGE_UNCHANGED  = -1,
+        CV_LOAD_IMAGE_GRAYSCALE  =  0,
+        CV_LOAD_IMAGE_COLOR      =  1,
+        CV_LOAD_IMAGE_ANYDEPTH   =  2,
+        CV_LOAD_IMAGE_ANYCOLOR   =  4
+    };
 
 public:
     explicit QImRead(QQuickItem *parent = 0);
@@ -32,14 +44,44 @@ public:
 
     const QString& file() const;
     void setFile(const QString& file);
+
+    const int& iscolor() const;
+    void setIscolor(const int& iscolor);
     
 signals:
+    void iscolorChanged();
     void fileChanged();
 
+protected:
+    void componentComplete();
+
 private:
+    void loadImage();
+
     QString m_file;
+    int     m_iscolor;
     
 };
+
+inline const int& QImRead::iscolor() const{
+	return m_iscolor;
+}
+
+inline void QImRead::setIscolor(const int& iscolor){
+	if (m_iscolor != iscolor){
+		m_iscolor = iscolor;
+		emit iscolorChanged();
+        loadImage();
+	}
+}
+
+inline void QImRead::setFile(const QString &file){
+    if ( file != m_file ){
+        m_file = file;
+        emit fileChanged();
+        loadImage();
+    }
+}
 
 inline const QString &QImRead::file() const{
     return m_file;
