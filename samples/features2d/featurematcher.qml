@@ -7,8 +7,9 @@ Grid{
     
     // Train images
     
-    property string imagePath : codeDocument.path + '/../_images/caltech_buildings_DSCN0246_small.JPG'
-    property string imagePath2 : codeDocument.path + '/../_images/caltech_buildings_DSCN0246_small.JPG'
+    property string imagePath : codeDocument.path + '/../_images/'
+    property string trainImage : imagePath + 'object_101_piano_train1.jpg'
+    property string queryImage : imagePath + 'object_101_piano_query.jpg'
     
     ImRead{
         id: trainImageLoader
@@ -22,7 +23,7 @@ Grid{
             var imageArray    = new Array()
             var keypointArray = new Array()
             
-            file = imagePath
+            file = trainImage
             imageArray.push(output.createOwnedObject())
             keypointArray.push(trainFeatureDetect.keypoints.createOwnedObject())
             
@@ -50,7 +51,7 @@ Grid{
     
     ImRead{
         id : queryImageLoader
-        file : imagePath2
+        file : queryImage
     }
     
     FastFeatureDetector{
@@ -72,11 +73,9 @@ Grid{
     }
     
     DrawMatches{
-        keypoints1 : trainImageLoader.keypoints[0]
-        keypoints2 : queryFeatureDetect.keypoints
+        keypoints1 : queryFeatureDetect.keypoints
+        keypoints2 : trainImageLoader.keypoints[0]
         matches1to2 : descriptorMatcher.matches
-        width : 1000
-        height : 555
     }
     
 }

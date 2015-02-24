@@ -36,7 +36,6 @@ cv::FeatureDetector* QFeatureDetector::detector(){
 
 void QFeatureDetector::detect(){
     if ( m_detector != 0 && isComponentComplete() ){
-
         m_detector->detect(*m_in->cvMat(), m_keypoints->keypoints(), *m_mask->cvMat());
 
         m_keypoints->setMat(m_in->cvMat()->clone());
@@ -59,6 +58,7 @@ QSGNode* QFeatureDetector::updatePaintNode(QSGNode* node, QQuickItem::UpdatePain
                     *output()->cvMat(),
                      cv::Scalar::all(-1),
                      cv::DrawMatchesFlags::DEFAULT);
+
         emit outputChanged();
     }
     return QMatDisplay::updatePaintNode(node, nodeData);

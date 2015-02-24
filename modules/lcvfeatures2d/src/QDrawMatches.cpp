@@ -15,13 +15,15 @@ QSGNode *QDrawMatches::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeD
     if ( m_keypoints1 && m_keypoints2 && m_matches && m_matchSurfaceDirty ){
         try{
             cv::drawMatches(
-                        m_keypoints2->cvMat(),
-                        m_keypoints2->keypoints(),
                         m_keypoints1->cvMat(),
                         m_keypoints1->keypoints(),
+                        m_keypoints2->cvMat(),
+                        m_keypoints2->keypoints(),
                         m_matches->matches(),
                         *(output()->cvMat())
                         );
+            setImplicitSize(output()->cvMat()->cols, output()->cvMat()->rows);
+
         } catch(cv::Exception& e){
             qWarning(e.what());
         }
