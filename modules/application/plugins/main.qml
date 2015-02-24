@@ -172,6 +172,9 @@ Rectangle {
                         }else
                             fileSaveDialog.open()
                     }
+                    onOpen: {
+                        header.openFile()
+                    }
 
                     text : "Rectangle{\n}"
                     color : "#eeeeee"

@@ -15,11 +15,15 @@ public:
     std::vector<cv::KeyPoint>& keypoints();
     const std::vector<cv::KeyPoint>& keypoints() const;
 
+    void setMat(cv::Mat& mat);
+    const cv::Mat& cvMat();
+
 public slots:
     QKeyPointVector* createOwnedObject();
 
 private:
     std::vector<cv::KeyPoint> m_keyPoints;
+    cv::Mat                   m_mat;
 };
 
 inline const std::vector<cv::KeyPoint>&QKeyPointVector::keypoints() const{
@@ -28,6 +32,14 @@ inline const std::vector<cv::KeyPoint>&QKeyPointVector::keypoints() const{
 
 inline std::vector<cv::KeyPoint>& QKeyPointVector::keypoints(){
     return m_keyPoints;
+}
+
+inline const cv::Mat &QKeyPointVector::cvMat(){
+    return m_mat;
+}
+
+inline void QKeyPointVector::setMat(cv::Mat &mat){
+    m_mat = mat;
 }
 
 #endif // QKEYPOINTVECTOR_HPP

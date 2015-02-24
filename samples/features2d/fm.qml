@@ -8,12 +8,9 @@ Grid{
     // Train images
     
     property string imagePath : codeDocument.path + '/../_images/caltech_buildings_DSCN0246_small.JPG'
-    property string imagePath2 : codeDocument.path + '/../_images/caltech_buildings_DSCN0246_small.JPG'
     
     ImRead{
         id: trainImageLoader
-        
-        visible : false
         
         property variant images
         property variant keypoints
@@ -24,7 +21,7 @@ Grid{
             
             file = imagePath
             imageArray.push(output.createOwnedObject())
-            keypointArray.push(trainFeatureDetect.keypoints.createOwnedObject())
+            keypointArray.push(trainFeatureDetect.output.createOwnedObject())
             
             images    = imageArray
             keypoints = keypointArray
@@ -37,31 +34,29 @@ Grid{
     }
     
     BriefDescriptorExtractor{
-        input : trainImageLoader.output
-        keypoints : trainFeatureDetect.keypoints
+        input : trainFeatureDetect.output
         onDescriptorsChanged : {
             descriptorMatcher.add(descriptors)
             descriptorMatcher.train();
         }
     }
-        
+    
     // Query Image
     
     
     ImRead{
         id : queryImageLoader
-        file : imagePath2
+        file : imagePath
     }
     
     FastFeatureDetector{
         id : queryFeatureDetect
         input : queryImageLoader.output
-    }    
+    }
     
     BriefDescriptorExtractor{
         id : queryFeatureExtract
-        input : queryImageLoader.output
-        keypoints : queryFeatureDetect.keypoints
+        input : queryFeatureDetect.output
     }
     
     // Matching
@@ -72,11 +67,10 @@ Grid{
     }
     
     DrawMatches{
+        img1 : trainImageLoader.images[0]
         keypoints1 : trainImageLoader.keypoints[0]
-        keypoints2 : queryFeatureDetect.keypoints
         matches1to2 : descriptorMatcher.matches
-        width : 1000
-        height : 555
     }
+    
     
 }

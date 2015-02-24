@@ -35,6 +35,9 @@ public slots:
 
     void match(QMat* queryDescriptors, QDMatchVector* matches);
 
+protected:
+    virtual void componentComplete();
+
 private:
     cv::DescriptorMatcher* m_matcher;
 
@@ -45,8 +48,10 @@ private:
 inline void QDescriptorMatcher::setQueryDescriptors(QMat* descriptors){
     m_queryDescriptors = descriptors;
     emit queryDescriptorsChanged();
-    if ( isComponentComplete() )
+    if ( isComponentComplete() ){
         match(m_queryDescriptors, m_matches);
+        emit matchesChanged();
+    }
 }
 
 inline QMat* QDescriptorMatcher::queryDescriptors(){

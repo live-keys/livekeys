@@ -37,9 +37,10 @@ void QDescriptorExtractor::componentComplete(){
 
 void QDescriptorExtractor::compute(){
     if ( m_extractor && m_keypoints && isComponentComplete() ){
-        m_inDirty = false;
+        m_inDirty        = false;
         m_keypointsDirty = false;
-        m_extractor->compute(*m_in->cvMat(), m_keypoints->keypoints(), *m_descriptors->cvMat());
+        m_extractor->compute(m_keypoints->cvMat(), m_keypoints->keypoints(), *m_descriptors->cvMat());
+
         emit descriptorsChanged();
     }
 }

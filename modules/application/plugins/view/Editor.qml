@@ -21,6 +21,7 @@ TextEdit {
     id : editor
 
     signal save()
+    signal open()
 
     focus : false
     font.family: "Courier New"
@@ -53,6 +54,9 @@ TextEdit {
             }
         } else if ( event.key === Qt.Key_S && (event.modifiers & Qt.ControlModifier ) ){
             editor.save()
+            event.accepted = true
+        } else if ( event.key === Qt.Key_O && (event.modifiers & Qt.ControlModifier ) ) {
+            editor.open()
             event.accepted = true
         } else
             event.accepted = false

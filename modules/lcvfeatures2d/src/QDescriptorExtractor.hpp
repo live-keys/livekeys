@@ -3,6 +3,7 @@
 
 #include <QQuickItem>
 #include "QMat.hpp"
+#include "QKeyPointVector.hpp"
 
 namespace cv{
 class DescriptorExtractor;
@@ -60,8 +61,8 @@ inline void QDescriptorExtractor::setInputMat(QMat* mat){
     m_in      = mat;
     m_inDirty = true;
     emit inputChanged();
-    if ( m_keypointsDirty )
-        compute();
+//    if ( m_keypointsDirty )
+//        compute();
 }
 
 inline QKeyPointVector*QDescriptorExtractor::keypoints(){
@@ -69,11 +70,13 @@ inline QKeyPointVector*QDescriptorExtractor::keypoints(){
 }
 
 inline void QDescriptorExtractor::setKeypoints(QKeyPointVector* keypoints){
-    m_keypoints      = keypoints;
-    m_keypointsDirty = true;
-    emit keypointsChanged();
-    if ( m_inDirty )
-        compute();
+    if ( keypoints->keypoints().size() > 0 ){
+        m_keypoints      = keypoints;
+        m_keypointsDirty = true;
+        emit keypointsChanged();
+        if ( m_inDirty )
+            compute();
+    }
 }
 
 inline QMat*QDescriptorExtractor::descriptors(){
