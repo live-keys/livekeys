@@ -8,7 +8,8 @@ HEADERS += \
     $$PWD/QDescriptorMatcher.hpp \
     $$PWD/QDMatchVector.hpp \
     $$PWD/QBruteForceMatcher.hpp \
-    $$PWD/QDrawMatches.hpp
+    $$PWD/QDrawMatches.hpp \
+    $$PWD/QBriskFeatureDetector.hpp
 
 SOURCES += \
     $$PWD/lcvfeatures2d_plugin.cpp \
@@ -20,4 +21,5 @@ SOURCES += \
     $$PWD/QDescriptorMatcher.cpp \
     $$PWD/QDMatchVector.cpp \
     $$PWD/QBruteForceMatcher.cpp \
-    $$PWD/QDrawMatches.cpp
+    $$PWD/QDrawMatches.cpp \
+    $$PWD/QBriskFeatureDetector.cpp
