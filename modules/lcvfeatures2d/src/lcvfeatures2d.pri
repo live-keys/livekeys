@@ -13,7 +13,8 @@ HEADERS += \
     $$PWD/QBriskDescriptorExtractor.hpp \
     $$PWD/QGoodFeaturesToTrackDetector.hpp \
     $$PWD/QStarFeatureDetector.hpp \
-    $$PWD/QDenseFeatureDetector.hpp
+    $$PWD/QDenseFeatureDetector.hpp \
+    $$PWD/QOrbFeatureDetector.hpp
 
 SOURCES += \
     $$PWD/lcvfeatures2d_plugin.cpp \
@@ -30,4 +31,5 @@ SOURCES += \
     $$PWD/QBriskDescriptorExtractor.cpp \
     $$PWD/QGoodFeaturesToTrackDetector.cpp \
     $$PWD/QStarFeatureDetector.cpp \
-    $$PWD/QDenseFeatureDetector.cpp
+    $$PWD/QDenseFeatureDetector.cpp \
+    $$PWD/QOrbFeatureDetector.cpp

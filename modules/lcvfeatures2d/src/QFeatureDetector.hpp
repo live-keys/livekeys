@@ -89,10 +89,4 @@ inline void QFeatureDetector::setKeypoints(QKeyPointVector* keypoints){
     emit keypointsChanged();
 }
 
-inline void QFeatureDetector::initializeDetector(cv::FeatureDetector *detector){
-    delete m_detector;
-    m_detector = detector;
-    detect();
-}
-
 #endif // QFEATUREDETECTOR_HPP

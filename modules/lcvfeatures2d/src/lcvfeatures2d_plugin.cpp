@@ -22,6 +22,7 @@
 #include "QDenseFeatureDetector.hpp"
 #include "QGoodFeaturesToTrackDetector.hpp"
 #include "QStarFeatureDetector.hpp"
+#include "QOrbFeatureDetector.hpp"
 
 #include "QDescriptorExtractor.hpp"
 #include "QBriefDescriptorExtractor.hpp"
@@ -42,6 +43,7 @@ void Lcvfeatures2dPlugin::registerTypes(const char *uri){
     qmlRegisterType<QDenseFeatureDetector>(       uri, 1, 0, "DenseFeatureDetector");
     qmlRegisterType<QGoodFeaturesToTrackDetector>(uri, 1, 0, "GoodFeaturesToTrackFeatureDetector");
     qmlRegisterType<QStarFeatureDetector>(        uri, 1, 0, "StarFeatureDetector");
+    qmlRegisterType<QOrbFeatureDetector>(         uri, 1, 0, "OrbFeatureDetector");
 
     qmlRegisterType<QDescriptorExtractor>(        uri, 1, 0, "DescriptorExtractor");
     qmlRegisterType<QBriefDescriptorExtractor>(   uri, 1, 0, "BriefDescriptorExtractor");

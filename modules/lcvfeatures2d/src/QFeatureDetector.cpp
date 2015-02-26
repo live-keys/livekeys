@@ -34,6 +34,12 @@ cv::FeatureDetector * const QFeatureDetector::detector(){
     return m_detector;
 }
 
+void QFeatureDetector::initializeDetector(cv::FeatureDetector *detector){
+    delete m_detector;
+    m_detector = detector;
+    detect();
+}
+
 void QFeatureDetector::detect(){
     if ( m_detector != 0 && isComponentComplete() ){
         m_detector->detect(*m_in->cvMat(), m_keypoints->keypoints(), *m_mask->cvMat());
