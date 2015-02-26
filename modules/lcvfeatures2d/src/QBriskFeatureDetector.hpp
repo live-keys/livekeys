@@ -13,6 +13,7 @@ public:
 signals:
 
 public slots:
+    void initialize(int thresh = 30, int octaves = 3, float patternScale = 1.0f);
 
 };
 

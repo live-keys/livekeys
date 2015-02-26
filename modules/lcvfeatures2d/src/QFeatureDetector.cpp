@@ -30,7 +30,7 @@ QFeatureDetector::~QFeatureDetector(){
     delete m_maskInternal;
 }
 
-cv::FeatureDetector* QFeatureDetector::detector(){
+cv::FeatureDetector * const QFeatureDetector::detector(){
     return m_detector;
 }
 

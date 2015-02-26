@@ -22,7 +22,8 @@ public:
     virtual ~QFeatureDetector();
 
 protected:
-    cv::FeatureDetector* detector();
+    cv::FeatureDetector* const detector();
+    void initializeDetector(cv::FeatureDetector* detector);
     void detect();
 
     QMat* inputMat();
@@ -50,7 +51,6 @@ private:
     QMat* m_inInternal;
     QMat* m_mask;
     QMat* m_maskInternal;
-
 };
 
 inline QMat *QFeatureDetector::inputMat(){
@@ -85,6 +85,11 @@ inline QKeyPointVector* QFeatureDetector::keypoints(){
 inline void QFeatureDetector::setKeypoints(QKeyPointVector* keypoints){
     m_keypoints = keypoints;
     emit keypointsChanged();
+}
+
+inline void QFeatureDetector::initializeDetector(cv::FeatureDetector *detector){
+    m_detector = detector;
+    detect();
 }
 
 #endif // QFEATUREDETECTOR_HPP
