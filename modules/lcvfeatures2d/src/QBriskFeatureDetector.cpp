@@ -4,6 +4,7 @@
 QBriskFeatureDetector::QBriskFeatureDetector(QQuickItem *parent) :
     QFeatureDetector(new cv::BRISK, parent)
 {
+    this->detector()->setInt("thresh", 30);
 }
 
 QBriskFeatureDetector::~QBriskFeatureDetector(){

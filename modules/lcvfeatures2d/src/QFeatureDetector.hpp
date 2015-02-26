@@ -21,10 +21,6 @@ public:
     QFeatureDetector(cv::FeatureDetector* detector, QQuickItem* parent = 0);
     virtual ~QFeatureDetector();
 
-protected:
-    cv::FeatureDetector* detector();
-    void detect();
-
     QMat* inputMat();
     void setInputMat(QMat* mat);
 
@@ -34,6 +30,11 @@ protected:
     QKeyPointVector* keypoints();
     void setKeypoints(QKeyPointVector* keypoints);
 
+protected:
+    cv::FeatureDetector* detector();
+    void detect();
+
+public:
     virtual void componentComplete();
     virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
 
