@@ -8,3 +8,7 @@ QFastFeatureDetector::QFastFeatureDetector(QQuickItem *parent)
 
 QFastFeatureDetector::~QFastFeatureDetector(){
 }
+
+void QFastFeatureDetector::initialize(int threshold, bool nonmaxSuppression){
+    initializeDetector(new cv::FastFeatureDetector(threshold, nonmaxSuppression));
+}

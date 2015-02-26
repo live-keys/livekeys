@@ -90,6 +90,7 @@ inline void QFeatureDetector::setKeypoints(QKeyPointVector* keypoints){
 }
 
 inline void QFeatureDetector::initializeDetector(cv::FeatureDetector *detector){
+    delete m_detector;
     m_detector = detector;
     detect();
 }

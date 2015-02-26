@@ -10,7 +10,10 @@ HEADERS += \
     $$PWD/QBruteForceMatcher.hpp \
     $$PWD/QDrawMatches.hpp \
     $$PWD/QBriskFeatureDetector.hpp \
-    $$PWD/QBriskDescriptorExtractor.hpp
+    $$PWD/QBriskDescriptorExtractor.hpp \
+    $$PWD/QGoodFeaturesToTrackDetector.hpp \
+    $$PWD/QStarFeatureDetector.hpp \
+    $$PWD/QDenseFeatureDetector.hpp
 
 SOURCES += \
     $$PWD/lcvfeatures2d_plugin.cpp \
@@ -24,4 +27,7 @@ SOURCES += \
     $$PWD/QBruteForceMatcher.cpp \
     $$PWD/QDrawMatches.cpp \
     $$PWD/QBriskFeatureDetector.cpp \
-    $$PWD/QBriskDescriptorExtractor.cpp
+    $$PWD/QBriskDescriptorExtractor.cpp \
+    $$PWD/QGoodFeaturesToTrackDetector.cpp \
+    $$PWD/QStarFeatureDetector.cpp \
+    $$PWD/QDenseFeatureDetector.cpp

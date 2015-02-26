@@ -11,9 +11,8 @@ public:
     explicit QFastFeatureDetector(QQuickItem *parent = 0);
     ~QFastFeatureDetector();
 
-signals:
-
 public slots:
+    void initialize(int threshold = 10, bool nonmaxSuppression = true);
 
 };
 

@@ -19,6 +19,10 @@
 #include "QFeatureDetector.hpp"
 #include "QFastFeatureDetector.hpp"
 #include "QBriskFeatureDetector.hpp"
+#include "QDenseFeatureDetector.hpp"
+#include "QGoodFeaturesToTrackDetector.hpp"
+#include "QStarFeatureDetector.hpp"
+
 #include "QDescriptorExtractor.hpp"
 #include "QBriefDescriptorExtractor.hpp"
 #include "QBriskDescriptorExtractor.hpp"
@@ -31,17 +35,22 @@
 
 void Lcvfeatures2dPlugin::registerTypes(const char *uri){
     // @uri modules.lcvfeatures2d
-    qmlRegisterType<QKeyPointVector>(          uri, 1, 0, "KeyPointVector");
-    qmlRegisterType<QFeatureDetector>(         uri, 1, 0, "FeatureDetector");
-    qmlRegisterType<QFastFeatureDetector>(     uri, 1, 0, "FastFeatureDetector");
-    qmlRegisterType<QBriskFeatureDetector>(    uri, 1, 0, "BriskFeatureDetector");
-    qmlRegisterType<QDescriptorExtractor>(     uri, 1, 0, "DescriptorExtractor");
-    qmlRegisterType<QBriefDescriptorExtractor>(uri, 1, 0, "BriefDescriptorExtractor");
-    qmlRegisterType<QBriskDescriptorExtractor>(uri, 1, 0, "BriskDescriptorExtractor");
-    qmlRegisterType<QDMatchVector>(            uri, 1, 0, "DMatchVector");
-    qmlRegisterType<QDescriptorMatcher>(       uri, 1, 0, "DescriptorMatcher");
-    qmlRegisterType<QBruteForceMatcher>(       uri, 1, 0, "BruteForceMatcher");
-    qmlRegisterType<QDrawMatches>(             uri, 1, 0, "DrawMatches");
+    qmlRegisterType<QKeyPointVector>(             uri, 1, 0, "KeyPointVector");
+    qmlRegisterType<QFeatureDetector>(            uri, 1, 0, "FeatureDetector");
+    qmlRegisterType<QFastFeatureDetector>(        uri, 1, 0, "FastFeatureDetector");
+    qmlRegisterType<QBriskFeatureDetector>(       uri, 1, 0, "BriskFeatureDetector");
+    qmlRegisterType<QDenseFeatureDetector>(       uri, 1, 0, "DenseFeatureDetector");
+    qmlRegisterType<QGoodFeaturesToTrackDetector>(uri, 1, 0, "GoodFeaturesToTrackFeatureDetector");
+    qmlRegisterType<QStarFeatureDetector>(        uri, 1, 0, "StarFeatureDetector");
+
+    qmlRegisterType<QDescriptorExtractor>(        uri, 1, 0, "DescriptorExtractor");
+    qmlRegisterType<QBriefDescriptorExtractor>(   uri, 1, 0, "BriefDescriptorExtractor");
+    qmlRegisterType<QBriskDescriptorExtractor>(   uri, 1, 0, "BriskDescriptorExtractor");
+
+    qmlRegisterType<QDMatchVector>(               uri, 1, 0, "DMatchVector");
+    qmlRegisterType<QDescriptorMatcher>(          uri, 1, 0, "DescriptorMatcher");
+    qmlRegisterType<QBruteForceMatcher>(          uri, 1, 0, "BruteForceMatcher");
+    qmlRegisterType<QDrawMatches>(                uri, 1, 0, "DrawMatches");
 }
 
 
