@@ -15,7 +15,8 @@ HEADERS += \
     $$PWD/QStarFeatureDetector.hpp \
     $$PWD/QDenseFeatureDetector.hpp \
     $$PWD/QOrbFeatureDetector.hpp \
-    $$PWD/QOrbDescriptorExtractor.hpp
+    $$PWD/QOrbDescriptorExtractor.hpp \
+    $$PWD/QFreakDescriptorExtractor.hpp
 
 SOURCES += \
     $$PWD/lcvfeatures2d_plugin.cpp \
@@ -34,4 +35,5 @@ SOURCES += \
     $$PWD/QStarFeatureDetector.cpp \
     $$PWD/QDenseFeatureDetector.cpp \
     $$PWD/QOrbFeatureDetector.cpp \
-    $$PWD/QOrbDescriptorExtractor.cpp
+    $$PWD/QOrbDescriptorExtractor.cpp \
+    $$PWD/QFreakDescriptorExtractor.cpp
