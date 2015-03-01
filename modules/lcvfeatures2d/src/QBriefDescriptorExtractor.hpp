@@ -11,9 +11,8 @@ public:
     explicit QBriefDescriptorExtractor(QQuickItem *parent = 0);
     ~QBriefDescriptorExtractor();
 
-signals:
-
 public slots:
+    void initialize(int bytes = 32);
 
 };
 

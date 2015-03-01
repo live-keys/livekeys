@@ -8,3 +8,7 @@ QBriefDescriptorExtractor::QBriefDescriptorExtractor(QQuickItem *parent)
 
 QBriefDescriptorExtractor::~QBriefDescriptorExtractor(){
 }
+
+void QBriefDescriptorExtractor::initialize(int bytes){
+    initializeExtractor(new cv::BriefDescriptorExtractor(bytes));
+}

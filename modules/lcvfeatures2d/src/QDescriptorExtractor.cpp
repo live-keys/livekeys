@@ -30,6 +30,12 @@ QDescriptorExtractor::~QDescriptorExtractor(){
     delete m_inInternal;
 }
 
+void QDescriptorExtractor::initializeExtractor(cv::DescriptorExtractor* extractor){
+    delete m_extractor;
+    m_extractor = extractor;
+    compute();
+}
+
 void QDescriptorExtractor::componentComplete(){
     QQuickItem::componentComplete();
     compute();

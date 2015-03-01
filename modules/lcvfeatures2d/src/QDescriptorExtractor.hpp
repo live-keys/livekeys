@@ -32,6 +32,7 @@ public:
 
 protected:
     cv::DescriptorExtractor* extractor();
+    void initializeExtractor(cv::DescriptorExtractor* extractor);
     virtual void componentComplete();
 
 signals:
