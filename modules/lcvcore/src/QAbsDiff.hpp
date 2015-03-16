@@ -22,7 +22,6 @@ signals:
 
 private:
     QMat* m_in2;
-    QMat* m_in2Internal;
 
 };
 

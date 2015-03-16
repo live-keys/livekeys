@@ -6,10 +6,8 @@ QFeatureDetector::QFeatureDetector(QQuickItem *parent)
     : QMatDisplay(parent)
     , m_detector(0)
     , m_keypoints(new QKeyPointVector)
-    , m_in(new QMat(this))
-    , m_inInternal(m_in)
-    , m_mask(new QMat(this))
-    , m_maskInternal(m_mask)
+    , m_in(QMat::nullMat())
+    , m_mask(QMat::nullMat())
 {
 }
 
@@ -17,17 +15,13 @@ QFeatureDetector::QFeatureDetector(cv::FeatureDetector* detector, QQuickItem* pa
     : QMatDisplay(parent)
     , m_detector(detector)
     , m_keypoints(new QKeyPointVector)
-    , m_in(new QMat(this))
-    , m_inInternal(m_in)
-    , m_mask(new QMat(this))
-    , m_maskInternal(m_mask)
+    , m_in(QMat::nullMat())
+    , m_mask(QMat::nullMat())
 {
 }
 
 QFeatureDetector::~QFeatureDetector(){
     delete m_detector;
-    delete m_inInternal;
-    delete m_maskInternal;
 }
 
 cv::FeatureDetector * const QFeatureDetector::detector(){

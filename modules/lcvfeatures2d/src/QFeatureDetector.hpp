@@ -50,9 +50,7 @@ private:
     QKeyPointVector*     m_keypoints;
 
     QMat* m_in;
-    QMat* m_inInternal;
     QMat* m_mask;
-    QMat* m_maskInternal;
 };
 
 inline QMat *QFeatureDetector::inputMat(){

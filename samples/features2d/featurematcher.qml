@@ -7,9 +7,10 @@ Grid{
     
     // Train images
     
-    property string imagePath : codeDocument.path + '/../_images/'
-    property string trainImage : imagePath + 'object_101_piano_train1.jpg'
-    property string queryImage : imagePath + 'object_101_piano_query.jpg'
+    property string imagePath   : codeDocument.path + '/../_images/'
+    property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
+    property string trainImage2 : imagePath + 'caltech_buildings_DSCN0246_small.JPG'
+    property string queryImage  : imagePath + 'object_101_piano_query.jpg'
     
     ImRead{
         id: trainImageLoader
@@ -24,6 +25,10 @@ Grid{
             var keypointArray = new Array()
             
             file = trainImage
+            imageArray.push(output.createOwnedObject())
+            keypointArray.push(trainFeatureDetect.keypoints.createOwnedObject())
+            
+            file = trainImage2
             imageArray.push(output.createOwnedObject())
             keypointArray.push(trainFeatureDetect.keypoints.createOwnedObject())
             
@@ -74,7 +79,7 @@ Grid{
     
     DrawMatches{
         keypoints1 : queryFeatureDetect.keypoints
-        keypoints2 : trainImageLoader.keypoints[0]
+        keypoints2 : trainImageLoader.keypoints[1]
         matches1to2 : descriptorMatcher.matches
     }
     

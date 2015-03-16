@@ -25,8 +25,7 @@
  */
 QAbsDiff::QAbsDiff(QQuickItem *parent)
     : QMatFilter(parent)
-    , m_in2(new QMat())
-    , m_in2Internal(m_in2)
+    , m_in2(QMat::nullMat())
 {
 }
 
@@ -34,7 +33,6 @@ QAbsDiff::QAbsDiff(QQuickItem *parent)
    \brief QAbsDiff destructor
  */
 QAbsDiff::~QAbsDiff(){
-    delete m_in2Internal;
 }
 
 

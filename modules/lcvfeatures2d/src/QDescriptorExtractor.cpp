@@ -5,8 +5,7 @@ QDescriptorExtractor::QDescriptorExtractor(QQuickItem *parent)
     : QQuickItem(parent)
     , m_extractor(0)
     , m_keypoints(0)
-    , m_in(new QMat)
-    , m_inInternal(m_in)
+    , m_in(QMat::nullMat())
     , m_descriptors(new QMat)
     , m_inDirty(false)
     , m_keypointsDirty(false)
@@ -17,8 +16,7 @@ QDescriptorExtractor::QDescriptorExtractor(cv::DescriptorExtractor* extractor, Q
     : QQuickItem(parent)
     , m_extractor(extractor)
     , m_keypoints(0)
-    , m_in(new QMat)
-    , m_inInternal(m_in)
+    , m_in(QMat::nullMat())
     , m_descriptors(new QMat)
     , m_inDirty(false)
     , m_keypointsDirty(false)
@@ -27,7 +25,6 @@ QDescriptorExtractor::QDescriptorExtractor(cv::DescriptorExtractor* extractor, Q
 
 QDescriptorExtractor::~QDescriptorExtractor(){
     delete m_descriptors;
-    delete m_inInternal;
 }
 
 void QDescriptorExtractor::componentComplete(){

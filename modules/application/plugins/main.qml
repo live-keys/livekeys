@@ -175,6 +175,12 @@ Rectangle {
                     onOpen: {
                         header.openFile()
                     }
+                    onToggleSize: {
+                        if ( splitter.x < contentWrap.width / 2)
+                            splitter.x = contentWrap.width - contentWrap.width / 4
+                        else
+                            splitter.x = contentWrap.width / 4
+                    }
 
                     text : "Rectangle{\n}"
                     color : "#eeeeee"

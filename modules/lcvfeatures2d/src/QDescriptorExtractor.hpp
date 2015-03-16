@@ -47,7 +47,6 @@ private:
     QKeyPointVector*         m_keypoints;
 
     QMat* m_in;
-    QMat* m_inInternal;
     QMat* m_descriptors;
     bool  m_inDirty;
     bool  m_keypointsDirty;

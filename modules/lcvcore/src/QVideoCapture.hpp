@@ -24,13 +24,13 @@ class QVideoCaptureThread;
 class QVideoCapture : public QQuickItem{
 
     Q_OBJECT
-    Q_PROPERTY(QMat*   output       READ output       WRITE setOutput       NOTIFY outChanged)
+    Q_PROPERTY(QMat*   output       READ output       NOTIFY outChanged)
+    Q_PROPERTY(int     totalFrames  READ totalFrames  NOTIFY totalFramesChanged)
     Q_PROPERTY(bool    linearFilter READ linearFilter WRITE setLinearFilter NOTIFY linearFilterChanged)
     Q_PROPERTY(QString file         READ file         WRITE setFile         NOTIFY fileChanged)
     Q_PROPERTY(bool    paused       READ paused       WRITE setPaused       NOTIFY pausedChanged)
     Q_PROPERTY(qreal   fps          READ fps          WRITE setFps          NOTIFY fpsChanged)
     Q_PROPERTY(int     currentFrame READ currentFrame WRITE seekTo          NOTIFY outChanged)
-    Q_PROPERTY(int     totalFrames  READ totalFrames  WRITE setTotalFrames  NOTIFY totalFramesChanged)
     Q_PROPERTY(bool    loop         READ loop         WRITE setLoop         NOTIFY loopChanged)
 
 public:
@@ -47,12 +47,10 @@ public:
     void setFps(qreal fps);
 
     int totalFrames() const;
-    void setTotalFrames(int totalFrames);
 
     int currentFrame() const;
 
     QMat* output();
-    void setOutput(QMat* mat);
 
     bool linearFilter() const;
     void setLinearFilter(bool filter);
@@ -85,7 +83,6 @@ private:
     QString m_file;
     qreal   m_fps;
     QMat*   m_output;
-    QMat*   m_restore;
     bool    m_linearFilter;
     bool    m_loop;
 
@@ -103,11 +100,6 @@ inline qreal QVideoCapture::fps() const{
 
 inline QMat *QVideoCapture::output(){
     return m_output;
-}
-
-inline void QVideoCapture::setOutput(QMat *mat){
-    m_output = mat;
-    emit outChanged();
 }
 
 inline bool QVideoCapture::linearFilter() const{

@@ -42,14 +42,13 @@
 QMatDraw::QMatDraw(QQuickItem *parent)
     : QMatDisplay(parent)
     , m_in(new QMat(this))
-    , m_inInternal(m_in){
+{
 }
 
 /*!
   \brief QMatDraw destructor
  */
 QMatDraw::~QMatDraw(){
-    delete m_inInternal;
 }
 
 /*!

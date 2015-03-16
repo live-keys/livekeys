@@ -22,6 +22,7 @@ TextEdit {
 
     signal save()
     signal open()
+    signal toggleSize()
 
     focus : false
     font.family: "Courier New"
@@ -57,6 +58,9 @@ TextEdit {
             event.accepted = true
         } else if ( event.key === Qt.Key_O && (event.modifiers & Qt.ControlModifier ) ) {
             editor.open()
+            event.accepted = true
+        } else if ( event.key === Qt.Key_E && (event.modifiers & Qt.ControlModifier ) ){
+            editor.toggleSize()
             event.accepted = true
         } else
             event.accepted = false

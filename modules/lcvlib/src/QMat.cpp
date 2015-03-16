@@ -126,6 +126,20 @@ QMat::~QMat(){
     delete m_cvmat;
 }
 
+QMat* QMat::m_nullMat = 0;
+
+QMat*QMat::nullMat(){
+    if ( !m_nullMat ){
+        m_nullMat = new QMat;
+        atexit(&QMat::cleanUp);
+    }
+    return m_nullMat;
+}
+
+void QMat::cleanUp(){
+    delete m_nullMat;
+}
+
 /*!
   \fn cv::Mat* QMat::cvMat()
   \brief Returns the contained open cv mat.

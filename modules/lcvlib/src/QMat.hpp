@@ -46,13 +46,18 @@ public:
 
     cv::Mat* cvMat();
 
+    static QMat* nullMat();
+    static void  cleanUp();
+
 public slots:
     QMatAccess* data();
     QSize       dataSize() const;
     QMat*       createOwnedObject();
 
-public:
+private:
     cv::Mat* m_cvmat;
+
+    static QMat* m_nullMat;
     
 };
 

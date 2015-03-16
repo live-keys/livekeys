@@ -24,7 +24,7 @@
 class Q_LCV_EXPORT QMatDisplay : public QQuickItem{
 
     Q_OBJECT
-    Q_PROPERTY(QMat* output       READ output       WRITE setOutput       NOTIFY outputChanged)
+    Q_PROPERTY(QMat* output       READ output       NOTIFY outputChanged)
     Q_PROPERTY(bool  linearFilter READ linearFilter WRITE setLinearFilter NOTIFY linearFilterChanged)
 
 public:
@@ -33,7 +33,6 @@ public:
     virtual ~QMatDisplay();
 
     QMat* output();
-    void setOutput(QMat* mat);
 
     bool linearFilter() const;
     void setLinearFilter(bool filter);
@@ -43,6 +42,7 @@ signals:
     void linearFilterChanged();
 
 protected:
+    void setOutput(QMat* mat);
     virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
     
 private:

@@ -59,8 +59,7 @@ QVideoCapture::QVideoCapture(QQuickItem *parent)
     : QQuickItem(parent)
     , m_file("")
     , m_fps(0)
-    , m_output(new QMat())
-    , m_restore(m_output)
+    , m_output(QMat::nullMat())
     , m_linearFilter(true)
     , m_loop(false)
     , m_thread(0)
@@ -93,7 +92,9 @@ void QVideoCapture::setFile(const QString &file){
                 stateCont.registerState(m_file, m_thread);
             }
 
-            setOutput(m_thread->output());
+            m_output = m_thread->output();
+            emit outChanged();
+
             connect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
 
             if ( m_thread->isCaptureOpened() ){
@@ -216,10 +217,6 @@ int QVideoCapture::totalFrames() const{
     return 0;
 }
 
-void QVideoCapture::setTotalFrames(int){
-
-}
-
 /*!
   \property QVideoCapture::currentFrame
   \sa VideoCapture::currentFrame
@@ -256,7 +253,8 @@ void QVideoCapture::seekTo(int frame){
  */
 void QVideoCapture::switchMat(){
     if ( m_thread ){
-        setOutput(m_thread->output());
+        m_output = m_thread->output();
+        emit outChanged();
         m_thread->processNextFrame();
         update();
     }
@@ -326,5 +324,4 @@ QVideoCapture::~QVideoCapture(){
     m_thread = stateCont.state(m_file);
     if (m_thread != 0)
         disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
-    delete m_restore;
 }

@@ -73,10 +73,9 @@
   \brief QMatFilter constructor
   \a parent
  */
-QMatFilter::QMatFilter(QQuickItem *parent) :
-    QMatDisplay(parent),
-    m_in(new QMat(this)),
-    m_inInternal(m_in)
+QMatFilter::QMatFilter(QQuickItem *parent)
+    : QMatDisplay(parent)
+    , m_in(QMat::nullMat())
 {
 }
 
@@ -84,7 +83,6 @@ QMatFilter::QMatFilter(QQuickItem *parent) :
   \brief QMatFilter destructor
  */
 QMatFilter::~QMatFilter(){
-    delete m_inInternal;
 }
 
 
