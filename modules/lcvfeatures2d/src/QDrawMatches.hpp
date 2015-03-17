@@ -11,6 +11,7 @@ class QDrawMatches : public QMatDisplay{
     Q_PROPERTY(QKeyPointVector* keypoints1  READ keypoints1  WRITE setKeypoints1  NOTIFY keypoints1Changed)
     Q_PROPERTY(QKeyPointVector* keypoints2  READ keypoints2  WRITE setKeypoints2  NOTIFY keypoints2Changed)
     Q_PROPERTY(QDMatchVector*   matches1to2 READ matches1to2 WRITE setMatches1to2 NOTIFY matches1to2Changed)
+    Q_PROPERTY(int              matchIndex  READ matchIndex  WRITE setMatchIndex  NOTIFY matchIndexChanged)
 
 public:
     explicit QDrawMatches(QQuickItem *parent = 0);
@@ -25,6 +26,10 @@ public:
     QDMatchVector* matches1to2();
     void setMatches1to2(QDMatchVector* matches1to2);
 
+    int matchIndex() const;
+    void setMatchIndex(int matchIndex);
+
+
 protected:
     virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
 
@@ -32,15 +37,18 @@ signals:
     void keypoints1Changed();
     void keypoints2Changed();
     void matches1to2Changed();
+    void matchIndexChanged();
 
 public slots:
 
 private:
-    QKeyPointVector* m_keypoints1;
-    QKeyPointVector* m_keypoints2;
-    QDMatchVector*   m_matches;
+    QKeyPointVector*  m_keypoints1;
+    QKeyPointVector*  m_keypoints2;
+    QDMatchVector*    m_matches;
+    std::vector<char> m_mask;
 
-    bool             m_matchSurfaceDirty;
+    bool              m_matchSurfaceDirty;
+    int               m_matchIndex;
 };
 
 inline QKeyPointVector *QDrawMatches::keypoints1(){
@@ -72,6 +80,17 @@ inline QDMatchVector *QDrawMatches::matches1to2(){
 inline void QDrawMatches::setMatches1to2(QDMatchVector *matches1to2){
     m_matches = matches1to2;
     emit matches1to2Changed();
+    m_matchSurfaceDirty = true;
+    update();
+}
+
+inline int QDrawMatches::matchIndex() const{
+    return m_matchIndex;
+}
+
+inline void QDrawMatches::setMatchIndex(int matchIndex){
+    m_matchIndex = matchIndex;
+    emit matchIndexChanged();
     m_matchSurfaceDirty = true;
     update();
 }

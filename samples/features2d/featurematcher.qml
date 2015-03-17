@@ -79,8 +79,9 @@ Grid{
     
     DrawMatches{
         keypoints1 : queryFeatureDetect.keypoints
-        keypoints2 : trainImageLoader.keypoints[1]
+        keypoints2 : trainImageLoader.keypoints[0]
         matches1to2 : descriptorMatcher.matches
+        matchIndex : 0
     }
     
 }
