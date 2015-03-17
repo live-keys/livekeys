@@ -27,6 +27,9 @@
 #include "QDescriptorExtractor.hpp"
 #include "QBriefDescriptorExtractor.hpp"
 #include "QBriskDescriptorExtractor.hpp"
+#include "QOrbDescriptorExtractor.hpp"
+#include "QFreakDescriptorExtractor.hpp"
+
 #include "QDMatchVector.hpp"
 #include "QDescriptorMatcher.hpp"
 #include "QBruteForceMatcher.hpp"
@@ -48,6 +51,8 @@ void Lcvfeatures2dPlugin::registerTypes(const char *uri){
     qmlRegisterType<QDescriptorExtractor>(        uri, 1, 0, "DescriptorExtractor");
     qmlRegisterType<QBriefDescriptorExtractor>(   uri, 1, 0, "BriefDescriptorExtractor");
     qmlRegisterType<QBriskDescriptorExtractor>(   uri, 1, 0, "BriskDescriptorExtractor");
+    qmlRegisterType<QOrbDescriptorExtractor>(     uri, 1, 0, "OrbDescriptorExtractor");
+    qmlRegisterType<QFreakDescriptorExtractor>(   uri, 1, 0, "FreakDescriptorExtractor");
 
     qmlRegisterType<QDMatchVector>(               uri, 1, 0, "DMatchVector");
     qmlRegisterType<QDescriptorMatcher>(          uri, 1, 0, "DescriptorMatcher");
