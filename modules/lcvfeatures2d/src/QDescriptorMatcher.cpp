@@ -1,6 +1,8 @@
 #include "QDescriptorMatcher.hpp"
 #include "opencv2/features2d/features2d.hpp"
 
+#include <QDebug>
+
 QDescriptorMatcher::QDescriptorMatcher(QQuickItem *parent)
     : QQuickItem(parent)
     , m_matcher(0)
@@ -28,19 +30,31 @@ void QDescriptorMatcher::add(QMat* descriptors){
         std::vector<cv::Mat> descriptorVector;
         descriptorVector.push_back(*descriptors->cvMat());
         m_matcher->add(descriptorVector);
+    } else {
+        qWarning("Descriptor Matcher Add: No matcher defined. You need to initialize the matcher manually.");
     }
 }
 
 void QDescriptorMatcher::train(){
     if ( m_matcher ){
-        m_matcher->train();
-        match(m_queryDescriptors, m_matches);
+        try{
+            m_matcher->train();
+            match(m_queryDescriptors, m_matches);
+        } catch ( cv::Exception& e ){
+            qCritical(qPrintable( QString( QString("Descriptor matcher train: ") + e.what()) ) );
+        }
+    } else {
+        qWarning("Descriptor Matcher Train: No matcher defined. You need to initialize the matcher manually.");
     }
 }
 
 void QDescriptorMatcher::match(QMat* queryDescriptors, QDMatchVector* matches){
     if ( m_matcher ){
-        m_matcher->match(*queryDescriptors->cvMat(), matches->matches() );
+        try{
+            m_matcher->match(*queryDescriptors->cvMat(), matches->matches() );
+        } catch ( cv::Exception& e ){
+            qCritical(qPrintable( QString( QString("Descriptor matcher match: ") + e.what()) ) );
+        }
     }
 }
 
@@ -48,4 +62,10 @@ void QDescriptorMatcher::componentComplete(){
     QQuickItem::componentComplete();
     match(m_queryDescriptors, m_matches);
     emit matchesChanged();
+}
+
+void QDescriptorMatcher::initializeMatcher(cv::DescriptorMatcher* matcher){
+    delete m_matcher;
+    m_matcher = matcher;
+    match(m_queryDescriptors, m_matches);
 }

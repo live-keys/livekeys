@@ -16,7 +16,8 @@ HEADERS += \
     $$PWD/QDenseFeatureDetector.hpp \
     $$PWD/QOrbFeatureDetector.hpp \
     $$PWD/QOrbDescriptorExtractor.hpp \
-    $$PWD/QFreakDescriptorExtractor.hpp
+    $$PWD/QFreakDescriptorExtractor.hpp \
+    $$PWD/QFlannBasedMatcher.hpp
 
 SOURCES += \
     $$PWD/lcvfeatures2d_plugin.cpp \
@@ -36,4 +37,5 @@ SOURCES += \
     $$PWD/QDenseFeatureDetector.cpp \
     $$PWD/QOrbFeatureDetector.cpp \
     $$PWD/QOrbDescriptorExtractor.cpp \
-    $$PWD/QFreakDescriptorExtractor.cpp
+    $$PWD/QFreakDescriptorExtractor.cpp \
+    $$PWD/QFlannBasedMatcher.cpp

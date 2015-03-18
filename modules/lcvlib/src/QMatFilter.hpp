@@ -61,7 +61,7 @@ inline void QMatFilter::transform(){
     try{
         transform(*inputMat()->cvMat(), *output()->cvMat());
     } catch (cv::Exception& e ){
-        qDebug() << e.msg.c_str();
+        qCritical(e.msg.c_str());
     }
     emit outputChanged();
     update();

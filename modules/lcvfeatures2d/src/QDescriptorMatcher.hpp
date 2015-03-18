@@ -37,6 +37,7 @@ public slots:
 
 protected:
     virtual void componentComplete();
+    virtual void initializeMatcher(cv::DescriptorMatcher* matcher);
 
 private:
     cv::DescriptorMatcher* m_matcher;
