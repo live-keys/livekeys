@@ -30,10 +30,13 @@
 int main(int argc, char *argv[]){
 
     QGuiApplication app(argc, argv);
+    QGuiApplication::setApplicationName("Live CV");
+    QGuiApplication::setApplicationVersion("1.1.0");
+
+    if ( !app.arguments().contains("-c" ) )
+        qInstallMessageHandler(&QLiveCVLog::logFunction);
 
     QLibrary(QCoreApplication::applicationDirPath() + "/lcvlib").load();
-
-//    qInstallMessageHandler(&QLiveCVLog::logFunction);
 
     qmlRegisterType<QCursorShape>( "Cv", 1, 0, "CursorArea");
     qmlRegisterType<QCodeDocument>("Cv", 1, 0, "Document");
