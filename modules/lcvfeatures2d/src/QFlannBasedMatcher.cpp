@@ -40,7 +40,7 @@ void QFlannBasedMatcher::initialize(const QJsonObject& initParams){
         if ( initParams.contains("multiProbeLevel") )
             multiProbeLevel = initParams["multiProbeLevel"].toInt();
 
-        indexParams = new cv::flann::LshIndexParams-(tableNumber, keySize, multiProbeLevel);
+        indexParams = new cv::flann::LshIndexParams(tableNumber, keySize, multiProbeLevel);
 
     } else {
         qWarning(qPrintable(QString(

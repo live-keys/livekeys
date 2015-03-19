@@ -7,6 +7,7 @@ QDescriptorMatcher::QDescriptorMatcher(QQuickItem *parent)
     : QQuickItem(parent)
     , m_matcher(0)
     , m_matches(new QDMatchVector)
+    , m_queryDescriptors(QMat::nullMat())
 {
 }
 
@@ -14,6 +15,7 @@ QDescriptorMatcher::QDescriptorMatcher(cv::DescriptorMatcher* matcher, QQuickIte
     : QQuickItem(parent)
     , m_matcher(matcher)
     , m_matches(new QDMatchVector)
+    , m_queryDescriptors(QMat::nullMat())
 {
 }
 

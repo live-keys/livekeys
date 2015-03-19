@@ -29,8 +29,11 @@ inline QMat *QAbsDiff::input2(){
     return m_in2;
 }
 
-inline void QAbsDiff::setInput2(QMat *m){
-    m_in2 = m;
+inline void QAbsDiff::setInput2(QMat *mat){
+    if ( mat == 0 )
+        return;
+
+    m_in2 = mat;
     emit input2Changed();
     if ( m_in2->cvMat()->size() == inputMat()->cvMat()->size() )
         QMatFilter::transform();

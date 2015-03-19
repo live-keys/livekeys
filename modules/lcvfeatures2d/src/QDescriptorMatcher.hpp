@@ -47,6 +47,9 @@ private:
 };
 
 inline void QDescriptorMatcher::setQueryDescriptors(QMat* descriptors){
+    if ( descriptors == 0 )
+        return;
+
     m_queryDescriptors = descriptors;
     emit queryDescriptorsChanged();
     if ( isComponentComplete() ){

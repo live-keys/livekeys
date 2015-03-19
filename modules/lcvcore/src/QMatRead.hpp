@@ -149,6 +149,9 @@ inline QMat *QMatRead::inputMat(){
 }
 
 inline void QMatRead::setInputMat(QMat *mat){
+    if ( mat == 0 )
+        return;
+
     if ( mat != m_input ){
         m_input = mat;
         calculateImplicitSize();

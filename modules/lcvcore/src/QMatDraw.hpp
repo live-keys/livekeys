@@ -86,6 +86,9 @@ inline QMat *QMatDraw::inputMat(){
 }
 
 inline void QMatDraw::setInputMat(QMat *mat){
+    if ( mat == 0 )
+        return;
+
     cv::Mat* matData = mat->cvMat();
     if ( implicitWidth() != matData->cols || implicitHeight() != matData->rows ){
         setImplicitWidth(matData->cols);
