@@ -153,18 +153,21 @@ Rectangle {
                 function ensureVisible(r){
                     if (contentX >= r.x)
                         contentX = r.x;
-                    else if (contentX+width <= r.x+r.width)
-                        contentX = r.x+r.width-width;
+                    else if (contentX + width <= r.x + r.width)
+                        contentX = r.x + r.width - width;
                     if (contentY >= r.y)
                         contentY = r.y;
-                    else if (contentY+height <= r.y+r.height)
-                        contentY = r.y+r.height-height;
+                    else if (contentY + height <= r.y + r.height)
+                        contentY = r.y + r.height - height;
                 }
 
                 Editor{
                     id : editor
                     property bool isDirty : false
 
+                    onCursorRectangleChanged: {
+                        flick.ensureVisible(cursorRectangle)
+                    }
                     onSave: {
                         if ( codeDocument.file !==  "" ){
                             codeDocument.saveFile(editor.text)
@@ -178,8 +181,30 @@ Rectangle {
                     onToggleSize: {
                         if ( splitter.x < contentWrap.width / 2)
                             splitter.x = contentWrap.width - contentWrap.width / 4
-                        else
+                        else if ( splitter.x === contentWrap.width / 2 )
                             splitter.x = contentWrap.width / 4
+                        else
+                            splitter.x = contentWrap.width / 2
+                    }
+                    onPageDown : {
+                        var lines = flick.height / cursorRectangle.height
+                        var nextLineStartPos = editor.text.indexOf('\n', cursorPosition)
+                        while ( lines-- > 0 && nextLineStartPos !== -1 ){
+                            cursorPosition   = nextLineStartPos + 1
+                            nextLineStartPos = editor.text.indexOf('\n', cursorPosition)
+                        }
+                    }
+                    onPageUp : {
+                        var lines = flick.height / cursorRectangle.height
+                        var prevLineStartPos = editor.text.lastIndexOf('\n', cursorPosition - 1)
+                        while ( --lines > 0 ){
+                            cursorPosition   = prevLineStartPos + 1
+                            prevLineStartPos = editor.text.lastIndexOf('\n', cursorPosition - 2)
+                            if ( prevLineStartPos === -1 ){
+                                cursorPosition = 0;
+                                break;
+                            }
+                        }
                     }
 
                     text : "Rectangle{\n}"

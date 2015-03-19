@@ -24,6 +24,9 @@ TextEdit {
     signal open()
     signal toggleSize()
 
+    signal pageUp()
+    signal pageDown()
+
     focus : false
     font.family: "Courier New"
     font.pixelSize: 13
@@ -37,7 +40,6 @@ TextEdit {
     text : ""
     wrapMode: TextEdit.NoWrap
 
-    onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
     Keys.onPressed: {
         if ( (event.key === Qt.Key_BracketRight && (event.modifiers & Qt.ShiftModifier) ) ||
              (event.key === Qt.Key_BraceRight) ){
@@ -61,6 +63,12 @@ TextEdit {
             event.accepted = true
         } else if ( event.key === Qt.Key_E && (event.modifiers & Qt.ControlModifier ) ){
             editor.toggleSize()
+            event.accepted = true
+        } else if ( event.key === Qt.Key_PageUp ){
+            editor.pageUp()
+            event.accepted = true
+        } else if ( event.key === Qt.Key_PageDown ){
+            editor.pageDown()
             event.accepted = true
         } else
             event.accepted = false
