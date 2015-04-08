@@ -43,7 +43,7 @@ void QFlannBasedMatcher::initialize(const QJsonObject& initParams){
         indexParams = new cv::flann::LshIndexParams(tableNumber, keySize, multiProbeLevel);
 
     } else {
-        qWarning(qPrintable(QString(
+        qWarning("%s", qPrintable(QString(
             QString("FlannBasedMatcher : Unknown indexParams value in initialization function : '") +
             indexParamsType + "'. Cannot create matcher."
         )));

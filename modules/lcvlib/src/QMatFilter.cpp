@@ -113,3 +113,8 @@ QMatFilter::~QMatFilter(){
  */
 void QMatFilter::transform(cv::Mat&, cv::Mat&){
 }
+
+void QMatFilter::componentComplete(){
+    QQuickItem::componentComplete();
+    transform();
+}

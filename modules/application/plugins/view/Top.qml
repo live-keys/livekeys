@@ -269,6 +269,7 @@ Rectangle {
             anchors.left: parent.left
             anchors.leftMargin: 20
             anchors.verticalCenter: parent.verticalCenter
+            font.pixelSize: 12
             text : "Would you like to save your current code?"
         }
         Rectangle{
@@ -282,6 +283,7 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.leftMargin: 20
                 anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 12
                 text : "Yes"
             }
             MouseArea{
@@ -305,6 +307,7 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.leftMargin: 20
                 anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 12
                 text : "No"
             }
             MouseArea{

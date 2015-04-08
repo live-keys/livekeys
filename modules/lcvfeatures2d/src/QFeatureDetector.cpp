@@ -24,7 +24,7 @@ QFeatureDetector::~QFeatureDetector(){
     delete m_detector;
 }
 
-cv::FeatureDetector * const QFeatureDetector::detector(){
+cv::FeatureDetector *QFeatureDetector::detector(){
     return m_detector;
 }
 
@@ -38,7 +38,8 @@ void QFeatureDetector::detect(){
     if ( m_detector != 0 && isComponentComplete() ){
         m_detector->detect(*m_in->cvMat(), m_keypoints->keypoints(), *m_mask->cvMat());
 
-        m_keypoints->setMat(m_in->cvMat()->clone());
+        cv::Mat inClone = m_in->cvMat()->clone();
+        m_keypoints->setMat(inClone);
         emit keypointsChanged();
         update();
     }

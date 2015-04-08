@@ -43,6 +43,8 @@ using namespace cv;
 QGaussianBlur::QGaussianBlur(QQuickItem *parent)
     : QMatFilter(parent)
     , m_ksize(QSize(3, 3))
+    , m_sigmaX(0)
+    , m_sigmaY(0)
     , m_borderType(BORDER_DEFAULT)
 {
 }

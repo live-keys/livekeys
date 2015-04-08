@@ -22,7 +22,7 @@ public:
 public slots:
     void initialize(
             int nfeatures = 500, float scaleFactor = 1.2f, int nlevels = 8, int edgeThreshold = 31, int firstLevel = 0,
-            int WTA_K = 2, int scoreType = ScoreType::HARRIS_SCORE);
+            int WTA_K = 2, int scoreType = HARRIS_SCORE);
 
 };
 

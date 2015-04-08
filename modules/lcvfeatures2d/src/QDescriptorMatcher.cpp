@@ -8,6 +8,7 @@ QDescriptorMatcher::QDescriptorMatcher(QQuickItem *parent)
     , m_matcher(0)
     , m_matches(new QDMatchVector)
     , m_queryDescriptors(QMat::nullMat())
+    , m_knn(-1)
 {
 }
 
@@ -16,6 +17,7 @@ QDescriptorMatcher::QDescriptorMatcher(cv::DescriptorMatcher* matcher, QQuickIte
     , m_matcher(matcher)
     , m_matches(new QDMatchVector)
     , m_queryDescriptors(QMat::nullMat())
+    , m_knn(-1)
 {
 }
 
@@ -43,7 +45,7 @@ void QDescriptorMatcher::train(){
             m_matcher->train();
             match(m_queryDescriptors, m_matches);
         } catch ( cv::Exception& e ){
-            qCritical(qPrintable( QString( QString("Descriptor matcher train: ") + e.what()) ) );
+            qCritical("%s", qPrintable( QString( QString("Descriptor matcher train: ") + e.what()) ) );
         }
     } else {
         qWarning("Descriptor Matcher Train: No matcher defined. You need to initialize the matcher manually.");
@@ -51,11 +53,27 @@ void QDescriptorMatcher::train(){
 }
 
 void QDescriptorMatcher::match(QMat* queryDescriptors, QDMatchVector* matches){
+    if ( m_knn != -1 ){
+        knnMatch(queryDescriptors, matches, m_knn);
+    } else {
+        if ( m_matcher ){
+            try{
+                if ( matches->matches().size() != 1)
+                    matches->matches().resize(1);
+                m_matcher->match(*queryDescriptors->cvMat(), matches->matches()[0] );
+            } catch ( cv::Exception& e ){
+                qCritical("%s", qPrintable( QString( QString("Descriptor matcher match: ") + e.what()) ) );
+            }
+        }
+    }
+}
+
+void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches, int k){
     if ( m_matcher ){
         try{
-            m_matcher->match(*queryDescriptors->cvMat(), matches->matches() );
+            m_matcher->knnMatch(*queryDescriptors->cvMat(), matches->matches(), k);
         } catch ( cv::Exception& e ){
-            qCritical(qPrintable( QString( QString("Descriptor matcher match: ") + e.what()) ) );
+            qCritical("%s", qPrintable( QString( QString("Descriptor matcher match: ") + e.what()) ) );
         }
     }
 }

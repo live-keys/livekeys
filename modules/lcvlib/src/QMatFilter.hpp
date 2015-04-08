@@ -37,6 +37,9 @@ public:
 signals:
     void inputChanged();
 
+protected:
+    void componentComplete();
+
 private:
     QMat* m_in;
     
@@ -61,13 +64,15 @@ inline void QMatFilter::setInputMat(QMat *mat){
 }
 
 inline void QMatFilter::transform(){
-    try{
-        transform(*inputMat()->cvMat(), *output()->cvMat());
-    } catch (cv::Exception& e ){
-        qCritical(e.msg.c_str());
+    if ( isComponentComplete() ){
+        try{
+            transform(*inputMat()->cvMat(), *output()->cvMat());
+            emit outputChanged();
+            update();
+        } catch (cv::Exception& e ){
+            qCritical("%s", e.msg.c_str());
+        }
     }
-    emit outputChanged();
-    update();
 }
 
 #endif // QMATTRANSFORMATION_HPP

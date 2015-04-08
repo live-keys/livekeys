@@ -32,7 +32,7 @@ public:
     void setKeypoints(QKeyPointVector* keypoints);
 
 protected:
-    cv::FeatureDetector* const detector();
+    cv::FeatureDetector* detector();
     void initializeDetector(cv::FeatureDetector* detector);
     void detect();
 

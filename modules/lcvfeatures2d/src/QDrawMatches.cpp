@@ -18,7 +18,8 @@ QSGNode *QDrawMatches::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeD
 
     if ( m_keypoints1 && m_keypoints2 && m_matches && m_matchSurfaceDirty ){
 
-        const std::vector<cv::DMatch>& matches = m_matches->matches();
+//        const std::vector<cv::DMatch>& matches = m_matches->matches()[0];
+        const std::vector<cv::DMatch>& matches = m_matches->matches()[0];
 
 //        double max_dist = 0;
 //        double min_dist = 100;
@@ -59,22 +60,24 @@ QSGNode *QDrawMatches::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeD
                 m_mask[i] = 1;
         }
 
+        qDebug() << matches.size();
+
         try{
             cv::drawMatches(
-                        m_keypoints1->cvMat(),
-                        m_keypoints1->keypoints(),
-                        m_keypoints2->cvMat(),
-                        m_keypoints2->keypoints(),
-                        m_matches->matches(),
-                        *(output()->cvMat()),
-                        cv::Scalar::all(-1),
-                        cv::Scalar::all(-1),
-                        m_mask
-                        );
+                m_keypoints1->cvMat(),
+                m_keypoints1->keypoints(),
+                m_keypoints2->cvMat(),
+                m_keypoints2->keypoints(),
+                matches,
+                *(output()->cvMat()),
+                cv::Scalar::all(-1),
+                cv::Scalar::all(-1),
+                m_mask
+            );
             setImplicitSize(output()->cvMat()->cols, output()->cvMat()->rows);
 
         } catch(cv::Exception& e){
-            qWarning(e.what());
+            qWarning("%s", e.what());
         }
 
         m_matchSurfaceDirty = false;

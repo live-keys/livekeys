@@ -43,7 +43,6 @@ Grid{
     }
     
     BriskDescriptorExtractor{
-        input : trainImageLoader.output
         keypoints : trainFeatureDetect.keypoints
         onDescriptorsChanged : {
             descriptorMatcher.add(descriptors)
@@ -66,7 +65,6 @@ Grid{
     
     BriskDescriptorExtractor{
         id : queryFeatureExtract
-        input : queryImageLoader.output
         keypoints : queryFeatureDetect.keypoints
     }
     
@@ -81,7 +79,7 @@ Grid{
             })
         }
     }
-    
+       
     DrawMatches{
         keypoints1 : queryFeatureDetect.keypoints
         keypoints2 : trainImageLoader.keypoints[0]

@@ -12,19 +12,18 @@ public:
     explicit QDMatchVector(QQuickItem *parent = 0);
     virtual ~QDMatchVector();
 
-    std::vector<cv::DMatch>& matches();
-    const std::vector<cv::DMatch>& matches() const;
+    std::vector<std::vector<cv::DMatch> >& matches();
+    const std::vector<std::vector<cv::DMatch> >& matches() const;
 
 private:
-    std::vector<cv::DMatch> m_matches;
-
+    std::vector<std::vector<cv::DMatch> > m_matches;
 };
 
-inline const std::vector<cv::DMatch>& QDMatchVector::matches() const{
+inline const std::vector< std::vector<cv::DMatch> >& QDMatchVector::matches() const{
     return m_matches;
 }
 
-inline std::vector<cv::DMatch>& QDMatchVector::matches(){
+inline std::vector<std::vector<cv::DMatch> >& QDMatchVector::matches(){
     return m_matches;
 }
 
