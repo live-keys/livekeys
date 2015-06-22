@@ -3,6 +3,7 @@
 
 #include <QQuickItem>
 #include "QMat.hpp"
+#include "QLCVFeatures2DGlobal.hpp"
 #include "QKeyPointVector.hpp"
 
 namespace cv{
@@ -10,8 +11,8 @@ class DescriptorExtractor;
 }
 
 class QKeyPointVector;
-class QDescriptorExtractor : public QQuickItem
-{
+class Q_LCVFEATURES2D_EXPORT QDescriptorExtractor : public QQuickItem{
+
     Q_OBJECT
     Q_PROPERTY(QKeyPointVector* keypoints READ keypoints   WRITE  setKeypoints NOTIFY keypointsChanged)
     Q_PROPERTY(QMat* descriptors          READ descriptors NOTIFY descriptorsChanged)

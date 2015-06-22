@@ -1,7 +1,8 @@
 #include "QBriefDescriptorExtractor.hpp"
 #include "opencv2/features2d/features2d.hpp"
 
-QBriefDescriptorExtractor::QBriefDescriptorExtractor(QQuickItem *parent)
+QBriefDescriptorExtractor::
+QBriefDescriptorExtractor(QQuickItem *parent)
     : QDescriptorExtractor(new cv::BriefDescriptorExtractor, parent)
 {
 }

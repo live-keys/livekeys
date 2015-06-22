@@ -2,9 +2,11 @@
 #define QKEYPOINTVECTOR_HPP
 
 #include <QQuickItem>
+#include "QLCVFeatures2DGlobal.hpp"
+
 #include "opencv2/features2d/features2d.hpp"
 
-class QKeyPointVector : public QQuickItem{
+class Q_LCVFEATURES2D_EXPORT QKeyPointVector : public QQuickItem{
 
     Q_OBJECT
 

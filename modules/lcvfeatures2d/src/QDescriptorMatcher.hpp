@@ -3,13 +3,14 @@
 
 #include <QQuickItem>
 #include "QMat.hpp"
+#include "QLCVFeatures2DGlobal.hpp"
 #include "QDMatchVector.hpp"
 
 namespace cv{
     class DescriptorMatcher;
 }
 
-class QDescriptorMatcher : public QQuickItem{
+class Q_LCVFEATURES2D_EXPORT QDescriptorMatcher : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(QMat*          queryDescriptors READ queryDescriptors WRITE  setQueryDescriptors NOTIFY queryDescriptorsChanged)

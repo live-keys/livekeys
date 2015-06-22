@@ -2,9 +2,10 @@
 #define QDMATCHVECTOR_HPP
 
 #include <QQuickItem>
+#include "QLCVFeatures2DGlobal.hpp"
 #include "opencv2/features2d/features2d.hpp"
 
-class QDMatchVector : public QQuickItem{
+class Q_LCVFEATURES2D_EXPORT QDMatchVector : public QQuickItem{
 
     Q_OBJECT
 

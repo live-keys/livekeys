@@ -17,7 +17,10 @@ HEADERS += \
     $$PWD/QOrbFeatureDetector.hpp \
     $$PWD/QOrbDescriptorExtractor.hpp \
     $$PWD/QFreakDescriptorExtractor.hpp \
-    $$PWD/QFlannBasedMatcher.hpp
+    $$PWD/QFlannBasedMatcher.hpp \
+    $$PWD/QMSerFeatureDetector.hpp \
+    $$PWD/QSimpleBlobDetector.hpp \
+    $$PWD/QLCVFeatures2DGlobal.hpp
 
 SOURCES += \
     $$PWD/lcvfeatures2d_plugin.cpp \
@@ -38,4 +41,6 @@ SOURCES += \
     $$PWD/QOrbFeatureDetector.cpp \
     $$PWD/QOrbDescriptorExtractor.cpp \
     $$PWD/QFreakDescriptorExtractor.cpp \
-    $$PWD/QFlannBasedMatcher.cpp
+    $$PWD/QFlannBasedMatcher.cpp \
+    $$PWD/QMSerFeatureDetector.cpp \
+    $$PWD/QSimpleBlobDetector.cpp

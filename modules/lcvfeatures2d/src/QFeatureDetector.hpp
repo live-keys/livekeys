@@ -2,14 +2,14 @@
 #define QFEATUREDETECTOR_HPP
 
 #include "QMatDisplay.hpp"
-
+#include "QLCVFeatures2DGlobal.hpp"
 
 namespace cv{
 class FeatureDetector;
 }
 
 class QKeyPointVector;
-class QFeatureDetector : public QMatDisplay{
+class Q_LCVFEATURES2D_EXPORT QFeatureDetector : public QMatDisplay{
 
     Q_OBJECT
     Q_PROPERTY(QMat* input                READ inputMat  WRITE setInputMat  NOTIFY inputChanged)

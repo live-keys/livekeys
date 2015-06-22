@@ -2,10 +2,11 @@
 #define QDRAWMATCHES_HPP
 
 #include "QMatDisplay.hpp"
+#include "QLCVFeatures2DGlobal.hpp"
 #include "QKeyPointVector.hpp"
 #include "QDMatchVector.hpp"
 
-class QDrawMatches : public QMatDisplay{
+class Q_LCVFEATURES2D_EXPORT QDrawMatches : public QMatDisplay{
 
     Q_OBJECT
     Q_PROPERTY(QKeyPointVector* keypoints1  READ keypoints1  WRITE setKeypoints1  NOTIFY keypoints1Changed)
