@@ -39,12 +39,15 @@ public slots:
     void add(QMat* descriptors);
     void train();
 
+
     void match(QMat* queryDescriptors, QDMatchVector* matches);
     void knnMatch(QMat* queryDescriptors, QDMatchVector* matches, int k = 2);
 
 protected:
     virtual void componentComplete();
     virtual void initializeMatcher(cv::DescriptorMatcher* matcher);
+
+    void callMatch();
 
 private:
     cv::DescriptorMatcher* m_matcher;

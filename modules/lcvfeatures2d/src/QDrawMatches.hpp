@@ -30,7 +30,6 @@ public:
     int matchIndex() const;
     void setMatchIndex(int matchIndex);
 
-
 protected:
     virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
 
@@ -43,6 +42,8 @@ signals:
 public slots:
 
 private:
+    void drawExtractedMatches(const std::vector<cv::DMatch> matches);
+
     QKeyPointVector*  m_keypoints1;
     QKeyPointVector*  m_keypoints2;
     QDMatchVector*    m_matches;
@@ -76,13 +77,6 @@ inline void QDrawMatches::setKeypoints2(QKeyPointVector *keypoints2){
 
 inline QDMatchVector *QDrawMatches::matches1to2(){
     return m_matches;
-}
-
-inline void QDrawMatches::setMatches1to2(QDMatchVector *matches1to2){
-    m_matches = matches1to2;
-    emit matches1to2Changed();
-    m_matchSurfaceDirty = true;
-    update();
 }
 
 inline int QDrawMatches::matchIndex() const{

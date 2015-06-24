@@ -6,6 +6,7 @@
 class QBriskFeatureDetector : public QFeatureDetector{
 
     Q_OBJECT
+
 public:
     explicit QBriskFeatureDetector(QQuickItem *parent = 0);
     virtual ~QBriskFeatureDetector();

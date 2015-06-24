@@ -32,11 +32,13 @@
 #include "QOrbDescriptorExtractor.hpp"
 #include "QFreakDescriptorExtractor.hpp"
 
-#include "QDMatchVector.hpp"
 #include "QDescriptorMatcher.hpp"
 #include "QBruteForceMatcher.hpp"
 #include "QFlannBasedMatcher.hpp"
+
+#include "QDMatchVector.hpp"
 #include "QDrawMatches.hpp"
+#include "QDescriptorMatchFilter.hpp"
 
 #include <qqml.h>
 
@@ -64,6 +66,7 @@ void Lcvfeatures2dPlugin::registerTypes(const char *uri){
     qmlRegisterType<QBruteForceMatcher>(          uri, 1, 0, "BruteForceMatcher");
     qmlRegisterType<QFlannBasedMatcher>(          uri, 1, 0, "FlannBasedMatcher");
     qmlRegisterType<QDrawMatches>(                uri, 1, 0, "DrawMatches");
+    qmlRegisterType<QDescriptorMatchFilter>(      uri, 1, 0, "DescriptorMatchFilter");
 }
 
 

@@ -74,6 +74,7 @@ Grid{
     BruteForceMatcher{
         id : descriptorMatcher
         queryDescriptors : queryFeatureExtract.descriptors
+        knn : 1
     }
     
     DrawMatches{
