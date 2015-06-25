@@ -1,0 +1,118 @@
+import QtQuick.Controls 1.2
+import 'lcvcore' 1.0
+import "lcvimgproc" 1.0
+import "lcvfeatures2d" 1.0
+
+Row{
+
+    // Fast feature detector sample
+
+    property string imagePath :
+        codeDocument.path + '/../_images/object_101_piano_train1.jpg'
+
+    ImRead{
+        id : inputImage
+        file : imagePath
+    }
+
+    SimpleBlobDetector{
+        id : fastFeatureDetector
+        input : inputImage.output
+        Component.onCompleted : {
+            initialize({
+                'minDistanceBetweenBlobs': 50.0,
+                'minArea' : 20.0,
+                'maxArea': 500.0
+            });
+        }
+        onKeypointsChanged : {
+            //var list = keypoints.keyPointData();
+            //keypointView.model = list
+        }
+    }
+    
+    MatDraw{
+        id : keypointHighlight
+        input: fastFeatureDetector.output
+    }
+    
+    Column{
+        Rectangle{
+            width: 400
+            height: 30
+            color: "#223344"
+            Text{
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+                anchors.verticalCenter: parent.verticalCenter
+                text: 'Total Keypoints: ' + keypointView.model.length
+                
+                color: '#fff'
+                font.pixelSize: 14
+                font.family: 'Arial'
+                font.bold: true
+            }
+        }
+        
+        property FeatureDetector detector : fastFeatureDetector
+        
+        ScrollView{
+            width: 400
+            height: 600
+            
+        ListView{
+            id : keypointView
+            model : parent.detector ? parent.detector.keypoints.keyPointData() : []
+            
+            width: 400
+            height: 600
+            clip: true
+            
+            delegate: Rectangle{
+                width: 400
+                height: 50
+                color: keypointMouse.containsMouse ? "#223333" : "#222228"
+                Text{
+                    anchors.left: parent.left
+                    anchors.leftMargin: 20
+                    anchors.top: parent.top
+                    anchors.topMargin: 7
+                    text: modelData.pt ? 
+                        'P(' + parseFloat(modelData.pt.x).toFixed(2) + ', ' + parseFloat(modelData.pt.y).toFixed(2) + ')' : ''
+                    font.pixelSize: 12
+                    font.family: 'Arial'
+                    color: "#fff"
+                }
+                Text{
+                    anchors.left: parent.left
+                    anchors.leftMargin: 20
+                    anchors.top: parent.top
+                    anchors.topMargin: 26
+                    font.pixelSize: 11
+                    font.family: 'Arial'
+                    color: '#fff'
+                    text: 
+                        'Size(' + parseFloat(modelData.size).toFixed(2) + '), ' + 
+                        'Angle(' + parseFloat(modelData.angle).toFixed(2) + '), ' + 
+                        'Response(' + parseFloat(modelData.response).toFixed(2) + '), ' + 
+                        'Octave(' + modelData.octave + '), ' + 
+                        'Class(' + modelData.classId + ')'
+                }
+                MouseArea{
+                    id: keypointMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered : {
+                        if ( modelData.pt )
+                            keypointHighlight.circle(modelData.pt, 10, "#33cc33", 2, 8, 0);
+                    }
+                    onExited : {
+                        keypointHighlight.cleanUp(); 
+                    }
+                }
+            }
+        }
+    }
+    }
+    
+}

@@ -75,6 +75,8 @@ QMatDraw::~QMatDraw(){
 void QMatDraw::cleanUp(){
     if ( inputMat() )
         inputMat()->cvMat()->copyTo(*output()->cvMat());
+    emit outputChanged();
+    update();
 }
 
 /*!

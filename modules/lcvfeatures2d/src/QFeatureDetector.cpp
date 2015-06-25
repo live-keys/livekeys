@@ -2,8 +2,6 @@
 #include "QKeyPointVector.hpp"
 #include "opencv2/features2d/features2d.hpp"
 
-#include "opencv2/highgui/highgui.hpp"
-
 QFeatureDetector::QFeatureDetector(QQuickItem *parent)
     : QMatDisplay(parent)
     , m_detector(0)

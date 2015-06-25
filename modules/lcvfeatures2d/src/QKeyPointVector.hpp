@@ -6,6 +6,7 @@
 
 #include "opencv2/features2d/features2d.hpp"
 
+class QKeyPoint;
 class Q_LCVFEATURES2D_EXPORT QKeyPointVector : public QQuickItem{
 
     Q_OBJECT
@@ -22,6 +23,12 @@ public:
 
 public slots:
     QKeyPointVector* createOwnedObject();
+    QList<QObject*> keyPointData();
+    void setKeyPointData(const QList<QObject*> data);
+    void appendKeyPoint(QKeyPoint* pt);
+    void removeKeyPoint(int position);
+    QKeyPoint *createKeyPoint();
+    int size();
 
 private:
     std::vector<cv::KeyPoint> m_keyPoints;
@@ -42,6 +49,10 @@ inline const cv::Mat &QKeyPointVector::cvMat(){
 
 inline void QKeyPointVector::setMat(cv::Mat &mat){
     m_mat = mat;
+}
+
+inline int QKeyPointVector::size(){
+    return static_cast<int>(m_keyPoints.size());
 }
 
 #endif // QKEYPOINTVECTOR_HPP

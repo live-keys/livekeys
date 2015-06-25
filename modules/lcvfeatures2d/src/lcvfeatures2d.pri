@@ -21,7 +21,8 @@ HEADERS += \
     $$PWD/QMSerFeatureDetector.hpp \
     $$PWD/QSimpleBlobDetector.hpp \
     $$PWD/QLCVFeatures2DGlobal.hpp \
-    $$PWD/QDescriptorMatchFilter.hpp
+    $$PWD/QDescriptorMatchFilter.hpp \
+    $$PWD/QKeyPoint.hpp
 
 SOURCES += \
     $$PWD/lcvfeatures2d_plugin.cpp \
@@ -45,4 +46,5 @@ SOURCES += \
     $$PWD/QFlannBasedMatcher.cpp \
     $$PWD/QMSerFeatureDetector.cpp \
     $$PWD/QSimpleBlobDetector.cpp \
-    $$PWD/QDescriptorMatchFilter.cpp
+    $$PWD/QDescriptorMatchFilter.cpp \
+    $$PWD/QKeyPoint.cpp
