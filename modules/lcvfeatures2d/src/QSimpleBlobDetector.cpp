@@ -12,6 +12,12 @@ QSimpleBlobDetector::~QSimpleBlobDetector(){
 void QSimpleBlobDetector::initialize(const QVariantMap &settings){
     cv::SimpleBlobDetector::Params params;
 
+    params.filterByInertia     = false;
+    params.filterByConvexity   = false;
+    params.filterByColor       = false;
+    params.filterByCircularity = false;
+    params.filterByArea        = false;
+
     if ( settings.contains("thresholdStep") )
         params.thresholdStep       = settings["thresholdStep"].toFloat();
     if ( settings.contains("minThreshold") )
