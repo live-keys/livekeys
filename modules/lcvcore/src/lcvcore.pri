@@ -12,7 +12,8 @@ HEADERS += \
     $$PWD/QVideoCaptureThread.hpp \
     $$PWD/QAlphaMerge.hpp \
     $$PWD/lcvcore_plugin.hpp \
-    $$PWD/QAbsDiff.hpp
+    $$PWD/QAbsDiff.hpp \
+    $$PWD/QDrawHistogram.hpp
 
 SOURCES += \
     $$PWD/QCamCapture.cpp \
@@ -28,4 +29,5 @@ SOURCES += \
     $$PWD/QVideoCaptureThread.cpp \
     $$PWD/QAlphaMerge.cpp \
     $$PWD/lcvcore_plugin.cpp \
-    $$PWD/QAbsDiff.cpp
+    $$PWD/QAbsDiff.cpp \
+    $$PWD/QDrawHistogram.cpp

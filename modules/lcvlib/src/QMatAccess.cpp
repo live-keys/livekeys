@@ -79,6 +79,7 @@ namespace helpers{
 template<typename T, typename LT> void cacheValues( Mat& m, QVariantList& output){
     T* data  = reinterpret_cast<T*>(m.data);
     int step = (int)(m.step / sizeof(T));
+
     for ( int i = 0; i < m.rows; ++i ){
         QList<LT> row;
         int rowstep = i * step;
@@ -137,7 +138,7 @@ QMatAccess::~QMatAccess(){
 /*!
   \brief QMatAccess::setUpCache
  */
-void QMatAccess::setUpCache(){
+void QMatAccess::setupCache(){
     Mat* cvmat = m_mat->cvMat();
 
     switch(cvmat->depth()){
@@ -223,7 +224,7 @@ void QMatAccess::setUpCache(){
  */
 QVariantList QMatAccess::values(){
     if ( m_values.empty() )
-        setUpCache();
+        setupCache();
     return m_values;
 }
 

@@ -42,8 +42,7 @@ public slots:
     void setValues(QVariantList values);
 
 private:
-    void setUpCache();
-
+    void setupCache();
 
     QMat* m_mat;
 
