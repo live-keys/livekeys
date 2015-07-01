@@ -7,6 +7,81 @@
 
 #include <QPainter>
 
+// QAbstractHistogramRenderer definitions
+// --------------------------------------
+
+QAbstractHistogramRenderer::QAbstractHistogramRenderer(){
+}
+
+QAbstractHistogramRenderer::~QAbstractHistogramRenderer(){
+}
+
+// QAbstractHistogramRenderer implementations
+// ------------------------------------------
+
+class QHistogramConnectedLinesRenderer : public QAbstractHistogramRenderer{
+
+public:
+    QHistogramConnectedLinesRenderer(){}
+
+    virtual void renderSingleList(
+        QPainter* painter,
+        const QSize &size,
+        const QVariantList& values,
+        const QColor &color,
+        qreal maxValue
+    ){
+        painter->setPen(QPen(color, 1));
+
+        int totalItems = values.size();
+        qreal widthStep  = (qreal)size.width() / (totalItems > 1 ? totalItems - 1 : totalItems);
+        qreal heightStep = (qreal)size.height() / maxValue;
+
+        for ( int i = 1; i < values.size(); ++i ){
+            double val = values[i].toDouble();
+            painter->drawLine(
+                QPointF((i - 1) * widthStep, size.height() - values[i - 1].toDouble() * heightStep),
+                QPointF(i * widthStep, size.height() - val * heightStep)
+            );
+        }
+    }
+};
+
+class QHistogramRectanglesRenderer : public QAbstractHistogramRenderer{
+
+public:
+    QHistogramRectanglesRenderer(){}
+
+    virtual void renderSingleList(
+        QPainter* painter,
+        const QSize &size,
+        const QVariantList& values,
+        const QColor &color,
+        qreal maxValue
+    ){
+        painter->setPen(QPen(color, 1));
+        painter->setBrush(QBrush(color));
+
+        int totalItems = values.size();
+        qreal widthStep  = (qreal)size.width() / totalItems;
+        qreal heightStep = (qreal)size.height() / maxValue;
+
+        for ( int i = 0; i < values.size(); ++i ){
+            double val = values[i].toDouble();
+            painter->drawRect(
+                QRectF(
+                    QPointF((double)i * widthStep, size.height()),
+                    QPointF((double)(i + 1) * widthStep, size.height() - val * heightStep)
+                )
+            );
+        }
+    }
+};
+
+
+// QDrawHistogramNode definitions
+// ------------------------------
+
 QDrawHistogramNode::QDrawHistogramNode(QQuickWindow *window)
     : m_fbo(0)
     , m_texture(0)
@@ -23,7 +98,12 @@ QDrawHistogramNode::~QDrawHistogramNode(){
     delete m_paintDevice;
 }
 
-void QDrawHistogramNode::render(const QVariantList &values, const QVariantList &colors, qreal maxValue){
+void QDrawHistogramNode::render(
+        const QVariantList &values,
+        const QVariantList &colors,
+        qreal maxValue,
+        QAbstractHistogramRenderer* renderer
+){
     QSize size = rect().size().toSize();
 
     if ( !m_fbo ){
@@ -66,7 +146,7 @@ void QDrawHistogramNode::render(const QVariantList &values, const QVariantList &
 
             QColor color = colorIt == colors.end() ? QColor(255, 255, 255, 255) : QColor((*colorIt).toString());
 
-            renderSingleList(
+            renderer->renderSingleList(
                 m_painter,
                 size,
                 v.toList(),
@@ -79,7 +159,7 @@ void QDrawHistogramNode::render(const QVariantList &values, const QVariantList &
                 colorIt = colors.begin();
         }
     } else {
-        renderSingleList(
+        renderer->renderSingleList(
             m_painter,
             size,
             values,
@@ -92,30 +172,14 @@ void QDrawHistogramNode::render(const QVariantList &values, const QVariantList &
     m_fbo->release();
 }
 
-void QDrawHistogramNode::renderSingleList(QPainter *painter,
-        const QSize& size,
-        const QVariantList &values,
-        const QColor &color,
-        qreal maxValue)
-{
-    painter->setPen(QPen(color, 1));
-
-    int totalItems = values.size();
-    qreal widthStep  = (qreal)size.width() / (totalItems > 1 ? totalItems - 1 : totalItems);
-    qreal heightStep = (qreal)size.height() / maxValue;
-
-    for ( int i = 1; i < values.size(); ++i ){
-        double val = values[i].toDouble();
-        painter->drawLine(
-            QPointF((i - 1) * widthStep, size.height() - values[i - 1].toDouble() * heightStep),
-            QPointF(i * widthStep, size.height() - val * heightStep)
-        );
-    }
-}
+// QDrawHistogram definitions
+// --------------------------
 
 QDrawHistogram::QDrawHistogram(QQuickItem *parent)
     : QQuickItem(parent)
     , m_maxValue(100)
+    , m_renderType(QDrawHistogram::ConnectedLines)
+    , m_renderer(new QHistogramConnectedLinesRenderer)
 {
     setFlag(ItemHasContents, true);
 }
@@ -129,8 +193,26 @@ QSGNode *QDrawHistogram::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePai
         node = new QDrawHistogramNode(window());
 
     node->setRect(boundingRect());
-    node->render(m_values, m_colors, m_maxValue);
+    node->render(m_values, m_colors, m_maxValue, m_renderer);
 
     return node;
 }
 
+void QDrawHistogram::setRender(QDrawHistogram::RenderType arg){
+    if (m_renderType == arg)
+        return;
+
+    m_renderType = arg;
+    delete m_renderer;
+
+    switch (m_renderType) {
+    case QDrawHistogram::ConnectedLines:
+        m_renderer = new QHistogramConnectedLinesRenderer;
+        break;
+    case QDrawHistogram::Rectangles:
+        m_renderer = new QHistogramRectanglesRenderer;
+        break;
+    }
+
+    emit renderChanged();
+}
