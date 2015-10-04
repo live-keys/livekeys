@@ -104,5 +104,11 @@ unix{
 
 }
 
+macx {
+# This solves failure to find OpenCV.
+QT_CONFIG -= no-pkg-config
+# And this solves a linking error (XCode quirkies).
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.9
+}
 
 }
