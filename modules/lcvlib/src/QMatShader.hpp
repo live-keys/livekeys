@@ -5,11 +5,11 @@
 ** This file is part of Live CV application.
 **
 ** GNU General Public License Usage
-** 
-** This file may be used under the terms of the GNU General Public License 
-** version 3.0 as published by the Free Software Foundation and appearing 
-** in the file LICENSE.GPL included in the packaging of this file.  Please 
-** review the following information to ensure the GNU General Public License 
+**
+** This file may be used under the terms of the GNU General Public License
+** version 3.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.  Please
+** review the following information to ensure the GNU General Public License
 ** version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
 **
 ****************************************************************************/
@@ -21,6 +21,7 @@
 #include "QMatState.hpp"
 #include "QMat.hpp"
 #include "QLCVGlobal.hpp"
+#include <QOpenGLFunctions>
 
 class Q_LCV_EXPORT QMatShader : public QSGSimpleMaterialShader<QMatState>{
 
@@ -39,34 +40,35 @@ public:
 
 
 private:
-    QList<GLuint> m_textures;
-    int           m_textureId;
+    QList<GLuint>    m_textures;
+    int              m_textureId;
+    QOpenGLFunctions m_glFunctions;
 
 };
 
 inline const char *QMatShader::vertexShader() const{
     return
-            "attribute highp vec4 aVertex;                              \n"
-            "attribute highp vec2 aTexCoord;                            \n"
-            "uniform highp mat4 qt_Matrix;                              \n"
-            "varying highp vec2 texCoord;                               \n"
-            "void main() {                                              \n"
-            "    gl_Position = qt_Matrix * aVertex;                     \n"
-            "    texCoord[0] = aTexCoord.x;"
-            "    texCoord[1] = aTexCoord.y;"
-            "}";
+        "attribute highp vec4 aVertex;                              \n"
+        "attribute highp vec2 aTexCoord;                            \n"
+        "uniform highp mat4 qt_Matrix;                              \n"
+        "varying highp vec2 texCoord;                               \n"
+        "void main() {                                              \n"
+        "    gl_Position = qt_Matrix * aVertex;                     \n"
+        "    texCoord[0] = aTexCoord.x;"
+        "    texCoord[1] = aTexCoord.y;"
+        "}";
 }
 
 inline const char *QMatShader::fragmentShader() const{
     return
-            "uniform lowp float qt_Opacity;                             \n"
-            "varying highp vec2 texCoord;                               \n"
-            "uniform sampler2D textures[1];                             \n"
-            "void main ()                                               \n"
-            "{                                                          \n"
-            "   highp vec4 textureColor = texture2D( textures[0], texCoord.st );"
-            "   gl_FragColor = vec4(textureColor.b, textureColor.g, textureColor.r, 1.0) * ( qt_Opacity * textureColor.a );"
-            "}";
+        "uniform lowp float qt_Opacity;                             \n"
+        "varying highp vec2 texCoord;                               \n"
+        "uniform sampler2D textures[1];                             \n"
+        "void main ()                                               \n"
+        "{                                                          \n"
+        "   highp vec4 textureColor = texture2D( textures[0], texCoord.st );"
+        "   gl_FragColor = vec4(textureColor.b, textureColor.g, textureColor.r, 1.0) * ( qt_Opacity * textureColor.a );"
+        "}";
 }
 
 inline QList<QByteArray> QMatShader::attributes() const{
@@ -74,20 +76,20 @@ inline QList<QByteArray> QMatShader::attributes() const{
 }
 
 inline void QMatShader::updateState(const QMatState *state, const QMatState *){
-
     if ( state->mat != 0 ){
-        glEnable(GL_TEXTURE_2D);
+        m_glFunctions.initializeOpenGLFunctions();
+        m_glFunctions.glActiveTexture(GL_TEXTURE_2D);
         if ( !state->textureSync ){
             if ( state->textureIndex == -1 ){
                 state->textureIndex = m_textures.length();
                 m_textures.append(0);
-                glGenTextures(1, &m_textures[state->textureIndex]);
+                m_glFunctions.glGenTextures(1, &m_textures[state->textureIndex]);
             }
             loadTexture(state->mat, state->textureIndex, state->linearFilter);
             state->textureSync = true;
         }
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_textures[state->textureIndex]);
+        m_glFunctions.glActiveTexture(GL_TEXTURE0);
+        m_glFunctions.glBindTexture(GL_TEXTURE_2D, m_textures[state->textureIndex]);
         program()->setUniformValue(m_textureId, 0);
     }
 }
