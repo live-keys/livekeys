@@ -17,7 +17,7 @@
 import QtQuick 2.2
 import QtQuick.Dialogs 1.0
 import QtQuick.Controls 1.1
-//import Cv 1.0
+import Cv 1.0
 import "view"
 
 ApplicationWindow {
@@ -137,128 +137,31 @@ ApplicationWindow {
         anchors.right: parent.right
         height : parent.height - header.height
 
-        Rectangle{
-            id : editorWrap
-            color : "#041725"
-            height : parent.height
-            anchors.left: parent.left
-            clip : true
+        Editor{
+            id: editor
+            anchors.fill: parent
 
-            Flickable {
-                id: flick
-
-                anchors.fill: parent
-                anchors.leftMargin: 9
-                anchors.topMargin: 8
-                anchors.bottomMargin: 30
-                contentWidth: editor.paintedWidth
-                contentHeight: editor.paintedHeight
-
-                function ensureVisible(r){
-                    if (contentX >= r.x)
-                        contentX = r.x;
-                    else if (contentX + width <= r.x + r.width)
-                        contentX = r.x + r.width - width;
-                    if (contentY >= r.y)
-                        contentY = r.y;
-                    else if (contentY + height <= r.y + r.height)
-                        contentY = r.y + r.height - height;
-                }
-
-                Editor{
-                    id : editor
-                    property bool isDirty : false
-
-                    onCursorRectangleChanged: {
-                        flick.ensureVisible(cursorRectangle)
-                    }
-                    onSave: {
-                        if ( codeDocument.file !==  "" ){
-                            codeDocument.saveFile(editor.text)
-                            editor.isDirty = false
-                        }else
-                            fileSaveDialog.open()
-                    }
-                    onOpen: {
-                        header.openFile()
-                    }
-                    onToggleSize: {
-                        if ( splitter.x < contentWrap.width / 2)
-                            splitter.x = contentWrap.width - contentWrap.width / 4
-                        else if ( splitter.x === contentWrap.width / 2 )
-                            splitter.x = contentWrap.width / 4
-                        else
-                            splitter.x = contentWrap.width / 2
-                    }
-                    onPageDown : {
-                        var lines = flick.height / cursorRectangle.height
-                        var nextLineStartPos = editor.text.indexOf('\n', cursorPosition)
-                        while ( lines-- > 0 && nextLineStartPos !== -1 ){
-                            cursorPosition   = nextLineStartPos + 1
-                            nextLineStartPos = editor.text.indexOf('\n', cursorPosition)
-                        }
-                    }
-                    onPageUp : {
-                        var lines = flick.height / cursorRectangle.height
-                        var prevLineStartPos = editor.text.lastIndexOf('\n', cursorPosition - 1)
-                        while ( --lines > 0 ){
-                            cursorPosition   = prevLineStartPos + 1
-                            prevLineStartPos = editor.text.lastIndexOf('\n', cursorPosition - 2)
-                            if ( prevLineStartPos === -1 ){
-                                cursorPosition = 0;
-                                break;
-                            }
-                        }
-                    }
-
-                    text : "Rectangle{\n}"
-                    color : "#eeeeee"
-                    font.family: "Courier New, Courier"
-
-                    focus: true
-
-                    height : Math.max( flick.height, paintedHeight )
-                    width : Math.max( flick.width, paintedWidth )
-
-                    Behavior on font.pixelSize {
-                        NumberAnimation { duration: 40 }
-                    }
-                    Component.onCompleted: isDirty = false
-                }
-
+            onSave: {
+                if ( codeDocument.file !==  "" ){
+                    codeDocument.saveFile(editor.text)
+                    editor.isDirty = false
+                }else
+                    fileSaveDialog.open()
             }
-
-            Rectangle{
-                id : errorWrap
-                anchors.bottom: parent.bottom
-                height : error.text !== '' ? 30 : 0
-                width : parent.width
-                color : "#141a1a"
-                Behavior on height {
-                    SpringAnimation { spring: 3; damping: 0.1 }
-                }
-
-                Rectangle{
-                    width : 14
-                    height : parent.height
-                    color : "#601818"
-                    visible: error.text === "" ? false : true
-                }
-                Text {
-                    id: error
-                    anchors.left : parent.left
-                    anchors.leftMargin: 25
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width
-                    font.pointSize: 25 * editor.fontScale
-                    text: ""
-                    onTextChanged : console.log(text)
-                    color: "#c5d0d7"
-                }
+            onOpen: {
+                header.openFile()
             }
-
+            onToggleSize: {
+                if ( splitter.x < contentWrap.width / 2)
+                    splitter.x = contentWrap.width - contentWrap.width / 4
+                else if ( splitter.x === contentWrap.width / 2 )
+                    splitter.x = contentWrap.width / 4
+                else
+                    splitter.x = contentWrap.width / 2
+            }
         }
 
+/*
         Rectangle{
             id : splitter
              anchors.top: parent.top
@@ -328,7 +231,7 @@ ApplicationWindow {
                 }
             }
         }
-
+*/
     }
 
 }

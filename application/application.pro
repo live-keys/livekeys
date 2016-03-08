@@ -27,7 +27,7 @@ win32{
 PLUGIN_DEPLOY_FROM = $$PWD/plugins
 win32:CONFIG(debug, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../application/debug/plugins
 else:win32:CONFIG(release, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../application/release/plugins
-else:unix: PLUGIN_DEPLOY_TO = $$OUT_PWD/../application/plugins
+else:unix: PLUGIN_DEPLOY_TO = $$OUT_PWD/../application
 
 win32:PLUGIN_DEPLOY_TO ~= s,/,\\,g
 win32:PLUGIN_DEPLOY_FROM ~= s,/,\\,g
@@ -38,7 +38,7 @@ plugincopy.commands = $(COPY_DIR) \"$$PLUGIN_DEPLOY_FROM\" \"$$PLUGIN_DEPLOY_TO\
 IMAGE_DEPLOY_FROM = $$PWD/images
 win32:CONFIG(debug, debug|release): IMAGE_DEPLOY_TO = $$OUT_PWD/../application/debug/images
 else:win32:CONFIG(release, debug|release): IMAGE_DEPLOY_TO = $$OUT_PWD/../application/release/images
-else:unix: IMAGE_DEPLOY_TO = $$OUT_PWD/../application/images
+else:unix: IMAGE_DEPLOY_TO = $$OUT_PWD/../application
 
 win32:IMAGE_DEPLOY_TO ~= s,/,\\,g
 win32:IMAGE_DEPLOY_FROM ~= s,/,\\,g
