@@ -27,7 +27,7 @@ Rectangle{
 
     property bool isDirty: false
     property alias text: editorArea.text
-
+    property alias font: editorArea.font
 
     color : "#041725"
     clip : true
@@ -38,7 +38,6 @@ Rectangle{
         anchors.fill: parent
         anchors.leftMargin: 9
         anchors.topMargin: 8
-        anchors.bottomMargin: 30
 
         frameVisible: false
 
@@ -77,8 +76,8 @@ Rectangle{
             textFormat: TextEdit.PlainText
 
             wrapMode: TextEdit.NoWrap
-            height : Math.max( flick.height, paintedHeight )
-            width : Math.max( flick.width, paintedWidth )
+            height : Math.max( flick.height - 20, paintedHeight )
+            width : Math.max( flick.width - 20, paintedWidth )
 
             Keys.onPressed: {
                 if ( (event.key === Qt.Key_BracketRight && (event.modifiers & Qt.ShiftModifier) ) ||
@@ -184,35 +183,6 @@ Rectangle{
 
         }
 
-    }
-
-    Rectangle{
-        id : errorWrap
-        anchors.bottom: parent.bottom
-        height : error.text !== '' ? 30 : 0
-        width : parent.width
-        color : "#141a1a"
-        Behavior on height {
-            SpringAnimation { spring: 3; damping: 0.1 }
-        }
-
-        Rectangle{
-            width : 14
-            height : parent.height
-            color : "#601818"
-            visible: error.text === "" ? false : true
-        }
-        Text {
-            id: error
-            anchors.left : parent.left
-            anchors.leftMargin: 25
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
-            font.pointSize: 25 * editorArea.fontScale
-            text: ""
-            onTextChanged : console.log(text)
-            color: "#c5d0d7"
-        }
     }
 
 }

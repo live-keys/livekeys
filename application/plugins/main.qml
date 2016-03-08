@@ -96,8 +96,8 @@ ApplicationWindow {
             }
         }
 
-        onFontPlus: if ( editor.font.pixelSize < 24 ) editor.font.pixelSize += 2
-        onFontMinus: if ( editor.font.pixelSize > 10 ) editor.font.pixelSize -= 2
+        onFontPlus: if ( editorArea.font.pixelSize < 24 ) editorArea.font.pixelSize += 2
+        onFontMinus: if ( editorArea.font.pixelSize > 10 ) editorArea.font.pixelSize -= 2
     }
 
     FileDialog {
@@ -115,7 +115,7 @@ ApplicationWindow {
     FileDialog{
         id : fileSaveDialog
         title: "Please choose a file"
-        nameFilters: [ "Qml files (*.qml)", "All files (*)" ]
+        nameFilters: ["Qml files (*.qml)", "All files (*)"]
         selectExisting : false
         visible : false
         onAccepted: {
@@ -137,28 +137,110 @@ ApplicationWindow {
         anchors.right: parent.right
         height : parent.height - header.height
 
-        Editor{
-            id: editor
+        SplitView{
             anchors.fill: parent
+            orientation: Qt.Horizontal
 
-            onSave: {
-                if ( codeDocument.file !==  "" ){
-                    codeDocument.saveFile(editor.text)
-                    editor.isDirty = false
-                }else
-                    fileSaveDialog.open()
+            Editor{
+                id: editor
+                height: parent.height
+                width: 400
+
+                onSave: {
+                    if ( codeDocument.file !==  "" ){
+                        codeDocument.saveFile(editor.text)
+                        editor.isDirty = false
+                    }else
+                        fileSaveDialog.open()
+                }
+                onOpen: {
+                    header.openFile()
+                }
+                onToggleSize: {
+                    if ( splitter.x < contentWrap.width / 2)
+                        splitter.x = contentWrap.width - contentWrap.width / 4
+                    else if ( splitter.x === contentWrap.width / 2 )
+                        splitter.x = contentWrap.width / 4
+                    else
+                        splitter.x = contentWrap.width / 2
+                }
             }
-            onOpen: {
-                header.openFile()
+
+
+            Rectangle{
+                id : viewer
+                height : parent.height
+
+                color : "#051521"
+
+                Item {
+                    id: tester
+                    anchors.fill: parent
+                    property string program: editor.text
+                    property variant item
+                    onProgramChanged: {
+                        editor.isDirty = true
+                        createTimer.restart()
+                    }
+                    Timer {
+                        id: createTimer
+                        interval: 1000
+                        running: true
+                        repeat : false
+                        onTriggered: {
+                            var newItem;
+                            try {
+                                root.beforeCompile()
+                                newItem = Qt.createQmlObject("import QtQuick 2.1\n" + tester.program, tester, "canvas");
+                            } catch (err) {
+                                error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;
+                            }
+                            if ( tester.program === "Rectangle{\n}" || tester.program === "" )
+                                editor.isDirty = false
+
+                            if (newItem){
+                                error.text = "";
+                                if (tester.item) {
+                                    tester.item.destroy();
+                                }
+                                tester.item = newItem;
+                                root.afterCompile()
+                            }
+                        }
+                    }
+                }
+
+                Rectangle{
+                    id : errorWrap
+                    anchors.bottom: parent.bottom
+                    height : error.text !== '' ? 30 : 0
+                    width : parent.width
+                    color : "#141a1a"
+                    Behavior on height {
+                        SpringAnimation { spring: 3; damping: 0.1 }
+                    }
+
+                    Rectangle{
+                        width : 14
+                        height : parent.height
+                        color : "#601818"
+                        visible: error.text === "" ? false : true
+                    }
+                    Text {
+                        id: error
+                        anchors.left : parent.left
+                        anchors.leftMargin: 25
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+                        font.pointSize: editor.font.pointSize
+                        text: ""
+                        onTextChanged : console.log(text)
+                        color: "#c5d0d7"
+                    }
+                }
+
             }
-            onToggleSize: {
-                if ( splitter.x < contentWrap.width / 2)
-                    splitter.x = contentWrap.width - contentWrap.width / 4
-                else if ( splitter.x === contentWrap.width / 2 )
-                    splitter.x = contentWrap.width / 4
-                else
-                    splitter.x = contentWrap.width / 2
-            }
+
         }
 
 /*
@@ -187,49 +269,6 @@ ApplicationWindow {
              }
          }
 
-        Rectangle{
-            id : viewer
-            anchors.left : splitter.right
-            anchors.right: parent.right
-            height : parent.height
-            color : "#051521"
-
-            Item {
-                id: tester
-                anchors.fill: parent
-                property string program: editor.text
-                property variant item
-                onProgramChanged: {
-                    editor.isDirty = true
-                    createTimer.restart()
-                }
-                Timer {
-                    id: createTimer
-                    interval: 1000
-                    running: true
-                    repeat : false
-                    onTriggered: {
-                        var newItem;
-                        try {
-                            root.beforeCompile()
-                            newItem = Qt.createQmlObject("import QtQuick 2.1\n" + tester.program, tester, "canvas");
-                        } catch (err) {
-                            error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;
-                        }
-                        if ( tester.program === "Rectangle{\n}" || tester.program === "" )
-                            editor.isDirty = false
-
-                        if (newItem){
-                            error.text = "";
-                            if (tester.item) {
-                                tester.item.destroy();
-                            }
-                            tester.item = newItem;
-                            root.afterCompile()
-                        }
-                    }
-                }
-            }
         }
 */
     }

@@ -2,7 +2,7 @@
 
 **Live Computer Vision Coding Environment**
 
- * **Version**: 1.0.0
+ * **Version**: 1.2.0
  * **License**: LGPL
  * **Website**: [livecv.dinusv.com](http://livecv.dinusv.com)
  * **Demo**: [www.youtube.com/watch?v=uEnJE6Jawfw](https://www.youtube.com/watch?v=uEnJE6Jawfw)
