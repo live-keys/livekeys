@@ -95,10 +95,10 @@ Rectangle{
                         }
                     }
                 } else if ( event.key === Qt.Key_S && (event.modifiers & Qt.ControlModifier ) ){
-                    editorArea.save()
+                    editor.save()
                     event.accepted = true
                 } else if ( event.key === Qt.Key_O && (event.modifiers & Qt.ControlModifier ) ) {
-                    editorArea.open()
+                    editor.open()
                     event.accepted = true
                 } else if ( event.key === Qt.Key_E && (event.modifiers & Qt.ControlModifier ) ){
                     editorArea.toggleSize()

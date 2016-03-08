@@ -191,7 +191,7 @@ ApplicationWindow {
                             var newItem;
                             try {
                                 root.beforeCompile()
-                                newItem = Qt.createQmlObject("import QtQuick 2.1\n" + tester.program, tester, "canvas");
+                                newItem = Qt.createQmlObject("import QtQuick 2.1\n" + tester.program, tester, codeDocument.file);
                             } catch (err) {
                                 error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;
                             }
@@ -243,34 +243,6 @@ ApplicationWindow {
 
         }
 
-/*
-        Rectangle{
-            id : splitter
-             anchors.top: parent.top
-             height : parent.height
-             z : 100
-             width : 2
-             color : "#1c2228"
-             Component.onCompleted: x = parent.width / 3.4
-             onXChanged: {
-                 viewer.width  = contentWrap.width - x - 2
-                 editorWrap.width = x + 2
-             }
-             MouseArea{
-                anchors.fill: parent
-                drag.target: splitter
-                drag.axis: Drag.XAxis
-                drag.minimumX: 2
-                drag.maximumX: contentWrap.width - 150
-             }
-             CursorArea{
-                 anchors.fill: parent
-                 cursorShape: Qt.SplitHCursor
-             }
-         }
-
-        }
-*/
     }
 
 }
