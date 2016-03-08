@@ -14,7 +14,8 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.2
+import QtQuick 2.3
+import QtQuick.Controls 1.2
 import Cv 1.0
 
 Rectangle{
@@ -31,33 +32,36 @@ Rectangle{
     color : "#041725"
     clip : true
 
-    Flickable {
+    ScrollView {
         id: flick
 
         anchors.fill: parent
         anchors.leftMargin: 9
         anchors.topMargin: 8
         anchors.bottomMargin: 30
-        contentWidth: editorArea.paintedWidth
-        contentHeight: editorArea.paintedHeight
+
+        frameVisible: false
 
         function ensureVisible(r){
-            if (contentX >= r.x)
-                contentX = r.x;
-            else if (contentX + width <= r.x + r.width)
-                contentX = r.x + r.width - width;
-            if (contentY >= r.y)
-                contentY = r.y;
-            else if (contentY + height <= r.y + r.height)
-                contentY = r.y + r.height - height;
+            if (flickableItem.contentX >= r.x)
+                flickableItem.contentX = r.x;
+            else if (flickableItem.contentX + width <= r.x + r.width + 20)
+                flickableItem.contentX = r.x + r.width - width + 20;
+            if (flickableItem.contentY >= r.y)
+                flickableItem.contentY = r.y;
+            else if (flickableItem.contentY + height <= r.y + r.height + 20)
+                flickableItem.contentY = r.y + r.height - height + 20;
         }
 
         TextEdit {
             id : editorArea
-            property bool isDirty : false
 
             onCursorRectangleChanged: {
                 flick.ensureVisible(cursorRectangle)
+            }
+
+            Component.onCompleted: {
+                editor.isDirty = false
             }
 
             focus : false
@@ -161,7 +165,6 @@ Rectangle{
                 editorArea.cursorPosition = clastpos + 4
             }
 
-
             CodeHandler{
                 id : codeH
                 Component.onCompleted: {
@@ -172,7 +175,13 @@ Rectangle{
             Behavior on font.pixelSize {
                 NumberAnimation { duration: 40 }
             }
-            Component.onCompleted: isDirty = false
+
+            MouseArea{
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                cursorShape: Qt.IBeamCursor
+            }
+
         }
 
     }
