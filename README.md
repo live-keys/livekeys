@@ -2,33 +2,27 @@
 
 **Live Computer Vision Coding Environment**
 
-Website : http://livecv.dinusv.com
-Version : 1.0.0-beta
+ * **Version**: 1.0.0
+ * **License**: LGPL
+ * **Website**: [livecv.dinusv.com](http://livecv.dinusv.com)
+ * **Demo**: [www.youtube.com/watch?v=uEnJE6Jawfw](https://www.youtube.com/watch?v=uEnJE6Jawfw)
+ * **Documentation**: [livecv.dinusv.com/documentation](http://livecv.dinusv.com/documentation)
+ * **Build Requirements**:
+   * Qt 5.3 or higher
+   * Open CV 2.4 or higher
 
-Live CV is a computer vision coding environment that displays results in real time. It can be used to interact, link and adjust algorithms in order to create quick solutions within it's domain. 
+Live CV is a computer vision coding environment that displays results while you code. It can be used to interact, link and adjust algorithms 
+in order to create quick solutions within it's domain. 
 
-The application is built using QtQuick, and uses Open CV library in the back to do the actual processing. From this perspective, Live CV can also be considered a QML wrapper for the Open CV library. 
+The application is built using QtQuick, and uses Open CV library in the back to do the actual processing, kind of like a QML wrapper for the 
+Open CV library. 
 
 An API is also available to link already built algorithms to Live CV's interface by simply exposing configurable variables to Qt's meta object system.
 
-If you are interested in this project, please subscribe to the newsletter on the homepage. This helps me know people are interested, and I can invest more time in coding more features and provide faster releases.
+## Installation and getting started
 
-## Dependencies
+To get started, simply download the application from Live CV's [website](http://livecv.dinusv.com/download.html), extract the archive, and you're ready 
+to go. Step by step instructions are also found in the download section.
 
- * Qt5 or later
- * OpenCv 2.4 or later
+## Compiling
 
-## Compiler Configuration
-
-All modules are available through qmake projects. 
-
- * In **windows**, it is required to configure paths for opencv include directories, libs and dlls. These can be found within the Config.pro file in the main project directory. Additionally, the version of opencv is required, so as to be appended when each lib or dll file is loaded. The below variables are the ones that require configuration :
-
-	* PATH\_OPENCV\_INCLUDE
-	* PATH\_OPENCV\_LIBRARIES
-	* PATH\_OPENCV\_DLLS
-	* VERSION\_OPENCV
-	
-	The faster version would be to simply copy Open CV's build directory into the opencv directory of live cv and just configure the VERSION_OPENCV varialbe in the config file.
-
- * In **unix**, by default, no configuration should be required. If you are having trouble though, you can consult articles on how to link open cv with qmake.
