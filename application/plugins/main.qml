@@ -96,8 +96,8 @@ ApplicationWindow {
             }
         }
 
-        onFontPlus: if ( editorArea.font.pixelSize < 24 ) editorArea.font.pixelSize += 2
-        onFontMinus: if ( editorArea.font.pixelSize > 10 ) editorArea.font.pixelSize -= 2
+        onFontPlus: if ( editor.font.pixelSize < 24 ) editor.font.pixelSize += 2
+        onFontMinus: if ( editor.font.pixelSize > 10 ) editor.font.pixelSize -= 2
     }
 
     FileDialog {
@@ -164,6 +164,9 @@ ApplicationWindow {
                     else
                         splitter.x = contentWrap.width / 2
                 }
+
+                Component.onCompleted: forceFocus()
+
             }
 
 
@@ -191,6 +194,7 @@ ApplicationWindow {
                             var newItem;
                             try {
                                 root.beforeCompile()
+                                // Info Qt/Src/qtquick1/src/declarative/qml/qdeclarativeengine.cpp
                                 newItem = Qt.createQmlObject("import QtQuick 2.1\n" + tester.program, tester, codeDocument.file);
                             } catch (err) {
                                 error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;

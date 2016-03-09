@@ -21,9 +21,8 @@
 #include <QDebug>
 #include <QQmlEngine>
 
-QCodeDocument::QCodeDocument(QQuickItem *parent) :
-    QQuickItem(parent),
-    m_engine(0)
+QCodeDocument::QCodeDocument(QQuickItem *parent)
+    : QQuickItem(parent)
 {
 }
 
@@ -37,13 +36,6 @@ QString QCodeDocument::openFile(const QUrl &file){
         QTextStream in(&file);
         setFile(fileName);
         setPath(QFileInfo(file).path());
-        if ( m_engine ){
-//            qDebug() << "Import paths :\ns " << m_engine->importPathList();
-//            QStringList importPathsTemp = m_importPaths;
-//            importPathsTemp.append(m_path);
-//            m_engine->addImportPath(m_path);
-//            m_engine->setImportPathList(importPathsTemp);
-        }
         QString content = in.readAll();
         file.close();
         return content;
@@ -65,11 +57,6 @@ void QCodeDocument::saveFile(const QUrl& file, const QString &content){
             file.close();
             setPath(QFileInfo(file).path());
             setFile(fileName);
-//            if ( m_engine ){
-//                QStringList importPathsTemp = m_importPaths;
-//                importPathsTemp.append(m_path);
-//                m_engine->setImportPathList(importPathsTemp);
-//            }
         }
     }
 }
@@ -77,10 +64,4 @@ void QCodeDocument::saveFile(const QUrl& file, const QString &content){
 void QCodeDocument::saveFile(const QString& content){
     if ( m_openedFile != "" )
         saveFile(QUrl::fromLocalFile(m_openedFile), content);
-}
-
-void QCodeDocument::setEngine(QQmlEngine *engine){
-    m_engine      = engine;
-    m_engine->addImportPath(QDir::currentPath());
-    m_importPaths = engine->importPathList();
 }

@@ -1,7 +1,7 @@
 HEADERS += \
         $$PWD/lcvvideo_plugin.hpp \
-        $$PWD/QCalcOpticalFlowPyrLK.hpp
+    $$PWD/qcalcopticalflowpyrlk.h
 
 SOURCES += \
-        $$PWD/QCalcOpticalFlowPyrLK.cpp \
-    $$PWD/lcvvideo_plugin.cpp
+    $$PWD/lcvvideo_plugin.cpp \
+    $$PWD/qcalcopticalflowpyrlk.cpp

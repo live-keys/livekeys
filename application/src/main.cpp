@@ -29,6 +29,8 @@
 #include <QDir>
 #include <QLibrary>
 
+#include <QThread>
+
 int main(int argc, char *argv[]){
 
     QGuiApplication app(argc, argv);
@@ -38,9 +40,18 @@ int main(int argc, char *argv[]){
     if ( !app.arguments().contains("-c" ) )
         qInstallMessageHandler(&QLiveCVLog::logFunction);
 
+    QLibrary(QCoreApplication::applicationDirPath() + "/lcvlib").load();
+
     QQmlApplicationEngine engine;
 
-    QLibrary(QCoreApplication::applicationDirPath() + "/lcvlib").load();
+    QString applicationDirPath = QGuiApplication::applicationDirPath();
+    QStringList importPaths    = engine.importPathList();
+    engine.setImportPathList(QStringList());
+    for ( QStringList::iterator it = importPaths.begin(); it != importPaths.end(); ++it ){
+        if ( *it != applicationDirPath )
+            engine.addImportPath(*it);
+    }
+    engine.addImportPath(applicationDirPath + "/plugins");
 
     qmlRegisterType<QCodeDocument>("Cv", 1, 0, "Document");
     qmlRegisterType<QCodeHandler>( "Cv", 1, 0, "CodeHandler");
@@ -50,8 +61,6 @@ int main(int argc, char *argv[]){
     engine.rootContext()->setContextProperty("codeDocument", &document);
     engine.rootContext()->setContextProperty("lcvlog", QLiveCVLog::instance());
     engine.load(QUrl(QStringLiteral("plugins/main.qml")));
-
-    document.setEngine(&engine);
 
     return app.exec();
 }

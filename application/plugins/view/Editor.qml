@@ -32,6 +32,10 @@ Rectangle{
     color : "#041725"
     clip : true
 
+    function forceFocus(){
+        editorArea.forceActiveFocus()
+    }
+
     ScrollView {
         id: flick
 
@@ -63,7 +67,7 @@ Rectangle{
                 editor.isDirty = false
             }
 
-            focus : false
+            focus : true
             text : "Rectangle{\n}"
             color : "#eeeeee"
             font.family: "Courier New, Courier"

@@ -1,33 +1,33 @@
 HEADERS += \
-    $$PWD/QCamCapture.hpp \
-    $$PWD/QCamCaptureThread.hpp \
-    $$PWD/QMat2DArray.hpp \
-    $$PWD/QMatBuffer.hpp \
-    $$PWD/QMatEmpty.hpp \
-    $$PWD/QMatDraw.hpp \
-    $$PWD/QImRead.hpp \
-    $$PWD/QMatRead.hpp \
-    $$PWD/QMatRoi.hpp \
-    $$PWD/QVideoCapture.hpp \
-    $$PWD/QVideoCaptureThread.hpp \
-    $$PWD/QAlphaMerge.hpp \
     $$PWD/lcvcore_plugin.hpp \
-    $$PWD/QAbsDiff.hpp \
-    $$PWD/QDrawHistogram.hpp
+    $$PWD/qabsdiff.h \
+    $$PWD/qalphamerge.h \
+    $$PWD/qcamcapture.h \
+    $$PWD/qcamcapturethread.h \
+    $$PWD/qdrawhistogram.h \
+    $$PWD/qimread.h \
+    $$PWD/qmat2darray.h \
+    $$PWD/qmatbuffer.h \
+    $$PWD/qmatdraw.h \
+    $$PWD/qmatempty.h \
+    $$PWD/qmatread.h \
+    $$PWD/qmatroi.h \
+    $$PWD/qvideocapture.h \
+    $$PWD/qvideocapturethread.h
 
 SOURCES += \
-    $$PWD/QCamCapture.cpp \
-    $$PWD/QCamCaptureThread.cpp \
-    $$PWD/QMat2DArray.cpp \
-    $$PWD/QMatBuffer.cpp \
-    $$PWD/QMatEmpty.cpp \
-    $$PWD/QMatDraw.cpp \
-    $$PWD/QImRead.cpp \
-    $$PWD/QMatRead.cpp \
-    $$PWD/QMatRoi.cpp \
-    $$PWD/QVideoCapture.cpp \
-    $$PWD/QVideoCaptureThread.cpp \
-    $$PWD/QAlphaMerge.cpp \
     $$PWD/lcvcore_plugin.cpp \
-    $$PWD/QAbsDiff.cpp \
-    $$PWD/QDrawHistogram.cpp
+    $$PWD/qabsdiff.cpp \
+    $$PWD/qalphamerge.cpp \
+    $$PWD/qcamcapture.cpp \
+    $$PWD/qcamcapturethread.cpp \
+    $$PWD/qdrawhistogram.cpp \
+    $$PWD/qimread.cpp \
+    $$PWD/qmat2darray.cpp \
+    $$PWD/qmatbuffer.cpp \
+    $$PWD/qmatdraw.cpp \
+    $$PWD/qmatempty.cpp \
+    $$PWD/qmatread.cpp \
+    $$PWD/qmatroi.cpp \
+    $$PWD/qvideocapture.cpp \
+    $$PWD/qvideocapturethread.cpp

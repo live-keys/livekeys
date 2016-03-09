@@ -14,21 +14,21 @@ REQUIRES_CV_IMGPROC = 1
 REQUIRES_CV_VIDEO   = 1
 
 include($$PWD/src/lcvvideo.pri)
-include($$PWD/../../config.pro)
+include($$PWD/../../3rdparty/opencvconfig.pro)
 
-INCLUDEPATH += $$PWD/../lcvlib/src
-DEPENDPATH  += $$PWD/../lcvlib/src
+INCLUDEPATH += $$PWD/../../lib/include
+DEPENDPATH  += $$PWD/../../lib/include
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lcvlib/release/ -llcvlib
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lcvlib/debug/ -llcvlib
-else:unix: LIBS += -L$$OUT_PWD/../application/ -llcvlib
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lcvlib/release/ -llcvlib
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lcvlib/debug/ -llcvlib
+else:unix: LIBS += -L$$OUT_PWD/../../application/ -llcvlib
 
 
 # Destination
 
-win32:CONFIG(debug, debug|release): DESTDIR = $$quote($$OUT_PWD/../application/debug/plugins/lcvvideo)
-else:win32:CONFIG(release, debug|release): DESTDIR = $$quote($$OUT_PWD/../application/release/plugins/lcvvideo)
-else:unix: DESTDIR = $$quote($$OUT_PWD/../application/plugins/lcvvideo)
+win32:CONFIG(debug, debug|release): DESTDIR = $$quote($$OUT_PWD/../../application/debug/plugins/lcvvideo)
+else:win32:CONFIG(release, debug|release): DESTDIR = $$quote($$OUT_PWD/../../application/release/plugins/lcvvideo)
+else:unix: DESTDIR = $$quote($$OUT_PWD/../../application/plugins/lcvvideo)
 
 
 !equals(_PRO_FILE_PWD_, $$OUT_PWD) {

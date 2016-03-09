@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QCODEDOCUMENT_HPP
-#define QCODEDOCUMENT_HPP
+#ifndef QCODEDOCUMENT_H
+#define QCODEDOCUMENT_H
 
 #include <QQuickItem>
 
@@ -39,8 +39,6 @@ public slots:
     void saveFile(const QUrl &file, const QString& content);
     void saveFile(const QString& content);
 
-    void setEngine(QQmlEngine* engine);
-
 signals:
     void pathChanged();
     void fileChanged();
@@ -48,9 +46,6 @@ signals:
 private:
     QString     m_path;
     QString     m_openedFile;
-    QQmlEngine* m_engine;
-    QStringList m_importPaths;
-
 };
 
 inline const QString &QCodeDocument::path() const{
@@ -75,4 +70,4 @@ inline void QCodeDocument::setFile(const QString& file){
     }
 }
 
-#endif // QCODEDOCUMENT_HPP
+#endif // QCODEDOCUMENT_H

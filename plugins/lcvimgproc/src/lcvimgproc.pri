@@ -1,36 +1,36 @@
 HEADERS += \
 	$$PWD/lcvimgproc_plugin.hpp \
-	$$PWD/QCanny.hpp \
-	$$PWD/QGaussianBlur.hpp \
-	$$PWD/QHoughLines.hpp \
-	$$PWD/QHoughLinesP.hpp \
-	$$PWD/QSobel.hpp \
-	$$PWD/QCvtColor.hpp \
-	$$PWD/QThreshold.hpp \
-	$$PWD/QChannelSelect.hpp \
-	$$PWD/QStructuringElement.hpp \
-	$$PWD/QBlur.hpp \
-	$$PWD/QCopyMakeBorder.hpp \
-	$$PWD/QDilate.hpp \
-	$$PWD/QErode.hpp \
-        $$PWD/QFilter2D.hpp \
-        $$PWD/QMatResize.hpp
+    $$PWD/qblur.h \
+    $$PWD/qcanny.h \
+    $$PWD/qchannelselect.h \
+    $$PWD/qcopymakeborder.h \
+    $$PWD/qcvtcolor.h \
+    $$PWD/qdilate.h \
+    $$PWD/qerode.h \
+    $$PWD/qfilter2d.h \
+    $$PWD/qgaussianblur.h \
+    $$PWD/qhoughlines.h \
+    $$PWD/qhoughlinesp.h \
+    $$PWD/qmatresize.h \
+    $$PWD/qsobel.h \
+    $$PWD/qstructuringelement.h \
+    $$PWD/qthreshold.h
 
 SOURCES += \
 	$$PWD/lcvimgproc_plugin.cpp \
-	$$PWD/QCanny.cpp \
-	$$PWD/QGaussianBlur.cpp \
-	$$PWD/QHoughLines.cpp \
-	$$PWD/QHoughLinesP.cpp \
-	$$PWD/QSobel.cpp \
-	$$PWD/QCvtColor.cpp \
-	$$PWD/QThreshold.cpp \
-	$$PWD/QChannelSelect.cpp \
-	$$PWD/QStructuringElement.cpp \
-	$$PWD/QBlur.cpp \
-	$$PWD/QCopyMakeBorder.cpp \
-	$$PWD/QDilate.cpp \
-	$$PWD/QErode.cpp \
-        $$PWD/QFilter2D.cpp \
-        $$PWD/QMatResize.cpp
+    $$PWD/qblur.cpp \
+    $$PWD/qcanny.cpp \
+    $$PWD/qchannelselect.cpp \
+    $$PWD/qcopymakeborder.cpp \
+    $$PWD/qcvtcolor.cpp \
+    $$PWD/qdilate.cpp \
+    $$PWD/qerode.cpp \
+    $$PWD/qfilter2d.cpp \
+    $$PWD/qgaussianblur.cpp \
+    $$PWD/qhoughlines.cpp \
+    $$PWD/qhoughlinesp.cpp \
+    $$PWD/qmatresize.cpp \
+    $$PWD/qsobel.cpp \
+    $$PWD/qstructuringelement.cpp \
+    $$PWD/qthreshold.cpp
 

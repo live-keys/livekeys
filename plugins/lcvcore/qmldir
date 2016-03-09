@@ -1,3 +1,2 @@
-module plugins.lcvcore
+module lcvcore
 plugin lcvcore
-

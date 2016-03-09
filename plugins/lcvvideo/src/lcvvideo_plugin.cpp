@@ -17,7 +17,7 @@
 #include "lcvvideo_plugin.hpp"
 
 #include <qqml.h>
-#include "QCalcOpticalFlowPyrLK.hpp"
+#include "qcalcopticalflowpyrlk.h"
 
 void LcvvideoPlugin::registerTypes(const char *uri){
     // @uri modules.lcvvideo
