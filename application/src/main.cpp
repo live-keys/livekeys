@@ -31,36 +31,18 @@
 
 #include <QThread>
 
+#include "qlivecv.h"
+
 int main(int argc, char *argv[]){
 
-    QGuiApplication app(argc, argv);
-    QGuiApplication::setApplicationName("Live CV");
-    QGuiApplication::setApplicationVersion("1.1.0");
-
-    if ( !app.arguments().contains("-c" ) )
-        qInstallMessageHandler(&QLiveCVLog::logFunction);
-
-    QLibrary(QCoreApplication::applicationDirPath() + "/lcvlib").load();
-
-    QQmlApplicationEngine engine;
-
-    QString applicationDirPath = QGuiApplication::applicationDirPath();
-    QStringList importPaths    = engine.importPathList();
-    engine.setImportPathList(QStringList());
-    for ( QStringList::iterator it = importPaths.begin(); it != importPaths.end(); ++it ){
-        if ( *it != applicationDirPath )
-            engine.addImportPath(*it);
-    }
-    engine.addImportPath(applicationDirPath + "/plugins");
+    QLiveCV livecv(argc, argv);
+    livecv.loadLibrary(livecv.dir() + "/lcvlib");
 
     qmlRegisterType<QCodeDocument>("Cv", 1, 0, "Document");
     qmlRegisterType<QCodeHandler>( "Cv", 1, 0, "CodeHandler");
     qmlRegisterType<QLiveCVLog>(   "Cv", 1, 0, "MessageLog");
 
-    QCodeDocument document;
-    engine.rootContext()->setContextProperty("codeDocument", &document);
-    engine.rootContext()->setContextProperty("lcvlog", QLiveCVLog::instance());
-    engine.load(QUrl(QStringLiteral("plugins/main.qml")));
+    livecv.loadQml(QUrl(QStringLiteral("plugins/main.qml")));
 
-    return app.exec();
+    return livecv.exec();
 }
