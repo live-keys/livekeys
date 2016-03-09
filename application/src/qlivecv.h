@@ -2,6 +2,7 @@
 #define QLIVECV_H
 
 #include <QString>
+#include <QLibrary>
 
 #define LIVECV_VERSION_MAJOR 1
 #define LIVECV_VERSION_MINOR 2
@@ -10,23 +11,22 @@
 class QGuiApplication;
 class QQmlApplicationEngine;
 class QCodeDocument;
+
 class QUrl;
 
 class QLiveCV{
 
 public:
-    QLiveCV(int argc, char *argv[]);
+    QLiveCV(const QStringList &arguments);
     ~QLiveCV();
 
     void loadLibrary(const QString& library);
     void loadQml(const QUrl& url);
 
-    int versionMajor() const;
-    int versionMinor() const;
-    int versionPatch() const;
-    QString versionString() const;
-
-    int exec();
+    static int versionMajor();
+    static int versionMinor();
+    static int versionPatch();
+    static QString versionString();
 
     const QString& dir() const;
 
@@ -34,30 +34,30 @@ private:
     QLiveCV(const QLiveCV&);
     QLiveCV& operator = (const QLiveCV&);
 
-    void parseArguments();
+    void parseArguments(const QStringList& arguments);
     void solveImportPaths();
 
-    QGuiApplication* m_app;
     QQmlApplicationEngine* m_engine;
 
     QCodeDocument* m_document;
     QString m_dir;
+    QLibrary m_lcvlib;
 
 };
 
-inline int QLiveCV::versionMajor() const{
+inline int QLiveCV::versionMajor(){
     return LIVECV_VERSION_MAJOR;
 }
 
-inline int QLiveCV::versionMinor() const{
+inline int QLiveCV::versionMinor(){
     return LIVECV_VERSION_MINOR;
 }
 
-inline int QLiveCV::versionPatch() const{
+inline int QLiveCV::versionPatch(){
     return LIVECV_VERSION_PATCH;
 }
 
-inline QString QLiveCV::versionString() const{
+inline QString QLiveCV::versionString(){
     return
         QString::number(versionMajor()) + "." +
         QString::number(versionMinor()) + "." +

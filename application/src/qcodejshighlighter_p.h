@@ -264,6 +264,10 @@ QCodeJSHighlighter::QCodeJSHighlighter(QTextDocument *parent)
     m_knownIds << "window";
     m_knownIds << "navigator";
     m_knownIds << "userAgent";
+    m_knownIds << "import";
+    m_knownIds << "string";
+    m_knownIds << "int";
+    m_knownIds << "variant";
 }
 
 void QCodeJSHighlighter::setColor(ColorComponent component, const QColor &color){

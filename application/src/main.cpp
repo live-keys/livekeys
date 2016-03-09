@@ -35,7 +35,11 @@
 
 int main(int argc, char *argv[]){
 
-    QLiveCV livecv(argc, argv);
+    QGuiApplication app(argc, argv);
+    QGuiApplication::setApplicationName("Live CV");
+    QGuiApplication::setApplicationVersion(QLiveCV::versionString());
+
+    QLiveCV livecv(app.arguments());
     livecv.loadLibrary(livecv.dir() + "/lcvlib");
 
     qmlRegisterType<QCodeDocument>("Cv", 1, 0, "Document");
@@ -44,5 +48,5 @@ int main(int argc, char *argv[]){
 
     livecv.loadQml(QUrl(QStringLiteral("plugins/main.qml")));
 
-    return livecv.exec();
+    return app.exec();
 }

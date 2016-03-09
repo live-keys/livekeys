@@ -2,32 +2,26 @@
 #include "qlivecvlog.h"
 #include "qcodedocument.h"
 
-#include <QLibrary>
 #include <QUrl>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QGuiApplication>
 
-QLiveCV::QLiveCV(int argc, char *argv[])
-    : m_app(new QGuiApplication(argc, argv))
-    , m_engine(new QQmlApplicationEngine)
+QLiveCV::QLiveCV(const QStringList& arguments)
+    : m_engine(new QQmlApplicationEngine)
     , m_document(new QCodeDocument)
     , m_dir(QGuiApplication::applicationDirPath())
 {
-    QGuiApplication::setApplicationName("Live CV");
-    QGuiApplication::setApplicationVersion(versionString());
-
-//    parseArguments();
+    parseArguments(arguments);
 }
 
 QLiveCV::~QLiveCV(){
-//    delete m_engine;
-//    delete m_document;
-//    delete m_app;
+    delete m_engine;
+    delete m_document;
 }
 
-void QLiveCV::parseArguments(){
-    if ( !m_app->arguments().contains("-c" ) )
+void QLiveCV::parseArguments(const QStringList &arguments){
+    if ( arguments.contains("-c" ) )
         qInstallMessageHandler(&QLiveCVLog::logFunction);
 }
 
@@ -42,22 +36,15 @@ void QLiveCV::solveImportPaths(){
 }
 
 void QLiveCV::loadLibrary(const QString &library){
-    static QLibrary lib(library);
-    lib.load();
+    m_lcvlib.setFileName(library);
+    m_lcvlib.load();
 }
 
 void QLiveCV::loadQml(const QUrl &url){
-
     solveImportPaths();
 
     m_engine->rootContext()->setContextProperty("codeDocument", m_document);
     m_engine->rootContext()->setContextProperty("lcvlog", QLiveCVLog::instance());
 
-    m_engine->load(QUrl(QStringLiteral("plugins/main.qml")));
-
-//    m_app->exec();
-}
-
-int QLiveCV::exec(){
-    return m_app->exec();
+    m_engine->load(url);
 }
