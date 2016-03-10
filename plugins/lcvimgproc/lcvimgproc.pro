@@ -10,11 +10,9 @@ OTHER_FILES = qmldir
 
 DEFINES += Q_LCV
 
-REQUIRES_CV_HIGHGUI = 1
-REQUIRES_CV_IMGPROC = 1
-
 include($$PWD/src/lcvimgproc.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
+loadOpenCV(core highgui imgproc, deploy)
 
 INCLUDEPATH += $$PWD/../../lib/include
 DEPENDPATH  += $$PWD/../../lib/include

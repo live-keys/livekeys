@@ -11,12 +11,9 @@ OTHER_FILES = qmldir
 DEFINES += Q_LCV
 DEFINES += Q_LCVFEATURES2D_LIB
 
-REQUIRES_CV_IMGPROC    = 1
-REQUIRES_CV_FEATURES2D = 1
-REQUIRES_CV_FLANN      = 1
-
 include($$PWD/src/lcvfeatures2d.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
+loadOpenCV(core highgui imgproc features2d flann, deploy)
 
 INCLUDEPATH += $$PWD/../../lib/include
 DEPENDPATH  += $$PWD/../../lib/include

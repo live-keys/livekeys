@@ -7,7 +7,7 @@ QT      += qml quick
 
 include(src/application.pri)
 
-RC_ICONS = livecv.ico
+RC_ICONS = $$PWD/icons/livecv.ico
 
 win32{
     Release:DESTDIR = release/../release #fix for app current path
