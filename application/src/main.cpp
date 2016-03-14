@@ -18,20 +18,14 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include <QElapsedTimer>
-
 #include "qcodedocument.h"
 #include "qcodehandler.h"
 #include "qlivecvlog.h"
+#include "qlivecv.h"
 
-#include <QQmlEngine>
 #include <QDebug>
-#include <QDir>
 #include <QLibrary>
 
-#include <QThread>
-
-#include "qlivecv.h"
 
 int main(int argc, char *argv[]){
 

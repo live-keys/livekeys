@@ -17,8 +17,8 @@ loadOpenCV(core highgui imgproc, deploy)
 INCLUDEPATH += $$PWD/../../lib/include
 DEPENDPATH  += $$PWD/../../lib/include
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lcvlib/release/ -llcvlib
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lcvlib/debug/ -llcvlib
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/release/ -llcvlib
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/debug/ -llcvlib
 else:unix: LIBS += -L$$OUT_PWD/../../application/ -llcvlib
 
 # Destination

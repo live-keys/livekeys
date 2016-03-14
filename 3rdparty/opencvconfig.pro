@@ -31,8 +31,8 @@ win32{
 
     INCLUDEPATH += $${OPENCV_DIR_INCLUDE}
 
-    CONFIG(debug, debug|release):  DLL_DESTINATION = $$OUT_PWD/debug/
-    CONFIG(release, debug|release):DLL_DESTINATION = $$OUT_PWD/release/
+    CONFIG(debug, debug|release):  OPENCV_DLL_DESTINATION = $$OUT_PWD/../../application/debug/
+    CONFIG(release, debug|release):OPENCV_DLL_DESTINATION = $$OUT_PWD/../../application/release/
 
     # Helper Function to copy dlls
 
@@ -40,7 +40,7 @@ win32{
         files = $$1
 
         for(FILE, files) {
-            DDIR = $${DLL_DESTINATION}
+            DDIR = $${OPENCV_DLL_DESTINATION}
 
             # Replace slashes in paths with backslashes
             win32:FILE ~= s,/,\\,g
@@ -57,9 +57,7 @@ win32{
 
         contains(modules, core){
             LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_core$${OPENCV_VERSION}
-            equals(copyDll, deploy){
-                copyCvDll($${OPENCV_DIR_DLLS}/opencv_core$${OPENCV_VERSION}.dll)
-            }
+            equals(copyDll, deploy):copyCvDll($${OPENCV_DIR_DLLS}/opencv_core$${OPENCV_VERSION}.dll)
         }
 
         contains(modules, highgui){

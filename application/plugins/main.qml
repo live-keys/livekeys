@@ -140,6 +140,11 @@ ApplicationWindow {
         SplitView{
             anchors.fill: parent
             orientation: Qt.Horizontal
+            handleDelegate: Rectangle {
+                implicitWidth: 1
+                implicitHeight: 1
+                color: "#333"
+            }
 
             Editor{
                 id: editor

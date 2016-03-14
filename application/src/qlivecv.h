@@ -4,15 +4,23 @@
 #include <QString>
 #include <QLibrary>
 
+// Versioning
+// ----------
+
 #define LIVECV_VERSION_MAJOR 1
 #define LIVECV_VERSION_MINOR 2
 #define LIVECV_VERSION_PATCH 0
 
+// Forward declarations
+// --------------------
+
 class QGuiApplication;
 class QQmlApplicationEngine;
 class QCodeDocument;
-
 class QUrl;
+
+// class QLiveCV
+// -------------
 
 class QLiveCV{
 
@@ -61,7 +69,7 @@ inline QString QLiveCV::versionString(){
     return
         QString::number(versionMajor()) + "." +
         QString::number(versionMinor()) + "." +
-            QString::number(versionPatch());
+        QString::number(versionPatch());
 }
 
 inline const QString &QLiveCV::dir() const{
