@@ -3,16 +3,19 @@ import lcvimgproc 1.0
 import lcvfeatures2d 1.0
 
 
-Column{
+Row{
     
     // Train images
-    
+     
     property string imagePath   : codeDocument.path + '/../_images/'
     property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
     property string trainImage2 : imagePath + 'caltech_buildings_DSCN0246_small.JPG'
     property string queryImage  : imagePath + 'object_101_piano_query.jpg'
     
-    Row{
+    Column{
+        id: imageFeatureColumn
+        
+        property int maxWidth: 300
     
     Repeater{
         id : trainImages
@@ -29,7 +32,7 @@ Column{
             property variant trainKeypoints : trainImageDetector.keypoints
             property int     trainIndex : index
             
-            width : trainImageLoader.width
+            width : imageFeatureColumn.maxWidth
             height : trainImageLoader.height
             ImRead{
                 id : trainImageLoader
@@ -40,6 +43,8 @@ Column{
             FastFeatureDetector{
                 id : trainImageDetector
                 input : trainImageLoader.output
+                width: parent.width
+                height: implicitWidth / width * 100
             }
             
             BriefDescriptorExtractor{

@@ -57,7 +57,8 @@ class QDrawHistogram : public QQuickItem{
 public:
     enum RenderType{
         ConnectedLines = 0,
-        Rectangles
+        Rectangles,
+        Binary
     };
 
 public:

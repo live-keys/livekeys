@@ -193,7 +193,6 @@ QCodeJSHighlighter::QCodeJSHighlighter(QTextDocument *parent)
     m_knownIds << "Array";
     m_knownIds << "isArray";
     m_knownIds << "index";
-    m_knownIds << "input";
     m_knownIds << "pop";
     m_knownIds << "push";
     m_knownIds << "reverse";
@@ -268,6 +267,7 @@ QCodeJSHighlighter::QCodeJSHighlighter(QTextDocument *parent)
     m_knownIds << "string";
     m_knownIds << "int";
     m_knownIds << "variant";
+    m_knownIds << "signal";
 }
 
 void QCodeJSHighlighter::setColor(ColorComponent component, const QColor &color){

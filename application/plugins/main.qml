@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.2
+import QtQuick 2.3
 import QtQuick.Dialogs 1.0
 import QtQuick.Controls 1.1
 import Cv 1.0
@@ -200,7 +200,7 @@ ApplicationWindow {
                             try {
                                 root.beforeCompile()
                                 // Info Qt/Src/qtquick1/src/declarative/qml/qdeclarativeengine.cpp
-                                newItem = Qt.createQmlObject("import QtQuick 2.2\n" + tester.program, tester, codeDocument.file);
+                                newItem = Qt.createQmlObject("import QtQuick 2.3\n" + tester.program, tester, codeDocument.file);
                             } catch (err) {
                                 error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;
                             }

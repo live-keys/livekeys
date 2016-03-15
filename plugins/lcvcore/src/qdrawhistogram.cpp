@@ -78,6 +78,40 @@ public:
     }
 };
 
+class QHistogramBinaryRenderer : public QAbstractHistogramRenderer{
+
+public:
+    QHistogramBinaryRenderer(){}
+
+    virtual void renderSingleList(
+        QPainter* painter,
+        const QSize &size,
+        const QVariantList& values,
+        const QColor &color,
+        qreal maxValue
+    ){
+        painter->setPen(QPen(color, 1));
+        painter->setBrush(QBrush(color));
+
+        int totalItems   = values.size() > (int)maxValue ? (int)maxValue : values.size();
+        int drawArea     = size.width() * size.height();
+        int cellSide     = (int)floor(sqrt(drawArea / maxValue));
+        int cellsPerLine = (int)(size.width() / cellSide);
+
+        for ( int i = 0; i < totalItems; ++i ){
+            int row  = (int)(i / cellsPerLine);
+            if ( values[i].toBool() ){
+                painter->drawRect(
+                    QRectF(
+                        QPointF((double)(i % cellsPerLine * cellSide), (double)(row * cellSide)),
+                        QSizeF(cellSide, cellSide)
+                    )
+                );
+            }
+        }
+    }
+};
+
 
 // QDrawHistogramNode definitions
 // ------------------------------
@@ -212,6 +246,8 @@ void QDrawHistogram::setRender(QDrawHistogram::RenderType arg){
     case QDrawHistogram::Rectangles:
         m_renderer = new QHistogramRectanglesRenderer;
         break;
+    case QDrawHistogram::Binary:
+        m_renderer = new QHistogramBinaryRenderer;
     }
 
     emit renderChanged();
