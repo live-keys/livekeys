@@ -196,11 +196,11 @@ ApplicationWindow {
                         running: true
                         repeat : false
                         onTriggered: {
-                            var newItem;
+                            var newItem = null;
                             try {
                                 root.beforeCompile()
                                 // Info Qt/Src/qtquick1/src/declarative/qml/qdeclarativeengine.cpp
-                                newItem = Qt.createQmlObject("import QtQuick 2.1\n" + tester.program, tester, codeDocument.file);
+                                newItem = Qt.createQmlObject("import QtQuick 2.2\n" + tester.program, tester, codeDocument.file);
                             } catch (err) {
                                 error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;
                             }
