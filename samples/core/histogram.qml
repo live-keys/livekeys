@@ -48,13 +48,13 @@ Grid{
     Rectangle{
     
         width: 200
-        height : 200
+        height : 100
         color : "#222333"
     
         DrawHistogram{
-            width: 100
-            height : 200
-            maxValue : 10
+            width: 200
+            height : 100
+            maxValue : 5
             colors : root.colors
             render : DrawHistogram.Binary
             values : [

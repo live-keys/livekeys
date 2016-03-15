@@ -94,17 +94,16 @@ public:
         painter->setBrush(QBrush(color));
 
         int totalItems   = values.size() > (int)maxValue ? (int)maxValue : values.size();
-        int drawArea     = size.width() * size.height();
-        int cellSide     = (int)floor(sqrt(drawArea / maxValue));
-        int cellsPerLine = (int)(size.width() / cellSide);
+        int cellsPerLine = (int)ceil(sqrt(((float)maxValue * size.width()) / size.height()));
+        int cellSize     = (int)floor(size.width() / cellsPerLine);
 
         for ( int i = 0; i < totalItems; ++i ){
             int row  = (int)(i / cellsPerLine);
             if ( values[i].toBool() ){
                 painter->drawRect(
                     QRectF(
-                        QPointF((double)(i % cellsPerLine * cellSide), (double)(row * cellSide)),
-                        QSizeF(cellSide, cellSide)
+                        QPointF((double)(i % cellsPerLine * cellSize), (double)(row * cellSize)),
+                        QSizeF(cellSize, cellSize)
                     )
                 );
             }
