@@ -1,6 +1,6 @@
-import 'lcvcore' 1.0
-import "lcvimgproc" 1.0
-import "lcvfeatures2d" 1.0
+import lcvcore 1.0
+import lcvimgproc 1.0
+import lcvfeatures2d 1.0
 
 
 Column{
@@ -23,9 +23,11 @@ Column{
         model : [trainImage, trainImage2]
         
         delegate : Rectangle{
+            id: delegateRoot
             
             property variant trainImage : trainImageLoader.output
             property variant trainKeypoints : trainImageDetector.keypoints
+            property int     trainIndex : index
             
             width : trainImageLoader.width
             height : trainImageLoader.height
@@ -48,6 +50,13 @@ Column{
                 }
             }
             
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    trainImages.selectedIndex = delegateRoot.trainIndex
+                    trainImages.selectedItem  = trainImages.itemAt(trainImages.selectedIndex)
+                }
+            }
         }
         
         Component.onCompleted : {

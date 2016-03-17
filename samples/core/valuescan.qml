@@ -1,6 +1,6 @@
-import "lcvcore" 1.0
-import "lcvimgproc" 1.0
-import "lcvcontrols" 1.0
+import lcvcore 1.0
+import lcvimgproc 1.0
+import lcvcontrols 1.0
 
 Row{
     

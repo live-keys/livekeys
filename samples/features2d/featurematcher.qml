@@ -1,6 +1,6 @@
-import 'lcvcore' 1.0
-import "lcvimgproc" 1.0
-import "lcvfeatures2d" 1.0
+import lcvcore 1.0
+import lcvimgproc 1.0
+import lcvfeatures2d 1.0
 
 Grid{
     columns : 2
@@ -43,7 +43,6 @@ Grid{
     }
     
     BriefDescriptorExtractor{
-        input : trainImageLoader.output
         keypoints : trainFeatureDetect.keypoints
         onDescriptorsChanged : {
             descriptorMatcher.add(descriptors)
@@ -62,11 +61,10 @@ Grid{
     FastFeatureDetector{
         id : queryFeatureDetect
         input : queryImageLoader.output
-    }    
+    }
     
     BriefDescriptorExtractor{
         id : queryFeatureExtract
-        input : queryImageLoader.output
         keypoints : queryFeatureDetect.keypoints
     }
     
@@ -75,12 +73,20 @@ Grid{
     BruteForceMatcher{
         id : descriptorMatcher
         queryDescriptors : queryFeatureExtract.descriptors
+        knn: 2
+    }
+    
+    DescriptorMatchFilter{
+        id: descriptorMatchFilter
+        matches1to2: descriptorMatcher.matches
+        minDistanceCoeff: 2.5
+        nndrRatio: 0.8
     }
     
     DrawMatches{
         keypoints1 : queryFeatureDetect.keypoints
         keypoints2 : trainImageLoader.keypoints[0]
-        matches1to2 : descriptorMatcher.matches
+        matches1to2 : descriptorMatchFilter.matches1to2Out
         matchIndex : 0
     }
     

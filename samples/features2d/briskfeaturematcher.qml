@@ -1,6 +1,6 @@
-import 'lcvcore' 1.0
-import "lcvimgproc" 1.0
-import "lcvfeatures2d" 1.0
+import lcvcore 1.0
+import lcvimgproc 1.0
+import lcvfeatures2d 1.0
 
 Grid{
     columns : 2
@@ -74,6 +74,7 @@ Grid{
     BruteForceMatcher{
         id : descriptorMatcher
         queryDescriptors : queryFeatureExtract.descriptors
+        knn : 1
     }
     
     DrawMatches{

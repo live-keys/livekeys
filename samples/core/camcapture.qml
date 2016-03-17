@@ -1,4 +1,4 @@
-import "lcvcore" 1.0
+import lcvcore 1.0
 
 // A simple example showing how to use the
 // camera capture device.
