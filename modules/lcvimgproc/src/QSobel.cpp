@@ -44,7 +44,14 @@ using namespace cv;
  */
 QSobel::QSobel(QQuickItem *parent)
     : QMatFilter(parent)
-    , m_display(new QMat){
+    , m_display(new QMat)
+    , m_ddepth(QMat::CV16S)
+    , m_xorder(1)
+    , m_yorder(0)
+    , m_ksize(3)
+    , m_scale(1)
+    , m_delta(0)
+    , m_borderType(BORDER_DEFAULT){
 }
 
 /*!
