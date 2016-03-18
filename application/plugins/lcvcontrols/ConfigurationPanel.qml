@@ -1,17 +1,26 @@
 import QtQml.Models 2.1
+import lcvcontrols 1.0
 
 Column{
+
+
+    ConfigurationField{
+        width: 300
+        label: "lalala"
+        editor: InputBox{}
+    }
 
 Repeater{
     id: repeater
     
+    property Rectangle var1 : Rectangle{}
+    
     signal dataChanged()
     property variant mapData : {return {
-        'key' : mydata
-        'value' : value
-        'editor' : TextInputBox{}
+        'key' : mydata,
+        'value' : value,
+        'editor' : mydata//TextInputBox{}
     }}
-    
     
     
     property list<Component> mydata : [
@@ -34,7 +43,7 @@ Repeater{
             Rectangle{
                 id: dataEditor2
                 
-                property string key: 'ass'
+                property string key: 'asd'
                 
                 signal dataChanged(variant data)
                 

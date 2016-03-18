@@ -3,3 +3,5 @@ LiveCVScrollStyle 1.0 LiveCVScrollStyle.qml
 RegionSelection 1.0 RegionSelection.qml
 VideoControls 1.0 VideoControls.qml
 KeypointListView 1.0 KeypointListView.qml
+ConfigurationField 1.0 ConfigurationField.qml
+InputBox 1.0 InputBox.qml

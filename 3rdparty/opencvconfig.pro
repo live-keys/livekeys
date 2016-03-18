@@ -105,6 +105,8 @@ unix{
     CONFIG += link_pkgconfig
     PKGCONFIG += opencv
 
+    defineTest(loadOpenCV){}
+
 }
 
 

@@ -1,4 +1,5 @@
 #include "qdrawhistogram.h"
+#include "math.h"
 #include <QSGTexture>
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLFramebufferObjectFormat>

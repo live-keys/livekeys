@@ -70,5 +70,7 @@ include(deployment.pri)
 
 DISTFILES += \
     plugins/lcvcontrols/DropDown.qml \
-    plugins/lcvcontrols/ConfigurationPanel.qml
+    plugins/lcvcontrols/ConfigurationPanel.qml \
+    plugins/lcvcontrols/ConfigurationField.qml \
+    plugins/lcvcontrols/InputBox.qml
 
