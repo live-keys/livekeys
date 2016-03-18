@@ -9,6 +9,8 @@
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>
         <file alias="UbuntuMono-Italic.ttf">fonts/UbuntuMono-Italic.ttf</file>
         <file alias="UbuntuMono-Regular.ttf">fonts/UbuntuMono-Regular.ttf</file>
+        <file alias="SourceCodePro-Bold.ttf">fonts/SourceCodePro-Bold.ttf</file>
+        <file alias="SourceCodePro-Regular.ttf">fonts/SourceCodePro-Regular.ttf</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="log.png">images/log.png</file>

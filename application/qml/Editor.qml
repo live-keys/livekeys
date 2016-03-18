@@ -70,7 +70,7 @@ Rectangle{
             focus : true
             text : "Rectangle{\n}"
             color : "#eeeeee"
-            font.family: "Ubuntu Mono, Courier New, Courier"
+            font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
             font.pixelSize: 14
 
             selectByMouse: true

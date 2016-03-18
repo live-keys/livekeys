@@ -32,9 +32,11 @@ ApplicationWindow {
     signal beforeCompile()
     signal afterCompile()
 
-    FontLoader{ id: ubuntuMonoBold;    source: "qrc:/fonts/UbuntuMono-Bold.ttf"; }
-    FontLoader{ id: ubuntuMonoRegular; source: "qrc:/fonts/UbuntuMono-Regular.ttf"; }
-    FontLoader{ id: ubuntuMonoItalic;  source: "qrc:/fonts/UbuntuMono-Italic.ttf"; }
+    FontLoader{ id: ubuntuMonoBold;       source: "qrc:/fonts/UbuntuMono-Bold.ttf"; }
+    FontLoader{ id: ubuntuMonoRegular;    source: "qrc:/fonts/UbuntuMono-Regular.ttf"; }
+    FontLoader{ id: ubuntuMonoItalic;     source: "qrc:/fonts/UbuntuMono-Italic.ttf"; }
+    FontLoader{ id: sourceCodeProRegular; source: "qrc:/fonts/SourceCodePro-Regular.ttf"; }
+    FontLoader{ id: sourceCodeProBold;    source: "qrc:/fonts/SourceCodePro-Bold.ttf"; }
 
     LogWindow{
         id : logWindow
@@ -158,7 +160,7 @@ ApplicationWindow {
                     if ( codeDocument.file !==  "" ){
                         codeDocument.saveFile(editor.text)
                         editor.isDirty = false
-                    }else
+                    } else
                         fileSaveDialog.open()
                 }
                 onOpen: {
