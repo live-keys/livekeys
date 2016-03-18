@@ -40,7 +40,7 @@ int main(int argc, char *argv[]){
     qmlRegisterUncreatableType<QLiveCVLog>(   "Cv", 1, 0, "MessageLog", "Type is singleton.");
     qmlRegisterType<QCodeHandler>(            "Cv", 1, 0, "CodeHandler");
 
-    livecv.loadQml(QUrl(QStringLiteral("plugins/main.qml")));
+    livecv.loadQml(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return app.exec();
 }

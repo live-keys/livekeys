@@ -49,7 +49,7 @@ Rectangle {
         height : parent.height
         Image{
             anchors.verticalCenter: parent.verticalCenter
-            source : "../../images/logo.png"
+            source : "qrc:/images/logo.png"
         }
     }
 
@@ -64,7 +64,7 @@ Rectangle {
         Image{
             id : newImage
             anchors.verticalCenter: parent.verticalCenter
-            source : "../../images/new.png"
+            source : "qrc:/images/new.png"
         }
         Rectangle{
             color : "#354253"
@@ -93,7 +93,7 @@ Rectangle {
         Image{
             id : saveImage
             anchors.verticalCenter: parent.verticalCenter
-            source : "../../images/save.png"
+            source : "qrc:/images/save.png"
 
             Rectangle{
                 visible : container.isTextDirty
@@ -134,7 +134,7 @@ Rectangle {
         Image{
             id : openImage
             anchors.verticalCenter: parent.verticalCenter
-            source : "../../images/open.png"
+            source : "qrc:/images/open.png"
         }
         Rectangle{
             color : "#354253"
@@ -163,7 +163,7 @@ Rectangle {
         Image{
             id : openLog
             anchors.verticalCenter: parent.verticalCenter
-            source : "../../images/log.png"
+            source : "qrc:/images/log.png"
 
             Rectangle{
                 visible : container.isLogWindowDirty

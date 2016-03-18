@@ -18,7 +18,6 @@ import QtQuick 2.3
 import QtQuick.Dialogs 1.0
 import QtQuick.Controls 1.1
 import Cv 1.0
-import "view"
 
 ApplicationWindow {
     id : root
@@ -32,6 +31,10 @@ ApplicationWindow {
 
     signal beforeCompile()
     signal afterCompile()
+
+    FontLoader{ id: ubuntuMonoBold;    source: "qrc:/fonts/UbuntuMono-Bold.ttf"; }
+    FontLoader{ id: ubuntuMonoRegular; source: "qrc:/fonts/UbuntuMono-Regular.ttf"; }
+    FontLoader{ id: ubuntuMonoItalic;  source: "qrc:/fonts/UbuntuMono-Italic.ttf"; }
 
     LogWindow{
         id : logWindow
@@ -162,12 +165,12 @@ ApplicationWindow {
                     header.openFile()
                 }
                 onToggleSize: {
-                    if ( splitter.x < contentWrap.width / 2)
-                        splitter.x = contentWrap.width - contentWrap.width / 4
-                    else if ( splitter.x === contentWrap.width / 2 )
-                        splitter.x = contentWrap.width / 4
+                    if ( editor.width < contentWrap.width / 2)
+                        editor.width = contentWrap.width - contentWrap.width / 4
+                    else if ( editor.width === contentWrap.width / 2 )
+                        editor.width = contentWrap.width / 4
                     else
-                        splitter.x = contentWrap.width / 2
+                        editor.width = contentWrap.width / 2
                 }
 
                 Component.onCompleted: forceFocus()

@@ -70,8 +70,8 @@ Rectangle{
             focus : true
             text : "Rectangle{\n}"
             color : "#eeeeee"
-            font.family: "Courier New, Courier"
-            font.pixelSize: 13
+            font.family: "Ubuntu Mono, Courier New, Courier"
+            font.pixelSize: 14
 
             selectByMouse: true
             mouseSelectionMode: TextEdit.SelectCharacters
@@ -105,7 +105,7 @@ Rectangle{
                     editor.open()
                     event.accepted = true
                 } else if ( event.key === Qt.Key_E && (event.modifiers & Qt.ControlModifier ) ){
-                    editorArea.toggleSize()
+                    editor.toggleSize()
                     event.accepted = true
                 } else if ( event.key === Qt.Key_PageUp ){
                     var lines = flick.height / cursorRectangle.height
