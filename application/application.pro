@@ -68,3 +68,7 @@ OTHER_FILES += \
 
 include(deployment.pri)
 
+DISTFILES += \
+    plugins/lcvcontrols/DropDown.qml \
+    plugins/lcvcontrols/ConfigurationPanel.qml
+
