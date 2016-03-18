@@ -7,7 +7,6 @@ Rectangle {
     height: 30
 
     property string key : "key"
-    property string value : "default"
     property string label : "Label"
 
     property alias editor : editorContainer.children

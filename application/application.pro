@@ -70,5 +70,6 @@ DISTFILES += \
     $$PWD/plugins/lcvcontrols/DropDown.qml \
     $$PWD/plugins/lcvcontrols/ConfigurationPanel.qml \
     $$PWD/plugins/lcvcontrols/ConfigurationField.qml \
-    $$PWD/plugins/lcvcontrols/InputBox.qml
+    $$PWD/plugins/lcvcontrols/InputBox.qml \
+    plugins/lcvcontrols/FeatureDetectorSelection.qml
 
