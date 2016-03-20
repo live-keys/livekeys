@@ -55,6 +55,8 @@ ApplicationWindow {
         anchors.left: parent.left
         anchors.right: parent.right
 
+        color: "#08141d"
+
         property var callback : function(){}
 
         isTextDirty: editor.isDirty
@@ -148,7 +150,7 @@ ApplicationWindow {
             handleDelegate: Rectangle {
                 implicitWidth: 1
                 implicitHeight: 1
-                color: "#333"
+                color: "#05111b"
             }
 
             Editor{
@@ -183,7 +185,7 @@ ApplicationWindow {
                 id : viewer
                 height : parent.height
 
-                color : "#051521"
+                color : "#05111b"
 
                 Item {
                     id: tester

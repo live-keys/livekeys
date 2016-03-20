@@ -21,7 +21,7 @@ QLiveCV::~QLiveCV(){
 }
 
 void QLiveCV::parseArguments(const QStringList &arguments){
-    if ( arguments.contains("-c" ) )
+    if ( !arguments.contains("-c" ) )
         qInstallMessageHandler(&QLiveCVLog::logFunction);
 }
 

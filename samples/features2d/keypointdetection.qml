@@ -16,7 +16,6 @@ Column{
     }
     
     KeypointListView{
-        visible: false
         keypointHighlighter: keypointHighlight
         detector : detectorSelector.selectedDetector
         //extractor: descriptorExtractor

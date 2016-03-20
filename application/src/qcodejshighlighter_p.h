@@ -88,7 +88,7 @@ QCodeJSHighlighter::QCodeJSHighlighter(QTextDocument *parent)
 , m_markCaseSensitivity(Qt::CaseInsensitive){
 
     // default color scheme
-    m_colors[Normal]     = QColor("#ffffff");
+    m_colors[Normal]     = QColor("#fff");
     m_colors[Comment]    = QColor("#9c9c9c");
     m_colors[Number]     = QColor("#ca7000");
     m_colors[String]     = QColor("#30a020");

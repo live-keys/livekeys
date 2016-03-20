@@ -20,7 +20,10 @@ Rectangle {
     id : container
     width: 100
     height: 35
-    color : "#1f262f"
+    gradient: Gradient{
+        GradientStop{ position: 0.0; color: "#141923"}
+        GradientStop{ position: 1.0; color: "#05111b"}
+    }
 
     property bool isLogWindowDirty : false
     property bool isTextDirty      : false
@@ -45,7 +48,7 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: 14
         height : parent.height
         Image{
             anchors.verticalCenter: parent.verticalCenter
@@ -57,23 +60,26 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 165
-        height : parent.height
-        width : newImage.width
-        color : "transparent"
+        anchors.leftMargin: 160
+        height : newMArea.containsMouse ? parent.height : parent.height - 5
+        width : 35
+        color : "#091f2e"
+        border.width: 1
+        border.color: "#0f2636"
         Image{
             id : newImage
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             source : "qrc:/images/new.png"
         }
         Rectangle{
-            color : "#354253"
+            color : "#0f2636"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             visible : newMArea.containsMouse
         }
+        Behavior on height{ NumberAnimation{ duration: 100 } }
         MouseArea{
             id : newMArea
             anchors.fill: parent
@@ -86,13 +92,15 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 195
-        color : "transparent"
-        height : parent.height
-        width : saveImage.width
+        anchors.leftMargin: 200
+        color : "#091f2e"
+        border.width: 1
+        border.color: "#0f2636"
+        height : saveMArea.containsMouse ? parent.height : parent.height - 5
+        width : 35
         Image{
             id : saveImage
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             source : "qrc:/images/save.png"
 
             Rectangle{
@@ -108,13 +116,14 @@ Rectangle {
             }
         }
         Rectangle{
-            color : "#354253"
+            color : "#0f2636"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             visible : saveMArea.containsMouse
         }
+        Behavior on height{ NumberAnimation{  duration: 100 } }
         MouseArea{
             id : saveMArea
             anchors.fill: parent
@@ -127,23 +136,26 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 225
-        color : "transparent"
-        height : parent.height
-        width : openImage.width
+        anchors.leftMargin: 240
+        color : "#091f2e"
+        border.width: 1
+        border.color: "#0f2636"
+        height : openMArea.containsMouse ? parent.height : parent.height - 5
+        width : 35
         Image{
             id : openImage
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             source : "qrc:/images/open.png"
         }
         Rectangle{
-            color : "#354253"
+            color : "#0f2636"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             visible : openMArea.containsMouse
         }
+        Behavior on height{ NumberAnimation{  duration: 100 } }
         MouseArea{
             id : openMArea
             anchors.fill: parent
@@ -156,13 +168,15 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 310
-        color : "transparent"
-        height : parent.height
-        width : openLog.width
+        anchors.leftMargin: 320
+        color : "#091f2e"
+        border.width: 1
+        border.color: "#0f2636"
+        height : openLogMArea.containsMouse ? parent.height : parent.height - 5
+        width : 35
         Image{
             id : openLog
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             source : "qrc:/images/log.png"
 
             Rectangle{
@@ -178,13 +192,14 @@ Rectangle {
             }
         }
         Rectangle{
-            color : "#354253"
+            color : "#0f2636"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             visible : openLogMArea.containsMouse
         }
+        Behavior on height{ NumberAnimation{  duration: 100 } }
 
         MouseArea{
             id : openLogMArea
@@ -199,26 +214,28 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 360
-        color : "transparent"
-        height : parent.height
-        width : 20
+        anchors.leftMargin: 385
+        color : "#091f2e"
+        border.width: 1
+        border.color: "#0f2636"
+        height : minusMArea.containsMouse ? parent.height : parent.height - 5
+        width : 35
         Text{
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.centerIn: parent
             text : "-"
-            color : "#dee7ee"
+            color : "#eee"
             font.pixelSize: 24
             font.family: "Arial"
         }
         Rectangle{
-            color : "#354253"
+            color : "#0f2636"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             visible : minusMArea.containsMouse
         }
+        Behavior on height{ NumberAnimation{  duration: 100 } }
         MouseArea{
             id : minusMArea
             anchors.fill: parent
@@ -228,26 +245,28 @@ Rectangle {
     }
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 384
-        color : "transparent"
-        height : parent.height
-        width : 20
+        anchors.leftMargin: 425
+        color : "#091f2e"
+        border.width: 1
+        border.color: "#0f2636"
+        height : plusMArea.containsMouse ? parent.height : parent.height - 5
+        width : 35
         Text{
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.centerIn: parent
             text : "+"
-            color : "#dee7ee"
+            color : "#eee"
             font.pixelSize: 24
             font.family: "Arial"
         }
         Rectangle{
-            color : "#354253"
+            color : "#0f2636"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             visible : plusMArea.containsMouse
         }
+        Behavior on height{ NumberAnimation{  duration: 100 } }
         MouseArea{
             id : plusMArea
             anchors.fill: parent

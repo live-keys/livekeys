@@ -16,6 +16,7 @@
 
 import QtQuick 2.3
 import QtQuick.Controls 1.2
+import QtQuick.Controls.Styles 1.2
 import Cv 1.0
 
 Rectangle{
@@ -29,7 +30,12 @@ Rectangle{
     property alias text: editorArea.text
     property alias font: editorArea.font
 
-    color : "#041725"
+    color : "#071723"
+    gradient: Gradient{
+        GradientStop { position: 0.0;  color: "#08141f" }
+        GradientStop { position: 0.01; color: "#071723" }
+    }
+
     clip : true
 
     function forceFocus(){
@@ -38,9 +44,32 @@ Rectangle{
 
     ScrollView {
         id: flick
+        style: ScrollViewStyle {
+            transientScrollBars: false
+            handle: Item {
+                implicitWidth: 10
+                implicitHeight: 10
+                Rectangle {
+                    color: "#0b1f2e"
+                    anchors.fill: parent
+                }
+            }
+            scrollBarBackground: Item{
+                implicitWidth: 10
+                implicitHeight: 10
+                Rectangle{
+                    anchors.fill: parent
+                    color: "#091a27"
+                }
+            }
+            decrementControl: null
+            incrementControl: null
+            frame: Rectangle{color: "#071723"}
+            corner: Rectangle{color: "#071723"}
+        }
 
         anchors.fill: parent
-        anchors.leftMargin: 9
+        anchors.leftMargin: 10
         anchors.topMargin: 8
 
         frameVisible: false
@@ -69,7 +98,7 @@ Rectangle{
 
             focus : true
             text : "Rectangle{\n}"
-            color : "#eeeeee"
+            color : "#fff"
             font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
             font.pixelSize: 14
 

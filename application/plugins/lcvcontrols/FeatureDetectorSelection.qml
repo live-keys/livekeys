@@ -17,6 +17,15 @@ Rectangle{
         }
     })
 
+    signal configurationUpdate()
+
+    function updateConfiguration(detectorKey, propertyKey, value){
+        root.configuration[detectorKey][propertyKey] = value
+        if ( selectedDetector )
+            selectedDetector.initialize(root.configuration[detectorKey])
+        root.configurationUpdate()
+    }
+
     property list<QtObject> model: [
         QtObject{
             property string name: "FastFeatureDetector"
@@ -26,8 +35,8 @@ Rectangle{
                     ConfigurationField{
                         label : "Threshold"
                         editor : InputBox{
-                            text: root.configuration["FastFeatureDetector"]["threshold"];
-                            onTextChanged: root.configuration["FastFeatureDetector"]["threshold"] = text;
+                            text: root.configuration["FastFeatureDetector"]["threshold"]
+                            onTextChanged: root.updateConfiguration("FastFeatureDetector", "threshold", text)
                         }
                     }
                 },
@@ -35,8 +44,8 @@ Rectangle{
                     ConfigurationField{
                         label : "Non Max Suppression"
                         editor : InputBox{
-                            text: root.configuration["FastFeatureDetector"]["nonmaxSuppresion"];
-                            onTextChanged: root.configuration["FastFeatureDetector"]["nonMaxSuppresion"] = text;
+                            text: root.configuration["FastFeatureDetector"]["nonmaxSuppresion"]
+                            onTextChanged: root.updateConfiguration("FastFeatureDetector", "nonmaxSuppresion", text)
                         }
                     }
                 }
@@ -51,7 +60,7 @@ Rectangle{
                         label : "Threshold"
                         editor : InputBox{
                             text: root.configuration["BriskFeatureDetector"]["thresh"];
-                            onTextChanged: root.configuration["BriskFeatureDetector"]["thresh"] = text;
+                            onTextChanged: root.updateConfiguration("BriskFeatureDetector", "thresh", text)
                         }
                     }
                 },
@@ -60,7 +69,7 @@ Rectangle{
                         label : "Octaves"
                         editor : InputBox{
                             text: root.configuration["BriskFeatureDetector"]["octaves"];
-                            onTextChanged: root.configuration["BriskFeatureDetector"]["octaves"] = text;
+                            onTextChanged: root.updateConfiguration("BriskFeatureDetector", "octaves", text)
                         }
                     }
                 },
@@ -69,7 +78,7 @@ Rectangle{
                         label : "Pattern Scale"
                         editor : InputBox{
                             text: root.configuration["BriskFeatureDetector"]["patternScale"];
-                            onTextChanged: root.configuration["BriskFeatureDetector"]["patternScale"] = text;
+                            onTextChanged: root.updateConfiguration("BriskFeatureDetector", "patternScale", text)
                         }
                     }
                 }

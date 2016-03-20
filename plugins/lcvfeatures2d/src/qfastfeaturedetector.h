@@ -12,7 +12,8 @@ public:
     ~QFastFeatureDetector();
 
 public slots:
-    void initialize(int threshold = 10, bool nonmaxSuppression = true);
+//    void initialize(int threshold = 10, bool nonmaxSuppression = true);
+    void initialize(const QVariantMap& settings);
 
 };
 
