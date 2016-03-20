@@ -3,6 +3,7 @@
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLFramebufferObjectFormat>
 #include <QOpenGLPaintDevice>
+#include <QOpenGLFunctions>
 #include <QQuickWindow>
 
 #include <QPainter>
@@ -88,6 +89,7 @@ QDrawHistogramNode::QDrawHistogramNode(QQuickWindow *window)
     , m_window(window)
     , m_painter(new QPainter)
     , m_paintDevice(0)
+    , m_glFunctions(new QOpenGLFunctions)
 {
 }
 
@@ -96,6 +98,7 @@ QDrawHistogramNode::~QDrawHistogramNode(){
     delete m_fbo;
     delete m_painter;
     delete m_paintDevice;
+    delete m_glFunctions;
 }
 
 void QDrawHistogramNode::render(
@@ -117,8 +120,8 @@ void QDrawHistogramNode::render(
     }
 
     m_fbo->bind();
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    m_glFunctions->glClearColor(0, 0, 0, 0);
+    m_glFunctions->glClear(GL_COLOR_BUFFER_BIT);
 
     if ( size.isEmpty() ){
         m_fbo->release();

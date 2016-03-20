@@ -7,6 +7,7 @@
 class QPainter;
 class QOpenGLPaintDevice;
 class QOpenGLFramebufferObject;
+class QOpenGLFunctions;
 
 class QAbstractHistogramRenderer{
 public:
@@ -43,6 +44,7 @@ private:
     QQuickWindow             *m_window;
     QPainter                 *m_painter;
     QOpenGLPaintDevice       *m_paintDevice;
+    QOpenGLFunctions         *m_glFunctions;
 };
 
 class QDrawHistogram : public QQuickItem{

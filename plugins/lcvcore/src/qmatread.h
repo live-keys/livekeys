@@ -25,6 +25,7 @@
 class QPainter;
 class QOpenGLPaintDevice;
 class QOpenGLFramebufferObject;
+class QOpenGLFunctions;
 class QMatReadNode : public QObject, public QSGSimpleTextureNode{
 
     Q_OBJECT
@@ -41,6 +42,7 @@ private:
     QQuickWindow             *m_window;
     QPainter                 *m_painter;
     QOpenGLPaintDevice       *m_paintDevice;
+    QOpenGLFunctions         *m_glFunctions;
 
 };
 

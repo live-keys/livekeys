@@ -19,6 +19,7 @@
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLFramebufferObjectFormat>
 #include <QOpenGLPaintDevice>
+#include <QOpenGLFunctions>
 #include <QQuickWindow>
 
 #include <QPainter>
@@ -52,8 +53,9 @@ QMatReadNode::QMatReadNode(QQuickWindow *window)
     , m_texture(0)
     , m_window(window)
     , m_painter(new QPainter)
-    , m_paintDevice(0){
-
+    , m_paintDevice(0)
+    , m_glFunctions(new QOpenGLFunctions)
+{
 }
 
 QMatReadNode::~QMatReadNode(){
@@ -61,6 +63,7 @@ QMatReadNode::~QMatReadNode(){
     delete m_fbo;
     delete m_painter;
     delete m_paintDevice;
+    delete m_glFunctions;
 }
 
 void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, int numberWidth, bool equalAspectRatio){
@@ -77,8 +80,8 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
 
     if (image){
         m_fbo->bind();
-        glClearColor(0, 0, 0, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
+        m_glFunctions->glClearColor(0, 0, 0, 0);
+        m_glFunctions->glClear(GL_COLOR_BUFFER_BIT);
 
         Mat* renderSource = image->cvMat();
         int cellHeight = ( font.pixelSize() + 2 ) * renderSource->channels() + 4;
