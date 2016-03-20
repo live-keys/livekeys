@@ -8,7 +8,7 @@ ScrollViewStyle {
         implicitWidth: 10
         implicitHeight: 10
         Rectangle {
-            color: "#ff0000"
+            color: "#0b1f2e"
             anchors.fill: parent
         }
     }
@@ -17,11 +17,11 @@ ScrollViewStyle {
         implicitHeight: 10
         Rectangle{
             anchors.fill: parent
-            color: "#ffff00"
+            color: "#091823"
         }
     }
     decrementControl: null
     incrementControl: null
-    frame: Rectangle{color: "#ff00ff"}
-    corner: Rectangle{color: "#00f000"}
+    frame: Rectangle{color: "transparent"}
+    corner: Rectangle{color: "#091823"}
 }
