@@ -9,10 +9,11 @@ class FeatureDetector;
 }
 
 class QKeyPointVector;
-class Q_LCVFEATURES2D_EXPORT QFeatureDetector : public QMatDisplay{
+class Q_LCVFEATURES2D_EXPORT QFeatureDetector : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(QMat* input                READ inputMat  WRITE setInputMat  NOTIFY inputChanged)
+    Q_PROPERTY(QMat* output               READ output    NOTIFY outputChanged)
     Q_PROPERTY(QMat* mask                 READ mask      WRITE setMask      NOTIFY maskChanged)
     Q_PROPERTY(QKeyPointVector* keypoints READ keypoints WRITE setKeypoints NOTIFY keypointsChanged)
 
@@ -24,6 +25,8 @@ public:
 public:
     QMat* inputMat();
     void setInputMat(QMat* mat);
+
+    QMat* output();
 
     QMat* mask();
     void setMask(QMat* mat);
@@ -38,19 +41,25 @@ protected:
 
 public:
     virtual void componentComplete();
-    virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
+    virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *);
 
 signals:
     void inputChanged();
     void maskChanged();
     void keypointsChanged();
+    void outputChanged();
 
 private:
+    void drawKeypoints();
+
     cv::FeatureDetector* m_detector;
     QKeyPointVector*     m_keypoints;
 
     QMat* m_in;
+    QMat* m_output;
     QMat* m_mask;
+
+    bool  m_outputDirty;
 };
 
 inline QMat *QFeatureDetector::inputMat(){
@@ -69,6 +78,12 @@ inline void QFeatureDetector::setInputMat(QMat *mat){
     m_in = mat;
     emit inputChanged();
     detect();
+}
+
+inline QMat*QFeatureDetector::output(){
+    if ( m_outputDirty )
+        drawKeypoints();
+    return m_output;
 }
 
 inline QMat* QFeatureDetector::mask(){

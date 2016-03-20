@@ -18,12 +18,13 @@
 #define QCODEDOCUMENT_H
 
 #include <QQuickItem>
+#include <QUrl>
 
 class QCodeDocument : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(QString path READ path WRITE setPath NOTIFY pathChanged)
-    Q_PROPERTY(QString file READ file WRITE setFile NOTIFY fileChanged)
+    Q_PROPERTY(QUrl    file READ file WRITE setFile NOTIFY fileChanged)
 
 public:
     explicit QCodeDocument(QQuickItem *parent = 0);
@@ -31,8 +32,8 @@ public:
     const QString& path() const;
     void setPath(const QString& path);
 
-    const QString& file() const;
-    void setFile(const QString& file);
+    const QUrl &file() const;
+    void setFile(const QUrl& file);
 
 public slots:
     QString openFile(const QUrl& file);
@@ -44,8 +45,8 @@ signals:
     void fileChanged();
 
 private:
-    QString     m_path;
-    QString     m_openedFile;
+    QString m_path;
+    QUrl    m_openedFile;
 };
 
 inline const QString &QCodeDocument::path() const{
@@ -59,11 +60,11 @@ inline void QCodeDocument::setPath(const QString &path){
     }
 }
 
-inline const QString& QCodeDocument::file() const{
+inline const QUrl& QCodeDocument::file() const{
     return m_openedFile;
 }
 
-inline void QCodeDocument::setFile(const QString& file){
+inline void QCodeDocument::setFile(const QUrl &file){
     if ( m_openedFile != file ){
         m_openedFile = file;
         emit fileChanged();

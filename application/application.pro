@@ -55,13 +55,21 @@ QMAKE_EXTRA_TARGETS += first plugincopy imagecopy
 # Qml
 # ---
 
+RESOURCES += $$PWD/application.qrc
+
 OTHER_FILES += \
     $$PWD/plugins/lcvcontrols/RegionSelection.qml \
     $$PWD/plugins/lcvcontrols/VideoControls.qml \
-    $$PWD/plugins/view/Editor.qml \
-    $$PWD/plugins/view/LogWindow.qml \
-    $$PWD/plugins/view/Top.qml \
-    $$PWD/plugins/main.qml
+    $$PWD/plugins/lcvcontrols/KeypointListView.qml \
+    $$PWD/plugins/lcvcontrols/LiveCVScrollStyle.qml \
+    $$PWD/plugins/lcvcontrols/qmldir
 
 include(deployment.pri)
+
+DISTFILES += \
+    $$PWD/plugins/lcvcontrols/DropDown.qml \
+    $$PWD/plugins/lcvcontrols/ConfigurationPanel.qml \
+    $$PWD/plugins/lcvcontrols/ConfigurationField.qml \
+    $$PWD/plugins/lcvcontrols/InputBox.qml \
+    plugins/lcvcontrols/FeatureDetectorSelection.qml
 

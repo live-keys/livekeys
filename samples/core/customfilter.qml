@@ -26,7 +26,6 @@ Row{
             var rows = data.rows()
             var cols = data.cols()
             var channels = data.channels()
-            var it   = 0;
             
             var vals = data.values()
             

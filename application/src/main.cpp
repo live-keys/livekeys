@@ -36,11 +36,11 @@ int main(int argc, char *argv[]){
     QLiveCV livecv(app.arguments());
     livecv.loadLibrary(livecv.dir() + "/lcvlib");
 
-    qmlRegisterType<QCodeDocument>("Cv", 1, 0, "Document");
-    qmlRegisterType<QCodeHandler>( "Cv", 1, 0, "CodeHandler");
-    qmlRegisterType<QLiveCVLog>(   "Cv", 1, 0, "MessageLog");
+    qmlRegisterUncreatableType<QCodeDocument>("Cv", 1, 0, "Document", "Only access to the document object is allowed.");
+    qmlRegisterUncreatableType<QLiveCVLog>(   "Cv", 1, 0, "MessageLog", "Type is singleton.");
+    qmlRegisterType<QCodeHandler>(            "Cv", 1, 0, "CodeHandler");
 
-    livecv.loadQml(QUrl(QStringLiteral("plugins/main.qml")));
+    livecv.loadQml(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return app.exec();
 }

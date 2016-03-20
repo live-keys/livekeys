@@ -106,6 +106,7 @@ unix{
     PKGCONFIG += opencv
 
     defineTest(loadOpenCV){}
+
 }
 
 

@@ -14,11 +14,10 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.2
+import QtQuick 2.3
 import QtQuick.Dialogs 1.0
 import QtQuick.Controls 1.1
 import Cv 1.0
-import "view"
 
 ApplicationWindow {
     id : root
@@ -32,6 +31,12 @@ ApplicationWindow {
 
     signal beforeCompile()
     signal afterCompile()
+
+    FontLoader{ id: ubuntuMonoBold;       source: "qrc:/fonts/UbuntuMono-Bold.ttf"; }
+    FontLoader{ id: ubuntuMonoRegular;    source: "qrc:/fonts/UbuntuMono-Regular.ttf"; }
+    FontLoader{ id: ubuntuMonoItalic;     source: "qrc:/fonts/UbuntuMono-Italic.ttf"; }
+    FontLoader{ id: sourceCodeProRegular; source: "qrc:/fonts/SourceCodePro-Regular.ttf"; }
+    FontLoader{ id: sourceCodeProBold;    source: "qrc:/fonts/SourceCodePro-Bold.ttf"; }
 
     LogWindow{
         id : logWindow
@@ -155,23 +160,22 @@ ApplicationWindow {
                     if ( codeDocument.file !==  "" ){
                         codeDocument.saveFile(editor.text)
                         editor.isDirty = false
-                    }else
+                    } else
                         fileSaveDialog.open()
                 }
                 onOpen: {
                     header.openFile()
                 }
                 onToggleSize: {
-                    if ( splitter.x < contentWrap.width / 2)
-                        splitter.x = contentWrap.width - contentWrap.width / 4
-                    else if ( splitter.x === contentWrap.width / 2 )
-                        splitter.x = contentWrap.width / 4
+                    if ( editor.width < contentWrap.width / 2)
+                        editor.width = contentWrap.width - contentWrap.width / 4
+                    else if ( editor.width === contentWrap.width / 2 )
+                        editor.width = contentWrap.width / 4
                     else
-                        splitter.x = contentWrap.width / 2
+                        editor.width = contentWrap.width / 2
                 }
 
                 Component.onCompleted: forceFocus()
-
             }
 
 
@@ -196,17 +200,19 @@ ApplicationWindow {
                         running: true
                         repeat : false
                         onTriggered: {
-                            var newItem;
+                            var newItem = null;
                             try {
                                 root.beforeCompile()
                                 // Info Qt/Src/qtquick1/src/declarative/qml/qdeclarativeengine.cpp
-                                newItem = Qt.createQmlObject("import QtQuick 2.1\n" + tester.program, tester, codeDocument.file);
+                                newItem = Qt.createQmlObject(
+                                    "import QtQuick 2.3\n" + tester.program,
+                                    tester,
+                                    codeDocument.file.toString() !== '' ? codeDocument.file : 'untitled.qml');
                             } catch (err) {
                                 error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;
                             }
                             if ( tester.program === "Rectangle{\n}" || tester.program === "" )
                                 editor.isDirty = false
-
                             if (newItem){
                                 error.text = "";
                                 if (tester.item) {

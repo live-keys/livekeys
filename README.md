@@ -1,4 +1,4 @@
-# Live CV
+![Live CV](/doc/src/images/logo-dark.png)
 
 **Live Computer Vision Coding Environment**
 

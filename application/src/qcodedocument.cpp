@@ -29,15 +29,15 @@ QCodeDocument::QCodeDocument(QQuickItem *parent)
 QString QCodeDocument::openFile(const QUrl &file){
     QString fileName = file.toLocalFile();
     if ( fileName != "" ){
-        QFile file(fileName);
-        if ( !file.open(QIODevice::ReadOnly ) ){
+        QFile fileInput(fileName);
+        if ( !fileInput.open(QIODevice::ReadOnly ) ){
             return QString("Could not open file : ") + fileName;
         }
-        QTextStream in(&file);
-        setFile(fileName);
-        setPath(QFileInfo(file).path());
+        QTextStream in(&fileInput);
+        setFile(file);
+        setPath(QFileInfo(fileInput).path());
         QString content = in.readAll();
-        file.close();
+        fileInput.close();
         return content;
     }
     return "";
@@ -46,22 +46,22 @@ QString QCodeDocument::openFile(const QUrl &file){
 void QCodeDocument::saveFile(const QUrl& file, const QString &content){
     QString fileName = file.toLocalFile();
     if ( fileName != "" ){
-        QFile file(fileName);
-        if ( !file.open(QIODevice::WriteOnly ) ){
+        QFile fileInput(fileName);
+        if ( !fileInput.open(QIODevice::WriteOnly ) ){
             qDebug() << "Can't open file for writing";
             return;
         } else {
-            QTextStream stream(&file);
+            QTextStream stream(&fileInput);
             stream << content;
             stream.flush();
-            file.close();
-            setPath(QFileInfo(file).path());
-            setFile(fileName);
+            fileInput.close();
+            setPath(QFileInfo(fileInput).path());
+            setFile(file);
         }
     }
 }
 
 void QCodeDocument::saveFile(const QString& content){
-    if ( m_openedFile != "" )
-        saveFile(QUrl::fromLocalFile(m_openedFile), content);
+    if ( !m_openedFile.isEmpty() )
+        saveFile(m_openedFile, content);
 }
