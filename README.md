@@ -39,6 +39,7 @@ The executable and plugins will be found in the application directory.
 There's an [organization on github](http://github.com/livecv) created for Live CV plugins and projects, so anyone looking to contribute is always welcome. 
 Live CV is 90% based on plugins, the main application providing just the code editor and result viewer, therefore plugins can be developed either from within
 the application or separtely and integrated after. Computer vision based plugins link to live cv library, which provides the interface between live cv and qml.
+This [article](http://livecv.dinusv.com/documentation/api-configuration.html) describes how to build a live cv c++ plugin from scratch.
 
 There's a forum available for discussions on [live cv's website](http://livecv.dinusv.com/forum).
 
