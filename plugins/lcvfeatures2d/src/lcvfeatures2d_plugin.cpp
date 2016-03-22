@@ -40,6 +40,9 @@
 #include "qdmatchvector.h"
 #include "qdrawmatches.h"
 #include "qdescriptormatchfilter.h"
+#include "qkeypointtoscenemap.h"
+#include "qmatchestolocalkeypoint.h"
+#include "qkeypointhomography.h"
 
 #include <qqml.h>
 
@@ -69,6 +72,9 @@ void Lcvfeatures2dPlugin::registerTypes(const char *uri){
     qmlRegisterType<QFlannBasedMatcher>(          uri, 1, 0, "FlannBasedMatcher");
     qmlRegisterType<QDrawMatches>(                uri, 1, 0, "DrawMatches");
     qmlRegisterType<QDescriptorMatchFilter>(      uri, 1, 0, "DescriptorMatchFilter");
+    qmlRegisterType<QKeyPointToSceneMap>(         uri, 1, 0, "KeypointToSceneMap");
+    qmlRegisterType<QMatchesToLocalKeypoint>(     uri, 1, 0, "MatchesToLocalKeypoint");
+    qmlRegisterType<QKeypointHomography>(         uri, 1, 0, "KeypointHomography");
 }
 
 

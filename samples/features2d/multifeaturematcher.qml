@@ -33,7 +33,7 @@ Row{
             property int     trainIndex : index
             
             width : imageFeatureColumn.maxWidth
-            height : trainImageLoader.height
+            height : trainImageDetector.height
             ImRead{
                 id : trainImageLoader
                 file : modelData
@@ -44,7 +44,7 @@ Row{
                 id : trainImageDetector
                 input : trainImageLoader.output
                 width: parent.width
-                height: implicitWidth / width * 100
+                height: (parent.width / trainImageLoader.width) * implicitHeight
             }
             
             BriefDescriptorExtractor{
@@ -76,7 +76,6 @@ Row{
 }
     
     // Query Image
-    
     
     ImRead{
         id : queryImageLoader

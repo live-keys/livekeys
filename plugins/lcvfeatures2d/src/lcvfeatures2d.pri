@@ -22,7 +22,10 @@ HEADERS += \
     $$PWD/qorbdescriptorextractor.h \
     $$PWD/qorbfeaturedetector.h \
     $$PWD/qsimpleblobdetector.h \
-    $$PWD/qstarfeaturedetector.h
+    $$PWD/qstarfeaturedetector.h \
+    $$PWD/qmatchestolocalkeypoint.h \
+    $$PWD/qkeypointtoscenemap.h \
+    $$PWD/qkeypointhomography.h
 
 SOURCES += \
     $$PWD/lcvfeatures2d_plugin.cpp \
@@ -47,4 +50,7 @@ SOURCES += \
     $$PWD/qorbdescriptorextractor.cpp \
     $$PWD/qorbfeaturedetector.cpp \
     $$PWD/qsimpleblobdetector.cpp \
-    $$PWD/qstarfeaturedetector.cpp
+    $$PWD/qstarfeaturedetector.cpp \
+    $$PWD/qmatchestolocalkeypoint.cpp \
+    $$PWD/qkeypointtoscenemap.cpp \
+    $$PWD/qkeypointhomography.cpp

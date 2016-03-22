@@ -1,4 +1,5 @@
 #include "qdescriptormatchfilter.h"
+#include <QDebug>
 
 QDescriptorMatchFilter::QDescriptorMatchFilter(QQuickItem* parent)
     : QQuickItem(parent)
@@ -18,6 +19,9 @@ void QDescriptorMatchFilter::filterMatches(
         const std::vector<std::vector<cv::DMatch> > &src,
         std::vector<std::vector<cv::DMatch> > &dst
 ){
+
+    //TODO: Solve for BEST_MATCH vs KNN_MATCH scenarios
+
     if ( !isFilterSet() ){
         copyMatches(src, dst);
         return;
@@ -30,34 +34,42 @@ void QDescriptorMatchFilter::filterMatches(
     dst[0].clear();
     std::vector<cv::DMatch>& dstItem = dst[0];
 
+    qDebug() << "FIRST SIZE:" << src.size();
+    qDebug() << "SECOND SIZE:" << src[0].size();
+
     float minDistance = 100;
     if ( isMinDistanceFilterSet() ){
         for( size_t i = 0; i < src.size(); ++i ){
-            if ( src[i][0].distance < minDistance )
-                minDistance = src[i][0].distance;
+            if ( src[i].size() > 0 ){
+                if ( src[i][0].distance < minDistance )
+                    minDistance = src[i][0].distance;
+            }
         }
     }
 
     bool nndrRatioCheck = isNndrRatioSet() && (src[0].size() > 1);
 
     for( size_t i = 0; i < src.size(); ++i ){
-        const cv::DMatch& srcMatch = src[i][0];
+        if ( src[i].size() != 0 ){
 
-        bool srcValid = true;
-        if ( isMaxDistanceFilterSet() )
-            if ( srcMatch.distance < m_maxDistance )
-                srcValid = false;
+            const cv::DMatch& srcMatch = src[i][0];
 
-        if ( isMinDistanceFilterSet() )
-            if ( srcMatch.distance > m_minDistanceCoeff * minDistance)
-                srcValid = false;
+            bool srcValid = true;
+            if ( isMaxDistanceFilterSet() )
+                if ( srcMatch.distance < m_maxDistance )
+                    srcValid = false;
 
-        if ( nndrRatioCheck )
-            if ( srcMatch.distance >= m_nndrRatio * src[i][1].distance )
-                srcValid = false;
+            if ( isMinDistanceFilterSet() )
+                if ( srcMatch.distance > m_minDistanceCoeff * minDistance)
+                    srcValid = false;
 
-        if ( srcValid )
-            dstItem.push_back(srcMatch);
+            if ( nndrRatioCheck )
+                if ( srcMatch.distance >= m_nndrRatio * src[i][1].distance )
+                    srcValid = false;
+
+            if ( srcValid )
+                dstItem.push_back(srcMatch);
+        }
     }
 }
 
@@ -87,9 +99,6 @@ void QDescriptorMatchFilter::componentComplete(){
 
 
 QDMatchVector *QDescriptorMatchFilter::matches1to2() const{
-    if ( m_matches1to2->matches().size() ){
-        const std::vector<cv::DMatch>& matches = m_matches1to2->matches()[0];
-    }
     return m_matches1to2;
 }
 

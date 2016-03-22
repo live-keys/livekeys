@@ -17,8 +17,8 @@ Grid{
         
         visible : false
         
-        property variant images
-        property variant keypoints
+        property var images
+        property var keypoints
         
         Component.onCompleted : {
             var imageArray    = new Array()
@@ -82,6 +82,17 @@ Grid{
         minDistanceCoeff: 2.5
         nndrRatio: 0.8
     }
+    
+    MatchesToLocalKeypoint{
+        id: matchesToLocalKeypoint
+        matches1to2 : descriptorMatchFilter.matches1to2Out
+        trainKeypointVectors : trainImageLoader.keypoints
+        queryKeypointVectors : queryFeatureDetect.keypoints
+    }
+    
+    KeypointHomography{
+        keypointsToScene: matchesToLocalKeypoint.output
+    }    
     
     DrawMatches{
         keypoints1 : queryFeatureDetect.keypoints

@@ -9,7 +9,7 @@ Grid{
     
     property string imagePath   : codeDocument.path + '/../_images/'
     property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
-    property string trainImage2 : imagePath + 'caltech_buildings_DSCN0246_small.JPG'
+    property string trainImage2 : imagePath + 'object_101_piano_train1.jpg'
     property string queryImage  : imagePath + 'object_101_piano_query.jpg'
     
     ImRead{
@@ -73,17 +73,25 @@ Grid{
     FlannBasedMatcher{
         id : descriptorMatcher
         queryDescriptors : queryFeatureExtract.descriptors
+        knn : 2
         Component.onCompleted : {
             initialize({
                 'indexParams' : 'Lsh'
             })
         }
     }
+    
+    DescriptorMatchFilter{
+        id: descriptorMatchFilter
+        matches1to2: descriptorMatcher.matches
+        minDistanceCoeff: 3
+        nndrRatio: 0.8
+    }
        
     DrawMatches{
         keypoints1 : queryFeatureDetect.keypoints
         keypoints2 : trainImageLoader.keypoints[0]
-        matches1to2 : descriptorMatcher.matches
+        matches1to2 : descriptorMatchFilter.matches1to2Out
         matchIndex : 0
     }
     

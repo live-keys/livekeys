@@ -66,6 +66,7 @@ void QDescriptorMatcher::match(QMat* queryDescriptors, QDMatchVector* matches){
                 if ( matches->matches().size() != 1)
                     matches->matches().resize(1);
                 m_matcher->match(*queryDescriptors->cvMat(), matches->matches()[0] );
+                m_matches->setType(QDMatchVector::BEST_MATCH);
             } catch ( cv::Exception& e ){
                 qCritical("%s", qPrintable( QString( QString("Descriptor matcher match: ") + e.what()) ) );
             }
@@ -77,6 +78,7 @@ void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches
     if ( m_matcher ){
         try{
             m_matcher->knnMatch(*queryDescriptors->cvMat(), matches->matches(), k);
+            m_matches->setType(QDMatchVector::KNN);
         } catch ( cv::Exception& e ){
             qCritical("%s", qPrintable( QString( QString("Descriptor matcher match: ") + e.what()) ) );
         }
