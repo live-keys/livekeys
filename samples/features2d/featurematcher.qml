@@ -91,8 +91,9 @@ Grid{
     }
     
     KeypointHomography{
+        queryImage : queryImageLoader.output
         keypointsToScene: matchesToLocalKeypoint.output
-    }    
+    }
     
     DrawMatches{
         keypoints1 : queryFeatureDetect.keypoints
