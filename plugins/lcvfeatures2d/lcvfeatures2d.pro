@@ -13,7 +13,7 @@ DEFINES += Q_LCVFEATURES2D_LIB
 
 include($$PWD/src/lcvfeatures2d.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
-loadOpenCV(core highgui imgproc features2d flann, deploy)
+loadOpenCV(core highgui imgproc features2d flann calib3d, deploy)
 
 INCLUDEPATH += $$PWD/../../lib/include
 DEPENDPATH  += $$PWD/../../lib/include
