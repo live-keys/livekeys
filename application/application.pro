@@ -72,5 +72,8 @@ DISTFILES += \
     $$PWD/plugins/lcvcontrols/ConfigurationField.qml \
     $$PWD/plugins/lcvcontrols/InputBox.qml \
     plugins/lcvcontrols/FeatureDetectorSelection.qml \
-    plugins/lcvcontrols/SelectionArea.qml
+    plugins/lcvcontrols/SelectionArea.qml \
+    $$PWD/plugins/lcvcontrols/SelectionWindow.qml \
+    plugins/lcvcontrols/LiveCVStyle.qml \
+    plugins/lcvcontrols/FeatureObjectList.qml
 

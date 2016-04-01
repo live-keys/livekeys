@@ -1,28 +1,22 @@
+import QtQuick 2.3
+import QtQuick.Window 2.2
 import lcvcore 1.0
 import lcvcontrols 1.0
-import QtQuick.Window 2.2
-
-Column{
-
 
 Window{
-    width :100
-    height : 100
-    Component.onCompleted : {
-//        show();
-    }
-}
-        
-    property alias input : matView.mat
-    
-    ImRead{
-        id : imgSource
-    }
-    
+    id : selectionWindow
+
+    color: "#05111b"
+
+    width : matView.width
+    height : matView.height + 30
+
+    property alias mat : matView.mat
+    signal regionSelected(Mat region, int x, int y, int width, int height)
+
     MatView{
         id : matView
-        mat : imgSource.output
-        
+
         SelectionArea{
             id : selectionArea
             anchors.fill: parent
@@ -34,13 +28,34 @@ Window{
             }
         }
     }
-    
+
     MatRoi{
         id: selectedRegion
-        input : imgSource.output
+        input : matView.mat
+        visible : false
         regionX : 0
         regionY : 0
-        regionWidth : selectionArea.width - 1
-        regionHeight : selectionArea.height - 1
+        regionWidth : selectionArea.width
+        regionHeight : selectionArea.height
+    }
+    
+    Rectangle{
+        width : 100
+        height : 30
+        color : "#ff0000"
+        anchors.bottom: parent.bottom
+        MouseArea{
+            anchors.fill : parent
+            onClicked : {
+                selectionWindow.regionSelected(
+                    selectedRegion.output.createOwnedObject(),
+                    selectedRegion.regionX,
+                    selectedRegion.regionY,
+                    selectedRegion.regionWidth,
+                    selectedRegion.regionHeight
+                )
+                selectionWindow.close()
+            }
+        }
     }
 }
