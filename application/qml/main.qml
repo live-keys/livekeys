@@ -159,7 +159,8 @@ ApplicationWindow {
                 width: 400
 
                 onSave: {
-                    if ( codeDocument.file !==  "" ){
+                    console.log(codeDocument.file.toString())
+                    if ( codeDocument.file.toString() !==  "" ){
                         codeDocument.saveFile(editor.text)
                         editor.isDirty = false
                     } else
