@@ -30,6 +30,7 @@
 #include "qalphamerge.h"
 #include "qabsdiff.h"
 #include "qdrawhistogram.h"
+#include "qmatlist.h"
 
 #include <qqml.h>
 
@@ -50,6 +51,7 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QAlphaMerge>(   uri, 1, 0, "AlphaMerge");
     qmlRegisterType<QAbsDiff>(      uri, 1, 0, "AbsDiff");
     qmlRegisterType<QDrawHistogram>(uri, 1, 0, "DrawHistogram");
+    qmlRegisterType<QMatList>(      uri, 1, 0, "MatList");
 }
 
 
