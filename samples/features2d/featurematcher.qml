@@ -93,6 +93,9 @@ Grid{
     KeypointHomography{
         queryImage : queryImageLoader.output
         keypointsToScene: matchesToLocalKeypoint.output
+        objectCorners : [
+            [Qt.point(0,0), Qt.point(100,0), Qt.point(100,100), Qt.point(0,100)]
+        ]
     }
     
     DrawMatches{

@@ -4,6 +4,7 @@
 QKeypointHomography::QKeypointHomography(QQuickItem* parent)
     : QMatDisplay(parent)
     , m_keypointsToScene(0)
+    , m_queryImage(0)
 {
     setFlag(QQuickItem::ItemHasContents, true);
 }
@@ -13,26 +14,36 @@ QKeypointHomography::~QKeypointHomography(){
 
 QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
     if ( m_keypointsToScene && m_queryImage ){
-        QKeyPointToSceneMap::ObjectKeypointToScene* os = m_keypointsToScene->mappingAt(0);
-        qDebug() << os->objectPoints.size();
-        qDebug() << os->scenePoints.size();
-        cv::Mat H = cv::findHomography( os->objectPoints, os->scenePoints, CV_RANSAC );
 
-        std::vector<cv::Point2f> obj_corners(4);
-        obj_corners[0] = cvPoint(0,0);
-        obj_corners[1] = cvPoint( 100, 0 );
-        obj_corners[2] = cvPoint( 100, 100 );
-        obj_corners[3] = cvPoint( 0, 100 );
+        cv::Mat* surface = output()->cvMat();
+        m_queryImage->cvMat()->copyTo(*surface);
 
-        std::vector<cv::Point2f> scene_corners(4);
+        for ( int i = 0; i < m_keypointsToScene->size(); ++i ){
+            if ( i >= m_objectCorners.size() )
+                break;
 
-        perspectiveTransform( obj_corners, scene_corners, H);
+            QKeyPointToSceneMap::ObjectKeypointToScene* os = m_keypointsToScene->mappingAt(i);
+            if ( os->scenePoints.size() > 10 ){
+                cv::Mat H = cv::findHomography(os->objectPoints, os->scenePoints, CV_RANSAC);
 
-        cv::Mat img_matches = *output()->cvMat();
-        line( img_matches, scene_corners[0] + cv::Point2f( 100, 0), scene_corners[1] + cv::Point2f( 100, 0), cv::Scalar(0, 255, 0), 4 );
-        line( img_matches, scene_corners[1] + cv::Point2f( 100, 0), scene_corners[2] + cv::Point2f( 100, 0), cv::Scalar( 0, 255, 0), 4 );
-        line( img_matches, scene_corners[2] + cv::Point2f( 100, 0), scene_corners[3] + cv::Point2f( 100, 0), cv::Scalar( 0, 255, 0), 4 );
-        line( img_matches, scene_corners[3] + cv::Point2f( 100, 0), scene_corners[0] + cv::Point2f( 100, 0), cv::Scalar( 0, 255, 0), 4 );
+                QVariantList corners = m_objectCorners[i].toList();
+                std::vector<cv::Point2f> currentCorners(corners.size());
+                for ( int ci = 0; ci < corners.size(); ++ci ){
+                    QPoint p = corners[ci].toPoint();
+                    currentCorners[ci] = cvPoint(p.x(), p.y());
+                }
+
+                std::vector<cv::Point2f> sceneCorners(corners.size());
+
+                perspectiveTransform(currentCorners, sceneCorners, H);
+
+                for ( size_t si = 0; si < sceneCorners.size() - 1; ++si ){
+                    cv::line(*surface, sceneCorners[si], sceneCorners[si + 1], cv::Scalar(40 + si * 40, 255, 0), 4);
+                }
+                if ( sceneCorners.size() > 1 )
+                    cv::line(*surface, sceneCorners[sceneCorners.size() - 1], sceneCorners[0], cv::Scalar(0, 255, 0), 4);
+            }
+        }
 
     }
 
