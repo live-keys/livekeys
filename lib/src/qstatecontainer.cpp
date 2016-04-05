@@ -80,8 +80,8 @@ void QStateContainerManager::attachWindow(QQuickWindow *window){
     if (window != 0){
         QQuickView* view = qobject_cast<QQuickView*>(window);
         if ( view == 0 )
-            qDebug() << "Cannot connect to window compilation signal. State objects will not get destroyed, "
-                     << "which will cause the application to slow down over time.";
+            qWarning("Cannot connect to window compilation signal. State objects will not get destroyed, "
+                     "which will cause the application to slow down over time.");
         else {
             connect(view->rootObject(), SIGNAL(beforeCompile()), SLOT(beforeCompile()));
             connect(view->rootObject(), SIGNAL(afterCompile()),  SLOT(afterCompile()));

@@ -151,7 +151,7 @@ void QVideoCaptureThread::run(){
 
         if ( d->seekRequest != -1 ){
             if ( m_totalFrames == 0 )
-                qDebug() << "Error : Seek is not available for this video.";
+                qWarning("Error (VideoCapture): Seek is not available for this video.");
             else {
                 if ( d->seekRequest != m_framePos ){
                     QVIDEO_CAPTURE_THREAD_DEBUG("Seek request");
@@ -182,10 +182,10 @@ void QVideoCaptureThread::run(){
             emit inactiveMatChanged();
         } else {
             if ( m_loop ){
-                qDebug() << "Open CV : No image captured, restarting stream..";
+                qWarning("Open CV Error: No image captured, restarting stream..");
                 d->seekRequest = 0;
             } else {
-                qDebug() << "Open CV : No image captured.";
+                qWarning("Open CV Error: No image captured.");
             }
         }
 

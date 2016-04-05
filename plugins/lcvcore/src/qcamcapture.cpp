@@ -96,7 +96,7 @@ void QCamCapture::setDevice(const QString &device){
                 }
 
             } else
-                qDebug() << "Open CV error : Could not open capture : " << m_device;
+                qWarning("Open CV Error : Could not open capture : %s", qPrintable(m_device));
         }
         emit deviceChanged();
     }

@@ -165,7 +165,7 @@ void QHoughLinesP::transform(cv::Mat &in, cv::Mat&){
         if ( m_rho > 0 && m_theta > 0 && m_threshold > 0 )
             HoughLinesP(in, d->lines, m_rho, m_theta, m_threshold, m_minLineLength, m_maxLineGap );
         else
-            qDebug() << "OpenCV Error ( HoughLinesP ) : rho, theta and threshold must be positive";
+            qCritical("OpenCV Error (HoughLinesP): rho, theta and threshold must be positive");
     }
     d->linesDirty = true;
     d->outDirty   = true;

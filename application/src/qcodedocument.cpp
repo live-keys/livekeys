@@ -31,7 +31,8 @@ QString QCodeDocument::openFile(const QUrl &file){
     if ( fileName != "" ){
         QFile fileInput(fileName);
         if ( !fileInput.open(QIODevice::ReadOnly ) ){
-            return QString("Could not open file : ") + fileName;
+            qCritical("Cannot open file: %s", qPrintable(fileName));
+            return QString("Cannot open file: ") + fileName;
         }
         QTextStream in(&fileInput);
         setFile(file);
@@ -48,7 +49,7 @@ void QCodeDocument::saveFile(const QUrl& file, const QString &content){
     if ( fileName != "" ){
         QFile fileInput(fileName);
         if ( !fileInput.open(QIODevice::WriteOnly ) ){
-            qDebug() << "Can't open file for writing";
+            qCritical("Can't open file for writing");
             return;
         } else {
             QTextStream stream(&fileInput);

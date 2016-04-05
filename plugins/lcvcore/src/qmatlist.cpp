@@ -10,7 +10,7 @@ QMatList::~QMatList(){
 }
 
 QVariant QMatList::data(const QModelIndex &index, int role) const{
-    if ( index.row() > m_list.size() )
+    if ( index.row() >= m_list.size() )
         return QVariant();
     if ( role == Qt::UserRole )
         return QVariant::fromValue(m_list[index.row()]);

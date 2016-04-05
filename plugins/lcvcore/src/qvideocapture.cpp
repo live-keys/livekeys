@@ -120,9 +120,9 @@ void QVideoCapture::setFile(const QString &file){
                 emit totalFramesChanged();
 
             } else
-                qDebug() << "Open CV error : Could not open capture : " << m_file;
+                qCritical("Open CV Error: Could not open capture : %s", qPrintable(m_file));
         } else {
-            qDebug() << "File does not exist : " << file;
+            qCritical("File does not exist: %s", qPrintable(file));
         }
         emit fileChanged();
     }

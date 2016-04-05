@@ -40,7 +40,7 @@ template<typename T> cv::Size assignValuesHelper(const QVariantList& vmat, Mat* 
     int numberCols = 0;
     for( int i = 0; i < vmat.size(); ++i ){
         if ( !vmat[i].canConvert(QMetaType::QVariantList) ){
-            qDebug() << "Opencv error : values must me stored in a 2D array.";
+            qWarning("Open CV Error: Values must me stored in a 2D array.");
             m->create(0, 0, CV_MAKETYPE(type, 1));
             return cv::Size(0, 0);
         }

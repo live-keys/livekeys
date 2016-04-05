@@ -2,7 +2,6 @@
 #include "opencv2/features2d/features2d.hpp"
 
 #include <QJsonObject>
-#include <QDebug>
 
 QFlannBasedMatcher::QFlannBasedMatcher(QQuickItem* parent)
     : QDescriptorMatcher(0, parent)

@@ -84,7 +84,7 @@ void QAlphaMerge::transform(cv::Mat &in, cv::Mat &out){
  */
 void QAlphaMerge::mergeMask(cv::Mat &input, cv::Mat &mask, cv::Mat &output){
     if ( input.cols != mask.cols || input.rows != mask.rows ){
-        qDebug() << "opencv error : different mask size";
+        qWarning("Open CV Error: Different mask size.");
         return;
     }
     output.create(input.size(), CV_8UC4);

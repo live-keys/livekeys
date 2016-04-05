@@ -23,7 +23,6 @@
 #include "qlivecvlog.h"
 #include "qlivecv.h"
 
-#include <QDebug>
 #include <QLibrary>
 
 

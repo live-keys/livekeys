@@ -148,9 +148,9 @@ QCalcOpticalFlowPointState* QCalcOpticalFlowPyrLKPrivate::pointState(){
                 stateCont.registerState(m_stateId, m_pointState);
             }
         } else {
-            qDebug() << "QCalcOpticalFlowPyrLK does not have a stateId assigned and cannot save " <<
-                        "it\'s state over multiple code compilations. Set a unique stateId to " <<
-                        "avoid this problem. ";
+            qWarning("QCalcOpticalFlowPyrLK does not have a stateId assigned and cannot save "
+                     "it\'s state over multiple compilations. Set a unique stateId to "
+                     "avoid this problem.");
             m_pointState = new QCalcOpticalFlowPointState;
         }
     }

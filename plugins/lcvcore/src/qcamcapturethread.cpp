@@ -125,7 +125,7 @@ void QCamCaptureThread::run(){
             m_activeMat     = tempSwitch;
             emit inactiveMatChanged();
         } else
-            qDebug() << "Open CV : No image captured";
+            qWarning("Open CV Error: No image captured");
 
         d->mutex.lock();
         if ( d->inactiveMatReady && !d->abord){
