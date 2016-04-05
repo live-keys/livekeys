@@ -18,29 +18,17 @@ public:
     QKeyPointToSceneMap* keypointsToScene() const;
     void setKeypointsToScene(QKeyPointToSceneMap* arg);
 
-    QMat* queryImage() const
-    {
-        return m_queryImage;
-    }
+    QMat* queryImage() const;
 
 public slots:
-    void setQueryImage(QMat* queryImage)
-    {
-        if (m_queryImage == queryImage)
-            return;
-
-        m_queryImage = queryImage;
-        emit queryImageChanged(queryImage);
-        update();
-    }
+    void setQueryImage(QMat* queryImage);
 
 protected:
     virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
 
 signals:
     void keypointsToSceneChanged();
-
-    void queryImageChanged(QMat* queryImage);
+    void queryImageChanged();
 
 private:
     QKeyPointToSceneMap* m_keypointsToScene;
@@ -57,6 +45,16 @@ inline void QKeypointHomography::setKeypointsToScene(QKeyPointToSceneMap *arg){
 
     m_keypointsToScene = arg;
     emit keypointsToSceneChanged();
+    update();
+}
+
+inline QMat *QKeypointHomography::queryImage() const{
+    return m_queryImage;
+}
+
+inline void QKeypointHomography::setQueryImage(QMat *queryImage){
+    m_queryImage = queryImage;
+    emit queryImageChanged();
     update();
 }
 

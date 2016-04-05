@@ -28,13 +28,12 @@ QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdateP
 
         perspectiveTransform( obj_corners, scene_corners, H);
 
-        cv::Mat img_matches = *m_queryImage->cvMat();
+        cv::Mat img_matches = *output()->cvMat();
         line( img_matches, scene_corners[0] + cv::Point2f( 100, 0), scene_corners[1] + cv::Point2f( 100, 0), cv::Scalar(0, 255, 0), 4 );
         line( img_matches, scene_corners[1] + cv::Point2f( 100, 0), scene_corners[2] + cv::Point2f( 100, 0), cv::Scalar( 0, 255, 0), 4 );
         line( img_matches, scene_corners[2] + cv::Point2f( 100, 0), scene_corners[3] + cv::Point2f( 100, 0), cv::Scalar( 0, 255, 0), 4 );
         line( img_matches, scene_corners[3] + cv::Point2f( 100, 0), scene_corners[0] + cv::Point2f( 100, 0), cv::Scalar( 0, 255, 0), 4 );
 
-        setOutput(m_queryImage);
     }
 
     return QMatDisplay::updatePaintNode(node, nodeData);
