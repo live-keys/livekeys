@@ -1,63 +1,83 @@
 import QtQuick 2.3
+import QtQuick.Controls 1.2
 import lcvcore 1.0
 import lcvcontrols 1.0
 import lcvfeatures2d 1.0
 
-Column{
+Rectangle{
+    id : root
     
-    Row{
-        
-        id: row
-        
-    property string imagePath   : '/home/dinu/Work/livecv/samples/_images/'
-    property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
-    property string trainImage2 : imagePath + 'caltech_buildings_DSCN0246_small.JPG'
+    anchors.left: parent.left
+    anchors.right: parent.right
+    color: "transparent"
+    
+    height : 200
+    
+    property var imageSource : null
+    property FeatureDetector featureDetector : FastFeatureDetector{}
+    property DescriptorExtractor descriptorExtractor : BriefDescriptorExtractor{}
+    
+    signal descriptorsAdded(Mat descriptors)
     
     MatList{
         id : objectList
+        property variant keypoints : new Array()
     }
+    
+    ScrollView{
+        width : parent.width
+        height: parent.height
+        anchors.left: parent.left
+        anchors.leftMargin : 50
+        style : LiveCVScrollStyle{}
+        
+    Row{
+    
+    height: root.height
+    //width : trainImages.width
     
     Repeater{
         id : trainImages
-
-        property int     selectedIndex : 0
+        property int selectedIndex : 0
+        height : root.height
                         
         model : objectList
-        
         delegate : MatView{
+            height : parent.height
+            width : (parent.height / mat.dataSize().height) * mat.dataSize().width
             mat : modelData
         }
-        
-    }
-        
-        
     }
     
+    }
+}
     
     SelectionWindow{
         id : selectionWindow
         onRegionSelected : {
-            objectList.appendMat(mat)
-            console.log("Region selected" + x + y + width + height)
+            root.featureDetector.input = region
+            objectList.appendMat(root.featureDetector.output.createOwnedObject())
             
+            var keypoints = root.featureDetector.keypoints.createOwnedObject()
+            objectList.keypoints.push(keypoints)
+            root.descriptorExtractor.keypoints = keypoints
+            root.descriptorsAdded(root.descriptorExtractor.descriptors)
         }
     }
 
-    ImRead{
-        id : imgSource
-        file : "/home/dinu/Work/livecv/samples/_images/object_101_piano_query.jpg"
-    }
 
     Rectangle{
-        width : 100
-        height : 100
+        anchors.left: parent.left
+        width : 50
+        height : parent.height
         MouseArea{
             anchors.fill : parent
             onClicked : {
                 selectionWindow.show()
-                selectionWindow.mat = imgSource.output
+                selectionWindow.mat = root.imageSource.output
             }
         }
     }
-
+    
 }
+

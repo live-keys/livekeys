@@ -32,7 +32,7 @@ Window{
     MatRoi{
         id: selectedRegion
         input : matView.mat
-        visible : true
+        visible : false
         regionX : 0
         regionY : 0
         regionWidth : selectionArea.width
@@ -48,7 +48,7 @@ Window{
             anchors.fill : parent
             onClicked : {
                 selectionWindow.regionSelected(
-                    selectedRegion.output/*.createOwnedObject()*/,
+                    selectedRegion.output.createOwnedObject(),
                     selectedRegion.regionX,
                     selectedRegion.regionY,
                     selectedRegion.regionWidth,
