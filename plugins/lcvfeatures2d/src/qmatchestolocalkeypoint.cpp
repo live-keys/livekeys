@@ -1,7 +1,5 @@
 #include "qmatchestolocalkeypoint.h"
 
-#include <QDebug>
-
 QMatchesToLocalKeypoint::QMatchesToLocalKeypoint(QQuickItem *parent)
     : QQuickItem(parent)
     , m_matches1to2(0)
@@ -20,7 +18,6 @@ void QMatchesToLocalKeypoint::componentComplete(){
 }
 
 void QMatchesToLocalKeypoint::mapValues(){
-    qDebug() << "TRAIN KEYPOINT Vector Size: " << m_trainKeypointVectors.size();
     if ( !isComponentComplete() )
         return;
     if ( m_matches1to2 == 0 || m_queryKeypointVector == 0 )

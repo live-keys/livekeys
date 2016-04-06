@@ -72,8 +72,6 @@ inline void QMatchesToLocalKeypoint::setMatches1to2(QDMatchVector *arg){
 
 inline void QMatchesToLocalKeypoint::setTrainKeypointVectors(QList<QObject*> arg){
     m_trainKeypointVectors = arg;
-    qDebug() << "SETKEYPOINT_SIZE:" << arg.size();
-
     emit trainKeypointVectorsChanged();
     mapValues();
 }

@@ -15,7 +15,8 @@ HEADERS += \
     $$PWD/qvideocapture.h \
     $$PWD/qvideocapturethread.h \
     $$PWD/qmatview.h \
-    $$PWD/qmatlist.h
+    $$PWD/qmatlist.h \
+    $$PWD/qglobalitem.h
 
 SOURCES += \
     $$PWD/lcvcore_plugin.cpp \
@@ -34,4 +35,5 @@ SOURCES += \
     $$PWD/qvideocapture.cpp \
     $$PWD/qvideocapturethread.cpp \
     $$PWD/qmatview.cpp \
-    $$PWD/qmatlist.cpp
+    $$PWD/qmatlist.cpp \
+    $$PWD/qglobalitem.cpp

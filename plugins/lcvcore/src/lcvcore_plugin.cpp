@@ -31,6 +31,7 @@
 #include "qabsdiff.h"
 #include "qdrawhistogram.h"
 #include "qmatlist.h"
+#include "qglobalitem.h"
 
 #include <qqml.h>
 
@@ -52,6 +53,7 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QAbsDiff>(      uri, 1, 0, "AbsDiff");
     qmlRegisterType<QDrawHistogram>(uri, 1, 0, "DrawHistogram");
     qmlRegisterType<QMatList>(      uri, 1, 0, "MatList");
+    qmlRegisterType<QGlobalItem>(   uri, 1, 0, "GlobalItem");
 }
 
 
