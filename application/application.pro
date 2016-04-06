@@ -75,5 +75,6 @@ DISTFILES += \
     plugins/lcvcontrols/SelectionArea.qml \
     $$PWD/plugins/lcvcontrols/SelectionWindow.qml \
     plugins/lcvcontrols/LiveCVStyle.qml \
-    plugins/lcvcontrols/FeatureObjectList.qml
+    plugins/lcvcontrols/FeatureObjectList.qml \
+    plugins/lcvcontrols/FeatureObjectMatch.qml
 

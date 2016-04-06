@@ -5,7 +5,7 @@
 QMatchesToLocalKeypoint::QMatchesToLocalKeypoint(QQuickItem *parent)
     : QQuickItem(parent)
     , m_matches1to2(0)
-    , m_queryKeypointVectors(0)
+    , m_queryKeypointVector(0)
     , m_output(new QKeyPointToSceneMap)
 {
 }
@@ -20,9 +20,10 @@ void QMatchesToLocalKeypoint::componentComplete(){
 }
 
 void QMatchesToLocalKeypoint::mapValues(){
+    qDebug() << "TRAIN KEYPOINT Vector Size: " << m_trainKeypointVectors.size();
     if ( !isComponentComplete() )
         return;
-    if ( m_matches1to2 == 0 || m_queryKeypointVectors == 0 )
+    if ( m_matches1to2 == 0 || m_queryKeypointVector == 0 )
         return;
     if ( !m_matches1to2->matches().size() )
         return;
@@ -44,12 +45,10 @@ void QMatchesToLocalKeypoint::mapValues(){
             trainVector->keypoints().at(match.trainIdx).pt
         );
         m_output->mappingAt(match.imgIdx)->scenePoints.push_back(
-            m_queryKeypointVectors->keypoints().at(match.queryIdx).pt
+            m_queryKeypointVector->keypoints().at(match.queryIdx).pt
         );
 
     }
-    qDebug() << m_output->mappingAt(0)->scenePoints.size();
-    qDebug() << m_output->mappingAt(1)->scenePoints.size();
 
     emit outputChanged();
 }

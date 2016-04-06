@@ -23,6 +23,7 @@ QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdateP
                 break;
 
             QKeyPointToSceneMap::ObjectKeypointToScene* os = m_keypointsToScene->mappingAt(i);
+            qDebug() << "SCENE" << i << "size" << os->scenePoints.size();
             if ( os->scenePoints.size() > 10 ){
                 cv::Mat H = cv::findHomography(os->objectPoints, os->scenePoints, CV_RANSAC);
 

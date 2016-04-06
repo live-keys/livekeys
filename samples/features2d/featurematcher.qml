@@ -87,7 +87,7 @@ Grid{
         id: matchesToLocalKeypoint
         matches1to2 : descriptorMatchFilter.matches1to2Out
         trainKeypointVectors : trainImageLoader.keypoints
-        queryKeypointVectors : queryFeatureDetect.keypoints
+        queryKeypointVector : queryFeatureDetect.keypoints
     }
     
     KeypointHomography{

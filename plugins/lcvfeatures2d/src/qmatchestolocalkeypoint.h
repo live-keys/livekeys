@@ -12,7 +12,7 @@ class Q_LCVFEATURES2D_EXPORT QMatchesToLocalKeypoint : public QQuickItem{
     Q_OBJECT
     Q_PROPERTY(QDMatchVector*   matches1to2          READ matches1to2          WRITE setMatches1to2          NOTIFY matches1to2Changed)
     Q_PROPERTY(QList<QObject*>  trainKeypointVectors READ trainKeypointVectors WRITE setTrainKeypointVectors NOTIFY trainKeypointVectorsChanged)
-    Q_PROPERTY(QKeyPointVector* queryKeypointVectors READ queryKeypointVectors WRITE setQueryKeypointVectors NOTIFY queryKeypointVectorsChanged)
+    Q_PROPERTY(QKeyPointVector* queryKeypointVector  READ queryKeypointVector  WRITE setQueryKeypointVector  NOTIFY queryKeypointVectorChanged)
     Q_PROPERTY(QKeyPointToSceneMap* output           READ output               NOTIFY outputChanged)
 
 public:
@@ -21,7 +21,7 @@ public:
 
     QDMatchVector* matches1to2();
     const QList<QObject*>& trainKeypointVectors() const;
-    QKeyPointVector* queryKeypointVectors();
+    QKeyPointVector* queryKeypointVector();
 
     QKeyPointToSceneMap* output();
 
@@ -31,21 +31,20 @@ protected:
 signals:
     void matches1to2Changed();
     void trainKeypointVectorsChanged();
-    void queryKeypointVectorsChanged();
-
+    void queryKeypointVectorChanged();
     void outputChanged();
 
 public slots:
     void setMatches1to2(QDMatchVector* arg);
     void setTrainKeypointVectors(QList<QObject *> arg);
-    void setQueryKeypointVectors(QKeyPointVector* arg);
+    void setQueryKeypointVector(QKeyPointVector* arg);
 
 private:
     void mapValues();
 
     QDMatchVector*   m_matches1to2;
     QList<QObject*>  m_trainKeypointVectors;
-    QKeyPointVector* m_queryKeypointVectors;
+    QKeyPointVector* m_queryKeypointVector;
     QKeyPointToSceneMap* m_output;
 };
 
@@ -57,8 +56,8 @@ inline const QList<QObject *> &QMatchesToLocalKeypoint::trainKeypointVectors() c
     return m_trainKeypointVectors;
 }
 
-inline QKeyPointVector *QMatchesToLocalKeypoint::queryKeypointVectors(){
-    return m_queryKeypointVectors;
+inline QKeyPointVector *QMatchesToLocalKeypoint::queryKeypointVector(){
+    return m_queryKeypointVector;
 }
 
 inline QKeyPointToSceneMap *QMatchesToLocalKeypoint::output(){
@@ -73,14 +72,15 @@ inline void QMatchesToLocalKeypoint::setMatches1to2(QDMatchVector *arg){
 
 inline void QMatchesToLocalKeypoint::setTrainKeypointVectors(QList<QObject*> arg){
     m_trainKeypointVectors = arg;
+    qDebug() << "SETKEYPOINT_SIZE:" << arg.size();
 
     emit trainKeypointVectorsChanged();
     mapValues();
 }
 
-inline void QMatchesToLocalKeypoint::setQueryKeypointVectors(QKeyPointVector *arg){
-    m_queryKeypointVectors = arg;
-    emit queryKeypointVectorsChanged();
+inline void QMatchesToLocalKeypoint::setQueryKeypointVector(QKeyPointVector *arg){
+    m_queryKeypointVector = arg;
+    emit queryKeypointVectorChanged();
     mapValues();
 }
 

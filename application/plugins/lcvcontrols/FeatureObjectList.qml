@@ -17,7 +17,9 @@ Rectangle{
     property FeatureDetector featureDetector : FastFeatureDetector{}
     property DescriptorExtractor descriptorExtractor : BriefDescriptorExtractor{}
     
-    signal descriptorsAdded(Mat descriptors)
+    signal objectAdded(Mat descriptors, var points)
+    
+    property alias objectList : objectList
     
     MatList{
         id : objectList
@@ -34,7 +36,6 @@ Rectangle{
     Row{
     
     height: root.height
-    //width : trainImages.width
     
     Repeater{
         id : trainImages
@@ -54,6 +55,8 @@ Rectangle{
     
     SelectionWindow{
         id : selectionWindow
+        minimumWidth : 300
+        
         onRegionSelected : {
             root.featureDetector.input = region
             objectList.appendMat(root.featureDetector.output.createOwnedObject())
@@ -61,7 +64,10 @@ Rectangle{
             var keypoints = root.featureDetector.keypoints.createOwnedObject()
             objectList.keypoints.push(keypoints)
             root.descriptorExtractor.keypoints = keypoints
-            root.descriptorsAdded(root.descriptorExtractor.descriptors)
+            root.objectAdded(
+                root.descriptorExtractor.descriptors,
+                [Qt.point(0, 0), Qt.point(width, 0), Qt.point(width, height), Qt.point(0, height)]
+            )
         }
     }
 
@@ -73,8 +79,9 @@ Rectangle{
         MouseArea{
             anchors.fill : parent
             onClicked : {
+                if ( root.imageSource !== null )
+                    selectionWindow.mat = root.imageSource.output
                 selectionWindow.show()
-                selectionWindow.mat = root.imageSource.output
             }
         }
     }
