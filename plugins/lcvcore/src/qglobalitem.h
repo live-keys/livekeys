@@ -55,8 +55,8 @@ inline void QGlobalItem::setSource(QQmlComponent *arg){
     m_source = arg;
     emit sourceChanged();
 
-    sync();
-    reload();
+//    sync();
+//    reload();
 }
 
 inline const QString& QGlobalItem::stateId() const{

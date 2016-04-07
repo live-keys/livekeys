@@ -2,12 +2,20 @@
 #include "qstatecontainer.h"
 #include <QQmlEngine>
 
+void debugChildren(QList<QQuickItem*> children){
+    for ( int i = 0; i < children.size(); ++i ){
+        qDebug() << children[i];
+    }
+}
+
+
 class QGlobalItemState{
 public:
     QGlobalItemState() : item(0){}
     QQuickItem* item;
 };
 
+QGlobalItemState* st = new QGlobalItemState;
 
 QGlobalItem::QGlobalItem(QQuickItem* parent)
     : QQuickItem(parent)
@@ -18,30 +26,31 @@ QGlobalItem::QGlobalItem(QQuickItem* parent)
 }
 
 QGlobalItem::~QGlobalItem(){
-    if ( m_state ){
-        m_state->item->setParentItem(0);
-    }
-    if ( m_stateId == "" )
-        delete m_state;
+//    if ( m_state ){
+//        m_state->item->setParentItem(0);
+//    }
+//    if ( m_stateId == "" )
+//        delete m_state;
 }
 
 void QGlobalItem::setStateId(const QString& arg){
     if (m_stateId == arg)
         return;
-    if (m_stateId == "")
-        delete m_state;
-    else
-        m_state = 0;
+//    if (m_stateId == "")
+//        delete m_state;
+//    else
+//        m_state = 0;
 
     m_stateId = arg;
     emit stateIdChanged(arg);
 
-    sync();
+//    sync();
 }
 
 void QGlobalItem::sync(){
     if ( !isComponentComplete() || m_source == 0 )
         return;
+    qDebug() << "--Sync";
 
     if ( !m_state ){
         if ( m_stateId != "" ){
@@ -52,16 +61,20 @@ void QGlobalItem::sync(){
                 reload();
                 stateContainer.registerState(m_stateId, m_state);
             } else {
+                qDebug() << "--Sync without reload";
+//                m_state = new QGlobalItemState;
+//                QQuickItem* item = qobject_cast<QQuickItem*>(m_source->create(m_source->creationContext()));
+
+//                m_state->item = item;
                 m_state->item->setParentItem(parentItem());
+                m_state->item->stackAfter(this);
+
+//                m_state->item->polish();
+//                qmlEngine(this)->setObjectOwnership(m_state->item, QQmlEngine::CppOwnership);
+//                emit itemChanged();
+//                debugChildren(parentItem()->childItems());
+
                 //HERE
-//                qDebug() << parentItem()->childItems();
-//                qDebug() << m_state->item->parentItem();
-//                qDebug() << parentItem()->childItems();
-//                parentItem()->update();
-//                parentItem()->polish();
-//                parentItem()->resetWidth();
-//                parentItem()->resetHeight();
-//                m_state->item->stackAfter(this);
 //                qDebug() << "PARENT ITEM: " << parentItem();
             }
         } else {
@@ -87,6 +100,7 @@ QQuickItem* QGlobalItem::item() const{
 void QGlobalItem::reload(){
     if ( !isComponentComplete() || m_source == 0 )
         return;
+    qDebug() << "--Reload";
 
     QQuickItem* item = qobject_cast<QQuickItem*>(m_source->create(m_source->creationContext()));
     if ( item == 0 ){
@@ -101,6 +115,7 @@ void QGlobalItem::reload(){
     }
     m_state->item = item;
     m_state->item->setParentItem(parentItem());
+    m_state->item->stackAfter(this);
     qmlEngine(this)->setObjectOwnership(m_state->item, QQmlEngine::CppOwnership);
 
     emit itemChanged();
