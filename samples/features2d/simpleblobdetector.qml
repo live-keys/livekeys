@@ -4,7 +4,10 @@ import lcvfeatures2d 1.0
 
 Row{
 
-    //TODO
+    // Configuring the SimpleBlobDetector in order to extract specific
+    // blobs within an image
+
+    spacing : 15
 
     property string imagePath :
         codeDocument.path + '/../_images/object_101_piano_train1.jpg'
