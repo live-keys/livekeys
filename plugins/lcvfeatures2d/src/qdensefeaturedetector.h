@@ -12,10 +12,7 @@ public:
     virtual ~QDenseFeatureDetector();
 
 public slots:
-    void initialize(
-            float initFeatureScale = 1.f, int featureScaleLevels = 1, float featureScaleMul = 0.1f, int initXyStep=6,
-            int initImgBound = 0,bool varyXyStepWithScale = true, bool varyImgBoundWithScale = false
-    );
+    void initialize(const QVariantMap& settings);
 
 };
 

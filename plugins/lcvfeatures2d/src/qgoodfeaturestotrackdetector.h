@@ -12,9 +12,7 @@ public:
     ~QGoodFeaturesToTrackDetector();
 
 public slots:
-    void initialize(
-            int maxCorners = 1000, double qualityLevel = 0.01, double minDistance = 1,
-            int blockSize=3, bool useHarrisDetector = false, double k = 0.04);
+    void initialize(const QVariantMap& settings);
 
 };
 

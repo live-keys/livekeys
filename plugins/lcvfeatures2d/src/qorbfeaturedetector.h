@@ -20,9 +20,7 @@ public:
     virtual ~QOrbFeatureDetector();
 
 public slots:
-    void initialize(
-            int nfeatures = 500, float scaleFactor = 1.2f, int nlevels = 8, int edgeThreshold = 31, int firstLevel = 0,
-            int WTA_K = 2, int scoreType = HARRIS_SCORE);
+    void initialize(const QVariantMap& settings);
 
 };
 

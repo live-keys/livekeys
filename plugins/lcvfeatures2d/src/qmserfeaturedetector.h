@@ -12,17 +12,7 @@ public:
     ~QMSerFeatureDetector();
 
 public slots:
-    void initialize(
-        int delta = 5,
-        int minArea = 60,
-        int maxArea = 14400,
-        float maxVariation = 0.25,
-        float minDiversity = 0.2,
-        int maxEvolution = 200,
-        double areaThreshold = 1.01,
-        double minMargin = 0.003,
-        int edgeBlurSize = 5
-    );
+    void initialize(const QVariantMap& settings);
 };
 
 

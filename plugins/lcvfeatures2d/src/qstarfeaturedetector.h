@@ -1,5 +1,5 @@
-#ifndef QSTARFEATUREDETECTOR_HPP
-#define QSTARFEATUREDETECTOR_HPP
+#ifndef QSTARFEATUREDETECTOR_H
+#define QSTARFEATUREDETECTOR_H
 
 #include "qfeaturedetector.h"
 
@@ -12,10 +12,8 @@ public:
     ~QStarFeatureDetector();
 
 public slots:
-    void initialize(
-            int maxSize = 16, int responseThreshold = 30, int lineThresholdProjected = 10,
-            int lineThresholdBinarized = 8, int suppressNonmaxSize = 5);
+    void initialize(const QVariantMap& settings);
 
 };
 
-#endif // QSTARFEATUREDETECTOR_HPP
+#endif // QSTARFEATUREDETECTOR_H

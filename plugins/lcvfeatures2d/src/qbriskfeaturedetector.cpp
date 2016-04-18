@@ -9,6 +9,15 @@ QBriskFeatureDetector::QBriskFeatureDetector(QQuickItem *parent) :
 QBriskFeatureDetector::~QBriskFeatureDetector(){
 }
 
-void QBriskFeatureDetector::initialize(int thresh, int octaves, float patternScale){
+void QBriskFeatureDetector::initialize(const QVariantMap &settings){
+    int thresh  = 30;
+    int octaves = 3;
+    float patternScale = 1.0f;
+    if ( settings.contains("thresh") )
+        thresh = settings["thresh"].toInt();
+    if ( settings.contains("octaves") )
+        thresh = settings["octaves"].toInt();
+    if ( settings.contains("patternScale") )
+        patternScale = settings["patternScale"].toFloat();
     initializeDetector(new cv::BRISK(thresh, octaves, patternScale));
 }
