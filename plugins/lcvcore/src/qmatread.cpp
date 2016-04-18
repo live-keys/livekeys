@@ -33,7 +33,7 @@ using namespace cv;
   \inherits Item
   \brief Displays a matrixes values in text form.
 
-  This element becomes very usefull when debugging result images from algorithms. It can be used in combination
+  This element becomes very useful when debugging result images from algorithms. It can be used in combination
   with the MatRoi element in order to create a pan-type interaction over a zoomed area in an image. The sample in
   core/valuescan.qml shows this type of usage in action.
 
@@ -56,6 +56,7 @@ QMatReadNode::QMatReadNode(QQuickWindow *window)
     , m_paintDevice(0)
     , m_glFunctions(new QOpenGLFunctions)
 {
+    m_glFunctions->initializeOpenGLFunctions();
 }
 
 QMatReadNode::~QMatReadNode(){
