@@ -5,6 +5,7 @@ Grid{
     id: root
     
     spacing: 15
+    columns: 2
     
     property variant colors : ['#aa007700', '#aa000088']
     property variant values : [
@@ -19,7 +20,7 @@ Grid{
         color : "#222333"
     
         DrawHistogram{
-            width: 200
+            width : 200
             height : 200
             maxValue : 200
             colors : root.colors
@@ -36,7 +37,7 @@ Grid{
         color : "#222333"
     
         DrawHistogram{
-            width: 200
+            width : 200
             height : 200
             maxValue : 200
             colors : root.colors
@@ -52,9 +53,9 @@ Grid{
         color : "#222333"
     
         DrawHistogram{
-            width: 200
+            width : 200
             height : 100
-            maxValue : 5
+            maxValue : 9
             colors : root.colors
             render : DrawHistogram.Binary
             values : [
@@ -64,4 +65,21 @@ Grid{
         }
     }
     
+    Rectangle{
+    
+        width : 200
+        height : 100
+        color : "#222333"
+    
+        DrawHistogram{
+            width : 200
+            height : 100
+            maxValue : 5000
+            colors : root.colors
+            render : DrawHistogram.BinaryConverted
+            values : [
+                [3220, 255, 255, 255]
+            ]
+        }
+    }
 }

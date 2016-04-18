@@ -83,7 +83,7 @@ public:
 class QHistogramBinaryRenderer : public QAbstractHistogramRenderer{
 
 public:
-    QHistogramBinaryRenderer(){}
+    QHistogramBinaryRenderer(bool convert = false) : m_convert(convert){}
 
     virtual void renderSingleList(
         QPainter* painter,
@@ -95,22 +95,54 @@ public:
         painter->setPen(QPen(color, 1));
         painter->setBrush(QBrush(color));
 
-        int totalItems   = values.size() > (int)maxValue ? (int)maxValue : values.size();
-        int cellsPerLine = (int)ceil(sqrt(((float)maxValue * size.width()) / size.height()));
-        int cellSize     = (int)floor(size.width() / cellsPerLine);
+        if ( m_convert ){
 
-        for ( int i = 0; i < totalItems; ++i ){
-            int row  = (int)(i / cellsPerLine);
-            if ( values[i].toBool() ){
-                painter->drawRect(
-                    QRectF(
-                        QPointF((double)(i % cellsPerLine * cellSize), (double)(row * cellSize)),
-                        QSizeF(cellSize, cellSize)
-                    )
-                );
+            int totalItems   = values.size() > (int)maxValue / 32 ? (int)maxValue / 32 : values.size();
+            int cellsPerLine = (int)ceil(sqrt(((float)totalItems * 32 * size.width()) / size.height()));
+            int cellSize     = (int)floor(size.width() / cellsPerLine);
+            int currentItem = 0;
+
+
+            for ( int i = 0; i < totalItems; ++i ){
+                int val = values[i].toInt();
+                for ( int t = 31; t >= 0; --t ){
+                    int row  = (int)(currentItem / cellsPerLine);
+                    if ( val & (1 << t) ){
+                        painter->drawRect(
+                            QRectF(
+                                QPointF((double)(currentItem % cellsPerLine * cellSize), (double)(row * cellSize)),
+                                QSizeF(cellSize, cellSize)
+                            )
+                        );
+                    }
+                    ++currentItem;
+                }
+            }
+
+        } else {
+
+            int totalItems   = values.size() > (int)maxValue ? (int)maxValue : values.size();
+            int cellsPerLine = (int)ceil(sqrt(((float)totalItems * size.width()) / size.height()));
+            int cellSize     = (int)floor(size.width() / cellsPerLine);
+            int currentItem = 0;
+
+            for ( int i = 0; i < totalItems; ++i ){
+                int row  = (int)(currentItem / cellsPerLine);
+                if ( values[i].toBool() ){
+                    painter->drawRect(
+                        QRectF(
+                            QPointF((double)(i % cellsPerLine * cellSize), (double)(row * cellSize)),
+                            QSizeF(cellSize, cellSize)
+                        )
+                    );
+                }
+                ++currentItem;
             }
         }
     }
+
+private:
+    bool m_convert;
 };
 
 
@@ -125,6 +157,7 @@ QDrawHistogramNode::QDrawHistogramNode(QQuickWindow *window)
     , m_paintDevice(0)
     , m_glFunctions(new QOpenGLFunctions)
 {
+    m_glFunctions->initializeOpenGLFunctions();
 }
 
 QDrawHistogramNode::~QDrawHistogramNode(){
@@ -251,6 +284,9 @@ void QDrawHistogram::setRender(QDrawHistogram::RenderType arg){
         break;
     case QDrawHistogram::Binary:
         m_renderer = new QHistogramBinaryRenderer;
+        break;
+    case QDrawHistogram::BinaryConverted:
+        m_renderer = new QHistogramBinaryRenderer(true);
     }
 
     emit renderChanged();

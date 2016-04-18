@@ -60,7 +60,8 @@ public:
     enum RenderType{
         ConnectedLines = 0,
         Rectangles,
-        Binary
+        Binary,
+        BinaryConverted
     };
 
 public:
