@@ -5,11 +5,14 @@ import lcvfeatures2d 1.0
 Grid{
     columns : 2
     
+    //TODO
+    
     // Train images
     
-    property string imagePath : codeDocument.path + '/../_images/'
-    property string trainImage : imagePath + 'object_101_piano_train1.jpg'
-    property string queryImage : imagePath + 'object_101_piano_query.jpg'
+    property string imagePath   : codeDocument.path + '/../_images/'
+    property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
+    property string trainImage2 : imagePath + 'object_101_piano_train1.jpg'
+    property string queryImage  : imagePath + 'object_101_piano_query.jpg'
     
     ImRead{
         id: trainImageLoader
@@ -27,6 +30,10 @@ Grid{
             imageArray.push(output.createOwnedObject())
             keypointArray.push(trainFeatureDetect.keypoints.createOwnedObject())
             
+            file = trainImage2
+            imageArray.push(output.createOwnedObject())
+            keypointArray.push(trainFeatureDetect.keypoints.createOwnedObject())
+            
             images    = imageArray
             keypoints = keypointArray
         }
@@ -35,9 +42,6 @@ Grid{
     BriskFeatureDetector{
         id : trainFeatureDetect
         input : trainImageLoader.output
-        Component.onCompleted : {
-            initialize(30, 3)
-        }
     }
     
     BriskDescriptorExtractor{
@@ -59,10 +63,7 @@ Grid{
     BriskFeatureDetector{
         id : queryFeatureDetect
         input : queryImageLoader.output
-        Component.onCompleted : {
-            initialize(30, 3)
-        }
-    }
+    }    
     
     BriskDescriptorExtractor{
         id : queryFeatureExtract
@@ -71,16 +72,28 @@ Grid{
     
     // Matching
     
-    BruteForceMatcher{
+    FlannBasedMatcher{
         id : descriptorMatcher
         queryDescriptors : queryFeatureExtract.descriptors
-        knn : 1
+        knn : 2
+        Component.onCompleted : {
+            initialize({
+                'indexParams' : 'Lsh'
+            })
+        }
     }
     
+    DescriptorMatchFilter{
+        id: descriptorMatchFilter
+        matches1to2: descriptorMatcher.matches
+        minDistanceCoeff: 3
+        nndrRatio: 0.8
+    }
+       
     DrawMatches{
         keypoints1 : queryFeatureDetect.keypoints
         keypoints2 : trainImageLoader.keypoints[0]
-        matches1to2 : descriptorMatcher.matches
+        matches1to2 : descriptorMatchFilter.matches1to2Out
         matchIndex : 0
     }
     

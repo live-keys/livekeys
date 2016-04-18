@@ -4,7 +4,7 @@ import lcvfeatures2d 1.0
 
 Row{
 
-    // Fast feature detector sample
+    //TODO
 
     property string imagePath :
         codeDocument.path + '/../_images/object_101_piano_train1.jpg'

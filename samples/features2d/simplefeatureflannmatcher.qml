@@ -5,11 +5,12 @@ import lcvfeatures2d 1.0
 Grid{
     columns : 2
     
+    //TODO
     // Train images
     
     property string imagePath   : codeDocument.path + '/../_images/'
     property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
-    property string trainImage2 : imagePath + 'caltech_buildings_DSCN0246_small.JPG'
+    property string trainImage2 : imagePath + 'object_101_piano_train1.jpg'
     property string queryImage  : imagePath + 'object_101_piano_query.jpg'
     
     ImRead{
@@ -17,8 +18,8 @@ Grid{
         
         visible : false
         
-        property var images
-        property var keypoints
+        property variant images
+        property variant keypoints
         
         Component.onCompleted : {
             var imageArray    = new Array()
@@ -37,12 +38,12 @@ Grid{
         }
     }
     
-    FastFeatureDetector{
+    BriskFeatureDetector{
         id : trainFeatureDetect
         input : trainImageLoader.output
     }
     
-    BriefDescriptorExtractor{
+    BriskDescriptorExtractor{
         keypoints : trainFeatureDetect.keypoints
         onDescriptorsChanged : {
             descriptorMatcher.add(descriptors)
@@ -58,46 +59,36 @@ Grid{
         file : queryImage
     }
     
-    FastFeatureDetector{
+    BriskFeatureDetector{
         id : queryFeatureDetect
         input : queryImageLoader.output
-    }
+    }    
     
-    BriefDescriptorExtractor{
+    BriskDescriptorExtractor{
         id : queryFeatureExtract
         keypoints : queryFeatureDetect.keypoints
     }
     
     // Matching
     
-    BruteForceMatcher{
+    FlannBasedMatcher{
         id : descriptorMatcher
         queryDescriptors : queryFeatureExtract.descriptors
-        knn: 2
+        knn : 2
+        Component.onCompleted : {
+            initialize({
+                'indexParams' : 'Lsh'
+            })
+        }
     }
     
     DescriptorMatchFilter{
         id: descriptorMatchFilter
         matches1to2: descriptorMatcher.matches
-        minDistanceCoeff: 2.5
+        minDistanceCoeff: 3
         nndrRatio: 0.8
     }
-    
-    MatchesToLocalKeypoint{
-        id: matchesToLocalKeypoint
-        matches1to2 : descriptorMatchFilter.matches1to2Out
-        trainKeypointVectors : trainImageLoader.keypoints
-        queryKeypointVector : queryFeatureDetect.keypoints
-    }
-    
-    KeypointHomography{
-        queryImage : queryImageLoader.output
-        keypointsToScene: matchesToLocalKeypoint.output
-        objectCorners : [
-            [Qt.point(0,0), Qt.point(100,0), Qt.point(100,100), Qt.point(0,100)]
-        ]
-    }
-    
+       
     DrawMatches{
         keypoints1 : queryFeatureDetect.keypoints
         keypoints2 : trainImageLoader.keypoints[0]

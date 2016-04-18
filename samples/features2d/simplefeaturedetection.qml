@@ -4,6 +4,7 @@ import lcvfeatures2d 1.0
 
 Row{
 
+    //TODO
     // Fast feature detector sample
 
     property string imagePath :

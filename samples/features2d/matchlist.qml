@@ -2,10 +2,11 @@ import lcvcore 1.0
 import lcvimgproc 1.0
 import lcvfeatures2d 1.0
 
-
 Row{
     
     // Train images
+    
+    // TODO
      
     property string imagePath   : codeDocument.path + '/../_images/'
     property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
