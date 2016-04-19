@@ -9,8 +9,14 @@ QOrbDescriptorExtractor::QOrbDescriptorExtractor(QQuickItem *parent)
 QOrbDescriptorExtractor::~QOrbDescriptorExtractor(){
 }
 
-void QOrbDescriptorExtractor::initialize(int patchSize){
+void QOrbDescriptorExtractor::initialize(const QVariantMap &params){
+    int patchSize = 32;
+    if ( params.contains("patchSize") )
+        patchSize = params["patchSize"].toInt();
+
     initializeExtractor(
         new cv::ORB(500, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, patchSize)
     );
+
 }
+

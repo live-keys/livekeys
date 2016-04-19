@@ -11,7 +11,6 @@ public:
     QSimpleBlobDetector(QQuickItem *parent = 0);
     ~QSimpleBlobDetector();
 
-public slots:
     void initialize(const QVariantMap& settings);
 
 };

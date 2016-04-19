@@ -47,9 +47,11 @@ Column{
             
         ListView{
             id : keypointView
-            model : container.extractor ? 
-                            container.extractor.keypoints.keyPointData() : container.detector ? 
-                                container.detector.keypoints.keyPointData() : []
+            model : container.extractor
+                      ? (container.extractor.keypoints ? container.extractor.keypoints.keyPointData() : [])
+                      : container.detector
+                        ? container.detector.keypoints.keyPointData()
+                        : []
             
             width: parent.width
             height: parent.height

@@ -1,5 +1,5 @@
-#ifndef QDENSEFEATUREDETECTOR_HPP
-#define QDENSEFEATUREDETECTOR_HPP
+#ifndef QDENSEFEATUREDETECTOR_H
+#define QDENSEFEATUREDETECTOR_H
 
 #include "qfeaturedetector.h"
 
@@ -11,9 +11,8 @@ public:
     explicit QDenseFeatureDetector(QQuickItem *parent = 0);
     virtual ~QDenseFeatureDetector();
 
-public slots:
     void initialize(const QVariantMap& settings);
 
 };
 
-#endif // QDENSEFEATUREDETECTOR_HPP
+#endif // QDENSEFEATUREDETECTOR_H

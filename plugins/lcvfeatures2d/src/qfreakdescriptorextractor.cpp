@@ -9,8 +9,20 @@ QFreakDescriptorExtractor::QFreakDescriptorExtractor(QQuickItem *parent) :
 QFreakDescriptorExtractor::~QFreakDescriptorExtractor(){
 }
 
-void QFreakDescriptorExtractor::initialize(
-        bool orientationNormalized, bool scaleNormalized, float patternScale, int nOctaves)
-{
+void QFreakDescriptorExtractor::initialize(const QVariantMap &params){
+    bool orientationNormalized = true;
+    bool scaleNormalized       = true;
+    float patternScale         = 22.0f;
+    int nOctaves               = 4;
+
+    if ( params.contains("orientationNormalized") )
+        orientationNormalized = params["orientationNormalized"].toBool();
+    if ( params.contains("scaleNormalized") )
+        scaleNormalized = params["scaleNormalized"].toBool();
+    if ( params.contains("patternScale") )
+        patternScale = params["patternScale"].toFloat();
+    if ( params.contains("nOctaves") )
+        nOctaves = params["nOctaves"].toInt();
+
     initializeExtractor(new cv::FREAK(orientationNormalized, scaleNormalized, patternScale, nOctaves));
 }

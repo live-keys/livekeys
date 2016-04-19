@@ -7,3 +7,7 @@ QBriskDescriptorExtractor::QBriskDescriptorExtractor(QQuickItem *parent) :
 
 QBriskDescriptorExtractor::~QBriskDescriptorExtractor(){
 }
+
+void QBriskDescriptorExtractor::initialize(const QVariantMap &){
+    initializeExtractor(new cv::BRISK);
+}

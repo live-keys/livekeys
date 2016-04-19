@@ -6,6 +6,7 @@ QDescriptorExtractor::QDescriptorExtractor(QQuickItem *parent)
     , m_extractor(0)
     , m_keypoints(0)
     , m_descriptors(new QMat)
+    , m_isBinary(true)
 {
 }
 
@@ -14,12 +15,15 @@ QDescriptorExtractor::QDescriptorExtractor(cv::DescriptorExtractor* extractor, Q
     , m_extractor(extractor)
     , m_keypoints(0)
     , m_descriptors(new QMat)
+    , m_isBinary(true)
 {
 }
 
 QDescriptorExtractor::~QDescriptorExtractor(){
     delete m_descriptors;
 }
+
+void QDescriptorExtractor::initialize(const QVariantMap &){}
 
 void QDescriptorExtractor::initializeExtractor(cv::DescriptorExtractor* extractor){
     delete m_extractor;

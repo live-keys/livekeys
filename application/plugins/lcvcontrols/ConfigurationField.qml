@@ -3,7 +3,7 @@ import QtQuick 2.3
 Rectangle {
     id: root
 
-    width: 300
+    width: 500
     height: 30
 
     property string key : "key"
@@ -15,7 +15,7 @@ Rectangle {
 
     Rectangle{
         id: labelContainer
-        width: 80
+        width: 200
         height: parent.height
 
         Text{
@@ -26,7 +26,7 @@ Rectangle {
             anchors.verticalCenter : parent.verticalCenter
 
             text: root.label
-            font.pixelSize : 14
+            font.pixelSize : 13
             font.family : "Courier New, Courier"
             font.weight: Font.Normal
         }

@@ -11,10 +11,8 @@ public:
     explicit QFreakDescriptorExtractor(QQuickItem *parent = 0);
     ~QFreakDescriptorExtractor();
 
-public slots:
-    void initialize(
-        bool orientationNormalized = true, bool scaleNormalized = true, float patternScale = 22.0f, int nOctaves = 4
-    );
+protected:
+    void initialize(const QVariantMap& params);
 
 };
 

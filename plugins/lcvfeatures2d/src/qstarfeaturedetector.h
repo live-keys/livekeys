@@ -11,7 +11,6 @@ public:
     explicit QStarFeatureDetector(QQuickItem *parent = 0);
     ~QStarFeatureDetector();
 
-public slots:
     void initialize(const QVariantMap& settings);
 
 };

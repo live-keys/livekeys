@@ -9,6 +9,10 @@ QBriefDescriptorExtractor::QBriefDescriptorExtractor(QQuickItem *parent)
 QBriefDescriptorExtractor::~QBriefDescriptorExtractor(){
 }
 
-void QBriefDescriptorExtractor::initialize(int bytes){
+void QBriefDescriptorExtractor::initialize(const QVariantMap &params){
+    int bytes = 32;
+    if ( params.contains("bytes") )
+        bytes = params["bytes"].toInt();
+
     initializeExtractor(new cv::BriefDescriptorExtractor(bytes));
 }

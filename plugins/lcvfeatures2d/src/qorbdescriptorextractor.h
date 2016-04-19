@@ -10,8 +10,8 @@ public:
     explicit QOrbDescriptorExtractor(QQuickItem *parent = 0);
     ~QOrbDescriptorExtractor();
 
-public slots:
-    void initialize(int patchSize = 32);
+protected:
+    void initialize(const QVariantMap& params);
 
 };
 

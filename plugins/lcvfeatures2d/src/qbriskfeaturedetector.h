@@ -1,5 +1,5 @@
-#ifndef QBRISKFEATUREDETECTOR_HPP
-#define QBRISKFEATUREDETECTOR_HPP
+#ifndef QBRISKFEATUREDETECTOR_H
+#define QBRISKFEATUREDETECTOR_H
 
 #include "qfeaturedetector.h"
 
@@ -11,11 +11,8 @@ public:
     explicit QBriskFeatureDetector(QQuickItem *parent = 0);
     virtual ~QBriskFeatureDetector();
 
-signals:
-
-public slots:
     void initialize(const QVariantMap& settings);
 
 };
 
-#endif // QBRISKFEATUREDETECTOR_HPP
+#endif // QBRISKFEATUREDETECTOR_H

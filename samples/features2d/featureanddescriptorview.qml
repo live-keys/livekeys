@@ -1,40 +1,62 @@
-import lcvcontrols 1.0
 import lcvcore 1.0
+import lcvcontrols 1.0
 import lcvfeatures2d 1.0
+ 
+Row{
+    
+    property string imagePath : 
+        codeDocument.path + '/../_images/caltech_buildings_DSCN0246_small.JPG'
+     
+    Column{
+        FeatureDetectorSelection{
+            id: detectorSelector
+            detectorInput : iminput.output
+        }
+        ConfigurationPanel{
+            configurationFields : detectorSelector.selectedPanelModel
+        }
 
-Column{
-    
-    //TODO
-    
-    ImRead{
-        id: iminput
-        file: codeDocument.path + '/../_images/caltech_buildings_DSCN0246_small.JPG'
-        visible: false
+        ImRead{
+            id: iminput
+            file: imagePath
+            visible: false
+        }
+        MatDraw{
+            id : keypointHighlight
+            input: detectorSelector.selectedDetector.output
+        }
+        
+        Rectangle{
+            width : parent.width
+            height : 200
+            color : "#222333"
+            
+        DrawHistogram{
+            id : descriptorHistogram
+            width : parent.width
+            height : 200
+            maxValue : 5000
+            colors : ["#aa007700"]
+            render : DrawHistogram.BinaryConverted
+        }
+        }
     }
     
-    MatDraw{
-        id : keypointHighlight
-        input: detectorSelector.selectedDetector.output
-    }
+    Column{
+        DescriptorExtractorSelection{
+            id : extractorSelector
+            detector : detectorSelector.selectedDetector
+        }
+        
+        ConfigurationPanel{
+            configurationFields : extractorSelector.selectedPanelModel
+        }
     
-    KeypointListView{
-        keypointHighlighter: keypointHighlight
-        detector : detectorSelector.selectedDetector
-        //extractor: descriptorExtractor
-    }
-    
-    FeatureDetectorSelection{
-        id: detectorSelector
-        detectorInput : iminput.output
-    }
-    
-    ConfigurationPanel{
-        configurationFields : detectorSelector.selectedPanelModel
-    }
-    
-    MouseArea{
-        width: 100
-        height: 100
-        onClicked: console.log(detectorSelector.configuration[detectorSelector.selectedName]["threshold"])
+        KeypointListView{
+            keypointHighlighter: keypointHighlight
+            detector : detectorSelector.selectedDetector
+            extractor: extractorSelector.selectedExtractor
+            onKeypointSelected : descriptorHistogram.setValuesFromIntList(descriptorValues[index])
+        }
     }
 }

@@ -1,5 +1,5 @@
-#ifndef QBRIEFDESCRIPTOREXTRACTOR_HPP
-#define QBRIEFDESCRIPTOREXTRACTOR_HPP
+#ifndef QBRIEFDESCRIPTOREXTRACTOR_H
+#define QBRIEFDESCRIPTOREXTRACTOR_H
 
 #include "qdescriptorextractor.h"
 
@@ -11,9 +11,9 @@ public:
     explicit QBriefDescriptorExtractor(QQuickItem *parent = 0);
     ~QBriefDescriptorExtractor();
 
-public slots:
-    void initialize(int bytes = 32);
+protected:
+    void initialize(const QVariantMap& params);
 
 };
 
-#endif // QBRIEFDESCRIPTOREXTRACTOR_HPP
+#endif // QBRIEFDESCRIPTOREXTRACTOR_H

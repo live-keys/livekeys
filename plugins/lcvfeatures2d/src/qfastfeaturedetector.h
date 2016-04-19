@@ -1,5 +1,5 @@
-#ifndef QFASTFEATUREDETECTOR_HPP
-#define QFASTFEATUREDETECTOR_HPP
+#ifndef QFASTFEATUREDETECTOR_H
+#define QFASTFEATUREDETECTOR_H
 
 #include "qfeaturedetector.h"
 
@@ -11,10 +11,7 @@ public:
     explicit QFastFeatureDetector(QQuickItem *parent = 0);
     ~QFastFeatureDetector();
 
-public slots:
-//    void initialize(int threshold = 10, bool nonmaxSuppression = true);
     void initialize(const QVariantMap& settings);
-
 };
 
-#endif // QFASTFEATUREDETECTOR_HPP
+#endif // QFASTFEATUREDETECTOR_H
