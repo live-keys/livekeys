@@ -35,10 +35,13 @@ public:
     const QString data() const;
     void setData(const QString& data);
 
-    static QLiveCVLog* m_instance;
-    static QLiveCVLog* instance();
+    static QLiveCVLog& instance();
 
     static void logFunction(QtMsgType type, const QMessageLogContext& ctx, const QString& msg);
+
+    void enableFileLog(const QString& logPath = "");
+    void disableFileLog();
+    bool isFileLogEnabled() const;
 
 signals:
     void dataChanged();
@@ -49,7 +52,7 @@ public slots:
 private:
     QString     m_data;
     QString     m_logFilePath;
-    QFile       m_logFile;
+    QFile*      m_logFile;
     QTextStream m_textStream;
     QMutex      m_logMutex;
 
@@ -66,10 +69,13 @@ inline void QLiveCVLog::setData(const QString& data){
     }
 }
 
-inline QLiveCVLog*QLiveCVLog::instance(){
-    if ( !m_instance )
-        m_instance = new QLiveCVLog;
-    return m_instance;
+inline QLiveCVLog &QLiveCVLog::instance(){
+    static QLiveCVLog instance;
+    return instance;
+}
+
+inline bool QLiveCVLog::isFileLogEnabled() const{
+    return !m_logFilePath.isEmpty();
 }
 
 #endif // QLIVECVLOG_HPP

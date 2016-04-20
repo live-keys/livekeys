@@ -39,6 +39,8 @@ QLiveCV::~QLiveCV(){
 void QLiveCV::parseArguments(const QStringList &arguments){
     if ( !arguments.contains("-c" ) )
         qInstallMessageHandler(&QLiveCVLog::logFunction);
+    if ( arguments.contains("-l") )
+        QLiveCVLog::instance().enableFileLog();
 }
 
 void QLiveCV::solveImportPaths(){
@@ -60,7 +62,7 @@ void QLiveCV::loadQml(const QUrl &url){
     solveImportPaths();
 
     m_engine->rootContext()->setContextProperty("codeDocument", m_document);
-    m_engine->rootContext()->setContextProperty("lcvlog", QLiveCVLog::instance());
+    m_engine->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
 
     m_engine->load(url);
 }
