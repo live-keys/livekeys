@@ -34,23 +34,11 @@ win32:PLUGIN_DEPLOY_FROM ~= s,/,\\,g
 
 plugincopy.commands = $(COPY_DIR) \"$$PLUGIN_DEPLOY_FROM\" \"$$PLUGIN_DEPLOY_TO\"
 
-
-IMAGE_DEPLOY_FROM = $$PWD/images
-win32:CONFIG(debug, debug|release): IMAGE_DEPLOY_TO = $$OUT_PWD/../application/debug/images
-else:win32:CONFIG(release, debug|release): IMAGE_DEPLOY_TO = $$OUT_PWD/../application/release/images
-else:unix: IMAGE_DEPLOY_TO = $$OUT_PWD/../application
-
-win32:IMAGE_DEPLOY_TO ~= s,/,\\,g
-win32:IMAGE_DEPLOY_FROM ~= s,/,\\,g
-
-imagecopy.commands  = $(COPY_DIR) \"$$IMAGE_DEPLOY_FROM\" \"$$IMAGE_DEPLOY_TO\"
-
-first.depends = $(first) plugincopy imagecopy
+first.depends = $(first) plugincopy
 export(first.depends)
 export(plugincopy.commands)
-export(imagecopy.commands)
 
-QMAKE_EXTRA_TARGETS += first plugincopy imagecopy
+QMAKE_EXTRA_TARGETS += first plugincopy
 
 # Qml
 # ---
