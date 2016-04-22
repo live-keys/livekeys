@@ -4,8 +4,7 @@ import lcvfeatures2d 1.0
  
 Row{
     
-    property string imagePath : 
-        codeDocument.path + '/../_images/caltech_buildings_DSCN0246_small.JPG'
+    property string imagePath : codeDocument.path + '/../_images/buildings_0246.jpg'
      
     Column{
         FeatureDetectorSelection{

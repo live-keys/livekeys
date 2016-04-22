@@ -96,6 +96,7 @@ public:
 
 public slots:
     void setValuesFromIntList(const QList<int>& values);
+    void setValuesFromIntListAt(const QList<int>& values, int index);
 
 signals:
     void valuesChanged();
@@ -139,7 +140,10 @@ inline void QDrawHistogram::setValuesFromIntList(const QList<int> &values){
     QVariantList vals;
     for ( QList<int>::const_iterator it = values.begin(); it != values.end(); ++it )
         vals.append(*it);
-    setValues(vals);
+
+    m_values = vals;
+    emit valuesChanged();
+    update();
 }
 
 inline qreal QDrawHistogram::maxValue() const{
