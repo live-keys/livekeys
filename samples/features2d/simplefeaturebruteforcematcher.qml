@@ -3,50 +3,28 @@ import lcvimgproc 1.0
 import lcvfeatures2d 1.0
 
 Grid{
+    
     columns : 2
     
-    //TODO
+    property string trainImage : codeDocument.path + '/../_images/object_101_piano_train1.jpg'
+    property string queryImage : codeDocument.path + '/../_images/object_101_piano_query.jpg'
     
     // Train images
     
-    property string imagePath   : codeDocument.path + '/../_images/'
-    property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
-    property string trainImage2 : imagePath + 'object_101_piano_train1.jpg'
-    property string queryImage  : imagePath + 'object_101_piano_query.jpg'
-    
     ImRead{
-        id: trainImageLoader
-        
+        id: trainImageLoader 
         visible : false
-        
-        property variant images
-        property variant keypoints
-        
-        Component.onCompleted : {
-            var imageArray    = new Array()
-            var keypointArray = new Array()
-            
-            file = trainImage
-            imageArray.push(output.createOwnedObject())
-            keypointArray.push(trainFeatureDetect.keypoints.createOwnedObject())
-            
-            file = trainImage2
-            imageArray.push(output.createOwnedObject())
-            keypointArray.push(trainFeatureDetect.keypoints.createOwnedObject())
-            
-            images    = imageArray
-            keypoints = keypointArray
-        }
+        file : trainImage
     }
     
-    BriskFeatureDetector{
+    FastFeatureDetector{
         id : trainFeatureDetect
         input : trainImageLoader.output
     }
     
-    BriskDescriptorExtractor{
+    BriefDescriptorExtractor{
         keypoints : trainFeatureDetect.keypoints
-        onDescriptorsChanged : {
+        Component.onCompleted : {
             descriptorMatcher.add(descriptors)
             descriptorMatcher.train();
         }
@@ -54,45 +32,43 @@ Grid{
         
     // Query Image
     
-    
     ImRead{
         id : queryImageLoader
+        visible : false
         file : queryImage
     }
     
-    BriskFeatureDetector{
+    FastFeatureDetector{
         id : queryFeatureDetect
         input : queryImageLoader.output
-    }    
+    }
     
-    BriskDescriptorExtractor{
+    BriefDescriptorExtractor{
         id : queryFeatureExtract
         keypoints : queryFeatureDetect.keypoints
     }
     
     // Matching
-    
-    FlannBasedMatcher{
+     
+    BruteForceMatcher{
         id : descriptorMatcher
         queryDescriptors : queryFeatureExtract.descriptors
-        knn : 2
-        Component.onCompleted : {
-            initialize({
-                'indexParams' : 'Lsh'
-            })
+        params : {
+            'normType' : BruteForceMatcher.NORM_HAMMING
         }
+        knn : -1
     }
     
     DescriptorMatchFilter{
         id: descriptorMatchFilter
         matches1to2: descriptorMatcher.matches
-        minDistanceCoeff: 3
-        nndrRatio: 0.8
+        minDistanceCoeff: 1.5
+        nndrRatio: 0.9
     }
        
     DrawMatches{
         keypoints1 : queryFeatureDetect.keypoints
-        keypoints2 : trainImageLoader.keypoints[0]
+        keypoints2 : trainFeatureDetect.keypoints
         matches1to2 : descriptorMatchFilter.matches1to2Out
         matchIndex : 0
     }
