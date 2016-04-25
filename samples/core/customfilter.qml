@@ -9,11 +9,7 @@ Row{
     
     ImRead{
        id : src
-       file : codeDocument.path + '/../_images/caltech_buildings_DSCN0246.JPG'
-       Component.onCompleted : {
-           width = width / 4
-           height = height / 4
-       }
+       file : codeDocument.path + '/../_images/buildings_0246.jpg'
     }
     
     ChannelSelect{

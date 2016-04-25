@@ -10,7 +10,7 @@ Row{
      
     property string imagePath   : codeDocument.path + '/../_images/'
     property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
-    property string trainImage2 : imagePath + 'caltech_buildings_DSCN0246_small.JPG'
+    property string trainImage2 : imagePath + 'buildings_0246_small.jpg'
     property string queryImage  : imagePath + 'object_101_piano_query.jpg'
     
     Column{

@@ -307,3 +307,29 @@ void QDrawHistogram::setRender(QDrawHistogram::RenderType arg){
 
     emit renderChanged();
 }
+
+void QDrawHistogram::setValuesFromIntListAt(const QList<int> &values, int index){
+    QVariantList vals;
+    for ( QList<int>::const_iterator it = values.begin(); it != values.end(); ++it )
+        vals.append(*it);
+
+    if ( m_values.size() == 0 ){
+        m_values.reserve(index + 1);
+        for ( int i = 0; i < index + 1; ++i )
+            m_values.append(QVariant::fromValue(QVariantList()));
+        m_values[index] = vals;
+    } else {
+        if ( m_values.at(0).type() != QVariant::List ){
+            m_values.clear();
+        }
+        if ( index >= m_values.size() ){
+            m_values.reserve(index + 1);
+            for ( int i = m_values.size(); i < index + 1; ++i )
+                m_values.append(QVariant::fromValue(QVariantList()));
+        }
+        m_values[index] = vals;
+    }
+
+    emit valuesChanged();
+    update();
+}
