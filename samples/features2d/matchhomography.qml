@@ -3,40 +3,18 @@ import lcvimgproc 1.0
 import lcvfeatures2d 1.0
 
 Grid{
+    
     columns : 2
     
-    //TODO
+    property string trainImage : codeDocument.path + '/../_images/object_101_piano_train1.jpg'
+    property string queryImage : codeDocument.path + '/../_images/object_101_piano_query.jpg'
     
     // Train images
     
-    property string imagePath   : codeDocument.path + '/../_images/'
-    property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
-    property string trainImage2 : imagePath + 'caltech_buildings_DSCN0246_small.JPG'
-    property string queryImage  : imagePath + 'object_101_piano_query.jpg'
-    
     ImRead{
-        id: trainImageLoader
-        
+        id: trainImageLoader 
         visible : false
-        
-        property var images
-        property var keypoints
-        
-        Component.onCompleted : {
-            var imageArray    = new Array()
-            var keypointArray = new Array()
-            
-            file = trainImage
-            imageArray.push(output.createOwnedObject())
-            keypointArray.push(trainFeatureDetect.keypoints.createOwnedObject())
-            
-            file = trainImage2
-            imageArray.push(output.createOwnedObject())
-            keypointArray.push(trainFeatureDetect.keypoints.createOwnedObject())
-            
-            images    = imageArray
-            keypoints = keypointArray
-        }
+        file : trainImage
     }
     
     FastFeatureDetector{
@@ -46,7 +24,7 @@ Grid{
     
     BriefDescriptorExtractor{
         keypoints : trainFeatureDetect.keypoints
-        onDescriptorsChanged : {
+        Component.onCompleted : {
             descriptorMatcher.add(descriptors)
             descriptorMatcher.train();
         }
@@ -54,9 +32,9 @@ Grid{
         
     // Query Image
     
-    
     ImRead{
         id : queryImageLoader
+        visible : false
         file : queryImage
     }
     
@@ -71,24 +49,33 @@ Grid{
     }
     
     // Matching
-    
-    BruteForceMatcher{
+     
+    FlannBasedMatcher{
         id : descriptorMatcher
         queryDescriptors : queryFeatureExtract.descriptors
-        knn: 2
+        knn : 2
+        params : {'indexParams' : 'Lsh'}
     }
     
     DescriptorMatchFilter{
         id: descriptorMatchFilter
         matches1to2: descriptorMatcher.matches
-        minDistanceCoeff: 2.5
+        minDistanceCoeff: 12.5
         nndrRatio: 0.8
     }
+       
+    DrawMatches{
+        keypoints1 : queryFeatureDetect.keypoints
+        keypoints2 : trainFeatureDetect.keypoints
+        matches1to2 : descriptorMatchFilter.matches1to2Out
+        matchIndex : 0
+    }
+    
     
     MatchesToLocalKeypoint{
         id: matchesToLocalKeypoint
         matches1to2 : descriptorMatchFilter.matches1to2Out
-        trainKeypointVectors : trainImageLoader.keypoints
+        trainKeypointVectors : [trainFeatureDetect.keypoints]
         queryKeypointVector : queryFeatureDetect.keypoints
     }
     
@@ -96,15 +83,13 @@ Grid{
         queryImage : queryImageLoader.output
         keypointsToScene: matchesToLocalKeypoint.output
         objectCorners : [
-            [Qt.point(0,0), Qt.point(100,0), Qt.point(100,100), Qt.point(0,100)]
+            [Qt.point(0,0), 
+             Qt.point(trainFeatureDetect.width,0), 
+             Qt.point(trainFeatureDetect.width, trainFeatureDetect.height), 
+             Qt.point(0,trainFeatureDetect.height)]
         ]
     }
     
-    DrawMatches{
-        keypoints1 : queryFeatureDetect.keypoints
-        keypoints2 : trainImageLoader.keypoints[0]
-        matches1to2 : descriptorMatchFilter.matches1to2Out
-        matchIndex : 0
-    }
-    
 }
+
+    
