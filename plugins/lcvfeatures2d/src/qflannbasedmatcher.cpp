@@ -27,19 +27,18 @@ QFlannBasedMatcher::QFlannBasedMatcher(QQuickItem* parent)
 QFlannBasedMatcher::~QFlannBasedMatcher(){
 }
 
-void QFlannBasedMatcher::initialize(const QJsonObject& initParams){
-
+void QFlannBasedMatcher::initialize(const QVariantMap &params){
     cv::flann::IndexParams* indexParams = 0;
-    if ( !initParams.contains("indexParams") ){
+    if ( !params.contains("indexParams") ){
         qWarning("FlannBasedMatcher : Undefined indexParams in initialization function. Cannot create matcher.");
         return;
     }
 
-    QString indexParamsType = initParams["indexParams"].toString();
+    QString indexParamsType = params["indexParams"].toString();
     if ( indexParamsType == "KDTree" ){
         int trees = 4;
-        if ( !initParams.contains("trees") )
-            trees = initParams["trees"].toInt();
+        if ( !params.contains("trees") )
+            trees = params["trees"].toInt();
 
         indexParams = new cv::flann::KDTreeIndexParams(trees);
 
@@ -48,12 +47,12 @@ void QFlannBasedMatcher::initialize(const QJsonObject& initParams){
     } else if ( indexParamsType == "Lsh" ){
         int tableNumber = 10, keySize = 10, multiProbeLevel = 10;
 
-        if ( initParams.contains("tableNumber") )
-            tableNumber = initParams["tableNumber"].toInt();
-        if ( initParams.contains("keySize") )
-            keySize     = initParams["keySize"].toInt();
-        if ( initParams.contains("multiProbeLevel") )
-            multiProbeLevel = initParams["multiProbeLevel"].toInt();
+        if ( params.contains("tableNumber") )
+            tableNumber = params["tableNumber"].toInt();
+        if ( params.contains("keySize") )
+            keySize     = params["keySize"].toInt();
+        if ( params.contains("multiProbeLevel") )
+            multiProbeLevel = params["multiProbeLevel"].toInt();
 
         indexParams = new cv::flann::LshIndexParams(tableNumber, keySize, multiProbeLevel);
 

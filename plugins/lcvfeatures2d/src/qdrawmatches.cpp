@@ -46,7 +46,7 @@ QSGNode *QDrawMatches::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeD
          m_matchIndex != -1 &&
          m_matches->matches().size() > 0
     ){
-        if ( m_matches->matches().size() == 1 ){
+        if ( m_matches->type() == QDMatchVector::BEST_MATCH ){
             drawExtractedMatches(m_matches->matches()[0]);
         } else {
             std::vector<cv::DMatch> selectedMatches;
@@ -61,7 +61,6 @@ QSGNode *QDrawMatches::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeD
 }
 
 void QDrawMatches::drawExtractedMatches(const std::vector<cv::DMatch> matches){
-
     m_mask.resize(matches.size());
     std::fill(m_mask.begin(), m_mask.end(), 0);
     for ( size_t i = 0; i < matches.size(); ++i ){

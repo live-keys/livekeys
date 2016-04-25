@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QFLANNBASEDMATCHER_HPP
-#define QFLANNBASEDMATCHER_HPP
+#ifndef QFLANNBASEDMATCHER_H
+#define QFLANNBASEDMATCHER_H
 
 #include "qdescriptormatcher.h"
 
@@ -27,8 +27,8 @@ public:
     explicit QFlannBasedMatcher(QQuickItem *parent = 0);
     ~QFlannBasedMatcher();
 
-public slots:
-    void initialize(const QJsonObject& initparams);
+protected:
+    virtual void initialize(const QVariantMap& params);
 
 };
 

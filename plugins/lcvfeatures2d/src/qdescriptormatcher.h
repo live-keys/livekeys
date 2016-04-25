@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QDESCRIPTORMATCHER_HPP
-#define QDESCRIPTORMATCHER_HPP
+#ifndef QDESCRIPTORMATCHER_H
+#define QDESCRIPTORMATCHER_H
 
 #include <QQuickItem>
 #include "qmat.h"
@@ -31,6 +31,7 @@ class Q_LCVFEATURES2D_EXPORT QDescriptorMatcher : public QQuickItem{
     Q_OBJECT
     Q_PROPERTY(QMat*          queryDescriptors READ queryDescriptors WRITE  setQueryDescriptors NOTIFY queryDescriptorsChanged)
     Q_PROPERTY(QDMatchVector* matches          READ matches          NOTIFY matchesChanged)
+    Q_PROPERTY(QVariantMap    params           READ params           WRITE  setParams           NOTIFY paramsChanged)
     Q_PROPERTY(int            knn              READ knn              WRITE  setKnn              NOTIFY knnChanged)
 
 public:
@@ -46,23 +47,29 @@ public:
 
     QDMatchVector* matches();
 
+    const QVariantMap& params() const;
+
 signals:
     void queryDescriptorsChanged();
     void matchesChanged();
     void knnChanged();
 
+    void paramsChanged();
+
 public slots:
     void add(QMat* descriptors);
     void train();
 
-
     void match(QMat* queryDescriptors, QDMatchVector* matches);
     void knnMatch(QMat* queryDescriptors, QDMatchVector* matches, int k = 2);
 
+    void setParams(const QVariantMap &arg);
+
 protected:
     virtual void componentComplete();
-    virtual void initializeMatcher(cv::DescriptorMatcher* matcher);
+    virtual void initialize(const QVariantMap& params);
 
+    void initializeMatcher(cv::DescriptorMatcher* matcher);
     void callMatch();
 
 private:
@@ -72,6 +79,7 @@ private:
     QMat*                  m_queryDescriptors;
 
     int                    m_knn;
+    QVariantMap m_params;
 };
 
 inline void QDescriptorMatcher::setQueryDescriptors(QMat* descriptors){
@@ -103,6 +111,19 @@ inline void QDescriptorMatcher::setKnn(int knn){
 
 inline int QDescriptorMatcher::knn() const{
     return m_knn;
+}
+
+inline const QVariantMap& QDescriptorMatcher::params() const{
+    return m_params;
+}
+
+inline void QDescriptorMatcher::setParams(const QVariantMap& arg){
+    if (m_params == arg)
+        return;
+
+    initialize(arg);
+    m_params = arg;
+    emit paramsChanged();
 }
 
 #endif // QDESCRIPTORMATCHER_HPP

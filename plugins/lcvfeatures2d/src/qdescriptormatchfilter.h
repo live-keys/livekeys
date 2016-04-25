@@ -57,10 +57,17 @@ signals:
 
 protected:
     void callFilterMatches();
-    virtual void filterMatches(
+
+    QDMatchVector::Type filterKnnMatches(
         const std::vector<std::vector<cv::DMatch> >& src,
         std::vector<std::vector<cv::DMatch> >& dst
     );
+
+    QDMatchVector::Type filterBestMatches(
+        const std::vector<std::vector<cv::DMatch> >& src,
+        std::vector<std::vector<cv::DMatch> >& dst
+    );
+
     void copyMatches(
         const std::vector<std::vector<cv::DMatch> >& src,
         std::vector<std::vector<cv::DMatch> >& dst

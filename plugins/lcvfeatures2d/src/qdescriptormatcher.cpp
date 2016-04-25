@@ -84,7 +84,7 @@ void QDescriptorMatcher::match(QMat* queryDescriptors, QDMatchVector* matches){
                 m_matcher->match(*queryDescriptors->cvMat(), matches->matches()[0] );
                 m_matches->setType(QDMatchVector::BEST_MATCH);
             } catch ( cv::Exception& e ){
-                qCritical("%s", qPrintable( QString( QString("Descriptor matcher match: ") + e.what()) ) );
+                qCritical("Descriptor matcher: %s", e.what());
             }
         }
     }
@@ -93,10 +93,12 @@ void QDescriptorMatcher::match(QMat* queryDescriptors, QDMatchVector* matches){
 void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches, int k){
     if ( m_matcher ){
         try{
+            if ( queryDescriptors->cvMat()->cols == 0 )
+                return;
             m_matcher->knnMatch(*queryDescriptors->cvMat(), matches->matches(), k);
             m_matches->setType(QDMatchVector::KNN);
         } catch ( cv::Exception& e ){
-            qCritical("%s", qPrintable( QString( QString("Descriptor matcher match: ") + e.what()) ) );
+            qCritical("Descriptor matcher knn match: %s", qPrintable(e.what()));
         }
     }
 }
@@ -104,6 +106,9 @@ void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches
 void QDescriptorMatcher::componentComplete(){
     QQuickItem::componentComplete();
     callMatch();
+}
+
+void QDescriptorMatcher::initialize(const QVariantMap &){
 }
 
 void QDescriptorMatcher::initializeMatcher(cv::DescriptorMatcher* matcher){

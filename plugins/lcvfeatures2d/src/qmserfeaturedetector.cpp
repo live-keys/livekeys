@@ -30,7 +30,7 @@ void QMSerFeatureDetector::initialize(const QVariantMap& settings){
     int minArea          = 60;
     int maxArea          = 14400;
     float maxVariation   = 0.25;
-    float minDiversity   = 0.2;
+    float minDiversity   = 0.2f;
     int maxEvolution     = 200;
     double areaThreshold = 1.01;
     double minMargin     = 0.003;

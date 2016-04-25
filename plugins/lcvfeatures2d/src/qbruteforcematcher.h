@@ -14,19 +14,30 @@
 **
 ****************************************************************************/
 
-#ifndef QBRUTEFORCEMATCHER_HPP
-#define QBRUTEFORCEMATCHER_HPP
+#ifndef QBRUTEFORCEMATCHER_H
+#define QBRUTEFORCEMATCHER_H
 
 #include "qdescriptormatcher.h"
 
 class QBruteForceMatcher : public QDescriptorMatcher{
 
     Q_OBJECT
+    Q_ENUMS(NormType)
+
+public:
+    enum NormType{
+        NORM_L1 = 2,
+        NORM_L2 = 4,
+        NORM_HAMMING = 6,
+        NORM_HAMMING2 = 7
+    };
 
 public:
     QBruteForceMatcher(QQuickItem* parent = 0);
     virtual ~QBruteForceMatcher();
 
+protected:
+    virtual void initialize(const QVariantMap& params);
 };
 
 #endif // QBRUTEFORCEMATCHER_HPP

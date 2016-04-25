@@ -20,6 +20,12 @@
 #include "qmatshader.h"
 #include "opencv2/features2d/features2d.hpp"
 
+// null keypoints
+// null descriptors
+// defined keypoints
+// defined descriptors
+
+
 QFeatureDetector::QFeatureDetector(QQuickItem *parent)
     : QQuickItem(parent)
     , m_detector(0)
@@ -60,7 +66,7 @@ void QFeatureDetector::initializeDetector(cv::FeatureDetector *detector){
 }
 
 void QFeatureDetector::detect(){
-    if ( m_detector != 0 && isComponentComplete() ){
+    if ( m_detector != 0 && !m_in->cvMat()->empty() && isComponentComplete() ){
         m_detector->detect(*m_in->cvMat(), m_keypoints->keypoints(), *m_mask->cvMat());
         cv::Mat inClone = m_in->cvMat()->clone();
         m_keypoints->setMat(inClone);

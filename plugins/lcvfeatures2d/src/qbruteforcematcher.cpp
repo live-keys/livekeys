@@ -16,11 +16,28 @@
 
 #include "qbruteforcematcher.h"
 #include "opencv2/features2d/features2d.hpp"
+#include <QVariant>
 
 QBruteForceMatcher::QBruteForceMatcher(QQuickItem* parent)
-    : QDescriptorMatcher(new cv::BFMatcher, parent)
+    : QDescriptorMatcher(0, parent)
 {
 }
 
 QBruteForceMatcher::~QBruteForceMatcher(){
+}
+
+void QBruteForceMatcher::initialize(const QVariantMap &params){
+    int normType = cv::NORM_L2;
+    bool crossCheck = false;
+
+    if ( params.contains("normType") )
+        normType = params["normType"].toInt();
+    if ( params.contains("crossCheck") )
+        crossCheck = params["crossCheck"].toBool();
+    initializeMatcher(new cv::BFMatcher(normType, crossCheck));
+
+    //TODO
+// constructor int normType=NORM_L2, bool crossCheck=false
+//    new cv::BFMatcher(cv::NORM_HAMMING2)
+//    initializeMatcher(new cv::FlannBasedMatcher(indexParams));
 }
