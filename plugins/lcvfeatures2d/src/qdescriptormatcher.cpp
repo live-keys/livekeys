@@ -44,6 +44,10 @@ QDMatchVector* QDescriptorMatcher::matches(){
 }
 
 void QDescriptorMatcher::add(QMat* descriptors){
+    if ( !descriptors )
+        return;
+    if ( descriptors->cvMat()->cols == 0 )
+        return;
     if ( m_matcher ){
         std::vector<cv::Mat> descriptorVector;
         descriptorVector.push_back(*descriptors->cvMat());
@@ -81,6 +85,8 @@ void QDescriptorMatcher::match(QMat* queryDescriptors, QDMatchVector* matches){
             try{
                 if ( matches->matches().size() != 1)
                     matches->matches().resize(1);
+                if ( queryDescriptors->cvMat()->cols == 0 )
+                    return;
                 m_matcher->match(*queryDescriptors->cvMat(), matches->matches()[0] );
                 m_matches->setType(QDMatchVector::BEST_MATCH);
             } catch ( cv::Exception& e ){

@@ -34,10 +34,6 @@ void QBruteForceMatcher::initialize(const QVariantMap &params){
         normType = params["normType"].toInt();
     if ( params.contains("crossCheck") )
         crossCheck = params["crossCheck"].toBool();
-    initializeMatcher(new cv::BFMatcher(normType, crossCheck));
 
-    //TODO
-// constructor int normType=NORM_L2, bool crossCheck=false
-//    new cv::BFMatcher(cv::NORM_HAMMING2)
-//    initializeMatcher(new cv::FlannBasedMatcher(indexParams));
+    initializeMatcher(new cv::BFMatcher(normType, crossCheck));
 }

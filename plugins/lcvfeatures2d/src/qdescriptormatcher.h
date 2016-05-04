@@ -79,7 +79,7 @@ private:
     QMat*                  m_queryDescriptors;
 
     int                    m_knn;
-    QVariantMap m_params;
+    QVariantMap            m_params;
 };
 
 inline void QDescriptorMatcher::setQueryDescriptors(QMat* descriptors){
