@@ -54,15 +54,21 @@ QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdateP
                 perspectiveTransform(currentCorners, sceneCorners, H);
 
                 for ( size_t si = 0; si < sceneCorners.size() - 1; ++si ){
-                    cv::line(*surface, sceneCorners[si], sceneCorners[si + 1], cv::Scalar(40 + si * 40, 255, 0), 4);
+                    cv::line(*surface, sceneCorners[si], sceneCorners[si + 1], colorAt(i), 4);
                 }
                 if ( sceneCorners.size() > 1 )
-                    cv::line(*surface, sceneCorners[sceneCorners.size() - 1], sceneCorners[0], cv::Scalar(0, 255, 0), 4);
+                    cv::line(*surface, sceneCorners[sceneCorners.size() - 1], sceneCorners[0], colorAt(i), 4);
             }
         }
 
     }
 
     return QMatDisplay::updatePaintNode(node, nodeData);
+}
+
+cv::Scalar QKeypointHomography::colorAt(int i) const{
+    if ( m_cachedObjectColors.size() == 0 )
+        return cv::Scalar(0, 255, 0);
+    return m_cachedObjectColors[i % m_cachedObjectColors.size()];
 }
 

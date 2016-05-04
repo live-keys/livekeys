@@ -27,6 +27,7 @@ class Q_LCVFEATURES2D_EXPORT QKeypointHomography : public QMatDisplay{
     Q_PROPERTY(QKeyPointToSceneMap* keypointsToScene READ keypointsToScene WRITE setKeypointsToScene NOTIFY keypointsToSceneChanged)
     Q_PROPERTY(QMat* queryImage                      READ queryImage       WRITE setQueryImage       NOTIFY queryImageChanged)
     Q_PROPERTY(QVariantList objectCorners            READ objectCorners    WRITE setObjectCorners    NOTIFY objectCornersChanged)
+    Q_PROPERTY(QVariantList objectColors             READ objectColors     WRITE setObjectColors     NOTIFY objectColorsChanged)
 
 public:
     QKeypointHomography(QQuickItem* parent = 0);
@@ -37,6 +38,9 @@ public:
 
     QMat* queryImage() const;
     QVariantList objectCorners() const;
+
+    QVariantList objectColors() const;
+    void setObjectColors(const QVariantList& arg);
 
 public slots:
     void setQueryImage(QMat* queryImage);
@@ -51,10 +55,16 @@ signals:
     void queryImageChanged();
     void objectCornersChanged();
 
+    void objectColorsChanged(QVariantList arg);
+
 private:
+    cv::Scalar colorAt(int i) const;
+
     QKeyPointToSceneMap* m_keypointsToScene;
     QMat*                m_queryImage;
     QVariantList         m_objectCorners;
+    QVariantList         m_objectColors;
+    QList<cv::Scalar>    m_cachedObjectColors;
 };
 
 inline QKeyPointToSceneMap *QKeypointHomography::keypointsToScene() const{
@@ -73,6 +83,10 @@ inline QMat *QKeypointHomography::queryImage() const{
 
 inline QVariantList QKeypointHomography::objectCorners() const{
     return m_objectCorners;
+}
+
+inline QVariantList QKeypointHomography::objectColors() const{
+    return m_objectColors;
 }
 
 inline void QKeypointHomography::setQueryImage(QMat *queryImage){
@@ -99,6 +113,21 @@ inline void QKeypointHomography::setObjectCorners(QVariantList arg){
 inline void QKeypointHomography::appendObjectCorners(QVariantList corner){
     m_objectCorners.append(QVariant::fromValue(corner));
     emit objectCornersChanged();
+    update();
+}
+
+inline void QKeypointHomography::setObjectColors(const QVariantList &arg){
+    if (m_objectColors == arg)
+        return;
+
+    m_objectColors = arg;
+    m_cachedObjectColors.clear();
+    for ( int i = 0; i < m_objectColors.size(); ++i ){
+        QColor color(m_objectColors[i].toString());
+        m_cachedObjectColors.append(cv::Scalar(color.blue(), color.green(), color.red(), color.alpha()));
+    }
+
+    emit objectColorsChanged(arg);
     update();
 }
 
