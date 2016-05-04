@@ -17,51 +17,91 @@
 import QtQuick 2.3
 import lcvcore 1.0
 import lcvcontrols 1.0
-import lcvfeatures2d 1.0
+import lcvfeatures2d 1.0 
 
 Column{
+    id : root
     anchors.left: parent.left
     anchors.right : parent.right
+        
+    property FeatureDetector trainFeatureDetector : FastFeatureDetector{}
+    property DescriptorExtractor trainDescriptorExtractor : BriefDescriptorExtractor{}
+    
+    property FeatureDetector queryFeatureDetector : FastFeatureDetector{ input : qi }
+    onQueryFeatureDetectorChanged : { 
+        queryFeatureDetector.input = qi
+        queryDescriptorExtractor.keypoints = queryFeatureDetector.keypoints
+    }
+    property DescriptorExtractor queryDescriptorExtractor : BriefDescriptorExtractor{ keypoints : queryFeatureDetector.keypoints }
+    onQueryDescriptorExtractorChanged : {
+        queryDescriptorExtractor.keypoints = queryFeatureDetector.keypoints
+    }
+     
+    property var imageSource : null
     
     FeatureObjectList{
         id : featureObjectList
         imageSource : ImRead{
             file : "/home/dinu/Work/livecv/samples/_images/object_101_piano_train1.jpg"
         }
+        featureDetector : root.trainFeatureDetector
+        descriptorExtractor : root.trainDescriptorExtractor
         onObjectAdded : {
             var oc = keypointHomography.objectCorners
             oc.push(points)
             keypointHomography.objectCorners = oc
+             
+            var ocolors = keypointHomography.objectColors
+            ocolors.push(color)
+            keypointHomography.objectColors = ocolors
+            
             drawMatches.keypoints2 = featureObjectList.objectList.keypoints[featureObjectList.objectList.keypoints.length - 1]
             matchesToLocalKeypoint.trainKeypointVectors = featureObjectList.objectList.keypoints
-            descriptorMatcher.add(descriptors)
-            descriptorMatcher.train()
+            descriptorMatcherComponent.item.add(descriptors)
+            descriptorMatcherComponent.item.train()
+        }
+        onObjectListLoaded : {
+            matchesToLocalKeypoint.trainKeypointVectors = featureObjectList.objectList.keypoints
+            keypointHomography.objectCorners = corners
+            keypointHomography.objectColors  = colors
         }
     }
     
+    property Mat qi : queryImage.output
+     
     ImRead{
         id : queryImage
         file : "/home/dinu/Work/livecv/samples/_images/object_101_piano_train1.jpg"
         visible : false
     }
-    FastFeatureDetector{
-        id : queryFeatureDetect
-        input : queryImage.output
-    }
-    BriefDescriptorExtractor{
-        id : queryFeatureExtract
-        keypoints : queryFeatureDetect.keypoints
-    }
     
-    BruteForceMatcher{
-        id : descriptorMatcher
-        queryDescriptors : queryFeatureExtract.descriptors
-        knn : 2
+    GlobalItem{
+        id : descriptorMatcherComponent
+        stateId :"descriptorMatcher"
+
+        source : BruteForceMatcher{
+            id : descriptorMatcher
+            //queryDescriptors : root.queryDescriptorExtractor.descriptors 
+            knn : 2
+            params : {
+                'normType' : BruteForceMatcher.NORM_HAMMING
+            }
+        }
+        Component.onCompleted: {
+            item.queryDescriptors = root.queryDescriptorExtractor.descriptors
+            descriptorMatchFilter.matches1to2 = item.matches
+        }
+        Connections {
+            target : descriptorMatcherComponent.item
+            onMatchesChanged : {
+                descriptorMatchFilter.matches1to2 = descriptorMatcherComponent.item.matches
+            }
+        }
     }
     
     DescriptorMatchFilter{
         id : descriptorMatchFilter
-        matches1to2 : descriptorMatcher.matches
+        matches1to2 : descriptorMatcherComponent.item.matches
         minDistanceCoeff : 2.5
         nndrRatio : 0.8
     }
@@ -69,8 +109,8 @@ Column{
     MatchesToLocalKeypoint{
         id : matchesToLocalKeypoint
         matches1to2 : descriptorMatchFilter.matches1to2Out
-        trainKeypointVectors : featureObjectList.objectList.keypoints
-        queryKeypointVector : queryFeatureDetect.keypoints
+//        trainKeypointVectors : featureObjectList.objectList.keypoints
+        queryKeypointVector : root.queryFeatureDetector.keypoints
     }
     
     KeypointHomography{
@@ -78,17 +118,15 @@ Column{
         queryImage : queryImage.output
         keypointsToScene : matchesToLocalKeypoint.output
         objectCorners : []
+        objectColors : []
     }
     
     DrawMatches{
         id : drawMatches
-        keypoints1 : queryFeatureDetect.keypoints
+        keypoints1 : root.queryFeatureDetector.keypoints
         keypoints2 : null
         matches1to2 : descriptorMatchFilter.matches1to2Out
         matchIndex : 0
-        Component.onCompleted : {
-            console.log(featureObjectList.objectList.keypoints.length)
-        }
     }
     
 }

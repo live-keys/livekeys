@@ -33,13 +33,24 @@ Rectangle{
     property FeatureDetector featureDetector : FastFeatureDetector{}
     property DescriptorExtractor descriptorExtractor : BriefDescriptorExtractor{}
     
-    signal objectAdded(Mat descriptors, var points)
+    signal objectAdded(Mat descriptors, var points, var color)
+    signal objectListLoaded(MatList list, var keypoints, var corners, var colors)
     
-    property alias objectList : objectList
-    
-    MatList{
-        id : objectList
-        property variant keypoints : new Array()
+    property alias objectList : objectListComponent.item
+
+    GlobalItem{
+        id : objectListComponent
+        stateId : "objectListComponent"
+        source : Item{
+            property MatList objectList : MatList{}
+            property variant keypoints : new Array()
+            property variant corners : new Array()
+            property variant colors : new Array()
+        }
+        Component.onCompleted: {
+            trainImages.model = item.objectList
+            root.objectListLoaded(item.objectList, item.keypoints, item.corners, item.colors)
+        }
     }
     
     ScrollView{
@@ -57,12 +68,17 @@ Rectangle{
         id : trainImages
         property int selectedIndex : 0
         height : root.height
-                        
-        model : objectList
+
         delegate : MatView{
+            id : matView
             height : parent.height
             width : (parent.height / mat.dataSize().height) * mat.dataSize().width
             mat : modelData
+            Rectangle{
+                color : objectListComponent.item.colors[index].toString()
+                width : matView.width
+                height : 3
+            }
         }
     }
     
@@ -75,14 +91,21 @@ Rectangle{
         
         onRegionSelected : {
             root.featureDetector.input = region
-            objectList.appendMat(root.featureDetector.output.createOwnedObject())
-            
+
+            var generatedColor = Qt.hsla(Math.random(), Math.random() * 0.5 + 0.5, Math.random() * 0.5 + 0.5, 1)
             var keypoints = root.featureDetector.keypoints.createOwnedObject()
-            objectList.keypoints.push(keypoints)
+            var corners   = [Qt.point(0, 0), Qt.point(width, 0), Qt.point(width, height), Qt.point(0, height)]
+
+            objectListComponent.item.colors.push(generatedColor)
+            objectListComponent.item.keypoints.push(keypoints)
+            objectListComponent.item.corners.push(corners)
+            objectListComponent.item.objectList.appendMat(root.featureDetector.output.createOwnedObject())
+
             root.descriptorExtractor.keypoints = keypoints
             root.objectAdded(
                 root.descriptorExtractor.descriptors,
-                [Qt.point(0, 0), Qt.point(width, 0), Qt.point(width, height), Qt.point(0, height)]
+                corners,
+                generatedColor
             )
         }
     }

@@ -160,11 +160,6 @@ Rectangle{
     property alias selectedName: chosenItemText.text
     property alias selectedExtractor: chosenItem.extractor
 
-    onSelectedExtractorChanged: {
-        selectedExtractor.params    = globalConfig.item.configuration[selectedName]
-        selectedExtractor.keypoints = detector ? detector.keypoints : null
-    }
-
     property alias selectedPanelModel: chosenItem.panelModel
     property alias selectedIndex: listView.currentIndex
 
@@ -188,6 +183,11 @@ Rectangle{
         color: chosenItemMouse.containsMouse ? root.highlightColor : root.backgroundColor
 
         property DescriptorExtractor extractor: null
+        onExtractorChanged: {
+            extractor.params    = globalConfig.item.configuration[selectedName]
+            extractor.keypoints = detector ? detector.keypoints : null
+        }
+
         property var panelModel: []
 
         Text{
