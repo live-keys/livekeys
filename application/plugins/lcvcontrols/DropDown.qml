@@ -21,9 +21,9 @@ Rectangle{
 
     property variant model: []
 
-    property color backgroundColor: "#444"
-    property color highlightColor: "#44444a"
-    property color textColor: "#ccc"
+    property color backgroundColor: "#061a29"
+    property color highlightColor: "#071825"
+    property color textColor: "#fff"
 
     property int dropBoxHeight: 80
 
@@ -45,9 +45,9 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             id: chosenItemText
             text: root.model ? root.model[0] : ''
-            font.family: "Arial, Helvetica, sans-serif"
+            font.family: "Ubuntu Mono, Arial, Helvetica, sans-serif"
             font.pixelSize: 13
-            color: "#ddd"
+            color: root.textColor
         }
 
         MouseArea{
@@ -84,8 +84,8 @@ Rectangle{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.leftMargin: 10
-                    color: "#ddd"
-                    font.family: "Arial, Helvetica, sans-serif"
+                    color: root.textColor
+                    font.family: "Ubuntu Mono, Arial, Helvetica, sans-serif"
                     font.pixelSize: 13
                 }
                 MouseArea{

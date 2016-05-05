@@ -163,9 +163,9 @@ Rectangle{
     property alias selectedPanelModel: chosenItem.panelModel
     property alias selectedIndex: listView.currentIndex
 
-    property color backgroundColor: "#444"
-    property color highlightColor: "#44444a"
-    property color textColor: "#ccc"
+    property color backgroundColor: "#061a29"
+    property color highlightColor: "#071825"
+    property color textColor: "#fff"
 
     property int dropBoxHeight: 120
 
@@ -174,7 +174,7 @@ Rectangle{
     z: 100
 
     width: 500
-    height : 30
+    height : 35
 
     Rectangle {
         id: chosenItem
@@ -196,9 +196,9 @@ Rectangle{
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             text: ''
-            font.family: "Arial, Helvetica, sans-serif"
+            font.family: "Ubuntu Mono, Arial, Helvetica, sans-serif"
             font.pixelSize: 13
-            color: "#ddd"
+            color: root.textColor
         }
 
         MouseArea{
@@ -239,8 +239,8 @@ Rectangle{
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.leftMargin: 10
-                        color: "#ddd"
-                        font.family: "Arial, Helvetica, sans-serif"
+                        color: root.textColor
+                        font.family: "Ubuntu Mono, Arial, Helvetica, sans-serif"
                         font.pixelSize: 13
                     }
                     MouseArea{
