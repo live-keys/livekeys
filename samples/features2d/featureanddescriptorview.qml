@@ -7,6 +7,7 @@ Row{
     property string imagePath : codeDocument.path + '/../_images/buildings_0246.jpg'
      
     Column{
+
         FeatureDetectorSelection{
             id: detectorSelector
             detectorInput : iminput.output
@@ -30,14 +31,14 @@ Row{
             height : 200
             color : LiveCVStyle.darkElementBackgroundColor
             
-        DrawHistogram{
-            id : descriptorHistogram
-            width : parent.width
-            height : 200
-            maxValue : 5000
-            colors : ["#aa007700"]
-            render : DrawHistogram.BinaryConverted
-        }
+            DrawHistogram{
+                id : descriptorHistogram
+                width : parent.width
+                height : 200
+                maxValue : 5000
+                colors : ["#aa007700"]
+                render : DrawHistogram.BinaryConverted
+            }
         }
     }
     

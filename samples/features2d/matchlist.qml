@@ -5,8 +5,6 @@ import lcvfeatures2d 1.0
 Row{
     
     // Train images
-    
-    // TODO
      
     property string imagePath   : codeDocument.path + '/../_images/'
     
