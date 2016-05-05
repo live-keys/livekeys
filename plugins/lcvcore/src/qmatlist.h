@@ -37,6 +37,7 @@ public slots:
     void removeMat(QMat* mat);
     void removeAt(int index);
     QMat* at(int index);
+    int size() const;
 
 private:
     QList<QMat*> m_list;

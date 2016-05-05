@@ -19,9 +19,9 @@ import lcvcore 1.0
 import lcvcontrols 1.0
 import lcvfeatures2d 1.0 
 
-Column{
-    id : root
-    anchors.left: parent.left
+Column{   
+    id : root 
+    anchors.left: parent.left 
     anchors.right : parent.right
         
     property FeatureDetector trainFeatureDetector : FastFeatureDetector{}
@@ -109,12 +109,12 @@ Column{
     MatchesToLocalKeypoint{
         id : matchesToLocalKeypoint
         matches1to2 : descriptorMatchFilter.matches1to2Out
-//        trainKeypointVectors : featureObjectList.objectList.keypoints
+        trainKeypointVectors : featureObjectList.objectList.keypoints
         queryKeypointVector : root.queryFeatureDetector.keypoints
     }
     
-    KeypointHomography{
-        id : keypointHomography
+    KeypointHomography{  
+        id : keypointHomography       
         queryImage : queryImage.output
         keypointsToScene : matchesToLocalKeypoint.output
         objectCorners : []
