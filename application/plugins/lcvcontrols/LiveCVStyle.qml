@@ -20,4 +20,20 @@ import QtQuick 2.3
 QtObject{
     property color background: "#05111b"
     property color editorBackground : "#071723"
+
+    property color textColor : "#ffffff"
+    property int textPixelSize : 14
+    property string textFont : "Ubuntu Mono, Courier New, Courier"
+
+    property color headerColor : "#061a29"
+    property color elementBackground : "#081520"
+    property color elementHighlightBackground : "#071825"
+
+    property color buttonColor : "#061a29"
+    property color buttonHighlightColor : "#082134"
+    property color darkElementBackroundColor : "#020d14"
+    property color darkElementBorderColor : "#031728"
+
+    property color inputBoxColor : "#050e15"
+    property color inputboxBorderColor : "#031728"
 }
