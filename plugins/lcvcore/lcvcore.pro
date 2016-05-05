@@ -12,7 +12,7 @@ DEFINES += Q_LCV
 
 include($$PWD/src/lcvcore.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
-loadOpenCV(core highgui, deploy)
+loadOpenCV(core highgui ffmpeg, deploy)
 
 INCLUDEPATH += $$PWD/../../lib/include
 DEPENDPATH  += $$PWD/../../lib/include

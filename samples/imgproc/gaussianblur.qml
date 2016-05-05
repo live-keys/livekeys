@@ -8,7 +8,7 @@ Row{
     
     ImRead{
        id : src
-       file : codeDocument.path + '/../_images/caltech_buildings_DSCN0246_small.JPG'
+       file : codeDocument.path + '/../_images/buildings_0246.jpg'
     }
     
     GaussianBlur{

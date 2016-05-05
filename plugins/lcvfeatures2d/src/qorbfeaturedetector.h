@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2016 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #ifndef QORBFEATUREDETECTOR_HPP
 #define QORBFEATUREDETECTOR_HPP
 
@@ -20,9 +36,7 @@ public:
     virtual ~QOrbFeatureDetector();
 
 public slots:
-    void initialize(
-            int nfeatures = 500, float scaleFactor = 1.2f, int nlevels = 8, int edgeThreshold = 31, int firstLevel = 0,
-            int WTA_K = 2, int scoreType = HARRIS_SCORE);
+    void initialize(const QVariantMap& settings);
 
 };
 

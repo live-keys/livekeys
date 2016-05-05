@@ -1,8 +1,30 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2016 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "qfeaturedetector.h"
 #include "qkeypointvector.h"
 #include "qmatnode.h"
 #include "qmatshader.h"
 #include "opencv2/features2d/features2d.hpp"
+
+// null keypoints
+// null descriptors
+// defined keypoints
+// defined descriptors
+
 
 QFeatureDetector::QFeatureDetector(QQuickItem *parent)
     : QQuickItem(parent)
@@ -44,7 +66,7 @@ void QFeatureDetector::initializeDetector(cv::FeatureDetector *detector){
 }
 
 void QFeatureDetector::detect(){
-    if ( m_detector != 0 && isComponentComplete() ){
+    if ( m_detector != 0 && !m_in->cvMat()->empty() && isComponentComplete() ){
         m_detector->detect(*m_in->cvMat(), m_keypoints->keypoints(), *m_mask->cvMat());
         cv::Mat inClone = m_in->cvMat()->clone();
         m_keypoints->setMat(inClone);

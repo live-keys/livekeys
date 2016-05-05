@@ -1,16 +1,16 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Dinu SV.
+** Copyright (C) 2014-2016 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV application.
+** This file is part of Live CV Application.
 **
-** GNU General Public License Usage
-** 
-** This file may be used under the terms of the GNU General Public License 
-** version 3.0 as published by the Free Software Foundation and appearing 
-** in the file LICENSE.GPL included in the packaging of this file.  Please 
-** review the following information to ensure the GNU General Public License 
-** version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
 
@@ -33,7 +33,7 @@ using namespace cv;
   \inherits Item
   \brief Displays a matrixes values in text form.
 
-  This element becomes very usefull when debugging result images from algorithms. It can be used in combination
+  This element becomes very useful when debugging result images from algorithms. It can be used in combination
   with the MatRoi element in order to create a pan-type interaction over a zoomed area in an image. The sample in
   core/valuescan.qml shows this type of usage in action.
 
@@ -56,6 +56,7 @@ QMatReadNode::QMatReadNode(QQuickWindow *window)
     , m_paintDevice(0)
     , m_glFunctions(new QOpenGLFunctions)
 {
+    m_glFunctions->initializeOpenGLFunctions();
 }
 
 QMatReadNode::~QMatReadNode(){

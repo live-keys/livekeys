@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2016 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #ifndef QDRAWHISTOGRAM_HPP
 #define QDRAWHISTOGRAM_HPP
 
@@ -60,7 +76,8 @@ public:
     enum RenderType{
         ConnectedLines = 0,
         Rectangles,
-        Binary
+        Binary,
+        BinaryConverted
     };
 
 public:
@@ -76,6 +93,10 @@ public:
     void setColors(const QVariantList& arg);
     void setMaxValue(qreal arg);
     void setRender(RenderType arg);
+
+public slots:
+    void setValuesFromIntList(const QList<int>& values);
+    void setValuesFromIntListAt(const QList<int>& values, int index);
 
 signals:
     void valuesChanged();
@@ -111,6 +132,16 @@ inline void QDrawHistogram::setValues(const QVariantList &arg){
         return;
 
     m_values = arg;
+    emit valuesChanged();
+    update();
+}
+
+inline void QDrawHistogram::setValuesFromIntList(const QList<int> &values){
+    QVariantList vals;
+    for ( QList<int>::const_iterator it = values.begin(); it != values.end(); ++it )
+        vals.append(*it);
+
+    m_values = vals;
     emit valuesChanged();
     update();
 }

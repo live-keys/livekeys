@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2016 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #ifndef QMATCHFILTER_H
 #define QMATCHFILTER_H
 
@@ -41,10 +57,17 @@ signals:
 
 protected:
     void callFilterMatches();
-    virtual void filterMatches(
+
+    QDMatchVector::Type filterKnnMatches(
         const std::vector<std::vector<cv::DMatch> >& src,
         std::vector<std::vector<cv::DMatch> >& dst
     );
+
+    QDMatchVector::Type filterBestMatches(
+        const std::vector<std::vector<cv::DMatch> >& src,
+        std::vector<std::vector<cv::DMatch> >& dst
+    );
+
     void copyMatches(
         const std::vector<std::vector<cv::DMatch> >& src,
         std::vector<std::vector<cv::DMatch> >& dst

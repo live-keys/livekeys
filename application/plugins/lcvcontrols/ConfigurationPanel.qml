@@ -1,57 +1,71 @@
-import QtQuick 2.3
+/****************************************************************************
+**
+** Copyright (C) 2014-2016 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
 
-Column{
-    id: root
-    
-    width: 100
-    height : 100
-    
+import QtQuick 2.3
+import QtQuick.Controls 1.2
+import QtQuick.Controls.Styles 1.2
+
+Rectangle{
+    id : root
+    width: 500
+    height : 200
+
     property var configurationData : ({
-        'threshold' : 10,
-        'nonmaxSuppresion': true
+        'sample1' : 10
     })
-    
+
     property list<Component> configurationFields : [
-        Component{ 
-            ConfigurationField{
-                label : "Threshold"
-                editor : InputBox{text: root.configurationData["threshold"]; onTextChanged: root.configurationData["threshold"] = text;}
-            }
-        },
         Component{
             ConfigurationField{
-                label : "Non Max Suppression"
-                editor : InputBox{text: root.configurationData["nonmaxSuppresion"]; onTextChanged: root.configurationData["nonMaxSuppresion"] = text;}
-            }
-        }   
-    ]
-    
-    Repeater{
-        model: root.configurationFields ? root.configurationFields : []
-        delegate : Component{
-            Rectangle{
-                width: 300
-                height: 30
-                
-                Loader{
-                    id: fieldLoader
-                    sourceComponent: modelData
+                label : "Sample1"
+                editor : InputBox{
+                    text: root.configurationData["sample1"];
+                    onTextChanged: root.configurationData["sample1"] = text;
                 }
-                
             }
         }
-    }
-    
-    Rectangle{
-        id: propertymonitor
-        width: 100
-        height : 100
-        color: "#333"
-        
-        MouseArea{
-            width: 100
-            height : 100
-            onClicked: {console.log(configurationData['threshold'])}
+    ]
+
+
+    ScrollView{
+        style : LiveCVScrollStyle{}
+        anchors.fill: parent
+
+
+        Column{
+            width: parent.width
+
+            Repeater{
+                id : configurationView
+                model: root.configurationFields ? root.configurationFields : []
+                delegate : Component{
+                    Rectangle{
+                        width: 300
+                        height: 30
+
+                        Loader{
+                            id: fieldLoader
+                            sourceComponent: modelData
+                        }
+
+                    }
+                }
+            }
         }
+
     }
+
 }

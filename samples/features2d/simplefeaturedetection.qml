@@ -4,7 +4,9 @@ import lcvfeatures2d 1.0
 
 Row{
 
-    // Fast feature detector sample
+    // A simple feature detection example
+    // You can substitute with 'BriskFeatureDetector', 'OrbFeatureDetector', etc
+    // Check the documentation for the parameters data for each detector
 
     property string imagePath :
         codeDocument.path + '/../_images/object_101_piano_train1.jpg'
@@ -17,8 +19,9 @@ Row{
     FastFeatureDetector{
         id : fastFeatureDetector
         input : inputImage.output
-        Component.onCompleted : {
-            initialize(30, true)
+        params : {
+            'threshold' : 30,
+            'nonmaxSuppresion' : true
         }
     }
     

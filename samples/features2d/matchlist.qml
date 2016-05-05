@@ -2,21 +2,23 @@ import lcvcore 1.0
 import lcvimgproc 1.0
 import lcvfeatures2d 1.0
 
-
 Row{
     
     // Train images
+    
+    // TODO
      
     property string imagePath   : codeDocument.path + '/../_images/'
+    
     property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
-    property string trainImage2 : imagePath + 'caltech_buildings_DSCN0246_small.JPG'
+    property string trainImage2 : imagePath + 'buildings_0246.jpg'
     property string queryImage  : imagePath + 'object_101_piano_query.jpg'
     
     Column{
         id: imageFeatureColumn
         
         property int maxWidth: 300
-    
+     
     Repeater{
         id : trainImages
 
@@ -86,7 +88,7 @@ Row{
     FastFeatureDetector{
         id : queryFeatureDetect
         input : queryImageLoader.output
-    }    
+    }
     
     BriefDescriptorExtractor{
         id : queryFeatureExtract
@@ -98,13 +100,24 @@ Row{
     BruteForceMatcher{
         id : descriptorMatcher
         queryDescriptors : queryFeatureExtract.descriptors
+        params : {
+            'normType' : BruteForceMatcher.NORM_HAMMING
+        }
+        knn : 2
+    }
+    
+    DescriptorMatchFilter{
+        id: descriptorMatchFilter
+        matches1to2: descriptorMatcher.matches
+        minDistanceCoeff: 3.5
+        nndrRatio: 0.8
     }
     
     DrawMatches{
         keypoints1 : queryFeatureDetect.keypoints
         keypoints2 : trainImages.selectedItem.trainKeypoints
-        matches1to2 : descriptorMatcher.matches
+        matches1to2 : descriptorMatchFilter.matches1to2Out
         matchIndex : trainImages.selectedIndex
     }
-    
+     
 }

@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2016 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "qkeypointhomography.h"
 #include "opencv2/calib3d/calib3d.hpp"
 
@@ -23,7 +39,6 @@ QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdateP
                 break;
 
             QKeyPointToSceneMap::ObjectKeypointToScene* os = m_keypointsToScene->mappingAt(i);
-            qDebug() << "SCENE" << i << "size" << os->scenePoints.size();
             if ( os->scenePoints.size() > 10 ){
                 cv::Mat H = cv::findHomography(os->objectPoints, os->scenePoints, CV_RANSAC);
 
@@ -39,15 +54,21 @@ QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdateP
                 perspectiveTransform(currentCorners, sceneCorners, H);
 
                 for ( size_t si = 0; si < sceneCorners.size() - 1; ++si ){
-                    cv::line(*surface, sceneCorners[si], sceneCorners[si + 1], cv::Scalar(40 + si * 40, 255, 0), 4);
+                    cv::line(*surface, sceneCorners[si], sceneCorners[si + 1], colorAt(i), 4);
                 }
                 if ( sceneCorners.size() > 1 )
-                    cv::line(*surface, sceneCorners[sceneCorners.size() - 1], sceneCorners[0], cv::Scalar(0, 255, 0), 4);
+                    cv::line(*surface, sceneCorners[sceneCorners.size() - 1], sceneCorners[0], colorAt(i), 4);
             }
         }
 
     }
 
     return QMatDisplay::updatePaintNode(node, nodeData);
+}
+
+cv::Scalar QKeypointHomography::colorAt(int i) const{
+    if ( m_cachedObjectColors.size() == 0 )
+        return cv::Scalar(0, 255, 0);
+    return m_cachedObjectColors[i % m_cachedObjectColors.size()];
 }
 

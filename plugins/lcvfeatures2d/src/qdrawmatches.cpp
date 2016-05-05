@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2016 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "qdrawmatches.h"
 #include "opencv2/features2d/features2d.hpp"
 
@@ -30,7 +46,7 @@ QSGNode *QDrawMatches::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeD
          m_matchIndex != -1 &&
          m_matches->matches().size() > 0
     ){
-        if ( m_matches->matches().size() == 1 ){
+        if ( m_matches->type() == QDMatchVector::BEST_MATCH ){
             drawExtractedMatches(m_matches->matches()[0]);
         } else {
             std::vector<cv::DMatch> selectedMatches;
@@ -45,7 +61,6 @@ QSGNode *QDrawMatches::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeD
 }
 
 void QDrawMatches::drawExtractedMatches(const std::vector<cv::DMatch> matches){
-
     m_mask.resize(matches.size());
     std::fill(m_mask.begin(), m_mask.end(), 0);
     for ( size_t i = 0; i < matches.size(); ++i ){

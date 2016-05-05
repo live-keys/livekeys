@@ -7,5 +7,6 @@ KeypointListView 1.0 KeypointListView.qml
 ConfigurationField 1.0 ConfigurationField.qml
 ConfigurationPanel 1.0 ConfigurationPanel.qml
 FeatureDetectorSelection 1.0 FeatureDetectorSelection.qml
+DescriptorExtractorSelection 1.0 DescriptorExtractorSelection.qml
 SelectionArea 1.0 SelectionArea.qml
 singleton LiveCVStyle 1.0 LiveCVStyle.qml

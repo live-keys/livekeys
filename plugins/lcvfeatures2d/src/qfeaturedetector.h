@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2016 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #ifndef QFEATUREDETECTOR_H
 #define QFEATUREDETECTOR_H
 
@@ -15,6 +31,7 @@ class Q_LCVFEATURES2D_EXPORT QFeatureDetector : public QQuickItem{
     Q_PROPERTY(QMat* input                READ inputMat  WRITE setInputMat  NOTIFY inputChanged)
     Q_PROPERTY(QMat* output               READ output    NOTIFY outputChanged)
     Q_PROPERTY(QMat* mask                 READ mask      WRITE setMask      NOTIFY maskChanged)
+    Q_PROPERTY(QVariantMap params         READ params    WRITE setParams    NOTIFY paramsChanged)
     Q_PROPERTY(QKeyPointVector* keypoints READ keypoints WRITE setKeypoints NOTIFY keypointsChanged)
 
 public:
@@ -34,20 +51,28 @@ public:
     QKeyPointVector* keypoints();
     void setKeypoints(QKeyPointVector* keypoints);
 
+    const QVariantMap &params() const;
+
 protected:
+    virtual void initialize(const QVariantMap& params);
+
     cv::FeatureDetector* detector();
     void initializeDetector(cv::FeatureDetector* detector);
     void detect();
+    virtual void componentComplete();
 
 public:
-    virtual void componentComplete();
     virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *);
+
+public slots:
+    void setParams(const QVariantMap& arg);
 
 signals:
     void inputChanged();
     void maskChanged();
     void keypointsChanged();
     void outputChanged();
+    void paramsChanged();
 
 private:
     void drawKeypoints();
@@ -58,6 +83,7 @@ private:
     QMat* m_in;
     QMat* m_output;
     QMat* m_mask;
+    QVariantMap m_params;
 
     bool  m_outputDirty;
 };
@@ -106,6 +132,23 @@ inline QKeyPointVector* QFeatureDetector::keypoints(){
 inline void QFeatureDetector::setKeypoints(QKeyPointVector* keypoints){
     m_keypoints = keypoints;
     emit keypointsChanged();
+}
+
+inline void QFeatureDetector::initialize(const QVariantMap &){}
+
+inline const QVariantMap& QFeatureDetector::params() const{
+    return m_params;
+}
+
+inline void QFeatureDetector::setParams(const QVariantMap &arg){
+    if (m_params == arg)
+        return;
+
+    m_params = arg;
+
+    initialize(arg);
+    emit paramsChanged();
+    detect();
 }
 
 #endif // QFEATUREDETECTOR_H
