@@ -52,6 +52,7 @@ Row{
         }
     
         KeypointListView{
+            width : 500
             keypointHighlighter: keypointHighlight
             detector : detectorSelector.selectedDetector
             extractor: extractorSelector.selectedExtractor

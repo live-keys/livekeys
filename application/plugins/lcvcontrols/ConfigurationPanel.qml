@@ -22,7 +22,8 @@ Rectangle{
     id : root
     width: 500
     height : 200
-
+    color : backgroundColor
+    
     property var configurationData : ({
         'sample1' : 10
     })
@@ -39,11 +40,11 @@ Rectangle{
         }
     ]
 
+    property color backgroundColor : "#081520"
 
     ScrollView{
         style : LiveCVScrollStyle{}
         anchors.fill: parent
-
 
         Column{
             width: parent.width
@@ -55,6 +56,7 @@ Rectangle{
                     Rectangle{
                         width: 300
                         height: 30
+                        color : root.backgroundColor
 
                         Loader{
                             id: fieldLoader

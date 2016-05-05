@@ -17,10 +17,14 @@
 import QtQuick 2.3
 
 Rectangle {
+    id : root
     width: 100
     height: 30
+    border.color : "#031728"
     border.width : 1
-    border.color : "#ff0000"
+    color : "#050e15"
+    
+    property color textColor : "#fff"
 
     anchors.fill: parent
 
@@ -30,10 +34,11 @@ Rectangle {
         id : textInput
         anchors.fill: parent
         anchors.margins : 6
-        font.family : "Courier New, Courier"
+        font.family : "Ubuntu Mono, Courier New, Courier"
         font.pixelSize: 14
         font.weight : Font.Normal
-        text: 'asda'
+        text: 'Input Box'
+        color : root.textColor
         selectByMouse: true
 
         MouseArea{

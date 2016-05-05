@@ -20,7 +20,11 @@ Rectangle {
     id: root
 
     width: 500
-    height: 30
+    height: 35
+
+    color : "#081520"
+    property color containerColor : "#050e15"
+    property color labelColor : "#fff"
 
     property string key : "key"
     property string label : "Label"
@@ -33,6 +37,7 @@ Rectangle {
         id: labelContainer
         width: 200
         height: parent.height
+        color : parent.color
 
         Text{
             id : label
@@ -41,9 +46,11 @@ Rectangle {
             anchors.rightMargin: 10
             anchors.verticalCenter : parent.verticalCenter
 
+            color : root.labelColor
+
             text: root.label
             font.pixelSize : 13
-            font.family : "Courier New, Courier"
+            font.family : "Ubunto Mono, Courier New, Courier"
             font.weight: Font.Normal
         }
     }
@@ -51,7 +58,7 @@ Rectangle {
 
     Rectangle{
         id: editorContainer
-        color: "#ff0000"
+        color : parent.containerColor
         height: parent.height
         width: parent.width - labelContainer.width
         anchors.right: parent.right

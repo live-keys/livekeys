@@ -26,20 +26,27 @@ Column{
 
     width: 400
     height: 600
+    
+    property color headerColor : "#061a29"
+    property color headerTextColor : "#fff"
+    
+    property color backgroundColor : "#081520"
+    property color itemBackgroundColor : "#081520"
+    property color selectedItemBackgroundColor : "#071825"
         
     Rectangle{
         width: container.width
-        height: 30
-        color: "#223344"
+        height: 35
+        color: container.headerColor
         Text{
             anchors.left: parent.left
             anchors.leftMargin: 20
             anchors.verticalCenter: parent.verticalCenter
             text: 'Total Keypoints: ' + keypointView.model.length
 
-            color: '#fff'
+            color: container.headerTextColor
             font.pixelSize: 14
-            font.family: 'Arial'
+            font.family: 'Ubuntu Mono, Courier New, Courier'
             font.bold: true
         }
     }
@@ -82,7 +89,9 @@ Column{
                 width: keypointView.width
                 height: ListView.isCurrentItem ? 60 + descriptorData.height : 40
                 
-                color: ListView.isCurrentItem  ? "#223333" : keypointMouse.containsMouse ? "#223328" : "#222228"
+                color: ListView.isCurrentItem  ? 
+                    container.selectedItemBackgroundColor : keypointMouse.containsMouse ? 
+                        container.selectedItemBackgroundColor : container.itemBackgroundColor
                 Text{
                     anchors.left: parent.left
                     anchors.leftMargin: 20
@@ -100,7 +109,7 @@ Column{
                     anchors.top: parent.top
                     anchors.topMargin: 26
                     font.pixelSize: 11
-                    font.family: 'Arial'
+                    font.family: 'Ubuntu Mono, Courier New, Courier'
                     color: '#fff'
                     text: 
                         'Size(' + parseFloat(modelData.size).toFixed(2) + '), ' + 
@@ -117,7 +126,7 @@ Column{
                     anchors.topMargin: 46
                     width : 310
                     font.pixelSize: 11
-                    font.family: 'Courier'
+                    font.family: 'Ubuntu Mono, Courier New, Courier'
                     color: '#ccc'
                     text: ''
                     wrapMode: TextEdit.WrapAnywhere
