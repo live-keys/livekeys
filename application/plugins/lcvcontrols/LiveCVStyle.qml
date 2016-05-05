@@ -26,12 +26,12 @@ QtObject{
     property string textFont : "Ubuntu Mono, Courier New, Courier"
 
     property color headerColor : "#061a29"
-    property color elementBackground : "#081520"
-    property color elementHighlightBackground : "#071825"
+    property color elementBackgroundColor : "#081520"
+    property color elementHighlightBackgroundColor : "#071825"
 
     property color buttonColor : "#061a29"
     property color buttonHighlightColor : "#082134"
-    property color darkElementBackroundColor : "#020d14"
+    property color darkElementBackgroundColor : "#020d14"
     property color darkElementBorderColor : "#031728"
 
     property color inputBoxColor : "#050e15"

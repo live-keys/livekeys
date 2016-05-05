@@ -20,9 +20,9 @@ Row{
         }
         
         Rectangle{
-            width : parent.width
+            width : parent.width 
             height : 200
-            color : "#222333"
+            color : LiveCVStyle.darkElementBackgroundColor
             
             DrawHistogram{
                 id : descriptorHistogram
@@ -32,11 +32,6 @@ Row{
                 colors : ["#aa007700", "#66000077"]
                 render : DrawHistogram.BinaryConverted
             }
-        }
-        ConfigurationPanel{
-            id : featureConfigPanel2
-            visible : false
-            configurationFields : detectorSelector2.selectedPanelModel
         }
 
         ImRead{
@@ -53,18 +48,18 @@ Row{
     
     Column{
         spacing : 1
+        
         FeatureDetectorSelection{
             id: detectorSelector
             detectorInput : iminput.output
-            Rectangle{
+            TextButton{
                 anchors.right : parent.right
                 anchors.verticalCenter : parent.verticalCenter
                 width : 20
                 height : 20
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked : featureConfigPanel.visible = !featureConfigPanel.visible
-                }
+                fontPixelSize : 20
+                onClicked : featureConfigPanel.visible = !featureConfigPanel.visible
+                text : featureConfigPanel.visible ? "-" : "+"
             }
         }
         ConfigurationPanel{
@@ -72,18 +67,18 @@ Row{
             visible : false
             configurationFields : detectorSelector.selectedPanelModel
         }
+        
         DescriptorExtractorSelection{
             id : extractorSelector
             detector : detectorSelector.selectedDetector
-            Rectangle{
+            TextButton{
                 anchors.right : parent.right
                 anchors.verticalCenter : parent.verticalCenter
                 width : 20
                 height : 20
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked : descriptorConfigPanel.visible = !descriptorConfigPanel.visible
-                }
+                fontPixelSize : 20
+                onClicked : descriptorConfigPanel.visible = !descriptorConfigPanel.visible
+                text : descriptorConfigPanel.visible ? "-" : "+"
             }
         }
         
@@ -95,6 +90,7 @@ Row{
     
         KeypointListView{
             height : 400
+            width : 500
             keypointHighlighter: keypointHighlight
             detector : detectorSelector.selectedDetector
             extractor: extractorSelector.selectedExtractor
@@ -104,29 +100,34 @@ Row{
         FeatureDetectorSelection{
             id: detectorSelector2
             detectorInput : iminput2.output
-            Rectangle{
+            TextButton{
                 anchors.right : parent.right
                 anchors.verticalCenter : parent.verticalCenter
                 width : 20
                 height : 20
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked : featureConfigPanel2.visible = !featureConfigPanel2.visible
-                }
+                fontPixelSize : 20
+                onClicked : featureConfigPanel2.visible = !featureConfigPanel2.visible
+                text : featureConfigPanel2.visible ? "-" : "+"
             }
         }
+        
+        ConfigurationPanel{
+            id : featureConfigPanel2
+            visible : false
+            configurationFields : detectorSelector2.selectedPanelModel
+        }
+        
         DescriptorExtractorSelection{
             id : extractorSelector2
             detector : detectorSelector2.selectedDetector
-            Rectangle{
+            TextButton{
                 anchors.right : parent.right
                 anchors.verticalCenter : parent.verticalCenter
                 width : 20
                 height : 20
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked : descriptorConfigPanel2.visible = !descriptorConfigPanel2.visible
-                }
+                fontPixelSize : 20
+                onClicked : descriptorConfigPanel2.visible = !descriptorConfigPanel2.visible
+                text : descriptorConfigPanel2.visible ? "-" : "+"
             }
         }
         
@@ -137,6 +138,7 @@ Row{
         }
     
         KeypointListView{
+            width : 500
             height : 400
             keypointHighlighter: keypointHighlight2
             detector : detectorSelector2.selectedDetector

@@ -21,8 +21,10 @@ import QtQuick.Controls.Styles 1.2
 Rectangle{
     id : root
     width: 500
-    height : 200
+    height : contentHeight + 5 > 200 ? 200 : contentHeight + 5
     color : backgroundColor
+    
+    property int contentHeight : rootScroll.flickableItem.contentHeight
     
     property var configurationData : ({
         'sample1' : 10
@@ -43,6 +45,8 @@ Rectangle{
     property color backgroundColor : "#081520"
 
     ScrollView{
+        id : rootScroll
+        
         style : LiveCVScrollStyle{}
         anchors.fill: parent
 

@@ -1,5 +1,6 @@
 module lcvcontrols
 InputBox 1.0 InputBox.qml
+singleton LiveCVStyle 1.0 LiveCVStyle.qml
 LiveCVScrollStyle 1.0 LiveCVScrollStyle.qml
 RegionSelection 1.0 RegionSelection.qml
 VideoControls 1.0 VideoControls.qml
@@ -9,4 +10,6 @@ ConfigurationPanel 1.0 ConfigurationPanel.qml
 FeatureDetectorSelection 1.0 FeatureDetectorSelection.qml
 DescriptorExtractorSelection 1.0 DescriptorExtractorSelection.qml
 SelectionArea 1.0 SelectionArea.qml
-singleton LiveCVStyle 1.0 LiveCVStyle.qml
+TextButton 1.0 TextButton.qml
+FeatureObjectList 1.0 FeatureObjectList.qml
+FeatureObjectMatch 1.0 FeatureObjectMatch.qml

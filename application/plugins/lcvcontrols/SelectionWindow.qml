@@ -55,23 +55,20 @@ Window{
         regionHeight : selectionArea.height
     }
     
-    Rectangle{
+    TextButton{
         width : 100
         height : 30
-        color : "#ff0000"
+        text : "Done"
         anchors.bottom: parent.bottom
-        MouseArea{
-            anchors.fill : parent
-            onClicked : {
-                selectionWindow.regionSelected(
-                    selectedRegion.output.createOwnedObject(),
-                    selectedRegion.regionX,
-                    selectedRegion.regionY,
-                    selectedRegion.regionWidth,
-                    selectedRegion.regionHeight
-                )
-                selectionWindow.close()
-            }
+        onClicked : {
+            selectionWindow.regionSelected(
+                selectedRegion.output.createOwnedObject(),
+                selectedRegion.regionX,
+                selectedRegion.regionY,
+                selectedRegion.regionWidth,
+                selectedRegion.regionHeight
+            )
+            selectionWindow.close()
         }
     }
 }

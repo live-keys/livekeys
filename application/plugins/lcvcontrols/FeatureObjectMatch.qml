@@ -37,13 +37,13 @@ Column{
         queryDescriptorExtractor.keypoints = queryFeatureDetector.keypoints
     }
      
-    property var imageSource : null
+    property var imageSource : ImRead{
+        file : ""
+    }
     
     FeatureObjectList{
         id : featureObjectList
-        imageSource : ImRead{
-            file : "/home/dinu/Work/livecv/samples/_images/object_101_piano_train1.jpg"
-        }
+        imageSource : root.imageSource
         featureDetector : root.trainFeatureDetector
         descriptorExtractor : root.trainDescriptorExtractor
         onObjectAdded : {
@@ -67,11 +67,11 @@ Column{
         }
     }
     
-    property Mat qi : queryImage.output
+    property Mat qi : null
      
     ImRead{
         id : queryImage
-        file : "/home/dinu/Work/livecv/samples/_images/object_101_piano_train1.jpg"
+        file : ""
         visible : false
     }
     

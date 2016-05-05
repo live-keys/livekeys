@@ -60,30 +60,29 @@ Rectangle{
         anchors.leftMargin : 50
         style : LiveCVScrollStyle{}
         
-    Row{
-    
-    height: root.height
-    
-    Repeater{
-        id : trainImages
-        property int selectedIndex : 0
-        height : root.height
+        Row{
+            height: root.height
 
-        delegate : MatView{
-            id : matView
-            height : parent.height
-            width : (parent.height / mat.dataSize().height) * mat.dataSize().width
-            mat : modelData
-            Rectangle{
-                color : objectListComponent.item.colors[index].toString()
-                width : matView.width
-                height : 3
+            Repeater{
+                id : trainImages
+                property int selectedIndex : 0
+                height : root.height
+
+                delegate : MatView{
+                    id : matView
+                    height : parent.height
+                    width : (parent.height / mat.dataSize().height) * mat.dataSize().width
+                    mat : modelData
+                    Rectangle{
+                        color : objectListComponent.item.colors[index].toString()
+                        width : matView.width
+                        height : 3
+                    }
+                }
             }
         }
+
     }
-    
-    }
-}
     
     SelectionWindow{
         id : selectionWindow
@@ -111,17 +110,16 @@ Rectangle{
     }
 
 
-    Rectangle{
+    TextButton{
         anchors.left: parent.left
         width : 50
         height : parent.height
-        MouseArea{
-            anchors.fill : parent
-            onClicked : {
-                if ( root.imageSource !== null )
-                    selectionWindow.mat = root.imageSource.output
-                selectionWindow.show()
-            }
+        text : "+"
+        fontPixelSize : 30
+        onClicked : {
+            if ( root.imageSource !== null )
+                selectionWindow.mat = root.imageSource.output
+            selectionWindow.show()
         }
     }
     

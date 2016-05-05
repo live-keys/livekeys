@@ -65,5 +65,6 @@ DISTFILES += \
     plugins/lcvcontrols/LiveCVStyle.qml \
     plugins/lcvcontrols/FeatureObjectList.qml \
     plugins/lcvcontrols/FeatureObjectMatch.qml \
-    plugins/lcvcontrols/DescriptorExtractorSelection.qml
+    plugins/lcvcontrols/DescriptorExtractorSelection.qml \
+    plugins/lcvcontrols/TextButton.qml
 
