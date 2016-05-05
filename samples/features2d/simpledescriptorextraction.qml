@@ -26,11 +26,9 @@ Column {
         FastFeatureDetector{
             id : featureDetector
             input : inputImage.output
-            Component.onCompleted : {
-                initialize({
-                    threshold: 20,
-                    nonmaxSuppression: true
-                })
+            params : {
+               'threshold': 20,
+               'nonmaxSuppression': true
             }
         }
 

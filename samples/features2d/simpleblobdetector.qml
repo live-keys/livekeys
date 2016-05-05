@@ -20,12 +20,10 @@ Row{
     SimpleBlobDetector{
         id : fastFeatureDetector
         input : inputImage.output
-        Component.onCompleted : {
-            initialize({
-                'minDistanceBetweenBlobs': 50.0,
-                'minArea' : 20.0,
-                'maxArea': 500.0
-            });
+        params : {
+            'minDistanceBetweenBlobs': 50.0,
+            'minArea' : 20.0,
+            'maxArea': 500.0
         }
     }
     
