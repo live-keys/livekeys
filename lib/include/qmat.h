@@ -53,6 +53,7 @@ public slots:
     QMatAccess* data();
     QSize       dataSize() const;
     QMat*       createOwnedObject();
+    QMat*       cloneMat();
 
 private:
     cv::Mat* m_cvmat;

@@ -118,7 +118,7 @@ Rectangle{
         fontPixelSize : 30
         onClicked : {
             if ( root.imageSource !== null )
-                selectionWindow.mat = root.imageSource.output
+                selectionWindow.mat = root.imageSource.output.cloneMat()
             selectionWindow.show()
         }
     }

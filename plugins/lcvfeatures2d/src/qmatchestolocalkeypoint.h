@@ -81,21 +81,24 @@ inline QKeyPointToSceneMap *QMatchesToLocalKeypoint::output(){
 }
 
 inline void QMatchesToLocalKeypoint::setMatches1to2(QDMatchVector *arg){
+    qDebug() << "Setting matches";
     m_matches1to2 = arg;
     emit matches1to2Changed();
     mapValues();
 }
 
 inline void QMatchesToLocalKeypoint::setTrainKeypointVectors(QList<QObject*> arg){
+    qDebug() << "Setting train keypoint vectors.";
     m_trainKeypointVectors = arg;
     emit trainKeypointVectorsChanged();
     mapValues();
 }
 
 inline void QMatchesToLocalKeypoint::setQueryKeypointVector(QKeyPointVector *arg){
+    qDebug() << "Setting query keypoint vectors.";
     m_queryKeypointVector = arg;
     emit queryKeypointVectorChanged();
-    mapValues();
+//    mapValues(); //HERE, MATCH HOMOGRAPHY CRASH
 }
 
 #endif // QMATCHESTOLOCALKEYPOINT_H

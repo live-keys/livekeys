@@ -101,7 +101,7 @@ QSGNode* QFeatureDetector::updatePaintNode(QSGNode* node, QQuickItem::UpdatePain
 }
 
 void QFeatureDetector::drawKeypoints(){
-    if ( m_keypoints->keypoints().size() > 0 && !inputMat()->cvMat()->empty() ){
+    if ( !inputMat()->cvMat()->empty() ){
         cv::drawKeypoints(
             *m_in->cvMat(),
              m_keypoints->keypoints(),

@@ -47,6 +47,8 @@ public:
     const QVariantMap& params() const;
     bool isBinary() const;
 
+    virtual int descriptorCols() const;
+
 protected:
     virtual void initialize(const QVariantMap& params);
 
@@ -91,6 +93,10 @@ inline const QVariantMap &QDescriptorExtractor::params() const{
 
 inline bool QDescriptorExtractor::isBinary() const{
     return m_isBinary;
+}
+
+inline int QDescriptorExtractor::descriptorCols() const{
+    return 32;
 }
 
 inline void QDescriptorExtractor::setParams(const QVariantMap &arg){

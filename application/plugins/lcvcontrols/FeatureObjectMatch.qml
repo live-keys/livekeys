@@ -25,21 +25,23 @@ Column{
     anchors.right : parent.right
         
     property FeatureDetector trainFeatureDetector : FastFeatureDetector{}
-    property DescriptorExtractor trainDescriptorExtractor : BriefDescriptorExtractor{}
+    property DescriptorExtractor trainDescriptorExtractor : OrbDescriptorExtractor{}
     
-    property FeatureDetector queryFeatureDetector : FastFeatureDetector{ input : qi }
+    property FeatureDetector queryFeatureDetector : FastFeatureDetector{ input : querySource.output }
     onQueryFeatureDetectorChanged : { 
-        queryFeatureDetector.input = qi
+        queryFeatureDetector.input = querySource.output
         queryDescriptorExtractor.keypoints = queryFeatureDetector.keypoints
     }
-    property DescriptorExtractor queryDescriptorExtractor : BriefDescriptorExtractor{ keypoints : queryFeatureDetector.keypoints }
+    property DescriptorExtractor queryDescriptorExtractor : OrbDescriptorExtractor{ keypoints : queryFeatureDetector.keypoints }
     onQueryDescriptorExtractorChanged : {
         queryDescriptorExtractor.keypoints = queryFeatureDetector.keypoints
     }
      
-    property var imageSource : ImRead{
-        file : ""
-    }
+    property var imageSource : ImRead{}
+    property var querySource : ImRead{}
+
+    property double minMatchDistanceCoeff : 2.5
+    property double matchNndrRatio : 0.8
     
     FeatureObjectList{
         id : featureObjectList
@@ -56,7 +58,10 @@ Column{
             keypointHomography.objectColors = ocolors
             
             drawMatches.keypoints2 = featureObjectList.objectList.keypoints[featureObjectList.objectList.keypoints.length - 1]
+            drawMatches.matchIndex = featureObjectList.objectList.keypoints.length - 1
             matchesToLocalKeypoint.trainKeypointVectors = featureObjectList.objectList.keypoints
+
+            console.log('Descriptors: ' + descriptors.dataSize())
             descriptorMatcherComponent.item.add(descriptors)
             descriptorMatcherComponent.item.train()
         }
@@ -64,15 +69,13 @@ Column{
             matchesToLocalKeypoint.trainKeypointVectors = featureObjectList.objectList.keypoints
             keypointHomography.objectCorners = corners
             keypointHomography.objectColors  = colors
+            console.log(corners)
+
+            if ( featureObjectList.objectList.keypoints.length > 0 ){
+                drawMatches.keypoints2 = featureObjectList.objectList.keypoints[featureObjectList.objectList.keypoints.length - 1]
+                drawMatches.matchIndex = featureObjectList.objectList.keypoints.length - 1
+            }
         }
-    }
-    
-    property Mat qi : null
-     
-    ImRead{
-        id : queryImage
-        file : ""
-        visible : false
     }
     
     GlobalItem{
@@ -102,8 +105,8 @@ Column{
     DescriptorMatchFilter{
         id : descriptorMatchFilter
         matches1to2 : descriptorMatcherComponent.item.matches
-        minDistanceCoeff : 2.5
-        nndrRatio : 0.8
+        minDistanceCoeff : root.minMatchDistanceCoeff
+        nndrRatio : root.matchNndrRatio
     }
     
     MatchesToLocalKeypoint{
@@ -111,11 +114,16 @@ Column{
         matches1to2 : descriptorMatchFilter.matches1to2Out
         trainKeypointVectors : featureObjectList.objectList.keypoints
         queryKeypointVector : root.queryFeatureDetector.keypoints
+        onQueryKeypointVectorChanged : {
+            trainKeypointVectors = featureObjectList.objectList.keypoints
+            descriptorMatchFilter.matches1to2 = descriptorMatcherComponent.item.matches
+            matches1to2 = descriptorMatchFilter.matches1to2Out
+        }
     }
     
     KeypointHomography{  
         id : keypointHomography       
-        queryImage : queryImage.output
+        queryImage : querySource.output
         keypointsToScene : matchesToLocalKeypoint.output
         objectCorners : []
         objectColors : []

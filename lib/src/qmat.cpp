@@ -119,6 +119,14 @@ QMat* QMat::createOwnedObject(){
     return ownedObject;
 }
 
+QMat* QMat::cloneMat(){
+    cv::Mat* clonedMat = new cv::Mat;
+    m_cvmat->copyTo(*clonedMat);
+    QMat* clonedObject = new QMat(clonedMat);
+    QQmlEngine::setObjectOwnership(clonedObject, QQmlEngine::JavaScriptOwnership);
+    return clonedObject;
+}
+
 /*!
   \brief QMat::~QMat
  */
