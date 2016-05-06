@@ -211,7 +211,8 @@ ApplicationWindow {
                                     tester,
                                     codeDocument.file.toString() !== '' ? codeDocument.file : 'untitled.qml');
                             } catch (err) {
-                                error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;
+                                error.errorLine = err.qmlErrors[0].lineNumber
+                                error.errorText = err.qmlErrors[0].message
                             }
                             if ( tester.program === "Rectangle{\n}" || tester.program === "" )
                                 editor.isDirty = false
@@ -230,7 +231,7 @@ ApplicationWindow {
                 Rectangle{
                     id : errorWrap
                     anchors.bottom: parent.bottom
-                    height : error.text !== '' ? 30 : 0
+                    height : error.text !== '' ? error.height + 20 : 0
                     width : parent.width
                     color : "#141a1a"
                     Behavior on height {
@@ -248,9 +249,15 @@ ApplicationWindow {
                         anchors.left : parent.left
                         anchors.leftMargin: 25
                         anchors.verticalCenter: parent.verticalCenter
+
+                        property int    errorLine : 0
+                        property string errorText : ''
+
                         width: parent.width
+                        wrapMode: Text.Wrap
+                        font.family: "Ubuntu Mono, Courier New, Courier"
                         font.pointSize: editor.font.pointSize
-                        text: ""
+                        text: errorText !== '' ? "Line " + errorLine + ": " + errorText : ''
                         onTextChanged : console.log(text)
                         color: "#c5d0d7"
                     }
