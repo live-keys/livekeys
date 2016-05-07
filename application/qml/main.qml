@@ -211,12 +211,21 @@ ApplicationWindow {
                                     tester,
                                     codeDocument.file.toString() !== '' ? codeDocument.file : 'untitled.qml');
                             } catch (err) {
-                                error.text = "Line " + err.qmlErrors[0].lineNumber + ": " + err.qmlErrors[0].message;
+                                var message = err.qmlErrors[0].message
+                                if ( message.indexOf('\"lcvcore\"') === 0 || message.indexOf('\"lcvimgproc\"') === 0 ||
+                                     message.indexOf('\"lcvvideo\"') === 0 || message.indexOf('\"lcvcontrols\"') === 0 )
+                                {
+                                    message += ". Live CV modules are imported without quotes (Eg. import lcvcore 1.0)."
+                                }
+
+                                error.errorLine = err.qmlErrors[0].lineNumber
+                                error.errorText = message
                             }
                             if ( tester.program === "Rectangle{\n}" || tester.program === "" )
                                 editor.isDirty = false
                             if (newItem){
-                                error.text = "";
+                                error.errorLine = 0
+                                error.errorText = ''
                                 if (tester.item) {
                                     tester.item.destroy();
                                 }
@@ -230,7 +239,7 @@ ApplicationWindow {
                 Rectangle{
                     id : errorWrap
                     anchors.bottom: parent.bottom
-                    height : error.text !== '' ? 30 : 0
+                    height : error.errorText !== '' ? error.height + 20 : 0
                     width : parent.width
                     color : "#141a1a"
                     Behavior on height {
@@ -241,18 +250,25 @@ ApplicationWindow {
                         width : 14
                         height : parent.height
                         color : "#601818"
-                        visible: error.text === "" ? false : true
+                        visible: error.visible
                     }
                     Text {
                         id: error
                         anchors.left : parent.left
                         anchors.leftMargin: 25
                         anchors.verticalCenter: parent.verticalCenter
+
+                        property int    errorLine : 0
+                        property string errorText : ''
+
                         width: parent.width
+                        wrapMode: Text.Wrap
+                        font.family: "Ubuntu Mono, Courier New, Courier"
                         font.pointSize: editor.font.pointSize
-                        text: ""
-                        onTextChanged : console.log(text)
+                        text: "Line " + error.errorLine + ": " + error.errorText
+                        onTextChanged : if ( errorText !== '' ) console.log(text)
                         color: "#c5d0d7"
+                        visible : errorText === "" ? false : true
                     }
                 }
 
