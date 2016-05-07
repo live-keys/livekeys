@@ -61,7 +61,6 @@ Column{
             drawMatches.matchIndex = featureObjectList.objectList.keypoints.length - 1
             matchesToLocalKeypoint.trainKeypointVectors = featureObjectList.objectList.keypoints
 
-            console.log('Descriptors: ' + descriptors.dataSize())
             descriptorMatcherComponent.item.add(descriptors)
             descriptorMatcherComponent.item.train()
         }
@@ -69,11 +68,16 @@ Column{
             matchesToLocalKeypoint.trainKeypointVectors = featureObjectList.objectList.keypoints
             keypointHomography.objectCorners = corners
             keypointHomography.objectColors  = colors
-            console.log(corners)
 
             if ( featureObjectList.objectList.keypoints.length > 0 ){
-                drawMatches.keypoints2 = featureObjectList.objectList.keypoints[featureObjectList.objectList.keypoints.length - 1]
-                drawMatches.matchIndex = featureObjectList.objectList.keypoints.length - 1
+                drawMatches.keypoints2 = featureObjectList.objectList.keypoints[featureObjectList.selectedIndex]
+                drawMatches.matchIndex = featureObjectList.selectedIndex
+            }
+        }
+        onSelectedIndexChanged: {
+            if ( featureObjectList.objectList.keypoints.length > 0 ){
+                drawMatches.keypoints2 = featureObjectList.objectList.keypoints[featureObjectList.selectedIndex]
+                drawMatches.matchIndex = featureObjectList.selectedIndex
             }
         }
     }
@@ -84,7 +88,6 @@ Column{
 
         source : BruteForceMatcher{
             id : descriptorMatcher
-            //queryDescriptors : root.queryDescriptorExtractor.descriptors 
             knn : 2
             params : {
                 'normType' : BruteForceMatcher.NORM_HAMMING
@@ -93,8 +96,18 @@ Column{
         Component.onCompleted: {
             item.queryDescriptors = root.queryDescriptorExtractor.descriptors
             descriptorMatchFilter.matches1to2 = item.matches
+            matchesConnection.target = descriptorMatcherComponent.item
         }
+        Connections{
+            target : root.queryDescriptorExtractor
+            onDescriptorsChanged : {
+                if ( descriptorMatcherComponent.item )
+                    descriptorMatcherComponent.item.queryDescriptors = root.queryDescriptorExtractor.descriptors
+            }
+        }
+
         Connections {
+            id : matchesConnection
             target : descriptorMatcherComponent.item
             onMatchesChanged : {
                 descriptorMatchFilter.matches1to2 = descriptorMatcherComponent.item.matches
@@ -114,11 +127,11 @@ Column{
         matches1to2 : descriptorMatchFilter.matches1to2Out
         trainKeypointVectors : featureObjectList.objectList.keypoints
         queryKeypointVector : root.queryFeatureDetector.keypoints
-        onQueryKeypointVectorChanged : {
-            trainKeypointVectors = featureObjectList.objectList.keypoints
-            descriptorMatchFilter.matches1to2 = descriptorMatcherComponent.item.matches
-            matches1to2 = descriptorMatchFilter.matches1to2Out
-        }
+//        onQueryKeypointVectorChanged : {
+//            trainKeypointVectors = featureObjectList.objectList.keypoints
+//            descriptorMatchFilter.matches1to2 = descriptorMatcherComponent.item.matches
+//            matches1to2 = descriptorMatchFilter.matches1to2Out
+//        }
     }
     
     KeypointHomography{  

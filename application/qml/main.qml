@@ -23,8 +23,10 @@ ApplicationWindow {
     id : root
 
     visible: true
-    width: 1240
-    height: 700
+//    width: 1240
+//    height: 700
+    width : 1800
+    height : 900
     color : "#293039"
 
     title: qsTr("Live CV")

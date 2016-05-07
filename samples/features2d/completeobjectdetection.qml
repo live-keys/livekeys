@@ -16,22 +16,26 @@ Rectangle{
         visible : false
     }    
     
-    Component.onCompleted : {console.log('completed');}
-    
+    Component.onCompleted : {
+        console.log('Compilation completed\n________________________________________________________________________________________');
+    }  
+     
     
     Timer {
         interval: 1000; running: true; //repeat: true
         onTriggered: {
+            console.log('Time Triggered\n_____________________________________________________________________________________________');
             query.file = query.file === imagePath ? imagePath2 : imagePath
         } 
-    }  
+    } 
     
-    ImRead{
+    /*ImRead{
         id : query
         file : "/home/dinu/Work/livecv/samples/_images/object_101_piano_train1.jpg"
         visible : false 
-    }
-    /*CamCapture{
+    }*/
+    
+    CamCapture{
         device : '0'
         id : query
         visible : false
@@ -41,12 +45,12 @@ Rectangle{
         input : query.output
         id : queryResized
         matSize : Qt.size(query.width/2, query.height/2)
-    }*/
+    }
      
     FeatureObjectMatch{
         id : fom
-        imageSource : imageSource
-        querySource : query
+        imageSource : queryResized
+        querySource : queryResized
         
         minMatchDistanceCoeff : 2.5
         matchNndrRatio : 0.8

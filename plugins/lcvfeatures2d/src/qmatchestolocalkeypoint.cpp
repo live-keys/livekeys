@@ -61,6 +61,9 @@ void QMatchesToLocalKeypoint::mapValues(){
 
     int j = 0;
 
+    QString p1line;
+    QString p2line;
+
     // EDIT END
 
     for ( std::vector<cv::DMatch>::iterator it = matches.begin(); it != matches.end(); ++it ){
@@ -74,11 +77,13 @@ void QMatchesToLocalKeypoint::mapValues(){
         }
 
         // EDIT
+
         if ( j++ < 10 ){
             QString pt1 = "(" + QString::number(trainVector->keypoints().at(match.trainIdx).pt.x) + "," + QString::number(trainVector->keypoints().at(match.trainIdx).pt.y) + ")";
             QString pt2 = "(" + QString::number(m_queryKeypointVector->keypoints().at(match.queryIdx).pt.x) + "," + QString::number(m_queryKeypointVector->keypoints().at(match.queryIdx).pt.y) + ")";
-            qDebug() << pt1 << pt2;
 //            qDebug() << trainVector->keypoints().at(match.trainIdx).pt << m_queryKeypointVector->keypoints().at(match.queryIdx).pt;
+            p1line += pt1;
+            p2line += pt2;
         }
 
         m_output->mappingAt(match.imgIdx)->objectPoints.push_back(
@@ -89,6 +94,9 @@ void QMatchesToLocalKeypoint::mapValues(){
         );
 
     }
+
+    qDebug() << "-------Train Points" << p1line;
+    qDebug() << "-------Query Points" << p2line;
 
     emit outputChanged();
 }

@@ -37,6 +37,7 @@ Rectangle{
     signal objectListLoaded(MatList list, var keypoints, var corners, var colors)
     
     property alias objectList : objectListComponent.item
+    property alias selectedIndex : trainImages.selectedIndex
 
     GlobalItem{
         id : objectListComponent
@@ -76,7 +77,11 @@ Rectangle{
                     Rectangle{
                         color : objectListComponent.item.colors[index].toString()
                         width : matView.width
-                        height : 3
+                        height : trainImages.selectedIndex === index ? 10 : 5
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: trainImages.selectedIndex = index
                     }
                 }
             }

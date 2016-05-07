@@ -73,6 +73,7 @@ void QDescriptorMatcher::train(){
 void QDescriptorMatcher::callMatch(){
     if ( m_matcher && isComponentComplete() ){
         match(m_queryDescriptors, m_matches);
+        qDebug() << "%%%%%%%%%%%%%%%%%%%%%%%% Matches changed";
         emit matchesChanged();
     }
 }

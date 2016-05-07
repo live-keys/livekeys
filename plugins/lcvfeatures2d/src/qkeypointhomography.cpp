@@ -30,11 +30,10 @@ QKeypointHomography::~QKeypointHomography(){
 
 QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
     if ( m_keypointsToScene && m_queryImage ){
+        qDebug() << "Update triggered";
 
         cv::Mat* surface = output()->cvMat();
         m_queryImage->cvMat()->copyTo(*surface);
-
-        qDebug() << "Keypoints to Scene: " << m_keypointsToScene->size();
 
         for ( int i = 0; i < m_keypointsToScene->size(); ++i ){
             if ( i >= m_objectCorners.size() )
@@ -42,15 +41,15 @@ QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdateP
 
             QKeyPointToSceneMap::ObjectKeypointToScene* os = m_keypointsToScene->mappingAt(i);
 
-            qDebug() << "Scene points:" << os->scenePoints.size() << os->objectPoints.size();
-            QString scenePData;
-            QString objectPData;
+//            qDebug() << "Scene points:" << os->scenePoints.size() << os->objectPoints.size();
+//            QString scenePData;
+//            QString objectPData;
 //            for ( int i = 0; i < 10; ++i ){
 //                scenePData  += "(" + QString::number(os->scenePoints[i].x) + "," + QString::number(os->scenePoints[i].y) + ")";
 //                objectPData += "(" + QString::number(os->objectPoints[i].x) + "," + QString::number(os->objectPoints[i].y) + ")";
 //            }
-            qDebug() << "Scene point data:" <<  scenePData;
-            qDebug() << "Object point data:" << objectPData;
+//            qDebug() << "Scene point data:" <<  scenePData;
+//            qDebug() << "Object point data:" << objectPData;
 
             if ( os->scenePoints.size() > 10 ){
                 cv::Mat H = cv::findHomography(os->objectPoints, os->scenePoints, CV_RANSAC);
