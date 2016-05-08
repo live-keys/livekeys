@@ -426,63 +426,67 @@ Rectangle{
         source : Item{
             id : globalConfigItem
 
-            property var configuration : ({
-                "FastFeatureDetector" : {
-                    'threshold' : 10,
-                    'nonmaxSuppresion': true
-                },
-                "BriskFeatureDetector" : {
-                    'thresh' : 30,
-                    'octaves' : 3,
-                    'patternScale' : 1.0
-                },
-                "StarFeatureDetector" : {
-                    'maxSize' : 16,
-                    'responseThreshold' : 30,
-                    'lineThresholdProjected' : 10,
-                    'lineThresholdBinarized' : 8,
-                    'suppressNonmaxSize' : 5
-                },
-                "OrbFeatureDetector" : {
-                    'nfeatures' : 500,
-                    'scaleFactor' : 1.2,
-                    'nlevels' : 8,
-                    'edgeThreshold' : 31,
-                    'firstLevel' : 0,
-                    'WTA_K' : 2,
-                    'scoreType' : 0
-                },
-                "MSerFeatureDetector" : {
-                    'delta' : 5,
-                    'minArea' : 60,
-                    'maxArea' : 14400,
-                    'maxVariation' : 0.25,
-                    'minDiversity' : 0.2,
-                    'maxEvolution' : 200,
-                    'areaThreshold' : 1.01,
-                    'minMargin' : 0.003,
-                    'edgeBlurSize' : 5
-                },
-                "DenseFeatureDetector" : {
-                  'initFeatureScale' : 1.0,
-                  'featureScaleLevels' : 1,
-                  'featureScaleMul' : 0.1,
-                  'initXyStep' : 6,
-                  'initImgBound' : 0,
-                  'varyXyStepWithScale' : true,
-                  'varyImgBoundWithScale' : false
-                },
-                "GoodFeaturesToTrackFeatureDetector" : {
-                    'maxCorners' : 1000,
-                    'qualityLevel' : 0.01,
-                    'minDistance' : 1,
-                    'blockSize' : 3,
-                    'useHarrisDetector' : false,
-                    'k' : 0.04
-                }
-            })
-
             property int selectedIndex : 0
+            property alias configuration : configuration.value
+
+            GlobalItemProperty{
+                id : configuration
+                value : ({
+                    "FastFeatureDetector" : {
+                           'threshold' : 10,
+                           'nonmaxSuppresion': true
+                       },
+                       "BriskFeatureDetector" : {
+                           'thresh' : 30,
+                           'octaves' : 3,
+                           'patternScale' : 1.0
+                       },
+                       "StarFeatureDetector" : {
+                           'maxSize' : 16,
+                           'responseThreshold' : 30,
+                           'lineThresholdProjected' : 10,
+                           'lineThresholdBinarized' : 8,
+                           'suppressNonmaxSize' : 5
+                       },
+                       "OrbFeatureDetector" : {
+                           'nfeatures' : 500,
+                           'scaleFactor' : 1.2,
+                           'nlevels' : 8,
+                           'edgeThreshold' : 31,
+                           'firstLevel' : 0,
+                           'WTA_K' : 2,
+                           'scoreType' : 0
+                       },
+                       "MSerFeatureDetector" : {
+                           'delta' : 5,
+                           'minArea' : 60,
+                           'maxArea' : 14400,
+                           'maxVariation' : 0.25,
+                           'minDiversity' : 0.2,
+                           'maxEvolution' : 200,
+                           'areaThreshold' : 1.01,
+                           'minMargin' : 0.003,
+                           'edgeBlurSize' : 5
+                       },
+                       "DenseFeatureDetector" : {
+                         'initFeatureScale' : 1.0,
+                         'featureScaleLevels' : 1,
+                         'featureScaleMul' : 0.1,
+                         'initXyStep' : 6,
+                         'initImgBound' : 0,
+                         'varyXyStepWithScale' : true,
+                         'varyImgBoundWithScale' : false
+                       },
+                       "GoodFeaturesToTrackFeatureDetector" : {
+                           'maxCorners' : 1000,
+                           'qualityLevel' : 0.01,
+                           'minDistance' : 1,
+                           'blockSize' : 3,
+                           'useHarrisDetector' : false,
+                           'k' : 0.04
+                       }
+                   })
+            }
 
         }
         Component.onCompleted: {
@@ -536,6 +540,7 @@ Rectangle{
 
         property FeatureDetector detector: null
         onDetectorChanged: {
+            console.log(detector)
             detector.params = globalConfig.item.configuration[selectedName]
             detector.input  = detectorInput
         }

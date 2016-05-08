@@ -22,6 +22,9 @@ class QGlobalItemState{
 public:
     QGlobalItemState() : item(0){}
     QQuickItem* item;
+
+    ~QGlobalItemState(){
+    }
 };
 
 QGlobalItem::QGlobalItem(QQuickItem* parent)
@@ -35,6 +38,8 @@ QGlobalItem::QGlobalItem(QQuickItem* parent)
 QGlobalItem::~QGlobalItem(){
     if ( m_stateId == "" )
         delete m_state;
+    else if ( m_state->item )
+        m_state->item->setParentItem(0);
 }
 
 void QGlobalItem::setStateId(const QString& arg){
@@ -67,6 +72,7 @@ void QGlobalItem::sync(){
                 m_state->item->setParentItem(parentItem());
                 m_state->item->stackAfter(this);
             }
+
         } else {
             qCritical("GlobalItem will not function without a stateId assigned. "
                       "Assign a stateId key to fix this problem.");

@@ -22,7 +22,10 @@ Grid{
         input : trainImageLoader.output
         MouseArea{
             anchors.fill : parent
-            onClicked : queryImageLoader.file = trainImage
+            onClicked : {
+                queryImageLoader.file = ''
+                queryImageLoader.file = trainImage
+            }
         }
     }
     

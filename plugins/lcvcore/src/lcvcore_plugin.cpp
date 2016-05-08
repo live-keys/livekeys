@@ -32,28 +32,30 @@
 #include "qdrawhistogram.h"
 #include "qmatlist.h"
 #include "qglobalitem.h"
+#include "qglobalitemproperty.h"
 
 #include <qqml.h>
 
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
-    qmlRegisterType<QMat>(          uri, 1, 0, "Mat");
-    qmlRegisterType<QMatAccess>(    uri, 1, 0, "MatAccess");
-    qmlRegisterType<QMatView>(      uri, 1, 0, "MatView");
-    qmlRegisterType<QImRead>(       uri, 1, 0, "ImRead");
-    qmlRegisterType<QMatEmpty>(     uri, 1, 0, "MatEmpty");
-    qmlRegisterType<QMatRoi>(       uri, 1, 0, "MatRoi");
-    qmlRegisterType<QMatRead>(      uri, 1, 0, "MatRead");
-    qmlRegisterType<QMat2DArray>(   uri, 1, 0, "Mat2DArray");
-    qmlRegisterType<QCamCapture>(   uri, 1, 0, "CamCapture");
-    qmlRegisterType<QVideoCapture>( uri, 1, 0, "VideoCapture");
-    qmlRegisterType<QMatDraw>(      uri, 1, 0, "MatDraw");
-    qmlRegisterType<QMatBuffer>(    uri, 1, 0, "MatBuffer");
-    qmlRegisterType<QAlphaMerge>(   uri, 1, 0, "AlphaMerge");
-    qmlRegisterType<QAbsDiff>(      uri, 1, 0, "AbsDiff");
-    qmlRegisterType<QDrawHistogram>(uri, 1, 0, "DrawHistogram");
-    qmlRegisterType<QMatList>(      uri, 1, 0, "MatList");
-    qmlRegisterType<QGlobalItem>(   uri, 1, 0, "GlobalItem");
+    qmlRegisterType<QMat>(               uri, 1, 0, "Mat");
+    qmlRegisterType<QMatAccess>(         uri, 1, 0, "MatAccess");
+    qmlRegisterType<QMatView>(           uri, 1, 0, "MatView");
+    qmlRegisterType<QImRead>(            uri, 1, 0, "ImRead");
+    qmlRegisterType<QMatEmpty>(          uri, 1, 0, "MatEmpty");
+    qmlRegisterType<QMatRoi>(            uri, 1, 0, "MatRoi");
+    qmlRegisterType<QMatRead>(           uri, 1, 0, "MatRead");
+    qmlRegisterType<QMat2DArray>(        uri, 1, 0, "Mat2DArray");
+    qmlRegisterType<QCamCapture>(        uri, 1, 0, "CamCapture");
+    qmlRegisterType<QVideoCapture>(      uri, 1, 0, "VideoCapture");
+    qmlRegisterType<QMatDraw>(           uri, 1, 0, "MatDraw");
+    qmlRegisterType<QMatBuffer>(         uri, 1, 0, "MatBuffer");
+    qmlRegisterType<QAlphaMerge>(        uri, 1, 0, "AlphaMerge");
+    qmlRegisterType<QAbsDiff>(           uri, 1, 0, "AbsDiff");
+    qmlRegisterType<QDrawHistogram>(     uri, 1, 0, "DrawHistogram");
+    qmlRegisterType<QMatList>(           uri, 1, 0, "MatList");
+    qmlRegisterType<QGlobalItem>(        uri, 1, 0, "GlobalItem");
+    qmlRegisterType<QGlobalItemProperty>(uri, 1, 0, "GlobalItemProperty");
 }
 
 

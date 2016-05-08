@@ -10,7 +10,7 @@ Column{
             width : 100
             height : 100
             color : "#ff0000"
-        }   
+        }
     }
     
     Rectangle{

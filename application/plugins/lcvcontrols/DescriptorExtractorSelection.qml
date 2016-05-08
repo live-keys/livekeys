@@ -109,23 +109,27 @@ Rectangle{
         source : Item{
             id : globalConfigItem
 
-            property var configuration : ({
-                "BriefDescriptorExtractor" : {
-                    'bytes' : 32
-                },
-                "BriskDescriptorExtractor" : {
-                },
-                "OrbDescriptorExtractor" : {
-                    'patchSize' : 32
-                },
-                "FreakDescriptorExtractor" : {
-                    'orientationNormalized' : true,
-                    'scaleNormalized' : true,
-                    'patternScale' : 22.0,
-                    'nOctaves' : 4
-                }
-            })
+            GlobalItemProperty{
+                id : configurationProperty
+                value : ({
+                    "BriefDescriptorExtractor" : {
+                        'bytes' : 32
+                    },
+                    "BriskDescriptorExtractor" : {
+                    },
+                    "OrbDescriptorExtractor" : {
+                        'patchSize' : 32
+                    },
+                    "FreakDescriptorExtractor" : {
+                        'orientationNormalized' : true,
+                        'scaleNormalized' : true,
+                        'patternScale' : 22.0,
+                        'nOctaves' : 4
+                    }
+                })
+            }
 
+            property alias configuration : configurationProperty.value
             property int selectedIndex : 0
         }
         Component.onCompleted: {

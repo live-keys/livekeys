@@ -43,10 +43,32 @@ Rectangle{
         id : objectListComponent
         stateId : "objectListComponent"
         source : Item{
-            property MatList objectList : MatList{}
-            property variant keypoints : new Array()
-            property variant corners : new Array()
-            property variant colors : new Array()
+//            property MatList objectList : MatList{}
+//            property variant keypoints : new Array()
+//            property variant corners : new Array()
+//            property variant colors : new Array()
+
+            property alias objectList : objectListProperty.value
+            property alias keypoints : keypointsProperty.value
+            property alias corners : cornersProperty.value
+            property alias colors : colorsProperty.value
+
+            GlobalItemProperty{
+                id : objectListProperty
+                value : MatList{}
+            }
+            GlobalItemProperty{
+                id : keypointsProperty
+                value : new Array()
+            }
+            GlobalItemProperty{
+                id : cornersProperty
+                value : new Array()
+            }
+            GlobalItemProperty{
+                id : colorsProperty
+                value : new Array()
+            }
         }
         Component.onCompleted: {
             trainImages.model = item.objectList
