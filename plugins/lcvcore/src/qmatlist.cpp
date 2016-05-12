@@ -70,12 +70,5 @@ QMat *QMatList::at(int index){
 }
 
 int QMatList::size() const{
-//    QDebug dd = qDebug();
-//    qDebug() << "Checking size: " << m_list.size();
-//    for ( int i = 0; i < m_list.size(); ++i ){
-//        qDebug() << "Size:" << i;
-//        qDebug() << m_list[i]->cvMat()->cols;
-////        dd << m_list[i]->cvMat()->cols;
-//    }
     return m_list.size();
 }

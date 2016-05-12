@@ -14,20 +14,7 @@ Rectangle{
         id : imageSource
         file : imagePath
         visible : false
-    }    
-    
-    Component.onCompleted : {
-        console.log('Compilation completed\n________________________________________________________________________________________');
-    }  
-     
-    
-    Timer {
-        interval: 1000; running: true; //repeat: true
-        onTriggered: {
-            console.log('Time Triggered\n_____________________________________________________________________________________________');
-            //query.file = query.file === imagePath ? imagePath2 : imagePath
-        } 
-    } 
+    }
     
     /*ImRead{
         id : query
@@ -36,12 +23,12 @@ Rectangle{
     }*/
     
     CamCapture{
-        device : '1'
+        device : '0'
         id : query
         visible : false
     }
     Resize{ 
-        visible : false  
+        visible : false
         input : query.output
         id : queryResized
         matSize : Qt.size(query.width/2, query.height/2)

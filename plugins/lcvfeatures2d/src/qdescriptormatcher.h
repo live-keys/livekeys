@@ -85,15 +85,10 @@ private:
 inline void QDescriptorMatcher::setQueryDescriptors(QMat* descriptors){
     if ( descriptors == 0 )
         return;
-    qDebug() << "&*&*&*&&&&&*&*&*&*&Settubg qyert descruotirs.";
 
     m_queryDescriptors = descriptors;
     emit queryDescriptorsChanged();
     callMatch();
-//    if ( isComponentComplete() ){
-//        match(m_queryDescriptors, m_matches);
-//        emit matchesChanged();
-//    }
 }
 
 inline QMat* QDescriptorMatcher::queryDescriptors(){
@@ -105,10 +100,6 @@ inline void QDescriptorMatcher::setKnn(int knn){
         m_knn = knn;
         emit knnChanged();
         callMatch();
-//        if ( isComponentComplete() ){
-//            match(m_queryDescriptors, m_matches);
-//            emit matchesChanged();
-//        }
     }
 }
 

@@ -540,7 +540,6 @@ Rectangle{
 
         property FeatureDetector detector: null
         onDetectorChanged: {
-            console.log(detector)
             detector.params = globalConfig.item.configuration[selectedName]
             detector.input  = detectorInput
         }

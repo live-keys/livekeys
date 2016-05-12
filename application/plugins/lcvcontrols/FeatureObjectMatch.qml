@@ -27,18 +27,27 @@ Column{
     property FeatureDetector trainFeatureDetector : FastFeatureDetector{}
     property DescriptorExtractor trainDescriptorExtractor : OrbDescriptorExtractor{}
     
-    property FeatureDetector queryFeatureDetector : FastFeatureDetector{ input : querySource.output }
-    onQueryFeatureDetectorChanged : { 
-        queryFeatureDetector.input = querySource.output
-        queryDescriptorExtractor.keypoints = queryFeatureDetector.keypoints
+    property FeatureDetector queryFeatureDetector : FastFeatureDetector{}
+    Connections{
+        target : queryFeatureDetector
+        onKeypointsChanged : {
+            queryDescriptorExtractor.keypoints = queryFeatureDetector.keypoints
+        }
     }
-    property DescriptorExtractor queryDescriptorExtractor : OrbDescriptorExtractor{ keypoints : queryFeatureDetector.keypoints }
+
+    property DescriptorExtractor queryDescriptorExtractor : OrbDescriptorExtractor{
+        keypoints : queryFeatureDetector.keypoints
+    }
     onQueryDescriptorExtractorChanged : {
         queryDescriptorExtractor.keypoints = queryFeatureDetector.keypoints
     }
      
     property var imageSource : ImRead{}
     property var querySource : ImRead{}
+    Connections{
+        target : querySource
+        onOutputChanged : queryFeatureDetector.input = querySource.output
+    }
 
     property double minMatchDistanceCoeff : 2.5
     property double matchNndrRatio : 0.8
@@ -118,20 +127,15 @@ Column{
     DescriptorMatchFilter{
         id : descriptorMatchFilter
         matches1to2 : descriptorMatcherComponent.item.matches
+        onMatches1to2OutChanged :
+            matchesToLocalKeypoint.setQueryWithMatches(root.queryFeatureDetector.keypoints, matches1to2Out)
         minDistanceCoeff : root.minMatchDistanceCoeff
         nndrRatio : root.matchNndrRatio
     }
     
     MatchesToLocalKeypoint{
         id : matchesToLocalKeypoint
-        matches1to2 : descriptorMatchFilter.matches1to2Out
         trainKeypointVectors : featureObjectList.objectList.keypoints
-        queryKeypointVector : root.queryFeatureDetector.keypoints
-//        onQueryKeypointVectorChanged : {
-//            trainKeypointVectors = featureObjectList.objectList.keypoints
-//            descriptorMatchFilter.matches1to2 = descriptorMatcherComponent.item.matches
-//            matches1to2 = descriptorMatchFilter.matches1to2Out
-//        }
     }
     
     KeypointHomography{  
