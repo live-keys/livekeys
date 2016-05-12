@@ -25,7 +25,7 @@ Rectangle{
         interval: 1000; running: true; //repeat: true
         onTriggered: {
             console.log('Time Triggered\n_____________________________________________________________________________________________');
-            query.file = query.file === imagePath ? imagePath2 : imagePath
+            //query.file = query.file === imagePath ? imagePath2 : imagePath
         } 
     } 
     
@@ -36,7 +36,7 @@ Rectangle{
     }*/
     
     CamCapture{
-        device : '0'
+        device : '1'
         id : query
         visible : false
     }
@@ -54,6 +54,8 @@ Rectangle{
         
         minMatchDistanceCoeff : 2.5
         matchNndrRatio : 0.8
+        
+        //trainFeatureDetector : OrbFeatureDetector{}
     }
     
 }

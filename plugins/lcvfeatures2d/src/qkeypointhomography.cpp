@@ -30,7 +30,6 @@ QKeypointHomography::~QKeypointHomography(){
 
 QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
     if ( m_keypointsToScene && m_queryImage ){
-        qDebug() << "Update triggered";
 
         cv::Mat* surface = output()->cvMat();
         m_queryImage->cvMat()->copyTo(*surface);

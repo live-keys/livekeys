@@ -15,7 +15,6 @@
 ****************************************************************************/
 
 #include "qdescriptormatchfilter.h"
-#include <QDebug>
 
 QDescriptorMatchFilter::QDescriptorMatchFilter(QQuickItem* parent)
     : QQuickItem(parent)
