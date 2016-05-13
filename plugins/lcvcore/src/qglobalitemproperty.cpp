@@ -1,9 +1,7 @@
 #include "qglobalitemproperty.h"
 #include <QQmlEngine>
 
-QGlobalItemProperty::QGlobalItemProperty(QQuickItem *parent) : QQuickItem(parent)
-{
-
+QGlobalItemProperty::QGlobalItemProperty(QQuickItem *parent) : QQuickItem(parent){
 }
 
 QGlobalItemProperty::~QGlobalItemProperty(){

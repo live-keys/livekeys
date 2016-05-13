@@ -35,18 +35,39 @@ Rectangle{
     
     signal objectAdded(Mat descriptors, var points, var color)
     signal objectListLoaded(MatList list, var keypoints, var corners, var colors)
+    signal objectListCreated()
     
+    function addObject(region){
+
+        root.featureDetector.input = region
+
+        var generatedColor = Qt.hsla(Math.random(), Math.random() * 0.5 + 0.5, Math.random() * 0.5 + 0.5, 1)
+        var keypoints = root.featureDetector.keypoints.createOwnedObject()
+        var corners   = [Qt.point(0, 0), Qt.point(width, 0), Qt.point(width, height), Qt.point(0, height)]
+
+        objectListComponent.item.colors.push(generatedColor)
+        objectListComponent.item.keypoints.push(keypoints)
+        objectListComponent.item.corners.push(corners)
+        objectListComponent.item.objectList.appendMat(root.featureDetector.output.createOwnedObject())
+
+        root.descriptorExtractor.keypoints = keypoints
+        root.objectAdded(
+            root.descriptorExtractor.descriptors,
+            corners,
+            generatedColor
+        )
+    }
+
     property alias objectList : objectListComponent.item
     property alias selectedIndex : trainImages.selectedIndex
 
     GlobalItem{
         id : objectListComponent
         stateId : "objectListComponent"
+
+        property bool itemCreated : false
+
         source : Item{
-//            property MatList objectList : MatList{}
-//            property variant keypoints : new Array()
-//            property variant corners : new Array()
-//            property variant colors : new Array()
 
             property alias objectList : objectListProperty.value
             property alias keypoints : keypointsProperty.value
@@ -70,7 +91,11 @@ Rectangle{
                 value : new Array()
             }
         }
+        onItemChanged : itemCreated = true
+
         Component.onCompleted: {
+            if ( itemCreated )
+                root.objectListCreated()
             trainImages.model = item.objectList
             root.objectListLoaded(item.objectList, item.keypoints, item.corners, item.colors)
         }
@@ -115,25 +140,7 @@ Rectangle{
         id : selectionWindow
         minimumWidth : 300
         
-        onRegionSelected : {
-            root.featureDetector.input = region
-
-            var generatedColor = Qt.hsla(Math.random(), Math.random() * 0.5 + 0.5, Math.random() * 0.5 + 0.5, 1)
-            var keypoints = root.featureDetector.keypoints.createOwnedObject()
-            var corners   = [Qt.point(0, 0), Qt.point(width, 0), Qt.point(width, height), Qt.point(0, height)]
-
-            objectListComponent.item.colors.push(generatedColor)
-            objectListComponent.item.keypoints.push(keypoints)
-            objectListComponent.item.corners.push(corners)
-            objectListComponent.item.objectList.appendMat(root.featureDetector.output.createOwnedObject())
-
-            root.descriptorExtractor.keypoints = keypoints
-            root.objectAdded(
-                root.descriptorExtractor.descriptors,
-                corners,
-                generatedColor
-            )
-        }
+        onRegionSelected : root.addObject(region)
     }
 
 
