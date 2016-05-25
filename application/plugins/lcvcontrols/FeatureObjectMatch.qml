@@ -51,6 +51,11 @@ Column{
 
     property double minMatchDistanceCoeff : 2.5
     property double matchNndrRatio : 0.8
+
+    function addObject(region){
+        featureObjectList.addObject(region)
+    }
+    signal objectListCreated()
     
     FeatureObjectList{
         id : featureObjectList
@@ -89,6 +94,7 @@ Column{
                 drawMatches.matchIndex = featureObjectList.selectedIndex
             }
         }
+        onObjectListCreated: root.objectListCreated()
     }
     
     GlobalItem{
@@ -126,7 +132,7 @@ Column{
     
     DescriptorMatchFilter{
         id : descriptorMatchFilter
-        matches1to2 : descriptorMatcherComponent.item.matches
+//        matches1to2 : descriptorMatcherComponent.item.matches
         onMatches1to2OutChanged :
             matchesToLocalKeypoint.setQueryWithMatches(root.queryFeatureDetector.keypoints, matches1to2Out)
         minDistanceCoeff : root.minMatchDistanceCoeff
