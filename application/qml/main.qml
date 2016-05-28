@@ -112,13 +112,14 @@ ApplicationWindow {
         title: "Please choose a file"
         nameFilters: [ "Qml files (*.qml)", "All files (*)" ]
         selectExisting : true
-        visible : true
+        visible : isLinux ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
             editor.text = codeDocument.openFile(fileOpenDialog.fileUrl)
             editor.isDirty = false
         }
         Component.onCompleted: {
-            visible = false // fixes a display bug in some linux distributions
+            visible = false
+            close()
         }
     }
 
@@ -127,7 +128,7 @@ ApplicationWindow {
         title: "Please choose a file"
         nameFilters: ["Qml files (*.qml)", "All files (*)"]
         selectExisting : false
-        visible : true
+        visible : isLinux ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
             codeDocument.saveFile(fileSaveDialog.fileUrl, editor.text)
             editor.isDirty = false
@@ -139,7 +140,8 @@ ApplicationWindow {
             header.callback = function(){}
         }
         Component.onCompleted: {
-            visible: false // fixes a display bug in some linux distributions
+            visible: false
+            close()
         }
     }
 
