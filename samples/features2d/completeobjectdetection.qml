@@ -32,7 +32,7 @@ Rectangle{
         }
     }
         
-        minMatchDistanceCoeff : 3.5
+        minMatchDistanceCoeff : 5.5
         matchNndrRatio : 0.8
         
         //trainFeatureDetector : OrbFeatureDetector{}

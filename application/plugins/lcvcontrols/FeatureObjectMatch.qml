@@ -21,7 +21,7 @@ import lcvfeatures2d 1.0
 
 Column{   
     id : root 
-    anchors.left: parent.left 
+    anchors.left: parent.left
     anchors.right : parent.right
         
     property FeatureDetector trainFeatureDetector : FastFeatureDetector{}

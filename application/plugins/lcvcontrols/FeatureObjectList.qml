@@ -37,7 +37,7 @@ Rectangle{
     signal objectListLoaded(MatList list, var keypoints, var corners, var colors)
     signal objectListCreated()
     
-    function addObject(region){
+    function addObject(region, x, y, width, height){
 
         root.featureDetector.input = region
 
@@ -140,7 +140,7 @@ Rectangle{
         id : selectionWindow
         minimumWidth : 300
         
-        onRegionSelected : root.addObject(region)
+        onRegionSelected : root.addObject(region, x, y, width, height)
     }
 
 
