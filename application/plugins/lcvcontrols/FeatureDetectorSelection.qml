@@ -527,7 +527,7 @@ Rectangle{
 
     signal comboClicked
 
-    z: 100
+    z: 200
     
     width: 500
     height : 35
@@ -575,8 +575,10 @@ Rectangle{
         clip: true
         anchors.top: chosenItem.bottom
         color: root.backgroundColor
+        z: 201
 
         ScrollView{
+            z : 202
             width : parent.width
             height : root.dropBoxHeight
             style : LiveCVScrollStyle{}
