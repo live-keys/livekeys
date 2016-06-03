@@ -4,7 +4,7 @@ import lcvfeatures2d 1.0
 
 Grid{
     
-    columns : 2
+    columns : 1
     
     property string trainImage : codeDocument.path + '/../_images/clock-train-small.jpg'
     property string queryImage : codeDocument.path + '/../_images/clock-query-room-small.jpg'
@@ -27,6 +27,7 @@ Grid{
                 queryImageLoader.file = trainImage
             }
         }
+        visible : false
     }
     
     BriefDescriptorExtractor{
@@ -48,6 +49,7 @@ Grid{
     FastFeatureDetector{
         id : queryFeatureDetect
         input : queryImageLoader.output
+        visible : false
     }
     
     BriefDescriptorExtractor{
