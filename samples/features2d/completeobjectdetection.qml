@@ -4,38 +4,43 @@ import lcvcontrols 1.0
 import lcvfeatures2d 1.0
 
 Rectangle{
+    
+    // This sample shows the FeatureObjectMatch component, which provides a clipping
+    // window to add new objects, together with a homography are to display found objects
+    // To start, click on the add (+) button on the left of the scene, and select an 
+    // area of the object to add. The detected object will be highlighted on the query
+    // image. You can change sources by changing the file property from the imageSource
+    // component. Or you can change the source or query images with a webcam and start
+    // from there. 
+    
     anchors.fill : parent
     color : "transparent"
             
-    property string imagePath  : codeDocument.path + '/../_images/clock-train-small.jpg'
-    property string imagePath2 : codeDocument.path + '/../_images/clock-query-room-small.jpg'
+    property string trainImage  : codeDocument.path + '/../_images/cards-train-j.jpg'
+    property string trainImage2 : codeDocument.path + '/../_images/cards-train-q.jpg'
+    property string trainImage3 : codeDocument.path + '/../_images/cards-train-k.jpg'
+    
+    property string queryImage : codeDocument.path + '/../_images/cards-query.jpg'
     
     ImRead{
         id : imageSource
-        file : imagePath
+        file : trainImage
         visible : false
     }
     
     ImRead{
         id : query
-        file : codeDocument.path + '/../_images/clock-query-grass-small.jpg'
-        visible : false 
+        file : queryImage
+        visible : false
     }
      
     FeatureObjectMatch{
         id : fom
         imageSource : imageSource
         querySource : query
-    trainFeatureDetector : FastFeatureDetector{
-        params : {
-            'threshold' : 5
-        }
-    }
         
-        minMatchDistanceCoeff : 5.5
+        minMatchDistanceCoeff : 15.5
         matchNndrRatio : 0.8
-        
-        //trainFeatureDetector : OrbFeatureDetector{}
     }
     
 }

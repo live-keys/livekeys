@@ -22,26 +22,26 @@ import lcvfeatures2d 1.0
 
 Rectangle{
     id : root
-    
+
     anchors.left: parent.left
     anchors.right: parent.right
     color: "transparent"
-    
+
     height : 200
-    
+
     property var imageSource : null
     property FeatureDetector featureDetector : FastFeatureDetector{}
     property DescriptorExtractor descriptorExtractor : BriefDescriptorExtractor{}
-    
+
     signal objectAdded(Mat descriptors, var points, var color)
     signal objectListLoaded(MatList list, var keypoints, var corners, var colors)
     signal objectListCreated()
-    
+
     function addObject(region, x, y, width, height){
 
         root.featureDetector.input = region
 
-        var generatedColor = Qt.hsla(Math.random(), Math.random() * 0.3 + 0.7, Math.random() * 0.5 + 0.5, 1)
+        var generatedColor = Qt.hsla(Math.random(), Math.random() * 0.3 + 0.7, Math.random() * 0.25 + 0.5, 1)
         var keypoints = root.featureDetector.keypoints.createOwnedObject()
         var corners   = [Qt.point(0, 0), Qt.point(width, 0), Qt.point(width, height), Qt.point(0, height)]
 
@@ -102,14 +102,14 @@ Rectangle{
             root.objectListLoaded(item.objectList, item.keypoints, item.corners, item.colors)
         }
     }
-    
+
     ScrollView{
         width : parent.width
         height: parent.height
         anchors.left: parent.left
         anchors.leftMargin : 50
         style : LiveCVScrollStyle{}
-        
+
         Row{
             height: root.height
 
@@ -137,11 +137,11 @@ Rectangle{
         }
 
     }
-    
+
     SelectionWindow{
         id : selectionWindow
         minimumWidth : 300
-        
+
         onRegionSelected : root.addObject(region, x, y, width, height)
     }
 
@@ -158,6 +158,6 @@ Rectangle{
             selectionWindow.show()
         }
     }
-    
+
 }
 
