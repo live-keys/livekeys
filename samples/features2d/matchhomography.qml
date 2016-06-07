@@ -2,9 +2,12 @@ import lcvcore 1.0
 import lcvimgproc 1.0
 import lcvfeatures2d 1.0
 
-Grid{
+Column{
     
-    columns : 2
+    // Keypoint homography
+    
+    // This sample shows the basic components required to detect a trained object
+    // within an image
     
     property string trainImage : codeDocument.path + '/../_images/clock-train-small.jpg'
     property string queryImage : codeDocument.path + '/../_images/clock-query-room-small.jpg'
@@ -20,13 +23,7 @@ Grid{
     FastFeatureDetector{
         id : trainFeatureDetect
         input : trainImageLoader.output
-        MouseArea{
-            anchors.fill : parent
-            onClicked : {
-                queryImageLoader.file = ''
-                queryImageLoader.file = trainImage
-            }
-        }
+        visible : false
     }
     
     BriefDescriptorExtractor{
@@ -48,6 +45,7 @@ Grid{
     FastFeatureDetector{
         id : queryFeatureDetect
         input : queryImageLoader.output
+        visible : false
     }
     
     BriefDescriptorExtractor{

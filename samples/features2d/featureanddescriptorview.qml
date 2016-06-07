@@ -4,7 +4,13 @@ import lcvfeatures2d 1.0
  
 Row{
     
-    property string imagePath : codeDocument.path + '/../_images/buildings_0246.jpg'
+    // Descriptor histogram sample
+    
+    // Select/configure feature detectors/extractors from the panels.
+    // The generated feature list can then be used to view descriptors
+    // in the generated histogram
+    
+    property string imagePath : codeDocument.path + '/../_images/clock-train-small.jpg'
      
     Column{
 

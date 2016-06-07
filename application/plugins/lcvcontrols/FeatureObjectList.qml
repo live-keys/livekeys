@@ -61,9 +61,11 @@ Rectangle{
     property alias objectList : objectListComponent.item
     property alias selectedIndex : trainImages.selectedIndex
 
+    property string stateId : "objectListComponent"
+
     GlobalItem{
         id : objectListComponent
-        stateId : "objectListComponent"
+        stateId : root.stateId
 
         property bool itemCreated : false
 

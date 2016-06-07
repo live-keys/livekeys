@@ -97,9 +97,11 @@ Column{
         onObjectListCreated: root.objectListCreated()
     }
     
+    property string stateId : "descriptorMatcher"
+
     GlobalItem{
         id : descriptorMatcherComponent
-        stateId :"descriptorMatcher"
+        stateId : root.stateId
 
         source : BruteForceMatcher{
             id : descriptorMatcher

@@ -419,10 +419,11 @@ Rectangle{
         }
     ]
 
+    property string stateId : "featureDetectorConfig"
 
     GlobalItem{
         id : globalConfig
-        stateId : "featureDetectorConfig"
+        stateId : root.stateId
         source : Item{
             id : globalConfigItem
 

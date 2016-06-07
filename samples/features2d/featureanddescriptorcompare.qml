@@ -4,8 +4,13 @@ import lcvfeatures2d 1.0
  
 Row{
     
-    property string imagePath  : codeDocument.path + '/../_images/buildings_0246.jpg'
-    property string imagePath2 : codeDocument.path + '/../_images/buildings_0246.jpg'
+    // Descriptor histogram comparison sample
+    
+    // Select/configure feature detectors/extractors from the panels
+    // to compare and view descriptors in the generated histogram
+    
+    property string imagePath  : codeDocument.path + '/../_images/clock-train-small.jpg'
+    property string imagePath2 : codeDocument.path + '/../_images/clock-query-room-small.jpg'
      
     Column{
 
@@ -21,13 +26,13 @@ Row{
         
         Rectangle{
             width : parent.width 
-            height : 200
+            height : 100
             color : LiveCVStyle.darkElementBackgroundColor
             
             DrawHistogram{
                 id : descriptorHistogram
                 width : parent.width
-                height : 200
+                height : 100
                 maxValue : 5000
                 colors : ["#aa007700", "#66000077"]
                 render : DrawHistogram.BinaryConverted
@@ -52,6 +57,7 @@ Row{
         FeatureDetectorSelection{
             id: detectorSelector
             detectorInput : iminput.output
+            stateId : 'trainFeatureDetectorSelection'
             TextButton{
                 anchors.right : parent.right
                 anchors.verticalCenter : parent.verticalCenter
