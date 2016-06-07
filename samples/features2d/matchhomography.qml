@@ -3,7 +3,7 @@ import lcvimgproc 1.0
 import lcvfeatures2d 1.0
 
 Column{
-    
+
     // Keypoint homography
     
     // This sample shows the basic components required to detect a trained object

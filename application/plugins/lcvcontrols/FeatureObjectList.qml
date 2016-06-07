@@ -41,7 +41,7 @@ Rectangle{
 
         root.featureDetector.input = region
 
-        var generatedColor = Qt.hsla(Math.random(), Math.random() * 0.5 + 0.5, Math.random() * 0.5 + 0.5, 1)
+        var generatedColor = Qt.hsla(Math.random(), Math.random() * 0.3 + 0.7, Math.random() * 0.5 + 0.5, 1)
         var keypoints = root.featureDetector.keypoints.createOwnedObject()
         var corners   = [Qt.point(0, 0), Qt.point(width, 0), Qt.point(width, height), Qt.point(0, height)]
 
