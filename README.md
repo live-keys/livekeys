@@ -19,6 +19,8 @@ An API is also available to link already built algorithms to Live CV's interface
 
 ## Installation and getting started
 
+[![Join the chat at https://gitter.im/dinusv/livecv](https://badges.gitter.im/dinusv/livecv.svg)](https://gitter.im/dinusv/livecv?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 To get started, simply download the application from Live CV's [website](http://livecv.dinusv.com/download.html), extract the archive, and you're ready 
 to go. Step by step instructions are also found in the download section.
 
