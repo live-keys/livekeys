@@ -2,9 +2,9 @@
 
 This guide will serve as a quick start for anyone interested in contributing with Live CV. It offers a quick view over:
 
-1. The Structure of Live CV, 
-2. Qml Components from c++
-3. Repository organization
+1. [The Structure of Live CV](structure)
+2. [Qml Components From C++](qml-components-from-c++)
+3. [Repository organization](repository)
 
 ## Structure
 
@@ -14,7 +14,7 @@ Live CV is split into 3 sections:
  * lcvlib library, which all Live CV plugins link to. It contains the main components that provide a link between Open CV and qml
  * the plugins or modules, containing computer vision plugins that can be imported in Live CV (lcvcore, lcvimgproc, ...)
  
-## QML components from c++
+## QML Components From c++
 
 This section is just quick overview on how to create a qml component from c++. For a more detailed description on qml language and its bindings, you can check out the following links:
 
@@ -44,13 +44,13 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
 
 Whenever the plugin gets imported, the function gets called and the components become available. Components can have a set of properties accessible through qml. A property is declared through the Q_PROPERTY macro:
 
-```
+```cpp
 Q_PROPERTY(Type value READ getValue WRITE setValue NOTIFY valueChanged)
 ```
 
 The READ, WRITE and NOTIFY declare the getter setter and property changed handler. So, to declare a simple qml component that has a ```int``` property defaulted to 42:
 
-```
+```cpp
 #include <QObject>
 
 class MySample : public QObject{
@@ -96,11 +96,11 @@ The coding style used for Live CV si compatible with Qt's standards, described [
 
 Issues have associated labels, some of them handling specific cases:
 
- * deployment : dealing with Live CV project files, build and deployment scripts
- * quickstart : used for people who want to start contributing to Live CV
- * easy : entry level or issues that don't require a lot of time
- * editor : related to Live CV's code editor
- * has-sample : requires a use case sample within Live CV's sample directory
- * opencv : is related to open cv or an open cv wrapper
+ * *deployment* : dealing with Live CV project files, build and deployment scripts
+ * *quickstart* : used for people who want to start contributing to Live CV
+ * *easy* : entry level or issues that don't require a lot of time
+ * *editor* : related to Live CV's code editor
+ * *has-sample* : requires a use case sample within Live CV's sample directory
+ * *opencv* : is related to open cv or an open cv wrapper
  
 If issues are part of a module, the module is usually speciifed at the begining of the issue, e.g. [lcvvideo] Add BackgroundSubtractor{}
