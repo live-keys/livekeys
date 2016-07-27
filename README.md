@@ -38,7 +38,7 @@ The executable and plugins will be found in the application directory.
 
 ## Contributing
 
-There's an [organization on github](http://github.com/livecv) created for Live CV plugins and projects, so anyone looking to contribute is always welcome. This [section](CONTRIBUTING.md) offers a quick overview on contributing, and there are simple quickstart issues available for anyone looking to start. Most of them deal with wrapping an Open CV function and adding a sample.
+There's an [organization on github](http://github.com/livecv) created for Live CV plugins and projects, so anyone looking to contribute is always welcome. This [section](CONTRIBUTING.md) offers a quick overview on contributing, and there are [simple quickstart issues](https://github.com/dinusv/livecv/issues?q=is%3Aopen+is%3Aissue+label%3Aquickstart) available for anyone looking to start. Most of them deal with wrapping an Open CV functions and adding a sample. There are issues marked with [easy](https://github.com/dinusv/livecv/issues?q=is%3Aopen+is%3Aissue+label%3Aeasy) which are similar, but may have a few more displayable parameters or require a bit more processing.
 
 There's a forum available for discussions on [live cv's website](http://livecv.dinusv.com/forum).
 
