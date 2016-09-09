@@ -46,6 +46,7 @@ QCamCapture::QCamCapture(QQuickItem *parent) :
     QMatDisplay(parent),
     m_device(""),
     m_fps(25),
+    m_resolution(0, 0),
     m_thread(0)
 {
     m_restore = output();
@@ -81,6 +82,8 @@ void QCamCapture::setDevice(const QString &device){
             connect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
 
             if ( m_thread->isCaptureOpened() ){
+                m_resolution.setWidth(m_thread->captureWidth());
+                m_resolution.setHeight(m_thread->captureHeight());
                 setImplicitWidth (m_thread->captureWidth());
                 setImplicitHeight(m_thread->captureHeight());
 
@@ -126,6 +129,55 @@ void QCamCapture::setFps(qreal fps){
             }
         }
         emit fpsChanged();
+    }
+}
+
+void QCamCapture::reinitializeDevice(){
+    bool isPaused = paused();
+    QString device(m_device);
+    QStateContainer<QCamCaptureThread>& stateCont =
+            QStateContainer<QCamCaptureThread>::instance(this);
+
+    delete m_thread;
+    m_thread = 0;
+    stateCont.registerState(m_device, m_thread);
+    m_device = "";
+    setDevice(device);
+    setPaused(isPaused);
+}
+
+/*!
+  \property QCamCapture::resolution
+  \sa CamCapture::resolution
+ */
+
+/*!
+  \qmlproperty size CamCapture::resolution
+
+  By default, this is auto-detected based on the first received frame.
+  Can be overridden if your camera supports resolutions other than its default resolution.
+
+  Example with custom resolution set:
+  \code
+  CamCapture{
+      device: '0'
+      resolution: Qt.size(1280,720)
+  }
+  \endcode
+ */
+void QCamCapture::setResolution(const QSize& resolution){
+    if ( resolution != m_resolution ){
+        reinitializeDevice();
+        m_thread->setCaptureResolution(resolution.width(), resolution.height());
+        m_resolution.setWidth(m_thread->captureWidth());
+        m_resolution.setHeight(m_thread->captureHeight());
+        setImplicitWidth(m_resolution.width());
+        setImplicitHeight(m_resolution.height());
+        if ( resolution != m_resolution )
+            qWarning() << "Attempted to set resolution to" << resolution
+                       << "but OpenCV set it to" << m_resolution << "instead. "
+                       << "Does the camera support the target resolution?";
+        emit resolutionChanged();
     }
 }
 
