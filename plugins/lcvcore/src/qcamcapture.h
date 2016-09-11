@@ -24,9 +24,10 @@ class QCamCaptureThread;
 class QCamCapture : public QMatDisplay{
 
     Q_OBJECT
-    Q_PROPERTY(QString device READ device WRITE setDevice NOTIFY deviceChanged)
-    Q_PROPERTY(bool    paused READ paused WRITE setPaused NOTIFY pausedChanged)
-    Q_PROPERTY(qreal   fps    READ fps    WRITE setFps    NOTIFY fpsChanged)
+    Q_PROPERTY(QString device     READ device     WRITE setDevice     NOTIFY deviceChanged)
+    Q_PROPERTY(bool    paused     READ paused     WRITE setPaused     NOTIFY pausedChanged)
+    Q_PROPERTY(qreal   fps        READ fps        WRITE setFps        NOTIFY fpsChanged)
+    Q_PROPERTY(QSize   resolution READ resolution WRITE setResolution NOTIFY resolutionChanged)
 
 public:
     explicit QCamCapture(QQuickItem *parent = 0);
@@ -41,6 +42,9 @@ public:
     qreal fps() const;
     void setFps(qreal fps);
 
+    const QSize& resolution() const;
+    void setResolution(const QSize& resolution);
+
 public slots:
     void switchMat();
 
@@ -48,9 +52,11 @@ signals:
     void deviceChanged();
     void pausedChanged();
     void fpsChanged();
+    void resolutionChanged();
 
 private:
     void initializeMatSize();
+    void reinitializeDevice();
 
     QCamCapture(const QCamCapture& other);
     QCamCapture& operator= (const QCamCapture& other);
@@ -58,6 +64,7 @@ private:
     QString m_device;
     qreal   m_fps;
     QMat*   m_restore;
+    QSize   m_resolution;
 
     QCamCaptureThread* m_thread;
 
@@ -69,6 +76,10 @@ inline const QString &QCamCapture::device() const{
 
 inline qreal QCamCapture::fps() const{
     return m_fps;
+}
+
+inline const QSize& QCamCapture::resolution() const{
+    return m_resolution;
 }
 
 #endif // QCAMCAPTURE_HPP
