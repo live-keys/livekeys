@@ -5,7 +5,8 @@ QT      += qml quick
 # Application
 # -----------
 
-include(src/application.pri)
+include(src/base/base.pri)
+include(src/main/main.pri)
 
 RC_ICONS = $$PWD/icons/livecv.ico
 
