@@ -1,15 +1,18 @@
+INCLUDEPATH += $$PWD
+
 HEADERS += \
     $$PWD/qcodedocument.h \
     $$PWD/qcodejshighlighter_p.h \
     $$PWD/qcodehandler.h \
     $$PWD/qlivecvlog.h \
     $$PWD/qlivecv.h \
-    $$PWD/qcommandlineparser.h
+    $$PWD/qlivecvcommandlineparser.h \
+    $$PWD/qlivecvexception.h
 
 SOURCES += \
     $$PWD/qcodedocument.cpp \
-    $$PWD/main.cpp \
     $$PWD/qcodehandler.cpp \
     $$PWD/qlivecvlog.cpp \
     $$PWD/qlivecv.cpp \
-    $$PWD/qcommandlineparser.cpp
+    $$PWD/qlivecvcommandlineparser.cpp \
+    $$PWD/qlivecvexception.cpp
