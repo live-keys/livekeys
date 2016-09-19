@@ -29,7 +29,7 @@ using namespace cv;
 /*!
   \class QFastNlMeansDenoising
   \inmodule lcvphoto_cpp
-  \brief Finds edges within an image.
+  \brief Performs denoising using the Non-local Means Denoising algorithm.
  */
 
 /*!
@@ -61,13 +61,13 @@ QFastNlMeansDenoising::~QFastNlMeansDenoising(){
   \a in
   \a out
  */
-void QFastNlMeansDenoising::transform(cv::Mat &in, cv::Mat &out){
+void QFastNlMeansDenoising::transform(Mat &in, Mat &out){
     if ( !in.empty() ){ // fastNlMeansDenoising hangs on empty Mat
-        bool useColorAlgorithm = m_useColorAlgorithm;
+        bool colorEnabled = m_useColorAlgorithm;
         if ( m_autoDetectColor ){
-            useColorAlgorithm = (in.channels() > 1);
+            colorEnabled = (in.channels() > 1);
         }
-        if ( useColorAlgorithm ){
+        if ( colorEnabled ){
             fastNlMeansDenoisingColored(in, out, m_h, m_hColor, m_templateWindowSize, m_searchWindowSize);
         }
         else{
