@@ -17,9 +17,10 @@
 #include "lcvphoto_plugin.h"
 
 #include <qqml.h>
-#include "qfastnlmeansdenoising.h"
+#include "qfastnlmeansdenoisingmulti.h"
 
 void LcvphotoPlugin::registerTypes(const char *uri){
     // @uri modules.lcvphoto
-    qmlRegisterType<QFastNlMeansDenoising>(uri, 1, 0, "FastNlMeansDenoising");
+    qmlRegisterType<QFastNlMeansDenoising>     (uri, 1, 0, "FastNlMeansDenoising");
+    qmlRegisterType<QFastNlMeansDenoisingMulti>(uri, 1, 0, "FastNlMeansDenoisingMulti");
 }

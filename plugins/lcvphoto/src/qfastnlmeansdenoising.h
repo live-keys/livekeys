@@ -50,6 +50,9 @@ signals:
     void templateWindowSizeChanged();
     void searchWindowSizeChanged();
 
+protected:
+    bool autoDetectColor() const;
+
 private:
     bool m_useColorAlgorithm;
     bool m_autoDetectColor;
@@ -61,6 +64,10 @@ private:
 
 inline bool QFastNlMeansDenoising::colorAlgorithm() const{
     return m_useColorAlgorithm;
+}
+
+inline bool QFastNlMeansDenoising::autoDetectColor() const{
+    return m_autoDetectColor;
 }
 
 inline float QFastNlMeansDenoising::h() const{
