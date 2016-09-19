@@ -24,6 +24,18 @@ using namespace cv;
   \brief Denoises a grayscale or color image using multiple frames.
 
   Variant of FastNlMeansDenoising using a history of frames.
+  Implemented with a sliding window, which makes it suitable for video input.
+
+  All FastNlMeansDenoising options also apply to FastNlMeansDenoisingMulti.
+
+  Usage notes for video input:
+  \list
+  \li The algorithm is rather slow, which can be a problem for live video processing.
+      Tweak the input framerate, searchWindowSize and temporalWindowSize as required.
+  \li The output will lag behind (temporalWindowSize-1)/2 frames behind the input.
+  \li Output will only start when the buffer is filled; expect temporalWindowSize-1
+      black output frames directly after recompiling the QML.
+  \endlist
 */
 
 /*!
@@ -49,6 +61,18 @@ QFastNlMeansDenoisingMulti::QFastNlMeansDenoisingMulti(QQuickItem *parent) :
 QFastNlMeansDenoisingMulti::~QFastNlMeansDenoisingMulti(){
 }
 
+/*!
+  \property QFastNlMeansDenoisingMulti::temporalWindowSize
+  \sa FastNlMeansDenoisingMulti::temporalWindowSize
+ */
+
+/*!
+  \qmlproperty int FastNlMeansDenoisingMulti::temporalWindowSize
+
+  Size of the sliding window in frames. Higher values keep a longer history,
+  which requires more memory and processing power and increases output delay.
+  Must be an odd number. Defaults to 3.
+ */
 void QFastNlMeansDenoisingMulti::setTemporalWindowSize(int temporalWindowSize){
     if ( (temporalWindowSize & 1) == 0 )
         --temporalWindowSize; // Must be odd
@@ -80,7 +104,7 @@ void QFastNlMeansDenoisingMulti::trimFrameHistory(std::size_t size){
 void QFastNlMeansDenoisingMulti::transform(Mat &in, Mat &out){
     if ( !in.empty() ){ // fastNlMeansDenoising hangs on empty Mat
         trimFrameHistory(temporalWindowSize() - 1);
-        m_frameHistory.push_back(in.clone());
+        m_frameHistory.push_back(in);
         if ( m_frameHistory.size() == static_cast<std::size_t>(temporalWindowSize()) ){
             bool colorEnabled = colorAlgorithm();
             if ( autoDetectColor() ){
