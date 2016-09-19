@@ -24,6 +24,8 @@ using namespace cv;
   \brief Denoises a grayscale or color image.
 
   Performs denoising using the Non-local Means Denoising algorithm.
+
+  \quotefile photo/fastnlmeansdenoising.qml
 */
 
 /*!
