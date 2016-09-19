@@ -32,7 +32,7 @@ using namespace cv;
   \list
   \li The algorithm is rather slow, which can be a problem for live video processing.
       Tweak the input framerate, searchWindowSize and temporalWindowSize as required.
-  \li The output will lag behind (temporalWindowSize-1)/2 frames behind the input.
+  \li The output will lag (temporalWindowSize-1)/2 frames behind the input.
   \li Output will only start when the buffer is filled; expect temporalWindowSize-1
       black output frames directly after recompiling the QML.
   \endlist
