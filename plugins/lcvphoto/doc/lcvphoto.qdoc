@@ -1,0 +1,13 @@
+/*!
+
+  \qmlmodule lcvphoto
+
+  \title Live CV QML Computational Photography
+
+  This module contains elements for photo processing. It resembles open cv's photo module.
+
+  \code
+  import "lcvphoto" 1.0
+  \endcode
+
+*/
