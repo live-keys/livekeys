@@ -280,11 +280,14 @@ Rectangle {
     Rectangle{
         id : messageBox
         anchors.left: parent.left
-        anchors.leftMargin: 165
-        height : parent.height
-        color : "#242a34"
-        width : 350
+        anchors.leftMargin: 130
+        height : visible ? parent.height : 0
+        color : "#102235"
+        width : 400
         visible : false
+        Behavior on height {
+            SpringAnimation { spring: 3; damping: 0.1 }
+        }
         Text{
             color : "#bec7ce"
             anchors.left: parent.left
@@ -292,10 +295,11 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: 12
             text : "Would you like to save your current code?"
+            font.family: "Ubuntu Mono, Courier New, Courier"
         }
         Rectangle{
             anchors.left: parent.left
-            anchors.leftMargin: 250
+            anchors.leftMargin: 300
             height : parent.height
             width : 50
             color : "transparent"
@@ -306,6 +310,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 font.pixelSize: 12
                 text : "Yes"
+                font.family: "Ubuntu Mono, Courier New, Courier"
             }
             MouseArea{
                 id : yesMArea
@@ -319,7 +324,7 @@ Rectangle {
         }
         Rectangle{
             anchors.left: parent.left
-            anchors.leftMargin: 300
+            anchors.leftMargin: 350
             height : parent.height
             width : 50
             color : "transparent"
@@ -330,6 +335,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 font.pixelSize: 12
                 text : "No"
+                font.family: "Ubuntu Mono, Courier New, Courier"
             }
             MouseArea{
                 id : noMArea

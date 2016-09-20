@@ -23,10 +23,8 @@ ApplicationWindow {
     id : root
 
     visible: true
-//    width: 1240
-//    height: 700
-    width : 1800
-    height : 900
+    width: 1240
+    height: 700
     color : "#293039"
 
     title: qsTr("Live CV")
@@ -114,10 +112,14 @@ ApplicationWindow {
         title: "Please choose a file"
         nameFilters: [ "Qml files (*.qml)", "All files (*)" ]
         selectExisting : true
-        visible : false
+        visible : isLinux ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
             editor.text = codeDocument.openFile(fileOpenDialog.fileUrl)
             editor.isDirty = false
+        }
+        Component.onCompleted: {
+            visible = false
+            close()
         }
     }
 
@@ -126,7 +128,7 @@ ApplicationWindow {
         title: "Please choose a file"
         nameFilters: ["Qml files (*.qml)", "All files (*)"]
         selectExisting : false
-        visible : false
+        visible : isLinux ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
             codeDocument.saveFile(fileSaveDialog.fileUrl, editor.text)
             editor.isDirty = false
@@ -136,6 +138,10 @@ ApplicationWindow {
         onRejected:{
             header.callback()
             header.callback = function(){}
+        }
+        Component.onCompleted: {
+            visible: false
+            close()
         }
     }
 

@@ -31,6 +31,9 @@
     \row
         \li \l {lcvvideo}{lcvvideo}
         \li Video processing module.
+    \row
+        \li \l {lcvphoto}{lcvphoto}
+        \li Computational photography module.
 \endtable
 
 
@@ -72,6 +75,9 @@
     \row
         \li \l {lcvvideo_cpp}{video}
         \li The lcvvideo module.
+    \row
+        \li \l {lcvphoto_cpp}{photo}
+        \li The lcvphoto module.
 \endtable
 
 

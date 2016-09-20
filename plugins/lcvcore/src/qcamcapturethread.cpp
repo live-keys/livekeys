@@ -175,3 +175,15 @@ int QCamCaptureThread::captureHeight() const{
     Q_D(const QCamCaptureThread);
     return d->height;
 }
+
+// FRAME_WIDTH and FRAME_HEIGHT must be set together,
+// otherwise OpenCV may reject the change.
+void QCamCaptureThread::setCaptureResolution(int width, int height){
+    Q_D(QCamCaptureThread);
+    QMutexLocker lock(&d->mutex);
+    if ( d->capture->isOpened() ){
+        d->capture->set(CV_CAP_PROP_FRAME_WIDTH, width);
+        d->capture->set(CV_CAP_PROP_FRAME_HEIGHT, height);
+        initializeMatSize();
+    }
+}

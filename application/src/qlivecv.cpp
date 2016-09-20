@@ -63,6 +63,11 @@ void QLiveCV::loadQml(const QUrl &url){
 
     m_engine->rootContext()->setContextProperty("codeDocument", m_document);
     m_engine->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
+#ifdef Q_OS_LINUX
+    m_engine->rootContext()->setContextProperty("isLinux", true);
+#else
+    m_engine->rootContext()->setContextProperty("isLinux", false);
+#endif
 
     m_engine->load(url);
 }

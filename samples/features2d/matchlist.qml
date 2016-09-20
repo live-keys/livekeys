@@ -4,18 +4,20 @@ import lcvfeatures2d 1.0
 
 Row{
     
-    // Train images
+    // In this sample a set of images are trained and matched against a query image.
+    // Click on a trained image to view its matches
      
     property string imagePath   : codeDocument.path + '/../_images/'
     
-    property string trainImage  : imagePath + 'object_101_piano_train1.jpg'
-    property string trainImage2 : imagePath + 'buildings_0246.jpg'
-    property string queryImage  : imagePath + 'object_101_piano_query.jpg'
+    property string trainImage  : imagePath + 'cards-train-j.jpg'
+    property string trainImage2 : imagePath + 'cards-train-q.jpg'
+    property string trainImage3 : imagePath + 'cards-train-k.jpg'
+    property string queryImage  : imagePath + 'cards-query.jpg'
     
     Column{
         id: imageFeatureColumn
         
-        property int maxWidth: 300
+        property int maxWidth: 200
      
     Repeater{
         id : trainImages
@@ -23,7 +25,7 @@ Row{
         property variant selectedItem : null
         property int     selectedIndex : 0
                         
-        model : [trainImage, trainImage2]
+        model : [trainImage, trainImage2, trainImage3]
         
         delegate : Rectangle{
             id: delegateRoot
@@ -86,6 +88,7 @@ Row{
     FastFeatureDetector{
         id : queryFeatureDetect
         input : queryImageLoader.output
+        visible : false
     }
     
     BriefDescriptorExtractor{
@@ -116,6 +119,8 @@ Row{
         keypoints2 : trainImages.selectedItem.trainKeypoints
         matches1to2 : descriptorMatchFilter.matches1to2Out
         matchIndex : trainImages.selectedIndex
+        width : implicitWidth / 1.5
+        height : implicitHeight / 1.5
     }
      
 }

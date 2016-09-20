@@ -35,6 +35,7 @@ public:
     QTimer* timer();
     int     captureWidth() const;
     int     captureHeight() const;
+    void    setCaptureResolution(int width, int height);
     const QString& device() const;
 
     bool    isCaptureOpened();
@@ -43,7 +44,6 @@ public:
     void    setPaused(bool paused);
 
     void    processNextFrame();
-
 signals:
     void inactiveMatChanged();
 

@@ -103,9 +103,11 @@ Rectangle{
         }
     ]
 
+    property string stateId : "descriptorExtractorConfig"
+
     GlobalItem{
         id : globalConfig
-        stateId : "descriptorExtractorConfig"
+        stateId : root.stateId
         source : Item{
             id : globalConfigItem
 
