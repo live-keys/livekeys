@@ -90,6 +90,11 @@ win32{
             equals(copyDll, deploy):copyCvDll($${OPENCV_DIR_DLLS}/opencv_flann$${OPENCV_VERSION}.dll)
         }
 
+        contains(modules, photo){
+            LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_photo$${OPENCV_VERSION}
+            equals(copyDll, deploy):copyCvDll($${OPENCV_DIR_DLLS}/opencv_photo$${OPENCV_VERSION}.dll)
+        }
+
         contains(modules, ffmpeg){
             equals(copyDll, deploy):copyCvDll($$files($${OPENCV_DIR_DLLS}/opencv_ffmpeg$${OPENCV_VERSION_FIND}*.dll))
         }

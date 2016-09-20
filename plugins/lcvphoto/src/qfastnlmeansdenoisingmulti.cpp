@@ -89,7 +89,7 @@ void QFastNlMeansDenoisingMulti::setTemporalWindowSize(int temporalWindowSize){
 
 void QFastNlMeansDenoisingMulti::trimFrameHistory(std::size_t size){
     if (m_frameHistory.size() > size){
-        int elementsToDelete = m_frameHistory.size() - size;
+        int elementsToDelete = static_cast<int>(m_frameHistory.size() - size);
         m_frameHistory.erase(m_frameHistory.begin(), m_frameHistory.begin() + elementsToDelete);
     }
 }
