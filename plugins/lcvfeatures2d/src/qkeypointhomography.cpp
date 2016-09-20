@@ -41,7 +41,16 @@ QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdateP
             QKeyPointToSceneMap::ObjectKeypointToScene* os = m_keypointsToScene->mappingAt(i);
 
             if ( os->scenePoints.size() > 10 ){
-                cv::Mat H = cv::findHomography(os->objectPoints, os->scenePoints, CV_RANSAC);
+                std::vector<uchar> outlierMask;
+                cv::Mat H = cv::findHomography(os->objectPoints, os->scenePoints, outlierMask, CV_RANSAC, 4);
+
+                size_t outlierCount = 0;
+                for ( size_t k = 0; k < outlierMask.size(); ++k ){
+                    if ( !outlierMask[k] )
+                        outlierCount++;
+                }
+
+//                if ( outlierMask.size() / 2 > outlierCount ){
 
                 QVariantList corners = m_objectCorners[i].toList();
                 std::vector<cv::Point2f> currentCorners(corners.size());
@@ -59,6 +68,7 @@ QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdateP
                 }
                 if ( sceneCorners.size() > 1 )
                     cv::line(*surface, sceneCorners[sceneCorners.size() - 1], sceneCorners[0], colorAt(i), 4);
+//                }
             }
         }
 

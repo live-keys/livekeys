@@ -4,45 +4,43 @@ import lcvcontrols 1.0
 import lcvfeatures2d 1.0
 
 Rectangle{
+    
+    // This sample shows the FeatureObjectMatch component, which provides a clipping
+    // window to add new objects, together with a homography are to display found objects
+    // To start, click on the add (+) button on the left of the scene, and select an 
+    // area of the object to add. The detected object will be highlighted on the query
+    // image. You can change sources by changing the file property from the imageSource
+    // component. Or you can change the source or query images with a webcam and start
+    // from there. 
+    
     anchors.fill : parent
     color : "transparent"
+            
+    property string trainImage  : codeDocument.path + '/../_images/cards-train-j.jpg'
+    property string trainImage2 : codeDocument.path + '/../_images/cards-train-q.jpg'
+    property string trainImage3 : codeDocument.path + '/../_images/cards-train-k.jpg'
     
-    property string imagePath  : codeDocument.path + '/../_images/object_101_piano_train1.jpg'
-    property string imagePath2 : codeDocument.path + '/../_images/object_101_piano_query.jpg'
+    property string queryImage : codeDocument.path + '/../_images/cards-query.jpg'
     
     ImRead{
         id : imageSource
-        file : imagePath
+        file : trainImage
         visible : false
     }
     
-    /*ImRead{
+    ImRead{
         id : query
-        file : "/home/dinu/Work/livecv/samples/_images/object_101_piano_train1.jpg"
-        visible : false 
-    }*/
-    
-    CamCapture{
-        device : '0'
-        id : query
+        file : queryImage
         visible : false
-    }
-    Resize{ 
-        visible : false
-        input : query.output
-        id : queryResized
-        matSize : Qt.size(query.width/2, query.height/2)
     }
      
     FeatureObjectMatch{
         id : fom
-        imageSource : queryResized
-        querySource : queryResized
+        imageSource : imageSource
+        querySource : query
         
-        minMatchDistanceCoeff : 2.5
+        minMatchDistanceCoeff : 15.5
         matchNndrRatio : 0.8
-        
-        //trainFeatureDetector : OrbFeatureDetector{}
     }
     
 }

@@ -17,6 +17,9 @@
     \row
         \li \l {lcvvideo_cpp}{video}
         \li The lcvvideo module.
+    \row
+        \li \l {lcvphoto_cpp}{photo}
+        \li The lcvphoto module.
 \endtable
 
 */

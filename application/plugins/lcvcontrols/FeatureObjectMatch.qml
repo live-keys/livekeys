@@ -21,7 +21,7 @@ import lcvfeatures2d 1.0
 
 Column{   
     id : root 
-    anchors.left: parent.left 
+    anchors.left: parent.left
     anchors.right : parent.right
         
     property FeatureDetector trainFeatureDetector : FastFeatureDetector{}
@@ -51,6 +51,16 @@ Column{
 
     property double minMatchDistanceCoeff : 2.5
     property double matchNndrRatio : 0.8
+
+    function addObject(region, width, height, x, y){
+        featureObjectList.addObject(region, width, height, x, y)
+    }
+    signal objectListCreated()
+
+    property alias objectList: featureObjectList.objectList
+
+    property KeyPointVector drawQueryKeypoints : null
+    property int drawMatchIndex : 0
     
     FeatureObjectList{
         id : featureObjectList
@@ -65,13 +75,14 @@ Column{
             var ocolors = keypointHomography.objectColors
             ocolors.push(color)
             keypointHomography.objectColors = ocolors
-            
-            drawMatches.keypoints2 = featureObjectList.objectList.keypoints[featureObjectList.objectList.keypoints.length - 1]
+
+            drawMatches.keypoints2  = featureObjectList.objectList.keypoints[featureObjectList.objectList.keypoints.length - 1]
             drawMatches.matchIndex = featureObjectList.objectList.keypoints.length - 1
             matchesToLocalKeypoint.trainKeypointVectors = featureObjectList.objectList.keypoints
 
             descriptorMatcherComponent.item.add(descriptors)
             descriptorMatcherComponent.item.train()
+            descriptorMatchFilter.matches1to2 = descriptorMatcherComponent.item.matches
         }
         onObjectListLoaded : {
             matchesToLocalKeypoint.trainKeypointVectors = featureObjectList.objectList.keypoints
@@ -79,21 +90,24 @@ Column{
             keypointHomography.objectColors  = colors
 
             if ( featureObjectList.objectList.keypoints.length > 0 ){
-                drawMatches.keypoints2 = featureObjectList.objectList.keypoints[featureObjectList.selectedIndex]
+                drawMatches.keypoints2  = featureObjectList.objectList.keypoints[featureObjectList.selectedIndex]
                 drawMatches.matchIndex = featureObjectList.selectedIndex
             }
         }
         onSelectedIndexChanged: {
             if ( featureObjectList.objectList.keypoints.length > 0 ){
                 drawMatches.keypoints2 = featureObjectList.objectList.keypoints[featureObjectList.selectedIndex]
-                drawMatches.matchIndex = featureObjectList.selectedIndex
+                drawMatches.matchIndex     = featureObjectList.selectedIndex
             }
         }
+        onObjectListCreated: root.objectListCreated()
     }
     
+    property string stateId : "descriptorMatcher"
+
     GlobalItem{
         id : descriptorMatcherComponent
-        stateId :"descriptorMatcher"
+        stateId : root.stateId
 
         source : BruteForceMatcher{
             id : descriptorMatcher
@@ -105,28 +119,20 @@ Column{
         Component.onCompleted: {
             item.queryDescriptors = root.queryDescriptorExtractor.descriptors
             descriptorMatchFilter.matches1to2 = item.matches
-            matchesConnection.target = descriptorMatcherComponent.item
         }
         Connections{
             target : root.queryDescriptorExtractor
             onDescriptorsChanged : {
-                if ( descriptorMatcherComponent.item )
+                if ( descriptorMatcherComponent.item ){
                     descriptorMatcherComponent.item.queryDescriptors = root.queryDescriptorExtractor.descriptors
-            }
-        }
-
-        Connections {
-            id : matchesConnection
-            target : descriptorMatcherComponent.item
-            onMatchesChanged : {
-                descriptorMatchFilter.matches1to2 = descriptorMatcherComponent.item.matches
+                    descriptorMatchFilter.matches1to2 = descriptorMatcherComponent.item.matches
+                }
             }
         }
     }
     
     DescriptorMatchFilter{
         id : descriptorMatchFilter
-        matches1to2 : descriptorMatcherComponent.item.matches
         onMatches1to2OutChanged :
             matchesToLocalKeypoint.setQueryWithMatches(root.queryFeatureDetector.keypoints, matches1to2Out)
         minDistanceCoeff : root.minMatchDistanceCoeff
@@ -135,23 +141,27 @@ Column{
     
     MatchesToLocalKeypoint{
         id : matchesToLocalKeypoint
-        trainKeypointVectors : featureObjectList.objectList.keypoints
     }
     
-    KeypointHomography{  
-        id : keypointHomography       
-        queryImage : querySource.output
-        keypointsToScene : matchesToLocalKeypoint.output
-        objectCorners : []
-        objectColors : []
-    }
-    
-    DrawMatches{
-        id : drawMatches
-        keypoints1 : root.queryFeatureDetector.keypoints
-        keypoints2 : null
-        matches1to2 : descriptorMatchFilter.matches1to2Out
-        matchIndex : 0
+    Row{
+
+        KeypointHomography{
+            id : keypointHomography
+            queryImage : querySource.output
+            keypointsToScene : matchesToLocalKeypoint.output
+            objectCorners : []
+            objectColors : []
+        }
+
+        DrawMatches{
+            id : drawMatches
+            keypoints1 : root.queryFeatureDetector.keypoints
+            keypoints2 : null
+            matches1to2 : descriptorMatchFilter.matches1to2Out
+            matchIndex : 0//drawMatches.matchIndex
+            width : implicitWidth / 2
+            height : implicitHeight / 2
+        }
     }
     
 }

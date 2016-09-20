@@ -4,8 +4,13 @@ import lcvfeatures2d 1.0
 
 Column{
     
-    property string trainImage : codeDocument.path + '/../_images/object_101_piano_train1.jpg'
-    property string queryImage : codeDocument.path + '/../_images/object_101_piano_query.jpg'
+    // Brute force matcher
+    
+    // Usage of BruteForceMatcher on Brief descriptors to find matches
+    // between two images
+    
+    property string trainImage : codeDocument.path + '/../_images/clock-train-small.jpg'
+    property string queryImage : codeDocument.path + '/../_images/clock-query-room-small.jpg'
     
     // Train images
     
