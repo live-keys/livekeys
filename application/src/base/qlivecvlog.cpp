@@ -31,6 +31,11 @@ QLiveCVLog::~QLiveCVLog(){
 void QLiveCVLog::logMessage(QtMsgType type, const QMessageLogContext&, const QString& msg){
     m_logMutex.lock();
     switch (type){
+    case QtInfoMsg:
+        if ( isFileLogEnabled() )
+            m_textStream << "Info     : " << msg << "\n";
+        m_data.append(msg + "<br/>");
+        break;
     case QtDebugMsg:
         if ( isFileLogEnabled() )
             m_textStream << "Debug    : " << msg << "\n";
