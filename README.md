@@ -9,7 +9,8 @@
  * **Documentation**: [livecv.dinusv.com/documentation](http://livecv.dinusv.com/documentation)
  * **Build Requirements**:
    * Qt 5.3 or higher
-   * Open CV 2.4.*
+   * Open CV 2.4.* for *Master Branch* OR Open CV 3.* for dev branch. Next release will switch to Open CV 3.*
+   
 
 Live CV is a computer vision coding environment that displays results while you code. It can be used to interact, link and adjust algorithms 
 in order to create quick solutions within it's domain. 
