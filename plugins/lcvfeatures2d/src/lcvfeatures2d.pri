@@ -1,10 +1,10 @@
 HEADERS += \
     $$PWD/lcvfeatures2d_plugin.hpp \
-    $$PWD/qbriefdescriptorextractor.h \
+#    $$PWD/qbriefdescriptorextractor.h \
     $$PWD/qbriskdescriptorextractor.h \
     $$PWD/qbriskfeaturedetector.h \
     $$PWD/qbruteforcematcher.h \
-    $$PWD/qdensefeaturedetector.h \
+#    $$PWD/qdensefeaturedetector.h \
     $$PWD/qdescriptorextractor.h \
     $$PWD/qdescriptormatcher.h \
     $$PWD/qdescriptormatchfilter.h \
@@ -13,8 +13,8 @@ HEADERS += \
     $$PWD/qfastfeaturedetector.h \
     $$PWD/qfeaturedetector.h \
     $$PWD/qflannbasedmatcher.h \
-    $$PWD/qfreakdescriptorextractor.h \
-    $$PWD/qgoodfeaturestotrackdetector.h \
+#    $$PWD/qfreakdescriptorextractor.h \
+#    $$PWD/qgoodfeaturestotrackdetector.h \
     $$PWD/qkeypoint.h \
     $$PWD/qkeypointvector.h \
     $$PWD/qlcvfeatures2dglobal.h \
@@ -22,18 +22,18 @@ HEADERS += \
     $$PWD/qorbdescriptorextractor.h \
     $$PWD/qorbfeaturedetector.h \
     $$PWD/qsimpleblobdetector.h \
-    $$PWD/qstarfeaturedetector.h \
+#    $$PWD/qstarfeaturedetector.h \
     $$PWD/qmatchestolocalkeypoint.h \
     $$PWD/qkeypointtoscenemap.h \
     $$PWD/qkeypointhomography.h
 
 SOURCES += \
     $$PWD/lcvfeatures2d_plugin.cpp \
-    $$PWD/qbriefdescriptorextractor.cpp \
+#    $$PWD/qbriefdescriptorextractor.cpp \
     $$PWD/qbriskdescriptorextractor.cpp \
     $$PWD/qbriskfeaturedetector.cpp \
     $$PWD/qbruteforcematcher.cpp \
-    $$PWD/qdensefeaturedetector.cpp \
+#    $$PWD/qdensefeaturedetector.cpp \
     $$PWD/qdescriptorextractor.cpp \
     $$PWD/qdescriptormatcher.cpp \
     $$PWD/qdescriptormatchfilter.cpp \
@@ -42,15 +42,15 @@ SOURCES += \
     $$PWD/qfastfeaturedetector.cpp \
     $$PWD/qfeaturedetector.cpp \
     $$PWD/qflannbasedmatcher.cpp \
-    $$PWD/qfreakdescriptorextractor.cpp \
-    $$PWD/qgoodfeaturestotrackdetector.cpp \
+#    $$PWD/qfreakdescriptorextractor.cpp \
+#    $$PWD/qgoodfeaturestotrackdetector.cpp \
     $$PWD/qkeypoint.cpp \
     $$PWD/qkeypointvector.cpp \
     $$PWD/qmserfeaturedetector.cpp \
     $$PWD/qorbdescriptorextractor.cpp \
     $$PWD/qorbfeaturedetector.cpp \
     $$PWD/qsimpleblobdetector.cpp \
-    $$PWD/qstarfeaturedetector.cpp \
+#    $$PWD/qstarfeaturedetector.cpp \
     $$PWD/qmatchestolocalkeypoint.cpp \
     $$PWD/qkeypointtoscenemap.cpp \
     $$PWD/qkeypointhomography.cpp

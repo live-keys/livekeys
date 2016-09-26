@@ -18,7 +18,7 @@
 #include "opencv2/features2d/features2d.hpp"
 
 QMSerFeatureDetector::QMSerFeatureDetector(QQuickItem *parent)
-    : QFeatureDetector(new cv::MSER, parent)
+    : QFeatureDetector(cv::MSER::create(), parent)
 {
 }
 
@@ -55,7 +55,7 @@ void QMSerFeatureDetector::initialize(const QVariantMap& settings){
     if ( settings.contains("edgeBlurSize") )
         edgeBlurSize = settings["edgeBlurSize"].toInt();
 
-    initializeDetector(new cv::MSER(
+    initializeDetector(cv::MSER::create(
        delta,
        minArea,
        maxArea,

@@ -35,5 +35,5 @@ void QBriskFeatureDetector::initialize(const QVariantMap &settings){
         thresh = settings["octaves"].toInt();
     if ( settings.contains("patternScale") )
         patternScale = settings["patternScale"].toFloat();
-    initializeDetector(new cv::BRISK(thresh, octaves, patternScale));
+    initializeDetector(cv::BRISK::create(thresh, octaves, patternScale));
 }

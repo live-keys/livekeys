@@ -1,5 +1,5 @@
 HEADERS += \
-	$$PWD/lcvimgproc_plugin.hpp \
+    $$PWD/lcvimgproc_plugin.hpp \
     $$PWD/qblur.h \
     $$PWD/qcanny.h \
     $$PWD/qchannelselect.h \
@@ -14,10 +14,11 @@ HEADERS += \
     $$PWD/qmatresize.h \
     $$PWD/qsobel.h \
     $$PWD/qstructuringelement.h \
-    $$PWD/qthreshold.h
+    $$PWD/qthreshold.h \
+    $$PWD/qmatdraw.h
 
 SOURCES += \
-	$$PWD/lcvimgproc_plugin.cpp \
+    $$PWD/lcvimgproc_plugin.cpp \
     $$PWD/qblur.cpp \
     $$PWD/qcanny.cpp \
     $$PWD/qchannelselect.cpp \
@@ -32,5 +33,6 @@ SOURCES += \
     $$PWD/qmatresize.cpp \
     $$PWD/qsobel.cpp \
     $$PWD/qstructuringelement.cpp \
-    $$PWD/qthreshold.cpp
+    $$PWD/qthreshold.cpp \
+    $$PWD/qmatdraw.cpp
 

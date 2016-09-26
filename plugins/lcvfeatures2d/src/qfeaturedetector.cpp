@@ -18,17 +18,11 @@
 #include "qkeypointvector.h"
 #include "qmatnode.h"
 #include "qmatshader.h"
-#include "opencv2/features2d/features2d.hpp"
-
-// null keypoints
-// null descriptors
-// defined keypoints
-// defined descriptors
-
+#include "opencv2/features2d.hpp"
 
 QFeatureDetector::QFeatureDetector(QQuickItem *parent)
     : QQuickItem(parent)
-    , m_detector(0)
+    , m_detector(cv::Ptr<cv::FeatureDetector>())
     , m_keypoints(new QKeyPointVector)
     , m_in(QMat::nullMat())
     , m_output(new QMat)
@@ -38,7 +32,7 @@ QFeatureDetector::QFeatureDetector(QQuickItem *parent)
     setFlag(ItemHasContents, true);
 }
 
-QFeatureDetector::QFeatureDetector(cv::FeatureDetector* detector, QQuickItem* parent)
+QFeatureDetector::QFeatureDetector(cv::Ptr<cv::FeatureDetector> detector, QQuickItem* parent)
     : QQuickItem(parent)
     , m_detector(detector)
     , m_keypoints(new QKeyPointVector)
@@ -51,7 +45,6 @@ QFeatureDetector::QFeatureDetector(cv::FeatureDetector* detector, QQuickItem* pa
 }
 
 QFeatureDetector::~QFeatureDetector(){
-    delete m_detector;
     delete m_output;
 }
 
@@ -59,8 +52,7 @@ cv::FeatureDetector *QFeatureDetector::detector(){
     return m_detector;
 }
 
-void QFeatureDetector::initializeDetector(cv::FeatureDetector *detector){
-    delete m_detector;
+void QFeatureDetector::initializeDetector(cv::Ptr<cv::FeatureDetector> detector){
     m_detector = detector;
     detect();
 }

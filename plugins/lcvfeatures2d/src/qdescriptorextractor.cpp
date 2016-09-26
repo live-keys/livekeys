@@ -19,14 +19,14 @@
 
 QDescriptorExtractor::QDescriptorExtractor(QQuickItem *parent)
     : QQuickItem(parent)
-    , m_extractor(0)
+    , m_extractor()
     , m_keypoints(0)
     , m_descriptors(new QMat)
     , m_isBinary(true)
 {
 }
 
-QDescriptorExtractor::QDescriptorExtractor(cv::DescriptorExtractor* extractor, QQuickItem* parent)
+QDescriptorExtractor::QDescriptorExtractor(cv::Ptr<cv::DescriptorExtractor> extractor, QQuickItem* parent)
     : QQuickItem(parent)
     , m_extractor(extractor)
     , m_keypoints(0)
@@ -41,8 +41,7 @@ QDescriptorExtractor::~QDescriptorExtractor(){
 
 void QDescriptorExtractor::initialize(const QVariantMap &){}
 
-void QDescriptorExtractor::initializeExtractor(cv::DescriptorExtractor* extractor){
-    delete m_extractor;
+void QDescriptorExtractor::initializeExtractor(cv::Ptr<cv::DescriptorExtractor> extractor){
     m_extractor = extractor;
     compute();
 }

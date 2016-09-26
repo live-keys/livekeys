@@ -18,7 +18,7 @@
 #include "opencv2/features2d/features2d.hpp"
 
 QOrbDescriptorExtractor::QOrbDescriptorExtractor(QQuickItem *parent)
-    : QDescriptorExtractor(new cv::ORB, parent)
+    : QDescriptorExtractor(cv::ORB::create(), parent)
 {
 }
 
@@ -31,7 +31,7 @@ void QOrbDescriptorExtractor::initialize(const QVariantMap &params){
         patchSize = params["patchSize"].toInt();
 
     initializeExtractor(
-        new cv::ORB(500, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, patchSize)
+        cv::ORB::create(500, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, patchSize)
     );
 
 }

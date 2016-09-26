@@ -8,7 +8,6 @@ HEADERS += \
     $$PWD/qimread.h \
     $$PWD/qmat2darray.h \
     $$PWD/qmatbuffer.h \
-    $$PWD/qmatdraw.h \
     $$PWD/qmatempty.h \
     $$PWD/qmatread.h \
     $$PWD/qmatroi.h \
@@ -29,7 +28,6 @@ SOURCES += \
     $$PWD/qimread.cpp \
     $$PWD/qmat2darray.cpp \
     $$PWD/qmatbuffer.cpp \
-    $$PWD/qmatdraw.cpp \
     $$PWD/qmatempty.cpp \
     $$PWD/qmatread.cpp \
     $$PWD/qmatroi.cpp \

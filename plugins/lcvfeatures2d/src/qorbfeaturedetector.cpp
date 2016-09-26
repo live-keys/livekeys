@@ -18,7 +18,7 @@
 #include "opencv2/features2d/features2d.hpp"
 
 QOrbFeatureDetector::QOrbFeatureDetector(QQuickItem *parent) :
-    QFeatureDetector(new cv::ORB, parent)
+    QFeatureDetector(cv::ORB::create(), parent)
 {
 }
 
@@ -50,5 +50,5 @@ void QOrbFeatureDetector::initialize(const QVariantMap &settings){
     if ( settings.contains("scoreType") )
         scoreType = settings["scoreType"].toInt();
 
-    initializeDetector(new cv::ORB(nfeatures, scaleFactor, nlevels, edgeThreshold, firstLevel, WTA_K, scoreType));
+    initializeDetector(cv::ORB::create(nfeatures, scaleFactor, nlevels, edgeThreshold, firstLevel, WTA_K, scoreType));
 }

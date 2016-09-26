@@ -22,10 +22,6 @@
 #include "qlcvfeatures2dglobal.h"
 #include "qkeypointvector.h"
 
-namespace cv{
-class DescriptorExtractor;
-}
-
 class QKeyPointVector;
 class Q_LCVFEATURES2D_EXPORT QDescriptorExtractor : public QQuickItem{
 
@@ -37,7 +33,7 @@ class Q_LCVFEATURES2D_EXPORT QDescriptorExtractor : public QQuickItem{
 
 public:
     explicit QDescriptorExtractor(QQuickItem *parent = 0);
-    QDescriptorExtractor(cv::DescriptorExtractor* extractor, QQuickItem* parent = 0);
+    QDescriptorExtractor(cv::Ptr<cv::DescriptorExtractor> extractor, QQuickItem* parent = 0);
     ~QDescriptorExtractor();
 
     QKeyPointVector* keypoints();
@@ -52,8 +48,8 @@ public:
 protected:
     virtual void initialize(const QVariantMap& params);
 
-    cv::DescriptorExtractor* extractor();
-    void initializeExtractor(cv::DescriptorExtractor* extractor);
+    cv::Ptr<cv::DescriptorExtractor> extractor();
+    void initializeExtractor(cv::Ptr<cv::DescriptorExtractor> extractor);
     virtual void componentComplete();
 
 signals:
@@ -66,7 +62,8 @@ public slots:
     void setParams(const QVariantMap &arg);
 
 private:
-    cv::DescriptorExtractor* m_extractor;
+    cv::Ptr<cv::DescriptorExtractor> m_extractor;
+
     QKeyPointVector*         m_keypoints;
     QMat*                    m_descriptors;
     QVariantMap              m_params;
