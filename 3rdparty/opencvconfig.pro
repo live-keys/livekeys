@@ -52,7 +52,7 @@ win32{
     }
 
     LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_world$${OPENCV_VERSION}
-    equals(copyDll, deploy):copyCvDll($${OPENCV_DIR_DLLS}/opencv_world$${OPENCV_VERSION}.dll)
+    copyCvDll($${OPENCV_DIR_DLLS}/opencv_world$${OPENCV_VERSION}.dll)
 
     defineTest(loadOpenCV){
         modules = $$1

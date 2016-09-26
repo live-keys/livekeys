@@ -15,7 +15,8 @@ HEADERS += \
     $$PWD/qsobel.h \
     $$PWD/qstructuringelement.h \
     $$PWD/qthreshold.h \
-    $$PWD/qmatdraw.h
+    $$PWD/qmatdraw.h #\
+#    $$PWD/qbilateralfilter.h
 
 SOURCES += \
     $$PWD/lcvimgproc_plugin.cpp \
@@ -34,5 +35,6 @@ SOURCES += \
     $$PWD/qsobel.cpp \
     $$PWD/qstructuringelement.cpp \
     $$PWD/qthreshold.cpp \
-    $$PWD/qmatdraw.cpp
+    $$PWD/qmatdraw.cpp #\
+#    $$PWD/qbilateralfilter.cpp
 
