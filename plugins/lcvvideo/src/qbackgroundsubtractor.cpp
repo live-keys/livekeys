@@ -154,6 +154,6 @@ void QBackgroundSubtractor::setLearningRate(double rate){
 void QBackgroundSubtractor::transform(Mat& in, Mat& out){
     Q_D(QBackgroundSubtractor);
     BackgroundSubtractor* subtractor = d->subtractor();
-    if (subtractor)
+    if ( subtractor && !in.empty() )
         (*subtractor)(in, out, d->learningRate());
 }
