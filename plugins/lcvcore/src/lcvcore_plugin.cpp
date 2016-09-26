@@ -25,7 +25,6 @@
 #include "qmat2darray.h"
 #include "qcamcapture.h"
 #include "qvideocapture.h"
-#include "qmatdraw.h"
 #include "qmatbuffer.h"
 #include "qalphamerge.h"
 #include "qabsdiff.h"
@@ -48,7 +47,6 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QMat2DArray>(        uri, 1, 0, "Mat2DArray");
     qmlRegisterType<QCamCapture>(        uri, 1, 0, "CamCapture");
     qmlRegisterType<QVideoCapture>(      uri, 1, 0, "VideoCapture");
-    qmlRegisterType<QMatDraw>(           uri, 1, 0, "MatDraw");
     qmlRegisterType<QMatBuffer>(         uri, 1, 0, "MatBuffer");
     qmlRegisterType<QAlphaMerge>(        uri, 1, 0, "AlphaMerge");
     qmlRegisterType<QAbsDiff>(           uri, 1, 0, "AbsDiff");

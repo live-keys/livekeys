@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "qmatdraw.h"
+#include "opencv2/imgproc.hpp"
 
 /*!
   \qmltype MatDraw

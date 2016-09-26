@@ -26,9 +26,9 @@ class QOrbFeatureDetector : public QFeatureDetector{
 
 public:
     enum ScoreType{
-        kBytes = 32,
-        HARRIS_SCORE=0,
-        FAST_SCORE=1
+        kBytes       = 32,
+        HARRIS_SCORE = 0,
+        FAST_SCORE   = 1
     };
 
 public:

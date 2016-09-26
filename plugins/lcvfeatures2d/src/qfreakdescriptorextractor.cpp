@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "qfreakdescriptorextractor.h"
-#include "opencv2/features2d/features2d.hpp"
+#include "opencv2/features2d.hpp"
 
 QFreakDescriptorExtractor::QFreakDescriptorExtractor(QQuickItem *parent) :
     QDescriptorExtractor(new cv::FREAK, parent)

@@ -19,10 +19,7 @@
 
 #include "qmatdisplay.h"
 #include "qlcvfeatures2dglobal.h"
-
-namespace cv{
-class FeatureDetector;
-}
+#include "opencv2/features2d.hpp"
 
 class QKeyPointVector;
 class Q_LCVFEATURES2D_EXPORT QFeatureDetector : public QQuickItem{
@@ -36,7 +33,7 @@ class Q_LCVFEATURES2D_EXPORT QFeatureDetector : public QQuickItem{
 
 public:
     explicit QFeatureDetector(QQuickItem *parent = 0);
-    QFeatureDetector(cv::FeatureDetector* detector, QQuickItem* parent = 0);
+    QFeatureDetector(cv::Ptr<cv::FeatureDetector> detector, QQuickItem* parent = 0);
     virtual ~QFeatureDetector();
 
 public:
@@ -57,7 +54,7 @@ protected:
     virtual void initialize(const QVariantMap& params);
 
     cv::FeatureDetector* detector();
-    void initializeDetector(cv::FeatureDetector* detector);
+    void initializeDetector(cv::Ptr<cv::FeatureDetector> detector);
     void detect();
     virtual void componentComplete();
 
@@ -77,7 +74,7 @@ signals:
 private:
     void drawKeypoints();
 
-    cv::FeatureDetector* m_detector;
+    cv::Ptr<cv::FeatureDetector> m_detector;
     QKeyPointVector*     m_keypoints;
 
     QMat* m_in;

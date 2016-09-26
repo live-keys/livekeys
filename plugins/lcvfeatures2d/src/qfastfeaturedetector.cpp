@@ -18,7 +18,7 @@
 #include "opencv2/features2d/features2d.hpp"
 
 QFastFeatureDetector::QFastFeatureDetector(QQuickItem *parent)
-    : QFeatureDetector(new cv::FastFeatureDetector, parent)
+    : QFeatureDetector(cv::FastFeatureDetector::create(), parent)
 {
 }
 
@@ -34,5 +34,5 @@ void QFastFeatureDetector::initialize(const QVariantMap& settings){
     if ( settings.contains("nonmaxSuppresion") )
         nonmaxSuppression = settings["nonmaxSuppresion"].toBool();
 
-    initializeDetector(new cv::FastFeatureDetector(threshold, nonmaxSuppression));
+    initializeDetector(cv::FastFeatureDetector::create(threshold, nonmaxSuppression));
 }

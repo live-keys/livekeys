@@ -18,7 +18,7 @@
 #include "opencv2/features2d/features2d.hpp"
 
 QSimpleBlobDetector::QSimpleBlobDetector(QQuickItem* parent)
-    : QFeatureDetector(new cv::SimpleBlobDetector, parent)
+    : QFeatureDetector(cv::SimpleBlobDetector::create(), parent)
 {
 }
 
@@ -86,5 +86,5 @@ void QSimpleBlobDetector::initialize(const QVariantMap &settings){
         params.maxConvexity      = settings["maxConvexity"].toFloat();
     }
 
-    initializeDetector(new cv::SimpleBlobDetector(params));
+    initializeDetector(cv::SimpleBlobDetector::create(params));
 }

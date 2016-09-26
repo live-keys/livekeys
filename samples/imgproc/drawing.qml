@@ -1,4 +1,5 @@
 import lcvcore 1.0
+import lcvimgproc 1.0
 
 
 // This example shows how to use the drawing functions 
