@@ -33,6 +33,7 @@
 #include "qerode.h"
 #include "qcopymakeborder.h"
 #include "qmatdraw.h"
+//#include "qbilateralfilter.h"
 
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
@@ -52,6 +53,7 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QErode>(              uri, 1, 0, "Erode");
     qmlRegisterType<QCopyMakeBorder>(     uri, 1, 0, "CopyMakeBorder");
     qmlRegisterType<QMatDraw>(            uri, 1, 0, "MatDraw");
+//    qmlRegisterType<QBilateralFilter>(    uri, 1, 0, "BilateralFilter");
 }
 
 
