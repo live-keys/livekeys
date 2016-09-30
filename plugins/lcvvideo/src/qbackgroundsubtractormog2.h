@@ -23,6 +23,7 @@ class QBackgroundSubtractorMog2Private;
 class QBackgroundSubtractorMog2 : public QBackgroundSubtractor{
 
     Q_OBJECT
+    Q_PROPERTY(QMat* backgroundModel  READ backgroundModel)
     Q_PROPERTY(int   history          READ history          WRITE setHistory          NOTIFY historyChanged)
     Q_PROPERTY(int   nmixtures        READ nmixtures        WRITE setNmixtures        NOTIFY nmixturesChanged)
     Q_PROPERTY(int   nShadowDetection READ nShadowDetection WRITE setNShadowDetection NOTIFY nShadowDetectionChanged)
@@ -39,6 +40,8 @@ class QBackgroundSubtractorMog2 : public QBackgroundSubtractor{
 public:
     explicit QBackgroundSubtractorMog2(QQuickItem *parent = 0);
     virtual ~QBackgroundSubtractorMog2();
+
+    QMat* backgroundModel();
 
     int history() const;
     void setHistory(int history);

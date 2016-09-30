@@ -17,7 +17,7 @@
 
 #include <QQuickItem>
 #include "qmatfilter.h"
-#include "opencv2/video/background_segm.hpp"
+#include "opencv2/video.hpp"
 
 class QBackgroundSubtractorPrivate{
 
