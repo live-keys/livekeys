@@ -119,8 +119,8 @@ const QString& QBackgroundSubtractor::stateId() const{
 void QBackgroundSubtractor::setStateId(const QString& id){
     Q_D(QBackgroundSubtractor);
     if ( d->stateId() != id ){
-        d->setStateId(id);
         d->deleteSubtractor();
+        d->setStateId(id);
         emit stateIdChanged();
     }
 }
@@ -155,5 +155,5 @@ void QBackgroundSubtractor::transform(Mat& in, Mat& out){
     Q_D(QBackgroundSubtractor);
     BackgroundSubtractor* subtractor = d->subtractor();
     if ( subtractor && !in.empty() )
-        (*subtractor)(in, out, d->learningRate());
+        subtractor->apply(in, out, d->learningRate());
 }
