@@ -18,14 +18,22 @@
 using namespace cv;
 
 /*!
-  \qmltype BackgroundSubtractorMOG2
+  \qmltype BackgroundSubtractorMog2
   \instantiates QBackgroundSubtractorMog2
   \inqmlmodule lcvvideo
-  \inherits MatFilter
-  \brief Background subtractor
+  \inherits BackgroundSubtractor
+  \brief Gaussian mixture based background/foreground segmentation algorithm.
 
-  Background subtractor
+  Gaussian mixture based background/foreground segmentation algorithm.
+
+  \quotefile video/backgroundsubtractormog2.qml
 */
+
+/*!
+   \class QBackgroundSubtractorMog2
+   \inmodule lcvvideo_cpp
+   \brief Gaussian mixture based background/foreground segmentation algorithm.
+ */
 
 class QBackgroundSubtractorMog2Private : public QBackgroundSubtractorPrivate{
 
@@ -39,6 +47,7 @@ public:
     BackgroundSubtractorMOG2* subtractorMog2();
 
 public:
+    QMat backgroundModel;
     int history;
     int nmixtures;
     uchar nShadowDetection;
@@ -53,10 +62,10 @@ public:
     float varThresholdGen;
 
 private:
-    BackgroundSubtractorMOG2* createSubtractor();
+    Ptr<BackgroundSubtractorMOG2>* createSubtractor();
 
 private:
-    BackgroundSubtractorMOG2* m_subtractorMog2;
+    Ptr<BackgroundSubtractorMOG2>* m_subtractorMog2;
 
 };
 
@@ -67,7 +76,7 @@ QBackgroundSubtractorMog2Private::QBackgroundSubtractorMog2Private()
     , history(500)
     , nmixtures(5)
     , nShadowDetection(127)
-    , detectShadows(false)
+    , detectShadows(true)
     , backgroundRatio(0.9)
     , ct(0.05)
     , tau(0.5)
@@ -84,24 +93,24 @@ QBackgroundSubtractorMog2Private::~QBackgroundSubtractorMog2Private(){
         delete m_subtractorMog2;
 }
 
-BackgroundSubtractorMOG2* QBackgroundSubtractorMog2Private::createSubtractor(){
-    BackgroundSubtractorMOG2* subtractor = new BackgroundSubtractorMOG2(history, varThreshold, detectShadows);
-    subtractor->setInt("nmixtures", nmixtures);
-    subtractor->set("nShadowDetection", static_cast<uchar>(nShadowDetection));
-    subtractor->set("backgroundRatio", backgroundRatio);
-    subtractor->set("fCT", ct);
-    subtractor->set("fTau", tau);
-    subtractor->set("fVarInit", varInit);
-    subtractor->set("fVarMin", varMin);
-    subtractor->set("fVarMax", varMax);
-    subtractor->set("varThresholdGen", varThresholdGen);
-    return subtractor;
+Ptr<BackgroundSubtractorMOG2>* QBackgroundSubtractorMog2Private::createSubtractor(){
+    Ptr<BackgroundSubtractorMOG2> subtractor = createBackgroundSubtractorMOG2(history, varThreshold, detectShadows);
+    subtractor->setNMixtures(nmixtures);
+    subtractor->setShadowValue(nShadowDetection);
+    subtractor->setBackgroundRatio(backgroundRatio);
+    subtractor->setComplexityReductionThreshold(ct);
+    subtractor->setShadowThreshold(tau);
+    subtractor->setVarInit(varInit);
+    subtractor->setVarMin(varMin);
+    subtractor->setVarMax(varMax);
+    subtractor->setVarThresholdGen(varThresholdGen);
+    return new Ptr<BackgroundSubtractorMOG2>(subtractor);
 }
 
 void QBackgroundSubtractorMog2Private::deleteSubtractor(){
-    QStateContainer<BackgroundSubtractorMOG2>& stateCont =
-            QStateContainer<BackgroundSubtractorMOG2>::instance();
-    stateCont.registerState(stateId(), static_cast<BackgroundSubtractorMOG2*>(0));
+    QStateContainer<Ptr<BackgroundSubtractorMOG2>>& stateCont =
+            QStateContainer<Ptr<BackgroundSubtractorMOG2>>::instance();
+    stateCont.registerState(stateId(), static_cast<Ptr<BackgroundSubtractorMOG2>*>(0));
     delete m_subtractorMog2;
     m_subtractorMog2 = 0;
 }
@@ -109,8 +118,8 @@ void QBackgroundSubtractorMog2Private::deleteSubtractor(){
 BackgroundSubtractorMOG2* QBackgroundSubtractorMog2Private::subtractorMog2(){
     if ( !m_subtractorMog2 ){
         if ( stateId() != "" ){
-            QStateContainer<BackgroundSubtractorMOG2>& stateCont =
-                    QStateContainer<BackgroundSubtractorMOG2>::instance();
+            QStateContainer<Ptr<BackgroundSubtractorMOG2>>& stateCont =
+                    QStateContainer<Ptr<BackgroundSubtractorMOG2>>::instance();
 
             m_subtractorMog2 = stateCont.state(stateId());
             if ( m_subtractorMog2 == 0 ){
@@ -124,7 +133,7 @@ BackgroundSubtractorMOG2* QBackgroundSubtractorMog2Private::subtractorMog2(){
             m_subtractorMog2 = createSubtractor();
         }
     }
-    return m_subtractorMog2;
+    return m_subtractorMog2->get();
 }
 
 BackgroundSubtractor* QBackgroundSubtractorMog2Private::subtractor(){
@@ -158,6 +167,23 @@ QBackgroundSubtractorMog2::~QBackgroundSubtractorMog2(){
 }
 
 /*!
+  \property QBackgroundSubtractorMog2::backgroundModel
+  \sa BackgroundSubtractorMog2::backgroundModel
+ */
+
+/*!
+  \qmlproperty Mat BackgroundSubtractorMog2::backgroundModel
+
+  Snapshot of the background model computed by the MOG2 algorithm.
+ */
+QMat* QBackgroundSubtractorMog2::backgroundModel(){
+    Q_D(QBackgroundSubtractorMog2);
+    if ( d->subtractorMog2() )
+        d->subtractorMog2()->getBackgroundImage(*(d->backgroundModel.cvMat()));
+    return &d->backgroundModel;
+}
+
+/*!
   \property QBackgroundSubtractorMog2::history
   \sa BackgroundSubtractorMog2::history
  */
@@ -177,7 +203,7 @@ void QBackgroundSubtractorMog2::setHistory(int history){
     if ( d->history != history ){
          d->history = history;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->setInt("history", history);
+            d->subtractorMog2()->setHistory(history);
          emit historyChanged();
     }
 }
@@ -202,7 +228,7 @@ void QBackgroundSubtractorMog2::setNmixtures(int nmixtures){
     if ( d->nmixtures != nmixtures ){
          d->nmixtures = nmixtures;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->setInt("nmixtures", nmixtures);
+            d->subtractorMog2()->setNMixtures(nmixtures);
          emit nmixturesChanged();
     }
 }
@@ -232,7 +258,7 @@ void QBackgroundSubtractorMog2::setNShadowDetection(int nShadowDetection){
     if ( d->nShadowDetection != nShadowDetection ){
          d->nShadowDetection = nShadowDetection;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->set("nShadowDetection", static_cast<uchar>(nShadowDetection));
+            d->subtractorMog2()->setShadowValue(nShadowDetection);
          emit nShadowDetectionChanged();
     }
 }
@@ -257,7 +283,7 @@ void QBackgroundSubtractorMog2::setDetectShadows(bool detectShadows){
     if ( d->detectShadows != detectShadows ){
          d->detectShadows = detectShadows;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->setBool("detectShadows", detectShadows);
+            d->subtractorMog2()->setDetectShadows(detectShadows);
          emit detectShadowsChanged();
     }
 }
@@ -283,7 +309,7 @@ void QBackgroundSubtractorMog2::setBackgroundRatio(float backgroundRatio){
     if ( d->backgroundRatio != backgroundRatio ){
          d->backgroundRatio = backgroundRatio;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->set("backgroundRatio", backgroundRatio);
+            d->subtractorMog2()->setBackgroundRatio(backgroundRatio);
          emit backgroundRatioChanged();
     }
 }
@@ -308,7 +334,7 @@ void QBackgroundSubtractorMog2::setCt(float ct){
     if ( d->ct != ct ){
          d->ct = ct;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->set("fCT", ct);
+            d->subtractorMog2()->setComplexityReductionThreshold(ct);
          emit ctChanged();
     }
 }
@@ -328,7 +354,7 @@ void QBackgroundSubtractorMog2::setTau(float tau){
     if ( d->tau != tau ){
          d->tau = tau;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->set("fTau", tau);
+            d->subtractorMog2()->setShadowThreshold(tau);
          emit tauChanged();
     }
 }
@@ -348,7 +374,7 @@ void QBackgroundSubtractorMog2::setVarInit(float varInit){
     if ( d->varInit != varInit ){
          d->varInit = varInit;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->set("fVarInit", varInit);
+            d->subtractorMog2()->setVarInit(varInit);
          emit varInitChanged();
     }
 }
@@ -368,7 +394,7 @@ void QBackgroundSubtractorMog2::setVarMin(float varMin){
     if ( d->varMin != varMin ){
          d->varMin = varMin;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->set("fVarMin", varMin);
+            d->subtractorMog2()->setVarMin(varMin);
          emit varMinChanged();
     }
 }
@@ -388,7 +414,7 @@ void QBackgroundSubtractorMog2::setVarMax(float varMax){
     if ( d->varMax != varMax ){
          d->varMax = varMax;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->set("fVarMax", varMax);
+            d->subtractorMog2()->setVarMax(varMax);
          emit varMaxChanged();
     }
 }
@@ -409,7 +435,7 @@ void QBackgroundSubtractorMog2::setVarThreshold(float varThreshold){
     if ( d->varThreshold != varThreshold ){
          d->varThreshold = varThreshold;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->set("varThreshold", varThreshold);
+            d->subtractorMog2()->setVarThreshold(varThreshold);
          emit varThresholdChanged();
     }
 }
@@ -430,7 +456,7 @@ void QBackgroundSubtractorMog2::setVarThresholdGen(float varThresholdGen){
     if ( d->varThresholdGen != varThresholdGen ){
          d->varThresholdGen = varThresholdGen;
          if ( d->subtractorMog2() )
-            d->subtractorMog2()->set("varThresholdGen", varThresholdGen);
+            d->subtractorMog2()->setVarThresholdGen(varThresholdGen);
          emit varThresholdGenChanged();
     }
 }
