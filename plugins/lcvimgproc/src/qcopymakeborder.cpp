@@ -27,7 +27,7 @@ using namespace cv;
 
   The areas to the left, to the right, above and below the copied source image will be filled with extrapolated pixels
 
-  \quotefile imgproc/blur.qml
+  \quotefile imgproc/copymakeborder.qml
 */
 
 /*!

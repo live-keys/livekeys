@@ -25,7 +25,7 @@ using namespace cv;
   \inherits MatFilter
   \brief Converts an image from one color space to another.
 
-  \quotefile imgproc/blur.qml
+  \quotefile imgproc/threshold.qml
 */
 
 /*!
