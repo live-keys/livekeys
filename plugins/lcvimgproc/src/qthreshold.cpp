@@ -27,7 +27,7 @@
   bi-level (binary) image out of a grayscale image ( compare() could be also used for this purpose) or for removing a
   noise, that is, filtering out pixels with too small or too large values.
 
-  \quotefile imgproc/canny.qml
+  \quotefile imgproc/threshold.qml
 */
 
 /*!
