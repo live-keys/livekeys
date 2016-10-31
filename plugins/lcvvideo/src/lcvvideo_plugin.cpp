@@ -18,13 +18,13 @@
 
 #include <qqml.h>
 #include "qcalcopticalflowpyrlk.h"
-//#include "qbackgroundsubtractormog.h"
-//#include "qbackgroundsubtractormog2.h"
+#include "qbackgroundsubtractormog2.h"
+#include "qbackgroundsubtractorknn.h"
 
 void LcvvideoPlugin::registerTypes(const char *uri){
     // @uri modules.lcvvideo
     qmlRegisterType<QCalcOpticalFlowPyrLK>(     uri, 1, 0, "CalcOpticalFlowPyrLK");
-//    qmlRegisterType<QBackgroundSubtractor>(     uri, 1, 0, "BackgroundSubtractor");
-//    qmlRegisterType<QBackgroundSubtractorMog>(  uri, 1, 0, "BackgroundSubtractorMog");
-//    qmlRegisterType<QBackgroundSubtractorMog2>( uri, 1, 0, "BackgroundSubtractorMog2");
+    qmlRegisterType<QBackgroundSubtractor>(     uri, 1, 0, "BackgroundSubtractor");
+    qmlRegisterType<QBackgroundSubtractorMog2>( uri, 1, 0, "BackgroundSubtractorMog2");
+    qmlRegisterType<QBackgroundSubtractorKnn>(  uri, 1, 0, "BackgroundSubtractorKnn");
 }
