@@ -34,6 +34,7 @@ class QGuiApplication;
 class QQmlApplicationEngine;
 class QCodeDocument;
 class QUrl;
+class QLiveCVArguments;
 
 // class QLiveCV
 // -------------
@@ -41,7 +42,7 @@ class QUrl;
 class QLiveCV{
 
 public:
-    QLiveCV(const QStringList &arguments);
+    QLiveCV(int argc, const char* const argv[]);
     ~QLiveCV();
 
     void loadLibrary(const QString& library);
@@ -54,6 +55,8 @@ public:
 
     const QString& dir() const;
 
+    static void registerTypes();
+
 private:
     QLiveCV(const QLiveCV&);
     QLiveCV& operator = (const QLiveCV&);
@@ -62,6 +65,7 @@ private:
     void solveImportPaths();
 
     QQmlApplicationEngine* m_engine;
+    QLiveCVArguments* m_arguments;
 
     QCodeDocument* m_document;
     QString m_dir;

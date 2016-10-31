@@ -17,30 +17,35 @@
 #include "qlivecv.h"
 #include "qlivecvlog.h"
 #include "qcodedocument.h"
+#include "qlivecvarguments.h"
+#include "qcodehandler.h"
 
 #include <QUrl>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QGuiApplication>
 
-QLiveCV::QLiveCV(const QStringList& arguments)
+QLiveCV::QLiveCV(int argc, const char* const argv[])
     : m_engine(new QQmlApplicationEngine)
     , m_document(new QCodeDocument)
     , m_dir(QGuiApplication::applicationDirPath())
 {
-    parseArguments(arguments);
+    m_arguments = new QLiveCVArguments(
+        " Live CV v" + versionString() + "\n"
+        " --------------------------------------------------- ",
+        argc,
+        argv
+    );
+
+    if ( m_arguments->consoleFlag() )
+        qInstallMessageHandler(&QLiveCVLog::logFunction);
+    if ( m_arguments->fileLogFlag() )
+        QLiveCVLog::instance().enableFileLog();
 }
 
 QLiveCV::~QLiveCV(){
     delete m_engine;
     delete m_document;
-}
-
-void QLiveCV::parseArguments(const QStringList &arguments){
-    if ( !arguments.contains("-c" ) )
-        qInstallMessageHandler(&QLiveCVLog::logFunction);
-    if ( arguments.contains("-l") )
-        QLiveCVLog::instance().enableFileLog();
 }
 
 void QLiveCV::solveImportPaths(){
@@ -63,6 +68,7 @@ void QLiveCV::loadQml(const QUrl &url){
 
     m_engine->rootContext()->setContextProperty("codeDocument", m_document);
     m_engine->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
+    m_engine->rootContext()->setContextProperty("arguments", m_arguments);
 #ifdef Q_OS_LINUX
     m_engine->rootContext()->setContextProperty("isLinux", true);
 #else
@@ -70,4 +76,10 @@ void QLiveCV::loadQml(const QUrl &url){
 #endif
 
     m_engine->load(url);
+}
+
+void QLiveCV::registerTypes(){
+    qmlRegisterUncreatableType<QCodeDocument>("Cv", 1, 0, "Document", "Only access to the document object is allowed.");
+    qmlRegisterUncreatableType<QLiveCVLog>(   "Cv", 1, 0, "MessageLog", "Type is singleton.");
+    qmlRegisterType<QCodeHandler>(            "Cv", 1, 0, "CodeHandler");
 }
