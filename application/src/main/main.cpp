@@ -18,13 +18,9 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include "qcodedocument.h"
-#include "qcodehandler.h"
-#include "qlivecvlog.h"
 #include "qlivecv.h"
 
 #include <QLibrary>
-
 
 int main(int argc, char *argv[]){
 
@@ -32,13 +28,10 @@ int main(int argc, char *argv[]){
     QGuiApplication::setApplicationName("Live CV");
     QGuiApplication::setApplicationVersion(QLiveCV::versionString());
 
-    QLiveCV livecv(app.arguments());
+    QLiveCV::registerTypes();
+
+    QLiveCV livecv(argc, argv);
     livecv.loadLibrary(livecv.dir() + "/lcvlib");
-
-    qmlRegisterUncreatableType<QCodeDocument>("Cv", 1, 0, "Document", "Only access to the document object is allowed.");
-    qmlRegisterUncreatableType<QLiveCVLog>(   "Cv", 1, 0, "MessageLog", "Type is singleton.");
-    qmlRegisterType<QCodeHandler>(            "Cv", 1, 0, "CodeHandler");
-
     livecv.loadQml(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return app.exec();
