@@ -26,5 +26,7 @@ void QLiveCVArguments::initialize(int argc, const char* const argv[]){
     m_consoleFlag = m_parser->isSet(consoleOption);
     m_fileLogFlag = m_parser->isSet(logOption);
     m_previewFlag = m_parser->isSet(previewOption);
+
+    m_script = m_parser->script();
 }
 
