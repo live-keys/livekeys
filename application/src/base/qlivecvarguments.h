@@ -22,6 +22,8 @@ public:
     bool consoleFlag() const;
     bool fileLogFlag() const;
 
+    const QString& script() const;
+
 private:
     void initialize(int argc, const char* const argv[]);
 
@@ -30,6 +32,8 @@ private:
     bool m_fileLogFlag;
     bool m_consoleFlag;
     bool m_previewFlag;
+
+    QString m_script;
 
 };
 
@@ -43,6 +47,10 @@ inline bool QLiveCVArguments::consoleFlag() const{
 
 inline bool QLiveCVArguments::fileLogFlag() const{
     return m_fileLogFlag;
+}
+
+inline const QString&QLiveCVArguments::script() const{
+    return m_script;
 }
 
 #endif // QLIVECVARGUMENTS_HPP
