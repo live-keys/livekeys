@@ -36,6 +36,10 @@ class QCodeDocument;
 class QUrl;
 class QLiveCVArguments;
 
+namespace lcv{
+class QProject;
+}
+
 // class QLiveCV
 // -------------
 
@@ -70,6 +74,8 @@ private:
     QCodeDocument* m_document;
     QString m_dir;
     QLibrary m_lcvlib;
+
+    lcv::QProject* m_project;
 
 };
 

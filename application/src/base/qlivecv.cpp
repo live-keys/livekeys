@@ -20,6 +20,11 @@
 #include "qlivecvarguments.h"
 #include "qcodehandler.h"
 
+#include "qproject.h"
+#include "qprojectentry.h"
+#include "qprojectfile.h"
+#include "qprojectfilemodel.h"
+
 #include <QUrl>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -29,6 +34,7 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
     : m_engine(new QQmlApplicationEngine)
     , m_document(new QCodeDocument)
     , m_dir(QGuiApplication::applicationDirPath())
+    , m_project(new lcv::QProject)
 {
     m_arguments = new QLiveCVArguments(
         " Live CV v" + versionString() + "\n"
@@ -37,7 +43,7 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
         argv
     );
 
-    if ( m_arguments->consoleFlag() )
+    if ( !m_arguments->consoleFlag() )
         qInstallMessageHandler(&QLiveCVLog::logFunction);
     if ( m_arguments->fileLogFlag() )
         QLiveCVLog::instance().enableFileLog();
@@ -66,6 +72,7 @@ void QLiveCV::loadLibrary(const QString &library){
 void QLiveCV::loadQml(const QUrl &url){
     solveImportPaths();
 
+    m_engine->rootContext()->setContextProperty("projectFileModel", m_project->fileModel());
     m_engine->rootContext()->setContextProperty("codeDocument", m_document);
     m_engine->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
     m_engine->rootContext()->setContextProperty("arguments", m_arguments);
@@ -79,7 +86,17 @@ void QLiveCV::loadQml(const QUrl &url){
 }
 
 void QLiveCV::registerTypes(){
-    qmlRegisterUncreatableType<QCodeDocument>("Cv", 1, 0, "Document", "Only access to the document object is allowed.");
-    qmlRegisterUncreatableType<QLiveCVLog>(   "Cv", 1, 0, "MessageLog", "Type is singleton.");
-    qmlRegisterType<QCodeHandler>(            "Cv", 1, 0, "CodeHandler");
+    qmlRegisterUncreatableType<QCodeDocument>(
+        "Cv", 1, 0, "Document", "Only access to the document object is allowed.");
+    qmlRegisterUncreatableType<QLiveCVLog>(
+        "Cv", 1, 0, "MessageLog", "Type is singleton.");
+    qmlRegisterType<QCodeHandler>(
+        "Cv", 1, 0, "CodeHandler");
+
+    qmlRegisterUncreatableType<lcv::QProjectFileModel>(
+        "Cv", 1, 0, "ProjectFileModel", "Cannot create a FileSystemModel instance.");
+    qmlRegisterUncreatableType<lcv::QProjectEntry>(
+        "Cv", 1, 0, "ProjectEntry", "ProjectEntry objects are managed by the ProjectFileModel.");
+    qmlRegisterUncreatableType<lcv::QProjectFile>(
+        "Cv", 1, 0, "ProjectFile", "ProjectFile objects are managed by the ProjectFileModel.");
 }

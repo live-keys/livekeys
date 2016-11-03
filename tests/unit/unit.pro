@@ -5,6 +5,7 @@ CONFIG  += console testcase
 
 # Add files to test
 
+include($$PWD/../../application/src/scope/scope.pri)
 include($$PWD/../../application/src/base/base.pri)
 
 HEADERS += \
