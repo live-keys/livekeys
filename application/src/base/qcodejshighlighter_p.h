@@ -89,13 +89,13 @@ QCodeJSHighlighter::QCodeJSHighlighter(QTextDocument *parent)
 
     // default color scheme
     m_colors[Normal]     = QColor("#fff");
-    m_colors[Comment]    = QColor("#9c9c9c");
+    m_colors[Comment]    = QColor("#56748a");
     m_colors[Number]     = QColor("#ca7000");
-    m_colors[String]     = QColor("#30a020");
+    m_colors[String]     = QColor("#358d37");
     m_colors[Operator]   = QColor("#c0a000");
-    m_colors[Identifier] = QColor("#6666ff");
+    m_colors[Identifier] = QColor("#93672f");
     m_colors[Keyword]    = QColor("#a0a000");
-    m_colors[BuiltIn]    = QColor("#a0a000");
+    m_colors[BuiltIn]    = QColor("#93672f");
     m_colors[Marker]     = QColor("#ffff00");
 
     // https://developer.mozilla.org/en/JavaScript/Reference/Reserved_Words
