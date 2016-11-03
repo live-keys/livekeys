@@ -4,6 +4,7 @@
         <file alias="Editor.qml">qml/Editor.qml</file>
         <file alias="LogWindow.qml">qml/LogWindow.qml</file>
         <file alias="Top.qml">qml/Top.qml</file>
+        <file alias="Project.qml">qml/Project.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>
@@ -11,6 +12,10 @@
         <file alias="UbuntuMono-Regular.ttf">fonts/UbuntuMono-Regular.ttf</file>
         <file alias="SourceCodePro-Bold.ttf">fonts/SourceCodePro-Bold.ttf</file>
         <file alias="SourceCodePro-Regular.ttf">fonts/SourceCodePro-Regular.ttf</file>
+        <file alias="SourceCodePro-Light.ttf">fonts/SourceCodePro-Light.ttf</file>
+        <file alias="OpenSans-Bold.ttf">fonts/OpenSans-Bold.ttf</file>
+        <file alias="OpenSans-Light.ttf">fonts/OpenSans-Light.ttf</file>
+        <file alias="OpenSans-Regular.ttf">fonts/OpenSans-Regular.ttf</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="log.png">images/log.png</file>

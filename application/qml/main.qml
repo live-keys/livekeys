@@ -35,8 +35,12 @@ ApplicationWindow {
     FontLoader{ id: ubuntuMonoBold;       source: "qrc:/fonts/UbuntuMono-Bold.ttf"; }
     FontLoader{ id: ubuntuMonoRegular;    source: "qrc:/fonts/UbuntuMono-Regular.ttf"; }
     FontLoader{ id: ubuntuMonoItalic;     source: "qrc:/fonts/UbuntuMono-Italic.ttf"; }
+    FontLoader{ id: sourceCodeProLight;   source: "qrc:/fonts/SourceCodePro-Light.ttf"; }
     FontLoader{ id: sourceCodeProRegular; source: "qrc:/fonts/SourceCodePro-Regular.ttf"; }
     FontLoader{ id: sourceCodeProBold;    source: "qrc:/fonts/SourceCodePro-Bold.ttf"; }
+    FontLoader{ id: openSansLight;        source: "qrc:/fonts/OpenSans-Light.ttf"; }
+    FontLoader{ id: openSansRegular;      source: "qrc:/fonts/OpenSans-Regular.ttf"; }
+    FontLoader{ id: openSansBold;         source: "qrc:/fonts/OpenSans-Bold.ttf"; }
 
     LogWindow{
         id : logWindow
@@ -158,7 +162,13 @@ ApplicationWindow {
             handleDelegate: Rectangle {
                 implicitWidth: 1
                 implicitHeight: 1
-                color: "#05111b"
+                color: "#071723"
+            }
+
+            Project{
+                id: projectView
+                height: parent.height
+                width: 220
             }
 
             Editor{
