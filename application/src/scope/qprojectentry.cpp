@@ -18,7 +18,7 @@ QProjectEntry::QProjectEntry(const QString &path, QProjectEntry *parent)
 QProjectEntry::QProjectEntry(const QString &path, const QString &name, QProjectEntry *parent)
     : QObject(parent)
     , m_name(name)
-    , m_path(QDir::cleanPath(path + QDir::separator() + name))
+    , m_path(QDir::cleanPath((path != "" ? path + QDir::separator() : "") + name))
 {
 }
 

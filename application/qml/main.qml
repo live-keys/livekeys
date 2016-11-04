@@ -55,6 +55,7 @@ ApplicationWindow {
 
     Top{
         id : header
+//        visible: false
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -168,7 +169,7 @@ ApplicationWindow {
             Project{
                 id: projectView
                 height: parent.height
-                width: 220
+                width: 520
             }
 
             Editor{

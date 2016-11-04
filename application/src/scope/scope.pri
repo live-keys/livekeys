@@ -4,10 +4,12 @@ HEADERS += \
     $$PWD/qproject.h \
     $$PWD/qprojectentry.h \
     $$PWD/qprojectfile.h \
-    $$PWD/qprojectfilemodel.h
+    $$PWD/qprojectfilemodel.h \
+    $$PWD/qprojectdocument.h
 
 SOURCES += \
     $$PWD/qproject.cpp \
     $$PWD/qprojectentry.cpp \
     $$PWD/qprojectfile.cpp \
-    $$PWD/qprojectfilemodel.cpp
+    $$PWD/qprojectfilemodel.cpp \
+    $$PWD/qprojectdocument.cpp

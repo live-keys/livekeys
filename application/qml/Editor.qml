@@ -97,10 +97,11 @@ Rectangle{
             }
 
             focus : true
-            text : "Rectangle{\n}"
+            text : project.inFocus ? project.inFocus.content : ''
             color : "#fff"
             font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
-            font.pixelSize: 14
+            font.pixelSize: 13
+            font.weight: Font.Light
 
             selectByMouse: true
             mouseSelectionMode: TextEdit.SelectCharacters

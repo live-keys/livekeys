@@ -12,7 +12,7 @@ class QProjectEntry : public QObject{
     Q_OBJECT
     Q_PROPERTY(QString name   READ name NOTIFY nameChanged)
     Q_PROPERTY(QString path   READ path)
-    Q_PROPERTY(bool    isFile READ isFile)
+    Q_PROPERTY(bool    isFile READ isFile CONSTANT)
 
 public:
     explicit QProjectEntry(const QString& path, QProjectEntry *parent = 0);

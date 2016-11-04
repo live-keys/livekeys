@@ -1,5 +1,6 @@
 TEMPLATE = app
 TARGET   = livecv
+CONFIG  += c++11
 QT      += qml quick
 
 # Application

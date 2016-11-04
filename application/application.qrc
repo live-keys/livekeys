@@ -23,5 +23,10 @@
         <file alias="new.png">images/new.png</file>
         <file alias="open.png">images/open.png</file>
         <file alias="save.png">images/save.png</file>
+        <file alias="project-arrow.png">images/project-arrow.png</file>
+        <file alias="project-directory.png">images/project-directory.png</file>
+        <file alias="project-file.png">images/project-file.png</file>
+        <file alias="project-file-active.png">images/project-file-active.png</file>
+        <file alias="project-file-unsaved.png">images/project-file-unsaved.png</file>
     </qresource>
 </RCC>
