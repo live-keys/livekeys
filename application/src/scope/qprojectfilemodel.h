@@ -2,7 +2,7 @@
 #define QPROJECTFILEMODEL_H
 
 #include <QAbstractItemModel>
-
+#include <functional>
 
 // actions from livecvproject
 
@@ -44,11 +44,15 @@ public:
 
     QHash<int, QByteArray> roleNames() const;
 
+    void createProject();
     void openProject(const QString& path);
     void closeProject();
 
+//    QProjectEntry* visitFiles(std::function<bool(QProjectEntry*))> visitor);
+
     QProjectFile* openFile(const QString& file);
     QProjectEntry* findPathInEntry(QProjectEntry* entry, const QString& path);
+    QProjectEntry* root();
 
 public slots:
     void fileClosed(const QString& path);
@@ -76,6 +80,10 @@ private:
 
     QProjectEntry *m_root;
 };
+
+inline QProjectEntry *QProjectFileModel::root(){
+    return m_root;
+}
 
 }// namespace
 

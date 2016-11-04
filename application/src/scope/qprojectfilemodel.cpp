@@ -65,7 +65,7 @@ QModelIndex QProjectFileModel::parent(const QModelIndex &index) const{
 
 int QProjectFileModel::rowCount(const QModelIndex &parent) const{
     QProjectEntry *parentItem = itemOrRoot(parent);
-//    qDebug( )<< "Row count requested. for " << parent << parentItem->childCount();
+    qDebug( )<< "Row count requested. for " << parent << parentItem->childCount();
     if ( parentItem->childCount() == 0)
         expandEntry(parentItem);
 //    qDebug() << parentItem->childCount();
@@ -91,6 +91,13 @@ QHash<int, QByteArray> QProjectFileModel::roleNames() const{
     QHash<int, QByteArray> result;;
     result.insert(UrlStringRole, "fileName");
     return result;
+}
+
+void QProjectFileModel::createProject(){
+    beginResetModel();
+    m_root->clearItems();
+    m_root->addFileEntry("");
+    endResetModel();
 }
 
 QProjectFile *QProjectFileModel::openFile(const QString &file){

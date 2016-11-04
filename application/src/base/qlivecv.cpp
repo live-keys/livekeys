@@ -24,6 +24,7 @@
 #include "qprojectentry.h"
 #include "qprojectfile.h"
 #include "qprojectfilemodel.h"
+#include "qprojectdocument.h"
 
 #include <QUrl>
 #include <QQmlApplicationEngine>
@@ -47,6 +48,8 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
         qInstallMessageHandler(&QLiveCVLog::logFunction);
     if ( m_arguments->fileLogFlag() )
         QLiveCVLog::instance().enableFileLog();
+    if ( m_arguments->script() != "" )
+        m_project->openProject(m_arguments->script());
 }
 
 QLiveCV::~QLiveCV(){
@@ -72,7 +75,7 @@ void QLiveCV::loadLibrary(const QString &library){
 void QLiveCV::loadQml(const QUrl &url){
     solveImportPaths();
 
-    m_engine->rootContext()->setContextProperty("projectFileModel", m_project->fileModel());
+    m_engine->rootContext()->setContextProperty("project", m_project);
     m_engine->rootContext()->setContextProperty("codeDocument", m_document);
     m_engine->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
     m_engine->rootContext()->setContextProperty("arguments", m_arguments);
@@ -99,4 +102,6 @@ void QLiveCV::registerTypes(){
         "Cv", 1, 0, "ProjectEntry", "ProjectEntry objects are managed by the ProjectFileModel.");
     qmlRegisterUncreatableType<lcv::QProjectFile>(
         "Cv", 1, 0, "ProjectFile", "ProjectFile objects are managed by the ProjectFileModel.");
+    qmlRegisterUncreatableType<lcv::QProjectDocument>(
+        "Cv", 1, 0, "ProjectDocument", "ProjectDocument objects are managed by the Project class.");
 }
