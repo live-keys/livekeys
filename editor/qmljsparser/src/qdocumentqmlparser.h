@@ -1,17 +1,19 @@
 #ifndef QDOCUMENTQMLPARSER_H
 #define QDOCUMENTQMLPARSER_H
 
+#include "qqmljsparserglobal.h"
 #include "qdocumentqmlinfo.h"
+#include <QString>
 
 namespace lcv{
 
-class QDocumentQmlParser{
+class Q_QMLJSPARSER_EXPORT QDocumentQmlParser{
 
 public:
     QDocumentQmlParser();
     ~QDocumentQmlParser();
 
-//    QQmlDocumentInfo::Ptr operator(const QString& text);
+    QDocumentQmlInfo::MutablePtr operator()(const QString& filePath, const QString& text);
 
 };
 

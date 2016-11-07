@@ -33,7 +33,8 @@ HEADERS += \
     $$PWD/qmljs/qmljstypedescriptionreader.h \
     $$PWD/qmljs/qmljscontext.h \
     $$PWD/qmljs/qmljsviewercontext.h \
-    $$PWD/qmljs/qmljsqrcparser.h
+    $$PWD/qmljs/qmljsqrcparser.h \
+    $$PWD/qmljs/qmljsdescribevalue.h
 
 SOURCES += \
     $$PWD/qmljs/qmljsbind.cpp \
@@ -48,7 +49,8 @@ SOURCES += \
     $$PWD/qmljs/qmljstypedescriptionreader.cpp \
     $$PWD/qmljs/qmljscontext.cpp \
     $$PWD/qmljs/qmljsviewercontext.cpp \
-    $$PWD/qmljs/qmljsqrcparser.cpp
+    $$PWD/qmljs/qmljsqrcparser.cpp \
+    $$PWD/qmljs/qmljsdescribevalue.cpp
 
 # Language Utils
 
