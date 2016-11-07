@@ -62,12 +62,12 @@ public slots:
 
     void entryRemoved(const QModelIndex& item);
     void entryRemoved(QProjectEntry* entry);
-    void entryRemoved(const QModelIndex &item, QProjectEntry* entry);
-    void entryAdded(QProjectEntry* item, QProjectEntry* parent);
+    void entryRemoved(const QModelIndex &item, lcv::QProjectEntry* entry);
+    void entryAdded(lcv::QProjectEntry* item, lcv::QProjectEntry* parent);
 
-    void moveEntry(QProjectEntry* item, QProjectEntry* parent);
+    void moveEntry(lcv::QProjectEntry* item, lcv::QProjectEntry* parent);
 
-    void expandEntry(QProjectEntry* entry) const;
+    void expandEntry(lcv::QProjectEntry* entry) const;
 
     lcv::QProjectEntry *itemAt(const QModelIndex& index) const;
 

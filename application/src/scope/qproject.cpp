@@ -30,12 +30,19 @@ void QProject::newProject(){
 }
 
 void QProject::openProject(const QString &path){
-
+    closeProject();
     m_fileModel->openProject(path);
 }
 
 void QProject::closeProject(){
-
+    m_focus = 0;
+    m_active = 0;
+    emit inFocusChanged(0);
+    emit activeChanged(0);
+    for( QHash<QString, QProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
+        delete it.value();
+    }
+    m_openedFiles.clear();
 }
 
 void QProject::openFile(const QString &path){
@@ -105,8 +112,9 @@ void QProject::setInFocus(QProjectDocument *document){
 
 void QProject::setActive(QProjectDocument *document){
     if ( m_active != document ){
-        if ( m_active != 0 )
+        if ( m_active != 0 ){
             m_active->file()->setIsActive(false);
+        }
         m_active = document;
         document->file()->setIsActive(true);
         emit activeChanged(document);

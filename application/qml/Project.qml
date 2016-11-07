@@ -14,13 +14,9 @@ Rectangle{
     TreeView {
         id: view
         model: project.fileModel
-//        anchors.top: parent.top
-//        anchors.left: parent.left
         anchors.topMargin: 10
         anchors.leftMargin: 10
         anchors.fill: parent
-//        height: parent.height - 10
-
 
         style: TreeViewStyle{
             backgroundColor: "transparent"
@@ -93,8 +89,10 @@ Rectangle{
             Rectangle{
                 id: boundingRect
                 height: 22
+                anchors.left: parent.left
+                anchors.top: parent.top
                 width: entryData.width > 70 ? entryData.width + 30 : 95
-                color: entryDelegate.editMode ? "#ddaaff" : "transparent"
+                color: entryDelegate.editMode ? "#1b2934" : "transparent"
                 Image{
                     anchors.left: parent.left
                     anchors.leftMargin: 5
@@ -119,7 +117,7 @@ Rectangle{
                     text: {
                         styleData.value
                             ? styleData.value.name === ''
-                            ? 'untitled' : styleData.value.name : ''
+                            ? 'untitled' : styleData.value.name + styleData.index : ''
                     }
                     font.family: 'Open Sans, Arial, sans-serif'
                     font.pixelSize: 12
@@ -139,8 +137,10 @@ Rectangle{
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
                     drag.target: parent
                     drag.onActiveChanged: {
-                        if ( drag.active )
+                        if ( drag.active ){
                             view.dragEntry = styleData.value
+                            view.collapse(styleData.index)
+                        }
                         boundingRect.Drag.drop()
                     }
                     onClicked: {
@@ -164,6 +164,7 @@ Rectangle{
                         }
                     }
                     onDoubleClicked: {
+                        console.log(styleData.value)
                         if ( styleData.value.isFile )
                             project.openFile(styleData.value)
                         else if (view.isExpanded(styleData.index))
@@ -187,7 +188,6 @@ Rectangle{
                         }
                     }
                 ]
-
 
                 Drag.hotSpot.x: width / 2
                 Drag.hotSpot.y: height / 2
@@ -225,7 +225,6 @@ Rectangle{
         Menu {
             id: fileContextMenu
 
-
             style: MenuStyle{
                 frame: Rectangle{
                     color: "#071119"
@@ -233,7 +232,7 @@ Rectangle{
                 }
                 itemDelegate.label: Rectangle{
                     width: fileMenuLabel.width
-                    height: fileMenuLabel.height + 6
+                    height: 20
                     color: 'transparent'
                     Text{
                         id: fileMenuLabel
@@ -249,6 +248,7 @@ Rectangle{
                     color: styleData.selected ? "#092235" : "transparent"
                 }
             }
+
             MenuItem{
                 text: "Open File"
                 onTriggered: {
@@ -270,6 +270,9 @@ Rectangle{
             }
             MenuItem {
                 text: "Delete"
+                onTriggered: {
+                    console.log('triggered')
+                }
             }
 
         }

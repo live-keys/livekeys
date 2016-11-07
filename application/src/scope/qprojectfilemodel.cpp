@@ -65,7 +65,7 @@ QModelIndex QProjectFileModel::parent(const QModelIndex &index) const{
 
 int QProjectFileModel::rowCount(const QModelIndex &parent) const{
     QProjectEntry *parentItem = itemOrRoot(parent);
-    qDebug( )<< "Row count requested. for " << parent << parentItem->childCount();
+//    qDebug() << "Row count requested. for " << parent << parentItem->childCount();
     if ( parentItem->childCount() == 0)
         expandEntry(parentItem);
 //    qDebug() << parentItem->childCount();
@@ -190,12 +190,13 @@ void QProjectFileModel::entryRemoved(const QModelIndex &item, QProjectEntry *ent
 }
 
 void QProjectFileModel::entryAdded(QProjectEntry *item, QProjectEntry *parent){
-    QModelIndex parentIndex = createIndex(parent->childCount(), 0, parent);
+    QModelIndex parentIndex = createIndex(parent->childNumber(), 0, parent);
     beginInsertRows(
-                parentIndex,
-                parent->childCount(),
-                parent->childCount()
+        parentIndex,
+        parent->childCount(),
+        parent->childCount()
     );
+    qDebug() << "entry added";
     item->setParent(parent);
     endInsertRows();
 }
