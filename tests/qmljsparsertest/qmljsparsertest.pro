@@ -34,3 +34,6 @@ include($$PWD/src/qmljsparsertest.pri)
 
 OTHER_FILES += \
     $$PWD/data/mainwindow.in.qml
+
+DISTFILES += \
+    data/propertyexport.in.qml

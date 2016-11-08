@@ -128,6 +128,8 @@ Rectangle{
                             cursorPosition = clastpos + 1
                         }
                     }
+                } else if ( event.key === Qt.Key_Space && (event.modifiers & Qt.ControlModifier ) ){
+                    qmlSuggestionBox.visible = !qmlSuggestionBox.visible
                 } else if ( event.key === Qt.Key_S && (event.modifiers & Qt.ControlModifier ) ){
                     editor.save()
                     event.accepted = true
@@ -217,6 +219,35 @@ Rectangle{
 
         }
 
+    }
+
+    SuggestionBox{
+        id: qmlSuggestionBox
+
+        fontFamily: editorArea.font.family
+        fontSize: editorArea.font.pixelSize
+        visible: false
+
+        y: {
+            var calculatedY =
+                editorArea.cursorRectangle.y +
+                editorArea.cursorRectangle.height + 10 -
+                flick.flickableItem.contentY
+
+            if ( calculatedY > flick.height - height )
+                calculatedY = editorArea.cursorRectangle.y - height - flick.flickableItem.contentY
+            return calculatedY;
+        }
+        x: {
+            var calculatedX =
+                editorArea.positionToRectangle(editorArea.cursorPosition/*//TODOcodeH.completionModel.completionPosition*/).x -
+                flick.flickableItem.contentX
+
+            if ( calculatedX > flick.width - width)
+                calculatedX = flick.width - width
+            return calculatedX;
+        }
+//        model: codeHandler.completionModel
     }
 
 }

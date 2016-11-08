@@ -5,7 +5,6 @@
 namespace lcv{
 
 QDocumentQmlParser::QDocumentQmlParser(){
-//    QDocumentQmlInfo::Ptr doc = QDocumentQmlInfo::
 }
 
 QDocumentQmlParser::~QDocumentQmlParser()

@@ -2,6 +2,7 @@
 #include "qmljs/qmljsdocument.h"
 #include "qmljs/qmljsbind.h"
 #include "qqmlidvisitor.h"
+#include "qdocumentqmlranges_p.h"
 
 #include <QDebug>
 
@@ -11,6 +12,7 @@ class QDocumentQmlInfoPrivate{
 public:
     QmlJS::Document::MutablePtr internalDoc;
     QmlJS::Bind*                internalDocBind;
+    QDocumentQmlRanges          ranges;
 };
 
 QDocumentQmlInfo::Dialect QDocumentQmlInfo::extensionToDialect(const QString &extension){
@@ -50,30 +52,57 @@ QStringList QDocumentQmlInfo::extractIds(){
     return extractor.ids();
 }
 
-const QmlJS::Value *QDocumentQmlInfo::valueForId(const QString &id){
+const QDocumentQmlInfo::ValueReference QDocumentQmlInfo::rootObject(){
+    Q_D(QDocumentQmlInfo);
+    return QDocumentQmlInfo::ValueReference(d->internalDocBind->rootObjectValue(), this);
+}
+
+const QDocumentQmlInfo::ValueReference QDocumentQmlInfo::valueForId(const QString &id){
     Q_D(QDocumentQmlInfo);
     QIdValueExtractor valueExtractor(id);
 
     d->internalDocBind->idEnvironment()->processMembers(&valueExtractor);
 
-    return valueExtractor.value();
+    return QDocumentQmlInfo::ValueReference(valueExtractor.value(), this);
 }
 
-const QDocumentQmlInfo::ValueObject QDocumentQmlInfo::extractValueData(
-        const QmlJS::Value* value,
-        const QmlJS::Value** parent)
+const QDocumentQmlObject QDocumentQmlInfo::extractValueObject(
+        const ValueReference &valueref,
+        ValueReference *parent)
 {
-    Q_D(QDocumentQmlInfo);
-    QDocumentQmlInfo::ValueObject vodata;
-    if ( const QmlJS::ASTObjectValue* vob = value->asAstObjectValue()){
-        vodata.className = vob->className();
-        QValueMemberExtractor extractor;
+    QDocumentQmlObject vodata;
+    if ( isValueNull(valueref) || valueref.parent != this )
+        return vodata;
+
+    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
+        if ( vob->typeName() )
+            vodata.setTypeName(vob->typeName()->name.toString());
+        QValueMemberExtractor extractor(&vodata);
         vob->processMembers(&extractor);
+        if ( parent ){
+            parent->value = extractor.parent();
+            parent->parent = this;
+        }
     }
 
-//    qDebug() << DescribeValueVisitor::describe(value, 3);
+//    qDebug() << DescribeValueVisitor::describe(valueref.value, 3);
 
     return vodata;
+}
+
+void QDocumentQmlInfo::createRanges(QTextDocument *document){
+    Q_D(QDocumentQmlInfo);
+    d->ranges(document, d->internalDoc);
+}
+
+const QDocumentQmlInfo::ValueReference QDocumentQmlInfo::valueAtCursor(const QTextCursor &){
+    //TODO
+    //Use bind->findQmlObject(AST::Node*)
+    return QDocumentQmlInfo::ValueReference();
+}
+
+bool QDocumentQmlInfo::isValueNull(const QDocumentQmlInfo::ValueReference& vr){
+    return vr.value == 0;
 }
 
 bool QDocumentQmlInfo::parse(const QString &source){
