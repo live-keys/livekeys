@@ -17,12 +17,17 @@ private:
     QString filePath(const QString& relativePath);
     QString readFile(const QString& path);
 
-private slots:
     void initTestCase();
     void identifierTest();
     void identifierValueTest();
+    void identifierFunctionMemberTest();
     void identifierMemberTest();
 
+
+
+private slots:
+    void identifierScopeTest();
+    void rangeScopeTest();
 };
 
 #endif // QDOCUMENTQMLPARSERTEST_H

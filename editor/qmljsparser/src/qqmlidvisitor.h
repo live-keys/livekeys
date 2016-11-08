@@ -3,46 +3,11 @@
 
 #include "qmljs/qmljsinterpreter.h"
 #include "qmljs/parser/qmljsast_p.h"
+#include "qmljs/qmljsdescribevalue.h"
+#include "qdocumentqmlobject.h"
 #include <QMap>
 
 namespace lcv{
-
-class DescribeValueVisitor : public QmlJS::ValueVisitor{
-
-public:
-    static QString describe(const QmlJS::Value *value, int depth = 1);
-
-    DescribeValueVisitor(int detailDepth = 1, int startIndent = 0, int indentIncrement = 2);
-    virtual ~DescribeValueVisitor();
-
-    QString operator()(const QmlJS::Value *value);
-    void visit(const QmlJS::NullValue *) override;
-    void visit(const QmlJS::UndefinedValue *) override;
-    void visit(const QmlJS::UnknownValue *) override;
-    void visit(const QmlJS::NumberValue *) override;
-    void visit(const QmlJS::BooleanValue *) override;
-    void visit(const QmlJS::StringValue *) override;
-    void visit(const QmlJS::ObjectValue *) override;
-    void visit(const QmlJS::FunctionValue *) override;
-    void visit(const QmlJS::Reference *) override;
-    void visit(const QmlJS::ColorValue *) override;
-    void visit(const QmlJS::AnchorLineValue *) override;
-    QString description() const;
-    void basicDump(const char *baseName, const QmlJS::Value *value, bool opensContext);
-    void dumpNewline();
-    void openContext(const char *openStr = "{");
-    void closeContext(const char *closeStr = "}");
-    void dump(const char *toAdd);
-    void dump(const QString &toAdd);
-
-private:
-    int m_depth;
-    int m_indent;
-    int m_indentIncrement;
-    bool m_emptyContext;
-    QSet<const QmlJS::Value*> m_visited;
-    QString m_description;
-};
 
 class QIdExtractor : public QmlJS::MemberProcessor{
 
@@ -84,18 +49,28 @@ private:
 
 class QValueMemberExtractor : public QmlJS::MemberProcessor{
 public:
-    QValueMemberExtractor() : parent(0)
+    QValueMemberExtractor(QDocumentQmlObject* object) : m_parent(0), m_object(object)
     {}
 
     bool processProperty(const QString &name, const QmlJS::Value *value, const QmlJS::PropertyInfo&) override{
         QString type = "object";
-        if ( const QmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
+        if ( name == "parent" ){
+            m_parent = value;
+            return true;
+        } else if ( const QmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
             type = (vr->ast() != 0) ? vr->ast()->memberType.toString() : QString("object");
         } else if ( const QmlJS::ASTFunctionValue* fv = value->asAstFunctionValue() ){
-            type = "function";//TODO
+            type = "function";
+            QDocumentQmlObject::FunctionValue mf;
+            mf.name = name;
+            for( int i = 0; i < fv->namedArgumentCount(); ++i ){
+                mf.arguments.append(QPair<QString, QString>(fv->argumentName(i), ""));
+            }
+            m_object->addFunction(mf);
+            return true;
         }
-        members[name] = type;
-        return false;
+        m_object->addProperty(name, type);
+        return true;
     }
     bool processEnumerator(const QString &, const QmlJS::Value *) override
     {
@@ -103,30 +78,44 @@ public:
     }
     bool processSignal(const QString &name, const QmlJS::Value *value) override
     {
-        //TODO
-//        membersignals[name]
-//        qDebug() << "Signal" << name << value;
-        return false;
+        if ( const QmlJS::ASTSignal* vs = value->asAstSignal() ){
+            QDocumentQmlObject::FunctionValue mf;
+            mf.name = name;
+            for( int i = 0; i < vs->namedArgumentCount(); ++i ){
+                mf.arguments.append(QPair<QString, QString>(vs->argumentName(i), ""));
+            }
+            m_object->addSignal(mf);
+        }
+//        qDebug() << "SiGNAL:" << name;
+//        qDebug() << QmlJS::DescribeValueVisitor::describe(value, 2).toUtf8().data();
+        return true;
     }
     bool processSlot(const QString &name, const QmlJS::Value *value) override
     {
-        //TODO
-//        qDebug() << "Slot" << name << value;
-        return false;
+        if ( const QmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
+            m_object->addSlot(name, vr->ast()->name.toString());
+        } else {
+            m_object->addSlot(name, "");
+        }
+        return true;
     }
     bool processGeneratedSlot(const QString &name, const QmlJS::Value *value) override
     {
-        //TODO
-//        qDebug() << "Slot" << name << value;
-//        qDebug() << name << value;
-        return false;
+        if ( const QmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
+            m_object->addSlot(name, vr->ast()->name.toString());
+        } else if ( const QmlJS::ASTSignal* vs = value->asAstSignal() ){
+            m_object->addSlot(name, vs->ast()->name.toString());
+        } else {
+            m_object->addSlot(name, "");
+        }
+        return true;
     }
 
+    const QmlJS::Value* parent(){ return m_parent; }
+
 private:
-    const QmlJS::Value* parent;
-    QMap<QString, QString> members;
-    QMap<QString, QString> memberslots;
-    QMap<QString, QString> membersignals;
+    const QmlJS::Value* m_parent;
+    QDocumentQmlObject* m_object;
 };
 
 }// namespace

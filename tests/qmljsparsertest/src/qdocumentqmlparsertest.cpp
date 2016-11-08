@@ -1,6 +1,7 @@
 #include "qdocumentqmlparsertest.h"
 #include "qdocumentqmlparser.h"
 #include "qdocumentqmlinfo.h"
+#include <QPair>
 #include <QCoreApplication>
 #include <QtTest/QtTest>
 
@@ -54,10 +55,10 @@ void QDocumentQmlParserTest::identifierValueTest(){
     QDocumentQmlParser parser;
     QDocumentQmlInfo::MutablePtr doc = parser(file, code);
 
-    QVERIFY(doc->valueForId("messageDialog") != 0);
+    QVERIFY(!doc->isValueNull(doc->valueForId("messageDialog")));
 }
 
-void QDocumentQmlParserTest::identifierMemberTest(){
+void QDocumentQmlParserTest::identifierFunctionMemberTest(){
     QString file = filePath("mainwindow.in.qml");
     QString code = readFile(file);
     if ( code ==  "" )
@@ -65,7 +66,74 @@ void QDocumentQmlParserTest::identifierMemberTest(){
     QDocumentQmlParser parser;
     QDocumentQmlInfo::MutablePtr doc = parser(file, code);
 
-//    doc->extractValueData(doc->valueForId("messageDialog"));
-    doc->extractValueData(doc->valueForId("root"));
+    QDocumentQmlInfo::ValueReference vref;
+    QDocumentQmlObject data = doc->extractValueObject(doc->valueForId("messageDialog"), &vref);
+    QCOMPARE(data.typeName(), QString("MessageDialog"));
+    QCOMPARE(data.memberProperties().size(), 0);
+    QCOMPARE(data.memberSignals().size(), 0);
+    QCOMPARE(data.memberSlots().size(), 0);
+    QCOMPARE(data.memberFunctions().size(), 1);
+    QCOMPARE(data.memberFunctions()["show"].name, QString("show"));
+    QCOMPARE(data.memberFunctions()["show"].arguments.size(), 1);
+    QCOMPARE(data.memberFunctions()["show"].arguments[0].first, QString("caption"));
+}
+
+void QDocumentQmlParserTest::identifierMemberTest(){
+    QString file = filePath("propertyexport.in.qml");
+    QString code = readFile(file);
+    if ( code ==  "" )
+        QFAIL("Unable to read input file.");
+    QDocumentQmlParser parser;
+    QDocumentQmlInfo::MutablePtr doc = parser(file, code);
+
+    QDocumentQmlInfo::ValueReference parentref;
+    QDocumentQmlObject data = doc->extractValueObject(doc->valueForId("scope"), &parentref);
+    QCOMPARE(data.typeName(), QString("Item"));
+    QCOMPARE(data.memberProperties().size(), 1);
+    QCOMPARE(data.memberProperties()["scopeVarProperty"], QString("var"));
+    QCOMPARE(data.memberSlots().size(), 1);
+    QCOMPARE(data.memberSlots()["onScopeVarPropertyChanged"], QString("scopeVarProperty"));
+
+    QDocumentQmlObject rootData = doc->extractValueObject(doc->rootObject(), &parentref);
+    QCOMPARE(rootData.typeName(), QString("Item"));
+
+    QCOMPARE(rootData.memberProperties().size(), 3);
+    QCOMPARE(rootData.memberProperties()["intProperty"], QString("int"));
+    QCOMPARE(rootData.memberProperties()["stringProperty"], QString("string"));
+    QCOMPARE(rootData.memberProperties()["rectangleProperty"], QString("Rectangle"));
+
+    QCOMPARE(rootData.memberSignals().size(), 1);
+    QCOMPARE(rootData.memberSignals()["exportSignal"].name, QString("exportSignal"));
+    QCOMPARE(rootData.memberSignals()["exportSignal"].arguments.size(), 2);
+    QCOMPARE(rootData.memberSignals()["exportSignal"].arguments[0].first, QString("stringArgument"));
+    QCOMPARE(rootData.memberSignals()["exportSignal"].arguments[1].first, QString("intArgument"));
+
+    QCOMPARE(rootData.memberSlots().size(), 4);
+    QCOMPARE(rootData.memberSlots()["onIntPropertyChanged"], QString("intProperty"));
+    QCOMPARE(rootData.memberSlots()["onStringPropertyChanged"], QString("stringProperty"));
+    QCOMPARE(rootData.memberSlots()["onRectanglePropertyChanged"], QString("rectangleProperty"));
+    QCOMPARE(rootData.memberSlots()["onExportSignal"], QString("exportSignal"));
+}
+
+void QDocumentQmlParserTest::identifierScopeTest(){
+    QString file = filePath("propertyexport.in.qml");
+    QString code = readFile(file);
+    if ( code ==  "" )
+        QFAIL("Unable to read input file.");
+    QDocumentQmlParser parser;
+    QDocumentQmlInfo::MutablePtr doc = parser(file, code);
+
+    QDocumentQmlInfo::ValueReference parentref;
+    QDocumentQmlObject data = doc->extractValueObject(doc->valueForId("scope"), &parentref);
+    QVERIFY(!doc->isValueNull(parentref));
+
+    data = doc->extractValueObject(parentref);
+    QCOMPARE(data.typeName(), QString("Rectangle"));
+    QCOMPARE(data.memberProperties().size(), 1);
+    QCOMPARE(data.memberProperties()["parentIntProperty"], QString("int"));
+}
+
+void QDocumentQmlParserTest::rangeScopeTest(){
+    //HERE
 }
 

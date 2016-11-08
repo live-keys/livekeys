@@ -2,9 +2,13 @@
 #define QDOCUMENTQMLINFO_H
 
 #include "qqmljsparserglobal.h"
+#include "qdocumentqmlobject.h"
 #include <QSharedPointer>
 #include <QScopedPointer>
 #include <QMap>
+
+class QTextDocument;
+class QTextCursor;
 
 namespace QmlJS{ class Value; }
 
@@ -16,10 +20,16 @@ class Q_QMLJSPARSER_EXPORT QDocumentQmlInfo{
     Q_DISABLE_COPY(QDocumentQmlInfo)
 
 public:
-    class ValueObject{
+    class ValueReference{
     public:
-        QString className;
-        QMap<QString, QString> members;
+        ValueReference(const QmlJS::Value* val, QDocumentQmlInfo* p)
+            : value(val)
+            , parent(p)
+        {}
+        ValueReference() : value(0), parent(0){}
+
+        const QmlJS::Value* value;
+        QDocumentQmlInfo* parent;
     };
 
     enum Dialect{
@@ -43,8 +53,14 @@ public:
     static MutablePtr create(const QString& fileName);
 
     QStringList extractIds();
-    const QmlJS::Value *valueForId(const QString& id);
-    const ValueObject extractValueData(const QmlJS::Value *value, const QmlJS::Value** parent = 0);
+    const ValueReference rootObject();
+    const ValueReference valueForId(const QString& id);
+    const QDocumentQmlObject extractValueObject(const ValueReference& value, ValueReference *parent = 0);
+
+    void createRanges(QTextDocument* document);
+    const ValueReference valueAtCursor(const QTextCursor& cursor);
+
+    bool isValueNull(const ValueReference &vr);
 
     bool parse(const QString& source);
 
