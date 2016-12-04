@@ -1,16 +1,17 @@
 #ifndef QPROJECTFILE_H
 #define QPROJECTFILE_H
 
+#include "qlcveditorglobal.h"
+
 #include <QObject>
 #include "qprojectentry.h"
 
 namespace lcv{
 
-class QProjectFile : public QProjectEntry{
+class Q_LCVEDITOR_EXPORT QProjectFile : public QProjectEntry{
 
     Q_OBJECT
     Q_PROPERTY(QString text  READ text     WRITE setText     NOTIFY textChanged)
-    Q_PROPERTY(bool isActive READ isActive WRITE setIsActive NOTIFY isActiveChanged)
     Q_PROPERTY(bool isOpen   READ isOpen   WRITE setIsOpen   NOTIFY isOpenChanged)
     Q_PROPERTY(bool isDirty  READ isDirty  WRITE setIsDirty  NOTIFY isDirtyChanged)
 
@@ -21,9 +22,6 @@ public:
 
     const QString &text() const;
     void setText(const QString& text);
-
-    bool isActive() const;
-    void setIsActive(bool isActive);
 
     bool isOpen() const;
     void setIsOpen(bool isOpen);
@@ -41,7 +39,6 @@ signals:
 
 private:
     QString m_text;
-    bool    m_isActive;
     bool    m_isOpen;
     bool    m_isDirty;
 };
@@ -62,24 +59,12 @@ inline bool QProjectFile::isFile() const{
     return true;
 }
 
-inline bool QProjectFile::isActive() const{
-    return m_isActive;
-}
-
 inline bool QProjectFile::isOpen() const{
     return m_isOpen;
 }
 
 inline bool QProjectFile::isDirty() const{
     return m_isDirty;
-}
-
-inline void QProjectFile::setIsActive(bool isActive){
-    if (m_isActive == isActive)
-        return;
-
-    m_isActive = isActive;
-    emit isActiveChanged();
 }
 
 inline void QProjectFile::setIsOpen(bool isOpen){

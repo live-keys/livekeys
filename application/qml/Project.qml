@@ -99,7 +99,8 @@ Rectangle{
                     anchors.verticalCenter: parent.verticalCenter
                     source: {
                         if ( styleData.value.isFile ){
-                            if (styleData.value.isActive)
+                            console.log(styleData.value + ',' + project.active.file)
+                            if (styleData.value === (project.active ? project.active.file : null) )
                                 return "qrc:/images/project-file-active.png"
                             else
                                 return "qrc:/images/project-file.png"

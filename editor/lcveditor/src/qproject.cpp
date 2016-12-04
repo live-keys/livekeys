@@ -2,6 +2,7 @@
 #include "qprojectfile.h"
 #include "qprojectfilemodel.h"
 #include "qprojectdocument.h"
+#include <QUrl>
 
 #include <QDebug>
 
@@ -26,12 +27,29 @@ void QProject::newProject(){
         m_openedFiles[""] = document;
         m_active = document;
         m_focus  = document;
+        m_path   = "";
+        emit pathChanged("");
+        emit activeChanged(m_active);
+        emit inFocusChanged(document);
     }
 }
 
 void QProject::openProject(const QString &path){
     closeProject();
     m_fileModel->openProject(path);
+    emit pathChanged(path);
+
+    if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
+        QProjectDocument* document = new QProjectDocument(qobject_cast<QProjectFile*>(m_fileModel->root()->child(0)));
+        m_openedFiles[document->file()->path()] = document;
+        m_active = document;
+        m_focus  = document;
+        m_path   = path;
+        emit inFocusChanged(document);
+        emit activeChanged(document);
+    }
+//    emit pathChanged(path);
+    //TODO: Look for active and in focus node
 }
 
 void QProject::closeProject(){
@@ -43,6 +61,8 @@ void QProject::closeProject(){
         delete it.value();
     }
     m_openedFiles.clear();
+    m_path = "";
+    emit pathChanged("");
 }
 
 void QProject::openFile(const QString &path){
@@ -100,7 +120,11 @@ QProjectDocument *QProject::isOpened(const QString &path){
 }
 
 void QProject::closeFocusedFile(){
+    //TODO
+}
 
+void QProject::openFile(const QUrl &path){
+    openFile(path.toLocalFile());
 }
 
 void QProject::setInFocus(QProjectDocument *document){
@@ -112,11 +136,7 @@ void QProject::setInFocus(QProjectDocument *document){
 
 void QProject::setActive(QProjectDocument *document){
     if ( m_active != document ){
-        if ( m_active != 0 ){
-            m_active->file()->setIsActive(false);
-        }
         m_active = document;
-        document->file()->setIsActive(true);
         emit activeChanged(document);
     }
 }

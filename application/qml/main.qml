@@ -119,7 +119,9 @@ ApplicationWindow {
         selectExisting : true
         visible : isLinux ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
-            editor.text = codeDocument.openFile(fileOpenDialog.fileUrl)
+            //TODO: Question: Close this project
+//            editor.text = codeDocument.openFile(fileOpenDialog.fileUrl)
+            project.openFile(fileOpenDialog.fileUrl)
             editor.isDirty = false
         }
         Component.onCompleted: {
@@ -175,14 +177,20 @@ ApplicationWindow {
             Editor{
                 id: editor
                 height: parent.height
-                width: 400
+                width: 1000
 
                 onSave: {
-                    if ( codeDocument.file.toString() !==  "" ){
-                        codeDocument.saveFile(editor.text)
-                        editor.isDirty = false
-                    } else
+                    if ( project.inFocus.name !== '' ){
+                        project.inFocus.dumpContent(editor.text)
+                        project.inFocus.save()
+                    } else {
                         fileSaveDialog.open()
+                    }
+
+//                    if ( codeDocument.file.toString() !==  "" ){
+//                        codeDocument.saveFile(editor.text)
+//                        editor.isDirty = false
+//                    } else
                 }
                 onOpen: {
                     header.openFile()
@@ -225,8 +233,10 @@ ApplicationWindow {
                             try {
                                 root.beforeCompile()
                                 // Info Qt/Src/qtquick1/src/declarative/qml/qdeclarativeengine.cpp
+                                var program = "import QtQuick 2.3\n" + tester.program
+                                codeHandler.updateScope(program)
                                 newItem = Qt.createQmlObject(
-                                    "import QtQuick 2.3\n" + tester.program,
+                                    program,
                                     tester,
                                     codeDocument.file.toString() !== '' ? codeDocument.file : 'untitled.qml');
                             } catch (err) {
@@ -293,6 +303,28 @@ ApplicationWindow {
 
             }
 
+        }
+
+    }
+
+    MessageDialogInternal{
+        id: messageBox
+        anchors.fill: parent
+        visible: false
+        backgroudColor: "#08141d"
+
+        MessageDialogButton{
+            id: messageBoxButton1
+        }
+
+        MessageDialogButton{
+            id: messageBoxButton2
+            anchors.centerIn: parent
+        }
+
+        MessageDialogButton{
+            id: messageBoxButton3
+            anchors.right: parent.right
         }
 
     }

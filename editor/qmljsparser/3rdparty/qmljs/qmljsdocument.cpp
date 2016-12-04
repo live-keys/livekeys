@@ -94,7 +94,7 @@ Document::Document(const QString &fileName, Dialect language)
     , _parsedCorrectly(false)
 {
     QFileInfo fileInfo(fileName);
-    _path = QDir::cleanPath(fileInfo.absolutePath());
+    _path = fileName == "" ? "" : QDir::cleanPath(fileInfo.absolutePath());
 
     if (language.isQmlLikeLanguage()) {
         _componentName = fileInfo.baseName();

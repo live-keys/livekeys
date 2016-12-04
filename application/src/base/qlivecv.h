@@ -38,6 +38,7 @@ class QLiveCVArguments;
 
 namespace lcv{
 class QProject;
+class QDocumentCodeInterface;
 }
 
 // class QLiveCV
@@ -72,7 +73,8 @@ private:
     QLiveCVArguments* m_arguments;
 
     QCodeDocument* m_document;
-    QString m_dir;
+    lcv::QDocumentCodeInterface* m_codeInterface;
+    QString  m_dir;
     QLibrary m_lcvlib;
 
     lcv::QProject* m_project;
