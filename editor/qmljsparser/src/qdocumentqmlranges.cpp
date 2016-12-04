@@ -2,13 +2,10 @@
 
 namespace lcv{
 
-QDocumentQmlRanges::QDocumentQmlRanges()
-    : m_textDocument(0)
-{
+QDocumentQmlRanges::QDocumentQmlRanges(){
 }
 
-QList<QDocumentQmlRanges::Range> QDocumentQmlRanges::operator()(QTextDocument *textDocument, QmlJS::Document::Ptr doc){
-    m_textDocument = textDocument;
+QList<QDocumentQmlRanges::Range> QDocumentQmlRanges::operator()(QmlJS::Document::Ptr doc){
     m_ranges.clear();
     if (doc && doc->ast() != 0)
         doc->ast()->accept(this);
@@ -52,7 +49,10 @@ bool QDocumentQmlRanges::visit(QmlJS::AST::UiScriptBinding *ast){
     return true;
 }
 
-QDocumentQmlRanges::Range QDocumentQmlRanges::createRange(QmlJS::AST::UiObjectMember *member, QmlJS::AST::UiObjectInitializer *ast){
+QDocumentQmlRanges::Range QDocumentQmlRanges::createRange(
+        QmlJS::AST::UiObjectMember *member,
+        QmlJS::AST::UiObjectInitializer *ast)
+{
     //        qDebug() << "Create range for uiobject member."
     //         << member->firstSourceLocation().startLine << ast->rbraceToken.startLine;
     return createRange(member, member->firstSourceLocation(), ast->rbraceToken);
@@ -62,22 +62,34 @@ QDocumentQmlRanges::Range QDocumentQmlRanges::createRange(QmlJS::AST::FunctionEx
     return createRange(ast, ast->lbraceToken, ast->rbraceToken);
 }
 
-QDocumentQmlRanges::Range QDocumentQmlRanges::createRange(QmlJS::AST::UiScriptBinding *ast, QmlJS::AST::Block *block){
+QDocumentQmlRanges::Range QDocumentQmlRanges::createRange(
+        QmlJS::AST::UiScriptBinding *ast,
+        QmlJS::AST::Block *block)
+{
     return createRange(ast, block->lbraceToken, block->rbraceToken);
 }
 
-QDocumentQmlRanges::Range QDocumentQmlRanges::createRange(QmlJS::AST::Node *ast, QmlJS::AST::SourceLocation start, QmlJS::AST::SourceLocation end){
+QDocumentQmlRanges::Range QDocumentQmlRanges::createRange(
+        QmlJS::AST::Node *ast,
+        QmlJS::AST::SourceLocation start,
+        QmlJS::AST::SourceLocation end)
+{
     Range range;
 
     range.ast = ast;
-
-    range.begin = QTextCursor(m_textDocument);
-    range.begin.setPosition(start.begin());
-
-    range.end = QTextCursor(m_textDocument);
-    range.end.setPosition(end.end());
+    range.begin = start.begin();
+    range.end   = end.end();
 
     return range;
+}
+
+QDocumentQmlRanges::Range QDocumentQmlRanges::findClosestRange(int position) const{
+    QDocumentQmlRanges::Range base;
+    foreach( Range r, m_ranges ){
+        if ( r.begin <= position && r.end > position )
+            base = r;
+    }
+    return base;
 }
 
 } // namespace

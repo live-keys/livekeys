@@ -2,21 +2,22 @@
 #define QPROJECTDOCUMENT_H
 
 #include <QObject>
+#include "qlcveditorglobal.h"
 
 namespace lcv{
 
 class QProjectFile;
-class QProjectDocument : public QObject{
+class Q_LCVEDITOR_EXPORT QProjectDocument : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QProjectFile* file    READ file    NOTIFY fileChanged)
-    Q_PROPERTY(QString       content READ content NOTIFY contentChanged)
+    Q_PROPERTY(lcv::QProjectFile* file    READ file    NOTIFY fileChanged)
+    Q_PROPERTY(QString            content READ content NOTIFY contentChanged)
 
 public:
     explicit QProjectDocument(QProjectFile* file, QObject *parent = 0);
     ~QProjectDocument();
 
-    QProjectFile* file() const;
+    lcv::QProjectFile* file() const;
 
     const QString& content() const;
 
@@ -24,6 +25,7 @@ public:
 
 public slots:
     void dumpContent(const QString& content);
+    void save();
 
 signals:
     void fileChanged();

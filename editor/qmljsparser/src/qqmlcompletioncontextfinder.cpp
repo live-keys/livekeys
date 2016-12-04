@@ -7,9 +7,8 @@
 
 #include <QDebug>
 
-//ExpressionUnderCursor
-// -------------------
-
+// ExpressionUnderCursor
+// ---------------------
 
 using namespace QmlJS;
 using namespace QmlJS::AST;
@@ -93,6 +92,15 @@ public:
                 if ( tokens.at(i).kind == Token::Identifier )
                     path->append(blockText.mid(tokens.at(i).begin(), tokens.at(i).length));
             }
+            if ( tokens.size() > 0 ){
+                if ( tokens.last().kind == Token::Dot )
+                    path->append("");
+                else if ( tokens.last().kind == Token::Identifier ){
+                    if ( cursor.positionInBlock() > tokens.last().end() )
+                        path->clear();
+//                    qDebug() << "CURSOR:" << cursor() << tokens.last().end();
+                }
+            }
         }
 
         const Token &tk = tokens.at(start);
@@ -100,11 +108,13 @@ public:
     }
 };
 
-} // enf of anonymous namespace
+} // anonymous namespace
 
 
 // CompletionContextFinder
 // -----------------------
+
+namespace lcv{
 
 QQmlCompletionContextFinder::QQmlCompletionContextFinder(){
 
@@ -114,37 +124,30 @@ QQmlCompletionContextFinder::~QQmlCompletionContextFinder(){
 
 }
 
-QQmlCompletionContext QQmlCompletionContextFinder::getContext(const QTextCursor &cursor){
+QQmlCompletionContext *QQmlCompletionContextFinder::getContext(const QTextCursor &cursor){
     QmlJS::CompletionContextFinder finder(cursor);
 
     QStringList path;
     int context = 0;
-    if ( finder.isInImport() ){
+    if ( finder.isInImport() )
         context |= QQmlCompletionContext::InImport;
-        ExpressionUnderCursor euc;
-        euc(cursor, &path);
-    }
     if ( finder.isInQmlContext() )
         context |= QQmlCompletionContext::InQml;
-    if ( finder.isInLhsOfBinding() ){
+    if ( finder.isInLhsOfBinding() )
         context |= QQmlCompletionContext::InLhsOfBinding;
-        ExpressionUnderCursor euc;
-        euc(cursor, &path);
-    }
-    if ( finder.isInRhsOfBinding() ){
+    if ( finder.isInRhsOfBinding() )
         context |= QQmlCompletionContext::InRhsofBinding;
-        ExpressionUnderCursor euc;
-        euc(cursor, &path);
-    }
-    if ( finder.isAfterOnInLhsOfBinding() ){
+    if ( finder.isAfterOnInLhsOfBinding() )
         context |= QQmlCompletionContext::InAfterOnLhsOfBinding;
-        ExpressionUnderCursor euc;
-        euc(cursor, &path);
-    }
     if ( finder.isInStringLiteral() )
         context |= QQmlCompletionContext::InStringLiteral;
 
-    return QQmlCompletionContext(
+    if ( !finder.isInStringLiteral() ){
+        ExpressionUnderCursor euc;
+        euc(cursor, &path);
+    }
+
+    return new QQmlCompletionContext(
         context,
         finder.qmlObjectTypeName(),
         finder.bindingPropertyName(),
@@ -152,3 +155,4 @@ QQmlCompletionContext QQmlCompletionContextFinder::getContext(const QTextCursor 
     );
 }
 
+} // namespace

@@ -1,0 +1,1089 @@
+#include "qdocumentqmlhandler.h"
+#include "qqmljshighlighter_p.h"
+#include "qprojectqmlscanner_p.h"
+#include "qdocumentqmlobject.h"
+#include "qdocumentqmlobject_p.h"
+#include "qqmlcompletioncontextfinder.h"
+#include "qcodecompletionsuggestion.h"
+#include "qprojectqmlscope_p.h"
+#include "qqmllibraryinfo_p.h"
+#include "qprojectfile.h"
+
+#include <QQmlEngine>
+#include <QFileInfo>
+#include <QDirIterator>
+#include <QTextDocument>
+#include <QStringList>
+
+#include <QDebug>
+
+#define QDOCUMENT_QML_HANDLER_DEBUG_FLAG
+#ifdef QDOCUMENT_QML_HANDLER_DEBUG_FLAG
+#define QDOCUMENT_QML_HANDLER_DEBUG(_param) qDebug() << (_param)
+#else
+#define QDOCUMENT_QML_HANDLER_DEBUG(_param)
+#endif
+
+
+namespace lcv{
+
+namespace qmlhandler_helpers{
+
+    QQmlLibraryInfo::ExportVersion getType(
+            QDocumentQmlScope::Ptr document,
+            QProjectQmlScope::Ptr project,
+            const QString& name,
+            QString& libraryKey)
+    {
+        foreach( const QDocumentQmlScope::ImportEntry& imp, document->imports() ){
+            QQmlLibraryInfo::ExportVersion ev = project->data()->libraryInfo(imp.second)->findExport(name);
+            if ( ev.isValid() ){
+                libraryKey = imp.second;
+                return ev;
+            }
+        }
+        return QQmlLibraryInfo::ExportVersion();
+    }
+
+    QQmlLibraryInfo::ExportVersion getType(
+            QDocumentQmlScope::Ptr document,
+            QProjectQmlScope::Ptr project,
+            const QString& importNamespace,
+            const QString& name,
+            QString& libraryKey)
+    {
+        foreach( const QDocumentQmlScope::ImportEntry& imp, document->imports() ){
+            if ( imp.first.as() == importNamespace ){
+                QQmlLibraryInfo::ExportVersion ev = project->data()->libraryInfo(imp.second)->findExport(name);
+                if ( ev.isValid() ){
+                    libraryKey = imp.second;
+                    return ev;
+                }
+            }
+        }
+        return QQmlLibraryInfo::ExportVersion();
+    }
+
+    void generateTypePathFromObject(
+        LanguageUtils::FakeMetaObject::ConstPtr& object,
+        const QString& typeLibrary,
+        QProjectQmlScope::Ptr project,
+        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath
+    ){
+        if ( !object.isNull() && object->superclassName() != "" ){
+            QString typeSuperClass = object->superclassName();
+
+            QQmlLibraryInfo::Ptr libraryInfo = project->data()->libraryInfo(typeLibrary);
+            LanguageUtils::FakeMetaObject::ConstPtr superObject = libraryInfo->findObjectByClassName(typeSuperClass);
+
+            if ( superObject.isNull() ){
+                foreach( const QString& libraryDependency, libraryInfo->dependencyPaths() ){
+                    superObject = project->data()->libraryInfo(libraryDependency)->findObjectByClassName(typeSuperClass);
+                    if ( !superObject.isNull() )
+                        break;
+                }
+            }
+
+            if ( !superObject.isNull() ){
+                typePath.append(superObject);
+                generateTypePathFromObject(superObject, typeLibrary, project, typePath);
+            }
+        }
+    }
+
+    void generateTypePathFromClassName(
+        const QString& typeName,
+        const QString& typeLibrary,
+        QProjectQmlScope::Ptr project,
+        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath
+    ){
+        QQmlLibraryInfo::Ptr libraryInfo = project->data()->libraryInfo(typeLibrary);
+        LanguageUtils::FakeMetaObject::ConstPtr object = libraryInfo->findObjectByClassName(typeName);
+
+        if ( object.isNull() ){
+            foreach( const QString& libraryDependency, libraryInfo->dependencyPaths() ){
+                object = project->data()->libraryInfo(libraryDependency)->findObjectByClassName(typeName);
+                if ( !object.isNull() )
+                    break;
+            }
+        }
+
+        if ( !object.isNull() ){
+            typePath.append(object);
+            generateTypePathFromObject(object, typeLibrary, project, typePath);
+        }
+    }
+
+    void getTypePath(
+        QDocumentQmlScope::Ptr documentScope,
+        QProjectQmlScope::Ptr project,
+        const QString& importAs,
+        const QString& name,
+        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        QString& libraryKey
+    ){
+        QQmlLibraryInfo::ExportVersion ev = getType(
+            documentScope, project, importAs, name, libraryKey
+        );
+
+        if ( ev.isValid() ){
+            typePath.append(ev.object);
+
+            qmlhandler_helpers::generateTypePathFromObject(
+                ev.object,
+                libraryKey,
+                project,
+                typePath
+            );
+        }
+    }
+
+    void getTypePath(
+        QDocumentQmlScope::Ptr documentScope,
+        QProjectQmlScope::Ptr project,
+        const QString& name,
+        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        QString& libraryKey
+    ){
+        QQmlLibraryInfo::ExportVersion ev = getType(
+            documentScope, project, name, libraryKey
+        );
+
+        if ( ev.isValid() ){
+            typePath.append(ev.object);
+
+            qmlhandler_helpers::generateTypePathFromObject(
+                ev.object,
+                libraryKey,
+                project,
+                typePath
+            );
+        }
+    }
+
+    void evaluatePropertyClass(
+        const QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        const QString& typeLibraryKey,
+        const QString& propertyName,
+        QProjectQmlScope::Ptr projectScope,
+        QList<LanguageUtils::FakeMetaObject::ConstPtr>& propertyTypePath
+    ){
+        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, typePath ){
+            for ( int i = 0; i < object->propertyCount(); ++i ){
+                if ( object->property(i).name() == propertyName ){
+                    if ( object->property(i).isPointer() ){
+                        generateTypePathFromClassName(
+                            object->property(i).typeName(), typeLibraryKey, projectScope, propertyTypePath
+                        );
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief Checks wether value is a valid id in the given document scope.
+     * Outputs the object path and object value if true.
+     */
+    bool isId(
+        const QString& str,
+        QDocumentQmlScope::Ptr scope,
+        QProjectQmlScope::Ptr projectScope,
+        QDocumentQmlInfo::ValueReference& documentValue,
+        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        QString& typeLibraryKey
+    ){
+        documentValue = scope->info()->valueForId(str);
+        if ( scope->info()->isValueNull(documentValue) )
+            return false;
+
+        QString typeName = scope->info()->extractTypeName(documentValue);
+        if ( typeName != "" ){
+            getTypePath(scope, projectScope, typeName, typePath, typeLibraryKey);
+        }
+
+        return true;
+    }
+
+    /**
+     * @brief Checks wether value is a parent in the given document scope.
+     * Outputs the object path and value if true.
+     */
+    bool isParent(
+        const QString& str,
+        int position,
+        QDocumentQmlScope::Ptr scope,
+        QProjectQmlScope::Ptr projectScope,
+        QDocumentQmlInfo::ValueReference& parentValue,
+        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        QString& typeLibraryKey
+    ){
+        if ( str != "parent" )
+            return false;
+
+        QDocumentQmlInfo::ValueReference documentValue = scope->info()->valueAtPosition(position);
+        if ( scope->info()->isValueNull(documentValue) )
+            return true;
+
+        scope->info()->extractValueObject(documentValue, &parentValue);
+        if ( scope->info()->isValueNull(parentValue) )
+            return true;
+
+        QString typeName = scope->info()->extractTypeName(parentValue);
+        if ( typeName != "" ){
+            getTypePath(scope, projectScope, typeName, typePath, typeLibraryKey);
+        }
+
+        return true;
+    }
+
+    /**
+     * @brief Checks wether str is a property for the context object.
+     */
+    bool isProperty(
+        const QStringList& contextObject,
+        const QString& str,
+        int position,
+        QDocumentQmlScope::Ptr scope,
+        QProjectQmlScope::Ptr projectScope,
+        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        bool& isPointer,
+        QString& libraryKey
+    ){
+        QDocumentQmlInfo::ValueReference documentValue = scope->info()->valueAtPosition(position);
+        if ( !scope->info()->isValueNull(documentValue) ){
+            QDocumentQmlObject valueObject = scope->info()->extractValueObject(documentValue);
+
+            for (
+                QMap<QString, QString>::const_iterator it = valueObject.memberProperties().begin();
+                it != valueObject.memberProperties().end();
+                ++it )
+            {
+                if ( it.key() == str ){
+                    QString propertyType = it.value();
+                    isPointer = QDocumentQmlInfo::isObject(propertyType);
+                    if ( isPointer ){
+                        getTypePath(scope, projectScope, propertyType, typePath, libraryKey);
+                    }
+                    return true;
+                }
+            }
+        }
+
+        QString type = contextObject.size() > 0 ? contextObject[0] : "";
+        if ( type == "" )
+            return false;
+        QString typeNamespace = contextObject.size() > 1 ? contextObject[1] : "";
+
+        QList<LanguageUtils::FakeMetaObject::ConstPtr> contextTypePath;
+        getTypePath(scope, projectScope, typeNamespace, type, contextTypePath, libraryKey);
+
+        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, contextTypePath ){
+            for ( int i = 0; i < object->propertyCount(); ++i ){
+                if ( object->property(i).name() == str ){
+                    QString propertyType = object->property(i).typeName();
+                    isPointer = object->property(i).isPointer();
+                    if ( isPointer ){
+                        generateTypePathFromClassName(propertyType, libraryKey, projectScope, typePath);
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @brief isType
+     */
+    bool isType(
+        const QString& importAs,
+        const QString& str,
+        QDocumentQmlScope::Ptr documentScope,
+        QProjectQmlScope::Ptr projectScope,
+        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        QString& libraryKey)
+    {
+        QQmlLibraryInfo::ExportVersion ev = getType(
+            documentScope, projectScope, importAs, str, libraryKey
+        );
+
+        if ( ev.isValid() ){
+            typePath.append(ev.object);
+
+            qmlhandler_helpers::generateTypePathFromObject(
+                ev.object,
+                libraryKey,
+                projectScope,
+                typePath
+            );
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @brief isNamespace
+     */
+    bool isNamespace(const QString& str, QDocumentQmlScope::Ptr documentScope){
+        foreach( const QDocumentQmlScope::ImportEntry& imp, documentScope->imports() ){
+            if ( imp.first.as() == str ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * @brief Create suggestions from an object type path
+     */
+    void suggestionsForObjectPath(
+        const QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        bool suggestProperties,
+        bool suggestMethods,
+        bool suggestSignals,
+        bool suggestEnums,
+        bool suggestGeneratedSlots,
+        const QString& suffix,
+        QList<QCodeCompletionSuggestion>& suggestions
+    ){
+        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, typePath ){
+            QString objectTypeName = "";
+            if ( object->exports().size() > 0 )
+                objectTypeName = object->exports().first().type;
+
+            if ( suggestProperties ){
+                for ( int i = 0; i < object->propertyCount(); ++i ){
+                    if ( !object->property(i).name().startsWith("__") ){
+                        suggestions << QCodeCompletionSuggestion(
+                            object->property(i).name(),
+                            object->property(i).typeName(),
+                            objectTypeName,
+                            object->property(i).name() + (object->property(i).isPointer() ? "" : suffix)
+                        );
+                    }
+                }
+            }
+            for ( int i = 0; i < object->methodCount(); ++i ){
+                LanguageUtils::FakeMetaMethod m = object->method(i);
+                if ( m.methodType() == LanguageUtils::FakeMetaMethod::Method && suggestMethods ){
+                    QString completion =
+                        m.methodName() + "(" + m.parameterNames().join(", ") + ")";
+                        suggestions << QCodeCompletionSuggestion(
+                            m.methodName() + "()", "function", objectTypeName, completion
+                        );
+                }
+                if ( m.methodType() == LanguageUtils::FakeMetaMethod::Signal && suggestSignals ){
+                    QString completion =
+                        m.methodName() + "(" + m.parameterNames().join(", ") + ")";
+                        suggestions << QCodeCompletionSuggestion(
+                            m.methodName() + "()", "signal", objectTypeName, completion
+                        );
+                }
+                if ( m.methodType() == LanguageUtils::FakeMetaMethod::Signal && suggestGeneratedSlots ){
+                    QString methodName = m.methodName();
+                    if ( methodName.size() > 0 )
+                        methodName[0] = methodName[0].toUpper();
+                    suggestions << QCodeCompletionSuggestion(
+                        "on" + methodName, "slot", objectTypeName, "on" + methodName + suffix
+                    );
+                }
+            }
+            if ( suggestEnums ){
+                for ( int i = 0; i < object->enumeratorCount(); ++i ){
+                    LanguageUtils::FakeMetaEnum e = object->enumerator(i);
+                    for ( int j = 0; j < e.keyCount(); ++j ){
+                        suggestions << QCodeCompletionSuggestion(
+                            e.key(j),
+                            e.name(),
+                            objectTypeName,
+                            e.key(j)
+                        );
+                    }
+                }
+            }
+            if ( suggestGeneratedSlots ){
+                for ( int i = 0; i < object->propertyCount(); ++i ){
+                    if ( !object->property(i).name().startsWith("__") ){
+                        QString propertyName = object->property(i).name();
+                        if ( propertyName.size() > 0 )
+                            propertyName[0] = propertyName[0].toUpper();
+
+                        suggestions << QCodeCompletionSuggestion(
+                            "on" + propertyName + "Changed",
+                            "slot",
+                            objectTypeName,
+                            "on" + propertyName + "Changed" + suffix
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+
+// QDocumentQmlHandler implementation
+// ----------------------------------
+
+QDocumentQmlHandler::QDocumentQmlHandler(QQmlEngine* engine, QObject *parent)
+    : QAbstractCodeHandler(parent)
+    , m_target(0)
+    , m_highlighter(0)
+    , m_engine(engine)
+    , m_completionContextFinder(new QQmlCompletionContextFinder)
+    , m_documentScope(0)
+    , m_projectScope(0)
+    , m_scanner(new QProjectQmlScanner)
+    , m_newScope(false)
+{
+    connect(m_scanner, SIGNAL(documentScopeReady()), SLOT(newDocumentScopeReady()) );
+    connect(m_scanner, SIGNAL(projectScopeReady()), SLOT(newProjectScope()));
+}
+
+QDocumentQmlHandler::~QDocumentQmlHandler(){
+    delete m_scanner;
+    delete m_completionContextFinder;
+}
+
+void QDocumentQmlHandler::assistCompletion(
+        const QTextCursor& cursor,
+        const QChar& insertion,
+        bool manuallyTriggered,
+        QCodeCompletionModel* model,
+        QTextCursor& cursorChange)
+{
+    if ( !m_target )
+        return;
+    if ( insertion != QChar() && !manuallyTriggered ){
+        if ( insertion == '{' ){
+            cursorChange = cursor;
+            cursorChange.beginEditBlock();
+            cursorChange.insertText("}");
+            cursorChange.endEditBlock();
+            cursorChange.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+            return;
+        } else if ( insertion.category() == QChar::Separator_Line || insertion.category() == QChar::Separator_Paragraph){
+            cursorChange = cursor;
+            cursorChange.movePosition(QTextCursor::Up);
+            QString text = cursorChange.block().text();
+            QString indent = "";
+            for ( QString::const_iterator it = text.begin(); it != text.end(); ++it ){
+                if ( !it->isSpace() )
+                    break;
+                indent += *it;
+            }
+            bool isOpenBrace = false;
+            for ( QString::const_reverse_iterator it = text.rbegin(); it != text.rend(); ++it ){
+                if ( *it == QChar('{') )
+                    isOpenBrace = true;
+                if ( !it->isSpace() )
+                    break;
+            }
+            cursorChange.movePosition(QTextCursor::Down);
+            cursorChange.movePosition(QTextCursor::StartOfLine);
+            if ( isOpenBrace ){
+                text = cursorChange.block().text();
+                if ( text.trimmed().startsWith("}") ){
+                    cursorChange.beginEditBlock();
+                    cursorChange.insertText(indent + "    \n" + indent);
+                    cursorChange.endEditBlock();
+                    cursorChange.movePosition(QTextCursor::Up);
+                    cursorChange.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 4);
+                    return;
+                }
+                indent += "    ";
+            }
+
+            cursorChange.beginEditBlock();
+            cursorChange.insertText(indent);
+            cursorChange.endEditBlock();
+            return;
+        } else if ( insertion == '\"' ) {
+            cursorChange = cursor;
+            cursorChange.movePosition(QTextCursor::Left);
+            QQmlCompletionContext* ctx = m_completionContextFinder->getContext(cursorChange);
+            if ( !(ctx->context() & QQmlCompletionContext::InStringLiteral) ){
+                cursorChange = cursor;
+                cursorChange.beginEditBlock();
+                cursorChange.insertText("\"");
+                cursorChange.endEditBlock();
+                cursorChange.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+            } else {
+                cursorChange.movePosition(QTextCursor::Right);
+            }
+            delete ctx;
+        } else if ( insertion == '\'' ) {
+            cursorChange = cursor;
+            cursorChange.movePosition(QTextCursor::Left);
+            QQmlCompletionContext* ctx = m_completionContextFinder->getContext(cursorChange);
+            if ( !(ctx->context() & QQmlCompletionContext::InStringLiteral) ){
+                cursorChange.beginEditBlock();
+                cursorChange.insertText("\''");
+                cursorChange.endEditBlock();
+                cursorChange.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+            } else {
+                cursorChange.movePosition(QTextCursor::Right);
+            }
+            delete ctx;
+
+        } else if ( insertion != QChar('.') && !insertion.isLetterOrNumber() ){
+            model->disable();
+            return;
+        }
+    } else if ( !manuallyTriggered ){
+        model->disable();
+        return;
+    }
+
+    QQmlCompletionContext* ctx = m_completionContextFinder->getContext(cursor);
+    QString filter = ctx->expressionPath().size() > 0 ? ctx->expressionPath().last() : "";
+
+    model->setCompletionPosition(
+        cursor.position() -
+        (ctx->expressionPath().size() > 0 ? ctx->expressionPath().last().length() : 0)
+    );
+
+    if( filter == "" && insertion.isNumber() ){
+        model->setFilter(insertion);
+        return;
+    }
+    if ( model->completionContext() ){
+        QQmlCompletionContext* modelCtx = static_cast<QQmlCompletionContext*>(model->completionContext());
+        if ( modelCtx && *modelCtx == *ctx && !m_newScope ){
+            model->setFilter(filter);
+            model->enable();
+            delete ctx;
+            return;
+        }
+        model->removeCompletionContext();
+    }
+    m_newScope = false;
+    model->setCompletionContext(ctx);
+
+    QList<QCodeCompletionSuggestion> suggestions;
+    if ( ctx->context() & QQmlCompletionContext::InImport && ctx->context() & QQmlCompletionContext::InStringLiteral ){
+        suggestionsForStringImport(extractString(cursor), suggestions, filter);
+        model->setSuggestions(suggestions, filter);
+    } else if ( ctx->context() & QQmlCompletionContext::InImport ){
+        suggestionsForImport(*ctx, suggestions);
+        model->setSuggestions(suggestions, filter);
+    } else if ( ctx->context() & QQmlCompletionContext::InAfterOnLhsOfBinding ){
+        suggestionsForLeftSignalBind(*ctx, cursor.position(), suggestions);
+        model->setSuggestions(suggestions, filter);
+    } else if ( ctx->context() & QQmlCompletionContext::InLhsOfBinding ){
+        suggestionsForLeftBind(*ctx, cursor.position(), suggestions);
+        model->setSuggestions(suggestions, filter);
+    } else if ( ctx->context() & QQmlCompletionContext::InRhsofBinding ){
+        suggestionsForRightBind(*ctx, cursor.position(), suggestions);
+        model->setSuggestions(suggestions, filter);
+    } else {
+        suggestionsForGlobalQmlContext(*ctx, suggestions);
+        suggestionsForNamespaceTypes(ctx->expressionPath().size() > 1 ? ctx->expressionPath().first() : "", suggestions);
+        model->setSuggestions(suggestions, filter);
+    }
+
+    model->enable();
+
+    //TODO: Create model design
+}
+
+void QDocumentQmlHandler::setTarget(QTextDocument *target){
+    m_target      = target;
+    m_highlighter = new QQmlJsHighlighter(m_target);
+}
+
+void QDocumentQmlHandler::setDocument(QProjectDocument *document){
+    m_document      = document;
+    m_documentScope = QDocumentQmlScope::createEmptyScope(m_projectScope);
+
+    if ( !m_projectScope.isNull() && document != 0 ){
+        m_scanner->scanDocumentScope(document->file()->path(), document->content(), m_projectScope.data());
+        m_scanner->queueProjectScan();
+    }
+}
+
+void QDocumentQmlHandler::updateScope(const QString& data){
+    if ( !m_projectScope.isNull() && m_document )
+            m_scanner->queueDocumentScopeScan(m_document->file()->path(), data, m_projectScope.data());
+}
+
+void QDocumentQmlHandler::newDocumentScopeReady(){
+    m_documentScope = m_scanner->lastDocumentScope();
+    m_newScope = true;
+}
+
+void QDocumentQmlHandler::newProjectScope(){
+    m_newScope = true;
+}
+
+void QDocumentQmlHandler::newProject(const QString &){
+    m_projectScope = QProjectQmlScope::create(m_engine);
+    m_documentScope = QDocumentQmlScope::createEmptyScope(m_projectScope);
+
+    m_scanner->setProjectScope(m_projectScope);
+}
+
+void QDocumentQmlHandler::suggestionsForGlobalQmlContext(
+        const QQmlCompletionContext &,
+        QList<QCodeCompletionSuggestion> &suggestions
+){
+    suggestions << QCodeCompletionSuggestion("import", "", "", "import ");
+    suggestions << QCodeCompletionSuggestion("pragma singleton", "", "", "pragma singleton");
+}
+
+void QDocumentQmlHandler::suggestionsForImport(
+        const QQmlCompletionContext& context,
+        QList<QCodeCompletionSuggestion> &suggestions)
+{
+
+    foreach (const QString& importPath, m_engine->importPathList()){
+        suggestionsForRecursiveImport(0, importPath, context.expressionPath(), suggestions);
+    }
+}
+
+void QDocumentQmlHandler::suggestionsForStringImport(
+        const QString& enteredPath,
+        QList<QCodeCompletionSuggestion> &suggestions,
+        QString& filter)
+{
+    if ( m_document ){
+        QStringList enteredPathSegments = enteredPath.split('/');
+        filter = enteredPathSegments.size() > 0 ? enteredPathSegments.last() : "";
+        QString path = m_document->file()->path();
+        QString dirPath = QFileInfo(path).path();
+        suggestionsForRecursiveImport(0, dirPath, enteredPathSegments, suggestions);
+    }
+}
+
+void QDocumentQmlHandler::suggestionsForRecursiveImport(int index,
+        const QString& dir,
+        const QStringList& expression,
+        QList<QCodeCompletionSuggestion> &suggestions)
+{
+    if ( index >= expression.size() - 1 ){
+        QDirIterator dit(dir);
+        while( dit.hasNext() ){
+            dit.next();
+            if ( dit.fileInfo().isDir() && dit.fileName() != "." && dit.fileName() != ".."){
+                suggestions << QCodeCompletionSuggestion(dit.fileName(), "", "", dit.fileName());
+            }
+        }
+    } else {
+        QString path = dir + (dir.endsWith("/") ? "" : "/") + expression[index];
+        ++index;
+        suggestionsForRecursiveImport(index, path, expression, suggestions);
+    }
+}
+
+void QDocumentQmlHandler::suggestionsForValueObject(
+        const QDocumentQmlObject &object,
+        QList<QCodeCompletionSuggestion> &suggestions,
+        bool extractProperties,
+        bool extractFunctions,
+        bool extractSlots,
+        bool extractSignals)
+{
+    if ( extractProperties ){
+        for (
+            QMap<QString, QString>::const_iterator it = object.memberProperties().begin();
+            it != object.memberProperties().end();
+            ++it )
+        {
+            suggestions << QCodeCompletionSuggestion(it.key(), it.value(), object.typeName(), it.key());
+        }
+    }
+    if ( extractFunctions ){
+        for (
+            QMap<QString, QDocumentQmlObject::FunctionValue>::const_iterator it = object.memberFunctions().begin();
+            it != object.memberFunctions().end();
+            ++it
+        )
+        {
+            QString completion = it.value().name + "(";
+            for (
+                QList<QPair<QString, QString> >::const_iterator argit = it.value().arguments.begin();
+                argit != it.value().arguments.end();
+                ++argit
+            ){
+                if ( completion.at(completion.length() - 1) != QChar('(') )
+                    completion += ", ";
+                completion += argit->first;
+            }
+            completion += ")";
+
+            suggestions << QCodeCompletionSuggestion(it.value().name + "()", "function", object.typeName(), completion);
+        }
+    }
+    if ( extractSignals ){
+        for (
+            QMap<QString, QDocumentQmlObject::FunctionValue>::const_iterator it = object.memberSignals().begin();
+            it != object.memberSignals().end();
+            ++it
+        )
+        {
+            QString completion = it.value().name + "(";
+            for (
+                QList<QPair<QString, QString> >::const_iterator argit = it.value().arguments.begin();
+                argit != it.value().arguments.end();
+                ++argit
+            ){
+                if ( completion.at(completion.length() - 1) != QChar('(') )
+                    completion += ", ";
+                completion += argit->first;
+            }
+            completion += ")";
+
+            suggestions << QCodeCompletionSuggestion(it.value().name + "()", "signal", object.typeName(), completion);
+        }
+    }
+    if ( extractSlots ){
+        for (
+            QMap<QString, QString>::const_iterator it = object.memberSlots().begin();
+            it != object.memberSlots().end();
+            ++it )
+        {
+            suggestions << QCodeCompletionSuggestion(it.key(), "slot", object.typeName(), it.key());
+        }
+    }
+}
+
+void QDocumentQmlHandler::suggestionsForNamespaceTypes(
+    const QString &typeNameSpace,
+    QList<QCodeCompletionSuggestion> &suggestions)
+{
+    QProjectQmlScope::Ptr projectScope = m_projectScope;
+    QDocumentQmlScope::Ptr document = m_documentScope;
+
+    foreach( const QDocumentQmlScope::ImportEntry& imp, document->imports() ){
+        if ( imp.first.as() == typeNameSpace ){
+            QStringList exports;
+            projectScope->data()->libraryInfo(imp.second)->listExports(&exports);
+            int segmentPosition = imp.second.lastIndexOf('/');
+            QString libraryName = imp.second.mid(segmentPosition + 1);
+            
+            foreach( const QString& e, exports ){
+                suggestions << QCodeCompletionSuggestion(e, "", libraryName, e);
+            }
+        }
+    }
+}
+
+void QDocumentQmlHandler::suggestionsForNamespaceImports(QList<QCodeCompletionSuggestion> &suggestions){
+    QMap<QString, QString> imports;
+    QDocumentQmlScope::Ptr document = m_documentScope;
+    foreach( const QDocumentQmlScope::ImportEntry& imp, document->imports() ){
+        if ( imp.first.as() != "" ){
+            imports[imp.first.as()] = imp.first.path();
+        }
+    }
+    for ( QMap<QString, QString>::iterator it = imports.begin(); it != imports.end(); ++it ){
+        suggestions << QCodeCompletionSuggestion(it.key(), "import", it.value(), it.key());
+    }
+}
+
+void QDocumentQmlHandler::suggestionsForDocumentsIds(QList<QCodeCompletionSuggestion> &suggestions){
+    QStringList ids = m_documentScope->info()->extractIds();
+    ids.sort();
+    foreach( const QString& id, ids ){
+        suggestions << QCodeCompletionSuggestion(id, "id", "", id);
+    }
+}
+
+void QDocumentQmlHandler::suggestionsForLeftBind(
+        const QQmlCompletionContext& context,
+        int cursorPosition,
+        QList<QCodeCompletionSuggestion> &suggestions)
+{
+    if ( context.objectTypePath().size() == 0 )
+        return;
+    
+    QDocumentQmlScope::Ptr documentScope      = m_documentScope;
+    QProjectQmlScope::Ptr projectScope = m_projectScope;
+
+    if ( context.expressionPath().size() > 1 ){
+        QString firstSegment = context.expressionPath()[0];
+        QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+        bool isPointer = false;
+        QString typeLibraryKey;
+        if ( qmlhandler_helpers::isProperty(
+                 context.objectTypePath(),
+                 firstSegment,
+                 cursorPosition,
+                 documentScope,
+                 projectScope,
+                 typePath,
+                 isPointer,
+                 typeLibraryKey
+        ) ){
+            if ( isPointer ){
+                for ( int i = 1; i < context.expressionPath().size() - 1; ++i ){
+                    QList<LanguageUtils::FakeMetaObject::ConstPtr> newTypePath;
+
+                    qmlhandler_helpers::evaluatePropertyClass(
+                        typePath, typeLibraryKey, context.expressionPath()[i], projectScope, newTypePath
+                    );
+                    typePath = newTypePath;
+                }
+                qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, ": ", suggestions);
+            }
+        } else if ( qmlhandler_helpers::isNamespace(firstSegment, documentScope) ){
+            if ( context.expressionPath().size() == 2 )
+                suggestionsForNamespaceTypes(firstSegment, suggestions);
+        }
+
+    } else {
+        suggestions << QCodeCompletionSuggestion("property", "", "", "property ");
+        suggestions << QCodeCompletionSuggestion("function", "", "", "function ");
+        QString type = context.objectTypePath().size() > 0 ? context.objectTypePath()[0] : "";
+        if ( type != "" ){
+            QString typeNamespace = context.objectTypePath().size() > 1 ? context.objectTypePath()[1] : "";
+            QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+            QString libraryKey;
+            qmlhandler_helpers::getTypePath(documentScope, projectScope, typeNamespace, type, typePath, libraryKey);
+            qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, ": ", suggestions);
+        }
+        suggestionsForNamespaceTypes("", suggestions);
+        suggestionsForNamespaceImports(suggestions);
+    }
+}
+
+void QDocumentQmlHandler::suggestionsForRightBind(
+        const QQmlCompletionContext& context,
+        int cursorPosition,
+        QList<QCodeCompletionSuggestion> &suggestions)
+{
+    QDocumentQmlScope::Ptr documentScope      = m_documentScope;
+    QProjectQmlScope::Ptr projectScope = m_projectScope;
+
+    if ( context.expressionPath().size() > 1 ){
+        QString firstSegment = context.expressionPath()[0];
+        QDocumentQmlInfo::ValueReference value;
+        QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+        QString typeLibraryKey;
+
+//        QString propertyType;
+        bool isPointer = false;
+
+        if (qmlhandler_helpers::isId(firstSegment, documentScope, projectScope, value, typePath, typeLibraryKey)){
+
+            QDocumentQmlObject valueObj = documentScope->info()->extractValueObject(value);
+            int startSegment = 1;
+
+            if ( startSegment < context.expressionPath().size() - 1 ){
+                if ( valueObj.memberProperties().contains(context.expressionPath()[startSegment])){
+                    QString valueType = valueObj.memberProperties()[context.expressionPath()[startSegment]];
+                    if ( QDocumentQmlInfo::isObject(valueType) ){
+                        typePath.clear();
+                        qmlhandler_helpers::getTypePath(
+                            documentScope,
+                            projectScope,
+                            valueType,
+                            typePath,
+                            typeLibraryKey
+                        );
+                    }
+                    ++startSegment;
+                }
+            } else {
+                suggestionsForValueObject(valueObj, suggestions, true, true, false, true);
+            }
+
+            for ( int i = startSegment; i < context.expressionPath().size() - 1; ++i ){
+                QList<LanguageUtils::FakeMetaObject::ConstPtr> newTypePath;
+
+                qmlhandler_helpers::evaluatePropertyClass(
+                    typePath, typeLibraryKey, context.expressionPath()[i], projectScope, newTypePath
+                );
+                typePath = newTypePath;
+            }
+
+            qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, "", suggestions);
+
+        } else if (qmlhandler_helpers::isParent(
+                       firstSegment,
+                       cursorPosition,
+                       documentScope,
+                       projectScope,
+                       value,
+                       typePath,
+                       typeLibraryKey))
+        {
+            QDocumentQmlObject valueObj = documentScope->info()->extractValueObject(value);
+            int startSegment = 1;
+
+            if ( startSegment < context.expressionPath().size() - 1 ){
+                if ( valueObj.memberProperties().contains(context.expressionPath()[startSegment])){
+                    QString valueType = valueObj.memberProperties()[context.expressionPath()[startSegment]];
+                    if ( QDocumentQmlInfo::isObject(valueType) ){
+                        typePath.clear();
+                        qmlhandler_helpers::getTypePath(
+                            documentScope,
+                            projectScope,
+                            valueType,
+                            typePath,
+                            typeLibraryKey
+                        );
+                    }
+                    ++startSegment;
+                }
+            } else {
+                suggestionsForValueObject(valueObj, suggestions, true, true, false, true);
+            }
+
+            for ( int i = 1; i < context.expressionPath().size() - 1; ++i ){
+                QList<LanguageUtils::FakeMetaObject::ConstPtr> newTypePath;
+
+                qmlhandler_helpers::evaluatePropertyClass(
+                    typePath, typeLibraryKey, context.expressionPath()[i], projectScope, newTypePath
+                );
+                typePath = newTypePath;
+            }
+
+            qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, "", suggestions);
+
+        } else if (qmlhandler_helpers::isProperty(
+                       context.objectTypePath(),
+                       firstSegment,
+                       cursorPosition,
+                       documentScope,
+                       projectScope,
+                       typePath,
+                       isPointer,
+                       typeLibraryKey))
+        {
+            if ( isPointer ){
+                for ( int i = 1; i < context.expressionPath().size() - 1; ++i ){
+                    QList<LanguageUtils::FakeMetaObject::ConstPtr> newTypePath;
+
+                    qmlhandler_helpers::evaluatePropertyClass(
+                        typePath, typeLibraryKey, context.expressionPath()[i], projectScope, newTypePath
+                    );
+                    typePath = newTypePath;
+                }
+                qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, "", suggestions);
+            }
+
+
+        } else if (qmlhandler_helpers::isType(
+                       "",
+                       firstSegment,
+                       documentScope,
+                       projectScope,
+                       typePath,
+                       typeLibraryKey ) )
+        {
+            qmlhandler_helpers::suggestionsForObjectPath(
+                typePath, false, false, false, true, false, "", suggestions
+            );
+        } else if ( qmlhandler_helpers::isNamespace(firstSegment, documentScope) )
+        {
+            if ( context.expressionPath().size() == 3 ){
+
+                /// get type and enums
+                QQmlLibraryInfo::ExportVersion ev = qmlhandler_helpers::getType(
+                    documentScope, projectScope, context.expressionPath()[1], firstSegment, typeLibraryKey
+                );
+                if ( ev.isValid() ){
+                    typePath.append(ev.object);
+
+                    qmlhandler_helpers::generateTypePathFromObject(
+                        ev.object,
+                        typeLibraryKey,
+                        projectScope,
+                        typePath
+                    );
+
+                    qmlhandler_helpers::suggestionsForObjectPath(
+                        typePath, false, false, false, true, false, "", suggestions
+                    );
+                }
+            } else if ( context.expressionPath().size() == 2 ){
+
+                /// get namespace types
+                suggestionsForNamespaceTypes(firstSegment, suggestions);
+            }
+        }
+
+    } else {
+        /// single expression path
+        if ( context.propertyName() == "id" ){
+
+            /// special case for id
+            QString type = context.objectTypePath().size() > 0 ? context.objectTypePath().last() : "";
+            if ( type.isEmpty() )
+                return;
+            type[0] = type[0].toLower();
+            suggestions << QCodeCompletionSuggestion(type, "id", "", type);
+        } else {
+
+            /// other cases
+            suggestions << QCodeCompletionSuggestion("parent", "id", "", "parent");
+            suggestionsForDocumentsIds(suggestions);
+            QDocumentQmlInfo::ValueReference documentValue = documentScope->info()->valueAtPosition(cursorPosition);
+            if ( !documentScope->info()->isValueNull(documentValue) )
+                suggestionsForValueObject(
+                    documentScope->info()->extractValueObject(documentValue),
+                    suggestions,
+                    true,
+                    true,
+                    false,
+                    true
+                );
+
+            QString type = context.objectTypePath().size() > 0 ? context.objectTypePath().last() : "";
+            if ( type == "" )
+                return;
+            QString typeNamespace = context.objectTypePath().size() > 1 ? context.objectTypePath().first() : "";
+            QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+            QString libraryKey;
+            qmlhandler_helpers::getTypePath(documentScope, projectScope, typeNamespace, type, typePath, libraryKey);
+            qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, "", suggestions);
+            suggestionsForNamespaceTypes("", suggestions);
+        }
+    }
+}
+
+void QDocumentQmlHandler::suggestionsForLeftSignalBind(
+        const QQmlCompletionContext& context,
+        int cursorPosition,
+        QList<QCodeCompletionSuggestion> &suggestions)
+{
+    QDocumentQmlScope::Ptr documentScope      = m_documentScope;
+    QProjectQmlScope::Ptr projectScope = m_projectScope;
+
+    QDocumentQmlInfo::ValueReference documentValue = documentScope->info()->valueAtPosition(cursorPosition);
+    if ( !documentScope->info()->isValueNull(documentValue) )
+        suggestionsForValueObject(
+            documentScope->info()->extractValueObject(documentValue),
+            suggestions,
+            false,
+            false,
+            true,
+            false
+        );
+
+    QString type = context.objectTypePath().size() > 0 ? context.objectTypePath()[0] : "";
+    if ( type == "" )
+        return;
+    QString typeNamespace = context.objectTypePath().size() > 1 ? context.objectTypePath()[1] : "";
+    QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+    QString libraryKey;
+    qmlhandler_helpers::getTypePath(documentScope, projectScope, typeNamespace, type, typePath, libraryKey);
+    qmlhandler_helpers::suggestionsForObjectPath(typePath, false, false, false, false, true, ": ", suggestions);
+}
+
+QString QDocumentQmlHandler::extractString(const QTextCursor &cursor) const{
+    QTextBlock block = cursor.block();
+    int localCursorPosition = cursor.positionInBlock();
+    QString blockString = block.text();
+
+    int startOfQuote = blockString.lastIndexOf('\"', localCursorPosition - 1);
+    if ( startOfQuote != -1 )
+        return blockString.mid(startOfQuote + 1, localCursorPosition - startOfQuote - 1);
+    else
+        return blockString.mid(0, localCursorPosition);
+}
+
+}// namespace

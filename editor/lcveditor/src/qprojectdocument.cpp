@@ -30,6 +30,22 @@ void QProjectDocument::readContent(){
     }
 }
 
+void QProjectDocument::save(){
+    if ( m_file->path() != "" ){
+        QFile fileInput(m_file->path());
+        if ( !fileInput.open(QIODevice::WriteOnly ) ){
+            qCritical("Can't open file for writing");
+            return;
+        } else {
+            QTextStream stream(&fileInput);
+            stream << m_content;
+            stream.flush();
+            fileInput.close();
+            m_file->setIsDirty(false);
+        }
+    }
+}
+
 QProjectDocument::~QProjectDocument(){
 }
 

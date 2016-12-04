@@ -145,13 +145,20 @@ QProjectEntry *QProjectFileModel::findPathInEntry(QProjectEntry *entry, const QS
 void QProjectFileModel::openProject(const QString &path){
     beginResetModel();
     m_root->clearItems();
-    QDir pathDir(path);
-    if ( !pathDir.exists())
+
+    QFileInfo pathInfo(path);
+    if ( !pathInfo.exists() ){
+        endResetModel();
         return;
+    }
 
-    QProjectEntry* project = new QProjectEntry(path, m_root);
-    expandEntry(project);
-
+    QProjectEntry* project = 0;
+    if ( pathInfo.isDir() ){
+        project = new QProjectEntry(path, m_root);
+        expandEntry(project);
+    } else {
+        project = new QProjectFile(path, m_root);
+    }
     endResetModel();
     emit projectNodeChanged(createIndex(0, 0, project));
 }

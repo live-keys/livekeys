@@ -88,16 +88,21 @@ Rectangle{
         TextEdit {
             id : editorArea
 
+            property int lastLength: 0
+
             onCursorRectangleChanged: {
                 flick.ensureVisible(cursorRectangle)
             }
-
-            Component.onCompleted: {
-                editor.isDirty = false
+            onCursorPositionChanged: {
+                // disable the model if no text has changed, let the code handler decide otherwise
+                if ( length === lastLength )
+                    codeHandler.completionModel.disable()
+                lastLength = length
             }
 
             focus : true
             text : project.inFocus ? project.inFocus.content : ''
+
             color : "#fff"
             font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
             font.pixelSize: 13
@@ -129,7 +134,10 @@ Rectangle{
                         }
                     }
                 } else if ( event.key === Qt.Key_Space && (event.modifiers & Qt.ControlModifier ) ){
-                    qmlSuggestionBox.visible = !qmlSuggestionBox.visible
+                    codeHandler.generateCompletion(cursorPosition)
+                    event.accepted = true
+                } else if ( event.key === Qt.Key_Escape ){
+                    codeHandler.completionModel.disable()
                 } else if ( event.key === Qt.Key_S && (event.modifiers & Qt.ControlModifier ) ){
                     editor.save()
                     event.accepted = true
@@ -159,39 +167,59 @@ Rectangle{
                         nextLineStartPos = editorArea.text.indexOf('\n', cursorPosition)
                     }
                     event.accepted = true
+                } else if ( event.key === Qt.Key_Down ){
+                    if ( codeHandler.completionModel.isEnabled ){
+                        event.accepted = true
+                        qmlSuggestionBox.incrementSelection()
+                    }
+                } else if ( event.key === Qt.Key_Up ){
+                    if ( codeHandler.completionModel.isEnabled ){
+                        event.accepted = true
+                        qmlSuggestionBox.decrementSelection()
+                    }
                 } else
                     event.accepted = false
             }
 
             Keys.onReturnPressed: {
-                event.accepted = true
-                var clastpos = cursorPosition
-                var append = ""
-                var cpos = cursorPosition - 1
-                var bracketSearchEnd = false
-                while ( cpos > 0 ){
-                    if ( !bracketSearchEnd ){
-                        if ( editorArea.text.charAt(cpos) !== ' ' ){
-                            if ( editorArea.text.charAt(cpos) === '{' ){
-                                append += "    "
-                                bracketSearchEnd = true
-                            } else {
-                                bracketSearchEnd = true
-                            }
-                        }
-                    }// bracket search
-                    if ( editorArea.text.charAt(cpos) === '\n' ){
-                        ++cpos;
-                        while( editorArea.text.charAt(cpos) === '\t' || editorArea.text.charAt(cpos) === ' ' ){
-                            append += editorArea.text.charAt(cpos)
-                            ++cpos
-                        }
-                        break;
-                    }
-                    --cpos;
+                event.accepted = false
+                if ( codeHandler.completionModel.isEnabled ){
+                    codeHandler.insertCompletion(
+                        codeHandler.completionModel.completionPosition,
+                        cursorPosition,
+                        qmlSuggestionBox.getCompletion()
+                    )
+                    event.accepted = true
                 }
-                editorArea.text = editorArea.text.slice(0, clastpos) + "\n" + append + editorArea.text.slice(clastpos)
-                editorArea.cursorPosition = clastpos + 1 + append.length
+
+//                event.accepted = true
+//                var clastpos = cursorPosition
+//                var append = ""
+//                var cpos = cursorPosition - 1
+//                var bracketSearchEnd = false
+//                while ( cpos > 0 ){
+//                    if ( !bracketSearchEnd ){
+//                        if ( editorArea.text.charAt(cpos) !== ' ' ){
+//                            if ( editorArea.text.charAt(cpos) === '{' ){
+//                                append += "    "
+//                                bracketSearchEnd = true
+//                            } else {
+//                                bracketSearchEnd = true
+//                            }
+//                        }
+//                    }// bracket search
+//                    if ( editorArea.text.charAt(cpos) === '\n' ){
+//                        ++cpos;
+//                        while( editorArea.text.charAt(cpos) === '\t' || editorArea.text.charAt(cpos) === ' ' ){
+//                            append += editorArea.text.charAt(cpos)
+//                            ++cpos
+//                        }
+//                        break;
+//                    }
+//                    --cpos;
+//                }
+//                editorArea.text = editorArea.text.slice(0, clastpos) + "\n" + append + editorArea.text.slice(clastpos)
+//                editorArea.cursorPosition = clastpos + 1 + append.length
             }
             Keys.onTabPressed: {
                 event.accepted = true
@@ -200,15 +228,18 @@ Rectangle{
                 editorArea.cursorPosition = clastpos + 4
             }
 
-            CodeHandler{
-                id : codeH
-                Component.onCompleted: {
-                    codeH.target = parent.textDocument
-                }
+            Component.onCompleted: {
+                editor.isDirty = false
+                codeHandler.target = textDocument
             }
 
             Behavior on font.pixelSize {
                 NumberAnimation { duration: 40 }
+            }
+
+            Connections{
+                target: codeHandler
+                onCursorPositionRequest : editorArea.cursorPosition = position
             }
 
             MouseArea{
@@ -226,7 +257,8 @@ Rectangle{
 
         fontFamily: editorArea.font.family
         fontSize: editorArea.font.pixelSize
-        visible: false
+        visible: codeHandler.completionModel.isEnabled && suggestionCount > 0
+        opacity: visible ? 0.95 : 0
 
         y: {
             var calculatedY =
@@ -240,14 +272,18 @@ Rectangle{
         }
         x: {
             var calculatedX =
-                editorArea.positionToRectangle(editorArea.cursorPosition/*//TODOcodeH.completionModel.completionPosition*/).x -
+                editorArea.positionToRectangle(codeHandler.completionModel.completionPosition).x -
                 flick.flickableItem.contentX
 
             if ( calculatedX > flick.width - width)
                 calculatedX = flick.width - width
             return calculatedX;
         }
-//        model: codeHandler.completionModel
+        model: codeHandler.completionModel
+
+        Behavior on opacity {
+            NumberAnimation { duration: 150 }
+        }
     }
 
 }

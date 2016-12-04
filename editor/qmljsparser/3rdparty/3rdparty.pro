@@ -34,7 +34,8 @@ HEADERS += \
     $$PWD/qmljs/qmljscontext.h \
     $$PWD/qmljs/qmljsviewercontext.h \
     $$PWD/qmljs/qmljsqrcparser.h \
-    $$PWD/qmljs/qmljsdescribevalue.h
+    $$PWD/qmljs/qmljsdescribevalue.h \
+    $$PWD/qmljs/qmljscompletioncontextfinder.h
 
 SOURCES += \
     $$PWD/qmljs/qmljsbind.cpp \
@@ -50,7 +51,8 @@ SOURCES += \
     $$PWD/qmljs/qmljscontext.cpp \
     $$PWD/qmljs/qmljsviewercontext.cpp \
     $$PWD/qmljs/qmljsqrcparser.cpp \
-    $$PWD/qmljs/qmljsdescribevalue.cpp
+    $$PWD/qmljs/qmljsdescribevalue.cpp \
+    $$PWD/qmljs/qmljscompletioncontextfinder.cpp
 
 # Language Utils
 

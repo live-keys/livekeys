@@ -1,6 +1,7 @@
 #ifndef QPROJECTFILEMODEL_H
 #define QPROJECTFILEMODEL_H
 
+#include "qlcveditorglobal.h"
 #include <QAbstractItemModel>
 #include <functional>
 
@@ -15,7 +16,8 @@ namespace lcv{
 
 class QProjectEntry;
 class QProjectFile;
-class QProjectFileModel : public QAbstractItemModel{
+
+class Q_LCVEDITOR_EXPORT QProjectFileModel : public QAbstractItemModel{
 
     Q_OBJECT
 

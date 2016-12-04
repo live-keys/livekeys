@@ -1,10 +1,15 @@
 #ifndef QQMLCOMPLETIONCONTEXT_H
 #define QQMLCOMPLETIONCONTEXT_H
 
+#include "qqmljsparserglobal.h"
+#include "qcodecompletionmodel.h"
+
 #include <QString>
 #include <QStringList>
 
-class QQmlCompletionContext{
+namespace lcv{
+
+class Q_QMLJSPARSER_EXPORT QQmlCompletionContext : public QCodeCompletionContext{
 
 public:
     enum Context{
@@ -35,6 +40,9 @@ public:
     const QStringList& propertyPath() const;
 
     const QStringList& expressionPath() const;
+
+    bool operator ==(const QQmlCompletionContext& other) const;
+    bool operator !=(const QQmlCompletionContext& other) const;
 
 private:
     int         m_context;
@@ -67,5 +75,7 @@ inline const QStringList &QQmlCompletionContext::propertyPath() const{
 inline const QStringList &QQmlCompletionContext::expressionPath() const{
     return m_expressionPath;
 }
+
+}// namespace
 
 #endif // QQMLCOMPLETIONCONTEXT_H

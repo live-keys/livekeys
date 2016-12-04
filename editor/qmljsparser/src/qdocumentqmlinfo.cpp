@@ -1,7 +1,7 @@
 #include "qdocumentqmlinfo.h"
 #include "qmljs/qmljsdocument.h"
 #include "qmljs/qmljsbind.h"
-#include "qqmlidvisitor.h"
+#include "qqmlidvisitor_p.h"
 #include "qdocumentqmlranges_p.h"
 
 #include <QDebug>
@@ -43,12 +43,13 @@ QDocumentQmlInfo::MutablePtr QDocumentQmlInfo::create(const QString &fileName){
     return QDocumentQmlInfo::MutablePtr(new QDocumentQmlInfo(fileName));
 }
 
-QStringList QDocumentQmlInfo::extractIds(){
-    Q_D(QDocumentQmlInfo);
+QStringList QDocumentQmlInfo::extractIds() const{
+    Q_D(const QDocumentQmlInfo);
+    if ( d->internalDocBind->idEnvironment() == 0 )
+        return QStringList();
+
     QIdExtractor extractor;
-
     d->internalDocBind->idEnvironment()->processMembers(&extractor);
-
     return extractor.ids();
 }
 
@@ -57,18 +58,19 @@ const QDocumentQmlInfo::ValueReference QDocumentQmlInfo::rootObject(){
     return QDocumentQmlInfo::ValueReference(d->internalDocBind->rootObjectValue(), this);
 }
 
-const QDocumentQmlInfo::ValueReference QDocumentQmlInfo::valueForId(const QString &id){
-    Q_D(QDocumentQmlInfo);
+const QDocumentQmlInfo::ValueReference QDocumentQmlInfo::valueForId(const QString &id) const{
+    Q_D(const QDocumentQmlInfo);
+    if ( d->internalDocBind->idEnvironment() == 0 )
+        return QDocumentQmlInfo::ValueReference();
+
     QIdValueExtractor valueExtractor(id);
-
     d->internalDocBind->idEnvironment()->processMembers(&valueExtractor);
-
     return QDocumentQmlInfo::ValueReference(valueExtractor.value(), this);
 }
 
-const QDocumentQmlObject QDocumentQmlInfo::extractValueObject(
+ QDocumentQmlObject QDocumentQmlInfo::extractValueObject(
         const ValueReference &valueref,
-        ValueReference *parent)
+        ValueReference *parent) const
 {
     QDocumentQmlObject vodata;
     if ( isValueNull(valueref) || valueref.parent != this )
@@ -85,23 +87,36 @@ const QDocumentQmlObject QDocumentQmlInfo::extractValueObject(
         }
     }
 
-//    qDebug() << DescribeValueVisitor::describe(valueref.value, 3);
-
     return vodata;
+ }
+
+QString QDocumentQmlInfo::extractTypeName(const QDocumentQmlInfo::ValueReference &valueref) const{
+    if ( isValueNull(valueref) || valueref.parent != this )
+        return "";
+
+    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() )
+        if ( vob->typeName() )
+            return vob->typeName()->name.toString();
+
+    return "";
 }
 
-void QDocumentQmlInfo::createRanges(QTextDocument *document){
+void QDocumentQmlInfo::createRanges(){
     Q_D(QDocumentQmlInfo);
-    d->ranges(document, d->internalDoc);
+    d->ranges(d->internalDoc);
 }
 
-const QDocumentQmlInfo::ValueReference QDocumentQmlInfo::valueAtCursor(const QTextCursor &){
-    //TODO
-    //Use bind->findQmlObject(AST::Node*)
-    return QDocumentQmlInfo::ValueReference();
+const QDocumentQmlInfo::ValueReference QDocumentQmlInfo::valueAtPosition(int position) const{
+    Q_D(const QDocumentQmlInfo);
+    QDocumentQmlRanges::Range range = d->ranges.findClosestRange(position);
+    if ( range.ast == 0 )
+        return QDocumentQmlInfo::ValueReference();
+
+    QmlJS::ObjectValue* value = d->internalDocBind->findQmlObject(range.ast);
+    return QDocumentQmlInfo::ValueReference(value, this);
 }
 
-bool QDocumentQmlInfo::isValueNull(const QDocumentQmlInfo::ValueReference& vr){
+bool QDocumentQmlInfo::isValueNull(const QDocumentQmlInfo::ValueReference& vr) const{
     return vr.value == 0;
 }
 
@@ -110,7 +125,27 @@ bool QDocumentQmlInfo::parse(const QString &source){
     d->internalDoc->setSource(source);
     bool parseResult = d->internalDoc->parse();
     d->internalDocBind = d->internalDoc->bind();
+//    qDebug() << "PARSE MESSAGES:";
+
+    //HERE
+//    foreach( const QmlJS::DiagnosticMessage& message, d->internalDoc->diagnosticMessages() ){
+//        qDebug() << "M:" << message.message;
+//    }
+
     return parseResult;
+}
+
+QmlJS::Bind *QDocumentQmlInfo::internalBind(){
+    Q_D(QDocumentQmlInfo);
+    return d->internalDocBind;
+}
+
+bool QDocumentQmlInfo::isObject(const QString &typeString){
+    if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
+         typeString == "int" || typeString == "list" || typeString == "real" ||
+         typeString == "string" || typeString == "url" || typeString == "var" )
+        return false;
+    return true;
 }
 
 QDocumentQmlInfo::~QDocumentQmlInfo(){

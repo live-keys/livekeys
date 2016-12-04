@@ -2,12 +2,11 @@
 #define QPROJECTENTRY_H
 
 #include <QObject>
-
-//TODO: Sort out unnamed file handling (e.g. new file, new dir)
+#include "qlcveditorglobal.h"
 
 namespace lcv{
 
-class QProjectEntry : public QObject{
+class Q_LCVEDITOR_EXPORT QProjectEntry : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QString name   READ name NOTIFY nameChanged)
