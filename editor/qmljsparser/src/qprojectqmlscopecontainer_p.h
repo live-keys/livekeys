@@ -7,12 +7,11 @@
 
 namespace lcv{
 
-
-class QProjectQmlScopePrivate{
+class QProjectQmlScopeContainer{
 
 public:
-    QProjectQmlScopePrivate(){}
-    ~QProjectQmlScopePrivate(){}
+    QProjectQmlScopeContainer(){}
+    ~QProjectQmlScopeContainer(){}
 
     QQmlLibraryInfo::Ptr libraryInfo(const QString& path);
     bool libraryExists(const QString& path);
@@ -22,12 +21,15 @@ public:
 
     QHash<QString, QQmlLibraryInfo::Ptr> getNoInfoLibraries();
 
+    void resetLibrariesInPath(const QString& path);
+    void resetLibrary(const QString& path);
+
 private:
     QMutex m_libraryMutex;
     QHash<QString, QQmlLibraryInfo::Ptr> m_libraries;
 };
 
-inline QQmlLibraryInfo::Ptr QProjectQmlScopePrivate::libraryInfo(const QString &path){
+inline QQmlLibraryInfo::Ptr QProjectQmlScopeContainer::libraryInfo(const QString &path){
     QQmlLibraryInfo::Ptr libinfo(0);
     m_libraryMutex.lock();
     libinfo = m_libraries.value(path, QQmlLibraryInfo::Ptr(0));
@@ -39,20 +41,20 @@ inline QQmlLibraryInfo::Ptr QProjectQmlScopePrivate::libraryInfo(const QString &
     return libinfo;
 }
 
-inline bool QProjectQmlScopePrivate::libraryExists(const QString &path){
+inline bool QProjectQmlScopeContainer::libraryExists(const QString &path){
     m_libraryMutex.lock();
     bool contains = m_libraries.contains(path);
     m_libraryMutex.unlock();
     return contains;
 }
 
-inline void QProjectQmlScopePrivate::assignLibrary(const QString &path, QQmlLibraryInfo::Ptr libinfo){
+inline void QProjectQmlScopeContainer::assignLibrary(const QString &path, QQmlLibraryInfo::Ptr libinfo){
     m_libraryMutex.lock();
     m_libraries[path] = libinfo;
     m_libraryMutex.unlock();
 }
 
-inline void QProjectQmlScopePrivate::assignLibraries(const QHash<QString, QQmlLibraryInfo::Ptr> &libinfos){
+inline void QProjectQmlScopeContainer::assignLibraries(const QHash<QString, QQmlLibraryInfo::Ptr> &libinfos){
     m_libraryMutex.lock();
     for( QHash<QString, QQmlLibraryInfo::Ptr>::const_iterator it = libinfos.begin(); it != libinfos.end(); ++it ){
         m_libraries[it.key()] = it.value();
@@ -60,11 +62,11 @@ inline void QProjectQmlScopePrivate::assignLibraries(const QHash<QString, QQmlLi
     m_libraryMutex.unlock();
 }
 
-inline int QProjectQmlScopePrivate::totalLibraries() const{
+inline int QProjectQmlScopeContainer::totalLibraries() const{
     return m_libraries.size();
 }
 
-inline QHash<QString, QQmlLibraryInfo::Ptr> QProjectQmlScopePrivate::getNoInfoLibraries(){
+inline QHash<QString, QQmlLibraryInfo::Ptr> QProjectQmlScopeContainer::getNoInfoLibraries(){
     QHash<QString, QQmlLibraryInfo::Ptr> libraries;
     m_libraryMutex.lock();
 
@@ -76,6 +78,22 @@ inline QHash<QString, QQmlLibraryInfo::Ptr> QProjectQmlScopePrivate::getNoInfoLi
     m_libraryMutex.unlock();
 
     return libraries;
+}
+
+inline void QProjectQmlScopeContainer::resetLibrariesInPath(const QString &path){
+    m_libraryMutex.lock();
+    for( QHash<QString, QQmlLibraryInfo::Ptr>::iterator it = m_libraries.begin(); it != m_libraries.end(); ++it ){
+        if ( it.key().startsWith(path) )
+            it.value()->data().setPluginTypeInfoStatus(QmlJS::LibraryInfo::NoTypeInfo);
+    }
+    m_libraryMutex.unlock();
+}
+
+inline void QProjectQmlScopeContainer::resetLibrary(const QString &path){
+    m_libraryMutex.lock();
+    if ( m_libraries.contains(path) )
+        m_libraries[path]->data().setPluginTypeInfoStatus(QmlJS::LibraryInfo::NoTypeInfo);
+    m_libraryMutex.unlock();
 }
 
 }// namespace

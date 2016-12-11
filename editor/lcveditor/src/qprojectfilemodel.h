@@ -57,11 +57,6 @@ public:
     QProjectEntry* root();
 
 public slots:
-    void fileClosed(const QString& path);
-
-    void fileAdded(const QString& path);
-    void fileRemoved(const QString& path);
-
     void entryRemoved(const QModelIndex& item);
     void entryRemoved(QProjectEntry* entry);
     void entryRemoved(const QModelIndex &item, lcv::QProjectEntry* entry);
@@ -70,6 +65,7 @@ public slots:
     void moveEntry(lcv::QProjectEntry* item, lcv::QProjectEntry* parent);
 
     void expandEntry(lcv::QProjectEntry* entry) const;
+    void rescanEntries(lcv::QProjectEntry* entry = 0);
 
     lcv::QProjectEntry *itemAt(const QModelIndex& index) const;
 

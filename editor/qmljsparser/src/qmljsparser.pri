@@ -17,7 +17,7 @@ HEADERS += \
     $$PWD/qqmllibrarydependency.h \
     $$PWD/qdocumentqmlobject_p.h \
     $$PWD/qprojectqmlscope.h \
-    $$PWD/qprojectqmlscope_p.h
+    $$PWD/qprojectqmlscopecontainer_p.h
 
 SOURCES += \
     $$PWD/qdocumentqmlparser.cpp \

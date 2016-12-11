@@ -7,7 +7,7 @@
 
 namespace lcv{
 
-LanguageUtils::FakeMetaObject::Ptr metaObjectFromQmlObject(const QDocumentQmlObject& object){
+inline LanguageUtils::FakeMetaObject::Ptr metaObjectFromQmlObject(const QDocumentQmlObject& object){
     LanguageUtils::FakeMetaObject::Ptr fmo(new LanguageUtils::FakeMetaObject);
     fmo->setClassName(object.typeName());
     fmo->setAttachedTypeName(object.typeName());
@@ -18,7 +18,7 @@ LanguageUtils::FakeMetaObject::Ptr metaObjectFromQmlObject(const QDocumentQmlObj
         ++it )
     {
         LanguageUtils::FakeMetaProperty fmp(
-            it.key(), it.value(), false, true, QDocumentQmlInfo::isObject(object.typeName()), 0
+            it.key(), it.value(), false, true, QDocumentQmlInfo::isObject(it.value()), 0
         );
         fmo->addProperty(fmp);
     }

@@ -47,15 +47,17 @@ public:
         };
 
     public:
-        Message(Severity pkind, int pposition, const QString& ptext)
+        Message(Severity pkind, int pposition, int pline, const QString& ptext)
             : kind(pkind)
             , position(pposition)
+            , line(pline)
             , text(ptext)
         {}
 
 
-        int      position;
         Severity kind;
+        int      position;
+        int      line;
         QString  text;
 
     };
@@ -96,6 +98,9 @@ public:
     QmlJS::Bind* internalBind();
 
     static bool isObject(const QString& typeString);
+
+    QString path() const;
+    QString componentName() const;
 
     ~QDocumentQmlInfo();
 

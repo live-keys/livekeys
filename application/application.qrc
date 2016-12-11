@@ -8,6 +8,7 @@
         <file alias="SuggestionBox.qml">qml/SuggestionBox.qml</file>
         <file alias="MessageDialogButton.qml">qml/MessageDialogButton.qml</file>
         <file alias="MessageDialogInternal.qml">qml/MessageDialogInternal.qml</file>
+        <file alias="ProjectNavigation.qml">qml/ProjectNavigation.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>

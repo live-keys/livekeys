@@ -13,17 +13,24 @@
 
 namespace lcv{
 
+class QProjectEntry;
 class QProjectFile;
 class QProjectFileModel;
+class QProjectNavigationModel;
 class QProjectDocument;
+class QProjectDocumentModel;
 
 class Q_LCVEDITOR_EXPORT QProject : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lcv::QProjectDocument*  active    READ active    NOTIFY activeChanged)
-    Q_PROPERTY(lcv::QProjectDocument*  inFocus   READ inFocus   NOTIFY inFocusChanged)
-    Q_PROPERTY(lcv::QProjectFileModel* fileModel READ fileModel NOTIFY fileModelChanged)
-    Q_PROPERTY(QString                 path      READ path      NOTIFY pathChanged)
+    Q_PROPERTY(lcv::QProjectDocument*  active                READ active          NOTIFY activeChanged)
+    Q_PROPERTY(lcv::QProjectDocument*  inFocus               READ inFocus         NOTIFY inFocusChanged)
+    Q_PROPERTY(lcv::QProjectFileModel* fileModel             READ fileModel       NOTIFY fileModelChanged)
+    Q_PROPERTY(lcv::QProjectNavigationModel* navigationModel READ navigationModel NOTIFY navigationModelChanged)
+    Q_PROPERTY(lcv::QProjectDocumentModel* documentModel     READ documentModel   NOTIFY documentModelChanged)
+    Q_PROPERTY(QString path                                  READ path            NOTIFY pathChanged)
+
+    friend class QProjectFileModel;
 
 public:
     QProject(QObject* parent = 0);
@@ -34,10 +41,14 @@ public:
     void closeProject();
     void setActive(const QString& path);
 
+    QProjectFile* lookupBestFocus(QProjectEntry* entry);
+
     QProjectDocument* isOpened(const QString& path);
     void closeFocusedFile();
 
     lcv::QProjectFileModel* fileModel();
+    lcv::QProjectNavigationModel* navigationModel();
+    lcv::QProjectDocumentModel* documentModel();
     lcv::QProjectDocument*  active() const;
     lcv::QProjectDocument*  inFocus() const;
 
@@ -53,16 +64,23 @@ signals:
     void pathChanged(QString path);
     void activeChanged(QProjectDocument* active);
     void inFocusChanged(QProjectDocument* inFocus);
+
     void fileModelChanged(QProjectFileModel* fileModel);
+    void navigationModelChanged(QProjectNavigationModel* navigationModel);
+    void documentModelChanged(QProjectDocumentModel* documentModel);
+
+    void directoryChanged(const QString& path);
+    void fileChanged(const QString& path);
 
 private:
     void setInFocus(QProjectDocument* document);
     void setActive(QProjectDocument* document);
 
 private:
-    QProjectFileModel* m_fileModel;
+    QProjectFileModel*       m_fileModel;
+    QProjectNavigationModel* m_navigationModel;
+    QProjectDocumentModel*   m_documentModel;
 
-    QHash<QString, QProjectDocument*> m_openedFiles;
     QProjectDocument* m_active;
     QProjectDocument* m_focus;
     QString           m_path;
@@ -70,6 +88,14 @@ private:
 
 inline QProjectFileModel* QProject::fileModel(){
     return m_fileModel;
+}
+
+inline QProjectNavigationModel *QProject::navigationModel(){
+    return m_navigationModel;
+}
+
+inline QProjectDocumentModel *QProject::documentModel(){
+    return m_documentModel;
 }
 
 inline QProjectDocument *QProject::active() const{

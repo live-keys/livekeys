@@ -1,21 +1,20 @@
 #include "qprojectfile.h"
+#include <QFileInfo>
 
-#include <QDebug>
 namespace lcv{
 
 QProjectFile::QProjectFile(const QString &path, QProjectEntry *parent)
-    : QProjectEntry(path, parent)
+    : QProjectEntry(path, QFileInfo(path).fileName(), true, parent)
     , m_isOpen(false)
     , m_isDirty(false)
 {
 }
 
 QProjectFile::QProjectFile(const QString &path, const QString &name, QProjectEntry *parent)
-    : QProjectEntry(path, name, parent)
+    : QProjectEntry(path, name, true, parent)
     , m_isOpen(false)
     , m_isDirty(false)
 {
-
 }
 
 QProjectFile::~QProjectFile(){

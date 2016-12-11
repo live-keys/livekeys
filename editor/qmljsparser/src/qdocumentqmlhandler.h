@@ -43,6 +43,8 @@ public slots:
     void newDocumentScopeReady();
     void newProjectScope();
     void newProject(const QString& path);
+    void directoryChanged(const QString& path);
+    void fileChanged(const QString& path);
 
 private:
     void suggestionsForGlobalQmlContext(
@@ -59,7 +61,8 @@ private:
         QList<QCodeCompletionSuggestion>& suggestions,
         QString &filter
     );
-    void suggestionsForRecursiveImport(int index,
+    void suggestionsForRecursiveImport(
+        int index,
         const QString &dir,
         const QStringList& expression,
         QList<QCodeCompletionSuggestion>& suggestions
@@ -101,7 +104,7 @@ private:
         QList<QCodeCompletionSuggestion>& suggestions
     );
 
-    QString extractString(const QTextCursor& cursor) const;
+    QString extractQuotedString(const QTextCursor& cursor) const;
 
     QTextDocument*      m_target;
     QQmlJsHighlighter*  m_highlighter;

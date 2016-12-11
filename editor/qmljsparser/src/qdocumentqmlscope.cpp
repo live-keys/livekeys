@@ -56,41 +56,17 @@ QDocumentQmlScope::Ptr QDocumentQmlScope::createScope(
     documentInfo->createRanges();
 
     QDocumentQmlScope::Ptr documentScope(new QDocumentQmlScope(projectScope, documentInfo));
+    projectScope->addImplicitLibrary(documentInfo->path());
 
-//    QmlJS::Document::MutablePtr document = QmlJS::Document::create(fileName, QmlJS::Dialect::Qml);
-//    document->setSource(data);
-//    document->parseQml();
-
-    foreach (const QmlJS::ImportInfo &importInfo, documentInfo->internalBind()->imports()) {
-        QmlJS::ImportKey impKey(importInfo);
-        Import::Type importType;
-        switch(impKey.type){
-        case QmlJS::ImportType::Invalid:           importType = Import::Invalid; break;
-        case QmlJS::ImportType::Library:           importType = Import::Library; break;
-        case QmlJS::ImportType::Directory:         importType = Import::Directory; break;
-        case QmlJS::ImportType::ImplicitDirectory: importType = Import::ImplicitDirectory; break;
-        case QmlJS::ImportType::File:              importType = Import::File; break;
-        case QmlJS::ImportType::UnknownFile:       importType = Import::UnknownFile; break;
-        default:                                   importType = Import::Invalid;
-        }
-
-        Import import(
-            importType,
-            importInfo.path(),
-            importInfo.as(),
-            importInfo.version().majorVersion(),
-            importInfo.version().minorVersion()
-        );
-
-        //TODO: Add imports for implicit directory and implicit file
+    QList<QDocumentQmlScope::Import> imports = extractImports(documentInfo);
+    foreach( QDocumentQmlScope::Import import, imports ){
 
         if( !documentScope->hasImport(import) ){
             QList<QString> paths;
-            if (importInfo.type() == QmlJS::ImportType::Directory) {
-                projectScope->findQmlLibrary(
-                    importInfo.path(),
-                    importInfo.version().majorVersion(),
-                    importInfo.version().minorVersion(),
+            if (import.importType() == QDocumentQmlScope::Import::Directory) {
+                projectScope->findQmlLibraryInPath(
+                    import.path(),
+                    false,
                     paths
                 );
                 if ( paths.isEmpty() ){
@@ -100,13 +76,13 @@ QDocumentQmlScope::Ptr QDocumentQmlScope::createScope(
                 foreach (const QString& path, paths )
                     documentScope->addImport(import, path);
             }
-            if (importInfo.type() == QmlJS::ImportType::Library) {
-                if (!importInfo.version().isValid())
+            if (import.importType() == QDocumentQmlScope::Import::Library) {
+                if (!import.isVersionValid())
                     continue;
                 projectScope->findQmlLibraryInImports(
-                    importInfo.path(),
-                    importInfo.version().majorVersion(),
-                    importInfo.version().minorVersion(),
+                    import.path(),
+                    import.versionMajor(),
+                    import.versionMinor(),
                     paths
                 );
                 if ( paths.isEmpty() ){
@@ -121,6 +97,34 @@ QDocumentQmlScope::Ptr QDocumentQmlScope::createScope(
     }
 
     return documentScope;
+}
+
+QList<QDocumentQmlScope::Import> QDocumentQmlScope::extractImports(QDocumentQmlInfo::MutablePtr documentInfo){
+    QList<QDocumentQmlScope::Import> imports;
+    QList<QmlJS::ImportInfo> importInfos = documentInfo->internalBind()->imports();
+
+    for ( QList<QmlJS::ImportInfo>::iterator it = importInfos.begin(); it != importInfos.end(); ++it ){
+        QmlJS::ImportKey impKey(*it);
+        Import::Type importType;
+        switch(impKey.type){
+        case QmlJS::ImportType::Invalid:           importType = Import::Invalid; break;
+        case QmlJS::ImportType::Library:           importType = Import::Library; break;
+        case QmlJS::ImportType::Directory:         importType = Import::Directory; break;
+        case QmlJS::ImportType::ImplicitDirectory: importType = Import::ImplicitDirectory; break;
+        case QmlJS::ImportType::File:              importType = Import::File; break;
+        case QmlJS::ImportType::UnknownFile:       importType = Import::UnknownFile; break;
+        default:                                   importType = Import::Invalid;
+        }
+
+        imports << Import(
+           importType,
+           it->path(),
+           it->as(),
+           it->version().majorVersion(),
+           it->version().minorVersion()
+       );
+    }
+    return imports;
 }
 
 bool QDocumentQmlScope::hasImport(const QDocumentQmlScope::Import &key){

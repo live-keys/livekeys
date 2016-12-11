@@ -21,6 +21,8 @@ public:
     const QString& category() const;
     const QString& completion() const;
 
+    static bool compare(const QCodeCompletionSuggestion& first, const QCodeCompletionSuggestion& second);
+
 private:
     QString m_label;
     QString m_info;

@@ -27,6 +27,14 @@ ApplicationWindow {
     height: 700
     color : "#293039"
 
+    onActiveChanged: {
+        if ( active ){
+            project.navigationModel.requiresReindex()
+            project.fileModel.rescanEntries()
+            project.documentModel.rescanDocuments()
+        }
+    }
+
     title: qsTr("Live CV")
 
     signal beforeCompile()
@@ -55,7 +63,7 @@ ApplicationWindow {
 
     Top{
         id : header
-//        visible: false
+        visible: true
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -177,7 +185,7 @@ ApplicationWindow {
             Editor{
                 id: editor
                 height: parent.height
-                width: 1000
+                width: 400
 
                 onSave: {
                     if ( project.inFocus.name !== '' ){
@@ -202,6 +210,9 @@ ApplicationWindow {
                         editor.width = contentWrap.width / 4
                     else
                         editor.width = contentWrap.width / 2
+                }
+                onToggleNavigation: {
+                    projectNavigation.visible = true
                 }
 
                 Component.onCompleted: forceFocus()
@@ -235,10 +246,13 @@ ApplicationWindow {
                                 // Info Qt/Src/qtquick1/src/declarative/qml/qdeclarativeengine.cpp
                                 var program = "import QtQuick 2.3\n" + tester.program
                                 codeHandler.updateScope(program)
+                                var filepath = project.active ? project.active.file.path : 'untitled.qml'
+                                console.log(filepath)
                                 newItem = Qt.createQmlObject(
                                     program,
                                     tester,
-                                    codeDocument.file.toString() !== '' ? codeDocument.file : 'untitled.qml');
+                                    project.active ? project.active.file.path : 'untitled.qml'
+                                );
                             } catch (err) {
                                 var message = err.qmlErrors[0].message
                                 if ( message.indexOf('\"lcvcore\"') === 0 || message.indexOf('\"lcvimgproc\"') === 0 ||
@@ -305,7 +319,23 @@ ApplicationWindow {
 
         }
 
+        ProjectNavigation{
+            id: projectNavigation
+            anchors.left: parent.left
+
+            width: projectView.width + editor.width
+            height: parent.height
+            visible: false
+            onOpen: {
+                project.openFile(path)
+                editor.forceFocus()
+            }
+            onCancel: {
+                editor.forceFocus()
+            }
+        }
     }
+
 
     MessageDialogInternal{
         id: messageBox

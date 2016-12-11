@@ -29,8 +29,6 @@ public:
     bool isDirty() const;
     void setIsDirty(bool isDirty);
 
-    bool isFile() const;
-
 signals:
     void textChanged();
     void isActiveChanged();
@@ -53,10 +51,6 @@ inline void QProjectFile::setText(const QString &text){
 
     m_text = text;
     emit textChanged();
-}
-
-inline bool QProjectFile::isFile() const{
-    return true;
 }
 
 inline bool QProjectFile::isOpen() const{

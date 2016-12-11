@@ -1,6 +1,7 @@
 #include "qprojectfilemodel.h"
 #include "qprojectentry.h"
 #include "qprojectfile.h"
+#include "qproject.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -65,10 +66,9 @@ QModelIndex QProjectFileModel::parent(const QModelIndex &index) const{
 
 int QProjectFileModel::rowCount(const QModelIndex &parent) const{
     QProjectEntry *parentItem = itemOrRoot(parent);
-//    qDebug() << "Row count requested. for " << parent << parentItem->childCount();
-    if ( parentItem->childCount() == 0)
+    if ( parentItem != m_root ){
         expandEntry(parentItem);
-//    qDebug() << parentItem->childCount();
+    }
     return parentItem->childCount();
 }
 
@@ -104,13 +104,12 @@ QProjectFile *QProjectFileModel::openFile(const QString &file){
     QString absolutePath = QFileInfo(file).absoluteFilePath();
     if ( m_root->childCount() == 0 )
         return openExternalFile(absolutePath);
-    QProjectEntry* project   = m_root->child(0);
+    QProjectEntry* projectEntry   = m_root->child(0);
     QProjectEntry* foundPath = 0;
-    if ( absolutePath.indexOf(project->path()) == 0 ){
-        QString pathLeft = absolutePath.mid(0, project->path().size());
-        if ( pathLeft.startsWith("/") )
-            pathLeft = pathLeft.mid(1);
-        foundPath = findPathInEntry(project, absolutePath);
+    if ( absolutePath.indexOf(projectEntry->path()) == 0 ){
+        QString pathLeft = absolutePath.mid(projectEntry->path().size());
+        pathLeft.prepend(pathLeft.startsWith("/") ? projectEntry->name() : (projectEntry->name() + "/"));
+        foundPath = findPathInEntry(projectEntry, pathLeft);
     }
 
     if ( foundPath && foundPath->isFile() )
@@ -123,11 +122,13 @@ QProjectEntry *QProjectFileModel::findPathInEntry(QProjectEntry *entry, const QS
         QString pathLeft = path.mid(entry->name().size());
         if ( pathLeft.startsWith("/") )
             pathLeft = pathLeft.mid(1);
-        if ( pathLeft == "" )
+        if ( pathLeft == "" ) {
             return entry;
-        else {
-            if ( entry->childCount() == 0 )
+        } else {
+            if ( entry->lastCheckTime().isNull() )
                 expandEntry(entry);
+
+
 
             foreach( QObject* obj, entry->children() ){
                 QProjectEntry* currentEntry = qobject_cast<QProjectEntry*>(obj);
@@ -170,16 +171,6 @@ void QProjectFileModel::closeProject(){
 //    emit projectNodeChanged(createIndex(0, 0, m_root));
 }
 
-void QProjectFileModel::fileClosed(const QString &path){
-}
-
-void QProjectFileModel::fileAdded(const QString &path){
-
-}
-
-void QProjectFileModel::fileRemoved(const QString &path){
-}
-
 void QProjectFileModel::entryRemoved(const QModelIndex &item){
     QProjectEntry* itemEntry = itemAt(item);
     if ( itemEntry )
@@ -192,19 +183,19 @@ void QProjectFileModel::entryRemoved(QProjectEntry *entry){
 
 void QProjectFileModel::entryRemoved(const QModelIndex &item, QProjectEntry *entry){
     beginRemoveRows(parent(item), item.row(), item.row());
-    entry->setParent(0);
+    entry->setParentEntry(0);
     endRemoveRows();
 }
 
 void QProjectFileModel::entryAdded(QProjectEntry *item, QProjectEntry *parent){
     QModelIndex parentIndex = createIndex(parent->childNumber(), 0, parent);
+    int insertionIndex = parent->findEntryInsertionIndex(item);
     beginInsertRows(
         parentIndex,
-        parent->childCount(),
-        parent->childCount()
+        insertionIndex,
+        insertionIndex
     );
-    qDebug() << "entry added";
-    item->setParent(parent);
+    item->setParentEntry(parent);
     endInsertRows();
 }
 
@@ -236,18 +227,81 @@ void QProjectFileModel::moveEntry(QProjectEntry *item, QProjectEntry *newParent)
 }
 
 void QProjectFileModel::expandEntry(QProjectEntry *entry) const{
-    //check if entry is already expanded or dirty
+    if ( !entry->lastCheckTime().isNull() )
+        return;
+
     QDirIterator dit(entry->path());
     while( dit.hasNext() ){
         dit.next();
         QFileInfo info = dit.fileInfo();
         if ( info.fileName() == "." || info.fileName() == ".." )
             continue;
+
         if ( info.isDir() ){
             entry->addEntry(info.fileName());
         } else {
             entry->addFileEntry(info.fileName());
         }
+    }
+
+    entry->setLastCheckTime(QDateTime::currentDateTime());
+}
+
+void QProjectFileModel::rescanEntries(QProjectEntry *entry){
+    if ( entry == 0 ){
+        foreach( QProjectEntry* childEntry, m_root->entries() )
+            rescanEntries(childEntry);
+        return;
+    }
+    if ( entry->lastCheckTime().isNull() )
+        return;
+
+    QProject* project = qobject_cast<QProject*>(QObject::parent());
+
+    QDirIterator dit(entry->path());
+    QSet<QString> newEntries;
+
+    bool hasDirectoryChanged = false;
+    while( dit.hasNext() ){
+        dit.next();
+        QFileInfo info = dit.fileInfo();
+        if ( info.fileName() == "." || info.fileName() == ".." )
+            continue;
+
+        newEntries.insert(info.fileName());
+        if ( !entry->contains(info.fileName()) ){
+            QProjectEntry* newEntry = info.isDir()
+                ? new QProjectEntry(entry->path(), info.fileName(), (QProjectEntry*)0)
+                : new QProjectFile(entry->path(), info.fileName(), 0);
+
+            entryAdded(newEntry, entry);
+            hasDirectoryChanged = true;
+        }
+    }
+
+    foreach( QProjectEntry* childEntry, entry->entries() ){
+        if ( !newEntries.contains(childEntry->name()) ){
+            entryRemoved(childEntry);
+            if ( childEntry->isFile() ){
+                if ( project )
+                    emit project->fileChanged(childEntry->path());
+                QProjectFile* entryAsFile = qobject_cast<QProjectFile*>(childEntry);
+                if ( !entryAsFile->isOpen() )
+                    delete childEntry;
+            } else {
+                delete childEntry;
+            }
+            hasDirectoryChanged = true;
+        }
+    }
+
+    entry->setLastCheckTime(QDateTime::currentDateTime());
+
+    if ( hasDirectoryChanged )
+        emit project->directoryChanged(entry->path());
+
+    foreach( QProjectEntry* childEntry, entry->entries() ){
+        rescanEntries(childEntry);
     }
 }
 
