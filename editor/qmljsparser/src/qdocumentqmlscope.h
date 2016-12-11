@@ -44,6 +44,7 @@ public:
         const QString& as() const;
         int versionMajor() const;
         int versionMinor() const;
+        bool isVersionValid() const;
 
         bool operator ==(const Import& other) const;
 
@@ -73,6 +74,8 @@ public:
         QProjectQmlScope::Ptr projectScope
     );
 
+    static QList<Import> extractImports(QDocumentQmlInfo::MutablePtr document);
+
     bool hasImport(const Import& key);
     int totalImports() const;
     const ImportList& imports() const;
@@ -82,9 +85,12 @@ public:
     QDocumentQmlInfo::Ptr info() const;
     QProjectQmlScope::Ptr projectScope() const;
 
+    QString path() const;
+    QString componentName() const;
+
 private:
     ImportList                   m_imports;
-    QProjectQmlScope::Ptr m_projectScope;
+    QProjectQmlScope::Ptr        m_projectScope;
     QDocumentQmlInfo::MutablePtr m_documentInfo;
 };
 
@@ -94,6 +100,10 @@ inline int QDocumentQmlScope::Import::versionMajor() const{
 
 inline int QDocumentQmlScope::Import::versionMinor() const{
     return m_versionMinor;
+}
+
+inline bool QDocumentQmlScope::Import::isVersionValid() const{
+    return m_versionMajor >= 0 && m_versionMinor >= 0;
 }
 
 inline bool QDocumentQmlScope::Import::operator ==(const QDocumentQmlScope::Import &other) const{
@@ -134,6 +144,14 @@ inline const QDocumentQmlScope::ImportList &QDocumentQmlScope::imports() const{
 
 inline QProjectQmlScope::Ptr QDocumentQmlScope::projectScope() const{
     return m_projectScope;
+}
+
+inline QString QDocumentQmlScope::path() const{
+    return m_documentInfo->path();
+}
+
+inline QString QDocumentQmlScope::componentName() const{
+    return m_documentInfo->componentName();
 }
 
 }// namespace

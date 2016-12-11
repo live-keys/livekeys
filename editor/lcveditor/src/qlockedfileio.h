@@ -18,7 +18,8 @@ public:
 public:
     ~QLockedFileIO();
 
-    static MutablePtr createInstance();
+    //TODO: Static instance is not available through multiple dlls
+    static QLockedFileIO& instance();
 
     QString readFromFile(const QString& path);
     bool writeToFile(const QString& path, const QString& data);

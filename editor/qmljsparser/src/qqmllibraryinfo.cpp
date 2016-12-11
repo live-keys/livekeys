@@ -68,7 +68,7 @@ LanguageUtils::FakeMetaObject::ConstPtr QQmlLibraryInfo::findObjectByClassName(c
     return LanguageUtils::FakeMetaObject::ConstPtr(0);
 }
 
-void QQmlLibraryInfo::setDependencies(const QStringList& paths){
+void QQmlLibraryInfo::setDependencies(const QList<QString> &paths){
    m_dependencyPaths = paths;
 }
 

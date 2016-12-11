@@ -17,7 +17,7 @@ namespace QmlJS{ class LibraryInfo; }
 
 namespace lcv{
 
-class QProjectQmlScopePrivate;
+class QProjectQmlScopeContainer;
 class QProjectQmlScope{
 
     Q_DISABLE_COPY(QProjectQmlScope)
@@ -28,8 +28,6 @@ public:
 
 public:
     ~QProjectQmlScope();
-
-    void scan(const QString& file, const QString& source);
 
     static Ptr create(QQmlEngine* engine);
 
@@ -51,24 +49,21 @@ public:
         QList<QString>& paths
     );
 
-    void updateScope();
-//    LibraryInfoSnapshot* updateLibrary(
-//        const QString& path,
-//        const QmlJS::LibraryInfo& libInfo,
-//        QList<QQmlLibraryDependency>& depdendencies
-//    );
-
+    void addImplicitLibrary(const QString& path);
 
     int totalLibraries() const;
+    int totalImplicitLibraries() const;
 
-    QProjectQmlScopePrivate* data();
+    QProjectQmlScopeContainer* globalLibraries();
+    QProjectQmlScopeContainer* implicitLibraries();
 
 private:
 
     QProjectQmlScope(QQmlEngine* engine);
 
 private:
-    QScopedPointer<QProjectQmlScopePrivate> d_ptr;
+    QScopedPointer<QProjectQmlScopeContainer> d_globalLibraries;
+    QScopedPointer<QProjectQmlScopeContainer> d_implicitLibraries;
 
     QQmlEngine* m_engine;
 
@@ -76,8 +71,12 @@ private:
     QStringList m_defaultImportPaths;
 };
 
-inline QProjectQmlScopePrivate *QProjectQmlScope::data(){
-    return d_ptr.data();
+inline QProjectQmlScopeContainer *QProjectQmlScope::globalLibraries(){
+    return d_globalLibraries.data();
+}
+
+inline QProjectQmlScopeContainer *QProjectQmlScope::implicitLibraries(){
+    return d_implicitLibraries.data();
 }
 
 }// namespace

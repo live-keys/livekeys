@@ -2,6 +2,7 @@
 #define QPROJECTDOCUMENT_H
 
 #include <QObject>
+#include <QDateTime>
 #include "qlcveditorglobal.h"
 
 namespace lcv{
@@ -23,6 +24,9 @@ public:
 
     void readContent();
 
+    const QDateTime& lastModified() const;
+    void setLastModified(const QDateTime& lastModified);
+
 public slots:
     void dumpContent(const QString& content);
     void save();
@@ -34,6 +38,7 @@ signals:
 private:
     QProjectFile* m_file;
     QString       m_content;
+    QDateTime     m_lastModified;
 };
 
 inline QProjectFile *QProjectDocument::file() const{
@@ -42,6 +47,14 @@ inline QProjectFile *QProjectDocument::file() const{
 
 inline const QString &QProjectDocument::content() const{
     return m_content;
+}
+
+inline const QDateTime &QProjectDocument::lastModified() const{
+    return m_lastModified;
+}
+
+inline void QProjectDocument::setLastModified(const QDateTime &lastModified){
+    m_lastModified = lastModified;
 }
 
 }// namespace

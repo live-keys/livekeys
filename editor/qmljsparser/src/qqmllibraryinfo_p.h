@@ -56,7 +56,7 @@ public:
     ExportVersion findExportByClassName(const QString& name);
     LanguageUtils::FakeMetaObject::ConstPtr findObjectByClassName(const QString& name);
 
-    void setDependencies(const QStringList &paths);
+    void setDependencies(const QList<QString> &paths);
     const QList<QString>& dependencyPaths() const;
 
 private:

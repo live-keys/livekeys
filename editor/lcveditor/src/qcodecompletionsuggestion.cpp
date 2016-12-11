@@ -18,4 +18,13 @@ QCodeCompletionSuggestion::~QCodeCompletionSuggestion(){
 
 }
 
+bool QCodeCompletionSuggestion::compare(
+        const QCodeCompletionSuggestion &first,
+        const QCodeCompletionSuggestion &second)
+{
+    if ( first.category() == second.category() )
+        return first.label() < second.label();
+    return first.category() < second.category();
+}
+
 }// namespace

@@ -12,8 +12,9 @@ QLockedFileIO::~QLockedFileIO(){
 
 }
 
-QLockedFileIO::MutablePtr QLockedFileIO::createInstance(){
-    return QLockedFileIO::MutablePtr(new QLockedFileIO);
+QLockedFileIO &QLockedFileIO::instance(){
+    static QLockedFileIO ins;
+    return ins;
 }
 
 QString QLockedFileIO::readFromFile(const QString &path){

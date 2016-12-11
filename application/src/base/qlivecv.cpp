@@ -24,6 +24,8 @@
 #include "qprojectentry.h"
 #include "qprojectfile.h"
 #include "qprojectfilemodel.h"
+#include "qprojectnavigationmodel.h"
+#include "qprojectdocumentmodel.h"
 #include "qprojectdocument.h"
 
 #include "qdocumentqmlhandler.h"
@@ -41,6 +43,8 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
     , m_dir(QGuiApplication::applicationDirPath())
     , m_project(new lcv::QProject)
 {
+    solveImportPaths();
+
     lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(m_engine);
     m_codeInterface = new lcv::QDocumentCodeInterface(qmlHandler);
 
@@ -58,6 +62,14 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
     QObject::connect(
         m_project, SIGNAL(pathChanged(QString)),
         qmlHandler, SLOT(newProject(QString))
+    );
+    QObject::connect(
+        m_project, SIGNAL(directoryChanged(QString)),
+        qmlHandler, SLOT(directoryChanged(QString))
+    );
+    QObject::connect(
+        m_project, SIGNAL(fileChanged(QString)),
+        qmlHandler, SLOT(fileChanged(QString))
     );
 
     if ( !m_arguments->consoleFlag() )
@@ -89,8 +101,6 @@ void QLiveCV::loadLibrary(const QString &library){
 }
 
 void QLiveCV::loadQml(const QUrl &url){
-    solveImportPaths();
-
     m_engine->rootContext()->setContextProperty("project", m_project);
     m_engine->rootContext()->setContextProperty("codeDocument", m_document);
     m_engine->rootContext()->setContextProperty("codeHandler", m_codeInterface);
@@ -114,7 +124,12 @@ void QLiveCV::registerTypes(){
         "Cv", 1, 0, "DocumentCodeInterface", "DocumentCodeInterface is singleton.");
 
     qmlRegisterUncreatableType<lcv::QProjectFileModel>(
-        "Cv", 1, 0, "ProjectFileModel", "Cannot create a FileSystemModel instance.");
+        "Cv", 1, 0, "ProjectFileModel", "Cannot create a ProjectFileModel instance.");
+    qmlRegisterUncreatableType<lcv::QProjectDocumentModel>(
+        "Cv", 1, 0, "ProjectDocumentModel", "Cannot create a ProjectDocumentModel instance.");
+    qmlRegisterUncreatableType<lcv::QProjectNavigationModel>(
+        "Cv", 1, 0, "ProjectNavigationModel", "Cannot create a ProjectNavigationModel instance.");
+
     qmlRegisterUncreatableType<lcv::QProjectEntry>(
         "Cv", 1, 0, "ProjectEntry", "ProjectEntry objects are managed by the ProjectFileModel.");
     qmlRegisterUncreatableType<lcv::QProjectFile>(

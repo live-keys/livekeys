@@ -81,12 +81,12 @@ DISTFILES += \
     $$PWD/plugins/lcvcontrols/ConfigurationPanel.qml \
     $$PWD/plugins/lcvcontrols/ConfigurationField.qml \
     $$PWD/plugins/lcvcontrols/InputBox.qml \
-    plugins/lcvcontrols/FeatureDetectorSelection.qml \
-    plugins/lcvcontrols/SelectionArea.qml \
+    $$PWD/plugins/lcvcontrols/FeatureDetectorSelection.qml \
+    $$PWD/plugins/lcvcontrols/SelectionArea.qml \
     $$PWD/plugins/lcvcontrols/SelectionWindow.qml \
-    plugins/lcvcontrols/LiveCVStyle.qml \
-    plugins/lcvcontrols/FeatureObjectList.qml \
-    plugins/lcvcontrols/FeatureObjectMatch.qml \
-    plugins/lcvcontrols/DescriptorExtractorSelection.qml \
-    plugins/lcvcontrols/TextButton.qml
+    $$PWD/plugins/lcvcontrols/LiveCVStyle.qml \
+    $$PWD/plugins/lcvcontrols/FeatureObjectList.qml \
+    $$PWD/plugins/lcvcontrols/FeatureObjectMatch.qml \
+    $$PWD/plugins/lcvcontrols/DescriptorExtractorSelection.qml \
+    $$PWD/plugins/lcvcontrols/TextButton.qml
 

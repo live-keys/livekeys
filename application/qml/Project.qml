@@ -98,8 +98,7 @@ Rectangle{
                     anchors.leftMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
                     source: {
-                        if ( styleData.value.isFile ){
-                            console.log(styleData.value + ',' + project.active.file)
+                        if ( styleData.value && styleData.value.isFile ){
                             if (styleData.value === (project.active ? project.active.file : null) )
                                 return "qrc:/images/project-file-active.png"
                             else
@@ -272,6 +271,7 @@ Rectangle{
             MenuItem {
                 text: "Delete"
                 onTriggered: {
+                    //TODO
                     console.log('triggered')
                 }
             }
@@ -324,5 +324,65 @@ Rectangle{
             }
         }
     }
+
+    Rectangle{
+        id: addEntryNameBox
+
+        anchors.fill: parent
+        visible: false
+        color: "#000"
+        opacity: 0.7
+
+        MouseArea{
+            anchors.fill: parent
+            onClicked: mouse.accepted = true;
+            onPressed: mouse.accepted = true;
+            onReleased: mouse.accepted = true
+            onDoubleClicked: mouse.accepted = true;
+            onPositionChanged: mouse.accepted = true;
+            onPressAndHold: mouse.accepted = true;
+            onWheel: wheel.accepted = true
+        }
+
+        Rectangle{
+            width: parent.width
+            height: 60
+            color:"#fff"
+            Text{
+                text: 'asdsa'
+                font.family: 'Open Sans, Arial, sans-serif'
+                font.pixelSize: 12
+                font.weight: Font.Light
+            }
+            Rectangle{
+                anchors.bottom: parent.bottom
+                width: parent.width
+                height: 30
+                TextInput{
+                    id: addEntryNaming
+                    anchors.left: parent.left
+                    anchors.leftMargin: 25
+                    anchors.right: parent.right
+                    anchors.rightMargin: 25
+                    anchors.top: parent.top
+                    color: '#aaa'
+                    text: 'asdmasldkma'
+                    font.family: 'Open Sans, Arial, sans-serif'
+                    font.pixelSize: 12
+                    font.weight: Font.Light
+                    selectByMouse: true
+
+                    Keys.onReturnPressed: {
+                        //TODO: Implement rename
+                        console.log('enter pressed')
+                    }
+                    Keys.onEscapePressed: {
+
+                    }
+                }
+            }
+        }
+    }
+
 }
 

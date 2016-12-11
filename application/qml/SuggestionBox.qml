@@ -24,18 +24,35 @@ Rectangle{
         return ""
     }
 
-    function incrementSelection(){
-        if ( pluginList.currentIndex <  pluginList.count - 1 ){
+    function highlightNext(){
+        if ( pluginList.currentIndex + 1 <  pluginList.count ){
             pluginList.currentIndex++;
         } else {
             pluginList.currentIndex = 0;
         }
     }
-    function decrementSelection(){
+    function highlightPrev(){
         if ( pluginList.currentIndex > 0 ){
             pluginList.currentIndex--;
         } else {
             pluginList.currentIndex = pluginList.count - 1;
+        }
+    }
+
+    function highlightNextPage(){
+        var noItems = Math.floor(pluginList.height / 25)
+        if ( pluginList.currentIndex + noItems < pluginList.count ){
+            pluginList.currentIndex += noItems;
+        } else {
+            pluginList.currentIndex = pluginList.count - 1;
+        }
+    }
+    function highlightPrevPage(){
+        var noItems = Math.floor(pluginList.height / 25)
+        if ( pluginList.currentIndex - noItems >= 0 ){
+            pluginList.currentIndex -= noItems;
+        } else {
+            pluginList.currentIndex = 0;
         }
     }
 
@@ -45,24 +62,51 @@ Rectangle{
         height : root.height
         width: root.width
 
+        style: ScrollViewStyle {
+            transientScrollBars: false
+            handle: Item {
+                implicitWidth: 10
+                implicitHeight: 10
+                Rectangle {
+                    color: "#0b1f2e"
+                    anchors.fill: parent
+                }
+            }
+            scrollBarBackground: Item{
+                implicitWidth: 10
+                implicitHeight: 10
+                Rectangle{
+                    anchors.fill: parent
+                    color: "#091823"
+                }
+            }
+            decrementControl: null
+            incrementControl: null
+            frame: Rectangle{color: "transparent"}
+            corner: Rectangle{color: "#091823"}
+        }
+
         ListView{
             id : pluginList
             anchors.fill: parent
             anchors.rightMargin: 2
             anchors.bottomMargin: 5
             anchors.topMargin: 0
-            boundsBehavior : Flickable.StopAtBounds
             visible: true
             opacity: root.opacity
+
             currentIndex: 0
             onCountChanged: currentIndex = 0
+
+            boundsBehavior : Flickable.StopAtBounds
+            highlightMoveDuration: 100
 
             delegate: Component{
 
                 Rectangle{
                     property string completion: model.completion
 
-                    width : parent.width
+                    width : pluginList.width
                     height : 25
                     color : ListView.isCurrentItem ? "#444" : "transparent"
                     Text{

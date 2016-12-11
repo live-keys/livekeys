@@ -25,6 +25,7 @@ Rectangle{
     signal save()
     signal open()
     signal toggleSize()
+    signal toggleNavigation()
 
     property bool isDirty: false
     property alias text: editorArea.text
@@ -141,6 +142,9 @@ Rectangle{
                 } else if ( event.key === Qt.Key_S && (event.modifiers & Qt.ControlModifier ) ){
                     editor.save()
                     event.accepted = true
+                } else if ( event.key === Qt.Key_K && (event.modifiers & Qt.ControlModifier ) ){
+                    editor.toggleNavigation()
+                    event.accepted = true
                 } else if ( event.key === Qt.Key_O && (event.modifiers & Qt.ControlModifier ) ) {
                     editor.open()
                     event.accepted = true
@@ -148,34 +152,42 @@ Rectangle{
                     editor.toggleSize()
                     event.accepted = true
                 } else if ( event.key === Qt.Key_PageUp ){
-                    var lines = flick.height / cursorRectangle.height
-                    var prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 1)
-                    while ( --lines > 0 ){
-                        cursorPosition   = prevLineStartPos + 1
-                        prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 2)
-                        if ( prevLineStartPos === -1 ){
-                            cursorPosition = 0;
-                            break;
+                    if ( codeHandler.completionModel.isEnabled ){
+                        qmlSuggestionBox.highlightPrevPage()
+                    } else {
+                        var lines = flick.height / cursorRectangle.height
+                        var prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 1)
+                        while ( --lines > 0 ){
+                            cursorPosition   = prevLineStartPos + 1
+                            prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 2)
+                            if ( prevLineStartPos === -1 ){
+                                cursorPosition = 0;
+                                break;
+                            }
                         }
                     }
                     event.accepted = true
                 } else if ( event.key === Qt.Key_PageDown ){
-                    var lines = flick.height / cursorRectangle.height
-                    var nextLineStartPos = editorArea.text.indexOf('\n', cursorPosition)
-                    while ( lines-- > 0 && nextLineStartPos !== -1 ){
-                        cursorPosition   = nextLineStartPos + 1
-                        nextLineStartPos = editorArea.text.indexOf('\n', cursorPosition)
+                    if ( codeHandler.completionModel.isEnabled ){
+                        qmlSuggestionBox.highlightNextPage()
+                    } else {
+                        var lines = flick.height / cursorRectangle.height
+                        var nextLineStartPos = editorArea.text.indexOf('\n', cursorPosition)
+                        while ( lines-- > 0 && nextLineStartPos !== -1 ){
+                            cursorPosition   = nextLineStartPos + 1
+                            nextLineStartPos = editorArea.text.indexOf('\n', cursorPosition)
+                        }
                     }
                     event.accepted = true
                 } else if ( event.key === Qt.Key_Down ){
                     if ( codeHandler.completionModel.isEnabled ){
                         event.accepted = true
-                        qmlSuggestionBox.incrementSelection()
+                        qmlSuggestionBox.highlightNext()
                     }
                 } else if ( event.key === Qt.Key_Up ){
                     if ( codeHandler.completionModel.isEnabled ){
                         event.accepted = true
-                        qmlSuggestionBox.decrementSelection()
+                        qmlSuggestionBox.highlightPrev()
                     }
                 } else
                     event.accepted = false
