@@ -1,4 +1,5 @@
 #include "qprojectfilemodel.h"
+#include "qprojectdocumentmodel.h"
 #include "qprojectentry.h"
 #include "qprojectfile.h"
 #include "qproject.h"
@@ -41,7 +42,6 @@ QModelIndex QProjectFileModel::index(int row, int column, const QModelIndex &par
     QProjectEntry *parentItem = itemOrRoot(parent);
     QProjectEntry *childItem = parentItem->child(row);
     if (childItem){
-//        qDebug() << "Index request:" << row << column << childItem->name() << parentItem->children().size();
         return createIndex(row, column, childItem);
     } else
         return QModelIndex();
@@ -168,7 +168,7 @@ void QProjectFileModel::closeProject(){
     beginResetModel();
     m_root->clearItems();
     endResetModel();
-//    emit projectNodeChanged(createIndex(0, 0, m_root));
+    emit projectNodeChanged(createIndex(0, 0, m_root));
 }
 
 void QProjectFileModel::entryRemoved(const QModelIndex &item){
@@ -201,29 +201,128 @@ void QProjectFileModel::entryAdded(QProjectEntry *item, QProjectEntry *parent){
 
 void QProjectFileModel::moveEntry(QProjectEntry *item, QProjectEntry *newParent){
     if ( item && newParent ){
+        QString newPath = newParent->path() + "/" + item->name();
         if ( item->isFile() ){
-            //TODO: Removal actions
-            entryRemoved(item);
-            entryAdded(item, newParent);
-
-//            qDebug() << "Move file:" << itemEntry->path() << " to parent:" << newParentEntry->path();
-//            qDebug() << parent(item);
-//            beginRemoveRows(parent(item), item.row(), item.row());
-//            qDebug() << "moving...";
-//            if ( !QDir().rename(itemEntry->path(), newParentEntry->path() ) ){
-//                qDebug() << "failed to move";
-//            }
-//            endRemoveRows();
+            if ( QFile::rename(item->path(), newPath ) ){
+                entryRemoved(item);
+                entryAdded(item, newParent);
+                item->updatePaths();
+            } else {
+                emit error("Failed to move file: \"" + item->path() + "\" to \"" + newPath + "\"");
+            }
         } else {
-////            qDebug() << "Move dir:" << itemEntry->path() << " to parent:" << newParentEntry->path();
-////            qDebug() << parent(item);
-            entryRemoved(item);
-            entryAdded(item, newParent);
-////            if ( !QDir().rename(itemEntry->path(), newParentEntry->path() ) ){
-
-////            }
+            if ( !item->parentEntry() ){
+                emit error("Failed to move directory: \"" + item->path() + "\" to \"" + newPath + "\"");
+            }
+            if ( QDir(item->parentEntry()->path()).rename(item->path(), newPath ) ){
+                entryRemoved(item);
+                entryAdded(item, newParent);
+                item->updatePaths();
+            } else {
+                emit error("Failed to move directory: \"" + item->path() + "\" to \"" + newPath + "\"");
+            }
         }
     }
+}
+
+void QProjectFileModel::renameEntry(QProjectEntry *item, const QString &newName){
+    QProjectEntry* parentEntry = item->parentEntry();
+    if ( parentEntry == 0 )
+        return;
+
+    if ( item->name() != newName){
+        QString newPath = parentEntry->path() + "/" + newName;
+
+        if ( QFileInfo(newPath).exists() ){
+            emit error("Failed to rename entry. There is already a path with that name: " + newPath);
+            return;
+        }
+
+        QProject* p = qobject_cast<QProject*>(QObject::parent());
+
+        if ( item->isFile() ){
+            QFile f(item->path());
+            if ( !f.rename(newName) ){
+                emit error("Failed to rename file to: " + newName);
+                return;
+            } else {
+                item->setName(newName);
+            }
+        } else {
+            if ( parentEntry ){
+                QDir d(parentEntry->path());
+                if ( !d.rename(item->name(), newName) ){
+                    emit error("Failed to rename directory to:" + newName);
+                    return;
+                } else {
+                    item->setName(newName);
+                    item->updatePaths();
+                }
+            }
+        }
+    }
+}
+
+QProjectFile *QProjectFileModel::addFile(QProjectEntry *parentEntry, const QString &name){
+    QString filePath = QDir::cleanPath(parentEntry->path() + "/" + name);
+    QFile file(filePath);
+    if ( file.exists() ){
+        emit error("Failed to create file: " + filePath + "\nFile exists.");
+        return 0;
+    }
+
+    if ( !file.open(QIODevice::WriteOnly) ){
+        emit error("Failed to create file: " + parentEntry->path() + "/" + name);
+        return 0;
+    }
+    file.close();
+
+    QProjectFile* fileEntry = new QProjectFile(parentEntry->path(), name, 0);
+    entryAdded(fileEntry, parentEntry);
+    return fileEntry;
+}
+
+QProjectEntry* QProjectFileModel::addDirectory(QProjectEntry *parentEntry, const QString &name){
+    QString dirPath = QDir::cleanPath(parentEntry->path() + "/" + name);
+    QDir d(parentEntry->path());
+    if ( d.exists(name) ){
+        emit error("Failed to create directory: " + dirPath + "\nDirectory exists.");
+        return 0;
+    }
+    if ( !d.mkdir(name) ){
+        emit error("Failed to create directory: " + dirPath + "");
+        return 0;
+    }
+
+    QProjectEntry* entry = new QProjectEntry(parentEntry->path(), name);
+    entryAdded(entry, parentEntry);
+    return entry;
+}
+
+bool QProjectFileModel::removeEntry(QProjectEntry *entry){
+    QProject* p = qobject_cast<QProject*>(QObject::parent());
+    if ( entry->isFile() ){
+        if ( QFile(entry->path()).remove() ){
+            if ( p )
+                p->documentModel()->closeDocument(entry->path(), true);
+            entryRemoved(entry);
+            return true;
+        } else {
+            emit error("Failed to remove file: " + entry->path());
+            return false;
+        }
+    } else {
+        if ( QDir(entry->path()).removeRecursively() ){
+            if ( p )
+                p->documentModel()->closeDocumentsInPath(entry->path(), true);
+            entryRemoved(entry);
+            return true;
+        } else {
+            emit error("Failed to remove directory: "  + entry->path());
+            return false;
+        }
+    }
+    return false;
 }
 
 void QProjectFileModel::expandEntry(QProjectEntry *entry) const{
@@ -312,6 +411,10 @@ QProjectEntry* QProjectFileModel::itemAt(const QModelIndex &index) const{
             return item;
     }
     return 0;
+}
+
+QModelIndex QProjectFileModel::itemIndex(QProjectEntry *entry){
+    return createIndex(entry->childNumber(), 0, entry);
 }
 
 QProjectFile *QProjectFileModel::openExternalFile(const QString &path){

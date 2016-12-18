@@ -11,6 +11,7 @@ QDocumentCodeInterface::QDocumentCodeInterface(QAbstractCodeHandler *handler, QO
     , m_targetDoc(0)
     , m_completionModel(new QCodeCompletionModel)
     , m_codeHandler(handler)
+    , m_autoInserting(false)
 {
 }
 
@@ -44,6 +45,7 @@ void QDocumentCodeInterface::setTarget(QQuickTextDocument *target){
 
 void QDocumentCodeInterface::insertCompletion(int from, int to, const QString &completion){
     if ( m_targetDoc ){
+        m_autoInserting = true;
         QTextCursor cursor(m_targetDoc);
         cursor.beginEditBlock();
         cursor.setPosition(from);
@@ -51,6 +53,8 @@ void QDocumentCodeInterface::insertCompletion(int from, int to, const QString &c
         cursor.removeSelectedText();
         cursor.insertText(completion);
         cursor.endEditBlock();
+        m_completionModel->disable();
+        m_autoInserting = false;
     }
 }
 
@@ -62,7 +66,8 @@ void QDocumentCodeInterface::documentContentsChanged(int position, int, int char
 }
 
 void QDocumentCodeInterface::cursorWritePositionChanged(QTextCursor cursor){
-    if ( m_codeHandler ){
+    if ( m_codeHandler && !m_autoInserting ){
+        m_autoInserting = true;
         QTextCursor newCursor;
         m_codeHandler->assistCompletion(
             cursor,
@@ -71,6 +76,7 @@ void QDocumentCodeInterface::cursorWritePositionChanged(QTextCursor cursor){
             m_completionModel,
             newCursor
         );
+        m_autoInserting = false;
         if ( !newCursor.isNull() ){
             emit cursorPositionRequest(newCursor.position());
         }
@@ -96,7 +102,8 @@ void QDocumentCodeInterface::generateCompletion(int cursorPosition){
 }
 
 void QDocumentCodeInterface::updateScope(const QString &data){
-    m_codeHandler->updateScope(data);
+    if ( m_codeHandler )
+        m_codeHandler->updateScope(data);
 }
 
 }// namespace

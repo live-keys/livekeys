@@ -6,6 +6,7 @@
 #include "qprojectdocument.h"
 #include "qdocumentqmlscope.h"
 #include "qprojectqmlscope.h"
+#include "qlockedfileiosession.h"
 
 #include <QTextCursor>
 
@@ -25,7 +26,11 @@ class Q_QMLJSPARSER_EXPORT QDocumentQmlHandler : public QAbstractCodeHandler{
     Q_DISABLE_COPY(QDocumentQmlHandler)
 
 public:
-    explicit QDocumentQmlHandler(QQmlEngine* engine, QObject* parent = 0);
+    explicit QDocumentQmlHandler(
+        QQmlEngine* engine,
+        QLockedFileIOSession::Ptr lockedFileIO,
+        QObject* parent = 0
+    );
     ~QDocumentQmlHandler();
 
     void assistCompletion(

@@ -4,7 +4,7 @@
 namespace lcv{
 
 QProjectFile::QProjectFile(const QString &path, QProjectEntry *parent)
-    : QProjectEntry(path, QFileInfo(path).fileName(), true, parent)
+    : QProjectEntry(QFileInfo(path).path(), QFileInfo(path).fileName(), true, parent)
     , m_isOpen(false)
     , m_isDirty(false)
 {

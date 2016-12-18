@@ -469,7 +469,7 @@ namespace qmlhandler_helpers{
 // QDocumentQmlHandler implementation
 // ----------------------------------
 
-QDocumentQmlHandler::QDocumentQmlHandler(QQmlEngine* engine, QObject *parent)
+QDocumentQmlHandler::QDocumentQmlHandler(QQmlEngine* engine, QLockedFileIOSession::Ptr lockedFileIO, QObject *parent)
     : QAbstractCodeHandler(parent)
     , m_target(0)
     , m_highlighter(0)
@@ -477,7 +477,7 @@ QDocumentQmlHandler::QDocumentQmlHandler(QQmlEngine* engine, QObject *parent)
     , m_completionContextFinder(new QQmlCompletionContextFinder)
     , m_documentScope(0)
     , m_projectScope(0)
-    , m_scanner(new QProjectQmlScanner)
+    , m_scanner(new QProjectQmlScanner(lockedFileIO))
     , m_newScope(false)
 {
     connect(m_scanner, SIGNAL(documentScopeReady()), SLOT(newDocumentScopeReady()) );
@@ -547,15 +547,14 @@ void QDocumentQmlHandler::assistCompletion(
             cursorChange.movePosition(QTextCursor::Left);
             QQmlCompletionContext* ctx = m_completionContextFinder->getContext(cursorChange);
             if ( !(ctx->context() & QQmlCompletionContext::InStringLiteral) ){
-                cursorChange = cursor;
                 cursorChange.beginEditBlock();
                 cursorChange.insertText("\"");
                 cursorChange.endEditBlock();
-                cursorChange.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
             } else {
                 cursorChange.movePosition(QTextCursor::Right);
             }
             delete ctx;
+            return;
         } else if ( insertion == '\'' ) {
             cursorChange = cursor;
             cursorChange.movePosition(QTextCursor::Left);
@@ -564,11 +563,11 @@ void QDocumentQmlHandler::assistCompletion(
                 cursorChange.beginEditBlock();
                 cursorChange.insertText("\'");
                 cursorChange.endEditBlock();
-                cursorChange.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
             } else {
                 cursorChange.movePosition(QTextCursor::Right);
             }
             delete ctx;
+            return;
 
         } else if ( insertion != QChar('.') && !insertion.isLetterOrNumber() ){
             model->disable();
@@ -595,7 +594,8 @@ void QDocumentQmlHandler::assistCompletion(
         QQmlCompletionContext* modelCtx = static_cast<QQmlCompletionContext*>(model->completionContext());
         if ( modelCtx && *modelCtx == *ctx && !m_newScope ){
             model->setFilter(filter);
-            model->enable();
+            if ( model->rowCount() )
+                model->enable();
             delete ctx;
             return;
         }
@@ -626,7 +626,8 @@ void QDocumentQmlHandler::assistCompletion(
         model->setSuggestions(suggestions, filter);
     }
 
-    model->enable();
+    if ( model->rowCount() )
+        model->enable();
 }
 
 void QDocumentQmlHandler::setTarget(QTextDocument *target){

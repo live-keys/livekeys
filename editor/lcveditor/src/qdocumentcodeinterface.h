@@ -45,6 +45,7 @@ private:
     QTextDocument*             m_targetDoc;
     lcv::QCodeCompletionModel* m_completionModel;
     QAbstractCodeHandler*      m_codeHandler;
+    bool                       m_autoInserting;
 };
 
 inline QQuickTextDocument *QDocumentCodeInterface::target(){

@@ -3,7 +3,7 @@
 #include "qqmllibraryinfo_p.h"
 #include "qdocumentqmlobject_p.h"
 #include "qdocumentqmlscope.h"
-#include "qlockedfileio.h"
+#include "qlockedfileiosession.h"
 
 #include "qmljs/qmljsdocument.h"
 #include "qmljs/qmljsinterpreter.h"
@@ -44,6 +44,7 @@ public:
 
 void scanPathForQmlExports(
         QProjectQmlScope::Ptr projectScope,
+        QLockedFileIOSession::Ptr lockedFileIO,
         const QString &path,
         QQmlLibraryInfo::Ptr library)
 {
@@ -63,7 +64,7 @@ void scanPathForQmlExports(
             continue;
 
         QDocumentQmlInfo::MutablePtr documentInfo = QDocumentQmlInfo::create(info.filePath());
-        bool parseResult = documentInfo->parse(QLockedFileIO::instance().readFromFile(info.filePath()));
+        bool parseResult = documentInfo->parse(lockedFileIO->readFromFile(info.filePath()));
         if ( !parseResult )
             continue;
 
@@ -123,7 +124,6 @@ void scanPathForQmlExports(
         if ( ev.isValid() ){
             fmo->setSuperclassName(ev.object->className());
             objects.append(fmo);
-            qDebug() << "Found super class name:" << fmo->superclassName() << "for" << fmo->className();
         } else {
             if ( librariesDumped || dependencyLoop ){ /// avoid dependency loop, simply add the object as is
                 objects.append(fmo);
@@ -141,6 +141,7 @@ void scanPathForQmlExports(
 
 QQmlLibraryInfo::Ptr updateLibrary(
         QProjectQmlScope::Ptr projectScope,
+        QLockedFileIOSession::Ptr lockedFileIO,
         const QString& path,
         const QmlJS::LibraryInfo &libInfo,
         QList<QQmlLibraryDependency>& dependencies)
@@ -154,14 +155,12 @@ QQmlLibraryInfo::Ptr updateLibrary(
     const QDir dir(path);
     QFile dirFile(dir.filePath("qmldir"));
     if( !dirFile.exists() ){
-        scanPathForQmlExports(projectScope, path, base);
+        scanPathForQmlExports(projectScope, lockedFileIO, path, base);
         return base;
     }
 
-    dirFile.open(QFile::ReadOnly);
-
     QmlDirParser dirParser;
-    dirParser.parse(QString::fromUtf8(dirFile.readAll()));
+    dirParser.parse(lockedFileIO->readFromFile(dir.filePath("qmldir")));
 
     QStringList typeInfoPaths;
 
@@ -231,12 +230,13 @@ QQmlLibraryInfo::Ptr updateLibrary(
 
 } // namespace projectqml_helpers
 
-QProjectQmlScanner::QProjectQmlScanner(QObject *parent)
+QProjectQmlScanner::QProjectQmlScanner(QLockedFileIOSession::Ptr lockedFileIO, QObject *parent)
     : QObject(parent)
     , m_project(0)
     , m_lastDocumentScope(0)
     , m_thread(new QThread)
     , m_timer(new QTimer)
+    , m_lockedFileIO(lockedFileIO)
 {
     m_timer->setInterval(5000);
     m_timer->setSingleShot(false);
@@ -267,7 +267,6 @@ void QProjectQmlScanner::setProjectScope(QProjectQmlScope::Ptr scope){
     m_project = scope;
     m_timer->start();
     emit queueProjectScan();
-    qDebug() << "Emmiting new project scan queue";
 }
 
 void QProjectQmlScanner::queueDocumentScopeScan(
@@ -299,7 +298,7 @@ void QProjectQmlScanner::scanProjectScope(){
          ++it )
     {
         QQmlLibraryInfo::Ptr newLibInfo = QQmlLibraryInfo::create();
-        projectqml_helpers::scanPathForQmlExports(m_project, it.key(), newLibInfo);
+        projectqml_helpers::scanPathForQmlExports(m_project, m_lockedFileIO, it.key(), newLibInfo);
         implicitLibrariesSnapshot[it.key()] = newLibInfo;
     }
     if ( implicitLibrariesSnapshot.size() > 0 ){
@@ -320,6 +319,7 @@ void QProjectQmlScanner::scanProjectScope(){
             if ( !globalLibrariesSnapshot.contains(it.key()) ){
                 QQmlLibraryInfo::Ptr libinfo = projectqml_helpers::updateLibrary(
                     m_project,
+                    m_lockedFileIO,
                     it.key(),
                     it.value()->data(),
                     dependencies

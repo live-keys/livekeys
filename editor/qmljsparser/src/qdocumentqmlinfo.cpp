@@ -122,6 +122,11 @@ bool QDocumentQmlInfo::isValueNull(const QDocumentQmlInfo::ValueReference& vr) c
     return vr.value == 0;
 }
 
+bool QDocumentQmlInfo::isParsedCorrectly() const{
+    Q_D(const QDocumentQmlInfo);
+    return d->internalDoc->isParsedCorrectly();
+}
+
 bool QDocumentQmlInfo::parse(const QString &source){
     Q_D(QDocumentQmlInfo);
     d->messages.clear();

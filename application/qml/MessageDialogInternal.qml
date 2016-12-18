@@ -20,15 +20,21 @@ Rectangle{
     color: "transparent"
     property alias backgroudColor: box.color
 
+    property var returnPressed : function(){}
+    property var escapePressed : function(){}
+
+    Keys.onReturnPressed: root.returnPressed()
+    Keys.onEscapePressed: root.escapePressed()
+
     MouseArea{
         anchors.fill: parent
         onClicked: mouse.accepted = true;
         onPressed: mouse.accepted = true;
-        onReleased: mouse.accepted = true
+        onReleased: mouse.accepted = true;
         onDoubleClicked: mouse.accepted = true;
         onPositionChanged: mouse.accepted = true;
         onPressAndHold: mouse.accepted = true;
-        onWheel: wheel.accepted = true
+        onWheel: wheel.accepted = true;
     }
 
     Rectangle{

@@ -4,6 +4,8 @@
 #include <QAbstractListModel>
 #include "qlcveditorglobal.h"
 
+class QFileSystemWatcher;
+
 namespace lcv{
 
 class QProject;
@@ -33,13 +35,27 @@ public:
 
     const QHash<QString, QProjectDocument*> openedFiles() const;
 
+    void closeDocumentsInPath(const QString& path, bool closeIfActive = false);
+    void closeDocument(const QString& path, bool closeIfActive = false);
+
 public slots:
     void rescanDocuments();
+    void monitoredFileChanged(const QString& path);
+
+    bool saveDocuments();
+    QStringList listUnsavedDocuments();
+    QStringList listUnsavedDocumentsInPath(const QString& path);
+
+signals:
+    void documentChangedOutside(const QString& path);
 
 private:
     QHash<int, QByteArray> m_roles;
 
     QHash<QString, QProjectDocument*> m_openedFiles;
+
+    QFileSystemWatcher* fileWatcher();
+    QFileSystemWatcher* m_fileWatcher;
 
 };
 

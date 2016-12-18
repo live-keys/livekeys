@@ -93,6 +93,7 @@ public:
 
     bool isValueNull(const ValueReference &vr) const;
 
+    bool isParsedCorrectly() const;
     bool parse(const QString& source);
 
     QmlJS::Bind* internalBind();

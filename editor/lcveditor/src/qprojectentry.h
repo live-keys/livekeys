@@ -53,8 +53,7 @@ public:
 
     const QList<QProjectEntry*>& entries() const;
 
-public slots:
-    bool rename(const QString& newName);
+    void updatePaths();
 
 signals:
     void nameChanged();
@@ -66,6 +65,7 @@ protected:
     bool m_isFile;
 
 private:
+
     QList<QProjectEntry*> m_entries;
     QString m_name;
     QString m_path;
@@ -74,14 +74,6 @@ private:
 
 inline const QString &QProjectEntry::name() const{
     return m_name;
-}
-
-inline void QProjectEntry::setName(const QString& name){
-    if (m_name == name)
-        return;
-
-    m_name = name;
-    emit nameChanged();
 }
 
 inline const QString &QProjectEntry::path() const{
