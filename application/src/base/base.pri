@@ -9,7 +9,9 @@ HEADERS += \
     $$PWD/qlivecvcommandlineparser.h \
     $$PWD/qlivecvexception.h \
     $$PWD/qlivecvarguments.h \
-    $$PWD/qlivecvmain.h
+    $$PWD/qlivecvmain.h \
+    $$PWD/qlivecvengine.h \
+    $$PWD/qlivecvincubationcontroller.h
 
 SOURCES += \
     $$PWD/qcodedocument.cpp \
@@ -19,4 +21,6 @@ SOURCES += \
     $$PWD/qlivecvcommandlineparser.cpp \
     $$PWD/qlivecvexception.cpp \
     $$PWD/qlivecvarguments.cpp \
-    $$PWD/qlivecvmain.cpp
+    $$PWD/qlivecvmain.cpp \
+    $$PWD/qlivecvengine.cpp \
+    $$PWD/qlivecvincubationcontroller.cpp

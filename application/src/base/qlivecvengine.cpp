@@ -4,6 +4,7 @@
 #include <QQmlComponent>
 #include <QQmlIncubator>
 #include <QQmlEngine>
+#include <QQuickItem>
 #include <QQmlIncubationController>
 #include <QMutexLocker>
 
@@ -39,6 +40,8 @@ QJSValue QLiveCVEngine::lastErrorsObject() const{
 void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, const QUrl &url){
     QMutexLocker engineMutexLock(&m_engineMutex);
 
+    emit aboutToCreateObject(url);
+
     QQmlComponent component(m_engine);
     component.setData(qmlCode.toUtf8(), url);
 
@@ -63,8 +66,17 @@ void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, c
     }
 
     QObject* obj = incubator.object();
+    m_engine->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
+
     if (parent)
         obj->setParent(parent);
+
+    QQuickItem *parentItem = qobject_cast<QQuickItem*>(parent);
+    QQuickItem *item = qobject_cast<QQuickItem*>(obj);
+    if (parentItem && item){
+        item->setParentItem(parentItem);
+    }
+
     setIsLoading(false);
     emit objectCreated(obj);
 }
@@ -76,17 +88,27 @@ QObject* QLiveCVEngine::createObject(const QString &qmlCode, QObject *parent, co
     component.setData(qmlCode.toUtf8(), url);
 
     m_lastErrors = component.errors();
-    if ( m_lastErrors.size() > 0 )
+    if ( m_lastErrors.size() > 0 ){
         return 0;
+    }
 
     QObject* obj = component.create(m_engine->rootContext());
+    m_engine->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
 
     m_lastErrors = component.errors();
-    if ( m_lastErrors.size() > 0 )
+    if ( m_lastErrors.size() > 0 ){
         return 0;
+    }
 
     if (parent)
         obj->setParent(parent);
+
+    QQuickItem *parentItem = qobject_cast<QQuickItem*>(parent);
+    QQuickItem *item = qobject_cast<QQuickItem*>(obj);
+    if (parentItem && item){
+        item->setParentItem(parentItem);
+    }
+
     return obj;
 }
 

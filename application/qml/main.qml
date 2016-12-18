@@ -55,7 +55,7 @@ ApplicationWindow {
 
     Top{
         id : header
-//        visible: false
+        visible: false
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -212,7 +212,7 @@ ApplicationWindow {
                     property string program: editor.text
                     property variant item
                     onProgramChanged: {
-                        editor.isDirty = true
+//                        editor.isDirty = true
                         createTimer.restart()
                     }
                     Timer {
@@ -221,36 +221,43 @@ ApplicationWindow {
                         running: true
                         repeat : false
                         onTriggered: {
-                            var newItem = null;
-                            try {
-                                root.beforeCompile()
-                                // Info Qt/Src/qtquick1/src/declarative/qml/qdeclarativeengine.cpp
-                                newItem = Qt.createQmlObject(
-                                    "import QtQuick 2.3\n" + tester.program,
-                                    tester,
-                                    codeDocument.file.toString() !== '' ? codeDocument.file : 'untitled.qml');
-                            } catch (err) {
-                                var message = err.qmlErrors[0].message
-                                if ( message.indexOf('\"lcvcore\"') === 0 || message.indexOf('\"lcvimgproc\"') === 0 ||
-                                     message.indexOf('\"lcvvideo\"') === 0 || message.indexOf('\"lcvcontrols\"') === 0 )
-                                {
-                                    message += ". Live CV modules are imported without quotes (Eg. import lcvcore 1.0)."
-                                }
+                            engine.createObjectAsync(
+                                "import QtQuick 2.3\n" + tester.program,
+                                tester,
+                                codeDocument.file.toString() !== '' ? codeDocument.file : 'untitled.qml'
+                            );
+                        }
+                    }
+                    Connections{
+                        target: engine
+                        onAboutToCreateObject : {
+                            root.beforeCompile()
+                        }
+                        onObjectCreated : {
+                            error.text = ''
+                            if (tester.item) {
+                                tester.item.destroy();
+                            }
+                            tester.item = object;
+                            root.afterCompile()
+                        }
+                        onObjectCreationError : {
+                            var lastErrorsText = ''
+                            for ( var i = 0; i < errors.length; ++i ){
+                                var lerror = errors[i]
+                                var errorFile = lerror.fileName
+                                var index = errorFile.lastIndexOf('/')
+                                if ( index !== -1 && index < errorFile.length - 1)
+                                    errorFile = errorFile.substring(index + 1)
 
-                                error.errorLine = err.qmlErrors[0].lineNumber
-                                error.errorText = message
+                                lastErrorsText +=
+                                    (i !== 0 ? '<br>' : '') +
+                                    '<a href=\"' + lerror.fileName + ':' + lerror.lineNumber + '\">' +
+                                        errorFile + ':' + lerror.lineNumber +
+                                    '</a>' +
+                                    ' ' + lerror.message
                             }
-                            if ( tester.program === "Rectangle{\n}" || tester.program === "" )
-                                editor.isDirty = false
-                            if (newItem){
-                                error.errorLine = 0
-                                error.errorText = ''
-                                if (tester.item) {
-                                    tester.item.destroy();
-                                }
-                                tester.item = newItem;
-                                root.afterCompile()
-                            }
+                            error.text = lastErrorsText
                         }
                     }
                 }
@@ -258,7 +265,7 @@ ApplicationWindow {
                 Rectangle{
                     id : errorWrap
                     anchors.bottom: parent.bottom
-                    height : error.errorText !== '' ? error.height + 20 : 0
+                    height : error.text !== '' ? error.height + 20 : 0
                     width : parent.width
                     color : "#141a1a"
                     Behavior on height {
@@ -277,17 +284,21 @@ ApplicationWindow {
                         anchors.leftMargin: 25
                         anchors.verticalCenter: parent.verticalCenter
 
-                        property int    errorLine : 0
-                        property string errorText : ''
-
                         width: parent.width
                         wrapMode: Text.Wrap
+                        textFormat: Text.StyledText
+
+                        linkColor: "#c5d0d7"
                         font.family: "Ubuntu Mono, Courier New, Courier"
                         font.pointSize: editor.font.pointSize
-                        text: "Line " + error.errorLine + ": " + error.errorText
-                        onTextChanged : if ( errorText !== '' ) console.log(text)
+                        text: ''
+                        onTextChanged : if ( text !== '' ) console.log(text)
                         color: "#c5d0d7"
-                        visible : errorText === "" ? false : true
+                        visible : text === "" ? false : true
+
+                        onLinkActivated: {
+                            project.openFile(link.substring(0, link.lastIndexOf(':')))
+                        }
                     }
                 }
 

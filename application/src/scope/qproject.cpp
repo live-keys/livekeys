@@ -3,6 +3,7 @@
 #include "qprojectfilemodel.h"
 #include "qprojectdocument.h"
 
+#include <QUrl>
 #include <QDebug>
 
 namespace lcv{
@@ -101,6 +102,10 @@ QProjectDocument *QProject::isOpened(const QString &path){
 
 void QProject::closeFocusedFile(){
 
+}
+
+void QProject::openFile(const QUrl& path){
+    openFile(path.toLocalFile());
 }
 
 void QProject::setInFocus(QProjectDocument *document){
