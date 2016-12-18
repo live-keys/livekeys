@@ -52,6 +52,11 @@ QLiveCVCommandLineParser::~QLiveCVCommandLineParser(){
         delete *it;
     }
     m_options.clear();
+
+    for ( QList<QLiveCVCommandLineParser::Option*>::iterator it = m_scriptOptions.begin(); it != m_scriptOptions.end(); ++it ){
+        delete *it;
+    }
+    m_scriptOptions.clear();
 }
 
 QLiveCVCommandLineParser::Option *QLiveCVCommandLineParser::addFlag(const QStringList &names, const QString &description){

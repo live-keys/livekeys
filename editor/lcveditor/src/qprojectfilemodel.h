@@ -1,21 +1,16 @@
 #ifndef QPROJECTFILEMODEL_H
 #define QPROJECTFILEMODEL_H
 
+#include "qlcveditorglobal.h"
 #include <QAbstractItemModel>
 #include <functional>
-
-// actions from livecvproject
-
-// projectdir->findDirEntries(dirname)
-// projectdir->activeFileChaned(file)
-// projectdir->dirtyFileChanged(file)
-// projectdir->scopeFileChanged(file)
 
 namespace lcv{
 
 class QProjectEntry;
 class QProjectFile;
-class QProjectFileModel : public QAbstractItemModel{
+
+class Q_LCVEDITOR_EXPORT QProjectFileModel : public QAbstractItemModel{
 
     Q_OBJECT
 
@@ -48,31 +43,32 @@ public:
     void openProject(const QString& path);
     void closeProject();
 
-//    QProjectEntry* visitFiles(std::function<bool(QProjectEntry*))> visitor);
-
     QProjectFile* openFile(const QString& file);
     QProjectEntry* findPathInEntry(QProjectEntry* entry, const QString& path);
     QProjectEntry* root();
 
 public slots:
-    void fileClosed(const QString& path);
-
-    void fileAdded(const QString& path);
-    void fileRemoved(const QString& path);
-
     void entryRemoved(const QModelIndex& item);
     void entryRemoved(QProjectEntry* entry);
     void entryRemoved(const QModelIndex &item, lcv::QProjectEntry* entry);
     void entryAdded(lcv::QProjectEntry* item, lcv::QProjectEntry* parent);
 
     void moveEntry(lcv::QProjectEntry* item, lcv::QProjectEntry* parent);
+    void renameEntry(lcv::QProjectEntry* item, const QString& newName);
+    lcv::QProjectFile* addFile(lcv::QProjectEntry* parentEntry, const QString& name);
+    lcv::QProjectEntry* addDirectory(lcv::QProjectEntry* parentEntry, const QString& name);
+    bool removeEntry(lcv::QProjectEntry* entry);
 
     void expandEntry(lcv::QProjectEntry* entry) const;
+    void rescanEntries(lcv::QProjectEntry* entry = 0);
 
     lcv::QProjectEntry *itemAt(const QModelIndex& index) const;
 
+    QModelIndex itemIndex(lcv::QProjectEntry* entry);
+
 signals:
     void projectNodeChanged(QModelIndex index);
+    void error(const QString& message);
 
 private:
     QProjectFile* openExternalFile(const QString& file);

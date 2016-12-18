@@ -10,7 +10,10 @@
 class QTextDocument;
 class QTextCursor;
 
-namespace QmlJS{ class Value; }
+namespace QmlJS{
+    class Value;
+    class Bind;
+}
 
 namespace lcv{
 
@@ -22,14 +25,41 @@ class Q_QMLJSPARSER_EXPORT QDocumentQmlInfo{
 public:
     class ValueReference{
     public:
-        ValueReference(const QmlJS::Value* val, QDocumentQmlInfo* p)
+        ValueReference(const QmlJS::Value* val, const QDocumentQmlInfo* p)
             : value(val)
             , parent(p)
         {}
         ValueReference() : value(0), parent(0){}
 
         const QmlJS::Value* value;
-        QDocumentQmlInfo* parent;
+        const QDocumentQmlInfo* parent;
+    };
+
+    class Message{
+
+    public:
+        enum Severity{
+            Hint,
+            MaybeWarning,
+            Warning,
+            MaybeError,
+            Error
+        };
+
+    public:
+        Message(Severity pkind, int pposition, int pline, const QString& ptext)
+            : kind(pkind)
+            , position(pposition)
+            , line(pline)
+            , text(ptext)
+        {}
+
+
+        Severity kind;
+        int      position;
+        int      line;
+        QString  text;
+
     };
 
     enum Dialect{
@@ -52,17 +82,26 @@ protected:
 public:
     static MutablePtr create(const QString& fileName);
 
-    QStringList extractIds();
+    QStringList extractIds() const;
     const ValueReference rootObject();
-    const ValueReference valueForId(const QString& id);
-    const QDocumentQmlObject extractValueObject(const ValueReference& value, ValueReference *parent = 0);
+    const ValueReference valueForId(const QString& id) const;
+    QDocumentQmlObject extractValueObject(const ValueReference& value, ValueReference *parent = 0) const;
+    QString extractTypeName(const ValueReference& value) const;
 
-    void createRanges(QTextDocument* document);
-    const ValueReference valueAtCursor(const QTextCursor& cursor);
+    void createRanges();
+    const ValueReference valueAtPosition(int position) const;
 
-    bool isValueNull(const ValueReference &vr);
+    bool isValueNull(const ValueReference &vr) const;
 
+    bool isParsedCorrectly() const;
     bool parse(const QString& source);
+
+    QmlJS::Bind* internalBind();
+
+    static bool isObject(const QString& typeString);
+
+    QString path() const;
+    QString componentName() const;
 
     ~QDocumentQmlInfo();
 

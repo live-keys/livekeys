@@ -10,7 +10,7 @@
 #    define Q_QMLJSPARSER_EXPORT Q_DECL_IMPORT
 #  endif
 #else
-#  define Q_LCV_EXPORT
+#  define Q_QMLJSPARSER_EXPORT
 #endif
 
 #endif // QQMLJSPARSERGLOBAL_H

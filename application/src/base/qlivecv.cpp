@@ -18,16 +18,23 @@
 #include "qlivecvlog.h"
 #include "qcodedocument.h"
 #include "qlivecvarguments.h"
-#include "qcodehandler.h"
 
+#include "qdocumentcodeinterface.h"
 #include "qproject.h"
 #include "qprojectentry.h"
 #include "qprojectfile.h"
 #include "qprojectfilemodel.h"
+#include "qprojectnavigationmodel.h"
+#include "qprojectdocumentmodel.h"
 #include "qprojectdocument.h"
 #include "qlivecvengine.h"
 
+#include "qdocumentqmlhandler.h"
+#include "qdocumentqmlinfo.h"
+
 #include <QUrl>
+#include <QFileInfo>
+#include <QDir>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QGuiApplication>
@@ -35,9 +42,12 @@
 QLiveCV::QLiveCV(int argc, const char* const argv[])
     : m_engine(new QLiveCVEngine(new QQmlApplicationEngine))
     , m_document(new QCodeDocument)
+    , m_codeInterface(0)
     , m_dir(QGuiApplication::applicationDirPath())
     , m_project(new lcv::QProject)
 {
+    solveImportPaths();
+
     m_arguments = new QLiveCVArguments(
         " Live CV v" + versionString() + "\n"
         " --------------------------------------------------- ",
@@ -45,13 +55,42 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
         argv
     );
 
+    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(m_engine->engine(), m_project->lockedFileIO());
+    m_codeInterface = new lcv::QDocumentCodeInterface(qmlHandler);
+    QObject::connect(
+        m_project, SIGNAL(inFocusChanged(QProjectDocument*)),
+        m_codeInterface, SLOT(setDocument(QProjectDocument*))
+    );
+    QObject::connect(
+        m_project, SIGNAL(pathChanged(QString)),
+        qmlHandler, SLOT(newProject(QString))
+    );
+    QObject::connect(
+        m_project, SIGNAL(directoryChanged(QString)),
+        qmlHandler, SLOT(directoryChanged(QString))
+    );
+    QObject::connect(
+        m_project, SIGNAL(fileChanged(QString)),
+        qmlHandler, SLOT(fileChanged(QString))
+    );
+
     if ( !m_arguments->consoleFlag() )
         qInstallMessageHandler(&QLiveCVLog::logFunction);
     if ( m_arguments->fileLogFlag() )
         QLiveCVLog::instance().enableFileLog();
-    if ( m_arguments->script() != "" ){
+    if ( m_arguments->script() != "" )
         m_project->openProject(m_arguments->script());
-        m_document->openFile(QUrl::fromLocalFile("E:/Work/Live CV/LiveCVLoadTest/Load.qml"));
+    if ( !m_arguments->monitoredFiles().isEmpty() ){
+        foreach( QString mfile, m_arguments->monitoredFiles() ){
+            if ( !mfile.isEmpty() ){
+                QFileInfo mfileInfo(mfile);
+                if ( mfileInfo.isRelative() ){
+                    m_project->openFile(QDir::cleanPath(m_project->path() + QDir::separator() + mfile), true);
+                } else {
+                    m_project->openFile(mfile, true);
+                }
+            }
+        }
     }
 }
 
@@ -76,13 +115,12 @@ void QLiveCV::loadLibrary(const QString &library){
 }
 
 void QLiveCV::loadQml(const QUrl &url){
-    solveImportPaths();
-
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("codeDocument", m_document);
     m_engine->engine()->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
     m_engine->engine()->rootContext()->setContextProperty("arguments", m_arguments);
     m_engine->engine()->rootContext()->setContextProperty("engine", m_engine);
+    m_engine->engine()->rootContext()->setContextProperty("codeHandler", m_codeInterface);
 #ifdef Q_OS_LINUX
     m_engine->engine()->rootContext()->setContextProperty("isLinux", true);
 #else
@@ -97,11 +135,16 @@ void QLiveCV::registerTypes(){
         "Cv", 1, 0, "Document", "Only access to the document object is allowed.");
     qmlRegisterUncreatableType<QLiveCVLog>(
         "Cv", 1, 0, "MessageLog", "Type is singleton.");
-    qmlRegisterType<QCodeHandler>(
-        "Cv", 1, 0, "CodeHandler");
+    qmlRegisterUncreatableType<lcv::QDocumentCodeInterface>(
+        "Cv", 1, 0, "DocumentCodeInterface", "DocumentCodeInterface is singleton.");
 
     qmlRegisterUncreatableType<lcv::QProjectFileModel>(
-        "Cv", 1, 0, "ProjectFileModel", "Cannot create a FileSystemModel instance.");
+        "Cv", 1, 0, "ProjectFileModel", "Cannot create a ProjectFileModel instance.");
+    qmlRegisterUncreatableType<lcv::QProjectDocumentModel>(
+        "Cv", 1, 0, "ProjectDocumentModel", "Cannot create a ProjectDocumentModel instance.");
+    qmlRegisterUncreatableType<lcv::QProjectNavigationModel>(
+        "Cv", 1, 0, "ProjectNavigationModel", "Cannot create a ProjectNavigationModel instance.");
+
     qmlRegisterUncreatableType<lcv::QProjectEntry>(
         "Cv", 1, 0, "ProjectEntry", "ProjectEntry objects are managed by the ProjectFileModel.");
     qmlRegisterUncreatableType<lcv::QProjectFile>(

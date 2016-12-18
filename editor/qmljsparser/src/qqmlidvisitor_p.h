@@ -86,7 +86,6 @@ public:
             }
             m_object->addSignal(mf);
         }
-//        qDebug() << "SiGNAL:" << name;
 //        qDebug() << QmlJS::DescribeValueVisitor::describe(value, 2).toUtf8().data();
         return true;
     }
