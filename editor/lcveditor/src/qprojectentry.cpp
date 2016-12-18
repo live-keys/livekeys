@@ -5,10 +5,7 @@
 #include <QFileInfo>
 #include <QDir>
 
-#include <QDebug>
-
 namespace lcv {
-
 
 QProjectEntry::QProjectEntry(const QString &path, QProjectEntry *parent)
     : QObject(parent)
@@ -42,6 +39,22 @@ QProjectEntry::QProjectEntry(
 {
     if ( parent )
         parent->addChildEntry(this);
+}
+
+void QProjectEntry::updatePaths(){
+    QProjectEntry* parent = parentEntry();
+    if ( parent ){
+        QString newPath = QDir::cleanPath(parent->path() + QDir::separator() + m_name);
+        if ( newPath != m_path ){
+            m_path = newPath;
+            emit pathChanged();
+            if ( !isFile() ){
+                foreach( QProjectEntry* entry, m_entries ){
+                    entry->updatePaths();
+                }
+            }
+        }
+    }
 }
 
 QProjectEntry::~QProjectEntry(){
@@ -126,9 +139,21 @@ void QProjectEntry::removeChildEntry(QProjectEntry *entry){
     m_entries.removeOne(entry);
 }
 
-bool QProjectEntry::rename(const QString &newName){
-    //TODO: Implement rename functionality
-    return false;
+void QProjectEntry::setName(const QString &name){
+    if (m_name == name)
+        return;
+
+    m_name = name;
+    m_path = QFileInfo().path() + "/" + name;
+
+    emit nameChanged();
+    emit pathChanged();
+
+    if ( !isFile() ){
+        foreach( QProjectEntry* entry, m_entries ){
+            entry->updatePaths();
+        }
+    }
 }
 
 

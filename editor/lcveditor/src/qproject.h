@@ -5,11 +5,7 @@
 
 #include <QObject>
 #include <QHash>
-
-//Filewatcher watches opened files
-//Directorywatcher watches opened directories
-//TODO: See if parser requires watched directories as well
-//TODO: Sort files and directories
+#include "qlockedfileiosession.h"
 
 namespace lcv{
 
@@ -31,20 +27,18 @@ class Q_LCVEDITOR_EXPORT QProject : public QObject{
     Q_PROPERTY(QString path                                  READ path            NOTIFY pathChanged)
 
     friend class QProjectFileModel;
+    friend class QProjectDocumentModel;
 
 public:
     QProject(QObject* parent = 0);
     ~QProject();
 
     void newProject();
-    void openProject(const QString& path);
-    void closeProject();
     void setActive(const QString& path);
 
     QProjectFile* lookupBestFocus(QProjectEntry* entry);
 
     QProjectDocument* isOpened(const QString& path);
-    void closeFocusedFile();
 
     lcv::QProjectFileModel* fileModel();
     lcv::QProjectNavigationModel* navigationModel();
@@ -54,11 +48,25 @@ public:
 
     const QString& path() const;
 
+    QLockedFileIOSession::Ptr lockedFileIO();
+
 public slots:
-    void openFile(const QUrl& path);
-    void openFile(const QString& path);
-    void openFile(lcv::QProjectFile* file);
+    void closeProject();
+    void openFile(const QUrl& path, bool monitor);
+    void openFile(const QString& path, bool monitor);
+    void openFile(lcv::QProjectFile* file, bool monitor);
     void setActive(lcv::QProjectFile *file);
+
+    bool isDirProject() const;
+    bool isFileInProject(const QUrl& path) const;
+    bool isFileInProject(const QString& path) const;
+
+    void openProject(const QString& path);
+    void openProject(const QUrl& url);
+
+    void closeFocusedFile();
+
+    QString dir() const;
 
 signals:
     void pathChanged(QString path);
@@ -80,6 +88,8 @@ private:
     QProjectFileModel*       m_fileModel;
     QProjectNavigationModel* m_navigationModel;
     QProjectDocumentModel*   m_documentModel;
+
+    QLockedFileIOSession::Ptr m_lockedFileIO;
 
     QProjectDocument* m_active;
     QProjectDocument* m_focus;
@@ -109,6 +119,11 @@ inline QProjectDocument *QProject::inFocus() const{
 inline const QString &QProject::path() const{
     return m_path;
 }
+
+inline QLockedFileIOSession::Ptr QProject::lockedFileIO(){
+    return m_lockedFileIO;
+}
+
 
 }// namespace
 

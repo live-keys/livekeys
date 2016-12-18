@@ -4,6 +4,7 @@
 #include <QObject>
 #include "qdocumentqmlscope.h"
 #include "qprojectqmlscope.h"
+#include "qlockedfileiosession.h"
 
 class QThread;
 class QTimer;
@@ -15,7 +16,7 @@ class QProjectQmlScanner : public QObject{
     Q_OBJECT
 
 public:
-    QProjectQmlScanner(QObject* parent = 0);
+    QProjectQmlScanner(QLockedFileIOSession::Ptr lockedFileIO, QObject* parent = 0);
     ~QProjectQmlScanner();
 
 public:
@@ -36,7 +37,8 @@ signals:
 
 private:
     QProjectQmlScope::Ptr m_project;
-    QDocumentQmlScope::Ptr       m_lastDocumentScope;
+    QDocumentQmlScope::Ptr m_lastDocumentScope;
+    QLockedFileIOSession::Ptr m_lockedFileIO;
     QThread* m_thread;
     QTimer*  m_timer;
 };

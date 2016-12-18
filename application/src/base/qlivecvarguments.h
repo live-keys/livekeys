@@ -22,6 +22,8 @@ public:
     bool consoleFlag() const;
     bool fileLogFlag() const;
 
+    const QStringList& monitoredFiles() const;
+
     const QString& script() const;
 
 private:
@@ -32,6 +34,8 @@ private:
     bool m_fileLogFlag;
     bool m_consoleFlag;
     bool m_previewFlag;
+
+    QStringList m_monitoredFiles;
 
     QString m_script;
 
@@ -47,6 +51,10 @@ inline bool QLiveCVArguments::consoleFlag() const{
 
 inline bool QLiveCVArguments::fileLogFlag() const{
     return m_fileLogFlag;
+}
+
+inline const QStringList &QLiveCVArguments::monitoredFiles() const{
+    return m_monitoredFiles;
 }
 
 inline const QString&QLiveCVArguments::script() const{

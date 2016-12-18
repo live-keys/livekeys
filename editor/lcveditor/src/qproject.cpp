@@ -19,6 +19,7 @@ QProject::QProject(QObject *parent)
     , m_documentModel(new QProjectDocumentModel(this))
     , m_focus(0)
     , m_active(0)
+    , m_lockedFileIO(QLockedFileIOSession::createInstance())
 {
     newProject();
 }
@@ -32,7 +33,9 @@ QProject::~QProject(){
 void QProject::newProject(){
     m_fileModel->createProject();
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
-        QProjectDocument* document = new QProjectDocument(qobject_cast<QProjectFile*>(m_fileModel->root()->child(0)));
+        QProjectDocument* document = new QProjectDocument(
+            qobject_cast<QProjectFile*>(m_fileModel->root()->child(0)), false, this
+        );
         m_documentModel->openDocument("", document);
         m_active = document;
         m_focus  = document;
@@ -49,7 +52,11 @@ void QProject::openProject(const QString &path){
     m_fileModel->openProject(absolutePath);
 
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
-        QProjectDocument* document = new QProjectDocument(qobject_cast<QProjectFile*>(m_fileModel->root()->child(0)));
+        QProjectDocument* document = new QProjectDocument(
+            qobject_cast<QProjectFile*>(m_fileModel->root()->child(0)),
+            false,
+            this
+        );
         m_documentModel->openDocument(document->file()->path(), document);
         m_active = document;
         m_focus  = document;
@@ -61,7 +68,11 @@ void QProject::openProject(const QString &path){
 
         QProjectFile* bestFocus = lookupBestFocus(m_fileModel->root()->child(0));
         if( bestFocus ){
-            QProjectDocument* document = new QProjectDocument(bestFocus);
+            QProjectDocument* document = new QProjectDocument(
+                bestFocus,
+                false,
+                this
+            );
             m_documentModel->openDocument(document->file()->path(), document);
             m_active = document;
             m_focus = document;
@@ -74,31 +85,47 @@ void QProject::openProject(const QString &path){
     }
 }
 
+void QProject::openProject(const QUrl &url){
+    openProject(url.toLocalFile());
+}
+
+QString QProject::dir() const{
+    if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile())
+        return QFileInfo(m_path).path();
+    else
+        return m_path;
+}
+
 void QProject::closeProject(){
-    m_focus = 0;
-    m_active = 0;
-    emit inFocusChanged(0);
-    emit activeChanged(0);
+    setInFocus(0);
+    setActive((QProjectDocument*)0);
     m_documentModel->closeDocuments();
+    m_fileModel->closeProject();
     m_path = "";
     emit pathChanged("");
 }
 
-void QProject::openFile(const QString &path){
+void QProject::openFile(const QUrl &path, bool monitor){
+    openFile(path.toLocalFile(), monitor);
+}
+
+void QProject::openFile(const QString &path, bool monitor){
     QProjectDocument* document = isOpened(path);
-    if (!document)
-        openFile(m_fileModel->openFile(path));
-    else
+    if (!document){
+        openFile(m_fileModel->openFile(path), monitor);
+    } else if ( document->isMonitored() != monitor ){
+        openFile(m_fileModel->openFile(path), monitor);
+    } else
         setInFocus(document);
 }
 
-void QProject::openFile(QProjectFile *file){
+void QProject::openFile(QProjectFile *file, bool monitor){
     if (!file)
         return;
 
     QProjectDocument* document = isOpened(file->path());
     if (!document){
-        document = new QProjectDocument(file);
+        document = new QProjectDocument(file, monitor, this);
         file->setIsOpen(true);
         m_documentModel->openDocument(file->path(), document);
     }
@@ -112,17 +139,30 @@ void QProject::setActive(QProjectFile* file){
 
     QProjectDocument* document = isOpened(file->path());
     if (!document){
-        document = new QProjectDocument(file);
-        file->setIsOpen(true);
-        m_documentModel->openDocument(file->path(), document);
+        document = new QProjectDocument(file, false, this);
     }
     setActive(document);
+}
+
+bool QProject::isDirProject() const{
+    return m_fileModel->root()->childCount() > 0 && !m_fileModel->root()->child(0)->isFile();
+}
+
+bool QProject::isFileInProject(const QUrl &path) const{
+    return isFileInProject(path.toLocalFile());
+}
+
+bool QProject::isFileInProject(const QString &path) const{
+    if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile() )
+        return path == m_path;
+    else
+        return !path.isEmpty() && path.startsWith(m_path);
 }
 
 void QProject::setActive(const QString &path){
     QProjectDocument* document = isOpened(path);
     if ( !document ){
-        document = new QProjectDocument(m_fileModel->openFile(path));
+        document = new QProjectDocument(m_fileModel->openFile(path), false, this);
     }
     if ( document ){
         setActive(document);
@@ -177,11 +217,9 @@ QProjectDocument *QProject::isOpened(const QString &path){
 }
 
 void QProject::closeFocusedFile(){
-    //TODO
-}
-
-void QProject::openFile(const QUrl &path){
-    openFile(path.toLocalFile());
+    if ( m_focus ){
+        m_documentModel->closeDocument(m_focus->file()->path());
+    }
 }
 
 void QProject::setInFocus(QProjectDocument *document){
@@ -193,6 +231,8 @@ void QProject::setInFocus(QProjectDocument *document){
 
 void QProject::setActive(QProjectDocument *document){
     if ( m_active != document ){
+        if ( m_active && !m_documentModel->isOpened(m_active->file()->path()) )
+            delete m_active;
         m_active = document;
         emit activeChanged(document);
     }

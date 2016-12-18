@@ -7,18 +7,21 @@
 
 namespace lcv{
 
+class QProject;
 class QProjectFile;
 class Q_LCVEDITOR_EXPORT QProjectDocument : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lcv::QProjectFile* file    READ file    NOTIFY fileChanged)
-    Q_PROPERTY(QString            content READ content NOTIFY contentChanged)
+    Q_PROPERTY(lcv::QProjectFile* file    READ file        CONSTANT)
+    Q_PROPERTY(QString            content READ content     NOTIFY contentChanged)
+    Q_PROPERTY(bool isMonitored           READ isMonitored CONSTANT)
 
 public:
-    explicit QProjectDocument(QProjectFile* file, QObject *parent = 0);
+    explicit QProjectDocument(QProjectFile* file, bool isMonitored, QProject *parent);
     ~QProjectDocument();
 
     lcv::QProjectFile* file() const;
+    bool isMonitored() const;
 
     const QString& content() const;
 
@@ -27,22 +30,30 @@ public:
     const QDateTime& lastModified() const;
     void setLastModified(const QDateTime& lastModified);
 
+    QProject* parentAsProject();
+
 public slots:
     void dumpContent(const QString& content);
-    void save();
+    bool save();
+    bool saveAs(const QString& path);
+    bool saveAs(const QUrl& url);
 
 signals:
-    void fileChanged();
     void contentChanged();
 
 private:
     QProjectFile* m_file;
     QString       m_content;
     QDateTime     m_lastModified;
+    bool          m_isMonitored;
 };
 
 inline QProjectFile *QProjectDocument::file() const{
     return m_file;
+}
+
+inline bool QProjectDocument::isMonitored() const{
+    return m_isMonitored;
 }
 
 inline const QString &QProjectDocument::content() const{

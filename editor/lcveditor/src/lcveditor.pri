@@ -11,9 +11,9 @@ HEADERS += \
     $$PWD/qcodecompletionmodel.h \
     $$PWD/qcodecompletionsuggestion.h \
     $$PWD/qabstractcodehandler.h \
-    $$PWD/qlockedfileio.h \
     $$PWD/qprojectnavigationmodel.h \
-    $$PWD/qprojectdocumentmodel.h
+    $$PWD/qprojectdocumentmodel.h \
+    $$PWD/qlockedfileiosession.h
 
 SOURCES += \
     $$PWD/qproject.cpp \
@@ -25,6 +25,6 @@ SOURCES += \
     $$PWD/qcodecompletionmodel.cpp \
     $$PWD/qcodecompletionsuggestion.cpp \
     $$PWD/qabstractcodehandler.cpp \
-    $$PWD/qlockedfileio.cpp \
     $$PWD/qprojectnavigationmodel.cpp \
-    $$PWD/qprojectdocumentmodel.cpp
+    $$PWD/qprojectdocumentmodel.cpp \
+    $$PWD/qlockedfileiosession.cpp

@@ -77,6 +77,8 @@ void QCodeCompletionModel::updateFilters(){
         if ( m_suggestions[i].label().startsWith(m_filter, Qt::CaseInsensitive) )
             m_filteredSuggestions.append(i);
     }
+    if ( m_filteredSuggestions.isEmpty() )
+        disable();
 }
 
 }// namespace

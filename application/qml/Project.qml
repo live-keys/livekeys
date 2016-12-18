@@ -11,6 +11,13 @@ Rectangle{
         GradientStop { position: 0.01; color: "#0b1924" }
     }
 
+    signal addEntry(ProjectEntry parentEntry, bool isFile)
+    signal openEntry(ProjectEntry entry, bool monitor)
+    signal removeEntry(ProjectEntry entry, bool isFile)
+    signal moveEntry(ProjectEntry entry, ProjectEntry newParent)
+    signal renameEntry(ProjectEntry entry, string newName)
+    signal closeProject()
+
     TreeView {
         id: view
         model: project.fileModel
@@ -61,6 +68,8 @@ Rectangle{
             resizable: true
         }
 
+        selectionMode: SelectionMode.NoSelection
+
         headerVisible: false
 
         itemDelegate: Item{
@@ -68,6 +77,12 @@ Rectangle{
 
             property bool editMode: false
 
+            function path(){
+                return styleData.value.path
+            }
+            function entry(){
+                return styleData.value
+            }
             function focusText(){
                 entryData.selectAll()
                 entryData.forceActiveFocus()
@@ -79,7 +94,10 @@ Rectangle{
                 project.setActive(styleData.value)
             }
             function openFile(){
-                project.openFile(styleData.value)
+                root.openEntry(styleData.value, false)
+            }
+            function monitorFile(){
+                root.openEntry(styleData.value, true)
             }
 
             function openExternally(){
@@ -101,6 +119,8 @@ Rectangle{
                         if ( styleData.value && styleData.value.isFile ){
                             if (styleData.value === (project.active ? project.active.file : null) )
                                 return "qrc:/images/project-file-active.png"
+                            else if ( styleData.value.isDirty )
+                                return "qrc:/images/project-file-unsaved.png"
                             else
                                 return "qrc:/images/project-file.png"
                         } else
@@ -117,18 +137,21 @@ Rectangle{
                     text: {
                         styleData.value
                             ? styleData.value.name === ''
-                            ? 'untitled' : styleData.value.name + styleData.index : ''
+                            ? 'untitled' : styleData.value.name : ''
                     }
                     font.family: 'Open Sans, Arial, sans-serif'
                     font.pixelSize: 12
                     font.weight: styleData.value.isOpen ? Font.Bold : Font.Light
                     readOnly: !entryDelegate.editMode
                     Keys.onReturnPressed: {
-                        //TODO: Implement rename
-                        console.log('enter pressed')
+                        root.renameEntry(styleData.value, text)
+                        entryDelegate.editMode = false
                     }
                     Keys.onEscapePressed: {
-
+                        entryData.text = styleData.value
+                                ? styleData.value.name === ''
+                                ? 'untitled' : styleData.value.name : ''
+                        entryDelegate.editMode = false
                     }
                 }
                 MouseArea {
@@ -148,29 +171,34 @@ Rectangle{
                             if ( styleData.value.isFile ){
                                 view.setContextDelegate(entryDelegate)
                                 fileContextMenu.popup()
+                            } else if ( styleData.value.path === project.path ){
+                                view.setContextDelegate(entryDelegate)
+                                projectContextMenu.popup()
                             } else {
                                 view.setContextDelegate(entryDelegate)
                                 dirContextMenu.popup()
                             }
                         } else if ( mouse.button === Qt.LeftButton ) {
-                            if ( entryDelegate.editMode ){
-                                entryData.forceActiveFocus()
-                            } else {
-//                                view.currentIndex = styleData.index
+                            if ( entryDelegate.editMode){
+                                if (!entryData.focus)
+                                    entryData.forceActiveFocus()
+                                else
+                                    mouse.accepted = false
                             }
-
                             if ( view.contextDelegate )
                                 view.contextDelegate.editMode = false
                         }
                     }
                     onDoubleClicked: {
-                        console.log(styleData.value)
                         if ( styleData.value.isFile )
-                            project.openFile(styleData.value)
-                        else if (view.isExpanded(styleData.index))
-                            view.collapse(styleData.index)
-                        else
-                            view.expand(styleData.index)
+                            root.openEntry(styleData.value, false)
+                        else {
+                            var modelIndex = project.fileModel.itemIndex(styleData.value)
+                            if (view.isExpanded(modelIndex))
+                                view.collapse(modelIndex)
+                            else
+                                view.expand(modelIndex)
+                        }
                     }
                 }
 
@@ -209,7 +237,7 @@ Rectangle{
             }
             onDropped: {
                 if ( view.dropEntry !== null ){
-                    project.fileModel.moveEntry(view.dragEntry, view.dropEntry)
+                    root.moveEntry(view.dragEntry, view.dropEntry)
                     view.dragEntry = null
                     view.dropEntry = null
                 }
@@ -225,29 +253,7 @@ Rectangle{
         Menu {
             id: fileContextMenu
 
-            style: MenuStyle{
-                frame: Rectangle{
-                    color: "#071119"
-                    opacity: 0.95
-                }
-                itemDelegate.label: Rectangle{
-                    width: fileMenuLabel.width
-                    height: 20
-                    color: 'transparent'
-                    Text{
-                        id: fileMenuLabel
-                        color: "#9babb8"
-                        anchors.centerIn: parent
-                        text: styleData.text
-                        font.family: 'Open Sans, Arial, sans-serif'
-                        font.pixelSize: 12
-                        font.weight: Font.Light
-                    }
-                }
-                itemDelegate.background: Rectangle{
-                    color: styleData.selected ? "#092235" : "transparent"
-                }
-            }
+            style: ContextMenuStyle{}
 
             MenuItem{
                 text: "Open File"
@@ -255,6 +261,13 @@ Rectangle{
                     view.contextDelegate.openFile()
                 }
             }
+            MenuItem{
+                text: "Monitor file"
+                onTriggered: {
+                    view.contextDelegate.monitorFile()
+                }
+            }
+
             MenuItem{
                 text: "Set As Active"
                 onTriggered: {
@@ -271,8 +284,7 @@ Rectangle{
             MenuItem {
                 text: "Delete"
                 onTriggered: {
-                    //TODO
-                    console.log('triggered')
+                    root.removeEntry(view.contextDelegate.entry(), false)
                 }
             }
 
@@ -280,29 +292,7 @@ Rectangle{
 
         Menu {
             id: dirContextMenu
-            style: MenuStyle{
-                frame: Rectangle{
-                    color: "#071119"
-                    opacity: 0.95
-                }
-                itemDelegate.label: Rectangle{
-                    width: dirLabelMenu.width
-                    height: dirLabelMenu.height + 6
-                    color: 'transparent'
-                    Text{
-                        id: dirLabelMenu
-                        color: "#9babb8"
-                        anchors.centerIn: parent
-                        text: styleData.text
-                        font.family: 'Open Sans, Arial, sans-serif'
-                        font.pixelSize: 12
-                        font.weight: Font.Light
-                    }
-                }
-                itemDelegate.background: Rectangle{
-                    color: styleData.selected ? "#092235" : "transparent"
-                }
-            }
+            style: ContextMenuStyle{}
             MenuItem{
                 text: "Show in Explorer"
                 onTriggered: {
@@ -316,73 +306,54 @@ Rectangle{
                     view.contextDelegate.focusText()
                 }
             }
+            MenuItem{
+                text: "Delete"
+                onTriggered: {
+                    root.removeEntry(view.contextDelegate.entry(), true)
+                }
+            }
             MenuItem {
                 text: "Add File"
+                onTriggered: {
+                    root.addEntry(view.contextDelegate.entry(), true)
+                }
             }
             MenuItem {
                 text: "Add Directory"
+                onTriggered: {
+                    root.addEntry(view.contextDelegate.entry(), false)
+                }
             }
         }
-    }
 
-    Rectangle{
-        id: addEntryNameBox
-
-        anchors.fill: parent
-        visible: false
-        color: "#000"
-        opacity: 0.7
-
-        MouseArea{
-            anchors.fill: parent
-            onClicked: mouse.accepted = true;
-            onPressed: mouse.accepted = true;
-            onReleased: mouse.accepted = true
-            onDoubleClicked: mouse.accepted = true;
-            onPositionChanged: mouse.accepted = true;
-            onPressAndHold: mouse.accepted = true;
-            onWheel: wheel.accepted = true
-        }
-
-        Rectangle{
-            width: parent.width
-            height: 60
-            color:"#fff"
-            Text{
-                text: 'asdsa'
-                font.family: 'Open Sans, Arial, sans-serif'
-                font.pixelSize: 12
-                font.weight: Font.Light
+        Menu {
+            id: projectContextMenu
+            style: ContextMenuStyle{}
+            MenuItem{
+                text: "Show in Explorer"
+                onTriggered: {
+                    view.contextDelegate.openExternally()
+                }
             }
-            Rectangle{
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: 30
-                TextInput{
-                    id: addEntryNaming
-                    anchors.left: parent.left
-                    anchors.leftMargin: 25
-                    anchors.right: parent.right
-                    anchors.rightMargin: 25
-                    anchors.top: parent.top
-                    color: '#aaa'
-                    text: 'asdmasldkma'
-                    font.family: 'Open Sans, Arial, sans-serif'
-                    font.pixelSize: 12
-                    font.weight: Font.Light
-                    selectByMouse: true
-
-                    Keys.onReturnPressed: {
-                        //TODO: Implement rename
-                        console.log('enter pressed')
-                    }
-                    Keys.onEscapePressed: {
-
-                    }
+            MenuItem{
+                text: "Close project"
+                onTriggered: {
+                    root.closeProject()
+                }
+            }
+            MenuItem {
+                text: "Add File"
+                onTriggered: {
+                    root.addEntry(view.contextDelegate.entry(), true)
+                }
+            }
+            MenuItem {
+                text: "Add Directory"
+                onTriggered: {
+                    root.addEntry(view.contextDelegate.entry(), false)
                 }
             }
         }
     }
-
 }
 

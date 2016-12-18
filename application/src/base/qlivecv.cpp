@@ -32,6 +32,8 @@
 #include "qdocumentqmlinfo.h"
 
 #include <QUrl>
+#include <QFileInfo>
+#include <QDir>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QGuiApplication>
@@ -45,9 +47,6 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
 {
     solveImportPaths();
 
-    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(m_engine);
-    m_codeInterface = new lcv::QDocumentCodeInterface(qmlHandler);
-
     m_arguments = new QLiveCVArguments(
         " Live CV v" + versionString() + "\n"
         " --------------------------------------------------- ",
@@ -55,6 +54,8 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
         argv
     );
 
+    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(m_engine, m_project->lockedFileIO());
+    m_codeInterface = new lcv::QDocumentCodeInterface(qmlHandler);
     QObject::connect(
         m_project, SIGNAL(inFocusChanged(QProjectDocument*)),
         m_codeInterface, SLOT(setDocument(QProjectDocument*))
@@ -78,6 +79,18 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
         QLiveCVLog::instance().enableFileLog();
     if ( m_arguments->script() != "" )
         m_project->openProject(m_arguments->script());
+    if ( !m_arguments->monitoredFiles().isEmpty() ){
+        foreach( QString mfile, m_arguments->monitoredFiles() ){
+            if ( !mfile.isEmpty() ){
+                QFileInfo mfileInfo(mfile);
+                if ( mfileInfo.isRelative() ){
+                    m_project->openFile(QDir::cleanPath(m_project->path() + QDir::separator() + mfile), true);
+                } else {
+                    m_project->openFile(mfile, true);
+                }
+            }
+        }
+    }
 }
 
 QLiveCV::~QLiveCV(){

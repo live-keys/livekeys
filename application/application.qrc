@@ -9,6 +9,8 @@
         <file alias="MessageDialogButton.qml">qml/MessageDialogButton.qml</file>
         <file alias="MessageDialogInternal.qml">qml/MessageDialogInternal.qml</file>
         <file alias="ProjectNavigation.qml">qml/ProjectNavigation.qml</file>
+        <file alias="ProjectAddEntry.qml">qml/ProjectAddEntry.qml</file>
+        <file alias="ContextMenuStyle.qml">qml/ContextMenuStyle.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>

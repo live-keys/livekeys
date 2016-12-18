@@ -18,14 +18,21 @@ void QLiveCVArguments::initialize(int argc, const char* const argv[]){
         "Output log data to console instead of using the log window.");
     QLiveCVCommandLineParser::Option* logOption     = m_parser->addFlag(QStringList() << "-l",
         "Output log data to a log file. Default file: livecv.log");
-    QLiveCVCommandLineParser::Option* previewOption   = m_parser->addFlag(QStringList() << "-p" << "--preview",
+    QLiveCVCommandLineParser::Option* previewOption  = m_parser->addFlag(QStringList() << "-p" << "--preview",
         "Launches live cv in preview mode. Does not load the editor.");
+    QLiveCVCommandLineParser::Option* monitorOption  = m_parser->addFlag(QStringList() << "-m" << "--monitor",
+        "Opens the list of paths in monitor mode.");
 
     m_parser->parse(argc, argv);
 
     m_consoleFlag = m_parser->isSet(consoleOption);
     m_fileLogFlag = m_parser->isSet(logOption);
     m_previewFlag = m_parser->isSet(previewOption);
+
+    QString monitoredList = m_parser->value(monitorOption);
+    if ( !monitoredList.isEmpty() ){
+        m_monitoredFiles = monitoredList.split(";");
+    }
 
     m_script = m_parser->script();
 }

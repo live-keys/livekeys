@@ -2,9 +2,12 @@ import QtQuick 2.3
 
 Rectangle{
     id: root
+
     property alias text: buttonLabel.text
+    property var callback : function(){}
 
     signal clicked()
+    onClicked: callback()
 
     color: buttonMouseArea.containsMouse ? "#222240" : "#222230"
     width: 100
@@ -13,7 +16,7 @@ Rectangle{
     Text{
         id: buttonLabel
         anchors.centerIn: parent
-        text: "Label"
+        text: ""
         color: "#ccc"
         font.pixelSize: 12
         font.family: "Open Sans, sans-serif"

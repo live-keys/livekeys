@@ -73,6 +73,7 @@ inline void QProjectFile::setIsDirty(bool isDirty){
     if (m_isDirty == isDirty)
         return;
 
+
     m_isDirty = isDirty;
     emit isDirtyChanged();
 }
