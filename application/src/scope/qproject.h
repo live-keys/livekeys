@@ -40,6 +40,7 @@ public:
     lcv::QProjectDocument*  inFocus() const;
 
 public slots:
+    void openFile(const QUrl& path);
     void openFile(const QString& path);
     void openFile(lcv::QProjectFile* file);
     void setActive(lcv::QProjectFile *file);

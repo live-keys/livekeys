@@ -27,9 +27,12 @@ public:
 
     const QList<QQmlError>& lastErrors() const;
 
+    QQmlEngine* engine();
+
 signals:
+    void aboutToCreateObject(const QUrl& file);
     void isLoadingChanged(bool isLoading);
-    void objectCreated(QObject*);
+    void objectCreated(QObject* object);
     void objectCreationError(QJSValue errors);
 
 public slots:
@@ -57,6 +60,10 @@ inline bool QLiveCVEngine::isLoading() const{
 
 inline void QLiveCVEngine::setIsLoading(bool isLoading){
     m_isLoading = isLoading;
+}
+
+inline QQmlEngine*QLiveCVEngine::engine(){
+    return m_engine;
 }
 
 #endif // QLIVECVENGINE_H
