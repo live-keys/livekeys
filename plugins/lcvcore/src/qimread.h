@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMATSOURCE_HPP
-#define QMATSOURCE_HPP
+#ifndef QIMREAD_H
+#define QIMREAD_H
 
 #include <QQuickItem>
 #include "qmat.h"
@@ -87,4 +87,4 @@ inline const QString &QImRead::file() const{
     return m_file;
 }
 
-#endif // QMATSOURCE_HPP
+#endif // QIMREAD_H

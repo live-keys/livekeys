@@ -3,10 +3,29 @@ TARGET   = livecv
 CONFIG  += c++11
 QT      += qml quick
 
+# Editor library
+# --------------
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../editor/lcveditor/release/ -llcveditor
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../editor/lcveditor/debug/ -llcveditor
+else:unix: LIBS += -L$$OUT_PWD/../application/lcveditor/ -llcveditor
+
+INCLUDEPATH += $$PWD/../editor/lcveditor/src
+DEPENDPATH += $$PWD/../editor/lcveditor/src
+
+# QmlJS library
+# -------------
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../editor/qmljsparser/release/ -lqmljsparser
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../editor/qmljsparser/debug/ -lqmljsparser
+else:unix: LIBS += -L$$OUT_PWD/../application/qmljsparser/ -lqmljsparser
+
+INCLUDEPATH += $$PWD/../editor/qmljsparser/src
+DEPENDPATH += $$PWD/../editor/qmljsparser/src
+
 # Application
 # -----------
 
-include($$PWD/src/scope/scope.pri)
 include($$PWD/src/base/base.pri)
 include($$PWD/src/main/main.pri)
 
@@ -62,12 +81,12 @@ DISTFILES += \
     $$PWD/plugins/lcvcontrols/ConfigurationPanel.qml \
     $$PWD/plugins/lcvcontrols/ConfigurationField.qml \
     $$PWD/plugins/lcvcontrols/InputBox.qml \
-    plugins/lcvcontrols/FeatureDetectorSelection.qml \
-    plugins/lcvcontrols/SelectionArea.qml \
+    $$PWD/plugins/lcvcontrols/FeatureDetectorSelection.qml \
+    $$PWD/plugins/lcvcontrols/SelectionArea.qml \
     $$PWD/plugins/lcvcontrols/SelectionWindow.qml \
-    plugins/lcvcontrols/LiveCVStyle.qml \
-    plugins/lcvcontrols/FeatureObjectList.qml \
-    plugins/lcvcontrols/FeatureObjectMatch.qml \
-    plugins/lcvcontrols/DescriptorExtractorSelection.qml \
-    plugins/lcvcontrols/TextButton.qml
+    $$PWD/plugins/lcvcontrols/LiveCVStyle.qml \
+    $$PWD/plugins/lcvcontrols/FeatureObjectList.qml \
+    $$PWD/plugins/lcvcontrols/FeatureObjectMatch.qml \
+    $$PWD/plugins/lcvcontrols/DescriptorExtractorSelection.qml \
+    $$PWD/plugins/lcvcontrols/TextButton.qml
 

@@ -61,7 +61,16 @@ void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, c
 
     QList<QQmlError> incubatorErrors = component.errors();
     if ( incubatorErrors.size() > 0 ){
+        setIsLoading(false);
         emit objectCreationError(toJSErrors(incubatorErrors));
+        return;
+    }
+
+    if ( incubator.isNull() ){
+        setIsLoading(false);
+        QQmlError errorObject;
+        errorObject.setDescription("Component returned null object.");
+        emit objectCreationError(toJSErrors(QList<QQmlError>() << errorObject));
         return;
     }
 

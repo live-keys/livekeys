@@ -1,8 +1,6 @@
 #ifndef QDOCUMENTQMLRANGES_H
 #define QDOCUMENTQMLRANGES_H
 
-#include <QTextCursor>
-#include <QTextDocument>
 #include "qmljs/qmljsdocument.h"
 #include "qmljs/parser/qmljsastvisitor_p.h"
 #include "qmljs/parser/qmljsast_p.h"
@@ -18,15 +16,17 @@ public:
 
     public: // attributes
         QmlJS::AST::Node *ast;
-        QTextCursor begin;
-        QTextCursor end;
+        int begin;
+        int end;
     };
 
 public:
     QDocumentQmlRanges();
 
     QList<Range> operator()(QmlJS::AST::Node* ast);
-    QList<Range> operator()(QTextDocument *textDocument, QmlJS::Document::Ptr doc);
+    QList<Range> operator()(QmlJS::Document::Ptr doc);
+
+    Range findClosestRange(int position) const;
 
 protected:
     using QmlJS::AST::Visitor::visit;
@@ -47,7 +47,6 @@ protected:
     Range createRange(QmlJS::AST::Node *ast, QmlJS::AST::SourceLocation start, QmlJS::AST::SourceLocation end);
 
 private:
-    QTextDocument *m_textDocument;
     QList<Range> m_ranges;
 };
 
