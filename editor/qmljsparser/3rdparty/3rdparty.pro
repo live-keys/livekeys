@@ -3,7 +3,7 @@ INCLUDEPATH += $$PWD
 DEFINES += QTCREATOR_UTILS_STATIC_LIB # Utils as Static
 DEFINES += LANGUAGEUTILS_BUILD_STATIC_LIB # Language Utils as Static
 DEFINES += QML_BUILD_STATIC_LIB # QmlJS Parser as Static
-DEFINES += QT_QMLDEVTOOLS_LIB # QmlJS Static
+#DEFINES += QT_QMLDEVTOOLS_LIB # QmlJS Static
 DEFINES += QT_CREATOR
 
 # Utils
@@ -33,8 +33,7 @@ HEADERS += \
     $$PWD/qmljs/qmljstypedescriptionreader.h \
     $$PWD/qmljs/qmljscontext.h \
     $$PWD/qmljs/qmljsviewercontext.h \
-    $$PWD/qmljs/qmljsqrcparser.h \
-    $$PWD/qmljs/qmljsdescribevalue.h
+    $$PWD/qmljs/qmljsqrcparser.h
 
 SOURCES += \
     $$PWD/qmljs/qmljsbind.cpp \
@@ -49,8 +48,7 @@ SOURCES += \
     $$PWD/qmljs/qmljstypedescriptionreader.cpp \
     $$PWD/qmljs/qmljscontext.cpp \
     $$PWD/qmljs/qmljsviewercontext.cpp \
-    $$PWD/qmljs/qmljsqrcparser.cpp \
-    $$PWD/qmljs/qmljsdescribevalue.cpp
+    $$PWD/qmljs/qmljsqrcparser.cpp
 
 # Language Utils
 

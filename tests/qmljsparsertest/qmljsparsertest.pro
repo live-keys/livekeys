@@ -6,6 +6,7 @@ CONFIG  += console testcase
 # Fix dependencies
 
 INCLUDEPATH += $$PWD/../../editor/qmljsparser/src
+INCLUDEPATH += $$PWD/../../editor/qmljsparser/plugintypes
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../editor/qmljsparser/release/ -lqmljsparser
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../editor/qmljsparser/debug/ -lqmljsparser
@@ -33,7 +34,9 @@ QMAKE_EXTRA_TARGETS += first testdatacopy
 include($$PWD/src/qmljsparsertest.pri)
 
 OTHER_FILES += \
-    $$PWD/data/mainwindow.in.qml
+    $$PWD/data/mainwindow.in.qml \
+    $$PWD/data/propertyexport.in.qml \
+    $$PWD/data/scrollview.in.qml
 
 DISTFILES += \
-    data/propertyexport.in.qml
+    data/customtype.in.qml

@@ -22,12 +22,12 @@ private:
     void identifierValueTest();
     void identifierFunctionMemberTest();
     void identifierMemberTest();
+    void identifierScopeTest();
+    void rangeScopeTest();
 
 
 
 private slots:
-    void identifierScopeTest();
-    void rangeScopeTest();
 };
 
 #endif // QDOCUMENTQMLPARSERTEST_H
