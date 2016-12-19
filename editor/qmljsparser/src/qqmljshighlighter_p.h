@@ -41,7 +41,7 @@ public:
 /**
  * @brief The QCodeJSHighlighter is a private class used internally by QCodeHandler.
  */
-class QCodeJSHighlighter : public QSyntaxHighlighter{
+class QQmlJsHighlighter : public QSyntaxHighlighter{
 
 public:
     enum ColorComponent{
@@ -64,7 +64,7 @@ public:
     };
 
 public:
-    QCodeJSHighlighter(QTextDocument *parent = 0);
+    QQmlJsHighlighter(QTextDocument *parent = 0);
 
     void setColor(ColorComponent component, const QColor &color);
     void mark(const QString &str, Qt::CaseSensitivity caseSensitivity);
@@ -83,19 +83,19 @@ private:
     Qt::CaseSensitivity m_markCaseSensitivity;
 };
 
-QCodeJSHighlighter::QCodeJSHighlighter(QTextDocument *parent)
+QQmlJsHighlighter::QQmlJsHighlighter(QTextDocument *parent)
 : QSyntaxHighlighter(parent)
 , m_markCaseSensitivity(Qt::CaseInsensitive){
 
     // default color scheme
     m_colors[Normal]     = QColor("#fff");
-    m_colors[Comment]    = QColor("#9c9c9c");
+    m_colors[Comment]    = QColor("#56748a");
     m_colors[Number]     = QColor("#ca7000");
-    m_colors[String]     = QColor("#30a020");
+    m_colors[String]     = QColor("#358d37");
     m_colors[Operator]   = QColor("#c0a000");
-    m_colors[Identifier] = QColor("#6666ff");
+    m_colors[Identifier] = QColor("#93672f");
     m_colors[Keyword]    = QColor("#a0a000");
-    m_colors[BuiltIn]    = QColor("#a0a000");
+    m_colors[BuiltIn]    = QColor("#93672f");
     m_colors[Marker]     = QColor("#ffff00");
 
     // https://developer.mozilla.org/en/JavaScript/Reference/Reserved_Words
@@ -270,13 +270,13 @@ QCodeJSHighlighter::QCodeJSHighlighter(QTextDocument *parent)
     m_knownIds << "signal";
 }
 
-void QCodeJSHighlighter::setColor(ColorComponent component, const QColor &color){
+void QQmlJsHighlighter::setColor(ColorComponent component, const QColor &color){
 
     m_colors[component] = color;
     rehighlight();
 }
 
-void QCodeJSHighlighter::highlightBlock(const QString &text){
+void QQmlJsHighlighter::highlightBlock(const QString &text){
 
     // parsing state
     enum States{
@@ -446,17 +446,17 @@ void QCodeJSHighlighter::highlightBlock(const QString &text){
     setCurrentBlockState(blockState);
 }
 
-void QCodeJSHighlighter::mark(const QString &str, Qt::CaseSensitivity caseSensitivity){
+void QQmlJsHighlighter::mark(const QString &str, Qt::CaseSensitivity caseSensitivity){
     m_markString = str;
     m_markCaseSensitivity = caseSensitivity;
     rehighlight();
 }
 
-QStringList QCodeJSHighlighter::keywords() const{
+QStringList QQmlJsHighlighter::keywords() const{
     return m_keywords.toList();
 }
 
-void QCodeJSHighlighter::setKeywords(const QStringList &keywords){
+void QQmlJsHighlighter::setKeywords(const QStringList &keywords){
     m_keywords = QSet<QString>::fromList(keywords);
     rehighlight();
 }

@@ -61,7 +61,7 @@
   \code
   ImRead{
        id : src
-       file : codeDocument.path + 'sample.jpg'
+       file : project.path + '/sample.jpg'
   }
   MatToGrey{
        input : src.output

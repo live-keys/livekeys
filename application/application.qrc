@@ -4,6 +4,13 @@
         <file alias="Editor.qml">qml/Editor.qml</file>
         <file alias="LogWindow.qml">qml/LogWindow.qml</file>
         <file alias="Top.qml">qml/Top.qml</file>
+        <file alias="Project.qml">qml/Project.qml</file>
+        <file alias="SuggestionBox.qml">qml/SuggestionBox.qml</file>
+        <file alias="MessageDialogButton.qml">qml/MessageDialogButton.qml</file>
+        <file alias="MessageDialogInternal.qml">qml/MessageDialogInternal.qml</file>
+        <file alias="ProjectNavigation.qml">qml/ProjectNavigation.qml</file>
+        <file alias="ProjectAddEntry.qml">qml/ProjectAddEntry.qml</file>
+        <file alias="ContextMenuStyle.qml">qml/ContextMenuStyle.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>
@@ -11,6 +18,10 @@
         <file alias="UbuntuMono-Regular.ttf">fonts/UbuntuMono-Regular.ttf</file>
         <file alias="SourceCodePro-Bold.ttf">fonts/SourceCodePro-Bold.ttf</file>
         <file alias="SourceCodePro-Regular.ttf">fonts/SourceCodePro-Regular.ttf</file>
+        <file alias="SourceCodePro-Light.ttf">fonts/SourceCodePro-Light.ttf</file>
+        <file alias="OpenSans-Bold.ttf">fonts/OpenSans-Bold.ttf</file>
+        <file alias="OpenSans-Light.ttf">fonts/OpenSans-Light.ttf</file>
+        <file alias="OpenSans-Regular.ttf">fonts/OpenSans-Regular.ttf</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="log.png">images/log.png</file>
@@ -18,5 +29,12 @@
         <file alias="new.png">images/new.png</file>
         <file alias="open.png">images/open.png</file>
         <file alias="save.png">images/save.png</file>
+        <file alias="project-arrow.png">images/project-arrow.png</file>
+        <file alias="project-directory.png">images/project-directory.png</file>
+        <file alias="project-file.png">images/project-file.png</file>
+        <file alias="project-file-active.png">images/project-file-active.png</file>
+        <file alias="project-file-unsaved.png">images/project-file-unsaved.png</file>
+        <file alias="open-directory.png">images/open-directory.png</file>
+        <file alias="toggle-navigation.png">images/toggle-navigation.png</file>
     </qresource>
 </RCC>

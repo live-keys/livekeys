@@ -1,0 +1,573 @@
+--- ../source/qmljs/qmljsbind.cpp	Mon Oct 17 20:46:00 2016
++++ qmljsbind.cpp	Sun Nov  6 21:12:18 2016
+@@ -27,7 +27,6 @@
+ #include "parser/qmljsast_p.h"
+ #include "qmljsutils.h"
+ #include "qmljsdocument.h"
+-#include "qmljsmodelmanagerinterface.h"
+ 
+ using namespace LanguageUtils;
+ using namespace QmlJS;
+@@ -200,17 +199,17 @@
+                                                      importId, ast);
+         if (_doc->language() == Dialect::Qml) {
+             const QString importStr = import.name() + importId;
+-            if (ModelManagerInterface::instance()) {
+-                QmlLanguageBundles langBundles = ModelManagerInterface::instance()->extendedBundles();
+-                QmlBundle qq1 = langBundles.bundleForLanguage(Dialect::QmlQtQuick1);
+-                QmlBundle qq2 = langBundles.bundleForLanguage(Dialect::QmlQtQuick2);
+-                bool isQQ1 = qq1.supportedImports().contains(importStr);
+-                bool isQQ2 = qq2.supportedImports().contains(importStr);
+-                if (isQQ1 && ! isQQ2)
+-                    _doc->setLanguage(Dialect::QmlQtQuick1);
+-                if (isQQ2 && ! isQQ1)
+-                    _doc->setLanguage(Dialect::QmlQtQuick2);
+-            }
++//            if (ModelManagerInterface::instance()) {
++//                QmlLanguageBundles langBundles = ModelManagerInterface::instance()->extendedBundles();
++//                QmlBundle qq1 = langBundles.bundleForLanguage(Dialect::QmlQtQuick1);
++//                QmlBundle qq2 = langBundles.bundleForLanguage(Dialect::QmlQtQuick2);
++//                bool isQQ1 = qq1.supportedImports().contains(importStr);
++//                bool isQQ2 = qq2.supportedImports().contains(importStr);
++//                if (isQQ1 && ! isQQ2)
++//                    _doc->setLanguage(Dialect::QmlQtQuick1);
++//                if (isQQ2 && ! isQQ1)
++//                    _doc->setLanguage(Dialect::QmlQtQuick2);
++//            }
+         }
+         _imports += import;
+     } else if (!ast->fileName.isEmpty()) {
+--- ../source/qmljs/qmljsdialect.h	Mon Oct 17 20:45:59 2016
++++ qmljsdialect.h	Sun Nov  6 19:30:27 2016
+@@ -27,7 +27,8 @@
+ 
+ #include "qmljs_global.h"
+ 
+-#include <utils/fileutils.h>
++//HACK
++//#include <utils/fileutils.h>
+ 
+ #include <QString>
+ 
+@@ -77,24 +78,24 @@
+ 
+ QMLJS_EXPORT QDebug operator << (QDebug &dbg, const Dialect &dialect);
+ 
+-class QMLJS_EXPORT PathAndLanguage {
+-public:
+-    PathAndLanguage(const Utils::FileName &path = Utils::FileName(), Dialect language = Dialect::AnyLanguage);
+-    PathAndLanguage(const PathAndLanguage &o)
+-        : m_path(o.path()), m_language(o.language())
+-    { }
+-    Utils::FileName path() const {
+-        return m_path;
+-    }
+-    Dialect language() const {
+-        return m_language;
+-    }
+-    bool operator ==(const PathAndLanguage &other) const;
+-    bool operator < (const PathAndLanguage &other) const;
+-private:
+-    Utils::FileName m_path;
+-    Dialect m_language;
+-};
++//class QMLJS_EXPORT PathAndLanguage {
++//public:
++//    PathAndLanguage(const Utils::FileName &path = Utils::FileName(), Dialect language = Dialect::AnyLanguage);
++//    PathAndLanguage(const PathAndLanguage &o)
++//        : m_path(o.path()), m_language(o.language())
++//    { }
++//    Utils::FileName path() const {
++//        return m_path;
++//    }
++//    Dialect language() const {
++//        return m_language;
++//    }
++//    bool operator ==(const PathAndLanguage &other) const;
++//    bool operator < (const PathAndLanguage &other) const;
++//private:
++//    Utils::FileName m_path;
++//    Dialect m_language;
++//};
+ 
+ // tries to find the "most specific" language still compatible with all requested ones
+ class QMLJS_EXPORT LanguageMerger
+@@ -121,49 +122,49 @@
+ };
+ 
+ 
+-QMLJS_EXPORT QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage);
+-
+-class QMLJS_EXPORT PathsAndLanguages
+-{
+-public:
+-    explicit PathsAndLanguages()
+-    { }
+-    explicit PathsAndLanguages(const QList<PathAndLanguage> &list)
+-        : m_list(list)
+-    { }
+-    PathsAndLanguages(const PathsAndLanguages &o)
+-        : m_list(o.m_list)
+-    { }
++//QMLJS_EXPORT QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage);
+ 
+-    bool maybeInsert(const Utils::FileName &path, Dialect language = Dialect::AnyLanguage) {
+-        return maybeInsert(PathAndLanguage(path, language));
+-    }
+-
+-    bool maybeInsert(const PathAndLanguage &pathAndLanguage);
+-
+-    PathAndLanguage at(int i) const {
+-        return m_list.at(i);
+-    }
+-    int size() const {
+-        return m_list.size();
+-    }
+-    int length() const {
+-        return m_list.length();
+-    }
+-    void clear() {
+-        m_list.clear();
+-    }
+-    // foreach support
+-    typedef QList<PathAndLanguage>::const_iterator const_iterator;
+-    const_iterator begin() const {
+-        return m_list.begin();
+-    }
+-    const_iterator end() const {
+-        return m_list.end();
+-    }
+-    void compact();
+-private:
+-    QList<PathAndLanguage> m_list;
+-};
++//class QMLJS_EXPORT PathsAndLanguages
++//{
++//public:
++//    explicit PathsAndLanguages()
++//    { }
++//    explicit PathsAndLanguages(const QList<PathAndLanguage> &list)
++//        : m_list(list)
++//    { }
++//    PathsAndLanguages(const PathsAndLanguages &o)
++//        : m_list(o.m_list)
++//    { }
++
++//    bool maybeInsert(const Utils::FileName &path, Dialect language = Dialect::AnyLanguage) {
++//        return maybeInsert(PathAndLanguage(path, language));
++//    }
++
++//    bool maybeInsert(const PathAndLanguage &pathAndLanguage);
++
++//    PathAndLanguage at(int i) const {
++//        return m_list.at(i);
++//    }
++//    int size() const {
++//        return m_list.size();
++//    }
++//    int length() const {
++//        return m_list.length();
++//    }
++//    void clear() {
++//        m_list.clear();
++//    }
++//    // foreach support
++//    typedef QList<PathAndLanguage>::const_iterator const_iterator;
++//    const_iterator begin() const {
++//        return m_list.begin();
++//    }
++//    const_iterator end() const {
++//        return m_list.end();
++//    }
++//    void compact();
++//private:
++//    QList<PathAndLanguage> m_list;
++//};
+ 
+ } // namespace QmlJS
+--- ../source/qmljs/qmljsdialect.cpp	Mon Oct 17 20:46:00 2016
++++ qmljsdialect.cpp	Sun Nov  6 19:30:20 2016
+@@ -242,98 +242,98 @@
+     return dbg;
+ }
+ 
+-PathAndLanguage::PathAndLanguage(const Utils::FileName &path, Dialect language)
+-    : m_path(path), m_language(language)
+-{ }
+-
+-bool PathAndLanguage::operator ==(const PathAndLanguage &other) const
+-{
+-    return path() == other.path() && language() == other.language();
+-}
+-
+-bool PathAndLanguage::operator <(const PathAndLanguage &other) const
+-{
+-    if (path() < other.path())
+-        return true;
+-    if (path() > other.path())
+-        return false;
+-    if (language() == other.language())
+-        return false;
+-    bool i1 = other.language().companionLanguages().contains(language());
+-    bool i2 = language().companionLanguages().contains(other.language());
+-    if (i1 && !i2)
+-        return true;
+-    if (i2 && !i1)
+-        return false;
+-    return language() < other.language();
+-}
+-
+-QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage)
+-{
+-    dbg << "{ path:" << pathAndLanguage.path() << " language:" << pathAndLanguage.language().toString() << "}";
+-    return dbg;
+-}
+-
+-bool PathsAndLanguages::maybeInsert(const PathAndLanguage &pathAndLanguage) {
+-    for (int i = 0; i < m_list.size(); ++i) {
+-        PathAndLanguage currentElement = m_list.at(i);
+-        if (currentElement.path() == pathAndLanguage.path()) {
+-            int j = i;
+-            do {
+-                if (pathAndLanguage.language() < currentElement.language()) {
+-                    if (currentElement.language() == pathAndLanguage.language())
+-                        return false;
+-                    break;
+-                }
+-                ++j;
+-                if (j == m_list.length())
+-                    break;
+-                currentElement = m_list.at(j);
+-            } while (currentElement.path() == pathAndLanguage.path());
+-            m_list.insert(j, pathAndLanguage);
+-            return true;
+-        }
+-    }
+-    m_list.append(pathAndLanguage);
+-    return true;
+-}
+-
+-void PathsAndLanguages::compact()
+-{
+-    if (m_list.isEmpty())
+-        return;
+-
+-    int oldCompactionPlace = 0;
+-    Utils::FileName oldPath = m_list.first().path();
+-    QList<PathAndLanguage> compactedList;
+-    bool restrictFailed = false;
+-    for (int i = 1; i < m_list.length(); ++i) {
+-        Utils::FileName newPath = m_list.at(i).path();
+-        if (newPath == oldPath) {
+-            int newCompactionPlace = i - 1;
+-            compactedList << m_list.mid(oldCompactionPlace, newCompactionPlace - oldCompactionPlace);
+-            LanguageMerger merger;
+-            merger.merge(m_list.at(i - 1).language());
+-            do {
+-                merger.merge(m_list.at(i).language());
+-                if (++i == m_list.length())
+-                    break;
+-                newPath = m_list.at(i).path();
+-            } while (newPath == oldPath);
+-            oldCompactionPlace = i;
+-            compactedList << PathAndLanguage(oldPath, merger.mergedLanguage());
+-            if (merger.restrictFailed())
+-                restrictFailed = true;
+-        }
+-        oldPath = newPath;
+-    }
+-    if (oldCompactionPlace == 0)
+-        return;
+-    compactedList << m_list.mid(oldCompactionPlace);
+-    if (restrictFailed)
+-        qCWarning(qmljsLog) << "failed to restrict PathAndLanguages " << m_list;
+-    m_list = compactedList;
+-}
++//PathAndLanguage::PathAndLanguage(const Utils::FileName &path, Dialect language)
++//    : m_path(path), m_language(language)
++//{ }
++
++//bool PathAndLanguage::operator ==(const PathAndLanguage &other) const
++//{
++//    return path() == other.path() && language() == other.language();
++//}
++
++//bool PathAndLanguage::operator <(const PathAndLanguage &other) const
++//{
++//    if (path() < other.path())
++//        return true;
++//    if (path() > other.path())
++//        return false;
++//    if (language() == other.language())
++//        return false;
++//    bool i1 = other.language().companionLanguages().contains(language());
++//    bool i2 = language().companionLanguages().contains(other.language());
++//    if (i1 && !i2)
++//        return true;
++//    if (i2 && !i1)
++//        return false;
++//    return language() < other.language();
++//}
++
++//QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage)
++//{
++//    dbg << "{ path:" << pathAndLanguage.path() << " language:" << pathAndLanguage.language().toString() << "}";
++//    return dbg;
++//}
++
++//bool PathsAndLanguages::maybeInsert(const PathAndLanguage &pathAndLanguage) {
++//    for (int i = 0; i < m_list.size(); ++i) {
++//        PathAndLanguage currentElement = m_list.at(i);
++//        if (currentElement.path() == pathAndLanguage.path()) {
++//            int j = i;
++//            do {
++//                if (pathAndLanguage.language() < currentElement.language()) {
++//                    if (currentElement.language() == pathAndLanguage.language())
++//                        return false;
++//                    break;
++//                }
++//                ++j;
++//                if (j == m_list.length())
++//                    break;
++//                currentElement = m_list.at(j);
++//            } while (currentElement.path() == pathAndLanguage.path());
++//            m_list.insert(j, pathAndLanguage);
++//            return true;
++//        }
++//    }
++//    m_list.append(pathAndLanguage);
++//    return true;
++//}
++
++//void PathsAndLanguages::compact()
++//{
++//    if (m_list.isEmpty())
++//        return;
++
++//    int oldCompactionPlace = 0;
++//    Utils::FileName oldPath = m_list.first().path();
++//    QList<PathAndLanguage> compactedList;
++//    bool restrictFailed = false;
++//    for (int i = 1; i < m_list.length(); ++i) {
++//        Utils::FileName newPath = m_list.at(i).path();
++//        if (newPath == oldPath) {
++//            int newCompactionPlace = i - 1;
++//            compactedList << m_list.mid(oldCompactionPlace, newCompactionPlace - oldCompactionPlace);
++//            LanguageMerger merger;
++//            merger.merge(m_list.at(i - 1).language());
++//            do {
++//                merger.merge(m_list.at(i).language());
++//                if (++i == m_list.length())
++//                    break;
++//                newPath = m_list.at(i).path();
++//            } while (newPath == oldPath);
++//            oldCompactionPlace = i;
++//            compactedList << PathAndLanguage(oldPath, merger.mergedLanguage());
++//            if (merger.restrictFailed())
++//                restrictFailed = true;
++//        }
++//        oldPath = newPath;
++//    }
++//    if (oldCompactionPlace == 0)
++//        return;
++//    compactedList << m_list.mid(oldCompactionPlace);
++//    if (restrictFailed)
++//        qCWarning(qmljsLog) << "failed to restrict PathAndLanguages " << m_list;
++//    m_list = compactedList;
++//}
+ 
+ void LanguageMerger::merge(Dialect l)
+ {
+--- ../source/qmljs/qmljsinterpreter.cpp	Mon Oct 17 20:46:00 2016
++++ qmljsinterpreter.cpp	Sun Nov  6 21:20:45 2016
+@@ -25,19 +25,14 @@
+ 
+ #include "parser/qmljsast_p.h"
+ #include "qmljsconstants.h"
+-#include "qmljscontext.h"
+-#include "qmljsevaluate.h"
+ #include "qmljsinterpreter.h"
+-#include "qmljsmodelmanagerinterface.h"
+-#include "qmljsscopeastpath.h"
+-#include "qmljsscopebuilder.h"
+-#include "qmljsscopechain.h"
+ #include "qmljstypedescriptionreader.h"
+ #include "qmljsvalueowner.h"
++#include "qmljsdocument.h"
+ 
+ #include <utils/qtcassert.h>
+ 
+-#include <QApplication>
++//#include <QApplication>
+ #include <QDir>
+ #include <QFile>
+ #include <QString>
+@@ -1028,13 +1023,13 @@
+     return _prototype;
+ }
+ 
+-const ObjectValue *ObjectValue::prototype(const Context *context) const
++const ObjectValue *ObjectValue::prototype(const Context *) const
+ {
+     const ObjectValue *prototypeObject = value_cast<ObjectValue>(_prototype);
+-    if (! prototypeObject) {
+-        if (const Reference *prototypeReference = value_cast<Reference>(_prototype))
+-            prototypeObject = value_cast<ObjectValue>(context->lookupReference(prototypeReference));
+-    }
++//    if (! prototypeObject) {
++//        if (const Reference *prototypeReference = value_cast<Reference>(_prototype))
++//            prototypeObject = value_cast<ObjectValue>(context->lookupReference(prototypeReference));
++//    }
+     return prototypeObject;
+ }
+ 
+@@ -1166,8 +1161,8 @@
+         return false;
+ 
+     m_next = value_cast<ObjectValue>(proto);
+-    if (! m_next)
+-        m_next = value_cast<ObjectValue>(m_context->lookupReference(proto));
++//    if (! m_next)
++//        m_next = value_cast<ObjectValue>(m_context->lookupReference(proto));
+     if (!m_next) {
+         m_error = ReferenceResolutionError;
+         return false;
+@@ -1948,19 +1943,19 @@
+     return m_ast;
+ }
+ 
+-const Value *ASTVariableReference::value(ReferenceContext *referenceContext) const
++const Value *ASTVariableReference::value(ReferenceContext *) const
+ {
+     // may be assigned to later
+-    if (!m_ast->expression)
++//    if (!m_ast->expression)
+         return valueOwner()->unknownValue();
+ 
+-    Document::Ptr doc = m_doc->ptr();
+-    ScopeChain scopeChain(doc, referenceContext->context());
+-    ScopeBuilder builder(&scopeChain);
+-    builder.push(ScopeAstPath(doc)(m_ast->expression->firstSourceLocation().begin()));
++//    Document::Ptr doc = m_doc->ptr();
++//    ScopeChain scopeChain(doc, referenceContext->context());
++//    ScopeBuilder builder(&scopeChain);
++//    builder.push(ScopeAstPath(doc)(m_ast->expression->firstSourceLocation().begin()));
+ 
+-    Evaluate evaluator(&scopeChain, referenceContext);
+-    return evaluator(m_ast->expression);
++//    Evaluate evaluator(&scopeChain, referenceContext);
++//    return evaluator(m_ast->expression);
+ }
+ 
+ bool ASTVariableReference::getSourceLocation(QString *fileName, int *line, int *column) const
+@@ -2084,9 +2079,10 @@
+     return m_doc;
+ }
+ 
+-const Value *QmlPrototypeReference::value(ReferenceContext *referenceContext) const
++const Value *QmlPrototypeReference::value(ReferenceContext *) const
+ {
+-    return referenceContext->context()->lookupType(m_doc, m_qmlTypeName);
++    return 0;
++//    return referenceContext->context()->lookupType(m_doc, m_qmlTypeName);
+ }
+ 
+ ASTPropertyReference::ASTPropertyReference(UiPublicMember *ast, const Document *doc, ValueOwner *valueOwner)
+@@ -2114,27 +2110,27 @@
+     return true;
+ }
+ 
+-const Value *ASTPropertyReference::value(ReferenceContext *referenceContext) const
++const Value *ASTPropertyReference::value(ReferenceContext *) const
+ {
+-    if (m_ast->statement
+-            && (m_ast->memberType.isEmpty()
+-                || m_ast->memberType == QLatin1String("variant")
+-                || m_ast->memberType == QLatin1String("var")
+-                || m_ast->memberType == QLatin1String("alias"))) {
+-
+-        // Adjust the context for the current location - expensive!
+-        // ### Improve efficiency by caching the 'use chain' constructed in ScopeBuilder.
+-
+-        Document::Ptr doc = m_doc->ptr();
+-        ScopeChain scopeChain(doc, referenceContext->context());
+-        ScopeBuilder builder(&scopeChain);
+-
+-        int offset = m_ast->statement->firstSourceLocation().begin();
+-        builder.push(ScopeAstPath(doc)(offset));
+-
+-        Evaluate evaluator(&scopeChain, referenceContext);
+-        return evaluator(m_ast->statement);
+-    }
++//    if (m_ast->statement
++//            && (m_ast->memberType.isEmpty()
++//                || m_ast->memberType == QLatin1String("variant")
++//                || m_ast->memberType == QLatin1String("var")
++//                || m_ast->memberType == QLatin1String("alias"))) {
++
++//        // Adjust the context for the current location - expensive!
++//        // ### Improve efficiency by caching the 'use chain' constructed in ScopeBuilder.
++
++//        Document::Ptr doc = m_doc->ptr();
++//        ScopeChain scopeChain(doc, referenceContext->context());
++//        ScopeBuilder builder(&scopeChain);
++
++//        int offset = m_ast->statement->firstSourceLocation().begin();
++//        builder.push(ScopeAstPath(doc)(offset));
++
++//        Evaluate evaluator(&scopeChain, referenceContext);
++//        return evaluator(m_ast->statement);
++//    }
+ 
+     const QString memberType = m_ast->memberType.toString();
+ 
+@@ -2142,13 +2138,14 @@
+     if (!builtin->asUndefinedValue())
+         return builtin;
+ 
+-    if (m_ast->typeModifier.isEmpty()) {
+-        const Value *type = referenceContext->context()->lookupType(m_doc, QStringList(memberType));
+-        if (type)
+-            return type;
+-    }
++    return 0;
++//    if (m_ast->typeModifier.isEmpty()) {
++//        const Value *type = referenceContext->context()->lookupType(m_doc, QStringList(memberType));
++//        if (type)
++//            return type;
++//    }
+ 
+-    return referenceContext->context()->valueOwner()->undefinedValue();
++//    return referenceContext->context()->valueOwner()->undefinedValue();
+ }
+ 
+ ASTSignal::ASTSignal(UiPublicMember *ast, const Document *doc, ValueOwner *valueOwner)
+@@ -2254,10 +2251,10 @@
+         info.m_type = ImportType::Directory;
+     } else if (path.startsWith(QLatin1String("qrc:"))) {
+         info.m_path = path;
+-        if (ModelManagerInterface::instance()->filesAtQrcPath(info.path()).isEmpty())
+-            info.m_type = ImportType::QrcDirectory;
+-        else
+-            info.m_type = ImportType::QrcFile;
++//        if (ModelManagerInterface::instance()->filesAtQrcPath(info.path()).isEmpty())
++//            info.m_type = ImportType::QrcDirectory;
++//        else
++//            info.m_type = ImportType::QrcFile;
+     } else {
+         info.m_type = ImportType::UnknownFile;
+     }
+--- ../source/qmljs/qmljsqrcparser.cpp	Mon Oct 17 20:46:00 2016
++++ qmljsqrcparser.cpp	Sun Nov  6 22:08:28 2016
+@@ -483,8 +483,9 @@
+         }
+     }
+     QrcParser::Ptr newParser = QrcParser::parseQrcFile(path);
+-    if (!newParser->isValid())
+-        qCWarning(qmljsLog) << "adding invalid qrc " << path << " to the cache:" << newParser->errorMessages();
++//    if (!newParser->isValid())
++
++//        qCWarning(qmljsLog) << "adding invalid qrc " << path << " to the cache:" << newParser->errorMessages();
+     {
+         QMutexLocker l(&m_mutex);
+         QPair<QrcParser::Ptr,int> currentValue = m_cache.value(path, qMakePair(QrcParser::Ptr(0), 0));

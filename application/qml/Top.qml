@@ -16,8 +16,6 @@
 
 import QtQuick 2.3
 
-// selected().
-
 Rectangle {
     id : container
     width: 100
@@ -33,8 +31,9 @@ Rectangle {
     signal messageYes()
     signal messageNo()
 
-    signal newFile()
+    signal newProject()
     signal openFile()
+    signal openProject()
     signal saveFile()
 
     signal toggleLogWindow()
@@ -86,7 +85,7 @@ Rectangle {
             id : newMArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: container.newFile()
+            onClicked: container.newProject()
         }
     }
 
@@ -134,7 +133,7 @@ Rectangle {
         }
     }
 
-    // Open
+    // Open File
 
     Rectangle{
         anchors.left: parent.left
@@ -166,11 +165,44 @@ Rectangle {
         }
     }
 
+
+    // Open Project
+
+    Rectangle{
+        anchors.left: parent.left
+        anchors.leftMargin: 280
+        color : "#091f2e"
+        border.width: 1
+        border.color: "#0f2636"
+        height : openProjectMArea.containsMouse ? parent.height : parent.height - 5
+        width : 35
+        Image{
+            id : openProjectImage
+            anchors.centerIn: parent
+            source : "qrc:/images/open-directory.png"
+        }
+        Rectangle{
+            color : "#0f2636"
+            width : parent.width
+            height : 3
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            visible : openProjectMArea.containsMouse
+        }
+        Behavior on height{ NumberAnimation{  duration: 100 } }
+        MouseArea{
+            id : openProjectMArea
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: container.openProject()
+        }
+    }
+
     // Log Window
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 320
+        anchors.leftMargin: 360
         color : "#091f2e"
         border.width: 1
         border.color: "#0f2636"
@@ -216,7 +248,7 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 385
+        anchors.leftMargin: 425
         color : "#091f2e"
         border.width: 1
         border.color: "#0f2636"
@@ -247,7 +279,7 @@ Rectangle {
     }
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 425
+        anchors.leftMargin: 465
         color : "#091f2e"
         border.width: 1
         border.color: "#0f2636"
