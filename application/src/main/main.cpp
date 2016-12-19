@@ -34,5 +34,7 @@ int main(int argc, char *argv[]){
     livecv.loadLibrary(livecv.dir() + "/lcvlib");
     livecv.loadQml(QUrl(QStringLiteral("qrc:/main.qml")));
 
+
+
     return app.exec();
 }

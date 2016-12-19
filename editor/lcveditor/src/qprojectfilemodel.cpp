@@ -238,8 +238,6 @@ void QProjectFileModel::renameEntry(QProjectEntry *item, const QString &newName)
             return;
         }
 
-        QProject* p = qobject_cast<QProject*>(QObject::parent());
-
         if ( item->isFile() ){
             QFile f(item->path());
             if ( !f.rename(newName) ){

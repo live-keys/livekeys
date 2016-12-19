@@ -3,6 +3,8 @@
 #include <qqml.h>
 
 #include "qtestrunner.h"
+#include "qplugintypestest.h"
+#include "qdocumentqmlparsertest.h"
 
 int main(int argc, char *argv[]){
 

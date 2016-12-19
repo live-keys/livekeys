@@ -27,6 +27,7 @@
 #include "qprojectnavigationmodel.h"
 #include "qprojectdocumentmodel.h"
 #include "qprojectdocument.h"
+#include "qlivecvengine.h"
 
 #include "qdocumentqmlhandler.h"
 #include "qdocumentqmlinfo.h"
@@ -39,7 +40,7 @@
 #include <QGuiApplication>
 
 QLiveCV::QLiveCV(int argc, const char* const argv[])
-    : m_engine(new QQmlApplicationEngine)
+    : m_engine(new QLiveCVEngine(new QQmlApplicationEngine))
     , m_document(new QCodeDocument)
     , m_codeInterface(0)
     , m_dir(QGuiApplication::applicationDirPath())
@@ -54,7 +55,7 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
         argv
     );
 
-    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(m_engine, m_project->lockedFileIO());
+    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(m_engine->engine(), m_project->lockedFileIO());
     m_codeInterface = new lcv::QDocumentCodeInterface(qmlHandler);
     QObject::connect(
         m_project, SIGNAL(inFocusChanged(QProjectDocument*)),
@@ -99,13 +100,13 @@ QLiveCV::~QLiveCV(){
 }
 
 void QLiveCV::solveImportPaths(){
-    QStringList importPaths = m_engine->importPathList();
-    m_engine->setImportPathList(QStringList());
+    QStringList importPaths = m_engine->engine()->importPathList();
+    m_engine->engine()->setImportPathList(QStringList());
     for ( QStringList::iterator it = importPaths.begin(); it != importPaths.end(); ++it ){
         if ( *it != dir() )
-            m_engine->addImportPath(*it);
+            m_engine->engine()->addImportPath(*it);
     }
-    m_engine->addImportPath(dir() + "/plugins");
+    m_engine->engine()->addImportPath(dir() + "/plugins");
 }
 
 void QLiveCV::loadLibrary(const QString &library){
@@ -114,18 +115,19 @@ void QLiveCV::loadLibrary(const QString &library){
 }
 
 void QLiveCV::loadQml(const QUrl &url){
-    m_engine->rootContext()->setContextProperty("project", m_project);
-    m_engine->rootContext()->setContextProperty("codeDocument", m_document);
-    m_engine->rootContext()->setContextProperty("codeHandler", m_codeInterface);
-    m_engine->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
-    m_engine->rootContext()->setContextProperty("arguments", m_arguments);
+    m_engine->engine()->rootContext()->setContextProperty("project", m_project);
+    m_engine->engine()->rootContext()->setContextProperty("codeDocument", m_document);
+    m_engine->engine()->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
+    m_engine->engine()->rootContext()->setContextProperty("arguments", m_arguments);
+    m_engine->engine()->rootContext()->setContextProperty("engine", m_engine);
+    m_engine->engine()->rootContext()->setContextProperty("codeHandler", m_codeInterface);
 #ifdef Q_OS_LINUX
-    m_engine->rootContext()->setContextProperty("isLinux", true);
+    m_engine->engine()->rootContext()->setContextProperty("isLinux", true);
 #else
-    m_engine->rootContext()->setContextProperty("isLinux", false);
+    m_engine->engine()->rootContext()->setContextProperty("isLinux", false);
 #endif
 
-    m_engine->load(url);
+    static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);
 }
 
 void QLiveCV::registerTypes(){
@@ -149,4 +151,9 @@ void QLiveCV::registerTypes(){
         "Cv", 1, 0, "ProjectFile", "ProjectFile objects are managed by the ProjectFileModel.");
     qmlRegisterUncreatableType<lcv::QProjectDocument>(
         "Cv", 1, 0, "ProjectDocument", "ProjectDocument objects are managed by the Project class.");
+
+    qmlRegisterUncreatableType<QLiveCVEngine>(
+        "Cv", 1, 0, "LiveEngine", "LiveEngine is available through engine property."
+    );
 }
+

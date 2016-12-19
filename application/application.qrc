@@ -34,5 +34,7 @@
         <file alias="project-file.png">images/project-file.png</file>
         <file alias="project-file-active.png">images/project-file-active.png</file>
         <file alias="project-file-unsaved.png">images/project-file-unsaved.png</file>
+        <file alias="open-directory.png">images/open-directory.png</file>
+        <file alias="toggle-navigation.png">images/toggle-navigation.png</file>
     </qresource>
 </RCC>

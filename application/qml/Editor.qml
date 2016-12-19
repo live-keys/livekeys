@@ -56,16 +56,17 @@ Rectangle{
         color : "#000"
         gradient: Gradient{
             GradientStop { position: 0.0;  color: "#08141f" }
-            GradientStop { position: 0.30; color: "#071723" }
+            GradientStop { position: 0.30; color: "#081926" }
         }
 
         Text{
-            anchors.fill: parent
-            anchors.margins: 10
-            color: "#883322"
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 15
+            color: "#7b838b"
             text: project.inFocus ? project.inFocus.file.name + (project.inFocus.file.isDirty ? '*' : '') : ''
             font.family: "Open Sans, sans-serif"
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.weight: Font.Light
         }
 
@@ -74,19 +75,40 @@ Rectangle{
             width: 30
             height: parent.height
             anchors.right: parent.right
-            anchors.rightMargin: 30
+            anchors.rightMargin: 35
             visible : project.inFocus !== null
             Text{
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 16
                 font.weight: Font.Light
                 text: 'x'
-                color: "#aaa"
+                color: "#7b838b"
                 anchors.centerIn: parent
             }
             MouseArea{
                 anchors.fill: parent
                 onClicked: editor.closeFocusedFile()
+            }
+        }
+
+        Rectangle{
+            anchors.right: parent.right
+            width: 30
+            height: parent.height
+            gradient: Gradient{
+                GradientStop { position: 0.0;  color: "#08141f" }
+                GradientStop { position: 0.30; color: "#061c2d" }
+            }
+
+            Image{
+                id : openProjectImage
+                anchors.centerIn: parent
+                source : "qrc:/images/toggle-navigation.png"
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: editor.toggleNavigation()
             }
         }
     }
@@ -308,6 +330,7 @@ Rectangle{
 
             fontFamily: editorArea.font.family
             fontSize: editorArea.font.pixelSize
+            smallFontSize: editorArea.font.pixelSize - 2
             visible: codeHandler.completionModel.isEnabled && suggestionCount > 0
             opacity: visible ? 0.95 : 0
 

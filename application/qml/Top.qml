@@ -179,7 +179,7 @@ Rectangle {
         Image{
             id : openProjectImage
             anchors.centerIn: parent
-            source : "qrc:/images/open.png"
+            source : "qrc:/images/open-directory.png"
         }
         Rectangle{
             color : "#0f2636"

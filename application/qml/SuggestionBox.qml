@@ -8,13 +8,13 @@ Rectangle{
 
     width: 250
     height: 280
-    color: "#111"
+    color: "#071119"
     opacity: 0.95
 
     property alias suggestionCount : pluginList.count
     property alias model : pluginList.model
     property string fontFamily: 'Courier New, Courier'
-    property int fontSize: 11
+    property int fontSize: 12
     property int smallFontSize: 9
 
     function getCompletion(){
@@ -108,7 +108,7 @@ Rectangle{
 
                     width : pluginList.width
                     height : 25
-                    color : ListView.isCurrentItem ? "#444" : "transparent"
+                    color : ListView.isCurrentItem ? "#11222e" : "transparent"
                     Text{
                         id: label
                         anchors.left: parent.left
@@ -122,16 +122,28 @@ Rectangle{
                         text: model.label
                     }
                     Text{
-                        id: category
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
+                        id: info
+                        anchors.left: label.right
+                        anchors.leftMargin: 10
                         anchors.verticalCenter: parent.verticalCenter
 
                         font.family: root.fontFamily
                         font.pixelSize: root.smallFontSize
 
-                        color: "#666688"
-                        text: model.info + "|" + model.category
+                        color: "#173e5f"
+                        text: model.info
+                    }
+                    Text{
+                        id: categoryt
+                        anchors.right: parent.right
+                        anchors.rightMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        font.family: root.fontFamily
+                        font.pixelSize: root.smallFontSize - 1
+
+                        color: "#8f772e"
+                        text: model.category
                     }
 
                     MouseArea{
