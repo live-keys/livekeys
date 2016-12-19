@@ -35,7 +35,7 @@ QElapsedTimer timer;
   \code
   ImRead{
       id : src
-      file : codeDocument.path + 'sample.jpg'
+      file : project.path + '/sample.jpg'
       Component.onCompleted : {
            var outputdata = output.data()
            var rows       = outputdata.rows()
