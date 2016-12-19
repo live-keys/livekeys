@@ -5,9 +5,8 @@ import Cv 1.0
 
 Rectangle{
     id: root
-    color: "#000"
     visible: false
-    opacity: 0.7
+    color: "transparent"
 
     onVisibleChanged: {
         if ( visible ){
@@ -31,41 +30,28 @@ Rectangle{
         visible = false
     }
 
-    MouseArea{
-        anchors.fill: parent
-        onClicked: {
-            root.cancel()
-            root.visible = false
-            mouse.accepted = true;
-        }
-        onPressed: mouse.accepted = true;
-        onReleased: mouse.accepted = true
-        onDoubleClicked: mouse.accepted = true;
-        onPositionChanged: mouse.accepted = true;
-        onPressAndHold: mouse.accepted = true;
-        onWheel: wheel.accepted = true
-    }
 
     Rectangle{
         id: navigationInputBox
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.right: parent.right
+        width: parent.width - 30
 
-        color: "#333"
-        height: 36
+        color: "#0b1c29"
+        height: 30
 
-        border.color: "#666"
+        border.color: "#12202c"
         border.width: 1
 
         TextInput{
             id : navigationInput
-            anchors.fill: parent
-            anchors.margins: 10
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 16
 
-            color : "#fff"
+            color : "#afafaf"
             font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.weight: Font.Light
 
             selectByMouse: true
@@ -110,6 +96,29 @@ Rectangle{
                 root.cancel()
                 event.accepted = true
             }
+        }
+    }
+
+    Rectangle{
+        anchors.fill: parent
+        anchors.topMargin: 30
+        color: "#091016"
+        opacity: root.visible ? 0.92 : 0
+        Behavior on opacity{ NumberAnimation{ duration: 250} }
+
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                root.cancel()
+                root.visible = false
+                mouse.accepted = true;
+            }
+            onPressed: mouse.accepted = true;
+            onReleased: mouse.accepted = true
+            onDoubleClicked: mouse.accepted = true;
+            onPositionChanged: mouse.accepted = true;
+            onPressAndHold: mouse.accepted = true;
+            onWheel: wheel.accepted = true
         }
     }
 
@@ -193,28 +202,43 @@ Rectangle{
 
                 property string path: model.path
 
-                color: ListView.isCurrentItem ? "#224422" : "#332222"
+                color: ListView.isCurrentItem ? "#152432" : "#0d1923"
                 width: root.width
                 height: documentView.delegateHeight
                 Text{
+                    anchors.left: parent.left
+                    anchors.leftMargin: 20
                     text: model.name
-                    color: "#fff"
+                    color: "#ebebeb"
 
                     font.family: "Open Sans, sans-serif"
-                    font.pixelSize: 13
+                    font.pixelSize: 12
                     font.weight: model.isOpen ? Font.Bold : Font.Light
                 }
                 Text{
+                    anchors.left: parent.left
+                    anchors.leftMargin: 20
                     anchors.top: parent.top
                     anchors.topMargin: 20
 
                     text: model.path
-                    color: "#aaa"
+                    color: "#aaa5a5"
 
                     font.family: "Open Sans, sans-serif"
-                    font.pixelSize: 13
+                    font.pixelSize: 12
                     font.weight: Font.Light
                 }
+                Text{
+                    text: 'x'
+                    anchors.right: parent.right
+                    anchors.rightMargin: 16
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: "#acabab"
+                    font.family: "Source Code Pro, sans-serif"
+                    font.pixelSize: 16
+                    font.weight: Font.Light
+                }
+
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {

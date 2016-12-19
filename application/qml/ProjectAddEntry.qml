@@ -47,40 +47,52 @@ Rectangle{
 
     Rectangle{
         anchors.fill: parent
-        color: "#000"
-        opacity: root.visible ? 0.7 : 0
+        color: "#091016"
+        opacity: root.visible ? 0.92 : 0
         Behavior on opacity{ NumberAnimation{ duration: 250} }
     }
 
     Rectangle{
-        width: parent.width
-        height: 60
-        color:"#555"
+        clip: true
+        width: parent.width > 570 ? 570 : parent.width - 10
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 80
+        color:"#081621"
+        border.width: 1
+        border.color: "#0a1a26"
 
         opacity: root.visible ? 1 : 0
         Behavior on opacity{ NumberAnimation{ duration: 250} }
 
         Text{
+            anchors.top: parent.top
+            anchors.topMargin: 14
             anchors.left: parent.left
-            width: parent.width
+            anchors.leftMargin: 14
             text: 'Add ' + (root.isFile ? 'file' : 'directory') + ' in ' + (root.entry ? root.entry.path : '')
             font.family: 'Open Sans, Arial, sans-serif'
             font.pixelSize: 12
             font.weight: Font.Light
+            color: "#afafaf"
         }
         Rectangle{
             anchors.bottom: parent.bottom
-            width: parent.width
-            height: 30
-            color: "#333"
+            anchors.bottomMargin: 10
+            anchors.left: parent.left
+            anchors.leftMargin: 14
+            width: parent.width - 28
+            height: 28
+            color: "#0c1d2a"
+            border.width: 1
+            border.color: "#071520"
 
             TextInput{
                 id: addEntryInput
                 anchors.left: parent.left
-                anchors.leftMargin: 25
+                anchors.leftMargin: 10
                 anchors.right: parent.right
-                anchors.rightMargin: 25
-                anchors.top: parent.top
+                anchors.rightMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
                 color: '#aaa'
                 text: ''
                 font.family: 'Open Sans, Arial, sans-serif'

@@ -32,6 +32,7 @@
 
 class QGuiApplication;
 class QQmlApplicationEngine;
+class QLiveCVEngine;
 class QCodeDocument;
 class QUrl;
 class QLiveCVArguments;
@@ -69,7 +70,7 @@ private:
     void parseArguments(const QStringList& arguments);
     void solveImportPaths();
 
-    QQmlApplicationEngine* m_engine;
+    QLiveCVEngine* m_engine;
     QLiveCVArguments* m_arguments;
 
     QCodeDocument* m_document;
