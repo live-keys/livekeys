@@ -11,6 +11,8 @@ class QQmlError;
 class QQmlIncubator;
 class QLiveCVIncubationController;
 
+namespace lcv{
+
 class QLiveCVEngine : public QObject{
 
     Q_OBJECT
@@ -65,5 +67,7 @@ inline void QLiveCVEngine::setIsLoading(bool isLoading){
 inline QQmlEngine*QLiveCVEngine::engine(){
     return m_engine;
 }
+
+}// namespace
 
 #endif // QLIVECVENGINE_H

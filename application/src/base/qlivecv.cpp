@@ -18,6 +18,7 @@
 #include "qlivecvlog.h"
 #include "qcodedocument.h"
 #include "qlivecvarguments.h"
+#include "qlivecvmain.h"
 
 #include "qdocumentcodeinterface.h"
 #include "qproject.h"
@@ -38,6 +39,8 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QGuiApplication>
+
+namespace lcv{
 
 QLiveCV::QLiveCV(int argc, const char* const argv[])
     : m_engine(new QLiveCVEngine(new QQmlApplicationEngine))
@@ -85,9 +88,12 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
             if ( !mfile.isEmpty() ){
                 QFileInfo mfileInfo(mfile);
                 if ( mfileInfo.isRelative() ){
-                    m_project->openFile(QDir::cleanPath(m_project->path() + QDir::separator() + mfile), true);
+                    m_project->openFile(
+                        QDir::cleanPath(m_project->path() + QDir::separator() + mfile),
+                        QProjectDocument::Monitor
+                    );
                 } else {
-                    m_project->openFile(mfile, true);
+                    m_project->openFile(mfile, QProjectDocument::Monitor);
                 }
             }
         }
@@ -118,7 +124,7 @@ void QLiveCV::loadQml(const QUrl &url){
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("codeDocument", m_document);
     m_engine->engine()->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
-    m_engine->engine()->rootContext()->setContextProperty("arguments", m_arguments);
+    m_engine->engine()->rootContext()->setContextProperty("args", m_arguments);
     m_engine->engine()->rootContext()->setContextProperty("engine", m_engine);
     m_engine->engine()->rootContext()->setContextProperty("codeHandler", m_codeInterface);
 #ifdef Q_OS_LINUX
@@ -152,8 +158,13 @@ void QLiveCV::registerTypes(){
     qmlRegisterUncreatableType<lcv::QProjectDocument>(
         "Cv", 1, 0, "ProjectDocument", "ProjectDocument objects are managed by the Project class.");
 
-    qmlRegisterUncreatableType<QLiveCVEngine>(
-        "Cv", 1, 0, "LiveEngine", "LiveEngine is available through engine property."
+    qmlRegisterUncreatableType<lcv::QLiveCVEngine>(
+        "live", 1, 0, "LiveEngine", "LiveEngine is available through engine property."
     );
+    qmlRegisterUncreatableType<lcv::QLiveCVArguments>(
+        "live", 1, 0, "LiveArguments", "LiveArguments is available through the arguments property."
+    );
+    qmlRegisterType<lcv::QLiveCVMain>("live", 1, 0, "Main");
 }
 
+}// namespace
