@@ -51,12 +51,26 @@ QDocumentQmlScope::Ptr QDocumentQmlScope::createScope(
         const QString &data,
         QProjectQmlScope::Ptr projectScope)
 {
-    QDocumentQmlInfo::MutablePtr documentInfo = QDocumentQmlInfo::create(fileName);
+    QDocumentQmlInfo::MutablePtr documentInfo = QDocumentQmlInfo::create(fileName.isEmpty() ? "untitled.qml" : fileName);
     documentInfo->parse(data);
     documentInfo->createRanges();
 
     QDocumentQmlScope::Ptr documentScope(new QDocumentQmlScope(projectScope, documentInfo));
     projectScope->addImplicitLibrary(documentInfo->path());
+
+
+    {
+    QList<QString> paths;
+    projectScope->findQmlLibraryInImports("QtQml", 2, 2, paths);
+    foreach (const QString& path, paths )
+        documentScope->addImport(Import(
+            QDocumentQmlScope::Import::Library,
+            path,
+            "",
+            2,
+            2
+        ), path);
+    }
 
     QList<QDocumentQmlScope::Import> imports = extractImports(documentInfo);
     foreach( QDocumentQmlScope::Import import, imports ){

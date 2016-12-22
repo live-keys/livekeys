@@ -128,8 +128,6 @@ QProjectEntry *QProjectFileModel::findPathInEntry(QProjectEntry *entry, const QS
             if ( entry->lastCheckTime().isNull() )
                 expandEntry(entry);
 
-
-
             foreach( QObject* obj, entry->children() ){
                 QProjectEntry* currentEntry = qobject_cast<QProjectEntry*>(obj);
                 if( currentEntry ){
@@ -150,6 +148,7 @@ void QProjectFileModel::openProject(const QString &path){
     QFileInfo pathInfo(path);
     if ( !pathInfo.exists() ){
         endResetModel();
+        emit error("Project path does not exist: " + path);
         return;
     }
 
@@ -273,6 +272,8 @@ QProjectFile *QProjectFileModel::addFile(QProjectEntry *parentEntry, const QStri
         emit error("Failed to create file: " + parentEntry->path() + "/" + name);
         return 0;
     }
+    if ( file.fileName().endsWith(".qml") )
+        file.write("import QtQuick 2.3\n\nItem{\n}");
     file.close();
 
     QProjectFile* fileEntry = new QProjectFile(parentEntry->path(), name, 0);

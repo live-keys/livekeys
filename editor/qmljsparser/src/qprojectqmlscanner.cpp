@@ -19,8 +19,10 @@
 #include <QDirIterator>
 #include <QQmlEngine>
 
+#include "qplugintypesfacade.h"
 
-//#define QDOCUMENT_QML_SCANNER_DEBUG_FLAG
+
+#define QDOCUMENT_QML_SCANNER_DEBUG_FLAG
 #ifdef QDOCUMENT_QML_SCANNER_DEBUG_FLAG
 #define QDOCUMENT_QML_SCANNER_DEBUG(_param) qDebug() << "QML SCANNER:" << (_param)
 #else
@@ -108,7 +110,7 @@ void scanPathForQmlExports(
         bool dependencyLoop = false;
         foreach( const QString& path, paths ){
             QQmlLibraryInfo::Ptr linfo = projectScope->globalLibraries()->libraryInfo(path);
-            if ( linfo->data().pluginTypeInfoStatus() == QmlJS::LibraryInfo::NoTypeInfo ){
+            if ( linfo->data().pluginTypeInfoStatus() != QmlJS::LibraryInfo::DumpDone){
                 librariesDumped = false;
                 foreach( const QString& dependency, linfo->dependencyPaths() ){
                     if ( dependency == path )
@@ -127,6 +129,7 @@ void scanPathForQmlExports(
         } else {
             if ( librariesDumped || dependencyLoop ){ /// avoid dependency loop, simply add the object as is
                 objects.append(fmo);
+                QDOCUMENT_QML_SCANNER_DEBUG("Dependency loop detected in: " + info.filePath());
             } else { /// try again when more libraries are populated
                 return;
             }
@@ -139,7 +142,7 @@ void scanPathForQmlExports(
     library->updateExports();
 }
 
-QQmlLibraryInfo::Ptr updateLibrary(
+QMap<QString, QQmlLibraryInfo::Ptr> updateLibrary(
         QProjectQmlScope::Ptr projectScope,
         QLockedFileIOSession::Ptr lockedFileIO,
         const QString& path,
@@ -147,7 +150,10 @@ QQmlLibraryInfo::Ptr updateLibrary(
         QList<QQmlLibraryDependency>& dependencies)
 {
     QDOCUMENT_QML_SCANNER_DEBUG("Updating library: " + path);
-    QQmlLibraryInfo::Ptr base = QQmlLibraryInfo::create();
+    QMap<QString, QQmlLibraryInfo::Ptr> base;
+    QQmlLibraryInfo::Ptr baseLib = QQmlLibraryInfo::create();
+    base[path] = baseLib;
+
     LibraryInfoSnapshot snapshot;
 
     QList<QString> dependencyPaths;
@@ -155,12 +161,34 @@ QQmlLibraryInfo::Ptr updateLibrary(
     const QDir dir(path);
     QFile dirFile(dir.filePath("qmldir"));
     if( !dirFile.exists() ){
-        scanPathForQmlExports(projectScope, lockedFileIO, path, base);
+        scanPathForQmlExports(projectScope, lockedFileIO, path, baseLib);
         return base;
     }
 
     QmlDirParser dirParser;
     dirParser.parse(lockedFileIO->readFromFile(dir.filePath("qmldir")));
+
+    /// Check parent dependencies (some libraries do not have a plugins.qmlinfo file since their
+    /// parent modules cover their types. We must make sure the parent libraries are populated
+    /// before continuing).
+
+    QStringList namespaceSegments = dirParser.typeNamespace().split('.');
+    QString builtNamespace = "";
+    QStringList parentDependencies;
+    for ( int i = 0; i < namespaceSegments.size() - 1; ++i ){
+        builtNamespace += (builtNamespace.isEmpty() ? namespaceSegments[i] : ("." + namespaceSegments[i]));
+        projectScope->findQmlLibraryInImports(builtNamespace, 0, 0, parentDependencies);
+    }
+
+    foreach( const QString& parentDependency, parentDependencies){
+        QQmlLibraryInfo::Ptr parentLibInfo = projectScope->globalLibraries()->libraryInfo(parentDependency);
+
+        if (parentLibInfo->data().pluginTypeInfoStatus() != QmlJS::LibraryInfo::DumpDone ){
+            return base;
+        }
+    }
+
+    /// Add typeinfopaths
 
     QStringList typeInfoPaths;
 
@@ -175,14 +203,79 @@ QQmlLibraryInfo::Ptr updateLibrary(
             typeInfoPaths += fullPath;
     }
 
-    //
+    if ( typeInfoPaths.isEmpty() ){
+        if ( dirParser.plugins().size() == 0 ){
+            scanPathForQmlExports(projectScope, lockedFileIO, path, baseLib); //TODO, switch to qdirparser type
+            return base;
+        } else {
+//        //TODO: Block engine and create dump if necessary
 
-//    qDebug() << path << typeInfoPaths;
-//    foreach( const QmlDirParser::Component& com, dirParser.components() ){
-//        qDebug() << com.typeName << com.fileName << com.majorVersion << "." << com.minorVersion;
-//    }
+//            QHash<QByteArray, QSet<const QQmlType *> > qmlTypesByCppName;
+//            QList<const QQmlType*> nsTypes;
+//            QPluginTypesFacade::extractTypes(dirParser.typeNamespace(), 0, nsTypes, qmlTypesByCppName);
 
-    //TODO: Block engine and create dump if necessary
+//            if ( nsTypes.size() == 0 ){
+//                baseLib->data().setPluginTypeInfoStatus(QmlJS::LibraryInfo::TypeInfoFileError);
+//                return base;
+//            } else {
+//                QList<const QMetaObject*> unknownTypes;
+//                QStringList dependencies;
+
+//                QPluginTypesFacade::getTypeDependencies(
+//                    dirParser.typeNamespace(),
+//                    nsTypes,
+//                    qmlTypesByCppName,
+//                    unknownTypes,
+//                    dependencies
+//                );
+
+//                if ( unknownTypes.size() > 0 ){
+//                    QStringList dependencyPaths;
+//                    QStringList paths;
+//                    //TODO: Merge with qmldir dependencies
+//                    foreach( QString typeDependency, dependencies ){
+//                        projectScope->findQmlLibraryInImports(
+//                            typeDependency.replace(".", "/"),
+//                            2,
+//                            0,
+//                            paths
+//                        );
+//                        foreach( const QString& depPath, paths ){
+//                            if ( !dependencyPaths.contains(depPath) ){
+//                                dependencyPaths.append(depPath);
+//                            }
+//                        }
+//                    }
+
+//                    QList<QQmlLibraryInfo::Ptr> dependentLibraries;
+//                    foreach( const QString& path, paths ){
+//                        QQmlLibraryInfo::Ptr linfo = projectScope->globalLibraries()->libraryInfo(path);
+//                        if ( linfo->data().pluginTypeInfoStatus() != QmlJS::LibraryInfo::DumpDone){
+//                            return base; /// try again when more libraries are populated
+//                        }
+//                        dependentLibraries.append(linfo);
+//                    }
+
+
+//                    foreach( const QMetaObject* obj, unknownTypes ){
+//                        LanguageUtils::FakeMetaObject::ConstPtr fakeobj;
+//                        foreach ( QQmlLibraryInfo::Ptr deplib, dependentLibraries ){
+//                            fakeobj = deplib->findObjectByClassName(obj->className());
+//                            if ( !fakeobj.isNull() )
+//                                break;
+//                        }
+//                        if ( fakeobj.isNull() )
+//                            qDebug() << "WILL FIND:" << obj->className();
+//                    }
+
+//                }
+//            }
+        }
+
+
+
+    }
+
 
     foreach( const QString& typeInfoPath, typeInfoPaths ){
 
@@ -198,10 +291,6 @@ QQmlLibraryInfo::Ptr updateLibrary(
             qCritical("TypeInfo parse error: %s", qPrintable(reader.errorMessage()));
         }
 
-        foreach( LanguageUtils::FakeMetaObject::ConstPtr fmo, newObjects ){
-            snapshot.objects.append(fmo);
-        }
-
         foreach( const QString& dependency, snapshot.dependencies){
             QQmlLibraryDependency parsedDependency = QQmlLibraryDependency::parse(dependency);
             if ( parsedDependency.isValid() ){
@@ -215,15 +304,56 @@ QQmlLibraryInfo::Ptr updateLibrary(
                 dependencies << parsedDependency;
             }
         }
+
+        QMap<QString, QList<LanguageUtils::FakeMetaObject::ConstPtr> > newLibraries;
+        for ( QHash<QString, LanguageUtils::FakeMetaObject::ConstPtr>::iterator it = newObjects.begin();
+              it != newObjects.end();
+              ++it )
+        {
+            QString typeModule = "";
+            bool childModule = true;
+            if ( it.value()->exports().size() > 0){
+                foreach( LanguageUtils::FakeMetaObject::Export expt, it.value()->exports() ){
+
+                    if ( !expt.package.startsWith(dirParser.typeNamespace()) && expt.package != "<cpp>" ){
+                        childModule = false;
+                        typeModule = "";
+                    } else if ( expt.package.startsWith(dirParser.typeNamespace() ) && childModule ){
+                        typeModule = expt.package;
+                    } else if ( typeModule.isEmpty() && childModule ){
+                        typeModule = expt.package;
+                    }
+
+                }
+            } else {
+                typeModule = "<cpp>";
+            }
+
+            if ( !typeModule.isEmpty() ){
+                if ( typeModule == "<cpp>" || typeModule == dirParser.typeNamespace() ){
+                    snapshot.objects.append(it.value());
+                } else {
+                    newLibraries[typeModule].append(it.value());
+                }
+            }
+        }
+
+        for ( QMap<QString, QList<LanguageUtils::FakeMetaObject::ConstPtr> >::iterator it = newLibraries.begin();
+              it != newLibraries.end();
+              ++it )
+        {
+//            qDebug() << "      --- NEW LIBRARY:" << it.key();
+            //TODO: Add library
+        }
     }
 
-    base->setDependencies(dependencyPaths);
-    base->data().setDependencies(snapshot.dependencies);
-    base->data().setMetaObjects(snapshot.objects);
-    base->data().setModuleApis(snapshot.moduleApis);
-    base->data().setPluginTypeInfoStatus(QmlJS::LibraryInfo::DumpDone);
-    base->updateExports();
 
+    baseLib->setDependencies(dependencyPaths);
+    baseLib->data().setDependencies(snapshot.dependencies);
+    baseLib->data().setMetaObjects(snapshot.objects);
+    baseLib->data().setModuleApis(snapshot.moduleApis);
+    baseLib->data().setPluginTypeInfoStatus(QmlJS::LibraryInfo::DumpDone);
+    baseLib->updateExports();
 
     return base;
 }
@@ -289,6 +419,14 @@ void QProjectQmlScanner::scanDocumentScope(
 }
 
 void QProjectQmlScanner::scanProjectScope(){
+    scanProjectScopeRecurse();
+}
+
+void QProjectQmlScanner::scanProjectScopeRecurse(int limit){
+    if ( limit == 0 ){
+        qWarning("Warning: Project scanner loop reaching end of limit.");
+        return;
+    }
 
     QHash<QString, QQmlLibraryInfo::Ptr> implicitLibrariesSnapshot;
     QProjectQmlScopeContainer* implicitContainer = m_project->implicitLibraries();
@@ -317,16 +455,20 @@ void QProjectQmlScanner::scanProjectScope(){
 
         for( QHash<QString, QQmlLibraryInfo::Ptr>::const_iterator it = libraries.begin(); it != libraries.end(); ++it ){
             if ( !globalLibrariesSnapshot.contains(it.key()) ){
-                QQmlLibraryInfo::Ptr libinfo = projectqml_helpers::updateLibrary(
+                QMap<QString, QQmlLibraryInfo::Ptr> libinfos = projectqml_helpers::updateLibrary(
                     m_project,
                     m_lockedFileIO,
                     it.key(),
                     it.value()->data(),
                     dependencies
                 );
-                globalLibrariesSnapshot[it.key()] = libinfo;
-                if( libinfo->data().pluginTypeInfoStatus() == QmlJS::LibraryInfo::NoTypeInfo )
-                    unsolvedDependencies = true;
+
+                for ( QMap<QString, QQmlLibraryInfo::Ptr>::iterator liit = libinfos.begin(); liit != libinfos.end(); ++liit ){
+                    globalLibrariesSnapshot[liit.key()] = liit.value();
+                    if( liit.value()->data().pluginTypeInfoStatus() == QmlJS::LibraryInfo::NoTypeInfo )
+                        unsolvedDependencies = true;
+                }
+
                 reenter = true;
             }
         }
@@ -337,10 +479,10 @@ void QProjectQmlScanner::scanProjectScope(){
         globalContainer->assignLibraries(globalLibrariesSnapshot);
         emit projectScopeReady();
         if ( unsolvedDependencies )
-            scanProjectScope();
+            scanProjectScopeRecurse(--limit);
     } else if ( implicitLibrariesSnapshot.size() > 0 ){
         emit projectScopeReady();
     }
-
 }
+
 }// namespace
