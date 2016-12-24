@@ -35,6 +35,7 @@ void QLockedFileIOSession::releaseLock(const QString &path){
     m_locksMutex->lock();
     QFileLock* fl = m_locks.value(path, 0);
     if ( fl ){
+        fl->lock.unlock();
         if ( --(fl->refcount) <= 0 )
             delete m_locks.take(path);
     }
