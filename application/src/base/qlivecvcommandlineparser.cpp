@@ -1,6 +1,6 @@
 #include "qlivecvcommandlineparser.h"
 
-#include <QDebug>
+namespace lcv{
 
 class QLiveCVCommandLineParser::Option{
 
@@ -43,8 +43,11 @@ void QLiveCVCommandLineParser::assignName(const QString &name, QLiveCVCommandLin
 QLiveCVCommandLineParser::QLiveCVCommandLineParser(const QString &header)
     : m_header(header)
 {
-    m_helpOption =    addFlag(QStringList() << "-h" << "--help",    "Displays this information and exits.");
+    m_helpOption    = addFlag(QStringList() << "-h" << "--help",    "Displays this information and exits.");
     m_versionOption = addFlag(QStringList() << "-v" << "--version", "Displays version information and exits.");
+
+    m_scriptHelpOption    = addScriptFlag(QStringList() << "-h" << "--help",    "Displays this information and exits.");
+    m_scriptVersionOption = addScriptFlag(QStringList() << "-v" << "--version", "Displays version information and exits.");
 }
 
 QLiveCVCommandLineParser::~QLiveCVCommandLineParser(){
@@ -141,6 +144,17 @@ QString QLiveCVCommandLineParser::helpString() const{
 
 }
 
+void QLiveCVCommandLineParser::resetScriptOptions(){
+    for ( QList<QLiveCVCommandLineParser::Option*>::iterator it = m_scriptOptions.begin(); it != m_scriptOptions.end(); ++it ){
+        delete *it;
+    }
+    m_scriptOptions.clear();
+    m_scriptArguments.clear();
+
+    m_scriptHelpOption    = addScriptFlag(QStringList() << "-h" << "--help",    "Displays this information and exits.");
+    m_scriptVersionOption = addScriptFlag(QStringList() << "-v" << "--version", "Displays version information and exits.");
+}
+
 QLiveCVCommandLineParser::Option *QLiveCVCommandLineParser::addScriptFlag(const QStringList &names, const QString &description){
     if ( names.isEmpty() )
         throw QLiveCVCommandLineException("Setting up option requires at least one name.");
@@ -231,6 +245,32 @@ void QLiveCVCommandLineParser::parseScriptArguments(){
     }
 }
 
+QString QLiveCVCommandLineParser::scriptHelpString() const{
+    QString base("\n" + m_header + "\n\n" + "Usage:\n\n   livecv [...] script.qml [options] [args ...]\n\nScript options:\n\n");
+    for ( QList<QLiveCVCommandLineParser::Option*>::const_iterator it = m_scriptOptions.begin(); it != m_scriptOptions.end(); ++it ){
+        for ( QStringList::const_iterator nameIt = (*it)->shortNames.begin(); nameIt != (*it)->shortNames.end(); ++nameIt ){
+            base += QString("  ") + "-" + *nameIt + ((*it)->type != "" ? "<" + (*it)->type + ">" : "");
+        }
+        for ( QStringList::const_iterator nameIt = (*it)->longNames.begin(); nameIt != (*it)->longNames.end(); ++nameIt ){
+            base += QString("  ") + "--" + *nameIt + ((*it)->type != "" ? "<" + (*it)->type + ">" : "");
+        }
+        base += "\n";
+        base += "    " + (*it)->description + "\n\n";
+    }
+    return base;
+}
+
+QStringList QLiveCVCommandLineParser::optionNames(QLiveCVCommandLineParser::Option *option) const{
+    QStringList base;
+    for ( QStringList::const_iterator nameIt = option->shortNames.begin(); nameIt != option->shortNames.end(); ++nameIt ){
+        base << *nameIt;
+    }
+    for ( QStringList::const_iterator nameIt = option->longNames.begin(); nameIt != option->longNames.end(); ++nameIt ){
+        base << *nameIt;
+    }
+    return base;
+}
+
 bool QLiveCVCommandLineParser::isSet(QLiveCVCommandLineParser::Option *option) const{
     return option->isSet;
 }
@@ -244,6 +284,14 @@ void QLiveCVCommandLineParser::assertIsSet(QLiveCVCommandLineParser::Option *opt
         QString key = option->longNames.length() > 0 ? "--" + option->longNames.first() : "-" + option->shortNames.first();
         throw QLiveCVCommandLineException("Required option has not been set: " + key);
     }
+}
+
+QLiveCVCommandLineParser::Option* QLiveCVCommandLineParser::findScriptOptionByName(const QString &name){
+    if ( name.startsWith("--") )
+        return findOptionByLongName(name.mid(2), m_scriptOptions);
+    else if ( name.startsWith("-") )
+        return findOptionByShortName(name.mid(1), m_scriptOptions);
+    return 0;
 }
 
 void QLiveCVCommandLineParser::parse(int argc, const char * const argv[]){
@@ -293,3 +341,5 @@ void QLiveCVCommandLineParser::parse(int argc, const char * const argv[]){
         }
     }
 }
+
+}// namespace

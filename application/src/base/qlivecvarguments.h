@@ -3,11 +3,13 @@
 
 #include <QObject>
 
+namespace lcv{
+
 class QLiveCVCommandLineParser;
 class QLiveCVArguments : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(bool previewFlag READ previewFlag)
+    Q_PROPERTY(bool previewFlag READ previewFlag CONSTANT)
 
 public:
     explicit QLiveCVArguments(
@@ -22,9 +24,20 @@ public:
     bool consoleFlag() const;
     bool fileLogFlag() const;
 
+    bool helpFlag() const;
+    bool versionFlag() const;
+    QString helpString() const;
+
     const QStringList& monitoredFiles() const;
 
+    QLiveCVCommandLineParser* parser();
+
+public slots:
     const QString& script() const;
+    QString at(int number) const;
+    int length() const;
+    QString option(const QString& key) const;
+    bool isOptionSet(const QString& key) const;
 
 private:
     void initialize(int argc, const char* const argv[]);
@@ -57,8 +70,14 @@ inline const QStringList &QLiveCVArguments::monitoredFiles() const{
     return m_monitoredFiles;
 }
 
+inline QLiveCVCommandLineParser *QLiveCVArguments::parser(){
+    return m_parser;
+}
+
 inline const QString&QLiveCVArguments::script() const{
     return m_script;
 }
+
+}// namespace
 
 #endif // QLIVECVARGUMENTS_HPP

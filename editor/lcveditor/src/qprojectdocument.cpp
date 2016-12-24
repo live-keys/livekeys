@@ -15,7 +15,6 @@ QProjectDocument::QProjectDocument(QProjectFile *file, bool isMonitored, QProjec
     , m_file(file)
     , m_isMonitored(isMonitored)
 {
-    m_lastModified = QFileInfo(m_file->path()).lastModified();
     readContent();
 }
 
@@ -27,6 +26,7 @@ void QProjectDocument::dumpContent(const QString &content){
 void QProjectDocument::readContent(){
     if ( m_file->path() != "" ){
         m_content = parentAsProject()->lockedFileIO()->readFromFile(m_file->path());
+        m_lastModified = QFileInfo(m_file->path()).lastModified();
         emit contentChanged();
     }
 }

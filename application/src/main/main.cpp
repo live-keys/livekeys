@@ -19,8 +19,11 @@
 #include <QQmlContext>
 
 #include "qlivecv.h"
+#include "qlivecvarguments.h"
 
 #include <QLibrary>
+
+using namespace lcv;
 
 int main(int argc, char *argv[]){
 
@@ -31,6 +34,14 @@ int main(int argc, char *argv[]){
     QLiveCV::registerTypes();
 
     QLiveCV livecv(argc, argv);
+    if ( livecv.arguments()->helpFlag() ){
+        printf("%s", qPrintable(livecv.arguments()->helpString()));
+        return 0;
+    } else if ( livecv.arguments()->versionFlag() ){
+        printf("%s\n", qPrintable(livecv.versionString()));
+        return 0;
+    }
+
     livecv.loadLibrary(livecv.dir() + "/lcvlib");
     livecv.loadQml(QUrl(QStringLiteral("qrc:/main.qml")));
 

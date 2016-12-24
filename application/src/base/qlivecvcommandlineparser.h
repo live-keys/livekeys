@@ -5,6 +5,7 @@
 #include <QList>
 #include "qlivecvexception.h"
 
+namespace lcv{
 
 class QLiveCVCommandLineException : public QLiveCVException{
 public:
@@ -34,18 +35,28 @@ public:
 
     QString helpString() const;
 
+    Option* scriptHelpOption();
+    Option* scriptVersionOption();
+
+    void resetScriptOptions();
     Option* addScriptFlag(const QStringList& names, const QString& description);
     Option* addScriptFlag(const QString& name, const QString& description);
     Option* addScriptOption(const QStringList& names, const QString& description, const QString& type);
     Option* addScriptOption(const QString& name, const QString& description, const QString& type);
     void parseScriptArguments();
 
+    QString scriptHelpString() const;
+
     const QStringList& scriptArguments();
     const QStringList& scriptSentArguments();
+
+    QStringList optionNames(Option* option) const;
 
     bool isSet(Option* option) const;
     const QString& value(Option* option) const;
     void assertIsSet(Option* option) const;
+
+    Option *findScriptOptionByName(const QString& name);
 
 private:
     void assignName(const QString& name, Option* option, const QList<Option*>& check);
@@ -54,6 +65,9 @@ private:
 
     Option*        m_helpOption;
     Option*        m_versionOption;
+
+    Option*        m_scriptHelpOption;
+    Option*        m_scriptVersionOption;
 
     QList<Option*> m_options;
     QString        m_header;
@@ -84,5 +98,15 @@ inline const QStringList &QLiveCVCommandLineParser::scriptArguments(){
 inline const QStringList &QLiveCVCommandLineParser::scriptSentArguments(){
     return m_scriptSentArguments;
 }
+
+inline QLiveCVCommandLineParser::Option *QLiveCVCommandLineParser::scriptHelpOption(){
+    return m_scriptHelpOption;
+}
+
+inline QLiveCVCommandLineParser::Option *QLiveCVCommandLineParser::scriptVersionOption(){
+    return m_scriptVersionOption;
+}
+
+}// namespace
 
 #endif // QCOMMANDLINEPARSER_H

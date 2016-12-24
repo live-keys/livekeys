@@ -36,6 +36,7 @@ void QProject::newProject(){
         QProjectDocument* document = new QProjectDocument(
             qobject_cast<QProjectFile*>(m_fileModel->root()->child(0)), false, this
         );
+        document->dumpContent("import QtQuick 2.3\n\nGrid{\n}");
         m_documentModel->openDocument("", document);
         m_active = document;
         m_focus  = document;
@@ -47,6 +48,11 @@ void QProject::newProject(){
 }
 
 void QProject::openProject(const QString &path){
+    QFileInfo pathInfo(path);
+    if ( !pathInfo.exists() ){
+        qCritical("Path does not exist: %s", qPrintable(path));
+        return;
+    }
     closeProject();
     QString absolutePath = QFileInfo(path).absoluteFilePath();
     m_fileModel->openProject(absolutePath);
@@ -105,30 +111,39 @@ void QProject::closeProject(){
     emit pathChanged("");
 }
 
-void QProject::openFile(const QUrl &path, bool monitor){
-    openFile(path.toLocalFile(), monitor);
+void QProject::openFile(const QUrl &path, int mode){
+    openFile(path.toLocalFile(), mode);
 }
 
-void QProject::openFile(const QString &path, bool monitor){
+void QProject::openFile(const QString &path, int mode){
     QProjectDocument* document = isOpened(path);
     if (!document){
-        openFile(m_fileModel->openFile(path), monitor);
-    } else if ( document->isMonitored() != monitor ){
-        openFile(m_fileModel->openFile(path), monitor);
+        openFile(m_fileModel->openFile(path), mode);
+    } else if ( document->isMonitored() && mode == QProjectDocument::Edit ){
+        m_documentModel->updateDocumeMonitoring(document, false);
+    } else if ( !document->isMonitored() && mode == QProjectDocument::Monitor ){
+        document->readContent();
+        m_documentModel->updateDocumeMonitoring(document, true);
     } else
         setInFocus(document);
 }
 
-void QProject::openFile(QProjectFile *file, bool monitor){
+void QProject::openFile(QProjectFile *file, int mode){
     if (!file)
         return;
 
     QProjectDocument* document = isOpened(file->path());
     if (!document){
-        document = new QProjectDocument(file, monitor, this);
+        document = new QProjectDocument(file, mode == QProjectDocument::Monitor, this);
         file->setIsOpen(true);
         m_documentModel->openDocument(file->path(), document);
-    }
+    } else if ( document->isMonitored() && mode == QProjectDocument::Edit ){
+        m_documentModel->updateDocumeMonitoring(document, false);
+    } else if ( !document->isMonitored() && mode == QProjectDocument::Monitor ){
+        document->readContent();
+        m_documentModel->updateDocumeMonitoring(document, true);
+    } else
+        setInFocus(document);
     if(document)
         setInFocus(document);
 }
@@ -140,6 +155,7 @@ void QProject::setActive(QProjectFile* file){
     QProjectDocument* document = isOpened(file->path());
     if (!document){
         document = new QProjectDocument(file, false, this);
+        m_documentModel->openDocument(file->path(), document);
     }
     setActive(document);
 }
@@ -214,6 +230,10 @@ QProjectFile *QProject::lookupBestFocus(QProjectEntry *entry){
 
 QProjectDocument *QProject::isOpened(const QString &path){
     return m_documentModel->isOpened(path);
+}
+
+void QProject::closeFile(const QString &path){
+    m_documentModel->closeDocument(path);
 }
 
 void QProject::closeFocusedFile(){
