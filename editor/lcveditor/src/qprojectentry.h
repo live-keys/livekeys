@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDateTime>
+#include <QUrl>
 #include "qlcveditorglobal.h"
 #include <QDebug>
 
@@ -54,6 +55,9 @@ public:
     const QList<QProjectEntry*>& entries() const;
 
     void updatePaths();
+
+public slots:
+    QUrl pathUrl() const;
 
 signals:
     void nameChanged();

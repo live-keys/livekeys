@@ -65,7 +65,6 @@ void QProjectQmlScope::findQmlLibrary(
 }
 
 void QProjectQmlScope::findQmlLibraryInPath(const QString &path, bool requiresQmlDir, QList<QString>& paths){
-
     if ( d_globalLibraries->libraryExists(path) ){
         paths.append(path);
         return;

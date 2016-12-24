@@ -12,6 +12,8 @@
 
 #include <QDebug>
 
+namespace lcv{
+
 QLiveCVEngine::QLiveCVEngine(QQmlEngine *engine, QObject *parent)
     : QObject(parent)
     , m_engine(engine)
@@ -134,3 +136,5 @@ QJSValue QLiveCVEngine::toJSErrors(const QList<QQmlError> &errors) const{
     }
     return val;
 }
+
+}// namespace

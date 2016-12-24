@@ -36,6 +36,8 @@ signals:
     void projectScopeReady();
 
 private:
+    void scanProjectScopeRecurse(int limit = 10);
+
     QProjectQmlScope::Ptr m_project;
     QDocumentQmlScope::Ptr m_lastDocumentScope;
     QLockedFileIOSession::Ptr m_lockedFileIO;

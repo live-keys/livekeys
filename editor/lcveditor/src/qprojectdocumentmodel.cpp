@@ -77,6 +77,18 @@ void QProjectDocumentModel::closeDocuments(){
 
 }
 
+void QProjectDocumentModel::updateDocumeMonitoring(QProjectDocument *document, bool monitor){
+    if ( document->isMonitored() != monitor ){
+        if ( monitor ){
+            fileWatcher()->addPath(document->file()->path());
+            document->setIsMonitored(true);
+        } else {
+            fileWatcher()->removePath(document->file()->path());
+            document->setIsMonitored(false);
+        }
+    }
+}
+
 void QProjectDocumentModel::closeDocumentsInPath(const QString &path, bool closeIfActive){
     if ( path.isEmpty() ){
         closeDocument(path);
@@ -184,12 +196,14 @@ void QProjectDocumentModel::rescanDocuments(){
     for( QHash<QString, QProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         QDateTime modifiedDate = QFileInfo(it.key()).lastModified();
         if ( modifiedDate > it.value()->lastModified() && !it.value()->isMonitored() )
-            emit documentChangedOutside(it.key());
+            emit documentChangedOutside(it.value());
     }
 }
 
 void QProjectDocumentModel::monitoredFileChanged(const QString &path){
-    m_openedFiles[path]->readContent();
+    QProjectDocument* doc = m_openedFiles[path];
+    doc->readContent();
+    emit monitoredDocumentChanged(doc);
 }
 
 bool QProjectDocumentModel::saveDocuments(){
