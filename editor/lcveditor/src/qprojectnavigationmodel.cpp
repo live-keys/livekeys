@@ -55,7 +55,6 @@ QVariant QProjectNavigationModel::data(const QModelIndex &index, int role) const
 }
 
 void QProjectNavigationModel::reindex(){
-    qDebug() << "Project path:" << m_project->path();
     if ( m_requiresReindex ){
         beginResetModel();
         m_filteredFiles.clear();

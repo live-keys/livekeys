@@ -7,6 +7,7 @@ Rectangle{
     id: root
     visible: false
     color: "transparent"
+    signal closeFile(string path)
 
     onVisibleChanged: {
         if ( visible ){
@@ -228,8 +229,19 @@ Rectangle{
                     font.pixelSize: 12
                     font.weight: Font.Light
                 }
+
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        root.open(path)
+                        root.close()
+                    }
+                }
+
                 Text{
                     text: 'x'
+                    width: 30
+                    height: 30
                     anchors.right: parent.right
                     anchors.rightMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
@@ -237,13 +249,9 @@ Rectangle{
                     font.family: "Source Code Pro, sans-serif"
                     font.pixelSize: 16
                     font.weight: Font.Light
-                }
-
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: {
-                        root.open(path)
-                        root.close()
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: root.closeFile(model.path)
                     }
                 }
             }

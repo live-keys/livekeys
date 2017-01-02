@@ -18,6 +18,7 @@ import QtQuick 2.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.2
 import Cv 1.0
+import live 1.0
 
 ApplicationWindow {
     id : root
@@ -27,18 +28,24 @@ ApplicationWindow {
     height: 700
     color : "#293039"
 
+    property bool documentsReloaded : false
     onActiveChanged: {
         if ( active ){
             project.navigationModel.requiresReindex()
             project.fileModel.rescanEntries()
             project.documentModel.rescanDocuments()
+            if ( documentsReloaded && project.active ){
+                createTimer.restart()
+                documentsReloaded = false
+            }
         }
     }
 
     title: qsTr("Live CV")
 
-    signal beforeCompile()
     signal afterCompile()
+    signal aboutToRecompile()
+
 
     FontLoader{ id: ubuntuMonoBold;       source: "qrc:/fonts/UbuntuMono-Bold.ttf"; }
     FontLoader{ id: ubuntuMonoRegular;    source: "qrc:/fonts/UbuntuMono-Regular.ttf"; }
@@ -188,7 +195,7 @@ ApplicationWindow {
         visible : isLinux ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
             if ( project.isFileInProject(fileSaveDialog.fileUrl ) )
-                project.openFile(fileSaveDialog.fileUrl, false)
+                project.openFile(fileSaveDialog.fileUrl, ProjectDocument.Edit)
             else if ( !project.isDirProject() ){
                 header.closeProject(function(){ project.openProject(fileSaveDialog.fileUrl) } )
             } else {
@@ -264,9 +271,16 @@ ApplicationWindow {
 
                 if ( !project.isDirProject() ){
                     project.openProject(fileSaveDialog.fileUrl)
-                } else if ( project.isFileInProject(fileSaveDialog.fileUrl ) )
-                    project.openFile(fileSaveDialog.fileUrl, false)
-                else {
+                } else if ( project.isFileInProject(fileSaveDialog.fileUrl ) ){
+                    project.openFile(fileSaveDialog.fileUrl, ProjectDocument.Edit)
+                    if ( project.active && project.active !== project.inFocus ){
+                        engine.createObjectAsync(
+                            project.active.content,
+                            tester,
+                            project.active.file.pathUrl()
+                        );
+                    }
+                } else {
                     var fileUrl = fileSaveDialog.fileUrl
                     messageBox.show(
                         'File is outside project scope. Would you like to open it as a new project?',
@@ -325,10 +339,11 @@ ApplicationWindow {
                 id: projectView
                 height: parent.height
                 width: 240
+                visible : !args.previewFlag
                 onOpenEntry: {
                     if ( project.inFocus )
                         project.inFocus.dumpContent(editor.text)
-                    project.openFile(entry, monitor)
+                    project.openFile(entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen)
                 }
                 onAddEntry: {
                     projectAddEntry.show(parentEntry, isFile)
@@ -433,11 +448,19 @@ ApplicationWindow {
                 id: editor
                 height: parent.height
                 width: 400
+                visible : !args.previewFlag
 
                 onSave: {
                     if ( project.inFocus.name !== '' ){
                         project.inFocus.dumpContent(editor.text)
                         project.inFocus.save()
+                        if ( project.active && project.active !== project.inFocus ){
+                            engine.createObjectAsync(
+                                project.active.content,
+                                tester,
+                                project.active.file.pathUrl()
+                            );
+                        }
                     } else {
                         fileSaveDialog.open()
                     }
@@ -504,8 +527,19 @@ ApplicationWindow {
                     property string program: editor.text
                     property variant item
                     onProgramChanged: {
-//                        editor.isDirty = true
-                        createTimer.restart()
+                        if ( project.active === project.inFocus )
+                            createTimer.restart()
+                        editor.isDirty = true
+                        if ( project.inFocus )
+                            project.inFocus.file.isDirty = true
+                        scopeTimer.restart()
+                    }
+                    Timer {
+                        id: scopeTimer
+                        interval: 1000
+                        running: true
+                        repeat : false
+                        onTriggered: codeHandler.updateScope(editor.text)
                     }
                     Timer {
                         id: createTimer
@@ -513,17 +547,25 @@ ApplicationWindow {
                         running: true
                         repeat : false
                         onTriggered: {
-                            engine.createObjectAsync(
-                                "import QtQuick 2.3\n" + tester.program,
-                                tester,
-                                project.active ? project.active.file.path : 'untitled.qml'
-                            );
+                            if (project.active === project.inFocus && project.active){
+                                engine.createObjectAsync(
+                                    tester.program,
+                                    tester,
+                                    project.active.file.pathUrl()
+                                );
+                            } else if ( project.active ){
+                                engine.createObjectAsync(
+                                    project.active.content,
+                                    tester,
+                                    project.active.file.pathUrl()
+                                );
+                            }
                         }
                     }
                     Connections{
                         target: engine
                         onAboutToCreateObject : {
-                            root.beforeCompile()
+                            root.aboutToRecompile()
                         }
                         onObjectCreated : {
                             error.text = ''
@@ -549,7 +591,9 @@ ApplicationWindow {
                                         errorFile + ':' + lerror.lineNumber +
                                     '</a>' +
                                     ' ' + lerror.message
-                                lastErrorsLog += lerror.file + ':' + lerror.lineNumber + ' ' + error.message + '\n'
+                                lastErrorsLog +=
+                                    (lastErrorsLog === '' ? '' : '\n') +
+                                    'Error: ' + lerror.fileName + ':' + lerror.lineNumber + ' ' + lerror.message
                             }
                             error.text = lastErrorsText
                             console.error(lastErrorsLog)
@@ -591,7 +635,7 @@ ApplicationWindow {
                         visible : text === "" ? false : true
 
                         onLinkActivated: {
-                            project.openFile(link.substring(0, link.lastIndexOf(':')), false)
+                            project.openFile(link.substring(0, link.lastIndexOf(':')), ProjectDocument.EditIfNotOpen)
                         }
                     }
                 }
@@ -610,8 +654,41 @@ ApplicationWindow {
             onOpen: {
                 if ( project.inFocus )
                     project.inFocus.dumpContent(editor.text)
-                project.openFile(path, false)
+                project.openFile(path, ProjectDocument.EditIfNotOpen)
                 editor.forceFocus()
+            }
+            onCloseFile: {
+                var doc = project.documentModel.isOpened(path)
+                if ( doc ){
+                    if ( doc.file.isDirty ){
+                        messageBox.show('File contains unsaved changes. Would you like to save them before closing?',
+                        {
+                            button1Name : 'Yes',
+                            button1Function : function(){
+                                doc.dumpContent(editor.text)
+                                doc.save()
+                                project.closeFile(path)
+                                messageBox.close()
+                            },
+                            button2Name : 'No',
+                            button2Function : function(){
+                                project.closeFile(path)
+                                messageBox.close()
+                            },
+                            button3Name : 'Cancel',
+                            button3Function : function(){
+                                messageBox.close()
+                            },
+                            returnPressed : function(){
+                                doc.dumpContent(editor.text)
+                                doc.save()
+                                project.closeFile(path)
+                                messageBox.close()
+                            }
+                        })
+                    } else
+                        project.closeFile(path)
+                }
             }
             onCancel: {
                 editor.forceFocus()
@@ -628,7 +705,7 @@ ApplicationWindow {
                 if ( isFile ){
                     var f = project.fileModel.addFile(entry, name)
                     if ( f !== null )
-                        project.openFile(f, false)
+                        project.openFile(f, ProjectDocument.Edit)
                 } else {
                     project.fileModel.addDirectory(entry, name)
                 }
@@ -705,6 +782,62 @@ ApplicationWindow {
             id: messageBoxButton3
             anchors.right: parent.right
             visible : text !== ''
+        }
+    }
+
+    Connections{
+        target: project
+        onActiveChanged : {
+            if (active)
+                createTimer.restart()
+        }
+        onInFocusChanged : {
+            editor.isDirty = false
+        }
+    }
+
+    Connections{
+        target: project.documentModel
+        onMonitoredDocumentChanged : {
+            console.log('compiling ' + (project.active === project.inFocus))
+            console.log('compiling ' + project.active + project.inFocus)
+            if (project.active === project.inFocus){
+                engine.createObjectAsync(
+                    tester.program,
+                    tester,
+                    project.active.file.pathUrl()
+                );
+            } else if ( project.active ){
+                engine.createObjectAsync(
+                    project.active.content,
+                    tester,
+                    project.active.file.pathUrl()
+                );
+            }
+        }
+        onDocumentChangedOutside : {
+            messageBox.show(
+                'File \'' + document.file.path + '\' changed outside Live CV. Would you like to reload it?',
+                {
+                    button1Name : 'Yes',
+                    button1Function : function(){
+                        messageBox.close()
+                        document.readContent()
+                        root.documentsReloaded = true
+                    },
+                    button2Name : 'Save',
+                    button2Function : function(){
+                        messageBox.close()
+                        if ( project.inFocus === document )
+                            document.dumpContent(editor.text)
+                        document.save()
+                    },
+                    button3Name : 'No',
+                    button3Function : function(){
+                        messageBox.close()
+                    }
+                }
+            )
         }
     }
 

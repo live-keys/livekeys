@@ -32,15 +32,14 @@
 
 class QGuiApplication;
 class QQmlApplicationEngine;
-class QLiveCVEngine;
 class QCodeDocument;
 class QUrl;
-class QLiveCVArguments;
 
 namespace lcv{
+class QLiveCVEngine;
+class QLiveCVArguments;
 class QProject;
 class QDocumentCodeInterface;
-}
 
 // class QLiveCV
 // -------------
@@ -62,6 +61,8 @@ public:
     const QString& dir() const;
 
     static void registerTypes();
+
+    const QLiveCVArguments* arguments() const;
 
 private:
     QLiveCV(const QLiveCV&);
@@ -104,5 +105,11 @@ inline QString QLiveCV::versionString(){
 inline const QString &QLiveCV::dir() const{
     return m_dir;
 }
+
+inline const QLiveCVArguments *QLiveCV::arguments() const{
+    return m_arguments;
+}
+
+}// namespace
 
 #endif // QLIVECV_H

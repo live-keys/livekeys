@@ -4,6 +4,7 @@
 #include <QStringList>
 #include <QFileInfo>
 #include <QDir>
+#include <QUrl>
 
 namespace lcv {
 
@@ -55,6 +56,10 @@ void QProjectEntry::updatePaths(){
             }
         }
     }
+}
+
+QUrl QProjectEntry::pathUrl() const{
+    return QUrl::fromLocalFile(m_path);
 }
 
 QProjectEntry::~QProjectEntry(){

@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QHash>
 #include "qlockedfileiosession.h"
+#include "qprojectdocument.h"
 
 namespace lcv{
 
@@ -13,7 +14,6 @@ class QProjectEntry;
 class QProjectFile;
 class QProjectFileModel;
 class QProjectNavigationModel;
-class QProjectDocument;
 class QProjectDocumentModel;
 
 class Q_LCVEDITOR_EXPORT QProject : public QObject{
@@ -33,7 +33,6 @@ public:
     QProject(QObject* parent = 0);
     ~QProject();
 
-    void newProject();
     void setActive(const QString& path);
 
     QProjectFile* lookupBestFocus(QProjectEntry* entry);
@@ -51,10 +50,11 @@ public:
     QLockedFileIOSession::Ptr lockedFileIO();
 
 public slots:
+    void newProject();
     void closeProject();
-    void openFile(const QUrl& path, bool monitor);
-    void openFile(const QString& path, bool monitor);
-    void openFile(lcv::QProjectFile* file, bool monitor);
+    void openFile(const QUrl& path, int mode);
+    void openFile(const QString& path, int mode);
+    void openFile(lcv::QProjectFile* file, int mode);
     void setActive(lcv::QProjectFile *file);
 
     bool isDirProject() const;
@@ -64,6 +64,7 @@ public slots:
     void openProject(const QString& path);
     void openProject(const QUrl& url);
 
+    void closeFile(const QString& path);
     void closeFocusedFile();
 
     QString dir() const;
