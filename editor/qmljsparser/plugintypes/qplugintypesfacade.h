@@ -5,8 +5,6 @@
 #include <QQmlEngine>
 #include <QList>
 
-
-
 namespace lcv{
 
 class Q_QMLJSPARSER_EXPORT QPluginTypesFacade{
@@ -15,9 +13,25 @@ public:
     QPluginTypesFacade();
     ~QPluginTypesFacade();
 
-    static QList<const QQmlType*> extractTypes(const QString& module, QQmlEngine* engine);
+    static void extractTypes(
+        const QString& module,
+        QQmlEngine* engine,
+        QList<const QQmlType*>& types,
+        QHash<QByteArray, QSet<const QQmlType *> >& qmlTypesByCppName
+    );
+    static void getTypeDependencies(
+        const QString &module,
+        const QList<const QQmlType*>& types,
+        const QHash<QByteArray, QSet<const QQmlType *> >& qmlTypesByCppName,
+        QList<const QMetaObject *> &unknownTypes,
+        QStringList& dependencies
+    );
     static QString getTypeName(const QQmlType* type);
-    static void extractPluginInfo(QByteArray* stream);
+    static void extractPluginInfo(
+        const QSet<const QMetaObject*> metaTypes,
+        const QHash<QByteArray, QSet<const QQmlType *> >& qmlTypesByCppName,
+        QByteArray* stream
+    );
 
 };
 

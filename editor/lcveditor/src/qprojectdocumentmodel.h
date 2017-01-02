@@ -29,11 +29,12 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     QHash<int, QByteArray> roleNames() const;
 
-    QProjectDocument* isOpened(const QString& path);
     void openDocument(const QString& path, QProjectDocument* document);
     void closeDocuments();
 
     const QHash<QString, QProjectDocument*> openedFiles() const;
+
+    void updateDocumeMonitoring(QProjectDocument* document, bool monitor);
 
     void closeDocumentsInPath(const QString& path, bool closeIfActive = false);
     void closeDocument(const QString& path, bool closeIfActive = false);
@@ -43,11 +44,14 @@ public slots:
     void monitoredFileChanged(const QString& path);
 
     bool saveDocuments();
+    lcv::QProjectDocument* isOpened(const QString& path);
+
     QStringList listUnsavedDocuments();
     QStringList listUnsavedDocumentsInPath(const QString& path);
 
 signals:
-    void documentChangedOutside(const QString& path);
+    void monitoredDocumentChanged(lcv::QProjectDocument* document);
+    void documentChangedOutside(lcv::QProjectDocument* document);
 
 private:
     QHash<int, QByteArray> m_roles;

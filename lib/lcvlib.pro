@@ -18,3 +18,4 @@ include($$PWD/src/lcvlibsrc.pri)
 include($$PWD/include/lcvlibinclude.pri)
 include($$PWD/../3rdparty/opencvconfig.pro)
 loadOpenCV(core)
+

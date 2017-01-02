@@ -71,7 +71,8 @@ inline QHash<QString, QQmlLibraryInfo::Ptr> QProjectQmlScopeContainer::getNoInfo
     m_libraryMutex.lock();
 
     for( QHash<QString, QQmlLibraryInfo::Ptr>::const_iterator it = m_libraries.begin(); it != m_libraries.end(); ++it ){
-        if ( it.value()->data().pluginTypeInfoStatus() == QmlJS::LibraryInfo::NoTypeInfo )
+        if ( it.value()->data().pluginTypeInfoStatus() == QmlJS::LibraryInfo::NoTypeInfo ||
+             it.value()->data().pluginTypeInfoStatus() == QmlJS::LibraryInfo::TypeInfoFileError )
             libraries[it.key()] = it.value();
     }
 

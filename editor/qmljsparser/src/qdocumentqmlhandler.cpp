@@ -605,9 +605,11 @@ void QDocumentQmlHandler::assistCompletion(
     model->setCompletionContext(ctx);
 
     QList<QCodeCompletionSuggestion> suggestions;
-    if ( ctx->context() & QQmlCompletionContext::InImport && ctx->context() & QQmlCompletionContext::InStringLiteral ){
-        suggestionsForStringImport(extractQuotedString(cursor), suggestions, filter);
-        model->setSuggestions(suggestions, filter);
+    if ( ctx->context() & QQmlCompletionContext::InStringLiteral ){
+        if ( ctx->context() & QQmlCompletionContext::InImport ){
+            suggestionsForStringImport(extractQuotedString(cursor), suggestions, filter);
+            model->setSuggestions(suggestions, filter);
+        }
     } else if ( ctx->context() & QQmlCompletionContext::InImport ){
         suggestionsForImport(*ctx, suggestions);
         model->setSuggestions(suggestions, filter);
