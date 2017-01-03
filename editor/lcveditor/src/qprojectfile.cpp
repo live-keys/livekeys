@@ -7,6 +7,7 @@ QProjectFile::QProjectFile(const QString &path, QProjectEntry *parent)
     : QProjectEntry(QFileInfo(path).path(), QFileInfo(path).fileName(), true, parent)
     , m_isOpen(false)
     , m_isDirty(false)
+    , m_isMonitored(false)
 {
 }
 
@@ -14,6 +15,7 @@ QProjectFile::QProjectFile(const QString &path, const QString &name, QProjectEnt
     : QProjectEntry(path, name, true, parent)
     , m_isOpen(false)
     , m_isDirty(false)
+    , m_isMonitored(false)
 {
 }
 

@@ -119,9 +119,9 @@ void QProject::openFile(const QString &path, int mode){
     QProjectDocument* document = isOpened(path);
     if (!document){
         openFile(m_fileModel->openFile(path), mode);
-    } else if ( document->isMonitored() && mode == QProjectDocument::Edit ){
+    } else if ( document->file()->isMonitored() && mode == QProjectDocument::Edit ){
         m_documentModel->updateDocumeMonitoring(document, false);
-    } else if ( !document->isMonitored() && mode == QProjectDocument::Monitor ){
+    } else if ( !document->file()->isMonitored() && mode == QProjectDocument::Monitor ){
         document->readContent();
         m_documentModel->updateDocumeMonitoring(document, true);
     } else
@@ -137,9 +137,9 @@ void QProject::openFile(QProjectFile *file, int mode){
         document = new QProjectDocument(file, mode == QProjectDocument::Monitor, this);
         file->setIsOpen(true);
         m_documentModel->openDocument(file->path(), document);
-    } else if ( document->isMonitored() && mode == QProjectDocument::Edit ){
+    } else if ( document->file()->isMonitored() && mode == QProjectDocument::Edit ){
         m_documentModel->updateDocumeMonitoring(document, false);
-    } else if ( !document->isMonitored() && mode == QProjectDocument::Monitor ){
+    } else if ( !document->file()->isMonitored() && mode == QProjectDocument::Monitor ){
         document->readContent();
         m_documentModel->updateDocumeMonitoring(document, true);
     } else

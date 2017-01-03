@@ -11,9 +11,10 @@ namespace lcv{
 class Q_LCVEDITOR_EXPORT QProjectFile : public QProjectEntry{
 
     Q_OBJECT
-    Q_PROPERTY(QString text  READ text     WRITE setText     NOTIFY textChanged)
-    Q_PROPERTY(bool isOpen   READ isOpen   WRITE setIsOpen   NOTIFY isOpenChanged)
-    Q_PROPERTY(bool isDirty  READ isDirty  WRITE setIsDirty  NOTIFY isDirtyChanged)
+    Q_PROPERTY(QString text     READ text        WRITE setText        NOTIFY textChanged)
+    Q_PROPERTY(bool isOpen      READ isOpen      WRITE setIsOpen      NOTIFY isOpenChanged)
+    Q_PROPERTY(bool isDirty     READ isDirty     WRITE setIsDirty     NOTIFY isDirtyChanged)
+    Q_PROPERTY(bool isMonitored READ isMonitored WRITE setIsMonitored NOTIFY isMonitoredChanged)
 
 public:
     explicit QProjectFile(const QString& path, QProjectEntry *parent = 0);
@@ -26,6 +27,9 @@ public:
     bool isOpen() const;
     void setIsOpen(bool isOpen);
 
+    bool isMonitored() const;
+    void setIsMonitored(bool monitored);
+
     bool isDirty() const;
     void setIsDirty(bool isDirty);
 
@@ -34,11 +38,13 @@ signals:
     void isActiveChanged();
     void isOpenChanged();
     void isDirtyChanged();
+    void isMonitoredChanged();
 
 private:
     QString m_text;
     bool    m_isOpen;
     bool    m_isDirty;
+    bool    m_isMonitored;
 };
 
 inline const QString &QProjectFile::text() const{
@@ -76,6 +82,17 @@ inline void QProjectFile::setIsDirty(bool isDirty){
 
     m_isDirty = isDirty;
     emit isDirtyChanged();
+}
+
+inline bool QProjectFile::isMonitored() const{
+    return m_isMonitored;
+}
+
+inline void QProjectFile::setIsMonitored(bool monitored){
+    if ( m_isMonitored != monitored ){
+        m_isMonitored = monitored;
+        emit isMonitoredChanged();
+    }
 }
 
 }// namespace

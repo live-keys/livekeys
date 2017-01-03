@@ -119,6 +119,8 @@ Rectangle{
                         if ( styleData.value && styleData.value.isFile ){
                             if (styleData.value === (project.active ? project.active.file : null) )
                                 return "qrc:/images/project-file-active.png"
+                            else if ( styleData.value.isMonitored )
+                                return "qrc:/images/project-file-monitor.png"
                             else if ( styleData.value.isDirty )
                                 return "qrc:/images/project-file-unsaved.png"
                             else
