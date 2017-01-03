@@ -193,7 +193,7 @@ Rectangle{
                 height : Math.max( flick.height - 20, paintedHeight )
                 width : Math.max( flick.width - 20, paintedWidth )
 
-                readOnly: project.inFocus === null || project.inFocus.isMonitored
+                readOnly: project.inFocus === null || project.inFocus.file.isMonitored
 
                 Keys.onPressed: {
                     if ( (event.key === Qt.Key_BracketRight && (event.modifiers & Qt.ShiftModifier) ) ||
