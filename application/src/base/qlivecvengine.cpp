@@ -17,6 +17,7 @@ namespace lcv{
 QLiveCVEngine::QLiveCVEngine(QQmlEngine *engine, QObject *parent)
     : QObject(parent)
     , m_engine(engine)
+    , m_engineMutex(new QMutex)
     , m_incubator(new QQmlIncubator(QQmlIncubator::Asynchronous))
     , m_incubationController(new QLiveCVIncubationController)
 {
@@ -24,10 +25,11 @@ QLiveCVEngine::QLiveCVEngine(QQmlEngine *engine, QObject *parent)
 }
 
 QLiveCVEngine::~QLiveCVEngine(){
+    delete m_engineMutex;
 }
 
 void QLiveCVEngine::useEngine(std::function<void(QQmlEngine *)> call){
-    QMutexLocker engineMutexLock(&m_engineMutex);
+    QMutexLocker engineMutexLock(m_engineMutex);
     call(m_engine);
 }
 
@@ -40,7 +42,7 @@ QJSValue QLiveCVEngine::lastErrorsObject() const{
 }
 
 void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, const QUrl &url){
-    QMutexLocker engineMutexLock(&m_engineMutex);
+    m_engineMutex->lock();
 
     emit aboutToCreateObject(url);
 
@@ -49,6 +51,7 @@ void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, c
 
     QList<QQmlError> errors = component.errors();
     if ( errors.size() > 0 ){
+        m_engineMutex->unlock();
         emit objectCreationError(toJSErrors(errors));
         return;
     }
@@ -64,7 +67,9 @@ void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, c
     QList<QQmlError> incubatorErrors = component.errors();
     if ( incubatorErrors.size() > 0 ){
         setIsLoading(false);
-        emit objectCreationError(toJSErrors(incubatorErrors));
+        QJSValue jsErrors = toJSErrors(incubatorErrors);
+        m_engineMutex->unlock();
+        emit objectCreationError(jsErrors);
         return;
     }
 
@@ -72,7 +77,9 @@ void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, c
         setIsLoading(false);
         QQmlError errorObject;
         errorObject.setDescription("Component returned null object.");
-        emit objectCreationError(toJSErrors(QList<QQmlError>() << errorObject));
+        QJSValue jsErrors = toJSErrors(QList<QQmlError>() << errorObject);
+        m_engineMutex->unlock();
+        emit objectCreationError(jsErrors);
         return;
     }
 
@@ -89,11 +96,12 @@ void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, c
     }
 
     setIsLoading(false);
+    m_engineMutex->unlock();
     emit objectCreated(obj);
 }
 
 QObject* QLiveCVEngine::createObject(const QString &qmlCode, QObject *parent, const QUrl &url){
-    QMutexLocker engineMutexLock(&m_engineMutex);
+    QMutexLocker engineMutexLock(m_engineMutex);
 
     QQmlComponent component(m_engine);
     component.setData(qmlCode.toUtf8(), url);

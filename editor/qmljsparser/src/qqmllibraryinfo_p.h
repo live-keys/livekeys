@@ -11,6 +11,15 @@ namespace lcv{
 class QQmlLibraryInfo{
 
 public:
+    enum ScanStatus{
+        NotScanned = 0,
+        ScanError,
+        NoPrototypeLink,
+        RequiresDependency,
+        Done
+    };
+
+public:
     class ExportVersion{
     public:
         ExportVersion()
@@ -59,6 +68,11 @@ public:
     void setDependencies(const QList<QString> &paths);
     const QList<QString>& dependencyPaths() const;
 
+    void updateImportInfo(const QString& uri, int versionMajor, int versionMinor);
+
+    ScanStatus status() const;
+    void setStatus(ScanStatus status);
+
 private:
     QQmlLibraryInfo();
     QQmlLibraryInfo(const QmlDirParser& parser);
@@ -66,6 +80,7 @@ private:
 private:
     void addExport();
 
+    ScanStatus            m_status;
     QMap<QString, Export> m_exports;
     QmlJS::LibraryInfo    m_data;
     QList<QString>        m_dependencyPaths;
@@ -81,6 +96,14 @@ inline QQmlLibraryInfo::Ptr QQmlLibraryInfo::create(const QmlDirParser &parser){
 
 inline const QList<QString> &QQmlLibraryInfo::dependencyPaths() const{
     return m_dependencyPaths;
+}
+
+inline QQmlLibraryInfo::ScanStatus QQmlLibraryInfo::status() const{
+    return m_status;
+}
+
+inline void QQmlLibraryInfo::setStatus(QQmlLibraryInfo::ScanStatus status){
+    m_status = status;
 }
 
 }// namespace

@@ -1,7 +1,6 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
-    $$PWD/qdocumentqmlparser.h \
     $$PWD/qqmljsparserglobal.h \
     $$PWD/qdocumentqmlinfo.h \
     $$PWD/qdocumentqmlranges_p.h \
@@ -17,10 +16,10 @@ HEADERS += \
     $$PWD/qqmllibrarydependency.h \
     $$PWD/qdocumentqmlobject_p.h \
     $$PWD/qprojectqmlscope.h \
-    $$PWD/qprojectqmlscopecontainer_p.h
+    $$PWD/qprojectqmlscopecontainer_p.h \
+    $$PWD/qplugininfoextractor.h
 
 SOURCES += \
-    $$PWD/qdocumentqmlparser.cpp \
     $$PWD/qdocumentqmlinfo.cpp \
     $$PWD/qdocumentqmlranges.cpp \
     $$PWD/qqmlidvisitor.cpp \
@@ -32,4 +31,5 @@ SOURCES += \
     $$PWD/qprojectqmlscope.cpp \
     $$PWD/qdocumentqmlscope.cpp \
     $$PWD/qprojectqmlscanner.cpp \
-    $$PWD/qqmllibrarydependency.cpp
+    $$PWD/qqmllibrarydependency.cpp \
+    $$PWD/qplugininfoextractor.cpp

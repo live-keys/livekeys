@@ -2,16 +2,18 @@
 
 namespace lcv{
 
-QQmlLibraryInfo::QQmlLibraryInfo(){
+QQmlLibraryInfo::QQmlLibraryInfo()
+    : m_status(QQmlLibraryInfo::NotScanned)
+{
 }
 
 QQmlLibraryInfo::QQmlLibraryInfo(const QmlDirParser &parser)
-    : m_data(parser)
+    : m_status(QQmlLibraryInfo::NotScanned)
+    , m_data(parser)
 {
 }
 
 QQmlLibraryInfo::~QQmlLibraryInfo(){
-
 }
 
 void QQmlLibraryInfo::updateExports(){
@@ -69,8 +71,7 @@ LanguageUtils::FakeMetaObject::ConstPtr QQmlLibraryInfo::findObjectByClassName(c
 }
 
 void QQmlLibraryInfo::setDependencies(const QList<QString> &paths){
-   m_dependencyPaths = paths;
+    m_dependencyPaths = paths;
 }
-
 
 }// namespace

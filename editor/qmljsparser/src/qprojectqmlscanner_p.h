@@ -6,6 +6,8 @@
 #include "qprojectqmlscope.h"
 #include "qlockedfileiosession.h"
 
+#include <functional>
+
 class QThread;
 class QTimer;
 
@@ -16,14 +18,43 @@ class QProjectQmlScanner : public QObject{
     Q_OBJECT
 
 public:
-    QProjectQmlScanner(QLockedFileIOSession::Ptr lockedFileIO, QObject* parent = 0);
+    class TypeLoadRequest{
+    public:
+        TypeLoadRequest(const QString& uri, const QString& path)
+            : importUri(uri), libraryPath(path), object(0), isError(false)
+        {}
+        ~TypeLoadRequest(){ delete object; }
+
+        QString importUri;
+        QString libraryPath;
+        QObject* object;
+        bool isError;
+    };
+
+public:
+    QProjectQmlScanner(
+        QQmlEngine* engine,
+        QMutex* engineMutex,
+        QLockedFileIOSession::Ptr lockedFileIO,
+        QObject* parent = 0
+    );
     ~QProjectQmlScanner();
 
 public:
     void setProjectScope(QProjectQmlScope::Ptr scope);
     void queueDocumentScopeScan(const QString& path, const QString& content, QProjectQmlScope* projectScope);
 
+    void updateLoadRequest(const QString& uri, QObject* object, bool isError);
+    void removeLoadRequest(const QString &path);
+    void addLoadRequest(const TypeLoadRequest& request);
+    bool requestErrorStatus(const QString& path);
+    QObject* requestObject(const QString& path);
+    bool hasRequest(const QString& path) const;
+
     QDocumentQmlScope::Ptr lastDocumentScope();
+
+    bool tryToExtractPluginInfo(const QString& path, QByteArray* stream);
+    void updatePluginInfo(const QString& libraryPath, const QByteArray& libInfo);
 
 public slots:
     void scanDocumentScope(const QString& path, const QString& content, QProjectQmlScope* projectScope);
@@ -34,15 +65,24 @@ signals:
     void queueProjectScan();
     void documentScopeReady();
     void projectScopeReady();
+    void requestObjectLoad(const QString& uri);
 
 private:
     void scanProjectScopeRecurse(int limit = 10);
+    void updatePrototypeList();
 
-    QProjectQmlScope::Ptr m_project;
-    QDocumentQmlScope::Ptr m_lastDocumentScope;
+
+    QProjectQmlScope::Ptr     m_project;
+    QDocumentQmlScope::Ptr    m_lastDocumentScope;
     QLockedFileIOSession::Ptr m_lockedFileIO;
-    QThread* m_thread;
-    QTimer*  m_timer;
+    QThread*    m_thread;
+    QTimer*     m_timer;
+
+    QQmlEngine* m_engine;
+    QMutex*     m_engineMutex;
+
+    //TODO: Switch to pointer
+    QList<TypeLoadRequest> m_loadRequests;
 };
 
 inline QDocumentQmlScope::Ptr QProjectQmlScanner::lastDocumentScope(){
