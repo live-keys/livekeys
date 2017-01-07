@@ -64,6 +64,7 @@ void QProject::openProject(const QString &path){
             this
         );
         m_documentModel->openDocument(document->file()->path(), document);
+        document->file()->setIsOpen(true);
         m_active = document;
         m_focus  = document;
         m_path   = absolutePath;
@@ -80,6 +81,7 @@ void QProject::openProject(const QString &path){
                 this
             );
             m_documentModel->openDocument(document->file()->path(), document);
+            document->file()->setIsOpen(true);
             m_active = document;
             m_focus = document;
             emit inFocusChanged(document);
@@ -133,7 +135,10 @@ void QProject::openFile(QProjectFile *file, int mode){
         return;
 
     QProjectDocument* document = isOpened(file->path());
-    if (!document){
+
+    if ( !document && m_active != 0 && m_active->file() == file ){
+        document = m_active;
+    } else if (!document){
         document = new QProjectDocument(file, mode == QProjectDocument::Monitor, this);
         file->setIsOpen(true);
         m_documentModel->openDocument(file->path(), document);

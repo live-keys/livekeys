@@ -39,10 +39,13 @@ QJSValue QLiveCVEngine::lastErrorsObject() const{
     return toJSErrors(lastErrors());
 }
 
-void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, const QUrl &url){
+void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, const QUrl &url, bool clearCache){
     QMutexLocker engineMutexLock(&m_engineMutex);
 
     emit aboutToCreateObject(url);
+
+    if ( clearCache )
+        m_engine->clearComponentCache();
 
     QQmlComponent component(m_engine);
     component.setData(qmlCode.toUtf8(), url);
@@ -92,8 +95,11 @@ void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, c
     emit objectCreated(obj);
 }
 
-QObject* QLiveCVEngine::createObject(const QString &qmlCode, QObject *parent, const QUrl &url){
+QObject* QLiveCVEngine::createObject(const QString &qmlCode, QObject *parent, const QUrl &url, bool clearCache){
     QMutexLocker engineMutexLock(&m_engineMutex);
+
+    if ( clearCache )
+        m_engine->clearComponentCache();
 
     QQmlComponent component(m_engine);
     component.setData(qmlCode.toUtf8(), url);

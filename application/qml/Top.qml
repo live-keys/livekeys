@@ -103,18 +103,6 @@ Rectangle {
             id : saveImage
             anchors.centerIn: parent
             source : "qrc:/images/save.png"
-
-            Rectangle{
-                visible : container.isTextDirty
-                anchors.bottom : parent.bottom
-                anchors.right: parent.right
-                anchors.rightMargin: 4
-                anchors.bottomMargin: 2
-                width : 5
-                height : 5
-                color : "#aabbcc"
-                radius : width * 0.5
-            }
         }
         Rectangle{
             color : "#0f2636"
