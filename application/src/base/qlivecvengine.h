@@ -39,8 +39,8 @@ signals:
     void objectCreationError(QJSValue errors);
 
 public slots:
-    void createObjectAsync(const QString& qmlCode, QObject* parent, const QUrl& file);
-    QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file);
+    void createObjectAsync(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
+    QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
 
     QJSValue lastErrorsObject() const;
 

@@ -119,6 +119,8 @@ Rectangle{
                         if ( styleData.value && styleData.value.isFile ){
                             if (styleData.value === (project.active ? project.active.file : null) )
                                 return "qrc:/images/project-file-active.png"
+                            else if ( styleData.value.isMonitored )
+                                return "qrc:/images/project-file-monitor.png"
                             else if ( styleData.value.isDirty )
                                 return "qrc:/images/project-file-unsaved.png"
                             else
@@ -141,7 +143,20 @@ Rectangle{
                     }
                     font.family: 'Open Sans, Arial, sans-serif'
                     font.pixelSize: 12
-                    font.weight: styleData.value.isOpen ? Font.Bold : Font.Light
+                    property int type : {
+                        if (styleData.value){
+                            if ( project.inFocus ){
+                                if ( project.inFocus.file === styleData.value )
+                                    return 1
+                            }
+                            if ( styleData.value.isOpen )
+                                return 2
+                        }
+                        return 0
+                    }
+
+                    font.weight: type === 1 ? Font.Bold : Font.Light
+                    font.italic: type === 2
                     readOnly: !entryDelegate.editMode
                     Keys.onReturnPressed: {
                         root.renameEntry(styleData.value, text)
