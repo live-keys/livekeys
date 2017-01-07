@@ -1,2 +1,3 @@
 module lcvcore
 plugin lcvcore
+depends QtQuick 2.3

@@ -24,6 +24,9 @@ public:
     bool consoleFlag() const;
     bool fileLogFlag() const;
 
+    bool pluginInfoFlag() const;
+    const QString& pluginInfoImport() const;
+
     bool helpFlag() const;
     bool versionFlag() const;
     QString helpString() const;
@@ -48,6 +51,9 @@ private:
     bool m_consoleFlag;
     bool m_previewFlag;
 
+    bool m_pluginInfoFlag;
+    QString m_pluginInfoImport;
+
     QStringList m_monitoredFiles;
 
     QString m_script;
@@ -64,6 +70,10 @@ inline bool QLiveCVArguments::consoleFlag() const{
 
 inline bool QLiveCVArguments::fileLogFlag() const{
     return m_fileLogFlag;
+}
+
+inline const QString &QLiveCVArguments::pluginInfoImport() const{
+    return m_pluginInfoImport;
 }
 
 inline const QStringList &QLiveCVArguments::monitoredFiles() const{

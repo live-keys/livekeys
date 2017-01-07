@@ -18,7 +18,7 @@ namespace QmlJS{ class LibraryInfo; }
 namespace lcv{
 
 class QProjectQmlScopeContainer;
-class QProjectQmlScope{
+class Q_QMLJSPARSER_EXPORT QProjectQmlScope{
 
     Q_DISABLE_COPY(QProjectQmlScope)
 
@@ -57,15 +57,24 @@ public:
     QProjectQmlScopeContainer* globalLibraries();
     QProjectQmlScopeContainer* implicitLibraries();
 
-private:
+    QList<QString> pathsForImport(const QString& importUri);
+    QString uriForPath(const QString& path);
 
+    void addDefaultLibraries(const QList<QString>& paths);
+    const QList<QString>& defaultLibraries() const;
+
+private:
     QProjectQmlScope(QQmlEngine* engine);
 
 private:
     QScopedPointer<QProjectQmlScopeContainer> d_globalLibraries;
     QScopedPointer<QProjectQmlScopeContainer> d_implicitLibraries;
 
+    QList<QString> m_defaultLibraries;
+
     QQmlEngine* m_engine;
+
+    QHash<QString, QList<QString> > m_importToPaths;
 
     QSet<QString> m_monitoredPaths;
     QStringList m_defaultImportPaths;
@@ -77,6 +86,23 @@ inline QProjectQmlScopeContainer *QProjectQmlScope::globalLibraries(){
 
 inline QProjectQmlScopeContainer *QProjectQmlScope::implicitLibraries(){
     return d_implicitLibraries.data();
+}
+
+inline QList<QString> QProjectQmlScope::pathsForImport(const QString &importUri){
+    if ( m_importToPaths.contains(importUri) )
+        return m_importToPaths.value(importUri);
+    return QList<QString>();
+}
+
+inline void QProjectQmlScope::addDefaultLibraries(const QList<QString> &paths){
+    foreach( const QString& path, paths ){
+        if ( !m_defaultLibraries.contains(path) )
+            m_defaultLibraries.append(path);
+    }
+}
+
+inline const QList<QString> &QProjectQmlScope::defaultLibraries() const{
+    return m_defaultLibraries;
 }
 
 }// namespace
