@@ -22,6 +22,7 @@
         <file alias="OpenSans-Bold.ttf">fonts/OpenSans-Bold.ttf</file>
         <file alias="OpenSans-Light.ttf">fonts/OpenSans-Light.ttf</file>
         <file alias="OpenSans-Regular.ttf">fonts/OpenSans-Regular.ttf</file>
+        <file alias="OpenSans-LightItalic.ttf">fonts/OpenSans-LightItalic.ttf</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="log.png">images/log.png</file>
