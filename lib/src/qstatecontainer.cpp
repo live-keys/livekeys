@@ -47,8 +47,9 @@ QStateContainerManager &QStateContainerManager::instance(QQuickItem *item, QObje
   \a parent
  */
 QStateContainerManager::QStateContainerManager(QQuickItem *item, QObject *parent)
-    : QObject(parent){
-
+    : QObject(parent)
+    , m_attachedWindow(0)
+{
     atexit(&cleanStateManager);
 
     connect(item, SIGNAL(windowChanged(QQuickWindow*)), SLOT(attachWindow(QQuickWindow*)));
@@ -77,16 +78,17 @@ void QStateContainerManager::afterCompile(){
   \a window
  */
 void QStateContainerManager::attachWindow(QQuickWindow *window){
-    if (window != 0){
-        QQuickView* view = qobject_cast<QQuickView*>(window);
-        if ( view == 0 )
-            qWarning("Cannot connect to window compilation signal. State objects will not get destroyed, "
-                     "which will cause the application to slow down over time.");
-        else {
-            connect(view->rootObject(), SIGNAL(beforeCompile()), SLOT(beforeCompile()));
-            connect(view->rootObject(), SIGNAL(afterCompile()),  SLOT(afterCompile()));
-        }
+    if ( m_attachedWindow )
+        return;
+    if ( window == 0){
+        qWarning("Cannot connect to window compilation signal. State objects will not get destroyed, "
+                 "which will cause the application to slow down over time.");
+        return;
     }
+
+    m_attachedWindow = window;
+    connect(window, SIGNAL(aboutToRecompile()), SLOT(beforeCompile()));
+    connect(window, SIGNAL(afterCompile()),  SLOT(afterCompile()));
 }
 
 /*!
