@@ -58,6 +58,7 @@ public slots:
     void attachWindow(QQuickWindow* window);
 
 private:
+    QQuickWindow* m_attachedWindow;
     QLinkedList<QStateContainerBase*> m_stateContainerList;
 
 };
