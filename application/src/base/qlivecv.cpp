@@ -32,6 +32,7 @@
 
 #include "qdocumentqmlhandler.h"
 #include "qdocumentqmlinfo.h"
+#include "qplugininfoextractor.h"
 
 #include <QUrl>
 #include <QFileInfo>
@@ -57,8 +58,35 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
         argc,
         argv
     );
+}
 
-    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(m_engine->engine(), m_project->lockedFileIO());
+QLiveCV::~QLiveCV(){
+    delete m_engine;
+    delete m_document;
+}
+
+void QLiveCV::solveImportPaths(){
+    QStringList importPaths = m_engine->engine()->importPathList();
+    m_engine->engine()->setImportPathList(QStringList());
+    for ( QStringList::iterator it = importPaths.begin(); it != importPaths.end(); ++it ){
+        if ( *it != dir() )
+            m_engine->engine()->addImportPath(*it);
+    }
+    m_engine->engine()->addImportPath(dir() + "/plugins");
+}
+
+void QLiveCV::loadLibrary(const QString &library){
+    m_lcvlib.setFileName(library);
+    m_lcvlib.load();
+}
+
+void QLiveCV::loadQml(const QUrl &url){
+
+    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(
+        m_engine->engine(),
+        m_engine->engineMutex(),
+        m_project->lockedFileIO()
+    );
     m_codeInterface = new lcv::QDocumentCodeInterface(qmlHandler);
     QObject::connect(
         m_project, SIGNAL(inFocusChanged(QProjectDocument*)),
@@ -98,29 +126,7 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
             }
         }
     }
-}
 
-QLiveCV::~QLiveCV(){
-    delete m_engine;
-    delete m_document;
-}
-
-void QLiveCV::solveImportPaths(){
-    QStringList importPaths = m_engine->engine()->importPathList();
-    m_engine->engine()->setImportPathList(QStringList());
-    for ( QStringList::iterator it = importPaths.begin(); it != importPaths.end(); ++it ){
-        if ( *it != dir() )
-            m_engine->engine()->addImportPath(*it);
-    }
-    m_engine->engine()->addImportPath(dir() + "/plugins");
-}
-
-void QLiveCV::loadLibrary(const QString &library){
-    m_lcvlib.setFileName(library);
-    m_lcvlib.load();
-}
-
-void QLiveCV::loadQml(const QUrl &url){
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("codeDocument", m_document);
     m_engine->engine()->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
@@ -165,6 +171,24 @@ void QLiveCV::registerTypes(){
         "live", 1, 0, "LiveArguments", "LiveArguments is available through the arguments property."
     );
     qmlRegisterType<lcv::QLiveCVMain>("live", 1, 0, "Main");
+}
+
+QByteArray QLiveCV::extractPluginInfo(const QString &import) const{
+    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(
+        m_engine->engine(),
+        m_engine->engineMutex(),
+        m_project->lockedFileIO()
+    );
+
+
+    lcv::QPluginInfoExtractor* extractor = qmlHandler->getPluginInfoExtractor(import);
+    if ( extractor ){
+        extractor->waitForResult(10000);
+        if (extractor->timedOut() ){
+            return "Timed out\n";
+        }
+    }
+    return extractor->result();
 }
 
 }// namespace

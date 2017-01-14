@@ -54,8 +54,9 @@ ApplicationWindow {
     FontLoader{ id: sourceCodeProRegular; source: "qrc:/fonts/SourceCodePro-Regular.ttf"; }
     FontLoader{ id: sourceCodeProBold;    source: "qrc:/fonts/SourceCodePro-Bold.ttf"; }
     FontLoader{ id: openSansLight;        source: "qrc:/fonts/OpenSans-Light.ttf"; }
+    FontLoader{ id: openSansBold;         source: "qrc:/fonts/OpenSans-LightItalic.ttf"; }
     FontLoader{ id: openSansRegular;      source: "qrc:/fonts/OpenSans-Regular.ttf"; }
-    FontLoader{ id: openSansBold;         source: "qrc:/fonts/OpenSans-Bold.ttf"; }
+    FontLoader{ id: openSansLightItalic;  source: "qrc:/fonts/OpenSans-Bold.ttf"; }
 
     LogWindow{
         id : logWindow
@@ -277,7 +278,8 @@ ApplicationWindow {
                         engine.createObjectAsync(
                             project.active.content,
                             tester,
-                            project.active.file.pathUrl()
+                            project.active.file.pathUrl(),
+                            true
                         );
                     }
                 } else {
@@ -458,7 +460,8 @@ ApplicationWindow {
                             engine.createObjectAsync(
                                 project.active.content,
                                 tester,
-                                project.active.file.pathUrl()
+                                project.active.file.pathUrl(),
+                                true
                             );
                         }
                     } else {
@@ -529,9 +532,6 @@ ApplicationWindow {
                     onProgramChanged: {
                         if ( project.active === project.inFocus )
                             createTimer.restart()
-                        editor.isDirty = true
-                        if ( project.inFocus )
-                            project.inFocus.file.isDirty = true
                         scopeTimer.restart()
                     }
                     Timer {
@@ -557,7 +557,8 @@ ApplicationWindow {
                                 engine.createObjectAsync(
                                     project.active.content,
                                     tester,
-                                    project.active.file.pathUrl()
+                                    project.active.file.pathUrl(),
+                                    true
                                 );
                             }
                         }
@@ -791,16 +792,11 @@ ApplicationWindow {
             if (active)
                 createTimer.restart()
         }
-        onInFocusChanged : {
-            editor.isDirty = false
-        }
     }
 
     Connections{
         target: project.documentModel
         onMonitoredDocumentChanged : {
-            console.log('compiling ' + (project.active === project.inFocus))
-            console.log('compiling ' + project.active + project.inFocus)
             if (project.active === project.inFocus){
                 engine.createObjectAsync(
                     tester.program,
@@ -811,7 +807,8 @@ ApplicationWindow {
                 engine.createObjectAsync(
                     project.active.content,
                     tester,
-                    project.active.file.pathUrl()
+                    project.active.file.pathUrl(),
+                    true
                 );
             }
         }

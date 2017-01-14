@@ -1,13 +1,13 @@
 #include "qplugintypesfacade.h"
 
+#ifdef Q_PLUGINTYPES_ENABLED
+
 #include <QtQml/private/qqmlmetatype_p.h>
 #include <QtQml/private/qqmlopenmetaobject_p.h>
 #include <QtQuick/private/qquickevents_p_p.h>
 #include <QtQuick/private/qquickpincharea_p.h>
 #include <QtCore/private/qobject_p.h>
 #include <QtCore/private/qmetaobject_p.h>
-
-
 #include <QtQml/private/qhashedstring_p.h>
 
 #include "qmlstreamwriter.h"
@@ -19,35 +19,15 @@
 
 namespace lcv{
 
+
 namespace{
 
-//QString pluginImportPath;
-//bool verbose = false;
-//bool creatable = true;
-
-//QString currentProperty;
-//QString inObjectInstantiation;
-
-static QString enquote(const QString &string)
-{
+static QString enquote(const QString &string){
     QString s = string;
     return QString("\"%1\"").arg(s.replace(QLatin1Char('\\'), QLatin1String("\\\\"))
                                  .replace(QLatin1Char('"'),QLatin1String("\\\"")));
 }
 
-//void collectReachableMetaObjects(const QMetaObject *meta, QSet<const QMetaObject *> *metas, bool extended = false)
-//{
-//    if (! meta || metas->contains(meta))
-//        return;
-
-//    // dynamic meta objects can break things badly
-//    // but extended types are usually fine
-//    const QMetaObjectPrivate *mop = reinterpret_cast<const QMetaObjectPrivate *>(meta->d.data);
-//    if (extended || !(mop->flags & DynamicMetaObject))
-//        metas->insert(meta);
-
-//    collectReachableMetaObjects(meta->superClass(), metas);
-//}
 
 //void collectReachableMetaObjects(QObject *object, QSet<const QMetaObject *> *metas)
 //{
@@ -79,27 +59,9 @@ static QString enquote(const QString &string)
 //void collectReachableMetaObjects(const QQmlType *ty, QSet<const QMetaObject *> *metas)
 //{
 //    collectReachableMetaObjects(ty->metaObject(), metas, ty->isExtendedType());
-////    if (ty->attachedPropertiesType())
-////        collectReachableMetaObjects(ty->attachedPropertiesType(), metas);
+//    if (ty->attachedPropertiesType())
+//        collectReachableMetaObjects(ty->attachedPropertiesType(), metas);
 //}
-
-///* We want to add the MetaObject for 'Qt' to the list, this is a
-//   simple way to access it.
-//*/
-//class FriendlyQObject: public QObject
-//{
-//public:
-//    static const QMetaObject *qtMeta() { return &staticQtMetaObject; }
-//};
-
-/* When we dump a QMetaObject, we want to list all the types it is exported as.
-   To do this, we need to find the QQmlTypes associated with this
-   QMetaObject.
-*/
-static QHash<QByteArray, QSet<const QQmlType *> > qmlTypesByCppName;
-
-// No different versioning possible for a composite type.
-//static QMap<QString, const QQmlType * > qmlTypesByCompositeName;
 
 static QHash<QByteArray, QByteArray> cppToId;
 
@@ -300,13 +262,18 @@ public:
 };
 
 
-class Dumper
-{
+class Dumper{
+
     QmlStreamWriter *qml;
     QString relocatableModuleUri;
 
+    QHash<QByteArray, QSet<const QQmlType *> > qmlTypesByCppName;
+
 public:
-    Dumper(QmlStreamWriter *qml) : qml(qml) {}
+    Dumper(QmlStreamWriter *qml, const QHash<QByteArray, QSet<const QQmlType *> > &qmlTypesCppName)
+        : qml(qml)
+        , qmlTypesByCppName(qmlTypesCppName)
+    {}
 
     void setRelocatableModuleUri(const QString &uri)
     {
@@ -649,7 +616,6 @@ private:
     }
 };
 
-
 }// namespace
 
 
@@ -659,7 +625,12 @@ QPluginTypesFacade::QPluginTypesFacade(){
 QPluginTypesFacade::~QPluginTypesFacade(){
 }
 
-void QPluginTypesFacade::extractTypes(const QString &module,
+bool QPluginTypesFacade::pluginTypesEnabled(){
+    return true;
+}
+
+void QPluginTypesFacade::extractTypes(
+        const QString &module,
         QQmlEngine *,
         QList<const QQmlType *> &types,
         QHash<QByteArray, QSet<const QQmlType *> > &qmlTypesByCppName)
@@ -677,26 +648,35 @@ void QPluginTypesFacade::extractTypes(const QString &module,
     }
 }
 
-//TODO: Also parse properties and attached objects
-void QPluginTypesFacade::getTypeDependencies(const QString& module,
+bool QPluginTypesFacade::isModule(const QString &uri){
+    return QQmlMetaType::isAnyModule(uri);
+}
+
+//TODO: Also parse attached objects
+void QPluginTypesFacade::getTypeDependencies(
+        const QString& module,
         const QList<const QQmlType *> &types,
         const QHash<QByteArray, QSet<const QQmlType *> > &qmlTypesByCppName,
+        QSet<const QMetaObject*>& solvedTypes,
         QList<const QMetaObject *>& unknownTypes,
         QStringList &dependencies)
 {
     foreach( const QQmlType* ty, types ){
         const QMetaObject* tyme = ty->metaObject();
+        solvedTypes.insert(tyme);
 
         while( tyme->superClass() != 0 ){
             tyme = tyme->superClass();
             if ( qmlTypesByCppName.contains(convertToId(tyme)) ){
+
                 bool typeHasExport = false;
                 const QSet<const QQmlType*>& tymeexports = qmlTypesByCppName[convertToId(tyme)];
                 foreach( const QQmlType* nestedType, tymeexports ){
                     QString typeModule = nestedType->qmlTypeName();
                     typeModule = typeModule.mid(0, typeModule.lastIndexOf(QLatin1Char('/')));
-                    if ( !typeModule.isEmpty() && typeModule != module && !dependencies.contains(typeModule))
+                    if ( !typeModule.isEmpty() && typeModule != module && !dependencies.contains(typeModule)){
                         dependencies.append(typeModule);
+                    }
                     typeHasExport = true;
                 }
                 if ( !tymeexports.isEmpty() )
@@ -713,12 +693,11 @@ QString QPluginTypesFacade::getTypeName(const QQmlType* type){
 }
 
 void QPluginTypesFacade::extractPluginInfo(
-    const QSet<const QMetaObject *> metaTypes,
-    const QHash<QByteArray, QSet<const QQmlType *> > &qmlTypesCppName,
-    QByteArray *stream)
+        const QSet<const QMetaObject *>& metaTypes,
+        const QHash<QByteArray, QSet<const QQmlType *> > &qmlTypesCppName,
+        const QList<QString> &dependencies,
+        QByteArray *stream)
 {
-    qmlTypesByCppName = qmlTypesCppName; // HACK
-
     QmlStreamWriter qml(stream);
 
     qml.writeStartDocument();
@@ -732,21 +711,20 @@ void QPluginTypesFacade::extractPluginInfo(
               "\n").arg("Live CV").arg("1.2"));
     qml.writeStartObject("Module");
 
-
     QStringList quotedDependencies;
-    //    foreach (const QString &dep, dependencies) //TODO
-    //        quotedDependencies << enquote(dep);
+    foreach (const QString &dep, dependencies)
+        quotedDependencies << enquote(dep);
     qml.writeArrayBinding("dependencies", quotedDependencies);
 
     QMap<QString, const QMetaObject *> nameToMeta;
     foreach (const QMetaObject *meta, metaTypes)
         nameToMeta.insert(convertToId(meta), meta);
 
-    Dumper dumper(&qml);
-    //    dumper.setRelocatableModuleUri("QtQuick.Layouts");
+    Dumper dumper(&qml, qmlTypesCppName);
 
     foreach (const QMetaObject *meta, nameToMeta) {
-        dumper.dump(meta, true, false); //TODO: View uncreatable & singleton
+        //TODO: View uncreatable & singleton
+        dumper.dump(meta, false, false);
     }
     //    foreach (const QQmlType *compositeType, qmlTypesByCompositeName)
     //        dumper.dumpComposite(&engine, compositeType, defaultReachableNames);
@@ -755,83 +733,53 @@ void QPluginTypesFacade::extractPluginInfo(
     qml.writeEndDocument();
 }
 
-//void QPluginTypesFacade::extractPluginInfo( QByteArray* stream){
-//    QList<QQmlType*> types;
-//    QSet<const QMetaObject *> metas;
+}// namespace
 
-//    foreach (const QQmlType *ty, QQmlMetaType::qmlTypes()){
-////        qDebug() << ty->metaObject()->className();
+#else
 
-//        QString typeModule = ty->qmlTypeName();
-//        typeModule = typeModule.mid(0, typeModule.lastIndexOf(QLatin1Char('/')));
-
-//        if ( typeModule != "QtQuick" )
-//            qDebug() << ty->qmlTypeName() << ty->elementName() << ty->module() << ty->sourceUrl();
+namespace lcv{
 
 
-////        qDebug() << "Module:" << module;
-////        qDebug() << "Id:" << convertToId(ty->metaObject());
+bool QPluginTypesFacade::pluginTypesEnabled(){
+    return false;
+}
 
-//        if ( typeModule == "QtQuick.Layouts" ){
-//            qmlTypesByCppName[convertToId(ty->metaObject())].insert(ty);
-//            metas.insert(ty->metaObject());
-//        }
-////        qDebug() << ty->module();
-//    }
+void QPluginTypesFacade::extractTypes(
+    const QString &,
+    QQmlEngine *,
+    QList<const QQmlType *> &,
+    QHash<QByteArray, QSet<const QQmlType *> > &)
+{
+}
 
-//    qDebug() << "TOTAL INSERTIONS:" << qmlTypesByCppName.size();
-//    for( static QHash<QByteArray, QSet<const QQmlType *> >::iterator it = qmlTypesByCppName.begin();
-//         it != qmlTypesByCppName.end(); ++it ){
+void QPluginTypesFacade::getTypeDependencies(
+    const QString &,
+    const QList<const QQmlType *> &,
+    const QHash<QByteArray, QSet<const QQmlType *> > &,
+    QSet<const QMetaObject *> &,
+    QList<const QMetaObject *> &,
+    QStringList &)
+{
+}
 
-//        qDebug() << "OBJECT:" << it.key();
-//        qDebug() << "EXPORT COUNT:" << it.value().size();
+QString QPluginTypesFacade::getTypeName(
+    const QQmlType *)
+{
+    return "";
+}
 
-//    }
+bool QPluginTypesFacade::isModule(const QString &){
+    return false;
+}
 
-//    QmlStreamWriter qml(&stream);
-
-//    qml.writeStartDocument();
-//    qml.writeLibraryImport(QLatin1String("QtQuick.tooling"), 1, 2);
-//    qml.write(QString("\n"
-//              "// This file describes the plugin-supplied types contained in the library.\n"
-//              "// It is used for QML tooling purposes only.\n"
-//              "//\n"
-//              "// This file was auto-generated by:\n"
-//              "// '%1 %2'\n"
-//              "\n").arg("Live CV").arg("1.2"));
-//    qml.writeStartObject("Module");
-
-
-//    QStringList quotedDependencies;
-////    foreach (const QString &dep, dependencies) //TODO
-////        quotedDependencies << enquote(dep);
-//    qml.writeArrayBinding("dependencies", quotedDependencies);
-
-//    QMap<QString, const QMetaObject *> nameToMeta;
-//    foreach (const QMetaObject *meta, metas)
-//        nameToMeta.insert(convertToId(meta), meta);
-
-//    Dumper dumper(&qml);
-////    dumper.setRelocatableModuleUri("QtQuick.Layouts");
-
-//    foreach (const QMetaObject *meta, nameToMeta) {
-//        dumper.dump(meta, true, false);
-//    }
-////    foreach (const QQmlType *compositeType, qmlTypesByCompositeName)
-////        dumper.dumpComposite(&engine, compositeType, defaultReachableNames);
-
-//    qml.writeEndObject();
-//    qml.writeEndDocument();
-
-//    std::cout << bytes.constData() << std::flush;
-//    // it is part of the current library
-
-////    foreach (const QMetaObject *mo, defaultReachable) {
-////        qDebug() << mo->className();
-////    }
-
-////    qDebug() << defaultReachable.size();
-////    qDebug() << defaultTypes.size();
-//}
+void QPluginTypesFacade::extractPluginInfo(
+        const QSet<const QMetaObject *> &,
+        const QHash<QByteArray, QSet<const QQmlType *> > &,
+        const QList<QString> &,
+        QByteArray *)
+{
+}
 
 }// namespace
+
+#endif

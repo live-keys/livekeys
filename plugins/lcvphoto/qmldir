@@ -1,3 +1,4 @@
 module lcvphoto
 plugin lcvphoto
-
+depends QtQuick 2.3
+depends lcvcore 1.0

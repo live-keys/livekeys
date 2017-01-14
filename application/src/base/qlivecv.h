@@ -40,6 +40,7 @@ class QLiveCVEngine;
 class QLiveCVArguments;
 class QProject;
 class QDocumentCodeInterface;
+class QDocumentQmlHandler;
 
 // class QLiveCV
 // -------------
@@ -63,6 +64,8 @@ public:
     static void registerTypes();
 
     const QLiveCVArguments* arguments() const;
+
+    QByteArray extractPluginInfo(const QString& import) const;
 
 private:
     QLiveCV(const QLiveCV&);

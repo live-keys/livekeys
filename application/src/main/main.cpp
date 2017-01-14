@@ -43,6 +43,12 @@ int main(int argc, char *argv[]){
     }
 
     livecv.loadLibrary(livecv.dir() + "/lcvlib");
+
+    if ( livecv.arguments()->pluginInfoFlag() ){
+        printf("%s", livecv.extractPluginInfo(livecv.arguments()->pluginInfoImport()).data());
+        return 0;
+    }
+
     livecv.loadQml(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return app.exec();

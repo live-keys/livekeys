@@ -214,7 +214,8 @@ Rectangle{
 
                     font.family: "Open Sans, sans-serif"
                     font.pixelSize: 12
-                    font.weight: model.isOpen ? Font.Bold : Font.Light
+                    font.weight: Font.Light
+                    font.italic: model.isOpen
                 }
                 Text{
                     anchors.left: parent.left
