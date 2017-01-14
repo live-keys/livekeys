@@ -13,9 +13,11 @@ Column{
        file : project.dir() + '/../_images/buildings_0246.jpg'
     }
 
-    ChannelSelect{
-        id : channelSelect
+    MatRoi{
+        id : matRoi
         input : src.output
+        regionWidth: 100
+        regionHeight: 100
     }
     
     ImWrite{
@@ -28,7 +30,7 @@ Column{
         InputBox{
             id: pathInput
             clip: true
-            text: project.dir() + '/../_images/buildings_0246_grey.jpg'
+            text: project.dir() + '/../_images/buildings_0246_roi.jpg'
             anchors.rightMargin: 50
             border.width: 1
             border.color: "#061a29"
@@ -39,7 +41,8 @@ Column{
             anchors.right: parent.right
             text: 'Save'
             onClicked: {
-                imWrite.saveImage(pathInput.text, channelSelect.output)
+                if ( imWrite.saveImage(pathInput.text, matRoi.output) )
+                    console.log("Image saved succesfully")
             }
         }
     }

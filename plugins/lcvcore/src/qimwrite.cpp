@@ -23,9 +23,6 @@ bool QImWrite::saveImage(const QString &file, QMat *image){
 }
 
 void QImWrite::setParams(const QJSValue &params){
-    if (m_params == params)
-        return;
-
     m_convertedParams.clear();
     if ( params.isObject() ){
         QJSValueIterator paramsIt(params);
