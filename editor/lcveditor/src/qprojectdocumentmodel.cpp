@@ -51,7 +51,7 @@ QHash<int, QByteArray> QProjectDocumentModel::roleNames() const{
 void QProjectDocumentModel::openDocument(const QString &path, QProjectDocument *document){
     beginResetModel();
     m_openedFiles[path] = document;
-    if ( document->isMonitored() )
+    if ( document->file()->isMonitored() )
         fileWatcher()->addPath(path);
     endResetModel();
 }
@@ -78,13 +78,13 @@ void QProjectDocumentModel::closeDocuments(){
 }
 
 void QProjectDocumentModel::updateDocumeMonitoring(QProjectDocument *document, bool monitor){
-    if ( document->isMonitored() != monitor ){
+    if ( document->file()->isMonitored() != monitor ){
         if ( monitor ){
             fileWatcher()->addPath(document->file()->path());
-            document->setIsMonitored(true);
+            document->file()->setIsMonitored(true);
         } else {
             fileWatcher()->removePath(document->file()->path());
-            document->setIsMonitored(false);
+            document->file()->setIsMonitored(false);
         }
     }
 }
@@ -195,7 +195,7 @@ void QProjectDocumentModel::closeDocument(const QString &path, bool closeIfActiv
 void QProjectDocumentModel::rescanDocuments(){
     for( QHash<QString, QProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         QDateTime modifiedDate = QFileInfo(it.key()).lastModified();
-        if ( modifiedDate > it.value()->lastModified() && !it.value()->isMonitored() )
+        if ( modifiedDate > it.value()->lastModified() && !it.value()->file()->isMonitored() )
             emit documentChangedOutside(it.value());
     }
 }

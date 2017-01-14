@@ -8,12 +8,16 @@
 #include "qprojectqmlscopecontainer_p.h"
 #include "qqmllibraryinfo_p.h"
 #include "qprojectfile.h"
+#include "qplugininfoextractor.h"
+#include "qplugintypesfacade.h"
 
 #include <QQmlEngine>
 #include <QFileInfo>
 #include <QDirIterator>
 #include <QTextDocument>
+#include <QQmlComponent>
 #include <QStringList>
+#include <QWaitCondition>
 
 #include <QDebug>
 
@@ -28,6 +32,8 @@
 namespace lcv{
 
 namespace qmlhandler_helpers{
+
+    /// Retrieve a type from any available libraries to the document scope
 
     QQmlLibraryInfo::ExportVersion getType(
             QDocumentQmlScope::Ptr document,
@@ -49,8 +55,21 @@ namespace qmlhandler_helpers{
                 return ev;
             }
         }
+
+        foreach( const QString& defaultLibrary, project->defaultLibraries() ){
+            QQmlLibraryInfo::ExportVersion ev = project->globalLibraries()->libraryInfo(defaultLibrary)->findExport(name);
+            if ( ev.isValid() ){
+                libraryKey = defaultLibrary;
+                return ev;
+            }
+        }
+
         return QQmlLibraryInfo::ExportVersion();
     }
+
+    /// Retrieve a type from a specified namespace. If the namespace is empty, the type is searched through
+    /// implicit libraries and default ones as well. Otherwise, only libraries with the imported namespace are
+    /// searched.
 
     QQmlLibraryInfo::ExportVersion getType(
             QDocumentQmlScope::Ptr document,
@@ -59,11 +78,21 @@ namespace qmlhandler_helpers{
             const QString& name,
             QString& libraryKey)
     {
-        QQmlLibraryInfo::ExportVersion ev =
-            project->implicitLibraries()->libraryInfo(document->path())->findExport(name);
-        if ( ev.isValid() ){
-            libraryKey = "";
-            return ev;
+        if ( importNamespace.isEmpty() ){
+            QQmlLibraryInfo::ExportVersion ev =
+                project->implicitLibraries()->libraryInfo(document->path())->findExport(name);
+            if ( ev.isValid() ){
+                libraryKey = "";
+                return ev;
+            }
+
+            foreach( const QString& defaultLibrary, project->defaultLibraries() ){
+                QQmlLibraryInfo::ExportVersion ev = project->globalLibraries()->libraryInfo(defaultLibrary)->findExport(name);
+                if ( ev.isValid() ){
+                    libraryKey = defaultLibrary;
+                    return ev;
+                }
+            }
         }
 
         foreach( const QDocumentQmlScope::ImportEntry& imp, document->imports() ){
@@ -75,6 +104,7 @@ namespace qmlhandler_helpers{
                 }
             }
         }
+
         return QQmlLibraryInfo::ExportVersion();
     }
 
@@ -102,6 +132,16 @@ namespace qmlhandler_helpers{
                     if ( !superObject.isNull() ){
                         typeLibrary = libraryDependency;
                         break;
+                    }
+                }
+
+                if ( superObject.isNull() ){
+                    foreach( const QString& defaultLibrary, project->defaultLibraries() ){
+                        superObject = globalLibs->libraryInfo(defaultLibrary)->findObjectByClassName(typeSuperClass);
+                        if ( !superObject.isNull() ){
+                            typeLibrary = defaultLibrary;
+                            break;
+                        }
                     }
                 }
             }
@@ -469,7 +509,7 @@ namespace qmlhandler_helpers{
 // QDocumentQmlHandler implementation
 // ----------------------------------
 
-QDocumentQmlHandler::QDocumentQmlHandler(QQmlEngine* engine, QLockedFileIOSession::Ptr lockedFileIO, QObject *parent)
+QDocumentQmlHandler::QDocumentQmlHandler(QQmlEngine* engine, QMutex *engineMutex, QLockedFileIOSession::Ptr lockedFileIO, QObject *parent)
     : QAbstractCodeHandler(parent)
     , m_target(0)
     , m_highlighter(0)
@@ -477,11 +517,12 @@ QDocumentQmlHandler::QDocumentQmlHandler(QQmlEngine* engine, QLockedFileIOSessio
     , m_completionContextFinder(new QQmlCompletionContextFinder)
     , m_documentScope(0)
     , m_projectScope(0)
-    , m_scanner(new QProjectQmlScanner(lockedFileIO))
+    , m_scanner(new QProjectQmlScanner(engine, engineMutex, lockedFileIO))
     , m_newScope(false)
 {
     connect(m_scanner, SIGNAL(documentScopeReady()), SLOT(newDocumentScopeReady()) );
     connect(m_scanner, SIGNAL(projectScopeReady()), SLOT(newProjectScope()));
+    connect(m_scanner, SIGNAL(requestObjectLoad(QString)), SLOT(loadImport(QString)));
 }
 
 QDocumentQmlHandler::~QDocumentQmlHandler(){
@@ -649,7 +690,40 @@ void QDocumentQmlHandler::setDocument(QProjectDocument *document){
 
 void QDocumentQmlHandler::updateScope(const QString& data){
     if ( !m_projectScope.isNull() && m_document )
-            m_scanner->queueDocumentScopeScan(m_document->file()->path(), data, m_projectScope.data());
+        m_scanner->queueDocumentScopeScan(m_document->file()->path(), data, m_projectScope.data());
+}
+
+QPluginInfoExtractor* QDocumentQmlHandler::getPluginInfoExtractor(const QString &import){
+    if ( !QPluginTypesFacade::pluginTypesEnabled() ){
+        qCritical("Plugin types not available in this build.");
+        return 0;
+    }
+
+    QQmlLibraryDependency parsedImport = QQmlLibraryDependency::parse(import);
+    if ( !parsedImport.isValid() ){
+        qCritical("Invalid import: %s", import);
+        return 0;
+    }
+
+    m_projectScope = QProjectQmlScope::create(m_engine);
+    m_scanner->setProjectScope(m_projectScope);
+
+    QList<QString> paths;
+    m_projectScope->findQmlLibraryInImports(
+        parsedImport.uri(),
+        parsedImport.versionMajor(),
+        parsedImport.versionMinor(),
+        paths
+    );
+
+    if ( paths.size() == 0 ){
+        qCritical("Failed to find import path: %s", qPrintable(import));
+        return 0;
+    }
+
+    QPluginInfoExtractor* extractor = new QPluginInfoExtractor(m_scanner, paths.first(), this);
+    connect(m_scanner, &QProjectQmlScanner::projectScopeReady, extractor, &QPluginInfoExtractor::newProjectScope);
+    return extractor;
 }
 
 void QDocumentQmlHandler::newDocumentScopeReady(){
@@ -682,6 +756,25 @@ void QDocumentQmlHandler::fileChanged(const QString &path){
     QProjectQmlScope::Ptr project = m_projectScope;
     project->globalLibraries()->resetLibrariesInPath(path);
     project->implicitLibraries()->resetLibrariesInPath(path);
+}
+
+void QDocumentQmlHandler::loadImport(const QString &import){
+    QQmlComponent component(m_engine);
+    QByteArray code = "import " + import.toUtf8() + "\nQtObject{}\n";
+
+    QDOCUMENT_QML_HANDLER_DEBUG("Importing object for plugininfo: " + code);
+
+    component.setData(code, QUrl::fromLocalFile("loading.qml"));
+    if ( component.errors().size() > 0 ){
+        m_scanner->updateLoadRequest(import, 0, true);
+        return;
+    }
+    QObject* obj = component.create(m_engine->rootContext());
+    if ( obj == 0 ){
+        m_scanner->updateLoadRequest(import, 0, true);
+    } else {
+        m_scanner->updateLoadRequest(import, obj, false);
+    }
 }
 
 void QDocumentQmlHandler::suggestionsForGlobalQmlContext(
@@ -825,6 +918,15 @@ void QDocumentQmlHandler::suggestionsForNamespaceTypes(
         foreach( const QString& e, exports ){
             if ( e != document->componentName() )
                 suggestions << QCodeCompletionSuggestion(e, "", "implicit", e);
+        }
+
+
+        foreach( const QString& defaultLibrary, projectScope->defaultLibraries() ){
+            QStringList exports;
+            projectScope->globalLibraries()->libraryInfo(defaultLibrary)->listExports(&exports);
+            foreach( const QString& e, exports ){
+                suggestions << QCodeCompletionSuggestion(e, "", "QtQml", e);
+            }
         }
     }
 

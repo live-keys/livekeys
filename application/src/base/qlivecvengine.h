@@ -30,6 +30,7 @@ public:
     const QList<QQmlError>& lastErrors() const;
 
     QQmlEngine* engine();
+    QMutex* engineMutex();
 
 signals:
     void aboutToCreateObject(const QUrl& file);
@@ -38,8 +39,8 @@ signals:
     void objectCreationError(QJSValue errors);
 
 public slots:
-    void createObjectAsync(const QString& qmlCode, QObject* parent, const QUrl& file);
-    QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file);
+    void createObjectAsync(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
+    QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
 
     QJSValue lastErrorsObject() const;
 
@@ -47,7 +48,7 @@ private:
     QJSValue toJSErrors(const QList<QQmlError>& errors) const;
 
     QQmlEngine*    m_engine;
-    QMutex         m_engineMutex;
+    QMutex*        m_engineMutex;
     QQmlIncubator* m_incubator;
     QLiveCVIncubationController* m_incubationController;
 
@@ -66,6 +67,10 @@ inline void QLiveCVEngine::setIsLoading(bool isLoading){
 
 inline QQmlEngine*QLiveCVEngine::engine(){
     return m_engine;
+}
+
+inline QMutex *QLiveCVEngine::engineMutex(){
+    return m_engineMutex;
 }
 
 }// namespace

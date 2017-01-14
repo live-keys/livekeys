@@ -20,6 +20,7 @@ public:
     int totalLibraries() const;
 
     QHash<QString, QQmlLibraryInfo::Ptr> getNoInfoLibraries();
+    QHash<QString, QQmlLibraryInfo::Ptr> getNoLinkLibraries();
 
     void resetLibrariesInPath(const QString& path);
     void resetLibrary(const QString& path);
@@ -71,9 +72,26 @@ inline QHash<QString, QQmlLibraryInfo::Ptr> QProjectQmlScopeContainer::getNoInfo
     m_libraryMutex.lock();
 
     for( QHash<QString, QQmlLibraryInfo::Ptr>::const_iterator it = m_libraries.begin(); it != m_libraries.end(); ++it ){
-        if ( it.value()->data().pluginTypeInfoStatus() == QmlJS::LibraryInfo::NoTypeInfo ||
-             it.value()->data().pluginTypeInfoStatus() == QmlJS::LibraryInfo::TypeInfoFileError )
+        if ( it.value()->status() == QQmlLibraryInfo::NotScanned ||
+             it.value()->status() == QQmlLibraryInfo::RequiresDependency ){
+
             libraries[it.key()] = it.value();
+        }
+    }
+
+    m_libraryMutex.unlock();
+
+    return libraries;
+}
+
+inline QHash<QString, QQmlLibraryInfo::Ptr> QProjectQmlScopeContainer::getNoLinkLibraries(){
+    QHash<QString, QQmlLibraryInfo::Ptr> libraries;
+    m_libraryMutex.lock();
+
+    for( QHash<QString, QQmlLibraryInfo::Ptr>::const_iterator it = m_libraries.begin(); it != m_libraries.end(); ++it ){
+        if ( it.value()->status() == QQmlLibraryInfo::NoPrototypeLink ){
+            libraries[it.key()] = it.value();
+        }
     }
 
     m_libraryMutex.unlock();
@@ -85,7 +103,7 @@ inline void QProjectQmlScopeContainer::resetLibrariesInPath(const QString &path)
     m_libraryMutex.lock();
     for( QHash<QString, QQmlLibraryInfo::Ptr>::iterator it = m_libraries.begin(); it != m_libraries.end(); ++it ){
         if ( it.key().startsWith(path) )
-            it.value()->data().setPluginTypeInfoStatus(QmlJS::LibraryInfo::NoTypeInfo);
+            it.value()->setStatus(QQmlLibraryInfo::NotScanned);
     }
     m_libraryMutex.unlock();
 }
@@ -93,7 +111,7 @@ inline void QProjectQmlScopeContainer::resetLibrariesInPath(const QString &path)
 inline void QProjectQmlScopeContainer::resetLibrary(const QString &path){
     m_libraryMutex.lock();
     if ( m_libraries.contains(path) )
-        m_libraries[path]->data().setPluginTypeInfoStatus(QmlJS::LibraryInfo::NoTypeInfo);
+        m_libraries[path]->setStatus(QQmlLibraryInfo::NotScanned);
     m_libraryMutex.unlock();
 }
 

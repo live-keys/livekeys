@@ -13,9 +13,9 @@ namespace lcv{
 QProjectDocument::QProjectDocument(QProjectFile *file, bool isMonitored, QProject *parent)
     : QObject(parent)
     , m_file(file)
-    , m_isMonitored(isMonitored)
 {
     readContent();
+    m_file->setIsMonitored(isMonitored);
 }
 
 void QProjectDocument::dumpContent(const QString &content){
@@ -67,6 +67,7 @@ QProjectDocument::~QProjectDocument(){
     else {
         m_file->setIsOpen(false);
         m_file->setIsDirty(false);
+        m_file->setIsMonitored(false);
     }
 }
 

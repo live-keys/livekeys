@@ -28,12 +28,8 @@ Rectangle{
     signal toggleSize()
     signal toggleNavigation()
 
+    property bool isDirtyMask: true
     property bool isDirty: false
-//    onIsDirtyChanged : {
-//        if ( project.inFocus ){
-//            project.inFocus.file.isDirty = isDirty
-//        }
-//    }
 
     property alias text: editorArea.text
     property alias font: editorArea.font
@@ -176,7 +172,15 @@ Rectangle{
                 }
 
                 focus : true
-                text : project.inFocus ? project.inFocus.content : ''
+                onTextChanged: {
+                    if ( editor.isDirtyMask )
+                        editor.isDirtyMask = false
+                    else {
+                        editor.isDirty = true
+                        if ( project.inFocus )
+                            project.inFocus.file.isDirty = true
+                    }
+                }
 
                 color : "#fff"
                 font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
@@ -193,7 +197,7 @@ Rectangle{
                 height : Math.max( flick.height - 20, paintedHeight )
                 width : Math.max( flick.width - 20, paintedWidth )
 
-                readOnly: project.inFocus === null || project.inFocus.isMonitored
+                readOnly: project.inFocus === null || project.inFocus.file.isMonitored
 
                 Keys.onPressed: {
                     if ( (event.key === Qt.Key_BracketRight && (event.modifiers & Qt.ShiftModifier) ) ||
@@ -291,8 +295,12 @@ Rectangle{
                 }
 
                 Component.onCompleted: {
-                    editor.isDirty = false
                     codeHandler.target = textDocument
+                    if ( project.inFocus ){
+                        editor.isDirtyMask = true
+                        editor.isDirty = project.inFocus.file.isDirty
+                        editor.text    = project.inFocus.content
+                    }
                 }
 
                 Behavior on font.pixelSize {
@@ -307,12 +315,24 @@ Rectangle{
                 Connections{
                     target: project
                     onInFocusChanged : {
-                        editor.isDirty = (project.inFocus ? project.inFocus.file.isDirty : false)
+                        editor.isDirtyMask = true
+                        if ( project.inFocus ){
+                            editor.isDirty = project.inFocus.file.isDirty
+                            editor.text    = project.inFocus.content
+                        } else {
+                            editor.text = ''
+                            editor.isDirty = false
+                        }
                     }
                 }
 
                 Connections{
                     target: project.inFocus
+                    onContentChanged : {
+                        editor.isDirtyMask = true
+                        editor.isDirty = project.inFocus.file.isDirty
+                        editor.text    = project.inFocus.content
+                    }
                 }
 
                 MouseArea{
