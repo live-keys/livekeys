@@ -517,8 +517,8 @@ QDocumentQmlHandler::QDocumentQmlHandler(QQmlEngine* engine, QMutex *engineMutex
     , m_completionContextFinder(new QQmlCompletionContextFinder)
     , m_documentScope(0)
     , m_projectScope(0)
-    , m_scanner(new QProjectQmlScanner(engine, engineMutex, lockedFileIO))
     , m_newScope(false)
+    , m_scanner(new QProjectQmlScanner(engine, engineMutex, lockedFileIO))
 {
     connect(m_scanner, SIGNAL(documentScopeReady()), SLOT(newDocumentScopeReady()) );
     connect(m_scanner, SIGNAL(projectScopeReady()), SLOT(newProjectScope()));
@@ -650,6 +650,8 @@ void QDocumentQmlHandler::assistCompletion(
         if ( ctx->context() & QQmlCompletionContext::InImport ){
             suggestionsForStringImport(extractQuotedString(cursor), suggestions, filter);
             model->setSuggestions(suggestions, filter);
+        } else {
+            model->setSuggestions(suggestions, filter);
         }
     } else if ( ctx->context() & QQmlCompletionContext::InImport ){
         suggestionsForImport(*ctx, suggestions);
@@ -701,7 +703,7 @@ QPluginInfoExtractor* QDocumentQmlHandler::getPluginInfoExtractor(const QString 
 
     QQmlLibraryDependency parsedImport = QQmlLibraryDependency::parse(import);
     if ( !parsedImport.isValid() ){
-        qCritical("Invalid import: %s", import);
+        qCritical("Invalid import: %s", qPrintable(import));
         return 0;
     }
 

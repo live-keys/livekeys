@@ -62,12 +62,12 @@ private:
     bool m_requiresReindex;
     QFutureWatcher<QList<Entry> > m_workerWatcher;
 
+    QProject*              m_project;
     QList<Entry>           m_files;
     QList<Entry>           m_filteredOpenedFiles;
     QList<int>             m_filteredFiles;
     QHash<int, QByteArray> m_roles;
     QString                m_filter;
-    QProject*              m_project;
 };
 
 inline bool QProjectNavigationModel::isIndexing() const{

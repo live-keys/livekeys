@@ -134,9 +134,9 @@ void QLiveCV::loadQml(const QUrl &url){
     m_engine->engine()->rootContext()->setContextProperty("engine", m_engine);
     m_engine->engine()->rootContext()->setContextProperty("codeHandler", m_codeInterface);
 #ifdef Q_OS_LINUX
-    m_engine->engine()->rootContext()->setContextProperty("isLinux", true);
+    m_engine->engine()->rootContext()->setContextProperty("isLinux", QVariant::fromValue(true));
 #else
-    m_engine->engine()->rootContext()->setContextProperty("isLinux", false);
+    m_engine->engine()->rootContext()->setContextProperty("isLinux", QVariant::fromValue(false));
 #endif
 
     static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);

@@ -42,7 +42,7 @@ QString QLiveCVArguments::option(const QString &key) const{
 bool QLiveCVArguments::isOptionSet(const QString &key) const{
     QLiveCVCommandLineParser::Option* option = m_parser->findScriptOptionByName(key);
     if ( !option ){
-        qCritical("Failed to find script option: ", qPrintable(key));
+        qCritical("Failed to find script option: %s", qPrintable(key));
         return "";
     }
     return m_parser->isSet(option);

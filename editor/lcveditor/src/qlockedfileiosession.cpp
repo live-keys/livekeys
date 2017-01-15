@@ -1,6 +1,7 @@
 #include "qlockedfileiosession.h"
 #include <QFile>
 #include <QTextStream>
+#include <QMutex>
 #include <QReadWriteLock>
 
 namespace lcv{

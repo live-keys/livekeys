@@ -1,14 +1,12 @@
 #include "qcodecompletionmodel.h"
 
-#include <QDebug>
-
 namespace lcv{
 
 QCodeCompletionModel::QCodeCompletionModel(QObject *parent)
     : QAbstractListModel(parent)
+    , m_completionContext(0)
     , m_completionPosition(0)
     , m_isEnabled(false)
-    , m_completionContext(0)
 {
     m_roles[QCodeCompletionModel::Label]         = "label";
     m_roles[QCodeCompletionModel::Info]          = "info";
