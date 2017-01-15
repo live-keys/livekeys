@@ -10,6 +10,7 @@ class QQmlEngine;
 class QQmlError;
 class QQmlIncubator;
 class QLiveCVIncubationController;
+class QMutex;
 
 namespace lcv{
 

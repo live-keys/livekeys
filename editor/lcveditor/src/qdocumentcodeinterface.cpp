@@ -91,12 +91,13 @@ void QDocumentCodeInterface::generateCompletion(int cursorPosition){
     if ( m_target && m_codeHandler ){
         QTextCursor cursor(m_target->textDocument());
         cursor.setPosition(cursorPosition);
+        QTextCursor newCursor;
         m_codeHandler->assistCompletion(
             cursor,
             m_lastChar,
             true,
             m_completionModel,
-            QTextCursor()
+            newCursor
         );
     }
 }

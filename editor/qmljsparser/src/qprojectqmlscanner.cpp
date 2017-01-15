@@ -42,7 +42,7 @@ public:
 
 void updateLibraryPrototypes(
         QProjectQmlScope::Ptr projectScope,
-        const QString &path,
+        const QString &, //path
         QQmlLibraryInfo::Ptr library)
 {
     int missingDependencies = 0;
@@ -228,7 +228,7 @@ void scanObjectFile(
     QList<QDocumentQmlScope::Import> imports = QDocumentQmlScope::extractImports(documentInfo);
     QList<QString> paths;
     foreach( const QDocumentQmlScope::Import import, imports ){
-        if (import.importType() == QmlJS::ImportType::Directory) {
+        if (import.importType() == QDocumentQmlScope::Import::Directory) {
             projectScope->findQmlLibraryInPath(
                 import.path(),
                 false,
@@ -236,7 +236,7 @@ void scanObjectFile(
             );
         }
 
-        if (import.importType() == QmlJS::ImportType::Library) {
+        if (import.importType() == QDocumentQmlScope::Import::Library) {
             if (!import.isVersionValid())
                 continue;
             projectScope->findQmlLibraryInImports(
@@ -580,9 +580,9 @@ QProjectQmlScanner::QProjectQmlScanner(
     : QObject(parent)
     , m_project(0)
     , m_lastDocumentScope(0)
+    , m_lockedFileIO(lockedFileIO)
     , m_thread(new QThread)
     , m_timer(new QTimer)
-    , m_lockedFileIO(lockedFileIO)
     , m_engine(engine)
     , m_engineMutex(engineMutex)
 {
@@ -769,7 +769,7 @@ bool QProjectQmlScanner::tryToExtractPluginInfo(const QString& path, QByteArray*
     const QDir dir(path);
     QFile dirFile(dir.filePath("qmldir"));
     if( !dirFile.exists() ){
-        qCritical("Expected qmldir file does not exist: %s", dir.filePath("qmldir"));
+        qCritical("Expected qmldir file does not exist: %s", qPrintable(dir.filePath("qmldir")));
         return false;
     }
 

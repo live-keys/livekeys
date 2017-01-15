@@ -11,9 +11,9 @@ namespace lcv{
 
 QProjectNavigationModel::QProjectNavigationModel(QProject *project)
     : QAbstractListModel(project)
-    , m_project(project)
     , m_isIndexing(false)
     , m_requiresReindex(true)
+    , m_project(project)
 {
     m_roles[QProjectNavigationModel::Name]   = "name";
     m_roles[QProjectNavigationModel::Path]   = "path";

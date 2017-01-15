@@ -6,6 +6,7 @@
 #include <QQmlEngine>
 #include <QQuickItem>
 #include <QQmlIncubationController>
+#include <QMutex>
 #include <QMutexLocker>
 
 #include <QCoreApplication>
