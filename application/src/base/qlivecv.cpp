@@ -109,8 +109,11 @@ void QLiveCV::loadQml(const QUrl &url){
         qInstallMessageHandler(&QLiveCVLog::logFunction);
     if ( m_arguments->fileLogFlag() )
         QLiveCVLog::instance().enableFileLog();
-    if ( m_arguments->script() != "" )
+    if ( m_arguments->script() != "" ){
         m_project->openProject(m_arguments->script());
+    } else {
+        m_project->newProject();
+    }
     if ( !m_arguments->monitoredFiles().isEmpty() ){
         foreach( QString mfile, m_arguments->monitoredFiles() ){
             if ( !mfile.isEmpty() ){
@@ -185,7 +188,7 @@ QByteArray QLiveCV::extractPluginInfo(const QString &import) const{
     if ( extractor ){
         extractor->waitForResult(10000);
         if (extractor->timedOut() ){
-            return "Timed out\n";
+            return "Error: Timed out\n";
         }
     }
     return extractor->result();

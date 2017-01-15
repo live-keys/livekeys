@@ -21,7 +21,6 @@ QProject::QProject(QObject *parent)
     , m_active(0)
     , m_focus(0)
 {
-    newProject();
 }
 
 QProject::~QProject(){
