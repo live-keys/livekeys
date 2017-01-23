@@ -60,7 +60,18 @@ Rectangle{
             anchors.left: parent.left
             anchors.leftMargin: 15
             color: "#7b838b"
-            text: project.inFocus ? project.inFocus.file.name + (project.inFocus.file.isDirty ? '*' : '') : ''
+            text: {
+                if ( project.inFocus ){
+                    var filename = project.inFocus.file.name
+                    if ( filename === '' )
+                        filename = 'untitled'
+                    if ( project.inFocus.file.isDirty )
+                        filename += '*'
+                    return filename;
+                } else {
+                    return ''
+                }
+            }
             font.family: "Open Sans, sans-serif"
             font.pixelSize: 12
             font.weight: Font.Light
