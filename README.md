@@ -2,14 +2,14 @@
 
 [![Join the chat at https://gitter.im/dinusv/livecv](https://badges.gitter.im/dinusv/livecv.svg)](https://gitter.im/dinusv/livecv?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
- * **Version**: 1.2.0
+ * **Version**: 1.3.0
  * **License**: LGPL
  * **Website**: [livecv.dinusv.com](http://livecv.dinusv.com)
  * **Demo**: [www.youtube.com/watch?v=uEnJE6Jawfw](https://www.youtube.com/watch?v=uEnJE6Jawfw)
  * **Documentation**: [livecv.dinusv.com/documentation](http://livecv.dinusv.com/documentation)
  * **Build Requirements**:
-   * Qt 5.3 or higher
-   * Open CV 2.4.* for *Master Branch* OR Open CV 3.* for dev branch. Next release will switch to Open CV 3.*
+   * Qt 5.6 or higher
+   * Open CV 3.1 or higher
    
 
 Live CV is a computer vision coding environment that displays results while you code. It can be used to interact, link and adjust algorithms 
@@ -27,7 +27,7 @@ to go. Step by step instructions are also found in the download section.
 
 ## Compiling
 
-Live CV requires qt and open cv libraries to compile. You can use qmake to generate the makefile, then run make or nmake to build:
+To compile Live CV, you need to have qt and Open CV installed. You can then use qmake to generate the makefile, and run make or nmake to build:
 
 ```
 cd build
@@ -45,18 +45,24 @@ There's a forum available for discussions on [live cv's website](http://livecv.d
 
 ## Roadmap
 
-The feature detection module is to be added in version 1.2, after which the following versions are scheduled:
-
- * Version 1.3 - Scripting module
-    * Posibility to execute qml scripts with live cv: ```livecv extract-background.qml```
-    * Project files
-    * VideoWriter and ImWrite
-    * Text files ins and outs
-    * Editor search functionality and file navigation
-    * Argument forwarding to qml
- * Version 1.4 - Photography module
+Live CV's goal is to provide an environment where people can experiment with different libraries or algorithms and can also share their own as easily as possible. To do this, it needs to be scalable, plugin-based, have a simple and easy to use build system, and a place to access and share plugins. These features ar all planned iteratively in the following versions: 
+ 
+ * Version 1.4 - Deployment Kit and Open CV Contrib
+    * Simplifying and automating Live CV's build
+    * Ability to customize build with separate plugins
+    * Including Open CV Contrib module
+ * Version 1.5 - Photography module
     * Exposure and contrast configuration
     * Photo stiching
     * HDR Merging
     * Levels and histograms
+ * Version 1.6 - Editor Updates
+	*  Component documentation from within the editor
+	*  Editor shortcut customization
+ * Version 1.7 - MultiThreading Module 
+ 	* Executing components in separate threads
+ 	* Automatic assignment of components to threads according to their execution time
 
+ * Version 2.0 - Showroom
+ 	* Plugin and sample showroom on Live CV's website
+ 	* Support for fetching plugins and samples from within the application
