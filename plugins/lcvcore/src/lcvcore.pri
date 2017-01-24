@@ -16,7 +16,10 @@ HEADERS += \
     $$PWD/qmatview.h \
     $$PWD/qmatlist.h \
     $$PWD/qglobalitem.h \
-    $$PWD/qglobalitemproperty.h
+    $$PWD/qglobalitemproperty.h \
+    $$PWD/qimwrite.h \
+    $$PWD/qvideowriter.h \
+    $$PWD/qvideowriterthread.h
 
 SOURCES += \
     $$PWD/lcvcore_plugin.cpp \
@@ -36,4 +39,7 @@ SOURCES += \
     $$PWD/qmatview.cpp \
     $$PWD/qmatlist.cpp \
     $$PWD/qglobalitem.cpp \
-    $$PWD/qglobalitemproperty.cpp
+    $$PWD/qglobalitemproperty.cpp \
+    $$PWD/qimwrite.cpp \
+    $$PWD/qvideowriter.cpp \
+    $$PWD/qvideowriterthread.cpp

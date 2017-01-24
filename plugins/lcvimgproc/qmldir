@@ -1,3 +1,4 @@
 module lcvimgproc
 plugin lcvimgproc
-
+depends QtQuick 2.3
+depends lcvcore 1.0

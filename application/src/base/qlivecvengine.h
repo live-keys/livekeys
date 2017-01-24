@@ -10,6 +10,7 @@ class QQmlEngine;
 class QQmlError;
 class QQmlIncubator;
 class QLiveCVIncubationController;
+class QMutex;
 
 namespace lcv{
 
@@ -30,6 +31,7 @@ public:
     const QList<QQmlError>& lastErrors() const;
 
     QQmlEngine* engine();
+    QMutex* engineMutex();
 
 signals:
     void aboutToCreateObject(const QUrl& file);
@@ -47,7 +49,7 @@ private:
     QJSValue toJSErrors(const QList<QQmlError>& errors) const;
 
     QQmlEngine*    m_engine;
-    QMutex         m_engineMutex;
+    QMutex*        m_engineMutex;
     QQmlIncubator* m_incubator;
     QLiveCVIncubationController* m_incubationController;
 
@@ -66,6 +68,10 @@ inline void QLiveCVEngine::setIsLoading(bool isLoading){
 
 inline QQmlEngine*QLiveCVEngine::engine(){
     return m_engine;
+}
+
+inline QMutex *QLiveCVEngine::engineMutex(){
+    return m_engineMutex;
 }
 
 }// namespace

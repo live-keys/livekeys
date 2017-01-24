@@ -1,9 +1,18 @@
 TEMPLATE = lib
 TARGET   = qmljsparser
-QT      += core qml quick xml core-private qml-private quick-private
+QT      += core qml quick xml
 CONFIG  += qt c++11
 
 DEFINES += Q_QMLJSPARSER_LIB
+
+
+#ENABLE_PLUTINTYPES = 1
+
+!isEmpty(ENABLE_PLUTINTYPES){
+    message(Plugin Types Enabled: Live CV will use private libraries)
+    QT += core-private qml-private quick-private
+    DEFINES += Q_PLUGINTYPES_ENABLED
+}
 
 # Editor Lib
 

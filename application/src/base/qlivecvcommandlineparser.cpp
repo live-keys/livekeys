@@ -132,10 +132,10 @@ QString QLiveCVCommandLineParser::helpString() const{
     QString base("\n" + m_header + "\n\n" + "Usage:\n\n   livecv [options...] script.qml [args ...]\n\nOptions:\n\n");
     for ( QList<QLiveCVCommandLineParser::Option*>::const_iterator it = m_options.begin(); it != m_options.end(); ++it ){
         for ( QStringList::const_iterator nameIt = (*it)->shortNames.begin(); nameIt != (*it)->shortNames.end(); ++nameIt ){
-            base += QString("  ") + "-" + *nameIt + ((*it)->type != "" ? "<" + (*it)->type + ">" : "");
+            base += QString("  ") + "-" + *nameIt + ((*it)->type != "" ? " <" + (*it)->type + ">" : "");
         }
         for ( QStringList::const_iterator nameIt = (*it)->longNames.begin(); nameIt != (*it)->longNames.end(); ++nameIt ){
-            base += QString("  ") + "--" + *nameIt + ((*it)->type != "" ? "<" + (*it)->type + ">" : "");
+            base += QString("  ") + "--" + *nameIt + ((*it)->type != "" ? " <" + (*it)->type + ">" : "");
         }
         base += "\n";
         base += "    " + (*it)->description + "\n\n";
@@ -249,10 +249,10 @@ QString QLiveCVCommandLineParser::scriptHelpString() const{
     QString base("\n" + m_header + "\n\n" + "Usage:\n\n   livecv [...] script.qml [options] [args ...]\n\nScript options:\n\n");
     for ( QList<QLiveCVCommandLineParser::Option*>::const_iterator it = m_scriptOptions.begin(); it != m_scriptOptions.end(); ++it ){
         for ( QStringList::const_iterator nameIt = (*it)->shortNames.begin(); nameIt != (*it)->shortNames.end(); ++nameIt ){
-            base += QString("  ") + "-" + *nameIt + ((*it)->type != "" ? "<" + (*it)->type + ">" : "");
+            base += QString("  ") + "-" + *nameIt + ((*it)->type != "" ? " <" + (*it)->type + ">" : "");
         }
         for ( QStringList::const_iterator nameIt = (*it)->longNames.begin(); nameIt != (*it)->longNames.end(); ++nameIt ){
-            base += QString("  ") + "--" + *nameIt + ((*it)->type != "" ? "<" + (*it)->type + ">" : "");
+            base += QString("  ") + "--" + *nameIt + ((*it)->type != "" ? " <" + (*it)->type + ">" : "");
         }
         base += "\n";
         base += "    " + (*it)->description + "\n\n";
