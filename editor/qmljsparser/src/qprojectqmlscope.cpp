@@ -1,6 +1,7 @@
 #include "qprojectqmlscope.h"
 #include "qprojectqmlscopecontainer_p.h"
 #include "qqmllibraryinfo_p.h"
+#include "QtQml/qqml.h"
 
 #include "qmljs/qmljsdocument.h"
 #include "qmljs/qmljsinterpreter.h"
@@ -21,6 +22,15 @@ QProjectQmlScope::QProjectQmlScope(QQmlEngine *engine)
     , m_engine(engine)
     , m_defaultImportPaths(engine->importPathList())
 {
+    QStringList versionSegments = QString(QML_VERSION_STR).split(".");
+    int versionMajor = versionSegments.length() > 0 ? versionSegments[0].toInt() : 2;
+    int versionMinor = versionSegments.length() > 1 ? versionSegments[1].toInt() : 0;
+
+    QList<QString> paths;
+    findQmlLibraryInImports("QtQml", versionMajor, versionMinor, paths);
+    findQmlLibraryInImports("QtQml/Models", versionMajor, versionMinor, paths);
+
+    addDefaultLibraries(paths);
 }
 
 QProjectQmlScope::~QProjectQmlScope(){
@@ -36,14 +46,27 @@ void QProjectQmlScope::findQmlLibraryInImports(
         int versionMinor,
         QList<QString> &paths)
 {
+    QList<QString> newPaths;
+    QString importUri = path;
+    importUri.replace('/', '.') += " " + QString::number(versionMajor) + "." + QString::number(versionMinor);
+    if ( m_importToPaths.contains(importUri) ){
+        paths.append(m_importToPaths.value(importUri));
+        return;
+    }
+
     foreach( const QString& importPath, m_defaultImportPaths ){
         findQmlLibrary(
             QDir::cleanPath(importPath + QDir::separator() + path),
             versionMajor,
             versionMinor,
-            paths
+            newPaths
         );
     }
+
+    if ( !newPaths.isEmpty() )
+        m_importToPaths[importUri] = newPaths;
+
+    paths << newPaths;
 }
 
 void QProjectQmlScope::findQmlLibrary(
@@ -103,6 +126,17 @@ int QProjectQmlScope::totalLibraries() const{
 
 int QProjectQmlScope::totalImplicitLibraries() const{
     return d_implicitLibraries->totalLibraries();
+}
+
+QString QProjectQmlScope::uriForPath(const QString &path){
+    QString bestmatch;
+    for ( QHash<QString, QList<QString> >::iterator it = m_importToPaths.begin(); it != m_importToPaths.end(); ++it ){
+        for ( QList<QString>::iterator iit = it.value().begin(); iit != it.value().end(); ++iit ){
+            if ( *iit == path && it.key() > bestmatch )
+                bestmatch = it.key();
+        }
+    }
+    return bestmatch;
 }
 
 }// namespace

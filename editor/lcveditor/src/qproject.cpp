@@ -17,11 +17,10 @@ QProject::QProject(QObject *parent)
     , m_fileModel(new QProjectFileModel(this))
     , m_navigationModel(new QProjectNavigationModel(this))
     , m_documentModel(new QProjectDocumentModel(this))
-    , m_focus(0)
-    , m_active(0)
     , m_lockedFileIO(QLockedFileIOSession::createInstance())
+    , m_active(0)
+    , m_focus(0)
 {
-    newProject();
 }
 
 QProject::~QProject(){

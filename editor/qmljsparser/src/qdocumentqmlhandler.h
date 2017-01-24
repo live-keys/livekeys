@@ -17,6 +17,7 @@ class QQmlJsHighlighter;
 namespace lcv{
 
 class QProjectQmlScanner;
+class QPluginInfoExtractor;
 class QQmlCompletionContextFinder;
 class QQmlCompletionContext;
 
@@ -28,6 +29,7 @@ class Q_QMLJSPARSER_EXPORT QDocumentQmlHandler : public QAbstractCodeHandler{
 public:
     explicit QDocumentQmlHandler(
         QQmlEngine* engine,
+        QMutex* engineMutex,
         QLockedFileIOSession::Ptr lockedFileIO,
         QObject* parent = 0
     );
@@ -44,12 +46,15 @@ public:
     void setDocument(QProjectDocument* document) Q_DECL_OVERRIDE;
     void updateScope(const QString& data) Q_DECL_OVERRIDE;
 
+    QPluginInfoExtractor *getPluginInfoExtractor(const QString& import);
+
 public slots:
     void newDocumentScopeReady();
     void newProjectScope();
     void newProject(const QString& path);
     void directoryChanged(const QString& path);
     void fileChanged(const QString& path);
+    void loadImport(const QString& import);
 
 private:
     void suggestionsForGlobalQmlContext(

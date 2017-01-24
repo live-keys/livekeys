@@ -32,6 +32,7 @@
 
 #include "qdocumentqmlhandler.h"
 #include "qdocumentqmlinfo.h"
+#include "qplugininfoextractor.h"
 
 #include <QUrl>
 #include <QFileInfo>
@@ -57,47 +58,6 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
         argc,
         argv
     );
-
-    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(m_engine->engine(), m_project->lockedFileIO());
-    m_codeInterface = new lcv::QDocumentCodeInterface(qmlHandler);
-    QObject::connect(
-        m_project, SIGNAL(inFocusChanged(QProjectDocument*)),
-        m_codeInterface, SLOT(setDocument(QProjectDocument*))
-    );
-    QObject::connect(
-        m_project, SIGNAL(pathChanged(QString)),
-        qmlHandler, SLOT(newProject(QString))
-    );
-    QObject::connect(
-        m_project, SIGNAL(directoryChanged(QString)),
-        qmlHandler, SLOT(directoryChanged(QString))
-    );
-    QObject::connect(
-        m_project, SIGNAL(fileChanged(QString)),
-        qmlHandler, SLOT(fileChanged(QString))
-    );
-
-    if ( !m_arguments->consoleFlag() )
-        qInstallMessageHandler(&QLiveCVLog::logFunction);
-    if ( m_arguments->fileLogFlag() )
-        QLiveCVLog::instance().enableFileLog();
-    if ( m_arguments->script() != "" )
-        m_project->openProject(m_arguments->script());
-    if ( !m_arguments->monitoredFiles().isEmpty() ){
-        foreach( QString mfile, m_arguments->monitoredFiles() ){
-            if ( !mfile.isEmpty() ){
-                QFileInfo mfileInfo(mfile);
-                if ( mfileInfo.isRelative() ){
-                    m_project->openFile(
-                        QDir::cleanPath(m_project->path() + QDir::separator() + mfile),
-                        QProjectDocument::Monitor
-                    );
-                } else {
-                    m_project->openFile(mfile, QProjectDocument::Monitor);
-                }
-            }
-        }
-    }
 }
 
 QLiveCV::~QLiveCV(){
@@ -121,6 +81,55 @@ void QLiveCV::loadLibrary(const QString &library){
 }
 
 void QLiveCV::loadQml(const QUrl &url){
+
+    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(
+        m_engine->engine(),
+        m_engine->engineMutex(),
+        m_project->lockedFileIO()
+    );
+    m_codeInterface = new lcv::QDocumentCodeInterface(qmlHandler);
+    QObject::connect(
+        m_project, SIGNAL(inFocusChanged(QProjectDocument*)),
+        m_codeInterface, SLOT(setDocument(QProjectDocument*))
+    );
+    QObject::connect(
+        m_project, SIGNAL(pathChanged(QString)),
+        qmlHandler, SLOT(newProject(QString))
+    );
+    QObject::connect(
+        m_project, SIGNAL(directoryChanged(QString)),
+        qmlHandler, SLOT(directoryChanged(QString))
+    );
+    QObject::connect(
+        m_project, SIGNAL(fileChanged(QString)),
+        qmlHandler, SLOT(fileChanged(QString))
+    );
+
+    if ( !m_arguments->consoleFlag() )
+        qInstallMessageHandler(&QLiveCVLog::logFunction);
+    if ( m_arguments->fileLogFlag() )
+        QLiveCVLog::instance().enableFileLog();
+    if ( m_arguments->script() != "" ){
+        m_project->openProject(m_arguments->script());
+    } else {
+        m_project->newProject();
+    }
+    if ( !m_arguments->monitoredFiles().isEmpty() ){
+        foreach( QString mfile, m_arguments->monitoredFiles() ){
+            if ( !mfile.isEmpty() ){
+                QFileInfo mfileInfo(mfile);
+                if ( mfileInfo.isRelative() ){
+                    m_project->openFile(
+                        QDir::cleanPath(m_project->path() + QDir::separator() + mfile),
+                        QProjectDocument::Monitor
+                    );
+                } else {
+                    m_project->openFile(mfile, QProjectDocument::Monitor);
+                }
+            }
+        }
+    }
+
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("codeDocument", m_document);
     m_engine->engine()->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
@@ -128,9 +137,9 @@ void QLiveCV::loadQml(const QUrl &url){
     m_engine->engine()->rootContext()->setContextProperty("engine", m_engine);
     m_engine->engine()->rootContext()->setContextProperty("codeHandler", m_codeInterface);
 #ifdef Q_OS_LINUX
-    m_engine->engine()->rootContext()->setContextProperty("isLinux", true);
+    m_engine->engine()->rootContext()->setContextProperty("isLinux", QVariant::fromValue(true));
 #else
-    m_engine->engine()->rootContext()->setContextProperty("isLinux", false);
+    m_engine->engine()->rootContext()->setContextProperty("isLinux", QVariant::fromValue(false));
 #endif
 
     static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);
@@ -165,6 +174,24 @@ void QLiveCV::registerTypes(){
         "live", 1, 0, "LiveArguments", "LiveArguments is available through the arguments property."
     );
     qmlRegisterType<lcv::QLiveCVMain>("live", 1, 0, "Main");
+}
+
+QByteArray QLiveCV::extractPluginInfo(const QString &import) const{
+    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(
+        m_engine->engine(),
+        m_engine->engineMutex(),
+        m_project->lockedFileIO()
+    );
+
+
+    lcv::QPluginInfoExtractor* extractor = qmlHandler->getPluginInfoExtractor(import);
+    if ( extractor ){
+        extractor->waitForResult(10000);
+        if (extractor->timedOut() ){
+            return "Error: Timed out\n";
+        }
+    }
+    return extractor->result();
 }
 
 }// namespace
