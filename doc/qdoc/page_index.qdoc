@@ -44,8 +44,11 @@
         \li{2, 1} \section2 Using the API
 
     \row
-        \li \l {Configuration. A simple example}{Configuration. A simple example}
-        \li Configuring the Live CV API and building an example.
+        \li \l {Dependencies. Configuring dependencies}{Dependencies. Configuring dependencies}
+        \li Configuring Live CV dependencies.
+    \row
+        \li \l {A first example}{A first example}
+        \li Building your first example.
     \row
         \li \l {Creating a filter}{Creating a filter}
         \li Create an element that filters a matrix.
@@ -58,7 +61,7 @@
 
     \row
         \li \l {Building Live CV}{Building Live CV}
-        \li Configuring and building Live CV from source code on windows and linux.
+        \li Configuring and build options for Live CV on different Operating Systems.
 
     \row
         \li{2, 1} \section2 C++ Modules

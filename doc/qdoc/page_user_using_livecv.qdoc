@@ -12,7 +12,7 @@ start the application by using its executable found in its installation director
 
 \section1 The header
 
-There are 6 buttons on top, which use the basic actions to work with QML files. The first 3 are the \b{New}, \b{Save As}
+There are 7 buttons on top, which use the basic actions to work with QML files. The first 3 are the \b{New}, \b{Save As}
 and \b{Open} actions. To keep the interface minimal, there's no button for the simple \b{Save} action, which instead is
 mapped to the CTRL + S key combination while you are in the code editor.
 
@@ -21,6 +21,8 @@ messages you place in the application. If you try out the following code for exa
 see the "Rectangle loaded" message :
 
 \code
+import QtQuick 2.4
+
 Rectangle{
     Component.onCompleted : {
         console.log('Rectangle loaded')
@@ -28,7 +30,9 @@ Rectangle{
 }
 \endcode
 
-By default, Live CV shows error messages in its bottom left corner, where a small box with a red border on the left
+\section1 Errors
+
+By default, Live CV shows error messages in its bottom right corner, where a small box with a red border on the left
 opens in case of an error. Since not all error messages can be redirected there, some of them might appear in the log
 window, so it's a good ideea either to keep the log window open, or to check its icon, on which a circle appears in case
 new messages pop up :
