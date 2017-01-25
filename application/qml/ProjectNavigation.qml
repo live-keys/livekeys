@@ -259,6 +259,7 @@ Rectangle{
                     text: 'x'
                     width: 30
                     height: 30
+                    visible : model.isOpen
                     anchors.right: parent.right
                     anchors.rightMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
@@ -277,10 +278,18 @@ Rectangle{
 
     Rectangle{
         anchors.centerIn: parent
-        color: "#003300"
+        color: "#001122"
         width: 100
         height: 100
         visible: project.navigationModel.isIndexing
+        Text{
+            anchors.centerIn: parent
+            text: 'Indexing...'
+            color: "#aaa5a5"
+            font.family: "Open Sans, sans-serif"
+            font.pixelSize: 12
+            font.weight: Font.Light
+        }
     }
 
 }
