@@ -12,7 +12,7 @@ DEFINES += Q_LCV
 
 include($$PWD/src/lcvimgproc.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
-loadOpenCV(core highgui imgproc, deploy)
+deployOpenCV()
 
 INCLUDEPATH += $$PWD/../../lib/include
 DEPENDPATH  += $$PWD/../../lib/include
