@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -24,7 +24,7 @@
 // ----------
 
 #define LIVECV_VERSION_MAJOR 1
-#define LIVECV_VERSION_MINOR 2
+#define LIVECV_VERSION_MINOR 3
 #define LIVECV_VERSION_PATCH 0
 
 // Forward declarations
