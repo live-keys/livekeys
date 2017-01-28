@@ -26,6 +26,8 @@ Rectangle{
     signal open()
     signal closeFocusedFile()
     signal toggleSize()
+    signal toggleProject()
+    signal toggleVisibility()
     signal toggleNavigation()
 
     property bool isDirtyMask: true
@@ -244,6 +246,12 @@ Rectangle{
                         event.accepted = true
                     } else if ( event.key === Qt.Key_E && (event.modifiers & Qt.ControlModifier ) ){
                         editor.toggleSize()
+                        event.accepted = true
+                    } else if ( event.key === Qt.Key_T && (event.modifiers & Qt.ControlModifier ) ){
+                        editor.toggleVisibility()
+                        event.accepted = true
+                    } else if ( event.key === Qt.Key_Backslash && (event.modifiers & Qt.ControlModifier ) ){
+                        editor.toggleProject()
                         event.accepted = true
                     } else if ( event.key === Qt.Key_PageUp ){
                         if ( codeHandler.completionModel.isEnabled ){
