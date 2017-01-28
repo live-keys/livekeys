@@ -21,10 +21,9 @@
 class QGlobalItemState{
 public:
     QGlobalItemState() : item(0){}
-    QQuickItem* item;
+    ~QGlobalItemState(){}
 
-    ~QGlobalItemState(){
-    }
+    QQuickItem* item;
 };
 
 QGlobalItem::QGlobalItem(QQuickItem* parent)

@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 #include "qcanny.h"
-#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/imgproc.hpp"
 
 /*!
   \qmltype Canny

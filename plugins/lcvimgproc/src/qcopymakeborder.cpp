@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 #include "qcopymakeborder.h"
-#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/imgproc.hpp"
 
 using namespace cv;
 

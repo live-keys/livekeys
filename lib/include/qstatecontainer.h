@@ -20,6 +20,7 @@
 #include <QObject>
 #include <QMap>
 #include <QLinkedList>
+#include <QDebug>
 
 //#define QSTATE_CONTAINER_DEBUG_FLAG
 #ifdef QSTATE_CONTAINER_DEBUG_FLAG
@@ -55,6 +56,7 @@ private:
 public slots:
     void beforeCompile();
     void afterCompile();
+    void clearStates();
     void attachWindow(QQuickWindow* window);
 
 private:
@@ -71,6 +73,7 @@ public:
 
     virtual void beforeCompile() = 0;
     virtual void afterCompile() = 0;
+    virtual void clearStates() = 0;
 };
 
 
@@ -85,6 +88,7 @@ public:
 
     void beforeCompile();
     void afterCompile();
+    void clearStates();
 
 private:
     QStateContainer(QQuickItem* item);
@@ -173,6 +177,14 @@ template<typename T> void QStateContainer<T>::afterCompile(){
     }
 }
 
+template<typename T> void QStateContainer<T>::clearStates(){
+    QSTATE_CONTAINER_DEBUG("-----Clear States-----");
+    for ( typename QMap<QString, T*>::iterator it = m_states.begin(); it != m_states.end(); ++it )
+        delete it.value();
+    m_states.clear();
+    m_statesActive.clear();
+}
+
 /**
  * @brief QStateContainer constructor
  * @param item
@@ -187,10 +199,7 @@ template<typename T> QStateContainer<T>::QStateContainer(QQuickItem* item)
  * @brief QStateContainer destructor
  */
 template<typename T> QStateContainer<T>::~QStateContainer(){
-    for ( typename QMap<QString, T*>::iterator it = m_states.begin(); it != m_states.end(); ++it )
-        delete it.value();
-    m_states.clear();
-    m_statesActive.clear();
+    clearStates();
 }
 
 #endif // QSTATECONTAINER_H

@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "qbruteforcematcher.h"
-#include "opencv2/features2d/features2d.hpp"
+#include "opencv2/features2d.hpp"
 #include <QVariant>
 
 QBruteForceMatcher::QBruteForceMatcher(QQuickItem* parent)
