@@ -511,6 +511,18 @@ ApplicationWindow {
                     else
                         editor.width = contentWrap.width / 2
                 }
+                onToggleVisibility: {
+                    if ( editor.width === 0 && projectView.width === 0 ){
+                        editor.width = 400
+                        projectView.width = 240
+                    } else {
+                        editor.width = 0
+                        projectView.width = 0
+                    }
+                }
+                onToggleProject: {
+                    projectView.width = projectView.width === 0 ? 240 : 0
+                }
                 onToggleNavigation: {
                     projectNavigation.visible = !projectNavigation.visible
                 }
