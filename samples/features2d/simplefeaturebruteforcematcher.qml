@@ -1,3 +1,4 @@
+import QtQuick 2.3
 import lcvcore 1.0
 import lcvimgproc 1.0
 import lcvfeatures2d 1.0
@@ -9,8 +10,8 @@ Column{
     // Usage of BruteForceMatcher on Brief descriptors to find matches
     // between two images
     
-    property string trainImage : codeDocument.path + '/../_images/clock-train-small.jpg'
-    property string queryImage : codeDocument.path + '/../_images/clock-query-room-small.jpg'
+    property string trainImage : project.dir() + '/../_images/clock-train-small.jpg'
+    property string queryImage : project.dir() + '/../_images/clock-query-room-small.jpg'
     
     // Train images
     
@@ -27,7 +28,7 @@ Column{
             input : trainImageLoader.output
         }
 
-        BriefDescriptorExtractor{
+        OrbDescriptorExtractor{
             keypoints : trainFeatureDetect.keypoints
             Component.onCompleted : {
                 descriptorMatcher.add(descriptors)
@@ -48,7 +49,7 @@ Column{
             input : queryImageLoader.output
         }
 
-        BriefDescriptorExtractor{
+        OrbDescriptorExtractor{
             id : queryFeatureExtract
             keypoints : queryFeatureDetect.keypoints
         }

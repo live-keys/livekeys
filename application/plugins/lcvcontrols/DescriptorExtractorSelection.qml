@@ -25,21 +25,6 @@ Rectangle{
 
     property list<QtObject> model : [
         QtObject{
-            property string name: "BriefDescriptorExtractor"
-            property DescriptorExtractor extractor: BriefDescriptorExtractor{}
-            property list<Component> configurationFields : [
-                Component{
-                    ConfigurationField{
-                        label : "Bytes"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["BriefDescriptorExtractor"]["bytes"]
-                            onTextChanged: root.updateConfiguration("BriefDescriptorExtractor", "bytes", text)
-                        }
-                    }
-                }
-            ]
-        },
-        QtObject{
             property string name: "BriskDescriptorExtractor"
             property DescriptorExtractor extractor: BriskDescriptorExtractor{}
             property list<Component> configurationFields
@@ -114,9 +99,6 @@ Rectangle{
             GlobalItemProperty{
                 id : configurationProperty
                 value : ({
-                    "BriefDescriptorExtractor" : {
-                        'bytes' : 32
-                    },
                     "BriskDescriptorExtractor" : {
                     },
                     "OrbDescriptorExtractor" : {

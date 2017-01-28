@@ -1,4 +1,6 @@
+import QtQuick 2.3
 import lcvcore 1.0
+import lcvimgproc 1.0
 import lcvcontrols 1.0
 import lcvfeatures2d 1.0
  
@@ -9,8 +11,8 @@ Row{
     // Select/configure feature detectors/extractors from the panels
     // to compare and view descriptors in the generated histogram
     
-    property string imagePath  : codeDocument.path + '/../_images/clock-train-small.jpg'
-    property string imagePath2 : codeDocument.path + '/../_images/clock-query-room-small.jpg'
+    property string imagePath  : project.dir() + '/../_images/clock-train-small.jpg'
+    property string imagePath2 : project.dir() + '/../_images/clock-query-room-small.jpg'
      
     Column{
 

@@ -1,3 +1,4 @@
+import QtQuick 2.3
 import lcvcore 1.0
 import lcvimgproc 1.0
 
@@ -9,7 +10,7 @@ Grid{
     
     id : root
     
-    property string imagePath : codeDocument.path + '/../_images/buildings_0246.jpg'
+    property string imagePath : project.dir() + '/../_images/buildings_0246.jpg'
     
     ImRead{
         id : src

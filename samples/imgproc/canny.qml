@@ -1,3 +1,4 @@
+import QtQuick 2.3
 import lcvcore 1.0
 import lcvimgproc 1.0
 
@@ -7,7 +8,7 @@ Row{
     // Sample showing how to use 
     // Canny Edge Detector algorithm
     
-    property string imagePath : codeDocument.path + '/../_images/buildings_0246.jpg'
+    property string imagePath : project.dir() + '/../_images/buildings_0246.jpg'
     
     ImRead{
         id : imgSource
@@ -16,7 +17,7 @@ Row{
     
     Canny{
         input: imgSource.output
-        threshold1 : 70
+        threshold1 : 72
         threshold2 : 222
     }
     

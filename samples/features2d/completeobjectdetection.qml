@@ -1,3 +1,4 @@
+import QtQuick 2.3
 import lcvcore 1.0
 import lcvimgproc 1.0
 import lcvcontrols 1.0
@@ -16,11 +17,11 @@ Rectangle{
     anchors.fill : parent
     color : "transparent"
             
-    property string trainImage  : codeDocument.path + '/../_images/cards-train-j.jpg'
-    property string trainImage2 : codeDocument.path + '/../_images/cards-train-q.jpg'
-    property string trainImage3 : codeDocument.path + '/../_images/cards-train-k.jpg'
+    property string trainImage  : project.dir() + '/../_images/cards-train-j.jpg'
+    property string trainImage2 : project.dir() + '/../_images/cards-train-q.jpg'
+    property string trainImage3 : project.dir() + '/../_images/cards-train-k.jpg'
     
-    property string queryImage : codeDocument.path + '/../_images/cards-query.jpg'
+    property string queryImage : project.dir() + '/../_images/cards-query.jpg'
     
     ImRead{
         id : imageSource
