@@ -203,7 +203,7 @@ Rectangle{
                 if ( documentView.currentIndex + noItems < documentView.count ){
                     documentView.currentIndex += noItems;
                 } else {
-                    documentView.currentIndex = pluginList.count - 1;
+                    documentView.currentIndex = documentView.count - 1;
                 }
             }
             function highlightPrevPage(){

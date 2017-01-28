@@ -45,6 +45,7 @@ ApplicationWindow {
 
     signal afterCompile()
     signal aboutToRecompile()
+    signal projectActiveChanged()
 
 
     FontLoader{ id: ubuntuMonoBold;       source: "qrc:/fonts/UbuntuMono-Bold.ttf"; }
@@ -195,12 +196,12 @@ ApplicationWindow {
         selectExisting : true
         visible : isLinux ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
-            if ( project.isFileInProject(fileSaveDialog.fileUrl ) )
-                project.openFile(fileSaveDialog.fileUrl, ProjectDocument.Edit)
+            if ( project.isFileInProject(fileOpenDialog.fileUrl ) )
+                project.openFile(fileOpenDialog.fileUrl, ProjectDocument.Edit)
             else if ( !project.isDirProject() ){
-                header.closeProject(function(){ project.openProject(fileSaveDialog.fileUrl) } )
+                header.closeProject(function(){ project.openProject(fileOpenDialog.fileUrl) } )
             } else {
-                var fileUrl = fileSaveDialog.fileUrl
+                var fileUrl = fileOpenDialog.fileUrl
                 messageBox.show(
                     'File is outside project scope. Would you like to open it as a new project?',
                 {
@@ -789,6 +790,10 @@ ApplicationWindow {
     Connections{
         target: project
         onActiveChanged : {
+            if (tester.item) {
+                tester.item.destroy();
+                tester.item = 0
+            }
             if (active)
                 createTimer.restart()
         }

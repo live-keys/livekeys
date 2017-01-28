@@ -58,9 +58,10 @@ public:
 
 void updateLibraryPrototypes(
         QProjectQmlScope::Ptr projectScope,
-        const QString &, //path
+        const QString &path,
         QQmlLibraryInfo::Ptr library)
 {
+    Q_UNUSED(path);
     int missingDependencies = 0;
     foreach( const QString& dependency, library->dependencyPaths() ){
         QQmlLibraryInfo::Ptr linfo = projectScope->globalLibraries()->libraryInfo(dependency);

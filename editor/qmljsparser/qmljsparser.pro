@@ -8,7 +8,7 @@ DEFINES += Q_QMLJSPARSER_LIB
 
 #ENABLE_PLUTINTYPES = 1
 
-!isEmpty(ENABLE_PLUTINTYPES){
+!isEmpty(ENABLE_PLUGINTYPES){
     message(Plugin Types Enabled: Live CV will use private libraries)
     QT += core-private qml-private quick-private
     DEFINES += Q_PLUGINTYPES_ENABLED
@@ -18,7 +18,7 @@ DEFINES += Q_QMLJSPARSER_LIB
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lcveditor/release/ -llcveditor
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lcveditor/debug/ -llcveditor
-else:unix: LIBS += -L$$OUT_PWD/../../application/lcveditor/ -llcveditor
+else:unix: LIBS += -L$$OUT_PWD/../../application -llcveditor
 
 INCLUDEPATH += $$PWD/../lcveditor/src
 DEPENDPATH += $$PWD/../lcveditor/src
