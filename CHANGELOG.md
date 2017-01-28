@@ -6,7 +6,7 @@ This file summarises notable changes between Live CV versions.
 
 ### Compatibility:
    - All files now require manual import of QtQuick module. (e.g. ```import QtQuick 2.3```)
-   - Use ```project.dir()``` instead of ```codeDocument.path``` when refering tothe path of the project
+   - Use ```project.dir()``` instead of ```codeDocument.path``` when refering to the path of the project
 
 ### Features:
    - Code Completion support
