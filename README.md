@@ -43,6 +43,10 @@ There's an [organization on github](http://github.com/livecv) created for Live C
 
 There's a forum available for discussions on [live cv's website](http://livecv.dinusv.com/forum).
 
+## Changes
+
+For changes and compatibility information between versions, see the [CHANGELOG](CHANGELOG.md).
+
 ## Roadmap
 
 Live CV's goal is to provide an environment where people can experiment with different libraries or algorithms and can also share their own as easily as possible. To do this, it needs to be scalable, plugin-based, have a simple and easy to use build system, and a place to access and share plugins. These features ar all planned iteratively in the following versions: 
@@ -57,12 +61,12 @@ Live CV's goal is to provide an environment where people can experiment with dif
     * HDR Merging
     * Levels and histograms
  * Version 1.6 - Editor Updates
-	*  Component documentation from within the editor
-	*  Editor shortcut customization
+    *  Component documentation from within the editor
+    *  Editor shortcut customization
  * Version 1.7 - MultiThreading Module 
- 	* Executing components in separate threads
- 	* Automatic assignment of components to threads according to their execution time
-
+    * Executing components in separate threads
+    * Automatic assignment of components to threads according to their execution time
  * Version 2.0 - Showroom
- 	* Plugin and sample showroom on Live CV's website
- 	* Support for fetching plugins and samples from within the application
+    * Plugin and sample showroom on Live CV's website
+    * Support for fetching plugins and samples from within the application
+
