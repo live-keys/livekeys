@@ -74,7 +74,7 @@ Rectangle{
             }
             font.family: "Open Sans, sans-serif"
             font.pixelSize: 12
-            font.weight: Font.Light
+            font.weight: isLinux ? Font.Normal : Font.Light
         }
 
         Rectangle{
@@ -196,7 +196,7 @@ Rectangle{
                 color : "#fff"
                 font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
                 font.pixelSize: 13
-                font.weight: Font.Light
+                font.weight: isLinux ? Font.Normal : Font.Light
 
                 selectByMouse: true
                 mouseSelectionMode: TextEdit.SelectCharacters

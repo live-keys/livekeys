@@ -88,7 +88,7 @@ Rectangle{
             text: 'Add ' + (root.isFile ? 'file' : 'directory') + ' in ' + (root.entry ? root.entry.path : '')
             font.family: 'Open Sans, Arial, sans-serif'
             font.pixelSize: 12
-            font.weight: Font.Light
+            font.weight: Font.Normal
             color: "#afafaf"
         }
         Rectangle{
@@ -113,7 +113,7 @@ Rectangle{
                 text: ''
                 font.family: 'Open Sans, Arial, sans-serif'
                 font.pixelSize: 12
-                font.weight: Font.Light
+                font.weight: Font.Normal
                 selectByMouse: true
 
                 Keys.onReturnPressed: {

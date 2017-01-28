@@ -8,7 +8,7 @@ QT      += qml quick
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../editor/lcveditor/release/ -llcveditor
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../editor/lcveditor/debug/ -llcveditor
-else:unix: LIBS += -L$$OUT_PWD/../application/lcveditor/ -llcveditor
+else:unix: LIBS += -L$$OUT_PWD/../application -llcveditor
 
 INCLUDEPATH += $$PWD/../editor/lcveditor/src
 DEPENDPATH += $$PWD/../editor/lcveditor/src
@@ -18,10 +18,17 @@ DEPENDPATH += $$PWD/../editor/lcveditor/src
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../editor/qmljsparser/release/ -lqmljsparser
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../editor/qmljsparser/debug/ -lqmljsparser
-else:unix: LIBS += -L$$OUT_PWD/../application/qmljsparser/ -lqmljsparser
+else:unix: LIBS += -L$$OUT_PWD/../application -lqmljsparser
 
 INCLUDEPATH += $$PWD/../editor/qmljsparser/src
 DEPENDPATH += $$PWD/../editor/qmljsparser/src
+
+# Load library paths
+# ------------------
+
+unix{
+    QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN\''
+}
 
 # Application
 # -----------

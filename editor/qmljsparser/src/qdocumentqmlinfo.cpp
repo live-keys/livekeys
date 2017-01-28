@@ -151,7 +151,7 @@ bool QDocumentQmlInfo::parse(const QString &source){
     d->internalDocBind = d->internalDoc->bind();
 
     foreach( const QmlJS::DiagnosticMessage& message, d->internalDoc->diagnosticMessages() ){
-        QDocumentQmlInfo::Message::Severity severity;
+        QDocumentQmlInfo::Message::Severity severity = QDocumentQmlInfo::Message::Hint;
         switch( message.kind ){
         case QmlJS::Severity::Hint: severity = QDocumentQmlInfo::Message::Hint; break;
         case QmlJS::Severity::MaybeWarning: severity = QDocumentQmlInfo::Message::MaybeWarning; break;

@@ -102,7 +102,6 @@ public:
             }
             m_object->addSignal(mf);
         }
-//        qDebug() << QmlJS::DescribeValueVisitor::describe(value, 2).toUtf8().data();
         return true;
     }
     bool processSlot(const QString &name, const QmlJS::Value *value) override
