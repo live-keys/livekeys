@@ -18,9 +18,10 @@
 #define QVIDEOWRITERTHREAD_H
 
 #include <QThread>
+#include <QMutex>
 #include <QWaitCondition>
 #include "qmat.h"
-#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/highgui.hpp"
 
 class QVideoWriterThread : public QThread{
 

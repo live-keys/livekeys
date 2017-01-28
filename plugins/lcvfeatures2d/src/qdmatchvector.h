@@ -19,7 +19,7 @@
 
 #include <QQuickItem>
 #include "qlcvfeatures2dglobal.h"
-#include "opencv2/features2d/features2d.hpp"
+#include "opencv2/features2d.hpp"
 
 class Q_LCVFEATURES2D_EXPORT QDMatchVector : public QQuickItem{
 

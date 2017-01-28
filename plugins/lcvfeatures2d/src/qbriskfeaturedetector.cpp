@@ -15,10 +15,10 @@
 ****************************************************************************/
 
 #include "qbriskfeaturedetector.h"
-#include "opencv2/features2d/features2d.hpp"
+#include "opencv2/features2d.hpp"
 
 QBriskFeatureDetector::QBriskFeatureDetector(QQuickItem *parent) :
-    QFeatureDetector(new cv::BRISK, parent)
+    QFeatureDetector(cv::BRISK::create(), parent)
 {
 }
 

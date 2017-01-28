@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 #include "qsobel.h"
-#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/imgproc.hpp"
 #include "qmatnode.h"
 #include <QSGSimpleMaterial>
 

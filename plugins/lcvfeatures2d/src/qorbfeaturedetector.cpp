@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "qorbfeaturedetector.h"
-#include "opencv2/features2d/features2d.hpp"
+#include "opencv2/features2d.hpp"
 
 QOrbFeatureDetector::QOrbFeatureDetector(QQuickItem *parent) :
     QFeatureDetector(cv::ORB::create(), parent)

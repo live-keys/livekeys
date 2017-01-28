@@ -18,7 +18,7 @@
 #include "qvideowriterthread.h"
 #include "qstatecontainer.h"
 #include <QJSValueIterator>
-#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/highgui.hpp"
 
 QVideoWriter::QVideoWriter(QQuickItem *parent)
     : QQuickItem(parent)

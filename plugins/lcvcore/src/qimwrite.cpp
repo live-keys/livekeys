@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "qimwrite.h"
-#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/highgui.hpp"
 #include <QJSValueIterator>
 
 QImWrite::QImWrite(QObject *parent)

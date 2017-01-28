@@ -18,7 +18,7 @@
 
 #include <QQuickItem>
 #include "qmat.h"
-#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/imgproc.hpp"
 
 class QStructuringElement : public QQuickItem{
 

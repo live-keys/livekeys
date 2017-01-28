@@ -71,6 +71,14 @@ void QStateContainerManager::afterCompile(){
         (*it)->afterCompile();
 }
 
+/**
+ * @brief QStateContainerManager::resetStates
+ */
+void QStateContainerManager::clearStates(){
+    for ( QLinkedList<QStateContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
+        (*it)->clearStates();
+}
+
 /*!
   \brief Called when the gui initializes a window
 
@@ -89,6 +97,7 @@ void QStateContainerManager::attachWindow(QQuickWindow *window){
     m_attachedWindow = window;
     connect(window, SIGNAL(aboutToRecompile()), SLOT(beforeCompile()));
     connect(window, SIGNAL(afterCompile()),  SLOT(afterCompile()));
+    connect(window, SIGNAL(projectActiveChanged()), SLOT(clearStates()));
 }
 
 /*!

@@ -28,7 +28,7 @@
 **
 ****************************************************************************/
 #include "qdenoisetvl1.h"
-#include "opencv2/photo/photo.hpp"
+#include "opencv2/photo.hpp"
 
 using namespace cv;
 
