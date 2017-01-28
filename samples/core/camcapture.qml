@@ -1,3 +1,4 @@
+import QtQuick 2.3
 import lcvcore 1.0
 
 // A simple example showing how to use the

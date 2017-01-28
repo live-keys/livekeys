@@ -31,7 +31,7 @@ Rectangle{
 
     property var imageSource : null
     property FeatureDetector featureDetector : FastFeatureDetector{}
-    property DescriptorExtractor descriptorExtractor : BriefDescriptorExtractor{}
+    property DescriptorExtractor descriptorExtractor : BriskDescriptorExtractor{}
 
     signal objectAdded(Mat descriptors, var points, var color)
     signal objectListLoaded(MatList list, var keypoints, var corners, var colors)

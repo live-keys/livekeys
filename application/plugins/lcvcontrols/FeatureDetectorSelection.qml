@@ -82,57 +82,6 @@ Rectangle{
             ]
         },
         QtObject{
-            property string name: "StarFeatureDetector"
-            property FeatureDetector detector: StarFeatureDetector{}
-            property list<Component> configurationFields : [
-                Component{
-                    ConfigurationField{
-                        label : "Max Size"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["StarFeatureDetector"]["maxSize"]
-                            onTextChanged: root.updateConfiguration("StarFeatureDetector", "maxSize", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Response Threshold"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["StarFeatureDetector"]["responseThreshold"]
-                            onTextChanged: root.updateConfiguration("StarFeatureDetector", "responseThreshold", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Line Threshold Projected"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["StarFeatureDetector"]["lineThresholdProjected"]
-                            onTextChanged: root.updateConfiguration("StarFeatureDetector", "lineThresholdProjected", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Line Threshold Binarized"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["StarFeatureDetector"]["lineThresholdBinarized"]
-                            onTextChanged: root.updateConfiguration("StarFeatureDetector", "lineThresholdBinarized", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Suppress Nonmax Size"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["StarFeatureDetector"]["suppressNonmaxSize"]
-                            onTextChanged: root.updateConfiguration("StarFeatureDetector", "suppressNonmaxSize", text)
-                        }
-                    }
-                }
-            ]
-        },
-        QtObject{
             property string name: "OrbFeatureDetector"
             property FeatureDetector detector: OrbFeatureDetector{}
             property list<Component> configurationFields : [
@@ -287,135 +236,6 @@ Rectangle{
                     }
                 }
             ]
-        },
-        QtObject{
-            property string name: "DenseFeatureDetector"
-            property FeatureDetector detector: DenseFeatureDetector{}
-            property list<Component> configurationFields : [
-                Component{
-                    ConfigurationField{
-                        label : "Init Feature Scale"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["DenseFeatureDetector"]["initFeatureScale"]
-                            onTextChanged: root.updateConfiguration("DenseFeatureDetector", "initFeatureScale", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Feature Scale Levels"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["DenseFeatureDetector"]["featureScaleLevels"]
-                            onTextChanged: root.updateConfiguration("DenseFeatureDetector", "featureScaleLevels", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Feature Scale Mul"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["DenseFeatureDetector"]["featureScaleMul"]
-                            onTextChanged: root.updateConfiguration("DenseFeatureDetector", "featureScaleMul", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Init XY Step"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["DenseFeatureDetector"]["initXyStep"]
-                            onTextChanged: root.updateConfiguration("DenseFeatureDetector", "initXyStep", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Init Img Bound"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["DenseFeatureDetector"]["initImgBound"]
-                            onTextChanged: root.updateConfiguration("DenseFeatureDetector", "initImgBound", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Vary XY Step with Scale"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["DenseFeatureDetector"]["varyXyStepWithScale"]
-                            onTextChanged: root.updateConfiguration("DenseFeatureDetector", "varyXyStepWithScale", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Vary Img Bound With Scale"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["DenseFeatureDetector"]["varyImgBoundWithScale"]
-                            onTextChanged: root.updateConfiguration("DenseFeatureDetector", "varyImgBoundWithScale", text)
-                        }
-                    }
-                }
-            ]
-        },
-        QtObject{
-            property string name: "GoodFeaturesToTrackFeatureDetector"
-            property FeatureDetector detector: GoodFeaturesToTrackFeatureDetector{}
-            property list<Component> configurationFields : [
-                Component{
-                    ConfigurationField{
-                        label : "Max Corners"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["GoodFeaturesToTrackFeatureDetector"]["maxCorners"]
-                            onTextChanged: root.updateConfiguration("GoodFeaturesToTrackFeatureDetector", "maxCorners", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Quality Level"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["GoodFeaturesToTrackFeatureDetector"]["qualityLevel"]
-                            onTextChanged: root.updateConfiguration("GoodFeaturesToTrackFeatureDetector", "qualityLevel", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Min Distance"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["GoodFeaturesToTrackFeatureDetector"]["minDistance"]
-                            onTextChanged: root.updateConfiguration("GoodFeaturesToTrackFeatureDetector", "minDistance", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Block Size"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["GoodFeaturesToTrackFeatureDetector"]["blockSize"]
-                            onTextChanged: root.updateConfiguration("GoodFeaturesToTrackFeatureDetector", "blockSize", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "Use Harris Detector"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["GoodFeaturesToTrackFeatureDetector"]["useHarrisDetector"]
-                            onTextChanged: root.updateConfiguration("GoodFeaturesToTrackFeatureDetector", "useHarrisDetector", text)
-                        }
-                    }
-                },
-                Component{
-                    ConfigurationField{
-                        label : "K"
-                        editor : InputBox{
-                            text: globalConfig.item.configuration["GoodFeaturesToTrackFeatureDetector"]["k"]
-                            onTextChanged: root.updateConfiguration("GoodFeaturesToTrackFeatureDetector", "k", text)
-                        }
-                    }
-                }
-            ]
         }
     ]
 
@@ -433,60 +253,36 @@ Rectangle{
             GlobalItemProperty{
                 id : configuration
                 value : ({
-                    "FastFeatureDetector" : {
-                           'threshold' : 10,
-                           'nonmaxSuppresion': true
-                       },
-                       "BriskFeatureDetector" : {
-                           'thresh' : 30,
-                           'octaves' : 3,
-                           'patternScale' : 1.0
-                       },
-                       "StarFeatureDetector" : {
-                           'maxSize' : 16,
-                           'responseThreshold' : 30,
-                           'lineThresholdProjected' : 10,
-                           'lineThresholdBinarized' : 8,
-                           'suppressNonmaxSize' : 5
-                       },
-                       "OrbFeatureDetector" : {
-                           'nfeatures' : 500,
-                           'scaleFactor' : 1.2,
-                           'nlevels' : 8,
-                           'edgeThreshold' : 31,
-                           'firstLevel' : 0,
-                           'WTA_K' : 2,
-                           'scoreType' : 0
-                       },
-                       "MSerFeatureDetector" : {
-                           'delta' : 5,
-                           'minArea' : 60,
-                           'maxArea' : 14400,
-                           'maxVariation' : 0.25,
-                           'minDiversity' : 0.2,
-                           'maxEvolution' : 200,
-                           'areaThreshold' : 1.01,
-                           'minMargin' : 0.003,
-                           'edgeBlurSize' : 5
-                       },
-                       "DenseFeatureDetector" : {
-                         'initFeatureScale' : 1.0,
-                         'featureScaleLevels' : 1,
-                         'featureScaleMul' : 0.1,
-                         'initXyStep' : 6,
-                         'initImgBound' : 0,
-                         'varyXyStepWithScale' : true,
-                         'varyImgBoundWithScale' : false
-                       },
-                       "GoodFeaturesToTrackFeatureDetector" : {
-                           'maxCorners' : 1000,
-                           'qualityLevel' : 0.01,
-                           'minDistance' : 1,
-                           'blockSize' : 3,
-                           'useHarrisDetector' : false,
-                           'k' : 0.04
-                       }
-                   })
+                   "FastFeatureDetector" : {
+                       'threshold' : 10,
+                       'nonmaxSuppresion': true
+                   },
+                   "BriskFeatureDetector" : {
+                       'thresh' : 30,
+                       'octaves' : 3,
+                       'patternScale' : 1.0
+                   },
+                   "OrbFeatureDetector" : {
+                       'nfeatures' : 500,
+                       'scaleFactor' : 1.2,
+                       'nlevels' : 8,
+                       'edgeThreshold' : 31,
+                       'firstLevel' : 0,
+                       'WTA_K' : 2,
+                       'scoreType' : 0
+                   },
+                   "MSerFeatureDetector" : {
+                       'delta' : 5,
+                       'minArea' : 60,
+                       'maxArea' : 14400,
+                       'maxVariation' : 0.25,
+                       'minDiversity' : 0.2,
+                       'maxEvolution' : 200,
+                       'areaThreshold' : 1.01,
+                       'minMargin' : 0.003,
+                       'edgeBlurSize' : 5
+                   }
+               })
             }
 
         }

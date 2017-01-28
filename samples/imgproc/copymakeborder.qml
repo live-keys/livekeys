@@ -1,3 +1,4 @@
+import QtQuick 2.3
 import lcvcore 1.0
 import lcvimgproc 1.0
 
@@ -7,7 +8,7 @@ Row{
 
     ImRead{
        id : src
-       file : codeDocument.path + '/../_images/buildings_0246.jpg'
+       file : project.dir() + '/../_images/buildings_0246.jpg'
     }
 
     CopyMakeBorder{
