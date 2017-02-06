@@ -670,8 +670,12 @@ void QDocumentQmlHandler::assistCompletion(
             model->setSuggestions(suggestions, filter);
         }
     } else if ( ctx->context() & QQmlCompletionContext::InImport ){
-        suggestionsForImport(*ctx, suggestions);
-        model->setSuggestions(suggestions, filter);
+        if ( ctx->context() & QQmlCompletionContext::InImportVersion ){
+            model->setSuggestions(suggestions, filter);
+        } else {
+            suggestionsForImport(*ctx, suggestions);
+            model->setSuggestions(suggestions, filter);
+        }
     } else if ( ctx->context() & QQmlCompletionContext::InAfterOnLhsOfBinding ){
         suggestionsForLeftSignalBind(*ctx, cursor.position(), suggestions);
         model->setSuggestions(suggestions, filter);

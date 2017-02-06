@@ -105,6 +105,7 @@ void QDocumentCodeInterface::setDocument(QProjectDocument *document){
 
 void QDocumentCodeInterface::generateCompletion(int cursorPosition){
     if ( m_target && m_codeHandler ){
+        m_lastChar = QChar();
         QTextCursor cursor(m_target->textDocument());
         cursor.setPosition(cursorPosition);
         QTextCursor newCursor;
