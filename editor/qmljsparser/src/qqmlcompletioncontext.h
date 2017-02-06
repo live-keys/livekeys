@@ -30,11 +30,12 @@ class Q_QMLJSPARSER_EXPORT QQmlCompletionContext : public QCodeCompletionContext
 public:
     enum Context{
         InImport = 1,
-        InQml = 2,
-        InLhsOfBinding = 4,
-        InRhsofBinding = 8,
-        InAfterOnLhsOfBinding = 16,
-        InStringLiteral = 32,
+        InImportVersion = 2,
+        InQml = 4,
+        InLhsOfBinding = 8,
+        InRhsofBinding = 16,
+        InAfterOnLhsOfBinding = 32,
+        InStringLiteral = 64,
     };
 
 public:
