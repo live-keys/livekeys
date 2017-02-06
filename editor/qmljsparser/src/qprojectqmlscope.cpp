@@ -77,6 +77,8 @@ void QProjectQmlScope::findQmlLibraryInImports(
             versionMinor,
             newPaths
         );
+        if ( !newPaths.isEmpty() )
+            break;
     }
 
     if ( !newPaths.isEmpty() )
