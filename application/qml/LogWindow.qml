@@ -67,11 +67,13 @@ Window {
                 if ( logScroll.flickableItem.contentHeight > logScroll.height )
                     logScroll.flickableItem.contentY = logScroll.flickableItem.contentHeight - logScroll.height
             }
+            selectByMouse: true
             textFormat: Text.RichText
             readOnly: true
             font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
             font.pixelSize: 12
             color : "#eee"
+            selectionColor: "#333"
         }
 
     }
