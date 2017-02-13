@@ -172,7 +172,9 @@ ApplicationWindow {
             fileOpenDialog.open()
         }
         onOpenProject: {
-            dirOpenDialog.open()
+            closeProject(function(){
+                dirOpenDialog.open()
+            })
         }
         onSaveFile : {
             fileSaveDialog.open()
@@ -242,9 +244,7 @@ ApplicationWindow {
 
         visible : isLinux ? true : false /// fixes a display bug in some linux distributions
         onAccepted: {
-            header.closeProject(function(){
-                project.openProject(dirOpenDialog.fileUrl)
-            })
+            project.openProject(dirOpenDialog.fileUrl)
         }
         Component.onCompleted: {
             visible = false

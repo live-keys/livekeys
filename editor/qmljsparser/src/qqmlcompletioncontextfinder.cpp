@@ -162,10 +162,18 @@ QQmlCompletionContext *QQmlCompletionContextFinder::getContext(const QTextCursor
         ExpressionUnderCursor euc;
         euc(cursor, &path);
     }
+    QStringList objectTypePath = finder.qmlObjectTypeName();
+
+    if ( finder.isInImport() && !finder.libVersionImport().isEmpty() ){
+        if ( path.isEmpty() ){
+            context |= QQmlCompletionContext::InImportVersion;
+            objectTypePath = finder.libVersionImport().split(".");
+        }
+    }
 
     return new QQmlCompletionContext(
         context,
-        finder.qmlObjectTypeName(),
+        objectTypePath,
         finder.bindingPropertyName(),
         path
     );
