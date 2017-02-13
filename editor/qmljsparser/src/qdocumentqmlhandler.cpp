@@ -670,7 +670,7 @@ void QDocumentQmlHandler::assistCompletion(
             model->setSuggestions(suggestions, filter);
         }
     } else if ( ctx->context() & QQmlCompletionContext::InImport ){
-        if ( ctx->context() & QQmlCompletionContext::InImportVersion){
+        if ( ctx->context() & QQmlCompletionContext::InImportVersion ){
             model->setSuggestions(suggestions, filter);
         } else {
             suggestionsForImport(*ctx, suggestions);

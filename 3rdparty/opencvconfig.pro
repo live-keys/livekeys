@@ -56,6 +56,7 @@ win32{
 
     defineTest(deployOpenCV){
         copyCvDll($${OPENCV_DIR_DLLS}/opencv_world$${OPENCV_VERSION}.dll)
+        copyCvDll($${OPENCV_DIR_DLLS}/opencv_ffmpeg$${OPENCV_VERSION_FIND}_64.dll)
     }
 }
 
