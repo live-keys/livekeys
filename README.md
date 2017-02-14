@@ -1,6 +1,8 @@
 ![Live CV](/doc/src/images/logo-dark.png)
 
 [![Join the chat at https://gitter.im/dinusv/livecv](https://badges.gitter.im/dinusv/livecv.svg)](https://gitter.im/dinusv/livecv?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/livecv/livecv.svg?branch=master)](https://travis-ci.org/livecv/livecv)
+[![Build status](https://ci.appveyor.com/api/projects/status/c1kk7crl0wiox16b?svg=true)](https://ci.appveyor.com/project/dinusv/livecv)
 
  * **Version**: 1.3.0
  * **License**: LGPL
