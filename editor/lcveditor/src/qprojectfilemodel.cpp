@@ -197,9 +197,14 @@ void QProjectFileModel::entryRemoved(QProjectEntry *entry){
 }
 
 void QProjectFileModel::entryRemoved(const QModelIndex &item, QProjectEntry *entry){
+    QProjectEntry* parentEntry = entry->parentEntry();
     beginRemoveRows(parent(item), item.row(), item.row());
     entry->setParentEntry(0);
     endRemoveRows();
+
+    QProject* project = qobject_cast<QProject*>(QObject::parent());
+    if ( project && parentEntry )
+        emit project->directoryChanged(parentEntry->path());
 }
 
 void QProjectFileModel::entryAdded(QProjectEntry *item, QProjectEntry *parent){
@@ -212,6 +217,10 @@ void QProjectFileModel::entryAdded(QProjectEntry *item, QProjectEntry *parent){
     );
     item->setParentEntry(parent);
     endInsertRows();
+
+    QProject* project = qobject_cast<QProject*>(QObject::parent());
+    if ( project )
+        emit project->directoryChanged(parent->path());
 }
 
 void QProjectFileModel::moveEntry(QProjectEntry *item, QProjectEntry *newParent){
@@ -255,21 +264,27 @@ void QProjectFileModel::renameEntry(QProjectEntry *item, const QString &newName)
 
         if ( item->isFile() ){
             QFile f(item->path());
-            if ( !f.rename(newName) ){
+            if ( !f.rename(newPath) ){
                 emit error("Failed to rename file to: " + newName);
                 return;
             } else {
                 item->setName(newName);
+                QProject* project = qobject_cast<QProject*>(QObject::parent());
+                if ( project )
+                    emit project->directoryChanged(parentEntry->path());
             }
         } else {
             if ( parentEntry ){
                 QDir d(parentEntry->path());
-                if ( !d.rename(item->name(), newName) ){
+                if ( !d.rename(item->name(), newPath) ){
                     emit error("Failed to rename directory to:" + newName);
                     return;
                 } else {
                     item->setName(newName);
                     item->updatePaths();
+                    QProject* project = qobject_cast<QProject*>(QObject::parent());
+                    if ( project )
+                        emit project->directoryChanged(parentEntry->path());
                 }
             }
         }
