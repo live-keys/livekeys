@@ -43,6 +43,7 @@ class Q_LCVEDITOR_EXPORT QProject : public QObject{
     Q_PROPERTY(QString path                                  READ path            NOTIFY pathChanged)
 
     friend class QProjectFileModel;
+    friend class QProjectDocument;
     friend class QProjectDocumentModel;
 
 public:

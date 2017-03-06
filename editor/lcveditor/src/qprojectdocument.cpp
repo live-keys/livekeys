@@ -56,6 +56,8 @@ bool QProjectDocument::save(){
         if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path(), m_content ) ){
             m_file->setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
+            if ( parentAsProject() )
+                emit parentAsProject()->fileChanged(m_file->path());
             return true;
         }
     }

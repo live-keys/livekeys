@@ -131,17 +131,19 @@ namespace qmlhandler_helpers{
         QString typeLibrary,
         QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath
     ){
-        if ( !object.isNull() && object->superclassName() != "" ){
+        if ( !object.isNull() && object->superclassName() != "" && object->superclassName() != object->className() ){
             QString typeSuperClass = object->superclassName();
             QDOCUMENT_QML_HANDLER_DEBUG("Loooking up object \'" + typeSuperClass + "\' from " + typeLibrary);
 
+            // Slider -> Slider (Controls) -> Slider(Controls.Private) -> ... (the reason I can go into a loop is recursive library dependencies)
+            // Avoid loop? -> keep track of all library dependencies and dont go back -> super type with the same name cannot be from the same library
             QQmlLibraryInfo::Ptr libraryInfo = typeLibrary == ""
                     ? project->implicitLibraries()->libraryInfo(documentScope->path())
                     : project->globalLibraries()->libraryInfo(typeLibrary);
 
             LanguageUtils::FakeMetaObject::ConstPtr superObject = libraryInfo->findObjectByClassName(typeSuperClass);
 
-            if ( superObject.isNull() ){
+            if ( superObject.isNull()  ){
                 QProjectQmlScopeContainer* globalLibs = project->globalLibraries();
                 foreach( const QString& libraryDependency, libraryInfo->dependencyPaths() ){
                     superObject = globalLibs->libraryInfo(libraryDependency)->findObjectByClassName(typeSuperClass);
@@ -769,11 +771,15 @@ void QDocumentQmlHandler::directoryChanged(const QString &path){
 }
 
 void QDocumentQmlHandler::fileChanged(const QString &path){
-    QDOCUMENT_QML_HANDLER_DEBUG("Reseting library for file: " + path);
+    QFileInfo finfo(path);
+    if ( finfo.fileName() == "" || finfo.suffix() != "qml" || !finfo.fileName().at(0).isUpper() )
+        return;
+    QString fileDir = finfo.path();
 
+    QDOCUMENT_QML_HANDLER_DEBUG("Reseting library for file: " + path);
     QProjectQmlScope::Ptr project = m_projectScope;
-    project->globalLibraries()->resetLibrariesInPath(path);
-    project->implicitLibraries()->resetLibrariesInPath(path);
+    project->globalLibraries()->resetLibrary(fileDir);
+    project->implicitLibraries()->resetLibrary(fileDir);
 }
 
 void QDocumentQmlHandler::loadImport(const QString &import){
