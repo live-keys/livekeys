@@ -380,6 +380,11 @@ ApplicationWindow {
                         project.inFocus.dumpContent(editor.text)
                     project.openFile(entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen)
                 }
+                onEditEntry : {
+                    if ( project.inFocus )
+                        project.inFocus.dumpContent(editor.text)
+                    project.openFile(entry, ProjectDocument.Edit)
+                }
                 onAddEntry: {
                     projectAddEntry.show(parentEntry, isFile)
                 }
