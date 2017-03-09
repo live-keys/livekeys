@@ -29,6 +29,7 @@ Rectangle{
 
     signal addEntry(ProjectEntry parentEntry, bool isFile)
     signal openEntry(ProjectEntry entry, bool monitor)
+    signal editEntry(ProjectEntry entry)
     signal removeEntry(ProjectEntry entry, bool isFile)
     signal moveEntry(ProjectEntry entry, ProjectEntry newParent)
     signal renameEntry(ProjectEntry entry, string newName)
@@ -110,7 +111,7 @@ Rectangle{
                 project.setActive(styleData.value)
             }
             function openFile(){
-                root.openEntry(styleData.value, false)
+                root.editEntry(styleData.value)
             }
             function monitorFile(){
                 root.openEntry(styleData.value, true)
@@ -287,7 +288,7 @@ Rectangle{
             style: ContextMenuStyle{}
 
             MenuItem{
-                text: "Open File"
+                text: "Edit File"
                 onTriggered: {
                     view.contextDelegate.openFile()
                 }
