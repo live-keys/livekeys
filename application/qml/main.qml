@@ -108,10 +108,30 @@ ApplicationWindow {
                 button1Name : 'Yes',
                 button1Function : function(){
                     messageBox.close()
-                    if ( !project.documentModel.saveDocuments() ){
+                    if ( !project.isDirProject() && project.inFocus && project.inFocus.file.name === ''){
+                        var closeCallback = callback;
+                        fileSaveDialog.callback = function(){
+                            project.inFocus.dumpContent(editor.text)
+                            if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
+                                messageBox.show(
+                                    'Failed to save file to: ' + fileSaveDialog.fileUrl,
+                                    {
+                                        button3Name : 'Ok',
+                                        button3Function : function(){ messageBox.close(); }
+                                    }
+                                )
+                                return;
+                            }
+                            project.closeProject()
+                            closeCallback()
+                        }
+                        fileSaveDialog.open()
+                    } else if ( !project.documentModel.saveDocuments() ){
                         var unsavedList = project.documentModel.listUnsavedDocuments()
                         unsavedFiles = '';
                         for ( var i = 0; i < unsavedList.length; ++i ){
+                            if ( unsavedList[i] === '' )
+                                unsavedList[i] = 'untitled'
                             unsavedFiles += unsavedList[i] + "\n";
                         }
 
@@ -169,10 +189,18 @@ ApplicationWindow {
             })
         }
         onOpenFile : {
-            fileOpenDialog.open()
+            if ( !project.isDirProject() ){
+                closeProject(function(){
+                    fileOpenDialog.open()
+                })
+            } else {
+                fileOpenDialog.open()
+            }
         }
         onOpenProject: {
-            dirOpenDialog.open()
+            closeProject(function(){
+                dirOpenDialog.open()
+            })
         }
         onSaveFile : {
             fileSaveDialog.open()
@@ -196,11 +224,11 @@ ApplicationWindow {
         selectExisting : true
         visible : isLinux ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
-            if ( project.isFileInProject(fileOpenDialog.fileUrl ) )
+            if ( project.path === '' )
+                project.openProject(fileOpenDialog.fileUrl)
+            else if ( project.isFileInProject(fileOpenDialog.fileUrl ) )
                 project.openFile(fileOpenDialog.fileUrl, ProjectDocument.Edit)
-            else if ( !project.isDirProject() ){
-                header.closeProject(function(){ project.openProject(fileOpenDialog.fileUrl) } )
-            } else {
+            else {
                 var fileUrl = fileOpenDialog.fileUrl
                 messageBox.show(
                     'File is outside project scope. Would you like to open it as a new project?',
@@ -242,9 +270,7 @@ ApplicationWindow {
 
         visible : isLinux ? true : false /// fixes a display bug in some linux distributions
         onAccepted: {
-            header.closeProject(function(){
-                project.openProject(dirOpenDialog.fileUrl)
-            })
+            project.openProject(dirOpenDialog.fileUrl)
         }
         Component.onCompleted: {
             visible = false
@@ -258,8 +284,15 @@ ApplicationWindow {
         nameFilters: ["Qml files (*.qml)", "All files (*)"]
         selectExisting : false
         visible : isLinux ? true : false /// fixes a display bug in some linux distributions
+
+        property var callback: null
+
         onAccepted: {
-            if ( project.inFocus ){
+            if ( callback ){
+                callback()
+                callback = null
+            } else if ( project.inFocus ){
+                project.inFocus.dumpContent(editor.text)
                 if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
                     messageBox.show(
                         'Failed to save file to: ' + fileSaveDialog.fileUrl,
@@ -312,8 +345,7 @@ ApplicationWindow {
             }
         }
         onRejected:{
-            header.callback()
-            header.callback = function(){}
+            fileSaveDialog.callback = null
         }
         Component.onCompleted: {
             visible: false
@@ -468,6 +500,7 @@ ApplicationWindow {
                             );
                         }
                     } else {
+                        project.inFocus.dumpContent(editor.text)
                         fileSaveDialog.open()
                     }
                 }
@@ -481,8 +514,24 @@ ApplicationWindow {
                             button1Name : 'Yes',
                             button1Function : function(){
                                 project.inFocus.dumpContent(editor.text)
-                                project.inFocus.save()
-                                project.closeFocusedFile()
+                                if ( project.inFocus.file.name !== '' ){
+                                    project.inFocus.save()
+                                } else {
+                                    fileSaveDialog.open()
+                                    fileSaveDialog.callback = function(){
+                                        if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
+                                            messageBox.show(
+                                                'Failed to save file to: ' + fileSaveDialog.fileUrl,
+                                                {
+                                                    button3Name : 'Ok',
+                                                    button3Function : function(){ messageBox.close(); }
+                                                }
+                                            )
+                                            return;
+                                        }
+                                        project.closeFocusedFile()
+                                    }
+                                }
                                 messageBox.close()
                             },
                             button2Name : 'No',
@@ -496,7 +545,23 @@ ApplicationWindow {
                             },
                             returnPressed : function(){
                                 project.inFocus.dumpContent(editor.text)
-                                project.inFocus.save()
+                                if ( project.inFocus.file.name !== '' ){
+                                    project.inFocus.save()
+                                } else {
+                                    fileSaveDialog.callback = function(){
+                                        if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
+                                            messageBox.show(
+                                                'Failed to save file to: ' + fileSaveDialog.fileUrl,
+                                                {
+                                                    button3Name : 'Ok',
+                                                    button3Function : function(){ messageBox.close(); }
+                                                }
+                                            )
+                                            return;
+                                        }
+                                        project.closeFocusedFile()
+                                    }
+                                }
                                 project.closeFocusedFile()
                                 messageBox.close()
                             }
