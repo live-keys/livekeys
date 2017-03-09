@@ -1283,10 +1283,10 @@ void QDocumentQmlHandler::suggestionsForLeftSignalBind(
         suggestionsForValueObject(
             documentScope->info()->extractValueObject(documentValue),
             suggestions,
-            false,
-            false,
             true,
-            false
+            true,
+            true,
+            true
         );
 
     QString type = context.objectTypePath().size() > 0 ? context.objectTypePath()[0] : "";
@@ -1296,7 +1296,7 @@ void QDocumentQmlHandler::suggestionsForLeftSignalBind(
     QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
     QString libraryKey;
     qmlhandler_helpers::getTypePath(documentScope, projectScope, typeNamespace, type, typePath, libraryKey);
-    qmlhandler_helpers::suggestionsForObjectPath(typePath, false, false, false, false, true, ": ", suggestions);
+    qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, true, true, true, ": ", suggestions);
 }
 
 QString QDocumentQmlHandler::extractQuotedString(const QTextCursor &cursor) const{
