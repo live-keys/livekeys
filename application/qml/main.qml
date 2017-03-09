@@ -454,7 +454,9 @@ ApplicationWindow {
                 visible : !args.previewFlag
 
                 onSave: {
-                    if ( project.inFocus.name !== '' ){
+                    if ( !project.inFocus )
+                        return;
+                    if ( project.inFocus.file.name !== '' ){
                         project.inFocus.dumpContent(editor.text)
                         project.inFocus.save()
                         if ( project.active && project.active !== project.inFocus ){
