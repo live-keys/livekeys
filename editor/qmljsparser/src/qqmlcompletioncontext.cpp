@@ -37,6 +37,8 @@ QString QQmlCompletionContext::contextString() const{
     QString base;
     if ( m_context & QQmlCompletionContext::InImport)
         base += "InImport";
+    if ( m_context & QQmlCompletionContext::InImportVersion)
+        base += base.isEmpty() ? "InImportVersion" : " | InImportVersion";
     if ( m_context & QQmlCompletionContext::InQml)
         base += base.isEmpty() ? "InQml" : " | InQml";
     if ( m_context & QQmlCompletionContext::InLhsOfBinding)
