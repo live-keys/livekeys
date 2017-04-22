@@ -16,9 +16,12 @@
 
 #include "qvideowriter.h"
 #include "qvideowriterthread.h"
-#include "qstatecontainer.h"
+#include "qstaticcontainer.h"
 #include <QJSValueIterator>
+#include <QQmlContext>
 #include "opencv2/highgui.hpp"
+
+#include "qlivecvarguments.h"
 
 QVideoWriter::QVideoWriter(QQuickItem *parent)
     : QQuickItem(parent)
@@ -35,41 +38,36 @@ int QVideoWriter::framesWritten() const{
     return m_thread ? m_thread->framesWritten() : 0;
 }
 
-QString QVideoWriter::getKey() const{
+QString QVideoWriter::getKey(const QString &filename,
+        int fourcc,
+        double fps,
+        const cv::Size frameSize) const
+{
     return
-        m_filename +
-        QString::number(m_fourcc) +
-        QString::number(m_fps) +
-        QString::number(m_frameSize.width) +
-        QString::number(m_frameSize.height);
+        filename +
+        QString::number(fourcc) +
+        QString::number(fps) +
+        QString::number(frameSize.width) +
+        QString::number(frameSize.height);
 }
 
 void QVideoWriter::componentComplete(){
     QQuickItem::componentComplete();
-
-    if ( !m_init.isNull() && m_fourcc != 0 && !m_filename.isEmpty() ){
-        QStateContainer<QVideoWriterThread>& stateCont =
-            QStateContainer<QVideoWriterThread>::instance(this);
-
-        m_thread = stateCont.state(getKey());
-        if ( m_thread == 0 ){
-            m_thread = createThread();
-            m_thread->start();
-            stateCont.registerState(getKey(), m_thread);
-        }
-    }
 }
 
-void QVideoWriter::setInit(const QJSValue &init){
-    m_fourcc = 0;
-    m_fps = 0;
-    m_frameSize = cv::Size(0, 0);
-    m_isColor = true;
+void QVideoWriter::staticLoad(const QJSValue &params){
+    QString filename = "";
+    int m_fourcc = 0;
+    double m_fps = 0;
+    cv::Size m_frameSize = cv::Size(0, 0);
+    int m_isColor = true;
 
-    QJSValueIterator initIt(init);
+    QJSValueIterator initIt(params);
     while ( initIt.hasNext() ){
         initIt.next();
-        if ( initIt.name() == "fourcc" ){
+        if ( initIt.name() == "filename" ){
+            filename = initIt.value().toString();
+        } else if ( initIt.name() == "fourcc" ){
             if ( initIt.value().isNumber() ){
                 m_fourcc = initIt.value().toInt();
             } else {
@@ -96,36 +94,17 @@ void QVideoWriter::setInit(const QJSValue &init){
         }
     }
 
-    m_init = init;
-    emit initChanged();
+    QStaticContainer* container = qmlContext(this)->contextProperty("staticContainer").value<QStaticContainer*>();
+    m_thread = container->get<QVideoWriterThread>(getKey(
+        filename, m_fourcc, m_fps, m_frameSize
+    ));
 
-    if ( m_fourcc != 0 && isComponentComplete() ){
-        delete m_thread;
-        QStateContainer<QVideoWriterThread>& stateCont =
-            QStateContainer<QVideoWriterThread>::instance(this);
-
-        m_thread = createThread();
-        stateCont.registerState(m_filename, m_thread);
+    if ( !m_thread ){
+        m_thread = createThread(filename, m_fourcc, m_fps, m_frameSize, m_isColor);
+        container->set<QVideoWriterThread>(getKey(
+            filename, m_fourcc, m_fps, m_frameSize
+        ), m_thread);
     }
-}
-
-void QVideoWriter::setFilename(const QString &filename){
-    if (m_filename == filename)
-        return;
-
-    m_filename = filename;
-    if ( isComponentComplete() ){
-        QStateContainer<QVideoWriterThread>& stateCont =
-            QStateContainer<QVideoWriterThread>::instance(this);
-
-        m_thread = stateCont.state(getKey());
-        if ( m_thread == 0 ){
-            m_thread = createThread();
-            stateCont.registerState(getKey(), m_thread);
-        }
-    }
-
-    emit filenameChanged();
 }
 
 void QVideoWriter::save(){
@@ -136,19 +115,19 @@ void QVideoWriter::save(){
 void QVideoWriter::write(QMat *image){
     if ( m_thread ){
         if ( !m_thread->isOpen() ){
-            m_thread->open(m_filename, m_fourcc, m_fps, m_frameSize, m_isColor);
+            m_thread->open();
         }
         m_thread->write(image);
     }
 }
 
-QVideoWriterThread *QVideoWriter::createThread(){
+QVideoWriterThread *QVideoWriter::createThread(const QString &filename, int fourcc, double fps, const cv::Size frameSize, bool isColor){
     return new QVideoWriterThread(
-        m_filename,
-        m_fourcc,
-        m_fps,
-        m_frameSize,
-        m_isColor,
+        filename,
+        fourcc,
+        fps,
+        frameSize,
+        isColor,
         this
     );
 }

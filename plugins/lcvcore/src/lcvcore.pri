@@ -15,11 +15,17 @@ HEADERS += \
     $$PWD/qvideocapturethread.h \
     $$PWD/qmatview.h \
     $$PWD/qmatlist.h \
-    $$PWD/qglobalitem.h \
-    $$PWD/qglobalitemproperty.h \
     $$PWD/qimwrite.h \
     $$PWD/qvideowriter.h \
-    $$PWD/qvideowriterthread.h
+    $$PWD/qvideowriterthread.h \
+    $$PWD/qmat.h \
+    $$PWD/qmatdisplay.h \
+    $$PWD/qmatfilter.h \
+    $$PWD/qmatnode.h \
+    $$PWD/qmatshader.h \
+    $$PWD/qmatstate.h \
+    $$PWD/qmataccess.h \
+    $$PWD/qlcvcoreglobal.h
 
 SOURCES += \
     $$PWD/lcvcore_plugin.cpp \
@@ -38,8 +44,14 @@ SOURCES += \
     $$PWD/qvideocapturethread.cpp \
     $$PWD/qmatview.cpp \
     $$PWD/qmatlist.cpp \
-    $$PWD/qglobalitem.cpp \
-    $$PWD/qglobalitemproperty.cpp \
     $$PWD/qimwrite.cpp \
     $$PWD/qvideowriter.cpp \
-    $$PWD/qvideowriterthread.cpp
+    $$PWD/qvideowriterthread.cpp \
+    $$PWD/qmat.cpp \
+    $$PWD/qmatdisplay.cpp \
+    $$PWD/qmatfilter.cpp \
+    $$PWD/qmatnode.cpp \
+    $$PWD/qmatshader.cpp \
+    $$PWD/qmatstate.cpp \
+    $$PWD/qmataccess.cpp
+

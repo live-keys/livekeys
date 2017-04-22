@@ -1,6 +1,6 @@
 import QtQuick 2.3
 import lcvcore 1.0
-import lcvcontrols 1.0
+import live 1.0
 
 Column{
     
@@ -12,11 +12,11 @@ Column{
     property string recordPath : project.dir() + '/../_videos/amherst-11_2754_3754_record.avi'
     
     VideoCapture{
-        file : parent.videoPath
         id : videoArea
         loop : true
         fps : 100
         Component.onCompleted : {
+            staticOpen(parent.videoPath)
             paused = true
         }
     }
@@ -35,13 +35,15 @@ Column{
     
     VideoWriter{
         id : videoWriter
-        filename: parent.recordPath
         input: videoArea.output
-        init : {
-             'fourcc': "XVID",
-             'fps': videoArea.fps,
-             'frameWidth' : 800,
-             'frameHeight' : 600
+        Component.onCompleted : {
+            staticLoad({
+                'filename': parent.recordPath,
+                'fourcc': "XVID",
+                'fps': videoArea.fps,
+                'frameWidth' : 800,
+                'frameHeight' : 600
+            });
         }
     }
 }

@@ -18,10 +18,11 @@
 #define QBACKGROUNDSUBTRACTOR_HPP
 
 #include <QQuickItem>
+#include "qlcvvideoglobal.h"
 #include "qmatfilter.h"
 #include "opencv2/video.hpp"
 
-class QBackgroundSubtractorPrivate{
+class Q_LCVVIDEO_EXPORT QBackgroundSubtractorPrivate{
 
 public:
     QBackgroundSubtractorPrivate();

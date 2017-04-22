@@ -19,7 +19,6 @@
 
 #include <QQuickItem>
 #include <QSGSimpleTextureNode>
-#include "qlcvglobal.h"
 #include "qmat.h"
 
 class QPainter;

@@ -26,8 +26,6 @@ class QVideoWriterThread;
 class QVideoWriter : public QQuickItem{
 
     Q_OBJECT
-    Q_PROPERTY(QJSValue init     READ init          WRITE  setInit       NOTIFY initChanged)
-    Q_PROPERTY(QString filename  READ filename      WRITE  setFilename   NOTIFY filenameChanged)
     Q_PROPERTY(QMat* input       READ input         WRITE  setInput      NOTIFY inputChanged)
     Q_PROPERTY(int framesWritten READ framesWritten NOTIFY framesWrittenChanged)
 
@@ -37,53 +35,31 @@ public:
     explicit QVideoWriter(QQuickItem *parent = 0);
     virtual ~QVideoWriter();
 
-    const QJSValue& init() const;
-    const QString& filename() const;
-
     QMat* input() const;
     int framesWritten() const;
 
-    QString getKey() const;
+    QString getKey(const QString& filename, int fourcc, double fps, const cv::Size frameSize) const;
 
 protected:
     void componentComplete();
 
 signals:
-    void initChanged();
-    void filenameChanged();
     void inputChanged();
     void framesWrittenChanged();
 
 public slots:
-    void setInit(const QJSValue& init);
-    void setFilename(const QString& filename);
+    void staticLoad(const QJSValue& params);
     void setInput(QMat* input);
     void save();
 
     void write(QMat* image);
 
 private:
-    QVideoWriterThread* createThread();
+    QVideoWriterThread* createThread(const QString& filename, int fourcc, double fps, const cv::Size frameSize, bool isColor);
 
-    QJSValue m_init;
-    QString  m_filename;
     QMat*    m_input;
-
-    int      m_fourcc;
-    double   m_fps;
-    cv::Size m_frameSize;
-    bool     m_isColor;
-
     QVideoWriterThread* m_thread;
 };
-
-inline const QJSValue& QVideoWriter::init() const{
-    return m_init;
-}
-
-inline const QString &QVideoWriter::filename() const{
-    return m_filename;
-}
 
 inline QMat *QVideoWriter::input() const{
     return m_input;

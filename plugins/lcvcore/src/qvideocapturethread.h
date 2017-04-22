@@ -18,7 +18,6 @@
 #define QVIDEOCAPTURETHREAD_H
 
 #include <QThread>
-#include "qlcvglobal.h"
 
 class QMat;
 class QTimer;

@@ -12,5 +12,5 @@ CamCapture{
     property string deviceId : '0'
     
     anchors.centerIn : parent
-    device : deviceId
+    Component.onCompleted : staticOpen(deviceId)
 }

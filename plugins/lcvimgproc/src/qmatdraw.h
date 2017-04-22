@@ -17,7 +17,6 @@
 #ifndef QMATDRAW_H
 #define QMATDRAW_H
 
-#include "qlcvglobal.h"
 #include "qmatdisplay.h"
 
 class QMatDraw : public QMatDisplay{
