@@ -10,10 +10,10 @@ Grid{
     columns : 2    
 
     VideoCapture{
-        file : parent.videoPath
         id : videoArea
         loop : true
         Component.onCompleted : {
+            staticOpen(parent.videoPath)
             width = width / 2
             height = height / 2
         }

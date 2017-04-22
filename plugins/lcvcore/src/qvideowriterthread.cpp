@@ -29,6 +29,10 @@ QVideoWriterThread::QVideoWriterThread(
     : QThread(parent)
     , m_filename(filename)
     , m_framesWritten(0)
+    , m_fourcc(fourcc)
+    , m_fps(fps)
+    , m_frameSize(frameSize)
+    , m_isColor(isColor)
 {
     m_writer = new cv::VideoWriter();
     m_writer->open(filename.toStdString(), fourcc, fps, frameSize, isColor);
@@ -91,16 +95,10 @@ bool QVideoWriterThread::isOpen(){
     return m_writer->isOpened();
 }
 
-void QVideoWriterThread::open(
-    const QString filename,
-    int fourcc,
-    double fps,
-    const cv::Size &frameSize,
-    bool isColor)
-{
-    m_writer->open(filename.toStdString(), fourcc, fps, frameSize, isColor);
+void QVideoWriterThread::open(){
+    m_writer->open(m_filename.toStdString(), m_fourcc, m_fps, m_frameSize, m_isColor);
     if ( !m_writer->isOpened() ){
-        qWarning("Failed to open VideoWriter on file: %s", qPrintable(filename));
+        qWarning("Failed to open VideoWriter on file: %s", qPrintable(m_filename));
     }
 }
 

@@ -490,6 +490,8 @@ ApplicationWindow {
                 width: 400
                 visible : !args.previewFlag
 
+                font.pixelSize: settings.editor.fontSize
+
                 onSave: {
                     if ( !project.inFocus )
                         return;

@@ -42,12 +42,7 @@ public:
     void stop();
     void save();
     bool isOpen();
-    void open(
-        const QString filename,
-        int fourcc,
-        double fps,
-        const cv::Size& frameSize,
-        bool isColor);
+    void open();
 
     void write(QMat* mat);
     int framesWritten() const;
@@ -61,6 +56,11 @@ private:
     cv::Mat          m_data;
     bool             m_hasDataToWrite;
     bool             m_stop;
+
+    int              m_fourcc;
+    double           m_fps;
+    cv::Size         m_frameSize;
+    bool             m_isColor;
 };
 
 inline int QVideoWriterThread::framesWritten() const{

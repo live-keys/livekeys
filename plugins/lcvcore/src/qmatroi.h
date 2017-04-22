@@ -17,7 +17,6 @@
 #ifndef QMATROI_HPP
 #define QMATROI_HPP
 
-#include "qlcvglobal.h"
 #include "qmatfilter.h"
 
 class QMatRoi : public QMatFilter{

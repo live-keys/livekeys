@@ -17,9 +17,7 @@
 #ifndef QMAT2DARRAY_H
 #define QMAT2DARRAY_H
 
-#include "qlcvglobal.h"
 #include "qmatdisplay.h"
-
 #include <QList>
 
 class QMat2DArray : public QMatDisplay{

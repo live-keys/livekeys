@@ -17,7 +17,6 @@
 #ifndef QVIDEOCAPTURE_H
 #define QVIDEOCAPTURE_H
 
-#include "qlcvglobal.h"
 #include "qmatdisplay.h"
 
 class QVideoCaptureThread;
@@ -26,8 +25,8 @@ class QVideoCapture : public QQuickItem{
     Q_OBJECT
     Q_PROPERTY(QMat*   output       READ output       NOTIFY outChanged)
     Q_PROPERTY(int     totalFrames  READ totalFrames  NOTIFY totalFramesChanged)
+    Q_PROPERTY(QString file         READ file         NOTIFY fileChanged)
     Q_PROPERTY(bool    linearFilter READ linearFilter WRITE setLinearFilter NOTIFY linearFilterChanged)
-    Q_PROPERTY(QString file         READ file         WRITE setFile         NOTIFY fileChanged)
     Q_PROPERTY(bool    paused       READ paused       WRITE setPaused       NOTIFY pausedChanged)
     Q_PROPERTY(qreal   fps          READ fps          WRITE setFps          NOTIFY fpsChanged)
     Q_PROPERTY(int     currentFrame READ currentFrame WRITE seekTo          NOTIFY outChanged)
@@ -38,7 +37,6 @@ public:
     virtual ~QVideoCapture();
 
     const QString& file() const;
-    void setFile(const QString& file);
 
     bool paused() const;
     void setPaused(bool paused);
@@ -61,6 +59,8 @@ public:
 public slots:
     void switchMat();
     void seekTo(int frame);
+    void staticLoad(const QString& file);
+    void staticOpen(const QString& file);
 
 signals:
     void outChanged();

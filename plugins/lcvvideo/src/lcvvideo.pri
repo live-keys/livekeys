@@ -3,7 +3,8 @@ HEADERS += \
     $$PWD/qcalcopticalflowpyrlk.h \
     $$PWD/qbackgroundsubtractor.h \
     $$PWD/qbackgroundsubtractormog2.h \
-    $$PWD/qbackgroundsubtractorknn.h
+    $$PWD/qbackgroundsubtractorknn.h \
+    $$PWD/qlcvvideoglobal.h
 
 SOURCES += \
         $$PWD/lcvvideo_plugin.cpp \

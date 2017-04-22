@@ -18,7 +18,6 @@
 #define QMATBUFFER_HPP
 
 #include <QQuickItem>
-#include "qlcvglobal.h"
 #include "qmatdisplay.h"
 
 class QMatBuffer : public QMatDisplay{

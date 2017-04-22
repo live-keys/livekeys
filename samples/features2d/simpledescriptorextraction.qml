@@ -1,9 +1,9 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
+import live 1.0
 import lcvcore 1.0
 import lcvimgproc 1.0
 import lcvfeatures2d 1.0
-import lcvcontrols 1.0
 
 Column {
 
