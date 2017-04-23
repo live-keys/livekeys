@@ -1,6 +1,5 @@
 import QtQuick 2.3
 import live 1.0
-import lcvcore 1.0
 
 Rectangle{
 
