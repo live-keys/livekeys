@@ -29,9 +29,11 @@ namespace lcv{
 QProjectDocument::QProjectDocument(QProjectFile *file, bool isMonitored, QProject *parent)
     : QObject(parent)
     , m_file(file)
+    , m_isDirty(false)
+    , m_isMonitored(isMonitored)
 {
     readContent();
-    m_file->setIsMonitored(isMonitored);
+    m_file->setDocument(this);
 }
 
 void QProjectDocument::dumpContent(const QString &content){
@@ -54,7 +56,7 @@ QProject *QProjectDocument::parentAsProject(){
 bool QProjectDocument::save(){
     if ( m_file->path() != "" ){
         if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path(), m_content ) ){
-            m_file->setIsDirty(false);
+            setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
             if ( parentAsProject() )
                 emit parentAsProject()->fileChanged(m_file->path());
@@ -67,7 +69,8 @@ bool QProjectDocument::save(){
 bool QProjectDocument::saveAs(const QString &path){
     if ( path != "" ){
         if ( parentAsProject()->lockedFileIO()->writeToFile(path, m_content ) ){
-            m_file->setIsDirty(false);
+            //TODO: parentAsProject()->relocateDocumentInFileSystem()
+            setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
             return true;
         }
@@ -83,9 +86,7 @@ QProjectDocument::~QProjectDocument(){
     if ( m_file->parent() == 0 )
         m_file->deleteLater();
     else {
-        m_file->setIsOpen(false);
-        m_file->setIsDirty(false);
-        m_file->setIsMonitored(false);
+        m_file->setDocument(0);
     }
 }
 

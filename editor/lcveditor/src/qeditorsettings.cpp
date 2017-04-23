@@ -1,4 +1,6 @@
 #include "qeditorsettings.h"
+#include "qprojectdocument.h"
+#include "qprojectfile.h"
 #include <QFile>
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -14,38 +16,52 @@ QEditorSettings::QEditorSettings(const QString &path, QObject *parent)
 }
 
 QEditorSettings::~QEditorSettings(){
-    save();
+}
+
+void QEditorSettings::fromJson(const QJsonObject &root){
+    if ( root.contains("fontSize") ){
+        m_fontSize = root["fontSize"].toInt();
+        emit fontSizeChanged(m_fontSize);
+    }
+}
+
+QJsonObject QEditorSettings::toJson() const{
+    QJsonObject root;
+    root["fontSize"] = m_fontSize;
+    return root;
 }
 
 void QEditorSettings::reparse(){
     QFile file(m_path);
     if ( !file.exists() ){
-        QJsonObject root;
-        root["fontSize"] = m_fontSize;
-        m_content = QJsonDocument(root).toJson(QJsonDocument::Indented);
+        m_content = QJsonDocument(toJson()).toJson(QJsonDocument::Indented);
     } else if ( file.open(QIODevice::ReadOnly) ){
         init(file.readAll());
         file.close();
     }
 }
 
-void QEditorSettings::save(){
-    QFile file(m_path);
-    if ( file.open(QIODevice::WriteOnly) ){
-        file.write(m_content);
-        file.close();
-    } else {
-        qCritical("Failed to save settings to file");
-    }
-}
-
 void QEditorSettings::init(const QByteArray &data){
     m_content = data;
-    QJsonDocument jsondoc = QJsonDocument::fromJson(data);
-    QJsonObject root = jsondoc.object();
-    if ( root.contains("fontSize") ){
-        m_fontSize = root["fontSize"].toInt();
-        emit fontSizeChanged(m_fontSize);
+    QJsonParseError error;
+    QJsonDocument jsondoc = QJsonDocument::fromJson(data, &error);
+    if ( error.error != QJsonParseError::NoError ){
+        emit initError(error.errorString());
+        qCritical("Failed to parse settings file: %s", qPrintable(error.errorString()));
+    }
+    fromJson(jsondoc.object());
+}
+
+void QEditorSettings::documentOpened(lcv::QProjectDocument *document){
+    connect(document, SIGNAL(isDirtyChanged()), this, SLOT(documentIsDirtyChanged()));
+}
+
+void QEditorSettings::documentIsDirtyChanged(){
+    QProjectDocument* document = qobject_cast<QProjectDocument*>(sender());
+    if ( document ){
+        if ( !document->isDirty() && document->file()->path() == m_path ){
+            init(document->content().toUtf8());
+        }
     }
 }
 

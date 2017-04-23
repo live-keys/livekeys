@@ -12,14 +12,14 @@ class QLicenseContainer;
 class QLiveCVSettings : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QEditorSettings*   editor  READ editor  CONSTANT)
-    Q_PROPERTY(QLicenseContainer* license READ license CONSTANT)
+    Q_PROPERTY(lcv::QEditorSettings*   editor  READ editor  CONSTANT)
+    Q_PROPERTY(lcv::QLicenseContainer* license READ license CONSTANT)
 
 public:
     ~QLiveCVSettings();
 
-    QEditorSettings*   editor();
-    QLicenseContainer* license();
+    lcv::QEditorSettings*   editor();
+    lcv::QLicenseContainer* license();
 
     static QLiveCVSettings* initialize(const QString& path, QObject* parent = 0);
 

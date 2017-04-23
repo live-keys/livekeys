@@ -1,7 +1,6 @@
 #include "qlivecvsettings.h"
 #include "qeditorsettings.h"
 #include "qlicensesettings.h"
-
 #include <QDir>
 
 namespace lcv{
