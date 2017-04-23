@@ -22,7 +22,7 @@ Rectangle {
     height: 35
     gradient: Gradient{
         GradientStop{ position: 0.0; color: "#141923"}
-        GradientStop{ position: 1.0; color: "#05111b"}
+        GradientStop{ position: 1.0; color: "#061119"}
     }
 
     property bool isLogWindowDirty : false
@@ -64,7 +64,7 @@ Rectangle {
         anchors.leftMargin: 160
         height : newMArea.containsMouse ? parent.height : parent.height - 5
         width : 35
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         Image{
@@ -94,7 +94,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 200
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : saveMArea.containsMouse ? parent.height : parent.height - 5
@@ -126,7 +126,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 240
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : openMArea.containsMouse ? parent.height : parent.height - 5
@@ -159,7 +159,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 280
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : openProjectMArea.containsMouse ? parent.height : parent.height - 5
@@ -191,7 +191,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 360
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : openLogMArea.containsMouse ? parent.height : parent.height - 5
@@ -237,7 +237,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 425
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : minusMArea.containsMouse ? parent.height : parent.height - 5
@@ -268,7 +268,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 465
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : plusMArea.containsMouse ? parent.height : parent.height - 5

@@ -54,7 +54,7 @@ Rectangle{
         anchors.left: parent.left
         width: parent.width - 30
 
-        color: "#0b1c29"
+        color: "#0c161e"
         height: 30
 
         border.color: "#12202c"
@@ -219,7 +219,7 @@ Rectangle{
 
                 property string path: model.path
 
-                color: ListView.isCurrentItem ? "#152432" : "#0d1923"
+                color: ListView.isCurrentItem ? "#101e29" : "#0d1923"
                 width: root.width
                 height: documentView.delegateHeight
                 Text{

@@ -24,7 +24,7 @@ Window {
     width: 400
     height: 200
     title: "LCV Log"
-    color : "#05111b"
+    color : "#081017"
 
     property string text : ""
 
@@ -49,13 +49,13 @@ Window {
                 implicitHeight: 10
                 Rectangle{
                     anchors.fill: parent
-                    color: "#091a27"
+                    color: container.color
                 }
             }
             decrementControl: null
             incrementControl: null
-            frame: Rectangle{color: "#071723"}
-            corner: Rectangle{color: "#071723"}
+            frame: Rectangle{color: container.color}
+            corner: Rectangle{color: container.color}
         }
 
         TextEdit{

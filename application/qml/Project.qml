@@ -23,8 +23,8 @@ Rectangle{
     id: root
     color : "#0b1924"
     gradient: Gradient{
-        GradientStop { position: 0.0;  color: "#08141f" }
-        GradientStop { position: 0.01; color: "#0b1924" }
+        GradientStop { position: 0.0;  color: "#061119" }
+        GradientStop { position: 0.01; color: "#050e16" }
     }
 
     signal addEntry(ProjectEntry parentEntry, bool isFile)

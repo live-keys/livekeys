@@ -20,7 +20,7 @@ import QtQuick.Controls.Styles 1.4
 
 MenuStyle{
     frame: Rectangle{
-        color: "#071119"
+        color: "#030a11"
         opacity: 0.95
     }
     itemDelegate.label: Rectangle{
@@ -38,6 +38,6 @@ MenuStyle{
         }
     }
     itemDelegate.background: Rectangle{
-        color: styleData.selected ? "#092235" : "transparent"
+        color: styleData.selected ? "#0a1a27" : "transparent"
     }
 }
