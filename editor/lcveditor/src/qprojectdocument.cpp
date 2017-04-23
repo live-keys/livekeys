@@ -67,9 +67,16 @@ bool QProjectDocument::save(){
 }
 
 bool QProjectDocument::saveAs(const QString &path){
-    if ( path != "" ){
+    if ( m_file->path() == path ){
+        save();
+    } else if ( path != "" ){
         if ( parentAsProject()->lockedFileIO()->writeToFile(path, m_content ) ){
-            //TODO: parentAsProject()->relocateDocumentInFileSystem()
+            QProjectFile* file = parentAsProject()->relocateDocument(m_file->path(), path, this);
+            if ( file ){
+                m_file->setDocument(0);
+                m_file = file;
+                emit fileChanged();
+            }
             setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
             return true;

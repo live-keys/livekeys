@@ -72,6 +72,17 @@ void QProjectDocumentModel::openDocument(const QString &path, QProjectDocument *
     endResetModel();
 }
 
+void QProjectDocumentModel::relocateDocument(const QString &path, const QString &newPath, QProjectDocument *document){
+    beginResetModel();
+    m_openedFiles.take(path);
+    m_openedFiles[newPath] = document;
+    if ( document->isMonitored() ){
+        fileWatcher()->removePath(path);
+        fileWatcher()->addPath(newPath);
+    }
+    endResetModel();
+}
+
 void QProjectDocumentModel::closeDocuments(){
     QProject* p = qobject_cast<QProject*>(parent());
     if ( p ){
