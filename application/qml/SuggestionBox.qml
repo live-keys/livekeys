@@ -24,7 +24,8 @@ Rectangle{
 
     width: 250
     height: 280
-    color: "#071119"
+    color: "#0b1116"
+    property color selectionColor: "#0a1a27"
     opacity: 0.95
 
     property alias suggestionCount : pluginList.count
@@ -93,13 +94,13 @@ Rectangle{
                 implicitHeight: 10
                 Rectangle{
                     anchors.fill: parent
-                    color: "#091823"
+                    color: root.color
                 }
             }
             decrementControl: null
             incrementControl: null
             frame: Rectangle{color: "transparent"}
-            corner: Rectangle{color: "#091823"}
+            corner: Rectangle{color: root.color}
         }
 
         ListView{
@@ -124,7 +125,7 @@ Rectangle{
 
                     width : pluginList.width
                     height : 25
-                    color : ListView.isCurrentItem ? "#11222e" : "transparent"
+                    color : ListView.isCurrentItem ? root.selectionColor : "transparent"
                     Text{
                         id: label
                         anchors.left: parent.left
@@ -158,7 +159,7 @@ Rectangle{
                         font.family: root.fontFamily
                         font.pixelSize: root.smallFontSize - 1
 
-                        color: "#8f772e"
+                        color: "#bc900c"
                         text: model.category
                     }
 

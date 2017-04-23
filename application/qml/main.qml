@@ -367,7 +367,7 @@ ApplicationWindow {
             handleDelegate: Rectangle {
                 implicitWidth: 1
                 implicitHeight: 1
-                color: "#071723"
+                color: "#060d13"
             }
 
             Project{
@@ -609,7 +609,7 @@ ApplicationWindow {
                 id : viewer
                 height : parent.height
 
-                color : "#05111b"
+                color : "#081017"
 
                 Item {
                     id: tester
@@ -694,7 +694,7 @@ ApplicationWindow {
                     anchors.bottom: parent.bottom
                     height : error.text !== '' ? error.height + 20 : 0
                     width : parent.width
-                    color : "#141a1a"
+                    color : editor.color
                     Behavior on height {
                         SpringAnimation { spring: 3; damping: 0.1 }
                     }
@@ -806,7 +806,7 @@ ApplicationWindow {
         id: messageBox
         anchors.fill: parent
         visible: false
-        backgroudColor: "#08141d"
+        backgroudColor: "#050e16"
 
         function show(
             message,

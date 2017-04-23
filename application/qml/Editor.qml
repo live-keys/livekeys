@@ -36,7 +36,7 @@ Rectangle{
     property alias text: editorArea.text
     property alias font: editorArea.font
 
-    color : "#071723"
+    color : "#050c13"
 
     clip : true
 
@@ -54,7 +54,7 @@ Rectangle{
         color : "#000"
         gradient: Gradient{
             GradientStop { position: 0.0;  color: "#08141f" }
-            GradientStop { position: 0.30; color: "#081926" }
+            GradientStop { position: 0.10; color: "#071119" }
         }
 
         Text{
@@ -76,7 +76,7 @@ Rectangle{
             }
             font.family: "Open Sans, sans-serif"
             font.pixelSize: 12
-            font.weight: isLinux ? Font.Normal : Font.Light
+            font.weight: Font.Normal
         }
 
         Rectangle{
@@ -106,7 +106,7 @@ Rectangle{
             height: parent.height
             gradient: Gradient{
                 GradientStop { position: 0.0;  color: "#08141f" }
-                GradientStop { position: 0.30; color: "#061c2d" }
+                GradientStop { position: 0.30; color: "#08131c" }
             }
 
             Image{
@@ -125,7 +125,7 @@ Rectangle{
     Rectangle{
         anchors.fill: parent
         anchors.topMargin: 38
-        color: "#071723"
+        color: editor.color
 
         ScrollView {
             id: flick
@@ -135,7 +135,7 @@ Rectangle{
                     implicitWidth: 10
                     implicitHeight: 10
                     Rectangle {
-                        color: "#0b1f2e"
+                        color: "#061724"
                         anchors.fill: parent
                     }
                 }
@@ -144,13 +144,13 @@ Rectangle{
                     implicitHeight: 10
                     Rectangle{
                         anchors.fill: parent
-                        color: "#091a27"
+                        color: editor.color
                     }
                 }
                 decrementControl: null
                 incrementControl: null
-                frame: Rectangle{color: "#071723"}
-                corner: Rectangle{color: "#071723"}
+                frame: Rectangle{color: editor.color}
+                corner: Rectangle{color: editor.color}
             }
 
             anchors.fill: parent
@@ -198,7 +198,7 @@ Rectangle{
                 color : "#fff"
                 font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
                 font.pixelSize: 13
-                font.weight: isLinux ? Font.Normal : Font.Light
+                font.weight: Font.Normal
 
                 selectByMouse: true
                 mouseSelectionMode: TextEdit.SelectCharacters
