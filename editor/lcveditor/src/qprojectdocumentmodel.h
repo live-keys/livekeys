@@ -46,6 +46,7 @@ public:
     QHash<int, QByteArray> roleNames() const;
 
     void openDocument(const QString& path, QProjectDocument* document);
+    void relocateDocument(const QString& path, const QString& newPath, QProjectDocument* document);
     void closeDocuments();
 
     const QHash<QString, QProjectDocument*> openedFiles() const;

@@ -117,6 +117,14 @@ QString QProject::dir() const{
         return m_path;
 }
 
+QProjectFile *QProject::relocateDocument(const QString &path, const QString& newPath, QProjectDocument* document){
+    m_documentModel->relocateDocument(path, newPath, document);
+    QString absoluteNewPath = QFileInfo(newPath).absoluteFilePath();
+    if (absoluteNewPath.indexOf(m_path) == 0 )
+        m_fileModel->rescanEntries();
+    return m_fileModel->openFile(newPath);
+}
+
 void QProject::closeProject(){
     setInFocus(0);
     setActive((QProjectDocument*)0);

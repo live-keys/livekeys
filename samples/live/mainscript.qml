@@ -1,5 +1,4 @@
 import live 1.0
-import lcvcore 1.0
 
 // This sample shows how to create a main script
 // with Live CV that can be executed from the command line

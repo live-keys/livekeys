@@ -99,6 +99,7 @@ signals:
     void fileChanged(const QString& path);
 
 private:
+    QProjectFile* relocateDocument(const QString& path, const QString &newPath, QProjectDocument *document);
     void setInFocus(QProjectDocument* document);
     void setActive(QProjectDocument* document);
 
