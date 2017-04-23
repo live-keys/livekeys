@@ -21,7 +21,8 @@ public:
 private:
     QLicenseContainer* m_container;
     QString            m_licenseFile;
-
+    bool               m_parseError;
+    QString            m_errorText;
 };
 
 inline QLicenseContainer *QLicenseSettings::container(){

@@ -6,10 +6,12 @@
 
 namespace lcv{
 
+class QProjectDocument;
 class Q_LCVEDITOR_EXPORT QEditorSettings : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(int fontSize READ fontSize NOTIFY fontSizeChanged)
+    Q_PROPERTY(QString path READ path     CONSTANT)
 
 public:
     explicit QEditorSettings(const QString& path, QObject *parent = 0);
@@ -17,13 +19,20 @@ public:
 
     int fontSize() const;
 
+    const QString& path() const;
+
+    void fromJson(const QJsonObject& root);
+    QJsonObject toJson() const;
+
 public slots:
     void reparse();
-    void save();
     void init(const QByteArray& data);
     const QByteArray& content() const;
+    void documentOpened(lcv::QProjectDocument* document);
+    void documentIsDirtyChanged();
 
 signals:
+    void initError(const QString& errorString);
     void fontSizeChanged(int fontSize);
 
 private:
@@ -34,6 +43,10 @@ private:
 
 inline int QEditorSettings::fontSize() const{
     return m_fontSize;
+}
+
+inline const QString &QEditorSettings::path() const{
+    return m_path;
 }
 
 inline const QByteArray &QEditorSettings::content() const{

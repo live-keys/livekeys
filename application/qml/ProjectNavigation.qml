@@ -225,7 +225,7 @@ Rectangle{
                 Text{
                     anchors.left: parent.left
                     anchors.leftMargin: 20
-                    text: model.name
+                    text: model.name !== '' ? model.name : 'untitled'
                     color: "#ebebeb"
 
                     font.family: "Open Sans, sans-serif"

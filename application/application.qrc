@@ -11,6 +11,7 @@
         <file alias="ProjectNavigation.qml">qml/ProjectNavigation.qml</file>
         <file alias="ProjectAddEntry.qml">qml/ProjectAddEntry.qml</file>
         <file alias="ContextMenuStyle.qml">qml/ContextMenuStyle.qml</file>
+        <file alias="License.qml">qml/License.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>
@@ -38,5 +39,8 @@
         <file alias="open-directory.png">images/open-directory.png</file>
         <file alias="toggle-navigation.png">images/toggle-navigation.png</file>
         <file alias="project-file-monitor.png">images/project-file-monitor.png</file>
+        <file alias="license.png">images/license.png</file>
+        <file alias="settings.png">images/settings.png</file>
+        <file alias="license-check.png">images/license-check.png</file>
     </qresource>
 </RCC>

@@ -21,21 +21,25 @@ namespace lcv{
 
 QProjectFile::QProjectFile(const QString &path, QProjectEntry *parent)
     : QProjectEntry(QFileInfo(path).path(), QFileInfo(path).fileName(), true, parent)
-    , m_isOpen(false)
-    , m_isDirty(false)
-    , m_isMonitored(false)
+    , m_document(0)
 {
 }
 
 QProjectFile::QProjectFile(const QString &path, const QString &name, QProjectEntry *parent)
     : QProjectEntry(path, name, true, parent)
-    , m_isOpen(false)
-    , m_isDirty(false)
-    , m_isMonitored(false)
+    , m_document(0)
 {
 }
 
 QProjectFile::~QProjectFile(){
+}
+
+void QProjectFile::setDocument(QProjectDocument *document){
+    if ( document == m_document )
+        return;
+
+    m_document = document;
+    emit documentChanged();
 }
 
 }// namespace

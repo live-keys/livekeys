@@ -67,7 +67,7 @@ QHash<int, QByteArray> QProjectDocumentModel::roleNames() const{
 void QProjectDocumentModel::openDocument(const QString &path, QProjectDocument *document){
     beginResetModel();
     m_openedFiles[path] = document;
-    if ( document->file()->isMonitored() )
+    if ( document->isMonitored() )
         fileWatcher()->addPath(path);
     endResetModel();
 }
@@ -94,13 +94,13 @@ void QProjectDocumentModel::closeDocuments(){
 }
 
 void QProjectDocumentModel::updateDocumeMonitoring(QProjectDocument *document, bool monitor){
-    if ( document->file()->isMonitored() != monitor ){
+    if ( document->isMonitored() != monitor ){
         if ( monitor ){
             fileWatcher()->addPath(document->file()->path());
-            document->file()->setIsMonitored(true);
+            document->setIsMonitored(true);
         } else {
             fileWatcher()->removePath(document->file()->path());
-            document->file()->setIsMonitored(false);
+            document->setIsMonitored(false);
         }
     }
 }
@@ -211,7 +211,7 @@ void QProjectDocumentModel::closeDocument(const QString &path, bool closeIfActiv
 void QProjectDocumentModel::rescanDocuments(){
     for( QHash<QString, QProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         QDateTime modifiedDate = QFileInfo(it.key()).lastModified();
-        if ( modifiedDate > it.value()->lastModified() && !it.value()->file()->isMonitored() )
+        if ( modifiedDate > it.value()->lastModified() && !it.value()->isMonitored() )
             emit documentChangedOutside(it.value());
     }
 }
@@ -225,7 +225,7 @@ void QProjectDocumentModel::monitoredFileChanged(const QString &path){
 bool QProjectDocumentModel::saveDocuments(){
     bool saved = true;
     for( QHash<QString, QProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
-        if ( it.value()->file()->isDirty() )
+        if ( it.value()->isDirty() )
             if ( !it.value()->save() )
                 saved = false;
     }
@@ -235,7 +235,7 @@ bool QProjectDocumentModel::saveDocuments(){
 QStringList QProjectDocumentModel::listUnsavedDocuments(){
     QStringList base;
     for( QHash<QString, QProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
-        if ( it.value()->file()->isDirty() )
+        if ( it.value()->isDirty() )
             base.append(it.value()->file()->path());
     }
     return base;
@@ -245,7 +245,7 @@ QStringList QProjectDocumentModel::listUnsavedDocumentsInPath(const QString &pat
     QStringList base;
     for( QHash<QString, QProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         if ( it.key().startsWith(path) ){
-            if ( it.value()->file()->isDirty() )
+            if ( it.value()->isDirty() )
                 base.append(it.value()->file()->path());
         }
     }

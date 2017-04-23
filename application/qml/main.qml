@@ -87,7 +87,7 @@ ApplicationWindow {
                 callback()
                 return;
             } else if ( !project.isDirProject() && project.inFocus ){
-                if ( !project.inFocus.file.isDirty ){
+                if ( !project.inFocus.isDirty ){
                     project.closeProject()
                     callback()
                     return;
@@ -213,8 +213,12 @@ ApplicationWindow {
             }
         }
 
-        onFontPlus: if ( editor.font.pixelSize < 24 ) editor.font.pixelSize += 2
-        onFontMinus: if ( editor.font.pixelSize > 10 ) editor.font.pixelSize -= 2
+        onOpenSettings: {
+            project.openFile(settings.editor.path, ProjectDocument.Edit);
+            settings.editor.documentOpened(project.inFocus)
+        }
+
+        onOpenLicense: licenseBox.visible = true
     }
 
     FileDialog {
@@ -515,7 +519,7 @@ ApplicationWindow {
                     header.openFile()
                 }
                 onCloseFocusedFile: {
-                    if ( project.inFocus.file.isDirty ){
+                    if ( project.inFocus.isDirty ){
                         messageBox.show('File contains unsaved changes. Would you like to save them before closing?',
                         {
                             button1Name : 'Yes',
@@ -748,7 +752,7 @@ ApplicationWindow {
             onCloseFile: {
                 var doc = project.documentModel.isOpened(path)
                 if ( doc ){
-                    if ( doc.file.isDirty ){
+                    if ( doc.isDirty ){
                         messageBox.show('File contains unsaved changes. Would you like to save them before closing?',
                         {
                             button1Name : 'Yes',
@@ -871,6 +875,12 @@ ApplicationWindow {
             anchors.right: parent.right
             visible : text !== ''
         }
+    }
+
+    License{
+        id: licenseBox
+        anchors.fill: parent
+        visible: false
     }
 
     Connections{

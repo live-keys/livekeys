@@ -67,7 +67,7 @@ Rectangle{
                     var filename = project.inFocus.file.name
                     if ( filename === '' )
                         filename = 'untitled'
-                    if ( project.inFocus.file.isDirty )
+                    if ( project.inFocus.isDirty )
                         filename += '*'
                     return filename;
                 } else {
@@ -191,7 +191,7 @@ Rectangle{
                     else {
                         editor.isDirty = true
                         if ( project.inFocus )
-                            project.inFocus.file.isDirty = true
+                            project.inFocus.isDirty = true
                     }
                 }
 
@@ -210,7 +210,7 @@ Rectangle{
                 height : Math.max( flick.height - 20, paintedHeight )
                 width : Math.max( flick.width - 20, paintedWidth )
 
-                readOnly: project.inFocus === null || project.inFocus.file.isMonitored
+                readOnly: project.inFocus === null || project.inFocus.isMonitored
 
                 Keys.onPressed: {
                     if ( (event.key === Qt.Key_BracketRight && (event.modifiers & Qt.ShiftModifier) ) ||
@@ -317,7 +317,7 @@ Rectangle{
                     codeHandler.target = textDocument
                     if ( project.inFocus ){
                         editor.isDirtyMask = true
-                        editor.isDirty = project.inFocus.file.isDirty
+                        editor.isDirty = project.inFocus.isDirty
                         editor.text    = project.inFocus.content
                     }
                 }
@@ -336,7 +336,7 @@ Rectangle{
                     onInFocusChanged : {
                         editor.isDirtyMask = true
                         if ( project.inFocus ){
-                            editor.isDirty = project.inFocus.file.isDirty
+                            editor.isDirty = project.inFocus.isDirty
                             editor.text    = project.inFocus.content
                         } else {
                             editor.text = ''
@@ -349,7 +349,7 @@ Rectangle{
                     target: project.inFocus
                     onContentChanged : {
                         editor.isDirtyMask = true
-                        editor.isDirty = project.inFocus.file.isDirty
+                        editor.isDirty = project.inFocus.isDirty
                         editor.text    = project.inFocus.content
                     }
                 }

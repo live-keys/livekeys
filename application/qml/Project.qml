@@ -136,12 +136,15 @@ Rectangle{
                         if ( styleData.value && styleData.value.isFile ){
                             if (styleData.value === (project.active ? project.active.file : null) )
                                 return "qrc:/images/project-file-active.png"
-                            else if ( styleData.value.isMonitored )
-                                return "qrc:/images/project-file-monitor.png"
-                            else if ( styleData.value.isDirty )
-                                return "qrc:/images/project-file-unsaved.png"
-                            else
+                            else {
+                                if ( styleData.value.document ){
+                                    if (styleData.value.document.isMonitored)
+                                        return "qrc:/images/project-file-monitor.png"
+                                    else if ( styleData.value.document.isDirty)
+                                        return "qrc:/images/project-file-unsaved.png"
+                                }
                                 return "qrc:/images/project-file.png"
+                            }
                         } else
                             return "qrc:/images/project-directory.png"
                     }
@@ -166,7 +169,7 @@ Rectangle{
                                 if ( project.inFocus.file === styleData.value )
                                     return 1
                             }
-                            if ( styleData.value.isOpen )
+                            if ( styleData.value.document )
                                 return 2
                         }
                         return 0
