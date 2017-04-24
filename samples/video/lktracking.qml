@@ -7,11 +7,12 @@ Rectangle{
     property string videoPath : project.dir() + '/../_videos/amherst-11_2754_3754.avi'
     
     VideoCapture{
-        file : parent.videoPath
         id : videoArea
         loop : true
         fps : 30
-        visible : false
+        visible : true
+        paused: false
+        Component.onCompleted : staticOpen(parent.videoPath)
     }
     
     CalcOpticalFlowPyrLK{
@@ -22,6 +23,7 @@ Rectangle{
                 parent.addPoint(Qt.point(mouse.x, mouse.y))
             }
         }
+        Component.onCompleted : staticLoad('lk')
     }
     
     

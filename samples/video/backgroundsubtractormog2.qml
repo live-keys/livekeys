@@ -11,11 +11,11 @@ ScrollView{
         property string videoPath : project.dir() + '/../_videos/amherst-11_2754_3754.avi'
         
         VideoCapture{
-            file : parent.videoPath
             id : videoArea
             loop : true
             fps : 30
             visible : false
+            Component.onCompleted : staticLoad(parent.videoPath)
         }
         
         MatView {
@@ -31,6 +31,7 @@ ScrollView{
             onOutputChanged : {
                background.mat = this.backgroundModel
             }
+            Component.onCompleted : staticLoad("mog2")
         }
 
     }

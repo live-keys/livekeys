@@ -9,4 +9,4 @@ SUBDIRS += $$PWD/lcvcore
 SUBDIRS += $$PWD/lcvimgproc
 SUBDIRS += $$PWD/lcvfeatures2d
 SUBDIRS += $$PWD/lcvphoto
-#SUBDIRS += $$PWD/lcvvideo
+SUBDIRS += $$PWD/lcvvideo
