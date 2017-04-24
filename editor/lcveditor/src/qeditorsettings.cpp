@@ -10,7 +10,7 @@ namespace lcv{
 QEditorSettings::QEditorSettings(const QString &path, QObject *parent)
     : QObject(parent)
     , m_path(path)
-    , m_fontSize(13)
+    , m_fontSize(12)
 {
     reparse();
 }
