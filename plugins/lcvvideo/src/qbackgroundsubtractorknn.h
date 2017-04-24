@@ -72,6 +72,9 @@ public:
     int shadowValue() const;
     void setShadowValue(int shadowValue);
 
+public slots:
+    void staticLoad(const QString& id);
+
 signals:
     void detectShadowsChanged();
     void dist2ThresholdChanged();

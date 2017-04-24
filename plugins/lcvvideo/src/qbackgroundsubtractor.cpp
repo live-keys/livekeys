@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "qbackgroundsubtractor.h"
+#include "qstaticcontainer.h"
 
 using namespace cv;
 
@@ -29,21 +30,9 @@ QBackgroundSubtractorPrivate::QBackgroundSubtractorPrivate()
 QBackgroundSubtractorPrivate::~QBackgroundSubtractorPrivate(){
 }
 
-void QBackgroundSubtractorPrivate::deleteSubtractor(){
-    qWarning() << "QBackgroundSubtractorPrivate::deleteSubtractor MUST be overridden by a subclass!";
-}
-
 cv::BackgroundSubtractor* QBackgroundSubtractorPrivate::subtractor(){
     qWarning() << "QBackgroundSubtractorPrivate::subtractor MUST be overridden by a subclass!";
     return 0;
-}
-
-const QString& QBackgroundSubtractorPrivate::stateId() const{
-    return m_stateId;
-}
-
-void QBackgroundSubtractorPrivate::setStateId(const QString& id){
-    m_stateId = id;
 }
 
 double QBackgroundSubtractorPrivate::learningRate() const{
@@ -85,47 +74,6 @@ QBackgroundSubtractor::QBackgroundSubtractor(QBackgroundSubtractorPrivate *d_ptr
   \brief QBackgroundSubtractor destructor
  */
 QBackgroundSubtractor::~QBackgroundSubtractor(){
-}
-
-
-/*!
-  \fn void QBackgroundSubtractor::reset()
-  \sa BackgroundSubtractor::reset()
- */
-
-/*!
-  \qmlmethod void BackgroundSubtractor::reset()
-
-  Resets the state (background model, history, ...) of the subtractor.
- */
-void QBackgroundSubtractor::reset(){
-    Q_D(QBackgroundSubtractor);
-    d->deleteSubtractor();
-}
-
-/*!
-  \property QBackgroundSubtractor::stateId
-  \sa QBackgroundSubtractor::stateId
- */
-
-/*!
-  \qmlproperty string QBackgroundSubtractor::stateId
-
-  This property is somehow required. It represents the id of the state container of this filter. The state is used in
-  order to store contents between compilations. Give this a unique id in order for the subtractor to not reset between compilations.
- */
-const QString& QBackgroundSubtractor::stateId() const{
-    Q_D(const QBackgroundSubtractor);
-    return d->stateId();
-}
-
-void QBackgroundSubtractor::setStateId(const QString& id){
-    Q_D(QBackgroundSubtractor);
-    if ( d->stateId() != id ){
-        d->deleteSubtractor();
-        d->setStateId(id);
-        emit stateIdChanged();
-    }
 }
 
 /*!

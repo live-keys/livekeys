@@ -29,7 +29,7 @@
 ****************************************************************************/
 
 #include "qbackgroundsubtractormog2.h"
-#include "qstatecontainer.h"
+#include "qstaticcontainer.h"
 
 using namespace cv;
 
@@ -57,7 +57,6 @@ public:
     QBackgroundSubtractorMog2Private();
     virtual ~QBackgroundSubtractorMog2Private();
 
-    virtual void deleteSubtractor();
     virtual BackgroundSubtractor* subtractor();
 
     BackgroundSubtractorMOG2* subtractorMog2();
@@ -77,10 +76,8 @@ public:
     float varThreshold;
     float varThresholdGen;
 
-private:
     Ptr<BackgroundSubtractorMOG2>* createSubtractor();
 
-private:
     Ptr<BackgroundSubtractorMOG2>* m_subtractorMog2;
 
 };
@@ -105,8 +102,6 @@ QBackgroundSubtractorMog2Private::QBackgroundSubtractorMog2Private()
 }
 
 QBackgroundSubtractorMog2Private::~QBackgroundSubtractorMog2Private(){
-    if ( stateId() == "" ) // otherwise leave it to the QStateContiner
-        delete m_subtractorMog2;
 }
 
 Ptr<BackgroundSubtractorMOG2>* QBackgroundSubtractorMog2Private::createSubtractor(){
@@ -123,32 +118,9 @@ Ptr<BackgroundSubtractorMOG2>* QBackgroundSubtractorMog2Private::createSubtracto
     return new Ptr<BackgroundSubtractorMOG2>(subtractor);
 }
 
-void QBackgroundSubtractorMog2Private::deleteSubtractor(){
-    QStateContainer<Ptr<BackgroundSubtractorMOG2>>& stateCont =
-            QStateContainer<Ptr<BackgroundSubtractorMOG2>>::instance();
-    stateCont.registerState(stateId(), static_cast<Ptr<BackgroundSubtractorMOG2>*>(0));
-    delete m_subtractorMog2;
-    m_subtractorMog2 = 0;
-}
-
 BackgroundSubtractorMOG2* QBackgroundSubtractorMog2Private::subtractorMog2(){
-    if ( !m_subtractorMog2 ){
-        if ( stateId() != "" ){
-            QStateContainer<Ptr<BackgroundSubtractorMOG2>>& stateCont =
-                    QStateContainer<Ptr<BackgroundSubtractorMOG2>>::instance();
-
-            m_subtractorMog2 = stateCont.state(stateId());
-            if ( m_subtractorMog2 == 0 ){
-                m_subtractorMog2 = createSubtractor();
-                stateCont.registerState(stateId(), m_subtractorMog2);
-            }
-        } else {
-            qWarning("QBackgroundSubtractorMog2 does not have a stateId assigned and cannot save "
-                     "it\'s state over multiple compilations. Set a unique stateId to "
-                     "avoid this problem.");
-            m_subtractorMog2 = createSubtractor();
-        }
-    }
+    if ( !m_subtractorMog2 )
+        return 0;
     return m_subtractorMog2->get();
 }
 
@@ -475,4 +447,15 @@ void QBackgroundSubtractorMog2::setVarThresholdGen(float varThresholdGen){
             d->subtractorMog2()->setVarThresholdGen(varThresholdGen);
          emit varThresholdGenChanged();
     }
+}
+
+void QBackgroundSubtractorMog2::staticLoad(const QString &id){
+    Q_D(QBackgroundSubtractorMog2);
+    QStaticContainer* container = QStaticContainer::grabFromContext(this);
+    d->m_subtractorMog2 = container->get<Ptr<BackgroundSubtractorMOG2> >(id);
+    if ( !d->m_subtractorMog2 ){
+        d->m_subtractorMog2 = d->createSubtractor();
+        container->set< Ptr<BackgroundSubtractorMOG2> >(id, d->m_subtractorMog2);
+    }
+    QMatFilter::transform();
 }
