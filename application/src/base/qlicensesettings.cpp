@@ -8,8 +8,8 @@
 namespace lcv{
 
 QLicenseSettings::QLicenseSettings(const QString &licenseFile)
-    : m_licenseFile(licenseFile)
-    , m_container(new QLicenseContainer)
+    : m_container(new QLicenseContainer)
+    , m_licenseFile(licenseFile)
     , m_parseError(false)
 {
     reparse();
