@@ -14,8 +14,8 @@ include($$PWD/include/lcvcoreheaders.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
 deployOpenCV()
 
-INCLUDEPATH += $$PWD/../../lib/include
-DEPENDPATH  += $$PWD/../../lib/include
+INCLUDEPATH += $$PWD/../../lib/live/include
+DEPENDPATH  += $$PWD/../../lib/live/include
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/release/ -llive
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/debug/ -llive
