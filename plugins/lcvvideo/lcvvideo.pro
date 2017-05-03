@@ -11,28 +11,12 @@ OTHER_FILES = qmldir
 DEFINES += Q_LCV
 DEFINES += Q_LCVVIDEO_LIB
 
+include($$PWD/../use_lcvcore.pri)
+include($$PWD/../use_liblive.pri)
 include($$PWD/src/lcvvideo.pri)
 include($$PWD/include/lcvvideoheaders.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
 deployOpenCV()
-
-# Live lib
-
-INCLUDEPATH += $$PWD/../../lib/include
-DEPENDPATH  += $$PWD/../../lib/include
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/release/ -llive
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/debug/ -llive
-else:unix: LIBS += -L$$OUT_PWD/../../application/ -llive
-
-# Lcvcore lib
-
-INCLUDEPATH += $$PWD/../lcvcore/include
-DEPENDPATH  += $$PWD/../lcvcore/include
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lcvcore/release/ -llcvcore
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lcvcore/debug/ -llcvcore
-else:unix: LIBS += -L$$OUT_PWD/../lcvcore/ -llcvcore
 
 # Destination
 

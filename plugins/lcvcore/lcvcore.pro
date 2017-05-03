@@ -9,17 +9,11 @@ uri = plugins.lcvcore
 DEFINES += Q_LCV
 DEFINES += Q_LCVCORE_LIB
 
+include($$PWD/../use_liblive.pri)
 include($$PWD/src/lcvcore.pri)
 include($$PWD/include/lcvcoreheaders.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
 deployOpenCV()
-
-INCLUDEPATH += $$PWD/../../lib/live/include
-DEPENDPATH  += $$PWD/../../lib/live/include
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/release/ -llive
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/debug/ -llive
-else:unix: LIBS += -L$$OUT_PWD/../../application/ -llive
 
 # Destination
 
@@ -40,7 +34,7 @@ OTHER_FILES = \
 PLUGIN_DEPLOY_FROM = $$PWD/qml
 win32:CONFIG(debug, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../../application/debug/plugins/lcvcore
 else:win32:CONFIG(release, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../../application/release/plugins/lcvcore
-else:unix: PLUGIN_DEPLOY_TO = $$OUT_PWD/../application/plugins/lcvcore
+else:unix: PLUGIN_DEPLOY_TO = $$OUT_PWD/../../application/plugins/lcvcore
 
 win32:PLUGIN_DEPLOY_TO ~= s,/,\\,g
 win32:PLUGIN_DEPLOY_FROM ~= s,/,\\,g
