@@ -2,9 +2,6 @@
 # Plugin build configuration,
 # !!! Modify only if you know what you are doing
 
-# Plugins depend on the "live" library.
-# This dependency is already taken care of in livecv.pro
-
 TEMPLATE = subdirs
 
 # Optional build modules
@@ -13,18 +10,21 @@ SUBDIRS += \
     lcvcore \
     lcvimgproc \
     lcvfeatures2d \
+    lcvlive \
     lcvphoto \
     lcvvideo
 
 # Subdir configuration
 
-lcvcore.subdir          = $$PWD/lcvcore
-lcvimgproc.subdir       = $$PWD/lcvimgproc
-lcvfeatures2d.subdir    = $$PWD/lcvfeatures2d
-lcvphoto.subdir         = $$PWD/lcvphoto
-lcvvideo.subdir         = $$PWD/lcvvideo
+lcvcore.subdir          = $$PATH_SOURCE_PLUGINS_CORE
+lcvimgproc.subdir       = $$PATH_SOURCE_PLUGINS_IMGPROC
+lcvfeatures2d.subdir    = $$PATH_SOURCE_PLUGINS_FEATURES2D
+lcvlive.subdir          = $$PATH_SOURCE_PLUGINS_LIVE
+lcvphoto.subdir         = $$PATH_SOURCE_PLUGINS_PHOTO
+lcvvideo.subdir         = $$PATH_SOURCE_PLUGINS_VIDEO
 
 # Dependency configuration
 
-lcvimgproc.depend       = lcvcore
-lcvfeatures2d.depend    = lcvcore
+lcvcore.depends         = lcvlive
+lcvfeatures2d.depend    = lcvcore lcvlive
+lcvimgproc.depend       = lcvcore lcvlive

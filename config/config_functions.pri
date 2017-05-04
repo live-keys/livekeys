@@ -4,6 +4,7 @@
 
 # A utility function to abbreviate the hassle of checking if a variable is
 # initialized and setting it to an initial value if not.
+# Note that an empty variable is already defined and thus will not be altered.
 #
 # First argument is the variable name ,
 # Second one the initial value
@@ -11,9 +12,9 @@
 # Example:
 #
 # clear(FOO)
-# initializeVar(FOO, bar)
+# initVar(FOO, bar)
 # message($$FOO) # yields "bar", since FOO was undefined
-# initializeVar(FOO, baz)
+# initVar(FOO, baz)
 # message($$FOO) # still yields "bar" since FOO was already defined
 
 defineTest(initVar){
@@ -21,7 +22,7 @@ defineTest(initVar){
         $$1 = $$2
         export($$1)
     } else {
-        message($$1 already defined)
+        # message($$1 already defined) # TODO better use a proper debug level
     }
 }
 
