@@ -1,0 +1,9 @@
+/*!
+
+  \module lcvlib_cpp
+
+  \title Live CV API
+
+  \brief This module contains the Live CV API to create new components and include them in the application.
+
+*/
