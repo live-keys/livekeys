@@ -1,45 +1,17 @@
-TEMPLATE = lib
-TARGET   = lcvphoto
-QT      += qml quick
-CONFIG  += qt plugin
+PLUGIN_NAME = lcvphoto
+PLUGIN_QML_DIR = $$PATH_SOURCE_PLUGINS_PHOTO/qml
+include($$getConfigFile(is_plugin.pri))
+include($$getConfigFile(use_plugin_core.pri))
+include($$getConfigFile(use_plugin_live.pri))
 
-TARGET = $$qtLibraryTarget($$TARGET)
-uri = plugins.lcvcore
+#uri = plugins.lcvcore
 
 DEFINES += Q_LCV
 
-include($$PWD/../use_lcvcore.pri)
-include($$PWD/../use_liblive.pri)
 include($$PWD/src/lcvphoto.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
 deployOpenCV()
 
-# Destination
-
-win32:CONFIG(debug, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../../application/debug/plugins/lcvphoto)
-else:win32:CONFIG(release, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../../application/release/plugins/lcvphoto)
-else:unix: TARGET = $$quote($$OUT_PWD/../../application/plugins/lcvphoto)
-
-# Qml
-
 OTHER_FILES = \
     $$PWD/qml/qmldir \
     $$PWD/qml/plugins.qmltypes
-
-# Deploy qml
-
-PLUGIN_DEPLOY_FROM = $$PWD/qml
-win32:CONFIG(debug, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../../application/debug/plugins/lcvphoto
-else:win32:CONFIG(release, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../../application/release/plugins/lcvphoto
-else:unix: PLUGIN_DEPLOY_TO = $$OUT_PWD/../../application/plugins/lcvphoto
-
-win32:PLUGIN_DEPLOY_TO ~= s,/,\\,g
-win32:PLUGIN_DEPLOY_FROM ~= s,/,\\,g
-
-plugincopy.commands = $(COPY_DIR) \"$$PLUGIN_DEPLOY_FROM\" \"$$PLUGIN_DEPLOY_TO\"
-
-first.depends = $(first) plugincopy
-export(first.depends)
-export(plugincopy.commands)
-
-QMAKE_EXTRA_TARGETS += first plugincopy
