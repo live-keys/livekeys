@@ -99,10 +99,11 @@ void QLiveCV::solveImportPaths(){
     Q_ASSERT(applicationQmlDir.exists());
     Q_ASSERT(pluginDir.exists());
     Q_ASSERT(livePluginDir.exists());
-    Q_ASSERT(livePluginQmlDir.exists());
+    //Q_ASSERT(livePluginQmlDir.exists());
 
     m_engine->engine()->addImportPath(applicationQmlDir.absolutePath());
-    m_engine->engine()->addImportPath(livePluginQmlDir.absolutePath());
+    m_engine->engine()->addImportPath(pluginDir.absolutePath());
+   // m_engine->engine()->addImportPath(livePluginQmlDir.absolutePath());
 
 
 }
