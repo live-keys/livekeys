@@ -12,6 +12,7 @@ include($$PWD/src/lcvphoto.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
 deployOpenCV()
 
-OTHER_FILES = \
-    $$PWD/qml/qmldir \
-    $$PWD/qml/plugins.qmltypes
+OTHER_FILES *= \
+    qml/*.qml \
+    qmldir \
+    projects.qmltypes

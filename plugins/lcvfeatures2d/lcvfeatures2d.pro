@@ -15,12 +15,7 @@ include($$PWD/../../3rdparty/opencvconfig.pro)
 
 deployOpenCV()
 
-OTHER_FILES += \
-    $$PWD/qml/KeypointListView.qml \
-    $$PWD/qml/FeatureDetectorSelection.qml \
-    $$PWD/qml/SelectionArea.qml \
-    $$PWD/qml/SelectionWindow.qml \
-    $$PWD/qml/FeatureObjectList.qml \
-    $$PWD/qml/FeatureObjectMatch.qml \
-    $$PWD/qml/DescriptorExtractorSelection.qml
-    $$PWD/qml/qmldir
+OTHER_FILES *= \
+    qml/*.qml \
+    qmldir \
+    projects.qmltypes
