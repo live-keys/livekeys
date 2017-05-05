@@ -1,5 +1,5 @@
-module live
-plugin live
+module lcvlive
+plugin lcvlive
 depends QtQuick 2.3
 ConfigurationField 1.0 ConfigurationField.qml
 ConfigurationPanel 1.0 ConfigurationPanel.qml

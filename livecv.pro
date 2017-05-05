@@ -10,13 +10,6 @@
 #
 # They are also included in this confiuration for completeness and easy access.
 
-# --- Verbosity setting ---
-# Comment one of the following
-# Note that this option is also propagated to subprojects
-
-# initVar(VERBOSE, true)
-  initVar(VERBOSE, false)
-
 # --- Subdir configuration ---
 
 TEMPLATE = subdirs
@@ -38,7 +31,7 @@ plugins.depend      = editor
 
 
 win32:DLLDESTDIR = $$PATH_DEPLOY_APPLICATION
-CONFIG *= c++11
+CONFIG *= c++11 qml_debug
 
 # Include the global configuration files since otherwise they would never show
 # up in your project
