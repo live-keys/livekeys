@@ -74,18 +74,48 @@ QLiveCV::~QLiveCV(){
 }
 
 void QLiveCV::solveImportPaths(){
+
+    /*
+     * I am not completely sure about the purpose of caching all import paths,
+     * clearing the list and then restore all paths except the application root
+     * one.
+     *
     QStringList importPaths = m_engine->engine()->importPathList();
     m_engine->engine()->setImportPathList(QStringList());
     for ( QStringList::iterator it = importPaths.begin(); it != importPaths.end(); ++it ){
         if ( *it != dir() )
             m_engine->engine()->addImportPath(*it);
     }
-    m_engine->engine()->addImportPath(dir() + "/plugins");
+    */
+
+    // FIXME: Magic strings are evil
+    QDir applicationDir {QGuiApplication::applicationDirPath()};
+    QDir applicationQmlDir {applicationDir.absoluteFilePath("qml")};
+    QDir pluginDir {applicationDir.absoluteFilePath("plugins")};
+    QDir livePluginDir {pluginDir.absoluteFilePath("lcvlive")};
+    QDir livePluginQmlDir {livePluginDir.absoluteFilePath("qml")};
+
+    Q_ASSERT(applicationDir.exists());
+    Q_ASSERT(applicationQmlDir.exists());
+    Q_ASSERT(pluginDir.exists());
+    Q_ASSERT(livePluginDir.exists());
+    Q_ASSERT(livePluginQmlDir.exists());
+
+    m_engine->engine()->addImportPath(applicationQmlDir.absolutePath());
+    m_engine->engine()->addImportPath(livePluginQmlDir.absolutePath());
+
+
 }
 
 void QLiveCV::loadLibrary(const QString &library){
+
     m_lcvlib.setFileName(library);
-    m_lcvlib.load();
+    bool loadSuccessful = m_lcvlib.load();
+
+    if(!loadSuccessful){
+        qDebug() << "Loading " << library << "failed: " << m_lcvlib.errorString();
+    }
+
 }
 
 void QLiveCV::loadQml(const QUrl &url){

@@ -4,7 +4,7 @@ include($$getConfigFile(is_plugin.pri))
 include($$getConfigFile(use_plugin_core.pri))
 include($$getConfigFile(use_plugin_live.pri))
 
-#uri = plugins.lcvfeatures2d
+uri = plugins.lcvfeatures2d
 
 DEFINES += Q_LCV
 DEFINES += Q_LCVFEATURES2D_LIB
