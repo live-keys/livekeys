@@ -1,0 +1,13 @@
+module lcvfeatures2d
+plugin lcvfeatures2d
+
+depends QtQuick 2.3
+depends live 1.0
+depends lcvcore 1.0
+
+KeypointListView                1.0 qml/KeypointListView.qml
+FeatureDetectorSelection        1.0 qml/FeatureDetectorSelection.qml
+DescriptorExtractorSelection    1.0 qml/DescriptorExtractorSelection.qml
+FeatureObjectList               1.0 qml/FeatureObjectList.qml
+FeatureObjectMatch              1.0 qml/FeatureObjectMatch.qml
+SelectionArea                   1.0 qml/SelectionArea.qml

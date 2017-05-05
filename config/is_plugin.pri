@@ -24,14 +24,19 @@ CONFIG      += qt plugin
 TARGET      = $$PLUGIN_NAME
 DESTDIR     = $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME
 
-QML_DEPLOY_FROM     = $$shell_path($$PLUGIN_QML_DIR)
-QMLDIR_DEPLOY_FROM  = $$shell_path($$PLUGIN_QML_DIR/../qmldir)
-PLUGIN_DEPLOY_TO    = $$shell_path($$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME)
+# --- Handling the (ugly) QML deployment ---
 
-!exists($$QMLDIR_DEPLOY_FROM) : error(Missing file $$QMLDIR_DEPLOY_FROM)
+QML_DEPLOY_FROM         = $$shell_path($$PLUGIN_QML_DIR)
+QMLDIR_DEPLOY_FROM      = $$shell_path($$PLUGIN_QML_DIR/../qmldir)
+PLUGIN_DEPLOY_TO        = $$shell_path($$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME)
 
-qmlcopy.commands = $$QMAKE_COPY_DIR $$QML_DEPLOY_FROM $$PLUGIN_DEPLOY_TO
-qmldircopy.commands = $$QMAKE_COPY $$QMLDIR_DEPLOY_FROM $$PLUGIN_DEPLOY_TO
+!exists($$QMLDIR_DEPLOY_FROM){
+    warning(Expected file $$QMLDIR_DEPLOY_FROM)
+    qmldircopy.commands =
+} else {
+    qmldircopy.commands = \
+    $$QMAKE_COPY $$QMLDIR_DEPLOY_FROM $$PLUGIN_DEPLOY_TO
+}
 
 first.depends = $(first) qmlcopy qmldircopy
 export(first.depends)
