@@ -28,6 +28,7 @@ class QQuickTextDocument;
 
 namespace lcv{
 
+class QLivePaletteContainer;
 class Q_LCVEDITOR_EXPORT QDocumentCodeInterface : public QObject{
 
     Q_OBJECT
@@ -35,7 +36,11 @@ class Q_LCVEDITOR_EXPORT QDocumentCodeInterface : public QObject{
     Q_PROPERTY(lcv::QCodeCompletionModel* completionModel READ completionModel CONSTANT)
 
 public:
-    explicit QDocumentCodeInterface(QAbstractCodeHandler* handler, QObject* parent = 0);
+    explicit QDocumentCodeInterface(
+        QAbstractCodeHandler* handler,
+        QLivePaletteContainer* paletteContainer = 0,
+        QObject* parent = 0
+    );
     ~QDocumentCodeInterface();
 
     QQuickTextDocument *target();
@@ -59,8 +64,9 @@ private:
     QChar                      m_lastChar;
     QQuickTextDocument*        m_target;
     QTextDocument*             m_targetDoc;
-    lcv::QCodeCompletionModel* m_completionModel;
+    QCodeCompletionModel*      m_completionModel;
     QAbstractCodeHandler*      m_codeHandler;
+    QLivePaletteContainer*     m_paletteContainer;
     bool                       m_autoInserting;
 };
 

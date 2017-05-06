@@ -14,16 +14,24 @@ win32:CONFIG(debug, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../application/
 else:win32:CONFIG(release, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../application/release/plugins/live
 else:unix: PLUGIN_DEPLOY_TO = $$OUT_PWD/../application/plugins/live
 
+PALETTE_DEPLOY_FROM = $$PWD/palettes
+PALETTE_DEPLOY_TO = $$PLUGIN_DEPLOY_TO/palettes
+
 win32:PLUGIN_DEPLOY_TO ~= s,/,\\,g
 win32:PLUGIN_DEPLOY_FROM ~= s,/,\\,g
 
-plugincopy.commands = $(COPY_DIR) \"$$PLUGIN_DEPLOY_FROM\" \"$$PLUGIN_DEPLOY_TO\"
+win32:PALETTE_DEPLOY_FROM ~= s,/,\\,g
+win32:PALETTE_DEPLOY_TO ~= s,/,\\,g
 
-first.depends = $(first) plugincopy
+plugincopy.commands = $(COPY_DIR) \"$$PLUGIN_DEPLOY_FROM\" \"$$PLUGIN_DEPLOY_TO\"
+palettecopy.commands = $(COPY_DIR) \"$$PALETTE_DEPLOY_FROM\" \"$$PALETTE_DEPLOY_TO\"
+
+first.depends = $(first) plugincopy palettecopy
 export(first.depends)
 export(plugincopy.commands)
+export(palettecopy.commands)
 
-QMAKE_EXTRA_TARGETS += first plugincopy
+QMAKE_EXTRA_TARGETS += first plugincopy palettecopy
 
 # Destination
 
@@ -43,3 +51,7 @@ OTHER_FILES += \
     $$PWD/qml/LiveCVStyle.qml \
     $$PWD/qml/LiveCVScrollStyle.qml \
     $$PWD/qml/TextButton.qml
+
+DISTFILES += \
+    palettes/IntPalette.qml \
+    palettes/palettedir
