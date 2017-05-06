@@ -24,8 +24,6 @@ public:
     int size() const;
 
 private:
-    void handleError(const QQmlComponent& component) const;
-
     QLivePaletteContainer(QQmlEngine* engine);
 
     Q_DISABLE_COPY(QLivePaletteContainer)
