@@ -21,12 +21,15 @@
 
 namespace lcv{
 
-QDocumentCodeInterface::QDocumentCodeInterface(QAbstractCodeHandler *handler, QObject *parent)
+QDocumentCodeInterface::QDocumentCodeInterface(QAbstractCodeHandler *handler,
+        QLivePaletteContainer *paletteContainer,
+        QObject *parent)
     : QObject(parent)
     , m_target(0)
     , m_targetDoc(0)
     , m_completionModel(new QCodeCompletionModel)
     , m_codeHandler(handler)
+    , m_paletteContainer(paletteContainer)
     , m_autoInserting(false)
 {
 }
