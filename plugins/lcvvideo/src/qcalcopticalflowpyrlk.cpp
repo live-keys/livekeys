@@ -27,9 +27,6 @@ using namespace cv;
   \inherits MatFilter
   \brief Sparse optical flow filter.
 
-  Use this to create an empty matrix by spcecifying the size, background color, number of channels and type. The
-  drawing example shows how to create an empty matrix, then use the draw element to draw on its surface.
-
   Calculate an optical flow for a sparse feature set using the iterative Lucas-Kanade method with pyramids. The function
   implements a sparse iterative version of the Lucas-Kanade optical flow in pyramids.
 
