@@ -13,6 +13,7 @@ class QLiveCVIncubationController;
 
 namespace lcv{
 
+class QProjectDocument;
 class QLiveCVEngine : public QObject{
 
     Q_OBJECT
@@ -39,7 +40,13 @@ signals:
     void objectCreationError(QJSValue errors);
 
 public slots:
-    void createObjectAsync(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
+    void createObjectAsync(
+        const QString& qmlCode,
+        QObject* parent,
+        const QUrl& file,
+        lcv::QProjectDocument* document = 0,
+        bool clearCache = false
+    );
     QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
 
     QJSValue lastErrorsObject() const;

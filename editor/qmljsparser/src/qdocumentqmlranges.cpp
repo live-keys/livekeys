@@ -14,7 +14,9 @@ QList<QDocumentQmlRanges::Range> QDocumentQmlRanges::operator()(QmlJS::Document:
 
 bool QDocumentQmlRanges::visit(QmlJS::AST::UiObjectBinding *ast){
     if (ast->initializer && ast->initializer->lbraceToken.length)
-        m_ranges.append(createRange(ast, ast->initializer));
+        m_ranges.append(createRange(
+            ast, ast->initializer->firstSourceLocation(), ast->initializer->lastSourceLocation()
+        ));
     return true;
 }
 
@@ -88,6 +90,16 @@ QDocumentQmlRanges::Range QDocumentQmlRanges::findClosestRange(int position) con
     foreach( Range r, m_ranges ){
         if ( r.begin <= position && r.end > position )
             base = r;
+    }
+    return base;
+}
+
+QList<QDocumentQmlRanges::Range> QDocumentQmlRanges::findRangePath(int position) const{
+    QList<QDocumentQmlRanges::Range> base;
+    foreach( Range r, m_ranges ){
+        if ( r.begin <= position && r.end > position ){
+            base.append(r);
+        }
     }
     return base;
 }

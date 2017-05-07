@@ -46,6 +46,7 @@ CompletionContextFinder::CompletionContextFinder(const QTextCursor &cursor)
     , m_behaviorBinding(false)
     , m_inStringLiteral(false)
     , m_inImport(false)
+    , m_propertyNamePosition(-1)
 {
     QTextBlock lastBlock = cursor.block();
     if (lastBlock.next().isValid())
@@ -164,6 +165,7 @@ void CompletionContextFinder::checkBinding()
             QStringRef tokenString = yyLine->midRef(token.begin(), token.length);
             dotExpected = false;
             if (identifierExpected) {
+                m_propertyNamePosition = yyLinizerState.iter.position() + token.begin();
                 m_bindingPropertyName.prepend(tokenString.toString());
                 identifierExpected = false;
                 dotExpected = true;
@@ -355,6 +357,11 @@ bool QmlJS::CompletionContextFinder::isInImport() const
 QString CompletionContextFinder::libVersionImport() const
 {
     return m_libVersion;
+}
+
+int CompletionContextFinder::propertyNamePosition() const
+{
+    return m_propertyNamePosition;
 }
 
 int CompletionContextFinder::findOpeningBrace(int startTokenIndex)

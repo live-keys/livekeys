@@ -26,7 +26,8 @@ public:
         int context,
         const QStringList& objectTypePath,
         const QStringList& propertyPath,
-        const QStringList& expressionPath = QStringList()
+        const QStringList& expressionPath = QStringList(),
+        int propertyPosition = -1
     );
     ~QQmlCompletionContext();
 
@@ -38,6 +39,7 @@ public:
 
     QString propertyName() const;
     const QStringList& propertyPath() const;
+    int propertyPosition() const;
 
     const QStringList& expressionPath() const;
 
@@ -49,6 +51,7 @@ private:
     QStringList m_objectTypePath;
     QStringList m_propertyPath;
     QStringList m_expressionPath;
+    int         m_propertyPosition;
 
 };
 
@@ -74,6 +77,10 @@ inline const QStringList &QQmlCompletionContext::propertyPath() const{
 
 inline const QStringList &QQmlCompletionContext::expressionPath() const{
     return m_expressionPath;
+}
+
+inline int QQmlCompletionContext::propertyPosition() const{
+    return m_propertyPosition;
 }
 
 }// namespace
