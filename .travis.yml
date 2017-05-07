@@ -1,0 +1,84 @@
+language: cpp
+
+os:
+  - linux
+
+sudo: required
+dist: trusty
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-5
+      - g++-5
+      - build-essential
+      - cmake
+      - cmake-data
+      - git
+      - libgtk2.0-dev
+      - pkg-config
+      - libavcodec-dev
+      - libavformat-dev
+      - libswscale-dev
+      - python-dev
+      - python-numpy
+      - libtbb2
+      - libtbb-dev
+      - libjpeg-dev
+      - libpng-dev
+      - libjasper-dev
+      - libdc1394-22-dev
+      - unzip
+      
+#env: GCC_VERSION=5 CPP=11 COMPILER=g++-5 CXX=g++-5 CC=gcc-5
+    
+install:
+  - sudo apt-get install -y libtiff5 libtiff5-dev
+#  - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+#  - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++
+  - git clone https://github.com/Itseez/opencv.git
+  - cd opencv
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make -j8
+  - sudo make -j8 install
+  - export OPENCV_DIR=/usr/local/lib
+  - cd ../../build
+  - wget https://github.com/livecv/livecv-deploy-kit/archive/master.zip
+  - unzip master.zip
+  - mv livecv-deploy-kit-master/* .
+  - wget http://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-linux-x64-5.7.0.run
+  - sudo chmod 777 qt-opensource-linux-x64-5.7.0.run
+  - ./qt-opensource-linux-x64-5.7.0.run --script resources/install-qt.qs --verbose --silent -platform minimal
+  - export QTDIR=/opt/qt/5.7/gcc_64
+  
+    
+script:
+  - ls
+  - python3 livecv_build.py
+  - ls
+  - python3 livecv_deploy.py -d gcc
+  - python3 livecv_deploy.py -d gcc_standalone
+
+before_deploy:
+  - ls
+  - ls *.tar.gz
+  - export LIVECV_STANDALONE=$(ls *.tar.gz | tail -n +1 | head -1)
+  - export LIVECV=$(ls *.tar.gz | tail -n +2 | head -1)
+  - echo ${LIVECV_STANDALONE}
+  - echo ${LIVECV}
+ 
+deploy:
+  provider: releases
+  api_key:
+    - secure: "uoyLbdtkGr8IDnyECv747iVkAsxMdqQR1v9wfwbEj4lsSHZ2E+Y3ShZMmV2AZUK86ajksBOvfMUYVo8P2JTQUsQtduu9SAIFF2MxxIVQbwmdF27cvnSUDFQjkU6h2UDNbgdi2I6rtH2g1Adhx/C45my0NQdvbhB9fEV3H+Z8g0YmoBDu3MZFGZknpf/PpNzaoGtHATo+0VooqCrAZhR9M1igGQF2ibU8z8E9xm04ehSjlMoXWv15GWmwOmkjQSe/mkeOUJ9Bl2LuIk3PcIv7uJNle5GgteQM+++iru59kZSXTLqih2peZVT7BLQ3c4gUZCtLASFPXwoQH2n4VMz4OeGv4b9LMw9bvwQ+eM8//enDDyIy2fP6KQu2BdLIScNX6B4eitxVMEcOXRHOc4xmlXqNloCOtGONaZ7w3OnwPj/O38ThM8c4riq1sh1TFBabRge8VGkBiKU3cDYPdGM2uMxST0swcrgBqu0UZ45xCftbF1tqJjs6K6ZS1v298KVlHcxyfdSJTDKCEOyTJXH6at2yYhQZ9RKrimZE5aiK0h3dsflKrmMXKDWWmQmAB7WxRQhNjEDuULvhq0f5z+oLDbL1hGSYM09196fyUDLeRY7wdYoIVaH3ebk5j6b+ar9RaQ16MoERBxR1ULUcs5gJHxCWPwyb4jRZBeMJJwzNF3Q="
+  file_glob: true
+  file: 
+    - "${LIVECV_STANDALONE}"
+    - "${LIVECV}"
+  skip_cleanup: true
+  on:
+    tags: true

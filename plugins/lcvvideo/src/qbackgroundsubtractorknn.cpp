@@ -1,5 +1,21 @@
 /****************************************************************************
 **
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
+/****************************************************************************
+**
 ** This file is part of Live CV Application.
 **
 ** GNU Lesser General Public License Usage
@@ -13,7 +29,7 @@
 ****************************************************************************/
 
 #include "qbackgroundsubtractorknn.h"
-#include "qstatecontainer.h"
+#include "qstaticcontainer.h"
 
 using namespace cv;
 
@@ -39,10 +55,11 @@ public:
     QBackgroundSubtractorKnnPrivate();
     ~QBackgroundSubtractorKnnPrivate();
 
-    virtual void deleteSubtractor();
     virtual BackgroundSubtractor* subtractor();
 
     BackgroundSubtractorKNN* subtractorKnn();
+
+    Ptr<BackgroundSubtractorKNN>* createSubtractor();
 
 public:
     bool detectShadows;
@@ -53,10 +70,6 @@ public:
     double shadowThreshold;
     int shadowValue;
 
-private:
-    Ptr<BackgroundSubtractorKNN>* createSubtractor();
-
-private:
     Ptr<BackgroundSubtractorKNN>* m_subtractorKnn;
 
 };
@@ -75,8 +88,6 @@ QBackgroundSubtractorKnnPrivate::QBackgroundSubtractorKnnPrivate() :
 }
 
 QBackgroundSubtractorKnnPrivate::~QBackgroundSubtractorKnnPrivate(){
-    if ( stateId() == "" ) // otherwise leave it to the QStateContiner
-        delete m_subtractorKnn;
 }
 
 Ptr<BackgroundSubtractorKNN>* QBackgroundSubtractorKnnPrivate::createSubtractor(){
@@ -88,32 +99,26 @@ Ptr<BackgroundSubtractorKNN>* QBackgroundSubtractorKnnPrivate::createSubtractor(
     return new Ptr<BackgroundSubtractorKNN>(subtractor);
 }
 
-void QBackgroundSubtractorKnnPrivate::deleteSubtractor(){
-    QStateContainer<Ptr<BackgroundSubtractorKNN>>& stateCont =
-            QStateContainer<Ptr<BackgroundSubtractorKNN>>::instance();
-    stateCont.registerState(stateId(), static_cast<Ptr<BackgroundSubtractorKNN>*>(0));
-    delete m_subtractorKnn;
-    m_subtractorKnn = 0;
-}
-
 BackgroundSubtractorKNN* QBackgroundSubtractorKnnPrivate::subtractorKnn(){
-    if ( !m_subtractorKnn ){
-        if ( stateId() != "" ){
-            QStateContainer<Ptr<BackgroundSubtractorKNN>>& stateCont =
-                    QStateContainer<Ptr<BackgroundSubtractorKNN>>::instance();
+    if ( !m_subtractorKnn )
+        return 0;
+//    {
+//        if ( stateId() != "" ){
+//            QStateContainer<Ptr<BackgroundSubtractorKNN>>& stateCont =
+//                    QStateContainer<Ptr<BackgroundSubtractorKNN>>::instance();
 
-            m_subtractorKnn = stateCont.state(stateId());
-            if ( m_subtractorKnn == 0 ){
-                m_subtractorKnn = createSubtractor();
-                stateCont.registerState(stateId(), m_subtractorKnn);
-            }
-        } else {
-            qWarning("QBackgroundSubtractorKnn does not have a stateId assigned and cannot save "
-                     "it\'s state over multiple compilations. Set a unique stateId to "
-                     "avoid this problem.");
-            m_subtractorKnn = createSubtractor();
-        }
-    }
+//            m_subtractorKnn = stateCont.state(stateId());
+//            if ( m_subtractorKnn == 0 ){
+//                m_subtractorKnn = createSubtractor();
+//                stateCont.registerState(stateId(), m_subtractorKnn);
+//            }
+//        } else {
+//            qWarning("QBackgroundSubtractorKnn does not have a stateId assigned and cannot save "
+//                     "it\'s state over multiple compilations. Set a unique stateId to "
+//                     "avoid this problem.");
+//            m_subtractorKnn = createSubtractor();
+//        }
+//    }
     return m_subtractorKnn->get();
 }
 
@@ -314,4 +319,15 @@ void QBackgroundSubtractorKnn::setShadowValue(int shadowValue){
             d->subtractorKnn()->setShadowValue(shadowValue);
         emit shadowValueChanged();
     }
+}
+
+void QBackgroundSubtractorKnn::staticLoad(const QString &id){
+    Q_D(QBackgroundSubtractorKnn);
+    QStaticContainer* container = QStaticContainer::grabFromContext(this);
+    d->m_subtractorKnn = container->get< Ptr<BackgroundSubtractorKNN> >(id);
+    if ( !d->m_subtractorKnn ){
+        d->m_subtractorKnn = d->createSubtractor();
+        container->set< Ptr<BackgroundSubtractorKNN> >(id, d->m_subtractorKnn);
+    }
+    QMatFilter::transform();
 }

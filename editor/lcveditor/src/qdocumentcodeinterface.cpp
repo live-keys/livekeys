@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "qdocumentcodeinterface.h"
 #include "qprojectdocument.h"
 #include "qprojectfile.h"
@@ -11,13 +27,16 @@
 
 namespace lcv{
 
-QDocumentCodeInterface::QDocumentCodeInterface(QAbstractCodeHandler *handler, QObject *parent)
+QDocumentCodeInterface::QDocumentCodeInterface(QAbstractCodeHandler *handler,
+        QLivePaletteContainer *paletteContainer,
+        QObject *parent)
     : QObject(parent)
     , m_target(0)
     , m_targetDoc(0)
     , m_completionModel(new QCodeCompletionModel)
     , m_codeHandler(handler)
     , m_projectDocument(0)
+    , m_paletteContainer(paletteContainer)
     , m_autoInserting(false)
     , m_silentEditing(false)
 {
@@ -143,14 +162,16 @@ void QDocumentCodeInterface::setDocument(QProjectDocument *document){
 
 void QDocumentCodeInterface::generateCompletion(int cursorPosition){
     if ( m_target && m_codeHandler ){
+        m_lastChar = QChar();
         QTextCursor cursor(m_target->textDocument());
         cursor.setPosition(cursorPosition);
+        QTextCursor newCursor;
         m_codeHandler->assistCompletion(
             cursor,
             m_lastChar,
             true,
             m_completionModel,
-            QTextCursor()
+            newCursor
         );
     }
 }

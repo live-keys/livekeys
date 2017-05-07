@@ -1,4 +1,0 @@
-module lcvfeatures2d
-plugin lcvfeatures2d
-depends QtQuick 2.3
-depends lcvcore 1.0

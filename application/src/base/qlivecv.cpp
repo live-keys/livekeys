@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -16,9 +16,12 @@
 
 #include "qlivecv.h"
 #include "qlivecvlog.h"
-#include "qcodedocument.h"
 #include "qlivecvarguments.h"
+#include "qstaticcontainer.h"
+#include "qlicensecontainer.h"
 #include "qlivecvmain.h"
+#include "qlivecvsettings.h"
+#include "qeditorsettings.h"
 
 #include "qdocumentcodeinterface.h"
 #include "qproject.h"
@@ -39,16 +42,20 @@
 #include <QDir>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickWindow>
 #include <QGuiApplication>
+
+#include "qlivepalettecontainer.h"
 
 namespace lcv{
 
 QLiveCV::QLiveCV(int argc, const char* const argv[])
     : m_engine(new QLiveCVEngine(new QQmlApplicationEngine))
-    , m_document(new QCodeDocument)
+    , m_staticContainer(new QStaticContainer(m_engine))
     , m_codeInterface(0)
     , m_dir(QGuiApplication::applicationDirPath())
-    , m_project(new lcv::QProject)
+    , m_project(new QProject)
+    , m_settings(0)
 {
     solveImportPaths();
 
@@ -58,11 +65,14 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
         argc,
         argv
     );
+
+    m_settings = QLiveCVSettings::initialize(dir() + "/config");
 }
 
 QLiveCV::~QLiveCV(){
+    delete m_settings;
+    delete m_staticContainer;
     delete m_engine;
-    delete m_document;
 }
 
 void QLiveCV::solveImportPaths(){
@@ -81,13 +91,16 @@ void QLiveCV::loadLibrary(const QString &library){
 }
 
 void QLiveCV::loadQml(const QUrl &url){
-
     lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(
         m_engine->engine(),
         m_engine->engineMutex(),
         m_project->lockedFileIO()
     );
-    m_codeInterface = new lcv::QDocumentCodeInterface(qmlHandler);
+    m_codeInterface = new lcv::QDocumentCodeInterface(
+        qmlHandler,
+        QLivePaletteContainer::create(m_engine->engine(), dir() + "/plugins")
+    );
+
     QObject::connect(
         m_project, SIGNAL(inFocusChanged(QProjectDocument*)),
         m_codeInterface, SLOT(setDocument(QProjectDocument*))
@@ -109,8 +122,11 @@ void QLiveCV::loadQml(const QUrl &url){
         qInstallMessageHandler(&QLiveCVLog::logFunction);
     if ( m_arguments->fileLogFlag() )
         QLiveCVLog::instance().enableFileLog();
-    if ( m_arguments->script() != "" )
+    if ( m_arguments->script() != "" ){
         m_project->openProject(m_arguments->script());
+    } else {
+        m_project->newProject();
+    }
     if ( !m_arguments->monitoredFiles().isEmpty() ){
         foreach( QString mfile, m_arguments->monitoredFiles() ){
             if ( !mfile.isEmpty() ){
@@ -127,24 +143,28 @@ void QLiveCV::loadQml(const QUrl &url){
         }
     }
 
+    m_engine->engine()->rootContext()->setContextProperty("staticContainer", m_staticContainer);
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
-    m_engine->engine()->rootContext()->setContextProperty("codeDocument", m_document);
     m_engine->engine()->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
     m_engine->engine()->rootContext()->setContextProperty("args", m_arguments);
     m_engine->engine()->rootContext()->setContextProperty("engine", m_engine);
     m_engine->engine()->rootContext()->setContextProperty("codeHandler", m_codeInterface);
+    m_engine->engine()->rootContext()->setContextProperty("settings", m_settings);
 #ifdef Q_OS_LINUX
-    m_engine->engine()->rootContext()->setContextProperty("isLinux", true);
+    m_engine->engine()->rootContext()->setContextProperty("isLinux", QVariant::fromValue(true));
 #else
-    m_engine->engine()->rootContext()->setContextProperty("isLinux", false);
+    m_engine->engine()->rootContext()->setContextProperty("isLinux", QVariant::fromValue(false));
 #endif
 
     static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);
+
+    QList<QObject*> objects = static_cast<QQmlApplicationEngine*>(m_engine->engine())->rootObjects();
+    if ( objects.size() > 0 && qobject_cast<QQuickWindow*>(objects.first())){
+        m_staticContainer->setWindow(qobject_cast<QQuickWindow*>(objects.first()));
+    }
 }
 
 void QLiveCV::registerTypes(){
-    qmlRegisterUncreatableType<QCodeDocument>(
-        "Cv", 1, 0, "Document", "Only access to the document object is allowed.");
     qmlRegisterUncreatableType<QLiveCVLog>(
         "Cv", 1, 0, "MessageLog", "Type is singleton.");
     qmlRegisterUncreatableType<lcv::QDocumentCodeInterface>(
@@ -163,14 +183,18 @@ void QLiveCV::registerTypes(){
         "Cv", 1, 0, "ProjectFile", "ProjectFile objects are managed by the ProjectFileModel.");
     qmlRegisterUncreatableType<lcv::QProjectDocument>(
         "Cv", 1, 0, "ProjectDocument", "ProjectDocument objects are managed by the Project class.");
-
     qmlRegisterUncreatableType<lcv::QLiveCVEngine>(
-        "live", 1, 0, "LiveEngine", "LiveEngine is available through engine property."
+        "Cv", 1, 0, "LiveEngine", "LiveEngine is available through engine property."
     );
-    qmlRegisterUncreatableType<lcv::QLiveCVArguments>(
-        "live", 1, 0, "LiveArguments", "LiveArguments is available through the arguments property."
+    qmlRegisterUncreatableType<lcv::QLiveCVSettings>(
+        "Cv", 1, 0, "LiveSettings", "LiveSettings is available through the settings property."
     );
-    qmlRegisterType<lcv::QLiveCVMain>("live", 1, 0, "Main");
+    qmlRegisterUncreatableType<lcv::QEditorSettings>(
+        "Cv", 1, 0, "EditorSettings", "EditorSettings is available through the settings.editor property."
+    );
+    qmlRegisterUncreatableType<lcv::QLicenseContainer>(
+        "Cv", 1, 0, "LicenseContainer", "LicenseContainer is available through the settings.license property."
+    );
 }
 
 QByteArray QLiveCV::extractPluginInfo(const QString &import) const{
@@ -185,7 +209,7 @@ QByteArray QLiveCV::extractPluginInfo(const QString &import) const{
     if ( extractor ){
         extractor->waitForResult(10000);
         if (extractor->timedOut() ){
-            return "Timed out\n";
+            return "Error: Timed out\n";
         }
     }
     return extractor->result();

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -26,6 +26,8 @@ Rectangle{
     signal open()
     signal closeFocusedFile()
     signal toggleSize()
+    signal toggleProject()
+    signal toggleVisibility()
     signal toggleNavigation()
 
     signal bindProperties(int position, int length)
@@ -36,7 +38,7 @@ Rectangle{
     property alias text: editorArea.text
     property alias font: editorArea.font
 
-    color : "#071723"
+    color : "#050c13"
 
     clip : true
 
@@ -54,7 +56,7 @@ Rectangle{
         color : "#000"
         gradient: Gradient{
             GradientStop { position: 0.0;  color: "#08141f" }
-            GradientStop { position: 0.30; color: "#081926" }
+            GradientStop { position: 0.10; color: "#071119" }
         }
 
         Text{
@@ -62,10 +64,21 @@ Rectangle{
             anchors.left: parent.left
             anchors.leftMargin: 15
             color: "#7b838b"
-            text: project.inFocus ? project.inFocus.file.name + (project.inFocus.file.isDirty ? '*' : '') : ''
+            text: {
+                if ( project.inFocus ){
+                    var filename = project.inFocus.file.name
+                    if ( filename === '' )
+                        filename = 'untitled'
+                    if ( project.inFocus.isDirty )
+                        filename += '*'
+                    return filename;
+                } else {
+                    return ''
+                }
+            }
             font.family: "Open Sans, sans-serif"
             font.pixelSize: 12
-            font.weight: Font.Light
+            font.weight: Font.Normal
         }
 
         Rectangle{
@@ -95,7 +108,7 @@ Rectangle{
             height: parent.height
             gradient: Gradient{
                 GradientStop { position: 0.0;  color: "#08141f" }
-                GradientStop { position: 0.30; color: "#061c2d" }
+                GradientStop { position: 0.30; color: "#08131c" }
             }
 
             Image{
@@ -114,7 +127,7 @@ Rectangle{
     Rectangle{
         anchors.fill: parent
         anchors.topMargin: 38
-        color: "#071723"
+        color: editor.color
 
         ScrollView {
             id: flick
@@ -124,7 +137,7 @@ Rectangle{
                     implicitWidth: 10
                     implicitHeight: 10
                     Rectangle {
-                        color: "#0b1f2e"
+                        color: "#061724"
                         anchors.fill: parent
                     }
                 }
@@ -133,13 +146,13 @@ Rectangle{
                     implicitHeight: 10
                     Rectangle{
                         anchors.fill: parent
-                        color: "#091a27"
+                        color: editor.color
                     }
                 }
                 decrementControl: null
                 incrementControl: null
-                frame: Rectangle{color: "#071723"}
-                corner: Rectangle{color: "#071723"}
+                frame: Rectangle{color: editor.color}
+                corner: Rectangle{color: editor.color}
             }
 
             anchors.fill: parent
@@ -180,14 +193,14 @@ Rectangle{
                     else {
                         editor.isDirty = true
                         if ( project.inFocus )
-                            project.inFocus.file.isDirty = true
+                            project.inFocus.isDirty = true
                     }
                 }
 
                 color : "#fff"
                 font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
                 font.pixelSize: 13
-                font.weight: Font.Light
+                font.weight: Font.Normal
 
                 selectByMouse: true
                 mouseSelectionMode: TextEdit.SelectCharacters
@@ -199,7 +212,7 @@ Rectangle{
                 height : Math.max( flick.height - 20, paintedHeight )
                 width : Math.max( flick.width - 20, paintedWidth )
 
-                readOnly: project.inFocus === null || project.inFocus.file.isMonitored
+                readOnly: project.inFocus === null || project.inFocus.isMonitored
 
                 Keys.onPressed: {
                     if ( (event.key === Qt.Key_BracketRight && (event.modifiers & Qt.ShiftModifier) ) ||
@@ -235,6 +248,12 @@ Rectangle{
                         event.accepted = true
                     } else if ( event.key === Qt.Key_E && (event.modifiers & Qt.ControlModifier ) ){
                         editor.toggleSize()
+                        event.accepted = true
+                    } else if ( event.key === Qt.Key_T && (event.modifiers & Qt.ControlModifier ) ){
+                        editor.toggleVisibility()
+                        event.accepted = true
+                    } else if ( event.key === Qt.Key_Backslash && (event.modifiers & Qt.ControlModifier ) ){
+                        editor.toggleProject()
                         event.accepted = true
                     } else if ( event.key === Qt.Key_PageUp ){
                         if ( codeHandler.completionModel.isEnabled ){
@@ -300,7 +319,7 @@ Rectangle{
                     codeHandler.target = textDocument
                     if ( project.inFocus ){
                         editor.isDirtyMask = true
-                        editor.isDirty = project.inFocus.file.isDirty
+                        editor.isDirty = project.inFocus.isDirty
 //                        editor.text    = project.inFocus.content
                     }
                 }
@@ -319,7 +338,7 @@ Rectangle{
                     onInFocusChanged : {
                         editor.isDirtyMask = true
                         if ( project.inFocus ){
-                            editor.isDirty = project.inFocus.file.isDirty
+                            editor.isDirty = project.inFocus.isDirty
 //                            editor.text    = project.inFocus.content
                         } else {
                             editor.text = ''
@@ -332,7 +351,7 @@ Rectangle{
                     target: project.inFocus
                     onContentChanged : {
                         editor.isDirtyMask = true
-                        editor.isDirty = project.inFocus.file.isDirty
+                        editor.isDirty     = project.inFocus.isDirty
 //                        editor.text    = project.inFocus.content
                     }
                 }

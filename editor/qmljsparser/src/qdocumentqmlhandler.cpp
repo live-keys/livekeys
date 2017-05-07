@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "qdocumentqmlhandler.h"
 #include "qqmljshighlighter_p.h"
 #include "qprojectqmlscanner_p.h"
@@ -130,17 +146,19 @@ namespace qmlhandler_helpers{
         QString typeLibrary,
         QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath
     ){
-        if ( !object.isNull() && object->superclassName() != "" ){
+        if ( !object.isNull() && object->superclassName() != "" && object->superclassName() != object->className() ){
             QString typeSuperClass = object->superclassName();
             QDOCUMENT_QML_HANDLER_DEBUG("Loooking up object \'" + typeSuperClass + "\' from " + typeLibrary);
 
+            // Slider -> Slider (Controls) -> Slider(Controls.Private) -> ... (the reason I can go into a loop is recursive library dependencies)
+            // Avoid loop? -> keep track of all library dependencies and dont go back -> super type with the same name cannot be from the same library
             QQmlLibraryInfo::Ptr libraryInfo = typeLibrary == ""
                     ? project->implicitLibraries()->libraryInfo(documentScope->path())
                     : project->globalLibraries()->libraryInfo(typeLibrary);
 
             LanguageUtils::FakeMetaObject::ConstPtr superObject = libraryInfo->findObjectByClassName(typeSuperClass);
 
-            if ( superObject.isNull() ){
+            if ( superObject.isNull()  ){
                 QProjectQmlScopeContainer* globalLibs = project->globalLibraries();
                 foreach( const QString& libraryDependency, libraryInfo->dependencyPaths() ){
                     superObject = globalLibs->libraryInfo(libraryDependency)->findObjectByClassName(typeSuperClass);
@@ -654,8 +672,8 @@ QDocumentQmlHandler::QDocumentQmlHandler(QQmlEngine* engine, QMutex *engineMutex
     , m_completionContextFinder(new QQmlCompletionContextFinder)
     , m_documentScope(0)
     , m_projectScope(0)
-    , m_scanner(new QProjectQmlScanner(engine, engineMutex, lockedFileIO))
     , m_newScope(false)
+    , m_scanner(new QProjectQmlScanner(engine, engineMutex, lockedFileIO))
 {
     connect(m_scanner, SIGNAL(documentScopeReady()), SLOT(newDocumentScopeReady()) );
     connect(m_scanner, SIGNAL(projectScopeReady()), SLOT(newProjectScope()));
@@ -787,10 +805,16 @@ void QDocumentQmlHandler::assistCompletion(
         if ( ctx->context() & QQmlCompletionContext::InImport ){
             suggestionsForStringImport(extractQuotedString(cursor), suggestions, filter);
             model->setSuggestions(suggestions, filter);
+        } else {
+            model->setSuggestions(suggestions, filter);
         }
     } else if ( ctx->context() & QQmlCompletionContext::InImport ){
-        suggestionsForImport(*ctx, suggestions);
-        model->setSuggestions(suggestions, filter);
+        if ( ctx->context() & QQmlCompletionContext::InImportVersion ){
+            model->setSuggestions(suggestions, filter);
+        } else {
+            suggestionsForImport(*ctx, suggestions);
+            model->setSuggestions(suggestions, filter);
+        }
     } else if ( ctx->context() & QQmlCompletionContext::InAfterOnLhsOfBinding ){
         suggestionsForLeftSignalBind(*ctx, cursor.position(), suggestions);
         model->setSuggestions(suggestions, filter);
@@ -978,7 +1002,7 @@ QPluginInfoExtractor* QDocumentQmlHandler::getPluginInfoExtractor(const QString 
 
     QQmlLibraryDependency parsedImport = QQmlLibraryDependency::parse(import);
     if ( !parsedImport.isValid() ){
-        qCritical("Invalid import: %s", import);
+        qCritical("Invalid import: %s", qPrintable(import));
         return 0;
     }
 
@@ -1028,11 +1052,15 @@ void QDocumentQmlHandler::directoryChanged(const QString &path){
 }
 
 void QDocumentQmlHandler::fileChanged(const QString &path){
-    QDOCUMENT_QML_HANDLER_DEBUG("Reseting library for file: " + path);
+    QFileInfo finfo(path);
+    if ( finfo.fileName() == "" || finfo.suffix() != "qml" || !finfo.fileName().at(0).isUpper() )
+        return;
+    QString fileDir = finfo.path();
 
+    QDOCUMENT_QML_HANDLER_DEBUG("Reseting library for file: " + path);
     QProjectQmlScope::Ptr project = m_projectScope;
-    project->globalLibraries()->resetLibrariesInPath(path);
-    project->implicitLibraries()->resetLibrariesInPath(path);
+    project->globalLibraries()->resetLibrary(fileDir);
+    project->implicitLibraries()->resetLibrary(fileDir);
 }
 
 void QDocumentQmlHandler::loadImport(const QString &import){
@@ -1536,10 +1564,10 @@ void QDocumentQmlHandler::suggestionsForLeftSignalBind(
         suggestionsForValueObject(
             documentScope->info()->extractValueObject(documentValue),
             suggestions,
-            false,
-            false,
             true,
-            false
+            true,
+            true,
+            true
         );
 
     QString type = context.objectTypePath().size() > 0 ? context.objectTypePath()[0] : "";
@@ -1549,7 +1577,7 @@ void QDocumentQmlHandler::suggestionsForLeftSignalBind(
     QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
     QString libraryKey;
     qmlhandler_helpers::getTypePath(documentScope, projectScope, typeNamespace, type, typePath, libraryKey);
-    qmlhandler_helpers::suggestionsForObjectPath(typePath, false, false, false, false, true, ": ", suggestions);
+    qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, true, true, true, ": ", suggestions);
 }
 
 QString QDocumentQmlHandler::extractQuotedString(const QTextCursor &cursor) const{

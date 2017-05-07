@@ -7,6 +7,6 @@ CONFIG  += ordered
 
 SUBDIRS += $$PWD/lcvcore
 SUBDIRS += $$PWD/lcvimgproc
-SUBDIRS += $$PWD/lcvvideo
 SUBDIRS += $$PWD/lcvfeatures2d
 SUBDIRS += $$PWD/lcvphoto
+SUBDIRS += $$PWD/lcvvideo

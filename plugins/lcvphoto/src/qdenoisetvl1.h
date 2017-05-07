@@ -1,5 +1,7 @@
 /****************************************************************************
 **
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
 ** GNU Lesser General Public License Usage
@@ -11,6 +13,7 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
+
 #ifndef QDENOISETVL1_HPP
 #define QDENOISETVL1_HPP
 

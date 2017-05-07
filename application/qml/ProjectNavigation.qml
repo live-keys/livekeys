@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
@@ -38,7 +54,7 @@ Rectangle{
         anchors.left: parent.left
         width: parent.width - 30
 
-        color: "#0b1c29"
+        color: "#0c161e"
         height: 30
 
         border.color: "#12202c"
@@ -187,7 +203,7 @@ Rectangle{
                 if ( documentView.currentIndex + noItems < documentView.count ){
                     documentView.currentIndex += noItems;
                 } else {
-                    documentView.currentIndex = pluginList.count - 1;
+                    documentView.currentIndex = documentView.count - 1;
                 }
             }
             function highlightPrevPage(){
@@ -203,13 +219,13 @@ Rectangle{
 
                 property string path: model.path
 
-                color: ListView.isCurrentItem ? "#152432" : "#0d1923"
+                color: ListView.isCurrentItem ? "#101e29" : "#0d1923"
                 width: root.width
                 height: documentView.delegateHeight
                 Text{
                     anchors.left: parent.left
                     anchors.leftMargin: 20
-                    text: model.name
+                    text: model.name !== '' ? model.name : 'untitled'
                     color: "#ebebeb"
 
                     font.family: "Open Sans, sans-serif"
@@ -243,6 +259,7 @@ Rectangle{
                     text: 'x'
                     width: 30
                     height: 30
+                    visible : model.isOpen
                     anchors.right: parent.right
                     anchors.rightMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
@@ -261,10 +278,18 @@ Rectangle{
 
     Rectangle{
         anchors.centerIn: parent
-        color: "#003300"
+        color: "#001122"
         width: 100
         height: 100
         visible: project.navigationModel.isIndexing
+        Text{
+            anchors.centerIn: parent
+            text: 'Indexing...'
+            color: "#aaa5a5"
+            font.family: "Open Sans, sans-serif"
+            font.pixelSize: 12
+            font.weight: Font.Light
+        }
     }
 
 }

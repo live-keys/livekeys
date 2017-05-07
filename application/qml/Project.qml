@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
@@ -7,12 +23,13 @@ Rectangle{
     id: root
     color : "#0b1924"
     gradient: Gradient{
-        GradientStop { position: 0.0;  color: "#08141f" }
-        GradientStop { position: 0.01; color: "#0b1924" }
+        GradientStop { position: 0.0;  color: "#061119" }
+        GradientStop { position: 0.01; color: "#050e16" }
     }
 
     signal addEntry(ProjectEntry parentEntry, bool isFile)
     signal openEntry(ProjectEntry entry, bool monitor)
+    signal editEntry(ProjectEntry entry)
     signal removeEntry(ProjectEntry entry, bool isFile)
     signal moveEntry(ProjectEntry entry, ProjectEntry newParent)
     signal renameEntry(ProjectEntry entry, string newName)
@@ -94,7 +111,7 @@ Rectangle{
                 project.setActive(styleData.value)
             }
             function openFile(){
-                root.openEntry(styleData.value, false)
+                root.editEntry(styleData.value)
             }
             function monitorFile(){
                 root.openEntry(styleData.value, true)
@@ -119,12 +136,15 @@ Rectangle{
                         if ( styleData.value && styleData.value.isFile ){
                             if (styleData.value === (project.active ? project.active.file : null) )
                                 return "qrc:/images/project-file-active.png"
-                            else if ( styleData.value.isMonitored )
-                                return "qrc:/images/project-file-monitor.png"
-                            else if ( styleData.value.isDirty )
-                                return "qrc:/images/project-file-unsaved.png"
-                            else
+                            else {
+                                if ( styleData.value.document ){
+                                    if (styleData.value.document.isMonitored)
+                                        return "qrc:/images/project-file-monitor.png"
+                                    else if ( styleData.value.document.isDirty)
+                                        return "qrc:/images/project-file-unsaved.png"
+                                }
                                 return "qrc:/images/project-file.png"
+                            }
                         } else
                             return "qrc:/images/project-directory.png"
                     }
@@ -149,7 +169,7 @@ Rectangle{
                                 if ( project.inFocus.file === styleData.value )
                                     return 1
                             }
-                            if ( styleData.value.isOpen )
+                            if ( styleData.value.document )
                                 return 2
                         }
                         return 0
@@ -271,7 +291,7 @@ Rectangle{
             style: ContextMenuStyle{}
 
             MenuItem{
-                text: "Open File"
+                text: "Edit File"
                 onTriggered: {
                     view.contextDelegate.openFile()
                 }

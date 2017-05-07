@@ -6,40 +6,56 @@ CONFIG  += qt plugin
 TARGET = $$qtLibraryTarget($$TARGET)
 uri = plugins.lcvcore
 
-OTHER_FILES = qmldir
-
 DEFINES += Q_LCV
 
 include($$PWD/src/lcvimgproc.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
-loadOpenCV(core highgui imgproc, deploy)
+deployOpenCV()
+
+# Live lib
 
 INCLUDEPATH += $$PWD/../../lib/include
 DEPENDPATH  += $$PWD/../../lib/include
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/release/ -llcvlib
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/debug/ -llcvlib
-else:unix: LIBS += -L$$OUT_PWD/../../application/ -llcvlib
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/release/ -llive
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/debug/ -llive
+else:unix: LIBS += -L$$OUT_PWD/../../application/ -llive
+
+# Lcvcore lib
+
+INCLUDEPATH += $$PWD/../lcvcore/include
+DEPENDPATH  += $$PWD/../lcvcore/include
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lcvcore/release/ -llcvcore
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lcvcore/debug/ -llcvcore
+else:unix: LIBS += -L$$OUT_PWD/../lcvcore/ -llcvcore
 
 # Destination
 
-win32:CONFIG(debug, debug|release): DESTDIR = $$quote($$OUT_PWD/../../application/debug/plugins/lcvimgproc)
-else:win32:CONFIG(release, debug|release): DESTDIR = $$quote($$OUT_PWD/../../application/release/plugins/lcvimgproc)
-else:unix: DESTDIR = $$quote($$OUT_PWD/../../application/plugins/lcvimgproc)
+win32:CONFIG(debug, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../../application/debug/plugins/lcvimgproc)
+else:win32:CONFIG(release, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../../application/release/plugins/lcvimgproc)
+else:unix: TARGET = $$quote($$OUT_PWD/../../application/plugins/lcvimgproc)
 
+# Qml
 
-!equals(_PRO_FILE_PWD_, $$OUT_PWD) {
-    copy_qmldir.target = $$DESTDIR/qmldir
-    copy_qmldir.depends = $$_PRO_FILE_PWD_/qmldir
-    copy_qmldir.commands = $(COPY_FILE) \"$$replace(copy_qmldir.depends, /, $$QMAKE_DIR_SEP)\" \"$$replace(copy_qmldir.target, /, $$QMAKE_DIR_SEP)\"
-    QMAKE_EXTRA_TARGETS += copy_qmldir
-    PRE_TARGETDEPS += $$copy_qmldir.target
-}
+OTHER_FILES = \
+    $$PWD/qml/qmldir \
+    $$PWD/qml/plugins.qmltypes
 
-qmldir.files = qmldir
-unix {
-    installPath = $$[QT_INSTALL_QML]/$$replace(uri, \\., /)
-    qmldir.path = $$installPath
-    target.path = $$installPath
-    INSTALLS += target qmldir
-}
+# Deploy qml
+
+PLUGIN_DEPLOY_FROM = $$PWD/qml
+win32:CONFIG(debug, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../../application/debug/plugins/lcvimgproc
+else:win32:CONFIG(release, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../../application/release/plugins/lcvimgproc
+else:unix: PLUGIN_DEPLOY_TO = $$OUT_PWD/../../application/plugins/lcvimgproc
+
+win32:PLUGIN_DEPLOY_TO ~= s,/,\\,g
+win32:PLUGIN_DEPLOY_FROM ~= s,/,\\,g
+
+plugincopy.commands = $(COPY_DIR) \"$$PLUGIN_DEPLOY_FROM\" \"$$PLUGIN_DEPLOY_TO\"
+
+first.depends = $(first) plugincopy
+export(first.depends)
+export(plugincopy.commands)
+
+QMAKE_EXTRA_TARGETS += first plugincopy

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -15,12 +15,14 @@
 ****************************************************************************/
 
 #include "qdrawmatches.h"
-#include "opencv2/features2d/features2d.hpp"
+#include "opencv2/features2d.hpp"
 
 #include <iostream>
 
 QDrawMatches::QDrawMatches(QQuickItem *parent)
     : QMatDisplay(parent)
+    , m_keypoints1(0)
+    , m_keypoints2(0)
     , m_matches(0)
     , m_matchSurfaceDirty(false)
     , m_matchIndex(-1)

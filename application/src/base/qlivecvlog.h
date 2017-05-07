@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -47,7 +47,7 @@ signals:
     void dataChanged();
 
 public slots:
-    void logMessage(QtMsgType type, const QMessageLogContext& ctx, const QString& msg);
+    void logMessage(QtMsgType type, const QMessageLogContext& ctx, QString msg);
 
 private:
     QString     m_data;

@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #ifndef QDOCUMENTCODEINTERFACE_H
 #define QDOCUMENTCODEINTERFACE_H
 
@@ -12,6 +28,7 @@ class QQuickTextDocument;
 
 namespace lcv{
 
+class QLivePaletteContainer;
 class Q_LCVEDITOR_EXPORT QDocumentCodeInterface : public QObject{
 
     Q_OBJECT
@@ -19,7 +36,11 @@ class Q_LCVEDITOR_EXPORT QDocumentCodeInterface : public QObject{
     Q_PROPERTY(lcv::QCodeCompletionModel* completionModel READ completionModel CONSTANT)
 
 public:
-    explicit QDocumentCodeInterface(QAbstractCodeHandler* handler, QObject* parent = 0);
+    explicit QDocumentCodeInterface(
+        QAbstractCodeHandler* handler,
+        QLivePaletteContainer* paletteContainer = 0,
+        QObject* parent = 0
+    );
     ~QDocumentCodeInterface();
 
     QQuickTextDocument *target();
@@ -55,10 +76,11 @@ private:
     QChar                      m_lastChar;
     QQuickTextDocument*        m_target;
     QTextDocument*             m_targetDoc;
-    lcv::QCodeCompletionModel* m_completionModel;
+    QCodeCompletionModel*      m_completionModel;
     QAbstractCodeHandler*      m_codeHandler;
     QProjectDocument*          m_projectDocument;
     bool                       m_silentEditing;
+    QLivePaletteContainer*     m_paletteContainer;
     bool                       m_autoInserting;
 };
 

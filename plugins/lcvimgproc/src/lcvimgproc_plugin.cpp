@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -33,7 +33,6 @@
 #include "qerode.h"
 #include "qcopymakeborder.h"
 #include "qmatdraw.h"
-//#include "qbilateralfilter.h"
 
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
@@ -53,7 +52,6 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QErode>(              uri, 1, 0, "Erode");
     qmlRegisterType<QCopyMakeBorder>(     uri, 1, 0, "CopyMakeBorder");
     qmlRegisterType<QMatDraw>(            uri, 1, 0, "MatDraw");
-//    qmlRegisterType<QBilateralFilter>(    uri, 1, 0, "BilateralFilter");
 }
 
 

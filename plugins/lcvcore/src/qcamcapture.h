@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -16,7 +16,6 @@
 #ifndef QCAMCAPTURE_H
 #define QCAMCAPTURE_H
 
-#include "qlcvglobal.h"
 #include "qmatdisplay.h"
 
 class QCamCaptureThread;
@@ -24,17 +23,16 @@ class QCamCaptureThread;
 class QCamCapture : public QMatDisplay{
 
     Q_OBJECT
-    Q_PROPERTY(QString device     READ device     WRITE setDevice     NOTIFY deviceChanged)
+    Q_PROPERTY(QString device     READ device     NOTIFY deviceChanged)
+    Q_PROPERTY(QSize   resolution READ resolution NOTIFY resolutionChanged)
     Q_PROPERTY(bool    paused     READ paused     WRITE setPaused     NOTIFY pausedChanged)
     Q_PROPERTY(qreal   fps        READ fps        WRITE setFps        NOTIFY fpsChanged)
-    Q_PROPERTY(QSize   resolution READ resolution WRITE setResolution NOTIFY resolutionChanged)
 
 public:
     explicit QCamCapture(QQuickItem *parent = 0);
     ~QCamCapture();
 
     const QString& device() const;
-    void setDevice(const QString& device);
 
     bool paused() const;
     void setPaused(bool paused);
@@ -43,10 +41,11 @@ public:
     void setFps(qreal fps);
 
     const QSize& resolution() const;
-    void setResolution(const QSize& resolution);
 
 public slots:
     void switchMat();
+    void staticOpen(const QString& device, const QSize& resolution = QSize());
+    void staticLoad(const QString& device, const QSize& resolution = QSize());
 
 signals:
     void deviceChanged();
@@ -56,7 +55,6 @@ signals:
 
 private:
     void initializeMatSize();
-    void reinitializeDevice();
 
     QCamCapture(const QCamCapture& other);
     QCamCapture& operator= (const QCamCapture& other);
@@ -80,6 +78,10 @@ inline qreal QCamCapture::fps() const{
 
 inline const QSize& QCamCapture::resolution() const{
     return m_resolution;
+}
+
+inline void QCamCapture::staticOpen(const QString &device, const QSize &resolution){
+    staticLoad(device, resolution);
 }
 
 #endif // QCAMCAPTURE_HPP

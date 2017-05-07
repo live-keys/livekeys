@@ -1,3 +1,4 @@
+import QtQuick 2.3
 import lcvcore 1.0
 
 // A simple example showing how to use the
@@ -11,5 +12,5 @@ CamCapture{
     property string deviceId : '0'
     
     anchors.centerIn : parent
-    device : deviceId
+    Component.onCompleted : staticOpen(deviceId)
 }

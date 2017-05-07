@@ -52,55 +52,11 @@ win32{
     }
 
     LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_world$${OPENCV_VERSION}
-    copyCvDll($${OPENCV_DIR_DLLS}/opencv_world$${OPENCV_VERSION}.dll)
 
-    defineTest(loadOpenCV){
-        modules = $$1
-        copyDll = $$2
 
-#        contains(modules, core){
-#        }
-
-#        contains(modules, highgui){
-#            LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_highgui$${OPENCV_VERSION}
-#            equals(copyDll, deploy):copyCvDll($${OPENCV_DIR_DLLS}/opencv_highgui$${OPENCV_VERSION}.dll)
-#        }
-
-#        contains(modules, imgproc){
-#            LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_imgproc$${OPENCV_VERSION}
-#            equals(copyDll, deploy):copyCvDll($${OPENCV_DIR_DLLS}/opencv_imgproc$${OPENCV_VERSION}.dll)
-#        }
-
-#        contains(modules, video){
-#            LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_video$${OPENCV_VERSION}
-#            equals(copyDll, deploy):copyCvDll($${OPENCV_DIR_DLLS}/opencv_video$${OPENCV_VERSION}.dll)
-#        }
-
-#        contains(modules, calib3d){
-#            LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_calib3d$${OPENCV_VERSION}
-#            equals(copyDll, deploy):copyCvDll($${OPENCV_DIR_DLLS}/opencv_calib3d$${OPENCV_VERSION}.dll)
-#        }
-
-#        contains(modules, features2d){
-#            LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_features2d$${OPENCV_VERSION}
-#            equals(copyDll, deploy):copyCvDll($${OPENCV_DIR_DLLS}/opencv_features2d$${OPENCV_VERSION}.dll)
-#        }
-
-#        contains(modules, flann){
-#            LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_flann$${OPENCV_VERSION}
-#            equals(copyDll, deploy):copyCvDll($${OPENCV_DIR_DLLS}/opencv_flann$${OPENCV_VERSION}.dll)
-#        }
-
-#        contains(modules, photo){
-#            LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_photo$${OPENCV_VERSION}
-#            equals(copyDll, deploy):copyCvDll($${OPENCV_DIR_DLLS}/opencv_photo$${OPENCV_VERSION}.dll)
-#        }
-
-#        contains(modules, ffmpeg){
-#            equals(copyDll, deploy):copyCvDll($$files($${OPENCV_DIR_DLLS}/opencv_ffmpeg$${OPENCV_VERSION_FIND}*.dll))
-#        }
-
-#        export(LIBS)
+    defineTest(deployOpenCV){
+        copyCvDll($${OPENCV_DIR_DLLS}/opencv_world$${OPENCV_VERSION}.dll)
+        copyCvDll($${OPENCV_DIR_DLLS}/opencv_ffmpeg$${OPENCV_VERSION_FIND}_64.dll)
     }
 }
 
@@ -111,7 +67,7 @@ unix{
     CONFIG += link_pkgconfig
     PKGCONFIG += opencv
 
-    defineTest(loadOpenCV){}
+    defineTest(deployOpenCV){}
 
 }
 

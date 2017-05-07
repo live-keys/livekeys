@@ -1,3 +1,4 @@
+import QtQuick 2.3
 import lcvcore 1.0
 import lcvimgproc 1.0
 import lcvfeatures2d 1.0
@@ -9,7 +10,7 @@ Row{
     // Check the documentation for the parameters data for each detector
 
     property string imagePath :
-        codeDocument.path + '/../_images/object_101_piano_train1.jpg'
+        project.dir() + '/../_images/object_101_piano_train1.jpg'
 
     ImRead{
         id : inputImage
