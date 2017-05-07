@@ -10,6 +10,10 @@
 #include "qprojectfile.h"
 #include "qplugininfoextractor.h"
 #include "qplugintypesfacade.h"
+#include "qdocumentqmlvaluescanner_p.h"
+#include "qdocumentqmlvalueobjects.h"
+
+#include "qmljs/qmljsscanner.h"
 
 #include <QQmlEngine>
 #include <QFileInfo>
@@ -32,6 +36,17 @@
 namespace lcv{
 
 namespace qmlhandler_helpers{
+
+    class ScopeCopy{
+    public:
+        ScopeCopy(const QProjectQmlScope::Ptr& pProject, const QDocumentQmlScope::Ptr& pDocument)
+            : project(pProject)
+            , document(pDocument)
+        {}
+
+        QProjectQmlScope::Ptr  project;
+        QDocumentQmlScope::Ptr document;
+    };
 
     /// Retrieve a type from any available libraries to the document scope
 
@@ -314,10 +329,132 @@ namespace qmlhandler_helpers{
         return true;
     }
 
+
+    LanguageUtils::FakeMetaProperty getPropertyInObject(
+        const QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        const QString& propertyName
+    )
+    {
+        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, typePath ){
+            for ( int i = 0; i < object->propertyCount(); ++i ){
+                if ( object->property(i).name() == propertyName ){
+                    return object->property(i);
+                }
+            }
+        }
+        return LanguageUtils::FakeMetaProperty("", "", false, false, false, -1);
+    }
+
+
+    /**
+     * @brief Finds the property propertyName for the contextObject in the document
+     * @return
+     */
+    LanguageUtils::FakeMetaProperty getPropertyInDocument(
+        const ScopeCopy& scope,
+        const QStringList &contextObject,
+        const QString &propertyName,
+        int propertyPosition,
+        bool& isClassName,
+        QString &contextObjectLibrary)
+    {
+        QDocumentQmlInfo::ValueReference documentValue = scope.document->info()->valueAtPosition(propertyPosition);
+        if ( !scope.document->info()->isValueNull(documentValue) ){
+            QDocumentQmlObject valueObject = scope.document->info()->extractValueObject(documentValue);
+
+            for (
+                QMap<QString, QString>::const_iterator it = valueObject.memberProperties().begin();
+                it != valueObject.memberProperties().end();
+                ++it )
+            {
+                if ( it.key() == propertyName ){
+                    isClassName = false;
+                    return LanguageUtils::FakeMetaProperty(
+                        it.key(),
+                        it.value(),
+                        false,
+                        true,
+                        QDocumentQmlInfo::isObject(it.value()), 0
+                    );
+                }
+            }
+        }
+
+        QString type = contextObject.size() > 0 ? contextObject[0] : "";
+        if ( type == "" )
+            return LanguageUtils::FakeMetaProperty("", "", false, false, false, -1);;
+        QString typeNamespace = contextObject.size() > 1 ? contextObject[1] : "";
+
+        QList<LanguageUtils::FakeMetaObject::ConstPtr> contextTypePath;
+        getTypePath(scope.document, scope.project, typeNamespace, type, contextTypePath, contextObjectLibrary);
+
+        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, contextTypePath ){
+            for ( int i = 0; i < object->propertyCount(); ++i ){
+                if ( object->property(i).name() == propertyName ){
+                    isClassName = true;
+                    return object->property(i);
+                }
+            }
+        }
+        return LanguageUtils::FakeMetaProperty("", "", false, false, false, -1);
+    }
+
+    /**
+     * @brief Finds the property in the propertyChain for the contextObject in the document
+     * @return
+     */
+    LanguageUtils::FakeMetaProperty getPropertyInDocument(
+        const ScopeCopy& scope,
+        const QStringList &contextObject,
+        const QStringList &propertyChain,
+        int propertyPosition,
+        bool& isClassName,
+        QString &contextObjectLibrary)
+    {
+        if ( propertyChain.isEmpty() )
+            return LanguageUtils::FakeMetaProperty("", "", false, false, false, -1);
+
+        LanguageUtils::FakeMetaProperty property(qmlhandler_helpers::getPropertyInDocument(
+             scope,
+             contextObject,
+             propertyChain[0],
+             propertyPosition,
+             isClassName,
+             contextObjectLibrary
+        ));
+
+        for ( int i = 1; i < propertyChain.size(); ++i ){
+            if ( property.revision() == -1 )
+                return property;
+
+            QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+            if ( property.isPointer() ){
+                if ( isClassName ){
+                    qmlhandler_helpers::generateTypePathFromClassName(
+                        scope.document, scope.project, property.typeName(), contextObjectLibrary, typePath
+                    );
+                } else {
+                    qmlhandler_helpers::getTypePath(
+                        scope.document, scope.project, property.typeName(), typePath, contextObjectLibrary
+                    );
+                    isClassName = true;
+                }
+
+                property = qmlhandler_helpers::getPropertyInObject(typePath, propertyChain[i]);
+
+            // if the property is not of pointer type, there cannot be anymore chaining after it
+            } else {
+                return LanguageUtils::FakeMetaProperty("", "", false, false, false, -1);
+            }
+        }
+
+        return property;
+    }
+
     /**
      * @brief Checks wether str is a property for the context object.
      */
-    bool isProperty(
+    bool getProperty(
         const QStringList& contextObject,
         const QString& str,
         int position,
@@ -693,6 +830,146 @@ void QDocumentQmlHandler::updateScope(const QString& data){
         m_scanner->queueDocumentScopeScan(m_document->file()->path(), data, m_projectScope.data());
 }
 
+void QDocumentQmlHandler::rehighlightBlock(const QTextBlock &block){
+    if ( m_highlighter )
+        m_highlighter->rehighlightBlock(block);
+}
+
+QList<QAbstractCodeHandler::CodeProperty> QDocumentQmlHandler::getProperties(const QTextCursor& cursor){
+
+    QList<QAbstractCodeHandler::CodeProperty> properties;
+    int length = cursor.selectionEnd() - cursor.selectionStart();
+
+    if ( length == 0 ){
+        QQmlCompletionContext* ctx = m_completionContextFinder->getContext(cursor);
+
+        QStringList expression;
+        int propertyLength = 0;
+
+        if ( ctx->context() & QQmlCompletionContext::InLhsOfBinding ){
+            expression = ctx->expressionPath();
+
+            int advancedLength = QDocumentQmlValueScanner::getPropertyLength(
+                m_target, cursor.position(), &expression
+            );
+            propertyLength = (cursor.position() - ctx->propertyPosition()) + advancedLength;
+
+        } else if ( ctx->context() & QQmlCompletionContext::InRhsofBinding ){
+            expression     = ctx->propertyPath();
+            propertyLength = QDocumentQmlValueScanner::getPropertyLength(m_target, ctx->propertyPosition());
+        }
+
+        if ( expression.size() > 0 ){
+            qmlhandler_helpers::ScopeCopy scope(m_projectScope, m_documentScope);
+            bool isClassName = false;
+            QString typeLibraryKey;
+            LanguageUtils::FakeMetaProperty property(qmlhandler_helpers::getPropertyInDocument(
+                 scope,
+                 ctx->objectTypePath(),
+                 expression,
+                 cursor.position(),
+                 isClassName,
+                 typeLibraryKey
+            ));
+
+            // If property is retrieved by class name (eg. QQuickItem), convert it to its export name(Item)
+            QString propertyType;
+            if ( isClassName && !typeLibraryKey.isEmpty() ){
+                QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+                qmlhandler_helpers::generateTypePathFromClassName(
+                    scope.document, scope.project, property.typeName(), typeLibraryKey, typePath
+                );
+                if ( typePath.size() > 0 ){
+                    QList<LanguageUtils::FakeMetaObject::Export> exports = typePath.first()->exports();
+                    if ( exports.size() > 0 )
+                        propertyType = exports.first().type;
+                }
+            }
+
+            if ( propertyType == "" ){
+                propertyType = property.typeName();
+            }
+
+            if ( property.revision() != -1 ){
+                properties.append(QAbstractCodeHandler::CodeProperty(
+                    ctx->propertyPosition(), propertyLength, expression, propertyType)
+                );
+            }
+        }
+        delete ctx;
+
+    } else { // multiple properties were selected
+
+        QDocumentQmlInfo::MutablePtr docinfo = QDocumentQmlInfo::create(m_document->file()->path());
+        docinfo->parse(m_target->toPlainText());
+
+        QDocumentQmlValueObjects* objects = docinfo->createObjects();
+
+        QList<QDocumentQmlValueObjects::RangeProperty*> rangeProperties = objects->propertiesBetween(
+            cursor.selectionStart(), cursor.selectionEnd()
+        );
+
+        if ( rangeProperties.size() > 0 ){
+
+            qmlhandler_helpers::ScopeCopy scope(m_projectScope, m_documentScope);
+
+            for( QList<QDocumentQmlValueObjects::RangeProperty*>::iterator it = rangeProperties.begin();
+                 it != rangeProperties.end();
+                 ++it )
+            {
+                QDocumentQmlValueObjects::RangeProperty* rp = *it;
+                QString propertyType = rp->type();
+
+                if ( propertyType.isEmpty() ){
+
+                    bool isClassName = false;
+                    QString typeLibraryKey;
+                    LanguageUtils::FakeMetaProperty property(qmlhandler_helpers::getPropertyInDocument(
+                         scope,
+                         rp->object(),
+                         rp->name(),
+                         rp->begin,
+                         isClassName,
+                         typeLibraryKey
+                    ));
+
+                    // If property is retrieved by class name (eg. QQuickItem), convert it to its export name(Item)
+                    if ( isClassName && !typeLibraryKey.isEmpty() ){
+                        QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+                        qmlhandler_helpers::generateTypePathFromClassName(
+                            scope.document, scope.project, property.typeName(), typeLibraryKey, typePath
+                        );
+                        if ( typePath.size() > 0 ){
+                            QList<LanguageUtils::FakeMetaObject::Export> exports = typePath.first()->exports();
+                            if ( exports.size() > 0 )
+                                propertyType = exports.first().type;
+                        }
+                    }
+
+                    if ( propertyType == "" ){
+                        propertyType = property.typeName();
+                    }
+                }
+
+                if ( !propertyType.isEmpty() ){
+                    properties.append(QAbstractCodeHandler::CodeProperty(
+                        rp->begin, rp->propertyEnd - rp->begin, rp->name(), propertyType)
+                    );
+                }
+            }
+        }
+
+        delete objects;
+    }
+
+    return properties;
+}
+
+void QDocumentQmlHandler::connectBindings(QList<QProjectDocumentBinding *> bindings, QObject *root){
+    if ( m_document->isActive() )
+        QDocumentQmlInfo::syncBindings(m_target->toPlainText(), m_document, bindings, root);
+}
+
 QPluginInfoExtractor* QDocumentQmlHandler::getPluginInfoExtractor(const QString &import){
     if ( !QPluginTypesFacade::pluginTypesEnabled() ){
         qCritical("Plugin types not available in this build.");
@@ -987,7 +1264,7 @@ void QDocumentQmlHandler::suggestionsForLeftBind(
         QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
         bool isPointer = false;
         QString typeLibraryKey;
-        if ( qmlhandler_helpers::isProperty(
+        if ( qmlhandler_helpers::getProperty(
                  context.objectTypePath(),
                  firstSegment,
                  cursorPosition,
@@ -1138,7 +1415,7 @@ void QDocumentQmlHandler::suggestionsForRightBind(
 
             qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, "", suggestions);
 
-        } else if (qmlhandler_helpers::isProperty(
+        } else if (qmlhandler_helpers::getProperty(
                        context.objectTypePath(),
                        firstSegment,
                        cursorPosition,
@@ -1251,7 +1528,7 @@ void QDocumentQmlHandler::suggestionsForLeftSignalBind(
         int cursorPosition,
         QList<QCodeCompletionSuggestion> &suggestions)
 {
-    QDocumentQmlScope::Ptr documentScope      = m_documentScope;
+    QDocumentQmlScope::Ptr documentScope = m_documentScope;
     QProjectQmlScope::Ptr projectScope = m_projectScope;
 
     QDocumentQmlInfo::ValueReference documentValue = documentScope->info()->valueAtPosition(cursorPosition);
