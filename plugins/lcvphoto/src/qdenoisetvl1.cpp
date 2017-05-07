@@ -1,5 +1,7 @@
 /****************************************************************************
 **
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
 ** GNU Lesser General Public License Usage
@@ -11,8 +13,9 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
+
 #include "qdenoisetvl1.h"
-#include "opencv2/photo/photo.hpp"
+#include "opencv2/photo.hpp"
 
 using namespace cv;
 
@@ -60,7 +63,7 @@ void QDenoiseTvl1::setBufferSize(int bufferSize){
 
 void QDenoiseTvl1::trimBuffer(int size){
     if (m_matBuffer.size() > static_cast<std::size_t>(size)){
-        int elementsToDelete = m_matBuffer.size() - size;
+        size_t elementsToDelete = m_matBuffer.size() - size;
         m_matBuffer.erase(m_matBuffer.begin(), m_matBuffer.begin() + elementsToDelete);
     }
 }

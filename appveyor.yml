@@ -1,0 +1,55 @@
+os: unstable
+
+platform:
+  - x64
+
+environment:
+  matrix:
+    - PYTHON: "C:\\Python35"
+      PYTHON_VERSION: "3.5.0"
+      PYTHON_ARCH: "32"
+      
+install:
+  - choco install opencv -version 3.1.0.20160701
+  
+before_build:
+  - SET ARCH=x64
+  - SET APP_PATH=%CD%
+  - IF EXIST C:\tools\OpenCV* CD C:\tools*
+  - SET OPENCV_ROOT_PATH=%CD%\opencv
+  - CD %APP_PATH%
+  - SET OPENCV_DIR=%OPENCV_ROOT_PATH%\build\%ARCH%\vc12
+  - SET QTDIR=C:\Qt\5.7\msvc2013_64
+
+build_script:
+  - cd build
+  - echo %OPENCV_DIR%
+  - echo %QTDIR%
+  - ps: $file = "$pwd\deploy.zip"
+  - ps: (new-object System.Net.WebClient).Downloadfile("https://github.com/livecv/livecv-deploy-kit/archive/master.zip", $file)
+  - ps: 7z x -y $file -o"."
+  - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+  - mv livecv-deploy-kit-master/* .
+  - python --version
+  - python livecv_build.py -b 64
+  - python livecv_deploy.py -b 64
+  - dir
+
+artifacts:
+  - path: 'build\livecv-*.zip'
+    name: Release
+
+deploy:
+  release: $(APPVEYOR_REPO_TAG_NAME)
+  description: 'View Changelog.md for further details.'
+  provider: GitHub
+  auth_token:
+    secure: 'ewCMPMl6d/IVBZ0r/ZApqeh0NgF/0UMMtKTqvQcmTNFb3uK57XFyqbZBHLDICAVC'
+  artifact: /.*\.zip/
+  draft: true
+  prerelease: false
+  on:
+    branch: master                 # release from master branch only
+    appveyor_repo_tag: true    
+    
+    

@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "qprojectqmlscanner_p.h"
 #include "qprojectqmlscopecontainer_p.h"
 #include "qqmllibraryinfo_p.h"
@@ -45,6 +61,7 @@ void updateLibraryPrototypes(
         const QString &path,
         QQmlLibraryInfo::Ptr library)
 {
+    Q_UNUSED(path);
     int missingDependencies = 0;
     foreach( const QString& dependency, library->dependencyPaths() ){
         QQmlLibraryInfo::Ptr linfo = projectScope->globalLibraries()->libraryInfo(dependency);
@@ -228,7 +245,7 @@ void scanObjectFile(
     QList<QDocumentQmlScope::Import> imports = QDocumentQmlScope::extractImports(documentInfo);
     QList<QString> paths;
     foreach( const QDocumentQmlScope::Import import, imports ){
-        if (import.importType() == QmlJS::ImportType::Directory) {
+        if (import.importType() == QDocumentQmlScope::Import::Directory) {
             projectScope->findQmlLibraryInPath(
                 import.path(),
                 false,
@@ -236,7 +253,7 @@ void scanObjectFile(
             );
         }
 
-        if (import.importType() == QmlJS::ImportType::Library) {
+        if (import.importType() == QDocumentQmlScope::Import::Library) {
             if (!import.isVersionValid())
                 continue;
             projectScope->findQmlLibraryInImports(
@@ -580,9 +597,9 @@ QProjectQmlScanner::QProjectQmlScanner(
     : QObject(parent)
     , m_project(0)
     , m_lastDocumentScope(0)
+    , m_lockedFileIO(lockedFileIO)
     , m_thread(new QThread)
     , m_timer(new QTimer)
-    , m_lockedFileIO(lockedFileIO)
     , m_engine(engine)
     , m_engineMutex(engineMutex)
 {
@@ -769,7 +786,7 @@ bool QProjectQmlScanner::tryToExtractPluginInfo(const QString& path, QByteArray*
     const QDir dir(path);
     QFile dirFile(dir.filePath("qmldir"));
     if( !dirFile.exists() ){
-        qCritical("Expected qmldir file does not exist: %s", dir.filePath("qmldir"));
+        qCritical("Expected qmldir file does not exist: %s", qPrintable(dir.filePath("qmldir")));
         return false;
     }
 

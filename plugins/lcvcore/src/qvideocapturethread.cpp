@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -17,8 +17,8 @@
 #include "qvideocapturethread.h"
 #include "qmat.h"
 
-#include "opencv2/video/video.hpp"
-#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/video.hpp"
+#include "opencv2/highgui.hpp"
 
 #include <QMutex>
 #include <QTime>

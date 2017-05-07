@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -18,7 +18,7 @@
 #include "qvideocapturethread.h"
 #include "qmatnode.h"
 #include "qmatshader.h"
-#include "qstatecontainer.h"
+#include "qstaticcontainer.h"
 #include <QSGSimpleMaterial>
 
 #include <QTimer>
@@ -68,65 +68,55 @@ QVideoCapture::QVideoCapture(QQuickItem *parent)
 }
 
 
-/*!
-  \property QVideoCapture::file
-  \sa VideoCapture::file
- */
+//void QVideoCapture::setFile(const QString &file){
+//    if ( m_file != file ){
+//        m_file = file;
+//        if ( QFile::exists(file) ){
 
-/*!
-  \qmlproperty string VideoCapture::file
+//            QStateContainer<QVideoCaptureThread>& stateCont =
+//                    QStateContainer<QVideoCaptureThread>::instance(this);
 
-  The path to the video file to open.
- */
-void QVideoCapture::setFile(const QString &file){
-    if ( m_file != file ){
-        m_file = file;
-        if ( QFile::exists(file) ){
+//            m_thread = stateCont.state(m_file);
+//            if ( m_thread == 0 ){
+//                m_thread = new QVideoCaptureThread(m_file);
+//                stateCont.registerState(m_file, m_thread);
+//            }
 
-            QStateContainer<QVideoCaptureThread>& stateCont =
-                    QStateContainer<QVideoCaptureThread>::instance(this);
+//            m_output = m_thread->output();
+//            emit outChanged();
 
-            m_thread = stateCont.state(m_file);
-            if ( m_thread == 0 ){
-                m_thread = new QVideoCaptureThread(m_file);
-                stateCont.registerState(m_file, m_thread);
-            }
+//            connect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
 
-            m_output = m_thread->output();
-            emit outChanged();
+//            if ( m_thread->isCaptureOpened() ){
 
-            connect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
+//                setImplicitWidth (m_thread->captureWidth());
+//                setImplicitHeight(m_thread->captureHeight());
 
-            if ( m_thread->isCaptureOpened() ){
+//                m_thread->setLoop(m_loop);
+//                if ( m_fps == 0 )
+//                    m_fps = m_thread->captureFps();
 
-                setImplicitWidth (m_thread->captureWidth());
-                setImplicitHeight(m_thread->captureHeight());
+//                if ( !m_thread->paused() ){
+//                    if ( m_thread->timer()->isActive() ){
+//                        if ( m_thread->timer()->interval() != (1000 / m_fps) ){
+//                            m_thread->timer()->stop();
+//                            m_thread->timer()->start(1000 / m_fps);
+//                        }
+//                    } else {
+//                        m_thread->timer()->start(1000 / m_fps);
+//                    }
+//                }
+//                emit pausedChanged();
+//                emit totalFramesChanged();
 
-                m_thread->setLoop(m_loop);
-                if ( m_fps == 0 )
-                    m_fps = m_thread->captureFps();
-
-                if ( !m_thread->paused() ){
-                    if ( m_thread->timer()->isActive() ){
-                        if ( m_thread->timer()->interval() != (1000 / m_fps) ){
-                            m_thread->timer()->stop();
-                            m_thread->timer()->start(1000 / m_fps);
-                        }
-                    } else {
-                        m_thread->timer()->start(1000 / m_fps);
-                    }
-                }
-                emit pausedChanged();
-                emit totalFramesChanged();
-
-            } else
-                qCritical("Open CV Error: Could not open capture : %s", qPrintable(m_file));
-        } else {
-            qCritical("File does not exist: %s", qPrintable(file));
-        }
-        emit fileChanged();
-    }
-}
+//            } else
+//                qCritical("Open CV Error: Could not open capture : %s", qPrintable(m_file));
+//        } else {
+//            qCritical("File does not exist: %s", qPrintable(file));
+//        }
+//        emit fileChanged();
+//    }
+//}
 
 /*!
   \property QVideoCapture::output
@@ -243,9 +233,61 @@ int QVideoCapture::currentFrame() const{
  */
 
 void QVideoCapture::seekTo(int frame){
-    if ( frame != m_thread->currentFrame() ){
+    if ( m_thread && frame != m_thread->currentFrame() ){
         m_thread->seekTo(frame);
     }
+}
+
+void QVideoCapture::staticLoad(const QString &file){
+    if ( m_file == file )
+        return;
+    if ( !QFile::exists(file) ){
+        qCritical("File does not exist: %s", qPrintable(file));
+        return;
+    }
+    if (m_thread != 0)
+        disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
+
+    QStaticContainer* container = QStaticContainer::grabFromContext(this);
+    m_thread = container->get<QVideoCaptureThread>(file);
+    if ( !m_thread ){
+        m_thread = new QVideoCaptureThread(file);
+        container->set<QVideoCaptureThread>(file, m_thread);
+    }
+
+    m_output = m_thread->output();
+    emit outChanged();
+
+    connect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
+
+    if ( m_thread->isCaptureOpened() ){
+
+        setImplicitWidth (m_thread->captureWidth());
+        setImplicitHeight(m_thread->captureHeight());
+
+        m_thread->setLoop(m_loop);
+        if ( m_fps == 0 )
+            m_fps = m_thread->captureFps();
+
+        if ( !m_thread->paused() ){
+            if ( m_thread->timer()->isActive() ){
+                if ( m_thread->timer()->interval() != (1000 / m_fps) ){
+                    m_thread->timer()->stop();
+                    m_thread->timer()->start(1000 / m_fps);
+                }
+            } else {
+                m_thread->timer()->start(1000 / m_fps);
+            }
+        }
+        emit pausedChanged();
+        emit totalFramesChanged();
+
+    } else
+        qCritical("Open CV Error: Could not open capture : %s", qPrintable(m_file));
+}
+
+void QVideoCapture::staticOpen(const QString &file){
+    staticLoad(file);
 }
 
 /*!
@@ -319,9 +361,6 @@ QSGNode *QVideoCapture::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNo
   \brief QVideoCapture destructor
  */
 QVideoCapture::~QVideoCapture(){
-    QStateContainer<QVideoCaptureThread>& stateCont =
-        QStateContainer<QVideoCaptureThread>::instance(this);
-    m_thread = stateCont.state(m_file);
     if (m_thread != 0)
         disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
 }

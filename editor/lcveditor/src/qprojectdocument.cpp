@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "qprojectdocument.h"
 #include "qprojectfile.h"
 #include "qlockedfileiosession.h"
@@ -15,9 +31,11 @@ QProjectDocument::QProjectDocument(QProjectFile *file, bool isMonitored, QProjec
     : QObject(parent)
     , m_file(file)
     , m_editingDocument(0)
+    , m_isDirty(false)
+    , m_isMonitored(isMonitored)
 {
     readContent();
-    m_file->setIsMonitored(isMonitored);
+    m_file->setDocument(this);
 }
 
 void QProjectDocument::dumpContent(const QString &content){
@@ -293,7 +311,7 @@ void QProjectDocument::updateBindingValue(QProjectDocumentBinding *binding, cons
             m_editingDocumentHandler->disableSilentEditing();
         } else {
             m_content.replace(from, binding->valueLength, value);
-            m_file->setIsDirty(true);
+            setIsDirty(true);
         }
 
     }
@@ -308,9 +326,11 @@ bool QProjectDocument::isActive() const{
 
 bool QProjectDocument::save(){
     if ( m_file->path() != "" ){
-        if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path(), m_content) ){
-            m_file->setIsDirty(false);
+        if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path(), m_content ) ){
+            setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
+            if ( parentAsProject() )
+                emit parentAsProject()->fileChanged(m_file->path());
             return true;
         }
     }
@@ -318,9 +338,17 @@ bool QProjectDocument::save(){
 }
 
 bool QProjectDocument::saveAs(const QString &path){
-    if ( path != "" ){
+    if ( m_file->path() == path ){
+        save();
+    } else if ( path != "" ){
         if ( parentAsProject()->lockedFileIO()->writeToFile(path, m_content ) ){
-            m_file->setIsDirty(false);
+            QProjectFile* file = parentAsProject()->relocateDocument(m_file->path(), path, this);
+            if ( file ){
+                m_file->setDocument(0);
+                m_file = file;
+                emit fileChanged();
+            }
+            setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
             return true;
         }
@@ -336,9 +364,7 @@ QProjectDocument::~QProjectDocument(){
     if ( m_file->parent() == 0 )
         m_file->deleteLater();
     else {
-        m_file->setIsOpen(false);
-        m_file->setIsDirty(false);
-        m_file->setIsMonitored(false);
+        m_file->setDocument(0);
     }
 }
 

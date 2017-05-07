@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "qprojectdocumentmodel.h"
 #include "qprojectdocument.h"
 #include "qprojectfile.h"
@@ -51,8 +67,19 @@ QHash<int, QByteArray> QProjectDocumentModel::roleNames() const{
 void QProjectDocumentModel::openDocument(const QString &path, QProjectDocument *document){
     beginResetModel();
     m_openedFiles[path] = document;
-    if ( document->file()->isMonitored() )
+    if ( document->isMonitored() )
         fileWatcher()->addPath(path);
+    endResetModel();
+}
+
+void QProjectDocumentModel::relocateDocument(const QString &path, const QString &newPath, QProjectDocument *document){
+    beginResetModel();
+    m_openedFiles.take(path);
+    m_openedFiles[newPath] = document;
+    if ( document->isMonitored() ){
+        fileWatcher()->removePath(path);
+        fileWatcher()->addPath(newPath);
+    }
     endResetModel();
 }
 
@@ -78,13 +105,13 @@ void QProjectDocumentModel::closeDocuments(){
 }
 
 void QProjectDocumentModel::updateDocumeMonitoring(QProjectDocument *document, bool monitor){
-    if ( document->file()->isMonitored() != monitor ){
+    if ( document->isMonitored() != monitor ){
         if ( monitor ){
             fileWatcher()->addPath(document->file()->path());
-            document->file()->setIsMonitored(true);
+            document->setIsMonitored(true);
         } else {
             fileWatcher()->removePath(document->file()->path());
-            document->file()->setIsMonitored(false);
+            document->setIsMonitored(false);
         }
     }
 }
@@ -195,7 +222,7 @@ void QProjectDocumentModel::closeDocument(const QString &path, bool closeIfActiv
 void QProjectDocumentModel::rescanDocuments(){
     for( QHash<QString, QProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         QDateTime modifiedDate = QFileInfo(it.key()).lastModified();
-        if ( modifiedDate > it.value()->lastModified() && !it.value()->file()->isMonitored() )
+        if ( modifiedDate > it.value()->lastModified() && !it.value()->isMonitored() )
             emit documentChangedOutside(it.value());
     }
 }
@@ -209,7 +236,7 @@ void QProjectDocumentModel::monitoredFileChanged(const QString &path){
 bool QProjectDocumentModel::saveDocuments(){
     bool saved = true;
     for( QHash<QString, QProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
-        if ( it.value()->file()->isDirty() )
+        if ( it.value()->isDirty() )
             if ( !it.value()->save() )
                 saved = false;
     }
@@ -219,7 +246,7 @@ bool QProjectDocumentModel::saveDocuments(){
 QStringList QProjectDocumentModel::listUnsavedDocuments(){
     QStringList base;
     for( QHash<QString, QProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
-        if ( it.value()->file()->isDirty() )
+        if ( it.value()->isDirty() )
             base.append(it.value()->file()->path());
     }
     return base;
@@ -229,7 +256,7 @@ QStringList QProjectDocumentModel::listUnsavedDocumentsInPath(const QString &pat
     QStringList base;
     for( QHash<QString, QProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         if ( it.key().startsWith(path) ){
-            if ( it.value()->file()->isDirty() )
+            if ( it.value()->isDirty() )
                 base.append(it.value()->file()->path());
         }
     }

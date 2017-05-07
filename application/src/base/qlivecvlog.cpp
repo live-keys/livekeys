@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -28,33 +28,33 @@ QLiveCVLog::~QLiveCVLog(){
     delete m_logFile;
 }
 
-void QLiveCVLog::logMessage(QtMsgType type, const QMessageLogContext&, const QString& msg){
+void QLiveCVLog::logMessage(QtMsgType type, const QMessageLogContext&, QString msg){
     m_logMutex.lock();
     switch (type){
     case QtInfoMsg:
         if ( isFileLogEnabled() )
             m_textStream << "Info     : " << msg << "\n";
-        m_data.append(msg + "<br/>");
+        m_data.append(msg.replace("\n","<br/>") + "<br/>");
         break;
     case QtDebugMsg:
         if ( isFileLogEnabled() )
             m_textStream << "Debug    : " << msg << "\n";
-        m_data.append(msg + "<br/>");
+        m_data.append(msg.replace("\n","<br/>") + "<br/>");
         break;
     case QtWarningMsg:
         if ( isFileLogEnabled() )
             m_textStream << "Warning  : " << msg << "\n";
-        m_data.append("<span style=\"color : #ffff00;\">" + msg + "</span><br/>");
+        m_data.append("<span style=\"color : #ffff00;\">" + msg.replace("\n","<br/>") + "</span><br/>");
         break;
     case QtCriticalMsg:
         if ( isFileLogEnabled() )
             m_textStream << "Critical : " << msg;
-        m_data.append("<span style=\"color : #cc3333;\">" + msg + "</span><br/>");
+        m_data.append("<span style=\"color : #cc3333;\">" + msg.replace("\n","<br/>") + "</span><br/>");
         break;
     case QtFatalMsg:
         if ( isFileLogEnabled() )
             m_textStream << "Fatal    : " << msg;
-        m_data.append("<span style=\"color : #ff0000;\">" + msg + "</span><br/>");
+        m_data.append("<span style=\"color : #ff0000;\">" + msg.replace("\n","<br/>") + "</span><br/>");
         break;
     }
     m_logMutex.unlock();

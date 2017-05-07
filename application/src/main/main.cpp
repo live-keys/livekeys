@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    livecv.loadLibrary(livecv.dir() + "/lcvlib");
+    livecv.loadLibrary(livecv.dir() + "/plugins/live");
 
     if ( livecv.arguments()->pluginInfoFlag() ){
         printf("%s", livecv.extractPluginInfo(livecv.arguments()->pluginInfoImport()).data());

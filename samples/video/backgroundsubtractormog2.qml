@@ -1,3 +1,4 @@
+import QtQuick 2.3
 import QtQuick.Controls 1.2
 import lcvcore 1.0
 import lcvimgproc 1.0
@@ -7,14 +8,14 @@ ScrollView{
     anchors.fill : parent
     Row{
 
-        property string videoPath : codeDocument.path + '/../_videos/amherst-11_2754_3754.avi'
+        property string videoPath : project.dir() + '/../_videos/amherst-11_2754_3754.avi'
         
         VideoCapture{
-            file : parent.videoPath
             id : videoArea
             loop : true
             fps : 30
             visible : false
+            Component.onCompleted : staticLoad(parent.videoPath)
         }
         
         MatView {
@@ -30,6 +31,7 @@ ScrollView{
             onOutputChanged : {
                background.mat = this.backgroundModel
             }
+            Component.onCompleted : staticLoad("mog2")
         }
 
     }

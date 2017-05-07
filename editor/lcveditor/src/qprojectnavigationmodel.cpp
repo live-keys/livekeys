@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "qprojectnavigationmodel.h"
 #include "qprojectdocumentmodel.h"
 #include "qprojectdocument.h"
@@ -11,9 +27,9 @@ namespace lcv{
 
 QProjectNavigationModel::QProjectNavigationModel(QProject *project)
     : QAbstractListModel(project)
-    , m_project(project)
     , m_isIndexing(false)
     , m_requiresReindex(true)
+    , m_project(project)
 {
     m_roles[QProjectNavigationModel::Name]   = "name";
     m_roles[QProjectNavigationModel::Path]   = "path";
@@ -55,7 +71,7 @@ QVariant QProjectNavigationModel::data(const QModelIndex &index, int role) const
 }
 
 void QProjectNavigationModel::reindex(){
-    if ( m_requiresReindex ){
+    if ( m_requiresReindex && m_project->path() != "" ){
         beginResetModel();
         m_filteredFiles.clear();
         m_files.clear();

@@ -1,6 +1,5 @@
 HEADERS += \
     $$PWD/lcvfeatures2d_plugin.hpp \
-#    $$PWD/qbriefdescriptorextractor.h \
     $$PWD/qbriskdescriptorextractor.h \
     $$PWD/qbriskfeaturedetector.h \
     $$PWD/qbruteforcematcher.h \
@@ -29,7 +28,6 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/lcvfeatures2d_plugin.cpp \
-#    $$PWD/qbriefdescriptorextractor.cpp \
     $$PWD/qbriskdescriptorextractor.cpp \
     $$PWD/qbriskfeaturedetector.cpp \
     $$PWD/qbruteforcematcher.cpp \

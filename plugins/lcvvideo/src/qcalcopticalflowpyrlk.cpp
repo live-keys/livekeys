@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -16,7 +16,7 @@
 
 #include "qcalcopticalflowpyrlk.h"
 #include "opencv2/video/tracking.hpp"
-#include "qstatecontainer.h"
+#include "qstaticcontainer.h"
 
 using namespace cv;
 
@@ -26,9 +26,6 @@ using namespace cv;
   \inqmlmodule lcvvideo
   \inherits MatFilter
   \brief Sparse optical flow filter.
-
-  Use this to create an empty matrix by spcecifying the size, background color, number of channels and type. The
-  drawing example shows how to create an empty matrix, then use the draw element to draw on its surface.
 
   Calculate an optical flow for a sparse feature set using the iterative Lucas-Kanade method with pyramids. The function
   implements a sparse iterative version of the Lucas-Kanade optical flow in pyramids.
@@ -54,7 +51,6 @@ public:
     std::vector<Point2f> prevPoints;
     std::vector<uchar>   status;
     std::vector<float>   err;
-
 };
 
 class QCalcOpticalFlowPyrLKPrivate{
@@ -66,11 +62,6 @@ public:
     void calculateFlow(cv::Mat& input);
     void draw(cv::Mat& frame, cv::Mat& m);
     void addPoint(const cv::Point& p);
-
-    QCalcOpticalFlowPointState* pointState();
-
-    const QString& stateId() const;
-    void setStateId(const QString& id);
 
     size_t totalPoints() const;
 
@@ -84,9 +75,7 @@ public:
     int                  flags;
     double               minEigThreshold;
 
-private:
-    QString                     m_stateId;
-    QCalcOpticalFlowPointState* m_pointState;
+    QCalcOpticalFlowPointState* pointState;
 };
 
 
@@ -100,95 +89,65 @@ QCalcOpticalFlowPyrLKPrivate::QCalcOpticalFlowPyrLKPrivate()
     , maxLevel(3)
     , flags(0)
     , minEigThreshold(1e-4)
-    , m_pointState(0){
+    , pointState(0){
 
 }
 
 QCalcOpticalFlowPyrLKPrivate::~QCalcOpticalFlowPyrLKPrivate(){
-    if ( m_stateId == "" ) // otherwise leave it to the QStateContiner
-        delete m_pointState;
 }
 
 void QCalcOpticalFlowPyrLKPrivate::calculateFlow(cv::Mat& input){
+    if ( !pointState ){
+        qWarning("This item requires staticLoading.");
+        return;
+    }
+
     if ( input.channels() == 1 )
         gray = input;
     else
         cvtColor(input, gray, CV_BGR2GRAY);
 
-    QCalcOpticalFlowPointState* ps = pointState();
+    if ( !pointState->currentPoints.empty() ){
 
-    if ( !ps->currentPoints.empty() ){
-
-        std::swap(ps->currentPoints, ps->prevPoints);
+        std::swap(pointState->currentPoints, pointState->prevPoints);
         if ( prevGray.empty() )
             gray.copyTo(prevGray);
         else {
 
             calcOpticalFlowPyrLK(
-                        prevGray, gray, ps->prevPoints, ps->currentPoints,
-                        ps->status, ps->err, winSize, maxLevel, termcrit, flags, minEigThreshold);
+                        prevGray, gray, pointState->prevPoints, pointState->currentPoints,
+                        pointState->status, pointState->err, winSize, maxLevel, termcrit, flags, minEigThreshold);
 
             gray.copyTo(prevGray);
 
             size_t k = 0;
-            for ( size_t i = 0; i < ps->currentPoints.size(); ++i ){
-                if ( !ps->status[i] )
+            for ( size_t i = 0; i < pointState->currentPoints.size(); ++i ){
+                if ( !pointState->status[i] )
                     continue;
-                ps->currentPoints[k++] = ps->currentPoints[i];
+                pointState->currentPoints[k++] = pointState->currentPoints[i];
             }
-            ps->currentPoints.resize(k);
+            pointState->currentPoints.resize(k);
         }
     }
 }
 
 void QCalcOpticalFlowPyrLKPrivate::draw(cv::Mat& frame, cv::Mat& m){
+    if ( !pointState )
+        return;
+
     frame.copyTo(m);
-    for ( size_t i = 0; i < pointState()->currentPoints.size(); ++i )
-        circle(m, pointState()->currentPoints[i], 3, pointColor, -1, 8);
+    for ( size_t i = 0; i < pointState->currentPoints.size(); ++i )
+        circle(m, pointState->currentPoints[i], 3, pointColor, -1, 8);
 }
 
 void QCalcOpticalFlowPyrLKPrivate::addPoint(const cv::Point& p){
-    pointState()->currentPoints.push_back(p);
-}
-
-QCalcOpticalFlowPointState* QCalcOpticalFlowPyrLKPrivate::pointState(){
-
-    if ( !m_pointState ){
-        if ( m_stateId != "" ){
-            QStateContainer<QCalcOpticalFlowPointState>& stateCont =
-                    QStateContainer<QCalcOpticalFlowPointState>::instance();
-
-            m_pointState = stateCont.state(m_stateId);
-            if ( m_pointState == 0 ){
-                m_pointState = new QCalcOpticalFlowPointState;
-                stateCont.registerState(m_stateId, m_pointState);
-            }
-        } else {
-            qWarning("QCalcOpticalFlowPyrLK does not have a stateId assigned and cannot save "
-                     "it\'s state over multiple compilations. Set a unique stateId to "
-                     "avoid this problem.");
-            m_pointState = new QCalcOpticalFlowPointState;
-        }
-    }
-    return m_pointState;
-}
-
-const QString&QCalcOpticalFlowPyrLKPrivate::stateId() const{
-    return m_stateId;
-}
-
-void QCalcOpticalFlowPyrLKPrivate::setStateId(const QString& id){
-    if ( m_stateId == "" )
-        if ( m_pointState != 0 )
-            delete m_pointState;
-
-    m_pointState = 0;
-    m_stateId    = id;
+    if ( pointState )
+        pointState->currentPoints.push_back(p);
 }
 
 size_t QCalcOpticalFlowPyrLKPrivate::totalPoints() const{
-    if ( m_pointState )
-        return m_pointState->currentPoints.size();
+    if ( pointState )
+        return pointState->currentPoints.size();
     return 0;
 }
 
@@ -249,9 +208,12 @@ void QCalcOpticalFlowPyrLK::addPoint(const QPoint& point){
  */
 QList<QPoint> QCalcOpticalFlowPyrLK::points(){
     Q_D(QCalcOpticalFlowPyrLK);
-
-    QCalcOpticalFlowPointState* ps = d->pointState();
     QList<QPoint> base;
+
+    QCalcOpticalFlowPointState* ps = d->pointState;
+    if (!ps)
+        return base;
+
 
     for ( size_t i = 0; i < ps->currentPoints.size(); ++i ){
         base.append(QPoint(ps->currentPoints[i].x, ps->currentPoints[i].y));
@@ -273,31 +235,15 @@ int QCalcOpticalFlowPyrLK::totalPoints() const{
     return (int)d->totalPoints();
 }
 
-
-/*!
-  \property QCalcOpticalFlowPyrLK::stateId
-  \sa CalcOpticalFlowPyrLK::stateId
- */
-
-/*!
-  \qmlproperty string CalcOpticalFlowPyrLK::stateId
-
-  This property is somehow required. It represents the id of the state container of this filter. The state is used in
-  order to store contents between compilations. Give this a unique id in order for the current flow points to not reset
-  between compilations.
- */
-
-const QString&QCalcOpticalFlowPyrLK::stateId() const{
-    Q_D(const QCalcOpticalFlowPyrLK);
-    return d->stateId();
-}
-
-void QCalcOpticalFlowPyrLK::setStateId(const QString& id){
+void QCalcOpticalFlowPyrLK::staticLoad(const QString &id){
     Q_D(QCalcOpticalFlowPyrLK);
-    if ( d->stateId() != id ){
-        d->setStateId(id);
-        emit stateIdChanged();
+    QStaticContainer* container = QStaticContainer::grabFromContext(this);
+    d->pointState = container->get<QCalcOpticalFlowPointState>(id);
+    if ( !d->pointState ){
+        d->pointState = new QCalcOpticalFlowPointState;
+        container->set<QCalcOpticalFlowPointState>(id, d->pointState);
     }
+    QMatFilter::transform();
 }
 
 /*!

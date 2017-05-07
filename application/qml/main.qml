@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -45,6 +45,7 @@ ApplicationWindow{
 
     signal afterCompile()
     signal aboutToRecompile()
+    signal projectActiveChanged()
 
 
     FontLoader{ id: ubuntuMonoBold;       source: "qrc:/fonts/UbuntuMono-Bold.ttf"; }
@@ -87,7 +88,7 @@ ApplicationWindow{
                 callback()
                 return;
             } else if ( !project.isDirProject() && project.inFocus ){
-                if ( !project.inFocus.file.isDirty ){
+                if ( !project.inFocus.isDirty ){
                     project.closeProject()
                     callback()
                     return;
@@ -108,10 +109,30 @@ ApplicationWindow{
                 button1Name : 'Yes',
                 button1Function : function(){
                     messageBox.close()
-                    if ( !project.documentModel.saveDocuments() ){
+                    if ( !project.isDirProject() && project.inFocus && project.inFocus.file.name === ''){
+                        var closeCallback = callback;
+                        fileSaveDialog.callback = function(){
+                            project.inFocus.dumpContent(editor.text)
+                            if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
+                                messageBox.show(
+                                    'Failed to save file to: ' + fileSaveDialog.fileUrl,
+                                    {
+                                        button3Name : 'Ok',
+                                        button3Function : function(){ messageBox.close(); }
+                                    }
+                                )
+                                return;
+                            }
+                            project.closeProject()
+                            closeCallback()
+                        }
+                        fileSaveDialog.open()
+                    } else if ( !project.documentModel.saveDocuments() ){
                         var unsavedList = project.documentModel.listUnsavedDocuments()
                         unsavedFiles = '';
                         for ( var i = 0; i < unsavedList.length; ++i ){
+                            if ( unsavedList[i] === '' )
+                                unsavedList[i] = 'untitled'
                             unsavedFiles += unsavedList[i] + "\n";
                         }
 
@@ -169,10 +190,18 @@ ApplicationWindow{
             })
         }
         onOpenFile : {
-            fileOpenDialog.open()
+            if ( !project.isDirProject() ){
+                closeProject(function(){
+                    fileOpenDialog.open()
+                })
+            } else {
+                fileOpenDialog.open()
+            }
         }
         onOpenProject: {
-            dirOpenDialog.open()
+            closeProject(function(){
+                dirOpenDialog.open()
+            })
         }
         onSaveFile : {
             fileSaveDialog.open()
@@ -185,8 +214,12 @@ ApplicationWindow{
             }
         }
 
-        onFontPlus: if ( editor.font.pixelSize < 24 ) editor.font.pixelSize += 2
-        onFontMinus: if ( editor.font.pixelSize > 10 ) editor.font.pixelSize -= 2
+        onOpenSettings: {
+            project.openFile(settings.editor.path, ProjectDocument.Edit);
+            settings.editor.documentOpened(project.inFocus)
+        }
+
+        onOpenLicense: licenseBox.visible = true
     }
 
     FileDialog {
@@ -196,12 +229,12 @@ ApplicationWindow{
         selectExisting : true
         visible : isLinux ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
-            if ( project.isFileInProject(fileSaveDialog.fileUrl ) )
-                project.openFile(fileSaveDialog.fileUrl, ProjectDocument.Edit)
-            else if ( !project.isDirProject() ){
-                header.closeProject(function(){ project.openProject(fileSaveDialog.fileUrl) } )
-            } else {
-                var fileUrl = fileSaveDialog.fileUrl
+            if ( project.path === '' )
+                project.openProject(fileOpenDialog.fileUrl)
+            else if ( project.isFileInProject(fileOpenDialog.fileUrl ) )
+                project.openFile(fileOpenDialog.fileUrl, ProjectDocument.Edit)
+            else {
+                var fileUrl = fileOpenDialog.fileUrl
                 messageBox.show(
                     'File is outside project scope. Would you like to open it as a new project?',
                 {
@@ -242,9 +275,7 @@ ApplicationWindow{
 
         visible : isLinux ? true : false /// fixes a display bug in some linux distributions
         onAccepted: {
-            header.closeProject(function(){
-                project.openProject(dirOpenDialog.fileUrl)
-            })
+            project.openProject(dirOpenDialog.fileUrl)
         }
         Component.onCompleted: {
             visible = false
@@ -258,8 +289,15 @@ ApplicationWindow{
         nameFilters: ["Qml files (*.qml)", "All files (*)"]
         selectExisting : false
         visible : isLinux ? true : false /// fixes a display bug in some linux distributions
+
+        property var callback: null
+
         onAccepted: {
-            if ( project.inFocus ){
+            if ( callback ){
+                callback()
+                callback = null
+            } else if ( project.inFocus ){
+                project.inFocus.dumpContent(editor.text)
                 if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
                     messageBox.show(
                         'Failed to save file to: ' + fileSaveDialog.fileUrl,
@@ -313,8 +351,7 @@ ApplicationWindow{
             }
         }
         onRejected:{
-            header.callback()
-            header.callback = function(){}
+            fileSaveDialog.callback = null
         }
         Component.onCompleted: {
             visible: false
@@ -336,7 +373,7 @@ ApplicationWindow{
             handleDelegate: Rectangle {
                 implicitWidth: 1
                 implicitHeight: 1
-                color: "#071723"
+                color: "#060d13"
             }
 
             Project{
@@ -348,6 +385,11 @@ ApplicationWindow{
                     if ( project.inFocus )
                         project.inFocus.dumpContent(editor.text)
                     project.openFile(entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen)
+                }
+                onEditEntry : {
+                    if ( project.inFocus )
+                        project.inFocus.dumpContent(editor.text)
+                    project.openFile(entry, ProjectDocument.Edit)
                 }
                 onAddEntry: {
                     projectAddEntry.show(parentEntry, isFile)
@@ -454,8 +496,12 @@ ApplicationWindow{
                 width: 400
                 visible : !args.previewFlag
 
+                font.pixelSize: settings.editor.fontSize
+
                 onSave: {
-                    if ( project.inFocus.name !== '' ){
+                    if ( !project.inFocus )
+                        return;
+                    if ( project.inFocus.file.name !== '' ){
                         project.inFocus.dumpContent(editor.text)
                         project.inFocus.save()
                         if ( project.active && project.active !== project.inFocus ){
@@ -468,6 +514,7 @@ ApplicationWindow{
                             );
                         }
                     } else {
+                        project.inFocus.dumpContent(editor.text)
                         fileSaveDialog.open()
                     }
                 }
@@ -475,14 +522,30 @@ ApplicationWindow{
                     header.openFile()
                 }
                 onCloseFocusedFile: {
-                    if ( project.inFocus.file.isDirty ){
+                    if ( project.inFocus.isDirty ){
                         messageBox.show('File contains unsaved changes. Would you like to save them before closing?',
                         {
                             button1Name : 'Yes',
                             button1Function : function(){
                                 project.inFocus.dumpContent(editor.text)
-                                project.inFocus.save()
-                                project.closeFocusedFile()
+                                if ( project.inFocus.file.name !== '' ){
+                                    project.inFocus.save()
+                                } else {
+                                    fileSaveDialog.open()
+                                    fileSaveDialog.callback = function(){
+                                        if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
+                                            messageBox.show(
+                                                'Failed to save file to: ' + fileSaveDialog.fileUrl,
+                                                {
+                                                    button3Name : 'Ok',
+                                                    button3Function : function(){ messageBox.close(); }
+                                                }
+                                            )
+                                            return;
+                                        }
+                                        project.closeFocusedFile()
+                                    }
+                                }
                                 messageBox.close()
                             },
                             button2Name : 'No',
@@ -496,7 +559,23 @@ ApplicationWindow{
                             },
                             returnPressed : function(){
                                 project.inFocus.dumpContent(editor.text)
-                                project.inFocus.save()
+                                if ( project.inFocus.file.name !== '' ){
+                                    project.inFocus.save()
+                                } else {
+                                    fileSaveDialog.callback = function(){
+                                        if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
+                                            messageBox.show(
+                                                'Failed to save file to: ' + fileSaveDialog.fileUrl,
+                                                {
+                                                    button3Name : 'Ok',
+                                                    button3Function : function(){ messageBox.close(); }
+                                                }
+                                            )
+                                            return;
+                                        }
+                                        project.closeFocusedFile()
+                                    }
+                                }
                                 project.closeFocusedFile()
                                 messageBox.close()
                             }
@@ -513,6 +592,18 @@ ApplicationWindow{
                     else
                         editor.width = contentWrap.width / 2
                 }
+                onToggleVisibility: {
+                    if ( editor.width === 0 && projectView.width === 0 ){
+                        editor.width = 400
+                        projectView.width = 240
+                    } else {
+                        editor.width = 0
+                        projectView.width = 0
+                    }
+                }
+                onToggleProject: {
+                    projectView.width = projectView.width === 0 ? 240 : 0
+                }
                 onToggleNavigation: {
                     projectNavigation.visible = !projectNavigation.visible
                 }
@@ -526,7 +617,7 @@ ApplicationWindow{
                 id : viewer
                 height : parent.height
 
-                color : "#05111b"
+                color : "#081017"
 
                 Item {
                     id: tester
@@ -616,7 +707,7 @@ ApplicationWindow{
                     anchors.bottom: parent.bottom
                     height : error.text !== '' ? error.height + 20 : 0
                     width : parent.width
-                    color : "#141a1a"
+                    color : editor.color
                     Behavior on height {
                         SpringAnimation { spring: 3; damping: 0.1 }
                     }
@@ -670,7 +761,7 @@ ApplicationWindow{
             onCloseFile: {
                 var doc = project.documentModel.isOpened(path)
                 if ( doc ){
-                    if ( doc.file.isDirty ){
+                    if ( doc.isDirty ){
                         messageBox.show('File contains unsaved changes. Would you like to save them before closing?',
                         {
                             button1Name : 'Yes',
@@ -728,7 +819,7 @@ ApplicationWindow{
         id: messageBox
         anchors.fill: parent
         visible: false
-        backgroudColor: "#08141d"
+        backgroudColor: "#050e16"
 
         function show(
             message,
@@ -795,9 +886,19 @@ ApplicationWindow{
         }
     }
 
+    License{
+        id: licenseBox
+        anchors.fill: parent
+        visible: false
+    }
+
     Connections{
         target: project
         onActiveChanged : {
+            if (tester.item) {
+                tester.item.destroy();
+                tester.item = 0
+            }
             if (active)
                 createTimer.restart()
         }

@@ -1,5 +1,7 @@
 /****************************************************************************
 **
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
 ** GNU Lesser General Public License Usage
@@ -16,20 +18,17 @@
 #define QBACKGROUNDSUBTRACTOR_HPP
 
 #include <QQuickItem>
+#include "qlcvvideoglobal.h"
 #include "qmatfilter.h"
 #include "opencv2/video.hpp"
 
-class QBackgroundSubtractorPrivate{
+class Q_LCVVIDEO_EXPORT QBackgroundSubtractorPrivate{
 
 public:
     QBackgroundSubtractorPrivate();
     virtual ~QBackgroundSubtractorPrivate();
 
-    virtual void deleteSubtractor();
     virtual cv::BackgroundSubtractor* subtractor();
-
-    const QString& stateId() const;
-    void setStateId(const QString& id);
 
     double learningRate() const;
     void setLearningRate(double rate);
@@ -43,26 +42,18 @@ private:
 class QBackgroundSubtractor : public QMatFilter{
 
     Q_OBJECT
-    Q_PROPERTY(QString stateId      READ stateId      WRITE setStateId      NOTIFY stateIdChanged)
-    Q_PROPERTY(double  learningRate READ learningRate WRITE setLearningRate NOTIFY learningRateChanged)
+    Q_PROPERTY(double learningRate READ learningRate WRITE setLearningRate NOTIFY learningRateChanged)
 
 public:
     explicit QBackgroundSubtractor(QBackgroundSubtractorPrivate *d_ptr = 0, QQuickItem *parent = 0);
     virtual ~QBackgroundSubtractor();
-
-    const QString& stateId() const;
-    void setStateId(const QString& id);
 
     double learningRate() const;
     void setLearningRate(double rate);
 
     virtual void transform(cv::Mat& in, cv::Mat& out);
 
-public slots:
-    void reset();
-
 signals:
-    void stateIdChanged();
     void learningRateChanged();
 
 protected:

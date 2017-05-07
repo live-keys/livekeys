@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -15,15 +15,15 @@
 ****************************************************************************/
 
 #include "qbriskdescriptorextractor.h"
-#include "opencv2/features2d/features2d.hpp"
+#include "opencv2/features2d.hpp"
 
 QBriskDescriptorExtractor::QBriskDescriptorExtractor(QQuickItem *parent) :
-    QDescriptorExtractor(new cv::BRISK, parent){
+    QDescriptorExtractor(cv::BRISK::create(), parent){
 }
 
 QBriskDescriptorExtractor::~QBriskDescriptorExtractor(){
 }
 
 void QBriskDescriptorExtractor::initialize(const QVariantMap &){
-    initializeExtractor(new cv::BRISK);
+    initializeExtractor(cv::BRISK::create());
 }

@@ -1,8 +1,9 @@
+import QtQuick 2.3
 import QtQuick.Controls 1.2
+import live 1.0
 import lcvcore 1.0
 import lcvimgproc 1.0
 import lcvfeatures2d 1.0
-import lcvcontrols 1.0
 
 Column {
 
@@ -12,7 +13,7 @@ Column {
     // 'FreakDescriptorExtractor', etc to view different results.
 
     property string imagePath: 
-        codeDocument.path + '/../_images/object_101_piano_train1.jpg'
+        project.dir() + '/../_images/object_101_piano_train1.jpg'
 
     spacing: 10
 
@@ -32,7 +33,7 @@ Column {
             }
         }
 
-        BriefDescriptorExtractor{
+        BriskDescriptorExtractor{
             id : descriptorExtractor
             keypoints : featureDetector.keypoints
             onDescriptorsChanged : {

@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "qproject.h"
 #include "qprojectfile.h"
 #include "qprojectentry.h"
@@ -17,11 +33,10 @@ QProject::QProject(QObject *parent)
     , m_fileModel(new QProjectFileModel(this))
     , m_navigationModel(new QProjectNavigationModel(this))
     , m_documentModel(new QProjectDocumentModel(this))
-    , m_focus(0)
-    , m_active(0)
     , m_lockedFileIO(QLockedFileIOSession::createInstance())
+    , m_active(0)
+    , m_focus(0)
 {
-    newProject();
 }
 
 QProject::~QProject(){
@@ -64,7 +79,6 @@ void QProject::openProject(const QString &path){
             this
         );
         m_documentModel->openDocument(document->file()->path(), document);
-        document->file()->setIsOpen(true);
         m_active = document;
         m_focus  = document;
         m_path   = absolutePath;
@@ -81,7 +95,6 @@ void QProject::openProject(const QString &path){
                 this
             );
             m_documentModel->openDocument(document->file()->path(), document);
-            document->file()->setIsOpen(true);
             m_active = document;
             m_focus = document;
             emit inFocusChanged(document);
@@ -104,6 +117,14 @@ QString QProject::dir() const{
         return m_path;
 }
 
+QProjectFile *QProject::relocateDocument(const QString &path, const QString& newPath, QProjectDocument* document){
+    m_documentModel->relocateDocument(path, newPath, document);
+    QString absoluteNewPath = QFileInfo(newPath).absoluteFilePath();
+    if (absoluteNewPath.indexOf(m_path) == 0 )
+        m_fileModel->rescanEntries();
+    return m_fileModel->openFile(newPath);
+}
+
 void QProject::closeProject(){
     setInFocus(0);
     setActive((QProjectDocument*)0);
@@ -121,9 +142,9 @@ void QProject::openFile(const QString &path, int mode){
     QProjectDocument* document = isOpened(path);
     if (!document){
         openFile(m_fileModel->openFile(path), mode);
-    } else if ( document->file()->isMonitored() && mode == QProjectDocument::Edit ){
+    } else if ( document->isMonitored() && mode == QProjectDocument::Edit ){
         m_documentModel->updateDocumeMonitoring(document, false);
-    } else if ( !document->file()->isMonitored() && mode == QProjectDocument::Monitor ){
+    } else if ( !document->isMonitored() && mode == QProjectDocument::Monitor ){
         document->readContent();
         m_documentModel->updateDocumeMonitoring(document, true);
     } else
@@ -140,11 +161,10 @@ void QProject::openFile(QProjectFile *file, int mode){
         document = m_active;
     } else if (!document){
         document = new QProjectDocument(file, mode == QProjectDocument::Monitor, this);
-        file->setIsOpen(true);
         m_documentModel->openDocument(file->path(), document);
-    } else if ( document->file()->isMonitored() && mode == QProjectDocument::Edit ){
+    } else if ( document->isMonitored() && mode == QProjectDocument::Edit ){
         m_documentModel->updateDocumeMonitoring(document, false);
-    } else if ( !document->file()->isMonitored() && mode == QProjectDocument::Monitor ){
+    } else if ( !document->isMonitored() && mode == QProjectDocument::Monitor ){
         document->readContent();
         m_documentModel->updateDocumeMonitoring(document, true);
     } else

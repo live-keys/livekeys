@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -22,11 +22,11 @@ Rectangle {
     height: 35
     gradient: Gradient{
         GradientStop{ position: 0.0; color: "#141923"}
-        GradientStop{ position: 1.0; color: "#05111b"}
+        GradientStop{ position: 1.0; color: "#061119"}
     }
 
-    property bool isLogWindowDirty : false
-    property bool isTextDirty      : false
+    property bool isLogWindowDirty     : false
+    property bool isTextDirty          : false
 
     signal messageYes()
     signal messageNo()
@@ -38,8 +38,8 @@ Rectangle {
 
     signal toggleLogWindow()
 
-    signal fontPlus()
-    signal fontMinus()
+    signal openSettings()
+    signal openLicense()
 
     function questionSave(){
         messageBox.visible = true
@@ -64,7 +64,7 @@ Rectangle {
         anchors.leftMargin: 160
         height : newMArea.containsMouse ? parent.height : parent.height - 5
         width : 35
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         Image{
@@ -94,7 +94,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 200
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : saveMArea.containsMouse ? parent.height : parent.height - 5
@@ -126,7 +126,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 240
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : openMArea.containsMouse ? parent.height : parent.height - 5
@@ -159,7 +159,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 280
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : openProjectMArea.containsMouse ? parent.height : parent.height - 5
@@ -191,7 +191,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 360
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : openLogMArea.containsMouse ? parent.height : parent.height - 5
@@ -232,22 +232,20 @@ Rectangle {
     }
 
 
-    // Font Size
+    // Configuration
 
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 425
-        color : "#091f2e"
+        color : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
-        height : minusMArea.containsMouse ? parent.height : parent.height - 5
+        height : openSettingsArea.containsMouse ? parent.height : parent.height - 5
         width : 35
-        Text{
+        Image{
+            id : openSettings
             anchors.centerIn: parent
-            text : "-"
-            color : "#eee"
-            font.pixelSize: 24
-            font.family: "Arial"
+            source : "qrc:/images/settings.png"
         }
         Rectangle{
             color : "#0f2636"
@@ -255,30 +253,28 @@ Rectangle {
             height : 3
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            visible : minusMArea.containsMouse
+            visible : openSettingsArea.containsMouse
         }
         Behavior on height{ NumberAnimation{  duration: 100 } }
         MouseArea{
-            id : minusMArea
+            id : openSettingsArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: container.fontMinus()
+            onClicked: container.openSettings()
         }
     }
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 465
-        color : "#091f2e"
+        color : settings.license.highlights > 0 ? "#44130b" : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
-        height : plusMArea.containsMouse ? parent.height : parent.height - 5
+        height : openLicenseArea.containsMouse ? parent.height : parent.height - 5
         width : 35
-        Text{
+        Image{
+            id : openLicense
             anchors.centerIn: parent
-            text : "+"
-            color : "#eee"
-            font.pixelSize: 24
-            font.family: "Arial"
+            source : "qrc:/images/license.png"
         }
         Rectangle{
             color : "#0f2636"
@@ -286,14 +282,14 @@ Rectangle {
             height : 3
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            visible : plusMArea.containsMouse
+            visible : openLicenseArea.containsMouse
         }
         Behavior on height{ NumberAnimation{  duration: 100 } }
         MouseArea{
-            id : plusMArea
+            id : openLicenseArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: container.fontPlus()
+            onClicked: container.openLicense()
         }
     }
 

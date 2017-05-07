@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Dinu SV.
+** Copyright (C) 2014-2017 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
@@ -17,9 +17,7 @@
 #ifndef QMAT2DARRAY_H
 #define QMAT2DARRAY_H
 
-#include "qlcvglobal.h"
 #include "qmatdisplay.h"
-
 #include <QList>
 
 class QMat2DArray : public QMatDisplay{

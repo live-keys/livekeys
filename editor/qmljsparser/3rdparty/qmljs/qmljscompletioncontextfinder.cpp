@@ -169,7 +169,7 @@ void CompletionContextFinder::checkBinding()
                 m_bindingPropertyName.prepend(tokenString.toString());
                 identifierExpected = false;
                 dotExpected = true;
-            } else if (tokenString == QLatin1String("on")) {
+            } else if (tokenString.startsWith(QLatin1String("on"))) {
                 m_behaviorBinding = true;
             }
         } break;
