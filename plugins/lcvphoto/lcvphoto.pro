@@ -4,7 +4,7 @@ include($$getConfigFile(is_plugin.pri))
 include($$getConfigFile(use_plugin_core.pri))
 include($$getConfigFile(use_plugin_live.pri))
 
-#uri = plugins.lcvcore
+uri = plugins.lcvcore
 
 DEFINES += Q_LCV
 

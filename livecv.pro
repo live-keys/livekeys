@@ -10,7 +10,7 @@
 #
 # They are also included in this confiuration for completeness and easy access.
 
-# --- Subdir configuration ---
+# --- Project structure ---
 
 TEMPLATE = subdirs
 
@@ -19,14 +19,14 @@ SUBDIRS += \
     editor \
     plugins
 
-# Subdiŕ configurations
+# --- Subdiŕ configurations ---
 application.subdir  = $$PATH_SOURCE_APPLICATION
 editor.subdir       = $$PATH_SOURCE_EDITOR
 plugins.subdir      = $$PATH_SOURCE_PLUGINS
 
-# Dependency configuration
+# --- Dependency configuration ---
 application.depends = editor plugins # because we have a dependency to the live plugin here
-plugins.depend      = editor
+plugins.depends     = editor
 
 
 
