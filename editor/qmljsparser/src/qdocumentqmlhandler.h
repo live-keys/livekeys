@@ -61,6 +61,10 @@ public:
     void setTarget(QTextDocument *target) Q_DECL_OVERRIDE;
     void setDocument(QProjectDocument* document) Q_DECL_OVERRIDE;
     void updateScope(const QString& data) Q_DECL_OVERRIDE;
+    void rehighlightBlock(const QTextBlock& block) Q_DECL_OVERRIDE;
+    QList<QAbstractCodeHandler::CodeProperty> getProperties(const QTextCursor& cursor) Q_DECL_OVERRIDE;
+    bool getPropertyValueOffset(int position, int length, int& semicolonPosition, int& valueEnd);
+    void connectBindings(QList<QProjectDocumentBinding*> bindings, QObject* root) Q_DECL_OVERRIDE;
 
     QPluginInfoExtractor *getPluginInfoExtractor(const QString& import);
 
@@ -140,7 +144,7 @@ private:
     QProjectDocument* m_document;
 
     QDocumentQmlScope::Ptr       m_documentScope;
-    QProjectQmlScope::Ptr m_projectScope;
+    QProjectQmlScope::Ptr        m_projectScope;
     bool                         m_newScope;
     QProjectQmlScanner*          m_scanner;
 

@@ -27,7 +27,14 @@
 
 #include <QCoreApplication>
 
+#include "qprojectdocument.h"
+#include "qprojectfile.h"
+#include "qdocumentqmlinfo.h"
+
 #include <QDebug>
+
+#include <QQuickItem>
+#include <QQmlProperty>
 
 namespace lcv{
 
@@ -54,11 +61,13 @@ const QList<QQmlError> &QLiveCVEngine::lastErrors() const{
     return m_lastErrors;
 }
 
-QJSValue QLiveCVEngine::lastErrorsObject() const{
-    return toJSErrors(lastErrors());
-}
-
-void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, const QUrl &url, bool clearCache){
+void QLiveCVEngine::createObjectAsync(
+        const QString& qmlCode,
+        QObject* parent,
+        const QUrl& url,
+        QProjectDocument* document,
+        bool clearCache)
+{
     m_engineMutex->lock();
 
     emit aboutToCreateObject(url);
@@ -115,9 +124,16 @@ void QLiveCVEngine::createObjectAsync(const QString &qmlCode, QObject *parent, c
         item->setParentItem(parentItem);
     }
 
+    QDocumentQmlInfo::syncBindings(qmlCode, document, obj);
+
     setIsLoading(false);
+
     m_engineMutex->unlock();
     emit objectCreated(obj);
+}
+
+QJSValue QLiveCVEngine::lastErrorsObject() const{
+    return toJSErrors(lastErrors());
 }
 
 QObject* QLiveCVEngine::createObject(const QString &qmlCode, QObject *parent, const QUrl &url, bool clearCache){

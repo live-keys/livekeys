@@ -45,6 +45,8 @@
 #include <QQuickWindow>
 #include <QGuiApplication>
 
+#include "qlivepalettecontainer.h"
+
 namespace lcv{
 
 QLiveCV::QLiveCV(int argc, const char* const argv[])
@@ -117,13 +119,16 @@ void QLiveCV::loadLibrary(const QString &library){
 }
 
 void QLiveCV::loadQml(const QUrl &url){
-
     lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(
         m_engine->engine(),
         m_engine->engineMutex(),
         m_project->lockedFileIO()
     );
-    m_codeInterface = new lcv::QDocumentCodeInterface(qmlHandler);
+    m_codeInterface = new lcv::QDocumentCodeInterface(
+        qmlHandler,
+        QLivePaletteContainer::create(m_engine->engine(), dir() + "/plugins")
+    );
+
     QObject::connect(
         m_project, SIGNAL(inFocusChanged(QProjectDocument*)),
         m_codeInterface, SLOT(setDocument(QProjectDocument*))

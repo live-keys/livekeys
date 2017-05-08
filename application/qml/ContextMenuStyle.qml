@@ -29,7 +29,7 @@ MenuStyle{
         color: 'transparent'
         Text{
             id: dirLabelMenu
-            color: "#9babb8"
+            color: styleData.enabled ? "#9babb8" : "#555"
             anchors.centerIn: parent
             text: styleData.text
             font.family: 'Open Sans, Arial, sans-serif'
@@ -37,7 +37,22 @@ MenuStyle{
             font.weight: Font.Light
         }
     }
+    itemDelegate.shortcut: Rectangle{
+        width: dirShortCutText.width
+        height: dirShortCutText.height + 6
+        color: 'transparent'
+        Text{
+            id: dirShortCutText
+            color: "#7b8b98"
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            text: styleData.shortcut
+            font.family: 'Open Sans, Arial, sans-serif'
+            font.pixelSize: 9
+            font.weight: Font.Light
+        }
+    }
     itemDelegate.background: Rectangle{
-        color: styleData.selected ? "#0a1a27" : "transparent"
+        color: styleData.selected && styleData.enabled ? "#0a1a27" : "transparent"
     }
 }

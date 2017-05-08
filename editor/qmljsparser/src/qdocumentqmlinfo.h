@@ -33,6 +33,9 @@ namespace QmlJS{
 
 namespace lcv{
 
+class QProjectDocument;
+class QProjectDocumentBinding;
+class QDocumentQmlValueObjects;
 class QDocumentQmlInfoPrivate;
 class Q_QMLJSPARSER_EXPORT QDocumentQmlInfo{
 
@@ -106,6 +109,7 @@ public:
 
     void createRanges();
     const ValueReference valueAtPosition(int position) const;
+    const ValueReference valueAtPosition(int position, int& begin, int& end) const;
 
     bool isValueNull(const ValueReference &vr) const;
 
@@ -118,6 +122,16 @@ public:
 
     QString path() const;
     QString componentName() const;
+
+    QDocumentQmlValueObjects* createObjects() const;
+
+    static void syncBindings(const QString& source, QProjectDocument* document, QObject* root);
+    static void syncBindings(
+        const QString& source,
+        QProjectDocument *document,
+        QList<QProjectDocumentBinding*> bindings,
+        QObject* root
+    );
 
     ~QDocumentQmlInfo();
 

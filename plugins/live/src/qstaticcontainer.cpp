@@ -29,16 +29,19 @@ QStaticContainer *QStaticContainer::grabFromContext(QQuickItem *item, const QStr
 }
 
 void QStaticContainer::beforeCompile(){
+    QSTATIC_ITEM_CONTAINER_DEBUG("-----Before Compile-----");
     for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->beforeCompile();
 }
 
 void QStaticContainer::afterCompile(){
+    QSTATIC_ITEM_CONTAINER_DEBUG("-----After Compile-----");
     for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->afterCompile();
 }
 
 void QStaticContainer::clearStates(){
+    QSTATIC_ITEM_CONTAINER_DEBUG("-----Clear States-----");
     for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->clearStates();
 }

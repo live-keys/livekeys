@@ -27,16 +27,7 @@
 #include <QTextBlockUserData>
 #include <QSyntaxHighlighter>
 
-/**
- * @brief The JSBlockData is a private class used internally by QCodeJSHighlighter.
- */
-class JSBlockData: public QTextBlockUserData{
-
-public:
-    QList<int> bracketPositions;
-    QString    blockIdentifier;
-
-};
+#include "qprojectdocument.h"
 
 /**
  * @brief The QCodeJSHighlighter is a private class used internally by QCodeHandler.
@@ -290,12 +281,18 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
 
     QList<int> bracketPositions;
     int blockState   = previousBlockState();
-    int bracketLevel = blockState >> 4;
+
+    bool prevGenerated   = (blockState >> 4) & 1;
+    int bracketLevel = blockState >> 5;
     int state        = blockState & 15;
+
+
     if (blockState < 0) {
+        prevGenerated = false;
         bracketLevel = 0;
         state = StateStart;
     }
+
     int start = 0;
     int i     = 0;
 
@@ -433,16 +430,61 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
         }
     }
 
+    lcv::QProjectDocumentBlockData *blockData =
+            reinterpret_cast<lcv::QProjectDocumentBlockData*>(currentBlock().userData());
+
     if (!bracketPositions.isEmpty()) {
-        JSBlockData *blockData = reinterpret_cast<JSBlockData*>(currentBlock().userData());
         if (!blockData) {
-            blockData = new JSBlockData;
+            blockData = new lcv::QProjectDocumentBlockData;
             currentBlock().setUserData(blockData);
         }
         blockData->bracketPositions = bracketPositions;
     }
 
-    blockState = (state & 15) | (bracketLevel << 4);
+    bool generated = false;
+
+    if ( prevGenerated ){
+        QTextBlock prevBlock = currentBlock().previous();
+        if ( prevBlock.isValid() && prevBlock.userData() ){
+            lcv::QProjectDocumentBlockData *prevBlockData =
+                    reinterpret_cast<lcv::QProjectDocumentBlockData*>(prevBlock.userData());
+
+            if ( prevBlockData->exceededBindingLength > 0 ){
+                int currentExceededLength = prevBlockData->exceededBindingLength - currentBlock().length();
+                if ( currentExceededLength > 0 ){
+                    setFormat(0, currentBlock().length(), QColor("#aa00aa") );
+
+                    if (!blockData) {
+                        blockData = new lcv::QProjectDocumentBlockData;
+                        currentBlock().setUserData(blockData);
+                    }
+                    blockData->exceededBindingLength = currentExceededLength;
+                    generated = true;
+                } else {
+                    setFormat(0, prevBlockData->exceededBindingLength, QColor("#aa00aa") );
+                }
+            }
+        }
+    }
+
+
+    if ( blockData ){
+        foreach(lcv::QProjectDocumentBinding* bind, blockData->m_bindings ){
+            setFormat(bind->propertyPosition - currentBlock().position(), bind->propertyLength, QColor("#ff0000"));
+
+            if ( bind->modifiedByEngine ){
+                int valueFrom = bind->propertyPosition + bind->propertyLength + bind->valuePositionOffset;
+                setFormat(valueFrom - currentBlock().position(), bind->valueLength, QColor("#ff00ff"));
+                if ( valueFrom + bind->valueLength > currentBlock().position() + currentBlock().length() ){
+                    generated = true;
+                    blockData->exceededBindingLength =
+                        bind->valueLength - (currentBlock().length() - (valueFrom - currentBlock().position()));
+                }
+            }
+        }
+    }
+
+    blockState = (state & 15) | (generated << 4) | (bracketLevel << 5);
     setCurrentBlockState(blockState);
 }
 

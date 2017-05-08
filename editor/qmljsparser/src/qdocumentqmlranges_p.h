@@ -43,6 +43,7 @@ public:
     QList<Range> operator()(QmlJS::Document::Ptr doc);
 
     Range findClosestRange(int position) const;
+    QList<Range> findRangePath(int position) const;
 
 protected:
     using QmlJS::AST::Visitor::visit;
@@ -53,7 +54,7 @@ protected:
     virtual bool visit(QmlJS::AST::FunctionExpression *ast);
     virtual bool visit(QmlJS::AST::FunctionDeclaration *ast);
 
-    bool visit(QmlJS::AST::BinaryExpression *ast);
+    virtual bool visit(QmlJS::AST::BinaryExpression *ast);
 
     virtual bool visit(QmlJS::AST::UiScriptBinding *ast);
 
