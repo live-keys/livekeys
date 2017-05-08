@@ -1,9 +1,9 @@
-TEMPLATE = lib
-TARGET   = lcvcore
-QT      += qml quick
-CONFIG  += qt plugin
 
-TARGET = $$qtLibraryTarget($$TARGET)
+PLUGIN_NAME = lcvcore
+PLUGIN_QML_DIR = $$PATH_SOURCE_PLUGINS_CORE/qml
+include($$getConfigFile(is_plugin.pri))
+include($$getConfigFile(use_plugin_live.pri))
+
 uri = plugins.lcvcore
 
 DEFINES += Q_LCV
@@ -14,41 +14,9 @@ include($$PWD/include/lcvcoreheaders.pri)
 include($$PWD/../../3rdparty/opencvconfig.pro)
 deployOpenCV()
 
-INCLUDEPATH += $$PWD/../../lib/include
-DEPENDPATH  += $$PWD/../../lib/include
+OTHER_FILES *= \
+    qml/*.qml \
+    qmldir \
+    projects.qmltypes
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/release/ -llive
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/debug/ -llive
-else:unix: LIBS += -L$$OUT_PWD/../../application/ -llive
 
-# Destination
-
-win32:CONFIG(debug, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../../application/debug/plugins/lcvcore)
-else:win32:CONFIG(release, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../../application/release/plugins/lcvcore)
-else:unix: TARGET = $$quote($$OUT_PWD/../../application/plugins/lcvcore)
-
-# Qml
-
-OTHER_FILES = \
-    $$PWD/qml/qmldir \
-    $$PWD/qml/plugins.qmltypes \
-    $$PWD/qml/RegionSelection.qml \
-    $$PWD/qml/VideoControls.qml
-
-# Deploy qml
-
-PLUGIN_DEPLOY_FROM = $$PWD/qml
-win32:CONFIG(debug, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../../application/debug/plugins/lcvcore
-else:win32:CONFIG(release, debug|release): PLUGIN_DEPLOY_TO = $$OUT_PWD/../../application/release/plugins/lcvcore
-else:unix: PLUGIN_DEPLOY_TO = $$OUT_PWD/../application/plugins/lcvcore
-
-win32:PLUGIN_DEPLOY_TO ~= s,/,\\,g
-win32:PLUGIN_DEPLOY_FROM ~= s,/,\\,g
-
-plugincopy.commands = $(COPY_DIR) \"$$PLUGIN_DEPLOY_FROM\" \"$$PLUGIN_DEPLOY_TO\"
-
-first.depends = $(first) plugincopy
-export(first.depends)
-export(plugincopy.commands)
-
-QMAKE_EXTRA_TARGETS += first plugincopy

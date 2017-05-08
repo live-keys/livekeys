@@ -42,14 +42,14 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    livecv.loadLibrary(livecv.dir() + "/plugins/live");
+    livecv.loadLibrary(livecv.dir() + "/plugins/live/live");
 
     if ( livecv.arguments()->pluginInfoFlag() ){
         printf("%s", livecv.extractPluginInfo(livecv.arguments()->pluginInfoImport()).data());
         return 0;
     }
 
-    livecv.loadQml(QUrl(QStringLiteral("qrc:/main.qml")));
+    livecv.loadQml(QUrl(QStringLiteral("qml/main.qml")));
 
     return app.exec();
 }

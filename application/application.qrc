@@ -1,5 +1,6 @@
 <RCC>
-    <qresource prefix="/">
+ <!--
+     <qresource prefix="/">
         <file alias="main.qml">qml/main.qml</file>
         <file alias="Editor.qml">qml/Editor.qml</file>
         <file alias="LogWindow.qml">qml/LogWindow.qml</file>
@@ -13,6 +14,7 @@
         <file alias="ContextMenuStyle.qml">qml/ContextMenuStyle.qml</file>
         <file alias="License.qml">qml/License.qml</file>
     </qresource>
+!-->
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>
         <file alias="UbuntuMono-Italic.ttf">fonts/UbuntuMono-Italic.ttf</file>
