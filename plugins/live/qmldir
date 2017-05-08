@@ -1,5 +1,5 @@
-module lcvlive
-plugin lcvlive
+module live
+plugin live
 
 depends QtQuick 2.3
 

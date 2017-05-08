@@ -92,18 +92,15 @@ void QLiveCV::solveImportPaths(){
     QDir applicationDir {QGuiApplication::applicationDirPath()};
     QDir applicationQmlDir {applicationDir.absoluteFilePath("qml")};
     QDir pluginDir {applicationDir.absoluteFilePath("plugins")};
-    QDir livePluginDir {pluginDir.absoluteFilePath("lcvlive")};
-    QDir livePluginQmlDir {livePluginDir.absoluteFilePath("qml")};
+    QDir livePluginDir {pluginDir.absoluteFilePath("live")};
 
     Q_ASSERT(applicationDir.exists());
     Q_ASSERT(applicationQmlDir.exists());
     Q_ASSERT(pluginDir.exists());
     Q_ASSERT(livePluginDir.exists());
-    //Q_ASSERT(livePluginQmlDir.exists());
 
     m_engine->engine()->addImportPath(applicationQmlDir.absolutePath());
     m_engine->engine()->addImportPath(pluginDir.absolutePath());
-   // m_engine->engine()->addImportPath(livePluginQmlDir.absolutePath());
 
 
 }

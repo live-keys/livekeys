@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    livecv.loadLibrary(livecv.dir() + "/plugins/lcvlive/lcvlive");
+    livecv.loadLibrary(livecv.dir() + "/plugins/live/live");
 
     if ( livecv.arguments()->pluginInfoFlag() ){
         printf("%s", livecv.extractPluginInfo(livecv.arguments()->pluginInfoImport()).data());

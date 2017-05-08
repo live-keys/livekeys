@@ -2,7 +2,7 @@ module lcvcore
 plugin lcvcore
 
 depends QtQuick 2.3
-depends lcvlive 1.0
+depends live 1.0
 
 RegionSelection 1.0 qml/RegionSelection.qml
 VideoControls   1.0 qml/VideoControls.qml
