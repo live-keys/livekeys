@@ -16,7 +16,7 @@ unix{
     QMAKE_LFLAGS += \
         "-Wl,-rpath,\'\$$ORIGIN\'" \
         "-Wl,-rpath,\'\$$ORIGIN/plugins\'" \
-        "-Wl,-rpath,\'\$$ORIGIN/plugins/lcvlive\'" \
+        "-Wl,-rpath,\'\$$ORIGIN/plugins/live\'" \
         "-Wl,-rpath,\'\$$ORIGIN/plugins/lcvcore\'"
 
 }

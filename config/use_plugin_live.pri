@@ -13,7 +13,7 @@ LIBIVE_INCLUDE_DIR    = $$PATH_SOURCE_PLUGINS_LIVE/include
 
 INCLUDEPATH += $$LIBIVE_INCLUDE_DIR
 DEPENDPATH  += $$LIBIVE_SOURCE_DIR
-LIBS        += -L$$PATH_DEPLOY_PLUGINS_LIVE -llcvlive
+LIBS        += -L$$PATH_DEPLOY_PLUGINS_LIVE -llive
 
 # Since "live" is a plugin, it will be installed into the plugin subdirectory
 # of the build

@@ -26,9 +26,18 @@ DESTDIR     = $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME
 
 # --- Handling the (ugly) QML deployment ---
 
+# TODO these variable names are confusing. Think of better ones.
+
 QML_DEPLOY_FROM         = $$shell_path($$PLUGIN_QML_DIR)
 QMLDIR_DEPLOY_FROM      = $$shell_path($$PLUGIN_QML_DIR/../qmldir)
 PLUGIN_DEPLOY_TO        = $$shell_path($$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME)
+
+!exists($$QML_DEPLOY_FROM){
+    warning(Expected folder $$QML_DEPLOY_FROM)
+    qmlcopy.commands =
+} else {
+    qmlcopy.commands = $$QMAKE_COPY_DIR $$QML_DEPLOY_FROM $$PLUGIN_DEPLOY_TO
+}
 
 !exists($$QMLDIR_DEPLOY_FROM){
     warning(Expected file $$QMLDIR_DEPLOY_FROM)
