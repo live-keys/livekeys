@@ -10,7 +10,7 @@ SUBDIRS += \
     lcvcore \
     lcvimgproc \
     lcvfeatures2d \
-    lcvlive \
+    live \
     lcvphoto \
     lcvvideo
 
@@ -19,12 +19,12 @@ SUBDIRS += \
 lcvcore.subdir          = $$PATH_SOURCE_PLUGINS_CORE
 lcvimgproc.subdir       = $$PATH_SOURCE_PLUGINS_IMGPROC
 lcvfeatures2d.subdir    = $$PATH_SOURCE_PLUGINS_FEATURES2D
-lcvlive.subdir          = $$PATH_SOURCE_PLUGINS_LIVE
+live.subdir             = $$PATH_SOURCE_PLUGINS_LIVE
 lcvphoto.subdir         = $$PATH_SOURCE_PLUGINS_PHOTO
 lcvvideo.subdir         = $$PATH_SOURCE_PLUGINS_VIDEO
 
 # Dependency configuration
 
-lcvcore.depends         = lcvlive
-lcvfeatures2d.depend    = lcvcore lcvlive
-lcvimgproc.depend       = lcvcore lcvlive
+lcvcore.depends         = live
+lcvfeatures2d.depends   = lcvcore live
+lcvimgproc.depends      = lcvcore live
