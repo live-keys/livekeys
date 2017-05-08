@@ -1,12 +1,30 @@
-# Please do not modify the following two lines. Required for deployment.
+
+# Plugin build configuration,
+# !!! Modify only if you know what you are doing
 
 TEMPLATE = subdirs
-CONFIG  += ordered
 
 # Optional build modules
 
-SUBDIRS += $$PWD/lcvcore
-SUBDIRS += $$PWD/lcvimgproc
-SUBDIRS += $$PWD/lcvfeatures2d
-SUBDIRS += $$PWD/lcvphoto
-SUBDIRS += $$PWD/lcvvideo
+SUBDIRS += \
+    lcvcore \
+    lcvimgproc \
+    lcvfeatures2d \
+    live \
+    lcvphoto \
+    lcvvideo
+
+# --- Subdir configuration ---
+
+lcvcore.subdir          = $$PATH_SOURCE_PLUGINS_CORE
+lcvimgproc.subdir       = $$PATH_SOURCE_PLUGINS_IMGPROC
+lcvfeatures2d.subdir    = $$PATH_SOURCE_PLUGINS_FEATURES2D
+live.subdir             = $$PATH_SOURCE_PLUGINS_LIVE
+lcvphoto.subdir         = $$PATH_SOURCE_PLUGINS_PHOTO
+lcvvideo.subdir         = $$PATH_SOURCE_PLUGINS_VIDEO
+
+# --- Dependency configuration ---
+
+lcvcore.depends         = live
+lcvfeatures2d.depends   = lcvcore live
+lcvimgproc.depends      = lcvcore live
