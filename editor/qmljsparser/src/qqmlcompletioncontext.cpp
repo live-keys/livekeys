@@ -22,11 +22,13 @@ QQmlCompletionContext::QQmlCompletionContext(
         int context,
         const QStringList &objectTypePath,
         const QStringList &identifierPath,
-        const QStringList &expressionPath)
+        const QStringList &expressionPath,
+        int propertyPosition)
     : m_context(context)
     , m_objectTypePath(objectTypePath)
     , m_propertyPath(identifierPath)
     , m_expressionPath(expressionPath)
+    , m_propertyPosition(propertyPosition)
 {
 }
 

@@ -19,7 +19,7 @@ import QtQuick.Controls 1.2
 import Cv 1.0
 import live 1.0
 
-ApplicationWindow {
+ApplicationWindow{
     id : root
 
     visible: true
@@ -75,6 +75,7 @@ ApplicationWindow {
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+
 
         color: "#08141d"
 
@@ -316,6 +317,7 @@ ApplicationWindow {
                             project.active.content,
                             tester,
                             project.active.file.pathUrl(),
+                            project.active,
                             true
                         );
                     }
@@ -506,6 +508,7 @@ ApplicationWindow {
                                 project.active.content,
                                 tester,
                                 project.active.file.pathUrl(),
+                                project.active,
                                 true
                             );
                         }
@@ -604,9 +607,10 @@ ApplicationWindow {
                     projectNavigation.visible = !projectNavigation.visible
                 }
 
+                onBindProperties: codeHandler.bind(position, length, tester.item)
+
                 Component.onCompleted: forceFocus()
             }
-
 
             Rectangle{
                 id : viewer
@@ -619,10 +623,13 @@ ApplicationWindow {
                     anchors.fill: parent
                     property string program: editor.text
                     property variant item
-                    onProgramChanged: {
-                        if ( project.active === project.inFocus )
-                            createTimer.restart()
-                        scopeTimer.restart()
+                    Connections{
+                        target: codeHandler
+                        onContentsChangedManually: {
+                            if ( project.active === project.inFocus )
+                                createTimer.restart()
+                            scopeTimer.restart()
+                        }
                     }
                     Timer {
                         id: scopeTimer
@@ -641,13 +648,15 @@ ApplicationWindow {
                                 engine.createObjectAsync(
                                     tester.program,
                                     tester,
-                                    project.active.file.pathUrl()
+                                    project.active.file.pathUrl(),
+                                    project.active
                                 );
                             } else if ( project.active ){
                                 engine.createObjectAsync(
                                     project.active.content,
                                     tester,
                                     project.active.file.pathUrl(),
+                                    project.active,
                                     true
                                 );
                             }
@@ -901,13 +910,15 @@ ApplicationWindow {
                 engine.createObjectAsync(
                     tester.program,
                     tester,
-                    project.active.file.pathUrl()
+                    project.active.file.pathUrl(),
+                    project.active
                 );
             } else if ( project.active ){
                 engine.createObjectAsync(
                     project.active.content,
                     tester,
                     project.active.file.pathUrl(),
+                    project.active,
                     true
                 );
             }

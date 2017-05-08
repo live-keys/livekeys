@@ -38,10 +38,10 @@ class ExpressionUnderCursor
 
 public:
     ExpressionUnderCursor()
-        : start(0), end(0)
+        : startOffset(-1), end(0)
     {}
 
-    int start, end;
+    int startOffset, end;
 
     int startState(const QTextBlock &block) const
     {
@@ -102,6 +102,8 @@ public:
         if (start == -1)
             return QString();
 
+        startOffset = block.position() + tokens.at(start).begin();
+
         if ( path ){
             path->clear();
             for ( int i = start; i < tokens.size(); ++i ){
@@ -112,8 +114,10 @@ public:
                 if ( tokens.last().kind == Token::Dot )
                     path->append("");
                 else if ( tokens.last().kind == Token::Identifier ){
-                    if ( cursor.positionInBlock() > tokens.last().end() )
+                    if ( cursor.positionInBlock() > tokens.last().end() ){
                         path->clear();
+                        startOffset = block.position() + cursor.positionInBlock();
+                    }
 //                    qDebug() << "CURSOR:" << cursor() << tokens.last().end();
                 }
             }
@@ -158,9 +162,13 @@ QQmlCompletionContext *QQmlCompletionContextFinder::getContext(const QTextCursor
     if ( finder.isInStringLiteral() )
         context |= QQmlCompletionContext::InStringLiteral;
 
+    int propertyNamePosition = finder.propertyNamePosition();
+
     if ( !finder.isInStringLiteral() ){
         ExpressionUnderCursor euc;
         euc(cursor, &path);
+        if ( finder.isInLhsOfBinding() )
+            propertyNamePosition = euc.startOffset;
     }
     QStringList objectTypePath = finder.qmlObjectTypeName();
 
@@ -175,7 +183,8 @@ QQmlCompletionContext *QQmlCompletionContextFinder::getContext(const QTextCursor
         context,
         objectTypePath,
         finder.bindingPropertyName(),
-        path
+        path,
+        propertyNamePosition
     );
 }
 

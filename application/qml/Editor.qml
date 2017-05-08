@@ -30,6 +30,8 @@ Rectangle{
     signal toggleVisibility()
     signal toggleNavigation()
 
+    signal bindProperties(int position, int length)
+
     property bool isDirtyMask: true
     property bool isDirty: false
 
@@ -318,7 +320,7 @@ Rectangle{
                     if ( project.inFocus ){
                         editor.isDirtyMask = true
                         editor.isDirty = project.inFocus.isDirty
-                        editor.text    = project.inFocus.content
+//                        editor.text    = project.inFocus.content
                     }
                 }
 
@@ -337,7 +339,7 @@ Rectangle{
                         editor.isDirtyMask = true
                         if ( project.inFocus ){
                             editor.isDirty = project.inFocus.isDirty
-                            editor.text    = project.inFocus.content
+//                            editor.text    = project.inFocus.content
                         } else {
                             editor.text = ''
                             editor.isDirty = false
@@ -349,15 +351,78 @@ Rectangle{
                     target: project.inFocus
                     onContentChanged : {
                         editor.isDirtyMask = true
-                        editor.isDirty = project.inFocus.isDirty
-                        editor.text    = project.inFocus.content
+                        editor.isDirty     = project.inFocus.isDirty
+//                        editor.text    = project.inFocus.content
                     }
                 }
 
                 MouseArea{
                     anchors.fill: parent
-                    acceptedButtons: Qt.NoButton
                     cursorShape: Qt.IBeamCursor
+                    acceptedButtons: Qt.RightButton
+                    onClicked: {
+                        if (editorArea.selectionStart === editorArea.selectionEnd)
+                            editorArea.cursorPosition = editorArea.positionAt(mouse.x, mouse.y)
+                        contextMenu.popup()
+                    }
+                }
+
+                Menu {
+                    id: contextMenu
+                    style: ContextMenuStyle{}
+
+                    onAboutToShow: {
+                        bindMenuItem.enabled = codeHandler.canBind(
+                            editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart
+                        )
+                        unbindMenuItem.enabled = codeHandler.canUnbind(
+                            editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart
+                        )
+                        editMenuItem.enabled = editorArea.selectionEnd - editorArea.selectionStart === 0 ?
+                            codeHandler.canEdit(editorArea.cursorPosition) : false
+                    }
+
+                    MenuItem {
+                        id: editMenuItem
+                        text: qsTr("Edit")
+                        enabled: false
+                        onTriggered: codeHandler.edit(editorArea.cursorPosition)
+                    }
+                    MenuItem {
+                        id: bindMenuItem
+                        text: qsTr("Bind")
+                        enabled: false
+                        onTriggered: editor.bindProperties(
+                            editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart
+                        )
+                    }
+
+                    MenuItem {
+                        id: unbindMenuItem
+                        text: qsTr("Unbind")
+                        enabled: false
+                        onTriggered: codeHandler.unbind(
+                            editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart
+                        )
+                    }
+                    MenuItem {
+                        text: qsTr("Cut")
+                        shortcut: StandardKey.Cut
+                        enabled: editorArea.selectedText
+                        onTriggered: editor.cut()
+                    }
+                    MenuItem {
+                        text: qsTr("Copy")
+                        shortcut: StandardKey.Copy
+                        enabled: editorArea.selectedText
+                        onTriggered: editor.copy()
+                    }
+                    MenuItem {
+                        text: qsTr("Paste")
+                        shortcut: StandardKey.Paste
+                        enabled: editorArea.canPaste
+                        onTriggered: editor.paste()
+                    }
                 }
 
             }

@@ -8,7 +8,7 @@
 
 #define QSTATIC_ITEM_CONTAINER_DEBUG_FLAG
 #ifdef QSTATIC_ITEM_CONTAINER_DEBUG_FLAG
-#define QSTATIC_ITEM_CONTAINER_DEBUG(_param) qDebug() << (_param)
+#define QSTATIC_ITEM_CONTAINER_DEBUG(_param) qDebug() << "STATIC CONTAINER:" << (_param)
 #else
 #define QSTATIC_ITEM_CONTAINER_DEBUG(_param)
 #endif
@@ -138,7 +138,6 @@ template<typename T> T *QStaticTypeContainer<T>::state(const QString &key){
  * @brief Before compilation routine.
  */
 template<typename T> void QStaticTypeContainer<T>::beforeCompile(){
-    QSTATIC_ITEM_CONTAINER_DEBUG("-----Before Compile-----");
     QMap<QString, bool>::iterator it = m_statesActive.begin();
     while ( it != m_statesActive.end() ){
         if ( it.value() == true ){
@@ -153,7 +152,6 @@ template<typename T> void QStaticTypeContainer<T>::beforeCompile(){
  * @brief After compilation routine.
  */
 template<typename T> void QStaticTypeContainer<T>::afterCompile(){
-    QSTATIC_ITEM_CONTAINER_DEBUG("-----After Compile-----");
     QMap<QString, bool>::iterator it = m_statesActive.begin();
     while ( it != m_statesActive.end() ){
         if ( it.value() == false ){
@@ -170,7 +168,6 @@ template<typename T> void QStaticTypeContainer<T>::afterCompile(){
 }
 
 template<typename T> void QStaticTypeContainer<T>::clearStates(){
-    QSTATIC_ITEM_CONTAINER_DEBUG("-----Clear States-----");
     for ( typename QMap<QString, T*>::iterator it = m_states.begin(); it != m_states.end(); ++it )
         delete it.value();
     m_states.clear();

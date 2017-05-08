@@ -51,6 +51,8 @@ public:
     bool isInImport() const;
     QString libVersionImport() const;
 
+    int propertyNamePosition() const;
+
 private:
     int findOpeningBrace(int startTokenIndex);
     void getQmlObjectTypeName(int startTokenIndex);
@@ -66,6 +68,8 @@ private:
     bool m_inStringLiteral;
     bool m_inImport;
     QString m_libVersion;
+
+    int m_propertyNamePosition;
 };
 
 } // namespace QmlJS

@@ -19,10 +19,94 @@
 #include "qmljs/qmljsbind.h"
 #include "qqmlidvisitor_p.h"
 #include "qdocumentqmlranges_p.h"
+#include "qdocumentqmlvalueobjects.h"
+
+#include "qprojectdocument.h"
+#include "qprojectfile.h"
+
+#include <QQmlProperty>
+#include <QQmlListReference>
 
 #include <QDebug>
 
 namespace lcv{
+
+namespace{
+
+    void connectBindingProperty(
+        QDocumentQmlValueObjects::RangeObject *object,
+        QObject *root,
+        QProjectDocumentBinding* binding,
+        const QString& source)
+    {
+        int position = binding->propertyPosition;
+
+        for ( int i = 0; i < object->properties.size(); ++i ){
+            if ( object->properties[i]->begin == position ){
+
+                if ( binding->propertyChain.isEmpty() ){
+                    return;
+                }
+
+                // iterate property chain (eg. border.size => (border, size))
+                QObject* objectChain = root;
+                for ( int j = 0; j < binding->propertyChain.size() - 1; ++j ){
+                    QQmlProperty foundprop(root, binding->propertyChain[j]);
+                    if ( !foundprop.isValid() || foundprop.propertyTypeCategory() != QQmlProperty::Object ){
+                        return;
+                    }
+
+                    objectChain = foundprop.read().value<QObject*>();
+                }
+
+                QQmlProperty finalprop(objectChain, binding->propertyChain.last());
+                finalprop.connectNotifySignal(binding, SLOT(updateValue()));
+
+                binding->valuePositionOffset =
+                    object->properties[i]->valueBegin - object->properties[i]->begin - binding->propertyLength;
+
+                binding->valueLength =
+                    object->properties[i]->end - object->properties[i]->valueBegin;
+
+                return;
+            } else if ( object->properties[i]->child &&
+                        object->properties[i]->begin < position &&
+                        object->properties[i]->end > position )
+            {
+                connectBindingProperty(
+                    object->properties[i]->child, root, binding, source
+                );
+            }
+        }
+
+        QQmlProperty pp(root);
+        if ( pp.isValid() ){
+            if ( pp.type() == QQmlProperty::Object &&
+                 object->children.size() == 1 &&
+                 position > object->children[0]->begin &&
+                 position < object->children[0]->end )
+            {
+                connectBindingProperty(
+                    object->children[0], pp.read().value<QObject*>(), binding, source
+                );
+            } else if ( pp.type() == QQmlProperty::List ){
+                QQmlListReference ppref = qvariant_cast<QQmlListReference>(pp.read());
+
+                if ( ppref.canAt() && ppref.canCount() ){
+                    for ( int i = 0; i < object->children.size(); ++i ){
+                        if ( position > object->children[i]->begin &&
+                             position < object->children[i]->end &&
+                             ppref.count() > i)
+                        {
+                            connectBindingProperty( object->children[i], ppref.at(i), binding, source );
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 class QDocumentQmlInfoPrivate{
 public:
@@ -126,9 +210,38 @@ void QDocumentQmlInfo::createRanges(){
 
 const QDocumentQmlInfo::ValueReference QDocumentQmlInfo::valueAtPosition(int position) const{
     Q_D(const QDocumentQmlInfo);
+
     QDocumentQmlRanges::Range range = d->ranges.findClosestRange(position);
     if ( range.ast == 0 )
         return QDocumentQmlInfo::ValueReference();
+
+    QmlJS::ObjectValue* value = d->internalDocBind->findQmlObject(range.ast);
+    return QDocumentQmlInfo::ValueReference(value, this);
+}
+
+const QDocumentQmlInfo::ValueReference QDocumentQmlInfo::valueAtPosition(
+        int position,
+        int &begin,
+        int &end) const
+{
+    Q_D(const QDocumentQmlInfo);
+
+    QList<QDocumentQmlRanges::Range> rangePath = d->ranges.findRangePath(position);
+    foreach( const QDocumentQmlRanges::Range& range, rangePath ){
+        begin = range.begin;
+        end   = range.end;
+
+        qDebug() << begin << end;
+//        QmlJS::ObjectValue* value = d->internalDocBind->findQmlObject(range.ast);
+//        return QDocumentQmlInfo::ValueReference(value, this);
+    }
+
+    QDocumentQmlRanges::Range range = d->ranges.findClosestRange(position);
+    if ( range.ast == 0 )
+        return QDocumentQmlInfo::ValueReference();
+
+    begin = range.begin;
+    end   = range.end;
 
     QmlJS::ObjectValue* value = d->internalDocBind->findQmlObject(range.ast);
     return QDocumentQmlInfo::ValueReference(value, this);
@@ -191,6 +304,51 @@ QString QDocumentQmlInfo::path() const{
 QString QDocumentQmlInfo::componentName() const{
     Q_D(const QDocumentQmlInfo);
     return d->internalDoc->componentName();
+}
+
+QDocumentQmlValueObjects *QDocumentQmlInfo::createObjects() const{
+    Q_D(const QDocumentQmlInfo);
+    QDocumentQmlValueObjects* objects = new QDocumentQmlValueObjects;
+    objects->visit(d->internalDoc->ast());
+    return objects;
+}
+
+void QDocumentQmlInfo::syncBindings(const QString &source, QProjectDocument *document, QObject *root){
+    if ( document && document->hasBindings() ){
+        QDocumentQmlInfo::MutablePtr docinfo = QDocumentQmlInfo::create(document->file()->path());
+        docinfo->parse(source);
+
+        QDocumentQmlValueObjects* objects = docinfo->createObjects();
+
+        for ( QProjectDocument::BindingIterator it = document->bindingsBegin(); it != document->bindingsEnd(); ++it ){
+            QProjectDocumentBinding* binding = *it;
+            connectBindingProperty(objects->root(), root, binding, source);
+        }
+
+        delete objects;
+    }
+}
+
+void QDocumentQmlInfo::syncBindings(
+        const QString &source,
+        QProjectDocument* document,
+        QList<QProjectDocumentBinding *> bindings,
+        QObject *root)
+{
+    if ( bindings.isEmpty() )
+        return;
+
+    QDocumentQmlInfo::MutablePtr docinfo = QDocumentQmlInfo::create(document->file()->path());
+    docinfo->parse(source);
+
+    QDocumentQmlValueObjects* objects = docinfo->createObjects();
+
+    for ( QList<QProjectDocumentBinding*>::iterator it = bindings.begin(); it != bindings.end(); ++it) {
+        QProjectDocumentBinding* binding = *it;
+        connectBindingProperty(objects->root(), root, binding, source);
+    }
+
+    delete objects;
 }
 
 QDocumentQmlInfo::~QDocumentQmlInfo(){
