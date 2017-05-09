@@ -16,12 +16,14 @@
 
 #include "qlivecv.h"
 #include "qlivecvlog.h"
+#include "qlivecvengine.h"
+#include "qlivecvsettings.h"
+#include "qeditorsettings.h"
+
 #include "qlivecvarguments.h"
 #include "qstaticcontainer.h"
 #include "qlicensecontainer.h"
-#include "qlivecvmain.h"
-#include "qlivecvsettings.h"
-#include "qeditorsettings.h"
+#include "qlivepalettecontainer.h"
 
 #include "qdocumentcodeinterface.h"
 #include "qproject.h"
@@ -31,7 +33,6 @@
 #include "qprojectnavigationmodel.h"
 #include "qprojectdocumentmodel.h"
 #include "qprojectdocument.h"
-#include "qlivecvengine.h"
 
 #include "qdocumentqmlhandler.h"
 #include "qdocumentqmlinfo.h"
@@ -45,7 +46,6 @@
 #include <QQuickWindow>
 #include <QGuiApplication>
 
-#include "qlivepalettecontainer.h"
 
 namespace lcv{
 
@@ -75,6 +75,18 @@ QLiveCV::~QLiveCV(){
     delete m_engine;
 }
 
+/**
+ * Removes the application directory from the import paths. This is to avoid
+ * having duplicate possible imports from within the application:
+ *
+ * \code
+ * import live 1.0
+ * \endcode
+ *
+ * \code
+ * import plugins.live 1.0
+ * \endcode
+ */
 void QLiveCV::solveImportPaths(){
     QStringList importPaths = m_engine->engine()->importPathList();
     m_engine->engine()->setImportPathList(QStringList());

@@ -3,9 +3,8 @@ TARGET   = lcveditor
 QT      += core qml quick
 CONFIG  += qt
 
-win32:CONFIG(debug, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../../application/debug)
-else:win32:CONFIG(release, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../../application/release)
-else:unix: TARGET = $$quote($$OUT_PWD/../../application/lcveditor)
+win32:DLLDESTDIR = $$buildModePath($$DEPLOY_PWD)
+else:DESTDIR = $$buildModePath($$DEPLOY_PWD)
 
 DEFINES += Q_LCVEDITOR_LIB
 

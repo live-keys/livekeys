@@ -50,6 +50,8 @@ defineTest(includeRequired){
     }
 }
 
+# Returns '/debug', '/release' or '' according to the build mode
+
 defineReplace(buildModePathExtension){
     if($$USE_BUILD_MODE_PATHS){
         CONFIG(release, debug|release): return(/release)
@@ -58,14 +60,25 @@ defineReplace(buildModePathExtension){
     return("")
 }
 
+# Appends '/debug', '/release' or '' to the path according to the build mode
+# and returns the new path
+
 defineReplace(buildModePath){
     return($$1$$buildModePathExtension())
 }
 
+# Links a local library to the current project
+#
+# Args: (path, name, [include_dir])
+#  * path: path to the library from root
+#  * name: name of the library
+#  * include_dir: include dir path(defaults to library path in source tree + '/src')
+
 defineTest(linkLocalLibrary){
-    LIB_PATH = $$OUT_PWD/$$buildModePath($$1)
+    win32:LIB_PATH = $$BUILD_PWD/$$buildModePath($$1)
+    else:LIB_PATH = $$DEPLOY_PWD
     LIB_NAME = $$2
-    LIB_INCLUDE_PATH = $$1/src
+    LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/src
     !isEmpty($$3):LIB_INCLUDE_PATH=$$3
 
     LIBS += -L$$LIB_PATH -l$$LIB_NAME
@@ -75,6 +88,15 @@ defineTest(linkLocalLibrary){
     export(INCLUDEPATH)
     export(DEPENDPATH)
 
-#    VERBOSE = true
     !isEmpty($$VERBOSE):message(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH)
+}
+
+
+defineReplace(deployLocalDirCommand){
+    DEPLOY_FROM = $$shell_path($$1)
+    DEPLOY_TO = $$shell_path($$buildModePath($$DEPLOY_PWD)/$$2)
+
+    !isEmpty($$VERBOSE):message(Deploy: $$DEPLOY_FROM to $$DEPLOY_TO)
+
+    return($(COPY_DIR) \"$$DEPLOY_FROM\" \"$$DEPLOY_TO\")
 }
