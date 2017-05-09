@@ -1,6 +1,3 @@
-# TODO Clarify: "live" actually seems to be a plugin. Why is it in lib?
-# TODO handle "live" properly
-
 
 TEMPLATE = subdirs
 
@@ -9,8 +6,8 @@ SUBDIRS += \
     qmljsparser
 
 # --- Subdir configuration ---
-lcveditor.subdir    = $$PATH_SOURCE_EDITOR_LCVEDITOR
-qmljsparser.subdir  = $$PATH_SOURCE_EDITOR_QMLJSPARSER
+lcveditor.subdir    = $$PWD/lcveditor
+qmljsparser.subdir  = $$PWD/qmljsparser
 
 # --- Dependency configuration ---
-qmljsparser.depend  = lcveditor
+qmljsparser.depends  = lcveditor

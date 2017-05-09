@@ -2,23 +2,30 @@ TEMPLATE = app
 TARGET   = livecv
 QT      += qml quick
 
-include($$getConfigFile(use_lcveditor.pri))
-include($$getConfigFile(use_qmljsparser.pri))
-include($$getConfigFile(use_plugin_live.pri))
+linkLocalLibrary(../editor/lcveditor, lcveditor)
+linkLocalLibrary(../editor/qmljsparser, qmljsparser)
+linkLocalLibrary(../plugins/live, live)
 
-DESTDIR = $$PATH_DEPLOY_APPLICATION
+#DESTDIR = $$PATH_DEPLOY_APPLICATION
 
 # Load library paths
 # ------------------
 
 unix{
+    QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN\''
+}
 
-    QMAKE_LFLAGS += \
-        "-Wl,-rpath,\'\$$ORIGIN\'" \
-        "-Wl,-rpath,\'\$$ORIGIN/plugins\'" \
-        "-Wl,-rpath,\'\$$ORIGIN/plugins/live\'" \
-        "-Wl,-rpath,\'\$$ORIGIN/plugins/lcvcore\'"
+##TODO: Revert
+win32{
+    Release:DESTDIR = release/../release #fix for app current path
+    Release:OBJECTS_DIR = release/.obj
+    Release:MOC_DIR = release/.moc
+    Release:RCC_DIR = release/.rcc
 
+    Debug:DESTDIR = debug/../debug #fix for app current path
+    Debug:OBJECTS_DIR = debug/.obj
+    Debug:MOC_DIR = debug/.moc
+    Debug:RCC_DIR = debug/.rcc
 }
 
 # Application
@@ -32,16 +39,6 @@ RC_ICONS = $$PWD/icons/livecv.ico
 RESOURCES += $$PWD/application.qrc
 
 OTHER_FILES += \
-    qml/*
+    $$PWD/qml/*.qml
 
-PLUGIN_DEPLOY_FROM  = $$shell_path($$PATH_SOURCE_APPLICATION/qml)
-PLUGIN_DEPLOY_TO    = $$shell_path($$PATH_DEPLOY_APPLICATION)
-
-plugincopy.commands = $$QMAKE_COPY_DIR $$PLUGIN_DEPLOY_FROM $$PLUGIN_DEPLOY_TO
-
-first.depends = $(first) plugincopy
-export(first.depends)
-export(plugincopy.commands)
-
-QMAKE_EXTRA_TARGETS += first plugincopy
 
