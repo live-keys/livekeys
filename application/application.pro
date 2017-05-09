@@ -2,31 +2,20 @@ TEMPLATE = app
 TARGET   = livecv
 QT      += qml quick
 
-linkLocalLibrary(../editor/lcveditor, lcveditor)
-linkLocalLibrary(../editor/qmljsparser, qmljsparser)
-linkLocalLibrary(../plugins/live, live)
-
-#DESTDIR = $$PATH_DEPLOY_APPLICATION
+linkLocalLibrary(editor/lcveditor, lcveditor)
+linkLocalLibrary(editor/qmljsparser, qmljsparser)
+linkLocalLibrary(plugins/live, live)
 
 # Load library paths
 # ------------------
 
 unix{
-    QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN\''
+    QMAKE_LFLAGS += \
+        '-Wl,-rpath,\'\$$ORIGIN\''
+        '-Wl,-rpath,\'\$$ORIGIN/plugins/live\''
 }
 
-##TODO: Revert
-win32{
-    Release:DESTDIR = release/../release #fix for app current path
-    Release:OBJECTS_DIR = release/.obj
-    Release:MOC_DIR = release/.moc
-    Release:RCC_DIR = release/.rcc
-
-    Debug:DESTDIR = debug/../debug #fix for app current path
-    Debug:OBJECTS_DIR = debug/.obj
-    Debug:MOC_DIR = debug/.moc
-    Debug:RCC_DIR = debug/.rcc
-}
+DESTDIR = $$buildModePath($$DEPLOY_PWD)
 
 # Application
 # -----------
