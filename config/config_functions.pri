@@ -49,3 +49,32 @@ defineTest(includeRequired){
         if($$VERBOSE): message(Included $$1)
     }
 }
+
+defineReplace(buildModePathExtension){
+    if($$USE_BUILD_MODE_PATHS){
+        CONFIG(release, debug|release): return(/release)
+        else: CONFIG(debug, debug|release): return(/debug)
+    }
+    return("")
+}
+
+defineReplace(buildModePath){
+    return($$1$$buildModePathExtension())
+}
+
+defineTest(linkLocalLibrary){
+    LIB_PATH = $$OUT_PWD/$$buildModePath($$1)
+    LIB_NAME = $$2
+    LIB_INCLUDE_PATH = $$1/src
+    !isEmpty($$3):LIB_INCLUDE_PATH=$$3
+
+    LIBS += -L$$LIB_PATH -l$$LIB_NAME
+    INCLUDEPATH += $$LIB_INCLUDE_PATH
+    DEPENDPATH  += $$LIB_INCLUDE_PATH
+    export(LIBS)
+    export(INCLUDEPATH)
+    export(DEPENDPATH)
+
+#    VERBOSE = true
+    !isEmpty($$VERBOSE):message(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH)
+}

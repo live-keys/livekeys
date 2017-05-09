@@ -16,7 +16,7 @@ isEmpty(PLUGIN_NAME): \
 isEmpty(PLUGIN_QML_DIR): \
     error($$_FILE_: Tried to set up a plugin with an empty PLUGIN_QML_DIR.)
 
-message(Configuring plugin $$PLUGIN_NAME)
+#message(Configuring plugin $$PLUGIN_NAME)
 
 TEMPLATE    = lib
 QT          += qml quick

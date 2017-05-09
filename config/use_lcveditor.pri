@@ -1,5 +1,7 @@
 # The configuration for projects depending on the lcveditor
 
+
+
 LCVEDITOR_INCLUDE_DIR = $$PATH_SOURCE_EDITOR_LCVEDITOR/src
 
 !exists($$LCVEDITOR_INCLUDE_DIR): \

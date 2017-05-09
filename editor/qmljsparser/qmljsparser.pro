@@ -1,11 +1,24 @@
 
-# Set the name of your library
-LIB_NAME = qmljsparser
-include($$getConfigFile(is_editor_lib.pri))
-include($$getConfigFile(use_lcveditor.pri))
+TEMPLATE = lib
+TARGET   = qmljsparser
+QT      += core qml quick xml
+CONFIG  += qt c++11
 
-QT      += xml
+linkLocalLibrary(../lcveditor, lcveditor)
+
 DEFINES += Q_QMLJSPARSER_LIB
+
+win32:CONFIG(debug, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../../application/debug)
+else:win32:CONFIG(release, debug|release): DLLDESTDIR = $$quote($$OUT_PWD/../../application/release)
+else:unix: TARGET = $$quote($$OUT_PWD/../../application/qmljsparser)
+
+## Set the name of your library
+#LIB_NAME = qmljsparser
+#include($$getConfigFile(is_editor_lib.pri))
+#include($$getConfigFile(use_lcveditor.pri))
+
+#QT      += xml
+#DEFINES += Q_QMLJSPARSER_LIB
 
 #ENABLE_PLUGINTYPES = true
 
