@@ -27,9 +27,9 @@ SUBDIRS += \
     plugins
 
 # --- Subdir configurations ---
-application.subdir  = $$PWD/application
-editor.subdir       = $$PWD/editor
-plugins.subdir      = $$PWD/plugins
+application.subdir  = application
+editor.subdir       = editor
+plugins.subdir      = plugins
 
 # --- Dependency configuration ---
 application.depends = editor plugins # because we have a dependency to the live plugin here
@@ -39,8 +39,17 @@ plugins.depends     = editor
 # Include the global configuration files since otherwise they would never show
 # up in your project
 OTHER_FILES += \
-    .qmake.conf \
-    $$CONFIG_DIR/*.pri
+    .qmake.conf
 
-include($$PWD/config/config_functions.pri)
-include($$PWD/config/config_paths.pri)
+# Set CONFIG_DIR_IN_PROJECT_TREE in your build environment for quick access
+# to qmake config files.
+# This may require re-opening the project in the qtcreator since it has some
+# issues with its file awareness
+!defined(CONFIG_DIR_IN_PROJECT_TREE, var){
+    OTHER_FILES *= $$CONFIG_DIR/*.pri
+}
+
+# NOTE: It is not required to explicitly
+#include($$PWD/config/config_functions.pri)
+#include($$PWD/config/config_paths.pri)
+# .qmkae.conf already does that for you project-wide.
