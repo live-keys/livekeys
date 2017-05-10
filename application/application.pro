@@ -6,8 +6,6 @@ linkLocalLibrary(editor/lcveditor, lcveditor)
 linkLocalLibrary(editor/qmljsparser, qmljsparser)
 linkLocalPlugin(plugins/live, live)
 
-printVar(LIBS)
-
 # Load library paths
 # ------------------
 
