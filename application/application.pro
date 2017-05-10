@@ -4,14 +4,16 @@ QT      += qml quick
 
 linkLocalLibrary(editor/lcveditor, lcveditor)
 linkLocalLibrary(editor/qmljsparser, qmljsparser)
-linkLocalLibrary(plugins/live, live)
+linkLocalPlugin(plugins/live, live)
+
+printVar(LIBS)
 
 # Load library paths
 # ------------------
 
 unix{
     QMAKE_LFLAGS += \
-        '-Wl,-rpath,\'\$$ORIGIN\''
+        '-Wl,-rpath,\'\$$ORIGIN\'' \
         '-Wl,-rpath,\'\$$ORIGIN/plugins/live\''
 }
 
