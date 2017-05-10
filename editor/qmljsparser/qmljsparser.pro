@@ -10,7 +10,7 @@ TARGET   = qmljsparser
 QT      += core qml quick xml
 CONFIG  += qt c++11
 
-linkLocalLibrary(../lcveditor, lcveditor)
+linkLocalLibrary(editor/lcveditor, lcveditor)
 
 DEFINES += Q_QMLJSPARSER_LIB
 

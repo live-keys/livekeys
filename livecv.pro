@@ -43,4 +43,3 @@ OTHER_FILES += \
     $$CONFIG_DIR/*.pri
 
 include($$PWD/config/config_functions.pri)
-include($$PWD/config/config_paths.pri)

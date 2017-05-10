@@ -31,8 +31,7 @@ win32{
 
     INCLUDEPATH += $${OPENCV_DIR_INCLUDE}
 
-    CONFIG(debug, debug|release):  OPENCV_DLL_DESTINATION = $$OUT_PWD/../../application/debug/
-    CONFIG(release, debug|release):OPENCV_DLL_DESTINATION = $$OUT_PWD/../../application/release/
+    OPENCV_DLL_DESTINATION = $$buildModePath($$DEPLOY_PWD)
 
     # Helper Function to copy dlls
 

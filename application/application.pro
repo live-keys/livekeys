@@ -4,7 +4,7 @@ QT      += qml quick
 
 linkLocalLibrary(editor/lcveditor, lcveditor)
 linkLocalLibrary(editor/qmljsparser, qmljsparser)
-linkLocalLibrary(plugins/live, live)
+linkLocalPlugin(live, live)
 
 # Load library paths
 # ------------------
@@ -12,7 +12,6 @@ linkLocalLibrary(plugins/live, live)
 unix{
     QMAKE_LFLAGS += \
         '-Wl,-rpath,\'\$$ORIGIN\''
-        '-Wl,-rpath,\'\$$ORIGIN/plugins/live\''
 }
 
 DESTDIR = $$buildModePath($$DEPLOY_PWD)
