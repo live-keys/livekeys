@@ -22,7 +22,7 @@ public:
 
     class RangeItem{
     public:
-        virtual ~QRangeItem(){}
+        virtual ~RangeItem(){}
 
         virtual QmlJS::AST::Node* getAst() = 0;
         virtual RangeItem* getParent() = 0;
