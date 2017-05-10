@@ -75,13 +75,42 @@ defineReplace(buildModePath){
 #  * include_dir: include dir path(defaults to library path in source tree + '/src')
 
 defineTest(linkLocalLibrary){
+
     win32:LIB_PATH = $$BUILD_PWD/$$buildModePath($$1)
     else:LIB_PATH = $$DEPLOY_PWD
     LIB_NAME = $$2
     LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/src
     !isEmpty($$3):LIB_INCLUDE_PATH=$$3
 
-    LIBS += -L$$LIB_PATH -l$$LIB_NAME
+    # use *= instead of += to prevent duplications of link path cofigurations
+    LIBS *= -L$$LIB_PATH
+    LIBS *= -l$$LIB_NAME
+    INCLUDEPATH += $$LIB_INCLUDE_PATH
+    DEPENDPATH  += $$LIB_INCLUDE_PATH
+    export(LIBS)
+    export(INCLUDEPATH)
+    export(DEPENDPATH)
+
+    !isEmpty($$VERBOSE):message(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH)
+}
+
+# Links a local library to the current project
+#
+# Args: (path, name, [include_dir])
+#  * path: path to the library from root
+#  * name: name of the library
+#  * include_dir: include dir path(defaults to library path in source tree + '/src')
+defineTest(linkLocalPlugin){
+
+    win32:LIB_PATH = $$BUILD_PWD/$$buildModePath($$1)
+    else:LIB_PATH = $$DEPLOY_PWD/$$1
+    LIB_NAME = $$2
+    LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/src
+    !isEmpty($$3):LIB_INCLUDE_PATH=$$3
+
+    # use *= instead of += to prevent duplications of link path cofigurations
+    LIBS *= -L$$LIB_PATH
+    LIBS *= -l$$LIB_NAME
     INCLUDEPATH += $$LIB_INCLUDE_PATH
     DEPENDPATH  += $$LIB_INCLUDE_PATH
     export(LIBS)
