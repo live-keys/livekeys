@@ -52,4 +52,4 @@ OTHER_FILES += \
 # NOTE: It is not required to explicitly
 #include($$PWD/config/config_functions.pri)
 #include($$PWD/config/config_paths.pri)
-# .qmkae.conf already does that for you project-wide.
+# .qmake.conf already does that for you project-wide.
