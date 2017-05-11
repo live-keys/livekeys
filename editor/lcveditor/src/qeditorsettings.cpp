@@ -12,7 +12,7 @@ QEditorSettings::QEditorSettings(const QString &path, QObject *parent)
     , m_fontSize(12)
     , m_path(path)
 {
-    reparse();
+    syncWithFile();
 }
 
 QEditorSettings::~QEditorSettings(){
@@ -31,10 +31,16 @@ QJsonObject QEditorSettings::toJson() const{
     return root;
 }
 
-void QEditorSettings::reparse(){
+void QEditorSettings::syncWithFile(){
     QFile file(m_path);
     if ( !file.exists() ){
         m_content = QJsonDocument(toJson()).toJson(QJsonDocument::Indented);
+        if ( file.open(QIODevice::WriteOnly) ){
+            file.write(m_content);
+            file.close();
+        } else {
+            qCritical("Failed to open settings file for writting: %s", qPrintable(m_path));
+        }
     } else if ( file.open(QIODevice::ReadOnly) ){
         init(file.readAll());
         file.close();

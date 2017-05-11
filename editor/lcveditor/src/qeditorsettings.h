@@ -25,7 +25,7 @@ public:
     QJsonObject toJson() const;
 
 public slots:
-    void reparse();
+    void syncWithFile();
     void init(const QByteArray& data);
     const QByteArray& content() const;
     void documentOpened(lcv::QProjectDocument* document);
