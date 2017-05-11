@@ -81,7 +81,7 @@ namespace{
 
         QQmlProperty pp(root);
         if ( pp.isValid() ){
-            if ( pp.type() == QQmlProperty::Object &&
+            if ( pp.propertyTypeCategory() == QQmlProperty::Object &&
                  object->children.size() == 1 &&
                  position > object->children[0]->begin &&
                  position < object->children[0]->end )
@@ -89,7 +89,7 @@ namespace{
                 connectBindingProperty(
                     object->children[0], pp.read().value<QObject*>(), binding, source
                 );
-            } else if ( pp.type() == QQmlProperty::List ){
+            } else if ( pp.propertyTypeCategory() == QQmlProperty::List ){
                 QQmlListReference ppref = qvariant_cast<QQmlListReference>(pp.read());
 
                 if ( ppref.canAt() && ppref.canCount() ){

@@ -22,10 +22,13 @@ public:
 
     class RangeItem{
     public:
+        virtual ~RangeItem(){}
+
         virtual QmlJS::AST::Node* getAst() = 0;
         virtual RangeItem* getParent() = 0;
         virtual void appendObject(RangeObject* child) = 0;
         virtual void appendProperty(RangeProperty*){}
+
     };
 
     class RangeProperty : public RangeItem{
