@@ -16,7 +16,7 @@ else:DESTDIR = $$buildModePath($$DEPLOY_PWD)/plugins/$$PLUGIN_PATH
 
 # Dependencies
 
-linkLocalPlugin(plugins/live, live)
+linkLocalPlugin(live, live)
 
 # Deploying qml is handled by the is_plugin configuration
 
