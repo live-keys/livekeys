@@ -93,7 +93,7 @@ defineTest(linkLocalLibrary){
     debug(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH, 1)
 }
 
-# Links a local library to the current project
+# Links a local plugin to the current project
 #
 # Args: (path, name, [include_dir])
 #  * path: path to the library from root
@@ -136,7 +136,7 @@ defineTest(linkLocalPlugin){
 defineReplace(deployDirCommand){
     DEPLOY_FROM = $$shell_path($$shell_quote($$1))
     DEPLOY_TO = $$shell_path($$shell_quote($$2))
-
+    
     debug(Deploy $$DEPLOY_FROM to $$DEPLOY_TO, 1)
 
     return($$QMAKE_COPY_DIR $$DEPLOY_FROM $$DEPLOY_TO)
