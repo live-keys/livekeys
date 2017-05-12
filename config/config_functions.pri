@@ -120,7 +120,7 @@ defineTest(linkLocalPlugin){
 
 
 defineReplace(deployLocalDirCommand){
-    DEPLOY_FROM = $$shell_path($$1)
+    DEPLOY_FROM = $$shell_path($$1/.)
     DEPLOY_TO = $$shell_path($$buildModePath($$DEPLOY_PWD)/$$2)
 
     !isEmpty($$VERBOSE):message(Deploy: $$DEPLOY_FROM to $$DEPLOY_TO)
