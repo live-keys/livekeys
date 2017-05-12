@@ -1,17 +1,4 @@
 
-
-
-# Generate the build path extension according to the build mode
-#!defined(BUILD_MODE_PATH_EXT){
-#    if($$USE_BUILD_MODE_PATHS){
-#              CONFIG(release, debug|release):   BUILD_MODE_PATH_EXT = /release
-#        else: CONFIG(debug,   debug|release):   BUILD_MODE_PATH_EXT = /debug
-#        else: error(Failed to determine build mode. Expected 'debug' or 'release'.)
-#    } else { # not using build mode paths
-#        BUILD_MODE_PATH_EXT = # Append nothing to the build path
-#    }
-#}
-
 # --- Shared subpaths ---
 # These subpaths are equal relative to the root of the source tree,
 # build tree and deployment tree
@@ -48,8 +35,8 @@ initVar(PATH_SOURCE_PLUGINS_PHOTO,      $$PATH_SOURCE_ROOT/$$SUBPATH_PLUGINS_PHO
 initVar(PATH_SOURCE_PLUGINS_VIDEO,      $$PATH_SOURCE_ROOT/$$SUBPATH_PLUGINS_VIDEO)
 
 # --- Deploy tree paths ---
-# NOTE: DEPLOY_PWD_PWD is defined in .qmake.conf to be globally viable
-initVar(PATH_DEPLOY_PWD,                $$DEPLOY_PWD_PWD$$BUILD_MODE_PATH_EXT) # c.f. Above
+# NOTE: DEPLOY_PWD is defined in .qmake.conf to be globally viable
+initVar(PATH_DEPLOY_PWD,                 $$DEPLOY_PWD)
 initVar(PATH_DEPLOY_APPLICATION,         $$PATH_DEPLOY_PWD)
 initVar(PATH_DEPLOY_EDITOR,              $$PATH_DEPLOY_PWD/$$SUBPATH_EDITOR)
 initVar(PATH_DEPLOY_EDITOR_LCVEDITOR,    $$PATH_DEPLOY_PWD/$$SUBPATH_EDITOR_LCVEDITOR)

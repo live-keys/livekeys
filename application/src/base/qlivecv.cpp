@@ -88,18 +88,22 @@ QLiveCV::~QLiveCV(){
  * \endcode
  */
 void QLiveCV::solveImportPaths(){
+
+    // Remove the application base dir from the import paths
+    // TODO: document why
     QStringList importPaths = m_engine->engine()->importPathList();
-    m_engine->engine()->setImportPathList(QStringList());
-    for ( QStringList::iterator it = importPaths.begin(); it != importPaths.end(); ++it ){
-        if ( *it != dir() )
-            m_engine->engine()->addImportPath(*it);
-    }
+    importPaths.removeAll(dir());
+    m_engine->engine()->setImportPathList(importPaths);
+
+    // Add the plugins directory to the import paths
     m_engine->engine()->addImportPath(dir() + "/plugins");
 }
 
 void QLiveCV::loadLibrary(const QString &library){
+
     m_lcvlib.setFileName(library);
     m_lcvlib.load();
+
 }
 
 void QLiveCV::loadQml(const QUrl &url){
