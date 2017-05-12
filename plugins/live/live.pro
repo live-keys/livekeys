@@ -1,31 +1,12 @@
-#include($$getConfigFile(is_plugin.pri))
-
 PLUGIN_NAME = live
-PLUGIN_PATH = live
+PLUGIN_PATH = $$PWD
 
-TEMPLATE = lib
-TARGET   = $$PLUGIN_NAME
-QT      += qml quick
-CONFIG  += qt plugin
+# PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
+include($$getConfigFile(is_plugin.pri))
 
 DEFINES += Q_LIVE_LIB
 
-# Destination
-
-win32:DLLDESTDIR = $$buildModePath($$DEPLOY_PWD)
-else:DESTDIR = $$buildModePath($$DEPLOY_PWD)
-
 uri = plugins.live
-
-# Deploy qml
-
-qmlcopy.commands     = $$deployLocalDirCommand($$PWD/qml, plugins/$$PLUGIN_PATH)
-palettecopy.commands = $$deployLocalDirCommand($$PWD/palettes, plugins/$$PLUGIN_PATH/palettes)
-first.depends = $(first) qmlcopy palettecopy
-export(first.depends)
-export(qmlcopy.commands)
-export(palettecopy.commands)
-QMAKE_EXTRA_TARGETS += first qmlcopy palettecopy
 
 # Source
 
@@ -43,3 +24,11 @@ OTHER_FILES *= \
     palettes/palettedir \
     palettes/*.qml
 
+# Deploy The palette
+
+palettecopy.commands = $$deployDirCommand($$PWD/palettes, $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME)
+first.depends = $(first) qmlcopy palettecopy
+export(first.depends)
+export(qmlcopy.commands)
+export(palettecopy.commands)
+QMAKE_EXTRA_TARGETS += first palettecopy

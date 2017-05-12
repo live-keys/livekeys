@@ -1,13 +1,8 @@
-#PLUGIN_QML_DIR = $$PATH_SOURCE_PLUGINS_FEATURES2D/qml
-#include($$getConfigFile(is_plugin.pri))
-
 PLUGIN_NAME = lcvfeatures2d
-PLUGIN_PATH = lcvfeatures2d
+PLUGIN_PATH = $$PWD
 
-TEMPLATE = lib
-TARGET   = $$PLUGIN_NAME
-QT      += qml quick
-CONFIG  += qt plugin
+# PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
+include($$getConfigFile(is_plugin.pri))
 
 uri = plugins.lcvfeatures2d
 
@@ -24,13 +19,7 @@ else:DESTDIR = $$buildModePath($$DEPLOY_PWD)/plugins/$$PLUGIN_PATH
 linkLocalPlugin(live,    live)
 linkLocalPlugin(lcvcore, lcvcore)
 
-# Deploy qml
-
-qmlcopy.commands = $$deployLocalDirCommand($$PWD/qml, plugins/$$PLUGIN_PATH)
-first.depends = $(first) qmlcopy
-export(first.depends)
-export(qmlcopy.commands)
-QMAKE_EXTRA_TARGETS += first qmlcopy
+# Deploying qml is handled by the is_plugin configuration
 
 # Source
 

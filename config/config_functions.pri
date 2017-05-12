@@ -76,8 +76,7 @@ defineReplace(buildModePath){
 
 defineTest(linkLocalLibrary){
 
-    win32:LIB_PATH = $$BUILD_PWD/$$buildModePath($$1)
-    else:LIB_PATH = $$DEPLOY_PWD
+    LIB_PATH = $$DEPLOY_PWD
     LIB_NAME = $$2
     LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/src
     !isEmpty($$3):LIB_INCLUDE_PATH=$$3
@@ -91,7 +90,7 @@ defineTest(linkLocalLibrary){
     export(INCLUDEPATH)
     export(DEPENDPATH)
 
-    !isEmpty($$VERBOSE):message(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH)
+    debug(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH, 1)
 }
 
 # Links a local library to the current project
@@ -100,12 +99,12 @@ defineTest(linkLocalLibrary){
 #  * path: path to the library from root
 #  * name: name of the library
 #  * include_dir: include dir path(defaults to library path in source tree + '/src')
+#
 defineTest(linkLocalPlugin){
 
-    win32:LIB_PATH = $$BUILD_PWD/$$buildModePath($$1)
-    else:LIB_PATH = $$DEPLOY_PWD/$$1
+    LIB_PATH = $$PATH_DEPLOY_PLUGINS/$$1
     LIB_NAME = $$2
-    LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/src
+    LIB_INCLUDE_PATH = $$PROJECT_ROOT/plugins/$$1/src
     !isEmpty($$3):LIB_INCLUDE_PATH=$$3
 
     # use *= instead of += to prevent duplications of link path cofigurations
@@ -117,42 +116,28 @@ defineTest(linkLocalPlugin){
     export(INCLUDEPATH)
     export(DEPENDPATH)
 
-    !isEmpty($$VERBOSE):message(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH)
+    debug(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH, 1)
 }
 
-# Links a local plugin to the current project
+# Generates the commands required for deploying directories by recursive copy.
+# This function takes care of quoting and OS dependent path transformations
 #
-# Args: (path, name, [include_dir])
-#  * path: relative path to the plugin from root/plugins
-#  * name: name of the library
-#  * include_dir: include dir path(defaults to library path in source tree + '/src')
+# Args: (from_dir, to_parent_dir)
+#  * from_dir: is the path to the directory that is to be copied
+#  * to_parent_dir: is the parent directory in which the copy will be placed
+#
+# Example:
+#
+# mycopy.command = $$deployDirCommand(foo foo, bar/baz)
+# # generates the command
+# # cp -f -R 'foo foo' bar/baz under Unix systems
+# # and would upon execution generate the directory 'bar/baz/foo foo'
+#
+defineReplace(deployDirCommand){
+    DEPLOY_FROM = $$shell_path($$shell_quote($$1))
+    DEPLOY_TO = $$shell_path($$shell_quote($$2))
 
-defineTest(linkLocalPlugin){
-    LIB_NAME = $$2
+    debug(Deploy $$DEPLOY_FROM to $$DEPLOY_TO, 1)
 
-    win32:LIB_PATH = $$BUILD_PWD/plugins/$$buildModePath($$1)
-    else:equals(LIB_NAME, "live"):LIB_PATH = $$DEPLOY_PWD # live gets special treatment
-    else:LIB_PATH = $$DEPLOY_PWD/plugins/$$buildModePath($$1)
-
-    LIB_INCLUDE_PATH = $$PROJECT_ROOT/plugins/$$1/src
-    !isEmpty($$3):LIB_INCLUDE_PATH=$$3
-
-    LIBS *= -L$$LIB_PATH -l$$LIB_NAME
-    INCLUDEPATH += $$LIB_INCLUDE_PATH
-    DEPENDPATH  += $$LIB_INCLUDE_PATH
-    export(LIBS)
-    export(INCLUDEPATH)
-    export(DEPENDPATH)
-
-    !isEmpty($$VERBOSE):message(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH)
-}
-
-
-defineReplace(deployLocalDirCommand){
-    DEPLOY_FROM = $$shell_path($$1)
-    DEPLOY_TO = $$shell_path($$buildModePath($$DEPLOY_PWD)/$$2)
-
-    !isEmpty($$VERBOSE):message(Deploy: $$DEPLOY_FROM to $$DEPLOY_TO)
-
-    return($(COPY_DIR) \"$$DEPLOY_FROM\" \"$$DEPLOY_TO\")
+    return($$QMAKE_COPY_DIR $$DEPLOY_FROM $$DEPLOY_TO)
 }
