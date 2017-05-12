@@ -9,11 +9,6 @@ uri = plugins.lcvvideo
 DEFINES += Q_LCV
 DEFINES += Q_LCVVIDEO_LIB
 
-# Destination
-
-win32:DLLDESTDIR = $$buildModePath($$DEPLOY_PWD)/plugins/$$PLUGIN_PATH
-else:DESTDIR = $$buildModePath($$DEPLOY_PWD)/plugins/$$PLUGIN_PATH
-
 # Dependencies
 
 linkLocalPlugin(live, live)
