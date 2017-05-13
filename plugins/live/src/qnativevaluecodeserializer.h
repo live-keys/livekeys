@@ -16,8 +16,8 @@ public:
     explicit QNativeValueCodeSerializer(QObject *parent = 0);
     ~QNativeValueCodeSerializer();
 
-    QString toCode(const QJSValue& value);
-    QJSValue fromCode(const QString& value);
+    QString toCode(const QVariant& value);
+    QVariant fromCode(const QString& value);
 };
 
 }// namespace

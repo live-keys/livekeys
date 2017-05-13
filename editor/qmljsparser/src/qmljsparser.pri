@@ -19,7 +19,8 @@ HEADERS += \
     $$PWD/qprojectqmlscopecontainer_p.h \
     $$PWD/qplugininfoextractor.h \
     $$PWD/qdocumentqmlvalueobjects.h \
-    $$PWD/qdocumentqmlvaluescanner_p.h
+    $$PWD/qdocumentqmlvaluescanner_p.h \
+    $$PWD/qdocumentqmlfragment.h
 
 SOURCES += \
     $$PWD/qdocumentqmlinfo.cpp \
@@ -36,4 +37,5 @@ SOURCES += \
     $$PWD/qqmllibrarydependency.cpp \
     $$PWD/qplugininfoextractor.cpp \
     $$PWD/qdocumentqmlvalueobjects.cpp \
-    $$PWD/qdocumentqmlvaluescanner.cpp
+    $$PWD/qdocumentqmlvaluescanner.cpp \
+    $$PWD/qdocumentqmlfragment.cpp

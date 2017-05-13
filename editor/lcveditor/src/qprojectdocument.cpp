@@ -411,7 +411,7 @@ QProjectDocumentBinding::~QProjectDocumentBinding(){
 }
 
 void QProjectDocumentBinding::updateValue(){
-    m_document->updateBindingValue(this, "{\n" + sender()->property(propertyChain.last().toUtf8()).toString() + "\n}");
+    m_document->updateBindingValue(this, sender()->property(propertyChain.last().toUtf8()).toString());
 }
 
 }// namespace

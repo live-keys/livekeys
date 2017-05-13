@@ -12,7 +12,7 @@ class Q_LIVE_EXPORT QLivePalette : public QCodeConverter{
 
     Q_OBJECT
     Q_PROPERTY(QQuickItem* item READ item  WRITE setItem  NOTIFY itemChanged)
-//    Q_PROPERTY(QVariant value   READ value NOTIFY valueChanged)
+    Q_PROPERTY(QVariant value   READ value WRITE setValue NOTIFY valueChanged)
 
 public:
     explicit QLivePalette(QObject *parent = 0);
@@ -21,16 +21,25 @@ public:
     QQuickItem* item();
     void setItem(QQuickItem* item);
 
+    const QVariant &value() const;
+    void setValue(const QVariant& value);
+
+    void initPallete(const QVariant &value);
+    void setValueFromCode(const QVariant& value);
+
 signals:
     void itemChanged();
+    void valueChanged();
 
-public slots:
-    void initPallete(const QString& code);
+    void init(const QVariant& value);
+    void codeChanged(const QVariant& value);
 
 private:
     Q_DISABLE_COPY(QLivePalette)
 
+    bool        m_codeChange;
     QQuickItem* m_item;
+    QVariant    m_value;
 };
 
 inline QQuickItem *QLivePalette::item(){
@@ -43,6 +52,17 @@ inline void QLivePalette::setItem(QQuickItem *item){
 
     m_item = item;
     emit itemChanged();
+}
+
+inline const QVariant& QLivePalette::value() const{
+    return m_value;
+}
+
+inline void QLivePalette::setValue(const QVariant &value){
+    if ( m_value != value && !m_codeChange ){
+        m_value = value;
+        emit valueChanged();
+    }
 }
 
 }// namespace

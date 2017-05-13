@@ -28,12 +28,15 @@ class QQuickTextDocument;
 
 namespace lcv{
 
+class QDocumentCodeState;
+class QLivePalette;
 class QLivePaletteContainer;
 class Q_LCVEDITOR_EXPORT QDocumentCodeInterface : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QQuickTextDocument* target                 READ target          WRITE setTarget NOTIFY targetChanged)
     Q_PROPERTY(lcv::QCodeCompletionModel* completionModel READ completionModel CONSTANT)
+    Q_PROPERTY(lcv::QLivePalette* palette                 READ palette         NOTIFY paletteChanged)
 
 public:
     explicit QDocumentCodeInterface(
@@ -48,10 +51,14 @@ public:
 
     lcv::QCodeCompletionModel* completionModel() const;
 
+    QLivePalette* palette();
+
     void enableSilentEditing();
     void disableSilentEditing();
 
     void rehighlightBlock(const QTextBlock& block);
+
+    QDocumentCodeState* state();
 
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
@@ -65,14 +72,24 @@ public slots:
     bool canUnbind(int position, int length);
     void unbind(int position, int length);
     bool canEdit(int position);
-    void edit(int position);
+    void edit(int position, QObject* currentApp = 0);
+    bool canAdjust(int position);
+    void adjust(int position, QObject* currentApp = 0);
+    void commitEdit();
+    void cancelEdit();
+    bool isEditing();
+
+    void paletteValueChanged();
 
 signals:
     void targetChanged();
     void cursorPositionRequest(int position);
     void contentsChangedManually();
+    void paletteChanged();
 
 private:
+    void rehighlightSection(int position, int length);
+
     QChar                      m_lastChar;
     QQuickTextDocument*        m_target;
     QTextDocument*             m_targetDoc;
@@ -80,8 +97,11 @@ private:
     QAbstractCodeHandler*      m_codeHandler;
     QProjectDocument*          m_projectDocument;
     bool                       m_silentEditing;
+    bool                       m_paletteEditing;
     QLivePaletteContainer*     m_paletteContainer;
     bool                       m_autoInserting;
+
+    QDocumentCodeState*        m_state;
 };
 
 inline QQuickTextDocument *QDocumentCodeInterface::target(){
@@ -98,6 +118,10 @@ inline void QDocumentCodeInterface::enableSilentEditing(){
 
 inline void QDocumentCodeInterface::disableSilentEditing(){
     m_silentEditing = false;
+}
+
+inline QDocumentCodeState *QDocumentCodeInterface::state(){
+    return m_state;
 }
 
 }// namespace

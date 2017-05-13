@@ -27,8 +27,11 @@ class QTextBlock;
 
 namespace lcv{
 
+class QDocumentCodeState;
+class QDocumentEditFragment;
 class QProjectDocument;
 class QProjectDocumentBinding;
+class QCodeConverter;
 
 class Q_LCVEDITOR_EXPORT QAbstractCodeHandler : public QObject{
 
@@ -54,7 +57,7 @@ public:
     explicit QAbstractCodeHandler(QObject* parent = 0);
     virtual ~QAbstractCodeHandler();
 
-    virtual void setTarget(QTextDocument* target) = 0;
+    virtual void setTarget(QTextDocument* target, QDocumentCodeState* state) = 0;
     virtual void assistCompletion(
         const QTextCursor& cursor,
         const QChar& insertion,
@@ -67,6 +70,11 @@ public:
     virtual void rehighlightBlock(const QTextBlock &block) = 0;
     virtual QList<CodeProperty> getProperties(const QTextCursor& cursor) = 0;
     virtual void connectBindings(QList<QProjectDocumentBinding*> bindings, QObject* root) = 0;
+    virtual QDocumentEditFragment* createInjectionChannel(
+        const CodeProperty& property,
+        QObject* runtime,
+        QCodeConverter* converter
+    ) = 0;
 };
 
 }// namespace

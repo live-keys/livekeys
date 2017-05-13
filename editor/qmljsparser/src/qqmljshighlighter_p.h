@@ -28,6 +28,8 @@
 #include <QSyntaxHighlighter>
 
 #include "qprojectdocument.h"
+#include "qdocumentcodestate.h"
+#include "qdocumenteditfragment.h"
 
 /**
  * @brief The QCodeJSHighlighter is a private class used internally by QCodeHandler.
@@ -55,7 +57,7 @@ public:
     };
 
 public:
-    QQmlJsHighlighter(QTextDocument *parent = 0);
+    QQmlJsHighlighter(QTextDocument *parent = 0, lcv::QDocumentCodeState* state = 0);
 
     void setColor(ColorComponent component, const QColor &color);
     void mark(const QString &str, Qt::CaseSensitivity caseSensitivity);
@@ -72,11 +74,14 @@ private:
     QHash<ColorComponent, QColor> m_colors;
     QString m_markString;
     Qt::CaseSensitivity m_markCaseSensitivity;
+
+    lcv::QDocumentCodeState* m_documentState;
 };
 
-QQmlJsHighlighter::QQmlJsHighlighter(QTextDocument *parent)
-: QSyntaxHighlighter(parent)
-, m_markCaseSensitivity(Qt::CaseInsensitive){
+QQmlJsHighlighter::QQmlJsHighlighter(QTextDocument *parent, lcv::QDocumentCodeState *state)
+    : QSyntaxHighlighter(parent)
+    , m_markCaseSensitivity(Qt::CaseInsensitive)
+    , m_documentState(state){
 
     // default color scheme
     m_colors[Normal]     = QColor("#fff");
@@ -486,6 +491,19 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
 
     blockState = (state & 15) | (generated << 4) | (bracketLevel << 5);
     setCurrentBlockState(blockState);
+
+    if ( m_documentState && m_documentState->editingFragment() ){
+        int position = m_documentState->editingFragment()->position();
+        int length   = m_documentState->editingFragment()->length();
+        if ( position + length >= currentBlock().position() &&
+             position < currentBlock().position() + currentBlock().length())
+        {
+            QTextCharFormat ctf;
+            ctf.setBackground(QColor("#0b273f"));
+            int from = position - currentBlock().position();
+            setFormat(from < 0 ? 0 : from, length, ctf);
+        }
+    }
 }
 
 void QQmlJsHighlighter::mark(const QString &str, Qt::CaseSensitivity caseSensitivity){
