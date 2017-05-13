@@ -17,6 +17,10 @@
 #include "qdocumentcodeinterface.h"
 #include "qprojectdocument.h"
 #include "qprojectfile.h"
+#include "qlivepalette.h"
+#include "qlivepalettecontainer.h"
+#include "qdocumenteditfragment.h"
+#include "qdocumentcodestate.h"
 #include <QQuickTextDocument>
 #include <QTextDocument>
 #include <QTextDocumentFragment>
@@ -24,6 +28,13 @@
 #include <QTextBlock>
 
 #include <QTextList>
+
+#define QDOCUMENT_CODE_INTERFACE_DEBUG_FLAG
+#ifdef QDOCUMENT_CODE_INTERFACE_DEBUG_FLAG
+#define QDOCUMENT_CODE_INTERFACE_DEBUG(_param) qDebug() << "DOCUMENT HANDLER:" << (_param)
+#else
+#define QDOCUMENT_CODE_INTERFACE_DEBUG(_param)
+#endif
 
 namespace lcv{
 
@@ -39,6 +50,8 @@ QDocumentCodeInterface::QDocumentCodeInterface(QAbstractCodeHandler *handler,
     , m_paletteContainer(paletteContainer)
     , m_autoInserting(false)
     , m_silentEditing(false)
+    , m_paletteEditing(false)
+    , m_state(new QDocumentCodeState)
 {
 }
 
@@ -65,7 +78,7 @@ void QDocumentCodeInterface::setTarget(QQuickTextDocument *target){
                     );
                 }
             }
-            m_codeHandler->setTarget(m_targetDoc);
+            m_codeHandler->setTarget(m_targetDoc, m_state);
             if ( m_projectDocument ){
                 enableSilentEditing();
                 m_targetDoc->setPlainText(m_projectDocument->content());
@@ -78,9 +91,84 @@ void QDocumentCodeInterface::setTarget(QQuickTextDocument *target){
     }
 }
 
+QLivePalette *QDocumentCodeInterface::palette(){
+    if ( !m_state->editingFragment() )
+        return 0;
+    return qobject_cast<QLivePalette*>(m_state->editingFragment()->converter());
+}
+
 void QDocumentCodeInterface::rehighlightBlock(const QTextBlock &block){
     if ( m_codeHandler )
         m_codeHandler->rehighlightBlock(block);
+}
+
+void QDocumentCodeInterface::commitEdit(){
+    if ( m_state->editingFragment() ){
+        int position = m_state->editingFragment()->position();
+        int length   = m_state->editingFragment()->length();
+
+        QCodeConverter* converter = m_state->editingFragment()->converter();
+        if ( converter ){
+            QTextCursor tc(m_targetDoc);
+            tc.setPosition(position);
+            tc.setPosition(position + length, QTextCursor::KeepAnchor);
+            QString commitText = tc.selectedText();
+            m_state->editingFragment()->commit(
+                converter->serialize()->fromCode(commitText)
+            );
+            QDOCUMENT_CODE_INTERFACE_DEBUG("Commited edit of size: " + QString::number(commitText.size()));
+        } else {
+            emit contentsChangedManually();
+        }
+
+        disconnect(palette(), SIGNAL(valueChanged()), this, SLOT(paletteValueChanged()));
+        m_state->clearEditingFragment();
+        rehighlightSection(position, length);
+        emit paletteChanged();
+        disableSilentEditing();
+    }
+}
+
+void QDocumentCodeInterface::cancelEdit(){
+    if ( m_state->editingFragment() ){
+        int position = m_state->editingFragment()->position();
+        int length   = m_state->editingFragment()->length();
+        disconnect(palette(), SIGNAL(valueChanged()), this, SLOT(paletteValueChanged()));
+        m_state->clearEditingFragment();
+        emit paletteChanged();
+        rehighlightSection(position, length);
+        disableSilentEditing();
+    }
+}
+
+bool QDocumentCodeInterface::isEditing(){
+    return (m_state->editingFragment() != 0);
+}
+
+void QDocumentCodeInterface::paletteValueChanged(){
+    QString code = palette()->serialize()->toCode(palette()->value());
+
+    m_paletteEditing = true;
+    QDocumentEditFragment* frg = m_state->editingFragment();
+    QTextCursor tc(m_targetDoc);
+    tc.setPosition(frg->position());
+    tc.setPosition(frg->position() + frg->length(), QTextCursor::KeepAnchor);
+    tc.beginEditBlock();
+    tc.removeSelectedText();
+    tc.insertText(code);
+    tc.endEditBlock();
+    m_paletteEditing = false;
+}
+
+void QDocumentCodeInterface::rehighlightSection(int position, int length){
+    QTextBlock bl = m_targetDoc->findBlock(position);
+    int end = position + length;
+    while ( bl.isValid() ){
+        m_codeHandler->rehighlightBlock(bl);
+        if (bl.position() > end )
+            break;
+        bl = bl.next();
+    }
 }
 
 void QDocumentCodeInterface::insertCompletion(int from, int to, const QString &completion){
@@ -124,6 +212,25 @@ void QDocumentCodeInterface::documentContentsChanged(int position, int charsRemo
         emit contentsChangedManually();
 
     } else if ( m_projectDocument ){
+        QDocumentEditFragment* frg = m_state->editingFragment();
+        if ( frg ){
+            if ( position >= frg->position() && position <= frg->position() + frg->length() ){
+                frg->updateLength(frg->length() - charsRemoved + charsAdded);
+                if ( frg->actionType() == QDocumentEditFragment::Adjust ){
+                    if ( m_paletteEditing ){
+                        m_state->editingFragment()->commit(palette()->value());
+                    } else {
+                        // TODO: Mb add timer
+                        QTextCursor tc(m_targetDoc);
+                        tc.setPosition(frg->position());
+                        tc.setPosition(frg->position() + frg->length(), QTextCursor::KeepAnchor);
+                        palette()->setValueFromCode(palette()->serialize()->fromCode(tc.selectedText()));
+                    }
+                }
+            } else {
+                cancelEdit();
+            }
+        }
         m_projectDocument->documentContentsSilentChanged(position, charsRemoved, addedText);
     }
 }
@@ -221,7 +328,6 @@ void QDocumentCodeInterface::bind(int position, int length, QObject *object){
 
     // Bind properties to engine and rehighlight
     if ( m_targetDoc ){
-
         if ( object )
             m_codeHandler->connectBindings(addedBindings, object);
 
@@ -276,13 +382,14 @@ bool QDocumentCodeInterface::canEdit(int position){
     if ( properties.isEmpty() )
         return false;
 
-    //TODO: Lookup converter
     return true;
 }
 
-void QDocumentCodeInterface::edit(int position){
+void QDocumentCodeInterface::edit(int position, QObject *currentApp){
     if ( !m_projectDocument || !m_codeHandler )
         return;
+
+    cancelEdit();
 
     QTextCursor cursor(m_target->textDocument());
     cursor.setPosition(position);
@@ -291,8 +398,79 @@ void QDocumentCodeInterface::edit(int position){
     if ( properties.isEmpty() )
         return;
 
-    //TODO: Lookup converter
-    qDebug() << "LOOK FOR CONVERTER:" << properties.first().type;
+    QCodeConverter* converter = m_paletteContainer->findPalette(properties.first().type);
+    if ( converter ){
+        QDOCUMENT_CODE_INTERFACE_DEBUG("Found Converter for type: \'" + properties.first().type + "\'");
+        QDocumentEditFragment* ef = m_codeHandler->createInjectionChannel(properties.first(), currentApp, converter);
+        m_state->setEditingFragment(ef);
+    }
+
+    //TODO: Check value extend(doesn't work all the time)
+
+    if ( !m_state->editingFragment() ){
+        QDOCUMENT_CODE_INTERFACE_DEBUG("Channel or converter missing for type: \'" + properties.first().type + "\'");
+
+        //TODO: Find value offset + length
+//        m_state->setEditingFragment(new QDocumentEditFragment(properties.first().position, properties.first().length));
+    }
+
+    if ( m_state->editingFragment() ){
+        emit cursorPositionRequest(m_state->editingFragment()->position());
+        enableSilentEditing();
+        rehighlightSection(properties.first().position, properties.first().length);
+    }
+
+}
+
+bool QDocumentCodeInterface::canAdjust(int position){
+    if ( !m_projectDocument || !m_codeHandler )
+        return false;
+
+    QTextCursor cursor(m_target->textDocument());
+    cursor.setPosition(position);
+
+    QList<QAbstractCodeHandler::CodeProperty> properties = m_codeHandler->getProperties(cursor);
+    if ( properties.isEmpty() )
+        return false;
+
+    QCodeConverter* converter = m_paletteContainer->findPalette(properties.first().type);
+    QLivePalette* palette = qobject_cast<QLivePalette*>(converter);
+    return (palette != 0);
+}
+
+void QDocumentCodeInterface::adjust(int position, QObject *currentApp){
+    if ( !m_projectDocument || !m_codeHandler )
+        return;
+
+    cancelEdit();
+
+    QTextCursor cursor(m_target->textDocument());
+    cursor.setPosition(position);
+
+    QList<QAbstractCodeHandler::CodeProperty> properties = m_codeHandler->getProperties(cursor);
+    if ( properties.isEmpty() )
+        return;
+
+    QCodeConverter* converter = m_paletteContainer->findPalette(properties.first().type);
+    QLivePalette* palette = qobject_cast<QLivePalette*>(converter);
+    if ( palette ){
+        QDocumentEditFragment* ef = m_codeHandler->createInjectionChannel(properties.first(), currentApp, converter);
+        ef->setActionType(QDocumentEditFragment::Adjust);
+        QTextCursor codeCursor(m_targetDoc);
+        codeCursor.setPosition(ef->position());
+        codeCursor.setPosition(ef->position() + ef->length(), QTextCursor::KeepAnchor);
+
+        palette->init(palette->serialize()->fromCode(codeCursor.selectedText()));
+        connect(palette, SIGNAL(valueChanged()), this, SLOT(paletteValueChanged()));
+
+        m_state->setEditingFragment(ef);
+        emit paletteChanged();
+
+        emit cursorPositionRequest(m_state->editingFragment()->position());
+        enableSilentEditing();
+        rehighlightSection(properties.first().position, properties.first().length);
+    }
+
 }
 
 }// namespace

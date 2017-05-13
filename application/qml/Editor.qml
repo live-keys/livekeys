@@ -30,6 +30,9 @@ Rectangle{
     signal toggleVisibility()
     signal toggleNavigation()
 
+    signal editFragment(int position)
+    signal adjustFragment(int position)
+
     signal bindProperties(int position, int length)
 
     property bool isDirtyMask: true
@@ -233,6 +236,8 @@ Rectangle{
                         codeHandler.generateCompletion(cursorPosition)
                         event.accepted = true
                     } else if ( event.key === Qt.Key_Escape ){
+                        if ( codeHandler.isEditing )
+                            codeHandler.cancelEdit()
                         codeHandler.completionModel.disable()
                     } else if ( event.key === Qt.Key_S && (event.modifiers & Qt.ControlModifier ) ){
                         editor.save()
@@ -254,6 +259,10 @@ Rectangle{
                         event.accepted = true
                     } else if ( event.key === Qt.Key_Backslash && (event.modifiers & Qt.ControlModifier ) ){
                         editor.toggleProject()
+                        event.accepted = true
+                    } else if ( event.key === Qt.Key_Return && (event.modifiers & Qt.ControlModifier) ){
+                        if ( codeHandler.isEditing )
+                            codeHandler.commitEdit()
                         event.accepted = true
                     } else if ( event.key === Qt.Key_PageUp ){
                         if ( codeHandler.completionModel.isEnabled ){
@@ -380,13 +389,23 @@ Rectangle{
                         )
                         editMenuItem.enabled = editorArea.selectionEnd - editorArea.selectionStart === 0 ?
                             codeHandler.canEdit(editorArea.cursorPosition) : false
+                        adjustMenuItem.enabled = editorArea.selectionEnd - editorArea.selectionStart === 0 ?
+                            codeHandler.canAdjust(editorArea.cursorPosition) : false
                     }
 
                     MenuItem {
                         id: editMenuItem
                         text: qsTr("Edit")
                         enabled: false
-                        onTriggered: codeHandler.edit(editorArea.cursorPosition)
+//                        onTriggered: codeHandler.edit(editorArea.cursorPosition)
+                        onTriggered: editor.editFragment(editorArea.cursorPosition)
+                    }
+                    MenuItem {
+                        id: adjustMenuItem
+                        text: qsTr("Adjust")
+                        enabled: false
+//                        onTriggered: codeHandler.edit(editorArea.cursorPosition)
+                        onTriggered: editor.adjustFragment(editorArea.cursorPosition)
                     }
                     MenuItem {
                         id: bindMenuItem

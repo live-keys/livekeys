@@ -19,6 +19,7 @@
 
 #include "qqmljsparserglobal.h"
 #include "qdocumentqmlobject.h"
+#include <QQmlProperty>
 #include <QSharedPointer>
 #include <QScopedPointer>
 #include <QMap>
@@ -130,6 +131,12 @@ public:
         const QString& source,
         QProjectDocument *document,
         QList<QProjectDocumentBinding*> bindings,
+        QObject* root
+    );
+    static QQmlProperty findMatchingProperty(
+        const QString& source,
+        QProjectDocument* document,
+        QProjectDocumentBinding* binding,
         QObject* root
     );
 

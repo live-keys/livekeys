@@ -607,6 +607,8 @@ ApplicationWindow{
                 onToggleNavigation: {
                     projectNavigation.visible = !projectNavigation.visible
                 }
+                onEditFragment: codeHandler.edit(position, tester.item)
+                onAdjustFragment: codeHandler.adjust(position, tester.item)
 
                 onBindProperties: codeHandler.bind(position, length, tester.item)
 
@@ -743,6 +745,39 @@ ApplicationWindow{
 
             }
 
+        }
+
+        Rectangle{
+            id: paletteBox
+            x: 0
+            y: visible ? 0 : 20
+            width: codeHandler.palette ? codeHandler.palette.item.width + 20: 0
+            height: codeHandler.palette ? codeHandler.palette.item.height + 20 : 0
+            color: "#08121a"
+            border.width: 1
+            border.color: "#132c3e"
+            visible: children.length > 0
+            opacity: visible ? 1 : 0
+            clip: true
+            Behavior on opacity{
+                NumberAnimation{ duration : 200 }
+            }
+            Behavior on y{
+                NumberAnimation{ duration : 200 }
+            }
+
+            Connections{
+                target: codeHandler
+                onPaletteChanged : {
+                    if ( codeHandler.palette ){
+                        codeHandler.palette.item.x = 10
+                        codeHandler.palette.item.y = 10
+                        paletteBox.children = [codeHandler.palette.item]
+                    } else {
+                        paletteBox.children = []
+                    }
+                }
+            }
         }
 
         ProjectNavigation{

@@ -14,7 +14,9 @@ HEADERS += \
     $$PWD/qprojectnavigationmodel.h \
     $$PWD/qprojectdocumentmodel.h \
     $$PWD/qlockedfileiosession.h \
-    $$PWD/qeditorsettings.h
+    $$PWD/qeditorsettings.h \
+    $$PWD/qdocumenteditfragment.h \
+    $$PWD/qdocumentcodestate.h
 
 SOURCES += \
     $$PWD/qproject.cpp \
@@ -29,4 +31,6 @@ SOURCES += \
     $$PWD/qprojectnavigationmodel.cpp \
     $$PWD/qprojectdocumentmodel.cpp \
     $$PWD/qlockedfileiosession.cpp \
-    $$PWD/qeditorsettings.cpp
+    $$PWD/qeditorsettings.cpp \
+    $$PWD/qdocumenteditfragment.cpp \
+    $$PWD/qdocumentcodestate.cpp
