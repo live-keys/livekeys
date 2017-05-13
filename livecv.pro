@@ -33,7 +33,7 @@ plugins.subdir      = $$PWD/plugins
 
 # --- Dependency configuration ---
 application.depends = editor plugins # because we have a dependency to the live plugin here
-plugins.depends     = editor
+editor.depends      = plugins
 
 
 # Include the global configuration files since otherwise they would never show
