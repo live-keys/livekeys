@@ -410,8 +410,20 @@ void QDocumentCodeInterface::edit(int position, QObject *currentApp){
     if ( !m_state->editingFragment() ){
         QDOCUMENT_CODE_INTERFACE_DEBUG("Channel or converter missing for type: \'" + properties.first().type + "\'");
 
-        //TODO: Find value offset + length
-//        m_state->setEditingFragment(new QDocumentEditFragment(properties.first().position, properties.first().length));
+        int propertyValue    = -1;
+        int propertyValueEnd = -1;
+        m_codeHandler->findPropertyValue(
+            properties.first().position,
+            properties.first().length,
+            propertyValue,
+            propertyValueEnd
+        );
+        if ( propertyValue == -1 || propertyValueEnd == -1 ){
+            qWarning("Failed to parse document: unable to identify value offset.");
+            return;
+        }
+
+        m_state->setEditingFragment(new QDocumentEditFragment(propertyValue, propertyValueEnd - propertyValue));
     }
 
     if ( m_state->editingFragment() ){
