@@ -994,6 +994,19 @@ QList<QAbstractCodeHandler::CodeProperty> QDocumentQmlHandler::getProperties(con
     return properties;
 }
 
+bool QDocumentQmlHandler::findPropertyValue(int position, int length, int &valuePosition, int &valueEnd){
+    QDocumentQmlValueScanner vs(m_document, position, length);
+    if ( vs() ){
+        valuePosition = vs.valuePosition();
+        valueEnd      = vs.valueEnd();
+        return true;
+    } else {
+        valuePosition = -1;
+        valueEnd      = -1;
+        return false;
+    }
+}
+
 void QDocumentQmlHandler::connectBindings(QList<QProjectDocumentBinding *> bindings, QObject *root){
     if ( m_document && m_document->isActive() )
         QDocumentQmlInfo::syncBindings(m_target->toPlainText(), m_document, bindings, root);
