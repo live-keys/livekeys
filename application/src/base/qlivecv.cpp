@@ -25,7 +25,7 @@
 #include "qlicensecontainer.h"
 #include "qlivepalettecontainer.h"
 
-#include "qdocumentcodeinterface.h"
+#include "qdocumenthandler.h"
 #include "qproject.h"
 #include "qprojectentry.h"
 #include "qprojectfile.h"
@@ -108,7 +108,7 @@ void QLiveCV::loadQml(const QUrl &url){
         m_engine->engineMutex(),
         m_project->lockedFileIO()
     );
-    m_codeInterface = new lcv::QDocumentCodeInterface(
+    m_codeInterface = new lcv::QDocumentHandler(
         qmlHandler,
         QLivePaletteContainer::create(m_engine->engine(), dir() + "/plugins")
     );
@@ -179,7 +179,7 @@ void QLiveCV::loadQml(const QUrl &url){
 void QLiveCV::registerTypes(){
     qmlRegisterUncreatableType<QLiveCVLog>(
         "Cv", 1, 0, "MessageLog", "Type is singleton.");
-    qmlRegisterUncreatableType<lcv::QDocumentCodeInterface>(
+    qmlRegisterUncreatableType<lcv::QDocumentHandler>(
         "Cv", 1, 0, "DocumentCodeInterface", "DocumentCodeInterface is singleton.");
 
     qmlRegisterUncreatableType<lcv::QProjectFileModel>(
