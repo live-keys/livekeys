@@ -233,7 +233,7 @@ const QDocumentQmlInfo::ValueReference QDocumentQmlInfo::valueAtPosition(
         begin = range.begin;
         end   = range.end;
 
-        qDebug() << begin << end;
+//        qDebug() << begin << end;
 //        QmlJS::ObjectValue* value = d->internalDocBind->findQmlObject(range.ast);
 //        return QDocumentQmlInfo::ValueReference(value, this);
     }

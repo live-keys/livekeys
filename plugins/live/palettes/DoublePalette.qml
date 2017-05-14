@@ -106,6 +106,32 @@ LivePalette{
                 color: '#7d87a3'
             }
         }
+
+        Slider{
+            id: zoomSlider
+            width: parent.width
+            height: 15
+            minimumValue: 0
+            value: 0
+            onValueChanged: intSlider.maximumValue = value * value
+            stepSize: 1.0
+            maximumValue: 200
+
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 0
+
+            style: SliderStyle{
+                groove: Rectangle {
+                    implicitHeight: 15
+                    color: "transparent"
+                }
+                handle: Rectangle{
+                    width: 10
+                    height: 15
+                    color: "#0b273f"
+                }
+            }
+        }
     }
 
     onInit: {

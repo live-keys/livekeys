@@ -40,17 +40,24 @@ class Q_LCVEDITOR_EXPORT QAbstractCodeHandler : public QObject{
 public:
     class CodeProperty{
     public:
-        CodeProperty(int pPosition, int pLength, const QStringList& pName, const QString& pType)
+        CodeProperty(
+                int pPosition,
+                int pLength,
+                const QStringList& pName,
+                const QString& pType,
+                const QString& pParentType = "")
             : position(pPosition)
             , length(pLength)
             , name(pName)
             , type(pType)
+            , parentType(pParentType)
         {}
 
         int position;
         int length;
         QStringList name;
         QString type;
+        QString parentType;
     };
 
 public:

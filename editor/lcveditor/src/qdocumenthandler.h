@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QDOCUMENTCODEINTERFACE_H
-#define QDOCUMENTCODEINTERFACE_H
+#ifndef QDOCUMENTHANDLER_H
+#define QDOCUMENTHANDLER_H
 
 #include "qlcveditorglobal.h"
 #include "qcodecompletionmodel.h"
@@ -31,7 +31,7 @@ namespace lcv{
 class QDocumentCodeState;
 class QLivePalette;
 class QLivePaletteContainer;
-class Q_LCVEDITOR_EXPORT QDocumentCodeInterface : public QObject{
+class Q_LCVEDITOR_EXPORT QDocumentHandler : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QQuickTextDocument* target                 READ target          WRITE setTarget NOTIFY targetChanged)
@@ -39,12 +39,21 @@ class Q_LCVEDITOR_EXPORT QDocumentCodeInterface : public QObject{
     Q_PROPERTY(lcv::QLivePalette* palette                 READ palette         NOTIFY paletteChanged)
 
 public:
-    explicit QDocumentCodeInterface(
+    enum EditingState{
+        Manual   = 0, //    0 : coming from the user
+        Assisted = 1, //    1 : coming from a code completion assistant
+        Silent   = 2, //   10 : does not trigger a recompile
+        Palette  = 6, //  110 : also silent (when a palette edits a section)
+        Runtime  = 10,// 1010 : also silent (comming from a runtime binding)
+    };
+
+public:
+    explicit QDocumentHandler(
         QAbstractCodeHandler* handler,
         QLivePaletteContainer* paletteContainer = 0,
         QObject* parent = 0
     );
-    ~QDocumentCodeInterface();
+    ~QDocumentHandler();
 
     QQuickTextDocument *target();
     void setTarget(QQuickTextDocument *target);
@@ -53,8 +62,10 @@ public:
 
     QLivePalette* palette();
 
-    void enableSilentEditing();
-    void disableSilentEditing();
+    void addEditingState(EditingState type);
+    void removeEditingState(EditingState state);
+    bool editingStateIs(int flag);
+    void resetEditingState();
 
     void rehighlightBlock(const QTextBlock& block);
 
@@ -96,34 +107,46 @@ private:
     QCodeCompletionModel*      m_completionModel;
     QAbstractCodeHandler*      m_codeHandler;
     QProjectDocument*          m_projectDocument;
-    bool                       m_silentEditing;
-    bool                       m_paletteEditing;
+    int                        m_editingState;
     QLivePaletteContainer*     m_paletteContainer;
-    bool                       m_autoInserting;
 
     QDocumentCodeState*        m_state;
 };
 
-inline QQuickTextDocument *QDocumentCodeInterface::target(){
+inline QQuickTextDocument *QDocumentHandler::target(){
     return m_target;
 }
 
-inline lcv::QCodeCompletionModel *QDocumentCodeInterface::completionModel() const{
+inline lcv::QCodeCompletionModel *QDocumentHandler::completionModel() const{
     return m_completionModel;
 }
 
-inline void QDocumentCodeInterface::enableSilentEditing(){
-    m_silentEditing = true;
+inline void QDocumentHandler::addEditingState(EditingState state){
+    m_editingState |= state;
 }
 
-inline void QDocumentCodeInterface::disableSilentEditing(){
-    m_silentEditing = false;
+inline void QDocumentHandler::removeEditingState(EditingState state){
+    if ( m_editingState & state ){
+        bool restoreSilent = editingStateIs(QDocumentHandler::Palette | QDocumentHandler::Runtime);
+        m_editingState = m_editingState & ~state;
+        if ( restoreSilent ){
+            m_editingState |= QDocumentHandler::Silent;
+        }
+    }
 }
 
-inline QDocumentCodeState *QDocumentCodeInterface::state(){
+inline bool QDocumentHandler::editingStateIs(int flag){
+    return (flag & m_editingState) == flag;
+}
+
+inline void QDocumentHandler::resetEditingState(){
+    m_editingState = 0;
+}
+
+inline QDocumentCodeState *QDocumentHandler::state(){
     return m_state;
 }
 
 }// namespace
 
-#endif // QDOCUMENTCODEINTERFACE_H
+#endif // QDOCUMENTHANDLER_H

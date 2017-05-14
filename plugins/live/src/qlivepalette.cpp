@@ -20,7 +20,6 @@ void QLivePalette::initPallete(const QVariant &value){
 }
 
 void QLivePalette::setValueFromCode(const QVariant &value){
-    qDebug() << "VALUE:" << value;
     m_codeChange = true;
     m_value = value;
     emit init(value);

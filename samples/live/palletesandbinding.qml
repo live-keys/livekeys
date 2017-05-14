@@ -6,6 +6,7 @@ Rectangle {
     width: 100
     height: 150
     x: 0
+    y: 0
 
     SequentialAnimation on x {
         id: xAnim

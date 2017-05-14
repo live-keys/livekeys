@@ -7,6 +7,7 @@ QDocumentEditFragment::QDocumentEditFragment(int position, int length, QCodeConv
     , m_length(length)
     , m_converter(converter)
     , m_actionType(QDocumentEditFragment::Edit)
+    , m_binding(0)
 {
 
 }
