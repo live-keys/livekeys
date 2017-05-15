@@ -32,7 +32,8 @@ class QProject;
 class QProjectFile;
 class QProjectDocument;
 class QProjectDocumentBlockData;
-class QDocumentCodeInterface;
+class QDocumentHandler;
+class QCodeConverter;
 
 class Q_LCVEDITOR_EXPORT QProjectDocumentAction : public QAbstractUndoItem{
 
@@ -76,11 +77,14 @@ public:
     QStringList                propertyChain;
     QProjectDocumentBlockData* parentBlock;
 
+    void setConverter(QCodeConverter* converter) { m_converter = converter; }
+
 public slots:
     void updateValue();
 
 private:
     QProjectDocument* m_document;
+    QCodeConverter* m_converter;
 
 };
 
@@ -137,7 +141,7 @@ public:
 
     QProject* parentAsProject();
 
-    void assignEditingDocument(QTextDocument* doc, QDocumentCodeInterface* handler);
+    void assignEditingDocument(QTextDocument* doc, QDocumentHandler* handler);
     QTextDocument* editingDocument();
     QProjectDocumentBinding* addNewBinding(int position, int length, const QStringList& propertyChain);
     void documentContentsChanged(int position, int charsRemoved, const QString& addedText = "");
@@ -176,7 +180,7 @@ private:
     QDateTime     m_lastModified;
 
     QTextDocument*          m_editingDocument;
-    QDocumentCodeInterface* m_editingDocumentHandler;
+    QDocumentHandler* m_editingDocumentHandler;
 
     QLinkedList<QProjectDocumentBinding*> m_bindings;
 

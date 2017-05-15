@@ -28,6 +28,7 @@
 #include "qplugintypesfacade.h"
 #include "qdocumentqmlvaluescanner_p.h"
 #include "qdocumentqmlvalueobjects.h"
+#include "qdocumentqmlfragment.h"
 
 #include "qmljs/qmljsscanner.h"
 
@@ -664,7 +665,11 @@ namespace qmlhandler_helpers{
 // QDocumentQmlHandler implementation
 // ----------------------------------
 
-QDocumentQmlHandler::QDocumentQmlHandler(QQmlEngine* engine, QMutex *engineMutex, QLockedFileIOSession::Ptr lockedFileIO, QObject *parent)
+QDocumentQmlHandler::QDocumentQmlHandler(
+        QQmlEngine* engine,
+        QMutex *engineMutex,
+        QLockedFileIOSession::Ptr lockedFileIO,
+        QObject *parent)
     : QAbstractCodeHandler(parent)
     , m_target(0)
     , m_highlighter(0)
@@ -834,9 +839,9 @@ void QDocumentQmlHandler::assistCompletion(
         model->enable();
 }
 
-void QDocumentQmlHandler::setTarget(QTextDocument *target){
+void QDocumentQmlHandler::setTarget(QTextDocument *target, QDocumentCodeState* state){
     m_target      = target;
-    m_highlighter = new QQmlJsHighlighter(m_target);
+    m_highlighter = new QQmlJsHighlighter(m_target, state);
 }
 
 void QDocumentQmlHandler::setDocument(QProjectDocument *document){
@@ -989,9 +994,50 @@ QList<QAbstractCodeHandler::CodeProperty> QDocumentQmlHandler::getProperties(con
     return properties;
 }
 
+bool QDocumentQmlHandler::findPropertyValue(int position, int length, int &valuePosition, int &valueEnd){
+    QDocumentQmlValueScanner vs(m_document, position, length);
+    if ( vs() ){
+        valuePosition = vs.valuePosition();
+        valueEnd      = vs.valueEnd();
+        return true;
+    } else {
+        valuePosition = -1;
+        valueEnd      = -1;
+        return false;
+    }
+}
+
 void QDocumentQmlHandler::connectBindings(QList<QProjectDocumentBinding *> bindings, QObject *root){
-    if ( m_document->isActive() )
+    if ( m_document && m_document->isActive() )
         QDocumentQmlInfo::syncBindings(m_target->toPlainText(), m_document, bindings, root);
+}
+
+QDocumentEditFragment *QDocumentQmlHandler::createInjectionChannel(
+        const QAbstractCodeHandler::CodeProperty &property,
+        QObject *runtime,
+        QCodeConverter* converter)
+{
+    QProjectDocumentBinding* binding = new QProjectDocumentBinding(0);
+    binding->propertyPosition = property.position;
+    binding->propertyLength = property.length;
+    binding->propertyChain = property.name;
+
+    if ( m_document && m_document->isActive() ){
+
+        QQmlProperty foundProperty(
+            QDocumentQmlInfo::findMatchingProperty(m_target->toPlainText(), m_document, binding, runtime)
+        );
+        if ( foundProperty.isValid() ){
+            return new QDocumentQmlFragment(
+                binding->propertyPosition + binding->propertyLength + binding->valuePositionOffset,
+                binding->valueLength,
+                converter,
+                foundProperty
+            );
+        }
+    }
+
+    return 0;
 }
 
 QPluginInfoExtractor* QDocumentQmlHandler::getPluginInfoExtractor(const QString &import){

@@ -17,6 +17,7 @@ public:
     bool operator()();
 
     int colonPosition() const;
+    int valuePosition() const;
     int valueEnd() const;
     int valueLength() const;
 
@@ -34,6 +35,7 @@ private:
     int m_length;
 
     int m_colonPosition;
+    int m_valuePosition;
     int m_valueEnd;
 
     QmlJS::Scanner m_scanner;
@@ -43,6 +45,10 @@ private:
 
 inline int QDocumentQmlValueScanner::colonPosition() const{
     return m_colonPosition;
+}
+
+inline int QDocumentQmlValueScanner::valuePosition() const{
+    return m_valuePosition;
 }
 
 inline int QDocumentQmlValueScanner::valueEnd() const{

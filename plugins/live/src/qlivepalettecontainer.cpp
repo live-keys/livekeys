@@ -9,7 +9,7 @@
 
 #include <QDebug>
 
-//#define QPALETTE_CONTAINER_DEBUG_FLAG
+#define QPALETTE_CONTAINER_DEBUG_FLAG
 #ifdef QPALETTE_CONTAINER_DEBUG_FLAG
 #define QPALETTE_CONTAINER_DEBUG(_param) qDebug() << "PALETTES:" << (_param)
 #else
@@ -59,14 +59,14 @@ QCodeConverter *QLivePaletteLoader::getItem(QQmlEngine *engine){
         return 0;
     }
 
-    QCodeConverter* cvt = static_cast<lcv::QCodeConverter*>(obj);
-    if ( !cvt ){
+    m_converter = static_cast<lcv::QCodeConverter*>(obj);
+    if ( !m_converter ){
         qCritical("Failed to load palette: \'%s\'. Value is not a LivePalette or CodeConverter type.",
                   qPrintable(m_path));
         return 0;
     }
 
-    if ( cvt->type().isEmpty() || cvt->serialize() == 0 ){
+    if ( m_converter->type().isEmpty() || m_converter->serialize() == 0 ){
         qCritical("Failed to load palette: \'%s\'. Palette/CodeConverter must have a type and serializer defined",
                   qPrintable(m_path));
         return 0;
@@ -74,7 +74,7 @@ QCodeConverter *QLivePaletteLoader::getItem(QQmlEngine *engine){
 
     //TODO: Check converter type with m_type, and also check typeobject
 
-    QPALETTE_CONTAINER_DEBUG("Loaded palette on type: " + cvt->type() + " " + cvt->typeObject());
+    QPALETTE_CONTAINER_DEBUG("Loaded palette on type: \'" + m_converter->type() + "\' " + m_converter->typeObject());
 
     return m_converter;
 }
@@ -97,8 +97,10 @@ void QLivePaletteLoader::handleError(const QQmlComponent &component) const{
 
 class QLivePaletteContainerPrivate{
 public:
+    typedef QHash<QString, QHash<QString, QLivePaletteLoader*> > PaletteHash;
+
     QQmlEngine* engine;
-    QHash<QString, QHash<QString, QLivePaletteLoader*> > m_items;
+    PaletteHash items;
 };
 
 
@@ -154,7 +156,7 @@ void QLivePaletteContainer::scanPaletteDir(const QString &path){
                 QString palettePath = QDir::cleanPath(path + "/" + segments[1].trimmed());
                 QString type = segments[0].trimmed();
                 QPALETTE_CONTAINER_DEBUG("Adding palette: \'" + palettePath + "\' on \'" + type + "\'");
-                d->m_items[type].insert("", new QLivePaletteLoader(palettePath, type));
+                d->items[type].insert("", new QLivePaletteLoader(palettePath, type));
             } else if ( segments.size() == 3 ){
                 QString palettePath = QDir::cleanPath(path + "/" + segments[2].trimmed());
                 QString type = segments[0].trimmed();
@@ -163,7 +165,7 @@ void QLivePaletteContainer::scanPaletteDir(const QString &path){
                     "Adding palette: \'" + palettePath + "\' on \'" + type + "\' for object \'" +
                     typeObject + "\'"
                 );
-                d->m_items[type].insert(
+                d->items[type].insert(
                     typeObject, new QLivePaletteLoader(palettePath, type, typeObject)
                 );
             } else {
@@ -181,9 +183,28 @@ QLivePaletteContainer *QLivePaletteContainer::create(QQmlEngine *engine, const Q
     return ct;
 }
 
+QCodeConverter *QLivePaletteContainer::findPalette(const QString &type, const QString &object){
+    Q_D(QLivePaletteContainer);
+    QLivePaletteContainerPrivate::PaletteHash::Iterator it = d->items.find(type);
+    if ( it == d->items.end() )
+        return 0;
+
+    // lookup specific palette
+    QHash<QString, QLivePaletteLoader*>::iterator typeit = it.value().find(object);
+    if ( typeit == it.value().end() ){
+
+        // lookup general palette
+        typeit = it->find("");
+        if ( typeit == it->end() )
+            return 0;
+        return typeit.value()->getItem(d->engine);
+    }
+    return typeit.value()->getItem(d->engine);
+}
+
 int QLivePaletteContainer::size() const{
     Q_D(const QLivePaletteContainer);
-    return d->m_items.size();
+    return d->items.size();
 }
 
 }// namespace

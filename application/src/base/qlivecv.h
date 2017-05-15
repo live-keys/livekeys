@@ -41,7 +41,7 @@ class QLiveCVEngine;
 class QLiveCVArguments;
 class QLiveCVSettings;
 class QProject;
-class QDocumentCodeInterface;
+class QDocumentHandler;
 class QDocumentQmlHandler;
 
 // class QLiveCV
@@ -80,7 +80,7 @@ private:
     QLiveCVArguments* m_arguments;
     QStaticContainer* m_staticContainer;
 
-    lcv::QDocumentCodeInterface* m_codeInterface;
+    lcv::QDocumentHandler* m_codeInterface;
     QString  m_dir;
     QLibrary m_lcvlib;
 

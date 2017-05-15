@@ -1,4 +1,5 @@
 #include "qdocumentqmlvaluescanner_p.h"
+#include <QDebug>
 
 namespace lcv{
 
@@ -6,6 +7,7 @@ QDocumentQmlValueScanner::QDocumentQmlValueScanner(QProjectDocument *document, i
     : m_position(position)
     , m_length(length)
     , m_colonPosition(-1)
+    , m_valuePosition(-1)
     , m_valueEnd(-1)
     , m_document(document)
 {
@@ -13,7 +15,6 @@ QDocumentQmlValueScanner::QDocumentQmlValueScanner(QProjectDocument *document, i
 }
 
 QDocumentQmlValueScanner::~QDocumentQmlValueScanner(){
-
 }
 
 bool QDocumentQmlValueScanner::operator()(){
@@ -51,6 +52,9 @@ bool QDocumentQmlValueScanner::operator()(){
 
         while(true){
             for ( QList<QmlJS::Token>::iterator it = tokens.begin(); it != tokens.end(); ++it ){
+                if ( valuePosition() == -1 )
+                    m_valuePosition = blockPosition + it->offset;
+
                 if ( it->is(QmlJS::Token::LeftBrace) ||
                      it->is(QmlJS::Token::LeftParenthesis) ||
                      it->is(QmlJS::Token::LeftBracket ) )
@@ -79,10 +83,12 @@ bool QDocumentQmlValueScanner::operator()(){
                             identifierExpected = false;
                         m_valueEnd = blockPosition + it->offset + it->length;
 
-                    } else if ( it->is(QmlJS::Token::RegExp) || it->is(QmlJS::Token::String) || it->is(QmlJS::Token::Number) ){
+                    } else if ( it->is(QmlJS::Token::RegExp) ||
+                                it->is(QmlJS::Token::String) ||
+                                it->is(QmlJS::Token::Number) )
+                    {
                         identifierExpected = false;
                         m_valueEnd = blockPosition + it->offset + it->length;
-
                     } else if ( it->is(QmlJS::Token::Semicolon) ){
                         return true;
 

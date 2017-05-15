@@ -58,13 +58,18 @@ public:
         QCodeCompletionModel* model,
         QTextCursor& cursorChange
     ) Q_DECL_OVERRIDE;
-    void setTarget(QTextDocument *target) Q_DECL_OVERRIDE;
+    void setTarget(QTextDocument *target, QDocumentCodeState* state) Q_DECL_OVERRIDE;
     void setDocument(QProjectDocument* document) Q_DECL_OVERRIDE;
     void updateScope(const QString& data) Q_DECL_OVERRIDE;
     void rehighlightBlock(const QTextBlock& block) Q_DECL_OVERRIDE;
     QList<QAbstractCodeHandler::CodeProperty> getProperties(const QTextCursor& cursor) Q_DECL_OVERRIDE;
-    bool getPropertyValueOffset(int position, int length, int& semicolonPosition, int& valueEnd);
+    bool findPropertyValue(int position, int length, int& valuePosition, int& valueEnd) Q_DECL_OVERRIDE;
     void connectBindings(QList<QProjectDocumentBinding*> bindings, QObject* root) Q_DECL_OVERRIDE;
+    QDocumentEditFragment* createInjectionChannel(
+        const CodeProperty& property,
+        QObject* runtime,
+        QCodeConverter* converter
+    ) Q_DECL_OVERRIDE;
 
     QPluginInfoExtractor *getPluginInfoExtractor(const QString& import);
 
