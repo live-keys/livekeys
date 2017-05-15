@@ -22,5 +22,5 @@ include($$PROJECT_ROOT/3rdparty/opencvconfig.pro)
 deployOpenCV()
 
 OTHER_FILES *= \
-    qml/qmldir \
+    qmldir \
     qml/plugins.qmltypes

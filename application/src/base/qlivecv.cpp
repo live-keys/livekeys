@@ -96,7 +96,7 @@ void QLiveCV::solveImportPaths(){
     m_engine->engine()->setImportPathList(importPaths);
 
     // Add the plugins directory to the import paths
-    m_engine->engine()->addImportPath(dir() + "/plugins/live");
+    m_engine->engine()->addImportPath(dir() + "/plugins");
 }
 
 void QLiveCV::loadLibrary(const QString &library){

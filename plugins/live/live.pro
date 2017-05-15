@@ -15,7 +15,7 @@ include($$PWD/include/liveheaders.pri)
 
 OTHER_FILES += \
     qml/*.qml \
-    qml/qmldir \
+    qmldir \
     qml/plugins.qmltypes
 
 # Handling the palette
@@ -27,8 +27,7 @@ OTHER_FILES *= \
 # Deploy The palette
 
 palettecopy.commands = $$deployDirCommand($$PWD/palettes, $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME)
-first.depends = $(first) qmlcopy palettecopy
+first.depends = $(first) palettecopy
 export(first.depends)
-export(qmlcopy.commands)
 export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
