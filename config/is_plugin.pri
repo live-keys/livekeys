@@ -19,6 +19,7 @@ isEmpty(PLUGIN_PATH): \
 # The PLUGIN_QML_DIR contains the path to the folder with all the qml files
 # and related files
 PLUGIN_QML_DIR = $$PLUGIN_PATH/qml
+PLUGIN_QMLDIR_FILE = $$PLUGIN_PATH/qmldir
 
 !defined(PLUGIN_QML_DIR, var): \
     error($$_FILE_: Tried to set up a plugin without defining PLUGIN_QML_DIR first.)
@@ -43,23 +44,14 @@ DESTDIR     = $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME
     qmlcopy.commands = $$deployDirCommand($$PLUGIN_QML_DIR, $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME)
 }
 
-first.depends = $(first) qmlcopy
+# Check if the qmldir file is placed in the plugin dir seperately and deploy it as such
+# otherwise it might already be deployed with the qml directory itself
+!exists($$PLUGIN_QMLDIR_FILE){
+    warning(No file $$PLUGIN_QMLDIR_FILE)
+    qmldircopy.commands =
+} else {
+    qmldircopy.commands = $$deployFileCommand($$PLUGIN_QMLDIR_FILE, $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME)
+}
 
-export(first.depends)
-export(qmlcopy.commands)
-
-QMAKE_EXTRA_TARGETS += first qmlcopy
-
-# Deploying the qmldir files seperately is currently not required.
-
-#QMLDIR_DEPLOY_FROM      = $$shell_path($$PLUGIN_QML_DIR/qmldir)
-#!exists($$QMLDIR_DEPLOY_FROM){
-#    warning(Expected file $$QMLDIR_DEPLOY_FROM)
-#    qmldircopy.commands =
-#} else {
-#    qmldircopy.commands = \
-#    $$QMAKE_COPY $$QMLDIR_DEPLOY_FROM $$PLUGIN_DEPLOY_TO
-#}
-# first.depends = $(first) qmldircopy
-#export(qmldircopy.commands)
-#QMAKE_EXTRA_TARGETS += first qmldircopy
+QMAKE_EXTRA_TARGETS += qmlcopy qmldircopy
+POST_TARGETDEPS += qmlcopy qmldircopy

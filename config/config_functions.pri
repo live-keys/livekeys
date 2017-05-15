@@ -136,8 +136,31 @@ defineTest(linkLocalPlugin){
 defineReplace(deployDirCommand){
     DEPLOY_FROM = $$shell_path($$shell_quote($$1))
     DEPLOY_TO = $$shell_path($$shell_quote($$2))
-    
+
     debug(Deploy $$DEPLOY_FROM to $$DEPLOY_TO, 1)
 
     return($$QMAKE_COPY_DIR $$DEPLOY_FROM $$DEPLOY_TO)
+}
+
+# Generates the commands required for deploying single files by copying.
+# This function takes care of quoting and OS dependent path transformations
+#
+# Args: (from_file, to_parent_dir)
+#  * from_file: is the path to the file that is to be copied
+#  * to_parent_dir: is the parent directory in which the copy will be placed
+#
+# Example:
+#
+# mycopy.command = $$deployDirCommand(foo foo, bar/baz)
+# # generates the command
+# # cp -f 'foo foo' bar/baz under Unix systems
+# # and would upon execution generate the file 'bar/baz/foo foo'
+#
+defineReplace(deployFileCommand){
+    DEPLOY_FROM = $$shell_path($$shell_quote($$1))
+    DEPLOY_TO = $$shell_path($$shell_quote($$2))
+
+    debug(Deploy $$DEPLOY_FROM to $$DEPLOY_TO, 1)
+
+    return($$QMAKE_COPY_FILE $$DEPLOY_FROM $$DEPLOY_TO)
 }
