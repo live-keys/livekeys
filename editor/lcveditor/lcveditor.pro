@@ -3,6 +3,8 @@ TARGET   = lcveditor
 QT      += core qml quick
 CONFIG  += qt
 
+linkLocalPlugin(live, live)
+
 win32:DLLDESTDIR = $$buildModePath($$DEPLOY_PWD)
 else:DESTDIR = $$buildModePath($$DEPLOY_PWD)
 

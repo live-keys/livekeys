@@ -7,14 +7,17 @@ HEADERS += \
     $$PWD/qprojectfile.h \
     $$PWD/qprojectfilemodel.h \
     $$PWD/qprojectdocument.h \
-    $$PWD/qdocumentcodeinterface.h \
     $$PWD/qcodecompletionmodel.h \
     $$PWD/qcodecompletionsuggestion.h \
     $$PWD/qabstractcodehandler.h \
     $$PWD/qprojectnavigationmodel.h \
     $$PWD/qprojectdocumentmodel.h \
     $$PWD/qlockedfileiosession.h \
-    $$PWD/qeditorsettings.h
+    $$PWD/qeditorsettings.h \
+    $$PWD/qdocumenteditfragment.h \
+    $$PWD/qdocumentcodestate.h \
+    $$PWD/qcodedeclaration.h \
+    $$PWD/qdocumenthandler.h
 
 SOURCES += \
     $$PWD/qproject.cpp \
@@ -22,11 +25,14 @@ SOURCES += \
     $$PWD/qprojectfile.cpp \
     $$PWD/qprojectfilemodel.cpp \
     $$PWD/qprojectdocument.cpp \
-    $$PWD/qdocumentcodeinterface.cpp \
     $$PWD/qcodecompletionmodel.cpp \
     $$PWD/qcodecompletionsuggestion.cpp \
     $$PWD/qabstractcodehandler.cpp \
     $$PWD/qprojectnavigationmodel.cpp \
     $$PWD/qprojectdocumentmodel.cpp \
     $$PWD/qlockedfileiosession.cpp \
-    $$PWD/qeditorsettings.cpp
+    $$PWD/qeditorsettings.cpp \
+    $$PWD/qdocumenteditfragment.cpp \
+    $$PWD/qdocumentcodestate.cpp \
+    $$PWD/qcodedeclaration.cpp \
+    $$PWD/qdocumenthandler.cpp

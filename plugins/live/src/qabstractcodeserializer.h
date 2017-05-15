@@ -15,8 +15,8 @@ public:
     explicit QAbstractCodeSerializer(QObject *parent = 0);
     virtual ~QAbstractCodeSerializer();
 
-    virtual QString toCode(const QJSValue& value) = 0;
-    virtual QJSValue fromCode(const QString& value) = 0;
+    virtual QString toCode(const QVariant& value) = 0;
+    virtual QVariant fromCode(const QString& value) = 0;
 
 };
 

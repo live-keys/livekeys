@@ -17,8 +17,9 @@
 #include "qprojectdocument.h"
 #include "qprojectfile.h"
 #include "qlockedfileiosession.h"
-#include "qdocumentcodeinterface.h"
+#include "qdocumenthandler.h"
 #include "qproject.h"
+#include "qcodeconverter.h"
 
 #include <QFile>
 #include <QUrl>
@@ -159,7 +160,7 @@ void QProjectDocument::updateBindingBlocks(int position, const QString& addedTex
     }
 }
 
-void QProjectDocument::assignEditingDocument(QTextDocument *doc, QDocumentCodeInterface* handler){
+void QProjectDocument::assignEditingDocument(QTextDocument *doc, QDocumentHandler* handler){
     m_editingDocument        = doc;
     m_editingDocumentHandler = handler;
 }
@@ -303,12 +304,12 @@ void QProjectDocument::updateBindingValue(QProjectDocumentBinding *binding, cons
             binding->valueLength      = value.length();
             binding->modifiedByEngine = true;
 
-            m_editingDocumentHandler->enableSilentEditing();
+            m_editingDocumentHandler->addEditingState(QDocumentHandler::Runtime);
             editCursor.beginEditBlock();
             editCursor.removeSelectedText();
             editCursor.insertText(value);
             editCursor.endEditBlock();
-            m_editingDocumentHandler->disableSilentEditing();
+            m_editingDocumentHandler->removeEditingState(QDocumentHandler::Runtime);
         } else {
             m_content.replace(from, binding->valueLength, value);
             setIsDirty(true);
@@ -402,6 +403,7 @@ QProjectDocumentBinding::QProjectDocumentBinding(QProjectDocument *parent)
     , modifiedByEngine(false)
     , parentBlock(0)
     , m_document(parent)
+    , m_converter(0)
 {}
 
 QProjectDocumentBinding::~QProjectDocumentBinding(){
@@ -411,7 +413,10 @@ QProjectDocumentBinding::~QProjectDocumentBinding(){
 }
 
 void QProjectDocumentBinding::updateValue(){
-    m_document->updateBindingValue(this, "{\n" + sender()->property(propertyChain.last().toUtf8()).toString() + "\n}");
+    if ( m_converter )
+        m_document->updateBindingValue(
+            this, m_converter->serialize()->toCode(sender()->property(propertyChain.last().toUtf8()))
+        );
 }
 
 }// namespace
