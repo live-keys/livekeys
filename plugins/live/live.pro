@@ -15,7 +15,7 @@ include($$PWD/include/liveheaders.pri)
 
 OTHER_FILES += \
     qml/*.qml \
-    qmldir \
+    qml/qmldir \
     qml/plugins.qmltypes
 
 # Handling the palette
