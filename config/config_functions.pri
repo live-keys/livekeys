@@ -121,20 +121,21 @@ defineTest(linkLocalPlugin){
 
 # Generates the commands required for deploying directories by recursive copy.
 # This function takes care of quoting and OS dependent path transformations
+# CAUTION: Only the contents of the directory gets copied, not the directory
+# itself
 #
 # Args: (from_dir, to_parent_dir)
-#  * from_dir: is the path to the directory that is to be copied
+#  * from_dir: is the path to the directory whose content is to be copied
 #  * to_parent_dir: is the parent directory in which the copy will be placed
 #
 # Example:
 #
 # mycopy.command = $$deployDirCommand(foo foo, bar/baz)
 # # generates the command
-# # cp -f -R 'foo foo' bar/baz under Unix systems
-# # and would upon execution generate the directory 'bar/baz/foo foo'
+# # cp -f -R 'foo foo/.' bar/baz under Unix systems
 #
 defineReplace(deployDirCommand){
-    DEPLOY_FROM = $$shell_path($$shell_quote($$1))
+    DEPLOY_FROM = $$shell_path($$shell_quote($$1/.))
     DEPLOY_TO = $$shell_path($$shell_quote($$2))
 
     debug(Deploy $$DEPLOY_FROM to $$DEPLOY_TO, 1)
