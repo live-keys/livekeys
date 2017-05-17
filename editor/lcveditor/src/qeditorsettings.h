@@ -2,11 +2,13 @@
 #define QEDITORSETTINGS_H
 
 #include <QObject>
+#include <QHash>
 #include "qlcveditorglobal.h"
 
 namespace lcv{
 
 class QProjectDocument;
+class QEditorSettingsCategory;
 class Q_LCVEDITOR_EXPORT QEditorSettings : public QObject{
 
     Q_OBJECT
@@ -24,6 +26,9 @@ public:
     void fromJson(const QJsonObject& root);
     QJsonObject toJson() const;
 
+    QEditorSettingsCategory* settingsFor(const QString& key);
+    void addSetting(const QString& key, QEditorSettingsCategory* category);
+
 public slots:
     void syncWithFile();
     void init(const QByteArray& data);
@@ -39,6 +44,8 @@ private:
     int        m_fontSize;
     QString    m_path;
     QByteArray m_content;
+
+    QHash<QString, QEditorSettingsCategory*> m_settings;
 };
 
 inline int QEditorSettings::fontSize() const{
@@ -47,6 +54,17 @@ inline int QEditorSettings::fontSize() const{
 
 inline const QString &QEditorSettings::path() const{
     return m_path;
+}
+
+inline QEditorSettingsCategory *QEditorSettings::settingsFor(const QString &key){
+    QHash<QString, QEditorSettingsCategory*>::iterator it = m_settings.find(key);
+    if ( it == m_settings.end() )
+        return 0;
+    return it.value();
+}
+
+inline void QEditorSettings::addSetting(const QString &key, QEditorSettingsCategory *category){
+    m_settings[key] = category;
 }
 
 inline const QByteArray &QEditorSettings::content() const{

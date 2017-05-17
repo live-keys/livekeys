@@ -17,7 +17,8 @@ HEADERS += \
     $$PWD/qdocumenteditfragment.h \
     $$PWD/qdocumentcodestate.h \
     $$PWD/qcodedeclaration.h \
-    $$PWD/qdocumenthandler.h
+    $$PWD/qdocumenthandler.h \
+    $$PWD/qeditorsettingscategory.h
 
 SOURCES += \
     $$PWD/qproject.cpp \
@@ -35,4 +36,5 @@ SOURCES += \
     $$PWD/qdocumenteditfragment.cpp \
     $$PWD/qdocumentcodestate.cpp \
     $$PWD/qcodedeclaration.cpp \
-    $$PWD/qdocumenthandler.cpp
+    $$PWD/qdocumenthandler.cpp \
+    $$PWD/qeditorsettingscategory.cpp
