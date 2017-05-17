@@ -23,17 +23,17 @@ QQmlJsHighlighter::QQmlJsHighlighter(QTextDocument *parent, lcv::QDocumentCodeSt
 
     m_formats[QQmlJsHighlighter::Text]        = createFormat("#fff");
     m_formats[QQmlJsHighlighter::Comment]     = createFormat("#56748a");
-    m_formats[QQmlJsHighlighter::Number]      = createFormat("#ca7000");
-    m_formats[QQmlJsHighlighter::String]      = createFormat("#358d37");
+    m_formats[QQmlJsHighlighter::Number]      = createFormat("#bc900c");
+    m_formats[QQmlJsHighlighter::String]      = createFormat("#809747");
     m_formats[QQmlJsHighlighter::Operator]    = createFormat("#c0a000");
     m_formats[QQmlJsHighlighter::Identifier]  = createFormat("#93672f");
     m_formats[QQmlJsHighlighter::Keyword]     = createFormat("#a0a000");
     m_formats[QQmlJsHighlighter::BuiltIn]     = createFormat("#93672f");
 
-    m_formats[QQmlJsHighlighter::QmlProperty] = createFormat("#9999aa");
-    m_formats[QQmlJsHighlighter::QmlType]     = createFormat("#aaa");
-    m_formats[QQmlJsHighlighter::QmlRuntimeBoundProperty] = createFormat("#333");
-    m_formats[QQmlJsHighlighter::QmlRuntimeModifiedValue] = createFormat("#333");
+    m_formats[QQmlJsHighlighter::QmlProperty] = createFormat("#ccc");
+    m_formats[QQmlJsHighlighter::QmlType]     = createFormat("#0080a0");
+    m_formats[QQmlJsHighlighter::QmlRuntimeBoundProperty] = createFormat("#26539f");
+    m_formats[QQmlJsHighlighter::QmlRuntimeModifiedValue] = createFormat("#0080a0");
     m_formats[QQmlJsHighlighter::QmlEdit] = createFormat("#fff", "#0b273f");
 
 
@@ -226,7 +226,7 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
             if ( prevBlockData->exceededBindingLength > 0 ){
                 int currentExceededLength = prevBlockData->exceededBindingLength - currentBlock().length();
                 if ( currentExceededLength > 0 ){
-                    setFormat(0, currentBlock().length(), QColor("#aa00aa") );
+                    setFormat(0, currentBlock().length(), m_formats[QQmlJsHighlighter::QmlEdit]);
 
                     if (!blockData) {
                         blockData = new lcv::QProjectDocumentBlockData;
@@ -235,7 +235,7 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
                     blockData->exceededBindingLength = currentExceededLength;
                     generated = true;
                 } else {
-                    setFormat(0, prevBlockData->exceededBindingLength, QColor("#aa00aa") );
+                    setFormat(0, prevBlockData->exceededBindingLength, m_formats[QQmlJsHighlighter::QmlEdit]);
                 }
             }
         }
@@ -244,11 +244,19 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
 
     if ( blockData ){
         foreach(lcv::QProjectDocumentBinding* bind, blockData->m_bindings ){
-            setFormat(bind->propertyPosition - currentBlock().position(), bind->propertyLength, QColor("#ff0000"));
+            setFormat(
+                bind->propertyPosition - currentBlock().position(),
+                bind->propertyLength,
+                m_formats[QQmlJsHighlighter::QmlRuntimeBoundProperty]
+            );
 
             if ( bind->modifiedByEngine ){
                 int valueFrom = bind->propertyPosition + bind->propertyLength + bind->valuePositionOffset;
-                setFormat(valueFrom - currentBlock().position(), bind->valueLength, QColor("#ff00ff"));
+                setFormat(
+                    valueFrom - currentBlock().position(),
+                    bind->valueLength,
+                    m_formats[QQmlJsHighlighter::QmlRuntimeModifiedValue]
+                );
                 if ( valueFrom + bind->valueLength > currentBlock().position() + currentBlock().length() ){
                     generated = true;
                     blockData->exceededBindingLength =
