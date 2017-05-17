@@ -381,16 +381,13 @@ Rectangle{
                     style: ContextMenuStyle{}
 
                     onAboutToShow: {
-                        bindMenuItem.enabled = codeHandler.canBind(
+                        var cursorInfo = codeHandler.cursorInfo(
                             editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart
-                        )
-                        unbindMenuItem.enabled = codeHandler.canUnbind(
-                            editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart
-                        )
-                        editMenuItem.enabled = editorArea.selectionEnd - editorArea.selectionStart === 0 ?
-                            codeHandler.canEdit(editorArea.cursorPosition) : false
-                        adjustMenuItem.enabled = editorArea.selectionEnd - editorArea.selectionStart === 0 ?
-                            codeHandler.canAdjust(editorArea.cursorPosition) : false
+                        );
+                        bindMenuItem.enabled = cursorInfo.canBind
+                        unbindMenuItem.enabled = cursorInfo.canUnbind
+                        editMenuItem.enabled = cursorInfo.canEdit
+                        adjustMenuItem.enabled = cursorInfo.canAdjust
                     }
 
                     MenuItem {

@@ -7,7 +7,7 @@
 namespace lcv{
 
 class QCodeConverter;
-class QProjectDocumentBinding;
+class QCodeRuntimeBinding;
 class Q_LCVEDITOR_EXPORT QDocumentEditFragment{
 
 public:
@@ -31,14 +31,14 @@ public:
 
     virtual void commit(const QVariant&){}
 
-    void setRuntimeBinding(QProjectDocumentBinding* runtimeBinding);
-    QProjectDocumentBinding* runtimeBinding();
+    void setRuntimeBinding(QCodeRuntimeBinding* runtimeBinding);
+    QCodeRuntimeBinding* runtimeBinding();
 
 private:
     int m_position;
     int m_length;
     QCodeConverter*          m_converter;
-    QProjectDocumentBinding* m_binding;
+    QCodeRuntimeBinding* m_binding;
 
     ActionType m_actionType;
 };
@@ -63,11 +63,11 @@ inline void QDocumentEditFragment::updateLength(int length){
     m_length = length;
 }
 
-inline void QDocumentEditFragment::setRuntimeBinding(QProjectDocumentBinding *binding){
+inline void QDocumentEditFragment::setRuntimeBinding(QCodeRuntimeBinding *binding){
     m_binding = binding;
 }
 
-inline QProjectDocumentBinding *QDocumentEditFragment::runtimeBinding(){
+inline QCodeRuntimeBinding *QDocumentEditFragment::runtimeBinding(){
     return m_binding;
 }
 

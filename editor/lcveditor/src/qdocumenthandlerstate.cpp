@@ -1,23 +1,23 @@
-#include "qdocumentcodestate.h"
+#include "qdocumenthandlerstate.h"
 #include "qdocumenteditfragment.h"
 
 namespace lcv{
 
-QDocumentCodeState::QDocumentCodeState()
+QDocumentHandlerState::QDocumentHandlerState()
     : m_editingFragment(0)
 {
 }
 
-QDocumentCodeState::~QDocumentCodeState(){
+QDocumentHandlerState::~QDocumentHandlerState(){
     delete m_editingFragment;
 }
 
-void QDocumentCodeState::setEditingFragment(QDocumentEditFragment *fragment){
+void QDocumentHandlerState::setEditingFragment(QDocumentEditFragment *fragment){
     clearEditingFragment();
     m_editingFragment = fragment;
 }
 
-void QDocumentCodeState::clearEditingFragment(){
+void QDocumentHandlerState::clearEditingFragment(){
     if ( m_editingFragment != 0 ){
         delete m_editingFragment;
         m_editingFragment = 0;

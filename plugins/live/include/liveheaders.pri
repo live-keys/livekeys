@@ -8,9 +8,4 @@ HEADERS += \
     $$PWD/qlivecvcommandlineparser.h \
     $$PWD/qstaticcontainer.h \
     $$PWD/qstaticloader.h \
-    $$PWD/qlicensecontainer.h \
-    $$PWD/qabstractcodeserializer.h \
-    $$PWD/qcodeconverter.h \
-    $$PWD/qnativevaluecodeserializer.h \
-    $$PWD/qlivepalette.h \
-    $$PWD/qlivepalettecontainer.h
+    $$PWD/qlicensecontainer.h 

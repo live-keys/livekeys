@@ -19,6 +19,7 @@
 
 #include "qlcveditorglobal.h"
 #include "qcodecompletionmodel.h"
+#include "qdocumentcursorinfo.h"
 #include "qabstractcodehandler.h"
 
 #include <QObject>
@@ -28,7 +29,7 @@ class QQuickTextDocument;
 
 namespace lcv{
 
-class QDocumentCodeState;
+class QDocumentHandlerState;
 class QLivePalette;
 class QLivePaletteContainer;
 class Q_LCVEDITOR_EXPORT QDocumentHandler : public QObject{
@@ -69,7 +70,7 @@ public:
 
     void rehighlightBlock(const QTextBlock& block);
 
-    QDocumentCodeState* state();
+    QDocumentHandlerState* state();
 
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
@@ -78,14 +79,13 @@ public slots:
     void setDocument(QProjectDocument* document);
     void generateCompletion(int cursorPosition);
     void updateScope(const QString& data);
-    bool canBind(int position, int length);
     void bind(int position, int length, QObject* object = 0);
-    bool canUnbind(int position, int length);
     void unbind(int position, int length);
-    bool canEdit(int position);
     void edit(int position, QObject* currentApp = 0);
-    bool canAdjust(int position);
     void adjust(int position, QObject* currentApp = 0);
+
+    lcv::QDocumentCursorInfo* cursorInfo(int position, int length);
+
     void commitEdit();
     void cancelEdit();
     bool isEditing();
@@ -110,7 +110,7 @@ private:
     int                        m_editingState;
     QLivePaletteContainer*     m_paletteContainer;
 
-    QDocumentCodeState*        m_state;
+    QDocumentHandlerState*     m_state;
 };
 
 inline QQuickTextDocument *QDocumentHandler::target(){
@@ -143,7 +143,7 @@ inline void QDocumentHandler::resetEditingState(){
     m_editingState = 0;
 }
 
-inline QDocumentCodeState *QDocumentHandler::state(){
+inline QDocumentHandlerState *QDocumentHandler::state(){
     return m_state;
 }
 

@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "qdocumentqmlhandler.h"
+#include "qcodeqmlhandler.h"
 #include "qqmljshighlighter_p.h"
 #include "qprojectqmlscanner_p.h"
 #include "qdocumentqmlobject.h"
@@ -665,7 +665,7 @@ namespace qmlhandler_helpers{
 // QDocumentQmlHandler implementation
 // ----------------------------------
 
-QDocumentQmlHandler::QDocumentQmlHandler(
+QCodeQmlHandler::QCodeQmlHandler(
         QQmlEngine* engine,
         QMutex *engineMutex,
         QLockedFileIOSession::Ptr lockedFileIO,
@@ -685,12 +685,12 @@ QDocumentQmlHandler::QDocumentQmlHandler(
     connect(m_scanner, SIGNAL(requestObjectLoad(QString)), SLOT(loadImport(QString)));
 }
 
-QDocumentQmlHandler::~QDocumentQmlHandler(){
+QCodeQmlHandler::~QCodeQmlHandler(){
     delete m_scanner;
     delete m_completionContextFinder;
 }
 
-void QDocumentQmlHandler::assistCompletion(
+void QCodeQmlHandler::assistCompletion(
         const QTextCursor& cursor,
         const QChar& insertion,
         bool manuallyTriggered,
@@ -839,12 +839,12 @@ void QDocumentQmlHandler::assistCompletion(
         model->enable();
 }
 
-void QDocumentQmlHandler::setTarget(QTextDocument *target, QDocumentCodeState* state){
+void QCodeQmlHandler::setTarget(QTextDocument *target, QDocumentHandlerState* state){
     m_target      = target;
     m_highlighter = new QQmlJsHighlighter(m_target, state);
 }
 
-void QDocumentQmlHandler::setDocument(QProjectDocument *document){
+void QCodeQmlHandler::setDocument(QProjectDocument *document){
     m_document      = document;
     m_documentScope = QDocumentQmlScope::createEmptyScope(m_projectScope);
 
@@ -854,19 +854,19 @@ void QDocumentQmlHandler::setDocument(QProjectDocument *document){
     }
 }
 
-void QDocumentQmlHandler::updateScope(const QString& data){
+void QCodeQmlHandler::updateScope(const QString& data){
     if ( !m_projectScope.isNull() && m_document )
         m_scanner->queueDocumentScopeScan(m_document->file()->path(), data, m_projectScope.data());
 }
 
-void QDocumentQmlHandler::rehighlightBlock(const QTextBlock &block){
+void QCodeQmlHandler::rehighlightBlock(const QTextBlock &block){
     if ( m_highlighter )
         m_highlighter->rehighlightBlock(block);
 }
 
-QList<QAbstractCodeHandler::CodeProperty> QDocumentQmlHandler::getProperties(const QTextCursor& cursor){
+QList<QCodeDeclaration*> QCodeQmlHandler::getDeclarations(const QTextCursor& cursor){
 
-    QList<QAbstractCodeHandler::CodeProperty> properties;
+    QList<QCodeDeclaration*> properties;
     int length = cursor.selectionEnd() - cursor.selectionStart();
 
     if ( length == 0 ){
@@ -920,9 +920,9 @@ QList<QAbstractCodeHandler::CodeProperty> QDocumentQmlHandler::getProperties(con
             }
 
             if ( property.revision() != -1 ){
-                properties.append(QAbstractCodeHandler::CodeProperty(
-                    ctx->propertyPosition(), propertyLength, expression, propertyType)
-                );
+                properties.append(new QCodeDeclaration(
+                    expression, propertyType, ctx->objectTypePath(), ctx->propertyPosition(), propertyLength, m_document
+                ));
             }
         }
         delete ctx;
@@ -981,9 +981,10 @@ QList<QAbstractCodeHandler::CodeProperty> QDocumentQmlHandler::getProperties(con
                 }
 
                 if ( !propertyType.isEmpty() ){
-                    properties.append(QAbstractCodeHandler::CodeProperty(
-                        rp->begin, rp->propertyEnd - rp->begin, rp->name(), propertyType)
-                    );
+                    //TODO: Find parentType
+                    properties.append(new QCodeDeclaration(
+                        rp->name(), propertyType, QStringList(), rp->begin, rp->propertyEnd - rp->begin, m_document
+                    ));
                 }
             }
         }
@@ -994,7 +995,7 @@ QList<QAbstractCodeHandler::CodeProperty> QDocumentQmlHandler::getProperties(con
     return properties;
 }
 
-bool QDocumentQmlHandler::findPropertyValue(int position, int length, int &valuePosition, int &valueEnd){
+bool QCodeQmlHandler::findPropertyValue(int position, int length, int &valuePosition, int &valueEnd){
     QDocumentQmlValueScanner vs(m_document, position, length);
     if ( vs() ){
         valuePosition = vs.valuePosition();
@@ -1007,20 +1008,17 @@ bool QDocumentQmlHandler::findPropertyValue(int position, int length, int &value
     }
 }
 
-void QDocumentQmlHandler::connectBindings(QList<QProjectDocumentBinding *> bindings, QObject *root){
+void QCodeQmlHandler::connectBindings(QList<QCodeRuntimeBinding *> bindings, QObject *root){
     if ( m_document && m_document->isActive() )
         QDocumentQmlInfo::syncBindings(m_target->toPlainText(), m_document, bindings, root);
 }
 
-QDocumentEditFragment *QDocumentQmlHandler::createInjectionChannel(
-        const QAbstractCodeHandler::CodeProperty &property,
+QDocumentEditFragment *QCodeQmlHandler::createInjectionChannel(
+        QCodeDeclaration* property,
         QObject *runtime,
         QCodeConverter* converter)
 {
-    QProjectDocumentBinding* binding = new QProjectDocumentBinding(0);
-    binding->propertyPosition = property.position;
-    binding->propertyLength = property.length;
-    binding->propertyChain = property.name;
+    QCodeRuntimeBinding* binding = new QCodeRuntimeBinding(property);
 
     if ( m_document && m_document->isActive() ){
 
@@ -1029,8 +1027,8 @@ QDocumentEditFragment *QDocumentQmlHandler::createInjectionChannel(
         );
         if ( foundProperty.isValid() ){
             return new QDocumentQmlFragment(
-                binding->propertyPosition + binding->propertyLength + binding->valuePositionOffset,
-                binding->valueLength,
+                binding->position() + binding->declaration()->identifierLength() + binding->declaration()->valueOffset(),
+                binding->declaration()->valueLength(),
                 converter,
                 foundProperty
             );
@@ -1040,7 +1038,7 @@ QDocumentEditFragment *QDocumentQmlHandler::createInjectionChannel(
     return 0;
 }
 
-QPluginInfoExtractor* QDocumentQmlHandler::getPluginInfoExtractor(const QString &import){
+QPluginInfoExtractor* QCodeQmlHandler::getPluginInfoExtractor(const QString &import){
     if ( !QPluginTypesFacade::pluginTypesEnabled() ){
         qCritical("Plugin types not available in this build.");
         return 0;
@@ -1073,23 +1071,23 @@ QPluginInfoExtractor* QDocumentQmlHandler::getPluginInfoExtractor(const QString 
     return extractor;
 }
 
-void QDocumentQmlHandler::newDocumentScopeReady(){
+void QCodeQmlHandler::newDocumentScopeReady(){
     m_documentScope = m_scanner->lastDocumentScope();
     m_newScope = true;
 }
 
-void QDocumentQmlHandler::newProjectScope(){
+void QCodeQmlHandler::newProjectScope(){
     m_newScope = true;
 }
 
-void QDocumentQmlHandler::newProject(const QString &){
+void QCodeQmlHandler::newProject(const QString &){
     m_projectScope = QProjectQmlScope::create(m_engine);
     m_documentScope = QDocumentQmlScope::createEmptyScope(m_projectScope);
 
     m_scanner->setProjectScope(m_projectScope);
 }
 
-void QDocumentQmlHandler::directoryChanged(const QString &path){
+void QCodeQmlHandler::directoryChanged(const QString &path){
     QDOCUMENT_QML_HANDLER_DEBUG("Reseting libraries in directory: " + path);
 
     QProjectQmlScope::Ptr project = m_projectScope;
@@ -1097,7 +1095,7 @@ void QDocumentQmlHandler::directoryChanged(const QString &path){
     project->implicitLibraries()->resetLibrariesInPath(path);
 }
 
-void QDocumentQmlHandler::fileChanged(const QString &path){
+void QCodeQmlHandler::fileChanged(const QString &path){
     QFileInfo finfo(path);
     if ( finfo.fileName() == "" || finfo.suffix() != "qml" || !finfo.fileName().at(0).isUpper() )
         return;
@@ -1109,7 +1107,7 @@ void QDocumentQmlHandler::fileChanged(const QString &path){
     project->implicitLibraries()->resetLibrary(fileDir);
 }
 
-void QDocumentQmlHandler::loadImport(const QString &import){
+void QCodeQmlHandler::loadImport(const QString &import){
     QQmlComponent component(m_engine);
     QByteArray code = "import " + import.toUtf8() + "\nQtObject{}\n";
 
@@ -1128,7 +1126,7 @@ void QDocumentQmlHandler::loadImport(const QString &import){
     }
 }
 
-void QDocumentQmlHandler::suggestionsForGlobalQmlContext(
+void QCodeQmlHandler::suggestionsForGlobalQmlContext(
         const QQmlCompletionContext &,
         QList<QCodeCompletionSuggestion> &suggestions
 ){
@@ -1136,7 +1134,7 @@ void QDocumentQmlHandler::suggestionsForGlobalQmlContext(
     suggestions << QCodeCompletionSuggestion("pragma singleton", "", "", "pragma singleton");
 }
 
-void QDocumentQmlHandler::suggestionsForImport(
+void QCodeQmlHandler::suggestionsForImport(
         const QQmlCompletionContext& context,
         QList<QCodeCompletionSuggestion> &suggestions)
 {
@@ -1147,7 +1145,7 @@ void QDocumentQmlHandler::suggestionsForImport(
     std::sort(suggestions.begin(), suggestions.end(), &QCodeCompletionSuggestion::compare);
 }
 
-void QDocumentQmlHandler::suggestionsForStringImport(
+void QCodeQmlHandler::suggestionsForStringImport(
         const QString& enteredPath,
         QList<QCodeCompletionSuggestion> &suggestions,
         QString& filter)
@@ -1162,7 +1160,7 @@ void QDocumentQmlHandler::suggestionsForStringImport(
     std::sort(suggestions.begin(), suggestions.end(), &QCodeCompletionSuggestion::compare);
 }
 
-void QDocumentQmlHandler::suggestionsForRecursiveImport(
+void QCodeQmlHandler::suggestionsForRecursiveImport(
         int index,
         const QString& dir,
         const QStringList& expression,
@@ -1183,7 +1181,7 @@ void QDocumentQmlHandler::suggestionsForRecursiveImport(
     }
 }
 
-void QDocumentQmlHandler::suggestionsForValueObject(
+void QCodeQmlHandler::suggestionsForValueObject(
         const QDocumentQmlObject &object,
         QList<QCodeCompletionSuggestion> &suggestions,
         bool extractProperties,
@@ -1255,7 +1253,7 @@ void QDocumentQmlHandler::suggestionsForValueObject(
     }
 }
 
-void QDocumentQmlHandler::suggestionsForNamespaceTypes(
+void QCodeQmlHandler::suggestionsForNamespaceTypes(
     const QString &typeNameSpace,
     QList<QCodeCompletionSuggestion> &suggestions)
 {
@@ -1295,7 +1293,7 @@ void QDocumentQmlHandler::suggestionsForNamespaceTypes(
     }
 }
 
-void QDocumentQmlHandler::suggestionsForNamespaceImports(QList<QCodeCompletionSuggestion> &suggestions){
+void QCodeQmlHandler::suggestionsForNamespaceImports(QList<QCodeCompletionSuggestion> &suggestions){
     QMap<QString, QString> imports;
     QDocumentQmlScope::Ptr document = m_documentScope;
 
@@ -1314,7 +1312,7 @@ void QDocumentQmlHandler::suggestionsForNamespaceImports(QList<QCodeCompletionSu
     suggestions << localSuggestions;
 }
 
-void QDocumentQmlHandler::suggestionsForDocumentsIds(QList<QCodeCompletionSuggestion> &suggestions){
+void QCodeQmlHandler::suggestionsForDocumentsIds(QList<QCodeCompletionSuggestion> &suggestions){
     QStringList ids = m_documentScope->info()->extractIds();
     ids.sort();
     foreach( const QString& id, ids ){
@@ -1322,7 +1320,7 @@ void QDocumentQmlHandler::suggestionsForDocumentsIds(QList<QCodeCompletionSugges
     }
 }
 
-void QDocumentQmlHandler::suggestionsForLeftBind(
+void QCodeQmlHandler::suggestionsForLeftBind(
         const QQmlCompletionContext& context,
         int cursorPosition,
         QList<QCodeCompletionSuggestion> &suggestions)
@@ -1385,7 +1383,7 @@ void QDocumentQmlHandler::suggestionsForLeftBind(
     }
 }
 
-void QDocumentQmlHandler::suggestionsForRightBind(
+void QCodeQmlHandler::suggestionsForRightBind(
         const QQmlCompletionContext& context,
         int cursorPosition,
         QList<QCodeCompletionSuggestion> &suggestions)
@@ -1597,7 +1595,7 @@ void QDocumentQmlHandler::suggestionsForRightBind(
     }
 }
 
-void QDocumentQmlHandler::suggestionsForLeftSignalBind(
+void QCodeQmlHandler::suggestionsForLeftSignalBind(
         const QQmlCompletionContext& context,
         int cursorPosition,
         QList<QCodeCompletionSuggestion> &suggestions)
@@ -1626,7 +1624,7 @@ void QDocumentQmlHandler::suggestionsForLeftSignalBind(
     qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, true, true, true, ": ", suggestions);
 }
 
-QString QDocumentQmlHandler::extractQuotedString(const QTextCursor &cursor) const{
+QString QCodeQmlHandler::extractQuotedString(const QTextCursor &cursor) const{
     QTextBlock block = cursor.block();
     int localCursorPosition = cursor.positionInBlock();
     QString blockString = block.text();

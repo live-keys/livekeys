@@ -28,8 +28,9 @@
 #include <QSyntaxHighlighter>
 
 #include "qprojectdocument.h"
-#include "qdocumentcodestate.h"
+#include "qdocumenthandlerstate.h"
 #include "qdocumenteditfragment.h"
+#include "qcoderuntimebinding.h"
 
 /**
  * @brief The QCodeJSHighlighter is a private class used internally by QCodeHandler.
@@ -57,7 +58,7 @@ public:
     };
 
 public:
-    QQmlJsHighlighter(QTextDocument *parent = 0, lcv::QDocumentCodeState* state = 0);
+    QQmlJsHighlighter(QTextDocument *parent = 0, lcv::QDocumentHandlerState* state = 0);
 
     void setColor(ColorComponent component, const QColor &color);
     void mark(const QString &str, Qt::CaseSensitivity caseSensitivity);
@@ -75,10 +76,10 @@ private:
     QString m_markString;
     Qt::CaseSensitivity m_markCaseSensitivity;
 
-    lcv::QDocumentCodeState* m_documentState;
+    lcv::QDocumentHandlerState* m_documentState;
 };
 
-QQmlJsHighlighter::QQmlJsHighlighter(QTextDocument *parent, lcv::QDocumentCodeState *state)
+QQmlJsHighlighter::QQmlJsHighlighter(QTextDocument *parent, lcv::QDocumentHandlerState *state)
     : QSyntaxHighlighter(parent)
     , m_markCaseSensitivity(Qt::CaseInsensitive)
     , m_documentState(state){
@@ -473,21 +474,30 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
     }
 
 
-    if ( blockData ){
-        foreach(lcv::QProjectDocumentBinding* bind, blockData->m_bindings ){
-            setFormat(bind->propertyPosition - currentBlock().position(), bind->propertyLength, QColor("#ff0000"));
+//    if ( blockData ){
+//        foreach(lcv::QCodeRuntimeBinding* bind, blockData->m_bindings ){
+//            setFormat(
+//                bind->position() - currentBlock().position(),
+//                bind->declaration()->identifierLength(), QColor("#ff0000")
+//            );
 
-            if ( bind->modifiedByEngine ){
-                int valueFrom = bind->propertyPosition + bind->propertyLength + bind->valuePositionOffset;
-                setFormat(valueFrom - currentBlock().position(), bind->valueLength, QColor("#ff00ff"));
-                if ( valueFrom + bind->valueLength > currentBlock().position() + currentBlock().length() ){
-                    generated = true;
-                    blockData->exceededBindingLength =
-                        bind->valueLength - (currentBlock().length() - (valueFrom - currentBlock().position()));
-                }
-            }
-        }
-    }
+//            if ( bind->isModifiedByEngine() ){
+//                int valueFrom =
+//                    bind->position() +
+//                    bind->declaration()->identifierLength() +
+//                    bind->declaration()->valueOffset();
+
+//                setFormat(valueFrom - currentBlock().position(), bind->declaration()->valueLength(), QColor("#ff00ff"));
+//                int blockEndPosition = currentBlock().position() + currentBlock().length();
+//                if ( valueFrom + bind->declaration()->valueLength() > blockEndPosition ){
+//                    generated = true;
+//                    blockData->exceededBindingLength =
+//                        bind->declaration()->valueLength() -
+//                        (currentBlock().length() - (valueFrom - currentBlock().position()));
+//                }
+//            }
+//        }
+//    }
 
     blockState = (state & 15) | (generated << 4) | (bracketLevel << 5);
     setCurrentBlockState(blockState);

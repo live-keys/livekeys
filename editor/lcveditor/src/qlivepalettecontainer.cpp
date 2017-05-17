@@ -202,6 +202,10 @@ QCodeConverter *QLivePaletteContainer::findPalette(const QString &type, const QS
     return typeit.value()->getItem(d->engine);
 }
 
+QCodeConverter *QLivePaletteContainer::findPalette(const QString &type, const QStringList &object){
+    return findPalette(type, object.isEmpty() ? "" : type);
+}
+
 int QLivePaletteContainer::size() const{
     Q_D(const QLivePaletteContainer);
     return d->items.size();
