@@ -5,7 +5,6 @@ HEADERS += \
     $$PWD/qdocumentqmlinfo.h \
     $$PWD/qdocumentqmlranges_p.h \
     $$PWD/qdocumentqmlobject.h \
-    $$PWD/qdocumentqmlhandler.h \
     $$PWD/qqmlidvisitor_p.h \
     $$PWD/qqmljshighlighter_p.h \
     $$PWD/qqmlcompletioncontext.h \
@@ -21,14 +20,14 @@ HEADERS += \
     $$PWD/qdocumentqmlvalueobjects.h \
     $$PWD/qdocumentqmlvaluescanner_p.h \
     $$PWD/qdocumentqmlfragment.h \
-    $$PWD/qqmljssettings.h
+    $$PWD/qqmljssettings.h \
+    $$PWD/qcodeqmlhandler.h
 
 SOURCES += \
     $$PWD/qdocumentqmlinfo.cpp \
     $$PWD/qdocumentqmlranges.cpp \
     $$PWD/qqmlidvisitor.cpp \
     $$PWD/qdocumentqmlobject.cpp \
-    $$PWD/qdocumentqmlhandler.cpp \
     $$PWD/qqmlcompletioncontext.cpp \
     $$PWD/qqmllibraryinfo.cpp \
     $$PWD/qqmlcompletioncontextfinder.cpp \
@@ -41,4 +40,5 @@ SOURCES += \
     $$PWD/qdocumentqmlvaluescanner.cpp \
     $$PWD/qdocumentqmlfragment.cpp \
     $$PWD/qqmljssettings.cpp \
-    $$PWD/qqmljshighlighter.cpp
+    $$PWD/qqmljshighlighter.cpp \
+    $$PWD/qcodeqmlhandler.cpp

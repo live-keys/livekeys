@@ -1,16 +1,16 @@
-#ifndef QDOCUMENTCODESTATE_H
-#define QDOCUMENTCODESTATE_H
+#ifndef QDOCUMENTHANDLERSTATE_H
+#define QDOCUMENTHANDLERSTATE_H
 
 #include "qlcveditorglobal.h"
 
 namespace lcv{
 
 class QDocumentEditFragment;
-class Q_LCVEDITOR_EXPORT QDocumentCodeState{
+class Q_LCVEDITOR_EXPORT QDocumentHandlerState{
 
 public:
-    QDocumentCodeState();
-    ~QDocumentCodeState();
+    QDocumentHandlerState();
+    ~QDocumentHandlerState();
 
     void setEditingFragment(QDocumentEditFragment* fragment);
     QDocumentEditFragment* editingFragment();
@@ -21,10 +21,10 @@ private:
 
 };
 
-inline QDocumentEditFragment *QDocumentCodeState::editingFragment(){
+inline QDocumentEditFragment *QDocumentHandlerState::editingFragment(){
     return m_editingFragment;
 }
 
 }// namespace
 
-#endif // QDOCUMENTCODESTATE_H
+#endif // QDOCUMENTHANDLERSTATE_H

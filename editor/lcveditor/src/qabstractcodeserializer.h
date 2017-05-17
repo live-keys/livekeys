@@ -3,11 +3,11 @@
 
 #include <QObject>
 #include <QJSValue>
-#include "qliveglobal.h"
+#include "qlcveditorglobal.h"
 
 namespace lcv{
 
-class Q_LIVE_EXPORT QAbstractCodeSerializer : public QObject{
+class Q_LCVEDITOR_EXPORT QAbstractCodeSerializer : public QObject{
 
     Q_OBJECT
 

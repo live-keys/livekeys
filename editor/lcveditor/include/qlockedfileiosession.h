@@ -1,0 +1,1 @@
+#include "../src/qlockedfileiosession.h"
