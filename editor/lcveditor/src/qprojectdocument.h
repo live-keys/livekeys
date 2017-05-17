@@ -34,6 +34,8 @@ class QProjectDocument;
 class QProjectDocumentBlockData;
 class QDocumentHandler;
 class QCodeConverter;
+class QCodeDeclaration;
+class QCodeRuntimeBinding;
 
 class Q_LCVEDITOR_EXPORT QProjectDocumentAction : public QAbstractUndoItem{
 
@@ -55,49 +57,16 @@ public:
     bool    commited;
 };
 
-
-class Q_LCVEDITOR_EXPORT QProjectDocumentBinding : public QObject{
-
-    Q_OBJECT
-
-public:
-    QProjectDocumentBinding(QProjectDocument* parent = 0);
-    ~QProjectDocumentBinding();
-
-    int propertyPosition;
-    int propertyLength;
-
-    int valuePositionOffset;
-    int valueLength;
-
-    bool modifiedByEngine;
-
-    int length() const{ return propertyLength + valuePositionOffset + valueLength; }
-
-    QStringList                propertyChain;
-    QProjectDocumentBlockData* parentBlock;
-
-    void setConverter(QCodeConverter* converter) { m_converter = converter; }
-
-public slots:
-    void updateValue();
-
-private:
-    QProjectDocument* m_document;
-    QCodeConverter* m_converter;
-
-};
-
 class Q_LCVEDITOR_EXPORT QProjectDocumentBlockData : public QTextBlockUserData{
 
 public:
     QProjectDocumentBlockData() : exceededBindingLength(0){}
     ~QProjectDocumentBlockData();
 
-    void addBinding(QProjectDocumentBinding* binding);
-    void removeBinding(QProjectDocumentBinding* binding);
+    void addBinding(QCodeRuntimeBinding* binding);
+    void removeBinding(QCodeRuntimeBinding* binding);
 
-    QLinkedList<QProjectDocumentBinding*> m_bindings;
+    QLinkedList<QCodeRuntimeBinding*> m_bindings;
     QList<int> bracketPositions;
     QString    blockIdentifier;
 
@@ -114,7 +83,7 @@ class Q_LCVEDITOR_EXPORT QProjectDocument : public QObject{
     Q_ENUMS(OpenMode)
 
 public:
-    typedef QLinkedList<QProjectDocumentBinding*>::iterator BindingIterator;
+    typedef QLinkedList<QCodeRuntimeBinding*>::iterator BindingIterator;
 
     enum OpenMode{
         Edit = 0,
@@ -143,7 +112,7 @@ public:
 
     void assignEditingDocument(QTextDocument* doc, QDocumentHandler* handler);
     QTextDocument* editingDocument();
-    QProjectDocumentBinding* addNewBinding(int position, int length, const QStringList& propertyChain);
+    QCodeRuntimeBinding* addNewBinding(QCodeDeclaration *declaration);
     void documentContentsChanged(int position, int charsRemoved, const QString& addedText = "");
     void documentContentsSilentChanged(int position, int charsRemoved, const QString& addedText = "");
 
@@ -151,10 +120,10 @@ public:
     BindingIterator bindingsEnd();
     int  totalBindings() const;
     bool hasBindings() const;
-    QProjectDocumentBinding* bindingAt(int position);
+    QCodeRuntimeBinding* bindingAt(int position);
     bool removeBindingAt(int position);
 
-    void updateBindingValue(QProjectDocumentBinding* binding, const QString &value);
+    void updateBindingValue(QCodeRuntimeBinding* binding, const QString &value);
 
     bool isActive() const;
 
@@ -182,7 +151,7 @@ private:
     QTextDocument*          m_editingDocument;
     QDocumentHandler* m_editingDocumentHandler;
 
-    QLinkedList<QProjectDocumentBinding*> m_bindings;
+    QLinkedList<QCodeRuntimeBinding*> m_bindings;
 
     QLinkedList<QProjectDocumentAction>   m_changes;
 

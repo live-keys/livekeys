@@ -2,12 +2,12 @@
 #define QCODECONVERTER_H
 
 #include <QObject>
-#include "qliveglobal.h"
+#include "qlcveditorglobal.h"
 #include "qabstractcodeserializer.h"
 
 namespace lcv{
 
-class Q_LIVE_EXPORT QCodeConverter : public QObject{
+class Q_LCVEDITOR_EXPORT QCodeConverter : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QAbstractCodeSerializer* serialize READ serialize  WRITE setSerialize  NOTIFY serializeChanged)

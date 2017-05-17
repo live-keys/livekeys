@@ -20,6 +20,8 @@
 #include "qdocumenthandler.h"
 #include "qproject.h"
 #include "qcodeconverter.h"
+#include "qcodedeclaration.h"
+#include "qcoderuntimebinding.h"
 
 #include <QFile>
 #include <QUrl>
@@ -63,19 +65,19 @@ void QProjectDocument::updateBindings(int position, int charsRemoved, const QStr
 
     int charsAdded = addedText.length();
 
-    QLinkedList<QProjectDocumentBinding*>::iterator it = m_bindings.begin();
+    QLinkedList<QCodeRuntimeBinding*>::iterator it = m_bindings.begin();
     while( it != m_bindings.end() ){
-        QProjectDocumentBinding* binding = *it;
+        QCodeRuntimeBinding* binding = *it;
 
-        if ( binding->propertyPosition + binding->length() <= position )
+        if ( binding->position() + binding->length() <= position )
             break;
 
         // delete bindings that have removed characters inside them
         if ( charsRemoved > 0 &&
-             position + charsRemoved > binding->propertyPosition &&
-             position < binding->propertyPosition + binding->length())
+             position + charsRemoved > binding->position() &&
+             position < binding->position() + binding->length())
         {
-            int bindingPosition = binding->propertyPosition;
+            int bindingPosition = binding->position();
             delete binding;
             it = m_bindings.erase(it);
 
@@ -84,10 +86,10 @@ void QProjectDocument::updateBindings(int position, int charsRemoved, const QStr
 
         // delete bindings that have inserted characters inside them
         } else if ( charsAdded > 0 &&
-                    position > binding->propertyPosition &&
-                    position <= binding->propertyPosition + binding->length() )
+                    position > binding->position() &&
+                    position <= binding->position() + binding->length() )
         {
-            int bindingPosition = binding->propertyPosition;
+            int bindingPosition = binding->position();
             delete binding;
             it = m_bindings.erase(it);
 
@@ -98,11 +100,11 @@ void QProjectDocument::updateBindings(int position, int charsRemoved, const QStr
 
         } else {
             // update other bindings positions
-            binding->propertyPosition = binding->propertyPosition - charsRemoved + charsAdded;
+            binding->declaration()->setIdentifierPosition(binding->position() - charsRemoved + charsAdded);
 
 
-            if ( charsRemoved > 0 && m_editingDocument && !binding->parentBlock ){
-                QTextBlock block = m_editingDocument->findBlock(binding->propertyPosition);
+            if ( charsRemoved > 0 && m_editingDocument && !binding->parentBlock() ){
+                QTextBlock block = m_editingDocument->findBlock(binding->position());
                 QProjectDocumentBlockData* bd = static_cast<QProjectDocumentBlockData*>(block.userData());
                 if ( !bd ){
                     bd = new QProjectDocumentBlockData;
@@ -135,11 +137,11 @@ void QProjectDocument::updateBindingBlocks(int position, const QString& addedTex
             QProjectDocumentBlockData* bddestination = 0;
             QTextBlock destinationBlock;
 
-            QLinkedList<QProjectDocumentBinding*>::iterator bdit = bd->m_bindings.begin();
+            QLinkedList<QCodeRuntimeBinding*>::iterator bdit = bd->m_bindings.begin();
             while ( bdit != bd->m_bindings.end() ){
-                QProjectDocumentBinding* bdbind = *bdit;
+                QCodeRuntimeBinding* bdbind = *bdit;
 
-                if ( bdbind->propertyPosition >= blockEnd ){
+                if ( bdbind->position() >= blockEnd ){
                     if ( !bddestination ){
                         destinationBlock = m_editingDocument->findBlock(position + addedText.length());
                         bddestination = static_cast<QProjectDocumentBlockData*>(destinationBlock.userData());
@@ -165,39 +167,37 @@ void QProjectDocument::assignEditingDocument(QTextDocument *doc, QDocumentHandle
     m_editingDocumentHandler = handler;
 }
 
-QProjectDocumentBinding *QProjectDocument::addNewBinding(int position, int length, const QStringList &propertyChain){
+QCodeRuntimeBinding *QProjectDocument::addNewBinding(QCodeDeclaration* declaration){
+    if ( declaration->document() != this ){
+        qCritical("Runtime binding requested on a different document.");
+        return 0;
+    }
 
     // bindings are added in descending order according to their position
-    QLinkedList<QProjectDocumentBinding*>::iterator it = m_bindings.begin();
-    QProjectDocumentBinding* binding = 0;
+    QLinkedList<QCodeRuntimeBinding*>::iterator it = m_bindings.begin();
+    QCodeRuntimeBinding* binding = 0;
     while( it != m_bindings.end() ){
-        QProjectDocumentBinding* itBind = *it;
+        QCodeRuntimeBinding* itBind = *it;
 
-        if ( itBind->propertyPosition < position ){
-            binding = new QProjectDocumentBinding(this);
-            binding->propertyPosition = position;
-            binding->propertyLength   = length;
-            binding->propertyChain    = propertyChain;
+        if ( itBind->position() < declaration->position() ){
+            binding = new QCodeRuntimeBinding(declaration);
             break;
 
         // do not add the same binding
-        } else if ( itBind->propertyPosition == position ){
+        } else if ( itBind->position() == declaration->position() ){
             return 0;
         }
         ++it;
     }
     if ( it == m_bindings.end() ){
-        binding = new QProjectDocumentBinding(this);
-        binding->propertyPosition = position;
-        binding->propertyLength   = length;
-        binding->propertyChain    = propertyChain;
+        binding = new QCodeRuntimeBinding(declaration);
     }
     if ( binding ){
         m_bindings.insert(it, binding);
     }
 
     if ( m_editingDocument && binding ){
-        QTextBlock bl = m_editingDocument->findBlock(position);
+        QTextBlock bl = m_editingDocument->findBlock(declaration->position());
         QProjectDocumentBlockData* blockdata = static_cast<QProjectDocumentBlockData*>(bl.userData());
         if ( !blockdata ){
             blockdata = new QProjectDocumentBlockData;
@@ -231,17 +231,17 @@ void QProjectDocument::documentContentsChanged(int position, int charsRemoved, c
 }
 
 void QProjectDocument::documentContentsSilentChanged(int position, int charsRemoved, const QString &addedText){
-    QLinkedList<QProjectDocumentBinding*>::iterator it = m_bindings.begin();
+    QLinkedList<QCodeRuntimeBinding*>::iterator it = m_bindings.begin();
     while( it != m_bindings.end() ){
-        QProjectDocumentBinding* binding = *it;
+        QCodeRuntimeBinding* binding = *it;
 
-        if ( binding->propertyPosition <= position )
+        if ( binding->position() <= position )
             break;
 
-        binding->propertyPosition = binding->propertyPosition - charsRemoved + addedText.length();
+        binding->declaration()->setIdentifierPosition(binding->position() - charsRemoved + addedText.length());
 
-        if ( charsRemoved > 0 && !binding->parentBlock ){
-            QTextBlock block = m_editingDocument->findBlock(binding->propertyPosition);
+        if ( charsRemoved > 0 && !binding->parentBlock() ){
+            QTextBlock block = m_editingDocument->findBlock(binding->position());
             QProjectDocumentBlockData* bd = static_cast<QProjectDocumentBlockData*>(block.userData());
             if ( !bd ){
                 bd = new QProjectDocumentBlockData;
@@ -255,15 +255,15 @@ void QProjectDocument::documentContentsSilentChanged(int position, int charsRemo
     updateBindingBlocks(position, addedText);
 }
 
-QProjectDocumentBinding *QProjectDocument::bindingAt(int position){
-    QLinkedList<QProjectDocumentBinding*>::iterator it = m_bindings.begin();
+QCodeRuntimeBinding *QProjectDocument::bindingAt(int position){
+    QLinkedList<QCodeRuntimeBinding*>::iterator it = m_bindings.begin();
     while( it != m_bindings.end() ){
-        QProjectDocumentBinding* binding = *it;
+        QCodeRuntimeBinding* binding = *it;
 
-        if ( binding->propertyPosition == position )
+        if ( binding->position() == position )
             return binding;
 
-        if ( binding->propertyPosition < position )
+        if ( binding->position() < position )
             return 0;
 
         ++it;
@@ -272,17 +272,17 @@ QProjectDocumentBinding *QProjectDocument::bindingAt(int position){
 }
 
 bool QProjectDocument::removeBindingAt(int position){
-    QLinkedList<QProjectDocumentBinding*>::iterator it = m_bindings.begin();
+    QLinkedList<QCodeRuntimeBinding*>::iterator it = m_bindings.begin();
     while( it != m_bindings.end() ){
-        QProjectDocumentBinding* binding = *it;
+        QCodeRuntimeBinding* binding = *it;
 
-        if ( binding->propertyPosition == position ){
+        if ( binding->position() == position ){
             m_bindings.erase(it);
             delete binding;
             return true;
         }
 
-        if ( binding->propertyPosition < position )
+        if ( binding->position() < position )
             return false;
 
         ++it;
@@ -290,19 +290,18 @@ bool QProjectDocument::removeBindingAt(int position){
     return false;
 }
 
-void QProjectDocument::updateBindingValue(QProjectDocumentBinding *binding, const QString& value){
-    if ( binding->valuePositionOffset != -1 ){
+void QProjectDocument::updateBindingValue(QCodeRuntimeBinding *binding, const QString& value){
+    if ( binding->declaration()->valueOffset() != -1 ){
 
-        int from = binding->propertyPosition + binding->propertyLength + binding->valuePositionOffset;
-        int to   = from + binding->valueLength;
+        int from = binding->position() + binding->declaration()->identifierLength() + binding->declaration()->valueOffset();
+        int to   = from + binding->declaration()->valueLength();
 
         if ( m_editingDocument ){
             QTextCursor editCursor(m_editingDocument);
             editCursor.setPosition(from);
             editCursor.setPosition(to, QTextCursor::KeepAnchor);
 
-            binding->valueLength      = value.length();
-            binding->modifiedByEngine = true;
+            binding->declaration()->setValueLength(value.length());
 
             m_editingDocumentHandler->addEditingState(QDocumentHandler::Runtime);
             editCursor.beginEditBlock();
@@ -311,7 +310,7 @@ void QProjectDocument::updateBindingValue(QProjectDocumentBinding *binding, cons
             editCursor.endEditBlock();
             m_editingDocumentHandler->removeEditingState(QDocumentHandler::Runtime);
         } else {
-            m_content.replace(from, binding->valueLength, value);
+            m_content.replace(from, binding->declaration()->valueLength(), value);
             setIsDirty(true);
         }
 
@@ -378,45 +377,45 @@ void QProjectDocumentAction::redo(){
 }
 
 QProjectDocumentBlockData::~QProjectDocumentBlockData(){
-    foreach ( QProjectDocumentBinding* binding, m_bindings ){
-        binding->parentBlock = 0;
+    foreach ( QCodeRuntimeBinding* binding, m_bindings ){
+        binding->m_parentBlock = 0;
     }
 }
 
-void QProjectDocumentBlockData::addBinding(QProjectDocumentBinding *binding){
-    binding->parentBlock = this;
+void QProjectDocumentBlockData::addBinding(QCodeRuntimeBinding *binding){
+    binding->m_parentBlock = this;
     m_bindings.append(binding);
 }
 
-void QProjectDocumentBlockData::removeBinding(QProjectDocumentBinding *binding){
+void QProjectDocumentBlockData::removeBinding(QCodeRuntimeBinding *binding){
     m_bindings.removeOne(binding);
-    if ( binding->parentBlock == this )
-        binding->parentBlock = 0;
+    if ( binding->m_parentBlock == this )
+        binding->m_parentBlock = 0;
 }
 
-QProjectDocumentBinding::QProjectDocumentBinding(QProjectDocument *parent)
-    : QObject(parent)
-    , propertyPosition(-1)
-    , propertyLength(0)
-    , valuePositionOffset(-1)
-    , valueLength(0)
-    , modifiedByEngine(false)
-    , parentBlock(0)
-    , m_document(parent)
-    , m_converter(0)
-{}
+//QCodeRuntimeBinding::QCodeRuntimeBinding(QProjectDocument *parent)
+//    : QObject(parent)
+//    , propertyPosition(-1)
+//    , propertyLength(0)
+//    , valuePositionOffset(-1)
+//    , valueLength(0)
+//    , modifiedByEngine(false)
+//    , parentBlock(0)
+//    , m_document(parent)
+//    , m_converter(0)
+//{}
 
-QProjectDocumentBinding::~QProjectDocumentBinding(){
-    if ( parentBlock ){
-        parentBlock->removeBinding(this);
-    }
-}
+//QCodeRuntimeBinding::~QCodeRuntimeBinding(){
+//    if ( parentBlock ){
+//        parentBlock->removeBinding(this);
+//    }
+//}
 
-void QProjectDocumentBinding::updateValue(){
-    if ( m_converter )
-        m_document->updateBindingValue(
-            this, m_converter->serialize()->toCode(sender()->property(propertyChain.last().toUtf8()))
-        );
-}
+//void QCodeRuntimeBinding::updateValue(){
+//    if ( m_converter )
+//        m_document->updateBindingValue(
+//            this, m_converter->serialize()->toCode(sender()->property(propertyChain.last().toUtf8()))
+//        );
+//}
 
 }// namespace

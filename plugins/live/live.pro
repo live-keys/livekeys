@@ -17,6 +17,8 @@ else:DESTDIR = $$buildModePath($$DEPLOY_PWD)
 
 uri = plugins.live
 
+linkLocalLibrary(editor/lcveditor, lcveditor)
+
 # Deploy qml
 
 qmlcopy.commands     = $$deployLocalDirCommand($$PWD/qml, plugins/$$PLUGIN_PATH)

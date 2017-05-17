@@ -20,6 +20,8 @@
 #include "qqmlidvisitor_p.h"
 #include "qdocumentqmlranges_p.h"
 #include "qdocumentqmlvalueobjects.h"
+#include "qcodedeclaration.h"
+#include "qcoderuntimebinding.h"
 
 #include "qprojectdocument.h"
 #include "qprojectfile.h"
@@ -36,22 +38,22 @@ namespace{
     QQmlProperty findBindingProperty(
         QDocumentQmlValueObjects::RangeObject *object,
         QObject *root,
-        QProjectDocumentBinding* binding,
+        QCodeRuntimeBinding* binding,
         const QString& source)
     {
-        int position = binding->propertyPosition;
+        int position = binding->position();
 
         for ( int i = 0; i < object->properties.size(); ++i ){
             if ( object->properties[i]->begin == position ){
 
-                if ( binding->propertyChain.isEmpty() ){
+                if ( binding->declaration()->identifierChain().isEmpty() ){
                     return QQmlProperty();
                 }
 
                 // iterate property chain (eg. border.size => (border, size))
                 QObject* objectChain = root;
-                for ( int j = 0; j < binding->propertyChain.size() - 1; ++j ){
-                    QQmlProperty foundprop(root, binding->propertyChain[j]);
+                for ( int j = 0; j < binding->declaration()->identifierChain().size() - 1; ++j ){
+                    QQmlProperty foundprop(root, binding->declaration()->identifierChain()[j]);
                     if ( !foundprop.isValid() || foundprop.propertyTypeCategory() != QQmlProperty::Object ){
                         return QQmlProperty();
                     }
@@ -60,13 +62,17 @@ namespace{
                 }
 
                 // found property
-                binding->valuePositionOffset =
-                    object->properties[i]->valueBegin - object->properties[i]->begin - binding->propertyLength;
+                binding->declaration()->setValuePositionOffset(
+                    object->properties[i]->valueBegin -
+                    object->properties[i]->begin -
+                    binding->declaration()->identifierLength()
+                );
 
-                binding->valueLength =
-                    object->properties[i]->end - object->properties[i]->valueBegin;
+                binding->declaration()->setValueLength(
+                    object->properties[i]->end - object->properties[i]->valueBegin
+                );
 
-                return QQmlProperty(objectChain, binding->propertyChain.last());
+                return QQmlProperty(objectChain, binding->declaration()->identifierChain().last());
 
             } else if ( object->properties[i]->child &&
                         object->properties[i]->begin < position &&
@@ -323,7 +329,7 @@ void QDocumentQmlInfo::syncBindings(const QString &source, QProjectDocument *doc
         QDocumentQmlValueObjects* objects = docinfo->createObjects();
 
         for ( QProjectDocument::BindingIterator it = document->bindingsBegin(); it != document->bindingsEnd(); ++it ){
-            QProjectDocumentBinding* binding = *it;
+            QCodeRuntimeBinding* binding = *it;
             QQmlProperty foundProperty(findBindingProperty(objects->root(), root, binding, source));
             if ( foundProperty.isValid() )
                 foundProperty.connectNotifySignal(binding, SLOT(updateValue()));
@@ -336,7 +342,7 @@ void QDocumentQmlInfo::syncBindings(const QString &source, QProjectDocument *doc
 void QDocumentQmlInfo::syncBindings(
         const QString &source,
         QProjectDocument* document,
-        QList<QProjectDocumentBinding *> bindings,
+        QList<QCodeRuntimeBinding *> bindings,
         QObject *root)
 {
     if ( bindings.isEmpty() )
@@ -347,8 +353,8 @@ void QDocumentQmlInfo::syncBindings(
 
     QDocumentQmlValueObjects* objects = docinfo->createObjects();
 
-    for ( QList<QProjectDocumentBinding*>::iterator it = bindings.begin(); it != bindings.end(); ++it) {
-        QProjectDocumentBinding* binding = *it;
+    for ( QList<QCodeRuntimeBinding*>::iterator it = bindings.begin(); it != bindings.end(); ++it) {
+        QCodeRuntimeBinding* binding = *it;
         QQmlProperty foundProperty(findBindingProperty(objects->root(), root, binding, source));
         if ( foundProperty.isValid() )
             foundProperty.connectNotifySignal(binding, SLOT(updateValue()));
@@ -360,7 +366,7 @@ void QDocumentQmlInfo::syncBindings(
 QQmlProperty QDocumentQmlInfo::findMatchingProperty(
         const QString &source,
         QProjectDocument *document,
-        QProjectDocumentBinding *binding,
+        QCodeRuntimeBinding *binding,
         QObject *root)
 {
     QDocumentQmlInfo::MutablePtr docinfo = QDocumentQmlInfo::create(document->file()->path());
