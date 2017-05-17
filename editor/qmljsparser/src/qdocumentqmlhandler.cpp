@@ -16,6 +16,7 @@
 
 #include "qdocumentqmlhandler.h"
 #include "qqmljshighlighter_p.h"
+#include "qqmljssettings.h"
 #include "qprojectqmlscanner_p.h"
 #include "qdocumentqmlobject.h"
 #include "qdocumentqmlobject_p.h"
@@ -29,6 +30,7 @@
 #include "qdocumentqmlvaluescanner_p.h"
 #include "qdocumentqmlvalueobjects.h"
 #include "qdocumentqmlfragment.h"
+#include "qqmljshighlighter_p.h"
 
 #include "qmljs/qmljsscanner.h"
 
@@ -672,7 +674,8 @@ QDocumentQmlHandler::QDocumentQmlHandler(
         QObject *parent)
     : QAbstractCodeHandler(parent)
     , m_target(0)
-    , m_highlighter(0)
+    , m_highlighter(new QQmlJsHighlighter(0, 0))
+    , m_settings(new QQmlJsSettings(m_highlighter))
     , m_engine(engine)
     , m_completionContextFinder(new QQmlCompletionContextFinder)
     , m_documentScope(0)
@@ -841,7 +844,7 @@ void QDocumentQmlHandler::assistCompletion(
 
 void QDocumentQmlHandler::setTarget(QTextDocument *target, QDocumentCodeState* state){
     m_target      = target;
-    m_highlighter = new QQmlJsHighlighter(m_target, state);
+    m_highlighter->setTarget(m_target, state);
 }
 
 void QDocumentQmlHandler::setDocument(QProjectDocument *document){

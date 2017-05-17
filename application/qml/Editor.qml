@@ -159,7 +159,8 @@ Rectangle{
             }
 
             anchors.fill: parent
-            anchors.leftMargin: 10
+            anchors.leftMargin: 7
+            anchors.rightMargin: 3
 
             frameVisible: false
 

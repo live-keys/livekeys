@@ -28,14 +28,15 @@
 
 class QQmlEngine;
 
-class QQmlJsHighlighter;
 
 namespace lcv{
 
 class QProjectQmlScanner;
 class QPluginInfoExtractor;
+class QQmlJsHighlighter;
 class QQmlCompletionContextFinder;
 class QQmlCompletionContext;
+class QQmlJsSettings;
 
 class Q_QMLJSPARSER_EXPORT QDocumentQmlHandler : public QAbstractCodeHandler{
 
@@ -72,6 +73,8 @@ public:
     ) Q_DECL_OVERRIDE;
 
     QPluginInfoExtractor *getPluginInfoExtractor(const QString& import);
+
+    QQmlJsSettings* settings();
 
 public slots:
     void newDocumentScopeReady();
@@ -143,10 +146,12 @@ private:
 
     QTextDocument*      m_target;
     QQmlJsHighlighter*  m_highlighter;
+    QQmlJsSettings*     m_settings;
     QQmlEngine*         m_engine;
     QQmlCompletionContextFinder* m_completionContextFinder;
 
     QProjectDocument* m_document;
+
 
     QDocumentQmlScope::Ptr       m_documentScope;
     QProjectQmlScope::Ptr        m_projectScope;
@@ -154,6 +159,10 @@ private:
     QProjectQmlScanner*          m_scanner;
 
 };
+
+inline QQmlJsSettings *QDocumentQmlHandler::settings(){
+    return m_settings;
+}
 
 }// namespace
 

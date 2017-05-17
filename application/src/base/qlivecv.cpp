@@ -34,8 +34,8 @@
 #include "qprojectdocumentmodel.h"
 #include "qprojectdocument.h"
 
+#include "qqmljssettings.h"
 #include "qdocumentqmlhandler.h"
-#include "qdocumentqmlinfo.h"
 #include "qplugininfoextractor.h"
 
 #include <QUrl>
@@ -108,6 +108,10 @@ void QLiveCV::loadQml(const QUrl &url){
         m_engine->engineMutex(),
         m_project->lockedFileIO()
     );
+
+    m_settings->editor()->addSetting("qmljs", qmlHandler->settings());
+    m_settings->editor()->syncWithFile();
+
     m_codeInterface = new lcv::QDocumentHandler(
         qmlHandler,
         QLivePaletteContainer::create(m_engine->engine(), dir() + "/plugins")
