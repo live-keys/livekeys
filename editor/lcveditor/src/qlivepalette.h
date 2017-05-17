@@ -3,12 +3,12 @@
 
 #include <QObject>
 #include <QQuickItem>
-#include "qliveglobal.h"
+#include "qlcveditorglobal.h"
 #include "qcodeconverter.h"
 
 namespace lcv{
 
-class Q_LIVE_EXPORT QLivePalette : public QCodeConverter{
+class Q_LCVEDITOR_EXPORT QLivePalette : public QCodeConverter{
 
     Q_OBJECT
     Q_PROPERTY(QQuickItem* item READ item  WRITE setItem  NOTIFY itemChanged)

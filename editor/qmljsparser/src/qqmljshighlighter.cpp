@@ -1,9 +1,10 @@
 #include "qqmljshighlighter_p.h"
+#include "qcoderuntimebinding.h"
 #include <QDebug>
 
 namespace lcv{
 
-QQmlJsHighlighter::QQmlJsHighlighter(QTextDocument *parent, lcv::QDocumentCodeState *state)
+QQmlJsHighlighter::QQmlJsHighlighter(QTextDocument *parent, lcv::QDocumentHandlerState *state)
     : QSyntaxHighlighter(parent)
     , m_documentState(state)
 {
@@ -243,24 +244,24 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
 
 
     if ( blockData ){
-        foreach(lcv::QProjectDocumentBinding* bind, blockData->m_bindings ){
+        foreach(lcv::QCodeRuntimeBinding* bind, blockData->m_bindings ){
             setFormat(
-                bind->propertyPosition - currentBlock().position(),
-                bind->propertyLength,
+                bind->position() - currentBlock().position(),
+                bind->declaration()->identifierLength(),
                 m_formats[QQmlJsHighlighter::QmlRuntimeBoundProperty]
             );
 
-            if ( bind->modifiedByEngine ){
-                int valueFrom = bind->propertyPosition + bind->propertyLength + bind->valuePositionOffset;
+            if ( bind->isModifiedByEngine() ){
+                int valueFrom = bind->position() + bind->declaration()->length() + bind->declaration()->valueOffset();
                 setFormat(
                     valueFrom - currentBlock().position(),
-                    bind->valueLength,
+                    bind->declaration()->valueLength(),
                     m_formats[QQmlJsHighlighter::QmlRuntimeModifiedValue]
                 );
-                if ( valueFrom + bind->valueLength > currentBlock().position() + currentBlock().length() ){
+                if ( valueFrom + bind->declaration()->valueLength() > currentBlock().position() + currentBlock().length() ){
                     generated = true;
                     blockData->exceededBindingLength =
-                            bind->valueLength - (currentBlock().length() - (valueFrom - currentBlock().position()));
+                        bind->declaration()->valueLength() - (currentBlock().length() - (valueFrom - currentBlock().position()));
                 }
             }
         }
@@ -280,10 +281,6 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
         }
     }
 }
-
-
-
-
 
 }// namespace
 

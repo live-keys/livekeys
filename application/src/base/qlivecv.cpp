@@ -35,7 +35,8 @@
 #include "qprojectdocument.h"
 
 #include "qqmljssettings.h"
-#include "qdocumentqmlhandler.h"
+#include "qcodeqmlhandler.h"
+#include "qdocumentqmlinfo.h"
 #include "qplugininfoextractor.h"
 
 #include <QUrl>
@@ -103,7 +104,7 @@ void QLiveCV::loadLibrary(const QString &library){
 }
 
 void QLiveCV::loadQml(const QUrl &url){
-    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(
+    lcv::QCodeQmlHandler* qmlHandler = new lcv::QCodeQmlHandler(
         m_engine->engine(),
         m_engine->engineMutex(),
         m_project->lockedFileIO()
@@ -184,7 +185,9 @@ void QLiveCV::registerTypes(){
     qmlRegisterUncreatableType<QLiveCVLog>(
         "Cv", 1, 0, "MessageLog", "Type is singleton.");
     qmlRegisterUncreatableType<lcv::QDocumentHandler>(
-        "Cv", 1, 0, "DocumentCodeInterface", "DocumentCodeInterface is singleton.");
+        "Cv", 1, 0, "DocumentHandler", "DocumentHandler is singleton.");
+    qmlRegisterType<lcv::QDocumentCursorInfo>(
+        "Cv", 1, 0, "DocumentCursorInfo");
 
     qmlRegisterUncreatableType<lcv::QProjectFileModel>(
         "Cv", 1, 0, "ProjectFileModel", "Cannot create a ProjectFileModel instance.");
@@ -214,7 +217,7 @@ void QLiveCV::registerTypes(){
 }
 
 QByteArray QLiveCV::extractPluginInfo(const QString &import) const{
-    lcv::QDocumentQmlHandler* qmlHandler = new lcv::QDocumentQmlHandler(
+    lcv::QCodeQmlHandler* qmlHandler = new lcv::QCodeQmlHandler(
         m_engine->engine(),
         m_engine->engineMutex(),
         m_project->lockedFileIO()

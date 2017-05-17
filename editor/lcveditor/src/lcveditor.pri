@@ -15,10 +15,17 @@ HEADERS += \
     $$PWD/qlockedfileiosession.h \
     $$PWD/qeditorsettings.h \
     $$PWD/qdocumenteditfragment.h \
-    $$PWD/qdocumentcodestate.h \
     $$PWD/qcodedeclaration.h \
     $$PWD/qdocumenthandler.h \
-    $$PWD/qeditorsettingscategory.h
+    $$PWD/qeditorsettingscategory.h \
+    $$PWD/qdocumenthandlerstate.h \
+    $$PWD/qcoderuntimebinding.h \
+    $$PWD/qabstractcodeserializer.h \
+    $$PWD/qcodeconverter.h \
+    $$PWD/qnativevaluecodeserializer.h \
+    $$PWD/qlivepalette.h \
+    $$PWD/qlivepalettecontainer.h \
+    $$PWD/qdocumentcursorinfo.h
 
 SOURCES += \
     $$PWD/qproject.cpp \
@@ -34,7 +41,14 @@ SOURCES += \
     $$PWD/qlockedfileiosession.cpp \
     $$PWD/qeditorsettings.cpp \
     $$PWD/qdocumenteditfragment.cpp \
-    $$PWD/qdocumentcodestate.cpp \
     $$PWD/qcodedeclaration.cpp \
     $$PWD/qdocumenthandler.cpp \
-    $$PWD/qeditorsettingscategory.cpp
+    $$PWD/qeditorsettingscategory.cpp \
+    $$PWD/qdocumenthandlerstate.cpp \
+    $$PWD/qcoderuntimebinding.cpp \
+    $$PWD/qabstractcodeserializer.cpp \
+    $$PWD/qcodeconverter.cpp \
+    $$PWD/qnativevaluecodeserializer.cpp \
+    $$PWD/qlivepalette.cpp \
+    $$PWD/qlivepalettecontainer.cpp \
+    $$PWD/qdocumentcursorinfo.cpp

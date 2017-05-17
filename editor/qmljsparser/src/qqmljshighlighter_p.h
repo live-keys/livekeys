@@ -21,14 +21,15 @@
 #include <QSyntaxHighlighter>
 
 #include "qprojectdocument.h"
-#include "qdocumentcodestate.h"
+#include "qdocumenthandlerstate.h"
 #include "qdocumenteditfragment.h"
 #include "qmljs/qmljsscanner.h"
+#include "qcoderuntimebinding.h"
 
 namespace lcv{
 
 /**
- * @brief The QCodeJSHighlighter is a private class used internally.
+ * @brief The QCodeJSHighlighter is a private class used internally for highlighting.
  */
 class QQmlJsHighlighter : public QSyntaxHighlighter{
 
@@ -56,12 +57,12 @@ public:
     };
 
 public:
-    QQmlJsHighlighter(QTextDocument *parent = 0, lcv::QDocumentCodeState* state = 0);
+    QQmlJsHighlighter(QTextDocument *parent = 0, lcv::QDocumentHandlerState* state = 0);
 
     QTextCharFormat& operator[](const QString& key);
     QTextCharFormat& operator[](const ColorComponent& key);
 
-    void setTarget(QTextDocument* target, QDocumentCodeState* state);
+    void setTarget(QTextDocument* target, QDocumentHandlerState* state);
 
     bool hasKey(const QString& key);
 
@@ -88,9 +89,8 @@ private:
     QHash<QString, ColorComponent> m_formatRoles;
     QHash<ColorComponent, QTextCharFormat> m_formats;
 
-    lcv::QDocumentCodeState* m_documentState;
+    lcv::QDocumentHandlerState* m_documentState;
 };
-
 
 inline QTextCharFormat &QQmlJsHighlighter::operator[](const QString &key){
     return m_formats[m_formatRoles[key]];
@@ -100,7 +100,7 @@ inline QTextCharFormat &QQmlJsHighlighter::operator[](const QQmlJsHighlighter::C
     return m_formats[key];
 }
 
-inline void QQmlJsHighlighter::setTarget(QTextDocument *target, QDocumentCodeState *state){
+inline void QQmlJsHighlighter::setTarget(QTextDocument *target, QDocumentHandlerState *state){
     m_documentState = state;
     setDocument(target);
 }
