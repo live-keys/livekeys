@@ -10,7 +10,8 @@ linkLocalLibrary(editor/qmljsparser, qmljsparser)
 
 unix{
     QMAKE_LFLAGS += \
-        '-Wl,-rpath,\'\$$ORIGIN\''
+        '-Wl,-rpath,\'\$$ORIGIN\'' \
+        '-Wl,-rpath,\'\$$ORIGIN/plugins/live\''
 }
 
 DESTDIR = $$DEPLOY_PWD
