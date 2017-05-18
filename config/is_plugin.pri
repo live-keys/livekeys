@@ -32,7 +32,11 @@ TEMPLATE    = lib
 QT          += qml quick
 CONFIG      += qt plugin
 TARGET      = $$PLUGIN_NAME
-DESTDIR     = $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME
+
+win32:{
+    DESTDIR    = $$BUILD_PWD/lib/plugins/$$PLUGIN_NAME
+    DLLDESTDIR = $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME
+}else:DESTDIR = $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME
 
 # --- Handling the QML deployment ---
 
