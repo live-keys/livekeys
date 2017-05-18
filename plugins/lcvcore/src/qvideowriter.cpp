@@ -21,8 +21,6 @@
 #include <QQmlContext>
 #include "opencv2/highgui.hpp"
 
-#include "qlivecvarguments.h"
-
 QVideoWriter::QVideoWriter(QQuickItem *parent)
     : QQuickItem(parent)
     , m_input(QMat::nullMat())

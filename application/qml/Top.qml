@@ -266,7 +266,8 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 465
-        color : settings.license.highlights > 0 ? "#44130b" : "#0c1924"
+//        color : settings.license.highlights > 0 ? "#44130b" : "#0c1924" //NO LICENSES
+        color: "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : openLicenseArea.containsMouse ? parent.height : parent.height - 5

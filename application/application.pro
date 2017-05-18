@@ -4,7 +4,7 @@ QT      += qml quick
 
 linkLocalLibrary(editor/lcveditor, lcveditor)
 linkLocalLibrary(editor/qmljsparser, qmljsparser)
-linkLocalPlugin(live, live)
+#linkLocalPlugin(live, live)
 
 # Load library paths
 # ------------------

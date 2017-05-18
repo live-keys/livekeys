@@ -19,9 +19,8 @@
 
 #include <exception>
 #include <QString>
-#include "qliveglobal.h"
 
-class Q_LIVE_EXPORT QLiveCVException : public std::exception{
+class QLiveCVException : public std::exception{
 
 public:
     QLiveCVException(const QString& message, int code = 0);

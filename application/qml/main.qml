@@ -31,6 +31,8 @@ ApplicationWindow{
     property bool documentsReloaded : false
     onActiveChanged: {
         if ( active ){
+            if ( staticContainer )
+                staticContainer.clearStates()
             project.navigationModel.requiresReindex()
             project.fileModel.rescanEntries()
             project.documentModel.rescanDocuments()
@@ -43,8 +45,6 @@ ApplicationWindow{
 
     title: qsTr("Live CV")
 
-    signal afterCompile()
-    signal aboutToRecompile()
     signal projectActiveChanged()
 
     FontLoader{ id: ubuntuMonoBold;       source: "qrc:/fonts/UbuntuMono-Bold.ttf"; }
@@ -667,7 +667,9 @@ ApplicationWindow{
                     Connections{
                         target: engine
                         onAboutToCreateObject : {
-                            root.aboutToRecompile()
+                            if (staticContainer)
+                                staticContainer.beforeCompile()
+//                            root.aboutToRecompile()
                         }
                         onObjectCreated : {
                             error.text = ''
@@ -675,7 +677,9 @@ ApplicationWindow{
                                 tester.item.destroy();
                             }
                             tester.item = object;
-                            root.afterCompile()
+                            if ( staticContainer )
+                                staticContainer.afterCompile()
+//                            root.afterCompile()
                         }
                         onObjectCreationError : {
                             var lastErrorsText = ''

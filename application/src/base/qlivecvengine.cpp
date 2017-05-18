@@ -50,6 +50,7 @@ QLiveCVEngine::QLiveCVEngine(QQmlEngine *engine, QObject *parent)
 
 QLiveCVEngine::~QLiveCVEngine(){
     delete m_engineMutex;
+    delete m_engine;
 }
 
 void QLiveCVEngine::useEngine(std::function<void(QQmlEngine *)> call){

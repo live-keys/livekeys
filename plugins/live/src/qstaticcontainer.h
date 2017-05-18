@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QDebug>
 
-//#define QSTATIC_ITEM_CONTAINER_DEBUG_FLAG
+#define QSTATIC_ITEM_CONTAINER_DEBUG_FLAG
 #ifdef QSTATIC_ITEM_CONTAINER_DEBUG_FLAG
 #define QSTATIC_ITEM_CONTAINER_DEBUG(_param) qDebug() << "STATIC CONTAINER:" << (_param)
 #else
@@ -26,7 +26,6 @@ public:
     ~QStaticContainer();
 
     void statecontainer(QStaticTypeContainerBase* container);
-    void setWindow(QQuickWindow* window);
 
     template<class T> T* get(const QString& key);
     template<class T> void set(const QString& key, T* value);

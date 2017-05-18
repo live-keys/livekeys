@@ -32,7 +32,6 @@
 
 class QGuiApplication;
 class QQmlApplicationEngine;
-class QStaticContainer;
 class QUrl;
 
 namespace lcv{
@@ -78,7 +77,6 @@ private:
 
     QLiveCVEngine* m_engine;
     QLiveCVArguments* m_arguments;
-    QStaticContainer* m_staticContainer;
 
     lcv::QDocumentHandler* m_codeInterface;
     QString  m_dir;
