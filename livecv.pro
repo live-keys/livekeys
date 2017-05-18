@@ -12,9 +12,9 @@
 # Some linux distributions have qt version 4 already installed. Sometimes this
 # can lead to running the wrong qmake version. Notify the user:
 
-if($$QT_MAJOR_VERSION<5):error( \
-    This project requires at least Qt version 5. \
-    Make sure you have Qt 5 installed and running the correct qmake. \
+!minQtVersion(5, 6)::error( \
+    This project requires at least Qt version 5.6. \
+    Make sure you have Qt 5.6 installed and running the correct qmake. \
 )
 
 # --- Project structure ---
@@ -33,7 +33,7 @@ plugins.subdir      = plugins
 
 # --- Dependency configuration ---
 application.depends = editor plugins # because we have a dependency to the live plugin here
-editor.depends      = plugins
+plugins.depends     = editor
 
 
 # Include the global configuration files since otherwise they would never show

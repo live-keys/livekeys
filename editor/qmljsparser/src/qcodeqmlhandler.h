@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QDOCUMENTQMLHANDLER_H
-#define QDOCUMENTQMLHANDLER_H
+#ifndef QCODEQMLHANDLER_H
+#define QCODEQMLHANDLER_H
 
 #include "qqmljsparserglobal.h"
 #include "qabstractcodehandler.h"
@@ -28,28 +28,28 @@
 
 class QQmlEngine;
 
-class QQmlJsHighlighter;
-
 namespace lcv{
 
 class QProjectQmlScanner;
 class QPluginInfoExtractor;
+class QQmlJsHighlighter;
 class QQmlCompletionContextFinder;
 class QQmlCompletionContext;
+class QQmlJsSettings;
 
-class Q_QMLJSPARSER_EXPORT QDocumentQmlHandler : public QAbstractCodeHandler{
+class Q_QMLJSPARSER_EXPORT QCodeQmlHandler : public QAbstractCodeHandler{
 
     Q_OBJECT
-    Q_DISABLE_COPY(QDocumentQmlHandler)
+    Q_DISABLE_COPY(QCodeQmlHandler)
 
 public:
-    explicit QDocumentQmlHandler(
+    explicit QCodeQmlHandler(
         QQmlEngine* engine,
         QMutex* engineMutex,
         QLockedFileIOSession::Ptr lockedFileIO,
         QObject* parent = 0
     );
-    ~QDocumentQmlHandler();
+    ~QCodeQmlHandler();
 
     void assistCompletion(
         const QTextCursor& cursor,
@@ -58,20 +58,22 @@ public:
         QCodeCompletionModel* model,
         QTextCursor& cursorChange
     ) Q_DECL_OVERRIDE;
-    void setTarget(QTextDocument *target, QDocumentCodeState* state) Q_DECL_OVERRIDE;
+    void setTarget(QTextDocument *target, QDocumentHandlerState* state) Q_DECL_OVERRIDE;
     void setDocument(QProjectDocument* document) Q_DECL_OVERRIDE;
     void updateScope(const QString& data) Q_DECL_OVERRIDE;
     void rehighlightBlock(const QTextBlock& block) Q_DECL_OVERRIDE;
-    QList<QAbstractCodeHandler::CodeProperty> getProperties(const QTextCursor& cursor) Q_DECL_OVERRIDE;
+    QList<QCodeDeclaration*> getDeclarations(const QTextCursor& cursor) Q_DECL_OVERRIDE;
     bool findPropertyValue(int position, int length, int& valuePosition, int& valueEnd) Q_DECL_OVERRIDE;
-    void connectBindings(QList<QProjectDocumentBinding*> bindings, QObject* root) Q_DECL_OVERRIDE;
+    void connectBindings(QList<QCodeRuntimeBinding*> bindings, QObject* root) Q_DECL_OVERRIDE;
     QDocumentEditFragment* createInjectionChannel(
-        const CodeProperty& property,
+        QCodeDeclaration* property,
         QObject* runtime,
         QCodeConverter* converter
     ) Q_DECL_OVERRIDE;
 
     QPluginInfoExtractor *getPluginInfoExtractor(const QString& import);
+
+    QQmlJsSettings* settings();
 
 public slots:
     void newDocumentScopeReady();
@@ -143,10 +145,12 @@ private:
 
     QTextDocument*      m_target;
     QQmlJsHighlighter*  m_highlighter;
+    QQmlJsSettings*     m_settings;
     QQmlEngine*         m_engine;
     QQmlCompletionContextFinder* m_completionContextFinder;
 
     QProjectDocument* m_document;
+
 
     QDocumentQmlScope::Ptr       m_documentScope;
     QProjectQmlScope::Ptr        m_projectScope;
@@ -155,6 +159,10 @@ private:
 
 };
 
+inline QQmlJsSettings *QCodeQmlHandler::settings(){
+    return m_settings;
+}
+
 }// namespace
 
-#endif // QDOCUMENTQMLHANDLER_H
+#endif // QCODEQMLHANDLER_H

@@ -42,7 +42,7 @@ class QLiveCVArguments;
 class QLiveCVSettings;
 class QProject;
 class QDocumentHandler;
-class QDocumentQmlHandler;
+class QCodeQmlHandler;
 
 // class QLiveCV
 // -------------

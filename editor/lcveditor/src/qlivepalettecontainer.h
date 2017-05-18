@@ -1,7 +1,7 @@
 #ifndef QPALLETECONTAINER_H
 #define QPALLETECONTAINER_H
 
-#include "qliveglobal.h"
+#include "qlcveditorglobal.h"
 #include <QString>
 
 class QQmlEngine;
@@ -11,7 +11,7 @@ namespace lcv{
 
 class QCodeConverter;
 class QLivePaletteContainerPrivate;
-class Q_LIVE_EXPORT QLivePaletteContainer{
+class Q_LCVEDITOR_EXPORT QLivePaletteContainer{
 
 public:
     ~QLivePaletteContainer();
@@ -22,6 +22,7 @@ public:
     static QLivePaletteContainer* create(QQmlEngine* engine, const QString& path);
 
     QCodeConverter* findPalette(const QString& type, const QString& object = "");
+    QCodeConverter* findPalette(const QString &type, const QStringList &object);
 
     int size() const;
 

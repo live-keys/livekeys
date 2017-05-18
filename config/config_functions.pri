@@ -165,3 +165,15 @@ defineReplace(deployFileCommand){
 
     return($$QMAKE_COPY_FILE $$DEPLOY_FROM $$DEPLOY_TO)
 }
+
+
+defineTest(minQtVersion) {
+    maj = $$1
+    min = $$2
+    isEqual(QT_MAJOR_VERSION, $$maj){
+        isEqual(QT_MINOR_VERSION, $$min):return(true)
+        greaterThan(QT_MINOR_VERSION, $$min):return(true)
+    }
+    greaterThan(QT_MAJOR_VERSION, $$maj):return(true)
+    return(false)
+}
