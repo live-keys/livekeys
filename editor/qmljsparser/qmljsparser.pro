@@ -1,10 +1,3 @@
-
-## Set the name of your library
-#LIB_NAME = qmljsparser
-#include($$getConfigFile(is_editor_lib.pri))
-#include($$getConfigFile(use_lcveditor.pri))
-#QT      += xml
-
 TEMPLATE = lib
 TARGET   = qmljsparser
 QT      += core qml quick xml
@@ -14,9 +7,10 @@ linkLocalLibrary(editor/lcveditor, lcveditor)
 
 DEFINES += Q_QMLJSPARSER_LIB
 
-win32:DLLDESTDIR = $$buildModePath($$DEPLOY_PWD)
-else:DESTDIR = $$buildModePath($$DEPLOY_PWD)
-
+win32:{
+    DESTDIR    = $$BUILD_PWD/lib
+    DLLDESTDIR = $$DEPLOY_PWD
+}else:DESTDIR = $$DEPLOY_PWD
 
 #ENABLE_PLUGINTYPES = true
 

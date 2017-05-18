@@ -27,7 +27,7 @@ OTHER_FILES *= \
 
 # Deploy The palette
 
-palettecopy.commands = $$deployDirCommand($$PWD/palettes, $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME)
+palettecopy.commands = $$deployDirCommand($$PWD/palettes, $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME/palettes)
 first.depends = $(first) palettecopy
 export(first.depends)
 export(palettecopy.commands)

@@ -32,7 +32,7 @@ editor.subdir       = editor
 plugins.subdir      = plugins
 
 # --- Dependency configuration ---
-application.depends = editor plugins # because we have a dependency to the live plugin here
+application.depends = editor
 plugins.depends     = editor
 
 
