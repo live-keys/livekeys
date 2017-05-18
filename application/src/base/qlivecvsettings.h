@@ -2,7 +2,6 @@
 #define QLIVECVSETTINGS_H
 
 #include <QObject>
-#include "qliveglobal.h"
 #include "qeditorsettings.h"
 
 namespace lcv{

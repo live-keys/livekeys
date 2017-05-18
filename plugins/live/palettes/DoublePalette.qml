@@ -11,7 +11,7 @@ LivePalette{
 
     item: Rectangle{
         width: 250
-        height: 90
+        height: 100
         color: 'transparent'
 
         Slider{
@@ -122,12 +122,12 @@ LivePalette{
 
             style: SliderStyle{
                 groove: Rectangle {
-                    implicitHeight: 15
+                    implicitHeight: 5
                     color: "transparent"
                 }
                 handle: Rectangle{
-                    width: 10
-                    height: 15
+                    width: 30
+                    height: 5
                     color: "#0b273f"
                 }
             }

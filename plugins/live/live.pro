@@ -8,6 +8,7 @@ DEFINES += Q_LIVE_LIB
 
 uri = plugins.live
 
+linkLocalLibrary(editor/lcveditor, lcveditor)
 # Source
 
 include($$PWD/src/live.pri)

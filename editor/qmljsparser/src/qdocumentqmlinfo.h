@@ -35,7 +35,7 @@ namespace QmlJS{
 namespace lcv{
 
 class QProjectDocument;
-class QProjectDocumentBinding;
+class QCodeRuntimeBinding;
 class QDocumentQmlValueObjects;
 class QDocumentQmlInfoPrivate;
 class Q_QMLJSPARSER_EXPORT QDocumentQmlInfo{
@@ -130,13 +130,13 @@ public:
     static void syncBindings(
         const QString& source,
         QProjectDocument *document,
-        QList<QProjectDocumentBinding*> bindings,
+        QList<QCodeRuntimeBinding*> bindings,
         QObject* root
     );
     static QQmlProperty findMatchingProperty(
         const QString& source,
         QProjectDocument* document,
-        QProjectDocumentBinding* binding,
+        QCodeRuntimeBinding* binding,
         QObject* root
     );
 

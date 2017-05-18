@@ -1,6 +1,7 @@
 #include "qeditorsettings.h"
 #include "qprojectdocument.h"
 #include "qprojectfile.h"
+#include "qeditorsettingscategory.h"
 #include <QFile>
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -12,28 +13,50 @@ QEditorSettings::QEditorSettings(const QString &path, QObject *parent)
     , m_fontSize(12)
     , m_path(path)
 {
-    syncWithFile();
 }
 
 QEditorSettings::~QEditorSettings(){
 }
 
 void QEditorSettings::fromJson(const QJsonObject &root){
-    if ( root.contains("fontSize") ){
-        m_fontSize = root["fontSize"].toInt();
-        emit fontSizeChanged(m_fontSize);
+    for( QJsonObject::ConstIterator it = root.begin(); it != root.end(); ++it ){
+        if ( it.key() == "font" ){
+            QJsonObject fontObj = it.value().toObject();
+            if ( fontObj.contains("size") ){
+                m_fontSize = root["size"].toInt();
+                emit fontSizeChanged(m_fontSize);
+            }
+        } else {
+            QEditorSettingsCategory* category = settingsFor(it.key());
+            if ( category )
+                category->fromJson(it.value());
+            else
+                qCritical("Failed to find settings for: %s", qPrintable(it.key()));
+        }
     }
 }
 
 QJsonObject QEditorSettings::toJson() const{
     QJsonObject root;
-    root["fontSize"] = m_fontSize;
+
+    QJsonObject font;
+    font["size"] = m_fontSize;
+
+    root["font"] = font;
+
+    for ( QHash<QString, QEditorSettingsCategory*>::ConstIterator it = m_settings.begin();
+          it != m_settings.end();
+          ++it
+    ){
+        root[it.key()] = it.value()->toJson();
+    }
+
     return root;
 }
 
 void QEditorSettings::syncWithFile(){
     QFile file(m_path);
-    if ( !file.exists() ){
+//    if ( !file.exists() ){
         m_content = QJsonDocument(toJson()).toJson(QJsonDocument::Indented);
         if ( file.open(QIODevice::WriteOnly) ){
             file.write(m_content);
@@ -41,10 +64,10 @@ void QEditorSettings::syncWithFile(){
         } else {
             qCritical("Failed to open settings file for writting: %s", qPrintable(m_path));
         }
-    } else if ( file.open(QIODevice::ReadOnly) ){
-        init(file.readAll());
-        file.close();
-    }
+//    } else if ( file.open(QIODevice::ReadOnly) ){
+//        init(file.readAll());
+//        file.close();
+//    }
 }
 
 void QEditorSettings::init(const QByteArray &data){
