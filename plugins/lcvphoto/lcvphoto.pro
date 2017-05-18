@@ -19,7 +19,6 @@ linkLocalPlugin(lcvcore, lcvcore)
 
 include($$PWD/src/lcvphoto.pri)
 include($$PROJECT_ROOT/3rdparty/opencvconfig.pro)
-deployOpenCV()
 
 OTHER_FILES *= \
     qml/qmldir \

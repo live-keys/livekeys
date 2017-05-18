@@ -27,9 +27,9 @@ SUBDIRS += \
     plugins
 
 # --- Subdir configurations ---
-application.subdir  = application
-editor.subdir       = editor
-plugins.subdir      = plugins
+application.subdir  = $$PWD/application
+editor.subdir       = $$PWD/editor
+plugins.subdir      = $$PWD/plugins
 
 # --- Dependency configuration ---
 application.depends = editor

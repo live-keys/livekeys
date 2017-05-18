@@ -98,7 +98,7 @@ defineTest(linkLocalLibrary){
 # Links a local plugin to the current project
 #
 # Args: (path, name, [include_dir])
-#  * path: path to the library from root
+#  * path: path to the plugin from 'plugins'
 #  * name: name of the library
 #  * include_dir: include dir path(defaults to library path in source tree + '/src')
 #
@@ -109,6 +109,38 @@ defineTest(linkLocalPlugin){
 
     LIB_NAME = $$2
     LIB_INCLUDE_PATH = $$PROJECT_ROOT/plugins/$$1/src
+    !isEmpty($$3):LIB_INCLUDE_PATH=$$3
+
+    # use *= instead of += to prevent duplications of link path cofigurations
+    LIBS *= -L$$LIB_PATH
+    LIBS *= -l$$LIB_NAME
+    INCLUDEPATH += $$LIB_INCLUDE_PATH
+    DEPENDPATH  += $$LIB_INCLUDE_PATH
+    export(LIBS)
+    export(INCLUDEPATH)
+    export(DEPENDPATH)
+
+    debug(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH, 1)
+}
+
+
+# Links a plugin within a specified path to the current project
+#
+# Args: (path, name, [include_dir])
+#  * dependencyPath: path to the dependency
+#  * path: path to the plugin from the dependency 'plugins' directory
+#  * name: name of the library
+#  * include_dir: include dir path(defaults to library path in source tree + '/src')
+#
+defineTest(linkPlugin){
+
+    win32:LIB_PATH = $$BUILD_PWD/lib/plugins/$$2
+    else:LIB_PATH = $$BUILD_PWD/plugins/$$2
+
+    LIB_NAME = $$3
+    LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/plugins/$$2/include
+    message($$LIB_INCLUDE_PATH)
+
     !isEmpty($$3):LIB_INCLUDE_PATH=$$3
 
     # use *= instead of += to prevent duplications of link path cofigurations
