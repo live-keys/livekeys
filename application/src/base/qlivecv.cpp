@@ -21,8 +21,7 @@
 #include "qeditorsettings.h"
 
 #include "qlivecvarguments.h"
-#include "qstaticcontainer.h"
-#include "qlicensecontainer.h"
+//#include "qlicensecontainer.h"
 #include "qlivepalettecontainer.h"
 
 #include "qdocumenthandler.h"
@@ -52,7 +51,6 @@ namespace lcv{
 
 QLiveCV::QLiveCV(int argc, const char* const argv[])
     : m_engine(new QLiveCVEngine(new QQmlApplicationEngine))
-    , m_staticContainer(new QStaticContainer(m_engine))
     , m_codeInterface(0)
     , m_dir(QGuiApplication::applicationDirPath())
     , m_project(new QProject)
@@ -72,7 +70,6 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
 
 QLiveCV::~QLiveCV(){
     delete m_settings;
-    delete m_staticContainer;
     delete m_engine;
 }
 
@@ -160,7 +157,6 @@ void QLiveCV::loadQml(const QUrl &url){
         }
     }
 
-    m_engine->engine()->rootContext()->setContextProperty("staticContainer", m_staticContainer);
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
     m_engine->engine()->rootContext()->setContextProperty("args", m_arguments);
@@ -174,11 +170,6 @@ void QLiveCV::loadQml(const QUrl &url){
 #endif
 
     static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);
-
-    QList<QObject*> objects = static_cast<QQmlApplicationEngine*>(m_engine->engine())->rootObjects();
-    if ( objects.size() > 0 && qobject_cast<QQuickWindow*>(objects.first())){
-        m_staticContainer->setWindow(qobject_cast<QQuickWindow*>(objects.first()));
-    }
 }
 
 void QLiveCV::registerTypes(){
@@ -211,9 +202,9 @@ void QLiveCV::registerTypes(){
     qmlRegisterUncreatableType<lcv::QEditorSettings>(
         "Cv", 1, 0, "EditorSettings", "EditorSettings is available through the settings.editor property."
     );
-    qmlRegisterUncreatableType<lcv::QLicenseContainer>(
-        "Cv", 1, 0, "LicenseContainer", "LicenseContainer is available through the settings.license property."
-    );
+//    qmlRegisterUncreatableType<lcv::QLicenseContainer>(
+//        "Cv", 1, 0, "LicenseContainer", "LicenseContainer is available through the settings.license property."
+//    );
 }
 
 QByteArray QLiveCV::extractPluginInfo(const QString &import) const{

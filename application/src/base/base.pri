@@ -6,7 +6,10 @@ HEADERS += \
     $$PWD/qlivecvengine.h \
     $$PWD/qlivecvincubationcontroller.h \
     $$PWD/qlicensesettings.h \
-    $$PWD/qlivecvsettings.h
+    $$PWD/qlivecvsettings.h \
+    $$PWD/qlivecvarguments.h \
+    $$PWD/qlivecvcommandlineparser.h \
+    $$PWD/qlivecvexception.h
 
 SOURCES += \
     $$PWD/qlivecvlog.cpp \
@@ -14,4 +17,7 @@ SOURCES += \
     $$PWD/qlivecvengine.cpp \
     $$PWD/qlivecvincubationcontroller.cpp \
     $$PWD/qlicensesettings.cpp \
-    $$PWD/qlivecvsettings.cpp
+    $$PWD/qlivecvsettings.cpp \
+    $$PWD/qlivecvarguments.cpp \
+    $$PWD/qlivecvcommandlineparser.cpp \
+    $$PWD/qlivecvexception.cpp

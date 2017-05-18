@@ -19,18 +19,17 @@
 
 #include <QString>
 #include <QList>
-#include "qliveglobal.h"
 #include "qlivecvexception.h"
 
 namespace lcv{
 
-class Q_LIVE_EXPORT QLiveCVCommandLineException : public QLiveCVException{
+class QLiveCVCommandLineException : public QLiveCVException{
 public:
     QLiveCVCommandLineException(const QString& message, int code = 0): QLiveCVException(message, code){}
 };
 
 
-class Q_LIVE_EXPORT QLiveCVCommandLineParser{
+class QLiveCVCommandLineParser{
 
 public:
     class Option;

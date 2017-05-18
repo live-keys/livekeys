@@ -18,12 +18,11 @@
 #define QLIVECVARGUMENTS_HPP
 
 #include <QObject>
-#include "qliveglobal.h"
 
 namespace lcv{
 
 class QLiveCVCommandLineParser;
-class Q_LIVE_EXPORT QLiveCVArguments : public QObject{
+class QLiveCVArguments : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(bool previewFlag READ previewFlag CONSTANT)

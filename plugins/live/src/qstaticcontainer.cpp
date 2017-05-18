@@ -18,12 +18,6 @@ void QStaticContainer::statecontainer(QStaticTypeContainerBase *container){
     m_stateContainerList.append(container);
 }
 
-void QStaticContainer::setWindow(QQuickWindow *window){
-    connect(window, SIGNAL(aboutToRecompile()), SLOT(beforeCompile()));
-    connect(window, SIGNAL(afterCompile()),  SLOT(afterCompile()));
-    connect(window, SIGNAL(projectActiveChanged()), SLOT(clearStates()));
-}
-
 QStaticContainer *QStaticContainer::grabFromContext(QQuickItem *item, const QString &contextProperty){
     return static_cast<QStaticContainer*>(qmlContext(item)->contextProperty(contextProperty).value<QObject*>());
 }
