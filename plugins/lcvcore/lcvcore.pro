@@ -1,35 +1,19 @@
-#PLUGIN_QML_DIR = $$PATH_SOURCE_PLUGINS_CORE/qml
-#include($$getConfigFile(is_plugin.pri))
-
 PLUGIN_NAME = lcvcore
-PLUGIN_PATH = lcvcore
+PLUGIN_PATH = $$PWD
 
-TEMPLATE = lib
-TARGET   = $$PLUGIN_NAME
-QT      += qml quick
-CONFIG  += qt plugin
+# PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
+include($$getConfigFile(is_plugin.pri))
 
 uri = plugins.lcvcore
 
 DEFINES += Q_LCV
 DEFINES += Q_LCVCORE_LIB
 
-# Destination
-
-win32:DLLDESTDIR = $$buildModePath($$DEPLOY_PWD)/plugins/$$PLUGIN_PATH
-else:DESTDIR = $$buildModePath($$DEPLOY_PWD)/plugins/$$PLUGIN_PATH
-
 # Dependencies
 
 linkLocalPlugin(live, live)
 
-# Deploy qml
-
-qmlcopy.commands = $$deployLocalDirCommand($$PWD/qml, plugins/$$PLUGIN_PATH)
-first.depends = $(first) qmlcopy
-export(first.depends)
-export(qmlcopy.commands)
-QMAKE_EXTRA_TARGETS += first qmlcopy
+# Deploying qml is handled by the is_plugin configuration
 
 # Source
 
