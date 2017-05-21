@@ -21,7 +21,6 @@ linkLocalPlugin(lcvcore, lcvcore)
 include($$PWD/src/lcvvideo.pri)
 include($$PWD/include/lcvvideoheaders.pri)
 include($$PROJECT_ROOT/3rdparty/opencvconfig.pro)
-deployOpenCV()
 
 OTHER_FILES *= \
     qml/*.qml \

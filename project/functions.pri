@@ -124,6 +124,42 @@ defineTest(linkLocalPlugin){
 }
 
 
+
+
+# Setup library deploy path, there are a few different scenarios here:
+#
+#   - If this file was linked to from a plugin (LIVECV_BIN_DIR is setup), then:
+#       - On windows, if we're building Live CV together with the plugin, then the path is in
+#         LIVECV_BIN_DIR/../lib, otherwise the libraries have been deployed in the dev dir
+#       - On other systems it's pretty straight forward, LIVECV_BIN_DIR is the actual location
+#         of the libraries
+#
+#   - If this file was linked to from Live CV:
+#       - On windows, it's the 'lib' in the BUILD directory
+#       - On other systems it's the same as the deployment directory
+
+isEmpty(LIVECV_BIN_DIR){ # File is not included from a plugin
+    win32:LIBRARY_DEPLOY_PATH = $$BUILD_PWD/lib
+    else:LIBRARY_DEPLOY_PATH  = $$DEPLOY_PWD
+} else {
+    isEmpty(LIVECV_DEV_DIR){
+        error(LIVECV_BIN_DIR setup without LIVECV_DEV_DIR. Both are required from a plugin.)
+    }
+    win32{ # On windows, we have a separate location for the libraries if we are building from source
+        exists($$LIVECV_DEV_DIR/lib): LIBRARY_DEPLOY_PATH = $$LIVECV_DEV_DIR/lib
+        else: LIBRARY_DEPLOY_PATH = $$LIVECV_BIN_DIR/../lib
+    } else {
+        LIBRARY_DEPLOY_PATH = $$LIVECV_BIN_DIR
+    }
+}
+
+# Setup library include path
+
+# Setup library include path depending on whether this file was included from a plugin or from Live CV
+isEmpty(LIVECV_DEV_DIR):LIBRARY_INCLUDE_PATH = $$PROJECT_ROOT
+else:LIBRARY_INCLUDE_PATH = $$LIVECV_DEV_DIR
+
+
 # Links a plugin within a specified path to the current project
 #
 # Args: (path, name, [include_dir])
@@ -133,13 +169,10 @@ defineTest(linkLocalPlugin){
 #  * include_dir: include dir path(defaults to library path in source tree + '/src')
 #
 defineTest(linkPlugin){
+    LIB_PATH = $$LIBRARY_DEPLOY_PATH/plugins/$$1
 
-    win32:LIB_PATH = $$BUILD_PWD/lib/plugins/$$2
-    else:LIB_PATH = $$BUILD_PWD/plugins/$$2
-
-    LIB_NAME = $$3
-    LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/plugins/$$2/include
-    message($$LIB_INCLUDE_PATH)
+    LIB_NAME = $$2
+    LIB_INCLUDE_PATH = $$LIBRARY_INCLUDE_PATH/plugins/$$1/include
 
     !isEmpty($$3):LIB_INCLUDE_PATH=$$3
 

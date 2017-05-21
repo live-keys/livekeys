@@ -31,7 +31,7 @@ win32{
 
     INCLUDEPATH += $${OPENCV_DIR_INCLUDE}
 
-    OPENCV_DLL_DESTINATION = $$buildModePath($$DEPLOY_PWD)
+    OPENCV_DLL_DESTINATION = $$DEPLOY_PWD
 
     # Helper Function to copy dlls
 

@@ -18,7 +18,7 @@ QLicenseSettings::QLicenseSettings(const QString &licenseFile)
 
 QLicenseSettings::~QLicenseSettings(){
     save();
-    delete m_container;
+//    delete m_container;
 }
 
 void QLicenseSettings::reparse(){
