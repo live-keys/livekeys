@@ -9,7 +9,7 @@
 
 #include <QDebug>
 
-#define QPALETTE_CONTAINER_DEBUG_FLAG
+//#define QPALETTE_CONTAINER_DEBUG_FLAG
 #ifdef QPALETTE_CONTAINER_DEBUG_FLAG
 #define QPALETTE_CONTAINER_DEBUG(_param) qDebug() << "PALETTES:" << (_param)
 #else
