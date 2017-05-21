@@ -1,0 +1,379 @@
+{
+    "version" : "1.4.0",
+    "name": "livecv",
+    "webpage": "http://livecv.dinusv.com",
+    "components" : {
+        "livecv" : {
+            "version" : "1.4.0",
+            "versionsync" : {
+                "README.md": "\\s*(?:\\* \\*\\*Version\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*",
+                "application/src/base/qlivecv.h" : [
+                  "(?:\\s*#define LIVECV_VERSION_MAJOR)\\s*([0-9]*)\\s*\n",
+                  "(?:\\s*#define LIVECV_VERSION_MINOR)\\s*([0-9]*)\\s*\n",
+                  "(?:\\s*#define LIVECV_VERSION_PATCH)\\s*([0-9]*)\\s*"
+                ]
+            }
+        },
+        "live" : {
+            "version" : "1.0"
+        },
+        "lcvcore" : {
+            "version" : "1.0"
+        },
+        "lcvimgproc" : {
+            "version" : "1.0"
+        },
+        "lcvphoto" : {
+            "version" : "1.0"
+        },
+        "lcvvideo" : {
+            "version" : "1.0"
+        }
+    },
+    "releases" : {
+        "gcc_64" : {
+            "compiler" : "gcc_64",
+            "environment" : {
+                "OPENCV_DIR" : "opencv_dir",
+                "QTDIR" : "qtdir"
+            },
+            "build" : [
+                {"qmake" : ["-recursive"]},
+                {"make" : []}
+            ],
+            "deploy" : [
+                { "copy" : {
+                    "{release}/bin" : {
+                        "livecv" : "-",
+                        "liblcveditor.so*" : "-",
+                        "libqmljsparser.so*" : "-",
+                        "liblcvlib.so*" : "-",
+                        "liblcvlib.*" : "api/lib/-",
+                        "plugins" : {
+                            "lcvcontrols": "plugins/lcvcontrols",
+                            "lcvcore": "plugins/lcvcore",
+                            "lcvimgproc": "plugins/lcvimgproc",
+                            "lcvvideo": "plugins/lcvvideo",
+                            "lcvfeatures2d": "plugins/lcvfeatures2d",
+                            "lcvphoto": "plugins/lcvphoto"
+                        }
+                    },
+                    "{source}/samples" : "-"
+                }
+              },
+              { "run" : ["chmod", "755", "livecv"] },
+              { "solveincludes": [
+                    {
+                        "from": "{source}/editor/lcveditor/include",
+                        "source": ["{source}/editor/lcveditor/src"],
+                        "to": "dev/include/editor/lcveditor"
+                    },
+                    {
+                        "from": "{source}/plugins/live/include",
+                        "source": ["{source}/plugins/live/src"],
+                        "to": "dev/include/plugins/live"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvcore/include",
+                        "source": ["{source}/plugins/lcvcore/src"],
+                        "to": "dev/include/plugins/lcvcore"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvfeatures2d/include",
+                        "source": ["{source}/plugins/lcvfeatures2d/src"],
+                        "to": "dev/include/plugins/lcvfeatures2d"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvvideo/include",
+                        "source": ["{source}/plugins/lcvvideo/src"],
+                        "to": "dev/include/plugins/lcvvideo"
+                    }
+                ]
+              }
+            ]
+        },
+        "gcc_64_standalone" : {
+            "compiler" : "gcc_64",
+            "environment" : {
+                "OPENCV_DIR" : "opencv_dir",
+                "QTDIR" : "qtdir"
+            },
+            "build" : [
+                {"qmake" : ["-recursive"]},
+                {"make" : []}
+            ],
+            "deploy" : [
+                { "copy" : {
+                  "{release}/bin" : {
+                      "livecv" : "-",
+                      "liblcveditor.so*" : "-",
+                      "libqmljsparser.so*" : "-",
+                      "liblcvlib.so*" : "-",
+                      "plugins" : {
+                          "lcvcontrols": "plugins/lcvcontrols",
+                          "lcvcore": "plugins/lcvcore",
+                          "lcvimgproc": "plugins/lcvimgproc",
+                          "lcvvideo": "plugins/lcvvideo",
+                          "lcvfeatures2d": "plugins/lcvfeatures2d",
+                          "lcvphoto": "plugins/lcvphoto"
+                      }
+                  },
+                  "{source}/samples" : "-",
+                  "{qtdir}/lib" : {
+                    "libQt5Core.so*": "lib/-",
+                    "libQt5DBus.so*": "lib/-",
+                    "libQt5Gui.so*": "lib/-",
+                    "libQt5OpenGL.so*": "lib/-",
+                    "libQt5Qml.so*": "lib/-",
+                    "libQt5Quick.so*": "lib/-",
+                    "libQt5Script.so*": "lib/-",
+                    "libQt5Widgets.so*": "lib/-",
+                    "libQt5Network.so*": "lib/-",
+                    "libQt5Xml.so*": "-",
+                    "libQt5XcbQpa.so*": "lib/-",
+                    "libicudata.so*": "lib/-",
+                    "libicui18n.so*": "lib/-",
+                    "libicuio.so*": "lib/-",
+                    "libicule.so*": "lib/-",
+                    "libiculx.so*": "lib/-",
+                    "libicutu.so*": "lib/-",
+                    "libicuuc.so*": "lib/-"
+                  },
+                  "{qtdir}/plugins" : {
+                    "imageformats" : "lib/plugins/imageformats",
+                    "platforminputcontexts" : "lib/plugins/platforminputcontexts",
+                    "platforms" : "lib/plugins/platforms",
+                    "xcbglintegrations" : "lib/plugins/xcbglintegrations"
+                  },
+                  "{qtdir}/qml" : {
+                    "QtQuick" : {
+                      "Controls/libqtquickcontrolsplugin.so": "plugins/QtQuick/Controls/-",
+                      "Controls/qmldir": "plugins/QtQuick/Controls/-",
+                      "Controls/*.qmltypes": "plugins/QtQuick/Controls/-",
+                      "Controls/Private" : "plugins/QtQuick/Controls/Private",
+                      "Controls/Styles" : "plugins/QtQuick/Controls/Styles",
+                      "Dialogs" : "plugins/QtQuick/Dialogs",
+                      "Layouts": "plugins/QtQuick/Layouts",
+                      "LocalStorage": "plugins/QtQuick/LocalStorage",
+                      "Particles.2": "plugins/QtQuick/Particles.2",
+                      "PrivateWidgets": "plugins/QtQuick/PrivateWidgets",
+                      "Window.2": "plugins/QtQuick/Window.2",
+                      "XmlListModel": "plugins/QtQuick/XmlListModel"
+                    },
+                    "QtQuick.2" : "plugins/QtQuick.2",
+                    "QtQml" : "plugins/QtQml",
+                    "Qt" : "plugins/Qt",
+                    "QtWebSockets" : "plugins/-"
+                  },
+                  "{opencv_dir}" : {
+                    "libopencv_calib3d.so*" : "-",
+                    "libopencv_core.so*" : "-",
+                    "libopencv_features2d.so*" : "-",
+                    "libopencv_shape.so*" : "-",
+                    "libopencv_flann.so*" : "-",
+                    "libopencv_highgui.so*" : "-",
+                    "libopencv_imgproc.so*" : "-",
+                    "libopencv_imgcodecs.so*" : "-",
+                    "libopencv_objdetect.so*" : "-",
+                    "libopencv_stitching.so*" : "-",
+                    "libopencv_photo.so*" : "-",
+                    "libopencv_videoio.so*" : "-",
+                    "libopencv_video.so*" : "-"
+                  }
+                }
+              },
+              { "run" : ["chmod", "755", "livecv"] },
+              { "write" : {
+                  "file": "launcher.sh",
+                  "data": [
+                    "#!/bin/bash\n",
+                    "export LD_LIBRARY_PATH=`pwd`/lib:\n",
+                    "export QML_IMPORT_PATH=`pwd`/plugins\n",
+                    "export QML2_IMPORT_PATH=`pwd`/plugins\n",
+                    "export QT_PLUGIN_PATH=`pwd`/lib/plugins\n",
+                    "export QT_QPA_PLATFORM_PLUGIN_PATH=`pwd`/lib/plugins/platforms\n",
+                    "./livecv"
+                    ]
+                  }
+              },
+              { "run" : ["chmod", "755", "launcher.sh"] },
+              { "solveincludes": [
+                    {
+                        "from": "{source}/editor/lcveditor/include",
+                        "source": ["{source}/editor/lcveditor/src"],
+                        "to": "dev/include/editor/lcveditor"
+                    },
+                    {
+                        "from": "{source}/plugins/live/include",
+                        "source": ["{source}/plugins/live/src"],
+                        "to": "dev/include/plugins/live"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvcore/include",
+                        "source": ["{source}/plugins/lcvcore/src"],
+                        "to": "dev/include/plugins/lcvcore"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvfeatures2d/include",
+                        "source": ["{source}/plugins/lcvfeatures2d/src"],
+                        "to": "dev/include/plugins/lcvfeatures2d"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvvideo/include",
+                        "source": ["{source}/plugins/lcvvideo/src"],
+                        "to": "dev/include/plugins/lcvvideo"
+                    }
+                ]
+              }
+            ]
+        },
+        "msvc2013_64" : {
+              "compiler" : "msvc2013_64",
+              "environment" : {
+                  "OPENCV_DIR" : "opencv_dir",
+                  "QTDIR" : "qtdir",
+                  "VS120COMNTOOLS": "vs120comntools"
+              },
+              "build" : [
+                  {"qmake" : ["-recursive"]},
+                  {"nmake" : []}
+              ],
+              "deploy" : [
+                  { "copy" : {
+                      "{qtdir}/bin" : {
+                          "d3dcompiler_47.dll": "-",
+                          "icudt*.dll": "-",
+                          "icuin*.dll": "-",
+                          "icuuc*.dll": "-",
+                          "libEGL.dll": "-",
+                          "libGLESv2.dll": "-",
+                          "Qt*Core.dll": "-",
+                          "Qt*Network.dll": "-",
+                          "Qt*Qml.dll": "-",
+                          "Qt*Quick.dll": "-",
+                          "Qt*Script.dll": "-",
+                          "Qt*Gui.dll": "-",
+                          "Qt*Widgets.dll": "-",
+                          "Qt*WinExtras.dll": "-"
+                      },
+                      "{qtdir}/plugins" : {
+                          "platforms/qwindows.dll": "platforms/qwindows.dll"
+                      },
+                      "{qtdir}/qml" : {
+                          "QtQuick" : {
+                            "Controls/qtquickcontrolsplugin.dll": "plugins/QtQuick/Controls/-",
+                            "Controls/qmldir": "plugins/QtQuick/Controls/-",
+                            "Controls/*.qmltypes": "plugins/QtQuick/Controls/-",
+                            "Controls/Styles/Flat/qtquickextrasflatplugin.dll" : "plugins/QtQuick/Controls/Styles/Flat/-",
+                            "Controls/Styles/Flat/qmldir" : "plugins/QtQuick/Controls/Styles/Flat/-",
+                            "Dialogs/dialogplugin.dll" : "plugins/QtQuick/Dialogs/-",
+                            "Dialogs/qmldir": "plugins/QtQuick/Dialogs/-",
+                            "Dialogs/*.qmltypes": "plugins/QtQuick/Dialogs/-",
+                            "Dialogs/Private/dialogsprivateplugin.dll" : "plugins/QtQuick/Dialogs/Private/-",
+                            "Dialogs/Private/qmldir" : "plugins/QtQuick/Dialogs/Private/-",
+                            "Dialogs/Private/*.qmltypes" : "plugins/QtQuick/Dialogs/Private/-",
+                            "Layouts/qquicklayoutsplugin.dll": "plugins/QtQuick/Layouts/-",
+                            "Layouts/qmldir": "plugins/QtQuick/Layouts/-",
+                            "Layouts/*.qmltypes": "plugins/QtQuick/Layouts/-",
+                            "LocalStorage/qmllocalstorageplugin.dll": "plugins/QtQuick/LocalStorage/-",
+                            "LocalStorage/qmldir": "plugins/QtQuick/LocalStorage/-",
+                            "LocalStorage/*.qmltypes": "plugins/QtQuick/LocalStorage/-",
+                            "Particles.2/particlesplugin.dll": "plugins/QtQuick/Particles.2/-",
+                            "Particles.2/qmldir": "plugins/QtQuick/Particles.2/-",
+                            "Particles.2/*.qmltypes": "plugins/QtQuick/Particles.2/-",
+                            "PrivateWidgets/widgetsplugin.dll": "plugins/QtQuick/PrivateWidgets/-",
+                            "PrivateWidgets/qmldir": "plugins/QtQuick/PrivateWidgets/-",
+                            "PrivateWidgets/*.qmltypes": "plugins/QtQuick/PrivateWidgets/-",
+                            "Window.2/windowplugin.dll": "plugins/QtQuick/Window.2/-",
+                            "Window.2/qmldir": "plugins/QtQuick/Window.2/-",
+                            "Window.2/*.qmltypes": "plugins/QtQuick/Window.2/-",
+                            "XmlListModel/qmlxmllistmodelplugin.dll": "plugins/QtQuick/XmlListModel/-",
+                            "XmlListModel/qmldir": "plugins/QtQuick/XmlListModel/-",
+                            "XmlListModel/*.qmltypes": "plugins/QtQuick/XmlListModel/-"
+                          },
+                        "QtQuick.2" : {
+                            "qtquick2plugin.dll": "plugins/QtQuick.2/-",
+                            "qmldir": "plugins/QtQuick.2/-",
+                            "*.qmltypes": "plugins/QtQuick.2/-"
+                        },
+                        "QtQml" : {
+                            "Models.2/*modelsplugin.dll" : "plugins/QtQml/Models.2/-",
+                            "Models.2/*qmldir": "plugins/QtQml/Models.2/-",
+                            "Models.2/*.qmltypes": "plugins/QtQml/Models.2/-",
+                            "StateMachine/*qtqmlstatemachine.dll": "plugins/QtQml/StateMachine/-",
+                            "StateMachine/*qmldir": "plugins/QtQml/StateMachine/-",
+                            "StateMachine/*.qmltypes": "plugins/QtQml/StateMachine/-",
+                            "*.qmltypes" : "plugins/QtQml/-",
+                            "*qmldir": "plugins/QtQml/-"
+                        },
+                        "Qt/labs" : {
+                            "folderlistmodel/qmlfolderlistmodelplugin.dll" : "plugins/Qt/labs/folderlistmodel/-",
+                            "folderlistmodel/qmldir" : "plugins/Qt/labs/folderlistmodel/-",
+                            "folderlistmodel/*.qmltypes" : "plugins/Qt/labs/folderlistmodel/-",
+                            "settings/qmlsettingsplugin.dll" : "plugins/Qt/labs/settings/-",
+                            "settings/*.qmltypes" : "plugins/Qt/labs/settings/-",
+                            "settings/qmldir" : "plugins/Qt/labs/settings/-"
+                        }
+                      },
+                      "{vs120comntools}/../../VC/redist/x64/Microsoft.VC120.CRT" : {
+                        "msvcp120.dll": "-",
+                        "msvcr120.dll": "-"
+                      },
+                      "{release}/bin/livecv.exe" : "-",
+                      "{release}/bin/lcveditor.dll" : "-",
+                      "{release}/bin/qmljsparser.dll" : "-",
+                      "{release}/bin/opencv_*.dll" : "-",
+                      "{release}/bin/plugins": {
+                          "live" : "plugins/live",
+                      		"lcvcore": "plugins/lcvcore",
+                      		"lcvimgproc": "plugins/lcvimgproc",
+                      		"lcvvideo": "plugins/lcvvideo",
+                      		"lcvfeatures2d": "plugins/lcvfeatures2d",
+                      		"lcvphoto": "plugins/lcvphoto"
+                      },
+                      "{release}/lib/lcveditor.lib" : "dev/lib/-",
+                      "{release}/lib/qmljsparser.lib" : "dev/lib/-",
+                      "{release}/lib/plugins": {
+                          "live/live.lib" : "dev/lib/plugins/live/-",
+                      		"lcvcore/lcvcore.lib": "dev/lib/plugins/lcvcore/-",
+                      		"lcvimgproc/lcvimgproc.lib": "dev/lib/plugins/lcvimgproc/-",
+                      		"lcvvideo/lcvvideo.lib": "dev/lib/plugins/lcvvideo/-",
+                      		"lcvfeatures2d/lcvfeatures2d.lib": "dev/lib/plugins/lcvfeatures2d/-",
+                      		"lcvphoto/lcvphoto.lib": "dev/lib/plugins/lcvphoto/-"
+                      },
+                      "{source}/project" : "dev/project",
+                      "{source}/samples" : "-"
+                    }
+                  },
+                  { "solveincludes": [
+                      {
+                          "from": "{source}/editor/lcveditor/include",
+                          "source": ["{source}/editor/lcveditor/src"],
+                          "to": "dev/include/editor/lcveditor"
+                      },
+                      {
+                          "from": "{source}/plugins/live/include",
+                          "source": ["{source}/plugins/live/src"],
+                          "to": "dev/include/plugins/live"
+                      },
+                      {
+                          "from": "{source}/plugins/lcvcore/include",
+                          "source": ["{source}/plugins/lcvcore/src"],
+                          "to": "dev/include/plugins/lcvcore"
+                      },
+                      {
+                          "from": "{source}/plugins/lcvfeatures2d/include",
+                          "source": ["{source}/plugins/lcvfeatures2d/src"],
+                          "to": "dev/include/plugins/lcvfeatures2d"
+                      },
+                      {
+                          "from": "{source}/plugins/lcvvideo/include",
+                          "source": ["{source}/plugins/lcvvideo/src"],
+                          "to": "dev/include/plugins/lcvvideo"
+                      }
+                    ]
+                  }
+            ]
+        }
+    }
+}
