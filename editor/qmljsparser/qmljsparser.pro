@@ -8,9 +8,9 @@ linkLocalLibrary(editor/lcveditor, lcveditor)
 DEFINES += Q_QMLJSPARSER_LIB
 
 win32:{
-    DESTDIR    = $$BUILD_PWD/lib
-    DLLDESTDIR = $$DEPLOY_PWD
-}else:DESTDIR = $$DEPLOY_PWD
+    DESTDIR    = $$BUILD_PATH/lib
+    DLLDESTDIR = $$DEPLOY_PATH
+}else:DESTDIR = $$DEPLOY_PATH
 
 #ENABLE_PLUGINTYPES = true
 
