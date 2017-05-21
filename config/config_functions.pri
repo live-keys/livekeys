@@ -76,8 +76,8 @@ defineReplace(buildModePath){
 
 defineTest(linkLocalLibrary){
 
-    win32:LIB_PATH = $$BUILD_PWD/lib
-    else:LIB_PATH = $$DEPLOY_PWD
+    win32:LIB_PATH = $$BUILD_PATH/lib
+    else:LIB_PATH = $$DEPLOY_PATH
 
     LIB_NAME = $$2
     LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/src
@@ -104,7 +104,7 @@ defineTest(linkLocalLibrary){
 #
 defineTest(linkLocalPlugin){
 
-    win32:LIB_PATH = $$BUILD_PWD/lib/plugins/$$1
+    win32:LIB_PATH = $$BUILD_PATH/lib/plugins/$$1
     else:LIB_PATH = $$PATH_DEPLOY_PLUGINS/$$1
 
     LIB_NAME = $$2
@@ -134,8 +134,8 @@ defineTest(linkLocalPlugin){
 #
 defineTest(linkPlugin){
 
-    win32:LIB_PATH = $$BUILD_PWD/lib/plugins/$$2
-    else:LIB_PATH = $$BUILD_PWD/plugins/$$2
+    win32:LIB_PATH = $$BUILD_PATH/lib/plugins/$$2
+    else:LIB_PATH = $$BUILD_PATH/plugins/$$2
 
     LIB_NAME = $$3
     LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/plugins/$$2/include

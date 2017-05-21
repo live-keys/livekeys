@@ -14,12 +14,12 @@ unix{
         '-Wl,-rpath,\'\$$ORIGIN/link\''
 
 
-    createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PWD}/link)
+    createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)
     QMAKE_EXTRA_TARGETS    += createlinkdir
     POST_TARGETDEPS        += createlinkdir
 }
 
-DESTDIR = $$DEPLOY_PWD
+DESTDIR = $$DEPLOY_PATH
 
 # Application
 # -----------
