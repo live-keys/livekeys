@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/livecv/livecv.svg?branch=master)](https://travis-ci.org/livecv/livecv)
 [![Build status](https://ci.appveyor.com/api/projects/status/c1kk7crl0wiox16b?svg=true)](https://ci.appveyor.com/project/dinusv/livecv)
 
- * **Version**: 1.3.0
+ * **Version**: 1.4.0
  * **License**: LGPL
  * **Website**: [livecv.dinusv.com](http://livecv.dinusv.com)
  * **Demo**: [www.youtube.com/watch?v=uEnJE6Jawfw](https://www.youtube.com/watch?v=uEnJE6Jawfw)
@@ -12,19 +12,19 @@
  * **Build Requirements**:
    * Qt 5.6 or higher
    * Open CV 3.1 or higher
-   
 
-Live CV is a computer vision coding environment that displays results while you code. It can be used to interact, link and adjust algorithms 
-in order to create quick solutions within it's domain. 
 
-The application is built using QtQuick, and uses Open CV library in the back to do the actual processing, kind of like a QML wrapper for the 
-Open CV library. 
+Live CV is a computer vision coding environment that displays results while you code. It can be used to interact, link and adjust algorithms
+in order to create quick solutions within it's domain.
+
+The application is built using QtQuick, and uses Open CV library in the back to do the actual processing, kind of like a QML wrapper for the
+Open CV library.
 
 An API is also available to link already built algorithms to Live CV's interface by simply exposing configurable variables to Qt's meta object system.
 
 ## Installation and getting started
 
-To get started, simply download the application from Live CV's [website](http://livecv.dinusv.com/download.html), extract the archive, and you're ready 
+To get started, simply download the application from Live CV's [website](http://livecv.dinusv.com/download.html), extract the archive, and you're ready
 to go. Step by step instructions are also found in the download section.
 
 ## Compiling
@@ -51,8 +51,8 @@ For changes and compatibility information between versions, see the [CHANGELOG](
 
 ## Roadmap
 
-Live CV's goal is to provide an environment where people can experiment with different libraries or algorithms and can also share their own as easily as possible. To do this, it needs to be scalable, plugin-based, have a simple and easy to use build system, and a place to access and share plugins. These features ar all planned iteratively in the following versions: 
- 
+Live CV's goal is to provide an environment where people can experiment with different libraries or algorithms and can also share their own as easily as possible. To do this, it needs to be scalable, plugin-based, have a simple and easy to use build system, and a place to access and share plugins. These features ar all planned iteratively in the following versions:
+
  * Version 1.4 - Deployment Kit and Open CV Contrib
     * Simplifying and automating Live CV's build
     * Ability to customize build with separate plugins
@@ -65,10 +65,9 @@ Live CV's goal is to provide an environment where people can experiment with dif
  * Version 1.6 - Editor Updates
     *  Component documentation from within the editor
     *  Editor shortcut customization
- * Version 1.7 - MultiThreading Module 
+ * Version 1.7 - MultiThreading Module
     * Executing components in separate threads
     * Automatic assignment of components to threads according to their execution time
  * Version 2.0 - Showroom
     * Plugin and sample showroom on Live CV's website
     * Support for fetching plugins and samples from within the application
-

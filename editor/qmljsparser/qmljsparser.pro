@@ -9,10 +9,10 @@ DEFINES += Q_QMLJSPARSER_LIB
 
 win32:{
     DESTDIR    = $$BUILD_PWD/lib
-    DLLDESTDIR = $$DEPLOY_PWD
-}else:DESTDIR = $$DEPLOY_PWD
+    DLLDESTDIR = $$DEPLOY_PATH
+}else:DESTDIR = $$DEPLOY_PATH
 
-#ENABLE_PLUGINTYPES = true
+ENABLE_PLUGINTYPES = true
 
 !isEmpty(ENABLE_PLUGINTYPES){
     message(Plugin Types Enabled: Live CV will use private libraries)

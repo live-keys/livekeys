@@ -14,7 +14,7 @@ unix{
         '-Wl,-rpath,\'\$$ORIGIN/plugins/live\''
 }
 
-DESTDIR = $$DEPLOY_PWD
+DESTDIR = $$DEPLOY_PATH
 
 # Application
 # -----------

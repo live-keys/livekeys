@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QDebug>
 
-#define QSTATIC_ITEM_CONTAINER_DEBUG_FLAG
+//#define QSTATIC_ITEM_CONTAINER_DEBUG_FLAG
 #ifdef QSTATIC_ITEM_CONTAINER_DEBUG_FLAG
 #define QSTATIC_ITEM_CONTAINER_DEBUG(_param) qDebug() << "STATIC CONTAINER:" << (_param)
 #else
