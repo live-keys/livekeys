@@ -2,8 +2,8 @@
 
 namespace lcv{
 
-QDocumentQmlFragment::QDocumentQmlFragment(int position, int length, QCodeConverter *palette, const QQmlProperty &property)
-    : QDocumentEditFragment(position, length, palette)
+QDocumentQmlFragment::QDocumentQmlFragment(QCodeDeclaration* declaration, QCodeConverter *palette, const QQmlProperty &property)
+    : QDocumentEditFragment(declaration, palette)
     , m_property(property)
 {
 }

@@ -41,6 +41,10 @@ Rectangle{
     property alias text: editorArea.text
     property alias font: editorArea.font
 
+    function getCursorRectangle(){
+        return editorArea.cursorRectangle
+    }
+
     color : "#050c13"
 
     clip : true
