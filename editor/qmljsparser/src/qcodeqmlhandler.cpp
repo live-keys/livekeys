@@ -44,7 +44,7 @@
 
 #include <QDebug>
 
-//#define QDOCUMENT_QML_HANDLER_DEBUG_FLAG
+#define QDOCUMENT_QML_HANDLER_DEBUG_FLAG
 #ifdef QDOCUMENT_QML_HANDLER_DEBUG_FLAG
 #define QDOCUMENT_QML_HANDLER_DEBUG(_param) qDebug() << "QML HANDLER:" << (_param)
 #else
@@ -1118,6 +1118,7 @@ void QCodeQmlHandler::loadImport(const QString &import){
 
     component.setData(code, QUrl::fromLocalFile("loading.qml"));
     if ( component.errors().size() > 0 ){
+        QDOCUMENT_QML_HANDLER_DEBUG("Importing object error: " + component.errorString());
         m_scanner->updateLoadRequest(import, 0, true);
         return;
     }

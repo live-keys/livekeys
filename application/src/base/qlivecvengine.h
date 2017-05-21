@@ -21,7 +21,6 @@
 #include <QJSValue>
 #include <functional>
 
-
 class QQmlEngine;
 class QQmlError;
 class QQmlIncubator;

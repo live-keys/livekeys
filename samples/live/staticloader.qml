@@ -2,7 +2,7 @@ import QtQuick 2.3
 import live 1.0
 
 Rectangle{
-
+    
     StaticLoader{
         id : staticLoader
      

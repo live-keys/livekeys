@@ -77,7 +77,7 @@ defineReplace(buildModePath){
 defineTest(linkLocalLibrary){
 
     win32:LIB_PATH = $$BUILD_PWD/lib
-    else:LIB_PATH = $$DEPLOY_PWD
+    else:LIB_PATH = $$DEPLOY_PATH
 
     LIB_NAME = $$2
     LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/src

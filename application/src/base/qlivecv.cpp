@@ -87,8 +87,6 @@ QLiveCV::~QLiveCV(){
  */
 void QLiveCV::solveImportPaths(){
 
-    // Remove the application base dir from the import paths
-    // TODO: document why
     QStringList importPaths = m_engine->engine()->importPathList();
     importPaths.removeAll(dir());
     m_engine->engine()->setImportPathList(importPaths);

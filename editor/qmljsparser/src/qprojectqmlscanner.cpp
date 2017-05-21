@@ -37,7 +37,7 @@
 #include "qplugintypesfacade.h"
 
 
-//#define QDOCUMENT_QML_SCANNER_DEBUG_FLAG
+#define QDOCUMENT_QML_SCANNER_DEBUG_FLAG
 #ifdef QDOCUMENT_QML_SCANNER_DEBUG_FLAG
 #define QDOCUMENT_QML_SCANNER_DEBUG(_param) qDebug() << "QML SCANNER:" << (_param)
 #else
@@ -121,7 +121,7 @@ QQmlLibraryInfo::ScanStatus loadPluginInfo(
         QString uriForPath = projectScope->uriForPath(path);
 
         if ( uriForPath.isEmpty() || scanner->requestErrorStatus(path) ){
-            QDOCUMENT_QML_SCANNER_DEBUG("Library PluginInfo Scan Error: " + path);
+            QDOCUMENT_QML_SCANNER_DEBUG("Library PluginInfo Scan Error: " + path + ", uri:" + uriForPath);
             return QQmlLibraryInfo::ScanError;
         }
 
@@ -290,8 +290,14 @@ void scanQmlDirForQmlExports(
     QDOCUMENT_QML_SCANNER_DEBUG("Scanning qmldir components in: " + path);
 
     QHash<QString, QmlDirParser::Component> components = dirParser.components();
+
+    int componentCount = 0; // eliminate "className" which is also treated as a component
+
     QHash<QString, QmlDirParser::Component>::iterator it;
     for ( it = components.begin(); it != components.end(); ++it ){
+        if ( it.key() == "classname" )
+            continue;
+
         QString filePath = QDir::cleanPath(path + QDir::separator() + it->fileName);
         if ( QFile::exists(filePath) ){
             scanObjectFile(
@@ -307,7 +313,14 @@ void scanQmlDirForQmlExports(
         } else {
             qWarning("Warning: Qml file does not exist for parsing: %s", qPrintable(filePath));
         }
+
+        ++componentCount;
     }
+    if ( componentCount == 0 ){
+        library->setStatus(QQmlLibraryInfo::Done);
+        return;
+    }
+
     library->data().setMetaObjects(objects);
     library->setStatus(QQmlLibraryInfo::NoPrototypeLink);
     library->setDependencies(dependencyPaths);
@@ -422,7 +435,8 @@ QMap<QString, QQmlLibraryInfo::Ptr> updateLibrary(
             }
         }
 
-        /// If library has no plugins, simply parse library qml files
+
+        /// If library has no plugins, simply return the qml files
 
         if ( dirParser.plugins().size() == 0 ){
             scanQmlDirForQmlExports(projectScope, lockedFileIO, dirParser, path, baseLib);
@@ -577,11 +591,17 @@ QMap<QString, QQmlLibraryInfo::Ptr> updateLibrary(
         }
     }
 
+    // this function also sets status for us
+    // library->setStatus(QQmlLibraryInfo::Done);
+    scanQmlDirForQmlExports(projectScope, lockedFileIO, dirParser, path, baseLib);
+
+    QStringList concatenatedDependencies = baseLib->data().dependencies() + snapshot.dependencies;
+    QList<LanguageUtils::FakeMetaObject::ConstPtr> concatenatedObjects = baseLib->data().metaObjects() + snapshot.objects;
+
     baseLib->setDependencies(dependencyPaths);
-    baseLib->data().setDependencies(snapshot.dependencies);
-    baseLib->data().setMetaObjects(snapshot.objects);
+    baseLib->data().setDependencies(concatenatedDependencies);
+    baseLib->data().setMetaObjects(concatenatedObjects);
     baseLib->data().setModuleApis(snapshot.moduleApis);
-    baseLib->setStatus(QQmlLibraryInfo::Done);
     baseLib->updateExports();
 
     return base;
