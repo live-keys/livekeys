@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/livecv/livecv.svg?branch=master)](https://travis-ci.org/livecv/livecv)
 [![Build status](https://ci.appveyor.com/api/projects/status/c1kk7crl0wiox16b?svg=true)](https://ci.appveyor.com/project/dinusv/livecv)
 
- * **Version**: 1.3.0
+ * **Version**: 1.4.0
  * **License**: LGPL
  * **Website**: [livecv.dinusv.com](http://livecv.dinusv.com)
  * **Demo**: [www.youtube.com/watch?v=uEnJE6Jawfw](https://www.youtube.com/watch?v=uEnJE6Jawfw)
@@ -53,10 +53,6 @@ For changes and compatibility information between versions, see the [CHANGELOG](
 
 Live CV's goal is to provide an environment where people can experiment with different libraries or algorithms and can also share their own as easily as possible. To do this, it needs to be scalable, plugin-based, have a simple and easy to use build system, and a place to access and share plugins. These features ar all planned iteratively in the following versions: 
  
- * Version 1.4 - Deployment Kit and Open CV Contrib
-    * Simplifying and automating Live CV's build
-    * Ability to customize build with separate plugins
-    * Including Open CV Contrib module
  * Version 1.5 - Photography module
     * Exposure and contrast configuration
     * Photo stiching
