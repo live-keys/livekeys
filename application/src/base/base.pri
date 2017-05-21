@@ -9,7 +9,8 @@ HEADERS += \
     $$PWD/qlivecvsettings.h \
     $$PWD/qlivecvarguments.h \
     $$PWD/qlivecvcommandlineparser.h \
-    $$PWD/qlivecvexception.h
+    $$PWD/qlivecvexception.h \
+    $$PWD/qlibraryloadpath.h
 
 SOURCES += \
     $$PWD/qlivecvlog.cpp \
@@ -20,4 +21,5 @@ SOURCES += \
     $$PWD/qlivecvsettings.cpp \
     $$PWD/qlivecvarguments.cpp \
     $$PWD/qlivecvcommandlineparser.cpp \
-    $$PWD/qlivecvexception.cpp
+    $$PWD/qlivecvexception.cpp \
+    $$PWD/qlibraryloadpath.cpp

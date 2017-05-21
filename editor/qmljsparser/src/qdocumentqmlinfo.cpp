@@ -35,25 +35,25 @@ namespace lcv{
 
 namespace{
 
-    QQmlProperty findBindingProperty(
+    QQmlProperty findRuntimeProperty(
         QDocumentQmlValueObjects::RangeObject *object,
         QObject *root,
-        QCodeRuntimeBinding* binding,
+        QCodeDeclaration* declaration,
         const QString& source)
     {
-        int position = binding->position();
+        int position = declaration->position();
 
         for ( int i = 0; i < object->properties.size(); ++i ){
             if ( object->properties[i]->begin == position ){
 
-                if ( binding->declaration()->identifierChain().isEmpty() ){
+                if ( declaration->identifierChain().isEmpty() ){
                     return QQmlProperty();
                 }
 
                 // iterate property chain (eg. border.size => (border, size))
                 QObject* objectChain = root;
-                for ( int j = 0; j < binding->declaration()->identifierChain().size() - 1; ++j ){
-                    QQmlProperty foundprop(root, binding->declaration()->identifierChain()[j]);
+                for ( int j = 0; j < declaration->identifierChain().size() - 1; ++j ){
+                    QQmlProperty foundprop(root, declaration->identifierChain()[j]);
                     if ( !foundprop.isValid() || foundprop.propertyTypeCategory() != QQmlProperty::Object ){
                         return QQmlProperty();
                     }
@@ -62,24 +62,24 @@ namespace{
                 }
 
                 // found property
-                binding->declaration()->setValuePositionOffset(
+                declaration->setValuePositionOffset(
                     object->properties[i]->valueBegin -
                     object->properties[i]->begin -
-                    binding->declaration()->identifierLength()
+                    declaration->identifierLength()
                 );
 
-                binding->declaration()->setValueLength(
+                declaration->setValueLength(
                     object->properties[i]->end - object->properties[i]->valueBegin
                 );
 
-                return QQmlProperty(objectChain, binding->declaration()->identifierChain().last());
+                return QQmlProperty(objectChain, declaration->identifierChain().last());
 
             } else if ( object->properties[i]->child &&
                         object->properties[i]->begin < position &&
                         object->properties[i]->end > position )
             {
-                return findBindingProperty(
-                    object->properties[i]->child, root, binding, source
+                return findRuntimeProperty(
+                    object->properties[i]->child, root, declaration, source
                 );
             }
         }
@@ -91,8 +91,8 @@ namespace{
                  position > object->children[0]->begin &&
                  position < object->children[0]->end )
             {
-                return findBindingProperty(
-                    object->children[0], pp.read().value<QObject*>(), binding, source
+                return findRuntimeProperty(
+                    object->children[0], pp.read().value<QObject*>(), declaration, source
                 );
             } else if ( pp.propertyTypeCategory() == QQmlProperty::List ){
                 QQmlListReference ppref = qvariant_cast<QQmlListReference>(pp.read());
@@ -104,7 +104,7 @@ namespace{
                              position < object->children[i]->end &&
                              ppref.count() > i )
                         {
-                            return findBindingProperty( object->children[i], ppref.at(i), binding, source );
+                            return findRuntimeProperty( object->children[i], ppref.at(i), declaration, source );
                         }
                     }
                 }
@@ -330,7 +330,7 @@ void QDocumentQmlInfo::syncBindings(const QString &source, QProjectDocument *doc
 
         for ( QProjectDocument::BindingIterator it = document->bindingsBegin(); it != document->bindingsEnd(); ++it ){
             QCodeRuntimeBinding* binding = *it;
-            QQmlProperty foundProperty(findBindingProperty(objects->root(), root, binding, source));
+            QQmlProperty foundProperty(findRuntimeProperty(objects->root(), root, binding->declaration(), source));
             if ( foundProperty.isValid() )
                 foundProperty.connectNotifySignal(binding, SLOT(updateValue()));
         }
@@ -355,7 +355,7 @@ void QDocumentQmlInfo::syncBindings(
 
     for ( QList<QCodeRuntimeBinding*>::iterator it = bindings.begin(); it != bindings.end(); ++it) {
         QCodeRuntimeBinding* binding = *it;
-        QQmlProperty foundProperty(findBindingProperty(objects->root(), root, binding, source));
+        QQmlProperty foundProperty(findRuntimeProperty(objects->root(), root, binding->declaration(), source));
         if ( foundProperty.isValid() )
             foundProperty.connectNotifySignal(binding, SLOT(updateValue()));
     }
@@ -366,7 +366,7 @@ void QDocumentQmlInfo::syncBindings(
 QQmlProperty QDocumentQmlInfo::findMatchingProperty(
         const QString &source,
         QProjectDocument *document,
-        QCodeRuntimeBinding *binding,
+        QCodeDeclaration *binding,
         QObject *root)
 {
     QDocumentQmlInfo::MutablePtr docinfo = QDocumentQmlInfo::create(document->file()->path());
@@ -374,7 +374,7 @@ QQmlProperty QDocumentQmlInfo::findMatchingProperty(
 
     QDocumentQmlValueObjects* objects = docinfo->createObjects();
 
-    QQmlProperty foundProperty(findBindingProperty(objects->root(), root, binding, source));
+    QQmlProperty foundProperty(findRuntimeProperty(objects->root(), root, binding, source));
 
     delete objects;
     return foundProperty;
