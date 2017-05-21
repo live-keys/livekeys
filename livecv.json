@@ -47,10 +47,8 @@
                         "livecv" : "-",
                         "liblcveditor.so*" : "-",
                         "libqmljsparser.so*" : "-",
-                        "liblcvlib.so*" : "-",
-                        "liblcvlib.*" : "api/lib/-",
                         "plugins" : {
-                            "lcvcontrols": "plugins/lcvcontrols",
+                            "live": "plugins/live",
                             "lcvcore": "plugins/lcvcore",
                             "lcvimgproc": "plugins/lcvimgproc",
                             "lcvvideo": "plugins/lcvvideo",
@@ -108,9 +106,8 @@
                       "livecv" : "-",
                       "liblcveditor.so*" : "-",
                       "libqmljsparser.so*" : "-",
-                      "liblcvlib.so*" : "-",
                       "plugins" : {
-                          "lcvcontrols": "plugins/lcvcontrols",
+                          "live": "plugins/live",
                           "lcvcore": "plugins/lcvcore",
                           "lcvimgproc": "plugins/lcvimgproc",
                           "lcvvideo": "plugins/lcvvideo",
