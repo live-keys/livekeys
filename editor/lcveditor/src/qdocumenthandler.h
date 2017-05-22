@@ -73,6 +73,8 @@ public:
 
     QDocumentHandlerState* state();
 
+    void setIndentSize(int size);
+
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
@@ -84,6 +86,7 @@ public slots:
     void unbind(int position, int length);
     void edit(int position, QObject* currentApp = 0);
     void adjust(int position, QObject* currentApp = 0);
+    void manageIndent(int from, int length, bool undo = false);
 
     lcv::QDocumentCursorInfo* cursorInfo(int position, int length);
 
@@ -109,6 +112,8 @@ private:
     QAbstractCodeHandler*      m_codeHandler;
     QProjectDocument*          m_projectDocument;
     int                        m_editingState;
+    int                        m_indentSize;
+    QString                    m_indentContent;
     QLivePaletteContainer*     m_paletteContainer;
 
     QDocumentHandlerState*     m_state;
@@ -146,6 +151,12 @@ inline void QDocumentHandler::resetEditingState(){
 
 inline QDocumentHandlerState *QDocumentHandler::state(){
     return m_state;
+}
+
+inline void QDocumentHandler::setIndentSize(int size){
+    m_indentContent.clear();
+    m_indentContent.resize(size, QChar(' '));
+    m_indentSize = size;
 }
 
 }// namespace

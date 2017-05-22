@@ -64,9 +64,11 @@ QDocumentHandler::QDocumentHandler(QAbstractCodeHandler *handler,
     , m_codeHandler(handler)
     , m_projectDocument(0)
     , m_editingState(0)
+    , m_indentSize(0)
     , m_paletteContainer(paletteContainer)
     , m_state(new QDocumentHandlerState)
 {
+    setIndentSize(4);
 }
 
 QDocumentHandler::~QDocumentHandler(){
@@ -494,6 +496,38 @@ void QDocumentHandler::adjust(int position, QObject *currentApp){
         delete declaration;
     }
 
+}
+
+void QDocumentHandler::manageIndent(int from, int length, bool undo){
+    QTextBlock bl = m_targetDoc->findBlock(from);
+    while ( bl.isValid() ){
+        QTextCursor cs(bl);
+        cs.beginEditBlock();
+        if ( undo ){
+            if ( bl.text().startsWith(m_indentContent) ){
+                cs.setPosition(cs.position() + m_indentSize, QTextCursor::KeepAnchor);
+                cs.removeSelectedText();
+                if ( from >= m_indentSize )
+                    from -= m_indentSize;
+                else {
+                    from = 0;
+                    length = length >= m_indentSize ? length - m_indentSize : 0;
+                }
+            }
+        } else {
+            cs.insertText(m_indentContent);
+            if ( cs.position() > from )
+                length += m_indentSize;
+            else
+                from += m_indentSize;
+        }
+        cs.endEditBlock();
+
+        if ( bl.position() + bl.length() >= from + length)
+            return;
+
+        bl = bl.next();
+    }
 }
 
 QDocumentCursorInfo *QDocumentHandler::cursorInfo(int position, int length){
