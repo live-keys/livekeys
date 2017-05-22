@@ -41,7 +41,7 @@
 
   \qml
   ImRead{
-       file : codeDocument.path + '/../_images/caltech_buildings_DSCN0246.JPG'
+       file : project.dir() + '/../_images/caltech_buildings_DSCN0246.JPG'
   }
   \endqml
 */

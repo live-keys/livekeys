@@ -76,7 +76,7 @@ defineReplace(buildModePath){
 
 defineTest(linkLocalLibrary){
 
-    win32:LIB_PATH = $$BUILD_PATH/lib
+    win32:LIB_PATH = $$DEPLOY_PATH/dev/lib
     else:LIB_PATH = $$DEPLOY_PATH
 
     LIB_NAME = $$2
@@ -104,7 +104,7 @@ defineTest(linkLocalLibrary){
 #
 defineTest(linkLocalPlugin){
 
-    win32:LIB_PATH = $$BUILD_PATH/lib/plugins/$$1
+    win32:LIB_PATH = $$DEPLOY_PATH/dev/lib/plugins/$$1
     else:LIB_PATH = $$PATH_DEPLOY_PLUGINS/$$1
 
     LIB_NAME = $$2
@@ -126,7 +126,7 @@ defineTest(linkLocalPlugin){
 
 
 
-# Setup library deploy path, there are a few different scenarios here:
+# Retrieves library deploy path, there are a few different scenarios here:
 #
 #   - If this file was linked to from a plugin (LIVECV_BIN_PATH is setup), then:
 #       - On windows, if we're building Live CV together with the plugin, then the path is in
@@ -137,27 +137,32 @@ defineTest(linkLocalPlugin){
 #   - If this file was linked to from Live CV:
 #       - On windows, it's the 'lib' in the BUILD directory
 #       - On other systems it's the same as the deployment directory
-
-isEmpty(LIVECV_BIN_PATH){ # File is not included from a plugin
-    win32:LIBRARY_DEPLOY_PATH = $$BUILD_PATH/lib
-    else:LIBRARY_DEPLOY_PATH  = $$DEPLOY_PATH
-} else {
-    isEmpty(LIVECV_DEV_PATH){
-        error(LIVECV_BIN_PATH setup without LIVECV_DEV_PATH. Both are required from a plugin.)
-    }
-    win32{ # On windows, we have a separate location for the libraries if we are building from source
-        exists($$LIVECV_DEV_PATH/lib): LIBRARY_DEPLOY_PATH = $$LIVECV_DEV_PATH/lib
-        else: LIBRARY_DEPLOY_PATH = $$LIVECV_BIN_PATH/../lib
+#
+defineReplace(libraryDeployPath){
+    isEmpty(LIVECV_BIN_PATH){ # File is not included from a plugin
+        win32:return($$DEPLOY_PATH/dev/lib)
+        else:return($$DEPLOY_PATH)
     } else {
-        LIBRARY_DEPLOY_PATH = $$LIVECV_BIN_PATH
+        isEmpty(LIVECV_DEV_PATH){
+            error(LIVECV_BIN_PATH setup without LIVECV_DEV_PATH. Both are required from a plugin.)
+        }
+        win32{ # On windows, we have a separate location for the libraries if we are building from source
+            exists($$LIVECV_DEV_PATH/lib): return($$LIVECV_DEV_PATH/lib)
+            else: return($$LIVECV_BIN_PATH/dev/lib)
+        } else {
+            return($$LIVECV_BIN_PATH)
+        }
     }
 }
 
 # Setup library include path
-
-# Setup library include path depending on whether this file was included from a plugin or from Live CV
-isEmpty(LIVECV_DEV_PATH):LIBRARY_INCLUDE_PATH = $$PROJECT_ROOT
-else:LIBRARY_INCLUDE_PATH = $$LIVECV_DEV_PATH
+#
+# Depends on whether this file was included from a plugin or from Live CV
+#
+defineReplace(libraryIncludePath){
+    isEmpty(LIVECV_DEV_PATH):return($$PROJECT_ROOT)
+    else:return($$LIVECV_DEV_PATH)
+}
 
 
 # Links a plugin within a specified path to the current project
@@ -169,10 +174,10 @@ else:LIBRARY_INCLUDE_PATH = $$LIVECV_DEV_PATH
 #  * include_dir: include dir path(defaults to library path in source tree + '/src')
 #
 defineTest(linkPlugin){
-    LIB_PATH = $$LIBRARY_DEPLOY_PATH/plugins/$$1
+    LIB_PATH = $$libraryDeployPath()/plugins/$$1
 
     LIB_NAME = $$2
-    LIB_INCLUDE_PATH = $$LIBRARY_INCLUDE_PATH/plugins/$$1/include
+    LIB_INCLUDE_PATH = $$libraryIncludePath()/plugins/$$1/include
 
     !isEmpty($$3):LIB_INCLUDE_PATH=$$3
 

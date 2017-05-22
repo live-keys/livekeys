@@ -328,9 +328,9 @@
                       		"lcvfeatures2d": "plugins/lcvfeatures2d",
                       		"lcvphoto": "plugins/lcvphoto"
                       },
-                      "{release}/lib/lcveditor.lib" : "dev/lib/-",
-                      "{release}/lib/qmljsparser.lib" : "dev/lib/-",
-                      "{release}/lib/plugins": {
+                      "{release}/bin/dev/lib/lcveditor.lib" : "dev/lib/-",
+                      "{release}/bin/dev/lib/qmljsparser.lib" : "dev/lib/-",
+                      "{release}/bin/dev/lib/plugins": {
                           "live/live.lib" : "dev/lib/plugins/live/-",
                       		"lcvcore/lcvcore.lib": "dev/lib/plugins/lcvcore/-",
                       		"lcvimgproc/lcvimgproc.lib": "dev/lib/plugins/lcvimgproc/-",
