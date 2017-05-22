@@ -60,6 +60,7 @@ script:
   - ls
   - python3 livecv_build.py .. gcc_64
   - ls
+  - find .
   - python3 livecv_deploy.py .. gcc_64
   - python3 livecv_deploy.py .. gcc_64_standalone
 
