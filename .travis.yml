@@ -58,10 +58,10 @@ install:
     
 script:
   - ls
-  - python3 livecv_build.py
+  - python3 livecv_build.py .. gcc_64
   - ls
-  - python3 livecv_deploy.py -d gcc
-  - python3 livecv_deploy.py -d gcc_standalone
+  - python3 livecv_deploy.py .. gcc_64
+  - python3 livecv_deploy.py .. gcc_64_standalone
 
 before_deploy:
   - ls

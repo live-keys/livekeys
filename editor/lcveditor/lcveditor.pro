@@ -4,7 +4,7 @@ QT      += core qml quick
 CONFIG  += qt
 
 win32:{
-    DESTDIR    = $$BUILD_PWD/lib
+    DESTDIR    = $$BUILD_PATH/lib
     DLLDESTDIR = $$DEPLOY_PATH
 }else:DESTDIR = $$DEPLOY_PATH
 

@@ -35,6 +35,7 @@ public:
     int identifierLength() const;
 
     int position() const;
+    int valuePosition() const;
 
     const QStringList& identifierChain() const;
     const QString& type() const;
@@ -84,6 +85,12 @@ inline int QCodeDeclaration::identifierLength() const{
 
 inline int QCodeDeclaration::position() const{
     return identifierPosition();
+}
+
+inline int QCodeDeclaration::valuePosition() const{
+    if ( valueLength() == 0 || valueOffset() == -1 )
+        return -1;
+    return identifierPosition() + identifierLength() + valueOffset();
 }
 
 inline const QStringList &QCodeDeclaration::identifierChain() const{

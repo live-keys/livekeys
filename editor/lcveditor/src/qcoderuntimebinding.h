@@ -24,6 +24,7 @@ public:
     const QCodeDeclaration* declaration() const;
 
     int position() const;
+    int valuePosition() const;
     int length() const;
 
     bool isModifiedByEngine() const;
@@ -50,6 +51,10 @@ inline QCodeDeclaration *QCodeRuntimeBinding::declaration(){
 
 inline const QCodeDeclaration *QCodeRuntimeBinding::declaration() const{
     return m_declaration;
+}
+
+inline int QCodeRuntimeBinding::valuePosition() const{
+    return declaration()->valuePosition();
 }
 
 inline bool QCodeRuntimeBinding::isModifiedByEngine() const{

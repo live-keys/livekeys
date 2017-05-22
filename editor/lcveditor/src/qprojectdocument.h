@@ -148,7 +148,7 @@ private:
     QString       m_content;
     QDateTime     m_lastModified;
 
-    QTextDocument*          m_editingDocument;
+    QTextDocument*    m_editingDocument;
     QDocumentHandler* m_editingDocumentHandler;
 
     QLinkedList<QCodeRuntimeBinding*> m_bindings;

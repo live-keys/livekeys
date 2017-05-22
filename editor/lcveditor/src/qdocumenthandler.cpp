@@ -28,6 +28,7 @@
 #include <QTextDocumentFragment>
 #include <QTextCursor>
 #include <QTextBlock>
+#include <QTimer>
 
 #include <QTextList>
 
@@ -42,7 +43,6 @@ namespace lcv{
 
 //TODO: Add object type on code properties
 //TODO: Add object type when looking for palettes
-//TODO: Connect added bindings to palettes so it can be disabled when needed
 
 namespace{
 
@@ -63,8 +63,8 @@ QDocumentHandler::QDocumentHandler(QAbstractCodeHandler *handler,
     , m_completionModel(new QCodeCompletionModel)
     , m_codeHandler(handler)
     , m_projectDocument(0)
-    , m_paletteContainer(paletteContainer)
     , m_editingState(0)
+    , m_paletteContainer(paletteContainer)
     , m_state(new QDocumentHandlerState)
 {
 }
@@ -118,8 +118,8 @@ void QDocumentHandler::rehighlightBlock(const QTextBlock &block){
 
 void QDocumentHandler::commitEdit(){
     if ( m_state->editingFragment() ){
-        int position = m_state->editingFragment()->position();
-        int length   = m_state->editingFragment()->length();
+        int position = m_state->editingFragment()->valuePosition();
+        int length   = m_state->editingFragment()->valueLength();
 
         QCodeConverter* converter = m_state->editingFragment()->converter();
         if ( converter ){
@@ -131,6 +131,12 @@ void QDocumentHandler::commitEdit(){
                 converter->serialize()->fromCode(commitText)
             );
             QCODE_BASIC_HANDLER_DEBUG("Commited edit of size: " + QString::number(commitText.size()));
+
+            if ( m_state->editingFragment()->actionType() == QDocumentEditFragment::Adjust ){
+                palette()->setValueFromCode(converter->serialize()->fromCode(commitText));
+                return;
+            }
+
         } else {
             emit contentsChangedManually();
         }
@@ -145,8 +151,8 @@ void QDocumentHandler::commitEdit(){
 
 void QDocumentHandler::cancelEdit(){
     if ( m_state->editingFragment() ){
-        int position = m_state->editingFragment()->position();
-        int length   = m_state->editingFragment()->length();
+        int position = m_state->editingFragment()->valuePosition();
+        int length   = m_state->editingFragment()->valueLength();
         disconnect(palette(), SIGNAL(valueChanged()), this, SLOT(paletteValueChanged()));
         m_state->clearEditingFragment();
         emit paletteChanged();
@@ -166,8 +172,8 @@ void QDocumentHandler::paletteValueChanged(){
 
     QDocumentEditFragment* frg = m_state->editingFragment();
     QTextCursor tc(m_targetDoc);
-    tc.setPosition(frg->position());
-    tc.setPosition(frg->position() + frg->length(), QTextCursor::KeepAnchor);
+    tc.setPosition(frg->valuePosition());
+    tc.setPosition(frg->valuePosition() + frg->valueLength(), QTextCursor::KeepAnchor);
     tc.beginEditBlock();
     tc.removeSelectedText();
     tc.insertText(code);
@@ -230,28 +236,33 @@ void QDocumentHandler::documentContentsChanged(int position, int charsRemoved, i
     } else if ( m_projectDocument ){
         QDocumentEditFragment* frg = m_state->editingFragment();
         if ( frg ){
-            if ( position >= frg->position() && position <= frg->position() + frg->length() ){
-                frg->updateLength(frg->length() - charsRemoved + charsAdded);
+            if ( position >= frg->valuePosition() && position <= frg->valuePosition() + frg->valueLength() ){
+                frg->declaration()->setValueLength(frg->valueLength() - charsRemoved + charsAdded);
                 if ( frg->actionType() == QDocumentEditFragment::Adjust ){
-                    if ( editingStateIs(QDocumentHandler::Palette) ){
-                        m_state->editingFragment()->commit(palette()->value());
+                    if ( editingStateIs(QDocumentHandler::Palette) ){ // palette edit
                         QCodeRuntimeBinding* binding = frg->runtimeBinding();
                         if ( binding ){
+                            QCODE_BASIC_HANDLER_DEBUG("Breaking binding at: " + QString::number(binding->position()));
                             frg->setRuntimeBinding(0);
-                            m_projectDocument->removeBindingAt(binding->position());
+                            if (m_projectDocument->removeBindingAt(binding->position()) )
+                                m_codeHandler->rehighlightBlock(m_targetDoc->findBlock(frg->declaration()->position()));
                         }
-                    } else {
-                        // TODO: Mb add timer
+                        m_state->editingFragment()->commit(palette()->value());
+                    } else if ( editingStateIs(QDocumentHandler::Runtime )){ // runtime edit
                         QTextCursor tc(m_targetDoc);
-                        tc.setPosition(frg->position());
-                        tc.setPosition(frg->position() + frg->length(), QTextCursor::KeepAnchor);
+                        tc.setPosition(frg->valuePosition());
+                        tc.setPosition(frg->valuePosition() + frg->valueLength(), QTextCursor::KeepAnchor);
                         palette()->setValueFromCode(palette()->serialize()->fromCode(tc.selectedText()));
-
-                        //TODO: Treat code coming from binding
+                    } else { // text edit
+                        QCodeRuntimeBinding* binding = frg->runtimeBinding();
+                        if ( binding ){
+                            QCODE_BASIC_HANDLER_DEBUG("Breaking binding at: " + QString::number(binding->position()));
+                            frg->setRuntimeBinding(0);
+                            if (m_projectDocument->removeBindingAt(binding->position()) )
+                                m_codeHandler->rehighlightBlock(m_targetDoc->findBlock(frg->declaration()->position()));
+                        }
                     }
                 }
-
-
 
             } else {
                 cancelEdit();
@@ -284,6 +295,7 @@ void QDocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
 }
 
 void QDocumentHandler::setDocument(QProjectDocument *document){
+    cancelEdit();
     if ( m_projectDocument )
         m_projectDocument->assignEditingDocument(0, 0);
 
@@ -341,8 +353,9 @@ void QDocumentHandler::bind(int position, int length, QObject *object){
             if (addedBinding){
                 addedBinding->setConverter(cvt);
                 addedBindings.append(addedBinding);
-                if ( m_state->editingFragment() ){
+                if ( m_state->editingFragment() && m_state->editingFragment()->declaration()->position() == addedBinding->position()){
                     m_state->editingFragment()->setRuntimeBinding(addedBinding);
+                    QCODE_BASIC_HANDLER_DEBUG("Linking binding to editing fragment: " + QString::number(m_state->editingFragment()->declaration()->position()));
                 }
             } else {
                 delete cde;
@@ -424,15 +437,18 @@ void QDocumentHandler::edit(int position, QObject *currentApp){
             return;
         }
 
-        m_state->setEditingFragment(new QDocumentEditFragment(propertyValue, propertyValueEnd - propertyValue));
+        declaration->setValuePositionOffset(propertyValue - declaration->position() - declaration->identifierLength());
+        declaration->setValueLength(propertyValueEnd - propertyValue);
+        m_state->setEditingFragment(new QDocumentEditFragment(declaration));
     }
 
     if ( m_state->editingFragment() ){
-        emit cursorPositionRequest(m_state->editingFragment()->position());
+        emit cursorPositionRequest(m_state->editingFragment()->valuePosition());
         addEditingState(QDocumentHandler::Silent);
-        rehighlightSection(m_state->editingFragment()->position(), m_state->editingFragment()->length());
+        rehighlightSection(m_state->editingFragment()->valuePosition(), m_state->editingFragment()->valueLength());
+    } else {
+        delete declaration;
     }
-    delete declaration;
 }
 
 void QDocumentHandler::adjust(int position, QObject *currentApp){
@@ -456,18 +472,24 @@ void QDocumentHandler::adjust(int position, QObject *currentApp){
         QDocumentEditFragment* ef = m_codeHandler->createInjectionChannel(declaration, currentApp, converter);
         ef->setActionType(QDocumentEditFragment::Adjust);
         QTextCursor codeCursor(m_targetDoc);
-        codeCursor.setPosition(ef->position());
-        codeCursor.setPosition(ef->position() + ef->length(), QTextCursor::KeepAnchor);
+        codeCursor.setPosition(ef->valuePosition());
+        codeCursor.setPosition(ef->valuePosition() + ef->valueLength(), QTextCursor::KeepAnchor);
 
         palette->init(palette->serialize()->fromCode(codeCursor.selectedText()));
         connect(palette, SIGNAL(valueChanged()), this, SLOT(paletteValueChanged()));
 
+        QCodeRuntimeBinding* bind = m_projectDocument->bindingAt(ef->declaration()->position());
+        if ( bind ){
+            QCODE_BASIC_HANDLER_DEBUG("Linking binding to editing fragment: " + QString::number(ef->declaration()->position()));
+            ef->setRuntimeBinding(bind);
+        }
+
         m_state->setEditingFragment(ef);
         emit paletteChanged();
 
-        emit cursorPositionRequest(m_state->editingFragment()->position());
+        emit cursorPositionRequest(m_state->editingFragment()->valuePosition());
         addEditingState(QDocumentHandler::Silent);
-        rehighlightSection(ef->position(), ef->length());
+        rehighlightSection(ef->valuePosition(), ef->valueLength());
     } else {
         delete declaration;
     }

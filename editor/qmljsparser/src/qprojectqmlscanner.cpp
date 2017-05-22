@@ -37,7 +37,7 @@
 #include "qplugintypesfacade.h"
 
 
-#define QDOCUMENT_QML_SCANNER_DEBUG_FLAG
+//#define QDOCUMENT_QML_SCANNER_DEBUG_FLAG
 #ifdef QDOCUMENT_QML_SCANNER_DEBUG_FLAG
 #define QDOCUMENT_QML_SCANNER_DEBUG(_param) qDebug() << "QML SCANNER:" << (_param)
 #else

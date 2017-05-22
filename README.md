@@ -51,12 +51,8 @@ For changes and compatibility information between versions, see the [CHANGELOG](
 
 ## Roadmap
 
-Live CV's goal is to provide an environment where people can experiment with different libraries or algorithms and can also share their own as easily as possible. To do this, it needs to be scalable, plugin-based, have a simple and easy to use build system, and a place to access and share plugins. These features ar all planned iteratively in the following versions:
+Live CV's goal is to provide an environment where people can experiment with different libraries or algorithms and can also share their own as easily as possible. To do this, it needs to be scalable, plugin-based, have a simple and easy to use build system, and a place to access and share plugins. These features ar all planned iteratively in the following versions: 
 
- * Version 1.4 - Deployment Kit and Open CV Contrib
-    * Simplifying and automating Live CV's build
-    * Ability to customize build with separate plugins
-    * Including Open CV Contrib module
  * Version 1.5 - Photography module
     * Exposure and contrast configuration
     * Photo stiching
