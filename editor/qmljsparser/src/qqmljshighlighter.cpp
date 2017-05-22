@@ -132,7 +132,6 @@ QQmlJsHighlighter::LookAheadType QQmlJsHighlighter::lookAhead(
 }
 
 void QQmlJsHighlighter::highlightBlock(const QString &text){
-
     QList<int> bracketPositions;
     int blockState   = previousBlockState();
 
@@ -189,6 +188,7 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
         case QmlJS::Token::RightBrace:
         case QmlJS::Token::LeftBracket:
         case QmlJS::Token::RightBracket:
+        case QmlJS::Token::EndOfFile:
             break;
         case QmlJS::Token::Semicolon:
         case QmlJS::Token::Colon:
@@ -252,7 +252,7 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
             );
 
             if ( bind->isModifiedByEngine() ){
-                int valueFrom = bind->position() + bind->declaration()->length() + bind->declaration()->valueOffset();
+                int valueFrom = bind->position() + bind->declaration()->identifierLength() + bind->declaration()->valueOffset();
                 setFormat(
                     valueFrom - currentBlock().position(),
                     bind->declaration()->valueLength(),
@@ -271,8 +271,8 @@ void QQmlJsHighlighter::highlightBlock(const QString &text){
     setCurrentBlockState(blockState);
 
     if ( m_documentState && m_documentState->editingFragment() ){
-        int position = m_documentState->editingFragment()->position();
-        int length   = m_documentState->editingFragment()->length();
+        int position = m_documentState->editingFragment()->valuePosition();
+        int length   = m_documentState->editingFragment()->valueLength();
         if ( position + length >= currentBlock().position() &&
              position < currentBlock().position() + currentBlock().length())
         {

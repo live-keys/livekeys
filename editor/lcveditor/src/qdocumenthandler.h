@@ -23,6 +23,7 @@
 #include "qabstractcodehandler.h"
 
 #include <QObject>
+#include <QTimer>
 #include <QTextCursor>
 
 class QQuickTextDocument;

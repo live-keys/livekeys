@@ -12,6 +12,7 @@ Rectangle{
         id: xAnim
         running: false
         loops: Animation.Infinite
+        
         NumberAnimation { from: 0; to: 200; duration: 500; easing.type: Easing.InOutQuad }
         NumberAnimation { from: 200; to: 0; duration: 500; easing.type: Easing.InOutQuad }
         PauseAnimation { duration: 250 }

@@ -7,6 +7,7 @@
 namespace lcv{
 
 class QCodeConverter;
+class QCodeDeclaration;
 class QCodeRuntimeBinding;
 class Q_LCVEDITOR_EXPORT QDocumentEditFragment{
 
@@ -17,39 +18,30 @@ public:
     };
 
 public:
-    QDocumentEditFragment(int position, int length, QCodeConverter* converter = 0);
+    QDocumentEditFragment(QCodeDeclaration* declaration, QCodeConverter* converter = 0);
     virtual ~QDocumentEditFragment();
 
-    int position() const;
-    int length() const;
+    int valuePosition() const;
+    int valueLength() const;
     QCodeConverter* converter();
 
     void setActionType(ActionType action);
     ActionType actionType() const;
 
-    void updateLength(int length);
-
     virtual void commit(const QVariant&){}
+
+    QCodeDeclaration* declaration();
 
     void setRuntimeBinding(QCodeRuntimeBinding* runtimeBinding);
     QCodeRuntimeBinding* runtimeBinding();
 
 private:
-    int m_position;
-    int m_length;
-    QCodeConverter*          m_converter;
+    QCodeDeclaration* m_declaration;
+    QCodeConverter* m_converter;
     QCodeRuntimeBinding* m_binding;
 
     ActionType m_actionType;
 };
-
-inline int QDocumentEditFragment::position() const{
-    return m_position;
-}
-
-inline int QDocumentEditFragment::length() const{
-    return m_length;
-}
 
 inline QCodeConverter *QDocumentEditFragment::converter(){
     return m_converter;
@@ -57,10 +49,6 @@ inline QCodeConverter *QDocumentEditFragment::converter(){
 
 inline void QDocumentEditFragment::setActionType(QDocumentEditFragment::ActionType action){
     m_actionType = action;
-}
-
-inline void QDocumentEditFragment::updateLength(int length){
-    m_length = length;
 }
 
 inline void QDocumentEditFragment::setRuntimeBinding(QCodeRuntimeBinding *binding){
@@ -73,6 +61,10 @@ inline QCodeRuntimeBinding *QDocumentEditFragment::runtimeBinding(){
 
 inline QDocumentEditFragment::ActionType QDocumentEditFragment::actionType() const{
     return m_actionType;
+}
+
+inline QCodeDeclaration *QDocumentEditFragment::declaration(){
+    return m_declaration;
 }
 
 }// namespace

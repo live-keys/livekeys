@@ -18,7 +18,7 @@ void QDocumentHandlerState::setEditingFragment(QDocumentEditFragment *fragment){
 }
 
 void QDocumentHandlerState::clearEditingFragment(){
-    if ( m_editingFragment != 0 ){
+    if ( m_editingFragment ){
         delete m_editingFragment;
         m_editingFragment = 0;
     }

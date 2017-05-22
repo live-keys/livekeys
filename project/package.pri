@@ -1,7 +1,7 @@
 
-#//TODO Check if LIVECV_DEV_DIR, LIVECV_BIN_DIR have been set and exist
+#//TODO Check if LIVECV_DEV_PATH, LIVECV_BIN_PATH have been set and exist
 
-BUILD_PWD  = $$shadowed($$PROJECT_ROOT)
-DEPLOY_PWD = $$LIVECV_BIN_DIR
+BUILD_PATH  = $$shadowed($$PROJECT_ROOT)
+DEPLOY_PATH = $$LIVECV_BIN_PATH
 
-include($$LIVECV_DEV_DIR/project/functions.pri)
+include($$LIVECV_DEV_PATH/project/functions.pri)

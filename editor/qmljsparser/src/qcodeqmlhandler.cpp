@@ -876,15 +876,25 @@ QList<QCodeDeclaration*> QCodeQmlHandler::getDeclarations(const QTextCursor& cur
         QQmlCompletionContext* ctx = m_completionContextFinder->getContext(cursor);
 
         QStringList expression;
-        int propertyLength = 0;
+        int propertyPosition = ctx->propertyPosition();
+        int propertyLength   = 0;
 
         if ( ctx->context() & QQmlCompletionContext::InLhsOfBinding ){
             expression = ctx->expressionPath();
 
+            if ( propertyPosition == -1 ){
+                if ( m_target->characterAt(cursor.position()).isSpace() ){
+                    delete ctx;
+                    return properties;
+                }
+                else
+                    propertyPosition = cursor.position();
+            }
+
             int advancedLength = QDocumentQmlValueScanner::getPropertyLength(
                 m_target, cursor.position(), &expression
             );
-            propertyLength = (cursor.position() - ctx->propertyPosition()) + advancedLength;
+            propertyLength = (cursor.position() - propertyPosition) + advancedLength;
 
         } else if ( ctx->context() & QQmlCompletionContext::InRhsofBinding ){
             expression     = ctx->propertyPath();
@@ -924,7 +934,7 @@ QList<QCodeDeclaration*> QCodeQmlHandler::getDeclarations(const QTextCursor& cur
 
             if ( property.revision() != -1 ){
                 properties.append(new QCodeDeclaration(
-                    expression, propertyType, ctx->objectTypePath(), ctx->propertyPosition(), propertyLength, m_document
+                    expression, propertyType, ctx->objectTypePath(), propertyPosition, propertyLength, m_document
                 ));
             }
         }
@@ -1017,21 +1027,18 @@ void QCodeQmlHandler::connectBindings(QList<QCodeRuntimeBinding *> bindings, QOb
 }
 
 QDocumentEditFragment *QCodeQmlHandler::createInjectionChannel(
-        QCodeDeclaration* property,
+        QCodeDeclaration* declaration,
         QObject *runtime,
         QCodeConverter* converter)
 {
-    QCodeRuntimeBinding* binding = new QCodeRuntimeBinding(property);
-
     if ( m_document && m_document->isActive() ){
 
         QQmlProperty foundProperty(
-            QDocumentQmlInfo::findMatchingProperty(m_target->toPlainText(), m_document, binding, runtime)
+            QDocumentQmlInfo::findMatchingProperty(m_target->toPlainText(), m_document, declaration, runtime)
         );
         if ( foundProperty.isValid() ){
             return new QDocumentQmlFragment(
-                binding->position() + binding->declaration()->identifierLength() + binding->declaration()->valueOffset(),
-                binding->declaration()->valueLength(),
+                declaration,
                 converter,
                 foundProperty
             );

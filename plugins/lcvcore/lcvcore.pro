@@ -24,6 +24,7 @@ deployOpenCV()
 
 OTHER_FILES *= \
     qml/*.qml \
-    qml/qmldir
+    qml/qmldir \
+    qml/plugins.qmltypes
 
 

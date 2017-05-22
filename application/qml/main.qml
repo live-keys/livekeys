@@ -754,8 +754,8 @@ ApplicationWindow{
             id: paletteBox
             x: 0
             y: visible ? 0 : 20
-            width: codeHandler.palette ? codeHandler.palette.item.width + 20: 0
-            height: codeHandler.palette ? codeHandler.palette.item.height + 20 : 0
+            width: codeHandler.palette ? codeHandler.palette.item.width + 10: 0
+            height: codeHandler.palette ? codeHandler.palette.item.height + 10 : 0
             color: "#08121a"
             border.width: 1
             border.color: "#132c3e"
@@ -763,19 +763,37 @@ ApplicationWindow{
             opacity: visible ? 1 : 0
             clip: true
             Behavior on opacity{
-                NumberAnimation{ duration : 200 }
+                NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
             }
             Behavior on y{
-                NumberAnimation{ duration : 200 }
+                id : moveYBehavior
+                NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
             }
 
             Connections{
                 target: codeHandler
                 onPaletteChanged : {
                     if ( codeHandler.palette ){
-                        codeHandler.palette.item.x = 10
-                        codeHandler.palette.item.y = 10
+                        var rect = editor.getCursorRectangle()
+                        moveYBehavior.enabled = false
+
+                        var startY = editor.y + rect.y + 38
+
+                        paletteBox.x = editor.x + rect.x + 7
+                        paletteBox.y = startY - rect.y / 2
+
+                        codeHandler.palette.item.x = 5
+                        codeHandler.palette.item.y = 7
                         paletteBox.children = [codeHandler.palette.item]
+
+                        moveYBehavior.enabled = true
+
+                        var newX = paletteBox.x - paletteBox.width / 2
+                        paletteBox.x = newX < 0 ? 0 : newX
+
+                        var upY = startY - paletteBox.height
+                        var downY = startY + rect.height + 5
+                        paletteBox.y = upY > 0 ? upY : downY
                     } else {
                         paletteBox.children = []
                     }

@@ -20,8 +20,7 @@
 
 #include "qlivecv.h"
 #include "qlivecvarguments.h"
-
-#include <QLibrary>
+#include "qlibraryloadpath.h"
 
 using namespace lcv;
 
@@ -32,8 +31,8 @@ int main(int argc, char *argv[]){
     QGuiApplication::setApplicationVersion(QLiveCV::versionString());
 
     QLiveCV::registerTypes();
-
     QLiveCV livecv(argc, argv);
+
     if ( livecv.arguments()->helpFlag() ){
         printf("%s", qPrintable(livecv.arguments()->helpString()));
         return 0;
@@ -41,6 +40,8 @@ int main(int argc, char *argv[]){
         printf("%s\n", qPrintable(livecv.versionString()));
         return 0;
     }
+
+    QLibraryLoadPath::addRecursive(livecv.dir() + "/plugins", livecv.dir() + "/link");
 
     if ( livecv.arguments()->pluginInfoFlag() ){
         printf("%s", livecv.extractPluginInfo(livecv.arguments()->pluginInfoImport()).data());

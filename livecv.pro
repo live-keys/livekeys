@@ -49,6 +49,8 @@ OTHER_FILES += \
     OTHER_FILES *= $$CONFIG_DIR/*.pri
 }
 
+OTHER_FILES *= project/*.pri
+
 # NOTE: It is not required to explicitly
 #include($$PWD/config/config_functions.pri)
 #include($$PWD/config/config_paths.pri)

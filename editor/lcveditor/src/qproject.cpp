@@ -160,7 +160,7 @@ void QProject::openFile(QProjectFile *file, int mode){
     if ( !document && m_active != 0 && m_active->file() == file ){
         document = m_active;
     } else if (!document){
-        document = new QProjectDocument(file, mode == QProjectDocument::Monitor, this);
+        document = new QProjectDocument(file, (mode == QProjectDocument::Monitor), this);
         m_documentModel->openDocument(file->path(), document);
     } else if ( document->isMonitored() && mode == QProjectDocument::Edit ){
         m_documentModel->updateDocumeMonitoring(document, false);

@@ -34,9 +34,9 @@ CONFIG      += qt plugin
 TARGET      = $$PLUGIN_NAME
 
 win32:{
-    DESTDIR    = $$BUILD_PWD/lib/plugins/$$PLUGIN_NAME
-    DLLDESTDIR = $$BUILD_PWD/bin/plugins/$$PLUGIN_NAME
-}else:DESTDIR = $$BUILD_PWD/bin/plugins/$$PLUGIN_NAME
+    DESTDIR    = $$BUILD_PATH/lib/plugins/$$PLUGIN_NAME
+    DLLDESTDIR = $$BUILD_PATH/bin/plugins/$$PLUGIN_NAME
+}else:DESTDIR = $$BUILD_PATH/bin/plugins/$$PLUGIN_NAME
 
 # --- Handling the QML deployment ---
 
@@ -44,7 +44,7 @@ win32:{
     warning(Expected folder $$PLUGIN_QML_DIR)
     qmlcopy.commands =
 } else {
-    qmlcopy.commands = $$deployDirCommand($$PLUGIN_QML_DIR, $$BUILD_PWD/bin/plugins/$$PLUGIN_NAME)
+    qmlcopy.commands = $$deployDirCommand($$PLUGIN_QML_DIR, $$BUILD_PATH/bin/plugins/$$PLUGIN_NAME)
 }
 
 QMAKE_EXTRA_TARGETS += qmlcopy
