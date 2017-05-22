@@ -8,7 +8,7 @@ linkLocalLibrary(editor/lcveditor, lcveditor)
 DEFINES += Q_QMLJSPARSER_LIB
 
 win32:{
-    DESTDIR    = $$BUILD_PATH/lib
+    DESTDIR    = $$DEPLOY_PATH/dev/lib
     DLLDESTDIR = $$DEPLOY_PATH
 }else:DESTDIR = $$DEPLOY_PATH
 

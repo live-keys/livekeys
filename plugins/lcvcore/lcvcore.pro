@@ -2,7 +2,7 @@ PLUGIN_NAME = lcvcore
 PLUGIN_PATH = $$PWD
 
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
-include($$getConfigFile(is_plugin.pri))
+include($$getGlobalFile(plugin.pri))
 
 uri = plugins.lcvcore
 
