@@ -31,8 +31,6 @@ ApplicationWindow{
     property bool documentsReloaded : false
     onActiveChanged: {
         if ( active ){
-            if ( staticContainer )
-                staticContainer.clearStates()
             project.navigationModel.requiresReindex()
             project.fileModel.rescanEntries()
             project.documentModel.rescanDocuments()
@@ -40,6 +38,7 @@ ApplicationWindow{
                 createTimer.restart()
                 documentsReloaded = false
             }
+            editor.forceActiveFocus()
         }
     }
 
@@ -954,6 +953,8 @@ ApplicationWindow{
             if (tester.item) {
                 tester.item.destroy();
                 tester.item = 0
+                if ( staticContainer )
+                    staticContainer.clearStates()
             }
             if (active)
                 createTimer.restart()
