@@ -62,11 +62,10 @@ void QStaticLoader::staticLoad(const QString &id){
         }
 
     } else if ( m_data->item ){
-        m_data->item->setParent(parent());
+        m_data->item->setParent(this);
         QQuickItem* item = qobject_cast<QQuickItem*>(m_data->item);
         if ( item ){
-            item->setParentItem(parentItem());
-            item->stackAfter(this);
+            item->setParentItem(this);
         }
     }
 
@@ -81,12 +80,11 @@ void QStaticLoader::createObject(){
         return;
     }
     m_data->item = obj;
-    m_data->item->setParent(parent());
+    m_data->item->setParent(this);
 
     QQuickItem* item = qobject_cast<QQuickItem*>(obj);
     if ( item ){
-        item->setParentItem(parentItem());
-        item->stackAfter(this);
+        item->setParentItem(this);
     }
     qmlEngine(this)->setObjectOwnership(m_data->item, QQmlEngine::CppOwnership);
 

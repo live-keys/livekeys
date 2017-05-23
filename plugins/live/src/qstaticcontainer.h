@@ -62,6 +62,15 @@ public:
 template<typename T>
 class QStaticTypeContainer : public QStaticTypeContainerBase{
 
+private:
+    class Entry{
+    public:
+        Entry(T* v) : value(v), activated(true){}
+
+        T*   value;
+        bool activated;
+    };
+
 public:
     static QStaticTypeContainer<T> &instance(QStaticContainer* parent);
 
@@ -83,9 +92,8 @@ private:
     static QStaticTypeContainer* m_instance;
 
 private:
-    QMap<QString, T*>   m_states;
-    QMap<QString, bool> m_statesActive;
-
+    QMap<QString, Entry> m_entries;
+    QLinkedList<T*>      m_toDelete;
 };
 
 template<class T> T *QStaticContainer::get(const QString &key){
@@ -114,9 +122,8 @@ template<typename T> QStaticTypeContainer<T> &QStaticTypeContainer<T>::instance(
  * @param state : The actual state
  */
 template<typename T> void QStaticTypeContainer<T>::registerState(const QString &key, T *state){
-    m_states[key]       = state;
-    m_statesActive[key] = true;
-    QSTATIC_ITEM_CONTAINER_DEBUG(QString("Key activated : ") + key);
+    m_entries.insert(key, Entry(state));
+    QSTATIC_ITEM_CONTAINER_DEBUG(QString("Key set and activated : ") + key);
 }
 
 /**
@@ -124,11 +131,11 @@ template<typename T> void QStaticTypeContainer<T>::registerState(const QString &
  * @return The found state on success. False otherwise.
  */
 template<typename T> T *QStaticTypeContainer<T>::state(const QString &key){
-    typename QMap<QString, T*>::iterator it = m_states.find(key);
-    if ( it != m_states.end() ){
-        m_statesActive[it.key()] = true;
+    typename QMap<QString, Entry>::iterator it = m_entries.find(key);
+    if ( it != m_entries.end() ){
+        it.value().activated = true;
         QSTATIC_ITEM_CONTAINER_DEBUG(QString("Key activated : ") + key);
-        return it.value();
+        return it.value().value;
     }
     return 0;
 }
@@ -137,11 +144,14 @@ template<typename T> T *QStaticTypeContainer<T>::state(const QString &key){
  * @brief Before compilation routine.
  */
 template<typename T> void QStaticTypeContainer<T>::beforeCompile(){
-    QMap<QString, bool>::iterator it = m_statesActive.begin();
-    while ( it != m_statesActive.end() ){
-        if ( it.value() == true ){
+    while ( !m_toDelete.isEmpty() )
+        delete m_toDelete.takeLast();
+
+    typename QMap<QString, Entry>::iterator it = m_entries.begin();
+    while ( it != m_entries.end() ){
+        if ( it.value().activated == true ){
             QSTATIC_ITEM_CONTAINER_DEBUG(QString("Key deactivated : ") + it.key());
-            it.value() = false;
+            it.value().activated = false;
         }
         ++it;
     }
@@ -151,15 +161,12 @@ template<typename T> void QStaticTypeContainer<T>::beforeCompile(){
  * @brief After compilation routine.
  */
 template<typename T> void QStaticTypeContainer<T>::afterCompile(){
-    QMap<QString, bool>::iterator it = m_statesActive.begin();
-    while ( it != m_statesActive.end() ){
-        if ( it.value() == false ){
-            QMap<QString, bool>::iterator prev = it;
-            ++it;
-            delete m_states[prev.key()];
-            m_states.remove(prev.key());
-            QSTATIC_ITEM_CONTAINER_DEBUG(QString("Key deleted : ") + prev.key());
-            m_statesActive.erase(prev);
+    typename QMap<QString, Entry>::iterator it = m_entries.begin();
+    while ( it != m_entries.end() ){
+        if ( it.value().activated == false ){
+            QSTATIC_ITEM_CONTAINER_DEBUG(QString("Key removed: ") + it.key());
+            m_toDelete.append(it.value().value);
+            it = m_entries.erase(it);
         } else {
             ++it;
         }
@@ -167,10 +174,10 @@ template<typename T> void QStaticTypeContainer<T>::afterCompile(){
 }
 
 template<typename T> void QStaticTypeContainer<T>::clearStates(){
-    for ( typename QMap<QString, T*>::iterator it = m_states.begin(); it != m_states.end(); ++it )
-        delete it.value();
-    m_states.clear();
-    m_statesActive.clear();
+    for ( typename QMap<QString, Entry>::iterator it = m_entries.begin(); it != m_entries.end(); ++it ){
+        m_toDelete.append(it.value().value);
+    }
+    m_entries.clear();
 }
 
 /**
