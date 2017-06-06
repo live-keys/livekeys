@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMATNODE_HPP
-#define QMATNODE_HPP
+#ifndef QMATNODE_H
+#define QMATNODE_H
 
 #include <QSGGeometryNode>
 #include "qlcvcoreglobal.h"
@@ -31,7 +31,7 @@ private:
 
 };
 
-#endif // QMATNODE_HPP
+#endif // QMATNODE_H
 
 
 

@@ -13,6 +13,7 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
+
 #ifndef QHOUGHTRANSFORMP_H
 #define QHOUGHTRANSFORMP_H
 

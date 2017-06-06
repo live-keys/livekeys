@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QBACKGROUNDSUBTRACTOR_HPP
-#define QBACKGROUNDSUBTRACTOR_HPP
+#ifndef QBACKGROUNDSUBTRACTOR_H
+#define QBACKGROUNDSUBTRACTOR_H
 
 #include <QQuickItem>
 #include "qlcvvideoglobal.h"
@@ -67,4 +67,4 @@ private:
 
 };
 
-#endif // QBACKGROUNDSUBTRACTOR_HPP
+#endif // QBACKGROUNDSUBTRACTOR_H

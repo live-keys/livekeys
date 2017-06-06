@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVECVSCOPE_H
-#define QLIVECVSCOPE_H
+#ifndef QPROJECTQMLSCOPE_H
+#define QPROJECTQMLSCOPE_H
 
 #include <QSet>
 #include <QString>
@@ -124,4 +124,4 @@ inline const QList<QString> &QProjectQmlScope::defaultLibraries() const{
 }// namespace
 
 
-#endif // QLIVECVSCOPE_H
+#endif // QPROJECTQMLSCOPE_H

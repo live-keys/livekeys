@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QDMATCHVECTOR_HPP
-#define QDMATCHVECTOR_HPP
+#ifndef QDMATCHVECTOR_H
+#define QDMATCHVECTOR_H
 
 #include <QQuickItem>
 #include "qlcvfeatures2dglobal.h"
@@ -63,4 +63,4 @@ inline std::vector<std::vector<cv::DMatch> >& QDMatchVector::matches(){
     return m_matches;
 }
 
-#endif // QDMATCHVECTOR_HPP
+#endif // QDMATCHVECTOR_H

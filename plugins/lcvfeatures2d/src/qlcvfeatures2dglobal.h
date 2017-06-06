@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLCVFEATURES2DGLOBAL_HPP
-#define QLCVFEATURES2DGLOBAL_HPP
+#ifndef QLCVFEATURES2DGLOBAL_H
+#define QLCVFEATURES2DGLOBAL_H
 
 #include <qglobal.h>
 
@@ -29,5 +29,5 @@
 #  define Q_LCV_EXPORT
 #endif
 
-#endif // QLCVFEATURES2DGLOBAL_HPP
+#endif // QLCVFEATURES2DGLOBAL_H
 

@@ -13,8 +13,9 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
-#ifndef QCANNY_HPP
-#define QCANNY_HPP
+
+#ifndef QCANNY_H
+#define QCANNY_H
 
 #include "qmatfilter.h"
 
@@ -104,4 +105,4 @@ inline void QCanny::setL2gradient(bool gradient){
     }
 }
 
-#endif // QCANNY_HPP
+#endif // QCANNY_H

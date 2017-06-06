@@ -1,5 +1,5 @@
-#ifndef QPALLETE_H
-#define QPALLETE_H
+#ifndef QLIVEPALLETE_H
+#define QLIVEPALLETE_H
 
 #include <QObject>
 #include <QQuickItem>
@@ -67,4 +67,4 @@ inline void QLivePalette::setValue(const QVariant &value){
 
 }// namespace
 
-#endif // QPALLETE_H
+#endif // QLIVEPALLETE_H

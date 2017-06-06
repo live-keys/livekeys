@@ -13,8 +13,9 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
-#ifndef QMATACCESS_HPP
-#define QMATACCESS_HPP
+
+#ifndef QMATACCESS_H
+#define QMATACCESS_H
 
 #include <QQuickItem>
 #include "qmat.h"
@@ -70,4 +71,4 @@ inline int QMatAccess::depth() const{
     return m_mat->cvMat()->depth();
 }
 
-#endif // QMATACCESS_HPP
+#endif // QMATACCESS_H

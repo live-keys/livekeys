@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLCVCOREGLOBAL_HPP
-#define QLCVCOREGLOBAL_HPP
+#ifndef QLCVCOREGLOBAL_H
+#define QLCVCOREGLOBAL_H
 
 #include <qglobal.h>
 
@@ -29,4 +29,4 @@
 #  define Q_LCV_EXPORT
 #endif
 
-#endif // QLCVCOREGLOBAL_HPP
+#endif // QLCVCOREGLOBAL_H

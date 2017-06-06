@@ -13,6 +13,7 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
+
 #ifndef QCVTCOLOR_H
 #define QCVTCOLOR_H
 
@@ -300,4 +301,4 @@ inline void QCvtColor::setDstCn(int arg){
     }
 }
 
-#endif // QCVTCOLOR_HPP
+#endif // QCVTCOLOR_H

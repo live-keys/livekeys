@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVECVMAIN_HPP
-#define QLIVECVMAIN_HPP
+#ifndef QLIVECVMAIN_H
+#define QLIVECVMAIN_H
 
 #include <QQuickItem>
 #include <QJSValue>
@@ -87,4 +87,4 @@ inline void QLiveCVMain::setVersion(const QString &version){
 
 }// namespace
 
-#endif // QLIVECVMAIN_HPP
+#endif // QLIVECVMAIN_H

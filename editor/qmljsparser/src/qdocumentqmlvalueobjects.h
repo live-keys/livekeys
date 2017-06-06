@@ -1,5 +1,5 @@
-#ifndef QDOCUMENTQMLOBJECTS_H
-#define QDOCUMENTQMLOBJECTS_H
+#ifndef QDOCUMENTQMLVALUEOBJECTS_H
+#define QDOCUMENTQMLVALUEOBJECTS_H
 
 #include "qqmljsparserglobal.h"
 #include <QList>
@@ -115,4 +115,4 @@ inline QDocumentQmlValueObjects::RangeObject *QDocumentQmlValueObjects::root(){
 
 }// namespace
 
-#endif // QDOCUMENTQMLOBJECTS_H
+#endif // QDOCUMENTQMLVALUEOBJECTS_H

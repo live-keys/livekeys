@@ -1,5 +1,5 @@
-#ifndef QSTATICITEMCONTAINER_H
-#define QSTATICITEMCONTAINER_H
+#ifndef QSTATICCONTAINER_H
+#define QSTATICCONTAINER_H
 
 #include "qliveglobal.h"
 #include <QLinkedList>
@@ -197,4 +197,4 @@ template<typename T> QStaticTypeContainer<T>::~QStaticTypeContainer(){
     clearStates();
 }
 
-#endif // QSTATICITEMCONTAINER_H
+#endif // QSTATICCONTAINER_H

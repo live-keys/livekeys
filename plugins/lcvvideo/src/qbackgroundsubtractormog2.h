@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 
-#ifndef QBACKGROUNDSUBTRACTORMOG2_HPP
-#define QBACKGROUNDSUBTRACTORMOG2_HPP
+#ifndef QBACKGROUNDSUBTRACTORMOG2_H
+#define QBACKGROUNDSUBTRACTORMOG2_H
 
 #include <QQuickItem>
 #include "qbackgroundsubtractor.h"
@@ -122,4 +122,4 @@ private:
 
 };
 
-#endif // QBACKGROUNDSUBTRACTORMOG2_HPP
+#endif // QBACKGROUNDSUBTRACTORMOG2_H

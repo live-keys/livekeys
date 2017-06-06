@@ -84,4 +84,4 @@ inline void QCamCapture::staticOpen(const QString &device, const QSize &resoluti
     staticLoad(device, resolution);
 }
 
-#endif // QCAMCAPTURE_HPP
+#endif // QCAMCAPTURE_H

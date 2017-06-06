@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QQMLJSHIGHLIGHTER_P_HPP
-#define QQMLJSHIGHLIGHTER_P_HPP
+#ifndef QQMLJSHIGHLIGHTER_P_H
+#define QQMLJSHIGHLIGHTER_P_H
 
 #include <QTextBlockUserData>
 #include <QSyntaxHighlighter>
@@ -132,4 +132,4 @@ inline QTextCharFormat QQmlJsHighlighter::createFormat(const QColor &foreground,
 
 }// namespace
 
-#endif // QCODEJSHIGHLIGHTER_P_HPP
+#endif // QQMLJSHIGHLIGHTER_P_H

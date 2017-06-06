@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QDRAWHISTOGRAM_HPP
-#define QDRAWHISTOGRAM_HPP
+#ifndef QDRAWHISTOGRAM_H
+#define QDRAWHISTOGRAM_H
 
 #include <QQuickItem>
 #include <QSGSimpleTextureNode>
@@ -172,4 +172,4 @@ inline QDrawHistogram::RenderType QDrawHistogram::render() const{
     return m_renderType;
 }
 
-#endif // QDRAWHISTOGRAM_HPP
+#endif // QDRAWHISTOGRAM_H

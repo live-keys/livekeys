@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QORBDESCRIPTOREXTRACTOR_HPP
-#define QORBDESCRIPTOREXTRACTOR_HPP
+#ifndef QORBDESCRIPTOREXTRACTOR_H
+#define QORBDESCRIPTOREXTRACTOR_H
 
 #include "qdescriptorextractor.h"
 
@@ -31,4 +31,4 @@ protected:
 
 };
 
-#endif // QORBDESCRIPTOREXTRACTOR_HPP
+#endif // QORBDESCRIPTOREXTRACTOR_H

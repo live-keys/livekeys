@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QBRISKDESCRIPTOREXTRACTOR_HPP
-#define QBRISKDESCRIPTOREXTRACTOR_HPP
+#ifndef QBRISKDESCRIPTOREXTRACTOR_H
+#define QBRISKDESCRIPTOREXTRACTOR_H
 
 #include "qdescriptorextractor.h"
 
@@ -32,4 +32,4 @@ protected:
 
 };
 
-#endif // QBRISKDESCRIPTOREXTRACTOR_HPP
+#endif // QBRISKDESCRIPTOREXTRACTOR_H

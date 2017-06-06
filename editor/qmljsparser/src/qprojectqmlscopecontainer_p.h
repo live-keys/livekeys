@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QPROJECTQMLSCOPE_P_H
-#define QPROJECTQMLSCOPE_P_H
+#ifndef QPROJECTQMLSCOPECONTAINER_P_H
+#define QPROJECTQMLSCOPECONTAINER_P_H
 
 #include <QMutex>
 #include <QMutexLocker>
@@ -133,4 +133,4 @@ inline void QProjectQmlScopeContainer::resetLibrary(const QString &path){
 
 }// namespace
 
-#endif // QPROJECTQMLSCOPE_P_H
+#endif // QPROJECTQMLSCOPECONTAINER_P_H

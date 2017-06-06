@@ -120,4 +120,4 @@ inline void QDescriptorMatcher::setParams(const QVariantMap& arg){
     emit paramsChanged();
 }
 
-#endif // QDESCRIPTORMATCHER_HPP
+#endif // QDESCRIPTORMATCHER_H

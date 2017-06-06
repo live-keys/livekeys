@@ -27,8 +27,9 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
-#ifndef QFASTNLMEANSDENOISINGMULTI_HPP
-#define QFASTNLMEANSDENOISINGMULTI_HPP
+
+#ifndef QFASTNLMEANSDENOISINGMULTI_H
+#define QFASTNLMEANSDENOISINGMULTI_H
 
 #include <QList>
 #include "qfastnlmeansdenoising.h"
@@ -65,4 +66,4 @@ inline int QFastNlMeansDenoisingMulti::temporalWindowSize() const{
     return m_temporalWindowSize;
 }
 
-#endif // QFASTNLMEANSDENOISINGMULTI_HPP
+#endif // QFASTNLMEANSDENOISINGMULTI_H

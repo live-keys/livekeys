@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVECVLOG_HPP
-#define QLIVECVLOG_HPP
+#ifndef QLIVECVLOG_H
+#define QLIVECVLOG_H
 
 #include <QObject>
 #include <QString>
@@ -78,5 +78,5 @@ inline bool QLiveCVLog::isFileLogEnabled() const{
     return !m_logFilePath.isEmpty();
 }
 
-#endif // QLIVECVLOG_HPP
+#endif // QLIVECVLOG_H
 

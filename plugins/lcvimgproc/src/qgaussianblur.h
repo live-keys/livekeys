@@ -13,8 +13,9 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
-#ifndef QGAUSSIANBLUR_HPP
-#define QGAUSSIANBLUR_HPP
+
+#ifndef QGAUSSIANBLUR_H
+#define QGAUSSIANBLUR_H
 
 #include "qmatfilter.h"
 
@@ -103,4 +104,4 @@ inline void QGaussianBlur::setBorderType(int arg){
     }
 }
 
-#endif // QGAUSSIANBLUR_HPP
+#endif // QGAUSSIANBLUR_H

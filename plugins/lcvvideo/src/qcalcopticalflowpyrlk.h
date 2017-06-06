@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QCALCOPTICALFLOWPYRLK_HPP
-#define QCALCOPTICALFLOWPYRLK_HPP
+#ifndef QCALCOPTICALFLOWPYRLK_H
+#define QCALCOPTICALFLOWPYRLK_H
 
 #include <QQuickItem>
 #include "qmatfilter.h"
@@ -67,4 +67,4 @@ private:
 
 };
 
-#endif // QCALCOPTICALFLOWPYRLK_HPP
+#endif // QCALCOPTICALFLOWPYRLK_H

@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QDOCUMENTSCOPE_H
-#define QDOCUMENTSCOPE_H
+#ifndef QDOCUMENTQMLSCOPE_H
+#define QDOCUMENTQMLSCOPE_H
 
 #include "qqmljsparserglobal.h"
 #include <QString>
@@ -172,4 +172,4 @@ inline QString QDocumentQmlScope::componentName() const{
 
 }// namespace
 
-#endif // QDOCUMENTSCOPE_H
+#endif // QDOCUMENTQMLSCOPE_H

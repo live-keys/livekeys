@@ -1,5 +1,5 @@
-#ifndef QPALLETECONTAINER_H
-#define QPALLETECONTAINER_H
+#ifndef QLIVEPALLETECONTAINER_H
+#define QLIVEPALLETECONTAINER_H
 
 #include "qlcveditorglobal.h"
 #include <QString>
@@ -37,4 +37,4 @@ private:
 
 }// namespace
 
-#endif // QPALLETECONTAINER_H
+#endif // QLIVEPALLETECONTAINER_H
