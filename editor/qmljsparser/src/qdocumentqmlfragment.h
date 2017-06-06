@@ -13,7 +13,7 @@ class Q_QMLJSPARSER_EXPORT QDocumentQmlFragment : public QDocumentEditFragment{
 
 public:
     QDocumentQmlFragment(
-        QCodeDeclaration* declaration,
+        QCodeDeclaration::Ptr declaration,
         QCodeConverter* converter,
         const QQmlProperty& property
     );

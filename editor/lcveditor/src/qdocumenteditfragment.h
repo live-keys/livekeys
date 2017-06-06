@@ -2,12 +2,12 @@
 #define QDOCUMENTEDITFRAGMENT_H
 
 #include "qlcveditorglobal.h"
+#include "qcodedeclaration.h"
 #include <QVariant>
 
 namespace lcv{
 
 class QCodeConverter;
-class QCodeDeclaration;
 class QCodeRuntimeBinding;
 class Q_LCVEDITOR_EXPORT QDocumentEditFragment{
 
@@ -18,7 +18,7 @@ public:
     };
 
 public:
-    QDocumentEditFragment(QCodeDeclaration* declaration, QCodeConverter* converter = 0);
+    QDocumentEditFragment(QCodeDeclaration::Ptr declaration, QCodeConverter* converter = 0);
     virtual ~QDocumentEditFragment();
 
     int valuePosition() const;
@@ -30,15 +30,15 @@ public:
 
     virtual void commit(const QVariant&){}
 
-    QCodeDeclaration* declaration();
+    QCodeDeclaration::Ptr declaration();
 
     void setRuntimeBinding(QCodeRuntimeBinding* runtimeBinding);
     QCodeRuntimeBinding* runtimeBinding();
 
 private:
-    QCodeDeclaration* m_declaration;
-    QCodeConverter* m_converter;
-    QCodeRuntimeBinding* m_binding;
+    QCodeDeclaration::Ptr m_declaration;
+    QCodeConverter*       m_converter;
+    QCodeRuntimeBinding*  m_binding;
 
     ActionType m_actionType;
 };
@@ -63,7 +63,7 @@ inline QDocumentEditFragment::ActionType QDocumentEditFragment::actionType() con
     return m_actionType;
 }
 
-inline QCodeDeclaration *QDocumentEditFragment::declaration(){
+inline QCodeDeclaration::Ptr QDocumentEditFragment::declaration(){
     return m_declaration;
 }
 

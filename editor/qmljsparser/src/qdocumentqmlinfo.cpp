@@ -38,7 +38,7 @@ namespace{
     QQmlProperty findRuntimeProperty(
         QDocumentQmlValueObjects::RangeObject *object,
         QObject *root,
-        QCodeDeclaration* declaration,
+        QCodeDeclaration::Ptr declaration,
         const QString& source)
     {
         int position = declaration->position();
@@ -148,8 +148,8 @@ QDocumentQmlInfo::QDocumentQmlInfo(const QString &fileName)
         d->internalDoc = QmlJS::Document::create(fileName, QmlJS::Dialect::NoLanguage);
 }
 
-QDocumentQmlInfo::MutablePtr QDocumentQmlInfo::create(const QString &fileName){
-    return QDocumentQmlInfo::MutablePtr(new QDocumentQmlInfo(fileName));
+QDocumentQmlInfo::Ptr QDocumentQmlInfo::create(const QString &fileName){
+    return QDocumentQmlInfo::Ptr(new QDocumentQmlInfo(fileName));
 }
 
 QStringList QDocumentQmlInfo::extractIds() const{
@@ -314,19 +314,19 @@ QString QDocumentQmlInfo::componentName() const{
     return d->internalDoc->componentName();
 }
 
-QDocumentQmlValueObjects *QDocumentQmlInfo::createObjects() const{
+QDocumentQmlValueObjects::Ptr QDocumentQmlInfo::createObjects() const{
     Q_D(const QDocumentQmlInfo);
-    QDocumentQmlValueObjects* objects = new QDocumentQmlValueObjects;
+    QDocumentQmlValueObjects::Ptr objects = QDocumentQmlValueObjects::create();
     objects->visit(d->internalDoc->ast());
     return objects;
 }
 
 void QDocumentQmlInfo::syncBindings(const QString &source, QProjectDocument *document, QObject *root){
     if ( document && document->hasBindings() ){
-        QDocumentQmlInfo::MutablePtr docinfo = QDocumentQmlInfo::create(document->file()->path());
+        QDocumentQmlInfo::Ptr docinfo = QDocumentQmlInfo::create(document->file()->path());
         docinfo->parse(source);
 
-        QDocumentQmlValueObjects* objects = docinfo->createObjects();
+        QDocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
 
         for ( QProjectDocument::BindingIterator it = document->bindingsBegin(); it != document->bindingsEnd(); ++it ){
             QCodeRuntimeBinding* binding = *it;
@@ -334,8 +334,6 @@ void QDocumentQmlInfo::syncBindings(const QString &source, QProjectDocument *doc
             if ( foundProperty.isValid() )
                 foundProperty.connectNotifySignal(binding, SLOT(updateValue()));
         }
-
-        delete objects;
     }
 }
 
@@ -348,10 +346,10 @@ void QDocumentQmlInfo::syncBindings(
     if ( bindings.isEmpty() )
         return;
 
-    QDocumentQmlInfo::MutablePtr docinfo = QDocumentQmlInfo::create(document->file()->path());
+    QDocumentQmlInfo::Ptr docinfo = QDocumentQmlInfo::create(document->file()->path());
     docinfo->parse(source);
 
-    QDocumentQmlValueObjects* objects = docinfo->createObjects();
+    QDocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
 
     for ( QList<QCodeRuntimeBinding*>::iterator it = bindings.begin(); it != bindings.end(); ++it) {
         QCodeRuntimeBinding* binding = *it;
@@ -359,24 +357,21 @@ void QDocumentQmlInfo::syncBindings(
         if ( foundProperty.isValid() )
             foundProperty.connectNotifySignal(binding, SLOT(updateValue()));
     }
-
-    delete objects;
 }
 
 QQmlProperty QDocumentQmlInfo::findMatchingProperty(
         const QString &source,
         QProjectDocument *document,
-        QCodeDeclaration *binding,
+        QCodeDeclaration::Ptr declaration,
         QObject *root)
 {
-    QDocumentQmlInfo::MutablePtr docinfo = QDocumentQmlInfo::create(document->file()->path());
+    QDocumentQmlInfo::Ptr docinfo = QDocumentQmlInfo::create(document->file()->path());
     docinfo->parse(source);
 
-    QDocumentQmlValueObjects* objects = docinfo->createObjects();
+    QDocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
 
-    QQmlProperty foundProperty(findRuntimeProperty(objects->root(), root, binding, source));
+    QQmlProperty foundProperty(findRuntimeProperty(objects->root(), root, declaration, source));
 
-    delete objects;
     return foundProperty;
 }
 

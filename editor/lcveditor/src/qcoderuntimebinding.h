@@ -3,6 +3,7 @@
 
 #include "qlcveditorglobal.h"
 #include "qcodedeclaration.h"
+#include "qcodeconverter.h"
 #include <QObject>
 
 namespace lcv{
@@ -15,13 +16,13 @@ class Q_LCVEDITOR_EXPORT QCodeRuntimeBinding : public QObject{
 
 public:
     QCodeRuntimeBinding(const QStringList &identifierChain, QProjectDocument* parent = 0);
-    QCodeRuntimeBinding(QCodeDeclaration* declaration);
+    QCodeRuntimeBinding(QCodeDeclaration::Ptr declaration);
     ~QCodeRuntimeBinding();
 
     void setConverter(QCodeConverter* converter);
 
-    QCodeDeclaration* declaration();
-    const QCodeDeclaration* declaration() const;
+    QCodeDeclaration::Ptr declaration();
+    QCodeDeclaration::ConstPtr declaration() const;
 
     int position() const;
     int valuePosition() const;
@@ -35,7 +36,7 @@ public slots:
     void updateValue();
 
 public:
-    QCodeDeclaration*          m_declaration;
+    QCodeDeclaration::Ptr      m_declaration;
     QProjectDocumentBlockData* m_parentBlock;
     QCodeConverter*            m_converter;
     bool                       m_modifiedByEngine;
@@ -45,11 +46,11 @@ inline void QCodeRuntimeBinding::setConverter(QCodeConverter *converter){
     m_converter = converter;
 }
 
-inline QCodeDeclaration *QCodeRuntimeBinding::declaration(){
+inline QCodeDeclaration::Ptr QCodeRuntimeBinding::declaration(){
     return m_declaration;
 }
 
-inline const QCodeDeclaration *QCodeRuntimeBinding::declaration() const{
+inline QCodeDeclaration::ConstPtr QCodeRuntimeBinding::declaration() const{
     return m_declaration;
 }
 

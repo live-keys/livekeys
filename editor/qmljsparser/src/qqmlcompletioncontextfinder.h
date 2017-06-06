@@ -29,7 +29,7 @@ public:
     QQmlCompletionContextFinder();
     ~QQmlCompletionContextFinder();
 
-    QQmlCompletionContext* getContext(const QTextCursor& cursor);
+    QQmlCompletionContext::ConstPtr getContext(const QTextCursor& cursor);
 };
 
 }// namespace

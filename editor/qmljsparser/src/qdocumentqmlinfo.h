@@ -19,6 +19,8 @@
 
 #include "qqmljsparserglobal.h"
 #include "qdocumentqmlobject.h"
+#include "qdocumentqmlvalueobjects.h"
+#include "qcodedeclaration.h"
 #include <QQmlProperty>
 #include <QSharedPointer>
 #include <QScopedPointer>
@@ -35,9 +37,7 @@ namespace QmlJS{
 namespace lcv{
 
 class QProjectDocument;
-class QCodeDeclaration;
 class QCodeRuntimeBinding;
-class QDocumentQmlValueObjects;
 class QDocumentQmlInfoPrivate;
 class Q_QMLJSPARSER_EXPORT QDocumentQmlInfo{
 
@@ -92,8 +92,8 @@ public:
         Json
     };
 
-    typedef QSharedPointer<const QDocumentQmlInfo> Ptr;
-    typedef QSharedPointer<QDocumentQmlInfo> MutablePtr;
+    typedef QSharedPointer<const QDocumentQmlInfo> ConstPtr;
+    typedef QSharedPointer<QDocumentQmlInfo>       Ptr;
 
     static Dialect extensionToDialect(const QString& extension);
 
@@ -101,7 +101,7 @@ protected:
     QDocumentQmlInfo(const QString& fileName);
 
 public:
-    static MutablePtr create(const QString& fileName);
+    static Ptr create(const QString& fileName);
 
     QStringList extractIds() const;
     const ValueReference rootObject();
@@ -125,7 +125,7 @@ public:
     QString path() const;
     QString componentName() const;
 
-    QDocumentQmlValueObjects* createObjects() const;
+    QDocumentQmlValueObjects::Ptr createObjects() const;
 
     static void syncBindings(const QString& source, QProjectDocument* document, QObject* root);
     static void syncBindings(
@@ -134,9 +134,10 @@ public:
         QList<QCodeRuntimeBinding*> bindings,
         QObject* root
     );
-    static QQmlProperty findMatchingProperty(const QString& source,
+    static QQmlProperty findMatchingProperty(
+        const QString& source,
         QProjectDocument* document,
-        QCodeDeclaration *binding,
+        QCodeDeclaration::Ptr declaration,
         QObject* root
     );
 

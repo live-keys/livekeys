@@ -23,6 +23,7 @@
 #include <QAbstractUndoItem>
 #include <QTextBlockUserData>
 #include "qlcveditorglobal.h"
+#include "qcodedeclaration.h"
 
 #include <QQmlProperty>
 
@@ -34,7 +35,6 @@ class QProjectDocument;
 class QProjectDocumentBlockData;
 class QDocumentHandler;
 class QCodeConverter;
-class QCodeDeclaration;
 class QCodeRuntimeBinding;
 
 class Q_LCVEDITOR_EXPORT QProjectDocumentAction : public QAbstractUndoItem{
@@ -112,7 +112,7 @@ public:
 
     void assignEditingDocument(QTextDocument* doc, QDocumentHandler* handler);
     QTextDocument* editingDocument();
-    QCodeRuntimeBinding* addNewBinding(QCodeDeclaration *declaration);
+    QCodeRuntimeBinding* addNewBinding(QCodeDeclaration::Ptr declaration);
     void documentContentsChanged(int position, int charsRemoved, const QString& addedText = "");
     void documentContentsSilentChanged(int position, int charsRemoved, const QString& addedText = "");
 

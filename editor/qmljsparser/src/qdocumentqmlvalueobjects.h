@@ -3,6 +3,7 @@
 
 #include "qqmljsparserglobal.h"
 #include <QList>
+#include <QSharedPointer>
 
 namespace QmlJS{ namespace AST {
     class Node;
@@ -16,6 +17,9 @@ class Q_QMLJSPARSER_EXPORT QDocumentQmlValueObjects{
 
 public:
     friend class QDocumentQmlValueObjectsVisitor;
+
+    typedef QSharedPointer<QDocumentQmlValueObjects>       Ptr;
+    typedef QSharedPointer<const QDocumentQmlValueObjects> ConstPtr;
 
     class RangeObject;
     class RangeProperty;
@@ -83,8 +87,9 @@ public:
     };
 
 public:
-    QDocumentQmlValueObjects();
     ~QDocumentQmlValueObjects();
+
+    static QDocumentQmlValueObjects::Ptr create();
 
     RangeObject* root();
 
@@ -95,6 +100,8 @@ public:
     QList<RangeProperty*> propertiesBetween(int start, int end, RangeObject* root = 0);
 
 private:
+    QDocumentQmlValueObjects();
+
     QString toStringRecursive(RangeObject* object, int indent = 0) const;
     QString toStringRecursive(RangeProperty* property, int indent = 0) const;
     QDocumentQmlValueObjects::RangeObject* appendRange(QmlJS::AST::Node* ast, int begin, int end);

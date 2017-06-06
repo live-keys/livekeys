@@ -76,7 +76,7 @@ public:
     typedef QList<ImportEntry> ImportList;
 
 private:
-    QDocumentQmlScope(QProjectQmlScope::Ptr projectScope, QDocumentQmlInfo::MutablePtr documentInfo);
+    QDocumentQmlScope(QProjectQmlScope::Ptr projectScope, QDocumentQmlInfo::Ptr documentInfo);
 
 public:
     ~QDocumentQmlScope();
@@ -90,7 +90,7 @@ public:
         QProjectQmlScope::Ptr projectScope
     );
 
-    static QList<Import> extractImports(QDocumentQmlInfo::MutablePtr document);
+    static QList<Import> extractImports(QDocumentQmlInfo::Ptr document);
 
     bool hasImport(const Import& key);
     int totalImports() const;
@@ -98,7 +98,7 @@ public:
 
     void addImport(const Import& key, const QString& path);
 
-    QDocumentQmlInfo::Ptr info() const;
+    QDocumentQmlInfo::ConstPtr info() const;
     QProjectQmlScope::Ptr projectScope() const;
 
     QString path() const;
@@ -107,7 +107,7 @@ public:
 private:
     ImportList                   m_imports;
     QProjectQmlScope::Ptr        m_projectScope;
-    QDocumentQmlInfo::MutablePtr m_documentInfo;
+    QDocumentQmlInfo::Ptr m_documentInfo;
 };
 
 inline int QDocumentQmlScope::Import::versionMajor() const{
@@ -150,7 +150,7 @@ inline int QDocumentQmlScope::totalImports() const{
     return m_imports.size();
 }
 
-inline QDocumentQmlInfo::Ptr QDocumentQmlScope::info() const{
+inline QDocumentQmlInfo::ConstPtr QDocumentQmlScope::info() const{
     return m_documentInfo;
 }
 

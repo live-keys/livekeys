@@ -44,16 +44,6 @@ namespace lcv{
 //TODO: Add object type on code properties
 //TODO: Add object type when looking for palettes
 
-namespace{
-
-void clearDeclarationList(QList<QCodeDeclaration*>& list){
-    for ( QList<QCodeDeclaration*>::iterator it = list.begin(); it != list.end(); ++it )
-        delete *it;
-    list.clear();
-}
-
-}
-
 QDocumentHandler::QDocumentHandler(QAbstractCodeHandler *handler,
         QLivePaletteContainer *paletteContainer,
         QObject *parent)
@@ -342,11 +332,11 @@ void QDocumentHandler::bind(int position, int length, QObject *object){
     if ( length != 0 )
         cursor.setPosition(position + length, QTextCursor::KeepAnchor);
 
-    QList<QCodeDeclaration*> properties = m_codeHandler->getDeclarations(cursor);
+    QList<QCodeDeclaration::Ptr> properties = m_codeHandler->getDeclarations(cursor);
 
     QList<QCodeRuntimeBinding*> addedBindings;
-    for ( QList<QCodeDeclaration*>::iterator it = properties.begin(); it != properties.end(); ++it ){
-        QCodeDeclaration* cde = *it;
+    for ( QList<QCodeDeclaration::Ptr>::iterator it = properties.begin(); it != properties.end(); ++it ){
+        QCodeDeclaration::Ptr cde = *it;
         //is there converter available for binding
         QCodeConverter* cvt = m_paletteContainer->findPalette(cde->type(), cde->parentType());
         if ( cvt ){
@@ -359,11 +349,8 @@ void QDocumentHandler::bind(int position, int length, QObject *object){
                     m_state->editingFragment()->setRuntimeBinding(addedBinding);
                     QCODE_BASIC_HANDLER_DEBUG("Linking binding to editing fragment: " + QString::number(m_state->editingFragment()->declaration()->position()));
                 }
-            } else {
-                delete cde;
             }
-        } else
-            delete cde;
+        }
     }
 
     // Bind runtime bindings to engine and rehighlight
@@ -388,12 +375,11 @@ void QDocumentHandler::unbind(int position, int length){
     if ( length != 0 )
         cursor.setPosition(position + length, QTextCursor::KeepAnchor);
 
-    QList<QCodeDeclaration*> properties = m_codeHandler->getDeclarations(cursor);
-    for ( QList<QCodeDeclaration*>::iterator it = properties.begin(); it != properties.end(); ++it ){
+    QList<QCodeDeclaration::Ptr> properties = m_codeHandler->getDeclarations(cursor);
+    for ( QList<QCodeDeclaration::Ptr>::iterator it = properties.begin(); it != properties.end(); ++it ){
         if ( m_projectDocument->removeBindingAt((*it)->position()) )
             m_codeHandler->rehighlightBlock(m_targetDoc->findBlock((*it)->position()));
     }
-    clearDeclarationList(properties);
 }
 
 void QDocumentHandler::edit(int position, QObject *currentApp){
@@ -405,11 +391,11 @@ void QDocumentHandler::edit(int position, QObject *currentApp){
     QTextCursor cursor(m_target->textDocument());
     cursor.setPosition(position);
 
-    QList<QCodeDeclaration*> properties = m_codeHandler->getDeclarations(cursor);
+    QList<QCodeDeclaration::Ptr> properties = m_codeHandler->getDeclarations(cursor);
     if ( properties.isEmpty() )
         return;
 
-    QCodeDeclaration* declaration = properties.first();
+    QCodeDeclaration::Ptr declaration = properties.first();
 
     QCodeConverter* converter = m_paletteContainer->findPalette(
         declaration->type(), declaration->parentType().isEmpty() ? "" : declaration->parentType().first()
@@ -435,7 +421,6 @@ void QDocumentHandler::edit(int position, QObject *currentApp){
         );
         if ( propertyValue == -1 || propertyValueEnd == -1 ){
             qWarning("Failed to parse document: unable to identify value offset.");
-            delete declaration;
             return;
         }
 
@@ -448,8 +433,6 @@ void QDocumentHandler::edit(int position, QObject *currentApp){
         emit cursorPositionRequest(m_state->editingFragment()->valuePosition());
         addEditingState(QDocumentHandler::Silent);
         rehighlightSection(m_state->editingFragment()->valuePosition(), m_state->editingFragment()->valueLength());
-    } else {
-        delete declaration;
     }
 }
 
@@ -462,11 +445,11 @@ void QDocumentHandler::adjust(int position, QObject *currentApp){
     QTextCursor cursor(m_target->textDocument());
     cursor.setPosition(position);
 
-    QList<QCodeDeclaration*> properties = m_codeHandler->getDeclarations(cursor);
+    QList<QCodeDeclaration::Ptr> properties = m_codeHandler->getDeclarations(cursor);
     if ( properties.isEmpty() )
         return;
 
-    QCodeDeclaration* declaration = properties.first();
+    QCodeDeclaration::Ptr declaration = properties.first();
 
     QCodeConverter* converter = m_paletteContainer->findPalette(declaration->type());
     QLivePalette* palette = qobject_cast<QLivePalette*>(converter);
@@ -492,8 +475,6 @@ void QDocumentHandler::adjust(int position, QObject *currentApp){
         emit cursorPositionRequest(m_state->editingFragment()->valuePosition());
         addEditingState(QDocumentHandler::Silent);
         rehighlightSection(ef->valuePosition(), ef->valueLength());
-    } else {
-        delete declaration;
     }
 
 }
@@ -541,12 +522,12 @@ QDocumentCursorInfo *QDocumentHandler::cursorInfo(int position, int length){
     if ( length != 0 )
         cursor.setPosition(position + length, QTextCursor::KeepAnchor);
 
-    QList<QCodeDeclaration*> properties = m_codeHandler->getDeclarations(cursor);
+    QList<QCodeDeclaration::Ptr> properties = m_codeHandler->getDeclarations(cursor);
     if ( properties.isEmpty() )
         return new QDocumentCursorInfo(canBind, canUnbind, canEdit, canAdjust);
 
     if ( properties.size() == 1 ){
-        QCodeDeclaration* firstdecl = properties.first();
+        QCodeDeclaration::Ptr firstdecl = properties.first();
         canEdit = true;
 
         QCodeConverter* converter = m_paletteContainer->findPalette(firstdecl->type());
@@ -554,7 +535,7 @@ QDocumentCursorInfo *QDocumentHandler::cursorInfo(int position, int length){
         canAdjust = (palette != 0);
     }
 
-    for ( QList<QCodeDeclaration*>::iterator it = properties.begin(); it != properties.end(); ++it ){
+    for ( QList<QCodeDeclaration::Ptr>::iterator it = properties.begin(); it != properties.end(); ++it ){
         if ( !m_projectDocument->bindingAt((*it)->position()) )
             canBind = true;
         if ( m_projectDocument->bindingAt((*it)->position()) )
@@ -563,8 +544,6 @@ QDocumentCursorInfo *QDocumentHandler::cursorInfo(int position, int length){
         if ( canBind && canUnbind )
             break;
     }
-
-    clearDeclarationList(properties);
 
     return new QDocumentCursorInfo(canBind, canUnbind, canEdit, canAdjust);
 

@@ -1,1 +1,1 @@
-#include "../src/qcodeconverter.h"
+#include "../src/qcodedeclaration.h"
