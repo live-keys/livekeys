@@ -10,13 +10,17 @@ LivePalette{
     serialize : NativeValueCodeSerializer{}
 
     item: Rectangle{
-        width: 250
-        height: 100
+        width: 280
+        height: 68
         color: 'transparent'
 
         Slider{
             id: intSlider
-            width: parent.width
+            anchors.top: parent.top
+            anchors.topMargin: 1
+            anchors.left: parent.left
+            anchors.leftMargin: 40
+            width: parent.width - 80
             height: 15
             minimumValue: 0
             value: 0
@@ -27,83 +31,126 @@ LivePalette{
             style: SliderStyle{
                 groove: Rectangle {
                     implicitHeight: 15
-                    color: "#010305"
+                    color: "#07131e"
                 }
                 handle: Rectangle{
-                    width: 10
-                    height: 15
-                    color: "#0b273f"
+                    width: 5
+                    height: 18
+                    border.width: 1
+                    border.color: "#093357"
+                    color: "#041f38"
                 }
             }
+        }
+
+        Rectangle{
+            width: 40
+            height: 18
+            color: "#071a2d"
+            anchors.top: parent.top
+
+            border.width: 1
+            border.color: "#0e263c"
 
             Text{
+                anchors.centerIn: parent
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 11
+                font.weight: Font.Light
                 text: intSlider.minimumValue
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.topMargin: 20
-                color: '#7d87a3'
+                color: '#d2d4db'
             }
-            Text{
-                text: intSlider.value
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: 20
-                color: '#d8d9db'
-            }
-            Text{
-                text: intSlider.maximumValue
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.topMargin: 20
-                color: '#7d87a3'
-            }
+        }
 
+        Rectangle{
+            width: 40
+            height: 18
+            color: "#071a2d"
+            anchors.right: parent.right
+            anchors.top: parent.top
+
+            border.width: 1
+            border.color: "#0e263c"
+
+            Text{
+                anchors.centerIn: parent
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 11
+                font.weight: Font.Light
+                text: intSlider.maximumValue
+                color: '#d2d4db'
+            }
         }
 
         Slider{
             id: fractionalSlider
-            width: parent.width
+
+            anchors.left: parent.left
+            anchors.leftMargin: 40
+            anchors.top: parent.top
+            anchors.topMargin: 31
+
+            width: parent.width - 80
+
             height: 15
             minimumValue: 0
             value: 0
             onValueChanged: palette.value = intSlider.value + fractionalSlider.value
-            stepSize: 0.05
+            stepSize: 0.01
             maximumValue: 1.0
-            anchors.top: parent.top
-            anchors.topMargin: 45
 
             style: SliderStyle{
                 groove: Rectangle {
                     implicitHeight: 15
-                    color: "#010305"
+                    color: "#07131e"
                 }
                 handle: Rectangle{
-                    width: 10
-                    height: 15
-                    color: "#0b273f"
+                    width: 5
+                    height: 18
+                    border.width: 1
+                    border.color: "#093357"
+                    color: "#041f38"
                 }
             }
+        }
+
+        Rectangle{
+            width: 40
+            height: 18
+            color: "#071a2d"
+            anchors.top: parent.top
+            anchors.topMargin: 30
+
+            border.width: 1
+            border.color: "#0e263c"
 
             Text{
+                anchors.centerIn: parent
+                font.family: "Open Sans, sans-serif"
+                font.weight: Font.Light
+                font.pixelSize: 11
                 text: fractionalSlider.minimumValue
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.topMargin: 20
-                color: '#7d87a3'
+                color: '#d2d4db'
             }
+        }
+
+        Rectangle{
+            width: 40
+            height: 18
+            color: "#071a2d"
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.topMargin: 30
+
+            border.width: 1
+            border.color: "#0e263c"
+
             Text{
-                text: fractionalSlider.value.toFixed(2)
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: 20
-                color: '#d8d9db'
-            }
-            Text{
-                text: fractionalSlider.maximumValue
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.topMargin: 20
-                color: '#7d87a3'
+                anchors.centerIn: parent
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 11
+                text: fractionalSlider.maximumValue.toFixed(1)
+                color: '#d2d4db'
             }
         }
 
@@ -113,7 +160,14 @@ LivePalette{
             height: 15
             minimumValue: 0
             value: 0
-            onValueChanged: intSlider.maximumValue = value * value
+            onValueChanged: {
+                var intMaxValue = value * value
+                if ( intMaxValue < intSlider.value ){
+                    var sqrt = Math.ceil(Math.sqrt(Math.floor(intSlider.value)))
+                    zoomSlider.value = 15 > sqrt ? 15 : sqrt
+                } else
+                    intSlider.maximumValue = value * value
+            }
             stepSize: 1.0
             maximumValue: 200
 
@@ -122,24 +176,30 @@ LivePalette{
 
             style: SliderStyle{
                 groove: Rectangle {
-                    implicitHeight: 5
+                    implicitHeight: 6
                     color: "transparent"
                 }
                 handle: Rectangle{
-                    width: 30
-                    height: 5
-                    color: "#0b273f"
+                    width: 40
+                    height: 6
+                    color: "#041f38"
                 }
             }
         }
     }
 
     onInit: {
+        var sqrt = Math.ceil(Math.sqrt(Math.floor(value))) + 1
+        zoomSlider.value = 15 > sqrt ? 15 : sqrt
+
         intSlider.value = Math.floor(value)
         fractionalSlider.value = value - intSlider.value
     }
     onCodeChanged:{
+        var sqrt = Math.ceil(Math.sqrt(Math.floor(value))) + 1
+        zoomSlider.value = 15 > sqrt ? 15 : sqrt
+
         intSlider.value = Math.floor(value)
-        fractionalSlider.value = value - intSlider.valu
+        fractionalSlider.value = value - intSlider.value
     }
 }
