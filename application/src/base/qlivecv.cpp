@@ -22,6 +22,7 @@
 
 #include "qlivecvarguments.h"
 //#include "qlicensecontainer.h"
+#include "qlivecvscript.h"
 #include "qlivepalettecontainer.h"
 
 #include "qdocumenthandler.h"
@@ -55,6 +56,7 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
     , m_dir(QGuiApplication::applicationDirPath())
     , m_project(new QProject)
     , m_settings(0)
+    , m_script(0)
 {
     solveImportPaths();
 
@@ -64,8 +66,14 @@ QLiveCV::QLiveCV(int argc, const char* const argv[])
         argc,
         argv
     );
+    m_script = new QLiveCVScript(m_arguments->scriptArguments());
+    QObject::connect(
+        m_project, SIGNAL(activeChanged(QProjectDocument*)),
+        m_script, SLOT(scriptChanged(QProjectDocument*))
+    );
 
     m_settings = QLiveCVSettings::initialize(dir() + "/config");
+    m_settings->setPreviewMode(m_arguments->previewFlag());
 }
 
 QLiveCV::~QLiveCV(){
@@ -96,7 +104,6 @@ void QLiveCV::solveImportPaths(){
 }
 
 void QLiveCV::loadLibrary(const QString &library){
-
     m_lcvlib.setFileName(library);
     m_lcvlib.load();
 
@@ -161,7 +168,7 @@ void QLiveCV::loadQml(const QUrl &url){
 
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
-    m_engine->engine()->rootContext()->setContextProperty("args", m_arguments);
+    m_engine->engine()->rootContext()->setContextProperty("script", m_script);
     m_engine->engine()->rootContext()->setContextProperty("engine", m_engine);
     m_engine->engine()->rootContext()->setContextProperty("codeHandler", m_codeInterface);
     m_engine->engine()->rootContext()->setContextProperty("settings", m_settings);
@@ -197,6 +204,9 @@ void QLiveCV::registerTypes(){
         "Cv", 1, 0, "ProjectDocument", "ProjectDocument objects are managed by the Project class.");
     qmlRegisterUncreatableType<lcv::QLiveCVEngine>(
         "Cv", 1, 0, "LiveEngine", "LiveEngine is available through engine property."
+    );
+    qmlRegisterUncreatableType<lcv::QLiveCVScript>(
+        "Cv", 1, 0, "LiveScript", "LiveScript is available through the \'script\' property"
     );
     qmlRegisterUncreatableType<lcv::QLiveCVSettings>(
         "Cv", 1, 0, "LiveSettings", "LiveSettings is available through the settings property."

@@ -11,6 +11,6 @@ Main{
     ]
     version : "1.0.0"
     onRun: {
-        console.log('Given input value ' + args.option('-p') )
+        console.log('Given input value ' + option('-p') )
     }
 }

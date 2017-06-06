@@ -24,7 +24,7 @@
 // ----------
 
 #define LIVECV_VERSION_MAJOR 1
-#define LIVECV_VERSION_MINOR 3
+#define LIVECV_VERSION_MINOR 4
 #define LIVECV_VERSION_PATCH 0
 
 // Forward declarations
@@ -39,6 +39,7 @@ namespace lcv{
 class QLiveCVEngine;
 class QLiveCVArguments;
 class QLiveCVSettings;
+class QLiveCVScript;
 class QProject;
 class QDocumentHandler;
 class QCodeQmlHandler;
@@ -84,6 +85,7 @@ private:
 
     lcv::QProject*        m_project;
     lcv::QLiveCVSettings* m_settings;
+    lcv::QLiveCVScript*   m_script;
 
 };
 

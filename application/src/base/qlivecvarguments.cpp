@@ -19,9 +19,8 @@
 
 namespace lcv{
 
-QLiveCVArguments::QLiveCVArguments(const QString& header, int argc, const char* const argv[], QObject *parent)
-    : QObject(parent)
-    , m_parser(new QLiveCVCommandLineParser(header))
+QLiveCVArguments::QLiveCVArguments(const QString& header, int argc, const char* const argv[])
+    : m_parser(new QLiveCVCommandLineParser(header))
 {
     initialize(argc, argv);
 }
@@ -36,32 +35,6 @@ bool QLiveCVArguments::pluginInfoFlag() const{
 
 bool QLiveCVArguments::helpFlag() const{
     return m_parser->isSet(m_parser->helpOption());
-}
-
-QString QLiveCVArguments::at(int number) const{
-    return m_parser->scriptArguments().at(number);
-}
-
-int QLiveCVArguments::length() const{
-    return m_parser->scriptArguments().size();
-}
-
-QString QLiveCVArguments::option(const QString &key) const{
-    QLiveCVCommandLineParser::Option* option = m_parser->findScriptOptionByName(key);
-    if ( !option ){
-        qCritical("Failed to find script option: %s", qPrintable(key));
-        return "";
-    }
-    return m_parser->value(option);
-}
-
-bool QLiveCVArguments::isOptionSet(const QString &key) const{
-    QLiveCVCommandLineParser::Option* option = m_parser->findScriptOptionByName(key);
-    if ( !option ){
-        qCritical("Failed to find script option: %s", qPrintable(key));
-        return "";
-    }
-    return m_parser->isSet(option);
 }
 
 void QLiveCVArguments::initialize(int argc, const char* const argv[]){
@@ -90,7 +63,6 @@ void QLiveCVArguments::initialize(int argc, const char* const argv[]){
         m_monitoredFiles = monitoredList.split(";");
     }
 
-    m_script = m_parser->script();
 }
 
 bool QLiveCVArguments::versionFlag() const{
@@ -99,6 +71,14 @@ bool QLiveCVArguments::versionFlag() const{
 
 QString QLiveCVArguments::helpString() const{
     return m_parser->helpString();
+}
+
+const QStringList &QLiveCVArguments::scriptArguments() const{
+    return m_parser->scriptArguments();
+}
+
+const QString &QLiveCVArguments::script() const{
+    return m_parser->script();
 }
 
 }// namespace

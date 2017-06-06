@@ -378,7 +378,7 @@ ApplicationWindow{
                 id: projectView
                 height: parent.height
                 width: 240
-                visible : !args.previewFlag
+                visible : !settings.previewMode
                 onOpenEntry: {
                     if ( project.inFocus )
                         project.inFocus.dumpContent(editor.text)
@@ -492,7 +492,7 @@ ApplicationWindow{
                 id: editor
                 height: parent.height
                 width: 400
-                visible : !args.previewFlag
+                visible : !settings.previewMode
 
                 font.pixelSize: settings.editor.fontSize
 
@@ -668,7 +668,8 @@ ApplicationWindow{
                         onAboutToCreateObject : {
                             if (staticContainer)
                                 staticContainer.beforeCompile()
-//                            root.aboutToRecompile()
+                            if ( engineMonitor )
+                                engineMonitor.emitBeforeCompile()
                         }
                         onObjectCreated : {
                             error.text = ''
@@ -678,7 +679,8 @@ ApplicationWindow{
                             tester.item = object;
                             if ( staticContainer )
                                 staticContainer.afterCompile()
-//                            root.afterCompile()
+                            if ( engineMonitor )
+                                engineMonitor.emitAfterCompile()
                         }
                         onObjectCreationError : {
                             var lastErrorsText = ''
@@ -955,6 +957,8 @@ ApplicationWindow{
                 tester.item = 0
                 if ( staticContainer )
                     staticContainer.clearStates()
+                if ( engineMonitor )
+                    engineMonitor.emitTargetChanged()
             }
             if (active)
                 createTimer.restart()

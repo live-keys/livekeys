@@ -14,26 +14,18 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVECVARGUMENTS_HPP
-#define QLIVECVARGUMENTS_HPP
+#ifndef QLIVECVARGUMENTS_H
+#define QLIVECVARGUMENTS_H
 
 #include <QObject>
 
 namespace lcv{
 
 class QLiveCVCommandLineParser;
-class QLiveCVArguments : public QObject{
-
-    Q_OBJECT
-    Q_PROPERTY(bool previewFlag READ previewFlag CONSTANT)
+class QLiveCVArguments{
 
 public:
-    explicit QLiveCVArguments(
-        const QString& header,
-        int argc,
-        const char* const argv[],
-        QObject *parent = 0
-    );
+    explicit QLiveCVArguments(const QString& header, int argc, const char* const argv[]);
     ~QLiveCVArguments();
 
     bool previewFlag() const;
@@ -51,12 +43,8 @@ public:
 
     QLiveCVCommandLineParser* parser();
 
-public slots:
     const QString& script() const;
-    QString at(int number) const;
-    int length() const;
-    QString option(const QString& key) const;
-    bool isOptionSet(const QString& key) const;
+    const QStringList& scriptArguments() const;
 
 private:
     void initialize(int argc, const char* const argv[]);
@@ -71,8 +59,6 @@ private:
     QString m_pluginInfoImport;
 
     QStringList m_monitoredFiles;
-
-    QString m_script;
 
 };
 
@@ -100,10 +86,7 @@ inline QLiveCVCommandLineParser *QLiveCVArguments::parser(){
     return m_parser;
 }
 
-inline const QString&QLiveCVArguments::script() const{
-    return m_script;
-}
 
 }// namespace
 
-#endif // QLIVECVARGUMENTS_HPP
+#endif // QLIVECVARGUMENTS_H

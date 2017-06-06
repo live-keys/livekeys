@@ -23,15 +23,15 @@
 
 namespace lcv{
 
+class QScriptCommandLineParser;
 class Q_LIVE_EXPORT QLiveCVMain : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(QJSValue options READ options WRITE setOptions NOTIFY optionsChanged)
     Q_PROPERTY(QString version  READ version WRITE setVersion NOTIFY versionChanged)
 
-
 public:
-    QLiveCVMain(QQuickItem* parent = 0);
+    explicit QLiveCVMain(QQuickItem* parent = 0);
     ~QLiveCVMain();
 
     const QJSValue& options() const;
@@ -40,10 +40,16 @@ public:
     void setOptions(const QJSValue& options);
     void setVersion(const QString& version);
 
+protected:
+    void componentComplete() Q_DECL_OVERRIDE;
+
 public slots:
-    void attachWindow(QQuickWindow* window);
-    void aboutToRecompile();
+    void beforeCompile();
     void afterCompile();
+
+    const QStringList& arguments() const;
+    QString option(const QString& key) const;
+    bool isOptionSet(const QString& key) const;
 
 signals:
     void optionsChanged();
@@ -55,7 +61,7 @@ private:
     QJSValue m_options;
     QString  m_version;
 
-    QQuickWindow* m_attachedWindow;
+    QScriptCommandLineParser* m_parser;
 };
 
 inline const QJSValue &QLiveCVMain::options() const{
