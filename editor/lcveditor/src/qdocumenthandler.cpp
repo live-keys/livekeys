@@ -297,6 +297,8 @@ void QDocumentHandler::setDocument(QProjectDocument *document){
         m_targetDoc->setPlainText(document->content());
         removeEditingState(QDocumentHandler::Silent);
     }
+    if ( m_targetDoc )
+        m_targetDoc->clearUndoRedoStacks();
     m_projectDocument = document;
     m_codeHandler->setDocument(document);
 }
