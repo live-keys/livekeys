@@ -24,6 +24,7 @@
 
 namespace lcv{
 
+class QProjectDocumentBlockData;
 class Q_LCVEDITOR_EXPORT QCodeRuntimeBinding : public QObject{
 
     Q_OBJECT
