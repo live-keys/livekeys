@@ -15,9 +15,10 @@
 ****************************************************************************/
 
 #include "qlivecvmain.h"
-#include "qlivecvarguments.h"
-#include "qlivecvcommandlineparser.h"
+#include "qenginemonitor.h"
+#include "qscriptcommandlineparser_p.h"
 
+#include <QException>
 #include <QQuickView>
 #include <QQmlContext>
 #include <QVariant>
@@ -29,46 +30,36 @@ namespace lcv{
 
 QLiveCVMain::QLiveCVMain(QQuickItem *parent)
     : QQuickItem(parent)
-    , m_attachedWindow(0)
+    , m_parser(0)
 {
     setFlag(ItemHasContents, false);
-    connect(this, SIGNAL(windowChanged(QQuickWindow*)), SLOT(attachWindow(QQuickWindow*)));
 }
 
 QLiveCVMain::~QLiveCVMain(){
 }
 
-void QLiveCVMain::attachWindow(QQuickWindow *window){
-    if (window == 0){
-        qWarning("Cannot connect to window compilation signal. , \'Main\' object will not run.");
-        return;
-    }
+void QLiveCVMain::componentComplete(){
+    QQuickItem::componentComplete();
 
-    connect(window, SIGNAL(aboutToRecompile()), this, SLOT(aboutToRecompile()));
-    connect(window, SIGNAL(afterCompile()), this, SLOT(afterCompile()));
-    m_attachedWindow = window;
+    QEngineMonitor* em = QEngineMonitor::grabFromContext(this);
+
+    connect(em, SIGNAL(afterCompile()), this, SLOT(afterCompile()));
+    connect(em, SIGNAL(beforeCompile()), this, SLOT(beforeCompile()));
+
+    QObject* obj = qmlContext(this)->contextProperty("script").value<QObject*>();
+    m_parser = new QScriptCommandLineParser(obj->property("argvTail").toStringList());
 }
 
-void QLiveCVMain::aboutToRecompile(){
-    disconnect(m_attachedWindow, SIGNAL(afterCompile()), this, SLOT(afterCompile()));
+void QLiveCVMain::beforeCompile(){
+    // Remove before a new compilation takes place (otherwise aftercompile triggers twice)
+    disconnect(sender(), SIGNAL(afterCompile()), this, SLOT(afterCompile()));
 }
 
 void QLiveCVMain::afterCompile(){
-    if ( !m_attachedWindow )
-        return;
-
-    QObject* obj = QQmlEngine::contextForObject(this)->contextProperty("args").value<QObject*>();
-    QLiveCVArguments* argsOb = static_cast<QLiveCVArguments*>(obj);
-    if ( !argsOb ){
-        qWarning("Failed to fetch arguments object. \'Main\' object will not run.");
-        return;
-    }
-
     try{
+        m_parser->resetScriptOptions();
 
-        argsOb->parser()->resetScriptOptions();
-
-        QList<QLiveCVCommandLineParser::Option*> requiredOptions;
+        QList<QScriptCommandLineParser::Option*> requiredOptions;
 
         if ( !m_options.isArray() ){
             qCritical("Unknown options type, expected array.");
@@ -107,40 +98,62 @@ void QLiveCVMain::afterCompile(){
             QString describe = option.hasOwnProperty("describe") ? option.property("describe").toString() : "";
 
             if ( type == "" ){
-                argsOb->parser()->addScriptFlag(keys, describe);
+                m_parser->addFlag(keys, describe);
             } else {
-                QLiveCVCommandLineParser::Option* parserOpt = argsOb->parser()->addScriptOption(keys, describe, type);
+                QScriptCommandLineParser::Option* parserOpt = m_parser->addOption(keys, describe, type);
                 bool required = option.hasOwnProperty("required") ? option.property("required").toBool() : false;
                 if ( required )
                     requiredOptions.append(parserOpt);
             }
         }
 
-        argsOb->parser()->parseScriptArguments();
+        m_parser->parseArguments();
 
-        if ( argsOb->parser()->isSet(argsOb->parser()->scriptHelpOption())){
-            printf("%s", qPrintable(argsOb->parser()->scriptHelpString()));
+        if ( m_parser->isSet(m_parser->helpOption())){
+            printf("%s", qPrintable(m_parser->helpString()));
             QCoreApplication::exit(0);
             return;
-        } else if ( argsOb->parser()->isSet(argsOb->parser()->versionOption() ) ){
-            printf("%s", qPrintable(m_version));
+        } else if ( m_parser->isSet(m_parser->versionOption() ) ){
+            printf("%s\n", qPrintable(m_version));
             QCoreApplication::exit(0);
             return;
         }
 
-        foreach( QLiveCVCommandLineParser::Option* option, requiredOptions ){
-            if ( !argsOb->parser()->isSet(option) ){
-                qCritical("Failed to find required option: %s", qPrintable(argsOb->parser()->optionNames(option).first()));
-                printf("%s", qPrintable(argsOb->parser()->scriptHelpString()));
+        foreach( QScriptCommandLineParser::Option* option, requiredOptions ){
+            if ( !m_parser->isSet(option) ){
+                qCritical("Failed to find required option: %s", qPrintable(m_parser->optionNames(option).first()));
+                printf("%s", qPrintable(m_parser->helpString()));
                 return;
             }
         }
 
         emit run();
 
-    } catch ( QLiveCVCommandLineException& e ){
-        qCritical("Command line option error: %s", qPrintable(e.message()));
+    } catch ( QException& e ){
+        qCritical("Command line option error: %s", e.what());
     }
+}
+
+const QStringList &QLiveCVMain::arguments() const{
+    return m_parser->arguments();
+}
+
+QString QLiveCVMain::option(const QString &key) const{
+    QScriptCommandLineParser::Option* option = m_parser->findOptionByName(key);
+    if ( !option ){
+        qCritical("Failed to find script option: %s", qPrintable(key));
+        return "";
+    }
+    return m_parser->value(option);
+}
+
+bool QLiveCVMain::isOptionSet(const QString &key) const{
+    QScriptCommandLineParser::Option* option = m_parser->findOptionByName(key);
+    if ( !option ){
+        qCritical("Failed to find script option: %s", qPrintable(key));
+        return "";
+    }
+    return m_parser->isSet(option);
 }
 
 }// namespace

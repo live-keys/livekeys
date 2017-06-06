@@ -34,7 +34,7 @@ class Q_LCVFEATURES2D_EXPORT QDescriptorExtractor : public QQuickItem{
 public:
     explicit QDescriptorExtractor(QQuickItem *parent = 0);
     QDescriptorExtractor(cv::Ptr<cv::DescriptorExtractor> extractor, QQuickItem* parent = 0);
-    ~QDescriptorExtractor();
+    virtual ~QDescriptorExtractor();
 
     QKeyPointVector* keypoints();
     void setKeypoints(QKeyPointVector* keypoints);

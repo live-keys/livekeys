@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QCOMMANDLINEPARSER_H
-#define QCOMMANDLINEPARSER_H
+#ifndef QLIVECVCOMMANDLINEPARSER_H
+#define QLIVECVCOMMANDLINEPARSER_H
 
 #include <QString>
 #include <QList>
@@ -47,32 +47,17 @@ public:
     Option* addFlag(const QString& name, const QString& description);
     Option* addOption(const QStringList& names, const QString& description, const QString& type);
     Option* addOption(const QString& name, const QString& description, const QString& type);
+
     const QString &script() const;
+    const QStringList& scriptArguments() const;
 
     QString helpString() const;
-
-    Option* scriptHelpOption();
-    Option* scriptVersionOption();
-
-    void resetScriptOptions();
-    Option* addScriptFlag(const QStringList& names, const QString& description);
-    Option* addScriptFlag(const QString& name, const QString& description);
-    Option* addScriptOption(const QStringList& names, const QString& description, const QString& type);
-    Option* addScriptOption(const QString& name, const QString& description, const QString& type);
-    void parseScriptArguments();
-
-    QString scriptHelpString() const;
-
-    const QStringList& scriptArguments();
-    const QStringList& scriptSentArguments();
-
     QStringList optionNames(Option* option) const;
 
     bool isSet(Option* option) const;
     const QString& value(Option* option) const;
     void assertIsSet(Option* option) const;
 
-    Option *findScriptOptionByName(const QString& name);
 
 private:
     void assignName(const QString& name, Option* option, const QList<Option*>& check);
@@ -82,17 +67,12 @@ private:
     Option*        m_helpOption;
     Option*        m_versionOption;
 
-    Option*        m_scriptHelpOption;
-    Option*        m_scriptVersionOption;
-
     QList<Option*> m_options;
     QString        m_header;
     QString        m_version;
 
-    QList<Option*> m_scriptOptions;
-    QStringList    m_scriptArguments;
-    QStringList    m_scriptSentArguments;
     QString        m_script;
+    QStringList    m_scriptArguments;
 };
 
 inline QLiveCVCommandLineParser::Option *QLiveCVCommandLineParser::helpOption(){
@@ -107,22 +87,11 @@ inline const QString &QLiveCVCommandLineParser::script() const{
     return m_script;
 }
 
-inline const QStringList &QLiveCVCommandLineParser::scriptArguments(){
+inline const QStringList &QLiveCVCommandLineParser::scriptArguments() const{
     return m_scriptArguments;
 }
 
-inline const QStringList &QLiveCVCommandLineParser::scriptSentArguments(){
-    return m_scriptSentArguments;
-}
-
-inline QLiveCVCommandLineParser::Option *QLiveCVCommandLineParser::scriptHelpOption(){
-    return m_scriptHelpOption;
-}
-
-inline QLiveCVCommandLineParser::Option *QLiveCVCommandLineParser::scriptVersionOption(){
-    return m_scriptVersionOption;
-}
 
 }// namespace
 
-#endif // QCOMMANDLINEPARSER_H
+#endif // QLIVECVCOMMANDLINEPARSER_H
