@@ -22,6 +22,7 @@
 #include "qprojectdocument.h"
 #include "qdocumentqmlscope.h"
 #include "qprojectqmlscope.h"
+#include "qcodedeclaration.h"
 #include "qlockedfileiosession.h"
 
 #include <QTextCursor>
@@ -62,11 +63,11 @@ public:
     void setDocument(QProjectDocument* document) Q_DECL_OVERRIDE;
     void updateScope(const QString& data) Q_DECL_OVERRIDE;
     void rehighlightBlock(const QTextBlock& block) Q_DECL_OVERRIDE;
-    QList<QCodeDeclaration*> getDeclarations(const QTextCursor& cursor) Q_DECL_OVERRIDE;
+    QList<lcv::QCodeDeclaration::Ptr> getDeclarations(const QTextCursor& cursor) Q_DECL_OVERRIDE;
     bool findPropertyValue(int position, int length, int& valuePosition, int& valueEnd) Q_DECL_OVERRIDE;
     void connectBindings(QList<QCodeRuntimeBinding*> bindings, QObject* root) Q_DECL_OVERRIDE;
     QDocumentEditFragment* createInjectionChannel(
-        QCodeDeclaration* property,
+        QCodeDeclaration::Ptr property,
         QObject* runtime,
         QCodeConverter* converter
     ) Q_DECL_OVERRIDE;

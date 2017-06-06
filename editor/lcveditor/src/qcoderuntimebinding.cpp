@@ -8,14 +8,14 @@ namespace lcv{
 
 QCodeRuntimeBinding::QCodeRuntimeBinding(const QStringList& identifierChain, QProjectDocument *parent)
     : QObject(parent)
-    , m_declaration(new QCodeDeclaration(identifierChain, parent))
+    , m_declaration(QCodeDeclaration::create(identifierChain, parent))
     , m_parentBlock(0)
     , m_converter(0)
     , m_modifiedByEngine(false)
 {
 }
 
-QCodeRuntimeBinding::QCodeRuntimeBinding(QCodeDeclaration *declaration)
+QCodeRuntimeBinding::QCodeRuntimeBinding(QCodeDeclaration::Ptr declaration)
     : QObject(declaration->document())
     , m_declaration(declaration)
     , m_parentBlock(0)
@@ -25,7 +25,6 @@ QCodeRuntimeBinding::QCodeRuntimeBinding(QCodeDeclaration *declaration)
 }
 
 QCodeRuntimeBinding::~QCodeRuntimeBinding(){
-    delete m_declaration;
     if( m_parentBlock )
         m_parentBlock->removeBinding(this);
 }

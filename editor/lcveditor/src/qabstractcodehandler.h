@@ -20,6 +20,7 @@
 #include <QObject>
 #include "qlcveditorglobal.h"
 #include "qcodecompletionmodel.h"
+#include "qcodedeclaration.h"
 
 class QTextDocument;
 class QTextCursor;
@@ -32,7 +33,6 @@ class QDocumentEditFragment;
 class QProjectDocument;
 class QCodeRuntimeBinding;
 class QCodeConverter;
-class QCodeDeclaration;
 
 class Q_LCVEDITOR_EXPORT QAbstractCodeHandler : public QObject{
 
@@ -53,11 +53,11 @@ public:
     virtual void setDocument(QProjectDocument* document) = 0;
     virtual void updateScope(const QString& data) = 0;
     virtual void rehighlightBlock(const QTextBlock &block) = 0;
-    virtual QList<QCodeDeclaration*> getDeclarations(const QTextCursor& cursor) = 0;
+    virtual QList<QCodeDeclaration::Ptr> getDeclarations(const QTextCursor& cursor) = 0;
     virtual bool findPropertyValue(int position, int length, int& valuePosition, int& valueEnd) = 0;
     virtual void connectBindings(QList<QCodeRuntimeBinding*> bindings, QObject* root) = 0;
     virtual QDocumentEditFragment* createInjectionChannel(
-        QCodeDeclaration* property,
+        QCodeDeclaration::Ptr property,
         QObject* runtime,
         QCodeConverter* converter
     ) = 0;

@@ -167,7 +167,7 @@ void QProjectDocument::assignEditingDocument(QTextDocument *doc, QDocumentHandle
     m_editingDocumentHandler = handler;
 }
 
-QCodeRuntimeBinding *QProjectDocument::addNewBinding(QCodeDeclaration* declaration){
+QCodeRuntimeBinding *QProjectDocument::addNewBinding(QCodeDeclaration::Ptr declaration){
     if ( declaration->document() != this ){
         qCritical("Runtime binding requested on a different document.");
         return 0;

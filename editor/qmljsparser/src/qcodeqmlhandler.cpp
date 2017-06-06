@@ -749,7 +749,7 @@ void QCodeQmlHandler::assistCompletion(
         } else if ( insertion == '\"' ) {
             cursorChange = cursor;
             cursorChange.movePosition(QTextCursor::Left);
-            QQmlCompletionContext* ctx = m_completionContextFinder->getContext(cursorChange);
+            QQmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursorChange);
             if ( !(ctx->context() & QQmlCompletionContext::InStringLiteral) ){
                 cursorChange.beginEditBlock();
                 cursorChange.insertText("\"");
@@ -757,12 +757,11 @@ void QCodeQmlHandler::assistCompletion(
             } else {
                 cursorChange.movePosition(QTextCursor::Right);
             }
-            delete ctx;
             return;
         } else if ( insertion == '\'' ) {
             cursorChange = cursor;
             cursorChange.movePosition(QTextCursor::Left);
-            QQmlCompletionContext* ctx = m_completionContextFinder->getContext(cursorChange);
+            QQmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursorChange);
             if ( !(ctx->context() & QQmlCompletionContext::InStringLiteral) ){
                 cursorChange.beginEditBlock();
                 cursorChange.insertText("\'");
@@ -770,7 +769,6 @@ void QCodeQmlHandler::assistCompletion(
             } else {
                 cursorChange.movePosition(QTextCursor::Right);
             }
-            delete ctx;
             return;
 
         } else if ( insertion != QChar('.') && !insertion.isLetterOrNumber() ){
@@ -782,7 +780,7 @@ void QCodeQmlHandler::assistCompletion(
         return;
     }
 
-    QQmlCompletionContext* ctx = m_completionContextFinder->getContext(cursor);
+    QQmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
     QString filter = ctx->expressionPath().size() > 0 ? ctx->expressionPath().last() : "";
 
     model->setCompletionPosition(
@@ -800,13 +798,11 @@ void QCodeQmlHandler::assistCompletion(
             model->setFilter(filter);
             if ( model->rowCount() )
                 model->enable();
-            delete ctx;
             return;
         }
         model->removeCompletionContext();
     }
     m_newScope = false;
-    model->setCompletionContext(ctx);
 
     QList<QCodeCompletionSuggestion> suggestions;
     if ( ctx->context() & QQmlCompletionContext::InStringLiteral ){
@@ -867,13 +863,13 @@ void QCodeQmlHandler::rehighlightBlock(const QTextBlock &block){
         m_highlighter->rehighlightBlock(block);
 }
 
-QList<QCodeDeclaration*> QCodeQmlHandler::getDeclarations(const QTextCursor& cursor){
+QList<QCodeDeclaration::Ptr> QCodeQmlHandler::getDeclarations(const QTextCursor& cursor){
 
-    QList<QCodeDeclaration*> properties;
+    QList<QCodeDeclaration::Ptr> properties;
     int length = cursor.selectionEnd() - cursor.selectionStart();
 
     if ( length == 0 ){
-        QQmlCompletionContext* ctx = m_completionContextFinder->getContext(cursor);
+        QQmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
 
         QStringList expression;
         int propertyPosition = ctx->propertyPosition();
@@ -884,7 +880,6 @@ QList<QCodeDeclaration*> QCodeQmlHandler::getDeclarations(const QTextCursor& cur
 
             if ( propertyPosition == -1 ){
                 if ( m_target->characterAt(cursor.position()).isSpace() ){
-                    delete ctx;
                     return properties;
                 }
                 else
@@ -933,19 +928,18 @@ QList<QCodeDeclaration*> QCodeQmlHandler::getDeclarations(const QTextCursor& cur
             }
 
             if ( property.revision() != -1 ){
-                properties.append(new QCodeDeclaration(
+                properties.append(QCodeDeclaration::create(
                     expression, propertyType, ctx->objectTypePath(), propertyPosition, propertyLength, m_document
                 ));
             }
         }
-        delete ctx;
 
     } else { // multiple properties were selected
 
-        QDocumentQmlInfo::MutablePtr docinfo = QDocumentQmlInfo::create(m_document->file()->path());
+        QDocumentQmlInfo::Ptr docinfo = QDocumentQmlInfo::create(m_document->file()->path());
         docinfo->parse(m_target->toPlainText());
 
-        QDocumentQmlValueObjects* objects = docinfo->createObjects();
+        QDocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
 
         QList<QDocumentQmlValueObjects::RangeProperty*> rangeProperties = objects->propertiesBetween(
             cursor.selectionStart(), cursor.selectionEnd()
@@ -995,14 +989,12 @@ QList<QCodeDeclaration*> QCodeQmlHandler::getDeclarations(const QTextCursor& cur
 
                 if ( !propertyType.isEmpty() ){
                     //TODO: Find parentType
-                    properties.append(new QCodeDeclaration(
+                    properties.append(QCodeDeclaration::create(
                         rp->name(), propertyType, QStringList(), rp->begin, rp->propertyEnd - rp->begin, m_document
                     ));
                 }
             }
         }
-
-        delete objects;
     }
 
     return properties;
@@ -1027,7 +1019,7 @@ void QCodeQmlHandler::connectBindings(QList<QCodeRuntimeBinding *> bindings, QOb
 }
 
 QDocumentEditFragment *QCodeQmlHandler::createInjectionChannel(
-        QCodeDeclaration* declaration,
+        QCodeDeclaration::Ptr declaration,
         QObject *runtime,
         QCodeConverter* converter)
 {

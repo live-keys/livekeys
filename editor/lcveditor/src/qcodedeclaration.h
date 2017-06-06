@@ -2,7 +2,7 @@
 #define QCODEDECLARATION_H
 
 #include "qlcveditorglobal.h"
-#include "qprojectdocument.h"
+#include <QSharedPointer>
 
 namespace lcv{
 
@@ -11,14 +11,18 @@ class QProjectDocument;
 class Q_LCVEDITOR_EXPORT QCodeDeclaration{
 
 public:
-    QCodeDeclaration(const QStringList& identifierChain, QProjectDocument* document = 0);
-    QCodeDeclaration(
+    typedef QSharedPointer<QCodeDeclaration>       Ptr;
+    typedef QSharedPointer<const QCodeDeclaration> ConstPtr;
+
+public:
+    static QCodeDeclaration::Ptr create(const QStringList& identifierChain, QProjectDocument* document = 0);
+    static QCodeDeclaration::Ptr create(
             const QStringList &identifierChain,
             const QString& type,
             const QStringList& parentType,
             QProjectDocument* document = 0
     );
-    QCodeDeclaration(
+    static QCodeDeclaration::Ptr create(
             const QStringList &identifierChain,
             const QString& type,
             const QStringList& parentType,
@@ -26,6 +30,7 @@ public:
             int identifierLength,
             QProjectDocument* document = 0
     );
+
     ~QCodeDeclaration();
 
     void setIdentifierPosition(int position);
@@ -50,6 +55,23 @@ public:
 
     int valueLength() const;
     void setValueLength(int valueLength);
+
+private:
+    QCodeDeclaration(const QStringList& identifierChain, QProjectDocument* document = 0);
+    QCodeDeclaration(
+            const QStringList &identifierChain,
+            const QString& type,
+            const QStringList& parentType,
+            QProjectDocument* document = 0
+    );
+    QCodeDeclaration(
+            const QStringList &identifierChain,
+            const QString& type,
+            const QStringList& parentType,
+            int identifierPosition,
+            int identifierLength,
+            QProjectDocument* document = 0
+    );
 
 private:
     Q_DISABLE_COPY(QCodeDeclaration)

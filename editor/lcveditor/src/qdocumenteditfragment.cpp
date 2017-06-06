@@ -3,7 +3,7 @@
 
 namespace lcv{
 
-QDocumentEditFragment::QDocumentEditFragment(QCodeDeclaration *declaration, QCodeConverter *converter)
+QDocumentEditFragment::QDocumentEditFragment(QCodeDeclaration::Ptr declaration, QCodeConverter *converter)
     : m_declaration(declaration)
     , m_converter(converter)
     , m_binding(0)
@@ -13,7 +13,6 @@ QDocumentEditFragment::QDocumentEditFragment(QCodeDeclaration *declaration, QCod
 }
 
 QDocumentEditFragment::~QDocumentEditFragment(){
-    delete m_declaration;
 }
 
 int QDocumentEditFragment::valuePosition() const{

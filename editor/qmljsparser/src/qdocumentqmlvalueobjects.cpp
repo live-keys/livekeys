@@ -164,6 +164,9 @@ QDocumentQmlValueObjects::~QDocumentQmlValueObjects(){
     delete m_root;
 }
 
+QDocumentQmlValueObjects::Ptr QDocumentQmlValueObjects::create(){
+    return QDocumentQmlValueObjects::Ptr(new QDocumentQmlValueObjects);
+}
 
 QString QDocumentQmlValueObjects::toString() const{
     if ( !m_root )

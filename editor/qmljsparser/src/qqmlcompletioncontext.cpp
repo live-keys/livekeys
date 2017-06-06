@@ -35,6 +35,22 @@ QQmlCompletionContext::QQmlCompletionContext(
 QQmlCompletionContext::~QQmlCompletionContext(){
 }
 
+QQmlCompletionContext::Ptr QQmlCompletionContext::create(
+        int context,
+        const QStringList &objectTypePath,
+        const QStringList &propertyPath,
+        const QStringList &expressionPath,
+        int propertyPosition)
+{
+    return QQmlCompletionContext::Ptr(new QQmlCompletionContext(
+        context,
+        objectTypePath,
+        propertyPath,
+        expressionPath,
+        propertyPosition
+    ));
+}
+
 QString QQmlCompletionContext::contextString() const{
     QString base;
     if ( m_context & QQmlCompletionContext::InImport)

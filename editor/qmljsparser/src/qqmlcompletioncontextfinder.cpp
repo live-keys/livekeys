@@ -144,7 +144,7 @@ QQmlCompletionContextFinder::~QQmlCompletionContextFinder(){
 
 }
 
-QQmlCompletionContext *QQmlCompletionContextFinder::getContext(const QTextCursor &cursor){
+QQmlCompletionContext::ConstPtr QQmlCompletionContextFinder::getContext(const QTextCursor &cursor){
     QmlJS::CompletionContextFinder finder(cursor);
 
     QStringList path;
@@ -179,7 +179,7 @@ QQmlCompletionContext *QQmlCompletionContextFinder::getContext(const QTextCursor
         }
     }
 
-    return new QQmlCompletionContext(
+    return QQmlCompletionContext::create(
         context,
         objectTypePath,
         finder.bindingPropertyName(),

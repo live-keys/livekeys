@@ -47,7 +47,7 @@ QDocumentQmlScope::Import::Import(
 // QDocumentQmlScope implementation
 // --------------------------------
 
-QDocumentQmlScope::QDocumentQmlScope(QProjectQmlScope::Ptr scope, QDocumentQmlInfo::MutablePtr documentInfo)
+QDocumentQmlScope::QDocumentQmlScope(QProjectQmlScope::Ptr scope, QDocumentQmlInfo::Ptr documentInfo)
     : m_projectScope(scope)
     , m_documentInfo(documentInfo)
 {
@@ -57,7 +57,7 @@ QDocumentQmlScope::~QDocumentQmlScope(){
 }
 
 QDocumentQmlScope::Ptr QDocumentQmlScope::createEmptyScope(QProjectQmlScope::Ptr projectScope){
-    QDocumentQmlInfo::MutablePtr documentInfo = QDocumentQmlInfo::create("");
+    QDocumentQmlInfo::Ptr documentInfo = QDocumentQmlInfo::create("");
     documentInfo->parse("");
     return QDocumentQmlScope::Ptr(new QDocumentQmlScope(projectScope, documentInfo));
 }
@@ -67,7 +67,7 @@ QDocumentQmlScope::Ptr QDocumentQmlScope::createScope(
         const QString &data,
         QProjectQmlScope::Ptr projectScope)
 {
-    QDocumentQmlInfo::MutablePtr documentInfo = QDocumentQmlInfo::create(fileName.isEmpty() ? "untitled.qml" : fileName);
+    QDocumentQmlInfo::Ptr documentInfo = QDocumentQmlInfo::create(fileName.isEmpty() ? "untitled.qml" : fileName);
     documentInfo->parse(data);
     documentInfo->createRanges();
 
@@ -115,7 +115,7 @@ QDocumentQmlScope::Ptr QDocumentQmlScope::createScope(
     return documentScope;
 }
 
-QList<QDocumentQmlScope::Import> QDocumentQmlScope::extractImports(QDocumentQmlInfo::MutablePtr documentInfo){
+QList<QDocumentQmlScope::Import> QDocumentQmlScope::extractImports(QDocumentQmlInfo::Ptr documentInfo){
     QList<QDocumentQmlScope::Import> imports;
     QList<QmlJS::ImportInfo> importInfos = documentInfo->internalBind()->imports();
 

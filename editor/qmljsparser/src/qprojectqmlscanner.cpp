@@ -237,7 +237,7 @@ void scanObjectFile(
     QList<LanguageUtils::FakeMetaObject::ConstPtr>& objects
 )
 {
-    QDocumentQmlInfo::MutablePtr documentInfo = QDocumentQmlInfo::create(filePath);
+    QDocumentQmlInfo::Ptr documentInfo = QDocumentQmlInfo::create(filePath);
     bool parseResult = documentInfo->parse(fileData);
     if ( !parseResult )
         return;

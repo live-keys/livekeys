@@ -46,6 +46,37 @@ QCodeDeclaration::QCodeDeclaration(
 {
 }
 
+QCodeDeclaration::Ptr QCodeDeclaration::create(const QStringList &identifierChain, QProjectDocument *document){
+    return QCodeDeclaration::Ptr(new QCodeDeclaration(identifierChain, document));
+}
+
+QCodeDeclaration::Ptr QCodeDeclaration::create(
+        const QStringList &identifierChain,
+        const QString &type,
+        const QStringList &parentType,
+        QProjectDocument *document)
+{
+    return QCodeDeclaration::Ptr(new QCodeDeclaration(identifierChain, type, parentType, document));
+}
+
+QCodeDeclaration::Ptr QCodeDeclaration::create(
+        const QStringList &identifierChain,
+        const QString &type,
+        const QStringList &parentType,
+        int identifierPosition,
+        int identifierLength,
+        QProjectDocument *document)
+{
+    return QCodeDeclaration::Ptr(new QCodeDeclaration(
+        identifierChain,
+        type,
+        parentType,
+        identifierPosition,
+        identifierLength,
+        document
+    ));
+}
+
 QCodeDeclaration::~QCodeDeclaration(){
 }
 

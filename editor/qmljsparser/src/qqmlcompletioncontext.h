@@ -38,15 +38,19 @@ public:
         InStringLiteral = 64,
     };
 
+    typedef QSharedPointer<const QQmlCompletionContext> ConstPtr;
+    typedef QSharedPointer<QQmlCompletionContext>       Ptr;
+
 public:
-    QQmlCompletionContext(
+    ~QQmlCompletionContext();
+
+    static Ptr create(
         int context,
         const QStringList& objectTypePath,
         const QStringList& propertyPath,
         const QStringList& expressionPath = QStringList(),
         int propertyPosition = -1
     );
-    ~QQmlCompletionContext();
 
     int context() const;
     QString contextString() const;
@@ -62,6 +66,15 @@ public:
 
     bool operator ==(const QQmlCompletionContext& other) const;
     bool operator !=(const QQmlCompletionContext& other) const;
+
+protected:
+    QQmlCompletionContext(
+        int context,
+        const QStringList& objectTypePath,
+        const QStringList& propertyPath,
+        const QStringList& expressionPath = QStringList(),
+        int propertyPosition = -1
+    );
 
 private:
     int         m_context;
