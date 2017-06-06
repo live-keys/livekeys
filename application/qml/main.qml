@@ -755,9 +755,9 @@ ApplicationWindow{
             y: visible ? 0 : 20
             width: codeHandler.palette ? codeHandler.palette.item.width + 10: 0
             height: codeHandler.palette ? codeHandler.palette.item.height + 10 : 0
-            color: "#08121a"
+            color: "#02070b"
             border.width: 1
-            border.color: "#132c3e"
+            border.color: "#061b24"
             visible: children.length > 0
             opacity: visible ? 1 : 0
             clip: true
