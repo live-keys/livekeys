@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMATEMPTY_HPP
-#define QMATEMPTY_HPP
+#ifndef QMATEMPTY_H
+#define QMATEMPTY_H
 
 #include "qmatdisplay.h"
 
@@ -133,4 +133,4 @@ inline void QMatEmpty::cacheScalarColor(){
     }
 }
 
-#endif // QMATEMPTY_HPP
+#endif // QMATEMPTY_H

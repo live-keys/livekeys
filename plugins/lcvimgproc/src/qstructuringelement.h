@@ -13,6 +13,7 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
+
 #ifndef QSTRUCTURINGELEMENT_H
 #define QSTRUCTURINGELEMENT_H
 

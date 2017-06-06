@@ -40,4 +40,4 @@ protected:
     virtual void initialize(const QVariantMap& params);
 };
 
-#endif // QBRUTEFORCEMATCHER_HPP
+#endif // QBRUTEFORCEMATCHER_H

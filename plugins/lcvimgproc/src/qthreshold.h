@@ -13,6 +13,7 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
+
 #ifndef QTHRESHOLD_H
 #define QTHRESHOLD_H
 

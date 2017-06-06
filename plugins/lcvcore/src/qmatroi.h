@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMATROI_HPP
-#define QMATROI_HPP
+#ifndef QMATROI_H
+#define QMATROI_H
 
 #include "qmatfilter.h"
 
@@ -104,4 +104,4 @@ inline void QMatRoi::setRegionHeight(int regionHeight){
     }
 }
 
-#endif // QMATROI_HPP
+#endif // QMATROI_H

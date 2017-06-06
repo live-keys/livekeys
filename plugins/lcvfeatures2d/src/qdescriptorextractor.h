@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QDESCRIPTOREXTRACTOR_HPP
-#define QDESCRIPTOREXTRACTOR_HPP
+#ifndef QDESCRIPTOREXTRACTOR_H
+#define QDESCRIPTOREXTRACTOR_H
 
 #include <QQuickItem>
 #include "qmat.h"
@@ -109,4 +109,4 @@ inline void QDescriptorExtractor::setParams(const QVariantMap &arg){
     }
 }
 
-#endif // QDESCRIPTOREXTRACTOR_HPP
+#endif // QDESCRIPTOREXTRACTOR_H

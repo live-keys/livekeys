@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QORBFEATUREDETECTOR_HPP
-#define QORBFEATUREDETECTOR_HPP
+#ifndef QORBFEATUREDETECTOR_H
+#define QORBFEATUREDETECTOR_H
 
 #include "qfeaturedetector.h"
 
@@ -40,4 +40,4 @@ public slots:
 
 };
 
-#endif // QORBFEATUREDETECTOR_HPP
+#endif // QORBFEATUREDETECTOR_H

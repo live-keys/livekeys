@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMAT_HPP
-#define QMAT_HPP
+#ifndef QMAT_H
+#define QMAT_H
 
 #include <QQuickItem>
 #include "opencv2/core.hpp"
@@ -66,4 +66,4 @@ inline cv::Mat *QMat::cvMat(){
     return m_cvmat;
 }
 
-#endif // QMAT_HPP
+#endif // QMAT_H

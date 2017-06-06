@@ -13,6 +13,7 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
+
 #ifndef QCHANNELSELECT_H
 #define QCHANNELSELECT_H
 

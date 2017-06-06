@@ -32,4 +32,4 @@ protected:
 
 };
 
-#endif // QFLANNBASEDMATCHER_HPP
+#endif // QFLANNBASEDMATCHER_H

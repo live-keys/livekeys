@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QDENOISETVL1_HPP
-#define QDENOISETVL1_HPP
+#ifndef QDENOISETVL1_H
+#define QDENOISETVL1_H
 
 #include "qmatfilter.h"
 
@@ -83,4 +83,4 @@ inline void QDenoiseTvl1::setNIters(int nIters){
     }
 }
 
-#endif // QDENOISETVL1_HPP
+#endif // QDENOISETVL1_H

@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMATSHADER_HPP
-#define QMATSHADER_HPP
+#ifndef QMATSHADER_H
+#define QMATSHADER_H
 
 #include <QSGSimpleMaterialShader>
 #include <QOpenGLFunctions>
@@ -99,4 +99,4 @@ inline void QMatShader::resolveUniforms(){
     m_textureId = program()->uniformLocation("textures[0]");
 }
 
-#endif // QMATSHADER_HPP
+#endif // QMATSHADER_H

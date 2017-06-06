@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMATDISPLAY_HPP
-#define QMATDISPLAY_HPP
+#ifndef QMATDISPLAY_H
+#define QMATDISPLAY_H
 
 #include <QQuickItem>
 #include "qlcvcoreglobal.h"
@@ -72,4 +72,4 @@ inline void QMatDisplay::setLinearFilter(bool filter){
     }
 }
 
-#endif // QMATDISPLAY_HPP
+#endif // QMATDISPLAY_H

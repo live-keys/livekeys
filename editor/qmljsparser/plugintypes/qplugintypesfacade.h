@@ -1,5 +1,5 @@
-#ifndef QPLUGINTYPESFACADE_HPP
-#define QPLUGINTYPESFACADE_HPP
+#ifndef QPLUGINTYPESFACADE_H
+#define QPLUGINTYPESFACADE_H
 
 #include "qqmljsparserglobal.h"
 #include <QQmlEngine>
@@ -46,4 +46,4 @@ public:
 
 }// namespace
 
-#endif // QPLUGINTYPESFACADE_HPP
+#endif // QPLUGINTYPESFACADE_H

@@ -13,8 +13,9 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
-#ifndef QBLUR_HPP
-#define QBLUR_HPP
+
+#ifndef QBLUR_H
+#define QBLUR_H
 
 #include <QQuickItem>
 #include "qmatfilter.h"
@@ -88,4 +89,4 @@ inline void QBlur::setKsize(const QSize& ksize){
 }
 
 
-#endif // QBLUR_HPP
+#endif // QBLUR_H

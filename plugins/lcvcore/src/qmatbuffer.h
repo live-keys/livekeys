@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMATBUFFER_HPP
-#define QMATBUFFER_HPP
+#ifndef QMATBUFFER_H
+#define QMATBUFFER_H
 
 #include <QQuickItem>
 #include "qmatdisplay.h"
@@ -57,4 +57,4 @@ inline QMat *QMatBuffer::inputMat(){
     return m_matCurrent;
 }
 
-#endif // QMATBUFFER_HPP
+#endif // QMATBUFFER_H

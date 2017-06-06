@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QKEYPOINTVECTOR_HPP
-#define QKEYPOINTVECTOR_HPP
+#ifndef QKEYPOINTVECTOR_H
+#define QKEYPOINTVECTOR_H
 
 #include <QQuickItem>
 #include "qlcvfeatures2dglobal.h"
@@ -70,4 +70,4 @@ inline int QKeyPointVector::size(){
     return static_cast<int>(m_keyPoints.size());
 }
 
-#endif // QKEYPOINTVECTOR_HPP
+#endif // QKEYPOINTVECTOR_H

@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 
-#ifndef QBACKGROUNDSUBTRACTORKNN_HPP
-#define QBACKGROUNDSUBTRACTORKNN_HPP
+#ifndef QBACKGROUNDSUBTRACTORKNN_H
+#define QBACKGROUNDSUBTRACTORKNN_H
 
 #include <QQuickItem>
 #include "qbackgroundsubtractor.h"
@@ -94,4 +94,4 @@ private:
 
 };
 
-#endif // QBACKGROUNDSUBTRACTORKNN_HPP
+#endif // QBACKGROUNDSUBTRACTORKNN_H

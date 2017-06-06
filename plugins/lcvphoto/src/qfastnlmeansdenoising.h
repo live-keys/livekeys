@@ -27,8 +27,9 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
-#ifndef QFASTNLMEANSDENOISING_HPP
-#define QFASTNLMEANSDENOISING_HPP
+
+#ifndef QFASTNLMEANSDENOISING_H
+#define QFASTNLMEANSDENOISING_H
 
 #include "qmatfilter.h"
 
@@ -140,4 +141,4 @@ inline void QFastNlMeansDenoising::setSearchWindowSize(int searchWindowSize){
     }
 }
 
-#endif // QFASTNLMEANSDENOISING_HPP
+#endif // QFASTNLMEANSDENOISING_H

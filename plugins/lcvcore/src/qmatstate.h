@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMATSTATE_HPP
-#define QMATSTATE_HPP
+#ifndef QMATSTATE_H
+#define QMATSTATE_H
 
 #include "qlcvcoreglobal.h"
 #include "qmat.h"
@@ -33,4 +33,4 @@ public:
     int compare(const QMatState *other) const;
 };
 
-#endif // QMATSTATE_HPP
+#endif // QMATSTATE_H
