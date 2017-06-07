@@ -16,6 +16,7 @@
 
 #include "qmatlist.h"
 
+//TODO: Document
 
 QMatList::QMatList(QObject *parent)
      : QAbstractListModel(parent)

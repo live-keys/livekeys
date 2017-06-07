@@ -70,7 +70,7 @@ QElapsedTimer timer;
 
 /*!
    \class QMatAccess
-   \inmodule lcvlib_cpp
+   \internal
    \brief Used to access matrix pixel values in QML.
  */
 
@@ -106,20 +106,11 @@ template<typename T, typename LT> void setValues( QVariantList& values, Mat& m){
 
 }// namespace helpers
 
-/*!
-  \brief QMatAccess constructor
-  \a parent
- */
 QMatAccess::QMatAccess(QQuickItem *parent)
     : QQuickItem(parent)
     , m_mat(0){
 }
 
-/*!
-  \brief QMatAccess constructor
-  \a mat
-  \a parent
- */
 QMatAccess::QMatAccess(QMat *mat, QQuickItem *parent)
     : QQuickItem(parent)
     , m_mat(mat){
@@ -130,15 +121,9 @@ QMatAccess::QMatAccess(QMat *mat, QQuickItem *parent)
 
 }
 
-/*!
-  \brief QMatAccess destructor
- */
 QMatAccess::~QMatAccess(){
 }
 
-/*!
-  \brief QMatAccess::setUpCache
- */
 void QMatAccess::setupCache(){
     Mat* cvmat = m_mat->cvMat();
 
@@ -174,19 +159,9 @@ void QMatAccess::setupCache(){
  */
 
 /*!
-  \fn int QMatAccess::cols() const
-  \brief Returns the number of columns
- */
-
-/*!
   \qmlmethod int MatAccess::rows()
 
   Returns the number of rows.
- */
-
-/*!
-  \fn int QMatAccess::rows() const
-  \brief Returns the number of rows
  */
 
 
@@ -196,21 +171,11 @@ void QMatAccess::setupCache(){
   Returns the number of channels.
  */
 
-/*!
-  \fn int QMatAccess::channels() const
-  \brief Returns the number of channels
- */
-
 
 /*!
   \qmlmethod int MatAccess::depth()
 
   Returns the depth of the matrix.
- */
-
-/*!
-  \fn int QMatAccess::depth() const
-  \brief Returns the depth of the matrix
  */
 
 
@@ -220,9 +185,7 @@ void QMatAccess::setupCache(){
   Returns the values of the matrix as a multi-dimensional array.
  */
 
-/*!
-  \brief Returns the matrix data as a QVariantList.
- */
+
 QVariantList QMatAccess::values(){
     if ( m_values.empty() )
         setupCache();
@@ -235,12 +198,7 @@ QVariantList QMatAccess::values(){
   Sends a multi-dimensional array of processed values back to the matrix element.
  */
 
-/*!
-  \brief Set the matrix data from a QVariantList
 
-  Parameters :
-  \a values
- */
 void QMatAccess::setValues(QVariantList values){
     m_values = values;
 

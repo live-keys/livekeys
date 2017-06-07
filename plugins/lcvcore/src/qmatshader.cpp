@@ -28,7 +28,7 @@
 
 /*!
   \class QMatShader
-  \inmodule lcvlib_cpp
+  \inmodule lcvcore_cpp
   \brief Open cv matrix shader.
  */
 

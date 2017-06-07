@@ -11,7 +11,7 @@
 \table
 
     \row
-        \li{1, 3} \section2 Installing Live CV
+        \li{2, 1} \section2 Installing Live CV
 
     \row
         \li \l{http://livecv.dinusv.com/download.html#installation-on-windows}{Installation on windows}
@@ -22,7 +22,7 @@
 
 
     \row
-        \li{1, 3} \section2 Using Live CV
+        \li{2, 1} \section2 Using Live CV
 
     \row
         \li \l {Using Live CV}{Using Live CV}
@@ -41,7 +41,7 @@
         \li Plungins and plugin structure
 
     \row
-        \li{1, 3} \section2 QML Modules
+        \li{2, 1} \section2 QML Modules
 
     \row
         \li \l {live}{live}
@@ -75,13 +75,13 @@
         \li Configuring and build options for Live CV on different Operating Systems.
 
     \row
-        \li{2, 2} \section2 Plugins
+        \li{2, 1} \section2 Plugins
 
     \row
         \li \l {Creating a Plugin}{Creating a Plugin}
         \li Creating a simple qml plugin and using it in Live CV
     \row
-        \li \l {Creating a LiveCV based Plugin}{Creating a Live CV based plugin}
+        \li \l {Creating a Live CV based Plugin}{Creating a Live CV based plugin}
         \li Creating a plugin dependent on Live CV libraries (live, lcvcore)
     \row
         \li \l {Creating a Filter}{Creating a Filter}
@@ -94,14 +94,14 @@
         \li Configuring a Live CV project
 
     \row
-        \li{2, 3} \section2 Deployment Scripts
+        \li{2, 1} \section2 Deployment Scripts
 
     \row
-        \li \l {Using Live CV deployment scripts}{Using Live CV deployment scripts}
+        \li \l {Deployment Scripts}{Live CV deployment scripts}
         \li Using Live CV deployment scripts
 
     \row
-        \li{2, 4} \section2 C++ Modules
+        \li{2, 1} \section2 C++ Modules
 
     \row
         \li \l {live_cpp}{live}
@@ -110,17 +110,20 @@
         \li \l {lcvcore_cpp}{lcvcore}
         \li The lcvcore module.
     \row
-        \li \l {lcvimgproc_cpp}{imgproc}
+        \li \l {lcvimgproc_cpp}{lcvimgproc}
         \li The lcvimgproc module.
     \row
-        \li \l {lcvfeatures2d}{features2d}
+        \li \l {lcvfeatures2d_cpp}{lcvfeatures2d}
         \li The lcvfeatures2d module.
     \row
-        \li \l {lcvvideo_cpp}{video}
+        \li \l {lcvvideo_cpp}{lcvvideo}
         \li The lcvvideo module.
     \row
-        \li \l {lcvphoto_cpp}{photo}
+        \li \l {lcvphoto_cpp}{lcvphoto}
         \li The lcvphoto module.
+    \row
+        \li \l {lcveditor_cpp}{lcveditor}
+        \li The code editor module.
 \endtable
 
 

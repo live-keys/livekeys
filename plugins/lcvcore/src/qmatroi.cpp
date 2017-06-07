@@ -27,12 +27,12 @@
   Select a region from an image for further processing. The 'valuescan' example shows how to use a MatRoi to select
   a region from an image, then use a MatRead to read the regions values.
 
-  \quotefile core/valuescan.qml
+  \quotefile imgproc/valuescan.qml
 */
 
 /*!
   \class QMatRoi
-  \inmodule lcvcore_cpp
+  \internal
   \brief Performs a selection of a matrixes region of interest for further processing.
  */
 
@@ -51,21 +51,11 @@ QMatRoi::QMatRoi(QQuickItem *parent)
 
 
 /*!
-  \property QMatRoi::regionX
-  \sa MatRoi::regionX
- */
-
-/*!
   \qmlproperty int MatRoi::regionX
 
   The x coordinate of the most top-left point of the region.
  */
 
-
-/*!
-  \property QMatRoi::regionY
-  \sa MatRoi::regionY
- */
 
 /*!
   \qmlproperty int MatRoi::regionY
@@ -75,20 +65,11 @@ QMatRoi::QMatRoi(QQuickItem *parent)
 
 
 /*!
-  \property QMatRoi::regionWidth
-  \sa MatRoi::regionWidth
- */
-
-/*!
   \qmlproperty int MatRoi::regionWidth
 
   The width of the seleted region.
  */
 
-/*!
-  \property QMatRoi::regionHeight
-  \sa MatRoi::regionHeight
- */
 
 /*!
   \qmlproperty int MatRoi::regionHeight
@@ -96,12 +77,6 @@ QMatRoi::QMatRoi(QQuickItem *parent)
   The height of the seleted region.
  */
 
-
-/*!
-  \brief Transformation function.
-  \a in
-  \a out
- */
 void QMatRoi::transform(cv::Mat &in, cv::Mat &out){
     if ( in.cols >= m_regionX + m_regionWidth && in.rows >= m_regionY + m_regionHeight )
         in(cv::Rect(m_regionX, m_regionY, m_regionWidth, m_regionHeight)).copyTo(out);

@@ -32,21 +32,39 @@ using namespace cv;
 /*!
   \class QDenoiseTvl1
   \inmodule lcvphoto_cpp
+  \internal
   \brief Performs denoising using the primal-dual algorithm.
  */
 
 /*!
-  \brief QDenoiseTvl1 constructor
+  \qmlproperty int DenoiseTvl1::bufferSize
 
-  Parameters :
-  \a parent
+  Number of observations or noised versions of the image to be restored.
  */
+
+/*!
+  \qmlproperty real DenoiseTvl1::lambda
+
+  As it is enlarged, the smooth (blurred) images are treated more favorably than detailed
+  (but maybe more noised) ones. Roughly speaking, as it becomes smaller, the result will be
+  more blur but more sever outliers will be removed.
+ */
+
+/*!
+  \qmlproperty int DenoiseTvl1::nIters
+
+  Number of iterations that the algorithm will run. The more iterations the better, but it is
+  hard to quantitatively refine this statement, so just use the default and increase it if the
+  results are poor.
+ */
+
 QDenoiseTvl1::QDenoiseTvl1(QQuickItem *parent) :
     QMatFilter(parent),
     m_matBuffer(),
     m_bufferSize(1),
     m_lambda(1.0),
-    m_nIters(30){
+    m_nIters(30)
+{
 }
 
 void QDenoiseTvl1::setBufferSize(int bufferSize){
@@ -68,9 +86,7 @@ void QDenoiseTvl1::trimBuffer(int size){
     }
 }
 
-/*!
-  \brief QDenoiseTvl1 destructor
- */
+
 QDenoiseTvl1::~QDenoiseTvl1(){
 }
 

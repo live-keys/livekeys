@@ -32,7 +32,7 @@ using namespace cv;
 
 /*!
    \class QMat2DArray
-   \inmodule lcvcore_cpp
+   \internal
    \brief Creates a mat from a 2D javascript array.
  */
 
@@ -61,28 +61,14 @@ template<typename T> cv::Size assignValuesHelper(const QVariantList& vmat, Mat* 
     return cv::Size(numberCols, vmat.size());
 }
 
-/*!
-  \brief QMat2DArray constructor
-
-  Parameters :
-  \a parent
- */
 QMat2DArray::QMat2DArray(QQuickItem *parent)
     : QMatDisplay(parent)
     , m_type(QMat::CV8U)
 {
 }
 
-/*!
-  \brief QMat2DArray destructor
- */
 QMat2DArray::~QMat2DArray(){
 }
-
-/*!
-  \property QMat2DArray::values
-  \sa Mat2DArray::values
- */
 
 /*!
   \qmlproperty variant Mat2DArray::values
@@ -91,19 +77,11 @@ QMat2DArray::~QMat2DArray(){
  */
 
 /*!
-  \property QMat2DArray::type
-  \sa Mat2DArray::type
- */
-
-/*!
   \qmlproperty Mat::Type Mat2DArray::type
 
   The type of the matrix.
  */
 
-/*!
-  \brief Assigns the set values to the matrix.
- */
 cv::Size QMat2DArray::assignValues(){
     switch(m_type){
     case CV_8U :  return assignValuesHelper<unsigned char>(  m_values, output()->cvMat(), m_type);

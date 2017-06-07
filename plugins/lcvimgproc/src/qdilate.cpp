@@ -31,6 +31,7 @@ using namespace cv;
 /*!
   \class QDilate
   \inmodule lcvimgproc_cpp
+  \internal
   \brief Erodes an image by using a specific structuring element.
  */
 

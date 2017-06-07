@@ -30,7 +30,7 @@
 
 /*!
   \class QMat
-  \inmodule lcvlib_cpp
+  \inmodule lcvcore_cpp
   \brief Open cv matrix wrapper.
 
    The class represents the wrapper for the opencv matrix element to be passed around in the QML structure. To access
@@ -112,6 +112,15 @@ QSize QMat::dataSize() const{
     return QSize(m_cvmat->cols, m_cvmat->rows);
 }
 
+
+/*!
+  \qmlmethod Mat Mat::createOwnedObject()
+  \brief Returns a shallow copied matrix with javascript ownership
+ */
+
+/*!
+  \brief Returns a shallow copied matrix that is owned by the javascript engine
+ */
 QMat* QMat::createOwnedObject(){
     cv::Mat* ownedObjectInternal = new cv::Mat(*m_cvmat);
     QMat*    ownedObject         = new QMat(ownedObjectInternal);
@@ -119,6 +128,15 @@ QMat* QMat::createOwnedObject(){
     return ownedObject;
 }
 
+
+/*!
+  \qmlmethod Mat Mat::cloneMat()
+  \brief Returns a cloned matrix with javascript ownership
+ */
+
+/*!
+  \brief Returns a cloned matrix that is owned by the javascript engine
+ */
 QMat* QMat::cloneMat(){
     cv::Mat* clonedMat = new cv::Mat;
     m_cvmat->copyTo(*clonedMat);
@@ -136,6 +154,9 @@ QMat::~QMat(){
 
 QMat* QMat::m_nullMat = 0;
 
+/*!
+ * \brief Returns a null matrix
+ */
 QMat*QMat::nullMat(){
     if ( !m_nullMat ){
         m_nullMat = new QMat;
@@ -144,6 +165,9 @@ QMat*QMat::nullMat(){
     return m_nullMat;
 }
 
+/*!
+ * \brief Internal method used to clean up the null matrix.
+ */
 void QMat::cleanUp(){
     delete m_nullMat;
 }

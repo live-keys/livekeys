@@ -45,8 +45,8 @@ public:
     const QString& file() const;
     void setFile(const QString& file);
 
-    const int& iscolor() const;
-    void setIscolor(const int& iscolor);
+    int iscolor() const;
+    void setIscolor(int iscolor);
     
 signals:
     void iscolorChanged();
@@ -63,11 +63,11 @@ private:
     
 };
 
-inline const int& QImRead::iscolor() const{
+inline int QImRead::iscolor() const{
 	return m_iscolor;
 }
 
-inline void QImRead::setIscolor(const int& iscolor){
+inline void QImRead::setIscolor(int iscolor){
 	if (m_iscolor != iscolor){
 		m_iscolor = iscolor;
 		emit iscolorChanged();

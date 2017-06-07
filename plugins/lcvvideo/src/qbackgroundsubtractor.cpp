@@ -19,6 +19,15 @@
 
 using namespace cv;
 
+
+/*!
+  \qmltype BackgroundSubtractor
+  \instantiates QBackgroundSubtractor
+  \inqmlmodule lcvvideo
+  \inherits MatFilter
+  \brief Background subtractor base type.
+ */
+
 // QBackgroundSubtractorPrivate Implementation
 // -------------------------------------------
 
@@ -76,11 +85,18 @@ QBackgroundSubtractor::QBackgroundSubtractor(QBackgroundSubtractorPrivate *d_ptr
 QBackgroundSubtractor::~QBackgroundSubtractor(){
 }
 
+
 /*!
-  \qmlproperty string QBackgroundSubtractor::learningRate
+  \qmlproperty string BackgroundSubtractor::learningRate
 
   Learning rate for updating the background model (0 to 1, default is 0).
  */
+
+/*!
+  \property QBackgroundSubtractor::learningRate
+  \sa BackgroundSubtractor::learningRate
+ */
+
 double QBackgroundSubtractor::learningRate() const{
     Q_D(const QBackgroundSubtractor);
     return d->learningRate();

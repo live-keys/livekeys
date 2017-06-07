@@ -28,7 +28,7 @@
   \instantiates QVideoCapture
   \inqmlmodule lcvcore
   \inherits Item
-  \brief Captures frames from video files.
+  \brief Captures frames from video files. This is a \b {static item}.
 
   The VideoCapture constantly grabes frames from a video file. The frames are captured at a speed equal to the video's
   fps, but that is not necessarily to be considered as an absolute value. The speed can be altered manually by
@@ -45,7 +45,7 @@
 
 /*!
    \class QVideoCapture
-   \inmodule lcvcore_cpp
+   \internal
    \brief Captures frames from a video file.
  */
 
@@ -66,57 +66,6 @@ QVideoCapture::QVideoCapture(QQuickItem *parent)
 {
     setFlag(ItemHasContents, true);
 }
-
-
-//void QVideoCapture::setFile(const QString &file){
-//    if ( m_file != file ){
-//        m_file = file;
-//        if ( QFile::exists(file) ){
-
-//            QStateContainer<QVideoCaptureThread>& stateCont =
-//                    QStateContainer<QVideoCaptureThread>::instance(this);
-
-//            m_thread = stateCont.state(m_file);
-//            if ( m_thread == 0 ){
-//                m_thread = new QVideoCaptureThread(m_file);
-//                stateCont.registerState(m_file, m_thread);
-//            }
-
-//            m_output = m_thread->output();
-//            emit outChanged();
-
-//            connect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
-
-//            if ( m_thread->isCaptureOpened() ){
-
-//                setImplicitWidth (m_thread->captureWidth());
-//                setImplicitHeight(m_thread->captureHeight());
-
-//                m_thread->setLoop(m_loop);
-//                if ( m_fps == 0 )
-//                    m_fps = m_thread->captureFps();
-
-//                if ( !m_thread->paused() ){
-//                    if ( m_thread->timer()->isActive() ){
-//                        if ( m_thread->timer()->interval() != (1000 / m_fps) ){
-//                            m_thread->timer()->stop();
-//                            m_thread->timer()->start(1000 / m_fps);
-//                        }
-//                    } else {
-//                        m_thread->timer()->start(1000 / m_fps);
-//                    }
-//                }
-//                emit pausedChanged();
-//                emit totalFramesChanged();
-
-//            } else
-//                qCritical("Open CV Error: Could not open capture : %s", qPrintable(m_file));
-//        } else {
-//            qCritical("File does not exist: %s", qPrintable(file));
-//        }
-//        emit fileChanged();
-//    }
-//}
 
 /*!
   \property QVideoCapture::output
@@ -237,6 +186,25 @@ void QVideoCapture::seekTo(int frame){
         m_thread->seekTo(frame);
     }
 }
+
+/*!
+  \qmlproperty string VideoCapture::file
+
+  This property holds the url to the file thats opened.
+ */
+
+/*!
+  \qmlmethod VideoCapture::staticOpen(string file)
+
+  This is an overloaded method for VideoCapture::staticLoad
+ */
+
+
+/*!
+  \qmlmethod VideoCapture::staticLoad(string file)
+
+  Loads the VideoCapture state. \a file is a link to the file to be opened. This also acts a a state identifier.
+ */
 
 void QVideoCapture::staticLoad(const QString &file){
     if ( m_file == file )

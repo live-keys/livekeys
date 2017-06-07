@@ -1,0 +1,9 @@
+/*!
+
+\module lcveditor_cpp
+
+\title Live CV Editor
+
+\brief This module contains components you can link to in order to customize Live CVs editor.
+
+*/

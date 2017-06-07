@@ -23,7 +23,7 @@
 
 #include <QAbstractListModel>
 
-class Q_LCVCORE_EXPORT QMatAccess : public QQuickItem{
+class QMatAccess : public QQuickItem{
 
     Q_OBJECT
 

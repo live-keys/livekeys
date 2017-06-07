@@ -31,6 +31,7 @@ using namespace cv;
 /*!
   \class QErode
   \inmodule lcvimgproc_cpp
+  \internal
   \brief Dilates an image by using a specific structuring element.
  */
 

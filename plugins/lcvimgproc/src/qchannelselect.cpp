@@ -29,16 +29,11 @@
 
 /*!
   \class QChannelSelect
+  \internal
   \inmodule lcvimgproc_cpp
   \brief Selects an image channel by its index.
  */
 
-/*!
-  \brief QChannelSelect constructor
-
-  Parameters:
-  \a parent
- */
 QChannelSelect::QChannelSelect(QQuickItem *parent)
     : QMatFilter(parent)
     , m_channel(0)
@@ -46,17 +41,8 @@ QChannelSelect::QChannelSelect(QQuickItem *parent)
 {
 }
 
-/*!
-  \brief QChannelSelect destructor
- */
 QChannelSelect::~QChannelSelect(){
 }
-
-
-/*!
-  \property QChannelSelect::channel
-  \sa ChannelSelect::channel
- */
 
 /*!
   \qmlproperty int ChannelSelect::channel

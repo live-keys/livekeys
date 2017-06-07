@@ -32,15 +32,10 @@ using namespace cv;
 /*!
   \class QStructuringElement
   \inmodule lcvimgproc_cpp
+  \internal
   \brief Creates a structuring element of the specified size and shape for morphological operations.
  */
 
-/*!
-  \brief QStructuringElement constructor
-
-  Parameters
-  \a parent
- */
 QStructuringElement::QStructuringElement(QQuickItem *parent)
     : QQuickItem(parent)
     , m_output(new QMat)
@@ -49,28 +44,15 @@ QStructuringElement::QStructuringElement(QQuickItem *parent)
     setFlag(ItemHasContents, false);
 }
 
-/*!
-  \brief QSobel destructor
- */
 QStructuringElement::~QStructuringElement(){
     delete m_output;
 }
 
 
 /*!
-  \property QStructuringElement::shape
-  \sa StructuringElement::shape
- */
-
-/*!
   \qmlproperty StructuringElement::ElementShape StructuringElement::shape
 
   Element shape.
- */
-
-/*!
-  \property QStructuringElement::ksize
-  \sa StructuringElement::ksize
  */
 
 /*!
@@ -80,21 +62,11 @@ QStructuringElement::~QStructuringElement(){
  */
 
 /*!
-  \property QStructuringElement::anchor
-  \sa StructuringElement::anchor
- */
-
-/*!
   \qmlproperty point StructuringElement::anchor
 
   Anchor position within the element. The default value (-1, -1) means that the anchor is at the center. Note that only
   the shape of a cross-shaped element depends on the anchor position. In other cases the anchor just regulates how much
   the result of the morphological operation is shifted
- */
-
-/*!
-  \property QStructuringElement::output
-  \sa StructuringElement::output
  */
 
 /*!

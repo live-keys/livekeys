@@ -19,7 +19,7 @@
 /*!
   \class QMatState
   \brief Mat texture state
-  \inmodule lcvlib_cpp
+  \inmodule lcvcore_cpp
  */
 
 /*!

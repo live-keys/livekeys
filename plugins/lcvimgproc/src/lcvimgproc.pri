@@ -1,5 +1,4 @@
 HEADERS += \
-    $$PWD/lcvimgproc_plugin.hpp \
     $$PWD/qblur.h \
     $$PWD/qcanny.h \
     $$PWD/qchannelselect.h \
@@ -15,7 +14,8 @@ HEADERS += \
     $$PWD/qsobel.h \
     $$PWD/qstructuringelement.h \
     $$PWD/qthreshold.h \
-    $$PWD/qmatdraw.h #\
+    $$PWD/qmatdraw.h \ #\
+    $$PWD/lcvimgproc_plugin.h
 #    $$PWD/qbilateralfilter.h
 
 SOURCES += \

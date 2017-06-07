@@ -34,6 +34,7 @@ using namespace std;
 /*!
   \class QHoughLines
   \inmodule lcvimgproc_cpp
+  \internal
   \brief Finds line segments in a binary image using the Hough transform.
  */
 
@@ -65,27 +66,14 @@ QHoughLines::QHoughLines(QQuickItem *parent)
     d->outDirty   = false;
 }
 
-/*!
-  \brief QHoughLines destructor
- */
 QHoughLines::~QHoughLines(){
     delete d_ptr;
 }
 
 /*!
-  \property QHoughLines::rho
-  \sa HoughLines::rho
- */
-
-/*!
   \qmlproperty real HoughLines::rho
 
   Distance resolution of the accumulator in pixels.
- */
-
-/*!
-  \property QHoughLines::theta
-  \sa HoughLines::theta
  */
 
 /*!
@@ -95,19 +83,9 @@ QHoughLines::~QHoughLines(){
  */
 
 /*!
-  \property QHoughLines::threshold
-  \sa HoughLines::threshold
- */
-
-/*!
   \qmlproperty int HoughLines::threshold
 
   Accumulator threshold parameter. Only those lines are returned that get enough votes ( > threshold ).
- */
-
-/*!
-  \property QHoughLines::srn
-  \sa HoughLines::srn
  */
 
 /*!
@@ -118,10 +96,6 @@ QHoughLines::~QHoughLines(){
   transform is used. Otherwise, both these parameters should be positive.
  */
 
-/*!
-  \property QHoughLines::stn
-  \sa HoughLines::stn
- */
 
 /*!
   \qmlproperty real HoughLines::stn
@@ -129,20 +103,11 @@ QHoughLines::~QHoughLines(){
   For the multi-scale Hough transform, it is a divisor for the distance resolution theta.
  */
 
-/*!
-  \property QHoughLines::lineColor
-  \sa HoughLines::lineColor
- */
 
 /*!
   \qmlproperty color HoughLines::lineColor
 
   Color of the lines being drawn.
- */
-
-/*!
-  \property QHoughLines::lineThickness
-  \sa HoughLines::lineColor
  */
 
 /*!

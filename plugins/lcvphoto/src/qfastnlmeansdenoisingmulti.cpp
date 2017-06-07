@@ -57,6 +57,7 @@ using namespace cv;
 /*!
   \class QFastNlMeansDenoisingMulti
   \inmodule lcvphoto_cpp
+  \internal
   \brief Denoises a grayscale or color image using multiple frames.
  */
 
@@ -76,11 +77,6 @@ QFastNlMeansDenoisingMulti::QFastNlMeansDenoisingMulti(QQuickItem *parent) :
  */
 QFastNlMeansDenoisingMulti::~QFastNlMeansDenoisingMulti(){
 }
-
-/*!
-  \property QFastNlMeansDenoisingMulti::temporalWindowSize
-  \sa FastNlMeansDenoisingMulti::temporalWindowSize
- */
 
 /*!
   \qmlproperty int FastNlMeansDenoisingMulti::temporalWindowSize

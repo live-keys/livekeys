@@ -32,6 +32,7 @@
 
 /*!
   \class QCanny
+  \internal
   \inmodule lcvimgproc_cpp
   \brief Finds edges within an image.
  */
@@ -49,20 +50,11 @@ QCanny::QCanny(QQuickItem *parent) :
 }
 
 /*!
-  \property QCanny::threshold1
-  \sa Canny::threshold1
- */
-
-/*!
   \qmlproperty int Canny::threshold1
 
   First threshold for the hysteresis procedure.
  */
 
-/*!
-  \property QCanny::threshold2
-  \sa Canny::threshold2
- */
 
 /*!
   \qmlproperty Size Canny::threshold2
@@ -70,10 +62,6 @@ QCanny::QCanny(QQuickItem *parent) :
   Second threshold for the hysteresis procedure.
  */
 
-/*!
-  \property QCanny::apertureSize
-  \sa Canny::apertureSize
- */
 
 /*!
   \qmlproperty Size Canny::apertureSize
@@ -81,10 +69,6 @@ QCanny::QCanny(QQuickItem *parent) :
   Aperture size for the Sobel() operator.
  */
 
-/*!
-  \property QCanny::l2gradient
-  \sa Canny::l2gradient
- */
 
 /*!
   \qmlproperty Size Canny::l2gradient
@@ -92,10 +76,6 @@ QCanny::QCanny(QQuickItem *parent) :
   A flag indicating whether a more accurate L2 norm should be used to calculate the image gradient magnitude.
  */
 
-
-/*!
-  \brief QCanny destructor
- */
 QCanny::~QCanny(){
 }
 

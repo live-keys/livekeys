@@ -18,6 +18,12 @@
 
 namespace lcv{
 
+/*!
+  \class lcv::QCodeCompletionSuggestion
+  \inmodule lcveditor_cpp
+  \brief Code completion suggestion used in the QCodeCompletionModel.
+ */
+
 QCodeCompletionSuggestion::QCodeCompletionSuggestion(
         const QString &label,
         const QString &info,

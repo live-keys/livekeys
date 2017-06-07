@@ -1,5 +1,4 @@
 HEADERS += \
-    $$PWD/lcvfeatures2d_plugin.hpp \
     $$PWD/qbriskdescriptorextractor.h \
     $$PWD/qbriskfeaturedetector.h \
     $$PWD/qbruteforcematcher.h \
@@ -24,7 +23,8 @@ HEADERS += \
 #    $$PWD/qstarfeaturedetector.h \
     $$PWD/qmatchestolocalkeypoint.h \
     $$PWD/qkeypointtoscenemap.h \
-    $$PWD/qkeypointhomography.h
+    $$PWD/qkeypointhomography.h \
+    $$PWD/lcvfeatures2d_plugin.h
 
 SOURCES += \
     $$PWD/lcvfeatures2d_plugin.cpp \

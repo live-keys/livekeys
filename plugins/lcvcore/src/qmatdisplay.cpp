@@ -19,7 +19,6 @@
 #include "qmatshader.h"
 #include <QSGSimpleMaterial>
 
-
 /*!
   \qmltype MatDisplay
   \instantiates QMatDisplay
@@ -34,7 +33,7 @@
 
 /*!
   \class QMatDisplay
-  \inmodule lcvlib_cpp
+  \inmodule lcvcore_cpp
   \brief Main matrix display class.
 
   Extend this class if you want to have a matrix type item that displays on screen. The display parameter is called
@@ -105,6 +104,12 @@ QMatDisplay::~QMatDisplay(){
 
   If set to true, linear filtering will occur when scaling the image on the screen. Default value is true.
  */
+
+/*!
+  \fn void QMatDisplay::setOutput(QMat*)
+
+  \brief Set the \a mat to be displayed.
+*/
 
 /*!
   \fn virtual QSGNode* QMatDisplay::updatePaintNode(QSGNode*, UpdatePaintNodeData*)

@@ -31,7 +31,7 @@
 
 /*!
   \class QMatFilter
-  \inmodule lcvlib_cpp
+  \inmodule lcvcore_cpp
   \brief  An abstract filter that transforms an input matrix into it's output.
 
   Besides the QMatDisplay class it inherits, the QMatFilter adds an input element, and a transformation function to
@@ -114,6 +114,9 @@ QMatFilter::~QMatFilter(){
 void QMatFilter::transform(cv::Mat&, cv::Mat&){
 }
 
+/*!
+  \brief Function used to initiate the transform function once the component is completed.
+ */
 void QMatFilter::componentComplete(){
     QQuickItem::componentComplete();
     transform();

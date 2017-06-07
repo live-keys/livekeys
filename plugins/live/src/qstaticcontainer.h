@@ -123,29 +123,17 @@ template<class T> void QStaticContainer::set(const QString &key, T *value){
 
 template<typename T> QStaticTypeContainer<T>* QStaticTypeContainer<T>::m_instance = 0;
 
-/**
- * @brief Singleton instance getter.
- */
 template<typename T> QStaticTypeContainer<T> &QStaticTypeContainer<T>::instance(QStaticContainer* item){
     if ( m_instance == 0 )
         m_instance = new QStaticTypeContainer<T>(item);
     return *m_instance;
 }
 
-/**
- * @brief Register a state.
- * @param key : The key to register the state by
- * @param state : The actual state
- */
 template<typename T> void QStaticTypeContainer<T>::registerState(const QString &key, T *state){
     m_entries.insert(key, Entry(state));
     QSTATIC_ITEM_CONTAINER_DEBUG(QString("Key set and activated : ") + key);
 }
 
-/**
- * @brief Retrieve a registered state.
- * @return The found state on success. False otherwise.
- */
 template<typename T> T *QStaticTypeContainer<T>::state(const QString &key){
     typename QMap<QString, Entry>::iterator it = m_entries.find(key);
     if ( it != m_entries.end() ){
@@ -156,9 +144,6 @@ template<typename T> T *QStaticTypeContainer<T>::state(const QString &key){
     return 0;
 }
 
-/**
- * @brief Before compilation routine.
- */
 template<typename T> void QStaticTypeContainer<T>::beforeCompile(){
     while ( !m_toDelete.isEmpty() )
         delete m_toDelete.takeLast();
@@ -173,9 +158,6 @@ template<typename T> void QStaticTypeContainer<T>::beforeCompile(){
     }
 }
 
-/**
- * @brief After compilation routine.
- */
 template<typename T> void QStaticTypeContainer<T>::afterCompile(){
     typename QMap<QString, Entry>::iterator it = m_entries.begin();
     while ( it != m_entries.end() ){
@@ -196,19 +178,12 @@ template<typename T> void QStaticTypeContainer<T>::clearStates(){
     m_entries.clear();
 }
 
-/**
- * @brief QStaticItemTypeContainer constructor
- * @param item
- */
 template<typename T> QStaticTypeContainer<T>::QStaticTypeContainer(QStaticContainer *item)
     : QStaticTypeContainerBase(){
 
     item->statecontainer(this);
 }
 
-/**
- * @brief QStaticItemTypeContainer destructor
- */
 template<typename T> QStaticTypeContainer<T>::~QStaticTypeContainer(){
     clearStates();
 }

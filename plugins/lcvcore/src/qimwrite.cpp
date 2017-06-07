@@ -18,6 +18,8 @@
 #include "opencv2/highgui.hpp"
 #include <QJSValueIterator>
 
+//TODO: Document
+
 QImWrite::QImWrite(QObject *parent)
     : QObject(parent)
 {

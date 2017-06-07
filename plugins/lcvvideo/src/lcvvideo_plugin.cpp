@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "lcvvideo_plugin.hpp"
+#include "lcvvideo_plugin.h"
 
 #include <qqml.h>
 #include "qcalcopticalflowpyrlk.h"

@@ -25,23 +25,13 @@
   \instantiates QCamCapture
   \inqmlmodule lcvcore
   \inherits MatDisplay
-  \brief Captures frames from a connected camera
+  \brief Captures frames from a connected camera. This is a \b {static item}.
 
   An example of how to use the cam capture can be found in samples/core/camcapture.qml :
 
   \quotefile core/camcapture.qml
 */
 
-/*!
-   \class QCamCapture
-   \inmodule lcvcore_cpp
-   \brief Captures frames from a connected camera.
- */
-
-/*!
- * \brief QCamCapture::QCamCapture
- * \a parent
- */
 QCamCapture::QCamCapture(QQuickItem *parent) :
     QMatDisplay(parent),
     m_device(""),
@@ -53,21 +43,15 @@ QCamCapture::QCamCapture(QQuickItem *parent) :
 }
 
 /*!
-  \property QCamCapture::device
-  \sa CamCapture::device
- */
-
-/*!
   \qmlproperty string CamCapture::device
 
-  This property holds the url to the camera device to be accessed. It can be either a link or a device number.
-  The device number should be given in string form. Ussually, an installed webcam can be accessed by setting
-  the device to '0'.
+  This property holds the url to the camera device to be accessed.
  */
 
 /*!
-  \property QCamCapture::fps
-  \sa CamCapture::fps
+  \qmlproperty size CamCapture::resolution
+
+  Stores the resolution for this cam capture.
  */
 
 /*!
@@ -92,9 +76,6 @@ void QCamCapture::setFps(qreal fps){
     }
 }
 
-/*!
-   \brief Switches buffers with it's associated thread
- */
 void QCamCapture::switchMat(){
     if ( m_thread ){
         setOutput(m_thread->output());
@@ -102,6 +83,22 @@ void QCamCapture::switchMat(){
         update();
     }
 }
+
+
+/*!
+  \qmlmethod CamCapture::staticOpen(string device, size resolution)
+
+  This is an overloaded method for CamCapture::staticLoad
+ */
+
+
+/*!
+  \qmlmethod CamCapture::staticLoad(string device, size resolution)
+
+  Loads the CamCaptures state. \a device can be either a link or a device number. The device number should be given
+  in string form. Usually a default webcam can be accesed by the '0'. \a resolution is optional and stores the
+  resolution at which to open the capture.
+ */
 
 void QCamCapture::staticLoad(const QString &device, const QSize &resolution){
     if ( m_device == device || device == "" )
@@ -152,7 +149,6 @@ void QCamCapture::staticLoad(const QString &device, const QSize &resolution){
     emit deviceChanged();
 }
 
-
 void QCamCapture::setPaused(bool paused){
     if ( !m_thread)
         return;
@@ -168,22 +164,15 @@ void QCamCapture::setPaused(bool paused){
 }
 
 /*!
-  \property QCamCapture::paused
-  \sa CamCapture::paused
- */
-
-/*!
   \qmlproperty bool CamCapture::paused
 
   This property can be set to true or false, depending if you want to freeze or continue capturing frames from the camera.
  */
+
 bool QCamCapture::paused() const{
     return m_thread->paused();
 }
 
-/*!
-  \brief QCamCapture destructor.
- */
 QCamCapture::~QCamCapture(){
     setOutput(m_restore);
 }

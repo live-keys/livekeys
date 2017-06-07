@@ -38,14 +38,13 @@ using namespace cv;
   \instantiates QBackgroundSubtractorKnn
   \inqmlmodule lcvvideo
   \inherits BackgroundSubtractor
-  \brief K-nearest neigbours based background/foreground segmentation algorithm
-
-  K-nearest neigbours based background/foreground segmentation algorithm.
+  \brief K-nearest neigbours based background/foreground segmentation algorithm.  This is a \b {static item}.
 */
 
 /*!
    \class QBackgroundSubtractorKnn
    \inmodule lcvvideo_cpp
+   \internal
    \brief K-nearest neigbours based background/foreground segmentation algorithm
  */
 
@@ -306,6 +305,7 @@ void QBackgroundSubtractorKnn::setShadowThreshold(double shadowThreshold){
 
   Pixel value for pixels detected as shadow.
  */
+
 int QBackgroundSubtractorKnn::shadowValue() const{
     Q_D(const QBackgroundSubtractorKnn);
     return d->shadowValue;
@@ -321,6 +321,12 @@ void QBackgroundSubtractorKnn::setShadowValue(int shadowValue){
     }
 }
 
+
+/*!
+  \qmlmethod BackgroundSubtractorKnn::staticLoad(string key)
+
+  Loads the BackgroundSubtractorKnn state from the given \a key.
+ */
 void QBackgroundSubtractorKnn::staticLoad(const QString &id){
     Q_D(QBackgroundSubtractorKnn);
     QStaticContainer* container = QStaticContainer::grabFromContext(this);

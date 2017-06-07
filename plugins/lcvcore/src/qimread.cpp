@@ -48,34 +48,36 @@
 
 /*!
    \class QImRead
-   \inmodule lcvcore_cpp
+   \internal
    \brief Reads an image from the hard drive.
  */
 
-/*!
- * \brief QImRead::QImRead
- * \a parent
- */
 QImRead::QImRead(QQuickItem *parent)
     : QMatDisplay(parent)
     , m_iscolor(CV_LOAD_IMAGE_COLOR)
 {
 }
 
-/*!
- * \brief QImRead::~QImRead
- */
 QImRead::~QImRead(){
 }
 
 /*!
- * \qmlproperty string ImRead::file
- * \brief The path to the file to load.
+  \qmlproperty string ImRead::file
+  \brief The path to the file to load.
  */
 
 /*!
- * \property QImRead::file
- * \sa ImRead::file
+  \qmlproperty enumeration ImRead::isColor
+  \brief Color type of the image
+
+  Can be one of the following:
+  \list
+  \li ImRead.CV_LOAD_IMAGE_UNCHANGED
+  \li ImRead.CV_LOAD_IMAGE_GRAYSCALE
+  \li ImRead.CV_LOAD_IMAGE_COLOR
+  \li ImRead.CV_LOAD_IMAGE_ANYDEPTH
+  \li ImRead.CV_LOAD_IMAGE_ANYCOLOR
+  \endlist
  */
 
 void QImRead::componentComplete(){

@@ -18,6 +18,13 @@
 
 namespace lcv{
 
+/*!
+  \class lcv::QCodeCompletionModel
+  \inmodule lcveditor_cpp
+  \brief Code Completion Model used by the code completion assist
+
+ */
+
 QCodeCompletionModel::QCodeCompletionModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_completionContext(0)
