@@ -9,25 +9,52 @@
 \section1 User Guide
 
 \table
+
+    \row
+        \li{1, 3} \section2 Installing Live CV
+
     \row
         \li \l{http://livecv.dinusv.com/download.html#installation-on-windows}{Installation on windows}
         \li Step by step tutorial on installing and running Live CV on windows.
     \row
         \li \l{http://livecv.dinusv.com/download.html#installation-on-windows}{Installation on linux}
         \li Step by step tutorial on installing and running Live CV on linux.
+
+
+    \row
+        \li{1, 3} \section2 Using Live CV
+
     \row
         \li \l {Using Live CV}{Using Live CV}
-        \li A guide on how to use and write code in Live CV
+        \li Main concepts on using Live CV
+    \row
+        \li \l {Projects}{Projects}
+        \li Projects and project structure
+    \row
+        \li \l {Static Items}{Static Items}
+        \li Live coding and static items in Live CV
+    \row
+        \li \l {Palettes and Bindings}{Palettes and Bindings}
+        \li New concepts in live coding
+    \row
+        \li \l {Plugins}{Plugins}
+        \li Plungins and plugin structure
 
     \row
-        \li{2, 1} \section2 QML Modules
+        \li{1, 3} \section2 QML Modules
 
+    \row
+        \li \l {live}{live}
+        \li Live CV QML Elements
     \row
         \li \l {lcvcore}{lcvcore}
-        \li Main computer vision QML elements.
+        \li Computer Vision core module.
     \row
         \li \l {lcvimgproc}{lcvimgproc}
         \li Image processing module.
+    \row
+        \li \l {lcvfeatures2d}{lcvfeatures2d}
+        \li Feature detection module.
     \row
         \li \l {lcvvideo}{lcvvideo}
         \li Video processing module.
@@ -41,40 +68,53 @@
 
 \table
     \row
-        \li{2, 1} \section2 Using the API
-
-    \row
-        \li \l {Dependencies. Configuring dependencies}{Dependencies. Configuring dependencies}
-        \li Configuring Live CV dependencies.
-    \row
-        \li \l {A first example}{A first example}
-        \li Building your first example.
-    \row
-        \li \l {Creating a filter}{Creating a filter}
-        \li Create an element that filters a matrix.
-    \row
-        \li \l {Using states}{Using states}
-        \li Keep consistent data between compilations.
-
-    \row
-        \li{2, 1} \section2 Contributing
+        \li{2, 1} \section2 Building Live CV
 
     \row
         \li \l {Building Live CV}{Building Live CV}
         \li Configuring and build options for Live CV on different Operating Systems.
 
     \row
-        \li{2, 1} \section2 C++ Modules
+        \li{2, 2} \section2 Plugins
 
     \row
-        \li \l {lcvlib_cpp}{lib}
-        \li The lcvlib or lcvapi module.
+        \li \l {Creating a Plugin}{Creating a Plugin}
+        \li Creating a simple qml plugin and using it in Live CV
     \row
-        \li \l {lcvcore_cpp}{core}
+        \li \l {Creating a LiveCV based Plugin}{Creating a Live CV based plugin}
+        \li Creating a plugin dependent on Live CV libraries (live, lcvcore)
+    \row
+        \li \l {Creating a Filter}{Creating a Filter}
+        \li Creating an image filter
+    \row
+        \li \l {Creating a Static Item}{Creating a Static Item}
+        \li Creating a Static Item
+    \row
+        \li \l {Project configuration}{Project Configuration}
+        \li Configuring a Live CV project
+
+    \row
+        \li{2, 3} \section2 Deployment Scripts
+
+    \row
+        \li \l {Using Live CV deployment scripts}{Using Live CV deployment scripts}
+        \li Using Live CV deployment scripts
+
+    \row
+        \li{2, 4} \section2 C++ Modules
+
+    \row
+        \li \l {live_cpp}{live}
+        \li The live module.
+    \row
+        \li \l {lcvcore_cpp}{lcvcore}
         \li The lcvcore module.
     \row
         \li \l {lcvimgproc_cpp}{imgproc}
         \li The lcvimgproc module.
+    \row
+        \li \l {lcvfeatures2d}{features2d}
+        \li The lcvfeatures2d module.
     \row
         \li \l {lcvvideo_cpp}{video}
         \li The lcvvideo module.

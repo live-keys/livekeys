@@ -6,17 +6,23 @@
 
 \table
     \row
+        \li \l {live}{live}
+        \li Live CV QML Elements
+    \row
         \li \l {lcvcore}{lcvcore}
-        \li Main computer vision QML elements.
+        \li Open CV core module.
     \row
         \li \l {lcvimgproc}{lcvimgproc}
-        \li Image processing module.
+        \li Open CV Image processing module.
+    \row
+        \li \l {lcvfeatures2d}{lcvfeatures2d}
+        \li Open CV Feature detection module.
     \row
         \li \l {lcvvideo}{lcvvideo}
-        \li Video processing module.
+        \li Open CV Video processing module.
     \row
         \li \l {lcvphoto}{lcvphoto}
-        \li Computational photography module.
+        \li Open CV Computational photography module.
 \endtable
 
 */

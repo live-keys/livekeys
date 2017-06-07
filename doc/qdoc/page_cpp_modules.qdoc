@@ -6,14 +6,17 @@
 
 \table
     \row
-        \li \l {lcvlib_cpp}{lib}
-        \li The lcvlib or lcvapi module.
+        \li \l {live_cpp}{live}
+        \li The live module.
     \row
-        \li \l {lcvcore_cpp}{core}
+        \li \l {lcvcore_cpp}{lcvcore}
         \li The lcvcore module.
     \row
         \li \l {lcvimgproc_cpp}{imgproc}
         \li The lcvimgproc module.
+    \row
+        \li \l {lcvfeatures2d_cpp}{features2d}
+        \li The lcvfeatures2d module.
     \row
         \li \l {lcvvideo_cpp}{video}
         \li The lcvvideo module.
