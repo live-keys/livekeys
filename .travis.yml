@@ -65,8 +65,6 @@ script:
   - python3 livecv_deploy.py .. gcc_64_standalone
   - python3 livecv_makedoc.py ..
   - ls
-  - ls ../doc
-  - ls ../doc/src
 
 before_deploy:
   - ls *.tar.gz
