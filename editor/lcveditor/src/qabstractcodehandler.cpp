@@ -16,8 +16,17 @@
 
 #include "qabstractcodehandler.h"
 
+/*!
+  \class lcv::QAbstractCodeHandler
+  \inmodule lcveditor_cpp
+
+  Code handler interface for file types.
+ */
 namespace lcv{
 
+/*!
+
+ */
 QAbstractCodeHandler::QAbstractCodeHandler(QObject *parent)
     : QObject(parent)
 {

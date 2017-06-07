@@ -155,7 +155,7 @@ inline QDocumentHandlerState *QDocumentHandler::state(){
 
 inline void QDocumentHandler::setIndentSize(int size){
     m_indentContent.clear();
-    m_indentContent.resize(size, QChar(' '));
+    m_indentContent.fill(QChar(' '), size);
     m_indentSize = size;
 }
 

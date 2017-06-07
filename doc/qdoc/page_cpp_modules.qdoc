@@ -23,6 +23,9 @@
     \row
         \li \l {lcvphoto_cpp}{photo}
         \li The lcvphoto module.
+    \row
+        \li \l {lcveditor_cpp}{lcveditor}
+        \li The code editor module.
 \endtable
 
 */

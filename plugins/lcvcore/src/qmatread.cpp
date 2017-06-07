@@ -37,7 +37,7 @@ using namespace cv;
   with the MatRoi element in order to create a pan-type interaction over a zoomed area in an image. The sample in
   core/valuescan.qml shows this type of usage in action.
 
-  \quotefile core/valuescan.qml
+  \quotefile imgproc/valuescan.qml
 
   An alternative to the above example is to use a flickable area and use the MatRead over a whole image.
 */
@@ -209,7 +209,7 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
 
 /*!
    \class QMatRead
-   \inmodule lcvcore_cpp
+   \internal
    \brief Displays the matrixes values in text form. Uses a scene graph node to display the values.
  */
 
@@ -232,17 +232,10 @@ QMatRead::QMatRead(QQuickItem *parent)
     m_font.setPixelSize(12);
 }
 
-/*!
-   \brief QMatRead destructor
- */
 QMatRead::~QMatRead(){
 }
 
 
-/*!
-  \property QMatRead::input
-  \sa MatRead::input
- */
 
 /*!
   \qmlproperty int MatRead::input
@@ -251,10 +244,6 @@ QMatRead::~QMatRead(){
  */
 
 
-/*!
-  \property QMatRead::font
-  \sa MatRead::font
- */
 
 /*!
   \qmlproperty Font MatRead::font
@@ -263,10 +252,6 @@ QMatRead::~QMatRead(){
  */
 
 
-/*!
-  \property QMatRead::color
-  \sa MatRead::color
- */
 
 /*!
   \qmlproperty Color MatRead::color
@@ -275,10 +260,6 @@ QMatRead::~QMatRead(){
  */
 
 
-/*!
-  \property QMatRead::numberWidth
-  \sa MatRead::numberWidth
- */
 
 /*!
   \qmlproperty int MatRead::numberWidth
@@ -286,11 +267,6 @@ QMatRead::~QMatRead(){
   Number of digits to display for each number. Default is 3.
  */
 
-
-/*!
-  \property QMatRead::squareCell
-  \sa MatRead::squareCell
- */
 
 /*!
   \qmlproperty bool MatRead::squareCell
@@ -309,8 +285,6 @@ QMatRead::~QMatRead(){
   \a oldNode
   \a nodeData
  */
-
-
 QSGNode *QMatRead::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *){
     QMatReadNode* node = static_cast<QMatReadNode*>(oldNode);
     if (!node)

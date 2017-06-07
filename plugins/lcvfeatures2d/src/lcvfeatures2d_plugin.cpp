@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "lcvfeatures2d_plugin.hpp"
+#include "lcvfeatures2d_plugin.h"
 #include "qkeypoint.h"
 #include "qkeypointvector.h"
 #include "qfeaturedetector.h"

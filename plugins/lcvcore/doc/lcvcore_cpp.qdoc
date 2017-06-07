@@ -1,11 +1,11 @@
 /*!
 
-  \module lcvcore_cpp
+\module lcvcore_cpp
 
-  \title Live CV Core
+\title Live CV Core
 
-  \brief This module contains the cpp implementation of core elements for Live CV's computer vision code.
+\brief This module contains the cpp implementation of core elements for Live CV's computer vision code.
 
-  \sa lcvcore
+\sa lcvcore
 
 */

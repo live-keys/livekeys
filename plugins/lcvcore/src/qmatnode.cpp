@@ -20,7 +20,7 @@
 
 /*!
   \class QMatNode
-  \inmodule lcvlib_cpp
+  \inmodule lcvcore_cpp
   \brief Node containing matrix state.
  */
 

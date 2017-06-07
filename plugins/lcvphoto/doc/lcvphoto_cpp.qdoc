@@ -6,6 +6,8 @@
 
   \brief This module contains the cpp implementation of the photo processing elements from Live CV.
 
+  This module currently does not export any c++ functionality
+
   \sa lcvcore
 
 */

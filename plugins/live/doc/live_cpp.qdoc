@@ -1,0 +1,12 @@
+/*!
+
+\module live_cpp
+
+\title Live
+
+\brief This module contains the main Live CV components required for live coding and working with other
+Live CV features.
+
+\sa live
+
+*/

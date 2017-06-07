@@ -96,8 +96,6 @@ void QProjectDocument::updateBindings(int position, int charsRemoved, const QStr
             if ( m_editingDocument && m_editingDocumentHandler )
                 m_editingDocumentHandler->rehighlightBlock(m_editingDocument->findBlock(bindingPosition));
 
-        //TODO: Remove also when changing chars around the binding.
-
         } else {
             // update other bindings positions
             binding->declaration()->setIdentifierPosition(binding->position() - charsRemoved + charsAdded);

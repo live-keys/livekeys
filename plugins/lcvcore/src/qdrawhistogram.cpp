@@ -25,6 +25,8 @@
 
 #include <QPainter>
 
+//TODO: Document
+
 // QAbstractHistogramRenderer definitions
 // --------------------------------------
 

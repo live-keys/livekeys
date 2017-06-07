@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "lcvcore_plugin.hpp"
+#include "lcvcore_plugin.h"
 #include "qmat.h"
 #include "qmataccess.h"
 #include "qmatview.h"

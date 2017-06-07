@@ -5,7 +5,7 @@
 \indexpage Index
 \title Creating a filter
 
-In the \l{Configuration. A simple example}{previous section} I've described the process of configuring and creating
+In the \l{Creating a Live CV based Plugin}{previous section} I've described the process of configuring and creating
 a simple QML item using the Live CV API. Within this next part, I will explain the easiest way to display a processed
 matrix on screen and how to create a filter which does \b{input to output} processing.
 
@@ -15,7 +15,7 @@ functionality. QMatDisplay is actually an implementation of QQuickItem that cont
 called \b{output}. All items that inherit QMatDisplay can work with this property in order to display their processed
 result.
 
-For example, the \l{QMatEmpty}{QMatEmpty} class works directly with the output property. Here's a snippet from its
+For example, the QMatEmpty class works directly with the output property. Here's a snippet from its
 setType method for the \l{QMatEmpty::type}{type} property:
 
 \code

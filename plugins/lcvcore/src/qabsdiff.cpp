@@ -29,33 +29,15 @@
   \quotefile imgproc/framedifference.qml
 */
 
-/*!
-   \class QAbsDiff
-   \inmodule lcvcore_cpp
-   \brief This class is used in qml to performs an absolute difference between two matrixes.
- */
 
-/*!
-   \brief QAbsDiff constructor
-   \a parent
- */
 QAbsDiff::QAbsDiff(QQuickItem *parent)
     : QMatFilter(parent)
     , m_in2(QMat::nullMat())
 {
 }
 
-/*!
-   \brief QAbsDiff destructor
- */
 QAbsDiff::~QAbsDiff(){
 }
-
-
-/*!
-  \property QAbsDiff::input2
-  \sa AbsDiff::input2
- */
 
 /*!
   \qmlproperty Mat AbsDiff::input2
@@ -63,11 +45,6 @@ QAbsDiff::~QAbsDiff(){
   Second input for the subtraction.
  */
 
-/*!
-   \brief QAbsDiff transformation function
-   \a in
-   \a out
- */
 void QAbsDiff::transform(cv::Mat &in, cv::Mat &out){
     if ( in.size() == m_in2->cvMat()->size() )
         cv::absdiff(in, *m_in2->cvMat(), out);

@@ -34,6 +34,7 @@ using namespace cv;
 /*!
   \class QMatResize
   \inmodule lcvimgproc_cpp
+  \internal
   \brief Finds edges within an image.
  */
 
@@ -58,20 +59,10 @@ QMatResize::~QMatResize(){
 }
 
 /*!
-  \property QMatResize::matSize
-  \sa Resize::matSize
- */
-
-/*!
   \qmlproperty Size Resize::matSize
 
   Size of the resized matrix. An unspecified size or a size of (0, 0) will make the element look into the
   fx and fy resize factors.
- */
-
-/*!
-  \property QMatResize::fx
-  \sa Resize::fx
  */
 
 /*!
@@ -82,19 +73,9 @@ QMatResize::~QMatResize(){
 
 
 /*!
-  \property QMatResize::fy
-  \sa Resize::fy
- */
-
-/*!
   \qmlproperty real Resize::fy
 
   Factor by which to resize on y axis.
- */
-
-/*!
-  \property QMatResize::interpolation
-  \sa Resize::interpolation
  */
 
 /*!

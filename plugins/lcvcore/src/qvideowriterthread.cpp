@@ -19,6 +19,12 @@
 
 #include <QWaitCondition>
 
+/*!
+  \class QVideoWriterThread
+  \internal
+  \brief Internal video writer thread used by QVideoWriter.
+ */
+
 QVideoWriterThread::QVideoWriterThread(
         const QString filename,
         int fourcc,

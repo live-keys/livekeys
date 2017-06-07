@@ -33,23 +33,15 @@
 /*!
   \class QThreshold
   \inmodule lcvimgproc_cpp
+  \internal
   \brief Finds edges within an image.
  */
 
-/*!
-  \brief QThreshold constructor
-
-  Parameters
-  \a parent
- */
 QThreshold::QThreshold(QQuickItem *parent) :
     QMatFilter(parent)
 {
 }
 
-/*!
-  \brief QThreshold destructor
- */
 QThreshold::~QThreshold()
 {
 }
@@ -82,30 +74,15 @@ QThreshold::~QThreshold()
  */
 
 /*!
-  \property QThreshold::thresh
-  \sa Threshold::thresh
- */
-
-/*!
   \qmlproperty int Threshold::thresh
 
   Threshold value
  */
 
 /*!
-  \property QThreshold::maxVal
-  \sa Threshold::maxVal
- */
-
-/*!
   \qmlproperty int Threshold::maxVal
 
   Maximum value to use with the THRESH_BINARY and THRESH_BINARY_INV thresholding types.
- */
-
-/*!
-  \property QThreshold::thresholdType
-  \sa Threshold::thresholdType
  */
 
 /*!
@@ -133,7 +110,6 @@ QThreshold::~QThreshold()
 //THRESH_TOZERO_INV
 
 //    \texttt{dst} (x,y) = \fork{0}{if $\texttt{src}(x,y) > \texttt{thresh}$}{\texttt{src}(x,y)}{otherwise}
-
 
 
 

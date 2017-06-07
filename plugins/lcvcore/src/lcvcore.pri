@@ -1,5 +1,4 @@
 HEADERS += \
-    $$PWD/lcvcore_plugin.hpp \
     $$PWD/qabsdiff.h \
     $$PWD/qalphamerge.h \
     $$PWD/qcamcapture.h \
@@ -25,7 +24,8 @@ HEADERS += \
     $$PWD/qmatshader.h \
     $$PWD/qmatstate.h \
     $$PWD/qmataccess.h \
-    $$PWD/qlcvcoreglobal.h
+    $$PWD/qlcvcoreglobal.h \
+    $$PWD/lcvcore_plugin.h
 
 SOURCES += \
     $$PWD/lcvcore_plugin.cpp \

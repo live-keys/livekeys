@@ -37,7 +37,7 @@ The application modules can be split into 3 categories :
 \endlist
 
 In order to add new components to Live CV's code, the main focus is on using the lcvlib module. The module is documented
-within the API section of the \l{index}{index} page. Internal modules to Live CV's source are added similarly as one
+within the API section of the \l{Index}{index} page. Internal modules to Live CV's source are added similarly as one
 would use the Live CV API to add external ones.
 
 Its also interesting to note that the Live CV application is only plugin based, so by default if no Open CV imports are

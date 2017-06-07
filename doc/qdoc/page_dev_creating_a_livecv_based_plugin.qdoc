@@ -1,8 +1,9 @@
+
 /*!
-\page api-simple-example.html
+\page dev-creating-a-livecv-plugin.html
 
 \indexpage Index
-\title A simple example
+\title Creating a Live CV based Plugin
 
 
 In this tutorial you will see how to use the Live CV libraries in order to create plugins for Live CV without the need to

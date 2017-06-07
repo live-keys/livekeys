@@ -32,25 +32,18 @@ using namespace cv;
 
 /*!
   \class QCopyMakeBorder
+  \internal
   \inmodule lcvimgproc_cpp
   \brief Copies the source image into the middle of the destination image.
  */
 
-/*!
-  \brief QCopyMakeBorder constructor
 
-  Parameters:
-  \a parent
- */
 QCopyMakeBorder::QCopyMakeBorder(QQuickItem *parent)
     : QMatFilter(parent)
     , m_color()
 {
 }
 
-/*!
-  \brief QCopyMakeBorder destructor
- */
 QCopyMakeBorder::~QCopyMakeBorder(){
 }
 
@@ -85,20 +78,11 @@ QCopyMakeBorder::~QCopyMakeBorder(){
  */
 
 /*!
-  \property QCopyMakeBorder::top
-  \sa CopyMakeBorder::top
- */
-
-/*!
   \qmlproperty int CopyMakeBorder::top
 
   Property specifying how many pixels in the top direction from the source image rectangle to extrapolate.
  */
 
-/*!
-  \property QCopyMakeBorder::bottom
-  \sa CopyMakeBorder::bottom
- */
 
 /*!
   \qmlproperty int CopyMakeBorder::bottom
@@ -106,10 +90,6 @@ QCopyMakeBorder::~QCopyMakeBorder(){
   Property specifying how many pixels in the bottom direction from the source image rectangle to extrapolate.
  */
 
-/*!
-  \property QCopyMakeBorder::left
-  \sa CopyMakeBorder::left
- */
 
 /*!
   \qmlproperty int CopyMakeBorder::left
@@ -117,10 +97,6 @@ QCopyMakeBorder::~QCopyMakeBorder(){
   Property specifying how many pixels in the left direction from the source image rectangle to extrapolate.
  */
 
-/*!
-  \property QCopyMakeBorder::right
-  \sa CopyMakeBorder::top
- */
 
 /*!
   \qmlproperty int CopyMakeBorder::right
@@ -129,20 +105,10 @@ QCopyMakeBorder::~QCopyMakeBorder(){
  */
 
 /*!
-  \property QCopyMakeBorder::borderType
-  \sa CopyMakeBorder::borderType
- */
-
-/*!
   \qmlproperty int CopyMakeBorder::borderType
 
   Border type.
   \sa CopyMakeBorder::BorderType
- */
-
-/*!
-  \property QCopyMakeBorder::color
-  \sa CopyMakeBorder::color
  */
 
 /*!

@@ -158,6 +158,7 @@ size_t QCalcOpticalFlowPyrLKPrivate::totalPoints() const{
 /*!
    \class QCalcOpticalFlowPyrLK
    \inmodule lcvvideo_cpp
+   \internal
    \brief Calculates the sparse optical flow.
  */
 
@@ -234,6 +235,14 @@ int QCalcOpticalFlowPyrLK::totalPoints() const{
     Q_D(const QCalcOpticalFlowPyrLK);
     return (int)d->totalPoints();
 }
+
+
+
+/*!
+  \qmlmethod CalcOpticalFlowPyrLK::staticLoad(string key)
+
+  Loads the CalcOpticalFlowPyrLK state from the given \a key.
+ */
 
 void QCalcOpticalFlowPyrLK::staticLoad(const QString &id){
     Q_D(QCalcOpticalFlowPyrLK);

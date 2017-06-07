@@ -27,6 +27,7 @@
 ** will be met: https://www.gnu.org/licenses/lgpl.html.
 **
 ****************************************************************************/
+
 #include "qfastnlmeansdenoising.h"
 #include "opencv2/photo.hpp"
 
@@ -47,8 +48,11 @@ using namespace cv;
 /*!
   \class QFastNlMeansDenoising
   \inmodule lcvphoto_cpp
+  \internal
   \brief Performs denoising using the Non-local Means Denoising algorithm.
  */
+
+
 
 /*!
   \brief QFastNlMeansDenoising constructor
@@ -73,21 +77,12 @@ QFastNlMeansDenoising::~QFastNlMeansDenoising(){
 }
 
 /*!
-  \property QFastNlMeansDenoising::colorAlgorithm
-  \sa FastNlMeansDenoising::colorAlgorithm
- */
-
-/*!
   \qmlproperty bool FastNlMeansDenoising::colorAlgorithm
 
   False to use fastNlMeansDenoising, true to use fastNlMeansDenoisingColored.
   By default, this is autodetected based on the number of channels in the source.
  */
 
-/*!
-  \property QFastNlMeansDenoising::h
-  \sa FastNlMeansDenoising::h
- */
 
 /*!
   \qmlproperty float FastNlMeansDenoising::h
@@ -95,10 +90,6 @@ QFastNlMeansDenoising::~QFastNlMeansDenoising(){
   Parameter regulating filter strength. Defaults to 3.
  */
 
-/*!
-  \property QFastNlMeansDenoising::hColor
-  \sa FastNlMeansDenoising::hColor
- */
 
 /*!
   \qmlproperty float FastNlMeansDenoising::hColor
@@ -108,20 +99,10 @@ QFastNlMeansDenoising::~QFastNlMeansDenoising(){
  */
 
 /*!
-  \property QFastNlMeansDenoising::templateWindowSize
-  \sa FastNlMeansDenoising::templateWindowSize
- */
-
-/*!
   \qmlproperty int FastNlMeansDenoising::templateWindowSize
 
   Size in pixels of the template patch that is used to compute weights.
   Should be odd. Defaults to 7.
- */
-
-/*!
-  \property QFastNlMeansDenoising::searchWindowSize
-  \sa FastNlMeansDenoising::searchWindowSize
  */
 
 /*!

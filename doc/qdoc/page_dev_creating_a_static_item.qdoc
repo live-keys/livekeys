@@ -1,9 +1,9 @@
 /*!
 
-\page using-states.html
+\page dev-creating-a-static-item.html
 
 \indexpage Index
-\title Using States
+\title Creating a Static Item
 
 Whenever the QML engine recompiles the code, all the QML objects found within the application get destroyed and
 recreated. This means that each time the user modifies something within the document, every object that made progress on

@@ -19,6 +19,13 @@
 
 namespace lcv{
 
+
+/*!
+   \class lcv::QScriptCommandLineParser
+   \inmodule live_cpp
+   \internal
+ */
+
 namespace{
 
     std::exception makeException(const QString& str){

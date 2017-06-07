@@ -19,6 +19,8 @@
 #include "qmatshader.h"
 #include <QSGSimpleMaterial>
 
+//TODO: Document
+
 QMatView::QMatView(QQuickItem *parent)
     : QQuickItem(parent)
     , m_mat(QMat::nullMat())

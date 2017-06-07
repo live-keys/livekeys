@@ -22,6 +22,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QSharedPointer>
 
 namespace lcv{
 

@@ -31,15 +31,10 @@ using namespace cv;
 /*!
   \class QCvtColor
   \inmodule lcvimgproc_cpp
+  \internal
   \brief Converts an image from one color space to another
  */
 
-/*!
-  \brief QCvtColor constructor
-
-  Parameters:
-  \a parent
- */
 QCvtColor::QCvtColor(QQuickItem *parent) :
     QMatFilter(parent)
 {
@@ -494,20 +489,11 @@ enum CvtType{
 
 
 /*!
-  \property QCvtColor::code
-  \sa CvtColor::code
- */
-
-/*!
   \qmlproperty CvtColor::CvtType CvtColor::code
 
   Color space conversion code.
  */
 
-/*!
-  \property QCvtColor::dstCn
-  \sa CvtColor::dstCn
- */
 
 /*!
   \qmlproperty int CvtColor::dstCn

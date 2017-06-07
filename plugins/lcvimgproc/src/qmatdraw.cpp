@@ -26,12 +26,13 @@
 
   Provides the basic set of functions needed in order to draw on a matrix.
 
-  \quotefile core/drawing.qml
+  \quotefile imgproc/drawing.qml
 */
 
 /*!
    \class QMatDraw
-   \inmodule lcvcore_cpp
+   \inmodule lcvimgproc_cpp
+   \internal
    \brief Draws on a matrix with opencv's drawing functions.
  */
 
@@ -52,10 +53,6 @@ QMatDraw::QMatDraw(QQuickItem *parent)
 QMatDraw::~QMatDraw(){
 }
 
-/*!
-  \property QMatDraw::input
-  \sa MatDraw::input
- */
 
 /*!
   \qmlproperty Mat MatDraw::input
@@ -70,9 +67,6 @@ QMatDraw::~QMatDraw(){
   Cleans up the matrix surface to it's initial value.
  */
 
-/*!
-  \brief Returns the depth of the matrix
- */
 void QMatDraw::cleanUp(){
     if ( inputMat() )
         inputMat()->cvMat()->copyTo(*output()->cvMat());

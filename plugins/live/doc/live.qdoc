@@ -1,0 +1,13 @@
+/*!
+
+\qmlmodule live
+
+\title Live QML Module
+
+This modules contains the main qml files that link to Live CV's functionality.
+
+\code
+import live 1.0
+\endcode
+
+*/

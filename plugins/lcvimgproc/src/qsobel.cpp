@@ -33,15 +33,10 @@ using namespace cv;
 /*!
   \class QSobel
   \inmodule lcvimgproc_cpp
+  \internal
   \brief Calculates the first, second, third, or mixed image derivatives using an extended Sobel operator.
  */
 
-/*!
-  \brief QSobel constructor
-
-  Parameters:
-  \a parent
- */
 QSobel::QSobel(QQuickItem *parent)
     : QMatFilter(parent)
     , m_ddepth(QMat::CV16S)
@@ -55,18 +50,11 @@ QSobel::QSobel(QQuickItem *parent)
 {
 }
 
-/*!
-  \brief QSobel destructor
- */
+
 QSobel::~QSobel(){
     delete m_display;
 }
 
-
-/*!
-  \property QSobel::ddepth
-  \sa Sobel::ddepth
- */
 
 /*!
   \qmlproperty Mat::Type Sobel::ddepth
@@ -84,10 +72,6 @@ QSobel::~QSobel(){
   input images, it will result in truncated derivatives
  */
 
-/*!
-  \property QSobel::xorder
-  \sa Sobel::xorder
- */
 
 /*!
   \qmlproperty int Sobel::xorder
@@ -95,10 +79,6 @@ QSobel::~QSobel(){
   Order of the derivative in x.
  */
 
-/*!
-  \property QSobel::yorder
-  \sa Sobel::yorder
- */
 
 /*!
   \qmlproperty int Sobel::yorder
@@ -106,10 +86,6 @@ QSobel::~QSobel(){
   Order of the derivative in y.
  */
 
-/*!
-  \property QSobel::ksize
-  \sa Sobel::ksize
- */
 
 /*!
   \qmlproperty int Sobel::ksize
@@ -117,10 +93,6 @@ QSobel::~QSobel(){
   Size of the extended Sobel kernel; ( must be 1, 3, 5, 7 )
  */
 
-/*!
-  \property QSobel::scale
-  \sa Sobel::scale
- */
 
 /*!
   \qmlproperty real Sobel::scale
@@ -129,19 +101,9 @@ QSobel::~QSobel(){
  */
 
 /*!
-  \property QSobel::delta
-  \sa Sobel::delta
- */
-
-/*!
   \qmlproperty real Sobel::delta
 
   Optional delta value that is added to the results prior to storing them in output.
- */
-
-/*!
-  \property QSobel::borderType
-  \sa Sobel::borderType
  */
 
 /*!

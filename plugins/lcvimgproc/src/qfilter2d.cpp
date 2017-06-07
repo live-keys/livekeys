@@ -31,6 +31,7 @@ using namespace cv;
 /*!
   \class QFilter2D
   \inmodule lcvimgproc_cpp
+  \internal
   \brief Converts an image with the specified kernel
  */
 
@@ -57,10 +58,6 @@ QFilter2D::QFilter2D(QQuickItem *parent)
 QFilter2D::~QFilter2D(){
 }
 
-/*!
-  \property QFilter2D::ddepth
-  \sa Filter2D::ddepth
- */
 
 /*!
   \qmlproperty int Filter2D::ddepth
@@ -75,10 +72,6 @@ QFilter2D::~QFilter2D(){
   where ddepth = -1 will yield an output the same as the source.
  */
 
-/*!
-  \property QFilter2D::kernel
-  \sa Filter2D::kernel
- */
 
 /*!
   \qmlproperty Mat Filter2D::kernel
@@ -88,21 +81,12 @@ QFilter2D::~QFilter2D(){
 
 
 /*!
-  \property QFilter2D::anchor
-  \sa Filter2D::anchor
- */
-
-/*!
   \qmlproperty Point Filter2D::anchor
 
   Anchor of the kernel that indicates the relative position of a filtered point within the kernel; the anchor should lie
   within the kernel; default value (-1,-1) means that the anchor is at the kernel center.
  */
 
-/*!
-  \property QFilter2D::delta
-  \sa Filter2D::delta
- */
 
 /*!
   \qmlproperty real Filter2D::delta
@@ -110,10 +94,6 @@ QFilter2D::~QFilter2D(){
   Optional value added to the filtered pixels before storing them in Filter2D.output.
  */
 
-/*!
-  \property QFilter2D::borderType
-  \sa Filter2D::borderType
- */
 
 /*!
   \qmlproperty int Filter2D::borderType

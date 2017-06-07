@@ -32,6 +32,7 @@ using namespace cv;
 
 /*!
   \class QBlur
+  \internal
   \inmodule lcvimgproc_cpp
   \brief Box image blur.
  */

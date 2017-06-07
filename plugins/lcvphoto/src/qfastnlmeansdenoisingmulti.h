@@ -39,7 +39,7 @@ using namespace cv;
 class QFastNlMeansDenoisingMulti : public QFastNlMeansDenoising{
 
     Q_OBJECT
-    Q_PROPERTY(int   temporalWindowSize READ temporalWindowSize WRITE setTemporalWindowSize NOTIFY temporalWindowSizeChanged)
+    Q_PROPERTY(int temporalWindowSize READ temporalWindowSize WRITE setTemporalWindowSize NOTIFY temporalWindowSizeChanged)
 
 public:
     explicit QFastNlMeansDenoisingMulti(QQuickItem *parent = 0);

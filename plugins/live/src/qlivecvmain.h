@@ -24,7 +24,7 @@
 namespace lcv{
 
 class QScriptCommandLineParser;
-class Q_LIVE_EXPORT QLiveCVMain : public QQuickItem{
+class QLiveCVMain : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(QJSValue options READ options WRITE setOptions NOTIFY optionsChanged)

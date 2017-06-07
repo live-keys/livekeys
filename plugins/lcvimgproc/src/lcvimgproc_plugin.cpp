@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "lcvimgproc_plugin.hpp"
+#include "lcvimgproc_plugin.h"
 
 #include <qqml.h>
 #include "qblur.h"

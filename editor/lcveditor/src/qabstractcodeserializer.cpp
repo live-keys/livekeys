@@ -18,6 +18,12 @@
 
 namespace lcv{
 
+/*!
+  \class lcv::QAbstractCodeSerializer
+  \inmodule lcveditor_cpp
+  \brief Abstract Code Serializer
+ */
+
 QAbstractCodeSerializer::QAbstractCodeSerializer(QObject *parent)
     : QObject(parent)
 {

@@ -26,34 +26,16 @@
   Alpha merge is used to merge an alpha channel to a 1 or 3 channel matrix. The alpha channel is a single channel image
   or mask that is loaded within the mask property of this class.
 
-  In the sample at samples/core/alphamerge.qml a loaded image is merged with a drawn circle.
+  In the sample at samples/imgproc/alphamerge.qml a loaded image is merged with a drawn circle.
 
-  \quotefile core/alphamerge.qml
+  \quotefile imgproc/alphamerge.qml
 */
 
-/*!
-   \class QAlphaMerge
-   \inmodule lcvcore_cpp
-   \brief Merges an alpha channel
- */
-
-
-/*!
-  \brief QAlphaMerge constructor
-  \a parent
- */
 QAlphaMerge::QAlphaMerge(QQuickItem *parent) :
     QMatFilter(parent),
     m_mask(0)
 {
 }
-
-
-
-/*!
-  \property QAlphaMerge::mask
-  \sa AlphaMerge::mask
- */
 
 /*!
   \qmlproperty Mat AlphaMerge::mask
@@ -62,26 +44,11 @@ QAlphaMerge::QAlphaMerge(QQuickItem *parent) :
  */
 
 
-/*!
-  \brief Filter processing function.
-
-  Params:
-  \a in
-  \a out
- */
 void QAlphaMerge::transform(cv::Mat &in, cv::Mat &out){
     if ( mask() )
         mergeMask(in, *mask()->cvMat(), out);
 }
 
-/*!
-  \brief Helper function to merge the mask
-
-  Parameters:
-  \a input
-  \a mask
-  \a output
- */
 void QAlphaMerge::mergeMask(cv::Mat &input, cv::Mat &mask, cv::Mat &output){
     if ( input.cols != mask.cols || input.rows != mask.rows ){
         qWarning("Open CV Error: Different mask size.");

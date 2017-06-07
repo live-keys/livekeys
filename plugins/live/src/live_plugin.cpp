@@ -17,6 +17,7 @@
 #include "live_plugin.h"
 #include "qlivecvmain.h"
 #include "qstaticloader.h"
+#include "qstaticloaderproperty.h"
 #include "qenginemonitor.h"
 #include "qstaticcontainer.h"
 #include "qabstractcodeserializer.h"
@@ -32,8 +33,9 @@
 
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
-    qmlRegisterType<lcv::QLiveCVMain>(  uri, 1, 0, "Main");
-    qmlRegisterType<lcv::QStaticLoader>(uri, 1, 0, "StaticLoader");
+    qmlRegisterType<lcv::QLiveCVMain>(          uri, 1, 0, "Main");
+    qmlRegisterType<lcv::QStaticLoader>(        uri, 1, 0, "StaticLoader");
+    qmlRegisterType<lcv::QStaticLoaderProperty>(uri, 1, 0, "StaticLoaderProperty");
 
     qmlRegisterUncreatableType<lcv::QAbstractCodeSerializer>(
         uri, 1, 0, "AbstractCodeSerializer", "Code serializer is of abstract type."

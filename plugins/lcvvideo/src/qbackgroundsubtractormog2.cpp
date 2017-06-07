@@ -38,9 +38,7 @@ using namespace cv;
   \instantiates QBackgroundSubtractorMog2
   \inqmlmodule lcvvideo
   \inherits BackgroundSubtractor
-  \brief Gaussian mixture based background/foreground segmentation algorithm.
-
-  Gaussian mixture based background/foreground segmentation algorithm.
+  \brief Gaussian mixture based background/foreground segmentation algorithm.  This is a \b {static item}.
 
   \quotefile video/backgroundsubtractormog2.qml
 */
@@ -48,6 +46,7 @@ using namespace cv;
 /*!
    \class QBackgroundSubtractorMog2
    \inmodule lcvvideo_cpp
+   \internal
    \brief Gaussian mixture based background/foreground segmentation algorithm.
  */
 
@@ -130,12 +129,6 @@ BackgroundSubtractor* QBackgroundSubtractorMog2Private::subtractor(){
 
 // QBackgroundSubtractorMog2 Implementation
 // ------------------------------------
-
-/*!
-   \class QBackgroundSubtractorMog2
-   \inmodule lcvvideo_cpp
-   \brief Subtracts background using Mog2 algorithm.
- */
 
 /*!
   \brief QBackgroundSubtractorMog2 constructor
@@ -449,6 +442,12 @@ void QBackgroundSubtractorMog2::setVarThresholdGen(float varThresholdGen){
     }
 }
 
+
+/*!
+  \qmlmethod BackgroundSubtractorMog2::staticLoad(string key)
+
+  Loads the BackgroundSubtractorMog2 state from the given \a key.
+ */
 void QBackgroundSubtractorMog2::staticLoad(const QString &id){
     Q_D(QBackgroundSubtractorMog2);
     QStaticContainer* container = QStaticContainer::grabFromContext(this);
