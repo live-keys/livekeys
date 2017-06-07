@@ -7,7 +7,7 @@
 
 project = Live CV
 description = Live CV Reference Documentation
-version = 1.1.0
+version = 1.4.0
 
 # The headerdirs variable specifies the directories
 # containing the header files associated
