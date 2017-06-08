@@ -30,7 +30,7 @@ class QMatRoi : public QMatFilter{
 public:
     explicit QMatRoi(QQuickItem *parent = 0);
 
-    virtual void transform(cv::Mat &in, cv::Mat &out);
+    virtual void transform(const cv::Mat &in, cv::Mat &out);
 
     int regionX() const;
     int regionY() const;

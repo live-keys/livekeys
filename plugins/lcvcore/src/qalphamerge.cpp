@@ -44,18 +44,19 @@ QAlphaMerge::QAlphaMerge(QQuickItem *parent) :
  */
 
 
-void QAlphaMerge::transform(cv::Mat &in, cv::Mat &out){
+void QAlphaMerge::transform(const cv::Mat &in, cv::Mat &out){
     if ( mask() )
         mergeMask(in, *mask()->cvMat(), out);
 }
 
-void QAlphaMerge::mergeMask(cv::Mat &input, cv::Mat &mask, cv::Mat &output){
+void QAlphaMerge::mergeMask(const cv::Mat &input, cv::Mat &mask, cv::Mat &output){
     if ( input.cols != mask.cols || input.rows != mask.rows ){
         qWarning("Open CV Error: Different mask size.");
         return;
     }
     output.create(input.size(), CV_8UC4);
-    uchar* pi, *pm, *po;
+    const uchar* pi;
+    uchar *pm, *po;
     if ( input.channels() == 1 ){
         for ( int i = 0; i < input.rows; ++i ){
             pi = input.ptr<uchar>(i);

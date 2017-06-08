@@ -109,7 +109,7 @@ QFilter2D::~QFilter2D(){
   \a in
   \a out
  */
-void QFilter2D::transform(cv::Mat &in, cv::Mat &out){
+void QFilter2D::transform(const cv::Mat &in, cv::Mat &out){
     if ( m_kernel ){
         Mat* m = m_kernel->cvMat();
         if ( m->cols > 0 || m->rows > 0 ){

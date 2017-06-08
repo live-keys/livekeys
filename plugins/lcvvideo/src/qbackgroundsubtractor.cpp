@@ -111,14 +111,14 @@ void QBackgroundSubtractor::setLearningRate(double rate){
 }
 
 /*!
-  \fn virtual void QBackgroundSubtractor::transform(cv::Mat& in, cv::Mat& out)
+  \fn virtual void QBackgroundSubtractor::transform(const cv::Mat& in, cv::Mat& out)
   \brief Filtering function.
 
   Parameters :
   \a in
   \a out
  */
-void QBackgroundSubtractor::transform(Mat& in, Mat& out){
+void QBackgroundSubtractor::transform(const Mat& in, Mat& out){
     Q_D(QBackgroundSubtractor);
     BackgroundSubtractor* subtractor = d->subtractor();
     if ( subtractor && !in.empty() )

@@ -259,7 +259,7 @@ public:
 public:
     explicit QCvtColor(QQuickItem *parent = 0);
 
-    virtual void transform(cv::Mat &in, cv::Mat&);
+    virtual void transform(const cv::Mat &in, cv::Mat&);
 
     CvtType code() const;
     void setCode(CvtType arg);

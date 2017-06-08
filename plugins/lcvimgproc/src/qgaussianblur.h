@@ -31,7 +31,7 @@ public:
     explicit QGaussianBlur(QQuickItem *parent = 0);
     ~QGaussianBlur();
 
-    virtual void transform(cv::Mat& in, cv::Mat& out);
+    virtual void transform(const cv::Mat& in, cv::Mat& out);
 
     const QSize& ksize() const;
     double sigmaX() const;

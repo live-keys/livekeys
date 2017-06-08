@@ -31,7 +31,7 @@ public:
     explicit QBlur(QQuickItem *parent = 0);
     ~QBlur();
 
-    virtual void transform(cv::Mat &in, cv::Mat &out);
+    virtual void transform(const cv::Mat &in, cv::Mat &out);
 
 signals:
     void ksizeChanged();

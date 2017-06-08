@@ -59,7 +59,7 @@ public:
     QCalcOpticalFlowPyrLKPrivate();
     ~QCalcOpticalFlowPyrLKPrivate();
 
-    void calculateFlow(cv::Mat& input);
+    void calculateFlow(const Mat &input);
     void draw(cv::Mat& frame, cv::Mat& m);
     void addPoint(const cv::Point& p);
 
@@ -96,7 +96,7 @@ QCalcOpticalFlowPyrLKPrivate::QCalcOpticalFlowPyrLKPrivate()
 QCalcOpticalFlowPyrLKPrivate::~QCalcOpticalFlowPyrLKPrivate(){
 }
 
-void QCalcOpticalFlowPyrLKPrivate::calculateFlow(cv::Mat& input){
+void QCalcOpticalFlowPyrLKPrivate::calculateFlow(const cv::Mat& input){
     if ( !pointState ){
         qWarning("This item requires staticLoading.");
         return;
@@ -336,14 +336,14 @@ void QCalcOpticalFlowPyrLK::setMinEigThreshold(double minEigThreshold){
 }
 
 /*!
-  \fn virtual void QCalcOpticalFlowPyrLK::transform(cv::Mat& in, cv::Mat& out)
+  \fn virtual void QCalcOpticalFlowPyrLK::transform(const cv::Mat& in, cv::Mat& out)
   \brief Filtering function.
 
   Parameters :
   \a in
   \a out
  */
-void QCalcOpticalFlowPyrLK::transform(Mat& in, Mat&){
+void QCalcOpticalFlowPyrLK::transform(const Mat& in, Mat&){
     Q_D(QCalcOpticalFlowPyrLK);
     d->calculateFlow(in);
 }

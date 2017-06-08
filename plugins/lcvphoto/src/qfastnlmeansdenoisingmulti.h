@@ -45,7 +45,7 @@ public:
     explicit QFastNlMeansDenoisingMulti(QQuickItem *parent = 0);
     ~QFastNlMeansDenoisingMulti();
 
-    virtual void transform(cv::Mat &in, cv::Mat &out);
+    virtual void transform(const cv::Mat &in, cv::Mat &out);
 
     int temporalWindowSize() const;
 

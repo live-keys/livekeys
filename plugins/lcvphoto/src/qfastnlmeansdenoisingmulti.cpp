@@ -113,7 +113,7 @@ void QFastNlMeansDenoisingMulti::trimFrameHistory(std::size_t size){
   \a in
   \a out
  */
-void QFastNlMeansDenoisingMulti::transform(Mat &in, Mat &out){
+void QFastNlMeansDenoisingMulti::transform(const Mat &in, Mat &out){
     if ( !in.empty() ){ // fastNlMeansDenoising hangs on empty Mat
         trimFrameHistory(temporalWindowSize() - 1);
         m_frameHistory.push_back(in);

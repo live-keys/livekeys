@@ -31,7 +31,7 @@ public:
     explicit QCanny(QQuickItem *parent = 0);
     ~QCanny();
 
-    virtual void transform(cv::Mat &in, cv::Mat &out);
+    virtual void transform(const cv::Mat &in, cv::Mat &out);
 
     double threshold1()  const;
     double threshold2()  const;

@@ -86,6 +86,6 @@ QCanny::~QCanny(){
   \a in
   \a out
  */
-void QCanny::transform(cv::Mat &in, cv::Mat &out){
+void QCanny::transform(const cv::Mat &in, cv::Mat &out){
     cv::Canny(in, out, m_threshold1, m_threshold2, m_apertureSize, m_l2gradient);
 }

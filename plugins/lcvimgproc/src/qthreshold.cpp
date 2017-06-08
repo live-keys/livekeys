@@ -120,6 +120,6 @@ QThreshold::~QThreshold()
   \a in
   \a out
  */
-void QThreshold::transform(cv::Mat &in, cv::Mat &out){
+void QThreshold::transform(const cv::Mat &in, cv::Mat &out){
     cv::threshold(in, out, m_thresh, m_maxVal, m_type);
 }

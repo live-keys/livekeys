@@ -91,6 +91,6 @@ QGaussianBlur::~QGaussianBlur(){
   \a in
   \a out
  */
-void QGaussianBlur::transform(cv::Mat &in, cv::Mat &out){
+void QGaussianBlur::transform(const cv::Mat &in, cv::Mat &out){
     GaussianBlur(in, out, cv::Size(m_ksize.width(), m_ksize.height()), m_sigmaX, m_sigmaY, m_borderType);
 }

@@ -31,7 +31,7 @@ public:
     QMat* input2();
     void setInput2(QMat* m);
 
-    void transform(cv::Mat& in, cv::Mat& out);
+    void transform(const cv::Mat& in, cv::Mat& out);
 
 signals:
     void input2Changed();
