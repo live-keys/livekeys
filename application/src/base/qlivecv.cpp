@@ -21,7 +21,6 @@
 #include "qeditorsettings.h"
 
 #include "qlivecvarguments.h"
-//#include "qlicensecontainer.h"
 #include "qlivecvscript.h"
 #include "qlivepalettecontainer.h"
 
@@ -214,9 +213,6 @@ void QLiveCV::registerTypes(){
     qmlRegisterUncreatableType<lcv::QEditorSettings>(
         "Cv", 1, 0, "EditorSettings", "EditorSettings is available through the settings.editor property."
     );
-//    qmlRegisterUncreatableType<lcv::QLicenseContainer>(
-//        "Cv", 1, 0, "LicenseContainer", "LicenseContainer is available through the settings.license property."
-//    );
 }
 
 QByteArray QLiveCV::extractPluginInfo(const QString &import) const{

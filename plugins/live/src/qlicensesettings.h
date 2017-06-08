@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLICENSECONTAINER_H
-#define QLICENSECONTAINER_H
+#ifndef QLICENSESETTINGS_H
+#define QLICENSESETTINGS_H
 
 #include <QObject>
 #include <QHash>
@@ -35,7 +35,7 @@ public:
     bool    highlight;
 };
 
-class Q_LIVE_EXPORT QLicenseContainer : public QAbstractListModel{
+class Q_LIVE_EXPORT QLicenseSettings : public QAbstractListModel{
 
     Q_OBJECT
     Q_PROPERTY(int highlights READ highlights NOTIFY highlightsChanged)
@@ -48,14 +48,17 @@ class Q_LIVE_EXPORT QLicenseContainer : public QAbstractListModel{
     };
 
 public:
-    explicit QLicenseContainer(QObject *parent = 0);
-    ~QLicenseContainer();
+    explicit QLicenseSettings(const QString& settingsPath, QObject *parent = 0);
+    ~QLicenseSettings();
 
     int rowCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
     QHash<int, QByteArray> roleNames() const;
 
     bool require(const QString& id, const QString& alias, const QString& text);
+
+    void reparse();
+    void save();
 
     void fromJson(const QJsonArray& root);
     QJsonArray toJson() const;
@@ -64,8 +67,8 @@ public:
 
     bool isDirty() const;
 
-    static QLicenseContainer* grabFromContext(
-        QQuickItem* item,
+    static QLicenseSettings* grabFromContext(
+        QObject* item,
         const QString& settingsProperty = "settings",
         const QString& contextProperty = "license"
     );
@@ -93,21 +96,25 @@ private:
     QHash<int, QByteArray>         m_roles;
     bool                           m_isDirty;
     int                            m_highlights;
+
+    QString                        m_licenseFile;
+    bool                           m_parseError;
+    QString                        m_errorText;
 };
 
-inline QHash<int, QByteArray> QLicenseContainer::roleNames() const{
+inline QHash<int, QByteArray> QLicenseSettings::roleNames() const{
     return m_roles;
 }
 
-inline int QLicenseContainer::highlights() const{
+inline int QLicenseSettings::highlights() const{
     return m_highlights;
 }
 
-inline bool QLicenseContainer::isDirty() const{
+inline bool QLicenseSettings::isDirty() const{
     return m_isDirty;
 }
 
-inline bool QLicenseContainer::isLicenseValid(const QString &id){
+inline bool QLicenseSettings::isLicenseValid(const QString &id){
     QHash<QString, QLiveCVLicense>::Iterator it = m_licenses.find(id);
     if ( it == m_licenses.end() )
         return false;
@@ -116,4 +123,4 @@ inline bool QLicenseContainer::isLicenseValid(const QString &id){
 
 }// namespace
 
-#endif // QLICENSECONTAINER_H
+#endif // QLICENSESETTINGS_H

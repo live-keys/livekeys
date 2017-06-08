@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 import QtQuick 2.3
+import live 1.0
 
 Rectangle {
     id : container
@@ -27,6 +28,8 @@ Rectangle {
 
     property bool isLogWindowDirty     : false
     property bool isTextDirty          : false
+
+    property var licenseSettings: settings.custom('license')
 
     signal messageYes()
     signal messageNo()
@@ -44,6 +47,7 @@ Rectangle {
     function questionSave(){
         messageBox.visible = true
     }
+
 
     // Logo
 
@@ -266,8 +270,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 465
-//        color : settings.license.highlights > 0 ? "#44130b" : "#0c1924" //NO LICENSES
-        color: "#0c1924"
+        color : settings.custom('license').highlights > 0 ? "#44130b" : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : openLicenseArea.containsMouse ? parent.height : parent.height - 5

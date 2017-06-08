@@ -22,25 +22,27 @@
 
 namespace lcv{
 
-class QLicenseSettings;
-class QLicenseContainer;
 class QLiveCVSettings : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lcv::QEditorSettings*   editor  READ editor  CONSTANT)
-    Q_PROPERTY(lcv::QLicenseContainer* license READ license CONSTANT)
+    Q_PROPERTY(lcv::QEditorSettings*   editor  READ editor      CONSTANT)
     Q_PROPERTY(bool previewMode                READ previewMode CONSTANT)
+    Q_PROPERTY(QString path                    READ path        CONSTANT)
 
 public:
     ~QLiveCVSettings();
 
     lcv::QEditorSettings*   editor();
-    lcv::QLicenseContainer* license();
 
     static QLiveCVSettings* initialize(const QString& path, QObject* parent = 0);
 
     bool previewMode() const;
     void setPreviewMode(bool previewMode);
+
+    const QString& path() const;
+
+public slots:
+    QObject* custom(const QString& key);
 
 private:
     QLiveCVSettings(const QString& path, QObject* parent = 0);
@@ -48,7 +50,6 @@ private:
 private:
     QString           m_path;
     QEditorSettings*  m_editor;
-    QLicenseSettings* m_license;
     bool              m_previewMode;
 };
 
@@ -62,6 +63,10 @@ inline bool QLiveCVSettings::previewMode() const{
 
 inline void QLiveCVSettings::setPreviewMode(bool previewMode){
     m_previewMode = previewMode;
+}
+
+inline const QString &QLiveCVSettings::path() const{
+    return m_path;
 }
 
 }// namespace

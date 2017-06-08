@@ -8,8 +8,8 @@ HEADERS += \
     $$PWD/qstaticloader.h \
     $$PWD/qscriptcommandlineparser_p.h \
     $$PWD/qenginemonitor.h \
-    $$PWD/qstaticloaderproperty.h
-#    $$PWD/qlicensecontainer.h
+    $$PWD/qstaticloaderproperty.h \
+    $$PWD/qlicensesettings.h
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
@@ -18,5 +18,5 @@ SOURCES += \
     $$PWD/qstaticloader.cpp \
     $$PWD/qscriptcommandlineparser.cpp \
     $$PWD/qenginemonitor.cpp \
-    $$PWD/qstaticloaderproperty.cpp
-#    $$PWD/qlicensecontainer.cpp
+    $$PWD/qstaticloaderproperty.cpp \
+    $$PWD/qlicensesettings.cpp

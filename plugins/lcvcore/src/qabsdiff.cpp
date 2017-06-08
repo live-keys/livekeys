@@ -45,7 +45,7 @@ QAbsDiff::~QAbsDiff(){
   Second input for the subtraction.
  */
 
-void QAbsDiff::transform(cv::Mat &in, cv::Mat &out){
+void QAbsDiff::transform(const cv::Mat &in, cv::Mat &out){
     if ( in.size() == m_in2->cvMat()->size() )
         cv::absdiff(in, *m_in2->cvMat(), out);
 }

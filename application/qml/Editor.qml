@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.3
+import QtQuick 2.4
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import Cv 1.0
@@ -93,7 +93,7 @@ Rectangle{
             width: 30
             height: parent.height
             anchors.right: parent.right
-            anchors.rightMargin: 35
+            anchors.rightMargin: 85
             visible : project.inFocus !== null
             Text{
                 font.family: "Open Sans, sans-serif"
@@ -101,11 +101,36 @@ Rectangle{
                 font.weight: Font.Light
                 text: 'x'
                 color: "#7b838b"
-                anchors.centerIn: parent
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 3
             }
             MouseArea{
                 anchors.fill: parent
                 onClicked: editor.closeFocusedFile()
+            }
+        }
+
+        Rectangle{
+            width: 50
+            height: parent.height
+            anchors.right: parent.right
+            anchors.rightMargin: 31
+            visible : project.inFocus !== null
+            gradient: Gradient{
+                GradientStop { position: 0.0;  color: "#08141f" }
+                GradientStop { position: 0.30; color: "#09141e" }
+            }
+            Text{
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 11
+                text:
+                    (Math.floor(editorArea.cursorRectangle.y / editorMetrics.height) + 1) + ', ' +
+                    (Math.floor(editorArea.cursorRectangle.x / editorMetrics.averageCharacterWidth) + 1)
+                color: "#4b555f"
+                anchors.left: parent.left
+                anchors.leftMargin: 7
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
 
@@ -115,11 +140,11 @@ Rectangle{
             height: parent.height
             gradient: Gradient{
                 GradientStop { position: 0.0;  color: "#08141f" }
-                GradientStop { position: 0.30; color: "#08131c" }
+                GradientStop { position: 0.30; color: "#0a151e" }
             }
 
             Image{
-                id : openProjectImage
+                id : toggleNavigationImage
                 anchors.centerIn: parent
                 source : "qrc:/images/toggle-navigation.png"
             }
@@ -129,6 +154,12 @@ Rectangle{
                 onClicked: editor.toggleNavigation()
             }
         }
+
+    }
+
+    FontMetrics{
+        id: editorMetrics
+        font: editorArea.font
     }
 
     Rectangle{
