@@ -14,58 +14,73 @@
 **
 ****************************************************************************/
 
-#include "qlicensecontainer.h"
+#include "qlicensesettings.h"
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
 
 #include <QQuickItem>
 #include <QQmlContext>
+#include <QQmlEngine>
 #include <QVariant>
+
+#include <QFile>
+#include <QDir>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 namespace lcv{
 
-QLicenseContainer::QLicenseContainer(QObject *parent)
+
+
+
+QLicenseSettings::QLicenseSettings(const QString &settingsPath, QObject *parent)
     : QAbstractListModel(parent)
     , m_isDirty(false)
     , m_highlights(0)
 {
-    m_roles[QLicenseContainer::Id]        = "id";
-    m_roles[QLicenseContainer::Alias]     = "alias";
-    m_roles[QLicenseContainer::Text]      = "text";
-    m_roles[QLicenseContainer::Valid]     = "valid";
-    m_roles[QLicenseContainer::Highlight] = "highlight";
+    m_licenseFile = QDir::cleanPath(settingsPath + "/licenses.json");
+
+    m_roles[QLicenseSettings::Id]        = "id";
+    m_roles[QLicenseSettings::Alias]     = "alias";
+    m_roles[QLicenseSettings::Text]      = "text";
+    m_roles[QLicenseSettings::Valid]     = "valid";
+    m_roles[QLicenseSettings::Highlight] = "highlight";
+
+    reparse();
 }
 
-QLicenseContainer::~QLicenseContainer(){
+QLicenseSettings::~QLicenseSettings(){
+    save();
 }
 
-int QLicenseContainer::rowCount(const QModelIndex &) const{
+int QLicenseSettings::rowCount(const QModelIndex &) const{
     return m_licenses.size();
 }
 
-QVariant QLicenseContainer::data(const QModelIndex &index, int role) const{
+QVariant QLicenseSettings::data(const QModelIndex &index, int role) const{
     if ( !index.isValid() )
         return QVariant();
 
     int row = index.row();
     QHash<QString, QLiveCVLicense>::ConstIterator it = m_licenses.begin() + row;
 
-    if ( role == QLicenseContainer::Id ){
+    if ( role == QLicenseSettings::Id ){
         return it.key();
-    } else if ( role == QLicenseContainer::Alias ){
+    } else if ( role == QLicenseSettings::Alias ){
         return it.value().alias;
-    } else if ( role == QLicenseContainer::Text ){
+    } else if ( role == QLicenseSettings::Text ){
         return it.value().text;
-    } else if ( role == QLicenseContainer::Valid ){
+    } else if ( role == QLicenseSettings::Valid ){
         return it.value().valid;
-    } else if ( role == QLicenseContainer::Highlight ){
+    } else if ( role == QLicenseSettings::Highlight ){
         return it.value().highlight;
     }
     return QVariant();
 }
 
-bool QLicenseContainer::require(const QString &id, const QString &alias, const QString &text){
+bool QLicenseSettings::require(const QString &id, const QString &alias, const QString &text){
     QHash<QString, QLiveCVLicense>::Iterator it = m_licenses.find(id);
     if ( it == m_licenses.end() ){
         addLicense(id, alias, text, false, true);
@@ -87,7 +102,7 @@ bool QLicenseContainer::require(const QString &id, const QString &alias, const Q
             emit dataChanged(
                 createIndex(row, 0),
                 createIndex(row, 0),
-                (QVector<int>() << QLicenseContainer::Highlight << QLicenseContainer::Valid)
+                (QVector<int>() << QLicenseSettings::Highlight << QLicenseSettings::Valid)
             );
             m_isDirty = true;
         }
@@ -95,7 +110,41 @@ bool QLicenseContainer::require(const QString &id, const QString &alias, const Q
     }
 }
 
-void QLicenseContainer::fromJson(const QJsonArray& root){
+void QLicenseSettings::reparse(){
+    QFile file(m_licenseFile);
+    if ( file.open(QIODevice::ReadOnly) ){
+        QJsonParseError error;
+        QJsonDocument jsondoc = QJsonDocument::fromJson(file.readAll(), &error);
+        if ( error.error != QJsonParseError::NoError ){
+            m_parseError = true;
+            m_errorText  = error.errorString();
+            qCritical(
+                "Failed to parse stored licenses file(config/licenses.json): %s. Licenses will not be saved.",
+                qPrintable(m_errorText)
+            );
+        }
+        fromJson(jsondoc.array());
+        file.close();
+    }
+}
+
+void QLicenseSettings::save(){
+    qDebug() << m_licenseFile;
+    if ( m_parseError || !isDirty() )
+        return;
+
+    QFile file(m_licenseFile);
+    if ( file.open(QIODevice::WriteOnly) ){
+        QJsonArray root = toJson();
+        file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+        file.close();
+    } else {
+        qCritical("Failed to save license settings to to file: \'%s\'. Make sure the "
+                  "path exists and you have set the correct access rights.", qPrintable(m_licenseFile));
+    }
+}
+
+void QLicenseSettings::fromJson(const QJsonArray& root){
     beginResetModel();
     m_licenses.clear();
     m_highlights = 0;
@@ -113,7 +162,7 @@ void QLicenseContainer::fromJson(const QJsonArray& root){
     }
 }
 
-QJsonArray QLicenseContainer::toJson() const{
+QJsonArray QLicenseSettings::toJson() const{
     QJsonArray root;
     for( QHash<QString, QLiveCVLicense>::ConstIterator it = m_licenses.begin(); it != m_licenses.end(); ++it ){
         QJsonObject licenseOb;
@@ -126,21 +175,23 @@ QJsonArray QLicenseContainer::toJson() const{
     return root;
 }
 
-QLicenseContainer *QLicenseContainer::grabFromContext(
-        QQuickItem *item,
+QLicenseSettings *QLicenseSettings::grabFromContext(QObject *item,
         const QString &settingsProperty,
         const QString &contextProperty)
 {
-    QQmlContext* context = qmlContext(item);
+    QQmlEngine* engine = qmlEngine(item);
+    if ( !engine )
+        return 0;
+    QQmlContext* context = engine->rootContext();
     if ( !context )
         return 0;
     QObject* settings = context->contextProperty(settingsProperty).value<QObject*>();
     if ( !settings )
         return 0;
-    return static_cast<QLicenseContainer*>(settings->property(contextProperty.toUtf8()).value<QObject*>());
+    return static_cast<QLicenseSettings*>(settings->property(contextProperty.toUtf8()).value<QObject*>());
 }
 
-void QLicenseContainer::acceptLicense(const QString &id){
+void QLicenseSettings::acceptLicense(const QString &id){
     QHash<QString, QLiveCVLicense>::Iterator it = m_licenses.find(id);
     if ( it != m_licenses.end() ){
         if ( it->valid == false ){
@@ -155,7 +206,7 @@ void QLicenseContainer::acceptLicense(const QString &id){
             emit dataChanged(
                 createIndex(row, 0),
                 createIndex(row, 0),
-                (QVector<int>() << QLicenseContainer::Highlight << QLicenseContainer::Valid)
+                (QVector<int>() << QLicenseSettings::Highlight << QLicenseSettings::Valid)
             );
             emit licenseAccepted(id);
             m_isDirty = true;
@@ -163,7 +214,7 @@ void QLicenseContainer::acceptLicense(const QString &id){
     }
 }
 
-void QLicenseContainer::addLicense(
+void QLicenseSettings::addLicense(
         const QString &id,
         const QString &alias,
         const QString &text,
@@ -189,11 +240,11 @@ void QLicenseContainer::addLicense(
     m_isDirty = true;
 }
 
-bool QLicenseContainer::hasLicense(const QString &id){
+bool QLicenseSettings::hasLicense(const QString &id){
     return m_licenses.contains(id);
 }
 
-QString QLicenseContainer::licenseText(const QString &id){
+QString QLicenseSettings::licenseText(const QString &id){
     if ( hasLicense(id) )
         return m_licenses[id].text;
     return QString();

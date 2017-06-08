@@ -165,7 +165,7 @@ Rectangle{
 
                 ListView{
                     id: licenseList
-                    model : settings.license
+                    model : settings.custom('license')
                     width: parent.width
                     height: parent.height
                     clip: true
@@ -269,9 +269,12 @@ Rectangle{
                     id: messageLabel
                     anchors.left: parent.left
                     anchors.leftMargin: 12
+                    anchors.top: parent.top
+                    anchors.topMargin: 12
 
-                    text: licenseList.currentItem ?
-                              settings.license.licenseText(licenseList.currentItem.licenseId) : "No licenses available."
+                    text: licenseList.currentItem
+                          ? settings.custom('license').licenseText(licenseList.currentItem.licenseId)
+                          : "No license selected."
 
                     width: boxRight.width - 24
 
@@ -311,7 +314,7 @@ Rectangle{
                     id: acceptButtonArea
                     anchors.fill: parent
                     hoverEnabled: true
-                    onClicked: settings.license.acceptLicense(licenseList.currentItem.licenseId)
+                    onClicked: settings.custom('license').acceptLicense(licenseList.currentItem.licenseId)
                 }
             }
         }
