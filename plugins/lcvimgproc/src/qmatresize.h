@@ -56,7 +56,7 @@ public:
     int interpolation() const;
     void setInterpolation(int interpolation);
 
-    void transform(cv::Mat& in, cv::Mat& out);
+    void transform(const cv::Mat& in, cv::Mat& out);
 
 signals:
     void matSizeChanged();

@@ -97,7 +97,7 @@ QDenoiseTvl1::~QDenoiseTvl1(){
   \a in
   \a out
  */
-void QDenoiseTvl1::transform(Mat &in, Mat &out){
+void QDenoiseTvl1::transform(const Mat &in, Mat &out){
     if ( !in.empty() ) {
         trimBuffer(m_bufferSize - 1);
         m_matBuffer.push_back(in);

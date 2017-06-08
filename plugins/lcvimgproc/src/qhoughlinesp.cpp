@@ -125,7 +125,7 @@ QHoughLinesP::~QHoughLinesP(){
   \a in
   \a out
  */
-void QHoughLinesP::transform(cv::Mat &in, cv::Mat&){
+void QHoughLinesP::transform(const cv::Mat &in, cv::Mat&){
     Q_D(QHoughLinesP);
     if ( in.size() != Size(0, 0) ){
         if ( m_rho > 0 && m_theta > 0 && m_threshold > 0 )

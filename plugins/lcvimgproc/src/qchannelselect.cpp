@@ -57,7 +57,7 @@ QChannelSelect::~QChannelSelect(){
   \a in
   \a out
  */
-void QChannelSelect::transform(cv::Mat &in, cv::Mat &out){
+void QChannelSelect::transform(const cv::Mat &in, cv::Mat &out){
     if ( out.channels() == 3 )
         cv::cvtColor(out, out, CV_BGR2GRAY);
     if ( !in.empty() ){

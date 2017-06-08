@@ -125,7 +125,7 @@ QCopyMakeBorder::~QCopyMakeBorder(){
   \a in
   \a out
  */
-void QCopyMakeBorder::transform(cv::Mat &in, cv::Mat &out){
+void QCopyMakeBorder::transform(const cv::Mat &in, cv::Mat &out){
     Scalar value;
     if ( m_color.isValid() ){
         if ( out.channels() == 1 )

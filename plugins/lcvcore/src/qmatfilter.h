@@ -33,7 +33,7 @@ public:
     void setInputMat(QMat* mat);
 
     void transform();
-    virtual void transform(cv::Mat& in, cv::Mat& out);
+    virtual void transform(const cv::Mat& in, cv::Mat& out);
 
 signals:
     void inputChanged();

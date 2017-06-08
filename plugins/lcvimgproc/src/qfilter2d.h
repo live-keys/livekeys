@@ -32,7 +32,7 @@ public:
     explicit QFilter2D(QQuickItem *parent = 0);
     ~QFilter2D();
 
-    void transform(cv::Mat& in, cv::Mat& out);
+    void transform(const cv::Mat& in, cv::Mat& out);
 
 signals:
     void ddepthChanged();

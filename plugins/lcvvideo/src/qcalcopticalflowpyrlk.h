@@ -42,7 +42,7 @@ public:
     double minEigThreshold() const;
     void setMinEigThreshold(double minEigThreshold);
 
-    virtual void transform(cv::Mat& in, cv::Mat& out);
+    virtual void transform(const cv::Mat& in, cv::Mat& out);
     virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
 
 public slots:

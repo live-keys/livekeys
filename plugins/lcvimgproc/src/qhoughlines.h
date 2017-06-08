@@ -35,7 +35,7 @@ public:
     explicit QHoughLines(QQuickItem *parent = 0);
     ~QHoughLines();
 
-    virtual void     transform(cv::Mat& in, cv::Mat& out);
+    virtual void     transform(const cv::Mat& in, cv::Mat& out);
     virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
 
     double rho() const;

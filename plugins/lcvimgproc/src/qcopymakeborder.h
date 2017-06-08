@@ -48,7 +48,7 @@ public:
     explicit QCopyMakeBorder(QQuickItem *parent = 0);
     ~QCopyMakeBorder();
 
-    virtual void transform(cv::Mat& in, cv::Mat& out);
+    virtual void transform(const cv::Mat& in, cv::Mat& out);
 
 signals:
     void topChanged();

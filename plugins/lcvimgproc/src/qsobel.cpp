@@ -140,7 +140,7 @@ QSGNode *QSobel::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData 
   \a in
   \a out
  */
-void QSobel::transform(cv::Mat &in, cv::Mat &out){
+void QSobel::transform(const cv::Mat &in, cv::Mat &out){
     if ( in.size() != Size(0, 0) )
         Sobel(in, out, m_ddepth, m_xorder, m_yorder, m_ksize, m_scale, m_delta, m_borderType);
 }

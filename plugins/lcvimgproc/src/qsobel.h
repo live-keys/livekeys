@@ -37,7 +37,7 @@ public:
     virtual ~QSobel();
 
     virtual QSGNode *updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData);
-    virtual void transform(cv::Mat& in, cv::Mat& out);
+    virtual void transform(const cv::Mat& in, cv::Mat& out);
 
     QMat::Type ddepth() const;
     int    xorder() const;

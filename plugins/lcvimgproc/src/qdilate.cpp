@@ -124,7 +124,7 @@ QDilate::~QDilate(){
   \a in
   \a out
  */
-void QDilate::transform(cv::Mat &in, cv::Mat &out){
+void QDilate::transform(const cv::Mat &in, cv::Mat &out){
     if ( m_kernel ){
         Scalar borderValue = morphologyDefaultBorderValue();
         if ( m_borderValue.isValid() ){

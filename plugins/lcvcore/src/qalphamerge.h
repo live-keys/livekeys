@@ -29,8 +29,8 @@ public:
     QMat* mask();
     void setMask(QMat* mask);
 
-    virtual void transform(cv::Mat &in, cv::Mat &out);
-    static void mergeMask( cv::Mat& input, cv::Mat& mask, cv::Mat& output);
+    virtual void transform(const cv::Mat &in, cv::Mat &out);
+    static void mergeMask(const cv::Mat &input, cv::Mat& mask, cv::Mat& output);
 
 signals:
     void maskChanged();

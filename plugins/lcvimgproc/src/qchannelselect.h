@@ -28,7 +28,7 @@ public:
     explicit QChannelSelect(QQuickItem *parent = 0);
     virtual ~QChannelSelect();
 
-    virtual void transform(cv::Mat &in, cv::Mat &out);
+    virtual void transform(const cv::Mat &in, cv::Mat &out);
 
     int channelNo() const;
     void setChannelNo(int channel);

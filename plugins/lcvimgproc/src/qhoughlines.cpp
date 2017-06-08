@@ -124,7 +124,7 @@ QHoughLines::~QHoughLines(){
   \a in
   \a out
  */
-void QHoughLines::transform(cv::Mat &in, cv::Mat&){
+void QHoughLines::transform(const cv::Mat &in, cv::Mat&){
     Q_D(QHoughLines);
     if ( in.size() != Size(0, 0) )
         HoughLines(in, d->lines, m_rho, m_theta, m_threshold, m_srn, m_stn);

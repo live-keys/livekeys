@@ -119,7 +119,7 @@ QFastNlMeansDenoising::~QFastNlMeansDenoising(){
   \a in
   \a out
  */
-void QFastNlMeansDenoising::transform(Mat &in, Mat &out){
+void QFastNlMeansDenoising::transform(const Mat &in, Mat &out){
     if ( !in.empty() ){ // fastNlMeansDenoising hangs on empty Mat
         bool colorEnabled = m_useColorAlgorithm;
         if ( m_autoDetectColor ){

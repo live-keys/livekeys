@@ -46,7 +46,7 @@ public:
     explicit QFastNlMeansDenoising(QQuickItem *parent = 0);
     ~QFastNlMeansDenoising();
 
-    virtual void transform(cv::Mat &in, cv::Mat &out);
+    virtual void transform(const cv::Mat &in, cv::Mat &out);
 
     bool colorAlgorithm() const;
     float h() const;

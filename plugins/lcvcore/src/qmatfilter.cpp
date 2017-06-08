@@ -48,7 +48,7 @@
       QMatToGrey(QQuickItem* parent = 0):QMatFilter(parent){
       }
 
-      void transform(cv::Mat& in, cv::Mat& out){
+      void transform(const cv::Mat& in, cv::Mat& out){
           cvtColor(in, out, CV_BGR2GREY);
       }
 
@@ -111,7 +111,7 @@ QMatFilter::~QMatFilter(){
   \a in
   \a out
  */
-void QMatFilter::transform(cv::Mat&, cv::Mat&){
+void QMatFilter::transform(const cv::Mat&, cv::Mat&){
 }
 
 /*!

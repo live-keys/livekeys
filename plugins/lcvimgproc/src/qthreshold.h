@@ -50,7 +50,7 @@ public:
     QThreshold::Type thresholdType() const;
     void setThresholdType(QThreshold::Type type);
 
-    virtual void transform(cv::Mat &in, cv::Mat &out);
+    virtual void transform(const cv::Mat &in, cv::Mat &out);
 
 signals:
     void threshChanged();

@@ -30,7 +30,7 @@ public:
     explicit QDenoiseTvl1(QQuickItem *parent = 0);
     ~QDenoiseTvl1();
 
-    virtual void transform(cv::Mat &in, cv::Mat &out);
+    virtual void transform(const cv::Mat &in, cv::Mat &out);
 
     bool bufferSize() const;
     int lambda() const;

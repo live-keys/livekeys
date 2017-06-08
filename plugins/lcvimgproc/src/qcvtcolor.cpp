@@ -510,6 +510,6 @@ enum CvtType{
   \a in
   \a out
  */
-void QCvtColor::transform(cv::Mat &in, cv::Mat &out){
+void QCvtColor::transform(const cv::Mat &in, cv::Mat &out){
     cvtColor(in, out, m_code, m_dstCn);
 }

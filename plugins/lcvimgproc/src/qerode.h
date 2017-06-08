@@ -55,7 +55,7 @@ public:
     const QColor& borderValue() const;
     void setBorderValue(const QColor& borderValue);
 
-    void transform(cv::Mat& in, cv::Mat& out);
+    void transform(const cv::Mat& in, cv::Mat& out);
 
 private:
     QMat*      m_kernel;

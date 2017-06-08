@@ -125,7 +125,7 @@ QErode::~QErode(){
   \a in
   \a out
  */
-void QErode::transform(cv::Mat &in, cv::Mat &out){
+void QErode::transform(const cv::Mat &in, cv::Mat &out){
     if ( m_kernel ){
         Scalar borderValue = morphologyDefaultBorderValue();
         if ( m_borderValue.isValid() ){

@@ -98,6 +98,6 @@ QBlur::~QBlur(){
   \a in
   \a out
  */
-void QBlur::transform(cv::Mat &in, cv::Mat &out){
+void QBlur::transform(const cv::Mat &in, cv::Mat &out){
     blur(in, out, Size(m_ksize.width(), m_ksize.height()), Point(m_anchor.x(), m_anchor.y()), m_borderType);
 }
