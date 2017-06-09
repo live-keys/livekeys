@@ -4,13 +4,10 @@
 #include <QObject>
 #include <QVariant>
 
-namespace lcv{
-
 class QStaticLoaderProperty : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QVariant value READ value WRITE setValue NOTIFY valueChanged)
-
 
 public:
     explicit QStaticLoaderProperty(QObject *parent = 0);
@@ -30,7 +27,5 @@ private:
 inline const QVariant &QStaticLoaderProperty::value() const{
     return m_value;
 }
-
-}// namespace
 
 #endif // QSTATICLOADERPROPERTY_H

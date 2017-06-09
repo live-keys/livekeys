@@ -92,8 +92,6 @@
   Emited once the arguments are parsed and the script is ready to run.
  */
 
-namespace lcv{
-
 QLiveCVMain::QLiveCVMain(QQuickItem *parent)
     : QQuickItem(parent)
     , m_parser(0)
@@ -239,5 +237,3 @@ bool QLiveCVMain::isOptionSet(const QString &key) const{
     }
     return m_parser->isSet(option);
 }
-
-}// namespace

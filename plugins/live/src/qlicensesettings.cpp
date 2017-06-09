@@ -30,7 +30,6 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
-namespace lcv{
 
 
 
@@ -250,4 +249,3 @@ QString QLicenseSettings::licenseText(const QString &id){
     return QString();
 }
 
-}// namespace

@@ -18,8 +18,6 @@
 #include "qstaticcontainer.h"
 #include <QQmlEngine>
 
-namespace lcv{
-
 /*!
    \class lcv::QStaticLoader
    \inmodule live_cpp
@@ -159,4 +157,3 @@ void QStaticLoader::createObject(){
     emit itemCreated();
 }
 
-}// namespace

@@ -33,9 +33,9 @@
 
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
-    qmlRegisterType<lcv::QLiveCVMain>(      uri, 1, 0, "Main");
-    qmlRegisterType<lcv::QStaticLoader>(    uri, 1, 0, "StaticLoader");
-    qmlRegisterUncreatableType<lcv::QLicenseSettings>(
+    qmlRegisterType<QLiveCVMain>(      uri, 1, 0, "Main");
+    qmlRegisterType<QStaticLoader>(    uri, 1, 0, "StaticLoader");
+    qmlRegisterUncreatableType<QLicenseSettings>(
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
 
     qmlRegisterUncreatableType<lcv::QAbstractCodeSerializer>(
@@ -49,12 +49,12 @@ void LivePlugin::registerTypes(const char *uri){
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){
     QStaticContainer* sc = new QStaticContainer(engine);
     engine->rootContext()->setContextProperty("staticContainer", sc);
-    lcv::QEngineMonitor* em = new lcv::QEngineMonitor(engine);
+    QEngineMonitor* em = new QEngineMonitor(engine);
     engine->rootContext()->setContextProperty("engineMonitor", em);
 
     QObject* obj = engine->rootContext()->contextProperty("settings").value<QObject*>();
 
     QString settingsPath = obj->property("path").toString();
-    lcv::QLicenseSettings* ls = new lcv::QLicenseSettings(settingsPath, obj);
+    QLicenseSettings* ls = new QLicenseSettings(settingsPath, obj);
     obj->setProperty("license", QVariant::fromValue(ls));
 }

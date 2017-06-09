@@ -20,8 +20,6 @@
 #include <QString>
 #include <QList>
 
-namespace lcv{
-
 class QScriptCommandLineParser{
 
 public:
@@ -76,7 +74,5 @@ inline QScriptCommandLineParser::Option *QScriptCommandLineParser::versionOption
     return m_versionOption;
 }
 
-
-}// namespace
 
 #endif // QSCRIPTCOMMANDLINEPARSER_H

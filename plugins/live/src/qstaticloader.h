@@ -22,8 +22,6 @@
 #include <QQmlComponent>
 #include <QQuickItem>
 
-namespace lcv{
-
 class QStaticLoaderItem;
 class Q_LIVE_EXPORT QStaticLoader : public QQuickItem{
 
@@ -58,7 +56,5 @@ private:
 inline QQmlComponent *QStaticLoader::source() const{
     return m_source;
 }
-
-}// namespace
 
 #endif // QSTATICLOADER_H

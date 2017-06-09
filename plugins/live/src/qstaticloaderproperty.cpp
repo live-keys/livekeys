@@ -2,8 +2,6 @@
 #include <QQmlEngine>
 #include <QtQml>
 
-namespace lcv{
-
 
 /*!
    \class lcv::QStaticLoaderProperty
@@ -56,4 +54,3 @@ void QStaticLoaderProperty::setValue(const QVariant& value){
     emit valueChanged();
 }
 
-}// namespace
