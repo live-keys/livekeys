@@ -17,8 +17,6 @@
 #include "qscriptcommandlineparser_p.h"
 #include <QException>
 
-namespace lcv{
-
 
 /*!
    \class lcv::QScriptCommandLineParser
@@ -255,6 +253,3 @@ void QScriptCommandLineParser::assertIsSet(QScriptCommandLineParser::Option *opt
         throw makeException("Required option has not been set: " + key);
     }
 }
-
-
-}// namespace

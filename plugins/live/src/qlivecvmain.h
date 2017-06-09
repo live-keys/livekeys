@@ -21,8 +21,6 @@
 #include <QJSValue>
 #include "qliveglobal.h"
 
-namespace lcv{
-
 class QScriptCommandLineParser;
 class QLiveCVMain : public QQuickItem{
 
@@ -84,7 +82,5 @@ inline void QLiveCVMain::setVersion(const QString &version){
     m_version = version;
     emit versionChanged();
 }
-
-}// namespace
 
 #endif // QLIVECVMAIN_H

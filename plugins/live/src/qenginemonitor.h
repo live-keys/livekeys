@@ -22,8 +22,6 @@
 
 class QQuickItem;
 
-namespace lcv{
-
 class Q_LIVE_EXPORT QEngineMonitor : public QObject{
 
     Q_OBJECT
@@ -56,7 +54,5 @@ inline void QEngineMonitor::emitAfterCompile(){
 inline void QEngineMonitor::emitTargetChanged(){
     emit targetChanged();
 }
-
-}// namespace
 
 #endif // QENGINEMONITOR_H

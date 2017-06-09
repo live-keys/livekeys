@@ -20,8 +20,6 @@
 #include <QQmlEngine>
 #include <QVariant>
 
-namespace lcv{
-
 /*!
    \class lcv::QEngineMonitor
    \inmodule live_cpp
@@ -93,5 +91,3 @@ QEngineMonitor *QEngineMonitor::grabFromContext(QQuickItem *item, const QString 
     }
     return static_cast<QEngineMonitor*>(ctx->contextProperty(contextProperty).value<QObject*>());
 }
-
-}// namespace

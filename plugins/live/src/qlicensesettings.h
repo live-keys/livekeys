@@ -24,8 +24,6 @@
 
 class QQuickItem;
 
-namespace lcv{
-
 class Q_LIVE_EXPORT QLiveCVLicense{
 public:
     QString id;
@@ -120,7 +118,5 @@ inline bool QLicenseSettings::isLicenseValid(const QString &id){
         return false;
     return it->valid;
 }
-
-}// namespace
 
 #endif // QLICENSESETTINGS_H
