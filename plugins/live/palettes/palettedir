@@ -1,2 +1,3 @@
 int IntPalette.qml
 double DoublePalette.qml
+color ColorPalette.qml
