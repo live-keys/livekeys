@@ -35,6 +35,8 @@ QString QNativeValueCodeSerializer::toCode(const QVariant &value){
               value.type() == QVariant::String ||
               value.type() == QVariant::ByteArray )
         return "\'" + value.toString() + "\'";
+    else if ( value.type() == QVariant::Color )
+        return "\'" + value.toString() + "\'";
 
     qWarning("Failed to convert value: %s", qPrintable(value.toString()));
     return "";

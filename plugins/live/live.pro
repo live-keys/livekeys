@@ -32,3 +32,6 @@ first.depends = $(first) palettecopy
 export(first.depends)
 export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
+
+DISTFILES += \
+    palettes/ColorPalette.qml
