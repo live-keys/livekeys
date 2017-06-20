@@ -13,8 +13,6 @@ DEFINES += Q_LCVCORE_LIB
 
 linkLocalPlugin(live, live)
 
-# Deploying qml is handled by the is_plugin configuration
-
 # Source
 
 include($$PWD/src/lcvcore.pri)
@@ -28,3 +26,16 @@ OTHER_FILES *= \
     qml/plugins.qmltypes
 
 
+# Handling the palettes
+
+OTHER_FILES *= \
+    palettes/palettedir \
+    palettes/*.qml
+
+# Deploy the palettes
+
+palettecopy.commands = $$deployDirCommand($$PWD/palettes, $$PATH_DEPLOY_PLUGINS/$$PLUGIN_NAME/palettes)
+first.depends = $(first) palettecopy
+export(first.depends)
+export(palettecopy.commands)
+QMAKE_EXTRA_TARGETS += first palettecopy

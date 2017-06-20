@@ -21,6 +21,7 @@
 #include "qstaticcontainer.h"
 #include "qabstractcodeserializer.h"
 #include "qnativevaluecodeserializer.h"
+#include "qqmlobjectcodeserializer.h"
 #include "qlicensesettings.h"
 #include "qcodeconverter.h"
 #include "qlivepalette.h"
@@ -42,6 +43,7 @@ void LivePlugin::registerTypes(const char *uri){
         uri, 1, 0, "AbstractCodeSerializer", "Code serializer is of abstract type."
     );
     qmlRegisterType<lcv::QNativeValueCodeSerializer>(uri, 1, 0, "NativeValueCodeSerializer");
+    qmlRegisterType<lcv::QQmlObjectCodeSerializer>(  uri, 1, 0, "QmlObjectCodeSerializer");
     qmlRegisterType<lcv::QCodeConverter>(            uri, 1, 0, "CodeConverter");
     qmlRegisterType<lcv::QLivePalette>(              uri, 1, 0, "LivePalette");
 }

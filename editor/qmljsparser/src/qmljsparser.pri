@@ -19,7 +19,6 @@ HEADERS += \
     $$PWD/qplugininfoextractor.h \
     $$PWD/qdocumentqmlvalueobjects.h \
     $$PWD/qdocumentqmlvaluescanner_p.h \
-    $$PWD/qdocumentqmlfragment.h \
     $$PWD/qqmljssettings.h \
     $$PWD/qcodeqmlhandler.h
 
@@ -38,7 +37,6 @@ SOURCES += \
     $$PWD/qplugininfoextractor.cpp \
     $$PWD/qdocumentqmlvalueobjects.cpp \
     $$PWD/qdocumentqmlvaluescanner.cpp \
-    $$PWD/qdocumentqmlfragment.cpp \
     $$PWD/qqmljssettings.cpp \
     $$PWD/qqmljshighlighter.cpp \
     $$PWD/qcodeqmlhandler.cpp

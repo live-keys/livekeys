@@ -23,6 +23,8 @@
 
 namespace lcv{
 
+class QDocumentEditFragment;
+
 class Q_LCVEDITOR_EXPORT QAbstractCodeSerializer : public QObject{
 
     Q_OBJECT
@@ -31,8 +33,8 @@ public:
     explicit QAbstractCodeSerializer(QObject *parent = 0);
     virtual ~QAbstractCodeSerializer();
 
-    virtual QString toCode(const QVariant& value) = 0;
-    virtual QVariant fromCode(const QString& value) = 0;
+    virtual QString toCode(const QVariant& value, const QDocumentEditFragment* channel) = 0;
+    virtual QVariant fromCode(const QString& value, const QDocumentEditFragment* channel) = 0;
 
 };
 

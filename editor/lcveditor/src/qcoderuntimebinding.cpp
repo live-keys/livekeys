@@ -47,11 +47,13 @@ QCodeRuntimeBinding::~QCodeRuntimeBinding(){
 
 void QCodeRuntimeBinding::updateValue(){
     if ( m_converter ){
-        declaration()->document()->updateBindingValue(
-            this,
-            m_converter->serialize()->toCode(sender()->property(declaration()->identifierChain().last().toUtf8()))
+        QString code = m_converter->serialize()->toCode(
+            sender()->property(declaration()->identifierChain().last().toUtf8()), 0
         );
-        m_modifiedByEngine = true;
+        if ( !code.isEmpty() ){
+            declaration()->document()->updateBindingValue(this, code);
+            m_modifiedByEngine = true;
+        }
     }
 }
 

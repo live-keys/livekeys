@@ -14,37 +14,20 @@
 **
 ****************************************************************************/
 
-#ifndef QDOCUMENTQMLFRAGMENT_H
-#define QDOCUMENTQMLFRAGMENT_H
-
-#include "qqmljsparserglobal.h"
-#include "qdocumenteditfragment.h"
-
-#include <QQmlProperty>
-#include <QQuickItem>
+#include "qdocumentqmlfragment.h"
 
 namespace lcv{
 
-class Q_QMLJSPARSER_EXPORT QDocumentQmlFragment : public QDocumentEditFragment{
-
-public:
-    QDocumentQmlFragment(
+QDocumentQmlFragment::QDocumentQmlFragment(
         QCodeDeclaration::Ptr declaration,
-        QCodeConverter* converter,
-        const QQmlProperty& property
-    );
-    ~QDocumentQmlFragment();
+        QCodeConverter *palette,
+        const QQmlProperty &property)
+    : QDocumentEditFragment(declaration, palette)
+    , m_property(property)
+{
+}
 
-    void commit(const QVariant &value) Q_DECL_OVERRIDE;
-
-private:
-    QQmlProperty m_property;
-};
-
-inline void QDocumentQmlFragment::commit(const QVariant &value){
-    m_property.write(value);
+QDocumentQmlFragment::~QDocumentQmlFragment(){
 }
 
 }// namespace
-
-#endif // QDOCUMENTQMLFRAGMENT_H

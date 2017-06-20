@@ -22,4 +22,6 @@ HEADERS += \
     $$PWD/qnativevaluecodeserializer.h \
     $$PWD/qlivepalette.h \
     $$PWD/qlivepalettecontainer.h \
-    $$PWD/qdocumentcursorinfo.h
+    $$PWD/qdocumentcursorinfo.h \
+    $$PWD/qdocumentqmlfragment.h \
+    $$PWD/qqmlobjectcodeserializer.h
