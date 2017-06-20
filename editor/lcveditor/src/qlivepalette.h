@@ -75,7 +75,7 @@ inline const QVariant& QLivePalette::value() const{
 }
 
 inline void QLivePalette::setValue(const QVariant &value){
-    if ( m_value != value && !m_codeChange ){
+    if ( (value.canConvert<QObject*>() || m_value != value) && !m_codeChange ){
         m_value = value;
         emit valueChanged();
     }

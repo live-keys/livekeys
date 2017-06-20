@@ -120,12 +120,12 @@ void QDocumentHandler::commitEdit(){
             tc.setPosition(position + length, QTextCursor::KeepAnchor);
             QString commitText = tc.selectedText();
             m_state->editingFragment()->commit(
-                converter->serialize()->fromCode(commitText)
+                converter->serialize()->fromCode(commitText, m_state->editingFragment())
             );
             QCODE_BASIC_HANDLER_DEBUG("Commited edit of size: " + QString::number(commitText.size()));
 
             if ( m_state->editingFragment()->actionType() == QDocumentEditFragment::Adjust ){
-                palette()->setValueFromCode(converter->serialize()->fromCode(commitText));
+                palette()->setValueFromCode(converter->serialize()->fromCode(commitText, m_state->editingFragment()));
                 return;
             }
 
@@ -158,20 +158,22 @@ bool QDocumentHandler::isEditing(){
 }
 
 void QDocumentHandler::paletteValueChanged(){
-    QString code = palette()->serialize()->toCode(palette()->value());
+    QString code = palette()->serialize()->toCode(palette()->value(), m_state->editingFragment());
 
-    addEditingState(QDocumentHandler::Palette);
+    if ( code != "" ){
+        addEditingState(QDocumentHandler::Palette);
 
-    QDocumentEditFragment* frg = m_state->editingFragment();
-    QTextCursor tc(m_targetDoc);
-    tc.setPosition(frg->valuePosition());
-    tc.setPosition(frg->valuePosition() + frg->valueLength(), QTextCursor::KeepAnchor);
-    tc.beginEditBlock();
-    tc.removeSelectedText();
-    tc.insertText(code);
-    tc.endEditBlock();
+        QDocumentEditFragment* frg = m_state->editingFragment();
+        QTextCursor tc(m_targetDoc);
+        tc.setPosition(frg->valuePosition());
+        tc.setPosition(frg->valuePosition() + frg->valueLength(), QTextCursor::KeepAnchor);
+        tc.beginEditBlock();
+        tc.removeSelectedText();
+        tc.insertText(code);
+        tc.endEditBlock();
 
-    removeEditingState(QDocumentHandler::Palette);
+        removeEditingState(QDocumentHandler::Palette);
+    }
 }
 
 void QDocumentHandler::rehighlightSection(int position, int length){
@@ -244,7 +246,7 @@ void QDocumentHandler::documentContentsChanged(int position, int charsRemoved, i
                         QTextCursor tc(m_targetDoc);
                         tc.setPosition(frg->valuePosition());
                         tc.setPosition(frg->valuePosition() + frg->valueLength(), QTextCursor::KeepAnchor);
-                        palette()->setValueFromCode(palette()->serialize()->fromCode(tc.selectedText()));
+                        palette()->setValueFromCode(palette()->serialize()->fromCode(tc.selectedText(), frg));
                     } else { // text edit
                         QCodeRuntimeBinding* binding = frg->runtimeBinding();
                         if ( binding ){
@@ -462,7 +464,7 @@ void QDocumentHandler::adjust(int position, QObject *currentApp){
         codeCursor.setPosition(ef->valuePosition());
         codeCursor.setPosition(ef->valuePosition() + ef->valueLength(), QTextCursor::KeepAnchor);
 
-        palette->init(palette->serialize()->fromCode(codeCursor.selectedText()));
+        palette->init(palette->serialize()->fromCode(codeCursor.selectedText(), ef));
         connect(palette, SIGNAL(valueChanged()), this, SLOT(paletteValueChanged()));
 
         QCodeRuntimeBinding* bind = m_projectDocument->bindingAt(ef->declaration()->position());

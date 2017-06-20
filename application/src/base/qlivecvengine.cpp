@@ -34,7 +34,6 @@
 #include <QDebug>
 
 #include <QQuickItem>
-#include <QQmlProperty>
 
 namespace lcv{
 

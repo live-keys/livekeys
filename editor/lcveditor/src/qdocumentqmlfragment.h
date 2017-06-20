@@ -14,28 +14,42 @@
 **
 ****************************************************************************/
 
-#ifndef QNATIVEVALUECODESERIALIZER_H
-#define QNATIVEVALUECODESERIALIZER_H
+#ifndef QDOCUMENTQMLFRAGMENT_H
+#define QDOCUMENTQMLFRAGMENT_H
 
-#include <QObject>
-#include <QJSValue>
 #include "qlcveditorglobal.h"
-#include "qabstractcodeserializer.h"
+#include "qdocumenteditfragment.h"
+
+#include <QQmlProperty>
+#include <QQuickItem>
 
 namespace lcv{
 
-class Q_LCVEDITOR_EXPORT QNativeValueCodeSerializer : public QAbstractCodeSerializer{
-
-    Q_OBJECT
+class Q_LCVEDITOR_EXPORT QDocumentQmlFragment : public QDocumentEditFragment{
 
 public:
-    explicit QNativeValueCodeSerializer(QObject *parent = 0);
-    ~QNativeValueCodeSerializer();
+    QDocumentQmlFragment(
+        QCodeDeclaration::Ptr declaration,
+        QCodeConverter* converter,
+        const QQmlProperty& property
+    );
+    ~QDocumentQmlFragment();
 
-    QString toCode(const QVariant& value, const QDocumentEditFragment* channel);
-    QVariant fromCode(const QString& value, const QDocumentEditFragment* channel);
+    void commit(const QVariant &value) Q_DECL_OVERRIDE;
+    const QQmlProperty& property() const;
+
+private:
+    QQmlProperty m_property;
 };
+
+inline void QDocumentQmlFragment::commit(const QVariant &value){
+    m_property.write(value);
+}
+
+inline const QQmlProperty &QDocumentQmlFragment::property() const{
+    return m_property;
+}
 
 }// namespace
 
-#endif // QNATIVEVALUECODESERIALIZER_H
+#endif // QDOCUMENTQMLFRAGMENT_H

@@ -25,8 +25,6 @@
 #include "qlcveditorglobal.h"
 #include "qcodedeclaration.h"
 
-#include <QQmlProperty>
-
 namespace lcv{
 
 class QProject;

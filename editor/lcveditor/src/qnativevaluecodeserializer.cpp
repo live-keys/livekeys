@@ -28,7 +28,7 @@ QNativeValueCodeSerializer::QNativeValueCodeSerializer(QObject *parent)
 QNativeValueCodeSerializer::~QNativeValueCodeSerializer(){
 }
 
-QString QNativeValueCodeSerializer::toCode(const QVariant &value){
+QString QNativeValueCodeSerializer::toCode(const QVariant &value, const QDocumentEditFragment *){
     if ( value.type() >= QVariant::Bool && value.type() <= QVariant::Double )
         return value.toString();
     else if ( value.type() == QVariant::Char ||
@@ -42,7 +42,7 @@ QString QNativeValueCodeSerializer::toCode(const QVariant &value){
     return "";
 }
 
-QVariant QNativeValueCodeSerializer::fromCode(const QString &value){
+QVariant QNativeValueCodeSerializer::fromCode(const QString &value, const QDocumentEditFragment *){
     QString val = value.trimmed();
     if ( val.length() > 1 && (
              (val.startsWith('"') && val.endsWith('"')) ||

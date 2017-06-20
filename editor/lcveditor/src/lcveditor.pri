@@ -25,7 +25,9 @@ HEADERS += \
     $$PWD/qnativevaluecodeserializer.h \
     $$PWD/qlivepalette.h \
     $$PWD/qlivepalettecontainer.h \
-    $$PWD/qdocumentcursorinfo.h
+    $$PWD/qdocumentcursorinfo.h \
+    $$PWD/qdocumentqmlfragment.h \
+    $$PWD/qqmlobjectcodeserializer.h
 
 SOURCES += \
     $$PWD/qproject.cpp \
@@ -51,4 +53,6 @@ SOURCES += \
     $$PWD/qnativevaluecodeserializer.cpp \
     $$PWD/qlivepalette.cpp \
     $$PWD/qlivepalettecontainer.cpp \
-    $$PWD/qdocumentcursorinfo.cpp
+    $$PWD/qdocumentcursorinfo.cpp \
+    $$PWD/qdocumentqmlfragment.cpp \
+    $$PWD/qqmlobjectcodeserializer.cpp
