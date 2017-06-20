@@ -5,81 +5,51 @@
 \indexpage Index
 \title Creating a Live CV based Plugin
 
-
-In this tutorial you will see how to use the Live CV libraries in order to create plugins for Live CV without the need to
-recompile the code. Live CV provides the necessary links in order to create Open CV components compatible with QtQuick.
-
-\section1 Creating the plugin
-
-In the previous section I have shown how to include opencv libraries into a qmake project. Within the Live CV API, this
-is done automatically by a qmake script you can include. I will show this a bit later though, once we have the plugin
-set up.
-
-A QtQuick plugin is a compiled c++ library with a specific method or hook that can be accessed by Qt. Whenever a module
-is imported within a QML application, Qt looks for its name in a predefined set of directories. If the module is found,
-Qt loads it and calls the hook, which contains the code to register all the modules items into QtQuick, then they
-become available for use. So to set up this type of plugin, all we need is to set up the hook.
-
-QtCreator offers a template project to build this type of plugin, so lets start from there. To keep this simple, we will
-create a plugin that counts the number of non-zero pixels within an image.
-
-Begin by creating a new project in QtCreator. Choose \b{Libraries} then {Qt Quick 2 Extension Plugin}.
-
-\image api_creating_1.png
-
-Set up the location, and put in the name "tutorial" as the project name.
-
-\image api_creating_2.png
-
-Next, select the compiler like you did in the previous section. The third step will ask you an object class-name, and an
-URI. Set up the  object class-name to be "CountNonZeroPixels", and \b{make sure you set the URI} to "plugins.tutorial"
-(or plugins.<module_name> in case you named the module differently).
-
-\image api_creating_3.png
-
-This path will be required by Live CV when it loads the plugin. From here go to the last step and click Finish. You will
-notice a project with 2 c++ classes set up. The first one is the tutorial_plugin class, which contains a hook method to
-register all the plugin types or QML items once the plugin loads, and the actual QtQuick item that will do the pixel
-counting. Now we need to set up Open CV and the Live CV API for this plugin.
-
-To set up the API, include the \b{api/pro/lcv.pro} file from your Live CV installation directory into your tutorial.pro
-project file :
+In order to use Open CV types within QtQuick, Live CV provides a set of wrapper libraries. We will be using lcvcore for
+this scenario since we will need the \c{QMat} type, so we will link to lcvcore and Open CV from our plugin. In qmake,
+linking to the 2 libraries requires a lot of boiler plate code:
 
 \code
-#tutorial.pro
 
-EMPLATE = lib
-TARGET = tutorial
-QT += qml quick
-CONFIG += qt plugin
-
-TARGET = $$qtLibraryTarget($$TARGET)
-uri = plugins.tutorial
-
-include(<LIVE_CV_INSTALLATION_DIRECTORY>/api/pro/lcv.pro)
 \endcode
 
-The API adds extra items that make the actual link between Open CV and Qt, like for example the QMat element which is a
-wrapper for cv::Mat. Now that we have the project configured, we can start working on the actual CountNonZeroPixels
-item. We're going to need to set up an input matrix, and an output value of the number of pixels, so we'll need the
-following 2 properties:
+so to simplify this, Live CV already provides a set of qmake files that simplify these types of operations. The files
+are located in the \i{project} folder of our Live CV installation directory. We will need the \i{functions.pri} file,
+together with the \i{3rdparty/opencv.pri} file:
+
+\code
+
+\endcode
+
+\i{functions.pri} expects us to define \c{LIVECV_BIN_PATH} and \c{LIVECV_DEV_PATH}, which are used as locations to
+find the plugins we will be linking to. Note that on windows, in order to link to Open CV, you will also need to have
+\c{OPENCV_DIR} environment variable set up (TODO: link). After we have the functionality available, we can link
+to the lcvcore library:
+
+\code
+
+\endcode
+
+Open CV is linked to automatically by just having the \i{opencv.pri} file included. After solving our dependencies, we
+can now go back to our \c{CountNonZeroPixels} item. We're going to need an input matrix, and an output value for the
+number of pixels:
 
 \code
 Q_PROPERTY(QMat* input         READ input         WRITE setInput         NOTIFY inputChanged)
 Q_PROPERTY(int   nonZeroPixels READ nonZeroPixels NOTIFY nonZeroPixelsChanged)
 \endcode
 
-The QMat element requires us to include the QMat file at the beginning :
+The QMat element requires us to include the \i{qmat.h} file at the beginning:
 
 \code
-#include <QMat>
+#include "qmat.h"
 \endcode
 
 Last, we need to add the 2 fields, setters, getters and notifiers, and we have the final version looking like this:
 
 \code
 #include <QQuickItem>
-#include <QMat>
+#include "qmat.h"
 
 class CountNonZeroPixels : public QQuickItem
 {
@@ -122,40 +92,38 @@ inline void CountNonZeroPixels::setInput(QMat* input){
 }
 \endcode
 
-In the setInput method, we calculate the non zero pixels using the cv::CountNonZero method from Open CV. To
-retrieve the actual cv::Mat contents of a QMat, we use the cvMat() getter, which retrieves a pointer to a cv::Mat
+In the \c{setInput} method, we calculate the non zero pixels using the cv::CountNonZero method from Open CV. To
+retrieve the actual cv::Mat contents of a QMat, we use the \c{cvMat()} getter, which retrieves a pointer to a cv::Mat
 object.
 
-We can now build the library and link it with Live CV. Press \b{CTRL + B} in QtCreator to build the lib. Go to the
-\b{plugins} directory in Live CVs installation path, and create a directory called "tutorial". Copy the generated lib,
-together with the \b{qmldir} file, which you can find either where your library was built, or in the source directory.
-You're going to have a structure similar to the other plugins found in that directory. Run livecv.exe, and use the
-following code to test your plugin:
+We can now build the library and test it. Just like the steps in the previous part, go to the  \b{plugins} directory in
+Live CVs installation path, and override the qmldir and the \i{so} or \i{dll} files with the newly build ones. Run
+livecv, and you can use the following code to test your plugin:
 
 \code
-import 'lcvcore' 1.0
-import "lcvimgproc" 1.0
-import "tutorial" 1.0
+import lcvcore 1.0
+import lcvimgproc 1.0
+import tutorial 1.0
 
 Grid{
 
     columns : 2
 
-    property string imagePath : codeDocument.path + 'tutorial.jpg'
+    property string imagePath : 'path/to/image.jpg'
 
     ImRead{
         id : imgSource
         file : parent.imagePath
     }
 
-    Canny{
+    Canny{ // get the edges
         id : canny
         input: imgSource.output
         threshold1 : 70
         threshold2 : 210
     }
 
-    CountNonZeroPixels{
+    CountNonZeroPixels{ // count the number of edge pixels
         id : count
         input : canny.output
     }
