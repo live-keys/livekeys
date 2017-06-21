@@ -30,6 +30,7 @@ addons:
       - libpng-dev
       - libjasper-dev
       - libdc1394-22-dev
+      - libgl-dev
       - unzip
 
 #env: GCC_VERSION=5 CPP=11 COMPILER=g++-5 CXX=g++-5 CC=gcc-5
