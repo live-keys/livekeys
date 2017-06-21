@@ -6,43 +6,40 @@
 \title Building Live CV
 
 
-All modules of Live CV are available through qmake projects. To compile Live CV you need to have Qt 5.2 or a newer
-version and Open CV, where recommended would at least version 2.4. The project can be opened up in QtCreator and
-build, or qmake can be used directly on the main project file \b{livecv.pro}. The config.pro file holds the main
-configuration for each Live CV module. You can have a look and configure it according to your system. Currently, the
-only supported and required configuration is for Live CV to find the lib, bin and include paths of Open CV library.
+All modules for Live CV are available through qmake projects. To compile Live CV you need to have Qt 5.6 or higher, and
+Open CV 3.1 or higher. On windows, OPENCV_DIR environment variable (TODO: link) needs to be set, or you can configure the
+variable whithin the source code of Live CV in \i{projects/3rdparty/opencv.pri} before compiling.
 
-For linux in general this does not require any configuration. For windows, 4 parameters are required to be configured
-within the following variables :
+You can build the application either by opening \i{livecv.pro} in QtCreator and building from there, or by manually
+running qmake in your build directory:
 
 \code
-PATH_OPENCV_INCLUDE
-PATH_OPENCV_LIBRARIES
-PATH_OPENCV_DLLS
-VERSION_OPENCV
+cd build
+qmake -r ..
+make (or nmake)
 \endcode
 
-where \b{PATH_OPENCV_INCLUDE} is the path to open cv's include directory, \b{PATH_OPENCV_LIBRARIES} is the path to
-open cv's libraries and \b{PATH_OPENCV_DLLS} is the path to open cv's dll files. The \b{VERSION_OPENCV} parameter
-requires the actual version of Open CV.
+\section1 Modules
 
-\section1 Module Organization
-
-The application modules can be split into 3 categories :
+Live CV is split into 3 main modules:
 
 \list
-\li The application module, which contains the actual Live CV interface and import features
-\li The lcvlib module, or the API, which contains the code necessary to link between Open CVs elements and QML itemss.
-\li The rest of the modules, which basically wrap around Open Cv's functionality
+\li \b{The application}, containing the visual elements and the runtime types
+\li \b{The editor}, containing components for projects and editing
+\li \b{The plugins}, containing the plugins you can import, some of which can also be linked to as libraries in ordeer
+to provide common transferable types.
 \endlist
 
-In order to add new components to Live CV's code, the main focus is on using the lcvlib module. The module is documented
-within the API section of the \l{Index}{index} page. Internal modules to Live CV's source are added similarly as one
-would use the Live CV API to add external ones.
+Further down, the editor contains the lcveditor(TODO: link) module, which you can link to in order to
+provide editor functionality to Live CV(e.g. palettes, code completion, highlighting for different file types)
 
-Its also interesting to note that the Live CV application is only plugin based, so by default if no Open CV imports are
-made, the application can run independently of any Open CV module. The lcvlib is only used by Open CV modules, so the
-lib itself is not required for running the application either. This means that modules independent of Open CV can be
-implemented, and the application can be shipped with a different set of dlls than the current Open CV ones.
+The plugins module then contains the live library (TODO: link), which offers components for live coding
+and communication with Live CVs interface, and lcvcore library which offers computer vision specific main types (mostly
+named after Open CV). You link to them as libraries in order to create Live CV specific plugins.
+
+It's also important to note that Live CV as an application is mostly plugin based, so we can for example disable all
+Open CV based plugins from our build configuration, and build Live CV outside of Open CV dependencies. All QtQuick based
+plugins are compatible by default, and you can build any plugins derived from those without having to link to any Live CV
+libraries.
 
 */

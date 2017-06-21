@@ -20,7 +20,7 @@ VideoCapture{
     id : videoArea
     loop : true
     fps : 100
-    Component.onCompleted : staticOpen(ideoPath)
+    Component.onCompleted : staticOpen(videoPath)
 }
 \endcode
 
@@ -50,6 +50,106 @@ during changes to the code. Note that \b{any changes to the StaticLoader's conte
 state identifier is the same}. For example, if we want to change the color from code, or want to add another property
 to the StaticLoaders contents, we need to also change its identifier, since Live CV will not replace the contents of
 our state as long as the state is active.
+
+\section1 Nesting Static Items
+
+Consider the following qml component:
+
+\code
+// Interact.qml
+
+import QtQuick 2.3
+import live 1.0
+
+Rectangle{
+    width : 100
+    height : 100
+
+    StaticLoader{
+        id : staticLoader
+        source : Rectangle{ color: "#ff0000" }
+        Component.onCompleted : { staticLoad("item1") }
+    }
+
+    Rectangle{
+        anchors.fill: parent
+        color : staticLoader.item ? staticLoader.item.color: "transparent"
+        MouseArea{
+            anchors.fill : parent
+            onClicked : {
+                staticLoader.item.color = "#ff00ff"
+            }
+        }
+    }
+}
+\endcode
+
+If we want to use this component in our application in more than one place, we're going to end up with some weird
+behavior:
+
+\code
+import QtQuick 2.3
+
+Row{
+    Interact{}
+    Interact{}
+}
+\endcode
+
+When we click on the first component, you will notice that both components will change their color. The reason why this
+is happening is that \b{both components have StaticLoaders that load their items from the same place}. It's important to
+be careful when a component is using any static item, be it a video capture or a background subtractor, to forward their
+call to the \c{staticload} function:
+
+\code
+// Interact.qml
+
+import QtQuick 2.3
+import live 1.0
+
+Rectangle{
+    width : 100
+    height : 100
+
+    function staticLoad(key){
+        staticLoader.staticLoad(key)
+    }
+
+    StaticLoader{
+        id : staticLoader
+        source : Rectangle{ color: "#ff0000" }
+    }
+
+    Rectangle{
+        anchors.fill: parent
+        color : staticLoader.item ? staticLoader.item.color: "transparent"
+        MouseArea{
+            anchors.fill : parent
+            onClicked : {
+                staticLoader.item.color = "#ff00ff"
+            }
+        }
+    }
+}
+\endcode
+
+Then when the user uses the component, he is required to call the staticLoad in order to use it:
+
+\code
+import QtQuick 2.3
+
+Row{
+    Interact{
+        Component.onCompleted : staticLoad('item1')
+    }
+    Interact{
+        Component.onCompleted : staticLoad('item2')
+    }
+}
+\endcode
+
+Another way to define this is that \b{any component that nests a static component will itself become static}.
+
 
 
 */
