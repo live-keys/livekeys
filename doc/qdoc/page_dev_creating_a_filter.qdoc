@@ -39,7 +39,7 @@ by derived classes to implement the actual filtering.
 \section1 A filter example.
 
 This is an example of a simple filter that converts an image to grayscale. Open CV assertions and other error handling
-issues are solved by QMatFilter, so they do not need to be handled by our transform function.
+issues are solved by \c{QMatFilter}, so they do not need to be handled by our transform function.
 
 \code
 #include "QMatFilter.h"
@@ -79,12 +79,12 @@ if you want to just see the end result.
 The addWeighted function has the following parameters :
 
 \list
-\li \b{src1}  – First input array.
-\li \b{alpha} – Weight of the first array elements.
-\li \b{src2}  – Second input array of the same size and channel number as src1.
-\li \b{beta}  – Weight of the second array elements.
-\li \b{dst}   – Output array that has the same size and number of channels as the input arrays.
-\li \b{gamma} – Scalar added to each sum.
+\li \b{src1} First input array.
+\li \b{alpha} Weight of the first array elements.
+\li \b{src2} Second input array of the same size and channel number as src1.
+\li \b{beta} Weight of the second array elements.
+\li \b{dst} Output array that has the same size and number of channels as the input arrays.
+\li \b{gamma} Scalar added to each sum.
 \endlist
 
 \b{src1} and \b{dst} will be the actual input and output properties, so we need to add the \b{src2} as

@@ -11,14 +11,39 @@ linking to the 2 libraries requires a lot of boiler plate code:
 
 \code
 
+# Link to Open CV
+
+win32{
+	OPENCV_DIR_INCLUDE   = $$(OPENCV_DIR)/../../include
+    OPENCV_DIR_LIBRARIES = $$(OPENCV_DIR)/lib
+	
+	INCLUDEPATH += $${OPENCV_DIR_INCLUDE}
+	LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_world310
+}
+unix{
+	CONFIG += link_pkgconfig
+    PKGCONFIG += opencv
+}
+
+# Link to lcvcore
+
+PATH_TO_LIVECV = '<path_to_livecv>'
+
+INCLUDEPATH += $$PATH_TO_LIVECV/dev/include/plugins/lcvcore
+LIBS += -L$$PATH_TO_LIVECV/dev/plugins/lcvcore -llcvcore
+
 \endcode
 
 so to simplify this, Live CV already provides a set of qmake files that simplify these types of operations. The files
 are located in the \i{project} folder of our Live CV installation directory. We will need the \i{functions.pri} file,
-together with the \i{3rdparty/opencv.pri} file:
+together with the \i{3rdparty/opencv.pri} file included in our \i{tutorial.pro}:
 
 \code
+LIVECV_BIN_PATH = <path_to_livecv>
+LIVECV_DEV_PATH = $$LIVECV_BIN_PATH/dev
 
+include($$LIVECV_DEV_PATH/project/functions.pri)
+include($$LIVECV_DEV_PATH/project/3rdparty/opencv.pri)
 \endcode
 
 \i{functions.pri} expects us to define \c{LIVECV_BIN_PATH} and \c{LIVECV_DEV_PATH}, which are used as locations to
@@ -27,12 +52,35 @@ find the plugins we will be linking to. Note that on windows, in order to link t
 to the lcvcore library:
 
 \code
-
+linkPlugin(lcvcore, lcvcore)
 \endcode
 
-Open CV is linked to automatically by just having the \i{opencv.pri} file included. After solving our dependencies, we
-can now go back to our \c{CountNonZeroPixels} item. We're going to need an input matrix, and an output value for the
-number of pixels:
+The \c{linkPlugin} function takes 2 parameters, a location where the plugin resides, and a plugin name to be used.
+Open CV is linked to automatically by just having the \i{opencv.pri} file included. After the appended lines
+, the top part of \i{tutorial.pro} file should look something similar to:
+
+\code
+TEMPLATE = lib
+TARGET = tutorial
+QT += qml quick
+CONFIG += qt plugin c++11
+
+TARGET = $$qtLibraryTarget($$TARGET)
+uri = tutorial
+
+LIVECV_BIN_PATH = <path_to_livecv>
+LIVECV_DEV_PATH = $$LIVECV_BIN_PATH/dev
+
+include($$LIVECV_DEV_PATH/project/functions.pri)
+include($$LIVECV_DEV_PATH/project/3rdparty/opencv.pri)
+
+linkPlugin(lcvcore,  lcvcore)
+
+# ...
+\endcode
+
+After solving our dependencies, we can now go back to our \c{CountNonZeroPixels} item. We're going to need 
+an input matrix, and an output value for the number of pixels:
 
 \code
 Q_PROPERTY(QMat* input         READ input         WRITE setInput         NOTIFY inputChanged)
@@ -101,6 +149,7 @@ Live CVs installation path, and override the qmldir and the \i{so} or \i{dll} fi
 livecv, and you can use the following code to test your plugin:
 
 \code
+import QtQuick 2.3
 import lcvcore 1.0
 import lcvimgproc 1.0
 import tutorial 1.0

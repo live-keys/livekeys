@@ -17,7 +17,7 @@ repository is also configured as a fully deployable package, which will be descr
 configuration (TODO: link) section.
 
 To start off, we can use the available template project in QtCreator, which will create our plugin
-template and our first item. So, in QtCreator, begin by creating a new project. Choose \b{libraries}, then
+template and our first item. So, in QtCreator, begin by creating a new project. Choose \b{library}, then
 {Qt Quick 2 Extension Plugin}.
 
 \image api_creating_1.png
@@ -28,8 +28,8 @@ Set up the location, and put in the name "tutorial" as the project name.
 
 Next, select the compiler. The third step will ask you an object class-name, and an URI. The first item we will be
 building is an item that will count the number of pixels whithin a matrix. We will call it CountNonZeroPixels. So
-set up the object class-name to be "CountNonZeroPixels", and \b{make sure to set the URI} to "plugins.tutorial"
-(or plugins.<module_name> in case you named the module diferently).
+set up the object class-name to be "CountNonZeroPixels", and \b{make sure to set the URI} to "tutorial"
+(or <module_name> in case you named the module diferently).
 
 \image api_creating_3.png
 
@@ -43,16 +43,33 @@ this if we build the project, and from our build directory we copy the library f
 windows) together with your qmldir file into your livecv installation directory, in plugins/tutorial. So we should
 have the following file structure:
 
+\list
+
 \li livecv/plugins/tutorial/tutorial.so
 \li livecv/plugins/tutorial/qmldir
 
+\endlist
+
 or on windows:
+
+\list
 
 \li livecv/plugins/tutorial/tutorial.dll
 \li livecv/plugins/tutorial/qmldir
 
+\endlist
+
 
 Next, if we open Live CV and import the tutorial plugin, we can create a \c{CountNonZeroPixels} object:
+
+\code
+import QtQuick 2.3
+import tutorial 1.0
+
+Grid{
+    CountNonZeroPixels{}
+}
+\endcode
 
 Although this object doesn't do anything for now, the fact that we are able to create it without any errors
 means that we are able to use our plugin succesfully.
