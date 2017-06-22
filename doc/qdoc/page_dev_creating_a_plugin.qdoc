@@ -8,13 +8,14 @@ These 4 sections will take you through the basics on building a Live CV plugin. 
 plugin with the added difference that it may have external dependencies outside of Qt (Open CV, dlib, etc)
 This makes Qt based plugins compatible in Live CV, however to use Live CV plugins in a QtQuick application
 the user must make sure that the application can find the plugins dependencies (which is done automatically by
-Live CV). Before starting, it's important to know the structure and contents of plugins and plugin packages (TODO: link),
-which is detailed in the user section.
+Live CV). Before starting, it's important to know the structure and contents of
+\l{Plugins}{plugins and plugin packages}, which is detailed in the user section.
 
-The full project we will be building is also available at this github(TODO: link) repository, so if you want to just
+The full project we will be building is also available at
+\l{https://github.com/livecv/live-tutorial}{this github repository}, so if you want to just
 start hacking through an existing project or get stuck on something, you can use the repository as a reference. The
-repository is also configured as a fully deployable package, which will be described in detail whithin the project
-configuration (TODO: link) section.
+repository is also configured as a fully deployable package, which will be described in detail within the
+\l{Project Configuration}{project configuration} section.
 
 To start off, we can use the available template project in QtCreator, which will create our plugin
 template and our first item. So, in QtCreator, begin by creating a new project. Choose \b{library}, then
@@ -77,8 +78,8 @@ means that we are able to use our plugin succesfully.
 If you want to build QtQuick based plugins without any dependencies, from here you can simply start adding your items
 and configure their properties.
 
-In the following part (TODO: link) we will look into linking our plugin to Open CV library and start working with Live CV
-types to do the actual pixel counting.
+In the \l{Creating a Live CV based Plugin}{following part} we will look into linking our plugin to Open CV library and
+start working with Live CV types to do the actual pixel counting.
 
 
 */

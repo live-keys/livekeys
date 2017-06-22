@@ -7,10 +7,12 @@
 
 
 All modules for Live CV are available through qmake projects. To compile Live CV you need to have Qt 5.6 or higher, and
-Open CV 3.1 or higher. On windows, OPENCV_DIR environment variable (TODO: link) needs to be set, or you can configure the
-variable whithin the source code of Live CV in \i{projects/3rdparty/opencv.pri} before compiling.
+Open CV 3.1 or higher. On windows, OPENCV_DIR
+\l{http://docs.opencv.org/2.4/doc/tutorials/introduction/windows_install/windows_install.html}{environment variable}
+needs to be set, or you can configure the
+variable whithin the source code of Live CV in \e{projects/3rdparty/opencv.pri} before compiling.
 
-You can build the application either by opening \i{livecv.pro} in QtCreator and building from there, or by manually
+You can build the application either by opening \e{livecv.pro} in QtCreator and building from there, or by manually
 running qmake in your build directory:
 
 \code
@@ -30,10 +32,10 @@ Live CV is split into 3 main modules:
 to provide common transferable types.
 \endlist
 
-Further down, the editor contains the lcveditor(TODO: link) module, which you can link to in order to
+Further down, the editor contains the \l{lcveditor_cpp}{lcveditor} module, which you can link to in order to
 provide editor functionality to Live CV(e.g. palettes, code completion, highlighting for different file types)
 
-The plugins module then contains the live library (TODO: link), which offers components for live coding
+The plugins module then contains the \l{live}{live} library, which offers components for live coding
 and communication with Live CVs interface, and lcvcore library which offers computer vision specific main types (mostly
 named after Open CV). You link to them as libraries in order to create Live CV specific plugins.
 

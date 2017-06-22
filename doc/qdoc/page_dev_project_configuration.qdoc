@@ -12,10 +12,10 @@ of wrappers for the same library. (e.g. lcv* based plugins in Live CV are all de
 In this part we will mostly describe the recommended way to organize such a repository. The
 \l{https://github.com/livecv/live-tutorial}{tutorial repository} can be used as an example.
 
-Previously we have created a plugin with 3 components, under the \i{tutorial} uri. The uri
+Previously we have created a plugin with 3 components, under the \e{tutorial} uri. The uri
 is used when importing the plugin into our application, and also it is taken as the path to our plugin. Live CV
-applies this uri from the \i{plugins} folder. So a plugin with the uri \c{opencv.contrib.core} is expected
-to be located in \i{<livecv>/plugins/opencv/contrib/core}. This is important, since we want to group our plugins
+applies this uri from the \e{plugins} folder. So a plugin with the uri \c{opencv.contrib.core} is expected
+to be located in \e{<livecv>/plugins/opencv/contrib/core}. This is important, since we want to group our plugins
 depending on their context. It's much easier to manage a package if all it's plugins are imported under the same
 prefix. Currently Live CV provides all its plugins without a prefix (e.g. lcvcore instead of opencv.core) for ease
 of access, however, it's recommended that packages created for Live CV should be grouped under the same prefix.
@@ -48,7 +48,7 @@ SUBDIRS += tutorial
 
 Since each plugin needs to configure \c{LIVECV_DEV_PATH} and \c{LIVECV_BIN_PATH} in our project is a bit of an overhead.
 To avoid this, qmake provides a file that is automatically included in all our projects called
-\i{.qmake.conf}. If we add this file to the top of our repository, we can provide functionality to all of our plugins in
+\e{.qmake.conf}. If we add this file to the top of our repository, we can provide functionality to all of our plugins in
 one go:
 
 \code
@@ -62,12 +62,12 @@ PROJECT_ROOT = $$PWD
 include($$LIVECV_DEV_PATH/project/package.pri)
 \endcode
 
-The project root is defined as the top level of our repository, and by including the \i{package.pri} file, we also add
-the \i{functions.pri} file we used in the previous parts and also configure our package to be build directly into the
-\i{livecv/plugins} directory so we can use it as soon as its built.
+The project root is defined as the top level of our repository, and by including the \e{package.pri} file, we also add
+the \e{functions.pri} file we used in the previous parts and also configure our package to be build directly into the
+\e{livecv/plugins} directory so we can use it as soon as its built.
 
 The last change we can make is to remove some boiler plate code in our actual plugin file, by including the provided
-\i{plugin.pri} file in \c{LIVECV_DEV_PATH/project}:
+\e{plugin.pri} file in \c{LIVECV_DEV_PATH/project}:
 
 \code
 PLUGIN_NAME = tutorial

@@ -4,5 +4,100 @@
 \indexpage Index
 \title Deployment Scripts
 
+Deployment scripts are part of Live CVs build, deploy and package process, offering a standardized way to
+create packages. If you will look into Live CVs main repository or the tutorial repository, you will see a file named
+\e{livecv.json} and \e{live.tutorial.json} respectively. These files describe the contents of the repository in terms of modules
+and dependencies, and the steps required to build, deploy and package the repository with different compilers. The
+files are used by Live CV's \l{https://github.com/livecv/livecv-deploy-kit}{deployment kit} in order to determine the
+repository configuration. Whithin a Live CV repository, the scripts expect to find a file that starts with \e{live} and
+ends with \e{.json} extension.
+
+The files are split into the following main sections:
+
+\list
+\li version: the version of the package
+\li name: the name of the package
+\li webpage: url of the package
+\li dependencies: a list of Live CV dependencies for the package. This does not include third party dependencies (e.g.
+opencv, dlib, etc)
+\li components: the components or plugins inside the package
+\li releases: a map of releases the the process required to package a release
+\endlist
+
+
+The \e{version}, \e{name} and \e{webpage} are pretty straight forward, so we will go into the other 3.
+
+\section1 Dependencies
+
+\e{dependencies} defines a list of livecv packages this current package is dependent on. For each list item, the
+following fields are expected:
+
+\list
+\li name: name of the dependent package
+\li version: version of the dependent package
+\li repository: repository for the package
+\endlist
+
+\section1 Components
+
+\e{components} defines a map of components this package will export. The component name is specified by its key. The
+version of the component is added through the version field:
+
+\code
+"components" : {
+    "tutorial" : {
+        "version": "1.0"
+    },
+    "tutorial.extended" : {
+        "version": "1.0"
+    }
+}
+\endcode
+
+\section1 Releases
+
+\e{releases} provides a map of items this package can be released to. The form for each release is to provide the key
+as the release id, and the following set of values as part of the release object:
+
+\list
+\li compiler: the compiler id to use. This must be compatible with the qmake compiler naming scheme
+\li environment: the environment variables required to build and deploy this release. Usually \c{QTDIR} is standard here
+\li build: a list of steps required to build the application
+\li deploy: a list of steps required to deploy the application after the build process.
+\endlist
+
+An example of a release for the gcc compiler in the tutorial package is as follows:
+
+\code
+"gcc_64" : {
+    "compiler" : "gcc_64",
+    "environment" : {
+        "OPENCV_DIR" : "opencv_dir",
+        "QTDIR" : "qtdir"
+    },
+    "build" : [
+        {"qmake" : ["-recursive"]},
+        {"make" : []}
+    ],
+    "deploy" : [
+        { "copy" : {
+            "{release}/bin" : {
+                "plugins" : {
+                    "tutorial": "plugins/tutorial"
+                }
+            },
+            "{source}/samples/tutorial" : "samples/tutorial"
+          }
+        }
+    ]
+},
+\endcode
+
+The environment captures our \c{QTDIR} and \c{OPENCV_DIR} environment variables, during our build we launch our
+\e{qmake} and \e{make} processes, and in the deployment part we copy the "plugins/tutorial" directory
+from the release/bin directory, as well as the "samples/tutorial" directory from our source code. The \e{copy} command
+takes a set of keys that define the files or directories to be copied, and a set of relative paths to which the entries
+will be copied to in the deployment dir (e.g. \c{"{source}/samples/tutorial" : "samples/tutorial"} will be copied to
+our deployment directory in "samples/tutorial".
 
 */

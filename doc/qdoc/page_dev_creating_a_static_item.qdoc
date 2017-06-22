@@ -8,7 +8,7 @@
 In Live CV, static items are items that keep their internal state across multiple compilations. They are mostly used
 in live coding, since during code changes, the application needs to refresh its items and recrete the scene. Items then
 have to reset to their initial state, therefore all interactions or changes that occured during the execution of the
-application will be lost. The user section on static items offers more details about their role and usage.(TODO: link)
+application will be lost. The \l{Static Items}{user section on static items} offers more details about their role and usage.
 
 In this part, we will focus on creating a static item. A simple example would be an item that counts the number of times
 the code recompiled during the items lifetime. This would require us to have a single read-only property which we can
@@ -25,7 +25,7 @@ then locates them through their given key. This means that we can have the same 
 be stored separately. For example, a VideoDecoder and VideoEncoder state can be stored using the same key, yet if we
 were to use the same key for 2 VideoDecoder objects, then one of them will get overwriten. The key is stored as a string,
 which we will aquire from the user as part of our \c{staticLoad} argument. To work with the global \c{QStaticContainer}
-object, we have to link to our live library in \i{tutorial.pro}:
+object, we have to link to our live library in \e{tutorial.pro}:
 
 \code
 linkPlugin(live, live)
@@ -87,16 +87,16 @@ CompilationCount{
 The flow of our application would be as follows:
 
 \list
-\li CompilationCount is created for the first time. \c{CompilationCountState} is created and stored at \i{cckey}.
+\li CompilationCount is created for the first time. \c{CompilationCountState} is created and stored at \e{cckey}.
 \c{compilations} is incremented to 1.
 \li The code changes and a new scene is about to be created
 \li CompilationCount object gets destroyed, the state remains stored in the \c{StaticContainer}
-\li A new CompilationCount object is created. The object then retrieves the \c{CompilationCountState} stored at\i{cckey}
+\li A new CompilationCount object is created. The object then retrieves the \c{CompilationCountState} stored at\e{cckey}
 and \c{compilations} is now incremented to 2.
 \endlist
 
 The full compilationcount class is found below, or you can see the full example in the live-tutorial repository, in
-\i{plugins/tutorial/src/compilationcount.*}.
+\e{plugins/tutorial/src/compilationcount.*}.
 
 \code
 // compilationcount.h
