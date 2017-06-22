@@ -5,7 +5,7 @@
 \title Static Items
 
 In terms of live coding, whenever an application code changes, a new compliation is triggered, replacing
-all the items whithin the previous build with a new set corresponding to the notified code. This means that each time
+all the items whithin the previous build with a new set corresponding to the modified code. This means that each time
 the user modifies something whithin the document, every object that awas modified so far during execution will be
 reset to its initial value. Unfortunately in some cases this is not the ideal scenario. Take a video player for example.
 After creating the video player and the video starts playing, the user would like to add a set of filters to the video
@@ -15,14 +15,14 @@ the concept of static items. As a definition, in Live CV, static items are items
 compilations. They are recognized by requiring the use of the \c{staticLoad} function. Take the VideoCapture
 for example:
 
-\code
+\qml
 VideoCapture{
     id : videoArea
     loop : true
     fps : 100
     Component.onCompleted : staticOpen(videoPath)
 }
-\endcode
+\endqml
 
 The \c{VideoCapture} works by keeping its state (in this case the progress made on te video) outside the
 actual built application. Whenever it's created, it will load or create its state (depending on whether the state was
@@ -44,7 +44,7 @@ modifications during runtime that require consistency.
 
 The \c{StaticLoader} is an item part of \l{live}{live} plugin similar to the Loader item in QtQuick, the difference
 being that its items are loaded statically. To do this, its item is registered as a state that can be retrieved when
-the \c{StaticLoader} is created. The TODO: link StaticLoader sample shows the usage of this item. The color property,
+the \c{StaticLoader} is created. The \l{StaticLoader}{StaticLoader} sample shows the usage of this item. The color property,
 which is part of the StaticLoaders state gets modified once the user clicks on the color, and will keep its color
 during changes to the code. Note that \b{any changes to the StaticLoader's contents will not take effect while the
 state identifier is the same}. For example, if we want to change the color from code, or want to add another property
@@ -55,7 +55,7 @@ our state as long as the state is active.
 
 Consider the following qml component:
 
-\code
+\qml
 // Interact.qml
 
 import QtQuick 2.3
@@ -82,26 +82,26 @@ Rectangle{
         }
     }
 }
-\endcode
+\endqml
 
 If we want to use this component in our application in more than one place, we're going to end up with some weird
 behavior:
 
-\code
+\qml
 import QtQuick 2.3
 
 Row{
     Interact{}
     Interact{}
 }
-\endcode
+\endqml
 
 When we click on the first component, you will notice that both components will change their color. The reason why this
 is happening is that \b{both components have StaticLoaders that load their items from the same place}. It's important to
 be careful when a component is using any static item, be it a video capture or a background subtractor, to forward their
 call to the \c{staticload} function:
 
-\code
+\qml
 // Interact.qml
 
 import QtQuick 2.3
@@ -131,11 +131,11 @@ Rectangle{
         }
     }
 }
-\endcode
+\endqml
 
 Then when the user uses the component, he is required to call the staticLoad in order to use it:
 
-\code
+\qml
 import QtQuick 2.3
 
 Row{
@@ -146,7 +146,7 @@ Row{
         Component.onCompleted : staticLoad('item2')
     }
 }
-\endcode
+\endqml
 
 Another way to define this is that \b{any component that nests a static component will itself become static}.
 

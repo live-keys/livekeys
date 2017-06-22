@@ -35,8 +35,8 @@ LIBS += -L$$PATH_TO_LIVECV/dev/plugins/lcvcore -llcvcore
 \endcode
 
 so to simplify this, Live CV already provides a set of qmake files that simplify these types of operations. The files
-are located in the \i{project} folder of our Live CV installation directory. We will need the \i{functions.pri} file,
-together with the \i{3rdparty/opencv.pri} file included in our \i{tutorial.pro}:
+are located in the \e{project} folder of our Live CV installation directory. We will need the \e{functions.pri} file,
+together with the \e{3rdparty/opencv.pri} file included in our \e{tutorial.pro}:
 
 \code
 LIVECV_BIN_PATH = <path_to_livecv>
@@ -46,18 +46,20 @@ include($$LIVECV_DEV_PATH/project/functions.pri)
 include($$LIVECV_DEV_PATH/project/3rdparty/opencv.pri)
 \endcode
 
-\i{functions.pri} expects us to define \c{LIVECV_BIN_PATH} and \c{LIVECV_DEV_PATH}, which are used as locations to
+\e{functions.pri} expects us to define \c{LIVECV_BIN_PATH} and \c{LIVECV_DEV_PATH}, which are used as locations to
 find the plugins we will be linking to. Note that on windows, in order to link to Open CV, you will also need to have
-\c{OPENCV_DIR} environment variable set up (TODO: link). After we have the functionality available, we can link
-to the lcvcore library:
+\c{OPENCV_DIR}
+\l{http://docs.opencv.org/2.4/doc/tutorials/introduction/windows_install/windows_install.html}{environment variable}
+set up.
+After we have the functionality available, we can link to the lcvcore library:
 
 \code
 linkPlugin(lcvcore, lcvcore)
 \endcode
 
 The \c{linkPlugin} function takes 2 parameters, a location where the plugin resides, and a plugin name to be used.
-Open CV is linked to automatically by just having the \i{opencv.pri} file included. After the appended lines
-, the top part of \i{tutorial.pro} file should look something similar to:
+Open CV is linked to automatically by just having the \e{opencv.pri} file included. After the appended lines
+, the top part of \e{tutorial.pro} file should look something similar to:
 
 \code
 TEMPLATE = lib
@@ -87,7 +89,7 @@ Q_PROPERTY(QMat* input         READ input         WRITE setInput         NOTIFY 
 Q_PROPERTY(int   nonZeroPixels READ nonZeroPixels NOTIFY nonZeroPixelsChanged)
 \endcode
 
-The QMat element requires us to include the \i{qmat.h} file at the beginning:
+The QMat element requires us to include the \e{qmat.h} file at the beginning:
 
 \code
 #include "qmat.h"
@@ -145,7 +147,7 @@ retrieve the actual cv::Mat contents of a QMat, we use the \c{cvMat()} getter, w
 object.
 
 We can now build the library and test it. Just like the steps in the previous part, go to the  \b{plugins} directory in
-Live CVs installation path, and override the qmldir and the \i{so} or \i{dll} files with the newly build ones. Run
+Live CVs installation path, and override the qmldir and the \e{so} or \e{dll} files with the newly build ones. Run
 livecv, and you can use the following code to test your plugin:
 
 \code

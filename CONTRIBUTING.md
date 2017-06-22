@@ -10,9 +10,9 @@ This guide will serve as a quick start for anyone interested in contributing wit
 
 Live CV is split into 3 sections:
 
- * the application itself containing the editor and viewer
- * lcvlib library, which all Live CV plugins link to. It contains the main components that provide a link between Open CV and qml
- * the plugins or modules, containing computer vision plugins that can be imported in Live CV (lcvcore, lcvimgproc, ...)
+ * **the application** containing the visual elements and the runtime types
+ * **the editor** containing components for projects and editing
+ * **the plugins** containing the plugins you can import, some of which can also be linked to as libraries in ordeer to provide common transferable types.
  
 ## QML Components From c++
 
@@ -21,7 +21,7 @@ This section is just quick overview on how to create a qml component from c++. F
  * [Tutorial on qml](http://doc.qt.io/qt-5/qml-tutorial1.html)
  * [QML Types from C++](http://doc.qt.io/qt-5/qtqml-cppintegration-definetypes.html)
  * [Writing QML Extensions](http://doc.qt.io/qt-5/qtqml-tutorials-extending-qml-example.html)
- * [Creating a Live CV filter](http://livecv.dinusv.com/documentation/api-creating-a-filter.html)
+ * [Live CV development documentation](http://livecv.dinusv.com/documentation)
 
 In terms of c++, qml components are basically classes of a [QObject](http://doc.qt.io/qt-5/qobject.html) subtype registered to the qml meta object system. A component is registered using the [qmlRegisterType](http://doc.qt.io/qt-5/qqmlengine.html#qmlRegisterType-2) function:
 
