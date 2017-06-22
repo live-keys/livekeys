@@ -30,6 +30,7 @@ addons:
       - libpng-dev
       - libjasper-dev
       - libdc1394-22-dev
+      - libgl1-mesa-dev
       - unzip
 
 #env: GCC_VERSION=5 CPP=11 COMPILER=g++-5 CXX=g++-5 CC=gcc-5
@@ -68,10 +69,12 @@ script:
 
 before_deploy:
   - ls *.tar.gz
-  - export LIVECV_STANDALONE=$(ls *.tar.gz | tail -n +1 | head -1)
-  - export LIVECV=$(ls *.tar.gz | tail -n +2 | head -1)
+  - export LIVECV_STANDALONE=$(ls live*.tar.gz | tail -n +1 | head -1)
+  - export LIVECV=$(ls live*.tar.gz | tail -n +2 | head -1)
+  - export LIVECV_DOC=$(ls doc*.tar.gz | tail -n +1 | head -1)
   - echo ${LIVECV_STANDALONE}
   - echo ${LIVECV}
+  - echo ${LIVECV_DOC}
 
 deploy:
   provider: releases
@@ -81,6 +84,7 @@ deploy:
   file:
     - "${LIVECV_STANDALONE}"
     - "${LIVECV}"
+    - "${LIVECV_DOC}"
   skip_cleanup: true
   on:
     tags: true
