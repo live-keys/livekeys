@@ -26,11 +26,42 @@ LivePalette{
     type : "color"
     serialize : NativeValueCodeSerializer{}
 
+
     item: Rectangle{
         id: root
 
+        property real hsvHue : 0
+        property real hsvSaturation : 0
+        property real hsvValue: 0
+
+        function setHsv(clr) {
+            var r = Math.round(clr.r * 255);
+            var g = Math.round(clr.g * 255);
+            var b = Math.round(clr.b * 255);
+            var max = Math.max(r, g, b), min = Math.min(r, g, b),
+                d = max - min,
+                h,
+                s = (max === 0 ? 0 : d / max),
+                v = max / 255;
+
+            switch (max) {
+                case min: h = 0; break;
+                case r: h = (g - b) + d * (g < b ? 6: 0); h /= 6 * d; break;
+                case g: h = (b - r) + d * 2; h /= 6 * d; break;
+                case b: h = (r - g) + d * 4; h /= 6 * d; break;
+            }
+
+            root.hsvHue = h
+            root.hsvSaturation = s
+            root.hsvValue = v
+        }
+
+
         property color selectedColor: "#fff"
-        onSelectedColorChanged: palette.value = selectedColor
+        onSelectedColorChanged: {
+            setHsv(root.selectedColor)
+            palette.value = selectedColor
+        }
 
         width: 280
         height: 90
@@ -51,7 +82,7 @@ LivePalette{
                 minimumValue: 0
                 value: 0
                 onValueChanged:
-                    root.selectedColor = Qt.hsva(value / 255, root.selectedColor.hsvSaturation, root.selectedColor.hsvValue)
+                    root.selectedColor = Qt.hsva(value / 255, root.hsvSaturation, root.hsvValue)
                 stepSize: 1.0
                 maximumValue: 255
 
@@ -162,8 +193,9 @@ LivePalette{
                 height: 15
                 minimumValue: 0
                 value: 0
-                onValueChanged:
-                    root.selectedColor = Qt.hsva(root.selectedColor.hsvHue, value / 255, root.selectedColor.hsvValue, 1)
+                onValueChanged: {
+                    root.selectedColor = Qt.hsva(root.hsvHue, value / 255, root.hsvValue, 1)
+                }
                 stepSize: 1.0
                 maximumValue: 255
 
@@ -178,12 +210,12 @@ LivePalette{
                                 GradientStop {
                                     position: 0.000
                                     color: Qt.hsva(
-                                        root.selectedColor.hsvHue, 0, root.selectedColor.hsvValue, 1
+                                        root.hsvHue, 0, 1, 1
                                     )
                                 }
                                 GradientStop {
                                     position: 1.000
-                                    color: Qt.hsva(root.selectedColor.hsvHue, 255, root.selectedColor.hsvValue, 1)
+                                    color: Qt.hsva(root.hsvHue, 255, 1, 1)
                                 }
                             }
                         }
@@ -257,7 +289,7 @@ LivePalette{
                 minimumValue: 0
                 value: 0
                 onValueChanged:
-                    root.selectedColor = Qt.hsva(root.selectedColor.hsvHue, root.selectedColor.hsvSaturation, value / 255, 1)
+                    root.selectedColor = Qt.hsva(root.hsvHue, root.hsvSaturation, value / 255, 1)
                 stepSize: 1.0
                 maximumValue: 255
 
@@ -272,12 +304,12 @@ LivePalette{
                                 GradientStop {
                                     position: 0.000
                                     color: Qt.hsva(
-                                        root.selectedColor.hsvHue, root.selectedColor.hsvSaturation, 0, 1
+                                        root.hsvHue, root.hsvSaturation, 0, 1
                                     )
                                 }
                                 GradientStop {
                                     position: 1.000
-                                    color: Qt.hsva(root.selectedColor.hsvHue, root.selectedColor.hsvSaturation, 1, 1)
+                                    color: Qt.hsva(root.hsvHue, root.hsvSaturation, 1, 1)
                                 }
                             }
                         }
@@ -331,14 +363,20 @@ LivePalette{
                 }
             }
 
-}
+        }
 
     }
 
     onInit: {
         root.selectedColor = value
+        hueSlider.value = Math.round(root.hsvHue * 255)
+        saturationSlider.value = Math.round(root.hsvSaturation * 255)
+        valueSlider.value = Math.round(root.hsvValue * 255)
     }
     onCodeChanged:{
         root.selectedColor = value
+        hueSlider.value = Math.round(root.hsvHue * 255)
+        saturationSlider.value = Math.round(root.hsvSaturation * 255)
+        valueSlider.value = Math.round(root.hsvValue * 255)
     }
 }
