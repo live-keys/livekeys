@@ -32,7 +32,7 @@
 
 #include <QTextList>
 
-#define QCODE_BASIC_HANDLER_DEBUG_FLAG
+//#define QCODE_BASIC_HANDLER_DEBUG_FLAG
 #ifdef QCODE_BASIC_HANDLER_DEBUG_FLAG
 #define QCODE_BASIC_HANDLER_DEBUG(_param) qDebug() << "DOCUMENT HANDLER:" << (_param)
 #else
