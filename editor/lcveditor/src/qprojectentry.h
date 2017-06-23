@@ -21,7 +21,6 @@
 #include <QDateTime>
 #include <QUrl>
 #include "qlcveditorglobal.h"
-#include <QDebug>
 
 namespace lcv{
 

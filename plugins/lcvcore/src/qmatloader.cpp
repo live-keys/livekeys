@@ -63,9 +63,9 @@ QMat *QMatLoader::staticLoad(const QString &id, const QJSValue &params){
         QMatLoaderParams mparams = QMatLoaderParams::parse(params);
         cv::Mat* cvm = 0;
         if ( mparams.color == cv::Scalar(-1) ){
-            cvm = new cv::Mat(mparams.width, mparams.height, mparams.type);
+            cvm = new cv::Mat(mparams.width, mparams.height, CV_MAKETYPE(mparams.type, mparams.channels));
         } else {
-            cvm = new cv::Mat(mparams.width, mparams.height, mparams.type, mparams.color);
+            cvm = new cv::Mat(mparams.width, mparams.height, CV_MAKETYPE(mparams.type, mparams.channels), mparams.color);
         }
         m = new QMat(cvm);
         container->set<QMat>(id, m);

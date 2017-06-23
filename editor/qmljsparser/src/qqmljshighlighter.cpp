@@ -16,7 +16,6 @@
 
 #include "qqmljshighlighter_p.h"
 #include "qcoderuntimebinding.h"
-#include <QDebug>
 
 namespace lcv{
 

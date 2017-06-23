@@ -37,6 +37,14 @@ public slots:
             int thickness = 1,
             int lineType  = 8,
             int shift     = 0);
+    void lineOn(
+            QMat* mat,
+            const QPoint& p1,
+            const QPoint& p2,
+            const QColor& color,
+            int thickness = 1,
+            int lineType  = 8,
+            int shift     = 0);
     void rectangle(
             const QPoint& p1,
             const QPoint& p2,

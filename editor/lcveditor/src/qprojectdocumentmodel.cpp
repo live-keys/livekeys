@@ -21,7 +21,6 @@
 #include "qproject.h"
 #include <QFileInfo>
 #include <QFileSystemWatcher>
-#include <QDebug>
 
 namespace lcv{
 
