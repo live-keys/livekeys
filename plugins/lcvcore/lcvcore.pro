@@ -17,7 +17,7 @@ linkLocalPlugin(live, live)
 
 include($$PWD/src/lcvcore.pri)
 include($$PWD/include/lcvcoreheaders.pri)
-include($$PROJECT_ROOT/3rdparty/opencvconfig.pro)
+include($$PROJECT_ROOT/project/3rdparty/opencv.pri)
 deployOpenCV()
 
 OTHER_FILES *= \
