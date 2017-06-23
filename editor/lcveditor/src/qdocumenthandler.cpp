@@ -290,8 +290,10 @@ void QDocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
 
 void QDocumentHandler::setDocument(QProjectDocument *document){
     cancelEdit();
-    if ( m_projectDocument )
+    if ( m_projectDocument ){
         m_projectDocument->assignEditingDocument(0, 0);
+        disconnect(m_projectDocument, SIGNAL(contentRead()), this, SLOT(documentRead()));
+    }
 
     if ( document && m_targetDoc ){
         addEditingState(QDocumentHandler::Silent);
@@ -302,7 +304,14 @@ void QDocumentHandler::setDocument(QProjectDocument *document){
     if ( m_targetDoc )
         m_targetDoc->clearUndoRedoStacks();
     m_projectDocument = document;
+    connect(m_projectDocument, SIGNAL(contentRead()), this, SLOT(documentRead()));
     m_codeHandler->setDocument(document);
+}
+
+void QDocumentHandler::documentRead(){
+    addEditingState(QDocumentHandler::Silent);
+    m_targetDoc->setPlainText(m_projectDocument->content());
+    removeEditingState(QDocumentHandler::Silent);
 }
 
 void QDocumentHandler::generateCompletion(int cursorPosition){

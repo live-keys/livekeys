@@ -136,6 +136,7 @@ signals:
     void isDirtyChanged();
     void isMonitoredChanged();
     void fileChanged();
+    void contentRead();
     void contentChanged();
 
 private:

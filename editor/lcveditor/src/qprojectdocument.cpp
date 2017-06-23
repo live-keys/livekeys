@@ -51,6 +51,7 @@ void QProjectDocument::readContent(){
         m_content = parentAsProject()->lockedFileIO()->readFromFile(m_file->path());
         m_lastModified = QFileInfo(m_file->path()).lastModified();
         m_changes.clear();
+        emit contentRead();
         emit contentChanged();
     }
 }

@@ -80,6 +80,7 @@ public slots:
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
     void cursorWritePositionChanged(QTextCursor cursor);
     void setDocument(QProjectDocument* document);
+    void documentRead();
     void generateCompletion(int cursorPosition);
     void updateScope(const QString& data);
     void bind(int position, int length, QObject* object = 0);
