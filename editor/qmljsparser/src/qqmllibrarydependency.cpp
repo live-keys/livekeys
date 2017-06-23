@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "qqmllibrarydependency.h"
+#include <QStringList>
 
 namespace lcv{
 
