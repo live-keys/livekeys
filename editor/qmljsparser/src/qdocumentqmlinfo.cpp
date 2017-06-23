@@ -29,8 +29,6 @@
 #include <QQmlProperty>
 #include <QQmlListReference>
 
-#include <QDebug>
-
 namespace lcv{
 
 namespace{

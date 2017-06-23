@@ -17,8 +17,6 @@
 #include "qqmljssettings.h"
 #include "qqmljshighlighter_p.h"
 
-#include <QDebug>
-
 namespace lcv{
 
 QQmlJsSettings::QQmlJsSettings(QQmlJsHighlighter *highlighter)

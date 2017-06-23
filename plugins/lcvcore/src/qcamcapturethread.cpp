@@ -25,7 +25,7 @@
 #include <QReadWriteLock>
 #include <QWaitCondition>
 
-#define QCAM_CAPTURE_THREAD_DEBUG_FLAG
+//#define QCAM_CAPTURE_THREAD_DEBUG_FLAG
 #ifdef QCAM_CAPTURE_THREAD_DEBUG_FLAG
 #define QCAM_CAPTURE_THREAD_DEBUG(_param) qDebug() << (_param)
 #else

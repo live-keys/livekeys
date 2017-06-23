@@ -16,8 +16,6 @@
 
 #include "qqmllibrarydependency.h"
 
-#include <QDebug>
-
 namespace lcv{
 
 QQmlLibraryDependency::QQmlLibraryDependency(const QString &uri, int versionMajor, int versionMinor)

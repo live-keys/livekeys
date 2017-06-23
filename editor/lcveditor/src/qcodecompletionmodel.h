@@ -22,8 +22,6 @@
 #include "qlcveditorglobal.h"
 #include "qcodecompletionsuggestion.h"
 
-#include <QDebug>
-
 namespace lcv{
 
 class Q_LCVEDITOR_EXPORT QCodeCompletionContext{

@@ -44,7 +44,7 @@
 
 #include <QDebug>
 
-#define QDOCUMENT_QML_HANDLER_DEBUG_FLAG
+//#define QDOCUMENT_QML_HANDLER_DEBUG_FLAG
 #ifdef QDOCUMENT_QML_HANDLER_DEBUG_FLAG
 #define QDOCUMENT_QML_HANDLER_DEBUG(_param) qDebug() << "QML HANDLER:" << (_param)
 #else

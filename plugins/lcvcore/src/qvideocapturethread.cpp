@@ -27,7 +27,7 @@
 #include <QWaitCondition>
 
 
-#define QVIDEO_CAPTURE_THREAD_DEBUG_FLAG
+//#define QVIDEO_CAPTURE_THREAD_DEBUG_FLAG
 #ifdef QVIDEO_CAPTURE_THREAD_DEBUG_FLAG
 #define QVIDEO_CAPTURE_THREAD_DEBUG(_param) qDebug() << (_param)
 #else

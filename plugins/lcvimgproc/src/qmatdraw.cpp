@@ -113,6 +113,27 @@ void QMatDraw::line(
     update();
 }
 
+void QMatDraw::lineOn(
+        QMat *mat,
+        const QPoint &p1,
+        const QPoint &p2,
+        const QColor &color,
+        int thickness,
+        int lineType,
+        int shift)
+{
+
+    cv::line(
+        *mat->cvMat(),
+        cv::Point(p1.x(), p1.y()),
+        cv::Point(p2.x(), p2.y()),
+        cv::Scalar( color.blue(), color.green(), color.red(), color.alpha() ),
+        thickness,
+        lineType,
+        shift
+    );
+}
+
 /*!
   \qmlmethod MatDraw::rectangle(Point p1, Point p2, Color color, int thickness, int lineType, int shift)
 
