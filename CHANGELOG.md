@@ -2,6 +2,26 @@
 
 This file summarises notable changes between Live CV versions.
 
+## 1.4.0
+
+### Compatibility:
+   - ```GlobalItem``` is now called ```StaticLoader``` and is available under ```live``` plugin (```import live 1.0```)
+   - ```GlobalItemProperty``` is now ```StaticLoaderProperty``` and is available under ```live``` plugin
+   - Items that used ```stateId``` are now configured using the ```staticLoad()``` function
+(see the documentation on Static Items)
+   - ```lcvcontrols``` have been removed, and all items have been distributed under ```lcvcore``` and
+```lcvfeatures2d``` plugins
+   - ```lcvlib``` api has been removed. Plugins like ```lcvcore```, ```live``` expose their types as libraries, so
+the user can now link to them
+   - Added a *project* folder for qmake project files developers can now include to extend Live CV
+
+### Features:
+   - Editor configuration file
+   - License management
+   - Direct runtime property editing
+   - Palettes
+   - Runtime Binding
+
 ## 1.3.0
 
 ### Compatibility:
