@@ -13,12 +13,12 @@ DEFINES += Q_LCV
 linkLocalPlugin(live, live)
 linkLocalPlugin(lcvcore, lcvcore)
 
-# Deploying qml is handled by the is_plugin configuration
+# Deploying qml is handled by the plugin.pri configuration
 
 # Source
 
 include($$PWD/src/lcvimgproc.pri)
-include($$PROJECT_ROOT/3rdparty/opencvconfig.pro)
+include($$PROJECT_ROOT/project/3rdparty/opencv.pri)
 
 OTHER_FILES *= \
     qml/*.qml \
