@@ -3,7 +3,6 @@
 # look at the following files:
 # .qmake.config
 # config/config_functions.pri
-# config/config_paths.pri
 #
 # They are also included in this confiuration for completeness and easy access.
 
@@ -50,8 +49,3 @@ OTHER_FILES += \
 }
 
 OTHER_FILES *= project/*.pri
-
-# NOTE: It is not required to explicitly
-#include($$PWD/config/config_functions.pri)
-#include($$PWD/config/config_paths.pri)
-# .qmake.conf already does that for you project-wide.

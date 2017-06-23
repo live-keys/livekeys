@@ -14,13 +14,13 @@ DEFINES += Q_LCVFEATURES2D_LIB
 linkLocalPlugin(live,    live)
 linkLocalPlugin(lcvcore, lcvcore)
 
-# Deploying qml is handled by the is_plugin configuration
+# Deploying qml is handled by the plugin.pri configuration
 
 # Source
 
 include($$PWD/src/lcvfeatures2d.pri)
 include($$PWD/include/lcvfeatures2dheaders.pri)
-include($$PROJECT_ROOT/3rdparty/opencvconfig.pro)
+include($$PROJECT_ROOT/project/3rdparty/opencv.pri)
 
 deployOpenCV()
 
