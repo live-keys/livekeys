@@ -27,7 +27,7 @@
 namespace{
 
     std::exception makeException(const QString& str){
-        return std::exception(str.toStdString().c_str());
+        return std::runtime_error(str.toStdString().c_str());
     }
 
 }// namespace
