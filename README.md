@@ -55,6 +55,7 @@ Live CV's goal is to provide an environment where people can experiment with dif
 
  * Version 1.5 - Packages & Image components
     * Package manager
+    * Visual logging
     * Advanced Editor Functionality
     * Image Exposure and contrast configuration
     * Photo stiching
