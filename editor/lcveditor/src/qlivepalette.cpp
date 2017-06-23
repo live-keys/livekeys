@@ -20,8 +20,8 @@ namespace lcv{
 
 QLivePalette::QLivePalette(QObject *parent)
     : QCodeConverter(parent)
-    , m_item(0)
     , m_codeChange(false)
+    , m_item(0)
 {
 }
 

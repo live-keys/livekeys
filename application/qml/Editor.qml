@@ -409,7 +409,7 @@ Rectangle{
 
                 Connections{
                     target: project.inFocus
-                    onContentChanged : {
+                    onContentRead : {
                         editor.isDirtyMask = true
                         editor.isDirty     = project.inFocus.isDirty
 //                        editor.text    = project.inFocus.content
