@@ -1,10 +1,10 @@
 PLUGIN_NAME = lcvvideo
-PLUGIN_PATH = $$PWD
+PLUGIN_PATH = lcvvideo
 
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
 include($$getGlobalFile(plugin.pri))
 
-uri = plugins.lcvvideo
+uri = lcvvideo
 
 DEFINES += Q_LCV
 DEFINES += Q_LCVVIDEO_LIB
