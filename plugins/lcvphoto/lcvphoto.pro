@@ -1,10 +1,10 @@
 PLUGIN_NAME = lcvphoto
-PLUGIN_PATH = $$PWD
+PLUGIN_PATH = lcvphoto
 
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
 include($$getGlobalFile(plugin.pri))
 
-uri = plugins.lcvphoto
+uri = lcvphoto
 
 DEFINES += Q_LCV
 

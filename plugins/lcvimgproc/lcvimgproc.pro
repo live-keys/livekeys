@@ -1,10 +1,10 @@
 PLUGIN_NAME = lcvimgproc
-PLUGIN_PATH = $$PWD
+PLUGIN_PATH = lcvimgproc
 
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
 include($$getGlobalFile(plugin.pri))
 
-uri = plugins.lcvimgproc
+uri = lcvimgproc
 
 DEFINES += Q_LCV
 

@@ -1,10 +1,10 @@
 PLUGIN_NAME = lcvfeatures2d
-PLUGIN_PATH = $$PWD
+PLUGIN_PATH = lcvfeatures2d
 
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
 include($$getGlobalFile(plugin.pri))
 
-uri = plugins.lcvfeatures2d
+uri = lcvfeatures2d
 
 DEFINES += Q_LCV
 DEFINES += Q_LCVFEATURES2D_LIB
