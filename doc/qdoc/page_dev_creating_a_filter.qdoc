@@ -52,7 +52,7 @@ class QBGRToGray : public QMatFilter{
 public:
     explicit QBGRToGray(QQuickItem *parent = 0) : QMatFilter(parent){}
 
-    virtual void transform(cv::Mat &in, cv::Mat &out){
+    virtual void transform(cv::Mat const &in, cv::Mat &out) override {
         cv::cvtColor(in, out, CV_BGR2GRAY);
     }
 
@@ -104,13 +104,13 @@ Add the setters and getters, and implement the following function :
 
 \code
 // addweighted.h
-void transform(cv::Mat& in, cv::Mat& out);
+void transform(cv::Mat const& in, cv::Mat& out) override;
 \endcode
 
 \code
 // addweighted.cpp
 
-void AddWeighted::transform(cv::Mat& in, cv::Mat& out){
+void AddWeighted::transform(cv::Mat const& in, cv::Mat& out){
     cv::Mat* in2 = m_input2->cvMat();
     if ( in.size() == in2->size() && in.channels() == in2->channels() ){
         cv::addWeighted(in, m_alpha, *in2, m_beta, m_gamma, out);
@@ -138,7 +138,7 @@ public:
     explicit AddWeighted(QQuickItem *parent = 0);
     ~AddWeighted();
 
-    void transform(cv::Mat& in, cv::Mat& out);
+    void transform(cv::Mat const& in, cv::Mat& out) override;
 
     QMat* input2();
     void setInput2(QMat* input2);
@@ -234,7 +234,7 @@ AddWeighted::~AddWeighted(){
     delete m_input2Internal;
 }
 
-void AddWeighted::transform(cv::Mat& in, cv::Mat& out){
+void AddWeighted::transform(cv::Mat const& in, cv::Mat& out){
     cv::Mat* in2 = m_input2->cvMat();
     if ( in.size() == in2->size() && in.channels() == in2->channels() ){
         cv::addWeighted(in, m_alpha, *in2, m_beta, m_gamma, out);
