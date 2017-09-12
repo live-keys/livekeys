@@ -304,7 +304,8 @@ void QDocumentHandler::setDocument(QProjectDocument *document){
     if ( m_targetDoc )
         m_targetDoc->clearUndoRedoStacks();
     m_projectDocument = document;
-    connect(m_projectDocument, SIGNAL(contentRead()), this, SLOT(documentRead()));
+    if ( document )
+        connect(m_projectDocument, SIGNAL(contentRead()), this, SLOT(documentRead()));
     m_codeHandler->setDocument(document);
 }
 

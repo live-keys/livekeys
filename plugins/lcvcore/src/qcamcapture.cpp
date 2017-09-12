@@ -127,11 +127,6 @@ void QCamCapture::staticLoad(const QString &device, const QSize &resolution){
         setImplicitWidth (m_thread->captureWidth());
         setImplicitHeight(m_thread->captureHeight());
 
-        if ( resolution != m_resolution )
-            qWarning() << "Attempted to set resolution to" << resolution
-                   << "but OpenCV set it to" << m_resolution << "instead. "
-                   << "Does the camera support the target resolution?";
-
         if ( !m_thread->paused() ){
             if ( m_thread->timer()->isActive() ){
                 if ( m_thread->timer()->interval() != (1000 / m_fps) ){
