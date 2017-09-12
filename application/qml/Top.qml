@@ -48,19 +48,6 @@ Rectangle {
         messageBox.visible = true
     }
 
-
-    // Logo
-
-    Rectangle{
-        anchors.left: parent.left
-        anchors.leftMargin: 14
-        height : parent.height
-        Image{
-            anchors.verticalCenter: parent.verticalCenter
-            source : "qrc:/images/logo.png"
-        }
-    }
-
     // New
 
     Rectangle{

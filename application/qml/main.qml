@@ -70,12 +70,12 @@ ApplicationWindow{
 
     Top{
         id : header
-        visible: true
+        visible: !settings.previewMode
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
 
-
+        height: settings.previewMode ? 0 : 35
         color: "#08141d"
 
         function closeProject(callback){
@@ -1009,6 +1009,21 @@ ApplicationWindow{
                 }
             )
         }
+    }
+
+
+    // Logo
+
+    Image{
+        id: logo
+
+        anchors.top: parent.top
+        anchors.topMargin: 10
+        anchors.left: parent.left
+        anchors.leftMargin: 14
+
+        opacity: settings.previewMode ? 0.3 : 1.0
+        source : "qrc:/images/logo.png"
     }
 
     Connections{

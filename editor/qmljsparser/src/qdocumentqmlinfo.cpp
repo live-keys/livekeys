@@ -39,6 +39,7 @@ namespace{
         QCodeDeclaration::Ptr declaration,
         const QString& source)
     {
+
         int position = declaration->position();
 
         for ( int i = 0; i < object->properties.size(); ++i ){
@@ -140,7 +141,7 @@ QDocumentQmlInfo::QDocumentQmlInfo(const QString &fileName)
     QDocumentQmlInfo::Dialect dialect = extensionToDialect(QFileInfo(fileName).suffix());
     if ( dialect == QDocumentQmlInfo::Javascript )
         d->internalDoc = QmlJS::Document::create(fileName, QmlJS::Dialect::JavaScript);
-    else if ( dialect == QDocumentQmlInfo::Qml ){
+    else if ( dialect == QDocumentQmlInfo::Qml || fileName == "" ){
         d->internalDoc = QmlJS::Document::create(fileName, QmlJS::Dialect::Qml);
     } else
         d->internalDoc = QmlJS::Document::create(fileName, QmlJS::Dialect::NoLanguage);
@@ -368,9 +369,10 @@ QQmlProperty QDocumentQmlInfo::findMatchingProperty(
 
     QDocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
 
-    QQmlProperty foundProperty(findRuntimeProperty(objects->root(), root, declaration, source));
+    if ( objects->root() )
+        return QQmlProperty(findRuntimeProperty(objects->root(), root, declaration, source));
 
-    return foundProperty;
+    return QQmlProperty();
 }
 
 QDocumentQmlInfo::~QDocumentQmlInfo(){
