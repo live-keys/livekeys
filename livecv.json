@@ -1,10 +1,10 @@
 {
-    "version" : "1.4.0",
+    "version" : "1.4.1",
     "name": "livecv",
     "webpage": "http://livecv.dinusv.com",
     "components" : {
         "livecv" : {
-            "version" : "1.4.0",
+            "version" : "1.4.1",
             "versionsync" : {
                 "README.md": "\\s*(?:\\* \\*\\*Version\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*",
                 "application/src/base/qlivecv.h" : [
