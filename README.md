@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/livecv/livecv.svg?branch=master)](https://travis-ci.org/livecv/livecv)
 [![Build status](https://ci.appveyor.com/api/projects/status/c1kk7crl0wiox16b?svg=true)](https://ci.appveyor.com/project/dinusv/livecv)
 
- * **Version**: 1.4.0
+ * **Version**: 1.4.1
  * **License**: LGPL
  * **Website**: [livecv.dinusv.com](http://livecv.dinusv.com)
  * **Demo**: [www.youtube.com/watch?v=uEnJE6Jawfw](https://www.youtube.com/watch?v=uEnJE6Jawfw)
