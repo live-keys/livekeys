@@ -13,12 +13,9 @@ isEmpty(PLUGIN_NAME): \
 isEmpty(PLUGIN_PATH): \
     error($$_FILE_: Tried to set up a plugin with an empty PLUGIN_PATH.)
 
-!exists($$PLUGIN_PATH): \
-    error($$_FILE_: Plugin path $$PLUGIN_PATH does not exist.)
-
 # The PLUGIN_QML_DIR contains the path to the folder with all the qml files
 # and related files
-PLUGIN_QML_DIR = $$PLUGIN_PATH/qml
+isEmpty(PLUGIN_QML_DIR): PLUGIN_QML_DIR = $$_PRO_FILE_PWD_/qml
 
 !defined(PLUGIN_QML_DIR, var): \
     error($$_FILE_: Tried to set up a plugin without defining PLUGIN_QML_DIR first.)
@@ -34,9 +31,9 @@ CONFIG      += qt plugin
 TARGET      = $$PLUGIN_NAME
 
 win32:{
-    DESTDIR    = $$DEPLOY_PATH/dev/lib/plugins/$$PLUGIN_NAME
-    DLLDESTDIR = $$DEPLOY_PATH/plugins/$$PLUGIN_NAME
-}else:DESTDIR = $$DEPLOY_PATH/plugins/$$PLUGIN_NAME
+    DESTDIR    = $$DEPLOY_PATH/dev/lib/plugins/$$PLUGIN_PATH
+    DLLDESTDIR = $$DEPLOY_PATH/plugins/$$PLUGIN_PATH
+}else:DESTDIR = $$DEPLOY_PATH/plugins/$$PLUGIN_PATH
 
 # --- Handling the QML deployment ---
 

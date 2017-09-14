@@ -1,12 +1,12 @@
 PLUGIN_NAME = live
-PLUGIN_PATH = $$PWD
+PLUGIN_PATH = live
 
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
 include($$getGlobalFile(plugin.pri))
 
 DEFINES += Q_LIVE_LIB
 
-uri = plugins.live
+uri = live
 
 linkLocalLibrary(editor/lcveditor, lcveditor)
 # Source

@@ -165,12 +165,13 @@ Rectangle{
                     font.pixelSize: 12
                     property int type : {
                         if (styleData.value){
-                            if ( project.inFocus ){
-                                if ( project.inFocus.file === styleData.value )
-                                    return 1
-                            }
-                            if ( styleData.value.document )
+                            if ( styleData.value.document ){
+                                if ( project.inFocus ){
+                                    if ( project.inFocus.file === styleData.value )
+                                        return 1
+                                }
                                 return 2
+                            }
                         }
                         return 0
                     }
