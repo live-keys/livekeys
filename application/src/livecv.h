@@ -25,7 +25,7 @@
 
 #define LIVECV_VERSION_MAJOR 1
 #define LIVECV_VERSION_MINOR 4
-#define LIVECV_VERSION_PATCH 0
+#define LIVECV_VERSION_PATCH 1
 
 // Forward declarations
 // --------------------
