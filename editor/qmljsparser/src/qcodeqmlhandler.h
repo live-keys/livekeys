@@ -17,13 +17,13 @@
 #ifndef QCODEQMLHANDLER_H
 #define QCODEQMLHANDLER_H
 
-#include "qqmljsparserglobal.h"
+#include "live/qqmljsparserglobal.h"
 #include "live/qabstractcodehandler.h"
 #include "live/qprojectdocument.h"
-#include "qdocumentqmlscope.h"
-#include "qprojectqmlscope.h"
+#include "live/qdocumentqmlscope.h"
+#include "live/qprojectqmlscope.h"
 #include "live/qcodedeclaration.h"
-#include "live/LockedFileIOSession.h"
+#include "live/lockedfileiosession.h"
 
 #include <QTextCursor>
 

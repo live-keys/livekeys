@@ -22,6 +22,7 @@
 
 //#include "livecvlog.h"
 #include "live/engine.h"
+#include "live/errorhandler.h"
 #include "live/settings.h"
 #include "live/qeditorsettings.h"
 
@@ -193,6 +194,8 @@ void LiveCV::registerTypes(){
         "Cv", 1, 0, "DocumentHandler", "DocumentHandler is singleton.");
     qmlRegisterType<lcv::QDocumentCursorInfo>(
         "Cv", 1, 0, "DocumentCursorInfo");
+    qmlRegisterType<lcv::ErrorHandler>(
+        "Cv", 1, 0, "ErrorHandler");
 
     qmlRegisterUncreatableType<lcv::QProjectFileModel>(
         "Cv", 1, 0, "ProjectFileModel", "Cannot create a ProjectFileModel instance.");

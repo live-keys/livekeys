@@ -50,7 +50,7 @@ void LibraryLoadPath::addImpl(const QString& path, const QString& linkPath, bool
             QLIBRARY_LOAD_PATH_DEBUG("Added \'" + linkPath + "/" + info.fileName() + "\' -> \'" + f.fileName() + "\'");
 
         } else if ( info.isDir() && recursive ){
-            addPath(info.filePath(), linkPath, recursive);
+            addImpl(info.filePath(), linkPath, recursive);
         }
     }
 }

@@ -9,4 +9,5 @@ HEADERS += \
     $$PWD/live/engine.h \
     $$PWD/live/incubationcontroller.h \
     $$PWD/live/commandlineparser.h \
-    $$PWD/live/lockedfileiosession.h
+    $$PWD/live/lockedfileiosession.h \
+    $$PWD/live/errorhandler.h

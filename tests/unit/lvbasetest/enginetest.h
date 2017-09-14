@@ -16,7 +16,14 @@ public:
 private slots:
     void initTestCase();
     void cppExceptionInObbjectTest();
-    void cppExceptionInQmlTest();
+    void engineExceptionTest();
+    void engineWarningTest();
+
+//    void engineObjectExceptionTest();
+//    void engineInternalWarningTest();
+
+//    void engineExceptionHandlerTest();
+//    void engineWarningHandlerTest();
 
 };
 

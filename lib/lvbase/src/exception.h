@@ -15,20 +15,20 @@ public:
     Exception(const QString& message = "", int code = 0);
     Exception(const Exception& other);
 
-    virtual ~Exception() throw(){}
+    virtual ~Exception(){}
 
-    bool hasLocation() const throw();
-    bool hasStackTrace() const throw();
+    bool hasLocation() const;
+    bool hasStackTrace() const;
 
-    const QString& message() const throw();
-    int code() const throw();
-    int line() const throw();
-    const QString& file() const throw();
-    QString fileName() const throw();
-    const QString& functionName() const throw();
-    const StackTrace::Ptr& stackTrace() const throw();
+    const QString& message() const;
+    int code() const;
+    int line() const;
+    const QString& file() const;
+    QString fileName() const;
+    const QString& functionName() const;
+    const StackTrace::Ptr& stackTrace() const;
 
-    QString location() const throw();
+    QString location() const;
 
     template<typename T> static T create(
         const QString& message,
@@ -41,8 +41,8 @@ public:
 
 
 private:
-    int     m_code;
     QString m_message;
+    int     m_code;
     int     m_line;
     QString m_file;
     QString m_functionName;
@@ -101,8 +101,11 @@ template<typename T> T Exception::create(
 
 } // namespace
 
+#define CREATE_EXCEPTION(_type, _message, _code) \
+    lcv::Exception::create<_type>((_message), (_code), __FILE__, __LINE__, __FUNCTION__, lcv::StackTrace::capture())
+
 #define THROW_EXCEPTION(_type, _message, _code) \
-    throw lcv::Exception::create<_type>((_message), (_code), __FILE__, __LINE__, __FUNCTION__, lcv::StackTrace::capture())
+    throw CREATE_EXCEPTION(_type, _message, _code)
 
 
 #endif // LCVEXCEPTIONS_H

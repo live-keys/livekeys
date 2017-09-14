@@ -19,9 +19,11 @@
 
 #include <QObject>
 #include <QJSValue>
+#include <QMap>
 #include <functional>
 
 #include "live/lvbaseglobal.h"
+#include "live/exception.h"
 
 class QQmlEngine;
 class QQmlError;
@@ -30,7 +32,23 @@ class QMutex;
 
 namespace lcv{
 
+class ErrorHandler;
 class IncubationController;
+
+class LVBASE_EXPORT FatalException : public lcv::Exception{
+
+public:
+    FatalException(const QString& message, int code = 0): lcv::Exception(message, code){}
+    virtual ~FatalException(){}
+};
+
+class LVBASE_EXPORT InputException : public lcv::Exception{
+public:
+    InputException(const QString& message, int code = 0) : lcv::Exception(message, code){}
+    virtual ~InputException(){}
+};
+
+
 class LVBASE_EXPORT Engine : public QObject{
 
     Q_OBJECT
@@ -50,11 +68,26 @@ public:
     QQmlEngine* engine();
     QMutex* engineMutex();
 
+    QJSValue evaluate(const QString& jsCode, const QString &fileName = QString(), int lineNumber = 1);
+    void throwError(const Exception *e, QObject* object = 0);
+    void throwError(const QQmlError& error);
+    void throwError(const QJSValue& error, QObject* object = 0);
+
+    void throwWarning(const QString& message, QObject* object = 0, const QString& fileName = QString(), int lineNumber = 0);
+    void throwWarning(const QJSValue& error, QObject* object = 0);
+
+    bool hasErrorHandler(QObject* object);
+    void registerErrorHandler(QObject* object, ErrorHandler* handler);
+    void removeErrorHandler(QObject* object);
+
 signals:
     void aboutToCreateObject(const QUrl& file);
     void isLoadingChanged(bool isLoading);
     void objectCreated(QObject* object);
     void objectCreationError(QJSValue errors);
+
+    void applicationError(QJSValue error);
+    void applicationWarning(QJSValue warning);
 
 public slots:
     void createObjectAsync(
@@ -74,9 +107,11 @@ private:
     QMutex*        m_engineMutex;
     QQmlIncubator* m_incubator;
     IncubationController* m_incubationController;
+    QJSValue       m_errorType;
     //TODO: Add std::function analyzer
 
     QList<QQmlError> m_lastErrors;
+    QMap<QObject*, ErrorHandler*> m_errorHandlers;
 
     bool m_isLoading;
 };

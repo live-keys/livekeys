@@ -28,17 +28,58 @@ void EngineTest::cppExceptionInObbjectTest(){
     );
 
     QVERIFY(obj != 0);
-    QVERIFY_EXCEPTION_THROWN(QMetaObject::invokeMethod(obj, "throwException"), lcv::Exception);
+
+    bool isException = false;
+    try{
+        QMetaObject::invokeMethod(obj, "throwException");
+        QCoreApplication::processEvents();
+    } catch ( lcv::Exception& ){
+        isException = true;
+    }
+    QVERIFY(isException);
 }
 
-void EngineTest::cppExceptionInQmlTest(){
+void EngineTest::engineExceptionTest(){
     Engine engine(new QQmlEngine);
 
-    const char* code =
-        "import QtQuick 2.3\n import cv 1.0\n "
-        "EngineTestStub{"
-            "Component.onCompleted: throwException()"
-        "}";
+    lcv::Exception exception = lcv::Exception::create<lcv::Exception>(
+        "JSTest", 1, "enginetest.cpp", 100, "jsExceptionInObjectTest", 0
+    );
 
-    QVERIFY_EXCEPTION_THROWN(engine.createObject(code, 0, QUrl::fromLocalFile("enginetest.qml")), lcv::Exception);
+    bool isException = false;
+
+    QObject::connect(&engine, &Engine::applicationError, [&isException, this](QJSValue error){
+        QCOMPARE(error.property("type").toString(), QString("Exception"));
+        QCOMPARE(error.property("message").toString(), QString("JSTest"));
+        QCOMPARE(error.property("code").toInt(), 1);
+        QCOMPARE(error.property("functionName").toString(), QString("jsExceptionInObjectTest"));
+        QCOMPARE(error.property("fileName").toString(), QString("enginetest.cpp"));
+        QCOMPARE(error.property("lineNumber").toInt(), 100);
+        QCOMPARE(error.property("object").toQObject(), this);
+        isException = true;
+    });
+
+    engine.throwError(&exception, this);
+    QCoreApplication::processEvents();
+
+    QVERIFY(isException);
+}
+
+void EngineTest::engineWarningTest(){
+    Engine engine(new QQmlEngine);
+
+    bool isEWarning = false;
+
+    QObject::connect(&engine, &Engine::applicationWarning, [&isEWarning, this](QJSValue error){
+        QCOMPARE(error.property("message").toString(), QString("JSTest"));
+        QCOMPARE(error.property("fileName").toString(), QString("enginetest.cpp"));
+        QCOMPARE(error.property("lineNumber").toInt(), 100);
+        QCOMPARE(error.property("object").toQObject(), this);
+        isEWarning = true;
+    });
+
+    engine.throwWarning("JSTest", this, "enginetest.cpp", 100);
+    QCoreApplication::processEvents();
+
+    QVERIFY(isEWarning);
 }
