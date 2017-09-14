@@ -20,11 +20,11 @@
 #include <QTextBlockUserData>
 #include <QSyntaxHighlighter>
 
-#include "qprojectdocument.h"
-#include "qdocumenthandlerstate.h"
-#include "qdocumenteditfragment.h"
+#include "live/qprojectdocument.h"
+#include "live/qdocumenthandlerstate.h"
+#include "live/qdocumenteditfragment.h"
+#include "live/qcoderuntimebinding.h"
 #include "qmljs/qmljsscanner.h"
-#include "qcoderuntimebinding.h"
 
 namespace lcv{
 

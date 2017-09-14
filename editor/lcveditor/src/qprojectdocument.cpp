@@ -16,7 +16,7 @@
 
 #include "qprojectdocument.h"
 #include "qprojectfile.h"
-#include "qlockedfileiosession.h"
+#include "live/lockedfileiosession.h"
 #include "qdocumenthandler.h"
 #include "qproject.h"
 #include "qcodeconverter.h"

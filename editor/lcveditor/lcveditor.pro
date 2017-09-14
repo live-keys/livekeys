@@ -3,6 +3,8 @@ TARGET   = lcveditor
 QT      += core qml quick
 CONFIG  += qt
 
+linkLocalLibrary(lib/lvbase, lvbase)
+
 win32:{
     DESTDIR    = $$DEPLOY_PATH/dev/lib
     DLLDESTDIR = $$DEPLOY_PATH

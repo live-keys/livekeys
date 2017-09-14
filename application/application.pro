@@ -2,6 +2,7 @@ TEMPLATE = app
 TARGET   = livecv
 QT      += qml quick
 
+linkLocalLibrary(lib/lvbase, lvbase)
 linkLocalLibrary(editor/lcveditor, lcveditor)
 linkLocalLibrary(editor/qmljsparser, qmljsparser)
 
@@ -24,8 +25,7 @@ DESTDIR = $$DEPLOY_PATH
 # Application
 # -----------
 
-include($$PWD/src/base/base.pri)
-include($$PWD/src/main/main.pri)
+include($$PWD/src/main.pri)
 
 RC_ICONS = $$PWD/icons/livecv.ico
 

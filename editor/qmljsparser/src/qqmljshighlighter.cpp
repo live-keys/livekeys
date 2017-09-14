@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "qqmljshighlighter_p.h"
-#include "qcoderuntimebinding.h"
+#include "live/qcoderuntimebinding.h"
 
 namespace lcv{
 

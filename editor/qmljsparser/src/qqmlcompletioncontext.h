@@ -18,7 +18,7 @@
 #define QQMLCOMPLETIONCONTEXT_H
 
 #include "qqmljsparserglobal.h"
-#include "qcodecompletionmodel.h"
+#include "live/qcodecompletionmodel.h"
 
 #include <QString>
 #include <QStringList>

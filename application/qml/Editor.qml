@@ -45,6 +45,13 @@ Rectangle{
         return editorArea.cursorRectangle
     }
 
+    objectName: "editor"
+    property string objectCommandIndex : livecv.commands.add(editor, {
+        'save' : editor.save,
+        'open' : editor.open,
+        'closeFile' : editor.closeFocusedFile
+    })
+
     color : "#050c13"
 
     clip : true

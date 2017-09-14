@@ -23,14 +23,18 @@ TEMPLATE = subdirs
 SUBDIRS += \
     application \
     editor \
-    plugins
+    lib \
+    plugins \
+    tests
 
 # --- Subdir configurations ---
 application.subdir  = $$PWD/application
 editor.subdir       = $$PWD/editor
 plugins.subdir      = $$PWD/plugins
+tests.subdir        = $$PWD/tests
 
 # --- Dependency configuration ---
+editor.depends      = lib
 application.depends = editor
 plugins.depends     = editor
 

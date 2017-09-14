@@ -17,7 +17,7 @@
 #ifndef QDOCUMENTQMLVALUESCANNER_H
 #define QDOCUMENTQMLVALUESCANNER_H
 
-#include "qprojectdocument.h"
+#include "live/qprojectdocument.h"
 #include "qmljs/qmljsscanner.h"
 
 class QTextDocument;

@@ -3,6 +3,7 @@ TARGET   = qmljsparser
 QT      += core qml quick xml
 CONFIG  += qt c++11
 
+linkLocalLibrary(lib/lvbase, lvbase)
 linkLocalLibrary(editor/lcveditor, lcveditor)
 
 DEFINES += Q_QMLJSPARSER_LIB
@@ -23,3 +24,4 @@ win32:{
 include($$PWD/src/qmljsparser.pri)
 include($$PWD/3rdparty/3rdparty.pro)
 include($$PWD/plugintypes/plugintypes.pri)
+include($$PWD/include/qmljsparserheaders.pri)

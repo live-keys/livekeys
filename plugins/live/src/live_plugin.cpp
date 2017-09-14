@@ -19,12 +19,13 @@
 #include "qstaticloader.h"
 #include "qenginemonitor.h"
 #include "qstaticcontainer.h"
-#include "qabstractcodeserializer.h"
-#include "qnativevaluecodeserializer.h"
-#include "qqmlobjectcodeserializer.h"
 #include "qlicensesettings.h"
-#include "qcodeconverter.h"
-#include "qlivepalette.h"
+
+#include "live/qabstractcodeserializer.h"
+#include "live/qnativevaluecodeserializer.h"
+#include "live/qqmlobjectcodeserializer.h"
+#include "live/qcodeconverter.h"
+#include "live/qlivepalette.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -54,9 +55,11 @@ void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){
     QEngineMonitor* em = new QEngineMonitor(engine);
     engine->rootContext()->setContextProperty("engineMonitor", em);
 
-    QObject* obj = engine->rootContext()->contextProperty("settings").value<QObject*>();
+    QObject* livecv   = engine->rootContext()->contextProperty("livecv").value<QObject*>();
+    QObject* settings = livecv->property("settings").value<QObject*>();
 
-    QString settingsPath = obj->property("path").toString();
-    QLicenseSettings* ls = new QLicenseSettings(settingsPath, obj);
-    obj->setProperty("license", QVariant::fromValue(ls));
+    QString settingsPath = settings->property("path").toString();
+    QLicenseSettings* ls = new QLicenseSettings(settingsPath, settings);
+
+    QMetaObject::invokeMethod(settings, "addConfigFile", Q_ARG(QString, "license"), Q_ARG(QObject*, ls));
 }

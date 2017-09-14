@@ -20,7 +20,7 @@
 #include "qqmljsparserglobal.h"
 #include "qdocumentqmlobject.h"
 #include "qdocumentqmlvalueobjects.h"
-#include "qcodedeclaration.h"
+#include "live/qcodedeclaration.h"
 #include <QQmlProperty>
 #include <QSharedPointer>
 #include <QScopedPointer>

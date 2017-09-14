@@ -19,7 +19,7 @@
 #include "qqmllibraryinfo_p.h"
 #include "qdocumentqmlobject_p.h"
 #include "qdocumentqmlscope.h"
-#include "qlockedfileiosession.h"
+#include "live/lockedfileiosession.h"
 
 #include "qmljs/qmljsdocument.h"
 #include "qmljs/qmljsinterpreter.h"
@@ -279,7 +279,7 @@ void scanObjectFile(
 
 void scanQmlDirForQmlExports(
         QProjectQmlScope::Ptr projectScope,
-        QLockedFileIOSession::Ptr lockedFileIO,
+        LockedFileIOSession::Ptr lockedFileIO,
         const QmlDirParser& dirParser,
         const QString &path,
         QQmlLibraryInfo::Ptr library
@@ -331,7 +331,7 @@ void scanQmlDirForQmlExports(
 
 void scanPathForQmlExports(
         QProjectQmlScope::Ptr projectScope,
-        QLockedFileIOSession::Ptr lockedFileIO,
+        LockedFileIOSession::Ptr lockedFileIO,
         const QString &path,
         QQmlLibraryInfo::Ptr library)
 {
@@ -372,7 +372,7 @@ void scanPathForQmlExports(
 
 QMap<QString, QQmlLibraryInfo::Ptr> updateLibrary(
         QProjectQmlScope::Ptr projectScope,
-        QLockedFileIOSession::Ptr lockedFileIO,
+        LockedFileIOSession::Ptr lockedFileIO,
         QMutex* engineMutex,
         const QString& path,
         const QmlJS::LibraryInfo &libInfo,
@@ -612,7 +612,7 @@ QMap<QString, QQmlLibraryInfo::Ptr> updateLibrary(
 QProjectQmlScanner::QProjectQmlScanner(
         QQmlEngine* engine,
         QMutex* engineMutex,
-        QLockedFileIOSession::Ptr lockedFileIO,
+        LockedFileIOSession::Ptr lockedFileIO,
         QObject *parent)
     : QObject(parent)
     , m_project(0)

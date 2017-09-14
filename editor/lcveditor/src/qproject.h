@@ -21,7 +21,7 @@
 
 #include <QObject>
 #include <QHash>
-#include "qlockedfileiosession.h"
+#include "live/lockedfileiosession.h"
 #include "qprojectdocument.h"
 
 namespace lcv{
@@ -64,7 +64,7 @@ public:
 
     const QString& path() const;
 
-    QLockedFileIOSession::Ptr lockedFileIO();
+    LockedFileIOSession::Ptr lockedFileIO();
 
 public slots:
     void newProject();
@@ -108,7 +108,7 @@ private:
     QProjectNavigationModel* m_navigationModel;
     QProjectDocumentModel*   m_documentModel;
 
-    QLockedFileIOSession::Ptr m_lockedFileIO;
+    LockedFileIOSession::Ptr m_lockedFileIO;
 
     QProjectDocument* m_active;
     QProjectDocument* m_focus;
@@ -139,7 +139,7 @@ inline const QString &QProject::path() const{
     return m_path;
 }
 
-inline QLockedFileIOSession::Ptr QProject::lockedFileIO(){
+inline LockedFileIOSession::Ptr QProject::lockedFileIO(){
     return m_lockedFileIO;
 }
 

@@ -17,7 +17,7 @@
 #ifndef QQMLJSSETTINGS_H
 #define QQMLJSSETTINGS_H
 
-#include "qeditorsettingscategory.h"
+#include "live/qeditorsettingscategory.h"
 
 namespace lcv{
 

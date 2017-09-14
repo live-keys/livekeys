@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 import QtQuick 2.3
+import Cv 1.0
 import live 1.0
 
 Rectangle {
@@ -29,7 +30,7 @@ Rectangle {
     property bool isLogWindowDirty     : false
     property bool isTextDirty          : false
 
-    property var licenseSettings: settings.custom('license')
+    property var licenseSettings: livecv.settings.file('license')
 
     signal messageYes()
     signal messageNo()
@@ -270,7 +271,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 465
-        color : settings.custom('license').highlights > 0 ? "#44130b" : "#0c1924"
+        color : livecv.settings.file('license').highlights > 0 ? "#44130b" : "#0c1924"
         border.width: 1
         border.color: "#0f2636"
         height : openLicenseArea.containsMouse ? parent.height : parent.height - 5

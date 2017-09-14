@@ -20,11 +20,11 @@
 #include "qqmlidvisitor_p.h"
 #include "qdocumentqmlranges_p.h"
 #include "qdocumentqmlvalueobjects.h"
-#include "qcodedeclaration.h"
-#include "qcoderuntimebinding.h"
+#include "live/qcodedeclaration.h"
+#include "live/qcoderuntimebinding.h"
 
-#include "qprojectdocument.h"
-#include "qprojectfile.h"
+#include "live/qprojectdocument.h"
+#include "live/qprojectfile.h"
 
 #include <QQmlProperty>
 #include <QQmlListReference>

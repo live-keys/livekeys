@@ -72,15 +72,15 @@ defineReplace(buildModePath){
 # Args: (path, name, [include_dir])
 #  * path: relative path to the library from root
 #  * name: name of the library
-#  * include_dir: include dir path(defaults to library path in source tree + '/src')
+#  * include_dir: include dir path(defaults to library path in source tree + '/include')
 
 defineTest(linkLocalLibrary){
 
     win32:LIB_PATH = $$DEPLOY_PATH/dev/lib
-    else:LIB_PATH = $$DEPLOY_PATH
+    else:LIB_PATH  = $$DEPLOY_PATH
 
     LIB_NAME = $$2
-    LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/src
+    LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/include
     !isEmpty($$3):LIB_INCLUDE_PATH=$$3
 
     # use *= instead of += to prevent duplications of link path cofigurations
@@ -108,7 +108,7 @@ defineTest(linkLocalPlugin){
     else:LIB_PATH = $$PATH_DEPLOY_PLUGINS/$$1
 
     LIB_NAME = $$2
-    LIB_INCLUDE_PATH = $$PROJECT_ROOT/plugins/$$1/src
+    LIB_INCLUDE_PATH = $$PROJECT_ROOT/plugins/$$1/include
     !isEmpty($$3):LIB_INCLUDE_PATH=$$3
 
     # use *= instead of += to prevent duplications of link path cofigurations

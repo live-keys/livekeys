@@ -12,7 +12,6 @@ HEADERS += \
     $$PWD/qabstractcodehandler.h \
     $$PWD/qprojectnavigationmodel.h \
     $$PWD/qprojectdocumentmodel.h \
-    $$PWD/qlockedfileiosession.h \
     $$PWD/qeditorsettings.h \
     $$PWD/qdocumenteditfragment.h \
     $$PWD/qcodedeclaration.h \
@@ -40,7 +39,6 @@ SOURCES += \
     $$PWD/qabstractcodehandler.cpp \
     $$PWD/qprojectnavigationmodel.cpp \
     $$PWD/qprojectdocumentmodel.cpp \
-    $$PWD/qlockedfileiosession.cpp \
     $$PWD/qeditorsettings.cpp \
     $$PWD/qdocumenteditfragment.cpp \
     $$PWD/qcodedeclaration.cpp \

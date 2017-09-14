@@ -1,1 +1,0 @@
-SOURCES += $$PWD/main.cpp

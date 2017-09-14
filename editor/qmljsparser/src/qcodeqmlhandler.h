@@ -18,12 +18,12 @@
 #define QCODEQMLHANDLER_H
 
 #include "qqmljsparserglobal.h"
-#include "qabstractcodehandler.h"
-#include "qprojectdocument.h"
+#include "live/qabstractcodehandler.h"
+#include "live/qprojectdocument.h"
 #include "qdocumentqmlscope.h"
 #include "qprojectqmlscope.h"
-#include "qcodedeclaration.h"
-#include "qlockedfileiosession.h"
+#include "live/qcodedeclaration.h"
+#include "live/LockedFileIOSession.h"
 
 #include <QTextCursor>
 
@@ -47,7 +47,7 @@ public:
     explicit QCodeQmlHandler(
         QQmlEngine* engine,
         QMutex* engineMutex,
-        QLockedFileIOSession::Ptr lockedFileIO,
+        LockedFileIOSession::Ptr lockedFileIO,
         QObject* parent = 0
     );
     ~QCodeQmlHandler();

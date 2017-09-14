@@ -21,15 +21,15 @@
 #include "qdocumentqmlobject.h"
 #include "qdocumentqmlobject_p.h"
 #include "qqmlcompletioncontextfinder.h"
-#include "qcodecompletionsuggestion.h"
+#include "live/qcodecompletionsuggestion.h"
 #include "qprojectqmlscopecontainer_p.h"
 #include "qqmllibraryinfo_p.h"
-#include "qprojectfile.h"
+#include "live/qprojectfile.h"
 #include "qplugininfoextractor.h"
 #include "qplugintypesfacade.h"
 #include "qdocumentqmlvaluescanner_p.h"
 #include "qdocumentqmlvalueobjects.h"
-#include "qdocumentqmlfragment.h"
+#include "live/qdocumentqmlfragment.h"
 #include "qqmljshighlighter_p.h"
 
 #include "qmljs/qmljsscanner.h"
@@ -670,7 +670,7 @@ namespace qmlhandler_helpers{
 QCodeQmlHandler::QCodeQmlHandler(
         QQmlEngine* engine,
         QMutex *engineMutex,
-        QLockedFileIOSession::Ptr lockedFileIO,
+        LockedFileIOSession::Ptr lockedFileIO,
         QObject *parent)
     : QAbstractCodeHandler(parent)
     , m_target(0)

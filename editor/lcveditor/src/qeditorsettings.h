@@ -19,7 +19,7 @@
 
 #include <QObject>
 #include <QHash>
-#include "qlcveditorglobal.h"
+#include "live/qlcveditorglobal.h"
 
 namespace lcv{
 

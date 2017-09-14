@@ -27,6 +27,7 @@ ApplicationWindow{
     width: 1240
     height: 700
     color : "#293039"
+    objectName: "window"
 
     property bool documentsReloaded : false
     onActiveChanged: {
@@ -40,6 +41,12 @@ ApplicationWindow{
             }
             editor.forceActiveFocus()
         }
+    }
+
+    Component.onCompleted: {
+        livecv.commands.add(root, {
+            'minimize' : root.showMinimized
+        })
     }
 
     title: qsTr("Live CV")
@@ -225,7 +232,7 @@ ApplicationWindow{
         title: "Please choose a file"
         nameFilters: [ "Qml files (*.qml)", "All files (*)" ]
         selectExisting : true
-        visible : isLinux ? true : false // fixes a display bug in some linux distributions
+        visible : script.environment.os.platform === 'linux' ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
             if ( project.path === '' )
                 project.openProject(fileOpenDialog.fileUrl)
@@ -271,7 +278,7 @@ ApplicationWindow{
         selectMultiple : false
         selectFolder : true
 
-        visible : isLinux ? true : false /// fixes a display bug in some linux distributions
+        visible : script.environment.os.platform === 'linux' ? true : false /// fixes a display bug in some linux distributions
         onAccepted: {
             project.openProject(dirOpenDialog.fileUrl)
         }
@@ -286,7 +293,7 @@ ApplicationWindow{
         title: "Please choose a file"
         nameFilters: ["Qml files (*.qml)", "All files (*)"]
         selectExisting : false
-        visible : isLinux ? true : false /// fixes a display bug in some linux distributions
+        visible : script.environment.os.platform === 'linux' ? true : false /// fixes a display bug in some linux distributions
 
         property var callback: null
 
@@ -378,7 +385,7 @@ ApplicationWindow{
                 id: projectView
                 height: parent.height
                 width: 240
-                visible : !settings.previewMode
+                visible : !livecv.settings.previewMode
                 onOpenEntry: {
                     if ( project.inFocus )
                         project.inFocus.dumpContent(editor.text)
@@ -492,9 +499,9 @@ ApplicationWindow{
                 id: editor
                 height: parent.height
                 width: 400
-                visible : !settings.previewMode
+                visible : !livecv.settings.previewMode
 
-                font.pixelSize: settings.editor.fontSize
+                font.pixelSize: livecv.settings.file('editor').fontSize
 
                 onSave: {
                     if ( !project.inFocus )
@@ -646,14 +653,14 @@ ApplicationWindow{
                         repeat : false
                         onTriggered: {
                             if (project.active === project.inFocus && project.active){
-                                engine.createObjectAsync(
+                                livecv.engine.createObjectAsync(
                                     tester.program,
                                     tester,
                                     project.active.file.pathUrl(),
                                     project.active
                                 );
                             } else if ( project.active ){
-                                engine.createObjectAsync(
+                                livecv.engine.createObjectAsync(
                                     project.active.content,
                                     tester,
                                     project.active.file.pathUrl(),
@@ -664,7 +671,7 @@ ApplicationWindow{
                         }
                     }
                     Connections{
-                        target: engine
+                        target: livecv.engine
                         onAboutToCreateObject : {
                             if (staticContainer)
                                 staticContainer.beforeCompile()

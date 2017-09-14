@@ -165,7 +165,7 @@ Rectangle{
 
                 ListView{
                     id: licenseList
-                    model : settings.custom('license')
+                    model : livecv.settings.file('license')
                     width: parent.width
                     height: parent.height
                     clip: true

@@ -20,7 +20,7 @@
 #include <QObject>
 #include "qdocumentqmlscope.h"
 #include "qprojectqmlscope.h"
-#include "qlockedfileiosession.h"
+#include "live/lockedfileiosession.h"
 
 #include <functional>
 
@@ -51,7 +51,7 @@ public:
     QProjectQmlScanner(
         QQmlEngine* engine,
         QMutex* engineMutex,
-        QLockedFileIOSession::Ptr lockedFileIO,
+        LockedFileIOSession::Ptr lockedFileIO,
         QObject* parent = 0
     );
     ~QProjectQmlScanner();
@@ -90,7 +90,7 @@ private:
 
     QProjectQmlScope::Ptr     m_project;
     QDocumentQmlScope::Ptr    m_lastDocumentScope;
-    QLockedFileIOSession::Ptr m_lockedFileIO;
+    LockedFileIOSession::Ptr  m_lockedFileIO;
     QThread*    m_thread;
     QTimer*     m_timer;
 

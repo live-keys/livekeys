@@ -18,8 +18,8 @@
 #define QABSTRACTCODEHANDLER_H
 
 #include <QObject>
-#include "qlcveditorglobal.h"
-#include "qcodecompletionmodel.h"
+#include "live/qlcveditorglobal.h"
+#include "live/qcodecompletionmodel.h"
 #include "qcodedeclaration.h"
 
 class QTextDocument;
