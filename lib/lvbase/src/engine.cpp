@@ -29,8 +29,6 @@
 
 #include <QCoreApplication>
 
-#include <QDebug>
-
 #include <QQuickItem>
 
 namespace lcv{
@@ -116,12 +114,12 @@ void Engine::throwError(const QQmlError &error){
 void Engine::throwError(const QJSValue &jsError, QObject *object){
     QObject* errorHandler = object;
     while ( errorHandler != 0 ){
-        auto it = m_errorHandlers.find(object);
+        auto it = m_errorHandlers.find(errorHandler);
         if ( it != m_errorHandlers.end() ){
             it.value()->signalError(jsError);
             return;
         }
-        errorHandler = object->parent();
+        errorHandler = errorHandler->parent();
     }
 
     emit applicationError(jsError);
@@ -144,12 +142,12 @@ void Engine::throwWarning(const QString &message, QObject *object, const QString
 void Engine::throwWarning(const QJSValue &jsError, QObject *object){
     QObject* errorHandler = object;
     while ( errorHandler != 0 ){
-        auto it = m_errorHandlers.find(object);
+        auto it = m_errorHandlers.find(errorHandler);
         if ( it != m_errorHandlers.end() ){
             it.value()->signalWarning(jsError);
             return;
         }
-        errorHandler = object->parent();
+        errorHandler = errorHandler->parent();
     }
 
     emit applicationWarning(jsError);

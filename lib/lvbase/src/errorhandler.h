@@ -1,5 +1,5 @@
-#ifndef ERRORHANDLER_H
-#define ERRORHANDLER_H
+#ifndef LVERRORHANDLER_H
+#define LVERRORHANDLER_H
 
 #include <QObject>
 #include <QJSValue>
@@ -49,4 +49,4 @@ inline QObject *ErrorHandler::target() const{
 
 }// namespace
 
-#endif // ERRORHANDLER_H
+#endif // LVERRORHANDLER_H

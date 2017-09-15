@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVECVENGINE_H
-#define QLIVECVENGINE_H
+#ifndef LVENGINE_H
+#define LVENGINE_H
 
 #include <QObject>
 #include <QJSValue>
@@ -134,4 +134,4 @@ inline QMutex *Engine::engineMutex(){
 
 }// namespace
 
-#endif // QLIVECVENGINE_H
+#endif // LVENGINE_H

@@ -10,7 +10,9 @@ HEADERS += \
     $$PWD/settings.h \
     $$PWD/lockedfileiosession.h \
     $$PWD/incubationcontroller.h \
-    $$PWD/errorhandler.h
+    $$PWD/errorhandler.h \
+    $$PWD/plugincontext.h \
+    $$PWD/mlnode.h
 
 SOURCES += \
     $$PWD/exception.cpp \
@@ -21,7 +23,9 @@ SOURCES += \
     $$PWD/settings.cpp \
     $$PWD/lockedfileiosession.cpp \
     $$PWD/incubationcontroller.cpp \
-    $$PWD/errorhandler.cpp
+    $$PWD/errorhandler.cpp \
+    $$PWD/plugincontext.cpp \
+    $$PWD/mlnode.cpp
 
 win32{
     SOURCES += $$PWD/stacktrace_win.cpp

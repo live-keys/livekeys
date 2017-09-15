@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "testrunner.h"
+#include "live/mlnode.h"
 
 class MLNodeTest : public QObject{
 
@@ -15,6 +16,15 @@ public:
 
 private slots:
     void initTestCase();
+    void constructorTest();
+    void constructorFromInitializerListTest();
+    void assignmentTest();
+    void accessOperatorTest();
+    void base64ToBytesTest();
+    void iteratorTest();
+    void constIteratorTest();
+    void reverseIteratorTest();
+    void reverseConstIteratorTest();
 
 };
 

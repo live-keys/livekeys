@@ -1,5 +1,5 @@
-#ifndef LCVEXCEPTIONS_H
-#define LCVEXCEPTIONS_H
+#ifndef LVEXCEPTION_H
+#define LVEXCEPTION_H
 
 #include <exception>
 #include <QString>
@@ -108,4 +108,4 @@ template<typename T> T Exception::create(
     throw CREATE_EXCEPTION(_type, _message, _code)
 
 
-#endif // LCVEXCEPTIONS_H
+#endif // LVEXCEPTION_H

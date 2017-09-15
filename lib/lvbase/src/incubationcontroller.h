@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVECVINCUBATIONCONTROLLER_H
-#define QLIVECVINCUBATIONCONTROLLER_H
+#ifndef LVINCUBATIONCONTROLLER_H
+#define LVINCUBATIONCONTROLLER_H
 
 #include <QObject>
 #include <QQmlIncubationController>
@@ -42,4 +42,4 @@ inline void IncubationController::timerEvent(QTimerEvent *){
 
 }// namespace
 
-#endif // QLIVECVINCUBATIONCONTROLLER_H
+#endif // LVINCUBATIONCONTROLLER_H

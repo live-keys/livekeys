@@ -19,11 +19,14 @@ private slots:
     void engineExceptionTest();
     void engineWarningTest();
 
-//    void engineObjectExceptionTest();
-//    void engineInternalWarningTest();
+    void engineObjectExceptionTest();
+    void engineInternalWarningTest();
 
-//    void engineExceptionHandlerTest();
-//    void engineWarningHandlerTest();
+    void engineErrorHandlerTest();
+    void engineErrorHandlerSkipTest();
+
+    //TODO:
+    void engineJsThrownErrorHandlerTest();
 
 };
 

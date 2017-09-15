@@ -10,4 +10,6 @@ HEADERS += \
     $$PWD/live/incubationcontroller.h \
     $$PWD/live/commandlineparser.h \
     $$PWD/live/lockedfileiosession.h \
-    $$PWD/live/errorhandler.h
+    $$PWD/live/errorhandler.h \
+    $$PWD/live/plugincontext.h \
+    $$PWD/live/mlnode.h

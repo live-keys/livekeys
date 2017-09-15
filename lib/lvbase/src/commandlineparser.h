@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVECVCOMMANDLINEPARSER_H
-#define QLIVECVCOMMANDLINEPARSER_H
+#ifndef LVCOMMANDLINEPARSER_H
+#define LVCOMMANDLINEPARSER_H
 
 #include <QString>
 #include <QList>
@@ -94,4 +94,4 @@ inline const QStringList &CommandLineParser::scriptArguments() const{
 
 }// namespace
 
-#endif // QLIVECVCOMMANDLINEPARSER_H
+#endif // LVCOMMANDLINEPARSER_H

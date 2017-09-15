@@ -1,5 +1,5 @@
-#ifndef STACKTRACE_H
-#define STACKTRACE_H
+#ifndef LVSTACKTRACE_H
+#define LVSTACKTRACE_H
 
 #include <string>
 #include <vector>
@@ -96,4 +96,4 @@ inline size_t StackTrace::size() const{
 
 }// namespace
 
-#endif // STACKTRACE_H
+#endif // LVSTACKTRACE_H

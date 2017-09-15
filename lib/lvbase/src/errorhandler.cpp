@@ -3,6 +3,8 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 
+#include <QDebug>
+
 namespace lcv{
 
 ErrorHandler::ErrorHandler(QObject *parent)
@@ -54,7 +56,7 @@ void ErrorHandler::signalWarning(const QJSValue &error){
 
 void ErrorHandler::skip(const QJSValue &error){
     if ( m_engine ){
-        if ( error.property("name").toString() == "Warning" ){
+        if ( error.property("type").toString() == "Warning" ){
             m_engine->throwWarning(error, m_target ? m_target->parent() : 0);
         } else {
             m_engine->throwError(error, m_target ? m_target->parent() : 0);

@@ -178,7 +178,7 @@ void LiveCV::loadQml(const QUrl &url){
 
     //TODO
 //    m_engine->engine()->rootContext()->setContextProperty("lcvlog", &QLiveCVLog::instance());
-    m_engine->engine()->rootContext()->setContextProperty("project", m_project);
+    m_engine->engine()->rootContext()->setContextProperty("project",     m_project);
     m_engine->engine()->rootContext()->setContextProperty("script",      m_script);
     m_engine->engine()->rootContext()->setContextProperty("codeHandler", m_codeInterface);
     m_engine->engine()->rootContext()->setContextProperty("livecv",      this);

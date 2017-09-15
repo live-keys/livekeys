@@ -1,8 +1,10 @@
 #include "stacktrace.h"
 
-#include <process.h>
+#ifdef USE_STACK_TRACE
 #include <Windows.h>
+#include <process.h>
 #include "dbghelp.h"
+#endif
 
 namespace lcv{
 
@@ -13,6 +15,7 @@ namespace{
 }
 
 StackTrace::Ptr StackTrace::capture(int maxFrames){
+#ifdef USE_STACK_TRACE
     StackTrace::Ptr dest(new StackTrace);
 
     void **stack = new void*[maxFrames];
@@ -64,6 +67,9 @@ StackTrace::Ptr StackTrace::capture(int maxFrames){
     free(symbol);
     delete[] stack;
     return dest;
+#else
+    return StackTrace::Ptr(0);
+#endif
 }
 
 

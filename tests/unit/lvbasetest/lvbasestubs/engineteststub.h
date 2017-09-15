@@ -2,6 +2,7 @@
 #define ENGINETESTSTUB_H
 
 #include <QObject>
+#include "live/engine.h"
 
 class EngineTestStub : public QObject{
 
@@ -12,7 +13,8 @@ public:
 
 public slots:
     void throwException();
-    void throwJsException();
+    void throwJsError();
+    void throwJsWarning();
 };
 
 #endif // ENGINETESTSTUB_H
