@@ -19,7 +19,7 @@ void EngineTestStub::throwJsError(){
         return;
 
     lcv::Exception exception = lcv::Exception::create<lcv::Exception>(
-        "JSTest", 1, "enginetest.cpp", 100, "jsExceptionInObjectTest", 0
+        "JSTest", 1, "enginetest.cpp", 100, "jsExceptionInObjectTest"
     );
     engine->throwError(&exception, this);
 }

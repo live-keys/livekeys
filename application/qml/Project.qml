@@ -207,7 +207,7 @@ Rectangle{
                             if ( styleData.value.isFile ){
                                 view.setContextDelegate(entryDelegate)
                                 fileContextMenu.popup()
-                            } else if ( styleData.value.path === project.path ){
+                            } else if ( styleData.value.path === project.rootPath ){
                                 view.setContextDelegate(entryDelegate)
                                 projectContextMenu.popup()
                             } else {

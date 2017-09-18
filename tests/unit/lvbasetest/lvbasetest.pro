@@ -11,12 +11,14 @@ HEADERS += \
     $$PWD/testrunner.h \
     $$PWD/commandlineparsertest.h \
     $$PWD/enginetest.h \
-    $$PWD/mlnodetest.h
+    $$PWD/mlnodetest.h \
+    mlnodetojsontest.h
 
 SOURCES += \
     $$PWD/main.cpp \
     $$PWD/commandlineparsertest.cpp \
     $$PWD/enginetest.cpp \
-    $$PWD/mlnodetest.cpp
+    $$PWD/mlnodetest.cpp \
+    mlnodetojsontest.cpp
 
 

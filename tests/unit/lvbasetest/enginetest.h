@@ -25,8 +25,8 @@ private slots:
     void engineErrorHandlerTest();
     void engineErrorHandlerSkipTest();
 
-    //TODO:
-    void engineJsThrownErrorHandlerTest();
+    void jsThrownErrorTest();
+    void jsThrownErrorHandlerTest();
 
 };
 

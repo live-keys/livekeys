@@ -19,6 +19,8 @@
 #include <qqml.h>
 
 #include "testrunner.h"
+#include "mlnodetest.h"
+#include "mlnodetojsontest.h"
 
 int main(int argc, char *argv[]){
 

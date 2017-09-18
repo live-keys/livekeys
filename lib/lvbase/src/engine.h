@@ -71,10 +71,8 @@ public:
     QJSValue evaluate(const QString& jsCode, const QString &fileName = QString(), int lineNumber = 1);
     void throwError(const Exception *e, QObject* object = 0);
     void throwError(const QQmlError& error);
-    void throwError(const QJSValue& error, QObject* object = 0);
 
     void throwWarning(const QString& message, QObject* object = 0, const QString& fileName = QString(), int lineNumber = 0);
-    void throwWarning(const QJSValue& error, QObject* object = 0);
 
     bool hasErrorHandler(QObject* object);
     void registerErrorHandler(QObject* object, ErrorHandler* handler);
@@ -97,10 +95,15 @@ public slots:
         bool clearCache = false
     );
     QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
+    void engineWarnings(const QList<QQmlError>& warnings);
 
+    void throwError(const QJSValue& error, QObject* object = 0);
+    void throwWarning(const QJSValue& error, QObject* object = 0);
+    QString markErrorObject(QObject* object);
     QJSValue lastErrorsObject() const;
 
 private:
+    QJSValue toJSError(const QQmlError& error) const;
     QJSValue toJSErrors(const QList<QQmlError>& errors) const;
 
     QQmlEngine*    m_engine;
@@ -110,8 +113,9 @@ private:
     QJSValue       m_errorType;
     //TODO: Add std::function analyzer
 
-    QList<QQmlError> m_lastErrors;
+    QList<QQmlError>              m_lastErrors;
     QMap<QObject*, ErrorHandler*> m_errorHandlers;
+    QMap<QString,  QObject*>      m_errorObjects;
 
     bool m_isLoading;
 };

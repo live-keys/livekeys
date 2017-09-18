@@ -71,7 +71,7 @@ QVariant QProjectNavigationModel::data(const QModelIndex &index, int role) const
 }
 
 void QProjectNavigationModel::reindex(){
-    if ( m_requiresReindex && m_project->path() != "" ){
+    if ( m_requiresReindex && m_project->rootPath() != "" ){
         beginResetModel();
         m_filteredFiles.clear();
         m_files.clear();
@@ -95,7 +95,7 @@ void QProjectNavigationModel::reindex(){
                 }
 
                 return entries;
-        }, m_project->path());
+        }, m_project->rootPath());
 
         m_workerWatcher.setFuture(future);
     }

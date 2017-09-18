@@ -128,6 +128,6 @@ QVideoWriterThread *QVideoWriter::createThread(const QString &filename, int four
         fps,
         frameSize,
         isColor,
-        this
+        0
     );
 }

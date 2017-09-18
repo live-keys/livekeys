@@ -284,4 +284,8 @@ void QProject::setActive(QProjectDocument *document){
     }
 }
 
+QString QProject::path(const QString &relative) const{
+    return dir() + '/' + relative;
+}
+
 }// namespace

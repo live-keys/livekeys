@@ -607,23 +607,6 @@ MLNode::ConstIterator MLNode::ConstIterator::operator-(MLNode::ConstIterator::Di
     return result;
 }
 
-
-// MLNode::MLValue
-// ----------------------------------------------------------------------------
-
-MLNode::MLValue::MLValue(MLNode::Type t){
-    switch(t){
-    case Type::Null: break;
-    case Type::Object:  asObject = new ObjectType(); break;
-    case Type::Array:   asArray = new ArrayType(); break;
-    case Type::Bytes:   asBytes = new BytesType(); break;
-    case Type::String:  asString = new StringType(); break;
-    case Type::Boolean: asBool = false;
-    case Type::Integer: asInt = 0;
-    case Type::Float:   asFloat = 0;
-    }
-}
-
 // MLNode
 // ----------------------------------------------------------------------------
 
@@ -648,11 +631,18 @@ MLNode::MLNode(const std::initializer_list<MLNode> &init)
         m_value = Type::Object;
         std::for_each(init.begin(), init.end(), [this](const MLNode& element){
             m_value.asObject->insert(*(element[0].m_value.asString), element[1]);
-        }); } else {
+        });
+    } else {
         m_type  = Type::Array;
         m_value = Type::Array;
         *(m_value.asArray) = init;
     }
+}
+
+MLNode::MLNode(std::nullptr_t)
+    : m_type(Type::Null)
+    , m_value()
+{
 }
 
 MLNode::MLNode(const char *value)
@@ -665,6 +655,11 @@ MLNode::MLNode(const MLNode::StringType &value)
     : m_type(Type::String)
     , m_value(value)
 {
+}
+
+MLNode::MLNode(MLNode::Type value)
+    : m_type(value)
+    , m_value(value){
 }
 
 MLNode::MLNode(float value)
@@ -751,6 +746,13 @@ MLNode &MLNode::operator[](int index){
         THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
 
     return (*m_value.asArray)[index];
+}
+
+void MLNode::append(const MLNode &value){
+    if ( m_type != Type::Array )
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
+
+    m_value.asArray->append(value);
 }
 
 bool MLNode::isNull() const{

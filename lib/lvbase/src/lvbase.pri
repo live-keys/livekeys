@@ -12,7 +12,8 @@ HEADERS += \
     $$PWD/incubationcontroller.h \
     $$PWD/errorhandler.h \
     $$PWD/plugincontext.h \
-    $$PWD/mlnode.h
+    $$PWD/mlnode.h \
+    $$PWD/mlnodetojson.h
 
 SOURCES += \
     $$PWD/exception.cpp \
@@ -25,7 +26,8 @@ SOURCES += \
     $$PWD/incubationcontroller.cpp \
     $$PWD/errorhandler.cpp \
     $$PWD/plugincontext.cpp \
-    $$PWD/mlnode.cpp
+    $$PWD/mlnode.cpp \
+    $$PWD/mlnodetojson.cpp
 
 win32{
     SOURCES += $$PWD/stacktrace_win.cpp

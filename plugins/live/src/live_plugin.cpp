@@ -20,12 +20,15 @@
 #include "qenginemonitor.h"
 #include "qstaticcontainer.h"
 #include "qlicensesettings.h"
+#include "qfilereader.h"
+#include "qstaticfilereader.h"
 
 #include "live/qabstractcodeserializer.h"
 #include "live/qnativevaluecodeserializer.h"
 #include "live/qqmlobjectcodeserializer.h"
 #include "live/qcodeconverter.h"
 #include "live/qlivepalette.h"
+#include "live/plugincontext.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -37,6 +40,8 @@ void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
     qmlRegisterType<QLiveCVMain>(      uri, 1, 0, "Main");
     qmlRegisterType<QStaticLoader>(    uri, 1, 0, "StaticLoader");
+    qmlRegisterType<QFileReader>(      uri, 1, 0, "FileReader");
+    qmlRegisterType<QStaticFileReader>(uri, 1, 0, "StaticFileReader");
     qmlRegisterUncreatableType<QLicenseSettings>(
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
 
@@ -50,6 +55,7 @@ void LivePlugin::registerTypes(const char *uri){
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){
+    lcv::PluginContext::initFromEngine(engine);
     QStaticContainer* sc = new QStaticContainer(engine);
     engine->rootContext()->setContextProperty("staticContainer", sc);
     QEngineMonitor* em = new QEngineMonitor(engine);

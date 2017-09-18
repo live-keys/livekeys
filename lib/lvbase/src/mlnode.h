@@ -62,7 +62,7 @@ public:
     // MLNode::BytesType
     // -----------------
 
-    class BytesType{
+    class LVBASE_EXPORT BytesType{
 
     public:
         BytesType(unsigned char* data, size_t size);
@@ -88,7 +88,7 @@ public:
     // MLNode::IteratorValue
     // ---------------------
 
-    class IteratorValue{
+    class LVBASE_EXPORT IteratorValue{
     public:
         ObjectType::iterator objectIterator;
         ArrayType::iterator  arrayIterator;
@@ -98,7 +98,7 @@ public:
     // MLNode::Iterator
     // ----------------
 
-    class Iterator{
+    class LVBASE_EXPORT Iterator{
 
     public:
         friend class MLNode;
@@ -156,7 +156,7 @@ public:
     // MLNode::ConstIteratorValue
     // --------------------------
 
-    class ConstIteratorValue{
+    class LVBASE_EXPORT ConstIteratorValue{
     public:
         ObjectType::const_iterator objectIterator;
         ArrayType::const_iterator  arrayIterator;
@@ -166,7 +166,7 @@ public:
     // MLNode::ConstIterator
     // ---------------------
 
-    class ConstIterator{
+    class LVBASE_EXPORT ConstIterator{
     public:
         friend class MLNode;
 
@@ -254,18 +254,19 @@ public:
         MLValue(IntType intVal) : asInt(intVal){}
         MLValue(FloatType floatVal) : asFloat(floatVal){}
         MLValue(Type t);
-
     };
 
 public:
     MLNode();
     MLNode(const std::initializer_list<MLNode>& init);
+    MLNode(std::nullptr_t);
     MLNode(const char* value);
     MLNode(const StringType& value);
-    MLNode(float value);
-    MLNode(FloatType value);
+    MLNode(MLNode::Type value);
     MLNode(int value);
     MLNode(IntType value);
+    MLNode(float value);
+    MLNode(FloatType value);
     MLNode(BoolType value);
     MLNode(const BytesType& value);
     MLNode(MLNode::ByteType* value, size_t size);
@@ -280,6 +281,8 @@ public:
     MLNode& operator[](int index);
 
     MLNode& operator=(MLNode other);
+
+    void append(const MLNode& value);
 
     Type type() const;
 
@@ -310,6 +313,20 @@ private:
     Type    m_type;
     MLValue m_value;
 };
+
+
+inline MLNode::MLValue::MLValue(MLNode::Type t){
+    switch(t){
+    case Type::Null: break;
+    case Type::Object:  asObject = new ObjectType(); break;
+    case Type::Array:   asArray = new ArrayType(); break;
+    case Type::Bytes:   asBytes = new BytesType(); break;
+    case Type::String:  asString = new StringType(); break;
+    case Type::Boolean: asBool = false;
+    case Type::Integer: asInt = 0;
+    case Type::Float:   asFloat = 0;
+    }
+}
 
 inline MLNode &MLNode::operator=(MLNode other){
     std::swap(m_type, other.m_type);

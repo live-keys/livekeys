@@ -26,6 +26,7 @@
 #include <QQmlIncubationController>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QJSValueIterator>
 
 #include <QCoreApplication>
 
@@ -42,7 +43,19 @@ Engine::Engine(QQmlEngine *engine, QObject *parent)
 {
     m_engine->setIncubationController(m_incubationController);
     m_engine->setOutputWarningsToStandardError(false);
+    connect(m_engine, SIGNAL(warnings(QList<QQmlError>)), this, SLOT(engineWarnings(QList<QQmlError>)));
     m_errorType = m_engine->evaluate("Error");
+
+    QJSValue markErrorConstructor = m_engine->evaluate(
+        "function(engine){"
+            "return function(error, object){\n"
+                "error.message += engine.markErrorObject(object);"
+                "return error;"
+            "}"
+        "}"
+    );
+    QJSValue markErrorFn = markErrorConstructor.call(QJSValueList() << engine->newQObject(this));
+    m_engine->globalObject().setProperty("linkedError", markErrorFn);
 }
 
 Engine::~Engine(){
@@ -112,6 +125,10 @@ void Engine::throwError(const QQmlError &error){
 }
 
 void Engine::throwError(const QJSValue &jsError, QObject *object){
+    QJSValueIterator it(jsError);
+    while (it.hasNext()) {
+        it.next();
+    }
     QObject* errorHandler = object;
     while ( errorHandler != 0 ){
         auto it = m_errorHandlers.find(errorHandler);
@@ -151,6 +168,13 @@ void Engine::throwWarning(const QJSValue &jsError, QObject *object){
     }
 
     emit applicationWarning(jsError);
+}
+
+QString Engine::markErrorObject(QObject *object){
+    QString key = "0x" + QString::number((quintptr)object, 16);
+    m_errorObjects[key] = object;
+
+    return "(" + key + ")";
 }
 
 bool Engine::hasErrorHandler(QObject *object){
@@ -274,16 +298,47 @@ QObject* Engine::createObject(const QString &qmlCode, QObject *parent, const QUr
     return obj;
 }
 
+void Engine::engineWarnings(const QList<QQmlError> &warnings){
+    for ( auto it = warnings.begin(); it != warnings.end(); ++it ){
+        const QQmlError& warning = *it;
+        if ( warning.object() == 0 ){
+            QString description = warning.description();
+            int errorObjectEnd = description.lastIndexOf(")");
+            if ( errorObjectEnd == description.length() - 1 ){
+                int errorObjectStart = description.lastIndexOf("(0x");
+                if ( errorObjectStart != -1 ){
+                    QString key = description.mid(errorObjectStart + 1, errorObjectEnd - errorObjectStart - 1);
+                    auto it = m_errorObjects.find(key);
+                    if ( it != m_errorObjects.end() ){
+                        QQmlError err = warning;
+                        err.setDescription(description.mid(0, errorObjectStart));
+                        err.setObject(it.value());
+                        throwError(err);
+                        return;
+                    }
+                }
+            }
+        }
+
+        throwError(*it);
+    }
+    m_errorObjects.clear();
+}
+
+QJSValue Engine::toJSError(const QQmlError &error) const{
+    QJSValue qmlErrOjbect = m_engine->newObject();
+    qmlErrOjbect.setProperty("lineNumber", QJSValue(error.line()));
+    qmlErrOjbect.setProperty("columnNumber", QJSValue(error.column()));
+    qmlErrOjbect.setProperty("fileName", QJSValue(error.url().toString()));
+    qmlErrOjbect.setProperty("message", QJSValue(error.description()));
+    return qmlErrOjbect;
+}
+
 QJSValue Engine::toJSErrors(const QList<QQmlError> &errors) const{
     QJSValue val = m_engine->newArray(errors.length());
     int i = 0;
     foreach( const QQmlError& error, errors ){
-        QJSValue qmlErrOjbect = m_engine->newObject();
-        qmlErrOjbect.setProperty("lineNumber", QJSValue(error.line()));
-        qmlErrOjbect.setProperty("columnNumber", QJSValue(error.column()));
-        qmlErrOjbect.setProperty("fileName", QJSValue(error.url().toString()));
-        qmlErrOjbect.setProperty("message", QJSValue(error.description()));
-        val.setProperty(i++, qmlErrOjbect);
+        val.setProperty(i++, toJSError(error));
     }
     return val;
 }

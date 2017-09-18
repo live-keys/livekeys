@@ -1,0 +1,8 @@
+{
+    "train": "clock-train-small.jpg",
+    "query": [
+        "clock-query-room-small.jpg",
+        "clock-query-pattern-small.jpg",
+        "clock-query-grass-small.jpg"
+    ]
+}

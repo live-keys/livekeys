@@ -47,7 +47,7 @@ void EngineTest::engineExceptionTest(){
     Engine engine(new QQmlEngine);
 
     lcv::Exception exception = lcv::Exception::create<lcv::Exception>(
-        "JSTest", 1, "enginetest.cpp", 100, "jsExceptionInObjectTest", 0
+        "JSTest", 1, "enginetest.cpp", 100, "jsExceptionInObjectTest"
     );
 
     bool isException = false;
@@ -159,11 +159,11 @@ void EngineTest::engineErrorHandlerTest(){
         isError = true;
     });
 
-    QObject* livecvStub = new QObject;
-    livecvStub->setProperty("engine", QVariant::fromValue(engine));
+    QObject livecvStub;
+    livecvStub.setProperty("engine", QVariant::fromValue(engine));
 
     engine->engine()->rootContext()->setContextProperty("engine", engine);
-    engine->engine()->rootContext()->setContextProperty("livecv", livecvStub);
+    engine->engine()->rootContext()->setContextProperty("livecv", &livecvStub);
     QObject* obj = engine->createObject(
         "import QtQuick 2.3\n import cv 1.0\n "
         "Item{\n"
@@ -208,11 +208,11 @@ void EngineTest::engineErrorHandlerSkipTest(){
         isError = true;
     });
 
-    QObject* livecvStub = new QObject;
-    livecvStub->setProperty("engine", QVariant::fromValue(engine));
+    QObject livecvStub;
+    livecvStub.setProperty("engine", QVariant::fromValue(engine));
 
     engine->engine()->rootContext()->setContextProperty("engine", engine);
-    engine->engine()->rootContext()->setContextProperty("livecv", livecvStub);
+    engine->engine()->rootContext()->setContextProperty("livecv", &livecvStub);
     QObject* obj = engine->createObject(
         "import QtQuick 2.3\n import cv 1.0\n "
         "Item{\n"
@@ -240,6 +240,72 @@ void EngineTest::engineErrorHandlerSkipTest(){
     QVERIFY(isError);
 }
 
-void EngineTest::engineJsThrownErrorHandlerTest(){
+void EngineTest::jsThrownErrorTest(){
+    Engine engine(new QQmlEngine);
 
+    bool isError = false;
+    QObject::connect(&engine, &Engine::applicationError, [&isError, this](QJSValue error){
+        QVERIFY(error.property("message").toString().endsWith("JSTest"));
+        QVERIFY(error.property("fileName").toString().endsWith("enginetest.qml"));
+        QCOMPARE(error.property("lineNumber").toInt(), 3);
+        isError = true;
+    });
+
+    engine.engine()->rootContext()->setContextProperty("engine", &engine);
+    QObject* obj = engine.createObject(
+        "import QtQuick 2.3\n import cv 1.0\n "
+        "EngineTestStub{"
+            "Component.onCompleted: {throw new Error('JSTest');}"
+        "}",
+        0,
+        QUrl::fromLocalFile("enginetest.qml")
+    );
+
+    QVERIFY(obj != 0);
+
+    QCoreApplication::processEvents();
+
+    QVERIFY(isError);
+}
+
+void EngineTest::jsThrownErrorHandlerTest(){
+    //See how I can extend exception
+    Engine* engine = new Engine(new QQmlEngine);
+
+    bool isError = false;
+    QObject::connect(engine, &Engine::applicationError, [&isError, this](QJSValue){
+        isError = true;
+    });
+
+    QObject* livecvStub = new QObject;
+    livecvStub->setProperty("engine", QVariant::fromValue(engine));
+
+    engine->engine()->rootContext()->setContextProperty("engine", engine);
+    engine->engine()->rootContext()->setContextProperty("livecv", livecvStub);
+    QObject* obj = engine->createObject(
+        "import QtQuick 2.3\n import cv 1.0\n "
+        "Item{\n"
+            "id: root;\n"
+            "property string errorMessage: 'empty';\n"
+            "ErrorHandler{\n"
+                "onError:   root.errorMessage   = e.message;\n"
+            "}\n"
+            "EngineTestStub{\n"
+                "Component.onCompleted: {\n"
+                    "throw linkedError(new Error('JSTest'), this);"
+                "}\n"
+            "}\n"
+        "}\n",
+        0,
+        QUrl::fromLocalFile("enginetest.qml")
+    );
+
+    QVERIFY(obj != 0);
+
+    QCoreApplication::processEvents();
+
+    QVERIFY(!isError);
+    QVERIFY(obj->property("errorMessage").toString().endsWith("JSTest"));
+
+    delete livecvStub;
 }

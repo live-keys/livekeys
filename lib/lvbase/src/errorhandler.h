@@ -1,6 +1,7 @@
 #ifndef LVERRORHANDLER_H
 #define LVERRORHANDLER_H
 
+#include "live/lvbaseglobal.h"
 #include <QObject>
 #include <QJSValue>
 #include <QQmlParserStatus>
@@ -8,7 +9,7 @@
 namespace lcv{
 
 class Engine;
-class ErrorHandler : public QObject, public QQmlParserStatus{
+class LVBASE_EXPORT ErrorHandler : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)

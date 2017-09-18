@@ -40,7 +40,7 @@ class Q_LCVEDITOR_EXPORT QProject : public QObject{
     Q_PROPERTY(lcv::QProjectFileModel* fileModel             READ fileModel       NOTIFY fileModelChanged)
     Q_PROPERTY(lcv::QProjectNavigationModel* navigationModel READ navigationModel NOTIFY navigationModelChanged)
     Q_PROPERTY(lcv::QProjectDocumentModel* documentModel     READ documentModel   NOTIFY documentModelChanged)
-    Q_PROPERTY(QString path                                  READ path            NOTIFY pathChanged)
+    Q_PROPERTY(QString rootPath                              READ rootPath        NOTIFY pathChanged)
 
     friend class QProjectFileModel;
     friend class QProjectDocument;
@@ -50,11 +50,11 @@ public:
     QProject(QObject* parent = 0);
     ~QProject();
 
-    void setActive(const QString& path);
+    void setActive(const QString& rootPath);
 
     QProjectFile* lookupBestFocus(QProjectEntry* entry);
 
-    QProjectDocument* isOpened(const QString& path);
+    QProjectDocument* isOpened(const QString& rootPath);
 
     lcv::QProjectFileModel* fileModel();
     lcv::QProjectNavigationModel* navigationModel();
@@ -62,32 +62,33 @@ public:
     lcv::QProjectDocument*  active() const;
     lcv::QProjectDocument*  inFocus() const;
 
-    const QString& path() const;
+    const QString& rootPath() const;
 
     LockedFileIOSession::Ptr lockedFileIO();
 
 public slots:
     void newProject();
     void closeProject();
-    void openFile(const QUrl& path, int mode);
-    void openFile(const QString& path, int mode);
+    void openFile(const QUrl& rootPath, int mode);
+    void openFile(const QString& rootPath, int mode);
     void openFile(lcv::QProjectFile* file, int mode);
     void setActive(lcv::QProjectFile *file);
 
     bool isDirProject() const;
-    bool isFileInProject(const QUrl& path) const;
-    bool isFileInProject(const QString& path) const;
+    bool isFileInProject(const QUrl& rootPath) const;
+    bool isFileInProject(const QString& rootPath) const;
 
-    void openProject(const QString& path);
+    void openProject(const QString& rootPath);
     void openProject(const QUrl& url);
 
-    void closeFile(const QString& path);
+    void closeFile(const QString& rootPath);
     void closeFocusedFile();
 
     QString dir() const;
+    QString path(const QString& relative) const;
 
 signals:
-    void pathChanged(QString path);
+    void pathChanged(QString rootPath);
     void activeChanged(QProjectDocument* active);
     void inFocusChanged(QProjectDocument* inFocus);
 
@@ -95,11 +96,11 @@ signals:
     void navigationModelChanged(QProjectNavigationModel* navigationModel);
     void documentModelChanged(QProjectDocumentModel* documentModel);
 
-    void directoryChanged(const QString& path);
-    void fileChanged(const QString& path);
+    void directoryChanged(const QString& rootPath);
+    void fileChanged(const QString& rootPath);
 
 private:
-    QProjectFile* relocateDocument(const QString& path, const QString &newPath, QProjectDocument *document);
+    QProjectFile* relocateDocument(const QString& rootPath, const QString &newPath, QProjectDocument *document);
     void setInFocus(QProjectDocument* document);
     void setActive(QProjectDocument* document);
 
@@ -135,7 +136,7 @@ inline QProjectDocument *QProject::inFocus() const{
     return m_focus;
 }
 
-inline const QString &QProject::path() const{
+inline const QString &QProject::rootPath() const{
     return m_path;
 }
 

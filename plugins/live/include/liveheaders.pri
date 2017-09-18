@@ -6,5 +6,6 @@ HEADERS += \
 #    $$PWD/qlivecvarguments.h \
     $$PWD/qstaticcontainer.h \
     $$PWD/qstaticloader.h \
-    $$PWD/qenginemonitor.h
+    $$PWD/qenginemonitor.h \
+    $$PWD/qfilereader.h
 #    $$PWD/qlicensecontainer.h

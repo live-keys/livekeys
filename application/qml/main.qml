@@ -234,7 +234,7 @@ ApplicationWindow{
         selectExisting : true
         visible : script.environment.os.platform === 'linux' ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
-            if ( project.path === '' )
+            if ( project.rootPath === '' )
                 project.openProject(fileOpenDialog.fileUrl)
             else if ( project.isFileInProject(fileOpenDialog.fileUrl ) )
                 project.openFile(fileOpenDialog.fileUrl, ProjectDocument.Edit)

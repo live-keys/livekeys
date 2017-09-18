@@ -166,7 +166,7 @@ void LiveCV::loadQml(const QUrl &url){
                 QFileInfo mfileInfo(mfile);
                 if ( mfileInfo.isRelative() ){
                     m_project->openFile(
-                        QDir::cleanPath(m_project->path() + QDir::separator() + mfile),
+                        QDir::cleanPath(m_project->rootPath() + QDir::separator() + mfile),
                         QProjectDocument::Monitor
                     );
                 } else {
