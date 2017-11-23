@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "engineteststub.h"
 #include "live/exception.h"
 #include <QQmlContext>
@@ -9,16 +25,16 @@ EngineTestStub::EngineTestStub(QObject *parent)
 }
 
 void EngineTestStub::throwException(){
-    THROW_EXCEPTION(lcv::Exception, "Exception stub.", 0);
+    THROW_EXCEPTION(lv::Exception, "Exception stub.", 0);
 }
 
 void EngineTestStub::throwJsError(){
     QObject* engineObj = qmlContext(this)->contextProperty("engine").value<QObject*>();
-    lcv::Engine* engine = qobject_cast<lcv::Engine*>(engineObj);
+    lv::Engine* engine = qobject_cast<lv::Engine*>(engineObj);
     if ( !engine )
         return;
 
-    lcv::Exception exception = lcv::Exception::create<lcv::Exception>(
+    lv::Exception exception = lv::Exception::create<lv::Exception>(
         "JSTest", 1, "enginetest.cpp", 100, "jsExceptionInObjectTest"
     );
     engine->throwError(&exception, this);
@@ -26,7 +42,7 @@ void EngineTestStub::throwJsError(){
 
 void EngineTestStub::throwJsWarning(){
     QObject* engineObj = qmlContext(this)->contextProperty("engine").value<QObject*>();
-    lcv::Engine* engine = qobject_cast<lcv::Engine*>(engineObj);
+    lv::Engine* engine = qobject_cast<lv::Engine*>(engineObj);
     if ( !engine )
         return;
 

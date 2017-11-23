@@ -22,7 +22,7 @@ defineTest(initVar){
         $$1 = $$2
         export($$1)
     } else {
-        # message($$1 already defined) # TODO better use a proper debug level
+        if($$VERBOSE):message($$1 already defined)
     }
 }
 
@@ -80,7 +80,7 @@ defineTest(linkLocalLibrary){
     else:LIB_PATH  = $$DEPLOY_PATH
 
     LIB_NAME = $$2
-    LIB_INCLUDE_PATH = $$PROJECT_ROOT/$$1/include
+    LIB_INCLUDE_PATH = $$PROJECT_ROOT/lib/$$1/include
     !isEmpty($$3):LIB_INCLUDE_PATH=$$3
 
     # use *= instead of += to prevent duplications of link path cofigurations

@@ -20,7 +20,7 @@
 
 Q_TEST_RUNNER_REGISTER(CommandLineParserTest);
 
-using namespace lcv;
+using namespace lv;
 
 CommandLineParserTest::CommandLineParserTest(QObject *parent)
     : QObject(parent)

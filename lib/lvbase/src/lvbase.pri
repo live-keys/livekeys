@@ -13,7 +13,18 @@ HEADERS += \
     $$PWD/errorhandler.h \
     $$PWD/plugincontext.h \
     $$PWD/mlnode.h \
-    $$PWD/mlnodetojson.h
+    $$PWD/mlnodetojson.h \
+    $$PWD/mlnodetojs.h \
+    $$PWD/visuallognetworksender.h \
+    $$PWD/visuallog.h \
+    $$PWD/visuallogmodel.h \
+    $$PWD/visuallogqt.h \
+    $$PWD/visuallogjsobject.h \
+    $$PWD/filter.h \
+    $$PWD/shareddata.h \
+    $$PWD/filterworker.h \
+    $$PWD/filterworker_p.h \
+    $$PWD/keymap.h
 
 SOURCES += \
     $$PWD/exception.cpp \
@@ -27,7 +38,16 @@ SOURCES += \
     $$PWD/errorhandler.cpp \
     $$PWD/plugincontext.cpp \
     $$PWD/mlnode.cpp \
-    $$PWD/mlnodetojson.cpp
+    $$PWD/mlnodetojson.cpp \
+    $$PWD/mlnodetojs.cpp \
+    $$PWD/visuallognetworksender.cpp \
+    $$PWD/visuallog.cpp \
+    $$PWD/visuallogmodel.cpp \
+    $$PWD/visuallogjsobject.cpp \
+    $$PWD/filter.cpp \
+    $$PWD/shareddata.cpp \
+    $$PWD/filterworker.cpp \
+    $$PWD/keymap.cpp
 
 win32{
     SOURCES += $$PWD/stacktrace_win.cpp

@@ -5,7 +5,7 @@
 #include <QMap>
 #include <QJSValue>
 
-namespace lcv{
+namespace lv{
 
 class Commands : public QObject{
 
@@ -25,7 +25,6 @@ class Commands : public QObject{
                 bool hasFocus = false
         );
         QString recurseDump(QString prefix = "");
-
 
         QObject* object;
         QMap<QString, QJSValue>   functions;

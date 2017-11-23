@@ -1,13 +1,13 @@
 {
-    "version" : "1.4.1",
+    "version" : "1.5.0",
     "name": "livecv",
     "webpage": "http://livecv.dinusv.com",
     "components" : {
         "livecv" : {
-            "version" : "1.4.1",
+            "version" : "1.5.0",
             "versionsync" : {
                 "README.md": "\\s*(?:\\* \\*\\*Version\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*",
-                "application/src/base/qlivecv.h" : [
+                "application/src/livecv.h" : [
                   "(?:\\s*#define LIVECV_VERSION_MAJOR)\\s*([0-9]*)\\s*\n",
                   "(?:\\s*#define LIVECV_VERSION_MINOR)\\s*([0-9]*)\\s*\n",
                   "(?:\\s*#define LIVECV_VERSION_PATCH)\\s*([0-9]*)\\s*"
@@ -45,8 +45,9 @@
                 { "copy" : {
                     "{release}/bin" : {
                         "livecv" : "-",
-                        "liblcveditor.so*" : "-",
-                        "libqmljsparser.so*" : "-",
+                        "liblvbase.so*" : "-",
+                        "liblveditor.so*" : "-",
+                        "liblveditqmljs.so*" : "-",
                         "plugins" : {
                             "live": "plugins/live",
                             "lcvcore": "plugins/lcvcore",
@@ -62,9 +63,14 @@
               { "run" : ["chmod", "755", "livecv"] },
               { "solveincludes": [
                     {
-                        "from": "{source}/editor/lcveditor/include",
-                        "source": ["{source}/editor/lcveditor/src"],
-                        "to": "dev/include/editor/lcveditor"
+                        "from": "{source}/lib/lvbase/include",
+                        "source": ["{source}/lib/lvbase/src"],
+                        "to": "dev/include/lib/lvbase"
+                    },
+                    {
+                        "from": "{source}/lib/lveditor/include",
+                        "source": ["{source}/lib/lveditor/src"],
+                        "to": "dev/include/lib/lveditor"
                     },
                     {
                         "from": "{source}/plugins/live/include",
@@ -104,8 +110,9 @@
                 { "copy" : {
                   "{release}/bin" : {
                       "livecv" : "-",
-                      "liblcveditor.so*" : "-",
-                      "libqmljsparser.so*" : "-",
+                      "liblvbase.so*" : "-",
+                      "liblveditor.so*" : "-",
+                      "liblveditqmljs.so*" : "-",
                       "plugins" : {
                           "live": "plugins/live",
                           "lcvcore": "plugins/lcvcore",
@@ -195,32 +202,37 @@
               },
               { "run" : ["chmod", "755", "launcher.sh"] },
               { "solveincludes": [
-                    {
-                        "from": "{source}/editor/lcveditor/include",
-                        "source": ["{source}/editor/lcveditor/src"],
-                        "to": "dev/include/editor/lcveditor"
-                    },
-                    {
-                        "from": "{source}/plugins/live/include",
-                        "source": ["{source}/plugins/live/src"],
-                        "to": "dev/include/plugins/live"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvcore/include",
-                        "source": ["{source}/plugins/lcvcore/src"],
-                        "to": "dev/include/plugins/lcvcore"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvfeatures2d/include",
-                        "source": ["{source}/plugins/lcvfeatures2d/src"],
-                        "to": "dev/include/plugins/lcvfeatures2d"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvvideo/include",
-                        "source": ["{source}/plugins/lcvvideo/src"],
-                        "to": "dev/include/plugins/lcvvideo"
-                    }
-                ]
+                      {
+                          "from": "{source}/lib/lvbase/include",
+                          "source": ["{source}/lib/lvbase/src"],
+                          "to": "dev/include/lib/lvbase"
+                      },
+                      {
+                          "from": "{source}/lib/lveditor/include",
+                          "source": ["{source}/lib/lveditor/src"],
+                          "to": "dev/include/lib/lveditor"
+                      },
+                      {
+                          "from": "{source}/plugins/live/include",
+                          "source": ["{source}/plugins/live/src"],
+                          "to": "dev/include/plugins/live"
+                      },
+                      {
+                          "from": "{source}/plugins/lcvcore/include",
+                          "source": ["{source}/plugins/lcvcore/src"],
+                          "to": "dev/include/plugins/lcvcore"
+                      },
+                      {
+                          "from": "{source}/plugins/lcvfeatures2d/include",
+                          "source": ["{source}/plugins/lcvfeatures2d/src"],
+                          "to": "dev/include/plugins/lcvfeatures2d"
+                      },
+                      {
+                          "from": "{source}/plugins/lcvvideo/include",
+                          "source": ["{source}/plugins/lcvvideo/src"],
+                          "to": "dev/include/plugins/lcvvideo"
+                      }
+                  ]
               }
             ]
         },
@@ -317,8 +329,9 @@
                         "msvcr120.dll": "-"
                       },
                       "{release}/bin/livecv.exe" : "-",
-                      "{release}/bin/lcveditor.dll" : "-",
-                      "{release}/bin/qmljsparser.dll" : "-",
+                      "{release}/bin/lvbase.dll" : "-",
+                      "{release}/bin/lveditor.dll" : "-",
+                      "{release}/bin/lveditqmljs.dll" : "-",
                       "{release}/bin/opencv_*.dll" : "-",
                       "{release}/bin/plugins": {
                           "live" : "plugins/live",
@@ -328,8 +341,9 @@
                       		"lcvfeatures2d": "plugins/lcvfeatures2d",
                       		"lcvphoto": "plugins/lcvphoto"
                       },
-                      "{release}/bin/dev/lib/lcveditor.lib" : "dev/lib/-",
-                      "{release}/bin/dev/lib/qmljsparser.lib" : "dev/lib/-",
+                      "{release}/bin/dev/lib/lvbase.lib" : "dev/lib/-",
+                      "{release}/bin/dev/lib/lveditor.lib" : "dev/lib/-",
+                      "{release}/bin/dev/lib/lveditqmljs.lib" : "dev/lib/-",
                       "{release}/bin/dev/lib/plugins": {
                           "live/live.lib" : "dev/lib/plugins/live/-",
                       		"lcvcore/lcvcore.lib": "dev/lib/plugins/lcvcore/-",
@@ -342,11 +356,16 @@
                       "{source}/samples" : "-"
                     }
                   },
-                  { "solveincludes": [
+                { "solveincludes": [
                       {
-                          "from": "{source}/editor/lcveditor/include",
-                          "source": ["{source}/editor/lcveditor/src"],
-                          "to": "dev/include/editor/lcveditor"
+                          "from": "{source}/lib/lvbase/include",
+                          "source": ["{source}/lib/lvbase/src"],
+                          "to": "dev/include/lib/lvbase"
+                      },
+                      {
+                          "from": "{source}/lib/lveditor/include",
+                          "source": ["{source}/lib/lveditor/src"],
+                          "to": "dev/include/lib/lveditor"
                       },
                       {
                           "from": "{source}/plugins/live/include",
@@ -368,8 +387,8 @@
                           "source": ["{source}/plugins/lcvvideo/src"],
                           "to": "dev/include/plugins/lcvvideo"
                       }
-                    ]
-                  }
+                  ]
+                }
             ]
         }
     }

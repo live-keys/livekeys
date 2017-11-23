@@ -32,7 +32,7 @@
 
 #include <QQuickItem>
 
-namespace lcv{
+namespace lv{
 
 Engine::Engine(QQmlEngine *engine, QObject *parent)
     : QObject(parent)
@@ -76,7 +76,7 @@ QJSValue Engine::evaluate(const QString &jsCode, const QString &fileName, int li
     return m_engine->evaluate(jsCode, fileName, lineNumber);
 }
 
-void Engine::throwError(const lcv::Exception *e, QObject *object){
+void Engine::throwError(const lv::Exception *e, QObject *object){
     QJSValue jsError = m_errorType.callAsConstructor(QJSValueList() << e->message());
     jsError.setProperty("code", e->code());
 
@@ -100,9 +100,9 @@ void Engine::throwError(const lcv::Exception *e, QObject *object){
         jsError.setProperty("stack", stackTrace);
     }
 
-    if ( dynamic_cast<const lcv::FatalException*>(e) != nullptr ){
+    if ( dynamic_cast<const lv::FatalException*>(e) != nullptr ){
         jsError.setProperty("type", "FatalException");
-    } else if ( dynamic_cast<const lcv::InputException*>(e) != nullptr ){
+    } else if ( dynamic_cast<const lv::InputException*>(e) != nullptr ){
         jsError.setProperty("type", "ConfigurationException");
     } else {
         jsError.setProperty("type", "Exception");
@@ -189,10 +189,15 @@ void Engine::removeErrorHandler(QObject *object){
     m_errorHandlers.remove(object);
 }
 
+void Engine::setBindHook(std::function<void(const QString&, const QUrl&, QObject*, QObject*)> hook){
+    m_bindHook = hook;
+}
+
 void Engine::createObjectAsync(
         const QString& qmlCode,
         QObject* parent,
         const QUrl& url,
+        QObject* attachment,
         bool clearCache)
 {
     m_engineMutex->lock();
@@ -251,8 +256,9 @@ void Engine::createObjectAsync(
         item->setParentItem(parentItem);
     }
 
-    //TODO
-//    QDocumentQmlInfo::syncBindings(qmlCode, url, obj);
+
+    if ( m_bindHook )
+        m_bindHook(qmlCode, url, obj, attachment);
 
     setIsLoading(false);
 

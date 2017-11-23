@@ -21,7 +21,7 @@
 #include <QVariant>
 
 /*!
-   \class lcv::QEngineMonitor
+   \class lv::EngineMonitor
    \inmodule live_cpp
    \internal
  */
@@ -52,7 +52,7 @@
  */
 
 /*!
-   \class lcv::QEngineMonitor
+   \class lv::EngineMonitor
    \inmodule live_cpp
    \brief Provides engine signals.
 

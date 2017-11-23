@@ -12,6 +12,8 @@
         <file alias="ProjectAddEntry.qml">qml/ProjectAddEntry.qml</file>
         <file alias="ContextMenuStyle.qml">qml/ContextMenuStyle.qml</file>
         <file alias="License.qml">qml/License.qml</file>
+        <file alias="MessageDialogMain.qml">qml/MessageDialogMain.qml</file>
+        <file alias="WindowControls.qml">qml/WindowControls.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>

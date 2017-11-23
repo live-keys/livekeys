@@ -19,11 +19,11 @@
 
 #include <qglobal.h>
 
-#ifndef LVBASE_STATIC
-#  ifdef LVBASE_LIB
-#    define LVBASE_EXPORT Q_DECL_EXPORT
+#ifndef LV_BASE_STATIC
+#  ifdef LV_BASE_LIB
+#    define LV_BASE_EXPORT Q_DECL_EXPORT
 #  else
-#    define LVBASE_EXPORT Q_DECL_IMPORT
+#    define LV_BASE_EXPORT Q_DECL_IMPORT
 #  endif
 #else
 #  define LVBASE_EXPORT

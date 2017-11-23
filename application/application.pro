@@ -2,9 +2,9 @@ TEMPLATE = app
 TARGET   = livecv
 QT      += qml quick
 
-linkLocalLibrary(lib/lvbase, lvbase)
-linkLocalLibrary(editor/lcveditor, lcveditor)
-linkLocalLibrary(editor/qmljsparser, qmljsparser)
+linkLocalLibrary(lvbase,      lvbase)
+linkLocalLibrary(lveditor,    lveditor)
+linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 # Load library paths
 # ------------------
@@ -33,5 +33,8 @@ RESOURCES += $$PWD/application.qrc
 
 OTHER_FILES += \
     $$PWD/qml/*.qml
+
+DISTFILES += \
+    qml/MessageDialogMain.qml
 
 

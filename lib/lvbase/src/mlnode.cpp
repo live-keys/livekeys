@@ -1,7 +1,25 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "live/mlnode.h"
+#include "live/visuallog.h"
+#include "assert.h"
 #include <QByteArray>
 
-namespace lcv{
+namespace lv{
 
 // MLNode::BytesType
 // ----------------------------------------------------------------------------
@@ -109,7 +127,7 @@ MLNode::Iterator &MLNode::Iterator::operator=(const MLNode::Iterator &other){
     return *this;
 }
 
-bool MLNode::Iterator::canCompareTo(const MLNode::Iterator &other) const{ //TODO
+bool MLNode::Iterator::canCompareTo(const MLNode::Iterator &other) const{
     return m_object == other.m_object;
 }
 
@@ -383,7 +401,7 @@ MLNode::ConstIterator &MLNode::ConstIterator::operator=(const MLNode::ConstItera
     return *this;
 }
 
-bool MLNode::ConstIterator::canCompareTo(const MLNode::ConstIterator &other) const{ //TODO
+bool MLNode::ConstIterator::canCompareTo(const MLNode::ConstIterator &other) const{
     return m_object == other.m_object;
 }
 
@@ -698,7 +716,7 @@ MLNode::MLNode(const MLNode::BytesType &value)
 {
 }
 
-MLNode::MLNode(lcv::MLNode::ByteType *value, size_t size)
+MLNode::MLNode(lv::MLNode::ByteType *value, size_t size)
     : m_type(Type::Bytes)
     , m_value(MLValue(value, size))
 {
@@ -729,6 +747,14 @@ MLNode::MLNode(const MLNode &other)
     case Type::Integer: m_value = other.m_value.asInt; break;
     case Type::Float:   m_value = other.m_value.asFloat; break;
     }
+}
+
+MLNode::MLNode(MLNode &&other)
+    : m_type(other.m_type)
+    , m_value(other.m_value)
+{
+    other.m_type  = MLNode::Type::Null;
+    other.m_value = {};
 }
 
 MLNode::~MLNode(){
@@ -957,6 +983,13 @@ MLNode::BytesType MLNode::asBytes() const{
         throw InvalidMLTypeException();
 }
 
+const MLNode::ArrayType &MLNode::asArray() const{
+    if ( m_type != Type::Array )
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
+
+    return *m_value.asArray;
+}
+
 int MLNode::size() const{
     if ( m_type == Type::Array ){
         return m_value.asArray->size();
@@ -967,11 +1000,24 @@ int MLNode::size() const{
     }
 }
 
+bool MLNode::hasKey(const MLNode::StringType &key) const{
+    if ( m_type != Type::Object )
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of object type.", 0);
+
+    return m_value.asObject->contains(key);
+}
+
+void MLNode::remove(const MLNode::StringType &key){
+    if ( m_type != Type::Object )
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of object type.", 0);
+
+    m_value.asObject->remove(key);
+}
 
 
-//TODO
-//VisualLog &operator <<(VisualLog &vl, const MLNode &value){
-//}
+VisualLog &operator <<(VisualLog &vl, const MLNode &value){
+    return vl << value.toString().c_str();
+}
 
 }
 

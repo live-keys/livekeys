@@ -21,15 +21,15 @@
 #include <QList>
 #include "live/exception.h"
 
-namespace lcv{
+namespace lv{
 
-class LVBASE_EXPORT CommandLineParserException : public Exception{
+class LV_BASE_EXPORT CommandLineParserException : public Exception{
 public:
     CommandLineParserException(const QString& message, int code = 0): Exception(message, code){}
 };
 
 
-class LVBASE_EXPORT CommandLineParser{
+class LV_BASE_EXPORT CommandLineParser{
 
 public:
     class Option;

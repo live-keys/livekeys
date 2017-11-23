@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #ifndef LVSTACKTRACE_H
 #define LVSTACKTRACE_H
 
@@ -5,16 +21,16 @@
 #include <vector>
 #include <QSharedPointer>
 
-#include "lvbaseglobal.h"
+#include "live/lvbaseglobal.h"
 
-namespace lcv{
+namespace lv{
 
 class VisualLog;
 
 // StackFrame
 // ----------
 
-class LVBASE_EXPORT StackFrame{
+class LV_BASE_EXPORT StackFrame{
 
 public:
     typedef unsigned long long AddressPtr;
@@ -47,13 +63,12 @@ private:
     int         m_line;
 };
 
-VisualLog &operator <<(VisualLog &vl, const StackFrame &value);
-
+LV_BASE_EXPORT VisualLog &operator <<(VisualLog &vl, const StackFrame &value);
 
 // StackTrace
 // ----------
 
-class LVBASE_EXPORT StackTrace{
+class LV_BASE_EXPORT StackTrace{
 
 
 public:
@@ -71,8 +86,6 @@ public:
     size_t size() const;
 
     ~StackTrace();
-
-    friend VisualLog& operator << (VisualLog& vl, const StackTrace& value);
 
 private:
     StackTrace();
@@ -93,6 +106,8 @@ inline StackTrace::ConstIterator StackTrace::end() const{
 inline size_t StackTrace::size() const{
     return m_frames->size();
 }
+
+LV_BASE_EXPORT VisualLog &operator <<(VisualLog &vl, const StackTrace &value);
 
 }// namespace
 

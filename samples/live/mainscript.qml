@@ -6,7 +6,7 @@ import live 1.0
 // Run this sample with ./livecv -p "Hello"
 
 Main{
-    options: [
+    options: [  
         { key: ['-p', '--print'], type: 'string', describe: 'Data to print on the screen.', required: true }
     ]
     version : "1.0.0"

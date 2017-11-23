@@ -14,15 +14,15 @@
 **
 ****************************************************************************/
 
-#ifndef QLIBRARYLOADPATH_H
-#define QLIBRARYLOADPATH_H
+#ifndef LVLIBRARYLOADPATH_H
+#define LVLIBRARYLOADPATH_H
 
 #include <QString>
 #include "live/lvbaseglobal.h"
 
-namespace lcv{
+namespace lv{
 
-class LVBASE_EXPORT LibraryLoadPath{
+class LV_BASE_EXPORT LibraryLoadPath{
 
 public:
     static void add(const QString& path, const QString& linkPath = "");
@@ -35,4 +35,4 @@ private:
 
 }// namespace
 
-#endif // QLIBRARYLOADPATH_H
+#endif // LVLIBRARYLOADPATH_H

@@ -16,7 +16,7 @@
 
 #include "live/incubationcontroller.h"
 
-namespace lcv{
+namespace lv{
 
 IncubationController::IncubationController(QObject *parent)
     : QObject(parent)

@@ -15,7 +15,8 @@
 ****************************************************************************/
 
 import QtQuick 2.3
-import Cv 1.0
+import editor 1.0
+import base 1.0
 import live 1.0
 
 Rectangle {

@@ -17,40 +17,129 @@
 import QtQuick 2.4
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
-import Cv 1.0
+import editor 1.0
+import base 1.0
 
 Rectangle{
     id : editor
 
-    signal save()
-    signal open()
-    signal closeFocusedFile()
-    signal toggleSize()
-    signal toggleProject()
-    signal toggleVisibility()
-    signal toggleNavigation()
-
     signal editFragment(int position)
     signal adjustFragment(int position)
-
     signal bindProperties(int position, int length)
 
     property bool isDirtyMask: true
-    property bool isDirty: false
+    property bool isDirty: document ? document.isDirty : false
 
     property alias text: editorArea.text
     property alias font: editorArea.font
+    property alias internalFocus : editorArea.activeFocus
+
+    property WindowControls windowControls : null
+    property var document: null
+    onDocumentChanged: {
+//        contentReadListener.target = document
+//        editor.isDirtyMask = true
+        codeHandler.setDocument(document)
+        if ( !document ){
+            editor.text = ''
+//            editor.isDirty = false
+        }
+//        else {
+//            editor.isDirty = document.isDirty
+//        }
+    }
+
+    function save(){
+        if ( !editor.document )
+            return;
+        if ( editor.document.file.name !== '' ){
+            editor.document.save()
+            if ( project.active && project.active !== editor.document ){
+                engine.createObjectAsync(
+                    project.active.content,
+                    windowControls.runSpace,
+                    project.active.file.pathUrl(),
+                    project.active,
+                    true
+                );
+            }
+        } else {
+            windowControls.saveFileDialog.open()
+        }
+    }
+
+    function saveAs(){
+        windowControls.saveFileDialog.open()
+    }
+
+    function closeDocument(){
+        if ( !editor.document )
+            return;
+        if ( editor.document.isDirty ){
+            var saveFunction = function(){
+                if ( editor.document.file.name !== '' ){
+                    editor.document.save()
+                    editor.closeDocumentAction()
+                } else {
+                    windowControls.saveFileDialog.open()
+                    windowControls.saveFileDialog.callback = function(){
+                        if ( !editor.document.saveAs(windowControls.saveFileDialog.fileUrl) ){
+                            windowControls.messageDialog.show(
+                                'Failed to save file to: ' + windowControls.saveFileDialog.fileUrl,
+                                {
+                                    button3Name : 'Ok',
+                                    button3Function : function(){ windowControls.messageDialog.close(); }
+                                }
+                            )
+                            return;
+                        }
+                        editor.closeDocumentAction()
+                    }
+                }
+                windowControls.messageDialog.close()
+            }
+
+            windowControls.messageDialog.show('File contains unsaved changes. Would you like to save them before closing?',
+            {
+                button1Name : 'Yes',
+                button1Function : saveFunction,
+                button2Name : 'No',
+                button2Function : function(){
+                    editor.closeDocumentAction()
+                    editor.document = project.documentModel.lastOpened()
+                    windowControls.messageDialog.close()
+                },
+                button3Name : 'Cancel',
+                button3Function : function(){
+                    windowControls.messageDialog.close()
+                },
+                returnPressed : saveFunction
+            })
+        } else
+            editor.closeDocumentAction()
+    }
+
+    function closeDocumentAction(){
+        project.closeFile(document.file.path)
+        editor.document = project.documentModel.lastOpened()
+    }
 
     function getCursorRectangle(){
         return editorArea.cursorRectangle
     }
 
-    objectName: "editor"
-    property string objectCommandIndex : livecv.commands.add(editor, {
-        'save' : editor.save,
-        'open' : editor.open,
-        'closeFile' : editor.closeFocusedFile
-    })
+    function assistCompletion(){
+        codeHandler.generateCompletion(editorArea.cursorPosition)
+    }
+
+    function toggleSize(){
+        if ( editor.width < parent.width / 2)
+            editor.width = parent.width - parent.width / 4
+        else if ( editor.width === parent.width / 2 )
+            editor.width = parent.width / 4
+        else
+            editor.width = parent.width / 2
+    }
 
     color : "#050c13"
 
@@ -79,11 +168,11 @@ Rectangle{
             anchors.leftMargin: 15
             color: "#7b838b"
             text: {
-                if ( project.inFocus ){
-                    var filename = project.inFocus.file.name
+                if ( editor.document ){
+                    var filename = editor.document.file.name
                     if ( filename === '' )
                         filename = 'untitled'
-                    if ( project.inFocus.isDirty )
+                    if ( editor.document.isDirty )
                         filename += '*'
                     return filename;
                 } else {
@@ -101,7 +190,7 @@ Rectangle{
             height: parent.height
             anchors.right: parent.right
             anchors.rightMargin: 85
-            visible : project.inFocus !== null
+            visible : editor.document !== null
             Text{
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 16
@@ -114,7 +203,7 @@ Rectangle{
             }
             MouseArea{
                 anchors.fill: parent
-                onClicked: editor.closeFocusedFile()
+                onClicked: editor.closeDocument()
             }
         }
 
@@ -123,7 +212,7 @@ Rectangle{
             height: parent.height
             anchors.right: parent.right
             anchors.rightMargin: 31
-            visible : project.inFocus !== null
+            visible : editor.document !== null
             gradient: Gradient{
                 GradientStop { position: 0.0;  color: "#08141f" }
                 GradientStop { position: 0.30; color: "#09141e" }
@@ -158,7 +247,7 @@ Rectangle{
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: editor.toggleNavigation()
+                onClicked: livecv.commands.execute('window.toggleNavigation')
             }
         }
 
@@ -233,19 +322,32 @@ Rectangle{
                 }
 
                 focus : true
-                onTextChanged: {
-                    if ( editor.isDirtyMask )
-                        editor.isDirtyMask = false
-                    else {
-                        editor.isDirty = true
-                        if ( project.inFocus )
-                            project.inFocus.isDirty = true
-                    }
+                onActiveFocusChanged: {
+//                    if (focus) editor.focusActive()
+                    console.log(this + ' - ' + activeFocus)
                 }
+//                onTextChanged: {
+//                    if ( editor.isDirtyMask )
+//                        editor.isDirtyMask = false
+//                    else {
+////                        editor.isDirty = true
+////                        if ( editor.document )
+////                            editor.document.isDirty = true
+//                    }
+//                }
+
+                objectName: "editor"
+                property string objectCommandIndex : livecv.commands.add(editorArea, {
+                    'saveFile' : editor.save,
+                    'saveFileAs' : editor.saveAs,
+                    'closeFile' : editor.closeDocument,
+                    'assistCompletion' : editor.assistCompletion,
+                    'toggleSize' : editor.toggleSize
+                })
 
                 color : "#fff"
                 font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
-                font.pixelSize: 13
+                font.pixelSize: livecv.settings.file('editor').fontSize
                 font.weight: Font.Normal
 
                 selectByMouse: true
@@ -258,13 +360,12 @@ Rectangle{
                 height : Math.max( flick.height - 20, paintedHeight )
                 width : Math.max( flick.width - 20, paintedWidth )
 
-                readOnly: project.inFocus === null || project.inFocus.isMonitored
+                readOnly: editor.document === null || editor.document.isMonitored
 
                 Keys.onPressed: {
                     if ( (event.key === Qt.Key_BracketRight && (event.modifiers & Qt.ShiftModifier) ) ||
                          (event.key === Qt.Key_BraceRight) ){
 
-                        event.accepted = true
                         if ( cursorPosition > 4 ){
                             var clastpos = cursorPosition
                             if( editorArea.text.substring(cursorPosition - 4, cursorPosition) === "    " ){
@@ -275,30 +376,27 @@ Rectangle{
                                 cursorPosition = clastpos + 1
                             }
                         }
-                    } else if ( event.key === Qt.Key_Space && (event.modifiers & Qt.ControlModifier ) ){
-                        codeHandler.generateCompletion(cursorPosition)
                         event.accepted = true
-                    } else if ( event.key === Qt.Key_Escape ){
+
+                    } else if ( event.key === Qt.Key_Return && (event.modifiers & Qt.ControlModifier) ){
                         if ( codeHandler.isEditing )
-                            codeHandler.cancelEdit()
-                        codeHandler.completionModel.disable()
-                    } else if ( event.key === Qt.Key_S && (event.modifiers & Qt.ControlModifier ) ){
-                        editor.save()
+                            codeHandler.commitEdit()
                         event.accepted = true
-                    } else if ( event.key === Qt.Key_K && (event.modifiers & Qt.ControlModifier ) ){
-                        editor.toggleNavigation()
-                        event.accepted = true
-                    } else if ( event.key === Qt.Key_W && (event.modifiers & Qt.ControlModifier ) ){
-                        editor.closeFocusedFile()
-                        event.accepted = true
-                    } else if ( event.key === Qt.Key_O && (event.modifiers & Qt.ControlModifier ) ) {
-                        editor.open()
-                        event.accepted = true
-                    } else if ( event.key === Qt.Key_E && (event.modifiers & Qt.ControlModifier ) ){
-                        editor.toggleSize()
-                        event.accepted = true
-                    } else if ( event.key === Qt.Key_T && (event.modifiers & Qt.ControlModifier ) ){
-                        editor.toggleVisibility()
+                    } else if ( event.key === Qt.Key_PageUp ){
+                        if ( codeHandler.completionModel.isEnabled ){
+                            qmlSuggestionBox.highlightPrevPage()
+                        } else {
+                            var lines = flick.height / cursorRectangle.height
+                            var prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 1)
+                            while ( --lines > 0 ){
+                                cursorPosition   = prevLineStartPos + 1
+                                prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 2)
+                                if ( prevLineStartPos === -1 ){
+                                    cursorPosition = 0;
+                                    break;
+                                }
+                            }
+                        }
                         event.accepted = true
                     } else if ( event.key === Qt.Key_Tab ){
                         if ( event.modifiers & Qt.ShiftModifier ){
@@ -322,29 +420,6 @@ Rectangle{
                             editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart, true
                         )
                         event.accepted = true
-                    } else if ( event.key === Qt.Key_Backslash && (event.modifiers & Qt.ControlModifier ) ){
-                        editor.toggleProject()
-                        event.accepted = true
-                    } else if ( event.key === Qt.Key_Return && (event.modifiers & Qt.ControlModifier) ){
-                        if ( codeHandler.isEditing )
-                            codeHandler.commitEdit()
-                        event.accepted = true
-                    } else if ( event.key === Qt.Key_PageUp ){
-                        if ( codeHandler.completionModel.isEnabled ){
-                            qmlSuggestionBox.highlightPrevPage()
-                        } else {
-                            var lines = flick.height / cursorRectangle.height
-                            var prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 1)
-                            while ( --lines > 0 ){
-                                cursorPosition   = prevLineStartPos + 1
-                                prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 2)
-                                if ( prevLineStartPos === -1 ){
-                                    cursorPosition = 0;
-                                    break;
-                                }
-                            }
-                        }
-                        event.accepted = true
                     } else if ( event.key === Qt.Key_PageDown ){
                         if ( codeHandler.completionModel.isEnabled ){
                             qmlSuggestionBox.highlightNextPage()
@@ -367,8 +442,18 @@ Rectangle{
                             event.accepted = true
                             qmlSuggestionBox.highlightPrev()
                         }
-                    } else
-                        event.accepted = false
+                    } else if ( event.key === Qt.Key_Escape ){
+                        if ( codeHandler.isEditing )
+                            codeHandler.cancelEdit()
+                        codeHandler.completionModel.disable()
+                    } else {
+                        var command = livecv.keymap.locateCommand(event.key, event.modifiers)
+                        if ( command !== '' ){
+//                            console.log(command)
+                            livecv.commands.execute(command)
+                            event.accepted = true
+                        }
+                    }
                 }
 
                 Keys.onReturnPressed: {
@@ -382,46 +467,27 @@ Rectangle{
                         event.accepted = true
                     }
                 }
-                Component.onCompleted: {
-                    codeHandler.target = textDocument
-                    if ( project.inFocus ){
-                        editor.isDirtyMask = true
-                        editor.isDirty = project.inFocus.isDirty
-//                        editor.text    = project.inFocus.content
-                    }
-                }
 
                 Behavior on font.pixelSize {
                     NumberAnimation { duration: 40 }
                 }
 
                 Connections{
-                    target: codeHandler
-                    onCursorPositionRequest : editorArea.cursorPosition = position
-                }
-
-                Connections{
-                    target: project
-                    onInFocusChanged : {
-                        editor.isDirtyMask = true
-                        if ( project.inFocus ){
-                            editor.isDirty = project.inFocus.isDirty
-//                            editor.text    = project.inFocus.content
-                        } else {
-                            editor.text = ''
-                            editor.isDirty = false
+                    target: project.documentModel
+                    onAboutToClose: {
+                        if ( document === editor.document ){
+                            editor.document = null
                         }
                     }
                 }
 
-                Connections{
-                    target: project.inFocus
-                    onContentRead : {
-                        editor.isDirtyMask = true
-                        editor.isDirty     = project.inFocus.isDirty
-//                        editor.text    = project.inFocus.content
-                    }
-                }
+//                Connections{
+//                    id: contentReadListener
+//                    onContentRead : {
+//                        editor.isDirtyMask = true
+//                        editor.isDirty     = editor.document.isDirty
+//                    }
+//                }
 
                 MouseArea{
                     anchors.fill: parent
@@ -431,6 +497,7 @@ Rectangle{
                         if (editorArea.selectionStart === editorArea.selectionEnd)
                             editorArea.cursorPosition = editorArea.positionAt(mouse.x, mouse.y)
                         contextMenu.popup()
+                        forceActiveFocus()
                     }
                 }
 
@@ -452,22 +519,22 @@ Rectangle{
                         id: editMenuItem
                         text: qsTr("Edit")
                         enabled: false
-//                        onTriggered: codeHandler.edit(editorArea.cursorPosition)
-                        onTriggered: editor.editFragment(editorArea.cursorPosition)
+                        onTriggered: codeHandler.edit(editorArea.cursorPosition, editor.windowControls.runSpace.item)
                     }
                     MenuItem {
                         id: adjustMenuItem
                         text: qsTr("Adjust")
                         enabled: false
-//                        onTriggered: codeHandler.edit(editorArea.cursorPosition)
-                        onTriggered: editor.adjustFragment(editorArea.cursorPosition)
+                        onTriggered: codeHandler.adjust(editorArea.cursorPosition, editor.windowControls.runSpace.item)
                     }
                     MenuItem {
                         id: bindMenuItem
                         text: qsTr("Bind")
                         enabled: false
-                        onTriggered: editor.bindProperties(
-                            editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart
+                        onTriggered: codeHandler.bind(
+                            editorArea.selectionStart,
+                            editorArea.selectionEnd - editorArea.selectionStart,
+                            editor.windowControls.runSpace.item
                         )
                     }
 
@@ -498,9 +565,25 @@ Rectangle{
                         onTriggered: editor.paste()
                     }
                 }
-
             }
+        }
 
+        DocumentHandler{
+            id: codeHandler
+            target: editorArea.textDocument
+            onCursorPositionRequest : {
+                editorArea.forceActiveFocus()
+                editorArea.cursorPosition = position
+            }
+            onContentsChangedManually: {
+                if ( project.active === editor.document )
+                    editor.windowControls.createTimer.restart()
+            }
+            onPaletteChanged: {
+                var rect = editor.getCursorRectangle()
+                var position = Qt.point(editor.x, editor.y)
+                windowControls.paletteBox.setPalette(palette, rect, position)
+            }
         }
 
         SuggestionBox{

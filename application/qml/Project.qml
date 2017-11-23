@@ -15,9 +15,11 @@
 ****************************************************************************/
 
 import QtQuick 2.5
+import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
-import Cv 1.0
+import base 1.0
+import editor 1.0
 
 Rectangle{
     id: root
@@ -26,14 +28,242 @@ Rectangle{
         GradientStop { position: 0.0;  color: "#061119" }
         GradientStop { position: 0.01; color: "#050e16" }
     }
+    objectName: "project"
 
-    signal addEntry(ProjectEntry parentEntry, bool isFile)
-    signal openEntry(ProjectEntry entry, bool monitor)
-    signal editEntry(ProjectEntry entry)
-    signal removeEntry(ProjectEntry entry, bool isFile)
-    signal moveEntry(ProjectEntry entry, ProjectEntry newParent)
-    signal renameEntry(ProjectEntry entry, string newName)
-    signal closeProject()
+    property WindowControls windowControls : null
+    property Editor focusEditor : null
+
+    Component.onCompleted: {
+        livecv.commands.add(root, {
+            'close' : closeProject,
+            'open' : openProject,
+            'new' : newProject,
+            'openFile' : openFile,
+            'toggleVisibility' : toggleVisibility
+        })
+    }
+
+    function closeProject(callback){
+        var documentList = project.documentModel.listUnsavedDocuments()
+        var message = ''
+        if ( documentList.length === 0 ){
+            project.closeProject()
+            callback()
+            return;
+        } else if ( !project.isDirProject() ){
+            message = "Your project file has unsaved changes. Would you like to save them before closing it?";
+        } else {
+            var unsavedFiles = '';
+            for ( var i = 0; i < documentList.length; ++i ){
+                unsavedFiles += documentList[i] + "\n";
+            }
+
+            message = "The following files have unsaved changes:\n";
+            message += unsavedFiles
+            message += "Would you like to save them before closing the project?\n"
+        }
+        windowControls.messageDialog.show(message, {
+            button1Name : 'Yes',
+            button1Function : function(){
+                windowControls.messageDialog.close()
+                if ( !project.isDirProject() && documentList.length === 1 && documentList[0] === ''){
+                    var closeCallback = callback;
+                    var untitledDocument = documentModel.isOpened(documentList[0])
+                    fileSaveDialog.callback = function(){
+                        if ( !untitledDocument.saveAs(windowControls.saveFileDialog.fileUrl) ){
+                            windowControls.messageDialog.show(
+                                'Failed to save file to: ' + windowControls.saveFileDialog.fileUrl,
+                                {
+                                    button3Name : 'Ok',
+                                    button3Function : function(){ windowControls.messageDialog.close(); }
+                                }
+                            )
+                            return;
+                        }
+                        project.closeProject()
+                        closeCallback()
+                    }
+                    windowControls.saveFileDialog.open()
+                } else if ( !project.documentModel.saveDocuments() ){
+                    var unsavedList = project.documentModel.listUnsavedDocuments()
+                    unsavedFiles = '';
+                    for ( var i = 0; i < unsavedList.length; ++i ){
+                        if ( unsavedList[i] === '' )
+                            unsavedList[i] = 'untitled'
+                        unsavedFiles += unsavedList[i] + "\n";
+                    }
+
+                    message = 'Failed to save the following files:\n'
+                    message += unsavedFiles
+                    windowControls.messageDialog.show(message,{
+                        button1Name : 'Close',
+                        button1Function : function(){
+                            project.closeProject()
+                            windowControls.messageDialog.close()
+                            callback()
+                        },
+                        button3Name : 'Cancel',
+                        button3Function : function(){
+                            windowControls.messageDialog.close()
+                        },
+                        returnPressed : function(){
+                            project.closeProject()
+                            windowControls.messageDialog.close()
+                            callback()
+                        }
+                    })
+                } else {
+                    project.closeProject()
+                    windowControls.messageDialog.close()
+                    callback()
+                }
+            },
+            button2Name : 'No',
+            button2Function : function(){
+                project.closeProject()
+                windowControls.messageDialog.close()
+                callback()
+            },
+            button3Name : 'Cancel',
+            button3Function : function(){
+                windowControls.messageDialog.close()
+            },
+            returnPressed : function(){
+                project.closeProject()
+                windowControls.messageDialog.close()
+            }
+        })
+    }
+    function openProject(){
+        root.closeProject(function(){
+            root.windowControls.openDirDialog.open()
+        })
+    }
+    function newProject(){
+        closeProject(function(){
+            project.newProject()
+            if ( project.active )
+                focusEditor.document = project.active
+        })
+    }
+    function openFile(){
+        if ( !project.isDirProject() ){
+            closeProject(function(){
+                root.windowControls.openFileDialog.open()
+            })
+        } else {
+            root.windowControls.openFileDialog.open()
+        }
+    }
+
+    function addEntry(parentEntry, isFile){
+        projectAddEntry.show(parentEntry, isFile)
+    }
+    function openEntry(entry, monitor){
+        root.focusEditor.document = project.openFile(
+            entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
+        )
+    }
+    function editEntry(entry){
+        root.focusEditor.document = project.openFile(entry, ProjectDocument.Edit)
+    }
+    function removeEntry(entry, isFile){
+        var message = ''
+        if ( entry.isFile ){
+            if ( !entry.isDirty ){
+                message = "Are you sure you want to remove file \'" + entry.path + "\'?"
+            } else
+                message = "Are you sure you want to remove unsaved file \'" + entry.path + "\'?"
+        } else {
+            var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
+            if ( documentList.length === 0 ){
+                message =
+                    "Are you sure you want to remove directory\'" + entry.path + "\' " +
+                    "and all its contents?"
+            } else {
+                var unsavedFiles = '';
+                for ( var i = 0; i < documentList.length; ++i ){
+                    unsavedFiles += documentList[i] + "\n";
+                }
+
+                message = "The following files have unsaved changes:\n";
+                message += unsavedFiles
+                message +=
+                    "Are you sure you want to remove directory \'" + entry.path +
+                    "\' and all its contents?\n"
+            }
+        }
+
+        windowControls.messageDialog.show(message, {
+            button1Name : 'Yes',
+            button1Function : function(){
+                project.fileModel.removeEntry(entry)
+                windowControls.messageDialog.close()
+            },
+            button3Name : 'No',
+            button3Function : function(){
+                windowControls.messageDialog.close()
+            },
+            returnPressed : function(){
+                project.fileModel.removeEntry(entry)
+                windowControls.messageDialog.close()
+            }
+        })
+    }
+    function moveEntry(entry, newParent){
+        var message = ''
+        if ( entry.isFile ){
+            if ( !entry.isDirty ){
+                project.fileModel.moveEntry(entry, newParent)
+                return;
+            }
+            message =
+                "Are you sure you want to move unsaved file \'" + entry.path + "\'?\n" +
+                "All your changes will be lost."
+        } else {
+            var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
+            if ( documentList.length === 0 ){
+                project.fileModel.moveEntry(entry, newParent)
+                return;
+            } else {
+                var unsavedFiles = '';
+                for ( var i = 0; i < documentList.length; ++i ){
+                    unsavedFiles += documentList[i] + "\n";
+                }
+
+                message = "The following files have unsaved changes:\n";
+                message += unsavedFiles
+                message +=
+                    "Are you sure you want to move directory \'" + entry.path +
+                    "\' and all its contents? Unsaved changes will be lost.\n"
+            }
+        }
+
+        windowControls.messageDialog.show(message, {
+            button1Name : 'Yes',
+            button1Function : function(){
+                project.fileModel.moveEntry(entry, newParent)
+                windowControls.messageDialog.close()
+            },
+            button3Name : 'No',
+            button3Function : function(){
+                windowControls.messageDialog.close()
+            },
+            returnPressed : function(){
+                project.fileModel.moveEntry(entry, newParent)
+                windowControls.messageDialog.close()
+            }
+        })
+    }
+
+    function renameEntry(entry, newName){
+        project.fileModel.renameEntry(entry, newName)
+    }
+
+    function toggleVisibility(){
+        root.width = root.width === 0 ? 240 : 0
+    }
+
 
     TreeView {
         id: view
@@ -166,8 +396,8 @@ Rectangle{
                     property int type : {
                         if (styleData.value){
                             if ( styleData.value.document ){
-                                if ( project.inFocus ){
-                                    if ( project.inFocus.file === styleData.value )
+                                if ( root.focusEditor && root.focusEditor.document ){
+                                    if ( root.focusEditor.document.file === styleData.value )
                                         return 1
                                 }
                                 return 2
@@ -374,7 +604,7 @@ Rectangle{
             MenuItem{
                 text: "Close project"
                 onTriggered: {
-                    root.closeProject()
+                    root.closeProject(function(){})
                 }
             }
             MenuItem {

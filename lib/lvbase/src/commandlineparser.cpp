@@ -16,7 +16,7 @@
 
 #include "live/commandlineparser.h"
 
-namespace lcv{
+namespace lv{
 
 class CommandLineParser::Option{
 

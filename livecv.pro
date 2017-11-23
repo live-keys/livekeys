@@ -22,22 +22,19 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     application \
-    editor \
     lib \
     plugins \
     tests
 
 # --- Subdir configurations ---
 application.subdir  = $$PWD/application
-editor.subdir       = $$PWD/editor
 plugins.subdir      = $$PWD/plugins
 tests.subdir        = $$PWD/tests
 
 # --- Dependency configuration ---
-editor.depends      = lib
-application.depends = editor
-plugins.depends     = editor
-
+application.depends = lib
+plugins.depends     = lib
+tests.depends       = lib
 
 # Include the global configuration files since otherwise they would never show
 # up in your project

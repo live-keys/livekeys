@@ -14,15 +14,15 @@
 **
 ****************************************************************************/
 
-#ifndef LCVTESTRUNNER_H
-#define LCVTESTRUNNER_H
+#ifndef LVTESTRUNNER_H
+#define LVTESTRUNNER_H
 
 #include <QObject>
 #include <QList>
 #include <QSharedPointer>
 #include <QTest>
 
-namespace lcv{
+namespace lv{
 
 class TestRunner{
 
@@ -38,7 +38,7 @@ private:
 
 inline int TestRunner::registerTest(QObject* test){
     tests().append(QSharedPointer<QObject>(test));
-    return 0;
+    return tests().size() - 1;
 }
 
 inline int TestRunner::runTests(int argc, char *argv[]){
@@ -72,6 +72,6 @@ inline QList<QSharedPointer<QObject> > &TestRunner::tests(){
         static const int testIndex;
 
 #define Q_TEST_RUNNER_REGISTER(className) \
-    const int className::testIndex = lcv::TestRunner::registerTest(new className)
+    const int className::testIndex = lv::TestRunner::registerTest(new className)
 
-#endif // LCVTESTRUNNER_H
+#endif // LVTESTRUNNER_H

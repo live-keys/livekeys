@@ -18,20 +18,20 @@
 #define QLIVECVARGUMENTS_H
 
 #include <QObject>
+#include "live/mlnode.h"
 
-namespace lcv{
+namespace lv{
 
 class CommandLineParser;
 class LiveCVArguments{
 
 public:
-    explicit LiveCVArguments(const QString& header, int argc, const char* const argv[]);
+    explicit LiveCVArguments(const QString& header);
     ~LiveCVArguments();
 
-    bool previewFlag() const;
+    bool launchFlag() const;
+    bool runFlag() const;
     bool consoleFlag() const;
-    bool fileLogFlag() const;
-
     bool pluginInfoFlag() const;
     const QString& pluginInfoImport() const;
 
@@ -46,14 +46,18 @@ public:
     const QString& script() const;
     const QStringList& scriptArguments() const;
 
-private:
     void initialize(int argc, const char* const argv[]);
 
+    const MLNode& getLogConfiguration();
+
+private:
     CommandLineParser* m_parser;
 
-    bool m_fileLogFlag;
     bool m_consoleFlag;
-    bool m_previewFlag;
+    bool m_launchFlag;
+    bool m_runFlag;
+
+    MLNode m_logConfiguration;
 
     bool m_pluginInfoFlag;
     QString m_pluginInfoImport;
@@ -62,16 +66,16 @@ private:
 
 };
 
-inline bool LiveCVArguments::previewFlag() const{
-    return m_previewFlag;
+inline bool LiveCVArguments::launchFlag() const{
+    return m_launchFlag;
+}
+
+inline bool LiveCVArguments::runFlag() const{
+    return m_runFlag;
 }
 
 inline bool LiveCVArguments::consoleFlag() const{
     return m_consoleFlag;
-}
-
-inline bool LiveCVArguments::fileLogFlag() const{
-    return m_fileLogFlag;
 }
 
 inline const QString &LiveCVArguments::pluginInfoImport() const{

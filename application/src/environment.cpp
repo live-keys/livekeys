@@ -1,7 +1,7 @@
 #include "environment.h"
 #include <QVariant>
 
-namespace lcv{
+namespace lv{
 
 Environment::Environment(QObject *parent)
     : QObject(parent)

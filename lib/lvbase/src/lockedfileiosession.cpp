@@ -20,7 +20,7 @@
 #include <QMutex>
 #include <QReadWriteLock>
 
-namespace lcv{
+namespace lv{
 
 class FileLock{
 public:

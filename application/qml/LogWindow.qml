@@ -23,10 +23,10 @@ Window {
     id : container
     width: 400
     height: 200
-    title: "LCV Log"
+    title: "Live CV Log"
     color : "#081017"
 
-    property string text : ""
+    signal itemAdded()
 
     ScrollView {
         id: logScroll
@@ -58,22 +58,26 @@ Window {
             corner: Rectangle{color: container.color}
         }
 
-        TextEdit{
-            id : logText
-            anchors.top : parent.top
-            anchors.topMargin: 0
-            text : container.text
-            onTextChanged: {
+        ListView{
+            id: logview
+            model: livecv.log
+            anchors.fill: parent
+            delegate: Item{
+                Text{
+
+                }
+
+                width: logview.model.width
+                height: msg.height + 2
+                children: [msg]
+            }
+
+            onAddChanged: {
                 if ( logScroll.flickableItem.contentHeight > logScroll.height )
                     logScroll.flickableItem.contentY = logScroll.flickableItem.contentHeight - logScroll.height
+                container.itemAdded()
             }
-            selectByMouse: true
-            textFormat: Text.RichText
-            readOnly: true
-            font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
-            font.pixelSize: 12
-            color : "#eee"
-            selectionColor: "#333"
+            onWidthChanged: logview.model.width = width
         }
 
     }

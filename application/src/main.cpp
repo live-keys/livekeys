@@ -21,8 +21,10 @@
 #include "livecv.h"
 #include "livecvarguments.h"
 #include "live/libraryloadpath.h"
+#include "live/visuallog.h"
+#include "live/exception.h"
 
-using namespace lcv;
+using namespace lv;
 
 int main(int argc, char *argv[]){
 
@@ -30,25 +32,37 @@ int main(int argc, char *argv[]){
     QGuiApplication::setApplicationName("Live CV");
     QGuiApplication::setApplicationVersion(LiveCV::versionString());
 
-    LiveCV::registerTypes();
-    LiveCV livecv(argc, argv);
+    try{
 
-    if ( livecv.arguments()->helpFlag() ){
-        printf("%s", qPrintable(livecv.arguments()->helpString()));
-        return 0;
-    } else if ( livecv.arguments()->versionFlag() ){
-        printf("%s\n", qPrintable(livecv.versionString()));
-        return 0;
+        LiveCV::Ptr livecv = LiveCV::create(argc, argv);
+        livecv->loadInternalPlugins();
+
+        if ( livecv->arguments()->helpFlag() ){
+            printf("%s", qPrintable(livecv->arguments()->helpString()));
+            return 0;
+        } else if ( livecv->arguments()->versionFlag() ){
+            printf("%s\n", qPrintable(livecv->versionString()));
+            return 0;
+        }
+
+        LibraryLoadPath::addRecursive(livecv->dir() + "/plugins", livecv->dir() + "/link");
+
+        if ( livecv->arguments()->pluginInfoFlag() ){
+            printf("%s", livecv->extractPluginInfo(livecv->arguments()->pluginInfoImport()).data());
+            return 0;
+        }
+
+        livecv->loadQml(QUrl(QStringLiteral("qrc:/main.qml")));
+
+        return app.exec();
+
+    } catch ( lv::Exception& e ){
+        if ( e.code() < 0 ){
+            printf("Uncaught exception when initializing: %s\n", qPrintable(e.message()));
+            return e.code();
+        } else {
+            vlog() << "Uncaught exception: " << e.message();
+            return e.code();
+        }
     }
-
-    LibraryLoadPath::addRecursive(livecv.dir() + "/plugins", livecv.dir() + "/link");
-
-    if ( livecv.arguments()->pluginInfoFlag() ){
-        printf("%s", livecv.extractPluginInfo(livecv.arguments()->pluginInfoImport()).data());
-        return 0;
-    }
-
-    livecv.loadQml(QUrl(QStringLiteral("qrc:/main.qml")));
-
-    return app.exec();
 }

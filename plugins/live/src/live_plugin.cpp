@@ -23,12 +23,14 @@
 #include "qfilereader.h"
 #include "qstaticfilereader.h"
 
-#include "live/qabstractcodeserializer.h"
-#include "live/qnativevaluecodeserializer.h"
-#include "live/qqmlobjectcodeserializer.h"
-#include "live/qcodeconverter.h"
-#include "live/qlivepalette.h"
+#include "live/abstractcodeserializer.h"
+#include "live/nativevaluecodeserializer.h"
+#include "live/qmlobjectcodeserializer.h"
+#include "live/codeconverter.h"
+#include "live/livepalette.h"
 #include "live/plugincontext.h"
+#include "live/visuallog.h"
+#include "live/settings.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -45,27 +47,25 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterUncreatableType<QLicenseSettings>(
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
 
-    qmlRegisterUncreatableType<lcv::QAbstractCodeSerializer>(
+    qmlRegisterUncreatableType<lv::AbstractCodeSerializer>(
         uri, 1, 0, "AbstractCodeSerializer", "Code serializer is of abstract type."
     );
-    qmlRegisterType<lcv::QNativeValueCodeSerializer>(uri, 1, 0, "NativeValueCodeSerializer");
-    qmlRegisterType<lcv::QQmlObjectCodeSerializer>(  uri, 1, 0, "QmlObjectCodeSerializer");
-    qmlRegisterType<lcv::QCodeConverter>(            uri, 1, 0, "CodeConverter");
-    qmlRegisterType<lcv::QLivePalette>(              uri, 1, 0, "LivePalette");
+    qmlRegisterType<lv::NativeValueCodeSerializer>(uri, 1, 0, "NativeValueCodeSerializer");
+    qmlRegisterType<lv::QmlObjectCodeSerializer>(  uri, 1, 0, "QmlObjectCodeSerializer");
+    qmlRegisterType<lv::CodeConverter>(            uri, 1, 0, "CodeConverter");
+    qmlRegisterType<lv::LivePalette>(              uri, 1, 0, "LivePalette");
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){
-    lcv::PluginContext::initFromEngine(engine);
     QStaticContainer* sc = new QStaticContainer(engine);
     engine->rootContext()->setContextProperty("staticContainer", sc);
     QEngineMonitor* em = new QEngineMonitor(engine);
-    engine->rootContext()->setContextProperty("engineMonitor", em);
+    engine->rootContext()->setContextProperty("engineMonitor", em); //TODO: Remove
 
     QObject* livecv   = engine->rootContext()->contextProperty("livecv").value<QObject*>();
-    QObject* settings = livecv->property("settings").value<QObject*>();
+    lv::Settings* settings = static_cast<lv::Settings*>(livecv->property("settings").value<QObject*>());
 
-    QString settingsPath = settings->property("path").toString();
+    QString settingsPath = settings->path();
     QLicenseSettings* ls = new QLicenseSettings(settingsPath, settings);
-
-    QMetaObject::invokeMethod(settings, "addConfigFile", Q_ARG(QString, "license"), Q_ARG(QObject*, ls));
+    settings->addConfigFile("license", ls);
 }

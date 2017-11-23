@@ -16,10 +16,10 @@
 
 #include "livecvscript.h"
 #include "environment.h"
-#include "live/qprojectdocument.h"
-#include "live/qprojectfile.h"
+#include "live/projectdocument.h"
+#include "live/projectfile.h"
 
-namespace lcv{
+namespace lv{
 
 LiveCVScript::LiveCVScript(const QStringList &argvTail, QObject *parent)
     : QObject(parent)
@@ -34,7 +34,7 @@ LiveCVScript::~LiveCVScript(){
     delete m_environment;
 }
 
-void LiveCVScript::scriptChanged(QProjectDocument *active){
+void LiveCVScript::scriptChanged(ProjectDocument *active){
     if ( active ){
         m_argv[0] = active->file()->name();
     } else {

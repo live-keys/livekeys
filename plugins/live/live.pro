@@ -8,8 +8,8 @@ DEFINES += Q_LIVE_LIB
 
 uri = live
 
-linkLocalLibrary(lib/lvbase,       lvbase)
-linkLocalLibrary(editor/lcveditor, lcveditor)
+linkLocalLibrary(lvbase,   lvbase)
+linkLocalLibrary(lveditor, lveditor)
 # Source
 
 include($$PWD/src/live.pri)
@@ -33,8 +33,3 @@ first.depends = $(first) palettecopy
 export(first.depends)
 export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
-
-DISTFILES += \
-    palettes/ColorPalette.qml \
-    qml/JsonFileReader.qml \
-    qml/StaticJsonFileReader.qml

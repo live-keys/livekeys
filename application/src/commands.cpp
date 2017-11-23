@@ -2,7 +2,7 @@
 #include <QJSValueIterator>
 #include <QDebug>
 
-namespace lcv{
+namespace lv{
 
 Commands::Commands(QObject *parent)
     : QObject(parent)
@@ -81,9 +81,14 @@ void Commands::execute(const QString &command){
     QStringList objectChain = commandChain;
     objectChain.removeLast();
 
+    // find commands and their object.
     QList<QPair<Commands::Node*, bool> > base = m_root->recurseFind(objectChain, objectChain.begin());
+
+    // if it's a single command, execute it
     if ( base.size() == 1 ){
         base.first().first->functions[commandChain.last()].call();
+
+    // if there are more than two commands, execute the one in focus
     } else if ( base.size() > 1 ){
         for ( auto it = base.begin(); it != base.end(); ++it ){
             if ( it->second == true ){
@@ -119,6 +124,7 @@ Commands::Node *Commands::Node::find(QObject *object){
     while (nodeit != nodes.end() && nodeit.key() == object->objectName()){
         if ( nodeit.value()->object == object )
             return nodeit.value();
+        ++nodeit;
     }
 
     return 0;

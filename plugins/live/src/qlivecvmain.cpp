@@ -28,7 +28,7 @@
 
 
 /*!
-   \class lcv::QLiveCVMain
+   \class lv::QLiveCVMain
    \inmodule live_cpp
    \internal
  */

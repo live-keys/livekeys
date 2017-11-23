@@ -20,17 +20,17 @@
 #include <QObject>
 #include <QStringList>
 
-namespace lcv{
+namespace lv{
 
 class Environment;
-class QProjectDocument;
+class ProjectDocument;
 
 class LiveCVScript : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QStringList  argv             READ argv        NOTIFY argvChanged)
     Q_PROPERTY(QStringList  argvTail         READ argvTail    CONSTANT)
-    Q_PROPERTY(lcv::Environment* environment READ environment CONSTANT)
+    Q_PROPERTY(lv::Environment* environment READ environment CONSTANT)
 
 public:
     LiveCVScript(const QStringList& argvTail, QObject* parent = 0);
@@ -39,10 +39,10 @@ public:
     const QStringList& argv() const;
     const QStringList& argvTail() const;
 
-    lcv::Environment* environment();
+    lv::Environment* environment();
 
 public slots:
-    void scriptChanged(QProjectDocument* active);
+    void scriptChanged(lv::ProjectDocument* active);
     const QString& name() const;
 
 signals:
@@ -51,7 +51,7 @@ signals:
 private:
     QStringList       m_argvTail;
     QStringList       m_argv;
-    lcv::Environment* m_environment;
+    lv::Environment* m_environment;
 
 };
 

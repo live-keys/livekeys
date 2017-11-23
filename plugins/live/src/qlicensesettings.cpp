@@ -31,9 +31,6 @@
 #include <QJsonDocument>
 
 
-
-
-
 QLicenseSettings::QLicenseSettings(const QString &settingsPath, QObject *parent)
     : QAbstractListModel(parent)
     , m_isDirty(false)
@@ -128,7 +125,6 @@ void QLicenseSettings::reparse(){
 }
 
 void QLicenseSettings::save(){
-    qDebug() << m_licenseFile;
     if ( m_parseError || !isDirty() )
         return;
 

@@ -17,7 +17,8 @@
 import QtQuick 2.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.2
-import Cv 1.0
+import editor 1.0
+import base 1.0
 import live 1.0
 
 ApplicationWindow{
@@ -45,13 +46,13 @@ ApplicationWindow{
 
     Component.onCompleted: {
         livecv.commands.add(root, {
-            'minimize' : root.showMinimized
+            'minimize' : root.showMinimized,
+            'toggleMaximizedRuntime' : contentWrap.toggleMaximizedRuntime,
+            'toggleNavigation' : contentWrap.toggleNavigation
         })
     }
 
     title: qsTr("Live CV")
-
-    signal projectActiveChanged()
 
     FontLoader{ id: ubuntuMonoBold;       source: "qrc:/fonts/UbuntuMono-Bold.ttf"; }
     FontLoader{ id: ubuntuMonoRegular;    source: "qrc:/fonts/UbuntuMono-Regular.ttf"; }
@@ -68,8 +69,7 @@ ApplicationWindow{
         id : logWindow
         visible : false
         Component.onCompleted: width = root.width
-        text : lcvlog.data
-        onTextChanged: {
+        onItemAdded: {
             if ( !visible && text !== "" )
                 header.isLogWindowDirty = true
         }
@@ -85,133 +85,16 @@ ApplicationWindow{
         height: settings.previewMode ? 0 : 35
         color: "#08141d"
 
-        function closeProject(callback){
-            var documentList = project.documentModel.listUnsavedDocuments()
-            var message = ''
-            if ( documentList.length === 0 ){
-                project.closeProject()
-                callback()
-                return;
-            } else if ( !project.isDirProject() && project.inFocus ){
-                if ( !project.inFocus.isDirty ){
-                    project.closeProject()
-                    callback()
-                    return;
-                } else {
-                    message = "Your project file has unsaved changes. Would you like to save them before closing it?";
-                }
-            } else {
-                var unsavedFiles = '';
-                for ( var i = 0; i < documentList.length; ++i ){
-                    unsavedFiles += documentList[i] + "\n";
-                }
-
-                message = "The following files have unsaved changes:\n";
-                message += unsavedFiles
-                message += "Would you like to save them before closing the project?\n"
-            }
-            messageBox.show(message, {
-                button1Name : 'Yes',
-                button1Function : function(){
-                    messageBox.close()
-                    if ( !project.isDirProject() && project.inFocus && project.inFocus.file.name === ''){
-                        var closeCallback = callback;
-                        fileSaveDialog.callback = function(){
-                            project.inFocus.dumpContent(editor.text)
-                            if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
-                                messageBox.show(
-                                    'Failed to save file to: ' + fileSaveDialog.fileUrl,
-                                    {
-                                        button3Name : 'Ok',
-                                        button3Function : function(){ messageBox.close(); }
-                                    }
-                                )
-                                return;
-                            }
-                            project.closeProject()
-                            closeCallback()
-                        }
-                        fileSaveDialog.open()
-                    } else if ( !project.documentModel.saveDocuments() ){
-                        var unsavedList = project.documentModel.listUnsavedDocuments()
-                        unsavedFiles = '';
-                        for ( var i = 0; i < unsavedList.length; ++i ){
-                            if ( unsavedList[i] === '' )
-                                unsavedList[i] = 'untitled'
-                            unsavedFiles += unsavedList[i] + "\n";
-                        }
-
-                        message = 'Failed to save the following files:\n'
-                        message += unsavedFiles
-                        messageBox.show(message,{
-                            button1Name : 'Close',
-                            button1Function : function(){
-                                project.closeProject()
-                                messageBox.close()
-                                callback()
-                            },
-                            button3Name : 'Cancel',
-                            button3Function : function(){
-                                messageBox.close()
-                            },
-                            returnPressed : function(){
-                                project.closeProject()
-                                messageBox.close()
-                                callback()
-                            }
-                        })
-                    } else {
-                        project.closeProject()
-                        messageBox.close()
-                        callback()
-                    }
-                },
-                button2Name : 'No',
-                button2Function : function(){
-                    project.closeProject()
-                    messageBox.close()
-                    callback()
-                },
-                button3Name : 'Cancel',
-                button3Function : function(){
-                    messageBox.close()
-                },
-                returnPressed : function(){
-                    project.closeProject()
-                    messageBox.close()
-                }
-            })
-        }
-
         property var callback : function(){}
 
         isTextDirty: editor.isDirty
 
         property string action : ""
 
-        onNewProject: {
-            closeProject(function(){
-                project.newProject()
-            })
-        }
-        onOpenFile : {
-            if ( !project.isDirProject() ){
-                closeProject(function(){
-                    fileOpenDialog.open()
-                })
-            } else {
-                fileOpenDialog.open()
-            }
-        }
-        onOpenProject: {
-            closeProject(function(){
-                dirOpenDialog.open()
-            })
-        }
-        onSaveFile : {
-            fileSaveDialog.open()
-        }
-
+        onNewProject: projectView.newProject()
+        onOpenFile : projectView.openFile()
+        onOpenProject: projectView.openProject()
+        onSaveFile : projectView.focusEditor.saveAs()
         onToggleLogWindow : {
             if ( !logWindow.visible ){
                 logWindow.show()
@@ -220,8 +103,8 @@ ApplicationWindow{
         }
 
         onOpenSettings: {
-            project.openFile(settings.editor.path, ProjectDocument.Edit);
-            settings.editor.documentOpened(project.inFocus)
+            editor.document = project.openFile(livecv.settings.file('editor').path, ProjectDocument.Edit);
+            livecv.settings.file('editor').documentOpened(editor.document)
         }
 
         onOpenLicense: licenseBox.visible = true
@@ -234,11 +117,15 @@ ApplicationWindow{
         selectExisting : true
         visible : script.environment.os.platform === 'linux' ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
-            if ( project.rootPath === '' )
-                project.openProject(fileOpenDialog.fileUrl)
-            else if ( project.isFileInProject(fileOpenDialog.fileUrl ) )
-                project.openFile(fileOpenDialog.fileUrl, ProjectDocument.Edit)
-            else {
+            if ( project.rootPath === '' ){
+                project.openProject(root.fileOpenDialog.fileUrl)
+                if ( project.active )
+                    projectView.focusEditor.document = project.active
+            } else if ( project.isFileInProject(fileOpenDialog.fileUrl ) ) {
+                var doc = project.openFile(fileOpenDialog.fileUrl, ProjectDocument.Edit)
+                if ( doc )
+                    projectView.focusEditor.document = doc
+            } else {
                 var fileUrl = fileOpenDialog.fileUrl
                 messageBox.show(
                     'File is outside project scope. Would you like to open it as a new project?',
@@ -246,8 +133,11 @@ ApplicationWindow{
                     button1Name : 'Open as project',
                     button1Function : function(){
                         var projectUrl = fileUrl
-                        header.closeProject(
-                            function(){ project.openProject(projectUrl) }
+                        projectView.closeProject(
+                            function(){
+                                project.openProject(projectUrl)
+                                projectView.focusEditor.document = project.active
+                            }
                         )
                         messageBox.close()
                     },
@@ -258,7 +148,10 @@ ApplicationWindow{
                     returnPressed : function(){
                         var projectUrl = fileUrl
                         header.closeProject(
-                            function(){ project.openProject(projectUrl) }
+                            function(){
+                                project.openProject(projectUrl)
+                                projectView.focusEditor.document = project.active
+                            }
                         )
                         messageBox.close()
                     }
@@ -281,6 +174,8 @@ ApplicationWindow{
         visible : script.environment.os.platform === 'linux' ? true : false /// fixes a display bug in some linux distributions
         onAccepted: {
             project.openProject(dirOpenDialog.fileUrl)
+            if ( project.active )
+                projectView.focusEditor.document = project.active
         }
         Component.onCompleted: {
             visible = false
@@ -301,9 +196,9 @@ ApplicationWindow{
             if ( callback ){
                 callback()
                 callback = null
-            } else if ( project.inFocus ){
-                project.inFocus.dumpContent(editor.text)
-                if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
+            } else if ( projectView.focusEditor.document ){
+                var editordoc = projectView.focusEditor.document
+                if ( !editordoc.saveAs(fileSaveDialog.fileUrl) ){
                     messageBox.show(
                         'Failed to save file to: ' + fileSaveDialog.fileUrl,
                         {
@@ -316,12 +211,13 @@ ApplicationWindow{
 
                 if ( !project.isDirProject() ){
                     project.openProject(fileSaveDialog.fileUrl)
+                    projectView.focusEditor.document = project.active
                 } else if ( project.isFileInProject(fileSaveDialog.fileUrl ) ){
-                    project.openFile(fileSaveDialog.fileUrl, ProjectDocument.Edit)
-                    if ( project.active && project.active !== project.inFocus ){
+                    projectView.focusEditor.document = project.openFile(fileSaveDialog.fileUrl, ProjectDocument.Edit)
+                    if ( project.active && project.active !== projectView.focusEditor.document ){
                         engine.createObjectAsync(
                             project.active.content,
-                            tester,
+                            runSpace,
                             project.active.file.pathUrl(),
                             project.active,
                             true
@@ -335,8 +231,11 @@ ApplicationWindow{
                         button1Name : 'Open as project',
                         button1Function : function(){
                             var projectUrl = fileUrl
-                            header.closeProject(
-                                function(){ project.openProject(projectUrl) }
+                            projectView.closeProject(
+                                function(){
+                                    project.openProject(projectUrl);
+                                    projectView.focusEditor.document = project.active
+                                }
                             )
                             messageBox.close()
                         },
@@ -346,8 +245,11 @@ ApplicationWindow{
                         },
                         returnPressed : function(){
                             var projectUrl = fileUrl
-                            header.closeProject(
-                                function(){ project.openProject(projectUrl) }
+                            projectView.closeProject(
+                                function(){
+                                    project.openProject(projectUrl)
+                                    projectView.focusEditor.document = project.active
+                                }
                             )
                             messageBox.close()
                         }
@@ -364,6 +266,17 @@ ApplicationWindow{
         }
     }
 
+    WindowControls{
+        id: controls
+        saveFileDialog: fileSaveDialog
+        openFileDialog: fileOpenDialog
+        openDirDialog: dirOpenDialog
+        messageDialog: messageBox
+        runSpace: runSpace
+        createTimer: createTimer
+        paletteBox: paletteBox
+    }
+
 
     Rectangle{
         id : contentWrap
@@ -371,6 +284,23 @@ ApplicationWindow{
         anchors.left: parent.left
         anchors.right: parent.right
         height : parent.height - header.height
+
+        property var toggledItems: []
+        function toggleMaximizedRuntime(){
+            if ( toggledItems.length === 0 ){
+                toggledItems = [projectView.width, editor.width]
+                projectView.width = 0
+                editor.width = 0
+            } else {
+                projectView.width = toggledItems[0]
+                editor.width = toggledItems[1]
+                toggledItems = []
+            }
+        }
+
+        function toggleNavigation(){
+            projectNavigation.visible = !projectNavigation.visible
+        }
 
         SplitView{
             anchors.fill: parent
@@ -386,113 +316,7 @@ ApplicationWindow{
                 height: parent.height
                 width: 240
                 visible : !livecv.settings.previewMode
-                onOpenEntry: {
-                    if ( project.inFocus )
-                        project.inFocus.dumpContent(editor.text)
-                    project.openFile(entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen)
-                }
-                onEditEntry : {
-                    if ( project.inFocus )
-                        project.inFocus.dumpContent(editor.text)
-                    project.openFile(entry, ProjectDocument.Edit)
-                }
-                onAddEntry: {
-                    projectAddEntry.show(parentEntry, isFile)
-                }
-                onRemoveEntry: {
-                    var message = ''
-                    if ( entry.isFile ){
-                        if ( !entry.isDirty ){
-                            message = "Are you sure you want to remove file \'" + entry.path + "\'?"
-                        } else
-                            message = "Are you sure you want to remove unsaved file \'" + entry.path + "\'?"
-                    } else {
-                        var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
-                        if ( documentList.length === 0 ){
-                            message =
-                                "Are you sure you want to remove directory\'" + entry.path + "\' " +
-                                "and all its contents?"
-                        } else {
-                            var unsavedFiles = '';
-                            for ( var i = 0; i < documentList.length; ++i ){
-                                unsavedFiles += documentList[i] + "\n";
-                            }
-
-                            message = "The following files have unsaved changes:\n";
-                            message += unsavedFiles
-                            message +=
-                                "Are you sure you want to remove directory \'" + entry.path +
-                                "\' and all its contents?\n"
-                        }
-                    }
-
-                    messageBox.show(message, {
-                        button1Name : 'Yes',
-                        button1Function : function(){
-                            project.fileModel.removeEntry(entry)
-                            messageBox.close()
-                        },
-                        button3Name : 'No',
-                        button3Function : function(){
-                            messageBox.close()
-                        },
-                        returnPressed : function(){
-                            project.fileModel.removeEntry(entry)
-                            messageBox.close()
-                        }
-                    })
-                }
-                onMoveEntry: {
-                    var message = ''
-                    if ( entry.isFile ){
-                        if ( !entry.isDirty ){
-                            project.fileModel.moveEntry(entry, newParent)
-                            return;
-                        }
-                        message =
-                            "Are you sure you want to move unsaved file \'" + entry.path + "\'?\n" +
-                            "All your changes will be lost."
-                    } else {
-                        var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
-                        if ( documentList.length === 0 ){
-                            project.fileModel.moveEntry(entry, newParent)
-                            return;
-                        } else {
-                            var unsavedFiles = '';
-                            for ( var i = 0; i < documentList.length; ++i ){
-                                unsavedFiles += documentList[i] + "\n";
-                            }
-
-                            message = "The following files have unsaved changes:\n";
-                            message += unsavedFiles
-                            message +=
-                                "Are you sure you want to move directory \'" + entry.path +
-                                "\' and all its contents? Unsaved changes will be lost.\n"
-                        }
-                    }
-
-                    messageBox.show(message, {
-                        button1Name : 'Yes',
-                        button1Function : function(){
-                            project.fileModel.moveEntry(entry, newParent)
-                            messageBox.close()
-                        },
-                        button3Name : 'No',
-                        button3Function : function(){
-                            messageBox.close()
-                        },
-                        returnPressed : function(){
-                            project.fileModel.moveEntry(entry, newParent)
-                            messageBox.close()
-                        }
-                    })
-                }
-                onRenameEntry: {
-                    project.fileModel.renameEntry(entry, newName)
-                }
-                onCloseProject: {
-                    header.closeProject(function(){})
-                }
+                windowControls: controls
             }
 
             Editor{
@@ -500,124 +324,16 @@ ApplicationWindow{
                 height: parent.height
                 width: 400
                 visible : !livecv.settings.previewMode
+                windowControls: controls
+                onInternalFocusChanged: if ( internalFocus ) projectView.focusEditor = editor
 
-                font.pixelSize: livecv.settings.file('editor').fontSize
-
-                onSave: {
-                    if ( !project.inFocus )
-                        return;
-                    if ( project.inFocus.file.name !== '' ){
-                        project.inFocus.dumpContent(editor.text)
-                        project.inFocus.save()
-                        if ( project.active && project.active !== project.inFocus ){
-                            engine.createObjectAsync(
-                                project.active.content,
-                                tester,
-                                project.active.file.pathUrl(),
-                                project.active,
-                                true
-                            );
-                        }
-                    } else {
-                        project.inFocus.dumpContent(editor.text)
-                        fileSaveDialog.open()
+                Component.onCompleted: {
+                    projectView.focusEditor = editor
+                    if ( project.active ){
+                        editor.document = project.active
                     }
+                    forceFocus()
                 }
-                onOpen: {
-                    header.openFile()
-                }
-                onCloseFocusedFile: {
-                    if ( project.inFocus.isDirty ){
-                        messageBox.show('File contains unsaved changes. Would you like to save them before closing?',
-                        {
-                            button1Name : 'Yes',
-                            button1Function : function(){
-                                project.inFocus.dumpContent(editor.text)
-                                if ( project.inFocus.file.name !== '' ){
-                                    project.inFocus.save()
-                                } else {
-                                    fileSaveDialog.open()
-                                    fileSaveDialog.callback = function(){
-                                        if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
-                                            messageBox.show(
-                                                'Failed to save file to: ' + fileSaveDialog.fileUrl,
-                                                {
-                                                    button3Name : 'Ok',
-                                                    button3Function : function(){ messageBox.close(); }
-                                                }
-                                            )
-                                            return;
-                                        }
-                                        project.closeFocusedFile()
-                                    }
-                                }
-                                messageBox.close()
-                            },
-                            button2Name : 'No',
-                            button2Function : function(){
-                                project.closeFocusedFile()
-                                messageBox.close()
-                            },
-                            button3Name : 'Cancel',
-                            button3Function : function(){
-                                messageBox.close()
-                            },
-                            returnPressed : function(){
-                                project.inFocus.dumpContent(editor.text)
-                                if ( project.inFocus.file.name !== '' ){
-                                    project.inFocus.save()
-                                } else {
-                                    fileSaveDialog.callback = function(){
-                                        if ( !project.inFocus.saveAs(fileSaveDialog.fileUrl) ){
-                                            messageBox.show(
-                                                'Failed to save file to: ' + fileSaveDialog.fileUrl,
-                                                {
-                                                    button3Name : 'Ok',
-                                                    button3Function : function(){ messageBox.close(); }
-                                                }
-                                            )
-                                            return;
-                                        }
-                                        project.closeFocusedFile()
-                                    }
-                                }
-                                project.closeFocusedFile()
-                                messageBox.close()
-                            }
-                        })
-                    } else
-                        project.closeFocusedFile()
-                }
-
-                onToggleSize: {
-                    if ( editor.width < contentWrap.width / 2)
-                        editor.width = contentWrap.width - contentWrap.width / 4
-                    else if ( editor.width === contentWrap.width / 2 )
-                        editor.width = contentWrap.width / 4
-                    else
-                        editor.width = contentWrap.width / 2
-                }
-                onToggleVisibility: {
-                    if ( editor.width === 0 && projectView.width === 0 ){
-                        editor.width = 400
-                        projectView.width = 240
-                    } else {
-                        editor.width = 0
-                        projectView.width = 0
-                    }
-                }
-                onToggleProject: {
-                    projectView.width = projectView.width === 0 ? 240 : 0
-                }
-                onToggleNavigation: {
-                    projectNavigation.visible = !projectNavigation.visible
-                }
-                onEditFragment: codeHandler.edit(position, tester.item)
-                onAdjustFragment: codeHandler.adjust(position, tester.item)
-
-                onBindProperties: codeHandler.bind(position, length, tester.item)
-
-                Component.onCompleted: forceFocus()
             }
 
             Rectangle{
@@ -627,25 +343,11 @@ ApplicationWindow{
                 color : "#081017"
 
                 Item {
-                    id: tester
+                    id: runSpace
                     anchors.fill: parent
                     property string program: editor.text
                     property variant item
-                    Connections{
-                        target: codeHandler
-                        onContentsChangedManually: {
-                            if ( project.active === project.inFocus )
-                                createTimer.restart()
-                            scopeTimer.restart()
-                        }
-                    }
-                    Timer {
-                        id: scopeTimer
-                        interval: 1000
-                        running: true
-                        repeat : false
-                        onTriggered: codeHandler.updateScope(editor.text)
-                    }
+
                     Timer {
                         id: createTimer
                         interval: 1000
@@ -654,15 +356,15 @@ ApplicationWindow{
                         onTriggered: {
                             if (project.active === project.inFocus && project.active){
                                 livecv.engine.createObjectAsync(
-                                    tester.program,
-                                    tester,
+                                    runSpace.program,
+                                    runSpace,
                                     project.active.file.pathUrl(),
                                     project.active
                                 );
                             } else if ( project.active ){
                                 livecv.engine.createObjectAsync(
                                     project.active.content,
-                                    tester,
+                                    runSpace,
                                     project.active.file.pathUrl(),
                                     project.active,
                                     true
@@ -680,10 +382,10 @@ ApplicationWindow{
                         }
                         onObjectCreated : {
                             error.text = ''
-                            if (tester.item) {
-                                tester.item.destroy();
+                            if (runSpace.item) {
+                                runSpace.item.destroy();
                             }
-                            tester.item = object;
+                            runSpace.item = object;
                             if ( staticContainer )
                                 staticContainer.afterCompile()
                             if ( engineMonitor )
@@ -762,14 +464,18 @@ ApplicationWindow{
             id: paletteBox
             x: 0
             y: visible ? 0 : 20
-            width: codeHandler.palette ? codeHandler.palette.item.width + 10: 0
-            height: codeHandler.palette ? codeHandler.palette.item.height + 10 : 0
+            width: paletteItem ? paletteItem.width + 10: 0
+            height: paletteItem ? paletteItem.height + 10 : 0
             color: "#02070b"
             border.width: 1
             border.color: "#061b24"
             visible: children.length > 0
             opacity: visible ? 1 : 0
             clip: true
+
+            property Item paletteItem : null
+            children: paletteItem ? [paletteItem] : []
+
             Behavior on opacity{
                 NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
             }
@@ -778,33 +484,30 @@ ApplicationWindow{
                 NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
             }
 
-            Connections{
-                target: codeHandler
-                onPaletteChanged : {
-                    if ( codeHandler.palette ){
-                        var rect = editor.getCursorRectangle()
-                        moveYBehavior.enabled = false
+            function setPalette(palette, cursorRectangle, editorPosition){
+                if ( palette ){
+                    moveYBehavior.enabled = false
 
-                        var startY = editor.y + rect.y + 38
+                    var startY = editorPosition.y + cursorRectangle.y + 38
 
-                        paletteBox.x = editor.x + rect.x + 7
-                        paletteBox.y = startY - rect.y / 2
+                    paletteBox.x = editorPosition.x + cursorRectangle.x + 7
+                    paletteBox.y = startY - cursorRectangle.y / 2
 
-                        codeHandler.palette.item.x = 5
-                        codeHandler.palette.item.y = 7
-                        paletteBox.children = [codeHandler.palette.item]
+                    palette.item.x = 5
+                    palette.item.y = 7
 
-                        moveYBehavior.enabled = true
+                    paletteBox.paletteItem = palette.item
 
-                        var newX = paletteBox.x - paletteBox.width / 2
-                        paletteBox.x = newX < 0 ? 0 : newX
+                    moveYBehavior.enabled = true
 
-                        var upY = startY - paletteBox.height
-                        var downY = startY + rect.height + 5
-                        paletteBox.y = upY > 0 ? upY : downY
-                    } else {
-                        paletteBox.children = []
-                    }
+                    var newX = paletteBox.x - paletteBox.width / 2
+                    paletteBox.x = newX < 0 ? 0 : newX
+
+                    var upY = startY - paletteBox.height
+                    var downY = startY + cursorRectangle.height + 5
+                    paletteBox.y = upY > 0 ? upY : downY
+                } else {
+                    paletteBox.paletteItem = null
                 }
             }
         }
@@ -817,10 +520,8 @@ ApplicationWindow{
             height: parent.height
             visible: false
             onOpen: {
-                if ( project.inFocus )
-                    project.inFocus.dumpContent(editor.text)
-                project.openFile(path, ProjectDocument.EditIfNotOpen)
-                editor.forceFocus()
+                projectView.focusEditor.document = project.openFile(path, ProjectDocument.EditIfNotOpen)
+                projectView.focusEditor.forceFocus()
             }
             onCloseFile: {
                 var doc = project.documentModel.isOpened(path)
@@ -830,7 +531,6 @@ ApplicationWindow{
                         {
                             button1Name : 'Yes',
                             button1Function : function(){
-                                doc.dumpContent(editor.text)
                                 doc.save()
                                 project.closeFile(path)
                                 messageBox.close()
@@ -845,7 +545,6 @@ ApplicationWindow{
                                 messageBox.close()
                             },
                             returnPressed : function(){
-                                doc.dumpContent(editor.text)
                                 doc.save()
                                 project.closeFile(path)
                                 messageBox.close()
@@ -879,75 +578,11 @@ ApplicationWindow{
     }
 
 
-    MessageDialogInternal{
+    MessageDialogMain{
         id: messageBox
         anchors.fill: parent
         visible: false
         backgroudColor: "#050e16"
-
-        function show(
-            message,
-            options
-        ){
-            var defaults = {
-                button1Name : '',
-                button1Function : null,
-                button2Name : '',
-                button2Function : null,
-                button3Name : '',
-                button3Function : null,
-                returnPressed : function(){ messageBox.close(); },
-                escapePressed : function(){ messageBox.close(); }
-            }
-            for ( var i in defaults )
-                if ( typeof options[i] == 'undefined' )
-                    options[i] = defaults[i]
-
-            if ( options.button1Name !== '' ){
-                messageBoxButton1.text     = options.button1Name
-                messageBoxButton1.callback = options.button1Function
-            }
-            if ( options.button2Name !== '' ){
-                messageBoxButton2.text     = options.button2Name
-                messageBoxButton2.callback = options.button2Function
-            }
-            if ( options.button3Name !== '' ){
-                messageBoxButton3.text     = options.button3Name
-                messageBoxButton3.callback = options.button3Function
-            }
-
-            messageBox.message = message
-            messageBox.returnPressed = options.returnPressed
-            messageBox.escapePressed = options.escapePressed
-
-            messageBox.visible = true
-            messageBox.forceActiveFocus()
-        }
-        function close(){
-            messageBox.message = ''
-            messageBox.visible = false
-            messageBoxButton1.text = ''
-            messageBoxButton2.text = ''
-            messageBoxButton3.text = ''
-            editor.forceFocus()
-        }
-
-        MessageDialogButton{
-            id: messageBoxButton1
-            visible : text !== ''
-        }
-
-        MessageDialogButton{
-            id: messageBoxButton2
-            anchors.centerIn: parent
-            visible : text !== ''
-        }
-
-        MessageDialogButton{
-            id: messageBoxButton3
-            anchors.right: parent.right
-            visible : text !== ''
-        }
     }
 
     License{
@@ -959,9 +594,9 @@ ApplicationWindow{
     Connections{
         target: project
         onActiveChanged : {
-            if (tester.item) {
-                tester.item.destroy();
-                tester.item = 0
+            if (runSpace.item) {
+                runSpace.item.destroy();
+                runSpace.item = 0
                 if ( staticContainer )
                     staticContainer.clearStates()
                 if ( engineMonitor )
@@ -977,15 +612,15 @@ ApplicationWindow{
         onMonitoredDocumentChanged : {
             if (project.active === project.inFocus){
                 engine.createObjectAsync(
-                    tester.program,
-                    tester,
+                    runSpace.program,
+                    runSpace,
                     project.active.file.pathUrl(),
                     project.active
                 );
             } else if ( project.active ){
                 engine.createObjectAsync(
                     project.active.content,
-                    tester,
+                    runSpace,
                     project.active.file.pathUrl(),
                     project.active,
                     true
@@ -1005,8 +640,6 @@ ApplicationWindow{
                     button2Name : 'Save',
                     button2Function : function(){
                         messageBox.close()
-                        if ( project.inFocus === document )
-                            document.dumpContent(editor.text)
                         document.save()
                     },
                     button3Name : 'No',

@@ -17,8 +17,9 @@
 #include "live/settings.h"
 #include <QVariant>
 #include <QDir>
+#include <QQmlEngine>
 
-namespace lcv{
+namespace lv{
 
 Settings::Settings(const QString &path, QObject *parent)
     : QObject(parent)
@@ -28,10 +29,13 @@ Settings::Settings(const QString &path, QObject *parent)
 }
 
 Settings::~Settings(){
+    for ( auto it = m_configFiles->begin(); it != m_configFiles->end(); ++it ){
+        delete it.value();
+    }
     delete m_configFiles;
 }
 
-Settings *Settings::initialize(const QString &path, QObject *parent){
+Settings *Settings::create(const QString &path, QObject *parent){
     if ( !QDir(path).exists() ){
         if ( !QDir().mkdir(path) ){
             qWarning("Failed to create configuration directory \'config\'\n");
@@ -44,6 +48,7 @@ QObject *Settings::file(const QString &key){
     auto foundit = m_configFiles->find(key);
     if ( foundit == m_configFiles->end() )
         return 0;
+    qmlEngine(this)->setObjectOwnership(*foundit, QQmlEngine::CppOwnership);
     return *foundit;
 }
 

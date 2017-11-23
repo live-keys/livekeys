@@ -22,7 +22,7 @@ win32:{
     DLLDESTDIR = $$DEPLOY_PATH
 }else:DESTDIR = $$DEPLOY_PATH
 
-DEFINES += LVBASE_LIB
+DEFINES += LV_BASE_LIB
 
 include($$PWD/3rdparty/3rdparty.pri)
 include($$PWD/include/lvbaseheaders.pri)

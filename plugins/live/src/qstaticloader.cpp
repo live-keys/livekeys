@@ -19,7 +19,7 @@
 #include <QQmlEngine>
 
 /*!
-   \class lcv::QStaticLoader
+   \class lv::StaticLoader
    \inmodule live_cpp
    \internal
  */

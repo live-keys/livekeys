@@ -21,16 +21,7 @@
 #include <QFile>
 #include <QDebug>
 
-//TODO: Use vlog
-//#define QLIBRARY_LOAD_PATH_DEBUG_FLAG
-//#ifdef QLIBRARY_LOAD_PATH_DEBUG_FLAG
-//#define QLIBRARY_LOAD_PATH_DEBUG(_param) qDebug() << "LIBRARY PATH:" << (_param)
-//#else
-//#define QLIBRARY_LOAD_PATH_DEBUG(_param)
-//#endif
-
-
-namespace lcv{
+namespace lv{
 
 void LibraryLoadPath::add(const QString &path, const QString &linkPath){
     addImpl(path, linkPath);

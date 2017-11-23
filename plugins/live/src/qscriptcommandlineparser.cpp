@@ -19,7 +19,7 @@
 
 
 /*!
-   \class lcv::QScriptCommandLineParser
+   \class lv::ScriptCommandLineParser
    \inmodule live_cpp
    \internal
  */

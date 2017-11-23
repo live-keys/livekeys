@@ -26,11 +26,11 @@
 class QReadWriteLock;
 class QMutex;
 
-namespace lcv{
+namespace lv{
 
 class FileLock;
 
-class LVBASE_EXPORT LockedFileIOSession{
+class LV_BASE_EXPORT LockedFileIOSession{
 
     Q_DISABLE_COPY(LockedFileIOSession)
 

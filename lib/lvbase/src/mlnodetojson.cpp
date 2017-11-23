@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "mlnodetojson.h"
 #include "live/exception.h"
 #include <QJsonValue>
@@ -5,7 +21,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
-namespace lcv{
+namespace lv{
 namespace ml{
 
 void toJson(const MLNode &n, QJsonValue &result){
@@ -50,6 +66,8 @@ void toJson(const MLNode &n, QJsonValue &result){
         result = n.asFloat();
         break;
     }
+    default:
+        break;
     }
 }
 
@@ -97,10 +115,10 @@ void fromJson(const QJsonValue &value, MLNode &n){
     }
 }
 
-// TODO: These implementations are currently safe but not very performance efficeint
+// TODO: These implementations are currently safe but not very performance efficient
 // since conversion is made through qt's json structures. They should be replaced
 // by string conversions
-void toJson(const lcv::MLNode &n, QByteArray &result){
+void toJson(const lv::MLNode &n, QByteArray &result){
     QJsonValue jsonresult;
     toJson(n, jsonresult);
     if ( jsonresult.isObject() ){
@@ -116,7 +134,7 @@ void fromJson(const QByteArray &data, MLNode &n){
     QJsonParseError pe;
     QJsonDocument jsondoc = QJsonDocument::fromJson(data, &pe);
     if ( jsondoc.isNull() ){
-        THROW_EXCEPTION(lcv::Exception, pe.errorString(), 0);
+        THROW_EXCEPTION(lv::Exception, pe.errorString(), 0);
     }
     if ( jsondoc.isArray() )
         fromJson(jsondoc.array(), n);

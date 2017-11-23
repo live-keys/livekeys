@@ -1,43 +1,51 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #ifndef LVMLNODE_H
 #define LVMLNODE_H
 
 #include "live/exception.h"
 
 #include <QMap>
-
-#include "assert.h"
 #include <sstream>
 #include <initializer_list>
 
-//TODO: reverse iterator, reverse const iterator
-//TODO: Negative line error
-//TODO: Move operators
-//TODO: Serialize to json
-//TODO: Serialize to jsvalue
-
-namespace lcv{
+namespace lv{
 
 class VisualLog;
 
-class LVBASE_EXPORT MLOutOfRanceException: public lcv::Exception{
+class LV_BASE_EXPORT MLOutOfRanceException: public lv::Exception{
 public:
-    MLOutOfRanceException(const QString& message = "", int code = 0) : lcv::Exception(message, code){}
+    MLOutOfRanceException(const QString& message = "", int code = 0) : lv::Exception(message, code){}
 };
 
-class LVBASE_EXPORT InvalidMLTypeException: public lcv::Exception{
+class LV_BASE_EXPORT InvalidMLTypeException: public lv::Exception{
 public:
-    InvalidMLTypeException(const QString& message = "", int code = 0) : lcv::Exception(message, code){}
+    InvalidMLTypeException(const QString& message = "", int code = 0) : lv::Exception(message, code){}
 };
 
-class LVBASE_EXPORT TypeNotSerializableException: public lcv::Exception{
+class LV_BASE_EXPORT TypeNotSerializableException: public lv::Exception{
 public:
-    TypeNotSerializableException(const QString& message = "", int code = 0) : lcv::Exception(message, code){}
+    TypeNotSerializableException(const QString& message = "", int code = 0) : lv::Exception(message, code){}
 };
 
 // MLNode
 // ------
 
-class LVBASE_EXPORT MLNode{
+class LV_BASE_EXPORT MLNode{
 
 public:
     typedef MLNode ValueType;
@@ -62,7 +70,7 @@ public:
     // MLNode::BytesType
     // -----------------
 
-    class LVBASE_EXPORT BytesType{
+    class LV_BASE_EXPORT BytesType{
 
     public:
         BytesType(unsigned char* data, size_t size);
@@ -88,7 +96,7 @@ public:
     // MLNode::IteratorValue
     // ---------------------
 
-    class LVBASE_EXPORT IteratorValue{
+    class LV_BASE_EXPORT IteratorValue{
     public:
         ObjectType::iterator objectIterator;
         ArrayType::iterator  arrayIterator;
@@ -98,7 +106,7 @@ public:
     // MLNode::Iterator
     // ----------------
 
-    class LVBASE_EXPORT Iterator{
+    class LV_BASE_EXPORT Iterator{
 
     public:
         friend class MLNode;
@@ -156,7 +164,7 @@ public:
     // MLNode::ConstIteratorValue
     // --------------------------
 
-    class LVBASE_EXPORT ConstIteratorValue{
+    class LV_BASE_EXPORT ConstIteratorValue{
     public:
         ObjectType::const_iterator objectIterator;
         ArrayType::const_iterator  arrayIterator;
@@ -166,7 +174,7 @@ public:
     // MLNode::ConstIterator
     // ---------------------
 
-    class LVBASE_EXPORT ConstIterator{
+    class LV_BASE_EXPORT ConstIterator{
     public:
         friend class MLNode;
 
@@ -273,6 +281,7 @@ public:
     MLNode(const ArrayType& value);
     MLNode(const ObjectType& value);
     MLNode(const MLNode& other);
+    MLNode(MLNode&& other);
     ~MLNode();
 
     const MLNode& operator[](const StringType& reference) const;
@@ -293,7 +302,11 @@ public:
     StringType asString() const;
     BytesType asBytes() const;
 
+    const ArrayType& asArray() const;
+
     int size() const;
+    bool hasKey(const StringType& key) const;
+    void remove(const StringType& key);
 
     std::string typeString() const;
     std::string toString(int indent = -1, int indentStep = 4) const;
@@ -339,7 +352,7 @@ inline MLNode::Type MLNode::type() const{
     return m_type;
 }
 
-//VisualLog &operator <<(VisualLog &vl, const MLNode &value);
+LV_BASE_EXPORT VisualLog &operator <<(VisualLog &vl, const MLNode &value);
 
 namespace ml{
 
@@ -353,6 +366,6 @@ template<typename T> void deserialize(const MLNode&, T&){
 
 }// namespace ml
 
-}// namespace lcv
+}// namespace lv
 
 #endif // LVMLNODE_H

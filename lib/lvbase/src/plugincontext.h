@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #ifndef LVPLUGINCONTEXT_H
 #define LVPLUGINCONTEXT_H
 
@@ -5,24 +21,24 @@
 
 class QQmlEngine;
 
-namespace lcv{
+namespace lv{
 
 class Engine;
 class Settings;
 
-class LVBASE_EXPORT PluginContext{
+class LV_BASE_EXPORT PluginContext{
 
 public:
     static void initFromEngine(QQmlEngine* engine);
 
-    static lcv::Engine*   engine();
-    static lcv::Settings* settings();
+    static lv::Engine*   engine();
+    static lv::Settings* settings();
 
 private:
     PluginContext(){}
 
-    static lcv::Engine*   m_engine;
-    static lcv::Settings* m_settings;
+    static lv::Engine*   m_engine;
+    static lv::Settings* m_settings;
 };
 
 inline Engine *PluginContext::engine(){

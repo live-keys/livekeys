@@ -22,9 +22,9 @@
 
 #include "live/lvbaseglobal.h"
 
-namespace lcv{
+namespace lv{
 
-class LVBASE_EXPORT IncubationController : public QObject, public QQmlIncubationController{
+class LV_BASE_EXPORT IncubationController : public QObject, public QQmlIncubationController{
 
     Q_OBJECT
 

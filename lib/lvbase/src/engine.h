@@ -30,26 +30,26 @@ class QQmlError;
 class QQmlIncubator;
 class QMutex;
 
-namespace lcv{
+namespace lv{
 
 class ErrorHandler;
 class IncubationController;
 
-class LVBASE_EXPORT FatalException : public lcv::Exception{
+class LV_BASE_EXPORT FatalException : public lv::Exception{
 
 public:
-    FatalException(const QString& message, int code = 0): lcv::Exception(message, code){}
+    FatalException(const QString& message, int code = 0): lv::Exception(message, code){}
     virtual ~FatalException(){}
 };
 
-class LVBASE_EXPORT InputException : public lcv::Exception{
+class LV_BASE_EXPORT InputException : public lv::Exception{
 public:
-    InputException(const QString& message, int code = 0) : lcv::Exception(message, code){}
+    InputException(const QString& message, int code = 0) : lv::Exception(message, code){}
     virtual ~InputException(){}
 };
 
 
-class LVBASE_EXPORT Engine : public QObject{
+class LV_BASE_EXPORT Engine : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
@@ -78,6 +78,8 @@ public:
     void registerErrorHandler(QObject* object, ErrorHandler* handler);
     void removeErrorHandler(QObject* object);
 
+    void setBindHook(std::function<void(const QString&, const QUrl&, QObject*, QObject*)> hook);
+
 signals:
     void aboutToCreateObject(const QUrl& file);
     void isLoadingChanged(bool isLoading);
@@ -92,6 +94,7 @@ public slots:
         const QString& qmlCode,
         QObject* parent,
         const QUrl& file,
+        QObject *attachment,
         bool clearCache = false
     );
     QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
@@ -111,7 +114,8 @@ private:
     QQmlIncubator* m_incubator;
     IncubationController* m_incubationController;
     QJSValue       m_errorType;
-    //TODO: Add std::function analyzer
+
+    std::function<void(const QString&, const QUrl&, QObject*, QObject*)> m_bindHook;
 
     QList<QQmlError>              m_lastErrors;
     QMap<QObject*, ErrorHandler*> m_errorHandlers;

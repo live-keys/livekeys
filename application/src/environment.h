@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QVariantMap>
 
-namespace lcv{
+namespace lv{
 
 class Environment : public QObject{
 

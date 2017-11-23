@@ -34,43 +34,52 @@ class QGuiApplication;
 class QQmlApplicationEngine;
 class QUrl;
 
-namespace lcv{
+namespace lv{
 
-class Engine;
 class LiveCVArguments;
-class Settings;
 class LiveCVScript;
-class QProject;
+class Engine;
+class Settings;
 class Commands;
-class QDocumentHandler;
-class QCodeQmlHandler;
+class KeyMap;
+class VisualLogModel;
+class VisualLogJsObject;
+class Project;
+class DocumentHandler;
+class CodeQmlHandler;
 
-// class QLiveCV
-// -------------
+// class LiveCV
+// ------------
 
 class LiveCV : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lcv::Settings* settings READ settings CONSTANT)
-    Q_PROPERTY(lcv::Engine*   engine   READ engine   CONSTANT)
-    Q_PROPERTY(lcv::QProject* project  READ project  CONSTANT)
-    Q_PROPERTY(lcv::Commands* commands READ commands CONSTANT)
+    Q_PROPERTY(lv::Settings* settings  READ settings CONSTANT)
+    Q_PROPERTY(lv::Engine* engine      READ engine   CONSTANT)
+    Q_PROPERTY(lv::Commands* commands  READ commands CONSTANT)
+    Q_PROPERTY(lv::VisualLogModel* log READ log      CONSTANT)
+    Q_PROPERTY(lv::KeyMap* keymap      READ keymap   CONSTANT)
 
 public:
-    LiveCV(int argc, const char* const argv[], QObject* parent = 0);
+    typedef QSharedPointer<LiveCV>       Ptr;
+    typedef QSharedPointer<const LiveCV> ConstPtr;
+
+public:
     ~LiveCV();
 
-    void loadLibrary(const QString& library);
+    static LiveCV::Ptr create(int argc, const char* const argv[], QObject* parent = 0);
+
     void loadQml(const QUrl& url);
 
     static int versionMajor();
     static int versionMinor();
     static int versionPatch();
     static QString versionString();
+    static QString header();
 
     const QString& dir() const;
 
-    static void registerTypes();
+    void loadInternalPlugins();
 
     const LiveCVArguments* arguments() const;
 
@@ -78,28 +87,32 @@ public:
 
     Settings* settings();
     Engine*   engine();
-    QProject* project();
+    Project* project();
     Commands* commands();
+    KeyMap* keymap();
+    VisualLogModel* log();
 
 private:
+    LiveCV(QObject* parent = 0);
     LiveCV(const LiveCV&);
     LiveCV& operator = (const LiveCV&);
 
     void parseArguments(const QStringList& arguments);
     void solveImportPaths();
 
-    Engine* m_engine;
+    Engine*          m_engine;
     LiveCVArguments* m_arguments;
 
-    lcv::QDocumentHandler* m_codeInterface;
+    lv::DocumentHandler* m_codeInterface;
     QString  m_dir;
-    QLibrary m_lcvlib;
 
-    lcv::QProject*        m_project;
-    lcv::Settings*        m_settings;
-    lcv::LiveCVScript*   m_script;
-    lcv::Commands*        m_commands;
-
+    lv::Project*           m_project;
+    lv::Settings*          m_settings;
+    lv::LiveCVScript*      m_script;
+    lv::Commands*          m_commands;
+    lv::KeyMap*            m_keymap;
+    lv::VisualLogModel*    m_log;
+    lv::VisualLogJsObject* m_vlog;
 };
 
 inline int LiveCV::versionMajor(){
@@ -137,12 +150,25 @@ inline Engine *LiveCV::engine(){
     return m_engine;
 }
 
-inline QProject *LiveCV::project(){
+inline Project *LiveCV::project(){
     return m_project;
 }
 
 inline Commands *LiveCV::commands(){
     return m_commands;
+}
+
+inline KeyMap *LiveCV::keymap(){
+    return m_keymap;
+}
+
+inline VisualLogModel *LiveCV::log(){
+    return m_log;
+}
+
+inline QString LiveCV::header(){
+    return " Live CV v" + versionString() + "\n"
+           " --------------------------------------------------- ";
 }
 
 }// namespace

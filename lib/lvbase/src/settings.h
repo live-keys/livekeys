@@ -21,21 +21,25 @@
 #include <QMap>
 #include "live/lvbaseglobal.h"
 
-namespace lcv{
+namespace lv{
 
-class LVBASE_EXPORT Settings : public QObject{
+class LV_BASE_EXPORT Settings : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(bool previewMode READ previewMode CONSTANT)
-    Q_PROPERTY(QString path     READ path        CONSTANT)
+    Q_PROPERTY(bool launchMode READ launchMode CONSTANT)
+    Q_PROPERTY(bool runMode    READ runMode    CONSTANT)
+    Q_PROPERTY(QString path    READ path       CONSTANT)
 
 public:
     ~Settings();
 
-    static Settings* initialize(const QString& path, QObject* parent = 0);
+    static Settings* create(const QString& path, QObject* parent = 0);
 
-    bool previewMode() const;
-    void setPreviewMode(bool previewMode);
+    bool launchMode() const;
+    void setLaunchMode(bool launchMode);
+
+    bool runMode() const;
+    void setRunMode(bool runMode);
 
     const QString& path() const;
 
@@ -49,15 +53,24 @@ private:
 private:
     QString m_path;
     bool    m_previewMode;
+    bool    m_runMode;
     QMap<QString, QObject*>* m_configFiles;
 };
 
-inline bool Settings::previewMode() const{
+inline bool Settings::launchMode() const{
     return m_previewMode;
 }
 
-inline void Settings::setPreviewMode(bool previewMode){
+inline void Settings::setLaunchMode(bool previewMode){
     m_previewMode = previewMode;
+}
+
+inline bool Settings::runMode() const{
+    return m_runMode;
+}
+
+inline void Settings::setRunMode(bool runMode){
+    m_runMode = runMode;
 }
 
 inline const QString &Settings::path() const{

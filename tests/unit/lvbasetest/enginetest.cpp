@@ -1,3 +1,19 @@
+/****************************************************************************
+**
+** Copyright (C) 2014-2017 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
+
 #include "enginetest.h"
 #include "engineteststub.h"
 #include "live/errorhandler.h"
@@ -9,7 +25,7 @@
 
 Q_TEST_RUNNER_REGISTER(EngineTest);
 
-using namespace lcv;
+using namespace lv;
 
 EngineTest::EngineTest(QObject *parent)
     : QObject(parent)
@@ -17,15 +33,15 @@ EngineTest::EngineTest(QObject *parent)
 }
 
 void EngineTest::initTestCase(){
-    qmlRegisterType<EngineTestStub>("cv", 1, 0, "EngineTestStub");
-    qmlRegisterType<lcv::ErrorHandler>("cv", 1, 0, "ErrorHandler");
+    qmlRegisterType<EngineTestStub>("base", 1, 0, "EngineTestStub");
+    qmlRegisterType<lv::ErrorHandler>("base", 1, 0, "ErrorHandler");
 }
 
 void EngineTest::cppExceptionInObbjectTest(){
     Engine engine(new QQmlEngine);
 
     QObject* obj = engine.createObject(
-        "import QtQuick 2.3\n import cv 1.0\n "
+        "import QtQuick 2.3\n import base 1.0\n "
         "EngineTestStub{}",
         0,
         QUrl::fromLocalFile("enginetest.qml")
@@ -37,7 +53,7 @@ void EngineTest::cppExceptionInObbjectTest(){
     try{
         QMetaObject::invokeMethod(obj, "throwException");
         QCoreApplication::processEvents();
-    } catch ( lcv::Exception& ){
+    } catch ( lv::Exception& ){
         isException = true;
     }
     QVERIFY(isException);
@@ -46,7 +62,7 @@ void EngineTest::cppExceptionInObbjectTest(){
 void EngineTest::engineExceptionTest(){
     Engine engine(new QQmlEngine);
 
-    lcv::Exception exception = lcv::Exception::create<lcv::Exception>(
+    lv::Exception exception = lv::Exception::create<lv::Exception>(
         "JSTest", 1, "enginetest.cpp", 100, "jsExceptionInObjectTest"
     );
 
@@ -104,7 +120,7 @@ void EngineTest::engineObjectExceptionTest(){
 
     engine.engine()->rootContext()->setContextProperty("engine", &engine);
     QObject* obj = engine.createObject(
-        "import QtQuick 2.3\n import cv 1.0\n "
+        "import QtQuick 2.3\n import base 1.0\n "
         "EngineTestStub{"
             "Component.onCompleted: throwJsError()"
         "}",
@@ -132,7 +148,7 @@ void EngineTest::engineInternalWarningTest(){
 
     engine.engine()->rootContext()->setContextProperty("engine", &engine);
     QObject* obj = engine.createObject(
-        "import QtQuick 2.3\n import cv 1.0\n "
+        "import QtQuick 2.3\n import base 1.0\n "
         "EngineTestStub{"
             "Component.onCompleted: throwJsWarning()"
         "}",
@@ -165,7 +181,7 @@ void EngineTest::engineErrorHandlerTest(){
     engine->engine()->rootContext()->setContextProperty("engine", engine);
     engine->engine()->rootContext()->setContextProperty("livecv", &livecvStub);
     QObject* obj = engine->createObject(
-        "import QtQuick 2.3\n import cv 1.0\n "
+        "import QtQuick 2.3\n import base 1.0\n "
         "Item{\n"
             "id: root;\n"
             "property string errorMessage: 'empty';\n"
@@ -214,7 +230,7 @@ void EngineTest::engineErrorHandlerSkipTest(){
     engine->engine()->rootContext()->setContextProperty("engine", engine);
     engine->engine()->rootContext()->setContextProperty("livecv", &livecvStub);
     QObject* obj = engine->createObject(
-        "import QtQuick 2.3\n import cv 1.0\n "
+        "import QtQuick 2.3\n import base 1.0\n "
         "Item{\n"
             "id: root;\n"
             "ErrorHandler{\n"
@@ -253,7 +269,7 @@ void EngineTest::jsThrownErrorTest(){
 
     engine.engine()->rootContext()->setContextProperty("engine", &engine);
     QObject* obj = engine.createObject(
-        "import QtQuick 2.3\n import cv 1.0\n "
+        "import QtQuick 2.3\n import base 1.0\n "
         "EngineTestStub{"
             "Component.onCompleted: {throw new Error('JSTest');}"
         "}",
@@ -283,7 +299,7 @@ void EngineTest::jsThrownErrorHandlerTest(){
     engine->engine()->rootContext()->setContextProperty("engine", engine);
     engine->engine()->rootContext()->setContextProperty("livecv", livecvStub);
     QObject* obj = engine->createObject(
-        "import QtQuick 2.3\n import cv 1.0\n "
+        "import QtQuick 2.3\n import base 1.0\n "
         "Item{\n"
             "id: root;\n"
             "property string errorMessage: 'empty';\n"
