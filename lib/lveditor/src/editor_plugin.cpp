@@ -84,11 +84,15 @@ void EditorPlugin::initializeEngine(QQmlEngine *engine, const char *){
         keymap->store(0, Qt::Key_S,         lv::KeyMap::CONTROL_OR_COMMAND, "window.editor.saveFile");
         keymap->store(0, Qt::Key_S,         lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt, "window.editor.saveFileAs");
         keymap->store(0, Qt::Key_W,         lv::KeyMap::CONTROL_OR_COMMAND, "window.editor.closeFile");
-        keymap->store(0, Qt::Key_Space,     lv::KeyMap::CONTROL_OR_COMMAND, "window.editor.assistCompletion");
+
         keymap->store(0, Qt::Key_Backslash, lv::KeyMap::CONTROL_OR_COMMAND, "window.project.toggleVisibility");
         keymap->store(0, Qt::Key_T,         lv::KeyMap::CONTROL_OR_COMMAND, "window.toggleMaximizedRuntime");
         keymap->store(0, Qt::Key_E,         lv::KeyMap::CONTROL_OR_COMMAND, "window.editor.toggleSize");
         keymap->store(0, Qt::Key_K,         lv::KeyMap::CONTROL_OR_COMMAND, "window.toggleNavigation");
+
+        keymap->store(lv::KeyMap::Linux,    Qt::Key_Space, lv::KeyMap::Control, "window.editor.assistCompletion");
+        keymap->store(lv::KeyMap::Windows,  Qt::Key_Space, lv::KeyMap::Control, "window.editor.assistCompletion");
+        keymap->store(lv::KeyMap::Mac,      Qt::Key_Space, lv::KeyMap::Alt,     "window.editor.assistCompletion");
     }
 
 }
