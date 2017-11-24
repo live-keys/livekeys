@@ -88,8 +88,6 @@ private:
 
     QList<QString> m_defaultLibraries;
 
-    QQmlEngine* m_engine;
-
     QHash<QString, QList<QString> > m_importToPaths;
 
     QSet<QString> m_monitoredPaths;

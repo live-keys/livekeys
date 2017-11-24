@@ -34,7 +34,6 @@ namespace lv{
 ProjectQmlScope::ProjectQmlScope(QQmlEngine *engine)
     : d_globalLibraries(new ProjectQmlScopeContainer)
     , d_implicitLibraries(new ProjectQmlScopeContainer)
-    , m_engine(engine)
     , m_defaultImportPaths(engine->importPathList())
 {
     QStringList versionSegments = QString(QML_VERSION_STR).split(".");

@@ -48,7 +48,7 @@ public:
     class StoredCommand{
     public:
         StoredCommand() : isDefault(false){}
-        StoredCommand(const QString& pcommand, bool pisDefault) : command(pcommand), isDefault(pisDefault){}
+        StoredCommand(const QString& pcommand, bool pisDefault) : isDefault(pisDefault), command(pcommand){}
 
         bool       isDefault;
         QString    command;

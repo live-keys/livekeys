@@ -37,7 +37,7 @@ public:
             return true;
         }
 
-        template<> bool recurseReadSingle<SharedDataPtr>(const SharedDataPtr& sd){
+       bool recurseReadSingle(const SharedDataPtr& sd){
             if ( sd->lockForRead(m_filter)){
                 m_locks.append(sd);
                 return true;
@@ -60,7 +60,7 @@ public:
             return true;
         }
 
-        template<> bool recurseWriteSingle(const SharedDataPtr& sd){
+        bool recurseWriteSingle(const SharedDataPtr& sd){
             if ( sd->lockForWrite(m_filter)){
                 m_locks.append(sd);
                 return true;

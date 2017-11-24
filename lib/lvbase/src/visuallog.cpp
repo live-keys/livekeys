@@ -418,7 +418,7 @@ void VisualLog::configure(VisualLog::Configuration *configuration, const MLNode 
         } else if ( it.key() == "prefix" ){
             configuration->m_prefix = QString::fromStdString(it.value().asString());
         } else {
-            qWarning("Unknown configuration key: %s", it.key());
+            qWarning("Unknown configuration key: %s", it.key().c_str());
         }
     }
 

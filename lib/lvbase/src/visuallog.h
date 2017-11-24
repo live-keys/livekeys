@@ -290,7 +290,7 @@ template<typename T> VisualLog& VisualLog::operator<< (std::ostream &(*f)(std::o
 
     std::stringstream ss;
     f(ss);
-    m_stream << ss.str();
+    m_stream << ss.str().c_str();
 
     return *this;
 }
@@ -301,7 +301,7 @@ template<typename T> VisualLog& VisualLog::operator<< ( std::ostream& (*f)(std::
 
     std::stringstream ss;
     f(ss);
-    m_stream << ss.str();
+    m_stream << ss.str().c_str();
 
     return *this;
 }
@@ -312,7 +312,7 @@ template<typename T> VisualLog& VisualLog::operator<< ( std::ostream (*f)(std::i
 
     std::stringstream ss;
     f(ss);
-    m_sream << ss.str();
+    m_stream << ss.str().c_str();
 
     return *this;
 }
