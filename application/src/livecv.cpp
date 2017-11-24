@@ -29,6 +29,7 @@
 #include "live/engine.h"
 #include "live/errorhandler.h"
 #include "live/settings.h"
+#include "live/plugincontext.h"
 
 #include "live/editor_plugin.h"
 #include "live/project.h"
@@ -56,7 +57,7 @@ LiveCV::LiveCV(QObject *parent)
     , m_engine(new Engine(new QQmlApplicationEngine))
     , m_arguments(new LiveCVArguments(header()))
     , m_codeInterface(0)
-    , m_dir(QGuiApplication::applicationDirPath())
+    , m_dir(PluginContext::applicationPath())
     , m_project(new Project)
     , m_settings(0)
     , m_script(0)
@@ -104,7 +105,7 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
         livecv->m_script, SLOT(scriptChanged(lv::ProjectDocument*))
     );
 
-    livecv->m_settings = Settings::create(livecv->dir() + "/config");
+    livecv->m_settings = Settings::create(PluginContext::configPath());
     livecv->m_settings->setLaunchMode(livecv->m_arguments->launchFlag());
     livecv->m_keymap = new KeyMap(livecv->m_settings->path());
     livecv->m_settings->addConfigFile("keymap", livecv->m_keymap);
@@ -132,7 +133,7 @@ void LiveCV::solveImportPaths(){
     m_engine->engine()->setImportPathList(importPaths);
 
     // Add the plugins directory to the import paths
-    m_engine->engine()->addImportPath(dir() + "/plugins");
+    m_engine->engine()->addImportPath(PluginContext::pluginPath());
 }
 
 void LiveCV::loadQml(const QUrl &url){

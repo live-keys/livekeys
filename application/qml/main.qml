@@ -118,7 +118,7 @@ ApplicationWindow{
         visible : script.environment.os.platform === 'linux' ? true : false // fixes a display bug in some linux distributions
         onAccepted: {
             if ( project.rootPath === '' ){
-                project.openProject(root.fileOpenDialog.fileUrl)
+                project.openProject(fileOpenDialog.fileUrl)
                 if ( project.active )
                     projectView.focusEditor.document = project.active
             } else if ( project.isFileInProject(fileOpenDialog.fileUrl ) ) {

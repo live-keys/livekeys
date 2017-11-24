@@ -105,7 +105,7 @@ defineTest(linkLocalLibrary){
 defineTest(linkLocalPlugin){
 
     win32:LIB_PATH = $$DEPLOY_PATH/dev/lib/plugins/$$1
-    else:LIB_PATH = $$DEPLOY_PATH/plugins/$$1
+    else:LIB_PATH = $$PLUGIN_DEPLOY_PATH/$$1
 
     LIB_NAME = $$2
     LIB_INCLUDE_PATH = $$PROJECT_ROOT/plugins/$$1/include

@@ -20,6 +20,8 @@
 #include "live/settings.h"
 #include <QQmlEngine>
 #include <QQmlContext>
+#include <QCoreApplication>
+#include <QDir>
 
 namespace lv{
 
@@ -35,6 +37,30 @@ void PluginContext::initFromEngine(QQmlEngine *engine){
     m_settings = qobject_cast<lv::Settings*>(livecv->property("settings").value<QObject*>());
     if ( !m_engine || !m_settings )
         THROW_EXCEPTION(lv::Exception, "Failed to load properties from context", 0);
+}
+
+QString PluginContext::executableDirPath(){
+    return QCoreApplication::applicationDirPath();
+}
+
+QString PluginContext::applicationPath(){
+#ifdef Q_OS_DARWIN
+    return QDir(QCoreApplication::applicationDirPath() + "/..").absolutePath();
+#else
+    return QCoreApplication::applicationDirPath();
+#endif
+}
+
+QString PluginContext::pluginPath(){
+#ifdef Q_OS_DARWIN
+    return applicationPath() + "/PlugIns";
+#else
+    return applicationPath() + "/plugins";
+#endif
+}
+
+QString PluginContext::configPath(){
+    return applicationPath() + "/config";
 }
 
 }// namespace

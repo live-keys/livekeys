@@ -16,6 +16,7 @@
 
 #include "visuallogmodel.h"
 #include "visuallog.h"
+#include "plugincontext.h"
 #include <QFile>
 #include <QCoreApplication>
 #include <QQmlEngine>
@@ -143,22 +144,22 @@ QQmlComponent *VisualLogModel::component(const QString &key){
 }
 
 QString VisualLogModel::componentPath(const QString &componentKey){
-    return QCoreApplication::applicationDirPath() + "/" + componentKey;
+    return PluginContext::applicationPath() + "/" + componentKey;
 }
 
-VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, const QString &p):
-    prefix(pprefix),
-    tag(ptag),
-    data(p),
-    objectData(0),
-    component(0),
-    context(0)
+VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, const QString &p)
+    : prefix(pprefix)
+    , tag(ptag)
+    , data(p)
+    , objectData(0)
+    , component(0)
+    , context(0)
 {
 }
 
 VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, QVariant *od, QQmlComponent *c)
-    : tag(ptag)
-    , prefix(pprefix)
+    : prefix(pprefix)
+    , tag(ptag)
     , objectData(od)
     , component(c)
     , context(0)

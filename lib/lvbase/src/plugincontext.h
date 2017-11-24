@@ -34,6 +34,11 @@ public:
     static lv::Engine*   engine();
     static lv::Settings* settings();
 
+    static QString executableDirPath();
+    static QString applicationPath();
+    static QString pluginPath();
+    static QString configPath();
+
 private:
     PluginContext(){}
 

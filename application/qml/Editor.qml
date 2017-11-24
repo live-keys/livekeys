@@ -322,10 +322,6 @@ Rectangle{
                 }
 
                 focus : true
-                onActiveFocusChanged: {
-//                    if (focus) editor.focusActive()
-                    console.log(this + ' - ' + activeFocus)
-                }
 //                onTextChanged: {
 //                    if ( editor.isDirtyMask )
 //                        editor.isDirtyMask = false

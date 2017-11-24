@@ -29,6 +29,7 @@
 #include "live/editorsettings.h"
 #include "live/livepalettecontainer.h"
 #include "live/editorglobalobject.h"
+#include "live/plugincontext.h"
 #include "live/keymap.h"
 
 #include <QCoreApplication>
@@ -69,7 +70,7 @@ void EditorPlugin::initializeEngine(QQmlEngine *engine, const char *){
     lv::Project* pr = qobject_cast<lv::Project*>(prob);
 
     lv::LivePaletteContainer* lpc = lv::LivePaletteContainer::create(
-        engine, QCoreApplication::applicationDirPath() + "/plugins"
+        engine, lv::PluginContext::pluginPath()
     );
 
     lv::EditorGlobalObject* editor = new lv::EditorGlobalObject(pr, lpc);

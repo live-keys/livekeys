@@ -20,7 +20,7 @@ unix{
     POST_TARGETDEPS        += createlinkdir
 }
 
-DESTDIR = $$DEPLOY_PATH
+DESTDIR = $$BUILD_PATH/bin
 
 # Application
 # -----------
