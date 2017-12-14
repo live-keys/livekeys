@@ -261,6 +261,12 @@ QFileSystemWatcher *ProjectDocumentModel::fileWatcher(){
     return m_fileWatcher;
 }
 
+ProjectDocument *ProjectDocumentModel::isOpened(const QString &path){
+    if ( m_openedFiles.contains(path) )
+        return m_openedFiles[path];
+    return 0;
+}
+
 
 }// namespace
 

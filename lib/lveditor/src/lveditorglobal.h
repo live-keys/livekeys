@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef LVLCVEDITORGLOBAL_H
-#define LVLCVEDITORGLOBAL_H
+#ifndef LVEDITORGLOBAL_H
+#define LVEDITORGLOBAL_H
 
 #include <qglobal.h>
 
@@ -26,7 +26,7 @@
 #    define LV_EDITOR_EXPORT Q_DECL_IMPORT
 #  endif
 #else
-#  define Q_LCVEDITOR_EXPORT
+#  define LV_EDITOR_EXPORT
 #endif
 
-#endif //QLCVEDITORGLOBAL_H
+#endif //LVEDITORGLOBAL_H

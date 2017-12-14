@@ -71,8 +71,6 @@ DocumentQmlRanges::Range DocumentQmlRanges::createRange(
         QmlJS::AST::UiObjectMember *member,
         QmlJS::AST::UiObjectInitializer *ast)
 {
-    //        qDebug() << "Create range for uiobject member."
-    //         << member->firstSourceLocation().startLine << ast->rbraceToken.startLine;
     return createRange(member, member->firstSourceLocation(), ast->rbraceToken);
 }
 

@@ -35,6 +35,16 @@ win32:{
     DLLDESTDIR = $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH
 }else:DESTDIR = $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH
 
+macx{
+    QMAKE_LFLAGS += \
+        '-Wl,-rpath,\'@executable_path/../Link\'' \
+        '-Wl,-rpath,\'@executable_path/../Frameworks\''
+
+    QMAKE_SONAME_PREFIX = @rpath
+    QMAKE_LFLAGS += ' -install_name @rpath/lib$${TARGET}.dylib'
+
+}
+
 # --- Handling the QML deployment ---
 
 !exists($$PLUGIN_QML_DIR){

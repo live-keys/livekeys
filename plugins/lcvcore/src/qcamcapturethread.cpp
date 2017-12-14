@@ -14,6 +14,7 @@
 **
 ****************************************************************************/
 
+#include "live/visuallog.h"
 #include "qcamcapturethread.h"
 #include "qmat.h"
 
@@ -24,13 +25,6 @@
 #include <QTimer>
 #include <QReadWriteLock>
 #include <QWaitCondition>
-
-//#define QCAM_CAPTURE_THREAD_DEBUG_FLAG
-#ifdef QCAM_CAPTURE_THREAD_DEBUG_FLAG
-#define QCAM_CAPTURE_THREAD_DEBUG(_param) qDebug() << (_param)
-#else
-#define QCAM_CAPTURE_THREAD_DEBUG(_param)
-#endif
 
 using namespace cv;
 
@@ -81,7 +75,7 @@ QCamCaptureThread::~QCamCaptureThread(){
     d->condition.wakeOne();
     d->mutex.unlock();
     wait(); // wait till thread finishes]
-    QCAM_CAPTURE_THREAD_DEBUG(QString("Cam capture \"") + m_deviceId + "\" thread released.");
+    vlog_debug("cv-cameracapture", QString("Cam capture \"") + m_deviceId + "\" thread released.");
     d->capture->release();
     delete m_timer;
     delete d->inactiveMat;

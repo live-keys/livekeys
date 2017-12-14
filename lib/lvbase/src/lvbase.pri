@@ -24,7 +24,9 @@ HEADERS += \
     $$PWD/shareddata.h \
     $$PWD/filterworker.h \
     $$PWD/filterworker_p.h \
-    $$PWD/keymap.h
+    $$PWD/keymap.h \
+    $$PWD/visuallogfilter.h \
+    $$PWD/visuallogbasemodel.h
 
 SOURCES += \
     $$PWD/exception.cpp \
@@ -47,7 +49,9 @@ SOURCES += \
     $$PWD/filter.cpp \
     $$PWD/shareddata.cpp \
     $$PWD/filterworker.cpp \
-    $$PWD/keymap.cpp
+    $$PWD/keymap.cpp \
+    $$PWD/visuallogfilter.cpp \
+    $$PWD/visuallogbasemodel.cpp
 
 win32{
     SOURCES += $$PWD/stacktrace_win.cpp

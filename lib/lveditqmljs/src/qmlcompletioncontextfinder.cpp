@@ -118,7 +118,6 @@ public:
                         path->clear();
                         startOffset = block.position() + cursor.positionInBlock();
                     }
-//                    qDebug() << "CURSOR:" << cursor() << tokens.last().end();
                 }
             }
         }

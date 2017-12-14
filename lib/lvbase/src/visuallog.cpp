@@ -24,7 +24,7 @@
 #include <cstdio>
 void vLoggerConsole(const QString& message)
 {
-   fprintf(stderr, "%s\n", qPrintable(message));
+   fprintf(stderr, "%s", qPrintable(message));
    fflush(stderr);
 }
 #elif defined(Q_OS_WIN)
@@ -334,6 +334,10 @@ QString VisualLog::MessageInfo::prefix(const VisualLog::Configuration *configura
     return "";
 }
 
+QString VisualLog::MessageInfo::tag(const VisualLog::Configuration *configuration) const{
+    return configuration->m_name;
+}
+
 void VisualLog::configure(const QString &configuration, const MLNode& options){
     m_output = 0;
 
@@ -472,7 +476,7 @@ void VisualLog::flushLine(){
         if ( m_output & VisualLog::File )
             flushFile(pref + m_buffer + "\n");
         if ( m_output & VisualLog::View && m_model )
-            m_model->appendMessage(m_configuration->m_name, pref, m_buffer);
+            m_model->onMessage(m_configuration, m_messageInfo, m_buffer);
         if ( m_output & VisualLog::Extensions )
             flushHandler(m_buffer);
 
@@ -487,7 +491,7 @@ void VisualLog::closeFile(){
 
 void VisualLog::asView(const QString &viewPath, const QVariant &viewData){
     if ( canLog() && m_objectOutput && (m_output & VisualLog::View) ){
-        m_model->appendView(m_configuration->m_name, prefix(), viewPath, viewData);
+        m_model->onView(m_configuration, m_messageInfo, viewPath, viewData);
         m_output = removeOutputFlag(m_output, VisualLog::View);
     }
 }

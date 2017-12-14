@@ -16,20 +16,12 @@
 
 
 #include "live/libraryloadpath.h"
+#include "live/visuallog.h"
 
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
 #include <QDebug>
-
-//TODO: Use vlog
-//#define QLIBRARY_LOAD_PATH_DEBUG_FLAG
-#ifdef QLIBRARY_LOAD_PATH_DEBUG_FLAG
-#define QLIBRARY_LOAD_PATH_DEBUG(_param) qDebug() << "LIBRARY PATH:" << (_param)
-#else
-#define QLIBRARY_LOAD_PATH_DEBUG(_param)
-#endif
-
 
 namespace lv{
 
@@ -58,12 +50,13 @@ void LibraryLoadPath::addImpl(const QString& path, const QString& linkPath, bool
 
         if (  (info.isFile() || info.isSymLink()) &&
                info.fileName().startsWith("lib") &&
-               info.fileName().contains(".so") )
+               ( info.fileName().contains(".so") || info.fileName().contains(".dylib") )
+              )
         {
             QFile f(dit.filePath());
             f.link(linkPath + "/" + info.fileName());
 
-            QLIBRARY_LOAD_PATH_DEBUG("Added \'" + linkPath + "/" + info.fileName() + "\' -> \'" + f.fileName() + "\'");
+            vlog_debug("libraryloadpath", "Added \'" + linkPath + "/" + info.fileName() + "\' -> \'" + f.fileName() + "\'");
 
         } else if ( info.isDir() && recursive ){
             addImpl(info.filePath(), linkPath, recursive);

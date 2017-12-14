@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVECVARGUMENTS_H
-#define QLIVECVARGUMENTS_H
+#ifndef LIVECVARGUMENTS_H
+#define LIVECVARGUMENTS_H
 
 #include <QObject>
 #include "live/mlnode.h"
@@ -93,4 +93,4 @@ inline CommandLineParser *LiveCVArguments::parser(){
 
 }// namespace
 
-#endif // QLIVECVARGUMENTS_H
+#endif // LIVECVARGUMENTS_H

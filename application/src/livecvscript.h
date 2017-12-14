@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVECVSCRIPT_H
-#define QLIVECVSCRIPT_H
+#ifndef LIVECVSCRIPT_H
+#define LIVECVSCRIPT_H
 
 #include <QObject>
 #include <QStringList>
@@ -73,4 +73,4 @@ inline const QString &LiveCVScript::name() const{
 
 }// namespace
 
-#endif // QLIVECVSCRIPT_H
+#endif // LIVECVSCRIPT_H

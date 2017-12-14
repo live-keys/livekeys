@@ -51,6 +51,14 @@ QString PluginContext::applicationPath(){
 #endif
 }
 
+QString PluginContext::linkPath(){
+#ifdef Q_OS_DARWIN
+    return applicationPath() + "/Link";
+#else
+    return applicationPath() + "/link";
+#endif
+}
+
 QString PluginContext::pluginPath(){
 #ifdef Q_OS_DARWIN
     return applicationPath() + "/PlugIns";

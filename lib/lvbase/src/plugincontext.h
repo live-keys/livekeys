@@ -36,6 +36,7 @@ public:
 
     static QString executableDirPath();
     static QString applicationPath();
+    static QString linkPath();
     static QString pluginPath();
     static QString configPath();
 

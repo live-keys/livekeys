@@ -22,6 +22,7 @@
 #include "livecvarguments.h"
 #include "live/libraryloadpath.h"
 #include "live/visuallog.h"
+#include "live/plugincontext.h"
 #include "live/exception.h"
 
 using namespace lv;
@@ -45,7 +46,7 @@ int main(int argc, char *argv[]){
             return 0;
         }
 
-        LibraryLoadPath::addRecursive(livecv->dir() + "/plugins", livecv->dir() + "/link");
+        LibraryLoadPath::addRecursive(PluginContext::pluginPath(), PluginContext::linkPath());
 
         if ( livecv->arguments()->pluginInfoFlag() ){
             printf("%s", livecv->extractPluginInfo(livecv->arguments()->pluginInfoImport()).data());

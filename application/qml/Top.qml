@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 import QtQuick 2.3
-import editor 1.0
+import editor.private 1.0
 import base 1.0
 import live 1.0
 
@@ -23,9 +23,13 @@ Rectangle {
     id : container
     width: 100
     height: 35
+
+    property color topColor: "#141923"
+    property color bottomColor: "#070c11"
+
     gradient: Gradient{
-        GradientStop{ position: 0.0; color: "#141923"}
-        GradientStop{ position: 1.0; color: "#061119"}
+        GradientStop{ position: 0.0; color: topColor}
+        GradientStop{ position: 1.0; color: bottomColor}
     }
 
     property bool isLogWindowDirty     : false

@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "qstaticcontainer.h"
+#include "live/visuallog.h"
 #include <QQuickWindow>
 #include <QQuickItem>
 #include <QQmlContext>
@@ -93,20 +94,24 @@ QStaticContainer *QStaticContainer::grabFromContext(QQuickItem *item, const QStr
     return static_cast<QStaticContainer*>(qmlContext(item)->contextProperty(contextProperty).value<QObject*>());
 }
 
+void QStaticContainer::debugMessage(const QString &message){
+    vlog("live-staticcontainer").v() << message;
+}
+
 void QStaticContainer::beforeCompile(){
-    QSTATIC_ITEM_CONTAINER_DEBUG("-----Before Compile-----");
+    vlog_debug("live-staticcontainer", "-----Before Compile-----");
     for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->beforeCompile();
 }
 
 void QStaticContainer::afterCompile(){
-    QSTATIC_ITEM_CONTAINER_DEBUG("-----After Compile-----");
+    vlog_debug("live-staticcontainer", "-----After Compile-----");
     for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->afterCompile();
 }
 
 void QStaticContainer::clearStates(){
-    QSTATIC_ITEM_CONTAINER_DEBUG("-----Clear States-----");
+    vlog_debug("live-staticcontainer", "-----Clear States-----");
     for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->clearStates();
 }

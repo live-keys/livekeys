@@ -19,7 +19,6 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
-#include <QDebug>
 
 namespace lv{
 

@@ -17,6 +17,8 @@
 #include "qvideocapturethread.h"
 #include "qmat.h"
 
+#include "live/visuallog.h"
+
 #include "opencv2/video.hpp"
 #include "opencv2/highgui.hpp"
 
@@ -25,14 +27,6 @@
 #include <QTimer>
 #include <QReadWriteLock>
 #include <QWaitCondition>
-
-
-//#define QVIDEO_CAPTURE_THREAD_DEBUG_FLAG
-#ifdef QVIDEO_CAPTURE_THREAD_DEBUG_FLAG
-#define QVIDEO_CAPTURE_THREAD_DEBUG(_param) qDebug() << (_param)
-#else
-#define QVIDEO_CAPTURE_THREAD_DEBUG(_param)
-#endif
 
 
 using namespace cv;
@@ -93,7 +87,7 @@ QVideoCaptureThread::~QVideoCaptureThread(){
     d->condition.wakeOne();
     d->mutex.unlock();
     wait(); // wait till thread finishes
-    QVIDEO_CAPTURE_THREAD_DEBUG( QString("Video capture \"") + m_file + "\" thread released." );
+    vlog_debug("cv-videocapture",  QString("Video capture \"") + m_file + "\" thread released." );
     d->capture->release();
     delete m_timer;
     delete d->inactiveMat;
@@ -154,7 +148,7 @@ void QVideoCaptureThread::run(){
                 qWarning("Error (VideoCapture): Seek is not available for this video.");
             else {
                 if ( d->seekRequest != m_framePos ){
-                    QVIDEO_CAPTURE_THREAD_DEBUG("Seek request");
+                    vlog_debug("cv-videocapture", "Seek request");
                     beginSeek();
                     d->capture->set(CV_CAP_PROP_POS_FRAMES, d->seekRequest);
                     m_framePos = (int)d->capture->get(CV_CAP_PROP_POS_FRAMES);

@@ -37,6 +37,7 @@
 #include "live/project.h"
 #include "live/editorsettings.h"
 #include "live/projectqmlextension.h"
+#include "live/visuallog.h"
 
 #include <QQmlEngine>
 #include <QFileInfo>
@@ -45,16 +46,6 @@
 #include <QQmlComponent>
 #include <QStringList>
 #include <QWaitCondition>
-
-#include <QDebug>
-
-//#define LVCODE_QML_HANDLER_DEBUG_FLAG
-#ifdef LVCODE_QML_HANDLER_DEBUG_FLAG
-#define LVCODE_QML_HANDLER_DEBUG(_param) qDebug() << "QML HANDLER:" << (_param)
-#else
-#define LVCODE_QML_HANDLER_DEBUG(_param)
-#endif
-
 
 namespace lv{
 
@@ -155,7 +146,7 @@ namespace qmlhandler_helpers{
     ){
         if ( !object.isNull() && object->superclassName() != "" && object->superclassName() != object->className() ){
             QString typeSuperClass = object->superclassName();
-            LVCODE_QML_HANDLER_DEBUG("Loooking up object \'" + typeSuperClass + "\' from " + typeLibrary);
+            vlog_debug("editqmljs-codehandler", "Loooking up object \'" + typeSuperClass + "\' from " + typeLibrary);
 
             // Slider -> Slider (Controls) -> Slider(Controls.Private) -> ... (the reason I can go into a loop is recursive library dependencies)
             // Avoid loop? -> keep track of all library dependencies and dont go back -> super type with the same name cannot be from the same library
@@ -200,7 +191,7 @@ namespace qmlhandler_helpers{
         QString typeLibrary,
         QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath
     ){
-        LVCODE_QML_HANDLER_DEBUG("Looking up type \'" + typeName + "\' from " + typeLibrary);
+        vlog_debug("editqmljs-codehandler", "Looking up type \'" + typeName + "\' from " + typeLibrary);
         QmlLibraryInfo::Ptr libraryInfo = typeLibrary == ""
                 ? project->implicitLibraries()->libraryInfo(documentScope->path())
                 : project->globalLibraries()->libraryInfo(typeLibrary);

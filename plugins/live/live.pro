@@ -10,6 +10,7 @@ uri = live
 
 linkLocalLibrary(lvbase,   lvbase)
 linkLocalLibrary(lveditor, lveditor)
+
 # Source
 
 include($$PWD/src/live.pri)
@@ -20,16 +21,6 @@ OTHER_FILES += \
     qml/qmldir \
     qml/plugins.qmltypes
 
-# Handling the palette
+DISTFILES += \
+    qml/VisualLogView.qml
 
-OTHER_FILES *= \
-    palettes/palettedir \
-    palettes/*.qml
-
-# Deploy The palette
-
-palettecopy.commands = $$deployDirCommand($$PWD/palettes, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_NAME/palettes)
-first.depends = $(first) palettecopy
-export(first.depends)
-export(palettecopy.commands)
-QMAKE_EXTRA_TARGETS += first palettecopy

@@ -19,9 +19,11 @@
 
 #include <QObject>
 #include <QQmlParserStatus>
+#include <QJSValue>
 #include <QTimer>
 #include <QTextCursor>
 
+#include "live/projectdocument.h"
 #include "live/lveditorglobal.h"
 #include "live/codecompletionmodel.h"
 #include "live/documentcursorinfo.h"
@@ -85,8 +87,8 @@ public slots:
     void insertCompletion(int from, int to, const QString& completion);
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
     void cursorWritePositionChanged(QTextCursor cursor);
-    void setDocument(lv::ProjectDocument* document);
-    void documentRead();
+    void setDocument(lv::ProjectDocument* document, QJSValue options = QJSValue());
+    void documentUpdatedContent(QObject* author);
     void generateCompletion(int cursorPosition);
     void updateScope();
     void bind(int position, int length, QObject* object = 0);
@@ -108,8 +110,11 @@ signals:
     void cursorPositionRequest(int position);
     void contentsChangedManually();
     void paletteChanged();
+    void fragmentLinesChanged(int lineStart, int lineEnd);
 
 private:
+    void readContent();
+    void updateFragments();
     void findCodeHandler();
     void updateCodeHandlerTarget();
     void rehighlightSection(int position, int length);
@@ -127,6 +132,11 @@ private:
     Project*              m_project;
     Engine*               m_engine;
     QTimer                m_timer;
+
+    ProjectDocumentMarker::Ptr m_fragmentStart;
+    ProjectDocumentMarker::Ptr m_fragmentEnd;
+    int m_fragmentStartLine;
+    int m_fragmentEndLine;
 
     DocumentHandlerState* m_state;
 };

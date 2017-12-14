@@ -17,36 +17,19 @@
 #ifndef LVVISUALLOGMODEL_H
 #define LVVISUALLOGMODEL_H
 
-#include <QDebug>
-
 #include <QString>
 #include <QAbstractListModel>
+#include "live/visuallog.h"
+#include "live/visuallogbasemodel.h"
 #include "live/lvbaseglobal.h"
 
 class QQmlEngine;
-class QQmlComponent;
-class QQmlContext;
 
-//TODO: Add log model filtering
 //TODO: Manage caching for components
 
 namespace lv{
 
-class LV_BASE_EXPORT VisualLogEntry{
-public:
-    VisualLogEntry(const QString& tag, const QString& prefix, const QString& data);
-    VisualLogEntry(const QString& tag, const QString& prefix, QVariant* objectData, QQmlComponent* component);
-
-    QString                prefix;
-    QString                tag;
-    QString                data;
-    QVariant*              objectData;
-    mutable QQmlComponent* component;
-    mutable QQmlContext*   context;
-};
-
-
-class LV_BASE_EXPORT VisualLogModel : public QAbstractListModel{
+class LV_BASE_EXPORT VisualLogModel : public VisualLogBaseModel{
 
     Q_OBJECT
     Q_PROPERTY(int width READ width WRITE setWidth NOTIFY widthChanged)
@@ -57,17 +40,36 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const;
     int rowCount(const QModelIndex &parent) const;
-    QHash<int, QByteArray> roleNames() const;
 
     const VisualLogEntry& entryAt(int index);
 
-    void appendMessage(const QString& tag, const QString& prefix, const QString &message);
-    void appendView(const QString& tag, const QString& prefix, const QString& viewName, const QVariant& value);
+    void onMessage(
+        const VisualLog::Configuration* configuration,
+        const VisualLog::MessageInfo& messageInfo,
+        const QString& message
+    );
+    void onView(
+        const VisualLog::Configuration* configuration,
+        const VisualLog::MessageInfo& messageInfo,
+        const QString& viewName,
+        const QVariant& value
+    );
 
     int width() const;
 
+    int totalEntries() const;
+    QVariant entryDataAt(int index) const;
+    QString entryPrefixAt(int index) const;
+    const VisualLogEntry &entryAt(int index) const;
+
+    QList<VisualLogEntry>::Iterator begin();
+    QList<VisualLogEntry>::Iterator end();
+    QList<VisualLogEntry>::ConstIterator begin() const;
+    QList<VisualLogEntry>::ConstIterator end() const;
+
 public slots:
     void setWidth(int width);
+    void clearValues();
 
 signals:
     void widthChanged(int width);
@@ -98,6 +100,26 @@ inline void VisualLogModel::setWidth(int width){
 
     m_width = width;
     emit widthChanged(width);
+}
+
+inline int VisualLogModel::totalEntries() const{
+    return m_entries.size();
+}
+
+inline QList<VisualLogEntry>::Iterator VisualLogModel::begin(){
+    return m_entries.begin();
+}
+
+inline QList<VisualLogEntry>::Iterator VisualLogModel::end(){
+    return m_entries.end();
+}
+
+inline QList<VisualLogEntry>::ConstIterator VisualLogModel::begin() const{
+    return m_entries.begin();
+}
+
+inline QList<VisualLogEntry>::ConstIterator VisualLogModel::end() const{
+    return m_entries.end();
 }
 
 }// namespace

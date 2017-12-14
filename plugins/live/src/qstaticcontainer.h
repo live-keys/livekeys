@@ -20,18 +20,16 @@
 #include "qliveglobal.h"
 #include <QLinkedList>
 #include <QObject>
-#include <QDebug>
-
-//#define QSTATIC_ITEM_CONTAINER_DEBUG_FLAG
-#ifdef QSTATIC_ITEM_CONTAINER_DEBUG_FLAG
-#define QSTATIC_ITEM_CONTAINER_DEBUG(_param) qDebug() << "STATIC CONTAINER:" << (_param)
-#else
-#define QSTATIC_ITEM_CONTAINER_DEBUG(_param)
-#endif
 
 class QQuickItem;
 class QQuickWindow;
 class QStaticTypeContainerBase;
+
+#ifdef VLOG_DEBUG_BUILD
+#define debug_static_container(_message) QStaticContainer::debugMessage(_message)
+#else
+#define debug_static_container(_message)
+#endif
 
 class Q_LIVE_EXPORT QStaticContainer : public QObject{
 
@@ -47,6 +45,7 @@ public:
     template<class T> void set(const QString& key, T* value);
 
     static QStaticContainer* grabFromContext(QQuickItem* item, const QString& contextProperty = "staticContainer");
+    static void debugMessage(const QString& message);
 
 public slots:
     void beforeCompile();
@@ -131,14 +130,14 @@ template<typename T> QStaticTypeContainer<T> &QStaticTypeContainer<T>::instance(
 
 template<typename T> void QStaticTypeContainer<T>::registerState(const QString &key, T *state){
     m_entries.insert(key, Entry(state));
-    QSTATIC_ITEM_CONTAINER_DEBUG(QString("Key set and activated : ") + key);
+    debug_static_container(QString("Key set and activated : ") + key);
 }
 
 template<typename T> T *QStaticTypeContainer<T>::state(const QString &key){
     typename QMap<QString, Entry>::iterator it = m_entries.find(key);
     if ( it != m_entries.end() ){
         it.value().activated = true;
-        QSTATIC_ITEM_CONTAINER_DEBUG(QString("Key activated : ") + key);
+        debug_static_container(QString("Key activated : ") + key);
         return it.value().value;
     }
     return 0;
@@ -151,7 +150,7 @@ template<typename T> void QStaticTypeContainer<T>::beforeCompile(){
     typename QMap<QString, Entry>::iterator it = m_entries.begin();
     while ( it != m_entries.end() ){
         if ( it.value().activated == true ){
-            QSTATIC_ITEM_CONTAINER_DEBUG(QString("Key deactivated : ") + it.key());
+            debug_static_container(QString("Key deactivated : ") + it.key());
             it.value().activated = false;
         }
         ++it;
@@ -162,7 +161,7 @@ template<typename T> void QStaticTypeContainer<T>::afterCompile(){
     typename QMap<QString, Entry>::iterator it = m_entries.begin();
     while ( it != m_entries.end() ){
         if ( it.value().activated == false ){
-            QSTATIC_ITEM_CONTAINER_DEBUG(QString("Key removed: ") + it.key());
+            debug_static_container(QString("Key removed: ") + it.key());
             m_toDelete.append(it.value().value);
             it = m_entries.erase(it);
         } else {

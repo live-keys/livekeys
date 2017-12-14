@@ -18,6 +18,7 @@ import QtQuick 2.3
 
 Rectangle {
     id : root
+    anchors.fill: parent
     width: 100
     height: 30
     border.color : "#031728"
@@ -26,7 +27,6 @@ Rectangle {
     
     property color textColor : "#fff"
 
-    anchors.fill: parent
 
     property alias text : textInput.text
 

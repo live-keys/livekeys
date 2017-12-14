@@ -79,6 +79,7 @@ public:
         QString sourceFunctionName() const;
         const QDateTime& stamp() const;
         QString prefix(const VisualLog::Configuration* configuration) const;
+        QString tag(const VisualLog::Configuration* configuration) const;
 
     private:
         MessageInfo();
@@ -180,9 +181,9 @@ private:
     static bool m_globalConfigured;
 
     int            m_output;
+    Configuration* m_configuration;
     MessageInfo    m_messageInfo;
     QString        m_buffer;
-    Configuration* m_configuration;
     QTextStream    m_stream;
     bool           m_objectOutput;
 
@@ -325,7 +326,16 @@ template<typename T> VisualLog& VisualLog::operator<< ( std::ostream (*f)(std::i
 #define vlog(...) lv::VisualLog(__VA_ARGS__).at(__FILE__, __LINE__, __FUNCTION__)
 #endif // vlog
 
+#ifndef vlog_debug
+#ifdef VLOG_DEBUG_BUILD
+#define vlog_debug(_configuration, _message) lv::VisualLog(_configuration).at(__FILE__, __LINE__, __FUNCTION__).v() << (_message)
+#else
+#define vlog_debug(_configuration, _message)
+#endif // VLOG_DEBUG_BUILD
+#endif // vlog_debug
+
 #endif // VLOG_NO_MACROS
+
 
 #endif // LVVISUALLOG_H
 

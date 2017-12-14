@@ -17,20 +17,13 @@
 #include "live/livepalettecontainer.h"
 #include "live/codeconverter.h"
 #include "live/livepalette.h"
+#include "live/visuallog.h"
 
 #include <QQmlEngine>
 #include <QQmlComponent>
 #include <QDir>
 #include <QDirIterator>
-
 #include <QDebug>
-
-//#define LVPALETTE_CONTAINER_DEBUG_FLAG
-#ifdef LVPALETTE_CONTAINER_DEBUG_FLAG
-#define LVPALETTE_CONTAINER_DEBUG(_param) qDebug() << "PALETTES:" << (_param)
-#else
-#define LVPALETTE_CONTAINER_DEBUG(_param)
-#endif
 
 namespace lv{
 
@@ -59,7 +52,7 @@ CodeConverter *QLivePaletteLoader::getItem(QQmlEngine *engine){
     if ( m_converter )
         return m_converter;
 
-    LVPALETTE_CONTAINER_DEBUG("Loading palette: " + m_path);
+    vlog_debug("editor-livepaletteloader", "Loading palette: " + m_path);
 
     QQmlComponent component(engine, QUrl::fromLocalFile(m_path), QQmlComponent::PreferSynchronous);
     if ( component.isError() || component.isNull() ){
@@ -90,7 +83,7 @@ CodeConverter *QLivePaletteLoader::getItem(QQmlEngine *engine){
 
     //TODO: Check converter type with m_type, and also check typeobject
 
-    LVPALETTE_CONTAINER_DEBUG("Loaded palette on type: \'" + m_converter->type() + "\' " + m_converter->typeObject());
+    vlog_debug("editor-livepaletteloader", "Loaded palette on type: \'" + m_converter->type() + "\' " + m_converter->typeObject());
 
     return m_converter;
 }
@@ -155,7 +148,7 @@ void LivePaletteContainer::scanPaletteDir(const QString &path){
 
     QString paletteDirPath = QDir::cleanPath(path + "/" + "palettedir");
 
-    LVPALETTE_CONTAINER_DEBUG("Scanning palettedir: " + paletteDirPath);
+    vlog_debug("editor-livepaletteloader", "Scanning palettedir: " + paletteDirPath);
 
     QFile f(paletteDirPath);
     if ( !f.open(QIODevice::ReadOnly) ){
@@ -171,13 +164,13 @@ void LivePaletteContainer::scanPaletteDir(const QString &path){
             if ( segments.size() == 2 ){
                 QString palettePath = QDir::cleanPath(path + "/" + segments[1].trimmed());
                 QString type = segments[0].trimmed();
-                LVPALETTE_CONTAINER_DEBUG("Adding palette: \'" + palettePath + "\' on \'" + type + "\'");
+                vlog_debug("editor-livepaletteloader", "Adding palette: \'" + palettePath + "\' on \'" + type + "\'");
                 d->items[type].insert("", new QLivePaletteLoader(palettePath, type));
             } else if ( segments.size() == 3 ){
                 QString palettePath = QDir::cleanPath(path + "/" + segments[2].trimmed());
                 QString type = segments[0].trimmed();
                 QString typeObject = segments[1].trimmed();
-                LVPALETTE_CONTAINER_DEBUG(
+                vlog_debug("editor-livepaletteloader",
                     "Adding palette: \'" + palettePath + "\' on \'" + type + "\' for object \'" +
                     typeObject + "\'"
                 );

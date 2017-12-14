@@ -15,12 +15,19 @@ unix:!isEmpty(ENABLE_STACK_TRACE_BFD){
     LIBS    += -lbfd -ldl
 }
 
+macx{
+    QMAKE_LFLAGS += \
+        '-Wl,-rpath,\'@executable_path/../Link\'' \
+        '-Wl,-rpath,\'@executable_path/../Frameworks\''
+    QMAKE_SONAME_PREFIX = @rpath/live.framework
+}
+
 ## Destination
 
 win32:{
     DESTDIR    = $$DEPLOY_PATH/dev/lib
     DLLDESTDIR = $$DEPLOY_PATH
-}else:DESTDIR = $$DEPLOY_PATH
+}else:DESTDIR = $$LIBRARY_DEPLOY_PATH
 
 DEFINES += LV_BASE_LIB
 

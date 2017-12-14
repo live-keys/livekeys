@@ -8,7 +8,15 @@ linkLocalLibrary(lvbase, lvbase)
 win32:{
     DESTDIR    = $$DEPLOY_PATH/dev/lib
     DLLDESTDIR = $$DEPLOY_PATH
-}else:DESTDIR  = $$DEPLOY_PATH
+}else:DESTDIR  = $$LIBRARY_DEPLOY_PATH
+
+
+macx{
+    QMAKE_LFLAGS += \
+        '-Wl,-rpath,\'@executable_path/../Link\'' \
+        '-Wl,-rpath,\'@executable_path/../Frameworks\''
+    QMAKE_SONAME_PREFIX = @rpath/live.framework
+}
 
 DEFINES += LV_EDITOR_LIB
 

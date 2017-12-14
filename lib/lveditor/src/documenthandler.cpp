@@ -26,6 +26,7 @@
 #include "live/editorglobalobject.h"
 #include "live/project.h"
 #include "live/engine.h"
+#include "live/visuallog.h"
 #include "live/projectextension.h"
 
 #include <QQuickTextDocument>
@@ -38,13 +39,6 @@
 #include <QTimer>
 
 #include <QTextList>
-
-//#define LVCODE_BASIC_HANDLER_DEBUG_FLAG
-#ifdef LVCODE_BASIC_HANDLER_DEBUG_FLAG
-#define LVCODE_BASIC_HANDLER_DEBUG(_param) qDebug() << "DOCUMENT HANDLER:" << (_param)
-#else
-#define LVCODE_BASIC_HANDLER_DEBUG(_param)
-#endif
 
 namespace lv{
 
@@ -63,6 +57,10 @@ DocumentHandler::DocumentHandler(QObject *parent)
     , m_paletteContainer(0)
     , m_project(0)
     , m_engine(0)
+    , m_fragmentStart(ProjectDocumentMarker::create())
+    , m_fragmentEnd(ProjectDocumentMarker::create())
+    , m_fragmentStartLine(-1)
+    , m_fragmentEndLine(-1)
     , m_state(new DocumentHandlerState)
 {
     setIndentSize(4);
@@ -92,9 +90,15 @@ void DocumentHandler::setTarget(QQuickTextDocument *target){
                     m_targetDoc, SIGNAL(contentsChange(int,int,int)),
                     this, SLOT(documentContentsChanged(int,int,int))
                 );
+                if ( m_projectDocument ){
+                    addEditingState(DocumentHandler::Read);
+                    m_targetDoc->setPlainText(m_projectDocument->content());
+                    m_projectDocument->assignEditingDocument(m_targetDoc, this);
+                    removeEditingState(DocumentHandler::Read);
+                    updateFragments();
+                }
             }
         }
-
         emit targetChanged();
     }
 }
@@ -150,7 +154,7 @@ void DocumentHandler::commitEdit(){
             m_state->editingFragment()->commit(
                 converter->serialize()->fromCode(commitText, m_state->editingFragment())
             );
-            LVCODE_BASIC_HANDLER_DEBUG("Commited edit of size: " + QString::number(commitText.size()));
+            vlog_debug("editor-documenthandler", "Commited edit of size: " + QString::number(commitText.size()));
 
             if ( m_state->editingFragment()->actionType() == DocumentEditFragment::Adjust ){
                 palette()->setValueFromCode(converter->serialize()->fromCode(commitText, m_state->editingFragment()));
@@ -207,9 +211,23 @@ void DocumentHandler::paletteValueChanged(){
     }
 }
 
+void DocumentHandler::readContent(){
+    m_targetDoc->setPlainText(m_projectDocument->content());
+}
+
+void DocumentHandler::updateFragments(){
+    if ( m_fragmentStartLine != -1 && m_fragmentEndLine > 0 && m_targetDoc ){
+        m_fragmentStart = m_projectDocument->addMarker(
+            m_targetDoc->findBlockByLineNumber(m_fragmentStartLine).position()
+        );
+        m_fragmentEnd   = m_projectDocument->addMarker(
+            m_targetDoc->findBlockByLineNumber(m_fragmentEndLine).position()
+        );
+    }
+}
+
 void DocumentHandler::findCodeHandler(){
     if ( m_project && m_engine && m_projectDocument ){
-
         for ( auto it = m_project->extensions().begin(); it != m_project->extensions().end(); ++it ){
             lv::ProjectExtension* ext = *it;
             m_codeHandler = ext->createHandler(m_projectDocument, m_project, m_engine, this);
@@ -220,7 +238,6 @@ void DocumentHandler::findCodeHandler(){
             }
         }
     }
-
 }
 
 void DocumentHandler::rehighlightSection(int position, int length){
@@ -275,7 +292,7 @@ void DocumentHandler::documentContentsChanged(int position, int charsRemoved, in
             m_lastChar = m_targetDoc->characterAt(position);
 
         if ( m_projectDocument )
-            m_projectDocument->documentContentsChanged(position, charsRemoved, addedText);
+            m_projectDocument->documentContentsChanged(this, position, charsRemoved, addedText);
 
         emit contentsChangedManually();
         m_timer.start();
@@ -289,7 +306,7 @@ void DocumentHandler::documentContentsChanged(int position, int charsRemoved, in
                     if ( editingStateIs(DocumentHandler::Palette) ){ // palette edit
                         CodeRuntimeBinding* binding = frg->runtimeBinding();
                         if ( binding ){
-                            LVCODE_BASIC_HANDLER_DEBUG("Breaking binding at: " + QString::number(binding->position()));
+                            vlog_debug("editor-documenthandler", "Breaking binding at: " + QString::number(binding->position()));
                             frg->setRuntimeBinding(0);
                             if (m_projectDocument->removeBindingAt(binding->position()) )
                                 m_codeHandler->rehighlightBlock(m_targetDoc->findBlock(frg->declaration()->position()));
@@ -303,7 +320,7 @@ void DocumentHandler::documentContentsChanged(int position, int charsRemoved, in
                     } else { // text edit
                         CodeRuntimeBinding* binding = frg->runtimeBinding();
                         if ( binding ){
-                            LVCODE_BASIC_HANDLER_DEBUG("Breaking binding at: " + QString::number(binding->position()));
+                            vlog_debug("editor-documenthandler", "Breaking binding at: " + QString::number(binding->position()));
                             frg->setRuntimeBinding(0);
                             if (m_projectDocument->removeBindingAt(binding->position()) )
                                 m_codeHandler->rehighlightBlock(m_targetDoc->findBlock(frg->declaration()->position()));
@@ -315,7 +332,7 @@ void DocumentHandler::documentContentsChanged(int position, int charsRemoved, in
                 cancelEdit();
             }
         }
-        m_projectDocument->documentContentsSilentChanged(position, charsRemoved, addedText);
+        m_projectDocument->documentContentsSilentChanged(this, position, charsRemoved, addedText);
     }
 }
 
@@ -341,16 +358,19 @@ void DocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
     }
 }
 
-void DocumentHandler::setDocument(ProjectDocument *document){
+void DocumentHandler::setDocument(ProjectDocument *document, QJSValue options){
     cancelEdit();
     if ( m_projectDocument ){
         m_projectDocument->assignEditingDocument(0, 0);
-        disconnect(m_projectDocument, SIGNAL(contentRead()), this, SLOT(documentRead()));
+        disconnect(m_projectDocument, SIGNAL(contentChanged(QObject*)), this, SLOT(documentUpdatedContent(QObject*)));
     }
 
     m_projectDocument = document;
     if ( document )
-        connect(m_projectDocument, SIGNAL(contentRead()), this, SLOT(documentRead()));
+        connect(m_projectDocument, SIGNAL(contentChanged(QObject*)), this, SLOT(documentUpdatedContent(QObject*)));
+
+    m_fragmentStartLine = -1;
+    m_fragmentEndLine   = -1;
 
     if ( m_codeHandler ){
         delete m_codeHandler;
@@ -358,22 +378,50 @@ void DocumentHandler::setDocument(ProjectDocument *document){
     }
     findCodeHandler();
 
-    if ( document && m_targetDoc ){
+    if ( m_projectDocument && m_targetDoc ){
         addEditingState(DocumentHandler::Read);
-        m_targetDoc->setPlainText(document->content());
-        document->assignEditingDocument(m_targetDoc, this);
+        m_targetDoc->setPlainText(m_projectDocument->content());
+        m_projectDocument->assignEditingDocument(m_targetDoc, this);
         removeEditingState(DocumentHandler::Read);
     }
     if ( m_targetDoc )
         m_targetDoc->clearUndoRedoStacks();
 
 
+    if ( options.isObject() ){
+        if ( options.hasOwnProperty("fragmentStartLine") && options.hasOwnProperty("fragmentEndLine") ){
+            m_fragmentStartLine = options.property("fragmentStartLine").toInt();
+            m_fragmentEndLine   = options.property("fragmentEndLine").toInt();
+            updateFragments();
+        }
+    }
 }
 
-void DocumentHandler::documentRead(){
-    addEditingState(DocumentHandler::Read);
-    m_targetDoc->setPlainText(m_projectDocument->content());
-    removeEditingState(DocumentHandler::Read);
+void DocumentHandler::documentUpdatedContent(QObject *author){
+    if ( author != this ){
+        addEditingState(DocumentHandler::Read);
+        m_targetDoc->setPlainText(m_projectDocument->content());
+        removeEditingState(DocumentHandler::Read);
+    }
+
+    if ( m_fragmentEndLine > 0 ){
+        if ( m_fragmentStart->isValid() && m_fragmentEnd->isValid() && m_targetDoc ){
+            int startLine = m_targetDoc->findBlock(m_fragmentStart->position()).firstLineNumber();
+            int endLine = m_targetDoc->findBlock(m_fragmentEnd->position()).firstLineNumber();
+
+            if ( startLine != m_fragmentStartLine || endLine != m_fragmentEndLine ){
+                m_fragmentStartLine = startLine;
+                m_fragmentEndLine = endLine;
+                emit fragmentLinesChanged(m_fragmentStartLine, m_fragmentEndLine);
+            }
+        } else {
+            if ( m_fragmentEndLine != 0 ){
+                m_fragmentEndLine = 0;
+                m_fragmentStartLine = 0;
+                emit fragmentLinesChanged(0, 0);
+            }
+        }
+    }
 }
 
 void DocumentHandler::generateCompletion(int cursorPosition){
@@ -422,13 +470,13 @@ void DocumentHandler::bind(int position, int length, QObject *object){
                 addedBindings.append(addedBinding);
                 if ( m_state->editingFragment() && m_state->editingFragment()->declaration()->position() == addedBinding->position()){
                     m_state->editingFragment()->setRuntimeBinding(addedBinding);
-                    LVCODE_BASIC_HANDLER_DEBUG("Linking binding to editing fragment: " + QString::number(m_state->editingFragment()->declaration()->position()));
+                    vlog_debug("editor-documenthandler", "Linking binding to editing fragment: " + QString::number(m_state->editingFragment()->declaration()->position()));
                 }
             }
         }
     }
 
-    // Bind runtime bindings to engine and rehighlight
+    // bind runtime bindings to engine and rehighlight
     if ( m_targetDoc ){
         if ( object )
             m_codeHandler->connectBindings(addedBindings, object);
@@ -476,7 +524,7 @@ void DocumentHandler::edit(int position, QObject *currentApp){
         declaration->type(), declaration->parentType().isEmpty() ? "" : declaration->parentType().first()
     );
     if ( converter ){
-        LVCODE_BASIC_HANDLER_DEBUG("Found Converter for type: \'" + declaration->type()+ "\'");
+        vlog_debug("editor-documenthandler", "Found Converter for type: \'" + declaration->type()+ "\'");
         DocumentEditFragment* ef = m_codeHandler->createInjectionChannel(declaration, currentApp, converter);
         m_state->setEditingFragment(ef);
     }
@@ -484,7 +532,7 @@ void DocumentHandler::edit(int position, QObject *currentApp){
     //TODO: Check value extend(doesn't work all the time)
 
     if ( !m_state->editingFragment() ){
-        LVCODE_BASIC_HANDLER_DEBUG("Channel or converter missing for type: \'" + declaration->type() + "\'");
+        vlog_debug("editor-documenthandler", "Channel or converter missing for type: \'" + declaration->type() + "\'");
 
         int propertyValue    = -1;
         int propertyValueEnd = -1;
@@ -540,7 +588,7 @@ void DocumentHandler::adjust(int position, QObject *currentApp){
 
         CodeRuntimeBinding* bind = m_projectDocument->bindingAt(ef->declaration()->position());
         if ( bind ){
-            LVCODE_BASIC_HANDLER_DEBUG("Linking binding to editing fragment: " + QString::number(ef->declaration()->position()));
+            vlog_debug("editor-documenthandler", "Linking binding to editing fragment: " + QString::number(ef->declaration()->position()));
             ef->setRuntimeBinding(bind);
         }
 

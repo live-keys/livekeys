@@ -16,20 +16,12 @@
 
 
 #include "live/libraryloadpath.h"
+#include "live/visuallog.h"
 #include "Windows.h"
 
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
-#include <QDebug>
-
-//TODO: Use vlog
-//#define QLIBRARY_LOAD_PATH_DEBUG_FLAG
-#ifdef QLIBRARY_LOAD_PATH_DEBUG_FLAG
-#define QLIBRARY_LOAD_PATH_DEBUG(_param) qDebug() << "LIBRARY PATH:" << (_param)
-#else
-#define QLIBRARY_LOAD_PATH_DEBUG(_param)
-#endif
 
 
 namespace lv{
@@ -42,7 +34,7 @@ namespace lv{
 // and AddDllDirectory() have weird behaviors when loading QtQuick.Controls, it's why we prefer to
 // manipulate the 'PATH' environment variable instead.
 
-namespace {
+namespace{
 
 QByteArray pathContents;
 
@@ -67,7 +59,7 @@ void LibraryLoadPath::addImpl(const QString& path, const QString& , bool recursi
             QString filePath = info.filePath();
             filePath.replace('/', '\\');
             pathContents += ";" + filePath.toUtf8();
-            QLIBRARY_LOAD_PATH_DEBUG("Added path \'" + filePath + "\'");
+            vlog_debug("libraryloadpasth", "Added path \'" + filePath + "\'");
             if ( recursive )
                 addImpl(info.filePath(), "", recursive);
         }

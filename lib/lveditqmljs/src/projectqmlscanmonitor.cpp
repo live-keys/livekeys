@@ -27,13 +27,6 @@
 #include <QFileInfo>
 #include <QQmlComponent>
 
-//#define LVCODE_QML_PROJECT_DEBUG_FLAG
-#ifdef LVCODE_QML_PROJECT_DEBUG_FLAG
-#define LVCODE_QML_PROJECT_DEBUG(_param) qDebug() << "QML PROJECT:" << (_param)
-#else
-#define LVCODE_QML_PROJECT_DEBUG(_param)
-#endif
-
 namespace lv{
 
 ProjectQmlScanMonitor::ProjectQmlScanMonitor(
@@ -108,7 +101,7 @@ void ProjectQmlScanMonitor::newProject(const QString &){
 }
 
 void ProjectQmlScanMonitor::directoryChanged(const QString &path){
-    LVCODE_QML_PROJECT_DEBUG("Reseting libraries in directory: " + path);
+    vlog_debug("editqmljs-scanmonitor", "Reseting libraries in directory: " + path);
 
     ProjectQmlScope::Ptr project = m_projectScope;
     project->globalLibraries()->resetLibrariesInPath(path);
@@ -121,7 +114,7 @@ void ProjectQmlScanMonitor::fileChanged(const QString &path){
         return;
     QString fileDir = finfo.path();
 
-    LVCODE_QML_PROJECT_DEBUG("Reseting library for file: " + path);
+    vlog_debug("editqmljs-scanmonitor", "Reseting library for file: " + path);
     ProjectQmlScope::Ptr project = m_projectScope;
     project->globalLibraries()->resetLibrary(fileDir);
     project->implicitLibraries()->resetLibrary(fileDir);
@@ -131,11 +124,11 @@ void ProjectQmlScanMonitor::loadImport(const QString &import){
     QQmlComponent component(m_engine->engine());
     QByteArray code = "import " + import.toUtf8() + "\nQtObject{}\n";
 
-    LVCODE_QML_PROJECT_DEBUG("Importing object for plugininfo: " + code);
+    vlog_debug("editqmljs-scanmonitor", "Importing object for plugininfo: " + code);
 
     component.setData(code, QUrl::fromLocalFile("loading.qml"));
     if ( component.errors().size() > 0 ){
-        LVCODE_QML_PROJECT_DEBUG("Importing object error: " + component.errorString());
+        vlog_debug("editqmljs-scanmonitor", "Importing object error: " + component.errorString());
         m_scanner->updateLoadRequest(import, 0, true);
         return;
     }

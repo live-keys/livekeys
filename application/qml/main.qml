@@ -17,8 +17,9 @@
 import QtQuick 2.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.2
-import editor 1.0
 import base 1.0
+import editor 1.0
+import editor.private 1.0
 import live 1.0
 
 ApplicationWindow{
@@ -29,6 +30,16 @@ ApplicationWindow{
     height: 700
     color : "#293039"
     objectName: "window"
+
+    property WindowControls controls: WindowControls{
+        saveFileDialog: fileSaveDialog
+        openFileDialog: fileOpenDialog
+        openDirDialog: dirOpenDialog
+        messageDialog: messageBox
+        runSpace: runSpace
+        createTimer: createTimer
+        paletteBox: paletteBox
+    }
 
     property bool documentsReloaded : false
     onActiveChanged: {
@@ -48,7 +59,13 @@ ApplicationWindow{
         livecv.commands.add(root, {
             'minimize' : root.showMinimized,
             'toggleMaximizedRuntime' : contentWrap.toggleMaximizedRuntime,
-            'toggleNavigation' : contentWrap.toggleNavigation
+            'toggleNavigation' : contentWrap.toggleNavigation,
+            'openLogInWindow' : mainVerticalSplit.openLogInWindow,
+            'openLogInEditor' : mainVerticalSplit.openLogInEditor,
+            'toggleLog' : mainVerticalSplit.toggleLog,
+            'toggleLogPrefix' : logView.toggleLogPrefix,
+            'addHorizontalEditorView' : mainVerticalSplit.addHorizontalEditor,
+            'removeHorizontalEditorView' : mainVerticalSplit.removeHorizontalEditor
         })
     }
 
@@ -68,11 +85,8 @@ ApplicationWindow{
     LogWindow{
         id : logWindow
         visible : false
+        onVisibleChanged: if ( !visible ) logView.visible = false
         Component.onCompleted: width = root.width
-        onItemAdded: {
-            if ( !visible && text !== "" )
-                header.isLogWindowDirty = true
-        }
     }
 
     Top{
@@ -95,12 +109,7 @@ ApplicationWindow{
         onOpenFile : projectView.openFile()
         onOpenProject: projectView.openProject()
         onSaveFile : projectView.focusEditor.saveAs()
-        onToggleLogWindow : {
-            if ( !logWindow.visible ){
-                logWindow.show()
-                isLogWindowDirty = false
-            }
-        }
+        onToggleLogWindow : mainVerticalSplit.toggleLog()
 
         onOpenSettings: {
             editor.document = project.openFile(livecv.settings.file('editor').path, ProjectDocument.Edit);
@@ -266,314 +275,430 @@ ApplicationWindow{
         }
     }
 
-    WindowControls{
-        id: controls
-        saveFileDialog: fileSaveDialog
-        openFileDialog: fileOpenDialog
-        openDirDialog: dirOpenDialog
-        messageDialog: messageBox
-        runSpace: runSpace
-        createTimer: createTimer
-        paletteBox: paletteBox
+    Component{
+        id: editorFactory
+
+        Editor{
+            id: editor
+            height: parent.height
+            width: 400
+            windowControls: controls
+            onInternalFocusChanged: if ( internalFocus ) projectView.focusEditor = editor
+
+            Component.onCompleted: {
+                projectView.focusEditor = editor
+                if ( project.active ){
+                    editor.document = project.active
+                }
+                forceFocus()
+            }
+        }
     }
 
-
-    Rectangle{
-        id : contentWrap
+    SplitView{
+        id: mainVerticalSplit
         anchors.top : header.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         height : parent.height - header.height
+        orientation: Qt.Vertical
 
-        property var toggledItems: []
-        function toggleMaximizedRuntime(){
-            if ( toggledItems.length === 0 ){
-                toggledItems = [projectView.width, editor.width]
-                projectView.width = 0
-                editor.width = 0
+        handleDelegate: Rectangle{
+            implicitWidth: 1
+            implicitHeight: 1
+            color: "#0e1924"
+        }
+
+        function addHorizontalEditor(){
+            var editorObject = editorFactory.createObject(0)
+            editorObject.height = mainHorizontalSplit.height
+
+
+            var projectViewWidth = projectView.width
+            var viewerWidth = viewer.width
+
+            var editorWidths = []
+            for ( var i = 0; i < mainHorizontalSplit.editors.length; ++i ){
+                editorWidths.push(mainHorizontalSplit.editors[i].width)
+            }
+
+            mainHorizontalSplit.removeItem(viewer)
+            mainHorizontalSplit.addItem(editorObject)
+            mainHorizontalSplit.addItem(viewer)
+
+            projectView.width = projectViewWidth
+            editorObject.width = 400
+            viewer.width = viewer.width - editorObject.width
+
+            for ( var i = 0; i < editorWidths.length; ++i ){
+                mainHorizontalSplit.editors[i].width = editorWidths[i]
+            }
+        }
+
+        function removeHorizontalEditor(){
+            mainHorizontalSplit.removeItem(projectView.focusEditor)
+        }
+
+        function openLogInWindow(){
+            var logItem = logView
+            mainVerticalSplit.removeItem(logView)
+
+            logItem.x = 0
+            logItem.y = 0
+            logItem.width = Qt.binding(function(){ return logWindow.contentWidth; })
+            logItem.height = Qt.binding(function(){ return logWindow.contentHeight; })
+            logItem.isInWindow = true
+
+            logWindow.content = logItem
+            logWindow.show()
+        }
+
+        function openLogInEditor(){
+            var logItem = logWindow.content
+            logWindow.content = null
+            logWindow.close()
+
+            logItem.isInWindow = false
+            logItem.visible = true
+            mainVerticalSplit.addItem(logItem)
+            contentWrap.height = contentWrap.height - 200
+        }
+
+        function toggleLog(){
+            if ( logView.isInWindow ){
+                if ( logView.visible ){
+                    logWindow.close()
+                    logView.visible = false
+                } else {
+                    header.isLogWindowDirty = false
+                    logView.visible = true
+                    logWindow.show()
+                }
             } else {
-                projectView.width = toggledItems[0]
-                editor.width = toggledItems[1]
-                toggledItems = []
+                if ( logView.visible ){
+                    logView.visible = false
+                    mainVerticalSplit.removeItem(logView)
+                } else {
+                    header.isLogWindowDirty = false
+                    logView.visible = true
+                    mainVerticalSplit.addItem(logView)
+                    contentWrap.height = contentWrap.height - 200
+                }
             }
         }
 
-        function toggleNavigation(){
-            projectNavigation.visible = !projectNavigation.visible
-        }
+        Rectangle{
+            id : contentWrap
+            width: parent.width
+            height: parent.height - 200
 
-        SplitView{
-            anchors.fill: parent
-            orientation: Qt.Horizontal
-            handleDelegate: Rectangle {
-                implicitWidth: 1
-                implicitHeight: 1
-                color: "#060d13"
-            }
-
-            Project{
-                id: projectView
-                height: parent.height
-                width: 240
-                visible : !livecv.settings.previewMode
-                windowControls: controls
-            }
-
-            Editor{
-                id: editor
-                height: parent.height
-                width: 400
-                visible : !livecv.settings.previewMode
-                windowControls: controls
-                onInternalFocusChanged: if ( internalFocus ) projectView.focusEditor = editor
-
-                Component.onCompleted: {
-                    projectView.focusEditor = editor
-                    if ( project.active ){
-                        editor.document = project.active
-                    }
-                    forceFocus()
+            property var toggledItems: []
+            function toggleMaximizedRuntime(){
+                if ( toggledItems.length === 0 ){
+                    toggledItems = [projectView.width, editor.width]
+                    projectView.width = 0
+                    editor.width = 0
+                } else {
+                    projectView.width = toggledItems[0]
+                    editor.width = toggledItems[1]
+                    toggledItems = []
                 }
             }
 
-            Rectangle{
-                id : viewer
-                height : parent.height
+            function toggleNavigation(){
+                projectNavigation.visible = !projectNavigation.visible
+            }
 
-                color : "#081017"
+            SplitView{
+                id: mainHorizontalSplit
+                anchors.fill: parent
+                orientation: Qt.Horizontal
+                handleDelegate: Rectangle {
+                    implicitWidth: 1
+                    implicitHeight: 1
+                    color: "#060d13"
+                }
 
-                Item {
-                    id: runSpace
-                    anchors.fill: parent
-                    property string program: editor.text
-                    property variant item
+                property var editors: [editor]
 
-                    Timer {
-                        id: createTimer
-                        interval: 1000
-                        running: true
-                        repeat : false
-                        onTriggered: {
-                            if (project.active === project.inFocus && project.active){
-                                livecv.engine.createObjectAsync(
-                                    runSpace.program,
-                                    runSpace,
-                                    project.active.file.pathUrl(),
-                                    project.active
-                                );
-                            } else if ( project.active ){
-                                livecv.engine.createObjectAsync(
-                                    project.active.content,
-                                    runSpace,
-                                    project.active.file.pathUrl(),
-                                    project.active,
-                                    true
-                                );
-                            }
-                        }
-                    }
-                    Connections{
-                        target: livecv.engine
-                        onAboutToCreateObject : {
-                            if (staticContainer)
-                                staticContainer.beforeCompile()
-                            if ( engineMonitor )
-                                engineMonitor.emitBeforeCompile()
-                        }
-                        onObjectCreated : {
-                            error.text = ''
-                            if (runSpace.item) {
-                                runSpace.item.destroy();
-                            }
-                            runSpace.item = object;
-                            if ( staticContainer )
-                                staticContainer.afterCompile()
-                            if ( engineMonitor )
-                                engineMonitor.emitAfterCompile()
-                        }
-                        onObjectCreationError : {
-                            var lastErrorsText = ''
-                            var lastErrorsLog  = ''
-                            for ( var i = 0; i < errors.length; ++i ){
-                                var lerror = errors[i]
-                                var errorFile = lerror.fileName
-                                var index = errorFile.lastIndexOf('/')
-                                if ( index !== -1 && index < errorFile.length - 1)
-                                    errorFile = errorFile.substring(index + 1)
+                Project{
+                    id: projectView
+                    height: parent.height
+                    width: 240
+                    visible : !livecv.settings.previewMode
+                    windowControls: controls
+                }
 
-                                lastErrorsText +=
-                                    (i !== 0 ? '<br>' : '') +
-                                    '<a href=\"' + lerror.fileName + ':' + lerror.lineNumber + '\">' +
-                                        errorFile + ':' + lerror.lineNumber +
-                                    '</a>' +
-                                    ' ' + lerror.message
-                                lastErrorsLog +=
-                                    (lastErrorsLog === '' ? '' : '\n') +
-                                    'Error: ' + lerror.fileName + ':' + lerror.lineNumber + ' ' + lerror.message
-                            }
-                            error.text = lastErrorsText
-                            console.error(lastErrorsLog)
+                Editor{
+                    id: editor
+                    height: parent.height
+                    width: 400
+                    visible : !livecv.settings.previewMode
+                    windowControls: controls
+                    onInternalFocusChanged: if ( internalFocus ) projectView.focusEditor = editor
+
+                    Component.onCompleted: {
+                        projectView.focusEditor = editor
+                        if ( project.active ){
+                            editor.document = project.active
                         }
+                        forceFocus()
                     }
                 }
 
                 Rectangle{
-                    id : errorWrap
-                    anchors.bottom: parent.bottom
-                    height : error.text !== '' ? error.height + 20 : 0
-                    width : parent.width
-                    color : editor.color
-                    Behavior on height {
-                        SpringAnimation { spring: 3; damping: 0.1 }
+                    id : viewer
+                    height : parent.height
+
+                    color : "#070c11"
+
+                    Item{
+                        id: runSpace
+                        anchors.fill: parent
+                        property string program: editor.text
+                        property variant item
+
+                        Timer{
+                            id: createTimer
+                            interval: 1000
+                            running: true
+                            repeat : false
+                            onTriggered: {
+                                if (project.active === project.inFocus && project.active){
+                                    livecv.engine.createObjectAsync(
+                                        runSpace.program,
+                                        runSpace,
+                                        project.active.file.pathUrl(),
+                                        project.active
+                                    );
+                                } else if ( project.active ){
+                                    livecv.engine.createObjectAsync(
+                                        project.active.content,
+                                        runSpace,
+                                        project.active.file.pathUrl(),
+                                        project.active,
+                                        true
+                                    );
+                                }
+                            }
+                        }
+
+                        Connections{
+                            target: livecv.engine
+                            onAboutToCreateObject : {
+                                if (staticContainer)
+                                    staticContainer.beforeCompile()
+                                if ( engineMonitor )
+                                    engineMonitor.emitBeforeCompile()
+                            }
+                            onObjectCreated : {
+                                error.text = ''
+                                if (runSpace.item) {
+                                    runSpace.item.destroy();
+                                }
+                                runSpace.item = object;
+                                if ( staticContainer )
+                                    staticContainer.afterCompile()
+                                if ( engineMonitor )
+                                    engineMonitor.emitAfterCompile()
+                            }
+                            onObjectCreationError : {
+                                var lastErrorsText = ''
+                                var lastErrorsLog  = ''
+                                for ( var i = 0; i < errors.length; ++i ){
+                                    var lerror = errors[i]
+                                    var errorFile = lerror.fileName
+                                    var index = errorFile.lastIndexOf('/')
+                                    if ( index !== -1 && index < errorFile.length - 1)
+                                        errorFile = errorFile.substring(index + 1)
+
+                                    lastErrorsText +=
+                                        (i !== 0 ? '<br>' : '') +
+                                        '<a href=\"' + lerror.fileName + ':' + lerror.lineNumber + '\">' +
+                                            errorFile + ':' + lerror.lineNumber +
+                                        '</a>' +
+                                        ' ' + lerror.message
+                                    lastErrorsLog +=
+                                        (lastErrorsLog === '' ? '' : '\n') +
+                                        'Error: ' + lerror.fileName + ':' + lerror.lineNumber + ' ' + lerror.message
+                                }
+                                error.text = lastErrorsText
+                                console.error(lastErrorsLog)
+                            }
+                        }
                     }
 
                     Rectangle{
-                        width : 14
-                        height : parent.height
-                        color : "#601818"
-                        visible: error.visible
-                    }
-                    Text {
-                        id: error
-                        anchors.left : parent.left
-                        anchors.leftMargin: 25
-                        anchors.verticalCenter: parent.verticalCenter
+                        id : errorWrap
+                        anchors.bottom: parent.bottom
+                        height : error.text !== '' ? error.height + 20 : 0
+                        width : parent.width
+                        color : editor.color
+                        Behavior on height {
+                            SpringAnimation { spring: 3; damping: 0.1 }
+                        }
 
-                        width: parent.width
-                        wrapMode: Text.Wrap
-                        textFormat: Text.StyledText
+                        Rectangle{
+                            width : 14
+                            height : parent.height
+                            color : "#601818"
+                            visible: error.visible
+                        }
+                        Text {
+                            id: error
+                            anchors.left : parent.left
+                            anchors.leftMargin: 25
+                            anchors.verticalCenter: parent.verticalCenter
 
-                        linkColor: "#c5d0d7"
-                        font.family: "Ubuntu Mono, Courier New, Courier"
-                        font.pointSize: editor.font.pointSize
-                        text: ''
-                        color: "#c5d0d7"
-                        visible : text === "" ? false : true
+                            width: parent.width
+                            wrapMode: Text.Wrap
+                            textFormat: Text.StyledText
 
-                        onLinkActivated: {
-                            project.openFile(link.substring(0, link.lastIndexOf(':')), ProjectDocument.EditIfNotOpen)
+                            linkColor: "#c5d0d7"
+                            font.family: "Ubuntu Mono, Courier New, Courier"
+                            font.pointSize: editor.font.pointSize
+                            text: ''
+                            color: "#c5d0d7"
+                            visible : text === "" ? false : true
+
+                            onLinkActivated: {
+                                project.openFile(link.substring(0, link.lastIndexOf(':')), ProjectDocument.EditIfNotOpen)
+                            }
                         }
                     }
+
                 }
 
             }
 
+            Rectangle{
+                id: paletteBox
+                x: 0
+                y: visible ? 0 : 20
+                width: paletteItem ? paletteItem.width + 10: 0
+                height: paletteItem ? paletteItem.height + 10 : 0
+                color: "#02070b"
+                border.width: 1
+                border.color: "#061b24"
+                visible: children.length > 0
+                opacity: visible ? 1 : 0
+                clip: true
+
+                property Item paletteItem : null
+                children: paletteItem ? [paletteItem] : []
+
+                Behavior on opacity{
+                    NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
+                }
+                Behavior on y{
+                    id : moveYBehavior
+                    NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
+                }
+
+                function setPalette(palette, cursorRectangle, editorPosition){
+                    if ( palette ){
+                        moveYBehavior.enabled = false
+
+                        var startY = editorPosition.y + cursorRectangle.y + 38
+
+                        paletteBox.x = editorPosition.x + cursorRectangle.x + 7
+                        paletteBox.y = startY - cursorRectangle.y / 2
+
+                        palette.item.x = 5
+                        palette.item.y = 7
+
+                        paletteBox.paletteItem = palette.item
+
+                        moveYBehavior.enabled = true
+
+                        var newX = paletteBox.x - paletteBox.width / 2
+                        paletteBox.x = newX < 0 ? 0 : newX
+
+                        var upY = startY - paletteBox.height
+                        var downY = startY + cursorRectangle.height + 5
+                        paletteBox.y = upY > 0 ? upY : downY
+                    } else {
+                        paletteBox.paletteItem = null
+                    }
+                }
+            }
+
+            ProjectNavigation{
+                id: projectNavigation
+                anchors.left: parent.left
+
+                width: projectView.width + editor.width
+                height: parent.height
+                visible: false
+                onOpen: {
+                    projectView.focusEditor.document = project.openFile(path, ProjectDocument.EditIfNotOpen)
+                    projectView.focusEditor.forceFocus()
+                }
+                onCloseFile: {
+                    var doc = project.documentModel.isOpened(path)
+                    if ( doc ){
+                        if ( doc.isDirty ){
+                            messageBox.show('File contains unsaved changes. Would you like to save them before closing?',
+                            {
+                                button1Name : 'Yes',
+                                button1Function : function(){
+                                    doc.save()
+                                    project.closeFile(path)
+                                    messageBox.close()
+                                },
+                                button2Name : 'No',
+                                button2Function : function(){
+                                    project.closeFile(path)
+                                    messageBox.close()
+                                },
+                                button3Name : 'Cancel',
+                                button3Function : function(){
+                                    messageBox.close()
+                                },
+                                returnPressed : function(){
+                                    doc.save()
+                                    project.closeFile(path)
+                                    messageBox.close()
+                                }
+                            })
+                        } else
+                            project.closeFile(path)
+                    }
+                }
+                onCancel: {
+                    editor.forceFocus()
+                }
+            }
+
+            ProjectAddEntry{
+                id: projectAddEntry
+                anchors.left: parent.left
+                width: projectView.width + editor.width
+                height: parent.height
+                visible: false
+                onAccepted: {
+                    if ( isFile ){
+                        var f = project.fileModel.addFile(entry, name)
+                        if ( f !== null )
+                            project.openFile(f, ProjectDocument.Edit)
+                    } else {
+                        project.fileModel.addDirectory(entry, name)
+                    }
+                }
+            }
         }
+    }
 
-        Rectangle{
-            id: paletteBox
-            x: 0
-            y: visible ? 0 : 20
-            width: paletteItem ? paletteItem.width + 10: 0
-            height: paletteItem ? paletteItem.height + 10 : 0
-            color: "#02070b"
-            border.width: 1
-            border.color: "#061b24"
-            visible: children.length > 0
-            opacity: visible ? 1 : 0
-            clip: true
+    property LogContainer logView : LogContainer{
+        id: logView
+        visible: false
+        isInWindow: false
+        width: parent.width
+        height: 200
 
-            property Item paletteItem : null
-            children: paletteItem ? [paletteItem] : []
-
-            Behavior on opacity{
-                NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
-            }
-            Behavior on y{
-                id : moveYBehavior
-                NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
-            }
-
-            function setPalette(palette, cursorRectangle, editorPosition){
-                if ( palette ){
-                    moveYBehavior.enabled = false
-
-                    var startY = editorPosition.y + cursorRectangle.y + 38
-
-                    paletteBox.x = editorPosition.x + cursorRectangle.x + 7
-                    paletteBox.y = startY - cursorRectangle.y / 2
-
-                    palette.item.x = 5
-                    palette.item.y = 7
-
-                    paletteBox.paletteItem = palette.item
-
-                    moveYBehavior.enabled = true
-
-                    var newX = paletteBox.x - paletteBox.width / 2
-                    paletteBox.x = newX < 0 ? 0 : newX
-
-                    var upY = startY - paletteBox.height
-                    var downY = startY + cursorRectangle.height + 5
-                    paletteBox.y = upY > 0 ? upY : downY
-                } else {
-                    paletteBox.paletteItem = null
-                }
-            }
-        }
-
-        ProjectNavigation{
-            id: projectNavigation
-            anchors.left: parent.left
-
-            width: projectView.width + editor.width
-            height: parent.height
-            visible: false
-            onOpen: {
-                projectView.focusEditor.document = project.openFile(path, ProjectDocument.EditIfNotOpen)
-                projectView.focusEditor.forceFocus()
-            }
-            onCloseFile: {
-                var doc = project.documentModel.isOpened(path)
-                if ( doc ){
-                    if ( doc.isDirty ){
-                        messageBox.show('File contains unsaved changes. Would you like to save them before closing?',
-                        {
-                            button1Name : 'Yes',
-                            button1Function : function(){
-                                doc.save()
-                                project.closeFile(path)
-                                messageBox.close()
-                            },
-                            button2Name : 'No',
-                            button2Function : function(){
-                                project.closeFile(path)
-                                messageBox.close()
-                            },
-                            button3Name : 'Cancel',
-                            button3Function : function(){
-                                messageBox.close()
-                            },
-                            returnPressed : function(){
-                                doc.save()
-                                project.closeFile(path)
-                                messageBox.close()
-                            }
-                        })
-                    } else
-                        project.closeFile(path)
-                }
-            }
-            onCancel: {
-                editor.forceFocus()
-            }
-        }
-
-        ProjectAddEntry{
-            id: projectAddEntry
-            anchors.left: parent.left
-            width: projectView.width + editor.width
-            height: parent.height
-            visible: false
-            onAccepted: {
-                if ( isFile ){
-                    var f = project.fileModel.addFile(entry, name)
-                    if ( f !== null )
-                        project.openFile(f, ProjectDocument.Edit)
-                } else {
-                    project.fileModel.addDirectory(entry, name)
-                }
-            }
+        onItemAdded: {
+            if ( !visible  )
+                header.isLogWindowDirty = true
         }
     }
 

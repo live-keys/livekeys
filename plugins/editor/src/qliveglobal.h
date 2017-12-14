@@ -14,23 +14,19 @@
 **
 ****************************************************************************/
 
-#ifndef LVEDITOR_PLUGIN_H
-#define LVEDITOR_PLUGIN_H
+#ifndef QLIVEGLOBAL_H
+#define QLIVEGLOBAL_H
 
-#include <QQmlExtensionPlugin>
-#include "live/lveditorglobal.h"
+#include <qglobal.h>
 
-class LV_EDITOR_EXPORT EditorPlugin : public QQmlExtensionPlugin{
+#ifndef Q_LIVE_STATIC
+#  ifdef Q_LIVE_LIB
+#    define Q_LIVE_EXPORT Q_DECL_EXPORT
+#  else
+#    define Q_LIVE_EXPORT Q_DECL_IMPORT
+#  endif
+#else
+#  define Q_LIVE_EXPORT
+#endif
 
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
-
-public:
-    EditorPlugin(QObject* parent = Q_NULLPTR) : QQmlExtensionPlugin(parent){}
-    ~EditorPlugin(){}
-
-    void registerTypes(const char* uri) Q_DECL_OVERRIDE;
-    void initializeEngine(QQmlEngine* engine, const char* uri) Q_DECL_OVERRIDE;
-};
-
-#endif // LVEDITOR_PLUGIN_H
+#endif // QLIVEGLOBAL_H

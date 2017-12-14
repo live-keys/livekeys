@@ -37,14 +37,6 @@
 
 #include "plugintypesfacade.h"
 
-
-//#define LVDOCUMENT_QML_SCANNER_DEBUG
-#ifdef LVDOCUMENT_QML_SCANNER_DEBUG
-#define LVDOCUMENT_QML_SCANNER_DEBUG(_param) qDebug() << "QML SCANNER:" << (_param)
-#else
-#define LVDOCUMENT_QML_SCANNER_DEBUG(_param)
-#endif
-
 namespace lv{
 
 namespace projectqml_helpers{
@@ -95,7 +87,7 @@ void updateLibraryPrototypes(
     if ( incompletePrototypes == 0 || missingDependencies == 0 )
         library->setStatus(QmlLibraryInfo::Done);
 
-    LVDOCUMENT_QML_SCANNER_DEBUG(
+    vlog_debug("editqmljs-projectscanner",
         "Updated library prototypes: " + path + " Missing prototypes: " + QString::number(incompletePrototypes) +
         " Missing dependencies: " + QString::number(missingDependencies)
     );
@@ -122,7 +114,7 @@ QmlLibraryInfo::ScanStatus loadPluginInfo(
         QString uriForPath = projectScope->uriForPath(path);
 
         if ( uriForPath.isEmpty() || scanner->requestErrorStatus(path) ){
-            LVDOCUMENT_QML_SCANNER_DEBUG("Library PluginInfo Scan Error: " + path + ", uri:" + uriForPath);
+            vlog_debug("editqmljs-projectscanner", "Library PluginInfo Scan Error: " + path + ", uri:" + uriForPath);
             return QmlLibraryInfo::ScanError;
         }
 
@@ -192,7 +184,7 @@ QmlLibraryInfo::ScanStatus loadPluginInfo(
             foreach( const QString& dpath, dependencyPaths ){
                 QmlLibraryInfo::Ptr linfo = projectScope->globalLibraries()->libraryInfo(dpath);
                 if ( linfo->status() == QmlLibraryInfo::NotScanned){
-                    LVDOCUMENT_QML_SCANNER_DEBUG("QmlInfo for: " + path + " requires " + dpath);
+                    vlog_debug("editqmljs-projectscanner", "QmlInfo for: " + path + " requires " + dpath);
                     return QmlLibraryInfo::RequiresDependency; /// try again when more libraries are populated
                 }
                 dependentLibraries.append(linfo);
@@ -288,7 +280,7 @@ void scanQmlDirForQmlExports(
 {
     QList<QString> dependencyPaths = library->dependencyPaths();
     QList<LanguageUtils::FakeMetaObject::ConstPtr> objects;
-    LVDOCUMENT_QML_SCANNER_DEBUG("Scanning qmldir components in: " + path);
+    vlog_debug("editqmljs-projectscanner", "Scanning qmldir components in: " + path);
 
     QHash<QString, QmlDirParser::Component> components = dirParser.components();
 
@@ -338,7 +330,7 @@ void scanPathForQmlExports(
 {
     QList<QString> dependencyPaths = library->dependencyPaths();
     QList<LanguageUtils::FakeMetaObject::ConstPtr> objects;
-    LVDOCUMENT_QML_SCANNER_DEBUG("Scannig path: " + path);
+    vlog_debug("editqmljs-projectscanner", "Scannig path: " + path);
 
     QDirIterator dit(path);
     while( dit.hasNext() ){
@@ -380,7 +372,7 @@ QMap<QString, QmlLibraryInfo::Ptr> updateLibrary(
         ProjectQmlScanner* scanner,
         QList<QmlLibraryDependency>& dependencies)
 {
-    LVDOCUMENT_QML_SCANNER_DEBUG("Updating library: " + path);
+    vlog_debug("editqmljs-projectscanner", "Updating library: " + path);
     QMap<QString, QmlLibraryInfo::Ptr> base;
     QmlLibraryInfo::Ptr baseLib = QmlLibraryInfo::create();
     base[path] = baseLib;
@@ -464,7 +456,7 @@ QMap<QString, QmlLibraryInfo::Ptr> updateLibrary(
             } else {
                 /// Read new stream
 
-                LVDOCUMENT_QML_SCANNER_DEBUG("Updating library from stream: " + path);
+                vlog_debug("editqmljs-projectscanner", "Updating library from stream: " + path);
 
                 QHash<QString, LanguageUtils::FakeMetaObject::ConstPtr> newObjects;
                 QmlJS::TypeDescriptionReader reader(defaultQmltypesPath, stream);

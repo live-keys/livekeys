@@ -28,7 +28,7 @@
 namespace lv{
 
 VisualLogModel::VisualLogModel(QQmlEngine *engine)
-    : QAbstractListModel(engine)
+    : VisualLogBaseModel(engine)
     , m_engine(engine)
     , m_textComponent(new QQmlComponent(m_engine))
 {
@@ -54,62 +54,83 @@ QVariant VisualLogModel::data(const QModelIndex &index, int role) const{
     if ( index.row() >= m_entries.size() )
         return QVariant();
 
-    const VisualLogEntry& entry = m_entries[index.row()];
-    if ( role == Qt::UserRole ){
-        if ( entry.component == 0 ){
-            if ( entry.context == 0 ){
-                entry.context = new QQmlContext(m_engine, (QObject*)this);
-                entry.context->setContextProperty("modelData", entry.data);
-                entry.context->setContextProperty("modelParent", (QObject*)this);
-            }
-
-            QObject* ob = m_textComponent->create(entry.context);
-            ob->setProperty("y", 5);
-            return QVariant::fromValue(ob);
-        } else {
-            if ( entry.context == 0 ){
-                entry.context = new QQmlContext(m_engine, (QObject*)this);
-                entry.context->setContextProperty("modelData", *entry.objectData);
-                entry.context->setContextProperty("modelParent", (QObject*)this);
-            }
-
-            QObject* ob = entry.component->create(entry.context);
-            ob->setProperty("y", 5);
-            return QVariant::fromValue(ob);
-        }
-
+    if ( role == VisualLogModel::Msg ){
+        return entryDataAt(index.row());
+    } else if ( role == VisualLogModel::Prefix ) {
+        return m_entries[index.row()].prefix;
     }
     return QVariant();
-}
-
-QHash<int, QByteArray> VisualLogModel::roleNames() const{
-    QHash<int, QByteArray> roles;
-    roles[Qt::UserRole] = "msg";
-    return roles;
 }
 
 const VisualLogEntry &VisualLogModel::entryAt(int index){
     return m_entries.at(index);
 }
 
-void VisualLogModel::appendMessage(const QString& tag, const QString& prefix, const QString &message){
+void VisualLogModel::onMessage(
+        const VisualLog::Configuration *configuration,
+        const VisualLog::MessageInfo &messageInfo,
+        const QString &message)
+{
     beginInsertRows(QModelIndex(), m_entries.size(), m_entries.size());
-    m_entries.append(VisualLogEntry(tag, prefix, message));
+    m_entries.append( VisualLogEntry(
+        messageInfo.tag(configuration), messageInfo.prefix(configuration), message
+    ));
     endInsertRows();
 }
 
-void VisualLogModel::appendView(
-        const QString &tag,
-        const QString &prefix,
+void VisualLogModel::onView(
+        const VisualLog::Configuration *configuration,
+        const VisualLog::MessageInfo &messageInfo,
         const QString &viewName,
         const QVariant &value)
 {
     QQmlComponent* comp = component(viewName);
     if ( comp ){
         beginInsertRows(QModelIndex(), m_entries.size(), m_entries.size());
-        m_entries.append(VisualLogEntry(tag, prefix, new QVariant(value), comp));
+        m_entries.append(VisualLogEntry(
+            messageInfo.tag(configuration), messageInfo.prefix(configuration), new QVariant(value), comp)
+        );
         endInsertRows();
     }
+}
+
+QVariant VisualLogModel::entryDataAt(int index) const{
+    const VisualLogEntry& entry = m_entries[index];
+    if ( entry.component == 0 ){
+        if ( entry.context == 0 ){
+            entry.context = new QQmlContext(m_engine, (QObject*)this);
+            entry.context->setContextProperty("modelData", entry.data);
+            entry.context->setContextProperty("modelParent", (QObject*)this);
+        }
+
+        QObject* ob = m_textComponent->create(entry.context);
+        ob->setProperty("y", 5);
+        return QVariant::fromValue(ob);
+    } else {
+        if ( entry.context == 0 ){
+            entry.context = new QQmlContext(m_engine, (QObject*)this);
+            entry.context->setContextProperty("modelData", *entry.objectData);
+            entry.context->setContextProperty("modelParent", (QObject*)this);
+        }
+
+        QObject* ob = entry.component->create(entry.context);
+        ob->setProperty("y", 5);
+        return QVariant::fromValue(ob);
+    }
+}
+
+QString VisualLogModel::entryPrefixAt(int index) const{
+    return m_entries[index].prefix;
+}
+
+const VisualLogEntry &VisualLogModel::entryAt(int index) const{
+    return m_entries.at(index);
+}
+
+void VisualLogModel::clearValues(){
+    beginResetModel();
+    m_entries.clear();
+    endResetModel();
 }
 
 QQmlComponent *VisualLogModel::component(const QString &key){
@@ -145,25 +166,6 @@ QQmlComponent *VisualLogModel::component(const QString &key){
 
 QString VisualLogModel::componentPath(const QString &componentKey){
     return PluginContext::applicationPath() + "/" + componentKey;
-}
-
-VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, const QString &p)
-    : prefix(pprefix)
-    , tag(ptag)
-    , data(p)
-    , objectData(0)
-    , component(0)
-    , context(0)
-{
-}
-
-VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, QVariant *od, QQmlComponent *c)
-    : prefix(pprefix)
-    , tag(ptag)
-    , objectData(od)
-    , component(c)
-    , context(0)
-{
 }
 
 }// namespace

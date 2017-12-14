@@ -23,4 +23,6 @@ HEADERS += \
     $$PWD/live/filter.h \
     $$PWD/live/shareddata.h \
     $$PWD/live/filterworker.h \
-    $$PWD/live/keymap.h
+    $$PWD/live/keymap.h \
+    $$PWD/live/visuallogfilter.h \
+    $$PWD/live/visuallogbasemodel.h

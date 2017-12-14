@@ -26,10 +26,10 @@ HEADERS += \
     $$PWD/documentcursorinfo.h \
     $$PWD/documentqmlfragment.h \
     $$PWD/qmlobjectcodeserializer.h \
-    $$PWD/editor_plugin.h \
     $$PWD/lveditorglobal.h \
     $$PWD/projectextension.h \
-    $$PWD/editorglobalobject.h
+    $$PWD/editorglobalobject.h \
+    $$PWD/editorprivate_plugin.h
 
 SOURCES += \
     $$PWD/project.cpp \
@@ -57,6 +57,6 @@ SOURCES += \
     $$PWD/documentcursorinfo.cpp \
     $$PWD/documentqmlfragment.cpp \
     $$PWD/qmlobjectcodeserializer.cpp \
-    $$PWD/editor_plugin.cpp \
     $$PWD/projectextension.cpp \
-    $$PWD/editorglobalobject.cpp
+    $$PWD/editorglobalobject.cpp \
+    $$PWD/editorprivate_plugin.cpp

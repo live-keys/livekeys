@@ -1,0 +1,11 @@
+module editor
+plugin editor
+
+depends QtQuick 2.3
+
+WindowControls   1.0 WindowControls.qml
+Editor           1.0 Editor.qml
+FragmentEditor   1.0 FragmentEditor.qml
+DocumentFragment 1.0 DocumentFragment.qml
+SuggestionBox    1.0 SuggestionBox.qml
+ContextMenuStyle 1.0 ContextMenuStyle.qml

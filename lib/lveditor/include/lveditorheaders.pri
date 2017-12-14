@@ -26,7 +26,7 @@ HEADERS += \
     $$PWD/live/documentqmlfragment.h \
     $$PWD/live/qmlobjectcodeserializer.h \
     $$PWD/live/editorsettingscategory.h \
-    $$PWD/live/editor_plugin.h \
     $$PWD/live/lveditorglobal.h \
     $$PWD/live/projectextension.h \
-    $$PWD/live/editorglobalobject.h
+    $$PWD/live/editorglobalobject.h \
+    $$PWD/live/editorprivate_plugin.h

@@ -71,9 +71,9 @@ public:
 public slots:
     void newProject();
     void closeProject();
-    lv::ProjectDocument* openFile(const QUrl& rootPath, int mode);
-    lv::ProjectDocument* openFile(const QString& rootPath, int mode);
-    lv::ProjectDocument* openFile(lv::ProjectFile* file, int mode);
+    lv::ProjectDocument* openFile(const QUrl& rootPath, int mode = lv::ProjectDocument::EditIfNotOpen);
+    lv::ProjectDocument* openFile(const QString& rootPath, int mode = lv::ProjectDocument::EditIfNotOpen);
+    lv::ProjectDocument* openFile(lv::ProjectFile* file, int mode = lv::ProjectDocument::EditIfNotOpen);
     void setActive(lv::ProjectFile *file);
 
     bool isDirProject() const;

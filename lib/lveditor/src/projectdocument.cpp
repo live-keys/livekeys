@@ -28,12 +28,15 @@
 #include <QTextStream>
 #include <QFileInfo>
 
+#include <QDebug>
+
 namespace lv{
 
 ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *parent)
     : QObject(parent)
     , m_file(file)
     , m_editingDocument(0)
+    , m_lastChange(m_changes.end())
     , m_isDirty(false)
     , m_isSynced(true)
     , m_isMonitored(isMonitored)
@@ -44,7 +47,7 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
 
 void ProjectDocument::dumpContent(const QString &content){
     m_content = content;
-    emit contentChanged();
+    emit contentChanged(0);
 }
 
 void ProjectDocument::readContent(){
@@ -52,9 +55,9 @@ void ProjectDocument::readContent(){
         m_content = parentAsProject()->lockedFileIO()->readFromFile(m_file->path());
         m_lastModified = QFileInfo(m_file->path()).lastModified();
         m_changes.clear();
+        m_lastChange = m_changes.end();
         m_isSynced = true;
-        emit contentRead();
-        emit contentChanged();
+        emit contentChanged(0);
     }
 }
 
@@ -122,6 +125,26 @@ void ProjectDocument::updateBindings(int position, int charsRemoved, const QStri
 
 }
 
+void ProjectDocument::updateMarkers(int position, int charsRemoved, int charsAdded){
+    if ( m_markers.isEmpty() )
+        return;
+
+    auto it = m_markers.begin();
+    while ( it != m_markers.end() ){
+        ProjectDocumentMarker::Ptr& marker = *it;
+        if ( marker->m_position <= position )
+            break;
+
+        if ( charsRemoved > 0 && marker->position() <= position + charsRemoved ){
+            marker->invalidate();
+            it = m_markers.erase(it);
+        } else {
+            marker->m_position = marker->m_position - charsRemoved + charsAdded;
+        }
+        ++it;
+    }
+}
+
 // solve bindings that are moved from one block to the next
 // (ex. when new line is inserted before a bind)
 void ProjectDocument::updateBindingBlocks(int position, const QString& addedText){
@@ -161,6 +184,14 @@ void ProjectDocument::updateBindingBlocks(int position, const QString& addedText
         }
 
     }
+}
+
+QString ProjectDocument::getCharsRemoved(int position, int count){
+    if ( count > 0 ){
+        syncContent();
+        return m_content.mid(position, count);
+    }
+    return "";
 }
 
 void ProjectDocument::assignEditingDocument(QTextDocument *doc, DocumentHandler* handler){
@@ -212,33 +243,84 @@ CodeRuntimeBinding *ProjectDocument::addNewBinding(CodeDeclaration::Ptr declarat
     return binding;
 }
 
-void ProjectDocument::documentContentsChanged(int position, int charsRemoved, const QString &addedText){
+void ProjectDocument::documentContentsChanged(
+        DocumentHandler* author,
+        int position,
+        int charsRemoved,
+        const QString &addedText)
+{
+    updateMarkers(position, charsRemoved, addedText.size());
     updateBindings(position, charsRemoved, addedText);
     bool hasPendingChange = m_changes.size() > 0 && m_changes.last().commited == false;
-    if ( charsRemoved == 0 && addedText.length() == 1 && !addedText[0].isSpace() ){
-        if ( hasPendingChange )
-            m_changes.last().charsAdded.append(addedText);
-        else {
-            m_changes.append(ProjectDocumentAction(position, addedText, "", false));
+    bool isPendingChangeCompatible =
+            hasPendingChange &&
+            (m_changes.last().position + m_changes.last().charsAdded.size() == position) &&
+            charsRemoved == 0 && addedText.length() == 1 && !addedText[0].isSpace();
+
+    if ( hasPendingChange && isPendingChangeCompatible ){
+        if ( m_lastChange == m_changes.end() ){
+            --m_lastChange;
+            m_lastChange->undo();
         }
+        m_changes.last().charsAdded.append(addedText);
     } else {
         if (hasPendingChange){
             m_changes.last().commited = true;
         }
         m_changes.append(
-            ProjectDocumentAction(position, addedText, m_content.mid(position, charsRemoved), false)
+            ProjectDocumentAction(this, position, addedText, getCharsRemoved(position, charsRemoved), false)
         );
+        if ( m_lastChange == m_changes.end() )
+            --m_lastChange;
     }
-    if ( m_changes.size() > 100 )
+    if ( m_changes.size() > 100 ){
+        if ( m_lastChange == m_changes.begin() && m_lastChange != m_changes.end() ){
+            m_lastChange->redo();
+            ++m_lastChange;
+        }
         m_changes.removeFirst();
+    }
 
     setIsDirty(true);
 
     resetSync();
-    emit contentChanged();
+    emit contentChanged(author);
 }
 
-void ProjectDocument::documentContentsSilentChanged(int position, int charsRemoved, const QString &addedText){
+void ProjectDocument::documentContentsSilentChanged(
+        DocumentHandler* author,
+        int position,
+        int charsRemoved,
+        const QString &addedText)
+{
+    updateMarkers(position, charsRemoved, addedText.size());
+    bool hasPendingChange = m_changes.size() > 0 && m_changes.last().commited == false;
+    bool isPendingChangeCompatible = hasPendingChange && m_changes.last().position == position;
+
+    if ( hasPendingChange && isPendingChangeCompatible ){
+        if ( m_lastChange == m_changes.end() ){
+            --m_lastChange;
+            m_lastChange->undo();
+        }
+        m_changes.last().charsAdded = addedText;
+    } else {
+        if (hasPendingChange){
+            m_changes.last().commited = true;
+        }
+        m_changes.append(
+            ProjectDocumentAction(this, position, addedText, m_content.mid(position, charsRemoved), false)
+        );
+        if ( m_lastChange == m_changes.end() )
+            --m_lastChange;
+    }
+    if ( m_changes.size() > 100 ){
+        if ( m_lastChange == m_changes.begin() && m_lastChange != m_changes.end() ){
+            m_lastChange->redo();
+            ++m_lastChange;
+        }
+        m_changes.removeFirst();
+    }
+
     QLinkedList<CodeRuntimeBinding*>::iterator it = m_bindings.begin();
     while( it != m_bindings.end() ){
         CodeRuntimeBinding* binding = *it;
@@ -264,8 +346,32 @@ void ProjectDocument::documentContentsSilentChanged(int position, int charsRemov
 
     setIsDirty(true);
 
-//    resetSync();
-//    emit contentChanged();
+    resetSync();
+    emit contentChanged(author);
+}
+
+ProjectDocumentMarker::Ptr ProjectDocument::addMarker(int position){
+    // markers are added in descending order according to their position
+    auto it = m_markers.begin();
+    while( it != m_markers.end() ){
+        if ( (*it)->position() <= position )
+            break;
+        ++it;
+    }
+    ProjectDocumentMarker::Ptr result(new ProjectDocumentMarker(position));
+    m_markers.insert(it, result);
+    return result;
+}
+
+void ProjectDocument::removeMarker(ProjectDocumentMarker::Ptr marker){
+    auto it = m_markers.begin();
+    while ( it != m_markers.end() ){
+        if ( (*it).data() == marker.data() ){
+            m_markers.erase(it);
+            return;
+        }
+        ++it;
+    }
 }
 
 CodeRuntimeBinding *ProjectDocument::bindingAt(int position){
@@ -376,10 +482,11 @@ bool ProjectDocument::saveAs(const QUrl &url){
 }
 
 void ProjectDocument::syncContent() const{
-    if ( m_editingDocument && !m_isSynced ){
-        m_content = m_editingDocument->toPlainText();
-        m_isSynced = true;
+    while ( m_lastChange != m_changes.end() ){
+        m_lastChange->redo();
+        ++m_lastChange;
     }
+    m_isSynced = true;
 }
 
 ProjectDocument::~ProjectDocument(){
@@ -391,11 +498,11 @@ ProjectDocument::~ProjectDocument(){
 }
 
 void ProjectDocumentAction::undo(){
-
+    parent->m_content.replace(position, charsAdded.size(), charsRemoved);
 }
 
 void ProjectDocumentAction::redo(){
-
+    parent->m_content.replace(position, charsRemoved.size(), charsAdded);
 }
 
 ProjectDocumentBlockData::~ProjectDocumentBlockData(){
@@ -414,30 +521,5 @@ void ProjectDocumentBlockData::removeBinding(CodeRuntimeBinding *binding){
     if ( binding->m_parentBlock == this )
         binding->m_parentBlock = 0;
 }
-
-//QCodeRuntimeBinding::QCodeRuntimeBinding(QProjectDocument *parent)
-//    : QObject(parent)
-//    , propertyPosition(-1)
-//    , propertyLength(0)
-//    , valuePositionOffset(-1)
-//    , valueLength(0)
-//    , modifiedByEngine(false)
-//    , parentBlock(0)
-//    , m_document(parent)
-//    , m_converter(0)
-//{}
-
-//QCodeRuntimeBinding::~QCodeRuntimeBinding(){
-//    if ( parentBlock ){
-//        parentBlock->removeBinding(this);
-//    }
-//}
-
-//void QCodeRuntimeBinding::updateValue(){
-//    if ( m_converter )
-//        m_document->updateBindingValue(
-//            this, m_converter->serialize()->toCode(sender()->property(propertyChain.last().toUtf8()))
-//        );
-//}
 
 }// namespace

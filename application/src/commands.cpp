@@ -153,9 +153,11 @@ void Commands::Node::remove(QObject *object){
 
     while (nodeit != nodes.end() && nodeit.key() == object->objectName()){
         if ( nodeit.value()->object == object ){
+            delete nodeit.value();
             nodes.erase(nodeit);
             return;
         }
+        ++nodeit;
     }
 }
 

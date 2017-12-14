@@ -20,65 +20,23 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 
 Window {
-    id : container
+    id : root
     width: 400
     height: 200
     title: "Live CV Log"
     color : "#081017"
 
+    property alias contentWidth : container.width
+    property alias contentHeight : container.height
+
+    property Item content : null
+
     signal itemAdded()
 
-    ScrollView {
-        id: logScroll
+    Item{
+        id: container
         anchors.fill: parent
-        anchors.margins: 5
-        clip: true
-
-        style: ScrollViewStyle {
-            transientScrollBars: false
-            handle: Item {
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle {
-                    color: "#0b1f2e"
-                    anchors.fill: parent
-                }
-            }
-            scrollBarBackground: Item{
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle{
-                    anchors.fill: parent
-                    color: container.color
-                }
-            }
-            decrementControl: null
-            incrementControl: null
-            frame: Rectangle{color: container.color}
-            corner: Rectangle{color: container.color}
-        }
-
-        ListView{
-            id: logview
-            model: livecv.log
-            anchors.fill: parent
-            delegate: Item{
-                Text{
-
-                }
-
-                width: logview.model.width
-                height: msg.height + 2
-                children: [msg]
-            }
-
-            onAddChanged: {
-                if ( logScroll.flickableItem.contentHeight > logScroll.height )
-                    logScroll.flickableItem.contentY = logScroll.flickableItem.contentHeight - logScroll.height
-                container.itemAdded()
-            }
-            onWidthChanged: logview.model.width = width
-        }
-
+        children: root.content ? [root.content] : []
     }
+
 }

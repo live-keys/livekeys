@@ -18,6 +18,7 @@ import QtQuick 2.4
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
+import editor.private 1.0
 import base 1.0
 
 Rectangle{
@@ -34,19 +35,13 @@ Rectangle{
     property alias font: editorArea.font
     property alias internalFocus : editorArea.activeFocus
 
-    property WindowControls windowControls : null
+    property var windowControls : null
     property var document: null
     onDocumentChanged: {
-//        contentReadListener.target = document
-//        editor.isDirtyMask = true
-        codeHandler.setDocument(document)
         if ( !document ){
             editor.text = ''
-//            editor.isDirty = false
         }
-//        else {
-//            editor.isDirty = document.isDirty
-//        }
+        codeHandler.setDocument(document)
     }
 
     function save(){
@@ -296,6 +291,8 @@ Rectangle{
             frameVisible: false
 
             function ensureVisible(r){
+                if (!editor.internalFocus )
+                    return;
                 if (flickableItem.contentX >= r.x)
                     flickableItem.contentX = r.x;
                 else if (flickableItem.contentX + width <= r.x + r.width + 20)
@@ -322,17 +319,9 @@ Rectangle{
                 }
 
                 focus : true
-//                onTextChanged: {
-//                    if ( editor.isDirtyMask )
-//                        editor.isDirtyMask = false
-//                    else {
-////                        editor.isDirty = true
-////                        if ( editor.document )
-////                            editor.document.isDirty = true
-//                    }
-//                }
 
                 objectName: "editor"
+
                 property string objectCommandIndex : livecv.commands.add(editorArea, {
                     'saveFile' : editor.save,
                     'saveFileAs' : editor.saveAs,
@@ -359,7 +348,7 @@ Rectangle{
                 readOnly: editor.document === null || editor.document.isMonitored
 
                 Keys.onPressed: {
-                    if ( (event.key === Qt.Key_BracketRight && (event.modifiers & Qt.ShiftModifier) ) ||
+                    if ( (event.key === Qt.Key_BracketRight && (event.modifiers === Qt.ShiftModifier) ) ||
                          (event.key === Qt.Key_BraceRight) ){
 
                         if ( cursorPosition > 4 ){
@@ -445,7 +434,6 @@ Rectangle{
                     } else {
                         var command = livecv.keymap.locateCommand(event.key, event.modifiers)
                         if ( command !== '' ){
-//                            console.log(command)
                             livecv.commands.execute(command)
                             event.accepted = true
                         }
@@ -476,14 +464,6 @@ Rectangle{
                         }
                     }
                 }
-
-//                Connections{
-//                    id: contentReadListener
-//                    onContentRead : {
-//                        editor.isDirtyMask = true
-//                        editor.isDirty     = editor.document.isDirty
-//                    }
-//                }
 
                 MouseArea{
                     anchors.fill: parent

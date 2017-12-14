@@ -34,18 +34,18 @@ public:
 public:
     static CodeDeclaration::Ptr create(const QStringList& identifierChain, ProjectDocument* document = 0);
     static CodeDeclaration::Ptr create(
-            const QStringList &identifierChain,
-            const QString& type,
-            const QStringList& parentType,
-            ProjectDocument* document = 0
+        const QStringList &identifierChain,
+        const QString& type,
+        const QStringList& parentType,
+        ProjectDocument* document = 0
     );
     static CodeDeclaration::Ptr create(
-            const QStringList &identifierChain,
-            const QString& type,
-            const QStringList& parentType,
-            int identifierPosition,
-            int identifierLength,
-            ProjectDocument* document = 0
+        const QStringList &identifierChain,
+        const QString& type,
+        const QStringList& parentType,
+        int identifierPosition,
+        int identifierLength,
+        ProjectDocument* document = 0
     );
 
     ~CodeDeclaration();
@@ -76,18 +76,18 @@ public:
 private:
     CodeDeclaration(const QStringList& identifierChain, ProjectDocument* document = 0);
     CodeDeclaration(
-            const QStringList &identifierChain,
-            const QString& type,
-            const QStringList& parentType,
-            ProjectDocument* document = 0
+        const QStringList &identifierChain,
+        const QString& type,
+        const QStringList& parentType,
+        ProjectDocument* document = 0
     );
     CodeDeclaration(
-            const QStringList &identifierChain,
-            const QString& type,
-            const QStringList& parentType,
-            int identifierPosition,
-            int identifierLength,
-            ProjectDocument* document = 0
+        const QStringList &identifierChain,
+        const QString& type,
+        const QStringList& parentType,
+        int identifierPosition,
+        int identifierLength,
+        ProjectDocument* document = 0
     );
 
 private:

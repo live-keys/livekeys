@@ -57,7 +57,7 @@ public:
     CodeDeclaration::Ptr      m_declaration;
     ProjectDocumentBlockData* m_parentBlock;
     CodeConverter*            m_converter;
-    bool                       m_modifiedByEngine;
+    bool                      m_modifiedByEngine;
 };
 
 inline void CodeRuntimeBinding::setConverter(CodeConverter *converter){

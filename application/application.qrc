@@ -1,19 +1,16 @@
 <RCC>
     <qresource prefix="/">
         <file alias="main.qml">qml/main.qml</file>
-        <file alias="Editor.qml">qml/Editor.qml</file>
         <file alias="LogWindow.qml">qml/LogWindow.qml</file>
         <file alias="Top.qml">qml/Top.qml</file>
         <file alias="Project.qml">qml/Project.qml</file>
-        <file alias="SuggestionBox.qml">qml/SuggestionBox.qml</file>
         <file alias="MessageDialogButton.qml">qml/MessageDialogButton.qml</file>
         <file alias="MessageDialogInternal.qml">qml/MessageDialogInternal.qml</file>
         <file alias="ProjectNavigation.qml">qml/ProjectNavigation.qml</file>
         <file alias="ProjectAddEntry.qml">qml/ProjectAddEntry.qml</file>
-        <file alias="ContextMenuStyle.qml">qml/ContextMenuStyle.qml</file>
         <file alias="License.qml">qml/License.qml</file>
         <file alias="MessageDialogMain.qml">qml/MessageDialogMain.qml</file>
-        <file alias="WindowControls.qml">qml/WindowControls.qml</file>
+        <file alias="LogContainer.qml">qml/LogContainer.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>
@@ -44,5 +41,8 @@
         <file alias="license.png">images/license.png</file>
         <file alias="settings.png">images/settings.png</file>
         <file alias="license-check.png">images/license-check.png</file>
+        <file alias="log-search-tag.png">images/log-search-tag.png</file>
+        <file alias="log-toggle-window.png">images/log-toggle-window.png</file>
+        <file alias="log-view-prefix.png">images/log-view-prefix.png</file>
     </qresource>
 </RCC>

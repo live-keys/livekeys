@@ -31,7 +31,7 @@
 #include "live/settings.h"
 #include "live/plugincontext.h"
 
-#include "live/editor_plugin.h"
+#include "live/editorprivate_plugin.h"
 #include "live/project.h"
 #include "live/documenthandler.h"
 
@@ -65,6 +65,7 @@ LiveCV::LiveCV(QObject *parent)
     , m_keymap(0)
     , m_log(new VisualLogModel(m_engine->engine()))
     , m_vlog(new VisualLogJsObject) // js ownership
+    , m_windowControls(0)
 {
     VisualLog::setViewTransport(m_log);
 }
@@ -186,6 +187,9 @@ void LiveCV::loadInternalPlugins(){
     qmlRegisterUncreatableType<lv::KeyMap>(
         "base", 1, 0, "KeyMap", "KeyMap is available through the \'livecv.keymap\' property."
     );
+    qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
+        "base", 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type."
+    );
     qmlRegisterUncreatableType<lv::VisualLogModel>(
         "base", 1, 0, "VisualLogModel", "VisualLogModel is available through the \'livecv.log\' property."
     );
@@ -200,9 +204,9 @@ void LiveCV::loadInternalPlugins(){
     QJSValue vlogjs  = m_engine->engine()->newQObject(m_vlog);
     m_engine->engine()->globalObject().setProperty("vlog", vlogjs);
 
-    EditorPlugin ep;
-    ep.registerTypes("editor");
-    ep.initializeEngine(m_engine->engine(), "editor");
+    EditorPrivatePlugin ep;
+    ep.registerTypes("editor.private");
+    ep.initializeEngine(m_engine->engine(), "editor.private");
 
     m_project->addExtension(new ProjectQmlExtension(m_settings, m_project, m_engine));
 }
@@ -218,7 +222,20 @@ QByteArray LiveCV::extractPluginInfo(const QString &import) const{
             return "Error: Timed out\n";
         }
     }
+
     return extractor->result();
+}
+
+QObject *LiveCV::windowControls() const{
+    if ( !m_windowControls ){
+        QList<QObject*> rootObjects = static_cast<QQmlApplicationEngine*>(m_engine->engine())->rootObjects();
+        for ( auto it = rootObjects.begin(); it != rootObjects.end(); ++it ){
+            if ( (*it)->objectName() == "window" ){
+                m_windowControls = (*it)->property("controls").value<QObject*>();
+            }
+        }
+    }
+    return m_windowControls;
 }
 
 }// namespace

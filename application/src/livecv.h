@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVECV_H
-#define QLIVECV_H
+#ifndef LIVECV_H
+#define LIVECV_H
 
 #include <QString>
 #include <QLibrary>
@@ -54,11 +54,11 @@ class CodeQmlHandler;
 class LiveCV : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lv::Settings* settings  READ settings CONSTANT)
-    Q_PROPERTY(lv::Engine* engine      READ engine   CONSTANT)
-    Q_PROPERTY(lv::Commands* commands  READ commands CONSTANT)
-    Q_PROPERTY(lv::VisualLogModel* log READ log      CONSTANT)
-    Q_PROPERTY(lv::KeyMap* keymap      READ keymap   CONSTANT)
+    Q_PROPERTY(lv::Settings*       settings READ settings CONSTANT)
+    Q_PROPERTY(lv::Engine*         engine         READ engine   CONSTANT)
+    Q_PROPERTY(lv::Commands*       commands       READ commands       CONSTANT)
+    Q_PROPERTY(lv::VisualLogModel* log            READ log            CONSTANT)
+    Q_PROPERTY(lv::KeyMap*         keymap         READ keymap         CONSTANT)
 
 public:
     typedef QSharedPointer<LiveCV>       Ptr;
@@ -92,6 +92,9 @@ public:
     KeyMap* keymap();
     VisualLogModel* log();
 
+public slots:
+    QObject *windowControls() const;
+
 private:
     LiveCV(QObject* parent = 0);
     LiveCV(const LiveCV&);
@@ -113,6 +116,7 @@ private:
     lv::KeyMap*            m_keymap;
     lv::VisualLogModel*    m_log;
     lv::VisualLogJsObject* m_vlog;
+    mutable QObject*       m_windowControls;
 };
 
 inline int LiveCV::versionMajor(){
@@ -173,4 +177,4 @@ inline QString LiveCV::header(){
 
 }// namespace
 
-#endif // QLIVECV_H
+#endif // LIVECV_H

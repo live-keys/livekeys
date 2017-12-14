@@ -17,17 +17,17 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
-import live 1.0
+import editor 1.0
 
 LivePalette{
     id: palette
 
-    type : "double"
+    type : "int"
     serialize : NativeValueCodeSerializer{}
 
     item: Rectangle{
         width: 280
-        height: 68
+        height: 40
         color: 'transparent'
 
         Slider{
@@ -40,7 +40,7 @@ LivePalette{
             height: 15
             minimumValue: 0
             value: 0
-            onValueChanged: palette.value = intSlider.value + fractionalSlider.value
+            onValueChanged: palette.value = intSlider.value
             stepSize: 1.0
             maximumValue: 200
 
@@ -99,78 +99,6 @@ LivePalette{
         }
 
         Slider{
-            id: fractionalSlider
-
-            anchors.left: parent.left
-            anchors.leftMargin: 40
-            anchors.top: parent.top
-            anchors.topMargin: 31
-
-            width: parent.width - 80
-
-            height: 15
-            minimumValue: 0
-            value: 0
-            onValueChanged: palette.value = intSlider.value + fractionalSlider.value
-            stepSize: 0.01
-            maximumValue: 1.0
-
-            style: SliderStyle{
-                groove: Rectangle {
-                    implicitHeight: 15
-                    color: "#07131e"
-                }
-                handle: Rectangle{
-                    width: 5
-                    height: 18
-                    border.width: 1
-                    border.color: "#093357"
-                    color: "#041f38"
-                }
-            }
-        }
-
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
-            anchors.top: parent.top
-            anchors.topMargin: 30
-
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.weight: Font.Light
-                font.pixelSize: 11
-                text: fractionalSlider.minimumValue
-                color: '#d2d4db'
-            }
-        }
-
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.topMargin: 30
-
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 11
-                text: fractionalSlider.maximumValue.toFixed(1)
-                color: '#d2d4db'
-            }
-        }
-
-        Slider{
             id: zoomSlider
             width: parent.width
             height: 15
@@ -209,13 +137,11 @@ LivePalette{
         zoomSlider.value = 15 > sqrt ? 15 : sqrt
 
         intSlider.value = Math.floor(value)
-        fractionalSlider.value = value - intSlider.value
     }
     onCodeChanged:{
         var sqrt = Math.ceil(Math.sqrt(Math.floor(value))) + 1
         zoomSlider.value = 15 > sqrt ? 15 : sqrt
 
         intSlider.value = Math.floor(value)
-        fractionalSlider.value = value - intSlider.value
     }
 }

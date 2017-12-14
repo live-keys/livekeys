@@ -28,7 +28,6 @@
 #include "live/visuallog.h"
 
 #include <QDebug>
-#include "live/stacktrace.h"
 
 namespace lv{
 
@@ -40,11 +39,38 @@ class DocumentHandler;
 class CodeConverter;
 class CodeRuntimeBinding;
 
+class LV_EDITOR_EXPORT ProjectDocumentMarker{
+
+public:
+    friend class ProjectDocument;
+    typedef QSharedPointer<ProjectDocumentMarker>       Ptr;
+    typedef QSharedPointer<const ProjectDocumentMarker> ConstPtr;
+
+public:
+    int position() const{ return m_position; }
+    bool isValid() const{ return m_position != -1; }
+    static Ptr create(){ return ProjectDocumentMarker::Ptr(new ProjectDocumentMarker); }
+    ~ProjectDocumentMarker(){}
+
+private:
+    ProjectDocumentMarker(int position = -1) : m_position(position){}
+    void invalidate(){ m_position = -1; }
+
+private:
+    int m_position;
+};
+
 class LV_EDITOR_EXPORT ProjectDocumentAction : public QAbstractUndoItem{
 
 public:
-    ProjectDocumentAction(int pPosition, const QString& pCharsAdded, const QString& pCharsRemoved, bool pCommited)
-        : charsAdded(pCharsAdded)
+    ProjectDocumentAction(
+            ProjectDocument* pParent,
+            int pPosition,
+            const QString& pCharsAdded,
+            const QString& pCharsRemoved,
+            bool pCommited)
+        : parent(pParent)
+        , charsAdded(pCharsAdded)
         , charsRemoved(pCharsRemoved)
         , position(pPosition)
         , commited(pCommited)
@@ -53,6 +79,8 @@ public:
 
     void undo();
     void redo();
+
+    ProjectDocument* parent;
 
     QString charsAdded;
     QString charsRemoved;
@@ -88,6 +116,9 @@ class LV_EDITOR_EXPORT ProjectDocument : public QObject{
 public:
     typedef QLinkedList<CodeRuntimeBinding*>::iterator BindingIterator;
 
+    friend class ProjectDocumentAction;
+    friend class ProjectDocumentMarker;
+
     enum OpenMode{
         Edit = 0,
         Monitor,
@@ -116,8 +147,21 @@ public:
     void assignEditingDocument(QTextDocument* doc, DocumentHandler* handler);
     QTextDocument* editingDocument();
     CodeRuntimeBinding* addNewBinding(CodeDeclaration::Ptr declaration);
-    void documentContentsChanged(int position, int charsRemoved, const QString& addedText = "");
-    void documentContentsSilentChanged(int position, int charsRemoved, const QString& addedText = "");
+
+    void documentContentsChanged(
+        DocumentHandler* author,
+        int position,
+        int charsRemoved,
+        const QString& addedText = "");
+    void documentContentsSilentChanged(
+        DocumentHandler* author,
+        int position,
+        int charsRemoved,
+        const QString& addedText = ""
+    );
+
+    ProjectDocumentMarker::Ptr addMarker(int position);
+    void removeMarker(ProjectDocumentMarker::Ptr marker);
 
     BindingIterator bindingsBegin();
     BindingIterator bindingsEnd();
@@ -141,14 +185,15 @@ signals:
     void isDirtyChanged();
     void isMonitoredChanged();
     void fileChanged();
-    void contentRead();
-    void contentChanged();
+    void contentChanged(QObject* author);
 
 private:
     void syncContent() const;
     void resetSync() const;
     void updateBindings(int position, int charsRemoved, const QString& addedText);
+    void updateMarkers(int position, int charsRemoved, int addedText);
     void updateBindingBlocks(int position, const QString &addedText);
+    QString getCharsRemoved(int position, int count);
 
     ProjectFile*    m_file;
     mutable QString m_content;
@@ -157,8 +202,11 @@ private:
     QTextDocument*   m_editingDocument;
     DocumentHandler* m_editingDocumentHandler;
 
-    QLinkedList<CodeRuntimeBinding*>   m_bindings;
-    QLinkedList<ProjectDocumentAction> m_changes;
+    QLinkedList<CodeRuntimeBinding*>        m_bindings;
+    QLinkedList<ProjectDocumentMarker::Ptr> m_markers;
+
+    QLinkedList<ProjectDocumentAction>      m_changes;
+    mutable QLinkedList<ProjectDocumentAction>::iterator m_lastChange;
 
     bool          m_isDirty;
     mutable bool  m_isSynced;

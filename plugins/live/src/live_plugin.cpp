@@ -23,14 +23,10 @@
 #include "qfilereader.h"
 #include "qstaticfilereader.h"
 
-#include "live/abstractcodeserializer.h"
-#include "live/nativevaluecodeserializer.h"
-#include "live/qmlobjectcodeserializer.h"
-#include "live/codeconverter.h"
-#include "live/livepalette.h"
 #include "live/plugincontext.h"
 #include "live/visuallog.h"
 #include "live/settings.h"
+#include "live/visuallogfilter.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -40,20 +36,13 @@
 
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
-    qmlRegisterType<QLiveCVMain>(      uri, 1, 0, "Main");
-    qmlRegisterType<QStaticLoader>(    uri, 1, 0, "StaticLoader");
-    qmlRegisterType<QFileReader>(      uri, 1, 0, "FileReader");
-    qmlRegisterType<QStaticFileReader>(uri, 1, 0, "StaticFileReader");
+    qmlRegisterType<QLiveCVMain>(        uri, 1, 0, "Main");
+    qmlRegisterType<QStaticLoader>(      uri, 1, 0, "StaticLoader");
+    qmlRegisterType<QFileReader>(        uri, 1, 0, "FileReader");
+    qmlRegisterType<QStaticFileReader>(  uri, 1, 0, "StaticFileReader");
+    qmlRegisterType<lv::VisualLogFilter>(uri, 1, 0, "VisualLogFilter");
     qmlRegisterUncreatableType<QLicenseSettings>(
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
-
-    qmlRegisterUncreatableType<lv::AbstractCodeSerializer>(
-        uri, 1, 0, "AbstractCodeSerializer", "Code serializer is of abstract type."
-    );
-    qmlRegisterType<lv::NativeValueCodeSerializer>(uri, 1, 0, "NativeValueCodeSerializer");
-    qmlRegisterType<lv::QmlObjectCodeSerializer>(  uri, 1, 0, "QmlObjectCodeSerializer");
-    qmlRegisterType<lv::CodeConverter>(            uri, 1, 0, "CodeConverter");
-    qmlRegisterType<lv::LivePalette>(              uri, 1, 0, "LivePalette");
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){

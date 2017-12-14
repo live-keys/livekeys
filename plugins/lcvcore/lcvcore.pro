@@ -11,6 +11,7 @@ DEFINES += Q_LCVCORE_LIB
 
 # Dependencies
 
+linkLocalLibrary(lvbase, lvbase)
 linkLocalPlugin(live, live)
 
 # Source

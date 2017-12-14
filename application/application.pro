@@ -9,13 +9,23 @@ linkLocalLibrary(lveditqmljs, lveditqmljs)
 # Load library paths
 # ------------------
 
-unix{
+unix:!macx{
     QMAKE_LFLAGS += \
         '-Wl,-rpath,\'\$$ORIGIN\'' \
         '-Wl,-rpath,\'\$$ORIGIN/link\''
 
 
     createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)
+    QMAKE_EXTRA_TARGETS    += createlinkdir
+    POST_TARGETDEPS        += createlinkdir
+}
+
+macx{
+    QMAKE_LFLAGS += \
+        '-Wl,-rpath,\'@executable_path/../Link\'' \
+        '-Wl,-rpath,\'@executable_path/../Frameworks\''
+
+    createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/Link)
     QMAKE_EXTRA_TARGETS    += createlinkdir
     POST_TARGETDEPS        += createlinkdir
 }
@@ -35,6 +45,7 @@ OTHER_FILES += \
     $$PWD/qml/*.qml
 
 DISTFILES += \
-    qml/MessageDialogMain.qml
+    qml/MessageDialogMain.qml \
+    qml/LogView.qml
 
 

@@ -11,3 +11,4 @@ singleton LiveCVStyle   1.0 LiveCVStyle.qml
 LiveCVScrollStyle       1.0 LiveCVScrollStyle.qml
 JsonFileReader          1.0 JsonFileReader.qml
 StaticJsonFileReader    1.0 StaticJsonFileReader.qml
+VisualLogView           1.0 VisualLogView.qml
