@@ -304,7 +304,6 @@ Rectangle{
                     flickableItem.contentX = r.x + r.width - width + 20;
 
                 var ry = r.y + editorArea.y
-                console.log(flickableItem.contentY + ' ' + r.y + ' ' + editorArea.y)
                 if (flickableItem.contentY >= ry)
                     flickableItem.contentY = ry;
                 else if (flickableItem.contentY + height <= ry + r.height + 20)
@@ -577,8 +576,6 @@ Rectangle{
             }
             onContentsChangedManually: {
                 if ( project.active === editor.document.document ){
-                    console.log(editor.windowControls)
-                    console.log(editor.windowControls.createTimer)
                     editor.windowControls.createTimer.restart()
                 }
             }
