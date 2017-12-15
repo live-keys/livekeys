@@ -91,12 +91,12 @@ ApplicationWindow{
 
     Top{
         id : header
-        visible: !settings.previewMode
+        visible: !livecv.settings.launchMode
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
 
-        height: settings.previewMode ? 0 : 35
+        height: livecv.settings.launchMode ? 0 : 35
         color: "#08141d"
 
         property var callback : function(){}
@@ -279,16 +279,16 @@ ApplicationWindow{
         id: editorFactory
 
         Editor{
-            id: editor
+            id: editorComponent
             height: parent.height
             width: 400
             windowControls: controls
-            onInternalFocusChanged: if ( internalFocus ) projectView.focusEditor = editor
+            onInternalFocusChanged: if ( internalFocus ) projectView.focusEditor = editorComponent
 
             Component.onCompleted: {
-                projectView.focusEditor = editor
+                projectView.focusEditor = editorComponent
                 if ( project.active ){
-                    editor.document = project.active
+                    editorComponent.document = project.active
                 }
                 forceFocus()
             }
@@ -425,7 +425,7 @@ ApplicationWindow{
                     id: projectView
                     height: parent.height
                     width: 240
-                    visible : !livecv.settings.previewMode
+                    visible : !livecv.settings.launchMode
                     windowControls: controls
                 }
 
@@ -433,7 +433,7 @@ ApplicationWindow{
                     id: editor
                     height: parent.height
                     width: 400
-                    visible : !livecv.settings.previewMode
+                    visible : !livecv.settings.launchMode
                     windowControls: controls
                     onInternalFocusChanged: if ( internalFocus ) projectView.focusEditor = editor
 
@@ -787,7 +787,7 @@ ApplicationWindow{
         anchors.left: parent.left
         anchors.leftMargin: 14
 
-        opacity: settings.previewMode ? 0.3 : 1.0
+        opacity: settings.launchMode ? 0.3 : 1.0
         source : "qrc:/images/logo.png"
     }
 
