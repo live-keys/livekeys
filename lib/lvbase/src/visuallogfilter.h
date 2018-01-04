@@ -39,7 +39,7 @@ private:
             QString* searchString;
             QRegExp* searchRegexp;
 
-            SearchContainer(): searchString(0), searchRegexp(0){}
+            SearchContainer() = default;
             SearchContainer(const QString& pSearchString) : searchString(new QString(pSearchString)){}
             SearchContainer(const QRegExp& pSearchRegexp) : searchRegexp(new QRegExp(pSearchRegexp)){}
 
