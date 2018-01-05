@@ -28,73 +28,78 @@ FilterTest::FilterTest(QObject *parent)
 {
 }
 
-void FilterTest::initTestCase()
-{
+void FilterTest::initTestCase(){
 }
 
 void FilterTest::testOneProducerOneFilter(){
-//    SharedDataTestStub* i1 = new SharedDataTestStub;
-//    SharedDataTestStub* i2 = new SharedDataTestStub;
-//    for ( int i = 1; i <= 5; ++i ){
-//        i1->items().append(i);
-//        i2->items().append(i);
-//    }
+    SharedDataTestStub* i1 = new SharedDataTestStub;
+    SharedDataTestStub* i2 = new SharedDataTestStub;
+    for ( int i = 1; i <= 5; ++i ){
+        i1->items().append(i);
+        i2->items().append(i);
+    }
 
-//    FilterTestStub* ft = new FilterTestStub;
-//    FilterWorker* fw   = new FilterWorker;
-//    ft->setWorkerThread(fw);
-//    fw->start();
+    FilterTestStub* ft = new FilterTestStub;
+    FilterWorker* fw   = new FilterWorker;
+    ft->setWorkerThread(fw);
+    fw->start();
 
-//    QEventLoop el;
+    QEventLoop el;
 
-//    QObject::connect(ft, &FilterTestStub::outputChanged, [ft](){
-//        QCOMPARE(ft->output()->items().size(), 5);
-//        QCOMPARE(ft->output()->items()[0], 2);
-//        QCOMPARE(ft->output()->items()[1], 4);
-//        QCOMPARE(ft->output()->items()[2], 6);
-//        QCOMPARE(ft->output()->items()[3], 8);
-//        QCOMPARE(ft->output()->items()[4], 10);
-//    });
-//    QObject::connect(ft, &FilterTestStub::outputChanged, &el, &QEventLoop::quit);
+    QObject::connect(ft, &FilterTestStub::outputChanged, [ft](){
+        QCOMPARE(ft->output()->items().size(), 5);
+        QCOMPARE(ft->output()->items()[0], 2);
+        QCOMPARE(ft->output()->items()[1], 4);
+        QCOMPARE(ft->output()->items()[2], 6);
+        QCOMPARE(ft->output()->items()[3], 8);
+        QCOMPARE(ft->output()->items()[4], 10);
+    });
 
-//    ft->setInput1(i1);
-//    ft->setInput2(i2);
+    QObject::connect(ft, &FilterTestStub::outputChanged, &el, &QEventLoop::quit);
 
-//    el.exec();
+    ft->setInput1(i1);
+    ft->setInput2(i2);
 
-//    delete i1;
-//    delete i2;
-//    delete ft;
-//    delete fw;
+    el.exec();
+
+    delete i1;
+    delete i2;
+    delete ft;
+    delete fw;
 }
 
 void FilterTest::testOneProducerTwoFilters(){
-//    SharedDataTestStub* i1 = new SharedDataTestStub;
-//    SharedDataTestStub* i2 = new SharedDataTestStub;
-//    for ( int i = 1; i <= 5; ++i ){
-//        i1->items().append(i);
-//        i2->items().append(i);
-//    }
+    SharedDataTestStub* i1 = new SharedDataTestStub;
+    SharedDataTestStub* i2 = new SharedDataTestStub;
+    for ( int i = 1; i <= 5; ++i ){
+        i1->items().append(i);
+        i2->items().append(i);
+    }
 
-//    FilterTestStub* ft = new FilterTestStub;
-//    FilterWorker* fw   = new FilterWorker;
-//    ft->setWorkerThread(fw);
-//    fw->start();
+    FilterTestStub* ft = new FilterTestStub;
+    FilterWorker* fw   = new FilterWorker;
+    ft->setWorkerThread(fw);
+    fw->start();
 
-//    QEventLoop el;
+    QEventLoop el;
 
-//    QObject::connect(ft, &FilterTestStub::outputChanged, [ft](){
-//        QCOMPARE(ft->output()->items().size(), 5);
-//        QCOMPARE(ft->output()->items()[0], 2);
-//        QCOMPARE(ft->output()->items()[1], 4);
-//        QCOMPARE(ft->output()->items()[2], 6);
-//        QCOMPARE(ft->output()->items()[3], 8);
-//        QCOMPARE(ft->output()->items()[4], 10);
-//    });
-//    QObject::connect(ft, &FilterTestStub::outputChanged, &el, &QEventLoop::quit);
+    QObject::connect(ft, &FilterTestStub::outputChanged, [ft](){
+        QCOMPARE(ft->output()->items().size(), 5);
+        QCOMPARE(ft->output()->items()[0], 2);
+        QCOMPARE(ft->output()->items()[1], 4);
+        QCOMPARE(ft->output()->items()[2], 6);
+        QCOMPARE(ft->output()->items()[3], 8);
+        QCOMPARE(ft->output()->items()[4], 10);
+    });
+    QObject::connect(ft, &FilterTestStub::outputChanged, &el, &QEventLoop::quit);
 
-//    ft->setInput1(i1);
-//    ft->setInput2(i2);
+    ft->setInput1(i1);
+    ft->setInput2(i2);
 
-//    el.exec();
+    el.exec();
+
+    delete i1;
+    delete i2;
+    delete ft;
+    delete fw;
 }

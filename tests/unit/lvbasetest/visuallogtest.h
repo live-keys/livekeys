@@ -37,6 +37,7 @@ public:
 
 private slots:
     void initTestCase();
+    void cleanupTestCase();
 
     void levelTest();
     void levelObjectTest();

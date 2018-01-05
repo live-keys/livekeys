@@ -30,8 +30,13 @@ FilterWorker::FilterWorker(QObject *)
 }
 
 FilterWorker::~FilterWorker(){
-    m_thread->deleteLater();
-    //TODO: Handle results after thread finishes
+    m_thread->exit();
+    if ( !m_thread->wait(5000) ){
+        qCritical("FilterWorker Thread failed to close, forcing quit. This may lead to inconsistent application state.");
+        m_thread->terminate();
+        m_thread->wait();
+    }
+    delete m_thread;
     delete m_d;
 }
 
@@ -53,6 +58,7 @@ bool FilterWorker::event(QEvent *ev){
 
     FilterWorker::CallEvent* ce = static_cast<FilterWorker::CallEvent*>(ev);
     ce->callFilter();
+    delete ce->popLocker();
 
     if ( ce->hasCallback() ){
         m_d->postNotify(ce->callbackEvent());
@@ -61,34 +67,50 @@ bool FilterWorker::event(QEvent *ev){
     return true;
 }
 
-FilterWorker::CallEvent::CallEvent(const std::function<void ()>& fnc)
+FilterWorker::CallEvent::CallEvent(const std::function<void ()>& fnc, Filter::SharedDataLocker *locker)
     : QEvent(QEvent::None)
     , m_filter(fnc)
+    , m_locker(locker)
 {
 }
 
-FilterWorker::CallEvent::CallEvent(std::function<void ()>&& fnc)
+FilterWorker::CallEvent::CallEvent(std::function<void ()>&& fnc, Filter::SharedDataLocker *locker)
     : QEvent(QEvent::None)
     , m_filter(std::move(fnc))
+    , m_locker(locker)
 {
 }
 
-FilterWorker::CallEvent::CallEvent(const std::function<void ()> &filter, const std::function<void ()> &callback)
+FilterWorker::CallEvent::CallEvent(
+        const std::function<void ()> &filter,
+        const std::function<void ()> &callback,
+        Filter::SharedDataLocker *locker)
     : QEvent(QEvent::None)
     , m_filter(filter)
     , m_callback(callback)
+    , m_locker(locker)
 {
 }
 
-FilterWorker::CallEvent::CallEvent(std::function<void ()> &&filter, std::function<void ()> &&callback)
+FilterWorker::CallEvent::CallEvent(
+        std::function<void ()> &&filter,
+        std::function<void ()> &&callback,
+        Filter::SharedDataLocker *locker)
     : QEvent(QEvent::None)
     , m_filter(filter)
     , m_callback(callback)
+    , m_locker(locker)
 {
 }
 
 void FilterWorker::CallEvent::callFilter(){
     m_filter();
+}
+
+Filter::SharedDataLocker* FilterWorker::CallEvent::popLocker(){
+    Filter::SharedDataLocker* l = m_locker;
+    m_locker = 0;
+    return l;
 }
 
 bool FilterWorker::CallEvent::hasCallback(){

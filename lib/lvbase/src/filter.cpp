@@ -36,10 +36,7 @@ void Filter::use(
         cb();
         rs();
     } else if ( locker && locker->m_allLocked ){
-        workerThread()->postWork(cb, [this, &locker, &rs](){
-//            delete locker;
-//            rs();
-        });
+        workerThread()->postWork(cb, rs);
     }
     delete locker;
 }
