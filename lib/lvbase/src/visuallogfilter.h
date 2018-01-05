@@ -5,6 +5,7 @@
 #include <QJSValue>
 #include <QQmlParserStatus>
 #include <QFutureWatcher>
+#include <QString>
 
 #include "live/lvbaseglobal.h"
 #include "live/visuallogbasemodel.h"
@@ -35,12 +36,12 @@ private:
 
         union SearchContainer{
 
-            QString searchString;
-            QRegExp searchRegexp;
+            QString* searchString;
+            QRegExp* searchRegexp;
 
             SearchContainer() = default;
-            SearchContainer(const QString& pSearchString) : searchString(pSearchString){}
-            SearchContainer(const QRegExp& pSearchRegexp) : searchRegexp(pSearchRegexp){}
+            SearchContainer(const QString& pSearchString) : searchString(new QString(pSearchString)){}
+            SearchContainer(const QRegExp& pSearchRegexp) : searchRegexp(new QRegExp(pSearchRegexp)){}
 
             ~SearchContainer(){}
         };

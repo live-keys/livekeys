@@ -18,9 +18,9 @@ VisualLogFilter::SearchQuery::SearchQuery(const VisualLogFilter::SearchQuery &ot
     , m_container(0)
 {
     if ( m_type == SearchQuery::Regexp ){
-        m_container = new SearchContainer(other.m_container->searchRegexp);
+        m_container = new SearchContainer(*other.m_container->searchRegexp);
     } else if ( m_type == SearchQuery::String ){
-        m_container = new SearchContainer(other.m_container->searchString);
+        m_container = new SearchContainer(*other.m_container->searchString);
     }
 }
 
@@ -38,6 +38,11 @@ VisualLogFilter::SearchQuery::SearchQuery(const QJSValue &value, QJSEngine *engi
 }
 
 VisualLogFilter::SearchQuery::~SearchQuery(){
+    if ( m_type == SearchQuery::Regexp )
+        delete m_container->searchRegexp;
+    else if ( m_type == SearchQuery::String )
+        delete m_container->searchString;
+
     delete m_container;
 }
 
@@ -45,10 +50,10 @@ VisualLogFilter::SearchQuery &VisualLogFilter::SearchQuery::operator =(const Vis
     m_type = other.m_type;
     if ( m_type == SearchQuery::Regexp ){
         delete m_container;
-        m_container = new SearchContainer(other.m_container->searchRegexp);
+        m_container = new SearchContainer(*other.m_container->searchRegexp);
     } else if ( m_type == SearchQuery::String ){
         delete m_container;
-        m_container = new SearchContainer(other.m_container->searchString);
+        m_container = new SearchContainer(*other.m_container->searchString);
     }
     return *this;
 }
@@ -66,9 +71,9 @@ bool VisualLogFilter::SearchQuery::operator ==(const VisualLogFilter::SearchQuer
 
 QJSValue VisualLogFilter::SearchQuery::toJs(QJSEngine *engine) const{
     if ( m_type == SearchQuery::Regexp ){
-        return engine->toScriptValue(m_container->searchRegexp);
+        return engine->toScriptValue(*m_container->searchRegexp);
     } else if ( m_type == SearchQuery::String ){
-        return QJSValue(m_container->searchString);
+        return QJSValue(*m_container->searchString);
     } else {
         return QJSValue();
     }
@@ -78,7 +83,7 @@ int VisualLogFilter::SearchQuery::locateIn(const QString &str){
     if ( m_type == SearchQuery::String ){
         return str.indexOf(m_container->searchString);
     } else if ( m_type == SearchQuery::Regexp ){
-        return m_container->searchRegexp.indexIn(str);
+        return m_container->searchRegexp->indexIn(str);
     } else {
         return -1;
     }
