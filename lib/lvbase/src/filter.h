@@ -101,6 +101,7 @@ public:
         }
 
         friend class Filter;
+        friend class FilterWorker;
 
     private:
         SharedDataLocker(Filter* filter) : m_filter(filter), m_allLocked(true){}
@@ -133,11 +134,11 @@ public:
     virtual void process(){}
 
     void use(
-            SharedDataLocker* locker,
-            const std::function<void()>& cb,
-            const std::function<void()>& rs);
+        SharedDataLocker* locker,
+        const std::function<void()>& cb,
+        const std::function<void()>& rs);
 
-    SharedDataLocker* locker(){
+    SharedDataLocker* createLocker(){
         return new SharedDataLocker(this);
     }
 

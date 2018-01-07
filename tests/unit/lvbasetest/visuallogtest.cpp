@@ -63,8 +63,6 @@ VisualLogTest::VisualLogTest(QObject *parent)
 }
 
 VisualLogTest::~VisualLogTest(){
-    delete m_vlogModel;
-    delete m_engine;
 }
 
 void VisualLogTest::initTestCase(){
@@ -75,6 +73,11 @@ void VisualLogTest::initTestCase(){
         {"defaultLevel", "Info"},
         {"toConsole",    false}
     });
+}
+
+void VisualLogTest::cleanupTestCase(){
+    delete m_vlogModel;
+    delete m_engine;
 }
 
 void VisualLogTest::levelTest(){
@@ -218,10 +221,10 @@ void VisualLogTest::dailyFileOutputTest(){
         return;
 
     vlog().configure("test", {
-        {"level", VisualLog::MessageInfo::Info},
-        {"defaultLevel",     VisualLog::MessageInfo::Info},
-        {"file",          MLNode::StringType((dr.path() + "/_temp_.txt").toStdString())},
-        {"logDaily",         true}
+        {"level",        VisualLog::MessageInfo::Info},
+        {"defaultLevel", VisualLog::MessageInfo::Info},
+        {"file",         MLNode::StringType((dr.path() + "/_temp_.txt").toStdString())},
+        {"logDaily",     true}
     });
 
     vlog("test")     << "test" << " " << "info";

@@ -48,35 +48,7 @@ void FilterTestStub::process(){
         }
     };
 
-    use(locker()->read(m_input1, m_input2)->write(m_output), cb, [this](){
-//        emit this->outputChanged();
+    use(createLocker()->read(m_input1, m_input2)->write(m_output), cb, [this](){
+        emit this->outputChanged();
     });
 }
-
-//SharedDataLock::template<>
-
-//    if ( workerThread() ){
-
-//        bool canExecute = true;
-//        if ( !m_input1->lockForRead(this) )
-//            canExecute = false;
-//        if( !m_input2->lockForRead(this) )
-//            canExecute = false;
-//        if ( !m_output->lockForWrite(this) )
-//            canExecute = false;
-
-//        if ( canExecute ){
-//            workerThread()->postWork(cb, [this](){
-//                m_input1->unlock(this);
-//                m_input2->unlock(this);
-//                m_output->unlock(this);
-
-//                emit outputChanged();
-//            });
-//        }
-//    } else {
-//        cb();
-
-//        emit outputChanged();
-//    }
-
