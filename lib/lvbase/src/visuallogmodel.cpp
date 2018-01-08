@@ -22,8 +22,7 @@
 #include <QQmlEngine>
 #include <QQmlComponent>
 #include <QQmlContext>
-
-#include <QDebug>
+#include <QThread>
 
 namespace lv{
 
@@ -71,11 +70,17 @@ void VisualLogModel::onMessage(
         const VisualLog::MessageInfo &messageInfo,
         const QString &message)
 {
-    beginInsertRows(QModelIndex(), m_entries.size(), m_entries.size());
-    m_entries.append( VisualLogEntry(
-        messageInfo.tag(configuration), messageInfo.prefix(configuration), message
-    ));
-    endInsertRows();
+    if ( thread() == QThread::currentThread() ){
+        beginInsertRows(QModelIndex(), m_entries.size(), m_entries.size());
+        m_entries.append( VisualLogEntry(
+            messageInfo.tag(configuration), messageInfo.prefix(configuration), message
+        ));
+        endInsertRows();
+    } else {
+        m_entries.append( VisualLogEntry(
+            messageInfo.tag(configuration), messageInfo.prefix(configuration), message
+        ));
+    }
 }
 
 void VisualLogModel::onView(
