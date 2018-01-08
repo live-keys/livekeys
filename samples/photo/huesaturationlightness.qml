@@ -4,7 +4,7 @@ import lcvphoto 1.0
 
 Grid{
     
-    // Usage of HueSaturationLightness
+    // Using HueSaturationLightness and HueSaturationLightnessSliders
     
     columns: 2
     
@@ -15,9 +15,17 @@ Grid{
     
     HueSaturationLightness{
         input: src.output
+        hue: hsls.hue
+        saturation: hsls.saturation
+        lightness: hsls.lightness
+    }
+
+    HueSaturationLightnessSliders{
+        id: hsls
         hue: 50
-        saturation: 120
+        saturation: 130
         lightness: 80
     }
+
 }
 

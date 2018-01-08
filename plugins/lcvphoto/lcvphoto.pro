@@ -23,3 +23,6 @@ include($$PROJECT_ROOT/project/3rdparty/opencv.pri)
 OTHER_FILES *= \
     qml/qmldir \
     qml/plugins.qmltypes
+
+DISTFILES += \
+    qml/HueSaturationLightnessSliders.qml
