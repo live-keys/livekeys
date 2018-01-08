@@ -16,7 +16,6 @@
 
 #include "lcvcore_plugin.h"
 #include "qmat.h"
-#include "qmataccess.h"
 #include "qmatview.h"
 #include "qimread.h"
 #include "qimwrite.h"
@@ -39,7 +38,6 @@
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
     qmlRegisterType<QMat>(               uri, 1, 0, "Mat");
-    qmlRegisterType<QMatAccess>(         uri, 1, 0, "MatAccess");
     qmlRegisterType<QMatView>(           uri, 1, 0, "MatView");
     qmlRegisterType<QImRead>(            uri, 1, 0, "ImRead");
     qmlRegisterType<QImWrite>(           uri, 1, 0, "ImWrite");

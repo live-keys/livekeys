@@ -5,5 +5,4 @@ HEADERS += \
     $$PWD/qmatnode.h \
     $$PWD/qmatshader.h \
     $$PWD/qmatstate.h \
-    $$PWD/qmataccess.h \
     $$PWD/qlcvcoreglobal.h

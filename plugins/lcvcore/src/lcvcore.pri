@@ -23,7 +23,6 @@ HEADERS += \
     $$PWD/qmatnode.h \
     $$PWD/qmatshader.h \
     $$PWD/qmatstate.h \
-    $$PWD/qmataccess.h \
     $$PWD/qmatloader.h \
     $$PWD/qlcvcoreglobal.h \
     $$PWD/lcvcore_plugin.h
@@ -54,6 +53,5 @@ SOURCES += \
     $$PWD/qmatnode.cpp \
     $$PWD/qmatshader.cpp \
     $$PWD/qmatstate.cpp \
-    $$PWD/qmatloader.cpp \
-    $$PWD/qmataccess.cpp
+    $$PWD/qmatloader.cpp
 

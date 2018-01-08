@@ -21,9 +21,7 @@
 #include "opencv2/core.hpp"
 #include "qlcvcoreglobal.h"
 
-class QMatAccess;
-
-class Q_LCVCORE_EXPORT QMat : public QQuickItem{
+class Q_LCVCORE_EXPORT QMat : public QObject{
 
     Q_OBJECT
     Q_ENUMS(Type)
@@ -40,8 +38,8 @@ public:
     };
 
 public:
-    explicit QMat(QQuickItem *parent = 0);
-    QMat(cv::Mat *mat, QQuickItem *parent = 0);
+    explicit QMat(QObject *parent = 0);
+    QMat(cv::Mat *mat, QObject *parent = 0);
     ~QMat();
 
     cv::Mat* cvMat();
@@ -50,8 +48,10 @@ public:
     static void  cleanUp();
 
 public slots:
-    QMatAccess* data();
-    QSize       dataSize() const;
+    QByteArray  buffer();
+    int         channels();
+    int         depth();
+    QSize       dimensions() const;
     QMat*       createOwnedObject();
     QMat*       cloneMat();
 
