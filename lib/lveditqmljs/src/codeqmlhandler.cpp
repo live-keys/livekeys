@@ -852,8 +852,9 @@ void CodeQmlHandler::updateScope(const QString& data){
 }
 
 void CodeQmlHandler::rehighlightBlock(const QTextBlock &block){
-    if ( m_highlighter )
+    if ( m_highlighter ){
         m_highlighter->rehighlightBlock(block);
+    }
 }
 
 QList<CodeDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cursor){
@@ -868,6 +869,8 @@ QList<CodeDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& c
         int propertyPosition = ctx->propertyPosition();
         int propertyLength   = 0;
 
+        QChar expressionEndDelimiter;
+
         if ( ctx->context() & QmlCompletionContext::InLhsOfBinding ){
             expression = ctx->expressionPath();
 
@@ -879,51 +882,64 @@ QList<CodeDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& c
                     propertyPosition = cursor.position();
             }
 
-            int advancedLength = DocumentQmlValueScanner::getPropertyLength(
-                m_target, cursor.position(), &expression
+            int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
+                m_target, cursor.position(), &expression, &expressionEndDelimiter
             );
             propertyLength = (cursor.position() - propertyPosition) + advancedLength;
 
         } else if ( ctx->context() & QmlCompletionContext::InRhsofBinding ){
             expression     = ctx->propertyPath();
-            propertyLength = DocumentQmlValueScanner::getPropertyLength(m_target, ctx->propertyPosition());
+            propertyLength = DocumentQmlValueScanner::getExpressionExtent(m_target, ctx->propertyPosition());
         }
 
         if ( expression.size() > 0 ){
-            qmlhandler_helpers::ScopeCopy scope(m_projectHandler->scanMonitor()->projectScope(), m_documentScope);
-            bool isClassName = false;
-            QString typeLibraryKey;
-            LanguageUtils::FakeMetaProperty property(qmlhandler_helpers::getPropertyInDocument(
-                 scope,
-                 ctx->objectTypePath(),
-                 expression,
-                 cursor.position(),
-                 isClassName,
-                 typeLibraryKey
-            ));
+            if ( expressionEndDelimiter == QChar('{') ){ // dealing with an object declaration ( 'Object{' )
 
-            // If property is retrieved by class name (eg. QQuickItem), convert it to its export name(Item)
-            QString propertyType;
-            if ( isClassName && !typeLibraryKey.isEmpty() ){
-                QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
-                qmlhandler_helpers::generateTypePathFromClassName(
-                    scope.document, scope.project, property.typeName(), typeLibraryKey, typePath
-                );
-                if ( typePath.size() > 0 ){
-                    QList<LanguageUtils::FakeMetaObject::Export> exports = typePath.first()->exports();
-                    if ( exports.size() > 0 )
-                        propertyType = exports.first().type;
-                }
-            }
-
-            if ( propertyType == "" ){
-                propertyType = property.typeName();
-            }
-
-            if ( property.revision() != -1 ){
                 properties.append(CodeDeclaration::create(
-                    expression, propertyType, ctx->objectTypePath(), propertyPosition, propertyLength, m_document
+                    QStringList(),
+                    expression.last(),
+                    QStringList(),
+                    propertyPosition,
+                    0,
+                    m_document
                 ));
+
+            } else { // dealing with a property declaration
+                qmlhandler_helpers::ScopeCopy scope(m_projectHandler->scanMonitor()->projectScope(), m_documentScope);
+                bool isClassName = false;
+                QString typeLibraryKey;
+                LanguageUtils::FakeMetaProperty property(qmlhandler_helpers::getPropertyInDocument(
+                     scope,
+                     ctx->objectTypePath(),
+                     expression,
+                     cursor.position(),
+                     isClassName,
+                     typeLibraryKey
+                ));
+
+                // If property is retrieved by class name (eg. QQuickItem), convert it to its export name(Item)
+                QString propertyType;
+                if ( isClassName && !typeLibraryKey.isEmpty() ){
+                    QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+                    qmlhandler_helpers::generateTypePathFromClassName(
+                        scope.document, scope.project, property.typeName(), typeLibraryKey, typePath
+                    );
+                    if ( typePath.size() > 0 ){
+                        QList<LanguageUtils::FakeMetaObject::Export> exports = typePath.first()->exports();
+                        if ( exports.size() > 0 )
+                            propertyType = exports.first().type;
+                    }
+                }
+
+                if ( propertyType == "" ){
+                    propertyType = property.typeName();
+                }
+
+                if ( property.revision() != -1 ){
+                    properties.append(CodeDeclaration::create(
+                        expression, propertyType, ctx->objectTypePath(), propertyPosition, propertyLength, m_document
+                    ));
+                }
             }
         }
 
@@ -993,16 +1009,30 @@ QList<CodeDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& c
     return properties;
 }
 
-bool CodeQmlHandler::findPropertyValue(int position, int length, int &valuePosition, int &valueEnd){
-    DocumentQmlValueScanner vs(m_document, position, length);
-    if ( vs() ){
-        valuePosition = vs.valuePosition();
-        valueEnd      = vs.valueEnd();
-        return true;
+bool CodeQmlHandler::findDeclarationValue(int position, int length, int &valuePosition, int &valueEnd){
+    if ( length > 0 ){
+        DocumentQmlValueScanner vs(m_document, position, length);
+        if ( vs() ){
+            valuePosition = vs.valuePosition();
+            valueEnd      = vs.valueEnd();
+            return true;
+        } else {
+            valuePosition = -1;
+            valueEnd      = -1;
+            return false;
+        }
     } else {
-        valuePosition = -1;
-        valueEnd      = -1;
-        return false;
+        DocumentQmlValueScanner vs(m_document, position, length);
+        int valueLength = vs.getBlockExtent(position);
+        if ( valueLength != -1 ){
+            valuePosition = position;
+            valueEnd      = valueLength + position;
+            return true;
+        } else {
+            valuePosition = -1;
+            valueEnd      = -1;
+            return false;
+        }
     }
 }
 

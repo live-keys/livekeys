@@ -37,12 +37,13 @@ public:
     int valueEnd() const;
     int valueLength() const;
 
-    static int getPropertyLength(
+    static int getExpressionExtent(
         QTextDocument* document,
         int position,
-        QStringList* propertyPath = 0
-    );
+        QStringList* propertyPath = 0,
+        QChar *endDelimiter = 0);
 
+    int getBlockExtent(int from);
 
 private:
     int findColonInTokenSet(const QList<QmlJS::Token>& tokens);

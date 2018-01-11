@@ -244,6 +244,7 @@ void DocumentHandler::rehighlightSection(int position, int length){
     if ( !m_codeHandler )
         return;
 
+
     QTextBlock bl = m_targetDoc->findBlock(position);
     int end = position + length;
     while ( bl.isValid() ){
@@ -536,7 +537,7 @@ void DocumentHandler::edit(int position, QObject *currentApp){
 
         int propertyValue    = -1;
         int propertyValueEnd = -1;
-        m_codeHandler->findPropertyValue(
+        m_codeHandler->findDeclarationValue(
             declaration->position(),
             declaration->identifierLength(),
             propertyValue,

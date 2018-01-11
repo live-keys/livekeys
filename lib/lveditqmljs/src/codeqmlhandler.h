@@ -68,7 +68,7 @@ public:
     void updateScope(const QString& data) Q_DECL_OVERRIDE;
     void rehighlightBlock(const QTextBlock& block) Q_DECL_OVERRIDE;
     QList<lv::CodeDeclaration::Ptr> getDeclarations(const QTextCursor& cursor) Q_DECL_OVERRIDE;
-    bool findPropertyValue(int position, int length, int& valuePosition, int& valueEnd) Q_DECL_OVERRIDE;
+    bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd) Q_DECL_OVERRIDE;
     void connectBindings(QList<CodeRuntimeBinding*> bindings, QObject* root) Q_DECL_OVERRIDE;
     DocumentEditFragment* createInjectionChannel(
         CodeDeclaration::Ptr property,

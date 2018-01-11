@@ -56,7 +56,7 @@ public:
     virtual void updateScope(const QString& data) = 0;
     virtual void rehighlightBlock(const QTextBlock &block) = 0;
     virtual QList<CodeDeclaration::Ptr> getDeclarations(const QTextCursor& cursor) = 0;
-    virtual bool findPropertyValue(int position, int length, int& valuePosition, int& valueEnd) = 0;
+    virtual bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd) = 0;
     virtual void connectBindings(QList<CodeRuntimeBinding*> bindings, QObject* root) = 0;
     virtual DocumentEditFragment* createInjectionChannel(
         CodeDeclaration::Ptr property,
