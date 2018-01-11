@@ -25,7 +25,6 @@
 
 #include "live/lveditorglobal.h"
 #include "live/codedeclaration.h"
-#include "live/visuallog.h"
 
 #include <QDebug>
 

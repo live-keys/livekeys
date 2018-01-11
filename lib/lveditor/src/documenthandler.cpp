@@ -578,7 +578,11 @@ void DocumentHandler::adjust(int position, QObject *currentApp){
     CodeConverter* converter = m_paletteContainer->findPalette(declaration->type());
     LivePalette* palette = qobject_cast<LivePalette*>(converter);
     if ( palette ){
+
         DocumentEditFragment* ef = m_codeHandler->createInjectionChannel(declaration, currentApp, converter);
+        if ( !ef )
+            return;
+
         ef->setActionType(DocumentEditFragment::Adjust);
         QTextCursor codeCursor(m_targetDoc);
         codeCursor.setPosition(ef->valuePosition());

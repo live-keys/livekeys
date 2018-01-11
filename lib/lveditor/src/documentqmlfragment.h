@@ -31,23 +31,31 @@ public:
     DocumentQmlFragment(
         CodeDeclaration::Ptr declaration,
         CodeConverter* converter,
-        const QQmlProperty& property
+        const QQmlProperty& property,
+        int listIndex = -1
     );
     ~DocumentQmlFragment();
 
     void commit(const QVariant &value) Q_DECL_OVERRIDE;
     const QQmlProperty& property() const;
+    int listIndex() const;
 
 private:
     QQmlProperty m_property;
+    int          m_listIndex;
 };
 
 inline void DocumentQmlFragment::commit(const QVariant &value){
-    m_property.write(value);
+    if ( m_listIndex == -1 )
+        m_property.write(value);
 }
 
 inline const QQmlProperty &DocumentQmlFragment::property() const{
     return m_property;
+}
+
+inline int DocumentQmlFragment::listIndex() const{
+    return m_listIndex;
 }
 
 }// namespace

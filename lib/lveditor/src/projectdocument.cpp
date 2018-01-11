@@ -22,6 +22,7 @@
 #include "live/codeconverter.h"
 #include "live/codedeclaration.h"
 #include "live/coderuntimebinding.h"
+#include "live/visuallog.h"
 
 #include <QFile>
 #include <QUrl>

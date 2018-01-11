@@ -47,7 +47,7 @@ public:
 
     virtual void commit(const QVariant&){}
 
-    CodeDeclaration::Ptr declaration();
+    CodeDeclaration::Ptr declaration() const;
 
     void setRuntimeBinding(CodeRuntimeBinding* runtimeBinding);
     CodeRuntimeBinding* runtimeBinding();
@@ -80,7 +80,7 @@ inline DocumentEditFragment::ActionType DocumentEditFragment::actionType() const
     return m_actionType;
 }
 
-inline CodeDeclaration::Ptr DocumentEditFragment::declaration(){
+inline CodeDeclaration::Ptr DocumentEditFragment::declaration() const{
     return m_declaration;
 }
 

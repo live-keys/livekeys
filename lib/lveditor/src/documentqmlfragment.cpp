@@ -21,9 +21,11 @@ namespace lv{
 DocumentQmlFragment::DocumentQmlFragment(
         CodeDeclaration::Ptr declaration,
         CodeConverter *palette,
-        const QQmlProperty &property)
+        const QQmlProperty &property,
+        int listIndex)
     : DocumentEditFragment(declaration, palette)
     , m_property(property)
+    , m_listIndex(listIndex)
 {
 }
 

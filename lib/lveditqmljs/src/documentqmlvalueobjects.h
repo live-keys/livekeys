@@ -52,7 +52,7 @@ public:
 
     };
 
-    class RangeProperty : public RangeItem{
+    class LV_EDITQMLJS_EXPORT RangeProperty : public RangeItem{
 
     public:
         RangeProperty() : ast(0), parent(0), child(0), begin(0), propertyEnd(0), valueBegin(0), end(0){}
@@ -78,7 +78,7 @@ public:
         int end;
     };
 
-    class RangeObject : public RangeItem{
+    class LV_EDITQMLJS_EXPORT RangeObject : public RangeItem{
 
     public:
         RangeObject() : ast(0), parent(0), begin(0), end(0){}

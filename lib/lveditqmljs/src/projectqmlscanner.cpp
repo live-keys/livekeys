@@ -20,6 +20,7 @@
 #include "documentqmlobject_p.h"
 #include "documentqmlscope.h"
 #include "live/lockedfileiosession.h"
+#include "live/visuallog.h"
 #include "codeqmlhandler.h"
 
 #include "qmljs/qmljsdocument.h"

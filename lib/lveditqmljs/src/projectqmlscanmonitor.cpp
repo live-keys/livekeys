@@ -23,6 +23,7 @@
 #include "codeqmlhandler.h"
 #include "live/engine.h"
 #include "live/project.h"
+#include "live/visuallog.h"
 
 #include <QFileInfo>
 #include <QQmlComponent>

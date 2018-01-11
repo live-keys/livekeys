@@ -1048,14 +1048,17 @@ DocumentEditFragment *CodeQmlHandler::createInjectionChannel(
 {
     if ( m_document && m_document->isActive() ){
 
-        QQmlProperty foundProperty(
-            DocumentQmlInfo::findMatchingProperty(m_target->toPlainText(), m_document, declaration, runtime)
-        );
+        int listIndex = -1;
+        QQmlProperty foundProperty(DocumentQmlInfo::findRuntimeMatchingDeclaration(
+            m_target->toPlainText(), m_document, declaration, runtime, listIndex
+        ));
+
         if ( foundProperty.isValid() ){
             return new DocumentQmlFragment(
                 declaration,
                 converter,
-                foundProperty
+                foundProperty,
+                listIndex
             );
         }
     }

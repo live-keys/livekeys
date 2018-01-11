@@ -135,11 +135,12 @@ public:
         QList<CodeRuntimeBinding*> bindings,
         QObject* root
     );
-    static QQmlProperty findMatchingProperty(
+    static QQmlProperty findRuntimeMatchingDeclaration(
         const QString& source,
         ProjectDocument* document,
         CodeDeclaration::Ptr declaration,
-        QObject* root
+        QObject* root,
+        int &listIndex
     );
 
     ~DocumentQmlInfo();
