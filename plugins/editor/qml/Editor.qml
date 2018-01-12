@@ -557,7 +557,7 @@ Rectangle{
             }
             onPaletteChanged: {
                 var rect = editor.getCursorRectangle()
-                var position = Qt.point(editor.x, editor.y)
+                var position = Qt.point(editor.x, editor.y - flick.flickableItem.contentY)
                 windowControls.paletteBox.setPalette(palette, rect, position)
             }
         }
