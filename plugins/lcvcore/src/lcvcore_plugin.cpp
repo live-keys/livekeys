@@ -16,7 +16,6 @@
 
 #include "lcvcore_plugin.h"
 #include "qmat.h"
-#include "qmataccess.h"
 #include "qmatview.h"
 #include "qimread.h"
 #include "qimwrite.h"
@@ -31,6 +30,7 @@
 #include "qalphamerge.h"
 #include "qabsdiff.h"
 #include "qdrawhistogram.h"
+#include "qcolorhistogram.h"
 #include "qmatloader.h"
 #include "qmatlist.h"
 
@@ -39,7 +39,6 @@
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
     qmlRegisterType<QMat>(               uri, 1, 0, "Mat");
-    qmlRegisterType<QMatAccess>(         uri, 1, 0, "MatAccess");
     qmlRegisterType<QMatView>(           uri, 1, 0, "MatView");
     qmlRegisterType<QImRead>(            uri, 1, 0, "ImRead");
     qmlRegisterType<QImWrite>(           uri, 1, 0, "ImWrite");
@@ -54,6 +53,7 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QAlphaMerge>(        uri, 1, 0, "AlphaMerge");
     qmlRegisterType<QAbsDiff>(           uri, 1, 0, "AbsDiff");
     qmlRegisterType<QDrawHistogram>(     uri, 1, 0, "DrawHistogram");
+    qmlRegisterType<QColorHistogram>(    uri, 1, 0, "ColorHistogram");
     qmlRegisterType<QMatList>(           uri, 1, 0, "MatList");
     qmlRegisterType<QMatLoader>(         uri, 1, 0, "MatLoader");
 }

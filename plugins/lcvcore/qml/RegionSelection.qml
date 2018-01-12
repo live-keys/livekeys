@@ -21,6 +21,7 @@ Item{
     id : root
 
     property Item item : Item{}
+    property color borderColor: "#ff0000"
 
     MouseArea{
         anchors.fill : parent
@@ -34,7 +35,7 @@ Item{
         height : root.item.regionHeight
         color : "transparent"
         border.width : 1
-        border.color : "#ff0000"
+        border.color : root.borderColor
         x: root.item.regionX
         y: root.item.regionY
     }

@@ -3,4 +3,5 @@ plugin lcvphoto
 depends QtQuick 2.3
 depends lcvcore 1.0
 
-LevelsSliders 1.0 LevelsSliders.qml
+LevelsSliders                 1.0 LevelsSliders.qml
+HueSaturationLightnessSliders 1.0 HueSaturationLightnessSliders.qml

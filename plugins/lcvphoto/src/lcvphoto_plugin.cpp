@@ -19,6 +19,7 @@
 #include <qqml.h>
 #include "qfastnlmeansdenoisingmulti.h"
 #include "qdenoisetvl1.h"
+#include "qhuesaturationlightness.h"
 #include "qbrightnessandcontrast.h"
 #include "qbrightnessandcontrastserializer.h"
 
@@ -27,6 +28,7 @@ void LcvphotoPlugin::registerTypes(const char *uri){
     qmlRegisterType<QFastNlMeansDenoising>(           uri, 1, 0, "FastNlMeansDenoising");
     qmlRegisterType<QFastNlMeansDenoisingMulti>(      uri, 1, 0, "FastNlMeansDenoisingMulti");
     qmlRegisterType<QDenoiseTvl1>(                    uri, 1, 0, "DenoiseTvl1");
+    qmlRegisterType<QHueSaturationLightness>(         uri, 1, 0, "HueSaturationLightness");
     qmlRegisterType<QBrightnessAndContrast>(          uri, 1, 0, "BrightnessAndContrast");
     qmlRegisterType<QBrightnessAndContrastSerializer>(uri, 1, 0, "BrightnessAndContrastSerializer");
 }

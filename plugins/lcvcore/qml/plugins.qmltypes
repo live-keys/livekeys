@@ -133,7 +133,6 @@ Module {
                 "CV64F": 6
             }
         }
-        Method { name: "data"; type: "QMatAccess*" }
         Method { name: "dataSize"; type: "QSize" }
         Method { name: "createOwnedObject"; type: "QMat*" }
         Method { name: "cloneMat"; type: "QMat*" }
@@ -146,22 +145,6 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "values"; type: "QVariantList" }
         Property { name: "type"; type: "QMat::Type" }
-    }
-    Component {
-        name: "QMatAccess"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["lcvcore/MatAccess 1.0"]
-        exportMetaObjectRevisions: [0]
-        Method { name: "rows"; type: "int" }
-        Method { name: "cols"; type: "int" }
-        Method { name: "channels"; type: "int" }
-        Method { name: "depth"; type: "int" }
-        Method { name: "values"; type: "QVariantList" }
-        Method {
-            name: "setValues"
-            Parameter { name: "values"; type: "QVariantList" }
-        }
     }
     Component {
         name: "QMatBuffer"

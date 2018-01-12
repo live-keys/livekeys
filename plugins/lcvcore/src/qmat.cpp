@@ -15,7 +15,6 @@
 ****************************************************************************/
 
 #include "qmat.h"
-#include "qmataccess.h"
 #include <QQmlEngine>
 
 
@@ -23,8 +22,37 @@
   \qmltype Mat
   \instantiates QMat
   \inqmlmodule lcvcore
-  \inherits QQuickItem
-  \brief The main element passed around in the QML structure.
+  \inherits QObject
+  \brief Custom matrix element.
+
+  You can access a matrix's pixels from QML by using the buffer() function, which gives you a js ArrayBuffer. Here's a
+  how you can access pixel values from a RGB matrix.
+
+  \code
+  ImRead{
+      id : src
+      file : project.path + '/sample.jpg'
+      Component.onCompleted : {
+           var buffer     = output.buffer()
+           var size       = output.dimensions()
+           var channels   = output.channels()
+
+           var bufferview = new Uint8Array(buffer)
+
+           for ( var i = 0; i < size.height; ++i ){
+               for ( var j = 0; j < size.width; ++j ){
+                   var b = bufferview[i * size.width + j * channels + 0]; // get the blue channel
+                   var g = bufferview[i * size.width + j * channels + 1]; // get the green channel
+                   var r = bufferview[i * size.width + j * channels + 2]; // get the red channel
+               }
+           }
+       }
+  }
+  \endcode
+
+  A sample on accessing and changing matrixes is available in \b{samples/core/customfilter.qml} :
+
+  \quotefile core/customfilter.qml
 */
 
 
@@ -36,7 +64,7 @@
    The class represents the wrapper for the opencv matrix element to be passed around in the QML structure. To access
    its cv mat vaue, use the cvMat() function.
 
-   To access it's pixels within qml, use the Mat::data() function.
+   To access it's pixels within qml, use the Mat::buffer() function.
  */
 
 /*!
@@ -71,8 +99,8 @@
 
   Params : \a parent
  */
-QMat::QMat(QQuickItem *parent):
-    QQuickItem(parent),
+QMat::QMat(QObject *parent):
+    QObject(parent),
     m_cvmat(new cv::Mat){
 }
 
@@ -81,34 +109,54 @@ QMat::QMat(QQuickItem *parent):
 
   Params : \a mat , \a parent
  */
-QMat::QMat(cv::Mat *mat, QQuickItem *parent):
-    QQuickItem(parent),
+QMat::QMat(cv::Mat *mat, QObject *parent):
+    QObject(parent),
     m_cvmat(mat){
 }
 
-/*!
-  \qmlmethod MatAccess Mat::data()
-
-  Returns a matrix accessor element to access the matrixes pixels.
+/**
+ * @brief Returns an equivalent ArrayBuffer to access the matrix values
+ * @return
  */
-
-/*!
-  \brief Retruns the matrix access element.
- */
-QMatAccess *QMat::data(){
-    return new QMatAccess(this);
+QByteArray QMat::buffer(){
+    return QByteArray::fromRawData(
+        reinterpret_cast<const char*>(m_cvmat->data),
+        static_cast<int>(m_cvmat->total() * m_cvmat->elemSize())
+    );
 }
 
 /*!
-  \qmlmethod Size Mat::dataSize()
+  \qmlmethod int Mat::channels()
 
-  Returns the size of the internal matrix
+  Returns the number of channels of the matrix
+*/
+
+/**
+ * @brief QMat::channels
+ * @return
+ */
+int QMat::channels(){
+    return m_cvmat->channels();
+}
+
+/**
+ * @brief QMat::depth
+ * @return
+ */
+int QMat::depth(){
+    return m_cvmat->depth();
+}
+
+/*!
+  \qmlmethod Size Mat::dimensions()
+
+  Returns the size of the matrix
  */
 
 /*!
   \brief Returns the size of the matrix element
  */
-QSize QMat::dataSize() const{
+QSize QMat::dimensions() const{
     return QSize(m_cvmat->cols, m_cvmat->rows);
 }
 

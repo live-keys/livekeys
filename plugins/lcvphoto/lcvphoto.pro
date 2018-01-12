@@ -10,10 +10,10 @@ DEFINES += Q_LCV
 
 # Dependencies
 
-linkLocalLibrary(lveditor, lveditor)
+linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
 
-linkLocalPlugin(live, live)
+linkLocalPlugin(live,    live)
 linkLocalPlugin(lcvcore, lcvcore)
 
 # Qml Files
@@ -41,3 +41,9 @@ first.depends = $(first) palettecopy
 export(first.depends)
 export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
+
+# Distfiles
+
+DISTFILES += \
+    qml/LevelsSliders.qml \
+    qml/HueSaturationLightnessSliders.qml

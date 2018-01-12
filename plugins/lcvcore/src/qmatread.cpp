@@ -286,6 +286,9 @@ QMatRead::~QMatRead(){
   \a nodeData
  */
 QSGNode *QMatRead::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *){
+    if ( boundingRect().width() == 0 || boundingRect().height() == 0 )
+        return oldNode;
+
     QMatReadNode* node = static_cast<QMatReadNode*>(oldNode);
     if (!node)
         node = new QMatReadNode(window());

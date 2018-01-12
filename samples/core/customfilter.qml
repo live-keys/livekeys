@@ -19,25 +19,17 @@ Row{
         height : src.height
         
         onOutputChanged : {
-            var data = output.data()
-            var rows = data.rows()
-            var cols = data.cols()
-            var channels = data.channels()
-            
-            var vals = data.values()
-            
-            for ( var i = 0; i < rows; ++i ){
-                for ( var j = 0; j < cols; ++j ){
-                    if ( vals[i][j * channels] > 160 ){
-                        vals[i][j * channels + 0] = 200
-                        vals[i][j * channels + 1] = 200
-                        vals[i][j * channels + 2] = 200
-                    }
+            var dim   = output.dimensions()
+            var buffer = output.buffer()
+            var uview = new Uint8Array(buffer)
+
+            for ( var i = 0; i < dim.height; ++i ){
+                for ( var j = 0; j < dim.width; ++j ){
+                    var val = uview[i * dim.width + j]
+                    if ( val < 100 )
+                        uview[i * dim.width + j] = 0
                 }
             }
-            
-            
-            data.setValues(vals)
         }
     }
     
