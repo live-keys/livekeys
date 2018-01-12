@@ -29,6 +29,7 @@
 #include "plugintypesfacade.h"
 #include "documentqmlvaluescanner_p.h"
 #include "documentqmlvalueobjects.h"
+#include "qmljsbuiltintypes_p.h"
 #include "qmljshighlighter_p.h"
 
 #include "live/codecompletionsuggestion.h"
@@ -919,15 +920,19 @@ QList<CodeDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& c
 
                 // If property is retrieved by class name (eg. QQuickItem), convert it to its export name(Item)
                 QString propertyType;
+
                 if ( isClassName && !typeLibraryKey.isEmpty() ){
                     QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
                     qmlhandler_helpers::generateTypePathFromClassName(
                         scope.document, scope.project, property.typeName(), typeLibraryKey, typePath
                     );
+
                     if ( typePath.size() > 0 ){
                         QList<LanguageUtils::FakeMetaObject::Export> exports = typePath.first()->exports();
                         if ( exports.size() > 0 )
                             propertyType = exports.first().type;
+                    } else {
+                        propertyType = QmlJsBuiltinTypes::nameFromCpp(property.typeName());
                     }
                 }
 

@@ -22,7 +22,8 @@ HEADERS += \
     $$PWD/codeqmlhandler.h \
     $$PWD/lveditqmljsglobal.h \
     $$PWD/projectqmlextension.h \
-    $$PWD/projectqmlscanmonitor_p.h
+    $$PWD/projectqmlscanmonitor_p.h \
+    $$PWD/qmljsbuiltintypes_p.h
 
 SOURCES += \
     $$PWD/documentqmlinfo.cpp \
@@ -43,4 +44,5 @@ SOURCES += \
     $$PWD/qmljshighlighter.cpp \
     $$PWD/codeqmlhandler.cpp \
     $$PWD/projectqmlextension.cpp \
-    $$PWD/projectqmlscanmonitor.cpp
+    $$PWD/projectqmlscanmonitor.cpp \
+    $$PWD/qmljsbuiltintypes.cpp
