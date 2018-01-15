@@ -111,7 +111,7 @@ Rectangle{
         name: "dropDown"
         PropertyChanges {
             target: dropDown
-            height: 40 * root.model.length
+            height: root.height * root.model.length
         }
     }
 

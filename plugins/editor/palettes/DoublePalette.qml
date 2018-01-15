@@ -18,6 +18,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 import editor 1.0
+import live 1.0
 
 LivePalette{
     id: palette
@@ -46,56 +47,29 @@ LivePalette{
 
             style: SliderStyle{
                 groove: Rectangle {
-                    implicitHeight: 15
-                    color: "#07131e"
+                    implicitHeight: 8
+                    color: '#0c2838'
                 }
                 handle: Rectangle{
-                    width: 5
+                    width: 8
                     height: 18
+                    radius: 5
                     border.width: 1
-                    border.color: "#093357"
-                    color: "#041f38"
+                    border.color: '#233569'
+                    color: '#b2b2b2'
                 }
             }
         }
 
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
+        SliderLabel{
             anchors.top: parent.top
-
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 11
-                font.weight: Font.Light
-                text: intSlider.minimumValue
-                color: '#d2d4db'
-            }
+            text: intSlider.minimumValue
         }
 
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
-            anchors.right: parent.right
+        SliderLabel{
             anchors.top: parent.top
-
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 11
-                font.weight: Font.Light
-                text: intSlider.maximumValue
-                color: '#d2d4db'
-            }
+            anchors.right: parent.right
+            text: intSlider.maximumValue
         }
 
         Slider{
@@ -117,57 +91,30 @@ LivePalette{
 
             style: SliderStyle{
                 groove: Rectangle {
-                    implicitHeight: 15
-                    color: "#07131e"
+                    implicitHeight: 8
+                    color: '#0c2838'
                 }
                 handle: Rectangle{
-                    width: 5
+                    width: 8
                     height: 18
+                    radius: 5
                     border.width: 1
-                    border.color: "#093357"
-                    color: "#041f38"
+                    border.color: '#233569'
+                    color: '#b2b2b2'
                 }
             }
         }
 
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
+        SliderLabel{
             anchors.top: parent.top
             anchors.topMargin: 30
-
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.weight: Font.Light
-                font.pixelSize: 11
-                text: fractionalSlider.minimumValue
-                color: '#d2d4db'
-            }
+            text: fractionalSlider.minimumValue.toFixed(1)
         }
-
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
-            anchors.right: parent.right
+        SliderLabel{
             anchors.top: parent.top
             anchors.topMargin: 30
-
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 11
-                text: fractionalSlider.maximumValue.toFixed(1)
-                color: '#d2d4db'
-            }
+            anchors.right: parent.right
+            text: fractionalSlider.maximumValue.toFixed(1)
         }
 
         Slider{
@@ -198,7 +145,7 @@ LivePalette{
                 handle: Rectangle{
                     width: 40
                     height: 6
-                    color: "#041f38"
+                    color: '#b2b2b2'
                 }
             }
         }

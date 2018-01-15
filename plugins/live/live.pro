@@ -22,5 +22,6 @@ OTHER_FILES += \
     qml/plugins.qmltypes
 
 DISTFILES += \
-    qml/VisualLogView.qml
+    qml/VisualLogView.qml \
+    qml/SliderLabel.qml
 
