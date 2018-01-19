@@ -27,7 +27,9 @@ ApplicationWindow{
 
     visible: true
     width: 1240
+    minimumWidth: 640
     height: 700
+    minimumHeight: 400
     color : "#293039"
     objectName: "window"
 
