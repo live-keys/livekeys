@@ -200,7 +200,7 @@ Rectangle{
         }
     }
 
-    Rectangle {
+    Rectangle{
         id: dropDown
         width: root.width
         height: 0

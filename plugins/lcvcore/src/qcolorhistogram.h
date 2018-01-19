@@ -52,14 +52,11 @@ private:
 class QColorHistogram : public QQuickItem{
 
     Q_OBJECT
-    Q_PROPERTY(QMat* input  READ input   WRITE setInput   NOTIFY inputChanged)
+    Q_PROPERTY(QMat* input  READ input   WRITE  setInput   NOTIFY inputChanged)
     Q_PROPERTY(QMat* output READ output  NOTIFY outputChanged)
-    Q_PROPERTY(bool  fill   READ fill    WRITE setFill    NOTIFY fillChanged)
-    Q_PROPERTY(int channel  READ channel WRITE setChannel NOTIFY channelChanged)
+    Q_PROPERTY(bool  fill   READ fill    WRITE  setFill    NOTIFY fillChanged)
+    Q_PROPERTY(int channel  READ channel WRITE  setChannel NOTIFY channelChanged)
     Q_ENUMS(Selection)
-
-    //TODO: Some enum to define histogram creation type:
-    //      one channel(0, 1, 2, ...) / allchannels(-1) / luminanceChannel(-2)
 
 public:
     enum Selection{

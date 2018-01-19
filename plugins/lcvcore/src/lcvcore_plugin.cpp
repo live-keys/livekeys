@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "lcvcore_plugin.h"
+#include "qcvglobalobject.h"
 #include "qmat.h"
 #include "qmatview.h"
 #include "qimread.h"
@@ -35,9 +36,13 @@
 #include "qmatlist.h"
 
 #include <qqml.h>
+#include <QQmlEngine>
 
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
+    qmlRegisterUncreatableType<QCvGlobalObject>(
+        uri, 1, 0, "CvGlobalObject", "CvGlobal Object is available through the \'cv\' property");
+
     qmlRegisterType<QMat>(               uri, 1, 0, "Mat");
     qmlRegisterType<QMatView>(           uri, 1, 0, "MatView");
     qmlRegisterType<QImRead>(            uri, 1, 0, "ImRead");
@@ -56,6 +61,11 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QColorHistogram>(    uri, 1, 0, "ColorHistogram");
     qmlRegisterType<QMatList>(           uri, 1, 0, "MatList");
     qmlRegisterType<QMatLoader>(         uri, 1, 0, "MatLoader");
+}
+
+void LcvcorePlugin::initializeEngine(QQmlEngine *engine, const char *){
+    QCvGlobalObject* cvob = new QCvGlobalObject;
+    engine->globalObject().setProperty("cv", engine->newQObject(cvob));
 }
 
 

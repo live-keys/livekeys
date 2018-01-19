@@ -32,13 +32,17 @@ QString QBrightnessAndContrastSerializer::toCode(const QVariant &value, const lv
     if ( !ob )
         return "";
 
+    QSet<QString> setProperties;
+
     for ( auto it = root->properties.begin(); it != root->properties.end(); ++it ){
         lv::DocumentQmlValueObjects::RangeProperty* p = *it;
         QString propertyName = source.mid(p->begin, p->propertyEnd - p->begin);
         if ( propertyName == "brightness" ){
             source.replace(p->valueBegin, p->end - p->valueBegin, ob->property("brightness").toString());
+            setProperties.insert("brightness");
         } else if ( propertyName == "contrast" ){
             source.replace(p->valueBegin, p->end - p->valueBegin, ob->property("contrast").toString());
+            setProperties.insert("contrast");
         }
     }
 

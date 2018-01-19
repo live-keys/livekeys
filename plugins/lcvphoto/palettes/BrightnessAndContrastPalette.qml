@@ -24,7 +24,7 @@ import lcvphoto 1.0
 LivePalette{
     id: palette
 
-    type : "double"
+    type : "BrightnessAndContrast"
     serialize : BrightnessAndContrastSerializer{}
 
     item: Rectangle{

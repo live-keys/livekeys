@@ -158,7 +158,7 @@ QColorHistogram::QColorHistogram(QQuickItem *parent)
     , m_renderer(new QColorHistogramConnectedLinesRenderer)
 {
     setFlag(ItemHasContents, true);
-    setImplicitSize(300, 255);
+    setImplicitSize(300, 256);
 }
 
 QColorHistogram::~QColorHistogram(){
@@ -200,7 +200,7 @@ void QColorHistogram::createHistogram(){
         return;
 
     if ( m_channel == QColorHistogram::AllChannels ){
-        m_output->cvMat()->create(m_input->cvMat()->channels(), 255, CV_16UC1);
+        m_output->cvMat()->create(m_input->cvMat()->channels(), 256, CV_16UC1);
         m_output->cvMat()->setTo(0);
         ushort* outdata = reinterpret_cast<ushort*>(m_output->cvMat()->data);
         for ( int y = 0; y < m_input->cvMat()->rows; ++y ){
@@ -213,7 +213,7 @@ void QColorHistogram::createHistogram(){
             }
         }
     } else if ( m_channel == QColorHistogram::Total ){
-        m_output->cvMat()->create(1, 255, CV_16UC1);
+        m_output->cvMat()->create(1, 256, CV_16UC1);
         m_output->cvMat()->setTo(0);
         ushort* outdata = reinterpret_cast<ushort*>(m_output->cvMat()->data);
         for ( int y = 0; y < m_input->cvMat()->rows; ++y ){
@@ -226,7 +226,7 @@ void QColorHistogram::createHistogram(){
             }
         }
     } else {
-        m_output->cvMat()->create(1, 255, CV_16UC1);
+        m_output->cvMat()->create(1, 256, CV_16UC1);
         m_output->cvMat()->setTo(0);
         ushort* outdata = reinterpret_cast<ushort*>(m_output->cvMat()->data);
         int c = m_channel;
