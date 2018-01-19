@@ -58,6 +58,9 @@ public:
         Read     = 16 // 10000 : populate from project document, does not signal anything
     };
 
+    static const QChar ParagraphSeparator;
+    static const QChar NewLine;
+
 public:
     explicit DocumentHandler(QObject* parent = 0);
     ~DocumentHandler();
