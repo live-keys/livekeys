@@ -55,10 +55,10 @@ Rectangle{
         anchors.left: parent.left
         width: parent.width - 30
 
-        color: "#0c161e"
+        color: "#050d13"
         height: 30
 
-        border.color: "#12202c"
+        border.color: "#0d1f2d"
         border.width: 1
 
         TextInput{
@@ -120,7 +120,7 @@ Rectangle{
     Rectangle{
         anchors.fill: parent
         anchors.topMargin: 30
-        color: "#091016"
+        color: "#030609"
         opacity: root.visible ? 0.92 : 0
         Behavior on opacity{ NumberAnimation{ duration: 250} }
 
@@ -220,7 +220,7 @@ Rectangle{
 
                 property string path: model.path
 
-                color: ListView.isCurrentItem ? "#101e29" : "#0d1923"
+                color: ListView.isCurrentItem ? "#11202d" : "#0a131a"
                 width: root.width
                 height: documentView.delegateHeight
                 Text{
@@ -262,7 +262,7 @@ Rectangle{
                     height: 30
                     visible : model.isOpen
                     anchors.right: parent.right
-                    anchors.rightMargin: 16
+                    anchors.rightMargin: 0
                     anchors.verticalCenter: parent.verticalCenter
                     color: "#acabab"
                     font.family: "Source Code Pro, sans-serif"

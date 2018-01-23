@@ -6,7 +6,7 @@ import live 1.0
 Rectangle{
     id: root
 
-    color: '#080b0f'
+    color: '#050a0f'
 
     signal itemAdded()
 
@@ -83,13 +83,13 @@ Rectangle{
                 anchors.bottom: parent.bottom
                 width: parent.width
                 height: 1
-                color: "#273037"
+                color: "#0c1c2c"
             }
         }
 
         Rectangle{
             id: prefixSplitDragHandle
-            color: '#363636'
+            color: '#0c1c2c'
             width: 3
             visible: root.prefixVisible
             x: 350
@@ -127,7 +127,7 @@ Rectangle{
                 anchors.bottom: parent.bottom
                 width: parent.width
                 height: 1
-                color: "#273037"
+                color: "#0c1c2c"
             }
         }
 

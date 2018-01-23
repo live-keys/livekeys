@@ -452,7 +452,7 @@ ApplicationWindow{
                     id : viewer
                     height : parent.height
 
-                    color : "#070c11"
+                    color : "#000509"
 
                     Item{
                         id: runSpace
@@ -570,7 +570,6 @@ ApplicationWindow{
                     }
 
                 }
-
             }
 
             Rectangle{
@@ -580,6 +579,7 @@ ApplicationWindow{
                 width: paletteItem ? paletteItem.width + 10: 0
                 height: paletteItem ? paletteItem.height + 10 : 0
                 color: "#02070b"
+                radius: 5
                 border.width: 1
                 border.color: "#061b24"
                 visible: children.length > 0

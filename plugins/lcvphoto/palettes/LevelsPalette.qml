@@ -45,9 +45,7 @@ LivePalette{
             updateSliders()
         }
 
-        color: '#04111b'
-        border.width: 1
-        border.color: '#061a29'
+        color: 'transparent'
         input: cv.nullMat
         onLightnessChanged: {
             levels.lightness = lightness

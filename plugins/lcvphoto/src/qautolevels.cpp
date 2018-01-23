@@ -3,7 +3,6 @@
 #include "live/engine.h"
 
 #include <QQmlEngine>
-
 #include <QJSValueIterator>
 
 QAutoLevels::QAutoLevels(QObject *parent)
@@ -54,11 +53,6 @@ void QAutoLevels::setHistogram(QMat *histogram){
         channelAutoLevels.setProperty(2, white);
 
         m_output.setProperty(y, channelAutoLevels);
-    }
-
-    QJSValueIterator it(m_output);
-    while ( it.next() ){
-        qDebug() << it.name() << it.value().toVariant().toStringList();
     }
 
     emit outputChanged();

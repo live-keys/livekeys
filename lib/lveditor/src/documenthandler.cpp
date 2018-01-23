@@ -287,7 +287,6 @@ void DocumentHandler::documentContentsChanged(int position, int charsRemoved, in
         if ( c == DocumentHandler::ParagraphSeparator )
             c = DocumentHandler::NewLine;
         addedText = c;
-
     } else if ( charsAdded > 0 ){
         QTextCursor cursor(m_targetDoc);
         cursor.setPosition(position);

@@ -11,7 +11,10 @@ DEFINES += Q_LCVCORE_LIB
 
 # Dependencies
 
-linkLocalLibrary(lvbase, lvbase)
+linkLocalLibrary(lvbase,      lvbase)
+linkLocalLibrary(lveditor,    lveditor)
+linkLocalLibrary(lveditqmljs, lveditqmljs)
+
 linkLocalPlugin(live, live)
 
 # Source
@@ -40,3 +43,6 @@ first.depends = $(first) palettecopy
 export(first.depends)
 export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
+
+DISTFILES += \
+    palettes/VideoCapturePalette.qml

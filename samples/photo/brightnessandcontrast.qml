@@ -4,18 +4,19 @@ import lcvphoto 1.0
 
 Grid{
     
-    // Usage of FastNlMeansDenoising
+    // Usage of BrightnessAndContrast
     
-    columns: 2
+    columns: 1
     
     ImRead{
        id : src
-       file : project.dir() + '/../_images/object_101_piano_query.jpg'
+       file : project.dir() + '/../_images/buildings_0246.jpg'
     }
     
     BrightnessAndContrast{
         input : src.output
-        brightness: 0.01         contrast: 2.0
+        brightness: -19
+        contrast: 1.53
     }
     
 }

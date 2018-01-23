@@ -44,6 +44,11 @@ Rectangle{
         codeHandler.setDocument(document)
     }
 
+    property color topColor: "#081019"
+
+    color : "#050b12"
+    clip : true
+
     function save(){
         if ( !editor.document )
             return;
@@ -136,10 +141,6 @@ Rectangle{
             editor.width = parent.width / 2
     }
 
-    color : "#050c13"
-
-    clip : true
-
     function forceFocus(){
         editorArea.forceActiveFocus()
     }
@@ -151,17 +152,17 @@ Rectangle{
         width: parent.width
         height: 30
 
-        color : "#000"
+        color : editor.topColor
         gradient: Gradient{
-            GradientStop { position: 0.0;  color: "#08141f" }
-            GradientStop { position: 0.10; color: "#071119" }
+            GradientStop { position: 0.0;  color: "#030d16" }
+            GradientStop { position: 0.10; color: editor.topColor }
         }
 
         Text{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 15
-            color: "#7b838b"
+            color: "#808691"
             text: {
                 if ( editor.document ){
                     var filename = editor.document.file.name
@@ -191,7 +192,7 @@ Rectangle{
                 font.pixelSize: 16
                 font.weight: Font.Light
                 text: 'x'
-                color: "#7b838b"
+                color: "#808691"
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: parent.top
                 anchors.topMargin: 3
@@ -209,8 +210,8 @@ Rectangle{
             anchors.rightMargin: 31
             visible : editor.document !== null
             gradient: Gradient{
-                GradientStop { position: 0.0;  color: "#08141f" }
-                GradientStop { position: 0.30; color: "#09141e" }
+                GradientStop { position: 0.0;  color: "#050b12" }
+                GradientStop { position: 0.30; color: "#050b12" }
             }
             Text{
                 font.family: "Open Sans, sans-serif"
@@ -218,7 +219,7 @@ Rectangle{
                 text:
                     (Math.floor(editorArea.cursorRectangle.y / editorMetrics.height) + 1) + ', ' +
                     (Math.floor(editorArea.cursorRectangle.x / editorMetrics.averageCharacterWidth) + 1)
-                color: "#4b555f"
+                color: "#808691"
                 anchors.left: parent.left
                 anchors.leftMargin: 7
                 anchors.verticalCenter: parent.verticalCenter
@@ -230,8 +231,8 @@ Rectangle{
             width: 30
             height: parent.height
             gradient: Gradient{
-                GradientStop { position: 0.0;  color: "#08141f" }
-                GradientStop { position: 0.30; color: "#0a151e" }
+                GradientStop { position: 0.0;  color: "#04131f" }
+                GradientStop { position: 0.30; color: "#081019" }
             }
 
             Image{

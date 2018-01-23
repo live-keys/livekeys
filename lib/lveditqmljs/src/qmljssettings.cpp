@@ -23,9 +23,9 @@ QmlJsSettings::QmlJsSettings()
 {
     m_formats[QmlJsSettings::Text]        = createFormat("#fff");
     m_formats[QmlJsSettings::Comment]     = createFormat("#56748a");
-    m_formats[QmlJsSettings::Number]      = createFormat("#bc900c");
-    m_formats[QmlJsSettings::String]      = createFormat("#809747");
-    m_formats[QmlJsSettings::Operator]    = createFormat("#c0a000");
+    m_formats[QmlJsSettings::Number]      = createFormat("#ba761d");
+    m_formats[QmlJsSettings::String]      = createFormat("#86a930");
+    m_formats[QmlJsSettings::Operator]    = createFormat("#bc900c");
     m_formats[QmlJsSettings::Identifier]  = createFormat("#93672f");
     m_formats[QmlJsSettings::Keyword]     = createFormat("#a0a000");
     m_formats[QmlJsSettings::BuiltIn]     = createFormat("#93672f");

@@ -20,8 +20,7 @@ import QtQuick.Controls.Styles 1.4
 
 MenuStyle{
     frame: Rectangle{
-        color: "#030a11"
-        opacity: 0.95
+        color: "#0d1621"
     }
     itemDelegate.label: Rectangle{
         width: dirLabelMenu.width
@@ -29,7 +28,7 @@ MenuStyle{
         color: 'transparent'
         Text{
             id: dirLabelMenu
-            color: styleData.enabled ? "#9babb8" : "#555"
+            color: styleData.enabled ? "#9babb8" : "#505961"
             anchors.centerIn: parent
             text: styleData.text
             font.family: 'Open Sans, Arial, sans-serif'
@@ -53,6 +52,6 @@ MenuStyle{
         }
     }
     itemDelegate.background: Rectangle{
-        color: styleData.selected && styleData.enabled ? "#0a1a27" : "transparent"
+        color: styleData.selected && styleData.enabled ? "#132740" : "transparent"
     }
 }

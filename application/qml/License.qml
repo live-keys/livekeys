@@ -29,14 +29,14 @@ Rectangle{
     signal close()
 
     color: "transparent"
-    property color backgroundColor: "#03090d"
+    property color backgroundColor: "#010d16"
     property color titleColor: "#afafaf"
     property color containerBackgroundColor: "#081017"
-    property color licenseBackgroundColor: "#020507"
+    property color licenseBackgroundColor: "#010d16"
     property color licenseTextColor: "#93999e"
-    property color licenseItemBackground: "#08131b"
+    property color licenseItemBackground: "#04121d"
     property color licenseItemTextColor: "#afafaf"
-    property color licenseItemHighlightBackground: "#0a202c"
+    property color licenseItemHighlightBackground: "#051826"
     property color licenseItemRequiredBackground: "#883120"
     property color licenseItemRequiredHighlightBackground: "#973826"
     property color licenseAcceptButtonColor: "#091925"
@@ -88,7 +88,7 @@ Rectangle{
         Rectangle{
             id: boxTop
             width: parent.width
-            height: 40
+            height: 30
             color: 'transparent'
             Text{
                 anchors.centerIn: parent
@@ -129,7 +129,7 @@ Rectangle{
             anchors.left: parent.left
             anchors.leftMargin: 2
             anchors.top: parent.top
-            anchors.topMargin: 45
+            anchors.topMargin: 35
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 2
             width: 230
@@ -228,7 +228,7 @@ Rectangle{
             anchors.left: boxLeft.right
             anchors.leftMargin: 2
             anchors.top: parent.top
-            anchors.topMargin: 45
+            anchors.topMargin: 35
             anchors.right: parent.right
             anchors.rightMargin: 2
             anchors.bottom: parent.bottom

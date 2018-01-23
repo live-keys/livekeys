@@ -64,7 +64,7 @@ Rectangle{
 
     Rectangle{
         anchors.fill: parent
-        color: "#091016"
+        color: "#030609"
         opacity: root.visible ? 0.92 : 0
         Behavior on opacity{ NumberAnimation{ duration: 250} }
     }

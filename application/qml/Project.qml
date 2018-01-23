@@ -24,10 +24,10 @@ import editor.private 1.0
 
 Rectangle{
     id: root
-    color : "#0b1924"
+    color : "#060e17"
     gradient: Gradient{
-        GradientStop { position: 0.0;  color: "#061119" }
-        GradientStop { position: 0.01; color: "#050e16" }
+        GradientStop { position: 0.0;  color: "#060e17" }
+        GradientStop { position: 0.01; color: "#060e17" }
     }
     objectName: "project"
 
