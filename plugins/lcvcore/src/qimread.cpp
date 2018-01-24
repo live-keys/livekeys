@@ -19,6 +19,9 @@
 #include "qmatnode.h"
 #include "opencv2/highgui.hpp"
 
+#include "live/visuallog.h"
+#include "live/stacktrace.h"
+
 #include <QSGSimpleMaterial>
 
 /*!

@@ -24,6 +24,8 @@
 
 #include "live/lvbaseglobal.h"
 #include "live/exception.h"
+#include "live/typeinfo.h"
+#include "live/mlnode.h"
 
 class QQmlEngine;
 class QQmlError;
@@ -80,6 +82,14 @@ public:
 
     void setBindHook(std::function<void(const QString&, const QUrl&, QObject*, QObject*)> hook);
 
+    template<typename T> TypeInfo::Ptr registerQmlTypeInfo(
+        const std::function<void(const T&, MLNode&)>& serializeFunction,
+        const std::function<void(const MLNode&, T&)>& deserializeFunction,
+        bool canLog
+    );
+
+    TypeInfo::Ptr typeInfo(const QMetaObject *type);
+
 signals:
     void aboutToCreateObject(const QUrl& file);
     void isLoadingChanged(bool isLoading);
@@ -121,8 +131,25 @@ private:
     QMap<QObject*, ErrorHandler*> m_errorHandlers;
     QMap<QString,  QObject*>      m_errorObjects;
 
+    QHash<const QMetaObject*, TypeInfo::Ptr> m_types;
+
     bool m_isLoading;
 };
+
+template<typename T>
+TypeInfo::Ptr Engine::registerQmlTypeInfo(
+        const std::function<void(const T&, MLNode&)>& serializeFunction,
+        const std::function<void(const MLNode&, T&)>& deserializeFunction,
+        bool canLog)
+{
+    TypeInfo::Ptr t = TypeInfo::create(T::staticMetaObject.className());
+    t->addSerialization<T>(serializeFunction, deserializeFunction);
+    if ( canLog )
+        t->addLogging<T>();
+    m_types[&T::staticMetaObject] = t;
+
+    return t;
+}
 
 inline bool Engine::isLoading() const{
     return m_isLoading;
@@ -138,6 +165,13 @@ inline QQmlEngine*Engine::engine(){
 
 inline QMutex *Engine::engineMutex(){
     return m_engineMutex;
+}
+
+inline TypeInfo::Ptr Engine::typeInfo(const QMetaObject *key){
+    auto it = m_types.find(key);
+    if ( it == m_types.end() )
+        return TypeInfo::Ptr(0);
+    return it.value();
 }
 
 }// namespace

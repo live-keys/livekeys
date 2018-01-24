@@ -170,7 +170,7 @@ QQmlComponent *VisualLogModel::component(const QString &key){
 }
 
 QString VisualLogModel::componentPath(const QString &componentKey){
-    return PluginContext::applicationPath() + "/" + componentKey;
+    return PluginContext::pluginPath() + "/" + componentKey;
 }
 
 }// namespace

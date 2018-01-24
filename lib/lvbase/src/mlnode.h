@@ -356,7 +356,7 @@ LV_BASE_EXPORT VisualLog &operator <<(VisualLog &vl, const MLNode &value);
 
 namespace ml{
 
-template<typename T> void serialize(MLNode&, const T&){
+template<typename T> void serialize(const T&, MLNode&){
     throw TypeNotSerializableException();
 }
 

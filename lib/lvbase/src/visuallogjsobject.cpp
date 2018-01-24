@@ -17,6 +17,11 @@
 #include "visuallogjsobject.h"
 #include "visuallog.h"
 #include "mlnodetojs.h"
+#include "plugincontext.h"
+#include "typeinfo.h"
+#include "engine.h"
+
+#include <QMetaType>
 
 namespace lv{
 
@@ -25,13 +30,27 @@ namespace{
 void log_helper(VisualLog::MessageInfo::Level level, const QJSValue& messageOrCategory, const QJSValue& message){
     if ( message.isUndefined() ){
         if ( messageOrCategory.isQObject() ){
-            //TODO
+            QObject* messageObject = messageOrCategory.toQObject();
+            TypeInfo::Ptr ti = PluginContext::engine()->typeInfo(messageObject->metaObject());
+            if ( !ti.isNull() && ti->isLoggable() ){
+                VisualLog vl(level);
+                ti->log(vl, messageObject);
+            } else {
+                VisualLog(level) << "[Object object]";
+            }
         } else {
             VisualLog(level) << messageOrCategory.toString();
         }
     } else {
         if ( message.isQObject() ){
-
+            QObject* messageObject = messageOrCategory.toQObject();
+            TypeInfo::Ptr ti = PluginContext::engine()->typeInfo(messageObject->metaObject());
+            if ( !ti.isNull() && ti->isLoggable() ){
+                VisualLog vl(level);
+                ti->log(vl, messageObject);
+            } else {
+                VisualLog(level) << "[Object object]";
+            }
         } else {
             VisualLog(level) << message.toString();
         }

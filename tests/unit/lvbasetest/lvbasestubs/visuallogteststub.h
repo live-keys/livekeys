@@ -30,7 +30,7 @@ public:
     VisualLogTestStub(int field1, const QString& field2, QObject *parent = 0);
     ~VisualLogTestStub();
 
-    friend void lv::ml::serialize<VisualLogTestStub>(lv::MLNode& node, const VisualLogTestStub& d);
+    friend void lv::ml::serialize<VisualLogTestStub>(const VisualLogTestStub& d, lv::MLNode& node);
     friend void lv::ml::deserialize<VisualLogTestStub>(const lv::MLNode& node, VisualLogTestStub& d);
     friend lv::VisualLog& operator << (lv::VisualLog& vl, const VisualLogTestStub& v);
 
@@ -40,7 +40,7 @@ private:
 };
 
 template<>
-inline void lv::ml::serialize<VisualLogTestStub>(MLNode& node, const VisualLogTestStub& v){
+inline void lv::ml::serialize<VisualLogTestStub>(const VisualLogTestStub& v, MLNode& node){
     node = {
         {"field1", v.m_field1},
         {"field2", v.m_field2.toStdString()}

@@ -185,7 +185,7 @@ QMat* QMat::createOwnedObject(){
 /*!
   \brief Returns a cloned matrix that is owned by the javascript engine
  */
-QMat* QMat::cloneMat(){
+QMat* QMat::cloneMat() const{
     cv::Mat* clonedMat = new cv::Mat;
     m_cvmat->copyTo(*clonedMat);
     QMat* clonedObject = new QMat(clonedMat);
@@ -198,6 +198,10 @@ QMat* QMat::cloneMat(){
  */
 QMat::~QMat(){
     delete m_cvmat;
+}
+
+const cv::Mat &QMat::data() const{
+    return *m_cvmat;
 }
 
 QMat* QMat::m_nullMat = 0;

@@ -127,8 +127,7 @@ public:
     VisualLog& d();
     VisualLog& v();
 
-    template<typename T> void object(MessageInfo::Level level, const T& value);
-
+    template<typename T> void object(const T& value);
     template<typename T> void f(const T& value);
     template<typename T> void e(const T& value);
     template<typename T> void w(const T& value);
@@ -151,6 +150,7 @@ public:
     void closeFile();
 
     void asView(const QString& viewPath, const QVariant& viewData);
+    void asView(const QString& viewPath, std::function<QVariant()> cloneFunction);
     template<typename T> void asObject(const QString& type, const T& value);
     void asObject(const QString& type, const MLNode& value);
 
@@ -171,6 +171,8 @@ private:
     QString prefix();
     bool canLogObjects(VisualLog::Configuration* configuration);
 
+    template<typename T> void object(MessageInfo::Level level, const T& value);
+
     static int removeOutputFlag(int flags, VisualLog::Output output);
 
     static ConfigurationContainer createDefaultConfigurations();
@@ -189,17 +191,21 @@ private:
 
 };
 
-template<typename T> void VisualLog::object(VisualLog::MessageInfo::Level level, const T &value){
-    m_messageInfo.m_level = level;
+template<typename T> void VisualLog::object(const T &value){
     m_objectOutput = true;
     if ( canLog() )
         *this << value;
 }
 
+template<typename T> void VisualLog::object(VisualLog::MessageInfo::Level level, const T& value){
+    m_messageInfo.m_level = level;
+    object(value);
+}
+
 template<typename T> void VisualLog::asObject(const QString &type, const T &value){
     if ( canLog() && m_objectOutput && canLogObjects(m_configuration) ){
         MLNode mlvalue;
-        ml::serialize(mlvalue, value);
+        ml::serialize(value, mlvalue);
         asObject(type, mlvalue);
     }
 }

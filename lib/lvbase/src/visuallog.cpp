@@ -496,6 +496,13 @@ void VisualLog::asView(const QString &viewPath, const QVariant &viewData){
     }
 }
 
+void VisualLog::asView(const QString &viewPath, std::function<QVariant ()> cloneFunction){
+    if ( canLog() && m_objectOutput && (m_output & VisualLog::View) ){
+        m_model->onView(m_configuration, m_messageInfo, viewPath, cloneFunction());
+        m_output = removeOutputFlag(m_output, VisualLog::View);
+    }
+}
+
 void VisualLog::asObject(const QString &type, const MLNode &mlvalue){
     std::string str = mlvalue.toString();
     QString pref = prefix();

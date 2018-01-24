@@ -40,3 +40,6 @@ first.depends = $(first) palettecopy
 export(first.depends)
 export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
+
+DISTFILES += \
+    qml/MatLog.qml

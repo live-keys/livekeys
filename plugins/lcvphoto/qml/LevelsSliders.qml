@@ -171,13 +171,13 @@ Rectangle{
                     rc[2] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
                 } else if ( colorHistogram.channel === ColorHistogram.GreenChannel ){
-                    var rc = root.levelByChannel
-                    rc[1] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
-                    root.levelByChannel = rc
+                    var rc2 = root.levelByChannel
+                    rc2[1] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
+                    root.levelByChannel = rc2
                 } else if ( colorHistogram.channel === ColorHistogram.BlueChannel ){
-                    var rc = root.levelByChannel
-                    rc[0] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
-                    root.levelByChannel = rc
+                    var rc3 = root.levelByChannel
+                    rc3[0] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
+                    root.levelByChannel = rc3
                 }
             }
             width: 10

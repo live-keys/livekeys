@@ -25,4 +25,5 @@ HEADERS += \
     $$PWD/live/filterworker.h \
     $$PWD/live/keymap.h \
     $$PWD/live/visuallogfilter.h \
-    $$PWD/live/visuallogbasemodel.h
+    $$PWD/live/visuallogbasemodel.h \
+    $$PWD/live/typeinfo.h

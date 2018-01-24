@@ -43,6 +43,7 @@ public:
     ~QMat();
 
     cv::Mat* cvMat();
+    const cv::Mat& data() const;
 
     static QMat* nullMat();
     static void  cleanUp();
@@ -53,7 +54,7 @@ public slots:
     int         depth();
     QSize       dimensions() const;
     QMat*       createOwnedObject();
-    QMat*       cloneMat();
+    QMat*       cloneMat() const;
 
 private:
     cv::Mat* m_cvmat;
@@ -65,5 +66,7 @@ private:
 inline cv::Mat *QMat::cvMat(){
     return m_cvmat;
 }
+
+
 
 #endif // QMAT_H

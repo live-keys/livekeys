@@ -17,6 +17,7 @@
 #include "lcvcore_plugin.h"
 #include "qcvglobalobject.h"
 #include "qmat.h"
+#include "qmatext.h"
 #include "qmatview.h"
 #include "qimread.h"
 #include "qimwrite.h"
@@ -34,6 +35,10 @@
 #include "qcolorhistogram.h"
 #include "qmatloader.h"
 #include "qmatlist.h"
+#include "qimagefile.h"
+
+#include "live/engine.h"
+#include "live/plugincontext.h"
 
 #include <qqml.h>
 #include <QQmlEngine>
@@ -61,11 +66,18 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QColorHistogram>(    uri, 1, 0, "ColorHistogram");
     qmlRegisterType<QMatList>(           uri, 1, 0, "MatList");
     qmlRegisterType<QMatLoader>(         uri, 1, 0, "MatLoader");
+    qmlRegisterType<QImageFile>(         uri, 1, 0, "ImageFile");
 }
 
 void LcvcorePlugin::initializeEngine(QQmlEngine *engine, const char *){
     QCvGlobalObject* cvob = new QCvGlobalObject;
     engine->globalObject().setProperty("cv", engine->newQObject(cvob));
+
+    lv::PluginContext::engine()->registerQmlTypeInfo<QMat>(
+        &lv::ml::serialize<QMat>,
+        &lv::ml::deserialize<QMat>,
+        true
+    );
 }
 
 

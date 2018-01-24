@@ -14,8 +14,9 @@ Grid{
     }
     
     BrightnessAndContrast{
-        input : src.output
-        brightness: 0.01         contrast: 2.0
+        input: src.output
+        brightness: 0.01
+        contrast: 2.0
     }
     
 }
