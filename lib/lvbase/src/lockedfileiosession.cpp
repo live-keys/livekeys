@@ -71,7 +71,7 @@ QString LockedFileIOSession::readFromFile(const QString &path){
     getLock(path)->lockForRead();
 
     QFile fileInput(path);
-    if ( !fileInput.open(QIODevice::ReadOnly ) ){
+    if ( !fileInput.open(QIODevice::ReadOnly | QIODevice::Text) ){
         qCritical("Cannot open file: %s", qPrintable(path));
         releaseLock(path);
         return "";

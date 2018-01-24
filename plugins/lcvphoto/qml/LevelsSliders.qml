@@ -6,7 +6,7 @@ import lcvphoto 1.0
 Rectangle{
     id: root
     width: 200
-    height: 250
+    height: 200
     color: 'transparent'
 
     property alias input: colorHistogram.input

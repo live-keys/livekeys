@@ -22,6 +22,7 @@
 #include "qlicensesettings.h"
 #include "qfilereader.h"
 #include "qstaticfilereader.h"
+#include "qtriangle.h"
 
 #include "live/plugincontext.h"
 #include "live/visuallog.h"
@@ -37,6 +38,7 @@
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
     qmlRegisterType<QLiveCVMain>(        uri, 1, 0, "Main");
+    qmlRegisterType<QTriangle>(          uri, 1, 0, "Triangle");
     qmlRegisterType<QStaticLoader>(      uri, 1, 0, "StaticLoader");
     qmlRegisterType<QFileReader>(        uri, 1, 0, "FileReader");
     qmlRegisterType<QStaticFileReader>(  uri, 1, 0, "StaticFileReader");

@@ -11,7 +11,10 @@ DEFINES += Q_LCVCORE_LIB
 
 # Dependencies
 
-linkLocalLibrary(lvbase, lvbase)
+linkLocalLibrary(lvbase,      lvbase)
+linkLocalLibrary(lveditor,    lveditor)
+linkLocalLibrary(lveditqmljs, lveditqmljs)
+
 linkLocalPlugin(live, live)
 
 # Source
@@ -41,5 +44,3 @@ export(first.depends)
 export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
 
-DISTFILES += \
-    qml/MatLog.qml

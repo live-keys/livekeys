@@ -14,13 +14,15 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.1
+import QtQuick 2.3
+import live 1.0
 
 Rectangle{
     id : root
 
-    height : 25
+    height : 30
     width : 100
+    color: '#000d18'
 
     property Item videoCapture : Item{
         property bool paused : true
@@ -28,41 +30,60 @@ Rectangle{
         property int currentFrame : 0
     }
 
-    Rectangle{
+    signal playPauseTriggered(bool paused)
+    signal seekTriggered(int currentFrame)
+
+    Item{
         id : playPause
-        width : 25
+        width : 35
         height : parent.height
-        color : "#113344"
+
+        Triangle{
+            anchors.centerIn: parent
+            width: 11
+            height: 16
+            color: "#aeaeae"
+            rotation: Triangle.Right
+            visible: root.videoCapture.paused
+        }
+
+        Text{
+            anchors.centerIn : parent
+            text : '||'
+            color : "#aeaeae"
+            font.pixelSize: 12
+            font.bold: true
+            visible: !root.videoCapture.paused
+        }
+
         MouseArea{
             anchors.fill : parent
             onClicked : {
                 root.videoCapture.paused = !root.videoCapture.paused
+                root.playPauseTriggered(root.videoCapture.paused)
             }
-        }
-        Text{
-            anchors.centerIn : parent
-            text : root.videoCapture.paused ? '>' : '||'
-            color : "#fff"
         }
     }
 
     Rectangle{
         anchors.right : parent.right
-        anchors.top   : parent.top
-        width  : parent.width - playPause.width
-        height : parent.height
-        color  : "#192a3b"
+        anchors.rightMargin: 12
+        anchors.verticalCenter: parent.verticalCenter
+        width  : parent.width - 70
+        height : 8
+        color  : "#0d1a2a"
         Rectangle{
             height : parent.height
             width : root.videoCapture.totalFrames > 0 ?
                 Math.round( (parent.width / root.videoCapture.totalFrames) * root.videoCapture.currentFrame ) : 0
-            color : "#153848"
+            color : "#aeaeae"
         }
 
         MouseArea{
             anchors.fill : parent
             onClicked : {
-                root.videoCapture.seekTo(mouse.x * (root.videoCapture.totalFrames / parent.width ))
+                root.videoCapture.seekTo(mouse.x * (root.videoCapture.totalFrames / parent.width))
+                root.seekTriggered(mouse.x * (root.videoCapture.totalFrames / parent.width))
             }
         }
     }

@@ -45,6 +45,9 @@ namespace lv{
 //TODO: Add object type on code properties
 //TODO: Add object type when looking for palettes
 
+const QChar DocumentHandler::ParagraphSeparator = QChar(8233);
+const QChar DocumentHandler::NewLine            = QChar('\n');
+
 DocumentHandler::DocumentHandler(QObject *parent)
     : QObject(parent)
     , m_target(0)
@@ -280,7 +283,10 @@ void DocumentHandler::documentContentsChanged(int position, int charsRemoved, in
 
     QString addedText = "";
     if ( charsAdded == 1 ){
-        addedText = m_targetDoc->characterAt(position);
+        QChar c = m_targetDoc->characterAt(position);
+        if ( c == DocumentHandler::ParagraphSeparator )
+            c = DocumentHandler::NewLine;
+        addedText = c;
     } else if ( charsAdded > 0 ){
         QTextCursor cursor(m_targetDoc);
         cursor.setPosition(position);

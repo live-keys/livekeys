@@ -18,6 +18,7 @@ HEADERS += \
     $$PWD/qvideowriter.h \
     $$PWD/qvideowriterthread.h \
     $$PWD/qmat.h \
+    $$PWD/qmatext.h \
     $$PWD/qmatdisplay.h \
     $$PWD/qmatfilter.h \
     $$PWD/qmatnode.h \
@@ -29,7 +30,7 @@ HEADERS += \
     $$PWD/qcolorhistogram.h \
     $$PWD/qcvglobalobject.h \
     $$PWD/qimagefile.h \
-    $$PWD/qmatext.h
+    $$PWD/qvideocaptureserializer.h
 
 SOURCES += \
     $$PWD/lcvcore_plugin.cpp \
@@ -60,5 +61,6 @@ SOURCES += \
     $$PWD/qmatloader.cpp \
     $$PWD/qcolorhistogram.cpp \
     $$PWD/qcvglobalobject.cpp \
-    $$PWD/qimagefile.cpp
+    $$PWD/qimagefile.cpp \
+    $$PWD/qvideocaptureserializer.cpp
 

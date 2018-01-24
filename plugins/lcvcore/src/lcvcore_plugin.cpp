@@ -27,6 +27,7 @@
 #include "qmat2darray.h"
 #include "qcamcapture.h"
 #include "qvideocapture.h"
+#include "qvideocaptureserializer.h"
 #include "qvideowriter.h"
 #include "qmatbuffer.h"
 #include "qalphamerge.h"
@@ -48,25 +49,26 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterUncreatableType<QCvGlobalObject>(
         uri, 1, 0, "CvGlobalObject", "CvGlobal Object is available through the \'cv\' property");
 
-    qmlRegisterType<QMat>(               uri, 1, 0, "Mat");
-    qmlRegisterType<QMatView>(           uri, 1, 0, "MatView");
-    qmlRegisterType<QImRead>(            uri, 1, 0, "ImRead");
-    qmlRegisterType<QImWrite>(           uri, 1, 0, "ImWrite");
-    qmlRegisterType<QMatEmpty>(          uri, 1, 0, "MatEmpty");
-    qmlRegisterType<QMatRoi>(            uri, 1, 0, "MatRoi");
-    qmlRegisterType<QMatRead>(           uri, 1, 0, "MatRead");
-    qmlRegisterType<QMat2DArray>(        uri, 1, 0, "Mat2DArray");
-    qmlRegisterType<QCamCapture>(        uri, 1, 0, "CamCapture");
-    qmlRegisterType<QVideoCapture>(      uri, 1, 0, "VideoCapture");
-    qmlRegisterType<QVideoWriter>(       uri, 1, 0, "VideoWriter");
-    qmlRegisterType<QMatBuffer>(         uri, 1, 0, "MatBuffer");
-    qmlRegisterType<QAlphaMerge>(        uri, 1, 0, "AlphaMerge");
-    qmlRegisterType<QAbsDiff>(           uri, 1, 0, "AbsDiff");
-    qmlRegisterType<QDrawHistogram>(     uri, 1, 0, "DrawHistogram");
-    qmlRegisterType<QColorHistogram>(    uri, 1, 0, "ColorHistogram");
-    qmlRegisterType<QMatList>(           uri, 1, 0, "MatList");
-    qmlRegisterType<QMatLoader>(         uri, 1, 0, "MatLoader");
-    qmlRegisterType<QImageFile>(         uri, 1, 0, "ImageFile");
+    qmlRegisterType<QMat>(                   uri, 1, 0, "Mat");
+    qmlRegisterType<QMatView>(               uri, 1, 0, "MatView");
+    qmlRegisterType<QImRead>(                uri, 1, 0, "ImRead");
+    qmlRegisterType<QImWrite>(               uri, 1, 0, "ImWrite");
+    qmlRegisterType<QMatEmpty>(              uri, 1, 0, "MatEmpty");
+    qmlRegisterType<QMatRoi>(                uri, 1, 0, "MatRoi");
+    qmlRegisterType<QMatRead>(               uri, 1, 0, "MatRead");
+    qmlRegisterType<QMat2DArray>(            uri, 1, 0, "Mat2DArray");
+    qmlRegisterType<QCamCapture>(            uri, 1, 0, "CamCapture");
+    qmlRegisterType<QVideoCapture>(          uri, 1, 0, "VideoCapture");
+    qmlRegisterType<QVideoCaptureSerializer>(uri, 1, 0, "VideoCaptureSerializer");
+    qmlRegisterType<QVideoWriter>(           uri, 1, 0, "VideoWriter");
+    qmlRegisterType<QMatBuffer>(             uri, 1, 0, "MatBuffer");
+    qmlRegisterType<QAlphaMerge>(            uri, 1, 0, "AlphaMerge");
+    qmlRegisterType<QAbsDiff>(               uri, 1, 0, "AbsDiff");
+    qmlRegisterType<QDrawHistogram>(         uri, 1, 0, "DrawHistogram");
+    qmlRegisterType<QColorHistogram>(        uri, 1, 0, "ColorHistogram");
+    qmlRegisterType<QMatList>(               uri, 1, 0, "MatList");
+    qmlRegisterType<QMatLoader>(             uri, 1, 0, "MatLoader");
+    qmlRegisterType<QImageFile>(             uri, 1, 0, "ImageFile");
 }
 
 void LcvcorePlugin::initializeEngine(QQmlEngine *engine, const char *){

@@ -11,7 +11,8 @@ HEADERS += \
     $$PWD/qstaticloaderproperty.h \
     $$PWD/qlicensesettings.h \
     $$PWD/qfilereader.h \
-    $$PWD/qstaticfilereader.h
+    $$PWD/qstaticfilereader.h \
+    $$PWD/qtriangle.h
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
@@ -23,4 +24,5 @@ SOURCES += \
     $$PWD/qstaticloaderproperty.cpp \
     $$PWD/qlicensesettings.cpp \
     $$PWD/qfilereader.cpp \
-    $$PWD/qstaticfilereader.cpp
+    $$PWD/qstaticfilereader.cpp \
+    $$PWD/qtriangle.cpp

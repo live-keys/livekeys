@@ -24,8 +24,8 @@ Rectangle {
     width: 100
     height: 35
 
-    property color topColor: "#141923"
-    property color bottomColor: "#070c11"
+    property color topColor: "#020a11"
+    property color bottomColor: "#000509"
 
     gradient: Gradient{
         GradientStop{ position: 0.0; color: topColor}
@@ -61,16 +61,16 @@ Rectangle {
         anchors.leftMargin: 160
         height : newMArea.containsMouse ? parent.height : parent.height - 5
         width : 35
-        color : "#0c1924"
-        border.width: 1
-        border.color: "#0f2636"
+        color : "transparent"
+//        border.width: 1
+//        border.color: "#031626"
         Image{
             id : newImage
             anchors.centerIn: parent
             source : "qrc:/images/new.png"
         }
         Rectangle{
-            color : "#0f2636"
+            color : "#031626"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
@@ -91,9 +91,9 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 200
-        color : "#0c1924"
-        border.width: 1
-        border.color: "#0f2636"
+        color : "transparent"
+//        border.width: 1
+//        border.color: "#031626"
         height : saveMArea.containsMouse ? parent.height : parent.height - 5
         width : 35
         Image{
@@ -102,7 +102,7 @@ Rectangle {
             source : "qrc:/images/save.png"
         }
         Rectangle{
-            color : "#0f2636"
+            color : "#031626"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
@@ -123,9 +123,9 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 240
-        color : "#0c1924"
-        border.width: 1
-        border.color: "#0f2636"
+        color : "transparent"
+//        border.width: 1
+//        border.color: "#031626"
         height : openMArea.containsMouse ? parent.height : parent.height - 5
         width : 35
         Image{
@@ -134,7 +134,7 @@ Rectangle {
             source : "qrc:/images/open.png"
         }
         Rectangle{
-            color : "#0f2636"
+            color : "#031626"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
@@ -156,9 +156,9 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 280
-        color : "#0c1924"
-        border.width: 1
-        border.color: "#0f2636"
+        color : "transparent"
+//        border.width: 1
+//        border.color: "#031626"
         height : openProjectMArea.containsMouse ? parent.height : parent.height - 5
         width : 35
         Image{
@@ -167,7 +167,7 @@ Rectangle {
             source : "qrc:/images/open-directory.png"
         }
         Rectangle{
-            color : "#0f2636"
+            color : "#031626"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
@@ -188,9 +188,9 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 360
-        color : "#0c1924"
-        border.width: 1
-        border.color: "#0f2636"
+        color : "transparent"
+//        border.width: 1
+//        border.color: "#031626"
         height : openLogMArea.containsMouse ? parent.height : parent.height - 5
         width : 35
         Image{
@@ -211,7 +211,7 @@ Rectangle {
             }
         }
         Rectangle{
-            color : "#0f2636"
+            color : "#031626"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
@@ -228,15 +228,14 @@ Rectangle {
         }
     }
 
-
     // Configuration
 
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 425
-        color : "#0c1924"
-        border.width: 1
-        border.color: "#0f2636"
+        color : "transparent"
+//        border.width: 1
+//        border.color: "#031626"
         height : openSettingsArea.containsMouse ? parent.height : parent.height - 5
         width : 35
         Image{
@@ -245,7 +244,7 @@ Rectangle {
             source : "qrc:/images/settings.png"
         }
         Rectangle{
-            color : "#0f2636"
+            color : "#031626"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom
@@ -263,9 +262,9 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 465
-        color : livecv.settings.file('license').highlights > 0 ? "#44130b" : "#0c1924"
-        border.width: 1
-        border.color: "#0f2636"
+        color : livecv.settings.file('license').highlights > 0 ? "#44130b" : "transparent"
+//        border.width: 1
+//        border.color: "#031626"
         height : openLicenseArea.containsMouse ? parent.height : parent.height - 5
         width : 35
         Image{
@@ -274,7 +273,7 @@ Rectangle {
             source : "qrc:/images/license.png"
         }
         Rectangle{
-            color : "#0f2636"
+            color : "#031626"
             width : parent.width
             height : 3
             anchors.bottom: parent.bottom

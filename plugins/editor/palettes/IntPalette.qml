@@ -48,7 +48,7 @@ LivePalette{
             style: SliderStyle{
                 groove: Rectangle {
                     implicitHeight: 8
-                    color: '#0c2838'
+                    color: '#15202c'
                 }
                 handle: Rectangle{
                     width: 8

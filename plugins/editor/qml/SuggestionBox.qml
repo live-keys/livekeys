@@ -25,8 +25,8 @@ Rectangle{
 
     width: 250
     height: 280
-    color: "#0b1116"
-    property color selectionColor: "#0a1a27"
+    color: "#03070a"
+    property color selectionColor: "#091927"
     opacity: 0.95
 
     property alias suggestionCount : pluginList.count
