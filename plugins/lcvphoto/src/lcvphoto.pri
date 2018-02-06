@@ -8,7 +8,18 @@ HEADERS += \
     $$PWD/qhuesaturationlightness.h \
     $$PWD/qlevels.h \
     $$PWD/qlevelsserializer.h \
-    $$PWD/qautolevels.h
+    $$PWD/qautolevels.h \
+    $$PWD/qalignmtb.h \
+    $$PWD/qcalibratedebevec.h \
+    $$PWD/qcalibraterobertson.h \
+    $$PWD/qmergedebevec.h \
+    $$PWD/qmergerobertson.h \
+    $$PWD/qtonemap.h \
+    $$PWD/qtonemapdrago.h \
+    $$PWD/qtonemapdurand.h \
+    $$PWD/qtonemapmantiuk.h \
+    $$PWD/qtonemapreinard.h \
+    $$PWD/qstitcher.h
 
 SOURCES += \
     $$PWD/lcvphoto_plugin.cpp \
@@ -20,4 +31,15 @@ SOURCES += \
     $$PWD/qhuesaturationlightness.cpp \
     $$PWD/qlevels.cpp \
     $$PWD/qlevelsserializer.cpp \
-    $$PWD/qautolevels.cpp
+    $$PWD/qautolevels.cpp \
+    $$PWD/qalignmtb.cpp \
+    $$PWD/qcalibratedebevec.cpp \
+    $$PWD/qcalibraterobertson.cpp \
+    $$PWD/qmergedebevec.cpp \
+    $$PWD/qmergerobertson.cpp \
+    $$PWD/qtonemap.cpp \
+    $$PWD/qtonemapdrago.cpp \
+    $$PWD/qtonemapdurand.cpp \
+    $$PWD/qtonemapmantiuk.cpp \
+    $$PWD/qtonemapreinard.cpp \
+    $$PWD/qstitcher.cpp

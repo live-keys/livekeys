@@ -103,7 +103,7 @@ inline void QFeatureDetector::setInputMat(QMat *mat){
     detect();
 }
 
-inline QMat*QFeatureDetector::output(){
+inline QMat* QFeatureDetector::output(){
     if ( m_outputDirty )
         drawKeypoints();
     return m_output;

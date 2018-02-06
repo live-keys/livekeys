@@ -126,7 +126,7 @@ void QLevels::setLightness(const QJSValue &value){
         }
     } else if (!value.isUndefined() ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Global channel must be array of size 3.", 0);
-        lv::PluginContext::engine()->throwError(&e);
+        lv::PluginContext::engine()->throwError(&e, this);
         return;
     } else {
         m_lightnessConfiguration = Configuration();
