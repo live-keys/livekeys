@@ -5,7 +5,11 @@
 
 QStitcher::QStitcher(QQuickItem *parent)
     : QMatDisplay(parent)
+#if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
     , m_stitcher(cv::Stitcher::create())
+#else
+    , m_stitcher(cv::Stitcher::createDefault())
+#endif
 {
 
 }
@@ -13,7 +17,11 @@ QStitcher::QStitcher(QQuickItem *parent)
 void QStitcher::filter(){
     if ( m_input && m_input->size() > 1 ){
         try{
-            cv::Stitcher::Status status = m_stitcher->stitch(m_input->asVector(), *output()->cvMat());
+            #if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
+                cv::Stitcher::Status status = m_stitcher->stitch(m_input->asVector(), *output()->cvMat());
+            #else
+                cv::Stitcher::Status status = m_stitcher.stitch(m_input->asVector(), *output()->cvMat());
+            #endif
 
             if ( status == cv::Stitcher::OK ){
                 setImplicitWidth(output()->data().cols);
@@ -38,15 +46,21 @@ void QStitcher::setParams(const QVariantMap &params){
     m_params = params;
     emit paramsChanged(m_params);
 
+#if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
     cv::Stitcher::Mode mode = cv::Stitcher::PANORAMA;
-    bool tryUseGpu = false;
-
     if ( params.contains("mode") )
         mode = static_cast<cv::Stitcher::Mode>(params["mode"].toInt());
+#endif
+
+    bool tryUseGpu = false;
     if ( params.contains("tryUseGpu") )
         tryUseGpu = params["tryUseGpu"].toBool();
 
+#if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
     m_stitcher = cv::Stitcher::create(mode, tryUseGpu);
+#else
+    m_stitcher = cv::Stitcher::createDefault(tryUseGpu);
+#endif
 
     filter();
 }
