@@ -225,6 +225,16 @@ void QMat::cleanUp(){
 }
 
 /*!
+ * \brief Deep clones the mat
+ */
+QMat *QMat::clone() const{
+    cv::Mat* clonedMat = new cv::Mat;
+    m_cvmat->copyTo(*clonedMat);
+    QMat* clonedObject = new QMat(clonedMat);
+    return clonedObject;
+}
+
+/*!
   \fn cv::Mat* QMat::cvMat()
   \brief Returns the contained open cv mat.
  */

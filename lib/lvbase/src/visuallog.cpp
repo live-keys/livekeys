@@ -16,6 +16,7 @@
 
 #include "visuallog.h"
 #include "visuallogmodel.h"
+#include "live/mlnodetojson.h"
 #include <QFile>
 #include <QDateTime>
 
@@ -245,6 +246,18 @@ VisualLog::SourceLocation::SourceLocation(const QString &pfile, int pline, const
     : file(pfile)
     , line(pline)
     , functionName(pFunctionName)
+{
+}
+
+VisualLog::SourceLocation::SourceLocation(
+        const QString &premote,
+        const QString &pfile,
+        int pline,
+        const QString &pfunctionName)
+    : remote(premote)
+    , file(pfile)
+    , line(pline)
+    , functionName(pfunctionName)
 {
 }
 
@@ -504,11 +517,12 @@ void VisualLog::asView(const QString &viewPath, std::function<QVariant ()> clone
 }
 
 void VisualLog::asObject(const QString &type, const MLNode &mlvalue){
-    std::string str = mlvalue.toString();
+    QByteArray str;
+    ml::toJson(mlvalue, str);
     QString pref = prefix();
     QString writeData =
         pref + "\\@" + type + "\n" +
-        QString(pref.length(), ' ') + QString::fromStdString(str) + "\n";
+        QString(pref.length(), ' ') + str + "\n";
 
     if ( m_output & VisualLog::Console && m_configuration->m_logObjects & VisualLog::Console ){
         flushConsole(writeData);
@@ -588,6 +602,8 @@ QString VisualLog::MessageInfo::expand(const QString &pattern) const{
                 char c = it->toLatin1();
                 switch(c){
                 case 'p': {
+                    if ( m_location && !m_location->remote.isEmpty() )
+                        base += m_location->remote + "> ";
                     base += QString().sprintf(
                         "%0*d-%0*d-%0*d %0*d:%0*d:%0*d.%0*d %s %s@%d: ",
                         4, dt.date().year(),
@@ -603,6 +619,7 @@ QString VisualLog::MessageInfo::expand(const QString &pattern) const{
                     );
                     break;
                 }
+                case 'r': base += sourceRemoteLocation(); break;
                 case 'F': base += sourceFileName(); break;
                 case 'N': base += extractFileNameSegment(sourceFileName()); break;
                 case 'U': base += sourceFunctionName(); break;

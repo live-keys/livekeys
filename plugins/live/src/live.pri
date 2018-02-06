@@ -12,7 +12,9 @@ HEADERS += \
     $$PWD/qlicensesettings.h \
     $$PWD/qfilereader.h \
     $$PWD/qstaticfilereader.h \
-    $$PWD/qtriangle.h
+    $$PWD/qtriangle.h \
+    $$PWD/qloglistener.h \
+    $$PWD/qloglistenersocket.h
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
@@ -25,4 +27,6 @@ SOURCES += \
     $$PWD/qlicensesettings.cpp \
     $$PWD/qfilereader.cpp \
     $$PWD/qstaticfilereader.cpp \
-    $$PWD/qtriangle.cpp
+    $$PWD/qtriangle.cpp \
+    $$PWD/qloglistener.cpp \
+    $$PWD/qloglistenersocket.cpp

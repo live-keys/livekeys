@@ -48,6 +48,8 @@ public:
     static QMat* nullMat();
     static void  cleanUp();
 
+    QMat* clone() const;
+
 public slots:
     QByteArray  buffer();
     int         channels();

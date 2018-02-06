@@ -48,7 +48,9 @@ public:
     class LV_BASE_EXPORT SourceLocation{
     public:
         SourceLocation(const QString& file, int line, const QString& fileName);
+        SourceLocation(const QString& remote, const QString& file, int line, const QString& functionName);
 
+        QString remote;
         QString file;
         int     line;
         QString functionName;
@@ -74,6 +76,7 @@ public:
         static QString levelToString(VisualLog::MessageInfo::Level level);
         static VisualLog::MessageInfo::Level levelFromString(const QString& str);
 
+        QString sourceRemoteLocation() const;
         QString sourceFileName() const;
         int     sourceLineNumber() const;
         QString sourceFunctionName() const;
@@ -114,6 +117,8 @@ public:
     ~VisualLog();
 
     VisualLog& at(const QString& file, int line = 0, const QString& functionName = "");
+    VisualLog& at(const QString& remote, const QString& file, int line = 0, const QString& functionName = "");
+    VisualLog& overrideStamp(const QDateTime& stamp);
 
     template<typename T> VisualLog& operator <<( const T& x );
     template<typename T> VisualLog& operator <<( std::ostream& (*f)(std::ostream&) );
@@ -262,6 +267,23 @@ inline VisualLog &VisualLog::v(){
 inline VisualLog &VisualLog::at(const QString &file, int line, const QString &functionName){
     m_messageInfo.m_location = new VisualLog::SourceLocation(file, line, functionName);
     return *this;
+}
+
+inline VisualLog &VisualLog::at(const QString &remote, const QString &file, int line, const QString &functionName){
+    m_messageInfo.m_location = new VisualLog::SourceLocation(remote, file, line, functionName);
+    return *this;
+}
+
+inline VisualLog &VisualLog::overrideStamp(const QDateTime &stamp){
+    if ( !m_messageInfo.m_stamp )
+        m_messageInfo.m_stamp = new QDateTime(stamp);
+    else
+        *m_messageInfo.m_stamp = stamp;
+    return *this;
+}
+
+inline QString VisualLog::MessageInfo::sourceRemoteLocation() const{
+    return m_location ? m_location->remote : "";
 }
 
 inline QString VisualLog::MessageInfo::sourceFileName() const{

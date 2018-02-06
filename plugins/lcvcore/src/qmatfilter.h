@@ -64,16 +64,4 @@ inline void QMatFilter::setInputMat(QMat *mat){
     transform();
 }
 
-inline void QMatFilter::transform(){
-    if ( isComponentComplete() ){
-        try{
-            transform(*inputMat()->cvMat(), *output()->cvMat());
-            emit outputChanged();
-            update();
-        } catch (cv::Exception& e ){
-            qCritical("%s", e.msg.c_str());
-        }
-    }
-}
-
 #endif // QMATFILTER_H

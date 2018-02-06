@@ -95,6 +95,9 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
                 QString::fromStdString(it.key()),
                 new VisualLogNetworkSender(toNetwork.mid(0, portPos), toNetwork.mid(portPos + 1).toInt())
             );
+
+            if ( !it.value().hasKey("toExtensions") )
+                it.value()["toExtensions"] = true;
             it.value().remove("toNetwork");
         }
         vlog().configure(QString::fromStdString(it.key()), it.value());

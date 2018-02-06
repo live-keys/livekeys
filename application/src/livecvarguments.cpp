@@ -48,7 +48,6 @@ void LiveCVArguments::initialize(int argc, const char* const argv[]){
     CommandLineParser::Option* pluginInfoOption = m_parser->addOption(QStringList() << "--plugininfo",
         "Outputs the plugin info to a specified import (e.g. --plugininfo \"live 1.0\".", "string");
 
-
     CommandLineParser::Option* logToConsoleOption = m_parser->addFlag(QStringList() << "-c" << "--log-toconsole",
         "Output log data to the console. This is on by default if Live CV is in run mode.");
     CommandLineParser::Option* logLevelOption = m_parser->addOption(QStringList() << "--log-level",

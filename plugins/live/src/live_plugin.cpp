@@ -23,6 +23,7 @@
 #include "qfilereader.h"
 #include "qstaticfilereader.h"
 #include "qtriangle.h"
+#include "qloglistener.h"
 
 #include "live/plugincontext.h"
 #include "live/visuallog.h"
@@ -43,6 +44,7 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterType<QFileReader>(        uri, 1, 0, "FileReader");
     qmlRegisterType<QStaticFileReader>(  uri, 1, 0, "StaticFileReader");
     qmlRegisterType<lv::VisualLogFilter>(uri, 1, 0, "VisualLogFilter");
+    qmlRegisterType<QLogListener>(       uri, 1, 0, "LogListener");
     qmlRegisterUncreatableType<QLicenseSettings>(
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
 }

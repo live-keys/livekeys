@@ -24,8 +24,12 @@ public:
     void log(lv::VisualLog& vl, const QObject* object);
     template<typename T> void addLogging();
 
+    void addConstructor(std::function<QObject*()> ctor);
+    QObject* newInstance();
+
     bool isSerializable() const;
     void serialize(const QObject* object, lv::MLNode& node);
+    void deserialize(const lv::MLNode& node, QObject* object);
     template<typename T> void addSerialization(
         std::function<void(const T&, MLNode&)> serialize,
         std::function<void(const MLNode&, T&)> deserialize
@@ -39,6 +43,7 @@ private:
     TypeInfo& operator = (const TypeInfo&);
 
     QByteArray m_name;
+    std::function<QObject*()>                              m_constructor;
     std::function<void(const QObject*, lv::MLNode& node)>  m_serialize;
     std::function<void(const lv::MLNode& node, QObject*)>  m_deserialize;
     std::function<void(lv::VisualLog& vl, const QObject*)> m_log;
@@ -81,8 +86,22 @@ inline void TypeInfo::log(VisualLog &vl, const QObject *object){
     m_log(vl, object);
 }
 
+inline void TypeInfo::addConstructor(std::function<QObject *()> ctor){
+    m_constructor = ctor;
+}
+
+inline QObject *TypeInfo::newInstance(){
+    if ( m_constructor )
+        return m_constructor();
+    return 0;
+}
+
 inline void TypeInfo::serialize(const QObject *object, MLNode &node){
     m_serialize(object, node);
+}
+
+inline void TypeInfo::deserialize(const MLNode &node, QObject *object){
+    m_deserialize(node, object);
 }
 
 }// namespace

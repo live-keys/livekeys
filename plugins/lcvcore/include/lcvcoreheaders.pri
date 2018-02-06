@@ -6,4 +6,5 @@ HEADERS += \
     $$PWD/qmatshader.h \
     $$PWD/qmatstate.h \
     $$PWD/qlcvcoreglobal.h \
-    $$PWD/qmatext.h
+    $$PWD/qmatext.h \
+    $$PWD/qmatlist.h

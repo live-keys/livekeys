@@ -20,7 +20,7 @@
 #include <QAbstractListModel>
 #include "qmat.h"
 
-class QMatList : public QAbstractListModel{
+class Q_LCVCORE_EXPORT QMatList : public QAbstractListModel{
 
     Q_OBJECT
 
@@ -32,6 +32,11 @@ public:
     int rowCount(const QModelIndex &parent) const;
     QHash<int, QByteArray> roleNames() const;
 
+    void resize(int newSize);
+
+    std::vector<cv::Mat> asVector();
+    void fromVector(const std::vector<cv::Mat>& v);
+
 public slots:
     void appendMat(QMat* mat);
     void removeMat(QMat* mat);
@@ -39,9 +44,15 @@ public slots:
     QMat* at(int index);
     int size() const;
 
-private:
-    QList<QMat*> m_list;
+    void fromArray(const QJSValue& matArray);
 
+signals:
+    void entriesAdded();
+
+private:
+    void clearList();
+
+    QList<QMat*>  m_list;
 };
 
 

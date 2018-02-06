@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "visuallognetworksender.h"
+#include "live/mlnodetojson.h"
 #include <QTcpSocket>
 #include <QTimer>
 
@@ -30,7 +31,7 @@ VisualLogNetworkSender::VisualLogNetworkSender(const QString &ip, int port, QObj
     , m_port(port)
     , m_timer(0)
     , m_connectRetries(0)
-    , m_connectMaxRetries(0)
+    , m_connectMaxRetries(5)
 {
     connect(m_socket, SIGNAL(connected()), this, SLOT(socketConnected()));
     connect(m_socket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
@@ -47,7 +48,7 @@ void VisualLogNetworkSender::sendMessage(const QString &message){
 
 void VisualLogNetworkSender::sendMessage(const QByteArray &message){
     if ( m_socket->state() == QTcpSocket::ConnectedState){
-        m_socket->write(message);
+        m_socket->write(message + "\n");
     } else if ( m_socket->state() == QTcpSocket::UnconnectedState ){
         reconnect();
     } else {
@@ -77,19 +78,19 @@ void VisualLogNetworkSender::onObject(
         const QString &type,
         const MLNode &node)
 {
-    std::string nodestr = node.toString();
+    QByteArray nodestr;
+    ml::toJson(node, nodestr);
     QString pref = messageInfo.prefix(configuration);
     QByteArray messageData =
         pref.toUtf8() + "\\@" + type.toUtf8() + "\n" +
-        QString(pref.length(), ' ').toUtf8() + nodestr.c_str() + "\n";
-
+        QString(pref.length(), ' ').toUtf8() + nodestr + "\n";
     sendMessage(messageData);
 }
 
 void VisualLogNetworkSender::socketConnected(){
     m_connectRetries = 0;
     while ( !m_messageQueue.isEmpty() ){
-        m_socket->write(m_messageQueue.dequeue());
+        m_socket->write(m_messageQueue.dequeue() + "\n");
     }
 }
 
@@ -105,6 +106,7 @@ void VisualLogNetworkSender::socketDisconnected(){
 }
 
 void VisualLogNetworkSender::socketError(QAbstractSocket::SocketError){
+    m_socket->abort();
     if ( m_connectRetries < m_connectMaxRetries ){
         qWarning(
             "Failed to connect to %s: \'%s\'. [%d] Reconnecting...",

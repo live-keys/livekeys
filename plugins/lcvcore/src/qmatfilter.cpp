@@ -104,7 +104,17 @@ QMatFilter::~QMatFilter(){
 
   Call this function in order to trigger the filtering process.
  */
-
+void QMatFilter::transform(){
+    if ( isComponentComplete() ){
+        try{
+            transform(*inputMat()->cvMat(), *output()->cvMat());
+            emit outputChanged();
+            update();
+        } catch (cv::Exception& e ){
+            qCritical("%s", e.msg.c_str());
+        }
+    }
+}
 
 /*!
   \brief Function to be implemented by derived classes to apply the filtering process.

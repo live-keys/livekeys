@@ -78,6 +78,7 @@ void LcvcorePlugin::initializeEngine(QQmlEngine *engine, const char *){
     lv::PluginContext::engine()->registerQmlTypeInfo<QMat>(
         &lv::ml::serialize<QMat>,
         &lv::ml::deserialize<QMat>,
+        [](){return new QMat;},
         true
     );
 }

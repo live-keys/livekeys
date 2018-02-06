@@ -15,6 +15,8 @@
 ****************************************************************************/
 
 #include "qmatlist.h"
+#include <QQmlEngine>
+#include <QJSValueIterator>
 
 //TODO: Document
 
@@ -24,9 +26,7 @@ QMatList::QMatList(QObject *parent)
 }
 
 QMatList::~QMatList(){
-    for ( int i = 0; i < m_list.size(); ++i )
-        delete m_list[i];
-    m_list.clear();
+    clearList();
 }
 
 QVariant QMatList::data(const QModelIndex &index, int role) const{
@@ -43,11 +43,44 @@ QHash<int, QByteArray> QMatList::roleNames() const{
     return roles;
 }
 
+void QMatList::resize(int newSize){
+    if ( newSize < m_list.size() ){
+        for ( int i = newSize; i < m_list.size(); ++i ){
+            delete m_list[i];
+        }
+        m_list.erase(m_list.begin() + newSize, m_list.end());
+    } else {
+        m_list.reserve(newSize);
+        for ( int i = m_list.size(); i < newSize; ++i ){
+            m_list.append(new QMat);
+        }
+    }
+}
+
+std::vector<cv::Mat> QMatList::asVector(){
+    std::vector<cv::Mat> base;
+    for ( auto it = m_list.begin(); it != m_list.end(); ++it ){
+        QMat* m = *it;
+        base.push_back(m->data());
+    }
+
+    return base;
+}
+
+void QMatList::fromVector(const std::vector<cv::Mat> &v){
+    resize(v.size());
+    for ( int i = 0; i < (int)v.size(); ++i ){
+        *m_list[i]->cvMat() = v[i];
+    }
+}
+
 void QMatList::appendMat(QMat *mat){
     beginInsertRows(QModelIndex(), m_list.size(), m_list.size());
     cv::Mat* nmat = new cv::Mat(*mat->cvMat());
     m_list.append(new QMat(nmat));
     endInsertRows();
+
+    emit entriesAdded();
 }
 
 void QMatList::removeMat(QMat *mat){
@@ -59,7 +92,9 @@ void QMatList::removeMat(QMat *mat){
 void QMatList::removeAt(int index){
     if ( index == -1 || index >= m_list.size() )
         return;
+
     beginRemoveRows(QModelIndex(), index, index);
+    delete m_list[index];
     m_list.removeAt(index);
     endRemoveRows();
 }
@@ -72,4 +107,45 @@ QMat *QMatList::at(int index){
 
 int QMatList::size() const{
     return m_list.size();
+}
+
+void QMatList::fromArray(const QJSValue &matArray){
+    beginResetModel();
+
+    bool entriesWereAdded = false;
+    if ( m_list.size() > 0 ){
+        entriesWereAdded = true;
+        clearList();
+    }
+
+    if ( matArray.isArray() ){
+        QJSValueIterator it(matArray);
+        while ( it.hasNext() ){
+            it.next();
+            if ( it.name() != "length" ){
+                QMat* m = qobject_cast<QMat*>(it.value().toQObject());
+                if ( m ){
+                    cv::Mat* nmat = new cv::Mat(*m->cvMat());
+                    m_list.append(new QMat(nmat));
+                } else {
+                    clearList();
+                    break;
+                }
+            }
+        }
+    }
+
+    if ( m_list.size() > 0 )
+        entriesWereAdded = true;
+
+    endResetModel();
+
+    if ( entriesWereAdded )
+        emit entriesAdded();
+}
+
+void QMatList::clearList(){
+    for( auto it = m_list.begin(); it != m_list.end(); ++it )
+        delete *it;
+    m_list.clear();
 }

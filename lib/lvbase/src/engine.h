@@ -85,10 +85,13 @@ public:
     template<typename T> TypeInfo::Ptr registerQmlTypeInfo(
         const std::function<void(const T&, MLNode&)>& serializeFunction,
         const std::function<void(const MLNode&, T&)>& deserializeFunction,
+        const std::function<QObject*()>& constructorFunction,
         bool canLog
     );
 
     TypeInfo::Ptr typeInfo(const QMetaObject *type);
+    TypeInfo::Ptr typeInfo(const QByteArray& typeName);
+    TypeInfo::Ptr typeInfo(const QMetaType& metaType);
 
 signals:
     void aboutToCreateObject(const QUrl& file);
@@ -132,6 +135,7 @@ private:
     QMap<QString,  QObject*>      m_errorObjects;
 
     QHash<const QMetaObject*, TypeInfo::Ptr> m_types;
+    QHash<QString, const QMetaObject*>       m_typeNames;
 
     bool m_isLoading;
 };
@@ -140,13 +144,16 @@ template<typename T>
 TypeInfo::Ptr Engine::registerQmlTypeInfo(
         const std::function<void(const T&, MLNode&)>& serializeFunction,
         const std::function<void(const MLNode&, T&)>& deserializeFunction,
+        const std::function<QObject*()>& constructorFunction,
         bool canLog)
 {
     TypeInfo::Ptr t = TypeInfo::create(T::staticMetaObject.className());
     t->addSerialization<T>(serializeFunction, deserializeFunction);
+    t->addConstructor(constructorFunction);
     if ( canLog )
         t->addLogging<T>();
     m_types[&T::staticMetaObject] = t;
+    m_typeNames[T::staticMetaObject.className()] = &T::staticMetaObject;
 
     return t;
 }
@@ -165,13 +172,6 @@ inline QQmlEngine*Engine::engine(){
 
 inline QMutex *Engine::engineMutex(){
     return m_engineMutex;
-}
-
-inline TypeInfo::Ptr Engine::typeInfo(const QMetaObject *key){
-    auto it = m_types.find(key);
-    if ( it == m_types.end() )
-        return TypeInfo::Ptr(0);
-    return it.value();
 }
 
 }// namespace
