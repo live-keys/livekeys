@@ -73,7 +73,7 @@
                         "to": "dev/lveditor/include/live"
                     },
                     {
-                        "from": "{source}/plugins/live/include/live",
+                        "from": "{source}/plugins/live/include",
                         "source": ["{source}/plugins/live/src"],
                         "to": "dev/plugins/live/include"
                     },
@@ -213,7 +213,7 @@
                         "to": "dev/lveditor/include/live"
                     },
                     {
-                        "from": "{source}/plugins/live/include/live",
+                        "from": "{source}/plugins/live/include",
                         "source": ["{source}/plugins/live/src"],
                         "to": "dev/plugins/live/include"
                     },
@@ -368,7 +368,7 @@
                           "to": "dev/lveditor/include/live"
                       },
                       {
-                          "from": "{source}/plugins/live/include/live",
+                          "from": "{source}/plugins/live/include",
                           "source": ["{source}/plugins/live/src"],
                           "to": "dev/plugins/live/include"
                       },
