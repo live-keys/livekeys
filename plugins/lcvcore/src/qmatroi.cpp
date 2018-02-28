@@ -24,10 +24,10 @@
   \inherits MatFilter
   \brief Selects a region of interest (ROI).
 
-  Select a region from an image for further processing. The 'valuescan' example shows how to use a MatRoi to select
+  Select a region from an image for further processing. The 'PanAndZoom' component shows how to use a MatRoi to select
   a region from an image, then use a MatRead to read the regions values.
 
-  \quotefile imgproc/valuescan.qml
+  \quotefile imgproc/panandzoom.qml
 */
 
 /*!

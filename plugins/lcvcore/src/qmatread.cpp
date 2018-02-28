@@ -35,9 +35,9 @@ using namespace cv;
 
   This element becomes very useful when debugging result images from algorithms. It can be used in combination
   with the MatRoi element in order to create a pan-type interaction over a zoomed area in an image. The sample in
-  core/valuescan.qml shows this type of usage in action.
+  imgproc/panandzoom.qml uses this component.
 
-  \quotefile imgproc/valuescan.qml
+  \quotefile imgproc/panandzoom.qml
 
   An alternative to the above example is to use a flickable area and use the MatRead over a whole image.
 */

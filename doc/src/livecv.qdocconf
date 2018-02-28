@@ -15,7 +15,9 @@ version = 1.4.0
 
 headerdirs  = \
     ../../application \
-    ../../editor/lcveditor \
+    ../../lib/lvbase \
+    ../../lib/lveditor \
+    ../../lib/lveditqmljs/src \
     ../../plugins \
     ../qmockup
 
@@ -25,7 +27,9 @@ headerdirs  = \
 
 sourcedirs  = \
     ../../application \
-    ../../editor/lcveditor \
+    ../../lib/lvbase \
+    ../../lib/lveditor \
+    ../../lib/lveditqmljs/src \
     ../../plugins \
     ../qdoc
 
