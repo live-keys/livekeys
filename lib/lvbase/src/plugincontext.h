@@ -36,15 +36,22 @@ public:
 
     static QString executableDirPath();
     static QString applicationPath();
+    static QString applicationFilePath();
     static QString linkPath();
     static QString pluginPath();
+    static QString librariesPath();
+    static QString developmentPath();
     static QString configPath();
 
 private:
+    static QString applicationFilePathImpl();
+
     PluginContext(){}
 
     static lv::Engine*   m_engine;
     static lv::Settings* m_settings;
+
+    static QString m_applicationFilePath;
 };
 
 inline Engine *PluginContext::engine(){

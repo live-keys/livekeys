@@ -53,15 +53,18 @@ SOURCES += \
     $$PWD/keymap.cpp \
     $$PWD/visuallogfilter.cpp \
     $$PWD/visuallogbasemodel.cpp \
-    $$PWD/typeinfo.cpp
+    $$PWD/typeinfo.cpp \
 
 win32{
     SOURCES += $$PWD/stacktrace_win.cpp
     SOURCES += $$PWD/libraryloadpath_win.cpp
+    SOURCES += $$PWD/plugincontext_win.cpp
 }
 
 unix{
+    !macx:SOURCES += $$PWD/plugincontext_unix.cpp
     SOURCES += $$PWD/stacktrace_unix.cpp
     SOURCES += $$PWD/libraryloadpath_unix.cpp
 }
+macx:SOURCES += $$PWD/plugincontext_mac.cpp
 
