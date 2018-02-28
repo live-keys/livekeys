@@ -1,10 +1,12 @@
 #include "plugincontext.h"
+#include <QString>
 
 #include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <utime.h>
 #include <cstring>
+#include <linux/limits.h>
 
 namespace lv{
 
@@ -17,5 +19,6 @@ QString PluginContext::applicationFilePathImpl(){
     } else {
         return QString();
     }
+}
 
 } // namespace

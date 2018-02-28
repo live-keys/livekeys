@@ -1,4 +1,5 @@
 #include "plugincontext.h"
+#include <QString>
 
 #include <windows.h>
 #include <tchar.h>
@@ -17,16 +18,16 @@ QString PluginContext::applicationFilePathImpl(){
             buffer = newBuffer;
         } else {
             free(buffer);
-            return Path();
+            return QString();
         }
         n = GetModuleFileNameA(NULL, buffer, size);
     } while ((int)n >= size);
     if ( buffer != 0 ){
-        Path base(buffer);
+        QString base(buffer);
         free(buffer);
         return base;
     }
-    return Path();
+    return QString();
 }
 
-}
+} // namespace
