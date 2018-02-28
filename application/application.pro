@@ -38,6 +38,7 @@ DESTDIR = $$BUILD_PATH/bin
 include($$PWD/src/main.pri)
 
 RC_ICONS = $$PWD/icons/livecv.ico
+macx:ICON = $$PWD/icons/livecv.icns
 
 RESOURCES += $$PWD/application.qrc
 
