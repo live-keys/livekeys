@@ -63,34 +63,34 @@
               { "run" : ["chmod", "755", "livecv"] },
               { "solveincludes": [
                     {
-                        "from": "{source}/lib/lvbase/include",
+                        "from": "{source}/lib/lvbase/include/live",
                         "source": ["{source}/lib/lvbase/src"],
-                        "to": "dev/include/lib/lvbase"
+                        "to": "dev/lvbase/include/live"
                     },
                     {
-                        "from": "{source}/lib/lveditor/include",
+                        "from": "{source}/lib/lveditor/include/live",
                         "source": ["{source}/lib/lveditor/src"],
-                        "to": "dev/include/lib/lveditor"
+                        "to": "dev/lveditor/include/live"
                     },
                     {
-                        "from": "{source}/plugins/live/include",
+                        "from": "{source}/plugins/live/include/live",
                         "source": ["{source}/plugins/live/src"],
-                        "to": "dev/include/plugins/live"
+                        "to": "dev/plugins/live/include"
                     },
                     {
                         "from": "{source}/plugins/lcvcore/include",
                         "source": ["{source}/plugins/lcvcore/src"],
-                        "to": "dev/include/plugins/lcvcore"
+                        "to": "dev/plugins/lcvcore/include"
                     },
                     {
                         "from": "{source}/plugins/lcvfeatures2d/include",
                         "source": ["{source}/plugins/lcvfeatures2d/src"],
-                        "to": "dev/include/plugins/lcvfeatures2d"
+                        "to": "dev/plugins/lcvfeatures2d/include"
                     },
                     {
                         "from": "{source}/plugins/lcvvideo/include",
                         "source": ["{source}/plugins/lcvvideo/src"],
-                        "to": "dev/include/plugins/lcvvideo"
+                        "to": "dev/plugins/lcvvideo/include"
                     }
                 ]
               }
@@ -202,37 +202,37 @@
               },
               { "run" : ["chmod", "755", "launcher.sh"] },
               { "solveincludes": [
-                      {
-                          "from": "{source}/lib/lvbase/include",
-                          "source": ["{source}/lib/lvbase/src"],
-                          "to": "dev/include/lib/lvbase"
-                      },
-                      {
-                          "from": "{source}/lib/lveditor/include",
-                          "source": ["{source}/lib/lveditor/src"],
-                          "to": "dev/include/lib/lveditor"
-                      },
-                      {
-                          "from": "{source}/plugins/live/include",
-                          "source": ["{source}/plugins/live/src"],
-                          "to": "dev/include/plugins/live"
-                      },
-                      {
-                          "from": "{source}/plugins/lcvcore/include",
-                          "source": ["{source}/plugins/lcvcore/src"],
-                          "to": "dev/include/plugins/lcvcore"
-                      },
-                      {
-                          "from": "{source}/plugins/lcvfeatures2d/include",
-                          "source": ["{source}/plugins/lcvfeatures2d/src"],
-                          "to": "dev/include/plugins/lcvfeatures2d"
-                      },
-                      {
-                          "from": "{source}/plugins/lcvvideo/include",
-                          "source": ["{source}/plugins/lcvvideo/src"],
-                          "to": "dev/include/plugins/lcvvideo"
-                      }
-                  ]
+                    {
+                        "from": "{source}/lib/lvbase/include/live",
+                        "source": ["{source}/lib/lvbase/src"],
+                        "to": "dev/lvbase/include/live"
+                    },
+                    {
+                        "from": "{source}/lib/lveditor/include/live",
+                        "source": ["{source}/lib/lveditor/src"],
+                        "to": "dev/lveditor/include/live"
+                    },
+                    {
+                        "from": "{source}/plugins/live/include/live",
+                        "source": ["{source}/plugins/live/src"],
+                        "to": "dev/plugins/live/include"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvcore/include",
+                        "source": ["{source}/plugins/lcvcore/src"],
+                        "to": "dev/plugins/lcvcore/include"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvfeatures2d/include",
+                        "source": ["{source}/plugins/lcvfeatures2d/src"],
+                        "to": "dev/plugins/lcvfeatures2d/include"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvvideo/include",
+                        "source": ["{source}/plugins/lcvvideo/src"],
+                        "to": "dev/plugins/lcvvideo/include"
+                    }
+                ]
               }
             ]
         },
@@ -341,16 +341,16 @@
                       		"lcvfeatures2d": "plugins/lcvfeatures2d",
                       		"lcvphoto": "plugins/lcvphoto"
                       },
-                      "{release}/bin/dev/lib/lvbase.lib" : "dev/lib/-",
-                      "{release}/bin/dev/lib/lveditor.lib" : "dev/lib/-",
-                      "{release}/bin/dev/lib/lveditqmljs.lib" : "dev/lib/-",
+                      "{release}/bin/dev/lib/lvbase.lib" : "dev/lvbase/lib/-",
+                      "{release}/bin/dev/lib/lveditor.lib" : "dev/lveditor/lib/-",
+                      "{release}/bin/dev/lib/lveditqmljs.lib" : "dev/lveditqmljs/lib/-",
                       "{release}/bin/dev/lib/plugins": {
-                          "live/live.lib" : "dev/lib/plugins/live/-",
-                      		"lcvcore/lcvcore.lib": "dev/lib/plugins/lcvcore/-",
-                      		"lcvimgproc/lcvimgproc.lib": "dev/lib/plugins/lcvimgproc/-",
-                      		"lcvvideo/lcvvideo.lib": "dev/lib/plugins/lcvvideo/-",
-                      		"lcvfeatures2d/lcvfeatures2d.lib": "dev/lib/plugins/lcvfeatures2d/-",
-                      		"lcvphoto/lcvphoto.lib": "dev/lib/plugins/lcvphoto/-"
+                          "live/live.lib" : "dev/plugins/live/lib/-",
+                      		"lcvcore/lcvcore.lib": "dev/plugins/lcvcore/lib/-",
+                      		"lcvimgproc/lcvimgproc.lib": "dev/plugins/lcvimgproc/lib/-",
+                      		"lcvvideo/lcvvideo.lib": "dev/plugins/lcvvideo/lib/-",
+                      		"lcvfeatures2d/lcvfeatures2d.lib": "dev/plugins/lcvfeatures2d/lib/-",
+                      		"lcvphoto/lcvphoto.lib": "dev/plugins/lcvphoto/lib/-"
                       },
                       "{source}/project" : "dev/project",
                       "{source}/samples" : "-"
@@ -358,37 +358,186 @@
                   },
                 { "solveincludes": [
                       {
-                          "from": "{source}/lib/lvbase/include",
+                          "from": "{source}/lib/lvbase/include/live",
                           "source": ["{source}/lib/lvbase/src"],
-                          "to": "dev/include/lib/lvbase"
+                          "to": "dev/lvbase/include/live"
                       },
                       {
-                          "from": "{source}/lib/lveditor/include",
+                          "from": "{source}/lib/lveditor/include/live",
                           "source": ["{source}/lib/lveditor/src"],
-                          "to": "dev/include/lib/lveditor"
+                          "to": "dev/lveditor/include/live"
                       },
                       {
-                          "from": "{source}/plugins/live/include",
+                          "from": "{source}/plugins/live/include/live",
                           "source": ["{source}/plugins/live/src"],
-                          "to": "dev/include/plugins/live"
+                          "to": "dev/plugins/live/include"
                       },
                       {
                           "from": "{source}/plugins/lcvcore/include",
                           "source": ["{source}/plugins/lcvcore/src"],
-                          "to": "dev/include/plugins/lcvcore"
+                          "to": "dev/plugins/lcvcore/include"
                       },
                       {
                           "from": "{source}/plugins/lcvfeatures2d/include",
                           "source": ["{source}/plugins/lcvfeatures2d/src"],
-                          "to": "dev/include/plugins/lcvfeatures2d"
+                          "to": "dev/plugins/lcvfeatures2d/include"
                       },
                       {
                           "from": "{source}/plugins/lcvvideo/include",
                           "source": ["{source}/plugins/lcvvideo/src"],
-                          "to": "dev/include/plugins/lcvvideo"
+                          "to": "dev/plugins/lcvvideo/include"
                       }
                   ]
                 }
+            ]
+        },
+        "macos_clang_64" : {
+            "compiler" : "clang_64",
+            "environment" : {
+                "OPENCV_DIR" : "opencv_dir",
+                "QTDIR" : "qtdir"
+            },
+            "build" : [
+                {"qmake" : ["-recursive"]},
+                {"make" : []}
+            ],
+            "deploy" : [
+                { "copy" : {
+                    "{release}/bin/livecv.app" : "-",
+                    "{source}/samples" : "livecv.app/Contents/Samples",
+                    "{source}/project" : "livecv.app/Contents/Project",
+                    "{opencv_dir}/lib/libopencv_*": "livecv.app/Contents/Frameworks/OpenCV.framework/Libraries/-",
+                    "{qtdir}/qml" : {
+                        "Qt" : "livecv.app/Contents/PlugIns/Qt",
+                        "QtCanvas3D" : "livecv.app/Contents/PlugIns/QtCanvas3D",
+                        "QtGraphicalEffects" : "livecv.app/Contents/PlugIns/QtGraphicalEffects",
+                        "QtMultimedia" : "livecv.app/Contents/PlugIns/QtMultimedia",
+                        "QtQml" : "livecv.app/Contents/PlugIns/QtQml",
+                        "QtQuick" : "livecv.app/Contents/PlugIns/QtQuick",
+                        "QtQuick.2" : "livecv.app/Contents/PlugIns/QtQuick.2",
+                        "QtWebSockets" : "livecv.app/Contents/PlugIns/QtWebSockets"
+                    },
+                    "{qtdir}/plugins" : {
+                        "imageformats" : "livecv.app/Contents/Libraries/imageformats",
+                        "platforms" : "livecv.app/Contents/Libraries/platforms"
+                    },
+                    "{qtdir}/lib" : {
+                        "Qt3DExtras.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DExtras.framework/Versions/5",
+                        "Qt3DInput.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DInput.framework/Versions/5",
+                        "Qt3DLogic.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DLogic.framework/Versions/5",
+                        "Qt3DQuick.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuick.framework/Versions/5",
+                        "Qt3DQuickExtras.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuickExtras.framework/Versions/5",
+                        "Qt3DQuickInput.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuickInput.framework/Versions/5",
+                        "Qt3DQuickRender.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuickRender.framework/Versions/5",
+                        "Qt3DRender.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DRender.framework/Versions/5",
+                        "QtCLucene.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtCLucene.framework/Versions/5",
+                        "QtConcurrent.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtConcurrent.framework/Versions/5",
+                        "QtCore.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtCore.framework/Versions/5",
+                        "QtDBus.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtDBus.framework/Versions/5",
+                        "QtGui.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtGui.framework/Versions/5",
+                        "QtMacExtras.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMacExtras.framework/Versions/5",
+                        "QtMultimedia.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimedia.framework/Versions/5",
+                        "QtMultimediaQuick_p.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimediaQuick_p.framework/Versions/5",
+                        "QtMultimediaWidgets.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimediaWidgets.framework/Versions/5",
+                        "QtNetwork.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtNetwork.framework/Versions/5",
+                        "QtNfc.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtNfc.framework/Versions/5",
+                        "QtOpenGL.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtOpenGL.framework/Versions/5",
+                        "QtPositioning.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtPositioning.framework/Versions/5",
+                        "QtPrintSupport.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtPrintSupport.framework/Versions/5",
+                        "QtQml.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQml.framework/Versions/5",
+                        "QtQuick.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQuick.framework/Versions/5",
+                        "QtQuickControls2.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQuickControls2.framework/Versions/5",
+                        "QtQuickParticles.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQuickParticles.framework/Versions/5",
+                        "QtQuickTemplates2.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQuickTemplates2.framework/Versions/5",
+                        "QtQuickWidgets.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQuickWidgets.framework/Versions/5",
+                        "QtSql.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtSql.framework/Versions/5",
+                        "QtUiPlugin.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtUiPlugin.framework/Versions/5",
+                        "QtWebChannel.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtWebChannel.framework/Versions/5",
+                        "QtWebSockets.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtWebSockets.framework/Versions/5",
+                        "QtWebView.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtWebView.framework/Versions/5",
+                        "QtWidgets.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtWidgets.framework/Versions/5",
+                        "QtXml.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtXml.framework/Versions/5",
+                        "libQt5Bootstrap.a" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5Bootstrap.la" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5OpenGLExtensions.a" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5OpenGLExtensions.la" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5PacketProtocol.a" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5PacketProtocol.la" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5PlatformSupport.a" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5PlatformSupport.la" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5QmlDebug.a" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5QmlDebug.la" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5QmlDevTools.a" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5QmlDevTools.la" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5UiTools.a" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5UiTools.la" : "livecv.app/Contents/Frameworks/-",
+                        "libqtfreetype.a" : "livecv.app/Contents/Frameworks/-",
+                        "libqtpng.a" : "livecv.app/Contents/Frameworks/-"
+                    }
+                }},
+                { "clean" : {
+                    "livecv.app/Contents/PlugIns" : ["*_debug.dylib.dSYM", "*_debug.dylib"],
+                    "livecv.app/Contents/Libraries" : ["*_debug.dylib.dSYM", "*_debug.dylib"],
+                    "livecv.app/Contents/Frameworks" : ["*_debug.dylib.dSYM", "*_debug.dylib", "*Headers", "*_debug", "*.pri"]
+                }},
+                { "dylibrelink" : {
+                    "livecv.app/Contents/PlugIns/lcvcore/liblcvcore.dylib" : {
+                        "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
+                    },
+                    "livecv.app/Contents/PlugIns/lcvimgproc/liblcvimgproc.dylib" : {
+                        "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
+                    },
+                    "livecv.app/Contents/PlugIns/lcvvideo/liblcvvideo.dylib" : {
+                        "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
+                    },
+                    "livecv.app/Contents/PlugIns/lcvphoto/liblcvphoto.dylib" : {
+                        "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
+                    },
+                    "livecv.app/Contents/PlugIns/lcvfeatures2d/liblcvfeatures2d.dylib" : {
+                        "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
+                    }
+                }},
+                { "dylibaddrpath" : {
+                    "livecv.app/Contents/Frameworks/OpenCV.framework/Libraries/*.dylib" : ["@loader_path"]
+                }},
+                { "solveincludes": [
+                    {
+                        "from": "{source}/lib/lvbase/include/live",
+                        "source": ["{source}/lib/lvbase/src"],
+                        "to": "livecv.app/Contents/Dev/lvbase/include/live"
+                    },
+                    {
+                        "from": "{source}/lib/lveditor/include/live",
+                        "source": ["{source}/lib/lveditor/src"],
+                        "to": "livecv.app/Contents/Dev/lveditor/include/live"
+                    },
+                    {
+                        "from": "{source}/lib/lveditqmljs/include/live",
+                        "source": ["{source}/lib/lveditqmljs/src"],
+                        "to": "livecv.app/Contents/Dev/lveditqmljs/include/live"
+                    },
+                    {
+                        "from": "{source}/plugins/live/include",
+                        "source": ["{source}/plugins/live/src"],
+                        "to": "livecv.app/Contents/Dev/plugins/live/include"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvcore/include",
+                        "source": ["{source}/plugins/lcvcore/src"],
+                        "to": "livecv.app/Contents/Dev/plugins/lcvcore/include"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvfeatures2d/include",
+                        "source": ["{source}/plugins/lcvfeatures2d/src"],
+                        "to": "livecv.app/Contents/Dev/plugins/lcvfeatures2d/include"
+                    },
+                    {
+                        "from": "{source}/plugins/lcvvideo/include",
+                        "source": ["{source}/plugins/lcvvideo/src"],
+                        "to": "livecv.app/Contents/Dev/plugins/lcvvideo/include"
+                    }
+                ]
+              }
             ]
         }
     }
