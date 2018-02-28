@@ -15,7 +15,7 @@ macx{
     QMAKE_LFLAGS += \
         '-Wl,-rpath,\'@executable_path/../Link\'' \
         '-Wl,-rpath,\'@executable_path/../Frameworks\''
-    QMAKE_SONAME_PREFIX = @rpath/live.framework
+    QMAKE_SONAME_PREFIX = @rpath/Live.framework/Libraries
 }
 
 DEFINES += LV_EDITOR_LIB
