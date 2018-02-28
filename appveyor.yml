@@ -31,8 +31,8 @@ build_script:
   - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   - mv livecv-deploy-kit-master/* .
   - python --version
-  - python livecv_build.py .. msvc2013_64
-  - python livecv_deploy.py .. msvc2013_64
+  - python livepm/main.py build .. msvc2013_64
+  - python livepm/main.py deploy .. msvc2013_64
   - dir
 
 artifacts:
