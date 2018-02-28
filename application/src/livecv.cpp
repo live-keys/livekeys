@@ -63,10 +63,13 @@ LiveCV::LiveCV(QObject *parent)
     , m_script(0)
     , m_commands(new Commands)
     , m_keymap(0)
-    , m_log(new VisualLogModel(m_engine->engine()))
+    , m_log(0)
     , m_vlog(new VisualLogJsObject) // js ownership
     , m_windowControls(0)
 {
+    solveImportPaths();
+    m_log = new VisualLogModel(m_engine->engine());
+
     VisualLog::setViewTransport(m_log);
 }
 
@@ -77,7 +80,6 @@ LiveCV::~LiveCV(){
 
 LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent){
     LiveCV::Ptr livecv = LiveCV::Ptr(new LiveCV(parent));
-    livecv->solveImportPaths();
 
     livecv->m_arguments->initialize(argc, argv);
 
@@ -131,9 +133,11 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
  * \endcode
  */
 void LiveCV::solveImportPaths(){
-
     QStringList importPaths = m_engine->engine()->importPathList();
+
     importPaths.removeAll(dir());
+    importPaths.removeAll(PluginContext::executableDirPath());
+
     m_engine->engine()->setImportPathList(importPaths);
 
     // Add the plugins directory to the import paths
