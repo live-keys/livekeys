@@ -68,7 +68,7 @@ std::vector<cv::Mat> QMatList::asVector(){
 }
 
 void QMatList::fromVector(const std::vector<cv::Mat> &v){
-    resize(v.size());
+    resize((int)v.size());
     for ( int i = 0; i < (int)v.size(); ++i ){
         *m_list[i]->cvMat() = v[i];
     }

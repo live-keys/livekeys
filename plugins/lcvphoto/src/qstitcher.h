@@ -13,11 +13,13 @@ class QStitcher : public QMatDisplay{
     Q_PROPERTY(QVariantMap params READ params WRITE setParams NOTIFY paramsChanged)
 
 public:
+#if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
     enum Mode{
         Panorma = cv::Stitcher::PANORAMA,
         Scans = cv::Stitcher::SCANS
     };
     Q_ENUM(Mode)
+#endif
 
     enum Status{
         Ok = cv::Stitcher::OK,
@@ -48,7 +50,13 @@ private:
     void filter();
 
     QMatList*             m_input;
+
+#if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
     cv::Ptr<cv::Stitcher> m_stitcher;
+#else
+    cv::Stitcher m_stitcher;
+#endif
+
     QVariantMap m_params;
 };
 

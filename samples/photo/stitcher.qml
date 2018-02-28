@@ -8,6 +8,8 @@ Column{
     // Images are loaded into a MatList, and once the list is loaded
     // it's redirected to the Stitcher.
     
+    // This sample might not work in OpenCV versions lower than 3.3
+    
     spacing: 5
     
     Row{
