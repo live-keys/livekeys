@@ -101,6 +101,7 @@ public slots:
     void manageIndent(int from, int length, bool undo = false);
 
     lv::DocumentCursorInfo* cursorInfo(int position, int length);
+    QJSValue contextBlockRange(int cursorPosition);
 
     void commitEdit();
     void cancelEdit();
