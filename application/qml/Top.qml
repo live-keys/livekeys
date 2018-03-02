@@ -58,7 +58,7 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 160
+        anchors.leftMargin: 130
         height : newMArea.containsMouse ? parent.height : parent.height - 5
         width : 35
         color : "transparent"
@@ -90,7 +90,7 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 200
+        anchors.leftMargin: 170
         color : "transparent"
 //        border.width: 1
 //        border.color: "#031626"
@@ -122,7 +122,7 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 240
+        anchors.leftMargin: 210
         color : "transparent"
 //        border.width: 1
 //        border.color: "#031626"
@@ -155,7 +155,7 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 280
+        anchors.leftMargin: 250
         color : "transparent"
 //        border.width: 1
 //        border.color: "#031626"
@@ -187,7 +187,7 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 360
+        anchors.leftMargin: 330
         color : "transparent"
 //        border.width: 1
 //        border.color: "#031626"
@@ -232,7 +232,7 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 425
+        anchors.leftMargin: 395
         color : "transparent"
 //        border.width: 1
 //        border.color: "#031626"
@@ -261,7 +261,7 @@ Rectangle {
     }
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 465
+        anchors.leftMargin: 435
         color : livecv.settings.file('license').highlights > 0 ? "#44130b" : "transparent"
 //        border.width: 1
 //        border.color: "#031626"
