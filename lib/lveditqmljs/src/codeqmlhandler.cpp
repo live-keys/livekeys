@@ -1071,6 +1071,13 @@ DocumentEditFragment *CodeQmlHandler::createInjectionChannel(
     return 0;
 }
 
+QPair<int, int> CodeQmlHandler::contextBlock(int position){
+    DocumentQmlValueScanner vs(m_document, position, 0);
+    int start = vs.getBlockStart(position);
+    int end   = vs.getBlockEnd(start + 1);
+    return QPair<int, int>(start, end);
+}
+
 
 void CodeQmlHandler::newDocumentScopeReady(const QString &, lv::DocumentQmlScope::Ptr documentScope){
     m_documentScope = documentScope;

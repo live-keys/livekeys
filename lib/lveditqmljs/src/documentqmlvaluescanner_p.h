@@ -43,6 +43,8 @@ public:
         QStringList* propertyPath = 0,
         QChar *endDelimiter = 0);
 
+    int getBlockStart(int position);
+    int getBlockEnd(int position);
     int getBlockExtent(int from);
 
 private:

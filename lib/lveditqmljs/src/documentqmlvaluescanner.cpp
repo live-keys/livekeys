@@ -173,6 +173,82 @@ int DocumentQmlValueScanner::getExpressionExtent(
     return propertyLength;
 }
 
+int DocumentQmlValueScanner::getBlockStart(int position){
+    QTextBlock block = m_document->editingDocument()->findBlock(position);
+    if ( !block.isValid() )
+        return 0;
+
+    int state = 0;
+    while(true){
+        int blockState = block.userState();
+        if ( blockState < 0 ){
+            state = 0;
+        } else {
+            state = blockState & 15;
+        }
+
+        QList<QmlJS::Token> tokens = m_scanner(block.text(), state);
+        for ( auto it = tokens.rbegin(); it != tokens.rend(); ++it ){
+            if ( it->is(QmlJS::Token::LeftBrace) ){
+                int startPosition = block.position() + it->offset;
+                if ( startPosition <= position )
+                    return startPosition;
+            }
+        }
+
+        block = block.previous();
+        if ( !block.isValid() ){
+            return 0;
+        }
+    }
+    return 0;
+}
+
+int DocumentQmlValueScanner::getBlockEnd(int position){
+    QTextBlock block = m_document->editingDocument()->findBlock(position);
+    if ( !block.isValid() )
+        return 0;
+
+    int state = 0;
+    int nestingDepth = 0;
+    while(true){
+        int blockState = block.userState();
+        if ( blockState < 0 ){
+            state = 0;
+        } else {
+            state = blockState & 15;
+        }
+
+        QList<QmlJS::Token> tokens = m_scanner(block.text(), state);
+        for ( auto it = tokens.begin(); it != tokens.end(); ++it ){
+            int tokenPosition = block.position() + it->offset;
+
+            if ( it->is(QmlJS::Token::LeftBrace) ||
+                 it->is(QmlJS::Token::LeftParenthesis) ||
+                 it->is(QmlJS::Token::LeftBracket ) )
+            {
+                if ( tokenPosition > position )
+                    ++nestingDepth;
+            } else if ( it->is(QmlJS::Token::RightBrace ) ||
+                        it->is(QmlJS::Token::RightBracket) ||
+                        it->is(QmlJS::Token::RightParenthesis) )
+            {
+                --nestingDepth;
+                if ( nestingDepth < 0 ){
+                    return tokenPosition;
+                }
+            }
+        }
+
+        block = block.next();
+        if ( !block.isValid() ){
+            return 0;
+        }
+    }
+
+    return 0;
+}
+
 int DocumentQmlValueScanner::getBlockExtent(int from){
     QTextBlock block = m_document->editingDocument()->findBlock(from);
     int blockTrim = from - block.position();

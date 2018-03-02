@@ -75,6 +75,7 @@ public:
         QObject* runtime,
         CodeConverter* converter
     ) Q_DECL_OVERRIDE;
+    QPair<int, int> contextBlock(int position) Q_DECL_OVERRIDE;
 
 
     QmlJsSettings* settings();

@@ -63,6 +63,7 @@ public:
         QObject* runtime,
         CodeConverter* converter
     ) = 0;
+    virtual QPair<int, int> contextBlock(int position) = 0;
 };
 
 }// namespace
