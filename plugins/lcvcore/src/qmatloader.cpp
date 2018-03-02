@@ -17,8 +17,11 @@
 #include "qmatloader.h"
 #include "qmat.h"
 #include "qstaticcontainer.h"
+#include "live/plugincontext.h"
+#include "live/engine.h"
 
 #include <QQmlContext>
+#include <QQmlEngine>
 
 namespace{
 
@@ -79,11 +82,12 @@ QMat *QMatLoader::staticLoad(const QString &id, const QJSValue &params){
         QMatLoaderParams mparams = QMatLoaderParams::parse(params);
         cv::Mat* cvm = 0;
         if ( mparams.color == cv::Scalar(-1) ){
-            cvm = new cv::Mat(mparams.width, mparams.height, CV_MAKETYPE(mparams.type, mparams.channels));
+            cvm = new cv::Mat(mparams.height, mparams.width, CV_MAKETYPE(mparams.type, mparams.channels));
         } else {
-            cvm = new cv::Mat(mparams.width, mparams.height, CV_MAKETYPE(mparams.type, mparams.channels), mparams.color);
+            cvm = new cv::Mat(mparams.height, mparams.width, CV_MAKETYPE(mparams.type, mparams.channels), mparams.color);
         }
         m = new QMat(cvm);
+        lv::PluginContext::engine()->engine()->setObjectOwnership(m, QQmlEngine::CppOwnership);
         container->set<QMat>(id, m);
     }
     return m;
