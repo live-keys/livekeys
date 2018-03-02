@@ -32,7 +32,14 @@ Rectangle{
     objectName: "project"
 
     property WindowControls windowControls : null
-    property Editor focusEditor : null
+    property Item focusEditor : null
+    function setFocusEditor(e){
+        if ( focusEditor && focusEditor !== e ){
+            focusEditor.internalFocus = false
+            focusEditor = e
+            focusEditor.internalFocus = true
+        }
+    }
 
     Component.onCompleted: {
         livecv.commands.add(root, {

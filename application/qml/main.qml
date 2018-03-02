@@ -67,6 +67,7 @@ ApplicationWindow{
             'toggleLog' : mainVerticalSplit.toggleLog,
             'toggleLogPrefix' : logView.toggleLogPrefix,
             'addHorizontalEditorView' : mainVerticalSplit.addHorizontalEditor,
+            'addHorizontalFragmentEditorView': mainVerticalSplit.addHorizontalFragmentEditor,
             'removeHorizontalEditorView' : mainVerticalSplit.removeHorizontalEditor
         })
     }
@@ -285,16 +286,38 @@ ApplicationWindow{
             height: parent.height
             width: 400
             windowControls: controls
-            onInternalFocusChanged: if ( internalFocus ) projectView.focusEditor = editorComponent
+            onInternalActiveFocusChanged: if ( internalActiveFocus ) projectView.setFocusEditor(editorComponent)
 
             Component.onCompleted: {
-                projectView.focusEditor = editorComponent
+                projectView.setFocusEditor(editorComponent)
                 if ( project.active ){
                     editorComponent.document = project.active
                 }
                 forceFocus()
             }
         }
+    }
+
+    Component{
+        id: fragmentEditorFactory
+
+        FragmentEditor{
+            id: fragmentEditorComponent
+            height: parent.height
+            width: 400
+            windowControls: controls
+            onInternalActiveFocusChanged: if ( internalActiveFocus ) projectView.setFocusEditor(fragmentEditorComponent)
+
+            Component.onCompleted: {
+                projectView.setFocusEditor(fragmentEditorComponent)
+                forceFocus()
+            }
+        }
+    }
+
+    Component{
+        id: fragmentDocumentFactory
+        DocumentFragment{}
     }
 
     SplitView{
@@ -334,6 +357,49 @@ ApplicationWindow{
 
             for ( var i = 0; i < editorWidths.length; ++i ){
                 mainHorizontalSplit.editors[i].width = editorWidths[i]
+            }
+        }
+
+        function addHorizontalFragmentEditor(){
+            if ( !projectView.focusEditor || !projectView.focusEditor.document ){
+                addHorizontalEditor();
+                return
+            }
+
+            var cursorBlock = projectView.focusEditor.getCursorFragment()
+            var editorObject = null
+            if ( cursorBlock.start !== cursorBlock.end ){
+                var editorDocumentFragment = fragmentDocumentFactory.createObject(0)
+                editorDocumentFragment.document = projectView.focusEditor.document
+                editorDocumentFragment.lineStartIndex = cursorBlock.start
+                editorDocumentFragment.lineEndIndex = cursorBlock.end + 1
+
+                editorObject = fragmentEditorFactory.createObject(0)
+                editorObject.height = mainHorizontalSplit.height
+                editorObject.document = editorDocumentFragment
+
+                var projectViewWidth = projectView.width
+                var viewerWidth = viewer.width
+
+                var editorWidths = []
+                for ( var i = 0; i < mainHorizontalSplit.editors.length; ++i ){
+                    editorWidths.push(mainHorizontalSplit.editors[i].width)
+                }
+
+                mainHorizontalSplit.removeItem(viewer)
+                mainHorizontalSplit.addItem(editorObject)
+                mainHorizontalSplit.addItem(viewer)
+
+                projectView.width = projectViewWidth
+                editorObject.width = 400
+                viewer.width = viewer.width - editorObject.width
+
+                for ( var i = 0; i < editorWidths.length; ++i ){
+                    mainHorizontalSplit.editors[i].width = editorWidths[i]
+                }
+
+            } else {
+                addHorizontalEditor()
             }
         }
 
@@ -437,7 +503,7 @@ ApplicationWindow{
                     width: 400
                     visible : !livecv.settings.launchMode
                     windowControls: controls
-                    onInternalFocusChanged: if ( internalFocus ) projectView.focusEditor = editor
+                    onInternalActiveFocusChanged: if ( internalFocus ) projectView.focusEditor = editor
 
                     Component.onCompleted: {
                         projectView.focusEditor = editor
@@ -785,7 +851,7 @@ ApplicationWindow{
         id: logo
 
         anchors.top: parent.top
-        anchors.topMargin: 10
+        anchors.topMargin: 9
         anchors.left: parent.left
         anchors.leftMargin: 14
 

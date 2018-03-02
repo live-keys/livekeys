@@ -33,7 +33,11 @@ Rectangle{
 
     property alias text: editorArea.text
     property alias font: editorArea.font
-    property alias internalFocus : editorArea.activeFocus
+    property alias internalActiveFocus : editorArea.activeFocus
+    property alias internalFocus : editorArea.focus
+
+    property color headerColorTop: "#08141f"
+    property color headerColorBottom: "#071119"
 
     property var windowControls : null
 
@@ -123,6 +127,10 @@ Rectangle{
         editor.document.document = project.documentModel.lastOpened()
     }
 
+    function getCursorFragment(){
+        return codeHandler.contextBlockRange(editorArea.cursorPosition)
+    }
+
     function getCursorRectangle(){
         return editorArea.cursorRectangle
     }
@@ -140,8 +148,7 @@ Rectangle{
             editor.width = parent.width / 2
     }
 
-    color : "#050c13"
-
+    color : "#050b12"
     clip : true
 
     function forceFocus(){
@@ -149,6 +156,7 @@ Rectangle{
     }
 
     Rectangle{
+        id: editorHeader
         anchors.left: parent.left
         anchors.top: parent.top
 
@@ -157,8 +165,8 @@ Rectangle{
 
         color : "#000"
         gradient: Gradient{
-            GradientStop { position: 0.0;  color: "#08141f" }
-            GradientStop { position: 0.10; color: "#071119" }
+            GradientStop { position: 0.0;  color: editor.headerColorTop }
+            GradientStop { position: 0.10; color: editor.headerColorBottom }
         }
 
         Text{
@@ -260,7 +268,7 @@ Rectangle{
     Rectangle{
         anchors.fill: parent
         anchors.topMargin: 38
-        color: editor.color
+        color: 'transparent'
 
         ScrollView {
             id: flick
@@ -284,8 +292,8 @@ Rectangle{
                 }
                 decrementControl: null
                 incrementControl: null
-                frame: Rectangle{color: editor.color}
-                corner: Rectangle{color: editor.color}
+                frame: Rectangle{color: 'transparent'}
+                corner: Rectangle{color: 'transparent'}
             }
 
             anchors.fill: parent
@@ -601,6 +609,7 @@ Rectangle{
 
             y: {
                 var calculatedY =
+                    editorArea.y +
                     editorArea.cursorRectangle.y +
                     editorArea.cursorRectangle.height + 2 -
                     flick.flickableItem.contentY

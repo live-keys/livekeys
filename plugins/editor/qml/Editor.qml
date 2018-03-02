@@ -33,7 +33,8 @@ Rectangle{
 
     property alias text: editorArea.text
     property alias font: editorArea.font
-    property alias internalFocus : editorArea.activeFocus
+    property alias internalActiveFocus : editorArea.activeFocus
+    property alias internalFocus: editorArea.focus
 
     property var windowControls : null
     property var document: null
@@ -117,6 +118,10 @@ Rectangle{
             })
         } else
             editor.closeDocumentAction()
+    }
+
+    function getCursorFragment(){
+        return codeHandler.contextBlockRange(editorArea.cursorPosition)
     }
 
     function closeDocumentAction(){
@@ -292,7 +297,7 @@ Rectangle{
             frameVisible: false
 
             function ensureVisible(r){
-                if (!editor.internalFocus )
+                if (!editor.internalActiveFocus )
                     return;
                 if (flickableItem.contentX >= r.x)
                     flickableItem.contentX = r.x;
