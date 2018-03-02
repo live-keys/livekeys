@@ -25,6 +25,7 @@
 
 namespace lv{
 
+QString       PluginContext::m_applicationFilePath = "";
 lv::Engine*   PluginContext::m_engine   = 0;
 lv::Settings* PluginContext::m_settings = 0;
 
@@ -45,10 +46,17 @@ QString PluginContext::executableDirPath(){
 
 QString PluginContext::applicationPath(){
 #ifdef Q_OS_DARWIN
-    return QDir(QCoreApplication::applicationDirPath() + "/..").absolutePath();
+    return QDir(QFileInfo(applicationFilePath()).path() + "/..").absolutePath();
 #else
-    return QCoreApplication::applicationDirPath();
+    return QFileInfo(applicationFilePath()).path();
 #endif
+}
+
+QString PluginContext::applicationFilePath(){
+    if ( m_applicationFilePath.isEmpty() )
+        m_applicationFilePath = applicationFilePathImpl();
+
+    return m_applicationFilePath;
 }
 
 QString PluginContext::linkPath(){
@@ -67,8 +75,25 @@ QString PluginContext::pluginPath(){
 #endif
 }
 
+QString PluginContext::librariesPath(){
+#ifdef Q_OS_DARWIN
+    return applicationPath() + "/Libraries";
+#else
+    return applicationPath() + "/libraries";
+#endif
+}
+
+QString PluginContext::developmentPath(){
+#ifdef Q_OS_DARWIN
+    return applicationPath() + "/Dev";
+#else
+    return applicationPath() + "/dev";
+#endif
+}
+
 QString PluginContext::configPath(){
     return applicationPath() + "/config";
 }
+
 
 }// namespace

@@ -32,7 +32,7 @@ VisualLogModel::VisualLogModel(QQmlEngine *engine)
     , m_textComponent(new QQmlComponent(m_engine))
 {
     m_textComponent->setData(
-        "import QtQuick 2.7\n\n"
+        "import QtQuick 2.3\n\n"
         "Text{ "
             "y: 1; "
             "text: modelData; "

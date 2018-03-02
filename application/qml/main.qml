@@ -171,6 +171,8 @@ ApplicationWindow{
             }
         }
         Component.onCompleted: {
+            if ( script.environment.os.platform === 'darwin' )
+                folder = '~' // fixes a warning message that the path was constructed with an empty filename
             visible = false
             close()
         }
@@ -190,6 +192,8 @@ ApplicationWindow{
                 projectView.focusEditor.document = project.active
         }
         Component.onCompleted: {
+            if ( script.environment.os.platform === 'darwin' )
+                folder = '~' // fixes a warning message that the path was constructed with an empty filename
             visible = false
             close()
         }
@@ -273,6 +277,8 @@ ApplicationWindow{
             fileSaveDialog.callback = null
         }
         Component.onCompleted: {
+            if ( script.environment.os.platform === 'darwin' )
+                folder = '~' // fixes a warning message that the path was constructed with an empty filename
             visible: false
             close()
         }

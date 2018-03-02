@@ -39,8 +39,10 @@ private:
     QString m_field2;
 };
 
+namespace lv{ namespace ml{
+
 template<>
-inline void lv::ml::serialize<VisualLogTestStub>(const VisualLogTestStub& v, MLNode& node){
+inline void serialize<VisualLogTestStub>(const VisualLogTestStub& v, MLNode& node){
     node = {
         {"field1", v.m_field1},
         {"field2", v.m_field2.toStdString()}
@@ -48,10 +50,13 @@ inline void lv::ml::serialize<VisualLogTestStub>(const VisualLogTestStub& v, MLN
 }
 
 template<>
-inline void lv::ml::deserialize<VisualLogTestStub>(const MLNode& node, VisualLogTestStub& v){
+inline void deserialize<VisualLogTestStub>(const MLNode& node, VisualLogTestStub& v){
     v.m_field1 = node["field1"].asInt();
     v.m_field2 = QString::fromStdString(node["field2"].asString());
 }
+
+}// namespace ml
+}// namespace lv
 
 inline lv::VisualLog& operator << (lv::VisualLog& vl, const VisualLogTestStub& v){
     vl.asObject("VisualLogTestStub", v);

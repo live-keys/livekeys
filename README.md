@@ -4,13 +4,13 @@
 [![Build Status](https://travis-ci.org/livecv/livecv.svg?branch=master)](https://travis-ci.org/livecv/livecv)
 [![Build status](https://ci.appveyor.com/api/projects/status/c1kk7crl0wiox16b?svg=true)](https://ci.appveyor.com/project/dinusv/livecv)
 
- * **Version**: 1.4.1
+ * **Version**: 1.5.0
  * **License**: LGPL
  * **Website**: [livecv.dinusv.com](http://livecv.dinusv.com)
  * **Demo**: [www.youtube.com/watch?v=uEnJE6Jawfw](https://www.youtube.com/watch?v=uEnJE6Jawfw)
  * **Documentation**: [livecv.dinusv.com/documentation](http://livecv.dinusv.com/documentation)
  * **Build Requirements**:
-   * Qt 5.6 or higher
+   * Qt 5.7 or higher
    * Open CV 3.1 or higher
 
 
@@ -53,14 +53,6 @@ For changes and compatibility information between versions, see the [CHANGELOG](
 
 Live CV's goal is to provide an environment where people can experiment with different libraries or algorithms and can also share their own as easily as possible. To do this, it needs to be scalable, plugin-based, have a simple and easy to use build system, and a place to access and share plugins. These features ar all planned iteratively in the following versions: 
 
- * Version 1.5 - Packages & Image components
-    * Package manager
-    * Visual logging
-    * Advanced Editor Functionality
-    * Image Exposure and contrast configuration
-    * Photo stiching
-    * HDR Merging
-    * Levels and histograms
  * Version 1.6 - Editor Updates
     *  Component documentation from within the editor
     *  Editor shortcut customization

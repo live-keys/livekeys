@@ -28,6 +28,7 @@
 using namespace lv;
 
 int main(int argc, char *argv[]){
+    QGuiApplication::addLibraryPath(lv::PluginContext::librariesPath());
 
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName("Live CV");
