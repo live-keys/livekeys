@@ -84,7 +84,7 @@ public:
 
 QCalcOpticalFlowPyrLKPrivate::QCalcOpticalFlowPyrLKPrivate()
     : winSize(21, 21)
-    , pointColor(0, 255, 0)
+    , pointColor(255, 255, 0)
     , termcrit(TermCriteria::COUNT+TermCriteria::EPS, 30, 0.01)
     , maxLevel(3)
     , flags(0)

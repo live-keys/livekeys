@@ -10,11 +10,13 @@ Row{
     property int regionHeight: 20
     property int regionX: 0
     property int regionY: 0
+    property alias selectionColor: regionSelection.borderColor
 
     MatView{
         id: mv
         mat: Mat{}
         RegionSelection{
+            id: regionSelection
             item : matRoi
             anchors.fill : parent
         }
@@ -23,6 +25,8 @@ Row{
     Rectangle{
         width : matRoi.width
         height : matRoi.height
+        border.width: 1
+        border.color: regionSelection.borderColor
 
 
         MatRoi{
