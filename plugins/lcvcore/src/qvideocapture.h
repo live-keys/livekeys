@@ -70,9 +70,11 @@ signals:
     void fpsChanged();
     void totalFramesChanged();
     void loopChanged();
+    void init();
 
 protected:
     virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
+    virtual void componentComplete();
 
 private:
     void initializeMatSize();

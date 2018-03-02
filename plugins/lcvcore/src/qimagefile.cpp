@@ -69,9 +69,14 @@ void QImageFile::systemFileChanged(const QString &){
     loadImage();
 }
 
+void QImageFile::open(const QString &file){
+    setSource(file);
+}
+
 
 void QImageFile::componentComplete(){
     QQuickItem::componentComplete();
+    emit init();
     loadImage();
 }
 

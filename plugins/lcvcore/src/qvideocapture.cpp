@@ -309,7 +309,6 @@ bool QVideoCapture::paused() const{
   \a node
   \a nodeData
  */
-
 QSGNode *QVideoCapture::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *){
     QMatNode *n = static_cast<QMatNode*>(node);
     if (!node)
@@ -323,6 +322,11 @@ QSGNode *QVideoCapture::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNo
     n->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
 
     return n;
+}
+
+void QVideoCapture::componentComplete(){
+    QQuickItem::componentComplete();
+    emit init();
 }
 
 /*!

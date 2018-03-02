@@ -40,11 +40,13 @@ public:
 
 public slots:
     void systemFileChanged(const QString& file);
+    void open(const QString& file);
 
 signals:
     void iscolorChanged();
     void sourceChanged();
     void monitorChanged();
+    void init();
 
 protected:
     void componentComplete();

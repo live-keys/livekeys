@@ -52,6 +52,10 @@ signals:
     void pausedChanged();
     void fpsChanged();
     void resolutionChanged();
+    void init();
+
+protected:
+    virtual void componentComplete();
 
 private:
     void initializeMatSize();

@@ -144,6 +144,11 @@ void QCamCapture::staticLoad(const QString &device, const QSize &resolution){
     emit deviceChanged();
 }
 
+void QCamCapture::componentComplete(){
+    QQuickItem::componentComplete();
+    emit init();
+}
+
 void QCamCapture::setPaused(bool paused){
     if ( !m_thread)
         return;
