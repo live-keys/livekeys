@@ -31,7 +31,7 @@ CONFIG      += qt plugin
 TARGET      = $$PLUGIN_NAME
 
 win32:{
-    DESTDIR    = $$DEPLOY_PATH/dev/lib/plugins/$$PLUGIN_PATH
+    DESTDIR    = $$DEPLOY_PATH/dev/plugins/$$PLUGIN_PATH/lib
     DLLDESTDIR = $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH
 }else:DESTDIR = $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH
 
