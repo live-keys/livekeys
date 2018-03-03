@@ -9,7 +9,7 @@ linkLocalLibrary(lveditor, lveditor)
 DEFINES += LV_EDITQMLJS_LIB
 
 win32:{
-    DESTDIR    = $$DEPLOY_PATH/dev/lib
+    DESTDIR    = $$DEPLOY_PATH/dev/$$TARGET/lib
     DLLDESTDIR = $$DEPLOY_PATH
 }else:DESTDIR  = $$LIBRARY_DEPLOY_PATH
 
