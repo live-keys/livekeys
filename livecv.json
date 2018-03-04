@@ -50,6 +50,7 @@
                         "liblveditqmljs.so*" : "-",
                         "plugins" : {
                             "live": "plugins/live",
+                            "editor": "plugins/editor",
                             "lcvcore": "plugins/lcvcore",
                             "lcvimgproc": "plugins/lcvimgproc",
                             "lcvvideo": "plugins/lcvvideo",
@@ -71,6 +72,11 @@
                         "from": "{source}/lib/lveditor/include/live",
                         "source": ["{source}/lib/lveditor/src"],
                         "to": "dev/lveditor/include/live"
+                    },
+                    {
+                        "from": "{source}/lib/lveditqmljs/include/live",
+                        "source": ["{source}/lib/lveditqmljs/src"],
+                        "to": "dev/lveditqmljs/include/live"
                     },
                     {
                         "from": "{source}/plugins/live/include",
@@ -115,6 +121,7 @@
                       "liblveditqmljs.so*" : "-",
                       "plugins" : {
                           "live": "plugins/live",
+                          "editor" :"plugins/editor",
                           "lcvcore": "plugins/lcvcore",
                           "lcvimgproc": "plugins/lcvimgproc",
                           "lcvvideo": "plugins/lcvvideo",
@@ -211,6 +218,11 @@
                         "from": "{source}/lib/lveditor/include/live",
                         "source": ["{source}/lib/lveditor/src"],
                         "to": "dev/lveditor/include/live"
+                    },
+                    {
+                        "from": "{source}/lib/lveditqmljs/include/live",
+                        "source": ["{source}/lib/lveditqmljs/src"],
+                        "to": "dev/lveditqmljs/include/live"
                     },
                     {
                         "from": "{source}/plugins/live/include",
@@ -334,23 +346,24 @@
                       "{release}/bin/lveditqmljs.dll" : "-",
                       "{release}/bin/opencv_*.dll" : "-",
                       "{release}/bin/plugins": {
-                          "live" : "plugins/live",
-                      		"lcvcore": "plugins/lcvcore",
-                      		"lcvimgproc": "plugins/lcvimgproc",
-                      		"lcvvideo": "plugins/lcvvideo",
-                      		"lcvfeatures2d": "plugins/lcvfeatures2d",
-                      		"lcvphoto": "plugins/lcvphoto"
+                            "live" : "plugins/live",
+                            "editor": "plugins/editor",
+                            "lcvcore": "plugins/lcvcore",
+                            "lcvimgproc": "plugins/lcvimgproc",
+                            "lcvvideo": "plugins/lcvvideo",
+                            "lcvfeatures2d": "plugins/lcvfeatures2d",
+                            "lcvphoto": "plugins/lcvphoto"
                       },
-                      "{release}/bin/dev/lib/lvbase.lib" : "dev/lvbase/lib/-",
-                      "{release}/bin/dev/lib/lveditor.lib" : "dev/lveditor/lib/-",
-                      "{release}/bin/dev/lib/lveditqmljs.lib" : "dev/lveditqmljs/lib/-",
-                      "{release}/bin/dev/lib/plugins": {
-                          "live/live.lib" : "dev/plugins/live/lib/-",
-                      		"lcvcore/lcvcore.lib": "dev/plugins/lcvcore/lib/-",
-                      		"lcvimgproc/lcvimgproc.lib": "dev/plugins/lcvimgproc/lib/-",
-                      		"lcvvideo/lcvvideo.lib": "dev/plugins/lcvvideo/lib/-",
-                      		"lcvfeatures2d/lcvfeatures2d.lib": "dev/plugins/lcvfeatures2d/lib/-",
-                      		"lcvphoto/lcvphoto.lib": "dev/plugins/lcvphoto/lib/-"
+                      "{release}/bin/dev/lvbase/lib/lvbase.lib" : "dev/lvbase/lib/-",
+                      "{release}/bin/dev/lveditor/lib/lveditor.lib" : "dev/lveditor/lib/-",
+                      "{release}/bin/dev/lveditqmljs/lib/lveditqmljs.lib" : "dev/lveditqmljs/lib/-",
+                      "{release}/bin/dev/plugins": {
+                            "live/lib/live.lib" : "dev/plugins/live/lib/-",
+                            "lcvcore/lib/lcvcore.lib": "dev/plugins/lcvcore/lib/-",
+                            "lcvimgproc/lib/lcvimgproc.lib": "dev/plugins/lcvimgproc/lib/-",
+                            "lcvvideo/lib/lcvvideo.lib": "dev/plugins/lcvvideo/lib/-",
+                            "lcvfeatures2d/lib/lcvfeatures2d.lib": "dev/plugins/lcvfeatures2d/lib/-",
+                            "lcvphoto/lib/lcvphoto.lib": "dev/plugins/lcvphoto/lib/-"
                       },
                       "{source}/project" : "dev/project",
                       "{source}/samples" : "-"
@@ -366,6 +379,11 @@
                           "from": "{source}/lib/lveditor/include/live",
                           "source": ["{source}/lib/lveditor/src"],
                           "to": "dev/lveditor/include/live"
+                      },
+                      {
+                          "from": "{source}/lib/lveditqmljs/include/live",
+                          "source": ["{source}/lib/lveditqmljs/src"],
+                          "to": "dev/lveditqmljs/include/live"
                       },
                       {
                           "from": "{source}/plugins/live/include",
