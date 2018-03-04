@@ -86,8 +86,7 @@ defineTest(linkLocalLibrary){
 #  * include_dir: include dir path(defaults to library path in source tree + '/src')
 #
 defineTest(linkLocalPlugin){
-
-    win32:LIB_PATH = $$DEPLOY_PATH/dev/lib/plugins/$$1
+    win32:LIB_PATH = $$DEPLOY_PATH/dev/plugins/$$1/lib
     else:LIB_PATH = $$PLUGIN_DEPLOY_PATH/$$1
 
     LIB_NAME = $$2
@@ -120,7 +119,7 @@ defineTest(linkLocalPlugin){
 #
 defineReplace(pluginLibraryDeployPath){
     isEmpty(LIVECV_BIN_PATH){ # File is not included from a plugin
-        win32:return($$LIBRARY_DEPLOY_PATH/dev/plugins/$$1)
+        win32:return($$LIBRARY_DEPLOY_PATH/dev/plugins/$$1/lib)
         else:return($$LIBRARY_DEPLOY_PATH)
     } else {
         isEmpty(LIVECV_DEV_PATH){
