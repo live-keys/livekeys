@@ -31,7 +31,7 @@ win32{
 
     INCLUDEPATH += $${OPENCV_DIR_INCLUDE}
 
-    OPENCV_DLL_DESTINATION = $$DEPLOY_PATH
+    OPENCV_DLL_DESTINATION = $$DEPLOY_PATH/external/opencv
 
     # Helper Function to copy dlls
 
@@ -50,10 +50,20 @@ win32{
         export(QMAKE_POST_LINK)
     }
 
+    defineTest(mkCvDir){
+        DDIR = $$1
+        !exists($$DDIR){
+            win32:DDIR ~= s,/,\\,g
+            QMAKE_POST_LINK += $(CHK_DIR_EXISTS) \"$${DDIR}\" $(MKDIR) \"$${DDIR}\" $$escape_expand(\n\t)
+            export(QMAKE_POST_LINK)
+        }
+    }
+
     LIBS += -L$${OPENCV_DIR_LIBRARIES} -lopencv_world$${OPENCV_VERSION}
 
-
     defineTest(deployOpenCV){
+        mkCvDir($$DEPLOY_PATH/external)
+        mkCvDir($$DEPLOY_PATH/external/opencv)
         copyCvDll($${OPENCV_DIR_DLLS}/opencv_world$${OPENCV_VERSION}.dll)
         copyCvDll($${OPENCV_DIR_DLLS}/opencv_ffmpeg$${OPENCV_VERSION_FIND}_64.dll)
     }

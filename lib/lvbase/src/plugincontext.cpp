@@ -75,6 +75,14 @@ QString PluginContext::pluginPath(){
 #endif
 }
 
+QString PluginContext::externalPath(){
+#ifdef Q_OS_DARWIN
+    return applicationPath() + "/External";
+#else
+    return applicationPath() + "/external";
+#endif
+}
+
 QString PluginContext::librariesPath(){
 #ifdef Q_OS_DARWIN
     return applicationPath() + "/Libraries";

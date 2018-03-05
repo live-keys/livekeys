@@ -30,6 +30,9 @@
             "version" : "1.0"
         }
     },
+    "external" : {
+        "opencv" : {}
+    },
     "releases" : {
         "gcc_64" : {
             "compiler" : "gcc_64",
@@ -278,7 +281,7 @@
                           "Qt*WinExtras.dll": "-"
                       },
                       "{qtdir}/plugins" : {
-                          "platforms/qwindows.dll": "platforms/qwindows.dll"
+                          "platforms/qwindows.dll": "libraries/platforms/qwindows.dll"
                       },
                       "{qtdir}/qml" : {
                           "QtQuick" : {
@@ -344,7 +347,7 @@
                       "{release}/bin/lvbase.dll" : "-",
                       "{release}/bin/lveditor.dll" : "-",
                       "{release}/bin/lveditqmljs.dll" : "-",
-                      "{release}/bin/opencv_*.dll" : "-",
+                      "{release}/bin/external/opencv" : "external/opencv",
                       "{release}/bin/plugins": {
                             "live" : "plugins/live",
                             "editor": "plugins/editor",

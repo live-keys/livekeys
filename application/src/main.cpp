@@ -17,6 +17,7 @@
 #include <QtGui/QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QFileInfo>
 
 #include "livecv.h"
 #include "livecvarguments.h"
@@ -48,6 +49,8 @@ int main(int argc, char *argv[]){
         }
 
         LibraryLoadPath::addRecursive(PluginContext::pluginPath(), PluginContext::linkPath());
+        if ( QFileInfo(PluginContext::externalPath()).exists() )
+            LibraryLoadPath::addRecursive(PluginContext::externalPath(), PluginContext::linkPath());
 
         if ( livecv->arguments()->pluginInfoFlag() ){
             printf("%s", livecv->extractPluginInfo(livecv->arguments()->pluginInfoImport()).data());

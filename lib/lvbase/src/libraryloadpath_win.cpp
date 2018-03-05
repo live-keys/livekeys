@@ -67,6 +67,8 @@ void LibraryLoadPath::addImpl(const QString& path, const QString& , bool recursi
 
     if ( firstRun ){
         SetEnvironmentVariableA("PATH", pathContents.data());
+        firstRun = false;
+        pathContents.clear();
     }
 }
 

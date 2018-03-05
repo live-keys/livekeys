@@ -84,6 +84,7 @@ StackTrace::Ptr StackTrace::capture(int maxFrames){
     delete[] stack;
     return dest;
 #else
+    Q_UNUSED(maxFrames);
     return StackTrace::Ptr(0);
 #endif
 }

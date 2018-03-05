@@ -39,6 +39,7 @@ public:
     static QString applicationFilePath();
     static QString linkPath();
     static QString pluginPath();
+    static QString externalPath();
     static QString librariesPath();
     static QString developmentPath();
     static QString configPath();
