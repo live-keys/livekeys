@@ -2,7 +2,7 @@
 # If you need to understand the build process in detail with all its magic,
 # look at the following files:
 # .qmake.config
-# config/config_functions.pri
+# project/functions.pri
 #
 # They are also included in this confiuration for completeness and easy access.
 

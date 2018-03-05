@@ -251,8 +251,8 @@
               }
             ]
         },
-        "msvc2013_64" : {
-              "compiler" : "msvc2013_64",
+        "msvc2015_64" : {
+              "compiler" : "msvc2015_64",
               "environment" : {
                   "OPENCV_DIR" : "opencv_dir",
                   "QTDIR" : "qtdir",
@@ -338,10 +338,6 @@
                             "settings/*.qmltypes" : "plugins/Qt/labs/settings/-",
                             "settings/qmldir" : "plugins/Qt/labs/settings/-"
                         }
-                      },
-                      "{vs120comntools}/../../VC/redist/x64/Microsoft.VC120.CRT" : {
-                        "msvcp120.dll": "-",
-                        "msvcr120.dll": "-"
                       },
                       "{release}/bin/livecv.exe" : "-",
                       "{release}/bin/lvbase.dll" : "-",
