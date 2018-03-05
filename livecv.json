@@ -256,7 +256,7 @@
               "environment" : {
                   "OPENCV_DIR" : "opencv_dir",
                   "QTDIR" : "qtdir",
-                  "VS120COMNTOOLS": "vs120comntools"
+                  "VS140COMNTOOLS": "vs140comntools"
               },
               "build" : [
                   {"qmake" : ["-recursive"]},
@@ -338,6 +338,12 @@
                             "settings/*.qmltypes" : "plugins/Qt/labs/settings/-",
                             "settings/qmldir" : "plugins/Qt/labs/settings/-"
                         }
+                      },
+                      "{vs140comntools}/../../VC/redist/x64/Microsoft.VC140.CRT" : {
+                        "vcruntime140.dll": "-",
+                        "vccorlib140.dll": "-",
+                        "msvcp140.dll": "-",
+                        "concrt140.dll": "-"
                       },
                       "{release}/bin/livecv.exe" : "-",
                       "{release}/bin/lvbase.dll" : "-",
