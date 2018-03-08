@@ -129,7 +129,7 @@ defineReplace(pluginLibraryDeployPath){
             exists($$LIVECV_DEV_PATH/plugins/$$1/lib): return($$LIVECV_DEV_PATH/plugins/$$1/lib)
             else: return($$LIVECV_BIN_PATH/dev/plugins/$$1/lib)
         } else {
-            return($$LIBRARY_DEPLOY_PATH)
+            return($$LIVECV_BIN_PATH/plugins/$$1)
         }
     }
 }
