@@ -64,6 +64,7 @@
                     "{source}/samples" : "-"
                 }
               },
+	      { "run" : ["mkdir", "-m", "775", "link"] },
               { "run" : ["chmod", "755", "livecv"] },
               { "solveincludes": [
                     {
@@ -143,7 +144,7 @@
                     "libQt5Script.so*": "lib/-",
                     "libQt5Widgets.so*": "lib/-",
                     "libQt5Network.so*": "lib/-",
-                    "libQt5Xml.so*": "-",
+                    "libQt5Xml.so*": "lib/-",
                     "libQt5XcbQpa.so*": "lib/-",
                     "libicudata.so*": "lib/-",
                     "libicui18n.so*": "lib/-",
@@ -154,10 +155,10 @@
                     "libicuuc.so*": "lib/-"
                   },
                   "{qtdir}/plugins" : {
-                    "imageformats" : "lib/plugins/imageformats",
-                    "platforminputcontexts" : "lib/plugins/platforminputcontexts",
-                    "platforms" : "lib/plugins/platforms",
-                    "xcbglintegrations" : "lib/plugins/xcbglintegrations"
+                    "imageformats" : "libraries/imageformats",
+                    "platforminputcontexts" : "libraries/platforminputcontexts",
+                    "platforms" : "libraries/platforms",
+                    "xcbglintegrations" : "libraries/xcbglintegrations"
                   },
                   "{qtdir}/qml" : {
                     "QtQuick" : {
@@ -180,32 +181,33 @@
                     "QtWebSockets" : "plugins/-"
                   },
                   "{opencv_dir}" : {
-                    "libopencv_calib3d.so*" : "-",
-                    "libopencv_core.so*" : "-",
-                    "libopencv_features2d.so*" : "-",
-                    "libopencv_shape.so*" : "-",
-                    "libopencv_flann.so*" : "-",
-                    "libopencv_highgui.so*" : "-",
-                    "libopencv_imgproc.so*" : "-",
-                    "libopencv_imgcodecs.so*" : "-",
-                    "libopencv_objdetect.so*" : "-",
-                    "libopencv_stitching.so*" : "-",
-                    "libopencv_photo.so*" : "-",
-                    "libopencv_videoio.so*" : "-",
-                    "libopencv_video.so*" : "-"
+                    "libopencv_calib3d.so*" : "external/opencv/-",
+                    "libopencv_core.so*" : "external/opencv/-",
+                    "libopencv_features2d.so*" : "external/opencv/-",
+                    "libopencv_shape.so*" : "external/opencv/-",
+                    "libopencv_flann.so*" : "external/opencv/-",
+                    "libopencv_highgui.so*" : "external/opencv/-",
+                    "libopencv_imgproc.so*" : "external/opencv/-",
+                    "libopencv_imgcodecs.so*" : "external/opencv/-",
+                    "libopencv_objdetect.so*" : "external/opencv/-",
+                    "libopencv_stitching.so*" : "external/opencv/-",
+                    "libopencv_photo.so*" : "external/opencv/-",
+                    "libopencv_videoio.so*" : "external/opencv/-",
+                    "libopencv_video.so*" : "external/opencv/-"
                   }
                 }
               },
+              { "run" : ["mkdir", "-m", "775", "link"] },
               { "run" : ["chmod", "755", "livecv"] },
               { "write" : {
                   "file": "launcher.sh",
                   "data": [
                     "#!/bin/bash\n",
-                    "export LD_LIBRARY_PATH=`pwd`/lib:\n",
+		    "export LD_LIBRARY_PATH=`pwd`/lib:`pwd`:\n",
                     "export QML_IMPORT_PATH=`pwd`/plugins\n",
                     "export QML2_IMPORT_PATH=`pwd`/plugins\n",
-                    "export QT_PLUGIN_PATH=`pwd`/lib/plugins\n",
-                    "export QT_QPA_PLATFORM_PLUGIN_PATH=`pwd`/lib/plugins/platforms\n",
+                    "export QT_PLUGIN_PATH=`pwd`/libraries\n",
+                    "export QT_QPA_PLATFORM_PLUGIN_PATH=`pwd`/libraries/platforms\n",
                     "./livecv"
                     ]
                   }
