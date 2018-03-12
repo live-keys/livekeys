@@ -19,9 +19,15 @@ Row{
         height : src.height
         
         onOutputChanged : {
+            // Versions of Qt >= 5.8 have raw buffer processing
+            // which is a lot faster than the current method
+            // If you're using a higher version, you can replace the 
+            // 5.7 lines with 5.8
+            
             var dim   = output.dimensions()
-            var buffer = output.buffer()
-            var uview = new Uint8Array(buffer)
+            var uview = cv.matToArray(output) // 5.7
+            //var buffer = output.buffer() // 5.8
+            //var uview = new Uint8Array(buffer) // 5.8
 
             for ( var i = 0; i < dim.height; ++i ){
                 for ( var j = 0; j < dim.width; ++j ){
@@ -30,6 +36,8 @@ Row{
                         uview[i * dim.width + j] = 0
                 }
             }
+            
+            cv.assignArrayToMat(uview, output) // 5.7
         }
     }
     
