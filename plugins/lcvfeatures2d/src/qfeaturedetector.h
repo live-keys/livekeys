@@ -55,7 +55,7 @@ protected:
 
     cv::FeatureDetector* detector();
     void initializeDetector(cv::Ptr<cv::FeatureDetector> detector);
-    void detect();
+    virtual void detect();
     virtual void componentComplete();
 
 public:

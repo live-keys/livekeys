@@ -22,16 +22,13 @@
 #include "qbriskfeaturedetector.h"
 //#include "qdensefeaturedetector.h"
 //#include "qgoodfeaturestotrackdetector.h"
-//#include "qstarfeaturedetector.h"   IN OPENCV_EXPERIMENTAL
 #include "qorbfeaturedetector.h"
 #include "qmserfeaturedetector.h"
 #include "qsimpleblobdetector.h"
 
 #include "qdescriptorextractor.h"
-//#include "qbriefdescriptorextractor.h" IN OPENCV_EXPERIMENTAL
 #include "qbriskdescriptorextractor.h"
 #include "qorbdescriptorextractor.h"
-//#include "qfreakdescriptorextractor.h"   IN OPENCV_EXPERIMENTAL
 
 #include "qdescriptormatcher.h"
 #include "qbruteforcematcher.h"
@@ -53,18 +50,13 @@ void Lcvfeatures2dPlugin::registerTypes(const char *uri){
     qmlRegisterType<QFeatureDetector>(            uri, 1, 0, "FeatureDetector");
     qmlRegisterType<QFastFeatureDetector>(        uri, 1, 0, "FastFeatureDetector");
     qmlRegisterType<QBriskFeatureDetector>(       uri, 1, 0, "BriskFeatureDetector");
-//    qmlRegisterType<QDenseFeatureDetector>(       uri, 1, 0, "DenseFeatureDetector");
-//    qmlRegisterType<QGoodFeaturesToTrackDetector>(uri, 1, 0, "GoodFeaturesToTrackFeatureDetector");
-//    qmlRegisterType<QStarFeatureDetector>(        uri, 1, 0, "StarFeatureDetector");
     qmlRegisterType<QOrbFeatureDetector>(         uri, 1, 0, "OrbFeatureDetector");
     qmlRegisterType<QMSerFeatureDetector>(        uri, 1, 0, "MSerFeatureDetector");
     qmlRegisterType<QSimpleBlobDetector>(         uri, 1, 0, "SimpleBlobDetector");
 
     qmlRegisterType<QDescriptorExtractor>(        uri, 1, 0, "DescriptorExtractor");
-//    qmlRegisterType<QBriefDescriptorExtractor>(   uri, 1, 0, "BriefDescriptorExtractor");
     qmlRegisterType<QBriskDescriptorExtractor>(   uri, 1, 0, "BriskDescriptorExtractor");
     qmlRegisterType<QOrbDescriptorExtractor>(     uri, 1, 0, "OrbDescriptorExtractor");
-//    qmlRegisterType<QFreakDescriptorExtractor>(   uri, 1, 0, "FreakDescriptorExtractor");
 
     qmlRegisterType<QDMatchVector>(               uri, 1, 0, "DMatchVector");
     qmlRegisterType<QDescriptorMatcher>(          uri, 1, 0, "DescriptorMatcher");
