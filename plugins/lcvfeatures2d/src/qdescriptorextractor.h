@@ -58,7 +58,7 @@ signals:
     void paramsChanged();
 
 public slots:
-    void compute();
+    virtual void compute();
     void setParams(const QVariantMap &arg);
 
 private:

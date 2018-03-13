@@ -88,14 +88,14 @@ Rectangle{
         Rectangle{
             id: boxTop
             width: parent.width
-            height: 30
+            height: 35
             color: 'transparent'
             Text{
                 anchors.centerIn: parent
                 text: 'Manage Licenses'
 
                 color: root.titleColor
-                font.pixelSize: 14
+                font.pixelSize: 12
                 font.family: "Open Sans, sans-serif"
                 font.weight: Font.Light
             }
@@ -110,7 +110,7 @@ Rectangle{
                     anchors.centerIn: parent
                     text: "x"
                     color: root.titleColor
-                    font.pixelSize: closeBoxArea.containsMouse ? 24 : 18
+                    font.pixelSize: closeBoxArea.containsMouse ? 22 : 18
                     font.family: "Open Sans, sans-serif"
                     font.weight: Font.Light
                     Behavior on font.pixelSize{ NumberAnimation{ duration: 250 } }
@@ -273,7 +273,7 @@ Rectangle{
                     anchors.topMargin: 12
 
                     text: licenseList.currentItem
-                          ? settings.custom('license').licenseText(licenseList.currentItem.licenseId)
+                          ? livecv.settings.file('license').licenseText(licenseList.currentItem.licenseId)
                           : "No license selected."
 
                     width: boxRight.width - 24
@@ -314,7 +314,7 @@ Rectangle{
                     id: acceptButtonArea
                     anchors.fill: parent
                     hoverEnabled: true
-                    onClicked: settings.custom('license').acceptLicense(licenseList.currentItem.licenseId)
+                    onClicked: livecv.settings.file('license').acceptLicense(licenseList.currentItem.licenseId)
                 }
             }
         }

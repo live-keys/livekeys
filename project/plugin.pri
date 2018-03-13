@@ -56,7 +56,7 @@ macx{
     warning(Expected folder $$PLUGIN_QML_DIR)
     qmlcopy.commands =
 } else {
-    qmlcopy.commands = $$deployDirCommand($$PLUGIN_QML_DIR, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_NAME)
+    qmlcopy.commands = $$deployDirCommand($$PLUGIN_QML_DIR, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH)
 }
 
 QMAKE_EXTRA_TARGETS += qmlcopy
