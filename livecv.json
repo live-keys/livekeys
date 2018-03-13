@@ -181,19 +181,7 @@
                     "QtWebSockets" : "plugins/-"
                   },
                   "{opencv_dir}" : {
-                    "libopencv_calib3d.so*" : "external/opencv/-",
-                    "libopencv_core.so*" : "external/opencv/-",
-                    "libopencv_features2d.so*" : "external/opencv/-",
-                    "libopencv_shape.so*" : "external/opencv/-",
-                    "libopencv_flann.so*" : "external/opencv/-",
-                    "libopencv_highgui.so*" : "external/opencv/-",
-                    "libopencv_imgproc.so*" : "external/opencv/-",
-                    "libopencv_imgcodecs.so*" : "external/opencv/-",
-                    "libopencv_objdetect.so*" : "external/opencv/-",
-                    "libopencv_stitching.so*" : "external/opencv/-",
-                    "libopencv_photo.so*" : "external/opencv/-",
-                    "libopencv_videoio.so*" : "external/opencv/-",
-                    "libopencv_video.so*" : "external/opencv/-"
+                    "libopencv_*.so*" : "external/opencv/-"
                   }
                 }
               },
