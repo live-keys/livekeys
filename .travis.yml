@@ -77,9 +77,9 @@ install:
       wget https://github.com/livecv/live-pm/archive/master.zip;
       unzip master.zip;
       mv live-pm-master/* .;
-      wget http://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-linux-x64-5.7.0.run;
-      sudo chmod 777 qt-opensource-linux-x64-5.7.0.run;
-      ./qt-opensource-linux-x64-5.7.0.run --script resources/install-qt.qs --verbose --silent -platform minimal;
+      wget http://download.qt.io/official_releases/qt/5.7/5.7.1/qt-opensource-linux-x64-5.7.1.run;
+      sudo chmod 777 qt-opensource-linux-x64-5.7.1.run;
+      ./qt-opensource-linux-x64-5.7.1.run --script resources/install-qt.qs --verbose --silent -platform minimal;
       export QTDIR=/opt/qt/5.7/gcc_64;
     fi
 
