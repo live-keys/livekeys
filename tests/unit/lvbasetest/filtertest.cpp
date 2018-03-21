@@ -76,30 +76,34 @@ void FilterTest::testOneProducerTwoFilters(){
         i2->items().append(i);
     }
 
-    FilterTestStub* ft = new FilterTestStub;
+    FilterTestStub* filter1 = new FilterTestStub;
+    FilterTestStub* filter2 = new FilterTestStub;
     FilterWorker* fw   = new FilterWorker;
-    ft->setWorkerThread(fw);
+    filter1->setWorkerThread(fw);
+    filter2->setWorkerThread(fw);
     fw->start();
 
     QEventLoop el;
 
-    QObject::connect(ft, &FilterTestStub::outputChanged, [ft](){
-        QCOMPARE(ft->output()->items().size(), 5);
-        QCOMPARE(ft->output()->items()[0], 2);
-        QCOMPARE(ft->output()->items()[1], 4);
-        QCOMPARE(ft->output()->items()[2], 6);
-        QCOMPARE(ft->output()->items()[3], 8);
-        QCOMPARE(ft->output()->items()[4], 10);
+    QObject::connect(filter1, &FilterTestStub::outputChanged, filter2, &FilterTestStub::setInput2);
+    QObject::connect(filter2, &FilterTestStub::outputChanged, [filter2](){
+        QCOMPARE(filter2->output()->items().size(), 5);
+        QCOMPARE(filter2->output()->items()[0], 3);
+        QCOMPARE(filter2->output()->items()[1], 6);
+        QCOMPARE(filter2->output()->items()[2], 9);
+        QCOMPARE(filter2->output()->items()[3], 12);
+        QCOMPARE(filter2->output()->items()[4], 15);
     });
-    QObject::connect(ft, &FilterTestStub::outputChanged, &el, &QEventLoop::quit);
+    QObject::connect(filter2, &FilterTestStub::outputChanged, &el, &QEventLoop::quit);
 
-    ft->setInput1(i1);
-    ft->setInput2(i2);
+    filter2->setInput1(i1);
+    filter1->setInput1(i1);
+    filter1->setInput2(i2);
 
     el.exec();
 
     delete i1;
     delete i2;
-    delete ft;
+    delete filter1;
     delete fw;
 }

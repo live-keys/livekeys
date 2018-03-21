@@ -42,9 +42,9 @@ public:
     SharedDataTestStub* output() const;
 
 signals:
-    void input1Changed();
-    void input2Changed();
-    void outputChanged();
+    void input1Changed(SharedDataTestStub*);
+    void input2Changed(SharedDataTestStub*);
+    void outputChanged(SharedDataTestStub*);
 
 private:
     SharedDataTestStub* m_input1;
@@ -55,14 +55,14 @@ private:
 
 inline void FilterTestStub::setInput1(SharedDataTestStub *input1){
     m_input1 = input1;
-    emit input1Changed();
+    emit input1Changed(input1);
 
     process();
 }
 
 inline void FilterTestStub::setInput2(SharedDataTestStub *input2){
     m_input2 = input2;
-    emit input2Changed();
+    emit input2Changed(input2);
 
     process();
 }

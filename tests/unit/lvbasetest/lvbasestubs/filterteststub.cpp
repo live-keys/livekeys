@@ -49,6 +49,6 @@ void FilterTestStub::process(){
     };
 
     use(createLocker()->read(m_input1, m_input2)->write(m_output), cb, [this](){
-        emit this->outputChanged();
+        emit this->outputChanged(m_output);
     });
 }
