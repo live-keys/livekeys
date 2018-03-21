@@ -26,10 +26,10 @@ build_script:
   - echo %OPENCV_DIR%
   - echo %QTDIR%
   - ps: $file = "$pwd\deploy.zip"
-  - ps: (new-object System.Net.WebClient).Downloadfile("https://github.com/livecv/livecv-deploy-kit/archive/master.zip", $file)
+  - ps: (new-object System.Net.WebClient).Downloadfile("https://github.com/livecv/live-pm/archive/v1.4.0.zip", $file)
   - ps: 7z x -y $file -o"."
   - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
-  - mv livecv-deploy-kit-master/* .
+  - mv live-pm-1.4.0/* .
   - python --version
   - python livecv_build.py .. msvc2013_64
   - python livecv_deploy.py .. msvc2013_64

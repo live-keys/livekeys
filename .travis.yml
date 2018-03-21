@@ -48,9 +48,9 @@ install:
   - sudo make -j8 install
   - export OPENCV_DIR=/usr/local/lib
   - cd ../../build
-  - wget https://github.com/livecv/livecv-deploy-kit/archive/master.zip
-  - unzip master.zip
-  - mv livecv-deploy-kit-master/* .
+  - wget https://github.com/livecv/live-pm/archive/v1.4.0.zip 
+  - unzip v1.4.0.zip
+  - mv live-pm-1.4.0/* .
   - wget http://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-linux-x64-5.7.0.run
   - sudo chmod 777 qt-opensource-linux-x64-5.7.0.run
   - ./qt-opensource-linux-x64-5.7.0.run --script resources/install-qt.qs --verbose --silent -platform minimal
