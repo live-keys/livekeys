@@ -7,5 +7,6 @@ HEADERS += \
     $$PWD/qstaticcontainer.h \
     $$PWD/qstaticloader.h \
     $$PWD/qenginemonitor.h \
-    $$PWD/qfilereader.h
+    $$PWD/qfilereader.h \
+    $$PWD/qlicensesettings.h
 #    $$PWD/qlicensecontainer.h

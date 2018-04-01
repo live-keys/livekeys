@@ -78,6 +78,35 @@ defineTest(linkLocalLibrary){
     debug(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH, 1)
 }
 
+# Links a livecv library to the current project
+#
+# Args: (path, name, [include_dir])
+#  * path: relative path to the library from root
+#  * name: name of the library
+#  * include_dir: include dir path(defaults to library path in source tree + '/include')
+
+defineTest(linkLibrary){
+
+    win32:LIB_PATH = $$DEPLOY_PATH/dev/$$1/lib
+    else:LIB_PATH = $$LIBRARY_DEPLOY_PATH
+
+    LIB_NAME = $$2
+    LIB_INCLUDE_PATH = $$PROJECT_ROOT/lib/$$1/include
+    !isEmpty(LIVECV_DEV_PATH):LIB_INCLUDE_PATH = $$LIVECV_DEV_PATH/lib/$$1/include
+    !isEmpty($$3):LIB_INCLUDE_PATH=$$3
+
+    # use *= instead of += to prevent duplications of link path cofigurations
+    LIBS *= -L$$LIB_PATH
+    LIBS *= -l$$LIB_NAME
+    INCLUDEPATH += $$LIB_INCLUDE_PATH
+    DEPENDPATH  += $$LIB_INCLUDE_PATH
+    export(LIBS)
+    export(INCLUDEPATH)
+    export(DEPENDPATH)
+
+    debug(Linking: $$LIB_PATH -$$LIB_NAME with include path: $$LIB_INCLUDE_PATH, 1)
+}
+
 # Links a local plugin to the current project
 #
 # Args: (path, name, [include_dir])
@@ -129,7 +158,7 @@ defineReplace(pluginLibraryDeployPath){
             exists($$LIVECV_DEV_PATH/plugins/$$1/lib): return($$LIVECV_DEV_PATH/plugins/$$1/lib)
             else: return($$LIVECV_BIN_PATH/dev/plugins/$$1/lib)
         } else {
-            return($$LIBRARY_DEPLOY_PATH)
+            return($$LIVECV_BIN_PATH/plugins/$$1)
         }
     }
 }

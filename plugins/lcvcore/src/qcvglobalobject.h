@@ -29,6 +29,10 @@ public:
     explicit QCvGlobalObject(QObject *parent = nullptr);
 
     QMat* nullMat() const;
+
+public slots:
+    QVariantList matToArray(QMat* m);
+    void assignArrayToMat(const QVariantList &a, QMat *m);
 };
 
 inline QMat *QCvGlobalObject::nullMat() const{
