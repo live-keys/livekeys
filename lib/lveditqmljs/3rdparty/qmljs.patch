@@ -1,0 +1,1651 @@
+diff -bur ./qmljs/parser/qmldirparser.cpp ../creator/qmljs/parser/qmldirparser.cpp
+--- ./qmljs/parser/qmldirparser.cpp	2018-03-28 21:12:33.000000000 +0300
++++ ../creator/qmljs/parser/qmldirparser.cpp	2018-03-26 19:20:35.000000000 +0300
+@@ -270,10 +270,10 @@
+ 
+ void QmlDirParser::reportError(quint16 line, quint16 column, const QString &description)
+ {
+-    QmlJS::DiagnosticMessage error;
+-    error.loc.startLine = line;
+-    error.loc.startColumn = column;
+-    error.message = description;
++    QmlError error;
++    error.setLine(line);
++    error.setColumn(column);
++    error.setDescription(description);
+     _errors.append(error);
+ }
+ 
+@@ -288,25 +288,19 @@
+ void QmlDirParser::setError(const QmlError &e)
+ {
+     _errors.clear();
+-    reportError(e.line(), e.column(), e.description());
++    _errors.append(e);
+ }
+ 
+ QList<QmlError> QmlDirParser::errors(const QString &uri) const
+ {
+     QUrl url(uri);
+-    QList<QmlError> errors;
+-    const int numErrors = _errors.size();
+-    errors.reserve(numErrors);
+-    for (int i = 0; i < numErrors; ++i) {
+-        const QmlJS::DiagnosticMessage &msg = _errors.at(i);
+-        QmlError e;
+-        QString description = msg.message;
++    QList<QmlError> errors = _errors;
++    for (int i = 0; i < errors.size(); ++i) {
++        QmlError &e = errors[i];
++        QString description = e.description();
+         description.replace(QLatin1String("$$URI$$"), uri);
+         e.setDescription(description);
+         e.setUrl(url);
+-        e.setLine(msg.loc.startLine);
+-        e.setColumn(msg.loc.startColumn);
+-        errors << e;
+     }
+     return errors;
+ }
+@@ -331,11 +325,6 @@
+     return _components;
+ }
+ 
+-QHash<QString, QmlDirParser::Component> QmlDirParser::dependencies() const
+-{
+-    return _dependencies;
+-}
+-
+ QList<QmlDirParser::Script> QmlDirParser::scripts() const
+ {
+     return _scripts;
+diff -bur ./qmljs/parser/qmldirparser_p.h ../creator/qmljs/parser/qmldirparser_p.h
+--- ./qmljs/parser/qmldirparser_p.h	2018-03-28 20:56:53.000000000 +0300
++++ ../creator/qmljs/parser/qmldirparser_p.h	2018-03-26 19:20:35.000000000 +0300
+@@ -46,7 +46,8 @@
+ #include <QtCore/QHash>
+ #include <QtCore/QDebug>
+ 
+-#include "qmljsengine_p.h"
++
++#include "qmljsglobal_p.h"
+ 
+ QT_BEGIN_NAMESPACE
+ 
+@@ -112,7 +113,6 @@
+     };
+ 
+     QHash<QString,Component> components() const;
+-    QHash<QString,Component> dependencies() const;
+     QList<Script> scripts() const;
+     QList<Plugin> plugins() const;
+ 
+@@ -130,14 +130,12 @@
+ #endif
+ 
+ private:
+-    bool maybeAddComponent(const QString &typeName, const QString &fileName, const QString &version, QHash<QString,Component> &hash, int lineNumber = -1, bool multi = true);
+     void reportError(quint16 line, quint16 column, const QString &message);
+ 
+ private:
+-    QList<QmlJS::DiagnosticMessage> _errors;
++    QList<QmlError> _errors;
+     QString _typeNamespace;
+     QHash<QString,Component> _components; // multi hash
+-    QHash<QString,Component> _dependencies;
+     QList<Script> _scripts;
+     QList<Plugin> _plugins;
+ #ifdef QT_CREATOR
+diff -bur ./qmljs/qmljsbind.cpp ../creator/qmljs/qmljsbind.cpp
+--- ./qmljs/qmljsbind.cpp	2018-03-28 22:00:46.000000000 +0300
++++ ../creator/qmljs/qmljsbind.cpp	2018-03-26 19:20:35.000000000 +0300
+@@ -32,6 +32,7 @@
+ #include "parser/qmljsast_p.h"
+ #include "qmljsutils.h"
+ #include "qmljsdocument.h"
++#include "qmljsmodelmanagerinterface.h"
+ 
+ using namespace LanguageUtils;
+ using namespace QmlJS;
+@@ -204,17 +205,17 @@
+                                                      importId, ast);
+         if (_doc->language() == Dialect::Qml) {
+             const QString importStr = import.name() + importId;
+-//            if (ModelManagerInterface::instance()) {
+-//                QmlLanguageBundles langBundles = ModelManagerInterface::instance()->extendedBundles();
+-//                QmlBundle qq1 = langBundles.bundleForLanguage(Dialect::QmlQtQuick1);
+-//                QmlBundle qq2 = langBundles.bundleForLanguage(Dialect::QmlQtQuick2);
+-//                bool isQQ1 = qq1.supportedImports().contains(importStr);
+-//                bool isQQ2 = qq2.supportedImports().contains(importStr);
+-//                if (isQQ1 && ! isQQ2)
+-//                    _doc->setLanguage(Dialect::QmlQtQuick1);
+-//                if (isQQ2 && ! isQQ1)
+-//                    _doc->setLanguage(Dialect::QmlQtQuick2);
+-//            }
++            if (ModelManagerInterface::instance()) {
++                QmlLanguageBundles langBundles = ModelManagerInterface::instance()->extendedBundles();
++                QmlBundle qq1 = langBundles.bundleForLanguage(Dialect::QmlQtQuick1);
++                QmlBundle qq2 = langBundles.bundleForLanguage(Dialect::QmlQtQuick2);
++                bool isQQ1 = qq1.supportedImports().contains(importStr);
++                bool isQQ2 = qq2.supportedImports().contains(importStr);
++                if (isQQ1 && ! isQQ2)
++                    _doc->setLanguage(Dialect::QmlQtQuick1);
++                if (isQQ2 && ! isQQ1)
++                    _doc->setLanguage(Dialect::QmlQtQuick2);
++            }
+         }
+         _imports += import;
+     } else if (!ast->fileName.isEmpty()) {
+diff -bur ./qmljs/qmljscompletioncontextfinder.cpp ../creator/qmljs/qmljscompletioncontextfinder.cpp
+--- ./qmljs/qmljscompletioncontextfinder.cpp	2018-03-28 22:02:48.000000000 +0300
++++ ../creator/qmljs/qmljscompletioncontextfinder.cpp	2018-03-26 19:20:35.000000000 +0300
+@@ -51,7 +51,6 @@
+     , m_behaviorBinding(false)
+     , m_inStringLiteral(false)
+     , m_inImport(false)
+-    , m_propertyNamePosition(-1)
+ {
+     QTextBlock lastBlock = cursor.block();
+     if (lastBlock.next().isValid())
+@@ -170,11 +169,10 @@
+             QStringRef tokenString = yyLine->midRef(token.begin(), token.length);
+             dotExpected = false;
+             if (identifierExpected) {
+-                m_propertyNamePosition = yyLinizerState.iter.position() + token.begin();
+                 m_bindingPropertyName.prepend(tokenString.toString());
+                 identifierExpected = false;
+                 dotExpected = true;
+-            } else if (tokenString.startsWith(QLatin1String("on"))) {
++            } else if (tokenString == QLatin1String("on")) {
+                 m_behaviorBinding = true;
+             }
+         } break;
+@@ -364,11 +362,6 @@
+     return m_libVersion;
+ }
+ 
+-int CompletionContextFinder::propertyNamePosition() const
+-{
+-    return m_propertyNamePosition;
+-}
+-
+ int CompletionContextFinder::findOpeningBrace(int startTokenIndex)
+ {
+     YY_SAVE();
+diff -bur ./qmljs/qmljscompletioncontextfinder.h ../creator/qmljs/qmljscompletioncontextfinder.h
+--- ./qmljs/qmljscompletioncontextfinder.h	2018-03-28 22:03:19.000000000 +0300
++++ ../creator/qmljs/qmljscompletioncontextfinder.h	2018-03-26 19:20:35.000000000 +0300
+@@ -31,7 +31,7 @@
+ #ifndef QMLJSCOMPLETIONCONTEXTFINDER_H
+ #define QMLJSCOMPLETIONCONTEXTFINDER_H
+ 
+-#include "qmljs/qmljs_global.h"
++#include "qmljs_global.h"
+ #include <qmljs/qmljslineinfo.h>
+ 
+ #include <QStringList>
+@@ -39,8 +39,8 @@
+ 
+ namespace QmlJS {
+ 
+-class QMLJS_EXPORT CompletionContextFinder : public LineInfo{
+-
++class QMLJS_EXPORT CompletionContextFinder : public LineInfo
++{
+ public:
+     CompletionContextFinder(const QTextCursor &cursor);
+ 
+@@ -57,8 +57,6 @@
+     bool isInImport() const;
+     QString libVersionImport() const;
+ 
+-    int propertyNamePosition() const;
+-
+ private:
+     int findOpeningBrace(int startTokenIndex);
+     void getQmlObjectTypeName(int startTokenIndex);
+@@ -74,8 +72,6 @@
+     bool m_inStringLiteral;
+     bool m_inImport;
+     QString m_libVersion;
+-
+-    int m_propertyNamePosition;
+ };
+ 
+ } // namespace QmlJS
+diff -bur ./qmljs/qmljsconstants.h ../creator/qmljs/qmljsconstants.h
+--- ./qmljs/qmljsconstants.h	2018-03-28 22:04:19.000000000 +0300
++++ ../creator/qmljs/qmljsconstants.h	2018-03-26 19:20:35.000000000 +0300
+@@ -31,7 +31,7 @@
+ #ifndef QMLJSCONSTANTS_H
+ #define QMLJSCONSTANTS_H
+ 
+-#include "qmljs/qmljs_global.h"
++#include "qmljs_global.h"
+ 
+ #include <QLoggingCategory>
+ 
+diff -bur ./qmljs/qmljscontext.h ../creator/qmljs/qmljscontext.h
+--- ./qmljs/qmljscontext.h	2018-03-28 22:05:30.000000000 +0300
++++ ../creator/qmljs/qmljscontext.h	2018-03-26 19:20:35.000000000 +0300
+@@ -31,7 +31,7 @@
+ #ifndef QMLJS_CONTEXT_H
+ #define QMLJS_CONTEXT_H
+ 
+-#include "qmljs/qmljs_global.h"
++#include "qmljs_global.h"
+ #include "qmljsdocument.h"
+ #include "qmljsinterpreter.h"
+ #include "qmljsviewercontext.h"
+diff -bur ./qmljs/qmljsdescribevalue.h ../creator/qmljs/qmljsdescribevalue.h
+--- ./qmljs/qmljsdescribevalue.h	2018-03-28 22:07:50.000000000 +0300
++++ ../creator/qmljs/qmljsdescribevalue.h	2018-03-26 19:20:35.000000000 +0300
+@@ -31,7 +31,7 @@
+ #ifndef QMLJSDESCRIBEVALUE_H
+ #define QMLJSDESCRIBEVALUE_H
+ 
+-#include "qmljs/qmljs_global.h"
++#include "qmljs_global.h"
+ #include "qmljsinterpreter.h"
+ 
+ #include <QString>
+diff -bur ./qmljs/qmljsdialect.cpp ../creator/qmljs/qmljsdialect.cpp
+--- ./qmljs/qmljsdialect.cpp	2018-03-28 22:08:18.000000000 +0300
++++ ../creator/qmljs/qmljsdialect.cpp	2018-03-26 19:20:35.000000000 +0300
+@@ -247,98 +247,98 @@
+     return dbg;
+ }
+ 
+-//PathAndLanguage::PathAndLanguage(const Utils::FileName &path, Dialect language)
+-//    : m_path(path), m_language(language)
+-//{ }
+-
+-//bool PathAndLanguage::operator ==(const PathAndLanguage &other) const
+-//{
+-//    return path() == other.path() && language() == other.language();
+-//}
+-
+-//bool PathAndLanguage::operator <(const PathAndLanguage &other) const
+-//{
+-//    if (path() < other.path())
+-//        return true;
+-//    if (path() > other.path())
+-//        return false;
+-//    if (language() == other.language())
+-//        return false;
+-//    bool i1 = other.language().companionLanguages().contains(language());
+-//    bool i2 = language().companionLanguages().contains(other.language());
+-//    if (i1 && !i2)
+-//        return true;
+-//    if (i2 && !i1)
+-//        return false;
+-//    return language() < other.language();
+-//}
+-
+-//QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage)
+-//{
+-//    dbg << "{ path:" << pathAndLanguage.path() << " language:" << pathAndLanguage.language().toString() << "}";
+-//    return dbg;
+-//}
+-
+-//bool PathsAndLanguages::maybeInsert(const PathAndLanguage &pathAndLanguage) {
+-//    for (int i = 0; i < m_list.size(); ++i) {
+-//        PathAndLanguage currentElement = m_list.at(i);
+-//        if (currentElement.path() == pathAndLanguage.path()) {
+-//            int j = i;
+-//            do {
+-//                if (pathAndLanguage.language() < currentElement.language()) {
+-//                    if (currentElement.language() == pathAndLanguage.language())
+-//                        return false;
+-//                    break;
+-//                }
+-//                ++j;
+-//                if (j == m_list.length())
+-//                    break;
+-//                currentElement = m_list.at(j);
+-//            } while (currentElement.path() == pathAndLanguage.path());
+-//            m_list.insert(j, pathAndLanguage);
+-//            return true;
+-//        }
+-//    }
+-//    m_list.append(pathAndLanguage);
+-//    return true;
+-//}
+-
+-//void PathsAndLanguages::compact()
+-//{
+-//    if (m_list.isEmpty())
+-//        return;
+-
+-//    int oldCompactionPlace = 0;
+-//    Utils::FileName oldPath = m_list.first().path();
+-//    QList<PathAndLanguage> compactedList;
+-//    bool restrictFailed = false;
+-//    for (int i = 1; i < m_list.length(); ++i) {
+-//        Utils::FileName newPath = m_list.at(i).path();
+-//        if (newPath == oldPath) {
+-//            int newCompactionPlace = i - 1;
+-//            compactedList << m_list.mid(oldCompactionPlace, newCompactionPlace - oldCompactionPlace);
+-//            LanguageMerger merger;
+-//            merger.merge(m_list.at(i - 1).language());
+-//            do {
+-//                merger.merge(m_list.at(i).language());
+-//                if (++i == m_list.length())
+-//                    break;
+-//                newPath = m_list.at(i).path();
+-//            } while (newPath == oldPath);
+-//            oldCompactionPlace = i;
+-//            compactedList << PathAndLanguage(oldPath, merger.mergedLanguage());
+-//            if (merger.restrictFailed())
+-//                restrictFailed = true;
+-//        }
+-//        oldPath = newPath;
+-//    }
+-//    if (oldCompactionPlace == 0)
+-//        return;
+-//    compactedList << m_list.mid(oldCompactionPlace);
+-//    if (restrictFailed)
+-//        qCWarning(qmljsLog) << "failed to restrict PathAndLanguages " << m_list;
+-//    m_list = compactedList;
+-//}
++PathAndLanguage::PathAndLanguage(const Utils::FileName &path, Dialect language)
++    : m_path(path), m_language(language)
++{ }
++
++bool PathAndLanguage::operator ==(const PathAndLanguage &other) const
++{
++    return path() == other.path() && language() == other.language();
++}
++
++bool PathAndLanguage::operator <(const PathAndLanguage &other) const
++{
++    if (path() < other.path())
++        return true;
++    if (path() > other.path())
++        return false;
++    if (language() == other.language())
++        return false;
++    bool i1 = other.language().companionLanguages().contains(language());
++    bool i2 = language().companionLanguages().contains(other.language());
++    if (i1 && !i2)
++        return true;
++    if (i2 && !i1)
++        return false;
++    return language() < other.language();
++}
++
++QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage)
++{
++    dbg << "{ path:" << pathAndLanguage.path() << " language:" << pathAndLanguage.language().toString() << "}";
++    return dbg;
++}
++
++bool PathsAndLanguages::maybeInsert(const PathAndLanguage &pathAndLanguage) {
++    for (int i = 0; i < m_list.size(); ++i) {
++        PathAndLanguage currentElement = m_list.at(i);
++        if (currentElement.path() == pathAndLanguage.path()) {
++            int j = i;
++            do {
++                if (pathAndLanguage.language() < currentElement.language()) {
++                    if (currentElement.language() == pathAndLanguage.language())
++                        return false;
++                    break;
++                }
++                ++j;
++                if (j == m_list.length())
++                    break;
++                currentElement = m_list.at(j);
++            } while (currentElement.path() == pathAndLanguage.path());
++            m_list.insert(j, pathAndLanguage);
++            return true;
++        }
++    }
++    m_list.append(pathAndLanguage);
++    return true;
++}
++
++void PathsAndLanguages::compact()
++{
++    if (m_list.isEmpty())
++        return;
++
++    int oldCompactionPlace = 0;
++    Utils::FileName oldPath = m_list.first().path();
++    QList<PathAndLanguage> compactedList;
++    bool restrictFailed = false;
++    for (int i = 1; i < m_list.length(); ++i) {
++        Utils::FileName newPath = m_list.at(i).path();
++        if (newPath == oldPath) {
++            int newCompactionPlace = i - 1;
++            compactedList << m_list.mid(oldCompactionPlace, newCompactionPlace - oldCompactionPlace);
++            LanguageMerger merger;
++            merger.merge(m_list.at(i - 1).language());
++            do {
++                merger.merge(m_list.at(i).language());
++                if (++i == m_list.length())
++                    break;
++                newPath = m_list.at(i).path();
++            } while (newPath == oldPath);
++            oldCompactionPlace = i;
++            compactedList << PathAndLanguage(oldPath, merger.mergedLanguage());
++            if (merger.restrictFailed())
++                restrictFailed = true;
++        }
++        oldPath = newPath;
++    }
++    if (oldCompactionPlace == 0)
++        return;
++    compactedList << m_list.mid(oldCompactionPlace);
++    if (restrictFailed)
++        qCWarning(qmljsLog) << "failed to restrict PathAndLanguages " << m_list;
++    m_list = compactedList;
++}
+ 
+ void LanguageMerger::merge(Dialect l)
+ {
+diff -bur ./qmljs/qmljsdialect.h ../creator/qmljs/qmljsdialect.h
+--- ./qmljs/qmljsdialect.h	2018-03-28 22:25:28.000000000 +0300
++++ ../creator/qmljs/qmljsdialect.h	2018-03-26 19:20:35.000000000 +0300
+@@ -31,10 +31,9 @@
+ #ifndef QMLJSDIALECT_H
+ #define QMLJSDIALECT_H
+ 
+-#include "qmljs/qmljs_global.h"
++#include "qmljs_global.h"
+ 
+-//HACK
+-//#include <utils/fileutils.h>
++#include <utils/fileutils.h>
+ 
+ #include <QString>
+ 
+@@ -84,24 +83,24 @@
+ 
+ QMLJS_EXPORT QDebug operator << (QDebug &dbg, const Dialect &dialect);
+ 
+-//class QMLJS_EXPORT PathAndLanguage {
+-//public:
+-//    PathAndLanguage(const Utils::FileName &path = Utils::FileName(), Dialect language = Dialect::AnyLanguage);
+-//    PathAndLanguage(const PathAndLanguage &o)
+-//        : m_path(o.path()), m_language(o.language())
+-//    { }
+-//    Utils::FileName path() const {
+-//        return m_path;
+-//    }
+-//    Dialect language() const {
+-//        return m_language;
+-//    }
+-//    bool operator ==(const PathAndLanguage &other) const;
+-//    bool operator < (const PathAndLanguage &other) const;
+-//private:
+-//    Utils::FileName m_path;
+-//    Dialect m_language;
+-//};
++class QMLJS_EXPORT PathAndLanguage {
++public:
++    PathAndLanguage(const Utils::FileName &path = Utils::FileName(), Dialect language = Dialect::AnyLanguage);
++    PathAndLanguage(const PathAndLanguage &o)
++        : m_path(o.path()), m_language(o.language())
++    { }
++    Utils::FileName path() const {
++        return m_path;
++    }
++    Dialect language() const {
++        return m_language;
++    }
++    bool operator ==(const PathAndLanguage &other) const;
++    bool operator < (const PathAndLanguage &other) const;
++private:
++    Utils::FileName m_path;
++    Dialect m_language;
++};
+ 
+ // tries to find the "most specific" language still compatible with all requested ones
+ class QMLJS_EXPORT LanguageMerger
+@@ -128,50 +127,50 @@
+ };
+ 
+ 
+-//QMLJS_EXPORT QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage);
++QMLJS_EXPORT QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage);
++
++class QMLJS_EXPORT PathsAndLanguages
++{
++public:
++    explicit PathsAndLanguages()
++    { }
++    explicit PathsAndLanguages(const QList<PathAndLanguage> &list)
++        : m_list(list)
++    { }
++    PathsAndLanguages(const PathsAndLanguages &o)
++        : m_list(o.m_list)
++    { }
+ 
+-//class QMLJS_EXPORT PathsAndLanguages
+-//{
+-//public:
+-//    explicit PathsAndLanguages()
+-//    { }
+-//    explicit PathsAndLanguages(const QList<PathAndLanguage> &list)
+-//        : m_list(list)
+-//    { }
+-//    PathsAndLanguages(const PathsAndLanguages &o)
+-//        : m_list(o.m_list)
+-//    { }
+-
+-//    bool maybeInsert(const Utils::FileName &path, Dialect language = Dialect::AnyLanguage) {
+-//        return maybeInsert(PathAndLanguage(path, language));
+-//    }
+-
+-//    bool maybeInsert(const PathAndLanguage &pathAndLanguage);
+-
+-//    PathAndLanguage at(int i) const {
+-//        return m_list.at(i);
+-//    }
+-//    int size() const {
+-//        return m_list.size();
+-//    }
+-//    int length() const {
+-//        return m_list.length();
+-//    }
+-//    void clear() {
+-//        m_list.clear();
+-//    }
+-//    // foreach support
+-//    typedef QList<PathAndLanguage>::const_iterator const_iterator;
+-//    const_iterator begin() const {
+-//        return m_list.begin();
+-//    }
+-//    const_iterator end() const {
+-//        return m_list.end();
+-//    }
+-//    void compact();
+-//private:
+-//    QList<PathAndLanguage> m_list;
+-//};
++    bool maybeInsert(const Utils::FileName &path, Dialect language = Dialect::AnyLanguage) {
++        return maybeInsert(PathAndLanguage(path, language));
++    }
++
++    bool maybeInsert(const PathAndLanguage &pathAndLanguage);
++
++    PathAndLanguage at(int i) const {
++        return m_list.at(i);
++    }
++    int size() const {
++        return m_list.size();
++    }
++    int length() const {
++        return m_list.length();
++    }
++    void clear() {
++        m_list.clear();
++    }
++    // foreach support
++    typedef QList<PathAndLanguage>::const_iterator const_iterator;
++    const_iterator begin() const {
++        return m_list.begin();
++    }
++    const_iterator end() const {
++        return m_list.end();
++    }
++    void compact();
++private:
++    QList<PathAndLanguage> m_list;
++};
+ 
+ } // namespace QmlJS
+ #endif // QMLJSDIALECT_H
+diff -bur ./qmljs/qmljsdocument.cpp ../creator/qmljs/qmljsdocument.cpp
+--- ./qmljs/qmljsdocument.cpp	2018-03-29 00:10:41.000000000 +0300
++++ ../creator/qmljs/qmljsdocument.cpp	2018-03-26 19:20:35.000000000 +0300
+@@ -99,7 +99,7 @@
+     , _parsedCorrectly(false)
+ {
+     QFileInfo fileInfo(fileName);
+-    _path = fileName == "" ? "" : QDir::cleanPath(fileInfo.absolutePath());
++    _path = QDir::cleanPath(fileInfo.absolutePath());
+ 
+     if (language.isQmlLikeLanguage()) {
+         _componentName = fileInfo.baseName();
+@@ -524,7 +524,6 @@
+         foreach (const Export &e, cImport.possibleExports)
+             _dependencies.addExport(component.fileName, e.exportName, e.pathRequired, e.typeName);
+     }
+-
+     cImport.fingerprint = info.fingerprint();
+     _dependencies.addCoreImport(cImport);
+ }
+diff -bur ./qmljs/qmljsdocument.h ../creator/qmljs/qmljsdocument.h
+--- ./qmljs/qmljsdocument.h	2018-03-28 22:26:51.000000000 +0300
++++ ../creator/qmljs/qmljsdocument.h	2018-03-26 19:20:35.000000000 +0300
+@@ -39,7 +39,7 @@
+ #include "qmljsdialect.h"
+ #include "parser/qmldirparser_p.h"
+ #include "parser/qmljsastfwd_p.h"
+-#include "qmljs/qmljs_global.h"
++#include "qmljs_global.h"
+ #include "qmljsconstants.h"
+ #include "qmljsimportdependencies.h"
+ 
+@@ -159,7 +159,6 @@
+     typedef QList<LanguageUtils::FakeMetaObject::ConstPtr> FakeMetaObjectList;
+     FakeMetaObjectList _metaObjects;
+     QList<ModuleApiInfo> _moduleApis;
+-    QStringList _dependencies;
+     QByteArray _fingerprint;
+ 
+     PluginTypeInfoStatus _dumpStatus;
+@@ -196,12 +195,6 @@
+     void setModuleApis(const QList<ModuleApiInfo> &apis)
+     { _moduleApis = apis; }
+ 
+-    QStringList dependencies() const
+-    { return _dependencies; }
+-
+-    void setDependencies(const QStringList &deps)
+-    { _dependencies = deps; }
+-
+     bool isValid() const
+     { return _status == Found; }
+ 
+diff -bur ./qmljs/qmljsinterpreter.cpp ../creator/qmljs/qmljsinterpreter.cpp
+--- ./qmljs/qmljsinterpreter.cpp	2018-03-28 22:23:28.000000000 +0300
++++ ../creator/qmljs/qmljsinterpreter.cpp	2018-03-26 19:20:35.000000000 +0300
+@@ -30,14 +30,19 @@
+ 
+ #include "parser/qmljsast_p.h"
+ #include "qmljsconstants.h"
++#include "qmljscontext.h"
++#include "qmljsevaluate.h"
+ #include "qmljsinterpreter.h"
++#include "qmljsmodelmanagerinterface.h"
++#include "qmljsscopeastpath.h"
++#include "qmljsscopebuilder.h"
++#include "qmljsscopechain.h"
+ #include "qmljstypedescriptionreader.h"
+ #include "qmljsvalueowner.h"
+-#include "qmljsdocument.h"
+ 
+ #include <utils/qtcassert.h>
+ 
+-//#include <QApplication>
++#include <QApplication>
+ #include <QDir>
+ #include <QFile>
+ #include <QString>
+@@ -1028,13 +1033,13 @@
+     return _prototype;
+ }
+ 
+-const ObjectValue *ObjectValue::prototype(const Context *) const
++const ObjectValue *ObjectValue::prototype(const Context *context) const
+ {
+     const ObjectValue *prototypeObject = value_cast<ObjectValue>(_prototype);
+-//    if (! prototypeObject) {
+-//        if (const Reference *prototypeReference = value_cast<Reference>(_prototype))
+-//            prototypeObject = value_cast<ObjectValue>(context->lookupReference(prototypeReference));
+-//    }
++    if (! prototypeObject) {
++        if (const Reference *prototypeReference = value_cast<Reference>(_prototype))
++            prototypeObject = value_cast<ObjectValue>(context->lookupReference(prototypeReference));
++    }
+     return prototypeObject;
+ }
+ 
+@@ -1117,13 +1122,11 @@
+         }
+     }
+ 
+-    const ObjectValue *prototypeObject = 0;
+-
+     if (examinePrototypes && context) {
+         PrototypeIterator iter(this, context);
+         iter.next(); // skip this
+         while (iter.hasNext()) {
+-            prototypeObject = iter.next();
++            const ObjectValue *prototypeObject = iter.next();
+             if (const Value *m = prototypeObject->lookupMember(name, context, foundInObject, false))
+                 return m;
+         }
+@@ -1131,7 +1134,6 @@
+ 
+     if (foundInObject)
+         *foundInObject = 0;
+-
+     return 0;
+ }
+ 
+@@ -1166,8 +1168,8 @@
+         return false;
+ 
+     m_next = value_cast<ObjectValue>(proto);
+-//    if (! m_next)
+-//        m_next = value_cast<ObjectValue>(m_context->lookupReference(proto));
++    if (! m_next)
++        m_next = value_cast<ObjectValue>(m_context->lookupReference(proto));
+     if (!m_next) {
+         m_error = ReferenceResolutionError;
+         return false;
+@@ -1349,7 +1351,6 @@
+ CppQmlTypesLoader::BuiltinObjects CppQmlTypesLoader::loadQmlTypes(const QFileInfoList &qmlTypeFiles, QStringList *errors, QStringList *warnings)
+ {
+     QHash<QString, FakeMetaObject::ConstPtr> newObjects;
+-    QStringList newDependencies;
+ 
+     foreach (const QFileInfo &qmlTypeFile, qmlTypeFiles) {
+         QString error, warning;
+@@ -1359,8 +1360,7 @@
+             file.close();
+ 
+ 
+-            parseQmlTypeDescriptions(contents, &newObjects, 0, &newDependencies, &error, &warning,
+-                                     qmlTypeFile.absoluteFilePath());
++            parseQmlTypeDescriptions(contents, &newObjects, 0, &error, &warning, qmlTypeFile.absoluteFilePath());
+         } else {
+             error = file.errorString();
+         }
+@@ -1382,7 +1382,6 @@
+ void CppQmlTypesLoader::parseQmlTypeDescriptions(const QByteArray &contents,
+                                                  BuiltinObjects *newObjects,
+                                                  QList<ModuleApiInfo> *newModuleApis,
+-                                                 QStringList *newDependencies,
+                                                  QString *errorMessage,
+                                                  QString *warningMessage, const QString &fileName)
+ {
+@@ -1402,7 +1401,7 @@
+     errorMessage->clear();
+     warningMessage->clear();
+     TypeDescriptionReader reader(fileName, QString::fromUtf8(contents));
+-    if (!reader(newObjects, newModuleApis, newDependencies)) {
++    if (!reader(newObjects, newModuleApis)) {
+         if (reader.errorMessage().isEmpty())
+             *errorMessage = QLatin1String("unknown error");
+         else
+@@ -1948,19 +1947,19 @@
+     return m_ast;
+ }
+ 
+-const Value *ASTVariableReference::value(ReferenceContext *) const
++const Value *ASTVariableReference::value(ReferenceContext *referenceContext) const
+ {
+     // may be assigned to later
+-//    if (!m_ast->expression)
++    if (!m_ast->expression)
+         return valueOwner()->unknownValue();
+ 
+-//    Document::Ptr doc = m_doc->ptr();
+-//    ScopeChain scopeChain(doc, referenceContext->context());
+-//    ScopeBuilder builder(&scopeChain);
+-//    builder.push(ScopeAstPath(doc)(m_ast->expression->firstSourceLocation().begin()));
++    Document::Ptr doc = m_doc->ptr();
++    ScopeChain scopeChain(doc, referenceContext->context());
++    ScopeBuilder builder(&scopeChain);
++    builder.push(ScopeAstPath(doc)(m_ast->expression->firstSourceLocation().begin()));
+ 
+-//    Evaluate evaluator(&scopeChain, referenceContext);
+-//    return evaluator(m_ast->expression);
++    Evaluate evaluator(&scopeChain, referenceContext);
++    return evaluator(m_ast->expression);
+ }
+ 
+ bool ASTVariableReference::getSourceLocation(QString *fileName, int *line, int *column) const
+@@ -2084,10 +2083,9 @@
+     return m_doc;
+ }
+ 
+-const Value *QmlPrototypeReference::value(ReferenceContext *) const
++const Value *QmlPrototypeReference::value(ReferenceContext *referenceContext) const
+ {
+-    return 0;
+-//    return referenceContext->context()->lookupType(m_doc, m_qmlTypeName);
++    return referenceContext->context()->lookupType(m_doc, m_qmlTypeName);
+ }
+ 
+ ASTPropertyReference::ASTPropertyReference(UiPublicMember *ast, const Document *doc, ValueOwner *valueOwner)
+@@ -2115,27 +2113,27 @@
+     return true;
+ }
+ 
+-const Value *ASTPropertyReference::value(ReferenceContext *) const
++const Value *ASTPropertyReference::value(ReferenceContext *referenceContext) const
+ {
+-//    if (m_ast->statement
+-//            && (m_ast->memberType.isEmpty()
+-//                || m_ast->memberType == QLatin1String("variant")
+-//                || m_ast->memberType == QLatin1String("var")
+-//                || m_ast->memberType == QLatin1String("alias"))) {
+-
+-//        // Adjust the context for the current location - expensive!
+-//        // ### Improve efficiency by caching the 'use chain' constructed in ScopeBuilder.
+-
+-//        Document::Ptr doc = m_doc->ptr();
+-//        ScopeChain scopeChain(doc, referenceContext->context());
+-//        ScopeBuilder builder(&scopeChain);
+-
+-//        int offset = m_ast->statement->firstSourceLocation().begin();
+-//        builder.push(ScopeAstPath(doc)(offset));
+-
+-//        Evaluate evaluator(&scopeChain, referenceContext);
+-//        return evaluator(m_ast->statement);
+-//    }
++    if (m_ast->statement
++            && (m_ast->memberType.isEmpty()
++                || m_ast->memberType == QLatin1String("variant")
++                || m_ast->memberType == QLatin1String("var")
++                || m_ast->memberType == QLatin1String("alias"))) {
++
++        // Adjust the context for the current location - expensive!
++        // ### Improve efficiency by caching the 'use chain' constructed in ScopeBuilder.
++
++        Document::Ptr doc = m_doc->ptr();
++        ScopeChain scopeChain(doc, referenceContext->context());
++        ScopeBuilder builder(&scopeChain);
++
++        int offset = m_ast->statement->firstSourceLocation().begin();
++        builder.push(ScopeAstPath(doc)(offset));
++
++        Evaluate evaluator(&scopeChain, referenceContext);
++        return evaluator(m_ast->statement);
++    }
+ 
+     const QString memberType = m_ast->memberType.toString();
+ 
+@@ -2143,14 +2141,13 @@
+     if (!builtin->asUndefinedValue())
+         return builtin;
+ 
+-    return 0;
+-//    if (m_ast->typeModifier.isEmpty()) {
+-//        const Value *type = referenceContext->context()->lookupType(m_doc, QStringList(memberType));
+-//        if (type)
+-//            return type;
+-//    }
++    if (m_ast->typeModifier.isEmpty()) {
++        const Value *type = referenceContext->context()->lookupType(m_doc, QStringList(memberType));
++        if (type)
++            return type;
++    }
+ 
+-//    return referenceContext->context()->valueOwner()->undefinedValue();
++    return referenceContext->context()->valueOwner()->undefinedValue();
+ }
+ 
+ ASTSignal::ASTSignal(UiPublicMember *ast, const Document *doc, ValueOwner *valueOwner)
+@@ -2256,10 +2253,10 @@
+         info.m_type = ImportType::Directory;
+     } else if (path.startsWith(QLatin1String("qrc:"))) {
+         info.m_path = path;
+-//        if (ModelManagerInterface::instance()->filesAtQrcPath(info.path()).isEmpty())
+-//            info.m_type = ImportType::QrcDirectory;
+-//        else
+-//            info.m_type = ImportType::QrcFile;
++        if (ModelManagerInterface::instance()->filesAtQrcPath(info.path()).isEmpty())
++            info.m_type = ImportType::QrcDirectory;
++        else
++            info.m_type = ImportType::QrcFile;
+     } else {
+         info.m_type = ImportType::UnknownFile;
+     }
+@@ -2285,14 +2282,6 @@
+     return info;
+ }
+ 
+-ImportInfo ImportInfo::qrcDirectoryImport(const QString &directory)
+-{
+-    ImportInfo info;
+-    info.m_type = ImportType::QrcDirectory;
+-    info.m_path = directory;
+-    return info;
+-}
+-
+ bool ImportInfo::isValid() const
+ {
+     return m_type != ImportType::Invalid;
+@@ -2570,48 +2559,48 @@
+ public:
+     MemberDumper() {}
+ 
+-//    virtual bool processProperty(const QString &name, const Value *, const PropertyInfo &pInfo)
+-//    {
+-//        qCDebug(qmljsLog) << "property: " << name << " flags:" << pInfo.toString();
+-//        return true;
+-//    }
+-
+-//    virtual bool processEnumerator(const QString &name, const Value *)
+-//    {
+-//        qCDebug(qmljsLog) << "enumerator: " << name;
+-//        return true;
+-//    }
+-
+-//    virtual bool processSignal(const QString &name, const Value *)
+-//    {
+-//        qCDebug(qmljsLog) << "signal: " << name;
+-//        return true;
+-//    }
+-
+-//    virtual bool processSlot(const QString &name, const Value *)
+-//    {
+-//        qCDebug(qmljsLog) << "slot: " << name;
+-//        return true;
+-//    }
+-
+-//    virtual bool processGeneratedSlot(const QString &name, const Value *)
+-//    {
+-//        qCDebug(qmljsLog) << "generated slot: " << name;
+-//        return true;
+-//    }
++    virtual bool processProperty(const QString &name, const Value *, const PropertyInfo &pInfo)
++    {
++        qCDebug(qmljsLog) << "property: " << name << " flags:" << pInfo.toString();
++        return true;
++    }
++
++    virtual bool processEnumerator(const QString &name, const Value *)
++    {
++        qCDebug(qmljsLog) << "enumerator: " << name;
++        return true;
++    }
++
++    virtual bool processSignal(const QString &name, const Value *)
++    {
++        qCDebug(qmljsLog) << "signal: " << name;
++        return true;
++    }
++
++    virtual bool processSlot(const QString &name, const Value *)
++    {
++        qCDebug(qmljsLog) << "slot: " << name;
++        return true;
++    }
++
++    virtual bool processGeneratedSlot(const QString &name, const Value *)
++    {
++        qCDebug(qmljsLog) << "generated slot: " << name;
++        return true;
++    }
+ };
+ 
+ void Imports::dump() const
+ {
+-//    qCDebug(qmljsLog) << "Imports contents, in search order:";
++    qCDebug(qmljsLog) << "Imports contents, in search order:";
+     QListIterator<Import> it(m_imports);
+     it.toBack();
+     while (it.hasPrevious()) {
+         const Import &i = it.previous();
+         const ObjectValue *import = i.object;
+-//        const ImportInfo &info = i.info;
++        const ImportInfo &info = i.info;
+ 
+-//        qCDebug(qmljsLog) << "  " << info.path() << " " << info.version().toString() << " as " << info.as() << " : " << import;
++        qCDebug(qmljsLog) << "  " << info.path() << " " << info.version().toString() << " as " << info.as() << " : " << import;
+         MemberDumper dumper;
+         import->processMembers(&dumper);
+     }
+diff -bur ./qmljs/qmljsinterpreter.h ../creator/qmljs/qmljsinterpreter.h
+--- ./qmljs/qmljsinterpreter.h	2018-03-28 22:30:38.000000000 +0300
++++ ../creator/qmljs/qmljsinterpreter.h	2018-03-26 19:20:35.000000000 +0300
+@@ -727,11 +727,7 @@
+     // parses the contents of a qmltypes file and fills the newObjects map
+     static void parseQmlTypeDescriptions(const QByteArray &contents,
+                                          BuiltinObjects *newObjects,
+-                                         QList<ModuleApiInfo> *newModuleApis,
+-                                         QStringList *newDependencies,
+-                                         QString *errorMessage,
+-                                         QString *warningMessage,
+-                                         const QString &fileName);
++        QList<ModuleApiInfo> *newModuleApis, QString *errorMessage, QString *warningMessage, const QString &fileName);
+ };
+ 
+ class QMLJS_EXPORT FakeMetaObjectWithOrigin
+@@ -1011,7 +1007,6 @@
+                                  const QString &as, AST::UiImport *ast = 0);
+     static ImportInfo invalidImport(AST::UiImport *ast = 0);
+     static ImportInfo implicitDirectoryImport(const QString &directory);
+-    static ImportInfo qrcDirectoryImport(const QString &directory);
+ 
+     bool isValid() const;
+     ImportType::Enum type() const;
+diff -bur ./qmljs/qmljslineinfo.h ../creator/qmljs/qmljslineinfo.h
+--- ./qmljs/qmljslineinfo.h	2018-03-28 22:31:47.000000000 +0300
++++ ../creator/qmljs/qmljslineinfo.h	2018-03-26 19:20:35.000000000 +0300
+@@ -124,3 +124,4 @@
+ } // namespace QmlJS
+ 
+ #endif // QMLJSLINEINFO_H
++
+diff -bur ./qmljs/qmljsqrcparser.cpp ../creator/qmljs/qmljsqrcparser.cpp
+--- ./qmljs/qmljsqrcparser.cpp	2018-03-28 22:23:42.000000000 +0300
++++ ../creator/qmljs/qmljsqrcparser.cpp	2018-03-26 19:20:35.000000000 +0300
+@@ -79,9 +79,6 @@
+     bool hasDirAtPath(const QString &path, const QLocale *locale = 0) const;
+     void collectFilesInPath(const QString &path, QMap<QString,QStringList> *res, bool addDirs = false,
+                             const QLocale *locale = 0) const;
+-    void collectResourceFilesForSourceFile(const QString &sourceFile, QStringList *res,
+-                                           const QLocale *locale = 0) const;
+-
+     QStringList errorMessages() const;
+     QStringList languages() const;
+ private:
+@@ -89,7 +86,6 @@
+     QStringList allUiLanguages(const QLocale *locale) const;
+ 
+     SMap m_resources;
+-    SMap m_files;
+     QStringList m_languages;
+     QStringList m_errorMessages;
+ };
+@@ -139,11 +135,6 @@
+     return normPath;
+ }
+ 
+-QString QrcParser::qrcDirectoryPathForQrcFilePath(const QString &file)
+-{
+-    return file.left(file.lastIndexOf(QLatin1Char('/')));
+-}
+-
+ QrcParser::QrcParser()
+ {
+     d = new Internal::QrcParserPrivate(this);
+@@ -195,12 +186,6 @@
+     d->collectFilesInPath(path, res, addDirs, locale);
+ }
+ 
+-void QrcParser::collectResourceFilesForSourceFile(const QString &sourceFile, QStringList *res,
+-                                                  const QLocale *locale) const
+-{
+-    d->collectResourceFilesForSourceFile(sourceFile, res, locale);
+-}
+-
+ /*! \brief returns the errors found while parsing
+  */
+ QStringList QrcParser::errorMessages() const
+@@ -317,12 +302,13 @@
+                 accessPath = language + prefix + alias;
+             else
+                 accessPath = language + prefix + fileName;
+-            QStringList &resources = m_resources[accessPath];
+-            if (!resources.contains(filePath))
+-                resources.append(filePath);
+-            QStringList &files = m_files[filePath];
+-            if (!files.contains(accessPath))
+-                files.append(accessPath);
++            if (m_resources.contains(accessPath)) {
++                QStringList &val = m_resources[accessPath];
++                if (!val.contains(filePath))
++                    val.append(filePath);
++            } else {
++                m_resources.insert(accessPath, QStringList(filePath));
++            }
+         }
+     }
+     return true;
+@@ -407,24 +393,6 @@
+     }
+ }
+ 
+-void QrcParserPrivate::collectResourceFilesForSourceFile(const QString &sourceFile,
+-                                                         QStringList *results,
+-                                                         const QLocale *locale) const
+-{
+-    // TODO: use FileName from fileutils for file pathes
+-
+-    QStringList langs = allUiLanguages(locale);
+-    SMap::const_iterator file = m_files.find(sourceFile);
+-    if (file == m_files.end())
+-        return;
+-    foreach (const QString &resource, file.value()) {
+-        foreach (const QString &language, langs) {
+-            if (resource.startsWith(language) && !results->contains(resource))
+-                results->append(resource);
+-        }
+-    }
+-}
+-
+ QStringList QrcParserPrivate::errorMessages() const
+ {
+     return m_errorMessages;
+@@ -488,9 +456,8 @@
+         }
+     }
+     QrcParser::Ptr newParser = QrcParser::parseQrcFile(path);
+-//    if (!newParser->isValid())
+-
+-//        qCWarning(qmljsLog) << "adding invalid qrc " << path << " to the cache:" << newParser->errorMessages();
++    if (!newParser->isValid())
++        qCWarning(qmljsLog) << "adding invalid qrc " << path << " to the cache:" << newParser->errorMessages();
+     {
+         QMutexLocker l(&m_mutex);
+         QPair<QrcParser::Ptr,int> currentValue = m_cache.value(path, qMakePair(QrcParser::Ptr(0), 0));
+diff -bur ./qmljs/qmljsqrcparser.h ../creator/qmljs/qmljsqrcparser.h
+--- ./qmljs/qmljsqrcparser.h	2018-03-28 22:32:22.000000000 +0300
++++ ../creator/qmljs/qmljsqrcparser.h	2018-03-26 19:20:35.000000000 +0300
+@@ -30,7 +30,7 @@
+ 
+ #ifndef QMLJSQRCPARSER_H
+ #define QMLJSQRCPARSER_H
+-#include "qmljs/qmljs_global.h"
++#include "qmljs_global.h"
+ 
+ #include <QMap>
+ #include <QSharedPointer>
+@@ -58,9 +58,6 @@
+     bool hasDirAtPath(const QString &path, const QLocale *locale = 0) const;
+     void collectFilesInPath(const QString &path, QMap<QString,QStringList> *res, bool addDirs = false,
+                             const QLocale *locale = 0) const;
+-    void collectResourceFilesForSourceFile(const QString &sourceFile, QStringList *results,
+-                                           const QLocale *locale = 0) const;
+-
+     QStringList errorMessages() const;
+     QStringList languages() const;
+     bool isValid() const;
+@@ -68,7 +65,6 @@
+     static Ptr parseQrcFile(const QString &path);
+     static QString normalizedQrcFilePath(const QString &path);
+     static QString normalizedQrcDirectoryPath(const QString &path);
+-    static QString qrcDirectoryPathForQrcFilePath(const QString &file);
+ private:
+     QrcParser();
+     QrcParser(const QrcParser &);
+@@ -89,5 +85,4 @@
+     Internal::QrcCachePrivate *d;
+ };
+ }
+-
+ #endif // QMLJSQRCPARSER_H
+\ No newline at end of file
+diff -bur ./qmljs/qmljsscanner.cpp ../creator/qmljs/qmljsscanner.cpp
+--- ./qmljs/qmljsscanner.cpp	2018-03-28 22:47:07.000000000 +0300
++++ ../creator/qmljs/qmljsscanner.cpp	2018-03-26 19:20:35.000000000 +0300
+@@ -30,13 +30,11 @@
+ 
+ #include <qmljs/qmljsscanner.h>
+ 
+-#include <algorithm>
+-
+ using namespace QmlJS;
+ 
+ namespace {
+-static const QString js_keywords[] = {
+-    QString::fromLatin1("break"),
++QString js_keywords[] = {
++    QLatin1String("break"),
+     QString::fromLatin1("case"),
+     QString::fromLatin1("catch"),
+     QString::fromLatin1("continue"),
+@@ -417,16 +415,18 @@
+ 
+ bool Scanner::isKeyword(const QString &text) const
+ {
+-    return std::binary_search(begin(js_keywords), end(js_keywords), text);
++    if (qBinaryFind(begin(js_keywords), end(js_keywords), text) != end(js_keywords))
++        return true;
++
++    return false;
+ }
+ 
+ QStringList Scanner::keywords()
+ {
+-    static QStringList words = []() {
+-        QStringList res;
++    static QStringList words;
++    if (words.isEmpty()) {
+         for (const QString *word = begin(js_keywords); word != end(js_keywords); ++word)
+-            res.append(*word);
+-        return res;
+-    }();
++            words.append(*word);
++    }
+     return words;
+ }
+diff -bur ./qmljs/qmljstypedescriptionreader.cpp ../creator/qmljs/qmljstypedescriptionreader.cpp
+--- ./qmljs/qmljstypedescriptionreader.cpp	2018-03-28 22:23:58.000000000 +0300
++++ ../creator/qmljs/qmljstypedescriptionreader.cpp	2018-03-26 19:20:35.000000000 +0300
+@@ -57,8 +57,7 @@
+ 
+ bool TypeDescriptionReader::operator()(
+         QHash<QString, FakeMetaObject::ConstPtr> *objects,
+-        QList<ModuleApiInfo> *moduleApis,
+-        QStringList *dependencies)
++        QList<ModuleApiInfo> *moduleApis)
+ {
+     Engine engine;
+ 
+@@ -77,7 +76,6 @@
+ 
+     _objects = objects;
+     _moduleApis = moduleApis;
+-    _dependencies = dependencies;
+     readDocument(parser.ast());
+ 
+     return _errorMessage.isEmpty();
+@@ -115,8 +113,8 @@
+     const QString versionString = _source.mid(import->versionToken.offset, import->versionToken.length);
+     const int dotIdx = versionString.indexOf(QLatin1Char('.'));
+     if (dotIdx != -1) {
+-        version = ComponentVersion(versionString.leftRef(dotIdx).toInt(),
+-                                   versionString.midRef(dotIdx + 1).toInt());
++        version = ComponentVersion(versionString.left(dotIdx).toInt(),
++                                   versionString.mid(dotIdx + 1).toInt());
+     }
+     if (version.majorVersion() != 1) {
+         addError(import->versionToken, tr("Major version different from 1 not supported."));
+@@ -128,7 +126,7 @@
+         return;
+     }
+ 
+-    UiObjectDefinition *module = AST::cast<UiObjectDefinition *>(ast->members->member);
++    UiObjectDefinition *module = dynamic_cast<UiObjectDefinition *>(ast->members->member);
+     if (!module) {
+         addError(SourceLocation(), tr("Expected document to contain a single object definition."));
+         return;
+@@ -146,13 +144,7 @@
+ {
+     for (UiObjectMemberList *it = ast->initializer->members; it; it = it->next) {
+         UiObjectMember *member = it->member;
+-        UiObjectDefinition *component = AST::cast<UiObjectDefinition *>(member);
+-
+-        UiScriptBinding *script = AST::cast<UiScriptBinding *>(member);
+-        if (script && (toString(script->qualifiedId) == QStringLiteral("dependencies"))) {
+-            readDependencies(script);
+-            continue;
+-        }
++        UiObjectDefinition *component = dynamic_cast<UiObjectDefinition *>(member);
+ 
+         QString typeName;
+         if (component)
+@@ -187,36 +179,14 @@
+                 message);
+ }
+ 
+-void TypeDescriptionReader::readDependencies(UiScriptBinding *ast)
+-{
+-    ExpressionStatement *stmt = AST::cast<ExpressionStatement*>(ast->statement);
+-    if (!stmt) {
+-        addError(ast->statement->firstSourceLocation(), tr("Expected dependency definitions"));
+-        return;
+-    }
+-    ArrayLiteral *exp = AST::cast<ArrayLiteral *>(stmt->expression);
+-    if (!exp) {
+-        addError(stmt->expression->firstSourceLocation(), tr("Expected dependency definitions"));
+-        return;
+-    }
+-    for (ElementList *l = exp->elements; l; l = l->next) {
+-        StringLiteral *str = AST::cast<StringLiteral *>(l->expression);
+-        if (!exp) {
+-            addWarning(l->expression->firstSourceLocation(),
+-                       tr("Cannot read dependency: skipping."));
+-        }
+-        *_dependencies << str->value.toString();
+-    }
+-}
+-
+ void TypeDescriptionReader::readComponent(UiObjectDefinition *ast)
+ {
+     FakeMetaObject::Ptr fmo(new FakeMetaObject);
+ 
+     for (UiObjectMemberList *it = ast->initializer->members; it; it = it->next) {
+         UiObjectMember *member = it->member;
+-        UiObjectDefinition *component = AST::cast<UiObjectDefinition *>(member);
+-        UiScriptBinding *script = AST::cast<UiScriptBinding *>(member);
++        UiObjectDefinition *component = dynamic_cast<UiObjectDefinition *>(member);
++        UiScriptBinding *script = dynamic_cast<UiScriptBinding *>(member);
+         if (component) {
+             QString name = toString(component->qualifiedTypeNameId);
+             if (name == QLatin1String("Property"))
+@@ -277,7 +247,7 @@
+ 
+     for (UiObjectMemberList *it = ast->initializer->members; it; it = it->next) {
+         UiObjectMember *member = it->member;
+-        UiScriptBinding *script = AST::cast<UiScriptBinding *>(member);
++        UiScriptBinding *script = dynamic_cast<UiScriptBinding *>(member);
+ 
+         if (script) {
+             const QString name = toString(script->qualifiedId);
+@@ -316,8 +286,8 @@
+ 
+     for (UiObjectMemberList *it = ast->initializer->members; it; it = it->next) {
+         UiObjectMember *member = it->member;
+-        UiObjectDefinition *component = AST::cast<UiObjectDefinition *>(member);
+-        UiScriptBinding *script = AST::cast<UiScriptBinding *>(member);
++        UiObjectDefinition *component = dynamic_cast<UiObjectDefinition *>(member);
++        UiScriptBinding *script = dynamic_cast<UiScriptBinding *>(member);
+         if (component) {
+             QString name = toString(component->qualifiedTypeNameId);
+             if (name == QLatin1String("Parameter"))
+@@ -359,7 +329,7 @@
+ 
+     for (UiObjectMemberList *it = ast->initializer->members; it; it = it->next) {
+         UiObjectMember *member = it->member;
+-        UiScriptBinding *script = AST::cast<UiScriptBinding *>(member);
++        UiScriptBinding *script = dynamic_cast<UiScriptBinding *>(member);
+         if (!script) {
+             addWarning(member->firstSourceLocation(), tr("Expected script binding."));
+             continue;
+@@ -396,7 +366,7 @@
+ 
+     for (UiObjectMemberList *it = ast->initializer->members; it; it = it->next) {
+         UiObjectMember *member = it->member;
+-        UiScriptBinding *script = AST::cast<UiScriptBinding *>(member);
++        UiScriptBinding *script = dynamic_cast<UiScriptBinding *>(member);
+         if (!script) {
+             addWarning(member->firstSourceLocation(), tr("Expected script binding."));
+             continue;
+@@ -421,7 +391,7 @@
+ 
+     for (UiObjectMemberList *it = ast->initializer->members; it; it = it->next) {
+         UiObjectMember *member = it->member;
+-        UiScriptBinding *script = AST::cast<UiScriptBinding *>(member);
++        UiScriptBinding *script = dynamic_cast<UiScriptBinding *>(member);
+         if (!script) {
+             addWarning(member->firstSourceLocation(), tr("Expected script binding."));
+             continue;
+@@ -455,13 +425,13 @@
+         return QString();
+     }
+ 
+-    ExpressionStatement *expStmt = AST::cast<ExpressionStatement *>(ast->statement);
++    ExpressionStatement *expStmt = dynamic_cast<ExpressionStatement *>(ast->statement);
+     if (!expStmt) {
+         addError(ast->statement->firstSourceLocation(), tr("Expected string after colon."));
+         return QString();
+     }
+ 
+-    StringLiteral *stringLit = AST::cast<StringLiteral *>(expStmt->expression);
++    StringLiteral *stringLit = dynamic_cast<StringLiteral *>(expStmt->expression);
+     if (!stringLit) {
+         addError(expStmt->firstSourceLocation(), tr("Expected string after colon."));
+         return QString();
+@@ -479,14 +449,14 @@
+         return false;
+     }
+ 
+-    ExpressionStatement *expStmt = AST::cast<ExpressionStatement *>(ast->statement);
++    ExpressionStatement *expStmt = dynamic_cast<ExpressionStatement *>(ast->statement);
+     if (!expStmt) {
+         addError(ast->statement->firstSourceLocation(), tr("Expected boolean after colon."));
+         return false;
+     }
+ 
+-    TrueLiteral *trueLit = AST::cast<TrueLiteral *>(expStmt->expression);
+-    FalseLiteral *falseLit = AST::cast<FalseLiteral *>(expStmt->expression);
++    TrueLiteral *trueLit = dynamic_cast<TrueLiteral *>(expStmt->expression);
++    FalseLiteral *falseLit = dynamic_cast<FalseLiteral *>(expStmt->expression);
+     if (!trueLit && !falseLit) {
+         addError(expStmt->firstSourceLocation(), tr("Expected true or false after colon."));
+         return false;
+@@ -565,20 +535,20 @@
+         return;
+     }
+ 
+-    ExpressionStatement *expStmt = AST::cast<ExpressionStatement *>(ast->statement);
++    ExpressionStatement *expStmt = dynamic_cast<ExpressionStatement *>(ast->statement);
+     if (!expStmt) {
+         addError(ast->statement->firstSourceLocation(), tr("Expected array of strings after colon."));
+         return;
+     }
+ 
+-    ArrayLiteral *arrayLit = AST::cast<ArrayLiteral *>(expStmt->expression);
++    ArrayLiteral *arrayLit = dynamic_cast<ArrayLiteral *>(expStmt->expression);
+     if (!arrayLit) {
+         addError(expStmt->firstSourceLocation(), tr("Expected array of strings after colon."));
+         return;
+     }
+ 
+     for (ElementList *it = arrayLit->elements; it; it = it->next) {
+-        StringLiteral *stringLit = AST::cast<StringLiteral *>(it->expression);
++        StringLiteral *stringLit = dynamic_cast<StringLiteral *>(it->expression);
+         if (!stringLit) {
+             addError(arrayLit->firstSourceLocation(), tr("Expected array literal with only string literal members."));
+             return;
+@@ -611,13 +581,13 @@
+         return;
+     }
+ 
+-    ExpressionStatement *expStmt = AST::cast<ExpressionStatement *>(ast->statement);
++    ExpressionStatement *expStmt = dynamic_cast<ExpressionStatement *>(ast->statement);
+     if (!expStmt) {
+         addError(ast->statement->firstSourceLocation(), tr("Expected array of numbers after colon."));
+         return;
+     }
+ 
+-    ArrayLiteral *arrayLit = AST::cast<ArrayLiteral *>(expStmt->expression);
++    ArrayLiteral *arrayLit = dynamic_cast<ArrayLiteral *>(expStmt->expression);
+     if (!arrayLit) {
+         addError(expStmt->firstSourceLocation(), tr("Expected array of numbers after colon."));
+         return;
+@@ -655,13 +625,13 @@
+         return;
+     }
+ 
+-    ExpressionStatement *expStmt = AST::cast<ExpressionStatement *>(ast->statement);
++    ExpressionStatement *expStmt = dynamic_cast<ExpressionStatement *>(ast->statement);
+     if (!expStmt) {
+         addError(ast->statement->firstSourceLocation(), tr("Expected object literal after colon."));
+         return;
+     }
+ 
+-    ObjectLiteral *objectLit = AST::cast<ObjectLiteral *>(expStmt->expression);
++    ObjectLiteral *objectLit = dynamic_cast<ObjectLiteral *>(expStmt->expression);
+     if (!objectLit) {
+         addError(expStmt->firstSourceLocation(), tr("Expected object literal after colon."));
+         return;
+@@ -670,11 +640,11 @@
+     for (PropertyAssignmentList *it = objectLit->properties; it; it = it->next) {
+         PropertyNameAndValue *assignement = AST::cast<PropertyNameAndValue *>(it->assignment);
+         if (assignement) {
+-            StringLiteralPropertyName *propName = AST::cast<StringLiteralPropertyName *>(assignement->name);
+-            NumericLiteral *value = AST::cast<NumericLiteral *>(assignement->value);
+-            UnaryMinusExpression *minus = AST::cast<UnaryMinusExpression *>(assignement->value);
++            StringLiteralPropertyName *propName = dynamic_cast<StringLiteralPropertyName *>(assignement->name);
++            NumericLiteral *value = dynamic_cast<NumericLiteral *>(assignement->value);
++            UnaryMinusExpression *minus = dynamic_cast<UnaryMinusExpression *>(assignement->value);
+             if (minus)
+-                value = AST::cast<NumericLiteral *>(minus->expression);
++                value = dynamic_cast<NumericLiteral *>(minus->expression);
+             if (!propName || !value) {
+                 addError(objectLit->firstSourceLocation(), tr("Expected object literal to contain only 'string: number' elements."));
+                 continue;
+diff -bur ./qmljs/qmljstypedescriptionreader.h ../creator/qmljs/qmljstypedescriptionreader.h
+--- ./qmljs/qmljstypedescriptionreader.h	2018-03-28 22:34:51.000000000 +0300
++++ ../creator/qmljs/qmljstypedescriptionreader.h	2018-03-26 19:20:35.000000000 +0300
+@@ -31,7 +31,7 @@
+ #ifndef QMLJSTYPEDESCRIPTIONREADER_H
+ #define QMLJSTYPEDESCRIPTIONREADER_H
+ 
+-#include "qmljs/qmljs_global.h"
++#include "qmljs_global.h"
+ #include <qmljs/parser/qmljsastfwd_p.h>
+ 
+ #include <languageutils/fakemetaobject.h>
+@@ -64,15 +64,13 @@
+ 
+     bool operator()(
+             QHash<QString, LanguageUtils::FakeMetaObject::ConstPtr> *objects,
+-            QList<ModuleApiInfo> *moduleApis,
+-            QStringList *dependencies);
++            QList<ModuleApiInfo> *moduleApis);
+     QString errorMessage() const;
+     QString warningMessage() const;
+ 
+ private:
+     void readDocument(AST::UiProgram *ast);
+     void readModule(AST::UiObjectDefinition *ast);
+-    void readDependencies(AST::UiScriptBinding *ast);
+     void readComponent(AST::UiObjectDefinition *ast);
+     void readModuleApi(AST::UiObjectDefinition *ast);
+     void readSignalOrMethod(AST::UiObjectDefinition *ast, bool isMethod, LanguageUtils::FakeMetaObject::Ptr fmo);
+@@ -98,7 +96,6 @@
+     QString _warningMessage;
+     QHash<QString, LanguageUtils::FakeMetaObject::ConstPtr> *_objects;
+     QList<ModuleApiInfo> *_moduleApis;
+-    QStringList *_dependencies;
+ };
+ 
+ } // namespace QmlJS
+diff -bur ./qmljs/qmljsutils.cpp ../creator/qmljs/qmljsutils.cpp
+--- ./qmljs/qmljsutils.cpp	2018-03-28 22:24:04.000000000 +0300
++++ ../creator/qmljs/qmljsutils.cpp	2018-03-26 19:20:35.000000000 +0300
+@@ -33,8 +33,6 @@
+ #include "parser/qmljsast_p.h"
+ 
+ #include <QColor>
+-#include <QDir>
+-#include <QRegularExpression>
+ 
+ using namespace QmlJS;
+ using namespace QmlJS::AST;
+@@ -86,7 +84,7 @@
+     QColor color;
+     if (qmlColorString.size() == 9 && qmlColorString.at(0) == QLatin1Char('#')) {
+         bool ok;
+-        const int alpha = qmlColorString.midRef(1, 2).toInt(&ok, 16);
++        const int alpha = qmlColorString.mid(1, 2).toInt(&ok, 16);
+         if (ok) {
+             QString name(qmlColorString.at(0));
+             name.append(qmlColorString.right(6));
+@@ -202,83 +200,6 @@
+     return DiagnosticMessage(Severity::Error, loc, message);
+ }
+ 
+-namespace {
+-const QString undefinedVersion = QLatin1String("-1.-1");
+-}
+-
+-/*!
+- * \brief Permissive validation of a string representing a module version.
+- * \param version
+- * \return True if \p version is a valid version format (<digit(s)>.<digit(s)>), if it is the
+- *         undefined version (-1.-1) or if it is empty.  False otherwise.
+- */
+-bool QmlJS::maybeModuleVersion(const QString &version) {
+-    QRegularExpression re(QLatin1String("^\\d+\\.\\d+$"));
+-    return version.isEmpty() || version == undefinedVersion || re.match(version).hasMatch();
+-}
+-
+-/*!
+- * \brief Get the path of a module
+- * \param name
+- * \param version
+- * \param importPaths
+- *
+- * Given the qualified \p name and \p version of a module, look for a valid path in \p importPaths.
+- * Most specific version are searched first, the version is searched also in parent modules.
+- * For example, given the \p name QtQml.Models and \p version 2.0, the following directories are
+- * searched in every element of \p importPath:
+- *
+- * - QtQml/Models.2.0
+- * - QtQml.2.0/Models
+- * - QtQml/Models.2
+- * - QtQml.2/Models
+- * - QtQml/Models
+- *
+- * \return The module paths if found, an empty string otherwise
+- * \see qmlimportscanner in qtdeclarative/tools
+- */
+-QString QmlJS::modulePath(const QString &name, const QString &version,
+-                          const QStringList &importPaths)
+-{
+-    Q_ASSERT(maybeModuleVersion(version));
+-    if (importPaths.isEmpty())
+-        return QString();
+-
+-    const QString sanitizedVersion = version == undefinedVersion ? QString() : version;
+-    const QStringList parts = name.split(QLatin1Char('.'), QString::SkipEmptyParts);
+-    auto mkpath = [] (const QStringList &xs) -> QString { return xs.join(QLatin1Char('/')); };
+-
+-    // Regular expression for building candidates by successively removing minor and major
+-    // version numbers.  It does not match the undefined version, so it has to be applied to the
+-    // sanitized version.
+-    const QRegularExpression re("\\.?\\d+$");
+-
+-    QString candidate;
+-
+-    for (QString ver = sanitizedVersion; !ver.isEmpty(); ver.remove(re)) {
+-        for (const QString &path: importPaths) {
+-            for (int i = parts.count() - 1; i >= 0; --i) {
+-                candidate = QDir::cleanPath(
+-                            QString::fromLatin1("%1/%2.%3/%4").arg(path,
+-                                                                   mkpath(parts.mid(0, i + 1)),
+-                                                                   ver,
+-                                                                   mkpath(parts.mid(i + 1))));
+-                if (QDir(candidate).exists())
+-                    return candidate;
+-            }
+-        }
+-    }
+-
+-    // Version is empty
+-    for (const QString &path: importPaths) {
+-        candidate = QDir::cleanPath(QString::fromLatin1("%1/%2").arg(path, mkpath(parts)));
+-        if (QDir(candidate).exists())
+-            return candidate;
+-    }
+-
+-    return QString();
+-}
+-
+ bool QmlJS::isValidBuiltinPropertyType(const QString &name)
+ {
+     return sharedData()->validBuiltinPropertyNames.contains(name);
+diff -bur ./qmljs/qmljsutils.h ../creator/qmljs/qmljsutils.h
+--- ./qmljs/qmljsutils.h	2018-03-28 22:35:26.000000000 +0300
++++ ../creator/qmljs/qmljsutils.h	2018-03-26 19:20:35.000000000 +0300
+@@ -31,7 +31,7 @@
+ #ifndef QMLJS_QMLJSUTILS_H
+ #define QMLJS_QMLJSUTILS_H
+ 
+-#include "qmljs/qmljs_global.h"
++#include "qmljs_global.h"
+ #include "qmljsconstants.h"
+ #include "parser/qmljsastfwd_p.h"
+ #include "parser/qmljsengine_p.h"
+@@ -60,11 +60,6 @@
+ QMLJS_EXPORT DiagnosticMessage errorMessage(const AST::SourceLocation &loc,
+                                             const QString &message);
+ 
+-QMLJS_EXPORT bool maybeModuleVersion(const QString &version);
+-
+-QMLJS_EXPORT QString modulePath(const QString &moduleImportName, const QString &version,
+-                                const QStringList &importPaths);
+-
+ template <class T>
+ AST::SourceLocation locationFromRange(const T *node)
+ {
+diff -bur ./qmljs/qmljsvalueowner.h ../creator/qmljs/qmljsvalueowner.h
+--- ./qmljs/qmljsvalueowner.h	2018-03-28 22:36:37.000000000 +0300
++++ ../creator/qmljs/qmljsvalueowner.h	2018-03-26 19:20:35.000000000 +0300
+@@ -31,7 +31,7 @@
+ #ifndef QMLJS_VALUEOWNER_H
+ #define QMLJS_VALUEOWNER_H
+ 
+-#include "qmljs/qmljs_global.h"
++#include "qmljs_global.h"
+ #include "qmljsinterpreter.h"
+ 
+ #include <QList>
+diff -bur ./qmljs/qmljsviewercontext.h ../creator/qmljs/qmljsviewercontext.h
+--- ./qmljs/qmljsviewercontext.h	2018-03-28 22:37:06.000000000 +0300
++++ ../creator/qmljs/qmljsviewercontext.h	2018-03-26 19:20:35.000000000 +0300
+@@ -31,7 +31,7 @@
+ #ifndef VIEWERCONTEXT_H
+ #define VIEWERCONTEXT_H
+ 
+-#include "qmljs/qmljs_global.h"
++#include "qmljs_global.h"
+ #include "qmljsdialect.h"
+ 
+ #include <QStringList>
+diff -bur ./utils/qtcassert.h ../creator/utils/qtcassert.h
+--- ./utils/qtcassert.h	2018-03-28 23:34:50.000000000 +0300
++++ ../creator/utils/qtcassert.h	2018-03-26 19:20:35.000000000 +0300
+@@ -45,6 +45,6 @@
+ 
+ #define QTC_ASSERT(cond, action) if (cond) {} else { QTC_ASSERT_STRING(#cond); action; } do {} while (0)
+ #define QTC_CHECK(cond) if (cond) {} else { QTC_ASSERT_STRING(#cond); } do {} while (0)
+-#define QTC_GUARD(cond) ((cond) ? true : (QTC_ASSERT_STRING(#cond), false))
+ 
+ #endif // QTC_ASSERT_H
+\ No newline at end of file
++

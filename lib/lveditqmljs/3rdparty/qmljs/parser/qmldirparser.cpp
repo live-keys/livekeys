@@ -1,7 +1,7 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing
 **
 ** This file is part of Qt Creator.
 **
@@ -9,22 +9,29 @@
 ** Licensees holding valid commercial Qt licenses may use this file in
 ** accordance with the commercial license agreement provided with the
 ** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
+** a written agreement between you and The Qt Company.  For licensing terms and
+** conditions see http://www.qt.io/terms-conditions.  For further information
+** use the contact form at http://www.qt.io/contact-us.
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 or version 3 as published by the Free
+** Software Foundation and appearing in the file LICENSE.LGPLv21 and
+** LICENSE.LGPLv3 included in the packaging of this file.  Please review the
+** following information to ensure the GNU Lesser General Public License
+** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, The Qt Company gives you certain additional
+** rights.  These rights are described in The Qt Company LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
 **
 ****************************************************************************/
 
 #include "qmldirparser_p.h"
 #include "qmlerror.h"
+
+
 
 #include <QtCore/QtDebug>
 
@@ -47,20 +54,7 @@ static int parseInt(const QStringRef &str, bool *ok)
     return number;
 }
 
-static bool parseVersion(const QString &str, int *major, int *minor)
-{
-    const int dotIndex = str.indexOf(QLatin1Char('.'));
-    if (dotIndex != -1 && str.indexOf(QLatin1Char('.'), dotIndex + 1) == -1) {
-        bool ok = false;
-        *major = parseInt(QStringRef(&str, 0, dotIndex), &ok);
-        if (ok)
-            *minor = parseInt(QStringRef(&str, dotIndex + 1, str.length() - dotIndex - 1), &ok);
-        return ok;
-    }
-    return false;
-}
-
-QmlDirParser::QmlDirParser() : _designerSupported(false)
+QmlDirParser::QmlDirParser()
 {
 }
 
@@ -92,7 +86,6 @@ bool QmlDirParser::parse(const QString &source)
     _plugins.clear();
     _components.clear();
     _scripts.clear();
-    _designerSupported = false;
 
     quint16 lineNumber = 0;
     bool firstLine = true;
@@ -138,7 +131,7 @@ bool QmlDirParser::parse(const QString &source)
 
         if (invalidLine) {
             reportError(lineNumber, 0,
-                        QStringLiteral("invalid qmldir directive contains too many tokens"));
+                        QString::fromLatin1("invalid qmldir directive contains too many tokens"));
             continue;
         } else if (sectionCount == 0) {
             continue; // no sections, no party.
@@ -146,17 +139,17 @@ bool QmlDirParser::parse(const QString &source)
         } else if (sections[0] == QLatin1String("module")) {
             if (sectionCount != 2) {
                 reportError(lineNumber, 0,
-                            QStringLiteral("module identifier directive requires one argument, but %1 were provided").arg(sectionCount - 1));
+                            QString::fromLatin1("module identifier directive requires one argument, but %1 were provided").arg(sectionCount - 1));
                 continue;
             }
             if (!_typeNamespace.isEmpty()) {
                 reportError(lineNumber, 0,
-                            QStringLiteral("only one module identifier directive may be defined in a qmldir file"));
+                            QString::fromLatin1("only one module identifier directive may be defined in a qmldir file"));
                 continue;
             }
             if (!firstLine) {
                 reportError(lineNumber, 0,
-                            QStringLiteral("module identifier directive must be the first directive in a qmldir file"));
+                            QString::fromLatin1("module identifier directive must be the first directive in a qmldir file"));
                 continue;
             }
 
@@ -165,7 +158,7 @@ bool QmlDirParser::parse(const QString &source)
         } else if (sections[0] == QLatin1String("plugin")) {
             if (sectionCount < 2 || sectionCount > 3) {
                 reportError(lineNumber, 0,
-                            QStringLiteral("plugin directive requires one or two arguments, but %1 were provided").arg(sectionCount - 1));
+                            QString::fromLatin1("plugin directive requires one or two arguments, but %1 were provided").arg(sectionCount - 1));
 
                 continue;
             }
@@ -177,7 +170,7 @@ bool QmlDirParser::parse(const QString &source)
         } else if (sections[0] == QLatin1String("internal")) {
             if (sectionCount != 3) {
                 reportError(lineNumber, 0,
-                            QStringLiteral("internal types require 2 arguments, but %1 were provided").arg(sectionCount - 1));
+                            QString::fromLatin1("internal types require 2 arguments, but %1 were provided").arg(sectionCount - 1));
                 continue;
             }
             Component entry(sections[1], sections[2], -1, -1);
@@ -186,7 +179,7 @@ bool QmlDirParser::parse(const QString &source)
         } else if (sections[0] == QLatin1String("singleton")) {
             if (sectionCount < 3 || sectionCount > 4) {
                 reportError(lineNumber, 0,
-                            QStringLiteral("singleton types require 2 or 3 arguments, but %1 were provided").arg(sectionCount - 1));
+                            QString::fromLatin1("singleton types require 2 or 3 arguments, but %1 were provided").arg(sectionCount - 1));
                 continue;
             } else if (sectionCount == 3) {
                 // handle qmldir directory listing case where singleton is defined in the following pattern:
@@ -197,20 +190,33 @@ bool QmlDirParser::parse(const QString &source)
             } else {
                 // handle qmldir module listing case where singleton is defined in the following pattern:
                 // singleton TestSingletonType 2.0 TestSingletonType20.qml
-                int major, minor;
-                if (parseVersion(sections[2], &major, &minor)) {
-                    const QString &fileName = sections[3];
-                    Component entry(sections[1], fileName, major, minor);
-                    entry.singleton = true;
-                    _components.insertMulti(entry.typeName, entry);
+                const QString &version = sections[2];
+                const int dotIndex = version.indexOf(QLatin1Char('.'));
+
+                if (dotIndex == -1) {
+                    reportError(lineNumber, 0, QLatin1String("expected '.'"));
+                } else if (version.indexOf(QLatin1Char('.'), dotIndex + 1) != -1) {
+                    reportError(lineNumber, 0, QLatin1String("unexpected '.'"));
                 } else {
-                    reportError(lineNumber, 0, QStringLiteral("invalid version %1, expected <major>.<minor>").arg(sections[2]));
+                    bool validVersionNumber = false;
+                    const int majorVersion = parseInt(QStringRef(&version, 0, dotIndex), &validVersionNumber);
+
+                    if (validVersionNumber) {
+                        const int minorVersion = parseInt(QStringRef(&version, dotIndex+1, version.length()-dotIndex-1), &validVersionNumber);
+
+                        if (validVersionNumber) {
+                            const QString &fileName = sections[3];
+                            Component entry(sections[1], fileName, majorVersion, minorVersion);
+                            entry.singleton = true;
+                            _components.insertMulti(entry.typeName, entry);
+                        }
+                    }
                 }
             }
         } else if (sections[0] == QLatin1String("typeinfo")) {
             if (sectionCount != 2) {
                 reportError(lineNumber, 0,
-                            QStringLiteral("typeinfo requires 1 argument, but %1 were provided").arg(sectionCount - 1));
+                            QString::fromLatin1("typeinfo requires 1 argument, but %1 were provided").arg(sectionCount - 1));
                 continue;
             }
 #ifdef QT_CREATOR
@@ -218,49 +224,42 @@ bool QmlDirParser::parse(const QString &source)
             _typeInfos.append(typeInfo);
 #endif
 
-        } else if (sections[0] == QLatin1String("designersupported")) {
-            if (sectionCount != 1)
-                reportError(lineNumber, 0, QStringLiteral("designersupported does not expect any argument"));
-            else
-                _designerSupported = true;
-        } else if (sections[0] == QLatin1String("depends")) {
-            if (sectionCount != 3) {
-                reportError(lineNumber, 0,
-                            QStringLiteral("depends requires 2 arguments, but %1 were provided").arg(sectionCount - 1));
-                continue;
-            }
-
-            int major, minor;
-            if (parseVersion(sections[2], &major, &minor)) {
-                Component entry(sections[1], QString(), major, minor);
-                entry.internal = true;
-                _dependencies.insert(entry.typeName, entry);
-            } else {
-                reportError(lineNumber, 0, QStringLiteral("invalid version %1, expected <major>.<minor>").arg(sections[2]));
-            }
         } else if (sectionCount == 2) {
             // No version specified (should only be used for relative qmldir files)
             const Component entry(sections[0], sections[1], -1, -1);
             _components.insertMulti(entry.typeName, entry);
         } else if (sectionCount == 3) {
-            int major, minor;
-            if (parseVersion(sections[1], &major, &minor)) {
-                const QString &fileName = sections[2];
+            const QString &version = sections[1];
+            const int dotIndex = version.indexOf(QLatin1Char('.'));
 
-                if (fileName.endsWith(QLatin1String(".js"))) {
-                    // A 'js' extension indicates a namespaced script import
-                    const Script entry(sections[0], fileName, major, minor);
-                    _scripts.append(entry);
-                } else {
-                    const Component entry(sections[0], fileName, major, minor);
-                    _components.insertMulti(entry.typeName, entry);
-                }
+            if (dotIndex == -1) {
+                reportError(lineNumber, 0, QLatin1String("expected '.'"));
+            } else if (version.indexOf(QLatin1Char('.'), dotIndex + 1) != -1) {
+                reportError(lineNumber, 0, QLatin1String("unexpected '.'"));
             } else {
-                reportError(lineNumber, 0, QStringLiteral("invalid version %1, expected <major>.<minor>").arg(sections[1]));
+                bool validVersionNumber = false;
+                const int majorVersion = parseInt(QStringRef(&version, 0, dotIndex), &validVersionNumber);
+
+                if (validVersionNumber) {
+                    const int minorVersion = parseInt(QStringRef(&version, dotIndex+1, version.length()-dotIndex-1), &validVersionNumber);
+
+                    if (validVersionNumber) {
+                        const QString &fileName = sections[2];
+
+                        if (fileName.endsWith(QLatin1String(".js"))) {
+                            // A 'js' extension indicates a namespaced script import
+                            const Script entry(sections[0], fileName, majorVersion, minorVersion);
+                            _scripts.append(entry);
+                        } else {
+                            const Component entry(sections[0], fileName, majorVersion, minorVersion);
+                            _components.insertMulti(entry.typeName, entry);
+                        }
+                    }
+                }
             }
         } else {
             reportError(lineNumber, 0,
-                        QStringLiteral("a component declaration requires two or three arguments, but %1 were provided").arg(sectionCount));
+                        QString::fromLatin1("a component declaration requires two or three arguments, but %1 were provided").arg(sectionCount));
         }
 
         firstLine = false;
@@ -327,7 +326,7 @@ QList<QmlDirParser::Plugin> QmlDirParser::plugins() const
     return _plugins;
 }
 
-QHash<QString, QmlDirParser::Component> QmlDirParser::components() const
+QHash<QString,QmlDirParser::Component> QmlDirParser::components() const
 {
     return _components;
 }
@@ -349,21 +348,16 @@ QList<QmlDirParser::TypeInfo> QmlDirParser::typeInfos() const
 }
 #endif
 
-bool QmlDirParser::designerSupported() const
-{
-    return _designerSupported;
-}
-
 QDebug &operator<< (QDebug &debug, const QmlDirParser::Component &component)
 {
-    const QString output = QStringLiteral("{%1 %2.%3}").
+    const QString output = QString::fromLatin1("{%1 %2.%3}").
         arg(component.typeName).arg(component.majorVersion).arg(component.minorVersion);
     return debug << qPrintable(output);
 }
 
 QDebug &operator<< (QDebug &debug, const QmlDirParser::Script &script)
 {
-    const QString output = QStringLiteral("{%1 %2.%3}").
+    const QString output = QString::fromLatin1("{%1 %2.%3}").
         arg(script.nameSpace).arg(script.majorVersion).arg(script.minorVersion);
     return debug << qPrintable(output);
 }

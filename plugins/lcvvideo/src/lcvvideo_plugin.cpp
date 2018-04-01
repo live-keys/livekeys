@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2017 Dinu SV.
+** Copyright (C) 2014-2018 Dinu SV.
 ** (contact: mail@dinusv.com)
 ** This file is part of Live CV Application.
 **
