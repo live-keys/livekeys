@@ -1,7 +1,7 @@
 HEADERS += \
     $$PWD/qdescriptorextractor.h \
     $$PWD/qdescriptormatcher.h \
-    $$PWD/qdescriptoratchfilter.h \
+    $$PWD/qdescriptormatchfilter.h \
     $$PWD/qdmatchvector.h \
     $$PWD/qdrawmatches.h \
     $$PWD/qfeaturedetector.h \
