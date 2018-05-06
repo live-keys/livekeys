@@ -44,6 +44,9 @@ public:
     void initPallete(const QVariant &value);
     void setValueFromCode(const QVariant& value);
 
+    void setPath(const QString& path);
+    const QString &path() const;
+
 signals:
     void itemChanged();
     void valueChanged();
@@ -57,6 +60,7 @@ private:
     bool        m_codeChange;
     QQuickItem* m_item;
     QVariant    m_value;
+    QString     m_path;
 };
 
 inline QQuickItem *LivePalette::item(){
@@ -80,6 +84,14 @@ inline void LivePalette::setValue(const QVariant &value){
         m_value = value;
         emit valueChanged();
     }
+}
+
+inline void LivePalette::setPath(const QString &path){
+    m_path = path;
+}
+
+inline const QString& LivePalette::path() const{
+    return m_path;
 }
 
 }// namespace

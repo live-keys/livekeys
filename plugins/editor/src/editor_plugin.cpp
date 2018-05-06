@@ -21,6 +21,7 @@
 #include "live/qmlobjectcodeserializer.h"
 #include "live/codeconverter.h"
 #include "live/livepalette.h"
+#include "live/livepalettelist.h"
 #include "live/plugincontext.h"
 #include "live/visuallog.h"
 #include "live/settings.h"
@@ -36,6 +37,8 @@ void EditorPlugin::registerTypes(const char *uri){
     qmlRegisterUncreatableType<lv::AbstractCodeSerializer>(
         uri, 1, 0, "AbstractCodeSerializer", "Code serializer is of abstract type."
     );
+    qmlRegisterUncreatableType<lv::LivePaletteList>(
+        uri, 1, 0, "LivePaletteList", "LivePaletteList can be accessed through a DocumentHandler.");
     qmlRegisterType<lv::NativeValueCodeSerializer>(uri, 1, 0, "NativeValueCodeSerializer");
     qmlRegisterType<lv::QmlObjectCodeSerializer>(  uri, 1, 0, "QmlObjectCodeSerializer");
     qmlRegisterType<lv::CodeConverter>(            uri, 1, 0, "CodeConverter");

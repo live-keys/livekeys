@@ -33,6 +33,11 @@ class LV_EDITOR_EXPORT CodeRuntimeBinding : public QObject{
     friend class ProjectDocumentBlockData;
 
 public:
+    enum SectionType{
+        Section = 1002
+    };
+
+public:
     CodeRuntimeBinding(const QStringList &identifierChain, ProjectDocument* parent = 0);
     CodeRuntimeBinding(CodeDeclaration::Ptr declaration);
     ~CodeRuntimeBinding();

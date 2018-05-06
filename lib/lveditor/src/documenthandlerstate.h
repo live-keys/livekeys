@@ -28,18 +28,18 @@ public:
     DocumentHandlerState();
     ~DocumentHandlerState();
 
-    void setEditingFragment(DocumentEditFragment* fragment);
-    DocumentEditFragment* editingFragment();
-    void clearEditingFragment();
+//    void setEditingFragment(DocumentEditFragment* fragment);
+//    DocumentEditFragment* editingFragment();
+//    void clearEditingFragment();
 
 private:
-    DocumentEditFragment* m_editingFragment;
+//    DocumentEditFragment* m_editingFragment;
 
 };
 
-inline DocumentEditFragment *DocumentHandlerState::editingFragment(){
-    return m_editingFragment;
-}
+//inline DocumentEditFragment *DocumentHandlerState::editingFragment(){
+//    return m_editingFragment;
+//}
 
 }// namespace
 

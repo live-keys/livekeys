@@ -63,7 +63,7 @@ public:
         CodeCompletionModel* model,
         QTextCursor& cursorChange
     ) Q_DECL_OVERRIDE;
-    void setTarget(QTextDocument *target, DocumentHandlerState* state) Q_DECL_OVERRIDE;
+    void setTarget(QTextDocument *target) Q_DECL_OVERRIDE;
     void setDocument(ProjectDocument* document) Q_DECL_OVERRIDE;
     void updateScope(const QString& data) Q_DECL_OVERRIDE;
     void rehighlightBlock(const QTextBlock& block) Q_DECL_OVERRIDE;

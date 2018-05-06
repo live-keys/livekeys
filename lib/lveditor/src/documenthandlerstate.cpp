@@ -20,24 +20,24 @@
 namespace lv{
 
 DocumentHandlerState::DocumentHandlerState()
-    : m_editingFragment(0)
+//    : m_editingFragment(0)
 {
 }
 
 DocumentHandlerState::~DocumentHandlerState(){
-    delete m_editingFragment;
+//    delete m_editingFragment;
 }
 
-void DocumentHandlerState::setEditingFragment(DocumentEditFragment *fragment){
-    clearEditingFragment();
-    m_editingFragment = fragment;
-}
+//void DocumentHandlerState::setEditingFragment(DocumentEditFragment *fragment){
+//    clearEditingFragment();
+//    m_editingFragment = fragment;
+//}
 
-void DocumentHandlerState::clearEditingFragment(){
-    if ( m_editingFragment ){
-        delete m_editingFragment;
-        m_editingFragment = 0;
-    }
-}
+//void DocumentHandlerState::clearEditingFragment(){
+//    if ( m_editingFragment ){
+//        delete m_editingFragment;
+//        m_editingFragment = 0;
+//    }
+//}
 
 }// namespace

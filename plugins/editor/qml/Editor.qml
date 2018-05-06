@@ -36,8 +36,11 @@ Rectangle{
     property alias internalActiveFocus : editorArea.activeFocus
     property alias internalFocus: editorArea.focus
 
-    property var windowControls : null
+    property var loadedPalettes: []
+    property bool isEditingSection: false
+    property var windowControls: null
     property var document: null
+
     onDocumentChanged: {
         if ( !document ){
             editor.text = ''
@@ -370,7 +373,7 @@ Rectangle{
                         event.accepted = true
 
                     } else if ( event.key === Qt.Key_Return && (event.modifiers & Qt.ControlModifier) ){
-                        if ( codeHandler.isEditing )
+                        if ( editor.isEditingSection )
                             codeHandler.commitEdit()
                         event.accepted = true
                     } else if ( event.key === Qt.Key_PageUp ){
@@ -434,8 +437,15 @@ Rectangle{
                             qmlSuggestionBox.highlightPrev()
                         }
                     } else if ( event.key === Qt.Key_Escape ){
-                        if ( codeHandler.isEditing )
+                        if ( editor.loadedPalettes.length > 0 ){
+
+                            var last = editor.loadedPalettes[editor.loadedPalettes.length - 1]
+                            codeHandler.removePalette(last.paletteItem)
+
+                        } else if ( codeHandler.isEditing() ){
                             codeHandler.cancelEdit()
+                        }
+
                         codeHandler.completionModel.disable()
                     } else {
                         var command = livecv.keymap.locateCommand(event.key, event.modifiers)
@@ -507,7 +517,64 @@ Rectangle{
                         id: adjustMenuItem
                         text: qsTr("Adjust")
                         enabled: false
-                        onTriggered: codeHandler.adjust(editorArea.cursorPosition, editor.windowControls.runSpace.item)
+                        onTriggered: {
+                            var palettes = codeHandler.findPalettes(editorArea.cursorPosition, editor.windowControls.runSpace.item)
+                            var rect = editor.getCursorRectangle()
+                            var position = Qt.point(editor.x, editor.y - flick.flickableItem.contentY)
+                            if ( palettes.size() === 1 ){
+                                var palette = palettes.loadAt(0)
+                                codeHandler.openPalette(palette, editorArea.cursorPosition, editor.windowControls.runSpace.item)
+
+                                var paletteBox = windowControls.editSpace.createPalette()
+
+                                palette.item.x = 5
+                                palette.item.y = 7
+
+                                paletteBox.setChild(palette.item, rect, position, editSpace.placement.top)
+
+                                paletteBox.color = "#02070b"
+                                paletteBox.radius = 5
+                                paletteBox.border.width = 1
+                                paletteBox.border.color = "#061b24"
+                                editor.loadedPalettes.push(paletteBox)
+                            } else {
+                                //Create editor box
+                                var palList      = windowControls.editSpace.createPaletteList()
+                                var palListBox   = windowControls.editSpace.createEditorBox(palList, rect, position, editSpace.placement.bottom)
+                                palListBox.color = 'transparent'
+                                palList.model    = palettes
+                                editor.internalFocus = false
+                                palList.forceActiveFocus()
+
+                                palList.cancelled.connect(function(){
+                                    palList.focus = false
+                                    editor.forceFocus()
+                                    palListBox.destroy()
+                                })
+                                palList.paletteSelected.connect(function(index){
+                                    palList.focus = false
+                                    editor.forceFocus()
+                                    palListBox.destroy()
+
+                                    var palette = palettes.loadAt(index)
+                                    codeHandler.openPalette(palette, editorArea.cursorPosition, editor.windowControls.runSpace.item)
+
+                                    var paletteBox = windowControls.editSpace.createPalette()
+
+                                    palette.item.x = 5
+                                    palette.item.y = 7
+
+                                    paletteBox.setChild(palette.item, rect, position, editSpace.placement.top)
+
+                                    paletteBox.color = "#02070b"
+                                    paletteBox.radius = 5
+                                    paletteBox.border.width = 1
+                                    paletteBox.border.color = "#061b24"
+
+                                    editor.loadedPalettes.push(paletteBox)
+                                })
+                            }
+                        }
                     }
                     MenuItem {
                         id: bindMenuItem
@@ -561,10 +628,18 @@ Rectangle{
                 if ( project.active === editor.document )
                     editor.windowControls.createTimer.restart()
             }
-            onPaletteChanged: {
-                var rect = editor.getCursorRectangle()
-                var position = Qt.point(editor.x, editor.y - flick.flickableItem.contentY)
-                windowControls.paletteBox.setPalette(palette, rect, position)
+            onPaletteAboutToRemove: {
+                for ( var i = 0; i < loadedPalettes.length; ++i ){
+                    if ( palette.item === loadedPalettes[i].paletteItem ){
+                        var lp = loadedPalettes[i]
+                        loadedPalettes.splice(i, 1)
+                        lp.destroy()
+                        return
+                    }
+                }
+            }
+            onEditingStateChanged: {
+                editor.isEditingSection = isEditing
             }
         }
 

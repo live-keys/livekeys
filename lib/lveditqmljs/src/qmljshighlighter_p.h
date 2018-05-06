@@ -42,9 +42,9 @@ public:
     };
 
 public:
-    QmlJsHighlighter(QmlJsSettings* settings, QTextDocument *parent = 0, lv::DocumentHandlerState* state = 0);
+    QmlJsHighlighter(QmlJsSettings* settings, QTextDocument *parent = 0);
 
-    void setTarget(QTextDocument* target, DocumentHandlerState* state);
+    void setTarget(QTextDocument* target);
 
     LookAheadType lookAhead(
         const QString& text,
@@ -54,18 +54,16 @@ public:
 
 protected:
     void highlightBlock(const QString &text);
+    void highlightSection(const ProjectDocumentSection::Ptr& section, ProjectDocumentBlockData *blockData, bool& exceeded);
 
 private:
     static QSet<QString> m_knownIds;
     static QSet<QString> createKnownIds();
 
     QmlJsSettings* m_settings;
-
-    lv::DocumentHandlerState* m_documentState;
 };
 
-inline void QmlJsHighlighter::setTarget(QTextDocument *target, DocumentHandlerState *state){
-    m_documentState = state;
+inline void QmlJsHighlighter::setTarget(QTextDocument *target){
     setDocument(target);
 }
 

@@ -14,7 +14,8 @@ HEADERS += \
     $$PWD/qstaticfilereader.h \
     $$PWD/qtriangle.h \
     $$PWD/qloglistener.h \
-    $$PWD/qloglistenersocket.h
+    $$PWD/qloglistenersocket.h \
+    $$PWD/qvaluehistory.h
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
@@ -29,4 +30,5 @@ SOURCES += \
     $$PWD/qstaticfilereader.cpp \
     $$PWD/qtriangle.cpp \
     $$PWD/qloglistener.cpp \
-    $$PWD/qloglistenersocket.cpp
+    $$PWD/qloglistenersocket.cpp \
+    $$PWD/qvaluehistory.cpp

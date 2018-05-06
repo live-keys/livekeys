@@ -19,10 +19,9 @@
 
 namespace lv{
 
-QmlJsHighlighter::QmlJsHighlighter(QmlJsSettings* settings, QTextDocument *parent, lv::DocumentHandlerState *state)
+QmlJsHighlighter::QmlJsHighlighter(QmlJsSettings* settings, QTextDocument *parent)
     : QSyntaxHighlighter(parent)
     , m_settings(settings)
-    , m_documentState(state)
 {
 }
 
@@ -97,15 +96,15 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
     QList<int> bracketPositions;
     int blockState   = previousBlockState();
 
-    bool prevGenerated   = (blockState >> 4) & 1;
-    int bracketLevel = blockState >> 5;
-    int state        = blockState & 15;
+    bool prevSectionExceeded = (blockState >> 4) & 1;
+    int bracketLevel         = blockState >> 5;
+    int state                = blockState & 15;
 
 
     if (blockState < 0) {
-        prevGenerated = false;
-        bracketLevel = 0;
-        state = QmlJS::Scanner::Normal;
+        prevSectionExceeded = false;
+        bracketLevel        = 0;
+        state               = QmlJS::Scanner::Normal;
     }
 
     QmlJsSettings& settings = *m_settings;
@@ -171,36 +170,27 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
 
     lv::ProjectDocumentBlockData *blockData =
             reinterpret_cast<lv::ProjectDocumentBlockData*>(currentBlock().userData());
+    if (!blockData) {
+        blockData = new lv::ProjectDocumentBlockData;
+        currentBlock().setUserData(blockData);
+    }
+    blockData->m_exceededSections.clear();
 
     if (!bracketPositions.isEmpty()) {
-        if (!blockData) {
-            blockData = new lv::ProjectDocumentBlockData;
-            currentBlock().setUserData(blockData);
-        }
         blockData->bracketPositions = bracketPositions;
     }
 
-    bool generated = false;
+    bool exceeded = false;
 
-    if ( prevGenerated ){
+    if ( prevSectionExceeded ){
         QTextBlock prevBlock = currentBlock().previous();
         if ( prevBlock.isValid() && prevBlock.userData() ){
             lv::ProjectDocumentBlockData *prevBlockData =
                     reinterpret_cast<lv::ProjectDocumentBlockData*>(prevBlock.userData());
 
-            if ( prevBlockData->exceededBindingLength > 0 ){
-                int currentExceededLength = prevBlockData->exceededBindingLength - currentBlock().length();
-                if ( currentExceededLength > 0 ){
-                    setFormat(0, currentBlock().length(), settings[QmlJsSettings::QmlEdit]);
-
-                    if (!blockData) {
-                        blockData = new lv::ProjectDocumentBlockData;
-                        currentBlock().setUserData(blockData);
-                    }
-                    blockData->exceededBindingLength = currentExceededLength;
-                    generated = true;
-                } else {
-                    setFormat(0, prevBlockData->exceededBindingLength, settings[QmlJsSettings::QmlEdit]);
+            foreach (const ProjectDocumentSection::Ptr& section, prevBlockData->m_exceededSections ){
+                if ( section->isValid() ){
+                    highlightSection(section, blockData, exceeded);
                 }
             }
         }
@@ -208,40 +198,73 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
 
 
     if ( blockData ){
-        foreach(lv::CodeRuntimeBinding* bind, blockData->m_bindings ){
-            setFormat(
-                bind->position() - currentBlock().position(),
-                bind->declaration()->identifierLength(),
-                settings[QmlJsSettings::QmlRuntimeBoundProperty]
-            );
-
-            if ( bind->isModifiedByEngine() ){
-                int valueFrom = bind->position() + bind->declaration()->identifierLength() + bind->declaration()->valueOffset();
-                setFormat(
-                    valueFrom - currentBlock().position(),
-                    bind->declaration()->valueLength(),
-                    settings[QmlJsSettings::QmlRuntimeModifiedValue]
-                );
-                if ( valueFrom + bind->declaration()->valueLength() > currentBlock().position() + currentBlock().length() ){
-                    generated = true;
-                    blockData->exceededBindingLength =
-                        bind->declaration()->valueLength() - (currentBlock().length() - (valueFrom - currentBlock().position()));
-                }
-            }
+        foreach(const ProjectDocumentSection::Ptr& section, blockData->m_sections ){
+            highlightSection(section, blockData, exceeded);
         }
     }
 
-    blockState = (state & 15) | (generated << 4) | (bracketLevel << 5);
+    blockState = (state & 15) | (exceeded << 4) | (bracketLevel << 5);
     setCurrentBlockState(blockState);
 
-    if ( m_documentState && m_documentState->editingFragment() ){
-        int position = m_documentState->editingFragment()->valuePosition();
-        int length   = m_documentState->editingFragment()->valueLength();
-        if ( position + length >= currentBlock().position() &&
-             position < currentBlock().position() + currentBlock().length())
-        {
-            int from = position - currentBlock().position();
-            setFormat(from < 0 ? 0 : from, length, settings[QmlJsSettings::QmlEdit]);
+//    if ( m_documentState && m_documentState->editingFragment() ){
+//        int position = m_documentState->editingFragment()->valuePosition();
+//        int length   = m_documentState->editingFragment()->valueLength();
+//        if ( position + length >= currentBlock().position() &&
+//             position < currentBlock().position() + currentBlock().length())
+//        {
+//            int from = position - currentBlock().position();
+//            setFormat(from < 0 ? 0 : from, length, settings[QmlJsSettings::QmlEdit]);
+//        }
+//    }
+}
+
+void QmlJsHighlighter::highlightSection(const ProjectDocumentSection::Ptr &section, ProjectDocumentBlockData *blockData, bool &exceeded){
+    QmlJsSettings& settings = *m_settings;
+    if ( section->type() == lv::CodeRuntimeBinding::Section && section->userData() ){
+        lv::CodeRuntimeBinding* bind = reinterpret_cast<lv::CodeRuntimeBinding*>(section->userData());
+        int identifierBegin = bind->position() - currentBlock().position();
+        int identifierEnd   = identifierBegin + bind->declaration()->identifierLength();
+
+        if ( identifierEnd > 0 ){
+            if ( identifierBegin < 0 )
+                identifierBegin = 0;
+            setFormat(
+                identifierBegin,
+                identifierEnd - identifierBegin,
+                settings[QmlJsSettings::QmlRuntimeBoundProperty]
+            );
+        }
+
+        if ( bind->isModifiedByEngine() ){
+            int valueFrom  = bind->position() + bind->declaration()->identifierLength() + bind->declaration()->valueOffset();
+            int valueBegin = valueFrom - currentBlock().position();
+            int valueEnd   = valueBegin + bind->declaration()->valueLength();
+
+            if ( valueBegin < 0 )
+                valueBegin = 0;
+
+            setFormat(
+                valueBegin,
+                valueEnd - valueBegin,
+                settings[QmlJsSettings::QmlRuntimeModifiedValue]
+            );
+            if ( valueEnd > currentBlock().position() + currentBlock().length() ){
+                exceeded = true;
+                blockData->m_exceededSections.append(section);
+            }
+        }
+    } else if ( section->type() == lv::DocumentEditFragment::Section && section->userData() ){
+        lv::DocumentEditFragment* def = reinterpret_cast<lv::DocumentEditFragment*>(section->userData());
+        int valueBegin = def->valuePosition() - currentBlock().position();
+        int valueEnd   = def->valuePosition() + def->valueLength();
+
+        if ( valueBegin < 0 )
+            valueBegin = 0;
+
+        setFormat(valueBegin, valueEnd - valueBegin, settings[QmlJsSettings::QmlEdit]);
+        if ( valueEnd > currentBlock().position() + currentBlock().length() ){
+            exceeded = true;
+            blockData->m_exceededSections.append(section);
         }
     }
 }

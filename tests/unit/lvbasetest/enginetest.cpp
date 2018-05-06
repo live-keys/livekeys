@@ -75,7 +75,6 @@ void EngineTest::engineExceptionTest(){
         QCOMPARE(error.property("functionName").toString(), QString("jsExceptionInObjectTest"));
         QCOMPARE(error.property("fileName").toString(), QString("enginetest.cpp"));
         QCOMPARE(error.property("lineNumber").toInt(), 100);
-        QCOMPARE(error.property("object").toQObject(), nullptr);
         isException = true;
     });
 
@@ -94,7 +93,6 @@ void EngineTest::engineWarningTest(){
         QCOMPARE(error.property("message").toString(), QString("JSTest"));
         QCOMPARE(error.property("fileName").toString(), QString("enginetest.cpp"));
         QCOMPARE(error.property("lineNumber").toInt(), 100);
-        QCOMPARE(error.property("object").toQObject(), nullptr);
         isWarning = true;
     });
 

@@ -44,7 +44,7 @@ public:
     explicit AbstractCodeHandler(QObject* parent = 0);
     virtual ~AbstractCodeHandler();
 
-    virtual void setTarget(QTextDocument* target, DocumentHandlerState* state) = 0;
+    virtual void setTarget(QTextDocument* target) = 0;
     virtual void assistCompletion(
         const QTextCursor& cursor,
         const QChar& insertion,

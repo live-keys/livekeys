@@ -40,7 +40,8 @@ ApplicationWindow{
         messageDialog: messageBox
         runSpace: runSpace
         createTimer: createTimer
-        paletteBox: paletteBox
+        paletteBoxFactory: editorBoxFactory
+        editSpace: editSpace
     }
 
     property bool documentsReloaded : false
@@ -326,6 +327,121 @@ ApplicationWindow{
         DocumentFragment{}
     }
 
+    Item{
+        id: editSpace
+
+        property QtObject placement : QtObject{
+            property int top: 0
+            property int right: 1
+            property int bottom: 2
+            property int left: 3
+        }
+
+        function createPalette(){
+            return editorBoxFactory.createObject(contentWrap)
+        }
+
+        function createPaletteList(){
+            return paletteListFactory.createObject()
+        }
+
+        function createEditorBox(child, aroundRect, editorPosition, relativePlacement){
+            var eb = editorBoxFactory.createObject(contentWrap)
+            eb.setChild(child, aroundRect, editorPosition, relativePlacement)
+            return eb;
+        }
+    }
+
+    Component{
+        id: paletteListFactory
+
+        PaletteList{}
+    }
+
+    Component{
+        id: editorBoxFactory
+
+        Rectangle{
+            id: paletteBoxComponent
+            x: 0
+            y: visible ? 0 : 20
+            width: paletteItem ? paletteItem.width + 10: 0
+            height: paletteItem ? paletteItem.height + 10 : 0
+            visible: children.length > 0
+            opacity: visible ? 1 : 0
+
+            property Item paletteItem : null
+            children: paletteItem ? [paletteItem] : []
+
+            Behavior on opacity{
+                NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
+            }
+            Behavior on y{
+                id : moveYBehavior
+                NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
+            }
+            Behavior on x{
+                id: moveXBehavior
+                NumberAnimation{ duration: 200; easing.type: Easing.OutCubic; }
+            }
+
+            function setChild(item, aroundRectangle, editorPosition, relativePlacement){
+                if ( relativePlacement === 0 || relativePlacement === 2 ){
+                    moveXBehavior.enabled = false
+                    moveYBehavior.enabled = false
+
+                    var startY = editorPosition.y + aroundRectangle.y + 38
+
+                    paletteBoxComponent.x = editorPosition.x + aroundRectangle.x + 7
+                    paletteBoxComponent.y = startY - aroundRectangle.y / 2
+
+                    paletteBoxComponent.paletteItem = item
+
+                    moveYBehavior.enabled = true
+
+                    var newX = paletteBoxComponent.x - paletteBoxComponent.width / 2
+                    var maxX = contentWrap.width - paletteBoxComponent.width
+                    paletteBoxComponent.x = newX < 0 ? 0 : (newX > maxX ? maxX : newX)
+
+                    var upY = startY - paletteBoxComponent.height
+                    var downY = startY + aroundRectangle.height + 5
+
+                    if ( relativePlacement === 0 ){ // top placement
+                        paletteBoxComponent.y = upY > 0 ? upY : downY
+                    } else { // bottom placement
+                        paletteBoxComponent.y = downY + paletteBoxComponent.height < contentWrap.height ? downY : upY
+                    }
+
+                } else {
+                    moveXBehavior.enabled = false
+                    moveYBehavior.enabled = false
+
+                    var startX = editorPosition.x + aroundRectangle.x + 5
+
+                    paletteBoxComponent.x = startX - aroundRectangle.x / 2
+                    paletteBoxComponent.y = editorPosition.y + aroundRectangle.y + 38
+
+                    paletteBoxComponent.paletteItem = item
+
+                    moveXBehavior.enabled = true
+
+                    var newY = paletteBoxComponent.y - paletteBoxComponent.height / 2
+                    var maxY = contentWrap.height - paletteBoxComponent.height
+                    paletteBoxComponent.y = newY < 0 ? 0 : (newY > maxY ? maxY : newY)
+
+                    var upX = startX - paletteBoxComponent.width
+                    var downX = startX + aroundRectangle.width + 5
+
+                    if ( relativePlacement === 1 ){ // right placement
+                        paletteBoxComponent.x = upX > 0 ? upX : downX
+                    } else { // left placement
+                        paletteBoxComponent.x = downX + paletteBoxComponent.width < contentWrap.width ? downX : upX
+                    }
+                }
+            }
+        }
+    }
+
     SplitView{
         id: mainVerticalSplit
         anchors.top : header.bottom
@@ -466,6 +582,8 @@ ApplicationWindow{
             width: parent.width
             height: parent.height - 200
 
+            property var palettes: []
+
             property var toggledItems: []
             function toggleMaximizedRuntime(){
                 if ( toggledItems.length === 0 ){
@@ -487,7 +605,7 @@ ApplicationWindow{
                 id: mainHorizontalSplit
                 anchors.fill: parent
                 orientation: Qt.Horizontal
-                handleDelegate: Rectangle {
+                handleDelegate: Rectangle{
                     implicitWidth: 1
                     implicitHeight: 1
                     color: "#060d13"
@@ -641,59 +759,6 @@ ApplicationWindow{
                         }
                     }
 
-                }
-            }
-
-            Rectangle{
-                id: paletteBox
-                x: 0
-                y: visible ? 0 : 20
-                width: paletteItem ? paletteItem.width + 10: 0
-                height: paletteItem ? paletteItem.height + 10 : 0
-                color: "#02070b"
-                radius: 5
-                border.width: 1
-                border.color: "#061b24"
-                visible: children.length > 0
-                opacity: visible ? 1 : 0
-                clip: true
-
-                property Item paletteItem : null
-                children: paletteItem ? [paletteItem] : []
-
-                Behavior on opacity{
-                    NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
-                }
-                Behavior on y{
-                    id : moveYBehavior
-                    NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
-                }
-
-                function setPalette(palette, cursorRectangle, editorPosition){
-                    if ( palette ){
-                        moveYBehavior.enabled = false
-
-                        var startY = editorPosition.y + cursorRectangle.y + 38
-
-                        paletteBox.x = editorPosition.x + cursorRectangle.x + 7
-                        paletteBox.y = startY - cursorRectangle.y / 2
-
-                        palette.item.x = 5
-                        palette.item.y = 7
-
-                        paletteBox.paletteItem = palette.item
-
-                        moveYBehavior.enabled = true
-
-                        var newX = paletteBox.x - paletteBox.width / 2
-                        paletteBox.x = newX < 0 ? 0 : newX
-
-                        var upY = startY - paletteBox.height
-                        var downY = startY + cursorRectangle.height + 5
-                        paletteBox.y = upY > 0 ? upY : downY
-                    } else {
-                        paletteBox.paletteItem = null
-                    }
                 }
             }
 

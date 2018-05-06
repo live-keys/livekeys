@@ -24,7 +24,6 @@
 #include <QTextBlockUserData>
 
 #include "live/lveditorglobal.h"
-#include "live/codedeclaration.h"
 
 #include <QDebug>
 
@@ -53,10 +52,57 @@ public:
 
 private:
     ProjectDocumentMarker(int position = -1) : m_position(position){}
-    void invalidate(){ m_position = -1; }
+    void invalidate(){m_position = -1;}
 
 private:
     int m_position;
+};
+
+
+class LV_EDITOR_EXPORT ProjectDocumentSection{
+
+public:
+    friend class ProjectDocument;
+    friend class ProjectDocumentBlockData;
+    typedef QSharedPointer<ProjectDocumentSection>       Ptr;
+    typedef QSharedPointer<const ProjectDocumentSection> ConstPtr;
+
+public:
+    int position() const{ return m_position; }
+    int length() const{ return m_length; }
+    int type() const{ return m_type; }
+    bool isValid() const{ return m_position != -1; }
+    void resize(int newLength){ m_length = newLength; }
+    ~ProjectDocumentSection();
+
+    void setUserData(void* data){ m_userData = data; }
+    void* userData(){ return m_userData; }
+
+    ProjectDocumentBlockData* parentBlock(){ return m_parentBlock; }
+
+    void onTextChanged(std::function<void (bool, int, int, const QString &)> handler);
+
+    static Ptr create(int type, int position = -1, int length = 0){
+        return ProjectDocumentSection::Ptr(new ProjectDocumentSection(0, type, position, length));
+    }
+
+private:
+    ProjectDocumentSection(ProjectDocument* document, int type, int position = -1, int length = 0)
+        : m_document(document), m_type(type), m_position(position), m_length(length), m_userData(0), m_parentBlock(0)
+    {}
+    static Ptr create(ProjectDocument* document, int type, int position = -1, int length = 0){
+        return ProjectDocumentSection::Ptr(new ProjectDocumentSection(document, type, position, length));
+    }
+    void invalidate();
+
+private:
+    ProjectDocument* m_document;
+    int              m_type;
+    int              m_position;
+    int              m_length;
+    void*            m_userData;
+    ProjectDocumentBlockData* m_parentBlock;
+    std::function<void(bool, int, int, const QString&)> m_textChangedHandler;
 };
 
 class LV_EDITOR_EXPORT ProjectDocumentAction : public QAbstractUndoItem{
@@ -90,18 +136,22 @@ public:
 class LV_EDITOR_EXPORT ProjectDocumentBlockData : public QTextBlockUserData{
 
 public:
-    ProjectDocumentBlockData() : exceededBindingLength(0){}
+    ProjectDocumentBlockData(){}
     ~ProjectDocumentBlockData();
 
     void addBinding(CodeRuntimeBinding* binding);
     void removeBinding(CodeRuntimeBinding* binding);
+    void addSection(ProjectDocumentSection::Ptr section);
+    void removeSection(ProjectDocumentSection::Ptr section);
+    void removeSection(ProjectDocumentSection* section);
 
     QLinkedList<CodeRuntimeBinding*> m_bindings;
+    QLinkedList<ProjectDocumentSection::Ptr> m_sections;
+    QLinkedList<ProjectDocumentSection::Ptr> m_exceededSections;
     QList<int> bracketPositions;
     QString    blockIdentifier;
-
-    int exceededBindingLength;
 };
+
 
 class LV_EDITOR_EXPORT ProjectDocument : public QObject{
 
@@ -113,10 +163,13 @@ class LV_EDITOR_EXPORT ProjectDocument : public QObject{
     Q_ENUMS(OpenMode)
 
 public:
-    typedef QLinkedList<CodeRuntimeBinding*>::iterator BindingIterator;
+    typedef QLinkedList<CodeRuntimeBinding*>::iterator               BindingIterator;
+    typedef QLinkedList<ProjectDocumentSection::Ptr>::iterator       SectionIterator;
+    typedef QLinkedList<ProjectDocumentSection::Ptr>::const_iterator SectionConstIterator;
 
     friend class ProjectDocumentAction;
     friend class ProjectDocumentMarker;
+    friend class ProjectDocumentSection;
 
     enum OpenMode{
         Edit = 0,
@@ -145,7 +198,6 @@ public:
 
     void assignEditingDocument(QTextDocument* doc, DocumentHandler* handler);
     QTextDocument* editingDocument();
-    CodeRuntimeBinding* addNewBinding(CodeDeclaration::Ptr declaration);
 
     void documentContentsChanged(
         DocumentHandler* author,
@@ -162,14 +214,25 @@ public:
     ProjectDocumentMarker::Ptr addMarker(int position);
     void removeMarker(ProjectDocumentMarker::Ptr marker);
 
+    bool addNewBinding(CodeRuntimeBinding* binding);
     BindingIterator bindingsBegin();
     BindingIterator bindingsEnd();
     int  totalBindings() const;
     bool hasBindings() const;
     CodeRuntimeBinding* bindingAt(int position);
     bool removeBindingAt(int position);
-
     void updateBindingValue(CodeRuntimeBinding* binding, const QString &value);
+
+    ProjectDocumentSection::Ptr createSection(int type, int position, int length);
+    SectionIterator sectionsBegin();
+    SectionIterator sectionsEnd();
+    SectionConstIterator sectionsBegin() const;
+    SectionConstIterator sectionsEnd() const;
+    int totalSections() const;
+    bool hasSections() const;
+    ProjectDocumentSection::Ptr sectionAt(int position);
+    bool removeSectionAt(int position);
+    void removeSection(ProjectDocumentSection::Ptr section);
 
     bool isActive() const;
 
@@ -190,8 +253,10 @@ private:
     void syncContent() const;
     void resetSync() const;
     void updateBindings(int position, int charsRemoved, const QString& addedText);
+    void updateSections(bool engineChange, int position, int charsRemoved, const QString& addedText);
     void updateMarkers(int position, int charsRemoved, int addedText);
     void updateBindingBlocks(int position, const QString &addedText);
+    void updateSectionBlocks(int position, const QString& addedText);
     QString getCharsRemoved(int position, int count);
 
     ProjectFile*    m_file;
@@ -201,8 +266,12 @@ private:
     QTextDocument*   m_editingDocument;
     DocumentHandler* m_editingDocumentHandler;
 
-    QLinkedList<CodeRuntimeBinding*>        m_bindings;
-    QLinkedList<ProjectDocumentMarker::Ptr> m_markers;
+    QLinkedList<CodeRuntimeBinding*>         m_bindings;
+    QLinkedList<ProjectDocumentSection::Ptr> m_sections;
+    QLinkedList<ProjectDocumentMarker::Ptr>  m_markers;
+
+    QLinkedList<ProjectDocumentSection::Ptr> m_sectionsToRemove;
+    bool                                     m_iteratingSections;
 
     QLinkedList<ProjectDocumentAction>      m_changes;
     mutable QLinkedList<ProjectDocumentAction>::iterator m_lastChange;
@@ -267,6 +336,30 @@ inline int ProjectDocument::totalBindings() const{
 
 inline bool ProjectDocument::hasBindings() const{
     return !m_bindings.isEmpty();
+}
+
+inline ProjectDocument::SectionIterator ProjectDocument::sectionsBegin(){
+    return m_sections.begin();
+}
+
+inline ProjectDocument::SectionIterator ProjectDocument::sectionsEnd(){
+    return m_sections.end();
+}
+
+inline ProjectDocument::SectionConstIterator ProjectDocument::sectionsBegin() const{
+    return m_sections.begin();
+}
+
+inline ProjectDocument::SectionConstIterator ProjectDocument::sectionsEnd() const{
+    return m_sections.end();
+}
+
+inline int ProjectDocument::totalSections() const{
+    return m_sections.size();
+}
+
+inline bool ProjectDocument::hasSections() const{
+    return totalSections() > 0;
 }
 
 inline void ProjectDocument::resetSync() const{

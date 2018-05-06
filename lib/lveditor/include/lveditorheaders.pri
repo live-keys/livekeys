@@ -29,4 +29,5 @@ HEADERS += \
     $$PWD/live/lveditorglobal.h \
     $$PWD/live/projectextension.h \
     $$PWD/live/editorglobalobject.h \
-    $$PWD/live/editorprivate_plugin.h
+    $$PWD/live/editorprivate_plugin.h \
+    $$PWD/live/livepalettelist.h

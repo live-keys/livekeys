@@ -34,6 +34,10 @@ public:
         Adjust
     };
 
+    enum SectionType{
+        Section = 1001
+    };
+
 public:
     DocumentEditFragment(CodeDeclaration::Ptr declaration, CodeConverter* converter = 0);
     virtual ~DocumentEditFragment();

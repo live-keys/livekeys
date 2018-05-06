@@ -19,11 +19,10 @@
 namespace lv{
 
 CodeDeclaration::CodeDeclaration(const QStringList &identifierChain, ProjectDocument *document)
-    : m_identifierPosition(-1)
+    : m_section(ProjectDocumentSection::create(CodeDeclaration::Section))
     , m_identifierLength(0)
     , m_identifierChain(identifierChain)
     , m_valueOffset(-1)
-    , m_valueLength(0)
     , m_document(document)
 {
 }
@@ -33,13 +32,12 @@ CodeDeclaration::CodeDeclaration(
         const QString &identifierType,
         const QStringList &parentType,
         ProjectDocument *document)
-    : m_identifierPosition(-1)
+    : m_section(ProjectDocumentSection::create(CodeDeclaration::Section))
     , m_identifierLength(0)
     , m_identifierChain(identifierChain)
     , m_type(identifierType)
     , m_parentType(parentType)
     , m_valueOffset(-1)
-    , m_valueLength(0)
     , m_document(document)
 {
 }
@@ -51,13 +49,12 @@ CodeDeclaration::CodeDeclaration(
         int identifierPosition,
         int identifierLength,
         ProjectDocument *document)
-    : m_identifierPosition(identifierPosition)
+    : m_section(ProjectDocumentSection::create(CodeDeclaration::Section, identifierPosition, identifierLength))
     , m_identifierLength(identifierLength)
     , m_identifierChain(identifierChain)
     , m_type(identifierType)
     , m_parentType(parentType)
     , m_valueOffset(-1)
-    , m_valueLength(0)
     , m_document(document)
 {
 }

@@ -29,7 +29,8 @@ HEADERS += \
     $$PWD/lveditorglobal.h \
     $$PWD/projectextension.h \
     $$PWD/editorglobalobject.h \
-    $$PWD/editorprivate_plugin.h
+    $$PWD/editorprivate_plugin.h \
+    $$PWD/livepalettelist.h
 
 SOURCES += \
     $$PWD/project.cpp \
@@ -59,4 +60,5 @@ SOURCES += \
     $$PWD/qmlobjectcodeserializer.cpp \
     $$PWD/projectextension.cpp \
     $$PWD/editorglobalobject.cpp \
-    $$PWD/editorprivate_plugin.cpp
+    $$PWD/editorprivate_plugin.cpp \
+    $$PWD/livepalettelist.cpp

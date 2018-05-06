@@ -35,4 +35,8 @@ export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
 
 DISTFILES += \
-    qml/DocumentFragment.qml
+    qml/DocumentFragment.qml \
+    palettes/IntHistoryPlotPalette.qml \
+    palettes/DoubleHistoryPlotPalette.qml \
+    qml/PaletteList.qml \
+    qml/RefactorList.qml

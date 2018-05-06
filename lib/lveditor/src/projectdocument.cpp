@@ -37,6 +37,7 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     : QObject(parent)
     , m_file(file)
     , m_editingDocument(0)
+    , m_iteratingSections(false)
     , m_lastChange(m_changes.end())
     , m_isDirty(false)
     , m_isSynced(true)
@@ -105,14 +106,14 @@ void ProjectDocument::updateBindings(int position, int charsRemoved, const QStri
 
         } else {
             // update other bindings positions
-            binding->declaration()->setIdentifierPosition(binding->position() - charsRemoved + charsAdded);
+            binding->declaration()->m_section->m_position = (binding->position() - charsRemoved + charsAdded);
 
 
             if ( charsRemoved > 0 && m_editingDocument && !binding->parentBlock() ){
                 QTextBlock block = m_editingDocument->findBlock(binding->position());
                 ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(block.userData());
                 if ( !bd ){
-                    bd = new ProjectDocumentBlockData;
+                     bd = new ProjectDocumentBlockData;
                     block.setUserData(bd);
                 }
                 bd->addBinding(binding);
@@ -123,6 +124,91 @@ void ProjectDocument::updateBindings(int position, int charsRemoved, const QStri
     }
 
     updateBindingBlocks(position, addedText);
+
+}
+
+/**
+ * @brief ProjectDocument::updateSections
+ *
+ * Sections are iterated in descending order from their position. If the text between a section changes,
+ * the textChanged handler is notified. If the handler requests an invalidation, invalidations are parsed
+ * at the end of the iteration, by looking up the m_setctionsToRemove list.
+ * @param position
+ * @param charsRemoved
+ * @param addedText
+ */
+void ProjectDocument::updateSections(bool engineChange, int position, int charsRemoved, const QString &addedText){
+    if ( m_sections.isEmpty() )
+        return;
+
+    // Invalidation scenario
+
+    m_iteratingSections = true;
+
+    int charsAdded = addedText.length();
+
+    ProjectDocument::SectionIterator it = m_sections.begin();
+    while( it != m_sections.end() ){
+        ProjectDocumentSection::Ptr& section = *it;
+        if ( section->position() + section->length() <= position )
+            break;
+
+        int sectionPosition = section->position();
+
+        // notify sections that have removed characters inside them
+        if ( section->isValid() ){
+            if ( charsRemoved > 0 &&
+                 position + charsRemoved > section->position() &&
+                 position < section->position() + section->length())
+            {
+                if ( section->m_textChangedHandler )
+                    section->m_textChangedHandler(engineChange, position, charsRemoved, addedText);
+                else
+                    section->invalidate();
+
+            } else if ( charsAdded > 0 &&
+                        position > section->position() &&
+                        position <= section->position() + section->length() )
+            {
+                if ( section->m_textChangedHandler )
+                    section->m_textChangedHandler(engineChange, position, charsRemoved, addedText);
+                else
+                    section->invalidate();
+
+            } else {
+                // update other bindings positions
+                section->m_position = section->position() - charsRemoved + charsAdded;
+
+                if ( charsRemoved > 0 && m_editingDocument && !section->parentBlock() ){
+                    QTextBlock block = m_editingDocument->findBlock(section->position());
+                    ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(block.userData());
+                    if ( !bd ){
+                        bd = new ProjectDocumentBlockData;
+                        block.setUserData(bd);
+                    }
+                    bd->addSection(section);
+                }
+            }
+        }
+
+        if ( !section->isValid() ){
+            it = m_sections.erase(it);
+
+            if ( m_editingDocument && m_editingDocumentHandler )
+                m_editingDocumentHandler->rehighlightBlock(m_editingDocument->findBlock(sectionPosition));
+        } else {
+            ++it;
+        }
+    }
+
+    m_iteratingSections = false;
+
+    while ( !m_sectionsToRemove.isEmpty() ){
+        ProjectDocumentSection::Ptr se = m_sectionsToRemove.takeLast();
+        removeSection(se);
+    }
+
+    updateSectionBlocks(position, addedText);
 
 }
 
@@ -187,6 +273,46 @@ void ProjectDocument::updateBindingBlocks(int position, const QString& addedText
     }
 }
 
+void ProjectDocument::updateSectionBlocks(int position, const QString &addedText){
+    if ( m_sections.size() > 0 &&
+         m_editingDocument &&
+       ( addedText.contains(QChar(QChar::ParagraphSeparator)) ||
+         addedText.contains(QChar(QChar::LineFeed))))
+    {
+        QTextBlock block = m_editingDocument->findBlock(position);
+        int blockEnd = block.position() + block.length();
+
+        // iterate current block, see if it has any binds, check if binds are before the end of the block
+        ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(block.userData());
+        if ( bd && bd->m_sections.size() > 0 ){
+            ProjectDocumentBlockData* bddestination = 0;
+            QTextBlock destinationBlock;
+
+            QLinkedList<ProjectDocumentSection::Ptr>::iterator seit = bd->m_sections.begin();
+            while ( seit != bd->m_sections.end() ){
+                ProjectDocumentSection::Ptr& itSection = *seit;
+
+                if ( itSection->position() >= blockEnd ){
+                    if ( !bddestination ){
+                        destinationBlock = m_editingDocument->findBlock(position + addedText.length());
+                        bddestination = static_cast<ProjectDocumentBlockData*>(destinationBlock.userData());
+                        if ( !bddestination ){
+                            bddestination = new ProjectDocumentBlockData;
+                            destinationBlock.setUserData(bddestination);
+                        }
+                    }
+                    seit = bd->m_sections.erase(seit);
+                    bddestination->addSection(itSection);
+                    m_editingDocumentHandler->rehighlightBlock(destinationBlock);
+                    continue;
+                }
+                ++seit;
+            }
+        }
+
+    }
+}
+
 QString ProjectDocument::getCharsRemoved(int position, int count){
     if ( count > 0 ){
         syncContent();
@@ -202,46 +328,59 @@ void ProjectDocument::assignEditingDocument(QTextDocument *doc, DocumentHandler*
     m_editingDocumentHandler = handler;
 }
 
-CodeRuntimeBinding *ProjectDocument::addNewBinding(CodeDeclaration::Ptr declaration){
-    if ( declaration->document() != this ){
+bool ProjectDocument::addNewBinding(CodeRuntimeBinding *binding){
+    if ( binding->declaration()->document() != this ){
         qCritical("Runtime binding requested on a different document.");
         return 0;
     }
 
     // bindings are added in descending order according to their position
     QLinkedList<CodeRuntimeBinding*>::iterator it = m_bindings.begin();
-    CodeRuntimeBinding* binding = 0;
     while( it != m_bindings.end() ){
         CodeRuntimeBinding* itBind = *it;
 
-        if ( itBind->position() < declaration->position() ){
-            binding = new CodeRuntimeBinding(declaration);
+        if ( itBind->position() < binding->position() ){
             break;
 
         // do not add the same binding
-        } else if ( itBind->position() == declaration->position() ){
-            return 0;
+        } else if ( itBind->position() == binding->position() ){
+            return false;
         }
         ++it;
     }
-    if ( it == m_bindings.end() ){
-        binding = new CodeRuntimeBinding(declaration);
-    }
     if ( binding ){
+        int bindingPosition = binding->position();
+        int bindingLength   = binding->length();
+        binding->declaration()->m_section = createSection(CodeRuntimeBinding::Section, bindingPosition, bindingLength);
+        binding->declaration()->m_section->setUserData(binding);
+        binding->declaration()->m_section->onTextChanged([this, binding](bool engineChange, int, int, const QString&){
+            if ( !engineChange ){
+                binding->declaration()->m_section->invalidate();
+                int bindingPosition = binding->position();
+                this->removeBindingAt(bindingPosition);
+            } else if ( m_editingDocumentHandler ){
+                if ( !m_editingDocumentHandler->editingStateIs(DocumentHandler::Runtime) ){
+                    binding->declaration()->m_section->invalidate();
+                    int bindingPosition = binding->position();
+                    this->removeBindingAt(bindingPosition);
+                }
+            }
+        });
+
         m_bindings.insert(it, binding);
-    }
 
-    if ( m_editingDocument && binding ){
-        QTextBlock bl = m_editingDocument->findBlock(declaration->position());
-        ProjectDocumentBlockData* blockdata = static_cast<ProjectDocumentBlockData*>(bl.userData());
-        if ( !blockdata ){
-            blockdata = new ProjectDocumentBlockData;
-            bl.setUserData(blockdata);
+        if ( m_editingDocument && binding ){
+            QTextBlock bl = m_editingDocument->findBlock(binding->position());
+            ProjectDocumentBlockData* blockdata = static_cast<ProjectDocumentBlockData*>(bl.userData());
+            if ( !blockdata ){
+                blockdata = new ProjectDocumentBlockData;
+                bl.setUserData(blockdata);
+            }
+            blockdata->addBinding(binding);
         }
-        blockdata->addBinding(binding);
     }
 
-    return binding;
+    return true;
 }
 
 void ProjectDocument::documentContentsChanged(
@@ -251,7 +390,8 @@ void ProjectDocument::documentContentsChanged(
         const QString &addedText)
 {
     updateMarkers(position, charsRemoved, addedText.size());
-    updateBindings(position, charsRemoved, addedText);
+//    updateBindings(position, charsRemoved, addedText);
+    updateSections(false, position, charsRemoved, addedText);
     bool hasPendingChange = m_changes.size() > 0 && m_changes.last().commited == false;
     bool isPendingChangeCompatible =
             hasPendingChange &&
@@ -295,6 +435,7 @@ void ProjectDocument::documentContentsSilentChanged(
         const QString &addedText)
 {
     updateMarkers(position, charsRemoved, addedText.size());
+    updateSections(true, position, charsRemoved, addedText);
     bool hasPendingChange = m_changes.size() > 0 && m_changes.last().commited == false;
     bool isPendingChangeCompatible = hasPendingChange && m_changes.last().position == position;
 
@@ -322,28 +463,28 @@ void ProjectDocument::documentContentsSilentChanged(
         m_changes.removeFirst();
     }
 
-    QLinkedList<CodeRuntimeBinding*>::iterator it = m_bindings.begin();
-    while( it != m_bindings.end() ){
-        CodeRuntimeBinding* binding = *it;
+//    QLinkedList<CodeRuntimeBinding*>::iterator it = m_bindings.begin();
+//    while( it != m_bindings.end() ){
+//        CodeRuntimeBinding* binding = *it;
 
-        if ( binding->position() <= position )
-            break;
+//        if ( binding->position() <= position )
+//            break;
 
-        binding->declaration()->setIdentifierPosition(binding->position() - charsRemoved + addedText.length());
+//        binding->declaration()->m_section->m_position = (binding->position() - charsRemoved + addedText.length());
 
-        if ( charsRemoved > 0 && !binding->parentBlock() ){
-            QTextBlock block = m_editingDocument->findBlock(binding->position());
-            ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(block.userData());
-            if ( !bd ){
-                bd = new ProjectDocumentBlockData;
-                block.setUserData(bd);
-            }
-            bd->addBinding(binding);
-        }
+//        if ( charsRemoved > 0 && !binding->parentBlock() ){
+//            QTextBlock block = m_editingDocument->findBlock(binding->position());
+//            ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(block.userData());
+//            if ( !bd ){
+//                bd = new ProjectDocumentBlockData;
+//                block.setUserData(bd);
+//            }
+//            bd->addBinding(binding);
+//        }
 
-        ++it;
-    }
-    updateBindingBlocks(position, addedText);
+//        ++it;
+//    }
+//    updateBindingBlocks(position, addedText);
 
     setIsDirty(true);
 
@@ -437,6 +578,91 @@ void ProjectDocument::updateBindingValue(CodeRuntimeBinding *binding, const QStr
     }
 }
 
+ProjectDocumentSection::Ptr ProjectDocument::createSection(int type, int position, int length){
+    ProjectDocumentSection::Ptr section = ProjectDocumentSection::create(this, type, position, length);
+
+    // sections are added in descending order according to their position
+    SectionIterator it = m_sections.begin();
+
+    while( it != m_sections.end() ){
+        ProjectDocumentSection::Ptr& itSection = *it;
+
+        if ( itSection->position() < section->position() )
+            break;
+
+        ++it;
+    }
+    m_sections.insert(it, section);
+
+    if ( m_editingDocument ){
+        QTextBlock bl = m_editingDocument->findBlock(section->position());
+        ProjectDocumentBlockData* blockdata = static_cast<ProjectDocumentBlockData*>(bl.userData());
+        if ( !blockdata ){
+            blockdata = new ProjectDocumentBlockData;
+            bl.setUserData(blockdata);
+        }
+        blockdata->addSection(section);
+    }
+
+    return section;
+}
+
+ProjectDocumentSection::Ptr ProjectDocument::sectionAt(int position){
+    SectionIterator it = m_sections.begin();
+    while( it != m_sections.end() ){
+        ProjectDocumentSection::Ptr& section = *it;
+        if ( section->position() == position )
+            return section;
+
+        if ( section->position() < position )
+            return ProjectDocumentSection::Ptr(0);
+
+        ++it;
+    }
+    return ProjectDocumentSection::Ptr(0);
+}
+
+bool ProjectDocument::removeSectionAt(int position){
+    SectionIterator it = m_sections.begin();
+    while( it != m_sections.end() ){
+        ProjectDocumentSection::Ptr& section = *it;
+
+        if ( section->position() == position ){
+            section->invalidate();
+            m_sections.erase(it);
+            return true;
+        }
+
+        if ( section->position() < position )
+            return false;
+
+        ++it;
+    }
+    return false;
+}
+
+void ProjectDocument::removeSection(ProjectDocumentSection::Ptr section){
+    int sectionPosition = section->position();
+    section->invalidate();
+    if ( m_iteratingSections ){
+        m_sectionsToRemove.append(section);
+    } else {
+        SectionIterator it = m_sections.begin();
+        while( it != m_sections.end() ){
+            ProjectDocumentSection::Ptr& currentSection = *it;
+            if ( currentSection.data() == section.data() ){
+                m_sections.erase(it);
+
+                if ( m_editingDocument && m_editingDocumentHandler )
+                    m_editingDocumentHandler->rehighlightBlock(m_editingDocument->findBlock(sectionPosition));
+
+                return;
+            }
+            ++it;
+        }
+    }
+}
+
 bool ProjectDocument::isActive() const{
     Project* prj = qobject_cast<Project*>(parent());
     if ( prj && prj->active() == this )
@@ -510,6 +736,9 @@ ProjectDocumentBlockData::~ProjectDocumentBlockData(){
     foreach ( CodeRuntimeBinding* binding, m_bindings ){
         binding->m_parentBlock = 0;
     }
+    foreach ( const ProjectDocumentSection::Ptr& section, m_sections ){
+        section->m_parentBlock = 0;
+    }
 }
 
 void ProjectDocumentBlockData::addBinding(CodeRuntimeBinding *binding){
@@ -521,6 +750,39 @@ void ProjectDocumentBlockData::removeBinding(CodeRuntimeBinding *binding){
     m_bindings.removeOne(binding);
     if ( binding->m_parentBlock == this )
         binding->m_parentBlock = 0;
+}
+
+ProjectDocumentSection::~ProjectDocumentSection(){
+}
+
+void ProjectDocumentSection::onTextChanged(std::function<void (bool, int, int, const QString&)> handler){
+    m_textChangedHandler = handler;
+}
+
+void ProjectDocumentSection::invalidate(){
+    m_position = -1;
+    if ( m_parentBlock )
+        m_parentBlock->removeSection(this);
+}
+
+void ProjectDocumentBlockData::addSection(ProjectDocumentSection::Ptr section){
+    section->m_parentBlock = this;
+    m_sections.append(section);
+}
+
+void ProjectDocumentBlockData::removeSection(ProjectDocumentSection::Ptr section){
+    removeSection(section.data());
+}
+
+void ProjectDocumentBlockData::removeSection(ProjectDocumentSection *section){
+    for ( auto it = m_sections.begin(); it != m_sections.end(); ++it ){
+        if ( it->data() == section ){
+            m_sections.erase(it);
+            return;
+        }
+    }
+    if ( section->m_parentBlock == this )
+        section->m_parentBlock = 0;
 }
 
 }// namespace

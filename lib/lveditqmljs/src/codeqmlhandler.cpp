@@ -671,7 +671,7 @@ CodeQmlHandler::CodeQmlHandler(
         QObject *parent)
     : AbstractCodeHandler(parent)
     , m_target(0)
-    , m_highlighter(new QmlJsHighlighter(settings, 0, 0))
+    , m_highlighter(new QmlJsHighlighter(settings, 0))
     , m_settings(settings)
     , m_engine(engine->engine())
     , m_completionContextFinder(new QmlCompletionContextFinder)
@@ -832,9 +832,9 @@ void CodeQmlHandler::assistCompletion(
         model->enable();
 }
 
-void CodeQmlHandler::setTarget(QTextDocument *target, DocumentHandlerState* state){
+void CodeQmlHandler::setTarget(QTextDocument *target){
     m_target      = target;
-    m_highlighter->setTarget(m_target, state);
+    m_highlighter->setTarget(m_target);
 }
 
 void CodeQmlHandler::setDocument(ProjectDocument *document){

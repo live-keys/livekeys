@@ -9,3 +9,4 @@ FragmentEditor   1.0 FragmentEditor.qml
 DocumentFragment 1.0 DocumentFragment.qml
 SuggestionBox    1.0 SuggestionBox.qml
 ContextMenuStyle 1.0 ContextMenuStyle.qml
+PaletteList      1.0 PaletteList.qml

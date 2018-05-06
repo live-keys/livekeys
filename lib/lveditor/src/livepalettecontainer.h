@@ -26,6 +26,9 @@ class QQmlComponent;
 namespace lv{
 
 class CodeConverter;
+class LivePalette;
+class LivePaletteList;
+class LivePaletteLoader;
 class LivePaletteContainerPrivate;
 class LV_EDITOR_EXPORT LivePaletteContainer{
 
@@ -39,6 +42,12 @@ public:
 
     CodeConverter* findPalette(const QString& type, const QString& object = "");
     CodeConverter* findPalette(const QString &type, const QStringList &object);
+
+    LivePaletteList* findPalettes(const QString& type, const QString& object = "");
+    LivePaletteList* findPalettes(const QString& type, const QStringList& object);
+
+    QString paletteName(LivePaletteLoader* loader);
+    LivePalette* createPalette(LivePaletteLoader* loader);
 
     int size() const;
 

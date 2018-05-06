@@ -37,6 +37,7 @@ class Project;
 class Engine;
 
 class LivePalette;
+class LivePaletteList;
 class LivePaletteContainer;
 
 class DocumentHandlerState;
@@ -45,7 +46,6 @@ class LV_EDITOR_EXPORT DocumentHandler : public QObject, public QQmlParserStatus
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QQuickTextDocument* target               READ target          WRITE setTarget  NOTIFY targetChanged)
-    Q_PROPERTY(lv::LivePalette* palette                 READ palette         NOTIFY paletteChanged)
     Q_PROPERTY(lv::CodeCompletionModel* completionModel READ completionModel CONSTANT)
 
 public:
@@ -70,8 +70,6 @@ public:
 
     CodeCompletionModel* completionModel() const;
 
-    LivePalette* palette();
-
     void addEditingState(EditingState type);
     void removeEditingState(EditingState state);
     bool editingStateIs(int flag);
@@ -86,6 +84,9 @@ public:
     void classBegin(){}
     void componentComplete();
 
+    bool addEditingPalette(DocumentEditFragment *palette);
+    void removeEditingPalette(DocumentEditFragment* palette);
+
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
@@ -96,25 +97,27 @@ public slots:
     void updateScope();
     void bind(int position, int length, QObject* object = 0);
     void unbind(int position, int length);
-    void edit(int position, QObject* currentApp = 0);
-    void adjust(int position, QObject* currentApp = 0);
+    lv::LivePaletteList *findPalettes(int position);
+    void openPalette(lv::LivePalette* palette, int position, QObject* currentApp = 0);
+    void removePalette(QObject* palette);
     void manageIndent(int from, int length, bool undo = false);
 
     lv::DocumentCursorInfo* cursorInfo(int position, int length);
     QJSValue contextBlockRange(int cursorPosition);
 
+    bool edit(int position, QObject* currentApp = 0);
     void commitEdit();
     void cancelEdit();
-    bool isEditing();
 
-    void paletteValueChanged();
+    void paletteValueChanged(DocumentEditFragment *editFragment);
 
 signals:
     void targetChanged();
     void cursorPositionRequest(int position);
     void contentsChangedManually();
-    void paletteChanged();
+    void paletteAboutToRemove(lv::LivePalette* palette);
     void fragmentLinesChanged(int lineStart, int lineEnd);
+    void editingStateChanged(bool isEditing);
 
 private:
     void readContent();
@@ -143,6 +146,9 @@ private:
     int m_fragmentEndLine;
 
     DocumentHandlerState* m_state;
+
+    QLinkedList<DocumentEditFragment*> m_palettes; // opened palettes
+    DocumentEditFragment*              m_editingFragment; // editing fragment
 };
 
 inline QQuickTextDocument *DocumentHandler::target(){

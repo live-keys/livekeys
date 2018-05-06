@@ -20,16 +20,22 @@
 #include <QSharedPointer>
 
 #include "live/lveditorglobal.h"
+#include "live/projectdocument.h"
 
 namespace lv{
-
-class ProjectDocument;
 
 class LV_EDITOR_EXPORT CodeDeclaration{
 
 public:
     typedef QSharedPointer<CodeDeclaration>       Ptr;
     typedef QSharedPointer<const CodeDeclaration> ConstPtr;
+
+    friend class ProjectDocument;
+    friend class DocumentHandler;
+
+    enum SectionType{
+        Section = 1000
+    };
 
 public:
     static CodeDeclaration::Ptr create(const QStringList& identifierChain, ProjectDocument* document = 0);
@@ -50,10 +56,7 @@ public:
 
     ~CodeDeclaration();
 
-    void setIdentifierPosition(int position);
     int identifierPosition() const;
-
-    void setIdentifierLength(int length);
     int identifierLength() const;
 
     int position() const;
@@ -93,7 +96,9 @@ private:
 private:
     Q_DISABLE_COPY(CodeDeclaration)
 
-    int         m_identifierPosition;
+
+    ProjectDocumentSection::Ptr m_section;
+
     int         m_identifierLength;
     QStringList m_identifierChain;
     QString     m_type;
@@ -101,21 +106,12 @@ private:
 
 
     int m_valueOffset;
-    int m_valueLength;
 
     ProjectDocument* m_document;
 };
 
-inline void CodeDeclaration::setIdentifierPosition(int position){
-    m_identifierPosition = position;
-}
-
 inline int CodeDeclaration::identifierPosition() const{
-    return m_identifierPosition;
-}
-
-inline void CodeDeclaration::setIdentifierLength(int length){
-    m_identifierLength = length;
+    return m_section->position();
 }
 
 inline int CodeDeclaration::identifierLength() const{
@@ -149,7 +145,7 @@ inline ProjectDocument *CodeDeclaration::document(){
 }
 
 inline int CodeDeclaration::length() const{
-    return m_identifierLength + m_valueOffset + m_valueLength;
+    return m_section->length();
 }
 
 inline int CodeDeclaration::valueOffset() const{
@@ -157,15 +153,17 @@ inline int CodeDeclaration::valueOffset() const{
 }
 
 inline void CodeDeclaration::setValuePositionOffset(int positionOffset){
+    int vl = valueLength();
     m_valueOffset = positionOffset;
+    m_section->resize(m_identifierLength + valueOffset() + vl);
 }
 
 inline int CodeDeclaration::valueLength() const{
-    return m_valueLength;
+    return m_section->length() - m_identifierLength - m_valueOffset;
 }
 
 inline void CodeDeclaration::setValueLength(int valueLength){
-    m_valueLength = valueLength;
+    m_section->resize(m_identifierLength + m_valueOffset + valueLength);
 }
 
 }// namespace

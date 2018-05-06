@@ -26,9 +26,9 @@ Rectangle{
     width: 250
     height: 280
     color: "#03070a"
-    property color selectionColor: "#091927"
     opacity: 0.95
 
+    property color selectionColor: "#091927"
     property alias suggestionCount : pluginList.count
     property alias model : pluginList.model
     property string fontFamily: 'Courier New, Courier'

@@ -8,6 +8,8 @@ QtObject{
     property FileDialog openDirDialog: null
     property var messageDialog: null
     property QtObject runSpace: null
+    property Item editSpace: null
     property Timer createTimer: null
-    property Item paletteBox: null
+//    property Item paletteBox: null
+    property Component paletteBoxFactory: null
 }

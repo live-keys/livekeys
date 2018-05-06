@@ -27,7 +27,7 @@ namespace lv{
 class LV_EDITOR_EXPORT CodeConverter : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(AbstractCodeSerializer* serialize READ serialize  WRITE setSerialize  NOTIFY serializeChanged)
+    Q_PROPERTY(AbstractCodeSerializer* serialize  READ serialize  WRITE setSerialize  NOTIFY serializeChanged)
     Q_PROPERTY(QString type                       READ type       WRITE setType       NOTIFY typeChanged)
     Q_PROPERTY(QString typeObject                 READ typeObject WRITE setTypeObject NOTIFY typeObjectChanged)
 
