@@ -223,6 +223,36 @@ QString DocumentQmlInfo::extractTypeName(const DocumentQmlInfo::ValueReference &
     return "";
 }
 
+void DocumentQmlInfo::extractTypeNameRange(const DocumentQmlInfo::ValueReference &valueref, int &begin, int &end){
+    if ( isValueNull(valueref) || valueref.parent != this ){
+        begin = -1;
+        end = -1;
+        return;
+    }
+
+    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
+        if ( vob->typeName() ){
+            begin = vob->typeName()->firstSourceLocation().begin();
+            end = vob->typeName()->lastSourceLocation().end();
+        }
+    }
+}
+
+void DocumentQmlInfo::extractRange(const DocumentQmlInfo::ValueReference &valueref, int &begin, int &end){
+    if ( isValueNull(valueref) || valueref.parent != this ){
+        begin = -1;
+        end = -1;
+        return;
+    }
+
+    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
+        if ( vob->initializer() ){
+            begin = vob->initializer()->firstSourceLocation().begin();
+            end = vob->initializer()->lastSourceLocation().end();
+        }
+    }
+}
+
 void DocumentQmlInfo::createRanges(){
     Q_D(DocumentQmlInfo);
     d->ranges(d->internalDoc);
@@ -264,6 +294,12 @@ const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueAtPosition(
 
     QmlJS::ObjectValue* value = d->internalDocBind->findQmlObject(range.ast);
     return DocumentQmlInfo::ValueReference(value, this);
+}
+
+const DocumentQmlInfo::ASTReference DocumentQmlInfo::astObjectAtPosition(int position){
+    Q_D(const DocumentQmlInfo);
+    DocumentQmlRanges::Range range = d->ranges.findClosestRange(position);
+    return DocumentQmlInfo::ASTReference(range.ast);
 }
 
 bool DocumentQmlInfo::isValueNull(const DocumentQmlInfo::ValueReference& vr) const{
@@ -329,6 +365,14 @@ DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects() const{
     Q_D(const DocumentQmlInfo);
     DocumentQmlValueObjects::Ptr objects = DocumentQmlValueObjects::create();
     objects->visit(d->internalDoc->ast());
+    return objects;
+}
+
+DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects(const DocumentQmlInfo::ASTReference &ast) const{
+    DocumentQmlValueObjects::Ptr objects = DocumentQmlValueObjects::create();
+    if ( ast.node ){
+        objects->visit(ast.node);
+    }
     return objects;
 }
 

@@ -33,6 +33,7 @@ class QTextCursor;
 namespace QmlJS{
     class Value;
     class Bind;
+    namespace AST{ class Node; }
 }
 
 namespace lv{
@@ -55,6 +56,14 @@ public:
 
         const QmlJS::Value* value;
         const DocumentQmlInfo* parent;
+    };
+
+    class ASTReference{
+    public:
+        ASTReference(QmlJS::AST::Node* n) : node(n){}
+        ASTReference() : node(0){}
+
+        QmlJS::AST::Node* node;
     };
 
     class Message{
@@ -109,10 +118,13 @@ public:
     const ValueReference valueForId(const QString& id) const;
     DocumentQmlObject extractValueObject(const ValueReference& value, ValueReference *parent = 0) const;
     QString extractTypeName(const ValueReference& value) const;
+    void extractTypeNameRange(const ValueReference& value, int& begin, int& end);
+    void extractRange(const ValueReference& value, int& begin, int& end);
 
     void createRanges();
     const ValueReference valueAtPosition(int position) const;
     const ValueReference valueAtPosition(int position, int& begin, int& end) const;
+    const ASTReference astObjectAtPosition(int position);
 
     bool isValueNull(const ValueReference &vr) const;
 
@@ -127,6 +139,7 @@ public:
     QString componentName() const;
 
     DocumentQmlValueObjects::Ptr createObjects() const;
+    DocumentQmlValueObjects::Ptr createObjects(const ASTReference& ast) const;
 
     static void syncBindings(const QString& source, ProjectDocument* document, QObject* root);
     static void syncBindings(
