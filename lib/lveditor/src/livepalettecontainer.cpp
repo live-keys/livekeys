@@ -230,7 +230,6 @@ LivePaletteList* LivePaletteContainer::findPalettes(const QString &type, const Q
 
     QHash<QString, LivePaletteLoader*>::iterator typeIt = it.value().begin();
     while ( typeIt != it.value().end() ){
-        qDebug() << typeIt.value()->path() << type;
         if ( typeIt.key() == "" || typeIt.key() == object )
             l->append(typeIt.value());
         ++typeIt;
