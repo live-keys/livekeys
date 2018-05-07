@@ -31,7 +31,8 @@ HEADERS += \
     $$PWD/qcvglobalobject.h \
     $$PWD/qimagefile.h \
     $$PWD/qvideocaptureserializer.h \
-    $$PWD/qoverlapmat.h
+    $$PWD/qoverlapmat.h \
+    $$PWD/qsharedmat.h
 
 SOURCES += \
     $$PWD/lcvcore_plugin.cpp \
@@ -64,5 +65,6 @@ SOURCES += \
     $$PWD/qcvglobalobject.cpp \
     $$PWD/qimagefile.cpp \
     $$PWD/qvideocaptureserializer.cpp \
-    $$PWD/qoverlapmat.cpp
+    $$PWD/qoverlapmat.cpp \
+    $$PWD/qsharedmat.cpp
 

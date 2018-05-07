@@ -40,7 +40,7 @@ public:
 public:
     explicit QMat(QObject *parent = 0);
     QMat(cv::Mat *mat, QObject *parent = 0);
-    ~QMat();
+    virtual ~QMat();
 
     cv::Mat* cvMat();
     const cv::Mat& data() const;
