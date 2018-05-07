@@ -27,7 +27,8 @@ HEADERS += \
     $$PWD/keymap.h \
     $$PWD/visuallogfilter.h \
     $$PWD/visuallogbasemodel.h \
-    $$PWD/typeinfo.h
+    $$PWD/typeinfo.h \
+    $$PWD/qmlengineinterceptor.h
 
 SOURCES += \
     $$PWD/exception.cpp \
@@ -54,6 +55,7 @@ SOURCES += \
     $$PWD/visuallogfilter.cpp \
     $$PWD/visuallogbasemodel.cpp \
     $$PWD/typeinfo.cpp \
+    $$PWD/qmlengineinterceptor.cpp
 
 win32{
     SOURCES += $$PWD/stacktrace_win.cpp

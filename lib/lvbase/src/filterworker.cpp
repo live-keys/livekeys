@@ -40,12 +40,19 @@ FilterWorker::~FilterWorker(){
     delete m_d;
 }
 
-void FilterWorker::postWork(const std::function<void ()> &fnc) {
-    QCoreApplication::postEvent(this, new FilterWorker::CallEvent(fnc));
+void FilterWorker::postWork(
+        const std::function<void ()> &fnc,
+        Filter::SharedDataLocker *locker)
+{
+    QCoreApplication::postEvent(this, new FilterWorker::CallEvent(fnc, locker));
 }
 
-void FilterWorker::postWork(const std::function<void ()> &fnc, const std::function<void ()> &cbk){
-    QCoreApplication::postEvent(this, new FilterWorker::CallEvent(fnc, cbk));
+void FilterWorker::postWork(
+        const std::function<void ()> &fnc,
+        const std::function<void ()> &cbk,
+        Filter::SharedDataLocker *locker)
+{
+    QCoreApplication::postEvent(this, new FilterWorker::CallEvent(fnc, cbk, locker));
 }
 
 void FilterWorker::start(){
@@ -57,11 +64,14 @@ bool FilterWorker::event(QEvent *ev){
         return QObject::event(ev);
 
     FilterWorker::CallEvent* ce = static_cast<FilterWorker::CallEvent*>(ev);
-    ce->callFilter();
-    delete ce->popLocker();
+        ce->callFilter();
 
     if ( ce->hasCallback() ){
+        // locker will be deleted in the callback
         m_d->postNotify(ce->callbackEvent());
+    } else {
+        // locker can be deleted now
+        delete ce->locker();
     }
 
     return true;
@@ -107,10 +117,8 @@ void FilterWorker::CallEvent::callFilter(){
     m_filter();
 }
 
-Filter::SharedDataLocker* FilterWorker::CallEvent::popLocker(){
-    Filter::SharedDataLocker* l = m_locker;
-    m_locker = 0;
-    return l;
+Filter::SharedDataLocker* FilterWorker::CallEvent::locker(){
+    return m_locker;
 }
 
 bool FilterWorker::CallEvent::hasCallback(){
@@ -118,7 +126,7 @@ bool FilterWorker::CallEvent::hasCallback(){
 }
 
 FilterWorker::CallEvent *FilterWorker::CallEvent::callbackEvent(){
-    return new FilterWorker::CallEvent(m_callback);
+    return new FilterWorker::CallEvent(m_callback, m_locker);
 }
 
 }// namespace

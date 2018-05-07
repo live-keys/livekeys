@@ -32,13 +32,27 @@ void Filter::use(
         const std::function<void ()> &cb,
         const std::function<void ()> &rs)
 {
-    if ( !workerThread() ){
+    if ( locker ){
+        if( !locker->m_allReserved ){
+            delete locker;
+            return;
+        }
+    }
+
+    if ( workerThread() ){
+        workerThread()->postWork(cb, rs, locker);
+    } else {
         cb();
         rs();
-    } else if ( locker && locker->m_allLocked ){
-        workerThread()->postWork(cb, rs);
+        delete locker;
     }
-    delete locker;
+}
+
+void Filter::SharedDataLocker::clearReservations(){
+    foreach ( SharedData* sd, m_readLocks )
+        sd->unlockReservation(m_filter);
+    foreach ( SharedData* sd, m_writeLocks )
+        sd->unlockReservation(m_filter);
 }
 
 }// namespace

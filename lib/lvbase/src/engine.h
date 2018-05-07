@@ -89,9 +89,9 @@ public:
         bool canLog
     );
 
-    TypeInfo::Ptr typeInfo(const QMetaObject *type);
-    TypeInfo::Ptr typeInfo(const QByteArray& typeName);
-    TypeInfo::Ptr typeInfo(const QMetaType& metaType);
+    TypeInfo::Ptr typeInfo(const QMetaObject *type) const;
+    TypeInfo::Ptr typeInfo(const QByteArray& typeName) const;
+    TypeInfo::Ptr typeInfo(const QMetaType& metaType) const;
 
 signals:
     void aboutToCreateObject(const QUrl& file);

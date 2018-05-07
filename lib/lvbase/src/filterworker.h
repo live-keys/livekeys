@@ -35,34 +35,44 @@ public:
     class CallEvent : public QEvent{
 
     public:
-       CallEvent(const std::function<void()>& filter, Filter::SharedDataLocker* locker = 0);
-       CallEvent(std::function<void()>&& filter, Filter::SharedDataLocker* locker = 0);
-       CallEvent(
+        CallEvent(
+            const std::function<void()>& filter,
+            Filter::SharedDataLocker* locker = 0);
+        CallEvent(
+            std::function<void()>&& filter,
+            Filter::SharedDataLocker* locker = 0);
+        CallEvent(
             const std::function<void()>& filter,
             const std::function<void()>& callCallback,
             Filter::SharedDataLocker* locker = 0);
-       CallEvent(
+        CallEvent(
             std::function<void()>&& filter,
             std::function<void()>&& callCallback,
             Filter::SharedDataLocker* locker = 0);
-       void callFilter();
-       Filter::SharedDataLocker *popLocker();
-       bool hasCallback();
+        void callFilter();
+        Filter::SharedDataLocker *locker();
+        bool hasCallback();
 
-       CallEvent* callbackEvent();
+        CallEvent* callbackEvent();
 
     private:
-       std::function<void()>     m_filter;
-       std::function<void()>     m_callback;
-       Filter::SharedDataLocker* m_locker;
+        std::function<void()>     m_filter;
+        std::function<void()>     m_callback;
+        Filter::SharedDataLocker* m_locker;
     };
 
 public:
     FilterWorker(QObject* parent = 0);
     virtual ~FilterWorker();
 
-    void postWork(const std::function<void()>& fnc);
-    void postWork(const std::function<void()>& fnc, const std::function<void()>& cbk);
+    void postWork(
+        const std::function<void()>& fnc,
+        Filter::SharedDataLocker* locker = 0);
+    void postWork(
+        const std::function<void()>& fnc,
+        const std::function<void()>& cbk,
+        Filter::SharedDataLocker* locker = 0
+    );
     void start();
 
     bool event(QEvent * ev);

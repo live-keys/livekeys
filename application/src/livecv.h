@@ -54,7 +54,7 @@ class CodeQmlHandler;
 class LiveCV : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lv::Settings*       settings READ settings CONSTANT)
+    Q_PROPERTY(lv::Settings*       settings       READ settings CONSTANT)
     Q_PROPERTY(lv::Engine*         engine         READ engine   CONSTANT)
     Q_PROPERTY(lv::Commands*       commands       READ commands       CONSTANT)
     Q_PROPERTY(lv::VisualLogModel* log            READ log            CONSTANT)

@@ -194,14 +194,14 @@ void Engine::setBindHook(std::function<void(const QString&, const QUrl&, QObject
 }
 
 
-TypeInfo::Ptr Engine::typeInfo(const QMetaObject *key){
+TypeInfo::Ptr Engine::typeInfo(const QMetaObject *key) const{
     auto it = m_types.find(key);
     if ( it == m_types.end() )
         return TypeInfo::Ptr(0);
     return it.value();
 }
 
-TypeInfo::Ptr Engine::typeInfo(const QByteArray &typeName){
+TypeInfo::Ptr Engine::typeInfo(const QByteArray &typeName) const{
     auto it = m_typeNames.find(typeName);
     if ( it == m_typeNames.end() )
         return TypeInfo::Ptr(0);
@@ -209,7 +209,7 @@ TypeInfo::Ptr Engine::typeInfo(const QByteArray &typeName){
     return m_types[*it];
 }
 
-TypeInfo::Ptr Engine::typeInfo(const QMetaType &metaType){
+TypeInfo::Ptr Engine::typeInfo(const QMetaType &metaType) const{
     const QMetaObject* mo = metaType.metaObject();
     if ( !mo )
         return TypeInfo::Ptr(0);

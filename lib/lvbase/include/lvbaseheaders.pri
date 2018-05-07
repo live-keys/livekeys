@@ -26,4 +26,5 @@ HEADERS += \
     $$PWD/live/keymap.h \
     $$PWD/live/visuallogfilter.h \
     $$PWD/live/visuallogbasemodel.h \
-    $$PWD/live/typeinfo.h
+    $$PWD/live/typeinfo.h \
+    $$PWD/live/qmlengineinterceptor.h

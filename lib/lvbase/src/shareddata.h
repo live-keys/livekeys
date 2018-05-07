@@ -20,6 +20,7 @@
 #include "live/lvbaseglobal.h"
 
 #include <QSet>
+#include <QDebug>
 
 class QObject;
 class QReadWriteLock;
@@ -36,22 +37,39 @@ public:
     SharedData();
     virtual ~SharedData();
 
-    bool lockForRead(Filter* filter);
-    bool lockForWrite(Filter* filter);
+    void unlockReservation(Filter* filter);
+    bool reserveForRead(Filter* filter);
+    bool reserveForWrite(Filter* filter);
 
-    void unlock(Filter* filter);
-
-    QReadWriteLock* lock();
+    bool hasLock();
     void createLock();
 
 private:
     void releaseObservers();
+
     QReadWriteLock* m_lock;
 
-    Filter*       m_writer;
-    QSet<Filter*> m_readers;
+    Filter*       m_reservedWriter;
+    QSet<Filter*> m_reserverdReaders;
     QSet<Filter*> m_observers;
 };
+
+inline bool SharedData::reserveForRead(Filter *filter){
+    if ( m_reservedWriter ){
+        return false;
+    }
+    m_reserverdReaders.insert(filter);
+    return true;
+}
+
+inline bool SharedData::reserveForWrite(Filter *filter){
+    if ( m_reserverdReaders.size() > 0 ){
+        m_observers.insert(filter);
+        return false;
+    }
+    m_reservedWriter = filter;
+    return true;
+}
 
 }// namespace
 

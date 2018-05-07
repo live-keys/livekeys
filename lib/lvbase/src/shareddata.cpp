@@ -22,7 +22,7 @@ namespace lv{
 
 SharedData::SharedData()
     : m_lock(0)
-    , m_writer(0)
+    , m_reservedWriter(0)
 {
 }
 
@@ -30,38 +30,19 @@ SharedData::~SharedData(){
     delete m_lock;
 }
 
-bool SharedData::lockForWrite(Filter *filter){
-    if ( m_readers.size() > 0 || m_writer ){
-        m_observers.insert(filter);
-        return false;
-    }
-
-    m_writer = filter;
-    return true;
-}
-
-void SharedData::unlock(Filter *filter){
-    if ( m_writer ){
-        m_writer = 0;
-        releaseObservers();
+void SharedData::unlockReservation(Filter *filter){
+    if ( m_reservedWriter ){
+        m_reservedWriter = 0;
+//        releaseObservers();
     } else {
-        m_readers.remove(filter);
-        if (m_readers.isEmpty() ){
+        m_reserverdReaders.remove(filter);
+        if (m_reserverdReaders.isEmpty() ){
             releaseObservers();
         }
     }
 }
 
-bool SharedData::lockForRead(Filter *filter){
-    if ( m_writer ){
-        m_observers.insert(filter);
-        return false;
-    }
-    m_readers.insert(filter);
-    return true;
-}
-
-QReadWriteLock *SharedData::lock(){
+bool SharedData::hasLock(){
     return m_lock;
 }
 

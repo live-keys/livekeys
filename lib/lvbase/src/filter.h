@@ -28,21 +28,58 @@ class FilterWorker;
 class LV_BASE_EXPORT Filter{
 
     typedef SharedData* SharedDataPtr;
+    typedef QObject*    QObjectPtr;
 
 public:
+    /**
+     * @brief The SharedDataLocker class
+     * Blocks resources according to the thread that's using them.
+     *
+     * For example, given 2 filters:
+     *   Fitler1{ reads ... / writes to: B, C} -- UI Thread
+     *   Filter2{ reads B, C / writes ... }    -- WK Thread
+     *
+     *   UI Thread reaches Filter2, Filter2 locks B, C for read and starts processing
+     *   UI Thread reaches Filter1 (Filter2 still processing) ==> UI Thread locks to B, C till
+     *   they are released
+     *
+     */
     class SharedDataLocker{
 
     private:
-        template<typename T> bool recurseReadSingle(const T&){
-            return true;
+        bool recurseReadSingle(const SharedDataPtr& sd){
+           // create lock if worker thread
+           if ( m_filter->workerThread() && !sd->hasLock())
+               sd->createLock();
+
+           // no lock => free to process
+           if ( !sd->hasLock() )
+               return true;
+
+           // reserve for read
+           if ( sd->reserveForRead(m_filter) ){
+               m_readLocks.append(sd);
+               return true;
+           }
+
+           return false;
         }
 
-       bool recurseReadSingle(const SharedDataPtr& sd){
-            if ( sd->lockForRead(m_filter)){
-                m_locks.append(sd);
-                return true;
-            }
-            return false;
+        bool recurseWriteSingle(const SharedDataPtr& sd){
+           // create lock if there's a worker thread
+           if ( m_filter->workerThread() && !sd->hasLock())
+               sd->createLock();
+
+           // if there's no lock we're free to process
+           if ( !sd->hasLock() )
+               return true;
+
+           // reserve for write
+           if ( sd->reserveForWrite(m_filter)){
+               m_writeLocks.append(sd);
+               return true;
+           }
+           return false;
         }
 
         template<typename T, typename... Args> bool recurseRead(const T& first){
@@ -60,14 +97,6 @@ public:
             return true;
         }
 
-        bool recurseWriteSingle(const SharedDataPtr& sd){
-            if ( sd->lockForWrite(m_filter)){
-                m_locks.append(sd);
-                return true;
-            }
-            return false;
-        }
-
         template<typename T, typename... Args> bool recurseWrite(const T& first){
             return recurseWriteSingle(first);
         }
@@ -81,39 +110,33 @@ public:
 
     public:
         template<typename... Args> SharedDataLocker* read(Args... args){
-            if ( !m_filter->workerThread() )
-                return this;
-
             if ( !recurseRead(args...) )
-                m_allLocked = false;
+                m_allReserved = false;
 
             return this;
         }
 
         template<typename... Args> SharedDataLocker* write(Args... args){
-            if ( !m_filter->workerThread() )
-                return this;
-
             if ( !recurseWrite(args...) )
-                m_allLocked = false;
+                m_allReserved = false;
 
             return this;
         }
 
         friend class Filter;
         friend class FilterWorker;
+        friend class FilterWorkerPrivate;
 
     private:
-        SharedDataLocker(Filter* filter) : m_filter(filter), m_allLocked(true){}
-        ~SharedDataLocker(){
-            for ( auto it = m_locks.begin(); it != m_locks.end(); ++it ){
-                (*it)->unlock(m_filter);
-            }
-        }
+        void clearReservations();
+
+        SharedDataLocker(Filter* filter) : m_filter(filter), m_allReserved(true){}
+        ~SharedDataLocker(){ clearReservations(); }
 
         Filter*            m_filter;
-        bool               m_allLocked;
-        QList<SharedData*> m_locks;
+        bool               m_allReserved;
+        QList<SharedData*> m_readLocks;
+        QList<SharedData*> m_writeLocks;
     };
 
 private:
@@ -140,6 +163,9 @@ public:
 
     SharedDataLocker* createLocker(){
         return new SharedDataLocker(this);
+    }
+    void deleteLocker(SharedDataLocker* locker){
+        delete locker;
     }
 
 };
