@@ -33,25 +33,29 @@
 #include "qerode.h"
 #include "qcopymakeborder.h"
 #include "qmatdraw.h"
+#include "qgetperspectivetransform.h"
+#include "qwarpperspective.h"
 
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
-    qmlRegisterType<QBlur>(               uri, 1, 0, "Blur");
-    qmlRegisterType<QCanny>(              uri, 1, 0, "Canny");
-    qmlRegisterType<QGaussianBlur>(       uri, 1, 0, "GaussianBlur");
-    qmlRegisterType<QHoughLines>(         uri, 1, 0, "HoughLines");
-    qmlRegisterType<QHoughLinesP>(        uri, 1, 0, "HoughLinesP");
-    qmlRegisterType<QSobel>(              uri, 1, 0, "Sobel");
-    qmlRegisterType<QCvtColor>(           uri, 1, 0, "CvtColor");
-    qmlRegisterType<QThreshold>(          uri, 1, 0, "Threshold");
-    qmlRegisterType<QChannelSelect>(      uri, 1, 0, "ChannelSelect");
-    qmlRegisterType<QStructuringElement>( uri, 1, 0, "StructuringElement");
-    qmlRegisterType<QMatResize>(          uri, 1, 0, "Resize");
-    qmlRegisterType<QFilter2D>(           uri, 1, 0, "Filter2D");
-    qmlRegisterType<QDilate>(             uri, 1, 0, "Dilate");
-    qmlRegisterType<QErode>(              uri, 1, 0, "Erode");
-    qmlRegisterType<QCopyMakeBorder>(     uri, 1, 0, "CopyMakeBorder");
-    qmlRegisterType<QMatDraw>(            uri, 1, 0, "MatDraw");
+    qmlRegisterType<QBlur>(                   uri, 1, 0, "Blur");
+    qmlRegisterType<QCanny>(                  uri, 1, 0, "Canny");
+    qmlRegisterType<QGaussianBlur>(           uri, 1, 0, "GaussianBlur");
+    qmlRegisterType<QHoughLines>(             uri, 1, 0, "HoughLines");
+    qmlRegisterType<QHoughLinesP>(            uri, 1, 0, "HoughLinesP");
+    qmlRegisterType<QSobel>(                  uri, 1, 0, "Sobel");
+    qmlRegisterType<QCvtColor>(               uri, 1, 0, "CvtColor");
+    qmlRegisterType<QThreshold>(              uri, 1, 0, "Threshold");
+    qmlRegisterType<QChannelSelect>(          uri, 1, 0, "ChannelSelect");
+    qmlRegisterType<QStructuringElement>(     uri, 1, 0, "StructuringElement");
+    qmlRegisterType<QMatResize>(              uri, 1, 0, "Resize");
+    qmlRegisterType<QFilter2D>(               uri, 1, 0, "Filter2D");
+    qmlRegisterType<QDilate>(                 uri, 1, 0, "Dilate");
+    qmlRegisterType<QErode>(                  uri, 1, 0, "Erode");
+    qmlRegisterType<QCopyMakeBorder>(         uri, 1, 0, "CopyMakeBorder");
+    qmlRegisterType<QMatDraw>(                uri, 1, 0, "MatDraw");
+    qmlRegisterType<QGetPerspectiveTransform>(uri, 1, 0, "GetPerspectiveTransform");
+    qmlRegisterType<QWarpPerspective>(        uri, 1, 0, "WarpPerspective");
 }
 
 

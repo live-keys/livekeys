@@ -42,7 +42,7 @@ Engine::Engine(QQmlEngine *engine, QObject *parent)
     , m_incubationController(new IncubationController)
 {
     m_engine->setIncubationController(m_incubationController);
-    m_engine->setOutputWarningsToStandardError(false);
+    m_engine->setOutputWarningsToStandardError(true);
     connect(m_engine, SIGNAL(warnings(QList<QQmlError>)), this, SLOT(engineWarnings(QList<QQmlError>)));
     m_errorType = m_engine->evaluate("Error");
 

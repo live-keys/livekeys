@@ -24,7 +24,15 @@
 #include "qstaticfilereader.h"
 #include "qtriangle.h"
 #include "qloglistener.h"
+#include "componentsource.h"
+#include "thread.h"
+#include "tuple.h"
+#include "tcpline.h"
+#include "tcpagent.h"
 #include "qvaluehistory.h"
+#include "stringbasedloader.h"
+#include "qmlobjectlist.h"
+#include "qmlvariantlist.h"
 
 #include "live/plugincontext.h"
 #include "live/visuallog.h"
@@ -39,16 +47,26 @@
 
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
-    qmlRegisterType<QLiveCVMain>(        uri, 1, 0, "Main");
-    qmlRegisterType<QTriangle>(          uri, 1, 0, "Triangle");
-    qmlRegisterType<QStaticLoader>(      uri, 1, 0, "StaticLoader");
-    qmlRegisterType<QFileReader>(        uri, 1, 0, "FileReader");
-    qmlRegisterType<QStaticFileReader>(  uri, 1, 0, "StaticFileReader");
-    qmlRegisterType<lv::VisualLogFilter>(uri, 1, 0, "VisualLogFilter");
-    qmlRegisterType<QLogListener>(       uri, 1, 0, "LogListener");
-    qmlRegisterType<QValueHistory>(      uri, 1, 0, "ValueHistory");
+    qmlRegisterType<QLiveCVMain>(          uri, 1, 0, "Main");
+    qmlRegisterType<QTriangle>(            uri, 1, 0, "Triangle");
+    qmlRegisterType<QStaticLoader>(        uri, 1, 0, "StaticLoader");
+    qmlRegisterType<QFileReader>(          uri, 1, 0, "FileReader");
+    qmlRegisterType<QStaticFileReader>(    uri, 1, 0, "StaticFileReader");
+    qmlRegisterType<lv::VisualLogFilter>(  uri, 1, 0, "VisualLogFilter");
+    qmlRegisterType<QLogListener>(         uri, 1, 0, "LogListener");
+    qmlRegisterType<QValueHistory>(        uri, 1, 0, "ValueHistory");
     qmlRegisterUncreatableType<QLicenseSettings>(
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
+    qmlRegisterType<lv::StringBasedLoader>(uri, 1, 0, "StringBasedLoader");
+    qmlRegisterType<lv::ComponentSource>(  uri, 1, 0, "ComponentSource");
+    qmlRegisterType<lv::Thread>(           uri, 1, 0, "Thread");
+    qmlRegisterType<lv::Tuple>(            uri, 1, 0, "Tuple");
+    qmlRegisterType<lv::TcpLine>(          uri, 1, 0, "TcpLine");
+    qmlRegisterType<lv::TcpAgent>(         uri, 1, 0, "TcpAgent");
+    qmlRegisterUncreatableType<lv::QmlObjectList>(
+        uri, 1, 0, "QmlObjectList", "QmlObjectList can only be created internally.");
+    qmlRegisterUncreatableType<lv::QmlVariantList>(
+        uri, 1, 0, "QmlVariantList", "QmlVariantList can only be created internally.");
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){

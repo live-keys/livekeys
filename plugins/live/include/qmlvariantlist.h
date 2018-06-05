@@ -1,0 +1,1 @@
+#include "../src/qmlvariantlist.h"

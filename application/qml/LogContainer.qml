@@ -58,6 +58,37 @@ Rectangle{
         }
     }
 
+    Timer{
+        id: searchTimer
+        interval: 1000
+        running: false
+        repeat: false
+        onTriggered: {
+            var logFilterActive = prefixSearchBox.text !== '' || logSearchBox.text !== '' || tagSearchBox.text
+            if ( logFilterActive ){
+                logFilter.source = livecv.log
+
+                var search = logSearchBox.text
+                if ( search.length > 1 && search.startsWith('/') && search.endsWith('/') ){
+                    search = new RegExp(search.substring(1, search.length - 1))
+                }
+
+                var prefixSearch = prefixSearchBox.text
+                if ( prefixSearch.length > 1 && prefixSearch.startsWith('/') && prefixSearch.endsWith('/') ){
+                    prefixSearch = new RegExp(prefixSearch.substring(1, prefixSearch.length - 1))
+                }
+
+                logFilter.search = search
+                logFilter.prefix = prefixSearch
+                logFilter.tag    = tagSearchBox.text
+                logList.model = logFilter
+            } else {
+                logList.model = livecv.log
+                logFilter.source = null
+            }
+        }
+    }
+
     Rectangle{
         id: logViewHeader
         width: parent.width
@@ -150,37 +181,6 @@ Rectangle{
                 width: parent.width
                 height: 1
                 color: "#273057"
-            }
-        }
-
-        Timer{
-            id: searchTimer
-            interval: 1000
-            running: false
-            repeat: false
-            onTriggered: {
-                var logFilterActive = prefixSearchBox.text !== '' || logSearchBox.text !== '' || tagSearchBox.text
-                if ( logFilterActive ){
-                    logFilter.source = livecv.log
-
-                    var search = logSearchBox.text
-                    if ( search.length > 1 && search.startsWith('/') && search.endsWith('/') ){
-                        search = new RegExp(search.substring(1, search.length - 1))
-                    }
-
-                    var prefixSearch = prefixSearchBox.text
-                    if ( prefixSearch.length > 1 && prefixSearch.startsWith('/') && prefixSearch.endsWith('/') ){
-                        prefixSearch = new RegExp(prefixSearch.substring(1, prefixSearch.length - 1))
-                    }
-
-                    logFilter.search = search
-                    logFilter.prefix = prefixSearch
-                    logFilter.tag    = tagSearchBox.text
-                    logList.model = logFilter
-                } else {
-                    logList.model = livecv.log
-                    logFilter.source = null
-                }
             }
         }
 

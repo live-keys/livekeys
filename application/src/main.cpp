@@ -37,7 +37,6 @@ int main(int argc, char *argv[]){
     QGuiApplication::setApplicationVersion(LiveCV::versionString());
 
     try{
-
         LiveCV::Ptr livecv = LiveCV::create(argc, argv);
         livecv->loadInternalPlugins();
 

@@ -17,7 +17,6 @@
 #include "qmat.h"
 #include <QQmlEngine>
 
-
 /*!
   \qmltype Mat
   \instantiates QMat

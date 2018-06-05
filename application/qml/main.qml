@@ -832,7 +832,7 @@ ApplicationWindow{
         id: logView
         visible: false
         isInWindow: false
-        width: parent.width
+        width: parent ? parent.width : 0
         height: 200
 
         onItemAdded: {
@@ -925,8 +925,9 @@ ApplicationWindow{
         anchors.topMargin: 9
         anchors.left: parent.left
         anchors.leftMargin: 14
+        visible: false
 
-        opacity: settings.launchMode ? 0.3 : 1.0
+        opacity: livecv.settings.launchMode ? 0.3 : 1.0
         source : "qrc:/images/logo.png"
     }
 

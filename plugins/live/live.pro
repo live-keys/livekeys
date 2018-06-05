@@ -8,8 +8,9 @@ DEFINES += Q_LIVE_LIB
 
 uri = live
 
-linkLocalLibrary(lvbase,   lvbase)
-linkLocalLibrary(lveditor, lveditor)
+linkLocalLibrary(lvbase,      lvbase)
+linkLocalLibrary(lveditor,    lveditor)
+linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 # Source
 
@@ -20,8 +21,3 @@ OTHER_FILES += \
     qml/*.qml \
     qml/qmldir \
     qml/plugins.qmltypes
-
-DISTFILES += \
-    qml/VisualLogView.qml \
-    qml/SliderLabel.qml
-

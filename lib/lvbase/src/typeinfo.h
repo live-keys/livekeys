@@ -43,6 +43,8 @@ public:
     void addConstructor(std::function<QObject*()> ctor);
     QObject* newInstance();
 
+    const QByteArray& name() const;
+
     bool isSerializable() const;
     void serialize(const QObject* object, lv::MLNode& node);
     void deserialize(const lv::MLNode& node, QObject* object);
@@ -110,6 +112,10 @@ inline QObject *TypeInfo::newInstance(){
     if ( m_constructor )
         return m_constructor();
     return 0;
+}
+
+inline const QByteArray &TypeInfo::name() const{
+    return m_name;
 }
 
 inline void TypeInfo::serialize(const QObject *object, MLNode &node){
