@@ -23,6 +23,8 @@
 #include <QAbstractUndoItem>
 #include <QTextBlockUserData>
 
+#include <functional>
+
 #include "live/lveditorglobal.h"
 
 #include <QDebug>

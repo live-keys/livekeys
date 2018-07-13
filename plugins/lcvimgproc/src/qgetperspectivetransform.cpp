@@ -37,7 +37,7 @@ QVariantList QGetPerspectiveTransform::itemList(lv::QmlVariantList *list){
 
 int QGetPerspectiveTransform::itemCount(lv::QmlVariantList *list){
     std::vector<cv::Point2f>* data = list->dataAs<std::vector<cv::Point2f> >();
-    return data->size();
+    return static_cast<int>(data->size());
 }
 
 QVariant QGetPerspectiveTransform::itemAt(lv::QmlVariantList *list, int index){
