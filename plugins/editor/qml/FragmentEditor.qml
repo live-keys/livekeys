@@ -644,7 +644,7 @@ Rectangle{
 
         DocumentHandler{
             id: codeHandler
-            target: editorArea.textDocument
+            // target: editorArea.textDocument
             onCursorPositionRequest : {
                 editorArea.forceActiveFocus()
                 editorArea.cursorPosition = position

@@ -41,6 +41,9 @@
 #include "live/documentqmlinfo.h"
 #include "live/plugininfoextractor.h"
 
+#include "../../lib/lveditor/3rdparty/textedit_p.h"
+#include "linenumbersurface.h"
+
 #include <QUrl>
 #include <QFileInfo>
 #include <QDir>
@@ -171,6 +174,10 @@ void LiveCV::loadQml(const QUrl &url){
 }
 
 void LiveCV::loadInternalPlugins(){
+    qmlRegisterType<TextEdit>("base", 1, 0, "NewTextEdit");
+    qmlRegisterType<LineNumberSurface>("base", 1, 0, "LineSurface");
+    qmlRegisterType<LineManager>("base", 1, 0, "LineManager");
+
     qmlRegisterType<lv::ErrorHandler>(
         "base", 1, 0, "ErrorHandler");
     qmlRegisterUncreatableType<lv::LiveCV>(

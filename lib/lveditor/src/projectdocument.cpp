@@ -36,7 +36,7 @@ namespace lv{
 ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *parent)
     : QObject(parent)
     , m_file(file)
-    , m_editingDocument(0)
+    //, m_editingDocument(0)
     , m_iteratingSections(false)
     , m_lastChange(m_changes.end())
     , m_isDirty(false)
@@ -44,12 +44,13 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     , m_isMonitored(isMonitored)
 {
     readContent();
+    m_editingDocument = new QTextDocument(this);
     m_file->setDocument(this);
 }
 
 void ProjectDocument::dumpContent(const QString &content){
     m_content = content;
-    emit contentChanged(0);
+    emit contentChanged(nullptr);
 }
 
 void ProjectDocument::readContent(){
@@ -59,7 +60,7 @@ void ProjectDocument::readContent(){
         m_changes.clear();
         m_lastChange = m_changes.end();
         m_isSynced = true;
-        emit contentChanged(0);
+        emit contentChanged(nullptr);
     }
 }
 
@@ -245,7 +246,7 @@ void ProjectDocument::updateBindingBlocks(int position, const QString& addedText
         // iterate current block, see if it has any binds, check if binds are before the end of the block
         ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(block.userData());
         if ( bd && bd->m_bindings.size() > 0 ){
-            ProjectDocumentBlockData* bddestination = 0;
+            ProjectDocumentBlockData* bddestination = nullptr;
             QTextBlock destinationBlock;
 
             QLinkedList<CodeRuntimeBinding*>::iterator bdit = bd->m_bindings.begin();
@@ -285,7 +286,7 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
         // iterate current block, see if it has any binds, check if binds are before the end of the block
         ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(block.userData());
         if ( bd && bd->m_sections.size() > 0 ){
-            ProjectDocumentBlockData* bddestination = 0;
+            ProjectDocumentBlockData* bddestination = nullptr;
             QTextBlock destinationBlock;
 
             QLinkedList<ProjectDocumentSection::Ptr>::iterator seit = bd->m_sections.begin();
@@ -321,10 +322,8 @@ QString ProjectDocument::getCharsRemoved(int position, int count){
     return "";
 }
 
-void ProjectDocument::assignEditingDocument(QTextDocument *doc, DocumentHandler* handler){
+void ProjectDocument::assignDocumentHandler(DocumentHandler* handler){
     syncContent();
-
-    m_editingDocument        = doc;
     m_editingDocumentHandler = handler;
 }
 
@@ -525,11 +524,11 @@ CodeRuntimeBinding *ProjectDocument::bindingAt(int position){
             return binding;
 
         if ( binding->position() < position )
-            return 0;
+            return nullptr;
 
         ++it;
     }
-    return 0;
+    return nullptr;
 }
 
 bool ProjectDocument::removeBindingAt(int position){
@@ -615,11 +614,11 @@ ProjectDocumentSection::Ptr ProjectDocument::sectionAt(int position){
             return section;
 
         if ( section->position() < position )
-            return ProjectDocumentSection::Ptr(0);
+            return ProjectDocumentSection::Ptr(nullptr);
 
         ++it;
     }
-    return ProjectDocumentSection::Ptr(0);
+    return ProjectDocumentSection::Ptr(nullptr);
 }
 
 bool ProjectDocument::removeSectionAt(int position){
@@ -692,7 +691,7 @@ bool ProjectDocument::saveAs(const QString &path){
         if ( parentAsProject()->lockedFileIO()->writeToFile(path, m_content ) ){
             ProjectFile* file = parentAsProject()->relocateDocument(m_file->path(), path, this);
             if ( file ){
-                m_file->setDocument(0);
+                m_file->setDocument(nullptr);
                 m_file = file;
                 emit fileChanged();
             }
@@ -717,10 +716,10 @@ void ProjectDocument::syncContent() const{
 }
 
 ProjectDocument::~ProjectDocument(){
-    if ( m_file->parent() == 0 )
+    if ( m_file->parent() == nullptr )
         m_file->deleteLater();
     else {
-        m_file->setDocument(0);
+        m_file->setDocument(nullptr);
     }
 }
 
@@ -732,12 +731,14 @@ void ProjectDocumentAction::redo(){
     parent->m_content.replace(position, charsRemoved.size(), charsAdded);
 }
 
+ProjectDocumentBlockData::ProjectDocumentBlockData() : m_collapseState(NoCollapse), numOfCollapsedLines(0) {}
+
 ProjectDocumentBlockData::~ProjectDocumentBlockData(){
     foreach ( CodeRuntimeBinding* binding, m_bindings ){
-        binding->m_parentBlock = 0;
+        binding->m_parentBlock = nullptr;
     }
     foreach ( const ProjectDocumentSection::Ptr& section, m_sections ){
-        section->m_parentBlock = 0;
+        section->m_parentBlock = nullptr;
     }
 }
 
@@ -749,7 +750,7 @@ void ProjectDocumentBlockData::addBinding(CodeRuntimeBinding *binding){
 void ProjectDocumentBlockData::removeBinding(CodeRuntimeBinding *binding){
     m_bindings.removeOne(binding);
     if ( binding->m_parentBlock == this )
-        binding->m_parentBlock = 0;
+        binding->m_parentBlock = nullptr;
 }
 
 ProjectDocumentSection::~ProjectDocumentSection(){
@@ -782,7 +783,7 @@ void ProjectDocumentBlockData::removeSection(ProjectDocumentSection *section){
         }
     }
     if ( section->m_parentBlock == this )
-        section->m_parentBlock = 0;
+        section->m_parentBlock = nullptr;
 }
 
 }// namespace

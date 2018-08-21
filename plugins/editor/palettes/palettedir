@@ -1,5 +1,3 @@
 int IntPalette.qml
-int IntHistoryPlotPalette.qml
-double DoubleHistoryPlotPalette.qml
 double DoublePalette.qml
 color ColorPalette.qml

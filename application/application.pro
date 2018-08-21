@@ -1,11 +1,10 @@
 TEMPLATE = app
 TARGET   = livecv
-QT      += qml quick
+QT      += qml quick quick-private qml-private
 
 linkLocalLibrary(lvbase,      lvbase)
 linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
-
 # Load library paths
 # ------------------
 

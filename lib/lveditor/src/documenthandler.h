@@ -29,10 +29,9 @@
 #include "live/documentcursorinfo.h"
 #include "live/abstractcodehandler.h"
 
-class QQuickTextDocument;
-
 namespace lv{
 
+class TextEdit;
 class Project;
 class Engine;
 
@@ -45,7 +44,6 @@ class LV_EDITOR_EXPORT DocumentHandler : public QObject, public QQmlParserStatus
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QQuickTextDocument* target               READ target          WRITE setTarget  NOTIFY targetChanged)
     Q_PROPERTY(lv::CodeCompletionModel* completionModel READ completionModel CONSTANT)
 
 public:
@@ -65,8 +63,8 @@ public:
     explicit DocumentHandler(QObject* parent = 0);
     ~DocumentHandler();
 
-    QQuickTextDocument *target();
-    void setTarget(QQuickTextDocument *target);
+    QTextDocument *target();
+    void setTarget(QTextDocument *target);
 
     CodeCompletionModel* completionModel() const;
 
@@ -86,6 +84,9 @@ public:
 
     bool addEditingPalette(DocumentEditFragment *palette);
     void removeEditingPalette(DocumentEditFragment* palette);
+
+    TextEdit* textEdit();
+    void setTextEdit(TextEdit* te);
 
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
@@ -127,7 +128,6 @@ private:
     void rehighlightSection(int position, int length);
 
     QChar                 m_lastChar;
-    QQuickTextDocument*   m_target;
     QTextDocument*        m_targetDoc;
     CodeCompletionModel*  m_completionModel;
     AbstractCodeHandler*  m_codeHandler;
@@ -139,6 +139,7 @@ private:
     Project*              m_project;
     Engine*               m_engine;
     QTimer                m_timer;
+    TextEdit*          m_textEdit;
 
     ProjectDocumentMarker::Ptr m_fragmentStart;
     ProjectDocumentMarker::Ptr m_fragmentEnd;
@@ -151,8 +152,8 @@ private:
     DocumentEditFragment*              m_editingFragment; // editing fragment
 };
 
-inline QQuickTextDocument *DocumentHandler::target(){
-    return m_target;
+inline QTextDocument *DocumentHandler::target(){
+    return m_targetDoc;
 }
 
 inline lv::CodeCompletionModel *DocumentHandler::completionModel() const{
@@ -183,6 +184,10 @@ inline void DocumentHandler::resetEditingState(){
 
 inline DocumentHandlerState *DocumentHandler::state(){
     return m_state;
+}
+
+inline TextEdit *DocumentHandler::textEdit(){
+    return m_textEdit;
 }
 
 inline void DocumentHandler::setIndentSize(int size){
