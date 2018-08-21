@@ -52,6 +52,8 @@ public:
         QList<QmlJS::Token>::ConstIterator it,
         int state);
 
+    static void collapse(const QTextBlock& tb, int& numLines, QString& replacement);
+
 protected:
     void highlightBlock(const QString &text);
     void highlightSection(const ProjectDocumentSection::Ptr& section, ProjectDocumentBlockData *blockData, bool& exceeded);

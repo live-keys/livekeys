@@ -1,6 +1,6 @@
 TEMPLATE = lib
 TARGET   = lveditor
-QT      += core qml quick
+QT      += core qml quick quick-private
 CONFIG  += qt
 
 linkLocalLibrary(lvbase, lvbase)
@@ -22,3 +22,4 @@ DEFINES += LV_EDITOR_LIB
 
 include($$PWD/src/lveditor.pri)
 include($$PWD/include/lveditorheaders.pri)
+include($$PWD/3rdparty/3rdparty.pri)

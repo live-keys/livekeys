@@ -138,7 +138,9 @@ public:
 class LV_EDITOR_EXPORT ProjectDocumentBlockData : public QTextBlockUserData{
 
 public:
-    ProjectDocumentBlockData(){}
+    enum CollapseState {NoCollapse, Collapse, Expand};
+
+    ProjectDocumentBlockData();
     ~ProjectDocumentBlockData();
 
     void addBinding(CodeRuntimeBinding* binding);
@@ -152,6 +154,10 @@ public:
     QLinkedList<ProjectDocumentSection::Ptr> m_exceededSections;
     QList<int> bracketPositions;
     QString    blockIdentifier;
+    CollapseState m_collapseState;
+    QString replacementString;
+    int numOfCollapsedLines;
+    std::function<void(const QTextBlock& tb, int& numLines, QString& replacement)> m_onCollapse;
 };
 
 
@@ -198,7 +204,7 @@ public:
 
     Project* parentAsProject();
 
-    void assignEditingDocument(QTextDocument* doc, DocumentHandler* handler);
+    void assignDocumentHandler(DocumentHandler* handler);
     QTextDocument* editingDocument();
 
     void documentContentsChanged(

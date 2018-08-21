@@ -317,6 +317,53 @@ int DocumentQmlValueScanner::getBlockExtent(int from){
     return -1;
 }
 
+int DocumentQmlValueScanner::getBlockEnd(QTextBlock &block, int position){
+    if ( !block.isValid() )
+        return 0;
+
+    int state = 0;
+    int nestingDepth = 0;
+
+    QmlJS::Scanner scanner;
+
+    while(true){
+        int blockState = block.userState();
+        if ( blockState < 0 ){
+            state = 0;
+        } else {
+            state = blockState & 15;
+        }
+
+        QList<QmlJS::Token> tokens = scanner(block.text(), state);
+        for ( auto it = tokens.begin(); it != tokens.end(); ++it ){
+            int tokenPosition = block.position() + it->offset;
+
+            if ( it->is(QmlJS::Token::LeftBrace) ||
+                 it->is(QmlJS::Token::LeftParenthesis) ||
+                 it->is(QmlJS::Token::LeftBracket ) )
+            {
+                if ( tokenPosition > position )
+                    ++nestingDepth;
+            } else if ( it->is(QmlJS::Token::RightBrace ) ||
+                        it->is(QmlJS::Token::RightBracket) ||
+                        it->is(QmlJS::Token::RightParenthesis) )
+            {
+                --nestingDepth;
+                if ( nestingDepth < 0 ){
+                    return tokenPosition;
+                }
+            }
+        }
+
+        block = block.next();
+        if ( !block.isValid() ){
+            return 0;
+        }
+    }
+
+    return 0;
+}
+
 int DocumentQmlValueScanner::findColonInTokenSet(const QList<QmlJS::Token> &tokens){
     for ( QList<QmlJS::Token>::ConstIterator it = tokens.begin(); it != tokens.end(); ++it ){
         if ( it->is(QmlJS::Token::Colon) ){
