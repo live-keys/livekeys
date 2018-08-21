@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVariant>
+#include <functional>
 #include "qliveglobal.h"
 
 namespace lv{
@@ -10,7 +11,7 @@ namespace lv{
 class Q_LIVE_EXPORT QmlVariantList : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QVariantList items READ items WRITE setItems CONSTANT)
+    Q_PROPERTY(QVariantList items READ items WRITE setItems)
 
 public:
     QmlVariantList(void* data,

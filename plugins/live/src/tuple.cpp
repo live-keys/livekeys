@@ -200,10 +200,6 @@ void Tuple::deserialize(Engine *engine, const MLNode &n, QVariant &v){
             QObject* ob = ti->newInstance();
             ti->deserialize(n, ob);
 
-            MLNode dsad;
-            ti->serialize(ob, dsad);
-            qDebug() << "back" << dsad.toString().substr(0, 200).c_str();
-
             v.setValue(ob);
         }
         break;

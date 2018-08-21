@@ -10,8 +10,8 @@ QGetPerspectiveTransform::QGetPerspectiveTransform(QObject *parent)
 }
 
 QGetPerspectiveTransform::~QGetPerspectiveTransform(){
-    delete m_src;
-    delete m_dst;
+//    delete m_src;
+//    delete m_dst;
     delete m_output;
 }
 
@@ -37,7 +37,7 @@ QVariantList QGetPerspectiveTransform::itemList(lv::QmlVariantList *list){
 
 int QGetPerspectiveTransform::itemCount(lv::QmlVariantList *list){
     std::vector<cv::Point2f>* data = list->dataAs<std::vector<cv::Point2f> >();
-    return data->size();
+    return static_cast<int>(data->size());
 }
 
 QVariant QGetPerspectiveTransform::itemAt(lv::QmlVariantList *list, int index){
@@ -76,21 +76,28 @@ void QGetPerspectiveTransform::assignItems(lv::QmlVariantList *list, QVariantLis
         data->push_back(cv::Point2f(p.x(), p.y()));
     }
 
+    //TODO: Change with connection
     QGetPerspectiveTransform* parent = qobject_cast<QGetPerspectiveTransform*>(list->parent());
     if ( parent )
         parent->process();
 }
 
 void QGetPerspectiveTransform::setSrc(lv::QmlVariantList *src){
+    //TODO: Change with connection
     src->setParent(this);
     m_src = src;
     emit srcChanged();
+
+    process();
 }
 
 void QGetPerspectiveTransform::setDst(lv::QmlVariantList *dst){
+    //TODO: Change with connection
     dst->setParent(this);
     m_dst = dst;
     emit dstChanged();
+
+    process();
 }
 
 lv::QmlVariantList *QGetPerspectiveTransform::createList(){

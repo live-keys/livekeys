@@ -14,10 +14,11 @@ HEADERS += \
     $$PWD/qsobel.h \
     $$PWD/qstructuringelement.h \
     $$PWD/qthreshold.h \
-    $$PWD/qmatdraw.h \ #\
+    $$PWD/qmatdraw.h \
     $$PWD/lcvimgproc_plugin.h \
     $$PWD/qgetperspectivetransform.h \
-    $$PWD/qwarpperspective.h
+    $$PWD/qwarpperspective.h \
+    $$PWD/qcachedwarpperspective.h
 #    $$PWD/qbilateralfilter.h
 
 SOURCES += \
@@ -37,8 +38,9 @@ SOURCES += \
     $$PWD/qsobel.cpp \
     $$PWD/qstructuringelement.cpp \
     $$PWD/qthreshold.cpp \
-    $$PWD/qmatdraw.cpp \ #\
+    $$PWD/qmatdraw.cpp \
     $$PWD/qgetperspectivetransform.cpp \
-    $$PWD/qwarpperspective.cpp
+    $$PWD/qwarpperspective.cpp \
+    $$PWD/qcachedwarpperspective.cpp
 #    $$PWD/qbilateralfilter.cpp
 

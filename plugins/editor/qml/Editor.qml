@@ -611,7 +611,7 @@ Rectangle{
                         text: qsTr("Paste")
                         shortcut: StandardKey.Paste
                         enabled: editorArea.canPaste
-                        onTriggered: editor.paste()
+                        onTriggered: editorArea.paste()
                     }
                 }
             }

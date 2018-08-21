@@ -18,6 +18,7 @@
 #define QCVGLOBALOBJECT_H
 
 #include <QObject>
+#include <QMatrix4x4>
 #include "qmat.h"
 
 class QCvGlobalObject : public QObject{
@@ -33,6 +34,7 @@ public:
 public slots:
     QVariantList matToArray(QMat* m);
     void assignArrayToMat(const QVariantList &a, QMat *m);
+    QMatrix4x4 matrix4x4(QMat* m);
 };
 
 inline QMat *QCvGlobalObject::nullMat() const{
