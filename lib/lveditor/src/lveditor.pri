@@ -1,4 +1,5 @@
-INCLUDEPATH += $$PWD
+INCLUDEPATH += $$PWD \
+               $$PWD/../3rdparty
 
 HEADERS += \
     $$PWD/project.h \
@@ -30,7 +31,10 @@ HEADERS += \
     $$PWD/projectextension.h \
     $$PWD/editorglobalobject.h \
     $$PWD/editorprivate_plugin.h \
-    $$PWD/livepalettelist.h
+    $$PWD/livepalettelist.h \
+    $$PWD/linemanager.h \
+    $$PWD/linenumbersurface.h \
+    $$PWD/collapsedsection.h
 
 SOURCES += \
     $$PWD/project.cpp \
@@ -61,4 +65,7 @@ SOURCES += \
     $$PWD/projectextension.cpp \
     $$PWD/editorglobalobject.cpp \
     $$PWD/editorprivate_plugin.cpp \
-    $$PWD/livepalettelist.cpp
+    $$PWD/livepalettelist.cpp \
+    $$PWD/linemanager.cpp \
+    $$PWD/linenumbersurface.cpp \
+    $$PWD/collapsedsection.cpp

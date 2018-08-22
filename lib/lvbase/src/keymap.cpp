@@ -239,7 +239,9 @@ QPair<quint32, quint32> KeyMap::splitKeyCode(KeyCode kc){
 }
 
 QString KeyMap::getKeyCodeDescription(KeyMap::KeyCode kc){
+
     auto split = splitKeyCode(kc); //TODO
+    Q_UNUSED(split)
     return "";
 }
 

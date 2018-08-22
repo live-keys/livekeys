@@ -1,4 +1,10 @@
-INCLUDEPATH += $$PWD
+INCLUDEPATH += $$PWD \
+               $$PWD/../../lib/lveditor/src \
+               $$PWD/../../lib/lveditor/include \
+               $$PWD/../../lib/lveditor/3rdparty
+
+QT      += qml quick quick-private qml-private
+
 
 HEADERS += \
     $$PWD/livecv.h \

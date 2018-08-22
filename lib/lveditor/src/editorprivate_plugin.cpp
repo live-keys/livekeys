@@ -31,6 +31,8 @@
 #include "live/editorglobalobject.h"
 #include "live/plugincontext.h"
 #include "live/keymap.h"
+#include "linenumbersurface.h"
+#include "linemanager.h"
 
 #include <QCoreApplication>
 #include <QQmlEngine>
@@ -39,6 +41,9 @@
 void EditorPrivatePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::DocumentHandler>(   uri, 1, 0, "DocumentHandler");
     qmlRegisterType<lv::DocumentCursorInfo>(uri, 1, 0, "DocumentCursorInfo");
+    qmlRegisterType<lv::TextEdit>(          uri, 1, 0, "NewTextEdit");
+    qmlRegisterType<lv::LineNumberSurface>( uri, 1, 0, "LineSurface");
+    qmlRegisterType<lv::LineManager>(       uri, 1, 0, "LineManager");
 
     qmlRegisterUncreatableType<lv::ProjectFileModel>(
         uri, 1, 0, "ProjectFileModel", "Cannot create a ProjectFileModel instance.");

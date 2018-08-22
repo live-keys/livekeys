@@ -5,7 +5,6 @@ QT      += qml quick
 linkLocalLibrary(lvbase,      lvbase)
 linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
-
 # Load library paths
 # ------------------
 
