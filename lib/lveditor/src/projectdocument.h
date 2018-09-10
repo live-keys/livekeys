@@ -22,11 +22,12 @@
 #include <QLinkedList>
 #include <QAbstractUndoItem>
 #include <QTextBlockUserData>
-#include <functional>
 
 #include <functional>
 
 #include "live/lveditorglobal.h"
+
+#include <QDebug>
 
 namespace lv{
 
@@ -134,6 +135,8 @@ public:
     bool    commited;
 };
 
+typedef std::function<void(const QTextBlock& tb, int& numLines, QString& replacement)> CollapseFunctionType;
+
 class LV_EDITOR_EXPORT ProjectDocumentBlockData : public QTextBlockUserData{
 
 public:
@@ -153,10 +156,27 @@ public:
     QLinkedList<ProjectDocumentSection::Ptr> m_exceededSections;
     QList<int> bracketPositions;
     QString    blockIdentifier;
+
+    void setCollapse(CollapseState state, CollapseFunctionType func);
+    CollapseState collapseState();
+    void setReplacementString(QString& string);
+    QString &replacementString();
+    void setNumOfCollapsedLines(int num);
+    int numOfCollapsedLines();
+    CollapseFunctionType onCollapse();
+    void setStateChangeFlag(bool value) {m_stateChangeFlag = value; }
+    bool stateChangeFlag() {return m_stateChangeFlag; }
+    void collapse() {m_collapseState = Expand; }
+    void expand() { m_collapseState = Collapse; }
+
+    void resetCollapseParams();
+
+private:
     CollapseState m_collapseState;
-    QString replacementString;
-    int numOfCollapsedLines;
-    std::function<void(const QTextBlock& tb, int& numLines, QString& replacement)> m_onCollapse;
+    QString m_replacementString;
+    int m_numOfCollapsedLines;
+    CollapseFunctionType m_onCollapse;
+    bool m_stateChangeFlag;
 };
 
 
@@ -190,7 +210,7 @@ public:
 
     lv::ProjectFile* file() const;
 
-    const QString& content() const;
+    QString content() const;
 
     void setIsDirty(bool isDirty);
     bool isDirty() const;
@@ -244,7 +264,7 @@ public:
     bool isActive() const;
 
 public slots:
-    void dumpContent(const QString& content);
+    void resetContent(const QString& content);
     void readContent();
     bool save();
     bool saveAs(const QString& path);
@@ -267,7 +287,7 @@ private:
     QString getCharsRemoved(int position, int count);
 
     ProjectFile*    m_file;
-    mutable QString m_content;
+    // mutable QString m_content;
     QDateTime       m_lastModified;
 
     QTextDocument*   m_editingDocument;
@@ -292,9 +312,9 @@ inline ProjectFile *ProjectDocument::file() const{
     return m_file;
 }
 
-inline const QString &ProjectDocument::content() const{
+inline QString ProjectDocument::content() const{
     syncContent();
-    return m_content;
+    return m_editingDocument->toPlainText();
 }
 
 inline void ProjectDocument::setIsDirty(bool isDirty){

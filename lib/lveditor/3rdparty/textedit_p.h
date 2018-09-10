@@ -339,8 +339,11 @@ Q_SIGNALS:
     Q_REVISION(6) void rightPaddingChanged();
     Q_REVISION(6) void bottomPaddingChanged();
     void dirtyBlockPosition(int pos);
+    void stateChangeSignal(int blockNum);
+    void textDocumentFinishedUpdating();
 
 public Q_SLOTS:
+    void singleShotUpdate();
     void selectAll();
     void selectWord();
     void select(int start, int end);
@@ -409,6 +412,7 @@ protected:
 
     friend class TextUtil;
     friend class LineNumberSurface;
+    friend class DocumentHandler;
 
 private:
     Q_DISABLE_COPY(TextEdit)

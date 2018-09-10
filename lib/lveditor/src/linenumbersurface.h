@@ -23,14 +23,16 @@ public:
 };
 
 class LV_EDITOR_EXPORT LineNumberSurface : public QQuickItem {
+
     Q_OBJECT
+    Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
 
 public:
     LineNumberSurface(QQuickItem *parent=nullptr);
     ~LineNumberSurface() override;
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData) Q_DECL_OVERRIDE;
 
-    Q_INVOKABLE void setComponents(TextEdit *te, LineManager *lm);
+    Q_INVOKABLE void setComponents(TextEdit *te);
 
     void updateSize();
     void linesAdded();
@@ -42,9 +44,16 @@ public:
     void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
     // void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
+    QColor color() const{ return m_color; }
+
 public Q_SLOTS:
-    void lineCountChanged();
     void setDirtyBlockPosition(int pos);
+    void textDocumentFinished();
+    void setColor(QColor color);
+
+signals:
+    void colorChanged(QColor color);
+
 private:
     Q_DISABLE_COPY(LineNumberSurface)
     // Q_DECLARE_PRIVATE(LineNumberSurface)
@@ -52,7 +61,6 @@ private:
     void init();
 
     TextEdit* textEdit;
-    QTextDocument* textEditDocument;
 
     // Document containing line numbers. Allows us to use pre-existing text rendering structure beneath.
     QTextDocument* lineDocument;
@@ -74,6 +82,8 @@ private:
     // character width used for calculating the width of the line surface
     int visibleWidth;
 
+    bool isInitialized;
+
     static inline int numberOfDigits(int i) {
         int res = 0;
         if (i < 10) return 2;
@@ -94,7 +104,17 @@ private:
     void testSetup1();
     void testSetup2();
 #endif
+    QColor m_color;
 };
+
+inline void LineNumberSurface::setColor(QColor color){
+    if (m_color == color)
+        return;
+
+    m_color = color;
+    emit colorChanged(color);
+    update();
+}
 
 
 }

@@ -36,7 +36,7 @@ namespace lv{
 ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *parent)
     : QObject(parent)
     , m_file(file)
-    //, m_editingDocument(0)
+    , m_editingDocument(new QTextDocument(this))
     , m_iteratingSections(false)
     , m_lastChange(m_changes.end())
     , m_isDirty(false)
@@ -44,18 +44,17 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     , m_isMonitored(isMonitored)
 {
     readContent();
-    m_editingDocument = new QTextDocument(this);
     m_file->setDocument(this);
 }
 
-void ProjectDocument::dumpContent(const QString &content){
-    m_content = content;
+void ProjectDocument::resetContent(const QString &content){
+    m_editingDocument->setPlainText(content);
     emit contentChanged(nullptr);
 }
 
 void ProjectDocument::readContent(){
     if ( m_file->path() != "" ){
-        m_content = parentAsProject()->lockedFileIO()->readFromFile(m_file->path());
+        m_editingDocument->setPlainText(parentAsProject()->lockedFileIO()->readFromFile(m_file->path()));
         m_lastModified = QFileInfo(m_file->path()).lastModified();
         m_changes.clear();
         m_lastChange = m_changes.end();
@@ -272,6 +271,7 @@ void ProjectDocument::updateBindingBlocks(int position, const QString& addedText
         }
 
     }
+
 }
 
 void ProjectDocument::updateSectionBlocks(int position, const QString &addedText){
@@ -285,6 +285,7 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
 
         // iterate current block, see if it has any binds, check if binds are before the end of the block
         ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(block.userData());
+
         if ( bd && bd->m_sections.size() > 0 ){
             ProjectDocumentBlockData* bddestination = nullptr;
             QTextBlock destinationBlock;
@@ -317,7 +318,10 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
 QString ProjectDocument::getCharsRemoved(int position, int count){
     if ( count > 0 ){
         syncContent();
-        return m_content.mid(position, count);
+        QTextCursor c(m_editingDocument);
+        c.setPosition(position);
+        c.setPosition(position + count, QTextCursor::MoveMode::KeepAnchor);
+        return c.selectedText();
     }
     return "";
 }
@@ -433,6 +437,7 @@ void ProjectDocument::documentContentsSilentChanged(
         int charsRemoved,
         const QString &addedText)
 {
+
     updateMarkers(position, charsRemoved, addedText.size());
     updateSections(true, position, charsRemoved, addedText);
     bool hasPendingChange = m_changes.size() > 0 && m_changes.last().commited == false;
@@ -449,7 +454,7 @@ void ProjectDocument::documentContentsSilentChanged(
             m_changes.last().commited = true;
         }
         m_changes.append(
-            ProjectDocumentAction(this, position, addedText, m_content.mid(position, charsRemoved), false)
+            ProjectDocumentAction(this, position, addedText, getCharsRemoved(position, charsRemoved), false)
         );
         if ( m_lastChange == m_changes.end() )
             --m_lastChange;
@@ -569,10 +574,10 @@ void ProjectDocument::updateBindingValue(CodeRuntimeBinding *binding, const QStr
             editCursor.insertText(value);
             editCursor.endEditBlock();
             m_editingDocumentHandler->removeEditingState(DocumentHandler::Runtime);
-        } else {
+        } /*else {
             m_content.replace(from, binding->declaration()->valueLength(), value);
             setIsDirty(true);
-        }
+        }*/
 
     }
 }
@@ -672,7 +677,7 @@ bool ProjectDocument::isActive() const{
 bool ProjectDocument::save(){
     syncContent();
     if ( m_file->path() != "" ){
-        if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path(), m_content ) ){
+        if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path(), m_editingDocument->toPlainText() ) ){
             setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
             if ( parentAsProject() )
@@ -688,7 +693,7 @@ bool ProjectDocument::saveAs(const QString &path){
         save();
     } else if ( path != "" ){
         syncContent();
-        if ( parentAsProject()->lockedFileIO()->writeToFile(path, m_content ) ){
+        if ( parentAsProject()->lockedFileIO()->writeToFile(path, m_editingDocument->toPlainText() ) ){
             ProjectFile* file = parentAsProject()->relocateDocument(m_file->path(), path, this);
             if ( file ){
                 m_file->setDocument(nullptr);
@@ -724,14 +729,15 @@ ProjectDocument::~ProjectDocument(){
 }
 
 void ProjectDocumentAction::undo(){
-    parent->m_content.replace(position, charsAdded.size(), charsRemoved);
+//    parent->m_content.replace(position, charsAdded.size(), charsRemoved);
 }
 
 void ProjectDocumentAction::redo(){
-    parent->m_content.replace(position, charsRemoved.size(), charsAdded);
+//    parent->m_content.replace(position, charsRemoved.size(), charsAdded);
 }
 
-ProjectDocumentBlockData::ProjectDocumentBlockData() : m_collapseState(NoCollapse), numOfCollapsedLines(0) {}
+ProjectDocumentBlockData::ProjectDocumentBlockData() : m_collapseState(NoCollapse), m_numOfCollapsedLines(0)
+    , m_stateChangeFlag(false) {}
 
 ProjectDocumentBlockData::~ProjectDocumentBlockData(){
     foreach ( CodeRuntimeBinding* binding, m_bindings ){
@@ -786,4 +792,39 @@ void ProjectDocumentBlockData::removeSection(ProjectDocumentSection *section){
         section->m_parentBlock = nullptr;
 }
 
-}// namespace
+void ProjectDocumentBlockData::setCollapse(CollapseState state, CollapseFunctionType func)
+{
+    m_collapseState = state;
+    m_onCollapse = func;
+
+}
+
+void ProjectDocumentBlockData::setNumOfCollapsedLines(int num)
+{
+    m_numOfCollapsedLines = num;
+}
+
+void ProjectDocumentBlockData::setReplacementString(QString &repl)
+{
+    m_replacementString = repl;
+}
+
+ProjectDocumentBlockData::CollapseState ProjectDocumentBlockData::collapseState() { return m_collapseState; }
+int ProjectDocumentBlockData::numOfCollapsedLines() { return m_numOfCollapsedLines; }
+CollapseFunctionType ProjectDocumentBlockData::onCollapse() { return m_onCollapse; }
+QString& ProjectDocumentBlockData::replacementString() { return m_replacementString; }
+
+void ProjectDocumentBlockData::resetCollapseParams()
+{
+    if (m_collapseState != Expand) {
+        if (m_collapseState != NoCollapse) m_stateChangeFlag = true;
+        m_collapseState = NoCollapse;
+        m_numOfCollapsedLines = 0;
+        m_onCollapse = nullptr;
+        m_replacementString = QString();
+    }
+
+}
+
+} // namespace
+

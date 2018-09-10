@@ -24,8 +24,15 @@ void LineRootNode::resetFrameDecorations(TextNode* newNode)
 
 LineNumberSurface::LineNumberSurface(QQuickItem *parent)
     : QQuickItem(parent)
+    , lineManager(new LineManager)
     , textEdit(nullptr), lineDocument(nullptr), prevLineNumber(0)
-    , lineNumber(0), lineNodes(), dirtyPos(0) {}
+    , lineNumber(0), lineNodes(), dirtyPos(0)
+    , isInitialized(false)
+    , m_color(QColor(255, 255, 255, 255))
+{
+    setFlag(QQuickItem::ItemHasContents, true);
+    lineManager->setLineSurface(this);
+}
 
 void LineNumberSurface::updateSize()
 {
@@ -39,11 +46,9 @@ void LineNumberSurface::updateSize()
     setImplicitSize(newWidth, newHeight);
 }
 
-void LineNumberSurface::setComponents(TextEdit* te, LineManager* lm)
+void LineNumberSurface::setComponents(TextEdit* te)
 {
     textEdit = te;
-    lineManager = lm;
-    lm->setLineSurface(this);
     init();
 }
 
@@ -73,30 +78,19 @@ QSGNode* LineNumberSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeDat
     if (numberOfDigits(prevLineNumber) != numberOfDigits(lineNumber)) dirtyPos = 0;
 
     // dirty fix for overlapping update bug - redraw everything if a line node is missing
-    if (oldNode && prevLineNumber != lineNodes.count())
+    /*if (oldNode && prevLineNumber != lineNodes.count())
     {
         dirtyPos = 0;
-    }
-
-    /*
-    qDebug() << "================";
-    for (auto it = lineDocument->rootFrame()->begin()
-            ; it != lineDocument->rootFrame()->end()
-            ; ++it)
-    {
-        qDebug() << it.currentBlock().blockNumber() << ": " << it.currentBlock().isVisible();
-    }
-    */
+    }*/
 
     if (!oldNode || dirtyPos != -1)
     {
         TextNode* node = new TextNode(this);
         node->setUseNativeRenderer(true);
         rootNode->resetFrameDecorations(node);
-        auto color = textEdit->getPriv()->color;
 
         frameDecorationsEngine = TextNodeEngine();
-        frameDecorationsEngine.setTextColor(color);
+        frameDecorationsEngine.setTextColor(m_color);
 
         QMatrix4x4 basePositionMatrix;
         rootNode->setMatrix(basePositionMatrix);
@@ -123,7 +117,7 @@ QSGNode* LineNumberSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeDat
             node = new TextNode(this);
             node->setUseNativeRenderer(true);
             engine = TextNodeEngine();
-            engine.setTextColor(color);
+            engine.setTextColor(m_color);
 
             QTextBlock block = it.currentBlock();
             it++;
@@ -138,7 +132,7 @@ QSGNode* LineNumberSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeDat
             QMatrix4x4 transformMatrix;
             transformMatrix.translate(static_cast<float>(nodeOffset.x()), static_cast<float>(nodeOffset.y()));
             node->setMatrix(transformMatrix);
-            engine.addTextBlock(lineDocument, block, -nodeOffset, color, QColor(), -1, -1);
+            engine.addTextBlock(lineDocument, block, -nodeOffset, m_color, QColor(), -1, -1);
             engine.addToSceneGraph(node, QQuickText::Normal, QColor());
             lineNodes.append(node);
             rootNode->appendChildNode(node);
@@ -154,18 +148,42 @@ QSGNode* LineNumberSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeDat
             block.layout()->engine()->resetFontEngineCache();
     }
 
+    if (!isInitialized && lineNumber != 0 && lineNodes.size() == lineNumber)
+    {
+        isInitialized = true;
+    }
+
     return rootNode;
 }
 
-void LineNumberSurface::lineCountChanged()
+void LineNumberSurface::textDocumentFinished()
 {
+    auto document = textEdit->documentHandler()->target();
     prevLineNumber = lineNumber;
-    lineNumber = textEditDocument->blockCount();
+    lineNumber = document->blockCount();
 
     deltaLineNumber = abs(prevLineNumber - lineNumber);
-
-    if (prevLineNumber < lineNumber) linesAdded();
-    else linesRemoved();
+    if (deltaLineNumber)
+    {
+        if (prevLineNumber < lineNumber) linesAdded();
+        else linesRemoved();
+    }
+    else
+    {
+        if (dirtyPos == -1)
+        {
+            dirtyPos = 0;
+            updateLineDocument();
+            return;
+        }
+        QTextBlock block = document->findBlockByNumber(dirtyPos);
+        auto userData = static_cast<ProjectDocumentBlockData*>(block.userData());
+        if (userData && userData->stateChangeFlag())
+        {
+            userData->setStateChangeFlag(false);
+            updateLineDocument();
+        }
+    }
 }
 
 #ifdef COLLAPSE_DEBUG
@@ -296,14 +314,14 @@ void LineNumberSurface::updateLineDocument()
     while (it != lineDocument->rootFrame()->end())
     {
         lv::ProjectDocumentBlockData* userData =
-                static_cast<lv::ProjectDocumentBlockData*>(textEditDocument->findBlockByNumber(curr).userData());
+                static_cast<lv::ProjectDocumentBlockData*>(textEdit->documentHandler()->target()->findBlockByNumber(curr).userData());
 
         bool visible = true;
         if (itSections != sections.end())
         {
             CollapsedSection* sec = (*itSections);
             if (curr == sec->position && userData
-                    && userData->m_collapseState == lv::ProjectDocumentBlockData::Expand)
+                    && userData->collapseState() == lv::ProjectDocumentBlockData::Expand)
             {
                 changeLastCharInBlock(curr, '>');
 
@@ -320,11 +338,11 @@ void LineNumberSurface::updateLineDocument()
 
         it.currentBlock().setVisible(visible);
         if (visible) {
-            if (userData && userData->m_collapseState == lv::ProjectDocumentBlockData::Collapse)
+            if (userData && userData->collapseState() == lv::ProjectDocumentBlockData::Collapse)
             {
                 changeLastCharInBlock(curr, 'v');
             }
-            else if (userData && userData->m_collapseState != lv::ProjectDocumentBlockData::Expand)
+            else if (userData && userData->collapseState() != lv::ProjectDocumentBlockData::Expand)
                 changeLastCharInBlock(curr, ' ');
 
             visibleWidth = it.currentBlock().length();
@@ -333,6 +351,7 @@ void LineNumberSurface::updateLineDocument()
     }
     auto firstDirtyBlock = lineDocument->findBlockByNumber(dirtyPos);
     lineDocument->markContentsDirty(firstDirtyBlock.position(), lineDocument->characterCount() - firstDirtyBlock.position());
+
 
 
     polish();
@@ -407,7 +426,7 @@ void LineNumberSurface::collapseLines(int pos, int num)
 {
     changeLastCharInBlock(pos, '>');
 
-    QTextBlock matchingBlock = textEditDocument->findBlockByNumber(pos);
+    QTextBlock matchingBlock = textEdit->documentHandler()->target()->findBlockByNumber(pos);
     // ProjectDocumentBlockData* userData = static_cast<ProjectDocumentBlockData*>(matchingBlock.userData());
     QString s = matchingBlock.text();
     // s+=userData->replacementString;
@@ -418,7 +437,7 @@ void LineNumberSurface::expandLines(int pos, int num)
 {
     changeLastCharInBlock(pos, 'v');
 
-    QTextBlock matchingBlock = textEditDocument->findBlockByNumber(pos);
+    QTextBlock matchingBlock = textEdit->documentHandler()->target()->findBlockByNumber(pos);
     // lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
     QString s = matchingBlock.text();
     // s.chop(userData->replacementString.length());
@@ -466,7 +485,6 @@ void LineNumberSurface::init() {
 #endif
     font = textEdit->font();
 
-    textEditDocument = textEdit->documentHandler()->target();
     lineDocument = new QTextDocument(this);
     lineDocument->setDefaultFont(font);
     QTextOption opt;
@@ -474,11 +492,16 @@ void LineNumberSurface::init() {
     opt.setTextDirection(Qt::LeftToRight);
     lineDocument->setDefaultTextOption(opt);
     setFlag(QQuickItem::ItemHasContents);
-    lineCountChanged();
+
+    dirtyPos = 0;
+    prevLineNumber = 0;
+    isInitialized = false;
+    textDocumentFinished();
 
 
-    QObject::connect(textEdit, &TextEdit::lineCountChanged, this, &LineNumberSurface::lineCountChanged);
     QObject::connect(textEdit, &TextEdit::dirtyBlockPosition, this, &LineNumberSurface::setDirtyBlockPosition);
+    QObject::connect(textEdit, &TextEdit::textDocumentFinishedUpdating, this, &LineNumberSurface::textDocumentFinished);
+
 
 
     setAcceptedMouseButtons(Qt::AllButtons);
@@ -496,23 +519,26 @@ void LineNumberSurface::mousePressEvent(QMouseEvent *event)
     QTextBlock block = lineDocument->findBlock(position);
     int blockNum = block.blockNumber();
 
-    QTextBlock matchingBlock = textEditDocument->findBlockByNumber(blockNum);
+    QTextBlock matchingBlock = textEdit->documentHandler()->target()->findBlockByNumber(blockNum);
     lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
     if (userData)
     {
-        if (userData->m_collapseState == lv::ProjectDocumentBlockData::Collapse)
+        if (userData->collapseState() == lv::ProjectDocumentBlockData::Collapse)
         {
-            userData->m_collapseState = lv::ProjectDocumentBlockData::Expand;
+            userData->collapse();
 #ifndef COLLAPSE_DEBUG
-            userData->m_onCollapse(matchingBlock, userData->numOfCollapsedLines, userData->replacementString);
+            int num; QString repl;
+            userData->onCollapse()(matchingBlock, num, repl);
+            userData->setNumOfCollapsedLines(num);
+            userData->setReplacementString(repl);
 #endif
-            lineManager->collapseLines(blockNum, userData->numOfCollapsedLines);
+            lineManager->collapseLines(blockNum, userData->numOfCollapsedLines());
         }
-        else if (userData->m_collapseState == lv::ProjectDocumentBlockData::Expand)
+        else if (userData->collapseState() == lv::ProjectDocumentBlockData::Expand)
         {
             std::string result;
-            userData->m_collapseState = lv::ProjectDocumentBlockData::Collapse;
-            lineManager->expandLines(blockNum, userData->numOfCollapsedLines);
+            userData->expand();
+            lineManager->expandLines(blockNum, userData->numOfCollapsedLines());
         }
 
     }

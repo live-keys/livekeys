@@ -114,9 +114,15 @@ void QmlJsHighlighter::collapse(const QTextBlock &tb, int &numLines, QString &re
         QmlJS::Token& tk = *it;
         if ( tk.kind == QmlJS::Token::LeftBrace ){
             QTextBlock bScan = tb;
-            DocumentQmlValueScanner::getBlockEnd(bScan, tb.position() + tk.end());
-            numLines = bScan.blockNumber() - tb.blockNumber();
+            if ( DocumentQmlValueScanner::getBlockEnd(bScan, tb.position() + tk.end()) == 0 )
+            {
+                numLines = tb.document()->blockCount() - tb.blockNumber();
+            } else {
+
+                numLines = bScan.blockNumber() - tb.blockNumber();
+            }
             replacement = "{ ... }";
+
             return;
         }
         ++it;
@@ -145,11 +151,15 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
     state = scanner.state();
 
 
+//    qDebug() << "highlighter triggered " << currentBlock().blockNumber();
+
     lv::ProjectDocumentBlockData *blockData =
             reinterpret_cast<lv::ProjectDocumentBlockData*>(currentBlock().userData());
     if (!blockData) {
         blockData = new lv::ProjectDocumentBlockData;
         currentBlock().setUserData(blockData);
+    } else {
+        blockData->resetCollapseParams();
     }
 
     QList<QmlJS::Token>::iterator it = tokens.begin();
@@ -188,8 +198,8 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
         case QmlJS::Token::RightParenthesis:
             break;
         case QmlJS::Token::LeftBrace:
-            blockData->m_collapseState = lv::ProjectDocumentBlockData::Collapse;
-            blockData->m_onCollapse = &QmlJsHighlighter::collapse;
+            blockData->setCollapse(lv::ProjectDocumentBlockData::Collapse, &QmlJsHighlighter::collapse);
+            blockData->setStateChangeFlag(true);
             break;
         case QmlJS::Token::RightBrace:
         case QmlJS::Token::LeftBracket:
@@ -207,6 +217,7 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
             setFormat(tk.begin(), tk.length, settings[QmlJsSettings::String]);
             break;
         }
+
 
         ++it;
     }

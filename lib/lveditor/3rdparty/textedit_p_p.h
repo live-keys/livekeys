@@ -46,6 +46,7 @@
 #include "documenthandler.h"
 #include <QtQml/qqml.h>
 #include <QtCore/qlist.h>
+#include <climits>
 
 class QTextLayout;
 
@@ -71,7 +72,8 @@ public:
         TextNode* textNode() const { return m_node; }
         void moveStartPos(int delta) { Q_ASSERT(m_startPos + delta > 0); m_startPos += delta; }
         int startPos() const { return m_startPos; }
-        void setDirty() { m_dirty = true; }
+        void setDirty() {
+            m_dirty = true; }
         bool dirty() const { return m_dirty; }
 
     private:
@@ -106,6 +108,8 @@ public:
         , textMargin(0.0), xoff(0), yoff(0)
         , font(sourceFont), documentHandler(nullptr), cursorComponent(nullptr), cursorItem(nullptr), document(nullptr),  control(nullptr)
         , lastSelectionStart(0), lastSelectionEnd(0), lineCount(0)
+        , lastHighlightChangeStart(INT_MAX)
+        , lastHighlightChangeEnd(0)
         , hAlign(TextEdit::AlignLeft), vAlign(TextEdit::AlignTop)
         , format(TextEdit::PlainText), wrapMode(TextEdit::NoWrap)
 #if defined(QT_QUICK_DEFAULT_TEXT_RENDER_TYPE)
@@ -119,6 +123,7 @@ public:
         , inputMethodHints(Qt::ImhNone)
 #endif
         , updateType(UpdatePaintNode)
+        , highlightingInProgress(false)
         , dirty(false), richText(false), cursorVisible(false), cursorPending(false)
         , focusOnPress(true), persistentSelection(false), requireImplicitWidth(false)
         , selectByMouse(false), canPaste(false), canPasteValid(false), hAlignImplicit(true)
@@ -138,7 +143,7 @@ public:
 
     void init();
     void setTextDocument(QTextDocument* d);
-
+    void unsetTextDocument();
     void resetInputMethod();
     void updateDefaultTextOption();
     void relayoutDocument();
@@ -201,6 +206,9 @@ public:
         UpdatePaintNode
     };
 
+    int lastHighlightChangeStart;
+    int lastHighlightChangeEnd;
+
     TextEdit::HAlignment hAlign;
     TextEdit::VAlignment vAlign;
     TextEdit::TextFormat format;
@@ -212,6 +220,8 @@ public:
     Qt::InputMethodHints inputMethodHints;
 #endif
     UpdateType updateType;
+
+    bool highlightingInProgress;
 
     bool dirty : 1;
     bool richText : 1;

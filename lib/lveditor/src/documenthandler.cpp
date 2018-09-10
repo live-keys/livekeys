@@ -37,6 +37,7 @@
 #include <QTimer>
 
 #include "textedit_p.h"
+#include "textedit_p_p.h"
 
 #include <QTextList>
 
@@ -401,16 +402,20 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue options){
         }
 
 
-        addEditingState(DocumentHandler::Read);
-        m_targetDoc->setPlainText(m_projectDocument->content());
         m_projectDocument->assignDocumentHandler(this);
-        removeEditingState(DocumentHandler::Read);
         updateFragments();
 
         connect(
             m_targetDoc, SIGNAL(contentsChange(int,int,int)),
             this, SLOT(documentContentsChanged(int,int,int))
         );
+    }
+    else
+    {
+        if (m_textEdit)
+        {
+            m_textEdit->setTextDocument(nullptr);
+        }
     }
 
     emit targetChanged();

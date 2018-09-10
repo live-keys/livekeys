@@ -8,11 +8,11 @@ namespace lv {
 
 class CollapsedSection;
 
-class LV_EDITOR_EXPORT LineManager: public QObject
-{
-private:
+class LV_EDITOR_EXPORT LineManager: public QObject{
+
     Q_OBJECT
 
+private:
     static bool before(int pos1, int num1, int pos2, int num2);
     static bool inside(int pos1, int num1, int pos2, int num2);
     static bool after(int pos1, int num1, int pos2, int num2);

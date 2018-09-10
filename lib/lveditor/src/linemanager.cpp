@@ -170,7 +170,10 @@ void LineManager::setLineSurface(LineNumberSurface* lns)
     myLineSurface = lns;
 }
 
-LineManager::LineManager(QObject *parent) : QObject(parent), myLineSurface(nullptr), sections() {}
+LineManager::LineManager(QObject *parent)
+    : QObject(parent), myLineSurface(nullptr), sections() {
+
+}
 
 LineManager::~LineManager() {}
 

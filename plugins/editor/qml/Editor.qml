@@ -48,7 +48,7 @@ Rectangle{
         codeHandler.setDocument(document)
     }
 
-    property color topColor: "#081019"
+    property color topColor: "#09121c"
 
     color : "#050b12"
     clip : true
@@ -254,7 +254,6 @@ Rectangle{
                 onClicked: livecv.commands.execute('window.toggleNavigation')
             }
         }
-
     }
 
     FontMetrics{
@@ -264,11 +263,41 @@ Rectangle{
 
     Rectangle{
         anchors.fill: parent
-        anchors.topMargin: 38
+        anchors.topMargin: 30
         color: editor.color
+
+        Rectangle{
+            id: lineSurfaceBackground
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            width: lineSurface.width
+            color: editor.topColor
+            clip: true
+
+            Flickable{
+                anchors.fill: parent
+                anchors.bottomMargin: 10
+                contentY: flick.flickableItem.contentY
+
+                LineSurface{
+                    id: lineSurface
+                    color: "#808691"
+                    Component.onCompleted: {
+                        setComponents(editorArea);
+                    }
+                }
+            }
+        }
 
         ScrollView {
             id: flick
+
+            anchors.fill: parent
+            anchors.topMargin: 5
+            anchors.leftMargin: 7 + lineSurfaceBackground.width
+            anchors.rightMargin: 3
+
             style: ScrollViewStyle {
                 transientScrollBars: false
                 handle: Item {
@@ -289,13 +318,9 @@ Rectangle{
                 }
                 decrementControl: null
                 incrementControl: null
-                frame: Rectangle{color: editor.color}
+                frame: Item{}
                 corner: Rectangle{color: editor.color}
             }
-
-            anchors.fill: parent
-            anchors.leftMargin: 7
-            anchors.rightMargin: 3
 
             frameVisible: false
 
@@ -312,252 +337,217 @@ Rectangle{
                     flickableItem.contentY = r.y + r.height - height + 20;
             }
 
-            Rectangle {
-                color: editor.color
-                width: lineSurface.width + editorArea.width + 20
-                height: editorArea.height + 20
-                Rectangle {
-                    visible: editor.document != null
-                    id: lineSurfaceContainer
-                    width: lineSurface.width
-                    height: lineSurface.height
-                    color: "#333333"
-                    LineSurface {
+            NewTextEdit {
+                id : editorArea
 
-                        id: lineSurface
-                        Component.onCompleted: {
-                            setComponents(editorArea, lineManager);
+                anchors.left: parent.left
+                anchors.leftMargin: 5
+
+                documentHandler: DocumentHandler {
+                    id: codeHandler
+                    // target: editorArea.textDocument
+                    onCursorPositionRequest : {
+                        editorArea.forceActiveFocus()
+                        editorArea.cursorPosition = position
+                    }
+                    onContentsChangedManually: {
+                        if ( project.active === editor.document )
+                        {
+                            editor.windowControls.createTimer.restart();
                         }
-
-
-                        /*MouseArea {
-                            anchors.fill:parent;
-                            onClicked: lineSurface.testFunction();
-                        }*/
+                    }
+                    onPaletteAboutToRemove: {
+                        for ( var i = 0; i < loadedPalettes.length; ++i ){
+                            if ( palette.item === loadedPalettes[i].paletteItem ){
+                                var lp = loadedPalettes[i]
+                                loadedPalettes.splice(i, 1)
+                                lp.destroy()
+                                return
+                            }
+                        }
+                    }
+                    onEditingStateChanged: {
+                        editor.isEditingSection = isEditing
                     }
                 }
 
-                LineManager {
-                    id: lineManager
+
+                property int lastLength: 0
+
+                onCursorRectangleChanged: {
+                    flick.ensureVisible(cursorRectangle)
+                }
+                onCursorPositionChanged: {
+                    /// disable the model if no text has changed, let the code handler decide otherwise
+                    if ( length === lastLength )
+                        codeHandler.completionModel.disable()
+                    lastLength = length
                 }
 
+                focus : true
 
-                NewTextEdit {
-                    id : editorArea
+                objectName: "editor"
 
+                property string objectCommandIndex : livecv.commands.add(editorArea, {
+                    'saveFile' : editor.save,
+                    'saveFileAs' : editor.saveAs,
+                    'closeFile' : editor.closeDocument,
+                    'assistCompletion' : editor.assistCompletion,
+                    'toggleSize' : editor.toggleSize
+                })
 
-                    anchors.left: lineSurfaceContainer.right
-                    anchors.leftMargin: 5
-                    x: lineSurfaceContainer.width
-                    y: 4
+                color : "#fff"
+                font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
+                font.pixelSize: livecv.settings.file('editor').fontSize
+                font.weight: Font.Normal
 
-                    documentHandler: DocumentHandler {
-                        id: codeHandler
-                        // target: editorArea.textDocument
-                        onCursorPositionRequest : {
-                            editorArea.forceActiveFocus()
-                            editorArea.cursorPosition = position
-                        }
-                        onContentsChangedManually: {
-                            if ( project.active === editor.document )
-                            {
-                                editor.windowControls.createTimer.restart();
-                            }
-                        }
-                        onPaletteAboutToRemove: {
-                            for ( var i = 0; i < loadedPalettes.length; ++i ){
-                                if ( palette.item === loadedPalettes[i].paletteItem ){
-                                    var lp = loadedPalettes[i]
-                                    loadedPalettes.splice(i, 1)
-                                    lp.destroy()
-                                    return
-                                }
-                            }
-                        }
-                        onEditingStateChanged: {
-                            editor.isEditingSection = isEditing
-                        }
-                    }
+                selectByMouse: true
+                mouseSelectionMode: NewTextEdit.SelectCharacters
+                selectionColor: "#3d4856"
 
+                textFormat: NewTextEdit.PlainText
 
-                    property int lastLength: 0
+                wrapMode: NewTextEdit.NoWrap
+                height : Math.max( flick.height - 20, paintedHeight )
+                width : Math.max( flick.width - 20, paintedWidth )
 
-                    onCursorRectangleChanged: {
-                        flick.ensureVisible(cursorRectangle)
-                    }
-                    onCursorPositionChanged: {
-                        /// disable the model if no text has changed, let the code handler decide otherwise
-                        if ( length === lastLength )
-                            codeHandler.completionModel.disable()
-                        lastLength = length
-                    }
+                readOnly: editor.document === null || editor.document.isMonitored
 
-                    focus : true
+                Keys.onPressed: {
+                    if ( (event.key === Qt.Key_BracketRight && (event.modifiers === Qt.ShiftModifier) ) ||
+                         (event.key === Qt.Key_BraceRight) ){
 
-                    objectName: "editor"
-
-                    property string objectCommandIndex : livecv.commands.add(editorArea, {
-                        'saveFile' : editor.save,
-                        'saveFileAs' : editor.saveAs,
-                        'closeFile' : editor.closeDocument,
-                        'assistCompletion' : editor.assistCompletion,
-                        'toggleSize' : editor.toggleSize
-                    })
-
-                    color : "#fff"
-                    font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
-                    font.pixelSize: livecv.settings.file('editor').fontSize
-                    font.weight: Font.Normal
-
-                    selectByMouse: true
-                    mouseSelectionMode: NewTextEdit.SelectCharacters
-                    selectionColor: "#3d4856"
-
-                    textFormat: NewTextEdit.PlainText
-
-                    wrapMode: NewTextEdit.NoWrap
-                    height : Math.max( flick.height - 20, paintedHeight )
-                    width : Math.max( flick.width - 20, paintedWidth )
-
-                    readOnly: editor.document === null || editor.document.isMonitored
-
-                    Keys.onPressed: {
-                        if ( (event.key === Qt.Key_BracketRight && (event.modifiers === Qt.ShiftModifier) ) ||
-                             (event.key === Qt.Key_BraceRight) ){
-
-                            if ( cursorPosition > 4 ){
-                                var clastpos = cursorPosition
-                                if( editorArea.text.substring(cursorPosition - 4, cursorPosition) === "    " ){
-                                    editorArea.text = editorArea.text.slice(0, clastpos - 4) + "}" + editorArea.text.slice(clastpos)
-                                    cursorPosition = clastpos - 3
-                                } else {
-                                    editorArea.text = editorArea.text.slice(0, clastpos) + "}" + editorArea.text.slice(clastpos)
-                                    cursorPosition = clastpos + 1
-                                }
-                            }
-                            event.accepted = true
-
-                        } else if ( event.key === Qt.Key_Return && (event.modifiers & Qt.ControlModifier) ){
-                            if ( editor.isEditingSection )
-                                codeHandler.commitEdit()
-                            event.accepted = true
-                        } else if ( event.key === Qt.Key_PageUp ){
-                            if ( codeHandler.completionModel.isEnabled ){
-                                qmlSuggestionBox.highlightPrevPage()
+                        if ( cursorPosition > 4 ){
+                            var clastpos = cursorPosition
+                            if( editorArea.text.substring(cursorPosition - 4, cursorPosition) === "    " ){
+                                editorArea.text = editorArea.text.slice(0, clastpos - 4) + "}" + editorArea.text.slice(clastpos)
+                                cursorPosition = clastpos - 3
                             } else {
-                                var lines = flick.height / cursorRectangle.height
-                                var prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 1)
-                                while ( --lines > 0 ){
-                                    cursorPosition   = prevLineStartPos + 1
-                                    prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 2)
-                                    if ( prevLineStartPos === -1 ){
-                                        cursorPosition = 0;
-                                        break;
-                                    }
+                                editorArea.text = editorArea.text.slice(0, clastpos) + "}" + editorArea.text.slice(clastpos)
+                                cursorPosition = clastpos + 1
+                            }
+                        }
+                        event.accepted = true
+
+                    } else if ( event.key === Qt.Key_Return && (event.modifiers & Qt.ControlModifier) ){
+                        if ( editor.isEditingSection )
+                            codeHandler.commitEdit()
+                        event.accepted = true
+                    } else if ( event.key === Qt.Key_PageUp ){
+                        if ( codeHandler.completionModel.isEnabled ){
+                            qmlSuggestionBox.highlightPrevPage()
+                        } else {
+                            var lines = flick.height / cursorRectangle.height
+                            var prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 1)
+                            while ( --lines > 0 ){
+                                cursorPosition   = prevLineStartPos + 1
+                                prevLineStartPos = editorArea.text.lastIndexOf('\n', cursorPosition - 2)
+                                if ( prevLineStartPos === -1 ){
+                                    cursorPosition = 0;
+                                    break;
                                 }
                             }
-                            event.accepted = true
-                        } else if ( event.key === Qt.Key_Tab ){
-                            if ( event.modifiers & Qt.ShiftModifier ){
-                                codeHandler.manageIndent(
-                                    editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart, true
-                                )
-                                event.accepted = true
-                            } else if ( selectionStart !== selectionEnd ){
-                                codeHandler.manageIndent(
-                                    editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart, false
-                                )
-                                event.accepted = true
-                            } else {
-                                var clastpost = cursorPosition
-                                editorArea.text = editorArea.text.slice(0, clastpost) + "    " + editorArea.text.slice(clastpost)
-                                editorArea.cursorPosition = clastpost + 4
-                                event.accepted = true
-                            }
-                        } else if ( event.key === Qt.Key_Backtab ){
+                        }
+                        event.accepted = true
+                    } else if ( event.key === Qt.Key_Tab ){
+                        if ( event.modifiers & Qt.ShiftModifier ){
                             codeHandler.manageIndent(
                                 editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart, true
                             )
                             event.accepted = true
-                        } else if ( event.key === Qt.Key_PageDown ){
-                            if ( codeHandler.completionModel.isEnabled ){
-                                qmlSuggestionBox.highlightNextPage()
-                            } else {
-                                var lines = flick.height / cursorRectangle.height
-                                var nextLineStartPos = editorArea.text.indexOf('\n', cursorPosition)
-                                while ( lines-- > 0 && nextLineStartPos !== -1 ){
-                                    cursorPosition   = nextLineStartPos + 1
-                                    nextLineStartPos = editorArea.text.indexOf('\n', cursorPosition)
-                                }
-                            }
-                            event.accepted = true
-                        } else if ( event.key === Qt.Key_Down ){
-                            if ( codeHandler.completionModel.isEnabled ){
-                                event.accepted = true
-                                qmlSuggestionBox.highlightNext()
-                            }
-                        } else if ( event.key === Qt.Key_Up ){
-                            if ( codeHandler.completionModel.isEnabled ){
-                                event.accepted = true
-                                qmlSuggestionBox.highlightPrev()
-                            }
-                        } else if ( event.key === Qt.Key_Escape ){
-                            if ( editor.loadedPalettes.length > 0 ){
-
-                                var last = editor.loadedPalettes[editor.loadedPalettes.length - 1]
-                                codeHandler.removePalette(last.paletteItem)
-
-                            } else if ( codeHandler.isEditing() ){
-                                codeHandler.cancelEdit()
-                            }
-
-                            codeHandler.completionModel.disable()
-                        } else {
-                            var command = livecv.keymap.locateCommand(event.key, event.modifiers)
-                            if ( command !== '' ){
-                                livecv.commands.execute(command)
-                                event.accepted = true
-                            }
-                        }
-                    }
-
-                    Keys.onReturnPressed: {
-                        event.accepted = false
-                        if ( codeHandler.completionModel.isEnabled ){
-                            codeHandler.insertCompletion(
-                                codeHandler.completionModel.completionPosition,
-                                cursorPosition,
-                                qmlSuggestionBox.getCompletion()
+                        } else if ( selectionStart !== selectionEnd ){
+                            codeHandler.manageIndent(
+                                editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart, false
                             )
                             event.accepted = true
+                        } else {
+                            var clastpost = cursorPosition
+                            editorArea.text = editorArea.text.slice(0, clastpost) + "    " + editorArea.text.slice(clastpost)
+                            editorArea.cursorPosition = clastpost + 4
+                            event.accepted = true
                         }
-                    }
-
-                    Behavior on font.pixelSize {
-                        NumberAnimation { duration: 40 }
-                    }
-
-                    Connections{
-                        target: project.documentModel
-                        onAboutToClose: {
-                            if ( document === editor.document ){
-                                editor.document = null
+                    } else if ( event.key === Qt.Key_Backtab ){
+                        codeHandler.manageIndent(
+                            editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart, true
+                        )
+                        event.accepted = true
+                    } else if ( event.key === Qt.Key_PageDown ){
+                        if ( codeHandler.completionModel.isEnabled ){
+                            qmlSuggestionBox.highlightNextPage()
+                        } else {
+                            var lines = flick.height / cursorRectangle.height
+                            var nextLineStartPos = editorArea.text.indexOf('\n', cursorPosition)
+                            while ( lines-- > 0 && nextLineStartPos !== -1 ){
+                                cursorPosition   = nextLineStartPos + 1
+                                nextLineStartPos = editorArea.text.indexOf('\n', cursorPosition)
                             }
                         }
-                    }
+                        event.accepted = true
+                    } else if ( event.key === Qt.Key_Down ){
+                        if ( codeHandler.completionModel.isEnabled ){
+                            event.accepted = true
+                            qmlSuggestionBox.highlightNext()
+                        }
+                    } else if ( event.key === Qt.Key_Up ){
+                        if ( codeHandler.completionModel.isEnabled ){
+                            event.accepted = true
+                            qmlSuggestionBox.highlightPrev()
+                        }
+                    } else if ( event.key === Qt.Key_Escape ){
+                        if ( editor.loadedPalettes.length > 0 ){
 
-                    MouseArea{
-                        anchors.fill: parent
-                        cursorShape: Qt.IBeamCursor
-                        acceptedButtons: Qt.RightButton
-                        onClicked: {
-                            if (editorArea.selectionStart === editorArea.selectionEnd)
-                                editorArea.cursorPosition = editorArea.positionAt(mouse.x, mouse.y)
-                            contextMenu.popup()
-                            forceActiveFocus()
+                            var last = editor.loadedPalettes[editor.loadedPalettes.length - 1]
+                            codeHandler.removePalette(last.paletteItem)
+
+                        } else if ( codeHandler.isEditing() ){
+                            codeHandler.cancelEdit()
+                        }
+
+                        codeHandler.completionModel.disable()
+                    } else {
+                        var command = livecv.keymap.locateCommand(event.key, event.modifiers)
+                        if ( command !== '' ){
+                            livecv.commands.execute(command)
+                            event.accepted = true
                         }
                     }
+                }
 
+                Keys.onReturnPressed: {
+                    event.accepted = false
+                    if ( codeHandler.completionModel.isEnabled ){
+                        codeHandler.insertCompletion(
+                            codeHandler.completionModel.completionPosition,
+                            cursorPosition,
+                            qmlSuggestionBox.getCompletion()
+                        )
+                        event.accepted = true
+                    }
+                }
+
+                Behavior on font.pixelSize {
+                    NumberAnimation { duration: 40 }
+                }
+
+                Connections{
+                    target: project.documentModel
+                    onAboutToClose: {
+                        if ( document === editor.document ){
+                            editor.document = null
+                        }
+                    }
+                }
+
+                MouseArea{
+                    anchors.fill: parent
+                    cursorShape: Qt.IBeamCursor
+                    acceptedButtons: Qt.RightButton
+                    onClicked: {
+                        if (editorArea.selectionStart === editorArea.selectionEnd)
+                            editorArea.cursorPosition = editorArea.positionAt(mouse.x, mouse.y)
+                        contextMenu.popup()
+                        forceActiveFocus()
+                    }
                 }
 
                 Menu {
@@ -681,10 +671,7 @@ Rectangle{
                         onTriggered: editorArea.paste()
                     }
                 }
-
             }
-
-
         }
 
         SuggestionBox{

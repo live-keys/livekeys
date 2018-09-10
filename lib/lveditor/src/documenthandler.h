@@ -139,7 +139,7 @@ private:
     Project*              m_project;
     Engine*               m_engine;
     QTimer                m_timer;
-    TextEdit*          m_textEdit;
+    TextEdit*             m_textEdit;
 
     ProjectDocumentMarker::Ptr m_fragmentStart;
     ProjectDocumentMarker::Ptr m_fragmentEnd;
