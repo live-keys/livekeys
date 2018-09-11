@@ -95,9 +95,9 @@ void EditorPrivatePlugin::initializeEngine(QQmlEngine *engine, const char *){
         keymap->store(0, Qt::Key_E,         lv::KeyMap::CONTROL_OR_COMMAND, "window.editor.toggleSize");
         keymap->store(0, Qt::Key_K,         lv::KeyMap::CONTROL_OR_COMMAND, "window.toggleNavigation");
         keymap->store(0, Qt::Key_L,         lv::KeyMap::CONTROL_OR_COMMAND, "window.toggleLog");
-        keymap->store(0, Qt::Key_BracketLeft,  lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.addHorizontalEditorView");
-        keymap->store(0, Qt::Key_BracketLeft,  lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt,   "window.addHorizontalFragmentEditorView");
-        keymap->store(0, Qt::Key_BracketRight, lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.removeHorizontalEditorView");
+        keymap->store(0, Qt::Key_BraceLeft, lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.addHorizontalEditorView");
+        keymap->store(0, Qt::Key_BraceLeft, lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt,   "window.addHorizontalFragmentEditorView");
+        keymap->store(0, Qt::Key_BraceRight,lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.removeHorizontalEditorView");
 
         keymap->store(lv::KeyMap::Linux,    Qt::Key_Space, lv::KeyMap::Control, "window.editor.assistCompletion");
         keymap->store(lv::KeyMap::Windows,  Qt::Key_Space, lv::KeyMap::Control, "window.editor.assistCompletion");

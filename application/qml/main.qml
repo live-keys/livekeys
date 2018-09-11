@@ -460,7 +460,6 @@ ApplicationWindow{
             var editorObject = editorFactory.createObject(0)
             editorObject.height = mainHorizontalSplit.height
 
-
             var projectViewWidth = projectView.width
             var viewerWidth = viewer.width
 
