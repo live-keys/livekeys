@@ -343,6 +343,7 @@ Q_SIGNALS:
     void textDocumentFinishedUpdating();
 
 public Q_SLOTS:
+    void clearSelectionOnFocus(bool value);
     void singleShotUpdate();
     void selectAll();
     void selectWord();

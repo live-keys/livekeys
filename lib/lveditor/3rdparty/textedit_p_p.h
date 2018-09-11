@@ -110,6 +110,7 @@ public:
         , lastSelectionStart(0), lastSelectionEnd(0), lineCount(0)
         , lastHighlightChangeStart(INT_MAX)
         , lastHighlightChangeEnd(0)
+        , clearSelectionOnFocus(false)
         , hAlign(TextEdit::AlignLeft), vAlign(TextEdit::AlignTop)
         , format(TextEdit::PlainText), wrapMode(TextEdit::NoWrap)
 #if defined(QT_QUICK_DEFAULT_TEXT_RENDER_TYPE)
@@ -199,6 +200,7 @@ public:
     int lastSelectionStart;
     int lastSelectionEnd;
     int lineCount;
+    bool clearSelectionOnFocus;
 
     enum UpdateType {
         UpdateNone,

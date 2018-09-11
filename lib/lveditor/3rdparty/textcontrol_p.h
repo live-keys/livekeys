@@ -110,6 +110,8 @@ public:
 
     void updateCursorRectangle(bool force);
 
+    void clearSelectionOnFocus(bool value);
+
     virtual int hitTest(const QPointF &point, Qt::HitTestAccuracy accuracy) const;
     virtual QRectF blockBoundingRect(const QTextBlock &block) const;
 

@@ -3275,6 +3275,11 @@ void TextEdit::setDocumentHandler(DocumentHandler *dh)
     dh->setTextEdit(this);
 }
 
+void TextEdit::clearSelectionOnFocus(bool value){
+    Q_D(TextEdit);
+    d->control->clearSelectionOnFocus(value);
+}
+
 void TextEdit::setTextDocument(QTextDocument *td)
 {
     Q_D(TextEdit);

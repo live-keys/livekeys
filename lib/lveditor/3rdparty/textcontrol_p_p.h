@@ -153,6 +153,7 @@ public:
     bool wordSelectionEnabled : 1;
     bool hasImState : 1;
     bool cursorRectangleChanged : 1;
+    bool clearSelectionOnFocus : 1;
 
     int lastSelectionStart;
     int lastSelectionEnd;

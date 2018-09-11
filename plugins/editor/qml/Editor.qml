@@ -542,17 +542,15 @@ Rectangle{
                     cursorShape: Qt.IBeamCursor
                     acceptedButtons: Qt.RightButton
                     onClicked: {
-                        if (editorArea.selectionStart === editorArea.selectionEnd)
-                            editorArea.cursorPosition = editorArea.positionAt(mouse.x, mouse.y)
+                        editorArea.clearSelectionOnFocus(false)
                         contextMenu.popup()
-                        forceActiveFocus()
                     }
                 }
 
                 Menu {
                     id: contextMenu
                     style: ContextMenuStyle{}
-
+                    onAboutToHide: editorArea.clearSelectionOnFocus(true)
                     onAboutToShow: {
                         var cursorInfo = codeHandler.cursorInfo(
                             editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart
@@ -654,14 +652,14 @@ Rectangle{
                     MenuItem {
                         text: qsTr("Cut")
                         shortcut: StandardKey.Cut
-                        enabled: editorArea.selectedText
-                        onTriggered: editor.cut()
+                        enabled: editorArea.selectionStart !== editorArea.selectionEnd
+                        onTriggered: editorArea.cut()
                     }
                     MenuItem {
                         text: qsTr("Copy")
                         shortcut: StandardKey.Copy
-                        enabled: editorArea.selectedText
-                        onTriggered: editor.copy()
+                        enabled: editorArea.selectionStart !== editorArea.selectionEnd
+                        onTriggered: editorArea.copy()
                     }
                     MenuItem {
                         text: qsTr("Paste")

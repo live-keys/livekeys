@@ -127,6 +127,7 @@ TextControlPrivate::TextControlPrivate()
       wordSelectionEnabled(false),
       hasImState(false),
       cursorRectangleChanged(false),
+      clearSelectionOnFocus(true),
       lastSelectionStart(-1),
       lastSelectionEnd(-1)
 {}
@@ -661,6 +662,11 @@ void TextControl::updateCursorRectangle(bool force)
     d->cursorRectangleChanged = false;
     if (update)
         emit cursorRectangleChanged();
+}
+
+void TextControl::clearSelectionOnFocus(bool value){
+    Q_D(TextControl);
+    d->clearSelectionOnFocus = value;
 }
 
 void TextControl::setTextCursor(const QTextCursor &cursor)
@@ -1498,7 +1504,8 @@ void TextControlPrivate::focusEvent(QFocusEvent *e)
         if (cursorIsFocusIndicator
             && e->reason() != Qt::ActiveWindowFocusReason
             && e->reason() != Qt::PopupFocusReason
-            && cursor.hasSelection()) {
+            && cursor.hasSelection() && clearSelectionOnFocus)
+        {
             cursor.clearSelection();
             emit q->selectionChanged();
         }
