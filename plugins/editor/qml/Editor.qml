@@ -495,16 +495,14 @@ Rectangle{
                             qmlSuggestionBox.highlightPrev()
                         }
                     } else if ( event.key === Qt.Key_Escape ){
-                        if ( editor.loadedPalettes.length > 0 ){
-
+                        if ( codeHandler.completionModel.isEnabled ){
+                            codeHandler.completionModel.disable()
+                        } else if ( editor.loadedPalettes.length > 0 ){
                             var last = editor.loadedPalettes[editor.loadedPalettes.length - 1]
                             codeHandler.removePalette(last.paletteItem)
-
-                        } else if ( codeHandler.isEditing() ){
-                            codeHandler.cancelEdit()
                         }
 
-                        codeHandler.completionModel.disable()
+                        codeHandler.cancelEdit()
                     } else {
                         var command = livecv.keymap.locateCommand(event.key, event.modifiers)
                         if ( command !== '' ){

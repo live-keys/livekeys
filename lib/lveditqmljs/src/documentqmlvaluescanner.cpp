@@ -36,8 +36,8 @@ DocumentQmlValueScanner::~DocumentQmlValueScanner(){
 bool DocumentQmlValueScanner::operator()(){
 
     int startFrom = m_position + m_length;
-    if ( m_document->editingDocument() ){
-        QTextBlock block = m_document->editingDocument()->findBlock(startFrom);
+    if ( m_document->textDocument() ){
+        QTextBlock block = m_document->textDocument()->findBlock(startFrom);
         int blockTrim    = startFrom - block.position();
 
         while ( block.isValid() ){
@@ -174,7 +174,7 @@ int DocumentQmlValueScanner::getExpressionExtent(
 }
 
 int DocumentQmlValueScanner::getBlockStart(int position){
-    QTextBlock block = m_document->editingDocument()->findBlock(position);
+    QTextBlock block = m_document->textDocument()->findBlock(position);
     if ( !block.isValid() )
         return 0;
 
@@ -205,7 +205,7 @@ int DocumentQmlValueScanner::getBlockStart(int position){
 }
 
 int DocumentQmlValueScanner::getBlockEnd(int position){
-    QTextBlock block = m_document->editingDocument()->findBlock(position);
+    QTextBlock block = m_document->textDocument()->findBlock(position);
     if ( !block.isValid() )
         return 0;
 
@@ -250,7 +250,7 @@ int DocumentQmlValueScanner::getBlockEnd(int position){
 }
 
 int DocumentQmlValueScanner::getBlockExtent(int from){
-    QTextBlock block = m_document->editingDocument()->findBlock(from);
+    QTextBlock block = m_document->textDocument()->findBlock(from);
     int blockTrim = from - block.position();
 
     QList<QmlJS::Token> tokens = m_scanner(block.text().mid(blockTrim));

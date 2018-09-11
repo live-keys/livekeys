@@ -137,7 +137,7 @@ void DocumentHandler::componentComplete(){
 bool DocumentHandler::addEditingPalette(DocumentEditFragment *palette){
     auto it = m_palettes.begin();
     while ( it != m_palettes.end() ){
-        DocumentEditFragment* itPalette = palette;
+        DocumentEditFragment* itPalette = *it;
 
         if ( itPalette->declaration()->position() < palette->declaration()->position() ){
             break;
@@ -295,55 +295,26 @@ void DocumentHandler::insertCompletion(int from, int to, const QString &completi
     }
 }
 
-void DocumentHandler::documentContentsChanged(int position, int charsRemoved, int charsAdded){
-    if ( !m_targetDoc || !m_projectDocument )
-        return;
-    if ( m_projectDocument->editingStateIs(ProjectDocument::Read) )
+void DocumentHandler::documentContentsChanged(int position, int, int charsAdded){
+    if ( !m_projectDocument || m_projectDocument->editingStateIs(ProjectDocument::Read) )
         return;
 
     m_lastChar = QChar();
-
-    QString addedText = "";
-    if ( charsAdded == 1 ){
-        QChar c = m_targetDoc->characterAt(position);
-        if ( c == DocumentHandler::ParagraphSeparator )
-            c = DocumentHandler::NewLine;
-        addedText = c;
-    } else if ( charsAdded > 0 ){
-        QTextCursor cursor(m_targetDoc);
-        cursor.setPosition(position);
-        cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, charsAdded);
-        addedText = cursor.selection().toPlainText();
-    }
-
-    if ( !m_projectDocument->editingStateIs(ProjectDocument::Silent) ){
-
+    if ( !m_projectDocument->editingStateIs(ProjectDocument::Silent) && m_editorFocus ){
         if ( charsAdded == 1 )
             m_lastChar = m_targetDoc->characterAt(position);
 
         if ( m_editingFragment ){
-
             if ( position < m_editingFragment->valuePosition() ||
                  position > m_editingFragment->valuePosition() + m_editingFragment->valueLength() )
             {
                 cancelEdit();
             } else {
-                if ( m_projectDocument ){
-                    m_projectDocument->documentContentsSilentChanged(this, position, charsRemoved, addedText);
-                    return;
-                }
+                return;
             }
         }
-
-        if ( m_projectDocument ){
-            m_projectDocument->documentContentsChanged(this, position, charsRemoved, addedText);
-        }
         emit contentsChangedManually();
-
         m_timer.start();
-
-    } else if ( m_projectDocument ){
-        m_projectDocument->documentContentsSilentChanged(this, position, charsRemoved, addedText);
     }
 }
 
@@ -389,7 +360,7 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue options){
     }
 
     if (m_projectDocument) {
-        m_targetDoc = m_projectDocument->editingDocument();
+        m_targetDoc = m_projectDocument->textDocument();
 
         connect(
             m_targetDoc, SIGNAL(cursorPositionChanged(QTextCursor)),
@@ -608,8 +579,6 @@ void DocumentHandler::openPalette(lv::LivePalette* palette, int position, QObjec
     if ( !m_projectDocument || !m_codeHandler )
         return;
 
-    cancelEdit();
-
     QTextCursor cursor(m_targetDoc);
     cursor.setPosition(position);
 
@@ -644,7 +613,7 @@ void DocumentHandler::openPalette(lv::LivePalette* palette, int position, QObjec
 
             LivePalette* lp = static_cast<LivePalette*>(editingFragment->converter());
 
-            QTextCursor tc(projectDocument->editingDocument());
+            QTextCursor tc(projectDocument->textDocument());
             tc.setPosition(editingFragment->valuePosition());
             tc.setPosition(editingFragment->valuePosition() + editingFragment->valueLength(), QTextCursor::KeepAnchor);
 

@@ -27,6 +27,8 @@
 #include <QFile>
 #include <QUrl>
 #include <QTextStream>
+#include <QTextDocument>
+#include <QTextDocumentFragment>
 #include <QFileInfo>
 
 #include <QDebug>
@@ -36,7 +38,7 @@ namespace lv{
 ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *parent)
     : QObject(parent)
     , m_file(file)
-    , m_editingDocument(new QTextDocument(this))
+    , m_textDocument(new QTextDocument(this))
     , m_iteratingSections(false)
     , m_lastChange(m_changes.end())
     , m_editingState(0)
@@ -44,18 +46,21 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     , m_isSynced(true)
     , m_isMonitored(isMonitored)
 {
+    connect(m_textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::documentContentsChanged);
     readContent();
     m_file->setDocument(this);
 }
 
 void ProjectDocument::resetContent(const QString &content){
-    m_editingDocument->setPlainText(content);
+    m_textDocument->setPlainText(content);
     emit contentChanged();
 }
 
 void ProjectDocument::readContent(){
     if ( m_file->path() != "" ){
-        m_editingDocument->setPlainText(parentAsProject()->lockedFileIO()->readFromFile(m_file->path()));
+        addEditingState(ProjectDocument::Read);
+        m_textDocument->setPlainText(parentAsProject()->lockedFileIO()->readFromFile(m_file->path()));
+        removeEditingState(ProjectDocument::Read);
         m_lastModified = QFileInfo(m_file->path()).lastModified();
         m_changes.clear();
         m_lastChange = m_changes.end();
@@ -78,7 +83,7 @@ Project *ProjectDocument::parentAsProject(){
  * @param charsRemoved
  * @param addedText
  */
-void ProjectDocument::updateSections(bool engineChange, int position, int charsRemoved, const QString &addedText){
+void ProjectDocument::updateSections(int position, int charsRemoved, const QString &addedText){
     if ( m_sections.isEmpty() )
         return;
 
@@ -120,8 +125,8 @@ void ProjectDocument::updateSections(bool engineChange, int position, int charsR
                 // update other bindings positions
                 section->m_position = section->position() - charsRemoved + charsAdded;
 
-                if ( charsRemoved > 0 && m_editingDocument && !section->parentBlock() ){
-                    QTextBlock block = m_editingDocument->findBlock(section->position());
+                if ( charsRemoved > 0 && m_textDocument && !section->parentBlock() ){
+                    QTextBlock block = m_textDocument->findBlock(section->position());
                     ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(block.userData());
                     if ( !bd ){
                         bd = new ProjectDocumentBlockData;
@@ -135,8 +140,8 @@ void ProjectDocument::updateSections(bool engineChange, int position, int charsR
         if ( !section->isValid() ){
             it = m_sections.erase(it);
 
-            if ( m_editingDocument && m_editingDocumentHandler )
-                m_editingDocumentHandler->rehighlightBlock(m_editingDocument->findBlock(sectionPosition));
+            if ( m_textDocument && m_editingDocumentHandler )
+                m_editingDocumentHandler->rehighlightBlock(m_textDocument->findBlock(sectionPosition));
         } else {
             ++it;
         }
@@ -175,11 +180,11 @@ void ProjectDocument::updateMarkers(int position, int charsRemoved, int charsAdd
 
 void ProjectDocument::updateSectionBlocks(int position, const QString &addedText){
     if ( m_sections.size() > 0 &&
-         m_editingDocument &&
+         m_textDocument &&
        ( addedText.contains(QChar(QChar::ParagraphSeparator)) ||
          addedText.contains(QChar(QChar::LineFeed))))
     {
-        QTextBlock block = m_editingDocument->findBlock(position);
+        QTextBlock block = m_textDocument->findBlock(position);
         int blockEnd = block.position() + block.length();
 
         // iterate current block, see if it has any binds, check if binds are before the end of the block
@@ -195,7 +200,7 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
 
                 if ( itSection->position() >= blockEnd ){
                     if ( !bddestination ){
-                        destinationBlock = m_editingDocument->findBlock(position + addedText.length());
+                        destinationBlock = m_textDocument->findBlock(position + addedText.length());
                         bddestination = static_cast<ProjectDocumentBlockData*>(destinationBlock.userData());
                         if ( !bddestination ){
                             bddestination = new ProjectDocumentBlockData;
@@ -210,14 +215,13 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
                 ++seit;
             }
         }
-
     }
 }
 
 QString ProjectDocument::getCharsRemoved(int position, int count){
     if ( count > 0 ){
         syncContent();
-        QTextCursor c(m_editingDocument);
+        QTextCursor c(m_textDocument);
         c.setPosition(position);
         c.setPosition(position + count, QTextCursor::MoveMode::KeepAnchor);
         return c.selectedText();
@@ -266,107 +270,54 @@ bool ProjectDocument::addNewBinding(CodeRuntimeBinding *binding){
         });
 
         m_bindings.insert(it, binding);
-
-//        if ( m_editingDocument && binding ){
-//            QTextBlock bl = m_editingDocument->findBlock(binding->position());
-//            ProjectDocumentBlockData* blockdata = static_cast<ProjectDocumentBlockData*>(bl.userData());
-//            if ( !blockdata ){
-//                blockdata = new ProjectDocumentBlockData;
-//                bl.setUserData(blockdata);
-//            }
-//            blockdata->addBinding(binding);
-//        }
     }
 
     return true;
 }
 
-void ProjectDocument::documentContentsChanged(
-        DocumentHandler* author,
-        int position,
-        int charsRemoved,
-        const QString &addedText)
-{
-    updateMarkers(position, charsRemoved, addedText.size());
-//    updateBindings(position, charsRemoved, addedText);
-    updateSections(false, position, charsRemoved, addedText);
-    bool hasPendingChange = m_changes.size() > 0 && m_changes.last().commited == false;
-    bool isPendingChangeCompatible =
-            hasPendingChange &&
-            (m_changes.last().position + m_changes.last().charsAdded.size() == position) &&
-            charsRemoved == 0 && addedText.length() == 1 && !addedText[0].isSpace();
+//void ProjectDocument::documentContentsChanged(
+//        DocumentHandler* author,
+//        int position,
+//        int charsRemoved,
+//        const QString &addedText)
+//{
+//    updateMarkers(position, charsRemoved, addedText.size());
+//    updateSections(position, charsRemoved, addedText);
+////    bool hasPendingChange = m_changes.size() > 0 && m_changes.last().commited == false;
+////    bool isPendingChangeCompatible =
+////            hasPendingChange &&
+////            (m_changes.last().position + m_changes.last().charsAdded.size() == position) &&
+////            charsRemoved == 0 && addedText.length() == 1 && !addedText[0].isSpace();
 
-    if ( hasPendingChange && isPendingChangeCompatible ){
-        if ( m_lastChange == m_changes.end() ){
-            --m_lastChange;
-            m_lastChange->undo();
-        }
-        m_changes.last().charsAdded.append(addedText);
-    } else {
-        if (hasPendingChange){
-            m_changes.last().commited = true;
-        }
-        m_changes.append(
-            ProjectDocumentAction(this, position, addedText, getCharsRemoved(position, charsRemoved), false)
-        );
-        if ( m_lastChange == m_changes.end() )
-            --m_lastChange;
-    }
-    if ( m_changes.size() > 100 ){
-        if ( m_lastChange == m_changes.begin() && m_lastChange != m_changes.end() ){
-            m_lastChange->redo();
-            ++m_lastChange;
-        }
-        m_changes.removeFirst();
-    }
+////    if ( hasPendingChange && isPendingChangeCompatible ){
+////        if ( m_lastChange == m_changes.end() ){
+////            --m_lastChange;
+////            m_lastChange->undo();
+////        }
+////        m_changes.last().charsAdded.append(addedText);
+////    } else {
+////        if (hasPendingChange){
+////            m_changes.last().commited = true;
+////        }
+////        m_changes.append(
+////            ProjectDocumentAction(this, position, addedText, getCharsRemoved(position, charsRemoved), false)
+////        );
+////        if ( m_lastChange == m_changes.end() )
+////            --m_lastChange;
+////    }
+////    if ( m_changes.size() > 100 ){
+////        if ( m_lastChange == m_changes.begin() && m_lastChange != m_changes.end() ){
+////            m_lastChange->redo();
+////            ++m_lastChange;
+////        }
+////        m_changes.removeFirst();
+////    }
 
-    setIsDirty(true);
+//    setIsDirty(true);
 
-    resetSync();
-    emit contentChanged();
-}
-
-void ProjectDocument::documentContentsSilentChanged(
-        DocumentHandler* author,
-        int position,
-        int charsRemoved,
-        const QString &addedText)
-{
-
-    updateMarkers(position, charsRemoved, addedText.size());
-    updateSections(true, position, charsRemoved, addedText);
-    bool hasPendingChange = m_changes.size() > 0 && m_changes.last().commited == false;
-    bool isPendingChangeCompatible = hasPendingChange && m_changes.last().position == position;
-
-    if ( hasPendingChange && isPendingChangeCompatible ){
-        if ( m_lastChange == m_changes.end() ){
-            --m_lastChange;
-            m_lastChange->undo();
-        }
-        m_changes.last().charsAdded = addedText;
-    } else {
-        if (hasPendingChange){
-            m_changes.last().commited = true;
-        }
-        m_changes.append(
-            ProjectDocumentAction(this, position, addedText, getCharsRemoved(position, charsRemoved), false)
-        );
-        if ( m_lastChange == m_changes.end() )
-            --m_lastChange;
-    }
-    if ( m_changes.size() > 100 ){
-        if ( m_lastChange == m_changes.begin() && m_lastChange != m_changes.end() ){
-            m_lastChange->redo();
-            ++m_lastChange;
-        }
-        m_changes.removeFirst();
-    }
-
-    setIsDirty(true);
-
-    resetSync();
-    emit contentChanged();
-}
+//    resetSync();
+//    emit contentChanged();
+//}
 
 ProjectDocumentMarker::Ptr ProjectDocument::addMarker(int position){
     // markers are added in descending order according to their position
@@ -433,7 +384,7 @@ void ProjectDocument::updateBindingValue(CodeRuntimeBinding *binding, const QStr
         int from = binding->position() + binding->declaration()->identifierLength() + binding->declaration()->valueOffset();
         int to   = from + binding->declaration()->valueLength();
 
-        QTextCursor editCursor(m_editingDocument);
+        QTextCursor editCursor(m_textDocument);
         editCursor.setPosition(from);
         editCursor.setPosition(to, QTextCursor::KeepAnchor);
 
@@ -464,8 +415,8 @@ ProjectDocumentSection::Ptr ProjectDocument::createSection(int type, int positio
     }
     m_sections.insert(it, section);
 
-    if ( m_editingDocument ){
-        QTextBlock bl = m_editingDocument->findBlock(section->position());
+    if ( m_textDocument ){
+        QTextBlock bl = m_textDocument->findBlock(section->position());
         ProjectDocumentBlockData* blockdata = static_cast<ProjectDocumentBlockData*>(bl.userData());
         if ( !blockdata ){
             blockdata = new ProjectDocumentBlockData;
@@ -523,8 +474,8 @@ void ProjectDocument::removeSection(ProjectDocumentSection::Ptr section){
             if ( currentSection.data() == section.data() ){
                 m_sections.erase(it);
 
-                if ( m_editingDocument && m_editingDocumentHandler )
-                    m_editingDocumentHandler->rehighlightBlock(m_editingDocument->findBlock(sectionPosition));
+                if ( m_textDocument && m_editingDocumentHandler )
+                    m_editingDocumentHandler->rehighlightBlock(m_textDocument->findBlock(sectionPosition));
 
                 return;
             }
@@ -540,10 +491,28 @@ bool ProjectDocument::isActive() const{
     return false;
 }
 
+void ProjectDocument::documentContentsChanged(int position, int charsRemoved, int charsAdded){
+    QString addedText = "";
+    if ( charsAdded == 1 ){
+        QChar c = m_textDocument->characterAt(position);
+        if ( c == DocumentHandler::ParagraphSeparator )
+            c = DocumentHandler::NewLine;
+        addedText = c;
+    } else if ( charsAdded > 0 ){
+        QTextCursor cursor(m_textDocument);
+        cursor.setPosition(position);
+        cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, charsAdded);
+        addedText = cursor.selection().toPlainText();
+    }
+
+    updateMarkers(position, charsRemoved, addedText.size());
+    updateSections(position, charsRemoved, addedText);
+}
+
 bool ProjectDocument::save(){
     syncContent();
     if ( m_file->path() != "" ){
-        if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path(), m_editingDocument->toPlainText() ) ){
+        if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path(), m_textDocument->toPlainText() ) ){
             setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
             if ( parentAsProject() )
@@ -559,7 +528,7 @@ bool ProjectDocument::saveAs(const QString &path){
         save();
     } else if ( path != "" ){
         syncContent();
-        if ( parentAsProject()->lockedFileIO()->writeToFile(path, m_editingDocument->toPlainText() ) ){
+        if ( parentAsProject()->lockedFileIO()->writeToFile(path, m_textDocument->toPlainText() ) ){
             ProjectFile* file = parentAsProject()->relocateDocument(m_file->path(), path, this);
             if ( file ){
                 m_file->setDocument(nullptr);

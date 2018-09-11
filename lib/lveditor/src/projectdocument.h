@@ -207,7 +207,7 @@ public:
         Silent   = 2, //    10 : does not trigger a recompile
         Palette  = 6, //   110 : also silent (when a palette edits a section)
         Runtime  = 10,//  1010 : also silent (comming from a runtime binding)
-        Read     = 16 // 10000 : populate from project document, does not signal anything
+        Read     = 16 // 10000 : populate from file, does not signal anything
     };
 
 public:
@@ -230,19 +230,7 @@ public:
     Project* parentAsProject();
 
     void assignDocumentHandler(DocumentHandler* handler);
-    QTextDocument* editingDocument();
-
-    void documentContentsChanged(
-        DocumentHandler* author,
-        int position,
-        int charsRemoved,
-        const QString& addedText = "");
-    void documentContentsSilentChanged(
-        DocumentHandler* author,
-        int position,
-        int charsRemoved,
-        const QString& addedText = ""
-    );
+    QTextDocument* textDocument();
 
     ProjectDocumentMarker::Ptr addMarker(int position);
     void removeMarker(ProjectDocumentMarker::Ptr marker);
@@ -275,6 +263,7 @@ public:
     void resetEditingState();
 
 public slots:
+    void documentContentsChanged(int position, int charsRemoved, int charsAdded);
     void resetContent(const QString& content);
     void readContent();
     bool save();
@@ -290,7 +279,7 @@ signals:
 private:
     void syncContent() const;
     void resetSync() const;
-    void updateSections(bool engineChange, int position, int charsRemoved, const QString& addedText);
+    void updateSections(int position, int charsRemoved, const QString& addedText);
     void updateMarkers(int position, int charsRemoved, int addedText);
     void updateSectionBlocks(int position, const QString& addedText);
     QString getCharsRemoved(int position, int count);
@@ -299,7 +288,7 @@ private:
     // mutable QString m_content;
     QDateTime       m_lastModified;
 
-    QTextDocument*   m_editingDocument;
+    QTextDocument*   m_textDocument;
     DocumentHandler* m_editingDocumentHandler;
 
     QLinkedList<CodeRuntimeBinding*>         m_bindings;
@@ -324,7 +313,7 @@ inline ProjectFile *ProjectDocument::file() const{
 
 inline QString ProjectDocument::content() const{
     syncContent();
-    return m_editingDocument->toPlainText();
+    return m_textDocument->toPlainText();
 }
 
 inline void ProjectDocument::setIsDirty(bool isDirty){
@@ -403,8 +392,8 @@ inline void ProjectDocument::resetSync() const{
     m_isSynced = false;
 }
 
-inline QTextDocument *ProjectDocument::editingDocument(){
-    return m_editingDocument;
+inline QTextDocument *ProjectDocument::textDocument(){
+    return m_textDocument;
 }
 
 inline void ProjectDocument::addEditingState(EditingState state){
