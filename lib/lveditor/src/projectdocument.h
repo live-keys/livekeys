@@ -60,7 +60,6 @@ private:
     int m_position;
 };
 
-
 class LV_EDITOR_EXPORT ProjectDocumentSection{
 
 public:
@@ -80,9 +79,10 @@ public:
     void setUserData(void* data){ m_userData = data; }
     void* userData(){ return m_userData; }
 
+    ProjectDocument* document(){ return m_document; }
     ProjectDocumentBlockData* parentBlock(){ return m_parentBlock; }
 
-    void onTextChanged(std::function<void (bool, int, int, const QString &)> handler);
+    void onTextChanged(std::function<void(ProjectDocumentSection::Ptr, int, int, const QString &)> handler);
 
     static Ptr create(int type, int position = -1, int length = 0){
         return ProjectDocumentSection::Ptr(new ProjectDocumentSection(0, type, position, length));
@@ -104,7 +104,7 @@ private:
     int              m_length;
     void*            m_userData;
     ProjectDocumentBlockData* m_parentBlock;
-    std::function<void(bool, int, int, const QString&)> m_textChangedHandler;
+    std::function<void(ProjectDocumentSection::Ptr, int, int, const QString&)> m_textChangedHandler;
 };
 
 class LV_EDITOR_EXPORT ProjectDocumentAction : public QAbstractUndoItem{
@@ -145,13 +145,10 @@ public:
     ProjectDocumentBlockData();
     ~ProjectDocumentBlockData();
 
-    void addBinding(CodeRuntimeBinding* binding);
-    void removeBinding(CodeRuntimeBinding* binding);
     void addSection(ProjectDocumentSection::Ptr section);
     void removeSection(ProjectDocumentSection::Ptr section);
     void removeSection(ProjectDocumentSection* section);
 
-    QLinkedList<CodeRuntimeBinding*> m_bindings;
     QLinkedList<ProjectDocumentSection::Ptr> m_sections;
     QLinkedList<ProjectDocumentSection::Ptr> m_exceededSections;
     QList<int> bracketPositions;
@@ -202,6 +199,15 @@ public:
         Edit = 0,
         Monitor,
         EditIfNotOpen
+    };
+
+    enum EditingState{
+        Manual   = 0, //     0 : coming from the user
+        Assisted = 1, //     1 : coming from a code completion assistant
+        Silent   = 2, //    10 : does not trigger a recompile
+        Palette  = 6, //   110 : also silent (when a palette edits a section)
+        Runtime  = 10,//  1010 : also silent (comming from a runtime binding)
+        Read     = 16 // 10000 : populate from project document, does not signal anything
     };
 
 public:
@@ -263,6 +269,11 @@ public:
 
     bool isActive() const;
 
+    void addEditingState(EditingState type);
+    void removeEditingState(EditingState state);
+    bool editingStateIs(int flag) const;
+    void resetEditingState();
+
 public slots:
     void resetContent(const QString& content);
     void readContent();
@@ -274,15 +285,13 @@ signals:
     void isDirtyChanged();
     void isMonitoredChanged();
     void fileChanged();
-    void contentChanged(QObject* author);
+    void contentChanged();
 
 private:
     void syncContent() const;
     void resetSync() const;
-    void updateBindings(int position, int charsRemoved, const QString& addedText);
     void updateSections(bool engineChange, int position, int charsRemoved, const QString& addedText);
     void updateMarkers(int position, int charsRemoved, int addedText);
-    void updateBindingBlocks(int position, const QString &addedText);
     void updateSectionBlocks(int position, const QString& addedText);
     QString getCharsRemoved(int position, int count);
 
@@ -303,6 +312,7 @@ private:
     QLinkedList<ProjectDocumentAction>      m_changes;
     mutable QLinkedList<ProjectDocumentAction>::iterator m_lastChange;
 
+    mutable int   m_editingState;
     bool          m_isDirty;
     mutable bool  m_isSynced;
     bool          m_isMonitored;
@@ -395,6 +405,28 @@ inline void ProjectDocument::resetSync() const{
 
 inline QTextDocument *ProjectDocument::editingDocument(){
     return m_editingDocument;
+}
+
+inline void ProjectDocument::addEditingState(EditingState state){
+    m_editingState |= state;
+}
+
+inline void ProjectDocument::removeEditingState(EditingState state){
+    if ( m_editingState & state ){
+        bool restoreSilent = editingStateIs(ProjectDocument::Palette | ProjectDocument::Runtime);
+        m_editingState = m_editingState & ~state;
+        if ( restoreSilent ){
+            m_editingState |= ProjectDocument::Silent;
+        }
+    }
+}
+
+inline bool ProjectDocument::editingStateIs(int flag) const{
+    return (flag & m_editingState) == flag;
+}
+
+inline void ProjectDocument::resetEditingState(){
+    m_editingState = 0;
 }
 
 }// namespace

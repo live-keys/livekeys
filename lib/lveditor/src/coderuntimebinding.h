@@ -53,14 +53,11 @@ public:
 
     bool isModifiedByEngine() const;
 
-    ProjectDocumentBlockData* parentBlock();
-
 public slots:
     void updateValue();
 
 public:
     CodeDeclaration::Ptr      m_declaration;
-    ProjectDocumentBlockData* m_parentBlock;
     CodeConverter*            m_converter;
     bool                      m_modifiedByEngine;
 };
@@ -83,10 +80,6 @@ inline int CodeRuntimeBinding::valuePosition() const{
 
 inline bool CodeRuntimeBinding::isModifiedByEngine() const{
     return m_modifiedByEngine;
-}
-
-inline ProjectDocumentBlockData *CodeRuntimeBinding::parentBlock(){
-    return m_parentBlock;
 }
 
 }// namespace

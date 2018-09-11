@@ -45,17 +45,9 @@ class LV_EDITOR_EXPORT DocumentHandler : public QObject, public QQmlParserStatus
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(lv::CodeCompletionModel* completionModel READ completionModel CONSTANT)
+    Q_PROPERTY(bool editorFocus                         READ editorFocus     WRITE setEditorFocus NOTIFY editorFocusChanged)
 
 public:
-    enum EditingState{
-        Manual   = 0, //     0 : coming from the user
-        Assisted = 1, //     1 : coming from a code completion assistant
-        Silent   = 2, //    10 : does not trigger a recompile
-        Palette  = 6, //   110 : also silent (when a palette edits a section)
-        Runtime  = 10,//  1010 : also silent (comming from a runtime binding)
-        Read     = 16 // 10000 : populate from project document, does not signal anything
-    };
-
     static const QChar ParagraphSeparator;
     static const QChar NewLine;
 
@@ -67,11 +59,6 @@ public:
     void setTarget(QTextDocument *target);
 
     CodeCompletionModel* completionModel() const;
-
-    void addEditingState(EditingState type);
-    void removeEditingState(EditingState state);
-    bool editingStateIs(int flag);
-    void resetEditingState();
 
     void rehighlightBlock(const QTextBlock& block);
 
@@ -88,12 +75,15 @@ public:
     TextEdit* textEdit();
     void setTextEdit(TextEdit* te);
 
+    bool editorFocus() const;
+    void setEditorFocus(bool editorFocus);
+
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
     void cursorWritePositionChanged(QTextCursor cursor);
     void setDocument(lv::ProjectDocument* document, QJSValue options = QJSValue());
-    void documentUpdatedContent(QObject* author);
+    void documentUpdatedContent();
     void generateCompletion(int cursorPosition);
     void updateScope();
     void bind(int position, int length, QObject* object = 0);
@@ -119,6 +109,7 @@ signals:
     void paletteAboutToRemove(lv::LivePalette* palette);
     void fragmentLinesChanged(int lineStart, int lineEnd);
     void editingStateChanged(bool isEditing);
+    void editorFocusChanged();
 
 private:
     void readContent();
@@ -132,7 +123,6 @@ private:
     CodeCompletionModel*  m_completionModel;
     AbstractCodeHandler*  m_codeHandler;
     ProjectDocument*      m_projectDocument;
-    int                   m_editingState;
     int                   m_indentSize;
     QString               m_indentContent;
     LivePaletteContainer* m_paletteContainer;
@@ -150,6 +140,7 @@ private:
 
     QLinkedList<DocumentEditFragment*> m_palettes; // opened palettes
     DocumentEditFragment*              m_editingFragment; // editing fragment
+    bool m_editorFocus;
 };
 
 inline QTextDocument *DocumentHandler::target(){
@@ -160,34 +151,23 @@ inline lv::CodeCompletionModel *DocumentHandler::completionModel() const{
     return m_completionModel;
 }
 
-inline void DocumentHandler::addEditingState(EditingState state){
-    m_editingState |= state;
-}
-
-inline void DocumentHandler::removeEditingState(EditingState state){
-    if ( m_editingState & state ){
-        bool restoreSilent = editingStateIs(DocumentHandler::Palette | DocumentHandler::Runtime);
-        m_editingState = m_editingState & ~state;
-        if ( restoreSilent ){
-            m_editingState |= DocumentHandler::Silent;
-        }
-    }
-}
-
-inline bool DocumentHandler::editingStateIs(int flag){
-    return (flag & m_editingState) == flag;
-}
-
-inline void DocumentHandler::resetEditingState(){
-    m_editingState = 0;
-}
-
 inline DocumentHandlerState *DocumentHandler::state(){
     return m_state;
 }
 
 inline TextEdit *DocumentHandler::textEdit(){
     return m_textEdit;
+}
+
+inline bool DocumentHandler::editorFocus() const{
+    return m_editorFocus;
+}
+
+inline void DocumentHandler::setEditorFocus(bool editorFocus){
+    if ( m_editorFocus == editorFocus )
+        return;
+    m_editorFocus = editorFocus;
+    emit editorFocusChanged();
 }
 
 inline void DocumentHandler::setIndentSize(int size){

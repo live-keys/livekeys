@@ -25,7 +25,6 @@ namespace lv{
 CodeRuntimeBinding::CodeRuntimeBinding(const QStringList& identifierChain, ProjectDocument *parent)
     : QObject(parent)
     , m_declaration(CodeDeclaration::create(identifierChain, parent))
-    , m_parentBlock(0)
     , m_converter(0)
     , m_modifiedByEngine(false)
 {
@@ -34,15 +33,12 @@ CodeRuntimeBinding::CodeRuntimeBinding(const QStringList& identifierChain, Proje
 CodeRuntimeBinding::CodeRuntimeBinding(CodeDeclaration::Ptr declaration)
     : QObject(declaration->document())
     , m_declaration(declaration)
-    , m_parentBlock(0)
     , m_converter(0)
     , m_modifiedByEngine(0)
 {
 }
 
 CodeRuntimeBinding::~CodeRuntimeBinding(){
-    if( m_parentBlock )
-        m_parentBlock->removeBinding(this);
 }
 
 void CodeRuntimeBinding::updateValue(){
