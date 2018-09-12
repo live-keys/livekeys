@@ -1,0 +1,34 @@
+Notes on v8
+
+Memory Management
+
+V8 uses 2 types of handles for memory management:
+
+ * Local handles
+ * Persistent handles
+
+Local handles reside within an execution scope. Once the scope exists, all local handles
+residing within the scope will get destroyed. To keep locals, we nned to use the
+persistent handle:
+
+@code
+Local<Object> localObject;
+Persistent<Object> persist = Persistent<Object>::New(localObject);
+@endcode
+
+The persistent handle contains a reference to a storage cell within the v8 engine,
+which holds an object value and which is updated by the GC whenever the object is moved.
+A new storage cell can be created using the constructor, or calling PersistentBase::Reset.
+Existing handles can also be disposed using PersistentBase::Reset.
+
+Utility functions of the Persistent handle:
+
+ * ```Persistent::IsNearDeath()``` Checks wether the handle holds the only reference to an
+   object.
+ * ```Persistent::SetWeak()``` The handle will be reset automatically when GC detects that
+   the object is no longer reachable.
+ * ```Persistent::Reset()``` Destroys the underlying storage cell if non-empty
+
+Persistent handles are used to create local objects which are used for operations
+within a local scope.
+

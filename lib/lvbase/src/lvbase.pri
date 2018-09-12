@@ -28,7 +28,9 @@ HEADERS += \
     $$PWD/visuallogfilter.h \
     $$PWD/visuallogbasemodel.h \
     $$PWD/typeinfo.h \
-    $$PWD/qmlengineinterceptor.h
+    $$PWD/qmlengineinterceptor.h \
+    $$PWD/indextuple.h \
+    $$PWD/functionargs.h
 
 SOURCES += \
     $$PWD/exception.cpp \
