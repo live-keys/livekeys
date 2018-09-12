@@ -7,6 +7,7 @@
 namespace lv {
 
 class CollapsedSection;
+class LineNumberSurface;
 
 class LV_EDITOR_EXPORT LineManager: public QObject{
 

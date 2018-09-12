@@ -24,9 +24,9 @@ void LineRootNode::resetFrameDecorations(TextNode* newNode)
 
 LineNumberSurface::LineNumberSurface(QQuickItem *parent)
     : QQuickItem(parent)
-    , lineManager(new LineManager)
     , textEdit(nullptr), lineDocument(nullptr), prevLineNumber(0)
     , lineNumber(0), lineNodes(), dirtyPos(0)
+    , lineManager(new LineManager)
     , isInitialized(false)
     , m_color(QColor(255, 255, 255, 255))
 {
@@ -37,13 +37,8 @@ LineNumberSurface::LineNumberSurface(QQuickItem *parent)
 void LineNumberSurface::updateSize()
 {
     // qreal newWidth = lineDocument->idealWidth();
-    QFontMetricsF fm(font);
-
-    int num = numberOfDigits(lineNumber) + 2;
-    qreal newWidth = lineDocument->isEmpty() ? qCeil(fm.maxWidth()) : qCeil(num*fm.maxWidth());
-    qreal newHeight = lineDocument->isEmpty() ? qCeil(fm.height()) : lineDocument->size().height();
-    lineDocument->setTextWidth(newWidth);
-    setImplicitSize(newWidth, newHeight);
+    QSizeF layoutSize = lineDocument->documentLayout()->documentSize();
+    setImplicitSize(layoutSize.width(), layoutSize.height());
 }
 
 void LineNumberSurface::setComponents(TextEdit* te)
@@ -67,15 +62,20 @@ QSGNode* LineNumberSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeDat
 {
     Q_UNUSED(updatePaintNodeData);
 
+    if ( !lineDocument )
+        return oldNode;
+
     LineRootNode* rootNode;
     if (!oldNode)
         rootNode = new LineRootNode;
-    else rootNode = static_cast<LineRootNode *>(oldNode);
+    else
+        rootNode = static_cast<LineRootNode *>(oldNode);
 
     TextNodeEngine engine;
     TextNodeEngine frameDecorationsEngine;
 
-    if (numberOfDigits(prevLineNumber) != numberOfDigits(lineNumber)) dirtyPos = 0;
+    if (numberOfDigits(prevLineNumber) != numberOfDigits(lineNumber))
+        dirtyPos = 0;
 
     // dirty fix for overlapping update bug - redraw everything if a line node is missing
     /*if (oldNode && prevLineNumber != lineNodes.count())

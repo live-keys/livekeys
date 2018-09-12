@@ -271,13 +271,14 @@ Rectangle{
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.bottom: parent.bottom
-            width: lineSurface.width
+            width: lineSurface.width + 5
             color: editor.topColor
             clip: true
 
             Flickable{
                 anchors.fill: parent
                 anchors.bottomMargin: 10
+                anchors.leftMargin: 5
                 contentY: flick.flickableItem.contentY
 
                 LineSurface{

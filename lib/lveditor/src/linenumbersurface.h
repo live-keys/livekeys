@@ -28,7 +28,7 @@ class LV_EDITOR_EXPORT LineNumberSurface : public QQuickItem {
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
 
 public:
-    LineNumberSurface(QQuickItem *parent=nullptr);
+    LineNumberSurface(QQuickItem *parent = nullptr);
     ~LineNumberSurface() override;
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData) Q_DECL_OVERRIDE;
 
