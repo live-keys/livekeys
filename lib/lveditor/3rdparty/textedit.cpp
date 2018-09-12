@@ -2600,6 +2600,9 @@ void TextEdit::updateSize()
 
     if (!d->document || !d->control) return;
 
+    if (d->document->textWidth() != -1 )
+        d->document->setTextWidth(-1);
+
     qreal naturalWidth = d->implicitWidth - leftPadding() - rightPadding();
 
 
@@ -2625,15 +2628,16 @@ void TextEdit::updateSize()
             if (d->inLayout)    // probably the result of a binding loop, but by letting it
                 return;         // get this far we'll get a warning to that effect.
         }
-        if (abs(d->document->textWidth() - width()) > LV_ACCURACY) {
-            d->document->setTextWidth(width() - leftPadding() - rightPadding());
-            newWidth = d->document->idealWidth();
-        }
+//        d->document->setTextWidth(-1);
+//        if (abs(d->document->textWidth() - width()) > LV_ACCURACY) {
+//            d->document->setTextWidth(width() - leftPadding() - rightPadding());
+//            newWidth = d->document->idealWidth();
+//        }
         //### need to confirm cost of always setting these
     } else if (d->wrapMode == NoWrap && abs(d->document->textWidth() - newWidth) > LV_ACCURACY) {
-        d->document->setTextWidth(newWidth); // ### Text does not align if width is not set or the idealWidth exceeds the textWidth (QTextDoc bug)
+//        d->document->setTextWidth(newWidth); // ### Text does not align if width is not set or the idealWidth exceeds the textWidth (QTextDoc bug)
     } else {
-        d->document->setTextWidth(-1);
+//        d->document->setTextWidth(-1);
     }
 
     QFontMetricsF fm(d->font);
