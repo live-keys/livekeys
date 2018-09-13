@@ -48,7 +48,7 @@ Rectangle{
         codeHandler.setDocument(document)
     }
 
-    property color topColor: "#081019"
+    property color topColor: "#09121c"
 
     color : "#050b12"
     clip : true
@@ -254,7 +254,6 @@ Rectangle{
                 onClicked: livecv.commands.execute('window.toggleNavigation')
             }
         }
-
     }
 
     FontMetrics{
@@ -264,11 +263,42 @@ Rectangle{
 
     Rectangle{
         anchors.fill: parent
-        anchors.topMargin: 38
+        anchors.topMargin: 30
         color: editor.color
+
+        Rectangle{
+            id: lineSurfaceBackground
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            width: lineSurface.width + 5
+            color: editor.topColor
+            clip: true
+
+            Flickable{
+                anchors.fill: parent
+                anchors.bottomMargin: 10
+                anchors.leftMargin: 5
+                contentY: flick.flickableItem.contentY
+
+                LineSurface{
+                    id: lineSurface
+                    color: "#808691"
+                    Component.onCompleted: {
+                        setComponents(editorArea);
+                    }
+                }
+            }
+        }
 
         ScrollView {
             id: flick
+
+            anchors.fill: parent
+            anchors.topMargin: 5
+            anchors.leftMargin: 7 + lineSurfaceBackground.width
+            anchors.rightMargin: 3
+
             style: ScrollViewStyle {
                 transientScrollBars: false
                 handle: Item {
@@ -289,13 +319,9 @@ Rectangle{
                 }
                 decrementControl: null
                 incrementControl: null
-                frame: Rectangle{color: editor.color}
+                frame: Item{}
                 corner: Rectangle{color: editor.color}
             }
-
-            anchors.fill: parent
-            anchors.leftMargin: 7
-            anchors.rightMargin: 3
 
             frameVisible: false
 
@@ -312,8 +338,41 @@ Rectangle{
                     flickableItem.contentY = r.y + r.height - height + 20;
             }
 
-            TextEdit {
+            NewTextEdit {
                 id : editorArea
+
+                anchors.left: parent.left
+                anchors.leftMargin: 5
+
+                documentHandler: DocumentHandler {
+                    id: codeHandler
+                    // target: editorArea.textDocument
+                    editorFocus: editorArea.activeFocus
+                    onCursorPositionRequest : {
+                        editorArea.forceActiveFocus()
+                        editorArea.cursorPosition = position
+                    }
+                    onContentsChangedManually: {
+                        if ( project.active === editor.document )
+                        {
+                            editor.windowControls.createTimer.restart();
+                        }
+                    }
+                    onPaletteAboutToRemove: {
+                        for ( var i = 0; i < loadedPalettes.length; ++i ){
+                            if ( palette.item === loadedPalettes[i].paletteItem ){
+                                var lp = loadedPalettes[i]
+                                loadedPalettes.splice(i, 1)
+                                lp.destroy()
+                                return
+                            }
+                        }
+                    }
+                    onEditingStateChanged: {
+                        editor.isEditingSection = isEditing
+                    }
+                }
+
 
                 property int lastLength: 0
 
@@ -345,12 +404,12 @@ Rectangle{
                 font.weight: Font.Normal
 
                 selectByMouse: true
-                mouseSelectionMode: TextEdit.SelectCharacters
+                mouseSelectionMode: NewTextEdit.SelectCharacters
                 selectionColor: "#3d4856"
 
-                textFormat: TextEdit.PlainText
+                textFormat: NewTextEdit.PlainText
 
-                wrapMode: TextEdit.NoWrap
+                wrapMode: NewTextEdit.NoWrap
                 height : Math.max( flick.height - 20, paintedHeight )
                 width : Math.max( flick.width - 20, paintedWidth )
 
@@ -437,16 +496,14 @@ Rectangle{
                             qmlSuggestionBox.highlightPrev()
                         }
                     } else if ( event.key === Qt.Key_Escape ){
-                        if ( editor.loadedPalettes.length > 0 ){
-
+                        if ( codeHandler.completionModel.isEnabled ){
+                            codeHandler.completionModel.disable()
+                        } else if ( editor.loadedPalettes.length > 0 ){
                             var last = editor.loadedPalettes[editor.loadedPalettes.length - 1]
                             codeHandler.removePalette(last.paletteItem)
-
-                        } else if ( codeHandler.isEditing() ){
-                            codeHandler.cancelEdit()
                         }
 
-                        codeHandler.completionModel.disable()
+                        codeHandler.cancelEdit()
                     } else {
                         var command = livecv.keymap.locateCommand(event.key, event.modifiers)
                         if ( command !== '' ){
@@ -486,17 +543,15 @@ Rectangle{
                     cursorShape: Qt.IBeamCursor
                     acceptedButtons: Qt.RightButton
                     onClicked: {
-                        if (editorArea.selectionStart === editorArea.selectionEnd)
-                            editorArea.cursorPosition = editorArea.positionAt(mouse.x, mouse.y)
+                        editorArea.clearSelectionOnFocus(false)
                         contextMenu.popup()
-                        forceActiveFocus()
                     }
                 }
 
                 Menu {
                     id: contextMenu
                     style: ContextMenuStyle{}
-
+                    onAboutToHide: editorArea.clearSelectionOnFocus(true)
                     onAboutToShow: {
                         var cursorInfo = codeHandler.cursorInfo(
                             editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart
@@ -598,48 +653,22 @@ Rectangle{
                     MenuItem {
                         text: qsTr("Cut")
                         shortcut: StandardKey.Cut
-                        enabled: editorArea.selectedText
-                        onTriggered: editor.cut()
+                        enabled: editorArea.selectionStart !== editorArea.selectionEnd
+                        onTriggered: editorArea.cut()
                     }
                     MenuItem {
                         text: qsTr("Copy")
                         shortcut: StandardKey.Copy
-                        enabled: editorArea.selectedText
-                        onTriggered: editor.copy()
+                        enabled: editorArea.selectionStart !== editorArea.selectionEnd
+                        onTriggered: editorArea.copy()
                     }
                     MenuItem {
                         text: qsTr("Paste")
                         shortcut: StandardKey.Paste
                         enabled: editorArea.canPaste
-                        onTriggered: editor.paste()
+                        onTriggered: editorArea.paste()
                     }
                 }
-            }
-        }
-
-        DocumentHandler{
-            id: codeHandler
-            target: editorArea.textDocument
-            onCursorPositionRequest : {
-                editorArea.forceActiveFocus()
-                editorArea.cursorPosition = position
-            }
-            onContentsChangedManually: {
-                if ( project.active === editor.document )
-                    editor.windowControls.createTimer.restart()
-            }
-            onPaletteAboutToRemove: {
-                for ( var i = 0; i < loadedPalettes.length; ++i ){
-                    if ( palette.item === loadedPalettes[i].paletteItem ){
-                        var lp = loadedPalettes[i]
-                        loadedPalettes.splice(i, 1)
-                        lp.destroy()
-                        return
-                    }
-                }
-            }
-            onEditingStateChanged: {
-                editor.isEditingSection = isEditing
             }
         }
 

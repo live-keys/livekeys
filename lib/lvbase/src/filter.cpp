@@ -48,11 +48,21 @@ void Filter::use(
     }
 }
 
+
+
 void Filter::SharedDataLocker::clearReservations(){
     foreach ( SharedData* sd, m_readLocks )
         sd->unlockReservation(m_filter);
     foreach ( SharedData* sd, m_writeLocks )
         sd->unlockReservation(m_filter);
 }
+
+
+Filter::SharedDataLocker::~SharedDataLocker(){ clearReservations(); }
+
+void Filter::deleteLocker(SharedDataLocker* locker){
+    delete locker;
+}
+
 
 }// namespace

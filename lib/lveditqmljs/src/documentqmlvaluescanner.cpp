@@ -36,8 +36,8 @@ DocumentQmlValueScanner::~DocumentQmlValueScanner(){
 bool DocumentQmlValueScanner::operator()(){
 
     int startFrom = m_position + m_length;
-    if ( m_document->editingDocument() ){
-        QTextBlock block = m_document->editingDocument()->findBlock(startFrom);
+    if ( m_document->textDocument() ){
+        QTextBlock block = m_document->textDocument()->findBlock(startFrom);
         int blockTrim    = startFrom - block.position();
 
         while ( block.isValid() ){
@@ -174,7 +174,7 @@ int DocumentQmlValueScanner::getExpressionExtent(
 }
 
 int DocumentQmlValueScanner::getBlockStart(int position){
-    QTextBlock block = m_document->editingDocument()->findBlock(position);
+    QTextBlock block = m_document->textDocument()->findBlock(position);
     if ( !block.isValid() )
         return 0;
 
@@ -205,7 +205,7 @@ int DocumentQmlValueScanner::getBlockStart(int position){
 }
 
 int DocumentQmlValueScanner::getBlockEnd(int position){
-    QTextBlock block = m_document->editingDocument()->findBlock(position);
+    QTextBlock block = m_document->textDocument()->findBlock(position);
     if ( !block.isValid() )
         return 0;
 
@@ -250,7 +250,7 @@ int DocumentQmlValueScanner::getBlockEnd(int position){
 }
 
 int DocumentQmlValueScanner::getBlockExtent(int from){
-    QTextBlock block = m_document->editingDocument()->findBlock(from);
+    QTextBlock block = m_document->textDocument()->findBlock(from);
     int blockTrim = from - block.position();
 
     QList<QmlJS::Token> tokens = m_scanner(block.text().mid(blockTrim));
@@ -315,6 +315,53 @@ int DocumentQmlValueScanner::getBlockExtent(int from){
     }
 
     return -1;
+}
+
+int DocumentQmlValueScanner::getBlockEnd(QTextBlock &block, int position){
+    if ( !block.isValid() )
+        return 0;
+
+    int state = 0;
+    int nestingDepth = 0;
+
+    QmlJS::Scanner scanner;
+
+    while(true){
+        int blockState = block.userState();
+        if ( blockState < 0 ){
+            state = 0;
+        } else {
+            state = blockState & 15;
+        }
+
+        QList<QmlJS::Token> tokens = scanner(block.text(), state);
+        for ( auto it = tokens.begin(); it != tokens.end(); ++it ){
+            int tokenPosition = block.position() + it->offset;
+
+            if ( it->is(QmlJS::Token::LeftBrace) ||
+                 it->is(QmlJS::Token::LeftParenthesis) ||
+                 it->is(QmlJS::Token::LeftBracket ) )
+            {
+                if ( tokenPosition > position )
+                    ++nestingDepth;
+            } else if ( it->is(QmlJS::Token::RightBrace ) ||
+                        it->is(QmlJS::Token::RightBracket) ||
+                        it->is(QmlJS::Token::RightParenthesis) )
+            {
+                --nestingDepth;
+                if ( nestingDepth < 0 ){
+                    return tokenPosition;
+                }
+            }
+        }
+
+        block = block.next();
+        if ( !block.isValid() ){
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 int DocumentQmlValueScanner::findColonInTokenSet(const QList<QmlJS::Token> &tokens){

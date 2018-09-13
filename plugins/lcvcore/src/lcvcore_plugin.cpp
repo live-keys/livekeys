@@ -39,6 +39,7 @@
 #include "qmatlist.h"
 #include "qimagefile.h"
 #include "qoverlapmat.h"
+#include "qitemcapture.h"
 
 #include "live/engine.h"
 #include "live/plugincontext.h"
@@ -72,6 +73,7 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QMatLoader>(             uri, 1, 0, "MatLoader");
     qmlRegisterType<QImageFile>(             uri, 1, 0, "ImageFile");
     qmlRegisterType<QOverlapMat>(            uri, 1, 0, "OverlapMat");
+    qmlRegisterType<QItemCapture>(           uri, 1, 0, "ItemCapture");
 }
 
 void LcvcorePlugin::initializeEngine(QQmlEngine *engine, const char *){

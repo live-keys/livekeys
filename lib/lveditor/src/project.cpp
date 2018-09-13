@@ -50,7 +50,7 @@ void Project::newProject(){
         ProjectDocument* document = new ProjectDocument(
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false, this
         );
-        document->dumpContent("import QtQuick 2.3\n\nGrid{\n}");
+        document->resetContent("import QtQuick 2.3\n\nGrid{\n}");
         m_documentModel->openDocument("", document);
         m_active = document;
         m_path   = "";

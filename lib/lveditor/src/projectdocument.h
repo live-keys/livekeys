@@ -60,7 +60,6 @@ private:
     int m_position;
 };
 
-
 class LV_EDITOR_EXPORT ProjectDocumentSection{
 
 public:
@@ -80,9 +79,10 @@ public:
     void setUserData(void* data){ m_userData = data; }
     void* userData(){ return m_userData; }
 
+    ProjectDocument* document(){ return m_document; }
     ProjectDocumentBlockData* parentBlock(){ return m_parentBlock; }
 
-    void onTextChanged(std::function<void (bool, int, int, const QString &)> handler);
+    void onTextChanged(std::function<void(ProjectDocumentSection::Ptr, int, int, const QString &)> handler);
 
     static Ptr create(int type, int position = -1, int length = 0){
         return ProjectDocumentSection::Ptr(new ProjectDocumentSection(0, type, position, length));
@@ -104,7 +104,7 @@ private:
     int              m_length;
     void*            m_userData;
     ProjectDocumentBlockData* m_parentBlock;
-    std::function<void(bool, int, int, const QString&)> m_textChangedHandler;
+    std::function<void(ProjectDocumentSection::Ptr, int, int, const QString&)> m_textChangedHandler;
 };
 
 class LV_EDITOR_EXPORT ProjectDocumentAction : public QAbstractUndoItem{
@@ -135,23 +135,45 @@ public:
     bool    commited;
 };
 
+typedef std::function<void(const QTextBlock& tb, int& numLines, QString& replacement)> CollapseFunctionType;
+
 class LV_EDITOR_EXPORT ProjectDocumentBlockData : public QTextBlockUserData{
 
 public:
-    ProjectDocumentBlockData(){}
+    enum CollapseState {NoCollapse, Collapse, Expand};
+
+    ProjectDocumentBlockData();
     ~ProjectDocumentBlockData();
 
-    void addBinding(CodeRuntimeBinding* binding);
-    void removeBinding(CodeRuntimeBinding* binding);
     void addSection(ProjectDocumentSection::Ptr section);
     void removeSection(ProjectDocumentSection::Ptr section);
     void removeSection(ProjectDocumentSection* section);
 
-    QLinkedList<CodeRuntimeBinding*> m_bindings;
     QLinkedList<ProjectDocumentSection::Ptr> m_sections;
     QLinkedList<ProjectDocumentSection::Ptr> m_exceededSections;
     QList<int> bracketPositions;
     QString    blockIdentifier;
+
+    void setCollapse(CollapseState state, CollapseFunctionType func);
+    CollapseState collapseState();
+    void setReplacementString(QString& string);
+    QString &replacementString();
+    void setNumOfCollapsedLines(int num);
+    int numOfCollapsedLines();
+    CollapseFunctionType onCollapse();
+    void setStateChangeFlag(bool value) {m_stateChangeFlag = value; }
+    bool stateChangeFlag() {return m_stateChangeFlag; }
+    void collapse() {m_collapseState = Expand; }
+    void expand() { m_collapseState = Collapse; }
+
+    void resetCollapseParams();
+
+private:
+    CollapseState m_collapseState;
+    QString m_replacementString;
+    int m_numOfCollapsedLines;
+    CollapseFunctionType m_onCollapse;
+    bool m_stateChangeFlag;
 };
 
 
@@ -179,13 +201,22 @@ public:
         EditIfNotOpen
     };
 
+    enum EditingState{
+        Manual   = 0, //     0 : coming from the user
+        Assisted = 1, //     1 : coming from a code completion assistant
+        Silent   = 2, //    10 : does not trigger a recompile
+        Palette  = 6, //   110 : also silent (when a palette edits a section)
+        Runtime  = 10,//  1010 : also silent (comming from a runtime binding)
+        Read     = 16 // 10000 : populate from file, does not signal anything
+    };
+
 public:
     explicit ProjectDocument(ProjectFile* file, bool isMonitored, Project *parent);
     ~ProjectDocument();
 
     lv::ProjectFile* file() const;
 
-    const QString& content() const;
+    QString content() const;
 
     void setIsDirty(bool isDirty);
     bool isDirty() const;
@@ -198,20 +229,8 @@ public:
 
     Project* parentAsProject();
 
-    void assignEditingDocument(QTextDocument* doc, DocumentHandler* handler);
-    QTextDocument* editingDocument();
-
-    void documentContentsChanged(
-        DocumentHandler* author,
-        int position,
-        int charsRemoved,
-        const QString& addedText = "");
-    void documentContentsSilentChanged(
-        DocumentHandler* author,
-        int position,
-        int charsRemoved,
-        const QString& addedText = ""
-    );
+    void assignDocumentHandler(DocumentHandler* handler);
+    QTextDocument* textDocument();
 
     ProjectDocumentMarker::Ptr addMarker(int position);
     void removeMarker(ProjectDocumentMarker::Ptr marker);
@@ -238,8 +257,14 @@ public:
 
     bool isActive() const;
 
+    void addEditingState(EditingState type);
+    void removeEditingState(EditingState state);
+    bool editingStateIs(int flag) const;
+    void resetEditingState();
+
 public slots:
-    void dumpContent(const QString& content);
+    void documentContentsChanged(int position, int charsRemoved, int charsAdded);
+    void resetContent(const QString& content);
     void readContent();
     bool save();
     bool saveAs(const QString& path);
@@ -249,23 +274,21 @@ signals:
     void isDirtyChanged();
     void isMonitoredChanged();
     void fileChanged();
-    void contentChanged(QObject* author);
+    void contentChanged();
 
 private:
     void syncContent() const;
     void resetSync() const;
-    void updateBindings(int position, int charsRemoved, const QString& addedText);
-    void updateSections(bool engineChange, int position, int charsRemoved, const QString& addedText);
+    void updateSections(int position, int charsRemoved, const QString& addedText);
     void updateMarkers(int position, int charsRemoved, int addedText);
-    void updateBindingBlocks(int position, const QString &addedText);
     void updateSectionBlocks(int position, const QString& addedText);
     QString getCharsRemoved(int position, int count);
 
     ProjectFile*    m_file;
-    mutable QString m_content;
+    // mutable QString m_content;
     QDateTime       m_lastModified;
 
-    QTextDocument*   m_editingDocument;
+    QTextDocument*   m_textDocument;
     DocumentHandler* m_editingDocumentHandler;
 
     QLinkedList<CodeRuntimeBinding*>         m_bindings;
@@ -278,6 +301,7 @@ private:
     QLinkedList<ProjectDocumentAction>      m_changes;
     mutable QLinkedList<ProjectDocumentAction>::iterator m_lastChange;
 
+    mutable int   m_editingState;
     bool          m_isDirty;
     mutable bool  m_isSynced;
     bool          m_isMonitored;
@@ -287,9 +311,9 @@ inline ProjectFile *ProjectDocument::file() const{
     return m_file;
 }
 
-inline const QString &ProjectDocument::content() const{
+inline QString ProjectDocument::content() const{
     syncContent();
-    return m_content;
+    return m_textDocument->toPlainText();
 }
 
 inline void ProjectDocument::setIsDirty(bool isDirty){
@@ -368,8 +392,30 @@ inline void ProjectDocument::resetSync() const{
     m_isSynced = false;
 }
 
-inline QTextDocument *ProjectDocument::editingDocument(){
-    return m_editingDocument;
+inline QTextDocument *ProjectDocument::textDocument(){
+    return m_textDocument;
+}
+
+inline void ProjectDocument::addEditingState(EditingState state){
+    m_editingState |= state;
+}
+
+inline void ProjectDocument::removeEditingState(EditingState state){
+    if ( m_editingState & state ){
+        bool restoreSilent = editingStateIs(ProjectDocument::Palette | ProjectDocument::Runtime);
+        m_editingState = m_editingState & ~state;
+        if ( restoreSilent ){
+            m_editingState |= ProjectDocument::Silent;
+        }
+    }
+}
+
+inline bool ProjectDocument::editingStateIs(int flag) const{
+    return (flag & m_editingState) == flag;
+}
+
+inline void ProjectDocument::resetEditingState(){
+    m_editingState = 0;
 }
 
 }// namespace

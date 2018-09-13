@@ -16,6 +16,7 @@
 
 #include "qmljshighlighter_p.h"
 #include "live/coderuntimebinding.h"
+#include "documentqmlvaluescanner_p.h"
 
 namespace lv{
 
@@ -92,6 +93,42 @@ QmlJsHighlighter::LookAheadType QmlJsHighlighter::lookAhead(
     return QmlJsHighlighter::Unknown;
 }
 
+void QmlJsHighlighter::collapse(const QTextBlock &tb, int &numLines, QString &replacement){
+    int blockState   = tb.previous().userState();
+
+    bool prevSectionExceeded = (blockState >> 4) & 1;
+    int bracketLevel         = blockState >> 5;
+    int state                = blockState & 15;
+
+
+    if (blockState < 0) {
+        prevSectionExceeded = false;
+        bracketLevel        = 0;
+        state               = QmlJS::Scanner::Normal;
+    }
+
+    QmlJS::Scanner scanner;
+    QList<QmlJS::Token> tokens = scanner(tb.text(), state);
+    QList<QmlJS::Token>::iterator it = tokens.begin();
+    while ( it != tokens.end() ){
+        QmlJS::Token& tk = *it;
+        if ( tk.kind == QmlJS::Token::LeftBrace ){
+            QTextBlock bScan = tb;
+            if ( DocumentQmlValueScanner::getBlockEnd(bScan, tb.position() + tk.end()) == 0 )
+            {
+                numLines = tb.document()->blockCount() - tb.blockNumber();
+            } else {
+
+                numLines = bScan.blockNumber() - tb.blockNumber();
+            }
+            replacement = "{ ... }";
+
+            return;
+        }
+        ++it;
+    }
+}
+
 void QmlJsHighlighter::highlightBlock(const QString &text){
     QList<int> bracketPositions;
     int blockState   = previousBlockState();
@@ -112,6 +149,18 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
     QmlJS::Scanner scanner;
     QList<QmlJS::Token> tokens = scanner(text, state);
     state = scanner.state();
+
+
+//    qDebug() << "highlighter triggered " << currentBlock().blockNumber();
+
+    lv::ProjectDocumentBlockData *blockData =
+            reinterpret_cast<lv::ProjectDocumentBlockData*>(currentBlock().userData());
+    if (!blockData) {
+        blockData = new lv::ProjectDocumentBlockData;
+        currentBlock().setUserData(blockData);
+    } else {
+        blockData->resetCollapseParams();
+    }
 
     QList<QmlJS::Token>::iterator it = tokens.begin();
     while ( it != tokens.end() ){
@@ -147,7 +196,11 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
             break;
         case QmlJS::Token::LeftParenthesis:
         case QmlJS::Token::RightParenthesis:
+            break;
         case QmlJS::Token::LeftBrace:
+            blockData->setCollapse(lv::ProjectDocumentBlockData::Collapse, &QmlJsHighlighter::collapse);
+            blockData->setStateChangeFlag(true);
+            break;
         case QmlJS::Token::RightBrace:
         case QmlJS::Token::LeftBracket:
         case QmlJS::Token::RightBracket:
@@ -165,15 +218,10 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
             break;
         }
 
+
         ++it;
     }
 
-    lv::ProjectDocumentBlockData *blockData =
-            reinterpret_cast<lv::ProjectDocumentBlockData*>(currentBlock().userData());
-    if (!blockData) {
-        blockData = new lv::ProjectDocumentBlockData;
-        currentBlock().setUserData(blockData);
-    }
     blockData->m_exceededSections.clear();
 
     if (!bracketPositions.isEmpty()) {

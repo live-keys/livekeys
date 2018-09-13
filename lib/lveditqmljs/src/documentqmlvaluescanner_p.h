@@ -47,6 +47,8 @@ public:
     int getBlockEnd(int position);
     int getBlockExtent(int from);
 
+    static int getBlockEnd(QTextBlock& bl, int position);
+
 private:
     int findColonInTokenSet(const QList<QmlJS::Token>& tokens);
 

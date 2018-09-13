@@ -131,7 +131,7 @@ public:
         void clearReservations();
 
         SharedDataLocker(Filter* filter) : m_filter(filter), m_allReserved(true){}
-        ~SharedDataLocker(){ clearReservations(); }
+        ~SharedDataLocker();
 
         Filter*            m_filter;
         bool               m_allReserved;
@@ -164,9 +164,7 @@ public:
     SharedDataLocker* createLocker(){
         return new SharedDataLocker(this);
     }
-    void deleteLocker(SharedDataLocker* locker){
-        delete locker;
-    }
+    void deleteLocker(SharedDataLocker* locker);
 
 };
 

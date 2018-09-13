@@ -27,4 +27,6 @@ HEADERS += \
     $$PWD/live/visuallogfilter.h \
     $$PWD/live/visuallogbasemodel.h \
     $$PWD/live/typeinfo.h \
-    $$PWD/live/qmlengineinterceptor.h
+    $$PWD/live/qmlengineinterceptor.h \
+    $$PWD/live/meta/indextuple.h \
+    $$PWD/live/meta/functionargs.h

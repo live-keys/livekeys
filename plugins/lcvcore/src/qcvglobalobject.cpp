@@ -31,6 +31,18 @@ template<typename T, typename LT> void getValues( cv::Mat& m, QVariantList& outp
     }
 }
 
+template<typename T> QMatrix4x4 matrix4x4( cv::Mat& m ){
+    T* data  = reinterpret_cast<T*>(m.data);
+    int step = (int)(m.step / sizeof(T));
+
+    return QMatrix4x4(
+        (float)data[step * 0 + 0], (float)data[step * 0 + 1], (float)data[step * 0 + 2], (float)data[step * 0 + 3],
+        (float)data[step * 1 + 0], (float)data[step * 1 + 1], (float)data[step * 1 + 2], (float)data[step * 1 + 3],
+        (float)data[step * 2 + 0], (float)data[step * 2 + 1], (float)data[step * 2 + 2], (float)data[step * 2 + 3],
+        (float)data[step * 3 + 0], (float)data[step * 3 + 1], (float)data[step * 3 + 2], (float)data[step * 3 + 3]
+    );
+}
+
 template<typename T, typename LT> void setValues(const QVariantList& values, cv::Mat& m){
     T* data  = reinterpret_cast<T*>(m.data);
     int step = (int)(m.step / sizeof(T));
@@ -42,6 +54,8 @@ template<typename T, typename LT> void setValues(const QVariantList& values, cv:
         }
     }
 }
+
+
 
 } // namespace
 
@@ -105,4 +119,23 @@ void QCvGlobalObject::assignArrayToMat(const QVariantList &a, QMat *m){
         helpers::setValues<float, qreal>(a, *cvmat);
         break;
     }
+}
+
+QMatrix4x4 QCvGlobalObject::matrix4x4(QMat *m){
+    cv::Mat* cvmat = m->cvMat();
+
+    if ( cvmat->rows == 4 && cvmat->cols == 4 && m->channels() == 1 ){
+
+        switch(cvmat->depth()){
+        case CV_8U: return helpers::matrix4x4<uchar>(*cvmat);
+        case CV_8S: return helpers::matrix4x4<uchar>(*cvmat);
+        case CV_16U: return helpers::matrix4x4<ushort>(*cvmat);
+        case CV_16S: return helpers::matrix4x4<short>(*cvmat);
+        case CV_32S: return helpers::matrix4x4<int>(*cvmat);
+        case CV_32F: return helpers::matrix4x4<float>(*cvmat);
+        case CV_64F: return helpers::matrix4x4<double>(*cvmat);
+        }
+    }
+    qWarning("Matrix not of 4x4 and single channel type.");
+    return QMatrix4x4();
 }
