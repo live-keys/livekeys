@@ -179,12 +179,14 @@ void ProjectDocument::updateMarkers(int position, int charsRemoved, int charsAdd
 }
 
 void ProjectDocument::updateSectionBlocks(int position, const QString &addedText){
+    QTextBlock block = m_textDocument->findBlock(position);
+    QTextBlock otherBlock = m_textDocument->findBlock(position + addedText.length());
     if ( m_sections.size() > 0 &&
          m_textDocument &&
-       ( addedText.contains(QChar(QChar::ParagraphSeparator)) ||
-         addedText.contains(QChar(QChar::LineFeed))))
+       // ( addedText.contains(QChar(QChar::ParagraphSeparator)) ||
+       //  addedText.contains(QChar(QChar::LineFeed))))
+        block.blockNumber() != otherBlock.blockNumber())
     {
-        QTextBlock block = m_textDocument->findBlock(position);
         int blockEnd = block.position() + block.length();
 
         // iterate current block, see if it has any binds, check if binds are before the end of the block
