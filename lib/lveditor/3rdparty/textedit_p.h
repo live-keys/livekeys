@@ -375,6 +375,7 @@ private Q_SLOTS:
     void q_updateAlignment();
     void updateSize();
     void triggerPreprocess();
+    void highlightingDone(const QRectF &);
 
 private:
     void markDirtyNodesForRange(int start, int end, int charDelta);

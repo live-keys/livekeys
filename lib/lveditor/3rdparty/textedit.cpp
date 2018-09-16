@@ -2318,6 +2318,7 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
 
     QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
+    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
 
     document->setDefaultFont(font);
     document->setDocumentMargin(textMargin);
@@ -2652,17 +2653,22 @@ void TextEdit::updateWholeDocument()
     }
 }
 
-void TextEdit::invalidateBlock(const QTextBlock &block)
+void TextEdit::highlightingDone(const QRectF &)
 {
     Q_D(TextEdit);
-
-    markDirtyNodesForRange(block.position(), block.position() + block.length(), 0);
 
     if (d->highlightingInProgress)
     {
         d->highlightingInProgress = false;
         emit textDocumentFinishedUpdating();
     }
+}
+
+void TextEdit::invalidateBlock(const QTextBlock &block)
+{
+    Q_D(TextEdit);
+
+    markDirtyNodesForRange(block.position(), block.position() + block.length(), 0);
 
     polish();
     if (isComponentComplete()) {
