@@ -2316,9 +2316,7 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     lv_qmlobject_connect(document, QTextDocument, SIGNAL(undoAvailable(bool)), q, TextEdit, SIGNAL(canUndoChanged()));
     lv_qmlobject_connect(document, QTextDocument, SIGNAL(redoAvailable(bool)), q, TextEdit, SIGNAL(canRedoChanged()));
 
-    QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
-    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
-    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
+
 
     document->setDefaultFont(font);
     document->setDocumentMargin(textMargin);
@@ -2331,6 +2329,10 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     q->setReadOnly(readOnly);
     updateDefaultTextOption();
     q->updateSize();
+
+    QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
+    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
+    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
 }
 
 void TextEditPrivate::unsetTextDocument()
@@ -2669,6 +2671,14 @@ void TextEdit::invalidateBlock(const QTextBlock &block)
     Q_D(TextEdit);
 
     markDirtyNodesForRange(block.position(), block.position() + block.length(), 0);
+
+    ProjectDocumentBlockData* userData = static_cast<ProjectDocumentBlockData*>(block.userData());
+
+    if (userData && userData->stateChangeFlag())
+    {
+        emit dirtyBlockPosition(block.blockNumber());
+        emit textDocumentFinishedUpdating();
+    }
 
     polish();
     if (isComponentComplete()) {

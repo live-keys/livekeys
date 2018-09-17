@@ -74,14 +74,8 @@ QSGNode* LineNumberSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeDat
     TextNodeEngine engine;
     TextNodeEngine frameDecorationsEngine;
 
-    if (numberOfDigits(prevLineNumber) != numberOfDigits(lineNumber))
+    if (numberOfDigits(prevLineNumber) != numberOfDigits(lineNumber) || dirtyPos >= lineNodes.size())
         dirtyPos = 0;
-
-    // dirty fix for overlapping update bug - redraw everything if a line node is missing
-    /*if (oldNode && prevLineNumber != lineNodes.count())
-    {
-        dirtyPos = 0;
-    }*/
 
     if (!oldNode || dirtyPos != -1)
     {
@@ -170,12 +164,6 @@ void LineNumberSurface::textDocumentFinished()
     }
     else
     {
-        if (dirtyPos == -1)
-        {
-            dirtyPos = 0;
-            updateLineDocument();
-            return;
-        }
         QTextBlock block = document->findBlockByNumber(dirtyPos);
         auto userData = static_cast<ProjectDocumentBlockData*>(block.userData());
         if (userData && userData->stateChangeFlag())
@@ -352,11 +340,12 @@ void LineNumberSurface::updateLineDocument()
     auto firstDirtyBlock = lineDocument->findBlockByNumber(dirtyPos);
     lineDocument->markContentsDirty(firstDirtyBlock.position(), lineDocument->characterCount() - firstDirtyBlock.position());
 
-
-
     polish();
-    updateSize();
-    update();
+    if (isComponentComplete())
+    {
+        updateSize();
+        update();
+    }
 }
 
 void LineNumberSurface::linesAdded()
