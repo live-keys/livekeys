@@ -642,7 +642,7 @@ QString& ProjectDocumentBlockData::replacementString() { return m_replacementStr
 void ProjectDocumentBlockData::resetCollapseParams()
 {
     if (m_collapseState != Expand) {
-        if (m_collapseState != NoCollapse) m_stateChangeFlag = true;
+        m_stateChangeFlag = true;
         m_collapseState = NoCollapse;
         m_numOfCollapsedLines = 0;
         m_onCollapse = nullptr;
