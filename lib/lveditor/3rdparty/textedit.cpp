@@ -2409,6 +2409,9 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
     if (start == end)
         return;
 
+    int oldEnd = end;
+    bool nodesUpdate = true;
+
     if ( start < d->lastHighlightChangeStart && end > d->lastHighlightChangeEnd ){ // stretch both ways
         d->lastHighlightChangeStart = start;
         d->lastHighlightChangeEnd   = end;
@@ -2419,35 +2422,47 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
         start = d->lastHighlightChangeEnd;
         d->lastHighlightChangeEnd = end;
     } else {
-        return; // this is inside the interval we're updating
+        nodesUpdate = false; // this is inside the interval we're updating
     }
 
-    if(start == end)
-        return;
+    if(start == end) nodesUpdate = false;
 
     TextEditPrivate::Node dummyNode(start, nullptr);
     TextNodeIterator it = std::lower_bound(d->textNodeMap.begin(), d->textNodeMap.end(), &dummyNode, &comesBefore);
-    // qLowerBound gives us the first node past the start of the affected portion, rewind to the first node
-    // that starts at the last position before the edit position. (there might be several because of images)
-    if (it != d->textNodeMap.begin()) {
-        --it;
-        TextEditPrivate::Node otherDummy((*it)->startPos(), nullptr);
-        it = std::lower_bound(d->textNodeMap.begin(), d->textNodeMap.end(), &otherDummy, &comesBefore);
+    if (nodesUpdate && charDelta)
+    {
+        // qLowerBound gives us the first node past the start of the affected portion, rewind to the first node
+        // that starts at the last position before the edit position. (there might be several because of images)
+        if (it != d->textNodeMap.begin()) {
+            --it;
+            TextEditPrivate::Node otherDummy((*it)->startPos(), nullptr);
+            it = std::lower_bound(d->textNodeMap.begin(), d->textNodeMap.end(), &otherDummy, &comesBefore);
+        }
     }
 
-    // mark the affected nodes as dirty
-    while (it != d->textNodeMap.end()) {
-        if ((*it)->startPos() <= end){
-            (*it)->setDirty();
+    TextNodeIterator otherIt = it;
+
+    if (nodesUpdate)
+    {
+        while (it != d->textNodeMap.end() && (*it)->startPos() <= end)
+        {
+            (*it)->setDirty(); ++it;
         }
-        else if (charDelta)
-            (*it)->moveStartPos(charDelta);
-        else {
-            return;
-        }
-        ++it;
     }
 
+    if (charDelta)
+    {
+        while (otherIt != d->textNodeMap.end() && (*otherIt)->startPos() <= oldEnd)
+        {
+            ++otherIt;
+        }
+
+        while (otherIt != d->textNodeMap.end())
+        {
+            (*otherIt)->moveStartPos(charDelta);
+            ++otherIt;
+        }
+    }
 }
 
 void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
