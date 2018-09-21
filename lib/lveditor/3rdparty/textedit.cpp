@@ -605,6 +605,34 @@ void TextEdit::setSelectedTextColor(const QColor &color)
     emit selectedTextColorChanged(d->selectedTextColor);
 }
 
+int TextEdit::fragmentStart() const {
+    Q_D(const TextEdit);
+    return d->fragmentStart;
+}
+
+int TextEdit::fragmentEnd() const {
+    Q_D(const TextEdit);
+    return d->fragmentEnd;
+}
+
+void TextEdit::setFragmentStart(int frStart) {
+    Q_D(TextEdit);
+    d->fragmentStart = frStart;
+}
+
+void TextEdit::setFragmentEnd(int frEnd) {
+    Q_D(TextEdit);
+    d->fragmentEnd = frEnd;
+}
+
+void TextEdit::resetFragmentStart() {
+    setFragmentStart(-1);
+}
+
+void TextEdit::resetFragmentEnd() {
+    setFragmentEnd(-1);
+}
+
 /*!
     \qmlproperty enumeration QtQuick::TextEdit::horizontalAlignment
     \qmlproperty enumeration QtQuick::TextEdit::verticalAlignment
@@ -2299,6 +2327,9 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     control->setAcceptRichText(false);
     control->setCursorIsFocusIndicator(true);
 
+    // fragmentStart=2;
+    // fragmentEnd = 10;
+    // q->updateFragmentVisibility();
 
     lv_qmlobject_connect(control, TextControl, SIGNAL(updateCursorRequest()), q, TextEdit, SLOT(updateCursor()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, TextEdit, SIGNAL(selectedTextChanged()));
@@ -2743,6 +2774,7 @@ void TextEdit::updateTotalLines()
     if (d->lineCount != newTotalLines) {
         d->lineCount = newTotalLines;
         emit lineCountChanged();
+        updateFragmentVisibility();
     }
 }
 
@@ -3315,6 +3347,32 @@ void TextEdit::showHideLines(bool show, int pos, int num)
     }
 
     d->document->markContentsDirty(start, length);
+}
+
+void TextEdit::updateFragmentVisibility()
+{
+    Q_D(TextEdit);
+    if (!d->document || fragmentStart() == -1 || fragmentEnd() == -1) return;
+
+    auto it = d->document->rootFrame()->begin(); int cnt = 0;
+    auto endIt = d->document->rootFrame()->end();
+
+    qDebug() << fragmentStart() << fragmentEnd();
+
+    while (it != endIt)
+    {
+        if (cnt < fragmentStart()) it.currentBlock().setVisible(false);
+        else if (cnt < fragmentEnd()) it.currentBlock().setVisible(true);
+        else it.currentBlock().setVisible(false);
+
+        qDebug() << it.currentBlock().text() << it.currentBlock().isVisible();
+
+        ++cnt; ++it;
+    }
+
+    emit dirtyBlockPosition(0);
+    emit textDocumentFinishedUpdating();
+
 }
 
 void TextEdit::replaceTextInBlock(int blockNumber, std::string s)

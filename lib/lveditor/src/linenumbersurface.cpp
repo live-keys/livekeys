@@ -185,8 +185,9 @@ void LineNumberSurface::updateLineDocument()
     for (int i = 0; i < curr; i++) ++it;
     while (it != lineDocument->rootFrame()->end())
     {
+        auto currBlock = textEdit->documentHandler()->target()->findBlockByNumber(curr);
         lv::ProjectDocumentBlockData* userData =
-                static_cast<lv::ProjectDocumentBlockData*>(textEdit->documentHandler()->target()->findBlockByNumber(curr).userData());
+                static_cast<lv::ProjectDocumentBlockData*>(currBlock.userData());
 
         bool visible = true;
         if (itSections != sections.end())
@@ -207,6 +208,8 @@ void LineNumberSurface::updateLineDocument()
             if (curr == sec->position + sec->numberOfLines) ++itSections;
 
         }
+
+        visible = visible && currBlock.isVisible();
 
         it.currentBlock().setVisible(visible);
         if (visible) {
