@@ -8,8 +8,6 @@
 
 class TextNode;
 
-// #define COLLAPSE_DEBUG
-
 namespace lv {
 
 class LineNumberSurfacePrivate;
@@ -21,7 +19,7 @@ public:
     void resetFrameDecorations(TextNode* newNode);
     TextNode* frameDecorationsNode;
 };
-
+// done
 class LV_EDITOR_EXPORT LineNumberSurface : public QQuickItem {
 
     Q_OBJECT
@@ -32,27 +30,27 @@ public:
     ~LineNumberSurface() override;
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData) Q_DECL_OVERRIDE;
 
-    Q_INVOKABLE void setComponents(TextEdit *te);
+    Q_INVOKABLE void setComponents(TextEdit *te); //done
 
-    void updateSize();
-    void linesAdded();
-    void linesRemoved();
+    void updateSize(); //done
+    void linesAdded(); //done
+    void linesRemoved(); //done
 
-    void collapseLines(int pos, int num);
-    void expandLines(int pos, int num);
+    void collapseLines(int pos, int num); //done
+    void expandLines(int pos, int num); //done
 
     void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
     // void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
-    QColor color() const{ return m_color; }
+    QColor color() const{ return m_color; } //done
 
 public Q_SLOTS:
-    void setDirtyBlockPosition(int pos);
-    void textDocumentFinished();
-    void setColor(QColor color);
+    void setDirtyBlockPosition(int pos); //done
+    void textDocumentFinished(); //done
+    void setColor(QColor color); //done?
 
 signals:
-    void colorChanged(QColor color);
+    void colorChanged(QColor color); //done
 
 private:
     Q_DISABLE_COPY(LineNumberSurface)
@@ -60,29 +58,24 @@ private:
 
     void init();
 
-    TextEdit* textEdit;
+    TextEdit* textEdit; //done
 
     // Document containing line numbers. Allows us to use pre-existing text rendering structure beneath.
-    QTextDocument* lineDocument;
-    int prevLineNumber;
-    int lineNumber;
-    QFont font;
+    QTextDocument* lineDocument; //done
+    int prevLineNumber; //done
+    int lineNumber;//done
+    QFont font;//done
 
     //  Actual nodes to be drawn. One block - one node correspondence
-    QList<TextNode*> lineNodes;
+    QList<TextNode*> lineNodes; //done
 
     // Index of the block that was changed?
-    int dirtyPos;
+    int dirtyPos; //done
 
     // number of lines added/removed
-    int deltaLineNumber;
+    int deltaLineNumber; //done
 
-    LineManager *lineManager;
-
-    // character width used for calculating the width of the line surface
-    int visibleWidth;
-
-    bool isInitialized;
+    LineManager *lineManager; //done
 
     static inline int numberOfDigits(int i) {
         int res = 0;
@@ -98,12 +91,9 @@ private:
     void showHideLines(bool show, int pos, int num);
     void changeLastCharInBlock(int blockNumber, char c);
     void replaceTextInBlock(int blockNumber, std::string s);
-    void expandCollapseSkeleton(int pos, int num, QString &replacement, bool show);
-    void updateLineDocument();
-#ifdef COLLAPSE_DEBUG
-    void testSetup1();
-    void testSetup2();
-#endif
+    void expandCollapseSkeleton(int pos, int num, QString &replacement, bool show); //done
+    void updateLineDocument(); //done
+
     QColor m_color;
 };
 

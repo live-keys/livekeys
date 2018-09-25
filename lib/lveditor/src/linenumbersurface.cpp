@@ -27,7 +27,6 @@ LineNumberSurface::LineNumberSurface(QQuickItem *parent)
     , textEdit(nullptr), lineDocument(nullptr), prevLineNumber(0)
     , lineNumber(0), lineNodes(), dirtyPos(0)
     , lineManager(new LineManager)
-    , isInitialized(false)
     , m_color(QColor(255, 255, 255, 255))
 {
     setFlag(QQuickItem::ItemHasContents, true);
@@ -146,11 +145,6 @@ QSGNode* LineNumberSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeDat
             block.layout()->engine()->resetFontEngineCache();
     }
 
-    if (!isInitialized && lineNumber != 0 && lineNodes.size() == lineNumber)
-    {
-        isInitialized = true;
-    }
-
     return rootNode;
 }
 
@@ -224,7 +218,6 @@ void LineNumberSurface::updateLineDocument()
             else if (userData && userData->collapseState() != lv::ProjectDocumentBlockData::Expand)
                 changeLastCharInBlock(curr, ' ');
 
-            visibleWidth = it.currentBlock().length();
         }
         ++curr; ++it;
     }
@@ -256,12 +249,6 @@ void LineNumberSurface::linesAdded()
 
         cursor.insertText(a);
     }
-
-#ifdef COLLAPSE_DEBUG
-    static int callNum = 0;
-    if (!callNum) testSetup2();
-    callNum++;
-#endif
 
     updateLineDocument();
 }
@@ -360,9 +347,6 @@ void LineNumberSurface::changeLastCharInBlock(int blockNumber, char c)
 }
 
 void LineNumberSurface::init() {
-#ifdef COLLAPSE_DEBUG
-    testSetup1();
-#endif
     font = textEdit->font();
 
     lineDocument = new QTextDocument(this);
@@ -375,7 +359,6 @@ void LineNumberSurface::init() {
 
     dirtyPos = 0;
     prevLineNumber = 0;
-    isInitialized = false;
     textDocumentFinished();
 
 
@@ -386,7 +369,6 @@ void LineNumberSurface::init() {
 
     setAcceptedMouseButtons(Qt::AllButtons);
 
-    visibleWidth = lineDocument->end().previous().length();
 }
 
 

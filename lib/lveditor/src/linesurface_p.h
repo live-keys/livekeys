@@ -16,7 +16,7 @@ namespace lv {
 class TextControl;
 class TextNode;
 class TextNodeEngine;
-
+class LineManager;
 
 class LV_EDITOR_EXPORT LineSurfacePrivate : public QQuickImplicitSizeItemPrivate
 {
@@ -99,7 +99,6 @@ public:
     ~LineSurfacePrivate()
     {
         qDebug() << QThread::currentThreadId();
-        qDebug() << "TEXTEDIT==============Destructor:      " << static_cast<void*>(this) << textNodeMap.size();
         qDeleteAll(textNodeMap);
     }
 
@@ -208,6 +207,12 @@ public:
     bool selectByKeyboard:1;
     bool selectByKeyboardSet:1;
     bool hadSelection : 1;
+
+    int prevLineNumber;
+    int lineNumber;
+    int dirtyPos;
+    int deltaLineNumber;
+    LineManager *lineManager;
 };
 
 }

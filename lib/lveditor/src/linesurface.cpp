@@ -25,6 +25,8 @@
 
 #include <algorithm>
 #include "textedit_p.h"
+#include "linemanager.h"
+#include "collapsedsection.h"
 
 
 namespace lv {
@@ -44,7 +46,7 @@ namespace {
     class RootNode : public QSGTransformNode
     {
     public:
-        RootNode() : cursorNode(nullptr), frameDecorationsNode(nullptr)
+        RootNode() : frameDecorationsNode(nullptr)
         { }
 
         void resetFrameDecorations(TextNode* newNode)
@@ -56,8 +58,6 @@ namespace {
             frameDecorationsNode = newNode;
             newNode->setFlag(QSGNode::OwnedByParent);
         }
-
-        QSGRectangleNode *cursorNode;
         TextNode* frameDecorationsNode;
 
     };
@@ -132,6 +132,38 @@ void LineSurface::setFont(const QFont &font)
     }
     emit fontChanged(d->sourceFont);
 }
+
+void LineSurface::textDocumentFinished()
+{
+    Q_D(LineSurface);
+    auto teDocument = d->textEdit->documentHandler()->target();
+    d->prevLineNumber = d->lineNumber;
+    d->lineNumber = teDocument->blockCount();
+
+    d->deltaLineNumber = abs(d->prevLineNumber - d->lineNumber);
+    if (d->deltaLineNumber)
+    {
+        if (d->prevLineNumber < d->lineNumber) linesAdded();
+        else linesRemoved();
+    }
+    else
+    {
+        QTextBlock block = teDocument->findBlockByNumber(d->dirtyPos);
+        auto userData = static_cast<ProjectDocumentBlockData*>(block.userData());
+        if (userData && userData->stateChangeFlag())
+        {
+            userData->setStateChangeFlag(false);
+            updateLineDocument();
+        }
+    }
+}
+
+void LineSurface::setDirtyBlockPosition(int pos)
+{
+    Q_D(LineSurface);
+    d->dirtyPos = pos;
+}
+
 
 QColor LineSurface::color() const
 {
@@ -1174,75 +1206,9 @@ qreal LineSurfacePrivate::getImplicitWidth() const
 void LineSurface::updateSize()
 {
     Q_D(LineSurface);
-
-    if (!isComponentComplete()) {
-        d->dirty = true;
-        return;
-    }
-
     if (!d->document) return;
-
-    if (abs(d->document->textWidth() +1) > LV_ACCURACY)
-        d->document->setTextWidth(-1);
-
-    qreal naturalWidth = d->implicitWidth - leftPadding() - rightPadding();
-
-
-    qreal newWidth = d->document->idealWidth();
-    // ### assumes that if the width is set, the text will fill to edges
-    // ### (unless wrap is false, then clipping will occur)
-    if (widthValid()) {
-        if (!d->requireImplicitWidth) {
-            emit implicitWidthChanged();
-            // if the implicitWidth is used, then updateSize() has already been called (recursively)
-            if (d->requireImplicitWidth)
-                return;
-        }
-        if (d->requireImplicitWidth) {
-            d->document->setTextWidth(-1);
-            naturalWidth = d->document->idealWidth();
-
-            const bool wasInLayout = d->inLayout;
-            d->inLayout = true;
-            if (d->isImplicitResizeEnabled())
-                setImplicitWidth(naturalWidth + leftPadding() + rightPadding());
-            d->inLayout = wasInLayout;
-            if (d->inLayout)    // probably the result of a binding loop, but by letting it
-                return;         // get this far we'll get a warning to that effect.
-        }
-//        d->document->setTextWidth(-1);
-//        if (abs(d->document->textWidth() - width()) > LV_ACCURACY) {
-//            d->document->setTextWidth(width() - leftPadding() - rightPadding());
-//            newWidth = d->document->idealWidth();
-//        }
-        //### need to confirm cost of always setting these
-    } else if (d->wrapMode == NoWrap && abs(d->document->textWidth() - newWidth) > LV_ACCURACY) {
-//        d->document->setTextWidth(newWidth); // ### Text does not align if width is not set or the idealWidth exceeds the textWidth (QTextDoc bug)
-    } else {
-//        d->document->setTextWidth(-1);
-    }
-
-    QFontMetricsF fm(d->font);
-    qreal newHeight = d->document->isEmpty() ? qCeil(fm.height()) : d->document->size().height();
-
-    if (d->isImplicitResizeEnabled()) {
-        // ### Setting the implicitWidth triggers another updateSize(), and unless there are bindings nothing has changed.
-        if (!widthValid() && !d->requireImplicitWidth)
-            setImplicitSize(newWidth + leftPadding() + rightPadding(), newHeight + topPadding() + bottomPadding());
-        else
-            setImplicitHeight(newHeight + topPadding() + bottomPadding());
-    }
-
-    d->xoff = leftPadding() + qMax(qreal(0), TextUtil::alignedX(d->document->size().width(), width() - leftPadding() - rightPadding(), effectiveHAlign()));
-    d->yoff = topPadding() + TextUtil::alignedY(d->document->size().height(), height() - topPadding() - bottomPadding(), d->vAlign);
-    setBaselineOffset(fm.ascent() + d->yoff + d->textMargin);
-
-    QSizeF size(newWidth, newHeight);
-    if (d->contentSize != size) {
-        d->contentSize = size;
-        emit contentSizeChanged();
-        updateTotalLines();
-    }
+    QSizeF layoutSize = d->document->documentLayout()->documentSize();
+    setImplicitSize(layoutSize.width(), layoutSize.height());
 }
 
 void LineSurface::updateWholeDocument()
@@ -1259,6 +1225,160 @@ void LineSurface::updateWholeDocument()
         update();
     }
 }
+
+void LineSurface::linesAdded()
+{
+    Q_D(LineSurface);
+    d->lineManager->linesAdded(d->dirtyPos, d->deltaLineNumber);
+
+    QTextCursor cursor(d->document);
+    cursor.movePosition(QTextCursor::MoveOperation::End);
+    for (int i = d->prevLineNumber + 1; i <= d->lineNumber; i++)
+    {
+
+        if (i!=1) cursor.insertBlock();
+        std::string s = std::to_string(i) + "  ";
+        if (i < 10) s = " " + s;
+        const QString a(s.c_str());
+
+        cursor.insertText(a);
+    }
+    updateLineDocument();
+}
+
+void LineSurface::linesRemoved()
+{
+    Q_D(LineSurface);
+    d->lineManager->linesRemoved(d->dirtyPos, d->deltaLineNumber);
+
+    for (int i = d->prevLineNumber-1; i >= d->lineNumber; i--)
+    {
+        QTextCursor cursor(d->document->findBlockByNumber(i));
+        cursor.select(QTextCursor::BlockUnderCursor);
+        cursor.removeSelectedText();
+    }
+
+    updateLineDocument();
+}
+
+void LineSurface::updateLineDocument()
+{
+    Q_D(LineSurface);
+    // we look for a collapsed section after the position where we made a change
+    std::list<CollapsedSection*> &sections = d->lineManager->getSections();
+    auto itSections = sections.begin();
+    while (itSections != sections.end() && (*itSections)->position < d->dirtyPos) ++itSections;
+    int curr = d->dirtyPos;
+    auto it = d->document->rootFrame()->begin();
+    for (int i = 0; i < curr; i++) ++it;
+    while (it != d->document->rootFrame()->end())
+    {
+        auto currBlock = d->textEdit->documentHandler()->target()->findBlockByNumber(curr);
+        lv::ProjectDocumentBlockData* userData =
+                static_cast<lv::ProjectDocumentBlockData*>(currBlock.userData());
+
+        bool visible = true;
+        if (itSections != sections.end())
+        {
+            CollapsedSection* sec = (*itSections);
+            if (curr == sec->position && userData
+                    && userData->collapseState() == lv::ProjectDocumentBlockData::Expand)
+            {
+                changeLastCharInBlock(curr, '>');
+
+            }
+            // if we're in a collapsed section, block shouldn't be visible
+            if (curr > sec->position && curr <= sec->position + sec->numberOfLines)
+            {
+                visible = false;
+            }
+            // if we just exited a collapsed section, move to the next one
+            if (curr == sec->position + sec->numberOfLines) ++itSections;
+
+        }
+
+        visible = visible && currBlock.isVisible();
+
+        it.currentBlock().setVisible(visible);
+        if (visible) {
+            if (userData && userData->collapseState() == lv::ProjectDocumentBlockData::Collapse)
+            {
+                changeLastCharInBlock(curr, 'v');
+            }
+            else if (userData && userData->collapseState() != lv::ProjectDocumentBlockData::Expand)
+                changeLastCharInBlock(curr, ' ');
+        }
+        ++curr; ++it;
+    }
+    auto firstDirtyBlock = d->document->findBlockByNumber(d->dirtyPos);
+    d->document->markContentsDirty(firstDirtyBlock.position(), d->document->characterCount() - firstDirtyBlock.position());
+
+    polish();
+    if (isComponentComplete())
+    {
+        updateSize();
+        update();
+    }
+}
+
+void LineSurface::changeLastCharInBlock(int blockNumber, char c)
+{
+    Q_D(LineSurface);
+    QTextBlock b = d->document->findBlockByNumber(blockNumber);
+    QTextCursor cursor(b);
+    cursor.beginEditBlock();
+    cursor.movePosition(QTextCursor::EndOfBlock);
+    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
+    cursor.removeSelectedText();
+    cursor.insertText(QString(c));
+    cursor.endEditBlock();
+}
+
+void LineSurface::collapseLines(int pos, int num)
+{
+    Q_D(LineSurface);
+    changeLastCharInBlock(pos, '>');
+
+    QTextBlock matchingBlock = d->textEdit->documentHandler()->target()->findBlockByNumber(pos);
+    // ProjectDocumentBlockData* userData = static_cast<ProjectDocumentBlockData*>(matchingBlock.userData());
+    QString s = matchingBlock.text();
+    // s+=userData->replacementString;
+    expandCollapseSkeleton(pos, num, s, false);
+}
+
+void LineSurface::expandLines(int pos, int num)
+{
+    Q_D(LineSurface);
+    changeLastCharInBlock(pos, 'v');
+
+    QTextBlock matchingBlock = d->textEdit->documentHandler()->target()->findBlockByNumber(pos);
+    // lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
+    QString s = matchingBlock.text();
+    // s.chop(userData->replacementString.length());
+    expandCollapseSkeleton(pos, num, s, true);
+}
+
+void LineSurface::expandCollapseSkeleton(int pos, int num, QString &replacement, bool show)
+{
+    Q_D(LineSurface);
+    if (show)
+    {
+        d->textEdit->expandLines(pos, num, replacement);
+        // lineManager->expandLines(pos, num);
+    }
+    else
+    {
+        d->textEdit->collapseLines(pos, num, replacement);
+        // lineManager->collapseLines(pos, num);
+    }
+
+
+    showHideLines(show, pos, num);
+    d->dirtyPos = pos;
+
+    updateLineDocument();
+}
+
 
 void LineSurface::highlightingDone(const QRectF &)
 {

@@ -247,12 +247,15 @@ Q_SIGNALS:
     void fragmentEndChanged();
 
 public Q_SLOTS:
+    void setDirtyBlockPosition(int pos);
     void singleShotUpdate();
     bool isRightToLeft(int start, int end);
     void insert(int position, const QString &text);
     void remove(int start, int end);
     Q_REVISION(2) void append(const QString &text);
     Q_REVISION(7) void clear();
+    void textDocumentFinished();
+
 
 private Q_SLOTS:
     void q_textChanged();
@@ -274,6 +277,15 @@ private:
     void showHideLines(bool show, int pos, int num);
     void replaceTextInBlock(int blockNumber, std::string s);
     void updateFragmentVisibility();
+
+    void linesAdded();
+    void linesRemoved();
+    void updateLineDocument();
+    void changeLastCharInBlock(int blockNumber, char c);
+
+    void collapseLines(int pos, int num);
+    void expandLines(int pos, int num);
+    void expandCollapseSkeleton(int pos, int num, QString &replacement, bool show);
 
 protected:
     LineSurface(LineSurfacePrivate &dd, QQuickImplicitSizeItem *parent = nullptr);
