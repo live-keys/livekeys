@@ -840,11 +840,11 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     }
 
     RootNode *rootNode = static_cast<RootNode *>(oldNode);
-    TextNodeIterator nodeIterator = d->textNodeMap.begin();
+    /*TextNodeIterator nodeIterator = d->textNodeMap.begin();
 
     while (nodeIterator != d->textNodeMap.end() && !(*nodeIterator)->dirty())
         ++nodeIterator;
-
+*/
     TextNodeEngine engine;
     TextNodeEngine frameDecorationsEngine;
 
@@ -854,12 +854,12 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     if (numberOfDigits(d->prevLineNumber) != numberOfDigits(d->lineNumber) || d->dirtyPos >= d->textNodeMap.size())
         d->dirtyPos = 0;
 
-    if (!oldNode  || d->dirtyPos != -1 || nodeIterator < d->textNodeMap.end()) {
+    if (!oldNode  || d->dirtyPos != -1/* || nodeIterator < d->textNodeMap.end()*/) {
 
         if (!oldNode)
             rootNode = new RootNode;
 
-        int firstDirtyPos = 0;
+        /*int firstDirtyPos = 0;
         if (nodeIterator != d->textNodeMap.end()) {
             firstDirtyPos = (*nodeIterator)->startPos();
             do {
@@ -869,7 +869,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                 nodeIterator = d->textNodeMap.erase(nodeIterator);
             } while (nodeIterator != d->textNodeMap.end() && (*nodeIterator)->dirty());
         }
-
+*/
         // delete all dirty nodes
         auto lineNumIt = d->textNodeMap.begin();
         for (int k=0; k<d->dirtyPos; k++, lineNumIt++);
@@ -889,14 +889,14 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
         TextNode *node = nullptr;
 
         int currentNodeSize = 0;
-        int nodeStart = firstDirtyPos;
+        //int nodeStart = firstDirtyPos;
         QPointF basePosition(d->xoff, d->yoff);
         QMatrix4x4 basePositionMatrix;
         basePositionMatrix.translate(static_cast<float>(basePosition.x()), static_cast<float>(basePosition.y()));
         rootNode->setMatrix(basePositionMatrix);
 
         QPointF nodeOffset;
-        LineSurfacePrivate::Node *firstCleanNode = (nodeIterator != d->textNodeMap.end()) ? *nodeIterator : nullptr;
+        //LineSurfacePrivate::Node *firstCleanNode = (nodeIterator != d->textNodeMap.end()) ? *nodeIterator : nullptr;
 
         if (d->document) {
             QList<QTextFrame *> frames;
@@ -907,9 +907,9 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                 frames.append(textFrame->childFrames());
                 frameDecorationsEngine.addFrameDecorations(d->document, textFrame);
 
-                if (textFrame->lastPosition() < firstDirtyPos || (firstCleanNode && textFrame->firstPosition() >= firstCleanNode->startPos()))
+                /*if (textFrame->lastPosition() < firstDirtyPos || (firstCleanNode && textFrame->firstPosition() >= firstCleanNode->startPos()))
                     continue;
-
+*/
                 //INFO: creating the text node
                 node = d->createTextNode();
                 resetEngine(&engine, d->color, d->selectedTextColor, d->selectionColor);
@@ -925,7 +925,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                     engine.setCurrentLine(block.layout()->lineForTextPosition(pos - block.position()));
                     engine.addTextObject(QPointF(0, 0), format, TextNodeEngine::Unselected, d->document,
                                                   pos, textFrame->frameFormat().position());
-                    nodeStart = pos;
+                    //nodeStart = pos;
                 } else {
                     // Having nodes spanning across frame boundaries will break the current bookkeeping mechanism. We need to prevent that.
                     QList<int> frameBoundaries;
@@ -941,36 +941,45 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
 
                         QTextBlock block = it.currentBlock();
                         ++it;
-
+/*
                         if (block.position() < firstDirtyPos)
                             continue;
-
+*/
                         if (!block.isVisible()) continue;
 
                         if (!engine.hasContents()) {
                             nodeOffset = d->document->documentLayout()->blockBoundingRect(block).topLeft();
                             updateNodeTransform(node, nodeOffset);
-                            nodeStart = block.position();
+                            //nodeStart = block.position();
                         }
 
                         engine.addTextBlock(d->document, block, -nodeOffset, d->color, QColor(), -1, -1);
                         currentNodeSize += block.length();
-
+/*
                         if ((it.atEnd()) || (firstCleanNode && block.next().position() >= firstCleanNode->startPos())) // last node that needed replacing or last block of the frame
                             break;
-
-                        QList<int>::const_iterator lowerBound = std::lower_bound(frameBoundaries.constBegin(), frameBoundaries.constEnd(), block.next().position());
-                        if (currentNodeSize > nodeBreakingSize || lowerBound == frameBoundaries.constEnd() || *lowerBound > nodeStart) {
+*/
+                        //if (currentNodeSize > nodeBreakingSize || lowerBound == frameBoundaries.constEnd() || *lowerBound > nodeStart) {
                             currentNodeSize = 0;
-                            d->addCurrentTextNodeToRoot(&engine, rootNode, node, nodeIterator, nodeStart);
+                            //d->addCurrentTextNodeToRoot(&engine, rootNode, node, nodeIterator, nodeStart);
+                            engine.addToSceneGraph(node, QQuickText::Normal, QColor());
+                            d->textNodeMap.append(new LineSurfacePrivate::Node(-1, node));
+                            rootNode->appendChildNode(node);
+                            /*void LineSurfacePrivate::addCurrentTextNodeToRoot(TextNodeEngine *engine, QSGTransformNode *root, TextNode *node, TextNodeIterator &it, int startPos)
+                            {*/
+
+                            /*}*/
+
+
                             node = d->createTextNode();
                             resetEngine(&engine, d->color, d->selectedTextColor, d->selectionColor);
-                            nodeStart = block.next().position();
-                        }
+                            //nodeStart = block.next().position();
+                        //}
                     }
                 }
-                d->addCurrentTextNodeToRoot(&engine, rootNode, node, nodeIterator, nodeStart);
-            }
+                engine.addToSceneGraph(node, QQuickText::Normal, QColor());
+                d->textNodeMap.append(new LineSurfacePrivate::Node(-1, node));
+                rootNode->appendChildNode(node);            }
         }
 
 
@@ -978,7 +987,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
         // Now prepend the frame decorations since we want them rendered first, with the text nodes and cursor in front.
         rootNode->prependChildNode(rootNode->frameDecorationsNode);
 
-        Q_ASSERT(nodeIterator == d->textNodeMap.end() || (*nodeIterator) == firstCleanNode);
+        /*Q_ASSERT(nodeIterator == d->textNodeMap.end() || (*nodeIterator) == firstCleanNode);
         // Update the position of the subsequent text blocks.
         if (d->document && firstCleanNode) {
             QPointF oldOffset = firstCleanNode->textNode()->matrix().map(QPointF(0,0));
@@ -992,7 +1001,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
             }
 
         }
-
+*/
         // Since we iterate over blocks from different text frames that are potentially not sorted
         // we need to ensure that our list of nodes is sorted again:
         std::sort(d->textNodeMap.begin(), d->textNodeMap.end(), &comesBefore);
@@ -1379,6 +1388,7 @@ void LineSurface::updateLineDocument()
     if (isComponentComplete())
     {
         updateSize();
+        d->updateType = LineSurfacePrivate::UpdatePaintNode;
 
         update();
     }
