@@ -24,6 +24,7 @@
 #include "private/qsgadaptationlayer_p.h"
 
 #include <algorithm>
+#include "textedit_p.h"
 
 
 namespace lv {
@@ -56,18 +57,6 @@ namespace {
             newNode->setFlag(QSGNode::OwnedByParent);
         }
 
-        void resetCursorNode(QSGRectangleNode* newNode)
-        {
-            if (cursorNode)
-                removeChildNode(cursorNode);
-            delete cursorNode;
-            cursorNode = newNode;
-            if (cursorNode) {
-                appendChildNode(cursorNode);
-                cursorNode->setFlag(QSGNode::OwnedByParent);
-            }
-        }
-
         QSGRectangleNode *cursorNode;
         TextNode* frameDecorationsNode;
 
@@ -77,95 +66,15 @@ namespace {
 LineSurface::LineSurface(QQuickImplicitSizeItem *parent)
 : QQuickImplicitSizeItem(*(new LineSurfacePrivate), parent)
 {
-    /*Q_D(LineSurface);
-    d->init();*/
+    Q_D(LineSurface);
+    d->init();
 }
 
 LineSurface::LineSurface(LineSurfacePrivate &dd, QQuickImplicitSizeItem *parent)
 : QQuickImplicitSizeItem(dd, parent)
 {
-    /*Q_D(LineSurface);
-    d->init();*/
-}
-
-QString LineSurface::text() const
-{
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return QString();
-    if (!d->textCached && isComponentComplete()) {
-        LineSurfacePrivate *d = const_cast<LineSurfacePrivate *>(d_func());
-#ifndef QT_NO_TEXTHTMLPARSER
-        if (d->richText)
-            d->text = d->control->toHtml();
-        else
-#endif
-            d->text = d->control->toPlainText();
-        d->textCached = true;
-    }
-    return d->text;
-}
-
-void LineSurface::setText(const QString &text)
-{
-
     Q_D(LineSurface);
-    if (LineSurface::text() == text)
-        return;
-
-    d->richText = d->format == RichText || (d->format == AutoText && Qt::mightBeRichText(text));
-    if (!isComponentComplete()) {
-        d->text = text;
-    } else if (d->control) {
-        if (d->richText) {
-        #ifndef QT_NO_TEXTHTMLPARSER
-                d->control->setHtml(text);
-        #else
-                d->control->setPlainText(text);
-        #endif
-        } else {
-            d->control->setPlainText(text);
-        }
-    }
-}
-
-QString LineSurface::preeditText() const
-{
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return QString();
-    return d->control->preeditText();
-}
-
-LineSurface::TextFormat LineSurface::textFormat() const
-{
-    Q_D(const LineSurface);
-    return d->format;
-}
-
-void LineSurface::setTextFormat(TextFormat format)
-{
-    Q_D(LineSurface);
-
-    if (format == d->format)
-        return;
-
-    bool wasRich = d->richText;
-    d->richText = format == RichText || (format == AutoText && (wasRich || Qt::mightBeRichText(text())));
-
-#ifndef QT_NO_TEXTHTMLPARSER
-    if (isComponentComplete()) {
-        if (wasRich && !d->richText) {
-            if (d->control) d->control->setPlainText(!d->textCached ? d->control->toHtml() : d->text);
-            updateSize();
-        } else if (!wasRich && d->richText) {
-            if (d->control) d->control->setHtml(!d->textCached ? d->control->toPlainText() : d->text);
-            updateSize();
-        }
-    }
-#endif
-
-    d->format = format;
-    d->control->setAcceptRichText(d->format != PlainText);
-    emit textFormatChanged(d->format);
+    d->init();
 }
 
 LineSurface::RenderType LineSurface::renderType() const
@@ -322,15 +231,6 @@ void LineSurface::setHAlign(HAlignment align)
     }
 }
 
-void LineSurface::resetHAlign()
-{
-    Q_D(LineSurface);
-    d->hAlignImplicit = true;
-    if (d->determineHorizontalAlignment() && isComponentComplete()) {
-        d->updateDefaultTextOption();
-        updateSize();
-    }
-}
 
 LineSurface::HAlignment LineSurface::effectiveHAlign() const
 {
@@ -385,26 +285,6 @@ Qt::LayoutDirection LineSurfacePrivate::textDirection(const QString &text) const
     return Qt::LayoutDirectionAuto;
 }
 
-bool LineSurfacePrivate::determineHorizontalAlignment()
-{
-    Q_Q(LineSurface);
-    if (!document || !control) return false;
-
-    if (hAlignImplicit && q->isComponentComplete()) {
-        Qt::LayoutDirection direction = contentDirection;
-#ifndef QT_NO_IM
-        if (direction == Qt::LayoutDirectionAuto) {
-            const QString preeditText = control->textCursor().block().layout()->preeditAreaText();
-            direction = textDirection(preeditText);
-        }
-        if (direction == Qt::LayoutDirectionAuto)
-            direction = qGuiApp->inputMethod()->inputDirection();
-#endif
-
-        return setHAlign(direction == Qt::RightToLeft ? LineSurface::AlignRight : LineSurface::AlignLeft);
-    }
-    return false;
-}
 
 void LineSurfacePrivate::mirrorChange()
 {
@@ -439,12 +319,25 @@ void LineSurfacePrivate::setTopPadding(qreal value, bool reset)
     }
 }
 
-void LineSurface::setComponents(TextEdit* te)
+void LineSurface::setComponents(lv::TextEdit* te)
 {
     Q_D(LineSurface);
     d->textEdit = te;
+    d->init();
 
     d->document = new QTextDocument(this);
+
+    d->font = te->font();
+    d->document->setDefaultFont(d->font);
+    QTextOption opt;
+    opt.setAlignment(Qt::AlignRight | Qt::AlignTop);
+    opt.setTextDirection(Qt::LeftToRight);
+    d->document->setDefaultTextOption(opt);
+
+    d->document->documentLayout();
+
+    d->document->setPlainText("This\nis\na\ntest");
+    q_contentsChange(0,0,d->document->characterCount());
 }
 
 void LineSurfacePrivate::setLeftPadding(qreal value, bool reset)
@@ -594,150 +487,6 @@ void LineSurface::resetBaseUrl()
         setBaseUrl(QUrl());
 }
 
-QRectF LineSurface::positionToRectangle(int pos) const
-{
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return QRectF();
-    QTextCursor c(d->document);
-    c.setPosition(pos);
-    return d->control->cursorRect(c).translated(d->xoff, d->yoff);
-
-}
-
-int LineSurface::positionAt(qreal x, qreal y) const
-{
-    Q_D(const LineSurface);
-    if (!d->document) return -1;
-    x -= d->xoff;
-    y -= d->yoff;
-
-    int r = d->document->documentLayout()->hitTest(QPointF(x, y), Qt::FuzzyHit);
-#ifndef QT_NO_IM
-    QTextCursor cursor = d->control->textCursor();
-    if (r > cursor.position()) {
-        // The cursor position includes positions within the preedit text, but only positions in the
-        // same text block are offset so it is possible to get a position that is either part of the
-        // preedit or the next text block.
-        QTextLayout *layout = cursor.block().layout();
-        const int preeditLength = layout
-                ? layout->preeditAreaText().length()
-                : 0;
-        if (preeditLength > 0
-                && d->document->documentLayout()->blockBoundingRect(cursor.block()).contains(x, y)) {
-            r = r > cursor.position() + preeditLength
-                    ? r - preeditLength
-                    : cursor.position();
-        }
-    }
-#endif
-    return r;
-}
-
-void LineSurface::moveCursorSelection(int pos)
-{
-    //Note that this is the same as setCursorPosition but with the KeepAnchor flag set
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    QTextCursor cursor = d->control->textCursor();
-    if (cursor.position() == pos)
-        return;
-    cursor.setPosition(pos, QTextCursor::KeepAnchor);
-    d->control->setTextCursor(cursor);
-}
-
-void LineSurface::moveCursorSelection(int pos, SelectionMode mode)
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    QTextCursor cursor = d->control->textCursor();
-    if (cursor.position() == pos)
-        return;
-    if (mode == SelectCharacters) {
-        cursor.setPosition(pos, QTextCursor::KeepAnchor);
-    } else if (cursor.anchor() < pos || (cursor.anchor() == pos && cursor.position() < pos)) {
-        if (cursor.anchor() > cursor.position()) {
-            cursor.setPosition(cursor.anchor(), QTextCursor::MoveAnchor);
-            cursor.movePosition(QTextCursor::StartOfWord, QTextCursor::KeepAnchor);
-            if (cursor.position() == cursor.anchor())
-                cursor.movePosition(QTextCursor::PreviousWord, QTextCursor::MoveAnchor);
-            else
-                cursor.setPosition(cursor.position(), QTextCursor::MoveAnchor);
-        } else {
-            cursor.setPosition(cursor.anchor(), QTextCursor::MoveAnchor);
-            cursor.movePosition(QTextCursor::StartOfWord, QTextCursor::MoveAnchor);
-        }
-
-        cursor.setPosition(pos, QTextCursor::KeepAnchor);
-        cursor.movePosition(QTextCursor::StartOfWord, QTextCursor::KeepAnchor);
-        if (cursor.position() != pos)
-            cursor.movePosition(QTextCursor::EndOfWord, QTextCursor::KeepAnchor);
-    } else if (cursor.anchor() > pos || (cursor.anchor() == pos && cursor.position() > pos)) {
-        if (cursor.anchor() < cursor.position()) {
-            cursor.setPosition(cursor.anchor(), QTextCursor::MoveAnchor);
-            cursor.movePosition(QTextCursor::EndOfWord, QTextCursor::MoveAnchor);
-        } else {
-            cursor.setPosition(cursor.anchor(), QTextCursor::MoveAnchor);
-            cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
-            cursor.movePosition(QTextCursor::EndOfWord, QTextCursor::KeepAnchor);
-            if (cursor.position() != cursor.anchor()) {
-                cursor.setPosition(cursor.anchor(), QTextCursor::MoveAnchor);
-                cursor.movePosition(QTextCursor::EndOfWord, QTextCursor::MoveAnchor);
-            }
-        }
-
-        cursor.setPosition(pos, QTextCursor::KeepAnchor);
-        cursor.movePosition(QTextCursor::EndOfWord, QTextCursor::KeepAnchor);
-        if (cursor.position() != pos) {
-            cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
-            cursor.movePosition(QTextCursor::StartOfWord, QTextCursor::KeepAnchor);
-        }
-    }
-    d->control->setTextCursor(cursor);
-}
-
-bool LineSurface::isCursorVisible() const
-{
-    Q_D(const LineSurface);
-    return d->cursorVisible;
-}
-
-void LineSurface::setCursorVisible(bool on)
-{
-    Q_D(LineSurface);
-    d->cursorVisible = on;
-    if (on && isComponentComplete())
-        TextUtil::createCursor(d);
-    if (!on && !d->persistentSelection)
-        if (d->control) d->control->setCursorIsFocusIndicator(true);
-    if (d->control) d->control->setCursorVisible(on);
-    emit cursorVisibleChanged(d->cursorVisible);
-}
-
-int LineSurface::cursorPosition() const
-{
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return -1;
-
-    return d->control->textCursor().position();
-}
-
-void LineSurface::setCursorPosition(int pos)
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-    if (pos < 0 || pos >= d->document->characterCount()) // characterCount includes the terminating null.
-        return;
-    QTextCursor cursor = d->control->textCursor();
-    if (cursor.position() == pos && cursor.anchor() == pos)
-        return;
-    cursor.setPosition(pos);
-    d->control->setTextCursor(cursor);
-    d->control->updateCursorRectangle(true);
-}
-
-
 QQmlComponent* LineSurface::cursorDelegate() const
 {
     Q_D(const LineSurface);
@@ -757,35 +506,6 @@ void LineSurface::createCursor()
     TextUtil::createCursor(d);
 }
 
-int LineSurface::selectionStart() const
-{
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return -1;
-
-    return d->control->textCursor().selectionStart();
-}
-
-int LineSurface::selectionEnd() const
-{
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return -1;
-
-    return d->control->textCursor().selectionEnd();
-}
-
-QString LineSurface::selectedText() const
-{
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return QString();
-
-#ifndef QT_NO_TEXTHTMLPARSER
-    return d->richText
-            ? d->control->textCursor().selectedText()
-            : d->control->textCursor().selection().toPlainText();
-#else
-    return d->control->textCursor().selection().toPlainText();
-#endif
-}
 
 bool LineSurface::focusOnPress() const
 {
@@ -880,86 +600,15 @@ void LineSurface::componentComplete()
     Q_D(LineSurface);
 
     QQuickItem::componentComplete();
-    if (!d->document || !d->control) return;
+    if (!d->document) return;
 
     d->document->setBaseUrl(baseUrl());
-#ifndef QT_NO_TEXTHTML_PARSER
-    if (d->richText)
-        d->control->setHtml(d->text);
-    else
-#endif
-    if (!d->text.isEmpty())
-        d->control->setPlainText(d->text);
 
     if (d->dirty) {
-        d->determineHorizontalAlignment();
         d->updateDefaultTextOption();
         updateSize();
         d->dirty = false;
     }
-    if (d->cursorComponent && isCursorVisible())
-        TextUtil::createCursor(d);
-}
-
-bool LineSurface::selectByKeyboard() const
-{
-    Q_D(const LineSurface);
-    if (d->selectByKeyboardSet)
-        return d->selectByKeyboard;
-    return !isReadOnly();
-}
-
-void LineSurface::setSelectByKeyboard(bool on)
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    bool was = selectByKeyboard();
-    if (!d->selectByKeyboardSet || was != on) {
-        d->selectByKeyboardSet = true;
-        d->selectByKeyboard = on;
-        if (on)
-            d->control->setTextInteractionFlags(d->control->textInteractionFlags() | Qt::TextSelectableByKeyboard);
-        else
-            d->control->setTextInteractionFlags(d->control->textInteractionFlags() & ~Qt::TextSelectableByKeyboard);
-        emit selectByKeyboardChanged(on);
-    }
-}
-
-bool LineSurface::selectByMouse() const
-{
-    Q_D(const LineSurface);
-    return d->selectByMouse;
-}
-
-void LineSurface::setSelectByMouse(bool on)
-{
-    Q_D(LineSurface);
-
-    d->selectByMouse = on;
-    setKeepMouseGrab(on);
-    if (on) {
-        if (d->control) d->control->setTextInteractionFlags(d->control->textInteractionFlags() | Qt::TextSelectableByMouse);
-    }
-    else if (d->control)
-        d->control->setTextInteractionFlags(d->control->textInteractionFlags() & ~Qt::TextSelectableByMouse);
-    emit selectByMouseChanged(on);
-
-}
-
-LineSurface::SelectionMode LineSurface::mouseSelectionMode() const
-{
-    Q_D(const LineSurface);
-    return d->mouseSelectionMode;
-}
-
-void LineSurface::setMouseSelectionMode(SelectionMode mode)
-{
-    Q_D(LineSurface);
-
-    d->mouseSelectionMode = mode;
-    if (d->control) d->control->setWordSelectionEnabled(mode == SelectWords);
-    emit mouseSelectionModeChanged(mode);
 }
 
 void LineSurface::setReadOnly(bool r)
@@ -979,24 +628,11 @@ void LineSurface::setReadOnly(bool r)
         flags = flags | Qt::TextSelectableByKeyboard;
     if (!d->readOnly)
         flags = flags | Qt::TextEditable;
-    if (d->control)
-    {
-        d->control->setTextInteractionFlags(flags);
-        d->control->moveCursor(QTextCursor::End);
-    }
 
 #ifndef QT_NO_IM
     updateInputMethod(Qt::ImEnabled);
 #endif
-    q_canPasteChanged();
     emit readOnlyChanged(d->readOnly);
-    if (!d->selectByKeyboardSet)
-        emit selectByKeyboardChanged(!d->readOnly);
-    if (d->readOnly) {
-        setCursorVisible(false);
-    } else if (hasActiveFocus()) {
-        setCursorVisible(true);
-    }
 }
 
 bool LineSurface::isReadOnly() const
@@ -1007,95 +643,23 @@ bool LineSurface::isReadOnly() const
 
 QRectF LineSurface::cursorRectangle() const
 {
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return QRectF();
-
-    return d->control->cursorRect().translated(d->xoff, d->yoff);
+    return QRectF();
 }
 
 bool LineSurface::event(QEvent *event)
 {
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return QQuickItem::event(event);
-
-    if (event->type() == QEvent::ShortcutOverride) {
-        d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
-        return event->isAccepted();
-    }
     return QQuickItem::event(event);
 }
 
 void LineSurface::keyPressEvent(QKeyEvent *event)
 {
-    Q_D(LineSurface);
-    if (!d->document || !d->control)
-    {
-        QQuickItem::keyPressEvent(event);
-        return;
-    }
 
-    d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
-    if (!event->isAccepted())
-        QQuickItem::keyPressEvent(event);
+    QQuickItem::keyPressEvent(event);
 }
 
 void LineSurface::keyReleaseEvent(QKeyEvent *event)
 {
-    Q_D(LineSurface);
-    if (!d->document || !d->control)
-    {
-        QQuickItem::keyReleaseEvent(event);
-        return;
-    }
-    d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
-    if (!event->isAccepted())
-        QQuickItem::keyReleaseEvent(event);
-}
-
-void LineSurface::deselect()
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    QTextCursor c = d->control->textCursor();
-    c.clearSelection();
-    d->control->setTextCursor(c);
-}
-
-void LineSurface::selectAll()
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    d->control->selectAll();
-}
-
-void LineSurface::selectWord()
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    QTextCursor c = d->control->textCursor();
-    c.select(QTextCursor::WordUnderCursor);
-    d->control->setTextCursor(c);
-}
-void LineSurface::select(int start, int end)
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    if (start < 0 || end < 0 || start >= d->document->characterCount() || end >= d->document->characterCount())
-        return;
-    QTextCursor cursor = d->control->textCursor();
-    cursor.beginEditBlock();
-    cursor.setPosition(start, QTextCursor::MoveAnchor);
-    cursor.setPosition(end, QTextCursor::KeepAnchor);
-    cursor.endEditBlock();
-    d->control->setTextCursor(cursor);
-
-    // QTBUG-11100
-    updateSelection();
-    updateInputMethod();
+    QQuickItem::keyReleaseEvent(event);
 }
 
 bool LineSurface::isRightToLeft(int start, int end)
@@ -1108,158 +672,25 @@ bool LineSurface::isRightToLeft(int start, int end)
     }
 }
 
-#ifndef QT_NO_CLIPBOARD
-void LineSurface::cut()
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    d->control->cut();
-}
-
-void LineSurface::copy()
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    d->control->copy();
-}
-
-void LineSurface::paste()
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    d->control->paste();
-}
-#endif // QT_NO_CLIPBOARD
-
-
-
-void LineSurface::undo()
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    d->control->undo();
-}
-void LineSurface::redo()
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    d->control->redo();
-}
-
 void LineSurface::mousePressEvent(QMouseEvent *event)
 {
-    Q_D(LineSurface);
-    if (!d->document || !d->control)
-    {
-        QQuickItem::mousePressEvent(event);
-        return;
-    }
-
-    d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
-    if (d->focusOnPress){
-        bool hadActiveFocus = hasActiveFocus();
-        forceActiveFocus(Qt::MouseFocusReason);
-        // re-open input panel on press if already focused
-#ifndef QT_NO_IM
-        if (hasActiveFocus() && hadActiveFocus && !isReadOnly())
-            qGuiApp->inputMethod()->show();
-#else
-        Q_UNUSED(hadActiveFocus);
-#endif
-    }
-    if (!event->isAccepted())
-        QQuickItem::mousePressEvent(event);
+    QQuickItem::mousePressEvent(event);
 }
 
 void LineSurface::mouseReleaseEvent(QMouseEvent *event)
 {
-    Q_D(LineSurface);
-    if (!d->document || !d->control)
-    {
-        QQuickItem::mouseReleaseEvent(event);
-        return;
-    }
-    d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
-
-    if (!event->isAccepted())
-        QQuickItem::mouseReleaseEvent(event);
+    QQuickItem::mouseReleaseEvent(event);
 }
 
 void LineSurface::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    Q_D(LineSurface);
-    if (!d->document || !d->control)
-    {
-        QQuickItem::mouseDoubleClickEvent(event);
-        return;
-    }
-    d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
-    if (!event->isAccepted())
-        QQuickItem::mouseDoubleClickEvent(event);
+    QQuickItem::mouseDoubleClickEvent(event);
 }
 
 void LineSurface::mouseMoveEvent(QMouseEvent *event)
 {
-    Q_D(LineSurface);
-    if (!d->document || !d->control)
-    {
-        QQuickItem::mouseMoveEvent(event);
-        return;
-    }
-    d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
-    if (!event->isAccepted())
-        QQuickItem::mouseMoveEvent(event);
+    QQuickItem::mouseMoveEvent(event);
 }
-
-#ifndef QT_NO_IM
-void LineSurface::inputMethodEvent(QInputMethodEvent *event)
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-    const bool wasComposing = isInputMethodComposing();
-    d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
-    setCursorVisible(d->control->cursorVisible());
-    if (wasComposing != isInputMethodComposing())
-        emit inputMethodComposingChanged();
-}
-
-QVariant LineSurface::inputMethodQuery(Qt::InputMethodQuery property, QVariant argument) const
-{
-    Q_D(const LineSurface);
-
-    QVariant v;
-    switch (property) {
-    case Qt::ImEnabled:
-        v = static_cast<bool>(flags() & ItemAcceptsInputMethod);
-        break;
-    case Qt::ImHints:
-        v = static_cast<int>(d->effectiveInputMethodHints());
-        break;
-    case Qt::ImInputItemClipRectangle:
-        v = QQuickItem::inputMethodQuery(property);
-        break;
-    default:
-        if (property == Qt::ImCursorPosition && !argument.isNull())
-            argument = QVariant(argument.toPointF() - QPointF(d->xoff, d->yoff));
-        if (!d->document || !d->control) break;
-        v = d->control->inputMethodQuery(property, argument);
-        if (property == Qt::ImCursorRectangle || property == Qt::ImAnchorRectangle)
-            v = QVariant(v.toRectF().translated(d->xoff, d->yoff));
-        break;
-    }
-    return v;
-}
-
-QVariant LineSurface::inputMethodQuery(Qt::InputMethodQuery property) const
-{
-    return inputMethodQuery(property, QVariant());
-}
-#endif // QT_NO_IM
 
 void LineSurface::triggerPreprocess()
 {
@@ -1288,7 +719,7 @@ static inline void updateNodeTransform(TextNode* node, const QPointF &topLeft)
 void LineSurface::invalidateFontCaches()
 {
     Q_D(LineSurface);
-    if (!d->document || !d->control) return;
+    if (!d->document) return;
 
 
     QTextBlock block;
@@ -1311,7 +742,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     Q_UNUSED(updatePaintNodeData);
     Q_D(LineSurface);
 
-    if (!d->document || !d->control) {
+    if (!d->document) {
         if (oldNode) delete oldNode;
         return nullptr;
     }
@@ -1375,7 +806,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
         QPointF nodeOffset;
         LineSurfacePrivate::Node *firstCleanNode = (nodeIterator != d->textNodeMap.end()) ? *nodeIterator : nullptr;
 
-        if (d->document && d->control) {
+        if (d->document) {
             QList<QTextFrame *> frames;
             frames.append(d->document->rootFrame());
 
@@ -1429,7 +860,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                             nodeStart = block.position();
                         }
 
-                        engine.addTextBlock(d->document, block, -nodeOffset, d->color, QColor(), selectionStart(), selectionEnd() - 1);
+                        engine.addTextBlock(d->document, block, -nodeOffset, d->color, QColor(), -1, -1);
                         currentNodeSize += block.length();
 
                         if ((it.atEnd()) || (firstCleanNode && block.next().position() >= firstCleanNode->startPos())) // last node that needed replacing or last block of the frame
@@ -1474,13 +905,6 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
         std::sort(d->textNodeMap.begin(), d->textNodeMap.end(), &comesBefore);
     }
 
-    if (d->document && d->control && d->cursorComponent == nullptr) {
-        QSGRectangleNode* cursor = nullptr;
-        if (!isReadOnly() && d->cursorVisible && d->control->cursorOn())
-            cursor = d->sceneGraphContext()->createRectangleNode(d->control->cursorRect(), d->color);
-        rootNode->resetCursorNode(cursor);
-    }
-
     invalidateFontCaches();
 
     return rootNode;
@@ -1489,18 +913,6 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
 void LineSurface::updatePolish()
 {
     invalidateFontCaches();
-}
-
-bool LineSurface::canPaste() const
-{
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return false;
-
-    if (!d->canPasteValid) {
-        const_cast<LineSurfacePrivate *>(d)->canPaste = d->control->canPaste();
-        const_cast<LineSurfacePrivate *>(d)->canPasteValid = true;
-    }
-    return d->canPaste;
 }
 
 
@@ -1522,13 +934,7 @@ bool LineSurface::canRedo() const
 
 bool LineSurface::isInputMethodComposing() const
 {
-#ifdef QT_NO_IM
     return false;
-#else
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return false;
-    return d->control->hasImState();
-#endif // QT_NO_IM
 }
 
 LineSurfacePrivate::ExtraData::ExtraData()
@@ -1558,25 +964,11 @@ void LineSurfacePrivate::setTextDocument(QTextDocument *d)
     Q_Q(LineSurface);
     document = d;
 
-    control = new TextControl(document, q);
-    control->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::TextSelectableByKeyboard | Qt::TextEditable);
-    control->setAcceptRichText(false);
-    control->setCursorIsFocusIndicator(true);
 /*
     fragmentStart=2;
     fragmentEnd = 10;
     q->updateFragmentVisibility();
 */
-    lv_qmlobject_connect(control, TextControl, SIGNAL(updateCursorRequest()), q, LineSurface, SLOT(updateCursor()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, LineSurface, SIGNAL(selectedTextChanged()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, LineSurface, SLOT(updateSelection()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, LineSurface, SLOT(updateSelection()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, LineSurface, SIGNAL(cursorPositionChanged()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorRectangleChanged()), q, LineSurface, SLOT(moveCursorDelegate()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(linkActivated(QString)), q, LineSurface, SIGNAL(linkActivated(QString)));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(linkHovered(QString)), q, LineSurface, SIGNAL(linkHovered(QString)));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(textChanged()), q, LineSurface, SLOT(q_textChanged()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(preeditTextChanged()), q, LineSurface, SIGNAL(preeditTextChanged()));
     /*#if QT_CONFIG(clipboard)
         qmlobject_connect(QGuiApplication::clipboard(), QClipboard, SIGNAL(dataChanged()), q, QQuickLineSurface, SLOT(q_canPasteChanged()));
     #endif*/
@@ -1590,9 +982,6 @@ void LineSurfacePrivate::setTextDocument(QTextDocument *d)
     document->setUndoRedoEnabled(false); // flush undo buffer.
     document->setUndoRedoEnabled(true);
 
-    q->setCursorVisible(cursorVisible);
-    q->setSelectByMouse(selectByMouse);
-    q->setMouseSelectionMode(mouseSelectionMode);
     q->setReadOnly(readOnly);
     updateDefaultTextOption();
     q->updateSize();
@@ -1607,14 +996,6 @@ void LineSurfacePrivate::unsetTextDocument()
     Q_Q(LineSurface);
     if ( document )
     q->markDirtyNodesForRange(0, document->characterCount(), 0);
-
-    if (control)
-    {
-        control->disconnect();
-        delete control;
-        control = nullptr;
-    }
-
     document = nullptr;
 
 
@@ -1637,12 +1018,6 @@ void LineSurfacePrivate::init()
     q->setFlag(QQuickItem::ItemHasContents);
 
     q->setAcceptHoverEvents(true);
-
-
-#ifndef QT_NO_CLIPBOARD
-    lv_qmlobject_connect(QGuiApplication::clipboard(), QClipboard, SIGNAL(dataChanged()), q, LineSurface, SLOT(q_canPasteChanged()));
-#endif
-
 }
 
 void LineSurfacePrivate::resetInputMethod()
@@ -1655,14 +1030,13 @@ void LineSurfacePrivate::resetInputMethod()
 void LineSurface::q_textChanged()
 {
     Q_D(LineSurface);
-    if (!d->document || !d->control) return;
+    if (!d->document) return;
     d->textCached = false;
     for (QTextBlock it = d->document->begin(); it != d->document->end(); it = it.next()) {
         d->contentDirection = d->textDirection(it.text());
         if (d->contentDirection != Qt::LayoutDirectionAuto)
             break;
     }
-    d->determineHorizontalAlignment();
     d->updateDefaultTextOption();
     updateSize();
     emit textChanged();
@@ -1764,71 +1138,22 @@ void LineSurface::moveCursorDelegate()
     d->cursorItem->setY(cursorRect.y());
 }
 
-void LineSurface::updateSelection()
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    // No need for node updates when we go from an empty selection to another empty selection
-    if (d->control->textCursor().hasSelection() || d->hadSelection) {
-        markDirtyNodesForRange(qMin(d->lastSelectionStart, d->control->textCursor().selectionStart()), qMax(d->control->textCursor().selectionEnd(), d->lastSelectionEnd), 0);
-        polish();
-        if (isComponentComplete()) {
-            d->updateType = LineSurfacePrivate::UpdatePaintNode;
-            update();
-        }
-    }
-
-    d->hadSelection = d->control->textCursor().hasSelection();
-
-    if (d->lastSelectionStart != d->control->textCursor().selectionStart()) {
-        d->lastSelectionStart = d->control->textCursor().selectionStart();
-        emit selectionStartChanged();
-    }
-    if (d->lastSelectionEnd != d->control->textCursor().selectionEnd()) {
-        d->lastSelectionEnd = d->control->textCursor().selectionEnd();
-        emit selectionEndChanged();
-    }
-}
-
 QRectF LineSurface::boundingRect() const
 {
     Q_D(const LineSurface);
-    if (!d->document || !d->control) return QRectF();
+    if (!d->document) return QRectF();
 
     QRectF r(
             TextUtil::alignedX(d->contentSize.width(), width(), effectiveHAlign()),
             d->yoff,
             d->contentSize.width(),
             d->contentSize.height());
-
-    int cursorWidth = 1;
-    if (d->cursorItem)
-        cursorWidth = 0;
-    else if (!d->document->isEmpty())
-        cursorWidth += 3;// ### Need a better way of accounting for space between char and cursor
-
-    // Could include font max left/right bearings to either side of rectangle.
-    r.setRight(r.right() + cursorWidth);
-
     return r;
 }
 
 QRectF LineSurface::clipRect() const
 {
-    Q_D(const LineSurface);
     QRectF r = QQuickItem::clipRect();
-    if (!d->document || !d->control) return r;
-
-    int cursorWidth = 1;
-    if (d->cursorItem)
-        cursorWidth = static_cast<int>(d->cursorItem->width());
-    if (!d->document->isEmpty())
-        cursorWidth += 3;// ### Need a better way of accounting for space between char and cursor
-
-    // Could include font max left/right bearings to either side of rectangle.
-
-    r.setRight(r.right() + cursorWidth);
     return r;
 }
 
@@ -1855,7 +1180,7 @@ void LineSurface::updateSize()
         return;
     }
 
-    if (!d->document || !d->control) return;
+    if (!d->document) return;
 
     if (abs(d->document->textWidth() +1) > LV_ACCURACY)
         d->document->setTextWidth(-1);
@@ -1981,13 +1306,11 @@ void LineSurface::updateCursor()
 void LineSurface::q_updateAlignment()
 {
     Q_D(LineSurface);
-    if (!d->document || !d->control) return;
+    if (!d->document) return;
 
-    if (d->determineHorizontalAlignment()) {
         d->updateDefaultTextOption();
         d->xoff = qMax(qreal(0), TextUtil::alignedX(d->document->size().width(), width(), effectiveHAlign()));
         moveCursorDelegate();
-    }
 }
 
 void LineSurface::updateTotalLines()
@@ -1995,7 +1318,7 @@ void LineSurface::updateTotalLines()
     Q_D(LineSurface);
 
     int subLines = 0;
-    if (!d->document || !d->control) return;
+    if (!d->document) return;
 
     for (QTextBlock it = d->document->begin(); it != d->document->end(); it = it.next()) {
         QTextLayout *layout = it.layout();
@@ -2015,7 +1338,7 @@ void LineSurface::updateTotalLines()
 void LineSurfacePrivate::updateDefaultTextOption()
 {
     Q_Q(LineSurface);
-    if (!document || !control) return;
+    if (!document) return;
 
     QTextOption opt = document->defaultTextOption();
     int oldAlignment = opt.alignment();
@@ -2069,14 +1392,17 @@ void LineSurface::focusOutEvent(QFocusEvent *event)
     QQuickItem::focusOutEvent(event);
 }
 
+bool LineSurface::isCursorVisible()
+{
+    return false;
+}
+
 void LineSurfacePrivate::handleFocusEvent(QFocusEvent *event)
 {
     Q_Q(LineSurface);
-    if (!document || !control) return;
+    if (!document) return;
     bool focus = event->type() == QEvent::FocusIn;
-    if (!q->isReadOnly())
-        q->setCursorVisible(focus);
-    control->processEvent(event, QPointF(-xoff, -yoff));
+
     if (focus) {
         q->q_updateAlignment();
 #ifndef QT_NO_IM
@@ -2110,88 +1436,34 @@ TextNode *LineSurfacePrivate::createTextNode()
     return node;
 }
 
-void LineSurface::q_canPasteChanged()
+QString LineSurface::getText(int, int) const
 {
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-    bool old = d->canPaste;
-    d->canPaste = d->control->canPaste();
-    bool changed = old!=d->canPaste || !d->canPasteValid;
-    d->canPasteValid = true;
-    if (changed)
-        emit canPasteChanged();
+    return QString();
 }
 
-QString LineSurface::getText(int start, int end) const
+QString LineSurface::getFormattedText(int, int) const
 {
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return QString();
-
-    start = qBound(0, start, d->document->characterCount() - 1);
-    end = qBound(0, end, d->document->characterCount() - 1);
-    QTextCursor cursor(d->document);
-    cursor.setPosition(start, QTextCursor::MoveAnchor);
-    cursor.setPosition(end, QTextCursor::KeepAnchor);
-#ifndef QT_NO_TEXTHTMLPARSER
-    return d->richText
-            ? cursor.selectedText()
-            : cursor.selection().toPlainText();
-#else
-    return cursor.selection().toPlainText();
-#endif
-}
-
-QString LineSurface::getFormattedText(int start, int end) const
-{
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return QString();
-
-
-    start = qBound(0, start, d->document->characterCount() - 1);
-    end = qBound(0, end, d->document->characterCount() - 1);
-
-    QTextCursor cursor(d->document);
-    cursor.setPosition(start, QTextCursor::MoveAnchor);
-    cursor.setPosition(end, QTextCursor::KeepAnchor);
-
-    if (d->richText) {
-#ifndef QT_NO_TEXTHTMLPARSER
-        return cursor.selection().toHtml();
-#else
-        return cursor.selection().toPlainText();
-#endif
-    } else {
-        return cursor.selection().toPlainText();
-    }
+    return QString();
 }
 
 void LineSurface::insert(int position, const QString &text)
 {
     Q_D(LineSurface);
-    if (!d->document || !d->control) return;
+    if (!d->document) return;
 
     if (position < 0 || position >= d->document->characterCount())
         return;
     QTextCursor cursor(d->document);
     cursor.setPosition(position);
-    d->richText = d->richText || (d->format == AutoText && Qt::mightBeRichText(text));
-    if (d->richText) {
-#ifndef QT_NO_TEXTHTMLPARSER
-        cursor.insertHtml(text);
-#else
-        cursor.insertText(text);
-#endif
-    } else {
-        cursor.insertText(text);
-    }
-    d->control->updateCursorRectangle(false);
+    cursor.insertText(text);
+
 }
 
 
 void LineSurface::remove(int start, int end)
 {
     Q_D(LineSurface);
-    if (!d->document || !d->control) return;
+    if (!d->document) return;
 
     start = qBound(0, start, d->document->characterCount() - 1);
     end = qBound(0, end, d->document->characterCount() - 1);
@@ -2199,7 +1471,6 @@ void LineSurface::remove(int start, int end)
     cursor.setPosition(start, QTextCursor::MoveAnchor);
     cursor.setPosition(end, QTextCursor::KeepAnchor);
     cursor.removeSelectedText();
-    d->control->updateCursorRectangle(false);
 }
 
 bool LineSurfacePrivate::isLinkHoveredConnected()
@@ -2210,53 +1481,13 @@ bool LineSurfacePrivate::isLinkHoveredConnected()
 
 QString LineSurface::hoveredLink() const
 {
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return QString();
-
-    if (const_cast<LineSurfacePrivate *>(d)->isLinkHoveredConnected()) {
-        return d->control->hoveredLink();
-    } else {
-#ifndef QT_NO_CURSOR
-        if (QQuickWindow *wnd = window()) {
-            QPointF pos = QCursor::pos(wnd->screen()) - wnd->position() - mapToScene(QPointF(0, 0));
-            return d->control->anchorAt(pos);
-        }
-#endif // QT_NO_CURSOR
-    }
     return QString();
-}
-
-void LineSurface::hoverEnterEvent(QHoverEvent *event)
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    if (d->isLinkHoveredConnected())
-        d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
-}
-
-void LineSurface::hoverMoveEvent(QHoverEvent *event)
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    if (d->isLinkHoveredConnected())
-        d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
-}
-
-void LineSurface::hoverLeaveEvent(QHoverEvent *event)
-{
-    Q_D(LineSurface);
-    if (!d->document || !d->control) return;
-
-    if (d->isLinkHoveredConnected())
-        d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
 }
 
 void LineSurface::append(const QString &text)
 {
     Q_D(LineSurface);
-    if (!d->document || !d->control) return;
+    if (!d->document) return;
     QTextCursor cursor(d->document);
     cursor.beginEditBlock();
     cursor.movePosition(QTextCursor::End);
@@ -2265,25 +1496,12 @@ void LineSurface::append(const QString &text)
         cursor.insertBlock();
 
 #ifndef QT_NO_TEXTHTMLPARSER
-    if (d->format == RichText || (d->format == AutoText && Qt::mightBeRichText(text))) {
-        cursor.insertHtml(text);
-    } else {
         cursor.insertText(text);
-    }
 #else
     cursor.insertText(text);
 #endif // QT_NO_TEXTHTMLPARSER
 
     cursor.endEditBlock();
-    d->control->updateCursorRectangle(false);
-}
-
-QString LineSurface::linkAt(qreal x, qreal y) const
-{
-    Q_D(const LineSurface);
-    if (!d->document || !d->control) return QString();
-
-    return d->control->anchorAt(QPointF(x + topPadding(), y + leftPadding()));
 }
 
 qreal LineSurface::padding() const
@@ -2403,10 +1621,9 @@ void LineSurface::resetBottomPadding()
 void LineSurface::clear()
 {
     Q_D(LineSurface);
-    if (!d->document || !d->control) return;
+    if (!d->document) return;
 
     d->resetInputMethod();
-    d->control->clear();
 }
 
 
@@ -2435,11 +1652,6 @@ void LineSurface::setDocumentHandler(DocumentHandler *dh)
     Q_D(LineSurface);
     d->documentHandler = dh;
     // dh->setTextEdit(this);
-}
-
-void LineSurface::clearSelectionOnFocus(bool value){
-    Q_D(LineSurface);
-    d->control->clearSelectionOnFocus(value);
 }
 
 void LineSurface::setTextDocument(QTextDocument *td)

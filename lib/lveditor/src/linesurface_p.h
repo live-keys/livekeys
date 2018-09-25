@@ -75,7 +75,7 @@ public:
         , fragmentStart(-1)
         , fragmentEnd(-1)
         , hAlign(LineSurface::AlignLeft), vAlign(LineSurface::AlignTop)
-        , format(LineSurface::PlainText), wrapMode(LineSurface::NoWrap)
+        , wrapMode(LineSurface::NoWrap)
 #if defined(QT_QUICK_DEFAULT_TEXT_RENDER_TYPE)
         , renderType(LVTextEdit::QT_QUICK_DEFAULT_TEXT_RENDER_TYPE)
 #else
@@ -113,7 +113,6 @@ public:
     void resetInputMethod();
     void updateDefaultTextOption();
     void relayoutDocument();
-    bool determineHorizontalAlignment();
     bool setHAlign(LineSurface::HAlignment, bool forceAlign = false);
     void mirrorChange() Q_DECL_OVERRIDE;
     qreal getImplicitWidth() const Q_DECL_OVERRIDE;
@@ -182,7 +181,6 @@ public:
 
     LineSurface::HAlignment hAlign;
     LineSurface::VAlignment vAlign;
-    LineSurface::TextFormat format;
     LineSurface::WrapMode wrapMode;
     LineSurface::RenderType renderType;
     Qt::LayoutDirection contentDirection;
