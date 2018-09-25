@@ -287,7 +287,6 @@ Rectangle{
                 LineSurface{
                     id: lineSurface
                     color: "#808691"
-                    width: 100
                     Component.onCompleted: {
                         setComponents(editorArea);
                     }

@@ -8,6 +8,7 @@
 #include <QtQml/qqml.h>
 #include <QtCore/qlist.h>
 #include <climits>
+#include "linemanager.h"
 
 class QTextLayout;
 
@@ -93,12 +94,14 @@ public:
         , selectByMouse(false), canPaste(false), canPasteValid(false), hAlignImplicit(true)
         , textCached(true), inLayout(false), selectByKeyboard(false), selectByKeyboardSet(false)
         , hadSelection(false)
+        , textEdit(nullptr), prevLineNumber(0)
+        , lineNumber(0), dirtyPos(0)
+        , lineManager(new LineManager)
     {
     }
 
     ~LineSurfacePrivate()
     {
-        qDebug() << QThread::currentThreadId();
         qDeleteAll(textNodeMap);
     }
 
@@ -153,7 +156,6 @@ public:
     QFont font;
 
     lv::DocumentHandler* documentHandler;
-    TextEdit* textEdit;
 
     QQmlComponent* cursorComponent;
     QQuickItem* cursorItem;
@@ -208,6 +210,7 @@ public:
     bool selectByKeyboardSet:1;
     bool hadSelection : 1;
 
+    TextEdit* textEdit;
     int prevLineNumber;
     int lineNumber;
     int dirtyPos;

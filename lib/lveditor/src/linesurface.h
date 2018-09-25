@@ -287,6 +287,17 @@ private:
     void expandLines(int pos, int num);
     void expandCollapseSkeleton(int pos, int num, QString &replacement, bool show);
 
+    static inline int numberOfDigits(int i) {
+        int res = 0;
+        if (i < 10) return 2;
+        while (i > 0)
+        {
+            res++;
+            i/=10;
+        }
+        return res;
+    }
+
 protected:
     LineSurface(LineSurfacePrivate &dd, QQuickImplicitSizeItem *parent = nullptr);
 
@@ -308,12 +319,14 @@ protected:
     void updatePolish() Q_DECL_OVERRIDE;
 
     friend class TextUtil;
-    friend class LineNumberSurface;
     friend class DocumentHandler;
+    friend class LineManager;
+
 
 private:
     Q_DISABLE_COPY(LineSurface)
     Q_DECLARE_PRIVATE(LineSurface)
+
 };
 
 }

@@ -39,7 +39,7 @@ public:
     void collapseLines(int pos, int num); //done
     void expandLines(int pos, int num); //done
 
-    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE; //done
     // void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
     QColor color() const{ return m_color; } //done
@@ -53,10 +53,10 @@ signals:
     void colorChanged(QColor color); //done
 
 private:
-    Q_DISABLE_COPY(LineNumberSurface)
+    Q_DISABLE_COPY(LineNumberSurface) //done
     // Q_DECLARE_PRIVATE(LineNumberSurface)
 
-    void init();
+    void init(); //done-ish
 
     TextEdit* textEdit; //done
 
@@ -86,15 +86,15 @@ private:
             i/=10;
         }
         return res;
-    }
+    } // done
 
-    void showHideLines(bool show, int pos, int num);
-    void changeLastCharInBlock(int blockNumber, char c);
-    void replaceTextInBlock(int blockNumber, std::string s);
+    void showHideLines(bool show, int pos, int num); // done
+    void changeLastCharInBlock(int blockNumber, char c); //done
+    void replaceTextInBlock(int blockNumber, std::string s); //done
     void expandCollapseSkeleton(int pos, int num, QString &replacement, bool show); //done
     void updateLineDocument(); //done
 
-    QColor m_color;
+    QColor m_color; //done
 };
 
 inline void LineNumberSurface::setColor(QColor color){
@@ -104,7 +104,7 @@ inline void LineNumberSurface::setColor(QColor color){
     m_color = color;
     emit colorChanged(color);
     update();
-}
+} //done
 
 
 }

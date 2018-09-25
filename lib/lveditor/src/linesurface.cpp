@@ -358,6 +358,9 @@ void LineSurface::setComponents(lv::TextEdit* te)
     d->init();
 
     d->document = new QTextDocument(this);
+    //this is to create the layout!
+    d->document->documentLayout();
+
 
     d->font = te->font();
     d->document->setDefaultFont(d->font);
@@ -366,10 +369,26 @@ void LineSurface::setComponents(lv::TextEdit* te)
     opt.setTextDirection(Qt::LeftToRight);
     d->document->setDefaultTextOption(opt);
 
-    d->document->documentLayout();
+    //d->document->setPlainText("This\nis\na\ntest");
+    // q_contentsChange(0,0,d->document->characterCount());
 
-    d->document->setPlainText("This\nis\na\ntest");
-    q_contentsChange(0,0,d->document->characterCount());
+
+    setFlag(QQuickItem::ItemHasContents);
+
+    d->dirtyPos = 0;
+    d->prevLineNumber = 0;
+    d->lineNumber = 0;
+    textDocumentFinished();
+    //d->document->setPlainText("This\nis\na\ntest");
+    //q_contentsChange(0,0,d->document->characterCount());
+
+
+    QObject::connect(d->textEdit, &TextEdit::dirtyBlockPosition, this, &LineSurface::setDirtyBlockPosition);
+    QObject::connect(d->textEdit, &TextEdit::textDocumentFinishedUpdating, this, &LineSurface::textDocumentFinished);
+
+    setAcceptedMouseButtons(Qt::AllButtons);
+
+
 }
 
 void LineSurfacePrivate::setLeftPadding(qreal value, bool reset)
@@ -704,9 +723,35 @@ bool LineSurface::isRightToLeft(int start, int end)
     }
 }
 
-void LineSurface::mousePressEvent(QMouseEvent *event)
+void LineSurface::mousePressEvent(QMouseEvent* event)
 {
-    QQuickItem::mousePressEvent(event);
+    Q_D(LineSurface);
+    // find block that was clicked
+    int position = d->document->documentLayout()->hitTest(event->localPos(), Qt::FuzzyHit);
+    QTextBlock block = d->document->findBlock(position);
+    int blockNum = block.blockNumber();
+
+    QTextBlock matchingBlock = d->textEdit->documentHandler()->target()->findBlockByNumber(blockNum);
+    lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
+    if (userData)
+    {
+        if (userData->collapseState() == lv::ProjectDocumentBlockData::Collapse)
+        {
+            userData->collapse();
+            int num; QString repl;
+            userData->onCollapse()(matchingBlock, num, repl);
+            userData->setNumOfCollapsedLines(num);
+            userData->setReplacementString(repl);
+            d->lineManager->collapseLines(blockNum, userData->numOfCollapsedLines());
+        }
+        else if (userData->collapseState() == lv::ProjectDocumentBlockData::Expand)
+        {
+            std::string result;
+            userData->expand();
+            d->lineManager->expandLines(blockNum, userData->numOfCollapsedLines());
+        }
+
+    }
 }
 
 void LineSurface::mouseReleaseEvent(QMouseEvent *event)
@@ -806,7 +851,10 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     d->lastHighlightChangeStart = INT_MAX;
     d->lastHighlightChangeEnd   = 0;
 
-    if (!oldNode || nodeIterator < d->textNodeMap.end()) {
+    if (numberOfDigits(d->prevLineNumber) != numberOfDigits(d->lineNumber) || d->dirtyPos >= d->textNodeMap.size())
+        d->dirtyPos = 0;
+
+    if (!oldNode  || d->dirtyPos != -1 || nodeIterator < d->textNodeMap.end()) {
 
         if (!oldNode)
             rootNode = new RootNode;
@@ -820,6 +868,18 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                 delete *nodeIterator;
                 nodeIterator = d->textNodeMap.erase(nodeIterator);
             } while (nodeIterator != d->textNodeMap.end() && (*nodeIterator)->dirty());
+        }
+
+        // delete all dirty nodes
+        auto lineNumIt = d->textNodeMap.begin();
+        for (int k=0; k<d->dirtyPos; k++, lineNumIt++);
+        while (lineNumIt != d->textNodeMap.end())
+        {
+
+            rootNode->removeChildNode((*lineNumIt)->textNode());
+            delete (*lineNumIt)->textNode();
+            delete *lineNumIt;
+            lineNumIt = d->textNodeMap.erase(lineNumIt);
         }
 
         // FIXME: the text decorations could probably be handled separately (only updated for affected textFrames)
@@ -875,6 +935,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                     std::sort(frameBoundaries.begin(), frameBoundaries.end());
 
                     QTextFrame::iterator it = textFrame->begin();
+                    for (int k=0; k<d->dirtyPos; k++, it++);
 
                     while (!it.atEnd()) {
 
@@ -1050,6 +1111,7 @@ void LineSurfacePrivate::init()
     q->setFlag(QQuickItem::ItemHasContents);
 
     q->setAcceptHoverEvents(true);
+    lineManager->setLineSurface(q);
 }
 
 void LineSurfacePrivate::resetInputMethod()
@@ -1317,6 +1379,7 @@ void LineSurface::updateLineDocument()
     if (isComponentComplete())
     {
         updateSize();
+
         update();
     }
 }
@@ -1378,6 +1441,8 @@ void LineSurface::expandCollapseSkeleton(int pos, int num, QString &replacement,
 
     updateLineDocument();
 }
+
+
 
 
 void LineSurface::highlightingDone(const QRectF &)

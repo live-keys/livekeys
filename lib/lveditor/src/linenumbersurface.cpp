@@ -30,7 +30,7 @@ LineNumberSurface::LineNumberSurface(QQuickItem *parent)
     , m_color(QColor(255, 255, 255, 255))
 {
     setFlag(QQuickItem::ItemHasContents, true);
-    lineManager->setLineSurface(this);
+    //lineManager->setLineSurface(this);
 }
 
 void LineNumberSurface::updateSize()
