@@ -55,7 +55,6 @@ LineNumberSurface::~LineNumberSurface()
            delete *it;
            it = lineNodes.erase(it);
        }
-       delete lineDocument;
 }
 
 QSGNode* LineNumberSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
@@ -64,6 +63,11 @@ QSGNode* LineNumberSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeDat
 
     if ( !lineDocument )
         return oldNode;
+
+    if (!oldNode) {
+        qDeleteAll(lineNodes);
+        lineNodes.clear();
+    }
 
     LineRootNode* rootNode;
     if (!oldNode)

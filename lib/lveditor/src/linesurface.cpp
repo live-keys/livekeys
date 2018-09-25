@@ -1,44 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtQuick module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
-
-#include "textedit_p.h"
-#include "textedit_p_p.h"
+#include "linesurface.h"
+#include "linesurface_p.h"
 #include "textcontrol_p.h"
 #include "qquickwindow.h"
 #include "textnodeengine_p.h"
@@ -54,86 +15,19 @@
 #include <QtQuick/qsgsimplerectnode.h>
 #include <QTimer>
 
-// <REMOVED>
-// This might be copied
 #include "private/qquicktextnode_p.h"
-// <TOREMOVE>
-// This might deal with the whole event system behind QQuickTextEdit, or
-// it may not :)
 #include "private/qquickevents_p_p.h"
 
-//#include "private/qqmlglobal_p.h"
-
-// <TOREMOVE>
-// TODO: Document where it's used
 #include "private/qqmlproperty_p.h"
 
-// <TOREMOVE> : just copy
 #include "private/qtextengine_p.h"
 #include "private/qsgadaptationlayer_p.h"
 
 #include <algorithm>
 
+
 namespace lv {
 
-/*!
-    \qmltype TextEdit
-    \instantiates QQuickTextEdit
-    \inqmlmodule QtQuick
-    \ingroup qtquick-visual
-    \ingroup qtquick-input
-    \inherits Item
-    \brief Displays multiple lines of editable formatted text
-
-    The TextEdit item displays a block of editable, formatted text.
-
-    It can display both plain and rich text. For example:
-
-    \qml
-TextEdit {
-    width: 240
-    text: "<b>Hello</b> <i>World!</i>"
-    font.family: "Helvetica"
-    font.pointSize: 20
-    color: "blue"
-    focus: true
-}
-    \endqml
-
-    \image declarative-textedit.gif
-
-    Setting \l {Item::focus}{focus} to \c true enables the TextEdit item to receive keyboard focus.
-
-    Note that the TextEdit does not implement scrolling, following the cursor, or other behaviors specific
-    to a look-and-feel. For example, to add flickable scrolling that follows the cursor:
-
-    \snippet qml/texteditor.qml 0
-
-    A particular look-and-feel might use smooth scrolling (eg. using SmoothedAnimation), might have a visible
-    scrollbar, or a scrollbar that fades in to show location, etc.
-
-    Clipboard support is provided by the cut(), copy(), and paste() functions, and the selection can
-    be handled in a traditional "mouse" mechanism by setting selectByMouse, or handled completely
-    from QML by manipulating selectionStart and selectionEnd, or using selectAll() or selectWord().
-
-    You can translate between cursor positions (characters from the start of the document) and pixel
-    points using positionAt() and positionToRectangle().
-
-    \sa Text, TextInput
-*/
-
-/*!
-    \qmlsignal QtQuick::TextEdit::linkActivated(string link)
-
-    This signal is emitted when the user clicks on a link embedded in the text.
-    The link must be in rich text or HTML format and the
-    \a link string provides access to the particular link.
-
-    The corresponding handler is \c onLinkActivated.
-*/
-
-// This is a pretty arbitrary figure. The idea is that we don't want to break down the document
-// into text nodes corresponding to a text block each so that the glyph node grouping doesn't become pointless.
 static const int nodeBreakingSize = 300;
 
 namespace {
@@ -180,26 +74,26 @@ namespace {
     };
 }
 
-TextEdit::TextEdit(QQuickImplicitSizeItem *parent)
-: QQuickImplicitSizeItem(*(new TextEditPrivate), parent)
+LineSurface::LineSurface(QQuickImplicitSizeItem *parent)
+: QQuickImplicitSizeItem(*(new LineSurfacePrivate), parent)
 {
-    Q_D(TextEdit);
-    d->init();
+    /*Q_D(LineSurface);
+    d->init();*/
 }
 
-TextEdit::TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent)
+LineSurface::LineSurface(LineSurfacePrivate &dd, QQuickImplicitSizeItem *parent)
 : QQuickImplicitSizeItem(dd, parent)
 {
-    Q_D(TextEdit);
-    d->init();
+    /*Q_D(LineSurface);
+    d->init();*/
 }
 
-QString TextEdit::text() const
+QString LineSurface::text() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return QString();
     if (!d->textCached && isComponentComplete()) {
-        TextEditPrivate *d = const_cast<TextEditPrivate *>(d_func());
+        LineSurfacePrivate *d = const_cast<LineSurfacePrivate *>(d_func());
 #ifndef QT_NO_TEXTHTMLPARSER
         if (d->richText)
             d->text = d->control->toHtml();
@@ -211,147 +105,11 @@ QString TextEdit::text() const
     return d->text;
 }
 
-/*!
-    \qmlproperty string QtQuick::TextEdit::font.family
-
-    Sets the family name of the font.
-
-    The family name is case insensitive and may optionally include a foundry name, e.g. "Helvetica [Cronyx]".
-    If the family is available from more than one foundry and the foundry isn't specified, an arbitrary foundry is chosen.
-    If the family isn't available a family will be set using the font matching algorithm.
-*/
-
-/*!
-    \qmlproperty string QtQuick::TextEdit::font.styleName
-    \since 5.6
-
-    Sets the style name of the font.
-
-    The style name is case insensitive. If set, the font will be matched against style name instead
-    of the font properties \l font.weight, \l font.bold and \l font.italic.
-*/
-
-
-/*!
-    \qmlproperty bool QtQuick::TextEdit::font.bold
-
-    Sets whether the font weight is bold.
-*/
-
-/*!
-    \qmlproperty enumeration QtQuick::TextEdit::font.weight
-
-    Sets the font's weight.
-
-    The weight can be one of:
-    \list
-    \li Font.Thin
-    \li Font.Light
-    \li Font.ExtraLight
-    \li Font.Normal - the default
-    \li Font.Medium
-    \li Font.DemiBold
-    \li Font.Bold
-    \li Font.ExtraBold
-    \li Font.Black
-    \endlist
-
-    \qml
-    TextEdit { text: "Hello"; font.weight: Font.DemiBold }
-    \endqml
-*/
-
-/*!
-    \qmlproperty bool QtQuick::TextEdit::font.italic
-
-    Sets whether the font has an italic style.
-*/
-
-/*!
-    \qmlproperty bool QtQuick::TextEdit::font.underline
-
-    Sets whether the text is underlined.
-*/
-
-/*!
-    \qmlproperty bool QtQuick::TextEdit::font.strikeout
-
-    Sets whether the font has a strikeout style.
-*/
-
-/*!
-    \qmlproperty real QtQuick::TextEdit::font.pointSize
-
-    Sets the font size in points. The point size must be greater than zero.
-*/
-
-/*!
-    \qmlproperty int QtQuick::TextEdit::font.pixelSize
-
-    Sets the font size in pixels.
-
-    Using this function makes the font device dependent.  Use
-    \l{TextEdit::font.pointSize} to set the size of the font in a
-    device independent manner.
-*/
-
-/*!
-    \qmlproperty real QtQuick::TextEdit::font.letterSpacing
-
-    Sets the letter spacing for the font.
-
-    Letter spacing changes the default spacing between individual letters in the font.
-    A positive value increases the letter spacing by the corresponding pixels; a negative value decreases the spacing.
-*/
-
-/*!
-    \qmlproperty real QtQuick::TextEdit::font.wordSpacing
-
-    Sets the word spacing for the font.
-
-    Word spacing changes the default spacing between individual words.
-    A positive value increases the word spacing by a corresponding amount of pixels,
-    while a negative value decreases the inter-word spacing accordingly.
-*/
-
-/*!
-    \qmlproperty enumeration QtQuick::TextEdit::font.capitalization
-
-    Sets the capitalization for the text.
-
-    \list
-    \li Font.MixedCase - This is the normal text rendering option where no capitalization change is applied.
-    \li Font.AllUppercase - This alters the text to be rendered in all uppercase type.
-    \li Font.AllLowercase - This alters the text to be rendered in all lowercase type.
-    \li Font.SmallCaps - This alters the text to be rendered in small-caps type.
-    \li Font.Capitalize - This alters the text to be rendered with the first character of each word as an uppercase character.
-    \endlist
-
-    \qml
-    TextEdit { text: "Hello"; font.capitalization: Font.AllLowercase }
-    \endqml
-*/
-
-/*!
-    \qmlproperty string QtQuick::TextEdit::text
-
-    The text to display.  If the text format is AutoText the text edit will
-    automatically determine whether the text should be treated as
-    rich text.  This determination is made using Qt::mightBeRichText().
-
-    The text-property is mostly suitable for setting the initial content and
-    handling modifications to relatively small text content. The append(),
-    insert() and remove() methods provide more fine-grained control and
-    remarkably better performance for modifying especially large rich text
-    content.
-
-    \sa clear()
-*/
-void TextEdit::setText(const QString &text)
+void LineSurface::setText(const QString &text)
 {
 
-    Q_D(TextEdit);
-    if (TextEdit::text() == text)
+    Q_D(LineSurface);
+    if (LineSurface::text() == text)
         return;
 
     d->richText = d->format == RichText || (d->format == AutoText && Qt::mightBeRichText(text));
@@ -370,68 +128,22 @@ void TextEdit::setText(const QString &text)
     }
 }
 
-/*!
-    \qmlproperty string QtQuick::TextEdit::preeditText
-    \readonly
-    \since 5.7
-
-    This property contains partial text input from an input method.
-*/
-QString TextEdit::preeditText() const
+QString LineSurface::preeditText() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return QString();
     return d->control->preeditText();
 }
 
-/*!
-    \qmlproperty enumeration QtQuick::TextEdit::textFormat
-
-    The way the text property should be displayed.
-
-    \list
-    \li TextEdit.AutoText
-    \li TextEdit.PlainText
-    \li TextEdit.RichText
-    \endlist
-
-    The default is TextEdit.PlainText.  If the text format is TextEdit.AutoText the text edit
-    will automatically determine whether the text should be treated as
-    rich text.  This determination is made using Qt::mightBeRichText().
-
-    \table
-    \row
-    \li
-    \qml
-Column {
-    TextEdit {
-        font.pointSize: 24
-        text: "<b>Hello</b> <i>World!</i>"
-    }
-    TextEdit {
-        font.pointSize: 24
-        textFormat: TextEdit.RichText
-        text: "<b>Hello</b> <i>World!</i>"
-    }
-    TextEdit {
-        font.pointSize: 24
-        textFormat: TextEdit.PlainText
-        text: "<b>Hello</b> <i>World!</i>"
-    }
-}
-    \endqml
-    \li \image declarative-textformat.png
-    \endtable
-*/
-TextEdit::TextFormat TextEdit::textFormat() const
+LineSurface::TextFormat LineSurface::textFormat() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->format;
 }
 
-void TextEdit::setTextFormat(TextFormat format)
+void LineSurface::setTextFormat(TextFormat format)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     if (format == d->format)
         return;
@@ -456,31 +168,15 @@ void TextEdit::setTextFormat(TextFormat format)
     emit textFormatChanged(d->format);
 }
 
-/*!
-    \qmlproperty enumeration QtQuick::TextEdit::renderType
-
-    Override the default rendering type for this component.
-
-    Supported render types are:
-    \list
-    \li Text.QtRendering - the default
-    \li Text.NativeRendering
-    \endlist
-
-    Select Text.NativeRendering if you prefer text to look native on the target platform and do
-    not require advanced features such as transformation of the text. Using such features in
-    combination with the NativeRendering render type will lend poor and sometimes pixelated
-    results.
-*/
-TextEdit::RenderType TextEdit::renderType() const
+LineSurface::RenderType LineSurface::renderType() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->renderType;
 }
 
-void TextEdit::setRenderType(TextEdit::RenderType renderType)
+void LineSurface::setRenderType(LineSurface::RenderType renderType)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (d->renderType == renderType)
         return;
 
@@ -492,15 +188,15 @@ void TextEdit::setRenderType(TextEdit::RenderType renderType)
         updateSize();
 }
 
-QFont TextEdit::font() const
+QFont LineSurface::font() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->sourceFont;
 }
 
-void TextEdit::setFont(const QFont &font)
+void LineSurface::setFont(const QFont &font)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (d->sourceFont == font)
         return;
 
@@ -528,30 +224,15 @@ void TextEdit::setFont(const QFont &font)
     emit fontChanged(d->sourceFont);
 }
 
-/*!
-    \qmlproperty color QtQuick::TextEdit::color
-
-    The text color.
-
-    \qml
-    // green text using hexadecimal notation
-    TextEdit { color: "#00FF00" }
-    \endqml
-
-    \qml
-    // steelblue text using SVG color name
-    TextEdit { color: "steelblue" }
-    \endqml
-*/
-QColor TextEdit::color() const
+QColor LineSurface::color() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->color;
 }
 
-void TextEdit::setColor(const QColor &color)
+void LineSurface::setColor(const QColor &color)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (d->color == color)
         return;
 
@@ -561,20 +242,15 @@ void TextEdit::setColor(const QColor &color)
     emit colorChanged(d->color);
 }
 
-/*!
-    \qmlproperty color QtQuick::TextEdit::selectionColor
-
-    The text highlight color, used behind selections.
-*/
-QColor TextEdit::selectionColor() const
+QColor LineSurface::selectionColor() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->selectionColor;
 }
 
-void TextEdit::setSelectionColor(const QColor &color)
+void LineSurface::setSelectionColor(const QColor &color)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (d->selectionColor == color)
         return;
 
@@ -583,20 +259,15 @@ void TextEdit::setSelectionColor(const QColor &color)
     emit selectionColorChanged(d->selectionColor);
 }
 
-/*!
-    \qmlproperty color QtQuick::TextEdit::selectedTextColor
-
-    The selected text color, used in selections.
-*/
-QColor TextEdit::selectedTextColor() const
+QColor LineSurface::selectedTextColor() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->selectedTextColor;
 }
 
-void TextEdit::setSelectedTextColor(const QColor &color)
+void LineSurface::setSelectedTextColor(const QColor &color)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (d->selectedTextColor == color)
         return;
 
@@ -605,73 +276,44 @@ void TextEdit::setSelectedTextColor(const QColor &color)
     emit selectedTextColorChanged(d->selectedTextColor);
 }
 
-int TextEdit::fragmentStart() const {
-    Q_D(const TextEdit);
+int LineSurface::fragmentStart() const {
+    Q_D(const LineSurface);
     return d->fragmentStart;
 }
 
-int TextEdit::fragmentEnd() const {
-    Q_D(const TextEdit);
+int LineSurface::fragmentEnd() const {
+    Q_D(const LineSurface);
     return d->fragmentEnd;
 }
 
-void TextEdit::setFragmentStart(int frStart) {
-    Q_D(TextEdit);
+void LineSurface::setFragmentStart(int frStart) {
+    Q_D(LineSurface);
     d->fragmentStart = frStart;
 }
 
-void TextEdit::setFragmentEnd(int frEnd) {
-    Q_D(TextEdit);
+void LineSurface::setFragmentEnd(int frEnd) {
+    Q_D(LineSurface);
     d->fragmentEnd = frEnd;
 }
 
-void TextEdit::resetFragmentStart() {
+void LineSurface::resetFragmentStart() {
     setFragmentStart(-1);
 }
 
-void TextEdit::resetFragmentEnd() {
+void LineSurface::resetFragmentEnd() {
     setFragmentEnd(-1);
 }
 
-/*!
-    \qmlproperty enumeration QtQuick::TextEdit::horizontalAlignment
-    \qmlproperty enumeration QtQuick::TextEdit::verticalAlignment
-    \qmlproperty enumeration QtQuick::TextEdit::effectiveHorizontalAlignment
 
-    Sets the horizontal and vertical alignment of the text within the TextEdit item's
-    width and height. By default, the text alignment follows the natural alignment
-    of the text, for example text that is read from left to right will be aligned to
-    the left.
-
-    Valid values for \c horizontalAlignment are:
-    \list
-    \li TextEdit.AlignLeft (default)
-    \li TextEdit.AlignRight
-    \li TextEdit.AlignHCenter
-    \li TextEdit.AlignJustify
-    \endlist
-
-    Valid values for \c verticalAlignment are:
-    \list
-    \li TextEdit.AlignTop (default)
-    \li TextEdit.AlignBottom
-    \li TextEdit.AlignVCenter
-    \endlist
-
-    When using the attached property LayoutMirroring::enabled to mirror application
-    layouts, the horizontal alignment of text will also be mirrored. However, the property
-    \c horizontalAlignment will remain unchanged. To query the effective horizontal alignment
-    of TextEdit, use the read-only property \c effectiveHorizontalAlignment.
-*/
-TextEdit::HAlignment TextEdit::hAlign() const
+LineSurface::HAlignment LineSurface::hAlign() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->hAlign;
 }
 
-void TextEdit::setHAlign(HAlignment align)
+void LineSurface::setHAlign(HAlignment align)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     bool forceAlign = d->hAlignImplicit && d->effectiveLayoutMirror;
     d->hAlignImplicit = false;
     if (d->setHAlign(align, forceAlign) && isComponentComplete()) {
@@ -680,9 +322,9 @@ void TextEdit::setHAlign(HAlignment align)
     }
 }
 
-void TextEdit::resetHAlign()
+void LineSurface::resetHAlign()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->hAlignImplicit = true;
     if (d->determineHorizontalAlignment() && isComponentComplete()) {
         d->updateDefaultTextOption();
@@ -690,17 +332,17 @@ void TextEdit::resetHAlign()
     }
 }
 
-TextEdit::HAlignment TextEdit::effectiveHAlign() const
+LineSurface::HAlignment LineSurface::effectiveHAlign() const
 {
-    Q_D(const TextEdit);
-    TextEdit::HAlignment effectiveAlignment = d->hAlign;
+    Q_D(const LineSurface);
+    LineSurface::HAlignment effectiveAlignment = d->hAlign;
     if (!d->hAlignImplicit && d->effectiveLayoutMirror) {
         switch (d->hAlign) {
-        case TextEdit::AlignLeft:
-            effectiveAlignment = TextEdit::AlignRight;
+        case LineSurface::AlignLeft:
+            effectiveAlignment = LineSurface::AlignRight;
             break;
-        case TextEdit::AlignRight:
-            effectiveAlignment = TextEdit::AlignLeft;
+        case LineSurface::AlignRight:
+            effectiveAlignment = LineSurface::AlignLeft;
             break;
         default:
             break;
@@ -709,11 +351,11 @@ TextEdit::HAlignment TextEdit::effectiveHAlign() const
     return effectiveAlignment;
 }
 
-bool TextEditPrivate::setHAlign(TextEdit::HAlignment alignment, bool forceAlign)
+bool LineSurfacePrivate::setHAlign(LineSurface::HAlignment alignment, bool forceAlign)
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     if (hAlign != alignment || forceAlign) {
-        TextEdit::HAlignment oldEffectiveHAlign = q->effectiveHAlign();
+        LineSurface::HAlignment oldEffectiveHAlign = q->effectiveHAlign();
         hAlign = alignment;
         emit q->horizontalAlignmentChanged(alignment);
         if (oldEffectiveHAlign != q->effectiveHAlign())
@@ -724,7 +366,7 @@ bool TextEditPrivate::setHAlign(TextEdit::HAlignment alignment, bool forceAlign)
 }
 
 
-Qt::LayoutDirection TextEditPrivate::textDirection(const QString &text) const
+Qt::LayoutDirection LineSurfacePrivate::textDirection(const QString &text) const
 {
     const QChar *character = text.constData();
     while (!character->isNull()) {
@@ -743,9 +385,9 @@ Qt::LayoutDirection TextEditPrivate::textDirection(const QString &text) const
     return Qt::LayoutDirectionAuto;
 }
 
-bool TextEditPrivate::determineHorizontalAlignment()
+bool LineSurfacePrivate::determineHorizontalAlignment()
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     if (!document || !control) return false;
 
     if (hAlignImplicit && q->isComponentComplete()) {
@@ -759,16 +401,16 @@ bool TextEditPrivate::determineHorizontalAlignment()
             direction = qGuiApp->inputMethod()->inputDirection();
 #endif
 
-        return setHAlign(direction == Qt::RightToLeft ? TextEdit::AlignRight : TextEdit::AlignLeft);
+        return setHAlign(direction == Qt::RightToLeft ? LineSurface::AlignRight : LineSurface::AlignLeft);
     }
     return false;
 }
 
-void TextEditPrivate::mirrorChange()
+void LineSurfacePrivate::mirrorChange()
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     if (q->isComponentComplete()) {
-        if (!hAlignImplicit && (hAlign == TextEdit::AlignRight || hAlign == TextEdit::AlignLeft)) {
+        if (!hAlignImplicit && (hAlign == LineSurface::AlignRight || hAlign == LineSurface::AlignLeft)) {
             updateDefaultTextOption();
             q->updateSize();
             emit q->effectiveHorizontalAlignmentChanged();
@@ -777,15 +419,15 @@ void TextEditPrivate::mirrorChange()
 }
 
 #ifndef QT_NO_IM
-Qt::InputMethodHints TextEditPrivate::effectiveInputMethodHints() const
+Qt::InputMethodHints LineSurfacePrivate::effectiveInputMethodHints() const
 {
     return inputMethodHints | Qt::ImhMultiLine;
 }
 #endif
 
-void TextEditPrivate::setTopPadding(qreal value, bool reset)
+void LineSurfacePrivate::setTopPadding(qreal value, bool reset)
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     qreal oldPadding = q->topPadding();
     if (!reset || extra.isAllocated()) {
         extra.value().topPadding = value;
@@ -797,9 +439,17 @@ void TextEditPrivate::setTopPadding(qreal value, bool reset)
     }
 }
 
-void TextEditPrivate::setLeftPadding(qreal value, bool reset)
+void LineSurface::setComponents(TextEdit* te)
 {
-    Q_Q(TextEdit);
+    Q_D(LineSurface);
+    d->textEdit = te;
+
+    d->document = new QTextDocument(this);
+}
+
+void LineSurfacePrivate::setLeftPadding(qreal value, bool reset)
+{
+    Q_Q(LineSurface);
     qreal oldPadding = q->leftPadding();
     if (!reset || extra.isAllocated()) {
         extra.value().leftPadding = value;
@@ -811,9 +461,9 @@ void TextEditPrivate::setLeftPadding(qreal value, bool reset)
     }
 }
 
-void TextEditPrivate::setRightPadding(qreal value, bool reset)
+void LineSurfacePrivate::setRightPadding(qreal value, bool reset)
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     qreal oldPadding = q->rightPadding();
     if (!reset || extra.isAllocated()) {
         extra.value().rightPadding = value;
@@ -825,9 +475,9 @@ void TextEditPrivate::setRightPadding(qreal value, bool reset)
     }
 }
 
-void TextEditPrivate::setBottomPadding(qreal value, bool reset)
+void LineSurfacePrivate::setBottomPadding(qreal value, bool reset)
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     qreal oldPadding = q->bottomPadding();
     if (!reset || extra.isAllocated()) {
         extra.value().bottomPadding = value;
@@ -839,12 +489,12 @@ void TextEditPrivate::setBottomPadding(qreal value, bool reset)
     }
 }
 
-bool TextEditPrivate::isImplicitResizeEnabled() const
+bool LineSurfacePrivate::isImplicitResizeEnabled() const
 {
     return !extra.isAllocated() || extra->implicitResize;
 }
 
-void TextEditPrivate::setImplicitResizeEnabled(bool enabled)
+void LineSurfacePrivate::setImplicitResizeEnabled(bool enabled)
 {
     if (!enabled)
         extra.value().implicitResize = false;
@@ -852,15 +502,15 @@ void TextEditPrivate::setImplicitResizeEnabled(bool enabled)
         extra->implicitResize = true;
 }
 
-TextEdit::VAlignment TextEdit::vAlign() const
+LineSurface::VAlignment LineSurface::vAlign() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->vAlign;
 }
 
-void TextEdit::setVAlign(TextEdit::VAlignment alignment)
+void LineSurface::setVAlign(LineSurface::VAlignment alignment)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (alignment == d->vAlign)
         return;
     d->vAlign = alignment;
@@ -869,30 +519,16 @@ void TextEdit::setVAlign(TextEdit::VAlignment alignment)
     moveCursorDelegate();
     emit verticalAlignmentChanged(d->vAlign);
 }
-/*!
-    \qmlproperty enumeration QtQuick::TextEdit::wrapMode
 
-    Set this property to wrap the text to the TextEdit item's width.
-    The text will only wrap if an explicit width has been set.
-
-    \list
-    \li TextEdit.NoWrap - no wrapping will be performed. If the text contains insufficient newlines, then implicitWidth will exceed a set width.
-    \li TextEdit.WordWrap - wrapping is done on word boundaries only. If a word is too long, implicitWidth will exceed a set width.
-    \li TextEdit.WrapAnywhere - wrapping is done at any point on a line, even if it occurs in the middle of a word.
-    \li TextEdit.Wrap - if possible, wrapping occurs at a word boundary; otherwise it will occur at the appropriate point on the line, even in the middle of a word.
-    \endlist
-
-    The default is TextEdit.NoWrap. If you set a width, consider using TextEdit.Wrap.
-*/
-TextEdit::WrapMode TextEdit::wrapMode() const
+LineSurface::WrapMode LineSurface::wrapMode() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->wrapMode;
 }
 
-void TextEdit::setWrapMode(WrapMode mode)
+void LineSurface::setWrapMode(WrapMode mode)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (mode == d->wrapMode)
         return;
     d->wrapMode = mode;
@@ -901,83 +537,47 @@ void TextEdit::setWrapMode(WrapMode mode)
     emit wrapModeChanged();
 }
 
-/*!
-    \qmlproperty int QtQuick::TextEdit::lineCount
-
-    Returns the total number of lines in the textEdit item.
-*/
-int TextEdit::lineCount() const
+int LineSurface::lineCount() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->lineCount;
 }
 
-/*!
-    \qmlproperty int QtQuick::TextEdit::length
-
-    Returns the total number of plain text characters in the TextEdit item.
-
-    As this number doesn't include any formatting markup it may not be the same as the
-    length of the string returned by the \l text property.
-
-    This property can be faster than querying the length the \l text property as it doesn't
-    require any copying or conversion of the TextEdit's internal string data.
-*/
-
-int TextEdit::length() const
+int LineSurface::length() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document) return 0;
     // QTextDocument::characterCount() includes the terminating null character.
     return qMax(0, d->document->characterCount() - 1);
 }
 
-/*!
-    \qmlproperty real QtQuick::TextEdit::contentWidth
 
-    Returns the width of the text, including the width past the width
-    which is covered due to insufficient wrapping if \l wrapMode is set.
-*/
-qreal TextEdit::contentWidth() const
+qreal LineSurface::contentWidth() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->contentSize.width();
 }
 
-/*!
-    \qmlproperty real QtQuick::TextEdit::contentHeight
 
-    Returns the height of the text, including the height past the height
-    that is covered if the text does not fit within the set height.
-*/
-qreal TextEdit::contentHeight() const
+qreal LineSurface::contentHeight() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->contentSize.height();
 }
 
-/*!
-    \qmlproperty url QtQuick::TextEdit::baseUrl
-
-    This property specifies a base URL which is used to resolve relative URLs
-    within the text.
-
-    The default value is the url of the QML file instantiating the TextEdit item.
-*/
-
-QUrl TextEdit::baseUrl() const
+QUrl LineSurface::baseUrl() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (d->baseUrl.isEmpty()) {
         if (QQmlContext *context = qmlContext(this))
-            const_cast<TextEditPrivate *>(d)->baseUrl = context->baseUrl();
+            const_cast<LineSurfacePrivate *>(d)->baseUrl = context->baseUrl();
     }
     return d->baseUrl;
 }
 
-void TextEdit::setBaseUrl(const QUrl &url)
+void LineSurface::setBaseUrl(const QUrl &url)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (baseUrl() != url) {
         d->baseUrl = url;
 
@@ -986,7 +586,7 @@ void TextEdit::setBaseUrl(const QUrl &url)
     }
 }
 
-void TextEdit::resetBaseUrl()
+void LineSurface::resetBaseUrl()
 {
     if (QQmlContext *context = qmlContext(this))
         setBaseUrl(context->baseUrl());
@@ -994,16 +594,9 @@ void TextEdit::resetBaseUrl()
         setBaseUrl(QUrl());
 }
 
-/*!
-    \qmlmethod rectangle QtQuick::TextEdit::positionToRectangle(position)
-
-    Returns the rectangle at the given \a position in the text. The x, y,
-    and height properties correspond to the cursor that would describe
-    that position.
-*/
-QRectF TextEdit::positionToRectangle(int pos) const
+QRectF LineSurface::positionToRectangle(int pos) const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return QRectF();
     QTextCursor c(d->document);
     c.setPosition(pos);
@@ -1011,17 +604,9 @@ QRectF TextEdit::positionToRectangle(int pos) const
 
 }
 
-/*!
-    \qmlmethod int QtQuick::TextEdit::positionAt(int x, int y)
-
-    Returns the text position closest to pixel position (\a x, \a y).
-
-    Position 0 is before the first character, position 1 is after the first character
-    but before the second, and so on until position \l {text}.length, which is after all characters.
-*/
-int TextEdit::positionAt(qreal x, qreal y) const
+int LineSurface::positionAt(qreal x, qreal y) const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document) return -1;
     x -= d->xoff;
     y -= d->yoff;
@@ -1048,47 +633,10 @@ int TextEdit::positionAt(qreal x, qreal y) const
     return r;
 }
 
-/*!
-    \qmlmethod QtQuick::TextEdit::moveCursorSelection(int position, SelectionMode mode = TextEdit.SelectCharacters)
-
-    Moves the cursor to \a position and updates the selection according to the optional \a mode
-    parameter. (To only move the cursor, set the \l cursorPosition property.)
-
-    When this method is called it additionally sets either the
-    selectionStart or the selectionEnd (whichever was at the previous cursor position)
-    to the specified position. This allows you to easily extend and contract the selected
-    text range.
-
-    The selection mode specifies whether the selection is updated on a per character or a per word
-    basis.  If not specified the selection mode will default to TextEdit.SelectCharacters.
-
-    \list
-    \li TextEdit.SelectCharacters - Sets either the selectionStart or selectionEnd (whichever was at
-    the previous cursor position) to the specified position.
-    \li TextEdit.SelectWords - Sets the selectionStart and selectionEnd to include all
-    words between the specified position and the previous cursor position.  Words partially in the
-    range are included.
-    \endlist
-
-    For example, take this sequence of calls:
-
-    \code
-        cursorPosition = 5
-        moveCursorSelection(9, TextEdit.SelectCharacters)
-        moveCursorSelection(7, TextEdit.SelectCharacters)
-    \endcode
-
-    This moves the cursor to position 5, extend the selection end from 5 to 9
-    and then retract the selection end from 9 to 7, leaving the text from position 5 to 7
-    selected (the 6th and 7th characters).
-
-    The same sequence with TextEdit.SelectWords will extend the selection start to a word boundary
-    before or on position 5 and extend the selection end to a word boundary on or past position 9.
-*/
-void TextEdit::moveCursorSelection(int pos)
+void LineSurface::moveCursorSelection(int pos)
 {
     //Note that this is the same as setCursorPosition but with the KeepAnchor flag set
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     QTextCursor cursor = d->control->textCursor();
@@ -1098,9 +646,9 @@ void TextEdit::moveCursorSelection(int pos)
     d->control->setTextCursor(cursor);
 }
 
-void TextEdit::moveCursorSelection(int pos, SelectionMode mode)
+void LineSurface::moveCursorSelection(int pos, SelectionMode mode)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     QTextCursor cursor = d->control->textCursor();
@@ -1149,22 +697,15 @@ void TextEdit::moveCursorSelection(int pos, SelectionMode mode)
     d->control->setTextCursor(cursor);
 }
 
-/*!
-    \qmlproperty bool QtQuick::TextEdit::cursorVisible
-    If true the text edit shows a cursor.
-
-    This property is set and unset when the text edit gets active focus, but it can also
-    be set directly (useful, for example, if a KeyProxy might forward keys to it).
-*/
-bool TextEdit::isCursorVisible() const
+bool LineSurface::isCursorVisible() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->cursorVisible;
 }
 
-void TextEdit::setCursorVisible(bool on)
+void LineSurface::setCursorVisible(bool on)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->cursorVisible = on;
     if (on && isComponentComplete())
         TextUtil::createCursor(d);
@@ -1174,21 +715,17 @@ void TextEdit::setCursorVisible(bool on)
     emit cursorVisibleChanged(d->cursorVisible);
 }
 
-/*!
-    \qmlproperty int QtQuick::TextEdit::cursorPosition
-    The position of the cursor in the TextEdit.
-*/
-int TextEdit::cursorPosition() const
+int LineSurface::cursorPosition() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return -1;
 
     return d->control->textCursor().position();
 }
 
-void TextEdit::setCursorPosition(int pos)
+void LineSurface::setCursorPosition(int pos)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
     if (pos < 0 || pos >= d->document->characterCount()) // characterCount includes the terminating null.
         return;
@@ -1200,91 +737,45 @@ void TextEdit::setCursorPosition(int pos)
     d->control->updateCursorRectangle(true);
 }
 
-/*!
-    \qmlproperty Component QtQuick::TextEdit::cursorDelegate
-    The delegate for the cursor in the TextEdit.
 
-    If you set a cursorDelegate for a TextEdit, this delegate will be used for
-    drawing the cursor instead of the standard cursor. An instance of the
-    delegate will be created and managed by the text edit when a cursor is
-    needed, and the x and y properties of delegate instance will be set so as
-    to be one pixel before the top left of the current character.
-
-    Note that the root item of the delegate component must be a QQuickItem or
-    QQuickItem derived item.
-*/
-QQmlComponent* TextEdit::cursorDelegate() const
+QQmlComponent* LineSurface::cursorDelegate() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->cursorComponent;
 }
 
-void TextEdit::setCursorDelegate(QQmlComponent* c)
+void LineSurface::setCursorDelegate(QQmlComponent* c)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     TextUtil::setCursorDelegate(d, c);
 }
 
-void TextEdit::createCursor()
+void LineSurface::createCursor()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->cursorPending = true;
     TextUtil::createCursor(d);
 }
 
-/*!
-    \qmlproperty int QtQuick::TextEdit::selectionStart
-
-    The cursor position before the first character in the current selection.
-
-    This property is read-only. To change the selection, use select(start,end),
-    selectAll(), or selectWord().
-
-    \sa selectionEnd, cursorPosition, selectedText
-*/
-int TextEdit::selectionStart() const
+int LineSurface::selectionStart() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return -1;
 
     return d->control->textCursor().selectionStart();
 }
 
-/*!
-    \qmlproperty int QtQuick::TextEdit::selectionEnd
-
-    The cursor position after the last character in the current selection.
-
-    This property is read-only. To change the selection, use select(start,end),
-    selectAll(), or selectWord().
-
-    \sa selectionStart, cursorPosition, selectedText
-*/
-int TextEdit::selectionEnd() const
+int LineSurface::selectionEnd() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return -1;
 
     return d->control->textCursor().selectionEnd();
 }
 
-/*!
-    \qmlproperty string QtQuick::TextEdit::selectedText
-
-    This read-only property provides the text currently selected in the
-    text edit.
-
-    It is equivalent to the following snippet, but is faster and easier
-    to use.
-    \code
-    //myTextEdit is the id of the TextEdit
-    myTextEdit.text.toString().substring(myTextEdit.selectionStart,
-            myTextEdit.selectionEnd);
-    \endcode
-*/
-QString TextEdit::selectedText() const
+QString LineSurface::selectedText() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return QString();
 
 #ifndef QT_NO_TEXTHTMLPARSER
@@ -1296,62 +787,45 @@ QString TextEdit::selectedText() const
 #endif
 }
 
-/*!
-    \qmlproperty bool QtQuick::TextEdit::activeFocusOnPress
-
-    Whether the TextEdit should gain active focus on a mouse press. By default this is
-    set to true.
-*/
-bool TextEdit::focusOnPress() const
+bool LineSurface::focusOnPress() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->focusOnPress;
 }
 
-void TextEdit::setFocusOnPress(bool on)
+void LineSurface::setFocusOnPress(bool on)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (d->focusOnPress == on)
         return;
     d->focusOnPress = on;
     emit activeFocusOnPressChanged(d->focusOnPress);
 }
 
-/*!
-    \qmlproperty bool QtQuick::TextEdit::persistentSelection
-
-    Whether the TextEdit should keep the selection visible when it loses active focus to another
-    item in the scene. By default this is set to false.
-*/
-bool TextEdit::persistentSelection() const
+bool LineSurface::persistentSelection() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->persistentSelection;
 }
 
-void TextEdit::setPersistentSelection(bool on)
+void LineSurface::setPersistentSelection(bool on)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (d->persistentSelection == on)
         return;
     d->persistentSelection = on;
     emit persistentSelectionChanged(d->persistentSelection);
 }
 
-/*!
-   \qmlproperty real QtQuick::TextEdit::textMargin
-
-   The margin, in pixels, around the text in the TextEdit.
-*/
-qreal TextEdit::textMargin() const
+qreal LineSurface::textMargin() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->textMargin;
 }
 
-void TextEdit::setTextMargin(qreal margin)
+void LineSurface::setTextMargin(qreal margin)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     if (abs(d->textMargin - margin) < LV_ACCURACY)
         return;
@@ -1360,66 +834,23 @@ void TextEdit::setTextMargin(qreal margin)
     emit textMarginChanged(d->textMargin);
 }
 
-/*!
-    \qmlproperty enumeration QtQuick::TextEdit::inputMethodHints
 
-    Provides hints to the input method about the expected content of the text edit and how it
-    should operate.
-
-    The value is a bit-wise combination of flags or Qt.ImhNone if no hints are set.
-
-    Flags that alter behaviour are:
-
-    \list
-    \li Qt.ImhHiddenText - Characters should be hidden, as is typically used when entering passwords.
-    \li Qt.ImhSensitiveData - Typed text should not be stored by the active input method
-            in any persistent storage like predictive user dictionary.
-    \li Qt.ImhNoAutoUppercase - The input method should not try to automatically switch to upper case
-            when a sentence ends.
-    \li Qt.ImhPreferNumbers - Numbers are preferred (but not required).
-    \li Qt.ImhPreferUppercase - Upper case letters are preferred (but not required).
-    \li Qt.ImhPreferLowercase - Lower case letters are preferred (but not required).
-    \li Qt.ImhNoPredictiveText - Do not use predictive text (i.e. dictionary lookup) while typing.
-
-    \li Qt.ImhDate - The text editor functions as a date field.
-    \li Qt.ImhTime - The text editor functions as a time field.
-    \endlist
-
-    Flags that restrict input (exclusive flags) are:
-
-    \list
-    \li Qt.ImhDigitsOnly - Only digits are allowed.
-    \li Qt.ImhFormattedNumbersOnly - Only number input is allowed. This includes decimal point and minus sign.
-    \li Qt.ImhUppercaseOnly - Only upper case letter input is allowed.
-    \li Qt.ImhLowercaseOnly - Only lower case letter input is allowed.
-    \li Qt.ImhDialableCharactersOnly - Only characters suitable for phone dialing are allowed.
-    \li Qt.ImhEmailCharactersOnly - Only characters suitable for email addresses are allowed.
-    \li Qt.ImhUrlCharactersOnly - Only characters suitable for URLs are allowed.
-    \endlist
-
-    Masks:
-
-    \list
-    \li Qt.ImhExclusiveInputMask - This mask yields nonzero if any of the exclusive flags are used.
-    \endlist
-*/
-
-Qt::InputMethodHints TextEdit::inputMethodHints() const
+Qt::InputMethodHints LineSurface::inputMethodHints() const
 {
 #ifdef QT_NO_IM
     return Qt::ImhNone;
 #else
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->inputMethodHints;
 #endif // QT_NO_IM
 }
 
-void TextEdit::setInputMethodHints(Qt::InputMethodHints hints)
+void LineSurface::setInputMethodHints(Qt::InputMethodHints hints)
 {
 #ifdef QT_NO_IM
     Q_UNUSED(hints);
 #else
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     if (hints == d->inputMethodHints)
         return;
@@ -1430,10 +861,10 @@ void TextEdit::setInputMethodHints(Qt::InputMethodHints hints)
 #endif // QT_NO_IM
 }
 
-void TextEdit::geometryChanged(const QRectF &newGeometry,
+void LineSurface::geometryChanged(const QRectF &newGeometry,
                                   const QRectF &oldGeometry)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->inLayout && ((abs(newGeometry.width() - oldGeometry.width()) > LV_ACCURACY && widthValid())
         || (abs(newGeometry.height() - oldGeometry.height()) > LV_ACCURACY && heightValid()))) {
         updateSize();
@@ -1444,13 +875,9 @@ void TextEdit::geometryChanged(const QRectF &newGeometry,
 
 }
 
-/*!
-    Ensures any delayed caching or data loading the class
-    needs to performed is complete.
-*/
-void TextEdit::componentComplete()
+void LineSurface::componentComplete()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     QQuickItem::componentComplete();
     if (!d->document || !d->control) return;
@@ -1474,31 +901,17 @@ void TextEdit::componentComplete()
         TextUtil::createCursor(d);
 }
 
-/*!
-    \qmlproperty bool QtQuick::TextEdit::selectByKeyboard
-    \since 5.1
-
-    Defaults to true when the editor is editable, and false
-    when read-only.
-
-    If true, the user can use the keyboard to select text
-    even if the editor is read-only. If false, the user
-    cannot use the keyboard to select text even if the
-    editor is editable.
-
-    \sa readOnly
-*/
-bool TextEdit::selectByKeyboard() const
+bool LineSurface::selectByKeyboard() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (d->selectByKeyboardSet)
         return d->selectByKeyboard;
     return !isReadOnly();
 }
 
-void TextEdit::setSelectByKeyboard(bool on)
+void LineSurface::setSelectByKeyboard(bool on)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     bool was = selectByKeyboard();
@@ -1513,25 +926,15 @@ void TextEdit::setSelectByKeyboard(bool on)
     }
 }
 
-/*!
-    \qmlproperty bool QtQuick::TextEdit::selectByMouse
-
-    Defaults to false.
-
-    If true, the user can use the mouse to select text in some
-    platform-specific way. Note that for some platforms this may
-    not be an appropriate interaction; it may conflict with how
-    the text needs to behave inside a Flickable, for example.
-*/
-bool TextEdit::selectByMouse() const
+bool LineSurface::selectByMouse() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->selectByMouse;
 }
 
-void TextEdit::setSelectByMouse(bool on)
+void LineSurface::setSelectByMouse(bool on)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     d->selectByMouse = on;
     setKeepMouseGrab(on);
@@ -1544,44 +947,24 @@ void TextEdit::setSelectByMouse(bool on)
 
 }
 
-/*!
-    \qmlproperty enumeration QtQuick::TextEdit::mouseSelectionMode
-
-    Specifies how text should be selected using a mouse.
-
-    \list
-    \li TextEdit.SelectCharacters - The selection is updated with individual characters. (Default)
-    \li TextEdit.SelectWords - The selection is updated with whole words.
-    \endlist
-
-    This property only applies when \l selectByMouse is true.
-*/
-TextEdit::SelectionMode TextEdit::mouseSelectionMode() const
+LineSurface::SelectionMode LineSurface::mouseSelectionMode() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->mouseSelectionMode;
 }
 
-void TextEdit::setMouseSelectionMode(SelectionMode mode)
+void LineSurface::setMouseSelectionMode(SelectionMode mode)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     d->mouseSelectionMode = mode;
     if (d->control) d->control->setWordSelectionEnabled(mode == SelectWords);
     emit mouseSelectionModeChanged(mode);
 }
 
-/*!
-    \qmlproperty bool QtQuick::TextEdit::readOnly
-
-    Whether the user can interact with the TextEdit item. If this
-    property is set to true the text cannot be edited by user interaction.
-
-    By default this property is false.
-*/
-void TextEdit::setReadOnly(bool r)
+void LineSurface::setReadOnly(bool r)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     d->readOnly = r;
 #ifndef QT_NO_IM
@@ -1616,33 +999,23 @@ void TextEdit::setReadOnly(bool r)
     }
 }
 
-bool TextEdit::isReadOnly() const
+bool LineSurface::isReadOnly() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->readOnly;
 }
 
-/*!
-    \qmlproperty rectangle QtQuick::TextEdit::cursorRectangle
-
-    The rectangle where the standard text cursor is rendered
-    within the text edit. Read-only.
-
-    The position and height of a custom cursorDelegate are updated to follow the cursorRectangle
-    automatically when it changes.  The width of the delegate is unaffected by changes in the
-    cursor rectangle.
-*/
-QRectF TextEdit::cursorRectangle() const
+QRectF LineSurface::cursorRectangle() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return QRectF();
 
     return d->control->cursorRect().translated(d->xoff, d->yoff);
 }
 
-bool TextEdit::event(QEvent *event)
+bool LineSurface::event(QEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return QQuickItem::event(event);
 
     if (event->type() == QEvent::ShortcutOverride) {
@@ -1652,13 +1025,9 @@ bool TextEdit::event(QEvent *event)
     return QQuickItem::event(event);
 }
 
-/*!
-\overload
-Handles the given key \a event.
-*/
-void TextEdit::keyPressEvent(QKeyEvent *event)
+void LineSurface::keyPressEvent(QKeyEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control)
     {
         QQuickItem::keyPressEvent(event);
@@ -1670,13 +1039,9 @@ void TextEdit::keyPressEvent(QKeyEvent *event)
         QQuickItem::keyPressEvent(event);
 }
 
-/*!
-\overload
-Handles the given key \a event.
-*/
-void TextEdit::keyReleaseEvent(QKeyEvent *event)
+void LineSurface::keyReleaseEvent(QKeyEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control)
     {
         QQuickItem::keyReleaseEvent(event);
@@ -1687,14 +1052,9 @@ void TextEdit::keyReleaseEvent(QKeyEvent *event)
         QQuickItem::keyReleaseEvent(event);
 }
 
-/*!
-    \qmlmethod QtQuick::TextEdit::deselect()
-
-    Removes active text selection.
-*/
-void TextEdit::deselect()
+void LineSurface::deselect()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     QTextCursor c = d->control->textCursor();
@@ -1702,50 +1062,26 @@ void TextEdit::deselect()
     d->control->setTextCursor(c);
 }
 
-/*!
-    \qmlmethod QtQuick::TextEdit::selectAll()
-
-    Causes all text to be selected.
-*/
-void TextEdit::selectAll()
+void LineSurface::selectAll()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     d->control->selectAll();
 }
 
-/*!
-    \qmlmethod QtQuick::TextEdit::selectWord()
-
-    Causes the word closest to the current cursor position to be selected.
-*/
-void TextEdit::selectWord()
+void LineSurface::selectWord()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     QTextCursor c = d->control->textCursor();
     c.select(QTextCursor::WordUnderCursor);
     d->control->setTextCursor(c);
 }
-
-/*!
-    \qmlmethod QtQuick::TextEdit::select(int start, int end)
-
-    Causes the text from \a start to \a end to be selected.
-
-    If either start or end is out of range, the selection is not changed.
-
-    After calling this, selectionStart will become the lesser
-    and selectionEnd will become the greater (regardless of the order passed
-    to this method).
-
-    \sa selectionStart, selectionEnd
-*/
-void TextEdit::select(int start, int end)
+void LineSurface::select(int start, int end)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     if (start < 0 || end < 0 || start >= d->document->characterCount() || end >= d->document->characterCount())
@@ -1762,13 +1098,7 @@ void TextEdit::select(int start, int end)
     updateInputMethod();
 }
 
-/*!
-    \qmlmethod QtQuick::TextEdit::isRightToLeft(int start, int end)
-
-    Returns true if the natural reading direction of the editor text
-    found between positions \a start and \a end is right to left.
-*/
-bool TextEdit::isRightToLeft(int start, int end)
+bool LineSurface::isRightToLeft(int start, int end)
 {
     if (start > end) {
         qmlInfo(this) << "isRightToLeft(start, end) called with the end property being smaller than the start.";
@@ -1779,40 +1109,25 @@ bool TextEdit::isRightToLeft(int start, int end)
 }
 
 #ifndef QT_NO_CLIPBOARD
-/*!
-    \qmlmethod QtQuick::TextEdit::cut()
-
-    Moves the currently selected text to the system clipboard.
-*/
-void TextEdit::cut()
+void LineSurface::cut()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     d->control->cut();
 }
 
-/*!
-    \qmlmethod QtQuick::TextEdit::copy()
-
-    Copies the currently selected text to the system clipboard.
-*/
-void TextEdit::copy()
+void LineSurface::copy()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     d->control->copy();
 }
 
-/*!
-    \qmlmethod QtQuick::TextEdit::paste()
-
-    Replaces the currently selected text by the contents of the system clipboard.
-*/
-void TextEdit::paste()
+void LineSurface::paste()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     d->control->paste();
@@ -1820,43 +1135,25 @@ void TextEdit::paste()
 #endif // QT_NO_CLIPBOARD
 
 
-/*!
-    \qmlmethod QtQuick::TextEdit::undo()
 
-    Undoes the last operation if undo is \l {canUndo}{available}. Deselects any
-    current selection, and updates the selection start to the current cursor
-    position.
-*/
-
-void TextEdit::undo()
+void LineSurface::undo()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     d->control->undo();
 }
-
-/*!
-    \qmlmethod QtQuick::TextEdit::redo()
-
-    Redoes the last operation if redo is \l {canRedo}{available}.
-*/
-
-void TextEdit::redo()
+void LineSurface::redo()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     d->control->redo();
 }
 
-/*!
-\overload
-Handles the given mouse \a event.
-*/
-void TextEdit::mousePressEvent(QMouseEvent *event)
+void LineSurface::mousePressEvent(QMouseEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control)
     {
         QQuickItem::mousePressEvent(event);
@@ -1879,13 +1176,9 @@ void TextEdit::mousePressEvent(QMouseEvent *event)
         QQuickItem::mousePressEvent(event);
 }
 
-/*!
-\overload
-Handles the given mouse \a event.
-*/
-void TextEdit::mouseReleaseEvent(QMouseEvent *event)
+void LineSurface::mouseReleaseEvent(QMouseEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control)
     {
         QQuickItem::mouseReleaseEvent(event);
@@ -1897,13 +1190,9 @@ void TextEdit::mouseReleaseEvent(QMouseEvent *event)
         QQuickItem::mouseReleaseEvent(event);
 }
 
-/*!
-\overload
-Handles the given mouse \a event.
-*/
-void TextEdit::mouseDoubleClickEvent(QMouseEvent *event)
+void LineSurface::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control)
     {
         QQuickItem::mouseDoubleClickEvent(event);
@@ -1914,13 +1203,9 @@ void TextEdit::mouseDoubleClickEvent(QMouseEvent *event)
         QQuickItem::mouseDoubleClickEvent(event);
 }
 
-/*!
-\overload
-Handles the given mouse \a event.
-*/
-void TextEdit::mouseMoveEvent(QMouseEvent *event)
+void LineSurface::mouseMoveEvent(QMouseEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control)
     {
         QQuickItem::mouseMoveEvent(event);
@@ -1932,13 +1217,9 @@ void TextEdit::mouseMoveEvent(QMouseEvent *event)
 }
 
 #ifndef QT_NO_IM
-/*!
-\overload
-Handles the given input method \a event.
-*/
-void TextEdit::inputMethodEvent(QInputMethodEvent *event)
+void LineSurface::inputMethodEvent(QInputMethodEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
     const bool wasComposing = isInputMethodComposing();
     d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
@@ -1947,13 +1228,9 @@ void TextEdit::inputMethodEvent(QInputMethodEvent *event)
         emit inputMethodComposingChanged();
 }
 
-/*!
-\overload
-Returns the value of the given \a property and \a argument.
-*/
-QVariant TextEdit::inputMethodQuery(Qt::InputMethodQuery property, QVariant argument) const
+QVariant LineSurface::inputMethodQuery(Qt::InputMethodQuery property, QVariant argument) const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
 
     QVariant v;
     switch (property) {
@@ -1978,29 +1255,25 @@ QVariant TextEdit::inputMethodQuery(Qt::InputMethodQuery property, QVariant argu
     return v;
 }
 
-/*!
-\overload
-Returns the value of the given \a property.
-*/
-QVariant TextEdit::inputMethodQuery(Qt::InputMethodQuery property) const
+QVariant LineSurface::inputMethodQuery(Qt::InputMethodQuery property) const
 {
     return inputMethodQuery(property, QVariant());
 }
 #endif // QT_NO_IM
 
-void TextEdit::triggerPreprocess()
+void LineSurface::triggerPreprocess()
 {
-    Q_D(TextEdit);
-    if (d->updateType == TextEditPrivate::UpdateNone)
-        d->updateType = TextEditPrivate::UpdateOnlyPreprocess;
+    Q_D(LineSurface);
+    if (d->updateType == LineSurfacePrivate::UpdateNone)
+        d->updateType = LineSurfacePrivate::UpdateOnlyPreprocess;
     polish();
     update();
 }
 
-typedef QList<TextEditPrivate::Node*>::iterator TextNodeIterator;
+typedef QList<LineSurfacePrivate::Node*>::iterator TextNodeIterator;
 
 
-static bool comesBefore(TextEditPrivate::Node* n1, TextEditPrivate::Node* n2)
+static bool comesBefore(LineSurfacePrivate::Node* n1, LineSurfacePrivate::Node* n2)
 {
     return n1->startPos() < n2->startPos();
 }
@@ -2012,15 +1285,9 @@ static inline void updateNodeTransform(TextNode* node, const QPointF &topLeft)
     node->setMatrix(transformMatrix);
 }
 
-/*!
- * \internal
- *
- * Invalidates font caches owned by the text objects owned by the element
- * to work around the fact that text objects cannot be used from multiple threads.
- */
-void TextEdit::invalidateFontCaches()
+void LineSurface::invalidateFontCaches()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
 
@@ -2039,23 +1306,23 @@ inline void resetEngine(TextNodeEngine *engine, const QColor& textColor, const Q
     engine->setSelectionColor(selectionColor);
 }
 
-QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
+QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
 {
     Q_UNUSED(updatePaintNodeData);
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     if (!d->document || !d->control) {
         if (oldNode) delete oldNode;
         return nullptr;
     }
 
-    if (d->updateType != TextEditPrivate::UpdatePaintNode && oldNode != nullptr) {
+    if (d->updateType != LineSurfacePrivate::UpdatePaintNode && oldNode != nullptr) {
         // Update done in preprocess() in the nodes
-        d->updateType = TextEditPrivate::UpdateNone;
+        d->updateType = LineSurfacePrivate::UpdateNone;
         return oldNode;
     }
 
-    d->updateType = TextEditPrivate::UpdateNone;
+    d->updateType = LineSurfacePrivate::UpdateNone;
 
     if (!oldNode) {
         // If we had any QQuickTextNode node references, they were deleted along with the root node
@@ -2106,7 +1373,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
         rootNode->setMatrix(basePositionMatrix);
 
         QPointF nodeOffset;
-        TextEditPrivate::Node *firstCleanNode = (nodeIterator != d->textNodeMap.end()) ? *nodeIterator : nullptr;
+        LineSurfacePrivate::Node *firstCleanNode = (nodeIterator != d->textNodeMap.end()) ? *nodeIterator : nullptr;
 
         if (d->document && d->control) {
             QList<QTextFrame *> frames;
@@ -2219,83 +1486,52 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
     return rootNode;
 }
 
-void TextEdit::updatePolish()
+void LineSurface::updatePolish()
 {
     invalidateFontCaches();
 }
 
-/*!
-    \qmlproperty bool QtQuick::TextEdit::canPaste
-
-    Returns true if the TextEdit is writable and the content of the clipboard is
-    suitable for pasting into the TextEdit.
-*/
-bool TextEdit::canPaste() const
+bool LineSurface::canPaste() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return false;
 
     if (!d->canPasteValid) {
-        const_cast<TextEditPrivate *>(d)->canPaste = d->control->canPaste();
-        const_cast<TextEditPrivate *>(d)->canPasteValid = true;
+        const_cast<LineSurfacePrivate *>(d)->canPaste = d->control->canPaste();
+        const_cast<LineSurfacePrivate *>(d)->canPasteValid = true;
     }
     return d->canPaste;
 }
 
-/*!
-    \qmlproperty bool QtQuick::TextEdit::canUndo
 
-    Returns true if the TextEdit is writable and there are previous operations
-    that can be undone.
-*/
-
-bool TextEdit::canUndo() const
+bool LineSurface::canUndo() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document) return false;
 
     return d->document->isUndoAvailable();
 }
 
-/*!
-    \qmlproperty bool QtQuick::TextEdit::canRedo
-
-    Returns true if the TextEdit is writable and there are \l {undo}{undone}
-    operations that can be redone.
-*/
-
-bool TextEdit::canRedo() const
+bool LineSurface::canRedo() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document) return false;
 
     return d->document->isRedoAvailable();
 }
 
-/*!
-    \qmlproperty bool QtQuick::TextEdit::inputMethodComposing
-
-
-    This property holds whether the TextEdit has partial text input from an
-    input method.
-
-    While it is composing an input method may rely on mouse or key events from
-    the TextEdit to edit or commit the partial text.  This property can be used
-    to determine when to disable events handlers that may interfere with the
-    correct operation of an input method.
-*/
-bool TextEdit::isInputMethodComposing() const
+bool LineSurface::isInputMethodComposing() const
 {
 #ifdef QT_NO_IM
     return false;
 #else
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return false;
     return d->control->hasImState();
 #endif // QT_NO_IM
 }
 
-TextEditPrivate::ExtraData::ExtraData()
+LineSurfacePrivate::ExtraData::ExtraData()
     : padding(0)
     , topPadding(0)
     , leftPadding(0)
@@ -2309,17 +1545,17 @@ TextEditPrivate::ExtraData::ExtraData()
 {
 }
 
-void TextEdit::singleShotUpdate()
+void LineSurface::singleShotUpdate()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->highlightingInProgress = true;
     emit dirtyBlockPosition(-1);
     d->document->markContentsDirty(0, d->document->characterCount());
 }
 
-void TextEditPrivate::setTextDocument(QTextDocument *d)
+void LineSurfacePrivate::setTextDocument(QTextDocument *d)
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     document = d;
 
     control = new TextControl(document, q);
@@ -2331,21 +1567,21 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     fragmentEnd = 10;
     q->updateFragmentVisibility();
 */
-    lv_qmlobject_connect(control, TextControl, SIGNAL(updateCursorRequest()), q, TextEdit, SLOT(updateCursor()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, TextEdit, SIGNAL(selectedTextChanged()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, TextEdit, SLOT(updateSelection()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, TextEdit, SLOT(updateSelection()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, TextEdit, SIGNAL(cursorPositionChanged()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorRectangleChanged()), q, TextEdit, SLOT(moveCursorDelegate()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(linkActivated(QString)), q, TextEdit, SIGNAL(linkActivated(QString)));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(linkHovered(QString)), q, TextEdit, SIGNAL(linkHovered(QString)));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(textChanged()), q, TextEdit, SLOT(q_textChanged()));
-    lv_qmlobject_connect(control, TextControl, SIGNAL(preeditTextChanged()), q, TextEdit, SIGNAL(preeditTextChanged()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(updateCursorRequest()), q, LineSurface, SLOT(updateCursor()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, LineSurface, SIGNAL(selectedTextChanged()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, LineSurface, SLOT(updateSelection()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, LineSurface, SLOT(updateSelection()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, LineSurface, SIGNAL(cursorPositionChanged()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorRectangleChanged()), q, LineSurface, SLOT(moveCursorDelegate()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(linkActivated(QString)), q, LineSurface, SIGNAL(linkActivated(QString)));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(linkHovered(QString)), q, LineSurface, SIGNAL(linkHovered(QString)));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(textChanged()), q, LineSurface, SLOT(q_textChanged()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(preeditTextChanged()), q, LineSurface, SIGNAL(preeditTextChanged()));
     /*#if QT_CONFIG(clipboard)
-        qmlobject_connect(QGuiApplication::clipboard(), QClipboard, SIGNAL(dataChanged()), q, QQuickTextEdit, SLOT(q_canPasteChanged()));
+        qmlobject_connect(QGuiApplication::clipboard(), QClipboard, SIGNAL(dataChanged()), q, QQuickLineSurface, SLOT(q_canPasteChanged()));
     #endif*/
-    lv_qmlobject_connect(document, QTextDocument, SIGNAL(undoAvailable(bool)), q, TextEdit, SIGNAL(canUndoChanged()));
-    lv_qmlobject_connect(document, QTextDocument, SIGNAL(redoAvailable(bool)), q, TextEdit, SIGNAL(canRedoChanged()));
+    lv_qmlobject_connect(document, QTextDocument, SIGNAL(undoAvailable(bool)), q, LineSurface, SIGNAL(canUndoChanged()));
+    lv_qmlobject_connect(document, QTextDocument, SIGNAL(redoAvailable(bool)), q, LineSurface, SIGNAL(canRedoChanged()));
 
 
 
@@ -2361,18 +1597,16 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     updateDefaultTextOption();
     q->updateSize();
 
-    QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
-    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
-    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
+    QObject::connect(document, &QTextDocument::contentsChange, q, &LineSurface::q_contentsChange);
+    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &LineSurface::invalidateBlock);
+    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &LineSurface::highlightingDone);
 }
 
-void TextEditPrivate::unsetTextDocument()
+void LineSurfacePrivate::unsetTextDocument()
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     if ( document )
     q->markDirtyNodesForRange(0, document->characterCount(), 0);
-
-
 
     if (control)
     {
@@ -2386,9 +1620,9 @@ void TextEditPrivate::unsetTextDocument()
 
 }
 
-void TextEditPrivate::init()
+void LineSurfacePrivate::init()
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
 
 #ifndef QT_NO_CLIPBOARD
     if (QGuiApplication::clipboard()->supportsSelection())
@@ -2406,21 +1640,21 @@ void TextEditPrivate::init()
 
 
 #ifndef QT_NO_CLIPBOARD
-    lv_qmlobject_connect(QGuiApplication::clipboard(), QClipboard, SIGNAL(dataChanged()), q, TextEdit, SLOT(q_canPasteChanged()));
+    lv_qmlobject_connect(QGuiApplication::clipboard(), QClipboard, SIGNAL(dataChanged()), q, LineSurface, SLOT(q_canPasteChanged()));
 #endif
 
 }
 
-void TextEditPrivate::resetInputMethod()
+void LineSurfacePrivate::resetInputMethod()
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     if (!q->isReadOnly() && q->hasActiveFocus() && qGuiApp)
         QGuiApplication::inputMethod()->reset();
 }
 
-void TextEdit::q_textChanged()
+void LineSurface::q_textChanged()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
     d->textCached = false;
     for (QTextBlock it = d->document->begin(); it != d->document->end(); it = it.next()) {
@@ -2434,9 +1668,9 @@ void TextEdit::q_textChanged()
     emit textChanged();
 }
 
-void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
+void LineSurface::markDirtyNodesForRange(int start, int end, int charDelta)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (start == end)
         return;
 
@@ -2458,7 +1692,7 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
 
     if(start == end) nodesUpdate = false;
 
-    TextEditPrivate::Node dummyNode(start, nullptr);
+    LineSurfacePrivate::Node dummyNode(start, nullptr);
     TextNodeIterator it = std::lower_bound(d->textNodeMap.begin(), d->textNodeMap.end(), &dummyNode, &comesBefore);
     if (nodesUpdate && charDelta)
     {
@@ -2466,7 +1700,7 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
         // that starts at the last position before the edit position. (there might be several because of images)
         if (it != d->textNodeMap.begin()) {
             --it;
-            TextEditPrivate::Node otherDummy((*it)->startPos(), nullptr);
+            LineSurfacePrivate::Node otherDummy((*it)->startPos(), nullptr);
             it = std::lower_bound(d->textNodeMap.begin(), d->textNodeMap.end(), &otherDummy, &comesBefore);
         }
     }
@@ -2496,9 +1730,9 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
     }
 }
 
-void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
+void LineSurface::q_contentsChange(int pos, int charsRemoved, int charsAdded)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
@@ -2511,14 +1745,14 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
 
     polish();
     if (isComponentComplete()) {
-        d->updateType = TextEditPrivate::UpdatePaintNode;
+        d->updateType = LineSurfacePrivate::UpdatePaintNode;
         update();
     }
 }
 
-void TextEdit::moveCursorDelegate()
+void LineSurface::moveCursorDelegate()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 #ifndef QT_NO_IM
     updateInputMethod();
 #endif
@@ -2530,9 +1764,9 @@ void TextEdit::moveCursorDelegate()
     d->cursorItem->setY(cursorRect.y());
 }
 
-void TextEdit::updateSelection()
+void LineSurface::updateSelection()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     // No need for node updates when we go from an empty selection to another empty selection
@@ -2540,7 +1774,7 @@ void TextEdit::updateSelection()
         markDirtyNodesForRange(qMin(d->lastSelectionStart, d->control->textCursor().selectionStart()), qMax(d->control->textCursor().selectionEnd(), d->lastSelectionEnd), 0);
         polish();
         if (isComponentComplete()) {
-            d->updateType = TextEditPrivate::UpdatePaintNode;
+            d->updateType = LineSurfacePrivate::UpdatePaintNode;
             update();
         }
     }
@@ -2557,9 +1791,9 @@ void TextEdit::updateSelection()
     }
 }
 
-QRectF TextEdit::boundingRect() const
+QRectF LineSurface::boundingRect() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return QRectF();
 
     QRectF r(
@@ -2580,9 +1814,9 @@ QRectF TextEdit::boundingRect() const
     return r;
 }
 
-QRectF TextEdit::clipRect() const
+QRectF LineSurface::clipRect() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     QRectF r = QQuickItem::clipRect();
     if (!d->document || !d->control) return r;
 
@@ -2598,23 +1832,23 @@ QRectF TextEdit::clipRect() const
     return r;
 }
 
-qreal TextEditPrivate::getImplicitWidth() const
+qreal LineSurfacePrivate::getImplicitWidth() const
 {
-    Q_Q(const TextEdit);
+    Q_Q(const LineSurface);
     if (!requireImplicitWidth) {
         // We don't calculate implicitWidth unless it is required.
         // We need to force a size update now to ensure implicitWidth is calculated
-        const_cast<TextEditPrivate*>(this)->requireImplicitWidth = true;
-        const_cast<TextEdit*>(q)->updateSize();
+        const_cast<LineSurfacePrivate*>(this)->requireImplicitWidth = true;
+        const_cast<LineSurface*>(q)->updateSize();
     }
     return implicitWidth;
 }
 
 //### we should perhaps be a bit smarter here -- depending on what has changed, we shouldn't
 //    need to do all the calculations each time
-void TextEdit::updateSize()
+void LineSurface::updateSize()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     if (!isComponentComplete()) {
         d->dirty = true;
@@ -2623,7 +1857,7 @@ void TextEdit::updateSize()
 
     if (!d->document || !d->control) return;
 
-    if (d->document->textWidth() != -1 )
+    if (abs(d->document->textWidth() +1) > LV_ACCURACY)
         d->document->setTextWidth(-1);
 
     qreal naturalWidth = d->implicitWidth - leftPadding() - rightPadding();
@@ -2686,24 +1920,24 @@ void TextEdit::updateSize()
     }
 }
 
-void TextEdit::updateWholeDocument()
+void LineSurface::updateWholeDocument()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->textNodeMap.isEmpty()) {
-        Q_FOREACH (TextEditPrivate::Node* node, d->textNodeMap)
+        Q_FOREACH (LineSurfacePrivate::Node* node, d->textNodeMap)
             node->setDirty();
     }
 
     polish();
     if (isComponentComplete()) {
-        d->updateType = TextEditPrivate::UpdatePaintNode;
+        d->updateType = LineSurfacePrivate::UpdatePaintNode;
         update();
     }
 }
 
-void TextEdit::highlightingDone(const QRectF &)
+void LineSurface::highlightingDone(const QRectF &)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     if (d->highlightingInProgress)
     {
@@ -2712,9 +1946,9 @@ void TextEdit::highlightingDone(const QRectF &)
     }
 }
 
-void TextEdit::invalidateBlock(const QTextBlock &block)
+void LineSurface::invalidateBlock(const QTextBlock &block)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     markDirtyNodesForRange(block.position(), block.position() + block.length(), 0);
 
@@ -2729,24 +1963,24 @@ void TextEdit::invalidateBlock(const QTextBlock &block)
     polish();
     if (isComponentComplete()) {
         updateSize();
-        d->updateType = TextEditPrivate::UpdatePaintNode;
+        d->updateType = LineSurfacePrivate::UpdatePaintNode;
         update();
     }
 }
 
-void TextEdit::updateCursor()
+void LineSurface::updateCursor()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     polish();
     if (isComponentComplete()) {
-        d->updateType = TextEditPrivate::UpdatePaintNode;
+        d->updateType = LineSurfacePrivate::UpdatePaintNode;
         update();
     }
 }
 
-void TextEdit::q_updateAlignment()
+void LineSurface::q_updateAlignment()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     if (d->determineHorizontalAlignment()) {
@@ -2756,9 +1990,9 @@ void TextEdit::q_updateAlignment()
     }
 }
 
-void TextEdit::updateTotalLines()
+void LineSurface::updateTotalLines()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
 
     int subLines = 0;
     if (!d->document || !d->control) return;
@@ -2778,21 +2012,21 @@ void TextEdit::updateTotalLines()
     }
 }
 
-void TextEditPrivate::updateDefaultTextOption()
+void LineSurfacePrivate::updateDefaultTextOption()
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     if (!document || !control) return;
 
     QTextOption opt = document->defaultTextOption();
     int oldAlignment = opt.alignment();
     Qt::LayoutDirection oldTextDirection = opt.textDirection();
 
-    TextEdit::HAlignment horizontalAlignment = q->effectiveHAlign();
+    LineSurface::HAlignment horizontalAlignment = q->effectiveHAlign();
     if (contentDirection == Qt::RightToLeft) {
-        if (horizontalAlignment == TextEdit::AlignLeft)
-            horizontalAlignment = TextEdit::AlignRight;
-        else if (horizontalAlignment == TextEdit::AlignRight)
-            horizontalAlignment = TextEdit::AlignLeft;
+        if (horizontalAlignment == LineSurface::AlignLeft)
+            horizontalAlignment = LineSurface::AlignRight;
+        else if (horizontalAlignment == LineSurface::AlignRight)
+            horizontalAlignment = LineSurface::AlignLeft;
     }
     if (!hAlignImplicit)
         opt.setAlignment(static_cast<Qt::Alignment>(static_cast<int>(horizontalAlignment | vAlign)));
@@ -2812,7 +2046,7 @@ void TextEditPrivate::updateDefaultTextOption()
     opt.setWrapMode(QTextOption::WrapMode(wrapMode));
 
     bool oldUseDesignMetrics = opt.useDesignMetrics();
-    opt.setUseDesignMetrics(renderType != TextEdit::NativeRendering);
+    opt.setUseDesignMetrics(renderType != LineSurface::NativeRendering);
 
     if (oldWrapMode != opt.wrapMode() || oldAlignment != opt.alignment()
         || oldTextDirection != opt.textDirection()
@@ -2821,23 +2055,23 @@ void TextEditPrivate::updateDefaultTextOption()
     }
 }
 
-void TextEdit::focusInEvent(QFocusEvent *event)
+void LineSurface::focusInEvent(QFocusEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->handleFocusEvent(event);
     QQuickItem::focusInEvent(event);
 }
 
-void TextEdit::focusOutEvent(QFocusEvent *event)
+void LineSurface::focusOutEvent(QFocusEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->handleFocusEvent(event);
     QQuickItem::focusOutEvent(event);
 }
 
-void TextEditPrivate::handleFocusEvent(QFocusEvent *event)
+void LineSurfacePrivate::handleFocusEvent(QFocusEvent *event)
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     if (!document || !control) return;
     bool focus = event->type() == QEvent::FocusIn;
     if (!q->isReadOnly())
@@ -2860,25 +2094,25 @@ void TextEditPrivate::handleFocusEvent(QFocusEvent *event)
     }
 }
 
-void TextEditPrivate::addCurrentTextNodeToRoot(TextNodeEngine *engine, QSGTransformNode *root, TextNode *node, TextNodeIterator &it, int startPos)
+void LineSurfacePrivate::addCurrentTextNodeToRoot(TextNodeEngine *engine, QSGTransformNode *root, TextNode *node, TextNodeIterator &it, int startPos)
 {
     engine->addToSceneGraph(node, QQuickText::Normal, QColor());
-    it = textNodeMap.insert(it, new TextEditPrivate::Node(startPos, node));
+    it = textNodeMap.insert(it, new LineSurfacePrivate::Node(startPos, node));
     ++it;
     root->appendChildNode(node);
 }
 
-TextNode *TextEditPrivate::createTextNode()
+TextNode *LineSurfacePrivate::createTextNode()
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     TextNode* node = new TextNode(q);
-    node->setUseNativeRenderer(renderType == TextEdit::NativeRendering);
+    node->setUseNativeRenderer(renderType == LineSurface::NativeRendering);
     return node;
 }
 
-void TextEdit::q_canPasteChanged()
+void LineSurface::q_canPasteChanged()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
     bool old = d->canPaste;
     d->canPaste = d->control->canPaste();
@@ -2888,17 +2122,9 @@ void TextEdit::q_canPasteChanged()
         emit canPasteChanged();
 }
 
-/*!
-    \qmlmethod string QtQuick::TextEdit::getText(int start, int end)
-
-    Returns the section of text that is between the \a start and \a end positions.
-
-    The returned text does not include any rich text formatting.
-*/
-
-QString TextEdit::getText(int start, int end) const
+QString LineSurface::getText(int start, int end) const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return QString();
 
     start = qBound(0, start, d->document->characterCount() - 1);
@@ -2915,17 +2141,9 @@ QString TextEdit::getText(int start, int end) const
 #endif
 }
 
-/*!
-    \qmlmethod string QtQuick::TextEdit::getFormattedText(int start, int end)
-
-    Returns the section of text that is between the \a start and \a end positions.
-
-    The returned text will be formatted according the \l textFormat property.
-*/
-
-QString TextEdit::getFormattedText(int start, int end) const
+QString LineSurface::getFormattedText(int start, int end) const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return QString();
 
 
@@ -2947,14 +2165,9 @@ QString TextEdit::getFormattedText(int start, int end) const
     }
 }
 
-/*!
-    \qmlmethod QtQuick::TextEdit::insert(int position, string text)
-
-    Inserts \a text into the TextEdit at position.
-*/
-void TextEdit::insert(int position, const QString &text)
+void LineSurface::insert(int position, const QString &text)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     if (position < 0 || position >= d->document->characterCount())
@@ -2974,15 +2187,10 @@ void TextEdit::insert(int position, const QString &text)
     d->control->updateCursorRectangle(false);
 }
 
-/*!
-    \qmlmethod string QtQuick::TextEdit::remove(int start, int end)
 
-    Removes the section of text that is between the \a start and \a end positions from the TextEdit.
-*/
-
-void TextEdit::remove(int start, int end)
+void LineSurface::remove(int start, int end)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     start = qBound(0, start, d->document->characterCount() - 1);
@@ -2994,51 +2202,18 @@ void TextEdit::remove(int start, int end)
     d->control->updateCursorRectangle(false);
 }
 
-bool TextEditPrivate::isLinkHoveredConnected()
+bool LineSurfacePrivate::isLinkHoveredConnected()
 {
-    Q_Q(TextEdit);
-    LV_IS_SIGNAL_CONNECTED(q, TextEdit, linkHovered, (const QString &));
+    Q_Q(LineSurface);
+    LV_IS_SIGNAL_CONNECTED(q, LineSurface, linkHovered, (const QString &));
 }
 
-/*!
-    \qmlsignal QtQuick::TextEdit::linkHovered(string link)
-    \since 5.2
-
-    This signal is emitted when the user hovers a link embedded in the text.
-    The link must be in rich text or HTML format and the
-    \a link string provides access to the particular link.
-
-    The corresponding handler is \c onLinkHovered.
-
-    \sa hoveredLink, linkAt()
-*/
-
-/*!
-    \qmlsignal QtQuick::TextEdit::editingFinished()
-    \since 5.6
-
-    This signal is emitted when the text edit loses focus.
-
-    The corresponding handler is \c onEditingFinished.
-*/
-
-/*!
-    \qmlproperty string QtQuick::TextEdit::hoveredLink
-    \since 5.2
-
-    This property contains the link string when the user hovers a link
-    embedded in the text. The link must be in rich text or HTML format
-    and the link string provides access to the particular link.
-
-    \sa linkHovered, linkAt()
-*/
-
-QString TextEdit::hoveredLink() const
+QString LineSurface::hoveredLink() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return QString();
 
-    if (const_cast<TextEditPrivate *>(d)->isLinkHoveredConnected()) {
+    if (const_cast<LineSurfacePrivate *>(d)->isLinkHoveredConnected()) {
         return d->control->hoveredLink();
     } else {
 #ifndef QT_NO_CURSOR
@@ -3051,45 +2226,36 @@ QString TextEdit::hoveredLink() const
     return QString();
 }
 
-void TextEdit::hoverEnterEvent(QHoverEvent *event)
+void LineSurface::hoverEnterEvent(QHoverEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     if (d->isLinkHoveredConnected())
         d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
 }
 
-void TextEdit::hoverMoveEvent(QHoverEvent *event)
+void LineSurface::hoverMoveEvent(QHoverEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     if (d->isLinkHoveredConnected())
         d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
 }
 
-void TextEdit::hoverLeaveEvent(QHoverEvent *event)
+void LineSurface::hoverLeaveEvent(QHoverEvent *event)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     if (d->isLinkHoveredConnected())
         d->control->processEvent(event, QPointF(-d->xoff, -d->yoff));
 }
 
-/*!
-    \qmlmethod void QtQuick::TextEdit::append(string text)
-    \since 5.2
-
-    Appends a new paragraph with \a text to the end of the TextEdit.
-
-    In order to append without inserting a new paragraph,
-    call \c myTextEdit.insert(myTextEdit.length, text) instead.
-*/
-void TextEdit::append(const QString &text)
+void LineSurface::append(const QString &text)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
     QTextCursor cursor(d->document);
     cursor.beginEditBlock();
@@ -3112,50 +2278,30 @@ void TextEdit::append(const QString &text)
     d->control->updateCursorRectangle(false);
 }
 
-/*!
-    \qmlmethod QtQuick::TextEdit::linkAt(real x, real y)
-    \since 5.3
-
-    Returns the link string at point \a x, \a y in content coordinates,
-    or an empty string if no link exists at that point.
-
-    \sa hoveredLink
-*/
-QString TextEdit::linkAt(qreal x, qreal y) const
+QString LineSurface::linkAt(qreal x, qreal y) const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (!d->document || !d->control) return QString();
 
     return d->control->anchorAt(QPointF(x + topPadding(), y + leftPadding()));
 }
 
-/*!
-    \since 5.6
-    \qmlproperty real QtQuick::TextEdit::padding
-    \qmlproperty real QtQuick::TextEdit::topPadding
-    \qmlproperty real QtQuick::TextEdit::leftPadding
-    \qmlproperty real QtQuick::TextEdit::bottomPadding
-    \qmlproperty real QtQuick::TextEdit::rightPadding
-
-    These properties hold the padding around the content. This space is reserved
-    in addition to the contentWidth and contentHeight.
-*/
-qreal TextEdit::padding() const
+qreal LineSurface::padding() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     return d->padding();
 }
 
-void TextEdit::setPadding(qreal padding)
+void LineSurface::setPadding(qreal padding)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (qFuzzyCompare(d->padding(), padding))
         return;
 
     d->extra.value().padding = padding;
     updateSize();
     if (isComponentComplete()) {
-        d->updateType = TextEditPrivate::UpdatePaintNode;
+        d->updateType = LineSurfacePrivate::UpdatePaintNode;
         update();
     }
     emit paddingChanged();
@@ -3169,105 +2315,94 @@ void TextEdit::setPadding(qreal padding)
         emit bottomPaddingChanged();
 }
 
-void TextEdit::resetPadding()
+void LineSurface::resetPadding()
 {
     setPadding(0);
 }
 
-qreal TextEdit::topPadding() const
+qreal LineSurface::topPadding() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (d->extra.isAllocated() && d->extra->explicitTopPadding)
         return d->extra->topPadding;
     return d->padding();
 }
 
-void TextEdit::setTopPadding(qreal padding)
+void LineSurface::setTopPadding(qreal padding)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->setTopPadding(padding);
 }
 
-void TextEdit::resetTopPadding()
+void LineSurface::resetTopPadding()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->setTopPadding(0, true);
 }
 
-qreal TextEdit::leftPadding() const
+qreal LineSurface::leftPadding() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (d->extra.isAllocated() && d->extra->explicitLeftPadding)
         return d->extra->leftPadding;
     return d->padding();
 }
 
-void TextEdit::setLeftPadding(qreal padding)
+void LineSurface::setLeftPadding(qreal padding)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->setLeftPadding(padding);
 }
 
-void TextEdit::resetLeftPadding()
+void LineSurface::resetLeftPadding()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->setLeftPadding(0, true);
 }
 
-qreal TextEdit::rightPadding() const
+qreal LineSurface::rightPadding() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (d->extra.isAllocated() && d->extra->explicitRightPadding)
         return d->extra->rightPadding;
     return d->padding();
 }
 
-void TextEdit::setRightPadding(qreal padding)
+void LineSurface::setRightPadding(qreal padding)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->setRightPadding(padding);
 }
 
-void TextEdit::resetRightPadding()
+void LineSurface::resetRightPadding()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->setRightPadding(0, true);
 }
 
-qreal TextEdit::bottomPadding() const
+qreal LineSurface::bottomPadding() const
 {
-    Q_D(const TextEdit);
+    Q_D(const LineSurface);
     if (d->extra.isAllocated() && d->extra->explicitBottomPadding)
         return d->extra->bottomPadding;
     return d->padding();
 }
 
-void TextEdit::setBottomPadding(qreal padding)
+void LineSurface::setBottomPadding(qreal padding)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->setBottomPadding(padding);
 }
 
-void TextEdit::resetBottomPadding()
+void LineSurface::resetBottomPadding()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->setBottomPadding(0, true);
 }
 
-/*!
-    \qmlmethod QtQuick::TextEdit::clear()
-    \since 5.7
-
-    Clears the contents of the text edit
-    and resets partial text input from an input method.
-
-    Use this method instead of setting the \l text property to an empty string.
-
-    \sa QInputMethod::reset()
-*/
-void TextEdit::clear()
+void LineSurface::clear()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || !d->control) return;
 
     d->resetInputMethod();
@@ -3275,41 +2410,41 @@ void TextEdit::clear()
 }
 
 
-void TextEditPrivate::implicitWidthChanged()
+void LineSurfacePrivate::implicitWidthChanged()
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     QQuickImplicitSizeItemPrivate::implicitWidthChanged();
     emit q->implicitWidthChanged2();
 }
 
-void TextEditPrivate::implicitHeightChanged()
+void LineSurfacePrivate::implicitHeightChanged()
 {
-    Q_Q(TextEdit);
+    Q_Q(LineSurface);
     QQuickImplicitSizeItemPrivate::implicitHeightChanged();
     emit q->implicitHeightChanged2();
 }
 
-DocumentHandler* TextEdit::documentHandler()
+DocumentHandler* LineSurface::documentHandler()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     return d->documentHandler;
 }
 
-void TextEdit::setDocumentHandler(DocumentHandler *dh)
+void LineSurface::setDocumentHandler(DocumentHandler *dh)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     d->documentHandler = dh;
-    dh->setTextEdit(this);
+    // dh->setTextEdit(this);
 }
 
-void TextEdit::clearSelectionOnFocus(bool value){
-    Q_D(TextEdit);
+void LineSurface::clearSelectionOnFocus(bool value){
+    Q_D(LineSurface);
     d->control->clearSelectionOnFocus(value);
 }
 
-void TextEdit::setTextDocument(QTextDocument *td)
+void LineSurface::setTextDocument(QTextDocument *td)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (td)
     {
         d->setTextDocument(td);
@@ -3317,21 +2452,21 @@ void TextEdit::setTextDocument(QTextDocument *td)
     } else d->unsetTextDocument();
 }
 
-void TextEdit::collapseLines(int pos, int num, QString &replacement)
+void LineSurface::collapseLines(int pos, int num, QString &replacement)
 {
     Q_UNUSED(replacement)
     showHideLines(false, pos, num);
 }
 
-void TextEdit::expandLines(int pos, int num, QString &replacement)
+void LineSurface::expandLines(int pos, int num, QString &replacement)
 {
     Q_UNUSED(replacement)
     showHideLines(true, pos, num);
 }
 
-void TextEdit::showHideLines(bool show, int pos, int num)
+void LineSurface::showHideLines(bool show, int pos, int num)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     auto it = d->document->rootFrame()->begin();
     Q_ASSERT(d->document->blockCount() > pos);
     Q_ASSERT(d->document->blockCount() >= pos + num);
@@ -3349,9 +2484,9 @@ void TextEdit::showHideLines(bool show, int pos, int num)
     d->document->markContentsDirty(start, length);
 }
 
-void TextEdit::updateFragmentVisibility()
+void LineSurface::updateFragmentVisibility()
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     if (!d->document || fragmentStart() == -1 || fragmentEnd() == -1) return;
 
     auto it = d->document->rootFrame()->begin(); int cnt = 0;
@@ -3375,9 +2510,9 @@ void TextEdit::updateFragmentVisibility()
 
 }
 
-void TextEdit::replaceTextInBlock(int blockNumber, std::string s)
+void LineSurface::replaceTextInBlock(int blockNumber, std::string s)
 {
-    Q_D(TextEdit);
+    Q_D(LineSurface);
     QTextBlock b = d->document->findBlockByNumber(blockNumber);
     QTextCursor cursor(b);
     cursor.beginEditBlock();
