@@ -36,7 +36,6 @@ HEADERS += \
     $$PWD/linenumbersurface.h \
     $$PWD/collapsedsection.h \
     $$PWD/linesurface.h \
-    $$PWD/linesurface_p.h \
     $$PWD/linesurface.h
 
 SOURCES += \

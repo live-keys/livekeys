@@ -11,6 +11,9 @@ class QTextBlock;
 namespace lv {
 
 class LineSurfacePrivate;
+class LineManager;
+class TextNode;
+
 
 class LV_EDITOR_EXPORT LineSurface : public QQuickItem
 {
@@ -19,7 +22,25 @@ class LV_EDITOR_EXPORT LineSurface : public QQuickItem
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
     Q_PROPERTY(QFont font READ font WRITE setFont NOTIFY fontChanged)
 public:
+    class Node
+    {
+    public:
+        explicit Node(int startPos, TextNode* node)
+            : m_startPos(startPos), m_node(node) { }
+        TextNode* textNode() const { return m_node; }
+        void moveStartPos(int delta) { Q_ASSERT(m_startPos + delta > 0); m_startPos += delta; }
+        int startPos() const { return m_startPos; }
+
+
+    private:
+        int m_startPos;
+        TextNode* m_node;
+    };
+
+
+
     LineSurface(QQuickItem *parent=nullptr);
+    ~LineSurface() Q_DECL_OVERRIDE;
     QFont font() const;
     void setFont(const QFont &font);
     QColor color() const;
@@ -60,10 +81,27 @@ private:
         return res;
     }
 
+    QColor m_color;
+    QFont m_font;
+    QTextDocument *document;
+    QList<Node*> textNodeMap;
+
+
+    enum UpdateType {
+        UpdateNone,
+        UpdateOnlyPreprocess,
+        UpdatePaintNode
+    };
+
+    UpdateType updateType;
+    TextEdit* textEdit;
+    int prevLineNumber;
+    int lineNumber;
+    int dirtyPos;
+    int deltaLineNumber;
+    LineManager *lineManager;
+
 protected:
-    LineSurface(LineSurfacePrivate &dd, QQuickItem *parent = nullptr);
-
-
     // mouse filter?
     void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData) Q_DECL_OVERRIDE;
@@ -72,7 +110,7 @@ protected:
     friend class LineManager;
 private:
     Q_DISABLE_COPY(LineSurface)
-    Q_DECLARE_PRIVATE(LineSurface)
+    // Q_DECLARE_PRIVATE(LineSurface)
 };
 
 }

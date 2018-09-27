@@ -1,5 +1,4 @@
 #include "linesurface.h"
-#include "linesurface_p.h"
 #include "textcontrol_p.h"
 #include "qquickwindow.h"
 #include "textnodeengine_p.h"
@@ -62,62 +61,63 @@ namespace {
 }
 
 LineSurface::LineSurface(QQuickItem *parent)
-: QQuickItem(*(new LineSurfacePrivate), parent)
+: QQuickItem(parent)
+, m_color(QRgb(0xFF000000))
+, m_font(QFont()), document(nullptr)
+, updateType(UpdatePaintNode)
+, textEdit(nullptr), prevLineNumber(0)
+, lineNumber(0), dirtyPos(0)
+, lineManager(new LineManager)
 {
-    Q_D(LineSurface);
-    d->init();
+    setFlag(QQuickItem::ItemHasContents);
+    setAcceptHoverEvents(true);
+    lineManager->setLineSurface(this);
 }
-LineSurface::LineSurface(LineSurfacePrivate &dd, QQuickItem *parent)
-: QQuickItem(dd, parent)
+
+LineSurface::~LineSurface()
 {
-    Q_D(LineSurface);
-    d->init();
+    qDeleteAll(textNodeMap);
 }
+
 QFont LineSurface::font() const
 {
-    Q_D(const LineSurface);
-    return d->sourceFont;
+    return m_font;
 }
-void LineSurface::setFont(const QFont &font)
+
+void LineSurface::setFont(const QFont &f)
 {
-    Q_D(LineSurface);
-    if (d->sourceFont == font)
+    if (m_font == f)
         return;
 
-    d->sourceFont = font;
-    QFont oldFont = d->font;
-    d->font = font;
-    if (static_cast<int>(d->font.pointSizeF()) != -1) {
+    m_font = f;
+    if (static_cast<int>(m_font.pointSizeF()) != -1) {
         // 0.5pt resolution
-        qreal size = qRound(d->font.pointSizeF()*2.0);
-        d->font.setPointSizeF(size/2.0);
+        qreal size = qRound(m_font.pointSizeF()*2.0);
+        m_font.setPointSizeF(size/2.0);
     }
 
-    if (oldFont != d->font) {
-        if (d->document) d->document->setDefaultFont(d->font);
-        updateSize();
-#ifndef QT_NO_IM
-        updateInputMethod(Qt::ImCursorRectangle | Qt::ImAnchorRectangle | Qt::ImFont);
-#endif
-    }
-    emit fontChanged(d->sourceFont);
+    if (document) document->setDefaultFont(m_font);
+    updateSize();
+
+    emit fontChanged(m_font);
 }
+
 void LineSurface::textDocumentFinished()
 {
-    Q_D(LineSurface);
-    auto teDocument = d->textEdit->documentHandler()->target();
-    d->prevLineNumber = d->lineNumber;
-    d->lineNumber = teDocument->blockCount();
 
-    d->deltaLineNumber = abs(d->prevLineNumber - d->lineNumber);
-    if (d->deltaLineNumber)
+    auto teDocument = textEdit->documentHandler()->target();
+    prevLineNumber = lineNumber;
+    lineNumber = teDocument->blockCount();
+
+    deltaLineNumber = abs(prevLineNumber - lineNumber);
+    if (deltaLineNumber)
     {
-        if (d->prevLineNumber < d->lineNumber) linesAdded();
+        if (prevLineNumber < lineNumber) linesAdded();
         else linesRemoved();
     }
     else
     {
-        QTextBlock block = teDocument->findBlockByNumber(d->dirtyPos);
+        QTextBlock block = teDocument->findBlockByNumber(dirtyPos);
         auto userData = static_cast<ProjectDocumentBlockData*>(block.userData());
         if (userData && userData->stateChangeFlag())
         {
@@ -126,60 +126,62 @@ void LineSurface::textDocumentFinished()
         }
     }
 }
+
 void LineSurface::setDirtyBlockPosition(int pos)
 {
-    Q_D(LineSurface);
-    d->dirtyPos = pos;
+
+    dirtyPos = pos;
 }
+
 QColor LineSurface::color() const
 {
-    Q_D(const LineSurface);
-    return d->color;
+    return m_color;
 }
+
 void LineSurface::setColor(const QColor &color)
 {
-    Q_D(LineSurface);
-    if (d->color == color)
+
+    if (m_color == color)
         return;
 
-    d->color = color;
-    emit colorChanged(d->color);
+    m_color = color;
+    emit colorChanged(m_color);
 }
+
 void LineSurface::setComponents(lv::TextEdit* te)
 {
-    Q_D(LineSurface);
-    d->textEdit = te;
-    d->init();
 
-    d->document = new QTextDocument(this);
+    textEdit = te;
+
+    document = new QTextDocument(this);
     //this is to create the layout!
-    d->document->documentLayout();
+    document->documentLayout();
 
 
-    d->font = te->font();
-    d->document->setDefaultFont(d->font);
+    m_font = te->font();
+    document->setDefaultFont(m_font);
     QTextOption opt;
     opt.setAlignment(Qt::AlignRight | Qt::AlignTop);
     opt.setTextDirection(Qt::LeftToRight);
-    d->document->setDefaultTextOption(opt);
+    document->setDefaultTextOption(opt);
     setFlag(QQuickItem::ItemHasContents);
 
-    d->dirtyPos = 0;
-    d->prevLineNumber = 0;
-    d->lineNumber = 0;
+    dirtyPos = 0;
+    prevLineNumber = 0;
+    lineNumber = 0;
     textDocumentFinished();
 
-    QObject::connect(d->textEdit, &TextEdit::dirtyBlockPosition, this, &LineSurface::setDirtyBlockPosition);
-    QObject::connect(d->textEdit, &TextEdit::textDocumentFinishedUpdating, this, &LineSurface::textDocumentFinished);
+    QObject::connect(textEdit, &TextEdit::dirtyBlockPosition, this, &LineSurface::setDirtyBlockPosition);
+    QObject::connect(textEdit, &TextEdit::textDocumentFinishedUpdating, this, &LineSurface::textDocumentFinished);
 
     setAcceptedMouseButtons(Qt::AllButtons);
 }
+
 void LineSurface::showHideLines(bool show, int pos, int num)
 {
-    Q_D(LineSurface);
-    auto it = d->document->rootFrame()->begin();
-    Q_ASSERT(d->document->blockCount() > pos);
-    Q_ASSERT(d->document->blockCount() >= pos + num);
+    auto it = document->rootFrame()->begin();
+    Q_ASSERT(document->blockCount() > pos);
+    Q_ASSERT(document->blockCount() >= pos + num);
     for (int i = 0; i < pos+1; i++, ++it);
     int start = it.currentBlock().position();
 
@@ -191,12 +193,12 @@ void LineSurface::showHideLines(bool show, int pos, int num)
         ++it;
     }
 
-    d->document->markContentsDirty(start, length);
+    document->markContentsDirty(start, length);
 }
+
 void LineSurface::replaceTextInBlock(int blockNumber, std::string s)
 {
-    Q_D(LineSurface);
-    QTextBlock b = d->document->findBlockByNumber(blockNumber);
+    QTextBlock b = document->findBlockByNumber(blockNumber);
     QTextCursor cursor(b);
     cursor.beginEditBlock();
     cursor.movePosition(QTextCursor::EndOfBlock);
@@ -205,58 +207,61 @@ void LineSurface::replaceTextInBlock(int blockNumber, std::string s)
     cursor.insertText(QString(s.c_str()));
     cursor.endEditBlock();
 }
+
 void LineSurface::collapseLines(int pos, int num)
 {
-    Q_D(LineSurface);
     changeLastCharInBlock(pos, '>');
 
-    QTextBlock matchingBlock = d->textEdit->documentHandler()->target()->findBlockByNumber(pos);
+    QTextBlock matchingBlock = textEdit->documentHandler()->target()->findBlockByNumber(pos);
     // ProjectDocumentBlockData* userData = static_cast<ProjectDocumentBlockData*>(matchingBlock.userData());
     QString s = matchingBlock.text();
     // s+=userData->replacementString;
     expandCollapseSkeleton(pos, num, s, false);
 }
+
+
 void LineSurface::expandLines(int pos, int num)
 {
-    Q_D(LineSurface);
+
     changeLastCharInBlock(pos, 'v');
 
-    QTextBlock matchingBlock = d->textEdit->documentHandler()->target()->findBlockByNumber(pos);
+    QTextBlock matchingBlock = textEdit->documentHandler()->target()->findBlockByNumber(pos);
     // lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
     QString s = matchingBlock.text();
     // s.chop(userData->replacementString.length());
     expandCollapseSkeleton(pos, num, s, true);
 }
+
 void LineSurface::expandCollapseSkeleton(int pos, int num, QString &replacement, bool show)
 {
-    Q_D(LineSurface);
+
     if (show)
     {
-        d->textEdit->expandLines(pos, num, replacement);
+        textEdit->expandLines(pos, num, replacement);
         // lineManager->expandLines(pos, num);
     }
     else
     {
-        d->textEdit->collapseLines(pos, num, replacement);
+        textEdit->collapseLines(pos, num, replacement);
         // lineManager->collapseLines(pos, num);
     }
 
 
     showHideLines(show, pos, num);
-    d->dirtyPos = pos;
+    dirtyPos = pos;
 
     updateLineDocument();
 }
 
 void LineSurface::mousePressEvent(QMouseEvent* event)
 {
-    Q_D(LineSurface);
+
     // find block that was clicked
-    int position = d->document->documentLayout()->hitTest(event->localPos(), Qt::FuzzyHit);
-    QTextBlock block = d->document->findBlock(position);
+    int position = document->documentLayout()->hitTest(event->localPos(), Qt::FuzzyHit);
+    QTextBlock block = document->findBlock(position);
     int blockNum = block.blockNumber();
 
-    QTextBlock matchingBlock = d->textEdit->documentHandler()->target()->findBlockByNumber(blockNum);
+    QTextBlock matchingBlock = textEdit->documentHandler()->target()->findBlockByNumber(blockNum);
     lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
     if (userData)
     {
@@ -267,29 +272,29 @@ void LineSurface::mousePressEvent(QMouseEvent* event)
             userData->onCollapse()(matchingBlock, num, repl);
             userData->setNumOfCollapsedLines(num);
             userData->setReplacementString(repl);
-            d->lineManager->collapseLines(blockNum, userData->numOfCollapsedLines());
+            lineManager->collapseLines(blockNum, userData->numOfCollapsedLines());
         }
         else if (userData->collapseState() == lv::ProjectDocumentBlockData::Expand)
         {
             std::string result;
             userData->expand();
-            d->lineManager->expandLines(blockNum, userData->numOfCollapsedLines());
+            lineManager->expandLines(blockNum, userData->numOfCollapsedLines());
         }
-
     }
 }
+
 void LineSurface::triggerPreprocess()
 {
-    Q_D(LineSurface);
-    if (d->updateType == LineSurfacePrivate::UpdateNone)
-        d->updateType = LineSurfacePrivate::UpdateOnlyPreprocess;
+    if (updateType == LineSurface::UpdateNone)
+        updateType = LineSurface::UpdateOnlyPreprocess;
     polish();
     update();
 }
+
 void LineSurface::changeLastCharInBlock(int blockNumber, char c)
 {
-    Q_D(LineSurface);
-    QTextBlock b = d->document->findBlockByNumber(blockNumber);
+
+    QTextBlock b = document->findBlockByNumber(blockNumber);
     QTextCursor cursor(b);
     cursor.beginEditBlock();
     cursor.movePosition(QTextCursor::EndOfBlock);
@@ -298,14 +303,15 @@ void LineSurface::changeLastCharInBlock(int blockNumber, char c)
     cursor.insertText(QString(c));
     cursor.endEditBlock();
 }
+
 void LineSurface::linesAdded()
 {
-    Q_D(LineSurface);
-    d->lineManager->linesAdded(d->dirtyPos, d->deltaLineNumber);
 
-    QTextCursor cursor(d->document);
+    lineManager->linesAdded(dirtyPos, deltaLineNumber);
+
+    QTextCursor cursor(document);
     cursor.movePosition(QTextCursor::MoveOperation::End);
-    for (int i = d->prevLineNumber + 1; i <= d->lineNumber; i++)
+    for (int i = prevLineNumber + 1; i <= lineNumber; i++)
     {
 
         if (i!=1) cursor.insertBlock();
@@ -317,33 +323,35 @@ void LineSurface::linesAdded()
     }
     updateLineDocument();
 }
+
 void LineSurface::linesRemoved()
 {
-    Q_D(LineSurface);
-    d->lineManager->linesRemoved(d->dirtyPos, d->deltaLineNumber);
 
-    for (int i = d->prevLineNumber-1; i >= d->lineNumber; i--)
+    lineManager->linesRemoved(dirtyPos, deltaLineNumber);
+
+    for (int i = prevLineNumber-1; i >= lineNumber; i--)
     {
-        QTextCursor cursor(d->document->findBlockByNumber(i));
+        QTextCursor cursor(document->findBlockByNumber(i));
         cursor.select(QTextCursor::BlockUnderCursor);
         cursor.removeSelectedText();
     }
 
     updateLineDocument();
 }
+
 void LineSurface::updateLineDocument()
 {
-    Q_D(LineSurface);
+
     // we look for a collapsed section after the position where we made a change
-    std::list<CollapsedSection*> &sections = d->lineManager->getSections();
+    std::list<CollapsedSection*> &sections = lineManager->getSections();
     auto itSections = sections.begin();
-    while (itSections != sections.end() && (*itSections)->position < d->dirtyPos) ++itSections;
-    int curr = d->dirtyPos;
-    auto it = d->document->rootFrame()->begin();
+    while (itSections != sections.end() && (*itSections)->position < dirtyPos) ++itSections;
+    int curr = dirtyPos;
+    auto it = document->rootFrame()->begin();
     for (int i = 0; i < curr; i++) ++it;
-    while (it != d->document->rootFrame()->end())
+    while (it != document->rootFrame()->end())
     {
-        auto currBlock = d->textEdit->documentHandler()->target()->findBlockByNumber(curr);
+        auto currBlock = textEdit->documentHandler()->target()->findBlockByNumber(curr);
         lv::ProjectDocumentBlockData* userData =
                 static_cast<lv::ProjectDocumentBlockData*>(currBlock.userData());
 
@@ -380,30 +388,32 @@ void LineSurface::updateLineDocument()
         }
         ++curr; ++it;
     }
-    auto firstDirtyBlock = d->document->findBlockByNumber(d->dirtyPos);
-    d->document->markContentsDirty(firstDirtyBlock.position(), d->document->characterCount() - firstDirtyBlock.position());
+    auto firstDirtyBlock = document->findBlockByNumber(dirtyPos);
+    document->markContentsDirty(firstDirtyBlock.position(), document->characterCount() - firstDirtyBlock.position());
 
     polish();
     if (isComponentComplete())
     {
         updateSize();
-        d->updateType = LineSurfacePrivate::UpdatePaintNode;
+        updateType = LineSurface::UpdatePaintNode;
 
         update();
     }
 }
 
 
-static bool comesBefore(LineSurfacePrivate::Node* n1, LineSurfacePrivate::Node* n2)
+static bool comesBefore(LineSurface::Node* n1, LineSurface::Node* n2)
 {
     return n1->startPos() < n2->startPos();
 }
+
 static inline void updateNodeTransform(TextNode* node, const QPointF &topLeft)
 {
     QMatrix4x4 transformMatrix;
     transformMatrix.translate(static_cast<float>(topLeft.x()), static_cast<float>(topLeft.y()));
     node->setMatrix(transformMatrix);
 }
+
 inline void resetEngine(TextNodeEngine *engine, const QColor& textColor, const QColor& selectedTextColor, const QColor& selectionColor)
 {
     *engine = TextNodeEngine();
@@ -411,29 +421,31 @@ inline void resetEngine(TextNodeEngine *engine, const QColor& textColor, const Q
     engine->setSelectedTextColor(selectedTextColor);
     engine->setSelectionColor(selectionColor);
 }
+
+
 QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
 {
     Q_UNUSED(updatePaintNodeData);
-    Q_D(LineSurface);
 
-    if (!d->document) {
+
+    if (!document) {
         if (oldNode) delete oldNode;
         return nullptr;
     }
 
-    if (d->updateType != LineSurfacePrivate::UpdatePaintNode && oldNode != nullptr) {
+    if (updateType != LineSurface::UpdatePaintNode && oldNode != nullptr) {
         // Update done in preprocess() in the nodes
-        d->updateType = LineSurfacePrivate::UpdateNone;
+        updateType = LineSurface::UpdateNone;
         return oldNode;
     }
 
-    d->updateType = LineSurfacePrivate::UpdateNone;
+    updateType = LineSurface::UpdateNone;
 
     if (!oldNode) {
         // If we had any QQuickTextNode node references, they were deleted along with the root node
         // But here we must delete the Node structures in textNodeMap
-        qDeleteAll(d->textNodeMap);
-        d->textNodeMap.clear();
+        qDeleteAll(textNodeMap);
+        textNodeMap.clear();
     }
 
     RootNode *rootNode = static_cast<RootNode *>(oldNode);
@@ -441,29 +453,29 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     TextNodeEngine engine;
     TextNodeEngine frameDecorationsEngine;
 
-    if (numberOfDigits(d->prevLineNumber) != numberOfDigits(d->lineNumber) || d->dirtyPos >= d->textNodeMap.size())
-        d->dirtyPos = 0;
+    if (numberOfDigits(prevLineNumber) != numberOfDigits(lineNumber) || dirtyPos >= textNodeMap.size())
+        dirtyPos = 0;
 
-    if (!oldNode  || d->dirtyPos != -1) {
+    if (!oldNode  || dirtyPos != -1) {
 
         if (!oldNode)
             rootNode = new RootNode;
 
         // delete all dirty nodes
-        auto lineNumIt = d->textNodeMap.begin();
-        for (int k=0; k<d->dirtyPos; k++, lineNumIt++);
-        while (lineNumIt != d->textNodeMap.end())
+        auto lineNumIt = textNodeMap.begin();
+        for (int k=0; k<dirtyPos; k++, lineNumIt++);
+        while (lineNumIt != textNodeMap.end())
         {
 
             rootNode->removeChildNode((*lineNumIt)->textNode());
             delete (*lineNumIt)->textNode();
             delete *lineNumIt;
-            lineNumIt = d->textNodeMap.erase(lineNumIt);
+            lineNumIt = textNodeMap.erase(lineNumIt);
         }
 
         // FIXME: the text decorations could probably be handled separately (only updated for affected textFrames)
         rootNode->resetFrameDecorations(new TextNode(this));
-        resetEngine(&frameDecorationsEngine, d->color, QColor(), QColor());
+        resetEngine(&frameDecorationsEngine, m_color, QColor(), QColor());
 
         TextNode *node = nullptr;
 
@@ -472,29 +484,29 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
         rootNode->setMatrix(basePositionMatrix);
 
         QPointF nodeOffset;
-        if (d->document) {
+        if (document) {
             QList<QTextFrame *> frames;
-            frames.append(d->document->rootFrame());
+            frames.append(document->rootFrame());
 
             while (!frames.isEmpty()) { //INFO: Root frame
                 QTextFrame *textFrame = frames.takeFirst();
                 frames.append(textFrame->childFrames());
-                frameDecorationsEngine.addFrameDecorations(d->document, textFrame);
+                frameDecorationsEngine.addFrameDecorations(document, textFrame);
 
                 //INFO: creating the text node
                 node = new TextNode(this);
-                resetEngine(&engine, d->color, QColor(), QColor());
+                resetEngine(&engine, m_color, QColor(), QColor());
 
                 if (textFrame->firstPosition() > textFrame->lastPosition()
                         && textFrame->frameFormat().position() != QTextFrameFormat::InFlow) {
 
-                    updateNodeTransform(node, d->document->documentLayout()->frameBoundingRect(textFrame).topLeft());
+                    updateNodeTransform(node, document->documentLayout()->frameBoundingRect(textFrame).topLeft());
                     const int pos = textFrame->firstPosition() - 1;
-                    ProtectedLayoutAccessor *a = static_cast<ProtectedLayoutAccessor *>(d->document->documentLayout());
+                    ProtectedLayoutAccessor *a = static_cast<ProtectedLayoutAccessor *>(document->documentLayout());
                     QTextCharFormat format = a->formatAccessor(pos);
                     QTextBlock block = textFrame->firstCursorPosition().block();
                     engine.setCurrentLine(block.layout()->lineForTextPosition(pos - block.position()));
-                    engine.addTextObject(QPointF(0, 0), format, TextNodeEngine::Unselected, d->document,
+                    engine.addTextObject(QPointF(0, 0), format, TextNodeEngine::Unselected, document,
                                                   pos, textFrame->frameFormat().position());
                 } else {
                     // Having nodes spanning across frame boundaries will break the current bookkeeping mechanism. We need to prevent that.
@@ -505,7 +517,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                     std::sort(frameBoundaries.begin(), frameBoundaries.end());
 
                     QTextFrame::iterator it = textFrame->begin();
-                    for (int k=0; k<d->dirtyPos; k++, it++);
+                    for (int k=0; k<dirtyPos; k++, it++);
 
                     while (!it.atEnd()) {
 
@@ -514,24 +526,24 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                         if (!block.isVisible()) continue;
 
                         if (!engine.hasContents()) {
-                            nodeOffset = d->document->documentLayout()->blockBoundingRect(block).topLeft();
+                            nodeOffset = document->documentLayout()->blockBoundingRect(block).topLeft();
                             updateNodeTransform(node, nodeOffset);
                         }
 
-                        engine.addTextBlock(d->document, block, -nodeOffset, d->color, QColor(), -1, -1);
+                        engine.addTextBlock(document, block, -nodeOffset, m_color, QColor(), -1, -1);
                         currentNodeSize += block.length();
 
                         currentNodeSize = 0;
                         engine.addToSceneGraph(node, QQuickText::Normal, QColor());
-                        d->textNodeMap.append(new LineSurfacePrivate::Node(-1, node));
+                        textNodeMap.append(new LineSurface::Node(-1, node));
                         rootNode->appendChildNode(node);
                         node = new TextNode(this);
-                        resetEngine(&engine, d->color, QColor(), QColor());
+                        resetEngine(&engine, m_color, QColor(), QColor());
 
                     }
                 }
                 engine.addToSceneGraph(node, QQuickText::Normal, QColor());
-                d->textNodeMap.append(new LineSurfacePrivate::Node(-1, node));
+                textNodeMap.append(new LineSurface::Node(-1, node));
                 rootNode->appendChildNode(node);            }
         }
 
@@ -542,11 +554,11 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
 
         // Since we iterate over blocks from different text frames that are potentially not sorted
         // we need to ensure that our list of nodes is sorted again:
-        std::sort(d->textNodeMap.begin(), d->textNodeMap.end(), &comesBefore);
+        std::sort(textNodeMap.begin(), textNodeMap.end(), &comesBefore);
     }
 
     QTextBlock block;
-    for (block = d->document->firstBlock(); block.isValid(); block = block.next()) {
+    for (block = document->firstBlock(); block.isValid(); block = block.next()) {
         if (block.layout() != nullptr && block.layout()->engine() != nullptr)
             block.layout()->engine()->resetFontEngineCache();
     }
@@ -554,22 +566,12 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     return rootNode;
 }
 
-void LineSurfacePrivate::init()
-{
-    Q_Q(LineSurface);
-    q->setFlag(QQuickItem::ItemHasContents);
-
-    q->setAcceptHoverEvents(true);
-    lineManager->setLineSurface(q);
-}
-
 //### we should perhaps be a bit smarter here -- depending on what has changed, we shouldn't
 //    need to do all the calculations each time
 void LineSurface::updateSize()
 {
-    Q_D(LineSurface);
-    if (!d->document) return;
-    QSizeF layoutSize = d->document->documentLayout()->documentSize();
+    if (!document) return;
+    QSizeF layoutSize = document->documentLayout()->documentSize();
     setImplicitSize(layoutSize.width(), layoutSize.height());
 }
 
