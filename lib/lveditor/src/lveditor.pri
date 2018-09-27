@@ -33,7 +33,6 @@ HEADERS += \
     $$PWD/editorprivate_plugin.h \
     $$PWD/livepalettelist.h \
     $$PWD/linemanager.h \
-    $$PWD/linenumbersurface.h \
     $$PWD/collapsedsection.h \
     $$PWD/linesurface.h \
     $$PWD/linesurface.h
@@ -69,6 +68,5 @@ SOURCES += \
     $$PWD/editorprivate_plugin.cpp \
     $$PWD/livepalettelist.cpp \
     $$PWD/linemanager.cpp \
-    $$PWD/linenumbersurface.cpp \
     $$PWD/collapsedsection.cpp \
     $$PWD/linesurface.cpp

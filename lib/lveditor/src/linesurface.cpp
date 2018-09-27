@@ -12,16 +12,7 @@
 #include <QtGui/qtexttable.h>
 #include <QtQml/qqmlinfo.h>
 #include <QtQuick/qsgsimplerectnode.h>
-#include <QTimer>
-
-#include "private/qquicktextnode_p.h"
-#include "private/qquickevents_p_p.h"
-
-#include "private/qqmlproperty_p.h"
-
 #include "private/qtextengine_p.h"
-#include "private/qsgadaptationlayer_p.h"
-
 #include <algorithm>
 #include "textedit_p.h"
 #include "linemanager.h"
@@ -341,7 +332,6 @@ void LineSurface::linesRemoved()
 
 void LineSurface::updateLineDocument()
 {
-
     // we look for a collapsed section after the position where we made a change
     std::list<CollapsedSection*> &sections = lineManager->getSections();
     auto itSections = sections.begin();
@@ -400,20 +390,16 @@ void LineSurface::updateLineDocument()
         update();
     }
 }
-
-
 static bool comesBefore(LineSurface::Node* n1, LineSurface::Node* n2)
 {
     return n1->startPos() < n2->startPos();
 }
-
 static inline void updateNodeTransform(TextNode* node, const QPointF &topLeft)
 {
     QMatrix4x4 transformMatrix;
     transformMatrix.translate(static_cast<float>(topLeft.x()), static_cast<float>(topLeft.y()));
     node->setMatrix(transformMatrix);
 }
-
 inline void resetEngine(TextNodeEngine *engine, const QColor& textColor, const QColor& selectedTextColor, const QColor& selectionColor)
 {
     *engine = TextNodeEngine();
@@ -421,8 +407,6 @@ inline void resetEngine(TextNodeEngine *engine, const QColor& textColor, const Q
     engine->setSelectedTextColor(selectedTextColor);
     engine->setSelectionColor(selectionColor);
 }
-
-
 QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
 {
     Q_UNUSED(updatePaintNodeData);
