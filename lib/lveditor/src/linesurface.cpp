@@ -62,14 +62,14 @@ namespace {
 }
 
 LineSurface::LineSurface(QQuickImplicitSizeItem *parent)
-: QQuickImplicitSizeItem(*(new LineSurfacePrivate), parent)
+: QQuickItem(*(new LineSurfacePrivate), parent)
 {
     Q_D(LineSurface);
     d->init();
 }
 
 LineSurface::LineSurface(LineSurfacePrivate &dd, QQuickImplicitSizeItem *parent)
-: QQuickImplicitSizeItem(dd, parent)
+: QQuickItem(dd, parent)
 {
     Q_D(LineSurface);
     d->init();
@@ -140,7 +140,6 @@ void LineSurface::setDirtyBlockPosition(int pos)
     Q_D(LineSurface);
     d->dirtyPos = pos;
 }
-
 
 QColor LineSurface::color() const
 {
@@ -221,33 +220,6 @@ void LineSurface::replaceTextInBlock(int blockNumber, std::string s)
     cursor.removeSelectedText();
     cursor.insertText(QString(s.c_str()));
     cursor.endEditBlock();
-}
-
-
-bool LineSurfacePrivate::isImplicitResizeEnabled() const
-{
-    return !extra.isAllocated() || extra->implicitResize;
-}
-
-void LineSurfacePrivate::setImplicitResizeEnabled(bool enabled)
-{
-    if (!enabled)
-        extra.value().implicitResize = false;
-    else if (extra.isAllocated())
-        extra->implicitResize = true;
-}
-
-void LineSurface::geometryChanged(const QRectF &newGeometry,
-                                  const QRectF &oldGeometry)
-{
-    Q_D(LineSurface);
-    if (!d->inLayout && ((abs(newGeometry.width() - oldGeometry.width()) > LV_ACCURACY && widthValid())
-        || (abs(newGeometry.height() - oldGeometry.height()) > LV_ACCURACY && heightValid()))) {
-        updateSize();
-        updateWholeDocument();
-    }
-    QQuickItem::geometryChanged(newGeometry, oldGeometry);
-
 }
 
 void LineSurface::componentComplete()
@@ -541,20 +513,6 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
 void LineSurface::updatePolish()
 {
     invalidateFontCaches();
-}
-
-LineSurfacePrivate::ExtraData::ExtraData()
-    : padding(0)
-    , topPadding(0)
-    , leftPadding(0)
-    , rightPadding(0)
-    , bottomPadding(0)
-    , explicitTopPadding(false)
-    , explicitLeftPadding(false)
-    , explicitRightPadding(false)
-    , explicitBottomPadding(false)
-    , implicitResize(true)
-{
 }
 
 void LineSurface::singleShotUpdate()
@@ -947,20 +905,6 @@ void LineSurfacePrivate::updateDefaultTextOption()
     }
 }
 
-void LineSurface::focusInEvent(QFocusEvent *event)
-{
-    Q_D(LineSurface);
-    d->handleFocusEvent(event);
-    QQuickItem::focusInEvent(event);
-}
-
-void LineSurface::focusOutEvent(QFocusEvent *event)
-{
-    Q_D(LineSurface);
-    d->handleFocusEvent(event);
-    QQuickItem::focusOutEvent(event);
-}
-
 void LineSurfacePrivate::handleFocusEvent(QFocusEvent *event)
 {
     Q_Q(LineSurface);
@@ -1059,21 +1003,5 @@ void LineSurface::clear()
 
     d->resetInputMethod();
 }
-
-
-void LineSurfacePrivate::implicitWidthChanged()
-{
-    Q_Q(LineSurface);
-    QQuickImplicitSizeItemPrivate::implicitWidthChanged();
-    emit q->implicitWidthChanged2();
-}
-
-void LineSurfacePrivate::implicitHeightChanged()
-{
-    Q_Q(LineSurface);
-    QQuickImplicitSizeItemPrivate::implicitHeightChanged();
-    emit q->implicitHeightChanged2();
-}
-
 
 }

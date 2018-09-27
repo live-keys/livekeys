@@ -19,7 +19,7 @@ class TextNode;
 class TextNodeEngine;
 class LineManager;
 
-class LV_EDITOR_EXPORT LineSurfacePrivate : public QQuickImplicitSizeItemPrivate
+class LV_EDITOR_EXPORT LineSurfacePrivate : public QQuickItemPrivate
 {
 public:
     Q_DECLARE_PUBLIC(LineSurface)
@@ -44,26 +44,6 @@ public:
         bool m_dirty;
     };
     typedef QList<Node*>::iterator TextNodeIterator;
-
-    class ExtraData
-    {
-    public:
-        ExtraData();
-
-        qreal padding;
-        qreal topPadding;
-        qreal leftPadding;
-        qreal rightPadding;
-        qreal bottomPadding;
-        bool explicitTopPadding : 1;
-        bool explicitLeftPadding : 1;
-        bool explicitRightPadding : 1;
-        bool explicitBottomPadding : 1;
-        bool implicitResize : 1;
-    };
-    QLazilyAllocated<ExtraData> extra;
-    void implicitWidthChanged() Q_DECL_OVERRIDE;
-    void implicitHeightChanged() Q_DECL_OVERRIDE;
 
     LineSurfacePrivate()
         : readOnly(false), color(QRgb(0xFF000000)), selectionColor(QRgb(0xFF000080)), selectedTextColor(QRgb(0xFFFFFFFF))
@@ -119,7 +99,6 @@ public:
     Qt::InputMethodHints effectiveInputMethodHints() const;
 #endif
 
-    inline qreal padding() const { return extra.isAllocated() ? extra->padding : 0.0; }
     void setTopPadding(qreal value, bool reset = false);
     void setLeftPadding(qreal value, bool reset = false);
     void setRightPadding(qreal value, bool reset = false);

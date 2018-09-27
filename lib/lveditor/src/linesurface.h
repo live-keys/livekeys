@@ -14,7 +14,7 @@ namespace lv {
 
 class LineSurfacePrivate;
 
-class LV_EDITOR_EXPORT LineSurface : public QQuickImplicitSizeItem
+class LV_EDITOR_EXPORT LineSurface : public QQuickItem
 {
     Q_OBJECT
 
@@ -97,11 +97,6 @@ private:
 protected:
     LineSurface(LineSurfacePrivate &dd, QQuickImplicitSizeItem *parent = nullptr);
 
-    void geometryChanged(const QRectF &newGeometry,
-                         const QRectF &oldGeometry) Q_DECL_OVERRIDE;
-
-    void focusInEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
-    void focusOutEvent(QFocusEvent *event) Q_DECL_OVERRIDE;
 
     // mouse filter?
     void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
