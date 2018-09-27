@@ -4,7 +4,8 @@
 
 #include "private/qquickimplicitsizeitem_p.h"
 #include <QtGui/qtextoption.h>
-#include "documenthandler.h"
+#include "live/lveditorglobal.h"
+#include "textedit_p.h"
 #include "qquickpainteditem.h"
 
 class QTextBlock;
@@ -19,18 +20,6 @@ class LV_EDITOR_EXPORT LineSurface : public QQuickImplicitSizeItem
 
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
     Q_PROPERTY(QFont font READ font WRITE setFont NOTIFY fontChanged)
-    Q_PROPERTY(QUrl baseUrl READ baseUrl WRITE setBaseUrl RESET resetBaseUrl NOTIFY baseUrlChanged)
-    Q_PROPERTY(RenderType renderType READ renderType WRITE setRenderType NOTIFY renderTypeChanged)
-    Q_PROPERTY(QString hoveredLink READ hoveredLink NOTIFY linkHovered REVISION 2)
-    Q_PROPERTY(qreal padding READ padding WRITE setPadding RESET resetPadding NOTIFY paddingChanged REVISION 6)
-    Q_PROPERTY(qreal topPadding READ topPadding WRITE setTopPadding RESET resetTopPadding NOTIFY topPaddingChanged REVISION 6)
-    Q_PROPERTY(qreal leftPadding READ leftPadding WRITE setLeftPadding RESET resetLeftPadding NOTIFY leftPaddingChanged REVISION 6)
-    Q_PROPERTY(qreal rightPadding READ rightPadding WRITE setRightPadding RESET resetRightPadding NOTIFY rightPaddingChanged REVISION 6)
-    Q_PROPERTY(qreal bottomPadding READ bottomPadding WRITE setBottomPadding RESET resetBottomPadding NOTIFY bottomPaddingChanged REVISION 6)
-    Q_PROPERTY(lv::DocumentHandler* documentHandler READ documentHandler WRITE setDocumentHandler NOTIFY documentHandlerChanged)
-    Q_PROPERTY(int fragmentStart READ fragmentStart WRITE setFragmentStart RESET resetFragmentStart NOTIFY fragmentStartChanged)
-    Q_PROPERTY(int fragmentEnd READ fragmentEnd WRITE setFragmentEnd RESET resetFragmentEnd NOTIFY fragmentEndChanged)
-
 public:
     LineSurface(QQuickImplicitSizeItem *parent=nullptr);
 
@@ -104,53 +93,11 @@ public:
 
     void setTextDocument(QTextDocument* td);
 
-    QUrl baseUrl() const;
-    void setBaseUrl(const QUrl &url);
-    void resetBaseUrl();
-
     QRectF boundingRect() const Q_DECL_OVERRIDE;
     QRectF clipRect() const Q_DECL_OVERRIDE;
 
-
-    RenderType renderType() const;
-    void setRenderType(RenderType renderType);
-
     Q_INVOKABLE QString getText(int start, int end) const;
     Q_INVOKABLE QString getFormattedText(int start, int end) const;
-
-
-    QString hoveredLink() const;
-
-    qreal padding() const;
-    void setPadding(qreal padding);
-    void resetPadding();
-
-    qreal topPadding() const;
-    void setTopPadding(qreal padding);
-    void resetTopPadding();
-
-    qreal leftPadding() const;
-    void setLeftPadding(qreal padding);
-    void resetLeftPadding();
-
-    qreal rightPadding() const;
-    void setRightPadding(qreal padding);
-    void resetRightPadding();
-
-    qreal bottomPadding() const;
-    void setBottomPadding(qreal padding);
-    void resetBottomPadding();
-
-    int fragmentStart() const;
-    void setFragmentStart(int frStart);
-    void resetFragmentStart();
-
-    int fragmentEnd() const;
-    void setFragmentEnd(int frStart);
-    void resetFragmentEnd();
-
-    lv::DocumentHandler* documentHandler();
-    void setDocumentHandler(lv::DocumentHandler* dh);
 
 Q_SIGNALS:
 
@@ -168,22 +115,11 @@ Q_SIGNALS:
     void linkActivated(const QString &link);
     Q_REVISION(2) void linkHovered(const QString &link);
     void effectiveHorizontalAlignmentChanged();
-    void baseUrlChanged();
-    void renderTypeChanged();
     void textDocumentChanged();
-    void documentHandlerChanged();
     Q_REVISION(6) void editingFinished();
-    Q_REVISION(6) void paddingChanged();
-    Q_REVISION(6) void topPaddingChanged();
-    Q_REVISION(6) void leftPaddingChanged();
-    Q_REVISION(6) void rightPaddingChanged();
-    Q_REVISION(6) void bottomPaddingChanged();
     void dirtyBlockPosition(int pos);
     void stateChangeSignal(int blockNum);
     void textDocumentFinishedUpdating();
-
-    void fragmentStartChanged();
-    void fragmentEndChanged();
 
 public Q_SLOTS:
     void setDirtyBlockPosition(int pos);
@@ -215,7 +151,6 @@ private:
     void invalidateFontCaches();
     void showHideLines(bool show, int pos, int num);
     void replaceTextInBlock(int blockNumber, std::string s);
-    void updateFragmentVisibility();
 
     void linesAdded();
     void linesRemoved();
@@ -258,7 +193,6 @@ protected:
     void updatePolish() Q_DECL_OVERRIDE;
 
     friend class TextUtil;
-    friend class DocumentHandler;
     friend class LineManager;
 
 

@@ -75,26 +75,6 @@ LineSurface::LineSurface(LineSurfacePrivate &dd, QQuickImplicitSizeItem *parent)
     d->init();
 }
 
-LineSurface::RenderType LineSurface::renderType() const
-{
-    Q_D(const LineSurface);
-    return d->renderType;
-}
-
-void LineSurface::setRenderType(LineSurface::RenderType renderType)
-{
-    Q_D(LineSurface);
-    if (d->renderType == renderType)
-        return;
-
-    d->renderType = renderType;
-    emit renderTypeChanged();
-    d->updateDefaultTextOption();
-
-    if (isComponentComplete())
-        updateSize();
-}
-
 QFont LineSurface::font() const
 {
     Q_D(const LineSurface);
@@ -179,34 +159,6 @@ void LineSurface::setColor(const QColor &color)
 
     updateWholeDocument();
     emit colorChanged(d->color);
-}
-
-int LineSurface::fragmentStart() const {
-    Q_D(const LineSurface);
-    return d->fragmentStart;
-}
-
-int LineSurface::fragmentEnd() const {
-    Q_D(const LineSurface);
-    return d->fragmentEnd;
-}
-
-void LineSurface::setFragmentStart(int frStart) {
-    Q_D(LineSurface);
-    d->fragmentStart = frStart;
-}
-
-void LineSurface::setFragmentEnd(int frEnd) {
-    Q_D(LineSurface);
-    d->fragmentEnd = frEnd;
-}
-
-void LineSurface::resetFragmentStart() {
-    setFragmentStart(-1);
-}
-
-void LineSurface::resetFragmentEnd() {
-    setFragmentEnd(-1);
 }
 
 
@@ -301,20 +253,6 @@ Qt::InputMethodHints LineSurfacePrivate::effectiveInputMethodHints() const
 }
 #endif
 
-void LineSurfacePrivate::setTopPadding(qreal value, bool reset)
-{
-    Q_Q(LineSurface);
-    qreal oldPadding = q->topPadding();
-    if (!reset || extra.isAllocated()) {
-        extra.value().topPadding = value;
-        extra.value().explicitTopPadding = !reset;
-    }
-    if ((!reset && !qFuzzyCompare(oldPadding, value)) || (reset && !qFuzzyCompare(oldPadding, padding()))) {
-        q->updateSize();
-        emit q->topPaddingChanged();
-    }
-}
-
 void LineSurface::setComponents(lv::TextEdit* te)
 {
     Q_D(LineSurface);
@@ -353,48 +291,6 @@ void LineSurface::setComponents(lv::TextEdit* te)
     setAcceptedMouseButtons(Qt::AllButtons);
 
 
-}
-
-void LineSurfacePrivate::setLeftPadding(qreal value, bool reset)
-{
-    Q_Q(LineSurface);
-    qreal oldPadding = q->leftPadding();
-    if (!reset || extra.isAllocated()) {
-        extra.value().leftPadding = value;
-        extra.value().explicitLeftPadding = !reset;
-    }
-    if ((!reset && !qFuzzyCompare(oldPadding, value)) || (reset && !qFuzzyCompare(oldPadding, padding()))) {
-        q->updateSize();
-        emit q->leftPaddingChanged();
-    }
-}
-
-void LineSurfacePrivate::setRightPadding(qreal value, bool reset)
-{
-    Q_Q(LineSurface);
-    qreal oldPadding = q->rightPadding();
-    if (!reset || extra.isAllocated()) {
-        extra.value().rightPadding = value;
-        extra.value().explicitRightPadding = !reset;
-    }
-    if ((!reset && !qFuzzyCompare(oldPadding, value)) || (reset && !qFuzzyCompare(oldPadding, padding()))) {
-        q->updateSize();
-        emit q->rightPaddingChanged();
-    }
-}
-
-void LineSurfacePrivate::setBottomPadding(qreal value, bool reset)
-{
-    Q_Q(LineSurface);
-    qreal oldPadding = q->bottomPadding();
-    if (!reset || extra.isAllocated()) {
-        extra.value().bottomPadding = value;
-        extra.value().explicitBottomPadding = !reset;
-    }
-    if ((!reset && !qFuzzyCompare(oldPadding, value)) || (reset && !qFuzzyCompare(oldPadding, padding()))) {
-        q->updateSize();
-        emit q->bottomPaddingChanged();
-    }
 }
 
 bool LineSurfacePrivate::isImplicitResizeEnabled() const
@@ -459,35 +355,6 @@ int LineSurface::length() const
     return qMax(0, d->document->characterCount() - 1);
 }
 
-QUrl LineSurface::baseUrl() const
-{
-    Q_D(const LineSurface);
-    if (d->baseUrl.isEmpty()) {
-        if (QQmlContext *context = qmlContext(this))
-            const_cast<LineSurfacePrivate *>(d)->baseUrl = context->baseUrl();
-    }
-    return d->baseUrl;
-}
-
-void LineSurface::setBaseUrl(const QUrl &url)
-{
-    Q_D(LineSurface);
-    if (baseUrl() != url) {
-        d->baseUrl = url;
-
-        if (d->document) d->document->setBaseUrl(url);
-        emit baseUrlChanged();
-    }
-}
-
-void LineSurface::resetBaseUrl()
-{
-    if (QQmlContext *context = qmlContext(this))
-        setBaseUrl(context->baseUrl());
-    else
-        setBaseUrl(QUrl());
-}
-
 void LineSurface::createCursor()
 {
     Q_D(LineSurface);
@@ -515,8 +382,6 @@ void LineSurface::componentComplete()
 
     QQuickItem::componentComplete();
     if (!d->document) return;
-
-    d->document->setBaseUrl(baseUrl());
 
     if (d->dirty) {
         d->updateDefaultTextOption();
@@ -1336,7 +1201,6 @@ void LineSurface::updateTotalLines()
     if (d->lineCount != newTotalLines) {
         d->lineCount = newTotalLines;
         emit lineCountChanged();
-        updateFragmentVisibility();
     }
 }
 
@@ -1484,11 +1348,6 @@ bool LineSurfacePrivate::isLinkHoveredConnected()
     LV_IS_SIGNAL_CONNECTED(q, LineSurface, linkHovered, (const QString &));
 }
 
-QString LineSurface::hoveredLink() const
-{
-    return QString();
-}
-
 void LineSurface::append(const QString &text)
 {
     Q_D(LineSurface);
@@ -1509,119 +1368,6 @@ void LineSurface::append(const QString &text)
     cursor.endEditBlock();
 }
 
-qreal LineSurface::padding() const
-{
-    Q_D(const LineSurface);
-    return d->padding();
-}
-
-void LineSurface::setPadding(qreal padding)
-{
-    Q_D(LineSurface);
-    if (qFuzzyCompare(d->padding(), padding))
-        return;
-
-    d->extra.value().padding = padding;
-    updateSize();
-    if (isComponentComplete()) {
-        d->updateType = LineSurfacePrivate::UpdatePaintNode;
-        update();
-    }
-    emit paddingChanged();
-    if (!d->extra.isAllocated() || !d->extra->explicitTopPadding)
-        emit topPaddingChanged();
-    if (!d->extra.isAllocated() || !d->extra->explicitLeftPadding)
-        emit leftPaddingChanged();
-    if (!d->extra.isAllocated() || !d->extra->explicitRightPadding)
-        emit rightPaddingChanged();
-    if (!d->extra.isAllocated() || !d->extra->explicitBottomPadding)
-        emit bottomPaddingChanged();
-}
-
-void LineSurface::resetPadding()
-{
-    setPadding(0);
-}
-
-qreal LineSurface::topPadding() const
-{
-    Q_D(const LineSurface);
-    if (d->extra.isAllocated() && d->extra->explicitTopPadding)
-        return d->extra->topPadding;
-    return d->padding();
-}
-
-void LineSurface::setTopPadding(qreal padding)
-{
-    Q_D(LineSurface);
-    d->setTopPadding(padding);
-}
-
-void LineSurface::resetTopPadding()
-{
-    Q_D(LineSurface);
-    d->setTopPadding(0, true);
-}
-
-qreal LineSurface::leftPadding() const
-{
-    Q_D(const LineSurface);
-    if (d->extra.isAllocated() && d->extra->explicitLeftPadding)
-        return d->extra->leftPadding;
-    return d->padding();
-}
-
-void LineSurface::setLeftPadding(qreal padding)
-{
-    Q_D(LineSurface);
-    d->setLeftPadding(padding);
-}
-
-void LineSurface::resetLeftPadding()
-{
-    Q_D(LineSurface);
-    d->setLeftPadding(0, true);
-}
-
-qreal LineSurface::rightPadding() const
-{
-    Q_D(const LineSurface);
-    if (d->extra.isAllocated() && d->extra->explicitRightPadding)
-        return d->extra->rightPadding;
-    return d->padding();
-}
-
-void LineSurface::setRightPadding(qreal padding)
-{
-    Q_D(LineSurface);
-    d->setRightPadding(padding);
-}
-
-void LineSurface::resetRightPadding()
-{
-    Q_D(LineSurface);
-    d->setRightPadding(0, true);
-}
-
-qreal LineSurface::bottomPadding() const
-{
-    Q_D(const LineSurface);
-    if (d->extra.isAllocated() && d->extra->explicitBottomPadding)
-        return d->extra->bottomPadding;
-    return d->padding();
-}
-
-void LineSurface::setBottomPadding(qreal padding)
-{
-    Q_D(LineSurface);
-    d->setBottomPadding(padding);
-}
-
-void LineSurface::resetBottomPadding()
-{
-    Q_D(LineSurface);
-    d->setBottomPadding(0, true);
-}
 
 void LineSurface::clear()
 {
@@ -1644,19 +1390,6 @@ void LineSurfacePrivate::implicitHeightChanged()
     Q_Q(LineSurface);
     QQuickImplicitSizeItemPrivate::implicitHeightChanged();
     emit q->implicitHeightChanged2();
-}
-
-DocumentHandler* LineSurface::documentHandler()
-{
-    Q_D(LineSurface);
-    return d->documentHandler;
-}
-
-void LineSurface::setDocumentHandler(DocumentHandler *dh)
-{
-    Q_D(LineSurface);
-    d->documentHandler = dh;
-    // dh->setTextEdit(this);
 }
 
 void LineSurface::setTextDocument(QTextDocument *td)
@@ -1699,32 +1432,6 @@ void LineSurface::showHideLines(bool show, int pos, int num)
     }
 
     d->document->markContentsDirty(start, length);
-}
-
-void LineSurface::updateFragmentVisibility()
-{
-    Q_D(LineSurface);
-    if (!d->document || fragmentStart() == -1 || fragmentEnd() == -1) return;
-
-    auto it = d->document->rootFrame()->begin(); int cnt = 0;
-    auto endIt = d->document->rootFrame()->end();
-
-    qDebug() << fragmentStart() << fragmentEnd();
-
-    while (it != endIt)
-    {
-        if (cnt < fragmentStart()) it.currentBlock().setVisible(false);
-        else if (cnt < fragmentEnd()) it.currentBlock().setVisible(true);
-        else it.currentBlock().setVisible(false);
-
-        qDebug() << it.currentBlock().text() << it.currentBlock().isVisible();
-
-        ++cnt; ++it;
-    }
-
-    emit dirtyBlockPosition(0);
-    emit textDocumentFinishedUpdating();
-
 }
 
 void LineSurface::replaceTextInBlock(int blockNumber, std::string s)
