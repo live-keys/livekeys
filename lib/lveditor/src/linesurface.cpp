@@ -31,8 +31,6 @@
 
 namespace lv {
 
-static const int nodeBreakingSize = 300;
-
 namespace {
     class ProtectedLayoutAccessor: public QAbstractTextDocumentLayout
     {
@@ -181,40 +179,6 @@ void LineSurface::setColor(const QColor &color)
 
     updateWholeDocument();
     emit colorChanged(d->color);
-}
-
-QColor LineSurface::selectionColor() const
-{
-    Q_D(const LineSurface);
-    return d->selectionColor;
-}
-
-void LineSurface::setSelectionColor(const QColor &color)
-{
-    Q_D(LineSurface);
-    if (d->selectionColor == color)
-        return;
-
-    d->selectionColor = color;
-    updateWholeDocument();
-    emit selectionColorChanged(d->selectionColor);
-}
-
-QColor LineSurface::selectedTextColor() const
-{
-    Q_D(const LineSurface);
-    return d->selectedTextColor;
-}
-
-void LineSurface::setSelectedTextColor(const QColor &color)
-{
-    Q_D(LineSurface);
-    if (d->selectedTextColor == color)
-        return;
-
-    d->selectedTextColor = color;
-    updateWholeDocument();
-    emit selectedTextColorChanged(d->selectedTextColor);
 }
 
 int LineSurface::fragmentStart() const {
@@ -495,20 +459,6 @@ int LineSurface::length() const
     return qMax(0, d->document->characterCount() - 1);
 }
 
-
-qreal LineSurface::contentWidth() const
-{
-    Q_D(const LineSurface);
-    return d->contentSize.width();
-}
-
-
-qreal LineSurface::contentHeight() const
-{
-    Q_D(const LineSurface);
-    return d->contentSize.height();
-}
-
 QUrl LineSurface::baseUrl() const
 {
     Q_D(const LineSurface);
@@ -538,98 +488,11 @@ void LineSurface::resetBaseUrl()
         setBaseUrl(QUrl());
 }
 
-QQmlComponent* LineSurface::cursorDelegate() const
-{
-    Q_D(const LineSurface);
-    return d->cursorComponent;
-}
-
-void LineSurface::setCursorDelegate(QQmlComponent* c)
-{
-    Q_D(LineSurface);
-    TextUtil::setCursorDelegate(d, c);
-}
-
 void LineSurface::createCursor()
 {
     Q_D(LineSurface);
     d->cursorPending = true;
     TextUtil::createCursor(d);
-}
-
-
-bool LineSurface::focusOnPress() const
-{
-    Q_D(const LineSurface);
-    return d->focusOnPress;
-}
-
-void LineSurface::setFocusOnPress(bool on)
-{
-    Q_D(LineSurface);
-    if (d->focusOnPress == on)
-        return;
-    d->focusOnPress = on;
-    emit activeFocusOnPressChanged(d->focusOnPress);
-}
-
-bool LineSurface::persistentSelection() const
-{
-    Q_D(const LineSurface);
-    return d->persistentSelection;
-}
-
-void LineSurface::setPersistentSelection(bool on)
-{
-    Q_D(LineSurface);
-    if (d->persistentSelection == on)
-        return;
-    d->persistentSelection = on;
-    emit persistentSelectionChanged(d->persistentSelection);
-}
-
-qreal LineSurface::textMargin() const
-{
-    Q_D(const LineSurface);
-    return d->textMargin;
-}
-
-void LineSurface::setTextMargin(qreal margin)
-{
-    Q_D(LineSurface);
-
-    if (abs(d->textMargin - margin) < LV_ACCURACY)
-        return;
-    d->textMargin = margin;
-    if (!d->document) d->document->setDocumentMargin(d->textMargin);
-    emit textMarginChanged(d->textMargin);
-}
-
-
-Qt::InputMethodHints LineSurface::inputMethodHints() const
-{
-#ifdef QT_NO_IM
-    return Qt::ImhNone;
-#else
-    Q_D(const LineSurface);
-    return d->inputMethodHints;
-#endif // QT_NO_IM
-}
-
-void LineSurface::setInputMethodHints(Qt::InputMethodHints hints)
-{
-#ifdef QT_NO_IM
-    Q_UNUSED(hints);
-#else
-    Q_D(LineSurface);
-
-    if (hints == d->inputMethodHints)
-        return;
-
-    d->inputMethodHints = hints;
-    updateInputMethod(Qt::ImHints);
-    emit inputMethodHintsChanged();
-#endif // QT_NO_IM
 }
 
 void LineSurface::geometryChanged(const QRectF &newGeometry,
@@ -660,36 +523,6 @@ void LineSurface::componentComplete()
         updateSize();
         d->dirty = false;
     }
-}
-
-void LineSurface::setReadOnly(bool r)
-{
-    Q_D(LineSurface);
-
-    d->readOnly = r;
-#ifndef QT_NO_IM
-    setFlag(QQuickItem::ItemAcceptsInputMethod, !d->readOnly);
-#endif
-    Qt::TextInteractionFlags flags = Qt::LinksAccessibleByMouse;
-    if (d->selectByMouse)
-        flags = flags | Qt::TextSelectableByMouse;
-    if (d->selectByKeyboardSet && d->selectByKeyboard)
-        flags = flags | Qt::TextSelectableByKeyboard;
-    else if (!d->selectByKeyboardSet && !d->readOnly)
-        flags = flags | Qt::TextSelectableByKeyboard;
-    if (!d->readOnly)
-        flags = flags | Qt::TextEditable;
-
-#ifndef QT_NO_IM
-    updateInputMethod(Qt::ImEnabled);
-#endif
-    emit readOnlyChanged(d->readOnly);
-}
-
-bool LineSurface::isReadOnly() const
-{
-    Q_D(const LineSurface);
-    return d->readOnly;
 }
 
 QRectF LineSurface::cursorRectangle() const
@@ -1017,28 +850,6 @@ void LineSurface::updatePolish()
     invalidateFontCaches();
 }
 
-
-bool LineSurface::canUndo() const
-{
-    Q_D(const LineSurface);
-    if (!d->document) return false;
-
-    return d->document->isUndoAvailable();
-}
-
-bool LineSurface::canRedo() const
-{
-    Q_D(const LineSurface);
-    if (!d->document) return false;
-
-    return d->document->isRedoAvailable();
-}
-
-bool LineSurface::isInputMethodComposing() const
-{
-    return false;
-}
-
 LineSurfacePrivate::ExtraData::ExtraData()
     : padding(0)
     , topPadding(0)
@@ -1084,7 +895,6 @@ void LineSurfacePrivate::setTextDocument(QTextDocument *d)
     document->setUndoRedoEnabled(false); // flush undo buffer.
     document->setUndoRedoEnabled(true);
 
-    q->setReadOnly(readOnly);
     updateDefaultTextOption();
     q->updateSize();
 
@@ -1126,7 +936,7 @@ void LineSurfacePrivate::init()
 void LineSurfacePrivate::resetInputMethod()
 {
     Q_Q(LineSurface);
-    if (!q->isReadOnly() && q->hasActiveFocus() && qGuiApp)
+    if (q->hasActiveFocus() && qGuiApp)
         QGuiApplication::inputMethod()->reset();
 }
 
@@ -1601,7 +1411,7 @@ void LineSurfacePrivate::handleFocusEvent(QFocusEvent *event)
     if (focus) {
         q->q_updateAlignment();
 #ifndef QT_NO_IM
-        if (focusOnPress && !q->isReadOnly())
+        if (focusOnPress)
             qGuiApp->inputMethod()->show();
         q->connect(QGuiApplication::inputMethod(), SIGNAL(inputDirectionChanged(Qt::LayoutDirection)),
                 q, SLOT(q_updateAlignment()));
