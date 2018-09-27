@@ -75,15 +75,7 @@ public:
         , lastHighlightChangeEnd(0)
         , fragmentStart(-1)
         , fragmentEnd(-1)
-        , hAlign(LineSurface::AlignLeft), vAlign(LineSurface::AlignTop)
-        , wrapMode(LineSurface::NoWrap)
-#if defined(QT_QUICK_DEFAULT_TEXT_RENDER_TYPE)
-        , renderType(LVTextEdit::QT_QUICK_DEFAULT_TEXT_RENDER_TYPE)
-#else
-        , renderType(LineSurface::QtRendering)
-#endif
         , contentDirection(Qt::LayoutDirectionAuto)
-        , mouseSelectionMode(LineSurface::SelectCharacters)
 #ifndef QT_NO_IM
         , inputMethodHints(Qt::ImhNone)
 #endif
@@ -115,7 +107,6 @@ public:
     void resetInputMethod();
     void updateDefaultTextOption();
     void relayoutDocument();
-    bool setHAlign(LineSurface::HAlignment, bool forceAlign = false);
     void mirrorChange() Q_DECL_OVERRIDE;
     qreal getImplicitWidth() const Q_DECL_OVERRIDE;
     Qt::LayoutDirection textDirection(const QString &text) const;
@@ -180,12 +171,7 @@ public:
     int fragmentStart;
     int fragmentEnd;
 
-    LineSurface::HAlignment hAlign;
-    LineSurface::VAlignment vAlign;
-    LineSurface::WrapMode wrapMode;
-    LineSurface::RenderType renderType;
     Qt::LayoutDirection contentDirection;
-    LineSurface::SelectionMode mouseSelectionMode;
 #ifndef QT_NO_IM
     Qt::InputMethodHints inputMethodHints;
 #endif

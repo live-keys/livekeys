@@ -162,58 +162,6 @@ void LineSurface::setColor(const QColor &color)
 }
 
 
-LineSurface::HAlignment LineSurface::hAlign() const
-{
-    Q_D(const LineSurface);
-    return d->hAlign;
-}
-
-void LineSurface::setHAlign(HAlignment align)
-{
-    Q_D(LineSurface);
-    bool forceAlign = d->hAlignImplicit && d->effectiveLayoutMirror;
-    d->hAlignImplicit = false;
-    if (d->setHAlign(align, forceAlign) && isComponentComplete()) {
-        d->updateDefaultTextOption();
-        updateSize();
-    }
-}
-
-
-LineSurface::HAlignment LineSurface::effectiveHAlign() const
-{
-    Q_D(const LineSurface);
-    LineSurface::HAlignment effectiveAlignment = d->hAlign;
-    if (!d->hAlignImplicit && d->effectiveLayoutMirror) {
-        switch (d->hAlign) {
-        case LineSurface::AlignLeft:
-            effectiveAlignment = LineSurface::AlignRight;
-            break;
-        case LineSurface::AlignRight:
-            effectiveAlignment = LineSurface::AlignLeft;
-            break;
-        default:
-            break;
-        }
-    }
-    return effectiveAlignment;
-}
-
-bool LineSurfacePrivate::setHAlign(LineSurface::HAlignment alignment, bool forceAlign)
-{
-    Q_Q(LineSurface);
-    if (hAlign != alignment || forceAlign) {
-        LineSurface::HAlignment oldEffectiveHAlign = q->effectiveHAlign();
-        hAlign = alignment;
-        emit q->horizontalAlignmentChanged(alignment);
-        if (oldEffectiveHAlign != q->effectiveHAlign())
-            emit q->effectiveHorizontalAlignmentChanged();
-        return true;
-    }
-    return false;
-}
-
-
 Qt::LayoutDirection LineSurfacePrivate::textDirection(const QString &text) const
 {
     const QChar *character = text.constData();
@@ -238,7 +186,7 @@ void LineSurfacePrivate::mirrorChange()
 {
     Q_Q(LineSurface);
     if (q->isComponentComplete()) {
-        if (!hAlignImplicit && (hAlign == LineSurface::AlignRight || hAlign == LineSurface::AlignLeft)) {
+        if (!hAlignImplicit) {
             updateDefaultTextOption();
             q->updateSize();
             emit q->effectiveHorizontalAlignmentChanged();
@@ -304,41 +252,6 @@ void LineSurfacePrivate::setImplicitResizeEnabled(bool enabled)
         extra.value().implicitResize = false;
     else if (extra.isAllocated())
         extra->implicitResize = true;
-}
-
-LineSurface::VAlignment LineSurface::vAlign() const
-{
-    Q_D(const LineSurface);
-    return d->vAlign;
-}
-
-void LineSurface::setVAlign(LineSurface::VAlignment alignment)
-{
-    Q_D(LineSurface);
-    if (alignment == d->vAlign)
-        return;
-    d->vAlign = alignment;
-    d->updateDefaultTextOption();
-    updateSize();
-    moveCursorDelegate();
-    emit verticalAlignmentChanged(d->vAlign);
-}
-
-LineSurface::WrapMode LineSurface::wrapMode() const
-{
-    Q_D(const LineSurface);
-    return d->wrapMode;
-}
-
-void LineSurface::setWrapMode(WrapMode mode)
-{
-    Q_D(LineSurface);
-    if (mode == d->wrapMode)
-        return;
-    d->wrapMode = mode;
-    d->updateDefaultTextOption();
-    updateSize();
-    emit wrapModeChanged();
 }
 
 int LineSurface::lineCount() const
@@ -916,19 +829,6 @@ void LineSurface::moveCursorDelegate()
     d->cursorItem->setY(cursorRect.y());
 }
 
-QRectF LineSurface::boundingRect() const
-{
-    Q_D(const LineSurface);
-    if (!d->document) return QRectF();
-
-    QRectF r(
-            TextUtil::alignedX(d->contentSize.width(), width(), effectiveHAlign()),
-            d->yoff,
-            d->contentSize.width(),
-            d->contentSize.height());
-    return r;
-}
-
 QRectF LineSurface::clipRect() const
 {
     QRectF r = QQuickItem::clipRect();
@@ -1179,7 +1079,6 @@ void LineSurface::q_updateAlignment()
     if (!d->document) return;
 
         d->updateDefaultTextOption();
-        d->xoff = qMax(qreal(0), TextUtil::alignedX(d->document->size().width(), width(), effectiveHAlign()));
         moveCursorDelegate();
 }
 
@@ -1206,24 +1105,11 @@ void LineSurface::updateTotalLines()
 
 void LineSurfacePrivate::updateDefaultTextOption()
 {
-    Q_Q(LineSurface);
     if (!document) return;
 
     QTextOption opt = document->defaultTextOption();
     int oldAlignment = opt.alignment();
     Qt::LayoutDirection oldTextDirection = opt.textDirection();
-
-    LineSurface::HAlignment horizontalAlignment = q->effectiveHAlign();
-    if (contentDirection == Qt::RightToLeft) {
-        if (horizontalAlignment == LineSurface::AlignLeft)
-            horizontalAlignment = LineSurface::AlignRight;
-        else if (horizontalAlignment == LineSurface::AlignRight)
-            horizontalAlignment = LineSurface::AlignLeft;
-    }
-    if (!hAlignImplicit)
-        opt.setAlignment(static_cast<Qt::Alignment>(static_cast<int>(horizontalAlignment | vAlign)));
-    else
-        opt.setAlignment(Qt::Alignment(vAlign));
 
 #ifndef QT_NO_IM
     if (contentDirection == Qt::LayoutDirectionAuto) {
@@ -1235,10 +1121,8 @@ void LineSurfacePrivate::updateDefaultTextOption()
     }
 
     QTextOption::WrapMode oldWrapMode = opt.wrapMode();
-    opt.setWrapMode(QTextOption::WrapMode(wrapMode));
 
     bool oldUseDesignMetrics = opt.useDesignMetrics();
-    opt.setUseDesignMetrics(renderType != LineSurface::NativeRendering);
 
     if (oldWrapMode != opt.wrapMode() || oldAlignment != opt.alignment()
         || oldTextDirection != opt.textDirection()
@@ -1301,7 +1185,6 @@ TextNode *LineSurfacePrivate::createTextNode()
 {
     Q_Q(LineSurface);
     TextNode* node = new TextNode(q);
-    node->setUseNativeRenderer(renderType == LineSurface::NativeRendering);
     return node;
 }
 
@@ -1367,7 +1250,6 @@ void LineSurface::append(const QString &text)
 
     cursor.endEditBlock();
 }
-
 
 void LineSurface::clear()
 {

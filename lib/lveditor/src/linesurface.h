@@ -23,40 +23,6 @@ class LV_EDITOR_EXPORT LineSurface : public QQuickImplicitSizeItem
 public:
     LineSurface(QQuickImplicitSizeItem *parent=nullptr);
 
-    enum HAlignment {
-        AlignLeft = Qt::AlignLeft,
-        AlignRight = Qt::AlignRight,
-        AlignHCenter = Qt::AlignHCenter,
-        AlignJustify = Qt::AlignJustify
-    };
-    Q_ENUM(HAlignment)
-
-    enum VAlignment {
-        AlignTop = Qt::AlignTop,
-        AlignBottom = Qt::AlignBottom,
-        AlignVCenter = Qt::AlignVCenter
-    };
-    Q_ENUM(VAlignment)
-
-    enum WrapMode { NoWrap = QTextOption::NoWrap,
-                    WordWrap = QTextOption::WordWrap,
-                    WrapAnywhere = QTextOption::WrapAnywhere,
-                    WrapAtWordBoundaryOrAnywhere = QTextOption::WrapAtWordBoundaryOrAnywhere, // COMPAT
-                    Wrap = QTextOption::WrapAtWordBoundaryOrAnywhere
-                  };
-    Q_ENUM(WrapMode)
-
-    enum SelectionMode {
-        SelectCharacters,
-        SelectWords
-    };
-    Q_ENUM(SelectionMode)
-
-    enum RenderType { QtRendering,
-                      NativeRendering
-                    };
-    Q_ENUM(RenderType)
-
     bool isCursorVisible();
 
     QFont font() const;
@@ -64,17 +30,6 @@ public:
 
     QColor color() const;
     void setColor(const QColor &c);
-
-    HAlignment hAlign() const;
-    void setHAlign(HAlignment align);
-    void resetHAlign();
-    HAlignment effectiveHAlign() const;
-
-    VAlignment vAlign() const;
-    void setVAlign(VAlignment align);
-
-    WrapMode wrapMode() const;
-    void setWrapMode(WrapMode w);
 
     int lineCount() const;
 
@@ -93,7 +48,6 @@ public:
 
     void setTextDocument(QTextDocument* td);
 
-    QRectF boundingRect() const Q_DECL_OVERRIDE;
     QRectF clipRect() const Q_DECL_OVERRIDE;
 
     Q_INVOKABLE QString getText(int start, int end) const;
@@ -107,8 +61,6 @@ Q_SIGNALS:
     void colorChanged(const QColor &color);
     void selectedTextColorChanged(const QColor &color);
     void fontChanged(const QFont &font);
-    void horizontalAlignmentChanged(LineSurface::HAlignment alignment);
-    void verticalAlignmentChanged(LineSurface::VAlignment alignment);
     void wrapModeChanged();
     void lineCountChanged();
     void readOnlyChanged(bool isReadOnly);
