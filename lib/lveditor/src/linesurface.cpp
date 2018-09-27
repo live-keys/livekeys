@@ -95,9 +95,6 @@ void LineSurface::setFont(const QFont &font)
 
     if (oldFont != d->font) {
         if (d->document) d->document->setDefaultFont(d->font);
-        if (d->cursorItem) {
-            d->cursorItem->setHeight(QFontMetrics(d->font).height());
-        }
         updateSize();
 #ifndef QT_NO_IM
         updateInputMethod(Qt::ImCursorRectangle | Qt::ImAnchorRectangle | Qt::ImFont);
@@ -444,9 +441,6 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     TextNodeEngine engine;
     TextNodeEngine frameDecorationsEngine;
 
-    d->lastHighlightChangeStart = INT_MAX;
-    d->lastHighlightChangeEnd   = 0;
-
     if (numberOfDigits(d->prevLineNumber) != numberOfDigits(d->lineNumber) || d->dirtyPos >= d->textNodeMap.size())
         d->dirtyPos = 0;
 
@@ -469,14 +463,12 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
 
         // FIXME: the text decorations could probably be handled separately (only updated for affected textFrames)
         rootNode->resetFrameDecorations(new TextNode(this));
-        resetEngine(&frameDecorationsEngine, d->color, d->selectedTextColor, d->selectionColor);
+        resetEngine(&frameDecorationsEngine, d->color, QColor(), QColor());
 
         TextNode *node = nullptr;
 
         int currentNodeSize = 0;
-        QPointF basePosition(d->xoff, d->yoff);
         QMatrix4x4 basePositionMatrix;
-        basePositionMatrix.translate(static_cast<float>(basePosition.x()), static_cast<float>(basePosition.y()));
         rootNode->setMatrix(basePositionMatrix);
 
         QPointF nodeOffset;
@@ -491,7 +483,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
 
                 //INFO: creating the text node
                 node = new TextNode(this);
-                resetEngine(&engine, d->color, d->selectedTextColor, d->selectionColor);
+                resetEngine(&engine, d->color, QColor(), QColor());
 
                 if (textFrame->firstPosition() > textFrame->lastPosition()
                         && textFrame->frameFormat().position() != QTextFrameFormat::InFlow) {
@@ -534,7 +526,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                         d->textNodeMap.append(new LineSurfacePrivate::Node(-1, node));
                         rootNode->appendChildNode(node);
                         node = new TextNode(this);
-                        resetEngine(&engine, d->color, d->selectedTextColor, d->selectionColor);
+                        resetEngine(&engine, d->color, QColor(), QColor());
 
                     }
                 }
