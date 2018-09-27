@@ -43,7 +43,6 @@ public:
         TextNode* m_node;
         bool m_dirty;
     };
-    typedef QList<Node*>::iterator TextNodeIterator;
 
     LineSurfacePrivate()
         : readOnly(false), color(QRgb(0xFF000000)), selectionColor(QRgb(0xFF000080)), selectedTextColor(QRgb(0xFFFFFFFF))
@@ -82,30 +81,7 @@ public:
         return static_cast<LineSurfacePrivate *>(QObjectPrivate::get(item)); }
 
     void init();
-    void setTextDocument(QTextDocument* d);
-    void unsetTextDocument();
-    void resetInputMethod();
-    void updateDefaultTextOption();
-    void relayoutDocument();
-    qreal getImplicitWidth() const Q_DECL_OVERRIDE;
-    bool isLinkHoveredConnected();
 
-    void setNativeCursorEnabled(bool) {}
-    void handleFocusEvent(QFocusEvent *event);
-    void addCurrentTextNodeToRoot(TextNodeEngine *, QSGTransformNode *, TextNode*, TextNodeIterator&, int startPos);
-    TextNode* createTextNode();
-
-#ifndef QT_NO_IM
-    Qt::InputMethodHints effectiveInputMethodHints() const;
-#endif
-
-    void setTopPadding(qreal value, bool reset = false);
-    void setLeftPadding(qreal value, bool reset = false);
-    void setRightPadding(qreal value, bool reset = false);
-    void setBottomPadding(qreal value, bool reset = false);
-
-    bool isImplicitResizeEnabled() const;
-    void setImplicitResizeEnabled(bool enabled);
 
     bool readOnly;
     QColor color;
