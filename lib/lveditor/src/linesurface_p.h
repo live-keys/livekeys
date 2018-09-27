@@ -107,9 +107,7 @@ public:
     void resetInputMethod();
     void updateDefaultTextOption();
     void relayoutDocument();
-    void mirrorChange() Q_DECL_OVERRIDE;
     qreal getImplicitWidth() const Q_DECL_OVERRIDE;
-    Qt::LayoutDirection textDirection(const QString &text) const;
     bool isLinkHoveredConnected();
 
     void setNativeCursorEnabled(bool) {}

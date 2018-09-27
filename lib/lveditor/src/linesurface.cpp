@@ -190,46 +190,38 @@ void LineSurface::setComponents(lv::TextEdit* te)
     setAcceptedMouseButtons(Qt::AllButtons);
 }
 
-
-
-Qt::LayoutDirection LineSurfacePrivate::textDirection(const QString &text) const
+void LineSurface::showHideLines(bool show, int pos, int num)
 {
-    const QChar *character = text.constData();
-    while (!character->isNull()) {
-        switch (character->direction()) {
-        case QChar::DirL:
-            return Qt::LeftToRight;
-        case QChar::DirR:
-        case QChar::DirAL:
-        case QChar::DirAN:
-            return Qt::RightToLeft;
-        default:
-            break;
-        }
-        character++;
+    Q_D(LineSurface);
+    auto it = d->document->rootFrame()->begin();
+    Q_ASSERT(d->document->blockCount() > pos);
+    Q_ASSERT(d->document->blockCount() >= pos + num);
+    for (int i = 0; i < pos+1; i++, ++it);
+    int start = it.currentBlock().position();
+
+    int length = 0;
+    for (int i = 0; i < num; i++)
+    {
+        it.currentBlock().setVisible(show);
+        length += it.currentBlock().length();
+        ++it;
     }
-    return Qt::LayoutDirectionAuto;
+
+    d->document->markContentsDirty(start, length);
 }
 
-
-void LineSurfacePrivate::mirrorChange()
+void LineSurface::replaceTextInBlock(int blockNumber, std::string s)
 {
-    Q_Q(LineSurface);
-    if (q->isComponentComplete()) {
-        if (!hAlignImplicit) {
-            updateDefaultTextOption();
-            q->updateSize();
-            emit q->effectiveHorizontalAlignmentChanged();
-        }
-    }
+    Q_D(LineSurface);
+    QTextBlock b = d->document->findBlockByNumber(blockNumber);
+    QTextCursor cursor(b);
+    cursor.beginEditBlock();
+    cursor.movePosition(QTextCursor::EndOfBlock);
+    cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveMode::KeepAnchor);
+    cursor.removeSelectedText();
+    cursor.insertText(QString(s.c_str()));
+    cursor.endEditBlock();
 }
-
-#ifndef QT_NO_IM
-Qt::InputMethodHints LineSurfacePrivate::effectiveInputMethodHints() const
-{
-    return inputMethodHints | Qt::ImhMultiLine;
-}
-#endif
 
 
 bool LineSurfacePrivate::isImplicitResizeEnabled() const
@@ -605,11 +597,6 @@ void LineSurface::q_textChanged()
     Q_D(LineSurface);
     if (!d->document) return;
     d->textCached = false;
-    for (QTextBlock it = d->document->begin(); it != d->document->end(); it = it.next()) {
-        d->contentDirection = d->textDirection(it.text());
-        if (d->contentDirection != Qt::LayoutDirectionAuto)
-            break;
-    }
     d->updateDefaultTextOption();
     updateSize();
     emit textChanged();
@@ -903,29 +890,6 @@ void LineSurface::highlightingDone(const QRectF &)
     }
 }
 
-void LineSurface::invalidateBlock(const QTextBlock &block)
-{
-    Q_D(LineSurface);
-
-    markDirtyNodesForRange(block.position(), block.position() + block.length(), 0);
-
-    ProjectDocumentBlockData* userData = static_cast<ProjectDocumentBlockData*>(block.userData());
-
-    if (userData && userData->stateChangeFlag())
-    {
-        emit dirtyBlockPosition(block.blockNumber());
-        emit textDocumentFinishedUpdating();
-    }
-
-    polish();
-    if (isComponentComplete()) {
-        updateSize();
-        d->updateType = LineSurfacePrivate::UpdatePaintNode;
-        update();
-    }
-}
-
-
 void LineSurface::q_updateAlignment()
 {
     Q_D(LineSurface);
@@ -1111,37 +1075,5 @@ void LineSurfacePrivate::implicitHeightChanged()
     emit q->implicitHeightChanged2();
 }
 
-void LineSurface::showHideLines(bool show, int pos, int num)
-{
-    Q_D(LineSurface);
-    auto it = d->document->rootFrame()->begin();
-    Q_ASSERT(d->document->blockCount() > pos);
-    Q_ASSERT(d->document->blockCount() >= pos + num);
-    for (int i = 0; i < pos+1; i++, ++it);
-    int start = it.currentBlock().position();
-
-    int length = 0;
-    for (int i = 0; i < num; i++)
-    {
-        it.currentBlock().setVisible(show);
-        length += it.currentBlock().length();
-        ++it;
-    }
-
-    d->document->markContentsDirty(start, length);
-}
-
-void LineSurface::replaceTextInBlock(int blockNumber, std::string s)
-{
-    Q_D(LineSurface);
-    QTextBlock b = d->document->findBlockByNumber(blockNumber);
-    QTextCursor cursor(b);
-    cursor.beginEditBlock();
-    cursor.movePosition(QTextCursor::EndOfBlock);
-    cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveMode::KeepAnchor);
-    cursor.removeSelectedText();
-    cursor.insertText(QString(s.c_str()));
-    cursor.endEditBlock();
-}
 
 }

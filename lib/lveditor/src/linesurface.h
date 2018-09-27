@@ -62,7 +62,6 @@ private Q_SLOTS:
     void q_textChanged();
     void q_contentsChange(int, int, int);
     void updateWholeDocument();
-    void invalidateBlock(const QTextBlock &block);
     void q_updateAlignment();
     void updateSize();
     void triggerPreprocess();
