@@ -2456,11 +2456,11 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
         nodesUpdate = false; // this is inside the interval we're updating
     }
 
-    if(start == end) nodesUpdate = false;
+    if (start == end) nodesUpdate = false;
 
     TextEditPrivate::Node dummyNode(start, nullptr);
     TextNodeIterator it = std::lower_bound(d->textNodeMap.begin(), d->textNodeMap.end(), &dummyNode, &comesBefore);
-    if (nodesUpdate && charDelta)
+    if (nodesUpdate || charDelta)
     {
         // qLowerBound gives us the first node past the start of the affected portion, rewind to the first node
         // that starts at the last position before the edit position. (there might be several because of images)
