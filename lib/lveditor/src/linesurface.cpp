@@ -120,7 +120,6 @@ void LineSurface::textDocumentFinished()
 
 void LineSurface::setDirtyBlockPosition(int pos)
 {
-
     dirtyPos = pos;
 }
 
@@ -353,7 +352,7 @@ void LineSurface::updateLineDocument()
                     && userData->collapseState() == lv::ProjectDocumentBlockData::Expand)
             {
                 changeLastCharInBlock(curr, '>');
-
+                userData->setStateChangeFlag(false);
             }
             // if we're in a collapsed section, block shouldn't be visible
             if (curr > sec->position && curr <= sec->position + sec->numberOfLines)
@@ -372,9 +371,13 @@ void LineSurface::updateLineDocument()
             if (userData && userData->collapseState() == lv::ProjectDocumentBlockData::Collapse)
             {
                 changeLastCharInBlock(curr, 'v');
+                userData->setStateChangeFlag(false);
             }
             else if (userData && userData->collapseState() != lv::ProjectDocumentBlockData::Expand)
+            {
                 changeLastCharInBlock(curr, ' ');
+                userData->setStateChangeFlag(false);
+            }
         }
         ++curr; ++it;
     }
