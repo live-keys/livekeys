@@ -280,6 +280,7 @@ Rectangle{
                 anchors.bottomMargin: 10
                 anchors.leftMargin: 5
                 contentY: flick.flickableItem.contentY
+                interactive: false
 
                 LineSurface{
                     id: lineSurface
