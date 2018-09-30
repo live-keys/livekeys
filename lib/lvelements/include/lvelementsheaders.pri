@@ -18,4 +18,5 @@ HEADERS += \
     $$PWD/live/elements/callable.h \
     $$PWD/live/elements/object.h \
     $$PWD/live/elements/buffer.h \
-    $$PWD/live/elements/list.h
+    $$PWD/live/elements/list.h \
+    $$PWD/live/elements/container.h

@@ -1,0 +1,10 @@
+component default < Container{
+    Element elemProp : Element{
+        id: twenty
+        x: 20
+    }
+
+    Element{
+        int y: twenty.x
+    }
+}

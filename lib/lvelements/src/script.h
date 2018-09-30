@@ -23,6 +23,8 @@ public:
     typedef std::shared_ptr<Script> ConstPtr;
 
     Value run();
+    Object loadAsModule();
+
 
 public:
     ~Script();
@@ -31,14 +33,17 @@ private:
     static const std::string encloseStart;
     static const std::string encloseEnd;
 
+    static const std::string moduleEncloseStart;
+    static const std::string moduleEncloseEnd;
+
 private:
     DISABLE_COPY(Script);
 
-    Script(Engine* engine, const v8::Local<v8::Script>& value);
+    Script(Engine* engine, const v8::Local<v8::Script>& value, const std::string& path = "");
 
     ScriptPrivate* m_d;
 };
 
-}} // namespace lv, script
+}} // namespace lv, el
 
 #endif // LVSCRIPT_H

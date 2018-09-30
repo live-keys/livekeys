@@ -406,6 +406,18 @@ void Element::assignPropertyExpression(
     }
 }
 
+void Element::assignDefaultProperty(Element *e, LocalValue value){
+    if ( e->defaultProperty().empty() )
+        throw std::exception();
+
+    Property* p = e->property(e->defaultProperty());
+    p->write(e, value.data());
+}
+
+void Element::assignId(Element *e, const std::string &id){
+    e->m_d->id = id;
+}
+
 void Element::clearPropertyBoundExpression(const std::string &name){
     ElementPrivate* d = m_d;
     auto it = d->boundPropertyExpressions.find(name);
@@ -419,6 +431,10 @@ void Element::clearPropertyBoundExpression(const std::string &name){
         d->boundPropertyExpressions.erase(it);
 //        qDebug() << "BOUND EXPRESSIONS:" << m_boundPropertyExpressions.size();
     }
+}
+
+const std::string &Element::getId() const{
+    return m_d->id;
 }
 
 InstanceProperty* Element::addProperty(
@@ -477,6 +493,8 @@ InstanceProperty* Element::addProperty(
 }
 
 const std::string& Element::defaultProperty() const{
+    if ( m_d->defaultProperty.empty() )
+        return typeMetaObject().defaultProperty();
     return m_d->defaultProperty;
 }
 

@@ -15,7 +15,8 @@ public:
     typedef std::shared_ptr<const Module> ConstPtr;
 
 public:
-    static Ptr create(const std::string& path, int versionMajor, int versionMinor);
+    static Ptr createLoader(const std::string& path, int versionMajor, int versionMinor);
+    static LocalValue createObject(Engine* engine, const std::string& path);
 
     template<typename T> void addType();
 
@@ -23,7 +24,7 @@ public:
     std::map<std::string, const MetaObject*>::iterator end();
 
 private:
-    Module(const std::string& path, int versionMajor, int versinoMinor);
+    Module(const std::string& path, int versionMajor, int versionMinor);
 
     std::string m_path;
     int         m_versionMajor;
@@ -44,6 +45,6 @@ template<typename T> void Module::addType(){
     m_types[mo.name()] = &mo;
 }
 
-}} // namespace lv, namespace script
+}} // namespace lv, el
 
 #endif // LVMODULE_H

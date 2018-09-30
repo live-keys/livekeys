@@ -66,8 +66,6 @@ public:
     void* data();
     template<typename T> T dataAs(){ return reinterpret_cast<T>(m_data); }
 
-
-
 public:
     Event valuesAdded(int from, int length);
     Event valuesRemoved(int from, int length);

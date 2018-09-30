@@ -44,6 +44,7 @@ public:
 
 
     std::string                defaultProperty;
+    std::string                id;
 
     // Children
     std::list<Element*>        children;
