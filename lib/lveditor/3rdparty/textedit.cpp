@@ -605,6 +605,34 @@ void TextEdit::setSelectedTextColor(const QColor &color)
     emit selectedTextColorChanged(d->selectedTextColor);
 }
 
+int TextEdit::fragmentStart() const {
+    Q_D(const TextEdit);
+    return d->fragmentStart;
+}
+
+int TextEdit::fragmentEnd() const {
+    Q_D(const TextEdit);
+    return d->fragmentEnd;
+}
+
+void TextEdit::setFragmentStart(int frStart) {
+    Q_D(TextEdit);
+    d->fragmentStart = frStart;
+}
+
+void TextEdit::setFragmentEnd(int frEnd) {
+    Q_D(TextEdit);
+    d->fragmentEnd = frEnd;
+}
+
+void TextEdit::resetFragmentStart() {
+    setFragmentStart(-1);
+}
+
+void TextEdit::resetFragmentEnd() {
+    setFragmentEnd(-1);
+}
+
 /*!
     \qmlproperty enumeration QtQuick::TextEdit::horizontalAlignment
     \qmlproperty enumeration QtQuick::TextEdit::verticalAlignment
@@ -2038,11 +2066,6 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
 
     RootNode *rootNode = static_cast<RootNode *>(oldNode);
     TextNodeIterator nodeIterator = d->textNodeMap.begin();
-//    if ( d->lastHighlightChangeStart < d->lastHighlightChangeEnd ){
-
-//    } else {
-//        nodeIterator = d->textNodeMap.end();
-//    }
 
     while (nodeIterator != d->textNodeMap.end() && !(*nodeIterator)->dirty())
         ++nodeIterator;
@@ -2060,7 +2083,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
 
         int firstDirtyPos = 0;
         if (nodeIterator != d->textNodeMap.end()) {
-
+            firstDirtyPos = (*nodeIterator)->startPos();
             do {
                 rootNode->removeChildNode((*nodeIterator)->textNode());
                 delete (*nodeIterator)->textNode();
@@ -2123,20 +2146,15 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
 
                     QTextFrame::iterator it = textFrame->begin();
 
-                    //INFO: Here starts the iteration process
-
                     while (!it.atEnd()) {
 
-
-
                         QTextBlock block = it.currentBlock();
-//                        qDebug() << "block paint " << block.blockNumber() << block.position() << firstDirtyPos << block.isVisible();
                         ++it;
+
                         if (block.position() < firstDirtyPos)
                             continue;
 
                         if (!block.isVisible()) continue;
-
 
                         if (!engine.hasContents()) {
                             nodeOffset = d->document->documentLayout()->blockBoundingRect(block).topLeft();
@@ -2144,18 +2162,11 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                             nodeStart = block.position();
                         }
 
-//                        qDebug() << it.atEnd();// << firstCleanNode->startPos() << block.next().position();
-//                        if ( firstCleanNode && !it.atEnd() )
-//                            qDebug() << "IN PAINT" << firstCleanNode->startPos() << block.next().position();
-
-                        //INFO: This is where the rendering happens
                         engine.addTextBlock(d->document, block, -nodeOffset, d->color, QColor(), selectionStart(), selectionEnd() - 1);
                         currentNodeSize += block.length();
 
                         if ((it.atEnd()) || (firstCleanNode && block.next().position() >= firstCleanNode->startPos())) // last node that needed replacing or last block of the frame
                             break;
-
-//                        qDebug() << "BLOCK PAINT " << block.blockNumber();
 
                         QList<int>::const_iterator lowerBound = std::lower_bound(frameBoundaries.constBegin(), frameBoundaries.constEnd(), block.next().position());
                         if (currentNodeSize > nodeBreakingSize || lowerBound == frameBoundaries.constEnd() || *lowerBound > nodeStart) {
@@ -2202,12 +2213,9 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
             cursor = d->sceneGraphContext()->createRectangleNode(d->control->cursorRect(), d->color);
         rootNode->resetCursorNode(cursor);
     }
-//    qDebug() << "AFTER  =================================== "<< d->textNodeMap.size();
 
     invalidateFontCaches();
 
-
-    // qDebug() << d->textNodeMap.size();
     return rootNode;
 }
 
@@ -2318,8 +2326,11 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     control->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::TextSelectableByKeyboard | Qt::TextEditable);
     control->setAcceptRichText(false);
     control->setCursorIsFocusIndicator(true);
-
-
+/*
+    fragmentStart=2;
+    fragmentEnd = 10;
+    q->updateFragmentVisibility();
+*/
     lv_qmlobject_connect(control, TextControl, SIGNAL(updateCursorRequest()), q, TextEdit, SLOT(updateCursor()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, TextEdit, SIGNAL(selectedTextChanged()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, TextEdit, SLOT(updateSelection()));
@@ -2336,8 +2347,7 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     lv_qmlobject_connect(document, QTextDocument, SIGNAL(undoAvailable(bool)), q, TextEdit, SIGNAL(canUndoChanged()));
     lv_qmlobject_connect(document, QTextDocument, SIGNAL(redoAvailable(bool)), q, TextEdit, SIGNAL(canRedoChanged()));
 
-    QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
-    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
+
 
     document->setDefaultFont(font);
     document->setDocumentMargin(textMargin);
@@ -2350,6 +2360,10 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     q->setReadOnly(readOnly);
     updateDefaultTextOption();
     q->updateSize();
+
+    QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
+    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
+    QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
 }
 
 void TextEditPrivate::unsetTextDocument()
@@ -2426,6 +2440,9 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
     if (start == end)
         return;
 
+    int oldEnd = end;
+    bool nodesUpdate = true;
+
     if ( start < d->lastHighlightChangeStart && end > d->lastHighlightChangeEnd ){ // stretch both ways
         d->lastHighlightChangeStart = start;
         d->lastHighlightChangeEnd   = end;
@@ -2436,41 +2453,47 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
         start = d->lastHighlightChangeEnd;
         d->lastHighlightChangeEnd = end;
     } else {
-        return; // this is inside the interval we're updating
+        nodesUpdate = false; // this is inside the interval we're updating
     }
 
-    if(start == end)
-        return;
+    if (start == end) nodesUpdate = false;
 
     TextEditPrivate::Node dummyNode(start, nullptr);
     TextNodeIterator it = std::lower_bound(d->textNodeMap.begin(), d->textNodeMap.end(), &dummyNode, &comesBefore);
-    // qLowerBound gives us the first node past the start of the affected portion, rewind to the first node
-    // that starts at the last position before the edit position. (there might be several because of images)
-    if (it != d->textNodeMap.begin()) {
-        --it;
-        TextEditPrivate::Node otherDummy((*it)->startPos(), nullptr);
-        it = std::lower_bound(d->textNodeMap.begin(), d->textNodeMap.end(), &otherDummy, &comesBefore);
+    if (nodesUpdate || charDelta)
+    {
+        // qLowerBound gives us the first node past the start of the affected portion, rewind to the first node
+        // that starts at the last position before the edit position. (there might be several because of images)
+        if (it != d->textNodeMap.begin()) {
+            --it;
+            TextEditPrivate::Node otherDummy((*it)->startPos(), nullptr);
+            it = std::lower_bound(d->textNodeMap.begin(), d->textNodeMap.end(), &otherDummy, &comesBefore);
+        }
     }
 
-//    if ( it != d->textNodeMap.end() )
-//        qDebug() << " ---- START FROM: " << (*it)->startPos();
+    TextNodeIterator otherIt = it;
 
-    // mark the affected nodes as dirty
-    while (it != d->textNodeMap.end()) {
-        if ((*it)->startPos() <= end){
-            (*it)->setDirty();
-//            qDebug() << "NODE INVALIDATED: " << (*it)->startPos();
+    if (nodesUpdate)
+    {
+        while (it != d->textNodeMap.end() && (*it)->startPos() <= end)
+        {
+            (*it)->setDirty(); ++it;
         }
-        else if (charDelta)
-            (*it)->moveStartPos(charDelta);
-        else {
-//            if ( it != d->textNodeMap.end() )
-//                qDebug() << " ---- END AT: " << (*it)->startPos();
-            return;
-        }
-        ++it;
     }
 
+    if (charDelta)
+    {
+        while (otherIt != d->textNodeMap.end() && (*otherIt)->startPos() <= oldEnd)
+        {
+            ++otherIt;
+        }
+
+        while (otherIt != d->textNodeMap.end())
+        {
+            (*otherIt)->moveStartPos(charDelta);
+            ++otherIt;
+        }
+    }
 }
 
 void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
@@ -2678,31 +2701,30 @@ void TextEdit::updateWholeDocument()
     }
 }
 
-void TextEdit::invalidateBlock(const QTextBlock &block)
+void TextEdit::highlightingDone(const QRectF &)
 {
     Q_D(TextEdit);
-
-    markDirtyNodesForRange(block.position(), block.position() + block.length(), 0);
-
-//    TextNodeIterator nodeIterator = d->textNodeMap.begin();
-//    while (nodeIterator != d->textNodeMap.end() && !(*nodeIterator)->dirty())
-//        ++nodeIterator;
-//    TextNodeIterator nodeIteratorClean = nodeIterator;
-//    while (nodeIteratorClean != d->textNodeMap.end() && (*nodeIteratorClean)->dirty())
-//        ++nodeIteratorClean;
-
-//    qDebug() << " 7777 EXTRA DECORATION" << (nodeIterator == d->textNodeMap.end()) <<
-//                (nodeIteratorClean == d->textNodeMap.end());
-//    if (nodeIterator != d->textNodeMap.end() && nodeIteratorClean != d->textNodeMap.end())
-//        qDebug() << " 7777 INFORMATIVE MESSAGE" << (*nodeIterator)->startPos() << (*nodeIteratorClean)->startPos();
 
     if (d->highlightingInProgress)
     {
         d->highlightingInProgress = false;
         emit textDocumentFinishedUpdating();
     }
+}
 
+void TextEdit::invalidateBlock(const QTextBlock &block)
+{
+    Q_D(TextEdit);
 
+    markDirtyNodesForRange(block.position(), block.position() + block.length(), 0);
+
+    ProjectDocumentBlockData* userData = static_cast<ProjectDocumentBlockData*>(block.userData());
+
+    if (userData && userData->stateChangeFlag())
+    {
+        emit dirtyBlockPosition(block.blockNumber());
+        emit textDocumentFinishedUpdating();
+    }
 
     polish();
     if (isComponentComplete()) {
@@ -2752,6 +2774,7 @@ void TextEdit::updateTotalLines()
     if (d->lineCount != newTotalLines) {
         d->lineCount = newTotalLines;
         emit lineCountChanged();
+        updateFragmentVisibility();
     }
 }
 
@@ -3324,6 +3347,32 @@ void TextEdit::showHideLines(bool show, int pos, int num)
     }
 
     d->document->markContentsDirty(start, length);
+}
+
+void TextEdit::updateFragmentVisibility()
+{
+    Q_D(TextEdit);
+    if (!d->document || fragmentStart() == -1 || fragmentEnd() == -1) return;
+
+    auto it = d->document->rootFrame()->begin(); int cnt = 0;
+    auto endIt = d->document->rootFrame()->end();
+
+    qDebug() << fragmentStart() << fragmentEnd();
+
+    while (it != endIt)
+    {
+        if (cnt < fragmentStart()) it.currentBlock().setVisible(false);
+        else if (cnt < fragmentEnd()) it.currentBlock().setVisible(true);
+        else it.currentBlock().setVisible(false);
+
+        qDebug() << it.currentBlock().text() << it.currentBlock().isVisible();
+
+        ++cnt; ++it;
+    }
+
+    emit dirtyBlockPosition(0);
+    emit textDocumentFinishedUpdating();
+
 }
 
 void TextEdit::replaceTextInBlock(int blockNumber, std::string s)

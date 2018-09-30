@@ -111,6 +111,8 @@ public:
         , clearSelectionOnFocus(false)
         , lastHighlightChangeStart(INT_MAX)
         , lastHighlightChangeEnd(0)
+        , fragmentStart(-1)
+        , fragmentEnd(-1)
         , hAlign(TextEdit::AlignLeft), vAlign(TextEdit::AlignTop)
         , format(TextEdit::PlainText), wrapMode(TextEdit::NoWrap)
 #if defined(QT_QUICK_DEFAULT_TEXT_RENDER_TYPE)
@@ -210,6 +212,9 @@ public:
 
     int lastHighlightChangeStart;
     int lastHighlightChangeEnd;
+
+    int fragmentStart;
+    int fragmentEnd;
 
     TextEdit::HAlignment hAlign;
     TextEdit::VAlignment vAlign;
