@@ -29,7 +29,7 @@ Rectangle{
     signal bindProperties(int position, int length)
 
     property bool isDirtyMask: true
-    property bool isDirty: document ? document.isDirty : false
+    property bool isDirty: document ? document.document.isDirty : false
 
     property alias text: editorArea.text
     property alias font: editorArea.font
@@ -326,8 +326,39 @@ Rectangle{
                         Math.ceil(editorMetrics.lineSpacing)
                 clip: true
 
-                TextEdit{
+                NewTextEdit{
                     id : editorArea
+
+                    documentHandler: DocumentHandler{
+                        id: codeHandler
+                        // target: editorArea.textDocument
+                        onCursorPositionRequest : {
+                            editorArea.forceActiveFocus()
+                            editorArea.cursorPosition = position
+                        }
+                        onContentsChangedManually: {
+                            if ( project.active === editor.document.document ){
+                                editor.windowControls.createTimer.restart()
+                            }
+                        }
+                        onFragmentLinesChanged: {
+                            editor.document.lineStartIndex = lineStart
+                            editor.document.lineEndIndex = lineEnd
+                        }
+                        onPaletteAboutToRemove: {
+                            for ( var i = 0; i < loadedPalettes.length; ++i ){
+                                if ( palette.item === loadedPalettes[i].paletteItem ){
+                                    var lp = loadedPalettes[i]
+                                    loadedPalettes.splice(i, 1)
+                                    lp.destroy()
+                                    return
+                                }
+                            }
+                        }
+                        onEditingStateChanged: {
+                            editor.isEditingSection = isEditing
+                        }
+                    }
 
                     y: -(editor.document.lineStartIndex) * Math.ceil(editorMetrics.lineSpacing)
 
@@ -639,37 +670,6 @@ Rectangle{
                     }
                 }
 
-            }
-        }
-
-        DocumentHandler{
-            id: codeHandler
-            // target: editorArea.textDocument
-            onCursorPositionRequest : {
-                editorArea.forceActiveFocus()
-                editorArea.cursorPosition = position
-            }
-            onContentsChangedManually: {
-                if ( project.active === editor.document.document ){
-                    editor.windowControls.createTimer.restart()
-                }
-            }
-            onFragmentLinesChanged: {
-                editor.document.lineStartIndex = lineStart
-                editor.document.lineEndIndex = lineEnd
-            }
-            onPaletteAboutToRemove: {
-                for ( var i = 0; i < loadedPalettes.length; ++i ){
-                    if ( palette.item === loadedPalettes[i].paletteItem ){
-                        var lp = loadedPalettes[i]
-                        loadedPalettes.splice(i, 1)
-                        lp.destroy()
-                        return
-                    }
-                }
-            }
-            onEditingStateChanged: {
-                editor.isEditingSection = isEditing
             }
         }
 

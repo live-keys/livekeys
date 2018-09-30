@@ -7,7 +7,7 @@
 namespace lv {
 
 class CollapsedSection;
-class LineNumberSurface;
+class LineSurface;
 
 class LV_EDITOR_EXPORT LineManager: public QObject{
 
@@ -18,7 +18,7 @@ private:
     static bool inside(int pos1, int num1, int pos2, int num2);
     static bool after(int pos1, int num1, int pos2, int num2);
 
-    LineNumberSurface* myLineSurface;
+    LineSurface* myLineSurface;
     std::list<CollapsedSection*> sections;
 
 public:
@@ -31,7 +31,7 @@ public:
     void linesRemoved(int pos, int num);
 
     std::list<CollapsedSection*> & getSections();
-    void setLineSurface(LineNumberSurface* lns);
+    void setLineSurface(LineSurface* lns);
 
 };
 

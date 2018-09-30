@@ -2,7 +2,7 @@
 #include <list>
 #include "collapsedsection.h"
 #include "linemanager.h"
-#include "linenumbersurface.h"
+#include "linesurface.h"
 
 namespace lv {
 
@@ -165,7 +165,7 @@ std::list<CollapsedSection*> & LineManager::getSections()
     return sections;
 }
 
-void LineManager::setLineSurface(LineNumberSurface* lns)
+void LineManager::setLineSurface(LineSurface* lns)
 {
     myLineSurface = lns;
 }
