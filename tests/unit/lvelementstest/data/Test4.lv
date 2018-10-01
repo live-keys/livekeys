@@ -1,0 +1,24 @@
+component default < Container{
+
+    constructor(){
+        this.someVar = 20
+    }
+
+    int x: 20
+    int y: 20
+
+    event dataChanged()
+    on dataChanged : function(){
+        this.x = 100;
+    }
+
+
+    Element{
+        int k: 20
+    }
+
+    Element{
+        string message: "thirty"
+    }
+
+}

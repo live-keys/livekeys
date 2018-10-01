@@ -1,0 +1,5 @@
+component default < Element{
+    int y : 20
+    int t : 30
+    int x : y + t
+}

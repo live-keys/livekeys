@@ -52,6 +52,14 @@ QString PluginContext::applicationPath(){
 #endif
 }
 
+QString PluginContext::applicationDeploymentPath(){
+#ifdef Q_OS_DARWIN
+    return QDir(QFileInfo(applicationFilePath()).path() + "/../../..").absolutePath();
+#else
+    return QFileInfo(applicationFilePath()).path();
+#endif
+}
+
 QString PluginContext::applicationFilePath(){
     if ( m_applicationFilePath.isEmpty() )
         m_applicationFilePath = applicationFilePathImpl();

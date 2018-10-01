@@ -20,7 +20,8 @@ HEADERS += \
     $$PWD/jsmethodtest.h \
     $$PWD/jsmemorytest.h \
     $$PWD/jstypestest.h \
-    $$PWD/jslisttest.h
+    $$PWD/jslisttest.h \
+    $$PWD/lvcompiletest.h
 
 SOURCES += \
     $$PWD/main.cpp \
@@ -34,13 +35,26 @@ SOURCES += \
     $$PWD/jsmethodtest.cpp \
     $$PWD/jsmemorytest.cpp \
     $$PWD/jstypestest.cpp \
-    $$PWD/jslisttest.cpp
+    $$PWD/jslisttest.cpp \
+    $$PWD/lvcompiletest.cpp
+
+OTHER_FILES += $$PWD/data/*.*
 
 
+# Copy test data
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lvelements/release/ -llvelements
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lvelements/debug/ -llvelements
-else:unix: LIBS += -L$$OUT_PWD/../lvelements/ -llvelements
+TEST_DATA_DEPLOY_FROM = $$PWD/data
 
-INCLUDEPATH += $$PWD/../lvelements/include
-DEPENDPATH += $$PWD/../lvelements/include
+win32:CONFIG(debug, debug|release): TEST_DATA_DEPLOY_TO = $$OUT_PWD/debug/data
+else:win32:CONFIG(release, debug|release): TEST_DATA_DEPLOY_TO = $$OUT_PWD/release/data
+else:unix: TEST_DATA_DEPLOY_TO = $$OUT_PWD
+
+win32:TEST_DATA_DEPLOY_TO ~= s,/,\\,g
+win32:TEST_DATA_DEPLOY_FROM ~= s,/,\\,g
+
+testdatacopy.commands = $(COPY_DIR) \"$$TEST_DATA_DEPLOY_FROM\" \"$$TEST_DATA_DEPLOY_TO\"
+first.depends = $(first) testdatacopy
+export(first.depends)
+export(testdatacopy.commands)
+
+QMAKE_EXTRA_TARGETS += first testdatacopy

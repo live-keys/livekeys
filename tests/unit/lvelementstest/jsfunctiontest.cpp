@@ -84,7 +84,7 @@ void JsFunctionTest::initTestCase(){
 void JsFunctionTest::typesTest(){
 
     Engine* engine = new Engine();
-    Module::Ptr m = Module::create("test", 1, 0);
+    Module::Ptr m = Module::createLoader("test", 1, 0);
     m->addType<FunctionStub>();
 
     {

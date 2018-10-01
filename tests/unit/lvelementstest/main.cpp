@@ -30,6 +30,8 @@
 #include "jstypestest.h"
 #include "jsmemorytest.h"
 #include "jslisttest.h"
+#include "lvcompiletest.h"
+
 
 
 int main(int argc, char *argv[]){

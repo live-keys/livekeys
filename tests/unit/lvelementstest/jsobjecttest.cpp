@@ -67,7 +67,7 @@ void JsObjectTest::initTestCase(){
 }
 
 void JsObjectTest::simpleObjectInitializationTest(){
-    Module::Ptr m = Module::create("test", 1, 0);
+    Module::Ptr m = Module::createLoader("test", 1, 0);
     m->addType<ElementStub>();
 
     Engine* engine = new Engine();

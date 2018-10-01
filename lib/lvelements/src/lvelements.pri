@@ -21,7 +21,8 @@ HEADERS += \
     $$PWD/object.h \
     $$PWD/value_p.h \
     $$PWD/list.h \
-    $$PWD/buffer.h
+    $$PWD/buffer.h \
+    $$PWD/container.h
 
 SOURCES += \
     $$PWD/function.cpp \
@@ -40,4 +41,5 @@ SOURCES += \
     $$PWD/callable.cpp \
     $$PWD/object.cpp \
     $$PWD/list.cpp \
-    $$PWD/buffer.cpp
+    $$PWD/buffer.cpp \
+    $$PWD/container.cpp

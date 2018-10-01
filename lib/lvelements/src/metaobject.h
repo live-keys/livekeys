@@ -275,11 +275,15 @@ public:
         mo.m_indexGet      = builder.m_indexGet;
         mo.m_indexSet      = builder.m_indexSet;
 
+        mo.m_defaultProperty = builder.m_defaultProperty;
+
         if ( mo.m_base ){
             mo.m_methods.insert(mo.m_base->methodsBegin(), mo.m_base->methodsEnd());
             mo.m_events.insert(mo.m_base->eventsBegin(), mo.m_base->eventsEnd());
             mo.m_eventsById.insert(mo.m_base->m_eventsById.begin(), mo.m_base->m_eventsById.end());
             mo.m_properties.insert(mo.m_base->propertiesBegin(), mo.m_base->propertiesEnd());
+            if ( mo.m_defaultProperty.empty() )
+                mo.m_defaultProperty = mo.m_base->m_defaultProperty;
         }
 
         return mo;
@@ -333,6 +337,8 @@ public:
     Property::IndexGetFunction indexGet() const;
     Property::IndexSetFunction indexSet() const;
 
+    const std::string& defaultProperty() const;
+
 private:
     std::string                           m_name;
     const MetaObject*                     m_base;
@@ -352,6 +358,8 @@ private:
 
     Property::IndexGetFunction            m_indexGet;
     Property::IndexSetFunction            m_indexSet;
+
+    std::string                           m_defaultProperty;
 };
 
 // Builder Implementation
@@ -463,6 +471,9 @@ inline EventFunction *MetaObject::getEvent(const std::string &name) const{
     return it->second;
 }
 
+inline const std::string &MetaObject::defaultProperty() const{
+    return m_defaultProperty;
+}
 
 }} // namespace lv, namespace script
 

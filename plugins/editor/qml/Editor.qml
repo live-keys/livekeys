@@ -41,6 +41,9 @@ Rectangle{
     property var windowControls: null
     property var document: null
 
+    property int fragmentStart: -1
+    property int fragmentEnd: -1
+
     onDocumentChanged: {
         if ( !document ){
             editor.text = ''
@@ -280,6 +283,7 @@ Rectangle{
                 anchors.bottomMargin: 10
                 anchors.leftMargin: 5
                 contentY: flick.flickableItem.contentY
+                interactive: false
 
                 LineSurface{
                     id: lineSurface
@@ -343,6 +347,9 @@ Rectangle{
 
                 anchors.left: parent.left
                 anchors.leftMargin: 5
+
+                fragmentStart: editor.fragmentStart
+                fragmentEnd: editor.fragmentEnd
 
                 documentHandler: DocumentHandler {
                     id: codeHandler

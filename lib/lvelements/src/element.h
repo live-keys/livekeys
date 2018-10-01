@@ -63,9 +63,13 @@ class LV_ELEMENTS_EXPORT Element{
         META_OBJECT_DESCRIBE(Element)
             .constructor()
             .scriptMethod<void, LocalValue, Callable>("on", &Element::on)
+            .scriptMethod("setParent", &Element::setParent)
+            .scriptProperty<Element*>("parent", &Element::parent)
+            .scriptFunction("assignDefaultProperty", &Element::assignDefaultProperty)
             .scriptFunction<void, Element*, LocalValue, LocalValue>("addEvent", &Element::addEvent)
             .scriptFunction("addProperty", &Element::addProperty)
             .scriptFunction("assignPropertyExpression", &Element::assignPropertyExpression)
+            .scriptFunction("assignId", &Element::assignId)
         META_OBJECT_CLOSE
     }
 
@@ -127,9 +131,12 @@ public:
         LocalValue propertyName,
         LocalValue propertyExpression,
         LocalValue bindings);
+    static void assignDefaultProperty(Element* e, LocalValue value);
+    static void assignId(Element* e, const std::string& id);
 
     void clearPropertyBoundExpression(const std::string& propertyName);
 
+    const std::string& getId() const;
 
     template<typename T, typename ...Args>
     static Event::Id eventId(Event(T::*)(Args...));

@@ -3,7 +3,9 @@
 #include "element_p.h"
 #include "value_p.h"
 #include "context_p.h"
+#include "container.h"
 
+#include <sstream>
 #include "libplatform/libplatform.h"
 #include "v8.h"
 
@@ -214,6 +216,28 @@ Script::Ptr Engine::compileEnclosed(const std::string &str){
     return sc;
 }
 
+Script::Ptr Engine::compileJsFile(const std::string &str){
+    v8::HandleScope handle(isolate());
+    v8::Local<v8::Context> context = m_d->context->asLocal();
+    v8::Context::Scope context_scope(context);
+
+    std::ifstream file(str, std::ifstream::in | std::ifstream::binary);
+    if ( !file.is_open() )
+        throw std::exception(); //TODO
+
+    std::stringstream sstr;
+    sstr << Script::moduleEncloseStart << file.rdbuf() << Script::moduleEncloseEnd;
+
+    v8::Local<v8::String> source = v8::String::NewFromUtf8(isolate(), (sstr.str()).c_str());
+
+    v8::MaybeLocal<v8::Script> script = v8::Script::Compile(context, source);
+    if ( script.IsEmpty() )
+        throw std::exception(); //TODO
+
+    Script::Ptr sc(new Script(this, script.ToLocalChecked(), str));
+    return sc;
+}
+
 ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
     auto it = m_d->registeredTemplates.find(t);
     if ( it != m_d->registeredTemplates.end() )
@@ -323,9 +347,17 @@ void Engine::importInternals(){
     v8::Context::Scope context_scope(context);
 
     m_d->elementTemplate = registerTemplate(&Element::metaObject());
+    ComponentTemplate* listTemplate = registerTemplate(&List::metaObject());
+    ComponentTemplate* containerTemplate = registerTemplate(&Container::metaObject());
 
     v8::Local<v8::FunctionTemplate> tpl = m_d->elementTemplate->data.Get(isolate());
-    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Element"),   tpl->GetFunction());
+    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Element"), tpl->GetFunction());
+
+    v8::Local<v8::FunctionTemplate> listTpl = listTemplate->data.Get(isolate());
+    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "List"), listTpl->GetFunction());
+
+    v8::Local<v8::FunctionTemplate> containerTpl = containerTemplate->data.Get(isolate());
+    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Container"), containerTpl->GetFunction());
 
     m_d->pointTemplate.Reset(isolate(), Point::functionTemplate(isolate()));
     context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Point"), pointTemplate()->GetFunction());

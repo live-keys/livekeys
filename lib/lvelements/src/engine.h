@@ -50,6 +50,7 @@ public:
     Context* currentContext() const;
     Script::Ptr compile(const std::string& str);
     Script::Ptr compileEnclosed(const std::string& str);
+    Script::Ptr compileJsFile(const std::string& path);
 
     ComponentTemplate* registerTemplate(const MetaObject* mo);
     v8::Local<v8::FunctionTemplate> pointTemplate();

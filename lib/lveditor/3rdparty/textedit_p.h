@@ -101,6 +101,9 @@ class LV_EDITOR_EXPORT TextEdit : public QQuickImplicitSizeItem
     Q_PROPERTY(qreal bottomPadding READ bottomPadding WRITE setBottomPadding RESET resetBottomPadding NOTIFY bottomPaddingChanged REVISION 6)
     Q_PROPERTY(QString preeditText READ preeditText NOTIFY preeditTextChanged REVISION 7)
     Q_PROPERTY(lv::DocumentHandler* documentHandler READ documentHandler WRITE setDocumentHandler NOTIFY documentHandlerChanged)
+    Q_PROPERTY(int fragmentStart READ fragmentStart WRITE setFragmentStart RESET resetFragmentStart NOTIFY fragmentStartChanged)
+    Q_PROPERTY(int fragmentEnd READ fragmentEnd WRITE setFragmentEnd RESET resetFragmentEnd NOTIFY fragmentEndChanged)
+
 public:
     TextEdit(QQuickImplicitSizeItem *parent=nullptr);
 
@@ -289,6 +292,14 @@ public:
     void setBottomPadding(qreal padding);
     void resetBottomPadding();
 
+    int fragmentStart() const;
+    void setFragmentStart(int frStart);
+    void resetFragmentStart();
+
+    int fragmentEnd() const;
+    void setFragmentEnd(int frStart);
+    void resetFragmentEnd();
+
     lv::DocumentHandler* documentHandler();
     void setDocumentHandler(lv::DocumentHandler* dh);
 
@@ -342,6 +353,9 @@ Q_SIGNALS:
     void stateChangeSignal(int blockNum);
     void textDocumentFinishedUpdating();
 
+    void fragmentStartChanged();
+    void fragmentEndChanged();
+
 public Q_SLOTS:
     void clearSelectionOnFocus(bool value);
     void singleShotUpdate();
@@ -375,6 +389,7 @@ private Q_SLOTS:
     void q_updateAlignment();
     void updateSize();
     void triggerPreprocess();
+    void highlightingDone(const QRectF &);
 
 private:
     void markDirtyNodesForRange(int start, int end, int charDelta);
@@ -382,7 +397,7 @@ private:
     void invalidateFontCaches();
     void showHideLines(bool show, int pos, int num);
     void replaceTextInBlock(int blockNumber, std::string s);
-
+    void updateFragmentVisibility();
 
 protected:
     TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent = nullptr);
