@@ -54,6 +54,12 @@
 #include <QtQuick/qsgsimplerectnode.h>
 #include <QTimer>
 
+#include <QtGlobal>
+
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+#include <QSGRectangleNode> // change for 5.11
+#endif
+
 // <REMOVED>
 // This might be copied
 #include "private/qquicktextnode_p.h"
@@ -2209,8 +2215,16 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
 
     if (d->document && d->control && d->cursorComponent == nullptr) {
         QSGRectangleNode* cursor = nullptr;
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+        if (!isReadOnly() && d->cursorVisible && d->control->cursorOn()){ // change for 5.11
+            cursor = d->sceneGraphContext()->createRectangleNode();
+            cursor->setRect(d->control->cursorRect());
+            cursor->setColor(d->color);
+        }
+#else
         if (!isReadOnly() && d->cursorVisible && d->control->cursorOn())
             cursor = d->sceneGraphContext()->createRectangleNode(d->control->cursorRect(), d->color);
+#endif
         rootNode->resetCursorNode(cursor);
     }
 
@@ -3279,14 +3293,22 @@ void TextEditPrivate::implicitWidthChanged()
 {
     Q_Q(TextEdit);
     QQuickImplicitSizeItemPrivate::implicitWidthChanged();
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+    emit q->implicitWidthChanged(); // change for 5.11
+#else
     emit q->implicitWidthChanged2();
+#endif
 }
 
 void TextEditPrivate::implicitHeightChanged()
 {
     Q_Q(TextEdit);
     QQuickImplicitSizeItemPrivate::implicitHeightChanged();
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+    emit q->implicitHeightChanged(); // change for 5.11
+#else
     emit q->implicitHeightChanged2();
+#endif
 }
 
 DocumentHandler* TextEdit::documentHandler()

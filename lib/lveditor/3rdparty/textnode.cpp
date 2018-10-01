@@ -59,6 +59,11 @@
 #include <private/qtextdocumentlayout_p.h>
 #include <qhash.h>
 
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+#include <QSGRectangleNode>
+#include <QSGImageNode>
+#endif
+
 namespace lv {
 
 namespace {
@@ -136,7 +141,13 @@ void TextNode::setCursor(const QRectF &rect, const QColor &color)
         delete m_cursorNode;
 
     QSGRenderContext *sg = QQuickItemPrivate::get(m_ownerElement)->sceneGraphRenderContext();
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+    m_cursorNode =  sg->sceneGraphContext()->createRectangleNode(); // change for 5.11
+    m_cursorNode->setRect(rect);
+    m_cursorNode->setColor(color);
+#else
     m_cursorNode =  sg->sceneGraphContext()->createRectangleNode(rect, color);
+#endif
     appendChildNode(m_cursorNode);
 }
 
@@ -151,7 +162,14 @@ void TextNode::clearCursor()
 void TextNode::addRectangleNode(const QRectF &rect, const QColor &color)
 {
     QSGRenderContext *sg = QQuickItemPrivate::get(m_ownerElement)->sceneGraphRenderContext();
-    appendChildNode(sg->sceneGraphContext()->createRectangleNode(rect, color));
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+    auto node =  sg->sceneGraphContext()->createRectangleNode(); // change for 5.11
+    node->setRect(rect);
+    node->setColor(color);
+#else
+    auto node = sg->sceneGraphContext()->createRectangleNode(rect, color);
+#endif
+    appendChildNode(node);
 }
 
 
@@ -165,15 +183,24 @@ void TextNode::addImage(const QRectF &rect, const QImage &image)
         texture->setMipmapFiltering(QSGTexture::Linear);
     }
     m_textures.append(texture);
+
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+    node->setSourceRect(rect); // change for 5.11
+    node->setRect(rect);
+#else
     node->setTargetRect(rect);
     node->setInnerTargetRect(rect);
+#endif
+
     node->setTexture(texture);
     if (m_ownerElement->smooth()) {
         node->setFiltering(QSGTexture::Linear);
         node->setMipmapFiltering(QSGTexture::Linear);
     }
     appendChildNode(node);
+#if (QT_VERSION <= QT_VERSION_CHECK(5,7,1))
     node->update();
+#endif
 }
 
 void TextNode::addTextDocument(const QPointF &position, QTextDocument *textDocument,
