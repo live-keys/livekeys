@@ -212,12 +212,7 @@ Element *LocalValue::toElement(Engine*) const{
         return nullptr;
 
     v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(m_d->data);
-    if ( vo->InternalFieldCount() != 1 )
-        throw std::exception(); // not an element
-
-    v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(vo->GetInternalField(0));
-    void* ptr = wrap->Value();
-    return reinterpret_cast<Element*>(ptr);
+    return ElementPrivate::elementFromObject(vo);
 }
 
 Value LocalValue::toValue(Engine* engine) const{

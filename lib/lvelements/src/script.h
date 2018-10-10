@@ -39,6 +39,8 @@ private:
 private:
     DISABLE_COPY(Script);
 
+    Object loadAsModuleImpl(const v8::Local<v8::Context>& context);
+
     Script(Engine* engine, const v8::Local<v8::Script>& value, const std::string& path = "");
 
     ScriptPrivate* m_d;

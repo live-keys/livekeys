@@ -1,6 +1,9 @@
 #include "script.h"
 #include "context_p.h"
+#include "element_p.h"
+#include "errorhandler.h"
 #include "live/elements/engine.h"
+#include "live/elements/element.h"
 #include "v8.h"
 #include <QFileInfo>
 
@@ -47,6 +50,58 @@ Object Script::loadAsModule(){
     v8::Local<v8::Context> context = m_d->engine->currentContext()->asLocal();
     v8::Context::Scope context_scope(context);
 
+    if ( !m_d->engine->hasGlobalErrorHandler() ){
+        v8::TryCatch tc(m_d->engine->isolate());
+        m_d->engine->setGlobalErrorHandler(true);
+
+        Object m = loadAsModuleImpl(context);
+
+        if ( tc.HasCaught() ){
+            Engine::CatchData cd(m_d->engine, &tc);
+
+            v8::Local<v8::String> ehKey = v8::String::NewFromUtf8(
+                m_d->engine->isolate(), "__errorhandler__", v8::String::kInternalizedString
+            );
+
+            Element* current = cd.object();
+            while ( current ){
+                v8::Local<v8::Object> lo = ElementPrivate::localObject(current);
+                if ( lo->Has(ehKey) ){
+                    Element* elem = ElementPrivate::elementFromObject(lo->Get(ehKey)->ToObject());
+                    ErrorHandler* ehandler = elem->cast<ErrorHandler>();
+                    ErrorHandler::ErrorData ed;
+                    ed.fileName = cd.fileName();
+                    ed.stack    = cd.stack();
+                    ed.message  = cd.message();
+                    ed.line     = cd.lineNumber();
+
+                    ehandler->handlerError(tc.Exception(), ed);
+                    break;
+                }
+
+                current = current->parent();
+            }
+
+            if ( !current ){
+                m_d->engine->handleError(cd.message(), cd.stack(), cd.fileName(), cd.lineNumber());
+            }
+        }
+
+        m_d->engine->setGlobalErrorHandler(false);
+
+        return m;
+
+    } else {
+        return loadAsModuleImpl(context);
+    }
+}
+
+Script::~Script(){
+    m_d->data.Reset();
+    delete m_d;
+}
+
+Object Script::loadAsModuleImpl(const v8::Local<v8::Context> &context){
     v8::Local<v8::Script> ld = m_d->data.Get(m_d->engine->isolate());
     v8::MaybeLocal<v8::Value> result = ld->Run(context);
     if ( result.IsEmpty() )
@@ -76,11 +131,6 @@ Object Script::loadAsModule(){
     loadFunction->Call(context->Global(), 4, args);
 
     return module.toObject(m_d->engine);
-}
-
-Script::~Script(){
-    m_d->data.Reset();
-    delete m_d;
 }
 
 Script::Script(Engine *engine, const v8::Local<v8::Script> &value, const std::string &path)

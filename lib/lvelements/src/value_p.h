@@ -111,6 +111,29 @@ public:
 
 };
 
+// Bind Error Function
+// -------------------
+
+inline void linkError(const v8::FunctionCallbackInfo<v8::Value>& info){
+    if ( info.Length() != 2 ){
+        info.GetIsolate()->ThrowException(
+             v8::String::NewFromUtf8(info.GetIsolate(), "linkError requires 2 arguments to be provided."));
+        return;
+    }
+
+    v8::Local<v8::Object> errorObject   = info[0]->ToObject(info.GetIsolate());
+    v8::Local<v8::Object> bindingObject = info[1]->ToObject(info.GetIsolate());
+
+    v8::Maybe<bool> result = errorObject->Set(
+        info.GetIsolate()->GetCurrentContext(),
+        v8::String::NewFromUtf8(info.GetIsolate(), "object", v8::String::kInternalizedString),
+        bindingObject
+    );
+    result.IsNothing();
+
+    info.GetReturnValue().Set(errorObject);
+}
+
 
 }} // namespace lv, el
 

@@ -30,8 +30,8 @@
 #include "jstypestest.h"
 #include "jsmemorytest.h"
 #include "jslisttest.h"
+#include "jserrorhandlingtest.h"
 #include "lvcompiletest.h"
-
 
 
 int main(int argc, char *argv[]){
@@ -41,5 +41,6 @@ int main(int argc, char *argv[]){
 
     lv::el::Engine::InitializeScope initializer(QDir::currentPath().toStdString());
 
-    return lv::TestRunner::runTests(argc, argv);
+    return lv::TestRunner::runTest(JsErrorHandlingTest::testIndex, argc, argv);
+//    return lv::TestRunner::runTests(argc, argv);
 }

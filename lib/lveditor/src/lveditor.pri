@@ -34,7 +34,6 @@ HEADERS += \
     $$PWD/livepalettelist.h \
     $$PWD/linemanager.h \
     $$PWD/collapsedsection.h \
-    $$PWD/linesurface.h \
     $$PWD/linesurface.h
 
 SOURCES += \

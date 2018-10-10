@@ -38,11 +38,12 @@ public:
         m_ptr = &Function::methodPtrImplementation<C>;
         m_totalArguments  = sizeof...(Args);
         m_unwrapFunction = [this](const Function::CallInfo& params){
-            if ( params.length() != m_totalArguments )
-                throw std::exception();
+            if ( params.length() != m_totalArguments ){
+                params.throwError(params.engine(), "Invalid number of arguments supplied to event");
+                return;
+            }
 
             Function::callVoidMethod(m_function, typename meta::make_indexes<Args...>::type(), params);
-            return LocalValue(params.engine());
         };
     }
 

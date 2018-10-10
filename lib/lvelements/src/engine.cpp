@@ -4,8 +4,12 @@
 #include "value_p.h"
 #include "context_p.h"
 #include "container.h"
+#include "live/exception.h"
+#include "live/visuallog.h"
+#include "errorhandler.h"
 
 #include <sstream>
+#include <iomanip>
 #include "libplatform/libplatform.h"
 #include "v8.h"
 
@@ -46,7 +50,15 @@ public:
 class EnginePrivate{
 
 public:
-    EnginePrivate() : context(nullptr), platform(nullptr), isolate(nullptr), elementTemplate(nullptr){}
+    EnginePrivate()
+        : context(nullptr)
+        , platform(nullptr)
+        , isolate(nullptr)
+        , elementTemplate(nullptr)
+        , tryCatchNesting(0)
+        , pendingExceptionNesting(-1)
+        , hasGlobalErrorHandler(false)
+    {}
 
     Context*                   context;
     v8::Platform*              platform;
@@ -61,12 +73,18 @@ public:
     v8::Persistent<v8::FunctionTemplate> sizeTemplate;
     v8::Persistent<v8::FunctionTemplate> rectangleTemplate;
 
+    int  tryCatchNesting;
+    int  pendingExceptionNesting;
+    bool hasGlobalErrorHandler;
+
 public: // helpers
     bool isElementConstructor(
         Engine *engine,
         const v8::Local<v8::Function>& fnc,
         const v8::Local<v8::Function> &elementFnc
     );
+
+    static void messageListener(v8::Local<v8::Message> message, v8::Local<v8::Value> data);
 
 };
 
@@ -84,6 +102,17 @@ bool EnginePrivate::isElementConstructor(
         return false;
 
     return isElementConstructor(engine, v8::Local<v8::Function>::Cast(v), elementFnc);
+}
+
+void EnginePrivate::messageListener(v8::Local<v8::Message> message, v8::Local<v8::Value> data){
+    v8::Local<v8::External> engineData = v8::Local<v8::External>::Cast(data);
+    Engine* engine = reinterpret_cast<Engine*>(engineData->Value());
+
+    v8::String::Utf8Value msg(message->Get());
+    v8::String::Utf8Value file(v8::Local<v8::String>::Cast(message->GetScriptResourceName()));
+    int line = message->GetScriptOrigin().ResourceLineOffset()->Int32Value();
+
+    engine->handleError(*msg, "", *file, line);
 }
 
 // Engine Initialization
@@ -136,7 +165,7 @@ Engine::Engine()
     : m_d(new EnginePrivate)
 {
     if ( !isInitialized() )
-        throw std::exception(); //TODO
+        THROW_EXCEPTION(lv::Exception, "Call Engine::Initialize() before creating a new engine.", 0);
 
     // Create a new Isolate and make it the current one.
 
@@ -153,6 +182,9 @@ Engine::Engine()
     v8::HandleScope handle_scope(isolate());
     v8::Local<v8::Context> context = v8::Context::New(isolate());
     m_d->context = new Context(this, context);
+
+    v8::Local<v8::External> listenerData = v8::External::New(isolate(), this);
+    m_d->isolate->AddMessageListener(&EnginePrivate::messageListener, listenerData);
 
     importInternals();
 }
@@ -235,6 +267,20 @@ Script::Ptr Engine::compileJsFile(const std::string &str){
         throw std::exception(); //TODO
 
     Script::Ptr sc(new Script(this, script.ToLocalChecked(), str));
+    return sc;
+}
+
+Script::Ptr Engine::compileElement(const std::string &str){
+    v8::HandleScope handle(isolate());
+    v8::Local<v8::Context> context = m_d->context->asLocal();
+    v8::Context::Scope context_scope(context);
+
+    //TODO
+
+    v8::Local<v8::String> source =
+        v8::String::NewFromUtf8(isolate(), (Script::moduleEncloseStart + str + Script::moduleEncloseEnd).c_str());
+
+    Script::Ptr sc(new Script(this, v8::Script::Compile(context, source).ToLocalChecked()));
     return sc;
 }
 
@@ -341,6 +387,107 @@ bool Engine::isElementConstructor(const Callable &c){
     return m_d->isElementConstructor(this, f, elemfproto);
 }
 
+/**
+ * @brief Throws a javascript error within the engine
+ * @param exception
+ * @param object
+ *
+ * You are not allowed to call any js functions until the engine returns to the Js
+ * execution context or exists a TryCatch block.
+ *
+ * TryCatch blocks remove the exception when they exit if their nesting is smaller
+ * than that of the exception.
+ */
+void Engine::throwError(const Exception *exception, Element *object){
+    v8::Local<v8::Value> e = v8::Exception::Error(
+        v8::String::NewFromUtf8(m_d->isolate, exception->message().toStdString().c_str()));
+
+    v8::Local<v8::Object> o = v8::Local<v8::Object>::Cast(e);
+
+    if ( exception->hasStackTrace() ){
+        std::stringstream stackCapture;
+
+        StackTrace::Ptr est = exception->stackTrace();
+        for ( auto it = est->begin(); it != est->end(); ++it ){
+            if ( it != est->begin() )
+                stackCapture << "\n";
+
+            const StackFrame& sf = *it;
+            if ( sf.line() ){
+                stackCapture << "at " << sf.functionName().c_str() << "(" << sf.fileName().c_str() << ":" << sf.line()
+                   << ")" << "[0x" << std::setbase(16) << sf.address() << "]" << std::setbase(10);
+            } else {
+                stackCapture << "at " << sf.functionName().c_str() << "[0x" << std::setbase(16) << sf.address()
+                             << std::setbase(10) << "]";
+            }
+        }
+
+
+        v8::Local<v8::String> stackKey = v8::String::NewFromUtf8(isolate(), "stack", v8::String::kInternalizedString);
+        v8::Local<v8::String> stackValue = v8::String::NewFromUtf8(isolate(), stackCapture.str().c_str(), v8::String::kInternalizedString);
+
+        o->Set(stackKey, stackValue);
+    }
+
+    if ( object ){
+        v8::Local<v8::String> objectKey = v8::String::NewFromUtf8(isolate(), "object", v8::String::kInternalizedString);
+        o->Set(objectKey, ElementPrivate::localObject(object));
+    }
+
+    v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::String::kInternalizedString);
+    o->Set(fileNameKey, v8::String::NewFromUtf8(isolate(), exception->file().toStdString().c_str(), v8::String::kInternalizedString));
+
+    v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::String::kInternalizedString);
+    o->Set(lineNumberKey, v8::Integer::New(isolate(), exception->line()));
+
+
+    m_d->pendingExceptionNesting = m_d->tryCatchNesting;
+    m_d->isolate->ThrowException(e);
+}
+
+/**
+ * @brief Engine::tryCatch
+ * @param f
+ * @param c
+ */
+void Engine::tryCatch(const std::function<void ()> &f, const std::function<void(const Engine::CatchData &)> &c){
+    v8::TryCatch tc(m_d->isolate);
+    incrementTryCatchDepth();
+    f();
+    decrementTryCatchDepth();
+
+    if ( tc.HasCaught() ){
+        c(CatchData(this, &tc));
+    }
+}
+
+bool Engine::hasPendingException(){
+    return m_d->pendingExceptionNesting >= 0;
+}
+
+void Engine::incrementTryCatchDepth(){
+    m_d->tryCatchNesting++;
+}
+
+/**
+ * @brief Decrement the nesting depth of trycatch block. Will remove any exception
+ * nested below the block
+ */
+void Engine::decrementTryCatchDepth(){
+    if ( m_d->pendingExceptionNesting >= m_d->tryCatchNesting )
+        m_d->pendingExceptionNesting = -1;
+    m_d->tryCatchNesting--;
+}
+
+void Engine::clearPendingException(){
+    m_d->pendingExceptionNesting = -1;
+}
+
+void Engine::handleError(const std::string &message, const std::string &stack, const std::string &file, int line){
+    vlog().e() << "Uncaught exception occured:" << message.c_str() << "at " << file.c_str() << "(" << line
+               << ")\n" << stack.c_str();
+}
+
 void Engine::importInternals(){
     v8::HandleScope handle(isolate());
     v8::Local<v8::Context> context = m_d->context->asLocal();
@@ -349,6 +496,7 @@ void Engine::importInternals(){
     m_d->elementTemplate = registerTemplate(&Element::metaObject());
     ComponentTemplate* listTemplate = registerTemplate(&List::metaObject());
     ComponentTemplate* containerTemplate = registerTemplate(&Container::metaObject());
+    ComponentTemplate* errorHandlerTemplate = registerTemplate(&ErrorHandler::metaObject());
 
     v8::Local<v8::FunctionTemplate> tpl = m_d->elementTemplate->data.Get(isolate());
     context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Element"), tpl->GetFunction());
@@ -359,6 +507,9 @@ void Engine::importInternals(){
     v8::Local<v8::FunctionTemplate> containerTpl = containerTemplate->data.Get(isolate());
     context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Container"), containerTpl->GetFunction());
 
+    v8::Local<v8::FunctionTemplate> errorHandlerTpl = errorHandlerTemplate->data.Get(isolate());
+    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "ErrorHandler"), errorHandlerTpl->GetFunction());
+
     m_d->pointTemplate.Reset(isolate(), Point::functionTemplate(isolate()));
     context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Point"), pointTemplate()->GetFunction());
 
@@ -367,6 +518,10 @@ void Engine::importInternals(){
 
     m_d->rectangleTemplate.Reset(isolate(), Rectangle::functionTemplate(isolate()));
     context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Rectangle"), rectangleTemplate()->GetFunction());
+
+    context->Global()->Set(
+        v8::String::NewFromUtf8(isolate(), "linkError"),
+        v8::FunctionTemplate::New(isolate(), &linkError)->GetFunction());
 }
 
 void Engine::wrapScriptObject(Element *element){
@@ -376,6 +531,13 @@ void Engine::wrapScriptObject(Element *element){
     element->setLifeTimeWithObject(instance);
 }
 
+bool Engine::hasGlobalErrorHandler(){
+    return m_d->hasGlobalErrorHandler;
+}
+
+void Engine::setGlobalErrorHandler(bool value){
+    m_d->hasGlobalErrorHandler = value;
+}
 
 // Module caching
 
@@ -413,6 +575,79 @@ Engine::InitializeScope::InitializeScope(const std::string &defaultLocation){
 
 Engine::InitializeScope::~InitializeScope(){
     Engine::dispose();
+}
+
+bool Engine::CatchData::canContinue() const{
+    return m_tryCatch->CanContinue();
+}
+
+bool Engine::CatchData::hasTerminated() const
+{
+    return m_tryCatch->HasTerminated();
+}
+
+void Engine::CatchData::rethrow(){
+    m_tryCatch->ReThrow();
+}
+
+std::string Engine::CatchData::message() const{
+    v8::Local<v8::String> messageKey = v8::String::NewFromUtf8(m_engine->isolate(), "message", v8::String::kInternalizedString);
+    v8::Local<v8::Object> exceptionObj = m_tryCatch->Exception()->ToObject();
+    if ( exceptionObj->Has(messageKey) ){
+        v8::String::Utf8Value result(exceptionObj->Get(messageKey)->ToString());
+        return *result;
+    } else {
+        v8::String::Utf8Value msg(m_tryCatch->Message()->Get());
+        return *msg;
+    }
+}
+
+std::string Engine::CatchData::stack() const{
+    v8::String::Utf8Value msg(m_tryCatch->StackTrace()->ToString());
+    return *msg;
+}
+
+std::string Engine::CatchData::fileName() const{
+    v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(m_engine->isolate(), "fileName", v8::String::kInternalizedString);
+    v8::Local<v8::Object> exceptionObj = m_tryCatch->Exception()->ToObject();
+    if ( exceptionObj->Has(fileNameKey) ){
+        v8::String::Utf8Value result(exceptionObj->Get(fileNameKey)->ToString());
+        return *result;
+    } else {
+        v8::String::Utf8Value file(m_tryCatch->Message()->GetScriptResourceName()->ToString());
+        return *file;
+    }
+}
+
+int Engine::CatchData::lineNumber() const{
+    v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(m_engine->isolate(), "lineNumber", v8::String::kInternalizedString);
+    v8::Local<v8::Object> exceptionObj = m_tryCatch->Exception()->ToObject();
+    if ( exceptionObj->Has(lineNumberKey) ){
+        return exceptionObj->Get(lineNumberKey)->Int32Value();
+    }
+
+    return m_tryCatch->Message()->GetLineNumber();
+}
+
+Element *Engine::CatchData::object() const{
+    v8::Local<v8::Object> o = v8::Local<v8::Object>::Cast(m_tryCatch->Exception());
+    v8::Local<v8::String> oKey = v8::String::NewFromUtf8(m_engine->isolate(), "object", v8::String::kInternalizedString);
+
+    if ( o->Has(oKey) ){
+        v8::Local<v8::Object> obj = o->Get(oKey)->ToObject();
+        if ( obj->InternalFieldCount() == 1 ){
+            v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(obj->GetInternalField(0));
+            void* ptr = wrap->Value();
+            return reinterpret_cast<Element*>(ptr);
+        }
+    }
+
+    return nullptr;
+}
+
+Engine::CatchData::CatchData(Engine *engine, v8::TryCatch *tc)
+    : m_engine(engine), m_tryCatch(tc)
+{
 }
 
 }} // namespace lv, script

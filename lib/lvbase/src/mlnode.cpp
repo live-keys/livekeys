@@ -980,7 +980,7 @@ MLNode::BytesType MLNode::asBytes() const{
     } else if ( m_type == Type::String ){
         return MLNode::BytesType::fromBase64(*m_value.asString);
     } else
-        throw InvalidMLTypeException();
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of bytes type.", 0);
 }
 
 const MLNode::ArrayType &MLNode::asArray() const{

@@ -1,4 +1,5 @@
 #include "callable.h"
+#include "live/exception.h"
 #include "live/elements/engine.h"
 #include "live/elements/element.h"
 #include "live/elements/component.h"
@@ -106,7 +107,7 @@ bool Callable::isComponent() const{
 
 Component Callable::toComponent() const{
     if ( !isComponent() )
-        throw std::exception();
+        THROW_EXCEPTION(lv::Exception, "Callable is not of component type.", 0);;
     return Component(m_d->engine, *this);
 }
 

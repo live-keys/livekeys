@@ -32,6 +32,7 @@ class ElementPrivate{
 public:
     static void weakElementDestructor(const v8::WeakCallbackInfo<Element>& data);
     static v8::Local<v8::Object> localObject(Element* element);
+    static Element* elementFromObject(const v8::Local<v8::Object>& object);
 
     // Instance events
     std::map<std::string, InstanceEvent*>               instanceEvents;

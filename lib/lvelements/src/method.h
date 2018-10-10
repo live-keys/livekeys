@@ -46,7 +46,7 @@ public:
         m_ptr = &Function::methodPtrImplementation<C>;
         m_totalArguments  = sizeof...(Args);
         m_unwrapFunction = [this](const Function::CallInfo& params){
-            return Method::callMethod(
+            Method::callMethod(
                 params.engine(),
                 m_function,
                 typename meta::make_indexes<Args...>::type(), params);
@@ -115,9 +115,9 @@ public:
     {
         m_less = nullptr;
         m_ptr = &Function::methodPtrImplementation<C>;
-        m_totalArguments  = 1;
+        m_totalArguments  = 0;
         m_unwrapFunction = [this](const Function::CallInfo& params){
-            return LocalValue(params.engine(), m_function(params.template that<C>(), params));
+            Function::checkReturn(params.engine(), params, m_function(params.template that<C>(), params));
         };
     }
 
@@ -138,7 +138,7 @@ public:
     {
         m_less           = nullptr;
         m_ptr            = &Function::methodPtrImplementation<C>;
-        m_totalArguments = 1;
+        m_totalArguments = 0;
         m_unwrapFunction = [this](const Function::CallInfo& params){
             m_function(params.template that<C>(), params);
             return LocalValue(params.engine());

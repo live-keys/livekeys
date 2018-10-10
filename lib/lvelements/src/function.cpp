@@ -1,6 +1,7 @@
 #include "function.h"
 #include "live/elements/engine.h"
 #include "live/elements/element.h"
+#include "live/exception.h"
 #include "v8.h"
 
 namespace lv{ namespace el{
@@ -82,6 +83,23 @@ size_t Function::CallInfo::length() const{
 
 void *Function::CallInfo::userData(){
     return m_info->Data().As<v8::External>()->Value();
+}
+
+bool Function::CallInfo::clearedPendingException(Engine *engine) const{
+    if ( engine->hasPendingException() ){
+        engine->clearPendingException();
+        return true;
+    }
+    return false;
+}
+
+void Function::CallInfo::throwError(Engine *engine, Exception *e) const{
+    engine->throwError(e, reinterpret_cast<Element*>(internalField()));
+}
+
+void Function::CallInfo::throwError(Engine *engine, const std::string &message) const{
+    lv::Exception e = CREATE_EXCEPTION(lv::Exception, message.c_str(), 1);
+    throwError(engine, &e);
 }
 
 void Function::CallInfo::assignReturnValue(const v8::Local<v8::Value> &value) const{

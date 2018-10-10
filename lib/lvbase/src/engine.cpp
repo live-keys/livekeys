@@ -34,6 +34,8 @@
 
 namespace lv{
 
+
+
 Engine::Engine(QQmlEngine *engine, QObject *parent)
     : QObject(parent)
     , m_engine(engine)
@@ -55,7 +57,7 @@ Engine::Engine(QQmlEngine *engine, QObject *parent)
         "}"
     );
     QJSValue markErrorFn = markErrorConstructor.call(QJSValueList() << engine->newQObject(this));
-    m_engine->globalObject().setProperty("linkedError", markErrorFn);
+    m_engine->globalObject().setProperty("linkError", markErrorFn);
 }
 
 Engine::~Engine(){

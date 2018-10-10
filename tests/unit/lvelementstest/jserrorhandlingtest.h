@@ -13,8 +13,17 @@ public:
     JsErrorHandlingTest(QObject* parent = 0);
     ~JsErrorHandlingTest(){}
 
+
 private slots:
     void initTestCase();
+    void testException();
+    void testExceptionWithLink();
+    void testExceptionFromFunction();
+    void testExceptionFromMethod();
+    void testExceptionFromProperty();
+    void testExceptionPropagation();
+    void testExceptionPropagationFromJs();
+    void testExceptionRethrowPropagation();
 
 };
 

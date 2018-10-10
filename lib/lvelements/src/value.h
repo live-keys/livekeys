@@ -24,6 +24,7 @@ class Value;
 class Boolean;
 class Context;
 class Script;
+class TryCatch;
 template<class T> class Local;
 template<class T> class MaybeLocal;
 template<class T> class FunctionCallbackInfo;
