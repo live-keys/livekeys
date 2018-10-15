@@ -68,7 +68,7 @@ public:
     typedef double    Number;
 
 public:
-    union Data{
+    union LV_ELEMENTS_EXPORT Data{
         Int64     asInteger;
         Number    asNumber;
         Object*   asObject;

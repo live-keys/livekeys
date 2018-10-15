@@ -2,6 +2,7 @@
 #include "live/elements/engine.h"
 #include "live/elements/element.h"
 #include "live/elements/component.h"
+#include "live/exception.h"
 #include "element_p.h"
 #include "context_p.h"
 #include "value_p.h"
@@ -200,11 +201,16 @@ Buffer LocalValue::toBuffer(Engine *) const{
 }
 
 Object LocalValue::toObject(Engine *engine) const{
-    v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(m_d->data);
-    if ( vo->InternalFieldCount() == 1 ){
-        throw std::exception(); // element type
+    if ( isString() && !isObject() ){
+        v8::Local<v8::String> vs = m_d->data->ToString();
+        v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(v8::StringObject::New(vs));
+        return Object(engine, vo);
+    } else {
+        v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(m_d->data);
+        if ( vo->InternalFieldCount() == 1 )
+            THROW_EXCEPTION(lv::Exception, "Converting object of Element type to Object.", 1);
+        return Object(engine, vo);
     }
-    return Object(engine, vo);
 }
 
 Element *LocalValue::toElement(Engine*) const{

@@ -473,7 +473,7 @@ void JsPropertyTest::propertyTypes(){
                 "e.objectProperty = {b: 7};"
                 "e.bufferProperty = new ArrayBuffer(8); "
                 "e.localValueProperty = 'abcd';"
-                "e.valueProperty = 'abcd';"
+                "e.valueProperty = new String('abcd');"
                 "e.elementProperty = e;"
                 "e.userElementProperty = ps;"
                 "return e;"

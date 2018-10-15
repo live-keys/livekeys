@@ -430,7 +430,6 @@ void Element::clearPropertyBoundExpression(const std::string &name){
         }
         delete be;
         d->boundPropertyExpressions.erase(it);
-//        qDebug() << "BOUND EXPRESSIONS:" << m_boundPropertyExpressions.size();
     }
 }
 

@@ -200,7 +200,11 @@ public:
 
     ~EventConnectionFunction(){}
 
-    void call(Args... args){ m_f(args...); }
+    void call(Args... args){
+        // preserve function capture data in case the function gets deleted from within
+        std::function<void(Args...)> fcopy = m_f;
+        fcopy(args...);
+    }
 
 private:
     std::function<void(Args...)> m_f;
