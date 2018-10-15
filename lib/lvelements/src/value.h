@@ -201,27 +201,27 @@ template<typename T, typename R = ScriptToV8<T> > v8::Local<R> convertToV8(Engin
     convertToV8<Element*>(engine, value);
 }
 
-template<> v8::Local<v8::Integer> convertToV8<int>(Engine* engine, const int& value);
-template<> v8::Local<v8::Integer> convertToV8<long long>(Engine* engine, const long long& value);
-template<> v8::Local<v8::Number> convertToV8<double>(Engine* engine, const double& value);
-template<> v8::Local<v8::Object> convertToV8<Element*>(Engine* engine, Element* const& value);
-template<> v8::Local<v8::Value> convertToV8(Engine* engine, const LocalValue& value);
+template<> LV_ELEMENTS_EXPORT v8::Local<v8::Integer> convertToV8<int>(Engine* engine, const int& value);
+template<> LV_ELEMENTS_EXPORT v8::Local<v8::Integer> convertToV8<long long>(Engine* engine, const long long& value);
+template<> LV_ELEMENTS_EXPORT v8::Local<v8::Number> convertToV8<double>(Engine* engine, const double& value);
+template<> LV_ELEMENTS_EXPORT v8::Local<v8::Object> convertToV8<Element*>(Engine* engine, Element* const& value);
+template<> LV_ELEMENTS_EXPORT v8::Local<v8::Value> convertToV8(Engine* engine, const LocalValue& value);
 
 template<typename T> T convertFromV8(Engine* engine, const v8::Local<v8::Value>& value){
     return static_cast<T>(convertFromV8<Element*>(engine, value));
 }
 
-template<> bool convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
-template<> Value::Int32 convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
-template<> Value::Int64 convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
-template<> Value::Number convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
-template<> std::string convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
-template<> Callable convertFromV8(Engine *engine, const v8::Local<v8::Value> &value);
-template<> Object convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
-template<> Value convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
-template<> Buffer convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
-template<> LocalValue convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
-template<> Element* convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
+template<> LV_ELEMENTS_EXPORT bool convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
+template<> LV_ELEMENTS_EXPORT Value::Int32 convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
+template<> LV_ELEMENTS_EXPORT Value::Int64 convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
+template<> LV_ELEMENTS_EXPORT Value::Number convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
+template<> LV_ELEMENTS_EXPORT std::string convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
+template<> LV_ELEMENTS_EXPORT Callable convertFromV8(Engine *engine, const v8::Local<v8::Value> &value);
+template<> LV_ELEMENTS_EXPORT Object convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
+template<> LV_ELEMENTS_EXPORT Value convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
+template<> LV_ELEMENTS_EXPORT Buffer convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
+template<> LV_ELEMENTS_EXPORT LocalValue convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
+template<> LV_ELEMENTS_EXPORT Element* convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
 
 }} // namespace lv, script
 

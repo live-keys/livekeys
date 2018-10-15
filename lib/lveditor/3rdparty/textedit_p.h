@@ -358,7 +358,6 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void clearSelectionOnFocus(bool value);
-    void singleShotUpdate();
     void selectAll();
     void selectWord();
     void select(int start, int end);
