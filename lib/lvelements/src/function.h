@@ -182,34 +182,34 @@ protected:
 
 };
 
-template<> bool Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> Value::Int32 Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> Value::Int64 Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> Value::Number Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> std::string Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> Callable Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> Object Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> Buffer Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> Value Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> LocalValue Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> Element* Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT bool Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT Value::Int32 Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT Value::Int64 Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT Value::Number Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT std::string Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT Callable Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT Object Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT Buffer Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT Value Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT LocalValue Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT Element* Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
 
 
 template<typename T> T Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index){
     return static_cast<T>(Function::Parameters::extractValue<Element*>(engine, args, index));
 }
 
-template<> bool Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> Value::Int32 Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> Value::Int64 Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> Value::Number Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> std::string Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> Callable Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> Object Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> Buffer Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> Value Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> LocalValue Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> Element* Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT bool Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT Value::Int32 Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT Value::Int64 Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT Value::Number Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT std::string Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT Callable Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT Object Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT Buffer Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT Value Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT LocalValue Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT Element* Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
 
 
 template<typename RT, typename ...Args>
