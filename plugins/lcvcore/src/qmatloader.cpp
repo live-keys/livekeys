@@ -17,8 +17,8 @@
 #include "qmatloader.h"
 #include "qmat.h"
 #include "qstaticcontainer.h"
-#include "live/plugincontext.h"
-#include "live/engine.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
 
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -87,7 +87,7 @@ QMat *QMatLoader::staticLoad(const QString &id, const QJSValue &params){
             cvm = new cv::Mat(mparams.height, mparams.width, CV_MAKETYPE(mparams.type, mparams.channels), mparams.color);
         }
         m = new QMat(cvm);
-        lv::PluginContext::engine()->engine()->setObjectOwnership(m, QQmlEngine::CppOwnership);
+        lv::ViewContext::instance().engine()->engine()->setObjectOwnership(m, QQmlEngine::CppOwnership);
         container->set<QMat>(id, m);
     }
     return m;

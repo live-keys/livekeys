@@ -1,7 +1,7 @@
 #include "qmlvariantlist.h"
-#include "live/plugincontext.h"
+#include "live/viewcontext.h"
 #include "live/exception.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
 
 namespace lv{
 
@@ -49,7 +49,7 @@ QmlVariantList::~QmlVariantList(){
 void QmlVariantList::setItems(const QVariantList &items){
     if ( isReadOnly() ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "QmlVariantList is read only.", 0);
-        lv::PluginContext::engine()->throwError(&e);
+        lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
 
@@ -81,7 +81,7 @@ int QmlVariantList::itemCount(){
 void QmlVariantList::clearItems(){
     if ( isReadOnly() ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "QmlVariantList is read only.", 0);
-        lv::PluginContext::engine()->throwError(&e);
+        lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
     m_clearItems(this);
@@ -90,7 +90,7 @@ void QmlVariantList::clearItems(){
 void QmlVariantList::appendItem(QVariant item){
     if ( isReadOnly() ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "QmlVariantList is read only.", 0);
-        lv::PluginContext::engine()->throwError(&e);
+        lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
     m_appendItem(this, item);

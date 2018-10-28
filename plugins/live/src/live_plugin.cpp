@@ -34,7 +34,7 @@
 #include "qmlobjectlist.h"
 #include "qmlvariantlist.h"
 
-#include "live/plugincontext.h"
+#include "live/applicationcontext.h"
 #include "live/visuallog.h"
 #include "live/settings.h"
 #include "live/visuallogfilter.h"

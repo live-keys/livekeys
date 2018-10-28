@@ -56,7 +56,7 @@ bool TuplePropertyMap::reserveForWrite(const QQmlPropertyMap &t, Filter::SharedD
     return true;
 }
 
-void TuplePropertyMap::serialize(Engine *engine, const QQmlPropertyMap &t, MLNode &node){
+void TuplePropertyMap::serialize(ViewEngine *engine, const QQmlPropertyMap &t, MLNode &node){
     node = MLNode(MLNode::Object);
 
     QStringList keys = t.keys();
@@ -93,7 +93,7 @@ void TuplePropertyMap::serialize(Engine *engine, const QQmlPropertyMap &t, MLNod
                 if ( ti.isNull() || !ti->isSerializable() ){
                     node = MLNode(MLNode::Object);
                     lv::Exception e = CREATE_EXCEPTION(
-                        lv::Exception, "Non serializable Tuple object: " + QString(*it), 0
+                        lv::Exception, "Non serializable Tuple object: " + QString(*it).toStdString(), 0
                     );
                     engine->throwError(&e);
                     return;
@@ -115,7 +115,7 @@ void TuplePropertyMap::serialize(Engine *engine, const QQmlPropertyMap &t, MLNod
     }
 }
 
-void TuplePropertyMap::deserialize(Engine *engine, const MLNode &n, QQmlPropertyMap &t){
+void TuplePropertyMap::deserialize(ViewEngine *engine, const MLNode &n, QQmlPropertyMap &t){
     try{
         if ( n.type() == MLNode::Type::Object ){
             for ( auto it = n.begin(); it != n.end(); ++it ){
@@ -135,7 +135,7 @@ void TuplePropertyMap::deserialize(Engine *engine, const MLNode &n, QQmlProperty
     }
 }
 
-void TuplePropertyMap::deserialize(Engine *engine, const MLNode &n, QVariant &v){
+void TuplePropertyMap::deserialize(ViewEngine *engine, const MLNode &n, QVariant &v){
     switch( n.type() ){
     case MLNode::Type::Object: {
         //Object / QVariantMap
@@ -152,7 +152,9 @@ void TuplePropertyMap::deserialize(Engine *engine, const MLNode &n, QVariant &v)
             } else {
                 TypeInfo::Ptr ti = engine->typeInfo(objectType);
                 if ( ti.isNull() || !ti->isSerializable() ){
-                    THROW_EXCEPTION(lv::Exception, "Tuple deserialize: Unknown type: \'" + objectType + "\'", 0);
+                    THROW_EXCEPTION(
+                        lv::Exception, "Tuple deserialize: Unknown type: \'" + objectType.toStdString() + "\'", 0
+                    );
                 }
 
                 QObject* ob = ti->newInstance();

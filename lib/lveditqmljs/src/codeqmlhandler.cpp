@@ -664,7 +664,7 @@ namespace qmlhandler_helpers{
 // ----------------------------------
 
 CodeQmlHandler::CodeQmlHandler(
-        Engine *engine,
+        ViewEngine *engine,
         Project *,
         QmlJsSettings *settings,
         ProjectQmlExtension *projectHandler,

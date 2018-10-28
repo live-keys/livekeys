@@ -134,7 +134,7 @@ void fromJson(const QByteArray &data, MLNode &n){
     QJsonParseError pe;
     QJsonDocument jsondoc = QJsonDocument::fromJson(data, &pe);
     if ( jsondoc.isNull() ){
-        THROW_EXCEPTION(lv::Exception, pe.errorString(), 0);
+        THROW_EXCEPTION(lv::Exception, pe.errorString().toStdString(), 0);
     }
     if ( jsondoc.isArray() )
         fromJson(jsondoc.array(), n);

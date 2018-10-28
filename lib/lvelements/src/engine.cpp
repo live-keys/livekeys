@@ -174,7 +174,8 @@ Engine::Engine()
 
     m_d->isolate = v8::Isolate::New(*m_d->createParams);
     if ( m_d->isolate->GetNumberOfDataSlots() == 1 ){
-        throw std::exception(); //TODO: Replace with lvbase one, and collect garbage
+        delete m_d->createParams;
+        THROW_EXCEPTION(lv::Exception, "Not enough data slots allocated in the isolate.", 1);
     }
     m_d->isolate->SetData(0, this);
     m_d->mainIsolateScope = new v8::Isolate::Scope(m_d->isolate);
@@ -400,7 +401,7 @@ bool Engine::isElementConstructor(const Callable &c){
  */
 void Engine::throwError(const Exception *exception, Element *object){
     v8::Local<v8::Value> e = v8::Exception::Error(
-        v8::String::NewFromUtf8(m_d->isolate, exception->message().toStdString().c_str()));
+        v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()));
 
     v8::Local<v8::Object> o = v8::Local<v8::Object>::Cast(e);
 
@@ -435,7 +436,7 @@ void Engine::throwError(const Exception *exception, Element *object){
     }
 
     v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::String::kInternalizedString);
-    o->Set(fileNameKey, v8::String::NewFromUtf8(isolate(), exception->file().toStdString().c_str(), v8::String::kInternalizedString));
+    o->Set(fileNameKey, v8::String::NewFromUtf8(isolate(), exception->file().c_str(), v8::String::kInternalizedString));
 
     v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::String::kInternalizedString);
     o->Set(lineNumberKey, v8::Integer::New(isolate(), exception->line()));

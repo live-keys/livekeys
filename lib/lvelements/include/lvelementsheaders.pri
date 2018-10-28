@@ -19,4 +19,5 @@ HEADERS += \
     $$PWD/live/elements/object.h \
     $$PWD/live/elements/buffer.h \
     $$PWD/live/elements/list.h \
-    $$PWD/live/elements/container.h
+    $$PWD/live/elements/container.h \
+    $$PWD/live/elements/mlnodetojs.h

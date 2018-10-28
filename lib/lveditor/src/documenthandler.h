@@ -33,7 +33,7 @@ namespace lv{
 
 class TextEdit;
 class Project;
-class Engine;
+class ViewEngine;
 
 class LivePalette;
 class LivePaletteList;
@@ -127,7 +127,7 @@ private:
     QString               m_indentContent;
     LivePaletteContainer* m_paletteContainer;
     Project*              m_project;
-    Engine*               m_engine;
+    ViewEngine*               m_engine;
     QTimer                m_timer;
     TextEdit*             m_textEdit;
 

@@ -22,14 +22,12 @@
 #include <ostream>
 #include <functional>
 
-#include <QDate>
-#include <QTextStream>
-
 #include "live/mlnode.h"
 
-namespace lv{
+class QDateTime;
+class QVariant;
 
-class VisualLogModel;
+namespace lv{
 
 class LV_BASE_EXPORT VisualLog{
 
@@ -47,13 +45,13 @@ public:
 
     class LV_BASE_EXPORT SourceLocation{
     public:
-        SourceLocation(const QString& file, int line, const QString& fileName);
-        SourceLocation(const QString& remote, const QString& file, int line, const QString& functionName);
+        SourceLocation(const std::string& file, int line, const std::string& fileName);
+        SourceLocation(const std::string& remote, const std::string& file, int line, const std::string& functionName);
 
-        QString remote;
-        QString file;
-        int     line;
-        QString functionName;
+        std::string remote;
+        std::string file;
+        int         line;
+        std::string functionName;
     };
 
     class LV_BASE_EXPORT MessageInfo{
@@ -73,16 +71,16 @@ public:
     public:
         ~MessageInfo();
 
-        static QString levelToString(VisualLog::MessageInfo::Level level);
-        static VisualLog::MessageInfo::Level levelFromString(const QString& str);
+        static std::string levelToString(VisualLog::MessageInfo::Level level);
+        static VisualLog::MessageInfo::Level levelFromString(const std::string& str);
 
-        QString sourceRemoteLocation() const;
-        QString sourceFileName() const;
+        std::string sourceRemoteLocation() const;
+        std::string sourceFileName() const;
         int     sourceLineNumber() const;
-        QString sourceFunctionName() const;
+        std::string sourceFunctionName() const;
         const QDateTime& stamp() const;
-        QString prefix(const VisualLog::Configuration* configuration) const;
-        QString tag(const VisualLog::Configuration* configuration) const;
+        std::string prefix(const VisualLog::Configuration* configuration) const;
+        std::string tag(const VisualLog::Configuration* configuration) const;
 
     private:
         MessageInfo();
@@ -90,7 +88,7 @@ public:
         MessageInfo(const MessageInfo&);
         MessageInfo& operator = (const MessageInfo&);
 
-        QString expand(const QString& pattern) const;
+        std::string expand(const std::string& pattern) const;
 
         Level              m_level;
         SourceLocation*    m_location;
@@ -102,22 +100,38 @@ public:
         virtual ~Transport(){}
         virtual void onMessage(const VisualLog::Configuration* configuration,
                                const VisualLog::MessageInfo& messageInfo,
-                               const QString& message) = 0;
+                               const std::string& message) = 0;
         virtual void onObject(const VisualLog::Configuration* configuration,
                               const VisualLog::MessageInfo& messageInfo,
-                              const QString& type,
+                              const std::string& type,
                               const MLNode& node) = 0;
+    };
+
+    class LV_BASE_EXPORT ViewTransport{
+    public:
+        virtual ~ViewTransport(){}
+        virtual void onMessage(
+            const VisualLog::Configuration* configuration,
+            const VisualLog::MessageInfo& messageInfo,
+            const std::string& message
+        ) = 0;
+        virtual void onView(
+            const VisualLog::Configuration* configuration,
+            const VisualLog::MessageInfo& messageInfo,
+            const std::string& viewName,
+            const QVariant& value
+        ) = 0;
     };
 
 public:
     VisualLog();
     VisualLog(MessageInfo::Level level);
-    VisualLog(const QString& configuration);
-    VisualLog(const QString& configuration, MessageInfo::Level level);
+    VisualLog(const std::string& configuration);
+    VisualLog(const std::string& configuration, MessageInfo::Level level);
     ~VisualLog();
 
-    VisualLog& at(const QString& file, int line = 0, const QString& functionName = "");
-    VisualLog& at(const QString& remote, const QString& file, int line = 0, const QString& functionName = "");
+    VisualLog& at(const std::string& file, int line = 0, const std::string& functionName = "");
+    VisualLog& at(const std::string& remote, const std::string& file, int line = 0, const std::string& functionName = "");
     VisualLog& overrideStamp(const QDateTime& stamp);
 
     template<typename T> VisualLog& operator <<( const T& x );
@@ -142,11 +156,11 @@ public:
 
 
     bool canLog();
-    void configure(const QString& configuration, const MLNode &options);
+    void configure(const std::string& configuration, const MLNode &options);
     void configure(VisualLog::Configuration* configuration, const MLNode& options);
-    void addTransport(const QString& configuration, Transport* transport);
+    void addTransport(const std::string& configuration, Transport* transport);
     void addTransport(VisualLog::Configuration* configuration, Transport* transport);
-    void removeTransports(const QString& configuration);
+    void removeTransports(const std::string& configuration);
     void removeTransports(VisualLog::Configuration* configuration);
 
     int totalConfigurations();
@@ -154,16 +168,16 @@ public:
     void flushLine();
     void closeFile();
 
-    void asView(const QString& viewPath, const QVariant& viewData);
-    void asView(const QString& viewPath, std::function<QVariant()> cloneFunction);
-    template<typename T> void asObject(const QString& type, const T& value);
-    void asObject(const QString& type, const MLNode& value);
+    void asView(const std::string& viewPath, const QVariant& viewData);
+    void asView(const std::string& viewPath, std::function<QVariant()> cloneFunction);
+    template<typename T> void asObject(const std::string& type, const T& value);
+    void asObject(const std::string& type, const MLNode& value);
 
 
-    static VisualLogModel* model();
-    static void setViewTransport(VisualLogModel* model);
+    static ViewTransport* model();
+    static void setViewTransport(ViewTransport* model);
 
-    static void flushConsole(const QString& data);
+    static void flushConsole(const std::string& data);
 
 private:
     // disable copy
@@ -171,9 +185,9 @@ private:
     VisualLog& operator = (const VisualLog&);
 
     void init();
-    void flushFile(const QString &data);
-    void flushHandler(const QString& data);
-    QString prefix();
+    void flushFile(const std::string &data);
+    void flushHandler(const std::string& data);
+    std::string prefix();
     bool canLogObjects(VisualLog::Configuration* configuration);
 
     template<typename T> void object(MessageInfo::Level level, const T& value);
@@ -183,16 +197,15 @@ private:
     static ConfigurationContainer createDefaultConfigurations();
     static ConfigurationContainer m_registeredConfigurations;
 
-    static VisualLogModel* m_model;
+    static ViewTransport* m_model;
 
     static bool m_globalConfigured;
 
-    int            m_output;
-    Configuration* m_configuration;
-    MessageInfo    m_messageInfo;
-    QString        m_buffer;
-    QTextStream    m_stream;
-    bool           m_objectOutput;
+    int               m_output;
+    Configuration*    m_configuration;
+    MessageInfo       m_messageInfo;
+    std::stringstream m_stream;
+    bool              m_objectOutput;
 
 };
 
@@ -207,7 +220,7 @@ template<typename T> void VisualLog::object(VisualLog::MessageInfo::Level level,
     object(value);
 }
 
-template<typename T> void VisualLog::asObject(const QString &type, const T &value){
+template<typename T> void VisualLog::asObject(const std::string &type, const T &value){
     if ( canLog() && m_objectOutput && canLogObjects(m_configuration) ){
         MLNode mlvalue;
         ml::serialize(value, mlvalue);
@@ -264,29 +277,21 @@ inline VisualLog &VisualLog::v(){
     return *this;
 }
 
-inline VisualLog &VisualLog::at(const QString &file, int line, const QString &functionName){
+inline VisualLog &VisualLog::at(const std::string &file, int line, const std::string &functionName){
     m_messageInfo.m_location = new VisualLog::SourceLocation(file, line, functionName);
     return *this;
 }
 
-inline VisualLog &VisualLog::at(const QString &remote, const QString &file, int line, const QString &functionName){
+inline VisualLog &VisualLog::at(const std::string &remote, const std::string &file, int line, const std::string &functionName){
     m_messageInfo.m_location = new VisualLog::SourceLocation(remote, file, line, functionName);
     return *this;
 }
 
-inline VisualLog &VisualLog::overrideStamp(const QDateTime &stamp){
-    if ( !m_messageInfo.m_stamp )
-        m_messageInfo.m_stamp = new QDateTime(stamp);
-    else
-        *m_messageInfo.m_stamp = stamp;
-    return *this;
-}
-
-inline QString VisualLog::MessageInfo::sourceRemoteLocation() const{
+inline std::string VisualLog::MessageInfo::sourceRemoteLocation() const{
     return m_location ? m_location->remote : "";
 }
 
-inline QString VisualLog::MessageInfo::sourceFileName() const{
+inline std::string VisualLog::MessageInfo::sourceFileName() const{
     return m_location ? m_location->file : "";
 }
 
@@ -294,14 +299,8 @@ inline int VisualLog::MessageInfo::sourceLineNumber() const{
     return m_location ? m_location->line : 0;
 }
 
-inline QString VisualLog::MessageInfo::sourceFunctionName() const{
+inline std::string VisualLog::MessageInfo::sourceFunctionName() const{
     return m_location ? m_location->functionName : "";
-}
-
-inline const QDateTime &VisualLog::MessageInfo::stamp() const{
-    if ( !m_stamp )
-        m_stamp = new QDateTime(QDateTime::currentDateTime());
-    return *m_stamp;
 }
 
 template<typename T> VisualLog& VisualLog::operator<< (const T& x){

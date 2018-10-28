@@ -7,7 +7,7 @@
 #include "live/shareddata.h"
 #include "live/filter.h"
 #include "live/mlnode.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
 
 namespace lv{
 
@@ -37,9 +37,9 @@ public:
     QHash<QByteArray, int>::ConstIterator propertiesBegin();
     QHash<QByteArray, int>::ConstIterator propertiesEnd();
 
-    static void serialize(lv::Engine* engine, const Tuple& t, MLNode& node);
-    static void deserialize(lv::Engine* engine, const MLNode& node, Tuple& t);
-    static void deserialize(lv::Engine* engine, const MLNode& node, QVariant& v);
+    static void serialize(lv::ViewEngine* engine, const Tuple& t, MLNode& node);
+    static void deserialize(lv::ViewEngine* engine, const MLNode& node, Tuple& t);
+    static void deserialize(lv::ViewEngine* engine, const MLNode& node, QVariant& v);
 
 private:
     bool                            m_componentComplete;

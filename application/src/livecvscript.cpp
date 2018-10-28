@@ -30,6 +30,17 @@ LiveCVScript::LiveCVScript(const QStringList &argvTail, QObject *parent)
     m_argv.append(m_argvTail);
 }
 
+LiveCVScript::LiveCVScript(const std::vector<std::string> &argvTail, QObject *parent)
+    : QObject(parent)
+    , m_environment(new Environment(this))
+{
+    for ( auto it = argvTail.begin(); it != argvTail.end(); ++it ){
+        m_argvTail.append(QString::fromStdString(*it));
+    }
+    m_argv.append("");
+    m_argv.append(m_argvTail);
+}
+
 LiveCVScript::~LiveCVScript(){
     delete m_environment;
 }

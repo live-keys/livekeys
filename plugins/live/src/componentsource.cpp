@@ -3,8 +3,8 @@
 #include <QQuickItem>
 #include <QQmlEngine>
 #include "live/filter.h"
-#include "live/plugincontext.h"
-#include "live/engine.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
 #include "live/exception.h"
 #include "live/documentqmlinfo.h"
 #include "live/lockedfileiosession.h"
@@ -19,11 +19,11 @@ ComponentSource::ComponentSource(QObject *parent)
     , m_project(nullptr)
 {
     m_project = qobject_cast<lv::Project*>(
-        lv::PluginContext::engine()->engine()->rootContext()->contextProperty("project").value<QObject*>()
+        lv::ViewContext::instance().engine()->engine()->rootContext()->contextProperty("project").value<QObject*>()
     );
     if ( !m_project ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Failed to load 'project' property from context", 0);
-        lv::PluginContext::engine()->throwError(&e);
+        lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
 }
@@ -43,7 +43,7 @@ void ComponentSource::extractSource(){
     QQmlContext* thisContext = qmlContext(this);
     if ( !thisContext ){
         lv::Exception lve = CREATE_EXCEPTION(lv::Exception, "Failed to find ComponentSource context.", 0);
-        lv::PluginContext::engine()->throwError(&lve, this);
+        lv::ViewContext::instance().engine()->throwError(&lve, this);
         return;
     }
 
@@ -52,12 +52,12 @@ void ComponentSource::extractSource(){
 
     if ( thisId.isEmpty() ){
         lv::Exception lve = CREATE_EXCEPTION(lv::Exception, "Each ComponentSource requires an id to be set.", 0);
-        lv::PluginContext::engine()->throwError(&lve, this);
+        lv::ViewContext::instance().engine()->throwError(&lve, this);
         return;
     }
 
     DocumentQmlInfo::Ptr dqi = DocumentQmlInfo::create(thisPath);
-    QString code = m_project->lockedFileIO()->readFromFile(thisPath);
+    QString code = QString::fromStdString(m_project->lockedFileIO()->readFromFile(thisPath.toStdString()));
     dqi->parse(code);
     dqi->createRanges();
 
@@ -86,7 +86,7 @@ void ComponentSource::setSource(QQmlComponent *source){
         lv::Exception e = CREATE_EXCEPTION(
             lv::Exception, "ComponentSource: Cannot set source after component is completed.", 0
         );
-        lv::PluginContext::engine()->throwError(&e);
+        lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
 

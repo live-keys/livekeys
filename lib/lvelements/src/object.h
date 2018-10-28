@@ -83,8 +83,10 @@ public:
     LocalObject(Context* context);
     ~LocalObject();
 
+    LocalValue get(int index);
     LocalValue get(const LocalValue& key);
     LocalValue get(Engine* engine, const std::string& str);
+    void set(int index, const LocalValue& value);
     void set(const LocalValue& key, const LocalValue& value);
     void set(Engine* engine, const std::string& key, const LocalValue& value);
 

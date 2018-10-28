@@ -24,7 +24,7 @@ namespace lv{
 
 class Project;
 class Settings;
-class Engine;
+class ViewEngine;
 class LV_EDITOR_EXPORT ProjectExtension{
 
 public:
@@ -35,7 +35,7 @@ public:
     virtual AbstractCodeHandler* createHandler(
         ProjectDocument* document,
         Project* project,
-        Engine* engine,
+        ViewEngine* engine,
         QObject* parent
     ) = 0;
 };

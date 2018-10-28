@@ -21,7 +21,7 @@
 #include "plugininfoextractor.h"
 #include "plugintypesfacade.h"
 #include "codeqmlhandler.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
 #include "live/project.h"
 #include "live/visuallog.h"
 
@@ -33,7 +33,7 @@ namespace lv{
 ProjectQmlScanMonitor::ProjectQmlScanMonitor(
         ProjectQmlExtension *projectHandler,
         Project *project,
-        Engine *engine,
+        ViewEngine *engine,
         QObject *parent)
     : QObject(parent)
     , m_projectHandler(projectHandler)

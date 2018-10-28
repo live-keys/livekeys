@@ -17,15 +17,17 @@
 #ifndef LVCOMMANDLINEPARSER_H
 #define LVCOMMANDLINEPARSER_H
 
-#include <QString>
-#include <QList>
+#include "live/lvbaseglobal.h"
 #include "live/exception.h"
+
+#include <list>
+#include <string>
 
 namespace lv{
 
 class LV_BASE_EXPORT CommandLineParserException : public Exception{
 public:
-    CommandLineParserException(const QString& message, int code = 0): Exception(message, code){}
+    CommandLineParserException(const std::string& message, int code = 0): Exception(message, code){}
 };
 
 
@@ -35,7 +37,7 @@ public:
     class Option;
 
 public:
-    CommandLineParser(const QString& header);
+    CommandLineParser(const std::string& header);
     ~CommandLineParser();
 
     void parse(int argc, const char* const argv[]);
@@ -43,36 +45,35 @@ public:
     Option* helpOption();
     Option* versionOption();
 
-    Option* addFlag(const QStringList& names, const QString& description);
-    Option* addFlag(const QString& name, const QString& description);
-    Option* addOption(const QStringList& names, const QString& description, const QString& type);
-    Option* addOption(const QString& name, const QString& description, const QString& type);
+    Option* addFlag(const std::vector<std::string>& names, const std::string& description);
+//    Option* addFlag(const std::string& name, const std::string& description);
+    Option* addOption(const std::vector<std::string>& names, const std::string& description, const std::string& type);
+//    Option* addOption(const std::string& name, const std::string& description, const std::string& type);
 
-    const QString &script() const;
-    const QStringList& scriptArguments() const;
+    const std::string &script() const;
+    const std::vector<std::string>& scriptArguments() const;
 
-    QString helpString() const;
-    QStringList optionNames(Option* option) const;
+    std::string helpString() const;
+    std::vector<std::string> optionNames(Option* option) const;
 
     bool isSet(Option* option) const;
-    const QString& value(Option* option) const;
+    const std::string& value(Option* option) const;
     void assertIsSet(Option* option) const;
 
-
 private:
-    void assignName(const QString& name, Option* option, const QList<Option*>& check);
-    Option* findOptionByLongName(const QString& name, const QList<Option*>& check);
-    Option* findOptionByShortName(const QString& name, const QList<Option*>& check);
+    void assignName(const std::string& name, Option* option, const std::vector<Option*>& check);
+    Option* findOptionByLongName(const std::string& name, const std::vector<Option*>& check);
+    Option* findOptionByShortName(const std::string& name, const std::vector<Option*>& check);
 
     Option*        m_helpOption;
     Option*        m_versionOption;
 
-    QList<Option*> m_options;
-    QString        m_header;
-    QString        m_version;
+    std::vector<Option*> m_options;
+    std::string          m_header;
+    std::string          m_version;
 
-    QString        m_script;
-    QStringList    m_scriptArguments;
+    std::string          m_script;
+    std::vector<std::string> m_scriptArguments;
 };
 
 inline CommandLineParser::Option *CommandLineParser::helpOption(){
@@ -83,11 +84,11 @@ inline CommandLineParser::Option *CommandLineParser::versionOption(){
     return m_versionOption;
 }
 
-inline const QString &CommandLineParser::script() const{
+inline const std::string &CommandLineParser::script() const{
     return m_script;
 }
 
-inline const QStringList &CommandLineParser::scriptArguments() const{
+inline const std::vector<std::string> &CommandLineParser::scriptArguments() const{
     return m_scriptArguments;
 }
 

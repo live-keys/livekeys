@@ -64,8 +64,12 @@ LocalValue Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::V
 template<>
 Element *Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
     v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast((*info)[index]);
-    if ( vo->InternalFieldCount() != 1 )
-        throw std::exception(); // not an element
+    if ( vo->InternalFieldCount() != 1 ){
+        Engine* engine = reinterpret_cast<Engine*>(info->GetIsolate()->GetData(0));
+        lv::Exception exc = CREATE_EXCEPTION(lv::Exception, "Value cannot be converted to an Element type or subtype.", 1);
+        engine->throwError(&exc, nullptr);
+        return nullptr;
+    }
 
     v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(vo->GetInternalField(0));
     void* ptr = wrap->Value();
@@ -211,13 +215,16 @@ Value Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Val
 }
 
 template<>
-Element *Function::Parameters::extractValue(Engine *, const v8::Local<v8::Value> *args, int index){
+Element *Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Value> *args, int index){
     if ( args[index]->IsNullOrUndefined() )
         return nullptr;
 
     v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(args[index]);
-    if ( vo->InternalFieldCount() != 1 )
-        throw std::exception(); // not an element
+    if ( vo->InternalFieldCount() != 1 ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Value cannot be converted to an Element type or subtype.", 1);
+        engine->throwError(&e, nullptr);
+        return nullptr;
+    }
 
     v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(vo->GetInternalField(0));
     void* ptr = wrap->Value();

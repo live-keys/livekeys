@@ -240,6 +240,10 @@ Value LocalValue::toValue(Engine* engine) const{
     return Value();
 }
 
+bool LocalValue::isNull() const{
+    return m_d->data->IsNull();
+}
+
 bool LocalValue::isBool() const{
     return m_d->data->IsBoolean();
 }

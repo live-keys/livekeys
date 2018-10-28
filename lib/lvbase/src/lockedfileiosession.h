@@ -18,41 +18,32 @@
 #define LVLOCKEDFILEIOSESSION_H
 
 #include "live/lvbaseglobal.h"
-
-#include <QSharedPointer>
-#include <QHash>
-#include <QString>
-
-class QReadWriteLock;
-class QMutex;
+#include <memory>
 
 namespace lv{
 
 class FileLock;
 
+class LockedFileIOSessionPrivate;
 class LV_BASE_EXPORT LockedFileIOSession{
 
-    Q_DISABLE_COPY(LockedFileIOSession)
+    DISABLE_COPY(LockedFileIOSession);
 
 public:
-    typedef QSharedPointer<LockedFileIOSession> Ptr;
+    typedef std::shared_ptr<LockedFileIOSession> Ptr;
 
 public:
     ~LockedFileIOSession();
 
     static LockedFileIOSession::Ptr createInstance();
 
-    QString readFromFile(const QString& path);
-    bool writeToFile(const QString& path, const QString& data);
+    std::string readFromFile(const std::string& path);
+    bool writeToFile(const std::string& path, const std::string& data);
 
 private:
     LockedFileIOSession();
 
-    QReadWriteLock* getLock(const QString& path);
-    void releaseLock(const QString& path);
-
-    QHash<QString, FileLock*> m_locks;
-    QMutex* m_locksMutex;
+    LockedFileIOSessionPrivate* m_d;
 };
 
 }// namespace

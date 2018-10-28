@@ -16,7 +16,7 @@
 
 #include "stacktrace.h"
 #include "live/visuallog.h"
-#include <QSharedPointer>
+#include <QString>
 
 namespace lv{
 
@@ -84,9 +84,9 @@ bool StackFrame::hasLocation() const{
 VisualLog &operator <<(VisualLog &vl, const StackFrame &value){
     if ( value.line() ){
         vl << "at " << value.functionName().c_str() << "(" << value.fileName().c_str() << ":" << value.line()
-           << ")" << "[0x" << QString::number(value.address(), 16) << "]";
+           << ")" << "[0x" << QString::number(value.address(), 16).toStdString() << "]";
     } else {
-        vl << "at " << value.functionName().c_str() << "[0x" << QString::number(value.address(), 16) << "]";
+        vl << "at " << value.functionName().c_str() << "[0x" << QString::number(value.address(), 16).toStdString() << "]";
     }
     return vl;
 }

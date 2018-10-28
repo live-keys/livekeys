@@ -41,8 +41,8 @@
 #include "qoverlapmat.h"
 #include "qitemcapture.h"
 
-#include "live/engine.h"
-#include "live/plugincontext.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
 
 #include <qqml.h>
 #include <QQmlEngine>
@@ -80,7 +80,7 @@ void LcvcorePlugin::initializeEngine(QQmlEngine *engine, const char *){
     QCvGlobalObject* cvob = new QCvGlobalObject;
     engine->globalObject().setProperty("cv", engine->newQObject(cvob));
 
-    lv::PluginContext::engine()->registerQmlTypeInfo<QMat>(
+    lv::ViewContext::instance().engine()->registerQmlTypeInfo<QMat>(
         &lv::ml::serialize<QMat>,
         &lv::ml::deserialize<QMat>,
         [](){return new QMat;},

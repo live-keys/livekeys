@@ -15,9 +15,9 @@
 ****************************************************************************/
 
 #include "qstitcher.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
 #include "live/exception.h"
-#include "live/plugincontext.h"
+#include "live/viewcontext.h"
 
 QStitcher::QStitcher(QQuickItem *parent)
     : QMatDisplay(parent)
@@ -49,7 +49,7 @@ void QStitcher::filter(){
             }
         } catch ( cv::Exception& e ){
             lv::Exception lve = CREATE_EXCEPTION(lv::Exception, e.what(), e.code);
-            lv::PluginContext::engine()->throwError(&lve, this);
+            lv::ViewContext::instance().engine()->throwError(&lve, this);
             return;
         }
     }

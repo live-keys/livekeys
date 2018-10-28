@@ -15,10 +15,11 @@
 ****************************************************************************/
 
 #include "live/exception.h"
+#include <sstream>
 
 namespace lv{
 
-Exception::Exception(const QString &message, int code)
+Exception::Exception(const std::string &message, int code)
     : m_message(message)
     , m_code(code)
     , m_line(0)
@@ -36,23 +37,25 @@ Exception::Exception(const Exception &other)
 {
 }
 
-QString Exception::fileName() const{
-    int pos = m_file.lastIndexOf('/');
+std::string Exception::fileName() const{
+    std::string::size_type pos = m_file.find('/');
 
 #ifdef Q_OS_WIN
-    if ( pos == -1 ){
-        pos = m_file.lastIndexOf('\\');
+    if ( pos == std::string::npos ){
+        pos = m_file.find('\\');
     }
 #endif
 
-    if ( pos != -1 )
-        return m_file.mid(pos + 1);
+    if ( pos != std::string::npos )
+        return m_file.substr(pos + 1);
 
     return m_file;
 }
 
-QString Exception::location() const{
-    return m_functionName + "(" + fileName() + ":" + QString::number(line()) + ")";
+std::string Exception::location() const{
+    std::stringstream sstream;
+    sstream << m_functionName << "(" << fileName() << ":" << line() << ")";
+    return sstream.str();
 }
 
 

@@ -15,10 +15,12 @@
 ****************************************************************************/
 
 #include "qloglistenersocket.h"
-#include "live/plugincontext.h"
+#include "live/applicationcontext.h"
+#include "live/visuallogqt.h"
 #include "live/exception.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
 #include "live/mlnodetojson.h"
+#include "live/viewcontext.h"
 
 #include <QMetaType>
 #include <QMetaObject>
@@ -78,8 +80,10 @@ void QLogListenerSocket::tcpRead(){
 }
 
 void QLogListenerSocket::tcpError(QAbstractSocket::SocketError){
-    lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Log listener socket error: " + m_socket->errorString(), 0);
-    lv::PluginContext::engine()->throwError(&e);
+    lv::Exception e = CREATE_EXCEPTION(
+        lv::Exception, "Log listener socket error: " + m_socket->errorString().toStdString(), 0
+    );
+    lv::ViewContext::instance().engine()->throwError(&e);
 }
 
 bool QLogListenerSocket::isPrefix(
@@ -135,11 +139,11 @@ int QLogListenerSocket::isIp(const QByteArray &buffer){
 
 void QLogListenerSocket::logLine(const QByteArray &buffer){
     if ( m_expectObject ){
-        lv::TypeInfo::Ptr ti = lv::PluginContext::engine()->typeInfo(m_expectObject->typeName);
+        lv::TypeInfo::Ptr ti = lv::ViewContext::instance().engine()->typeInfo(m_expectObject->typeName);
         QObject* object = ti->newInstance();
 
         lv::VisualLog vl(m_expectObject->level);
-        vl.at(m_expectObject->address, "", m_expectObject->line, m_expectObject->functionName);
+        vl.at(m_expectObject->address.toStdString(), "", m_expectObject->line, m_expectObject->functionName.toStdString());
         vl.overrideStamp(m_expectObject->stamp);
 
         if ( object && !ti.isNull() && ti->isSerializable() && ti->isLoggable() ){
@@ -149,7 +153,7 @@ void QLogListenerSocket::logLine(const QByteArray &buffer){
                 ti->deserialize(node, object);
                 ti->log(vl, object);
             } catch ( lv::Exception& e ){
-                lv::PluginContext::engine()->throwError(&e, this);
+                lv::ViewContext::instance().engine()->throwError(&e, this);
             }
 
         } else {
@@ -161,7 +165,7 @@ void QLogListenerSocket::logLine(const QByteArray &buffer){
 
     } else {
         if ( buffer.size() == 0 ){
-            lv::VisualLog().at(m_address, "");
+            lv::VisualLog().at(m_address.toStdString(), "");
             return;
         }
 
@@ -185,7 +189,7 @@ void QLogListenerSocket::logLine(const QByteArray &buffer){
                     QDateTime stamp(QDate(year, month, day), QTime(hour, minute, second, msecond));
 
                     lv::VisualLog::MessageInfo::Level level = lv::VisualLog::MessageInfo::levelFromString(
-                        buffer.mid(levelIndex, functionIndex - levelIndex - 1)
+                        buffer.mid(levelIndex, functionIndex - levelIndex - 1).toStdString()
                     );
 
                     QString functionName = buffer.mid(functionIndex, lineIndex - functionIndex - 1);
@@ -203,7 +207,7 @@ void QLogListenerSocket::logLine(const QByteArray &buffer){
                         m_expectObject->stamp        = stamp;
                         m_expectObject->typeName     = buffer.mid(separatorIndex + 4);
                     } else {
-                        lv::VisualLog(level).at(buffer.mid(0, dateIndex) + m_address, "", line, functionName)
+                        lv::VisualLog(level).at((buffer.mid(0, dateIndex) + m_address).toStdString(), "", line, functionName.toStdString())
                                             .overrideStamp(stamp) << buffer.mid(separatorIndex + 2);
                     }
 
@@ -219,7 +223,7 @@ void QLogListenerSocket::logLine(const QByteArray &buffer){
             m_expectObject->stamp = QDateTime::currentDateTime();
             m_expectObject->typeName = buffer.mid(2);
         } else {
-            lv::VisualLog().at(m_address, "") << buffer;
+            lv::VisualLog().at(m_address.toStdString(), "") << buffer;
         }
     }
 }

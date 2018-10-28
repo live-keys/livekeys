@@ -17,16 +17,16 @@
 #ifndef LVBASEGLOBAL_H
 #define LVBASEGLOBAL_H
 
-#include <qglobal.h>
+#include "live/lvglobal.h"
 
 #ifndef LV_BASE_STATIC
 #  ifdef LV_BASE_LIB
-#    define LV_BASE_EXPORT Q_DECL_EXPORT
+#    define LV_BASE_EXPORT LV_EXPORT
 #  else
-#    define LV_BASE_EXPORT Q_DECL_IMPORT
+#    define LV_BASE_EXPORT LV_IMPORT
 #  endif
 #else
 #  define LVBASE_EXPORT
 #endif
 
-#endif //LVBASEGLOBAL
+#endif //LVBASEGLOBAL_H

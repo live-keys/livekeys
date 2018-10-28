@@ -59,7 +59,9 @@ void ProjectDocument::resetContent(const QString &content){
 void ProjectDocument::readContent(){
     if ( m_file->path() != "" ){
         addEditingState(ProjectDocument::Read);
-        m_textDocument->setPlainText(parentAsProject()->lockedFileIO()->readFromFile(m_file->path()));
+        m_textDocument->setPlainText(
+            QString::fromStdString(parentAsProject()->lockedFileIO()->readFromFile(m_file->path().toStdString()))
+        );
         removeEditingState(ProjectDocument::Read);
         m_lastModified = QFileInfo(m_file->path()).lastModified();
         m_changes.clear();
@@ -514,7 +516,7 @@ void ProjectDocument::documentContentsChanged(int position, int charsRemoved, in
 bool ProjectDocument::save(){
     syncContent();
     if ( m_file->path() != "" ){
-        if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path(), m_textDocument->toPlainText() ) ){
+        if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path().toStdString(), m_textDocument->toPlainText().toStdString() ) ){
             setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
             if ( parentAsProject() )
@@ -530,7 +532,7 @@ bool ProjectDocument::saveAs(const QString &path){
         save();
     } else if ( path != "" ){
         syncContent();
-        if ( parentAsProject()->lockedFileIO()->writeToFile(path, m_textDocument->toPlainText() ) ){
+        if ( parentAsProject()->lockedFileIO()->writeToFile(path.toStdString(), m_textDocument->toPlainText().toStdString() ) ){
             ProjectFile* file = parentAsProject()->relocateDocument(m_file->path(), path, this);
             if ( file ){
                 m_file->setDocument(nullptr);

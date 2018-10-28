@@ -1,8 +1,9 @@
 #include "tcpagent.h"
 #include "live/mlnode.h"
 #include "live/mlnodetojson.h"
-#include "live/plugincontext.h"
-#include "live/engine.h"
+#include "live/applicationcontext.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
 #include "live/visuallog.h"
 #include "tuplepropertymap.h"
 #include <QQmlComponent>
@@ -116,11 +117,11 @@ void TcpAgent::socketData(){
 
             if ( n.hasKey("input") ){
                 m_input = new QQmlPropertyMap(m_root);
-                TuplePropertyMap::deserialize(PluginContext::engine(), n["input"], *m_input);
+                TuplePropertyMap::deserialize(ViewContext::instance().engine(), n["input"], *m_input);
             }
             if ( n.hasKey("output") ){
                 m_output = new QQmlPropertyMap(m_root);
-                TuplePropertyMap::deserialize(PluginContext::engine(), n["output"], *m_output);
+                TuplePropertyMap::deserialize(ViewContext::instance().engine(), n["output"], *m_output);
             }
 
             if ( importsObject ){
@@ -163,7 +164,7 @@ void TcpAgent::outputValueChanged(const QString &, const QVariant &){
     MLNode n(MLNode::Object);
     MLNode result;
 
-    TuplePropertyMap::serialize(lv::PluginContext::engine(), *m_output, result);
+    TuplePropertyMap::serialize(lv::ViewContext::instance().engine(), *m_output, result);
     n["output"] = result;
 
     QByteArray bytes;

@@ -34,6 +34,7 @@ class LiveCVScript : public QObject{
 
 public:
     LiveCVScript(const QStringList& argvTail, QObject* parent = 0);
+    LiveCVScript(const std::vector<std::string>& argvTail, QObject* parent = 0);
     ~LiveCVScript();
 
     const QStringList& argv() const;

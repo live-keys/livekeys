@@ -25,7 +25,7 @@
 
 namespace lv{
 
-class Engine;
+class ViewEngine;
 class Project;
 class CodeQmlHandler;
 class ProjectQmlScanner;
@@ -49,7 +49,7 @@ public:
     explicit ProjectQmlScanMonitor(
         ProjectQmlExtension* projectHandler,
         Project* project,
-        Engine*  engine,
+        ViewEngine*  engine,
         QObject* parent = 0
     );
     ~ProjectQmlScanMonitor();
@@ -79,7 +79,7 @@ private:
     ProjectQmlExtension*  m_projectHandler;
     ProjectQmlScanner*    m_scanner;
     Project*              m_project;
-    Engine*               m_engine;
+    ViewEngine*               m_engine;
     QSet<CodeQmlHandler*> m_scopeListeners;
     ProjectQmlScope::Ptr  m_projectScope;
 };

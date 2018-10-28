@@ -20,16 +20,13 @@
 
 #include "testrunner.h"
 #include "mlnodetest.h"
-#include "mlnodetojstest.h"
 #include "mlnodetojsontest.h"
 #include "visuallogtest.h"
-#include "filtertest.h"
 
 int main(int argc, char *argv[]){
 
     QCoreApplication app(argc, argv);
     app.setAttribute(Qt::AA_Use96Dpi, true);
 
-//    return lv::TestRunner::runTest(FilterTest::testIndex, argc, argv);
     return lv::TestRunner::runTests(argc, argv);
 }

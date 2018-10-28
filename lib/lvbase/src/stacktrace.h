@@ -19,7 +19,7 @@
 
 #include <string>
 #include <vector>
-#include <QSharedPointer>
+#include <memory>
 
 #include "live/lvbaseglobal.h"
 
@@ -74,7 +74,7 @@ class LV_BASE_EXPORT StackTrace{
 public:
     typedef std::vector<StackFrame>                 Container;
     typedef std::vector<StackFrame>::const_iterator ConstIterator;
-    typedef QSharedPointer<StackTrace> Ptr;
+    typedef std::shared_ptr<StackTrace> Ptr;
 
     friend class StackTraceCapture;
 

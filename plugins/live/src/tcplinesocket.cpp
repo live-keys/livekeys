@@ -1,6 +1,6 @@
 #include "tcplinesocket.h"
-#include "live/engine.h"
-#include "live/plugincontext.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
 #include "live/exception.h"
 #include "live/mlnode.h"
 #include "live/mlnodetojson.h"
@@ -45,8 +45,10 @@ QByteArray TcpLineSocket::readAll(){
 }
 
 void TcpLineSocket::tcpError(QAbstractSocket::SocketError){
-    lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Log listener socket error: " + m_socket->errorString(), 0);
-    lv::PluginContext::engine()->throwError(&e);
+    lv::Exception e = CREATE_EXCEPTION(
+        lv::Exception, "Log listener socket error: " + m_socket->errorString().toStdString(), 0
+    );
+    lv::ViewContext::instance().engine()->throwError(&e);
 }
 
 

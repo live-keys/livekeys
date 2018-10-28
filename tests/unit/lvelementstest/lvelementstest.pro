@@ -21,7 +21,8 @@ HEADERS += \
     $$PWD/jsmemorytest.h \
     $$PWD/jstypestest.h \
     $$PWD/jslisttest.h \
-    $$PWD/lvcompiletest.h
+    $$PWD/lvcompiletest.h \
+    mlnodetojstest.h
 
 SOURCES += \
     $$PWD/main.cpp \
@@ -36,7 +37,8 @@ SOURCES += \
     $$PWD/jsmemorytest.cpp \
     $$PWD/jstypestest.cpp \
     $$PWD/jslisttest.cpp \
-    $$PWD/lvcompiletest.cpp
+    $$PWD/lvcompiletest.cpp \
+    mlnodetojstest.cpp
 
 OTHER_FILES += $$PWD/data/*.*
 

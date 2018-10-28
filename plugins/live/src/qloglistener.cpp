@@ -16,9 +16,10 @@
 
 #include "qloglistener.h"
 #include "qloglistenersocket.h"
-#include "live/plugincontext.h"
+#include "live/applicationcontext.h"
 #include "live/exception.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
 
 #include <QHostAddress>
 #include <QTcpServer>
@@ -84,15 +85,15 @@ void QLogListener::startListening(){
     if ( m_address == "" ){
         if( !m_server->listen(QHostAddress::Any, m_port) ){
             lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Cannot open tcp connection.", 0);
-            lv::PluginContext::engine()->throwError(&e);
+            lv::ViewContext::instance().engine()->throwError(&e);
             return;
         }
         m_address = m_server->serverAddress().toString();
         emit listening();
     } else {
         if( !m_server->listen(QHostAddress(m_address), m_port) ){
-            lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Cannot open tcp connection to " + m_address + ".", 0);
-            lv::PluginContext::engine()->throwError(&e);
+            lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Cannot open tcp connection to " + m_address.toStdString() + ".", 0);
+            lv::ViewContext::instance().engine()->throwError(&e);
             return;
         }
         emit listening();

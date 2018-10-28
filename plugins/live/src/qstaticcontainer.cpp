@@ -16,6 +16,7 @@
 
 #include "qstaticcontainer.h"
 #include "live/visuallog.h"
+#include "live/visuallogqt.h"
 #include <QQuickWindow>
 #include <QQuickItem>
 #include <QQmlContext>

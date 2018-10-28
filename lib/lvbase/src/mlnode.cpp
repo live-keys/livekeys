@@ -76,6 +76,12 @@ bool MLNode::BytesType::operator ==(const MLNode::BytesType &other) const{
     return (m_data == other.m_data && m_ref == other.m_ref);
 }
 
+MLNode::StringType MLNode::BytesType::toBase64String(){
+    return MLNode::StringType(QByteArray::fromRawData(
+        reinterpret_cast<const char*>(m_data), static_cast<int>(m_size)).toBase64().data()
+    );
+}
+
 QByteArray MLNode::BytesType::toBase64(){
     return QByteArray::fromRawData(reinterpret_cast<const char*>(m_data), static_cast<int>(m_size)).toBase64();
 }
@@ -260,7 +266,7 @@ MLNode::Iterator::Reference MLNode::Iterator::operator*() const{
     switch ( m_object->m_type ){
     case MLNode::Object:
         assert(m_it.objectIterator != m_object->m_value.asObject->end());
-        return m_it.objectIterator.value();
+        return m_it.objectIterator->second;
     case MLNode::Array:
         assert(m_it.arrayIterator != m_object->m_value.asArray->end());
         return *m_it.arrayIterator;
@@ -278,7 +284,7 @@ MLNode::Iterator::Pointer MLNode::Iterator::operator->() const{
     switch (m_object->m_type){
     case MLNode::Object:
         assert(m_it.objectIterator != m_object->m_value.asObject->end());
-        return &(m_it.objectIterator.value());
+        return &(m_it.objectIterator->second);
     case MLNode::Array:
         assert(m_it.arrayIterator != m_object->m_value.asArray->end());
         return &*m_it.arrayIterator;
@@ -305,7 +311,7 @@ MLNode::Iterator::Reference MLNode::Iterator::operator[](MLNode::Iterator::Diffe
 MLNode::ObjectType::key_type MLNode::Iterator::key() const{
     assert(m_object != nullptr);
     if ( m_object->m_type == MLNode::Object )
-        return m_it.objectIterator.key();
+        return m_it.objectIterator->first;
 
     THROW_EXCEPTION(InvalidMLTypeException, "Cannot use key with non-object iterators.", 0);
 }
@@ -534,7 +540,7 @@ MLNode::ConstIterator::ConstReference MLNode::ConstIterator::operator*() const{
     switch ( m_object->m_type ){
     case MLNode::Object:
         assert(m_it.objectIterator != m_object->m_value.asObject->end());
-        return m_it.objectIterator.value();
+        return m_it.objectIterator->second;
     case MLNode::Array:
         assert(m_it.arrayIterator != m_object->m_value.asArray->end());
         return *m_it.arrayIterator;
@@ -552,7 +558,7 @@ MLNode::ConstIterator::ConstPointer MLNode::ConstIterator::operator->() const{
     switch (m_object->m_type){
     case MLNode::Object:
         assert(m_it.objectIterator != m_object->m_value.asObject->end());
-        return &(m_it.objectIterator.value());
+        return &(m_it.objectIterator->second);
     case MLNode::Array:
         assert(m_it.arrayIterator != m_object->m_value.asArray->end());
         return &*m_it.arrayIterator;
@@ -579,7 +585,7 @@ MLNode::ConstIterator::ConstReference MLNode::ConstIterator::operator[](MLNode::
 MLNode::ObjectType::key_type MLNode::ConstIterator::key() const{
     assert(m_object != nullptr);
     if ( m_object->m_type == MLNode::Object )
-        return m_it.objectIterator.key();
+        return m_it.objectIterator->first;
 
     THROW_EXCEPTION(InvalidMLTypeException, "Cannot use key with non-object iterators.", 0);
 }
@@ -648,7 +654,7 @@ MLNode::MLNode(const std::initializer_list<MLNode> &init)
         m_type  = Type::Object;
         m_value = Type::Object;
         std::for_each(init.begin(), init.end(), [this](const MLNode& element){
-            m_value.asObject->insert(*(element[0].m_value.asString), element[1]);
+            (*m_value.asObject)[*(element[0].m_value.asString)] = element[1];
         });
     } else {
         m_type  = Type::Array;
@@ -778,7 +784,7 @@ void MLNode::append(const MLNode &value){
     if ( m_type != Type::Array )
         THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
 
-    m_value.asArray->append(value);
+    m_value.asArray->push_back(value);
 }
 
 bool MLNode::isNull() const{
@@ -811,7 +817,7 @@ const MLNode &MLNode::operator[](const MLNode::StringType &reference) const{
 void MLNode::toStringImpl(std::ostream &o, int indent, int indentStep) const{
     switch(m_type){
     case Type::Object:
-        if ( m_value.asObject->isEmpty() ){
+        if ( m_value.asObject->empty() ){
             o << "{}";
             return;
         }
@@ -825,10 +831,10 @@ void MLNode::toStringImpl(std::ostream &o, int indent, int indentStep) const{
             if ( it != m_value.asObject->cbegin() )
                 o << (indent >= 0 ? ",\n" : ",");
             o << (indent >= 0 ? StringType(indent, ' ') : "")
-              << "\"" << it.key() << "\":"
+              << "\"" << it->first << "\":"
               << (indent >= 0 ? " " : "");
 
-            it.value().toStringImpl(o, indent, indentStep);
+            it->second.toStringImpl(o, indent, indentStep);
         }
 
         if ( indent >= 0 ){
@@ -841,7 +847,7 @@ void MLNode::toStringImpl(std::ostream &o, int indent, int indentStep) const{
         return;
 
     case Type::Array:
-        if ( m_value.asArray->isEmpty() ){
+        if ( m_value.asArray->empty() ){
             o << "[]";
             return;
         }
@@ -1004,14 +1010,15 @@ bool MLNode::hasKey(const MLNode::StringType &key) const{
     if ( m_type != Type::Object )
         THROW_EXCEPTION(InvalidMLTypeException, "Node is not of object type.", 0);
 
-    return m_value.asObject->contains(key);
+    auto it = m_value.asObject->find(key);
+    return it != m_value.asObject->end();
 }
 
 void MLNode::remove(const MLNode::StringType &key){
     if ( m_type != Type::Object )
         THROW_EXCEPTION(InvalidMLTypeException, "Node is not of object type.", 0);
 
-    m_value.asObject->remove(key);
+    m_value.asObject->erase(key);
 }
 
 

@@ -165,6 +165,7 @@ public:
 
     Value toValue(Engine* engine) const;
 
+    bool isNull() const;
     bool isBool() const;
     bool isInt() const;
     bool isNumber() const;

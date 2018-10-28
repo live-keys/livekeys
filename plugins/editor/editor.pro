@@ -9,6 +9,7 @@ DEFINES += LV_EDITOR_PLUGIN
 uri = editor
 
 linkLocalLibrary(lvbase,   lvbase)
+linkLocalLibrary(lvview,  lvview)
 linkLocalLibrary(lveditor, lveditor)
 
 # Source

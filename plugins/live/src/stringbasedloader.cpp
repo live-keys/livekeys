@@ -1,8 +1,8 @@
 #include "stringbasedloader.h"
 
-#include "live/plugincontext.h"
 #include "live/exception.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -48,17 +48,17 @@ void StringBasedLoader::createObject(){
     m_sourceComponent->setData(m_source.toUtf8(), ctx->baseUrl());
     if ( m_sourceComponent->isError() ){
         lv::Exception e = CREATE_EXCEPTION(
-            lv::Exception, "Failed to compile component: " + m_sourceComponent->errorString(), 0
+            lv::Exception, "Failed to compile component: " + m_sourceComponent->errorString().toStdString(), 0
         );
-        lv::PluginContext::engine()->throwError(&e);
+        lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
 
     m_item = m_sourceComponent->create(ctx);
     if ( !m_item ){
         lv::Exception e = CREATE_EXCEPTION(
-            lv::Exception, "Failed to create component object: " + ctx->baseUrl().toLocalFile(), 0);
-        lv::PluginContext::engine()->throwError(&e);
+            lv::Exception, "Failed to create component object: " + ctx->baseUrl().toLocalFile().toStdString(), 0);
+        lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
 

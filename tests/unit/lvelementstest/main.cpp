@@ -18,6 +18,7 @@
 #include <QTest>
 #include <qqml.h>
 
+#include "live/applicationcontext.h"
 #include "live/elements/engine.h"
 
 #include "testrunner.h"
@@ -31,10 +32,12 @@
 #include "jsmemorytest.h"
 #include "jslisttest.h"
 #include "jserrorhandlingtest.h"
+#include "mlnodetojstest.h"
 #include "lvcompiletest.h"
 
 
 int main(int argc, char *argv[]){
+    lv::ApplicationContext::initialize();
 
     QCoreApplication app(argc, argv);
     app.setAttribute(Qt::AA_Use96Dpi, true);

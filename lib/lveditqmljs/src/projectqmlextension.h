@@ -33,13 +33,13 @@ class PluginInfoExtractor;
 class LV_EDITQMLJS_EXPORT ProjectQmlExtension : public ProjectExtension{
 
 public:
-    ProjectQmlExtension(Settings* settings, Project* project, Engine *engine);
+    ProjectQmlExtension(Settings* settings, Project* project, ViewEngine *engine);
     virtual ~ProjectQmlExtension();
 
     AbstractCodeHandler* createHandler(
         ProjectDocument* document,
         Project* project,
-        Engine* engine,
+        ViewEngine* engine,
         QObject* parent
     );
 

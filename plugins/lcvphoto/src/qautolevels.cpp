@@ -15,8 +15,8 @@
 ****************************************************************************/
 
 #include "qautolevels.h"
-#include "live/plugincontext.h"
-#include "live/engine.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
 
 #include <QQmlEngine>
 #include <QJSValueIterator>
@@ -33,7 +33,7 @@ void QAutoLevels::setHistogram(QMat *histogram){
     if (m_histogram == QMat::nullMat() )
         return;
 
-    m_output = lv::PluginContext::engine()->engine()->newObject();
+    m_output = lv::ViewContext::instance().engine()->engine()->newObject();
     const cv::Mat& hist = *histogram->cvMat();
 
     if ( hist.cols < 3 )
@@ -63,7 +63,7 @@ void QAutoLevels::setHistogram(QMat *histogram){
         if ( white < black + 2 )
             white = black + 2;
 
-        QJSValue channelAutoLevels = lv::PluginContext::engine()->engine()->newArray(3);
+        QJSValue channelAutoLevels = lv::ViewContext::instance().engine()->engine()->newArray(3);
         channelAutoLevels.setProperty(0, black);
         channelAutoLevels.setProperty(1, 1.0);
         channelAutoLevels.setProperty(2, white);
