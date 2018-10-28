@@ -6,6 +6,7 @@
 #include "container.h"
 #include "live/exception.h"
 #include "live/visuallog.h"
+#include "visuallogjsobject.h"
 #include "errorhandler.h"
 
 #include <sstream>
@@ -519,6 +520,10 @@ void Engine::importInternals(){
 
     m_d->rectangleTemplate.Reset(isolate(), Rectangle::functionTemplate(isolate()));
     context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Rectangle"), rectangleTemplate()->GetFunction());
+
+    context->Global()->Set(
+        v8::String::NewFromUtf8(isolate(), "vlog"),
+        VisualLogJsObject::functionTemplate(isolate())->InstanceTemplate()->NewInstance());
 
     context->Global()->Set(
         v8::String::NewFromUtf8(isolate(), "linkError"),

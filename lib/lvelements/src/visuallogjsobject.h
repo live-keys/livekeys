@@ -129,6 +129,25 @@ public:
         }
     }
 
+
+    static v8::Local<v8::FunctionTemplate> functionTemplate(v8::Isolate* isolate){
+        v8::Local<v8::FunctionTemplate> localTpl;
+        localTpl = v8::FunctionTemplate::New(isolate);
+        localTpl->SetClassName(v8::String::NewFromUtf8(isolate, "VisualLog"));
+
+        v8::Local<v8::Template> tplPrototype = localTpl->PrototypeTemplate();
+
+        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "f"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::f));
+        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "e"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::e));
+        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "w"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::w));
+        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "i"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::i));
+        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "d"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::d));
+        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "v"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::v));
+        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "configure"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::configure));
+
+        return localTpl;
+    }
+
 public:
     VisualLogJsObject();
 };
