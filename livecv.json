@@ -49,6 +49,7 @@
                     "{release}/bin" : {
                         "livecv" : "-",
                         "liblvbase.so*" : "-",
+                        "liblvview.so*" : "-",
                         "liblveditor.so*" : "-",
                         "liblveditqmljs.so*" : "-",
                         "plugins" : {
@@ -71,6 +72,11 @@
                         "from": "{source}/lib/lvbase/include/live",
                         "source": ["{source}/lib/lvbase/src"],
                         "to": "dev/lvbase/include/live"
+                    },
+                    {
+                        "from": "{source}/lib/lvview/include/live",
+                        "source": ["{source}/lib/lvview/src"],
+                        "to": "dev/lvview/include/live"
                     },
                     {
                         "from": "{source}/lib/lveditor/include/live",
@@ -121,6 +127,7 @@
                   "{release}/bin" : {
                       "livecv" : "-",
                       "liblvbase.so*" : "-",
+                      "liblvview.so*" : "-",
                       "liblveditor.so*" : "-",
                       "liblveditqmljs.so*" : "-",
                       "plugins" : {
@@ -206,6 +213,11 @@
                         "from": "{source}/lib/lvbase/include/live",
                         "source": ["{source}/lib/lvbase/src"],
                         "to": "dev/lvbase/include/live"
+                    },
+                    {
+                        "from": "{source}/lib/lvview/include/live",
+                        "source": ["{source}/lib/lvview/src"],
+                        "to": "dev/lvview/include/live"
                     },
                     {
                         "from": "{source}/lib/lveditor/include/live",
@@ -337,6 +349,7 @@
                       },
                       "{release}/bin/livecv.exe" : "-",
                       "{release}/bin/lvbase.dll" : "-",
+                      "{release}/bin/lview.dll" : "-",
                       "{release}/bin/lveditor.dll" : "-",
                       "{release}/bin/lveditqmljs.dll" : "-",
                       "{release}/bin/external/opencv" : "external/opencv",
@@ -350,6 +363,7 @@
                             "lcvphoto": "plugins/lcvphoto"
                       },
                       "{release}/bin/dev/lvbase/lib/lvbase.lib" : "dev/lvbase/lib/-",
+                      "{release}/bin/dev/lvview/lib/lvview.lib" : "dev/lvview/lib/-",
                       "{release}/bin/dev/lveditor/lib/lveditor.lib" : "dev/lveditor/lib/-",
                       "{release}/bin/dev/lveditqmljs/lib/lveditqmljs.lib" : "dev/lveditqmljs/lib/-",
                       "{release}/bin/dev/plugins": {
@@ -369,6 +383,11 @@
                           "from": "{source}/lib/lvbase/include/live",
                           "source": ["{source}/lib/lvbase/src"],
                           "to": "dev/lvbase/include/live"
+                      },
+                      {
+                          "from": "{source}/lib/lvview/include/live",
+                          "source": ["{source}/lib/lvview/src"],
+                          "to": "dev/lvview/include/live"
                       },
                       {
                           "from": "{source}/lib/lveditor/include/live",
@@ -518,6 +537,11 @@
                         "from": "{source}/lib/lvbase/include/live",
                         "source": ["{source}/lib/lvbase/src"],
                         "to": "livecv.app/Contents/Dev/lvbase/include/live"
+                    },
+                    {
+                        "from": "{source}/lib/lvview/include/live",
+                        "source": ["{source}/lib/lvview/src"],
+                        "to": "dev/lvview/include/live"
                     },
                     {
                         "from": "{source}/lib/lveditor/include/live",

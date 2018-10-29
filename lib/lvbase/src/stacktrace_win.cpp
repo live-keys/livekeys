@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "stacktrace.h"
+#include <QtGlobal>
 
 #ifdef USE_STACK_TRACE
 #include <Windows.h>
