@@ -43,7 +43,7 @@ public:
     class Configuration;
     class ConfigurationContainer;
 
-    class LV_BASE_EXPORT SourceLocation{
+    class SourceLocation{
     public:
         SourceLocation(const std::string& file, int line, const std::string& fileName);
         SourceLocation(const std::string& remote, const std::string& file, int line, const std::string& functionName);
@@ -208,6 +208,31 @@ private:
     bool              m_objectOutput;
 
 };
+
+// VisualLog::SourceLocation
+// ---------------------------------------------------------------------
+
+inline VisualLog::SourceLocation::SourceLocation(const std::string &pfile, int pline, const std::string &pFunctionName)
+    : file(pfile)
+    , line(pline)
+    , functionName(pFunctionName)
+{
+}
+
+inline VisualLog::SourceLocation::SourceLocation(
+        const std::string &premote,
+        const std::string &pfile,
+        int pline,
+        const std::string &pfunctionName)
+    : remote(premote)
+    , file(pfile)
+    , line(pline)
+    , functionName(pfunctionName)
+{
+}
+
+// VisualLog
+// ---------------------------------------------------------------------
 
 template<typename T> void VisualLog::object(const T &value){
     m_objectOutput = true;

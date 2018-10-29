@@ -53,12 +53,12 @@ void ApplicationContext::initializePaths(){
     m_applicationPath = QFileInfo(applicationFilePath).path().toStdString();
     m_executablePath = QFileInfo(applicationFilePath).path().toStdString();
     m_releasePath = QFileInfo(applicationFilePath).path().toStdString();
-    m_linkPath = applicationPath + "/link";
+    m_linkPath = applicationPath() + "/link";
     m_pluginPath = applicationPath() + "/plugins";
     m_externalPath = applicationPath() + "/external";
     m_librariesPath = applicationPath() + "/libraries";
     m_developmentPath = applicationPath() + "/dev";
-    m_configPath = pplicationPath() + "/config";
+    m_configPath = applicationPath() + "/config";
 #endif
 }
 

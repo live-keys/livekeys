@@ -49,12 +49,12 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     m_errorType = m_engine->evaluate("Error");
 
     QJSValue markErrorConstructor = m_engine->evaluate(
-        "function(engine){"
+        "(function(engine){"
             "return function(error, object){\n"
                 "error.message += engine.markErrorObject(object);"
                 "return error;"
             "}"
-        "}"
+        "})"
     );
     QJSValue markErrorFn = markErrorConstructor.call(QJSValueList() << engine->newQObject(this));
     m_engine->globalObject().setProperty("linkError", markErrorFn);

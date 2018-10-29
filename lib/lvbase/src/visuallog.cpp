@@ -35,7 +35,7 @@ void vLoggerConsole(const std::string& message)
 #include <windows.h>
 void vLoggerConsole(const std::string& message)
 {
-   OutputDebugStringW(reinterpret_cast<const WCHAR*>(message.utf16()));
+   OutputDebugStringA(message.c_str());
 }
 #endif
 
@@ -247,29 +247,6 @@ VisualLog::Configuration *VisualLog::ConfigurationContainer::configurationAt(int
 
 int VisualLog::ConfigurationContainer::configurationCount() const{
     return m_configurations.size();
-}
-
-
-// VisualLog::Location
-// ---------------------------------------------------------------------
-
-VisualLog::SourceLocation::SourceLocation(const std::string &pfile, int pline, const std::string &pFunctionName)
-    : file(pfile)
-    , line(pline)
-    , functionName(pFunctionName)
-{
-}
-
-VisualLog::SourceLocation::SourceLocation(
-        const std::string &premote,
-        const std::string &pfile,
-        int pline,
-        const std::string &pfunctionName)
-    : remote(premote)
-    , file(pfile)
-    , line(pline)
-    , functionName(pfunctionName)
-{
 }
 
 // VisualLog

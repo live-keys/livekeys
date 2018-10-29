@@ -998,9 +998,9 @@ const MLNode::ArrayType &MLNode::asArray() const{
 
 int MLNode::size() const{
     if ( m_type == Type::Array ){
-        return m_value.asArray->size();
+        return static_cast<int>(m_value.asArray->size());
     } else if ( m_type == Type::Object ){
-        return m_value.asObject->size();
+        return static_cast<int>(m_value.asObject->size());
     } else {
         return 0;
     }

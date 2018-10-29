@@ -99,7 +99,7 @@ public:
     // MLNode::IteratorValue
     // ---------------------
 
-    class LV_BASE_EXPORT IteratorValue{
+    class IteratorValue{
     public:
         ObjectType::iterator objectIterator;
         ArrayType::iterator  arrayIterator;
@@ -167,7 +167,7 @@ public:
     // MLNode::ConstIteratorValue
     // --------------------------
 
-    class LV_BASE_EXPORT ConstIteratorValue{
+    class ConstIteratorValue{
     public:
         ObjectType::const_iterator objectIterator;
         ArrayType::const_iterator  arrayIterator;
@@ -246,7 +246,7 @@ public:
     };
 
 public:
-    union MLValue{
+    union LV_BASE_EXPORT MLValue{
         ObjectType*  asObject;
         ArrayType*   asArray;
         BytesType*   asBytes;
