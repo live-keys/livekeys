@@ -462,7 +462,6 @@
                         "Qt3DQuickInput.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuickInput.framework/Versions/5",
                         "Qt3DQuickRender.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuickRender.framework/Versions/5",
                         "Qt3DRender.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DRender.framework/Versions/5",
-                        "QtCLucene.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtCLucene.framework/Versions/5",
                         "QtConcurrent.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtConcurrent.framework/Versions/5",
                         "QtCore.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtCore.framework/Versions/5",
                         "QtDBus.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtDBus.framework/Versions/5",
