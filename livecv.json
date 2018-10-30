@@ -495,8 +495,8 @@
                         "libQt5OpenGLExtensions.la" : "livecv.app/Contents/Frameworks/-",
                         "libQt5PacketProtocol.a" : "livecv.app/Contents/Frameworks/-",
                         "libQt5PacketProtocol.la" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5PlatformSupport.a" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5PlatformSupport.la" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5PlatformCompositorSupport.a" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5PlatformCompositorSupport.la" : "livecv.app/Contents/Frameworks/-",
                         "libQt5QmlDebug.a" : "livecv.app/Contents/Frameworks/-",
                         "libQt5QmlDebug.la" : "livecv.app/Contents/Frameworks/-",
                         "libQt5QmlDevTools.a" : "livecv.app/Contents/Frameworks/-",
@@ -504,7 +504,7 @@
                         "libQt5UiTools.a" : "livecv.app/Contents/Frameworks/-",
                         "libQt5UiTools.la" : "livecv.app/Contents/Frameworks/-",
                         "libqtfreetype.a" : "livecv.app/Contents/Frameworks/-",
-                        "libqtpng.a" : "livecv.app/Contents/Frameworks/-"
+                        "libqtlibpng.a" : "livecv.app/Contents/Frameworks/-"
                     }
                 }},
                 { "clean" : {
