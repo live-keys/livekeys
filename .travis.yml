@@ -65,7 +65,7 @@ install:
     fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
       sudo apt-get install -y libtiff5 libtiff5-dev;
-      git clone https://github.com/Itseez/opencv.git;
+      git clone --single-branch -b 3.4 https://github.com/opencv/opencv.git;
       cd opencv;
       mkdir build;
       cd build;
