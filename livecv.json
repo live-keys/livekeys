@@ -349,7 +349,7 @@
                       },
                       "{release}/bin/livecv.exe" : "-",
                       "{release}/bin/lvbase.dll" : "-",
-                      "{release}/bin/lview.dll" : "-",
+                      "{release}/bin/lvview.dll" : "-",
                       "{release}/bin/lveditor.dll" : "-",
                       "{release}/bin/lveditqmljs.dll" : "-",
                       "{release}/bin/external/opencv" : "external/opencv",
