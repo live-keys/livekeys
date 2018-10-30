@@ -60,8 +60,8 @@ install:
       ls;
       hdiutil attach -mountpoint installqt qt-opensource-mac-x64-5.11.1.dmg;
       ./installqt/qt-opensource-mac-x64-5.11.1.app/Contents/MacOS/qt-opensource-mac-x64-5.11.1 --script resources/install-qt-macos.qs --verbose --silent -platform minimal;
-      ls /opt/qt/5.11/clang_64;
-      export QTDIR=/opt/qt/5.11/clang_64;
+      ls /opt/qt/5.11.1/clang_64;
+      export QTDIR=/opt/qt/5.11.1/clang_64;
     fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
       sudo apt-get install -y libtiff5 libtiff5-dev;
@@ -80,7 +80,7 @@ install:
       wget http://download.qt.io/official_releases/qt/5.11/5.11.1/qt-opensource-linux-x64-5.11.1.run;
       sudo chmod 777 qt-opensource-linux-x64-5.11.1.run;
       ./qt-opensource-linux-x64-5.11.1.run --script resources/install-qt.qs --verbose --silent -platform minimal;
-      export QTDIR=/opt/qt/5.11/gcc_64;
+      export QTDIR=/opt/qt/5.11.1/gcc_64;
     fi
 
 script:
