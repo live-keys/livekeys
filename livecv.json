@@ -349,7 +349,7 @@
                       },
                       "{release}/bin/livecv.exe" : "-",
                       "{release}/bin/lvbase.dll" : "-",
-                      "{release}/bin/lview.dll" : "-",
+                      "{release}/bin/lvview.dll" : "-",
                       "{release}/bin/lveditor.dll" : "-",
                       "{release}/bin/lveditqmljs.dll" : "-",
                       "{release}/bin/external/opencv" : "external/opencv",
@@ -462,14 +462,13 @@
                         "Qt3DQuickInput.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuickInput.framework/Versions/5",
                         "Qt3DQuickRender.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuickRender.framework/Versions/5",
                         "Qt3DRender.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DRender.framework/Versions/5",
-                        "QtCLucene.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtCLucene.framework/Versions/5",
                         "QtConcurrent.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtConcurrent.framework/Versions/5",
                         "QtCore.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtCore.framework/Versions/5",
                         "QtDBus.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtDBus.framework/Versions/5",
                         "QtGui.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtGui.framework/Versions/5",
                         "QtMacExtras.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMacExtras.framework/Versions/5",
                         "QtMultimedia.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimedia.framework/Versions/5",
-                        "QtMultimediaQuick_p.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimediaQuick_p.framework/Versions/5",
+                        "QtMultimediaQuick.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimediaQuick_p.framework/Versions/5",
                         "QtMultimediaWidgets.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimediaWidgets.framework/Versions/5",
                         "QtNetwork.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtNetwork.framework/Versions/5",
                         "QtNfc.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtNfc.framework/Versions/5",
@@ -495,8 +494,8 @@
                         "libQt5OpenGLExtensions.la" : "livecv.app/Contents/Frameworks/-",
                         "libQt5PacketProtocol.a" : "livecv.app/Contents/Frameworks/-",
                         "libQt5PacketProtocol.la" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5PlatformSupport.a" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5PlatformSupport.la" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5PlatformCompositorSupport.a" : "livecv.app/Contents/Frameworks/-",
+                        "libQt5PlatformCompositorSupport.la" : "livecv.app/Contents/Frameworks/-",
                         "libQt5QmlDebug.a" : "livecv.app/Contents/Frameworks/-",
                         "libQt5QmlDebug.la" : "livecv.app/Contents/Frameworks/-",
                         "libQt5QmlDevTools.a" : "livecv.app/Contents/Frameworks/-",
@@ -504,7 +503,7 @@
                         "libQt5UiTools.a" : "livecv.app/Contents/Frameworks/-",
                         "libQt5UiTools.la" : "livecv.app/Contents/Frameworks/-",
                         "libqtfreetype.a" : "livecv.app/Contents/Frameworks/-",
-                        "libqtpng.a" : "livecv.app/Contents/Frameworks/-"
+                        "libqtlibpng.a" : "livecv.app/Contents/Frameworks/-"
                     }
                 }},
                 { "clean" : {
@@ -541,7 +540,7 @@
                     {
                         "from": "{source}/lib/lvview/include/live",
                         "source": ["{source}/lib/lvview/src"],
-                        "to": "dev/lvview/include/live"
+                        "to": "livecv.app/Contents/Dev/lvview/include/live"
                     },
                     {
                         "from": "{source}/lib/lveditor/include/live",
