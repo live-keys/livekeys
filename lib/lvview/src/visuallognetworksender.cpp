@@ -82,12 +82,12 @@ void VisualLogNetworkSender::onObject(
         const std::string &type,
         const MLNode &node)
 {
-    QByteArray nodestr;
+    std::string nodestr;
     ml::toJson(node, nodestr);
     std::string pref = messageInfo.prefix(configuration);
     QByteArray messageData =
         QByteArray() + pref.c_str() + "\\@" + type.c_str() + "\n" +
-        QString(pref.size(), ' ').toUtf8() + nodestr + "\n";
+        QString(static_cast<int>(pref.size()), ' ').toUtf8() + QByteArray::fromStdString(nodestr) + "\n";
     sendMessage(messageData);
 }
 

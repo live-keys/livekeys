@@ -30,7 +30,9 @@ class VisualLog;
 // StackFrame
 // ----------
 
-class LV_BASE_EXPORT StackFrame{
+LV_BASE_EXPORT std::string pathFileName(const std::string& path);
+
+class StackFrame{
 
 public:
     typedef unsigned long long AddressPtr;
@@ -42,18 +44,26 @@ public:
         const std::string& objectPath = "",
         const std::string& filePath = "",
         int line = -1
-    );
-    ~StackFrame();
+    )
+        : m_functionName(functionName)
+        , m_address(address)
+        , m_objectPath(objectPath)
+        , m_filePath(filePath)
+        , m_line(line)
+    {
+    }
 
-    const std::string& functionName() const;
-    AddressPtr address() const;
+    ~StackFrame(){}
 
-    const std::string& objectPath() const;
-    const std::string& filePath() const;
-    std::string fileName() const;
-    int line() const;
+    const std::string& functionName() const{ return m_functionName; }
+    AddressPtr address() const{ return m_address; }
 
-    bool hasLocation() const;
+    const std::string& objectPath() const{ return m_objectPath; }
+    const std::string& filePath() const{ return m_filePath; }
+    std::string fileName() const{ return pathFileName(m_filePath); }
+    int line() const{ return m_line; }
+
+    bool hasLocation() const{ return m_line != -1; }
 
 private:
     std::string m_functionName;
@@ -69,7 +79,6 @@ LV_BASE_EXPORT VisualLog &operator <<(VisualLog &vl, const StackFrame &value);
 // ----------
 
 class LV_BASE_EXPORT StackTrace{
-
 
 public:
     typedef std::vector<StackFrame>                 Container;

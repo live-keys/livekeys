@@ -58,10 +58,10 @@ void TcpAgent::sendError(const QByteArray& type, int code, const QString &messag
              {"type", type.toStdString()}
          }}
     };
-    QByteArray errorSerialized;
+    std::string errorSerialized;
     ml::toJson(errorObject, errorSerialized);
 
-    m_socket->write(errorSerialized);
+    m_socket->write(errorSerialized.c_str());
 }
 
 void TcpAgent::componentComplete(){
@@ -167,10 +167,10 @@ void TcpAgent::outputValueChanged(const QString &, const QVariant &){
     TuplePropertyMap::serialize(lv::ViewContext::instance().engine(), *m_output, result);
     n["output"] = result;
 
-    QByteArray bytes;
+    std::string bytes;
     ml::toJson(n, bytes);
 
-    m_socket->write(bytes);
+    m_socket->write(bytes.c_str());
 }
 
 void TcpAgent::socketError(QAbstractSocket::SocketError){

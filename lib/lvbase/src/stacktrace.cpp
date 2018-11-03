@@ -20,66 +20,25 @@
 
 namespace lv{
 
-
-// StackFrame
-// -----------------------------------------------------------------
-
-StackFrame::StackFrame(
-        const std::string &functionName,
-        StackFrame::AddressPtr address,
-        const std::string &objectPath,
-        const std::string &filePath,
-        int line)
-    : m_functionName(functionName)
-    , m_address(address)
-    , m_objectPath(objectPath)
-    , m_filePath(filePath)
-    , m_line(line)
-{
-}
-
-StackFrame::~StackFrame(){
-}
-
-const std::string &StackFrame::functionName() const{
-    return m_functionName;
-}
-
-const std::string &StackFrame::filePath() const{
-    return m_filePath;
-}
-
-std::string StackFrame::fileName() const{
-    std::string::size_type pos = m_filePath.rfind('/');
+std::string pathFileName(const std::string &path){
+    std::string::size_type pos = path.rfind('/');
 
 #ifdef Q_OS_WIN
     if ( pos == std::string::npos ){
-        pos = m_filePath.rfind('\\');
+        pos = path.rfind('\\');
     }
 #endif
 
     if ( pos != std::string::npos ){
-        return m_filePath.substr(pos + 1);
+        return path.substr(pos + 1);
     }
 
-    return m_filePath;
+    return path;
 }
 
-int StackFrame::line() const{
-    return m_line;
-}
+// StackFrame
+// -----------------------------------------------------------------
 
-StackFrame::AddressPtr StackFrame::address() const{
-    return m_address;
-}
-
-const std::string &StackFrame::objectPath() const{
-    return m_objectPath;
-}
-
-bool StackFrame::hasLocation() const{
-    return m_line != -1;
-}
 
 VisualLog &operator <<(VisualLog &vl, const StackFrame &value){
     if ( value.line() ){

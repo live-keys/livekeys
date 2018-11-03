@@ -180,9 +180,7 @@ public:
     static void flushConsole(const std::string& data);
 
 private:
-    // disable copy
-    VisualLog(const VisualLog&);
-    VisualLog& operator = (const VisualLog&);
+    DISABLE_COPY(VisualLog);
 
     void init();
     void flushFile(const std::string &data);
@@ -195,17 +193,17 @@ private:
     static int removeOutputFlag(int flags, VisualLog::Output output);
 
     static ConfigurationContainer createDefaultConfigurations();
-    static ConfigurationContainer m_registeredConfigurations;
+    static ConfigurationContainer& registeredConfigurations();
 
     static ViewTransport* m_model;
 
     static bool m_globalConfigured;
 
-    int               m_output;
-    Configuration*    m_configuration;
-    MessageInfo       m_messageInfo;
-    std::stringstream m_stream;
-    bool              m_objectOutput;
+    int                m_output;
+    Configuration*     m_configuration;
+    MessageInfo        m_messageInfo;
+    std::stringstream* m_stream;
+    bool               m_objectOutput;
 
 };
 
@@ -332,7 +330,7 @@ template<typename T> VisualLog& VisualLog::operator<< (const T& x){
     if ( !canLog() )
         return *this;
 
-    m_stream << x;
+    *m_stream << x;
 
     return *this;
 }
@@ -343,7 +341,7 @@ template<typename T> VisualLog& VisualLog::operator<< (std::ostream &(*f)(std::o
 
     std::stringstream ss;
     f(ss);
-    m_stream << ss.str().c_str();
+    *m_stream << ss.str().c_str();
 
     return *this;
 }
@@ -354,7 +352,7 @@ template<typename T> VisualLog& VisualLog::operator<< ( std::ostream& (*f)(std::
 
     std::stringstream ss;
     f(ss);
-    m_stream << ss.str().c_str();
+    *m_stream << ss.str().c_str();
 
     return *this;
 }
@@ -365,7 +363,7 @@ template<typename T> VisualLog& VisualLog::operator<< ( std::ostream (*f)(std::i
 
     std::stringstream ss;
     f(ss);
-    m_stream << ss.str().c_str();
+    *m_stream << ss.str().c_str();
 
     return *this;
 }

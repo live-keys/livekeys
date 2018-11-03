@@ -137,7 +137,8 @@ void KeyMap::readFile(){
     QFile file(m_path);
     if ( file.exists() && file.open(QIODevice::ReadOnly) ){
         MLNode n;
-        ml::fromJson(file.readAll(), n);
+        QByteArray fileContents = file.readAll();
+        ml::fromJson(fileContents.data(), n);
         if ( n.type() == MLNode::Object ){
             for ( auto it = n.begin(); it != n.end(); ++it ){
                 store(QString::fromStdString(it.key()), QString::fromStdString(it.value().asString()), false);

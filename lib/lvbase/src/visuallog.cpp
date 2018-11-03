@@ -218,6 +218,11 @@ VisualLog::ConfigurationContainer VisualLog::createDefaultConfigurations(){
     return container;
 }
 
+VisualLog::ConfigurationContainer &VisualLog::registeredConfigurations(){
+    static ConfigurationContainer registeredConfigurations = createDefaultConfigurations();
+    return registeredConfigurations;
+}
+
 VisualLog::ConfigurationContainer::ConfigurationContainer(){
 }
 
@@ -253,13 +258,13 @@ int VisualLog::ConfigurationContainer::configurationCount() const{
 // ---------------------------------------------------------------------
 
 
-VisualLog::ConfigurationContainer VisualLog::m_registeredConfigurations = VisualLog::createDefaultConfigurations();
 VisualLog::ViewTransport* VisualLog::m_model = 0;
 
 bool VisualLog::m_globalConfigured = false;
 
 VisualLog::VisualLog()
-    : m_configuration(m_registeredConfigurations.globalConfiguration())
+    : m_configuration(registeredConfigurations().globalConfiguration())
+    , m_stream(new std::stringstream)
     , m_objectOutput(false)
 {
     m_messageInfo.m_level = m_configuration->m_defaultLevel;
@@ -267,15 +272,17 @@ VisualLog::VisualLog()
 }
 
 VisualLog::VisualLog(VisualLog::MessageInfo::Level level)
-    : m_configuration(m_registeredConfigurations.globalConfiguration())
+    : m_configuration(registeredConfigurations().globalConfiguration())
     , m_messageInfo(level)
+    , m_stream(new std::stringstream)
     , m_objectOutput(false)
 {
     init();
 }
 
 VisualLog::VisualLog(const std::string &configurationKey)
-    : m_configuration(m_registeredConfigurations.configurationAt(configurationKey))
+    : m_configuration(registeredConfigurations().configurationAt(configurationKey))
+    , m_stream(new std::stringstream)
     , m_objectOutput(false)
 {
     m_messageInfo.m_level = m_configuration->m_defaultLevel;
@@ -283,8 +290,9 @@ VisualLog::VisualLog(const std::string &configurationKey)
 }
 
 VisualLog::VisualLog(const std::string &configurationKey, VisualLog::MessageInfo::Level level)
-    : m_configuration(m_registeredConfigurations.configurationAt(configurationKey))
+    : m_configuration(registeredConfigurations().configurationAt(configurationKey))
     , m_messageInfo(level)
+    , m_stream(new std::stringstream)
     , m_objectOutput(false)
 {
     init();
@@ -292,6 +300,7 @@ VisualLog::VisualLog(const std::string &configurationKey, VisualLog::MessageInfo
 
 VisualLog::~VisualLog(){
     flushLine();
+    delete m_stream;
 }
 
 std::string VisualLog::MessageInfo::levelToString(VisualLog::MessageInfo::Level level){
@@ -338,11 +347,11 @@ std::string VisualLog::MessageInfo::tag(const VisualLog::Configuration *configur
 void VisualLog::configure(const std::string &configuration, const MLNode& options){
     m_output = 0;
 
-    VisualLog::Configuration* cfg = m_registeredConfigurations.configurationAt(configuration);
+    VisualLog::Configuration* cfg = registeredConfigurations().configurationAt(configuration);
     if ( !cfg ){
-        cfg = new VisualLog::Configuration(*m_registeredConfigurations.globalConfiguration());
+        cfg = new VisualLog::Configuration(*registeredConfigurations().globalConfiguration());
         cfg->m_name = configuration;
-        m_registeredConfigurations.addConfiguration(configuration, cfg);
+        registeredConfigurations().addConfiguration(configuration, cfg);
     }
 
     configure(cfg, options);
@@ -424,11 +433,11 @@ void VisualLog::configure(VisualLog::Configuration *configuration, const MLNode 
 void VisualLog::addTransport(const std::string &configuration, VisualLog::Transport *transport){
     m_output = 0; // Disable output
 
-    VisualLog::Configuration* cfg = m_registeredConfigurations.configurationAt(configuration);
+    VisualLog::Configuration* cfg = registeredConfigurations().configurationAt(configuration);
     if ( !cfg ){
-        cfg = new VisualLog::Configuration(*m_registeredConfigurations.globalConfiguration());
+        cfg = new VisualLog::Configuration(*registeredConfigurations().globalConfiguration());
         cfg->m_name = configuration;
-        m_registeredConfigurations.addConfiguration(configuration, cfg);
+        registeredConfigurations().addConfiguration(configuration, cfg);
     }
 
     addTransport(cfg, transport);
@@ -443,7 +452,7 @@ void VisualLog::addTransport(VisualLog::Configuration *configuration, VisualLog:
 void VisualLog::removeTransports(const std::string &configuration){
     m_output = 0; // Disable output
 
-    VisualLog::Configuration* cfg = m_registeredConfigurations.configurationAt(configuration);
+    VisualLog::Configuration* cfg = registeredConfigurations().configurationAt(configuration);
     if ( cfg )
         removeTransports(cfg);
 }
@@ -457,13 +466,13 @@ void VisualLog::removeTransports(VisualLog::Configuration *configuration){
 int VisualLog::totalConfigurations(){
     m_output = 0;
 
-    return m_registeredConfigurations.configurationCount();
+    return registeredConfigurations().configurationCount();
 }
 
 void VisualLog::flushLine(){
     if ( canLog() ){
         std::string pref = prefix();
-        std::string buffer = m_stream.str();
+        std::string buffer = m_stream->str();
         if ( m_output & VisualLog::Console )
             vLoggerConsole(pref + buffer + "\n");
         if ( m_output & VisualLog::File )
@@ -473,7 +482,7 @@ void VisualLog::flushLine(){
         if ( m_output & VisualLog::Extensions )
             flushHandler(buffer);
 
-        m_stream.clear();
+        m_stream->clear();
     }
 }
 
@@ -498,12 +507,12 @@ void VisualLog::asView(const std::string &viewPath, std::function<QVariant ()> c
 
 void VisualLog::asObject(const std::string &type, const MLNode &mlvalue){
     //TODO: Use string here
-    QByteArray str;
+    std::string str;
     ml::toJson(mlvalue, str);
     std::string pref = prefix();
     std::string writeData =
         pref + "\\@" + type + "\n" +
-        std::string(pref.length(), ' ') + str.data() + "\n";
+        std::string(pref.length(), ' ') + str + "\n";
 
     if ( m_output & VisualLog::Console && m_configuration->m_logObjects & VisualLog::Console ){
         flushConsole(writeData);

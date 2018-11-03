@@ -29,15 +29,15 @@ TcpLineSocket::~TcpLineSocket(){
 }
 
 void TcpLineSocket::initialize(const MLNode& data){
-    QByteArray jsonResult;
+    std::string jsonResult;
     ml::toJson(data, jsonResult);
-    m_socket->write(jsonResult);
+    m_socket->write(jsonResult.c_str());
 }
 
 void TcpLineSocket::sendInput(const MLNode &n){
-    QByteArray jsonResult;
+    std::string jsonResult;
     ml::toJson(n, jsonResult);
-    m_socket->write(jsonResult);
+    m_socket->write(jsonResult.c_str());
 }
 
 QByteArray TcpLineSocket::readAll(){

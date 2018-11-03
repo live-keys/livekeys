@@ -973,7 +973,7 @@ MLNode::FloatType MLNode::asFloat() const{
     return m_value.asFloat;
 }
 
-MLNode::StringType MLNode::asString() const{
+const MLNode::StringType &MLNode::asString() const{
     if ( m_type != Type::String )
         THROW_EXCEPTION(InvalidMLTypeException, "Node is not of string type.", 0);
 
@@ -994,6 +994,13 @@ const MLNode::ArrayType &MLNode::asArray() const{
         THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
 
     return *m_value.asArray;
+}
+
+const MLNode::ObjectType &MLNode::asObject() const{
+    if ( m_type != Type::Object )
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of object type.", 0);
+
+    return *m_value.asObject;
 }
 
 int MLNode::size() const{

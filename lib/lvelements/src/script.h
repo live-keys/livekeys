@@ -30,11 +30,11 @@ public:
     ~Script();
 
 private:
-    static const std::string encloseStart;
-    static const std::string encloseEnd;
+    static const char* encloseStart;
+    static const char* encloseEnd;
 
-    static const std::string moduleEncloseStart;
-    static const std::string moduleEncloseEnd;
+    static const char* moduleEncloseStart;
+    static const char* moduleEncloseEnd;
 
 private:
     DISABLE_COPY(Script);

@@ -19,6 +19,16 @@
 
 namespace lv{
 
+class CommandLineParserPrivate{
+public:
+    std::vector<CommandLineParser::Option*> options;
+    std::string              header;
+    std::string              version;
+
+    std::string              script;
+    std::vector<std::string> scriptArguments;
+};
+
 class CommandLineParser::Option{
 
 public:
@@ -69,16 +79,18 @@ void CommandLineParser::assignName(const std::string &name, CommandLineParser::O
 
 
 CommandLineParser::CommandLineParser(const std::string &header)
-    : m_header(header)
+    : m_d(new CommandLineParserPrivate)
 {
+    m_d->header     = header;
     m_helpOption    = addFlag({"-h", "--help"},    "Displays this information and exits.");
     m_versionOption = addFlag({"-v", "--version"}, "Displays version information and exits.");
 }
 
 CommandLineParser::~CommandLineParser(){
-    for ( auto it = m_options.begin(); it != m_options.end(); ++it ){
+    for ( auto it = m_d->options.begin(); it != m_d->options.end(); ++it ){
         delete *it;
     }
+    delete m_d;
 }
 
 CommandLineParser::Option *CommandLineParser::addFlag(const std::vector<std::string> &names, const std::string &description){
@@ -87,21 +99,12 @@ CommandLineParser::Option *CommandLineParser::addFlag(const std::vector<std::str
 
     CommandLineParser::Option* option = new CommandLineParser::Option;
     for ( auto it = names.begin(); it != names.end(); ++it )
-        assignName(*it, option, m_options);
+        assignName(*it, option, m_d->options);
     option->isFlag      = true;
     option->description = description;
-    m_options.push_back(option);
+    m_d->options.push_back(option);
     return option;
 }
-
-//CommandLineParser::Option *CommandLineParser::addFlag(const std::string &name, const std::string &description){
-//    CommandLineParser::Option* option = new CommandLineParser::Option;
-//    assignName(name, option, m_options);
-//    option->isFlag      = true;
-//    option->description = description;
-//    m_options.push_back(option);
-//    return option;
-//}
 
 CommandLineParser::Option *CommandLineParser::addOption(const std::vector<std::string> &names, const std::string &description, const std::string &type){
     if ( names.empty() )
@@ -109,23 +112,13 @@ CommandLineParser::Option *CommandLineParser::addOption(const std::vector<std::s
 
     CommandLineParser::Option* option = new CommandLineParser::Option;
     for ( auto it = names.begin(); it != names.end(); ++it )
-        assignName(*it, option, m_options);
+        assignName(*it, option, m_d->options);
     option->isFlag      = false;
     option->description = description;
     option->type        = type;
-    m_options.push_back(option);
+    m_d->options.push_back(option);
     return option;
 }
-
-//CommandLineParser::Option *CommandLineParser::addOption(const std::string &name, const std::string &description, const std::string &type){
-//    CommandLineParser::Option* option = new CommandLineParser::Option;
-//    assignName(name, option, m_options);
-//    option->isFlag      = false;
-//    option->description = description;
-//    option->type        = type;
-//    m_options.push_back(option);
-//    return option;
-//}
 
 CommandLineParser::Option *CommandLineParser::findOptionByLongName(const std::string &name, const std::vector<Option *> &check){
     for ( auto it = check.begin(); it != check.end(); ++it ){
@@ -149,8 +142,8 @@ CommandLineParser::Option *CommandLineParser::findOptionByShortName(const std::s
 
 std::string CommandLineParser::helpString() const{
     std::stringstream base;
-    base << "\n" << m_header << "\n\n" << "Usage:\n\n   livecv [options...] script.qml [args ...]\n\nOptions:\n\n";
-    for ( auto it = m_options.begin(); it != m_options.end(); ++it ){
+    base << "\n" << m_d->header << "\n\n" << "Usage:\n\n   livecv [options...] script.qml [args ...]\n\nOptions:\n\n";
+    for ( auto it = m_d->options.begin(); it != m_d->options.end(); ++it ){
         for ( auto nameIt = (*it)->shortNames.begin(); nameIt != (*it)->shortNames.end(); ++nameIt ){
             base << std::string("  ") << "-" << *nameIt << ((*it)->type != "" ? " <" + (*it)->type + ">" : "");
         }
@@ -198,7 +191,7 @@ void CommandLineParser::parse(int argc, const char * const argv[]){
         while ( i < argc ){
             if ( argv[i][0] == '-' ){
                 if ( argv[i][1] == '-' ){
-                    CommandLineParser::Option* option = findOptionByLongName(std::string(&argv[i][2]), m_options);
+                    CommandLineParser::Option* option = findOptionByLongName(std::string(&argv[i][2]), m_d->options);
                     if ( !option )
                         THROW_EXCEPTION(CommandLineParserException, std::string("Option not found: ") + argv[i], 6);
 
@@ -212,7 +205,7 @@ void CommandLineParser::parse(int argc, const char * const argv[]){
                         option->value = argv[i];
                     }
                 } else {
-                    CommandLineParser::Option* option = findOptionByShortName(std::string(&argv[i][1]), m_options);
+                    CommandLineParser::Option* option = findOptionByShortName(std::string(&argv[i][1]), m_d->options);
                     if ( !option )
                         THROW_EXCEPTION(CommandLineParserException, std::string("Option not found: ") + argv[i], 8);
 
@@ -227,7 +220,7 @@ void CommandLineParser::parse(int argc, const char * const argv[]){
                     }
                 }
             } else {
-                m_script = argv[i];
+                m_d->script = argv[i];
                 ++i;
                 break;
             }
@@ -235,10 +228,18 @@ void CommandLineParser::parse(int argc, const char * const argv[]){
         }
 
         while ( i < argc ){
-            m_scriptArguments.push_back(argv[i]);
+            m_d->scriptArguments.push_back(argv[i]);
             ++i;
         }
     }
+}
+
+const std::string &CommandLineParser::script() const{
+    return m_d->script;
+}
+
+const std::vector<std::string> &CommandLineParser::scriptArguments() const{
+    return m_d->scriptArguments;
 }
 
 }// namespace

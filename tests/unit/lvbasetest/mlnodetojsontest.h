@@ -33,8 +33,8 @@ public:
 
 private slots:
     void initTestCase();
-    void jsonObjectTest();
-    void jsonDataTest();
+    void jsonSerializeTest();
+    void jsonDeserializeTest();
 };
 
 #endif // MLNODETOJSONTEST_H

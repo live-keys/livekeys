@@ -78,7 +78,7 @@ Element *Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Val
 
 
 LocalValue Function::CallInfo::at(size_t index) const{
-    return LocalValue((*m_info)[index]);
+    return LocalValue((*m_info)[static_cast<int>(index)]);
 }
 
 size_t Function::CallInfo::length() const{
@@ -134,8 +134,8 @@ Function::Parameters::Parameters(int length)
 }
 
 Function::Parameters::Parameters(const std::initializer_list<LocalValue> &init)
-    : m_length(init.size())
-    , m_args(new v8::Local<v8::Value>[init.size()])
+    : m_length(static_cast<int>(init.size()))
+    , m_args(new v8::Local<v8::Value>[static_cast<int>(init.size())])
 {
     int index = 0;
     for ( auto it = init.begin(); it != init.end(); ++it ){

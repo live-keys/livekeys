@@ -30,7 +30,7 @@ public:
     CommandLineParserException(const std::string& message, int code = 0): Exception(message, code){}
 };
 
-
+class CommandLineParserPrivate;
 class LV_BASE_EXPORT CommandLineParser{
 
 public:
@@ -46,9 +46,7 @@ public:
     Option* versionOption();
 
     Option* addFlag(const std::vector<std::string>& names, const std::string& description);
-//    Option* addFlag(const std::string& name, const std::string& description);
     Option* addOption(const std::vector<std::string>& names, const std::string& description, const std::string& type);
-//    Option* addOption(const std::string& name, const std::string& description, const std::string& type);
 
     const std::string &script() const;
     const std::vector<std::string>& scriptArguments() const;
@@ -61,6 +59,8 @@ public:
     void assertIsSet(Option* option) const;
 
 private:
+    DISABLE_COPY(CommandLineParser);
+
     void assignName(const std::string& name, Option* option, const std::vector<Option*>& check);
     Option* findOptionByLongName(const std::string& name, const std::vector<Option*>& check);
     Option* findOptionByShortName(const std::string& name, const std::vector<Option*>& check);
@@ -68,12 +68,7 @@ private:
     Option*        m_helpOption;
     Option*        m_versionOption;
 
-    std::vector<Option*> m_options;
-    std::string          m_header;
-    std::string          m_version;
-
-    std::string          m_script;
-    std::vector<std::string> m_scriptArguments;
+    CommandLineParserPrivate* m_d;
 };
 
 inline CommandLineParser::Option *CommandLineParser::helpOption(){
@@ -82,14 +77,6 @@ inline CommandLineParser::Option *CommandLineParser::helpOption(){
 
 inline CommandLineParser::Option *CommandLineParser::versionOption(){
     return m_versionOption;
-}
-
-inline const std::string &CommandLineParser::script() const{
-    return m_script;
-}
-
-inline const std::vector<std::string> &CommandLineParser::scriptArguments() const{
-    return m_scriptArguments;
 }
 
 

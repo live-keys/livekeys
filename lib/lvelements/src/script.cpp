@@ -23,11 +23,11 @@ public:
 };
 
 
-const std::string Script::encloseStart = "(function(){";
-const std::string Script::encloseEnd   = "})()";
+const char* Script::encloseStart = "(function(){";
+const char* Script::encloseEnd   = "})()";
 
-const std::string Script::moduleEncloseStart = "(function(module, imports, __NAME__, __FILE__){\n";
-const std::string Script::moduleEncloseEnd   = "})";
+const char* Script::moduleEncloseStart = "(function(module, imports, __NAME__, __FILE__){\n";
+const char* Script::moduleEncloseEnd   = "})";
 
 
 Value Script::run(){

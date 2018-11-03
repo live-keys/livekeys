@@ -302,10 +302,11 @@ public:
     int asInt() const;
     bool asBool() const;
     FloatType asFloat() const;
-    StringType asString() const;
+    const StringType& asString() const;
     BytesType asBytes() const;
 
     const ArrayType& asArray() const;
+    const ObjectType& asObject() const;
 
     int size() const;
     bool hasKey(const StringType& key) const;
