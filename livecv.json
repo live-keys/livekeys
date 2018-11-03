@@ -468,7 +468,7 @@
                         "QtGui.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtGui.framework/Versions/5",
                         "QtMacExtras.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMacExtras.framework/Versions/5",
                         "QtMultimedia.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimedia.framework/Versions/5",
-                        "QtMultimediaQuick_p.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimediaQuick_p.framework/Versions/5",
+                        "QtMultimediaQuick.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimediaQuick_p.framework/Versions/5",
                         "QtMultimediaWidgets.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimediaWidgets.framework/Versions/5",
                         "QtNetwork.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtNetwork.framework/Versions/5",
                         "QtNfc.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtNfc.framework/Versions/5",
@@ -540,7 +540,7 @@
                     {
                         "from": "{source}/lib/lvview/include/live",
                         "source": ["{source}/lib/lvview/src"],
-                        "to": "dev/lvview/include/live"
+                        "to": "livecv.app/Contents/Dev/lvview/include/live"
                     },
                     {
                         "from": "{source}/lib/lveditor/include/live",
