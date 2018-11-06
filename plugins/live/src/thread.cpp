@@ -1,8 +1,9 @@
 #include "thread.h"
 #include "live/filterworker.h"
 #include "live/filter.h"
-#include "live/plugincontext.h"
-#include "live/engine.h"
+#include "live/applicationcontext.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
 #include "live/exception.h"
 
 namespace lv{
@@ -33,9 +34,9 @@ void Thread::appendFilter(QObject * filter){
         m_filters.append(f);
     } else {
         lv::Exception lve = CREATE_EXCEPTION(
-            lv::Exception, QString("Object not of filter type: ") + filter->metaObject()->className(), 2
+            lv::Exception, std::string("Object not of filter type: ") + filter->metaObject()->className(), 2
         );
-        lv::PluginContext::engine()->throwError(&lve, this);
+        lv::ViewContext::instance().engine()->throwError(&lve, this);
         return;
     }
 }

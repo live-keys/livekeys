@@ -38,12 +38,12 @@ namespace lv{
 
 class LiveCVArguments;
 class LiveCVScript;
-class Engine;
+class ViewEngine;
 class Settings;
 class Commands;
 class KeyMap;
 class VisualLogModel;
-class VisualLogJsObject;
+class VisualLogQmlObject;
 class Project;
 class DocumentHandler;
 class CodeQmlHandler;
@@ -55,7 +55,7 @@ class LiveCV : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(lv::Settings*       settings       READ settings CONSTANT)
-    Q_PROPERTY(lv::Engine*         engine         READ engine   CONSTANT)
+    Q_PROPERTY(lv::ViewEngine*         engine         READ engine   CONSTANT)
     Q_PROPERTY(lv::Commands*       commands       READ commands       CONSTANT)
     Q_PROPERTY(lv::VisualLogModel* log            READ log            CONSTANT)
     Q_PROPERTY(lv::KeyMap*         keymap         READ keymap         CONSTANT)
@@ -86,7 +86,7 @@ public:
     QByteArray extractPluginInfo(const QString& import) const;
 
     Settings* settings();
-    Engine*   engine();
+    ViewEngine*   engine();
     Project* project();
     Commands* commands();
     KeyMap* keymap();
@@ -103,7 +103,7 @@ private:
     void parseArguments(const QStringList& arguments);
     void solveImportPaths();
 
-    Engine*          m_engine;
+    ViewEngine*          m_engine;
     LiveCVArguments* m_arguments;
 
     lv::DocumentHandler* m_codeInterface;
@@ -115,7 +115,7 @@ private:
     lv::Commands*          m_commands;
     lv::KeyMap*            m_keymap;
     lv::VisualLogModel*    m_log;
-    lv::VisualLogJsObject* m_vlog;
+    lv::VisualLogQmlObject* m_vlog;
     mutable QObject*       m_windowControls;
 };
 
@@ -150,7 +150,7 @@ inline Settings *LiveCV::settings(){
     return m_settings;
 }
 
-inline Engine *LiveCV::engine(){
+inline ViewEngine *LiveCV::engine(){
     return m_engine;
 }
 

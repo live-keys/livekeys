@@ -92,7 +92,7 @@ QHash<QByteArray, int>::ConstIterator Tuple::propertiesEnd(){
 }
 
 //TODO: Lists are not yet supported
-void Tuple::serialize(lv::Engine* engine, const lv::Tuple &t, MLNode &node){
+void Tuple::serialize(lv::ViewEngine* engine, const lv::Tuple &t, MLNode &node){
     node = MLNode(MLNode::Object);
     node["__type"] = "Tuple";
 
@@ -122,7 +122,7 @@ void Tuple::serialize(lv::Engine* engine, const lv::Tuple &t, MLNode &node){
                     if ( ti.isNull() || !ti->isSerializable() ){
                         node = MLNode(MLNode::Object);
                         lv::Exception e = CREATE_EXCEPTION(
-                            lv::Exception, "Non serializable Tuple object: " + QString(property.name()), 0
+                            lv::Exception, std::string("Non serializable Tuple object: ") + property.name(), 0
                         );
                         engine->throwError(&e);
                         return;
@@ -150,7 +150,7 @@ void Tuple::serialize(lv::Engine* engine, const lv::Tuple &t, MLNode &node){
             } else {
                 node = MLNode(MLNode::Object);
                 lv::Exception e = CREATE_EXCEPTION(
-                    lv::Exception, "Non serializable Tuple property: " + QString(property.name()), 0
+                    lv::Exception, std::string("Non serializable Tuple property: ") + property.name(), 0
                 );
                 engine->throwError(&e);
                 return;
@@ -159,14 +159,14 @@ void Tuple::serialize(lv::Engine* engine, const lv::Tuple &t, MLNode &node){
     }
 }
 
-void Tuple::deserialize(lv::Engine *engine, const MLNode &n, lv::Tuple &t){
+void Tuple::deserialize(lv::ViewEngine *engine, const MLNode &n, lv::Tuple &t){
     try{
         if ( n.type() == MLNode::Type::Object ){
             for ( auto it = n.begin(); it != n.end(); ++it ){
                 QVariant tp = t.property(it.key().c_str());
                 if ( !tp.isValid() ){
                     lv::Exception e = CREATE_EXCEPTION(
-                        lv::Exception, "Tuple does not contain key \'" + QByteArray(it.key().c_str()) + "\'" , 0
+                        lv::Exception, std::string("Tuple does not contain key \'") + it.key() + "\'" , 0
                     );
                     engine->throwError(&e);
                     return;
@@ -186,7 +186,7 @@ void Tuple::deserialize(lv::Engine *engine, const MLNode &n, lv::Tuple &t){
     }
 }
 
-void Tuple::deserialize(Engine *engine, const MLNode &n, QVariant &v){
+void Tuple::deserialize(ViewEngine *engine, const MLNode &n, QVariant &v){
     switch( n.type() ){
     case MLNode::Type::Object: {
         //Object / QVariantMap
@@ -194,7 +194,7 @@ void Tuple::deserialize(Engine *engine, const MLNode &n, QVariant &v){
             QByteArray objectType = QByteArray(n["__type"].asString().c_str());
             TypeInfo::Ptr ti = engine->typeInfo(objectType);
             if ( ti.isNull() || !ti->isSerializable() ){
-                THROW_EXCEPTION(lv::Exception, "Tuple deserialize: Unknown type: \'" + objectType + "\'", 0);
+                THROW_EXCEPTION(lv::Exception, "Tuple deserialize: Unknown type: \'" + objectType .toStdString()+ "\'", 0);
             }
 
             QObject* ob = ti->newInstance();

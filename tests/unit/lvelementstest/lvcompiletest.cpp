@@ -5,7 +5,7 @@
 #include "live/elements/module.h"
 #include "live/elements/component.h"
 #include "live/elements/container.h"
-#include "live/plugincontext.h"
+#include "live/applicationcontext.h"
 
 Q_TEST_RUNNER_REGISTER(LvCompileTest);
 
@@ -24,8 +24,8 @@ void LvCompileTest::initTestCase(){
 void LvCompileTest::test1Js(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
-        QString scriptsPath = lv::PluginContext::applicationDeploymentPath() + "/data/Test1.lv.js";
-        Script::Ptr sc = engine->compileJsFile(scriptsPath.toStdString());
+        std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test1.lv.js";
+        Script::Ptr sc = engine->compileJsFile(scriptsPath);
         Object m = sc->loadAsModule();
         LocalObject lm(m);
         LocalValue exports = lm.get(engine, "exports");
@@ -61,15 +61,14 @@ void LvCompileTest::test1Js(){
         QVERIFY(elem->get("x").toInt32(engine) == 100);
     });
 
-
     delete engine;
 }
 
 void LvCompileTest::test2Js(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
-        QString scriptsPath = lv::PluginContext::applicationDeploymentPath() + "/data/Test2.lv.js";
-        Script::Ptr sc = engine->compileJsFile(scriptsPath.toStdString());
+        std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test2.lv.js";
+        Script::Ptr sc = engine->compileJsFile(scriptsPath);
         Object m = sc->loadAsModule();
         LocalObject lm(m);
         LocalValue exports = lm.get(engine, "exports");
@@ -105,8 +104,8 @@ void LvCompileTest::test2Js(){
 void LvCompileTest::test3Js(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
-        QString scriptsPath = lv::PluginContext::applicationDeploymentPath() + "/data/Test3.lv.js";
-        Script::Ptr sc = engine->compileJsFile(scriptsPath.toStdString());
+        std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test3.lv.js";
+        Script::Ptr sc = engine->compileJsFile(scriptsPath);
         Object m = sc->loadAsModule();
         LocalObject lm(m);
         LocalValue exports = lm.get(engine, "exports");
@@ -146,8 +145,8 @@ void LvCompileTest::test3Js(){
 void LvCompileTest::test4Js(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
-        QString scriptsPath = lv::PluginContext::applicationDeploymentPath() + "/data/Test4.lv.js";
-        Script::Ptr sc = engine->compileJsFile(scriptsPath.toStdString());
+        std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test4.lv.js";
+        Script::Ptr sc = engine->compileJsFile(scriptsPath);
         Object m = sc->loadAsModule();
         LocalObject lm(m);
         LocalValue exports = lm.get(engine, "exports");

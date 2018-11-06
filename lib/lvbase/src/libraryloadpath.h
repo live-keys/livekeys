@@ -17,16 +17,18 @@
 #ifndef LVLIBRARYLOADPATH_H
 #define LVLIBRARYLOADPATH_H
 
-#include <QString>
+#include <string>
 #include "live/lvbaseglobal.h"
+
+class QString;
 
 namespace lv{
 
 class LV_BASE_EXPORT LibraryLoadPath{
 
 public:
-    static void add(const QString& path, const QString& linkPath = "");
-    static void addRecursive(const QString& path, const QString& linkPath = "");
+    static void add(const std::string path, const std::string& linkPath);
+    static void addRecursive(const std::string& path, const std::string& linkPath);
 
 private:
     static void addImpl(const QString& path, const QString& , bool recursive = false);

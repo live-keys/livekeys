@@ -25,7 +25,7 @@
 #include "live/coderuntimebinding.h"
 #include "live/editorglobalobject.h"
 #include "live/project.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
 #include "live/visuallog.h"
 #include "live/projectextension.h"
 #include <QQmlContext>
@@ -34,12 +34,12 @@
 #include <QTextDocumentFragment>
 #include <QTextCursor>
 #include <QTextBlock>
+#include <QTextList>
 #include <QTimer>
 
 #include "textedit_p.h"
 #include "textedit_p_p.h"
 
-#include <QTextList>
 
 namespace lv{
 
@@ -129,7 +129,7 @@ void DocumentHandler::componentComplete(){
         return;
     }
 
-    m_engine = static_cast<Engine*>(lg->property("engine").value<lv::Engine*>());
+    m_engine = static_cast<ViewEngine*>(lg->property("engine").value<lv::ViewEngine*>());
 
     findCodeHandler();
 }

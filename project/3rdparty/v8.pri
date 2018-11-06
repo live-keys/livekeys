@@ -1,6 +1,15 @@
 
 win32{
 
+    V8_DIR = $$(V8_DIR)
+
+    INCLUDEPATH += $$(V8_DIR)/include
+
+    V8_LIBRARY_PATH = $$(V8_DIR)/lib/Debug
+
+    LIBS += -L$$V8_LIBRARY_PATH -lv8_libplatform
+    LIBS += -L$$V8_LIBRARY_PATH -lv8
+
 }
 else:macx{
 

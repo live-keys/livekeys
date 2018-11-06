@@ -14,7 +14,11 @@
 #include <tuple>
 #include <QDebug>
 
-namespace lv{ namespace el{
+namespace lv{
+
+class Exception;
+
+namespace el{
 
 /**
  * @brief Base class for any mapped script function, method or event.
@@ -48,6 +52,10 @@ public:
         size_t length() const;
 
         void* userData();
+
+        bool clearedPendingException(Engine* engine) const;
+        void throwError(Engine* engine, Exception* e) const;
+        void throwError(Engine* engine, const std::string& message) const;
 
         void assignReturnValue(const v8::Local<v8::Value>& value) const;
         v8::Local<v8::Object> thatObject();
@@ -97,27 +105,38 @@ public:
     static void ptrImplementation(const v8::FunctionCallbackInfo<v8::Value>& info){
         Function::CallInfo pr(&info);
         Function* f = reinterpret_cast<Function*>(pr.userData());
-        Function::assignReturnValue(f->call(pr), info);
+        f->call(pr);
     }
 
     template<class T>
     static void methodPtrImplementation(const v8::FunctionCallbackInfo<v8::Value>& info){
         Function::CallInfo pr(&info);
         Function* f = reinterpret_cast<Function*>(pr.userData());
-        Function::assignReturnValue(f->call(pr), info);
+        f->call(pr);
+    }
+
+    template<typename RT>
+    static void checkReturn(Engine* engine, const Function::CallInfo& params, const RT& rt){
+        if ( params.clearedPendingException(engine) )
+            return;
+
+        LocalValue lv(engine, rt);
+        params.assignReturnValue(lv.data());
     }
 
     template<typename RT, typename ...Args, int... Indexes>
-    static LocalValue callFunction(
+    static void callFunction(
             Engine* engine,
             const std::function<RT(Args ...args)>& f,
             meta::IndexTuple<Indexes...>,
             const Function::CallInfo& params)
     {
-        return LocalValue(
+        checkReturn(
             engine,
-            f(params.template getValue<Indexes,
-                 typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
+            params,
+            f(params.template getValue<
+                Indexes,
+                typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
     }
 
     template<typename ...Args, int... Indexes>
@@ -131,17 +150,19 @@ public:
     }
 
     template<typename C, typename RT, typename ...Args, int... Indexes>
-    static LocalValue callMethod(
+    static void callMethod(
             Engine* engine,
             const std::function<RT(C*, Args ...args)>& f,
             meta::IndexTuple<Indexes...>,
             const Function::CallInfo& params)
     {
-        return LocalValue(
+        checkReturn(
             engine,
+            params,
             f(params.template that<C>(),
-              params.template getValue<Indexes,
-                  typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
+              params.template getValue<
+                    Indexes,
+                    typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
     }
 
     template<typename C, typename RT, typename ...Args, int... Indexes>
@@ -159,13 +180,13 @@ public:
     size_t totalArguments() const{ return m_totalArguments; }
     Function* less() const { return m_less; }
 
-    LocalValue call(const Function::CallInfo& params){
+    void call(const Function::CallInfo& params){
         if ( params.length() >= totalArguments() )
-            return m_unwrapFunction(params);
+            m_unwrapFunction(params);
         else if ( params.length() < totalArguments() && less() )
-            return less()->call(params);
+            less()->call(params);
         else {
-            throw std::exception(); // Argument does not fit the count
+            params.throwError(params.engine(), "Invalid number of arguments sent to function.");
         }
     }
 
@@ -174,7 +195,7 @@ public:
     void assignLess(Function* f){ m_less = f;}
 
 protected:
-    std::function<LocalValue(const Function::CallInfo& params)> m_unwrapFunction;
+    std::function<void(const Function::CallInfo& params)> m_unwrapFunction;
 
     size_t          m_totalArguments;
     FunctionPointer m_ptr;
@@ -242,7 +263,7 @@ public:
         m_ptr = &Function::ptrImplementation;
         m_totalArguments  = sizeof...(Args);
         m_unwrapFunction = [this](const Function::CallInfo& params){
-            return Function::callFunction(
+            Function::callFunction(
                 params.engine(), m_function, typename meta::make_indexes<Args...>::type(), params
             );
         };
@@ -271,7 +292,6 @@ public:
             Function::callVoidFunction(
                 m_function, typename meta::make_indexes<Args...>::type(), params
             );
-            return LocalValue(params.engine());
         };
     }
 
@@ -311,9 +331,9 @@ public:
     {
         m_less = nullptr;
         m_ptr = &Function::ptrImplementation;
-        m_totalArguments  = 1;
+        m_totalArguments  = 0;
         m_unwrapFunction = [this](const Function::CallInfo& params){
-            return LocalValue(params.engine(), m_function(params));
+            Function::checkReturn(params.engine(), params, m_function(params));
         };
     }
 
@@ -333,10 +353,9 @@ public:
     {
         m_less           = nullptr;
         m_ptr            = &Function::ptrImplementation;
-        m_totalArguments = 1;
+        m_totalArguments = 0;
         m_unwrapFunction = [this](const Function::CallInfo& params){
             m_function(params);
-            return LocalValue(params.engine());
         };
     }
 

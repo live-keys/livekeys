@@ -1,6 +1,9 @@
 #ifndef LVMETAOBJECT_H
 #define LVMETAOBJECT_H
 
+#include "live/exception.h"
+#include "live/mlnode.h"
+#include "live/visuallog.h"
 #include "live/elements/lvelementsglobal.h"
 #include "live/elements/function.h"
 #include "live/elements/method.h"
@@ -64,7 +67,7 @@ public:
             if ( it == m_methods.end() ){
                 m_methods[name] = new Method<C, RT, Args...>(f);
             } else {
-                throw std::exception(); // already have function
+                THROW_EXCEPTION(lv::Exception, "Function \'" + name + "\' has already been defined for this class", 1);
             }
             return *this;
         }
@@ -75,7 +78,7 @@ public:
             if ( it == m_methods.end() ){
                 m_methods[name] = new Method<C, RT, Args...>(f);
             } else {
-                throw std::exception(); // already have function
+                THROW_EXCEPTION(lv::Exception, "Function \'" + name + "\' has already been defined for this class", 1);
             }
             return *this;
         }
@@ -90,7 +93,7 @@ public:
                 Function* pf = new PointerFunction<RT, Args...>(f);
                 m_functions[name] = pf;
             } else {
-                throw std::exception();
+                THROW_EXCEPTION(lv::Exception, "Static function \'" + name + "\' has already been defined for this class", 1);
             }
             return *this;
         }
@@ -201,10 +204,10 @@ public:
         }
 
         Builder& scriptDefaultProperty(const std::string& name){
-            //TODO
-//            assert(!name.empty());
-//            assert(m_defaultProperty.empty());
-            // assert(m_properties.contains(name));
+            if ( name.empty() )
+                THROW_EXCEPTION(lv::Exception, "Default property name is empty.", 1);
+            if ( !m_defaultProperty.empty() )
+                THROW_EXCEPTION(lv::Exception, "Default property \'" + name + "\' is defined twice", 1);
             m_defaultProperty = name;
             return *this;
         }
@@ -234,6 +237,30 @@ public:
             return *this;
         }
 
+        // Serialization
+        // -------------
+
+        Builder& serialization(std::function<void(const C &, MLNode &)> srl){
+            m_serialize = [srl](const Element* obj, lv::MLNode& node){
+                const C* objtype = static_cast<const C*>(obj);
+                srl(*objtype, node);
+            };
+        }
+
+        Builder& deserialization(std::function<void(const MLNode&, C&)> dsrl){
+            m_deserialize = [dsrl](const lv::MLNode& node, Element* obj){
+                C* objtype = static_cast<C*>(obj);
+                dsrl(node, *objtype);
+            };
+        }
+
+        Builder& logging(std::function<void(lv::VisualLog&, const C&)> logger){
+            m_log = [logger](lv::VisualLog& vl, const Element* obj){
+                const C* objT = static_cast<C*>(obj);
+                logger(vl, objT);
+            };
+        }
+
     private:
         std::string                           m_name;
         const MetaObject*                     m_base;
@@ -247,6 +274,10 @@ public:
         Constructor*                          m_constructor;
         Property::IndexGetFunction            m_indexGet;
         Property::IndexSetFunction            m_indexSet;
+
+        std::function<void(const Element*, lv::MLNode& node)>  m_serialize;
+        std::function<void(const lv::MLNode& node, Element*)>  m_deserialize;
+        std::function<void(lv::VisualLog& vl, const Element*)> m_log;
     };
 
 public:
@@ -277,6 +308,10 @@ public:
 
         mo.m_defaultProperty = builder.m_defaultProperty;
 
+        mo.m_serialize    = builder.m_serialize;
+        mo.m_deserialize  = builder.m_deserialize;
+        mo.m_log          = builder.m_log;
+
         if ( mo.m_base ){
             mo.m_methods.insert(mo.m_base->methodsBegin(), mo.m_base->methodsEnd());
             mo.m_events.insert(mo.m_base->eventsBegin(), mo.m_base->eventsEnd());
@@ -285,6 +320,9 @@ public:
             if ( mo.m_defaultProperty.empty() )
                 mo.m_defaultProperty = mo.m_base->m_defaultProperty;
         }
+
+        if ( !mo.m_defaultProperty.empty() && mo.m_properties.find(mo.m_defaultProperty) == mo.m_properties.end() )
+            THROW_EXCEPTION(lv::Exception, "Default property \'" + mo.m_defaultProperty + "\' is not a class property.", 1);
 
         return mo;
     }
@@ -339,6 +377,14 @@ public:
 
     const std::string& defaultProperty() const;
 
+    bool isSerializable() const;
+    bool isDeserializable() const;
+    bool isLoggable() const;
+
+    void serialize(const Element* object, lv::MLNode& node) const;
+    void deserialize(const lv::MLNode& node, Element* object) const;
+    void log(lv::VisualLog& vl, const Element* object) const;
+
 private:
     std::string                           m_name;
     const MetaObject*                     m_base;
@@ -360,6 +406,10 @@ private:
     Property::IndexSetFunction            m_indexSet;
 
     std::string                           m_defaultProperty;
+
+    std::function<void(const Element*, MLNode& node)>  m_serialize;
+    std::function<void(const MLNode& node, Element*)>  m_deserialize;
+    std::function<void(lv::VisualLog& vl, const Element*)> m_log;
 };
 
 // Builder Implementation
@@ -473,6 +523,30 @@ inline EventFunction *MetaObject::getEvent(const std::string &name) const{
 
 inline const std::string &MetaObject::defaultProperty() const{
     return m_defaultProperty;
+}
+
+inline bool MetaObject::isSerializable() const{
+    return m_serialize ? true : false;
+}
+
+inline bool MetaObject::isDeserializable() const{
+    return m_deserialize ? true : false;
+}
+
+inline bool MetaObject::isLoggable() const{
+    return m_log ? true : false;
+}
+
+inline void MetaObject::serialize(const Element *object, MLNode &node) const{
+    m_serialize(object, node);
+}
+
+inline void MetaObject::deserialize(const MLNode &node, Element *object) const{
+    m_deserialize(node, object);
+}
+
+inline void MetaObject::log(VisualLog &vl, const Element *object) const{
+    m_log(vl, object);
 }
 
 }} // namespace lv, namespace script

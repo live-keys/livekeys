@@ -22,7 +22,7 @@
 #include "live/codeconverter.h"
 #include "live/livepalette.h"
 #include "live/livepalettelist.h"
-#include "live/plugincontext.h"
+#include "live/applicationcontext.h"
 #include "live/visuallog.h"
 #include "live/settings.h"
 

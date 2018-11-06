@@ -15,9 +15,9 @@
 ****************************************************************************/
 
 #include "qalignmtb.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
 #include "live/exception.h"
-#include "live/plugincontext.h"
+#include "live/viewcontext.h"
 
 QAlignMTB::QAlignMTB(QObject *parent)
     : QObject(parent)
@@ -69,7 +69,7 @@ void QAlignMTB::filter(){
             emit outputChanged();
         } catch ( cv::Exception& e ){
             lv::Exception lve = CREATE_EXCEPTION(lv::Exception, e.what(), e.code);
-            lv::PluginContext::engine()->throwError(&lve, this);
+            lv::ViewContext::instance().engine()->throwError(&lve, this);
             return;
         }
     }

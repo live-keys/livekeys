@@ -26,7 +26,7 @@ class CommandLineParser;
 class LiveCVArguments{
 
 public:
-    explicit LiveCVArguments(const QString& header);
+    explicit LiveCVArguments(const std::string &header);
     ~LiveCVArguments();
 
     bool launchFlag() const;
@@ -37,14 +37,14 @@ public:
 
     bool helpFlag() const;
     bool versionFlag() const;
-    QString helpString() const;
+    std::string helpString() const;
 
     const QStringList& monitoredFiles() const;
 
     CommandLineParser* parser();
 
-    const QString& script() const;
-    const QStringList& scriptArguments() const;
+    const std::string &script() const;
+    const std::vector<std::string>& scriptArguments() const;
 
     void initialize(int argc, const char* const argv[]);
 

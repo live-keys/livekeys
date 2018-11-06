@@ -18,9 +18,9 @@ private slots:
     void eventGenerationTest();
     void simpleEventEmissionTest();
     void eventEmissionThroughLambdaTest();
+
     void removeEventFromWithinTest();
     void removeAllEventsFromWithinTest();
-
 };
 
 #endif // LVEVENTTEST_H

@@ -12,6 +12,7 @@ DEFINES += Q_LCVCORE_LIB
 # Dependencies
 
 linkLocalLibrary(lvbase,      lvbase)
+linkLocalLibrary(lvview,     lvview)
 linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
 

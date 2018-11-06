@@ -24,6 +24,7 @@ class Value;
 class Boolean;
 class Context;
 class Script;
+class TryCatch;
 template<class T> class Local;
 template<class T> class MaybeLocal;
 template<class T> class FunctionCallbackInfo;
@@ -67,7 +68,7 @@ public:
     typedef double    Number;
 
 public:
-    union Data{
+    union LV_ELEMENTS_EXPORT Data{
         Int64     asInteger;
         Number    asNumber;
         Object*   asObject;
@@ -164,6 +165,7 @@ public:
 
     Value toValue(Engine* engine) const;
 
+    bool isNull() const;
     bool isBool() const;
     bool isInt() const;
     bool isNumber() const;

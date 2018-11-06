@@ -1,8 +1,8 @@
 #include "tcpline.h"
 #include "tcplinesocket.h"
 #include "live/filter.h"
-#include "live/plugincontext.h"
-#include "live/engine.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
 #include "live/exception.h"
 #include "live/documentqmlinfo.h"
 #include "live/lockedfileiosession.h"
@@ -29,11 +29,11 @@ TcpLine::TcpLine(QObject *parent)
     , m_componentComplete(false)
 {
     m_project = qobject_cast<lv::Project*>(
-        lv::PluginContext::engine()->engine()->rootContext()->contextProperty("project").value<QObject*>()
+        lv::ViewContext::instance().engine()->engine()->rootContext()->contextProperty("project").value<QObject*>()
     );
     if ( !m_project ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Failed to load 'project' property from context", 0);
-        lv::PluginContext::engine()->throwError(&e);
+        lv::ViewContext::instance().engine()->throwError(&e);
     }
     connect(m_server, SIGNAL(newConnection()), this, SLOT(newConnection()));
 }
@@ -65,7 +65,7 @@ void TcpLine::setInput(Tuple *input){
             if ( m_input->reserveForRead(locker, this)){
 
                 MLNode result;
-                Tuple::serialize(PluginContext::engine(), *input, result);
+                Tuple::serialize(ViewContext::instance().engine(), *input, result);
 
                 tls->sendInput(result);
 
@@ -92,7 +92,7 @@ void TcpLine::componentComplete(){
 void TcpLine::process(){
     use(createLocker()->write(m_output),
         [this](){
-            Tuple::deserialize(lv::PluginContext::engine(), m_receivedOutput["output"], *m_output);
+            Tuple::deserialize(lv::ViewContext::instance().engine(), m_receivedOutput["output"], *m_output);
         }, [this](){
             emit outputChanged();
         }
@@ -123,7 +123,7 @@ void TcpLine::socketOutputReady(TcpLineSocket *socket){
             m_receivedBytes.clear();
             process();
         } catch ( lv::Exception& e ){
-            PluginContext::engine()->throwError(&e, this);
+            ViewContext::instance().engine()->throwError(&e, this);
         }
     }
 }
@@ -141,7 +141,7 @@ void TcpLine::startListening(){
             lv::Exception e = CREATE_EXCEPTION(
                 lv::Exception, "TcpLine: Cannot open tcp connection.", 0
             );
-            lv::PluginContext::engine()->throwError(&e);
+            lv::ViewContext::instance().engine()->throwError(&e);
             return;
         }
         m_address = m_server->serverAddress().toString();
@@ -151,9 +151,9 @@ void TcpLine::startListening(){
     } else {
         if( !m_server->listen(QHostAddress(m_address), m_port) ){
             lv::Exception e = CREATE_EXCEPTION(
-                lv::Exception, "TcpLine: Cannot open tcp connection to " + m_address + ".", 0
+                lv::Exception, "TcpLine: Cannot open tcp connection to " + m_address.toStdString() + ".", 0
             );
-            lv::PluginContext::engine()->throwError(&e);
+            lv::ViewContext::instance().engine()->throwError(&e);
             return;
         }
         emit listening();
@@ -187,12 +187,12 @@ void TcpLine::initializeAgent(){
             m_initializer["imports"] = m_source->importSourceCode().toStdString();
 
             MLNode inputResult;
-            Tuple::serialize(PluginContext::engine(), *m_input, inputResult);
+            Tuple::serialize(ViewContext::instance().engine(), *m_input, inputResult);
 
             m_initializer["input"] = inputResult;
 
             MLNode outputResult;
-            Tuple::serialize(PluginContext::engine(), *m_output, outputResult);
+            Tuple::serialize(ViewContext::instance().engine(), *m_output, outputResult);
             m_initializer["output"] = outputResult;
 
             vlog_debug("live-tcpline", "Initializing agent: " + a->address());

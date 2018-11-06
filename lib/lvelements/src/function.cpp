@@ -1,6 +1,7 @@
 #include "function.h"
 #include "live/elements/engine.h"
 #include "live/elements/element.h"
+#include "live/exception.h"
 #include "v8.h"
 
 namespace lv{ namespace el{
@@ -63,8 +64,12 @@ LocalValue Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::V
 template<>
 Element *Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
     v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast((*info)[index]);
-    if ( vo->InternalFieldCount() != 1 )
-        throw std::exception(); // not an element
+    if ( vo->InternalFieldCount() != 1 ){
+        Engine* engine = reinterpret_cast<Engine*>(info->GetIsolate()->GetData(0));
+        lv::Exception exc = CREATE_EXCEPTION(lv::Exception, "Value cannot be converted to an Element type or subtype.", 1);
+        engine->throwError(&exc, nullptr);
+        return nullptr;
+    }
 
     v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(vo->GetInternalField(0));
     void* ptr = wrap->Value();
@@ -73,7 +78,7 @@ Element *Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Val
 
 
 LocalValue Function::CallInfo::at(size_t index) const{
-    return LocalValue((*m_info)[index]);
+    return LocalValue((*m_info)[static_cast<int>(index)]);
 }
 
 size_t Function::CallInfo::length() const{
@@ -82,6 +87,23 @@ size_t Function::CallInfo::length() const{
 
 void *Function::CallInfo::userData(){
     return m_info->Data().As<v8::External>()->Value();
+}
+
+bool Function::CallInfo::clearedPendingException(Engine *engine) const{
+    if ( engine->hasPendingException() ){
+        engine->clearPendingException();
+        return true;
+    }
+    return false;
+}
+
+void Function::CallInfo::throwError(Engine *engine, Exception *e) const{
+    engine->throwError(e, reinterpret_cast<Element*>(internalField()));
+}
+
+void Function::CallInfo::throwError(Engine *engine, const std::string &message) const{
+    lv::Exception e = CREATE_EXCEPTION(lv::Exception, message.c_str(), 1);
+    throwError(engine, &e);
 }
 
 void Function::CallInfo::assignReturnValue(const v8::Local<v8::Value> &value) const{
@@ -112,8 +134,8 @@ Function::Parameters::Parameters(int length)
 }
 
 Function::Parameters::Parameters(const std::initializer_list<LocalValue> &init)
-    : m_length(init.size())
-    , m_args(new v8::Local<v8::Value>[init.size()])
+    : m_length(static_cast<int>(init.size()))
+    , m_args(new v8::Local<v8::Value>[static_cast<int>(init.size())])
 {
     int index = 0;
     for ( auto it = init.begin(); it != init.end(); ++it ){
@@ -193,13 +215,16 @@ Value Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Val
 }
 
 template<>
-Element *Function::Parameters::extractValue(Engine *, const v8::Local<v8::Value> *args, int index){
+Element *Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Value> *args, int index){
     if ( args[index]->IsNullOrUndefined() )
         return nullptr;
 
     v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(args[index]);
-    if ( vo->InternalFieldCount() != 1 )
-        throw std::exception(); // not an element
+    if ( vo->InternalFieldCount() != 1 ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Value cannot be converted to an Element type or subtype.", 1);
+        engine->throwError(&e, nullptr);
+        return nullptr;
+    }
 
     v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(vo->GetInternalField(0));
     void* ptr = wrap->Value();

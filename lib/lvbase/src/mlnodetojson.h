@@ -25,11 +25,15 @@ namespace lv{
 
 namespace ml{
 
-void LV_BASE_EXPORT toJson(const MLNode& n, QJsonValue& result);
-void LV_BASE_EXPORT toJson(const MLNode& n, QByteArray& result);
+void LV_BASE_EXPORT toJson(const MLNode& n, std::string& result);
+void LV_BASE_EXPORT fromJson(const std::string& data, MLNode& n);
+void LV_BASE_EXPORT fromJson(const char* data, MLNode& n);
 
-void LV_BASE_EXPORT fromJson(const QJsonValue& value, MLNode& n);
-void LV_BASE_EXPORT fromJson(const QByteArray& data,  MLNode& n);
+//void LV_BASE_EXPORT toJson(const MLNode& n, QJsonValue& result);
+//void LV_BASE_EXPORT toJson(const MLNode& n, QByteArray& result);
+
+//void LV_BASE_EXPORT fromJson(const QJsonValue& value, MLNode& n);
+//void LV_BASE_EXPORT fromJson(const QByteArray& data,  MLNode& n);
 
 }// namespace ml
 

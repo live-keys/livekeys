@@ -1,6 +1,7 @@
 #include "element.h"
 #include "element_p.h"
 #include "context_p.h"
+#include "live/exception.h"
 #include "v8.h"
 
 namespace lv{ namespace el{
@@ -429,7 +430,6 @@ void Element::clearPropertyBoundExpression(const std::string &name){
         }
         delete be;
         d->boundPropertyExpressions.erase(it);
-//        qDebug() << "BOUND EXPRESSIONS:" << m_boundPropertyExpressions.size();
     }
 }
 
@@ -627,6 +627,15 @@ v8::Local<v8::Object> ElementPrivate::localObject(Element *element){
         d->engine->wrapScriptObject(element);
     }
     return d->persistent.Get(d->engine->isolate());
+}
+
+Element *ElementPrivate::elementFromObject(const v8::Local<v8::Object> &object){
+    if ( object->InternalFieldCount() != 1 )
+        THROW_EXCEPTION(lv::Exception, "Object is not of element type.", 1);
+
+    v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(object->GetInternalField(0));
+    void* ptr = wrap->Value();
+    return reinterpret_cast<Element*>(ptr);
 }
 
 }}// namespace lv, namespace script

@@ -18,7 +18,10 @@ public:
         return notify(eventId(&EventEmitter::valueChanged), val);
     }
 
-    void setValue(double value){ m_value = value; valueChanged(m_value);}
+    void setValue(double value){
+        m_value = value;
+        valueChanged(m_value);
+    }
 
 private:
     double m_value;
@@ -80,22 +83,23 @@ void EventTest::eventEmissionThroughLambdaTest(){
 }
 
 void EventTest::removeEventFromWithinTest(){
-    EventEmitter e(nullptr);
+    EventEmitter* e = new EventEmitter(nullptr);
 
     EventConnection** eHolder = new EventConnection*;
 
     double value = 0;
 
-    *eHolder = e.on(&EventEmitter::valueChanged, [eHolder, &value, &e](double v){
+    *eHolder = e->on(&EventEmitter::valueChanged, [eHolder, &value, e](double v){
         value = v;
         EventConnection::remove(*eHolder);
-        e.setValue(40.0);
+        e->setValue(40.0);
     });
 
-    e.setValue(20.0);
+    e->setValue(20.0);
     QCOMPARE(value, 20.0);
 
     delete eHolder;
+    delete e;
 }
 
 void EventTest::removeAllEventsFromWithinTest(){

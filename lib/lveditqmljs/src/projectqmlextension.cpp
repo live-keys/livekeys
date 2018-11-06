@@ -18,7 +18,7 @@
 #include "live/project.h"
 #include "live/projectfile.h"
 #include "live/settings.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
 #include "live/codeqmlhandler.h"
 #include "live/editorsettings.h"
 #include "live/qmljssettings.h"
@@ -27,7 +27,7 @@
 
 namespace lv{
 
-ProjectQmlExtension::ProjectQmlExtension(Settings *settings, Project *project, Engine* engine)
+ProjectQmlExtension::ProjectQmlExtension(Settings *settings, Project *project, ViewEngine* engine)
     : m_settings(new QmlJsSettings())
     , m_scanMonitor(new ProjectQmlScanMonitor(this, project, engine))
 {
@@ -44,7 +44,7 @@ ProjectQmlExtension::~ProjectQmlExtension(){
 AbstractCodeHandler *ProjectQmlExtension::createHandler(
         ProjectDocument *document,
         Project *project,
-        Engine *engine,
+        ViewEngine *engine,
         QObject *parent)
 {
     QString filePath = document->file()->path();

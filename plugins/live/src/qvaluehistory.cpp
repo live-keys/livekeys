@@ -1,6 +1,7 @@
 #include "qvaluehistory.h"
-#include "live/plugincontext.h"
-#include "live/engine.h"
+#include "live/applicationcontext.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
 #include <QtMath>
 #include <QSGTexture>
 #include <QOpenGLFramebufferObject>
@@ -133,7 +134,7 @@ QSGNode *QValueHistory::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePain
 
     if ( minValue == maxValue && m_minDisplayValue != QValueHistory::Auto && m_maxDisplayValue != QValueHistory::Auto){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "ValueHistory error: minDisplayValue == maxDisplayValue.", 0);
-        lv::PluginContext::engine()->throwError(&e);
+        lv::ViewContext::instance().engine()->throwError(&e);
         return node;
     }
 

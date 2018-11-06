@@ -200,7 +200,11 @@ public:
 
     ~EventConnectionFunction(){}
 
-    void call(Args... args){ m_f(args...); }
+    void call(Args... args){
+        // preserve function capture data in case the function gets deleted from within
+        std::function<void(Args...)> fcopy = m_f;
+        fcopy(args...);
+    }
 
 private:
     std::function<void(Args...)> m_f;
@@ -216,8 +220,8 @@ public:
             meta::IndexTuple<Indexes...>,
             const Function::Parameters& params)
     {
-        Engine* engine = elementEngine(f->emitter());
-        f->call(params.template getValue<Indexes, typename std::remove_const<typename std::remove_reference<Args>::type>::type>(engine)...);
+        f->call(params.template getValue<
+                Indexes, typename std::remove_const<typename std::remove_reference<Args>::type>::type>(elementEngine(f->emitter()))...);
     }
 
 public:

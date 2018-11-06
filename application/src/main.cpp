@@ -23,14 +23,16 @@
 #include "livecvarguments.h"
 #include "live/libraryloadpath.h"
 #include "live/visuallog.h"
-#include "live/plugincontext.h"
+#include "live/applicationcontext.h"
 #include "live/exception.h"
 
 using namespace lv;
 
 int main(int argc, char *argv[]){
+    ApplicationContext::initialize();
+
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication::addLibraryPath(lv::PluginContext::librariesPath());
+    QGuiApplication::addLibraryPath(QString::fromStdString(lv::ApplicationContext::instance().librariesPath()));
 
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName("Live CV");
@@ -41,16 +43,16 @@ int main(int argc, char *argv[]){
         livecv->loadInternalPlugins();
 
         if ( livecv->arguments()->helpFlag() ){
-            printf("%s", qPrintable(livecv->arguments()->helpString()));
+            printf("%s", livecv->arguments()->helpString().c_str());
             return 0;
         } else if ( livecv->arguments()->versionFlag() ){
             printf("%s\n", qPrintable(livecv->versionString()));
             return 0;
         }
 
-        LibraryLoadPath::addRecursive(PluginContext::pluginPath(), PluginContext::linkPath());
-        if ( QFileInfo(PluginContext::externalPath()).exists() )
-            LibraryLoadPath::addRecursive(PluginContext::externalPath(), PluginContext::linkPath());
+        LibraryLoadPath::addRecursive(ApplicationContext::instance().pluginPath(), ApplicationContext::instance().linkPath());
+        if ( QFileInfo(QString::fromStdString(ApplicationContext::instance().externalPath())).exists() )
+            LibraryLoadPath::addRecursive(ApplicationContext::instance().externalPath(), ApplicationContext::instance().linkPath());
 
         if ( livecv->arguments()->pluginInfoFlag() ){
             printf("%s", livecv->extractPluginInfo(livecv->arguments()->pluginInfoImport()).data());
@@ -63,10 +65,10 @@ int main(int argc, char *argv[]){
 
     } catch ( lv::Exception& e ){
         if ( e.code() < 0 ){
-            printf("Uncaught exception when initializing: %s\n", qPrintable(e.message()));
+            printf("Uncaught exception when initializing: %s\n", e.message().c_str());
             return e.code();
         } else {
-            vlog() << "Uncaught exception: " << e.message();
+            vlog() << "Uncaught exception: " << e.message().c_str();
             return e.code();
         }
     }

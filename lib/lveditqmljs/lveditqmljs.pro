@@ -4,6 +4,7 @@ QT      += core qml quick xml
 CONFIG  += qt c++11
 
 linkLocalLibrary(lvbase,   lvbase)
+linkLocalLibrary(lvview,  lvview)
 linkLocalLibrary(lveditor, lveditor)
 
 DEFINES += LV_EDITQMLJS_LIB

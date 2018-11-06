@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "editorprivate_plugin.h"
-#include "live/plugincontext.h"
+#include "live/applicationcontext.h"
 #include "live/settings.h"
 #include "live/documenthandler.h"
 #include "live/documentcursorinfo.h"
@@ -29,8 +29,9 @@
 #include "live/editorsettings.h"
 #include "live/livepalettecontainer.h"
 #include "live/editorglobalobject.h"
-#include "live/plugincontext.h"
+#include "live/applicationcontext.h"
 #include "live/keymap.h"
+#include "live/viewcontext.h"
 #include "linesurface.h"
 #include "linemanager.h"
 
@@ -42,7 +43,7 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::DocumentHandler>(   uri, 1, 0, "DocumentHandler");
     qmlRegisterType<lv::DocumentCursorInfo>(uri, 1, 0, "DocumentCursorInfo");
     qmlRegisterType<lv::TextEdit>(          uri, 1, 0, "NewTextEdit");
-    qmlRegisterType<lv::LineSurface>( uri, 1, 0, "LineSurface");
+    qmlRegisterType<lv::LineSurface>(       uri, 1, 0, "LineSurface");
     qmlRegisterType<lv::LineManager>(       uri, 1, 0, "LineManager");
 
     qmlRegisterUncreatableType<lv::ProjectFileModel>(
@@ -64,18 +65,18 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
 }
 
 void EditorPrivatePlugin::initializeEngine(QQmlEngine *engine, const char *){
-    lv::PluginContext::initFromEngine(engine);
+    lv::ViewContext::initFromEngine(engine);
 
     lv::EditorSettings* editorSettings = new lv::EditorSettings(
-        lv::PluginContext::settings()->path() + "/editor.json"
+        lv::ViewContext::instance().settings()->path() + "/editor.json"
     );
-    lv::PluginContext::settings()->addConfigFile("editor", editorSettings);
+    lv::ViewContext::instance().settings()->addConfigFile("editor", editorSettings);
 
     QObject* prob = engine->rootContext()->contextProperty("project").value<QObject*>();
     lv::Project* pr = qobject_cast<lv::Project*>(prob);
 
     lv::LivePaletteContainer* lpc = lv::LivePaletteContainer::create(
-        engine, lv::PluginContext::pluginPath()
+        engine, QString::fromStdString(lv::ApplicationContext::instance().pluginPath())
     );
 
     lv::EditorGlobalObject* editor = new lv::EditorGlobalObject(pr, lpc);

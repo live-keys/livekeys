@@ -15,12 +15,21 @@
 ****************************************************************************/
 
 #include "lockedfileiosession.h"
+#include <fstream>
+#include <istream>
+#include <unordered_map>
+
 #include <QFile>
 #include <QTextStream>
 #include <QMutex>
 #include <QReadWriteLock>
+#include <QHash>
+#include <QString>
 
 namespace lv{
+
+// Class FileLock
+// --------------------------------------------------
 
 class FileLock{
 public:
@@ -30,77 +39,106 @@ public:
     int refcount;
 };
 
-LockedFileIOSession::LockedFileIOSession()
-    : m_locksMutex(new QMutex)
-{
-}
+// Class LockedFileIOSessionPrivate
+// --------------------------------------------------
 
-QReadWriteLock *LockedFileIOSession::getLock(const QString &path){
+class LockedFileIOSessionPrivate{
+
+public:
+    QReadWriteLock* getLock(const std::string& path);
+    void releaseLock(const std::string& path);
+
+    std::unordered_map<std::string, FileLock*> m_locks;
+    QMutex* m_locksMutex;
+};
+
+QReadWriteLock *LockedFileIOSessionPrivate::getLock(const std::string &path){
     m_locksMutex->lock();
-    FileLock* fl = m_locks.value(path, 0);
-    if ( !fl ){
+
+    FileLock* fl = nullptr;
+
+    auto it = m_locks.find(path);
+    if ( it == m_locks.end() ){
         fl = new FileLock;
-        m_locks.insert(path, fl);
+        m_locks[path] = fl;
+    } else {
+        fl = it->second;
     }
+
     fl->refcount++;
 
     m_locksMutex->unlock();
     return &fl->lock;
 }
 
-void LockedFileIOSession::releaseLock(const QString &path){
+void LockedFileIOSessionPrivate::releaseLock(const std::string &path){
     m_locksMutex->lock();
-    FileLock* fl = m_locks.value(path, 0);
-    if ( fl ){
+
+    auto it = m_locks.find(path);
+    if ( it != m_locks.end() ){
+        FileLock* fl = it->second;
         fl->lock.unlock();
-        if ( --(fl->refcount) <= 0 )
-            delete m_locks.take(path);
+        if ( --(fl->refcount) <= 0 ){
+            m_locks.erase(it);
+            delete fl;
+        }
     }
     m_locksMutex->unlock();
 }
 
+// Class LockedFileIOSession
+// --------------------------------------------------
+
+LockedFileIOSession::LockedFileIOSession()
+    : m_d(new LockedFileIOSessionPrivate)
+{
+    m_d->m_locksMutex = new QMutex;
+}
+
+
 LockedFileIOSession::~LockedFileIOSession(){
-    delete m_locksMutex;
+    delete m_d->m_locksMutex;
+    delete m_d;
 }
 
 LockedFileIOSession::Ptr LockedFileIOSession::createInstance(){
     return LockedFileIOSession::Ptr(new LockedFileIOSession);
 }
 
-QString LockedFileIOSession::readFromFile(const QString &path){
-    getLock(path)->lockForRead();
+std::string LockedFileIOSession::readFromFile(const std::string &path){
+    m_d->getLock(path)->lockForRead();
 
-    QFile fileInput(path);
-    if ( !fileInput.open(QIODevice::ReadOnly | QIODevice::Text) ){
-        qCritical("Cannot open file: %s", qPrintable(path));
-        releaseLock(path);
+    std::ifstream instream(path, std::ifstream::in | std::ifstream::binary);
+    if ( !instream.is_open() ){
+        qCritical("Cannot open file: %s", path.c_str());
+        m_d->releaseLock(path);
         return "";
     }
 
-    QTextStream in(&fileInput);
-    QString content = in.readAll();
-    fileInput.close();
+    instream.seekg(0, std::ios::end);
+    size_t size = instream.tellg();
+    std::string buffer(size, ' ');
+    instream.seekg(0);
+    instream.read(&buffer[0], size);
 
-    releaseLock(path);
-    return content;
+    m_d->releaseLock(path);
+    return buffer;
 }
 
-bool LockedFileIOSession::writeToFile(const QString &path, const QString &data){
-    getLock(path)->lockForWrite();
+bool LockedFileIOSession::writeToFile(const std::string &path, const std::string &data){
+    m_d->getLock(path)->lockForWrite();
 
-    QFile fileInput(path);
+    QFile fileInput(path.c_str());
     if ( !fileInput.open(QIODevice::WriteOnly ) ){
-        qCritical("Can't open file for writing: %s", qPrintable(path));
-        releaseLock(path);
+        qCritical("Can't open file for writing: %s", path.c_str());
+        m_d->releaseLock(path);
         return false;
     }
 
-    QTextStream stream(&fileInput);
-    stream << data;
-    stream.flush();
+    fileInput.write(data.c_str(), data.size());
     fileInput.close();
 
-    releaseLock(path);
+    m_d->releaseLock(path);
     return true;
 }
 

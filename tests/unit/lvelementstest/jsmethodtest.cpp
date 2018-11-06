@@ -54,7 +54,7 @@ class MethodStub : public Element{
 
     int variableParametersType(const Function::CallInfo& p){
         forwardCall()(p.at(0).toInt32(p.engine()), p.at(1).toNumber(p.engine()), p.at(2).toStdString(p.engine()));
-        return p.length();
+        return (int)p.length();
     }
 
     void variableParametersVoidType(const Function::CallInfo& p){

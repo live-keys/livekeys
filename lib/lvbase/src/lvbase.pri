@@ -6,69 +6,36 @@ HEADERS += \
     $$PWD/lvbaseglobal.h \
     $$PWD/stacktrace.h \
     $$PWD/commandlineparser.h \
-    $$PWD/engine.h \
-    $$PWD/settings.h \
     $$PWD/lockedfileiosession.h \
-    $$PWD/incubationcontroller.h \
-    $$PWD/errorhandler.h \
-    $$PWD/plugincontext.h \
+    $$PWD/applicationcontext.h \
     $$PWD/mlnode.h \
     $$PWD/mlnodetojson.h \
-    $$PWD/mlnodetojs.h \
-    $$PWD/visuallognetworksender.h \
     $$PWD/visuallog.h \
-    $$PWD/visuallogmodel.h \
-    $$PWD/visuallogqt.h \
-    $$PWD/visuallogjsobject.h \
-    $$PWD/filter.h \
-    $$PWD/shareddata.h \
-    $$PWD/filterworker.h \
-    $$PWD/filterworker_p.h \
-    $$PWD/keymap.h \
-    $$PWD/visuallogfilter.h \
-    $$PWD/visuallogbasemodel.h \
-    $$PWD/typeinfo.h \
-    $$PWD/qmlengineinterceptor.h \
     $$PWD/indextuple.h \
-    $$PWD/functionargs.h
+    $$PWD/functionargs.h \
+    $$PWD/lvglobal.h
 
 SOURCES += \
     $$PWD/exception.cpp \
-    $$PWD/libraryloadpath.cpp \
-    $$PWD/stacktrace.cpp \
     $$PWD/commandlineparser.cpp \
-    $$PWD/engine.cpp \
-    $$PWD/settings.cpp \
     $$PWD/lockedfileiosession.cpp \
-    $$PWD/incubationcontroller.cpp \
-    $$PWD/errorhandler.cpp \
-    $$PWD/plugincontext.cpp \
+    $$PWD/applicationcontext.cpp \
     $$PWD/mlnode.cpp \
     $$PWD/mlnodetojson.cpp \
-    $$PWD/mlnodetojs.cpp \
-    $$PWD/visuallognetworksender.cpp \
+    $$PWD/libraryloadpath.cpp \
     $$PWD/visuallog.cpp \
-    $$PWD/visuallogmodel.cpp \
-    $$PWD/visuallogjsobject.cpp \
-    $$PWD/filter.cpp \
-    $$PWD/shareddata.cpp \
-    $$PWD/filterworker.cpp \
-    $$PWD/keymap.cpp \
-    $$PWD/visuallogfilter.cpp \
-    $$PWD/visuallogbasemodel.cpp \
-    $$PWD/typeinfo.cpp \
-    $$PWD/qmlengineinterceptor.cpp
+    $$PWD/stacktrace.cpp
 
 win32{
     SOURCES += $$PWD/stacktrace_win.cpp
     SOURCES += $$PWD/libraryloadpath_win.cpp
-    SOURCES += $$PWD/plugincontext_win.cpp
+    SOURCES += $$PWD/applicationcontext_win.cpp
 }
 
 unix{
-    !macx:SOURCES += $$PWD/plugincontext_unix.cpp
+    !macx:SOURCES += $$PWD/applicationcontext_unix.cpp
     SOURCES += $$PWD/stacktrace_unix.cpp
     SOURCES += $$PWD/libraryloadpath_unix.cpp
 }
-macx:SOURCES += $$PWD/plugincontext_mac.cpp
+macx:SOURCES += $$PWD/applicationcontext_mac.cpp
 

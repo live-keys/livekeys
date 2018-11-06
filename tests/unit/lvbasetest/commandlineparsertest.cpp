@@ -48,8 +48,8 @@ void CommandLineParserTest::helpFlagTest(){
 
 void CommandLineParserTest::noFlagTest(){
     CommandLineParser parser("Header");
-    CommandLineParser::Option* debugOption = parser.addFlag("-d", "debug");
-    CommandLineParser::Option* infoOption  = parser.addFlag("-i", "info");
+    CommandLineParser::Option* debugOption = parser.addFlag({"-d"}, "debug");
+    CommandLineParser::Option* infoOption  = parser.addFlag({"-i"}, "info");
 
     const char *argv[] = {"<bin>"};
     parser.parse(1, argv);
@@ -59,8 +59,8 @@ void CommandLineParserTest::noFlagTest(){
 
 void CommandLineParserTest::flagMultiNameTest(){
     CommandLineParser parser("Header");
-    CommandLineParser::Option* debugOption = parser.addFlag("-d", "debug");
-    CommandLineParser::Option* infoOption  = parser.addFlag(QStringList() << "-i" << "--info", "info");
+    CommandLineParser::Option* debugOption = parser.addFlag({"-d"}, "debug");
+    CommandLineParser::Option* infoOption  = parser.addFlag({"-i", "--info"}, "info");
 
     const char *argv[] = {"<bin>", "--info", "-d"};
     parser.parse(3, argv);
@@ -70,7 +70,7 @@ void CommandLineParserTest::flagMultiNameTest(){
 
 void CommandLineParserTest::noOptionTest(){
     CommandLineParser parser("Header");
-    CommandLineParser::Option* testOption = parser.addOption("--opt", "Test Option", "string");
+    CommandLineParser::Option* testOption = parser.addOption({"--opt"}, "Test Option", "string");
     const char *argv[] = {"<bin>"};
     parser.parse(1, argv);
     QCOMPARE(parser.isSet(testOption), false);
@@ -79,28 +79,28 @@ void CommandLineParserTest::noOptionTest(){
 
 void CommandLineParserTest::optionTest(){
     CommandLineParser parser("Header");
-    CommandLineParser::Option* testOption = parser.addOption("--opt", "Test Option", "string");
+    CommandLineParser::Option* testOption = parser.addOption({"--opt"}, "Test Option", "string");
     const char *argv[] = {"<bin>", "--opt", "test"};
     parser.parse(3, argv);
     QCOMPARE(parser.isSet(testOption), true);
-    QCOMPARE(parser.value(testOption), QString("test"));
+    QVERIFY(parser.value(testOption) == "test");
 }
 
 void CommandLineParserTest::optionAndFlagTest(){
     CommandLineParser parser("Header");
-    CommandLineParser::Option* testOption = parser.addOption("--opt", "Test Option", "string");
-    CommandLineParser::Option* infoOption = parser.addFlag("--info", "Info Option");
+    CommandLineParser::Option* testOption = parser.addOption({"--opt"}, "Test Option", "string");
+    CommandLineParser::Option* infoOption = parser.addFlag({"--info"}, "Info Option");
     const char *argv[] = {"<bin>", "--opt", "test", "--info"};
     parser.parse(4, argv);
     QCOMPARE(parser.isSet(infoOption), true);
     QCOMPARE(parser.isSet(testOption), true);
-    QCOMPARE(parser.value(testOption), QString("test"));
+    QVERIFY(parser.value(testOption) == "test");
 }
 
 void CommandLineParserTest::invalidOptiontest(){
     CommandLineParser parser("Header");
-    parser.addOption("--opt", "Test Option", "string");
-    parser.addFlag("--info", "Info Option");
+    parser.addOption({"--opt"}, "Test Option", "string");
+    parser.addFlag({"--info"}, "Info Option");
     const char *argv[] = {"<bin>", "--opt"};
     QVERIFY_EXCEPTION_THROWN(parser.parse(2, argv), CommandLineParserException);
 }

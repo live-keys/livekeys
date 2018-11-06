@@ -22,12 +22,12 @@
 
 namespace lv{
 
-void LibraryLoadPath::add(const QString &path, const QString &linkPath){
-    addImpl(path, linkPath);
+void LibraryLoadPath::add(const std::string path, const std::string &linkPath){
+    addImpl(QString::fromStdString(path), QString::fromStdString(linkPath));
 }
 
-void LibraryLoadPath::addRecursive(const QString &path, const QString &linkPath){
-    addImpl(path, linkPath, true);
+void LibraryLoadPath::addRecursive(const std::string &path, const std::string &linkPath){
+    addImpl(QString::fromStdString(path), QString::fromStdString(linkPath), true);
 }
 
 }// namespace

@@ -427,15 +427,19 @@ void JsEventTest::eventTypesTest(){
             QVERIFY(localObjectEventValue.get(engine, std::string("a")).toInt32(engine) == 1);
             QVERIFY(localObjectEventValue.get(engine, std::string("b")).toNumber(engine) == 20.2);
 
-            LocalValue localValueEventValue(engine);
-            jsEvent->on("localValueEvent", [&localValueEventValue, engine](const Function::Parameters& p){
-                localValueEventValue = p.at(engine, 0);
+            std::string localValueEventValue;
+            int localValueEventIntValue;
+            jsEvent->on("localValueEvent", [&localValueEventValue, &localValueEventIntValue, engine](const Function::Parameters& p){
+                if ( p.at(engine, 0).isInt() )
+                    localValueEventIntValue = p.at(engine, 0).toInt32(engine);
+                else
+                    localValueEventValue = p.at(engine, 0).toStdString(engine);
             });
             engine->compileEnclosed("jsEvent.localValueEvent('asd');")->run();
-            QVERIFY(localValueEventValue.toStdString(engine) == "asd");
+            QVERIFY(localValueEventValue == "asd");
 
             engine->compileEnclosed("jsEvent.localValueEvent(200);")->run();
-            QVERIFY(localValueEventValue.toInt32(engine) == 200);
+            QVERIFY(localValueEventIntValue == 200);
 
             Value valueEventValue;
             jsEvent->on("valueEvent", [&valueEventValue, engine](const Function::Parameters& p){

@@ -22,7 +22,10 @@ HEADERS += \
     $$PWD/value_p.h \
     $$PWD/list.h \
     $$PWD/buffer.h \
-    $$PWD/container.h
+    $$PWD/container.h \
+    $$PWD/errorhandler.h \
+    $$PWD/mlnodetojs.h \
+    $$PWD/visuallogjsobject.h
 
 SOURCES += \
     $$PWD/function.cpp \
@@ -42,4 +45,7 @@ SOURCES += \
     $$PWD/object.cpp \
     $$PWD/list.cpp \
     $$PWD/buffer.cpp \
-    $$PWD/container.cpp
+    $$PWD/container.cpp \
+    $$PWD/errorhandler.cpp \
+    $$PWD/mlnodetojs.cpp \
+    $$PWD/visuallogjsobject.cpp

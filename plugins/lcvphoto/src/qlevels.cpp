@@ -15,8 +15,8 @@
 ****************************************************************************/
 
 #include "qlevels.h"
-#include "live/plugincontext.h"
-#include "live/engine.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
 
 #include "opencv2/imgproc.hpp"
 
@@ -137,12 +137,12 @@ void QLevels::setLightness(const QJSValue &value){
             m_lightness = value;
         } else {
             lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Global channel must be array of size 3.", 0);
-            lv::PluginContext::engine()->throwError(&e);
+            lv::ViewContext::instance().engine()->throwError(&e);
             return;
         }
     } else if (!value.isUndefined() ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Global channel must be array of size 3.", 0);
-        lv::PluginContext::engine()->throwError(&e, this);
+        lv::ViewContext::instance().engine()->throwError(&e, this);
         return;
     } else {
         m_lightnessConfiguration = Configuration();
@@ -162,7 +162,7 @@ void QLevels::setChannels(const QJSValue &channels){
             int channelNo = it.name().toInt(&isKeyInt);
             if ( !isKeyInt ){
                 lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Channels must be of object of <int, Array> type.", 0);
-                lv::PluginContext::engine()->throwError(&e);
+                lv::ViewContext::instance().engine()->throwError(&e);
                 return;
             }
             QJSValue channel = it.value();
@@ -170,7 +170,7 @@ void QLevels::setChannels(const QJSValue &channels){
                 lv::Exception e = CREATE_EXCEPTION(
                     lv::Exception, "Channels must be of object of <int, Array> type, where Array is of size[3]", 0
                 );
-                lv::PluginContext::engine()->throwError(&e);
+                lv::ViewContext::instance().engine()->throwError(&e);
                 return;
             }
 
@@ -182,7 +182,7 @@ void QLevels::setChannels(const QJSValue &channels){
         }
     } else if (!channels.isUndefined() ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Channels must be of object of <int, Array> type.", 0);
-        lv::PluginContext::engine()->throwError(&e);
+        lv::ViewContext::instance().engine()->throwError(&e);
         return;
     } else {
         m_channelConfiguration.clear();

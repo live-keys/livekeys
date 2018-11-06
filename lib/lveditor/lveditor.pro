@@ -4,12 +4,7 @@ QT      += core qml quick quick-private
 CONFIG  += qt
 
 linkLocalLibrary(lvbase, lvbase)
-
-win32:{
-    DESTDIR    = $$DEPLOY_PATH/dev/$$TARGET/lib
-    DLLDESTDIR = $$DEPLOY_PATH
-}else:DESTDIR  = $$LIBRARY_DEPLOY_PATH
-
+linkLocalLibrary(lvview, lvview)
 
 macx{
     QMAKE_LFLAGS += \
@@ -17,6 +12,13 @@ macx{
         '-Wl,-rpath,\'@executable_path/../Frameworks\''
     QMAKE_SONAME_PREFIX = @rpath/Live.framework/Libraries
 }
+
+## Destination
+
+win32:{
+    DESTDIR    = $$DEPLOY_PATH/dev/$$TARGET/lib
+    DLLDESTDIR = $$DEPLOY_PATH
+}else:DESTDIR  = $$LIBRARY_DEPLOY_PATH
 
 DEFINES += LV_EDITOR_LIB
 

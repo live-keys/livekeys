@@ -15,9 +15,10 @@
 ****************************************************************************/
 
 #include "qfilereader.h"
-#include "live/plugincontext.h"
+#include "live/applicationcontext.h"
 #include "live/exception.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
 #include <QFile>
 #include <QFileSystemWatcher>
 
@@ -76,8 +77,8 @@ void QFileReader::resync(){
     if ( m_componentComplete && m_source != "" ){
         QFile fileInput(m_source);
         if ( !fileInput.open(QIODevice::ReadOnly ) ){
-            lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Cannot open file: " + m_source, 0);
-            lv::PluginContext::engine()->throwError(&e);
+            lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Cannot open file: " + m_source.toStdString(), 0);
+            lv::ViewContext::instance().engine()->throwError(&e);
             return;
         }
         m_data = fileInput.readAll();

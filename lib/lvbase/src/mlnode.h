@@ -19,9 +19,11 @@
 
 #include "live/exception.h"
 
-#include <QMap>
+#include <map>
 #include <sstream>
 #include <initializer_list>
+
+class QByteArray;
 
 namespace lv{
 
@@ -29,17 +31,17 @@ class VisualLog;
 
 class LV_BASE_EXPORT MLOutOfRanceException: public lv::Exception{
 public:
-    MLOutOfRanceException(const QString& message = "", int code = 0) : lv::Exception(message, code){}
+    MLOutOfRanceException(const std::string& message = "", int code = 0) : lv::Exception(message, code){}
 };
 
 class LV_BASE_EXPORT InvalidMLTypeException: public lv::Exception{
 public:
-    InvalidMLTypeException(const QString& message = "", int code = 0) : lv::Exception(message, code){}
+    InvalidMLTypeException(const std::string& message = "", int code = 0) : lv::Exception(message, code){}
 };
 
 class LV_BASE_EXPORT TypeNotSerializableException: public lv::Exception{
 public:
-    TypeNotSerializableException(const QString& message = "", int code = 0) : lv::Exception(message, code){}
+    TypeNotSerializableException(const std::string& message = "", int code = 0) : lv::Exception(message, code){}
 };
 
 // MLNode
@@ -59,13 +61,13 @@ public:
 
     union MLValue;
 
-    typedef long long                IntType;
-    typedef double                   FloatType;
-    typedef bool                     BoolType;
-    typedef std::string              StringType;
-    typedef QList<MLNode>            ArrayType;
-    typedef QMap<StringType, MLNode> ObjectType;
-    typedef unsigned char            ByteType;
+    typedef long long                    IntType;
+    typedef double                       FloatType;
+    typedef bool                         BoolType;
+    typedef std::string                  StringType;
+    typedef std::vector<MLNode>          ArrayType;
+    typedef std::map<StringType, MLNode> ObjectType;
+    typedef unsigned char                ByteType;
 
     // MLNode::BytesType
     // -----------------
@@ -82,6 +84,7 @@ public:
         bool operator == (const BytesType& other) const;
 
         QByteArray toBase64();
+        StringType toBase64String();
         static BytesType fromBase64(const StringType& str);
 
         ByteType* data();
@@ -96,7 +99,7 @@ public:
     // MLNode::IteratorValue
     // ---------------------
 
-    class LV_BASE_EXPORT IteratorValue{
+    class IteratorValue{
     public:
         ObjectType::iterator objectIterator;
         ArrayType::iterator  arrayIterator;
@@ -164,7 +167,7 @@ public:
     // MLNode::ConstIteratorValue
     // --------------------------
 
-    class LV_BASE_EXPORT ConstIteratorValue{
+    class ConstIteratorValue{
     public:
         ObjectType::const_iterator objectIterator;
         ArrayType::const_iterator  arrayIterator;
@@ -243,7 +246,7 @@ public:
     };
 
 public:
-    union MLValue{
+    union LV_BASE_EXPORT MLValue{
         ObjectType*  asObject;
         ArrayType*   asArray;
         BytesType*   asBytes;
@@ -299,10 +302,11 @@ public:
     int asInt() const;
     bool asBool() const;
     FloatType asFloat() const;
-    StringType asString() const;
+    const StringType& asString() const;
     BytesType asBytes() const;
 
     const ArrayType& asArray() const;
+    const ObjectType& asObject() const;
 
     int size() const;
     bool hasKey(const StringType& key) const;

@@ -143,8 +143,11 @@ bool Object::isPoint() const{
 
 void Object::toPoint(double &x, double &y) const{
     v8::Local<v8::Object> lo = m_d->data.Get(m_d->engine->isolate());
-    if ( !isPoint() )
-        throw std::exception(); //TODO
+    if ( !isPoint() ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Object is not of Point type.", 1);
+        m_d->engine->throwError(&e, nullptr);
+        return;
+    }
 
     x = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "x", v8::String::kInternalizedString))->NumberValue();
     y = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "y", v8::String::kInternalizedString))->NumberValue();
@@ -158,8 +161,11 @@ bool Object::isSize() const{
 
 void Object::toSize(double &width, double &height) const{
     v8::Local<v8::Object> lo = m_d->data.Get(m_d->engine->isolate());
-    if ( !isSize() )
-        throw std::exception(); //TODO
+    if ( !isSize() ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Object is not of Size type.", 1);
+        m_d->engine->throwError(&e, nullptr);
+        return;
+    }
 
     width =  lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "width", v8::String::kInternalizedString))->NumberValue();
     height = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "height", v8::String::kInternalizedString))->NumberValue();
@@ -173,8 +179,11 @@ bool Object::isRectangle() const{
 
 void Object::toRectangle(double &x, double &y, double &width, double &height){
     v8::Local<v8::Object> lo = m_d->data.Get(m_d->engine->isolate());
-    if ( !isRectangle() )
-        throw std::exception(); //TODO
+    if ( !isRectangle() ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Object is not of Rectangle type.", 1);
+        m_d->engine->throwError(&e, nullptr);
+        return;
+    }
 
     x = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "x", v8::String::kInternalizedString))->NumberValue();
     y = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "y", v8::String::kInternalizedString))->NumberValue();
@@ -228,12 +237,20 @@ LocalObject::~LocalObject(){
     delete m_d;
 }
 
+LocalValue LocalObject::get(int index){
+    return LocalValue(m_d->data->Get(index));
+}
+
 LocalValue LocalObject::get(const LocalValue &key){
     return m_d->data->Get(key.data());
 }
 
 LocalValue LocalObject::get(Engine *engine, const std::string &str){
     return get(LocalValue(engine, str));
+}
+
+void LocalObject::set(int index, const LocalValue &value){
+    m_d->data->Set(index, value.data());
 }
 
 void LocalObject::set(const LocalValue &key, const LocalValue &value){

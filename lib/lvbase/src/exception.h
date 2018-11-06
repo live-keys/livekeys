@@ -18,99 +18,62 @@
 #define LVEXCEPTION_H
 
 #include <exception>
-#include <QString>
+#include <string>
 
 #include "live/stacktrace.h"
 #include "live/lvbaseglobal.h"
 
 namespace lv{
 
+class ExceptionPrivate;
 class LV_BASE_EXPORT Exception : public std::exception{
 
 public:
-    Exception(const QString& message = "", int code = 0);
+    Exception(const std::string& message = "", int code = 0);
     Exception(const Exception& other);
-
-    virtual ~Exception(){}
+    Exception& operator = (const Exception& other);
+    virtual ~Exception();
 
     bool hasLocation() const;
     bool hasStackTrace() const;
 
-    const QString& message() const;
+    const std::string& message() const;
     int code() const;
     int line() const;
-    const QString& file() const;
-    QString fileName() const;
-    const QString& functionName() const;
+    const std::string& file() const;
+    std::string fileName() const;
+    const std::string& functionName() const;
     const StackTrace::Ptr& stackTrace() const;
 
-    QString location() const;
+    std::string location() const;
 
     template<typename T> static T create(
-        const QString& message,
+        const std::string& message,
         int code,
-        const QString& file = "",
+        const std::string& file = "",
         int line = 0,
-        const QString& functionName = "",
+        const std::string& functionName = "",
         StackTrace::Ptr stackTrace = StackTrace::Ptr(0)
     );
 
-
 private:
-    QString m_message;
-    int     m_code;
-    int     m_line;
-    QString m_file;
-    QString m_functionName;
+    void assignSourceLocation(const std::string& file, int line, const std::string& functionName);
+    void assignStackTrace(const StackTrace::Ptr& st);
 
-    StackTrace::Ptr m_stackTrace;
+    ExceptionPrivate* m_d;
 };
 
-inline bool Exception::hasLocation() const{
-    return m_line != 0;
-}
-
-inline bool Exception::hasStackTrace() const{
-    return m_stackTrace.data() != 0;
-}
-
-inline const QString &Exception::message() const{
-    return m_message;
-}
-
-inline int Exception::code() const{
-    return m_code;
-}
-
-inline int Exception::line() const{
-    return m_line;
-}
-
-inline const QString &Exception::file() const{
-    return m_file;
-}
-
-inline const QString &Exception::functionName() const{
-    return m_functionName;
-}
-
-inline const StackTrace::Ptr &Exception::stackTrace() const{
-    return m_stackTrace;
-}
-
 template<typename T> T Exception::create(
-        const QString &message,
+        const std::string &message,
         int code,
-        const QString &file,
+        const std::string &file,
         int line,
-        const QString &functionName,
+        const std::string &functionName,
         StackTrace::Ptr stackTrace)
 {
     T e(message, code);
-    e.m_line = line;
-    e.m_file = file;
-    e.m_functionName = functionName;
-    e.m_stackTrace = stackTrace;
+    e.assignSourceLocation(file, line, functionName);
+    e.assignStackTrace(stackTrace);
 
     return e;
 }

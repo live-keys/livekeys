@@ -25,11 +25,12 @@
 #include "live/visuallogqt.h"
 #include "live/visuallogmodel.h"
 #include "live/visuallognetworksender.h"
-#include "live/visuallogjsobject.h"
-#include "live/engine.h"
+#include "live/visuallogqmlobject.h"
+#include "live/viewengine.h"
 #include "live/errorhandler.h"
 #include "live/settings.h"
-#include "live/plugincontext.h"
+#include "live/applicationcontext.h"
+#include "live/viewcontext.h"
 
 #include "live/editorprivate_plugin.h"
 #include "live/project.h"
@@ -54,17 +55,17 @@ namespace lv{
 
 LiveCV::LiveCV(QObject *parent)
     : QObject(parent)
-    , m_engine(new Engine(new QQmlApplicationEngine))
-    , m_arguments(new LiveCVArguments(header()))
+    , m_engine(new ViewEngine(new QQmlApplicationEngine))
+    , m_arguments(new LiveCVArguments(header().toStdString()))
     , m_codeInterface(0)
-    , m_dir(PluginContext::applicationPath())
+    , m_dir(QString::fromStdString(ApplicationContext::instance().applicationPath()))
     , m_project(new Project)
     , m_settings(0)
     , m_script(0)
     , m_commands(new Commands)
     , m_keymap(0)
     , m_log(0)
-    , m_vlog(new VisualLogJsObject) // js ownership
+    , m_vlog(new VisualLogQmlObject) // js ownership
     , m_windowControls(0)
 {
     solveImportPaths();
@@ -91,10 +92,10 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
             QString toNetwork = QString::fromStdString(it.value()["toNetwork"].asString());
             int portPos = toNetwork.indexOf(':');
             if ( portPos == -1 )
-                THROW_EXCEPTION(lv::Exception, "Failed to parse port in segment: " + toNetwork, -1);
+                THROW_EXCEPTION(lv::Exception, "Failed to parse port in segment: " + toNetwork.toStdString(), -1);
 
             vlog().addTransport(
-                QString::fromStdString(it.key()),
+                it.key(),
                 new VisualLogNetworkSender(toNetwork.mid(0, portPos), toNetwork.mid(portPos + 1).toInt())
             );
 
@@ -102,7 +103,7 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
                 it.value()["toExtensions"] = true;
             it.value().remove("toNetwork");
         }
-        vlog().configure(QString::fromStdString(it.key()), it.value());
+        vlog().configure(it.key(), it.value());
     }
 
     livecv->m_script = new LiveCVScript(livecv->m_arguments->scriptArguments());
@@ -111,7 +112,7 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
         livecv->m_script, SLOT(scriptChanged(lv::ProjectDocument*))
     );
 
-    livecv->m_settings = Settings::create(PluginContext::configPath());
+    livecv->m_settings = Settings::create(QString::fromStdString(ApplicationContext::instance().configPath()));
     livecv->m_settings->setLaunchMode(livecv->m_arguments->launchFlag());
     livecv->m_keymap = new KeyMap(livecv->m_settings->path());
     livecv->m_settings->addConfigFile("keymap", livecv->m_keymap);
@@ -136,18 +137,18 @@ void LiveCV::solveImportPaths(){
     QStringList importPaths = m_engine->engine()->importPathList();
 
     importPaths.removeAll(dir());
-    importPaths.removeAll(PluginContext::executableDirPath());
+    importPaths.removeAll(QString::fromStdString(ApplicationContext::instance().executablePath()));
 
     m_engine->engine()->setImportPathList(importPaths);
 
     // Add the plugins directory to the import paths
-    m_engine->engine()->addImportPath(PluginContext::pluginPath());
+    m_engine->engine()->addImportPath(QString::fromStdString(ApplicationContext::instance().pluginPath()));
 }
 
 void LiveCV::loadQml(const QUrl &url){
 
     if ( m_arguments->script() != "" ){
-        m_project->openProject(m_arguments->script());
+        m_project->openProject(QString::fromStdString(m_arguments->script()));
     } else {
         m_project->newProject();
     }
@@ -176,7 +177,7 @@ void LiveCV::loadInternalPlugins(){
     qmlRegisterUncreatableType<lv::LiveCV>(
         "base", 1, 0, "LiveCV", "LiveCV is available through the \'livecv\' property."
     );
-    qmlRegisterUncreatableType<lv::Engine>(
+    qmlRegisterUncreatableType<lv::ViewEngine>(
         "base", 1, 0, "LiveEngine", "LiveEngine is available through \'livecv.engine\' property."
     );
     qmlRegisterUncreatableType<lv::LiveCVScript>(
@@ -200,7 +201,7 @@ void LiveCV::loadInternalPlugins(){
     qmlRegisterUncreatableType<lv::VisualLogModel>(
         "base", 1, 0, "VisualLogModel", "VisualLogModel is available through the \'livecv.log\' property."
     );
-    qmlRegisterUncreatableType<lv::VisualLogJsObject>(
+    qmlRegisterUncreatableType<lv::VisualLogQmlObject>(
         "base", 1, 0, "VisualLog", "VisualLog is available through the \'livecv.log\' property."
     );
 
@@ -210,6 +211,9 @@ void LiveCV::loadInternalPlugins(){
 
     QJSValue vlogjs  = m_engine->engine()->newQObject(m_vlog);
     m_engine->engine()->globalObject().setProperty("vlog", vlogjs);
+
+//    ApplicationContext::initialize(m_engine, m_settings); TODO: Come back
+    ViewContext::initFromEngine(m_engine->engine());
 
     EditorPrivatePlugin ep;
     ep.registerTypes("editor.private");

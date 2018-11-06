@@ -24,7 +24,7 @@
 #include "live/projectqmlscope.h"
 #include "live/codedeclaration.h"
 #include "live/lockedfileiosession.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
 #include "live/settings.h"
 
 #include <QTextCursor>
@@ -48,7 +48,7 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public AbstractCodeHandler{
 
 public:
     explicit CodeQmlHandler(
-        Engine* engine,
+        ViewEngine* engine,
         Project* project,
         QmlJsSettings *settings,
         ProjectQmlExtension* projectHandler,

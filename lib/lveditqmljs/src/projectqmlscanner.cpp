@@ -299,7 +299,7 @@ void scanQmlDirForQmlExports(
                 path,
                 it->typeName,
                 filePath,
-                lockedFileIO->readFromFile(filePath),
+                QString::fromStdString(lockedFileIO->readFromFile(filePath.toStdString())),
                 LanguageUtils::ComponentVersion(it->majorVersion, it->minorVersion),
                 dependencyPaths,
                 objects
@@ -349,7 +349,7 @@ void scanPathForQmlExports(
             path,
             info.baseName(),
             info.filePath(),
-            lockedFileIO->readFromFile(info.filePath()),
+            QString::fromStdString(lockedFileIO->readFromFile(info.filePath().toStdString())),
             LanguageUtils::ComponentVersion(1, 0),
             dependencyPaths,
             objects
@@ -390,7 +390,7 @@ QMap<QString, QmlLibraryInfo::Ptr> updateLibrary(
     }
 
     QmlDirParser dirParser;
-    dirParser.parse(lockedFileIO->readFromFile(dir.filePath("qmldir")));
+    dirParser.parse(QString::fromStdString(lockedFileIO->readFromFile(dir.filePath("qmldir").toStdString())));
 
     /// Add typeinfopaths
 
@@ -812,7 +812,7 @@ bool ProjectQmlScanner::tryToExtractPluginInfo(const QString& path, QByteArray* 
         return false;
     }
 
-    dirParser.parse(m_lockedFileIO->readFromFile(dir.filePath("qmldir")));
+    dirParser.parse(QString::fromStdString(m_lockedFileIO->readFromFile(dir.filePath("qmldir").toStdString())));
 
     QStringList dependencyPaths;
 

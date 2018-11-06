@@ -15,9 +15,9 @@
 ****************************************************************************/
 
 #include "qimagefile.h"
-#include "live/engine.h"
+#include "live/viewengine.h"
 #include "live/exception.h"
-#include "live/plugincontext.h"
+#include "live/viewcontext.h"
 
 #include "opencv2/highgui.hpp"
 
@@ -100,8 +100,8 @@ void QImageFile::loadImage(){
     if ( m_source != "" && isComponentComplete() ){
         cv::Mat temp = cv::imread(m_source.toStdString(), m_iscolor);
         if ( temp.empty() ){
-            lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Cannot open file: " + m_source, 0);
-            lv::PluginContext::engine()->throwError(&e);
+            lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Cannot open file: " + m_source.toStdString(), 0);
+            lv::ViewContext::instance().engine()->throwError(&e);
             return;
         }
 

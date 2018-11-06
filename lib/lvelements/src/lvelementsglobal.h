@@ -17,13 +17,7 @@
 #ifndef LVELEMENTSGLOBAL_H
 #define LVELEMENTSGLOBAL_H
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
-#define LV_EXPORT __declspec(dllexport)
-#define LV_IMPORT __declspec(dllimport)
-#else
-#define LV_EXPORT
-#define LV_IMPORT
-#endif
+#include "live/lvglobal.h"
 
 #ifndef LV_ELEMENTS_STATIC
 #  ifdef LV_ELEMENTS_LIB
@@ -35,9 +29,4 @@
 #  define LV_ELEMENTS_EXPORT
 #endif
 
-
-#define DISABLE_COPY(Class) \
-  Class(const Class&);   \
-  void operator=(const Class&)
-
-#endif //LVSCRIPTGLOBAL
+#endif //LVELEMENTSGLOBAL

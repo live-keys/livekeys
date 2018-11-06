@@ -18,6 +18,7 @@
 #include <QJsonValue>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QJsonDocument>
 
 Q_TEST_RUNNER_REGISTER(MLNodeToJsonTest);
 
@@ -34,7 +35,7 @@ MLNodeToJsonTest::~MLNodeToJsonTest(){
 void MLNodeToJsonTest::initTestCase(){
 }
 
-void MLNodeToJsonTest::jsonObjectTest(){
+void MLNodeToJsonTest::jsonSerializeTest(){
     MLNode n = {
         {"object", {
              {"string", "value1"},
@@ -47,8 +48,13 @@ void MLNodeToJsonTest::jsonObjectTest(){
         {"null", nullptr}
     };
 
-    QJsonValue jv;
-    ml::toJson(n, jv);
+    // Check against qt json structure
+
+    std::string serialized;
+    ml::toJson(n, serialized);
+
+    QJsonDocument jsondoc = QJsonDocument::fromJson(serialized.c_str());
+    QJsonValue jv = jsondoc.object();
 
     QVERIFY(jv.isObject());
     QCOMPARE(jv.toObject().size(), 6);
@@ -75,28 +81,9 @@ void MLNodeToJsonTest::jsonObjectTest(){
     QVERIFY(jv.toObject()["float"].isDouble());
     QCOMPARE(jv.toObject()["float"].toDouble(), 100.1);
     QVERIFY(jv.toObject()["null"].isNull());
-
-    MLNode rt;
-    ml::fromJson(jv, rt);
-
-    QCOMPARE(rt.type(), MLNode::Type::Object);
-    QCOMPARE(rt["object"].type(), MLNode::Type::Object);
-    QCOMPARE(rt["object"].size(), 2);
-    QCOMPARE(rt["object"]["string"].asString(), MLNode::StringType("value1"));
-    QCOMPARE(rt["object"]["key2"].asInt(), 100);
-
-    QCOMPARE(rt["array"].size(), 3);
-    QCOMPARE(rt["array"][0].asInt(), 100);
-    QCOMPARE(rt["array"][1].asString(), MLNode::StringType("200"));
-    QCOMPARE(rt["array"][2].asBool(), false);
-
-    QCOMPARE(rt["bool"].asBool(), true);
-    QCOMPARE(rt["int"].asInt(), 100);
-    QCOMPARE(rt["float"].asFloat(), 100.1);
-    QVERIFY(rt["null"].isNull());
 }
 
-void MLNodeToJsonTest::jsonDataTest(){
+void MLNodeToJsonTest::jsonDeserializeTest(){
     MLNode n = {
         {"object", {
              {"string", "value1"},
@@ -109,7 +96,7 @@ void MLNodeToJsonTest::jsonDataTest(){
         {"null", nullptr}
     };
 
-    QByteArray serialized;
+    std::string serialized;
     ml::toJson(n, serialized);
 
     MLNode rt;

@@ -9,6 +9,7 @@ DEFINES += Q_LIVE_LIB
 uri = live
 
 linkLocalLibrary(lvbase,      lvbase)
+linkLocalLibrary(lvview,     lvview)
 linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
 

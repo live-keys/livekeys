@@ -27,7 +27,6 @@ private slots:
 
     void eventTypesTest();
     void eventInheritanceTest();
-
 };
 
 #endif // JSEVENTTEST_H

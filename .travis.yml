@@ -56,16 +56,16 @@ install:
       wget https://github.com/livecv/live-pm/archive/master.zip;
       unzip master.zip;
       mv live-pm-master/* .;
-      wget http://download.qt.io/official_releases/qt/5.7/5.7.1/qt-opensource-mac-x64-clang-5.7.1.dmg;
+      wget http://download.qt.io/official_releases/qt/5.11/5.11.1/qt-opensource-mac-x64-5.11.1.dmg;
       ls;
-      hdiutil attach -mountpoint installqt qt-opensource-mac-x64-clang-5.7.1.dmg;
-      ./installqt/qt-opensource-mac-x64-clang-5.7.1.app/Contents/MacOS/qt-opensource-mac-x64-clang-5.7.1 --script resources/install-qt-macos.qs --verbose --silent -platform minimal;
-      ls /opt/qt/5.7/clang_64;
-      export QTDIR=/opt/qt/5.7/clang_64;
+      hdiutil attach -mountpoint installqt qt-opensource-mac-x64-5.11.1.dmg;
+      ./installqt/qt-opensource-mac-x64-5.11.1.app/Contents/MacOS/qt-opensource-mac-x64-5.11.1 --script resources/install-qt-macos.qs --verbose --silent -platform minimal;
+      ls /opt/qt/5.11.1/clang_64;
+      export QTDIR=/opt/qt/5.11.1/clang_64;
     fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
       sudo apt-get install -y libtiff5 libtiff5-dev;
-      git clone https://github.com/Itseez/opencv.git;
+      git clone --single-branch -b 3.4 https://github.com/opencv/opencv.git;
       cd opencv;
       mkdir build;
       cd build;
@@ -77,10 +77,10 @@ install:
       wget https://github.com/livecv/live-pm/archive/master.zip;
       unzip master.zip;
       mv live-pm-master/* .;
-      wget http://download.qt.io/official_releases/qt/5.7/5.7.1/qt-opensource-linux-x64-5.7.1.run;
-      sudo chmod 777 qt-opensource-linux-x64-5.7.1.run;
-      ./qt-opensource-linux-x64-5.7.1.run --script resources/install-qt.qs --verbose --silent -platform minimal;
-      export QTDIR=/opt/qt/5.7/gcc_64;
+      wget http://download.qt.io/official_releases/qt/5.11/5.11.1/qt-opensource-linux-x64-5.11.1.run;
+      sudo chmod 777 qt-opensource-linux-x64-5.11.1.run;
+      ./qt-opensource-linux-x64-5.11.1.run --script resources/install-qt.qs --verbose --silent -platform minimal;
+      export QTDIR=/opt/qt/5.11.1/gcc_64;
     fi
 
 script:

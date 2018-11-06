@@ -24,6 +24,7 @@
 #include "projectqmlscanmonitor_p.h"
 
 #include <functional>
+#include <QMutex>
 
 class QThread;
 class QTimer;
