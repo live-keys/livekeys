@@ -52,7 +52,7 @@ public:
         Project* project,
         QmlJsSettings *settings,
         ProjectQmlExtension* projectHandler,
-        QObject* parent = 0
+        DocumentHandler* handler = 0
     );
     ~CodeQmlHandler();
 

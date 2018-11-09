@@ -20,10 +20,12 @@
 
 namespace lv{
 
-QmlJsHighlighter::QmlJsHighlighter(QmlJsSettings* settings, QTextDocument *parent)
+QmlJsHighlighter::QmlJsHighlighter(QmlJsSettings* settings, DocumentHandler* handler, QTextDocument *parent)
     : QSyntaxHighlighter(parent)
     , m_settings(settings)
 {
+//    Highlighter* hg = new Highlighter(handler, parent);
+//    qDebug() << "Syntax HIGHLIGHT:" << handler << parent;
 }
 
 // Walks through ab.bc.cd to find whether it preceedes a colon or an opening brace

@@ -36,7 +36,7 @@ public:
         ProjectDocument* document,
         Project* project,
         ViewEngine* engine,
-        QObject* parent
+        DocumentHandler* parent
     ) = 0;
 };
 

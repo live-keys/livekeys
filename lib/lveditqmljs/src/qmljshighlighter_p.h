@@ -20,6 +20,7 @@
 #include <QTextBlockUserData>
 #include <QSyntaxHighlighter>
 
+#include "live/highlighter.h"
 #include "live/projectdocument.h"
 #include "live/documenthandlerstate.h"
 #include "live/documenteditfragment.h"
@@ -42,7 +43,7 @@ public:
     };
 
 public:
-    QmlJsHighlighter(QmlJsSettings* settings, QTextDocument *parent = 0);
+    QmlJsHighlighter(QmlJsSettings* settings, DocumentHandler* handler, QTextDocument *parent = 0);
 
     void setTarget(QTextDocument* target);
 

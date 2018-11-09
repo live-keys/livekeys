@@ -127,7 +127,7 @@ private:
     QString               m_indentContent;
     LivePaletteContainer* m_paletteContainer;
     Project*              m_project;
-    ViewEngine*               m_engine;
+    ViewEngine*           m_engine;
     QTimer                m_timer;
     TextEdit*             m_textEdit;
 

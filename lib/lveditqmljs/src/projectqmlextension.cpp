@@ -45,11 +45,11 @@ AbstractCodeHandler *ProjectQmlExtension::createHandler(
         ProjectDocument *document,
         Project *project,
         ViewEngine *engine,
-        QObject *parent)
+        DocumentHandler *handler)
 {
     QString filePath = document->file()->path();
     if ( filePath.toLower().endsWith(".js") || filePath.toLower().endsWith(".qml") || filePath.isEmpty() ){
-        CodeQmlHandler* ch = new CodeQmlHandler(engine, project, m_settings, this, parent);
+        CodeQmlHandler* ch = new CodeQmlHandler(engine, project, m_settings, this, handler);
         return ch;
     }
     return 0;

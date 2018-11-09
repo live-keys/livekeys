@@ -40,7 +40,7 @@ public:
         ProjectDocument* document,
         Project* project,
         ViewEngine* engine,
-        QObject* parent
+        DocumentHandler *handler
     );
 
     ProjectQmlScanMonitor* scanMonitor();

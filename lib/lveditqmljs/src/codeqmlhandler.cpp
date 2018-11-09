@@ -32,6 +32,7 @@
 #include "qmljsbuiltintypes_p.h"
 #include "qmljshighlighter_p.h"
 
+#include "live/documenthandler.h"
 #include "live/codecompletionsuggestion.h"
 #include "live/projectfile.h"
 #include "live/documentqmlfragment.h"
@@ -663,15 +664,14 @@ namespace qmlhandler_helpers{
 // QDocumentQmlHandler implementation
 // ----------------------------------
 
-CodeQmlHandler::CodeQmlHandler(
-        ViewEngine *engine,
+CodeQmlHandler::CodeQmlHandler(ViewEngine *engine,
         Project *,
         QmlJsSettings *settings,
         ProjectQmlExtension *projectHandler,
-        QObject *parent)
-    : AbstractCodeHandler(parent)
+        lv::DocumentHandler *handler)
+    : AbstractCodeHandler(handler)
     , m_target(0)
-    , m_highlighter(new QmlJsHighlighter(settings, 0))
+    , m_highlighter(new QmlJsHighlighter(settings, handler, 0))
     , m_settings(settings)
     , m_engine(engine->engine())
     , m_completionContextFinder(new QmlCompletionContextFinder)
