@@ -303,6 +303,8 @@ public:
     lv::DocumentHandler* documentHandler();
     void setDocumentHandler(lv::DocumentHandler* dh);
 
+    void linePaletteAdded(int lineStart, int lineEnd, int height, QObject* palette);
+
 Q_SIGNALS:
 
     void textChanged();

@@ -245,6 +245,7 @@ void LineSurface::expandCollapseSkeleton(int pos, int num, QString &replacement,
 
 void LineSurface::mousePressEvent(QMouseEvent* event)
 {
+    textEdit->linePaletteAdded(12, 15, 80, nullptr);
 
     // find block that was clicked
     int position = document->documentLayout()->hitTest(event->localPos(), Qt::FuzzyHit);

@@ -2165,6 +2165,11 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                         if (!engine.hasContents()) {
                             nodeOffset = d->document->documentLayout()->blockBoundingRect(block).topLeft();
                             updateNodeTransform(node, nodeOffset);
+
+                            if (block.blockNumber() > 5)
+                            {
+                                nodeOffset.setY(nodeOffset.y()-75);
+                            }
                             nodeStart = block.position();
                         }
 
@@ -3314,6 +3319,34 @@ void TextEdit::setDocumentHandler(DocumentHandler *dh)
     Q_D(TextEdit);
     d->documentHandler = dh;
     dh->setTextEdit(this);
+}
+
+void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QObject *palette)
+{
+    Q_D(TextEdit);
+    int lineHeight = static_cast<int>(implicitHeight() / lineCount());
+
+    qDebug() << lineHeight;
+    if (lineStart < lineEnd && lineEnd <= lineCount())
+    {
+        QTextCursor c(d->document);
+        c.beginEditBlock();
+        c.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, lineStart-1);
+        c.movePosition(QTextCursor::NextBlock, QTextCursor::KeepAnchor, lineEnd-1-lineStart);
+        c.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+        qDebug() << c.selectedText();
+        c.removeSelectedText();
+
+        c.endEditBlock();
+
+        c.beginEditBlock();
+        int num = qCeil(height*1.0/lineHeight);
+        qDebug() << "num: " << num;
+        for (int i = 0; i<num-1;i++){
+            c.insertBlock();
+        }
+        c.endEditBlock();
+    }
 }
 
 void TextEdit::clearSelectionOnFocus(bool value){
