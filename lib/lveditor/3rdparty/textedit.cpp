@@ -3350,7 +3350,6 @@ void TextEdit::showHideLines(bool show, int pos, int num)
     Q_ASSERT(d->document->blockCount() > pos);
     Q_ASSERT(d->document->blockCount() >= pos + num);
     for (int i = 0; i < pos+1; i++, ++it);
-    auto itCopy = it;
     int start = it.currentBlock().position();
 
     int length = 0;
@@ -3362,14 +3361,6 @@ void TextEdit::showHideLines(bool show, int pos, int num)
     }
 
     d->document->markContentsDirty(start, length);
-
-#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
-    for (int i=0; i<num; i++)
-    {
-        invalidateBlock(itCopy.currentBlock());
-        ++itCopy;
-    }
-#endif
 }
 
 void TextEdit::updateFragmentVisibility()
