@@ -82,6 +82,9 @@
 #include <qstylehints.h>
 #include <qmetaobject.h>
 
+#include "textedit_p.h"
+#include "palettemanager.h"
+
 namespace lv {
 
 // ### these should come from QStyleHints
@@ -746,6 +749,35 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
         return;
     }
 
+
+    /*
+     * // PALLETTE MOD
+    if (e->type() == QEvent::MouseButtonPress || e->type() == QEvent::MouseMove ||
+            e->type() == QEvent::MouseButtonRelease || e->type() == QEvent::MouseButtonDblClick)
+    {
+        auto em = static_cast<QMouseEvent *>(e);
+        auto mousePos = em->localPos();
+        if (mousePos.y() > 90 && mousePos.y() <= 165)
+            mousePos.setY(90);
+        if (mousePos.y() > 165)
+            mousePos.setY(mousePos.y()-75);
+
+        em->setLocalPos(mousePos);
+    }
+*/
+
+    if (e->type() == QEvent::MouseButtonPress || e->type() == QEvent::MouseMove ||
+            e->type() == QEvent::MouseButtonRelease || e->type() == QEvent::MouseButtonDblClick)
+    {
+        QMouseEvent *ev = static_cast<QMouseEvent *>(e);
+        auto mousePos = ev->localPos();
+        int oldy = mousePos.y();
+        mousePos.setY(d->textEdit->getPaletteManager()->positionOffset(oldy));
+        // mousePos.setY();
+
+        ev->setLocalPos(mousePos);
+    }
+
     switch (e->type()) {
         case QEvent::KeyPress:
             d->keyPressEvent(static_cast<QKeyEvent *>(e));
@@ -1039,9 +1071,8 @@ QRectF TextControlPrivate::rectForPosition(int position) const
     QTextLine line = layout->lineForTextPosition(relativePos);
 
     QRectF r;
-    int offset = 0;
-    if (block.blockNumber() > 5)
-        offset = 75;
+    int offset = textEdit->getPaletteManager()->drawingOffset(block.blockNumber());
+
     if (line.isValid()) {
         qreal x = line.cursorToX(relativePos);
         qreal w = 0;
@@ -1058,20 +1089,14 @@ void TextControlPrivate::mousePressEvent(QMouseEvent *e, const QPointF &pos)
 {
     Q_Q(TextControl);
 
-    auto newPos = pos;
-    if (pos.y() > 90 && pos.y()<=165)
-        newPos.setY(90);
-    if (pos.y() > 165)
-        newPos.setY(newPos.y()-75);
-
     mousePressed = (interactionFlags & Qt::TextSelectableByMouse) && (e->button() & Qt::LeftButton);
-    mousePressPos = newPos.toPoint();
+    mousePressPos = pos.toPoint();
 
-    if (sendMouseEventToInputContext(e, newPos))
+    if (sendMouseEventToInputContext(e, pos))
         return;
 
     if (interactionFlags & Qt::LinksAccessibleByMouse) {
-        anchorOnMousePress = q->anchorAt(newPos);
+        anchorOnMousePress = q->anchorAt(pos);
 
         if (cursorIsFocusIndicator) {
             cursorIsFocusIndicator = false;
@@ -1099,7 +1124,7 @@ void TextControlPrivate::mousePressEvent(QMouseEvent *e, const QPointF &pos)
 #endif
 
     if (tripleClickTimer.isActive()
-        && ((newPos - tripleClickPoint).toPoint().manhattanLength() < QGuiApplication::styleHints()->startDragDistance())) {
+        && ((pos - tripleClickPoint).toPoint().manhattanLength() < QGuiApplication::styleHints()->startDragDistance())) {
 
         cursor.movePosition(QTextCursor::StartOfBlock);
         cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
@@ -1110,7 +1135,7 @@ void TextControlPrivate::mousePressEvent(QMouseEvent *e, const QPointF &pos)
 
         tripleClickTimer.stop();
     } else {
-        int cursorPos = q->hitTest(newPos, Qt::FuzzyHit);
+        int cursorPos = q->hitTest(pos, Qt::FuzzyHit);
         if (cursorPos == -1) {
             e->ignore();
             return;
@@ -1125,7 +1150,7 @@ void TextControlPrivate::mousePressEvent(QMouseEvent *e, const QPointF &pos)
             if (selectedBlockOnTripleClick.hasSelection())
                 extendBlockwiseSelection(cursorPos);
             else if (selectedWordOnDoubleClick.hasSelection())
-                extendWordwiseSelection(cursorPos, newPos.x());
+                extendWordwiseSelection(cursorPos, pos.x());
             else if (!wordSelectionEnabled)
                 setCursorPosition(cursorPos, QTextCursor::KeepAnchor);
         } else {
@@ -1149,12 +1174,6 @@ void TextControlPrivate::mouseMoveEvent(QMouseEvent *e, const QPointF &mousePos)
 {
     Q_Q(TextControl);
 
-    auto newPos = mousePos;
-    if (mousePos.y() > 90 && mousePos.y() <= 165)
-        newPos.setY(90);
-    if (mousePos.y() > 165)
-        newPos.setY(mousePos.y()-75);
-
     if ((e->buttons() & Qt::LeftButton)) {
         const bool editable = interactionFlags & Qt::TextEditable;
 
@@ -1170,9 +1189,9 @@ void TextControlPrivate::mouseMoveEvent(QMouseEvent *e, const QPointF &mousePos)
         if (!mousePressed)
             return;
 
-        const qreal mouseX = qreal(newPos.x());
+        const qreal mouseX = qreal(mousePos.x());
 
-        int newCursorPos = q->hitTest(newPos, Qt::FuzzyHit);
+        int newCursorPos = q->hitTest(mousePos, Qt::FuzzyHit);
 
 #ifndef QT_NO_IM
         if (isPreediting()) {
@@ -1181,7 +1200,7 @@ void TextControlPrivate::mouseMoveEvent(QMouseEvent *e, const QPointF &mousePos)
             if (newCursorPos != selectionStartPos) {
                 commitPreedit();
                 // commit invalidates positions
-                newCursorPos = q->hitTest(newPos, Qt::FuzzyHit);
+                newCursorPos = q->hitTest(mousePos, Qt::FuzzyHit);
                 selectionStartPos = q->hitTest(mousePressPos, Qt::FuzzyHit);
                 setCursorPosition(selectionStartPos);
             }
@@ -1223,7 +1242,7 @@ void TextControlPrivate::mouseMoveEvent(QMouseEvent *e, const QPointF &mousePos)
         repaintOldAndNewSelection(oldSelection);
     }
 
-    sendMouseEventToInputContext(e, newPos);
+    sendMouseEventToInputContext(e, mousePos);
 }
 
 void TextControlPrivate::mouseReleaseEvent(QMouseEvent *e, const QPointF &pos)
@@ -1798,6 +1817,12 @@ void TextControlPrivate::cancelPreedit()
     QCoreApplication::sendEvent(q->parent(), &event);
 }
 #endif // QT_NO_IM
+
+void TextControl::setTextEdit(TextEdit* te)
+{
+    Q_D(TextControl);
+    d->textEdit = te;
+}
 
 void TextControl::setTextInteractionFlags(Qt::TextInteractionFlags flags)
 {

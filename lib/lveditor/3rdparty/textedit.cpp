@@ -193,6 +193,12 @@ TextEdit::TextEdit(QQuickImplicitSizeItem *parent)
     d->init();
 }
 
+PaletteManager *TextEdit::getPaletteManager()
+{
+    Q_D(TextEdit);
+    return d->paletteManager;
+}
+
 TextEdit::TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent)
 : QQuickImplicitSizeItem(dd, parent)
 {
@@ -2166,10 +2172,8 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                             nodeOffset = d->document->documentLayout()->blockBoundingRect(block).topLeft();
                             updateNodeTransform(node, nodeOffset);
 
-                            if (block.blockNumber() > 5)
-                            {
-                                nodeOffset.setY(nodeOffset.y()-75);
-                            }
+                            nodeOffset.setY(nodeOffset.y() - d->paletteManager->drawingOffset(block.blockNumber()));
+
                             nodeStart = block.position();
                         }
 
@@ -2337,6 +2341,8 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     control->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::TextSelectableByKeyboard | Qt::TextEditable);
     control->setAcceptRichText(false);
     control->setCursorIsFocusIndicator(true);
+
+    control->setTextEdit(q);
 /*
     fragmentStart=2;
     fragmentEnd = 10;
@@ -2375,6 +2381,10 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
+
+    auto rect = document->documentLayout()->blockBoundingRect(document->rootFrame()->begin().currentBlock());
+    paletteManager->setLineHeight(static_cast<int>(rect.height()));
+    qDebug() << rect.height();
 }
 
 void TextEditPrivate::unsetTextDocument()
@@ -2420,6 +2430,7 @@ void TextEditPrivate::init()
     lv_qmlobject_connect(QGuiApplication::clipboard(), QClipboard, SIGNAL(dataChanged()), q, TextEdit, SLOT(q_canPasteChanged()));
 #endif
 
+    paletteManager->setTextEdit(q);
 }
 
 void TextEditPrivate::resetInputMethod()
@@ -3324,29 +3335,7 @@ void TextEdit::setDocumentHandler(DocumentHandler *dh)
 void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QObject *palette)
 {
     Q_D(TextEdit);
-    int lineHeight = static_cast<int>(implicitHeight() / lineCount());
-
-    qDebug() << lineHeight;
-    if (lineStart < lineEnd && lineEnd <= lineCount())
-    {
-        QTextCursor c(d->document);
-        c.beginEditBlock();
-        c.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, lineStart-1);
-        c.movePosition(QTextCursor::NextBlock, QTextCursor::KeepAnchor, lineEnd-1-lineStart);
-        c.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
-        qDebug() << c.selectedText();
-        c.removeSelectedText();
-
-        c.endEditBlock();
-
-        c.beginEditBlock();
-        int num = qCeil(height*1.0/lineHeight);
-        qDebug() << "num: " << num;
-        for (int i = 0; i<num-1;i++){
-            c.insertBlock();
-        }
-        c.endEditBlock();
-    }
+    d->paletteManager->paletteAdded(lineStart-1, lineEnd - lineStart + 1, height, palette);
 }
 
 void TextEdit::clearSelectionOnFocus(bool value){
@@ -3360,6 +3349,8 @@ void TextEdit::setTextDocument(QTextDocument *td)
     if (td)
     {
         d->setTextDocument(td);
+        linePaletteAdded(7, 10, 35, nullptr);
+        linePaletteAdded(15, 18, 55, nullptr);
     }
     else d->unsetTextDocument();
 }

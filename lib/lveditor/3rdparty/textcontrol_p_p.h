@@ -53,6 +53,7 @@ class QMimeData;
 class QAbstractScrollArea;
 
 namespace lv {
+class TextEdit;
 
 class TextControlPrivate : public QObjectPrivate
 {
@@ -132,6 +133,8 @@ public:
 
     QBasicTimer cursorBlinkTimer;
     QBasicTimer tripleClickTimer;
+
+    TextEdit *textEdit;
 
 #ifndef QT_NO_IM
     int preeditCursor;
