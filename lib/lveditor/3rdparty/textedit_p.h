@@ -307,7 +307,8 @@ public:
     void setDocumentHandler(lv::DocumentHandler* dh);
 
     void linePaletteAdded(int lineStart, int lineEnd, int height, QObject* palette);
-
+    void linePaletteRemoved(QObject* palette);
+    void linePaletteHeightChanged(QObject* palette, int newHeight);
 Q_SIGNALS:
 
     void textChanged();

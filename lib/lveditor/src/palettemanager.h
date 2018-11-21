@@ -33,12 +33,16 @@ public:
     PaletteManager();
     void paletteAdded(int sb, int span, int height, QObject* p);
 
-    int drawingOffset(int blockNumber);
+    int drawingOffset(int blockNumber, bool forCursor);
     int positionOffset(int y);
     void setTextEdit(TextEdit *value);
 
     void setLineHeight(int value);
-
+    /** 0 if not, positive number of lines if yes*/
+    int isLineBeforePalette(int blockNumber);
+    int isLineAfterPalette(int blockNumber);
+    int removePalette(QObject* palette);
+    int resizePalette(QObject* palette, int newHeight);
 private:
     int lineHeight;
     TextEdit *textEdit;

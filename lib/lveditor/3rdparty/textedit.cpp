@@ -2172,7 +2172,8 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                             nodeOffset = d->document->documentLayout()->blockBoundingRect(block).topLeft();
                             updateNodeTransform(node, nodeOffset);
 
-                            nodeOffset.setY(nodeOffset.y() - d->paletteManager->drawingOffset(block.blockNumber()));
+                            // PALETTE
+                            nodeOffset.setY(nodeOffset.y() - d->paletteManager->drawingOffset(block.blockNumber(), false));
 
                             nodeStart = block.position();
                         }
@@ -2384,7 +2385,6 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
 
     auto rect = document->documentLayout()->blockBoundingRect(document->rootFrame()->begin().currentBlock());
     paletteManager->setLineHeight(static_cast<int>(rect.height()));
-    qDebug() << rect.height();
 }
 
 void TextEditPrivate::unsetTextDocument()
@@ -3336,7 +3336,37 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QObject 
 {
     Q_D(TextEdit);
     d->paletteManager->paletteAdded(lineStart-1, lineEnd - lineStart + 1, height, palette);
+    for (int i = lineStart - 1; i < d->document->blockCount(); ++i)
+        invalidateBlock(d->document->findBlockByNumber(i));
 }
+
+void TextEdit::linePaletteRemoved(QObject *palette)
+{
+    Q_D(TextEdit);
+    int result = d->paletteManager->removePalette(palette);
+    if (result != -1)
+    {
+        for (int i = result; i < d->document->blockCount(); ++i)
+        {
+            invalidateBlock(d->document->findBlockByNumber(i));
+        }
+    }
+}
+
+void TextEdit::linePaletteHeightChanged(QObject *palette, int newHeight)
+{
+    Q_D(TextEdit);
+    int result = d->paletteManager->resizePalette(palette, newHeight);
+    if (result != -1)
+    {
+        for (int i = result; i < d->document->blockCount(); ++i)
+        {
+            invalidateBlock(d->document->findBlockByNumber(i));
+        }
+    }
+}
+
+
 
 void TextEdit::clearSelectionOnFocus(bool value){
     Q_D(TextEdit);
@@ -3349,8 +3379,6 @@ void TextEdit::setTextDocument(QTextDocument *td)
     if (td)
     {
         d->setTextDocument(td);
-        linePaletteAdded(7, 10, 35, nullptr);
-        linePaletteAdded(15, 18, 55, nullptr);
     }
     else d->unsetTextDocument();
 }

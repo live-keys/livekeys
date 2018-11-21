@@ -285,13 +285,13 @@ Rectangle{
                 contentY: flick.flickableItem.contentY
                 interactive: false
 
-                /*LineSurface{
+                LineSurface{
                     id: lineSurface
                     color: "#808691"
                     Component.onCompleted: {
                         setComponents(editorArea);
                     }
-                }*/
+                }
             }
         }
 
