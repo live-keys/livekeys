@@ -51,6 +51,7 @@ class QTextBlock;
 namespace lv {
 
 class TextEditPrivate;
+class PaletteManager;
 
 class LV_EDITOR_EXPORT TextEdit : public QQuickImplicitSizeItem
 {
@@ -106,6 +107,8 @@ class LV_EDITOR_EXPORT TextEdit : public QQuickImplicitSizeItem
 
 public:
     TextEdit(QQuickImplicitSizeItem *parent=nullptr);
+
+    PaletteManager* getPaletteManager();
 
     enum HAlignment {
         AlignLeft = Qt::AlignLeft,
@@ -303,6 +306,9 @@ public:
     lv::DocumentHandler* documentHandler();
     void setDocumentHandler(lv::DocumentHandler* dh);
 
+    void linePaletteAdded(int lineStart, int lineEnd, int height, QObject* palette);
+    void linePaletteRemoved(QObject* palette);
+    void linePaletteHeightChanged(QObject* palette, int newHeight);
 Q_SIGNALS:
 
     void textChanged();
@@ -428,7 +434,7 @@ protected:
     friend class TextUtil;
     friend class LineNumberSurface;
     friend class DocumentHandler;
-
+    friend class TextControl;
 private:
     Q_DISABLE_COPY(TextEdit)
     Q_DECLARE_PRIVATE(TextEdit)

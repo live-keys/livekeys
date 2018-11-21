@@ -60,6 +60,7 @@ class QTimerEvent;
 
 namespace lv {
 
+class TextEdit;
 class TextControlPrivate;
 
 
@@ -72,6 +73,7 @@ public:
     virtual ~TextControl();
 
     QTextDocument *document() const;
+    void setTextEdit(TextEdit* te);
 
     void setTextCursor(const QTextCursor &cursor);
     QTextCursor textCursor() const;
@@ -150,6 +152,7 @@ Q_SIGNALS:
     void cursorRectangleChanged();
     void linkActivated(const QString &link);
     void linkHovered(const QString &link);
+
 
 public:
     virtual void processEvent(QEvent *e, const QMatrix &matrix);
