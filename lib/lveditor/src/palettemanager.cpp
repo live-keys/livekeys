@@ -1,13 +1,15 @@
 #include "palettemanager.h"
 #include <qmath.h>
 #include "qdebug.h"
+#include "textedit_p.h"
 using namespace std;
 
 namespace lv {
 
 PaletteManager::PaletteManager()
 {
-
+    lineNumber = 0;
+    dirtyPos = -1;
 }
 
 bool paletteCmp(PaletteData* a, PaletteData* b)
@@ -77,6 +79,11 @@ int PaletteManager::positionOffset(int y)
 void PaletteManager::setTextEdit(TextEdit *value)
 {
     textEdit = value;
+    if (value != nullptr)
+    {
+        QObject::connect(textEdit, &TextEdit::dirtyBlockPosition, this, &PaletteManager::setDirtyPos);
+        QObject::connect(textEdit, &TextEdit::lineCountChanged, this, &PaletteManager::lineNumberChange);
+    }
 }
 
 void PaletteManager::setLineHeight(int value)
@@ -157,7 +164,66 @@ int PaletteManager::resizePalette(QObject *palette, int newHeight)
     return -1;
 }
 
+void PaletteManager::setDirtyPos(int pos)
+{
+    dirtyPos = pos;
+}
 
+void PaletteManager::lineNumberChange()
+{
+    prevLineNumber = lineNumber;
+    lineNumber = textEdit->lineCount();
+    if (prevLineNumber == lineNumber) return;
+
+    if (prevLineNumber < lineNumber) linesAdded();
+    else linesRemoved();
+}
+
+void PaletteManager::linesAdded()
+{
+    int delta = lineNumber - prevLineNumber;
+    auto it = palettes.begin();
+    while (it != palettes.end())
+    {
+        PaletteData* pd = *it;
+        if (dirtyPos > pd->startBlock + pd->lineSpan)
+        {
+            ++it;
+            continue;
+        }
+
+        pd->startBlock += delta;
+        ++it;
+    }
+}
+
+void PaletteManager::linesRemoved()
+{
+    int delta = prevLineNumber - lineNumber;
+    auto it = palettes.begin();
+    qDebug() << dirtyPos;
+    qDebug() << delta;
+    while (it != palettes.end())
+    {
+        PaletteData* pd = *it;
+        qDebug() << pd->startBlock;
+        qDebug() << pd->lineSpan;
+        if (dirtyPos > pd->startBlock + pd->lineSpan)
+        {
+            ++it;
+            continue;
+        }
+
+        if (dirtyPos < pd->startBlock && dirtyPos + delta >= pd->startBlock + pd->lineSpan)
+        {
+            it = palettes.erase(it);
+            continue;
+        }
+
+        pd->startBlock -= delta;
+        ++it;
+    }
+}
 
 
 

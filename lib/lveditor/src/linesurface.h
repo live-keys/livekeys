@@ -46,6 +46,7 @@ public:
     QColor color() const;
     void setColor(const QColor &c);
     Q_INVOKABLE void setComponents(lv::TextEdit* te);
+    void updateLineDocument();
 
 Q_SIGNALS:
     void colorChanged(const QColor &color);
@@ -53,6 +54,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void setDirtyBlockPosition(int pos);
     void textDocumentFinished();
+    void paletteSlot(int blockNum);
 private Q_SLOTS:
     void updateSize();
     void triggerPreprocess();
@@ -63,7 +65,6 @@ private:
 
     void linesAdded();
     void linesRemoved();
-    void updateLineDocument();
     void changeLastCharInBlock(int blockNumber, char c);
 
     void collapseLines(int pos, int num);

@@ -3338,6 +3338,8 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QObject 
     d->paletteManager->paletteAdded(lineStart-1, lineEnd - lineStart + 1, height, palette);
     for (int i = lineStart - 1; i < d->document->blockCount(); ++i)
         invalidateBlock(d->document->findBlockByNumber(i));
+
+    emit paletteChange(lineStart - 1);
 }
 
 void TextEdit::linePaletteRemoved(QObject *palette)
@@ -3350,6 +3352,7 @@ void TextEdit::linePaletteRemoved(QObject *palette)
         {
             invalidateBlock(d->document->findBlockByNumber(i));
         }
+	emit paletteChange(result);
     }
 }
 
@@ -3363,6 +3366,8 @@ void TextEdit::linePaletteHeightChanged(QObject *palette, int newHeight)
         {
             invalidateBlock(d->document->findBlockByNumber(i));
         }
+        emit paletteChange(result);
+
     }
 }
 

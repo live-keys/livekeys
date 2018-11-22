@@ -362,6 +362,7 @@ Q_SIGNALS:
     void fragmentStartChanged();
     void fragmentEndChanged();
 
+    void paletteChange(int blockNumber);
 public Q_SLOTS:
     void clearSelectionOnFocus(bool value);
     void selectAll();

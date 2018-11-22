@@ -17,7 +17,7 @@
 #include "textedit_p.h"
 #include "linemanager.h"
 #include "collapsedsection.h"
-
+#include "palettemanager.h"
 
 namespace lv {
 
@@ -118,6 +118,21 @@ void LineSurface::textDocumentFinished()
     }
 }
 
+void LineSurface::paletteSlot(int blockNum)
+{
+    auto firstDirtyBlock = document->findBlockByNumber(blockNum);
+    document->markContentsDirty(firstDirtyBlock.position(), document->characterCount() - firstDirtyBlock.position());
+
+    polish();
+    if (isComponentComplete())
+    {
+        updateSize();
+        updateType = LineSurface::UpdatePaintNode;
+
+        update();
+    }
+}
+
 void LineSurface::setDirtyBlockPosition(int pos)
 {
     dirtyPos = pos;
@@ -163,7 +178,7 @@ void LineSurface::setComponents(lv::TextEdit* te)
 
     QObject::connect(textEdit, &TextEdit::dirtyBlockPosition, this, &LineSurface::setDirtyBlockPosition);
     QObject::connect(textEdit, &TextEdit::textDocumentFinishedUpdating, this, &LineSurface::textDocumentFinished);
-
+    QObject::connect(textEdit, &TextEdit::paletteChange, this, &LineSurface::paletteSlot);
     setAcceptedMouseButtons(Qt::AllButtons);
 }
 
@@ -514,6 +529,8 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                         if (!engine.hasContents()) {
                             nodeOffset = document->documentLayout()->blockBoundingRect(block).topLeft();
                             updateNodeTransform(node, nodeOffset);
+                            int offset = textEdit->getPaletteManager()->drawingOffset(block.blockNumber(), false);
+                            nodeOffset.setY(nodeOffset.y() - offset);
                         }
 
                         engine.addTextBlock(document, block, -nodeOffset, m_color, QColor(), -1, -1);
