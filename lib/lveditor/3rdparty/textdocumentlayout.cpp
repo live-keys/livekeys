@@ -38,15 +38,9 @@
 ****************************************************************************/
 
 #include "textdocumentlayout.h"
-#include "private/qtextimagehandler_p.h"
 #include "qtextlist.h"
 #include "private/qtextengine_p.h"
-#include "private/qcssutil_p.h"
-#include "private/qguiapplication_p.h"
-
 #include "private/qabstracttextdocumentlayout_p.h"
-#include "private/qcssparser_p.h"
-#include "private/qcssutil_p.h"
 
 #include <qpainter.h>
 #include <qmath.h>
@@ -56,13 +50,8 @@
 #include <qvarlengtharray.h>
 #include <limits.h>
 #include <qbasictimer.h>
-#include "private/qfunctions_p.h"
 
 #include <algorithm>
-
-// #define LAYOUT_DEBUG
-
-#define QT_NO_CSSPARSER
 
 #ifdef LAYOUT_DEBUG
 #define LDEBUG qDebug()
@@ -704,11 +693,7 @@ void TextDocumentLayoutPrivate::drawBorder(QPainter *painter, const QRectF &rect
     const int topPage = pageHeight > 0 ? static_cast<int>(rect.top() / pageHeight) : 0;
     const int bottomPage = pageHeight > 0 ? static_cast<int>((rect.bottom() + border) / pageHeight) : 0;
 
-#ifndef QT_NO_CSSPARSER
-    QCss::BorderStyle cssStyle = static_cast<QCss::BorderStyle>(style + 1);
-#else
     Q_UNUSED(style);
-#endif //QT_NO_CSSPARSER
 
     bool turn_off_antialiasing = !(painter->renderHints() & QPainter::Antialiasing);
     painter->setRenderHint(QPainter::Antialiasing);
@@ -723,12 +708,7 @@ void TextDocumentLayoutPrivate::drawBorder(QPainter *painter, const QRectF &rect
             if (clipped.bottom() <= clipped.top())
                 continue;
         }
-#ifndef QT_NO_CSSPARSER
-        qDrawEdge(painter, clipped.left(), clipped.top(), clipped.left() + border, clipped.bottom() + border, 0, 0, QCss::LeftEdge, cssStyle, brush);
-        qDrawEdge(painter, clipped.left() + border, clipped.top(), clipped.right() + border, clipped.top() + border, 0, 0, QCss::TopEdge, cssStyle, brush);
-        qDrawEdge(painter, clipped.right(), clipped.top() + border, clipped.right() + border, clipped.bottom(), 0, 0, QCss::RightEdge, cssStyle, brush);
-        qDrawEdge(painter, clipped.left() + border, clipped.bottom(), clipped.right() + border, clipped.bottom() + border, 0, 0, QCss::BottomEdge, cssStyle, brush);
-#else
+
         painter->save();
         painter->setPen(Qt::NoPen);
         painter->setBrush(brush);
@@ -737,7 +717,6 @@ void TextDocumentLayoutPrivate::drawBorder(QPainter *painter, const QRectF &rect
         painter->drawRect(QRectF(clipped.right(), clipped.top() + border, clipped.right() + border, clipped.bottom()));
         painter->drawRect(QRectF(clipped.left() + border, clipped.bottom(), clipped.right() + border, clipped.bottom() + border));
         painter->restore();
-#endif //QT_NO_CSSPARSER
     }
     if (turn_off_antialiasing)
         painter->setRenderHint(QPainter::Antialiasing, false);
@@ -1691,7 +1670,17 @@ void TextDocumentLayoutPrivate::layoutBlock(const QTextBlock &bl, int blockPosit
         Qt::Alignment align = docPrivate->defaultTextOption.alignment();
         if (blockFormat.hasProperty(QTextFormat::BlockAlignment))
             align = blockFormat.alignment();
-        option.setAlignment(QGuiApplicationPrivate::visualAlignment(dir, align)); // for paragraph that are RTL, alignment is auto-reversed;
+
+        Qt::Alignment alres = align;
+        if (!(alres & Qt::AlignHorizontal_Mask))
+            alres |= Qt::AlignLeft;
+        if (!(alres & Qt::AlignAbsolute) && (alres & (Qt::AlignLeft | Qt::AlignRight))) {
+            if (dir == Qt::RightToLeft)
+                alres ^= (Qt::AlignLeft | Qt::AlignRight);
+            alres |= Qt::AlignAbsolute;
+        }
+
+        option.setAlignment(alres); // for paragraph that are RTL, alignment is auto-reversed;
 
         if (blockFormat.nonBreakableLines() || document->pageSize().width() < 0) {
             option.setWrapMode(QTextOption::ManualWrap);
@@ -1912,7 +1901,7 @@ QFixed TextDocumentLayoutPrivate::findY(QFixed yFrom, const TextLayoutStruct *la
 TextDocumentLayout::TextDocumentLayout(QTextDocument *doc)
     : QAbstractTextDocumentLayout(*new TextDocumentLayoutPrivate, doc)
 {
-    registerHandler(QTextFormat::ImageObject, new QTextImageHandler(this));
+    // registerHandler(QTextFormat::ImageObject, new QTextImageHandler(this));
 }
 
 
