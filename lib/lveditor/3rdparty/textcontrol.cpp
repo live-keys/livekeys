@@ -834,8 +834,10 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
         auto mousePos = ev->localPos();
         int oldy = mousePos.y();
         mousePos.setY(d->textEdit->getPaletteManager()->positionOffset(oldy));
-
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
         ev->setLocalPos(mousePos);
+#else
+#endif
     }
 
     switch (e->type()) {

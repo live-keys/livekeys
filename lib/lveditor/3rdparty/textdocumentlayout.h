@@ -56,9 +56,10 @@
 #include "QtGui/qtextobject.h"
 #include "lveditorglobal.h"
 
-QT_BEGIN_NAMESPACE
-
 class QTextListFormat;
+
+namespace lv {
+
 class TextDocumentLayoutPrivate;
 
 class LV_EDITOR_EXPORT TextDocumentLayout : public QAbstractTextDocumentLayout
@@ -112,6 +113,6 @@ private:
     void layoutFinished();
 };
 
-QT_END_NAMESPACE
+}
 
 #endif // TEXTDOCUMENTLAYOUT_P_H

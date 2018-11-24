@@ -66,7 +66,7 @@
 
 
 
-QT_BEGIN_NAMESPACE
+namespace lv {
 
 class QTextFrameIterator {
     QTextFrame *f;
@@ -1017,7 +1017,11 @@ void TextDocumentLayoutPrivate::drawListItem(const QPointF &offset, QPainter *pa
     case QTextListFormat::ListLowerRoman:
     case QTextListFormat::ListUpperRoman:
         itemText = static_cast<QTextList *>(object)->itemText(bl);
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
         size.setWidth(fontMetrics.horizontalAdvance(itemText));
+#else
+        size.setWidth(fontMetrics.width(itemText));
+#endif
         size.setHeight(fontMetrics.height());
         break;
 
@@ -1034,8 +1038,11 @@ void TextDocumentLayoutPrivate::drawListItem(const QPointF &offset, QPainter *pa
     }
 
     QRectF r(pos, size);
-
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
     qreal xoff = fontMetrics.horizontalAdvance(QLatin1Char(' '));
+#else
+    qreal xoff = fontMetrics.width(QLatin1Char(' '));
+#endif
     if (dir == Qt::LeftToRight)
         xoff = -xoff - size.width();
     r.translate( xoff, (fontMetrics.height() / 2) - (size.height() / 2));
@@ -1647,7 +1654,11 @@ void TextDocumentLayoutPrivate::layoutBlock(const QTextBlock &bl, int blockPosit
     QFixed extraMargin;
     if (docPrivate->defaultTextOption.flags() & QTextOption::AddSpaceForLineAndParagraphSeparators) {
         QFontMetricsF fm(bl.charFormat().font());
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
         extraMargin = QFixed::fromReal(fm.horizontalAdvance(QChar(QChar(0x21B5))));
+#else
+        extraMargin = QFixed::fromReal(fm.width(QChar(QChar(0x21B5))));
+#endif
     }
 
     const QFixed indent = this->blockIndent(blockFormat);
@@ -2365,6 +2376,6 @@ QFixed TextDocumentLayoutPrivate::scaleToDevice(QFixed value) const
     return value * QFixed(paintDevice->logicalDpiY()) / QFixed(qt_defaultDpi());
 }
 
-QT_END_NAMESPACE
+}
 
-// #include "moc_textdocumentlayout.cpp"
+#include "moc_textdocumentlayout.cpp"
