@@ -42,7 +42,7 @@ int PaletteManager::drawingOffset(int blockNumber, bool forCursor)
         if (blockNumber < pd->startBlock + pd->lineSpan)
         {
             if (forCursor) offset = 0;
-            else offset = (-blockNumber - 1)*this->lineHeight;
+            else offset = (-blockNumber - 2)*this->lineHeight;
             break;
         }
         offset += (pd->paletteSpan - pd->lineSpan) * this->lineHeight;
@@ -201,13 +201,9 @@ void PaletteManager::linesRemoved()
 {
     int delta = prevLineNumber - lineNumber;
     auto it = palettes.begin();
-    qDebug() << dirtyPos;
-    qDebug() << delta;
     while (it != palettes.end())
     {
         PaletteData* pd = *it;
-        qDebug() << pd->startBlock;
-        qDebug() << pd->lineSpan;
         if (dirtyPos > pd->startBlock + pd->lineSpan)
         {
             ++it;

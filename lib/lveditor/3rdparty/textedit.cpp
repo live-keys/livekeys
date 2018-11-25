@@ -3428,7 +3428,7 @@ void TextEdit::updateFragmentVisibility()
     auto it = d->document->rootFrame()->begin(); int cnt = 0;
     auto endIt = d->document->rootFrame()->end();
 
-    qDebug() << fragmentStart() << fragmentEnd();
+    // qDebug() << fragmentStart() << fragmentEnd();
 
     while (it != endIt)
     {
@@ -3436,7 +3436,7 @@ void TextEdit::updateFragmentVisibility()
         else if (cnt < fragmentEnd()) it.currentBlock().setVisible(true);
         else it.currentBlock().setVisible(false);
 
-        qDebug() << it.currentBlock().text() << it.currentBlock().isVisible();
+        // qDebug() << it.currentBlock().text() << it.currentBlock().isVisible();
 
         ++cnt; ++it;
     }

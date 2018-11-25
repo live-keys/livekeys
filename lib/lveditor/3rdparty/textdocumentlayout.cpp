@@ -65,9 +65,6 @@
 
 
 
-
-namespace lv {
-
 class QTextFrameIterator {
     QTextFrame *f;
     int b;
@@ -76,7 +73,7 @@ class QTextFrameIterator {
     int cb;
 
     friend class QTextFrame;
-    friend class TextDocumentLayoutPrivate;
+    friend class lv::TextDocumentLayoutPrivate;
     QTextFrameIterator(QTextFrame *frame, int block, int begin, int end)
     {
         f = frame;
@@ -138,6 +135,7 @@ public:
     QTextFrameIterator &operator++()
     {
         const QTextDocumentPrivate *priv = f->docHandle();
+        QTextDocument* document = f->document();
         const QTextDocumentPrivate::BlockMap &map = priv->blockMap();
         if (cf) {
             int end = cf->lastPosition() + 1;
@@ -153,7 +151,11 @@ public:
                 // check if we entered a frame
                 QTextDocumentPrivate::FragmentIterator frag = priv->find(pos-1);
                 if (priv->buffer().at(frag->stringPosition) != QChar::ParagraphSeparator) {
-                    QTextFrame *nf = qobject_cast<QTextFrame *>(priv->objectForFormat(frag->format));
+
+                    auto formats = priv->formatCollection();
+                    int objectIndex = formats->format(frag->format).objectIndex();
+
+                    QTextFrame *nf = qobject_cast<QTextFrame *>(document->object(objectIndex));
                     if (nf) {
                         if (priv->buffer().at(frag->stringPosition) == QTextBeginningOfFrame && nf != f) {
                             cf = nf;
@@ -171,6 +173,7 @@ public:
     QTextFrameIterator &operator--()
     {
         const QTextDocumentPrivate *priv = f->docHandle();
+        QTextDocument* document = f->document();
         const QTextDocumentPrivate::BlockMap &map = priv->blockMap();
         if (cf) {
             int start = cf->firstPosition() - 1;
@@ -184,7 +187,12 @@ public:
                 // check if we have to enter a frame
                 QTextDocumentPrivate::FragmentIterator frag = priv->find(pos-1);
                 if (priv->buffer().at(frag->stringPosition) != QChar::ParagraphSeparator) {
-                    QTextFrame *pf = qobject_cast<QTextFrame *>(priv->objectForFormat(frag->format));
+
+                    auto formats = priv->formatCollection();
+                    int objectIndex = formats->format(frag->format).objectIndex();
+
+                    QTextFrame *pf = qobject_cast<QTextFrame *>(document->object(objectIndex));
+
                     if (pf) {
                         if (priv->buffer().at(frag->stringPosition) == QTextBeginningOfFrame) {
                             Q_ASSERT(pf == f);
@@ -204,6 +212,15 @@ public:
     }
     inline QTextFrameIterator operator--(int) { QTextFrameIterator tmp = *this; operator--(); return tmp; }
 };
+
+inline QTextFrameIterator QTextFrameIterator::findFrameBeginning(const QTextFrame *frame)
+{
+    const QTextDocumentPrivate *priv = frame->docHandle();
+    int b = priv->blockMap().findNode(frame->firstPosition());
+    int e = priv->blockMap().findNode(frame->lastPosition()+1);
+    return QTextFrameIterator(const_cast<QTextFrame *>(frame), b, b, e);
+}
+
 Q_DECLARE_TYPEINFO(QTextFrameIterator, Q_MOVABLE_TYPE);
 
 // ################ should probably add frameFormatChange notification!
@@ -367,6 +384,8 @@ static void fillBackground(QPainter *p, const QRectF &rect, QBrush brush, const 
     p->restore();
 }
 
+namespace lv {
+
 class TextDocumentLayoutPrivate : public QAbstractTextDocumentLayoutPrivate
 {
     Q_DECLARE_PUBLIC(TextDocumentLayout)
@@ -464,13 +483,6 @@ TextDocumentLayoutPrivate::TextDocumentLayoutPrivate()
     contentHasAlignment = false;
 }
 
-inline QTextFrameIterator QTextFrameIterator::findFrameBeginning(const QTextFrame *frame)
-{
-    const QTextDocumentPrivate *priv = frame->docHandle();
-    int b = priv->blockMap().findNode(frame->firstPosition());
-    int e = priv->blockMap().findNode(frame->lastPosition()+1);
-    return QTextFrameIterator(const_cast<QTextFrame *>(frame), b, b, e);
-}
 
 QTextFrameIterator TextDocumentLayoutPrivate::frameIteratorForYPosition(QFixed y) const
 {
@@ -497,7 +509,7 @@ QTextFrameIterator TextDocumentLayoutPrivate::frameIteratorForYPosition(QFixed y
 
 QTextFrameIterator TextDocumentLayoutPrivate::frameIteratorForTextPosition(int position) const
 {
-    QTextFrame *rootFrame = docPrivate->rootFrame();
+    QTextFrame *rootFrame = document->rootFrame();
 
     const QTextDocumentPrivate::BlockMap &map = docPrivate->blockMap();
     const int begin = map.findNode(rootFrame->firstPosition());
@@ -508,7 +520,7 @@ QTextFrameIterator TextDocumentLayoutPrivate::frameIteratorForTextPosition(int p
 
     QTextFrameIterator it(rootFrame, block, begin, end);
 
-    QTextFrame *containingFrame = docPrivate->frameAt(blockPos);
+    QTextFrame *containingFrame = document->frameAt(blockPos);
     if (containingFrame != rootFrame) {
         while (containingFrame->parentFrame() != rootFrame) {
             containingFrame = containingFrame->parentFrame();
@@ -533,7 +545,7 @@ TextDocumentLayoutPrivate::hitTest(QTextFrame *frame, const QFixedPoint &point, 
     Q_ASSERT(!fd->sizeDirty);
     const QFixedPoint relativePoint(point.x - fd->position.x, point.y - fd->position.y);
 
-    QTextFrame *rootFrame = docPrivate->rootFrame();
+    QTextFrame *rootFrame = document->rootFrame();
 
 //     LDEBUG << "checking frame" << frame->firstPosition() << "point=" << point
 //            << "position" << fd->position << "size" << fd->size;
@@ -792,7 +804,7 @@ void TextDocumentLayoutPrivate::drawFrame(const QPointF &offset, QPainter *paint
 
     QTextFrameIterator it = QTextFrameIterator::findFrameBeginning(frame);
 
-    if (frame == docPrivate->rootFrame())
+    if (frame == document->rootFrame())
         it = frameIteratorForYPosition(QFixed::fromReal(context.clip.top()));
 
     QList<QTextFrame *> floats;
@@ -2050,11 +2062,11 @@ QRectF TextDocumentLayout::doLayout(int from, int oldLength, int length)
 //     qDebug("documentChange: from=%d, oldLength=%d, length=%d", from, oldLength, length);
 
     // mark all frames between f_start and f_end as dirty
-    markFrames(d->docPrivate->rootFrame(), from, oldLength, length);
+    markFrames(d->document->rootFrame(), from, oldLength, length);
 
     QRectF updateRect;
 
-    QTextFrame *root = d->docPrivate->rootFrame();
+    QTextFrame *root = d->document->rootFrame();
     if(data(root)->sizeDirty)
         updateRect = d->layoutFrame(root, from, from + length);
     data(root)->layoutDirty = false;
@@ -2071,7 +2083,7 @@ int TextDocumentLayout::hitTest(const QPointF &point, Qt::HitTestAccuracy accura
 {
     Q_D(const TextDocumentLayout);
     d->ensureLayouted(QFixed::fromReal(point.y()));
-    QTextFrame *f = d->docPrivate->rootFrame();
+    QTextFrame *f = d->document->rootFrame();
     int position = 0;
     QTextLayout *l = 0;
     QFixedPoint pointf;
@@ -2187,7 +2199,7 @@ int TextDocumentLayout::dynamicPageCount() const
 QSizeF TextDocumentLayout::dynamicDocumentSize() const
 {
     Q_D(const TextDocumentLayout);
-    return data(d->docPrivate->rootFrame())->size.toSizeF();
+    return data(d->document->rootFrame())->size.toSizeF();
 }
 
 int TextDocumentLayout::pageCount() const

@@ -827,16 +827,19 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
     }
 
     // PALETTE
+    QMouseEvent *ev = nullptr;
     if (e->type() == QEvent::MouseButtonPress || e->type() == QEvent::MouseMove ||
             e->type() == QEvent::MouseButtonRelease || e->type() == QEvent::MouseButtonDblClick)
     {
-        QMouseEvent *ev = static_cast<QMouseEvent *>(e);
-        auto mousePos = ev->localPos();
+        ev = static_cast<QMouseEvent *>(e);
+        QPointF mousePos = ev->localPos();
         int oldy = mousePos.y();
         mousePos.setY(d->textEdit->getPaletteManager()->positionOffset(oldy));
 #if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
         ev->setLocalPos(mousePos);
 #else
+        ev = new QMouseEvent(ev->type(), mousePos, ev->windowPos(), ev->screenPos(), ev->button(), ev->buttons(), ev->modifiers(), ev->source());
+        e = ev;
 #endif
     }
 
@@ -933,6 +936,10 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
         default:
             break;
     }
+
+#if (QT_VERSION <= QT_VERSION_CHECK(5,7,1))
+    if (ev) delete ev;
+#endif
 }
 
 bool TextControl::event(QEvent *e)
@@ -978,9 +985,8 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
 {
     Q_Q(TextControl);
 
-    /*
-     * PALETTE TESTING
-     * static int cnt = 0;
+    /* PALETTE TEST
+    static int cnt = 0;
 
     switch (cnt)
     {
@@ -990,8 +996,7 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
     case 3: textEdit->linePaletteHeightChanged(textEdit, 55); break;
     }
 
-    cnt = (cnt + 1) % 3;
-    */
+    cnt++;*/
 
     if (e->key() == Qt::Key_Back) {
          e->ignore();
