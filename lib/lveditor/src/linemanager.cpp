@@ -19,7 +19,22 @@ bool LineManager::inside(int pos1, int num1, int pos2, int num2)
 
 bool LineManager::after(int pos1, int num1, int pos2, int num2)
 {
-    return before(pos2, num2, pos1, num1);
+    Q_UNUSED(num1)
+    return pos2 < pos1 && pos2+num2<=pos1;
+}
+
+void LineManager::writeOutContentOfSections()
+{
+    qDebug() << "---------------sections-------------";
+    auto it = sections.begin();
+    int cnt = 0;
+    while (it != sections.end())
+    {
+        CollapsedSection* cs = *it;
+        qDebug() << cnt << ": (" << cs->position << cs->numberOfLines << ")";
+        ++it; ++cnt;
+    }
+    qDebug() << "--------------------------------";
 }
 
 
@@ -139,7 +154,6 @@ void LineManager::linesRemoved(int pos, int num)
         }
         if (after(sec->position, sec->numberOfLines, pos, num))
         {
-
             std::queue<CollapsedSection*> q;
             q.push(sec);
             while (!q.empty())

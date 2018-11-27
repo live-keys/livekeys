@@ -20,7 +20,7 @@ before_build:
   - SET OPENCV_ROOT_PATH=%CD%\opencv
   - CD %APP_PATH%
   - SET OPENCV_DIR=%OPENCV_ROOT_PATH%\build\%ARCH%\vc14
-  - SET QTDIR=C:\Qt\5.11.1\msvc2015_64
+  - SET QTDIR=C:\Qt\5.11\msvc2015_64
   - dir C:\Qt
   - dir C:\Qt\5.7
   - dir C:\Qt\5.11
