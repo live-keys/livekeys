@@ -18,8 +18,10 @@
 #define COMMANDS_H
 
 #include <QObject>
-#include <QMap>
+#include <QHash>
 #include <QJSValue>
+
+#include "live/keymap.h"
 
 namespace lv{
 
@@ -29,22 +31,9 @@ class Commands : public QObject{
 
     class Node{
     public:
-        Node() : object(0){}
-        ~Node();
-
-        Node* find(QObject* object);
-        Node* add(QObject* object);
-        void  remove(QObject* object);
-        QList<QPair<Node *, bool> > recurseFind(
-                const QStringList &list,
-                QStringList::const_iterator it,
-                bool hasFocus = false
-        );
-        QString recurseDump(QString prefix = "");
-
-        QObject* object;
-        QMap<QString, QJSValue>   functions;
-        QMultiMap<QString, Node*> nodes;
+        QJSValue function;
+        QJSValue enabled;
+        KeyMap::KeyCode key;
     };
 
 public:
@@ -59,10 +48,9 @@ public slots:
     void execute(const QString& command);
 
 private:
-    QObjectList getCommandChain(QObject* object);
+    QStringList getCommandChain(QObject *object);
 
-    Node* m_root;
-
+    QHash<QString, Node*> m_commands;
 };
 
 }// namespace

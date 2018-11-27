@@ -31,7 +31,6 @@ class ProjectFile;
 class ProjectFileModel;
 class ProjectNavigationModel;
 class ProjectDocumentModel;
-class ProjectExtension;
 
 class LV_EDITOR_EXPORT Project : public QObject{
 
@@ -64,9 +63,6 @@ public:
     const QString& rootPath() const;
 
     LockedFileIOSession::Ptr lockedFileIO();
-
-    void addExtension(ProjectExtension* extension);
-    const QList<ProjectExtension*>& extensions() const;
 
 public slots:
     void newProject();
@@ -109,8 +105,6 @@ private:
     ProjectDocumentModel*   m_documentModel;
 
     LockedFileIOSession::Ptr m_lockedFileIO;
-
-    QList<ProjectExtension*> m_extensions;
 
     ProjectDocument* m_active;
     QString          m_path;

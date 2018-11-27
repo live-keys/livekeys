@@ -35,8 +35,10 @@ Rectangle{
     property alias font: editorArea.font
     property alias internalActiveFocus : editorArea.activeFocus
     property alias internalFocus: editorArea.focus
+    property alias documentHandler: editorArea.documentHandler
+    property alias textEdit: editorArea
 
-    property var loadedPalettes: []
+    property var loadedEditorPaletteBoxes: []
     property bool isEditingSection: false
     property var windowControls: null
     property var document: null
@@ -55,6 +57,20 @@ Rectangle{
 
     color : "#050b12"
     clip : true
+
+    objectName: "editor"
+
+    property string objectCommandIndex : livecv.commands.add(editor, {
+        'saveFile' : function(){ if ( hasActiveEditor() ) windowControls.activePane.save() },
+        'saveFileAs' : function(){ if ( hasActiveEditor() ) windowControls.activePane.saveAs() },
+        'closeFile' : function(){ if ( hasActiveEditor() ) windowControls.activePane.closeDocument() },
+        'assistCompletion' : function(){ if ( hasActiveEditor() ) windowControls.activePane.assistCompletion() },
+        'toggleSize' : function(){ if ( hasActiveEditor() ) windowControls.activePane.toggleSize() }
+    })
+
+    function hasActiveEditor(){
+        return windowControls.activePane.objectName === 'editor'
+    }
 
     function save(){
         if ( !editor.document )
@@ -156,6 +172,129 @@ Rectangle{
         editorArea.forceActiveFocus()
     }
 
+    function cursorWindowCoords(){
+        return Qt.point(editor.x, editor.y - flick.flickableItem.contentY);
+    }
+
+    function adjust(){
+        var palettes = codeHandler.findPalettes(editorArea.cursorPosition, true)
+        var rect = editor.getCursorRectangle()
+        var position = Qt.point(editor.x, editor.y - flick.flickableItem.contentY)
+        if ( palettes.size() === 1 ){
+            var palette = palettes.loadAt(0)
+            codeHandler.openPalette(palette, editorArea.cursorPosition, editor.windowControls.runSpace.item)
+
+            var paletteBoxContainer = null
+            var editorBox = null
+            for ( var i = 0; i < editor.loadedEditorPaletteBoxes.length; ++i ){
+                var localEditorBox = editor.loadedEditorPaletteBoxes[i]
+                var localPaletteBoxContainer = localEditorBox.child
+                if ( localPaletteBoxContainer.children.length > 0 ){
+                    var localPaletteItem = localPaletteBoxContainer.children[0].child
+                    var localPalettePosition = codeHandler.palettePosition(localPaletteItem)
+                    if ( localPalettePosition === palettes.position() ){
+                        editorBox = localEditorBox
+                        paletteBoxContainer = localPaletteBoxContainer
+                        break;
+                    }
+                }
+            }
+
+            if ( paletteBoxContainer === null ){
+                editorBox = windowControls.editSpace.createEmptyEditorBox()
+                editor.loadedEditorPaletteBoxes.push(editorBox)
+                paletteBoxContainer = windowControls.editSpace.createPaletteBoxContainer()
+                editorBox.setChild(paletteBoxContainer, rect, position, editSpace.placement.top)
+                paletteBoxContainer.x = 5
+                editorBox.color = "#02070b"
+                editorBox.radius = 5
+                editorBox.border.width = 1
+                editorBox.border.color = "#061b24"
+            }
+
+            var paletteBox = windowControls.editSpace.createPaletteBox(paletteBoxContainer)
+
+            palette.item.x = 5
+            palette.item.y = 7
+
+            paletteBox.child = palette.item
+            paletteBox.name = palette.name
+            paletteBox.type = palette.type
+            paletteBox.codeHandler = codeHandler
+            paletteBox.cursorRectangle = rect
+            paletteBox.editorPosition = position
+
+            editorBox.updatePlacement(rect, position, editSpace.placement.top)
+
+        } else {
+            //Create editor box
+            var palList      = windowControls.editSpace.createPaletteList()
+            var palListBox   = windowControls.editSpace.createEditorBox(palList, rect, position, editSpace.placement.bottom)
+            palListBox.color = 'transparent'
+            palList.model    = palettes
+            editor.internalFocus = false
+            palList.forceActiveFocus()
+            windowControls.setActiveItem(palList, editor)
+
+            palList.cancelled.connect(function(){
+                palList.focus = false
+                editor.forceFocus()
+                palListBox.destroy()
+            })
+            palList.paletteSelected.connect(function(index){
+                palList.focus = false
+                editor.forceFocus()
+                palListBox.destroy()
+
+                var palette = palettes.loadAt(index)
+                codeHandler.openPalette(palette, editorArea.cursorPosition, editor.windowControls.runSpace.item)
+
+                var paletteBoxContainer = null
+                var editorBox = null
+                for ( var i = 0; i < editor.loadedEditorPaletteBoxes.length; ++i ){
+                    var localEditorBox = editor.loadedEditorPaletteBoxes[i]
+                    var localPaletteBoxContainer = localEditorBox.child
+                    if ( localPaletteBoxContainer.children.length > 0 ){
+                        var localPaletteItem = localPaletteBoxContainer.children[0].child
+                        var localPalettePosition = codeHandler.palettePosition(localPaletteItem)
+                        if ( localPalettePosition === palettes.position() ){
+                            editorBox = localEditorBox
+                            paletteBoxContainer = localPaletteBoxContainer
+                            break;
+                        }
+                    }
+                }
+
+                if ( paletteBoxContainer === null ){
+                    editorBox = windowControls.editSpace.createEmptyEditorBox()
+                    editor.loadedEditorPaletteBoxes.push(editorBox)
+                    paletteBoxContainer = windowControls.editSpace.createPaletteBoxContainer()
+                    editorBox.setChild(paletteBoxContainer, rect, position, editSpace.placement.top)
+                    paletteBoxContainer.x = 5
+                    editorBox.color = "#02070b"
+                    editorBox.radius = 5
+                    editorBox.border.width = 1
+                    editorBox.border.color = "#061b24"
+                }
+
+                var paletteBox = windowControls.editSpace.createPaletteBox(paletteBoxContainer)
+
+                palette.item.x = 5
+                palette.item.y = 7
+
+                paletteBox.child = palette.item
+                paletteBox.name = palette.name
+                paletteBox.type = palette.type
+                paletteBox.codeHandler = codeHandler
+                paletteBox.cursorRectangle = rect
+                paletteBox.editorPosition = position
+
+                editorBox.updatePlacement(rect, position, editSpace.placement.top)
+
+            })
+        }
+    }
+
     Rectangle{
         anchors.left: parent.left
         anchors.top: parent.top
@@ -227,9 +366,9 @@ Rectangle{
             Text{
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 11
-                text:
-                    (Math.floor(editorArea.cursorRectangle.y / editorMetrics.height) + 1) + ', ' +
-                    (Math.floor(editorArea.cursorRectangle.x / editorMetrics.averageCharacterWidth) + 1)
+                text: editorArea.cursorPosition
+//                    (Math.floor(editorArea.cursorRectangle.y / editorMetrics.height) + 1) + ', ' +
+//                    (Math.floor(editorArea.cursorRectangle.x / editorMetrics.averageCharacterWidth) + 1)
                 color: "#808691"
                 anchors.left: parent.left
                 anchors.leftMargin: 7
@@ -366,13 +505,28 @@ Rectangle{
                         }
                     }
                     onPaletteAboutToRemove: {
-                        for ( var i = 0; i < loadedPalettes.length; ++i ){
-                            if ( palette.item === loadedPalettes[i].paletteItem ){
-                                var lp = loadedPalettes[i]
-                                loadedPalettes.splice(i, 1)
-                                lp.destroy()
-                                return
+                        for ( var i = 0; i < loadedEditorPaletteBoxes.length; ++i ){
+                            var paletteContainer = loadedEditorPaletteBoxes[i].child
+
+                            if ( paletteContainer.children.length > 0 ){
+                                for ( var j = 0; j < paletteContainer.children.length; ++j ){
+                                    var localPaletteContainer = paletteContainer.children[j]
+
+                                    if ( palette.item === localPaletteContainer.child ){
+                                        localPaletteContainer.parent = null
+                                        localPaletteContainer.destroy()
+                                        if ( paletteContainer.children.length === 0 ){
+                                            var lp = loadedEditorPaletteBoxes[i]
+                                            loadedEditorPaletteBoxes.splice(i, 1)
+                                            lp.destroy()
+
+                                        }
+
+                                        return
+                                    }
+                                }
                             }
+
                         }
                     }
                     onEditingStateChanged: {
@@ -394,16 +548,6 @@ Rectangle{
                 }
 
                 focus : true
-
-                objectName: "editor"
-
-                property string objectCommandIndex : livecv.commands.add(editorArea, {
-                    'saveFile' : editor.save,
-                    'saveFileAs' : editor.saveAs,
-                    'closeFile' : editor.closeDocument,
-                    'assistCompletion' : editor.assistCompletion,
-                    'toggleSize' : editor.toggleSize
-                })
 
                 color : "#fff"
                 font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
@@ -505,8 +649,8 @@ Rectangle{
                     } else if ( event.key === Qt.Key_Escape ){
                         if ( codeHandler.completionModel.isEnabled ){
                             codeHandler.completionModel.disable()
-                        } else if ( editor.loadedPalettes.length > 0 ){
-                            var last = editor.loadedPalettes[editor.loadedPalettes.length - 1]
+                        } else if ( editor.loadedEditorPaletteBoxes.length > 0 ){
+                            var last = editor.loadedEditorPaletteBoxes[editor.loadedEditorPaletteBoxes.length - 1]
                             codeHandler.removePalette(last.paletteItem)
                         }
 
@@ -551,112 +695,32 @@ Rectangle{
                     acceptedButtons: Qt.RightButton
                     onClicked: {
                         editorArea.clearSelectionOnFocus(false)
+
+                        for ( var i = 0; i < contextMenu.additionalItems.length; ++i ){
+                            contextMenu.removeItem(contextMenu.additionalItems[i])
+                        }
+                        contextMenu.additionalItems = []
+
+                        var res = livecv.interceptMenu(editor)
+                        for ( var i = 0; i < res.length; ++i ){
+                            var menuitem = contextMenu.insertItem(i, res[i].name)
+                            menuitem.enabled = res[i].enabled
+                            menuitem.triggered.connect(res[i].action)
+                            contextMenu.additionalItems.push(menuitem)
+                        }
+
                         contextMenu.popup()
                     }
                 }
 
-                Menu {
+                Menu{
                     id: contextMenu
                     style: ContextMenuStyle{}
-                    onAboutToHide: editorArea.clearSelectionOnFocus(true)
-                    onAboutToShow: {
-                        var cursorInfo = codeHandler.cursorInfo(
-                            editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart
-                        );
-                        bindMenuItem.enabled = cursorInfo.canBind
-                        unbindMenuItem.enabled = cursorInfo.canUnbind
-                        editMenuItem.enabled = cursorInfo.canEdit
-                        adjustMenuItem.enabled = cursorInfo.canAdjust
+                    property var additionalItems : []
+                    onAboutToHide: {
+                        editorArea.clearSelectionOnFocus(true)
                     }
 
-                    MenuItem {
-                        id: editMenuItem
-                        text: qsTr("Edit")
-                        enabled: false
-                        onTriggered: codeHandler.edit(editorArea.cursorPosition, editor.windowControls.runSpace.item)
-                    }
-                    MenuItem {
-                        id: adjustMenuItem
-                        text: qsTr("Adjust")
-                        enabled: false
-                        onTriggered: {
-                            var palettes = codeHandler.findPalettes(editorArea.cursorPosition, editor.windowControls.runSpace.item)
-                            var rect = editor.getCursorRectangle()
-                            var position = Qt.point(editor.x, editor.y - flick.flickableItem.contentY)
-                            if ( palettes.size() === 1 ){
-                                var palette = palettes.loadAt(0)
-                                codeHandler.openPalette(palette, editorArea.cursorPosition, editor.windowControls.runSpace.item)
-
-                                var paletteBox = windowControls.editSpace.createPalette()
-
-                                palette.item.x = 5
-                                palette.item.y = 7
-
-                                paletteBox.setChild(palette.item, rect, position, editSpace.placement.top)
-
-                                paletteBox.color = "#02070b"
-                                paletteBox.radius = 5
-                                paletteBox.border.width = 1
-                                paletteBox.border.color = "#061b24"
-                                editor.loadedPalettes.push(paletteBox)
-                            } else {
-                                //Create editor box
-                                var palList      = windowControls.editSpace.createPaletteList()
-                                var palListBox   = windowControls.editSpace.createEditorBox(palList, rect, position, editSpace.placement.bottom)
-                                palListBox.color = 'transparent'
-                                palList.model    = palettes
-                                editor.internalFocus = false
-                                palList.forceActiveFocus()
-
-                                palList.cancelled.connect(function(){
-                                    palList.focus = false
-                                    editor.forceFocus()
-                                    palListBox.destroy()
-                                })
-                                palList.paletteSelected.connect(function(index){
-                                    palList.focus = false
-                                    editor.forceFocus()
-                                    palListBox.destroy()
-
-                                    var palette = palettes.loadAt(index)
-                                    codeHandler.openPalette(palette, editorArea.cursorPosition, editor.windowControls.runSpace.item)
-
-                                    var paletteBox = windowControls.editSpace.createPalette()
-
-                                    palette.item.x = 5
-                                    palette.item.y = 7
-
-                                    paletteBox.setChild(palette.item, rect, position, editSpace.placement.top)
-
-                                    paletteBox.color = "#02070b"
-                                    paletteBox.radius = 5
-                                    paletteBox.border.width = 1
-                                    paletteBox.border.color = "#061b24"
-
-                                    editor.loadedPalettes.push(paletteBox)
-                                })
-                            }
-                        }
-                    }
-                    MenuItem {
-                        id: bindMenuItem
-                        text: qsTr("Bind")
-                        enabled: false
-                        onTriggered: codeHandler.bind(
-                            editorArea.selectionStart,
-                            editorArea.selectionEnd - editorArea.selectionStart,
-                            editor.windowControls.runSpace.item
-                        )
-                    }
-
-                    MenuItem {
-                        id: unbindMenuItem
-                        text: qsTr("Unbind")
-                        enabled: false
-                        onTriggered: codeHandler.unbind(
-                            editorArea.selectionStart, editorArea.selectionEnd - editorArea.selectionStart
-                        )
-                    }
                     MenuItem {
                         text: qsTr("Cut")
                         shortcut: StandardKey.Cut

@@ -2506,6 +2506,7 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
 {
     Q_D(TextEdit);
 
+
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
 
@@ -3379,8 +3380,6 @@ void TextEdit::updateFragmentVisibility()
 
     auto it = d->document->rootFrame()->begin(); int cnt = 0;
     auto endIt = d->document->rootFrame()->end();
-
-    qDebug() << fragmentStart() << fragmentEnd();
 
     while (it != endIt)
     {

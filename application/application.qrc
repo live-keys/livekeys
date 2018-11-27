@@ -44,5 +44,9 @@
         <file alias="log-search-tag.png">images/log-search-tag.png</file>
         <file alias="log-toggle-window.png">images/log-toggle-window.png</file>
         <file alias="log-view-prefix.png">images/log-view-prefix.png</file>
+        <file alias="palette-add.png">images/palette-add.png</file>
+        <file alias="palette-add-property.png">images/palette-add-property.png</file>
+        <file alias="palette-expand.png">images/palette-expand.png</file>
+        <file alias="palette-swap.png">images/palette-swap.png</file>
     </qresource>
 </RCC>

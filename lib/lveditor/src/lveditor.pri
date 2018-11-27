@@ -34,8 +34,7 @@ HEADERS += \
     $$PWD/livepalettelist.h \
     $$PWD/linemanager.h \
     $$PWD/collapsedsection.h \
-    $$PWD/linesurface.h \
-    $$PWD/highlighter.h
+    $$PWD/linesurface.h
 
 SOURCES += \
     $$PWD/project.cpp \
@@ -69,5 +68,4 @@ SOURCES += \
     $$PWD/livepalettelist.cpp \
     $$PWD/linemanager.cpp \
     $$PWD/collapsedsection.cpp \
-    $$PWD/linesurface.cpp \
-    $$PWD/highlighter.cpp
+    $$PWD/linesurface.cpp

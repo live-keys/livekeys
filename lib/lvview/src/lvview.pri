@@ -20,7 +20,9 @@ HEADERS += \
     $$PWD/mlnodetoqml.h \
     $$PWD/viewcontext.h \
     $$PWD/lvviewglobal.h \
-    $$PWD/viewengine.h
+    $$PWD/viewengine.h \
+    $$PWD/extensions.h \
+    $$PWD/liveextension.h
 
 SOURCES += \
     $$PWD/errorhandler.cpp \
@@ -39,4 +41,6 @@ SOURCES += \
     $$PWD/typeinfo.cpp \
     $$PWD/mlnodetoqml.cpp \
     $$PWD/viewcontext.cpp \
-    $$PWD/viewengine.cpp
+    $$PWD/viewengine.cpp \
+    $$PWD/extensions.cpp \
+    $$PWD/liveextension.cpp

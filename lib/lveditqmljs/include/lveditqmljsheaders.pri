@@ -2,7 +2,7 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/live/codeqmlhandler.h \
-    $$PWD/live/documentqmlinfo.h \ ##HERE
+    $$PWD/live/documentqmlinfo.h \
     $$PWD/live/documentqmlscope.h \
     $$PWD/live/documentqmlvalueobjects.h \
     $$PWD/live/plugininfoextractor.h \
@@ -12,4 +12,7 @@ HEADERS += \
     $$PWD/live/qmljssettings.h \
     $$PWD/live/qmllibrarydependency.h \
     $$PWD/live/lveditqmljsglobal.h \
-    $$PWD/live/projectqmlextension.h
+    $$PWD/live/projectqmlextension.h \
+    $$PWD/live/qmlpropertymodel.h \
+    $$PWD/live/qmlitemmodel.h \
+    $$PWD/live/qmladdcontainer.h

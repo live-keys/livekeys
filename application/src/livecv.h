@@ -19,6 +19,8 @@
 
 #include <QString>
 #include <QLibrary>
+#include <QQmlPropertyMap>
+#include <QJSValue>
 
 // Versioning
 // ----------
@@ -47,6 +49,7 @@ class VisualLogQmlObject;
 class Project;
 class DocumentHandler;
 class CodeQmlHandler;
+class Extensions;
 
 // class LiveCV
 // ------------
@@ -54,11 +57,12 @@ class CodeQmlHandler;
 class LiveCV : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lv::Settings*       settings       READ settings CONSTANT)
-    Q_PROPERTY(lv::ViewEngine*         engine         READ engine   CONSTANT)
-    Q_PROPERTY(lv::Commands*       commands       READ commands       CONSTANT)
-    Q_PROPERTY(lv::VisualLogModel* log            READ log            CONSTANT)
-    Q_PROPERTY(lv::KeyMap*         keymap         READ keymap         CONSTANT)
+    Q_PROPERTY(lv::Settings*       settings       READ settings   CONSTANT)
+    Q_PROPERTY(lv::ViewEngine*     engine         READ engine     CONSTANT)
+    Q_PROPERTY(lv::Commands*       commands       READ commands   CONSTANT)
+    Q_PROPERTY(lv::VisualLogModel* log            READ log        CONSTANT)
+    Q_PROPERTY(lv::KeyMap*         keymap         READ keymap     CONSTANT)
+    Q_PROPERTY(QQmlPropertyMap*    extensions     READ extensions CONSTANT)
 
 public:
     typedef QSharedPointer<LiveCV>       Ptr;
@@ -85,15 +89,17 @@ public:
 
     QByteArray extractPluginInfo(const QString& import) const;
 
-    Settings* settings();
-    ViewEngine*   engine();
-    Project* project();
-    Commands* commands();
-    KeyMap* keymap();
+    Settings*   settings();
+    ViewEngine* engine();
+    Project*    project();
+    Commands*   commands();
+    KeyMap*     keymap();
+    QQmlPropertyMap* extensions();
     VisualLogModel* log();
 
 public slots:
     QObject *windowControls() const;
+    QJSValue interceptMenu(QJSValue context);
 
 private:
     LiveCV(QObject* parent = 0);
@@ -103,17 +109,18 @@ private:
     void parseArguments(const QStringList& arguments);
     void solveImportPaths();
 
-    ViewEngine*          m_engine;
+    ViewEngine*      m_engine;
     LiveCVArguments* m_arguments;
 
     lv::DocumentHandler* m_codeInterface;
-    QString  m_dir;
+    QString              m_dir;
 
     lv::Project*           m_project;
     lv::Settings*          m_settings;
     lv::LiveCVScript*      m_script;
     lv::Commands*          m_commands;
     lv::KeyMap*            m_keymap;
+    lv::Extensions*        m_extensions;
     lv::VisualLogModel*    m_log;
     lv::VisualLogQmlObject* m_vlog;
     mutable QObject*       m_windowControls;

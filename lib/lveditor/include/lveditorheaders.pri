@@ -30,5 +30,4 @@ HEADERS += \
     $$PWD/live/projectextension.h \
     $$PWD/live/editorglobalobject.h \
     $$PWD/live/editorprivate_plugin.h \
-    $$PWD/live/livepalettelist.h \
-    $$PWD/live/highlighter.h
+    $$PWD/live/livepalettelist.h

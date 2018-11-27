@@ -19,8 +19,11 @@
 
 #include "live/lveditqmljsglobal.h"
 #include "live/projectextension.h"
+#include "live/documenthandler.h"
+#include "live/abstractcodehandler.h"
 
 #include <QObject>
+#include <QQmlParserStatus>
 
 namespace lv{
 
@@ -30,10 +33,14 @@ class CodeQmlHandler;
 class ProjectQmlScanner;
 class ProjectQmlScanMonitor;
 class PluginInfoExtractor;
-class LV_EDITQMLJS_EXPORT ProjectQmlExtension : public ProjectExtension{
+class LV_EDITQMLJS_EXPORT ProjectQmlExtension : public ProjectExtension, public QQmlParserStatus{
+
+    Q_OBJECT
+    Q_INTERFACES(QQmlParserStatus)
 
 public:
-    ProjectQmlExtension(Settings* settings, Project* project, ViewEngine *engine);
+    ProjectQmlExtension(QObject* parent = 0);
+    ProjectQmlExtension(Settings* settings, Project* project, ViewEngine *engine, QObject* parent = 0);
     virtual ~ProjectQmlExtension();
 
     AbstractCodeHandler* createHandler(
@@ -43,6 +50,9 @@ public:
         DocumentHandler *handler
     );
 
+    void classBegin(){}
+    void componentComplete();
+
     ProjectQmlScanMonitor* scanMonitor();
     ProjectQmlScanner* scanner();
 
@@ -50,9 +60,14 @@ public:
 
     static void engineHook(const QString& code, const QUrl& file, QObject* result, QObject* project);
 
+public slots:
+    QObject* createHandler(ProjectDocument* document, DocumentHandler* handler);
+
 private:
     Q_DISABLE_COPY(ProjectQmlExtension)
 
+    Project*               m_project;
+    ViewEngine*            m_engine;
     QmlJsSettings*         m_settings;
     ProjectQmlScanMonitor* m_scanMonitor;
 };

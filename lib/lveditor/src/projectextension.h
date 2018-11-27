@@ -25,12 +25,13 @@ namespace lv{
 class Project;
 class Settings;
 class ViewEngine;
-class LV_EDITOR_EXPORT ProjectExtension{
+class LV_EDITOR_EXPORT ProjectExtension : public QObject{
+
+    Q_OBJECT
 
 public:
-    ProjectExtension();
+    ProjectExtension(QObject* parent = 0);
     virtual ~ProjectExtension();
-
 
     virtual AbstractCodeHandler* createHandler(
         ProjectDocument* document,

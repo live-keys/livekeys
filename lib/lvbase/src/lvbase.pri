@@ -13,7 +13,10 @@ HEADERS += \
     $$PWD/visuallog.h \
     $$PWD/indextuple.h \
     $$PWD/functionargs.h \
-    $$PWD/lvglobal.h
+    $$PWD/lvglobal.h \
+    $$PWD/package.h \
+    $$PWD/plugin.h \
+    $$PWD/version.h
 
 SOURCES += \
     $$PWD/exception.cpp \
@@ -24,7 +27,10 @@ SOURCES += \
     $$PWD/mlnodetojson.cpp \
     $$PWD/libraryloadpath.cpp \
     $$PWD/visuallog.cpp \
-    $$PWD/stacktrace.cpp
+    $$PWD/stacktrace.cpp \
+    $$PWD/package.cpp \
+    $$PWD/plugin.cpp \
+    $$PWD/version.cpp
 
 win32{
     SOURCES += $$PWD/stacktrace_win.cpp

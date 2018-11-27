@@ -246,6 +246,10 @@ QString LivePaletteContainer::paletteName(LivePaletteLoader *loader){
     return QFileInfo(loader->path()).baseName();
 }
 
+const QString &LivePaletteContainer::palettePath(LivePaletteLoader *loader){
+    return loader->path();
+}
+
 LivePalette *LivePaletteContainer::createPalette(LivePaletteLoader *loader){
     Q_D(LivePaletteContainer);
     CodeConverter* cvt = loader->getItem(d->engine);

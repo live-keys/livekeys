@@ -250,14 +250,6 @@ ProjectDocument *Project::isOpened(const QString &path){
     return m_documentModel->isOpened(path);
 }
 
-void Project::addExtension(ProjectExtension *extension){
-    m_extensions.append(extension);
-}
-
-const QList<ProjectExtension *> &Project::extensions() const{
-    return m_extensions;
-}
-
 void Project::closeFile(const QString &path){
     m_documentModel->closeDocument(path);
 }

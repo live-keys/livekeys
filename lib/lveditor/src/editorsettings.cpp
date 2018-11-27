@@ -23,6 +23,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QDebug>
+
 namespace lv{
 
 EditorSettings::EditorSettings(const QString &path, QObject *parent)

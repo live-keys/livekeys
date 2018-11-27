@@ -145,6 +145,9 @@ Rectangle{
 
                     MouseArea{
                         anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: paletteList.currentIndex = index
+                        onClicked: root.paletteSelected(index)
                     }
                 }
             }

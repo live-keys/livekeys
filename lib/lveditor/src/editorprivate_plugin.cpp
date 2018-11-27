@@ -40,7 +40,6 @@
 #include <QQmlContext>
 
 void EditorPrivatePlugin::registerTypes(const char *uri){
-    qmlRegisterType<lv::DocumentHandler>(   uri, 1, 0, "DocumentHandler");
     qmlRegisterType<lv::DocumentCursorInfo>(uri, 1, 0, "DocumentCursorInfo");
     qmlRegisterType<lv::TextEdit>(          uri, 1, 0, "NewTextEdit");
     qmlRegisterType<lv::LineSurface>(       uri, 1, 0, "LineSurface");

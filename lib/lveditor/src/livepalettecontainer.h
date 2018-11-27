@@ -47,6 +47,7 @@ public:
     LivePaletteList* findPalettes(const QString& type, const QStringList& object);
 
     QString paletteName(LivePaletteLoader* loader);
+    static const QString& palettePath(LivePaletteLoader* loader);
     LivePalette* createPalette(LivePaletteLoader* loader);
 
     int size() const;

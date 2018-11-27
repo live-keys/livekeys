@@ -1078,6 +1078,195 @@ QPair<int, int> CodeQmlHandler::contextBlock(int position){
     return QPair<int, int>(start, end);
 }
 
+QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
+    if ( !m_document || !m_target )
+        return nullptr;
+
+    QTextCursor cursor(m_target);
+    cursor.setPosition(position);
+    QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
+
+    ctx->expressionPath();
+
+    int insertPosition = -1;
+    QString insertIndent;
+
+    QStringList expression;
+    int propertyPosition = ctx->propertyPosition();
+    int propertyLength   = 0;
+    QStringList objectTypePath;
+
+    QChar expressionEndDelimiter;
+
+    if ( ctx->context() & QmlCompletionContext::InLhsOfBinding ){
+        expression = ctx->expressionPath();
+
+        int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
+            m_target, cursor.position(), &expression, &expressionEndDelimiter
+        );
+        propertyLength = (cursor.position() - propertyPosition) + advancedLength;
+
+    } else if ( ctx->context() & QmlCompletionContext::InRhsofBinding ||
+                ctx->context() & QmlCompletionContext::InAfterOnLhsOfBinding)
+    {
+        expression     = ctx->propertyPath();
+        propertyLength = DocumentQmlValueScanner::getExpressionExtent(m_target, ctx->propertyPosition());
+    }
+
+    if ( expression.size() > 0 ){
+
+        if ( propertyPosition == -1 ){
+
+            DocumentQmlValueScanner qvs(m_document, propertyPosition, propertyLength);
+            int blockStart = qvs.getBlockStart(position) + 1;
+            while ( m_target->characterAt(blockStart).isSpace() ){
+                ++blockStart;
+            }
+
+            QTextBlock tb = m_target->findBlock(blockStart);
+            insertPosition = position;
+            insertIndent = tb.text().mid(0, blockStart - tb.position());
+            objectTypePath = ctx->objectTypePath();
+
+        } else {
+            DocumentQmlValueScanner qvs(m_document, propertyPosition, propertyLength);
+            int blockEnd = qvs.getBlockEnd(propertyPosition + propertyLength);
+            if ( blockEnd == -1 ){
+                blockEnd = m_target->characterCount() - 1;
+            }
+
+            QTextBlock tb = m_target->findBlock(propertyPosition);
+            insertPosition = blockEnd;
+            insertIndent = tb.text().mid(0, propertyPosition - tb.position());
+            objectTypePath = ctx->objectTypePath();
+
+        }
+    }
+
+    if ( insertPosition == -1 )
+        return nullptr;
+
+    QmlAddContainer* addContainer = new QmlAddContainer(insertPosition, objectTypePath);
+    ProjectQmlScope::Ptr projectScope = m_projectHandler->scanMonitor()->projectScope();
+    DocumentQmlScope::Ptr document    = m_documentScope;
+
+    if ( !ctx->objectTypePath().empty() ){
+        //TODO: Capture object's properties
+        // Capture properties in a set
+
+
+        QString type = ctx->objectTypeName();
+        QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
+        QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+        QString libraryKey;
+        qmlhandler_helpers::getTypePath(document, projectScope, typeNamespace, type, typePath, libraryKey);
+
+        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, typePath ){
+            QString objectTypeName = "";
+            if ( object->exports().size() > 0 )
+                objectTypeName = object->exports().first().type;
+
+            for ( int i = 0; i < object->propertyCount(); ++i ){
+                if ( !object->property(i).name().startsWith("__") ){
+                    addContainer->propertyModel()->addItem(QmlPropertyModel::PropertyData(
+                        object->property(i).name(),
+                        objectTypeName,
+                        "", //TODO: Find out library path
+                        insertIndent + object->property(i).name() + ": ")
+                    );
+                }
+            }
+            addContainer->propertyModel()->updateFilters();
+        }
+    }
+
+    // import global objects
+
+
+    QStringList exports;
+    projectScope->implicitLibraries()->libraryInfo(document->path())->listExports(&exports);
+
+    foreach( const QString& e, exports ){
+        if ( e != document->componentName() ){
+            addContainer->itemModel()->addItem(
+                QmlItemModel::ItemData(e, "implicit", document->path(), insertIndent + e + "{ }")
+            );
+        }
+    }
+
+    foreach( const QString& defaultLibrary, projectScope->defaultLibraries() ){
+        QStringList exports;
+        projectScope->globalLibraries()->libraryInfo(defaultLibrary)->listExports(&exports);
+        foreach( const QString& e, exports ){
+            addContainer->itemModel()->addItem(
+                QmlItemModel::ItemData(e, "QtQml", "QtQml", insertIndent + e + "{ }")
+            );
+        }
+    }
+
+    // import namespace objects
+
+    QSet<QString> imports;
+
+    foreach( const DocumentQmlScope::ImportEntry& imp, document->imports() ){
+        if ( imp.first.as() != "" ){
+            imports.insert(imp.first.as());
+        }
+    }
+    imports.insert("");
+
+    for ( QSet<QString>::iterator it = imports.begin(); it != imports.end(); ++it ){
+
+        foreach( const DocumentQmlScope::ImportEntry& imp, document->imports() ){
+            if ( imp.first.as() == *it ){
+                QStringList exports;
+                projectScope->globalLibraries()->libraryInfo(imp.second)->listExports(&exports);
+                int segmentPosition = imp.second.lastIndexOf('/');
+                QString libraryName = imp.second.mid(segmentPosition + 1);
+
+                foreach( const QString& e, exports ){
+                    addContainer->itemModel()->addItem(
+                        QmlItemModel::ItemData(e, libraryName, libraryName, insertIndent + e + "{ }")
+                    );
+                }
+            }
+        }
+    }
+
+    addContainer->itemModel()->updateFilters();
+
+    return addContainer;
+}
+
+void CodeQmlHandler::addProperty(int position, const QString &addText){
+    m_document->addEditingState(ProjectDocument::Palette);
+    QTextCursor cs(m_target);
+    cs.setPosition(position);
+    cs.beginEditBlock();
+    cs.insertText(addText + "\n");
+    cs.endEditBlock();
+    m_document->removeEditingState(ProjectDocument::Palette);
+
+    lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    if ( dh ){
+        dh->requestCursorPosition(position + addText.length());
+    }
+}
+
+void CodeQmlHandler::addItem(int position, const QString &addText){
+    m_document->addEditingState(ProjectDocument::Palette);
+    QTextCursor cs(m_target);
+    cs.setPosition(position);
+    cs.beginEditBlock();
+    cs.insertText(addText + "\n");
+    cs.endEditBlock();
+    m_document->removeEditingState(ProjectDocument::Palette);
+
+    lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    if (dh){
+        dh->requestCursorPosition(position + addText.length() - 1);
+    }
+}
 
 void CodeQmlHandler::newDocumentScopeReady(const QString &, lv::DocumentQmlScope::Ptr documentScope){
     m_documentScope = documentScope;
