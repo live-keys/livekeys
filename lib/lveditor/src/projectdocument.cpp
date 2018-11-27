@@ -23,6 +23,7 @@
 #include "live/codedeclaration.h"
 #include "live/coderuntimebinding.h"
 #include "live/visuallog.h"
+#include "textdocumentlayout.h"
 
 #include <QFile>
 #include <QUrl>
@@ -48,6 +49,7 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
 {
     connect(m_textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::documentContentsChanged);
     readContent();
+    m_textDocument->setDocumentLayout(new TextDocumentLayout(m_textDocument));
     m_file->setDocument(this);
 }
 
@@ -643,13 +645,9 @@ QString& ProjectDocumentBlockData::replacementString() { return m_replacementStr
 
 void ProjectDocumentBlockData::resetCollapseParams()
 {
-    if (m_collapseState != Expand) {
-        m_stateChangeFlag = true;
-        m_collapseState = NoCollapse;
-        m_numOfCollapsedLines = 0;
-        m_onCollapse = nullptr;
-        m_replacementString = QString();
-    }
+	m_stateChangeFlag = true;
+	m_collapseState = NoCollapse;
+	m_replacementString = QString();
 
 }
 

@@ -17,6 +17,7 @@ private:
     static bool before(int pos1, int num1, int pos2, int num2);
     static bool inside(int pos1, int num1, int pos2, int num2);
     static bool after(int pos1, int num1, int pos2, int num2);
+    void writeOutContentOfSections();
 
     LineSurface* myLineSurface;
     std::list<CollapsedSection*> sections;

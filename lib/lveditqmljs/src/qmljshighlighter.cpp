@@ -150,13 +150,11 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
     QList<QmlJS::Token> tokens = scanner(text, state);
     state = scanner.state();
 
-
-//    qDebug() << "highlighter triggered " << currentBlock().blockNumber();
-
     lv::ProjectDocumentBlockData *blockData =
             reinterpret_cast<lv::ProjectDocumentBlockData*>(currentBlock().userData());
     if (!blockData) {
         blockData = new lv::ProjectDocumentBlockData;
+        blockData->setCollapse(lv::ProjectDocumentBlockData::NoCollapse, &QmlJsHighlighter::collapse);
         currentBlock().setUserData(blockData);
     } else {
         blockData->resetCollapseParams();

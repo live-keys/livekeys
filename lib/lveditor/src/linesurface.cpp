@@ -17,7 +17,7 @@
 #include "textedit_p.h"
 #include "linemanager.h"
 #include "collapsedsection.h"
-
+#include "palettemanager.h"
 
 namespace lv {
 
@@ -59,6 +59,7 @@ LineSurface::LineSurface(QQuickItem *parent)
 , textEdit(nullptr), prevLineNumber(0)
 , lineNumber(0), dirtyPos(0)
 , lineManager(new LineManager)
+, updatePending(false)
 {
     setFlag(QQuickItem::ItemHasContents);
     setAcceptHoverEvents(true);
@@ -118,9 +119,28 @@ void LineSurface::textDocumentFinished()
     }
 }
 
+void LineSurface::paletteSlot(int blockNum)
+{
+    auto firstDirtyBlock = document->findBlockByNumber(blockNum);
+    document->markContentsDirty(firstDirtyBlock.position(), document->characterCount() - firstDirtyBlock.position());
+
+    polish();
+    if (isComponentComplete())
+    {
+        updateSize();
+        updateType = LineSurface::UpdatePaintNode;
+
+        update();
+    }
+}
+
 void LineSurface::setDirtyBlockPosition(int pos)
 {
-    dirtyPos = pos;
+    if (!updatePending || pos < dirtyPos)
+    {
+        updatePending = true;
+        dirtyPos = pos;
+    }
 }
 
 QColor LineSurface::color() const
@@ -163,7 +183,7 @@ void LineSurface::setComponents(lv::TextEdit* te)
 
     QObject::connect(textEdit, &TextEdit::dirtyBlockPosition, this, &LineSurface::setDirtyBlockPosition);
     QObject::connect(textEdit, &TextEdit::textDocumentFinishedUpdating, this, &LineSurface::textDocumentFinished);
-
+    QObject::connect(textEdit, &TextEdit::paletteChange, this, &LineSurface::paletteSlot);
     setAcceptedMouseButtons(Qt::AllButtons);
 }
 
@@ -243,9 +263,38 @@ void LineSurface::expandCollapseSkeleton(int pos, int num, QString &replacement,
     updateLineDocument();
 }
 
-void LineSurface::mousePressEvent(QMouseEvent* event)
+void LineSurface::writeOutBlockStates()
 {
 
+    qDebug() << "----------blockStates---------------";
+    auto it = textEdit->documentHandler()->target()->rootFrame()->begin();
+    while (it != textEdit->documentHandler()->target()->rootFrame()->end())
+    {
+        QTextBlock block = it.currentBlock();
+        lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(block.userData());
+
+        QString print(to_string(block.blockNumber()).c_str());
+        print += " : ";
+        if (userData)
+        {
+            switch (userData->collapseState())
+            {
+            case lv::ProjectDocumentBlockData::NoCollapse:
+                    print += "NoCollapse"; break;
+            case lv::ProjectDocumentBlockData::Collapse:
+                print += "Collapse"; break;
+            case lv::ProjectDocumentBlockData::Expand:
+                print += "Expand"; break;
+            }
+        } else print += "none";
+
+        qDebug() << print;
+        ++it;
+    }
+}
+
+void LineSurface::mousePressEvent(QMouseEvent* event)
+{
     // find block that was clicked
     int position = document->documentLayout()->hitTest(event->localPos(), Qt::FuzzyHit);
     QTextBlock block = document->findBlock(position);
@@ -303,7 +352,6 @@ void LineSurface::linesAdded()
     cursor.movePosition(QTextCursor::MoveOperation::End);
     for (int i = prevLineNumber + 1; i <= lineNumber; i++)
     {
-
         if (i!=1) cursor.insertBlock();
         std::string s = std::to_string(i) + "  ";
         if (i < 10) s = " " + s;
@@ -331,6 +379,7 @@ void LineSurface::linesRemoved()
 
 void LineSurface::updateLineDocument()
 {
+    updatePending = false;
     // we look for a collapsed section after the position where we made a change
     std::list<CollapsedSection*> &sections = lineManager->getSections();
     auto itSections = sections.begin();
@@ -348,10 +397,11 @@ void LineSurface::updateLineDocument()
         if (itSections != sections.end())
         {
             CollapsedSection* sec = (*itSections);
-            if (curr == sec->position && userData
-                    && userData->collapseState() == lv::ProjectDocumentBlockData::Expand)
+            if (curr == sec->position)
             {
                 changeLastCharInBlock(curr, '>');
+                userData->collapse();
+                userData->setNumOfCollapsedLines(sec->numberOfLines);
                 userData->setStateChangeFlag(false);
             }
             // if we're in a collapsed section, block shouldn't be visible
@@ -393,6 +443,7 @@ void LineSurface::updateLineDocument()
         update();
     }
 }
+
 static bool comesBefore(LineSurface::Node* n1, LineSurface::Node* n2)
 {
     return n1->startPos() < n2->startPos();
@@ -440,9 +491,9 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     TextNodeEngine engine;
     TextNodeEngine frameDecorationsEngine;
 
-    if (numberOfDigits(prevLineNumber) != numberOfDigits(lineNumber) || dirtyPos >= textNodeMap.size())
+    if (numberOfDigits(prevLineNumber) != numberOfDigits(lineNumber) || dirtyPos >= textNodeMap.size()){
         dirtyPos = 0;
-
+    }
     if (!oldNode  || dirtyPos != -1) {
 
         if (!oldNode)
@@ -515,6 +566,8 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                         if (!engine.hasContents()) {
                             nodeOffset = document->documentLayout()->blockBoundingRect(block).topLeft();
                             updateNodeTransform(node, nodeOffset);
+                            int offset = textEdit->getPaletteManager()->drawingOffset(block.blockNumber(), false);
+                            nodeOffset.setY(nodeOffset.y() - offset);
                         }
 
                         engine.addTextBlock(document, block, -nodeOffset, m_color, QColor(), -1, -1);

@@ -82,6 +82,9 @@
 #include <qstylehints.h>
 #include <qmetaobject.h>
 
+#include "textedit_p.h"
+#include "palettemanager.h"
+
 namespace lv {
 
 // ### these should come from QStyleHints
@@ -260,6 +263,83 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 
     bool visualNavigation = cursor.visualNavigation();
     cursor.setVisualNavigation(true);
+
+    auto pm = textEdit->getPaletteManager();
+    int result = pm->isLineBeforePalette(cursor.block().blockNumber());
+    if (result != 0)
+    {
+        if (cursor.atBlockEnd() &&(e == QKeySequence::MoveToNextChar || e ==  QKeySequence::MoveToNextWord || e == QKeySequence::MoveToEndOfLine))
+        {
+            for (int i = 0; i < result; ++i)
+                cursor.movePosition(QTextCursor::Down);
+            cursor.movePosition(QTextCursor::EndOfBlock);
+        }
+
+        if (cursor.atBlockEnd() && (e == QKeySequence::SelectNextChar || e == QKeySequence::SelectNextWord || e == QKeySequence::SelectEndOfLine))
+        {
+            for (int i = 0; i < result; ++i)
+            {
+                cursor.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor);
+            }
+            cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+        }
+
+        if (e == QKeySequence::MoveToNextLine)
+        {
+            for (int i = 0; i < result; ++i)
+            {
+                cursor.movePosition(QTextCursor::Down);
+            }
+        }
+
+        if (e == QKeySequence::SelectNextLine)
+        {
+            for (int i = 0; i < result; ++i)
+            {
+                cursor.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor);
+            }
+        }
+
+    }
+
+    result = pm->isLineAfterPalette(cursor.block().blockNumber());
+    if (result != 0)
+    {
+        if (cursor.atBlockStart() &&(e == QKeySequence::MoveToPreviousChar || e ==  QKeySequence::MoveToPreviousWord || e == QKeySequence::MoveToStartOfLine))
+        {
+            for (int i = 0; i < result; ++i)
+                cursor.movePosition(QTextCursor::Up);
+            cursor.movePosition(QTextCursor::StartOfBlock);
+        }
+
+        if (cursor.atBlockStart() && (e == QKeySequence::SelectPreviousChar || e == QKeySequence::SelectPreviousWord || e == QKeySequence::SelectStartOfLine))
+        {
+            for (int i = 0; i < result; ++i)
+            {
+                cursor.movePosition(QTextCursor::Up, QTextCursor::KeepAnchor);
+            }
+            cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::KeepAnchor);
+        }
+
+        if (e == QKeySequence::MoveToPreviousLine)
+        {
+            for (int i = 0; i < result; ++i)
+            {
+                cursor.movePosition(QTextCursor::Up);
+            }
+        }
+
+        if (e == QKeySequence::SelectPreviousLine)
+        {
+            for (int i = 0; i < result; ++i)
+            {
+                cursor.movePosition(QTextCursor::Up, QTextCursor::KeepAnchor);
+            }
+        }
+
+    }
+
+
     const bool moved = cursor.movePosition(op, mode);
     cursor.setVisualNavigation(visualNavigation);
 
@@ -746,6 +826,23 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
         return;
     }
 
+    // PALETTE
+    QMouseEvent *ev = nullptr;
+    if (e->type() == QEvent::MouseButtonPress || e->type() == QEvent::MouseMove ||
+            e->type() == QEvent::MouseButtonRelease || e->type() == QEvent::MouseButtonDblClick)
+    {
+        ev = static_cast<QMouseEvent *>(e);
+        QPointF mousePos = ev->localPos();
+        int oldy = mousePos.y();
+        mousePos.setY(d->textEdit->getPaletteManager()->positionOffset(oldy));
+#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+        ev->setLocalPos(mousePos);
+#else
+        ev = new QMouseEvent(ev->type(), mousePos, ev->windowPos(), ev->screenPos(), ev->button(), ev->buttons(), ev->modifiers(), ev->source());
+        e = ev;
+#endif
+    }
+
     switch (e->type()) {
         case QEvent::KeyPress:
             d->keyPressEvent(static_cast<QKeyEvent *>(e));
@@ -839,6 +936,10 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
         default:
             break;
     }
+
+#if (QT_VERSION <= QT_VERSION_CHECK(5,7,1))
+    if (ev) delete ev;
+#endif
 }
 
 bool TextControl::event(QEvent *e)
@@ -883,6 +984,19 @@ void TextControlPrivate::keyReleaseEvent(QKeyEvent *e)
 void TextControlPrivate::keyPressEvent(QKeyEvent *e)
 {
     Q_Q(TextControl);
+
+    /* PALETTE TEST
+    static int cnt = 0;
+
+    switch (cnt)
+    {
+    case 0: textEdit->linePaletteAdded(8, 9, 35, textEdit); break;
+    case 1: textEdit->linePaletteAdded(15, 17, 75, nullptr); break;
+    case 2: textEdit->linePaletteRemoved(nullptr); break;
+    case 3: textEdit->linePaletteHeightChanged(textEdit, 55); break;
+    }
+
+    cnt++;*/
 
     if (e->key() == Qt::Key_Back) {
          e->ignore();
@@ -1039,13 +1153,15 @@ QRectF TextControlPrivate::rectForPosition(int position) const
     QTextLine line = layout->lineForTextPosition(relativePos);
 
     QRectF r;
+     int offset = textEdit->getPaletteManager()->drawingOffset(block.blockNumber(), true);
 
     if (line.isValid()) {
         qreal x = line.cursorToX(relativePos);
         qreal w = 0;
-        r = QRectF(layoutPos.x() + x, layoutPos.y() + line.y(), textCursorWidth + w, line.height());
+
+        r = QRectF(layoutPos.x() + x, layoutPos.y() + line.y() + offset, textCursorWidth + w, line.height());
     } else {
-        r = QRectF(layoutPos.x(), layoutPos.y(), textCursorWidth, 10); // #### correct height
+        r = QRectF(layoutPos.x(), layoutPos.y() + offset, textCursorWidth, 10); // #### correct height
     }
 
     return r;
@@ -1783,6 +1899,12 @@ void TextControlPrivate::cancelPreedit()
     QCoreApplication::sendEvent(q->parent(), &event);
 }
 #endif // QT_NO_IM
+
+void TextControl::setTextEdit(TextEdit* te)
+{
+    Q_D(TextControl);
+    d->textEdit = te;
+}
 
 void TextControl::setTextInteractionFlags(Qt::TextInteractionFlags flags)
 {
