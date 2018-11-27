@@ -15,6 +15,8 @@
 ****************************************************************************/
 
 #include "commands.h"
+#include "live/visuallog.h"
+#include "live/visuallogqt.h"
 #include <QJSValueIterator>
 #include <QDebug>
 
@@ -22,16 +24,21 @@ namespace lv{
 
 Commands::Commands(QObject *parent)
     : QObject(parent)
-    , m_root(new Node)
 {
 }
 
 Commands::~Commands(){
-    delete m_root;
+    for ( auto it = m_commands.begin(); it != m_commands.end(); ++it ){
+        delete it.value();
+    }
 }
 
 QString Commands::dump(){
-    return m_root->recurseDump();
+    QString result;
+    for ( auto it = m_commands.begin(); it != m_commands.end(); ++it ){
+        result += it.key() + "\n";
+    }
+    return result;
 }
 
 QString Commands::add(QObject *object, const QJSValue &commands){
@@ -44,180 +51,72 @@ QString Commands::add(QObject *object, const QJSValue &commands){
         return "";
     }
 
-    QObjectList commandChain = getCommandChain(object);
-    Commands::Node* current = m_root;
-    for ( auto it = commandChain.begin(); it != commandChain.end(); ++it ){
-        current = current->add(*it);
-        if ( current == 0 )
-            return "";
-    }
+    QStringList commandChain = getCommandChain(object);
+    QString prefix = commandChain.join(".");
+
+    vlog("commmands").v() << "Adding commands for prefix: " << prefix;
 
     QJSValueIterator vit(commands);
     while( vit.hasNext() ){
         vit.next();
+
+        QString key = prefix + "." + vit.name();
+
         if ( vit.value().isCallable() ){
-            current->functions[vit.name()] = vit.value();
+
+            auto it = m_commands.find(key);
+            if ( it == m_commands.end() ){
+                Commands::Node* n = new Commands::Node;
+                n->function = vit.value();
+
+                m_commands.insert(key, n);
+            }
         } else {
-            qCritical("Non function value added: %s", qPrintable(vit.value().toString()));
+            qCritical("Non function value given for command: %s", qPrintable(key));
         }
     }
 
-    QString path = "";
-    for( auto it = commandChain.begin(); it != commandChain.end(); ++it ){
-        path += (path.isEmpty() ? "" : ".") + (*it)->objectName();
-    }
-
-    connect(object, SIGNAL(destroyed(QObject*)), this, SLOT(removeCommandsFor(QObject*)));
-
-    return path;
+    return prefix;
 }
 
 void Commands::removeCommandsFor(QObject *object){
-    QObjectList commandChain = getCommandChain(object);
+    QStringList commandChain = getCommandChain(object);
     if ( commandChain.isEmpty() )
         return;
 
-    Commands::Node* currentNode = m_root;
-    for ( auto it = commandChain.begin(); it != commandChain.end(); ++it ){
-        QObject* itob = *it;
-        if ( itob == object ){
-            currentNode->remove(itob);
-            return;
-        }
-        currentNode = currentNode->find(itob);
-        if ( !currentNode )
-            return;
-    }
-}
+    QString commandName = commandChain.join(".");
 
-void Commands::execute(const QString &command){
-    QStringList commandChain = command.split(".");
-    if ( commandChain.isEmpty() )
-        return;
-    QStringList objectChain = commandChain;
-    objectChain.removeLast();
-
-    // find commands and their object.
-    QList<QPair<Commands::Node*, bool> > base = m_root->recurseFind(objectChain, objectChain.begin());
-
-    // if it's a single command, execute it
-    if ( base.size() == 1 ){
-        base.first().first->functions[commandChain.last()].call();
-
-    // if there are more than two commands, execute the one in focus
-    } else if ( base.size() > 1 ){
-        for ( auto it = base.begin(); it != base.end(); ++it ){
-            if ( it->second == true ){
-                it->first->functions[commandChain.last()].call();
-                return;
-            }
+    auto it = m_commands.begin();
+    while ( it != m_commands.end() ){
+        if ( it.key().startsWith(commandName) ){
+            delete it.value();
+            it = m_commands.erase(it);
+        } else {
+            ++it;
         }
     }
 }
 
-QObjectList Commands::getCommandChain(QObject *object){
-    QObjectList commandChain;
+QStringList Commands::getCommandChain(QObject *object){
+    QStringList commandChain;
     while( object != 0 ){
         if ( object->objectName() != "" )
-            commandChain.prepend(object);
+            commandChain.prepend(object->objectName());
         object = object->parent();
     }
 
     return commandChain;
 }
 
-Commands::Node::~Node(){
-    for ( auto it = nodes.begin(); it != nodes.end(); ++it )
-        delete it.value();
-}
-
-Commands::Node *Commands::Node::find(QObject *object){
-    if ( object == 0 || object->objectName().isEmpty() )
-        return 0;
-
-    auto nodeit = nodes.find(object->objectName());
-
-    while (nodeit != nodes.end() && nodeit.key() == object->objectName()){
-        if ( nodeit.value()->object == object )
-            return nodeit.value();
-        ++nodeit;
-    }
-
-    return 0;
-}
-
-Commands::Node *Commands::Node::add(QObject *object){
-    if ( object->objectName().isEmpty() )
-        return 0;
-
-    Commands::Node* obj = find(object);
-    if ( obj )
-        return obj;
-
-    Commands::Node* node = new Commands::Node;
-    node->object = object;
-    nodes.insert(object->objectName(), node);
-
-    return node;
-}
-
-void Commands::Node::remove(QObject *object){
-    if ( object == 0 || object->objectName().isEmpty() )
+void Commands::execute(const QString &command){
+    auto it = m_commands.find(command);
+    if ( it != m_commands.end() ){
+        QJSValue r = it.value()->function.call();
+        if ( r.isError() ){
+            qWarning("Error executing command %s: %s", qPrintable(command), qPrintable(r.toString()));
+        }
         return;
-
-    auto nodeit = nodes.find(object->objectName());
-
-    while (nodeit != nodes.end() && nodeit.key() == object->objectName()){
-        if ( nodeit.value()->object == object ){
-            delete nodeit.value();
-            nodes.erase(nodeit);
-            return;
-        }
-        ++nodeit;
     }
-}
-
-QList<QPair<Commands::Node *, bool> > Commands::Node::recurseFind(
-        const QStringList &list,
-        QStringList::const_iterator it,
-        bool hasFocus)
-{
-    QList<QPair<Commands::Node *, bool> > base;
-
-    if ( object != 0 ){
-        QVariant focus = object->property("focus");
-        if ( focus.type() == QVariant::Bool && focus.value<bool>() == true ){
-            hasFocus = true;
-        }
-    }
-
-    auto nodeit = nodes.find(*it);
-
-    QStringList::const_iterator nextit = it;
-    ++nextit;
-
-    while (nodeit != nodes.end() && nodeit.key() == *it) {
-        if ( nextit == list.end() ){
-            base.append(QPair<Commands::Node*, bool>(nodeit.value(), hasFocus));
-        } else {
-            base.append(nodeit.value()->recurseFind(list, nextit, hasFocus));
-        }
-        ++nodeit;
-    }
-
-    return base;
-}
-
-QString Commands::Node::recurseDump(QString prefix){
-    QString base;
-    if ( object )
-        base += prefix + ":" + QString::number(functions.size()) + "\n";
-
-    for ( auto it = nodes.begin(); it != nodes.end(); ++it ){
-        base += it.value()->recurseDump(prefix + (prefix.isEmpty() ? "" : ".") + it.key());
-    }
-
-    return base;
 }
 
 }// namespace

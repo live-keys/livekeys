@@ -195,6 +195,8 @@ public:
     VisualLog::Configuration* configurationAt(const std::string& key);
     VisualLog::Configuration* configurationAt(int index);
 
+    VisualLog::Configuration* configurationAtOrGlobal(const std::string& key);
+
     int configurationCount() const;
 
 private:
@@ -250,6 +252,13 @@ VisualLog::Configuration *VisualLog::ConfigurationContainer::configurationAt(int
     return m_configurations.at(index);
 }
 
+VisualLog::Configuration *VisualLog::ConfigurationContainer::configurationAtOrGlobal(const std::string &key){
+    auto it = m_configurationMap.find(key);
+    if ( it == m_configurationMap.end() )
+        return globalConfiguration();
+    return it->second;;
+}
+
 int VisualLog::ConfigurationContainer::configurationCount() const{
     return m_configurations.size();
 }
@@ -281,7 +290,7 @@ VisualLog::VisualLog(VisualLog::MessageInfo::Level level)
 }
 
 VisualLog::VisualLog(const std::string &configurationKey)
-    : m_configuration(registeredConfigurations().configurationAt(configurationKey))
+    : m_configuration(registeredConfigurations().configurationAtOrGlobal(configurationKey))
     , m_stream(new std::stringstream)
     , m_objectOutput(false)
 {
@@ -290,7 +299,7 @@ VisualLog::VisualLog(const std::string &configurationKey)
 }
 
 VisualLog::VisualLog(const std::string &configurationKey, VisualLog::MessageInfo::Level level)
-    : m_configuration(registeredConfigurations().configurationAt(configurationKey))
+    : m_configuration(registeredConfigurations().configurationAtOrGlobal(configurationKey))
     , m_messageInfo(level)
     , m_stream(new std::stringstream)
     , m_objectOutput(false)
@@ -506,7 +515,6 @@ void VisualLog::asView(const std::string &viewPath, std::function<QVariant ()> c
 }
 
 void VisualLog::asObject(const std::string &type, const MLNode &mlvalue){
-    //TODO: Use string here
     std::string str;
     ml::toJson(mlvalue, str);
     std::string pref = prefix();

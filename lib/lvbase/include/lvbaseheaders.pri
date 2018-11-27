@@ -13,4 +13,7 @@ HEADERS += \
     $$PWD/live/mlnodetojson.h \
     $$PWD/live/visuallog.h \
     $$PWD/live/meta/indextuple.h \
-    $$PWD/live/meta/functionargs.h
+    $$PWD/live/meta/functionargs.h \
+    $$PWD/live/package.h \
+    $$PWD/live/version.h \
+    $$PWD/live/plugin.h

@@ -34,6 +34,7 @@ namespace lv{
 class TextEdit;
 class Project;
 class ViewEngine;
+class Extensions;
 
 class LivePalette;
 class LivePaletteList;
@@ -45,6 +46,7 @@ class LV_EDITOR_EXPORT DocumentHandler : public QObject, public QQmlParserStatus
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(lv::CodeCompletionModel* completionModel READ completionModel CONSTANT)
+    Q_PROPERTY(lv::AbstractCodeHandler* codeHandler     READ codeHandler     NOTIFY codeHandlerChanged)
     Q_PROPERTY(bool editorFocus                         READ editorFocus     WRITE setEditorFocus NOTIFY editorFocusChanged)
 
 public:
@@ -78,6 +80,10 @@ public:
     bool editorFocus() const;
     void setEditorFocus(bool editorFocus);
 
+    AbstractCodeHandler* codeHandler();
+
+    void requestCursorPosition(int position);
+
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
@@ -88,9 +94,10 @@ public slots:
     void updateScope();
     void bind(int position, int length, QObject* object = 0);
     void unbind(int position, int length);
-    lv::LivePaletteList *findPalettes(int position);
+    lv::LivePaletteList *findPalettes(int position, bool unrepeated = false);
     void openPalette(lv::LivePalette* palette, int position, QObject* currentApp = 0);
     void removePalette(QObject* palette);
+    int palettePosition(QObject* palette);
     void manageIndent(int from, int length, bool undo = false);
 
     lv::DocumentCursorInfo* cursorInfo(int position, int length);
@@ -110,6 +117,7 @@ signals:
     void fragmentLinesChanged(int lineStart, int lineEnd);
     void editingStateChanged(bool isEditing);
     void editorFocusChanged();
+    void codeHandlerChanged();
 
 private:
     void readContent();
@@ -127,7 +135,8 @@ private:
     QString               m_indentContent;
     LivePaletteContainer* m_paletteContainer;
     Project*              m_project;
-    ViewEngine*               m_engine;
+    Extensions*           m_extensions;
+    ViewEngine*           m_engine;
     QTimer                m_timer;
     TextEdit*             m_textEdit;
 
@@ -168,6 +177,10 @@ inline void DocumentHandler::setEditorFocus(bool editorFocus){
         return;
     m_editorFocus = editorFocus;
     emit editorFocusChanged();
+}
+
+inline AbstractCodeHandler *DocumentHandler::codeHandler(){
+    return m_codeHandler;
 }
 
 inline void DocumentHandler::setIndentSize(int size){

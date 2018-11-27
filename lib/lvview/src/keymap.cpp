@@ -18,6 +18,8 @@
 #include "live/mlnodetojson.h"
 #include <QFile>
 #include <QDir>
+#include <QJSValue>
+#include <QJSValueIterator>
 
 namespace lv{
 
@@ -83,6 +85,14 @@ void KeyMap::store(const QString &keydescription, const QString &command, bool i
     QPair<int, KeyMap::KeyCode> pkc = composeKeyCode(keydescription);
     if ( pkc.first == 0 || pkc.first == KeyMap::KEYBOARD_OS ){
         store(pkc.second, command, isDefault);
+    }
+}
+
+void KeyMap::store(const QJSValue &keyObject, bool isDefault){
+    QJSValueIterator vit(keyObject);
+    while( vit.hasNext() ){
+        vit.next();
+        store(vit.name(), vit.value().toString(), isDefault);
     }
 }
 

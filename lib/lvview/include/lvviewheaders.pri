@@ -18,4 +18,6 @@ HEADERS += \
     $$PWD/live/mlnodetoqml.h \
     $$PWD/live/viewcontext.h \
     $$PWD/live/lvviewglobal.h \
-    $$PWD/live/viewengine.h
+    $$PWD/live/viewengine.h \
+    $$PWD/live/extensions.h \
+    $$PWD/live/liveextension.h

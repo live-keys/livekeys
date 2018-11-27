@@ -42,7 +42,7 @@ public:
     };
 
 public:
-    QmlJsHighlighter(QmlJsSettings* settings, QTextDocument *parent = 0);
+    QmlJsHighlighter(QmlJsSettings* settings, DocumentHandler* handler, QTextDocument *parent = 0);
 
     void setTarget(QTextDocument* target);
 
@@ -62,7 +62,8 @@ private:
     static QSet<QString> m_knownIds;
     static QSet<QString> createKnownIds();
 
-    QmlJsSettings* m_settings;
+    DocumentHandler* m_handler;
+    QmlJsSettings*   m_settings;
 };
 
 inline void QmlJsHighlighter::setTarget(QTextDocument *target){

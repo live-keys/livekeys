@@ -18,7 +18,9 @@
 
 namespace lv{
 
-ProjectExtension::ProjectExtension(){
+ProjectExtension::ProjectExtension(QObject *parent)
+    : QObject(parent)
+{
 }
 
 ProjectExtension::~ProjectExtension(){

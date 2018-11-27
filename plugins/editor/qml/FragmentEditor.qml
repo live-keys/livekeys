@@ -29,7 +29,7 @@ Rectangle{
     signal bindProperties(int position, int length)
 
     property bool isDirtyMask: true
-    property bool isDirty: document ? document.document.isDirty : false
+    property bool isDirty: document.document ? document.document.isDirty : false
 
     property alias text: editorArea.text
     property alias font: editorArea.font

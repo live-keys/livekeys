@@ -21,6 +21,7 @@
 #include <QHash>
 #include "live/lveditorglobal.h"
 #include <QDebug>
+
 namespace lv{
 
 class ProjectDocument;

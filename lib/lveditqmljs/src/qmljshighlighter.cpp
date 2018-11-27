@@ -17,12 +17,13 @@
 #include "qmljshighlighter_p.h"
 #include "live/coderuntimebinding.h"
 #include "documentqmlvaluescanner_p.h"
-
+#include <QDebug>
 namespace lv{
 
-QmlJsHighlighter::QmlJsHighlighter(QmlJsSettings* settings, QTextDocument *parent)
+QmlJsHighlighter::QmlJsHighlighter(QmlJsSettings* settings, DocumentHandler* handler, QTextDocument *parent)
     : QSyntaxHighlighter(parent)
     , m_settings(settings)
+    , m_handler(handler)
 {
 }
 

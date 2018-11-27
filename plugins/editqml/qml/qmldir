@@ -1,0 +1,6 @@
+module editqml
+plugin editqml
+
+depends QtQuick 2.3
+
+AddQmlBox 1.0 AddQmlBox.qml
