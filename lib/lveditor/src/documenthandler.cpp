@@ -27,7 +27,12 @@
 #include "live/project.h"
 #include "live/viewengine.h"
 #include "live/visuallog.h"
+#include "live/visuallogqt.h"
 #include "live/projectextension.h"
+#include "live/livepalettelist.h"
+#include "live/livepalettecontainer.h"
+#include "live/extensions.h"
+
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QTextDocument>
@@ -36,6 +41,9 @@
 #include <QTextBlock>
 #include <QTextList>
 #include <QTimer>
+#include <QFileInfo>
+#include <QJSValue>
+#include <QJSValueList>
 
 #include "textedit_p.h"
 #include "textedit_p_p.h"
@@ -45,9 +53,6 @@ namespace lv{
 
 //TODO: Add object type on code properties
 //TODO: Add object type when looking for palettes
-//TODO: Store editor and palette state, in order to stack palettes properly
-//   * Palettes need to be stored by name and offset in document. The offset may change, so
-//     it must be acquired from the palette itself in order to receive it's updated value
 
 //TODO: Code completion model should only be visible when in focus
 
@@ -84,23 +89,16 @@ DocumentHandler::~DocumentHandler(){
     delete m_codeHandler;
 }
 
-// this shouldn't exist, should be handled in setDocument
-// management within the TextEdit
-// null pointer!!!
-// 1. setDocument method, check for null pointer
-// 2. setTextDocument for testing
-// 3. try with setting back to null
-// 4. we start moving to livecv
-//      1) everything works as before?
-//      2) switch to livecv passing the document
-//
-
 void DocumentHandler::setTextEdit(TextEdit *te)
 {
     m_textEdit = te;
     if (m_targetDoc) {
         te->setTextDocument(m_targetDoc);
     }
+}
+
+void DocumentHandler::requestCursorPosition(int position){
+    emit cursorPositionRequest(position);
 }
 
 void DocumentHandler::rehighlightBlock(const QTextBlock &block){
@@ -129,7 +127,8 @@ void DocumentHandler::componentComplete(){
         return;
     }
 
-    m_engine = static_cast<ViewEngine*>(lg->property("engine").value<lv::ViewEngine*>());
+    m_engine     = static_cast<ViewEngine*>(lg->property("engine").value<lv::ViewEngine*>());
+    m_extensions = static_cast<Extensions*>(lg->property("extensions").value<QQmlPropertyMap*>()->parent());
 
     findCodeHandler();
 }
@@ -208,6 +207,7 @@ void DocumentHandler::commitEdit(){
 }
 
 void DocumentHandler::cancelEdit(){
+
     if ( m_editingFragment ){
         m_projectDocument->removeSection(m_editingFragment->declaration()->m_section);
         delete m_editingFragment;
@@ -252,14 +252,38 @@ void DocumentHandler::updateFragments(){
 }
 
 void DocumentHandler::findCodeHandler(){
+
     if ( m_project && m_engine && m_projectDocument ){
-        for ( auto it = m_project->extensions().begin(); it != m_project->extensions().end(); ++it ){
-            lv::ProjectExtension* ext = *it;
-            m_codeHandler = ext->createHandler(m_projectDocument, m_project, m_engine, this);
-            if ( m_codeHandler ){
-                m_codeHandler->setTarget(m_targetDoc);
-                m_codeHandler->setDocument(m_projectDocument);
-                return;
+        vlog("editor-documenthandler").v() << "Looking up language handler for: " << m_projectDocument->file()->path();
+
+        QString fileExtension = QFileInfo(m_projectDocument->file()->path()).suffix();
+
+        QJSValueList interceptorArgs;
+        interceptorArgs << m_engine->engine()->newQObject(m_projectDocument);
+        interceptorArgs << m_engine->engine()->newQObject(this);
+        interceptorArgs << fileExtension;
+        QQmlEngine::setObjectOwnership(m_projectDocument, QQmlEngine::CppOwnership);
+        QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+
+        for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
+            LiveExtension* le = it.value();
+            if ( le->hasLanguageInterceptor() ){
+                QObject* o = le->callLanguageInterceptor(interceptorArgs);
+
+                AbstractCodeHandler* ach = qobject_cast<AbstractCodeHandler*>(o);
+                if ( ach ){
+
+                    vlog("editor-documenthandler").v() << "Found in extension: " << le->name();
+
+                    QQmlEngine::setObjectOwnership(ach, QQmlEngine::CppOwnership);
+                    m_codeHandler = ach;
+                    m_codeHandler->setTarget(m_targetDoc);
+                    m_codeHandler->setDocument(m_projectDocument);
+
+                    emit codeHandlerChanged();
+
+                    return;
+                }
             }
         }
     }
@@ -343,6 +367,17 @@ void DocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
 void DocumentHandler::setDocument(ProjectDocument *document, QJSValue options){
     cancelEdit();
     if ( m_projectDocument ){
+        auto it = m_palettes.begin();
+        while( it != m_palettes.end() ){
+            DocumentEditFragment* palette = *it;
+            LivePalette* pl = static_cast<LivePalette*>(palette->converter());
+            emit paletteAboutToRemove(pl);
+
+            m_projectDocument->removeSection(palette->declaration()->m_section);
+            it = m_palettes.erase(it);
+            delete palette;
+        }
+
         m_projectDocument->assignDocumentHandler(nullptr);
         disconnect(m_projectDocument, SIGNAL(contentChanged()), this, SLOT(documentUpdatedContent()));
     }
@@ -556,7 +591,7 @@ bool DocumentHandler::edit(int position, QObject *currentApp){
     }
 }
 
-LivePaletteList* DocumentHandler::findPalettes(int position){
+LivePaletteList* DocumentHandler::findPalettes(int position, bool unrepeated){
     if ( !m_projectDocument || !m_codeHandler )
         return nullptr;
 
@@ -571,7 +606,26 @@ LivePaletteList* DocumentHandler::findPalettes(int position){
 
     CodeDeclaration::Ptr declaration = properties.first();
 
-    return m_paletteContainer->findPalettes(declaration->type());
+    LivePaletteList* lpl = m_paletteContainer->findPalettes(declaration->type());
+    lpl->setPosition(declaration->position());
+    if ( unrepeated ){
+        for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
+            DocumentEditFragment* storedPalette = *it;
+            if ( storedPalette->declaration()->position() < declaration->position() ){
+                break;
+            } else if ( storedPalette->declaration()->position() == declaration->position() ){
+                LivePalette* loadedPalette = static_cast<LivePalette*>(storedPalette->converter());
+                for ( int i = 0; i < lpl->size(); ++i ){
+                    LivePaletteLoader* loader = lpl->loaderAt(i);
+                    if ( LivePaletteContainer::palettePath(loader) == loadedPalette->path() ){
+                        lpl->remove(loader);
+                    }
+                }
+            }
+
+        }
+    }
+    return lpl;
 }
 
 void DocumentHandler::openPalette(lv::LivePalette* palette, int position, QObject *currentApp){
@@ -666,6 +720,24 @@ void DocumentHandler::removePalette(QObject *paletteContainer){
 
         ++it;
     }
+}
+
+int DocumentHandler::palettePosition(QObject *paletteContainer){
+    auto it = m_palettes.begin();
+
+    while( it != m_palettes.end() ){
+
+        DocumentEditFragment* itPalette = *it;
+        LivePalette* lp = static_cast<LivePalette*>(itPalette->converter());
+
+        if ( lp->item() == paletteContainer ){
+            return itPalette->declaration()->position();
+        }
+
+        ++it;
+    }
+
+    return -1;
 }
 
 void DocumentHandler::manageIndent(int from, int length, bool undo){

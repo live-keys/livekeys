@@ -5,7 +5,6 @@ INCLUDEPATH += $$PWD \
 
 QT      += qml quick quick-private qml-private
 
-
 HEADERS += \
     $$PWD/livecv.h \
     $$PWD/livecvarguments.h \

@@ -42,6 +42,8 @@ ApplicationWindow{
         createTimer: createTimer
         paletteBoxFactory: editorBoxFactory
         editSpace: editSpace
+        activePane : null
+        activeItem : null
     }
 
     property bool documentsReloaded : false
@@ -290,10 +292,13 @@ ApplicationWindow{
 
         Editor{
             id: editorComponent
-            height: parent.height
+            height: parent ? parent.height : 0
             width: 400
             windowControls: controls
-            onInternalActiveFocusChanged: if ( internalActiveFocus ) projectView.setFocusEditor(editorComponent)
+            onInternalActiveFocusChanged: if ( internalActiveFocus ) {
+                root.controls.setActiveItem(editorComponent.textEdit, editorComponent)
+                projectView.setFocusEditor(editorComponent)
+            }
 
             Component.onCompleted: {
                 projectView.setFocusEditor(editorComponent)
@@ -310,10 +315,13 @@ ApplicationWindow{
 
         FragmentEditor{
             id: fragmentEditorComponent
-            height: parent.height
+            height: parent ? parent.height : 0
             width: 400
             windowControls: controls
-            onInternalActiveFocusChanged: if ( internalActiveFocus ) projectView.setFocusEditor(fragmentEditorComponent)
+            onInternalActiveFocusChanged: if ( internalActiveFocus ){
+                root.controls.setActiveItem(fragmentEditorComponent.textEdit, fragmentEditorComponent)
+                projectView.setFocusEditor(fragmentEditorComponent)
+            }
 
             Component.onCompleted: {
                 projectView.setFocusEditor(fragmentEditorComponent)
@@ -337,8 +345,16 @@ ApplicationWindow{
             property int left: 3
         }
 
-        function createPalette(){
+        function createEmptyEditorBox(){
             return editorBoxFactory.createObject(contentWrap)
+        }
+
+        function createPaletteBoxContainer(){
+            return paletteBoxContainerFactory.createObject(contentWrap)
+        }
+
+        function createPaletteBox(container){
+            return paletteBoxFactory.createObject(container)
         }
 
         function createPaletteList(){
@@ -362,16 +378,16 @@ ApplicationWindow{
         id: editorBoxFactory
 
         Rectangle{
-            id: paletteBoxComponent
+            id: editorBoxComponent
             x: 0
             y: visible ? 0 : 20
-            width: paletteItem ? paletteItem.width + 10: 0
-            height: paletteItem ? paletteItem.height + 10 : 0
-            visible: children.length > 0
+            width: child ? child.width + 10: 0
+            height: child ? child.height + 10 : 0
+            visible: false
             opacity: visible ? 1 : 0
 
-            property Item paletteItem : null
-            children: paletteItem ? [paletteItem] : []
+            property Item child : null
+            children: child ? [child] : []
 
             Behavior on opacity{
                 NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
@@ -385,6 +401,66 @@ ApplicationWindow{
                 NumberAnimation{ duration: 200; easing.type: Easing.OutCubic; }
             }
 
+            function disableMoveBehavior(){
+                moveXBehavior.enabled = false
+                moveYBehavior.enabled = false
+            }
+
+            function updatePlacement(aroundRectangle, editorPosition, relativePlacement){
+                if ( relativePlacement === 0 || relativePlacement === 2 ){
+                    visible = false
+                    moveXBehavior.enabled = false
+                    moveYBehavior.enabled = false
+
+                    var startY = editorPosition.y + aroundRectangle.y + 38
+
+                    editorBoxComponent.x = editorPosition.x + aroundRectangle.x + 7
+                    editorBoxComponent.y = startY - aroundRectangle.y / 2
+
+                    visible = true
+
+                    var newX = editorBoxComponent.x - editorBoxComponent.width / 2
+                    var maxX = contentWrap.width - editorBoxComponent.width
+                    editorBoxComponent.x = newX < 0 ? 0 : (newX > maxX ? maxX : newX)
+
+                    var upY = startY - editorBoxComponent.height
+                    var downY = startY + aroundRectangle.height + 5
+
+                    if ( relativePlacement === 0 ){ // top placement
+                        editorBoxComponent.y = upY > 0 ? upY : downY
+                    } else { // bottom placement
+                        editorBoxComponent.y = downY + editorBoxComponent.height < contentWrap.height ? downY : upY
+                    }
+                    moveYBehavior.enabled = true
+
+                } else {
+                    visible = false
+                    moveXBehavior.enabled = false
+                    moveYBehavior.enabled = false
+
+                    var startX = editorPosition.x + aroundRectangle.x + 5
+
+                    editorBoxComponent.x = startX - aroundRectangle.x / 2
+                    editorBoxComponent.y = editorPosition.y + aroundRectangle.y + 38
+
+                    visible = true
+
+                    var newY = editorBoxComponent.y - editorBoxComponent.height / 2
+                    var maxY = contentWrap.height - editorBoxComponent.height
+                    editorBoxComponent.y = newY < 0 ? 0 : (newY > maxY ? maxY : newY)
+
+                    var upX = startX - editorBoxComponent.width
+                    var downX = startX + aroundRectangle.width + 5
+
+                    if ( relativePlacement === 1 ){ // right placement
+                        editorBoxComponent.x = upX > 0 ? upX : downX
+                    } else { // left placement
+                        editorBoxComponent.x = downX + editorBoxComponent.width < contentWrap.width ? downX : upX
+                    }
+                    moveXBehavior.enabled = true
+                }
+            }
+
             function setChild(item, aroundRectangle, editorPosition, relativePlacement){
                 if ( relativePlacement === 0 || relativePlacement === 2 ){
                     moveXBehavior.enabled = false
@@ -392,24 +468,25 @@ ApplicationWindow{
 
                     var startY = editorPosition.y + aroundRectangle.y + 38
 
-                    paletteBoxComponent.x = editorPosition.x + aroundRectangle.x + 7
-                    paletteBoxComponent.y = startY - aroundRectangle.y / 2
+                    editorBoxComponent.x = editorPosition.x + aroundRectangle.x + 7
+                    editorBoxComponent.y = startY - aroundRectangle.y / 2
 
-                    paletteBoxComponent.paletteItem = item
+                    editorBoxComponent.child = item
 
                     moveYBehavior.enabled = true
+                    visible = true
 
-                    var newX = paletteBoxComponent.x - paletteBoxComponent.width / 2
-                    var maxX = contentWrap.width - paletteBoxComponent.width
-                    paletteBoxComponent.x = newX < 0 ? 0 : (newX > maxX ? maxX : newX)
+                    var newX = editorBoxComponent.x - editorBoxComponent.width / 2
+                    var maxX = contentWrap.width - editorBoxComponent.width
+                    editorBoxComponent.x = newX < 0 ? 0 : (newX > maxX ? maxX : newX)
 
-                    var upY = startY - paletteBoxComponent.height
+                    var upY = startY - editorBoxComponent.height
                     var downY = startY + aroundRectangle.height + 5
 
                     if ( relativePlacement === 0 ){ // top placement
-                        paletteBoxComponent.y = upY > 0 ? upY : downY
+                        editorBoxComponent.y = upY > 0 ? upY : downY
                     } else { // bottom placement
-                        paletteBoxComponent.y = downY + paletteBoxComponent.height < contentWrap.height ? downY : upY
+                        editorBoxComponent.y = downY + editorBoxComponent.height < contentWrap.height ? downY : upY
                     }
 
                 } else {
@@ -418,26 +495,278 @@ ApplicationWindow{
 
                     var startX = editorPosition.x + aroundRectangle.x + 5
 
-                    paletteBoxComponent.x = startX - aroundRectangle.x / 2
-                    paletteBoxComponent.y = editorPosition.y + aroundRectangle.y + 38
+                    editorBoxComponent.x = startX - aroundRectangle.x / 2
+                    editorBoxComponent.y = editorPosition.y + aroundRectangle.y + 38
 
-                    paletteBoxComponent.paletteItem = item
+                    editorBoxComponent.child = item
 
                     moveXBehavior.enabled = true
+                    visible = true
 
-                    var newY = paletteBoxComponent.y - paletteBoxComponent.height / 2
-                    var maxY = contentWrap.height - paletteBoxComponent.height
-                    paletteBoxComponent.y = newY < 0 ? 0 : (newY > maxY ? maxY : newY)
+                    var newY = editorBoxComponent.y - editorBoxComponent.height / 2
+                    var maxY = contentWrap.height - editorBoxComponent.height
+                    editorBoxComponent.y = newY < 0 ? 0 : (newY > maxY ? maxY : newY)
 
-                    var upX = startX - paletteBoxComponent.width
+                    var upX = startX - editorBoxComponent.width
                     var downX = startX + aroundRectangle.width + 5
 
                     if ( relativePlacement === 1 ){ // right placement
-                        paletteBoxComponent.x = upX > 0 ? upX : downX
+                        editorBoxComponent.x = upX > 0 ? upX : downX
                     } else { // left placement
-                        paletteBoxComponent.x = downX + paletteBoxComponent.width < contentWrap.width ? downX : upX
+                        editorBoxComponent.x = downX + editorBoxComponent.width < contentWrap.width ? downX : upX
                     }
                 }
+            }
+        }
+    }
+
+    Component{
+        id: paletteBoxContainerFactory
+
+        Column{
+            id: paletteBoxContainer
+            spacing: 20
+            width: {
+                var maxWidth = 0;
+                if ( children.length > 0 ){
+                    for ( var i = 0; i < children.length; ++i ){
+                        if ( children[i].width > maxWidth )
+                            maxWidth = children[i].width
+                    }
+                }
+                return maxWidth
+            }
+            height: {
+                var totalHeight = 0;
+                if ( children.length > 0 ){
+                    for ( var i = 0; i < children.length; ++i ){
+                        totalHeight += children[i].height
+                    }
+                }
+                if ( children.length > 1 )
+                    return totalHeight + (children.length - 1) * spacing
+                else
+                    return totalHeight
+            }
+        }
+    }
+
+    Component{
+        id: paletteBoxFactory
+
+        Item{
+            id: paletteBox
+            width: child ? child.width + 10 : 0
+            height: child ? child.height + 25 : 0
+
+            property Item child : null
+
+            property string name : ''
+            property string type : ''
+            property var cursorRectangle : null
+            property var editorPosition : null
+
+            property bool hasComposition : false
+
+            property DocumentHandler codeHandler : null
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: paletteBox.child.forceActiveFocus()
+            }
+
+            Item{
+                id: paletteBoxHeader
+                height: 24
+                width: paletteBox.parent ? paletteBox.parent.width : paletteBox.width
+
+                MouseArea{
+                    id: paletteBoxMoveArea
+                    anchors.fill: parent
+                    cursorShape: Qt.SizeAllCursor
+                    property point lastMousePos : Qt.point(0, 0)
+                    onPressed: {
+                        paletteBox.parent.parent.disableMoveBehavior()
+                        lastMousePos = paletteBoxMoveArea.mapToGlobal(mouse.x, mouse.y)
+                    }
+                    onPositionChanged: {
+                        if ( mouse.buttons & Qt.LeftButton ){
+                            var currentMousePos = paletteBoxMoveArea.mapToGlobal(mouse.x, mouse.y)
+                            var deltaX = currentMousePos.x - lastMousePos.x
+                            var deltaY = currentMousePos.y - lastMousePos.y
+                            paletteBox.parent.parent.x += deltaX
+                            paletteBox.parent.parent.y += deltaY
+                            lastMousePos = currentMousePos
+                        }
+                    }
+                }
+
+                Item{
+                    anchors.left: parent.left
+                    anchors.leftMargin: 5
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 15
+                    height: 20
+                    Image{
+                        anchors.centerIn: parent
+                        source: "qrc:/images/palette-swap.png"
+                    }
+                    MouseArea{
+                        id: paletteSwapMouse
+                        anchors.fill: parent
+                        onClicked: {
+                            var palettePosition = codeHandler.palettePosition(child)
+                            var palettes = codeHandler.findPalettes(palettePosition, true)
+                            if (palettes.size() ){
+                                paletteHeaderList.forceActiveFocus()
+                                paletteHeaderList.model = palettes
+                                paletteHeaderList.cancelledHandler = function(){
+                                    paletteHeaderList.focus = false
+                                    paletteHeaderList.model = null
+                                }
+                                paletteHeaderList.selectedHandler = function(index){
+                                    paletteHeaderList.focus = false
+                                    paletteHeaderList.model = null
+
+                                    codeHandler.removePalette(paletteBox.child)
+
+                                    var palette = palettes.loadAt(index)
+                                    codeHandler.openPalette(palette, palettePosition, root.controls.runSpace.item)
+
+                                    paletteBox.child = palette.item
+                                    paletteBox.name = palette.name
+                                    paletteBox.type = palette.type
+                                    paletteBox.parent.parent.updatePlacement(
+                                        paletteBox.cursorRectangle, paletteBox.editorPosition, editSpace.placement.top
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                Item{
+                    anchors.left: parent.left
+                    anchors.leftMargin: 25
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 15
+                    height: 20
+                    Image{
+                        anchors.centerIn: parent
+                        source: "qrc:/images/palette-add.png"
+                    }
+                    MouseArea{
+                        id: paletteAddMouse
+                        anchors.fill: parent
+                        onClicked: {
+                            var palettePosition = codeHandler.palettePosition(child)
+                            var palettes = codeHandler.findPalettes(palettePosition, true)
+                            if (palettes.size() ){
+                                paletteHeaderList.forceActiveFocus()
+                                paletteHeaderList.model = palettes
+                                paletteHeaderList.cancelledHandler = function(){
+                                    paletteHeaderList.focus = false
+                                    paletteHeaderList.model = null
+                                }
+                                paletteHeaderList.selectedHandler = function(index){
+                                    paletteHeaderList.focus = false
+                                    paletteHeaderList.model = null
+
+                                    var palette = palettes.loadAt(index)
+                                    codeHandler.openPalette(palette, palettePosition, root.controls.runSpace.item)
+
+                                    var newPaletteBox = root.controls.editSpace.createPaletteBox(paletteBox.parent)
+
+                                    palette.item.x = 5
+                                    palette.item.y = 7
+
+                                    newPaletteBox.child = palette.item
+                                    newPaletteBox.name = palette.name
+                                    newPaletteBox.type = palette.type
+                                    newPaletteBox.codeHandler = codeHandler
+                                    newPaletteBox.cursorRectangle = paletteBox.cursorRectangle
+                                    newPaletteBox.editorPosition = paletteBox.editorPosition
+                                    paletteBox.parent.parent.updatePlacement(
+                                        paletteBox.cursorRectangle, paletteBox.editorPosition, editSpace.placement.top
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Text{
+                    anchors.left: parent.left
+                    anchors.leftMargin: 50
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: paletteBox.type + ' - ' + paletteBox.name
+                    color: '#82909b'
+                }
+
+                Item{
+                    anchors.right: parent.right
+                    anchors.rightMargin: 25
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 15
+                    height: 20
+                    visible: paletteBox.hasComposition
+                    Image{
+                        anchors.centerIn: parent
+                        source: "qrc:/images/palette-add-property.png"
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+    //                        onClicked: listView.open()
+                    }
+                }
+                Item{
+                    anchors.right: parent.right
+                    anchors.rightMargin: 0
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 15
+                    height: 20
+                    Text{
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: 'x'
+                        color: '#ffffff'
+                    }
+                    MouseArea{
+                        id: paletteComposeArea
+                        anchors.fill: parent
+                        onClicked: {
+                            codeHandler.removePalette(child)
+                        }
+                    }
+                }
+
+
+
+            }
+
+            Item{
+                anchors.fill: parent
+                anchors.topMargin: 25
+                children: parent.child ? [parent.child] : []
+            }
+
+
+            PaletteList{
+                id: paletteHeaderList
+                visible: model ? true : false
+                anchors.top: parent.top
+                anchors.topMargin: 24
+                width: parent.width
+                color: "#0a141c"
+                selectionColor: "#0d2639"
+                fontSize: 10
+                fontFamily: "Open Sans, sans-serif"
+                onFocusChanged : if ( !focus ) model = null
+
+                property var selectedHandler : function(){}
+                property var cancelledHandler : function(index){}
+
+                onPaletteSelected: selectedHandler(index)
+                onCancelled : cancelledHandler()
+
             }
         }
     }
@@ -626,7 +955,10 @@ ApplicationWindow{
                     width: 400
                     visible : !livecv.settings.launchMode
                     windowControls: controls
-                    onInternalActiveFocusChanged: if ( internalFocus ) projectView.focusEditor = editor
+                    onInternalActiveFocusChanged: if ( internalFocus ) {
+                        root.controls.setActiveItem(editor.textEdit, editor)
+                        projectView.focusEditor = editor
+                    }
 
                     Component.onCompleted: {
                         projectView.focusEditor = editor
@@ -640,6 +972,7 @@ ApplicationWindow{
                 Rectangle{
                     id : viewer
                     height : parent.height
+                    objectName: "viewer"
 
                     color : "#000509"
 

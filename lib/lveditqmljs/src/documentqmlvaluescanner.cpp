@@ -179,6 +179,7 @@ int DocumentQmlValueScanner::getBlockStart(int position){
         return 0;
 
     int state = 0;
+    int nestingDepth = 0;
     while(true){
         int blockState = block.userState();
         if ( blockState < 0 ){
@@ -188,11 +189,23 @@ int DocumentQmlValueScanner::getBlockStart(int position){
         }
 
         QList<QmlJS::Token> tokens = m_scanner(block.text(), state);
-        for ( auto it = tokens.rbegin(); it != tokens.rend(); ++it ){
-            if ( it->is(QmlJS::Token::LeftBrace) ){
-                int startPosition = block.position() + it->offset;
-                if ( startPosition <= position )
-                    return startPosition;
+        for ( auto it = tokens.begin(); it != tokens.end(); ++it ){
+            int tokenPosition = block.position() + it->offset;
+
+            if ( it->is(QmlJS::Token::LeftBrace) ||
+                 it->is(QmlJS::Token::LeftParenthesis) ||
+                 it->is(QmlJS::Token::LeftBracket ) )
+            {
+                if ( tokenPosition > position )
+                    --nestingDepth;
+                if ( nestingDepth == 0 ){
+                    return tokenPosition;
+                }
+            } else if ( it->is(QmlJS::Token::RightBrace ) ||
+                        it->is(QmlJS::Token::RightBracket) ||
+                        it->is(QmlJS::Token::RightParenthesis) )
+            {
+                ++nestingDepth;
             }
         }
 
@@ -201,6 +214,7 @@ int DocumentQmlValueScanner::getBlockStart(int position){
             return 0;
         }
     }
+
     return 0;
 }
 

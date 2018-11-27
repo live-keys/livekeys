@@ -10,6 +10,36 @@ QtObject{
     property QtObject runSpace: null
     property Item editSpace: null
     property Timer createTimer: null
-//    property Item paletteBox: null
     property Component paletteBoxFactory: null
+    property Item activePane : null
+    property Item activeItem : null
+
+    function setActiveItem(item, pane){
+        activeItem = item
+        var p = pane ? pane : item
+        while ( p !== null ){
+            if ( p.objectName === 'editor' || p.objectName === 'project' || p.objectName === 'viewer' ){
+                activePane = p
+                return
+            }
+            p = p.parent
+        }
+    }
+
+    function activateItem(item, pane){
+        if ( activeItem && activeItem !== item ){
+            activeItem.focus = false
+        }
+
+        activeItem = item
+        activeItem.forceActiveFocus()
+        var p = pane ? pane : item
+        while ( p !== null ){
+            if ( p.objectName === 'editor' || p.objectName === 'project' || p.objectName === 'viewer' ){
+                activePane = p
+                return
+            }
+            p = p.parent
+        }
+    }
 }

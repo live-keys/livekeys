@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "live/livepalette.h"
+#include <QFileInfo>
 
 namespace lv{
 
@@ -40,6 +41,10 @@ void LivePalette::setValueFromCode(const QVariant &value){
     m_value = value;
     emit init(value);
     m_codeChange = false;
+}
+
+QString LivePalette::name() const{
+    return QFileInfo(m_path).baseName();
 }
 
 }// namespace

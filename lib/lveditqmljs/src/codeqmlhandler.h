@@ -26,6 +26,7 @@
 #include "live/lockedfileiosession.h"
 #include "live/viewengine.h"
 #include "live/settings.h"
+#include "live/qmladdcontainer.h"
 
 #include <QTextCursor>
 
@@ -52,7 +53,7 @@ public:
         Project* project,
         QmlJsSettings *settings,
         ProjectQmlExtension* projectHandler,
-        QObject* parent = 0
+        DocumentHandler* handler = 0
     );
     ~CodeQmlHandler();
 
@@ -81,6 +82,9 @@ public:
     QmlJsSettings* settings();
 
 public slots:
+    lv::QmlAddContainer* getAddOptions(int position);
+    void addProperty(int position, const QString& addText);
+    void addItem(int position, const QString& text);
     void newDocumentScopeReady(const QString& path, DocumentQmlScope::Ptr documentScope);
     void newProjectScopeReady();
 

@@ -6,6 +6,7 @@ namespace lv{
 
 LivePaletteList::LivePaletteList(LivePaletteContainer *container, QObject *parent)
     : QAbstractListModel(parent)
+    , m_position(-1)
     , m_paletteContainer(container)
 {
 

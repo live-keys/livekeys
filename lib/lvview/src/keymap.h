@@ -17,9 +17,11 @@
 #ifndef LVKEYMAP_H
 #define LVKEYMAP_H
 
+#include "live/lvviewglobal.h"
+
 #include <QObject>
 #include <QMap>
-#include "live/lvviewglobal.h"
+#include <QJSValue>
 
 namespace lv{
 
@@ -64,6 +66,7 @@ public:
     QString locateCommand(KeyCode key);
     void store(KeyCode key, const QString& command, bool isDefault = true);
     void store(const QString& keydescription, const QString& command, bool isDefault = true);
+    void store(const QJSValue &keyObject, bool isDefault = true);
     void store(quint32 os, quint32 key, quint32 localModifer, const QString& command, bool isDefault = true);
 
 public slots:

@@ -30,6 +30,7 @@ class LV_EDITOR_EXPORT LivePalette : public CodeConverter{
     Q_OBJECT
     Q_PROPERTY(QQuickItem* item READ item  WRITE setItem  NOTIFY itemChanged)
     Q_PROPERTY(QVariant value   READ value WRITE setValue NOTIFY valueChanged)
+    Q_PROPERTY(QString name     READ name CONSTANT)
 
 public:
     explicit LivePalette(QObject *parent = 0);
@@ -43,6 +44,8 @@ public:
 
     void initPallete(const QVariant &value);
     void setValueFromCode(const QVariant& value);
+
+    QString name() const;
 
     void setPath(const QString& path);
     const QString &path() const;

@@ -23,7 +23,10 @@ HEADERS += \
     $$PWD/lveditqmljsglobal.h \
     $$PWD/projectqmlextension.h \
     $$PWD/projectqmlscanmonitor_p.h \
-    $$PWD/qmljsbuiltintypes_p.h
+    $$PWD/qmljsbuiltintypes_p.h \
+    $$PWD/qmlpropertymodel.h \
+    $$PWD/qmlitemmodel.h \
+    $$PWD/qmladdcontainer.h
 
 SOURCES += \
     $$PWD/documentqmlinfo.cpp \
@@ -45,4 +48,7 @@ SOURCES += \
     $$PWD/codeqmlhandler.cpp \
     $$PWD/projectqmlextension.cpp \
     $$PWD/projectqmlscanmonitor.cpp \
-    $$PWD/qmljsbuiltintypes.cpp
+    $$PWD/qmljsbuiltintypes.cpp \
+    $$PWD/qmlpropertymodel.cpp \
+    $$PWD/qmlitemmodel.cpp \
+    $$PWD/qmladdcontainer.cpp

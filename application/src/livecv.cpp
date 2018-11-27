@@ -19,6 +19,7 @@
 #include "livecvscript.h"
 #include "commands.h"
 #include "environment.h"
+#include "live/extensions.h"
 
 #include "live/keymap.h"
 #include "live/visuallog.h"
@@ -31,6 +32,7 @@
 #include "live/settings.h"
 #include "live/applicationcontext.h"
 #include "live/viewcontext.h"
+#include "live/liveextension.h"
 
 #include "live/editorprivate_plugin.h"
 #include "live/project.h"
@@ -47,6 +49,8 @@
 #include <QDir>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QJSValue>
+#include <QJSValueIterator>
 #include <QQuickWindow>
 #include <QGuiApplication>
 
@@ -60,10 +64,11 @@ LiveCV::LiveCV(QObject *parent)
     , m_codeInterface(0)
     , m_dir(QString::fromStdString(ApplicationContext::instance().applicationPath()))
     , m_project(new Project)
-    , m_settings(0)
-    , m_script(0)
+    , m_settings(nullptr)
+    , m_script(nullptr)
     , m_commands(new Commands)
-    , m_keymap(0)
+    , m_keymap(nullptr)
+    , m_extensions(nullptr)
     , m_log(0)
     , m_vlog(new VisualLogQmlObject) // js ownership
     , m_windowControls(0)
@@ -117,6 +122,8 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
     livecv->m_keymap = new KeyMap(livecv->m_settings->path());
     livecv->m_settings->addConfigFile("keymap", livecv->m_keymap);
 
+    livecv->m_extensions = new Extensions(livecv->m_engine, livecv->m_settings->path());
+    livecv->m_settings->addConfigFile("extensions", livecv->m_extensions);
 
     return livecv;
 }
@@ -219,7 +226,13 @@ void LiveCV::loadInternalPlugins(){
     ep.registerTypes("editor.private");
     ep.initializeEngine(m_engine->engine(), "editor.private");
 
-    m_project->addExtension(new ProjectQmlExtension(m_settings, m_project, m_engine));
+    m_extensions->loadExtensions();
+    for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
+        LiveExtension* le = it.value();
+        m_commands->add(le, le->commands());
+        m_keymap->store(le->keyBindings());
+    }
+
 }
 
 QByteArray LiveCV::extractPluginInfo(const QString &import) const{
@@ -237,6 +250,12 @@ QByteArray LiveCV::extractPluginInfo(const QString &import) const{
     return extractor->result();
 }
 
+QQmlPropertyMap *LiveCV::extensions(){
+    if ( m_extensions )
+        return m_extensions->globals();
+    return nullptr;
+}
+
 QObject *LiveCV::windowControls() const{
     if ( !m_windowControls ){
         QList<QObject*> rootObjects = static_cast<QQmlApplicationEngine*>(m_engine->engine())->rootObjects();
@@ -247,6 +266,39 @@ QObject *LiveCV::windowControls() const{
         }
     }
     return m_windowControls;
+}
+
+QJSValue LiveCV::interceptMenu(QJSValue context){
+
+    QJSValueList interceptorArgs;
+    interceptorArgs << context;
+
+    QJSValueList result;
+
+    for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
+        LiveExtension* le = it.value();
+        if ( le->hasMenuInterceptor() ){
+            QJSValue v = le->callMenuInterceptor(interceptorArgs);
+            if ( v.isArray() ){
+                QJSValueIterator it(v);
+                while ( it.hasNext() ){
+                    it.next();
+                    if ( it.name() != "length" ){
+                        result << it.value();
+                    }
+                }
+            }
+        }
+    }
+
+    QJSValue concat = m_engine->engine()->newArray(result.length());
+    int index = 0;
+    for ( auto it = result.begin(); it != result.end(); ++it ){
+        concat.setProperty(index, *it);
+        ++index;
+    }
+
+    return concat;
 }
 
 }// namespace
