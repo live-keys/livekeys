@@ -102,7 +102,7 @@ private:
     int dirtyPos;
     int deltaLineNumber;
     LineManager *lineManager;
-
+    bool updatePending;
 protected:
     // mouse filter?
     void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;

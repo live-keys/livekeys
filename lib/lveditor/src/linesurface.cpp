@@ -59,6 +59,7 @@ LineSurface::LineSurface(QQuickItem *parent)
 , textEdit(nullptr), prevLineNumber(0)
 , lineNumber(0), dirtyPos(0)
 , lineManager(new LineManager)
+, updatePending(false)
 {
     setFlag(QQuickItem::ItemHasContents);
     setAcceptHoverEvents(true);
@@ -135,7 +136,11 @@ void LineSurface::paletteSlot(int blockNum)
 
 void LineSurface::setDirtyBlockPosition(int pos)
 {
-    dirtyPos = pos;
+    if (!updatePending || pos < dirtyPos)
+    {
+        updatePending = true;
+        dirtyPos = pos;
+    }
 }
 
 QColor LineSurface::color() const
@@ -374,6 +379,7 @@ void LineSurface::linesRemoved()
 
 void LineSurface::updateLineDocument()
 {
+    updatePending = false;
     // we look for a collapsed section after the position where we made a change
     std::list<CollapsedSection*> &sections = lineManager->getSections();
     auto itSections = sections.begin();
@@ -395,6 +401,7 @@ void LineSurface::updateLineDocument()
             {
                 changeLastCharInBlock(curr, '>');
                 userData->collapse();
+                userData->setNumOfCollapsedLines(sec->numberOfLines);
                 userData->setStateChangeFlag(false);
             }
             // if we're in a collapsed section, block shouldn't be visible
@@ -484,9 +491,9 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     TextNodeEngine engine;
     TextNodeEngine frameDecorationsEngine;
 
-    if (numberOfDigits(prevLineNumber) != numberOfDigits(lineNumber) || dirtyPos >= textNodeMap.size())
+    if (numberOfDigits(prevLineNumber) != numberOfDigits(lineNumber) || dirtyPos >= textNodeMap.size()){
         dirtyPos = 0;
-
+    }
     if (!oldNode  || dirtyPos != -1) {
 
         if (!oldNode)

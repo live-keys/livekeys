@@ -154,6 +154,7 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
             reinterpret_cast<lv::ProjectDocumentBlockData*>(currentBlock().userData());
     if (!blockData) {
         blockData = new lv::ProjectDocumentBlockData;
+        blockData->setCollapse(lv::ProjectDocumentBlockData::NoCollapse, &QmlJsHighlighter::collapse);
         currentBlock().setUserData(blockData);
     } else {
         blockData->resetCollapseParams();
