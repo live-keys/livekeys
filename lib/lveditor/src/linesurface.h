@@ -70,6 +70,7 @@ private:
     void collapseLines(int pos, int num);
     void expandLines(int pos, int num);
     void expandCollapseSkeleton(int pos, int num, QString &replacement, bool show);
+    void writeOutBlockStates();
 
     static inline int numberOfDigits(int i) {
         int res = 0;

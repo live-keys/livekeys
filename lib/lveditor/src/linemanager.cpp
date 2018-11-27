@@ -22,6 +22,20 @@ bool LineManager::after(int pos1, int num1, int pos2, int num2)
     return before(pos2, num2, pos1, num1);
 }
 
+void LineManager::writeOutContentOfSections()
+{
+    qDebug() << "---------------sections-------------";
+    auto it = sections.begin();
+    int cnt = 0;
+    while (it != sections.end())
+    {
+        CollapsedSection* cs = *it;
+        qDebug() << cnt << ": (" << cs->position << cs->numberOfLines << ")";
+        ++it; ++cnt;
+    }
+    qDebug() << "--------------------------------";
+}
+
 
 
 bool cmp(CollapsedSection* a, CollapsedSection* b)
