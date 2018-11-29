@@ -12,10 +12,17 @@
 #include <QDir>
 #include <QFileInfo>
 
+/**
+  \class lv::Package
+  \brief Manages a LiveCV package.
+  \ingroup lvbase
+ */
+
 namespace lv{
 
 const char* Package::fileName = "live.package.json";
 
+/// \private
 class PackagePrivate{
 
 public:

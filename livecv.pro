@@ -50,3 +50,5 @@ OTHER_FILES += \
 }
 
 OTHER_FILES *= project/*.pri
+OTHER_FILES *= doc/src/Doxyfile
+OTHER_FILES *= doc/pages/*.md

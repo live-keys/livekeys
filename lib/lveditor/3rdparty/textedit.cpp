@@ -3429,11 +3429,6 @@ void TextEdit::updateFragmentVisibility()
     auto it = d->document->rootFrame()->begin(); int cnt = 0;
     auto endIt = d->document->rootFrame()->end();
 
-<<<<<<< HEAD
-=======
-    // qDebug() << fragmentStart() << fragmentEnd();
-
->>>>>>> 176ec77dd92b21e84a124ec6f5e259f0a9be998b
     while (it != endIt)
     {
         if (cnt < fragmentStart()) it.currentBlock().setVisible(false);

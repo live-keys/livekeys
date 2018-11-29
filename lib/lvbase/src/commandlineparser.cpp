@@ -19,6 +19,15 @@
 
 namespace lv{
 
+
+/**
+  \class lv::CommandLineParser
+  \ingroup lvbase
+
+  \brief Command line parser class.
+  */
+
+/// \private
 class CommandLineParserPrivate{
 public:
     std::vector<CommandLineParser::Option*> options;

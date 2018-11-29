@@ -44,7 +44,6 @@ private:
     QList<GLuint>    m_textures;
     int              m_textureId;
     QOpenGLFunctions m_glFunctions;
-
 };
 
 inline const char *QMatShader::vertexShader() const{
