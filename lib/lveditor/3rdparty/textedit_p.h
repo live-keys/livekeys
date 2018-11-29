@@ -52,6 +52,7 @@ namespace lv {
 
 class TextEditPrivate;
 class PaletteManager;
+class LineManager;
 
 class LV_EDITOR_EXPORT TextEdit : public QQuickImplicitSizeItem
 {
@@ -109,6 +110,8 @@ public:
     TextEdit(QQuickImplicitSizeItem *parent=nullptr);
 
     PaletteManager* getPaletteManager();
+    void setLineManager(LineManager* lm);
+    LineManager *getLineManager();
 
     enum HAlignment {
         AlignLeft = Qt::AlignLeft,
@@ -433,7 +436,7 @@ protected:
     void updatePolish() Q_DECL_OVERRIDE;
 
     friend class TextUtil;
-    friend class LineNumberSurface;
+    friend class LineSurface;
     friend class DocumentHandler;
     friend class TextControl;
 private:

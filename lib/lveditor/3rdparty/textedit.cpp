@@ -199,6 +199,18 @@ PaletteManager *TextEdit::getPaletteManager()
     return d->paletteManager;
 }
 
+void TextEdit::setLineManager(LineManager *lm)
+{
+    Q_D(TextEdit);
+    d->lineManager = lm;
+}
+
+LineManager *TextEdit::getLineManager()
+{
+    Q_D(TextEdit);
+    return d->lineManager;
+}
+
 TextEdit::TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent)
 : QQuickImplicitSizeItem(dd, parent)
 {
@@ -3392,6 +3404,25 @@ void TextEdit::setTextDocument(QTextDocument *td)
 void TextEdit::collapseLines(int pos, int num, QString &replacement)
 {
     Q_UNUSED(replacement)
+    Q_D(TextEdit);
+
+    QTextCursor cursor = d->control->textCursor();
+    int cursorBlock = cursor.block().blockNumber();
+
+    qDebug() << pos << num;
+
+    qDebug() << cursorBlock;
+    if (cursorBlock > pos && cursorBlock <= pos + num)
+    {
+        qDebug() << "moving cursor";
+        cursor.beginEditBlock();
+        for (int i = 0; i < cursorBlock - pos; i++)
+        {
+            d->control->moveCursor(QTextCursor::MoveOperation::Up);
+        }
+        cursor.endEditBlock();
+    }
+
     showHideLines(false, pos, num);
 }
 

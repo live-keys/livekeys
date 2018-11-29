@@ -184,6 +184,19 @@ void LineManager::setLineSurface(LineSurface* lns)
     myLineSurface = lns;
 }
 
+std::pair<int, int> LineManager::isLineAfterCollapsedSection(int lineNumber)
+{
+    auto it = sections.begin();
+    while (it != sections.end())
+    {
+        auto cs = *it;
+        if  (lineNumber == cs->position + cs->numberOfLines + 1) return std::make_pair(cs->position, cs->numberOfLines);
+        ++it;
+    }
+
+    return std::make_pair(-1, -1);
+}
+
 LineManager::LineManager(QObject *parent)
     : QObject(parent), myLineSurface(nullptr), sections() {
 

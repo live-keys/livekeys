@@ -33,7 +33,10 @@ public:
 
     std::list<CollapsedSection*> & getSections();
     void setLineSurface(LineSurface* lns);
+    std::pair<int, int> isLineAfterCollapsedSection(int lineNumber);
 
+    friend class TextEdit;
+    friend class TextControl;
 };
 
 }

@@ -203,6 +203,7 @@ public:
     QList<Node*> textNodeMap;
 
     PaletteManager *paletteManager;
+    LineManager* lineManager;
 
     int lastSelectionStart;
     int lastSelectionEnd;

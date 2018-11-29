@@ -162,6 +162,7 @@ void LineSurface::setComponents(lv::TextEdit* te)
 {
 
     textEdit = te;
+    te->setLineManager(lineManager);
 
     document = new QTextDocument(this);
     //this is to create the layout!

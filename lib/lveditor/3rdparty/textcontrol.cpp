@@ -42,13 +42,7 @@
 
 #ifndef QT_NO_TEXTCONTROL
 
-// <TOREMOVE>
-// Same as above
-//QTextCursor included in qquicktextcontrol_p.h and _p_p.h
-//#include "private/qtextcursor_p.h"
-//#include "private/qtextdocumentlayout_p.h"
 #include "qabstracttextdocumentlayout.h"
-
 #include <qcoreapplication.h>
 #include <qfont.h>
 #include <qevent.h>
@@ -58,11 +52,7 @@
 #include <qtimer.h>
 #include <qinputmethod.h>
 #include "qtextdocument.h"
-
-// <REMOVED>
-// TextDocument exposes a lot of methods already to interact with it
-// Maybe this is only one or two function calls that can be eliminated?
-// #include "private/qtextdocument_p.h"
+#include "linemanager.h"
 
 #include "qtextlist.h"
 #include "qtextdocumentwriter.h"
@@ -1050,7 +1040,21 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
             cursor.setBlockFormat(blockFmt);
         } else {
             QTextCursor localCursor = cursor;
-            localCursor.deletePreviousChar();
+            pair<int, int> result(-1, -1);
+            if (textEdit && textEdit->getLineManager())
+            {
+                LineManager* lm = textEdit->getLineManager();
+                result = lm->isLineAfterCollapsedSection(localCursor.block().blockNumber());
+            }
+
+            if (result.first != -1 && localCursor.atBlockStart())
+            {
+                textEdit->getLineManager()->expandLines(result.first, result.second);
+            }
+            else {
+                localCursor.deletePreviousChar();
+            }
+
         }
         goto accept;
     }
