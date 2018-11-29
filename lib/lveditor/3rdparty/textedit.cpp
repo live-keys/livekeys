@@ -3409,12 +3409,8 @@ void TextEdit::collapseLines(int pos, int num, QString &replacement)
     QTextCursor cursor = d->control->textCursor();
     int cursorBlock = cursor.block().blockNumber();
 
-    qDebug() << pos << num;
-
-    qDebug() << cursorBlock;
     if (cursorBlock > pos && cursorBlock <= pos + num)
     {
-        qDebug() << "moving cursor";
         cursor.beginEditBlock();
         for (int i = 0; i < cursorBlock - pos; i++)
         {

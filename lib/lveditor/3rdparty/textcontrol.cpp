@@ -893,6 +893,20 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
                             case Qt::Key_Up:
                             case Qt::Key_Down:
                             case Qt::Key_Tab:
+
+                            if (ke->key() == Qt::Key_Return)
+                            {
+                                LineManager* lm = d->textEdit->getLineManager();
+                                pair<int, int> result(-1, -1);
+                                if (lm)
+                                {
+                                    result = lm->isFirstLineOfCollapsedSection(d->cursor.block().blockNumber());
+                                }
+                                if (result.first != -1)
+                                {
+                                    lm->expandLines(result.first, result.second);
+                                }
+                            }
                             ke->accept();
                         default:
                             break;
@@ -918,6 +932,18 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
                            || ke == QKeySequence::SelectEndOfDocument
                            || ke == QKeySequence::SelectAll
                           ) {
+
+                    LineManager* lm = d->textEdit->getLineManager();
+                    pair<int, int> result(-1, -1);
+                    if (lm && ke == QKeySequence::Paste)
+                    {
+                        result = lm->isFirstLineOfCollapsedSection(d->cursor.block().blockNumber());
+                    }
+                    if (result.first != -1)
+                    {
+                        lm->expandLines(result.first, result.second);
+                    }
+
                     ke->accept();
 #endif
                 }

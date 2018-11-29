@@ -84,8 +84,6 @@ void LineManager::expandLines(int pos, int num)
         CollapsedSection* sec = *it;
         sections.erase(it);
 
-        if (sec->numberOfLines != num) qDebug() << "line numbers don't match!";
-
         myLineSurface->expandLines(pos, num);
         std::list<CollapsedSection*> nested;
         nested = std::move(sec->nestedSections);
@@ -112,7 +110,7 @@ void LineManager::linesAdded(int pos, int num)
     while (it != sections.end())
     {
         CollapsedSection* sec = *it;
-        if (sec->position >= pos)
+        if (sec->position > pos)
         {
             std::queue<CollapsedSection*> q;
             q.push(sec);
@@ -191,6 +189,19 @@ std::pair<int, int> LineManager::isLineAfterCollapsedSection(int lineNumber)
     {
         auto cs = *it;
         if  (lineNumber == cs->position + cs->numberOfLines + 1) return std::make_pair(cs->position, cs->numberOfLines);
+        ++it;
+    }
+
+    return std::make_pair(-1, -1);
+}
+
+std::pair<int, int> LineManager::isFirstLineOfCollapsedSection(int lineNumber)
+{
+    auto it = sections.begin();
+    while (it != sections.end())
+    {
+        auto cs = *it;
+        if  (lineNumber == cs->position) return std::make_pair(cs->position, cs->numberOfLines);
         ++it;
     }
 

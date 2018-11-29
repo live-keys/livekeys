@@ -34,6 +34,7 @@ public:
     std::list<CollapsedSection*> & getSections();
     void setLineSurface(LineSurface* lns);
     std::pair<int, int> isLineAfterCollapsedSection(int lineNumber);
+    std::pair<int, int> isFirstLineOfCollapsedSection(int lineNumber);
 
     friend class TextEdit;
     friend class TextControl;
