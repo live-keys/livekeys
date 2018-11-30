@@ -259,8 +259,11 @@ void LineSurface::expandCollapseSkeleton(int pos, int num, QString &replacement,
 
 
     showHideLines(show, pos, num);
-    dirtyPos = pos;
-
+    if (!updatePending || pos < dirtyPos)
+    {
+        dirtyPos = pos;
+        updatePending = true;
+    }
     updateLineDocument();
 }
 
@@ -290,6 +293,19 @@ void LineSurface::writeOutBlockStates()
         } else print += "none";
 
         qDebug() << print;
+        ++it;
+    }
+}
+
+void LineSurface::writeOutBlockVisibility()
+{
+    qDebug() << "----------visibility---------------";
+    auto it = document->rootFrame()->begin();
+    while (it != document->rootFrame()->end())
+    {
+        QTextBlock block = it.currentBlock();
+
+        qDebug() << block.blockNumber() << block.isVisible();
         ++it;
     }
 }
@@ -384,10 +400,13 @@ void LineSurface::updateLineDocument()
     // we look for a collapsed section after the position where we made a change
     std::list<CollapsedSection*> &sections = lineManager->getSections();
     auto itSections = sections.begin();
-    while (itSections != sections.end() && (*itSections)->position < dirtyPos) ++itSections;
+    while (itSections != sections.end() && (*itSections)->position <= dirtyPos) ++itSections;
     int curr = dirtyPos;
     auto it = document->rootFrame()->begin();
-    for (int i = 0; i < curr; i++) ++it;
+    for (int i = 0; i < curr; i++)
+    {
+        ++it;
+    }
     while (it != document->rootFrame()->end())
     {
         auto currBlock = textEdit->documentHandler()->target()->findBlockByNumber(curr);
@@ -502,10 +521,16 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
 
         // delete all dirty nodes
         auto lineNumIt = textNodeMap.begin();
-        for (int k=0; k<dirtyPos; k++, lineNumIt++);
+        auto rootFrame = document->rootFrame();
+        int hiddenNum = 0; auto itPrime = rootFrame->begin();
+        for (int k=0; k<dirtyPos; k++)
+        {
+            if (!itPrime.currentBlock().isVisible()) hiddenNum++;
+            ++itPrime;
+        }
+        for (int k=0; k<dirtyPos-hiddenNum; k++, lineNumIt++);
         while (lineNumIt != textNodeMap.end())
         {
-
             rootNode->removeChildNode((*lineNumIt)->textNode());
             delete (*lineNumIt)->textNode();
             delete *lineNumIt;
@@ -580,7 +605,6 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                         rootNode->appendChildNode(node);
                         node = new TextNode(this);
                         resetEngine(&engine, m_color, QColor(), QColor());
-
                     }
                 }
                 engine.addToSceneGraph(node, QQuickText::Normal, QColor());
