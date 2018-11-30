@@ -53,6 +53,7 @@
 #include <QtQml/qqmlinfo.h>
 #include <QtQuick/qsgsimplerectnode.h>
 #include <QTimer>
+#include <cstdlib>
 
 #include <QtGlobal>
 
@@ -190,6 +191,17 @@ TextEdit::TextEdit(QQuickImplicitSizeItem *parent)
 : QQuickImplicitSizeItem(*(new TextEditPrivate), parent)
 {
     Q_D(TextEdit);
+    id = rand();
+    qDebug() << "id assigned: " << id;
+    d->init();
+}
+
+TextEdit::TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent)
+: QQuickImplicitSizeItem(dd, parent)
+{
+    Q_D(TextEdit);
+    id = rand();
+    qDebug() << "id assigned: " << id;
     d->init();
 }
 
@@ -211,12 +223,6 @@ LineManager *TextEdit::getLineManager()
     return d->lineManager;
 }
 
-TextEdit::TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent)
-: QQuickImplicitSizeItem(dd, parent)
-{
-    Q_D(TextEdit);
-    d->init();
-}
 
 QString TextEdit::text() const
 {

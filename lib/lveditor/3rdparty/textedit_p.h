@@ -107,6 +107,7 @@ class LV_EDITOR_EXPORT TextEdit : public QQuickImplicitSizeItem
     Q_PROPERTY(int fragmentEnd READ fragmentEnd WRITE setFragmentEnd RESET resetFragmentEnd NOTIFY fragmentEndChanged)
 
 public:
+    int id;
     TextEdit(QQuickImplicitSizeItem *parent=nullptr);
 
     PaletteManager* getPaletteManager();
