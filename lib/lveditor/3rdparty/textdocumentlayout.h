@@ -100,6 +100,10 @@ public:
     qreal idealWidth() const;
 
     bool contentHasAlignment() const;
+    void updateSingleLine(int lineNumber);
+
+Q_SIGNALS:
+    void updateForSingleLine(int lineNumber);
 
 protected:
     void documentChanged(int from, int oldLength, int length) override;

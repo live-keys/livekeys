@@ -111,9 +111,8 @@ void LineSurface::textDocumentFinished()
     {
         QTextBlock block = teDocument->findBlockByNumber(dirtyPos);
         auto userData = static_cast<ProjectDocumentBlockData*>(block.userData());
-        if (userData && userData->stateChangeFlag())
+        if (userData)
         {
-            userData->setStateChangeFlag(false);
             updateLineDocument();
         }
     }
@@ -317,13 +316,14 @@ void LineSurface::mousePressEvent(QMouseEvent* event)
     QTextBlock block = document->findBlock(position);
     int blockNum = block.blockNumber();
 
-    QTextBlock matchingBlock = textEdit->documentHandler()->target()->findBlockByNumber(blockNum);
+    const QTextBlock& matchingBlock = textEdit->documentHandler()->target()->findBlockByNumber(blockNum);
     lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
     if (userData)
     {
         if (userData->collapseState() == lv::ProjectDocumentBlockData::Collapse)
         {
             userData->collapse();
+            textEdit->stateChangeHandler(matchingBlock);
             int num; QString repl;
             userData->onCollapse()(matchingBlock, num, repl);
             userData->setNumOfCollapsedLines(num);
@@ -334,6 +334,7 @@ void LineSurface::mousePressEvent(QMouseEvent* event)
         {
             std::string result;
             userData->expand();
+            textEdit->stateChangeHandler(matchingBlock);
             lineManager->expandLines(blockNum, userData->numOfCollapsedLines());
         }
     }
@@ -419,7 +420,6 @@ void LineSurface::updateLineDocument()
             CollapsedSection* sec = (*itSections);
             if (curr == sec->position)
             {
-                changeLastCharInBlock(curr, '>');
                 userData->collapse();
                 userData->setNumOfCollapsedLines(sec->numberOfLines);
                 userData->setStateChangeFlag(false);
@@ -437,17 +437,20 @@ void LineSurface::updateLineDocument()
         visible = visible && currBlock.isVisible();
 
         it.currentBlock().setVisible(visible);
-        if (visible) {
-            if (userData && userData->collapseState() == lv::ProjectDocumentBlockData::Collapse)
+        if (visible && userData) {
+            switch (userData->collapseState())
             {
+            case lv::ProjectDocumentBlockData::Collapse:
                 changeLastCharInBlock(curr, 'v');
-                userData->setStateChangeFlag(false);
-            }
-            else if (userData && userData->collapseState() != lv::ProjectDocumentBlockData::Expand)
-            {
+                break;
+            case lv::ProjectDocumentBlockData::Expand:
+                changeLastCharInBlock(curr, '>');
+                break;
+            case lv::ProjectDocumentBlockData::NoCollapse:
                 changeLastCharInBlock(curr, ' ');
-                userData->setStateChangeFlag(false);
+                break;
             }
+            userData->setStateChangeFlag(false);
         }
         ++curr; ++it;
     }

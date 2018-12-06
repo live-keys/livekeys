@@ -237,6 +237,7 @@ public:
     bool isReadOnly() const;
 
     TextEditPrivate* getPriv() { Q_D(TextEdit); return d; }
+    void stateChangeHandler(const QTextBlock& block);
 
     QRectF cursorRectangle() const;
 
@@ -400,7 +401,7 @@ private Q_SLOTS:
     void updateSize();
     void triggerPreprocess();
     void highlightingDone(const QRectF &);
-
+    void updateSingleLine(int lineNumber);
 private:
     void markDirtyNodesForRange(int start, int end, int charDelta);
     void updateTotalLines();

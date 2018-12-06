@@ -1153,15 +1153,12 @@ void TextDocumentLayoutPrivate::positionFloat(QTextFrame *frame, QTextLine *curr
     fd->layoutDirty = true;
     Q_ASSERT(!fd->sizeDirty);
 
-//     qDebug() << "positionFloat:" << frame << "width=" << fd->size.width;
     QFixed y = layoutStruct->y;
     if (currentLine) {
         QFixed left, right;
         floatMargins(y, layoutStruct, &left, &right);
-//         qDebug() << "have line: right=" << right << "left=" << left << "textWidth=" << currentLine->width();
         if (right - left < QFixed::fromReal(currentLine->naturalTextWidth()) + fd->size.width) {
             layoutStruct->pendingFloats.append(frame);
-//             qDebug("    adding to pending list");
             return;
         }
     }
@@ -1190,7 +1187,6 @@ void TextDocumentLayoutPrivate::positionFloat(QTextFrame *frame, QTextLine *curr
     layoutStruct->minimumWidth = qMax(layoutStruct->minimumWidth, fd->minimumWidth);
     layoutStruct->maximumWidth = qMin(layoutStruct->maximumWidth, fd->maximumWidth);
 
-//     qDebug()<< "float positioned at " << fd->position.x << fd->position.y;
     fd->layoutDirty = false;
 
 }
@@ -1199,7 +1195,6 @@ QRectF TextDocumentLayoutPrivate::layoutFrame(QTextFrame *f, int layoutFrom, int
 {
     LDEBUG << "layoutFrame (pre)";
     Q_ASSERT(data(f)->sizeDirty);
-//     qDebug("layouting frame (%d--%d), parent=%p", f->firstPosition(), f->lastPosition(), f->parentFrame());
 
     QTextFrameFormat fformat = f->frameFormat();
 
@@ -1223,7 +1218,6 @@ QRectF TextDocumentLayoutPrivate::layoutFrame(QTextFrame *f, int layoutFrom, int
 {
     LDEBUG << "layoutFrame from=" << layoutFrom << "to=" << layoutTo;
     Q_ASSERT(data(f)->sizeDirty);
-//     qDebug("layouting frame (%d--%d), parent=%p", f->firstPosition(), f->lastPosition(), f->parentFrame());
 
     TextFrameData *fd = data(f);
     QFixed newContentsWidth;
@@ -1598,7 +1592,6 @@ void TextDocumentLayoutPrivate::layoutFlow(QTextFrameIterator it, TextLayoutStru
             contentHasAlignment = true;
 
         if (it.atEnd()) {
-            //qDebug("layout done!");
             currentLazyLayoutPosition = -1;
             CheckPoint cp;
             cp.y = layoutStruct->y;
@@ -1649,7 +1642,6 @@ void TextDocumentLayoutPrivate::layoutBlock(const QTextBlock &bl, int blockPosit
 
     LDEBUG << "layoutBlock from=" << layoutFrom << "to=" << layoutTo;
 
-//    qDebug() << "layoutBlock; width" << layoutStruct->x_right - layoutStruct->x_left << "(maxWidth is btw" << tl->maximumWidth() << ')';
 
     if (previousBlockFormat) {
         qreal margin = qMax(blockFormat.topMargin(), previousBlockFormat->bottomMargin());
@@ -1713,7 +1705,6 @@ void TextDocumentLayoutPrivate::layoutBlock(const QTextBlock &bl, int blockPosit
 
         const bool haveWordOrAnyWrapMode = (option.wrapMode() == QTextOption::WrapAtWordBoundaryOrAnywhere);
 
-//         qDebug() << "    layouting block at" << bl.position();
         const QFixed cy = layoutStruct->y;
         const QFixed l = layoutStruct->x_left  + totalLeftMargin;
         const QFixed r = layoutStruct->x_right - totalRightMargin;
@@ -1739,14 +1730,12 @@ void TextDocumentLayoutPrivate::layoutBlock(const QTextBlock &bl, int blockPosit
                     right -= text_indent;
                 firstLine = false;
             }
-//         qDebug() << "layout line y=" << currentYPos << "left=" << left << "right=" <<right;
 
             if (fixedColumnWidth != -1)
                 line.setNumColumns(fixedColumnWidth, (right - left).toReal());
             else
                 line.setLineWidth((right - left).toReal());
 
-//        qDebug() << "layoutBlock; layouting line with width" << right - left << "->textWidth" << line.textWidth();
             floatMargins(layoutStruct->y, layoutStruct, &left, &right);
             left = qMax(left, l);
             right = qMin(right, r);
@@ -1873,7 +1862,6 @@ void TextDocumentLayoutPrivate::layoutBlock(const QTextBlock &bl, int blockPosit
 void TextDocumentLayoutPrivate::floatMargins(const QFixed &y, const TextLayoutStruct *layoutStruct,
                                               QFixed *left, QFixed *right) const
 {
-//     qDebug() << "floatMargins y=" << y;
     *left = layoutStruct->x_left;
     *right = layoutStruct->x_right;
     TextFrameData *lfd = data(layoutStruct->frame);
@@ -1881,7 +1869,6 @@ void TextDocumentLayoutPrivate::floatMargins(const QFixed &y, const TextLayoutSt
         TextFrameData *fd = data(lfd->floats.at(i));
         if (!fd->layoutDirty) {
             if (fd->position.y <= y && fd->position.y + fd->size.height > y) {
-//                 qDebug() << "adjusting with float" << f << fd->position.x()<< fd->size.width();
                 if (lfd->floats.at(i)->frameFormat().position() == QTextFrameFormat::FloatLeft)
                     *left = qMax(*left, fd->position.x + fd->size.width);
                 else
@@ -1889,7 +1876,6 @@ void TextDocumentLayoutPrivate::floatMargins(const QFixed &y, const TextLayoutSt
             }
         }
     }
-//     qDebug() << "floatMargins: left="<<*left<<"right="<<*right<<"y="<<y;
 }
 
 QFixed TextDocumentLayoutPrivate::findY(QFixed yFrom, const TextLayoutStruct *layoutStruct, QFixed requiredWidth) const
@@ -1897,10 +1883,8 @@ QFixed TextDocumentLayoutPrivate::findY(QFixed yFrom, const TextLayoutStruct *la
     QFixed right, left;
     requiredWidth = qMin(requiredWidth, layoutStruct->x_right - layoutStruct->x_left);
 
-//     qDebug() << "findY:" << yFrom;
     while (1) {
         floatMargins(yFrom, layoutStruct, &left, &right);
-//         qDebug() << "    yFrom=" << yFrom<<"right=" << right << "left=" << left << "requiredWidth=" << requiredWidth;
         if (right-left >= requiredWidth)
             break;
 
@@ -1980,7 +1964,6 @@ static void markFrames(QTextFrame *current, int from, int oldLength, int length)
     fd->layoutDirty = true;
     fd->sizeDirty = true;
 
-//     qDebug("    marking frame (%d--%d) as dirty", current->firstPosition(), current->lastPosition());
     QList<QTextFrame *> children = current->childFrames();
     for (int i = 0; i < children.size(); ++i)
         markFrames(children.at(i), from, oldLength, length);
@@ -2059,7 +2042,6 @@ QRectF TextDocumentLayout::doLayout(int from, int oldLength, int length)
 {
     Q_D(TextDocumentLayout);
 
-//     qDebug("documentChange: from=%d, oldLength=%d, length=%d", from, oldLength, length);
 
     // mark all frames between f_start and f_end as dirty
     markFrames(d->document->rootFrame(), from, oldLength, length);
@@ -2168,8 +2150,7 @@ void TextDocumentLayout::positionInlineObject(QTextInlineObject item, int posInD
     QTextLine line;
     if (b.position() <= frame->firstPosition() && b.position() + b.length() > frame->lastPosition())
         line = b.layout()->lineAt(b.layout()->lineCount()-1);
-//     qDebug() << "layoutObject: line.isValid" << line.isValid() << b.position() << b.length() <<
-//         frame->firstPosition() << frame->lastPosition();
+
     d->positionFloat(frame, line.isValid() ? &line : 0);
 }
 
@@ -2183,7 +2164,6 @@ void TextDocumentLayout::drawInlineObject(QPainter *p, const QRectF &rect, QText
     if (frame && frame->frameFormat().position() != QTextFrameFormat::InFlow)
         return; // don't draw floating frames from inline objects here but in drawFlow instead
 
-//    qDebug() << "drawObject at" << r;
     QAbstractTextDocumentLayout::drawInlineObject(p, rect, item, posInDocument, format);
 }
 
@@ -2372,6 +2352,11 @@ bool TextDocumentLayout::contentHasAlignment() const
 {
     Q_D(const TextDocumentLayout);
     return d->contentHasAlignment;
+}
+
+void TextDocumentLayout::updateSingleLine(int lineNumber)
+{
+    emit updateForSingleLine(lineNumber);
 }
 
 qreal TextDocumentLayoutPrivate::scaleToDevice(qreal value) const

@@ -54,6 +54,7 @@
 #include <QtQuick/qsgsimplerectnode.h>
 #include <QTimer>
 #include <cstdlib>
+#include "textdocumentlayout.h"
 
 #include <QtGlobal>
 
@@ -192,7 +193,6 @@ TextEdit::TextEdit(QQuickImplicitSizeItem *parent)
 {
     Q_D(TextEdit);
     id = rand();
-    qDebug() << "id assigned: " << id;
     d->init();
 }
 
@@ -201,7 +201,6 @@ TextEdit::TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent)
 {
     Q_D(TextEdit);
     id = rand();
-    qDebug() << "id assigned: " << id;
     d->init();
 }
 
@@ -2400,6 +2399,8 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
+    QObject::connect(dynamic_cast<TextDocumentLayout*>(document->documentLayout()), &TextDocumentLayout::updateForSingleLine,
+            q, &TextEdit::updateSingleLine);
 
     auto rect = document->documentLayout()->blockBoundingRect(document->rootFrame()->begin().currentBlock());
     paletteManager->setLineHeight(static_cast<int>(rect.height()));
@@ -2753,19 +2754,32 @@ void TextEdit::highlightingDone(const QRectF &)
     }
 }
 
+void TextEdit::updateSingleLine(int lineNumber)
+{
+    emit dirtyBlockPosition(lineNumber);
+    emit textDocumentFinishedUpdating();
+}
+
+
+void TextEdit::stateChangeHandler(const QTextBlock &block)
+{
+    Q_D(TextEdit);
+    ProjectDocumentBlockData* userData = static_cast<ProjectDocumentBlockData*>(block.userData());
+
+    if (userData && userData->stateChangeFlag())
+    {
+        userData->setStateChangeFlag(false);
+        dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->updateSingleLine(block.blockNumber());
+    }
+}
+
 void TextEdit::invalidateBlock(const QTextBlock &block)
 {
     Q_D(TextEdit);
 
     markDirtyNodesForRange(block.position(), block.position() + block.length(), 0);
 
-    ProjectDocumentBlockData* userData = static_cast<ProjectDocumentBlockData*>(block.userData());
-
-    if (userData && userData->stateChangeFlag())
-    {
-        emit dirtyBlockPosition(block.blockNumber());
-        emit textDocumentFinishedUpdating();
-    }
+    stateChangeHandler(block);
 
     polish();
     if (isComponentComplete()) {
@@ -3467,8 +3481,6 @@ void TextEdit::updateFragmentVisibility()
         if (cnt < fragmentStart()) it.currentBlock().setVisible(false);
         else if (cnt < fragmentEnd()) it.currentBlock().setVisible(true);
         else it.currentBlock().setVisible(false);
-
-        // qDebug() << it.currentBlock().text() << it.currentBlock().isVisible();
 
         ++cnt; ++it;
     }
