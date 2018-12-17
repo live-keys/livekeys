@@ -46,8 +46,8 @@ public:
     QColor color() const;
     void setColor(const QColor &c);
     Q_INVOKABLE void setComponents(lv::TextEdit* te);
-    void updateLineDocument();
-
+    void setDocument(QTextDocument* doc);
+    void unsetTextDocument();
 Q_SIGNALS:
     void colorChanged(const QColor &color);
     void fontChanged(const QFont &font);
@@ -55,21 +55,13 @@ public Q_SLOTS:
     void setDirtyBlockPosition(int pos);
     void textDocumentFinished();
     void paletteSlot(int blockNum);
+    void triggerUpdate(int prev, int curr, int dirty);
 private Q_SLOTS:
     void updateSize();
     void triggerPreprocess();
 
 private:
     void showHideLines(bool show, int pos, int num);
-    void replaceTextInBlock(int blockNumber, std::string s);
-
-    void linesAdded();
-    void linesRemoved();
-    void changeLastCharInBlock(int blockNumber, char c);
-
-    void collapseLines(int pos, int num);
-    void expandLines(int pos, int num);
-    void expandCollapseSkeleton(int pos, int num, QString &replacement, bool show);
     void writeOutBlockStates();
     void writeOutBlockVisibility();
 
@@ -98,11 +90,10 @@ private:
 
     UpdateType updateType;
     TextEdit* textEdit;
-    int prevLineNumber;
+    int previousLineNumber;
     int lineNumber;
     int dirtyPos;
     int deltaLineNumber;
-    LineManager *lineManager;
     bool updatePending;
 protected:
     // mouse filter?

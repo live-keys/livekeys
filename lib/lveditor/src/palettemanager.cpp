@@ -81,7 +81,7 @@ void PaletteManager::setTextEdit(TextEdit *value)
     textEdit = value;
     if (value != nullptr)
     {
-        QObject::connect(textEdit, &TextEdit::dirtyBlockPosition, this, &PaletteManager::setDirtyPos);
+        // QObject::connect(textEdit, &TextEdit::dirtyBlockPosition, this, &PaletteManager::setDirtyPos);
         QObject::connect(textEdit, &TextEdit::lineCountChanged, this, &PaletteManager::lineNumberChange);
     }
 }

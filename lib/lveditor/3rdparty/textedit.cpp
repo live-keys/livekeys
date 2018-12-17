@@ -55,6 +55,8 @@
 #include <QTimer>
 #include <cstdlib>
 #include "textdocumentlayout.h"
+#include "linemanager.h"
+#include "linesurface.h"
 
 #include <QtGlobal>
 
@@ -62,21 +64,9 @@
 #include <QSGRectangleNode> // change for 5.11
 #endif
 
-// <REMOVED>
-// This might be copied
 #include "private/qquicktextnode_p.h"
-// <TOREMOVE>
-// This might deal with the whole event system behind QQuickTextEdit, or
-// it may not :)
 #include "private/qquickevents_p_p.h"
-
-//#include "private/qqmlglobal_p.h"
-
-// <TOREMOVE>
-// TODO: Document where it's used
 #include "private/qqmlproperty_p.h"
-
-// <TOREMOVE> : just copy
 #include "private/qtextengine_p.h"
 #include "private/qsgadaptationlayer_p.h"
 
@@ -210,18 +200,20 @@ PaletteManager *TextEdit::getPaletteManager()
     return d->paletteManager;
 }
 
-void TextEdit::setLineManager(LineManager *lm)
+void TextEdit::setLineSurface(LineSurface *ls)
 {
     Q_D(TextEdit);
-    d->lineManager = lm;
+    d->lineSurface = ls;
+    if (d->documentLayout && d->documentLayout->getLineManager())
+        d->lineSurface->setDocument(d->documentLayout->getLineManager()->lineDocument);
+
 }
 
 LineManager *TextEdit::getLineManager()
 {
     Q_D(TextEdit);
-    return d->lineManager;
+    return d->documentLayout->getLineManager();
 }
-
 
 QString TextEdit::text() const
 {
@@ -553,6 +545,10 @@ void TextEdit::setFont(const QFont &font)
 #ifndef QT_NO_IM
         updateInputMethod(Qt::ImCursorRectangle | Qt::ImAnchorRectangle | Qt::ImFont);
 #endif
+    }
+    if (d->documentLayout)
+    {
+        d->documentLayout->getLineManager()->setLineDocumentFont(font);
     }
     emit fontChanged(d->sourceFont);
 }
@@ -2350,10 +2346,18 @@ TextEditPrivate::ExtraData::ExtraData()
 {
 }
 
-void TextEditPrivate::setTextDocument(QTextDocument *d)
+void TextEditPrivate::setTextDocument(QTextDocument *doc)
 {
+
     Q_Q(TextEdit);
-    document = d;
+    document = doc;
+    documentLayout = dynamic_cast<TextDocumentLayout*>(doc->documentLayout());
+    LineManager* lm = documentLayout->getLineManager();
+    lm->setLineDocumentFont(font);
+    lm->setParentDocument(document);
+
+    if (lineSurface)
+        lineSurface->setDocument(documentLayout->getLineManager()->lineDocument);
 
     control = new TextControl(document, q);
     control->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::TextSelectableByKeyboard | Qt::TextEditable);
@@ -2361,11 +2365,7 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     control->setCursorIsFocusIndicator(true);
 
     control->setTextEdit(q);
-/*
-    fragmentStart=2;
-    fragmentEnd = 10;
-    q->updateFragmentVisibility();
-*/
+
     lv_qmlobject_connect(control, TextControl, SIGNAL(updateCursorRequest()), q, TextEdit, SLOT(updateCursor()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, TextEdit, SIGNAL(selectedTextChanged()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, TextEdit, SLOT(updateSelection()));
@@ -2399,19 +2399,21 @@ void TextEditPrivate::setTextDocument(QTextDocument *d)
     QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
-    QObject::connect(dynamic_cast<TextDocumentLayout*>(document->documentLayout()), &TextDocumentLayout::updateForSingleLine,
-            q, &TextEdit::updateSingleLine);
+    QObject::connect(documentLayout->getLineManager(), &LineManager::showHideTextEditLines,
+                     q, &TextEdit::showHideLines);
 
-    auto rect = document->documentLayout()->blockBoundingRect(document->rootFrame()->begin().currentBlock());
+    auto rect = documentLayout->blockBoundingRect(document->rootFrame()->begin().currentBlock());
     paletteManager->setLineHeight(static_cast<int>(rect.height()));
 }
 
 void TextEditPrivate::unsetTextDocument()
 {
     Q_Q(TextEdit);
-    if ( document )
-    q->markDirtyNodesForRange(0, document->characterCount(), 0);
+    if ( document ){
 
+        q->markDirtyNodesForRange(0, document->characterCount(), 0);
+        lineSurface->unsetTextDocument();
+    }
 
 
     if (control)
@@ -2422,7 +2424,7 @@ void TextEditPrivate::unsetTextDocument()
     }
 
     document = nullptr;
-
+    documentLayout = nullptr;
 
 }
 
@@ -2545,7 +2547,10 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
 
-    emit dirtyBlockPosition(d->document->findBlock(pos).blockNumber());
+    if (d->document && d->documentLayout)
+    {
+        d->documentLayout->getLineManager()->setDirtyPos(d->document->findBlock(pos).blockNumber());
+    }
 
     markDirtyNodesForRange(pos, editRange, delta);
 
@@ -2750,16 +2755,9 @@ void TextEdit::highlightingDone(const QRectF &)
     if (d->highlightingInProgress)
     {
         d->highlightingInProgress = false;
-        emit textDocumentFinishedUpdating();
+        d->documentLayout->getLineManager()->textDocumentFinishedUpdating(d->document->blockCount());
     }
 }
-
-void TextEdit::updateSingleLine(int lineNumber)
-{
-    emit dirtyBlockPosition(lineNumber);
-    emit textDocumentFinishedUpdating();
-}
-
 
 void TextEdit::stateChangeHandler(const QTextBlock &block)
 {
@@ -2769,7 +2767,7 @@ void TextEdit::stateChangeHandler(const QTextBlock &block)
     if (userData && userData->stateChangeFlag())
     {
         userData->setStateChangeFlag(false);
-        dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->updateSingleLine(block.blockNumber());
+        d->documentLayout->stateChangeUpdate(block.blockNumber());
     }
 }
 
@@ -3421,31 +3419,34 @@ void TextEdit::setTextDocument(QTextDocument *td)
     else d->unsetTextDocument();
 }
 
-void TextEdit::collapseLines(int pos, int num, QString &replacement)
+TextDocumentLayout *TextEdit::getDocumentLayout()
 {
-    Q_UNUSED(replacement)
     Q_D(TextEdit);
-
-    QTextCursor cursor = d->control->textCursor();
-    int cursorBlock = cursor.block().blockNumber();
-
-    if (cursorBlock > pos && cursorBlock <= pos + num)
-    {
-        cursor.beginEditBlock();
-        for (int i = 0; i < cursorBlock - pos; i++)
-        {
-            d->control->moveCursor(QTextCursor::MoveOperation::Up);
-        }
-        cursor.endEditBlock();
-    }
-
-    showHideLines(false, pos, num);
+    return d->documentLayout;
 }
 
-void TextEdit::expandLines(int pos, int num, QString &replacement)
+void TextEdit::manageExpandCollapse(int pos, bool collapsed)
 {
-    Q_UNUSED(replacement)
-    showHideLines(true, pos, num);
+    Q_D(TextEdit);
+    QTextBlock matchingBlock = d->document->findBlockByNumber(pos);
+    ProjectDocumentBlockData* userData = static_cast<ProjectDocumentBlockData*>(matchingBlock.userData());
+
+    if (collapsed)
+    {
+        userData->collapse();
+        userData->setStateChangeFlag(true);
+        int num; QString repl;
+        userData->onCollapse()(matchingBlock, num, repl);
+        userData->setNumOfCollapsedLines(num);
+        userData->setReplacementString(repl);
+        d->documentLayout->getLineManager()->collapseLines(pos, userData->numOfCollapsedLines());
+        stateChangeHandler(matchingBlock);
+    } else {
+        userData->expand();
+        userData->setStateChangeFlag(true);
+        d->documentLayout->getLineManager()->expandLines(pos, userData->numOfCollapsedLines());
+        stateChangeHandler(matchingBlock);
+    }
 }
 
 void TextEdit::showHideLines(bool show, int pos, int num)
@@ -3463,6 +3464,19 @@ void TextEdit::showHideLines(bool show, int pos, int num)
         it.currentBlock().setVisible(show);
         length += it.currentBlock().length();
         ++it;
+    }
+
+    QTextCursor cursor = d->control->textCursor();
+    int cursorBlock = cursor.block().blockNumber();
+
+    if (!show && cursorBlock > pos && cursorBlock <= pos + num)
+    {
+        cursor.beginEditBlock();
+        for (int i = 0; i < cursorBlock - pos; i++)
+        {
+            d->control->moveCursor(QTextCursor::MoveOperation::Up);
+        }
+        cursor.endEditBlock();
     }
 
     d->document->markContentsDirty(start, length);
@@ -3485,22 +3499,8 @@ void TextEdit::updateFragmentVisibility()
         ++cnt; ++it;
     }
 
-    emit dirtyBlockPosition(0);
-    emit textDocumentFinishedUpdating();
-
-}
-
-void TextEdit::replaceTextInBlock(int blockNumber, std::string s)
-{
-    Q_D(TextEdit);
-    QTextBlock b = d->document->findBlockByNumber(blockNumber);
-    QTextCursor cursor(b);
-    cursor.beginEditBlock();
-    cursor.movePosition(QTextCursor::EndOfBlock);
-    cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveMode::KeepAnchor);
-    cursor.removeSelectedText();
-    cursor.insertText(QString(s.c_str()));
-    cursor.endEditBlock();
+    d->documentLayout->getLineManager()->setDirtyPos(0);
+    d->documentLayout->getLineManager()->textDocumentFinishedUpdating(d->document->blockCount());
 }
 
 }

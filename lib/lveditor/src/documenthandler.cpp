@@ -343,7 +343,7 @@ void DocumentHandler::documentContentsChanged(int position, int, int charsAdded)
 }
 
 void DocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
-    if ( m_codeHandler && m_editorFocus &&
+    if ( m_codeHandler && m_editorFocus && cursor.position() == m_textEdit->cursorPosition() &&
          !m_projectDocument->editingStateIs(ProjectDocument::Assisted) &&
          !m_projectDocument->editingStateIs(ProjectDocument::Silent)
         )

@@ -18,6 +18,7 @@
 #include "linemanager.h"
 #include "collapsedsection.h"
 #include "palettemanager.h"
+#include "textdocumentlayout.h"
 
 namespace lv {
 
@@ -56,14 +57,12 @@ LineSurface::LineSurface(QQuickItem *parent)
 , m_color(QRgb(0xFF000000))
 , m_font(QFont()), document(nullptr)
 , updateType(UpdatePaintNode)
-, textEdit(nullptr), prevLineNumber(0)
+, textEdit(nullptr), previousLineNumber(0)
 , lineNumber(0), dirtyPos(0)
-, lineManager(new LineManager)
 , updatePending(false)
 {
     setFlag(QQuickItem::ItemHasContents);
     setAcceptHoverEvents(true);
-    lineManager->setLineSurface(this);
 }
 
 LineSurface::~LineSurface()
@@ -96,30 +95,25 @@ void LineSurface::setFont(const QFont &f)
 
 void LineSurface::textDocumentFinished()
 {
-
     auto teDocument = textEdit->documentHandler()->target();
-    prevLineNumber = lineNumber;
+    previousLineNumber = lineNumber;
     lineNumber = teDocument->blockCount();
 
-    deltaLineNumber = abs(prevLineNumber - lineNumber);
+    deltaLineNumber = abs(previousLineNumber - lineNumber);
     if (deltaLineNumber)
     {
-        if (prevLineNumber < lineNumber) linesAdded();
-        else linesRemoved();
+        /*if (previousLineNumber < lineNumber) linesAdded();
+        else linesRemoved();*/
     }
     else
     {
-        QTextBlock block = teDocument->findBlockByNumber(dirtyPos);
-        auto userData = static_cast<ProjectDocumentBlockData*>(block.userData());
-        if (userData)
-        {
-            updateLineDocument();
-        }
+        // updateLineDocument();
     }
 }
 
 void LineSurface::paletteSlot(int blockNum)
 {
+    if (!document) return;
     auto firstDirtyBlock = document->findBlockByNumber(blockNum);
     document->markContentsDirty(firstDirtyBlock.position(), document->characterCount() - firstDirtyBlock.position());
 
@@ -159,36 +153,23 @@ void LineSurface::setColor(const QColor &color)
 
 void LineSurface::setComponents(lv::TextEdit* te)
 {
-
     textEdit = te;
-    te->setLineManager(lineManager);
-
-    document = new QTextDocument(this);
-    //this is to create the layout!
-    document->documentLayout();
-
-
-    m_font = te->font();
-    document->setDefaultFont(m_font);
-    QTextOption opt;
-    opt.setAlignment(Qt::AlignRight | Qt::AlignTop);
-    opt.setTextDirection(Qt::LeftToRight);
-    document->setDefaultTextOption(opt);
+    te->setLineSurface(this);
     setFlag(QQuickItem::ItemHasContents);
+    setAcceptedMouseButtons(Qt::AllButtons);
 
     dirtyPos = 0;
-    prevLineNumber = 0;
+    previousLineNumber = 0;
     lineNumber = 0;
-    textDocumentFinished();
+    // textDocumentFinished();
 
-    QObject::connect(textEdit, &TextEdit::dirtyBlockPosition, this, &LineSurface::setDirtyBlockPosition);
     QObject::connect(textEdit, &TextEdit::textDocumentFinishedUpdating, this, &LineSurface::textDocumentFinished);
     QObject::connect(textEdit, &TextEdit::paletteChange, this, &LineSurface::paletteSlot);
-    setAcceptedMouseButtons(Qt::AllButtons);
 }
 
 void LineSurface::showHideLines(bool show, int pos, int num)
 {
+    if (!document) return;
     auto it = document->rootFrame()->begin();
     Q_ASSERT(document->blockCount() > pos);
     Q_ASSERT(document->blockCount() >= pos + num);
@@ -204,66 +185,6 @@ void LineSurface::showHideLines(bool show, int pos, int num)
     }
 
     document->markContentsDirty(start, length);
-}
-
-void LineSurface::replaceTextInBlock(int blockNumber, std::string s)
-{
-    QTextBlock b = document->findBlockByNumber(blockNumber);
-    QTextCursor cursor(b);
-    cursor.beginEditBlock();
-    cursor.movePosition(QTextCursor::EndOfBlock);
-    cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveMode::KeepAnchor);
-    cursor.removeSelectedText();
-    cursor.insertText(QString(s.c_str()));
-    cursor.endEditBlock();
-}
-
-void LineSurface::collapseLines(int pos, int num)
-{
-    changeLastCharInBlock(pos, '>');
-
-    QTextBlock matchingBlock = textEdit->documentHandler()->target()->findBlockByNumber(pos);
-    // ProjectDocumentBlockData* userData = static_cast<ProjectDocumentBlockData*>(matchingBlock.userData());
-    QString s = matchingBlock.text();
-    // s+=userData->replacementString;
-    expandCollapseSkeleton(pos, num, s, false);
-}
-
-
-void LineSurface::expandLines(int pos, int num)
-{
-
-    changeLastCharInBlock(pos, 'v');
-
-    QTextBlock matchingBlock = textEdit->documentHandler()->target()->findBlockByNumber(pos);
-    // lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
-    QString s = matchingBlock.text();
-    // s.chop(userData->replacementString.length());
-    expandCollapseSkeleton(pos, num, s, true);
-}
-
-void LineSurface::expandCollapseSkeleton(int pos, int num, QString &replacement, bool show)
-{
-
-    if (show)
-    {
-        textEdit->expandLines(pos, num, replacement);
-        // lineManager->expandLines(pos, num);
-    }
-    else
-    {
-        textEdit->collapseLines(pos, num, replacement);
-        // lineManager->collapseLines(pos, num);
-    }
-
-
-    showHideLines(show, pos, num);
-    if (!updatePending || pos < dirtyPos)
-    {
-        dirtyPos = pos;
-        updatePending = true;
-    }
-    updateLineDocument();
 }
 
 void LineSurface::writeOutBlockStates()
@@ -298,6 +219,7 @@ void LineSurface::writeOutBlockStates()
 
 void LineSurface::writeOutBlockVisibility()
 {
+    if (!document) return;
     qDebug() << "----------visibility---------------";
     auto it = document->rootFrame()->begin();
     while (it != document->rootFrame()->end())
@@ -311,6 +233,7 @@ void LineSurface::writeOutBlockVisibility()
 
 void LineSurface::mousePressEvent(QMouseEvent* event)
 {
+    if (!document) return;
     // find block that was clicked
     int position = document->documentLayout()->hitTest(event->localPos(), Qt::FuzzyHit);
     QTextBlock block = document->findBlock(position);
@@ -322,20 +245,11 @@ void LineSurface::mousePressEvent(QMouseEvent* event)
     {
         if (userData->collapseState() == lv::ProjectDocumentBlockData::Collapse)
         {
-            userData->collapse();
-            textEdit->stateChangeHandler(matchingBlock);
-            int num; QString repl;
-            userData->onCollapse()(matchingBlock, num, repl);
-            userData->setNumOfCollapsedLines(num);
-            userData->setReplacementString(repl);
-            lineManager->collapseLines(blockNum, userData->numOfCollapsedLines());
+            textEdit->manageExpandCollapse(matchingBlock.blockNumber(), true);
         }
         else if (userData->collapseState() == lv::ProjectDocumentBlockData::Expand)
         {
-            std::string result;
-            userData->expand();
-            textEdit->stateChangeHandler(matchingBlock);
-            lineManager->expandLines(blockNum, userData->numOfCollapsedLines());
+            textEdit->manageExpandCollapse(matchingBlock.blockNumber(), false);
         }
     }
 }
@@ -348,121 +262,32 @@ void LineSurface::triggerPreprocess()
     update();
 }
 
-void LineSurface::changeLastCharInBlock(int blockNumber, char c)
+void LineSurface::setDocument(QTextDocument *doc)
 {
-
-    QTextBlock b = document->findBlockByNumber(blockNumber);
-    QTextCursor cursor(b);
-    cursor.beginEditBlock();
-    cursor.movePosition(QTextCursor::EndOfBlock);
-    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
-    cursor.removeSelectedText();
-    cursor.insertText(QString(c));
-    cursor.endEditBlock();
-}
-
-void LineSurface::linesAdded()
-{
-
-    lineManager->linesAdded(dirtyPos, deltaLineNumber);
-
-    QTextCursor cursor(document);
-    cursor.movePosition(QTextCursor::MoveOperation::End);
-    for (int i = prevLineNumber + 1; i <= lineNumber; i++)
-    {
-        if (i!=1) cursor.insertBlock();
-        std::string s = std::to_string(i) + "  ";
-        if (i < 10) s = " " + s;
-        const QString a(s.c_str());
-
-        cursor.insertText(a);
-    }
-    updateLineDocument();
-}
-
-void LineSurface::linesRemoved()
-{
-
-    lineManager->linesRemoved(dirtyPos, deltaLineNumber);
-
-    for (int i = prevLineNumber-1; i >= lineNumber; i--)
-    {
-        QTextCursor cursor(document->findBlockByNumber(i));
-        cursor.select(QTextCursor::BlockUnderCursor);
-        cursor.removeSelectedText();
-    }
-
-    updateLineDocument();
-}
-
-void LineSurface::updateLineDocument()
-{
+    if (!doc) return;
+    document = doc;
     updatePending = false;
-    // we look for a collapsed section after the position where we made a change
-    std::list<CollapsedSection*> &sections = lineManager->getSections();
-    auto itSections = sections.begin();
-    while (itSections != sections.end() && (*itSections)->position <= dirtyPos) ++itSections;
-    int curr = dirtyPos;
-    auto it = document->rootFrame()->begin();
-    for (int i = 0; i < curr; i++)
-    {
-        ++it;
-    }
-    while (it != document->rootFrame()->end())
-    {
-        auto currBlock = textEdit->documentHandler()->target()->findBlockByNumber(curr);
-        lv::ProjectDocumentBlockData* userData =
-                static_cast<lv::ProjectDocumentBlockData*>(currBlock.userData());
+    document->rootFrame(); // bug fix
+    LineManager* lm = dynamic_cast<LineManager*>(document->parent());
+    triggerUpdate(document->lineCount(), document->lineCount(), 0);
+    connect(lm, &LineManager::updateLineSurface, this, &LineSurface::triggerUpdate);
+}
 
-        bool visible = true;
-        if (itSections != sections.end())
-        {
-            CollapsedSection* sec = (*itSections);
-            if (curr == sec->position)
-            {
-                userData->collapse();
-                userData->setNumOfCollapsedLines(sec->numberOfLines);
-                userData->setStateChangeFlag(false);
-            }
-            // if we're in a collapsed section, block shouldn't be visible
-            if (curr > sec->position && curr <= sec->position + sec->numberOfLines)
-            {
-                visible = false;
-            }
-            // if we just exited a collapsed section, move to the next one
-            if (curr == sec->position + sec->numberOfLines) ++itSections;
+void LineSurface::unsetTextDocument()
+{
+    document = nullptr;
+}
 
-        }
-
-        visible = visible && currBlock.isVisible();
-
-        it.currentBlock().setVisible(visible);
-        if (visible && userData) {
-            switch (userData->collapseState())
-            {
-            case lv::ProjectDocumentBlockData::Collapse:
-                changeLastCharInBlock(curr, 'v');
-                break;
-            case lv::ProjectDocumentBlockData::Expand:
-                changeLastCharInBlock(curr, '>');
-                break;
-            case lv::ProjectDocumentBlockData::NoCollapse:
-                changeLastCharInBlock(curr, ' ');
-                break;
-            }
-            userData->setStateChangeFlag(false);
-        }
-        ++curr; ++it;
-    }
-    auto firstDirtyBlock = document->findBlockByNumber(dirtyPos);
-    document->markContentsDirty(firstDirtyBlock.position(), document->characterCount() - firstDirtyBlock.position());
-
+void LineSurface::triggerUpdate(int prev, int curr, int dirty)
+{
+    previousLineNumber = prev;
+    lineNumber = curr;
+    dirtyPos = dirty;
     polish();
     if (isComponentComplete())
     {
         updateSize();
         updateType = LineSurface::UpdatePaintNode;
-
         update();
     }
 }
@@ -514,7 +339,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     TextNodeEngine engine;
     TextNodeEngine frameDecorationsEngine;
 
-    if (numberOfDigits(prevLineNumber) != numberOfDigits(lineNumber) || dirtyPos >= textNodeMap.size()){
+    if (numberOfDigits(previousLineNumber) != numberOfDigits(lineNumber) || dirtyPos >= textNodeMap.size()){
         dirtyPos = 0;
     }
     if (!oldNode  || dirtyPos != -1) {
@@ -524,8 +349,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
 
         // delete all dirty nodes
         auto lineNumIt = textNodeMap.begin();
-        auto rootFrame = document->rootFrame();
-        int hiddenNum = 0; auto itPrime = rootFrame->begin();
+        int hiddenNum = 0; auto itPrime = document->rootFrame()->begin();
         for (int k=0; k<dirtyPos; k++)
         {
             if (!itPrime.currentBlock().isVisible()) hiddenNum++;

@@ -902,7 +902,7 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
                                 {
                                     result = lm->isFirstLineOfCollapsedSection(d->cursor.block().blockNumber());
                                 }
-                                if (result.first != -1)
+                                if (lm && result.first != -1)
                                 {
                                     lm->expandLines(result.first, result.second);
                                 }
@@ -1075,7 +1075,7 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
 
             if (result.first != -1 && localCursor.atBlockStart())
             {
-                textEdit->getLineManager()->expandLines(result.first, result.second);
+                textEdit->manageExpandCollapse(result.first, false);
             }
             else {
                 localCursor.deletePreviousChar();

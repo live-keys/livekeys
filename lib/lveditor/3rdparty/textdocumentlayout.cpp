@@ -52,6 +52,7 @@
 #include <qbasictimer.h>
 
 #include <algorithm>
+#include "linemanager.h"
 
 #ifdef LAYOUT_DEBUG
 #define LDEBUG qDebug()
@@ -415,6 +416,8 @@ public:
     qreal idealWidth;
     bool contentHasAlignment;
 
+    LineManager* lineManager;
+
     QFixed blockIndent(const QTextBlockFormat &blockFormat) const;
 
     void drawFrame(const QPointF &offset, QPainter *painter, const QAbstractTextDocumentLayout::PaintContext &context,
@@ -475,7 +478,8 @@ TextDocumentLayoutPrivate::TextDocumentLayoutPrivate()
       cursorWidth(1),
       currentLazyLayoutPosition(-1),
       lazyLayoutStepSize(1000),
-      lastPageCount(-1)
+      lastPageCount(-1),
+      lineManager(new LineManager)
 {
     showLayoutProgress = true;
     insideDocumentChange = false;
@@ -1906,10 +1910,7 @@ QFixed TextDocumentLayoutPrivate::findY(QFixed yFrom, const TextLayoutStruct *la
 }
 
 TextDocumentLayout::TextDocumentLayout(QTextDocument *doc)
-    : QAbstractTextDocumentLayout(*new TextDocumentLayoutPrivate, doc)
-{
-    // registerHandler(QTextFormat::ImageObject, new QTextImageHandler(this));
-}
+    : QAbstractTextDocumentLayout(*new TextDocumentLayoutPrivate, doc){}
 
 
 void TextDocumentLayout::draw(QPainter *painter, const PaintContext &context)
@@ -2354,10 +2355,19 @@ bool TextDocumentLayout::contentHasAlignment() const
     return d->contentHasAlignment;
 }
 
-void TextDocumentLayout::updateSingleLine(int lineNumber)
+LineManager *TextDocumentLayout::getLineManager()
 {
-    emit updateForSingleLine(lineNumber);
+    Q_D(TextDocumentLayout);
+    return d->lineManager;
 }
+
+void TextDocumentLayout::stateChangeUpdate(int pos)
+{
+    Q_D(TextDocumentLayout);
+    d->lineManager->setDirtyPos(pos);
+    d->lineManager->textDocumentFinishedUpdating(this->document()->blockCount());
+}
+
 
 qreal TextDocumentLayoutPrivate::scaleToDevice(qreal value) const
 {
