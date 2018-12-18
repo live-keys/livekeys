@@ -2550,6 +2550,7 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
     if (d->document && d->documentLayout)
     {
         d->documentLayout->getLineManager()->setDirtyPos(d->document->findBlock(pos).blockNumber());
+        getPaletteManager()->setDirtyPos(d->document->findBlock(pos).blockNumber());
     }
 
     markDirtyNodesForRange(pos, editRange, delta);
@@ -2768,6 +2769,7 @@ void TextEdit::stateChangeHandler(const QTextBlock &block)
     {
         userData->setStateChangeFlag(false);
         d->documentLayout->stateChangeUpdate(block.blockNumber());
+        getPaletteManager()->setDirtyPos(block.blockNumber());
     }
 }
 
@@ -3500,6 +3502,7 @@ void TextEdit::updateFragmentVisibility()
     }
 
     d->documentLayout->getLineManager()->setDirtyPos(0);
+    getPaletteManager()->setDirtyPos(0);
     d->documentLayout->getLineManager()->textDocumentFinishedUpdating(d->document->blockCount());
 }
 

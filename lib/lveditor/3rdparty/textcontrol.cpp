@@ -1001,7 +1001,7 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
 {
     Q_Q(TextControl);
 
-    /* PALETTE TEST
+/*    //PALETTE TEST
     static int cnt = 0;
 
     switch (cnt)
