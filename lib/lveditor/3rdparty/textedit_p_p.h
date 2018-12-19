@@ -57,6 +57,7 @@ class PaletteManager;
 class TextControl;
 class TextNode;
 class TextNodeEngine;
+class TextDocumentLayout;
 
 class LV_EDITOR_EXPORT TextEditPrivate : public QQuickImplicitSizeItemPrivate
 {
@@ -107,8 +108,8 @@ public:
     TextEditPrivate()
         : readOnly(false), color(QRgb(0xFF000000)), selectionColor(QRgb(0xFF000080)), selectedTextColor(QRgb(0xFFFFFFFF))
         , textMargin(0.0), xoff(0), yoff(0)
-        , font(sourceFont), documentHandler(nullptr), cursorComponent(nullptr), cursorItem(nullptr), document(nullptr),  control(nullptr)
-        , paletteManager(new PaletteManager)
+        , font(sourceFont), documentHandler(nullptr), cursorComponent(nullptr), cursorItem(nullptr), document(nullptr), documentLayout(nullptr), control(nullptr)
+        , paletteManager(new PaletteManager), lineSurface(nullptr)
         , lastSelectionStart(0), lastSelectionEnd(0), lineCount(0)
         , clearSelectionOnFocus(false)
         , lastHighlightChangeStart(INT_MAX)
@@ -199,10 +200,12 @@ public:
     QQmlComponent* cursorComponent;
     QQuickItem* cursorItem;
     QTextDocument *document;
+    TextDocumentLayout *documentLayout;
     TextControl *control;
     QList<Node*> textNodeMap;
 
     PaletteManager *paletteManager;
+    LineSurface* lineSurface;
 
     int lastSelectionStart;
     int lastSelectionEnd;

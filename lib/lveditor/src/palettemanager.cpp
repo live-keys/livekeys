@@ -81,7 +81,7 @@ void PaletteManager::setTextEdit(TextEdit *value)
     textEdit = value;
     if (value != nullptr)
     {
-        QObject::connect(textEdit, &TextEdit::dirtyBlockPosition, this, &PaletteManager::setDirtyPos);
+        // QObject::connect(textEdit, &TextEdit::dirtyBlockPosition, this, &PaletteManager::setDirtyPos);
         QObject::connect(textEdit, &TextEdit::lineCountChanged, this, &PaletteManager::lineNumberChange);
     }
 }
@@ -149,7 +149,7 @@ int PaletteManager::resizePalette(QObject *palette, int newHeight)
         if (pd->matchesPalette(palette))
         {
             pd->palleteHeight = newHeight;
-            int newPaletteSpan = qCeil(newHeight / this->lineHeight);
+            int newPaletteSpan = qCeil(newHeight * 1.0/ this->lineHeight);
             if (newPaletteSpan != pd->paletteSpan)
             {
                 pd->paletteSpan = newPaletteSpan;

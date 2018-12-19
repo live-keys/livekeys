@@ -61,6 +61,7 @@ class QTextListFormat;
 namespace lv {
 
 class TextDocumentLayoutPrivate;
+class LineManager;
 
 class LV_EDITOR_EXPORT TextDocumentLayout : public QAbstractTextDocumentLayout
 {
@@ -101,6 +102,9 @@ public:
 
     bool contentHasAlignment() const;
 
+    LineManager* getLineManager();
+    void stateChangeUpdate(int pos);
+    void highlightingChanged(int position, int length);
 protected:
     void documentChanged(int from, int oldLength, int length) override;
     void resizeInlineObject(QTextInlineObject item, int posInDocument, const QTextFormat &format) override;

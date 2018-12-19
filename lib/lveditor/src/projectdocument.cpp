@@ -500,7 +500,6 @@ QString& ProjectDocumentBlockData::replacementString() { return m_replacementStr
 
 void ProjectDocumentBlockData::resetCollapseParams()
 {
-	m_stateChangeFlag = true;
 	m_collapseState = NoCollapse;
 	m_replacementString = QString();
 

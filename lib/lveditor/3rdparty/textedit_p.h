@@ -50,8 +50,11 @@ class QTextBlock;
 
 namespace lv {
 
+class TextDocumentLayout;
 class TextEditPrivate;
 class PaletteManager;
+class LineManager;
+class LineSurface;
 
 class LV_EDITOR_EXPORT TextEdit : public QQuickImplicitSizeItem
 {
@@ -109,6 +112,9 @@ public:
     TextEdit(QQuickImplicitSizeItem *parent=nullptr);
 
     PaletteManager* getPaletteManager();
+    void setLineManager(LineManager* lm);
+    void setLineSurface(LineSurface* ls);
+    LineManager *getLineManager();
 
     enum HAlignment {
         AlignLeft = Qt::AlignLeft,
@@ -233,15 +239,14 @@ public:
     bool isReadOnly() const;
 
     TextEditPrivate* getPriv() { Q_D(TextEdit); return d; }
+    void stateChangeHandler(const QTextBlock& block);
 
     QRectF cursorRectangle() const;
 
-    // Q_INVOKABLE void testSetDocument();
-    Q_INVOKABLE void collapseLines(int pos, int num, QString &replacement);
-    Q_INVOKABLE void expandLines(int pos, int num, QString &replacement);
-
     void setTextDocument(QTextDocument* td);
 
+    TextDocumentLayout* getDocumentLayout();
+    void manageExpandCollapse(int pos, bool collapsed);
 #ifndef QT_NO_IM
     QVariant inputMethodQuery(Qt::InputMethodQuery property) const Q_DECL_OVERRIDE;
     Q_REVISION(4) Q_INVOKABLE QVariant inputMethodQuery(Qt::InputMethodQuery query, QVariant argument) const;
@@ -355,7 +360,6 @@ Q_SIGNALS:
     Q_REVISION(6) void leftPaddingChanged();
     Q_REVISION(6) void rightPaddingChanged();
     Q_REVISION(6) void bottomPaddingChanged();
-    void dirtyBlockPosition(int pos);
     void stateChangeSignal(int blockNum);
     void textDocumentFinishedUpdating();
 
@@ -396,13 +400,11 @@ private Q_SLOTS:
     void updateSize();
     void triggerPreprocess();
     void highlightingDone(const QRectF &);
-
+    void showHideLines(bool show, int pos, int num);
 private:
     void markDirtyNodesForRange(int start, int end, int charDelta);
     void updateTotalLines();
     void invalidateFontCaches();
-    void showHideLines(bool show, int pos, int num);
-    void replaceTextInBlock(int blockNumber, std::string s);
     void updateFragmentVisibility();
 
 protected:
@@ -433,7 +435,7 @@ protected:
     void updatePolish() Q_DECL_OVERRIDE;
 
     friend class TextUtil;
-    friend class LineNumberSurface;
+    friend class LineSurface;
     friend class DocumentHandler;
     friend class TextControl;
 private:

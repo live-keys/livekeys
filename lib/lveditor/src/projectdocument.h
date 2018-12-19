@@ -161,8 +161,8 @@ public:
     CollapseFunctionType onCollapse();
     void setStateChangeFlag(bool value) {m_stateChangeFlag = value; }
     bool stateChangeFlag() {return m_stateChangeFlag; }
-    void collapse() {m_collapseState = Expand; m_stateChangeFlag = true; }
-    void expand() { m_collapseState = Collapse; m_stateChangeFlag = true; }
+    void collapse() {m_collapseState = Expand;  }
+    void expand() { m_collapseState = Collapse; }
 
     void resetCollapseParams();
 
