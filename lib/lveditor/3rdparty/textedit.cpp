@@ -53,7 +53,6 @@
 #include <QtQml/qqmlinfo.h>
 #include <QtQuick/qsgsimplerectnode.h>
 #include <QTimer>
-#include <cstdlib>
 #include "textdocumentlayout.h"
 #include "linemanager.h"
 #include "linesurface.h"
@@ -182,7 +181,6 @@ TextEdit::TextEdit(QQuickImplicitSizeItem *parent)
 : QQuickImplicitSizeItem(*(new TextEditPrivate), parent)
 {
     Q_D(TextEdit);
-    id = rand();
     d->init();
 }
 
@@ -190,7 +188,6 @@ TextEdit::TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent)
 : QQuickImplicitSizeItem(dd, parent)
 {
     Q_D(TextEdit);
-    id = rand();
     d->init();
 }
 
