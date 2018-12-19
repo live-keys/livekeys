@@ -18,7 +18,6 @@
 #define LVPROJECTQMLEXTENSION_H
 
 #include "live/lveditqmljsglobal.h"
-#include "live/projectextension.h"
 #include "live/documenthandler.h"
 #include "live/abstractcodehandler.h"
 
@@ -27,13 +26,14 @@
 
 namespace lv{
 
+class Settings;
 class QmlJsSettings;
 class ProjectQmlScope;
 class CodeQmlHandler;
 class ProjectQmlScanner;
 class ProjectQmlScanMonitor;
 class PluginInfoExtractor;
-class LV_EDITQMLJS_EXPORT ProjectQmlExtension : public ProjectExtension, public QQmlParserStatus{
+class LV_EDITQMLJS_EXPORT ProjectQmlExtension : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
@@ -43,13 +43,6 @@ public:
     ProjectQmlExtension(Settings* settings, Project* project, ViewEngine *engine, QObject* parent = 0);
     virtual ~ProjectQmlExtension();
 
-    AbstractCodeHandler* createHandler(
-        ProjectDocument* document,
-        Project* project,
-        ViewEngine* engine,
-        DocumentHandler *handler
-    );
-
     void classBegin(){}
     void componentComplete();
 
@@ -58,7 +51,12 @@ public:
 
     PluginInfoExtractor *getPluginInfoExtractor(const QString& import);
 
-    static void engineHook(const QString& code, const QUrl& file, QObject* result, QObject* project);
+    static void engineHook(const QString& code, const QUrl& file, QObject* result, QObject* project, void *data);
+
+    void addCodeQmlHandler(CodeQmlHandler* handler);
+    void removeCodeQmlHandler(CodeQmlHandler* handler);
+
+    PaletteContainer* paletteContainer();
 
 public slots:
     QObject* createHandler(ProjectDocument* document, DocumentHandler* handler);
@@ -70,10 +68,16 @@ private:
     ViewEngine*            m_engine;
     QmlJsSettings*         m_settings;
     ProjectQmlScanMonitor* m_scanMonitor;
+    QList<CodeQmlHandler*> m_codeHandlers;
+    PaletteContainer*  m_paletteContainer;
 };
 
 inline ProjectQmlScanMonitor *ProjectQmlExtension::scanMonitor(){
     return m_scanMonitor;
+}
+
+inline PaletteContainer *ProjectQmlExtension::paletteContainer(){
+    return m_paletteContainer;
 }
 
 }// namespace

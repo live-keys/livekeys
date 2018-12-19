@@ -15,13 +15,8 @@
 ****************************************************************************/
 
 #include "editor_plugin.h"
-
-#include "live/abstractcodeserializer.h"
-#include "live/nativevaluecodeserializer.h"
-#include "live/qmlobjectcodeserializer.h"
-#include "live/codeconverter.h"
-#include "live/livepalette.h"
-#include "live/livepalettelist.h"
+#include "live/codepalette.h"
+#include "live/palettelist.h"
 #include "live/applicationcontext.h"
 #include "live/visuallog.h"
 #include "live/settings.h"
@@ -35,22 +30,16 @@
 #include <QQuickWindow>
 
 void EditorPlugin::registerTypes(const char *uri){
-    // @uri modules.live
-    qmlRegisterUncreatableType<lv::AbstractCodeSerializer>(
-        uri, 1, 0, "AbstractCodeSerializer", "AbstractCodeSerializer is of abstract type."
-    );
-    qmlRegisterUncreatableType<lv::LivePaletteList>(
-        uri, 1, 0, "LivePaletteList", "LivePaletteList can be accessed through a DocumentHandler."
+    // @uri editor
+    qmlRegisterUncreatableType<lv::PaletteList>(
+        uri, 1, 0, "PaletteList", "PaletteList can be accessed through a DocumentHandler."
     );
     qmlRegisterUncreatableType<lv::AbstractCodeHandler>(
         uri, 1, 0, "AbstractCodeHandler", "AbstractCodeHandler is of abstract type."
     );
-    qmlRegisterType<lv::DocumentHandler>(          uri, 1, 0, "DocumentHandler");
-    qmlRegisterType<lv::NativeValueCodeSerializer>(uri, 1, 0, "NativeValueCodeSerializer");
-    qmlRegisterType<lv::QmlObjectCodeSerializer>(  uri, 1, 0, "QmlObjectCodeSerializer");
-    qmlRegisterType<lv::CodeConverter>(            uri, 1, 0, "CodeConverter");
-    qmlRegisterType<lv::LivePalette>(              uri, 1, 0, "LivePalette");
-    qmlRegisterType<lv::LiveExtension>(            uri, 1, 0, "LiveExtension");
+    qmlRegisterType<lv::DocumentHandler>(uri, 1, 0, "DocumentHandler");
+    qmlRegisterType<lv::CodePalette>(    uri, 1, 0, "CodePalette");
+    qmlRegisterType<lv::LiveExtension>(  uri, 1, 0, "LiveExtension");
 }
 
 void EditorPlugin::initializeEngine(QQmlEngine *, const char *){

@@ -2,11 +2,9 @@ import QtQuick 2.3
 import editor 1.0
 import live 1.0
 
-LivePalette{
+CodePalette{
     id: palette
-
-    type: "double"
-    serialize: NativeValueCodeSerializer{}
+    type: "qml/double"
 
     item: Rectangle{
         width: 300
@@ -19,10 +17,13 @@ LivePalette{
         }
     }
 
-    onInit: {
-        valueHistory.currentValue = value
+    onExtensionChanged: {
+        extension.whenBinding = function(){
+            extension.write(palette.value)
+        }
     }
-    onCodeChanged: {
+
+    onInit: {
         valueHistory.currentValue = value
     }
 

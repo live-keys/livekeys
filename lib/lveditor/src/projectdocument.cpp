@@ -19,9 +19,6 @@
 #include "live/lockedfileiosession.h"
 #include "live/documenthandler.h"
 #include "live/project.h"
-#include "live/codeconverter.h"
-#include "live/codedeclaration.h"
-#include "live/coderuntimebinding.h"
 #include "live/visuallog.h"
 #include "textdocumentlayout.h"
 
@@ -142,10 +139,11 @@ void ProjectDocument::updateSections(int position, int charsRemoved, const QStri
         }
 
         if ( !section->isValid() ){
+
             it = m_sections.erase(it);
 
-            if ( m_textDocument && m_editingDocumentHandler )
-                m_editingDocumentHandler->rehighlightBlock(m_textDocument->findBlock(sectionPosition));
+            QTextBlock tb = m_textDocument->findBlock(sectionPosition);
+            m_textDocument->markContentsDirty(tb.position(), tb.length());
         } else {
             ++it;
         }
@@ -215,7 +213,7 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
                     }
                     seit = bd->m_sections.erase(seit);
                     bddestination->addSection(itSection);
-                    m_editingDocumentHandler->rehighlightBlock(destinationBlock);
+                    m_textDocument->markContentsDirty(destinationBlock.position(), destinationBlock.length());
                     continue;
                 }
                 ++seit;
@@ -234,96 +232,6 @@ QString ProjectDocument::getCharsRemoved(int position, int count){
     }
     return "";
 }
-
-void ProjectDocument::assignDocumentHandler(DocumentHandler* handler){
-    syncContent();
-    m_editingDocumentHandler = handler;
-}
-
-bool ProjectDocument::addNewBinding(CodeRuntimeBinding *binding){
-    if ( binding->declaration()->document() != this ){
-        qCritical("Runtime binding requested on a different document.");
-        return 0;
-    }
-
-    // bindings are added in descending order according to their position
-    QLinkedList<CodeRuntimeBinding*>::iterator it = m_bindings.begin();
-    while( it != m_bindings.end() ){
-        CodeRuntimeBinding* itBind = *it;
-
-        if ( itBind->position() < binding->position() ){
-            break;
-
-        // do not add the same binding
-        } else if ( itBind->position() == binding->position() ){
-            return false;
-        }
-        ++it;
-    }
-    if ( binding ){
-        int bindingPosition = binding->position();
-        int bindingLength   = binding->length();
-        binding->declaration()->m_section = createSection(CodeRuntimeBinding::Section, bindingPosition, bindingLength);
-        binding->declaration()->m_section->setUserData(binding);
-        binding->declaration()->m_section->onTextChanged([](ProjectDocumentSection::Ptr section, int, int, const QString&){
-            auto projectDocument = section->document();
-            auto bind = reinterpret_cast<CodeRuntimeBinding*>(section->userData());
-            if ( !projectDocument->editingStateIs(ProjectDocument::Runtime) ){
-                section->invalidate();
-                int bindingPosition = bind->position();
-                projectDocument->removeBindingAt(bindingPosition);
-            }
-        });
-
-        m_bindings.insert(it, binding);
-    }
-
-    return true;
-}
-
-//void ProjectDocument::documentContentsChanged(
-//        DocumentHandler* author,
-//        int position,
-//        int charsRemoved,
-//        const QString &addedText)
-//{
-//    updateMarkers(position, charsRemoved, addedText.size());
-//    updateSections(position, charsRemoved, addedText);
-////    bool hasPendingChange = m_changes.size() > 0 && m_changes.last().commited == false;
-////    bool isPendingChangeCompatible =
-////            hasPendingChange &&
-////            (m_changes.last().position + m_changes.last().charsAdded.size() == position) &&
-////            charsRemoved == 0 && addedText.length() == 1 && !addedText[0].isSpace();
-
-////    if ( hasPendingChange && isPendingChangeCompatible ){
-////        if ( m_lastChange == m_changes.end() ){
-////            --m_lastChange;
-////            m_lastChange->undo();
-////        }
-////        m_changes.last().charsAdded.append(addedText);
-////    } else {
-////        if (hasPendingChange){
-////            m_changes.last().commited = true;
-////        }
-////        m_changes.append(
-////            ProjectDocumentAction(this, position, addedText, getCharsRemoved(position, charsRemoved), false)
-////        );
-////        if ( m_lastChange == m_changes.end() )
-////            --m_lastChange;
-////    }
-////    if ( m_changes.size() > 100 ){
-////        if ( m_lastChange == m_changes.begin() && m_lastChange != m_changes.end() ){
-////            m_lastChange->redo();
-////            ++m_lastChange;
-////        }
-////        m_changes.removeFirst();
-////    }
-
-//    setIsDirty(true);
-
-//    resetSync();
-//    emit contentChanged();
-//}
 
 ProjectDocumentMarker::Ptr ProjectDocument::addMarker(int position){
     // markers are added in descending order according to their position
@@ -349,61 +257,6 @@ void ProjectDocument::removeMarker(ProjectDocumentMarker::Ptr marker){
     }
 }
 
-CodeRuntimeBinding *ProjectDocument::bindingAt(int position){
-    QLinkedList<CodeRuntimeBinding*>::iterator it = m_bindings.begin();
-    while( it != m_bindings.end() ){
-        CodeRuntimeBinding* binding = *it;
-
-        if ( binding->position() == position )
-            return binding;
-
-        if ( binding->position() < position )
-            return nullptr;
-
-        ++it;
-    }
-    return nullptr;
-}
-
-bool ProjectDocument::removeBindingAt(int position){
-    QLinkedList<CodeRuntimeBinding*>::iterator it = m_bindings.begin();
-    while( it != m_bindings.end() ){
-        CodeRuntimeBinding* binding = *it;
-
-        if ( binding->position() == position ){
-            m_bindings.erase(it);
-            delete binding;
-            return true;
-        }
-
-        if ( binding->position() < position )
-            return false;
-
-        ++it;
-    }
-    return false;
-}
-
-void ProjectDocument::updateBindingValue(CodeRuntimeBinding *binding, const QString& value){
-    if ( binding->declaration()->valueOffset() != -1 ){
-
-        int from = binding->position() + binding->declaration()->identifierLength() + binding->declaration()->valueOffset();
-        int to   = from + binding->declaration()->valueLength();
-
-        QTextCursor editCursor(m_textDocument);
-        editCursor.setPosition(from);
-        editCursor.setPosition(to, QTextCursor::KeepAnchor);
-
-        binding->declaration()->setValueLength(value.length());
-
-        addEditingState(ProjectDocument::Runtime);
-        editCursor.beginEditBlock();
-        editCursor.removeSelectedText();
-        editCursor.insertText(value);
-        editCursor.endEditBlock();
-        removeEditingState(ProjectDocument::Runtime);
-    }
-}
 
 ProjectDocumentSection::Ptr ProjectDocument::createSection(int type, int position, int length){
     ProjectDocumentSection::Ptr section = ProjectDocumentSection::create(this, type, position, length);
@@ -480,8 +333,10 @@ void ProjectDocument::removeSection(ProjectDocumentSection::Ptr section){
             if ( currentSection.data() == section.data() ){
                 m_sections.erase(it);
 
-                if ( m_textDocument && m_editingDocumentHandler )
-                    m_editingDocumentHandler->rehighlightBlock(m_textDocument->findBlock(sectionPosition));
+                if ( m_textDocument ){
+                    QTextBlock tb = m_textDocument->findBlock(sectionPosition);
+                    m_textDocument->markContentsDirty(tb.position(), tb.length());
+                }
 
                 return;
             }

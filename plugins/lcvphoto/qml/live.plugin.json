@@ -1,0 +1,8 @@
+{
+    "name": "lcvphoto",
+    "package" : ".",
+    "palettes" : {
+        "palettes/LevelsPalette.qml" : "qml/Levels",
+        "palettes/BrightnessAndContrastPalette.qml": "qml/BrightnessAndContrast"
+    }
+}

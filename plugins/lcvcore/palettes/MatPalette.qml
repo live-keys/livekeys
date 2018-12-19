@@ -22,11 +22,10 @@ import editor 1.0
 import lcvcore 1.0
 import lcvimgproc 1.0
 
-LivePalette{
+CodePalette{
     id: palette
 
-    type : "Mat"
-    serialize : QmlObjectCodeSerializer{}
+    type : "qml/Mat"
 
     property real lastX
     property real lastY
@@ -60,9 +59,6 @@ LivePalette{
     property MatDraw drawing : MatDraw{}
 
     onInit: {
-        mView.mat = value
-    }
-    onCodeChanged:{
         mView.mat = value
     }
 }

@@ -34,7 +34,6 @@ OTHER_FILES *= \
 # Handling the palettes
 
 OTHER_FILES *= \
-    palettes/palettedir \
     palettes/*.qml
 
 # Deploy the palettes
@@ -44,4 +43,8 @@ first.depends = $(first) palettecopy
 export(first.depends)
 export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
+
+DISTFILES += \
+    qml/live.package.json \
+    qml/live.plugin.json
 

@@ -21,7 +21,7 @@ namespace lv{
 
 EditorGlobalObject::EditorGlobalObject(
         Project *project,
-        LivePaletteContainer *paletteContainer,
+        PaletteContainer *paletteContainer,
         QObject *parent)
     : QObject(parent)
     , m_project(project)

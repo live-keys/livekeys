@@ -15,4 +15,7 @@ HEADERS += \
     $$PWD/live/projectqmlextension.h \
     $$PWD/live/qmlpropertymodel.h \
     $$PWD/live/qmlitemmodel.h \
-    $$PWD/live/qmladdcontainer.h
+    $$PWD/live/qmladdcontainer.h \
+    $$PWD/live/qmlcodeconverter.h \
+    $$PWD/live/qmleditfragment.h \
+    $$PWD/live/qmldeclaration.h

@@ -366,12 +366,6 @@ Module {
         }
     }
     Component {
-        name: "QVideoCaptureSerializer"
-        prototype: "lv::AbstractCodeSerializer"
-        exports: ["lcvcore/VideoCaptureSerializer 1.0"]
-        exportMetaObjectRevisions: [0]
-    }
-    Component {
         name: "QVideoWriter"
         defaultProperty: "data"
         prototype: "QQuickItem"

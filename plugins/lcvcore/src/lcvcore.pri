@@ -30,7 +30,6 @@ HEADERS += \
     $$PWD/qcolorhistogram.h \
     $$PWD/qcvglobalobject.h \
     $$PWD/qimagefile.h \
-    $$PWD/qvideocaptureserializer.h \
     $$PWD/qoverlapmat.h \
     $$PWD/qsharedmat.h \
     $$PWD/qitemcapture.h
@@ -65,7 +64,6 @@ SOURCES += \
     $$PWD/qcolorhistogram.cpp \
     $$PWD/qcvglobalobject.cpp \
     $$PWD/qimagefile.cpp \
-    $$PWD/qvideocaptureserializer.cpp \
     $$PWD/qoverlapmat.cpp \
     $$PWD/qsharedmat.cpp \
     $$PWD/qitemcapture.cpp

@@ -53,8 +53,8 @@ public:
     const std::string& extension() const;
     std::string extensionAbsolutePath() const;
     bool hasExtension() const;
-    const std::map<std::string, Package::Dependency*> dependencies() const;
-    const std::map<std::string, Package::Library*> libraries() const;
+    const std::map<std::string, Package::Dependency*>& dependencies() const;
+    const std::map<std::string, Package::Library*>& libraries() const;
 
 private:
     Package(const std::string& path, const std::string& filePath, const std::string& name, const Version& version);

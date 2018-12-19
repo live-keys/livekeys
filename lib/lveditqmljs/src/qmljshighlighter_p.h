@@ -21,9 +21,7 @@
 #include <QSyntaxHighlighter>
 
 #include "live/projectdocument.h"
-#include "live/documenthandlerstate.h"
-#include "live/documenteditfragment.h"
-#include "live/coderuntimebinding.h"
+#include "live/qmleditfragment.h"
 #include "qmljssettings.h"
 #include "qmljs/qmljsscanner.h"
 

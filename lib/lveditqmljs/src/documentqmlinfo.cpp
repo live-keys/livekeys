@@ -16,10 +16,10 @@
 
 #include "live/documentqmlinfo.h"
 #include "live/documentqmlvalueobjects.h"
-#include "live/codedeclaration.h"
-#include "live/coderuntimebinding.h"
+#include "live/qmldeclaration.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
+#include "bindingchannel.h"
 
 #include "qmljs/qmljsdocument.h"
 #include "qmljs/qmljsbind.h"
@@ -33,12 +33,9 @@ namespace lv{
 
 namespace{
 
-    QQmlProperty findRuntimeDeclaration(
+    BindingPath::Node* findDeclarationPathImpl(
         DocumentQmlValueObjects::RangeObject *object,
-        QObject *root,
-        CodeDeclaration::Ptr declaration,
-        const QString& source,
-        int& listIndex)
+        QmlDeclaration::Ptr declaration)
     {
         int position = declaration->position();
 
@@ -47,19 +44,20 @@ namespace{
             // found property start position
             if ( object->properties[i]->begin == position ){
 
-                if ( declaration->identifierChain().isEmpty() ){
-                    return QQmlProperty();
-                }
+                if ( declaration->identifierChain().isEmpty() )
+                    return nullptr;
 
                 // iterate property chain (eg. border.size => (border, size))
-                QObject* objectChain = root;
-                for ( int j = 0; j < declaration->identifierChain().size() - 1; ++j ){
-                    QQmlProperty foundprop(root, declaration->identifierChain()[j]);
-                    if ( !foundprop.isValid() || foundprop.propertyTypeCategory() != QQmlProperty::Object ){
-                        return QQmlProperty();
-                    }
+                BindingPath::Node* currentParent = nullptr;
 
-                    objectChain = foundprop.read().value<QObject*>();
+                for ( int j = 0; j < declaration->identifierChain().size(); ++j ){
+                    BindingPath::PropertyNode* n = new BindingPath::PropertyNode;
+                    n->propertyName = declaration->identifierChain()[j];
+                    n->objectName = object->properties[i]->object();
+                    n->parent = currentParent;
+                    if ( currentParent )
+                        currentParent->child = n;
+                    currentParent = n;
                 }
 
                 // found property
@@ -73,59 +71,128 @@ namespace{
                     object->properties[i]->end - object->properties[i]->valueBegin
                 );
 
-                return QQmlProperty(objectChain, declaration->identifierChain().last());
+                BindingPath::Node* n = currentParent;
+                while ( n->parent != nullptr )
+                    n = n->parent;
+                return n;
 
             } else if ( object->properties[i]->child &&
                         object->properties[i]->begin < position &&
                         object->properties[i]->end > position )
             {
-                return findRuntimeDeclaration(
-                    object->properties[i]->child, root, declaration, source, listIndex
+                BindingPath::Node* currentParent = nullptr;
+
+                QStringList propertyNames = object->properties[i]->name();
+
+                for ( int j = 0; j < propertyNames.size(); ++j ){
+                    BindingPath::PropertyNode* n = new BindingPath::PropertyNode;
+                    n->propertyName = propertyNames[j];
+                    n->objectName = object->properties[i]->object();
+                    n->parent = currentParent;
+                    if ( currentParent )
+                        currentParent->child = n;
+                    currentParent = n;
+                }
+
+                BindingPath::Node* n = findDeclarationPathImpl(
+                    object->properties[i]->child, declaration
                 );
+                if ( !n ){
+                    delete currentParent;
+                    return nullptr;
+                }
+
+                n->parent = currentParent;
+                currentParent->child = n;
+
+                while ( n->parent != nullptr )
+                    n = n->parent;
+                return n;
+            }
+        } // properties end
+
+        for ( int i = 0; i < object->children.size(); ++i ){
+
+            if ( position > object->children[i]->begin &&
+                 position < object->children[i]->end )
+            {
+                BindingPath::IndexNode* indexNode = new BindingPath::IndexNode;
+                indexNode->index = i;
+
+                BindingPath::Node* n = findDeclarationPathImpl(
+                    object->children[i], declaration
+                );
+
+                if ( !n ){
+                    delete indexNode;
+                    return nullptr;
+                }
+
+                indexNode->child = n;
+                n->parent = indexNode;
+
+                return indexNode;
+
+            } else if ( position == object->children[i]->begin ){ // found object
+
+                // return the top property, and the index of the object
+                declaration->setValuePositionOffset(0);
+                declaration->setValueLength(object->children[i]->end - object->children[i]->begin);
+
+                BindingPath::IndexNode* indexNode = new BindingPath::IndexNode;
+                indexNode->index = i;
+
+                return indexNode;
             }
         }
 
-        QQmlProperty pp(root);
-        if ( pp.isValid() ){
-            if ( pp.propertyTypeCategory() == QQmlProperty::Object &&
-                 object->children.size() == 1 &&
-                 position > object->children[0]->begin &&
-                 position < object->children[0]->end )
-            {
-                return findRuntimeDeclaration(
-                    object->children[0], pp.read().value<QObject*>(), declaration, source, listIndex
-                );
-            } else if ( pp.propertyTypeCategory() == QQmlProperty::List ){
-                QQmlListReference ppref = qvariant_cast<QQmlListReference>(pp.read());
+        return nullptr;
+    }
 
-                // check if have children and object hierarchy hasn't been modified
-                if ( ppref.canAt() && ppref.canCount() && ppref.count() == object->children.size() ){
-                    for ( int i = 0; i < object->children.size(); ++i ){
+    void traversePath(BindingPath* path, BindingPath::Node* n, QObject* object){
+        if ( n == nullptr || object == nullptr)
+            return;
 
-                        if ( position > object->children[i]->begin &&
-                             position < object->children[i]->end &&
-                             ppref.count() > i )
-                        {
-                            return findRuntimeDeclaration(
-                                object->children[i], ppref.at(i), declaration, source, listIndex
-                            );
+        if ( n->type() == BindingPath::Node::Property ){
+            BindingPath::PropertyNode* pn = static_cast<BindingPath::PropertyNode*>(n);
 
-                        } else if ( position == object->children[i]->begin ){ // found object
+            QQmlProperty prop(object, pn->propertyName);
+            if ( !prop.isValid() )
+                return;
 
-                            // return the top property, and the index of the object
-                            declaration->setValuePositionOffset(0);
-                            declaration->setValueLength(object->children[i]->end - object->children[i]->begin);
-                            listIndex = i;
-                            return pp;
-                        }
-                    }
+            if ( n->child == nullptr ){
+                path->updateConnection(prop);
+                return;
+            } else {
+                traversePath(path, n->child, prop.read().value<QObject*>());
+            }
+        } else if ( n->type() == BindingPath::Node::Index ){
+            BindingPath::IndexNode* in = static_cast<BindingPath::IndexNode*>(n);
+
+            QQmlProperty prop(object);
+            if ( !prop.isValid() )
+                return;
+            if ( prop.propertyTypeCategory() == QQmlProperty::Object && in->index != 0 )
+                return;
+
+            if ( n->child == nullptr ){
+                path->updateConnection(prop, in->index);
+                return;
+            } else {
+                if ( prop.propertyTypeCategory() == QQmlProperty::Object ){
+                    traversePath(path, n->child, prop.read().value<QObject*>());
+                } else if ( prop.propertyTypeCategory() == QQmlProperty::List ){
+                    QQmlListReference ppref = qvariant_cast<QQmlListReference>(prop.read());
+                    if ( ppref.canAt() && ppref.canCount() && ppref.count() > in->index ){
+                        traversePath(path, n->child, ppref.at(in->index));
+                    } else
+                        return;
                 }
             }
         }
-
-        return QQmlProperty();
     }
-}
+
+} // namespace
 
 
 class DocumentQmlInfoPrivate{
@@ -376,62 +443,37 @@ DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects(const DocumentQmlInf
     return objects;
 }
 
-void DocumentQmlInfo::syncBindings(const QString &source, ProjectDocument *document, QObject *root){
-    if ( document && document->hasBindings() ){
-        DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(document->file()->path());
-        docinfo->parse(source);
-
-        DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
-
-        for ( ProjectDocument::BindingIterator it = document->bindingsBegin(); it != document->bindingsEnd(); ++it ){
-            CodeRuntimeBinding* binding = *it;
-            int listIndex = -1;
-            QQmlProperty foundProperty(findRuntimeDeclaration(objects->root(), root, binding->declaration(), source, listIndex));
-            if ( foundProperty.isValid() )
-                foundProperty.connectNotifySignal(binding, SLOT(updateValue()));
-        }
-    }
+void DocumentQmlInfo::traverseBindingPath(BindingPath *path, QObject *root){
+    traversePath(path, path->root(), root);
 }
 
-void DocumentQmlInfo::syncBindings(
-        const QString &source,
-        ProjectDocument* document,
-        QList<CodeRuntimeBinding *> bindings,
-        QObject *root)
+BindingPath *DocumentQmlInfo::findDeclarationPath(
+        DocumentQmlValueObjects::RangeObject *root,
+        QmlDeclaration::Ptr declaration)
 {
-    if ( bindings.isEmpty() )
-        return;
+    if ( !root )
+        return nullptr;
 
-    DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(document->file()->path());
-    docinfo->parse(source);
+    BindingPath::Node* n = findDeclarationPathImpl(root, declaration);
+    if ( !n )
+        return nullptr;
 
-    DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
+    BindingPath* path = new BindingPath;
+    path->updatePath(n);
 
-    for ( QList<CodeRuntimeBinding*>::iterator it = bindings.begin(); it != bindings.end(); ++it) {
-        CodeRuntimeBinding* binding = *it;
-        int listIndex = -1;
-        QQmlProperty foundProperty(findRuntimeDeclaration(objects->root(), root, binding->declaration(), source, listIndex));
-        if ( foundProperty.isValid() )
-            foundProperty.connectNotifySignal(binding, SLOT(updateValue()));
-    }
+    return path;
 }
 
-QQmlProperty DocumentQmlInfo::findRuntimeMatchingDeclaration(
+BindingPath* DocumentQmlInfo::findDeclarationPath(
         const QString &source,
         ProjectDocument *document,
-        CodeDeclaration::Ptr declaration,
-        QObject *root,
-        int &listIndex)
+        QmlDeclaration::Ptr declaration)
 {
     DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(document->file()->path());
     docinfo->parse(source);
 
     DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
-
-    if ( objects->root() )
-        return QQmlProperty(findRuntimeDeclaration(objects->root(), root, declaration, source, listIndex));
-
-    return QQmlProperty();
+    return findDeclarationPath(objects->root(), declaration);
 }
 
 DocumentQmlInfo::~DocumentQmlInfo(){
