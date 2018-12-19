@@ -42,13 +42,7 @@
 
 #ifndef QT_NO_TEXTCONTROL
 
-// <TOREMOVE>
-// Same as above
-//QTextCursor included in qquicktextcontrol_p.h and _p_p.h
-//#include "private/qtextcursor_p.h"
-//#include "private/qtextdocumentlayout_p.h"
 #include "qabstracttextdocumentlayout.h"
-
 #include <qcoreapplication.h>
 #include <qfont.h>
 #include <qevent.h>
@@ -58,11 +52,7 @@
 #include <qtimer.h>
 #include <qinputmethod.h>
 #include "qtextdocument.h"
-
-// <REMOVED>
-// TextDocument exposes a lot of methods already to interact with it
-// Maybe this is only one or two function calls that can be eliminated?
-// #include "private/qtextdocument_p.h"
+#include "linemanager.h"
 
 #include "qtextlist.h"
 #include "qtextdocumentwriter.h"
@@ -903,6 +893,20 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
                             case Qt::Key_Up:
                             case Qt::Key_Down:
                             case Qt::Key_Tab:
+
+                            if (ke->key() == Qt::Key_Return)
+                            {
+                                LineManager* lm = d->textEdit->getLineManager();
+                                pair<int, int> result(-1, -1);
+                                if (lm)
+                                {
+                                    result = lm->isFirstLineOfCollapsedSection(d->cursor.block().blockNumber());
+                                }
+                                if (lm && result.first != -1)
+                                {
+                                    lm->expandLines(result.first, result.second);
+                                }
+                            }
                             ke->accept();
                         default:
                             break;
@@ -928,6 +932,18 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
                            || ke == QKeySequence::SelectEndOfDocument
                            || ke == QKeySequence::SelectAll
                           ) {
+
+                    LineManager* lm = d->textEdit->getLineManager();
+                    pair<int, int> result(-1, -1);
+                    if (lm && ke == QKeySequence::Paste)
+                    {
+                        result = lm->isFirstLineOfCollapsedSection(d->cursor.block().blockNumber());
+                    }
+                    if (result.first != -1)
+                    {
+                        lm->expandLines(result.first, result.second);
+                    }
+
                     ke->accept();
 #endif
                 }
@@ -985,7 +1001,7 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
 {
     Q_Q(TextControl);
 
-    /* PALETTE TEST
+/*    //PALETTE TEST
     static int cnt = 0;
 
     switch (cnt)
@@ -1050,7 +1066,21 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
             cursor.setBlockFormat(blockFmt);
         } else {
             QTextCursor localCursor = cursor;
-            localCursor.deletePreviousChar();
+            pair<int, int> result(-1, -1);
+            if (textEdit && textEdit->getLineManager())
+            {
+                LineManager* lm = textEdit->getLineManager();
+                result = lm->isLineAfterCollapsedSection(localCursor.block().blockNumber());
+            }
+
+            if (result.first != -1 && localCursor.atBlockStart())
+            {
+                textEdit->manageExpandCollapse(result.first, false);
+            }
+            else {
+                localCursor.deletePreviousChar();
+            }
+
         }
         goto accept;
     }

@@ -29,6 +29,7 @@
 using namespace lv;
 
 int main(int argc, char *argv[]){
+
     ApplicationContext::initialize();
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
