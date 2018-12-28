@@ -13,29 +13,19 @@ HEADERS += \
     $$PWD/projectnavigationmodel.h \
     $$PWD/projectdocumentmodel.h \
     $$PWD/editorsettings.h \
-    $$PWD/documenteditfragment.h \
-    $$PWD/codedeclaration.h \
     $$PWD/documenthandler.h \
     $$PWD/editorsettingscategory.h \
-    $$PWD/documenthandlerstate.h \
-    $$PWD/coderuntimebinding.h \
-    $$PWD/abstractcodeserializer.h \
-    $$PWD/codeconverter.h \
-    $$PWD/nativevaluecodeserializer.h \
-    $$PWD/livepalette.h \
-    $$PWD/livepalettecontainer.h \
     $$PWD/documentcursorinfo.h \
-    $$PWD/documentqmlfragment.h \
-    $$PWD/qmlobjectcodeserializer.h \
     $$PWD/lveditorglobal.h \
-    $$PWD/projectextension.h \
     $$PWD/editorglobalobject.h \
     $$PWD/editorprivate_plugin.h \
-    $$PWD/livepalettelist.h \
     $$PWD/linemanager.h \
     $$PWD/collapsedsection.h \
     $$PWD/linesurface.h \
-    $$PWD/palettemanager.h
+    $$PWD/palettemanager.h \
+    $$PWD/palettecontainer.h \
+    $$PWD/palettelist.h \
+    $$PWD/codepalette.h
 
 SOURCES += \
     $$PWD/project.cpp \
@@ -49,25 +39,15 @@ SOURCES += \
     $$PWD/projectnavigationmodel.cpp \
     $$PWD/projectdocumentmodel.cpp \
     $$PWD/editorsettings.cpp \
-    $$PWD/documenteditfragment.cpp \
-    $$PWD/codedeclaration.cpp \
     $$PWD/documenthandler.cpp \
     $$PWD/editorsettingscategory.cpp \
-    $$PWD/documenthandlerstate.cpp \
-    $$PWD/coderuntimebinding.cpp \
-    $$PWD/abstractcodeserializer.cpp \
-    $$PWD/codeconverter.cpp \
-    $$PWD/nativevaluecodeserializer.cpp \
-    $$PWD/livepalette.cpp \
-    $$PWD/livepalettecontainer.cpp \
     $$PWD/documentcursorinfo.cpp \
-    $$PWD/documentqmlfragment.cpp \
-    $$PWD/qmlobjectcodeserializer.cpp \
-    $$PWD/projectextension.cpp \
     $$PWD/editorglobalobject.cpp \
     $$PWD/editorprivate_plugin.cpp \
-    $$PWD/livepalettelist.cpp \
     $$PWD/linemanager.cpp \
     $$PWD/collapsedsection.cpp \
     $$PWD/linesurface.cpp \
-    $$PWD/palettemanager.cpp
+    $$PWD/palettemanager.cpp \
+    $$PWD/palettecontainer.cpp \
+    $$PWD/palettelist.cpp \
+    $$PWD/codepalette.cpp

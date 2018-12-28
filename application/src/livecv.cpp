@@ -43,6 +43,7 @@
 #include "live/codeqmlhandler.h"
 #include "live/documentqmlinfo.h"
 #include "live/plugininfoextractor.h"
+#include "live/qmlengineinterceptor.h"
 
 #include <QUrl>
 #include <QFileInfo>

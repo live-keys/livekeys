@@ -1,0 +1,8 @@
+{
+    "name": "lcvcore",
+    "package" : ".",
+    "palettes" : {
+        "palettes/MatPalette.qml" : "qml/Mat",
+        "palettes/VideoCapturePalette.qml": "qml/VideoCapture"
+    }
+}

@@ -191,8 +191,21 @@ void ViewEngine::removeErrorHandler(QObject *object){
     m_errorHandlers.remove(object);
 }
 
-void ViewEngine::setBindHook(std::function<void(const QString&, const QUrl&, QObject*, QObject*)> hook){
-    m_bindHook = hook;
+void ViewEngine::addCompileHook(ViewEngine::CompileHook ch, void *userData){
+    CompileHookEntry che;
+    che.m_hook = ch;
+    che.m_userData = userData;
+
+    m_compileHooks.append(che);
+}
+
+void ViewEngine::removeCompileHook(ViewEngine::CompileHook ch, void *userData){
+    for ( auto it = m_compileHooks.begin(); it != m_compileHooks.end(); ++it ){
+        if ( it->m_hook == ch && it->m_userData == userData ){
+            m_compileHooks.erase(it);
+            return;
+        }
+    }
 }
 
 
@@ -282,9 +295,8 @@ void ViewEngine::createObjectAsync(
         item->setParentItem(parentItem);
     }
 
-
-    if ( m_bindHook )
-        m_bindHook(qmlCode, url, obj, attachment);
+    for (auto it = m_compileHooks.begin(); it != m_compileHooks.end(); ++it)
+        (it->m_hook)(qmlCode, url, obj, attachment, it->m_userData);
 
     setIsLoading(false);
 

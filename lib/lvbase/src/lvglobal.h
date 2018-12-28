@@ -17,6 +17,13 @@
 #ifndef LVGLOBAL_H
 #define LVGLOBAL_H
 
+
+/**
+  \defgroup lvbase lvbase module
+
+  Contains the core components for LiveCV.
+*/
+
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
 #define LV_EXPORT __declspec(dllexport)
 #define LV_IMPORT __declspec(dllimport)

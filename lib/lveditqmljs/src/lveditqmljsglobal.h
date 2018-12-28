@@ -19,6 +19,12 @@
 
 #include <qglobal.h>
 
+/**
+  \defgroup lveditqmljs lveditqmljs Library
+
+  Library used for extending and interacting with qml projects.
+  */
+
 #ifndef LV_EDITQMLJS_STATIC
 #  ifdef LV_EDITQMLJS_LIB
 #    define LV_EDITQMLJS_EXPORT Q_DECL_EXPORT

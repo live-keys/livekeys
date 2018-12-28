@@ -1,0 +1,12 @@
+{
+    "name": "editor",
+    "package" : ".",
+    "palettes" : {
+        "palettes/EditPalette.qml" : "edit/qml",
+        "palettes/IntPalette.qml": "qml/int",
+        "palettes/IntHistoryPlotPalette.qml": "qml/int",
+        "palettes/DoublePalette.qml": "qml/double",
+        "palettes/DoubleHistoryPlotPalette.qml": "qml/double",
+        "palettes/ColorPalette.qml": "qml/color"
+    }
+}

@@ -21,6 +21,7 @@
 #include "live/viewengine.h"
 #include "live/codeqmlhandler.h"
 #include "live/editorsettings.h"
+#include "live/editorglobalobject.h"
 #include "live/qmljssettings.h"
 #include "projectqmlscanner_p.h"
 #include "projectqmlscanmonitor_p.h"
@@ -31,42 +32,30 @@
 namespace lv{
 
 ProjectQmlExtension::ProjectQmlExtension(QObject *parent)
-    : ProjectExtension(parent)
+    : QObject(parent)
     , m_settings(new QmlJsSettings())
     , m_scanMonitor(nullptr)
+    , m_paletteContainer(nullptr)
 {
-
 }
 
 ProjectQmlExtension::ProjectQmlExtension(Settings *settings, Project *project, ViewEngine* engine, QObject *parent)
-    : ProjectExtension(parent)
+    : QObject(parent)
     , m_project(project)
     , m_engine(engine)
     , m_settings(new QmlJsSettings())
     , m_scanMonitor(new ProjectQmlScanMonitor(this, project, engine))
+    , m_paletteContainer(nullptr)
 {
     lv::EditorSettings* editorSettings = qobject_cast<lv::EditorSettings*>(settings->file("editor"));
     editorSettings->addSetting("qmljs", m_settings);
     editorSettings->syncWithFile();
 
-    engine->setBindHook(&engineHook);
+    engine->addCompileHook(&ProjectQmlExtension::engineHook, this);
 }
 
 ProjectQmlExtension::~ProjectQmlExtension(){
-}
-
-AbstractCodeHandler *ProjectQmlExtension::createHandler(
-        ProjectDocument *document,
-        Project *project,
-        ViewEngine *engine,
-        DocumentHandler *handler)
-{
-    QString filePath = document->file()->path();
-    if ( filePath.toLower().endsWith(".js") || filePath.toLower().endsWith(".qml") || filePath.isEmpty() ){
-        CodeQmlHandler* ch = new CodeQmlHandler(engine, project, m_settings, this, handler);
-        return ch;
-    }
-    return 0;
+    m_engine->removeCompileHook(&ProjectQmlExtension::engineHook, this);
 }
 
 void ProjectQmlExtension::componentComplete(){
@@ -92,19 +81,41 @@ void ProjectQmlExtension::componentComplete(){
         editorSettings->addSetting("qmljs", m_settings);
         editorSettings->syncWithFile();
 
-        m_engine->setBindHook(&engineHook);
+        m_engine->addCompileHook(&ProjectQmlExtension::engineHook, this);
+
+        EditorGlobalObject* editor = static_cast<EditorGlobalObject*>(ctx->contextProperty("editor").value<QObject*>());
+        if ( !editor ){
+            qWarning("Failed to find editor global object.");
+            return;
+        }
+
+        m_paletteContainer = editor->paletteContainer();
     }
 }
 
-ProjectQmlScanner *ProjectQmlExtension::scanner(){ return m_scanMonitor->m_scanner; }
+ProjectQmlScanner *ProjectQmlExtension::scanner(){
+    return m_scanMonitor->m_scanner;
+}
 
 PluginInfoExtractor *ProjectQmlExtension::getPluginInfoExtractor(const QString &import){
     return m_scanMonitor->getPluginInfoExtractor(import);
 }
 
-void ProjectQmlExtension::engineHook(const QString &code, const QUrl &, QObject *result, QObject *document){
-    ProjectDocument* doc = static_cast<ProjectDocument*>(document);
-    DocumentQmlInfo::syncBindings(code, doc, result);
+void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *result, QObject *, void* data){
+    ProjectQmlExtension* that = reinterpret_cast<ProjectQmlExtension*>(data);
+
+    for ( auto it = that->m_codeHandlers.begin(); it != that->m_codeHandlers.end(); ++it ){
+        CodeQmlHandler* h = *it;
+        h->updateRuntimeBindings(result);
+    }
+}
+
+void ProjectQmlExtension::addCodeQmlHandler(CodeQmlHandler *handler){
+    m_codeHandlers.append(handler);
+}
+
+void ProjectQmlExtension::removeCodeQmlHandler(CodeQmlHandler *handler){
+    m_codeHandlers.removeAll(handler);
 }
 
 QObject *ProjectQmlExtension::createHandler(ProjectDocument *, DocumentHandler *handler){

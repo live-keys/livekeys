@@ -48,5 +48,6 @@
         <file alias="palette-add-property.png">images/palette-add-property.png</file>
         <file alias="palette-expand.png">images/palette-expand.png</file>
         <file alias="palette-swap.png">images/palette-swap.png</file>
+        <file alias="palette-commit.png">images/palette-commit.png</file>
     </qresource>
 </RCC>

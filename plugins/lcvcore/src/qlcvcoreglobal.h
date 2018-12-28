@@ -19,6 +19,12 @@
 
 #include <qglobal.h>
 
+/**
+  \defgroup plugin-lcvcore lcvcore Plugin
+
+  OpenCV core module wrappers for Live CV.
+*/
+
 #ifndef Q_LCVCORE_STATIC
 #  ifdef Q_LCVCORE_LIB
 #    define Q_LCVCORE_EXPORT Q_DECL_EXPORT

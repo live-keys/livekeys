@@ -26,11 +26,18 @@
 #include <QHash>
 #include <QString>
 
+/**
+  \class lv::LockedFileIOSession
+  \ingroup lvbase
+  \brief Handles IO from files in a thread-safe manner.
+ */
+
 namespace lv{
 
 // Class FileLock
 // --------------------------------------------------
 
+/// \private
 class FileLock{
 public:
     FileLock() : refcount(0){}
@@ -42,6 +49,7 @@ public:
 // Class LockedFileIOSessionPrivate
 // --------------------------------------------------
 
+/// \private
 class LockedFileIOSessionPrivate{
 
 public:

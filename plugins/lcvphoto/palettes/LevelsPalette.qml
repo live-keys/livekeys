@@ -21,11 +21,10 @@ import editor 1.0
 import live 1.0
 import lcvphoto 1.0
 
-LivePalette{
+CodePalette{
     id: palette
 
-    type : "Levels"
-    serialize : LevelsSerializer{}
+    type : "qml/Levels"
 
     item: LevelsSliders{
         id: levelsSliders
@@ -48,19 +47,33 @@ LivePalette{
         color: 'transparent'
         input: cv.nullMat
         onLightnessChanged: {
-            levels.lightness = lightness
-            palette.value = levels
+            if ( !isBindingChange() ){
+                levels.lightness = lightness
+                extension.writeProperties({
+                    'lightness' : lightness
+                })
+            }
         }
         onLevelByChannelChanged: {
-            levels.channels = levelByChannel
-            palette.value = levels
+            if ( !isBindingChange() ){
+                levels.channels = levelByChannel
+                extension.writeProperties({
+                    'channels' : levelByChannel
+                })
+            }
+        }
+    }
+
+    onExtensionChanged: {
+        extension.whenBinding = function(){
+            extension.writeProperties({
+                'lightness' : palette.value.lightness,
+                'channels' : palette.value.channels
+            })
         }
     }
 
     onInit: {
-        levelsSliders.levels = value
-    }
-    onCodeChanged:{
         levelsSliders.levels = value
     }
 }

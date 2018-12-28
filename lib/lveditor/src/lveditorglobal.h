@@ -19,6 +19,11 @@
 
 #include <qglobal.h>
 
+/**
+  \defgroup lveditor lveditor Library
+  \brief Contains editor functionality and extension hooks.
+  */
+
 #ifndef LV_EDITOR_STATIC
 #  ifdef LV_EDITOR_LIB
 #    define LV_EDITOR_EXPORT Q_DECL_EXPORT

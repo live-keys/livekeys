@@ -21,16 +21,23 @@ import editor 1.0
 import live 1.0
 import lcvcore 1.0
 
-LivePalette{
+CodePalette{
     id: palette
 
-    type : "VideoCapture"
-    serialize : VideoCaptureSerializer{}
+    type : "qml/VideoCapture"
 
     item: Item{
         id: captureContainer
 
         property VideoCapture videoCapture: null
+
+        Connections{
+            target: captureContainer.videoCapture
+            onFpsChanged: extension.updateBindings()
+            onCurrentFrameChanged: extension.updateBindings()
+            onPausedChanged: extension.updateBindings()
+        }
+
         width: 290
         height: 60
 
@@ -44,7 +51,9 @@ LivePalette{
             value: parent.videoCapture.fps
             onValueChanged: {
                 parent.videoCapture.fps = fpsSlider.value
-                palette.value = parent.videoCapture
+                extension.writeProperties({
+                    'fps' : fpsSlider.value
+                })
             }
             stepSize: 1.0
             maximumValue: 150
@@ -70,8 +79,17 @@ LivePalette{
             anchors.topMargin: 20
             videoCapture : parent.videoCapture
             width: 290
-            onSeekTriggered: palette.value = videoCapture
-            onPlayPauseTriggered: palette.value = videoCapture
+            onSeekTriggered: {
+                extension.writeProperties({
+                    'currentFrame' : videoCapture.currentFrame
+                })
+            }
+            onPlayPauseTriggered: {
+                extension.writeProperties({
+                    'paused' : videoCapture.paused
+                })
+            }
+
             color: 'transparent'
         }
     }
@@ -79,7 +97,14 @@ LivePalette{
     onInit: {
         captureContainer.videoCapture = value
     }
-    onCodeChanged:{
-        captureContainer.videoCapture = value
+
+    onExtensionChanged: {
+        extension.whenBinding = function(){
+            extension.writeProperties({
+                'fps' : palette.value.fps,
+                'currentFrame' : palette.value.currentFrame,
+                'paused' : palette.value.paused
+            })
+        }
     }
 }

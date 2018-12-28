@@ -36,8 +36,6 @@ class ProjectFile;
 class ProjectDocument;
 class ProjectDocumentBlockData;
 class DocumentHandler;
-class CodeConverter;
-class CodeRuntimeBinding;
 
 class LV_EDITOR_EXPORT ProjectDocumentMarker{
 
@@ -187,7 +185,6 @@ class LV_EDITOR_EXPORT ProjectDocument : public QObject{
     Q_ENUMS(OpenMode)
 
 public:
-    typedef QLinkedList<CodeRuntimeBinding*>::iterator               BindingIterator;
     typedef QLinkedList<ProjectDocumentSection::Ptr>::iterator       SectionIterator;
     typedef QLinkedList<ProjectDocumentSection::Ptr>::const_iterator SectionConstIterator;
 
@@ -229,20 +226,10 @@ public:
 
     Project* parentAsProject();
 
-    void assignDocumentHandler(DocumentHandler* handler);
     QTextDocument* textDocument();
 
     ProjectDocumentMarker::Ptr addMarker(int position);
     void removeMarker(ProjectDocumentMarker::Ptr marker);
-
-    bool addNewBinding(CodeRuntimeBinding* binding);
-    BindingIterator bindingsBegin();
-    BindingIterator bindingsEnd();
-    int  totalBindings() const;
-    bool hasBindings() const;
-    CodeRuntimeBinding* bindingAt(int position);
-    bool removeBindingAt(int position);
-    void updateBindingValue(CodeRuntimeBinding* binding, const QString &value);
 
     ProjectDocumentSection::Ptr createSection(int type, int position, int length);
     SectionIterator sectionsBegin();
@@ -289,9 +276,7 @@ private:
     QDateTime       m_lastModified;
 
     QTextDocument*   m_textDocument;
-    DocumentHandler* m_editingDocumentHandler;
 
-    QLinkedList<CodeRuntimeBinding*>         m_bindings;
     QLinkedList<ProjectDocumentSection::Ptr> m_sections;
     QLinkedList<ProjectDocumentMarker::Ptr>  m_markers;
 
@@ -346,22 +331,6 @@ inline const QDateTime &ProjectDocument::lastModified() const{
 
 inline void ProjectDocument::setLastModified(const QDateTime &lastModified){
     m_lastModified = lastModified;
-}
-
-inline ProjectDocument::BindingIterator ProjectDocument::bindingsBegin(){
-    return m_bindings.begin();
-}
-
-inline ProjectDocument::BindingIterator ProjectDocument::bindingsEnd(){
-    return m_bindings.end();
-}
-
-inline int ProjectDocument::totalBindings() const{
-    return m_bindings.size();
-}
-
-inline bool ProjectDocument::hasBindings() const{
-    return !m_bindings.isEmpty();
 }
 
 inline ProjectDocument::SectionIterator ProjectDocument::sectionsBegin(){

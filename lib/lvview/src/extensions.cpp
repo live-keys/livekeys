@@ -16,8 +16,8 @@ namespace lv{
 
 Extensions::Extensions(ViewEngine *engine, const QString &settingsPath, QObject *parent)
     : QObject(parent)
-    , m_engine(engine)
     , m_globals(new QQmlPropertyMap(this))
+    , m_engine(engine)
 {
     m_path = QDir::cleanPath(settingsPath + "/extensions.json");
 }
@@ -110,7 +110,7 @@ LiveExtension *Extensions::loadPackageExtension(const Package::Ptr &package){
     le->setIdentifiers(package->name(), path);
     le->setParent(this);
     m_extensions.insert(le->name(), le);
-    m_globals->insert(QString::fromStdString(le->name()), le->globals().toVariant());
+    m_globals->insert(QString::fromStdString(le->name()), QVariant::fromValue(le->globals()));
 
     return le;
 }

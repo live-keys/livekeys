@@ -105,8 +105,6 @@ void fromQml(const QJSValue &value, MLNode &n){
             n = MLNode(vi);
         else
             n = MLNode(vd);
-    } else if ( value.isBool() ){
-        n = value.toBool();
     } else {
         n = MLNode();
     }

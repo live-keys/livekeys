@@ -69,7 +69,7 @@ public:
     public:
         QmlJS::AST::Node* ast;
 
-        RangeItem* parent;
+        RangeItem*   parent;
         RangeObject* child;
 
         int begin;

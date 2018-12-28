@@ -18,6 +18,13 @@
 #include "live/visuallog.h"
 #include <QString>
 
+
+/**
+  \class lv::StackTrace
+  \brief Captures and holds a stacktrace.
+  \ingroup lvbase
+ */
+
 namespace lv{
 
 std::string pathFileName(const std::string &path){

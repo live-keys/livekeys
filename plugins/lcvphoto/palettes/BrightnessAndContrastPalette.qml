@@ -21,11 +21,10 @@ import editor 1.0
 import live 1.0
 import lcvphoto 1.0
 
-LivePalette{
+CodePalette{
     id: palette
 
-    type : "BrightnessAndContrast"
-    serialize : BrightnessAndContrastSerializer{}
+    type : "qml/BrightnessAndContrast"
 
     item: Rectangle{
         id: adjustmentBox
@@ -47,7 +46,11 @@ LivePalette{
             value: adjustmentBox.bandc ? adjustmentBox.bandc.brightness : 0
             onValueChanged: {
                 adjustmentBox.bandc.brightness = value
-                palette.value = adjustmentBox.bandc
+                if ( !isBindingChange() ){
+                    extension.writeProperties({
+                        'brightness' : adjustmentBox.bandc.brightness
+                    })
+                }
             }
             stepSize: 1.0
             maximumValue: 200
@@ -93,7 +96,11 @@ LivePalette{
             value: adjustmentBox.bandc ? adjustmentBox.bandc.contrast : 0
             onValueChanged: {
                 adjustmentBox.bandc.contrast = value
-                palette.value = adjustmentBox.bandc
+                if ( !isBindingChange() ){
+                    extension.writeProperties({
+                        'contrast' : adjustmentBox.bandc.contrast
+                    })
+                }
             }
             stepSize: 0.01
             maximumValue: 3.0
@@ -130,7 +137,13 @@ LivePalette{
     onInit: {
         adjustmentBox.bandc = value
     }
-    onCodeChanged:{
-        adjustmentBox.bandc = value
+
+    onExtensionChanged: {
+        extension.whenBinding = function(){
+            extension.writeProperties({
+                'brightness' : palette.value.brightness,
+                'contrast' : palette.value.contrast
+            })
+        }
     }
 }

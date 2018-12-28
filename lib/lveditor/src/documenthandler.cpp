@@ -17,20 +17,15 @@
 #include "live/documenthandler.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
-#include "live/livepalette.h"
-#include "live/livepalettecontainer.h"
-#include "live/documenteditfragment.h"
-#include "live/documenthandlerstate.h"
-#include "live/codedeclaration.h"
-#include "live/coderuntimebinding.h"
+#include "live/codepalette.h"
+#include "live/palettecontainer.h"
 #include "live/editorglobalobject.h"
 #include "live/project.h"
 #include "live/viewengine.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
-#include "live/projectextension.h"
-#include "live/livepalettelist.h"
-#include "live/livepalettecontainer.h"
+#include "live/palettelist.h"
+#include "live/palettecontainer.h"
 #include "live/extensions.h"
 
 #include <QQmlContext>
@@ -54,8 +49,6 @@ namespace lv{
 //TODO: Add object type on code properties
 //TODO: Add object type when looking for palettes
 
-//TODO: Code completion model should only be visible when in focus
-
 const QChar DocumentHandler::ParagraphSeparator = QChar(8233);
 const QChar DocumentHandler::NewLine            = QChar('\n');
 
@@ -66,7 +59,6 @@ DocumentHandler::DocumentHandler(QObject *parent)
     , m_codeHandler(nullptr)
     , m_projectDocument(nullptr)
     , m_indentSize(0)
-    , m_paletteContainer(nullptr)
     , m_project(nullptr)
     , m_engine(nullptr)
     , m_textEdit(nullptr)
@@ -74,23 +66,15 @@ DocumentHandler::DocumentHandler(QObject *parent)
     , m_fragmentEnd(ProjectDocumentMarker::create())
     , m_fragmentStartLine(-1)
     , m_fragmentEndLine(-1)
-    , m_state(new DocumentHandlerState)
-    , m_editingFragment(nullptr)
 {
     setIndentSize(4);
-    m_timer.setInterval(1000);
-    m_timer.setSingleShot(true);
-    connect(&m_timer, SIGNAL(timeout()), this, SLOT(updateScope()));
 }
 
 DocumentHandler::~DocumentHandler(){
-    if ( m_projectDocument )
-        m_projectDocument->assignDocumentHandler(nullptr);
     delete m_codeHandler;
 }
 
-void DocumentHandler::setTextEdit(TextEdit *te)
-{
+void DocumentHandler::setTextEdit(TextEdit *te){
     m_textEdit = te;
     if (m_targetDoc) {
         te->setTextDocument(m_targetDoc);
@@ -107,10 +91,6 @@ void DocumentHandler::rehighlightBlock(const QTextBlock &block){
 }
 
 void DocumentHandler::componentComplete(){
-    /*if ( m_target == 0 ){
-        qWarning("Target has not been set for document handler. Highlighting and code completion will be disabled.");
-    }*/
-
     QQmlContext* ctx = qmlEngine(this)->rootContext();
     EditorGlobalObject* editor = static_cast<EditorGlobalObject*>(ctx->contextProperty("editor").value<QObject*>());
     if ( !editor ){
@@ -118,7 +98,6 @@ void DocumentHandler::componentComplete(){
         return;
     }
 
-    m_paletteContainer = editor->paletteContainer();
     m_project = editor->project();
 
     QObject* lg = ctx->contextProperty("livecv").value<QObject*>();
@@ -133,108 +112,6 @@ void DocumentHandler::componentComplete(){
     findCodeHandler();
 }
 
-bool DocumentHandler::addEditingPalette(DocumentEditFragment *palette){
-    auto it = m_palettes.begin();
-    while ( it != m_palettes.end() ){
-        DocumentEditFragment* itPalette = *it;
-
-        if ( itPalette->declaration()->position() < palette->declaration()->position() ){
-            break;
-
-        } else if ( itPalette->declaration()->position() == palette->declaration()->position() ){
-            LivePalette* itlp = static_cast<LivePalette*>(itPalette->converter());
-            LivePalette* lp   = static_cast<LivePalette*>(palette->converter());
-            if ( itlp->path() == lp->path() ){
-                return false;
-            } else {
-                break;
-            }
-        }
-
-        ++it;
-    }
-
-    m_palettes.insert(it, palette);
-
-    return true;
-}
-
-void DocumentHandler::removeEditingPalette(DocumentEditFragment *palette){
-    auto it = m_palettes.begin();
-
-    while( it != m_palettes.end() ){
-        DocumentEditFragment* itPalette = *it;
-
-        if ( itPalette == palette ){
-            LivePalette* pl = static_cast<LivePalette*>(palette->converter());
-            emit paletteAboutToRemove(pl);
-
-            m_projectDocument->removeSection(palette->declaration()->m_section);
-            m_palettes.erase(it);
-            delete palette;
-            return;
-        }
-
-        ++it;
-    }
-}
-
-void DocumentHandler::commitEdit(){
-    if ( m_editingFragment ){
-        int position = m_editingFragment->valuePosition();
-        int length   = m_editingFragment->valueLength();
-
-        CodeConverter* converter = m_editingFragment->converter();
-        if ( converter ){
-            QTextCursor tc(m_targetDoc);
-            tc.setPosition(position);
-            tc.setPosition(position + length, QTextCursor::KeepAnchor);
-            QString commitText = tc.selectedText();
-            m_editingFragment->commit(converter->serialize()->fromCode(commitText, m_editingFragment));
-            vlog_debug("editor-documenthandler", "Commited edit of size: " + QString::number(commitText.size()));
-
-        } else {
-            emit contentsChangedManually();
-            m_timer.start();
-        }
-
-        m_projectDocument->removeSection(m_editingFragment->declaration()->m_section);
-        delete m_editingFragment;
-        m_editingFragment = nullptr;
-
-        emit editingStateChanged(false);
-    }
-}
-
-void DocumentHandler::cancelEdit(){
-
-    if ( m_editingFragment ){
-        m_projectDocument->removeSection(m_editingFragment->declaration()->m_section);
-        delete m_editingFragment;
-        m_editingFragment = nullptr;
-
-        emit editingStateChanged(false);
-    }
-}
-
-void DocumentHandler::paletteValueChanged(lv::DocumentEditFragment *frg){
-    LivePalette* palette = static_cast<lv::LivePalette*>(frg->converter());
-    QString code = palette->serialize()->toCode(palette->value(), frg);
-
-    if ( code != "" ){
-        m_projectDocument->addEditingState(ProjectDocument::Palette);
-
-        QTextCursor tc(m_targetDoc);
-        tc.setPosition(frg->valuePosition());
-        tc.setPosition(frg->valuePosition() + frg->valueLength(), QTextCursor::KeepAnchor);
-        tc.beginEditBlock();
-        tc.removeSelectedText();
-        tc.insertText(code);
-        tc.endEditBlock();
-
-        m_projectDocument->removeEditingState(ProjectDocument::Palette);
-    }
-}
 
 void DocumentHandler::readContent(){
     m_targetDoc->setPlainText(m_projectDocument->content());
@@ -272,12 +149,10 @@ void DocumentHandler::findCodeHandler(){
 
                 AbstractCodeHandler* ach = qobject_cast<AbstractCodeHandler*>(o);
                 if ( ach ){
-
                     vlog("editor-documenthandler").v() << "Found in extension: " << le->name();
 
                     QQmlEngine::setObjectOwnership(ach, QQmlEngine::CppOwnership);
                     m_codeHandler = ach;
-                    m_codeHandler->setTarget(m_targetDoc);
                     m_codeHandler->setDocument(m_projectDocument);
 
                     emit codeHandlerChanged();
@@ -292,7 +167,6 @@ void DocumentHandler::findCodeHandler(){
 void DocumentHandler::rehighlightSection(int position, int length){
     if ( !m_codeHandler )
         return;
-
 
     QTextBlock bl = m_targetDoc->findBlock(position);
     int end = position + length;
@@ -319,7 +193,11 @@ void DocumentHandler::insertCompletion(int from, int to, const QString &completi
     }
 }
 
-void DocumentHandler::documentContentsChanged(int position, int, int charsAdded){
+void DocumentHandler::documentContentsChanged(int position, int charsRemoved, int charsAdded){
+    AbstractCodeHandler::ContentsTrigger cst = AbstractCodeHandler::Engine;
+    if ( m_codeHandler )
+         cst = m_codeHandler->documentContentsChanged(position, charsRemoved, charsAdded);
+
     if ( !m_projectDocument || m_projectDocument->editingStateIs(ProjectDocument::Read) )
         return;
 
@@ -328,17 +206,8 @@ void DocumentHandler::documentContentsChanged(int position, int, int charsAdded)
         if ( charsAdded == 1 )
             m_lastChar = m_targetDoc->characterAt(position);
 
-        if ( m_editingFragment ){
-            if ( position < m_editingFragment->valuePosition() ||
-                 position > m_editingFragment->valuePosition() + m_editingFragment->valueLength() )
-            {
-                cancelEdit();
-            } else {
-                return;
-            }
-        }
-        emit contentsChangedManually();
-        m_timer.start();
+        if ( cst == AbstractCodeHandler::Engine )
+            emit contentsChangedManually();
     }
 }
 
@@ -365,20 +234,7 @@ void DocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
 }
 
 void DocumentHandler::setDocument(ProjectDocument *document, QJSValue options){
-    cancelEdit();
     if ( m_projectDocument ){
-        auto it = m_palettes.begin();
-        while( it != m_palettes.end() ){
-            DocumentEditFragment* palette = *it;
-            LivePalette* pl = static_cast<LivePalette*>(palette->converter());
-            emit paletteAboutToRemove(pl);
-
-            m_projectDocument->removeSection(palette->declaration()->m_section);
-            it = m_palettes.erase(it);
-            delete palette;
-        }
-
-        m_projectDocument->assignDocumentHandler(nullptr);
         disconnect(m_projectDocument, SIGNAL(contentChanged()), this, SLOT(documentUpdatedContent()));
     }
 
@@ -402,14 +258,10 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue options){
             this, SLOT(cursorWritePositionChanged(QTextCursor))
         );
 
-
-
         if (m_textEdit) {
             m_textEdit->setTextDocument(m_targetDoc);
         }
 
-
-        m_projectDocument->assignDocumentHandler(this);
         updateFragments();
 
         connect(
@@ -478,268 +330,6 @@ void DocumentHandler::generateCompletion(int cursorPosition){
     }
 }
 
-void DocumentHandler::updateScope(){
-    if ( m_codeHandler && m_projectDocument )
-        m_codeHandler->updateScope(m_projectDocument->content());
-}
-
-
-void DocumentHandler::bind(int position, int length, QObject *object){
-    if ( !m_projectDocument || !m_codeHandler )
-        return;
-
-    QTextCursor cursor(m_targetDoc);
-    cursor.setPosition(position);
-    if ( length != 0 )
-        cursor.setPosition(position + length, QTextCursor::KeepAnchor);
-
-    QList<CodeDeclaration::Ptr> properties = m_codeHandler->getDeclarations(cursor);
-
-    QList<CodeRuntimeBinding*> addedBindings;
-    for ( QList<CodeDeclaration::Ptr>::iterator it = properties.begin(); it != properties.end(); ++it ){
-        CodeDeclaration::Ptr cde = *it;
-        //is there converter available for binding
-        CodeConverter* cvt = m_paletteContainer->findPalette(cde->type(), cde->parentType());
-        if ( cvt ){
-            CodeRuntimeBinding* addedBinding = new CodeRuntimeBinding(cde);
-            if (m_projectDocument->addNewBinding(addedBinding)){
-                addedBinding->setConverter(cvt);
-                addedBindings.append(addedBinding);
-
-            } else {
-                delete addedBinding;
-            }
-        }
-    }
-
-    // bind runtime bindings to engine and rehighlight
-    if ( m_targetDoc ){
-        if ( object )
-            m_codeHandler->connectBindings(addedBindings, object);
-
-        for ( QList<CodeRuntimeBinding*>::iterator it = addedBindings.begin(); it != addedBindings.end(); ++it ){
-            m_codeHandler->rehighlightBlock(m_targetDoc->findBlock((*it)->position()));
-        }
-    }
-
-}
-
-
-void DocumentHandler::unbind(int position, int length){
-    if ( !m_projectDocument || !m_codeHandler )
-        return;
-
-    QTextCursor cursor(m_targetDoc);
-    cursor.setPosition(position);
-    if ( length != 0 )
-        cursor.setPosition(position + length, QTextCursor::KeepAnchor);
-
-    QList<CodeDeclaration::Ptr> properties = m_codeHandler->getDeclarations(cursor);
-    for ( QList<CodeDeclaration::Ptr>::iterator it = properties.begin(); it != properties.end(); ++it ){
-        if ( m_projectDocument->removeBindingAt((*it)->position()) )
-            m_codeHandler->rehighlightBlock(m_targetDoc->findBlock((*it)->position()));
-    }
-}
-
-bool DocumentHandler::edit(int position, QObject *currentApp){
-    if ( !m_projectDocument || !m_codeHandler )
-        return false;
-
-    cancelEdit();
-
-    QTextCursor cursor(m_targetDoc);
-    cursor.setPosition(position);
-
-    QList<CodeDeclaration::Ptr> properties = m_codeHandler->getDeclarations(cursor);
-    if ( properties.isEmpty() )
-        return false;
-
-    CodeDeclaration::Ptr declaration = properties.first();
-
-    CodeConverter* converter = m_paletteContainer->findPalette(
-        declaration->type(), declaration->parentType().isEmpty() ? "" : declaration->parentType().first()
-    );
-
-    if ( converter ){
-        vlog_debug("editor-documenthandler", "Found Converter for type: \'" + declaration->type()+ "\'");
-        DocumentEditFragment* ef = m_codeHandler->createInjectionChannel(declaration, currentApp, converter);
-        m_editingFragment = ef;
-
-        ef->declaration()->m_section = m_projectDocument->createSection(
-            DocumentEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
-        );
-        ef->declaration()->m_section->setUserData(ef);
-        ef->declaration()->m_section->onTextChanged([](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText){
-            DocumentEditFragment* sectionEf = reinterpret_cast<DocumentEditFragment*>(section->userData());
-            if ( !section->document()->editingStateIs(ProjectDocument::Silent) ){
-                int length = sectionEf->declaration()->valueLength();
-                sectionEf->declaration()->setValueLength(length - charsRemoved + addedText.size());
-            }
-        });
-
-        rehighlightSection(ef->valuePosition(), ef->valueLength());
-
-
-        emit cursorPositionRequest(ef->valuePosition());
-        emit editingStateChanged(true);
-
-        return true;
-    } else {
-
-        vlog_debug("editor-documenthandler", "Channel or converter missing for type: \'" + declaration->type() + "\'");
-        return false;
-    }
-}
-
-LivePaletteList* DocumentHandler::findPalettes(int position, bool unrepeated){
-    if ( !m_projectDocument || !m_codeHandler )
-        return nullptr;
-
-    cancelEdit();
-
-    QTextCursor cursor(m_targetDoc);
-    cursor.setPosition(position);
-
-    QList<CodeDeclaration::Ptr> properties = m_codeHandler->getDeclarations(cursor);
-    if ( properties.isEmpty() )
-        return nullptr;
-
-    CodeDeclaration::Ptr declaration = properties.first();
-
-    LivePaletteList* lpl = m_paletteContainer->findPalettes(declaration->type());
-    lpl->setPosition(declaration->position());
-    if ( unrepeated ){
-        for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
-            DocumentEditFragment* storedPalette = *it;
-            if ( storedPalette->declaration()->position() < declaration->position() ){
-                break;
-            } else if ( storedPalette->declaration()->position() == declaration->position() ){
-                LivePalette* loadedPalette = static_cast<LivePalette*>(storedPalette->converter());
-                for ( int i = 0; i < lpl->size(); ++i ){
-                    LivePaletteLoader* loader = lpl->loaderAt(i);
-                    if ( LivePaletteContainer::palettePath(loader) == loadedPalette->path() ){
-                        lpl->remove(loader);
-                    }
-                }
-            }
-
-        }
-    }
-    return lpl;
-}
-
-void DocumentHandler::openPalette(lv::LivePalette* palette, int position, QObject *currentApp){
-
-    if ( !m_projectDocument || !m_codeHandler )
-        return;
-
-    QTextCursor cursor(m_targetDoc);
-    cursor.setPosition(position);
-
-    QList<CodeDeclaration::Ptr> properties = m_codeHandler->getDeclarations(cursor);
-    if ( properties.isEmpty() )
-        return;
-
-    CodeDeclaration::Ptr declaration = properties.first();
-
-    DocumentEditFragment* ef = m_codeHandler->createInjectionChannel(declaration, currentApp, palette);
-    if ( !ef )
-        return;
-
-    ef->setActionType(DocumentEditFragment::Adjust);
-
-    QTextCursor codeCursor(m_targetDoc);
-    codeCursor.setPosition(ef->valuePosition());
-    codeCursor.setPosition(ef->valuePosition() + ef->valueLength(), QTextCursor::KeepAnchor);
-
-    ef->declaration()->m_section = m_projectDocument->createSection(
-        DocumentEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
-    );
-    ef->declaration()->m_section->setUserData(ef);
-    ef->declaration()->m_section->onTextChanged([this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText){
-        auto projectDocument = section->document();
-        auto editingFragment = reinterpret_cast<DocumentEditFragment*>(section->userData());
-
-        if ( projectDocument->editingStateIs(ProjectDocument::Runtime) ){
-
-            int length = editingFragment->declaration()->valueLength();
-            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
-
-            LivePalette* lp = static_cast<LivePalette*>(editingFragment->converter());
-
-            QTextCursor tc(projectDocument->textDocument());
-            tc.setPosition(editingFragment->valuePosition());
-            tc.setPosition(editingFragment->valuePosition() + editingFragment->valueLength(), QTextCursor::KeepAnchor);
-
-            lp->setValueFromCode(lp->serialize()->fromCode(tc.selectedText(), editingFragment));
-
-        } else if ( !projectDocument->editingStateIs(ProjectDocument::Silent) ){
-            removeEditingPalette(editingFragment);
-        } else {
-            int length = editingFragment->declaration()->valueLength();
-            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
-
-            if ( projectDocument->editingStateIs(ProjectDocument::Palette) ){
-                LivePalette* lp = static_cast<LivePalette*>(editingFragment->converter());
-                if ( lp ){
-                    editingFragment->commit(lp->value());
-                }
-            }
-        }
-    });
-
-    palette->init(palette->serialize()->fromCode(codeCursor.selectedText(), ef));
-    connect(palette, &LivePalette::valueChanged, [this, ef](){
-        paletteValueChanged(ef);
-    });
-
-    CodeRuntimeBinding* bind = m_projectDocument->bindingAt(ef->declaration()->position());
-    if ( bind ){
-        vlog_debug("editor-documenthandler", "Linking binding to editing fragment: " + QString::number(ef->declaration()->position()));
-        ef->setRuntimeBinding(bind);
-    }
-
-    addEditingPalette(ef);
-
-    emit cursorPositionRequest(ef->valuePosition());
-    rehighlightSection(ef->valuePosition(), ef->valueLength());
-}
-
-void DocumentHandler::removePalette(QObject *paletteContainer){
-    auto it = m_palettes.begin();
-
-    while( it != m_palettes.end() ){
-
-        DocumentEditFragment* itPalette = *it;
-        LivePalette* lp = static_cast<LivePalette*>(itPalette->converter());
-
-        if ( lp->item() == paletteContainer ){
-            removeEditingPalette(itPalette);
-            return;
-        }
-
-        ++it;
-    }
-}
-
-int DocumentHandler::palettePosition(QObject *paletteContainer){
-    auto it = m_palettes.begin();
-
-    while( it != m_palettes.end() ){
-
-        DocumentEditFragment* itPalette = *it;
-        LivePalette* lp = static_cast<LivePalette*>(itPalette->converter());
-
-        if ( lp->item() == paletteContainer ){
-            return itPalette->declaration()->position();
-        }
-
-        ++it;
-    }
-
-    return -1;
-}
-
 void DocumentHandler::manageIndent(int from, int length, bool undo){
     QTextBlock bl = m_targetDoc->findBlock(from);
     while ( bl.isValid() ){
@@ -770,44 +360,6 @@ void DocumentHandler::manageIndent(int from, int length, bool undo){
 
         bl = bl.next();
     }
-}
-
-DocumentCursorInfo *DocumentHandler::cursorInfo(int position, int length){
-    bool canBind = false, canUnbind = false, canEdit = false, canAdjust = false;
-
-    if ( !m_projectDocument || !m_codeHandler )
-        return new DocumentCursorInfo(canBind, canUnbind, canEdit, canAdjust);
-
-    QTextCursor cursor(m_targetDoc);
-    cursor.setPosition(position);
-    if ( length != 0 )
-        cursor.setPosition(position + length, QTextCursor::KeepAnchor);
-
-    QList<CodeDeclaration::Ptr> properties = m_codeHandler->getDeclarations(cursor);
-    if ( properties.isEmpty() )
-        return new DocumentCursorInfo(canBind, canUnbind, canEdit, canAdjust);
-
-    if ( properties.size() == 1 ){
-        CodeDeclaration::Ptr firstdecl = properties.first();
-        canEdit = true;
-
-        CodeConverter* converter = m_paletteContainer->findPalette(firstdecl->type());
-        LivePalette* palette = qobject_cast<LivePalette*>(converter);
-        canAdjust = (palette != nullptr);
-    }
-
-    for ( QList<CodeDeclaration::Ptr>::iterator it = properties.begin(); it != properties.end(); ++it ){
-        if ( !m_projectDocument->bindingAt((*it)->position()) )
-            canBind = true;
-        if ( m_projectDocument->bindingAt((*it)->position()) )
-            canUnbind = true;
-
-        if ( canBind && canUnbind )
-            break;
-    }
-
-    return new DocumentCursorInfo(canBind, canUnbind, canEdit, canAdjust);
-
 }
 
 QJSValue DocumentHandler::contextBlockRange(int cursorPosition){

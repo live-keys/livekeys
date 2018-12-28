@@ -36,11 +36,10 @@ class Project;
 class ViewEngine;
 class Extensions;
 
-class LivePalette;
-class LivePaletteList;
-class LivePaletteContainer;
+class CodePalette;
+class PaletteList;
+class PaletteContainer;
 
-class DocumentHandlerState;
 class LV_EDITOR_EXPORT DocumentHandler : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
@@ -63,16 +62,12 @@ public:
     CodeCompletionModel* completionModel() const;
 
     void rehighlightBlock(const QTextBlock& block);
-
-    DocumentHandlerState* state();
+    void rehighlightSection(int position, int length);
 
     void setIndentSize(int size);
 
     void classBegin(){}
     void componentComplete();
-
-    bool addEditingPalette(DocumentEditFragment *palette);
-    void removeEditingPalette(DocumentEditFragment* palette);
 
     TextEdit* textEdit();
     void setTextEdit(TextEdit* te);
@@ -91,31 +86,15 @@ public slots:
     void setDocument(lv::ProjectDocument* document, QJSValue options = QJSValue());
     void documentUpdatedContent();
     void generateCompletion(int cursorPosition);
-    void updateScope();
-    void bind(int position, int length, QObject* object = 0);
-    void unbind(int position, int length);
-    lv::LivePaletteList *findPalettes(int position, bool unrepeated = false);
-    void openPalette(lv::LivePalette* palette, int position, QObject* currentApp = 0);
-    void removePalette(QObject* palette);
-    int palettePosition(QObject* palette);
-    void manageIndent(int from, int length, bool undo = false);
-
-    lv::DocumentCursorInfo* cursorInfo(int position, int length);
     QJSValue contextBlockRange(int cursorPosition);
 
-    bool edit(int position, QObject* currentApp = 0);
-    void commitEdit();
-    void cancelEdit();
-
-    void paletteValueChanged(DocumentEditFragment *editFragment);
+    void manageIndent(int from, int length, bool undo = false);
 
 signals:
     void targetChanged();
     void cursorPositionRequest(int position);
     void contentsChangedManually();
-    void paletteAboutToRemove(lv::LivePalette* palette);
     void fragmentLinesChanged(int lineStart, int lineEnd);
-    void editingStateChanged(bool isEditing);
     void editorFocusChanged();
     void codeHandlerChanged();
 
@@ -124,7 +103,6 @@ private:
     void updateFragments();
     void findCodeHandler();
     void updateCodeHandlerTarget();
-    void rehighlightSection(int position, int length);
 
     QChar                 m_lastChar;
     QTextDocument*        m_targetDoc;
@@ -133,23 +111,17 @@ private:
     ProjectDocument*      m_projectDocument;
     int                   m_indentSize;
     QString               m_indentContent;
-    LivePaletteContainer* m_paletteContainer;
     Project*              m_project;
     Extensions*           m_extensions;
     ViewEngine*           m_engine;
-    QTimer                m_timer;
     TextEdit*             m_textEdit;
 
     ProjectDocumentMarker::Ptr m_fragmentStart;
     ProjectDocumentMarker::Ptr m_fragmentEnd;
-    int m_fragmentStartLine;
-    int m_fragmentEndLine;
+    int                   m_fragmentStartLine;
+    int                   m_fragmentEndLine;
 
-    DocumentHandlerState* m_state;
-
-    QLinkedList<DocumentEditFragment*> m_palettes; // opened palettes
-    DocumentEditFragment*              m_editingFragment; // editing fragment
-    bool m_editorFocus;
+    bool                  m_editorFocus;
 };
 
 inline QTextDocument *DocumentHandler::target(){
@@ -158,10 +130,6 @@ inline QTextDocument *DocumentHandler::target(){
 
 inline lv::CodeCompletionModel *DocumentHandler::completionModel() const{
     return m_completionModel;
-}
-
-inline DocumentHandlerState *DocumentHandler::state(){
-    return m_state;
 }
 
 inline TextEdit *DocumentHandler::textEdit(){

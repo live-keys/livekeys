@@ -23,6 +23,12 @@
 #include <QSharedPointer>
 
 
+/**
+  \class lv::VisualLog
+  \brief Main logging class for LiveCV
+  \ingroup lvbase
+ */
+
 #if defined(Q_OS_UNIX) || (defined(Q_OS_WIN) && defined(QS_LOG_WIN_PRINTF_CONSOLE))
 #include <cstdio>
 void vLoggerConsole(const std::string& message)

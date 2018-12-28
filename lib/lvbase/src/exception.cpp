@@ -19,6 +19,16 @@
 
 namespace lv{
 
+
+/**
+ * \class lv::Exception
+ * \brief Standard Exception used throughout LiveCV
+ * \ingroup lvbase
+ *
+ */
+
+
+/// \private
 class ExceptionPrivate{
 
 public:

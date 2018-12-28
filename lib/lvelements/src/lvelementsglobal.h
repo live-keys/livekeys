@@ -19,6 +19,13 @@
 
 #include "live/lvglobal.h"
 
+/**
+  \defgroup lvelements lvelements Library
+
+  Contains the engine, compilers and main classes for Live Elements.
+*/
+
+
 #ifndef LV_ELEMENTS_STATIC
 #  ifdef LV_ELEMENTS_LIB
 #    define LV_ELEMENTS_EXPORT LV_EXPORT

@@ -26,7 +26,12 @@ HEADERS += \
     $$PWD/qmljsbuiltintypes_p.h \
     $$PWD/qmlpropertymodel.h \
     $$PWD/qmlitemmodel.h \
-    $$PWD/qmladdcontainer.h
+    $$PWD/qmladdcontainer.h \
+    $$PWD/bindingchannel.h \
+    $$PWD/qmlcodeconverter.h \
+    $$PWD/qmleditfragment.h \
+    $$PWD/qmldeclaration.h \
+    $$PWD/bindingpath.h
 
 SOURCES += \
     $$PWD/documentqmlinfo.cpp \
@@ -51,4 +56,9 @@ SOURCES += \
     $$PWD/qmljsbuiltintypes.cpp \
     $$PWD/qmlpropertymodel.cpp \
     $$PWD/qmlitemmodel.cpp \
-    $$PWD/qmladdcontainer.cpp
+    $$PWD/qmladdcontainer.cpp \
+    $$PWD/bindingchannel.cpp \
+    $$PWD/qmlcodeconverter.cpp \
+    $$PWD/qmleditfragment.cpp \
+    $$PWD/qmldeclaration.cpp \
+    $$PWD/bindingpath.cpp

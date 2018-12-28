@@ -21,12 +21,9 @@ import QtGraphicalEffects 1.0
 import live 1.0
 import editor 1.0
 
-LivePalette{
+CodePalette{
     id: palette
-
-    type : "color"
-    serialize : NativeValueCodeSerializer{}
-
+    type: "qml/color"
 
     item: Rectangle{
         id: root
@@ -62,6 +59,8 @@ LivePalette{
         onSelectedColorChanged: {
             setHsv(root.selectedColor)
             palette.value = selectedColor
+            if ( !palette.isBindingChange() )
+                extension.write(palette.value.toString())
         }
 
         width: 280
@@ -286,13 +285,13 @@ LivePalette{
 
     }
 
-    onInit: {
-        root.selectedColor = value
-        hueSlider.value = Math.round(root.hsvHue * 255)
-        saturationSlider.value = Math.round(root.hsvSaturation * 255)
-        valueSlider.value = Math.round(root.hsvValue * 255)
+    onExtensionChanged: {
+        extension.whenBinding = function(){
+            extension.write(palette.value)
+        }
     }
-    onCodeChanged:{
+
+    onInit: {
         root.selectedColor = value
         hueSlider.value = Math.round(root.hsvHue * 255)
         saturationSlider.value = Math.round(root.hsvSaturation * 255)

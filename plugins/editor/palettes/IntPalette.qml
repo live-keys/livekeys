@@ -20,11 +20,9 @@ import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
 
-LivePalette{
+CodePalette{
     id: palette
-
-    type : "int"
-    serialize : NativeValueCodeSerializer{}
+    type : "qml/int"
 
     item: Rectangle{
         width: 280
@@ -41,7 +39,11 @@ LivePalette{
             height: 15
             minimumValue: 0
             value: 0
-            onValueChanged: palette.value = intSlider.value
+            onValueChanged: {
+                palette.value = intSlider.value
+                if ( !palette.isBindingChange() )
+                    extension.write(palette.value)
+            }
             stepSize: 1.0
             maximumValue: 200
 
@@ -111,10 +113,10 @@ LivePalette{
 
         intSlider.value = Math.floor(value)
     }
-    onCodeChanged:{
-        var sqrt = Math.ceil(Math.sqrt(Math.floor(value))) + 1
-        zoomSlider.value = 15 > sqrt ? 15 : sqrt
 
-        intSlider.value = Math.floor(value)
+    onExtensionChanged: {
+        extension.whenBinding = function(){
+            extension.write(palette.value)
+        }
     }
 }
