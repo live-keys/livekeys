@@ -21,7 +21,14 @@ class LV_EDITOR_EXPORT LineSurface : public QQuickItem
 
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
     Q_PROPERTY(QFont font READ font WRITE setFont NOTIFY fontChanged)
+
 public:
+
+    friend class TextUtil;
+    friend class LineManager;
+
+public:
+
     class Node
     {
     public:
@@ -31,13 +38,10 @@ public:
         void moveStartPos(int delta) { Q_ASSERT(m_startPos + delta > 0); m_startPos += delta; }
         int startPos() const { return m_startPos; }
 
-
     private:
         int m_startPos;
         TextNode* m_node;
     };
-
-
 
     LineSurface(QQuickItem *parent=nullptr);
     ~LineSurface() Q_DECL_OVERRIDE;
@@ -48,14 +52,20 @@ public:
     Q_INVOKABLE void setComponents(lv::TextEdit* te);
     void setDocument(QTextDocument* doc);
     void unsetTextDocument();
+
+public Q_SLOTS:
+    void setDirtyBlockPosition(int pos);
+    void paletteSlot(int blockNum);
+    void triggerUpdate(int prev, int curr, int dirty);
+
 Q_SIGNALS:
     void colorChanged(const QColor &color);
     void fontChanged(const QFont &font);
-public Q_SLOTS:
-    void setDirtyBlockPosition(int pos);
-    void textDocumentFinished();
-    void paletteSlot(int blockNum);
-    void triggerUpdate(int prev, int curr, int dirty);
+
+protected:
+    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData) Q_DECL_OVERRIDE;
+
 private Q_SLOTS:
     void updateSize();
     void triggerPreprocess();
@@ -76,35 +86,25 @@ private:
         return res;
     }
 
-    QColor m_color;
-    QFont m_font;
-    QTextDocument *document;
-    QList<Node*> textNodeMap;
-
-
     enum UpdateType {
         UpdateNone,
         UpdateOnlyPreprocess,
         UpdatePaintNode
     };
 
-    UpdateType updateType;
-    TextEdit* textEdit;
-    int previousLineNumber;
-    int lineNumber;
-    int dirtyPos;
-    int deltaLineNumber;
-    bool updatePending;
-protected:
-    // mouse filter?
-    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData) Q_DECL_OVERRIDE;
-
-    friend class TextUtil;
-    friend class LineManager;
+    QColor m_color;
+    QFont m_font;
+    QTextDocument *m_document;
+    QList<Node*> m_textNodeMap;
+    UpdateType m_updateType;
+    TextEdit* m_textEdit;
+    int m_previousLineNumber;
+    int m_lineNumber;
+    int m_dirtyPos;
+    int m_deltaLineNumber;
+    bool m_updatePending;
 private:
     Q_DISABLE_COPY(LineSurface)
-    // Q_DECLARE_PRIVATE(LineSurface)
 };
 
 }

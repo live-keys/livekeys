@@ -63,7 +63,7 @@ namespace lv {
 class TextDocumentLayoutPrivate;
 class LineManager;
 
-class LV_EDITOR_EXPORT TextDocumentLayout : public QAbstractTextDocumentLayout
+class TextDocumentLayout : public QAbstractTextDocumentLayout
 {
     Q_DECLARE_PRIVATE(TextDocumentLayout)
     Q_OBJECT

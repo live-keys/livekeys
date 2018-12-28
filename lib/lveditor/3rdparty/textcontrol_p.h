@@ -64,7 +64,7 @@ class TextEdit;
 class TextControlPrivate;
 
 
-class LV_EDITOR_EXPORT TextControl : public QObject
+class TextControl : public QObject
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(TextControl)

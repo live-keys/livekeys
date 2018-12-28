@@ -24,9 +24,73 @@
 
 
 /**
-  \class lv::VisualLog
-  \brief Main logging class for LiveCV
-  \ingroup lvbase
+ * \class lv::VisualLog
+ * \brief Main logging class for LiveCV
+ *
+ * The way we primarily use this class is through a predefined macro `vlog`. It's defined in the following way
+ *
+ * ```
+ * lv::VisualLog(__VA_ARGS__).at(__FILE__, __LINE__, __FUNCTION__)
+ * ```
+ *
+ * This means that we can pass arguments to the vlog macro that are in accordance with the constructors of VisualLog.
+ * Those are:
+ * ```
+ * VisualLog();
+ * VisualLog(MessageInfo::Level level);
+ * VisualLog(const std::string& configuration);
+ * VisualLog(const std::string& configuration, MessageInfo::Level level);
+ * ```
+ *
+ * Therefore, we can pass no arguments, or we can pass a configuration string (also known as tag), or a default message level, or both.
+ * The at(...) function arguments provide us with the file, line number and function name of the place we're invoking the vlog call.
+ *
+ * Six levels of logging are available, in order of importance: Fatal, Error, Warning, Info, Debug, Verbose.
+ * There's a global configuration of the logger available, but there's also the ability to create a special configuration paired to a user-provided tag.
+ * Each user-created configuration starts as a global configuration - we can then change individual parameters as desired.
+ * `vlog(extension)` would create a configuration with the tag "extension". Perhaps the most important parameters of the configuration
+ * are the message levels. Each configuration has an application level and a default message level. If the level of the message we're logging
+ * is of less importance than the application level, it will not be displayed.
+ * We can set the level of the message in the following way
+ * ```
+ * vlog(extension).f() << "fatal"
+ * vlog(extension).e() << "error"
+ * vlog(extension).w() << "warning"
+ * vlog(extension).i() << "info"
+ * vlog(extension).d() << "debug"
+ * vlog(extension).v() << "verbose"
+ * ```
+ * Invoking one of the shorthand functions changes the message level of the logger. The default message level is info, while the application level
+ * is debug.
+ * An example on how to configure the custom configuration is given below.
+ * ```
+ * vlog().configure("test", {
+        {"level", VisualLog::MessageInfo::Error},
+        {"defaultLevel",     VisualLog::MessageInfo::Info}
+    });
+ * ```
+ * The above would change the application level of the logger to Error, and the default message level to Info. Messages would not get displayed for this particular configuration!
+ * The options are given as an Object MLNode (\sa MLNode). All the relevant options are listed below:
+ * * level - application level, the least important message level that the logger's showing
+ * * defaultLevel - default level of messages
+ * * file - output log file
+ * * logDaily - if the log should be created on a daily basis
+ * * toConsole - if the log messages should be passed to the console
+ * * toExtensions - if the log messages should be passed to other transports
+ * * toView - if the log messages should be passed to view
+ * * logObjects - set flags for places where we should log objects
+ * * prefix - formatted message prefix, depends on preset values (explained below)
+ *
+ * These settings can also be modified through the command line arguments (see --help).
+ * We can output our logged messages in several ways: `Console`, `View`, `File` and `Extensions`. It's important to mention
+ * the concept of Transport, which we use an abstraction of a listener picking up on our log messages. We can treat the Console and File
+ * as "transports" even though they're not technically extending our abstract class. Transport can broadcast the message in a simple textform, or
+ * as an object. View Transports are used to listen to messages which can be displayed in a visual way. If the message isn't in the correct format,
+ * or visual logging isn't enabled in the config, we default to a console display. Similarly, a generic transport is used for sending the object
+ * to an external listener, be it a file or a network listener. If object logging isn't enabled, or the object isn't in the correct form, we once again default
+ * to a console display.
+ *
+ * \ingroup lvbase
  */
 
 #if defined(Q_OS_UNIX) || (defined(Q_OS_WIN) && defined(QS_LOG_WIN_PRINTF_CONSOLE))
@@ -277,6 +341,9 @@ VisualLog::ViewTransport* VisualLog::m_model = 0;
 
 bool VisualLog::m_globalConfigured = false;
 
+/**
+ * \brief Default constructor of VisualLog
+ */
 VisualLog::VisualLog()
     : m_configuration(registeredConfigurations().globalConfiguration())
     , m_stream(new std::stringstream)
@@ -286,6 +353,9 @@ VisualLog::VisualLog()
     init();
 }
 
+/**
+ * \brief Constructor of VisualLog with level parameter
+*/
 VisualLog::VisualLog(VisualLog::MessageInfo::Level level)
     : m_configuration(registeredConfigurations().globalConfiguration())
     , m_messageInfo(level)
@@ -295,6 +365,9 @@ VisualLog::VisualLog(VisualLog::MessageInfo::Level level)
     init();
 }
 
+/**
+* \brief Constructor of VisualLog with configuration parameter
+*/
 VisualLog::VisualLog(const std::string &configurationKey)
     : m_configuration(registeredConfigurations().configurationAtOrGlobal(configurationKey))
     , m_stream(new std::stringstream)
@@ -304,6 +377,7 @@ VisualLog::VisualLog(const std::string &configurationKey)
     init();
 }
 
+/** \brief Constructor of VisualLog with both configuration and level parameters */
 VisualLog::VisualLog(const std::string &configurationKey, VisualLog::MessageInfo::Level level)
     : m_configuration(registeredConfigurations().configurationAtOrGlobal(configurationKey))
     , m_messageInfo(level)
@@ -313,6 +387,7 @@ VisualLog::VisualLog(const std::string &configurationKey, VisualLog::MessageInfo
     init();
 }
 
+/** \brief Destructor of VisualLog */
 VisualLog::~VisualLog(){
     flushLine();
     delete m_stream;
@@ -348,6 +423,9 @@ VisualLog::MessageInfo::Level VisualLog::MessageInfo::levelFromString(const std:
     return VisualLog::MessageInfo::Level::Info;
 }
 
+/**
+ * \brief Returns a prefix extracted from a given configuration object
+ */
 std::string VisualLog::MessageInfo::prefix(const VisualLog::Configuration *configuration) const{
     if ( !configuration->m_prefix.empty() ){
         return expand(configuration->m_prefix);
@@ -355,10 +433,14 @@ std::string VisualLog::MessageInfo::prefix(const VisualLog::Configuration *confi
     return "";
 }
 
+/**
+ * \brief Returns the tag which is actually the name of the given configuration
+ */
 std::string VisualLog::MessageInfo::tag(const VisualLog::Configuration *configuration) const{
     return configuration->m_name;
 }
 
+/** \brief Configure VisualLog given a configuration tag and options */
 void VisualLog::configure(const std::string &configuration, const MLNode& options){
     m_output = 0;
 
@@ -372,6 +454,7 @@ void VisualLog::configure(const std::string &configuration, const MLNode& option
     configure(cfg, options);
 }
 
+/** \brief Configure VisualLog given the configuration data and options */
 void VisualLog::configure(VisualLog::Configuration *configuration, const MLNode &options){
     m_output = 0; // Disable output
 
@@ -445,6 +528,7 @@ void VisualLog::configure(VisualLog::Configuration *configuration, const MLNode 
     //TODO: Requires parameter validation checking (e.g. log file / path exists)
 }
 
+/** \brief Adds transport given a predefined configuration */
 void VisualLog::addTransport(const std::string &configuration, VisualLog::Transport *transport){
     m_output = 0; // Disable output
 
@@ -458,12 +542,14 @@ void VisualLog::addTransport(const std::string &configuration, VisualLog::Transp
     addTransport(cfg, transport);
 }
 
+/** \brief Adds transport given configuration data */
 void VisualLog::addTransport(VisualLog::Configuration *configuration, VisualLog::Transport *transport){
     m_output = 0; // Disable output
 
     configuration->m_transports.append(QSharedPointer<VisualLog::Transport>(transport));
 }
 
+/** \brief Removes transport given a predefined configuration */
 void VisualLog::removeTransports(const std::string &configuration){
     m_output = 0; // Disable output
 
@@ -472,18 +558,21 @@ void VisualLog::removeTransports(const std::string &configuration){
         removeTransports(cfg);
 }
 
+/** \brief Removes transport given configuration data */
 void VisualLog::removeTransports(VisualLog::Configuration *configuration){
     m_output = 0; // Disable output
 
     configuration->m_transports.clear();
 }
 
+/** \brief Returns total number of configurations */
 int VisualLog::totalConfigurations(){
     m_output = 0;
 
     return registeredConfigurations().configurationCount();
 }
 
+/** \brief Flushes the entire buffer to preset outputs */
 void VisualLog::flushLine(){
     if ( canLog() ){
         std::string pref = prefix();
@@ -501,11 +590,13 @@ void VisualLog::flushLine(){
     }
 }
 
+/** \brief Closes the internal log file */
 void VisualLog::closeFile(){
     m_output = 0; // Disable output
     m_configuration->closeFile();
 }
 
+/** \brief Display viewData in the View given by the viewPath */
 void VisualLog::asView(const std::string &viewPath, const QVariant &viewData){
     if ( canLog() && m_objectOutput && (m_output & VisualLog::View) ){
         m_model->onView(m_configuration, m_messageInfo, viewPath, viewData);
@@ -513,6 +604,7 @@ void VisualLog::asView(const std::string &viewPath, const QVariant &viewData){
     }
 }
 
+/** \brief Display view data returned by the given function in the View given by the viewPath */
 void VisualLog::asView(const std::string &viewPath, std::function<QVariant ()> cloneFunction){
     if ( canLog() && m_objectOutput && (m_output & VisualLog::View) ){
         m_model->onView(m_configuration, m_messageInfo, viewPath, cloneFunction());
@@ -520,6 +612,7 @@ void VisualLog::asView(const std::string &viewPath, std::function<QVariant ()> c
     }
 }
 
+/** \brief Display MLNode as object of given type */
 void VisualLog::asObject(const std::string &type, const MLNode &mlvalue){
     std::string str;
     ml::toJson(mlvalue, str);
@@ -676,6 +769,7 @@ int VisualLog::removeOutputFlag(int flags, VisualLog::Output output){
     return flags;
 }
 
+/** \brief Shows if logging is enabled */
 bool VisualLog::canLog(){
     return m_messageInfo.m_level <= m_configuration->m_applicationLevel;
 }
@@ -691,6 +785,19 @@ bool VisualLog::canLogObjects(VisualLog::Configuration *configuration){
     return configuration->m_logObjects != 0;
 }
 
+/**
+  \class lv::VisualLog::MessageInfo
+  \brief Simple wrapper class for log messages, including the level, timestamp and location info
+
+  Location info includes a remote, function name, line number and file name. All of these are optional.
+  \ingroup lvbase
+ */
+
+/**
+ * \brief MessageInfo desctructor
+ *
+ * Deletes location and stamp pointers.
+ */
 VisualLog::MessageInfo::~MessageInfo(){
     delete m_location;
     delete m_stamp;
@@ -710,6 +817,7 @@ VisualLog::MessageInfo::MessageInfo(VisualLog::MessageInfo::Level level)
 {
 }
 
+/** \brief Overrides the previous timestamp with the given one */
 VisualLog &lv::VisualLog::overrideStamp(const QDateTime &stamp){
     if ( !m_messageInfo.m_stamp )
         m_messageInfo.m_stamp = new QDateTime(stamp);
@@ -718,6 +826,11 @@ VisualLog &lv::VisualLog::overrideStamp(const QDateTime &stamp){
     return *this;
 }
 
+/**
+ * \brief Returns the message info timestamp
+ *
+ * If there's none, it takes the current time and sets it as the stamp.
+ */
 const QDateTime &lv::VisualLog::MessageInfo::stamp() const{
     if ( !m_stamp )
         m_stamp = new QDateTime(QDateTime::currentDateTime());

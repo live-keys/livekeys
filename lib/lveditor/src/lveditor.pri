@@ -19,7 +19,6 @@ HEADERS += \
     $$PWD/editorglobalobject.h \
     $$PWD/editorprivate_plugin.h \
     $$PWD/linemanager.h \
-    $$PWD/collapsedsection.h \
     $$PWD/linesurface.h \
     $$PWD/palettemanager.h \
     $$PWD/palettecontainer.h \
@@ -43,7 +42,6 @@ SOURCES += \
     $$PWD/editorglobalobject.cpp \
     $$PWD/editorprivate_plugin.cpp \
     $$PWD/linemanager.cpp \
-    $$PWD/collapsedsection.cpp \
     $$PWD/linesurface.cpp \
     $$PWD/palettemanager.cpp \
     $$PWD/palettecontainer.cpp \

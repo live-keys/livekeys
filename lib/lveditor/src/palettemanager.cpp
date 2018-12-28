@@ -8,44 +8,44 @@ namespace lv {
 
 PaletteManager::PaletteManager()
 {
-    lineNumber = 0;
-    dirtyPos = -1;
+    m_lineNumber = 0;
+    m_dirtyPos = -1;
 }
 
 bool paletteCmp(PaletteData* a, PaletteData* b)
 {
-    return a->startBlock < b->startBlock;
+    return a->m_startBlock < b->m_startBlock;
 }
 
 void PaletteManager::paletteAdded(int sb, int span, int height, QObject *p)
 {
     auto pd = new PaletteData();
-    pd->startBlock = sb;
-    pd->lineSpan = span;
-    pd->palette = p;
-    pd->paletteSpan = qCeil(height*1.0/this->lineHeight);
-    pd->palleteHeight = height;
+    pd->m_startBlock = sb;
+    pd->m_lineSpan = span;
+    pd->m_palette = p;
+    pd->m_paletteSpan = qCeil(height*1.0/this->m_lineHeight);
+    pd->m_palleteHeight = height;
 
-    palettes.push_back(pd);
-    palettes.sort(paletteCmp);
+    m_palettes.push_back(pd);
+    m_palettes.sort(paletteCmp);
 }
 
 int PaletteManager::drawingOffset(int blockNumber, bool forCursor)
 {
-    auto it = palettes.begin();
+    auto it = m_palettes.begin();
     int offset = 0;
-    while (it != palettes.end())
+    while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
-        if (blockNumber < pd->startBlock) break;
+        if (blockNumber < pd->m_startBlock) break;
 
-        if (blockNumber < pd->startBlock + pd->lineSpan)
+        if (blockNumber < pd->m_startBlock + pd->m_lineSpan)
         {
             if (forCursor) offset = 0;
-            else offset = (-blockNumber - 2)*this->lineHeight;
+            else offset = (-blockNumber - 2)*this->m_lineHeight;
             break;
         }
-        offset += (pd->paletteSpan - pd->lineSpan) * this->lineHeight;
+        offset += (pd->m_paletteSpan - pd->m_lineSpan) * this->m_lineHeight;
 
         ++it;
     }
@@ -55,50 +55,50 @@ int PaletteManager::drawingOffset(int blockNumber, bool forCursor)
 
 int PaletteManager::positionOffset(int y)
 {
-    auto it = palettes.begin();
-    int offset = y / this->lineHeight;
-    while (it != palettes.end())
+    auto it = m_palettes.begin();
+    int offset = y / this->m_lineHeight;
+    while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
 
-        if (offset < pd->startBlock) break;
+        if (offset < pd->m_startBlock) break;
 
-        if (offset < pd->startBlock + pd->paletteSpan)
+        if (offset < pd->m_startBlock + pd->m_paletteSpan)
         {
-            offset = pd->startBlock - 1;
+            offset = pd->m_startBlock - 1;
             break;
         }
 
-        offset += pd->lineSpan - pd->paletteSpan;
+        offset += pd->m_lineSpan - pd->m_paletteSpan;
         it++;
     }
 
-    return offset * this->lineHeight + this->lineHeight / 2;
+    return offset * this->m_lineHeight + this->m_lineHeight / 2;
 }
 
 void PaletteManager::setTextEdit(TextEdit *value)
 {
-    textEdit = value;
+    m_textEdit = value;
     if (value != nullptr)
     {
         // QObject::connect(textEdit, &TextEdit::dirtyBlockPosition, this, &PaletteManager::setDirtyPos);
-        QObject::connect(textEdit, &TextEdit::lineCountChanged, this, &PaletteManager::lineNumberChange);
+        QObject::connect(m_textEdit, &TextEdit::lineCountChanged, this, &PaletteManager::lineNumberChange);
     }
 }
 
 void PaletteManager::setLineHeight(int value)
 {
-    lineHeight = value;
+    m_lineHeight = value;
 }
 
 int PaletteManager::isLineBeforePalette(int blockNumber)
 {
-    auto it = palettes.begin();
-    while (it != palettes.end())
+    auto it = m_palettes.begin();
+    while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
-        if (pd->startBlock == blockNumber + 1) return pd->lineSpan;
-        if (pd->startBlock > blockNumber) return 0;
+        if (pd->m_startBlock == blockNumber + 1) return pd->m_lineSpan;
+        if (pd->m_startBlock > blockNumber) return 0;
 
         ++it;
     }
@@ -108,12 +108,12 @@ int PaletteManager::isLineBeforePalette(int blockNumber)
 
 int PaletteManager::isLineAfterPalette(int blockNumber)
 {
-    auto it = palettes.begin();
-    while (it != palettes.end())
+    auto it = m_palettes.begin();
+    while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
-        if (pd->startBlock + pd->lineSpan == blockNumber) return pd->lineSpan;
-        if (pd->startBlock >= blockNumber) return 0;
+        if (pd->m_startBlock + pd->m_lineSpan == blockNumber) return pd->m_lineSpan;
+        if (pd->m_startBlock >= blockNumber) return 0;
 
         ++it;
     }
@@ -123,14 +123,14 @@ int PaletteManager::isLineAfterPalette(int blockNumber)
 
 int  PaletteManager::removePalette(QObject *palette)
 {
-    auto it = palettes.begin();
-    while (it != palettes.end())
+    auto it = m_palettes.begin();
+    while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
         if (pd->matchesPalette(palette))
         {
-            int result = pd->startBlock;
-            palettes.erase(it);
+            int result = pd->m_startBlock;
+            m_palettes.erase(it);
             return result;
         }
 
@@ -142,18 +142,18 @@ int  PaletteManager::removePalette(QObject *palette)
 
 int PaletteManager::resizePalette(QObject *palette, int newHeight)
 {
-    auto it = palettes.begin();
-    while (it != palettes.end())
+    auto it = m_palettes.begin();
+    while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
         if (pd->matchesPalette(palette))
         {
-            pd->palleteHeight = newHeight;
-            int newPaletteSpan = qCeil(newHeight * 1.0/ this->lineHeight);
-            if (newPaletteSpan != pd->paletteSpan)
+            pd->m_palleteHeight = newHeight;
+            int newPaletteSpan = qCeil(newHeight * 1.0/ this->m_lineHeight);
+            if (newPaletteSpan != pd->m_paletteSpan)
             {
-                pd->paletteSpan = newPaletteSpan;
-                return pd->startBlock;
+                pd->m_paletteSpan = newPaletteSpan;
+                return pd->m_startBlock;
             }
             return false;
         }
@@ -166,57 +166,57 @@ int PaletteManager::resizePalette(QObject *palette, int newHeight)
 
 void PaletteManager::setDirtyPos(int pos)
 {
-    dirtyPos = pos;
+    m_dirtyPos = pos;
 }
 
 void PaletteManager::lineNumberChange()
 {
-    prevLineNumber = lineNumber;
-    lineNumber = textEdit->lineCount();
-    if (prevLineNumber == lineNumber) return;
+    m_prevLineNumber = m_lineNumber;
+    m_lineNumber = m_textEdit->lineCount();
+    if (m_prevLineNumber == m_lineNumber) return;
 
-    if (prevLineNumber < lineNumber) linesAdded();
+    if (m_prevLineNumber < m_lineNumber) linesAdded();
     else linesRemoved();
 }
 
 void PaletteManager::linesAdded()
 {
-    int delta = lineNumber - prevLineNumber;
-    auto it = palettes.begin();
-    while (it != palettes.end())
+    int delta = m_lineNumber - m_prevLineNumber;
+    auto it = m_palettes.begin();
+    while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
-        if (dirtyPos > pd->startBlock + pd->lineSpan)
+        if (m_dirtyPos > pd->m_startBlock + pd->m_lineSpan)
         {
             ++it;
             continue;
         }
 
-        pd->startBlock += delta;
+        pd->m_startBlock += delta;
         ++it;
     }
 }
 
 void PaletteManager::linesRemoved()
 {
-    int delta = prevLineNumber - lineNumber;
-    auto it = palettes.begin();
-    while (it != palettes.end())
+    int delta = m_prevLineNumber - m_lineNumber;
+    auto it = m_palettes.begin();
+    while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
-        if (dirtyPos > pd->startBlock + pd->lineSpan)
+        if (m_dirtyPos > pd->m_startBlock + pd->m_lineSpan)
         {
             ++it;
             continue;
         }
 
-        if (dirtyPos < pd->startBlock && dirtyPos + delta >= pd->startBlock + pd->lineSpan)
+        if (m_dirtyPos < pd->m_startBlock && m_dirtyPos + delta >= pd->m_startBlock + pd->m_lineSpan)
         {
-            it = palettes.erase(it);
+            it = m_palettes.erase(it);
             continue;
         }
 
-        pd->startBlock -= delta;
+        pd->m_startBlock -= delta;
         ++it;
     }
 }

@@ -32,11 +32,17 @@ namespace lv{
 class LV_BASE_EXPORT VisualLog{
 
 public:
+    /** Bitmasks for each type of output */
     enum Output{
+        /** Console output */
         Console = 1,
+        /** Error output */
         Error = 2,
+        /** File output */
         File = 4,
+        /** View output */
         View = 8,
+        /** Extentions output */
         Extensions = 16
     };
 
@@ -57,6 +63,9 @@ public:
     class LV_BASE_EXPORT MessageInfo{
 
     public:
+        /**
+         * \brief Collection of all possible message levels, in decreasing order of importance
+         */
         enum Level{
             Fatal = 0,
             Error,
@@ -232,6 +241,7 @@ inline VisualLog::SourceLocation::SourceLocation(
 // VisualLog
 // ---------------------------------------------------------------------
 
+/** \brief Log given value as object */
 template<typename T> void VisualLog::object(const T &value){
     m_objectOutput = true;
     if ( canLog() )
@@ -243,6 +253,7 @@ template<typename T> void VisualLog::object(VisualLog::MessageInfo::Level level,
     object(value);
 }
 
+/** \brief Display value as object of given type */
 template<typename T> void VisualLog::asObject(const std::string &type, const T &value){
     if ( canLog() && m_objectOutput && canLogObjects(m_configuration) ){
         MLNode mlvalue;
@@ -251,81 +262,110 @@ template<typename T> void VisualLog::asObject(const std::string &type, const T &
     }
 }
 
+/** \brief Log given value as object with level Fatal */
 template<typename T> void VisualLog::f(const T &value){
     object(VisualLog::MessageInfo::Fatal, value);
 }
+
+/** \brief Log given value as object with level Error */
 template<typename T> void VisualLog::e(const T &value){
     object(VisualLog::MessageInfo::Error, value);
 }
+
+/** \brief Log given value as object with level Warning */
 template<typename T> void VisualLog::w(const T &value){
     object(VisualLog::MessageInfo::Warning, value);
 }
+
+/** \brief Log given value as object with level Info */
 template<typename T> void VisualLog::i(const T &value){
     object(VisualLog::MessageInfo::Info, value);
 }
+
+/** \brief Log given value as object with level Debug */
 template<typename T> void VisualLog::d(const T &value){
     object(VisualLog::MessageInfo::Debug, value);
 }
+
+/** \brief Log given value as object with level Verbose */
 template<typename T> void VisualLog::v(const T &value){
     object(VisualLog::MessageInfo::Verbose, value);
 }
 
+/** \brief Sets the message level to Fatal */
 inline VisualLog &VisualLog::f(){
     m_messageInfo.m_level = VisualLog::MessageInfo::Fatal;
     return *this;
 }
 
+/** \brief Sets the message level to Error */
 inline VisualLog &VisualLog::e(){
     m_messageInfo.m_level = VisualLog::MessageInfo::Error;
     return *this;
 }
-
+/** \brief Sets the message level to Warning */
 inline VisualLog &VisualLog::w(){
     m_messageInfo.m_level = VisualLog::MessageInfo::Warning;
     return *this;
 }
-
+/** \brief Sets the message level to Info */
 inline VisualLog &VisualLog::i(){
     m_messageInfo.m_level = VisualLog::MessageInfo::Info;
     return *this;
 }
-
+/** \brief Sets the message level to Debug */
 inline VisualLog &VisualLog::d(){
     m_messageInfo.m_level = VisualLog::MessageInfo::Debug;
     return *this;
 }
 
+/** \brief Sets the message level to Verbose */
 inline VisualLog &VisualLog::v(){
     m_messageInfo.m_level = VisualLog::MessageInfo::Verbose;
     return *this;
 }
 
+/** \brief Sets the message info location */
 inline VisualLog &VisualLog::at(const std::string &file, int line, const std::string &functionName){
     m_messageInfo.m_location = new VisualLog::SourceLocation(file, line, functionName);
     return *this;
 }
 
+/** \brief Sets the message info location with remote included */
 inline VisualLog &VisualLog::at(const std::string &remote, const std::string &file, int line, const std::string &functionName){
     m_messageInfo.m_location = new VisualLog::SourceLocation(remote, file, line, functionName);
     return *this;
 }
 
+/**
+ * \brief Returns a remote location, if it exists
+ */
 inline std::string VisualLog::MessageInfo::sourceRemoteLocation() const{
     return m_location ? m_location->remote : "";
 }
 
+/**
+ * \brief Returns the file name of the source, if it exists
+ */
 inline std::string VisualLog::MessageInfo::sourceFileName() const{
     return m_location ? m_location->file : "";
 }
 
+/**
+ * \brief Returns the line number, if it has been set
+ */
 inline int VisualLog::MessageInfo::sourceLineNumber() const{
     return m_location ? m_location->line : 0;
 }
 
+/**
+ * \brief Returns the name of the source function, if it has been set
+ */
 inline std::string VisualLog::MessageInfo::sourceFunctionName() const{
     return m_location ? m_location->functionName : "";
 }
 
+/** \brief Stream insertion operator */
 template<typename T> VisualLog& VisualLog::operator<< (const T& x){
     if ( !canLog() )
         return *this;
@@ -335,6 +375,7 @@ template<typename T> VisualLog& VisualLog::operator<< (const T& x){
     return *this;
 }
 
+/** \brief Stream insertion operator with a std::ostream& (*f)(std::ostream&) parameter */
 template<typename T> VisualLog& VisualLog::operator<< (std::ostream &(*f)(std::ostream &)){
     if ( !canLog() )
         return *this;
@@ -346,6 +387,7 @@ template<typename T> VisualLog& VisualLog::operator<< (std::ostream &(*f)(std::o
     return *this;
 }
 
+/** \brief Stream insertion operator with a std::ostream& (*f)(std::ios&)  parameter */
 template<typename T> VisualLog& VisualLog::operator<< ( std::ostream& (*f)(std::ios&) ){
     if ( !canLog() )
         return *this;
@@ -357,6 +399,7 @@ template<typename T> VisualLog& VisualLog::operator<< ( std::ostream& (*f)(std::
     return *this;
 }
 
+/** \brief Stream insertion operator with a std::ostream (*f)(std::ios_base& ) parameter */
 template<typename T> VisualLog& VisualLog::operator<< ( std::ostream (*f)(std::ios_base& ) ){
     if ( !canLog() )
         return *this;

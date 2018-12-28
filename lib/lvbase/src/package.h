@@ -18,6 +18,7 @@ class LV_BASE_EXPORT Package{
     DISABLE_COPY(Package);
 
 public:
+    /** Shared pointer to Package */
     typedef std::shared_ptr<Package> Ptr;
 
     class LV_BASE_EXPORT Reference{

@@ -1,11 +1,13 @@
 #include <queue>
 #include <list>
-#include "collapsedsection.h"
 #include "linemanager.h"
 #include "linesurface.h"
-// #include "qtextdocument.h"
 
 namespace lv {
+
+LineManager::CollapsedSection::CollapsedSection(int pos, int num)
+    : position(pos), numberOfLines(num), nestedSections() {}
+
 
 bool LineManager::before(int pos1, int num1, int pos2, int num2)
 {
@@ -27,9 +29,9 @@ bool LineManager::after(int pos1, int num1, int pos2, int num2)
 void LineManager::writeOutContentOfSections()
 {
     qDebug() << "---------------sections-------------";
-    auto it = sections.begin();
+    auto it = m_sections.begin();
     int cnt = 0;
-    while (it != sections.end())
+    while (it != m_sections.end())
     {
         CollapsedSection* cs = *it;
         qDebug() << cnt << ": (" << cs->position << cs->numberOfLines << ")";
@@ -40,7 +42,7 @@ void LineManager::writeOutContentOfSections()
 
 void LineManager::replaceTextInLineDocumentBlock(int blockNumber, std::string s)
 {
-    QTextBlock b = lineDocument->findBlockByNumber(blockNumber);
+    QTextBlock b = m_lineDocument->findBlockByNumber(blockNumber);
     QTextCursor cursor(b);
     cursor.beginEditBlock();
     cursor.movePosition(QTextCursor::EndOfBlock);
@@ -52,7 +54,7 @@ void LineManager::replaceTextInLineDocumentBlock(int blockNumber, std::string s)
 
 void LineManager::changeLastCharInLineDocumentBlock(int blockNumber, char c)
 {
-    QTextBlock b = lineDocument->findBlockByNumber(blockNumber);
+    QTextBlock b = m_lineDocument->findBlockByNumber(blockNumber);
     QTextCursor cursor(b);
     cursor.beginEditBlock();
     cursor.movePosition(QTextCursor::EndOfBlock);
@@ -64,22 +66,22 @@ void LineManager::changeLastCharInLineDocumentBlock(int blockNumber, char c)
 
 void LineManager::updateLineDocument()
 {
-    auto itSections = sections.begin();
-    while (itSections != sections.end() && (*itSections)->position < dirtyPos) ++itSections;
-    int curr = dirtyPos;
-    auto it = lineDocument->rootFrame()->begin();
+    auto itSections = m_sections.begin();
+    while (itSections != m_sections.end() && (*itSections)->position < m_dirtyPos) ++itSections;
+    int curr = m_dirtyPos;
+    auto it = m_lineDocument->rootFrame()->begin();
     for (int i = 0; i < curr; i++)
     {
         ++it;
     }
-    while (it != lineDocument->rootFrame()->end())
+    while (it != m_lineDocument->rootFrame()->end())
     {
-        auto currBlock = parentDocument->findBlockByNumber(curr);
+        auto currBlock = m_parentDocument->findBlockByNumber(curr);
         lv::ProjectDocumentBlockData* userData =
                 static_cast<lv::ProjectDocumentBlockData*>(currBlock.userData());
 
         bool visible = true;
-        if (itSections != sections.end())
+        if (itSections != m_sections.end())
         {
             CollapsedSection* sec = (*itSections);
             if (curr == sec->position)
@@ -117,12 +119,12 @@ void LineManager::updateLineDocument()
         }
         ++curr; ++it;
     }
-    auto firstDirtyBlock = lineDocument->findBlockByNumber(dirtyPos);
-    lineDocument->markContentsDirty(firstDirtyBlock.position(), lineDocument->characterCount() - firstDirtyBlock.position());
+    auto firstDirtyBlock = m_lineDocument->findBlockByNumber(m_dirtyPos);
+    m_lineDocument->markContentsDirty(firstDirtyBlock.position(), m_lineDocument->characterCount() - firstDirtyBlock.position());
 }
 
 
-bool cmp(CollapsedSection* a, CollapsedSection* b)
+bool cmp(LineManager::CollapsedSection* a, LineManager::CollapsedSection* b)
 {
     return a->position < b->position;
 }
@@ -130,17 +132,17 @@ bool cmp(CollapsedSection* a, CollapsedSection* b)
 void LineManager::collapseLines(int pos, int num) {
 
     std::list<CollapsedSection*> nested;
-    auto it = sections.begin();
+    auto it = m_sections.begin();
     showHideTextEditLines(false, pos, num);
 
-    while (it != sections.end()) {
+    while (it != m_sections.end()) {
         CollapsedSection* sec = *it;
         if (before(sec->position, sec->numberOfLines, pos, num)) {
             ++it; continue; }
         if (inside(sec->position, sec->numberOfLines, pos, num))
         {
             nested.emplace_back(sec);
-            it = sections.erase(it);
+            it = m_sections.erase(it);
             continue;
         }
         if (after(sec->position, sec->numberOfLines, pos, num)) {
@@ -153,29 +155,29 @@ void LineManager::collapseLines(int pos, int num) {
     CollapsedSection* nuSection = new CollapsedSection(pos, num);
     nuSection->nestedSections = std::move(nested);
 
-    sections.emplace_back(nuSection);
-    sections.sort(cmp);
+    m_sections.emplace_back(nuSection);
+    m_sections.sort(cmp);
 
 }
 
 void LineManager::expandLines(int pos, int num)
 {
-    auto it = sections.begin();
-    while (it != sections.end() && (*it)->position != pos) ++it;
+    auto it = m_sections.begin();
+    while (it != m_sections.end() && (*it)->position != pos) ++it;
 
     showHideTextEditLines(true, pos, num);
-    if (it != sections.end())
+    if (it != m_sections.end())
     {
         CollapsedSection* sec = *it;
-        sections.erase(it);
+        m_sections.erase(it);
 
         std::list<CollapsedSection*> nested;
         nested = std::move(sec->nestedSections);
 
         for (CollapsedSection* nestedSec: nested)
         {
-            sections.push_back(nestedSec);
-            sections.sort(cmp);
+            m_sections.push_back(nestedSec);
+            m_sections.sort(cmp);
             showHideTextEditLines(false, nestedSec->position, nestedSec->numberOfLines);
         }
 
@@ -190,11 +192,11 @@ void LineManager::expandLines(int pos, int num)
 
 void LineManager::linesAdded()
 {
-    int pos = dirtyPos;
-    int num = lineNumber - previousLineNumber;
-    QTextCursor cursor(lineDocument);
+    int pos = m_dirtyPos;
+    int num = m_lineNumber - m_previousLineNumber;
+    QTextCursor cursor(m_lineDocument);
     cursor.movePosition(QTextCursor::MoveOperation::End);
-    for (int i = previousLineNumber + 1; i <= lineNumber; i++)
+    for (int i = m_previousLineNumber + 1; i <= m_lineNumber; i++)
     {
         if (i!=1) cursor.insertBlock();
         std::string s = std::to_string(i) + "  ";
@@ -204,8 +206,8 @@ void LineManager::linesAdded()
         cursor.insertText(a);
     }
 
-    auto it = sections.begin();
-    while (it != sections.end())
+    auto it = m_sections.begin();
+    while (it != m_sections.end())
     {
         CollapsedSection* sec = *it;
         if (sec->position >= pos)
@@ -228,19 +230,19 @@ void LineManager::linesAdded()
 
 void LineManager::linesRemoved()
 {
-    int pos = dirtyPos;
-    int num = previousLineNumber - lineNumber;
-    for (int i = previousLineNumber-1; i >= lineNumber; i--)
+    int pos = m_dirtyPos;
+    int num = m_previousLineNumber - m_lineNumber;
+    for (int i = m_previousLineNumber-1; i >= m_lineNumber; i--)
     {
-        QTextCursor cursor(lineDocument->findBlockByNumber(i));
+        QTextCursor cursor(m_lineDocument->findBlockByNumber(i));
         cursor.select(QTextCursor::BlockUnderCursor);
         cursor.removeSelectedText();
     }
 
-    auto it = sections.begin();
+    auto it = m_sections.begin();
     std::queue<CollapsedSection*> qs;
 
-    while (it != sections.end())
+    while (it != m_sections.end())
     {
         CollapsedSection* sec = *it;
         if (before(sec->position, sec->numberOfLines, pos, num)) {
@@ -248,7 +250,7 @@ void LineManager::linesRemoved()
         if (inside(sec->position, sec->numberOfLines, pos, num))
         {
             qs.emplace(sec);
-            it = sections.erase(it);
+            it = m_sections.erase(it);
             while (!qs.empty())
             {
                 CollapsedSection* pop = qs.back(); qs.pop();
@@ -279,15 +281,15 @@ void LineManager::linesRemoved()
     }
 }
 
-std::list<CollapsedSection*> & LineManager::getSections()
+std::list<LineManager::CollapsedSection*> & LineManager::getSections()
 {
-    return sections;
+    return m_sections;
 }
 
 std::pair<int, int> LineManager::isLineAfterCollapsedSection(int lineNumber)
 {
-    auto it = sections.begin();
-    while (it != sections.end())
+    auto it = m_sections.begin();
+    while (it != m_sections.end())
     {
         auto cs = *it;
         if  (lineNumber == cs->position + cs->numberOfLines + 1) return std::make_pair(cs->position, cs->numberOfLines);
@@ -299,8 +301,8 @@ std::pair<int, int> LineManager::isLineAfterCollapsedSection(int lineNumber)
 
 std::pair<int, int> LineManager::isFirstLineOfCollapsedSection(int lineNumber)
 {
-    auto it = sections.begin();
-    while (it != sections.end())
+    auto it = m_sections.begin();
+    while (it != m_sections.end())
     {
         auto cs = *it;
         if  (lineNumber == cs->position) return std::make_pair(cs->position, cs->numberOfLines);
@@ -312,50 +314,50 @@ std::pair<int, int> LineManager::isFirstLineOfCollapsedSection(int lineNumber)
 
 void LineManager::setDirtyPos(int p)
 {
-    if (!updatePending || p < dirtyPos){
-        updatePending = true;
-        dirtyPos = p;
+    if (!m_updatePending || p < m_dirtyPos){
+        m_updatePending = true;
+        m_dirtyPos = p;
     }
 }
 
 void LineManager::textDocumentFinishedUpdating(int newLineNumber)
 {
-    previousLineNumber = lineNumber;
-    lineNumber = newLineNumber;
+    m_previousLineNumber = m_lineNumber;
+    m_lineNumber = newLineNumber;
 
-    int deltaLineNumber = abs(previousLineNumber - lineNumber);
+    int deltaLineNumber = abs(m_previousLineNumber - m_lineNumber);
     if (deltaLineNumber)
     {
-        if (previousLineNumber < lineNumber)
+        if (m_previousLineNumber < m_lineNumber)
             linesAdded();
         else
             linesRemoved();
     }
 
     updateLineDocument();
-    updatePending = false;
-    emit updateLineSurface(previousLineNumber, lineNumber, dirtyPos);
+    m_updatePending = false;
+    emit updateLineSurface(m_previousLineNumber, m_lineNumber, m_dirtyPos);
 }
 
 void LineManager::setLineDocumentFont(const QFont &font)
 {
-    lineDocument->setDefaultFont(font);
+    m_lineDocument->setDefaultFont(font);
 }
 
 void LineManager::setParentDocument(QTextDocument *td)
 {
-    parentDocument = td;
+    m_parentDocument = td;
 }
 
 LineManager::LineManager(QObject *parent)
-    : QObject(parent), sections(), lineDocument(new QTextDocument(this)),
-      previousLineNumber(0), lineNumber(0), dirtyPos(0), updatePending(false)
+    : QObject(parent), m_sections(), m_lineDocument(new QTextDocument(this)),
+      m_previousLineNumber(0), m_lineNumber(0), m_dirtyPos(0), m_updatePending(false)
 {
-    updatePending = false;
+    m_updatePending = false;
     QTextOption opt;
     opt.setAlignment(Qt::AlignRight | Qt::AlignTop);
     opt.setTextDirection(Qt::LeftToRight);
-    lineDocument->setDefaultTextOption(opt);
+    m_lineDocument->setDefaultTextOption(opt);
 }
 
 LineManager::~LineManager() {}

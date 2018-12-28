@@ -31,6 +31,7 @@ class LV_BASE_EXPORT LockedFileIOSession{
     DISABLE_COPY(LockedFileIOSession);
 
 public:
+    /** Shared pointer to this class */
     typedef std::shared_ptr<LockedFileIOSession> Ptr;
 
 public:

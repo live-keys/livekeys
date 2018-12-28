@@ -50,23 +50,38 @@ public:
 class LV_BASE_EXPORT MLNode{
 
 public:
+    /** MLNode */
     typedef MLNode ValueType;
+    /** Reference to MLNode */
     typedef MLNode& Reference;
+    /** Const reference to MLNode*/
     typedef const MLNode& ConstReference;
+    /** Allocator for MLNode */
     typedef std::allocator<MLNode> AllocatorType;
+    /** Pointer arithmetic difference type */
     typedef std::ptrdiff_t DifferenceType;
+    /** Standard size type */
     typedef std::size_t SizeType;
+    /** Allocator pointer to MLNode */
     typedef std::allocator_traits<AllocatorType>::pointer Pointer;
+    /** Const allocator pointer to MLNode */
     typedef std::allocator_traits<AllocatorType>::const_pointer ConstPointer;
 
     union MLValue;
 
+    /** Generic int type (specifically long long) */
     typedef long long                    IntType;
+    /** Generic float type (specifically double */
     typedef double                       FloatType;
+    /** bool */
     typedef bool                         BoolType;
+    /** Standard string type */
     typedef std::string                  StringType;
+    /** Vector of MLNodes */
     typedef std::vector<MLNode>          ArrayType;
+    /** Map of string-MLNode pairs */
     typedef std::map<StringType, MLNode> ObjectType;
+    /** Byte type i.e. unsigned char */
     typedef unsigned char                ByteType;
 
     // MLNode::BytesType
@@ -115,16 +130,37 @@ public:
         friend class MLNode;
 
     public:
+        /**
+         * \brief Identical to MLNode::DifferenceType
+         */
         typedef MLNode::DifferenceType DifferenceType;
+        /**
+         * \brief Identical to MLNode::ValueType
+         */
         typedef MLNode::ValueType      ValueType;
+        /**
+         * \brief Identical to MLNode::Reference
+         */
         typedef MLNode::Reference      Reference;
+        /**
+         * \brief Identical to MLNode::Pointer
+         */
         typedef MLNode::Pointer        Pointer;
+        /**
+         * \brief Identical to MLNode::ConstPointer
+         */
         typedef MLNode::ConstPointer   ConstPointer;
+        /**
+         * \brief The standard random access iterator tag
+         */
         typedef std::random_access_iterator_tag IteratorCategory;
 
     public:
         Iterator(Pointer object);
         Iterator(const Iterator& other);
+        /**
+          \brief Default (empty) destructor
+        */
         ~Iterator(){}
         Iterator& operator=(const Iterator& other);
 
@@ -182,18 +218,42 @@ public:
         friend class MLNode;
 
     public:
+        /**
+         * \brief Identical to MLNode::DifferenceType
+         */
         typedef MLNode::DifferenceType DifferenceType;
+        /**
+         * \brief Identical to MLNode::ValueType
+         */
         typedef MLNode::ValueType      ValueType;
+        /**
+         * \brief Identical to MLNode::Reference
+         */
         typedef MLNode::Reference      Reference;
+        /**
+         * \brief Identical to MLNode::ConstReference
+         */
         typedef MLNode::ConstReference ConstReference;
+        /**
+         * \brief Identical to MLNode::Pointer
+         */
         typedef MLNode::Pointer        Pointer;
+        /**
+         * \brief Identical to MLNode::ConstPointer
+         */
         typedef MLNode::ConstPointer   ConstPointer;
+        /**
+         * \brief Standard random access iterator tag
+         */
         typedef std::random_access_iterator_tag IteratorCategory;
 
     public:
         ConstIterator(ConstPointer object);
         ConstIterator(const Iterator& other);
         ConstIterator(const ConstIterator& other);
+        /**
+         * \brief Default (empty) destructor
+        */
         ~ConstIterator(){}
         ConstIterator& operator=(const ConstIterator& other);
 
@@ -234,14 +294,25 @@ public:
     friend class ConstIterator;
 
 public:
+    /**
+     * \brief Collection of all possible MLNode types.
+     */
     enum Type{
+        /** Null type */
         Null = 0,
+        /** Object type - map of string-MLNode pairs */
         Object,
+        /** Array type - vector of MLNodes */
         Array,
+        /** Bytes type - vector of unsigned chars (1B each!) */
         Bytes,
+        /** String type - encapsulation of the standard string */
         String,
+        /** Boolean type - encapsulation of bool */
         Boolean,
+        /** Integer type - whole numbers */
         Integer,
+        /** Float type - decimal numbers */
         Float
     };
 
@@ -345,6 +416,9 @@ inline MLNode::MLValue::MLValue(MLNode::Type t){
     }
 }
 
+/**
+ * \brief Assignment operator of MLNode implementing move semantics.
+ */
 inline MLNode &MLNode::operator=(MLNode other){
     std::swap(m_type, other.m_type);
     std::swap(m_value, other.m_value);
@@ -352,6 +426,9 @@ inline MLNode &MLNode::operator=(MLNode other){
     return *this;
 }
 
+/**
+ * \brief Returns the type of MLNode.
+ */
 inline MLNode::Type MLNode::type() const{
     return m_type;
 }
