@@ -56,7 +56,7 @@ class PaletteManager;
 class LineManager;
 class LineSurface;
 
-class LV_EDITOR_EXPORT TextEdit : public QQuickImplicitSizeItem
+class TextEdit : public QQuickImplicitSizeItem
 {
     Q_OBJECT
 
@@ -361,7 +361,6 @@ Q_SIGNALS:
     Q_REVISION(6) void rightPaddingChanged();
     Q_REVISION(6) void bottomPaddingChanged();
     void stateChangeSignal(int blockNum);
-    void textDocumentFinishedUpdating();
 
     void fragmentStartChanged();
     void fragmentEndChanged();

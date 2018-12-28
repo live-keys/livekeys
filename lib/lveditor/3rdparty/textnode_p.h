@@ -76,7 +76,7 @@ class QQuickTextNodeEngine;
 
 namespace lv {
 
-class LV_EDITOR_EXPORT TextNode : public QSGTransformNode
+class TextNode : public QSGTransformNode
 {
 public:
     enum Decoration {
