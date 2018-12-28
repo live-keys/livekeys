@@ -159,13 +159,13 @@ bool Package::hasExtension() const{
 }
 
 /** \brief Returns a map of dependencies with string keys */
-const std::map<std::string, Package::Dependency *> Package::dependencies() const{
+const std::map<std::string, Package::Dependency *>& Package::dependencies() const{
     return m_d->dependencies;
 }
 
 
 /** \brief Returns a map of libraries with string keys */
-const std::map<std::string, Package::Library *> Package::libraries() const{
+const std::map<std::string, Package::Library *>& Package::libraries() const{
     return m_d->libraries;
 }
 
