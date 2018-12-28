@@ -30,6 +30,11 @@
   \class lv::LockedFileIOSession
   \ingroup lvbase
   \brief Handles IO from files in a thread-safe manner.
+
+  This class contains a flexible internal representation, in accordance with the D-pointer design pattern.
+  Each file (given by its path) gets a unique file lock (the acquisition and release of locks themselves is
+  guaranteed to be in critical sections as well), and depending on the context, we get either read or write access.
+  There can be multiple readers, but only one writer, at a time.
  */
 
 namespace lv{
@@ -97,13 +102,22 @@ void LockedFileIOSessionPrivate::releaseLock(const std::string &path){
 // Class LockedFileIOSession
 // --------------------------------------------------
 
+/**
+ * \brief Default constructor of LockFileIOSession
+ *
+ * It initializes the internal mutex that helps us keep lock operations atomic.
+ */
 LockedFileIOSession::LockedFileIOSession()
     : m_d(new LockedFileIOSessionPrivate)
 {
     m_d->m_locksMutex = new QMutex;
 }
 
-
+/**
+ * \brief LockedFileIOSession destructor
+ *
+ * Deletes the internal mutex and the D-pointer itself.
+ */
 LockedFileIOSession::~LockedFileIOSession(){
     delete m_d->m_locksMutex;
     delete m_d;
@@ -113,6 +127,12 @@ LockedFileIOSession::Ptr LockedFileIOSession::createInstance(){
     return LockedFileIOSession::Ptr(new LockedFileIOSession);
 }
 
+/**
+ * \brief Locks the file (given by its path) for reading and loads up a buffer with its content.
+ *
+ * If the file can be opened, the buffer is returned with the entirety of the file's content.
+ * If not, an empty string is returned.
+ */
 std::string LockedFileIOSession::readFromFile(const std::string &path){
     m_d->getLock(path)->lockForRead();
 
@@ -133,6 +153,13 @@ std::string LockedFileIOSession::readFromFile(const std::string &path){
     return buffer;
 }
 
+/**
+ * \brief Locks the file (given by its path) for writing and writes the given data into it.
+ *
+ * Write lock means that only the singular writer can access it. If the file exists and it's possible
+ * to write in it, the given data is writen in, and a true flag is returned. If not, we return false.
+ * The return value is an indicator of a successful write.
+ */
 bool LockedFileIOSession::writeToFile(const std::string &path, const std::string &data){
     m_d->getLock(path)->lockForWrite();
 

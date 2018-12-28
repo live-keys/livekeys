@@ -23,15 +23,26 @@
 namespace lv{
 
 /**
-  \class LibraryLoadPath
-  \ingroup lvbase
-  \brief Handles library paths for LiveCV
+ * \class lv::LibraryLoadPath
+ *
+ * \brief Class that provides an ability to load libraries given a path (both recursively and non-recursively)
+ *
+ * The implementation in the background is reliant on the platform on which we're running LiveCV. Unix and Win platforms
+ * need to be implemented differently, and both of them are supported.
+ * \ingroup lvbase
  */
 
+/**
+ * \brief Non-recursive version of loader function, adds only libraries available on given folder level
+ */
 void LibraryLoadPath::add(const std::string path, const std::string &linkPath){
     addImpl(QString::fromStdString(path), QString::fromStdString(linkPath));
 }
 
+
+/**
+ * \brief Recursive version of loader function, adds all of the relevant subfolder contents as well
+ */
 void LibraryLoadPath::addRecursive(const std::string &path, const std::string &linkPath){
     addImpl(QString::fromStdString(path), QString::fromStdString(linkPath), true);
 }

@@ -60,6 +60,10 @@ VisualLog &operator <<(VisualLog &vl, const StackFrame &value){
 // StackTrace
 // -----------------------------------------------------------------
 
+/** \brief Destructor of StackTrace
+ *
+ * Simply removes the contained StackFrames.
+*/
 StackTrace::~StackTrace(){
     delete m_frames;
 }

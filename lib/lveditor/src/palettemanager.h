@@ -28,7 +28,7 @@ public:
     }
 };
 
-class LV_EDITOR_EXPORT PaletteManager: public QObject
+class PaletteManager: public QObject
 {
     Q_OBJECT
 
