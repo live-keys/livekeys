@@ -25,8 +25,16 @@
 
 namespace lv{
 
+/**
+ * \class lv::CommandLineParserException
+ * \brief A simple exception class for the command line parser, with message and code params
+ * \ingroup lvbase
+ */
 class LV_BASE_EXPORT CommandLineParserException : public Exception{
 public:
+    /**
+     * \brief Default constructor for this exception
+     */
     CommandLineParserException(const std::string& message, int code = 0): Exception(message, code){}
 };
 
@@ -71,10 +79,16 @@ private:
     CommandLineParserPrivate* m_d;
 };
 
+/**
+ * \brief Returns the help option object containing flag names and description.
+ */
 inline CommandLineParser::Option *CommandLineParser::helpOption(){
     return m_helpOption;
 }
 
+/**
+ * \brief Returns the version option object, containing flag names and description.
+ */
 inline CommandLineParser::Option *CommandLineParser::versionOption(){
     return m_versionOption;
 }

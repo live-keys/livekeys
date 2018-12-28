@@ -86,7 +86,12 @@ void CommandLineParser::assignName(const std::string &name, CommandLineParser::O
         THROW_EXCEPTION(CommandLineParserException, "Failed to parse option name: " + name, 4);
 }
 
-
+/**
+ * \brief Simple constructor with a single header parameter
+ *
+ * Header serves as a sort of title when displaying usage instructions.
+ * This constructor also adds the two most common command line flags, "help" and "version".
+ */
 CommandLineParser::CommandLineParser(const std::string &header)
     : m_d(new CommandLineParserPrivate)
 {
@@ -95,6 +100,11 @@ CommandLineParser::CommandLineParser(const std::string &header)
     m_versionOption = addFlag({"-v", "--version"}, "Displays version information and exits.");
 }
 
+/**
+ * \brief Destructor of CommandLineParser
+ *
+ * Erases all the pre-set options.
+ */
 CommandLineParser::~CommandLineParser(){
     for ( auto it = m_d->options.begin(); it != m_d->options.end(); ++it ){
         delete *it;
@@ -102,6 +112,12 @@ CommandLineParser::~CommandLineParser(){
     delete m_d;
 }
 
+/**
+ * \brief Adds a flag with given name(s) and description.
+ *
+ * A flag is a special, bool-like kind of option where just stating it sets it to true.
+ * A flag can have a short and/or long name(s), which has to be unique. If not, an exception is thrown.
+ */
 CommandLineParser::Option *CommandLineParser::addFlag(const std::vector<std::string> &names, const std::string &description){
     if ( names.empty() )
         THROW_EXCEPTION(CommandLineParserException, "Setting up option requires at least one name.", 1);
@@ -115,6 +131,14 @@ CommandLineParser::Option *CommandLineParser::addFlag(const std::vector<std::str
     return option;
 }
 
+/**
+ * \brief Adds an option with given name(s), description and type.
+ *
+ * An option can have a short and/or long name(s), indicated by one or two dashes respectively.
+ * The name(s) must be unique - if not, an exception is thrown. The third parameter serves as a
+ * type descriptor. Flags are inherently bools, while options in general can be anything like strings,
+ * paths, lists...
+ */
 CommandLineParser::Option *CommandLineParser::addOption(const std::vector<std::string> &names, const std::string &description, const std::string &type){
     if ( names.empty() )
         THROW_EXCEPTION(CommandLineParserException, "Setting up option requires at least one name.", 5);
@@ -149,6 +173,11 @@ CommandLineParser::Option *CommandLineParser::findOptionByShortName(const std::s
     return 0;
 }
 
+/**
+ * \brief Represents a string containing all of the pre-set options, their names, descriptions, types etc.
+ *
+ * A simple user instruction on how to pass arguments through the command line.
+ */
 std::string CommandLineParser::helpString() const{
     std::stringstream base;
     base << "\n" << m_d->header << "\n\n" << "Usage:\n\n   livecv [options...] script.qml [args ...]\n\nOptions:\n\n";
@@ -166,6 +195,11 @@ std::string CommandLineParser::helpString() const{
 
 }
 
+/**
+ * \brief Returns the name(s) of a given option.
+ *
+ * Each option/flag must have at least one name, be it long or short. This function returns all of them.
+ */
 std::vector<std::string> CommandLineParser::optionNames(CommandLineParser::Option *option) const{
     std::vector<std::string> base;
     for ( auto nameIt = option->shortNames.begin(); nameIt != option->shortNames.end(); ++nameIt ){
@@ -177,15 +211,31 @@ std::vector<std::string> CommandLineParser::optionNames(CommandLineParser::Optio
     return base;
 }
 
-
+/**
+ * \brief Returns an indicator that the option is set in the parsed batch of arguments.
+ *
+ * i.e. if we include "--version" as an argument, the isSet value of that flag is going to be true.
+ */
 bool CommandLineParser::isSet(CommandLineParser::Option *option) const{
     return option->isSet;
 }
 
+
+/**
+ * \brief Returns the parsed value for the given option.
+ *
+ * Each non-flag option has another argument following it. This is stored as the option's value,
+ * and returned by this function.
+ */
 const std::string &CommandLineParser::value(CommandLineParser::Option *option) const{
     return option->value;
 }
 
+/**
+ * \brief Asserts that the provided option is set in the parsed arguments.
+ *
+ * If not, CommandLineParserException is thrown.
+ */
 void CommandLineParser::assertIsSet(CommandLineParser::Option *option) const{
     if ( !isSet(option) ){
         std::string key = option->longNames.size() > 0 ? "--" + option->longNames.front() : "-" + option->shortNames.front();
@@ -193,7 +243,14 @@ void CommandLineParser::assertIsSet(CommandLineParser::Option *option) const{
     }
 }
 
-
+/**
+ * \brief Main function of this class, parses the given number of strings
+ *
+ * The arguments are identical to the standard C++ main(argc, argv) params.
+ * Each option is given by either its short or long name, preceeded by one or two dashes respectively.
+ * If it's a flag, we simply set it to true. If not, we expect another string to follow as a parameter.
+ * The first argument is, expectedly, the main program name.
+ */
 void CommandLineParser::parse(int argc, const char * const argv[]){
     if ( argc > 1 ){
         int i = 1;
@@ -243,10 +300,22 @@ void CommandLineParser::parse(int argc, const char * const argv[]){
     }
 }
 
+/**
+ * \brief Returns a script argument, if it exists.
+ *
+ * This field is set only in case if there's a script to run in the arguments.
+ * Every argument after it relates directly to the script itself.
+ */
 const std::string &CommandLineParser::script() const{
     return m_d->script;
 }
 
+/**
+ * \brief Returns the arguments listed after a script name
+ *
+ * If there's a script name among the command line args, all the following arguments are
+ * treated as script arguments and stored in this vector.
+ */
 const std::vector<std::string> &CommandLineParser::scriptArguments() const{
     return m_d->scriptArguments;
 }

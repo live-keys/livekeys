@@ -16,28 +16,26 @@ class TextEdit;
 class LV_EDITOR_EXPORT PaletteData
 {
 public:
-    int startBlock;
-    int lineSpan;
-    int palleteHeight;
-    QObject* palette;
-    int paletteSpan;
+    int m_startBlock;
+    int m_lineSpan;
+    int m_palleteHeight;
+    QObject* m_palette;
+    int m_paletteSpan;
 
     bool matchesPalette(QObject* p)
     {
-        return palette == p;
+        return m_palette == p;
     }
 };
 
-class LV_EDITOR_EXPORT PaletteManager: public QObject
+class PaletteManager: public QObject
 {
-
     Q_OBJECT
+
 public:
-
-
     PaletteManager();
-    void paletteAdded(int sb, int span, int height, QObject* p);
 
+    void paletteAdded(int sb, int span, int height, QObject* p);
     int drawingOffset(int blockNumber, bool forCursor);
     int positionOffset(int y);
     void setTextEdit(TextEdit *value);
@@ -52,12 +50,12 @@ public Q_SLOTS:
     void setDirtyPos(int pos);
     void lineNumberChange();
 private:
-    int lineHeight;
-    TextEdit *textEdit;
-    list<PaletteData*> palettes;
-    int dirtyPos;
-    int prevLineNumber;
-    int lineNumber;
+    int m_lineHeight;
+    TextEdit *m_textEdit;
+    list<PaletteData*> m_palettes;
+    int m_dirtyPos;
+    int m_prevLineNumber;
+    int m_lineNumber;
 
     void linesAdded();
     void linesRemoved();

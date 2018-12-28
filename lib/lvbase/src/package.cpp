@@ -35,6 +35,7 @@ public:
     std::map<std::string, Package::Library*>    libraries;
 };
 
+/** \brief Destructor of Package */
 Package::~Package(){
     for ( auto it = m_d->dependencies.begin(); it != m_d->dependencies.end(); ++it )
         delete it->second;
@@ -122,38 +123,48 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
     return pt;
 }
 
+/** \brief Returns the package name */
 const std::string &Package::name() const{
     return m_d->name;
 }
 
+/** \brief Returns the package path */
 const std::string &Package::path() const{
     return m_d->path;
 }
 
+/** \brief Returns the filepath of the package */
 const std::string &Package::filePath() const{
     return m_d->filePath;
 }
 
+/** \brief Returns the package version */
 const Version &Package::version() const{
     return m_d->version;
 }
 
+/** \brief Returns the package extension */
 const std::string &Package::extension() const{
     return m_d->extension;
 }
 
+/** \brief Returns the absolute path concatenation of the path and extension */
 std::string Package::extensionAbsolutePath() const{
     return m_d->path + "/" + m_d->extension;
 }
 
+/** \brief Returns an indicator that the extension exists */
 bool Package::hasExtension() const{
     return !m_d->extension.empty();
 }
 
+/** \brief Returns a map of dependencies with string keys */
 const std::map<std::string, Package::Dependency *>& Package::dependencies() const{
     return m_d->dependencies;
 }
 
+
+/** \brief Returns a map of libraries with string keys */
 const std::map<std::string, Package::Library *>& Package::libraries() const{
     return m_d->libraries;
 }

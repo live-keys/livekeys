@@ -59,7 +59,7 @@ class TextNode;
 class TextNodeEngine;
 class TextDocumentLayout;
 
-class LV_EDITOR_EXPORT TextEditPrivate : public QQuickImplicitSizeItemPrivate
+class TextEditPrivate : public QQuickImplicitSizeItemPrivate
 {
 public:
     Q_DECLARE_PUBLIC(TextEdit)
