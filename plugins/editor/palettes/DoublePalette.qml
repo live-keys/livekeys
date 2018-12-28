@@ -20,11 +20,9 @@ import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
 
-LivePalette{
+CodePalette{
     id: palette
-
-    type : "double"
-    serialize : NativeValueCodeSerializer{}
+    type : "qml/double"
 
     item: Rectangle{
         width: 280
@@ -41,7 +39,11 @@ LivePalette{
             height: 15
             minimumValue: 0
             value: 0
-            onValueChanged: palette.value = intSlider.value + fractionalSlider.value
+            onValueChanged: {
+                palette.value = intSlider.value + fractionalSlider.value
+                if ( !palette.isBindingChange() )
+                    extension.write(palette.value)
+            }
             stepSize: 1.0
             maximumValue: 200
 
@@ -85,7 +87,11 @@ LivePalette{
             height: 15
             minimumValue: 0
             value: 0
-            onValueChanged: palette.value = intSlider.value + fractionalSlider.value
+            onValueChanged: {
+                palette.value = intSlider.value + fractionalSlider.value
+                if ( !palette.isBindingChange() )
+                    extension.write(palette.value)
+            }
             stepSize: 0.01
             maximumValue: 1.0
 
@@ -151,14 +157,13 @@ LivePalette{
         }
     }
 
-    onInit: {
-        var sqrt = Math.ceil(Math.sqrt(Math.floor(value))) + 1
-        zoomSlider.value = 15 > sqrt ? 15 : sqrt
-
-        intSlider.value = Math.floor(value)
-        fractionalSlider.value = value - intSlider.value
+    onExtensionChanged: {
+        extension.whenBinding = function(){
+            extension.write(palette.value)
+        }
     }
-    onCodeChanged:{
+
+    onInit: {
         var sqrt = Math.ceil(Math.sqrt(Math.floor(value))) + 1
         zoomSlider.value = 15 > sqrt ? 15 : sqrt
 

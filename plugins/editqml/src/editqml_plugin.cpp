@@ -27,6 +27,7 @@
 #include "live/qmladdcontainer.h"
 #include "live/qmlpropertymodel.h"
 #include "live/qmlitemmodel.h"
+#include "live/qmlcodeconverter.h"
 
 void EditQmlPlugin::registerTypes(const char *uri){
     // @uri editqml
@@ -34,6 +35,8 @@ void EditQmlPlugin::registerTypes(const char *uri){
 
     qmlRegisterUncreatableType<lv::CodeQmlHandler>(
         uri, 1, 0, "CodeQmlHandler", "CodeQmlHandler can only be accessed through the Editor.documentHandler.");
+    qmlRegisterUncreatableType<lv::QmlCodeConverter>(
+        uri, 1, 0, "QmlCodeConverter", "QmlCodeConverter can only be accessed through the Palette.attachment.");
     qmlRegisterUncreatableType<lv::QmlAddContainer>(
         uri, 1, 0, "QmlAddContainer", "QmlAddContainer can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlPropertyModel>(

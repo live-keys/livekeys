@@ -12,10 +12,17 @@
 #include <QDir>
 #include <QFileInfo>
 
+/**
+  \class lv::Package
+  \brief Manages a LiveCV package.
+  \ingroup lvbase
+ */
+
 namespace lv{
 
 const char* Package::fileName = "live.package.json";
 
+/// \private
 class PackagePrivate{
 
 public:
@@ -143,21 +150,21 @@ bool Package::hasExtension() const{
     return !m_d->extension.empty();
 }
 
-const std::map<std::string, Package::Dependency *> Package::dependencies() const{
+const std::map<std::string, Package::Dependency *>& Package::dependencies() const{
     return m_d->dependencies;
 }
 
-const std::map<std::string, Package::Library *> Package::libraries() const{
+const std::map<std::string, Package::Library *>& Package::libraries() const{
     return m_d->libraries;
 }
 
 Package::Package(const std::string &path, const std::string& filePath, const std::string &name, const Version &version)
     : m_d(new PackagePrivate)
 {
-    m_d->path = path;
+    m_d->path     = path;
     m_d->filePath = filePath;
-    m_d->name = name;
-    m_d->version = version;
+    m_d->name     = name;
+    m_d->version  = version;
 }
 
 } // namespace

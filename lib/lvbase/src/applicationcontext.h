@@ -28,6 +28,7 @@ class ViewEngine;
 class Settings;
 
 class ApplicationContextPrivate;
+
 class LV_BASE_EXPORT ApplicationContext{
 
 public:

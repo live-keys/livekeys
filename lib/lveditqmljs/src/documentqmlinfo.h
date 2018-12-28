@@ -20,7 +20,7 @@
 #include "live/lveditqmljsglobal.h"
 #include "live/documentqmlobject.h"
 #include "live/documentqmlvalueobjects.h"
-#include "live/codedeclaration.h"
+#include "live/qmldeclaration.h"
 
 #include <QQmlProperty>
 #include <QSharedPointer>
@@ -39,7 +39,7 @@ namespace QmlJS{
 namespace lv{
 
 class ProjectDocument;
-class CodeRuntimeBinding;
+class BindingPath;
 class DocumentQmlInfoPrivate;
 class LV_EDITQMLJS_EXPORT DocumentQmlInfo{
 
@@ -141,20 +141,14 @@ public:
     DocumentQmlValueObjects::Ptr createObjects() const;
     DocumentQmlValueObjects::Ptr createObjects(const ASTReference& ast) const;
 
-    static void syncBindings(const QString& source, ProjectDocument* document, QObject* root);
-    static void syncBindings(
-        const QString& source,
-        ProjectDocument *document,
-        QList<CodeRuntimeBinding*> bindings,
-        QObject* root
-    );
-    static QQmlProperty findRuntimeMatchingDeclaration(
+    static void traverseBindingPath(BindingPath* path, QObject* root);
+    static BindingPath* findDeclarationPath(
+            DocumentQmlValueObjects::RangeObject *object,
+            QmlDeclaration::Ptr declaration);
+    static BindingPath *findDeclarationPath(
         const QString& source,
         ProjectDocument* document,
-        CodeDeclaration::Ptr declaration,
-        QObject* root,
-        int &listIndex
-    );
+        QmlDeclaration::Ptr declaration);
 
     ~DocumentQmlInfo();
 

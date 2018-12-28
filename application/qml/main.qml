@@ -371,7 +371,7 @@ ApplicationWindow{
     Component{
         id: paletteListFactory
 
-        PaletteList{}
+        PaletteListView{}
     }
 
     Component{
@@ -563,12 +563,19 @@ ApplicationWindow{
 
             property string name : ''
             property string type : ''
+            property string title : type + ' - ' + name
             property var cursorRectangle : null
             property var editorPosition : null
 
+            property alias paletteSwapVisible : paletteSwapButton.visible
+            property alias paletteAddVisible : paletteAddButton.visible
+
+            property double titleLeftMargin : 50
+            property double titleRightMargin : 50
+
             property bool hasComposition : false
 
-            property DocumentHandler codeHandler : null
+            property DocumentHandler documentHandler : null
 
             MouseArea{
                 anchors.fill: parent
@@ -579,6 +586,7 @@ ApplicationWindow{
                 id: paletteBoxHeader
                 height: 24
                 width: paletteBox.parent ? paletteBox.parent.width : paletteBox.width
+                clip: true
 
                 MouseArea{
                     id: paletteBoxMoveArea
@@ -596,12 +604,14 @@ ApplicationWindow{
                             var deltaY = currentMousePos.y - lastMousePos.y
                             paletteBox.parent.parent.x += deltaX
                             paletteBox.parent.parent.y += deltaY
+
                             lastMousePos = currentMousePos
                         }
                     }
                 }
 
                 Item{
+                    id: paletteSwapButton
                     anchors.left: parent.left
                     anchors.leftMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
@@ -615,8 +625,8 @@ ApplicationWindow{
                         id: paletteSwapMouse
                         anchors.fill: parent
                         onClicked: {
-                            var palettePosition = codeHandler.palettePosition(child)
-                            var palettes = codeHandler.findPalettes(palettePosition, true)
+                            var palettePosition = documentHandler.codeHandler.palettePosition(child)
+                            var palettes = documentHandler.codeHandler.findPalettes(palettePosition, true)
                             if (palettes.size() ){
                                 paletteHeaderList.forceActiveFocus()
                                 paletteHeaderList.model = palettes
@@ -628,14 +638,23 @@ ApplicationWindow{
                                     paletteHeaderList.focus = false
                                     paletteHeaderList.model = null
 
-                                    codeHandler.removePalette(paletteBox.child)
+                                    var childToRemove = paletteBox.child
 
-                                    var palette = palettes.loadAt(index)
-                                    codeHandler.openPalette(palette, palettePosition, root.controls.runSpace.item)
+                                    var palette = documentHandler.codeHandler.openPalette(palettes, index, root.controls.runSpace.item)
+                                    var newPaletteBox = root.controls.editSpace.createPaletteBox(paletteBox.parent)
 
-                                    paletteBox.child = palette.item
-                                    paletteBox.name = palette.name
-                                    paletteBox.type = palette.type
+                                    palette.item.x = 5
+                                    palette.item.y = 7
+
+                                    newPaletteBox.child = palette.item
+                                    newPaletteBox.name = palette.name
+                                    newPaletteBox.type = palette.type
+                                    newPaletteBox.documentHandler = documentHandler
+                                    newPaletteBox.cursorRectangle = paletteBox.cursorRectangle
+                                    newPaletteBox.editorPosition = paletteBox.editorPosition
+
+                                    documentHandler.codeHandler.removePalette(childToRemove)
+
                                     paletteBox.parent.parent.updatePlacement(
                                         paletteBox.cursorRectangle, paletteBox.editorPosition, editSpace.placement.top
                                     )
@@ -645,6 +664,7 @@ ApplicationWindow{
                     }
                 }
                 Item{
+                    id: paletteAddButton
                     anchors.left: parent.left
                     anchors.leftMargin: 25
                     anchors.verticalCenter: parent.verticalCenter
@@ -658,8 +678,8 @@ ApplicationWindow{
                         id: paletteAddMouse
                         anchors.fill: parent
                         onClicked: {
-                            var palettePosition = codeHandler.palettePosition(child)
-                            var palettes = codeHandler.findPalettes(palettePosition, true)
+                            var palettePosition = documentHandler.codeHandler.palettePosition(child)
+                            var palettes = documentHandler.codeHandler.findPalettes(palettePosition, true)
                             if (palettes.size() ){
                                 paletteHeaderList.forceActiveFocus()
                                 paletteHeaderList.model = palettes
@@ -671,8 +691,7 @@ ApplicationWindow{
                                     paletteHeaderList.focus = false
                                     paletteHeaderList.model = null
 
-                                    var palette = palettes.loadAt(index)
-                                    codeHandler.openPalette(palette, palettePosition, root.controls.runSpace.item)
+                                    var palette = documentHandler.codeHandler.openPalette(palettes, index, root.controls.runSpace.item)
 
                                     var newPaletteBox = root.controls.editSpace.createPaletteBox(paletteBox.parent)
 
@@ -682,7 +701,7 @@ ApplicationWindow{
                                     newPaletteBox.child = palette.item
                                     newPaletteBox.name = palette.name
                                     newPaletteBox.type = palette.type
-                                    newPaletteBox.codeHandler = codeHandler
+                                    newPaletteBox.documentHandler = documentHandler
                                     newPaletteBox.cursorRectangle = paletteBox.cursorRectangle
                                     newPaletteBox.editorPosition = paletteBox.editorPosition
                                     paletteBox.parent.parent.updatePlacement(
@@ -695,10 +714,14 @@ ApplicationWindow{
                 }
 
                 Text{
+                    id: paletteBoxTitle
                     anchors.left: parent.left
-                    anchors.leftMargin: 50
+                    anchors.leftMargin: paletteBox.titleLeftMargin
                     anchors.verticalCenter: parent.verticalCenter
-                    text: paletteBox.type + ' - ' + paletteBox.name
+                    anchors.right: parent.right
+                    anchors.rightMargin: paletteBox.titleRightMargin
+                    clip: true
+                    text: paletteBox.title
                     color: '#82909b'
                 }
 
@@ -730,15 +753,13 @@ ApplicationWindow{
                         color: '#ffffff'
                     }
                     MouseArea{
-                        id: paletteComposeArea
+                        id: paletteCloseArea
                         anchors.fill: parent
                         onClicked: {
-                            codeHandler.removePalette(child)
+                            documentHandler.codeHandler.removePalette(child)
                         }
                     }
                 }
-
-
 
             }
 
@@ -749,7 +770,7 @@ ApplicationWindow{
             }
 
 
-            PaletteList{
+            PaletteListView{
                 id: paletteHeaderList
                 visible: model ? true : false
                 anchors.top: parent.top

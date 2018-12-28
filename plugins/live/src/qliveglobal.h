@@ -19,6 +19,12 @@
 
 #include <qglobal.h>
 
+/**
+  \defgroup plugin-live live Plugin
+
+  Plugin oriented towards live coding.
+  */
+
 #ifndef Q_LIVE_STATIC
 #  ifdef Q_LIVE_LIB
 #    define Q_LIVE_EXPORT Q_DECL_EXPORT

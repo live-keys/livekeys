@@ -19,6 +19,12 @@
 
 #include <qglobal.h>
 
+/**
+  \defgroup plugin-lcvfeatures2d lcvfeatures2d Plugin
+
+  Open CV features 2d plugin.
+*/
+
 #ifndef Q_LCVFEATURES2D_STATIC
 #  ifdef Q_LCVFEATURES2D_LIB
 #    define Q_LCVFEATURES2D_EXPORT Q_DECL_EXPORT

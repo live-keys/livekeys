@@ -21,10 +21,8 @@
 #include "qdenoisetvl1.h"
 #include "qhuesaturationlightness.h"
 #include "qlevels.h"
-#include "qlevelsserializer.h"
 #include "qautolevels.h"
 #include "qbrightnessandcontrast.h"
-#include "qbrightnessandcontrastserializer.h"
 #include "qstitcher.h"
 
 #include "qalignmtb.h"
@@ -47,9 +45,7 @@ void LcvphotoPlugin::registerTypes(const char *uri){
     qmlRegisterType<QHueSaturationLightness>(         uri, 1, 0, "HueSaturationLightness");
     qmlRegisterType<QLevels>(                         uri, 1, 0, "Levels");
     qmlRegisterType<QAutoLevels>(                     uri, 1, 0, "AutoLevels");
-    qmlRegisterType<QLevelsSerializer>(               uri, 1, 0, "LevelsSerializer");
     qmlRegisterType<QBrightnessAndContrast>(          uri, 1, 0, "BrightnessAndContrast");
-    qmlRegisterType<QBrightnessAndContrastSerializer>(uri, 1, 0, "BrightnessAndContrastSerializer");
     qmlRegisterType<QStitcher>(                       uri, 1, 0, "Stitcher");
 
     qmlRegisterType<QAlignMTB>(                       uri, 1, 0, "AlignMTB");

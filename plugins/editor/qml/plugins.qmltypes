@@ -18,21 +18,13 @@ Module {
         exportMetaObjectRevisions: [0, 0]
     }
     Component {
-        name: "lv::CodeConverter"
+        name: "lv::CodePalette"
         prototype: "QObject"
-        exports: ["editor/CodeConverter 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "serialize"; type: "AbstractCodeSerializer"; isPointer: true }
-        Property { name: "type"; type: "QString" }
-        Property { name: "typeObject"; type: "QString" }
-    }
-    Component {
-        name: "lv::LivePalette"
-        prototype: "lv::CodeConverter"
-        exports: ["editor/LivePalette 1.0"]
+        exports: ["editor/CodePalette 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "item"; type: "QQuickItem"; isPointer: true }
         Property { name: "value"; type: "QVariant" }
+        Property { name: "type"; type: "QString" }
         Signal {
             name: "init"
             Parameter { name: "value"; type: "QVariant" }
@@ -41,11 +33,5 @@ Module {
             name: "codeChanged"
             Parameter { name: "value"; type: "QVariant" }
         }
-    }
-    Component {
-        name: "lv::NativeValueCodeSerializer"
-        prototype: "lv::AbstractCodeSerializer"
-        exports: ["editor/NativeValueCodeSerializer 1.0"]
-        exportMetaObjectRevisions: [0]
     }
 }

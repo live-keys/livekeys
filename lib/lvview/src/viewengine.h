@@ -20,6 +20,7 @@
 #include <QObject>
 #include <QJSValue>
 #include <QMap>
+#include <QLinkedList>
 #include <functional>
 
 #include "live/lvviewglobal.h"
@@ -59,6 +60,16 @@ class LV_VIEW_EXPORT ViewEngine : public QObject{
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
 
 public:
+    typedef void(*CompileHook)(const QString&, const QUrl&, QObject*, QObject*, void*);
+
+private:
+    class CompileHookEntry{
+    public:
+        CompileHook m_hook;
+        void*       m_userData;
+    };
+
+public:
     explicit ViewEngine(QQmlEngine* engine, QObject *parent = 0);
     ~ViewEngine();
 
@@ -82,7 +93,8 @@ public:
     void registerErrorHandler(QObject* object, ErrorHandler* handler);
     void removeErrorHandler(QObject* object);
 
-    void setBindHook(std::function<void(const QString&, const QUrl&, QObject*, QObject*)> hook);
+    void addCompileHook(CompileHook ch, void* userData);
+    void removeCompileHook(CompileHook ch, void* userData);
 
     template<typename T> TypeInfo::Ptr registerQmlTypeInfo(
         const std::function<void(const T&, MLNode&)>& serializeFunction,
@@ -130,7 +142,7 @@ private:
     IncubationController* m_incubationController;
     QJSValue       m_errorType;
 
-    std::function<void(const QString&, const QUrl&, QObject*, QObject*)> m_bindHook;
+    QLinkedList<CompileHookEntry> m_compileHooks;
 
     QList<QQmlError>              m_lastErrors;
     QMap<QObject*, ErrorHandler*> m_errorHandlers;

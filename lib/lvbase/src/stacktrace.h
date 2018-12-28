@@ -32,7 +32,7 @@ class VisualLog;
 
 LV_BASE_EXPORT std::string pathFileName(const std::string& path);
 
-class StackFrame{
+class LV_BASE_EXPORT StackFrame{
 
 public:
     typedef unsigned long long AddressPtr;

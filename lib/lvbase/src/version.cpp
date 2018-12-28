@@ -4,6 +4,13 @@
 
 namespace lv{
 
+
+/**
+  \class lv::Version
+  \brief Semantic version container
+  \ingroup lvbase
+ */
+
 const long long Version::PATCH_MULTIPLIER = 10000;
 const long long Version::MINOR_MULTIPLIER = Version::PATCH_MULTIPLIER * 10000;
 const long long Version::MAJOR_MULTIPLIER = Version::MINOR_MULTIPLIER * 10000;

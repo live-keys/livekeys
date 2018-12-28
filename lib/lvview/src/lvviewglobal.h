@@ -19,6 +19,12 @@
 
 #include "live/lvglobal.h"
 
+/**
+  \defgroup lvview lvview Library
+
+  Contains core fucntionality for the user interface.
+*/
+
 #ifndef LV_VIEW_STATIC
 #  ifdef LV_VIEW_LIB
 #    define LV_VIEW_EXPORT LV_EXPORT

@@ -24,7 +24,6 @@ OTHER_FILES += \
 # Handling the palette
 
 OTHER_FILES *= \
-    palettes/palettedir \
     palettes/*.qml
 
 # Deploy The palette
@@ -39,5 +38,8 @@ DISTFILES += \
     qml/DocumentFragment.qml \
     palettes/IntHistoryPlotPalette.qml \
     palettes/DoubleHistoryPlotPalette.qml \
-    qml/PaletteList.qml \
-    qml/RefactorList.qml
+    qml/RefactorList.qml \
+    qml/live.package.json \
+    qml/live.plugin.json \
+    qml/PaletteListView.qml \
+    palettes/EditPalette.qml

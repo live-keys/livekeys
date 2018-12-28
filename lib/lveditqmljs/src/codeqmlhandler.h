@@ -22,13 +22,17 @@
 #include "live/projectdocument.h"
 #include "live/documentqmlscope.h"
 #include "live/projectqmlscope.h"
-#include "live/codedeclaration.h"
+#include "live/qmldeclaration.h"
 #include "live/lockedfileiosession.h"
 #include "live/viewengine.h"
 #include "live/settings.h"
 #include "live/qmladdcontainer.h"
+#include "live/palettelist.h"
+#include "live/documentcursorinfo.h"
 
+#include <QTimer>
 #include <QTextCursor>
+#include <QQmlListProperty>
 
 class QQmlEngine;
 
@@ -37,10 +41,12 @@ namespace lv{
 class ProjectQmlScanner;
 class ProjectQmlExtension;
 class PluginInfoExtractor;
+
+class QmlEditFragment;
 class QmlJsHighlighter;
+class QmlJsSettings;
 class QmlCompletionContextFinder;
 class QmlCompletionContext;
-class QmlJsSettings;
 
 class LV_EDITQMLJS_EXPORT CodeQmlHandler : public AbstractCodeHandler{
 
@@ -64,29 +70,63 @@ public:
         CodeCompletionModel* model,
         QTextCursor& cursorChange
     ) Q_DECL_OVERRIDE;
-    void setTarget(QTextDocument *target) Q_DECL_OVERRIDE;
     void setDocument(ProjectDocument* document) Q_DECL_OVERRIDE;
-    void updateScope(const QString& data) Q_DECL_OVERRIDE;
+    AbstractCodeHandler::ContentsTrigger documentContentsChanged(int position, int charsRemoved, int charsAdded) Q_DECL_OVERRIDE;
     void rehighlightBlock(const QTextBlock& block) Q_DECL_OVERRIDE;
-    QList<lv::CodeDeclaration::Ptr> getDeclarations(const QTextCursor& cursor) Q_DECL_OVERRIDE;
-    bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd) Q_DECL_OVERRIDE;
-    void connectBindings(QList<CodeRuntimeBinding*> bindings, QObject* root) Q_DECL_OVERRIDE;
-    DocumentEditFragment* createInjectionChannel(
-        CodeDeclaration::Ptr property,
-        QObject* runtime,
-        CodeConverter* converter
-    ) Q_DECL_OVERRIDE;
     QPair<int, int> contextBlock(int position) Q_DECL_OVERRIDE;
 
+    QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
+    bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);
+    QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property,
+        QObject* runtime,
+        CodePalette *converter
+    );
+
+    bool addEditingFragment(QmlEditFragment *edit);
+    void removeEditingFragment(QmlEditFragment* edit);
+    void removeEditingFragmentPalette(QmlEditFragment* palette);
 
     QmlJsSettings* settings();
 
 public slots:
+    // Palette management
+
+    lv::PaletteList *findPalettes(int position, bool unrepeated = false);
+    lv::CodePalette* openPalette(lv::PaletteList* palette, int index, QObject* currentApp = 0);
+    void removePalette(QObject* palette);
+    int palettePosition(QObject* palette);
+    void paletteValueChanged(QmlEditFragment *editFragment);
+
+    void addPaletteBox(QObject* paletteBox);
+    QObject* paletteBoxFor(lv::CodePalette* palette);
+    QObject* paletteBoxAtPosition(int position);
+
+    // Binding management
+
+    lv::DocumentCursorInfo* cursorInfo(int position, int length);
+    lv::CodePalette* openBinding(lv::PaletteList* paletteList, int index, QObject* currentApp = 0);
+    void closeBinding(int position, int length);
+
+    // Direct editing management
+
+    lv::CodePalette *edit(int position, QObject* currentApp = 0);
+    void cancelEdit();
+
+    // Add Property Management
+
     lv::QmlAddContainer* getAddOptions(int position);
     void addProperty(int position, const QString& addText);
     void addItem(int position, const QString& text);
+    void updateRuntimeBindings(QObject* obj);
+
+    // Scopes
+
     void newDocumentScopeReady(const QString& path, DocumentQmlScope::Ptr documentScope);
     void newProjectScopeReady();
+    void updateScope();
+
+signals:
+    void paletteAboutToRemove(lv::CodePalette* palette);
 
 private:
     void suggestionsForGlobalQmlContext(
@@ -159,6 +199,11 @@ private:
     DocumentQmlScope::Ptr  m_documentScope;
     ProjectQmlExtension*   m_projectHandler;
     bool                   m_newScope;
+    QTimer                 m_timer;
+
+    QList<QObject*>               m_paletteBoxes;
+    QLinkedList<QmlEditFragment*> m_edits; // opened palettes
+    QmlEditFragment*              m_editingFragment; // editing fragment
 
 };
 

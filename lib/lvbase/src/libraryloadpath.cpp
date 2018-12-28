@@ -22,6 +22,12 @@
 
 namespace lv{
 
+/**
+  \class LibraryLoadPath
+  \ingroup lvbase
+  \brief Handles library paths for LiveCV
+ */
+
 void LibraryLoadPath::add(const std::string path, const std::string &linkPath){
     addImpl(QString::fromStdString(path), QString::fromStdString(linkPath));
 }

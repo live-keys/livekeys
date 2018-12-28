@@ -22,6 +22,15 @@
 
 namespace lv{
 
+/**
+  \class lv::ApplicationContext
+  \ingroup lvbase
+
+  \brief Contains the application running context data.
+
+  */
+
+/// \private
 class ApplicationContextPrivate{
 
 public:

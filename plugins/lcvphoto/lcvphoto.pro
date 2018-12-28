@@ -11,7 +11,7 @@ DEFINES += Q_LCV
 # Dependencies
 
 linkLocalLibrary(lvbase,      lvbase)
-linkLocalLibrary(lvview,     lvview)
+linkLocalLibrary(lvview,      lvview)
 linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
 
@@ -33,7 +33,6 @@ include($$PROJECT_ROOT/project/3rdparty/opencv.pri)
 # Handling the palettes
 
 OTHER_FILES *= \
-    palettes/palettedir \
     palettes/*.qml
 
 # Deploy the palettes
@@ -49,4 +48,6 @@ QMAKE_EXTRA_TARGETS += first palettecopy
 DISTFILES += \
     qml/LevelsSliders.qml \
     qml/HueSaturationLightnessSliders.qml \
+    qml/live.package.json \
+    qml/live.plugin.json \
     palettes/LevelsPalette.qml

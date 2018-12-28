@@ -12,22 +12,12 @@ HEADERS += \
     $$PWD/live/projectnavigationmodel.h \
     $$PWD/live/projectdocumentmodel.h \
     $$PWD/live/editorsettings.h \
-    $$PWD/live/documenteditfragment.h \
-    $$PWD/live/codedeclaration.h \
     $$PWD/live/documenthandler.h \
-    $$PWD/live/documenthandlerstate.h \
-    $$PWD/live/coderuntimebinding.h \
-    $$PWD/live/abstractcodeserializer.h \
-    $$PWD/live/codeconverter.h \
-    $$PWD/live/nativevaluecodeserializer.h \
-    $$PWD/live/livepalette.h \
-    $$PWD/live/livepalettecontainer.h \
     $$PWD/live/documentcursorinfo.h \
-    $$PWD/live/documentqmlfragment.h \
-    $$PWD/live/qmlobjectcodeserializer.h \
     $$PWD/live/editorsettingscategory.h \
     $$PWD/live/lveditorglobal.h \
-    $$PWD/live/projectextension.h \
     $$PWD/live/editorglobalobject.h \
     $$PWD/live/editorprivate_plugin.h \
-    $$PWD/live/livepalettelist.h
+    $$PWD/live/palettecontainer.h \
+    $$PWD/live/palettelist.h \
+    $$PWD/live/codepalette.h

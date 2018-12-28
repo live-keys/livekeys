@@ -26,6 +26,7 @@
 namespace lv{
 
 class ExceptionPrivate;
+
 class LV_BASE_EXPORT Exception : public std::exception{
 
 public:

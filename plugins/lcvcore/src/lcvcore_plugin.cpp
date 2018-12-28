@@ -28,7 +28,6 @@
 #include "qmat2darray.h"
 #include "qcamcapture.h"
 #include "qvideocapture.h"
-#include "qvideocaptureserializer.h"
 #include "qvideowriter.h"
 #include "qmatbuffer.h"
 #include "qalphamerge.h"
@@ -62,7 +61,6 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QMat2DArray>(            uri, 1, 0, "Mat2DArray");
     qmlRegisterType<QCamCapture>(            uri, 1, 0, "CamCapture");
     qmlRegisterType<QVideoCapture>(          uri, 1, 0, "VideoCapture");
-    qmlRegisterType<QVideoCaptureSerializer>(uri, 1, 0, "VideoCaptureSerializer");
     qmlRegisterType<QVideoWriter>(           uri, 1, 0, "VideoWriter");
     qmlRegisterType<QMatBuffer>(             uri, 1, 0, "MatBuffer");
     qmlRegisterType<QAlphaMerge>(            uri, 1, 0, "AlphaMerge");

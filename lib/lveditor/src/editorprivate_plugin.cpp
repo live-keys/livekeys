@@ -27,7 +27,7 @@
 #include "live/projectfile.h"
 #include "live/projectdocument.h"
 #include "live/editorsettings.h"
-#include "live/livepalettecontainer.h"
+#include "live/palettecontainer.h"
 #include "live/editorglobalobject.h"
 #include "live/applicationcontext.h"
 #include "live/keymap.h"
@@ -74,7 +74,7 @@ void EditorPrivatePlugin::initializeEngine(QQmlEngine *engine, const char *){
     QObject* prob = engine->rootContext()->contextProperty("project").value<QObject*>();
     lv::Project* pr = qobject_cast<lv::Project*>(prob);
 
-    lv::LivePaletteContainer* lpc = lv::LivePaletteContainer::create(
+    lv::PaletteContainer* lpc = lv::PaletteContainer::create(
         engine, QString::fromStdString(lv::ApplicationContext::instance().pluginPath())
     );
 

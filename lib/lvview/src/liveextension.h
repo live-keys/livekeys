@@ -12,7 +12,7 @@ namespace lv{
 class LV_VIEW_EXPORT LiveExtension : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QJSValue globals           READ globals           WRITE setGlobals           NOTIFY globalsChanged)
+    Q_PROPERTY(QObject* globals           READ globals           WRITE setGlobals           NOTIFY globalsChanged)
     Q_PROPERTY(QJSValue interceptLanguage READ interceptLanguage WRITE setInterceptLanguage NOTIFY interceptLanguageChanged)
     Q_PROPERTY(QJSValue interceptMenu     READ interceptMenu     WRITE setInterceptMenu     NOTIFY interceptMenuChanged)
     Q_PROPERTY(QJSValue commands          READ commands          WRITE setCommands          NOTIFY commandsChanged)
@@ -22,14 +22,14 @@ class LV_VIEW_EXPORT LiveExtension : public QObject{
 public:
     explicit LiveExtension(QObject *parent = 0);
 
-    QJSValue globals() const{ return m_globals; }
+    QObject* globals() const{ return m_globals; }
     QJSValue interceptLanguage() const { return m_interceptLanguage; }
     QJSValue commands() const{ return m_commands; }
     QJSValue configuration() const{ return m_configuration; }
     QJSValue keyBindings() const{ return m_keybindings; }
     QJSValue interceptMenu() const{ return m_interceptMenu; }
 
-    void setGlobals(QJSValue globals);
+    void setGlobals(QObject* globals);
     void setInterceptLanguage(QJSValue interceptLanguage);
     void setCommands(QJSValue commands);
     void setConfiguration(QJSValue configuration);
@@ -58,7 +58,7 @@ private:
     std::string m_name;
     std::string m_path;
 
-    QJSValue m_globals;
+    QObject* m_globals;
     QJSValue m_interceptLanguage;
     QJSValue m_commands;
     QJSValue m_configuration;
@@ -66,7 +66,7 @@ private:
     QJSValue m_interceptMenu;
 };
 
-inline void LiveExtension::setGlobals(QJSValue globals){
+inline void LiveExtension::setGlobals(QObject* globals){
     m_globals = globals;
     emit globalsChanged();
 }

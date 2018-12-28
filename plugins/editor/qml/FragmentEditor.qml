@@ -40,7 +40,6 @@ Rectangle{
     property color headerColorBottom: "#071119"
 
     property var loadedPalettes: []
-    property bool isEditingSection: false
     property var windowControls: null
 
     property DocumentFragment document: DocumentFragment{}
@@ -345,19 +344,31 @@ Rectangle{
                             editor.document.lineStartIndex = lineStart
                             editor.document.lineEndIndex = lineEnd
                         }
-                        onPaletteAboutToRemove: {
-                            for ( var i = 0; i < loadedPalettes.length; ++i ){
-                                if ( palette.item === loadedPalettes[i].paletteItem ){
-                                    var lp = loadedPalettes[i]
-                                    loadedPalettes.splice(i, 1)
-                                    lp.destroy()
-                                    return
-                                }
-                            }
-                        }
-                        onEditingStateChanged: {
-                            editor.isEditingSection = isEditing
-                        }
+
+//                        onPaletteAboutToRemove: {
+//                            for ( var i = 0; i < loadedEditorPaletteBoxes.length; ++i ){
+//                                var paletteContainer = loadedEditorPaletteBoxes[i].child
+
+//                                if ( paletteContainer.children.length > 0 ){
+//                                    for ( var j = 0; j < paletteContainer.children.length; ++j ){
+//                                        var localPaletteContainer = paletteContainer.children[j]
+
+//                                        if ( palette.item === localPaletteContainer.child ){
+//                                            localPaletteContainer.parent = null
+//                                            localPaletteContainer.destroy()
+//                                            if ( paletteContainer.children.length === 0 ){
+//                                                var lp = loadedEditorPaletteBoxes[i]
+//                                                loadedEditorPaletteBoxes.splice(i, 1)
+//                                                lp.destroy()
+
+//                                            }
+
+//                                            return
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
                     }
 
                     y: -(editor.document.lineStartIndex) * Math.ceil(editorMetrics.lineSpacing)
@@ -425,10 +436,6 @@ Rectangle{
                             }
                             event.accepted = true
 
-                        } else if ( event.key === Qt.Key_Return && (event.modifiers & Qt.ControlModifier) ){
-                            if ( editor.isEditingSection )
-                                codeHandler.commitEdit()
-                            event.accepted = true
                         } else if ( event.key === Qt.Key_PageUp ){
                             if ( codeHandler.completionModel.isEnabled ){
                                 qmlSuggestionBox.highlightPrevPage()
@@ -490,16 +497,6 @@ Rectangle{
                                 qmlSuggestionBox.highlightPrev()
                             }
                         } else if ( event.key === Qt.Key_Escape ){
-
-                            if ( editor.loadedPalettes.length > 0 ){
-
-                                var last = editor.loadedPalettes[editor.loadedPalettes.length - 1]
-                                codeHandler.removePalette(last.paletteItem)
-
-                            } else if ( codeHandler.isEditing() ){
-                                codeHandler.cancelEdit()
-                            }
-
                             codeHandler.completionModel.disable()
                         } else {
                             var command = livecv.keymap.locateCommand(event.key, event.modifiers)
