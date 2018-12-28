@@ -16,7 +16,8 @@ HEADERS += \
     $$PWD/lvglobal.h \
     $$PWD/package.h \
     $$PWD/plugin.h \
-    $$PWD/version.h
+    $$PWD/version.h \
+    $$PWD/packagegraph.h
 
 SOURCES += \
     $$PWD/exception.cpp \
@@ -30,7 +31,8 @@ SOURCES += \
     $$PWD/stacktrace.cpp \
     $$PWD/package.cpp \
     $$PWD/plugin.cpp \
-    $$PWD/version.cpp
+    $$PWD/version.cpp \
+    $$PWD/packagegraph.cpp
 
 win32{
     SOURCES += $$PWD/stacktrace_win.cpp

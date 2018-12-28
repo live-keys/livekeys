@@ -2370,7 +2370,7 @@ void TextDocumentLayout::stateChangeUpdate(int pos)
 
 void TextDocumentLayout::highlightingChanged(int position, int length)
 {
-    emit this->document()->contentsChange(position, length, length);
+//    emit this->document()->contentsChange(position, length, length);
 }
 
 

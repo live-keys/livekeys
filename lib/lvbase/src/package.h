@@ -20,19 +20,31 @@ class LV_BASE_EXPORT Package{
 public:
     typedef std::shared_ptr<Package> Ptr;
 
-    class Dependency{
+    class LV_BASE_EXPORT Reference{
     public:
-        Dependency(const std::string& n, Version v) : name(n), version(v){}
+        Reference(const std::string& n, Version v) : name(n), version(v){}
 
         std::string name;
         Version     version;
     };
 
-    class Library{
+    class LV_BASE_EXPORT Library{
+
+    public:
+        enum FlagResult{
+            Equal,
+            HasLess,
+            HasMore,
+            Different
+        };
+
     public:
         Library(const std::string& n, Version v) : name(n), version(v){}
 
+        FlagResult compareFlags(const Library& other);
+
         std::string            name;
+        std::string            path;
         Version                version;
         std::list<std::string> flags;
     };
@@ -53,7 +65,7 @@ public:
     const std::string& extension() const;
     std::string extensionAbsolutePath() const;
     bool hasExtension() const;
-    const std::map<std::string, Package::Dependency*>& dependencies() const;
+    const std::map<std::string, Package::Reference*>& dependencies() const;
     const std::map<std::string, Package::Library*>& libraries() const;
 
 private:

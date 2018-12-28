@@ -31,7 +31,7 @@ public:
     std::string filePath;
     Version     version;
     std::string extension;
-    std::map<std::string, Package::Dependency*> dependencies;
+    std::map<std::string, Package::Reference*> dependencies;
     std::map<std::string, Package::Library*>    libraries;
 };
 
@@ -100,7 +100,7 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
     if ( m.hasKey("dependencies") ){
         MLNode::ObjectType dep = m["dependencies"].asObject();
         for ( auto it = dep.begin(); it != dep.end(); ++it ){
-            Package::Dependency* dep = new Package::Dependency(it->first, Version(it->second.asString()));
+            Package::Reference* dep = new Package::Reference(it->first, Version(it->second.asString()));
             pt->m_d->dependencies[dep->name] = dep;
         }
     }
@@ -111,6 +111,7 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
             MLNode libValue = it->second;
 
             Package::Library* lib = new Package::Library(it->first, Version(libValue["version"].asString()));
+            lib->path = path + "/" + libValue["path"].asString();
             if ( libValue.hasKey("flags") ){
                 for ( auto it = libValue["flags"].asArray().begin(); it != libValue["flags"].asArray().end(); ++it ){
                     lib->flags.push_back(it->asString());
@@ -150,7 +151,7 @@ bool Package::hasExtension() const{
     return !m_d->extension.empty();
 }
 
-const std::map<std::string, Package::Dependency *>& Package::dependencies() const{
+const std::map<std::string, Package::Reference *>& Package::dependencies() const{
     return m_d->dependencies;
 }
 
@@ -165,6 +166,48 @@ Package::Package(const std::string &path, const std::string& filePath, const std
     m_d->filePath = filePath;
     m_d->name     = name;
     m_d->version  = version;
+}
+
+Package::Library::FlagResult Package::Library::compareFlags(const Package::Library &other){
+    bool thisHasMore = false;
+    bool otherHasMore = false;
+    for ( auto it = flags.begin(); it != flags.end(); ++it ){
+        bool found = false;
+        for ( auto oit = other.flags.begin(); oit != other.flags.end(); ++oit ){
+            if ( *oit == *it ){
+                found = true;
+                break;
+            }
+        }
+        if ( !found ){
+            thisHasMore = true;
+            break;
+        }
+    }
+
+    for ( auto oit = other.flags.begin(); oit != other.flags.end(); ++oit ){
+        bool found = false;
+        for ( auto it = flags.begin(); it != flags.end(); ++it ){
+            if ( *oit == *it ){
+                found = true;
+                break;
+            }
+        }
+        if ( !found ){
+            otherHasMore = true;
+            break;
+        }
+    }
+
+    if ( thisHasMore && otherHasMore ){
+        return Package::Library::Different;
+    } else if ( thisHasMore ) {
+        return Package::Library::HasMore;
+    } else if ( otherHasMore ){
+        return Package::Library::HasLess;
+    } else {
+        return Package::Library::Equal;
+    }
 }
 
 } // namespace

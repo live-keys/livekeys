@@ -21,6 +21,7 @@
 #include <QLibrary>
 #include <QQmlPropertyMap>
 #include <QJSValue>
+#include "live/package.h"
 
 // Versioning
 // ----------
@@ -50,6 +51,7 @@ class Project;
 class DocumentHandler;
 class CodeQmlHandler;
 class Extensions;
+class PackageGraph;
 
 // class LiveCV
 // ------------
@@ -83,7 +85,11 @@ public:
 
     const QString& dir() const;
 
+    void loadInternals();
     void loadInternalPlugins();
+    void loadInternalPackages();
+
+    std::vector<std::string> packageImportPaths() const;
 
     const LiveCVArguments* arguments() const;
 
@@ -100,6 +106,10 @@ public:
 public slots:
     QObject *windowControls() const;
     QJSValue interceptMenu(QJSValue context);
+    void projectChanged(const QString& path);
+
+signals:
+    void missingPackages();
 
 private:
     LiveCV(QObject* parent = 0);
@@ -122,7 +132,8 @@ private:
     lv::KeyMap*            m_keymap;
     lv::Extensions*        m_extensions;
     lv::VisualLogModel*    m_log;
-    lv::VisualLogQmlObject* m_vlog;
+    lv::VisualLogQmlObject*m_vlog;
+    lv::PackageGraph*      m_packageGraph;
     mutable QObject*       m_windowControls;
 };
 

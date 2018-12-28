@@ -85,6 +85,10 @@ void DocumentHandler::requestCursorPosition(int position){
     emit cursorPositionRequest(position);
 }
 
+void DocumentHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *box){
+    m_textEdit->linePaletteAdded(lineStart, lineEnd, height, box);
+}
+
 void DocumentHandler::rehighlightBlock(const QTextBlock &block){
     if ( m_codeHandler )
         m_codeHandler->rehighlightBlock(block);
