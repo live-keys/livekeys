@@ -81,6 +81,8 @@ void Project::openProject(const QString &path){
         emit pathChanged(absolutePath);
         emit activeChanged(document);
     } else if ( m_fileModel->root()->childCount() > 0 ){
+        m_path = absolutePath;
+        emit pathChanged(absolutePath);
 
         ProjectFile* bestFocus = lookupBestFocus(m_fileModel->root()->child(0));
         if( bestFocus ){
@@ -93,9 +95,6 @@ void Project::openProject(const QString &path){
             m_active = document;
             emit activeChanged(document);
         }
-
-        m_path = absolutePath;
-        emit pathChanged(absolutePath);
     }
 }
 

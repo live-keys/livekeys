@@ -13,7 +13,6 @@ HEADERS += \
     $$PWD/live/projectdocumentmodel.h \
     $$PWD/live/editorsettings.h \
     $$PWD/live/documenthandler.h \
-    $$PWD/live/documentcursorinfo.h \
     $$PWD/live/editorsettingscategory.h \
     $$PWD/live/lveditorglobal.h \
     $$PWD/live/editorglobalobject.h \

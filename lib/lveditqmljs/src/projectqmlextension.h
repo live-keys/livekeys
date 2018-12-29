@@ -20,6 +20,7 @@
 #include "live/lveditqmljsglobal.h"
 #include "live/documenthandler.h"
 #include "live/abstractcodehandler.h"
+#include "live/palettecontainer.h"
 
 #include <QObject>
 #include <QQmlParserStatus>

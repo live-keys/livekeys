@@ -28,7 +28,6 @@
 #include "live/settings.h"
 #include "live/qmladdcontainer.h"
 #include "live/palettelist.h"
-#include "live/documentcursorinfo.h"
 
 #include <QTimer>
 #include <QTextCursor>
@@ -42,6 +41,7 @@ class ProjectQmlScanner;
 class ProjectQmlExtension;
 class PluginInfoExtractor;
 
+class QmlCursorInfo;
 class QmlEditFragment;
 class QmlJsHighlighter;
 class QmlJsSettings;
@@ -101,9 +101,11 @@ public slots:
     QObject* paletteBoxFor(lv::CodePalette* palette);
     QObject* paletteBoxAtPosition(int position);
 
+    void framePalette(QQuickItem *box, lv::CodePalette* palette);
+
     // Binding management
 
-    lv::DocumentCursorInfo* cursorInfo(int position, int length);
+    lv::QmlCursorInfo* cursorInfo(int position, int length);
     lv::CodePalette* openBinding(lv::PaletteList* paletteList, int index, QObject* currentApp = 0);
     void closeBinding(int position, int length);
 

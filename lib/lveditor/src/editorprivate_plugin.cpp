@@ -18,7 +18,6 @@
 #include "live/applicationcontext.h"
 #include "live/settings.h"
 #include "live/documenthandler.h"
-#include "live/documentcursorinfo.h"
 #include "live/projectfilemodel.h"
 #include "live/projectdocumentmodel.h"
 #include "live/projectnavigationmodel.h"
@@ -40,7 +39,6 @@
 #include <QQmlContext>
 
 void EditorPrivatePlugin::registerTypes(const char *uri){
-    qmlRegisterType<lv::DocumentCursorInfo>(uri, 1, 0, "DocumentCursorInfo");
     qmlRegisterType<lv::TextEdit>(          uri, 1, 0, "NewTextEdit");
     qmlRegisterType<lv::LineSurface>(       uri, 1, 0, "LineSurface");
     qmlRegisterType<lv::LineManager>(       uri, 1, 0, "LineManager");

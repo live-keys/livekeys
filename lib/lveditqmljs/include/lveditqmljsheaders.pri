@@ -18,4 +18,5 @@ HEADERS += \
     $$PWD/live/qmladdcontainer.h \
     $$PWD/live/qmlcodeconverter.h \
     $$PWD/live/qmleditfragment.h \
-    $$PWD/live/qmldeclaration.h
+    $$PWD/live/qmldeclaration.h \
+    $$PWD/live/qmlcursorinfo.h
