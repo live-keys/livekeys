@@ -28,10 +28,12 @@
 #include "live/qmlpropertymodel.h"
 #include "live/qmlitemmodel.h"
 #include "live/qmlcodeconverter.h"
+#include "live/qmlcursorinfo.h"
 
 void EditQmlPlugin::registerTypes(const char *uri){
     // @uri editqml
     qmlRegisterType<lv::ProjectQmlExtension>(uri, 1, 0, "ProjectQmlExtension");
+    qmlRegisterType<lv::QmlCursorInfo>(      uri, 1, 0, "QmlCursorInfo");
 
     qmlRegisterUncreatableType<lv::CodeQmlHandler>(
         uri, 1, 0, "CodeQmlHandler", "CodeQmlHandler can only be accessed through the Editor.documentHandler.");

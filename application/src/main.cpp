@@ -41,7 +41,7 @@ int main(int argc, char *argv[]){
 
     try{
         LiveCV::Ptr livecv = LiveCV::create(argc, argv);
-        livecv->loadInternalPlugins();
+        livecv->loadInternals();
 
         if ( livecv->arguments()->helpFlag() ){
             printf("%s", livecv->arguments()->helpString().c_str());

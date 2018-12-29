@@ -18,27 +18,22 @@
 #define LVDOCUMENTHANDLER_H
 
 #include <QObject>
+#include <QQuickItem>
 #include <QQmlParserStatus>
-#include <QJSValue>
-#include <QTimer>
 #include <QTextCursor>
+#include <QJSValue>
 
 #include "live/projectdocument.h"
 #include "live/lveditorglobal.h"
 #include "live/codecompletionmodel.h"
-#include "live/documentcursorinfo.h"
 #include "live/abstractcodehandler.h"
 
 namespace lv{
 
 class TextEdit;
-class Project;
 class ViewEngine;
 class Extensions;
-
-class CodePalette;
-class PaletteList;
-class PaletteContainer;
+class Project;
 
 class LV_EDITOR_EXPORT DocumentHandler : public QObject, public QQmlParserStatus{
 
@@ -78,6 +73,8 @@ public:
     AbstractCodeHandler* codeHandler();
 
     void requestCursorPosition(int position);
+
+    void lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *palette);
 
 public slots:
     void insertCompletion(int from, int to, const QString& completion);

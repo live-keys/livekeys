@@ -33,6 +33,7 @@
 #include "live/applicationcontext.h"
 #include "live/viewcontext.h"
 #include "live/liveextension.h"
+#include "live/packagegraph.h"
 
 #include "live/editorprivate_plugin.h"
 #include "live/project.h"
@@ -72,10 +73,13 @@ LiveCV::LiveCV(QObject *parent)
     , m_extensions(nullptr)
     , m_log(0)
     , m_vlog(new VisualLogQmlObject) // js ownership
-    , m_windowControls(0)
+    , m_packageGraph(nullptr)
+    , m_windowControls(nullptr)
 {
     solveImportPaths();
     m_log = new VisualLogModel(m_engine->engine());
+
+    connect(m_project, SIGNAL(pathChanged(QString)), SLOT(projectChanged(QString)));
 
     VisualLog::setViewTransport(m_log);
 }
@@ -83,6 +87,7 @@ LiveCV::LiveCV(QObject *parent)
 LiveCV::~LiveCV(){
     delete m_settings;
     delete m_engine;
+    delete m_packageGraph;
 }
 
 LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent){
@@ -179,6 +184,12 @@ void LiveCV::loadQml(const QUrl &url){
     static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);
 }
 
+void LiveCV::loadInternals(){
+    loadInternalPackages();
+    loadInternalPlugins();
+    QmlEngineInterceptor::interceptEngine(engine(), m_packageGraph);
+}
+
 void LiveCV::loadInternalPlugins(){
     qmlRegisterType<lv::ErrorHandler>(
         "base", 1, 0, "ErrorHandler");
@@ -234,6 +245,60 @@ void LiveCV::loadInternalPlugins(){
         m_keymap->store(le->keyBindings());
     }
 
+}
+
+void LiveCV::loadInternalPackages(){
+    if ( m_packageGraph )
+        return;
+
+    m_packageGraph = new PackageGraph;
+
+    std::vector<std::string> internalPackages = {
+        "editor",
+        "editqml",
+        "live",
+        "lcvcore",
+        "lcvfeatures2d",
+        "lcvimgproc",
+        "lcvphoto",
+        "lcvvideo"
+    };
+
+    for ( auto it = internalPackages.begin(); it != internalPackages.end(); ++it ){
+
+        std::string packagePath = ApplicationContext::instance().pluginPath() + "/" + *it;
+
+        if ( Package::existsIn(packagePath) ){
+            PackageGraph::addInternalPackage(Package::createFromPath(packagePath));
+        }
+    }
+
+    std::vector<std::string> qtPackages = {
+        "Qt",
+        "QtQuick",
+        "QtCanvas3D",
+        "QtGraphicalEffects",
+        "QtMultimedia",
+        "QtWebSockets"
+    };
+
+    for ( auto it = qtPackages.begin(); it != qtPackages.end(); ++it ){
+        Package::Ptr package = Package::createFromNode(*it, *it, {
+            {"name", *it},
+            {"version", QT_VERSION_STR}
+        });
+        PackageGraph::addInternalPackage(package);
+    }
+}
+
+std::vector<std::string> LiveCV::packageImportPaths() const{
+    std::vector<std::string> paths;
+    paths.push_back(ApplicationContext::instance().pluginPath());
+
+    if ( !m_project->rootPath().isEmpty() ){
+        paths.push_back(m_project->dir().toStdString() + "/packages");
+    }
+    return paths;
 }
 
 QByteArray LiveCV::extractPluginInfo(const QString &import) const{
@@ -300,6 +365,19 @@ QJSValue LiveCV::interceptMenu(QJSValue context){
     }
 
     return concat;
+}
+
+void LiveCV::projectChanged(const QString &path){
+    m_packageGraph->clearPackages();
+    m_packageGraph->setPackageImportPaths(packageImportPaths());
+    std::string packagePath = path.toStdString();
+    if ( Package::existsIn(packagePath) ){
+        std::list<Package::Reference> missing;
+        m_packageGraph->loadPackageWithDependencies(Package::createFromPath(packagePath), missing);
+        if ( missing.size() > 0 ){
+            emit missingPackages();
+        }
+    }
 }
 
 }// namespace

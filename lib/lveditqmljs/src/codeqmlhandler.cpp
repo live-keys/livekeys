@@ -32,6 +32,7 @@
 #include "qmljsbuiltintypes_p.h"
 #include "qmljshighlighter_p.h"
 #include "bindingchannel.h"
+#include "qmlcursorinfo.h"
 
 #include "live/documenthandler.h"
 #include "live/codecompletionsuggestion.h"
@@ -1163,8 +1164,8 @@ void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
             emit paletteAboutToRemove(pl);
 
             if ( edit->paletteUse() ){
-                for ( auto it = m_paletteBoxes.begin(); it != m_paletteBoxes.end(); ++it ){
-                    QQuickItem* box = qobject_cast<QQuickItem*>((*it)->property("child").value<QObject*>());
+                for ( auto boxesIt = m_paletteBoxes.begin(); boxesIt != m_paletteBoxes.end(); ++boxesIt ){
+                    QQuickItem* box = qobject_cast<QQuickItem*>((*boxesIt)->property("child").value<QObject*>());
                     QList<QQuickItem*> boxItems = box->childItems();
 
                     for ( auto itemsIt = boxItems.begin(); itemsIt != boxItems.end(); ++itemsIt ){
@@ -1444,11 +1445,35 @@ QObject *CodeQmlHandler::paletteBoxAtPosition(int position){
     return nullptr;
 }
 
-DocumentCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
+void CodeQmlHandler::framePalette(QQuickItem *box, CodePalette *palette){
+    auto it = m_edits.begin();
+
+    QmlEditFragment* edit = nullptr;
+
+    while( it != m_edits.end() ){
+        QmlEditFragment* itEdit = *it;
+        CodePalette* lp = itEdit->palette();
+        if ( lp == palette )
+            edit = itEdit;
+        ++it;
+    }
+
+    if (!edit)
+        return;
+
+    int pos = edit->declaration()->position();
+    QTextBlock tb = m_document->textDocument()->findBlock(pos);
+    QTextBlock tbend = m_document->textDocument()->findBlock(pos + edit->declaration()->length());
+
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, box->height(), box);
+}
+
+QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
     bool canBind = false, canUnbind = false, canEdit = false, canAdjust = false;
 
     if ( !m_document )
-        return new DocumentCursorInfo(canBind, canUnbind, canEdit, canAdjust);
+        return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust);
 
     QTextCursor cursor(m_target);
     cursor.setPosition(position);
@@ -1457,7 +1482,7 @@ DocumentCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
     if ( properties.isEmpty() )
-        return new DocumentCursorInfo(canBind, canUnbind, canEdit, canAdjust);
+        return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust);
 
     if ( properties.size() == 1 ){
         QmlDeclaration::Ptr firstdecl = properties.first();
@@ -1491,7 +1516,7 @@ DocumentCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
             }
         }
     }
-    return new DocumentCursorInfo(canBind, canUnbind, canEdit, canAdjust);
+    return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust);
 }
 
 lv::CodePalette* CodeQmlHandler::openBinding(lv::PaletteList *paletteList, int index, QObject *currentApp){

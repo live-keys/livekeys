@@ -14,11 +14,11 @@
 **
 ****************************************************************************/
 
-#include "live/documentcursorinfo.h"
+#include "qmlcursorinfo.h"
 
 namespace lv{
 
-DocumentCursorInfo::DocumentCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, QObject *parent)
+QmlCursorInfo::QmlCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, QObject *parent)
     : QObject(parent)
     , m_canBind(canBind)
     , m_canUnbind(canUnbind)
@@ -27,7 +27,7 @@ DocumentCursorInfo::DocumentCursorInfo(bool canBind, bool canUnbind, bool canEdi
 {
 }
 
-DocumentCursorInfo::DocumentCursorInfo(QObject *parent)
+QmlCursorInfo::QmlCursorInfo(QObject *parent)
     : QObject(parent)
     , m_canBind(0)
     , m_canUnbind(0)
@@ -36,7 +36,7 @@ DocumentCursorInfo::DocumentCursorInfo(QObject *parent)
 {
 }
 
-DocumentCursorInfo::~DocumentCursorInfo(){
+QmlCursorInfo::~QmlCursorInfo(){
 }
 
 

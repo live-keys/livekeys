@@ -15,7 +15,6 @@ HEADERS += \
     $$PWD/editorsettings.h \
     $$PWD/documenthandler.h \
     $$PWD/editorsettingscategory.h \
-    $$PWD/documentcursorinfo.h \
     $$PWD/lveditorglobal.h \
     $$PWD/editorglobalobject.h \
     $$PWD/editorprivate_plugin.h \
@@ -40,7 +39,6 @@ SOURCES += \
     $$PWD/editorsettings.cpp \
     $$PWD/documenthandler.cpp \
     $$PWD/editorsettingscategory.cpp \
-    $$PWD/documentcursorinfo.cpp \
     $$PWD/editorglobalobject.cpp \
     $$PWD/editorprivate_plugin.cpp \
     $$PWD/linemanager.cpp \

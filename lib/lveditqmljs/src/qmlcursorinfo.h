@@ -18,12 +18,11 @@
 #define LVDOCUMENTCURSORINFO_H
 
 #include <QObject>
-
-#include "live/lveditorglobal.h"
+#include "live/lveditqmljsglobal.h"
 
 namespace lv{
 
-class LV_EDITOR_EXPORT DocumentCursorInfo: public QObject{
+class LV_EDITQMLJS_EXPORT QmlCursorInfo: public QObject{
 
     Q_OBJECT
     Q_PROPERTY(bool canBind   READ canBind   CONSTANT)
@@ -32,9 +31,9 @@ class LV_EDITOR_EXPORT DocumentCursorInfo: public QObject{
     Q_PROPERTY(bool canAdjust READ canAdjust CONSTANT)
 
 public:
-    DocumentCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, QObject* parent = 0);
-    DocumentCursorInfo(QObject* parent = 0);
-    ~DocumentCursorInfo();
+    QmlCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, QObject* parent = 0);
+    QmlCursorInfo(QObject* parent = 0);
+    ~QmlCursorInfo();
 
     bool canBind() const;
     bool canUnbind() const;
@@ -48,19 +47,19 @@ private:
     bool m_canAdjust;
 };
 
-inline bool DocumentCursorInfo::canBind() const{
+inline bool QmlCursorInfo::canBind() const{
     return m_canBind;
 }
 
-inline bool DocumentCursorInfo::canUnbind() const{
+inline bool QmlCursorInfo::canUnbind() const{
     return m_canUnbind;
 }
 
-inline bool DocumentCursorInfo::canEdit() const{
+inline bool QmlCursorInfo::canEdit() const{
     return m_canEdit;
 }
 
-inline bool DocumentCursorInfo::canAdjust() const{
+inline bool QmlCursorInfo::canAdjust() const{
     return m_canAdjust;
 }
 

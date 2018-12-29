@@ -31,7 +31,8 @@ HEADERS += \
     $$PWD/qmlcodeconverter.h \
     $$PWD/qmleditfragment.h \
     $$PWD/qmldeclaration.h \
-    $$PWD/bindingpath.h
+    $$PWD/bindingpath.h \
+    $$PWD/qmlcursorinfo.h
 
 SOURCES += \
     $$PWD/documentqmlinfo.cpp \
@@ -61,4 +62,5 @@ SOURCES += \
     $$PWD/qmlcodeconverter.cpp \
     $$PWD/qmleditfragment.cpp \
     $$PWD/qmldeclaration.cpp \
-    $$PWD/bindingpath.cpp
+    $$PWD/bindingpath.cpp \
+    $$PWD/qmlcursorinfo.cpp

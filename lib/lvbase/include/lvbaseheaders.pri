@@ -16,4 +16,5 @@ HEADERS += \
     $$PWD/live/meta/functionargs.h \
     $$PWD/live/package.h \
     $$PWD/live/version.h \
-    $$PWD/live/plugin.h
+    $$PWD/live/plugin.h \
+    $$PWD/live/packagegraph.h

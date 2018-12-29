@@ -72,7 +72,7 @@ Rectangle{
         if ( editor.document.file.name !== '' ){
             editor.document.save()
             if ( project.active && project.active !== editor.document ){
-                engine.createObjectAsync(
+                livecv.engine.createObjectAsync(
                     project.active.content,
                     windowControls.runSpace,
                     project.active.file.pathUrl(),

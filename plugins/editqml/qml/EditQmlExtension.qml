@@ -167,6 +167,146 @@ LiveExtension{
         }
     }
 
+    function shape(){
+        var activePane = livecv.windowControls().activePane
+
+        if ( activePane.objectName === 'editor' &&
+             activePane.document &&
+             ( endsWith(activePane.document.file.path, 'qml') || activePane.document.file.path === '' ) )
+        {
+            var editor = activePane
+            var codeHandler = editor.documentHandler.codeHandler
+            var windowControls = livecv.windowControls()
+
+            var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
+            var rect = editor.getCursorRectangle()
+            var cursorCoords = activePane.cursorWindowCoords()
+            if ( palettes.size() === 1 ){
+                var editorBox = codeHandler.paletteBoxAtPosition(palettes.position())
+                var paletteBoxContainer = editorBox ? editorBox.child : null
+
+                var palette = codeHandler.openPalette(palettes, 0, editor.windowControls.runSpace.item)
+
+                if ( paletteBoxContainer === null ){
+                    editorBox = windowControls.editSpace.createEmptyEditorBox()
+                    codeHandler.addPaletteBox(editorBox)
+                    paletteBoxContainer = windowControls.editSpace.createPaletteBoxContainer()
+                    editorBox.setChild(paletteBoxContainer, rect, cursorCoords, windowControls.editSpace.placement.top)
+                    paletteBoxContainer.x = 5
+                    editorBox.color = "#02070b"
+                    editorBox.radius = 5
+                    editorBox.border.width = 1
+                    editorBox.border.color = "#061b24"
+                }
+
+                var paletteBox = windowControls.editSpace.createPaletteBox(paletteBoxContainer)
+
+                palette.item.x = 5
+                palette.item.y = 7
+
+                paletteBox.child = palette.item
+                paletteBox.name = palette.name
+                paletteBox.type = palette.type
+                paletteBox.documentHandler = editor.documentHandler
+                paletteBox.cursorRectangle = rect
+                paletteBox.editorPosition = cursorCoords
+
+                editorBox.updatePlacement(rect, cursorCoords, windowControls.editSpace.placement.top)
+
+            } else {
+                //Palette list box
+                var palList      = windowControls.editSpace.createPaletteList()
+                var palListBox   = windowControls.editSpace.createEditorBox(palList, rect, cursorCoords, windowControls.editSpace.placement.bottom)
+                palListBox.color = 'transparent'
+                palList.model    = palettes
+                editor.internalFocus = false
+                palList.forceActiveFocus()
+                windowControls.setActiveItem(palList, editor)
+
+                palList.cancelled.connect(function(){
+                    palList.focus = false
+                    editor.forceFocus()
+                    palListBox.destroy()
+                })
+                palList.paletteSelected.connect(function(index){
+                    palList.focus = false
+                    editor.forceFocus()
+                    palListBox.destroy()
+
+                    var editorBox = codeHandler.paletteBoxAtPosition(palettes.position())
+                    var paletteBoxContainer = editorBox ? editorBox.child : null
+
+                    var palette = codeHandler.openPalette(palettes, index, editor.windowControls.runSpace.item)
+
+                    if ( paletteBoxContainer === null ){
+                        editorBox = windowControls.editSpace.createEmptyEditorBox()
+                        codeHandler.addPaletteBox(editorBox)
+                        paletteBoxContainer = windowControls.editSpace.createPaletteBoxContainer()
+                        editorBox.setChild(paletteBoxContainer, rect, cursorCoords, windowControls.editSpace.placement.top)
+                        paletteBoxContainer.x = 5
+                        editorBox.color = "#02070b"
+                        editorBox.radius = 5
+                        editorBox.border.width = 1
+                        editorBox.border.color = "#061b24"
+                    }
+
+                    var paletteBox = windowControls.editSpace.createPaletteBox(paletteBoxContainer)
+
+                    palette.item.x = 5
+                    palette.item.y = 7
+
+                    paletteBox.child = palette.item
+
+                    paletteBox.name = palette.name
+                    paletteBox.type = palette.type
+                    paletteBox.documentHandler = editor.documentHandler
+                    paletteBox.cursorRectangle = rect
+                    paletteBox.editorPosition = cursorCoords
+
+                    codeHandler.framePalette(editorBox, palette)
+
+//                    editorBox.updatePlacement(rect, cursorCoords, windowControls.editSpace.placement.top)
+                })
+            }
+        }
+    }
+
+    function add(){
+        var activePane = livecv.windowControls().activePane
+        if ( activePane.objectName === 'editor' &&
+             activePane.document &&
+             ( activePane.document.file.path.endsWith('.qml') || activePane.document.file.path === '' ) )
+        {
+            var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition)
+            if ( !addContainer )
+                return
+
+            var rect = activePane.getCursorRectangle()
+            var cursorCoords = activePane.cursorWindowCoords()
+            var addBoxItem = addBoxFactory.createObject()
+            addBoxItem.addContainer = addContainer
+
+            var addBox = livecv.windowControls().editSpace.createEditorBox(
+                addBoxItem, rect, cursorCoords, livecv.windowControls().editSpace.placement.bottom
+            )
+            addBox.color = 'transparent'
+            addBoxItem.cancel = function(){
+                addBox.destroy()
+            }
+            addBoxItem.accept = function(data){
+                if ( addBoxItem.activeIndex === 0 ){
+                    activePane.documentHandler.codeHandler.addProperty(addContainer.propertyModel.addPosition, data)
+                } else {
+                    activePane.documentHandler.codeHandler.addItem(addContainer.itemModel.addPosition, data)
+                }
+                addBox.destroy()
+            }
+
+            addBoxItem.assignFocus()
+            livecv.windowControls().setActiveItem(addBox, activePane)
+        }
+    }
+
     function bind(){
         var activePane = livecv.windowControls().activePane
 
@@ -228,47 +368,10 @@ LiveExtension{
     commands : {
         "edit" : edit,
         "palette" : palette,
-        "add" : function(){
-            var activePane = livecv.windowControls().activePane
-            if ( activePane.objectName === 'editor' &&
-                 activePane.document &&
-                 ( activePane.document.file.path.endsWith('.qml') || activePane.document.file.path === '' ) )
-            {
-                var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition)
-                if ( !addContainer )
-                    return
-
-                var rect = activePane.getCursorRectangle()
-                var cursorCoords = activePane.cursorWindowCoords()
-                var addBoxItem = addBoxFactory.createObject()
-                addBoxItem.addContainer = addContainer
-
-                var addBox = livecv.windowControls().editSpace.createEditorBox(
-                    addBoxItem, rect, cursorCoords, livecv.windowControls().editSpace.placement.bottom
-                )
-                addBox.color = 'transparent'
-                addBoxItem.cancel = function(){
-                    addBox.destroy()
-                }
-                addBoxItem.accept = function(data){
-                    if ( addBoxItem.activeIndex === 0 ){
-                        activePane.documentHandler.codeHandler.addProperty(addContainer.propertyModel.addPosition, data)
-                    } else {
-                        activePane.documentHandler.codeHandler.addItem(addContainer.itemModel.addPosition, data)
-                    }
-                    addBox.destroy()
-                }
-
-                addBoxItem.assignFocus()
-                livecv.windowControls().setActiveItem(addBox, activePane)
-
-            }
-        },
+        "add" : add,
         'bind' : bind,
         'unbind' : unbind,
-        'shape' : function(){
-
-        }
+        'shape' : shape
     }
 
     keyBindings : {
@@ -293,6 +396,10 @@ LiveExtension{
                     }, {
                         name : "Palette",
                         action : function(){ root.commands['palette']()},
+                        enabled : cursorInfo.canAdjust
+                    }, {
+                        name : "Shape",
+                        action : function(){ root.commands['shape']()},
                         enabled : cursorInfo.canAdjust
                     }, {
                         name : "Bind",
