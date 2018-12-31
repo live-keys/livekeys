@@ -6,10 +6,12 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <list>
 
 namespace lv{
 
 class MLNode;
+class PackageGraph;
 
 class PluginPrivate;
 class LV_BASE_EXPORT Plugin{
@@ -18,6 +20,8 @@ class LV_BASE_EXPORT Plugin{
 
 public:
     typedef std::shared_ptr<Plugin> Ptr;
+
+    class Context;
 
 public:
     static const char* fileName;
@@ -33,7 +37,11 @@ public:
     const std::string& path() const;
     const std::string& filePath() const;
     const std::string& package() const;
+    const std::list<std::string>& dependencies() const;
     const std::map<std::string, std::string>& palettes() const;
+
+    void assignContext(PackageGraph* graph);
+    Context* context();
 
 private:
     Plugin(const std::string& path, const std::string& filePath, const std::string& name, const std::string& package);

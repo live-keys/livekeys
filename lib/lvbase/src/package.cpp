@@ -1,10 +1,12 @@
 #include "package.h"
+#include "packagecontext.h"
+
 #include "lockedfileiosession.h"
 #include "live/mlnodetojson.h"
 #include "live/exception.h"
+
 #include <list>
 #include <map>
-
 #include <fstream>
 #include <istream>
 #include <sstream>
@@ -32,7 +34,9 @@ public:
     Version     version;
     std::string extension;
     std::map<std::string, Package::Reference*> dependencies;
-    std::map<std::string, Package::Library*>    libraries;
+    std::map<std::string, Package::Library*>   libraries;
+
+    Package::Context* context;
 };
 
 /** \brief Destructor of Package */
@@ -42,6 +46,7 @@ Package::~Package(){
     for ( auto it = m_d->libraries.begin(); it != m_d->libraries.end(); ++it )
         delete it->second;
 
+    delete m_d->context;
     delete m_d;
 }
 
@@ -170,6 +175,29 @@ const std::map<std::string, Package::Library *>& Package::libraries() const{
     return m_d->libraries;
 }
 
+/** \brief Assigns a new context to this package. */
+void Package::assignContext(PackageGraph *graph){
+    if ( m_d->context ){
+        if ( m_d->context->packageGraph == graph )
+            return;
+        delete m_d->context;
+    }
+
+    m_d->context = new Package::Context;
+    m_d->context->packageGraph = graph;
+}
+
+PackageGraph *Package::contextOwner(){
+    if ( m_d->context )
+        return m_d->context->packageGraph;
+    return nullptr;
+}
+
+/** \brief Returns the current context if any has been assigned, nullptr otherwise. */
+Package::Context *Package::context(){
+    return m_d->context;
+}
+
 Package::Package(const std::string &path, const std::string& filePath, const std::string &name, const Version &version)
     : m_d(new PackagePrivate)
 {
@@ -177,6 +205,7 @@ Package::Package(const std::string &path, const std::string& filePath, const std
     m_d->filePath = filePath;
     m_d->name     = name;
     m_d->version  = version;
+    m_d->context  = nullptr;
 }
 
 Package::Library::FlagResult Package::Library::compareFlags(const Package::Library &other){

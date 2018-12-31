@@ -252,6 +252,7 @@ void LiveCV::loadInternalPackages(){
         return;
 
     m_packageGraph = new PackageGraph;
+    PackageGraph::internalsContextOwner() = m_packageGraph;
 
     std::vector<std::string> internalPackages = {
         "editor",
@@ -275,6 +276,7 @@ void LiveCV::loadInternalPackages(){
 
     std::vector<std::string> qtPackages = {
         "Qt",
+        "QtQml",
         "QtQuick",
         "QtCanvas3D",
         "QtGraphicalEffects",
@@ -283,7 +285,7 @@ void LiveCV::loadInternalPackages(){
     };
 
     for ( auto it = qtPackages.begin(); it != qtPackages.end(); ++it ){
-        Package::Ptr package = Package::createFromNode(*it, *it, {
+        Package::Ptr package = Package::createFromNode(*it, "", {
             {"name", *it},
             {"version", QT_VERSION_STR}
         });
