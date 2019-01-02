@@ -1,8 +1,11 @@
 #include "packagegraph.h"
+#include "live/packagecontext.h"
+#include "live/plugincontext.h"
 #include "live/exception.h"
 #include "live/applicationcontext.h"
 #include "live/libraryloadpath.h"
 #include "live/visuallog.h"
+#include "live/plugincontext.h"
 
 #include <list>
 #include <iostream>
@@ -10,11 +13,26 @@
 
 namespace lv{
 
+namespace{
+
+    std::vector<std::string> splitString(const std::string &text, char sep) {
+        std::vector<std::string> tokens;
+        std::size_t start = 0, end = 0;
+        while ((end = text.find(sep, start)) != std::string::npos) {
+            tokens.push_back(text.substr(start, end - start));
+            start = end + 1;
+        }
+        tokens.push_back(text.substr(start));
+        return tokens;
+    }
+
+}
+
 class PackageGraphPrivate{
 
 public:
     std::vector<std::string> packageImportPaths;
-    std::map<std::string, PackageGraph::Node*> packages;
+    std::map<std::string, Package::Ptr> packages;
     std::map<std::string, PackageGraph::LibraryNode*> libraries;
 };
 
@@ -32,8 +50,7 @@ PackageGraph::~PackageGraph(){
 void PackageGraph::loadPackage(const Package::Ptr &p, bool addLibraries){
     auto it = m_d->packages.find(p->name());
     if ( it == m_d->packages.end() ){
-        PackageGraph::Node* node = new PackageGraph::Node;
-        node->package = p;
+        p->assignContext(this);
 
         if ( addLibraries ){
             for ( auto it = p->libraries().begin(); it != p->libraries().end(); ++it ){
@@ -42,13 +59,13 @@ void PackageGraph::loadPackage(const Package::Ptr &p, bool addLibraries){
             }
         }
 
-        m_d->packages[p->name()] = node;
+        m_d->packages[p->name()] = p;
 
-        vlog("lvbase-packagegraph").d() << "Loaded package \'" + p->name() << "\' [" + p->version().toString() + "]";
+        vlog("lvbase-packagegraph").v() << "Loaded package \'" + p->name() << "\' [" + p->version().toString() + "]";
 
     } else {
-        PackageGraph::Node* node = it->second;
-        Version oldVersion = node->package->version();
+        Package::Ptr existingPackage = it->second;
+        Version oldVersion = existingPackage->version();
         Version newVersion = p->version();
 
         if ( newVersion.major() != oldVersion.major() ){
@@ -59,11 +76,12 @@ void PackageGraph::loadPackage(const Package::Ptr &p, bool addLibraries){
         }
 
         if ( newVersion > oldVersion ){
-            vlog("lvbase-packagegraph").d() <<
-                "Replaced package \'" << p->name() << "\' from [" << node->package->version().toString() << "] to [" <<
+            vlog("lvbase-packagegraph").v() <<
+                "Replaced package \'" << p->name() << "\' from [" << existingPackage->version().toString() << "] to [" <<
                 p->version().toString() << "]";
 
-            node->package = p;
+            p->assignContext(this);
+            m_d->packages[p->name()] = p;
 
             if ( addLibraries ){
                 for ( auto it = p->libraries().begin(); it != p->libraries().end(); ++it ){
@@ -93,10 +111,12 @@ void PackageGraph::loadPackageWithDependencies(
 
 void PackageGraph::addDependency(const Package::Ptr &package, const Package::Ptr &dependsOn){
     auto packageit = m_d->packages.find(package->name());
-    if ( packageit == m_d->packages.end() ){
+    if ( packageit == m_d->packages.end() )
         THROW_EXCEPTION(lv::Exception, "Failed to find package:" + package->name(), 3);
-    }
-    PackageGraph::Node* packageNode = packageit->second;
+    if ( package->contextOwner() != this )
+        THROW_EXCEPTION(lv::Exception, "Package \'" + package->name() +"\' is not part of the current package graph.", 3);
+    if ( dependsOn->contextOwner() != this )
+        THROW_EXCEPTION(lv::Exception, "Package \'" + dependsOn->name() +"\' is not part of the current package graph.", 3);
 
     auto dependsOnit = m_d->packages.find(dependsOn->name());
     if ( dependsOnit == m_d->packages.end() ){
@@ -104,41 +124,38 @@ void PackageGraph::addDependency(const Package::Ptr &package, const Package::Ptr
         if ( internalsIt == internals().end() ){
             THROW_EXCEPTION(lv::Exception, "Failed to find package:" + dependsOn->name(), 2);
         } else {
-            PackageGraph::Node* dependsOnNode = internalsIt->second;
-            if ( !hasDependency(packageNode, dependsOnNode) )
-                packageNode->dependencies.push_back(dependsOnNode);
+            if ( !hasDependency(package, dependsOn) )
+                package->context()->dependencies.push_back(dependsOn);
             return;
         }
     }
-    PackageGraph::Node* dependsOnNode = dependsOnit->second;
+    if ( !hasDependency(package, dependsOn ) ){
+        package->context()->dependencies.push_back(dependsOn);
+        dependsOn->context()->dependents.push_back(package);
 
-    if ( !hasDependency(packageNode, dependsOnNode ) ){
-        packageNode->dependencies.push_back(dependsOnNode);
-        dependsOnNode->dependents.push_back(packageNode);
-
-        PackageGraph::CyclesResult cr = checkCycles(dependsOnNode->package);
+        PackageGraph::CyclesResult<Package::Ptr> cr = checkCycles(package);
         if ( cr.found() ){
             std::stringstream ss;
 
             for ( auto it = cr.path().begin(); it != cr.path().end(); ++it ){
-                PackageGraph::Node* n = *it;
+                Package::Ptr n = *it;
 
                 if ( it != cr.path().begin() ){
                     ss << " -> ";
                 }
 
-                ss << n->package->name() << "[" << n->package->version().toString() << "]";
+                ss << n->name() << "[" << n->version().toString() << "]";
             }
 
-            for ( auto it = packageNode->dependencies.begin(); it != packageNode->dependencies.end(); ++it ){
-                if ( *it == dependsOnNode ){
-                    packageNode->dependencies.erase(it);
+            for ( auto it = package->context()->dependencies.begin(); it != package->context()->dependencies.end(); ++it ){
+                if ( *it == dependsOn ){
+                    package->context()->dependencies.erase(it);
                     break;
                 }
             }
-            for ( auto it = dependsOnNode->dependents.begin(); it != dependsOnNode->dependents.end(); ++it ){
-                if ( *it == dependsOnNode ){
-                    dependsOnNode->dependents.erase(it);
+            for ( auto it = dependsOn->context()->dependents.begin(); it != dependsOn->context()->dependents.end(); ++it ){
+                if ( *it == dependsOn ){
+                    dependsOn->context()->dependents.erase(it);
                     break;
                 }
             }
@@ -149,36 +166,66 @@ void PackageGraph::addDependency(const Package::Ptr &package, const Package::Ptr
 
 }
 
-PackageGraph::CyclesResult PackageGraph::checkCycles(const Package::Ptr &p){
+PackageGraph::CyclesResult<Package::Ptr> PackageGraph::checkCycles(const Package::Ptr &p){
     auto it = m_d->packages.find(p->name());
     if ( it == m_d->packages.end() )
         THROW_EXCEPTION(lv::Exception, "Failed to find package for cycles:" + p->name(), 2);
-    PackageGraph::Node* node = it->second;
 
-    std::list<PackageGraph::Node*> path;
-    path.push_back(node);
+    std::list<Package::Ptr> path;
+    path.push_back(p);
 
-    for ( auto it = node->dependencies.begin(); it != node->dependencies.end(); ++it ){
-        PackageGraph::CyclesResult cr = checkCycles(p, *it, path);
+    for ( auto it = p->context()->dependencies.begin(); it != p->context()->dependencies.end(); ++it ){
+        PackageGraph::CyclesResult<Package::Ptr> cr = checkCycles(p, *it, path);
         if ( cr.found() )
             return cr;
     }
-    return PackageGraph::CyclesResult(PackageGraph::CyclesResult::NotFound);;
+    return PackageGraph::CyclesResult<Package::Ptr>(PackageGraph::CyclesResult<Package::Ptr>::NotFound);;
 }
 
-PackageGraph::CyclesResult PackageGraph::checkCycles(
-        const Package::Ptr &p, PackageGraph::Node *node, std::list<PackageGraph::Node*> path)
-{
-    path.push_back(node);
-    if ( node->package.get() == p.get() )
-        return PackageGraph::CyclesResult(PackageGraph::CyclesResult::Found, path);
+PackageGraph::CyclesResult<Plugin::Ptr> PackageGraph::checkCycles(const Plugin::Ptr &p){
+    if ( p->context() == nullptr || p->context()->packageGraph != this )
+        THROW_EXCEPTION(lv::Exception, "Failed to loaded plugin for cycles:" + p->name(), 2);
 
-    for ( auto it = node->dependencies.begin(); it != node->dependencies.end(); ++it ){
-        PackageGraph::CyclesResult cr = checkCycles(p, *it, path);
+    std::list<Plugin::Ptr> path;
+    path.push_back(p);
+
+
+    for ( auto it = p->context()->localDependencies.begin(); it != p->context()->localDependencies.end(); ++it ){
+        PackageGraph::CyclesResult<Plugin::Ptr> cr = checkCycles(p, *it, path);
         if ( cr.found() )
             return cr;
     }
-    return PackageGraph::CyclesResult(PackageGraph::CyclesResult::NotFound);
+    return PackageGraph::CyclesResult<Plugin::Ptr>(PackageGraph::CyclesResult<Plugin::Ptr>::NotFound);;
+}
+
+PackageGraph::CyclesResult<Package::Ptr> PackageGraph::checkCycles(
+        const Package::Ptr &p, Package::Ptr current, std::list<Package::Ptr> path)
+{
+    path.push_back(current);
+    if ( current.get() == p.get() )
+        return PackageGraph::CyclesResult<Package::Ptr>(PackageGraph::CyclesResult<Package::Ptr>::Found, path);
+
+    for ( auto it = current->context()->dependencies.begin(); it != current->context()->dependencies.end(); ++it ){
+        PackageGraph::CyclesResult<Package::Ptr> cr = checkCycles(p, *it, path);
+        if ( cr.found() )
+            return cr;
+    }
+    return PackageGraph::CyclesResult<Package::Ptr>(PackageGraph::CyclesResult<Package::Ptr>::NotFound);
+}
+
+PackageGraph::CyclesResult<Plugin::Ptr> PackageGraph::checkCycles(
+        const Plugin::Ptr &p, Plugin::Ptr current, std::list<Plugin::Ptr> path)
+{
+    path.push_back(current);
+    if ( current.get() == p.get() )
+        return PackageGraph::CyclesResult<Plugin::Ptr>(PackageGraph::CyclesResult<Plugin::Ptr>::Found, path);
+
+    for ( auto it = current->context()->localDependencies.begin(); it != current->context()->localDependencies.end(); ++it ){
+        PackageGraph::CyclesResult<Plugin::Ptr> cr = checkCycles(p, *it, path);
+        if ( cr.found() )
+            return cr;
+    }
+    return PackageGraph::CyclesResult<Plugin::Ptr>(PackageGraph::CyclesResult<Plugin::Ptr>::NotFound);
 }
 
 /**
@@ -274,15 +321,14 @@ void PackageGraph::loadLibraries(){
 }
 
 void PackageGraph::clearPackages(){
-    for ( auto it = m_d->packages.begin(); it != m_d->packages.end(); ++it ){
-        delete it->second;
-    }
+    m_d->packages.clear();
 }
 
 void PackageGraph::clearLibraries(){
     for ( auto it = m_d->libraries.begin(); it != m_d->libraries.end(); ++it ){
         delete it->second;
     }
+    m_d->libraries.clear();
 }
 
 std::string PackageGraph::toString() const{
@@ -292,7 +338,7 @@ std::string PackageGraph::toString() const{
 
     ss << "Internals:" << std::endl;
     for ( auto it = internals().begin(); it != internals().end(); ++it ){
-        ss << "  " << it->second->package->name() << "[" << it->second->package->version().toString() << "]";
+        ss << "  " << it->second->name() << "[" << it->second->version().toString() << "]";
     }
     ss << std::endl;
 
@@ -345,10 +391,33 @@ Package::Ptr PackageGraph::findPackage(Package::Reference ref){
     return Package::Ptr(nullptr);
 }
 
+/**
+ * @brief Finds the package with highest version
+ */
+Package::Ptr PackageGraph::findPackage(const std::string &packageName){
+    Package::Ptr foundPackage(nullptr);
+
+    std::vector<std::string> paths = packageImportPaths();
+    for ( auto it = paths.begin(); it != paths.end(); ++it ){
+        std::string path = *it + "/" + packageName;
+        if ( Package::existsIn(path) ){
+            Package::Ptr p = Package::createFromPath(path);
+
+            if ( foundPackage == nullptr ){
+                foundPackage = p;
+            } else if ( p->version() > foundPackage->version() ){
+                foundPackage = p;
+            }
+        }
+    }
+
+    return foundPackage;
+}
+
 Package::Ptr PackageGraph::package(const std::string &name){
     auto it = m_d->packages.find(name);
     if ( it != m_d->packages.end() )
-        return it->second->package;
+        return it->second;
     return Package::Ptr(nullptr);
 }
 
@@ -363,50 +432,180 @@ void PackageGraph::setPackageImportPaths(const std::vector<std::string> &paths){
 void PackageGraph::addInternalPackage(const Package::Ptr &package){
     auto it = internals().find(package->name());
     if ( it == internals().end() ){
-        PackageGraph::Node* node = new PackageGraph::Node;
-        node->package = package;
-        internals()[package->name()] = node;
+        internals()[package->name()] = package;
+        if ( internalsContextOwner() ){
+            package->assignContext(internalsContextOwner());
+        }
     }
 }
 
-std::map<std::string, PackageGraph::Node*> &PackageGraph::internals(){
-    static std::map<std::string, PackageGraph::Node*> internals;
+std::map<std::string, Package::Ptr> &PackageGraph::internals(){
+    static std::map<std::string, Package::Ptr> internals;
     return internals;
 }
 
+void PackageGraph::assignInternalContext(PackageGraph *graph){
+    internalsContextOwner() = graph;
+    for ( auto it = internals().begin(); it != internals().end(); ++it ){
+        it->second->assignContext(graph);
+    }
+}
+
+PackageGraph *&PackageGraph::internalsContextOwner(){
+    static PackageGraph* pg = nullptr;;
+    return pg;
+}
+
 Plugin::Ptr PackageGraph::loadPlugin(const std::string &importSegment){
-    //TODO: find loaded package
-    // if package:
-        // find path based on loaded package
-    // else
-        // find plugin,
-        // find plugin package, load package
-    // load plugin
-    // update plugin and package dependencies
+    return loadPlugin(splitString(importSegment, '.'));
+}
+
+Plugin::Ptr PackageGraph::loadPlugin(const std::vector<std::string> &importSegments){
+    PackageGraphPrivate* d = m_d;
+
+    if ( importSegments.empty() )
+        THROW_EXCEPTION(lv::Exception, "Given import path is empty.", 5);
+
+    std::string packageName = importSegments[0];
+
+    Package::Ptr foundPackage = nullptr;
+    auto it = d->packages.find(packageName); // find in loaded packages
+    if ( it != d->packages.end() )
+        foundPackage = it->second;
+
+    if ( foundPackage == nullptr ){
+        auto internalIt = internals().find(packageName); // find in internals
+        if ( internalIt != d->packages.end() ){
+            foundPackage = internalIt->second;
+        }
+    }
+    if ( foundPackage == nullptr ){
+        Package::Ptr package = findPackage(packageName); // search for it within the paths
+        if ( package ){
+            loadPackage(package);
+            foundPackage = package;
+        }
+    }
+
+    if ( foundPackage == nullptr ){
+        THROW_EXCEPTION(lv::Exception, "Failed to find package: " + packageName, 6);
+    }
+
+    if ( !foundPackage->filePath().empty() ){ // some internal packages may not have the package file
+        std::string pluginPath = foundPackage->path();
+        std::string importId = packageName;
+        for ( size_t i = 1; i < importSegments.size(); ++i ){
+            pluginPath += "/" + importSegments[i];
+            importId += "." + importSegments[i];
+        }
+
+        auto pluginIt = foundPackage->context()->plugins.find(importId);
+        if ( pluginIt != foundPackage->context()->plugins.end() ){
+            return pluginIt->second;
+        }
+
+        if ( !Plugin::existsIn(pluginPath) )
+            THROW_EXCEPTION(lv::Exception, "No \'live.plugin.json\' file has been found in " + pluginPath, 7);
+
+        Plugin::Ptr plugin = Plugin::createFromPath(pluginPath);
+        plugin->assignContext(this);
+        plugin->context()->package  = foundPackage;
+        plugin->context()->importId = importId;
+
+        for ( auto it = plugin->dependencies().begin(); it != plugin->dependencies().end(); ++it )
+            addDependency(plugin, *it);
+
+        vlog("lvbase-packagegraph").v() << "Loaded plugin: " << importId;
+
+        foundPackage->context()->plugins[importId] = plugin;
+
+        return plugin;
+    }
+
     return Plugin::Ptr(nullptr);
 }
 
-bool PackageGraph::hasDependency(PackageGraph::Node *node, PackageGraph::Node *dependency){
-    for ( auto it = node->dependencies.begin(); it != node->dependencies.end(); ++it ){
+void PackageGraph::addDependency(const Plugin::Ptr &plugin, const std::string &dependency){
+    Plugin::Ptr dependsOn = loadPlugin(dependency);
+    if ( dependsOn == nullptr )
+        THROW_EXCEPTION(
+            lv::Exception,
+            "Failed to find dependency \'" + dependency + "\' plugin for: " + plugin->context()->importId,
+            8);
+
+    addDependency(plugin, dependsOn);
+}
+
+void PackageGraph::addDependency(const Plugin::Ptr& plugin, const Plugin::Ptr& dependsOn){
+    if ( plugin.get() == dependsOn.get() )
+        return;
+
+    if ( plugin->context()->package.get() == dependsOn->context()->package.get() ){ // within the same package
+
+        if ( !hasDependency(plugin, dependsOn) ){
+            plugin->context()->localDependencies.push_back(dependsOn);
+            dependsOn->context()->localDependents.push_back(plugin);
+
+            PackageGraph::CyclesResult<Plugin::Ptr> cr = checkCycles(plugin);
+            if ( cr.found() ){
+                std::stringstream ss;
+
+                for ( auto it = cr.path().begin(); it != cr.path().end(); ++it ){
+                    Plugin::Ptr n = *it;
+                    if ( it != cr.path().begin() )
+                        ss << " -> ";
+                    ss << n->name();
+                }
+
+                for ( auto it = plugin->context()->localDependencies.begin(); it != plugin->context()->localDependencies.end(); ++it ){
+                    if ( *it == dependsOn ){
+                        plugin->context()->localDependencies.erase(it);
+                        break;
+                    }
+                }
+                for ( auto it = dependsOn->context()->localDependents.begin(); it != dependsOn->context()->localDependents.end(); ++it ){
+                    if ( *it == dependsOn ){
+                        dependsOn->context()->localDependents.erase(it);
+                        break;
+                    }
+                }
+
+                THROW_EXCEPTION(lv::Exception, "Plugin dependency cycle found :"  + ss.str(), 4);
+            }
+        }
+
+    } else { // add package dependency instead
+        addDependency(plugin->context()->package, dependsOn->context()->package);
+    }
+}
+
+bool PackageGraph::hasDependency(const Package::Ptr &package, const Package::Ptr &dependency){
+    for ( auto it = package->context()->dependencies.begin(); it != package->context()->dependencies.end(); ++it ){
         if ( *it == dependency )
             return true;
     }
     return false;
 }
 
+bool PackageGraph::hasDependency(const Plugin::Ptr &plugin, const Plugin::Ptr &dependency){
+    for ( auto it = plugin->context()->localDependencies.begin(); it != plugin->context()->localDependencies.end(); ++it ){
+        if ( *it == dependency )
+            return true;
+    }
+    return false;
+}
 
-std::string PackageGraph::toString(PackageGraph::Node *node, const std::string &indent) const{
+std::string PackageGraph::toString(Package::Ptr package, const std::string &indent) const{
     std::stringstream ss;
-    ss << indent << node->package->name() << "[" << node->package->version().toString() << "]" << std::endl;
+    ss << indent << package->name() << "[" << package->version().toString() << "]" << std::endl;
     return ss.str();
 }
 
-std::string PackageGraph::toStringRecurse(PackageGraph::Node *node, const std::string &indent) const{
+std::string PackageGraph::toStringRecurse(Package::Ptr package, const std::string &indent) const{
     std::stringstream ss;
-    ss << indent << node->package->name() << "[" << node->package->version().toString() << "]" << std::endl;
-    for ( auto it = node->dependencies.begin(); it != node->dependencies.end(); ++it ){
-        PackageGraph::Node* n = *it;
-        ss << toString(n, indent + "  ");
+    ss << indent << package->name() << "[" << package->version().toString() << "]" << std::endl;
+    for ( auto it = package->context()->dependencies.begin(); it != package->context()->dependencies.end(); ++it ){
+        ss << toStringRecurse(*it, indent + "  ");
     }
     return ss.str();
 }

@@ -28,3 +28,7 @@ OTHER_FILES *= \
     qml/*.qml \
     qml/qmldir \
     qml/plugins.qmltypes
+
+DISTFILES += \
+    qml/live.plugin.json \
+    qml/live.package.json

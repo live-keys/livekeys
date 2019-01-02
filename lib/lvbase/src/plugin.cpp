@@ -1,4 +1,5 @@
 #include "plugin.h"
+#include "plugincontext.h"
 
 #include "lockedfileiosession.h"
 #include "live/mlnodetojson.h"
@@ -34,8 +35,9 @@ public:
     std::string filePath;
     std::string package;
     std::map<std::string, std::string> palettes;
+    std::list<std::string> dependencies;
+    Plugin::Context* context;
 };
-
 
 
 Plugin::~Plugin(){
@@ -106,6 +108,13 @@ Plugin::Ptr Plugin::createFromNode(const std::string &path, const std::string &f
         }
     }
 
+    if ( m.hasKey("dependencies") ){
+        MLNode::ArrayType dep = m["dependencies"].asArray();
+        for ( auto it = dep.begin(); it != dep.end(); ++it ){
+            pt->m_d->dependencies.push_back(it->asString());
+        }
+    }
+
     return pt;
 }
 
@@ -125,8 +134,24 @@ const std::string &Plugin::package() const{
     return m_d->package;
 }
 
+const std::list<std::string> &Plugin::dependencies() const{
+    return m_d->dependencies;
+}
+
 const std::map<std::string, std::string> &Plugin::palettes() const{
     return m_d->palettes;
+}
+
+void Plugin::assignContext(PackageGraph *graph){
+    if ( m_d->context )
+        delete m_d->context;
+
+    m_d->context = new Plugin::Context;
+    m_d->context->packageGraph = graph;
+}
+
+Plugin::Context *Plugin::context(){
+    return m_d->context;
 }
 
 Plugin::Plugin(const std::string &path, const std::string &filePath, const std::string &name, const std::string &package)
@@ -136,6 +161,7 @@ Plugin::Plugin(const std::string &path, const std::string &filePath, const std::
     m_d->filePath = filePath;
     m_d->name     = name;
     m_d->package  = package;
+    m_d->context  = nullptr;
 }
 
 

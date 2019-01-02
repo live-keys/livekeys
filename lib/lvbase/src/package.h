@@ -11,6 +11,7 @@
 namespace lv{
 
 class MLNode;
+class PackageGraph;
 
 class PackagePrivate;
 class LV_BASE_EXPORT Package{
@@ -20,6 +21,8 @@ class LV_BASE_EXPORT Package{
 public:
     /** Shared pointer to Package */
     typedef std::shared_ptr<Package> Ptr;
+
+    class Context;
 
     class LV_BASE_EXPORT Reference{
     public:
@@ -68,6 +71,10 @@ public:
     bool hasExtension() const;
     const std::map<std::string, Package::Reference*>& dependencies() const;
     const std::map<std::string, Package::Library*>& libraries() const;
+
+    void assignContext(PackageGraph* graph);
+    PackageGraph* contextOwner();
+    Context* context();
 
 private:
     Package(const std::string& path, const std::string& filePath, const std::string& name, const Version& version);
