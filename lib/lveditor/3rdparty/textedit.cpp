@@ -234,15 +234,15 @@ void TextEdit::setLineSurface(LineSurface *ls)
 {
     Q_D(TextEdit);
     d->lineSurface = ls;
-    if (d->documentLayout && d->documentLayout->getLineManager())
-        d->lineSurface->setDocument(d->documentLayout->getLineManager()->m_lineDocument);
+    if (d->document && d->document->documentLayout() && dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager())
+        d->lineSurface->setDocument(dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->m_lineDocument);
 
 }
 
 LineManager *TextEdit::getLineManager()
 {
     Q_D(TextEdit);
-    return d->documentLayout->getLineManager();
+    return dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager();
 }
 
 QString TextEdit::text() const
@@ -576,9 +576,9 @@ void TextEdit::setFont(const QFont &font)
         updateInputMethod(Qt::ImCursorRectangle | Qt::ImAnchorRectangle | Qt::ImFont);
 #endif
     }
-    if (d->documentLayout)
+    if (d->document && d->document->documentLayout())
     {
-        d->documentLayout->getLineManager()->setLineDocumentFont(font);
+        dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->setLineDocumentFont(font);
     }
     emit fontChanged(d->sourceFont);
 }
@@ -1081,7 +1081,7 @@ int TextEdit::positionAt(qreal x, qreal y) const
     x -= d->xoff;
     y -= d->yoff;
 
-    int r = d->document->documentLayout()->hitTest(QPointF(x, y), Qt::FuzzyHit);
+    int r = dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->hitTest(QPointF(x, y), Qt::FuzzyHit);
 #ifndef QT_NO_IM
     QTextCursor cursor = d->control->textCursor();
     if (r > cursor.position()) {
@@ -1093,7 +1093,7 @@ int TextEdit::positionAt(qreal x, qreal y) const
                 ? layout->preeditAreaText().length()
                 : 0;
         if (preeditLength > 0
-                && d->document->documentLayout()->blockBoundingRect(cursor.block()).contains(x, y)) {
+                && dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->blockBoundingRect(cursor.block()).contains(x, y)) {
             r = r > cursor.position() + preeditLength
                     ? r - preeditLength
                     : cursor.position();
@@ -2182,7 +2182,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                 if (textFrame->firstPosition() > textFrame->lastPosition()
                         && textFrame->frameFormat().position() != QTextFrameFormat::InFlow) {
 
-                    updateNodeTransform(node, d->document->documentLayout()->frameBoundingRect(textFrame).topLeft());
+                    updateNodeTransform(node, dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->frameBoundingRect(textFrame).topLeft());
                     const int pos = textFrame->firstPosition() - 1;
                     ProtectedLayoutAccessor *a = static_cast<ProtectedLayoutAccessor *>(d->document->documentLayout());
                     QTextCharFormat format = a->formatAccessor(pos);
@@ -2212,7 +2212,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                         if (!block.isVisible()) continue;
 
                         if (!engine.hasContents()) {
-                            nodeOffset = d->document->documentLayout()->blockBoundingRect(block).topLeft();
+                            nodeOffset = dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->blockBoundingRect(block).topLeft();
                             updateNodeTransform(node, nodeOffset);
 
                             // PALETTE
@@ -2250,7 +2250,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
         // Update the position of the subsequent text blocks.
         if (d->document && firstCleanNode) {
             QPointF oldOffset = firstCleanNode->textNode()->matrix().map(QPointF(0,0));
-            QPointF currentOffset = d->document->documentLayout()->blockBoundingRect(d->document->findBlock(firstCleanNode->startPos())).topLeft();
+            QPointF currentOffset = dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->blockBoundingRect(d->document->findBlock(firstCleanNode->startPos())).topLeft();
             QPointF delta = currentOffset - oldOffset;
             while (nodeIterator != d->textNodeMap.end()) {
                 QMatrix4x4 transformMatrix = (*nodeIterator)->textNode()->matrix();
@@ -2378,16 +2378,15 @@ TextEditPrivate::ExtraData::ExtraData()
 
 void TextEditPrivate::setTextDocument(QTextDocument *doc)
 {
-
+    if (document) unsetTextDocument();
     Q_Q(TextEdit);
     document = doc;
-    documentLayout = dynamic_cast<TextDocumentLayout*>(doc->documentLayout());
-    LineManager* lm = documentLayout->getLineManager();
+    LineManager* lm = q->getDocumentLayout()->getLineManager();
     lm->setLineDocumentFont(font);
     lm->setParentDocument(document);
 
     if (lineSurface)
-        lineSurface->setDocument(documentLayout->getLineManager()->m_lineDocument);
+        lineSurface->setDocument(q->getDocumentLayout()->getLineManager()->m_lineDocument);
 
     control = new TextControl(document, q);
     control->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::TextSelectableByKeyboard | Qt::TextEditable);
@@ -2429,10 +2428,10 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
-    QObject::connect(documentLayout->getLineManager(), &LineManager::showHideTextEditLines,
+    QObject::connect(q->getDocumentLayout()->getLineManager(), &LineManager::showHideTextEditLines,
                      q, &TextEdit::showHideLines);
 
-    auto rect = documentLayout->blockBoundingRect(document->rootFrame()->begin().currentBlock());
+    auto rect = q->getDocumentLayout()->blockBoundingRect(document->rootFrame()->begin().currentBlock());
     paletteManager->setLineHeight(static_cast<int>(rect.height()));
 }
 
@@ -2443,6 +2442,13 @@ void TextEditPrivate::unsetTextDocument()
 
         q->markDirtyNodesForRange(0, document->characterCount(), 0);
         lineSurface->unsetTextDocument();
+
+        QObject::disconnect(document, &QTextDocument::undoAvailable, q, &TextEdit::canUndoChanged);
+        QObject::disconnect(document, &QTextDocument::redoAvailable, q, &TextEdit::canRedoChanged);
+
+        QObject::disconnect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
+        QObject::disconnect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
+        QObject::disconnect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
     }
 
 
@@ -2454,7 +2460,6 @@ void TextEditPrivate::unsetTextDocument()
     }
 
     document = nullptr;
-    documentLayout = nullptr;
 
 }
 
@@ -2577,9 +2582,9 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
 
-    if (d->document && d->documentLayout)
+    if (d->document && dynamic_cast<TextDocumentLayout*>(d->document->documentLayout()))
     {
-        d->documentLayout->getLineManager()->setDirtyPos(d->document->findBlock(pos).blockNumber());
+        dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->setDirtyPos(d->document->findBlock(pos).blockNumber());
         getPaletteManager()->setDirtyPos(d->document->findBlock(pos).blockNumber());
     }
 
@@ -2786,7 +2791,7 @@ void TextEdit::highlightingDone(const QRectF &)
     if (d->highlightingInProgress)
     {
         d->highlightingInProgress = false;
-        d->documentLayout->getLineManager()->textDocumentFinishedUpdating(d->document->blockCount());
+        dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->textDocumentFinishedUpdating(d->document->blockCount());
     }
 }
 
@@ -2798,7 +2803,7 @@ void TextEdit::stateChangeHandler(const QTextBlock &block)
     if (userData && userData->stateChangeFlag())
     {
         userData->setStateChangeFlag(false);
-        d->documentLayout->stateChangeUpdate(block.blockNumber());
+        dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->stateChangeUpdate(block.blockNumber());
         getPaletteManager()->setDirtyPos(block.blockNumber());
     }
 }
@@ -3402,6 +3407,19 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QObject 
     for (int i = lineStart - 1; i < d->document->blockCount(); ++i)
         invalidateBlock(d->document->findBlockByNumber(i));
 
+/*
+    QQuickItem* box = dynamic_cast<QQuickItem*>(palette);
+    if (box)
+    {
+        qDebug() << (-d->paletteManager->drawingOffset(lineStart-1, false)- 30 - 2*(box->y()-38));
+
+
+        if (static_cast<int>(std::round((box->y() - 38) / 7.5)) != lineStart-1)
+            qDebug() << "upm";
+
+        box->setProperty("y", 10-d->paletteManager->drawingOffset(lineStart-1, false));
+    }
+*/
     emit paletteChange(lineStart - 1);
 }
 
@@ -3454,7 +3472,7 @@ void TextEdit::setTextDocument(QTextDocument *td)
 TextDocumentLayout *TextEdit::getDocumentLayout()
 {
     Q_D(TextEdit);
-    return d->documentLayout;
+    return dynamic_cast<TextDocumentLayout*>(d->document->documentLayout());
 }
 
 void TextEdit::manageExpandCollapse(int pos, bool collapsed)
@@ -3471,12 +3489,12 @@ void TextEdit::manageExpandCollapse(int pos, bool collapsed)
         userData->onCollapse()(matchingBlock, num, repl);
         userData->setNumOfCollapsedLines(num);
         userData->setReplacementString(repl);
-        d->documentLayout->getLineManager()->collapseLines(pos, userData->numOfCollapsedLines());
+        dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->collapseLines(pos, userData->numOfCollapsedLines());
         stateChangeHandler(matchingBlock);
     } else {
         userData->expand();
         userData->setStateChangeFlag(true);
-        d->documentLayout->getLineManager()->expandLines(pos, userData->numOfCollapsedLines());
+        dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->expandLines(pos, userData->numOfCollapsedLines());
         stateChangeHandler(matchingBlock);
     }
 }
@@ -3531,9 +3549,9 @@ void TextEdit::updateFragmentVisibility()
         ++cnt; ++it;
     }
 
-    d->documentLayout->getLineManager()->setDirtyPos(0);
+    dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->setDirtyPos(0);
     getPaletteManager()->setDirtyPos(0);
-    d->documentLayout->getLineManager()->textDocumentFinishedUpdating(d->document->blockCount());
+    dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->textDocumentFinishedUpdating(d->document->blockCount());
 }
 
 }

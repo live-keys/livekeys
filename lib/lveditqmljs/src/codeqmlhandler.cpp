@@ -1177,6 +1177,8 @@ void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
                             if ( box->childItems().size() == 0 ){
                                 m_paletteBoxes.removeAll(box);
                                 box->deleteLater();
+                                /* auto dh = dynamic_cast<DocumentHandler*>(parent());
+                                dh->lineBoxRemoved(dynamic_cast<QQuickItem*>(box->parent()->parent()));*/
                             }
                         }
                     }
@@ -1217,10 +1219,13 @@ void CodeQmlHandler::removeEditingFragmentPalette(QmlEditFragment *edit){
                         QObject* child = container->property("child").value<QObject*>();
 
                         if ( child == pl->item() ){
+                            // container->setParentItem(nullptr);
                             container->deleteLater();
                             if ( box->childItems().size() == 0 ){
                                 m_paletteBoxes.removeAll(box);
                                 box->deleteLater();
+                                // auto dh = dynamic_cast<DocumentHandler*>(parent());
+                                // dh->lineBoxRemoved(box->parentItem());
                             }
                         }
                     }
