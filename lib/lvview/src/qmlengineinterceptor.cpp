@@ -33,9 +33,20 @@ QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstr
         }
 
         if ( !importSegment.isEmpty() ){
-            Plugin::Ptr plugin = m_packageGraph->loadPlugin(importSegment.toStdString());
+            QStringList importSegmentParts = importSegment.split('/');
+            std::vector<std::string> partsConverted;
+            for ( auto it = importSegmentParts.begin(); it != importSegmentParts.end(); ++it ){
+                int dotIndex = it->indexOf('.');
+                if ( dotIndex != -1 ){
+                    partsConverted.push_back(it->mid(0, dotIndex).toStdString());
+                } else {
+                    partsConverted.push_back(it->toStdString());
+                }
+            }
+
+            Plugin::Ptr plugin = m_packageGraph->loadPlugin(partsConverted);
             if ( plugin != nullptr ){
-                return QUrl::fromLocalFile(QString::fromStdString(plugin->path()));
+                return QUrl::fromLocalFile(QString::fromStdString(plugin->path() + "/qmldir"));
             }
         }
     }

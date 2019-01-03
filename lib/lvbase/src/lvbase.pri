@@ -17,7 +17,9 @@ HEADERS += \
     $$PWD/package.h \
     $$PWD/plugin.h \
     $$PWD/version.h \
-    $$PWD/packagegraph.h
+    $$PWD/packagegraph.h \
+    $$PWD/plugincontext.h \
+    $$PWD/packagecontext.h
 
 SOURCES += \
     $$PWD/exception.cpp \
