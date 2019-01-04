@@ -466,6 +466,11 @@ ApplicationWindow{
                     moveXBehavior.enabled = false
                     moveYBehavior.enabled = false
 
+                    // console.log("aroundRectangle", aroundRectangle.width, aroundRectangle.height, aroundRectangle.x, aroundRectangle.y)
+                    // console.log("editorPosition", editorPosition.x, editorPosition.y)
+                    // console.log("relativePlacement", relativePlacement)
+                    // console.log("editorBoxComponent.height", editorBoxComponent.height)
+
                     var startY = editorPosition.y + aroundRectangle.y + 38
 
                     editorBoxComponent.x = editorPosition.x + aroundRectangle.x + 7
@@ -482,6 +487,9 @@ ApplicationWindow{
 
                     var upY = startY - editorBoxComponent.height
                     var downY = startY + aroundRectangle.height + 5
+
+                    // console.log("upY", upY)
+                    // console.log("downY", downY)
 
                     if ( relativePlacement === 0 ){ // top placement
                         editorBoxComponent.y = upY > 0 ? upY : downY

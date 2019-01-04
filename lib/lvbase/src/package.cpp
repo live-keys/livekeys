@@ -165,6 +165,7 @@ bool Package::hasExtension() const{
 }
 
 /** \brief Returns a map of dependencies with string keys */
+
 const std::map<std::string, Package::Reference *>& Package::dependencies() const{
     return m_d->dependencies;
 }

@@ -53,8 +53,8 @@ void PackageGraph::loadPackage(const Package::Ptr &p, bool addLibraries){
         p->assignContext(this);
 
         if ( addLibraries ){
-            for ( auto it = p->libraries().begin(); it != p->libraries().end(); ++it ){
-                Package::Library* lib = it->second;
+            for ( auto libIt = p->libraries().begin(); libIt != p->libraries().end(); ++libIt ){
+                Package::Library* lib = libIt->second;
                 addLibrary(*lib);
             }
         }
@@ -475,7 +475,8 @@ Plugin::Ptr PackageGraph::loadPlugin(const std::vector<std::string> &importSegme
 
     if ( foundPackage == nullptr ){
         auto internalIt = internals().find(packageName); // find in internals
-        if ( internalIt != d->packages.end() ){
+
+        if ( internalIt != internals().end() ){
             foundPackage = internalIt->second;
         }
     }
