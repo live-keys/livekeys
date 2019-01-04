@@ -4,6 +4,7 @@
 #include "live/lvbaseglobal.h"
 #include "live/package.h"
 #include "live/plugin.h"
+#include <vector>
 
 #include <vector>
 #include <list>

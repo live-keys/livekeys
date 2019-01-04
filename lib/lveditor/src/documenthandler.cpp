@@ -86,7 +86,12 @@ void DocumentHandler::requestCursorPosition(int position){
 }
 
 void DocumentHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *box){
-    m_textEdit->linePaletteAdded(lineStart, lineEnd, height, box);
+    m_textEdit->linePaletteAdded(lineStart, lineEnd, height + 15, box);
+}
+
+void DocumentHandler::lineBoxRemoved(QQuickItem *palette)
+{
+    m_textEdit->linePaletteRemoved(palette);
 }
 
 void DocumentHandler::rehighlightBlock(const QTextBlock &block){
@@ -284,10 +289,10 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue options){
     emit targetChanged();
 
     findCodeHandler();
-
+/*
     if ( m_targetDoc )
         m_targetDoc->clearUndoRedoStacks();
-
+*/
     if ( options.isObject() ){
         if ( options.hasOwnProperty("fragmentStartLine") && options.hasOwnProperty("fragmentEndLine") ){
             m_fragmentStartLine = options.property("fragmentStartLine").toInt();
