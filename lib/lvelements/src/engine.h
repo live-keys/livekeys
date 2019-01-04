@@ -2,9 +2,11 @@
 #define LVENGINE_H
 
 #include "live/elements/lvelementsglobal.h"
-#include "live/elements/module.h"
+#include "live/elements/modulelibrary.h"
 #include "live/elements/value.h"
 #include "live/elements/script.h"
+#include "live/elements/elementsplugin.h"
+#include "live/packagegraph.h"
 
 namespace lv{
 
@@ -67,10 +69,12 @@ private:
     // ------
 
 public:
-    Engine();
+    Engine(PackageGraph* pg = nullptr);
     ~Engine();
 
-    Object require(Module::Ptr module);
+    Object require(ModuleLibrary* module);
+    ElementsPlugin::Ptr require(const std::string& importKey);
+
     void scope(const std::function<void()> &f);
 
     v8::Isolate* isolate();
@@ -86,6 +90,7 @@ public:
     v8::Local<v8::FunctionTemplate> pointTemplate();
     v8::Local<v8::FunctionTemplate> sizeTemplate();
     v8::Local<v8::FunctionTemplate> rectangleTemplate();
+    v8::Local<v8::FunctionTemplate> importsTemplate();
 
     bool isElementConstructor(const Callable& c);
 
@@ -107,7 +112,6 @@ private:
     void setGlobalErrorHandler(bool value);
 
     EnginePrivate* m_d;
-    std::map<std::string, Module::Ptr> module;
 };
 
 }} // namespace lv, script

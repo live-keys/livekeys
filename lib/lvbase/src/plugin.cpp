@@ -36,6 +36,8 @@ public:
     std::string package;
     std::map<std::string, std::string> palettes;
     std::list<std::string> dependencies;
+    std::list<std::string> modules;
+    std::list<std::string> libraryModules;
     Plugin::Context* context;
 };
 
@@ -115,6 +117,25 @@ Plugin::Ptr Plugin::createFromNode(const std::string &path, const std::string &f
         }
     }
 
+    if ( m.hasKey("modules") ){
+        MLNode::ArrayType mod = m["modules"].asArray();
+        for ( auto it = mod.begin(); it != mod.end(); ++it ){
+            pt->m_d->modules.push_back(it->asString());
+        }
+    }
+
+    if ( m.hasKey("libraryModules") ){
+        MLNode::ArrayType libmod = m["libraryModules"].asArray();
+        for ( auto it = libmod.begin(); it != libmod.end(); ++it ){
+            pt->m_d->libraryModules.push_back(it->asString());
+        }
+    }
+
+    return pt;
+}
+
+Plugin::Ptr Plugin::createEmpty(const std::string &name){
+    Plugin::Ptr pt(new Plugin(name, name, name, ""));
     return pt;
 }
 
@@ -136,6 +157,14 @@ const std::string &Plugin::package() const{
 
 const std::list<std::string> &Plugin::dependencies() const{
     return m_d->dependencies;
+}
+
+const std::list<std::string> &Plugin::modules() const{
+    return m_d->modules;
+}
+
+const std::list<std::string> &Plugin::libraryModules() const{
+    return m_d->libraryModules;
 }
 
 const std::map<std::string, std::string> &Plugin::palettes() const{

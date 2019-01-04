@@ -32,12 +32,15 @@ public:
     static bool existsIn(const std::string& path);
     static Plugin::Ptr createFromPath(const std::string& path);
     static Plugin::Ptr createFromNode(const std::string &path, const std::string& filePath, const MLNode& m);
+    static Plugin::Ptr createEmpty(const std::string& name);
 
     const std::string& name() const;
     const std::string& path() const;
     const std::string& filePath() const;
     const std::string& package() const;
     const std::list<std::string>& dependencies() const;
+    const std::list<std::string>& modules() const;
+    const std::list<std::string>& libraryModules() const;
     const std::map<std::string, std::string>& palettes() const;
 
     void assignContext(PackageGraph* graph);

@@ -154,7 +154,7 @@ void PackageGraph::addDependency(const Package::Ptr &package, const Package::Ptr
                 }
             }
             for ( auto it = dependsOn->context()->dependents.begin(); it != dependsOn->context()->dependents.end(); ++it ){
-                if ( *it == dependsOn ){
+                if ( *it == package ){
                     dependsOn->context()->dependents.erase(it);
                     break;
                 }
@@ -188,7 +188,6 @@ PackageGraph::CyclesResult<Plugin::Ptr> PackageGraph::checkCycles(const Plugin::
 
     std::list<Plugin::Ptr> path;
     path.push_back(p);
-
 
     for ( auto it = p->context()->localDependencies.begin(); it != p->context()->localDependencies.end(); ++it ){
         PackageGraph::CyclesResult<Plugin::Ptr> cr = checkCycles(p, *it, path);
@@ -564,7 +563,7 @@ void PackageGraph::addDependency(const Plugin::Ptr& plugin, const Plugin::Ptr& d
                     }
                 }
                 for ( auto it = dependsOn->context()->localDependents.begin(); it != dependsOn->context()->localDependents.end(); ++it ){
-                    if ( *it == dependsOn ){
+                    if ( *it == plugin ){
                         dependsOn->context()->localDependents.erase(it);
                         break;
                     }
