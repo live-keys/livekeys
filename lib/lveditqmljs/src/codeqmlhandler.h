@@ -26,8 +26,8 @@
 #include "live/lockedfileiosession.h"
 #include "live/viewengine.h"
 #include "live/settings.h"
-#include "live/qmladdcontainer.h"
 #include "live/palettelist.h"
+#include "qmladdcontainer.h"
 
 #include <QTimer>
 #include <QTextCursor>

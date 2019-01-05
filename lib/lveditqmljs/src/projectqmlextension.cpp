@@ -23,6 +23,8 @@
 #include "live/editorsettings.h"
 #include "live/editorglobalobject.h"
 #include "live/qmljssettings.h"
+#include "qmlcursorinfo.h"
+#include "qmlcodeconverter.h"
 #include "projectqmlscanner_p.h"
 #include "projectqmlscanmonitor_p.h"
 
@@ -116,6 +118,22 @@ void ProjectQmlExtension::addCodeQmlHandler(CodeQmlHandler *handler){
 
 void ProjectQmlExtension::removeCodeQmlHandler(CodeQmlHandler *handler){
     m_codeHandlers.removeAll(handler);
+}
+
+void ProjectQmlExtension::registerTypes(const char *uri){
+    qmlRegisterType<lv::ProjectQmlExtension>(uri, 1, 0, "ProjectQmlExtension");
+    qmlRegisterType<lv::QmlCursorInfo>(      uri, 1, 0, "QmlCursorInfo");
+
+    qmlRegisterUncreatableType<lv::CodeQmlHandler>(
+        uri, 1, 0, "CodeQmlHandler", "CodeQmlHandler can only be accessed through the Editor.documentHandler.");
+    qmlRegisterUncreatableType<lv::QmlCodeConverter>(
+        uri, 1, 0, "QmlCodeConverter", "QmlCodeConverter can only be accessed through the Palette.attachment.");
+    qmlRegisterUncreatableType<lv::QmlAddContainer>(
+        uri, 1, 0, "QmlAddContainer", "QmlAddContainer can only be accessed through the qmledit extension.");
+    qmlRegisterUncreatableType<lv::QmlPropertyModel>(
+        uri, 1, 0, "QmlPropertyModel", "QmlPropertyModel can only be accessed through the qmledit extension.");
+    qmlRegisterUncreatableType<lv::QmlItemModel>(
+        uri, 1, 0, "QmlItemModel", "QmlItemModel can only be accessed through the qmledit extension.");
 }
 
 QObject *ProjectQmlExtension::createHandler(ProjectDocument *, DocumentHandler *handler){

@@ -59,6 +59,8 @@ public:
 
     PaletteContainer* paletteContainer();
 
+    static void registerTypes(const char* uri);
+
 public slots:
     QObject* createHandler(ProjectDocument* document, DocumentHandler* handler);
 

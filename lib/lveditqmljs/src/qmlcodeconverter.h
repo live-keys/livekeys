@@ -11,7 +11,7 @@ namespace lv{
 
 class QmlEditFragment;
 
-class LV_EDITQMLJS_EXPORT QmlCodeConverter : public QObject{
+class QmlCodeConverter : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QJSValue whenBinding READ whenBinding WRITE setWhenBinding NOTIFY whenBindingChanged)
