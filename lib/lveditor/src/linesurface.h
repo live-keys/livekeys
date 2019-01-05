@@ -15,7 +15,7 @@ class LineManager;
 class TextNode;
 
 
-class LV_EDITOR_EXPORT LineSurface : public QQuickItem
+class LineSurface : public QQuickItem
 {
     Q_OBJECT
 

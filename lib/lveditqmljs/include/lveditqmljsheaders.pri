@@ -9,8 +9,6 @@ HEADERS += \
     $$PWD/live/projectqmlscope.h \
     $$PWD/live/qmlcompletioncontext.h \
     $$PWD/live/qmlcompletioncontextfinder.h \
-    $$PWD/live/qmljssettings.h \
-    $$PWD/live/qmllibrarydependency.h \
     $$PWD/live/lveditqmljsglobal.h \
     $$PWD/live/projectqmlextension.h \
     $$PWD/live/qmleditfragment.h \

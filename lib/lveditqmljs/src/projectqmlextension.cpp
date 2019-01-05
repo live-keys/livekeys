@@ -22,11 +22,14 @@
 #include "live/codeqmlhandler.h"
 #include "live/editorsettings.h"
 #include "live/editorglobalobject.h"
-#include "live/qmljssettings.h"
+#include "qmljssettings.h"
 #include "qmlcursorinfo.h"
 #include "qmlcodeconverter.h"
 #include "projectqmlscanner_p.h"
 #include "projectqmlscanmonitor_p.h"
+#include "qmlpropertymodel.h"
+#include "qmlitemmodel.h"
+#include "qmladdcontainer.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>

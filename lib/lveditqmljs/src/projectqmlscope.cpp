@@ -16,6 +16,7 @@
 
 #include "live/projectqmlscope.h"
 #include "projectqmlscopecontainer_p.h"
+#include "qmllibrarydependency.h"
 #include "qmllibraryinfo_p.h"
 
 #include "qmljs/qmljsdocument.h"
