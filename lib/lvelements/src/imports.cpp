@@ -30,9 +30,12 @@ void Imports::require(const std::string &importKey){
 v8::Local<v8::Object> Imports::requireAs(const std::string &importKey){
     ElementsPlugin::Ptr ep = m_engine->require(importKey);
     //TODO: Create new imports object
+
+    return v8::Local<v8::Object>();
 }
 
 v8::Local<v8::Value> Imports::get(const std::string &key){
+    return v8::Local<v8::Value>();
 }
 
 void Imports::require(const v8::FunctionCallbackInfo<v8::Value> &info){

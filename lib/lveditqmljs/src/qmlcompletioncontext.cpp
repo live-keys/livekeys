@@ -18,6 +18,36 @@
 
 namespace lv{
 
+
+/**
+ * \class lv::QmlCompletionContext
+ * \ingroup lveditqmljs
+ * \brief Contains a qml code completion context.
+ *
+ * You can use the QmlCompletionContextFinder to find such a context at a given cursor position.
+ *
+ * To find out the actual context state, use the QmlCompletionContext::context method.
+ *
+ * \code
+ * QTextCursor cursor(document);
+ * cursor.setPosition(100);
+ * QmlCompletionContextFinder finder;
+ *
+ * QmlCompltionContext::ConstPtr context = finder.getContext(cursor);
+ * vlog() << (context->context() == QmlCompletionContext::InImport);
+ * \endcode
+ *
+ * For a string based output, QmlCompletionContext::contextString() will give a concatenated string of
+ * the states
+ *
+ * \code
+ * // ...
+ * QmlCompletionContext::ConstPtr context = finder.getContext(cursor);
+ * vlog() << context->contextString();
+ * \endcode
+ */
+
+
 QmlCompletionContext::QmlCompletionContext(
         int context,
         const QStringList &objectTypePath,
@@ -32,9 +62,19 @@ QmlCompletionContext::QmlCompletionContext(
 {
 }
 
+/// \brief Completion context destructor
 QmlCompletionContext::~QmlCompletionContext(){
 }
 
+/**
+ * \brief Creates a new QmlCompletionContext
+ * \param context The given context
+ * \param objectTypePath The object type
+ * \param propertyPath The property chain
+ * \param expressionPath The expression chain
+ * \param propertyPosition The property position
+ * \return a new QmlCompletionContext::Ptr
+ */
 QmlCompletionContext::Ptr QmlCompletionContext::create(
         int context,
         const QStringList &objectTypePath,
@@ -51,6 +91,7 @@ QmlCompletionContext::Ptr QmlCompletionContext::create(
     ));
 }
 
+/// \brief Returns the context a string of concatenated states
 QString QmlCompletionContext::contextString() const{
     QString base;
     if ( m_context & QmlCompletionContext::InImport)
@@ -70,6 +111,7 @@ QString QmlCompletionContext::contextString() const{
     return base;
 }
 
+/// \brief Returns true if this QmlCompletionContext is equal to other, false otherwise
 bool QmlCompletionContext::operator ==(const QmlCompletionContext &other) const{
     if ( m_context != other.context() )
         return false;
@@ -86,6 +128,7 @@ bool QmlCompletionContext::operator ==(const QmlCompletionContext &other) const{
     return true;
 }
 
+/// \brief Returns true if this QmlCompletionContext is not equal to other, false otherwise
 bool QmlCompletionContext::operator !=(const QmlCompletionContext &other) const{
     return !(*this == other);
 }

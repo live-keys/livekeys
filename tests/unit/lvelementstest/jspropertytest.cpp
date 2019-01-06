@@ -324,7 +324,6 @@ private:
 JsPropertyTest::JsPropertyTest(QObject *parent)
     : QObject(parent)
 {
-    Engine::initialize(QDir::currentPath().toStdString());
 }
 
 void JsPropertyTest::initTestCase(){

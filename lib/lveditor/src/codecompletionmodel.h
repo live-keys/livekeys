@@ -81,7 +81,7 @@ private:
     QList<CodeCompletionSuggestion> m_suggestions;
     QString                         m_filter;
     QList<int>                      m_filteredSuggestions;
-    CodeCompletionContext*         m_completionContext;
+    CodeCompletionContext*          m_completionContext;
     QHash<int, QByteArray>          m_roles;
     int                             m_completionPosition;
     bool                            m_isEnabled;

@@ -18,12 +18,18 @@
 
 namespace lv{
 
-/*!
-  \class lv::CodeCompletionModel
-  \inmodule lveditor_cpp
-  \brief Code Completion Model used by the code completion assist
-
+/**
+ * \class lv::CodeCompletionContext
+ * \ingroup lveditor
+ * \brief Base class for a code completion context, to be stored in a CodeCompletionModel
  */
+
+/**
+ * \class lv::CodeCompletionModel
+ * \ingroup lveditor
+ * \brief Code Completion Model used by the code completion assist
+ */
+
 
 CodeCompletionModel::CodeCompletionModel(QObject *parent)
     : QAbstractListModel(parent)

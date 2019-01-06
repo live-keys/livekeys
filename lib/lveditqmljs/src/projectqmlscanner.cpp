@@ -37,6 +37,7 @@
 #include <QQmlEngine>
 
 #include "plugintypesfacade.h"
+#include "qmllibrarydependency.h"
 
 namespace lv{
 

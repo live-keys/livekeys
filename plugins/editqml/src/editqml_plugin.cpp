@@ -23,28 +23,10 @@
 #include <QQuickWindow>
 
 #include "live/projectqmlextension.h"
-#include "live/codeqmlhandler.h"
-#include "live/qmladdcontainer.h"
-#include "live/qmlpropertymodel.h"
-#include "live/qmlitemmodel.h"
-#include "live/qmlcodeconverter.h"
-#include "live/qmlcursorinfo.h"
 
 void EditQmlPlugin::registerTypes(const char *uri){
     // @uri editqml
-    qmlRegisterType<lv::ProjectQmlExtension>(uri, 1, 0, "ProjectQmlExtension");
-    qmlRegisterType<lv::QmlCursorInfo>(      uri, 1, 0, "QmlCursorInfo");
-
-    qmlRegisterUncreatableType<lv::CodeQmlHandler>(
-        uri, 1, 0, "CodeQmlHandler", "CodeQmlHandler can only be accessed through the Editor.documentHandler.");
-    qmlRegisterUncreatableType<lv::QmlCodeConverter>(
-        uri, 1, 0, "QmlCodeConverter", "QmlCodeConverter can only be accessed through the Palette.attachment.");
-    qmlRegisterUncreatableType<lv::QmlAddContainer>(
-        uri, 1, 0, "QmlAddContainer", "QmlAddContainer can only be accessed through the qmledit extension.");
-    qmlRegisterUncreatableType<lv::QmlPropertyModel>(
-        uri, 1, 0, "QmlPropertyModel", "QmlPropertyModel can only be accessed through the qmledit extension.");
-    qmlRegisterUncreatableType<lv::QmlItemModel>(
-        uri, 1, 0, "QmlItemModel", "QmlItemModel can only be accessed through the qmledit extension.");
+    lv::ProjectQmlExtension::registerTypes(uri);
 }
 
 void EditQmlPlugin::initializeEngine(QQmlEngine *, const char *){

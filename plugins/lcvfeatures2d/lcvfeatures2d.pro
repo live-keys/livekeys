@@ -22,8 +22,6 @@ include($$PWD/src/lcvfeatures2d.pri)
 include($$PWD/include/lcvfeatures2dheaders.pri)
 include($$PROJECT_ROOT/project/3rdparty/opencv.pri)
 
-deployOpenCV()
-
 OTHER_FILES *= \
     qml/*.qml \
     qml/qmldir \

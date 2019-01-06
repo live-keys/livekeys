@@ -40,7 +40,6 @@
 #include "live/documenthandler.h"
 
 #include "live/projectqmlextension.h"
-#include "live/qmljssettings.h"
 #include "live/codeqmlhandler.h"
 #include "live/documentqmlinfo.h"
 #include "live/plugininfoextractor.h"

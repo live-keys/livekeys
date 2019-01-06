@@ -23,6 +23,19 @@ class QTextCursor;
 
 namespace lv{
 
+/**
+ * \brief Finds the completion context at a given cursor position.
+ *
+ * Simply call the getContext function to get the actual completion context:
+ *
+ * \code
+ * QTextCursor cursor(document);
+ * cursor.setPosition(100);
+ * QmlCompletionContextFinder finder;
+ *
+ * QmlCompltionContext::ConstPtr context = finder.getContext(cursor);
+ * \endcode
+ */
 class LV_EDITQMLJS_EXPORT QmlCompletionContextFinder{
 
 public:

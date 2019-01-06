@@ -22,7 +22,7 @@
 
 namespace lv{
 
-class LV_EDITQMLJS_EXPORT QmlLibraryDependency{
+class QmlLibraryDependency{
 
 public:
     QmlLibraryDependency(const QString& uri, int versionMajor, int versionMinor);
