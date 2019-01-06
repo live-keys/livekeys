@@ -143,9 +143,7 @@ void ProjectDocument::updateSections(int position, int charsRemoved, const QStri
             it = m_sections.erase(it);
 
             QTextBlock tb = m_textDocument->findBlock(sectionPosition);
-            TextDocumentLayout* layout = static_cast<TextDocumentLayout*>(m_textDocument->documentLayout());
-            if ( layout )
-                layout->highlightingChanged(tb.position(), tb.length());
+            emit formatChanged(tb.position(), tb.length());
         } else {
             ++it;
         }
@@ -215,9 +213,7 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
                     }
                     seit = bd->m_sections.erase(seit);
                     bddestination->addSection(itSection);
-                    TextDocumentLayout* layout = static_cast<TextDocumentLayout*>(m_textDocument->documentLayout());
-                    if ( layout )
-                        layout->highlightingChanged(destinationBlock.position(), destinationBlock.length());
+                    emit formatChanged(destinationBlock.position(), destinationBlock.length());
                     continue;
                 }
                 ++seit;
@@ -339,9 +335,7 @@ void ProjectDocument::removeSection(ProjectDocumentSection::Ptr section){
 
                 if ( m_textDocument ){
                     QTextBlock tb = m_textDocument->findBlock(sectionPosition);
-                    TextDocumentLayout* layout = static_cast<TextDocumentLayout*>(m_textDocument->documentLayout());
-                    if ( layout )
-                        layout->highlightingChanged(tb.position(), tb.length());
+                    emit formatChanged(tb.position(), tb.length());
                 }
 
                 return;
