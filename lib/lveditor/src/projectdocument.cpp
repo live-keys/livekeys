@@ -62,6 +62,7 @@ void ProjectDocument::readContent(){
             QString::fromStdString(parentAsProject()->lockedFileIO()->readFromFile(m_file->path().toStdString()))
         );
         removeEditingState(ProjectDocument::Read);
+        m_textDocument->setModified(false);
         m_lastModified = QFileInfo(m_file->path()).lastModified();
         m_changes.clear();
         m_lastChange = m_changes.end();
@@ -374,6 +375,8 @@ void ProjectDocument::documentContentsChanged(int position, int charsRemoved, in
 
     updateMarkers(position, charsRemoved, addedText.size());
     updateSections(position, charsRemoved, addedText);
+
+    setIsDirty(m_textDocument->isModified());
 }
 
 bool ProjectDocument::save(){
