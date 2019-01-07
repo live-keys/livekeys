@@ -244,12 +244,15 @@ void DocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
 
 void DocumentHandler::setDocument(ProjectDocument *document, QJSValue options){
     if ( m_projectDocument ){
-        disconnect(m_projectDocument, SIGNAL(contentChanged()), this, SLOT(documentUpdatedContent()));
+        disconnect(m_projectDocument, SIGNAL(contentChanged()),       this, SLOT(documentUpdatedContent()));
+        disconnect(m_projectDocument, SIGNAL(formatChanged(int,int)), this, SLOT(documentFormatUpdate(int, int)));
     }
 
     m_projectDocument = document;
-    if ( document )
-        connect(m_projectDocument, SIGNAL(contentChanged()), this, SLOT(documentUpdatedContent()));
+    if ( document ){
+        connect(m_projectDocument, SIGNAL(contentChanged()),       this, SLOT(documentUpdatedContent()));
+        connect(m_projectDocument, SIGNAL(formatChanged(int,int)), this, SLOT(documentFormatUpdate(int, int)));
+    }
 
     m_fragmentStartLine = -1;
     m_fragmentEndLine   = -1;
@@ -321,6 +324,10 @@ void DocumentHandler::documentUpdatedContent(){
             }
         }
     }
+}
+
+void DocumentHandler::documentFormatUpdate(int position, int length){
+    rehighlightSection(position, length);
 }
 
 void DocumentHandler::generateCompletion(int cursorPosition){

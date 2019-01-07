@@ -2368,11 +2368,6 @@ void TextDocumentLayout::stateChangeUpdate(int pos)
     d->lineManager->textDocumentFinishedUpdating(this->document()->blockCount());
 }
 
-void TextDocumentLayout::highlightingChanged(int position, int length)
-{
-//    emit this->document()->contentsChange(position, length, length);
-}
-
 
 qreal TextDocumentLayoutPrivate::scaleToDevice(qreal value) const
 {
