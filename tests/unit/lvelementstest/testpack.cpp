@@ -1,10 +1,11 @@
 #include "testpack.h"
 
-#include <experimental/filesystem>
 #include <fstream>
 #include <cctype>
 #include "qdebug.h"
 #include <direct.h>
+#include "qdir.h"
+#include "live/exception.h"
 
 #define fs std::experimental::filesystem::v1
 
@@ -17,10 +18,7 @@ void TestPack::unpack(std::string filePath)
 {
     std::ifstream inputStream(filePath);
     if (!inputStream.is_open())
-    {
-        qDebug() << "Can't find the file " << filePath.c_str();
-        return;
-    }
+        THROW_EXCEPTION(lv::Exception, "Can't find the file " + filePath, 1);
 
     std::string line;
     std::ofstream outputStream;
@@ -58,8 +56,9 @@ void TestPack::unpack(std::string filePath)
                 for (unsigned i = 0; i<pathParts.size()-1; ++i)
                 {
                     temp += "\\" + pathParts[i];
-                    if (!fs::exists(temp))
-                        _mkdir(temp.c_str());
+                    QDir tempdir(temp.c_str());
+                    if (!tempdir.exists())
+                        tempdir.mkpath(".");
                 }
                 outputStream.close();
                 outputStream.open((m_path + "\\" + outputFileName).c_str());
@@ -76,8 +75,13 @@ void TestPack::unpack(std::string filePath)
 
 void TestPack::clear()
 {
-    fs::remove_all(fs::path(m_path));
-    _mkdir(m_path.c_str());
+    QString path = m_path.c_str();
+    std::string folderName = m_path.substr(m_path.find_last_of('\\') + 1);
+    QDir dir(path);
+    dir.removeRecursively();
+    path += "\\..\\";
+    QDir create(path);
+    create.mkpath(folderName.c_str());
 }
 
 
