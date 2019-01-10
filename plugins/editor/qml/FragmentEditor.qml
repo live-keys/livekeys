@@ -58,7 +58,7 @@ Rectangle{
             return;
         if ( editor.document.document.file.name !== '' ){
             editor.document.document.save()
-            if ( project.active && project.active !== editor.document.document ){
+            if ( project.active && ((controls.codingMode === 0 && project.active !== editor.document) || controls.codingMode === 1)) /* compiling isn't disabled */{
                 engine.createObjectAsync(
                     project.active.content,
                     windowControls.runSpace,

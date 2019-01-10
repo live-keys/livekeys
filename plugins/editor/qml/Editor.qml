@@ -71,7 +71,7 @@ Rectangle{
             return;
         if ( editor.document.file.name !== '' ){
             editor.document.save()
-            if ( project.active && project.active !== editor.document ){
+            if ( project.active && ((controls.codingMode === 0 && project.active !== editor.document) || controls.codingMode === 1)) /* compiling isn't disabled */{
                 livecv.engine.createObjectAsync(
                     project.active.content,
                     windowControls.runSpace,
@@ -203,6 +203,30 @@ Rectangle{
             font.family: "Open Sans, sans-serif"
             font.pixelSize: 12
             font.weight: Font.Normal
+        }
+
+        Rectangle{
+            color: 'transparent'
+            width: 24
+            height: parent.height
+            anchors.right: parent.right
+            anchors.rightMargin: 109
+            visible : editor.document !== null
+
+            Image{
+                id : switchImage
+                anchors.centerIn: parent
+                source : "qrc:/images/switch-file.png"
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    windowControls.navEditor = editor
+                    livecv.commands.execute('window.toggleNavigation')
+                }
+            }
         }
 
         Rectangle{

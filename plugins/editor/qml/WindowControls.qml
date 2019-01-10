@@ -13,6 +13,9 @@ QtObject{
     property Component paletteBoxFactory: null
     property Item activePane : null
     property Item activeItem : null
+    property Item navEditor: null
+    property bool wasLiveCoding: null
+    property int codingMode: null
 
     function setActiveItem(item, pane){
         activeItem = item

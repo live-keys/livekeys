@@ -33,11 +33,40 @@ Rectangle{
 
     property WindowControls windowControls : null
     property Item focusEditor : null
+    property Item navEditor: null
+
+    function maintainCodingMode()
+    {
+        if (focusEditor && focusEditor.document && focusEditor.document !== project.active && windowControls.codingMode === 0)
+        {
+            windowControls.codingMode = 1
+            windowControls.wasLiveCoding = true
+            modeButton.text = "On save"
+        }
+        if (focusEditor && focusEditor.document && focusEditor.document === project.active && windowControls.wasLiveCoding)
+        {
+            windowControls.wasLiveCoding = false
+            windowControls.codingMode = 0
+            modeButton.text = "Live"
+        }
+
+        modeContainer.visible = false
+    }
+
     function setFocusEditor(e){
-        if ( focusEditor && focusEditor !== e ){
-            focusEditor.internalFocus = false
+        if (focusEditor !== e ){
+            if (focusEditor) focusEditor.internalFocus = false
             focusEditor = e
             focusEditor.internalFocus = true
+        }
+
+        maintainCodingMode();
+    }
+
+    function setNavEditor(e){
+        if (navEditor && navEditor !== e)
+        {
+            navEditor = e;
         }
     }
 
@@ -151,7 +180,10 @@ Rectangle{
         closeProject(function(){
             project.newProject()
             if ( project.active )
+            {
                 focusEditor.document = project.active
+                maintainCodingMode();
+            }
         })
     }
     function openFile(){
@@ -171,9 +203,12 @@ Rectangle{
         root.focusEditor.document = project.openFile(
             entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
         )
+
+        maintainCodingMode();
     }
     function editEntry(entry){
         root.focusEditor.document = project.openFile(entry, ProjectDocument.Edit)
+        maintainCodingMode();
     }
     function removeEntry(entry, isFile){
         var message = ''
@@ -347,6 +382,7 @@ Rectangle{
             }
             function setActive(){
                 project.setActive(styleData.value)
+                projectView.maintainCodingMode();
             }
             function openFile(){
                 root.editEntry(styleData.value)

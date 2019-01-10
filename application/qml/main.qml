@@ -44,6 +44,9 @@ ApplicationWindow{
         editSpace: editSpace
         activePane : null
         activeItem : null
+        navEditor: null
+        wasLiveCoding: false
+        codingMode: 0
     }
 
     property bool documentsReloaded : false
@@ -125,6 +128,66 @@ ApplicationWindow{
         onOpenLicense: licenseBox.visible = true
     }
 
+    // Mode button
+    Button {
+        id: modeButton
+        anchors.left: parent.left
+        anchors.leftMargin: 580
+        onClicked: modeContainer.visible = !modeContainer.visible
+        text: "Live"
+    }
+
+    Rectangle {
+        id: modeContainer
+        visible: false
+        anchors.left: modeButton.left
+        anchors.top: modeButton.bottom
+        z: 1000
+
+        Button {
+            id: liveButton
+            anchors.top: parent.top
+            text: "Live"
+            visible: projectView.focusEditor ? projectView.focusEditor.document === project.active : false
+            onClicked: {
+                controls.codingMode = 0
+                modeContainer.visible = false
+                modeButton.text = "Live"
+                livecv.engine.createObjectAsync(
+                    project.active.content,
+                    runSpace,
+                    project.active.file.pathUrl(),
+                    project.active,
+                    true
+                );
+            }
+        }
+
+        Button {
+            id: onSaveButton
+            anchors.top: liveButton.visible ? liveButton.bottom : parent.top
+            text: "On save"
+            onClicked: {
+                controls.codingMode = 1
+                modeContainer.visible = false
+                modeButton.text = "On save"
+                controls.wasLiveCoding = false
+            }
+        }
+
+        Button {
+            id: disabledButton
+            anchors.top: onSaveButton.bottom
+            text: "Disabled"
+            onClicked: {
+                controls.codingMode = 2
+                modeContainer.visible = false
+                modeButton.text = "Disabled"
+                controls.wasLiveCoding = false
+            }
+        }
+    }
+
     FileDialog {
         id: fileOpenDialog
         title: "Please choose a file"
@@ -134,12 +197,16 @@ ApplicationWindow{
         onAccepted: {
             if ( project.rootPath === '' ){
                 project.openProject(fileOpenDialog.fileUrl)
-                if ( project.active )
+                if ( project.active ) {
                     projectView.focusEditor.document = project.active
+                    projectView.maintainCodingMode()
+                }
             } else if ( project.isFileInProject(fileOpenDialog.fileUrl ) ) {
                 var doc = project.openFile(fileOpenDialog.fileUrl, ProjectDocument.Edit)
-                if ( doc )
+                if ( doc ) {
                     projectView.focusEditor.document = doc
+                    projectView.maintainCodingMode()
+                }
             } else {
                 var fileUrl = fileOpenDialog.fileUrl
                 messageBox.show(
@@ -152,6 +219,7 @@ ApplicationWindow{
                             function(){
                                 project.openProject(projectUrl)
                                 projectView.focusEditor.document = project.active
+                                projectView.maintainCodingMode()
                             }
                         )
                         messageBox.close()
@@ -166,6 +234,7 @@ ApplicationWindow{
                             function(){
                                 project.openProject(projectUrl)
                                 projectView.focusEditor.document = project.active
+                                projectView.maintainCodingMode()
                             }
                         )
                         messageBox.close()
@@ -191,8 +260,10 @@ ApplicationWindow{
         visible : script.environment.os.platform === 'linux' ? true : false /// fixes a display bug in some linux distributions
         onAccepted: {
             project.openProject(dirOpenDialog.fileUrl)
-            if ( project.active )
+            if ( project.active ) {
                 projectView.focusEditor.document = project.active
+                projectView.maintainCodingMode()
+            }
         }
         Component.onCompleted: {
             if ( script.environment.os.platform === 'darwin' )
@@ -231,9 +302,11 @@ ApplicationWindow{
                 if ( !project.isDirProject() ){
                     project.openProject(fileSaveDialog.fileUrl)
                     projectView.focusEditor.document = project.active
+                    projectView.maintainCodingMode()
                 } else if ( project.isFileInProject(fileSaveDialog.fileUrl ) ){
                     projectView.focusEditor.document = project.openFile(fileSaveDialog.fileUrl, ProjectDocument.Edit)
-                    if ( project.active && project.active !== projectView.focusEditor.document ){
+                    projectView.maintainCodingMode()
+                    if ( project.active && project.active !== projectView.focusEditor.document && controls.codingMode !== 2 /* compiling isn't disabled */){
                         engine.createObjectAsync(
                             project.active.content,
                             runSpace,
@@ -254,6 +327,7 @@ ApplicationWindow{
                                 function(){
                                     project.openProject(projectUrl);
                                     projectView.focusEditor.document = project.active
+                                    projectView.maintainCodingMode()
                                 }
                             )
                             messageBox.close()
@@ -268,6 +342,7 @@ ApplicationWindow{
                                 function(){
                                     project.openProject(projectUrl)
                                     projectView.focusEditor.document = project.active
+                                    projectView.maintainCodingMode()
                                 }
                             )
                             messageBox.close()
@@ -986,11 +1061,11 @@ ApplicationWindow{
                     windowControls: controls
                     onInternalActiveFocusChanged: if ( internalFocus ) {
                         root.controls.setActiveItem(editor.textEdit, editor)
-                        projectView.focusEditor = editor
+                        projectView.setFocusEditor(editor)
                     }
 
                     Component.onCompleted: {
-                        projectView.focusEditor = editor
+                        projectView.setFocusEditor(editor)
                         if ( project.active ){
                             editor.document = project.active
                         }
@@ -1017,14 +1092,14 @@ ApplicationWindow{
                             running: true
                             repeat : false
                             onTriggered: {
-                                if (project.active === project.inFocus && project.active){
+                                if (project.active === project.inFocus && project.active && controls.codingMode === 0 /* live compile */){
                                     livecv.engine.createObjectAsync(
                                         runSpace.program,
                                         runSpace,
                                         project.active.file.pathUrl(),
                                         project.active
                                     );
-                                } else if ( project.active ){
+                                } else if ( project.active && controls.codingMode === 0 /* live compile */){
                                     livecv.engine.createObjectAsync(
                                         project.active.content,
                                         runSpace,
@@ -1125,13 +1200,14 @@ ApplicationWindow{
 
             ProjectNavigation{
                 id: projectNavigation
-                anchors.left: parent.left
-
-                width: projectView.width + editor.width
+                x: controls.navEditor ? controls.navEditor.x : 0
+                y: 30
+                width: controls.navEditor ? controls.navEditor.width : 0
                 height: parent.height
                 visible: false
                 onOpen: {
                     projectView.focusEditor.document = project.openFile(path, ProjectDocument.EditIfNotOpen)
+                    projectView.maintainCodingMode()
                     projectView.focusEditor.forceFocus()
                 }
                 onCloseFile: {
@@ -1235,14 +1311,14 @@ ApplicationWindow{
     Connections{
         target: project.documentModel
         onMonitoredDocumentChanged : {
-            if (project.active === project.inFocus){
+            if (project.active === project.inFocus && controls.codingMode === 0 /* live compile */){
                 engine.createObjectAsync(
                     runSpace.program,
                     runSpace,
                     project.active.file.pathUrl(),
                     project.active
                 );
-            } else if ( project.active ){
+            } else if ( project.active && controls.codingMode === 0 /* live compile */){
                 engine.createObjectAsync(
                     project.active.content,
                     runSpace,
