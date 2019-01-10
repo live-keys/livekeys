@@ -36,6 +36,8 @@ include($$PROJECT_ROOT/project/3rdparty/v8.pri)
 include($$PWD/include/lvelementsheaders.pri)
 include($$PWD/src/lvelements.pri)
 
+deployV8()
+
 OTHER_FILES += $$PWD/doc/*.dox
 
 DISTFILES += \

@@ -135,14 +135,17 @@ public:
 
 namespace lv{
 
+/// @brief QmlCompletionContextFinder Constructor
 QmlCompletionContextFinder::QmlCompletionContextFinder(){
 
 }
 
+/// \brief QmlCompletionContextFinder Destructor
 QmlCompletionContextFinder::~QmlCompletionContextFinder(){
 
 }
 
+/// \brief Finds the completion context
 QmlCompletionContext::ConstPtr QmlCompletionContextFinder::getContext(const QTextCursor &cursor){
     QmlJS::CompletionContextFinder finder(cursor);
 

@@ -177,7 +177,8 @@ void ProjectDocumentModel::closeDocument(const QString &path, bool closeIfActive
                 emit aboutToClose(document);
                 delete document;
             } else {
-                document->readContent();
+                if ( document->isDirty() )
+                    document->readContent();
             }
 
             ProjectFile* newActive = 0;

@@ -2,7 +2,7 @@
 #include "live/elements/event.h"
 #include "live/elements/element.h"
 #include "live/elements/metaobject.h"
-#include "live/elements/module.h"
+#include "live/elements/modulelibrary.h"
 #include "live/elements/list.h"
 
 Q_TEST_RUNNER_REGISTER(JsListTest);

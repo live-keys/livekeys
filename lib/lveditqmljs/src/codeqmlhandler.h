@@ -26,7 +26,6 @@
 #include "live/lockedfileiosession.h"
 #include "live/viewengine.h"
 #include "live/settings.h"
-#include "live/qmladdcontainer.h"
 #include "live/palettelist.h"
 
 #include <QTimer>
@@ -45,6 +44,7 @@ class QmlCursorInfo;
 class QmlEditFragment;
 class QmlJsHighlighter;
 class QmlJsSettings;
+class QmlAddContainer;
 class QmlCompletionContextFinder;
 class QmlCompletionContext;
 

@@ -7,8 +7,6 @@
 #include "qdir.h"
 #include "live/exception.h"
 
-#define fs std::experimental::filesystem::v1
-
 TestPack::TestPack(std::string path)
 {
     m_path = path;

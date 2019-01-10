@@ -18,11 +18,10 @@
 #define LVDOCUMENTCURSORINFO_H
 
 #include <QObject>
-#include "live/lveditqmljsglobal.h"
 
 namespace lv{
 
-class LV_EDITQMLJS_EXPORT QmlCursorInfo: public QObject{
+class QmlCursorInfo: public QObject{
 
     Q_OBJECT
     Q_PROPERTY(bool canBind   READ canBind   CONSTANT)

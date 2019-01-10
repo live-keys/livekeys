@@ -2,7 +2,7 @@
 #include "live/elements/engine.h"
 #include "live/elements/element.h"
 #include "live/elements/metaobject.h"
-#include "live/elements/module.h"
+#include "live/elements/modulelibrary.h"
 #include "live/elements/component.h"
 #include "live/elements/container.h"
 #include "live/applicationcontext.h"
@@ -26,12 +26,18 @@ void LvCompileTest::test1Js(){
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test1.lv.js";
         Script::Ptr sc = engine->compileJsFile(scriptsPath);
-        Object m = sc->loadAsModule();
+
+        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test1");
+
+        Object m = sc->loadAsModule(mf);
         LocalObject lm(m);
         LocalValue exports = lm.get(engine, "exports");
 
         Object e = exports.toObject(engine);
         LocalObject le(e);
+
+
 
         Callable c = le.get(engine, "Test1").toCallable(engine);
         QVERIFY(c.isComponent());
@@ -69,7 +75,11 @@ void LvCompileTest::test2Js(){
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test2.lv.js";
         Script::Ptr sc = engine->compileJsFile(scriptsPath);
-        Object m = sc->loadAsModule();
+
+        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test2");
+
+        Object m = sc->loadAsModule(mf);
         LocalObject lm(m);
         LocalValue exports = lm.get(engine, "exports");
 
@@ -106,7 +116,11 @@ void LvCompileTest::test3Js(){
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test3.lv.js";
         Script::Ptr sc = engine->compileJsFile(scriptsPath);
-        Object m = sc->loadAsModule();
+
+        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test3");
+
+        Object m = sc->loadAsModule(mf);
         LocalObject lm(m);
         LocalValue exports = lm.get(engine, "exports");
 
@@ -147,7 +161,11 @@ void LvCompileTest::test4Js(){
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test4.lv.js";
         Script::Ptr sc = engine->compileJsFile(scriptsPath);
-        Object m = sc->loadAsModule();
+
+        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test4");
+
+        Object m = sc->loadAsModule(mf);
         LocalObject lm(m);
         LocalValue exports = lm.get(engine, "exports");
 

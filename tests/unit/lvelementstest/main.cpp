@@ -42,7 +42,8 @@ int main(int argc, char *argv[]){
     QCoreApplication app(argc, argv);
     app.setAttribute(Qt::AA_Use96Dpi, true);
 
-    lv::el::Engine::InitializeScope initializer(QDir::currentPath().toStdString());
+    std::string blobsPath = lv::ApplicationContext::instance().applicationPath() + "/../../../../bin/external/v8/";
+    lv::el::Engine::InitializeScope initializer(blobsPath);
 
     return lv::TestRunner::runTests(argc, argv);
 }

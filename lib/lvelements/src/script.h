@@ -8,7 +8,7 @@
 namespace lv{ namespace el{
 
 class Engine;
-
+class ModuleFile;
 class ScriptPrivate;
 
 /**
@@ -23,7 +23,7 @@ public:
     typedef std::shared_ptr<Script> ConstPtr;
 
     Value run();
-    Object loadAsModule();
+    Object loadAsModule(ModuleFile* mf);
 
 
 public:
@@ -39,7 +39,7 @@ private:
 private:
     DISABLE_COPY(Script);
 
-    Object loadAsModuleImpl(const v8::Local<v8::Context>& context);
+    Object loadAsModuleImpl(ModuleFile* mf, const v8::Local<v8::Context>& context);
 
     Script(Engine* engine, const v8::Local<v8::Script>& value, const std::string& path = "");
 

@@ -82,6 +82,7 @@ public slots:
     void cursorWritePositionChanged(QTextCursor cursor);
     void setDocument(lv::ProjectDocument* document, QJSValue options = QJSValue());
     void documentUpdatedContent();
+    void documentFormatUpdate(int position, int length);
     void generateCompletion(int cursorPosition);
     QJSValue contextBlockRange(int cursorPosition);
 

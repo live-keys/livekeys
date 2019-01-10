@@ -8,6 +8,7 @@
 #include "live/visuallog.h"
 #include "visuallogjsobject.h"
 #include "errorhandler.h"
+#include "imports_p.h"
 
 #include <sstream>
 #include <iomanip>
@@ -73,10 +74,14 @@ public:
     v8::Persistent<v8::FunctionTemplate> pointTemplate;
     v8::Persistent<v8::FunctionTemplate> sizeTemplate;
     v8::Persistent<v8::FunctionTemplate> rectangleTemplate;
+    v8::Persistent<v8::FunctionTemplate> importsTemplate;
 
     int  tryCatchNesting;
     int  pendingExceptionNesting;
     bool hasGlobalErrorHandler;
+
+    PackageGraph* packageGraph;
+    std::map<std::string, ElementsPlugin::Ptr> loadedPlugins;
 
 public: // helpers
     bool isElementConstructor(
@@ -162,7 +167,7 @@ void Engine::disposeAtExit(){
 // Engine Implementation
 // --------------------------------------------------------------------------------------------
 
-Engine::Engine()
+Engine::Engine(PackageGraph *pg)
     : m_d(new EnginePrivate)
 {
     if ( !isInitialized() )
@@ -187,6 +192,8 @@ Engine::Engine()
 
     v8::Local<v8::External> listenerData = v8::External::New(isolate(), this);
     m_d->isolate->AddMessageListener(&EnginePrivate::messageListener, listenerData);
+
+    m_d->packageGraph = (pg == nullptr) ? new PackageGraph : pg;
 
     importInternals();
 }
@@ -382,6 +389,10 @@ v8::Local<v8::FunctionTemplate> Engine::rectangleTemplate(){
     return m_d->rectangleTemplate.Get(isolate());
 }
 
+v8::Local<v8::FunctionTemplate> Engine::importsTemplate(){
+    return m_d->importsTemplate.Get(isolate());
+}
+
 bool Engine::isElementConstructor(const Callable &c){
     v8::Local<v8::Function> f = c.data();
     v8::Local<v8::Function> elemf = m_d->elementTemplate->data.Get(isolate())->GetFunction();
@@ -521,6 +532,8 @@ void Engine::importInternals(){
     m_d->rectangleTemplate.Reset(isolate(), Rectangle::functionTemplate(isolate()));
     context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Rectangle"), rectangleTemplate()->GetFunction());
 
+    m_d->importsTemplate.Reset(isolate(), Imports::functionTemplate(isolate()));
+
     context->Global()->Set(
         v8::String::NewFromUtf8(isolate(), "vlog"),
         VisualLogJsObject::functionTemplate(isolate())->InstanceTemplate()->NewInstance());
@@ -547,7 +560,7 @@ void Engine::setGlobalErrorHandler(bool value){
 
 // Module caching
 
-Object Engine::require(Module::Ptr module){
+Object Engine::require(ModuleLibrary *module){
     v8::HandleScope handle(isolate());
     v8::Local<v8::Context> context = m_d->context->asLocal();
     v8::Context::Scope context_scope(context);
@@ -565,6 +578,16 @@ Object Engine::require(Module::Ptr module){
     }
 
     return exportsObject;
+}
+
+ElementsPlugin::Ptr Engine::require(const std::string &importKey){
+    auto foundEp = m_d->loadedPlugins.find(importKey);
+    if ( foundEp == m_d->loadedPlugins.end() ){
+        Plugin::Ptr plugin = m_d->packageGraph->loadPlugin(importKey);
+        return ElementsPlugin::create(plugin, this);
+    } else {
+        return foundEp->second;
+    }
 }
 
 void Engine::scope(const std::function<void()> &f){

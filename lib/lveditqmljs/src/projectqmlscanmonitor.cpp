@@ -21,6 +21,8 @@
 #include "plugininfoextractor.h"
 #include "plugintypesfacade.h"
 #include "codeqmlhandler.h"
+#include "qmllibrarydependency.h"
+
 #include "live/viewengine.h"
 #include "live/project.h"
 #include "live/visuallog.h"

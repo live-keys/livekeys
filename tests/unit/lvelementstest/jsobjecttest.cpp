@@ -18,7 +18,7 @@
 #include "live/elements/element.h"
 #include "live/elements/metaobject.h"
 #include "live/elements/component.h"
-#include "live/elements/module.h"
+#include "live/elements/modulelibrary.h"
 #include <memory.h>
 
 Q_TEST_RUNNER_REGISTER(JsObjectTest);
@@ -67,10 +67,11 @@ void JsObjectTest::initTestCase(){
 }
 
 void JsObjectTest::simpleObjectInitializationTest(){
-    Module::Ptr m = Module::createLoader("test", 1, 0);
+    Engine* engine = new Engine();
+
+    ModuleLibrary* m = ModuleLibrary::create(engine, "test");
     m->addType<ElementStub>();
 
-    Engine* engine = new Engine();
     {
         engine->scope([&engine, m](){
             el::Object ob = engine->require(m);
