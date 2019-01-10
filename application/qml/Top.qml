@@ -323,7 +323,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.topMargin: 5
             font.pixelSize: 12
-            text : project.active.file.name
+            text : project.active && project.active.file ? project.active.file.name : ""
             font.family: 'Open Sans, Arial, sans-serif'
         }
     }

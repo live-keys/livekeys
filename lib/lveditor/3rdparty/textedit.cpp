@@ -2479,6 +2479,12 @@ void TextEditPrivate::unsetTextDocument()
 
     document = nullptr;
 
+    q->polish();
+    if (q->isComponentComplete()) {
+        updateType = TextEditPrivate::UpdatePaintNode;
+        q->update();
+    }
+
 }
 
 void TextEditPrivate::init()

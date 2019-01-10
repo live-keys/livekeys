@@ -255,6 +255,7 @@ void LineSurface::setDocument(QTextDocument *doc)
 void LineSurface::unsetTextDocument()
 {
     m_document = nullptr;
+    triggerUpdate(m_lineNumber, 0, 0);
 }
 
 void LineSurface::triggerUpdate(int prev, int curr, int dirty)
