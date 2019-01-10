@@ -282,7 +282,10 @@ Rectangle{
             Text{
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 11
-                text: editorArea.cursorPosition
+                text: {
+                    editorArea.cursorPosition
+                    return editorArea.lineNumber + ", " + editorArea.linePosition
+                }
 //                    (Math.floor(editorArea.cursorRectangle.y / editorMetrics.height) + 1) + ', ' +
 //                    (Math.floor(editorArea.cursorRectangle.x / editorMetrics.averageCharacterWidth) + 1)
                 color: "#808691"
