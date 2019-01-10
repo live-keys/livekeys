@@ -1201,7 +1201,6 @@ ApplicationWindow{
             ProjectNavigation{
                 id: projectNavigation
                 x: controls.navEditor ? controls.navEditor.x : 0
-                y: 30
                 width: controls.navEditor ? controls.navEditor.width : 0
                 height: parent.height
                 visible: false
