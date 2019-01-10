@@ -44,7 +44,8 @@
 #include "live/visuallogqt.h"
 #include "live/editorglobalobject.h"
 #include "live/palettecontainer.h"
-#include "live/qmlcodeconverter.h"
+#include "qmlcodeconverter.h"
+#include "qmladdcontainer.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>

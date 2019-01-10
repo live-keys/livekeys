@@ -104,7 +104,6 @@ public:
 
     LineManager* getLineManager();
     void stateChangeUpdate(int pos);
-    void highlightingChanged(int position, int length);
 protected:
     void documentChanged(int from, int oldLength, int length) override;
     void resizeInlineObject(QTextInlineObject item, int posInDocument, const QTextFormat &format) override;

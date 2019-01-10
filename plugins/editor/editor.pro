@@ -38,7 +38,6 @@ DISTFILES += \
     qml/DocumentFragment.qml \
     palettes/IntHistoryPlotPalette.qml \
     palettes/DoubleHistoryPlotPalette.qml \
-    qml/RefactorList.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/PaletteListView.qml \

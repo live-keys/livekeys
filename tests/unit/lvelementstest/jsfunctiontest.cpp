@@ -3,7 +3,7 @@
 #include "live/elements/element.h"
 #include "live/elements/metaobject.h"
 #include "live/elements/component.h"
-#include "live/elements/module.h"
+#include "live/elements/modulelibrary.h"
 
 Q_TEST_RUNNER_REGISTER(JsFunctionTest);
 
@@ -84,7 +84,7 @@ void JsFunctionTest::initTestCase(){
 void JsFunctionTest::typesTest(){
 
     Engine* engine = new Engine();
-    Module::Ptr m = Module::createLoader("test", 1, 0);
+    ModuleLibrary* m = ModuleLibrary::create(engine, "test");
     m->addType<FunctionStub>();
 
     {

@@ -1,7 +1,7 @@
 #include "jsmemorytest.h"
 #include "live/elements/engine.h"
 #include "live/elements/element.h"
-#include "live/elements/module.h"
+#include "live/elements/modulelibrary.h"
 
 Q_TEST_RUNNER_REGISTER(JsMemoryTest);
 

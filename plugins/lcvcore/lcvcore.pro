@@ -34,7 +34,8 @@ OTHER_FILES *= \
 # Handling the palettes
 
 OTHER_FILES *= \
-    palettes/*.qml
+    palettes/*.qml \
+    doc/*.md
 
 # Deploy the palettes
 

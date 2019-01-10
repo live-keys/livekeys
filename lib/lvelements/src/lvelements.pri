@@ -3,7 +3,6 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/function.h \
     $$PWD/engine.h \
-    $$PWD/module.h \
     $$PWD/metaobject.h \
     $$PWD/value.h \
     $$PWD/element.h \
@@ -25,12 +24,17 @@ HEADERS += \
     $$PWD/container.h \
     $$PWD/errorhandler.h \
     $$PWD/mlnodetojs.h \
-    $$PWD/visuallogjsobject.h
+    $$PWD/visuallogjsobject.h \
+    $$PWD/modulefile.h \
+    $$PWD/elementsplugin.h \
+    $$PWD/imports_p.h \
+    $$PWD/modulelibrary.h \
+    $$PWD/parser.h \
+    $$PWD/moduleloader.h
 
 SOURCES += \
     $$PWD/function.cpp \
     $$PWD/engine.cpp \
-    $$PWD/module.cpp \
     $$PWD/metaobject.cpp \
     $$PWD/value.cpp \
     $$PWD/element.cpp \
@@ -48,4 +52,9 @@ SOURCES += \
     $$PWD/container.cpp \
     $$PWD/errorhandler.cpp \
     $$PWD/mlnodetojs.cpp \
-    $$PWD/visuallogjsobject.cpp
+    $$PWD/visuallogjsobject.cpp \
+    $$PWD/modulefile.cpp \
+    $$PWD/elementsplugin.cpp \
+    $$PWD/imports.cpp \
+    $$PWD/modulelibrary.cpp \
+    $$PWD/parser.cpp

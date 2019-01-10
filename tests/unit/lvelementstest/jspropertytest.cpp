@@ -2,7 +2,7 @@
 #include "live/elements/element.h"
 #include "live/elements/metaobject.h"
 #include "live/elements/component.h"
-#include "live/elements/module.h"
+#include "live/elements/modulelibrary.h"
 
 Q_TEST_RUNNER_REGISTER(JsPropertyTest);
 
@@ -324,7 +324,6 @@ private:
 JsPropertyTest::JsPropertyTest(QObject *parent)
     : QObject(parent)
 {
-    Engine::initialize(QDir::currentPath().toStdString());
 }
 
 void JsPropertyTest::initTestCase(){

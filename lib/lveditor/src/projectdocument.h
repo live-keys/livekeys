@@ -262,6 +262,7 @@ signals:
     void isMonitoredChanged();
     void fileChanged();
     void contentChanged();
+    void formatChanged(int position, int length);
 
 private:
     void syncContent() const;

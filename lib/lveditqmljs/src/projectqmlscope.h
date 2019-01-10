@@ -25,7 +25,6 @@
 #include <QSharedPointer>
 
 #include "live/lveditqmljsglobal.h"
-#include "live/qmllibrarydependency.h"
 
 class QQmlEngine;
 namespace QmlJS{ class LibraryInfo; }

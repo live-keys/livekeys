@@ -4,7 +4,6 @@ HEADERS += \
     $$PWD/live/elements/function.h \
     $$PWD/live/elements/engine.h \
     $$PWD/live/elements/metaobject.h \
-    $$PWD/live/elements/module.h \
     $$PWD/live/elements/value.h \
     $$PWD/live/elements/element.h \
     $$PWD/live/elements/event.h \
@@ -20,4 +19,6 @@ HEADERS += \
     $$PWD/live/elements/buffer.h \
     $$PWD/live/elements/list.h \
     $$PWD/live/elements/container.h \
-    $$PWD/live/elements/mlnodetojs.h
+    $$PWD/live/elements/mlnodetojs.h \
+    $$PWD/live/elements/modulelibrary.h \
+    $$PWD/live/elements/elementsplugin.h

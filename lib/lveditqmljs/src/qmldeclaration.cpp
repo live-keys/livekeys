@@ -18,6 +18,32 @@
 
 namespace lv{
 
+/**
+ * \class lv::QmlDeclaration
+ * \ingroup lveditqmljs
+ * \brief Holds a qml property declaration
+ *
+ * ```js
+ * Item{
+ *     property int declaration: 20
+ * }
+ * ```
+ *
+ * In the above case, the lv::QmlDeclaration has the following properties:
+ *
+ * - identifierChain : the property identifier, in this case ```declaration```
+ * - identifierPosition: position of the ```declaration``` property
+ * - identifierLength: length of the ```declaration``` property
+ * - type: type of the ```declaration``` property, in this case ```int```
+ * - document: document where the ```declaration``` property was declared
+ * - length: length of the declaration property
+ * - valueOffset: offset for the value of the ```declaration``` property, in this case it's the position
+ *   of the number ```20``` minus the position of the property
+ * - valueLength: length of the value for the ```declaration``` property, or ```2```
+ * - section: A section within the project document
+ */
+
+/// \brief QmlDeclaration constructor taking in an \p identifierChain and a \p document
 QmlDeclaration::QmlDeclaration(const QStringList &identifierChain, ProjectDocument *document)
     : m_section(ProjectDocumentSection::create(QmlDeclaration::Section))
     , m_identifierLength(0)
@@ -26,7 +52,9 @@ QmlDeclaration::QmlDeclaration(const QStringList &identifierChain, ProjectDocume
     , m_document(document)
 {
 }
-
+/// \brief QmlDeclaration constructor
+///
+/// Receives \p identifierChain, \p identifierType, \p parentType and a \p document
 QmlDeclaration::QmlDeclaration(
         const QStringList &identifierChain,
         const QString &identifierType,
@@ -42,6 +70,10 @@ QmlDeclaration::QmlDeclaration(
 {
 }
 
+/// \brief QmlDeclaration constructor
+///
+/// Receives \p identifierChain, \p identifierType, \p parentType,
+/// a \p identifierPosition, a \p identifierLength and a \p document
 QmlDeclaration::QmlDeclaration(
         const QStringList &identifierChain,
         const QString &identifierType,
@@ -59,10 +91,19 @@ QmlDeclaration::QmlDeclaration(
 {
 }
 
+/// \brief QmlDeclaration constructor
+///
+/// Receives \p identifierChain, \p identifierType, \p parentType,
+/// a \p identifierPosition, a \p identifierLength and a \p document
 QmlDeclaration::Ptr QmlDeclaration::create(const QStringList &identifierChain, ProjectDocument *document){
     return QmlDeclaration::Ptr(new QmlDeclaration(identifierChain, document));
 }
 
+/**
+ * \brief Creates a new lv::QmlDeclaration
+ *
+ * Recieves \p identifierChain, \p identifierType, \p parentType and a \p document
+ */
 QmlDeclaration::Ptr QmlDeclaration::create(
         const QStringList &identifierChain,
         const QString &type,
@@ -72,6 +113,12 @@ QmlDeclaration::Ptr QmlDeclaration::create(
     return QmlDeclaration::Ptr(new QmlDeclaration(identifierChain, type, parentType, document));
 }
 
+/**
+ * \brief Creates a new lv::QmlDeclaration
+ *
+ * Receives \p identifierChain, \p identifierType, \p parentType, \p identifierPosition, a
+ * \p identifierLength and a \p document
+ */
 QmlDeclaration::Ptr QmlDeclaration::create(
         const QStringList &identifierChain,
         const QString &type,
@@ -90,6 +137,7 @@ QmlDeclaration::Ptr QmlDeclaration::create(
     ));
 }
 
+/// \brief QmlDeclaration destructor
 QmlDeclaration::~QmlDeclaration(){
 }
 

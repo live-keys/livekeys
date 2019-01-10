@@ -4,7 +4,10 @@
 #include "errorhandler.h"
 #include "live/elements/engine.h"
 #include "live/elements/element.h"
+#include "modulefile.h"
+#include "imports_p.h"
 #include "v8.h"
+
 #include <QFileInfo>
 
 namespace lv{ namespace el{
@@ -45,7 +48,7 @@ Value Script::run(){
     return Value();
 }
 
-Object Script::loadAsModule(){
+Object Script::loadAsModule(ModuleFile* file){
     v8::HandleScope handle(m_d->engine->isolate());
     v8::Local<v8::Context> context = m_d->engine->currentContext()->asLocal();
     v8::Context::Scope context_scope(context);
@@ -54,7 +57,7 @@ Object Script::loadAsModule(){
         v8::TryCatch tc(m_d->engine->isolate());
         m_d->engine->setGlobalErrorHandler(true);
 
-        Object m = loadAsModuleImpl(context);
+        Object m = loadAsModuleImpl(file, context);
 
         if ( tc.HasCaught() ){
             Engine::CatchData cd(m_d->engine, &tc);
@@ -92,7 +95,7 @@ Object Script::loadAsModule(){
         return m;
 
     } else {
-        return loadAsModuleImpl(context);
+        return loadAsModuleImpl(file, context);
     }
 }
 
@@ -101,32 +104,26 @@ Script::~Script(){
     delete m_d;
 }
 
-Object Script::loadAsModuleImpl(const v8::Local<v8::Context> &context){
+Object Script::loadAsModuleImpl(ModuleFile *mf, const v8::Local<v8::Context> &context){
     v8::Local<v8::Script> ld = m_d->data.Get(m_d->engine->isolate());
     v8::MaybeLocal<v8::Value> result = ld->Run(context);
     if ( result.IsEmpty() )
-        throw std::exception();
+        throw std::exception(); //TODO
 
-    v8::Local<v8::Value> localResult = result.ToLocalChecked();
     v8::Local<v8::Function> loadFunction = v8::Local<v8::Function>::Cast(result.ToLocalChecked());
 
-    LocalValue module = Module::createObject(m_d->engine, m_d->path);
-
-    //TODO: Receive from package
-    v8::Local<v8::Object> importsObject = v8::Object::New(m_d->engine->isolate());
-
-    QFileInfo finfo(QString::fromStdString(m_d->path));
+    LocalValue module = mf->createObject(m_d->engine);
 
     v8::Local<v8::String> name = v8::String::NewFromUtf8(
-        m_d->engine->isolate(), finfo.baseName().toStdString().c_str(), v8::String::kInternalizedString);
-    v8::Local<v8::String> file = v8::String::NewFromUtf8(
-        m_d->engine->isolate(), finfo.filePath().toStdString().c_str(), v8::String::kInternalizedString);
+        m_d->engine->isolate(), mf->name().c_str(), v8::String::kInternalizedString);
+    v8::Local<v8::String> filePath = v8::String::NewFromUtf8(
+        m_d->engine->isolate(), mf->filePath().c_str(), v8::String::kInternalizedString);
 
     v8::Local<v8::Value> args[4];
     args[0] = module.data();
-    args[1] = importsObject;
+    args[1] = mf->imports()->object();
     args[2] = name;
-    args[3] = file;
+    args[3] = filePath;
 
     loadFunction->Call(context->Global(), 4, args);
 

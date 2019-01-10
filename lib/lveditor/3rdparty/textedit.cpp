@@ -2378,7 +2378,9 @@ TextEditPrivate::ExtraData::ExtraData()
 
 void TextEditPrivate::setTextDocument(QTextDocument *doc)
 {
-    if (document) unsetTextDocument();
+
+    if (document)
+        unsetTextDocument();
     Q_Q(TextEdit);
     document = doc;
     LineManager* lm = q->getDocumentLayout()->getLineManager();

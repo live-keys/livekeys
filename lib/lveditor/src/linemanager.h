@@ -9,7 +9,7 @@ namespace lv {
 class CollapsedSection;
 class LineSurface;
 
-class LV_EDITOR_EXPORT LineManager: public QObject{
+class LineManager: public QObject{
 
     Q_OBJECT
 
@@ -45,7 +45,7 @@ public:
     void setLineDocumentFont(const QFont& font);
     void setParentDocument(QTextDocument* td);
 
-Q_SIGNALS:
+signals:
     void updateLineSurface(int prev, int curr, int dirty);
     void showHideTextEditLines(bool visible, int pos, int num);
 

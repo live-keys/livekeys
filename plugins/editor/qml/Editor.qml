@@ -41,9 +41,6 @@ Rectangle{
     property int fragmentEnd: -1
 
     onDocumentChanged: {
-        if ( !document ){
-            editor.text = ''
-        }
         codeHandler.setDocument(document)
     }
 
@@ -122,9 +119,9 @@ Rectangle{
                 button1Function : saveFunction,
                 button2Name : 'No',
                 button2Function : function(){
+                    windowControls.messageDialog.close()
                     editor.closeDocumentAction()
                     editor.document = project.documentModel.lastOpened()
-                    windowControls.messageDialog.close()
                 },
                 button3Name : 'Cancel',
                 button3Function : function(){
@@ -141,8 +138,28 @@ Rectangle{
     }
 
     function closeDocumentAction(){
-        project.closeFile(document.file.path)
-        editor.document = project.documentModel.lastOpened()
+        if ( !project.isDirProject() && document === project.active ){
+            windowControls.messageDialog.show(
+                'Closing this file will also close this project. Would you like to close the project?',
+            {
+                button1Name : 'Yes',
+                button1Function : function(){
+                    project.closeProject()
+                    windowControls.messageDialog.close()
+                },
+                button3Name : 'No',
+                button3Function : function(){
+                    windowControls.messageDialog.close()
+                },
+                returnPressed : function(){
+                    project.closeProject()
+                    windowControls.messageDialog.close()
+                }
+            })
+        } else {
+            project.closeFile(document.file.path)
+            editor.document = project.documentModel.lastOpened()
+        }
     }
 
     function getCursorRectangle(){

@@ -2,14 +2,14 @@
 #define LVQMLADDCONTAINER_H
 
 #include "live/lveditqmljsglobal.h"
-#include "live/qmlpropertymodel.h"
-#include "live/qmlitemmodel.h"
+#include "qmlpropertymodel.h"
+#include "qmlitemmodel.h"
 
 #include <QObject>
 
 namespace lv{
 
-class LV_EDITQMLJS_EXPORT QmlAddContainer : public QObject{
+class QmlAddContainer : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(lv::QmlItemModel*     itemModel     READ itemModel     CONSTANT)

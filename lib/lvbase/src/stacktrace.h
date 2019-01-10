@@ -39,7 +39,7 @@ LV_BASE_EXPORT std::string pathFileName(const std::string& path);
   Very simple structure, containing only getters of its various fields.
   \ingroup lvbase
  */
-class LV_BASE_EXPORT StackFrame{
+class StackFrame{
 
 public:
     /**
