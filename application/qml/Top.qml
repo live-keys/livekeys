@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 import QtQuick 2.3
+import QtQuick.Controls 1.4
 import editor.private 1.0
 import base 1.0
 import live 1.0
@@ -286,6 +287,44 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: container.openLicense()
+        }
+    }
+
+    // Compile button
+
+    Button {
+        id: compileButton
+        anchors.left: parent.left
+        anchors.leftMargin: 500
+        // color : "transparent"
+        text: "Compile"
+        onClicked: {
+            console.log(project.active.content)
+            if (project.active)
+                livecv.engine.createObjectAsync(
+                    project.active.content,
+                    livecv.windowControls().runSpace,
+                    project.active.file.pathUrl(),
+                    project.active,
+                    true
+                );
+        }
+    }
+
+    Rectangle{
+        anchors.left: parent.left
+        anchors.leftMargin: 650
+        height : parent.height
+        color : "transparent"
+        Text{
+            color :  "#bec7ce"
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 5
+            font.pixelSize: 12
+            text : project.active && project.active.file ? project.active.file.name : ""
+            font.family: 'Open Sans, Arial, sans-serif'
         }
     }
 
