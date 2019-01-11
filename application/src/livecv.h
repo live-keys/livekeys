@@ -106,6 +106,7 @@ public:
 public slots:
     QObject *windowControls() const;
     QJSValue interceptMenu(QJSValue context);
+    void engineError(QJSValue error);
     void projectChanged(const QString& path);
 
 signals:

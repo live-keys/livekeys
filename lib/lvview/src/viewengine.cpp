@@ -99,7 +99,7 @@ void ViewEngine::throwError(const lv::Exception *e, QObject *object){
         for ( auto it = st->begin(); it != st->end(); ++it ){
             stackTrace.setProperty(i++, QString::fromStdString(it->functionName()) + "(" + it->fileName().c_str() + ":" + QString::number(it->line()) + ")");
         }
-        jsError.setProperty("stack", stackTrace);
+        jsError.setProperty("stackTrace", stackTrace);
     }
 
     if ( dynamic_cast<const lv::FatalException*>(e) != nullptr ){
