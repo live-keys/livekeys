@@ -54,7 +54,7 @@ Rectangle{
         id: navigationInputBox
         anchors.top: parent.top
         anchors.left: parent.left
-        width: parent.width - 30
+        width: parent.width - 150
 
         color: "#050d13"
         height: 30

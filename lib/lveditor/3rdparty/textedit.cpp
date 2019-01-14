@@ -688,6 +688,22 @@ void TextEdit::resetFragmentEnd() {
     setFragmentEnd(-1);
 }
 
+int TextEdit::lineNumber() const
+{
+    Q_D(const TextEdit);
+    if (!d->document) return 0;
+    int lineNumber = d->document->findBlock(cursorPosition()).blockNumber() + 1;
+    return lineNumber;
+}
+
+int TextEdit::linePosition() const
+{
+    Q_D(const TextEdit);
+    if (!d->document) return 0;
+    QTextBlock block = d->document->findBlock(cursorPosition());
+    return cursorPosition() - block.position();
+}
+
 /*!
     \qmlproperty enumeration QtQuick::TextEdit::horizontalAlignment
     \qmlproperty enumeration QtQuick::TextEdit::verticalAlignment
@@ -2378,7 +2394,9 @@ TextEditPrivate::ExtraData::ExtraData()
 
 void TextEditPrivate::setTextDocument(QTextDocument *doc)
 {
-    if (document) unsetTextDocument();
+
+    if (document)
+        unsetTextDocument();
     Q_Q(TextEdit);
     document = doc;
     LineManager* lm = q->getDocumentLayout()->getLineManager();
@@ -2460,6 +2478,12 @@ void TextEditPrivate::unsetTextDocument()
     }
 
     document = nullptr;
+
+    q->polish();
+    if (q->isComponentComplete()) {
+        updateType = TextEditPrivate::UpdatePaintNode;
+        q->update();
+    }
 
 }
 

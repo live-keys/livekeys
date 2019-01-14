@@ -41,9 +41,6 @@ Rectangle{
     property int fragmentEnd: -1
 
     onDocumentChanged: {
-        if ( !document ){
-            editor.text = ''
-        }
         codeHandler.setDocument(document)
     }
 
@@ -71,7 +68,7 @@ Rectangle{
             return;
         if ( editor.document.file.name !== '' ){
             editor.document.save()
-            if ( project.active && project.active !== editor.document ){
+            if ( project.active && ((controls.codingMode === 0 && project.active !== editor.document) || controls.codingMode === 1)) /* compiling isn't disabled */{
                 livecv.engine.createObjectAsync(
                     project.active.content,
                     windowControls.runSpace,
@@ -122,9 +119,9 @@ Rectangle{
                 button1Function : saveFunction,
                 button2Name : 'No',
                 button2Function : function(){
+                    windowControls.messageDialog.close()
                     editor.closeDocumentAction()
                     editor.document = project.documentModel.lastOpened()
-                    windowControls.messageDialog.close()
                 },
                 button3Name : 'Cancel',
                 button3Function : function(){
@@ -141,8 +138,28 @@ Rectangle{
     }
 
     function closeDocumentAction(){
-        project.closeFile(document.file.path)
-        editor.document = project.documentModel.lastOpened()
+        if ( !project.isDirProject() && document === project.active ){
+            windowControls.messageDialog.show(
+                'Closing this file will also close this project. Would you like to close the project?',
+            {
+                button1Name : 'Yes',
+                button1Function : function(){
+                    project.closeProject()
+                    windowControls.messageDialog.close()
+                },
+                button3Name : 'No',
+                button3Function : function(){
+                    windowControls.messageDialog.close()
+                },
+                returnPressed : function(){
+                    project.closeProject()
+                    windowControls.messageDialog.close()
+                }
+            })
+        } else {
+            project.closeFile(document.file.path)
+            editor.document = project.documentModel.lastOpened()
+        }
     }
 
     function getCursorRectangle(){
@@ -207,6 +224,30 @@ Rectangle{
 
         Rectangle{
             color: 'transparent'
+            width: 24
+            height: parent.height
+            anchors.right: parent.right
+            anchors.rightMargin: 109
+            visible : editor.document !== null
+
+            Image{
+                id : switchImage
+                anchors.centerIn: parent
+                source : "qrc:/images/switch-file.png"
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    windowControls.navEditor = editor
+                    livecv.commands.execute('window.toggleNavigation')
+                }
+            }
+        }
+
+        Rectangle{
+            color: 'transparent'
             width: 30
             height: parent.height
             anchors.right: parent.right
@@ -241,7 +282,10 @@ Rectangle{
             Text{
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 11
-                text: editorArea.cursorPosition
+                text: {
+                    editorArea.cursorPosition
+                    return editorArea.lineNumber + ", " + editorArea.linePosition
+                }
 //                    (Math.floor(editorArea.cursorRectangle.y / editorMetrics.height) + 1) + ', ' +
 //                    (Math.floor(editorArea.cursorRectangle.x / editorMetrics.averageCharacterWidth) + 1)
                 color: "#808691"

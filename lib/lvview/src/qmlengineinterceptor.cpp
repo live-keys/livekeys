@@ -14,40 +14,46 @@ QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstr
     QStringList importPaths = m_engine->engine()->importPathList();
 
     if ( dataType == QQmlAbstractUrlInterceptor::QmldirFile && path.isLocalFile() ){
-        QString localPath = path.toLocalFile();
-        if ( localPath.endsWith("qmldir") ){
-            localPath = localPath.mid(0, localPath.length() - 6);
-        }
-
-        QString importSegment;
-
-        for ( auto it = importPaths.begin(); it != importPaths.end(); ++it ){
-            if ( localPath.startsWith(*it) ){
-                importSegment = localPath.mid(it->length());
-                if ( importSegment.startsWith('/') )
-                    importSegment = importSegment.mid(1);
-                if ( importSegment.endsWith('/') )
-                    importSegment = importSegment.mid(0, importSegment.length() - 1);
-                break;
+        try{
+            QString localPath = path.toLocalFile();
+            if ( localPath.endsWith("qmldir") ){
+                localPath = localPath.mid(0, localPath.length() - 6);
             }
-        }
 
-        if ( !importSegment.isEmpty() ){
-            QStringList importSegmentParts = importSegment.split('/');
-            std::vector<std::string> partsConverted;
-            for ( auto it = importSegmentParts.begin(); it != importSegmentParts.end(); ++it ){
-                int dotIndex = it->indexOf('.');
-                if ( dotIndex != -1 ){
-                    partsConverted.push_back(it->mid(0, dotIndex).toStdString());
-                } else {
-                    partsConverted.push_back(it->toStdString());
+            QString importSegment;
+
+            for ( auto it = importPaths.begin(); it != importPaths.end(); ++it ){
+                if ( localPath.startsWith(*it) ){
+                    importSegment = localPath.mid(it->length());
+                    if ( importSegment.startsWith('/') )
+                        importSegment = importSegment.mid(1);
+                    if ( importSegment.endsWith('/') )
+                        importSegment = importSegment.mid(0, importSegment.length() - 1);
+                    break;
                 }
             }
 
-            Plugin::Ptr plugin = m_packageGraph->loadPlugin(partsConverted);
-            if ( plugin != nullptr ){
-                return QUrl::fromLocalFile(QString::fromStdString(plugin->path() + "/qmldir"));
+            if ( !importSegment.isEmpty() ){
+                QStringList importSegmentParts = importSegment.split('/');
+                std::vector<std::string> partsConverted;
+                for ( auto it = importSegmentParts.begin(); it != importSegmentParts.end(); ++it ){
+                    int dotIndex = it->indexOf('.');
+                    if ( dotIndex != -1 ){
+                        partsConverted.push_back(it->mid(0, dotIndex).toStdString());
+                    } else {
+                        partsConverted.push_back(it->toStdString());
+                    }
+                }
+
+                try{
+                    Plugin::Ptr plugin = m_packageGraph->loadPlugin(partsConverted);
+                    if ( plugin != nullptr ){
+                        return QUrl::fromLocalFile(QString::fromStdString(plugin->path() + "/qmldir"));
+                    }
+                } catch ( lv::Exception& ){}
             }
+        } catch ( lv::Exception& e ){
+            m_engine->throwError(&e, nullptr);
         }
     }
     return path;
