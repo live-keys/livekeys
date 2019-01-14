@@ -6,6 +6,9 @@
 import lcvphoto 1.0
 ```
 
+{plugin:lcvphoto}
+{qmlSummary:lcvphoto}
+
 {qmlType:FastNlMeansDenoising}
 {qmlInherits:MatFilter}
 {qmlBrief:Denoises a grayscale or color image.}
