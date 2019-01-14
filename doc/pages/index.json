@@ -78,6 +78,10 @@
             [
                 "../output/md/lcveditor-cpp.md>>"
             ],
+            {"lveditqmljs" : "../output/md/lveditqmljs-cpp.md"},
+            [
+                "../output/md/lveditqmljs-cpp.md>>"
+            ],
             {"lvelements" : "../output/md/lvelements-cpp.md"},
             [
                 "../output/md/lvelements-cpp.md>>"

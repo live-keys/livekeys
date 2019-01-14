@@ -9,6 +9,8 @@
 
 namespace lv{
 
+
+/// \private
 class QmlAddContainer : public QObject{
 
     Q_OBJECT

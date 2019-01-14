@@ -40,6 +40,7 @@
 #include <QtCore/QScopedPointer>
 #include <QtCore/QPair>
 
+/// \private
 class QmlStreamWriter
 {
 public:

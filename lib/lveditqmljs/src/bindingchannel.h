@@ -11,7 +11,7 @@
 namespace lv{
 
 /**
- * @brief The BindingChannel class
+ * \brief The BindingChannel class
  *
  * A binding channel can have multiple binding paths, describing an expression
  * within a docuemnt that requires a connection with the application.
@@ -19,6 +19,8 @@ namespace lv{
  * Since components can be created in different documents, and in turn those documents
  * can be recreated, a single expression can correspond to multiple binding paths, and
  * also documents.
+ *
+ * \private
  */
 class BindingChannel : public QObject{
 

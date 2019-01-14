@@ -24,6 +24,7 @@
 
 namespace lv{
 
+/// \private
 class QmlLibraryInfo{
 
 public:
@@ -36,6 +37,7 @@ public:
     };
 
 public:
+    /// \private
     class ExportVersion{
     public:
         ExportVersion()
@@ -54,6 +56,7 @@ public:
         LanguageUtils::FakeMetaObject::ConstPtr object;
     };
 
+    /// \private
     class Export{
     public:
         QList<ExportVersion> versions;

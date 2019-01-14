@@ -23,6 +23,7 @@
 
 namespace lv{
 
+/// \private
 class ProjectQmlScopeContainer{
 
 public:

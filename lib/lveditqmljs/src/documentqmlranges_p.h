@@ -23,6 +23,7 @@
 
 namespace lv{
 
+/// \private
 class DocumentQmlRanges: protected QmlJS::AST::Visitor{
 
 public:

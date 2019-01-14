@@ -33,6 +33,7 @@ namespace lv{
  */
 
 
+/// \private
 class ExceptionPrivate{
 
 public:

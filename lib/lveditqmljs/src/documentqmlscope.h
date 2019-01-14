@@ -111,18 +111,22 @@ private:
     DocumentQmlInfo::Ptr m_documentInfo;
 };
 
+/// \brief Returns the major version of this import
 inline int DocumentQmlScope::Import::versionMajor() const{
     return m_versionMajor;
 }
 
+/// \brief Returns the minor version of this import
 inline int DocumentQmlScope::Import::versionMinor() const{
     return m_versionMinor;
 }
 
+/// \brief Returns true if this version is valid, false otherwise
 inline bool DocumentQmlScope::Import::isVersionValid() const{
     return m_versionMajor >= 0 && m_versionMinor >= 0;
 }
 
+/// \brief Returns true if this object is the same as \p other, false otherwise
 inline bool DocumentQmlScope::Import::operator ==(const DocumentQmlScope::Import &other) const{
     if ( path() != other.path() )
         return false;
@@ -131,42 +135,52 @@ inline bool DocumentQmlScope::Import::operator ==(const DocumentQmlScope::Import
     return versionMinor() == other.versionMinor();
 }
 
+/// \brief Returns the path of this import
 inline const QString &DocumentQmlScope::Import::path() const{
     return m_path;
 }
 
+/// \brief Sets the \p importType for this import
 inline void DocumentQmlScope::Import::setImportType(DocumentQmlScope::Import::Type importType){
     m_type = importType;
 }
 
+/// \brief Returns the import type for this import
 inline DocumentQmlScope::Import::Type DocumentQmlScope::Import::importType() const{
     return m_type;
 }
 
+/// \brief Returns the import namespace for this import
 inline const QString &DocumentQmlScope::Import::as() const{
     return m_as;
 }
 
+/// \brief Returns the total number of imports for this lv::ProjectDocument.
 inline int DocumentQmlScope::totalImports() const{
     return m_imports.size();
 }
 
+/// \brief Returns the lv::DocumentQmlInfo associated with this object.
 inline DocumentQmlInfo::ConstPtr DocumentQmlScope::info() const{
     return m_documentInfo;
 }
 
+/// \brief Returns the ImportList associated with this object.
 inline const DocumentQmlScope::ImportList &DocumentQmlScope::imports() const{
     return m_imports;
 }
 
+/// \brief Returns the project scope.
 inline ProjectQmlScope::Ptr DocumentQmlScope::projectScope() const{
     return m_projectScope;
 }
 
+/// \brief Returns the path of this document.
 inline QString DocumentQmlScope::path() const{
     return m_documentInfo->path();
 }
 
+/// \brief Returnns the component name for this document.
 inline QString DocumentQmlScope::componentName() const{
     return m_documentInfo->componentName();
 }

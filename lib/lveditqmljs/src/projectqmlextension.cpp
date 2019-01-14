@@ -36,6 +36,22 @@
 
 namespace lv{
 
+/**
+ * \class lv::ProjectQmlExtension
+ * \ingroup lveditqmljs
+ * \brief Main object used throughout qml extension plugin.
+ *
+ * To capture the object, you can use the globals from livecv:
+ *
+ * \code
+ * var projectQmlExtension = livecv.extensions["editqml"].globals
+ * \endcode
+ */
+
+
+/**
+ * \brief ProjectQmlExtension constructor with a \p parent parameter
+ */
 ProjectQmlExtension::ProjectQmlExtension(QObject *parent)
     : QObject(parent)
     , m_settings(new QmlJsSettings())
@@ -44,25 +60,23 @@ ProjectQmlExtension::ProjectQmlExtension(QObject *parent)
 {
 }
 
-ProjectQmlExtension::ProjectQmlExtension(Settings *settings, Project *project, ViewEngine* engine, QObject *parent)
-    : QObject(parent)
-    , m_project(project)
-    , m_engine(engine)
-    , m_settings(new QmlJsSettings())
-    , m_scanMonitor(new ProjectQmlScanMonitor(this, project, engine))
-    , m_paletteContainer(nullptr)
-{
-    lv::EditorSettings* editorSettings = qobject_cast<lv::EditorSettings*>(settings->file("editor"));
-    editorSettings->addSetting("qmljs", m_settings);
-    editorSettings->syncWithFile();
-
-    engine->addCompileHook(&ProjectQmlExtension::engineHook, this);
-}
-
+/**
+ * @brief ProjectQmlExtension destructor
+ */
 ProjectQmlExtension::~ProjectQmlExtension(){
     m_engine->removeCompileHook(&ProjectQmlExtension::engineHook, this);
 }
 
+/**
+ * @brief Override of QQmlParserStatus::classBegin
+ */
+void ProjectQmlExtension::classBegin(){
+}
+
+
+/**
+ * @brief Override of QQmlParserStatus::componenComplete
+ */
 void ProjectQmlExtension::componentComplete(){
     if ( !m_scanMonitor ){
         QQmlContext* ctx = qmlEngine(this)->rootContext();
@@ -98,14 +112,23 @@ void ProjectQmlExtension::componentComplete(){
     }
 }
 
+/**
+ * \brief Returns the the qml scanner associated with this object.
+ */
 ProjectQmlScanner *ProjectQmlExtension::scanner(){
     return m_scanMonitor->m_scanner;
 }
 
+/**
+ * \brief Returns the lv::PluginInfoExtractor associated with this object.
+ */
 PluginInfoExtractor *ProjectQmlExtension::getPluginInfoExtractor(const QString &import){
     return m_scanMonitor->getPluginInfoExtractor(import);
 }
 
+/**
+ * \brief Hook that get's executed for each engine recompile, notifying all codeHandlers assigned to this object.
+ */
 void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *result, QObject *, void* data){
     ProjectQmlExtension* that = reinterpret_cast<ProjectQmlExtension*>(data);
 
@@ -115,14 +138,27 @@ void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *res
     }
 }
 
+/**
+ * \brief Adds a codeHandler to this object.
+ *
+ * CodeHandlers are updated each time the engine recompiles the code.
+ */
 void ProjectQmlExtension::addCodeQmlHandler(CodeQmlHandler *handler){
     m_codeHandlers.append(handler);
 }
 
+/**
+ * \brief Removes the \p handler from this object.
+ *
+ * Note that this does not destroy the object.
+ */
 void ProjectQmlExtension::removeCodeQmlHandler(CodeQmlHandler *handler){
     m_codeHandlers.removeAll(handler);
 }
 
+/**
+ * \brief Registers the ProjectQmlExtension qml types to the \p uri.
+ */
 void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterType<lv::ProjectQmlExtension>(uri, 1, 0, "ProjectQmlExtension");
     qmlRegisterType<lv::QmlCursorInfo>(      uri, 1, 0, "QmlCursorInfo");
@@ -139,6 +175,10 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         uri, 1, 0, "QmlItemModel", "QmlItemModel can only be accessed through the qmledit extension.");
 }
 
+
+/**
+ * \brief Creates a CodeQmlHandler for the given \p document
+ */
 QObject *ProjectQmlExtension::createHandler(ProjectDocument *, DocumentHandler *handler){
     return new CodeQmlHandler(m_engine, m_project, m_settings, this, handler);
 }

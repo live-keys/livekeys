@@ -22,6 +22,7 @@
 
 namespace lv{
 
+/// \private
 class QmlLibraryDependency{
 
 public:

@@ -38,6 +38,7 @@ public:
     std::vector<std::string> scriptArguments;
 };
 
+/// \private
 class CommandLineParser::Option{
 
 public:

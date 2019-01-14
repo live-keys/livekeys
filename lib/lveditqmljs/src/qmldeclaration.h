@@ -80,8 +80,8 @@ public:
     int valueLength() const;
     void setValueLength(int valueLength);
 
-    ProjectDocumentSection::Ptr section(){ return m_section; }
-    void setSection(ProjectDocumentSection::Ptr section) { m_section = section; }
+    ProjectDocumentSection::Ptr section();
+    void setSection(ProjectDocumentSection::Ptr section);
 
 private:
     QmlDeclaration(const QStringList& identifierChain, ProjectDocument* document = 0);
@@ -184,6 +184,16 @@ inline int QmlDeclaration::valueLength() const{
 /// \brief Sets the value length of this declaration
 inline void QmlDeclaration::setValueLength(int valueLength){
     m_section->resize(m_identifierLength + m_valueOffset + valueLength);
+}
+
+/// \brief Returns the current lv::ProjectDocument section.
+ProjectDocumentSection::Ptr QmlDeclaration::section(){
+    return m_section;
+}
+
+/// \brief Assigns the lv::ProjectDocument section.
+void QmlDeclaration::setSection(ProjectDocumentSection::Ptr section) {
+    m_section = section;
 }
 
 }// namespace

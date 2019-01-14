@@ -28,7 +28,8 @@
 namespace lv{
 
 /**
- * @brief The QCodeJSHighlighter is a private class used internally for highlighting.
+ * \brief The QCodeJSHighlighter is a private class used internally for highlighting.
+ * \private
  */
 class QmlJsHighlighter : public QSyntaxHighlighter{
 
