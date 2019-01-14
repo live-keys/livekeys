@@ -1363,9 +1363,7 @@ lv::CodePalette* CodeQmlHandler::openPalette(lv::PaletteList *paletteList, int i
             palette->setValueFromBinding(QVariant::fromValue(ppref.at(mainPath->listIndex())));
         }
 
-        connect(palette, &CodePalette::valueChanged, [this, ef](){
-            paletteValueChanged(ef);
-        });
+        connect(palette, &CodePalette::valueChanged, ef->bindingChannel(), &BindingChannel::commitFromFragment);
 
         addEditingFragment(ef);
     }
@@ -1604,9 +1602,7 @@ lv::CodePalette* CodeQmlHandler::openBinding(lv::PaletteList *paletteList, int i
             palette->setValueFromBinding(QVariant::fromValue(ppref.at(mainPath->listIndex())));
         }
 
-        connect(palette, &CodePalette::valueChanged, [this, ef](){
-            paletteValueChanged(ef);
-        });
+        connect(palette, &CodePalette::valueChanged, ef->bindingChannel(), &BindingChannel::commitFromFragment);
 
         addEditingFragment(ef);
     }
@@ -1725,7 +1721,8 @@ lv::CodePalette* CodeQmlHandler::edit(int position, QObject *currentApp){
     palette->setExtension(new QmlCodeConverter(ef, this), true);
 
     connect(palette, &CodePalette::valueChanged, [this, ef](){
-        paletteValueChanged(ef);
+        if ( ef->palette() )
+            ef->bindingChannel()->commit(ef->palette()->value());
         removeEditingFragment(ef);
     });
 
@@ -1745,12 +1742,6 @@ void CodeQmlHandler::cancelEdit(){
     if ( m_editingFragment ){
         removeEditingFragment(m_editingFragment);
     }
-}
-
-void CodeQmlHandler::paletteValueChanged(lv::QmlEditFragment *frg){
-    CodePalette* lp = frg->palette();
-    if ( lp )
-        frg->bindingChannel()->commit(lp->value());
 }
 
 

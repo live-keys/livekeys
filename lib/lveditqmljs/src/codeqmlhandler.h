@@ -95,7 +95,6 @@ public slots:
     lv::CodePalette* openPalette(lv::PaletteList* palette, int index, QObject* currentApp = 0);
     void removePalette(QObject* palette);
     int palettePosition(QObject* palette);
-    void paletteValueChanged(QmlEditFragment *editFragment);
 
     void addPaletteBox(QObject* paletteBox);
     QObject* paletteBoxFor(lv::CodePalette* palette);
