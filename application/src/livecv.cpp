@@ -305,7 +305,8 @@ std::vector<std::string> LiveCV::packageImportPaths() const{
 
 QByteArray LiveCV::extractPluginInfo(const QString &import) const{
 //    TODO: Check result
-    lv::ProjectQmlExtension* qmlHandler = new lv::ProjectQmlExtension(m_settings, m_project, m_engine);
+    lv::ProjectQmlExtension* qmlHandler = new lv::ProjectQmlExtension();
+    qmlHandler->setParams(m_settings, m_project, m_engine);
 
     lv::PluginInfoExtractor* extractor = qmlHandler->getPluginInfoExtractor(import);
     if ( extractor ){

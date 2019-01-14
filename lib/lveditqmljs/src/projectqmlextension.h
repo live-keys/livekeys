@@ -60,6 +60,8 @@ public:
 
     static void registerTypes(const char* uri);
 
+    void setParams(Settings *settings, Project* project, ViewEngine* engine);
+
 public slots:
     QObject* createHandler(ProjectDocument* document, DocumentHandler* handler);
 
