@@ -1,6 +1,6 @@
 # Plugin `lcvphoto`
 
-  Some description here
+Wrappers for opencv.photo library.
 
 ```js
 import lcvphoto 1.0

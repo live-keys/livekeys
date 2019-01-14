@@ -33,7 +33,8 @@ include($$PROJECT_ROOT/project/3rdparty/opencv.pri)
 # Handling the palettes
 
 OTHER_FILES *= \
-    palettes/*.qml
+    palettes/*.qml \
+    doc/*.md
 
 # Deploy the palettes
 
