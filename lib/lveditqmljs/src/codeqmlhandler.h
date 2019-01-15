@@ -127,6 +127,7 @@ public slots:
     void updateScope();
 
 signals:
+    /// \brief Triggered before removing a palette
     void paletteAboutToRemove(lv::CodePalette* palette);
 
 private:
@@ -208,6 +209,7 @@ private:
 
 };
 
+/// \brief Returns the settings associated with this object.
 inline QmlJsSettings *CodeQmlHandler::settings(){
     return m_settings;
 }

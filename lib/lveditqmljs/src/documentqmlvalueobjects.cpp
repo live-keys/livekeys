@@ -22,6 +22,10 @@
 
 namespace lv{
 
+// DocumentQmlValueObjectsVisitor
+// -----------------------------------------------------------------------------
+
+/// \private
 class DocumentQmlValueObjectsVisitor : protected QmlJS::AST::Visitor{
 
 public:
@@ -168,22 +172,224 @@ void DocumentQmlValueObjectsVisitor::endVisit(QmlJS::AST::UiPublicMember *ast){
     }
 }
 
-// Class QDocumentQmlValueObjects
-// ------------------------------
+// Class QDocumentQmlValueObjects::RangeItem
+// -----------------------------------------------------------------------------
 
+/**
+ * \class lv::DocumentQmlValueObjects::RangeItem
+ * \ingroup lveditqmljs
+ * \brief Base range item acting as a node in the hierarchy
+ */
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeItem::getAst()
+ * \brief Returns internal AST node.
+ */
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeItem::getParent()
+ * \brief Returns the parent of this item, or nullptr if there isn't any
+ */
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeItem::appendObject()
+ * \brief Appends an object to this item
+ */
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeItem::appendProperty()
+ * \brief Appends a property to this item
+ */
+
+// Class QDocumentQmlValueObjects::RangeProperty
+// -----------------------------------------------------------------------------
+
+/**
+ * \class lv::DocumentQmlValueObjects::RangeProperty
+ * \ingroup lveditqmljs
+ * \brief Property range item inside the ierarchy
+ */
+
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeProperty::getAst()
+ * \brief Returns internal AST node.
+ */
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeProperty::getParent()
+ * \brief Returns the parent of this item, or nullptr if there isn't any
+ */
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeProperty::appendObject()
+ * \brief Sets the value of this property to the specified object
+ */
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeProperty::name()
+ * \brief Returns the name chain of this property
+ */
+
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeProperty::object()
+ * \brief Returns the declared object chain this property belongs to
+ */
+
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeProperty::type()
+ * \brief Returns the declared type of this property if it has any
+ */
+
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeProperty::hasType()
+ * \brief Returns true if this property's type was declared within this document,
+ * false otherwise
+ */
+
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeProperty::ast
+ * \brief Internal AST node
+ */
+
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeProperty::parent
+ * \brief Parent of this item
+ */
+
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeProperty::child
+ * \brief Child object of this property if it has any
+ */
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeProperty::begin
+ * \brief Start range of this property
+ */
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeProperty::propertyEnd
+ * \brief Returns the end of this property's identifier declaration
+ */
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeProperty::valueBegin
+ * \brief Returns the starting position of this property's value declaration
+ */
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeProperty::end
+ * \brief Returns the end of this property
+ */
+
+// Class QDocumentQmlValueObjects::RangeObject
+// -----------------------------------------------------------------------------
+
+/**
+ * \class lv::DocumentQmlValueObjects::RangeObject
+ * \ingroup lveditqmljs
+ * \brief Object range item inside the hierarchy
+ */
+
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeObject::getAst()
+ * \brief Returns internal AST node.
+ */
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeObject::getParent()
+ * \brief Returns the parent of this object, or nullptr if there isn't any
+ */
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeObject::appendObject()
+ * \brief Appends a child object to this object
+ */
+
+/**
+ * \fn lv::DocumentQmlValueObjects::RangeObject::appendProperty()
+ * \brief Appends a property to this object
+ */
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeObject::ast
+ * \brief Internal AST node
+ */
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeObject::parent
+ * \brief Parent of this object
+ */
+
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeObject::children
+ * \brief Children for this object
+ */
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeObject::properties
+ * \brief Properties for this obejct
+ */
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeObject::begin
+ * \brief Start position for this object
+ */
+
+/**
+ * \property lv::DocumentQmlValueObjects::RangeObject::end
+ * \brief End position for this object
+ */
+
+// Class QDocumentQmlValueObjects
+// -----------------------------------------------------------------------------
+
+/**
+ * \class DocumentQmlValueObjects
+ * \ingroup lveditqmljs
+ * \brief Contains the ierarchy of Qml objects and a reference to their AST
+ *
+ * This class can be used to extract parsed objects and their properties using thei range and position
+ * in code..
+ */
+
+/**
+ * \brief DocumentQmlValueObjects constructor
+ */
 DocumentQmlValueObjects::DocumentQmlValueObjects()
     : m_root(0)
 {
 }
 
+
+/**
+ * \brief DocumentQmlValueObjects destructor
+ */
 DocumentQmlValueObjects::~DocumentQmlValueObjects(){
     delete m_root;
 }
 
+/**
+ * \brief Creates a new lv::DocumentQmlValueObjects object
+ * \returns Shared Pointer to a lv::DocumentQmlValueObjects object
+ */
 DocumentQmlValueObjects::Ptr DocumentQmlValueObjects::create(){
     return DocumentQmlValueObjects::Ptr(new DocumentQmlValueObjects);
 }
 
+/**
+ * \brief String representation of this object
+ *
+ * Will output the hierarchy of nodes defined in this object
+ */
 QString DocumentQmlValueObjects::toString() const{
     if ( !m_root )
         return QString();
@@ -191,11 +397,17 @@ QString DocumentQmlValueObjects::toString() const{
     return toStringRecursive(m_root);
 }
 
+/**
+ * \brief Visitor method implementation
+ */
 void DocumentQmlValueObjects::visit(QmlJS::AST::Node *astroot){
     DocumentQmlValueObjectsVisitor visitor(this);
     visitor(astroot);
 }
 
+/**
+ * \brief Returns the properties between \p start and \p end for the given \p root object
+ */
 QList<DocumentQmlValueObjects::RangeProperty*> DocumentQmlValueObjects::propertiesBetween(
         int start,
         int end,
@@ -264,6 +476,14 @@ QString DocumentQmlValueObjects::toStringRecursive(
     return base;
 }
 
+/**
+ * \brief Returns the name chain of this property
+ *
+ * For example
+ * \code
+ * border.size : 20 // will return border.size
+ * \endcode
+ */
 QStringList DocumentQmlValueObjects::RangeProperty::name() const{
     QStringList base;
 
@@ -287,6 +507,9 @@ QStringList DocumentQmlValueObjects::RangeProperty::name() const{
     return base;
 }
 
+/**
+ * \brief Returns the object type chain for this property
+ */
 QStringList DocumentQmlValueObjects::RangeProperty::object() const{
     QStringList base;
 
@@ -310,6 +533,9 @@ QStringList DocumentQmlValueObjects::RangeProperty::object() const{
     return base;
 }
 
+/**
+ * \brief Returns the type of this property
+ */
 QString DocumentQmlValueObjects::RangeProperty::type() const{
     if ( ast->kind == QmlJS::AST::Node::Kind_UiPublicMember ){
         return static_cast<QmlJS::AST::UiPublicMember*>(ast)->memberType.toString();
@@ -317,6 +543,11 @@ QString DocumentQmlValueObjects::RangeProperty::type() const{
     return "";
 }
 
+/**
+ * \brief Checks wether this property was declared with a type
+ *
+ * \returns True on success, false otherwise
+ */
 bool DocumentQmlValueObjects::RangeProperty::hasType() const{
     return ast->kind == QmlJS::AST::Node::Kind_UiPublicMember;
 }

@@ -35,7 +35,9 @@ class LV_EDITQMLJS_EXPORT DocumentQmlValueObjects{
 public:
     friend class DocumentQmlValueObjectsVisitor;
 
+    /// Shared Pointer to a lv::DocumentQmlValueObjects
     typedef QSharedPointer<DocumentQmlValueObjects>       Ptr;
+    /// Const Shared Pointer to a lv::DocumentQmlValueObjects
     typedef QSharedPointer<const DocumentQmlValueObjects> ConstPtr;
 
     class RangeObject;
@@ -126,6 +128,7 @@ private:
     RangeObject* m_root;
 };
 
+/// \brief Returns the root node of this ierarchy
 inline DocumentQmlValueObjects::RangeObject *DocumentQmlValueObjects::root(){
     return m_root;
 }

@@ -54,14 +54,17 @@ private:
     bool       m_timedOut;
 };
 
+/// \brief Returns the processed result
 inline const QByteArray PluginInfoExtractor::result() const{
     return m_result;
 }
 
+/// \brief Returns true if the result has been captured, false otherwise
 inline bool PluginInfoExtractor::isDone() const{
     return m_isDone;
 }
 
+/// \brief Returns true if capturing the result has timed out, false otherwise
 inline bool PluginInfoExtractor::timedOut() const{
     return m_timedOut;
 }

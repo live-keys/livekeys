@@ -33,6 +33,7 @@ namespace lv{
 
 namespace{
 
+    /// \private
     BindingPath::Node* findDeclarationPathImpl(
         DocumentQmlValueObjects::RangeObject *object,
         QmlDeclaration::Ptr declaration)
@@ -149,6 +150,7 @@ namespace{
         return nullptr;
     }
 
+    /// \private
     void traversePath(BindingPath* path, BindingPath::Node* n, QObject* object){
         if ( n == nullptr || object == nullptr)
             return;
@@ -194,15 +196,91 @@ namespace{
 
 } // namespace
 
+// class DocumentQmlInfoPrivate
+// ------------------------------------------------------------------------------
 
+/// \private
 class DocumentQmlInfoPrivate{
 public:
-    QmlJS::Document::MutablePtr      internalDoc;
-    QmlJS::Bind*                     internalDocBind;
+    QmlJS::Document::MutablePtr     internalDoc;
+    QmlJS::Bind*                    internalDocBind;
     DocumentQmlRanges               ranges;
     QList<DocumentQmlInfo::Message> messages;
 };
 
+/**
+ * \class lv::DocumentQmlInfo::ValueReference
+ * \ingroup lveditqmljs
+ * \brief Contains a reference to a value within a parsed qml document
+ */
+
+/**
+ * \property lv::DocumentQmlInfo::ValueReference::value
+ * \brief Internal reference to the value
+ */
+
+/**
+ * \property lv::DocumentQmlInfo::ValueReference::parent
+ * \brief Reference to the parent
+ */
+
+/**
+ * \class lv::DocumentQmlInfo::ASTReference
+ * \ingroup lveditqmljs
+ * \brief Reference to an AST node within the parsed qml document
+ */
+
+/**
+ * \property lv::DocumentQmlInfo::ASTReference::node
+ * \brief Internal reference to the AST node
+ */
+
+
+/**
+ * \class lv::DocumentQmlInfo::Message
+ * \ingroup lveditqmljs
+ * \brief Message information containing parsing status.
+ */
+
+
+/**
+ * \fn lv::DocumentQmlInfo::Message::Message()
+ * \brief DocumentQmlInfo::Message constructor
+ */
+
+/**
+ * \property lv::DocumentQmlInfo::Message::kind
+ * \brief Message severity level
+ */
+
+/**
+ * \property lv::DocumentQmlInfo::Message::position
+ * \brief Position the message was generated at
+ */
+
+/**
+ * \property lv::DocumentQmlInfo::Message::line
+ * \brief Line the message was generated at
+ */
+
+/**
+ * \property lv::DocumentQmlInfo::Message::text
+ * \brief Message text
+ */
+
+// class DocumentQmlInfo
+// ------------------------------------------------------------------------------
+
+/**
+ * \class lv::DocumentQmlInfo
+ * \ingroup lveditqmljs
+ * \brief Contains parsed information about a Project qml document
+ */
+
+
+/**
+ * \brief Returns the lv::DocumentQmlInfo::Dialect according to the file \p extension
+ */
 DocumentQmlInfo::Dialect DocumentQmlInfo::extensionToDialect(const QString &extension){
     static QHash<QString, DocumentQmlInfo::Dialect> map;
     map["js"]         = DocumentQmlInfo::Javascript;
@@ -214,6 +292,11 @@ DocumentQmlInfo::Dialect DocumentQmlInfo::extensionToDialect(const QString &exte
     return map.value(extension, DocumentQmlInfo::Unknown);
 }
 
+/**
+ * \brief DocumentQmlInfo constructor.
+ *
+ * This constructor is private. Use lv::DocumentQmlInfo::create() function.
+ */
 DocumentQmlInfo::DocumentQmlInfo(const QString &fileName)
     : d_ptr(new DocumentQmlInfoPrivate)
 {
@@ -227,10 +310,16 @@ DocumentQmlInfo::DocumentQmlInfo(const QString &fileName)
         d->internalDoc = QmlJS::Document::create(fileName, QmlJS::Dialect::NoLanguage);
 }
 
+/**
+ * \brief Constructs a new lv::DocumentQmlInfo object.
+ */
 DocumentQmlInfo::Ptr DocumentQmlInfo::create(const QString &fileName){
     return DocumentQmlInfo::Ptr(new DocumentQmlInfo(fileName));
 }
 
+/**
+ * \brief Extract the declared id's within a qml document.
+ */
 QStringList DocumentQmlInfo::extractIds() const{
     Q_D(const DocumentQmlInfo);
     if ( d->internalDocBind->idEnvironment() == 0 )
@@ -241,11 +330,17 @@ QStringList DocumentQmlInfo::extractIds() const{
     return extractor.ids();
 }
 
+/**
+ * \brief Return a reference to the root object of this qml document
+ */
 const DocumentQmlInfo::ValueReference DocumentQmlInfo::rootObject(){
     Q_D(DocumentQmlInfo);
     return DocumentQmlInfo::ValueReference(d->internalDocBind->rootObjectValue(), this);
 }
 
+/**
+ * \brief Returns a reference to the value represented by the given id.
+ */
 const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueForId(const QString &id) const{
     Q_D(const DocumentQmlInfo);
     if ( d->internalDocBind->idEnvironment() == 0 )
@@ -256,6 +351,12 @@ const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueForId(const QString 
     return DocumentQmlInfo::ValueReference(valueExtractor.value(), this);
 }
 
+/**
+ * \brief Extracts a usable object given a value reference.
+ *
+ * For example, you can use this class together with lv::DocumentQmlInfo::valueForId() to inspect
+ * a specific object defined with an id within the qml document.
+ */
 DocumentQmlObject DocumentQmlInfo::extractValueObject(
         const ValueReference &valueref,
         ValueReference *parent) const
@@ -279,6 +380,9 @@ DocumentQmlObject DocumentQmlInfo::extractValueObject(
     return vodata;
  }
 
+/**
+ * \brief Extract the name of the type given by this value reference.
+ */
 QString DocumentQmlInfo::extractTypeName(const DocumentQmlInfo::ValueReference &valueref) const{
     if ( isValueNull(valueref) || valueref.parent != this )
         return "";
@@ -290,6 +394,11 @@ QString DocumentQmlInfo::extractTypeName(const DocumentQmlInfo::ValueReference &
     return "";
 }
 
+/**
+ * \brief Extract the range of the type given by a value reference
+ *
+ * \p begin and \p end will be populated with the given range, or -1 if the range cannot be extracted
+ */
 void DocumentQmlInfo::extractTypeNameRange(const DocumentQmlInfo::ValueReference &valueref, int &begin, int &end){
     if ( isValueNull(valueref) || valueref.parent != this ){
         begin = -1;
@@ -305,6 +414,11 @@ void DocumentQmlInfo::extractTypeNameRange(const DocumentQmlInfo::ValueReference
     }
 }
 
+/**
+ * \brief Extract the full range given by a value reference
+ *
+ * \p begin and \p end will be populated with the given range, or -1 if the range cannot be extracted
+ */
 void DocumentQmlInfo::extractRange(const DocumentQmlInfo::ValueReference &valueref, int &begin, int &end){
     if ( isValueNull(valueref) || valueref.parent != this ){
         begin = -1;
@@ -320,11 +434,17 @@ void DocumentQmlInfo::extractRange(const DocumentQmlInfo::ValueReference &valuer
     }
 }
 
+/**
+ * \brief Finds the ranges within this document
+ */
 void DocumentQmlInfo::createRanges(){
     Q_D(DocumentQmlInfo);
     d->ranges(d->internalDoc);
 }
 
+/**
+ * \brief Find the value reference at a given \p position
+ */
 const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueAtPosition(int position) const{
     Q_D(const DocumentQmlInfo);
 
@@ -336,6 +456,11 @@ const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueAtPosition(int posit
     return DocumentQmlInfo::ValueReference(value, this);
 }
 
+/**
+ * \brief Find the value reference and range at a given \p position
+ *
+ * The \p begin and \p end arguments will be populated with the range positino
+ */
 const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueAtPosition(
         int position,
         int &begin,
@@ -363,21 +488,37 @@ const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueAtPosition(
     return DocumentQmlInfo::ValueReference(value, this);
 }
 
+/**
+ * \brief Returns the reference to an AST node at a specified \p position
+ */
 const DocumentQmlInfo::ASTReference DocumentQmlInfo::astObjectAtPosition(int position){
     Q_D(const DocumentQmlInfo);
     DocumentQmlRanges::Range range = d->ranges.findClosestRange(position);
     return DocumentQmlInfo::ASTReference(range.ast);
 }
 
+/**
+ * \brief Check wether the value reference is null.
+ *
+ * \returns true if \p vr is null, false otherwise
+ */
 bool DocumentQmlInfo::isValueNull(const DocumentQmlInfo::ValueReference& vr) const{
     return vr.value == 0;
 }
 
+/**
+ * \brief Check wether the document was parsed correctly after calling the lv::DocumentQmlInfo::parse() method
+ * \returns true if it was, false otherwise
+ */
 bool DocumentQmlInfo::isParsedCorrectly() const{
     Q_D(const DocumentQmlInfo);
     return d->internalDoc->isParsedCorrectly();
 }
 
+/**
+ * \brief Parses the source code to an AST form
+ * \returns True if the parse went correctly, false otherwise
+ */
 bool DocumentQmlInfo::parse(const QString &source){
     Q_D(DocumentQmlInfo);
     d->messages.clear();
@@ -405,11 +546,18 @@ bool DocumentQmlInfo::parse(const QString &source){
     return parseResult;
 }
 
+/**
+ * \brief Return a pointer to the internal QmlJS::Bind object
+ */
 QmlJS::Bind *DocumentQmlInfo::internalBind(){
     Q_D(DocumentQmlInfo);
     return d->internalDocBind;
 }
 
+/**
+ * \brief Check wether a given type is an object or not
+ * \returns true if \p typeString is an object, false otherwise
+ */
 bool DocumentQmlInfo::isObject(const QString &typeString){
     if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
          typeString == "int" || typeString == "list" || typeString == "real" ||
@@ -418,16 +566,26 @@ bool DocumentQmlInfo::isObject(const QString &typeString){
     return true;
 }
 
+/**
+ * \brief Return the path of the Document
+ */
 QString DocumentQmlInfo::path() const{
     Q_D(const DocumentQmlInfo);
     return d->internalDoc->path();
 }
 
+/**
+ * \brief Return the component name represented by this Document
+ */
 QString DocumentQmlInfo::componentName() const{
     Q_D(const DocumentQmlInfo);
     return d->internalDoc->componentName();
 }
 
+/**
+ * \brief Visit the AST and create the objects defined in this document
+ * \returns A pointer to the lv::DocumentQmlValueObjects
+ */
 DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects() const{
     Q_D(const DocumentQmlInfo);
     DocumentQmlValueObjects::Ptr objects = DocumentQmlValueObjects::create();
@@ -435,6 +593,10 @@ DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects() const{
     return objects;
 }
 
+/**
+ * \brief Visit the AST from the given \p ast node and create the objects defined within
+ * \returns A pointer to the lv::DocumentQmlValueObjects
+ */
 DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects(const DocumentQmlInfo::ASTReference &ast) const{
     DocumentQmlValueObjects::Ptr objects = DocumentQmlValueObjects::create();
     if ( ast.node ){
@@ -443,10 +605,22 @@ DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects(const DocumentQmlInf
     return objects;
 }
 
+/**
+ * \brief Match the binding \p path with the application value and update it's connection
+ *
+ * This function traverses the binding path recursively starting from the \p root of
+ * the application and tries to match the \p path with an application value.
+ *
+ * If the match is set, then the \p path value will be udpated.
+ */
 void DocumentQmlInfo::traverseBindingPath(BindingPath *path, QObject *root){
     traversePath(path, path->root(), root);
 }
 
+/**
+ * \brief Finds the binding path associated with a declaration within a range object
+ * \returns The found binding path on success, nullptr otherwise
+ */
 BindingPath *DocumentQmlInfo::findDeclarationPath(
         DocumentQmlValueObjects::RangeObject *root,
         QmlDeclaration::Ptr declaration)
@@ -464,6 +638,10 @@ BindingPath *DocumentQmlInfo::findDeclarationPath(
     return path;
 }
 
+/**
+ * \brief Finds the binding path associated with a delcaration within the project \p document
+ * \returns The found binding path if it exists, nullptr otherwise
+ */
 BindingPath* DocumentQmlInfo::findDeclarationPath(
         const QString &source,
         ProjectDocument *document,
@@ -476,6 +654,9 @@ BindingPath* DocumentQmlInfo::findDeclarationPath(
     return findDeclarationPath(objects->root(), declaration);
 }
 
+/**
+ * \brief DocumentQmlInfo destructor
+ */
 DocumentQmlInfo::~DocumentQmlInfo(){
 }
 

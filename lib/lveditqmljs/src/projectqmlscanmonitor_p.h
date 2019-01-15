@@ -40,6 +40,7 @@ class ProjectQmlScanMonitor : public QObject{
     friend class ProjectQmlExtension;
 
 public:
+    /// \private
     class DocumentQmlScopeTransport{
     public:
         QString path;

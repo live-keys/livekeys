@@ -44,6 +44,11 @@ namespace lv{
  * \brief Import data associated with a lv::DocumentQmlScope
  */
 
+/**
+ * \property lv::DocumentQmlScope::Import::NoVersion
+ * \brief Value used to check wether a version is valid or not
+ */
+
 // QDocumentQmlScope::Import implementation
 // ----------------------------------------
 

@@ -60,6 +60,7 @@ namespace lv{
 
 namespace qmlhandler_helpers{
 
+    /// \private
     class ScopeCopy{
     public:
         ScopeCopy(const ProjectQmlScope::Ptr& pProject, const DocumentQmlScope::Ptr& pDocument)
@@ -668,10 +669,28 @@ namespace qmlhandler_helpers{
     }
 }
 
+/**
+ * \class lv::CodeQmlHandler
+ * \ingroup lveditqmljs
+ * \brief Main code handler for the qml extension.
+ *
+ *
+ * Handles code completion, palette control, property and item searching.
+ */
+
+
+
 // QDocumentQmlHandler implementation
 // ----------------------------------
 
-CodeQmlHandler::CodeQmlHandler(ViewEngine *engine,
+
+/**
+ * \brief CodeQmlHandler constructor
+ *
+ * This is called through the ProjectQmlHandler.
+ */
+CodeQmlHandler::CodeQmlHandler(
+        ViewEngine *engine,
         Project *,
         QmlJsSettings *settings,
         ProjectQmlExtension *projectHandler,
@@ -695,6 +714,9 @@ CodeQmlHandler::CodeQmlHandler(ViewEngine *engine,
     m_projectHandler->scanMonitor()->addScopeListener(this);
 }
 
+/**
+ * \brief CodeQmlHandler destructor
+ */
 CodeQmlHandler::~CodeQmlHandler(){
     cancelEdit();
 
@@ -704,6 +726,11 @@ CodeQmlHandler::~CodeQmlHandler(){
     delete m_completionContextFinder;
 }
 
+/**
+ * \brief Implementation of code completion assist.
+ *
+ * Handles bracket and paranthesis auto-completion together with suggestions population.
+ */
 void CodeQmlHandler::assistCompletion(
         const QTextCursor& cursor,
         const QChar& insertion,
@@ -851,6 +878,9 @@ void CodeQmlHandler::assistCompletion(
         model->enable();
 }
 
+/**
+ * \brief Assints the document that will be used by this class.
+ */
 void CodeQmlHandler::setDocument(ProjectDocument *document){
     m_document      = document;
     m_target        = document->textDocument();
@@ -881,6 +911,9 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
     }
 }
 
+/**
+ * \brief DocumentContentsChanged handler
+ */
 AbstractCodeHandler::ContentsTrigger CodeQmlHandler::documentContentsChanged(int position, int, int){
     AbstractCodeHandler::ContentsTrigger r = AbstractCodeHandler::Engine;
     if ( !m_document->editingStateIs(ProjectDocument::Silent) ){
@@ -901,17 +934,26 @@ AbstractCodeHandler::ContentsTrigger CodeQmlHandler::documentContentsChanged(int
     return r;
 }
 
+/**
+ * \brief Called when a new scope is available from the scanMonitor
+ */
 void CodeQmlHandler::updateScope(){
     if ( m_projectHandler->scanMonitor()->hasProjectScope() && m_document )
         m_projectHandler->scanMonitor()->queueNewDocumentScope(m_document->file()->path(), m_document->content(), this);
 }
 
+/**
+ * \brief Calls a new rehighlight on the specified block
+ */
 void CodeQmlHandler::rehighlightBlock(const QTextBlock &block){
     if ( m_highlighter ){
         m_highlighter->rehighlightBlock(block);
     }
 }
 
+/**
+ * \brief Get a list of declarations from a specific cursor
+ */
 QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cursor){
 
     QList<QmlDeclaration::Ptr> properties;
@@ -1068,6 +1110,10 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
     return properties;
 }
 
+/**
+ * \brief Given a declaration identifier \p position and \p lenght, get the \p valuePosition and \p valueEnd
+ * for that declaration
+ */
 bool CodeQmlHandler::findDeclarationValue(int position, int length, int &valuePosition, int &valueEnd){
     if ( length > 0 ){
         DocumentQmlValueScanner vs(m_document, position, length);
@@ -1095,6 +1141,14 @@ bool CodeQmlHandler::findDeclarationValue(int position, int length, int &valuePo
     }
 }
 
+/**
+ * \brief Creates an injection channel between a declaration and the runtime
+ *
+ * This method will find all binding channels available by parsing the contents
+ * of the code structure, creating a set of binding pahts that describe where
+ * each component resides, and use those binding paths to connect the position of the
+ * code structure to the same values within the runtime.
+ */
 QmlEditFragment *CodeQmlHandler::createInjectionChannel(
         QmlDeclaration::Ptr declaration,
         QObject *runtime,
@@ -1120,6 +1174,9 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(
     return nullptr;
 }
 
+/**
+ * \brief Returns the block starting position and end position
+ */
 QPair<int, int> CodeQmlHandler::contextBlock(int position){
     DocumentQmlValueScanner vs(m_document, position, 0);
     int start = vs.getBlockStart(position);
@@ -1127,6 +1184,9 @@ QPair<int, int> CodeQmlHandler::contextBlock(int position){
     return QPair<int, int>(start, end);
 }
 
+/**
+ * \brief Adds an editing fragment to the current document
+ */
 bool CodeQmlHandler::addEditingFragment(QmlEditFragment *edit){
     auto it = m_edits.begin();
     while ( it != m_edits.end() ){
@@ -1153,6 +1213,9 @@ bool CodeQmlHandler::addEditingFragment(QmlEditFragment *edit){
     return true;
 }
 
+/**
+ * \brief Removes an editing fragment from this document
+ */
 void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
     auto it = m_edits.begin();
 
@@ -1199,6 +1262,9 @@ void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
     }
 }
 
+/**
+ * \brief Removes an editing fragment palette from this document
+ */
 void CodeQmlHandler::removeEditingFragmentPalette(QmlEditFragment *edit){
     auto it = m_edits.begin();
 
@@ -1248,7 +1314,12 @@ void CodeQmlHandler::removeEditingFragmentPalette(QmlEditFragment *edit){
     }
 }
 
-
+/**
+ * \brief Finds the available list of palettes at the current \p cursor position
+ *
+ * The \p unrepeated parameter makes sure the palettes that are found at that
+ * \p position are not already opened.
+ */
 lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated){
     if ( !m_document )
         return nullptr;
@@ -1285,6 +1356,9 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated){
     return lpl;
 }
 
+/**
+ * \brief Openes the palette \p index from a given \p paletteList
+ */
 lv::CodePalette* CodeQmlHandler::openPalette(lv::PaletteList *paletteList, int index, QObject *currentApp){
     if ( !m_document )
         return nullptr;
@@ -1384,6 +1458,9 @@ lv::CodePalette* CodeQmlHandler::openPalette(lv::PaletteList *paletteList, int i
     return ef->palette();
 }
 
+/**
+ * \brief Removes a palette given it's container object.
+ */
 void CodeQmlHandler::removePalette(QObject *paletteContainer){
     auto it = m_edits.begin();
 
@@ -1400,6 +1477,9 @@ void CodeQmlHandler::removePalette(QObject *paletteContainer){
     }
 }
 
+/**
+ * \brief Returns the palette cursor position given it's container box
+ */
 int CodeQmlHandler::palettePosition(QObject *paletteContainer){
     auto it = m_edits.begin();
 
@@ -1418,10 +1498,16 @@ int CodeQmlHandler::palettePosition(QObject *paletteContainer){
     return -1;
 }
 
+/**
+ * \brief Adds a palette box.
+ */
 void CodeQmlHandler::addPaletteBox(QObject *paletteBox){
     m_paletteBoxes.append(paletteBox);
 }
 
+/**
+ * \brief Returns the paletteBox for the given palette
+ */
 QObject *CodeQmlHandler::paletteBoxFor(CodePalette *palette){
     for ( auto it = m_paletteBoxes.begin(); it != m_paletteBoxes.end(); ++it ){
         QQuickItem* box = qobject_cast<QQuickItem*>((*it)->property("child").value<QObject*>());
@@ -1439,6 +1525,9 @@ QObject *CodeQmlHandler::paletteBoxFor(CodePalette *palette){
     return nullptr;
 }
 
+/**
+ * \brief Finds a palete box at a specific \p position
+ */
 QObject *CodeQmlHandler::paletteBoxAtPosition(int position){
     for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
         if ( (*it)->declaration()->position() == position ){
@@ -1449,6 +1538,9 @@ QObject *CodeQmlHandler::paletteBoxAtPosition(int position){
     return nullptr;
 }
 
+/**
+ * \brief Integrates a given palette box within the editor
+ */
 void CodeQmlHandler::framePalette(QQuickItem *box, CodePalette *palette){
     auto it = m_edits.begin();
 
@@ -1473,6 +1565,9 @@ void CodeQmlHandler::framePalette(QQuickItem *box, CodePalette *palette){
     dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, box->height(), box);
 }
 
+/**
+ * \brief Receive different qml based information about a given cursor position
+ */
 QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
     bool canBind = false, canUnbind = false, canEdit = false, canAdjust = false;
 
@@ -1523,6 +1618,11 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
     return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust);
 }
 
+/**
+ * \brief Open a specific binding palette given a \p paletteList and an \p index
+ *
+ * \returns A pointer to the opened lv::CodePalette.
+ */
 lv::CodePalette* CodeQmlHandler::openBinding(lv::PaletteList *paletteList, int index, QObject *currentApp){
     if ( !m_document )
         return nullptr;
@@ -1619,6 +1719,9 @@ lv::CodePalette* CodeQmlHandler::openBinding(lv::PaletteList *paletteList, int i
     return ef->palette();
 }
 
+/**
+ * \brief Closes the bindings between the given position and length
+ */
 void CodeQmlHandler::closeBinding(int position, int length){
     if ( !m_document )
         return;
@@ -1655,6 +1758,9 @@ void CodeQmlHandler::closeBinding(int position, int length){
         dh->rehighlightSection(position, length);
 }
 
+/**
+ * \brief Opens an editing palette at the given \p position
+ */
 lv::CodePalette* CodeQmlHandler::edit(int position, QObject *currentApp){
     if ( !m_document )
         return nullptr;
@@ -1738,6 +1844,9 @@ lv::CodePalette* CodeQmlHandler::edit(int position, QObject *currentApp){
     return ef->palette();
 }
 
+/**
+ * \brief Cancels the current editing palette
+ */
 void CodeQmlHandler::cancelEdit(){
     if ( m_editingFragment ){
         removeEditingFragment(m_editingFragment);
@@ -1745,6 +1854,11 @@ void CodeQmlHandler::cancelEdit(){
 }
 
 
+/**
+ * \brief Get the insertion optinos at the given \p position
+ *
+ * Returns an lv::QmlAddContainer for all the options
+ */
 QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
     if ( !m_document || !m_target )
         return nullptr;
@@ -1904,6 +2018,9 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
     return addContainer;
 }
 
+/**
+ * \brief Add a property given the \p addText at the specified \p position
+ */
 void CodeQmlHandler::addProperty(int position, const QString &addText){
     m_document->addEditingState(ProjectDocument::Palette);
     QTextCursor cs(m_target);
@@ -1919,6 +2036,9 @@ void CodeQmlHandler::addProperty(int position, const QString &addText){
     }
 }
 
+/**
+ * \brief Adds an item given the \p addText at the specitied \p position
+ */
 void CodeQmlHandler::addItem(int position, const QString &addText){
     m_document->addEditingState(ProjectDocument::Palette);
     QTextCursor cs(m_target);
@@ -1934,6 +2054,9 @@ void CodeQmlHandler::addItem(int position, const QString &addText){
     }
 }
 
+/**
+ * \brief Update palette binding channels for a new runtime root.
+ */
 void CodeQmlHandler::updateRuntimeBindings(QObject *runtime){
     QString source = m_target->toPlainText();
     DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(m_document->file()->path());
@@ -1987,11 +2110,17 @@ void CodeQmlHandler::updateRuntimeBindings(QObject *runtime){
     }
 }
 
+/**
+ * \brief Handler for when a new document scope is ready
+ */
 void CodeQmlHandler::newDocumentScopeReady(const QString &, lv::DocumentQmlScope::Ptr documentScope){
     m_documentScope = documentScope;
     m_newScope = true;
 }
 
+/**
+ * \brief Handler for when a new project scope is ready
+ */
 void CodeQmlHandler::newProjectScopeReady(){
     m_newScope = true;
 }

@@ -33,7 +33,7 @@ namespace lv{
 
 /**
  * \class ProjectQmlScope
- * \inmodule lveditqmljs
+ * \ingroup lveditqmljs
  * \brief Contains all the loaded plugins of a project
  */
 
@@ -181,6 +181,9 @@ int ProjectQmlScope::totalImplicitLibraries() const{
     return d_implicitLibraries->totalLibraries();
 }
 
+/**
+ * \brief Returns the uri of a library from it's path
+ */
 QString ProjectQmlScope::uriForPath(const QString &path){
     QString bestmatch;
     for ( QHash<QString, QList<QString> >::iterator it = m_importToPaths.begin(); it != m_importToPaths.end(); ++it ){
