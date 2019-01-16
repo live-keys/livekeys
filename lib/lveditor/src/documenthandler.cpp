@@ -46,9 +46,6 @@
 
 namespace lv{
 
-//TODO: Add object type on code properties
-//TODO: Add object type when looking for palettes
-
 const QChar DocumentHandler::ParagraphSeparator = QChar(8233);
 const QChar DocumentHandler::NewLine            = QChar('\n');
 
@@ -62,10 +59,6 @@ DocumentHandler::DocumentHandler(QObject *parent)
     , m_project(nullptr)
     , m_engine(nullptr)
     , m_textEdit(nullptr)
-    , m_fragmentStart(ProjectDocumentMarker::create())
-    , m_fragmentEnd(ProjectDocumentMarker::create())
-    , m_fragmentStartLine(-1)
-    , m_fragmentEndLine(-1)
 {
     setIndentSize(4);
 }
@@ -124,17 +117,6 @@ void DocumentHandler::componentComplete(){
 
 void DocumentHandler::readContent(){
     m_targetDoc->setPlainText(m_projectDocument->content());
-}
-
-void DocumentHandler::updateFragments(){
-    if ( m_fragmentStartLine != -1 && m_fragmentEndLine > 0 && m_targetDoc ){
-        m_fragmentStart = m_projectDocument->addMarker(
-            m_targetDoc->findBlockByLineNumber(m_fragmentStartLine).position()
-        );
-        m_fragmentEnd   = m_projectDocument->addMarker(
-            m_targetDoc->findBlockByLineNumber(m_fragmentEndLine).position()
-        );
-    }
 }
 
 void DocumentHandler::findCodeHandler(){
@@ -242,20 +224,15 @@ void DocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
     }
 }
 
-void DocumentHandler::setDocument(ProjectDocument *document, QJSValue options){
+void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
     if ( m_projectDocument ){
-        disconnect(m_projectDocument, SIGNAL(contentChanged()),       this, SLOT(documentUpdatedContent()));
         disconnect(m_projectDocument, SIGNAL(formatChanged(int,int)), this, SLOT(documentFormatUpdate(int, int)));
     }
 
     m_projectDocument = document;
     if ( document ){
-        connect(m_projectDocument, SIGNAL(contentChanged()),       this, SLOT(documentUpdatedContent()));
         connect(m_projectDocument, SIGNAL(formatChanged(int,int)), this, SLOT(documentFormatUpdate(int, int)));
     }
-
-    m_fragmentStartLine = -1;
-    m_fragmentEndLine   = -1;
 
     if ( m_codeHandler ){
         delete m_codeHandler;
@@ -274,8 +251,6 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue options){
             m_textEdit->setTextDocument(m_targetDoc);
         }
 
-        updateFragments();
-
         connect(
             m_targetDoc, SIGNAL(contentsChange(int,int,int)),
             this, SLOT(documentContentsChanged(int,int,int))
@@ -292,38 +267,6 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue options){
     emit targetChanged();
 
     findCodeHandler();
-/*
-    if ( m_targetDoc )
-        m_targetDoc->clearUndoRedoStacks();
-*/
-    if ( options.isObject() ){
-        if ( options.hasOwnProperty("fragmentStartLine") && options.hasOwnProperty("fragmentEndLine") ){
-            m_fragmentStartLine = options.property("fragmentStartLine").toInt();
-            m_fragmentEndLine   = options.property("fragmentEndLine").toInt();
-            updateFragments();
-        }
-    }
-}
-
-void DocumentHandler::documentUpdatedContent(){
-    if ( m_fragmentEndLine > 0 ){
-        if ( m_fragmentStart->isValid() && m_fragmentEnd->isValid() && m_targetDoc ){
-            int startLine = m_targetDoc->findBlock(m_fragmentStart->position()).firstLineNumber();
-            int endLine = m_targetDoc->findBlock(m_fragmentEnd->position()).firstLineNumber();
-
-            if ( startLine != m_fragmentStartLine || endLine != m_fragmentEndLine ){
-                m_fragmentStartLine = startLine;
-                m_fragmentEndLine = endLine;
-                emit fragmentLinesChanged(m_fragmentStartLine, m_fragmentEndLine);
-            }
-        } else {
-            if ( m_fragmentEndLine != 0 ){
-                m_fragmentEndLine = 0;
-                m_fragmentStartLine = 0;
-                emit fragmentLinesChanged(0, 0);
-            }
-        }
-    }
 }
 
 void DocumentHandler::documentFormatUpdate(int position, int length){
