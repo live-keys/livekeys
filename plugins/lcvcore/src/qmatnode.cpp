@@ -18,13 +18,13 @@
 #include "qmatshader.h"
 #include <QSGSimpleMaterial>
 
-/*!
-  \class QMatNode
-  \inmodule lcvcore_cpp
-  \brief Node containing matrix state.
+/**
+ * \class QMatNode
+ * \ingroup plugin-lcvcore
+ * \brief Node containing matrix state.
  */
 
-/*!
+/**
  * \brief QMatNode constructor
  */
 QMatNode::QMatNode()

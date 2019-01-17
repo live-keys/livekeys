@@ -56,6 +56,14 @@ Returns a cloned matrix with javascript ownership
 
 Returns a shallow copied matrix with javascript ownership
 
+
+{qmlType:MatView}
+{qmlInherits:QtQuick.Item}
+{qmlBrief:Provides a view for a lcvcore/Mat object}
+
+{qmlProperty:bool linearFilter}
+
+smooth the displayed image through linear filtering
 {qmlType:ImRead}
 {qmlInherits:lcvcore.MatDisplay}
 {qmlBrief:Read an image from the hard drive into a lcvcore.Mat structure.}
@@ -92,6 +100,24 @@ Can be one of the following:
  * ```ImRead.CV_LOAD_IMAGE_COLOR```
  * ```ImRead.CV_LOAD_IMAGE_ANYDEPTH```
  * ```ImRead.CV_LOAD_IMAGE_ANYCOLOR```
+
+{qmlType:ImWrite}
+{qmlInherits:QtObject}
+{qmlBrief:Saves an image to a specified file.}
+
+Parameters:	
+
+* params
+
+```
+{
+  'jpegQuality' : // jpeg compression
+  'pngCompression' : // png compression
+  'pxmBinary' : // For PPM, PGM, or PBM, it can be a binary format flag ( CV_IMWRITE_PXM_BINARY ), 0 or 1. Default value is 1.
+}
+
+```
+
 
 
 {qmlType:MatRoi}
@@ -153,7 +179,19 @@ Number of digits to display for each number. Default is 3.
 
 When enabled, each number cell will be resized to a square shape. This is useful if you want to display pixels
 together with their values. Default is false.
- 
+
+{qmlType:Mat2DArray}
+{qmlInherits:MatDisplay}
+{qmlBrief:Creates a matrix from a given array of values.}
+
+{qmlProperty:Array values}
+
+Array of values in the matrix form
+
+{qmlProperty:lcvcore.Mat.Type}
+
+Type of the matrix
+
 {qmlType:MatBuffer}
 {qmlInherits:MatDisplay}
 {qmlBrief:Keeps the previous frame.}
@@ -318,10 +356,93 @@ calculate the motion. It uses a MatBuffer to store the previous frame :
 
 Second input for the subtraction.
 
+{qmlType:MatList}
+{qmlBrief:Matrix list that can be used as a model.}
+
+* qmlMethod appendMat(Mat mat) appends a matrix to the list
+* qmlMethod removeMat(Mat mat) removes the matrix mat from the list
+* qmlMethod removeAt(int index) removes matrix at index
+* qmlMethod Mat at(int index) returns the matrix at index
+* qmlMethod int size() returns the total matrixes in the list
+
+{qmlType:MatLoader}
+{qmlBrief:Static matrix loader}
+
+qmlMethod Mat staticLoad(string id, Object options)
+Loads the matrix statically, where id is the static id used to capture the matrix, and options can be:
+
+```
+{
+ 'w' : // width of the matrix
+ 'h' : // height of the matrix
+ 'ch' : // no of channels of the matrix
+ 'type' : // matrix type
+ 'color' : // default background color
+}
+
+```
+
+{qmlType:ImageFile}
+{qmlInherits:MatDisplay}
+{qmlBrief:Read an image from the hard drive into a lcvcore.Mat structure.}
+
+{qmlProperty:string file}
+
+The path to the file to load.
 
 
+{qmlProperty:enumaration isColor}
+
+Color type of the image
+
+Can be one of the following:
+
+ * ```ImRead.CV_LOAD_IMAGE_UNCHANGED```
+ * ```ImRead.CV_LOAD_IMAGE_GRAYSCALE```
+ * ```ImRead.CV_LOAD_IMAGE_COLOR```
+ * ```ImRead.CV_LOAD_IMAGE_ANYDEPTH```
+ * ```ImRead.CV_LOAD_IMAGE_ANYCOLOR```
 
 
+{qmlProperty:monitor}
+
+Monitors the file for changes and reloads the image if the file has changed.
+
+{qmlType:OverlapMat}
+{qmlInherits:MatDisplay}
+{qmlBrief:Overlaps 2 matrixes}
+
+{qmlProperty:input2}
+
+Mat to overlap with
+
+{qmlProperty:mask}
+
+Mask used when overlaping
+
+{qmlType:ItemCapture}
+{qmlInherits:MatDisplay}
+{qmlBrief:Captures the screen into a Mat object.}
+
+Available through the `output` property from `MatDisplay`.
+
+{qmlProperty:Item captureSource}
+
+Item to capture screen from
+
+{qmlType:VideoControls}
+{qmlBrief:Video controls provides a play/pause button and a seekbar for a `lcvcore/VideoCapture`}
+
+{qmlProperty:VideoCapture videoCapture}
+{qmlBrief: receives the actual videoCapture object}
+
+{qmlSignal:playPauseTriggered(bool paused)}
+
+Triggered when play/pause state changed
+
+{qmlSignal:seekTriggered(int currentFrame)}
+
+Triggered when a seek occurred
 
 
 

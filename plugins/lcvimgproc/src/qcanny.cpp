@@ -17,20 +17,6 @@
 #include "opencv2/imgproc.hpp"
 
 /*!
-  \qmltype Canny
-  \instantiates QCanny
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Finds edges within an image.
-
-  Canny finds edges in the input image image and marks them in the output map edges using the Canny algorithm.
-  The smallest value between threshold1 and threshold2 is used for edge linking. The largest value is used to find
-  initial segments of strong edges
-
-  \quotefile imgproc/canny.qml
-*/
-
-/*!
   \class QCanny
   \internal
   \inmodule lcvimgproc_cpp
@@ -48,33 +34,6 @@ QCanny::QCanny(QQuickItem *parent) :
     m_apertureSize(3),
     m_l2gradient(false){
 }
-
-/*!
-  \qmlproperty int Canny::threshold1
-
-  First threshold for the hysteresis procedure.
- */
-
-
-/*!
-  \qmlproperty Size Canny::threshold2
-
-  Second threshold for the hysteresis procedure.
- */
-
-
-/*!
-  \qmlproperty Size Canny::apertureSize
-
-  Aperture size for the Sobel() operator.
- */
-
-
-/*!
-  \qmlproperty Size Canny::l2gradient
-
-  A flag indicating whether a more accurate L2 norm should be used to calculate the image gradient magnitude.
- */
 
 QCanny::~QCanny(){
 }

@@ -27,23 +27,6 @@
 using namespace cv;
 
 /*!
-  \qmltype MatRead
-  \instantiates QMatRead
-  \inqmlmodule lcvcore
-  \inherits Item
-  \brief Displays a matrixes values in text form.
-
-  This element becomes very useful when debugging result images from algorithms. It can be used in combination
-  with the MatRoi element in order to create a pan-type interaction over a zoomed area in an image. The sample in
-  imgproc/panandzoom.qml uses this component.
-
-  \quotefile imgproc/panandzoom.qml
-
-  An alternative to the above example is to use a flickable area and use the MatRead over a whole image.
-*/
-
-
-/*!
   \class QMatReadNode
   \internal
  */
@@ -234,47 +217,6 @@ QMatRead::QMatRead(QQuickItem *parent)
 
 QMatRead::~QMatRead(){
 }
-
-
-
-/*!
-  \qmlproperty int MatRead::input
-
-  Input matrix to read.
- */
-
-
-
-/*!
-  \qmlproperty Font MatRead::font
-
-  Font to use when displaying values. Default is "Courier New" with 12 pixel size.
- */
-
-
-
-/*!
-  \qmlproperty Color MatRead::color
-
-  Color of the displayed values
- */
-
-
-
-/*!
-  \qmlproperty int MatRead::numberWidth
-
-  Number of digits to display for each number. Default is 3.
- */
-
-
-/*!
-  \qmlproperty bool MatRead::squareCell
-
-  When enabled, each number cell will be resized to a square shape. This is useful if you want to display pixels
-  together with their values. Default is false.
- */
-
 
 /*!
   \fn virtual QSGNode* QMatRead::updatePaintNode(QSGNode*, UpdatePaintNodeData*)

@@ -18,17 +18,6 @@
 
 using namespace cv;
 
-
-/*!
-  \qmltype StructuringElement
-  \instantiates QStructuringElement
-  \inqmlmodule lcvimgproc
-  \inherits Item
-  \brief Creates a structuring element of the specified size and shape for morphological operations.
-
-  \quotefile imgproc/erodedilate.qml
-*/
-
 /*!
   \class QStructuringElement
   \inmodule lcvimgproc_cpp
@@ -47,47 +36,6 @@ QStructuringElement::QStructuringElement(QQuickItem *parent)
 QStructuringElement::~QStructuringElement(){
     delete m_output;
 }
-
-
-/*!
-  \qmlproperty StructuringElement::ElementShape StructuringElement::shape
-
-  Element shape.
- */
-
-/*!
-  \qmlproperty size StructuringElement::ksize
-
-  Size of the structuring element.
- */
-
-/*!
-  \qmlproperty point StructuringElement::anchor
-
-  Anchor position within the element. The default value (-1, -1) means that the anchor is at the center. Note that only
-  the shape of a cross-shaped element depends on the anchor position. In other cases the anchor just regulates how much
-  the result of the morphological operation is shifted
- */
-
-/*!
-  \qmlproperty Mat StructuringElement::output
-
-  Created element.
- */
-
-
-/*!
-  \qmlproperty enumeration StructuringElement::ElementShape
-
-  Extrapolation method border type:
-  \list
-  \li StructuringElement.MORPH_RECT A rectangluar structuring element.
-  \li StructuringElement.MORPH_ELLIPSE  An elliptic structuring element, that is, a filled ellipse inscribed into the
-  rectangle Rect(0, 0, ksize.width, ksize.height)
-  \li StructuringElement.MORPH_CROSS A cross-shaped structuring element.
-  \endlist
-*/
-
 
 /*!
   \enum QStructuringElement::ElementShape

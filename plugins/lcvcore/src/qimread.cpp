@@ -24,36 +24,6 @@
 
 #include <QSGSimpleMaterial>
 
-/*!
-  \qmltype ImRead
-  \instantiates QImRead
-  \inqmlmodule lcvcore
-  \inherits MatDisplay
-  \brief Read an image from the hard drive.
-
-  To read the image, all you need is to specify the location :
-
-  \qml
-  ImRead{
-       file : 'sample.jpg'
-  }
-  \endqml
-
-  You can load the image from the location where your qml file is saved by using the path from the codeDocument
-  property.
-
-  \qml
-  ImRead{
-       file : project.dir() + '/../_images/caltech_buildings_DSCN0246.JPG'
-  }
-  \endqml
-*/
-
-/*!
-   \class QImRead
-   \internal
-   \brief Reads an image from the hard drive.
- */
 
 QImRead::QImRead(QQuickItem *parent)
     : QMatDisplay(parent)
@@ -64,24 +34,6 @@ QImRead::QImRead(QQuickItem *parent)
 QImRead::~QImRead(){
 }
 
-/*!
-  \qmlproperty string ImRead::file
-  \brief The path to the file to load.
- */
-
-/*!
-  \qmlproperty enumeration ImRead::isColor
-  \brief Color type of the image
-
-  Can be one of the following:
-  \list
-  \li ImRead.CV_LOAD_IMAGE_UNCHANGED
-  \li ImRead.CV_LOAD_IMAGE_GRAYSCALE
-  \li ImRead.CV_LOAD_IMAGE_COLOR
-  \li ImRead.CV_LOAD_IMAGE_ANYDEPTH
-  \li ImRead.CV_LOAD_IMAGE_ANYCOLOR
-  \endlist
- */
 
 void QImRead::componentComplete(){
     QQuickItem::componentComplete();

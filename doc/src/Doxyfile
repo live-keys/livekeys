@@ -792,13 +792,13 @@ WARN_LOGFILE           =
 
 INPUT                  = \
     ../../lib/lvbase \
-    ../../lib/lveditor/src/ \
+    ../../lib/lveditor \
     ../../lib/lveditqmljs \
     ../../lib/lvelements/src/lvelementsglobal.h \
-    ../../lib/lvview/src/ \
-    ../../plugins/live/src/ \
+    ../../lib/lvview/src \
+    ../../plugins/live \
     ../../plugins/lcvcore \
-    ../../plugins/lcvfeatures2d/src/ \
+    ../../plugins/lcvfeatures2d \
     ../../plugins/lcvvideo
 
 # This tag can be used to specify the character encoding of the source files
