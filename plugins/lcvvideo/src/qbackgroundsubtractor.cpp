@@ -20,14 +20,6 @@
 using namespace cv;
 
 
-/*!
-  \qmltype BackgroundSubtractor
-  \instantiates QBackgroundSubtractor
-  \inqmlmodule lcvvideo
-  \inherits MatFilter
-  \brief Background subtractor base type.
- */
-
 // QBackgroundSubtractorPrivate Implementation
 // -------------------------------------------
 
@@ -55,21 +47,23 @@ void QBackgroundSubtractorPrivate::setLearningRate(double rate){
 // QBackgroundSubtractor Implementation
 // ------------------------------------
 
-/*!
-   \class QBackgroundSubtractor
-   \inmodule lcvvideo_cpp
-
-   Base class for background subtractor algorithms.
-   Should not be instantiated directly, use a specific background subtractor algorithm instead.
+/**
+ * \class QBackgroundSubtractor
+ * \ingroup plugin-lcvvideo
+ * 
+ * \brief Base class for background subtractor algorithms.
+ *  
+ * Should not be instantiated directly, use a specific background subtractor algorithm instead.
  */
 
-/*!
-  \brief QBackgroundSubtractor constructor
-
-  Parameters:
-  \a d_ptr Private pointer of a subclass instance
-  \a parent
- */
+/**
+* \brief QBackgroundSubtractor constructor
+* Parameters:
+* 
+* \a d_ptr Private pointer of a subclass instance
+* 
+* \a parent
+*/
 QBackgroundSubtractor::QBackgroundSubtractor(QBackgroundSubtractorPrivate *d_ptr, QQuickItem *parent)
     : QMatFilter(parent)
     , d_ptr(d_ptr ? d_ptr : new QBackgroundSubtractorPrivate){
@@ -79,22 +73,16 @@ QBackgroundSubtractor::QBackgroundSubtractor(QBackgroundSubtractorPrivate *d_ptr
     }
 }
 
-/*!
-  \brief QBackgroundSubtractor destructor
+/**
+ * \brief QBackgroundSubtractor destructor
  */
 QBackgroundSubtractor::~QBackgroundSubtractor(){
 }
 
 
-/*!
-  \qmlproperty string BackgroundSubtractor::learningRate
-
-  Learning rate for updating the background model (0 to 1, default is 0).
- */
-
-/*!
-  \property QBackgroundSubtractor::learningRate
-  \sa BackgroundSubtractor::learningRate
+/**
+ * \property QBackgroundSubtractor::learningRate
+ * \sa BackgroundSubtractor::learningRate
  */
 
 double QBackgroundSubtractor::learningRate() const{
@@ -110,13 +98,15 @@ void QBackgroundSubtractor::setLearningRate(double rate){
     }
 }
 
-/*!
-  \fn virtual void QBackgroundSubtractor::transform(const cv::Mat& in, cv::Mat& out)
-  \brief Filtering function.
-
-  Parameters :
-  \a in
-  \a out
+/**
+ * \fn virtual void QBackgroundSubtractor::transform(const cv::Mat& in, cv::Mat& out)
+ * \brief Filtering function.
+ * 
+ * Parameters :
+ * 
+ * \a in
+ * 
+ * \a out
  */
 void QBackgroundSubtractor::transform(const Mat& in, Mat& out){
     Q_D(QBackgroundSubtractor);

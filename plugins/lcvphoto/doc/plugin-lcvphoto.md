@@ -1,6 +1,6 @@
 # Plugin `lcvphoto`
 
-Wrappers for opencv.photo library.
+  This module contains elements for photo processing. It resembles open cv's photo module.
 
 ```js
 import lcvphoto 1.0
@@ -64,3 +64,28 @@ import lcvphoto 1.0
   Size of the sliding window in frames. Higher values keep a longer history,
   which requires more memory and processing power and increases output delay.
   Must be an odd number. Defaults to 3.
+
+
+{qmlType:DenoiseTvl1}
+{qmlInherits:MatFilter}
+{qmlBrief:Denoises a grayscale or color image.}
+
+  Performs denoising using the primal-dual algorithm.
+
+
+{qmlProperty:int bufferSize}
+
+  Number of observations or noised versions of the image to be restored.
+
+
+{qmlProperty:real lambda}
+
+  As it is enlarged, the smooth (blurred) images are treated more favorably than detailed
+  (but maybe more noised) ones. Roughly speaking, as it becomes smaller, the result will be
+  more blur but more sever outliers will be removed.
+
+{qmlProperty:int nIters}
+
+  Number of iterations that the algorithm will run. The more iterations the better, but it is
+  hard to quantitatively refine this statement, so just use the default and increase it if the
+  results are poor.

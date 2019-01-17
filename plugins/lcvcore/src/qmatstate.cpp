@@ -16,14 +16,14 @@
 
 #include "qmatstate.h"
 
-/*!
-  \class QMatState
-  \brief Mat texture state
-  \inmodule lcvcore_cpp
+/**
+ * \class QMatState
+ * \brief Mat texture state
+ * \ingroup plugin-lcvcore
  */
 
-/*!
-  \brief QMatState constructor.
+/**
+ * \brief QMatState constructor.
  */
 QMatState::QMatState()
     : mat(0)
@@ -33,11 +33,12 @@ QMatState::QMatState()
 {
 }
 
-/*!
-  \brief Compares 2 states.
-
-  Parameters:
-  \a other
+/**
+ * \brief Compares 2 states.
+ * 
+ * Parameters:
+ * 
+ * \a other
  */
 int QMatState::compare(const QMatState *other) const{
     if ( textureIndex == -1 && other->textureIndex == -1 ){

@@ -16,33 +16,11 @@
 #include "qalphamerge.h"
 
 
-/*!
-  \qmltype AlphaMerge
-  \instantiates QAlphaMerge
-  \inqmlmodule lcvcore
-  \inherits MatFilter
-  \brief Merges an alpha channel to a matrix.
-
-  Alpha merge is used to merge an alpha channel to a 1 or 3 channel matrix. The alpha channel is a single channel image
-  or mask that is loaded within the mask property of this class.
-
-  In the sample at samples/imgproc/alphamerge.qml a loaded image is merged with a drawn circle.
-
-  \quotefile imgproc/alphamerge.qml
-*/
-
 QAlphaMerge::QAlphaMerge(QQuickItem *parent) :
     QMatFilter(parent),
     m_mask(0)
 {
 }
-
-/*!
-  \qmlproperty Mat AlphaMerge::mask
-
-  Mask to merge the input with.
- */
-
 
 void QAlphaMerge::transform(const cv::Mat &in, cv::Mat &out){
     if ( mask() )

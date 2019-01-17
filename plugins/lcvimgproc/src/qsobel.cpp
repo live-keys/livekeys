@@ -21,16 +21,6 @@
 using namespace cv;
 
 /*!
-  \qmltype Sobel
-  \instantiates QSobel
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Calculates the first, second, third, or mixed image derivatives using an extended Sobel operator.
-
-  \quotefile imgproc/sobeloperator.qml
-*/
-
-/*!
   \class QSobel
   \inmodule lcvimgproc_cpp
   \internal
@@ -54,65 +44,6 @@ QSobel::QSobel(QQuickItem *parent)
 QSobel::~QSobel(){
     delete m_display;
 }
-
-
-/*!
-  \qmlproperty Mat::Type Sobel::ddepth
-
-  Output image depth, the following combinations of input depth and ddepth are supproted:
-
-  \list
-  \li input.depth = Mat.CV8U, ddepth = -1 / Mat.CV16S / Mat.CV32F / Mat.CV64F
-  \li input.depth = Mat.CV16U / Mat.CV16S, ddepth = -1 / Mat.CV32F / Mat.CV64F
-  \li input.depth = Mat.CV32F, ddepth = -1 / Mat.CV32F / Mat.CV64F
-  \li input.depth = Mat.64F, ddepth = -1 / Mat.CV64F
-  \endlist
-
-  When ddepth = -1, the destination image will have the same depth as the source. In case of 8-bit
-  input images, it will result in truncated derivatives
- */
-
-
-/*!
-  \qmlproperty int Sobel::xorder
-
-  Order of the derivative in x.
- */
-
-
-/*!
-  \qmlproperty int Sobel::yorder
-
-  Order of the derivative in y.
- */
-
-
-/*!
-  \qmlproperty int Sobel::ksize
-
-  Size of the extended Sobel kernel; ( must be 1, 3, 5, 7 )
- */
-
-
-/*!
-  \qmlproperty real Sobel::scale
-
-  Optional scale factor for the computed derivative values; by default, no scaling is  applied.
- */
-
-/*!
-  \qmlproperty real Sobel::delta
-
-  Optional delta value that is added to the results prior to storing them in output.
- */
-
-/*!
-  \qmlproperty real Sobel::borderType
-
-  Pixel extrapolation method.
-  \sa CopyMakeBorder::BorderType
- */
-
 
 /*!
   \fn virtual QSGNode* QSobel::updatePaintNode(QSGNode*, QQuickItem::UpdatePaintNodeData*)

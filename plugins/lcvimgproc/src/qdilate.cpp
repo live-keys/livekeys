@@ -19,16 +19,6 @@
 using namespace cv;
 
 /*!
-  \qmltype Dilate
-  \instantiates QDilate
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Erodes an image by using a specific structuring element.
-
-  \quotefile imgproc/erodedilate.qml
-*/
-
-/*!
   \class QDilate
   \inmodule lcvimgproc_cpp
   \internal
@@ -63,21 +53,8 @@ QDilate::~QDilate(){
  */
 
 /*!
-  \qmlproperty Mat Dilate::kernel
-
-  Structuring element used for dilation; if element=Mat(), a  3x3 rectangular structuring element is used.
- */
-
-
-/*!
   \property QDilate::anchor
   \sa Dilate::anchor
- */
-
-/*!
-  \qmlproperty Point Dilate::anchor
-
-  Position of the anchor within the element; default value (-1, -1) means that the anchor is at the element center.
  */
 
 /*!
@@ -86,35 +63,13 @@ QDilate::~QDilate(){
  */
 
 /*!
-  \qmlproperty int Dilate::iterations
-
-  Number of times dilation is applied.
- */
-
-/*!
   \property QDilate::borderType
   \sa Dilate::borderType
  */
 
 /*!
-  \qmlproperty int Dilate::borderType
-
-  Pixel extrapolation method.
-
-  \sa CopyMakeBorder::BorderType
- */
-
-/*!
   \property QDilate::borderValue
   \sa Dilate::borderValue
- */
-
-/*!
-  \qmlproperty color Dilate::borderValue
-
-  Border value in case of a constant border
-
-  \sa CopyMakeBorder::BorderType
  */
 
 /*!

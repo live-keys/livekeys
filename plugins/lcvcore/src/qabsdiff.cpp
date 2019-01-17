@@ -16,20 +16,6 @@
 
 #include "qabsdiff.h"
 
-/*!
-  \qmltype AbsDiff
-  \instantiates QAbsDiff
-  \inqmlmodule lcvcore
-  \inherits MatFilter
-  \brief Performs an absolute difference between two matrixes.
-
-  The example in \b{samples/imgproc/framedifference.qml} shows differentiating two consecutive frames in a video to
-  calculate the motion. It uses a MatBuffer to store the previous frame :
-
-  \quotefile imgproc/framedifference.qml
-*/
-
-
 QAbsDiff::QAbsDiff(QQuickItem *parent)
     : QMatFilter(parent)
     , m_in2(QMat::nullMat())
@@ -38,12 +24,6 @@ QAbsDiff::QAbsDiff(QQuickItem *parent)
 
 QAbsDiff::~QAbsDiff(){
 }
-
-/*!
-  \qmlproperty Mat AbsDiff::input2
-
-  Second input for the subtraction.
- */
 
 void QAbsDiff::transform(const cv::Mat &in, cv::Mat &out){
     if ( in.size() == m_in2->cvMat()->size() )

@@ -20,18 +20,6 @@
 
 #include <QTimer>
 
-/*!
-  \qmltype CamCapture
-  \instantiates QCamCapture
-  \inqmlmodule lcvcore
-  \inherits MatDisplay
-  \brief Captures frames from a connected camera. This is a \b {static item}.
-
-  An example of how to use the cam capture can be found in samples/core/camcapture.qml :
-
-  \quotefile core/camcapture.qml
-*/
-
 QCamCapture::QCamCapture(QQuickItem *parent) :
     QMatDisplay(parent),
     m_device(""),
@@ -42,26 +30,6 @@ QCamCapture::QCamCapture(QQuickItem *parent) :
     m_restore = output();
 }
 
-/*!
-  \qmlproperty string CamCapture::device
-
-  This property holds the url to the camera device to be accessed.
- */
-
-/*!
-  \qmlproperty size CamCapture::resolution
-
-  Stores the resolution for this cam capture.
- */
-
-/*!
-  \qmlproperty real CamCapture::fps
-
-  By default, this is initialized with the camera's given fps. You can change this value if you want faster/slower
-  capture playback, however, setting it faster than the actual camera permits will limit to the camera's maximum
-  rate. This value is not absolute, in fact it depends on a lot of factors like processing time done by Live CV and
-  speed by which frames are delivered.
- */
 void QCamCapture::setFps(qreal fps){
     if ( m_thread && fps != m_fps ){
         m_fps = fps;
@@ -84,21 +52,6 @@ void QCamCapture::switchMat(){
     }
 }
 
-
-/*!
-  \qmlmethod CamCapture::staticOpen(string device, size resolution)
-
-  This is an overloaded method for CamCapture::staticLoad
- */
-
-
-/*!
-  \qmlmethod CamCapture::staticLoad(string device, size resolution)
-
-  Loads the CamCaptures state. \a device can be either a link or a device number. The device number should be given
-  in string form. Usually a default webcam can be accesed by the '0'. \a resolution is optional and stores the
-  resolution at which to open the capture.
- */
 
 void QCamCapture::staticLoad(const QString &device, const QSize &resolution){
     if ( m_device == device || device == "" )
@@ -162,12 +115,6 @@ void QCamCapture::setPaused(bool paused){
         emit pausedChanged();
     }
 }
-
-/*!
-  \qmlproperty bool CamCapture::paused
-
-  This property can be set to true or false, depending if you want to freeze or continue capturing frames from the camera.
- */
 
 bool QCamCapture::paused() const{
     return m_thread->paused();
