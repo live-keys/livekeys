@@ -34,6 +34,7 @@
 #include "jserrorhandlingtest.h"
 #include "mlnodetojstest.h"
 #include "lvcompiletest.h"
+#include "jstupletest.h"
 
 
 int main(int argc, char *argv[]){
