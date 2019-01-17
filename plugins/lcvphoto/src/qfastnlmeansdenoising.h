@@ -18,8 +18,9 @@
 #define QFASTNLMEANSDENOISING_H
 
 #include "qmatfilter.h"
+#include "live/filter.h"
 
-class QFastNlMeansDenoising : public QMatFilter{
+class QFastNlMeansDenoising : public QMatFilter, public lv::Filter{
 
     Q_OBJECT
     Q_PROPERTY(bool  colorAlgorithm     READ colorAlgorithm     WRITE setColorAlgorithm     NOTIFY colorAlgorithmChanged)
@@ -32,6 +33,7 @@ public:
     explicit QFastNlMeansDenoising(QQuickItem *parent = 0);
     ~QFastNlMeansDenoising();
 
+    virtual void process();
     virtual void transform(const cv::Mat &in, cv::Mat &out);
 
     bool colorAlgorithm() const;
