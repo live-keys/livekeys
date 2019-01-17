@@ -64,7 +64,7 @@ import lcvphoto 1.0
   Size of the sliding window in frames. Higher values keep a longer history,
   which requires more memory and processing power and increases output delay.
   Must be an odd number. Defaults to 3.
-<<<<<<< HEAD
+
 
 {qmlType:DenoiseTvl1}
 {qmlInherits:MatFilter}
@@ -89,6 +89,3 @@ import lcvphoto 1.0
   Number of iterations that the algorithm will run. The more iterations the better, but it is
   hard to quantitatively refine this statement, so just use the default and increase it if the
   results are poor.
-  
-=======
->>>>>>> 1247952f130bf756fa08d4efce39faff91d8482b
