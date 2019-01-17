@@ -27,6 +27,7 @@ namespace lv{
 class DocumentQmlRanges: protected QmlJS::AST::Visitor{
 
 public:
+    /// \private
     class Range{
     public:
         Range(): ast(0) {}

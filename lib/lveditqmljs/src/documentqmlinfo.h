@@ -41,6 +41,8 @@ namespace lv{
 class ProjectDocument;
 class BindingPath;
 class DocumentQmlInfoPrivate;
+
+
 class LV_EDITQMLJS_EXPORT DocumentQmlInfo{
 
     Q_DISABLE_COPY(DocumentQmlInfo)
@@ -48,10 +50,12 @@ class LV_EDITQMLJS_EXPORT DocumentQmlInfo{
 public:
     class ValueReference{
     public:
+        /// \brief ValueReference constructor
         ValueReference(const QmlJS::Value* val, const DocumentQmlInfo* p)
             : value(val)
             , parent(p)
         {}
+        /// \brief ValueReference destructor
         ValueReference() : value(0), parent(0){}
 
         const QmlJS::Value* value;
@@ -60,7 +64,9 @@ public:
 
     class ASTReference{
     public:
+        /// \brief ASTReference constructor
         ASTReference(QmlJS::AST::Node* n) : node(n){}
+        /// \brief ASTReference destructor
         ASTReference() : node(0){}
 
         QmlJS::AST::Node* node;
@@ -69,11 +75,17 @@ public:
     class Message{
 
     public:
+        /// Severity of a message
         enum Severity{
+            /// Lowest severity level
             Hint,
+            /// Might be a warning
             MaybeWarning,
+            /// Warning Level
             Warning,
+            /// Might be an error
             MaybeError,
+            /// Error level
             Error
         };
 
@@ -93,16 +105,25 @@ public:
 
     };
 
+    /// Dialect used by the source code of a file
     enum Dialect{
+        /// Unknown dialect
         Unknown = 0,
+        /// Javascript dialect
         Javascript,
+        /// Qml dialect
         Qml,
+        /// QmlTypeInfo dialect
         QmlTypeInfo,
+        /// QmlProject dialect
         QmlProject,
+        /// Json dialect
         Json
     };
 
+    /// Constat SharedPointer to DocumentqmlInfo
     typedef QSharedPointer<const DocumentQmlInfo> ConstPtr;
+    /// SharedPointer to DocumentqmlInfo
     typedef QSharedPointer<DocumentQmlInfo>       Ptr;
 
     static Dialect extensionToDialect(const QString& extension);

@@ -55,6 +55,7 @@ Returns a cloned matrix with javascript ownership
 {qmlMethod:Mat createOwnedObject()}
 
 Returns a shallow copied matrix with javascript ownership
+<<<<<<< HEAD
 
 
 {qmlType:MatView}
@@ -64,7 +65,6 @@ Returns a shallow copied matrix with javascript ownership
 {qmlProperty:bool linearFilter}
 
 smooth the displayed image through linear filtering
-
 {qmlType:ImRead}
 {qmlInherits:lcvcore.MatDisplay}
 {qmlBrief:Read an image from the hard drive into a lcvcore.Mat structure.}

@@ -18,9 +18,30 @@
 
 namespace lv{
 
+
+/**
+ * \class DocumentQmlObject
+ * \ingroup lveditqmljs
+ * \brief Stores information about a QmlObject from a document
+ */
+
+
+/**
+ * \class DocumentQmlObject::FunctionValue
+ * \ingroup lveditqmljs
+ * \brief Stores information about a QmlObject function
+ */
+
+/**
+ * \brief DocumentQmlObject constructor
+ */
 DocumentQmlObject::DocumentQmlObject(){
 }
 
+
+/**
+ * \brief DocumentQmlObject destructor
+ */
 DocumentQmlObject::~DocumentQmlObject(){
 }
 

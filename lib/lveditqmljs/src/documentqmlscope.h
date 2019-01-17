@@ -29,6 +29,7 @@ namespace lv{
 class LV_EDITQMLJS_EXPORT DocumentQmlScope{
 
 public:
+    /// \brief SharedPointer to q DocumentQmlScope
     typedef QSharedPointer<DocumentQmlScope> Ptr;
 
     class Import{
@@ -36,12 +37,19 @@ public:
     public:
         static const int NoVersion;
 
+        /** Import type */
         enum Type{
+            /** Invalid type */
             Invalid,
+            /** Library based import with qmldir file. */
             Library,
+            /** Directory based import */
             Directory,
+            /** Implicit import */
             ImplicitDirectory,
+            /** Js file import */
             File,
+            /** Unknown file import */
             UnknownFile
         };
 
@@ -73,7 +81,9 @@ public:
         int     m_versionMinor;
     };
 
+    /** Import entry */
     typedef QPair<Import, QString> ImportEntry;
+    /** List of import entries */
     typedef QList<ImportEntry> ImportList;
 
 private:
@@ -106,8 +116,8 @@ public:
     QString componentName() const;
 
 private:
-    ImportList                   m_imports;
-    ProjectQmlScope::Ptr        m_projectScope;
+    ImportList           m_imports;
+    ProjectQmlScope::Ptr m_projectScope;
     DocumentQmlInfo::Ptr m_documentInfo;
 };
 

@@ -48,6 +48,11 @@ namespace lv{
  */
 
 
+/**
+ * \brief QmlCompletionContext constructor
+ *
+ * Use lv::QmlCompletionContext::create() to create a new completion context.
+ */
 QmlCompletionContext::QmlCompletionContext(
         int context,
         const QStringList &objectTypePath,

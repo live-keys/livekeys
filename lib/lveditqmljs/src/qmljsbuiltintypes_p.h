@@ -21,6 +21,7 @@
 
 namespace lv{
 
+/// \private
 class QmlJsBuiltinTypes{
 
 public:

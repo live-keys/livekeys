@@ -125,6 +125,7 @@ private:
 
     lv::DocumentHandler* m_codeInterface;
     QString              m_dir;
+    QStringList          m_engineImportPaths;
 
     lv::Project*           m_project;
     lv::Settings*          m_settings;

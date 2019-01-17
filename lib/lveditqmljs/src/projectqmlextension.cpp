@@ -75,7 +75,7 @@ void ProjectQmlExtension::classBegin(){
 
 
 /**
- * @brief Override of QQmlParserStatus::componenComplete
+ * @brief Override of QQmlParserStatus::componentComplete
  */
 void ProjectQmlExtension::componentComplete(){
     if ( !m_scanMonitor ){
@@ -86,29 +86,16 @@ void ProjectQmlExtension::componentComplete(){
             return;
         }
 
-        m_engine = static_cast<ViewEngine*>(lg->property("engine").value<QObject*>());
-        if ( !m_engine ){ qWarning("Failed to find engine object."); return; }
+        ViewEngine* engine = static_cast<ViewEngine*>(lg->property("engine").value<QObject*>());
+        if ( !engine ){ qWarning("Failed to find engine object."); return; }
 
         Settings* settings = static_cast<Settings*>(lg->property("settings").value<QObject*>());
         if ( !settings ){ qWarning("Failed to find settings object."); return; }
-        m_project = static_cast<Project*>(ctx->contextProperty("project").value<QObject*>());
-        if ( !m_project ){ qWarning("Failed to find project object."); return; }
 
-        m_scanMonitor = new ProjectQmlScanMonitor(this, m_project, m_engine);
+        Project* project = static_cast<Project*>(ctx->contextProperty("project").value<QObject*>());
+        if ( !project ){ qWarning("Failed to find project object."); return; }
 
-        lv::EditorSettings* editorSettings = qobject_cast<lv::EditorSettings*>(settings->file("editor"));
-        editorSettings->addSetting("qmljs", m_settings);
-        editorSettings->syncWithFile();
-
-        m_engine->addCompileHook(&ProjectQmlExtension::engineHook, this);
-
-        EditorGlobalObject* editor = static_cast<EditorGlobalObject*>(ctx->contextProperty("editor").value<QObject*>());
-        if ( !editor ){
-            qWarning("Failed to find editor global object.");
-            return;
-        }
-
-        m_paletteContainer = editor->paletteContainer();
+        setParams(settings, project, engine);
     }
 }
 
@@ -172,7 +159,31 @@ void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterUncreatableType<lv::QmlPropertyModel>(
         uri, 1, 0, "QmlPropertyModel", "QmlPropertyModel can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlItemModel>(
-        uri, 1, 0, "QmlItemModel", "QmlItemModel can only be accessed through the qmledit extension.");
+                uri, 1, 0, "QmlItemModel", "QmlItemModel can only be accessed through the qmledit extension.");
+}
+
+/**
+ * \brief Assing initialization params for this object
+ */
+void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEngine *engine){
+    m_project = project;
+    m_engine = engine;
+
+    m_scanMonitor = new ProjectQmlScanMonitor(this, m_project, m_engine);
+
+    lv::EditorSettings* editorSettings = qobject_cast<lv::EditorSettings*>(settings->file("editor"));
+    editorSettings->addSetting("qmljs", m_settings);
+    editorSettings->syncWithFile();
+
+    m_engine->addCompileHook(&ProjectQmlExtension::engineHook, this);
+
+    EditorGlobalObject* editor = static_cast<EditorGlobalObject*>(engine->engine()->rootContext()->contextProperty("editor").value<QObject*>());
+    if ( !editor ){
+        qWarning("Failed to find editor global object.");
+        return;
+    }
+
+    m_paletteContainer = editor->paletteContainer();
 }
 
 

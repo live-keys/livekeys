@@ -187,12 +187,12 @@ inline void QmlDeclaration::setValueLength(int valueLength){
 }
 
 /// \brief Returns the current lv::ProjectDocument section.
-ProjectDocumentSection::Ptr QmlDeclaration::section(){
+inline ProjectDocumentSection::Ptr QmlDeclaration::section(){
     return m_section;
 }
 
 /// \brief Assigns the lv::ProjectDocument section.
-void QmlDeclaration::setSection(ProjectDocumentSection::Ptr section) {
+inline void QmlDeclaration::setSection(ProjectDocumentSection::Ptr section) {
     m_section = section;
 }
 

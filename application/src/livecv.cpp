@@ -147,15 +147,15 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
  * \endcode
  */
 void LiveCV::solveImportPaths(){
-    QStringList importPaths = m_engine->engine()->importPathList();
+    m_engineImportPaths = m_engine->engine()->importPathList();
 
-    importPaths.removeAll(dir());
-    importPaths.removeAll(QString::fromStdString(ApplicationContext::instance().executablePath()));
-
-    m_engine->engine()->setImportPathList(importPaths);
+    m_engineImportPaths.removeAll(dir());
+    m_engineImportPaths.removeAll(QString::fromStdString(ApplicationContext::instance().executablePath()));
 
     // Add the plugins directory to the import paths
-    m_engine->engine()->addImportPath(QString::fromStdString(ApplicationContext::instance().pluginPath()));
+    m_engineImportPaths.append(QString::fromStdString(ApplicationContext::instance().pluginPath()));
+
+    m_engine->engine()->setImportPathList(m_engineImportPaths);
 }
 
 void LiveCV::loadQml(const QUrl &url){
@@ -305,7 +305,8 @@ std::vector<std::string> LiveCV::packageImportPaths() const{
 
 QByteArray LiveCV::extractPluginInfo(const QString &import) const{
 //    TODO: Check result
-    lv::ProjectQmlExtension* qmlHandler = new lv::ProjectQmlExtension(m_settings, m_project, m_engine);
+    lv::ProjectQmlExtension* qmlHandler = new lv::ProjectQmlExtension();
+    qmlHandler->setParams(m_settings, m_project, m_engine);
 
     lv::PluginInfoExtractor* extractor = qmlHandler->getPluginInfoExtractor(import);
     if ( extractor ){
@@ -396,6 +397,10 @@ void LiveCV::engineError(QJSValue error){
 }
 
 void LiveCV::projectChanged(const QString &path){
+    m_engine->engine()->setImportPathList(m_engineImportPaths);
+    if ( !path.isEmpty() && QFileInfo(path + "/packages").isDir() )
+        m_engine->engine()->addImportPath(path + "/packages");
+
     m_packageGraph->clearPackages();
     m_packageGraph->setPackageImportPaths(packageImportPaths());
     std::string packagePath = path.toStdString();

@@ -38,7 +38,10 @@ class LV_EDITQMLJS_EXPORT ProjectQmlScope{
     Q_DISABLE_COPY(ProjectQmlScope)
 
 public:
+    /// Constant SharedPointer to ProjectQmlScope
     typedef QSharedPointer<const ProjectQmlScope> ConstPtr;
+
+    /// SharedPointer to ProjectQmlScope
     typedef QSharedPointer<ProjectQmlScope>       Ptr;
 
 public:
@@ -93,20 +96,24 @@ private:
     QStringList m_defaultImportPaths;
 };
 
+/// \brief Returns the global libraries container
 inline ProjectQmlScopeContainer *ProjectQmlScope::globalLibraries(){
     return d_globalLibraries.data();
 }
 
+/// \brief Returns the implicit libraries container
 inline ProjectQmlScopeContainer *ProjectQmlScope::implicitLibraries(){
     return d_implicitLibraries.data();
 }
 
+/// \brief Returns the stored paths for an import uri.
 inline QList<QString> ProjectQmlScope::pathsForImport(const QString &importUri){
     if ( m_importToPaths.contains(importUri) )
         return m_importToPaths.value(importUri);
     return QList<QString>();
 }
 
+/// \brief Adds a set of paths to the default libraries.
 inline void ProjectQmlScope::addDefaultLibraries(const QList<QString> &paths){
     foreach( const QString& path, paths ){
         if ( !m_defaultLibraries.contains(path) )
@@ -114,6 +121,7 @@ inline void ProjectQmlScope::addDefaultLibraries(const QList<QString> &paths){
     }
 }
 
+/// \brief Returns the default libraries
 inline const QList<QString> &ProjectQmlScope::defaultLibraries() const{
     return m_defaultLibraries;
 }

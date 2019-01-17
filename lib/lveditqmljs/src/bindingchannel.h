@@ -10,6 +10,8 @@
 
 namespace lv{
 
+class QmlEditFragment;
+
 /**
  * \brief The BindingChannel class
  *
@@ -27,7 +29,7 @@ class BindingChannel : public QObject{
     Q_OBJECT
 
 public:
-    explicit BindingChannel(QObject *parent = nullptr);
+    explicit BindingChannel(QmlEditFragment* fragment, QObject *parent = nullptr);
     virtual ~BindingChannel();
 
     void setExpressionPath(BindingPath* expressionPath);
@@ -35,7 +37,11 @@ public:
 
     void commit(const QVariant& value);
 
+public slots:
+    void commitFromFragment();
+
 private:
+    QmlEditFragment*    m_fragment;
     BindingPath*        m_expressionPath;
     QList<BindingPath*> m_paths;
 };

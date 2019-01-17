@@ -40,7 +40,7 @@ namespace lv{
 QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodePalette *palette)
     : m_declaration(declaration)
     , m_palette(palette)
-    , m_bindingChannel(new BindingChannel)
+    , m_bindingChannel(new BindingChannel(this))
     , m_bindingUse(false)
     , m_paletteUse(false)
 {

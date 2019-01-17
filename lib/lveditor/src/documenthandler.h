@@ -81,7 +81,6 @@ public slots:
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
     void cursorWritePositionChanged(QTextCursor cursor);
     void setDocument(lv::ProjectDocument* document, QJSValue options = QJSValue());
-    void documentUpdatedContent();
     void documentFormatUpdate(int position, int length);
     void generateCompletion(int cursorPosition);
     QJSValue contextBlockRange(int cursorPosition);
@@ -92,13 +91,11 @@ signals:
     void targetChanged();
     void cursorPositionRequest(int position);
     void contentsChangedManually();
-    void fragmentLinesChanged(int lineStart, int lineEnd);
     void editorFocusChanged();
     void codeHandlerChanged();
 
 private:
     void readContent();
-    void updateFragments();
     void findCodeHandler();
     void updateCodeHandlerTarget();
 
@@ -113,11 +110,6 @@ private:
     Extensions*           m_extensions;
     ViewEngine*           m_engine;
     TextEdit*             m_textEdit;
-
-    ProjectDocumentMarker::Ptr m_fragmentStart;
-    ProjectDocumentMarker::Ptr m_fragmentEnd;
-    int                   m_fragmentStartLine;
-    int                   m_fragmentEndLine;
 
     bool                  m_editorFocus;
 };
