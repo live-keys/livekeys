@@ -2402,6 +2402,7 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     LineManager* lm = q->getDocumentLayout()->getLineManager();
     lm->setLineDocumentFont(font);
     lm->setParentDocument(document);
+    lm->textDocumentFinishedUpdating(document->blockCount());
 
     if (lineSurface)
         lineSurface->setDocument(q->getDocumentLayout()->getLineManager()->m_lineDocument);

@@ -72,11 +72,11 @@ Rectangle{
 
     Component.onCompleted: {
         livecv.commands.add(root, {
-            'close' : closeProject,
-            'open' : openProject,
-            'new' : newProject,
-            'openFile' : openFile,
-            'toggleVisibility' : toggleVisibility
+            'close' : [closeProject, "Close Project"],
+            'open' : [openProject, "Open Project"],
+            'new' : [newProject, "New Project"],
+            'openFile' : [openFile, "Open File"],
+            'toggleVisibility' : [toggleVisibility, "Toggle Visibility"]
         })
     }
 
@@ -194,6 +194,10 @@ Rectangle{
         } else {
             root.windowControls.openFileDialog.open()
         }
+    }
+
+    function openCommandsMenu(){
+        livecv.commands.model.updateAvailableCommands()
     }
 
     function addEntry(parentEntry, isFile){

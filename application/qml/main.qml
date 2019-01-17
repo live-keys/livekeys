@@ -65,16 +65,16 @@ ApplicationWindow{
 
     Component.onCompleted: {
         livecv.commands.add(root, {
-            'minimize' : root.showMinimized,
-            'toggleMaximizedRuntime' : contentWrap.toggleMaximizedRuntime,
-            'toggleNavigation' : contentWrap.toggleNavigation,
-            'openLogInWindow' : mainVerticalSplit.openLogInWindow,
-            'openLogInEditor' : mainVerticalSplit.openLogInEditor,
-            'toggleLog' : mainVerticalSplit.toggleLog,
-            'toggleLogPrefix' : logView.toggleLogPrefix,
-            'addHorizontalEditorView' : mainVerticalSplit.addHorizontalEditor,
-            'addHorizontalFragmentEditorView': mainVerticalSplit.addHorizontalFragmentEditor,
-            'removeHorizontalEditorView' : mainVerticalSplit.removeHorizontalEditor
+            'minimize' : [root.showMinimized, "Minimize"],
+            'toggleMaximizedRuntime' : [contentWrap.toggleMaximizedRuntime, "Toggle Maximized Runtime"],
+            'toggleNavigation' : [contentWrap.toggleNavigation, "Toggle Navigation"],
+            'openLogInWindow' : [mainVerticalSplit.openLogInWindow, "Open Log In Window"],
+            'openLogInEditor' : [mainVerticalSplit.openLogInEditor, "Open Log In Editor"],
+            'toggleLog' : [mainVerticalSplit.toggleLog, "Toggle Log"],
+            'toggleLogPrefix' : [logView.toggleLogPrefix, "Toggle Log Prefix"],
+            'addHorizontalEditorView' : [mainVerticalSplit.addHorizontalEditor, "Add Horizontal Editor"],
+            'addHorizontalFragmentEditorView': [mainVerticalSplit.addHorizontalFragmentEditor, "Add Horizontal Fragment Editor"],
+            'removeHorizontalEditorView' : [mainVerticalSplit.removeHorizontalEditor, "Remove Horizontal Editor"]
         })
     }
 
@@ -119,6 +119,7 @@ ApplicationWindow{
         onOpenProject: projectView.openProject()
         onSaveFile : projectView.focusEditor.saveAs()
         onToggleLogWindow : mainVerticalSplit.toggleLog()
+        onOpenCommandsMenu: projectView.openCommandsMenu()
 
         onOpenSettings: {
             editor.document = project.openFile(livecv.settings.file('editor').path, ProjectDocument.Edit);

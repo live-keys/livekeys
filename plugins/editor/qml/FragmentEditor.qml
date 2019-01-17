@@ -396,11 +396,11 @@ Rectangle{
                     objectName: "editor"
 
                     property string objectCommandIndex : livecv.commands.add(editorArea, {
-                        'saveFile' : editor.save,
+                        /*'saveFile' : editor.save,
                         'saveFileAs' : editor.saveAs,
                         'closeFile' : editor.closeDocument,
                         'assistCompletion' : editor.assistCompletion,
-                        'toggleSize' : editor.toggleSize
+                        'toggleSize' : editor.toggleSize*/
                     })
 
                     color : "#fff"

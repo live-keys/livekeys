@@ -173,6 +173,29 @@ quint32 KeyMap::modifierFromString(const QString &modifier){
     }
 }
 
+QString KeyMap::stringFromModifier(const quint32 &modifier)
+{
+    std::vector<QString> parts;
+    if (modifier & KeyMap::Command)
+        parts.push_back("Cmd");
+    if (modifier & KeyMap::Control)
+        parts.push_back("Ctrl");
+    if (modifier & KeyMap::Alt)
+        parts.push_back("Alt");
+    if (modifier & KeyMap::Shift)
+        parts.push_back("Shift");
+    if (modifier & KeyMap::Meta)
+        parts.push_back("Meta");
+
+    QString result = "";
+    for (QString part: parts)
+    {
+        if (result != "") result += "+";
+        result += part;
+    }
+    return result;
+}
+
 quint32 KeyMap::keyFromString(const QString &key){
     if ( key == "enter" ){
         return Qt::Key_Enter;
@@ -196,14 +219,42 @@ quint32 KeyMap::keyFromString(const QString &key){
         return Qt::Key_Left;
     } else if ( key == "right" ){
         return Qt::Key_Right;
-    } else if ( key == "escape" ){
-        return Qt::Key_Escape;
     } else if ( key == "space" ){
         return Qt::Key_Space;
     } else if ( key.size() == 1 ){
         return key.at(0).toUpper().unicode();
     }
     return 0;
+}
+
+QString KeyMap::stringFromKey(const quint32 &key)
+{
+    if (key == Qt::Key_Enter)
+        return "Enter";
+    if (key == Qt::Key_Escape)
+        return "Esc";
+    if (key == Qt::Key_Backspace)
+        return "Bksp";
+    if (key == Qt::Key_Delete)
+        return "Del";
+    if (key == Qt::Key_Tab)
+        return "Tab";
+    if (key == Qt::Key_Home)
+        return "Home";
+    if (key == Qt::Key_End)
+        return "End";
+    if (key == Qt::Key_PageUp)
+        return "PgUp";
+    if (key == Qt::Key_PageDown)
+        return "PgDn";
+    if (key == Qt::Key_Left)
+        return "Left";
+    if (key == Qt::Key_Right)
+        return "Right";
+    if (key == Qt::Key_Space)
+        return "Space";
+
+    return QString(char(key));
 }
 
 KeyMap::KeyCode KeyMap::composeKeyCode(quint32 key, quint32 modifiers){
@@ -251,9 +302,8 @@ QPair<quint32, quint32> KeyMap::splitKeyCode(KeyCode kc){
 
 QString KeyMap::getKeyCodeDescription(KeyMap::KeyCode kc){
 
-    auto split = splitKeyCode(kc); //TODO
-    Q_UNUSED(split)
-    return "";
+    auto split = splitKeyCode(kc);
+    return stringFromModifier(split.first) + "+" + stringFromKey(split.second);
 }
 
 }// namespace
