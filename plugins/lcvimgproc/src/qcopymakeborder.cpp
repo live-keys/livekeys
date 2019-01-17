@@ -19,25 +19,11 @@
 using namespace cv;
 
 /*!
-  \qmltype CopyMakeBorder
-  \instantiates QCopyMakeBorder
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Copies the source image into the middle of the destination image.
-
-  The areas to the left, to the right, above and below the copied source image will be filled with extrapolated pixels
-
-  \quotefile imgproc/copymakeborder.qml
-*/
-
-/*!
   \class QCopyMakeBorder
   \internal
   \inmodule lcvimgproc_cpp
   \brief Copies the source image into the middle of the destination image.
  */
-
-
 QCopyMakeBorder::QCopyMakeBorder(QQuickItem *parent)
     : QMatFilter(parent)
     , m_color()
@@ -46,23 +32,6 @@ QCopyMakeBorder::QCopyMakeBorder(QQuickItem *parent)
 
 QCopyMakeBorder::~QCopyMakeBorder(){
 }
-
-/*!
-  \qmlproperty enumeration CopyMakeBorder::BorderType
-
-  Extrapolation method border type:
-  \list
-  \li CopyMakeBorder.BORDER_REPLICATE
-  \li CopyMakeBorder.BORDER_CONSTANT
-  \li CopyMakeBorder.BORDER_REFLECT
-  \li CopyMakeBorder.BORDER_WRAP
-  \li CopyMakeBorder.BORDER_REFLECT_101
-  \li CopyMakeBorder.BORDER_TRANSPARENT
-  \li CopyMakeBorder.BORDER_DEFAULT
-  \li CopyMakeBorder.BORDER_ISOLATED
-  \endlist
-*/
-
 
 /*!
   \enum QCopyMakeBorder::BorderType
@@ -75,47 +44,6 @@ QCopyMakeBorder::~QCopyMakeBorder(){
   \value BORDER_TRANSPARENT
   \value BORDER_DEFAULT
   \value BORDER_ISOLATED
- */
-
-/*!
-  \qmlproperty int CopyMakeBorder::top
-
-  Property specifying how many pixels in the top direction from the source image rectangle to extrapolate.
- */
-
-
-/*!
-  \qmlproperty int CopyMakeBorder::bottom
-
-  Property specifying how many pixels in the bottom direction from the source image rectangle to extrapolate.
- */
-
-
-/*!
-  \qmlproperty int CopyMakeBorder::left
-
-  Property specifying how many pixels in the left direction from the source image rectangle to extrapolate.
- */
-
-
-/*!
-  \qmlproperty int CopyMakeBorder::right
-
-  Property specifying how many pixels in the right direction from the source image rectangle to extrapolate.
- */
-
-/*!
-  \qmlproperty int CopyMakeBorder::borderType
-
-  Border type.
-  \sa CopyMakeBorder::BorderType
- */
-
-/*!
-  \qmlproperty color CopyMakeBorder::color
-
-  Border value if borderType==CopyMakeBorder.BORDER_CONSTANT.
-  \sa CopyMakeBorder::BorderType
  */
 
 /*!

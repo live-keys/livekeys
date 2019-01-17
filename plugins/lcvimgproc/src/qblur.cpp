@@ -19,18 +19,6 @@
 using namespace cv;
 
 /*!
-  \qmltype Blur
-  \instantiates QBlur
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Blurs an image using the normalized box filter.
-
-  The function smoothes an image using the normalized box filter.
-
-  \quotefile imgproc/blur.qml
-*/
-
-/*!
   \class QBlur
   \internal
   \inmodule lcvimgproc_cpp
@@ -62,33 +50,13 @@ QBlur::~QBlur(){
  */
 
 /*!
-  \qmlproperty Size Blur::ksize
-
-  Blurring kernel size
- */
-
-/*!
   \property QBlur::anchor
   \sa Blur::anchor
  */
 
 /*!
-  \qmlproperty Point Blur::anchor
-
-  Anchor point; default value Point(-1,-1) means that the anchor is at the kernel center.
- */
-
-/*!
   \property QBlur::borderType
   \sa Blur::borderType
- */
-
-/*!
-  \qmlproperty int Blur::borderType
-
-  Border mode used to extrapolate pixels outside of the image.
-
-  \sa CopyMakeBorder::BorderType
  */
 
 /*!

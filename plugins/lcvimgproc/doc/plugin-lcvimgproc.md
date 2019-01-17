@@ -9,6 +9,33 @@ import lcvimgproc 1.0
 {plugin:lcvimgproc}
 {qmlSummary:lcvimgproc}
 
+{qmlType:PanAndZoom}
+{qmlInherits:MatFilter}
+{qmlBrief:UI component to perform panning and zooming on a given Mat object.}
+
+{qmlProperty:Mat *input*}
+
+  input matrix to perform PanAndZoom on
+
+{qmlProperty:int regionWidth}
+
+  width of the region to select out of the matrix
+
+{qmlProperty:int regionWidth}
+
+  height of the region to select out of the matrix
+
+{qmlProperty:int regionX}
+
+  x coordinate to start the selection from
+
+{qmlProperty:int regionY}
+
+  y coordinate to start the selection from
+
+{qmlProperty:color SelectionColor}
+
+  color for selection rectangle
 
 {qmlType:Blur}
 {qmlInherits:MatFilter}
@@ -799,7 +826,47 @@ See also [CopyMakeBorder::BorderType](#BorderType)
   * [shift]()
   * [offset]()
 
- 
+
+{qmlType:GetPerspectiveTransform}
+{qmlInherits:MatFilter}
+
+{qmlBrief:Calculates a perspective transform from four pairs of the corresponding points.}
+
+Parameters:
+
+* **src** – Coordinates of quadrangle vertices in the source image.
+* **dst** – Coordinates of the corresponding quadrangle vertices in the destination image.
+
+See also [GetPerspectiveTransform](https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html#getperspectivetransform)
+
+{qmlType:warpPerspective}
+{qmlInherits:MatFilter}
+{qmlBrief:Applies a perspective transformation to an image.}
+
+Parameters:
+
+* **src** – input image.
+* **dst** – output image that has the size dsize and the same type as src .
+* **M** – 3 X 3 transformation matrix.
+* **dsize** – size of the output image.
+* **flags** – combination of interpolation methods (INTER_LINEAR or INTER_NEAREST) and the optional flag WARP_INVERSE_MAP, that sets M as the inverse transformation ( **dst** &rightarrow; **src** ).
+* **borderMode** – pixel extrapolation method (BORDER_CONSTANT or BORDER_REPLICATE).
+* **borderValue** – value used in case of a constant border; by default, it equals 0.
+
+See also [warpPerspective](https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html#void%20warpPerspective(InputArray%20src,%20OutputArray%20dst,%20InputArray%20M,%20Size%20dsize,%20int%20flags,%20int%20borderMode,%20const%20Scalar&%20borderValue))
+
+{qmlType:QCachedWarpPerspective}
+{qmlInherits:MatFilter}
+{qmlBrief:Applies a perspective transformation to an image.}
+
+  Caches the transformation matrix when initialising, so it's faster and recommended to use for videos.
+
+* **src** – input image.
+* **dst** – output image that has the size dsize and the same type as src .
+* **M** – 3 X 3 transformation matrix.
+* **dsize** – size of the output image.
+
+See also [warpPerspective](https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html#void%20warpPerspective(InputArray%20src,%20OutputArray%20dst,%20InputArray%20M,%20Size%20dsize,%20int%20flags,%20int%20borderMode,%20const%20Scalar&%20borderValue))
 
 
 

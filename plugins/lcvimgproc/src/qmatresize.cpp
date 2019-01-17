@@ -20,18 +20,6 @@
 using namespace cv;
 
 /*!
-  \qmltype Resize
-  \instantiates QMatResize
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Resizes an image.
-
-  Resizes an image according to the specified filter.
-
-  \quotefile imgproc/resize.qml
-*/
-
-/*!
   \class QMatResize
   \inmodule lcvimgproc_cpp
   \internal
@@ -57,48 +45,6 @@ QMatResize::QMatResize(QQuickItem *parent)
  */
 QMatResize::~QMatResize(){
 }
-
-/*!
-  \qmlproperty Size Resize::matSize
-
-  Size of the resized matrix. An unspecified size or a size of (0, 0) will make the element look into the
-  fx and fy resize factors.
- */
-
-/*!
-  \qmlproperty real Resize::fx
-
-  Factor by which to resize on x axis.
- */
-
-
-/*!
-  \qmlproperty real Resize::fy
-
-  Factor by which to resize on y axis.
- */
-
-/*!
-  \qmlproperty Resize::Interpolation Resize::interpolation
-
-  Interpolation method.
- */
-
-
-/*!
-  \qmlproperty enumeration Resize::Interpolation
-
-  Interpolation method:
-  \list
-  \li Resize.INTER_NEAREST nearest neighbor interpolation
-  \li Resize.INTER_LINEAR bilinear interpolation
-  \li Resize.INTER_CUBIC bicubic interpolation
-  \li Resize.INTER_AREA area-based (or super) interpolation
-  \li Resize.INTER_LANCZOS4 Lanczos interpolation over 8x8 neighborhood
-  \li Resize.INTER_MAX nearest neighbor interpolation
-  \li Resize.WARP_INVERSE_MAP nearest neighbor interpolation
-  \endlist
- */
 
 /*!
   \enum QMatResize::Interpolation

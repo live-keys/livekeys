@@ -19,16 +19,6 @@
 using namespace cv;
 
 /*!
-  \qmltype Erode
-  \instantiates QErode
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Dilates an image by using a specific structuring element.
-
-  \quotefile imgproc/erodedilate.qml
-*/
-
-/*!
   \class QErode
   \inmodule lcvimgproc_cpp
   \internal
@@ -63,22 +53,10 @@ QErode::~QErode(){
   \sa Erode::kernel
  */
 
-/*!
-  \qmlproperty Mat Erode::kernel
-
-  Structuring element used for erosion; if element=Mat() , a 3x3 rectangular structuring element is used.
- */
-
 
 /*!
   \property QErode::anchor
   \sa Erode::anchor
- */
-
-/*!
-  \qmlproperty Point Erode::anchor
-
-  Position of the anchor within the element; default value (-1, -1) means that the anchor is at the element center.
  */
 
 /*!
@@ -87,35 +65,13 @@ QErode::~QErode(){
  */
 
 /*!
-  \qmlproperty int Erode::iterations
-
-  Number of times erosion is applied.
- */
-
-/*!
   \property QErode::borderType
   \sa Erode::borderType
  */
 
 /*!
-  \qmlproperty int Erode::borderType
-
-  Pixel extrapolation method.
-
-  \sa CopyMakeBorder::BorderType
- */
-
-/*!
   \property QErode::borderValue
   \sa Erode::borderValue
- */
-
-/*!
-  \qmlproperty color Erode::borderValue
-
-  Border value in case of a constant border
-
-  \sa CopyMakeBorder::BorderType
  */
 
 /*!

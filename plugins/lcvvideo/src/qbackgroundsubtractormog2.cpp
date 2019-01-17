@@ -35,7 +35,7 @@ using namespace cv;
    \internal
    \brief Gaussian mixture based background/foreground segmentation algorithm.
  */
-
+/// \private
 class QBackgroundSubtractorMog2Private : public QBackgroundSubtractorPrivate{
 
 public:
