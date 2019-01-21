@@ -36,6 +36,9 @@ class LV_EDITOR_EXPORT AbstractCodeHandler : public QObject{
     Q_OBJECT
 
 public:
+    /**
+     * \brief Indicates what triggers the content change
+     */
     enum ContentsTrigger{
         Engine,
         Silent
@@ -45,6 +48,9 @@ public:
     explicit AbstractCodeHandler(QObject* parent = 0);
     virtual ~AbstractCodeHandler();
 
+    /**
+     * \brief Assists code completion when typing
+     */
     virtual void assistCompletion(
         const QTextCursor& cursor,
         const QChar& insertion,
@@ -53,10 +59,22 @@ public:
         QTextCursor& cursorChange
     ) = 0;
 
+    /**
+     * \brief Sets the document being worked on
+     */
     virtual void setDocument(ProjectDocument* document) = 0;
+    /**
+     * \brief Define on-change behaviour
+     */
     virtual ContentsTrigger documentContentsChanged(int position, int charsRemoved, int charsAdded) = 0;
 
+    /**
+     * \brief Block highlighting implementation
+     */
     virtual void rehighlightBlock(const QTextBlock &block) = 0;
+    /**
+     * \brief Returns borders of the block containing the current position
+     */
     virtual QPair<int, int> contextBlock(int position) = 0;
 };
 
