@@ -1,13 +1,24 @@
 <!doctype html>
 <html>
+
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="utf-8" />
   <title>%title%</title>
-  <link rel="stylesheet" href="documentation.css">
+  <link rel="stylesheet" href="../../../../live-doc/node_modules/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../documentation.css">
 </head>
+
 <body>
-  <div id="wrapper">
-      %content%
+  <div id="main" class="container-fluid">
+    <div class='row'>
+      <div id='indexList' class='col-3'>%indexList%</div>
+      <div id='wrapper' class='col-9'>%content%</div>
+    </div>
   </div>
+
+  <script src="../../../../live-doc/node_modules/jquery/dist/jquery.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script> -->
+  <script src="../../../../live-doc/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 </body>
+
 </html>
