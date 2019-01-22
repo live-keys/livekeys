@@ -106,6 +106,7 @@ public:
 public slots:
     QObject *windowControls() const;
     QJSValue interceptMenu(QJSValue context);
+    void engineError(QJSValue error);
     void projectChanged(const QString& path);
 
 signals:
@@ -124,6 +125,7 @@ private:
 
     lv::DocumentHandler* m_codeInterface;
     QString              m_dir;
+    QStringList          m_engineImportPaths;
 
     lv::Project*           m_project;
     lv::Settings*          m_settings;

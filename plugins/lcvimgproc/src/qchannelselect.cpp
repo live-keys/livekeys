@@ -17,16 +17,6 @@
 #include "opencv2/imgproc.hpp"
 
 /*!
-  \qmltype ChannelSelect
-  \instantiates QChannelSelect
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Selects an image channel by its index.
-
-  \quotefile imgproc/framedifference.qml
-*/
-
-/*!
   \class QChannelSelect
   \internal
   \inmodule lcvimgproc_cpp
@@ -42,12 +32,6 @@ QChannelSelect::QChannelSelect(QQuickItem *parent)
 
 QChannelSelect::~QChannelSelect(){
 }
-
-/*!
-  \qmlproperty int ChannelSelect::channel
-
-  Channel number.
- */
 
 /*!
   \brief Filter function

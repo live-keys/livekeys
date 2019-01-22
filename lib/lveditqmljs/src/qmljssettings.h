@@ -24,6 +24,8 @@
 namespace lv{
 
 class QmlJsHighlighter;
+
+/// \private
 class QmlJsSettings : public EditorSettingsCategory{
 
 public:

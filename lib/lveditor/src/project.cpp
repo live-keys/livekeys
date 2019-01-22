@@ -149,7 +149,7 @@ ProjectDocument *Project::openFile(ProjectFile *file, int mode){
 
     ProjectDocument* document = isOpened(file->path());
 
-    if ( !document && m_active != 0 && m_active->file() == file ){
+    if ( !document && m_active != nullptr && m_active->file() == file ){
         document = m_active;
         m_documentModel->openDocument(file->path(), document);
     } else if (!document){

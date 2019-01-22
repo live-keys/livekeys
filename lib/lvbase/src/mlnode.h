@@ -317,6 +317,7 @@ public:
     };
 
 public:
+    /// \private
     union LV_BASE_EXPORT MLValue{
         ObjectType*  asObject;
         ArrayType*   asArray;

@@ -27,9 +27,37 @@
 
 namespace lv{
 
+/**
+ * \class lv::DocumentQmlScope
+ * \ingroup lveditqmljs
+ * \brief Imports and import data for a lv::ProjectDocument
+ *
+ * The DocumentQmlScope contains external information, or information comming in from
+ * imports for a lv::ProjectDocument.
+ *
+ * DocumentQmlScopes are mostly used internally, expecially by the lv::CodeQmlHandler
+ */
+
+/**
+ * \class lv::DocumentQmlScope::Import
+ * \ingroup lveditqmljs
+ * \brief Import data associated with a lv::DocumentQmlScope
+ */
+
+/**
+ * \property lv::DocumentQmlScope::Import::NoVersion
+ * \brief Value used to check wether a version is valid or not
+ */
+
 // QDocumentQmlScope::Import implementation
 // ----------------------------------------
 
+/**
+ * \brief Import constructor
+ *
+ * Takes an \p importType, the \p path of the import, the \p as namespace in which to import for this
+ * document and the two versions: \p vMajor, \p vMinor
+ */
 DocumentQmlScope::Import::Import(
         DocumentQmlScope::Import::Type importType,
         const QString &path,
@@ -47,21 +75,37 @@ DocumentQmlScope::Import::Import(
 // QDocumentQmlScope implementation
 // --------------------------------
 
+/**
+ * \brief DocumentQmlScope constructor
+ *
+ * Receives a \p scope pointer to the lv::ProjectQmlScope, and the \p documentInfo for this document.
+ */
 DocumentQmlScope::DocumentQmlScope(ProjectQmlScope::Ptr scope, DocumentQmlInfo::Ptr documentInfo)
     : m_projectScope(scope)
     , m_documentInfo(documentInfo)
 {
 }
 
+/// \brief DocumentQmlScope destructor
 DocumentQmlScope::~DocumentQmlScope(){
 }
 
+/**
+ * \brief Creates an empty DocumentQmlScope from a \p projectScope
+ */
 DocumentQmlScope::Ptr DocumentQmlScope::createEmptyScope(ProjectQmlScope::Ptr projectScope){
     DocumentQmlInfo::Ptr documentInfo = DocumentQmlInfo::create("");
     documentInfo->parse("");
     return DocumentQmlScope::Ptr(new DocumentQmlScope(projectScope, documentInfo));
 }
 
+
+/**
+ * @brief Creates a new lv::DocumentQmlScope
+ *
+ * Creates a new lv::DocumentQmlScope where the \p fileName and \p data are parsed for imports, and for each import
+ * the \p projectScope in order to populate the returned object.
+ */
 DocumentQmlScope::Ptr DocumentQmlScope::createScope(
         const QString &fileName,
         const QString &data,
@@ -115,6 +159,10 @@ DocumentQmlScope::Ptr DocumentQmlScope::createScope(
     return documentScope;
 }
 
+
+/**
+ * \brief Extracts the list of imports from the given \p documentInfo.
+ */
 QList<DocumentQmlScope::Import> DocumentQmlScope::extractImports(DocumentQmlInfo::Ptr documentInfo){
     QList<DocumentQmlScope::Import> imports;
     QList<QmlJS::ImportInfo> importInfos = documentInfo->internalBind()->imports();
@@ -143,6 +191,7 @@ QList<DocumentQmlScope::Import> DocumentQmlScope::extractImports(DocumentQmlInfo
     return imports;
 }
 
+/// \brief Checks for a given import \p key and \returns true if it exists, false otherwise
 bool DocumentQmlScope::hasImport(const DocumentQmlScope::Import &key){
     foreach( const ImportEntry& imp, m_imports ){
         if ( imp.first == key )
@@ -151,6 +200,7 @@ bool DocumentQmlScope::hasImport(const DocumentQmlScope::Import &key){
     return false;
 }
 
+/// \brief Adds an import \p path to a given \p key.
 void DocumentQmlScope::addImport(const DocumentQmlScope::Import &key, const QString &path){
     m_imports.append(QPair<Import, QString>(key, path));
 }

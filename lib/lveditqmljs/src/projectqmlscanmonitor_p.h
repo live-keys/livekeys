@@ -31,6 +31,8 @@ class CodeQmlHandler;
 class ProjectQmlScanner;
 class ProjectQmlExtension;
 class PluginInfoExtractor;
+
+/// \private
 class ProjectQmlScanMonitor : public QObject{
 
     Q_OBJECT
@@ -38,6 +40,7 @@ class ProjectQmlScanMonitor : public QObject{
     friend class ProjectQmlExtension;
 
 public:
+    /// \private
     class DocumentQmlScopeTransport{
     public:
         QString path;

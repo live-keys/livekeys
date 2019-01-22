@@ -41,10 +41,9 @@ class LV_EDITQMLJS_EXPORT ProjectQmlExtension : public QObject, public QQmlParse
 
 public:
     ProjectQmlExtension(QObject* parent = 0);
-    ProjectQmlExtension(Settings* settings, Project* project, ViewEngine *engine, QObject* parent = 0);
     virtual ~ProjectQmlExtension();
 
-    void classBegin(){}
+    void classBegin();
     void componentComplete();
 
     ProjectQmlScanMonitor* scanMonitor();
@@ -61,6 +60,8 @@ public:
 
     static void registerTypes(const char* uri);
 
+    void setParams(Settings *settings, Project* project, ViewEngine* engine);
+
 public slots:
     QObject* createHandler(ProjectDocument* document, DocumentHandler* handler);
 
@@ -75,10 +76,12 @@ private:
     PaletteContainer*  m_paletteContainer;
 };
 
+/// \brief Returns the lv::ProjectQmlScanMonitor associated with this object.
 inline ProjectQmlScanMonitor *ProjectQmlExtension::scanMonitor(){
     return m_scanMonitor;
 }
 
+/// \brief Returns the lv::PaletteContainer associated with this object.
 inline PaletteContainer *ProjectQmlExtension::paletteContainer(){
     return m_paletteContainer;
 }

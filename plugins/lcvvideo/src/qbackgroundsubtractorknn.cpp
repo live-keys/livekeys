@@ -19,13 +19,6 @@
 
 using namespace cv;
 
-/*!
-  \qmltype BackgroundSubtractorKnn
-  \instantiates QBackgroundSubtractorKnn
-  \inqmlmodule lcvvideo
-  \inherits BackgroundSubtractor
-  \brief K-nearest neigbours based background/foreground segmentation algorithm.  This is a \b {static item}.
-*/
 
 /*!
    \class QBackgroundSubtractorKnn
@@ -34,6 +27,7 @@ using namespace cv;
    \brief K-nearest neigbours based background/foreground segmentation algorithm
  */
 
+/// \private
 class QBackgroundSubtractorKnnPrivate : public QBackgroundSubtractorPrivate{
 
 public:
@@ -136,11 +130,6 @@ QBackgroundSubtractorKnn::~QBackgroundSubtractorKnn(){
   \sa BackgroundSubtractorKnn::detectShadows
  */
 
-/*!
-  \qmlproperty bool BackgroundSubtractorKnn::detectShadows
-
-  Enables or disables shadow detection.
- */
 bool QBackgroundSubtractorKnn::detectShadows() const{
     Q_D(const QBackgroundSubtractorKnn);
     return d->detectShadows;
@@ -161,11 +150,6 @@ void QBackgroundSubtractorKnn::setDetectShadows(bool detectShadows){
   \sa BackgroundSubtractorKnn::dist2Threshold
  */
 
-/*!
-  \qmlproperty double BackgroundSubtractorKnn::dist2Threshold
-
-  Threshold on the squared distance.
- */
 double QBackgroundSubtractorKnn::dist2Threshold() const{
     Q_D(const QBackgroundSubtractorKnn);
     return d->dist2Threshold;
@@ -186,11 +170,6 @@ void QBackgroundSubtractorKnn::setDist2Threshold(double dist2Threshold){
   \sa BackgroundSubtractorKnn::history
  */
 
-/*!
-  \qmlproperty int BackgroundSubtractorKnn::history
-
-  Number of last frames that affect the background model.
- */
 int QBackgroundSubtractorKnn::history() const{
     Q_D(const QBackgroundSubtractorKnn);
     return d->history;
@@ -211,11 +190,6 @@ void QBackgroundSubtractorKnn::setHistory(int history){
   \sa BackgroundSubtractorKnn::knnSamples
  */
 
-/*!
-  \qmlproperty int BackgroundSubtractorKnn::knnSamples
-
-  How many nearest neigbours need to match.
- */
 int QBackgroundSubtractorKnn::knnSamples() const{
     Q_D(const QBackgroundSubtractorKnn);
     return d->knnSamples;
@@ -236,11 +210,6 @@ void QBackgroundSubtractorKnn::setKnnSamples(int knnSamples){
   \sa BackgroundSubtractorKnn::nSamples
  */
 
-/*!
-  \qmlproperty int BackgroundSubtractorKnn::nSamples
-
-  Number of data samples in the background model.
- */
 int QBackgroundSubtractorKnn::nSamples() const{
     Q_D(const QBackgroundSubtractorKnn);
     return d->nSamples;
@@ -261,11 +230,6 @@ void QBackgroundSubtractorKnn::setNSamples(int nSamples){
   \sa BackgroundSubtractorKnn::shadowThreshold
  */
 
-/*!
-  \qmlproperty double BackgroundSubtractorKnn::shadowThreshold
-
-  Shadow threshold.
- */
 double QBackgroundSubtractorKnn::shadowThreshold() const{
     Q_D(const QBackgroundSubtractorKnn);
     return d->shadowThreshold;
@@ -286,12 +250,6 @@ void QBackgroundSubtractorKnn::setShadowThreshold(double shadowThreshold){
   \sa BackgroundSubtractorKnn::shadowValue
  */
 
-/*!
-  \qmlproperty int BackgroundSubtractorKnn::shadowValue
-
-  Pixel value for pixels detected as shadow.
- */
-
 int QBackgroundSubtractorKnn::shadowValue() const{
     Q_D(const QBackgroundSubtractorKnn);
     return d->shadowValue;
@@ -307,12 +265,6 @@ void QBackgroundSubtractorKnn::setShadowValue(int shadowValue){
     }
 }
 
-
-/*!
-  \qmlmethod BackgroundSubtractorKnn::staticLoad(string key)
-
-  Loads the BackgroundSubtractorKnn state from the given \a key.
- */
 void QBackgroundSubtractorKnn::staticLoad(const QString &id){
     Q_D(QBackgroundSubtractorKnn);
     QStaticContainer* container = QStaticContainer::grabFromContext(this);

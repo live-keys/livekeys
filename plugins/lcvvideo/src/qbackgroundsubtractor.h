@@ -22,7 +22,8 @@
 #include "qmatfilter.h"
 #include "opencv2/video.hpp"
 
-class Q_LCVVIDEO_EXPORT QBackgroundSubtractorPrivate{
+/// \private
+class QBackgroundSubtractorPrivate{
 
 public:
     QBackgroundSubtractorPrivate();
@@ -39,7 +40,7 @@ private:
 
 };
 
-class QBackgroundSubtractor : public QMatFilter{
+class Q_LCVVIDEO_EXPORT QBackgroundSubtractor : public QMatFilter{
 
     Q_OBJECT
     Q_PROPERTY(double learningRate READ learningRate WRITE setLearningRate NOTIFY learningRateChanged)

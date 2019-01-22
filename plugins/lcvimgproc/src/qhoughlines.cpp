@@ -21,16 +21,6 @@ using namespace cv;
 using namespace std;
 
 /*!
-  \qmltype HoughLines
-  \instantiates QHoughLines
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Finds line segments in a binary image using the Hough transform.
-
-  \quotefile imgproc/houghlines.qml
-*/
-
-/*!
   \class QHoughLines
   \inmodule lcvimgproc_cpp
   \internal
@@ -68,53 +58,6 @@ QHoughLines::QHoughLines(QQuickItem *parent)
 QHoughLines::~QHoughLines(){
     delete d_ptr;
 }
-
-/*!
-  \qmlproperty real HoughLines::rho
-
-  Distance resolution of the accumulator in pixels.
- */
-
-/*!
-  \qmlproperty real HoughLines::theta
-
-  Angle resolution of the accumulator in radians.
- */
-
-/*!
-  \qmlproperty int HoughLines::threshold
-
-  Accumulator threshold parameter. Only those lines are returned that get enough votes ( > threshold ).
- */
-
-/*!
-  \qmlproperty real HoughLines::srn
-
-  For the multi-scale Hough transform, it is a divisor for the distance resolution rho . The coarse accumulator distance
-  resolution is rho and the accurate accumulator resolution is rho/srn . If both srn=0 and stn=0 , the classical Hough
-  transform is used. Otherwise, both these parameters should be positive.
- */
-
-
-/*!
-  \qmlproperty real HoughLines::stn
-
-  For the multi-scale Hough transform, it is a divisor for the distance resolution theta.
- */
-
-
-/*!
-  \qmlproperty color HoughLines::lineColor
-
-  Color of the lines being drawn.
- */
-
-/*!
-  \qmlproperty int HoughLines::lineThickness
-
-  Thickness of the lines being drawn.
- */
-
 
 /*!
   \brief Filtering function.

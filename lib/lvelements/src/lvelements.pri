@@ -30,7 +30,8 @@ HEADERS += \
     $$PWD/imports_p.h \
     $$PWD/modulelibrary.h \
     $$PWD/parser.h \
-    $$PWD/moduleloader.h
+    $$PWD/moduleloader.h \
+    $$PWD/tuple.h
 
 SOURCES += \
     $$PWD/function.cpp \
@@ -57,4 +58,5 @@ SOURCES += \
     $$PWD/elementsplugin.cpp \
     $$PWD/imports.cpp \
     $$PWD/modulelibrary.cpp \
-    $$PWD/parser.cpp
+    $$PWD/parser.cpp \
+    $$PWD/tuple.cpp

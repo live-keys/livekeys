@@ -148,7 +148,7 @@ public:
     // Properties
     // ----------
 
-    InstanceProperty *addProperty(
+    virtual InstanceProperty *addProperty(
         const std::string& name,
         const std::string& type,
         LocalValue value,

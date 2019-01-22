@@ -6,12 +6,15 @@
 
 namespace lv{
 
+/// \private
 class QmlItemModel : public QAbstractListModel{
 
     Q_OBJECT
     Q_PROPERTY(int addPosition READ addPosition CONSTANT)
 
 public:
+
+    /// \private
     class ItemData{
     public:
         ItemData(const QString plabel, const QString& pimport, const QString& pdoc, const QString& pcode);

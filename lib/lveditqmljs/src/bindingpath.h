@@ -6,12 +6,14 @@
 
 namespace lv{
 
+/// \private
 class BindingPath{
 
 public:
     friend class BindingChannel;
 
 public:
+    /// \private
     class Node{
     public:
         enum Type{ Index, Property };
@@ -27,6 +29,7 @@ public:
         virtual ~Node();
     };
 
+    /// \private
     class IndexNode : public Node{
     public:
         int index;
@@ -35,6 +38,7 @@ public:
         virtual QString toString() const Q_DECL_OVERRIDE;
     };
 
+    /// \private
     class PropertyNode : public Node{
     public:
         QStringList objectName;

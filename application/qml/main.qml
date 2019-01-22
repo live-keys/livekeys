@@ -547,26 +547,6 @@ ApplicationWindow{
     }
 
     Component{
-        id: fragmentEditorFactory
-
-        FragmentEditor{
-            id: fragmentEditorComponent
-            height: parent ? parent.height : 0
-            width: 400
-            windowControls: controls
-            onInternalActiveFocusChanged: if ( internalActiveFocus ){
-                root.controls.setActiveItem(fragmentEditorComponent.textEdit, fragmentEditorComponent)
-                projectView.setFocusEditor(fragmentEditorComponent)
-            }
-
-            Component.onCompleted: {
-                projectView.setFocusEditor(fragmentEditorComponent)
-                forceFocus()
-            }
-        }
-    }
-
-    Component{
         id: fragmentDocumentFactory
         DocumentFragment{}
     }
@@ -1082,39 +1062,34 @@ ApplicationWindow{
             }
 
             var cursorBlock = projectView.focusEditor.getCursorFragment()
-            var editorObject = null
-            if ( cursorBlock.start !== cursorBlock.end ){
-                var editorDocumentFragment = fragmentDocumentFactory.createObject(0)
-                editorDocumentFragment.document = projectView.focusEditor.document
-                editorDocumentFragment.lineStartIndex = cursorBlock.start
-                editorDocumentFragment.lineEndIndex = cursorBlock.end + 1
-
-                editorObject = fragmentEditorFactory.createObject(0)
-                editorObject.height = mainHorizontalSplit.height
-                editorObject.document = editorDocumentFragment
-
-                var projectViewWidth = projectView.width
-                var viewerWidth = viewer.width
-
-                var editorWidths = []
-                for ( var i = 0; i < mainHorizontalSplit.editors.length; ++i ){
-                    editorWidths.push(mainHorizontalSplit.editors[i].width)
-                }
-
-                mainHorizontalSplit.removeItem(viewer)
-                mainHorizontalSplit.addItem(editorObject)
-                mainHorizontalSplit.addItem(viewer)
-
-                projectView.width = projectViewWidth
-                editorObject.width = 400
-                viewer.width = viewer.width - editorObject.width
-
-                for ( var i = 0; i < editorWidths.length; ++i ){
-                    mainHorizontalSplit.editors[i].width = editorWidths[i]
-                }
-
-            } else {
+            if ( cursorBlock.start === cursorBlock.end ){
                 addHorizontalEditor()
+                return
+            }
+
+            var editorObject = editorFactory.createObject(0)
+            editorObject.fragmentStart = cursorBlock.start
+            editorObject.fragmentEnd = cursorBlock.end
+            editorObject.height = mainHorizontalSplit.height
+
+            var projectViewWidth = projectView.width
+            var viewerWidth = viewer.width
+
+            var editorWidths = []
+            for ( var i = 0; i < mainHorizontalSplit.editors.length; ++i ){
+                editorWidths.push(mainHorizontalSplit.editors[i].width)
+            }
+
+            mainHorizontalSplit.removeItem(viewer)
+            mainHorizontalSplit.addItem(editorObject)
+            mainHorizontalSplit.addItem(viewer)
+
+            projectView.width = projectViewWidth
+            editorObject.width = 400
+            viewer.width = viewer.width - editorObject.width
+
+            for ( var i = 0; i < editorWidths.length; ++i ){
+                mainHorizontalSplit.editors[i].width = editorWidths[i]
             }
         }
 

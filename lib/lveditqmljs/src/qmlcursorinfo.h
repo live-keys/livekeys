@@ -21,6 +21,7 @@
 
 namespace lv{
 
+/// \private
 class QmlCursorInfo: public QObject{
 
     Q_OBJECT

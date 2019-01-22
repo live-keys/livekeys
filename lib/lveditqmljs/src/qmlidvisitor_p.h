@@ -25,6 +25,7 @@
 
 namespace lv{
 
+/// \private
 class IdExtractor : public QmlJS::MemberProcessor{
 
 public:
@@ -39,6 +40,7 @@ private:
     QStringList m_ids;
 };
 
+/// \private
 class IdValueExtractor : public QmlJS::MemberProcessor{
 
 public:
@@ -63,6 +65,7 @@ private:
     const QmlJS::Value* m_value;
 };
 
+/// \private
 class ValueMemberExtractor : public QmlJS::MemberProcessor{
 public:
     ValueMemberExtractor(DocumentQmlObject* object) : m_parent(0), m_object(object)

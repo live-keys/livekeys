@@ -11,6 +11,7 @@ namespace lv{
 
 class QmlEditFragment;
 
+/// \private
 class QmlCodeConverter : public QObject{
 
     Q_OBJECT

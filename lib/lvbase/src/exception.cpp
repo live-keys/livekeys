@@ -33,6 +33,7 @@ namespace lv{
  */
 
 
+/// \private
 class ExceptionPrivate{
 
 public:
@@ -146,7 +147,7 @@ bool Exception::hasLocation() const{
  * \brief Indicates if the stack trace was included in the Exception
  */
 bool Exception::hasStackTrace() const{
-    return m_d->stackTrace.get() != 0;
+    return m_d->stackTrace.get() != nullptr;
 }
 
 /**

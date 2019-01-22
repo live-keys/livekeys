@@ -14,8 +14,15 @@ Grid{
     }
     
     FastNlMeansDenoising{
+        id: fastNlMeansDenoising
+        visible: false
         input : src.output
-        h : 10.0
+        h : 20.0
+        searchWindowSize: 11
+    }
+    
+    MatView{
+        mat: fastNlMeansDenoising.output
     }
     
 }

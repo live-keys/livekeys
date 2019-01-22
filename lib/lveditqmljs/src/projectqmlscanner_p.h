@@ -32,11 +32,14 @@ class QTimer;
 namespace lv{
 
 class CodeQmlHandler;
+
+/// \private
 class ProjectQmlScanner : public QObject{
 
     Q_OBJECT
 
 public:
+    /// \private
     class TypeLoadRequest{
     public:
         TypeLoadRequest(const QString& uri, const QString& path)

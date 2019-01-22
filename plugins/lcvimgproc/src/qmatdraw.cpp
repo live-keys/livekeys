@@ -17,17 +17,6 @@
 #include "qmatdraw.h"
 #include "opencv2/imgproc.hpp"
 
-/*!
-  \qmltype MatDraw
-  \instantiates QMatDraw
-  \inqmlmodule lcvcore
-  \inherits MatDisplay
-  \brief Provides matrix drawing operations.
-
-  Provides the basic set of functions needed in order to draw on a matrix.
-
-  \quotefile imgproc/drawing.qml
-*/
 
 /*!
    \class QMatDraw
@@ -53,20 +42,6 @@ QMatDraw::QMatDraw(QQuickItem *parent)
 QMatDraw::~QMatDraw(){
 }
 
-
-/*!
-  \qmlproperty Mat MatDraw::input
-
-  Input surface to draw on.
- */
-
-
-/*!
-  \qmlmethod MatDraw::cleanUp()
-
-  Cleans up the matrix surface to it's initial value.
- */
-
 void QMatDraw::cleanUp(){
     if ( inputMat() )
         inputMat()->cvMat()->copyTo(*output()->cvMat());
@@ -74,13 +49,6 @@ void QMatDraw::cleanUp(){
     update();
 }
 
-/*!
-  \qmlmethod MatDraw::line(Point p1, Point p2, Color color, int thickness, int lineType, int shift)
-
-  Draw a line from point \a p1 to point \a p2 of a specified \a color and \a thickness. The \a lineType can be
-  4 ( 4-connected line ), 8 (8-connected line, also the default) and -1 (antialiased line). The shift is the number
-  of fractional bits in the point coordinates.
- */
 
 /*!
   \brief Draws a line from point \a p1 to point \a p2.
@@ -135,14 +103,6 @@ void QMatDraw::lineOn(
 }
 
 /*!
-  \qmlmethod MatDraw::rectangle(Point p1, Point p2, Color color, int thickness, int lineType, int shift)
-
-  Draw a rectangle from point \a p1 to point \a p2 of a specified \a color and \a thickness. The \a lineType can be
-  4 ( 4-connected line ), 8 (8-connected line, also the default) and -1 (antialiased line). The shift is the number
-  of fractional bits in the point coordinates.
- */
-
-/*!
   \brief Draws a rectangle point \a p1 to point \a p2.
 
   Parameters :
@@ -174,15 +134,6 @@ void QMatDraw::rectangle(
 }
 
 /*!
-  \qmlmethod MatDraw::circle(Point center, int radius, Color color, int thickness, int lineType, int shift)
-
-  Draw a circle by specifying its \a center point, \a radius, \a color and \a thickness. For the lineType and shift, see
-  the lin method.
-
-  \sa MatDraw::line
- */
-
-/*!
   \brief Draws a circle in \a center with \a radius.
 
   Parameters :
@@ -211,17 +162,6 @@ void QMatDraw::circle(
     emit outputChanged();
     update();
 }
-
-/*!
-  \qmlmethod MatDraw::ellipse(Point center, Size axes, real angle, real startAngle, real endAngle, Color color,
-  int thickness, int lineType, int shift)
-
-  Draw an ellipse in the \a center point, with its \a axes (half of the size of the ellipse main axes), rotation
-  \a angle in degrees, \a startAngle and \a endAngle of the elliptic arc in degrees and \a color. For the lineType and
-  shift see the line method.
-
-  \sa MatDraw::line
- */
 
 /*!
   \brief Draws an ellipse
@@ -263,17 +203,6 @@ void QMatDraw::ellipse(
     emit outputChanged();
     update();
 }
-
-/*!
-  \qmlmethod MatDraw::fillPoly(variant points, Color color, int lineType, int shift, Point offset)
-
-  Fills the area bounded by one or more polygons. The \a points is the array of polygons where each polygon is
-  represented by an array of points, the \a color is the polygons color, the \a lineType is the type of the polygon
-  boundaries and the shift is the number of fractional bits in the vertex coordinates. The offset is an optional offset
-  of all points of the contours.
-
-  \sa MatDraw::line
- */
 
 /*!
   \brief Fills an area bounded by one or more polygons.

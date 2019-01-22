@@ -95,7 +95,6 @@ public slots:
     lv::CodePalette* openPalette(lv::PaletteList* palette, int index, QObject* currentApp = 0);
     void removePalette(QObject* palette);
     int palettePosition(QObject* palette);
-    void paletteValueChanged(QmlEditFragment *editFragment);
 
     void addPaletteBox(QObject* paletteBox);
     QObject* paletteBoxFor(lv::CodePalette* palette);
@@ -128,6 +127,7 @@ public slots:
     void updateScope();
 
 signals:
+    /// \brief Triggered before removing a palette
     void paletteAboutToRemove(lv::CodePalette* palette);
 
 private:
@@ -209,6 +209,7 @@ private:
 
 };
 
+/// \brief Returns the settings associated with this object.
 inline QmlJsSettings *CodeQmlHandler::settings(){
     return m_settings;
 }

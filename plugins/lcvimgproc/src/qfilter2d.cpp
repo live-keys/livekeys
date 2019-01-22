@@ -19,16 +19,6 @@
 using namespace cv;
 
 /*!
-  \qmltype Filter2D
-  \instantiates QFilter2D
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Converts an image with the specified kernel
-
-  \quotefile imgproc/filter2D.qml
-*/
-
-/*!
   \class QFilter2D
   \inmodule lcvimgproc_cpp
   \internal
@@ -57,50 +47,6 @@ QFilter2D::QFilter2D(QQuickItem *parent)
  */
 QFilter2D::~QFilter2D(){
 }
-
-
-/*!
-  \qmlproperty int Filter2D::ddepth
-
-  Desired depth of the destination image; if it is negative, it will be the same as input.depth(); the following
-  combinations of src.depth() and ddepth are supported:
-        input.depth() = Mat.CV_8U, ddepth = -1/Mat.CV_16S/Mat.CV_32F/Mat.CV_64F
-        input.depth() = Mat.CV_16U/CV_16S, ddepth = -1/Mat.CV_32F/Mat.CV_64F
-        input.depth() = Mat.CV_32F, ddepth = -1/Mat.CV_32F/Mat.CV_64F
-        input.depth() = Mat.CV_64F, ddepth = -1/Mat.CV_64F,
-
-  where ddepth = -1 will yield an output the same as the source.
- */
-
-
-/*!
-  \qmlproperty Mat Filter2D::kernel
-
-  Convolution kernel (or rather a correlation kernel), a single-channel floating point matrix.
- */
-
-
-/*!
-  \qmlproperty Point Filter2D::anchor
-
-  Anchor of the kernel that indicates the relative position of a filtered point within the kernel; the anchor should lie
-  within the kernel; default value (-1,-1) means that the anchor is at the kernel center.
- */
-
-
-/*!
-  \qmlproperty real Filter2D::delta
-
-  Optional value added to the filtered pixels before storing them in Filter2D.output.
- */
-
-
-/*!
-  \qmlproperty int Filter2D::borderType
-
-  Pixel extrapolation method (see \l{CopyMakeBorder::BorderType}{CopyMakeBorder::BorderType} for details).
- */
-
 
 /*!
   \brief Filtering function.

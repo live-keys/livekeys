@@ -21,36 +21,71 @@
 
 namespace lv{
 
+/**
+ * \class lv::QmlEditFragment
+ * \ingroup lveditqmljs
+ * \brief An editing fragment for a lv::ProjectDocument.
+ *
+ * An editing fragment represents a section within a lv::ProjectDocument that is connected to
+ * the running application. Fragments have palettes associated with them, and can write code
+ * based on the given value of a palette. Also, they provide the set of binding channels connected
+ * to the application.
+ */
+
+/**
+ * \brief QmlEditFragment contructor
+ *
+ * The Fragment is constructed from a \p declaration object and a \p palette object.
+ */
 QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodePalette *palette)
     : m_declaration(declaration)
     , m_palette(palette)
-    , m_bindingChannel(new BindingChannel)
+    , m_bindingChannel(new BindingChannel(this))
     , m_bindingUse(false)
     , m_paletteUse(false)
 {
 }
 
+/**
+ * \brief QmlEditFragment destructor
+ */
 QmlEditFragment::~QmlEditFragment(){
     delete m_bindingChannel;
     m_palette->deleteLater();
 }
 
+/**
+ * \brief Returns the lv::QmlDeclaration's value postion
+ */
 int QmlEditFragment::valuePosition() const{
     return m_declaration->valuePosition();
 }
 
+
+/**
+ * \brief Returns the lv::QmlDeclaration's value length
+ */
 int QmlEditFragment::valueLength() const{
     return m_declaration->valueLength();
 }
 
-void QmlEditFragment::setExpressionPath(BindingPath *path){
-    m_bindingChannel->setExpressionPath(path);
+/**
+ * \brief Sets the main expressions \p bindingPath
+ */
+void QmlEditFragment::setExpressionPath(BindingPath *bindingPath){
+    m_bindingChannel->setExpressionPath(bindingPath);
 }
 
+/**
+ * \brief Returns the main expressions binding path
+ */
 BindingPath *QmlEditFragment::expressionPath(){
     return m_bindingChannel->expressionPath();
 }
 
+/**
+ * \brief Writes the \p code to the value part of this fragment
+ */
 void QmlEditFragment::write(const QString &code){
     ProjectDocument* document = m_declaration->document();
 
@@ -72,6 +107,9 @@ void QmlEditFragment::write(const QString &code){
     document->removeEditingState(ProjectDocument::Palette);
 }
 
+/**
+ * zbrief Reads the code value of this fragment and returns it.
+ */
 QString QmlEditFragment::readValueText() const{
     QTextCursor tc(m_declaration->document()->textDocument());
     tc.setPosition(valuePosition());

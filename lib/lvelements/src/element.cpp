@@ -176,7 +176,9 @@ EventConnection* Element::on(const std::string &key, std::function<void (const F
 }
 
 EventConnection *Element::on(const std::string &key, Callable callback){
+
     EventFunction* fnc = typeMetaObject().getEvent(key);
+
     if ( fnc ){
         EventListenerContainerBase* container = nullptr;
         auto delegateIt = m_listeningConnections.find(fnc->eventId());
@@ -190,8 +192,11 @@ EventConnection *Element::on(const std::string &key, Callable callback){
         return container->append(this, fnc->eventId(), callback);
     } else { // search locally
         auto evIt = m_d->instanceEvents.find(key);
-        if ( evIt == m_d->instanceEvents.end() )
-            throw std::exception();
+        if ( evIt == m_d->instanceEvents.end() ){
+            lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Object does not have event: " + key, 1);
+            engine()->throwError(&e, this);
+            return nullptr;
+        }
 
         InstanceEvent* ie = evIt->second;
 

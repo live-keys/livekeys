@@ -3,7 +3,6 @@
 #include <fstream>
 #include <cctype>
 #include "qdebug.h"
-#include <direct.h>
 #include "qdir.h"
 #include "live/exception.h"
 
@@ -20,7 +19,7 @@ void TestPack::unpack(std::string filePath)
 
     std::string line;
     std::ofstream outputStream;
-    while (getline(inputStream, line))
+    while (std::getline(inputStream, line))
     {
         if (line.length() > 6 && line.substr(0, 6) == "//////")
         {

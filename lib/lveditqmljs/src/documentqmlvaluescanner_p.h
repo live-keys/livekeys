@@ -24,6 +24,7 @@ class QTextDocument;
 
 namespace lv{
 
+/// \private
 class DocumentQmlValueScanner{
 
 public:

@@ -43,7 +43,7 @@ using namespace cv;
 
   \quotefile video/lktracking.qml
 */
-
+/// \private
 class QCalcOpticalFlowPointState{
 
 public:

@@ -7,7 +7,8 @@
 
 namespace lv{
 
-class LV_EDITQMLJS_EXPORT PluginTypesFacade{
+/// \private
+class PluginTypesFacade{
 
 public:
     PluginTypesFacade();

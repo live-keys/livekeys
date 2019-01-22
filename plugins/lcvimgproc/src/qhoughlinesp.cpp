@@ -21,16 +21,6 @@ using namespace cv;
 using namespace std;
 
 /*!
-  \qmltype HoughLinesP
-  \instantiates QHoughLinesP
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Finds line segments in a binary image using the probabilistic Hough transform.
-
-  \quotefile imgproc/houghlinesp.qml
-*/
-
-/*!
   \class QHoughLinesP
   \inmodule lcvimgproc_cpp
   \internal
@@ -74,49 +64,6 @@ QHoughLinesP::QHoughLinesP(QQuickItem *parent)
 QHoughLinesP::~QHoughLinesP(){
     delete d_ptr;
 }
-
-
-/*!
-  \qmlproperty real HoughLinesP::rho
-
-  Distance resolution of the accumulator in pixels.
- */
-
-/*!
-  \qmlproperty real HoughLinesP::theta
-
-  Angle resolution of the accumulator in radians.
- */
-
-/*!
-  \qmlproperty int HoughLinesP::threshold
-
-  Accumulator threshold parameter. Only those lines are returned that get enough votes ( > threshold ).
- */
-
-/*!
-  \qmlproperty real HoughLinesP::minLineLength
-
-  Minimum line length. Line segments shorter than that are rejected.
- */
-
-/*!
-  \qmlproperty real HoughLinesP::maxLineGap
-
-  Maximum allowed gap between points on the same line to link them.
- */
-
-/*!
-  \qmlproperty color HoughLinesP::lineColor
-
-  Color of the lines being drawn.
- */
-
-/*!
-  \qmlproperty int HoughLinesP::lineThickness
-
-  Thickness of the lines being drawn.
- */
 
 /*!
   \brief Filtering function.

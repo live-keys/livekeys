@@ -9,6 +9,7 @@
 #include "visuallogjsobject.h"
 #include "errorhandler.h"
 #include "imports_p.h"
+#include "tuple.h"
 
 #include <sstream>
 #include <iomanip>
@@ -510,6 +511,7 @@ void Engine::importInternals(){
     ComponentTemplate* listTemplate = registerTemplate(&List::metaObject());
     ComponentTemplate* containerTemplate = registerTemplate(&Container::metaObject());
     ComponentTemplate* errorHandlerTemplate = registerTemplate(&ErrorHandler::metaObject());
+    ComponentTemplate* tupleTemplate = registerTemplate(&Tuple::metaObject());
 
     v8::Local<v8::FunctionTemplate> tpl = m_d->elementTemplate->data.Get(isolate());
     context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Element"), tpl->GetFunction());
@@ -522,6 +524,9 @@ void Engine::importInternals(){
 
     v8::Local<v8::FunctionTemplate> errorHandlerTpl = errorHandlerTemplate->data.Get(isolate());
     context->Global()->Set(v8::String::NewFromUtf8(isolate(), "ErrorHandler"), errorHandlerTpl->GetFunction());
+
+    v8::Local<v8::FunctionTemplate> tupleTpl = tupleTemplate->data.Get(isolate());
+    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Tuple"), tupleTpl->GetFunction());
 
     m_d->pointTemplate.Reset(isolate(), Point::functionTemplate(isolate()));
     context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Point"), pointTemplate()->GetFunction());

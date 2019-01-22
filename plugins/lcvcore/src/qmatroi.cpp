@@ -18,19 +18,6 @@
 
 
 /*!
-  \qmltype MatRoi
-  \instantiates QMatRoi
-  \inqmlmodule lcvcore
-  \inherits MatFilter
-  \brief Selects a region of interest (ROI).
-
-  Select a region from an image for further processing. The 'PanAndZoom' component shows how to use a MatRoi to select
-  a region from an image, then use a MatRead to read the regions values.
-
-  \quotefile imgproc/panandzoom.qml
-*/
-
-/*!
   \class QMatRoi
   \internal
   \brief Performs a selection of a matrixes region of interest for further processing.
@@ -48,34 +35,6 @@ QMatRoi::QMatRoi(QQuickItem *parent)
     , m_regionY(0)
 {
 }
-
-
-/*!
-  \qmlproperty int MatRoi::regionX
-
-  The x coordinate of the most top-left point of the region.
- */
-
-
-/*!
-  \qmlproperty int MatRoi::regionY
-
-  The y coordinate of the most top-left point of the region.
- */
-
-
-/*!
-  \qmlproperty int MatRoi::regionWidth
-
-  The width of the seleted region.
- */
-
-
-/*!
-  \qmlproperty int MatRoi::regionHeight
-
-  The height of the seleted region.
- */
 
 void QMatRoi::transform(const cv::Mat &in, cv::Mat &out){
     if ( in.cols >= m_regionX + m_regionWidth && in.rows >= m_regionY + m_regionHeight )

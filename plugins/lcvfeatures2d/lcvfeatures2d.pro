@@ -25,7 +25,8 @@ include($$PROJECT_ROOT/project/3rdparty/opencv.pri)
 OTHER_FILES *= \
     qml/*.qml \
     qml/qmldir \
-    qml/plugins.qmltypes
+    qml/plugins.qmltypes \
+    doc/*.md
 
 DISTFILES += \
     qml/live.plugin.json \

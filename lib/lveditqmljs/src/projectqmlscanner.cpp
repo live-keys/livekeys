@@ -43,6 +43,7 @@ namespace lv{
 
 namespace projectqml_helpers{
 
+/// \private
 class LibraryInfoSnapshot{
 public:
     QStringList dependencies;
@@ -51,6 +52,7 @@ public:
     QList<QmlJS::ModuleApiInfo> moduleApis;
 };
 
+/// \private
 void updateLibraryPrototypes(
         ProjectQmlScope::Ptr projectScope,
         const QString &path,

@@ -18,15 +18,6 @@
 
 using namespace cv;
 
-/*!
-  \qmltype GaussianBlur
-  \instantiates QGaussianBlur
-  \inqmlmodule lcvimgproc
-  \inherits MatFilter
-  \brief Blurs an image using a Gaussian filter.
-
-  \quotefile imgproc/gaussianblur.qml
-*/
 
 /*!
   \class QGaussianBlur
@@ -55,34 +46,6 @@ QGaussianBlur::QGaussianBlur(QQuickItem *parent)
  */
 QGaussianBlur::~QGaussianBlur(){
 }
-
-
-/*!
-  \qmlproperty size GaussianBlur::ksize
-
-  Gaussian kernel size. ksize.width and ksize.height can differ but they both must be positive and odd. Or, they can be
-  zero’s and then they are computed from sigma.
- */
-
-/*!
-  \qmlproperty real GaussianBlur::sigmaX
-
-  Gaussian kernel standard deviation in X direction.
- */
-
-
-/*!
-  \qmlproperty real GaussianBlur::sigmaY
-
-  Gaussian kernel standard deviation in Y direction.
- */
-
-
-/*!
-  \qmlproperty int GaussianBlur::borderType
-
-  Pixel extrapolation method (see \l{CopyMakeBorder::BorderType}{CopyMakeBorder::BorderType} for details).
- */
 
 /*!
   \brief Filtering function.

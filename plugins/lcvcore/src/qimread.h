@@ -20,7 +20,7 @@
 #include <QQuickItem>
 #include "qmat.h"
 #include "qmatdisplay.h"
-
+/// \private
 class QImRead : public QMatDisplay{
 
     Q_OBJECT

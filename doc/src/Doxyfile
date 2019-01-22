@@ -796,11 +796,11 @@ INPUT                  = \
     ../../lib/lveditor/src/lveditorglobal.h \
     ../../lib/lveditqmljs/src/lveditqmljsglobal.h \
     ../../lib/lvelements/src/lvelementsglobal.h \
-    ../../lib/lvview/src/lvviewglobal.h \
-    ../../plugins/live/src/qliveglobal.h \
-    ../../plugins/lcvcore/src/qlcvcoreglobal.h \
-    ../../plugins/lcvfeatures2d/src/qlcvfeatures2dglobal.h \
-    ../../plugins/lcvvideo/src/qlcvvideoglobal.h
+    ../../lib/lvview/src \
+    ../../plugins/live \
+    ../../plugins/lcvcore \
+    ../../plugins/lcvfeatures2d \
+    ../../plugins/lcvvideo
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

@@ -24,26 +24,6 @@
 #include <QTimer>
 
 /*!
-  \qmltype VideoCapture
-  \instantiates QVideoCapture
-  \inqmlmodule lcvcore
-  \inherits Item
-  \brief Captures frames from video files. This is a \b {static item}.
-
-  The VideoCapture constantly grabes frames from a video file. The frames are captured at a speed equal to the video's
-  fps, but that is not necessarily to be considered as an absolute value. The speed can be altered manually by
-  configuring the fps parameter. A progress bar and a play/pause button can be attached by using the VideoControls type
-  in the lcvcontrols module.
-
-  The first example in core/videocapture_simple.qml shows a simple video frame grabber, while the second one in
-  core/videocapture_controls.qml shows the grabber with the VideoControls attached.
-
-  \quotefile core/videocapture_simple.qml
-
-  \quotefile core/videocapture_controls.qml
-*/
-
-/*!
    \class QVideoCapture
    \internal
    \brief Captures frames from a video file.
@@ -73,34 +53,13 @@ QVideoCapture::QVideoCapture(QQuickItem *parent)
  */
 
 /*!
-  \qmlproperty Mat VideoCapture::output
-
-  Output frame.
- */
-
-
-/*!
   \property QVideoCapture::linearFilter
   \sa VideoCapture::linearFilter
  */
 
 /*!
-  \qmlproperty bool VideoCapture::linearFilter
-
-  Perform linear filtering when scaling the matrix to be displayed. The default value is true.
- */
-
-
-/*!
   \property QVideoCapture::fps
   \sa VideoCapture::fps
- */
-
-/*!
-  \qmlproperty float VideoCapture::fps
-
-  By default, this is initialized with the video files fps. You can change this value if you want faster/slower
-  capture playback.
  */
 
 void QVideoCapture::setFps(qreal fps){
@@ -123,12 +82,6 @@ void QVideoCapture::setFps(qreal fps){
   \sa VideoCapture::loop
  */
 
-/*!
-  \qmlproperty bool VideoCapture::loop
-
-  If enabled, the video will start over once it's reach the end. By default, this value is disabled.
- */
-
 void QVideoCapture::setLoop(bool loop){
     if ( m_loop != loop ){
         m_loop = loop;
@@ -144,12 +97,6 @@ void QVideoCapture::setLoop(bool loop){
   \sa VideoCapture::totalFrames
  */
 
-/*!
-  \qmlproperty int VideoCapture::totalFrames
-
-  This \b{read-only} property holds the total frames available in the video.
- */
-
 int QVideoCapture::totalFrames() const{
     if ( m_thread )
         return m_thread->totalFrames();
@@ -161,50 +108,17 @@ int QVideoCapture::totalFrames() const{
   \sa VideoCapture::currentFrame
  */
 
-/*!
-  \qmlproperty int VideoCapture::currentFrame
-
-  This property holds the current frame number. If you set this manually, you perform a seek to the specified frame
-  number in the video.
- */
-
-
 int QVideoCapture::currentFrame() const{
     if ( m_thread )
         return m_thread->currentFrame();
     return 0;
 }
 
-/*!
-  \qmlmethod VideoCapture::seek(int frame)
-
-  Perform a seek to the specified \a frame number.
- */
-
 void QVideoCapture::seekTo(int frame){
     if ( m_thread && frame != m_thread->currentFrame() ){
         m_thread->seekTo(frame);
     }
 }
-
-/*!
-  \qmlproperty string VideoCapture::file
-
-  This property holds the url to the file thats opened.
- */
-
-/*!
-  \qmlmethod VideoCapture::staticOpen(string file)
-
-  This is an overloaded method for VideoCapture::staticLoad
- */
-
-
-/*!
-  \qmlmethod VideoCapture::staticLoad(string file)
-
-  Loads the VideoCapture state. \a file is a link to the file to be opened. This also acts a a state identifier.
- */
 
 void QVideoCapture::staticLoad(const QString &file){
     if ( m_file == file )
@@ -273,12 +187,6 @@ void QVideoCapture::switchMat(){
 /*!
   \property QVideoCapture::paused
   \sa VideoCapture::paused
- */
-
-/*!
-  \qmlproperty bool VideoCapture::paused
-
-  Pause / play the video by setting this property to true or false.
  */
 
 void QVideoCapture::setPaused(bool paused){

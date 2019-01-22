@@ -62,6 +62,29 @@ QFastNlMeansDenoising::QFastNlMeansDenoising(QQuickItem *parent) :
 QFastNlMeansDenoising::~QFastNlMeansDenoising(){
 }
 
+void QFastNlMeansDenoising::process(){
+    use(createLocker(), [this](){
+        const cv::Mat& in = inputMat()->data();
+        cv::Mat& out = *output()->cvMat();
+        if ( !in.empty() ){ // fastNlMeansDenoising hangs on empty Mat
+            bool colorEnabled = m_useColorAlgorithm;
+            if ( m_autoDetectColor ){
+                colorEnabled = (in.channels() > 1);
+            }
+            if ( colorEnabled ){
+                fastNlMeansDenoisingColored(in, out, m_h, m_hColor, m_templateWindowSize, m_searchWindowSize);
+            }
+            else{
+                fastNlMeansDenoising(in, out, m_h, m_templateWindowSize, m_searchWindowSize);
+            }
+        }
+    },
+    [this](){
+        emit outputChanged();
+        update();
+    });
+}
+
 /*!
   \qmlproperty bool FastNlMeansDenoising::colorAlgorithm
 
@@ -105,17 +128,6 @@ QFastNlMeansDenoising::~QFastNlMeansDenoising(){
   \a in
   \a out
  */
-void QFastNlMeansDenoising::transform(const Mat &in, Mat &out){
-    if ( !in.empty() ){ // fastNlMeansDenoising hangs on empty Mat
-        bool colorEnabled = m_useColorAlgorithm;
-        if ( m_autoDetectColor ){
-            colorEnabled = (in.channels() > 1);
-        }
-        if ( colorEnabled ){
-            fastNlMeansDenoisingColored(in, out, m_h, m_hColor, m_templateWindowSize, m_searchWindowSize);
-        }
-        else{
-            fastNlMeansDenoising(in, out, m_h, m_templateWindowSize, m_searchWindowSize);
-        }
-    }
+void QFastNlMeansDenoising::transform(const Mat &, Mat &){
+    process();
 }

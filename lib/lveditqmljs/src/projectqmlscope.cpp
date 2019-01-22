@@ -31,6 +31,18 @@
 
 namespace lv{
 
+/**
+ * \class ProjectQmlScope
+ * \ingroup lveditqmljs
+ * \brief Contains all the loaded plugins of a project
+ */
+
+/**
+ * \brief ProjectQmlScope constructor
+ *
+ * This constructor is private, if you want to create a new ProjectQmlScope, you need to use the
+ * lv::ProjectQmlScope::create function.
+ */
 
 ProjectQmlScope::ProjectQmlScope(QQmlEngine *engine)
     : d_globalLibraries(new ProjectQmlScopeContainer)
@@ -48,13 +60,22 @@ ProjectQmlScope::ProjectQmlScope(QQmlEngine *engine)
     addDefaultLibraries(paths);
 }
 
+/**
+ * \brief ProjectQmlScope destructor
+ */
 ProjectQmlScope::~ProjectQmlScope(){
 }
 
+/**
+ * \brief Creates a new ProjectQmlScope object
+ */
 ProjectQmlScope::Ptr ProjectQmlScope::create(QQmlEngine *engine){
     return ProjectQmlScope::Ptr(new ProjectQmlScope(engine));
 }
 
+/**
+ * \brief Finds a libraries paths given it's uri
+ */
 void ProjectQmlScope::findQmlLibraryInImports(
         const QString &path,
         int versionMajor,
@@ -86,6 +107,9 @@ void ProjectQmlScope::findQmlLibraryInImports(
     paths << newPaths;
 }
 
+/**
+ * \brief Finds a qml library in a given path
+ */
 void ProjectQmlScope::findQmlLibrary(
         const QString &path,
         int versionMajor,
@@ -104,6 +128,9 @@ void ProjectQmlScope::findQmlLibrary(
     findQmlLibraryInPath(path, true, paths);
 }
 
+/**
+ * \brief Finds a qml library in a given path.
+ */
 void ProjectQmlScope::findQmlLibraryInPath(const QString &path, bool requiresQmlDir, QList<QString>& paths){
     if ( d_globalLibraries->libraryExists(path) ){
         paths.append(path);
@@ -132,19 +159,31 @@ void ProjectQmlScope::findQmlLibraryInPath(const QString &path, bool requiresQml
     paths.append(path);
 }
 
+/**
+ * \brief Adds a library as implicit
+ */
 void ProjectQmlScope::addImplicitLibrary(const QString &path){
     if ( !d_implicitLibraries->libraryExists(path) )
         d_implicitLibraries->assignLibrary(path, QmlLibraryInfo::create());
 }
 
+/**
+ * \brief Returns the total number of global libraries
+ */
 int ProjectQmlScope::totalLibraries() const{
     return d_globalLibraries->totalLibraries();
 }
 
+/**
+ * \brief Returns the total number of implicit libraries
+ */
 int ProjectQmlScope::totalImplicitLibraries() const{
     return d_implicitLibraries->totalLibraries();
 }
 
+/**
+ * \brief Returns the uri of a library from it's path
+ */
 QString ProjectQmlScope::uriForPath(const QString &path){
     QString bestmatch;
     for ( QHash<QString, QList<QString> >::iterator it = m_importToPaths.begin(); it != m_importToPaths.end(); ++it ){
