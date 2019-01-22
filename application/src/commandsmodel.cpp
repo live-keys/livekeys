@@ -63,13 +63,10 @@ void CommandsModel::updateFilter()
 
 void CommandsModel::updateAvailableCommands()
 {
-    //qDebug() << "this mess right here!";
-
     auto commandsMap = m_commands->m_commands;
     for (auto it = commandsMap.begin(); it != commandsMap.end(); ++it)
     {
         QString commandId = it.key();
-        if (commandId == "") qDebug() << "WE HAVE A BLANK COMMAND";
         m_commandEntries[commandId] = CommandEntry(commandId, it.value()->description);
     }
 
@@ -83,11 +80,6 @@ void CommandsModel::updateAvailableCommands()
             entry.m_shortcuts += ", ";
         }
         entry.m_shortcuts += m_keymap->getKeyCodeDescription(key);
-    }
-
-    for (auto it: m_commandEntries)
-    {
-        qDebug() << it.second.m_command << it.second.m_description << it.second.m_shortcuts;
     }
 }
 
