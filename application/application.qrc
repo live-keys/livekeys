@@ -51,5 +51,8 @@
         <file alias="palette-commit.png">images/palette-commit.png</file>
         <file alias="switch-file.png">images/switch-file.png</file>
         <file alias="command.png">images/command.png</file>
+        <file alias="live.png">images/live.png</file>
+        <file alias="onsave.png">images/onsave.png</file>
+        <file alias="disabled.png">images/disabled.png</file>
     </qresource>
 </RCC>

@@ -41,13 +41,15 @@ Rectangle{
         {
             windowControls.codingMode = 1
             windowControls.wasLiveCoding = true
-            modeButton.text = "On save"
+            modeImage.source = onSaveImage.source
+            modeImage.anchors.rightMargin = onSaveImage.anchors.rightMargin
         }
         if (focusEditor && focusEditor.document && focusEditor.document === project.active && windowControls.wasLiveCoding)
         {
             windowControls.wasLiveCoding = false
             windowControls.codingMode = 0
-            modeButton.text = "Live"
+            modeImage.source = liveImage.source
+            modeImage.anchors.rightMargin = liveImage.anchors.rightMargin
         }
 
         modeContainer.visible = false
