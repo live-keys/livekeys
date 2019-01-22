@@ -25,11 +25,29 @@ body {
   padding: 15px;
 }
 
+#indexList {
+  overflow: scroll;
+  position: fixed;
+  height: 100vh;
+  width: calc(25% - 30px);
+  word-wrap: break-word;
+}
+
+#indexList {
+  overflow-x: hidden;
+}
+
+#indexList::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+
 #indexList hr {
   background: #ccc !important;
   border: 0 none;
   height: 1px;
-  margin: 6px 0;
+  margin: 6px 10px;
   padding: 0;
 }
 
@@ -38,30 +56,37 @@ body {
   
 } */
 
+#indexList .expandable {
+  margin-top: 10px;
+  margin-left: 20px;
+}
+
+#indexList a {
+  display: list-item;
+  list-style-type: circle;
+  list-style-position: outside;
+}
+
 #indexList .expandable a {
-  color: red !important;
+  /* color: red !important; */
 }
 
 #indexList .level-1 {
   font-weight: bold;
   margin: 6px 0;
-  display: inline-block;
 }
 
 #indexList .level-2 {
   margin-left: 20px;
-  display: inline-block;
 }
 
 
 #indexList .level-3 {
   margin-left: 40px;
-  display: inline-block;
 }
 
 #indexList .level-4 {
   margin-left: 60px;
-  display: inline-block;
 }
 
 #wrapper {

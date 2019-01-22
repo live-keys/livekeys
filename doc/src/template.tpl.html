@@ -12,13 +12,27 @@
 <body>
   <div id="main" class="container-fluid">
     <div class='row'>
-      <div id='indexList' class='col-3'>%indexList%</div>
+      <div class='col-3'>
+        <div id='indexList'>
+          %indexList%
+        </div>
+      </div>
       <div id='wrapper' class='col-9'>%content%</div>
     </div>
   </div>
 
   <script src="../include/jquery/dist/jquery.min.js"></script>
   <script src="../include/bootstrap/dist/js/bootstrap.min.js"></script>
+
+  <script>
+    // Removes <hr> before .expandable
+    // Removes empty .expandable
+    $(".expandable").each(function () {
+      $(this).parent().prev().remove();
+      if ($(this).children().length == 0)
+        $(this).remove();
+    })
+  </script>
 </body>
 
 </html>
