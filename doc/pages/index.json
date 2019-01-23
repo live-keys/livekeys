@@ -1,98 +1,160 @@
-[
-    {"Installation" : "installation.md"},
-    [
-        {"Installation On Windows" : "installation.md#windows"},
-        {"Installation On Linux" : "installation.md#linux"},
-        {"Installation On Mac" : "installation.md#macos"}
+[{
+        "Installation": "installation.md"
+    },
+    [{
+            "Installation On Windows": "installation.md#windows"
+        },
+        {
+            "Installation On Linux": "installation.md#linux"
+        },
+        {
+            "Installation On Mac": "installation.md#macos"
+        }
     ],
     "Using Live CV",
-    [
-        {"Running Live CV" : "running.md"},
-        {"Projects" : "projects.md"},
-        {"Palettes and Bindings" : "palettes-and-bindings.md"},
-        {"Plugin Structure": "plugin-structure.md"}
+    [{
+            "Running Live CV": "running.md"
+        },
+        {
+            "Projects": "projects.md"
+        },
+        {
+            "Palettes and Bindings": "palettes-and-bindings.md"
+        },
+        {
+            "Plugin Structure": "plugin-structure.md"
+        }
     ],
     "Plugins",
-    [
-        {"base" : "plugin-base.md"},
-        [ 
+    [{
+            "base": "plugin-base.md"
+        },
+        [
             "plugin-base.md>>"
         ],
-        {"live" : "../../plugins/live/doc/plugin-live.md"},
+        {
+            "live": "../../plugins/live/doc/plugin-live.md"
+        },
         [
             "../../plugins/live/doc/plugin-live.md>>"
         ],
-        {"editor" : "../../plugins/editor/doc/plugin-editor.md"},
+        {
+            "editor": "../../plugins/editor/doc/plugin-editor.md"
+        },
         [
             "../../plugins/live/doc/plugin-editor.md>>"
         ],
-        {"editqml" : "../../plugins/editqml/doc/plugin-editqml.md"},
+        {
+            "editqml": "../../plugins/editqml/doc/plugin-editqml.md"
+        },
         [
             "../../plugins/live/doc/plugin-editqml.md>>"
         ],
-        {"lcvcore" : "../../plugins/lcvcore/doc/plugin-lcvcore.md"},
+        {
+            "lcvcore": "../../plugins/lcvcore/doc/plugin-lcvcore.md"
+        },
         [
             "../../plugins/live/doc/plugin-lcvcore.md>>"
         ],
-        {"lcvimgproc" : "../../plugins/lcvimgproc/doc/plugin-lcvimgproc.md"},
+        {
+            "lcvimgproc": "../../plugins/lcvimgproc/doc/plugin-lcvimgproc.md"
+        },
         [
             "../../plugins/live/doc/plugin-lcvimgproc.md>>"
         ],
 
-        {"lcvfeatures2d" : "../../plugins/lcvfeatures2d/doc/plugin-lcvfeatures2d.md"},
+        {
+            "lcvfeatures2d": "../../plugins/lcvfeatures2d/doc/plugin-lcvfeatures2d.md"
+        },
         [
             "../../plugins/live/doc/plugin-lcvfeatures2d.md>>"
         ],
-        {"lcvvideo" : "../../plugins/lcvvideo/doc/plugin-lcvvideo.md"},
+        {
+            "lcvvideo": "../../plugins/lcvvideo/doc/plugin-lcvvideo.md"
+        },
         [
             "../../plugins/live/doc/plugin-lcvvideo.md>>"
         ],
-        {"lcvphoto" : "../../plugins/lcvphoto/doc/plugin-lcvphoto.md"},
+        {
+            "lcvphoto": "../../plugins/lcvphoto/doc/plugin-lcvphoto.md"
+        },
         [
             "../../plugins/live/doc/plugin-lcvphoto.md>>"
         ]
     ],
     "Developer",
-    [
-        {"Building Live CV": "building.md"},
-        {"Plugins" : "plugins.md"},
-        [
-            {"Creating a Plugin" : "creating-a-plugin.md"},
-            {"Creating a Live CV Plugin" : "creating-a-livecv-plugin.md"},
-            {"Creating a Filter" : "creating-a-filter.md"},
-            {"Creating a Static Item" : "creating-a-static-item.md"},
-            {"Project configuration" : "project-configuration.md"}
+    [{
+            "Building Live CV": "building.md"
+        },
+        {
+            "Plugins": "plugins.md"
+        },
+        [{
+                "Creating a Plugin": "creating-a-plugin.md"
+            },
+            {
+                "Creating a Live CV Plugin": "creating-a-livecv-plugin.md"
+            },
+            {
+                "Creating a Filter": "creating-a-filter.md"
+            },
+            {
+                "Creating a Static Item": "creating-a-static-item.md"
+            },
+            {
+                "Project configuration": "project-configuration.md"
+            }
         ],
-        {"Package Manager" : "package-manager.md"},
-        {"Libraries" : "libraries.md"},
-        [
-            {"lvbase" : "../output/md/lvbase-cpp.md"},
+        {
+            "Package Manager": "package-manager.md"
+        },
+        {
+            "Libraries": "libraries.md"
+        },
+        [{
+                "lvbase": "../output/md/lvbase-cpp.md"
+            },
             [
                 "../output/md/lvbase-cpp.md>>"
             ],
-            {"lvview" : "../output/md/lvview-cpp.md"},
+            {
+                "lvview": "../output/md/lvview-cpp.md"
+            },
             [
                 "../output/md/lvview-cpp.md>>"
             ],
-            {"lveditor" : "../output/md/lveditor-cpp.md"},
+            {
+                "lveditor": "../output/md/lveditor-cpp.md"
+            },
             [
                 "../output/md/lcveditor-cpp.md>>"
             ],
-            {"lveditqmljs" : "../output/md/lveditqmljs-cpp.md"},
+            {
+                "lveditqmljs": "../output/md/lveditqmljs-cpp.md"
+            },
             [
                 "../output/md/lveditqmljs-cpp.md>>"
             ],
-            {"lvelements" : "../output/md/lvelements-cpp.md"},
+            {
+                "lvelements": "../output/md/lvelements-cpp.md"
+            },
             [
                 "../output/md/lvelements-cpp.md>>"
             ]
         ],
         "Plugin Apis",
-        [
-            {"live" : "../output/md/plugin-live-cpp.md"},
-            {"lcvcore-cpp": "../output/md/plugin-lcvcore-cpp.md"},
-            {"lcvfeatures2d-cpp" : "../output/md/plugin-lcvfeatures2d-cpp.md"},
-            {"lcvvideo-cpp" : "../output/md/plugin-lcvvideo-cpp.md"}
+        [{
+                "live": "../output/md/plugin-live-cpp.md"
+            },
+            {
+                "lcvcore-cpp": "../output/md/plugin-lcvcore-cpp.md"
+            },
+            {
+                "lcvfeatures2d-cpp": "../output/md/plugin-lcvfeatures2d-cpp.md"
+            },
+            {
+                "lcvvideo-cpp": "../output/md/plugin-lcvvideo-cpp.md"
+            }
         ]
     ]
 ]
