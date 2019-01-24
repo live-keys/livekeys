@@ -56,5 +56,6 @@ void QTriangle::paint(QPainter *painter){
     }
     painter->setPen(QPen(m_color));
     painter->setBrush(QBrush(m_color));
+    painter->setRenderHint(QPainter::Antialiasing, true);
     painter->drawPolygon(m_points, 3, Qt::OddEvenFill);
 }

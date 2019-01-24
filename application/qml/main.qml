@@ -157,20 +157,22 @@ ApplicationWindow{
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
-            width: 6
-            height: 11
-            color: compileButton.containsMouse ? "#74aa15" : "#bcbdc1"
+            width: compileButton.containsMouse ? 8 : 7
+            height: compileButton.containsMouse ? 13 : 12
             state : "Released"
             rotation: Triangle.Right
+
+            Behavior on height{ NumberAnimation{ duration: 100 } }
+            Behavior on width{ NumberAnimation{ duration: 100 } }
 
             states: [
                 State {
                     name: "Pressed"
-                    PropertyChanges { target: compileButtonShape; color: "#74aa15"}
+                    PropertyChanges { target: compileButtonShape; color: "#487db9"}
                 },
                 State {
                     name: "Released"
-                    PropertyChanges { target: compileButtonShape; color: "#bcbdc1"}
+                    PropertyChanges { target: compileButtonShape; color: compileButton.containsMouse ? "#768aca" : "#bcbdc1"}
                 }
             ]
             transitions: [
@@ -190,8 +192,8 @@ ApplicationWindow{
         MouseArea{
             id : compileButton
             anchors.left: parent.left
-            anchors.leftMargin: 10
-            width: 30
+            anchors.leftMargin: 0
+            width: 50
             height: 30
             hoverEnabled: true
             onPressed: compileButtonShape.state = "Pressed"
@@ -228,7 +230,7 @@ ApplicationWindow{
                 anchors.verticalCenter: parent.verticalCenter
                 width: 9
                 height: 5
-                color: openStatesDropdown.containsMouse ? "#20568c" : "#bcbdc1"
+                color: openStatesDropdown.containsMouse ? "#9b6804" : "#bcbdc1"
                 rotation: Triangle.Bottom
             }
 

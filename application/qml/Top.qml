@@ -234,7 +234,7 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 363
+        anchors.leftMargin: 395
         color : "transparent"
         height : commandMArea.containsMouse ? parent.height : parent.height - 5
         width : 35
@@ -264,7 +264,7 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 395
+        anchors.leftMargin: 435
         color : "transparent"
         height : openSettingsArea.containsMouse ? parent.height : parent.height - 5
         width : 35
@@ -291,7 +291,7 @@ Rectangle {
     }
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 435
+        anchors.leftMargin: 475
         color : livecv.settings.file('license').highlights > 0 ? "#44130b" : "transparent"
         height : openLicenseArea.containsMouse ? parent.height : parent.height - 5
         width : 35
