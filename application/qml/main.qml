@@ -133,20 +133,16 @@ ApplicationWindow{
         id: modeWrapper
         anchors.left: parent.left
         anchors.leftMargin: 550
-        width: 200
-        height: header.height
-        color: "#1a1f25"
-        visible: true
+        width: 220
+        height: 30
+        color: 'transparent'
 
-        Rectangle{
+        Item{
             anchors.left: parent.left
-            anchors.leftMargin: 5
+            anchors.leftMargin: 35
             height : parent.height
-            color : "transparent"
             Text{
                 color :  "#969aa1"
-                anchors.left: parent.left
-                anchors.leftMargin: 20
                 anchors.verticalCenter: parent.verticalCenter
                 font.pixelSize: 12
                 font.family: 'Open Sans, Arial, sans-serif'
@@ -157,53 +153,82 @@ ApplicationWindow{
         }
 
         Triangle{
+            id: compileButtonShape
             anchors.left: parent.left
-            anchors.leftMargin: 5
+            anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
-            width: 10
-            height: 10
-            color: "#bcbdc1"
+            width: 6
+            height: 11
+            color: compileButton.containsMouse ? "#74aa15" : "#bcbdc1"
+            state : "Released"
             rotation: Triangle.Right
 
-            MouseArea{
-                id : compileButton
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    if (project.active)
-                        livecv.engine.createObjectAsync(
-                            project.active.content,
-                            livecv.windowControls().runSpace,
-                            project.active.file.pathUrl(),
-                            project.active,
-                            true
-                        );
+            states: [
+                State {
+                    name: "Pressed"
+                    PropertyChanges { target: compileButtonShape; color: "#74aa15"}
+                },
+                State {
+                    name: "Released"
+                    PropertyChanges { target: compileButtonShape; color: "#bcbdc1"}
+                }
+            ]
+            transitions: [
+                Transition {
+                    from: "Pressed"
+                    to: "Released"
+                    ColorAnimation { target: compileButtonShape; duration: 100}
+                },
+                Transition {
+                    from: "Released"
+                    to: "Pressed"
+                    ColorAnimation { target: compileButtonShape; duration: 100}
+                }
+            ]
+        }
+
+        MouseArea{
+            id : compileButton
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            width: 30
+            height: 30
+            hoverEnabled: true
+            onPressed: compileButtonShape.state = "Pressed"
+            onReleased: compileButtonShape.state = "Released"
+            onClicked: {
+                if (project.active){
+                    livecv.engine.createObjectAsync(
+                        project.active.content,
+                        livecv.windowControls().runSpace,
+                        project.active.file.pathUrl(),
+                        project.active,
+                        true
+                    );
                 }
             }
         }
 
-        Rectangle {
+        Item{
             width: modeImage.width + modeImage.anchors.rightMargin + 10
             height: parent.height
-            color: "transparent"
             anchors.right: parent.right
 
             Image{
                 id : modeImage
                 anchors.right: parent.right
-                anchors.rightMargin: liveImage.anchors.rightMargin
+                anchors.rightMargin: 25
                 anchors.verticalCenter: parent.verticalCenter
                 source: liveImage.source
-
             }
 
             Triangle{
                 anchors.right: parent.right
                 anchors.rightMargin: 7
                 anchors.verticalCenter: parent.verticalCenter
-                width: 8
-                height: 4
-                color: "#bcbdc1"
+                width: 9
+                height: 5
+                color: openStatesDropdown.containsMouse ? "#20568c" : "#bcbdc1"
                 rotation: Triangle.Bottom
             }
 
@@ -216,6 +241,13 @@ ApplicationWindow{
         }
 
 
+        Rectangle{
+            width: parent.width
+            height: 1
+            color: "#1a1f25"
+            anchors.bottom: parent.bottom
+        }
+
     }
 
     Rectangle {
@@ -224,8 +256,12 @@ ApplicationWindow{
         anchors.right: modeWrapper.right
         anchors.top: modeWrapper.bottom
         property int buttonHeight: 30
-        property int buttonWidth: 100
+        property int buttonWidth: 120
+        opacity: visible ? 1.0 : 0
         z: 1000
+
+        Behavior on opacity{ NumberAnimation{ duration: 200 } }
+
 
         Rectangle{
             id: liveButton
@@ -243,12 +279,12 @@ ApplicationWindow{
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                color: "#5e5e5e"
+                color: liveArea.containsMouse ? "#969aa1" : "#5e5e5e"
             }
             Image{
                 id : liveImage
                 anchors.right: parent.right
-                anchors.rightMargin: 20
+                anchors.rightMargin: 25
                 anchors.verticalCenter: parent.verticalCenter
                 source : "qrc:/images/live.png"
             }
@@ -287,12 +323,12 @@ ApplicationWindow{
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                color: "#5e5e5e"
+                color: onSaveArea.containsMouse ? "#969aa1" : "#5e5e5e"
             }
             Image{
                 id : onSaveImage
                 anchors.right: parent.right
-                anchors.rightMargin: 20
+                anchors.rightMargin: 25
                 anchors.verticalCenter: parent.verticalCenter
                 source : "qrc:/images/onsave.png"
             }
@@ -325,12 +361,12 @@ ApplicationWindow{
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                color: "#5e5e5e"
+                color: disabledArea.containsMouse ? "#969aa1" : "#5e5e5e"
             }
             Image{
                 id : disabledImage
                 anchors.right: parent.right
-                anchors.rightMargin: 23
+                anchors.rightMargin: 28
                 anchors.verticalCenter: parent.verticalCenter
                 source : "qrc:/images/disabled.png"
             }

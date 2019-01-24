@@ -266,8 +266,6 @@ Rectangle {
         anchors.left: parent.left
         anchors.leftMargin: 395
         color : "transparent"
-//        border.width: 1
-//        border.color: "#031626"
         height : openSettingsArea.containsMouse ? parent.height : parent.height - 5
         width : 35
         Image{
@@ -295,8 +293,6 @@ Rectangle {
         anchors.left: parent.left
         anchors.leftMargin: 435
         color : livecv.settings.file('license').highlights > 0 ? "#44130b" : "transparent"
-//        border.width: 1
-//        border.color: "#031626"
         height : openLicenseArea.containsMouse ? parent.height : parent.height - 5
         width : 35
         Image{
