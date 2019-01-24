@@ -691,17 +691,17 @@ void TextEdit::resetFragmentEnd() {
 int TextEdit::lineNumber() const
 {
     Q_D(const TextEdit);
-    if (!d->document) return 0;
-    int lineNumber = d->document->findBlock(cursorPosition()).blockNumber() + 1;
-    return lineNumber;
+    if (!d->document || !d->control) return 0;
+
+    return d->control->textCursor().block().blockNumber() + 1;
 }
 
-int TextEdit::linePosition() const
+int TextEdit::columnNumber() const
 {
     Q_D(const TextEdit);
-    if (!d->document) return 0;
-    QTextBlock block = d->document->findBlock(cursorPosition());
-    return cursorPosition() - block.position();
+    if (!d->document || !d->control) return 0;
+
+    return d->control->textCursor().position() - d->control->textCursor().block().position();
 }
 
 /*!
@@ -2418,6 +2418,8 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, TextEdit, SLOT(updateSelection()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, TextEdit, SLOT(updateSelection()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, TextEdit, SIGNAL(cursorPositionChanged()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, TextEdit, SIGNAL(lineNumberChanged()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, TextEdit, SIGNAL(columnNumberChanged()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(cursorRectangleChanged()), q, TextEdit, SLOT(moveCursorDelegate()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(linkActivated(QString)), q, TextEdit, SIGNAL(linkActivated(QString)));
     lv_qmlobject_connect(control, TextControl, SIGNAL(linkHovered(QString)), q, TextEdit, SIGNAL(linkHovered(QString)));
