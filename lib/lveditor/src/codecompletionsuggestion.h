@@ -46,18 +46,30 @@ private:
     QString m_completion;
 };
 
+/**
+ * \brief Label getter
+ */
 inline const QString &CodeCompletionSuggestion::label() const{
     return m_label;
 }
 
+/**
+ * \brief Completion getter
+ */
 inline const QString &CodeCompletionSuggestion::completion() const{
     return m_completion;
 }
 
+/**
+ * \brief Info getter
+ */
 inline const QString &CodeCompletionSuggestion::info() const{
     return m_info;
 }
 
+/**
+ * \brief Category getter
+ */
 inline const QString &CodeCompletionSuggestion::category() const{
     return m_category;
 }

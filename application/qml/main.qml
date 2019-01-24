@@ -65,16 +65,16 @@ ApplicationWindow{
 
     Component.onCompleted: {
         livecv.commands.add(root, {
-            'minimize' : root.showMinimized,
-            'toggleMaximizedRuntime' : contentWrap.toggleMaximizedRuntime,
-            'toggleNavigation' : contentWrap.toggleNavigation,
-            'openLogInWindow' : mainVerticalSplit.openLogInWindow,
-            'openLogInEditor' : mainVerticalSplit.openLogInEditor,
-            'toggleLog' : mainVerticalSplit.toggleLog,
-            'toggleLogPrefix' : logView.toggleLogPrefix,
-            'addHorizontalEditorView' : mainVerticalSplit.addHorizontalEditor,
-            'addHorizontalFragmentEditorView': mainVerticalSplit.addHorizontalFragmentEditor,
-            'removeHorizontalEditorView' : mainVerticalSplit.removeHorizontalEditor
+            'minimize' : [root.showMinimized, "Minimize"],
+            'toggleMaximizedRuntime' : [contentWrap.toggleMaximizedRuntime, "Toggle Maximized Runtime"],
+            'toggleNavigation' : [contentWrap.toggleNavigation, "Toggle Navigation"],
+            'openLogInWindow' : [mainVerticalSplit.openLogInWindow, "Open Log In Window"],
+            'openLogInEditor' : [mainVerticalSplit.openLogInEditor, "Open Log In Editor"],
+            'toggleLog' : [mainVerticalSplit.toggleLog, "Toggle Log"],
+            'toggleLogPrefix' : [logView.toggleLogPrefix, "Toggle Log Prefix"],
+            'addHorizontalEditorView' : [mainVerticalSplit.addHorizontalEditor, "Add Horizontal Editor"],
+            'addHorizontalFragmentEditorView': [mainVerticalSplit.addHorizontalFragmentEditor, "Add Horizontal Fragment Editor"],
+            'removeHorizontalEditorView' : [mainVerticalSplit.removeHorizontalEditor, "Remove Horizontal Editor"]
         })
     }
 
@@ -119,6 +119,7 @@ ApplicationWindow{
         onOpenProject: projectView.openProject()
         onSaveFile : projectView.focusEditor.saveAs()
         onToggleLogWindow : mainVerticalSplit.toggleLog()
+        onOpenCommandsMenu: projectView.openCommandsMenu()
 
         onOpenSettings: {
             editor.document = project.openFile(livecv.settings.file('editor').path, ProjectDocument.Edit);
@@ -128,62 +129,222 @@ ApplicationWindow{
         onOpenLicense: licenseBox.visible = true
     }
 
-    // Mode button
-    Button {
-        id: modeButton
+    Rectangle {
+        id: modeWrapper
         anchors.left: parent.left
-        anchors.leftMargin: 580
-        onClicked: modeContainer.visible = !modeContainer.visible
-        text: "Live"
+        anchors.leftMargin: 550
+        width: 200
+        height: header.height
+        color: "#1a1f25"
+        visible: true
+
+        Rectangle{
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            height : parent.height
+            color : "transparent"
+            Text{
+                color :  "#969aa1"
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+                anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 12
+                font.family: 'Open Sans, Arial, sans-serif'
+                elide: Text.ElideRight
+                width: 130
+                text : project.active && project.active.file ? project.active.file.name : ""
+            }
+        }
+
+        Triangle{
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.verticalCenter: parent.verticalCenter
+            width: 10
+            height: 10
+            color: "#bcbdc1"
+            rotation: Triangle.Right
+
+            MouseArea{
+                id : compileButton
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    if (project.active)
+                        livecv.engine.createObjectAsync(
+                            project.active.content,
+                            livecv.windowControls().runSpace,
+                            project.active.file.pathUrl(),
+                            project.active,
+                            true
+                        );
+                }
+            }
+        }
+
+        Rectangle {
+            width: modeImage.width + modeImage.anchors.rightMargin + 10
+            height: parent.height
+            color: "transparent"
+            anchors.right: parent.right
+
+            Image{
+                id : modeImage
+                anchors.right: parent.right
+                anchors.rightMargin: liveImage.anchors.rightMargin
+                anchors.verticalCenter: parent.verticalCenter
+                source: liveImage.source
+
+            }
+
+            Triangle{
+                anchors.right: parent.right
+                anchors.rightMargin: 7
+                anchors.verticalCenter: parent.verticalCenter
+                width: 8
+                height: 4
+                color: "#bcbdc1"
+                rotation: Triangle.Bottom
+            }
+
+            MouseArea{
+                id : openStatesDropdown
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: modeContainer.visible = !modeContainer.visible
+            }
+        }
+
+
     }
 
     Rectangle {
         id: modeContainer
         visible: false
-        anchors.left: modeButton.left
-        anchors.top: modeButton.bottom
+        anchors.right: modeWrapper.right
+        anchors.top: modeWrapper.bottom
+        property int buttonHeight: 30
+        property int buttonWidth: 100
         z: 1000
 
-        Button {
+        Rectangle{
             id: liveButton
             anchors.top: parent.top
-            text: "Live"
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
             visible: projectView.focusEditor ? projectView.focusEditor.document === project.active : false
-            onClicked: {
-                controls.codingMode = 0
-                modeContainer.visible = false
-                modeButton.text = "Live"
-                livecv.engine.createObjectAsync(
-                    project.active.content,
-                    runSpace,
-                    project.active.file.pathUrl(),
-                    project.active,
-                    true
-                );
+            color : "#03070b"
+            Text {
+                id: liveText
+                text: qsTr("Live")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: "#5e5e5e"
+            }
+            Image{
+                id : liveImage
+                anchors.right: parent.right
+                anchors.rightMargin: 20
+                anchors.verticalCenter: parent.verticalCenter
+                source : "qrc:/images/live.png"
+            }
+            MouseArea{
+                id : liveArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    controls.codingMode = 0
+                    modeContainer.visible = false
+                    modeImage.source = liveImage.source
+                    modeImage.anchors.rightMargin = liveImage.anchors.rightMargin
+                    livecv.engine.createObjectAsync(
+                        project.active.content,
+                        runSpace,
+                        project.active.file.pathUrl(),
+                        project.active,
+                        true
+                    );
+                }
             }
         }
 
-        Button {
+        Rectangle{
             id: onSaveButton
             anchors.top: liveButton.visible ? liveButton.bottom : parent.top
-            text: "On save"
-            onClicked: {
-                controls.codingMode = 1
-                modeContainer.visible = false
-                modeButton.text = "On save"
-                controls.wasLiveCoding = false
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
+                id: onSaveText
+                text: qsTr("On Save")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: "#5e5e5e"
+            }
+            Image{
+                id : onSaveImage
+                anchors.right: parent.right
+                anchors.rightMargin: 20
+                anchors.verticalCenter: parent.verticalCenter
+                source : "qrc:/images/onsave.png"
+            }
+            MouseArea{
+                id : onSaveArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    controls.codingMode = 1
+                    modeContainer.visible = false
+                    modeImage.source = onSaveImage.source
+                    modeImage.anchors.rightMargin = onSaveImage.anchors.rightMargin
+                    controls.wasLiveCoding = false
+                }
             }
         }
 
-        Button {
+        Rectangle{
             id: disabledButton
             anchors.top: onSaveButton.bottom
-            text: "Disabled"
-            onClicked: {
-                controls.codingMode = 2
-                modeContainer.visible = false
-                modeButton.text = "Disabled"
-                controls.wasLiveCoding = false
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
+                id: disabledText
+                text: qsTr("Disabled")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: "#5e5e5e"
+            }
+            Image{
+                id : disabledImage
+                anchors.right: parent.right
+                anchors.rightMargin: 23
+                anchors.verticalCenter: parent.verticalCenter
+                source : "qrc:/images/disabled.png"
+            }
+            MouseArea{
+                id : disabledArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    controls.codingMode = 2
+                    modeContainer.visible = false
+                    modeImage.source = disabledImage.source
+                    modeImage.anchors.rightMargin = disabledImage.anchors.rightMargin
+                    controls.wasLiveCoding = false
+                }
             }
         }
     }

@@ -19,6 +19,15 @@
 
 namespace lv{
 
+/**
+ * \class lv::CodePalette
+ * \brief Palette display of a property
+ * \ingroup lveditor
+ */
+
+/**
+ * \brief Default contructor of CodePalette
+ */
 CodePalette::CodePalette(QObject *parent)
     : QObject(parent)
     , m_bindingChange(false)
@@ -28,11 +37,17 @@ CodePalette::CodePalette(QObject *parent)
 {
 }
 
+/**
+ * \brief Default destructor
+ */
 CodePalette::~CodePalette(){
     if ( m_ownExtension && m_extension )
         delete m_extension;
 }
 
+/**
+ * \brief Assign property value (binding change)
+ */
 void CodePalette::setValueFromBinding(const QVariant &value){
     m_bindingChange = true;
     m_value = value;
@@ -40,6 +55,9 @@ void CodePalette::setValueFromBinding(const QVariant &value){
     m_bindingChange = false;
 }
 
+/**
+ * \brief Palette name
+ */
 QString CodePalette::name() const{
     return QFileInfo(m_path).baseName();
 }

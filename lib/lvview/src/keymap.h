@@ -69,6 +69,9 @@ public:
     void store(const QJSValue &keyObject, bool isDefault = true);
     void store(quint32 os, quint32 key, quint32 localModifer, const QString& command, bool isDefault = true);
 
+    QMap<KeyCode, StoredCommand>& commandMap() { return m_commandMap; }
+    QString getKeyCodeDescription(KeyCode kc);
+
 public slots:
     QString locateCommand(quint32 key, quint32 modifiers);
     quint32 cleanKey(quint32 key);
@@ -78,11 +81,12 @@ public slots:
 
 private:
     quint32 modifierFromString(const QString& modifier);
+    QString stringFromModifier(const quint32& modifier);
     quint32 keyFromString(const QString& key);
+    QString stringFromKey(const quint32& key);
     KeyCode composeKeyCode(quint32 key, quint32 modifiers);
     QPair<int, KeyCode> composeKeyCode(const QString& keydescription);
     QPair<quint32, quint32> splitKeyCode(KeyCode kc);
-    QString getKeyCodeDescription(KeyCode kc);
 
 
     QMap<KeyCode, StoredCommand> m_commandMap;

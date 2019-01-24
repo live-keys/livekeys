@@ -374,12 +374,12 @@ LiveExtension{
     }
 
     commands : {
-        "edit" : edit,
-        "palette" : palette,
-        "add" : add,
-        'bind' : bind,
-        'unbind' : unbind,
-        'shape' : shape
+        "edit" :  [edit, "Edit Property Under Cursor"],
+        "palette" : [palette, "Pallete for Property Under Cursor"],
+        "add" : [add, "Add a Property/Object"],
+        'bind' : [bind, "Bind to Property Under Cursor"],
+        'unbind' : [unbind, "Unbind Properties Under Cursor"],
+        'shape' : [shape, "Shape This Property Into a Palette"]
     }
 
     keyBindings : {
