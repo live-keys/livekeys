@@ -7,9 +7,32 @@ Title: GitHub
 Author: Brett Terpstra
 Description: Github README style. Includes theme for Pygmentized code blocks.
 */
+
+:root {
+  --main-bg-color: #000000;
+  --alt-bg-color: #1B1924;
+
+  --main-color: #B6B6B6;
+
+  --main-link-color: #A24506;
+  --main-link-hover-color: #E25D04;
+
+  --wrapper-box-1: #343044;
+  --wrapper-box-2: #221e31;
+
+  --bored-1: #8f8f8f;
+  --bored-2: #292635;
+
+  --table-bg-color-1: #1B1924;
+  --table-bg-color-2: #262333;
+}
+
 html,
 body {
-  color: black;
+  /* color: black; */
+  /* background: var(--main-bg-color); */
+  background: var(--alt-bg-color);
+  color: var(--main-color);
 }
 
 *:not('#mkdbuttons') {
@@ -21,6 +44,19 @@ body {
   margin: 0;
 }
 
+p {
+  margin: 1em 0;
+}
+
+a {
+  color: var(--main-link-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--main-link-hover-color);
+}
+
 #main {
   padding: 15px;
 }
@@ -28,12 +64,13 @@ body {
 #indexList {
   overflow: scroll;
   position: fixed;
+  top: 0;
+  left: 15px;
   height: 100vh;
   width: calc(25% - 30px);
   word-wrap: break-word;
-}
+  color: var(--main-link-color);
 
-#indexList {
   overflow-x: hidden;
 }
 
@@ -73,6 +110,10 @@ body {
 
 #indexList .level-1 {
   font-weight: bold;
+  margin: 16px 0 6px 0;
+}
+
+#indexList .level-1.top {
   margin: 6px 0;
 }
 
@@ -94,25 +135,14 @@ body {
   -webkit-font-smoothing: antialiased;
   line-height: 1.7;
   padding: 3px;
-  background: #fff;
+  /* background: #fff; */
+  background: var(--main-bg-color);
+  /* background: background: var(--alt-bg-color); */
   border-radius: 3px;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
-}
 
-p {
-  margin: 1em 0;
-}
-
-a {
-  color: #4183c4;
-  text-decoration: none;
-}
-
-#wrapper {
-  background-color: #fff;
   padding: 30px;
-  /* margin: 15px; */
   font-size: 15px;
   line-height: 1.6;
 }
@@ -127,7 +157,9 @@ a {
 
 @media screen {
   #wrapper {
-    box-shadow: 0 0 0 1px #cacaca, 0 0 0 4px #eee;
+    /* box-shadow: 0 0 0 1px #cacaca, 0 0 0 4px #eee; */
+    box-shadow: 0 0 0 1px var(--wrapper-box-1),
+      0 0 0 4px var(--wrapper-box-2);
   }
 }
 
@@ -304,22 +336,22 @@ table {
 
 table th {
   font-weight: bold;
-  border: 1px solid #ccc;
+  border: 1px solid var(--bored-1);
   padding: 6px 13px;
 }
 
 table td {
-  border: 1px solid #ccc;
+  border: 1px solid var(--bored-1);
   padding: 6px 13px;
 }
 
 table tr {
-  border-top: 1px solid #ccc;
-  background-color: #fff;
+  border-top: 1px solid var(--bored-1);
+  background-color: var(--table-bg-color-1);
 }
 
 table tr:nth-child(2n) {
-  background-color: #f8f8f8;
+  background-color: var(--table-bg-color-2);
 }
 
 img {
@@ -331,12 +363,12 @@ tt {
   margin: 0 2px;
   padding: 0 5px;
   /* white-space: nowrap; */
-  border: 1px solid #eaeaea;
-  background-color: #f8f8f8;
+  border: 1px solid var(--bored-2);
+  background-color: var(--alt-bg-color);
   border-radius: 3px;
   font-family: Consolas, 'Liberation Mono', Courier, monospace;
   font-size: 12px;
-  color: #333333;
+  color: var(--main-color);
 }
 
 pre>code {
@@ -352,20 +384,28 @@ pre>code {
   border: 1px solid #ccc;
   font-size: 13px;
   line-height: 19px;
-  overflow: auto;
+  overflow: hidden;
+  word-wrap: break-word;
   padding: 6px 10px;
   border-radius: 3px;
 }
 
 pre {
-  background-color: #f8f8f8;
+  /* background-color: #f8f8f8; */
+  background-color: var(--alt-bg-color);
   border: 1px solid #ccc;
+  color: var(--main-color);
   font-size: 14px;
   line-height: 19px;
   overflow: auto;
   padding: 6px 10px;
   border-radius: 3px;
   margin: 26px 0;
+}
+
+pre h2 {
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 pre code,
@@ -432,7 +472,7 @@ sub {
   }
 }
 
-@media screen {
+/* @media screen {
   body.inverted {
     color: #eee !important;
     border-color: #555;
@@ -539,7 +579,7 @@ sub {
   .inverted a {
     color: #acd1d5;
   }
-}
+} */
 
 .highlight .c {
   color: #998;
