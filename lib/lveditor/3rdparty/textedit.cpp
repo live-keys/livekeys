@@ -564,7 +564,7 @@ void TextEdit::setFont(const QFont &font)
         d->font.setPointSizeF(size/2.0);
     }
 
-    if (oldFont != d->font) {
+    if (oldFont != d->font && d->font.pixelSize() > 0) {
         if (d->document) d->document->setDefaultFont(d->font);
         if (d->cursorItem) {
             d->cursorItem->setHeight(QFontMetrics(d->font).height());
@@ -576,7 +576,7 @@ void TextEdit::setFont(const QFont &font)
         updateInputMethod(Qt::ImCursorRectangle | Qt::ImAnchorRectangle | Qt::ImFont);
 #endif
     }
-    if (d->document && d->document->documentLayout())
+    if (d->document && d->document->documentLayout() && font.pixelSize() > 0)
     {
         dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->setLineDocumentFont(font);
     }
@@ -2402,9 +2402,10 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     Q_Q(TextEdit);
     document = doc;
     LineManager* lm = q->getDocumentLayout()->getLineManager();
-    lm->setLineDocumentFont(font);
-    lm->setParentDocument(document);
-    lm->textDocumentFinishedUpdating(document->blockCount());
+    if (lm->m_parentDocument != document)
+    {
+        lm->setParentDocument(document);
+    }
 
     if (lineSurface)
         lineSurface->setDocument(q->getDocumentLayout()->getLineManager()->m_lineDocument);
@@ -2432,10 +2433,17 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     lv_qmlobject_connect(document, QTextDocument, SIGNAL(undoAvailable(bool)), q, TextEdit, SIGNAL(canUndoChanged()));
     lv_qmlobject_connect(document, QTextDocument, SIGNAL(redoAvailable(bool)), q, TextEdit, SIGNAL(canRedoChanged()));
 
+    if (document->defaultFont() != font && font.pixelSize() > 0)
+    {
+        lm->setLineDocumentFont(font);
+        document->setDefaultFont(font);
+    }
 
 
-    document->setDefaultFont(font);
-    document->setDocumentMargin(textMargin);
+    if (document->documentMargin() != textMargin)
+    {
+        document->setDocumentMargin(textMargin);
+    }
     document->setUndoRedoEnabled(false); // flush undo buffer.
     document->setUndoRedoEnabled(true);
 
@@ -2446,12 +2454,16 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     updateDefaultTextOption();
     q->updateSize();
 
+    lm->textDocumentFinishedUpdating(document->blockCount());
+
     QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
     QObject::connect(q->getDocumentLayout()->getLineManager(), &LineManager::showHideTextEditLines,
                      q, &TextEdit::showHideLines);
 
+
+    document->setTextWidth(-1);
     auto rect = q->getDocumentLayout()->blockBoundingRect(document->rootFrame()->begin().currentBlock());
     paletteManager->setLineHeight(static_cast<int>(rect.height()));
 }
