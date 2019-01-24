@@ -567,6 +567,24 @@ bool DocumentQmlInfo::isObject(const QString &typeString){
 }
 
 /**
+ * \brief Returns the default value to be assigned for a given qml type
+ */
+QString DocumentQmlInfo::typeDefaultValue(const QString &typeString){
+    if ( typeString == "bool" )
+        return "false";
+    else if ( typeString == "double" || typeString == "int" || typeString == "enumeration" || typeString == "real" )
+        return "0";
+    else if ( typeString == "list" )
+        return "[]";
+    else if ( typeString == "string" || typeString == "url " )
+        return "\"\"";
+    else if ( typeString == "var" )
+        return "undefined";
+    else
+        return "null";
+}
+
+/**
  * \brief Return the path of the Document
  */
 QString DocumentQmlInfo::path() const{

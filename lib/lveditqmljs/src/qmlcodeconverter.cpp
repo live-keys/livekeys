@@ -90,21 +90,16 @@ QVariant QmlCodeConverter::parse(){
     return QVariant();
 }
 
-void QmlCodeConverter::updateValue(){
-    CodePalette* lp = m_edit->palette();
-    BindingPath* mainPath = m_edit->bindingChannel()->expressionPath();
-
-    if ( mainPath->listIndex() == -1 )
-        lp->setValueFromBinding(mainPath->property().read());
-    if ( m_edit->bindingUse() ){
+void QmlCodeConverter::updateBindings(){
+    if ( m_edit->bindingPalette() ){
         m_whenBinding.call();
     }
 }
 
-void QmlCodeConverter::updateBindings(){
-    if ( m_edit->bindingUse() ){
-        m_whenBinding.call();
-    }
+void QmlCodeConverter::updateFromPalette(){
+    CodePalette* palette = static_cast<CodePalette*>(parent());
+    if ( palette && m_edit->bindingChannel() )
+        m_edit->bindingChannel()->commit(palette->value());
 }
 
 QString QmlCodeConverter::buildCode(const QJSValue &value){

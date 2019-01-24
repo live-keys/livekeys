@@ -400,20 +400,10 @@ ApplicationWindow{
             property int left: 3
         }
 
+        property alias content : contentWrap
+
         function createEmptyEditorBox(){
             return editorBoxFactory.createObject(contentWrap)
-        }
-
-        function createPaletteBoxContainer(){
-            return paletteBoxContainerFactory.createObject(contentWrap)
-        }
-
-        function createPaletteBox(container){
-            return paletteBoxFactory.createObject(container)
-        }
-
-        function createPaletteList(){
-            return paletteListFactory.createObject()
         }
 
         function createEditorBox(child, aroundRect, editorPosition, relativePlacement){
@@ -421,12 +411,6 @@ ApplicationWindow{
             eb.setChild(child, aroundRect, editorPosition, relativePlacement)
             return eb;
         }
-    }
-
-    Component{
-        id: paletteListFactory
-
-        PaletteListView{}
     }
 
     Component{
@@ -440,6 +424,7 @@ ApplicationWindow{
             height: child ? child.height + 10 : 0
             visible: false
             opacity: visible ? 1 : 0
+            objectName: "editorBox"
 
             property Item child : null
             children: child ? [child] : []
@@ -579,278 +564,6 @@ ApplicationWindow{
                         editorBoxComponent.x = downX + editorBoxComponent.width < contentWrap.width ? downX : upX
                     }
                 }
-            }
-        }
-    }
-
-    Component{
-        id: paletteBoxContainerFactory
-
-        Column{
-            id: paletteBoxContainer
-            spacing: 20
-            width: {
-                var maxWidth = 0;
-                if ( children.length > 0 ){
-                    for ( var i = 0; i < children.length; ++i ){
-                        if ( children[i].width > maxWidth )
-                            maxWidth = children[i].width
-                    }
-                }
-                return maxWidth
-            }
-            height: {
-                var totalHeight = 0;
-                if ( children.length > 0 ){
-                    for ( var i = 0; i < children.length; ++i ){
-                        totalHeight += children[i].height
-                    }
-                }
-                if ( children.length > 1 )
-                    return totalHeight + (children.length - 1) * spacing
-                else
-                    return totalHeight
-            }
-        }
-    }
-
-    Component{
-        id: paletteBoxFactory
-
-        Item{
-            id: paletteBox
-            width: child ? child.width + 10 : 0
-            height: child ? child.height + 25 : 0
-
-            property Item child : null
-
-            property string name : ''
-            property string type : ''
-            property string title : type + ' - ' + name
-            property var cursorRectangle : null
-            property var editorPosition : null
-
-            property alias paletteSwapVisible : paletteSwapButton.visible
-            property alias paletteAddVisible : paletteAddButton.visible
-
-            property double titleLeftMargin : 50
-            property double titleRightMargin : 50
-
-            property bool hasComposition : false
-
-            property DocumentHandler documentHandler : null
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: paletteBox.child.forceActiveFocus()
-            }
-
-            Item{
-                id: paletteBoxHeader
-                height: 24
-                width: paletteBox.parent ? paletteBox.parent.width : paletteBox.width
-                clip: true
-
-                MouseArea{
-                    id: paletteBoxMoveArea
-                    anchors.fill: parent
-                    cursorShape: Qt.SizeAllCursor
-                    property point lastMousePos : Qt.point(0, 0)
-                    onPressed: {
-                        paletteBox.parent.parent.disableMoveBehavior()
-                        lastMousePos = paletteBoxMoveArea.mapToGlobal(mouse.x, mouse.y)
-                    }
-                    onPositionChanged: {
-                        if ( mouse.buttons & Qt.LeftButton ){
-                            var currentMousePos = paletteBoxMoveArea.mapToGlobal(mouse.x, mouse.y)
-                            var deltaX = currentMousePos.x - lastMousePos.x
-                            var deltaY = currentMousePos.y - lastMousePos.y
-                            paletteBox.parent.parent.x += deltaX
-                            paletteBox.parent.parent.y += deltaY
-
-                            lastMousePos = currentMousePos
-                        }
-                    }
-                }
-
-                Item{
-                    id: paletteSwapButton
-                    anchors.left: parent.left
-                    anchors.leftMargin: 5
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 15
-                    height: 20
-                    Image{
-                        anchors.centerIn: parent
-                        source: "qrc:/images/palette-swap.png"
-                    }
-                    MouseArea{
-                        id: paletteSwapMouse
-                        anchors.fill: parent
-                        onClicked: {
-                            var palettePosition = documentHandler.codeHandler.palettePosition(child)
-                            var palettes = documentHandler.codeHandler.findPalettes(palettePosition, true)
-                            if (palettes.size() ){
-                                paletteHeaderList.forceActiveFocus()
-                                paletteHeaderList.model = palettes
-                                paletteHeaderList.cancelledHandler = function(){
-                                    paletteHeaderList.focus = false
-                                    paletteHeaderList.model = null
-                                }
-                                paletteHeaderList.selectedHandler = function(index){
-                                    paletteHeaderList.focus = false
-                                    paletteHeaderList.model = null
-
-                                    var childToRemove = paletteBox.child
-
-                                    var palette = documentHandler.codeHandler.openPalette(palettes, index, root.controls.runSpace.item)
-                                    var newPaletteBox = root.controls.editSpace.createPaletteBox(paletteBox.parent)
-
-                                    palette.item.x = 5
-                                    palette.item.y = 7
-
-                                    newPaletteBox.child = palette.item
-                                    newPaletteBox.name = palette.name
-                                    newPaletteBox.type = palette.type
-                                    newPaletteBox.documentHandler = documentHandler
-                                    newPaletteBox.cursorRectangle = paletteBox.cursorRectangle
-                                    newPaletteBox.editorPosition = paletteBox.editorPosition
-
-                                    documentHandler.codeHandler.removePalette(childToRemove)
-
-                                    paletteBox.parent.parent.updatePlacement(
-                                        paletteBox.cursorRectangle, paletteBox.editorPosition, editSpace.placement.top
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                Item{
-                    id: paletteAddButton
-                    anchors.left: parent.left
-                    anchors.leftMargin: 25
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 15
-                    height: 20
-                    Image{
-                        anchors.centerIn: parent
-                        source: "qrc:/images/palette-add.png"
-                    }
-                    MouseArea{
-                        id: paletteAddMouse
-                        anchors.fill: parent
-                        onClicked: {
-                            var palettePosition = documentHandler.codeHandler.palettePosition(child)
-                            var palettes = documentHandler.codeHandler.findPalettes(palettePosition, true)
-                            if (palettes.size() ){
-                                paletteHeaderList.forceActiveFocus()
-                                paletteHeaderList.model = palettes
-                                paletteHeaderList.cancelledHandler = function(){
-                                    paletteHeaderList.focus = false
-                                    paletteHeaderList.model = null
-                                }
-                                paletteHeaderList.selectedHandler = function(index){
-                                    paletteHeaderList.focus = false
-                                    paletteHeaderList.model = null
-
-                                    var palette = documentHandler.codeHandler.openPalette(palettes, index, root.controls.runSpace.item)
-
-                                    var newPaletteBox = root.controls.editSpace.createPaletteBox(paletteBox.parent)
-
-                                    palette.item.x = 5
-                                    palette.item.y = 7
-
-                                    newPaletteBox.child = palette.item
-                                    newPaletteBox.name = palette.name
-                                    newPaletteBox.type = palette.type
-                                    newPaletteBox.documentHandler = documentHandler
-                                    newPaletteBox.cursorRectangle = paletteBox.cursorRectangle
-                                    newPaletteBox.editorPosition = paletteBox.editorPosition
-                                    paletteBox.parent.parent.updatePlacement(
-                                        paletteBox.cursorRectangle, paletteBox.editorPosition, editSpace.placement.top
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Text{
-                    id: paletteBoxTitle
-                    anchors.left: parent.left
-                    anchors.leftMargin: paletteBox.titleLeftMargin
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.right: parent.right
-                    anchors.rightMargin: paletteBox.titleRightMargin
-                    clip: true
-                    text: paletteBox.title
-                    color: '#82909b'
-                }
-
-                Item{
-                    anchors.right: parent.right
-                    anchors.rightMargin: 25
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 15
-                    height: 20
-                    visible: paletteBox.hasComposition
-                    Image{
-                        anchors.centerIn: parent
-                        source: "qrc:/images/palette-add-property.png"
-                    }
-                    MouseArea{
-                        anchors.fill: parent
-    //                        onClicked: listView.open()
-                    }
-                }
-                Item{
-                    anchors.right: parent.right
-                    anchors.rightMargin: 0
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 15
-                    height: 20
-                    Text{
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: 'x'
-                        color: '#ffffff'
-                    }
-                    MouseArea{
-                        id: paletteCloseArea
-                        anchors.fill: parent
-                        onClicked: {
-                            documentHandler.codeHandler.removePalette(child)
-                        }
-                    }
-                }
-
-            }
-
-            Item{
-                anchors.fill: parent
-                anchors.topMargin: 25
-                children: parent.child ? [parent.child] : []
-            }
-
-
-            PaletteListView{
-                id: paletteHeaderList
-                visible: model ? true : false
-                anchors.top: parent.top
-                anchors.topMargin: 24
-                width: parent.width
-                color: "#0a141c"
-                selectionColor: "#0d2639"
-                fontSize: 10
-                fontFamily: "Open Sans, sans-serif"
-                onFocusChanged : if ( !focus ) model = null
-
-                property var selectedHandler : function(){}
-                property var cancelledHandler : function(index){}
-
-                onPaletteSelected: selectedHandler(index)
-                onCancelled : cancelledHandler()
-
             }
         }
     }

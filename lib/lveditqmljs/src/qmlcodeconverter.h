@@ -21,16 +21,18 @@ public:
     explicit QmlCodeConverter(QmlEditFragment* edit, QObject *parent = nullptr);
     ~QmlCodeConverter();
 
-    const QJSValue& whenBinding() const;
+    QJSValue& whenBinding();
     void setWhenBinding(const QJSValue& whenBinding);
+
+    QmlEditFragment* editingFragment();
 
 public slots:
     void writeProperties(const QJSValue& properties);
     void write(const QJSValue options);
     QVariant parse();
-
-    void updateValue();
     void updateBindings();
+
+    void updateFromPalette();
 
 signals:
     void whenBindingChanged();
@@ -42,13 +44,17 @@ private:
     QJSValue         m_whenBinding;
 };
 
-inline const QJSValue& QmlCodeConverter::whenBinding() const{
+inline QJSValue& QmlCodeConverter::whenBinding(){
     return m_whenBinding;
 }
 
 inline void QmlCodeConverter::setWhenBinding(const QJSValue& whenBinding){
     m_whenBinding = whenBinding;
     emit whenBindingChanged();
+}
+
+inline QmlEditFragment *QmlCodeConverter::editingFragment(){
+    return m_edit;
 }
 
 }// namespace

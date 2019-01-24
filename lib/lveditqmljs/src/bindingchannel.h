@@ -38,7 +38,6 @@ public:
     void commit(const QVariant& value);
 
 public slots:
-    void commitFromFragment();
 
 private:
     QmlEditFragment*    m_fragment;

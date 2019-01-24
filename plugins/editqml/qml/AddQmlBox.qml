@@ -51,7 +51,7 @@ Rectangle{
     }
 
     property var cancel: function(){ }
-    property var accept : function(data){ }
+    property var accept : function(type, data){ }
 
     function getCompletion(){
         if ( root.activeList.currentItem ){
@@ -210,9 +210,9 @@ Rectangle{
             }
             Keys.onReturnPressed: {
                 if ( root.activeIndex === 0 ){
-                    root.accept(propertyList.currentItem.code)
+                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
                 } else {
-                    root.accept(itemList.currentItem.code)
+                    root.accept(itemList.currentItem.importSpace, itemList.currentItem.code)
                 }
             }
             Keys.onEscapePressed: {
@@ -383,7 +383,11 @@ Rectangle{
                                 propertyList.currentIndex = index
                             }
                             onDoubleClicked: {
-                                root.accept(parent.code)
+                                if ( root.activeIndex === 0 ){
+                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
+                                } else {
+                                    root.accept(itemList.currentItem.importSpace, itemList.currentItem.code)
+                                }
                             }
                         }
                     }
@@ -556,7 +560,11 @@ Rectangle{
                                 itemList.currentIndex = index
                             }
                             onDoubleClicked: {
-                                root.accept(parent.code)
+                                if ( root.activeIndex === 0 ){
+                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
+                                } else {
+                                    root.accept(itemList.currentItem.importSpace, itemList.currentItem.code)
+                                }
                             }
                         }
                     }

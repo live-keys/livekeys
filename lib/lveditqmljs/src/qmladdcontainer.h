@@ -27,6 +27,8 @@ public:
     QString objectType() const;
 
 private:
+    int                   m_objectBegin;
+    QString               m_objectIndentation;
     QStringList           m_objectTypePath;
     lv::QmlItemModel*     m_itemModel;
     lv::QmlPropertyModel* m_propertyModel;
