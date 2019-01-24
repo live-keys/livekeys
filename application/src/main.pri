@@ -10,7 +10,8 @@ HEADERS += \
     $$PWD/livecvarguments.h \
     $$PWD/livecvscript.h \
     $$PWD/commands.h \
-    $$PWD/environment.h
+    $$PWD/environment.h \
+    $$PWD/commandsmodel.h
 
 SOURCES += \
     $$PWD/livecv.cpp \
@@ -18,4 +19,5 @@ SOURCES += \
     $$PWD/livecvscript.cpp \
     $$PWD/main.cpp \
     $$PWD/commands.cpp \
-    $$PWD/environment.cpp
+    $$PWD/environment.cpp \
+    $$PWD/commandsmodel.cpp

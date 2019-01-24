@@ -18,12 +18,15 @@
 
 namespace lv{
 
-/*!
+/**
   \class lv::CodeCompletionSuggestion
-  \inmodule lveditor_cpp
+  \ingroup lveditor
   \brief Code completion suggestion used in the QCodeCompletionModel.
  */
 
+/**
+ * \brief Default constructor for CodeCompletionSuggestion, simply setting the given parameters
+ */
 CodeCompletionSuggestion::CodeCompletionSuggestion(
         const QString &label,
         const QString &info,
@@ -36,10 +39,16 @@ CodeCompletionSuggestion::CodeCompletionSuggestion(
 {
 }
 
+/**
+ * \brief Blank destructor of CodeCOmpletionSuggestion
+ */
 CodeCompletionSuggestion::~CodeCompletionSuggestion(){
 
 }
 
+/**
+ * \brief Comparator function to be used for sorting
+ */
 bool CodeCompletionSuggestion::compare(
         const CodeCompletionSuggestion &first,
         const CodeCompletionSuggestion &second)

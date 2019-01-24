@@ -30,7 +30,9 @@ namespace lv{
  * \brief Code Completion Model used by the code completion assist
  */
 
-
+/**
+ * \brief Default constructor of CodeCompletionModel
+*/
 CodeCompletionModel::CodeCompletionModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_completionContext(0)
@@ -44,10 +46,16 @@ CodeCompletionModel::CodeCompletionModel(QObject *parent)
     m_roles[CodeCompletionModel::Documentation] = "documentation";
 }
 
+/**
+ * \brief Default destructor for CodeCompletionModel
+ */
 CodeCompletionModel::~CodeCompletionModel(){
     delete m_completionContext;
 }
 
+/**
+ * \brief Override of standard model function for fetching data
+*/
 QVariant CodeCompletionModel::data(const QModelIndex &index, int role) const{
     int suggestionIndex = m_filteredSuggestions[index.row()];
     if ( role == CodeCompletionModel::Label ){
@@ -64,6 +72,9 @@ QVariant CodeCompletionModel::data(const QModelIndex &index, int role) const{
     return QVariant();
 }
 
+/**
+* \brief Function to reset the internal model representation
+*/
 void CodeCompletionModel::resetModel(){
     beginResetModel();
     m_suggestions.clear();
@@ -71,6 +82,9 @@ void CodeCompletionModel::resetModel(){
     endResetModel();
 }
 
+/**
+ * \brief Simple function to assign code completion suggestions and filter
+ */
 void CodeCompletionModel::setSuggestions(
     const QList<CodeCompletionSuggestion> &suggestions,
     const QString &suggestionFilter)
@@ -82,6 +96,9 @@ void CodeCompletionModel::setSuggestions(
     endResetModel();
 }
 
+/**
+ * \brief Simple function to set the given filter
+ */
 void CodeCompletionModel::setFilter(const QString &filter){
     m_filter = filter;
     beginResetModel();
@@ -89,15 +106,24 @@ void CodeCompletionModel::setFilter(const QString &filter){
     endResetModel();
 }
 
+/**
+ * \brief Sets given code completion context
+ */
 void CodeCompletionModel::setCompletionContext(CodeCompletionContext *context){
     m_completionContext = context;
 }
 
+/**
+ * \brief Deletes the internal completion context
+ */
 void CodeCompletionModel::removeCompletionContext(){
     delete m_completionContext;
     m_completionContext = 0;
 }
 
+/**
+ * \brief Filters suggestions according to the stored filter string
+ */
 void CodeCompletionModel::updateFilters(){
     m_filteredSuggestions.clear();
     for ( int i = 0; i < m_suggestions.size(); ++i ){

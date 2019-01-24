@@ -114,8 +114,8 @@ public:
         , clearSelectionOnFocus(false)
         , lastHighlightChangeStart(INT_MAX)
         , lastHighlightChangeEnd(0)
-        , fragmentStart(-1)
-        , fragmentEnd(-1)
+        , fragmentStart(0), fragmentStartPalette(new QObject(q_func()))
+        , fragmentEnd(INT_MAX), fragmentEndPalette(new QObject(q_func()))
         , hAlign(TextEdit::AlignLeft), vAlign(TextEdit::AlignTop)
         , format(TextEdit::PlainText), wrapMode(TextEdit::NoWrap)
 #if defined(QT_QUICK_DEFAULT_TEXT_RENDER_TYPE)
@@ -136,7 +136,8 @@ public:
         , textCached(true), inLayout(false), selectByKeyboard(false), selectByKeyboardSet(false)
         , hadSelection(false)
     {
-
+        fragmentStartPalette->setObjectName("fragmentStartPalette");
+        fragmentEndPalette->setObjectName("fragmentEndPalette");
     }
 
     ~TextEditPrivate()
@@ -221,7 +222,9 @@ public:
     int lastHighlightChangeEnd;
 
     int fragmentStart;
+    QObject* fragmentStartPalette;
     int fragmentEnd;
+    QObject* fragmentEndPalette;
 
     TextEdit::HAlignment hAlign;
     TextEdit::VAlignment vAlign;

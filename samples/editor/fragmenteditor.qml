@@ -16,10 +16,10 @@ Item{
         source: Item{ property int start: 39; property int end: 46; }
         Component.onCompleted: {
             staticLoad('staticLineIndex')
-            fragmentEditor.document = fragmentSelection
+            fragmentEditor.document = project.openFile(project.path('fragmenteditor.qml'))
         }
     }
-    
+/*    
     DocumentFragment{
         id: fragmentSelection
         document: project.openFile(project.path('fragmenteditor.qml'))
@@ -28,12 +28,14 @@ Item{
         lineEndIndex: staticLineIndex.item.end
         onLineEndIndexChanged: staticLineIndex.item.end = lineEndIndex
     }
-    
-    FragmentEditor{
+*/
+    Editor{
         id: fragmentEditor
         anchors.left: parent.left
-        height: 300
-        width: 400
+        fragmentStart: 32
+        fragmentEnd: 41
+        height: 500
+        width: 600
         windowControls: livecv.windowControls()
     }
     

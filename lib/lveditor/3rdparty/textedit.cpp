@@ -673,19 +673,21 @@ int TextEdit::fragmentEnd() const {
 void TextEdit::setFragmentStart(int frStart) {
     Q_D(TextEdit);
     d->fragmentStart = frStart;
+    updateFragmentVisibility();
 }
 
 void TextEdit::setFragmentEnd(int frEnd) {
     Q_D(TextEdit);
     d->fragmentEnd = frEnd;
+    updateFragmentVisibility();
 }
 
 void TextEdit::resetFragmentStart() {
-    setFragmentStart(-1);
+    setFragmentStart(0);
 }
 
 void TextEdit::resetFragmentEnd() {
-    setFragmentEnd(-1);
+    setFragmentEnd(INT_MAX);
 }
 
 int TextEdit::lineNumber() const
@@ -2402,6 +2404,7 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     LineManager* lm = q->getDocumentLayout()->getLineManager();
     lm->setLineDocumentFont(font);
     lm->setParentDocument(document);
+    lm->textDocumentFinishedUpdating(document->blockCount());
 
     if (lineSurface)
         lineSurface->setDocument(q->getDocumentLayout()->getLineManager()->m_lineDocument);
@@ -3559,19 +3562,14 @@ void TextEdit::showHideLines(bool show, int pos, int num)
 void TextEdit::updateFragmentVisibility()
 {
     Q_D(TextEdit);
-    if (!d->document || fragmentStart() == -1 || fragmentEnd() == -1) return;
+    if (!d->document) return;
+    d->paletteManager->removePalette(d->fragmentStartPalette);
+    d->paletteManager->removePalette(d->fragmentEndPalette);
 
-    auto it = d->document->rootFrame()->begin(); int cnt = 0;
-    auto endIt = d->document->rootFrame()->end();
+    int lfrStart = max(0,d->fragmentStart-1), lfrEnd = min(d->fragmentEnd-1, d->document->blockCount());
 
-    while (it != endIt)
-    {
-        if (cnt < fragmentStart()) it.currentBlock().setVisible(false);
-        else if (cnt < fragmentEnd()) it.currentBlock().setVisible(true);
-        else it.currentBlock().setVisible(false);
-
-        ++cnt; ++it;
-    }
+    d->paletteManager->paletteAdded(0, lfrStart, 0, d->fragmentStartPalette);
+    d->paletteManager->paletteAdded(lfrEnd, d->document->blockCount() - lfrEnd, 0, d->fragmentEndPalette);
 
     dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->setDirtyPos(0);
     getPaletteManager()->setDirtyPos(0);

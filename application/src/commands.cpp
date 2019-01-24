@@ -71,8 +71,50 @@ QString Commands::add(QObject *object, const QJSValue &commands){
 
                 m_commands.insert(key, n);
             }
-        } else {
-            qCritical("Non function value given for command: %s", qPrintable(key));
+        }
+        else if (vit.value().isArray()) {
+            QJSValue arr = vit.value();
+            unsigned len = static_cast<unsigned>(arr.property("length").toInt());
+            Commands::Node* n = new Commands::Node;
+            for (unsigned int i = 0; i <len; i++)
+            {
+                QJSValue val = arr.property(i);
+                if (i == 0) {
+                    if (val.isCallable())
+                    {
+                        n->function = val;
+                    } else
+                    {
+                        qCritical("First value in array isn't a function: %s", qPrintable(key));
+                        break;
+                    }
+                }
+                if (i == 1) {
+                    if (val.isString())
+                    {
+                        n->description = val.toString();
+                    } else {
+                        qCritical("Second value in array isn't a string: %s", qPrintable(key));
+                        break;
+                    }
+                }
+                if (i == 2) {
+                    if (val.isCallable())
+                    {
+                        n->check = val;
+                    } else {
+                        qCritical("Third value in array isn't a function: %s", qPrintable(key));
+                        break;
+                    }
+                }
+                if (i > 2) break;
+            }
+
+            m_commands.insert(key, n);
+
+        }
+        else {
+            qCritical("Value given for command is neither a function nor an array: %s", qPrintable(key));
         }
     }
 

@@ -37,8 +37,8 @@ Rectangle{
     property var windowControls: null
     property var document: null
 
-    property int fragmentStart: -1
-    property int fragmentEnd: -1
+    property int fragmentStart: 0
+    property int fragmentEnd: 2147483647
 
     onDocumentChanged: {
         codeHandler.setDocument(document)
@@ -52,11 +52,11 @@ Rectangle{
     objectName: "editor"
 
     property string objectCommandIndex : livecv.commands.add(editor, {
-        'saveFile' : function(){ if ( hasActiveEditor() ) windowControls.activePane.save() },
-        'saveFileAs' : function(){ if ( hasActiveEditor() ) windowControls.activePane.saveAs() },
-        'closeFile' : function(){ if ( hasActiveEditor() ) windowControls.activePane.closeDocument() },
-        'assistCompletion' : function(){ if ( hasActiveEditor() ) windowControls.activePane.assistCompletion() },
-        'toggleSize' : function(){ if ( hasActiveEditor() ) windowControls.activePane.toggleSize() }
+        'saveFile' : [ function(){ if ( hasActiveEditor() ) windowControls.activePane.save() }, "Save File"],
+        'saveFileAs' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.saveAs() }, "Save File As"],
+        'closeFile' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.closeDocument() }, "Close File"],
+        'assistCompletion' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.assistCompletion() }, "Assist Completion"],
+        'toggleSize' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.toggleSize() }, "Toggle Size"]
     })
 
     function hasActiveEditor(){

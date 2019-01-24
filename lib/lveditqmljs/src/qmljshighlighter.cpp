@@ -198,6 +198,7 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
         case QmlJS::Token::LeftBrace:
             blockData->setCollapse(lv::ProjectDocumentBlockData::Collapse, &QmlJsHighlighter::collapse);
             blockData->setStateChangeFlag(true);
+            document()->markContentsDirty(currentBlock().position(), currentBlock().length());
             break;
         case QmlJS::Token::RightBrace:
         case QmlJS::Token::LeftBracket:
