@@ -72,6 +72,7 @@ a:hover {
   color: var(--main-link-color);
 
   overflow-x: hidden;
+  padding-bottom: 30px;
 }
 
 #indexList::-webkit-scrollbar {
@@ -93,7 +94,7 @@ a:hover {
   
 } */
 
-#indexList .expandable {
+#indexList .expandable-data {
   margin-top: 10px;
   margin-left: 20px;
 }
@@ -104,9 +105,17 @@ a:hover {
   list-style-position: outside;
 }
 
-#indexList .expandable a {
-  /* color: red !important; */
+#indexList .expandable-button {
+  font-size: 12px;
+  /* text-align: center; */
 }
+
+#indexList .expandable-button:hover {
+  cursor: pointer;
+  color: var(--main-link-hover-color);
+  text-decoration: underline;
+}
+
 
 #indexList .level-1 {
   font-weight: bold;

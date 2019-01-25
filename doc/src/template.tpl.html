@@ -29,8 +29,31 @@
     // Removes empty .expandable
     $(".expandable").each(function () {
       $(this).parent().prev().remove();
+      let data = $(this).children(".expandable-data");
+      if (data.hasClass("hidden")) {
+        data.hide();
+      }
+    })
+
+    $(".expandable-data").each(function () {
       if ($(this).children().length == 0)
-        $(this).remove();
+        $(this).parent().remove();
+    })
+
+
+    $(".expandable-button").click(function () {
+      let data = $(this).parent().children(".expandable-data");
+      if (data.hasClass("hidden")) {
+        data.removeClass("hidden").stop(true, true).slideDown();
+        $(this).text("Show less...");
+        // $(this).text("↑");
+      } else {
+        data.addClass("hidden").stop(true, true).slideUp();
+        // $(this).text("↓");
+        $(this).text("Show more...");
+
+      }
+      // console.log($(this));
     })
   </script>
 </body>
