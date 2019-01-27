@@ -19,6 +19,8 @@ Item{
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
     property Component propertyContainerFactory: null
 
+    property alias paletteAddButtonVisible: paletteAddButton.visible
+
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
         onAboutToBeRemoved : {

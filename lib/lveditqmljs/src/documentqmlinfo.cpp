@@ -576,15 +576,15 @@ QString DocumentQmlInfo::typeDefaultValue(const QString &typeString){
         return "0";
     else if ( typeString == "list" )
         return "[]";
-    else if ( typeString == "string" || typeString == "url " )
+    else if ( typeString == "string" || typeString == "url " || typeString == "QUrl" || typeString == "QString" )
         return "\"\"";
-    else if ( typeString == "color" )
+    else if ( typeString == "color" || typeString == "QColor" )
         return "\"transparent\"";
-    else if ( typeString == "point" )
+    else if ( typeString == "point" || typeString == "QPoint" )
         return "\"0x0\"";
-    else if ( typeString == "size" )
+    else if ( typeString == "size" || typeString == "QSize" )
         return "\"0x0\"";
-    else if ( typeString == "rect" )
+    else if ( typeString == "rect" || typeString == "QRect" )
         return "\50,50,100x100\"";
     else if ( typeString == "var" )
         return "undefined";

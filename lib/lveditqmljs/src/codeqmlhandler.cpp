@@ -708,7 +708,6 @@ CodeQmlHandler::CodeQmlHandler(
     , d_ptr(new CodeQmlHandlerPrivate)
 {
     Q_D(CodeQmlHandler);
-    d->documentScope = nullptr;
     d->projectHandler = projectHandler;
 
     m_timer.setInterval(1000);

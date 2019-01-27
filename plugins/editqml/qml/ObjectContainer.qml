@@ -169,17 +169,18 @@ Item{
 
                                     childObjectContainer.editor = objectContainer.editor
                                     childObjectContainer.editingFragment = ef
-                                    childObjectContainer.title = ''
+                                    childObjectContainer.title = type
 
                                     var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
                                     paletteBoxGroup.editingFragment = ef
                                     paletteBoxGroup.codeHandler = codeHandler
                                     ef.visualParent = paletteBoxGroup
 
-                                    objectContainer.paletteGroup = paletteBoxGroup
+                                    childObjectContainer.paletteGroup = paletteBoxGroup
                                     paletteBoxGroup.x = 5
 
                                     propertyContainer.valueContainer = childObjectContainer
+                                    propertyContainer.paletteAddButtonVisible = false
 
                                 } else {
 
@@ -209,7 +210,7 @@ Item{
                                 paletteBoxGroup.codeHandler = codeHandler
                                 ef.visualParent = paletteBoxGroup
 
-                                objectContainer.paletteGroup = paletteBoxGroup
+                                childObjectContainer.paletteGroup = paletteBoxGroup
                                 paletteBoxGroup.x = 5
                             }
                         }
