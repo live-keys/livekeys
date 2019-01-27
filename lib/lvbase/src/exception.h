@@ -30,7 +30,10 @@ class ExceptionPrivate;
 class LV_BASE_EXPORT Exception : public std::exception{
 
 public:
-    Exception(const std::string& message = "", int code = 0);
+    typedef unsigned long long Code;
+
+public:
+    Exception(const std::string& message = "", Code code = 0);
     Exception(const Exception& other);
     Exception& operator = (const Exception& other);
     virtual ~Exception();
@@ -39,7 +42,7 @@ public:
     bool hasStackTrace() const;
 
     const std::string& message() const;
-    int code() const;
+    Code code() const;
     int line() const;
     const std::string& file() const;
     std::string fileName() const;
@@ -48,9 +51,12 @@ public:
 
     std::string location() const;
 
+    static Exception::Code toCode(const std::string& str);
+    static std::string fromCode(Exception::Code code);
+
     template<typename T> static T create(
         const std::string& message,
-        int code,
+        Code code,
         const std::string& file = "",
         int line = 0,
         const std::string& functionName = "",
@@ -64,9 +70,8 @@ private:
     ExceptionPrivate* m_d;
 };
 
-template<typename T> T Exception::create(
-        const std::string &message,
-        int code,
+template<typename T> T Exception::create(const std::string &message,
+        Code code,
         const std::string &file,
         int line,
         const std::string &functionName,

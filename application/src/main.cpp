@@ -65,7 +65,7 @@ int main(int argc, char *argv[]){
         return app.exec();
 
     } catch ( lv::Exception& e ){
-        if ( e.code() < 0 ){
+        if ( e.code() == Exception::toCode("Init") ){
             printf("Uncaught exception when initializing: %s\n", e.message().c_str());
             return e.code();
         } else {

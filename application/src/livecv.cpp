@@ -103,7 +103,7 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
             QString toNetwork = QString::fromStdString(it.value()["toNetwork"].asString());
             int portPos = toNetwork.indexOf(':');
             if ( portPos == -1 )
-                THROW_EXCEPTION(lv::Exception, "Failed to parse port in segment: " + toNetwork.toStdString(), -1);
+                THROW_EXCEPTION(lv::Exception, "Failed to parse port in segment: " + toNetwork.toStdString(), Exception::toCode("Init"));
 
             vlog().addTransport(
                 it.key(),

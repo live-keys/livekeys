@@ -673,11 +673,13 @@ int TextEdit::fragmentEnd() const {
 void TextEdit::setFragmentStart(int frStart) {
     Q_D(TextEdit);
     d->fragmentStart = frStart;
+    updateFragmentVisibility();
 }
 
 void TextEdit::setFragmentEnd(int frEnd) {
     Q_D(TextEdit);
     d->fragmentEnd = frEnd;
+    updateFragmentVisibility();
 }
 
 void TextEdit::resetFragmentStart() {
@@ -3558,6 +3560,7 @@ void TextEdit::showHideLines(bool show, int pos, int num)
 
 void TextEdit::updateFragmentVisibility()
 {
+
     Q_D(TextEdit);
     if (!d->document || fragmentStart() == -1 || fragmentEnd() == -1) return;
 

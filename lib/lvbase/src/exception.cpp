@@ -19,6 +19,21 @@
 
 namespace lv{
 
+namespace{
+
+Exception::Code encodeSingle(char c){
+    if ( c == '~' )
+        return 27;
+    else if ( c >= 'A' && c <= 'Z' )
+        return static_cast<Exception::Code>(c - 'A' + 1);
+    else if ( c >= 'a' && c <= 'z' )
+        return static_cast<Exception::Code>(c - 'a' + 1);
+    else
+        return 0;
+}
+
+}
+
 
 /**
  * \class lv::Exception
@@ -37,7 +52,7 @@ namespace lv{
 class ExceptionPrivate{
 
 public:
-    ExceptionPrivate(const std::string& pmessage, int pcode)
+    ExceptionPrivate(const std::string& pmessage, Exception::Code pcode)
         : message(pmessage)
         , code(pcode)
         , line(0)
@@ -45,11 +60,11 @@ public:
     {
     }
 
-    std::string message;
-    int         code;
-    int         line;
-    std::string file;
-    std::string functionName;
+    std::string     message;
+    Exception::Code code;
+    int             line;
+    std::string     file;
+    std::string     functionName;
 
     StackTrace::Ptr stackTrace;
 };
@@ -57,7 +72,7 @@ public:
 /**
  * \brief Standard exception constructor with message and code parameters
  */
-Exception::Exception(const std::string &message, int code)
+Exception::Exception(const std::string &message, lv::Exception::Code code)
     : m_d(new ExceptionPrivate(message, code))
 {
 }
@@ -125,6 +140,62 @@ std::string Exception::location() const{
     return sstream.str();
 }
 
+/**
+ * \brief Encodes a specified string into an error code
+ *
+ * Useful for generating unique error codes. Note that there is a constraint on the
+ * size of the string (<14), due to the number of characters that can be uniquely encoded.
+ *
+ * Only characters between 'a' to 'z' and 'A' to 'Z' will be converted, all of them as
+ * lowercase. Additionaly the not (~) character is available to signify a negation.
+ */
+Exception::Code Exception::toCode(const std::string &str){
+    Exception::Code multiplier = 1;
+    Exception::Code result = 0;
+
+    int encodedChars = 14;
+
+    std::string s;
+    s.reserve(encodedChars);
+
+    for ( auto it = str.begin(); it != str.end(); ++it ){
+        Exception::Code current = encodeSingle(*it);
+        if ( current > 0 ){
+            encodedChars--;
+            s += *it;
+        }
+        if ( encodedChars == 0 )
+            break;
+    }
+
+    for (auto rit = s.rbegin(); rit != s.rend(); ++rit){
+        Exception::Code current = encodeSingle(*rit);
+        if ( current < 28 ){
+            result += current * multiplier;
+            multiplier = multiplier * 28;
+        }
+    }
+    return result;
+}
+
+/**
+ * \brief Decodes an error code into a set of characters
+ */
+std::string Exception::fromCode(Exception::Code code){
+    std::string result = "";
+
+    while (code > 0) {
+        unsigned long long remainder = code % 28;
+        char digit = static_cast<char>(remainder + 97);
+        if ( digit == 27 )
+          digit = '~';
+        result = (--digit) + result;
+        code = (code - remainder) / 28;
+    }
+
+    return result;
+}
+
 void Exception::assignSourceLocation(const std::string &file, int line, const std::string &functionName){
     m_d->file = file;
     m_d->line = line;
@@ -160,7 +231,7 @@ const std::string &Exception::message() const{
 /**
  * \brief Returns the Exception code
  */
-int Exception::code() const{
+Exception::Code Exception::code() const{
     return m_d->code;
 }
 
