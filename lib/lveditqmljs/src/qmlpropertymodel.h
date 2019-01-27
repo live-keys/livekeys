@@ -17,9 +17,16 @@ public:
     /// \private
     class PropertyData{
     public:
-        PropertyData(const QString& plabel, const QString& ptype, const QString& pdoc, const QString& pcode);
+        PropertyData(
+            const QString& label,
+            const QString& objectType,
+            const QString& type,
+            const QString& doc,
+            const QString& code
+        );
 
         QString label;
+        QString objectType;
         QString type;
         QString documentation;
         QString code;
@@ -28,6 +35,7 @@ public:
 public:
     enum Roles{
         Label = Qt::UserRole + 1,
+        ObjectType,
         Type,
         Documentation,
         Code
@@ -55,12 +63,12 @@ public slots:
     QStringList types() const;
 
 private:
-    QList<PropertyData>     m_data;
-    QString                 m_filter;
-    QString                 m_typeFilter;
-    QList<int>              m_filteredData;
-    QHash<int, QByteArray>  m_roles;
-    int                     m_addPosition;
+    QList<PropertyData>    m_data;
+    QString                m_filter;
+    QString                m_typeFilter;
+    QList<int>             m_filteredData;
+    QHash<int, QByteArray> m_roles;
+    int                    m_addPosition;
 };
 
 inline QHash<int, QByteArray> QmlPropertyModel::roleNames() const{

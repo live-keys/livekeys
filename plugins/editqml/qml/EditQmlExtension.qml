@@ -84,13 +84,13 @@ LiveExtension{
         var cursorCoords = editor.cursorWindowCoords()
 
         var ef = codeHandler.openConnection(palettes.position(), editor.windowControls.runSpace.item)
-        var palette = codeHandler.openPalette(ef, palettes, index)
+        var palette = palettes.size() > 0 ? codeHandler.openPalette(ef, palettes, index) : null
 
         var editorBox = ef.visualParent ? ef.visualParent.parent : null
         var paletteBoxGroup = editorBox ? editorBox.child : null
 
         if ( paletteBoxGroup === null ){
-            if ( codeHandler.isForAnObject(palette) ){
+            if ( codeHandler.isForAnObject(ef) ){
                 editorBox = windowControls.editSpace.createEmptyEditorBox()
 
                 var objectContainer = root.objectContainerFactory.createObject(windowControls.editSpace.content)
@@ -108,7 +108,6 @@ LiveExtension{
                 editorBox.setChild(objectContainer, rect, cursorCoords, windowControls.editSpace.placement.top)
 
             } else{
-
                 editorBox = windowControls.editSpace.createEmptyEditorBox()
 
                 paletteBoxGroup = root.paletteGroupFactory.createObject(windowControls.editSpace.content)
@@ -118,7 +117,6 @@ LiveExtension{
                 paletteBoxGroup.codeHandler = codeHandler
                 paletteBoxGroup.x = 5
                 editorBox.setChild(paletteBoxGroup, rect, cursorCoords, windowControls.editSpace.placement.top)
-
             }
 
             editorBox.color = "#02070b"
@@ -127,23 +125,25 @@ LiveExtension{
             editorBox.border.color = "#061b24"
         }
 
-        var paletteBox = root.paletteContainerFactory.createObject(paletteBoxGroup)
+        if ( palette || !codeHandler.isForAnObject(ef) ){
+            var paletteBox = root.paletteContainerFactory.createObject(paletteBoxGroup)
 
-        palette.item.x = 5
-        palette.item.y = 7
+            palette.item.x = 5
+            palette.item.y = 7
 
-        paletteBox.child = palette.item
-        paletteBox.palette = palette
+            paletteBox.child = palette.item
+            paletteBox.palette = palette
 
-        paletteBox.name = palette.name
-        paletteBox.type = palette.type
-        paletteBox.moveEnabled = false
-        paletteBox.documentHandler = editor.documentHandler
-        paletteBox.cursorRectangle = rect
-        paletteBox.editorPosition = cursorCoords
-        paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
+            paletteBox.name = palette.name
+            paletteBox.type = palette.type
+            paletteBox.moveEnabled = false
+            paletteBox.documentHandler = editor.documentHandler
+            paletteBox.cursorRectangle = rect
+            paletteBox.editorPosition = cursorCoords
+            paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
+        }
 
-        codeHandler.framePalette(editorBox, palette)
+        codeHandler.frameEdit(editorBox, ef)
     }
 
     function loadPalette(editor, palettes, index){
@@ -246,7 +246,9 @@ LiveExtension{
             var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
             var rect = editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
-            if ( palettes.size() === 1 ){
+            if ( palettes.size() === 0 ){
+                root.shapePalette(editor, palettes, -1)
+            } else if ( palettes.size() === 1 ){
                 root.shapePalette(editor, palettes, 0)
             } else {
                 //Palette list box
@@ -302,7 +304,7 @@ LiveExtension{
                     )
                 } else {
                     activePane.documentHandler.codeHandler.addItem(
-                        addContainer.itemModel.addPosition, data
+                        addContainer.itemModel.addPosition, addContainer.objectType, data
                     )
                 }
                 addBox.destroy()
@@ -400,29 +402,27 @@ LiveExtension{
                 return [
                     {
                         name : "Edit",
-                        action : function(){ root.commands['edit']()},
+                        action : root.commands['edit'][0],
                         enabled : cursorInfo.canEdit
                     }, {
                         name : "Palette",
-                        action : function(){ root.commands['palette']()},
+                        action : root.commands['palette'][0],
                         enabled : cursorInfo.canAdjust
                     }, {
                         name : "Shape",
-                        action : function(){ root.commands['shape']()},
-                        enabled : cursorInfo.canAdjust
+                        action : root.commands['shape'][0],
+                        enabled : cursorInfo.canShape
                     }, {
                         name : "Bind",
-                        action : function(){ root.commands['bind']() },
+                        action : root.commands['bind'][0],
                         enabled : cursorInfo.canBind
                     }, {
                         name : "Unbind",
-                        action : function(){ root.commands['unbind']() },
+                        action : root.commands['unbind'][0],
                         enabled : cursorInfo.canUnbind
                     }, {
                         name : "Add",
-                        action : function(){
-                            root.commands['add']()
-                        },
+                        action : root.commands['add'][0],
                         enabled : true
                     }
                 ]

@@ -33,7 +33,7 @@ Rectangle{
 
     property QtObject addContainer : null
 
-    property string fontFamily: 'Courier New, Courier'
+    property string fontFamily: 'Open Sans, Courier'
     property int fontSize: 12
     property int smallFontSize: 9
 
@@ -117,6 +117,7 @@ Rectangle{
         fontPixelSize: 12
         backgroundColor: isActive ? "#061a29" : "#111"
         fontFamily: "Open Sans, sans-serif"
+        radius: 5
 
         property bool isActive : activeIndex === 0
         onClicked : {
@@ -134,6 +135,7 @@ Rectangle{
         width: 70
         fontPixelSize: 12
         fontFamily: "Open Sans, sans-serif"
+        radius: 5
 
         backgroundColor: isActive ? "#061a29" : "#111"
         property bool isActive : activeIndex === 1
@@ -168,7 +170,7 @@ Rectangle{
             width: parent.width > implicitWidth ? parent.width : implicitWidth
 
             color : "#afafaf"
-            font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
+            font.family: "Open Sans, Courier"
             font.pixelSize: 12
             font.weight: Font.Light
 
@@ -289,6 +291,7 @@ Rectangle{
 
                             font.family: root.fontFamily
                             font.pixelSize: root.fontSize
+                            font.weight: Font.Light
 
                             color: "#fafafa"
                             text: modelData
@@ -359,6 +362,8 @@ Rectangle{
                 delegate: Component{
 
                     Rectangle{
+                        property string objectType : model.objectType
+                        property string type : model.type
                         property string code: model.code
 
                         width : propertyList.width
@@ -372,6 +377,7 @@ Rectangle{
 
                             font.family: root.fontFamily
                             font.pixelSize: root.fontSize
+                            font.weight: Font.Light
 
                             color: "#fafafa"
                             text: model.label
@@ -464,6 +470,7 @@ Rectangle{
 
                             font.family: root.fontFamily
                             font.pixelSize: root.fontSize
+                            font.weight: Font.Light
 
                             color: "#fafafa"
                             text: modelData
@@ -549,6 +556,7 @@ Rectangle{
 
                             font.family: root.fontFamily
                             font.pixelSize: root.fontSize
+                            font.weight: Font.Light
 
                             color: "#fafafa"
                             text: model.label

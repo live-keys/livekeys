@@ -24,7 +24,7 @@ Column{
                         box.destroy()
                     }
                 } else {
-                    if ( box.objectName === 'editorBox' ){
+                    if ( box && box.objectName === 'editorBox' ){
                         codeHandler.removeConnection(editingFragment)
                     }
                 }

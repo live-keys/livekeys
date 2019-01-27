@@ -10,6 +10,7 @@
 namespace lv{
 
 class QmlEditFragment;
+class DocumentQmlScope;
 
 /// \private
 class QmlCodeConverter : public QObject{
@@ -25,6 +26,13 @@ public:
     void setWhenBinding(const QJSValue& whenBinding);
 
     QmlEditFragment* editingFragment();
+
+    static QObject* create(
+        const DocumentQmlScope& scope,
+        const QString& declaration,
+        const QString& path,
+        QObject* parent = nullptr
+    );
 
 public slots:
     void writeProperties(const QJSValue& properties);

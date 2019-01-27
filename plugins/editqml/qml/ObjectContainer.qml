@@ -15,6 +15,7 @@ Item{
     property Component addBoxFactory: Component{ AddQmlBox{} }
     property Component propertyContainerFactory: Component{ PropertyContainer{} }
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
+    property Component paletteGroupFactory : Component{ PaletteGroup{} }
 
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
@@ -147,18 +148,70 @@ Item{
                                 addContainer.propertyModel.addPosition, addContainer.objectType, type, data, true
                             )
 
-                            var propertyContainer = propertyContainerFactory.createObject(container)
-
-                            propertyContainer.title = data
-                            propertyContainer.documentHandler = objectContainer.editor.documentHandler
-                            propertyContainer.propertyContainerFactory = propertyContainerFactory
-                            propertyContainer.editor = objectContainer.editor
-                            propertyContainer.editingFragment = codeHandler.openNestedConnection(
+                            var ef = codeHandler.openNestedConnection(
                                 objectContainer.editingFragment, ppos, livecv.windowControls().runSpace.item
                             )
+                            if ( ef ){
+
+                                var propertyContainer = propertyContainerFactory.createObject(container)
+
+                                propertyContainer.title = data
+                                propertyContainer.documentHandler = objectContainer.editor.documentHandler
+                                propertyContainer.propertyContainerFactory = propertyContainerFactory
+
+                                propertyContainer.editor = objectContainer.editor
+                                propertyContainer.editingFragment = ef
+
+
+                                if ( codeHandler.isForAnObject(ef) ){
+
+                                    var childObjectContainer = objectContainerFactory.createObject(container)
+
+                                    childObjectContainer.editor = objectContainer.editor
+                                    childObjectContainer.editingFragment = ef
+                                    childObjectContainer.title = ''
+
+                                    var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
+                                    paletteBoxGroup.editingFragment = ef
+                                    paletteBoxGroup.codeHandler = codeHandler
+                                    ef.visualParent = paletteBoxGroup
+
+                                    objectContainer.paletteGroup = paletteBoxGroup
+                                    paletteBoxGroup.x = 5
+
+                                    propertyContainer.valueContainer = childObjectContainer
+
+                                } else {
+
+                                    propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
+                                    propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
+                                    propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
+                                }
+                            }
 
                         } else {
-                            codeHandler.addItem(addContainer.itemModel.addPosition, data)
+                            var opos = codeHandler.addItem(addContainer.itemModel.addPosition, addContainer.objectType, data)
+                            codeHandler.addItemToRuntime(objectContainer.editingFragment, data, livecv.windowControls().runSpace.item)
+
+                            var ef = codeHandler.openNestedConnection(
+                                objectContainer.editingFragment, opos, livecv.windowControls().runSpace.item
+                            )
+
+                            if ( ef ){
+                                var childObjectContainer = objectContainerFactory.createObject(container)
+
+                                childObjectContainer.editor = objectContainer.editor
+                                childObjectContainer.editingFragment = ef
+                                childObjectContainer.title = data
+
+                                var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
+                                paletteBoxGroup.editingFragment = ef
+                                paletteBoxGroup.codeHandler = codeHandler
+                                ef.visualParent = paletteBoxGroup
+
+                                objectContainer.paletteGroup = paletteBoxGroup
+                                paletteBoxGroup.x = 5
+                            }
                         }
                         addBox.destroy()
                     }

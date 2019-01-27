@@ -103,9 +103,9 @@ public slots:
     lv::CodePalette* openBinding(lv::QmlEditFragment* edit, lv::PaletteList* paletteList, int index);
     void closeBinding(int position, int length);
 
-    bool isForAnObject(lv::CodePalette* palette);
+    bool isForAnObject(lv::QmlEditFragment* palette);
 
-    void framePalette(QQuickItem *box, lv::CodePalette* palette);
+    void frameEdit(QQuickItem *box, lv::QmlEditFragment* palette);
 
     // Direct editing management
 
@@ -121,7 +121,8 @@ public slots:
         const QString& type,
         const QString& name,
         bool assignDefault = false);
-    int addItem(int position, const QString& text);
+    int addItem(int position, const QString& object, const QString& type);
+    void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type, QObject* currentApp = nullptr);
     void updateRuntimeBindings(QObject* obj);
 
     // Scopes

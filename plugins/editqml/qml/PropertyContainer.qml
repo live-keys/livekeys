@@ -13,7 +13,9 @@ Item{
     property QtObject editingFragment : null
     property QtObject documentHandler : null
     property Item editor: null
+    property Item valueContainer : null
 
+    property Component paletteGroupFactory : Component{ PaletteGroup{} }
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
     property Component propertyContainerFactory: null
 
@@ -62,7 +64,8 @@ Item{
             id: paletteAddMouse
             anchors.fill: parent
             onClicked: {
-                var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
+                var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
+                    editingFragment.position(), true)
                 if (palettes.size() ){
                     paletteHeaderList.forceActiveFocus()
                     paletteHeaderList.model = palettes
@@ -74,25 +77,31 @@ Item{
                         paletteHeaderList.focus = false
                         paletteHeaderList.model = null
 
-                        var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
+                        if ( propertyContainer.valueContainer &&
+                             propertyContainer.valueContainer.objectName === 'paletteGroup' )
+                        {
+                            var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
 
-                        var newPaletteBox = paletteContainerFactory.createObject(paletteGroup)
+                            var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
 
-                        palette.item.x = 5
-                        palette.item.y = 7
+                            palette.item.x = 5
+                            palette.item.y = 7
 
-                        newPaletteBox.child = palette.item
-                        newPaletteBox.palette = palette
-                        newPaletteBox.moveEnabled = false
+                            newPaletteBox.child = palette.item
+                            newPaletteBox.palette = palette
+                            newPaletteBox.moveEnabled = false
 
-                        newPaletteBox.name = palette.name
-                        newPaletteBox.type = palette.type
-                        newPaletteBox.documentHandler = documentHandler
-                        newPaletteBox.cursorRectangle = propertyContainer.editor.getCursorRectangle()
-                        newPaletteBox.editorPosition = editor.cursorWindowCoords()
-                        newPaletteBox.paletteContainerFactory = function(arg){
-                            return propertyContainer.paletteContainerFactory.createObject(arg)
+                            newPaletteBox.name = palette.name
+                            newPaletteBox.type = palette.type
+                            newPaletteBox.documentHandler = documentHandler
+                            newPaletteBox.cursorRectangle = propertyContainer.editor.getCursorRectangle()
+                            newPaletteBox.editorPosition = editor.cursorWindowCoords()
+                            newPaletteBox.paletteContainerFactory = function(arg){
+                                return propertyContainer.paletteContainerFactory.createObject(arg)
+                            }
+
                         }
+
                     }
                 }
             }
@@ -148,14 +157,11 @@ Item{
         anchors.left: parent.left
         anchors.leftMargin: 140
 
-        width: paletteGroup.width
-        height: paletteGroup.height
+        width: propertyContainer.valueContainer ? propertyContainer.valueContainer.width : 0
+        height: propertyContainer.valueContainer ? propertyContainer.valueContainer.height : 0
 
-        PaletteGroup{
-            id: paletteGroup
-            editingFragment: propertyContainer.editingFragment
-            codeHandler: propertyContainer.documentHandler ? propertyContainer.documentHandler.codeHandler : null
-        }
+        children: propertyContainer.valueContainer ? [propertyContainer.valueContainer] : []
+        onChildrenChanged: console.log(children.length)
     }
 
 }

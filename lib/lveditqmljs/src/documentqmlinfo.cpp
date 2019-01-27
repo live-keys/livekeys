@@ -578,6 +578,14 @@ QString DocumentQmlInfo::typeDefaultValue(const QString &typeString){
         return "[]";
     else if ( typeString == "string" || typeString == "url " )
         return "\"\"";
+    else if ( typeString == "color" )
+        return "\"transparent\"";
+    else if ( typeString == "point" )
+        return "\"0x0\"";
+    else if ( typeString == "size" )
+        return "\"0x0\"";
+    else if ( typeString == "rect" )
+        return "\50,50,100x100\"";
     else if ( typeString == "var" )
         return "undefined";
     else

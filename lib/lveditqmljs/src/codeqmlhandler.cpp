@@ -1517,11 +1517,8 @@ lv::CodePalette* CodeQmlHandler::openPalette(lv::QmlEditFragment* edit, lv::Pale
     return palette;
 }
 
-bool CodeQmlHandler::isForAnObject(CodePalette *palette){
-    QmlCodeConverter* converter = static_cast<QmlCodeConverter*>(palette->extension());
-
-    QString type = converter->editingFragment()->declaration()->type();
-    return DocumentQmlInfo::isObject(type);
+bool CodeQmlHandler::isForAnObject(lv::QmlEditFragment *ef){
+    return DocumentQmlInfo::isObject(ef->declaration()->type());
 }
 
 /**
@@ -1580,8 +1577,7 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, PaletteList *pal
 /**
  * \brief Integrates a given palette box within the editor
  */
-void CodeQmlHandler::framePalette(QQuickItem *box, CodePalette *palette){
-    QmlEditFragment* edit = findEditFragment(palette);
+void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
     if (!edit)
         return;
 
@@ -1598,10 +1594,10 @@ void CodeQmlHandler::framePalette(QQuickItem *box, CodePalette *palette){
  */
 QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
     Q_D(CodeQmlHandler);
-    bool canBind = false, canUnbind = false, canEdit = false, canAdjust = false;
+    bool canBind = false, canUnbind = false, canEdit = false, canAdjust = false, canShape = false;
 
     if ( !m_document )
-        return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust);
+        return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 
     QTextCursor cursor(m_target);
     cursor.setPosition(position);
@@ -1610,16 +1606,21 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
     if ( properties.isEmpty() )
-        return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust);
+        return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 
     if ( properties.size() == 1 ){
         QmlDeclaration::Ptr firstdecl = properties.first();
+
+        if ( DocumentQmlInfo::isObject(firstdecl->type()) )
+            canShape = true;
+
         canEdit = true;
 
         int paletteCount = d->projectHandler->paletteContainer()->countPalettes("qml/" + firstdecl->type());
         if ( paletteCount > 0 ){
             int totalLoadedPalettes = 0;
             canBind = true;
+            canShape = true;
 
             for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
                 QmlEditFragment* edit = *it;
@@ -1644,7 +1645,7 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
             }
         }
     }
-    return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust);
+    return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 }
 
 /**
@@ -1829,6 +1830,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                     addContainer->propertyModel()->addItem(QmlPropertyModel::PropertyData(
                         object->property(i).name(),
                         objectTypeName,
+                        object->property(i).typeName(),
                         "", //TODO: Find library path
                         object->property(i).name())
                     );
@@ -1990,23 +1992,93 @@ int CodeQmlHandler::addProperty(
 /**
  * \brief Adds an item given the \p addText at the specitied \p position
  */
-int CodeQmlHandler::addItem(int position, const QString &addText){
+int CodeQmlHandler::addItem(int position, const QString &, const QString &type){
+    DocumentQmlValueScanner qvs(m_document, position, 1);
+    int blockStart = qvs.getBlockStart(position) + 1;
+    int blockEnd = qvs.getBlockEnd(position);
+
+    QTextBlock tbStart = m_target->findBlock(blockStart);
+    QTextBlock tbEnd   = m_target->findBlock(blockEnd);
+
+    QString insertionText;
+    int insertionPosition = position;
+    int cursorPosition = position;
+
+    // Check where to insert the item
+
+    if ( tbStart == tbEnd ){ // inline object declaration
+        insertionPosition = blockEnd;
+        insertionText = "; " + type + "{} ";
+        cursorPosition = insertionPosition + type.size() + 3;
+    } else { // multiline object declaration
+        QString indent = getBlockIndent(tbStart);
+        insertionPosition = tbEnd.position();
+        QTextBlock tbIt = tbEnd.previous();
+        while ( tbIt != tbStart && tbIt.isValid() ){
+            if ( !isBlockEmptySpace(tbIt) ){
+                indent = getBlockIndent(tbIt);
+                insertionPosition = tbIt.position() + tbIt.length();
+                break;
+            }
+            tbIt = tbIt.previous();
+        }
+
+        insertionText = indent + type + "{\n" + indent + "}\n";
+        cursorPosition = insertionPosition + indent.size() + type.size() + 1;
+    }
+
     m_document->addEditingState(ProjectDocument::Palette);
     QTextCursor cs(m_target);
-    cs.setPosition(position);
+    cs.setPosition(insertionPosition);
     cs.beginEditBlock();
-    cs.insertText(addText + "\n");
+    cs.insertText(insertionText);
     cs.endEditBlock();
     m_document->removeEditingState(ProjectDocument::Palette);
 
     lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     if (dh){
-        dh->requestCursorPosition(position + addText.length() - 1);
+        dh->requestCursorPosition(cursorPosition);
     }
 
-    //TODO
-    return 0;
-//    return position + addText)
+    return cursorPosition - 1 - type.size();
+}
+
+void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &type, QObject *currentApp){
+    Q_D(CodeQmlHandler);
+    if ( !edit || !currentApp )
+        return;
+
+    BindingPath* bp = edit->bindingChannel()->expressionPath();
+    QQmlProperty& p = bp->property();
+
+    QObject* result = QmlCodeConverter::create(
+        *d->documentScope, type + "{}", "temp"
+    );
+
+    if ( p.propertyTypeCategory() == QQmlProperty::List ){
+        QQmlListReference ppref = qvariant_cast<QQmlListReference>(p.read());
+        QObject* obat = ppref.at(bp->listIndex());
+
+        QQmlProperty assignmentProperty(obat);
+        if ( assignmentProperty.propertyTypeCategory() == QQmlProperty::List ){
+            QQmlListReference assignmentList = qvariant_cast<QQmlListReference>(assignmentProperty.read());
+            vlog("editqmljs-codehandler").v() <<
+                "Adding : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
+                "property " << assignmentProperty.name();
+            if ( assignmentList.canAppend() ){
+                assignmentList.append(result);
+                return;
+            }
+        } else {
+            vlog("editqmljs-codehandler").v() <<
+                "Assigning : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
+                "property " << assignmentProperty.name();
+            assignmentProperty.write(QVariant::fromValue(result));
+            return;
+        }
+    } else {
+        //TODO: Property based asignment
+    }
 }
 
 /**
