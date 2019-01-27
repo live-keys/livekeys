@@ -244,6 +244,8 @@ public:
 
     bool isActive() const;
 
+    QString peekContent(int position) const;
+
     void addEditingState(EditingState type);
     void removeEditingState(EditingState state);
     bool editingStateIs(int flag) const;
