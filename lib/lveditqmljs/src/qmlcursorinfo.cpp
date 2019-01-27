@@ -18,21 +18,23 @@
 
 namespace lv{
 
-QmlCursorInfo::QmlCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, QObject *parent)
+QmlCursorInfo::QmlCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, QObject *parent)
     : QObject(parent)
     , m_canBind(canBind)
     , m_canUnbind(canUnbind)
     , m_canEdit(canEdit)
     , m_canAdjust(canAdjust)
+    , m_canShape(canShape)
 {
 }
 
 QmlCursorInfo::QmlCursorInfo(QObject *parent)
     : QObject(parent)
-    , m_canBind(0)
-    , m_canUnbind(0)
-    , m_canEdit(0)
-    , m_canAdjust(0)
+    , m_canBind(false)
+    , m_canUnbind(false)
+    , m_canEdit(false)
+    , m_canAdjust(false)
+    , m_canShape(false)
 {
 }
 

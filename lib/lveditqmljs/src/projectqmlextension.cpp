@@ -30,6 +30,7 @@
 #include "qmlpropertymodel.h"
 #include "qmlitemmodel.h"
 #include "qmladdcontainer.h"
+#include "qmleditfragment.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -150,6 +151,8 @@ void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterType<lv::ProjectQmlExtension>(uri, 1, 0, "ProjectQmlExtension");
     qmlRegisterType<lv::QmlCursorInfo>(      uri, 1, 0, "QmlCursorInfo");
 
+    qmlRegisterUncreatableType<lv::QmlEditFragment>(
+        uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.documentHandler.codeQmlHandler.");
     qmlRegisterUncreatableType<lv::CodeQmlHandler>(
         uri, 1, 0, "CodeQmlHandler", "CodeQmlHandler can only be accessed through the Editor.documentHandler.");
     qmlRegisterUncreatableType<lv::QmlCodeConverter>(
@@ -159,7 +162,7 @@ void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterUncreatableType<lv::QmlPropertyModel>(
         uri, 1, 0, "QmlPropertyModel", "QmlPropertyModel can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlItemModel>(
-                uri, 1, 0, "QmlItemModel", "QmlItemModel can only be accessed through the qmledit extension.");
+        uri, 1, 0, "QmlItemModel", "QmlItemModel can only be accessed through the qmledit extension.");
 }
 
 /**

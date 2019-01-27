@@ -155,6 +155,7 @@ public:
     QmlJS::Bind* internalBind();
 
     static bool isObject(const QString& typeString);
+    static QString typeDefaultValue(const QString& typeString);
 
     QString path() const;
     QString componentName() const;

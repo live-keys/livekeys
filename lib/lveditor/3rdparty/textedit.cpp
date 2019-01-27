@@ -683,27 +683,27 @@ void TextEdit::setFragmentEnd(int frEnd) {
 }
 
 void TextEdit::resetFragmentStart() {
-    setFragmentStart(-1);
+    setFragmentStart(0);
 }
 
 void TextEdit::resetFragmentEnd() {
-    setFragmentEnd(-1);
+    setFragmentEnd(INT_MAX);
 }
 
 int TextEdit::lineNumber() const
 {
     Q_D(const TextEdit);
-    if (!d->document) return 0;
-    int lineNumber = d->document->findBlock(cursorPosition()).blockNumber() + 1;
-    return lineNumber;
+    if (!d->document || !d->control) return 0;
+
+    return d->control->textCursor().block().blockNumber() + 1;
 }
 
-int TextEdit::linePosition() const
+int TextEdit::columnNumber() const
 {
     Q_D(const TextEdit);
-    if (!d->document) return 0;
-    QTextBlock block = d->document->findBlock(cursorPosition());
-    return cursorPosition() - block.position();
+    if (!d->document || !d->control) return 0;
+
+    return d->control->textCursor().position() - d->control->textCursor().block().position();
 }
 
 /*!
@@ -2404,6 +2404,7 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     LineManager* lm = q->getDocumentLayout()->getLineManager();
     lm->setLineDocumentFont(font);
     lm->setParentDocument(document);
+    lm->textDocumentFinishedUpdating(document->blockCount());
 
     if (lineSurface)
         lineSurface->setDocument(q->getDocumentLayout()->getLineManager()->m_lineDocument);
@@ -2420,6 +2421,8 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     lv_qmlobject_connect(control, TextControl, SIGNAL(selectionChanged()), q, TextEdit, SLOT(updateSelection()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, TextEdit, SLOT(updateSelection()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, TextEdit, SIGNAL(cursorPositionChanged()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, TextEdit, SIGNAL(lineNumberChanged()));
+    lv_qmlobject_connect(control, TextControl, SIGNAL(cursorPositionChanged()), q, TextEdit, SIGNAL(columnNumberChanged()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(cursorRectangleChanged()), q, TextEdit, SLOT(moveCursorDelegate()));
     lv_qmlobject_connect(control, TextControl, SIGNAL(linkActivated(QString)), q, TextEdit, SIGNAL(linkActivated(QString)));
     lv_qmlobject_connect(control, TextControl, SIGNAL(linkHovered(QString)), q, TextEdit, SIGNAL(linkHovered(QString)));
@@ -3562,19 +3565,14 @@ void TextEdit::updateFragmentVisibility()
 {
 
     Q_D(TextEdit);
-    if (!d->document || fragmentStart() == -1 || fragmentEnd() == -1) return;
+    if (!d->document) return;
+    d->paletteManager->removePalette(d->fragmentStartPalette);
+    d->paletteManager->removePalette(d->fragmentEndPalette);
 
-    auto it = d->document->rootFrame()->begin(); int cnt = 0;
-    auto endIt = d->document->rootFrame()->end();
+    int lfrStart = max(0,d->fragmentStart-1), lfrEnd = min(d->fragmentEnd-1, d->document->blockCount());
 
-    while (it != endIt)
-    {
-        if (cnt < fragmentStart()) it.currentBlock().setVisible(false);
-        else if (cnt < fragmentEnd()) it.currentBlock().setVisible(true);
-        else it.currentBlock().setVisible(false);
-
-        ++cnt; ++it;
-    }
+    d->paletteManager->paletteAdded(0, lfrStart, 0, d->fragmentStartPalette);
+    d->paletteManager->paletteAdded(lfrEnd, d->document->blockCount() - lfrEnd, 0, d->fragmentEndPalette);
 
     dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->setDirtyPos(0);
     getPaletteManager()->setDirtyPos(0);

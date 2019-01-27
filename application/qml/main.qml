@@ -65,16 +65,16 @@ ApplicationWindow{
 
     Component.onCompleted: {
         livecv.commands.add(root, {
-            'minimize' : root.showMinimized,
-            'toggleMaximizedRuntime' : contentWrap.toggleMaximizedRuntime,
-            'toggleNavigation' : contentWrap.toggleNavigation,
-            'openLogInWindow' : mainVerticalSplit.openLogInWindow,
-            'openLogInEditor' : mainVerticalSplit.openLogInEditor,
-            'toggleLog' : mainVerticalSplit.toggleLog,
-            'toggleLogPrefix' : logView.toggleLogPrefix,
-            'addHorizontalEditorView' : mainVerticalSplit.addHorizontalEditor,
-            'addHorizontalFragmentEditorView': mainVerticalSplit.addHorizontalFragmentEditor,
-            'removeHorizontalEditorView' : mainVerticalSplit.removeHorizontalEditor
+            'minimize' : [root.showMinimized, "Minimize"],
+            'toggleMaximizedRuntime' : [contentWrap.toggleMaximizedRuntime, "Toggle Maximized Runtime"],
+            'toggleNavigation' : [contentWrap.toggleNavigation, "Toggle Navigation"],
+            'openLogInWindow' : [mainVerticalSplit.openLogInWindow, "Open Log In Window"],
+            'openLogInEditor' : [mainVerticalSplit.openLogInEditor, "Open Log In Editor"],
+            'toggleLog' : [mainVerticalSplit.toggleLog, "Toggle Log"],
+            'toggleLogPrefix' : [logView.toggleLogPrefix, "Toggle Log Prefix"],
+            'addHorizontalEditorView' : [mainVerticalSplit.addHorizontalEditor, "Add Horizontal Editor"],
+            'addHorizontalFragmentEditorView': [mainVerticalSplit.addHorizontalFragmentEditor, "Add Horizontal Fragment Editor"],
+            'removeHorizontalEditorView' : [mainVerticalSplit.removeHorizontalEditor, "Remove Horizontal Editor"]
         })
     }
 
@@ -119,6 +119,7 @@ ApplicationWindow{
         onOpenProject: projectView.openProject()
         onSaveFile : projectView.focusEditor.saveAs()
         onToggleLogWindow : mainVerticalSplit.toggleLog()
+        onOpenCommandsMenu: projectView.openCommandsMenu()
 
         onOpenSettings: {
             editor.document = project.openFile(livecv.settings.file('editor').path, ProjectDocument.Edit);
@@ -128,62 +129,260 @@ ApplicationWindow{
         onOpenLicense: licenseBox.visible = true
     }
 
-    // Mode button
-    Button {
-        id: modeButton
+    Rectangle {
+        id: modeWrapper
         anchors.left: parent.left
-        anchors.leftMargin: 580
-        onClicked: modeContainer.visible = !modeContainer.visible
-        text: "Live"
+        anchors.leftMargin: 550
+        width: 220
+        height: 30
+        color: 'transparent'
+
+        Item{
+            anchors.left: parent.left
+            anchors.leftMargin: 35
+            height : parent.height
+            Text{
+                color :  "#969aa1"
+                anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 12
+                font.family: 'Open Sans, Arial, sans-serif'
+                elide: Text.ElideRight
+                width: 130
+                text : project.active && project.active.file ? project.active.file.name : ""
+            }
+        }
+
+        Triangle{
+            id: compileButtonShape
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            width: compileButton.containsMouse ? 8 : 7
+            height: compileButton.containsMouse ? 13 : 12
+            state : "Released"
+            rotation: Triangle.Right
+
+            Behavior on height{ NumberAnimation{ duration: 100 } }
+            Behavior on width{ NumberAnimation{ duration: 100 } }
+
+            states: [
+                State {
+                    name: "Pressed"
+                    PropertyChanges { target: compileButtonShape; color: "#487db9"}
+                },
+                State {
+                    name: "Released"
+                    PropertyChanges { target: compileButtonShape; color: compileButton.containsMouse ? "#768aca" : "#bcbdc1"}
+                }
+            ]
+            transitions: [
+                Transition {
+                    from: "Pressed"
+                    to: "Released"
+                    ColorAnimation { target: compileButtonShape; duration: 100}
+                },
+                Transition {
+                    from: "Released"
+                    to: "Pressed"
+                    ColorAnimation { target: compileButtonShape; duration: 100}
+                }
+            ]
+        }
+
+        MouseArea{
+            id : compileButton
+            anchors.left: parent.left
+            anchors.leftMargin: 0
+            width: 50
+            height: 30
+            hoverEnabled: true
+            onPressed: compileButtonShape.state = "Pressed"
+            onReleased: compileButtonShape.state = "Released"
+            onClicked: {
+                if (project.active){
+                    livecv.engine.createObjectAsync(
+                        project.active.content,
+                        livecv.windowControls().runSpace,
+                        project.active.file.pathUrl(),
+                        project.active,
+                        true
+                    );
+                }
+            }
+        }
+
+        Item{
+            width: modeImage.width + modeImage.anchors.rightMargin + 10
+            height: parent.height
+            anchors.right: parent.right
+
+            Image{
+                id : modeImage
+                anchors.right: parent.right
+                anchors.rightMargin: 25
+                anchors.verticalCenter: parent.verticalCenter
+                source: liveImage.source
+            }
+
+            Triangle{
+                anchors.right: parent.right
+                anchors.rightMargin: 7
+                anchors.verticalCenter: parent.verticalCenter
+                width: 9
+                height: 5
+                color: openStatesDropdown.containsMouse ? "#9b6804" : "#bcbdc1"
+                rotation: Triangle.Bottom
+            }
+
+            MouseArea{
+                id : openStatesDropdown
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: modeContainer.visible = !modeContainer.visible
+            }
+        }
+
+
+        Rectangle{
+            width: parent.width
+            height: 1
+            color: "#1a1f25"
+            anchors.bottom: parent.bottom
+        }
+
     }
 
     Rectangle {
         id: modeContainer
         visible: false
-        anchors.left: modeButton.left
-        anchors.top: modeButton.bottom
+        anchors.right: modeWrapper.right
+        anchors.top: modeWrapper.bottom
+        property int buttonHeight: 30
+        property int buttonWidth: 120
+        opacity: visible ? 1.0 : 0
         z: 1000
 
-        Button {
+        Behavior on opacity{ NumberAnimation{ duration: 200 } }
+
+
+        Rectangle{
             id: liveButton
             anchors.top: parent.top
-            text: "Live"
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
             visible: projectView.focusEditor ? projectView.focusEditor.document === project.active : false
-            onClicked: {
-                controls.codingMode = 0
-                modeContainer.visible = false
-                modeButton.text = "Live"
-                livecv.engine.createObjectAsync(
-                    project.active.content,
-                    runSpace,
-                    project.active.file.pathUrl(),
-                    project.active,
-                    true
-                );
+            color : "#03070b"
+            Text {
+                id: liveText
+                text: qsTr("Live")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: liveArea.containsMouse ? "#969aa1" : "#5e5e5e"
+            }
+            Image{
+                id : liveImage
+                anchors.right: parent.right
+                anchors.rightMargin: 25
+                anchors.verticalCenter: parent.verticalCenter
+                source : "qrc:/images/live.png"
+            }
+            MouseArea{
+                id : liveArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    controls.codingMode = 0
+                    modeContainer.visible = false
+                    modeImage.source = liveImage.source
+                    modeImage.anchors.rightMargin = liveImage.anchors.rightMargin
+                    livecv.engine.createObjectAsync(
+                        project.active.content,
+                        runSpace,
+                        project.active.file.pathUrl(),
+                        project.active,
+                        true
+                    );
+                }
             }
         }
 
-        Button {
+        Rectangle{
             id: onSaveButton
             anchors.top: liveButton.visible ? liveButton.bottom : parent.top
-            text: "On save"
-            onClicked: {
-                controls.codingMode = 1
-                modeContainer.visible = false
-                modeButton.text = "On save"
-                controls.wasLiveCoding = false
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
+                id: onSaveText
+                text: qsTr("On Save")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: onSaveArea.containsMouse ? "#969aa1" : "#5e5e5e"
+            }
+            Image{
+                id : onSaveImage
+                anchors.right: parent.right
+                anchors.rightMargin: 25
+                anchors.verticalCenter: parent.verticalCenter
+                source : "qrc:/images/onsave.png"
+            }
+            MouseArea{
+                id : onSaveArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    controls.codingMode = 1
+                    modeContainer.visible = false
+                    modeImage.source = onSaveImage.source
+                    modeImage.anchors.rightMargin = onSaveImage.anchors.rightMargin
+                    controls.wasLiveCoding = false
+                }
             }
         }
 
-        Button {
+        Rectangle{
             id: disabledButton
             anchors.top: onSaveButton.bottom
-            text: "Disabled"
-            onClicked: {
-                controls.codingMode = 2
-                modeContainer.visible = false
-                modeButton.text = "Disabled"
-                controls.wasLiveCoding = false
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
+                id: disabledText
+                text: qsTr("Disabled")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: disabledArea.containsMouse ? "#969aa1" : "#5e5e5e"
+            }
+            Image{
+                id : disabledImage
+                anchors.right: parent.right
+                anchors.rightMargin: 28
+                anchors.verticalCenter: parent.verticalCenter
+                source : "qrc:/images/disabled.png"
+            }
+            MouseArea{
+                id : disabledArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    controls.codingMode = 2
+                    modeContainer.visible = false
+                    modeImage.source = disabledImage.source
+                    modeImage.anchors.rightMargin = disabledImage.anchors.rightMargin
+                    controls.wasLiveCoding = false
+                }
             }
         }
     }
@@ -400,20 +599,10 @@ ApplicationWindow{
             property int left: 3
         }
 
+        property alias content : contentWrap
+
         function createEmptyEditorBox(){
             return editorBoxFactory.createObject(contentWrap)
-        }
-
-        function createPaletteBoxContainer(){
-            return paletteBoxContainerFactory.createObject(contentWrap)
-        }
-
-        function createPaletteBox(container){
-            return paletteBoxFactory.createObject(container)
-        }
-
-        function createPaletteList(){
-            return paletteListFactory.createObject()
         }
 
         function createEditorBox(child, aroundRect, editorPosition, relativePlacement){
@@ -421,12 +610,6 @@ ApplicationWindow{
             eb.setChild(child, aroundRect, editorPosition, relativePlacement)
             return eb;
         }
-    }
-
-    Component{
-        id: paletteListFactory
-
-        PaletteListView{}
     }
 
     Component{
@@ -440,6 +623,7 @@ ApplicationWindow{
             height: child ? child.height + 10 : 0
             visible: false
             opacity: visible ? 1 : 0
+            objectName: "editorBox"
 
             property Item child : null
             children: child ? [child] : []
@@ -579,278 +763,6 @@ ApplicationWindow{
                         editorBoxComponent.x = downX + editorBoxComponent.width < contentWrap.width ? downX : upX
                     }
                 }
-            }
-        }
-    }
-
-    Component{
-        id: paletteBoxContainerFactory
-
-        Column{
-            id: paletteBoxContainer
-            spacing: 20
-            width: {
-                var maxWidth = 0;
-                if ( children.length > 0 ){
-                    for ( var i = 0; i < children.length; ++i ){
-                        if ( children[i].width > maxWidth )
-                            maxWidth = children[i].width
-                    }
-                }
-                return maxWidth
-            }
-            height: {
-                var totalHeight = 0;
-                if ( children.length > 0 ){
-                    for ( var i = 0; i < children.length; ++i ){
-                        totalHeight += children[i].height
-                    }
-                }
-                if ( children.length > 1 )
-                    return totalHeight + (children.length - 1) * spacing
-                else
-                    return totalHeight
-            }
-        }
-    }
-
-    Component{
-        id: paletteBoxFactory
-
-        Item{
-            id: paletteBox
-            width: child ? child.width + 10 : 0
-            height: child ? child.height + 25 : 0
-
-            property Item child : null
-
-            property string name : ''
-            property string type : ''
-            property string title : type + ' - ' + name
-            property var cursorRectangle : null
-            property var editorPosition : null
-
-            property alias paletteSwapVisible : paletteSwapButton.visible
-            property alias paletteAddVisible : paletteAddButton.visible
-
-            property double titleLeftMargin : 50
-            property double titleRightMargin : 50
-
-            property bool hasComposition : false
-
-            property DocumentHandler documentHandler : null
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: paletteBox.child.forceActiveFocus()
-            }
-
-            Item{
-                id: paletteBoxHeader
-                height: 24
-                width: paletteBox.parent ? paletteBox.parent.width : paletteBox.width
-                clip: true
-
-                MouseArea{
-                    id: paletteBoxMoveArea
-                    anchors.fill: parent
-                    cursorShape: Qt.SizeAllCursor
-                    property point lastMousePos : Qt.point(0, 0)
-                    onPressed: {
-                        paletteBox.parent.parent.disableMoveBehavior()
-                        lastMousePos = paletteBoxMoveArea.mapToGlobal(mouse.x, mouse.y)
-                    }
-                    onPositionChanged: {
-                        if ( mouse.buttons & Qt.LeftButton ){
-                            var currentMousePos = paletteBoxMoveArea.mapToGlobal(mouse.x, mouse.y)
-                            var deltaX = currentMousePos.x - lastMousePos.x
-                            var deltaY = currentMousePos.y - lastMousePos.y
-                            paletteBox.parent.parent.x += deltaX
-                            paletteBox.parent.parent.y += deltaY
-
-                            lastMousePos = currentMousePos
-                        }
-                    }
-                }
-
-                Item{
-                    id: paletteSwapButton
-                    anchors.left: parent.left
-                    anchors.leftMargin: 5
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 15
-                    height: 20
-                    Image{
-                        anchors.centerIn: parent
-                        source: "qrc:/images/palette-swap.png"
-                    }
-                    MouseArea{
-                        id: paletteSwapMouse
-                        anchors.fill: parent
-                        onClicked: {
-                            var palettePosition = documentHandler.codeHandler.palettePosition(child)
-                            var palettes = documentHandler.codeHandler.findPalettes(palettePosition, true)
-                            if (palettes.size() ){
-                                paletteHeaderList.forceActiveFocus()
-                                paletteHeaderList.model = palettes
-                                paletteHeaderList.cancelledHandler = function(){
-                                    paletteHeaderList.focus = false
-                                    paletteHeaderList.model = null
-                                }
-                                paletteHeaderList.selectedHandler = function(index){
-                                    paletteHeaderList.focus = false
-                                    paletteHeaderList.model = null
-
-                                    var childToRemove = paletteBox.child
-
-                                    var palette = documentHandler.codeHandler.openPalette(palettes, index, root.controls.runSpace.item)
-                                    var newPaletteBox = root.controls.editSpace.createPaletteBox(paletteBox.parent)
-
-                                    palette.item.x = 5
-                                    palette.item.y = 7
-
-                                    newPaletteBox.child = palette.item
-                                    newPaletteBox.name = palette.name
-                                    newPaletteBox.type = palette.type
-                                    newPaletteBox.documentHandler = documentHandler
-                                    newPaletteBox.cursorRectangle = paletteBox.cursorRectangle
-                                    newPaletteBox.editorPosition = paletteBox.editorPosition
-
-                                    documentHandler.codeHandler.removePalette(childToRemove)
-
-                                    paletteBox.parent.parent.updatePlacement(
-                                        paletteBox.cursorRectangle, paletteBox.editorPosition, editSpace.placement.top
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                Item{
-                    id: paletteAddButton
-                    anchors.left: parent.left
-                    anchors.leftMargin: 25
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 15
-                    height: 20
-                    Image{
-                        anchors.centerIn: parent
-                        source: "qrc:/images/palette-add.png"
-                    }
-                    MouseArea{
-                        id: paletteAddMouse
-                        anchors.fill: parent
-                        onClicked: {
-                            var palettePosition = documentHandler.codeHandler.palettePosition(child)
-                            var palettes = documentHandler.codeHandler.findPalettes(palettePosition, true)
-                            if (palettes.size() ){
-                                paletteHeaderList.forceActiveFocus()
-                                paletteHeaderList.model = palettes
-                                paletteHeaderList.cancelledHandler = function(){
-                                    paletteHeaderList.focus = false
-                                    paletteHeaderList.model = null
-                                }
-                                paletteHeaderList.selectedHandler = function(index){
-                                    paletteHeaderList.focus = false
-                                    paletteHeaderList.model = null
-
-                                    var palette = documentHandler.codeHandler.openPalette(palettes, index, root.controls.runSpace.item)
-
-                                    var newPaletteBox = root.controls.editSpace.createPaletteBox(paletteBox.parent)
-
-                                    palette.item.x = 5
-                                    palette.item.y = 7
-
-                                    newPaletteBox.child = palette.item
-                                    newPaletteBox.name = palette.name
-                                    newPaletteBox.type = palette.type
-                                    newPaletteBox.documentHandler = documentHandler
-                                    newPaletteBox.cursorRectangle = paletteBox.cursorRectangle
-                                    newPaletteBox.editorPosition = paletteBox.editorPosition
-                                    paletteBox.parent.parent.updatePlacement(
-                                        paletteBox.cursorRectangle, paletteBox.editorPosition, editSpace.placement.top
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Text{
-                    id: paletteBoxTitle
-                    anchors.left: parent.left
-                    anchors.leftMargin: paletteBox.titleLeftMargin
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.right: parent.right
-                    anchors.rightMargin: paletteBox.titleRightMargin
-                    clip: true
-                    text: paletteBox.title
-                    color: '#82909b'
-                }
-
-                Item{
-                    anchors.right: parent.right
-                    anchors.rightMargin: 25
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 15
-                    height: 20
-                    visible: paletteBox.hasComposition
-                    Image{
-                        anchors.centerIn: parent
-                        source: "qrc:/images/palette-add-property.png"
-                    }
-                    MouseArea{
-                        anchors.fill: parent
-    //                        onClicked: listView.open()
-                    }
-                }
-                Item{
-                    anchors.right: parent.right
-                    anchors.rightMargin: 0
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 15
-                    height: 20
-                    Text{
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: 'x'
-                        color: '#ffffff'
-                    }
-                    MouseArea{
-                        id: paletteCloseArea
-                        anchors.fill: parent
-                        onClicked: {
-                            documentHandler.codeHandler.removePalette(child)
-                        }
-                    }
-                }
-
-            }
-
-            Item{
-                anchors.fill: parent
-                anchors.topMargin: 25
-                children: parent.child ? [parent.child] : []
-            }
-
-
-            PaletteListView{
-                id: paletteHeaderList
-                visible: model ? true : false
-                anchors.top: parent.top
-                anchors.topMargin: 24
-                width: parent.width
-                color: "#0a141c"
-                selectionColor: "#0d2639"
-                fontSize: 10
-                fontFamily: "Open Sans, sans-serif"
-                onFocusChanged : if ( !focus ) model = null
-
-                property var selectedHandler : function(){}
-                property var cancelledHandler : function(index){}
-
-                onPaletteSelected: selectedHandler(index)
-                onCancelled : cancelledHandler()
-
             }
         }
     }

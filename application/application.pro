@@ -49,6 +49,7 @@ OTHER_FILES += \
 
 DISTFILES += \
     qml/MessageDialogMain.qml \
-    qml/LogView.qml
+    qml/LogView.qml \
+    qml/CommandsMenu.qml
 
 

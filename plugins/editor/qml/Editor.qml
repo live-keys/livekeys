@@ -37,8 +37,8 @@ Rectangle{
     property var windowControls: null
     property var document: null
 
-    property int fragmentStart: -1
-    property int fragmentEnd: -1
+    property int fragmentStart: 0
+    property int fragmentEnd: 2147483647
 
     onDocumentChanged: {
         codeHandler.setDocument(document)
@@ -52,11 +52,11 @@ Rectangle{
     objectName: "editor"
 
     property string objectCommandIndex : livecv.commands.add(editor, {
-        'saveFile' : function(){ if ( hasActiveEditor() ) windowControls.activePane.save() },
-        'saveFileAs' : function(){ if ( hasActiveEditor() ) windowControls.activePane.saveAs() },
-        'closeFile' : function(){ if ( hasActiveEditor() ) windowControls.activePane.closeDocument() },
-        'assistCompletion' : function(){ if ( hasActiveEditor() ) windowControls.activePane.assistCompletion() },
-        'toggleSize' : function(){ if ( hasActiveEditor() ) windowControls.activePane.toggleSize() }
+        'saveFile' : [ function(){ if ( hasActiveEditor() ) windowControls.activePane.save() }, "Save File"],
+        'saveFileAs' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.saveAs() }, "Save File As"],
+        'closeFile' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.closeDocument() }, "Close File"],
+        'assistCompletion' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.assistCompletion() }, "Assist Completion"],
+        'toggleSize' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.toggleSize() }, "Toggle Size"]
     })
 
     function hasActiveEditor(){
@@ -279,19 +279,23 @@ Rectangle{
                 GradientStop { position: 0.0;  color: "#050b12" }
                 GradientStop { position: 0.30; color: "#050b12" }
             }
+
+            property bool lineAndColumn : true
+
             Text{
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 11
-                text: {
-                    editorArea.cursorPosition
-                    return editorArea.lineNumber + ", " + editorArea.linePosition
-                }
-//                    (Math.floor(editorArea.cursorRectangle.y / editorMetrics.height) + 1) + ', ' +
-//                    (Math.floor(editorArea.cursorRectangle.x / editorMetrics.averageCharacterWidth) + 1)
+                text: parent.lineAndColumn
+                         ? editorArea.lineNumber + ", " + editorArea.columnNumber
+                         : editorArea.cursorPosition
                 color: "#808691"
                 anchors.left: parent.left
                 anchors.leftMargin: 7
                 anchors.verticalCenter: parent.verticalCenter
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: parent.lineAndColumn = !parent.lineAndColumn
             }
         }
 

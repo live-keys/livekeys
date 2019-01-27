@@ -9,7 +9,7 @@ DEFINES += LV_EDITOR_PLUGIN
 uri = editor
 
 linkLocalLibrary(lvbase,   lvbase)
-linkLocalLibrary(lvview,  lvview)
+linkLocalLibrary(lvview,   lvview)
 linkLocalLibrary(lveditor, lveditor)
 
 # Source
@@ -35,7 +35,6 @@ export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
 
 DISTFILES += \
-    qml/DocumentFragment.qml \
     palettes/IntHistoryPlotPalette.qml \
     palettes/DoubleHistoryPlotPalette.qml \
     qml/live.package.json \

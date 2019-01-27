@@ -29,4 +29,8 @@ OTHER_FILES += \
 #    qml/AddBox.qml
 
 DISTFILES += \
-    qml/AddQmlBox.qml
+    qml/AddQmlBox.qml \
+    qml/ObjectContainer.qml \
+    qml/PaletteGroup.qml \
+    qml/PropertyContainer.qml \
+    qml/PaletteContainer.qml

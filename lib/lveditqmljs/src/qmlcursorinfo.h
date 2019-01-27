@@ -29,9 +29,10 @@ class QmlCursorInfo: public QObject{
     Q_PROPERTY(bool canUnbind READ canUnbind CONSTANT)
     Q_PROPERTY(bool canEdit   READ canEdit   CONSTANT)
     Q_PROPERTY(bool canAdjust READ canAdjust CONSTANT)
+    Q_PROPERTY(bool canShape  READ canShape  CONSTANT)
 
 public:
-    QmlCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, QObject* parent = 0);
+    QmlCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, QObject* parent = 0);
     QmlCursorInfo(QObject* parent = 0);
     ~QmlCursorInfo();
 
@@ -39,12 +40,14 @@ public:
     bool canUnbind() const;
     bool canEdit() const;
     bool canAdjust() const;
+    bool canShape() const;
 
 private:
     bool m_canBind;
     bool m_canUnbind;
     bool m_canEdit;
     bool m_canAdjust;
+    bool m_canShape;
 };
 
 inline bool QmlCursorInfo::canBind() const{
@@ -61,6 +64,10 @@ inline bool QmlCursorInfo::canEdit() const{
 
 inline bool QmlCursorInfo::canAdjust() const{
     return m_canAdjust;
+}
+
+inline bool QmlCursorInfo::canShape() const{
+    return m_canShape;
 }
 
 }// namespace
