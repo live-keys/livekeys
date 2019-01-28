@@ -19,6 +19,11 @@
 
 #include <iostream>
 
+/**
+ * \class QDrawMatches
+ * \brief Draws the found matches of keypoints from two images.
+ * \ingroup plugin-lcvfeatures2d
+ */
 QDrawMatches::QDrawMatches(QQuickItem *parent)
     : QMatDisplay(parent)
     , m_keypoints1(0)

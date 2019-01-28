@@ -18,6 +18,11 @@
 #include "opencv2/calib3d.hpp"
 #include "opencv2/imgproc.hpp"
 
+/**
+ * \class QKeypointHomography
+ * \brief Maps the keypoints in one image to the corresponding keypoints in the other image
+ * \ingroup plugin-lcvfeatures2d
+ */
 QKeypointHomography::QKeypointHomography(QQuickItem* parent)
     : QMatDisplay(parent)
     , m_keypointsToScene(0)
@@ -26,6 +31,9 @@ QKeypointHomography::QKeypointHomography(QQuickItem* parent)
     setFlag(QQuickItem::ItemHasContents, true);
 }
 
+/**
+ * \brief QKeypointHomography desctructor
+ */
 QKeypointHomography::~QKeypointHomography(){
 }
 

@@ -16,6 +16,21 @@
 
 #include "qdescriptormatchfilter.h"
 
+/**
+ * \class QDescriptorMatchFilter
+ * \brief Filter for QDescriptorMatcher
+ * \ingroup plugin-lcvfeatures2d
+ */
+
+/**
+ * \brief QDescriptorMatchFilter constructror
+ * 
+ * Parameters:
+ * 
+ * \a parent
+ * 
+ */
+
 QDescriptorMatchFilter::QDescriptorMatchFilter(QQuickItem* parent)
     : QQuickItem(parent)
     , m_matches1to2(0)
@@ -27,8 +42,12 @@ QDescriptorMatchFilter::QDescriptorMatchFilter(QQuickItem* parent)
     QQuickItem::setFlag(QQuickItem::ItemHasContents, false);
 }
 
+/**
+ * \brief QDescriptorMatchFilter destructor
+ */
 QDescriptorMatchFilter::~QDescriptorMatchFilter(){
 }
+
 
 QDMatchVector::Type QDescriptorMatchFilter::filterKnnMatches(
         const std::vector<std::vector<cv::DMatch> > &src,
