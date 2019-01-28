@@ -17,6 +17,19 @@
 #include "qdescriptormatcher.h"
 #include "opencv2/features2d.hpp"
 
+/**
+ * \class QDescriptorMatcher
+ * \brief Abstract base class for matching keypoint descriptors.
+ * \ingroup plugin-lcvfeatures2d
+ */
+
+/**
+ * QDescriptorMatcher main constructor
+ * 
+ * Paramteres:
+ * \a parent
+ * 
+ */
 QDescriptorMatcher::QDescriptorMatcher(QQuickItem *parent)
     : QQuickItem(parent)
     , m_matcher(0)
@@ -26,6 +39,9 @@ QDescriptorMatcher::QDescriptorMatcher(QQuickItem *parent)
 {
 }
 
+/**
+ * \brief Constructor containing the actual matcher
+ */
 QDescriptorMatcher::QDescriptorMatcher(cv::DescriptorMatcher* matcher, QQuickItem *parent)
     : QQuickItem(parent)
     , m_matcher(matcher)
@@ -35,6 +51,9 @@ QDescriptorMatcher::QDescriptorMatcher(cv::DescriptorMatcher* matcher, QQuickIte
 {
 }
 
+/**
+ * QDescriptorMatcher destructor
+ */
 QDescriptorMatcher::~QDescriptorMatcher(){
     delete m_matcher;
 }
@@ -43,6 +62,9 @@ QDMatchVector* QDescriptorMatcher::matches(){
     return m_matches;
 }
 
+/**
+ * \brief Adding descriptors
+ */
 void QDescriptorMatcher::add(QMat* descriptors){
     if ( !descriptors )
         return;
@@ -57,6 +79,9 @@ void QDescriptorMatcher::add(QMat* descriptors){
     }
 }
 
+/**
+ * Trains QDescriptorMatcher
+ */
 void QDescriptorMatcher::train(){
     if ( m_matcher ){
         try{
@@ -96,6 +121,9 @@ void QDescriptorMatcher::match(QMat* queryDescriptors, QDMatchVector* matches){
     }
 }
 
+/**
+ * \brief Finds best matches for each descriptor 
+ */
 void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches, int k){
     if ( m_matcher ){
         try{

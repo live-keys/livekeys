@@ -33,12 +33,25 @@ public:
     };
 
 public:
+    /**
+     * \brief QDMatchVector constructor
+     */
     explicit QDMatchVector(QQuickItem *parent = 0);
+    
+    /**
+     * \brief QDMatchVector destructor
+     */
     virtual ~QDMatchVector();
 
+    /// \private
     std::vector<std::vector<cv::DMatch> >& matches();
+    
+    /// \private
     const std::vector<std::vector<cv::DMatch> >& matches() const;
 
+    /**
+     * \brief Type that was matched
+     */
     Type type() const;
     void setType(Type type);
 
