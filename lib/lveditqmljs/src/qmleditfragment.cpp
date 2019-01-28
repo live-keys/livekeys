@@ -17,6 +17,7 @@
 #include "live/qmleditfragment.h"
 #include "live/qmldeclaration.h"
 #include "live/codepalette.h"
+#include "qmlcodeconverter.h"
 #include "bindingchannel.h"
 
 namespace lv{
@@ -28,7 +29,7 @@ namespace lv{
  *
  * An editing fragment represents a section within a lv::ProjectDocument that is connected to
  * the running application. Fragments have palettes associated with them, and can write code
- * based on the given value of a palette. Also, they provide the set of binding channels connected
+ * based on the given value of a palette. They provide the set of binding channels connected
  * to the application.
  */
 
@@ -37,12 +38,12 @@ namespace lv{
  *
  * The Fragment is constructed from a \p declaration object and a \p palette object.
  */
-QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodePalette *palette)
-    : m_declaration(declaration)
-    , m_palette(palette)
+QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *parent)
+    : QObject(parent)
+    , m_declaration(declaration)
+    , m_bindingPalette(nullptr)
     , m_bindingChannel(new BindingChannel(this))
-    , m_bindingUse(false)
-    , m_paletteUse(false)
+    , m_visualParent(nullptr)
 {
 }
 
@@ -50,8 +51,23 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodePalett
  * \brief QmlEditFragment destructor
  */
 QmlEditFragment::~QmlEditFragment(){
-    delete m_bindingChannel;
-    m_palette->deleteLater();
+    ProjectDocumentSection::Ptr section = declaration()->section();
+    ProjectDocument* doc = section->document();
+    doc->removeSection(section);
+
+    for ( auto it = childFragments().begin(); it != childFragments().end(); ++it ){
+        QmlEditFragment* edit = *it;
+        edit->deleteLater();
+    }
+
+    for ( auto it = begin(); it != end(); ++it ){
+        CodePalette* cp = *it;
+        cp->deleteLater();
+    }
+    if ( m_bindingPalette )
+        m_bindingPalette->deleteLater();
+
+    m_bindingChannel->deleteLater();
 }
 
 /**
@@ -83,6 +99,68 @@ BindingPath *QmlEditFragment::expressionPath(){
     return m_bindingChannel->expressionPath();
 }
 
+CodePalette *QmlEditFragment::palette(const QString &type){
+    for ( auto it = begin(); it != end(); ++it ){
+        CodePalette* current = *it;
+        if ( current->type() == type )
+            return current;
+    }
+    return nullptr;
+}
+
+void QmlEditFragment::addPalette(CodePalette *palette){
+    m_palettes.append(palette);
+}
+
+void QmlEditFragment::removePalette(CodePalette *palette){
+    for ( auto it = begin(); it != end(); ++it ){
+        CodePalette* cp = *it;
+        if ( cp == palette ){
+            emit aboutToRemovePalette(palette);
+            m_palettes.erase(it);
+            if ( bindingPalette() != palette )
+                palette->deleteLater();
+            return;
+        }
+    }
+}
+
+int QmlEditFragment::totalPalettes() const{
+    return m_palettes.size();
+}
+
+void QmlEditFragment::removeBindingPalette(){
+    if ( !m_bindingPalette )
+        return;
+
+    if ( hasPalette(m_bindingPalette ) )
+        m_bindingPalette = nullptr;
+    else {
+        m_bindingPalette->deleteLater();
+        m_bindingPalette = nullptr;
+    }
+}
+
+void QmlEditFragment::setBindingPalette(CodePalette *palette){
+    removeBindingPalette();
+    m_bindingPalette = palette;
+}
+
+void QmlEditFragment::addChildFragment(QmlEditFragment *edit){
+    m_childFragments.append(edit);
+}
+
+void QmlEditFragment::removeChildFragment(QmlEditFragment *edit){
+    for ( auto it = m_childFragments.begin(); it != m_childFragments.end(); ++it ){
+        if ( *it == edit ){
+            edit->emitRemoval();
+            m_childFragments.erase(it);
+            edit->deleteLater();
+            return;
+        }
+    }
+}
+
 /**
  * \brief Writes the \p code to the value part of this fragment
  */
@@ -108,13 +186,44 @@ void QmlEditFragment::write(const QString &code){
 }
 
 /**
- * zbrief Reads the code value of this fragment and returns it.
+ * \brief Reads the code value of this fragment and returns it.
  */
 QString QmlEditFragment::readValueText() const{
     QTextCursor tc(m_declaration->document()->textDocument());
     tc.setPosition(valuePosition());
     tc.setPosition(valuePosition() + valueLength(), QTextCursor::KeepAnchor);
     return tc.selectedText();
+}
+
+void QmlEditFragment::updatePaletteValue(CodePalette *palette){
+    BindingPath* mainPath = bindingChannel()->expressionPath();
+    if ( mainPath->listIndex() == -1 ){
+        palette->setValueFromBinding(mainPath->property().read());
+    } else {
+        QQmlListReference ppref = qvariant_cast<QQmlListReference>(mainPath->property().read());
+        palette->setValueFromBinding(QVariant::fromValue(ppref.at(mainPath->listIndex())));
+    }
+}
+
+void QmlEditFragment::emitRemoval(){
+    emit aboutToBeRemoved();
+
+}
+
+void QmlEditFragment::updateValue(){
+    BindingPath* mainPath = bindingChannel()->expressionPath();
+
+    if ( mainPath->listIndex() == -1 ){
+        for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
+            CodePalette* cp = *it;
+            cp->setValueFromBinding(mainPath->property().read());
+        }
+        if ( m_bindingPalette ){
+            m_bindingPalette->setValueFromBinding(mainPath->property().read());
+            QmlCodeConverter* cvt = static_cast<QmlCodeConverter*>(m_bindingPalette->extension());
+            cvt->whenBinding().call();
+        }
+    }
 }
 
 }// namespace

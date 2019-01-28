@@ -279,19 +279,23 @@ Rectangle{
                 GradientStop { position: 0.0;  color: "#050b12" }
                 GradientStop { position: 0.30; color: "#050b12" }
             }
+
+            property bool lineAndColumn : true
+
             Text{
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 11
-                text: {
-                    editorArea.cursorPosition
-                    return editorArea.lineNumber + ", " + editorArea.linePosition
-                }
-//                    (Math.floor(editorArea.cursorRectangle.y / editorMetrics.height) + 1) + ', ' +
-//                    (Math.floor(editorArea.cursorRectangle.x / editorMetrics.averageCharacterWidth) + 1)
+                text: parent.lineAndColumn
+                         ? editorArea.lineNumber + ", " + editorArea.columnNumber
+                         : editorArea.cursorPosition
                 color: "#808691"
                 anchors.left: parent.left
                 anchors.leftMargin: 7
                 anchors.verticalCenter: parent.verticalCenter
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: parent.lineAndColumn = !parent.lineAndColumn
             }
         }
 

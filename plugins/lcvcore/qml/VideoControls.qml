@@ -44,7 +44,7 @@ Rectangle{
             height: 16
             color: "#aeaeae"
             rotation: Triangle.Right
-            visible: root.videoCapture.paused
+            visible: root.videoCapture ? root.videoCapture.paused : false
         }
 
         Text{
@@ -53,7 +53,7 @@ Rectangle{
             color : "#aeaeae"
             font.pixelSize: 12
             font.bold: true
-            visible: !root.videoCapture.paused
+            visible: root.videoCapture ? !root.videoCapture.paused : false
         }
 
         MouseArea{
@@ -74,8 +74,8 @@ Rectangle{
         color  : "#0d1a2a"
         Rectangle{
             height : parent.height
-            width : root.videoCapture.totalFrames > 0 ?
-                Math.round( (parent.width / root.videoCapture.totalFrames) * root.videoCapture.currentFrame ) : 0
+            width : root.videoCapture ? root.videoCapture.totalFrames > 0 ?
+                Math.round( (parent.width / root.videoCapture.totalFrames) * root.videoCapture.currentFrame ) : 0 : 0
             color : "#aeaeae"
         }
 

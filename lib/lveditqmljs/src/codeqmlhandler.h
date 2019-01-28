@@ -48,6 +48,7 @@ class QmlAddContainer;
 class QmlCompletionContextFinder;
 class QmlCompletionContext;
 
+class CodeQmlHandlerPrivate;
 class LV_EDITQMLJS_EXPORT CodeQmlHandler : public AbstractCodeHandler{
 
     Q_OBJECT
@@ -77,47 +78,51 @@ public:
 
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
     bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);
-    QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property,
-        QObject* runtime,
-        CodePalette *converter
-    );
+    QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property, QObject* runtime);
 
     bool addEditingFragment(QmlEditFragment *edit);
     void removeEditingFragment(QmlEditFragment* edit);
-    void removeEditingFragmentPalette(QmlEditFragment* palette);
 
     QmlJsSettings* settings();
 
+    QmlEditFragment* findEditFragment(CodePalette* palette);
+    QmlEditFragment* findEditFragmentIn(QmlEditFragment *parent, CodePalette* palette);
+
 public slots:
-    // Palette management
-
-    lv::PaletteList *findPalettes(int position, bool unrepeated = false);
-    lv::CodePalette* openPalette(lv::PaletteList* palette, int index, QObject* currentApp = 0);
-    void removePalette(QObject* palette);
-    int palettePosition(QObject* palette);
-
-    void addPaletteBox(QObject* paletteBox);
-    QObject* paletteBoxFor(lv::CodePalette* palette);
-    QObject* paletteBoxAtPosition(int position);
-
-    void framePalette(QQuickItem *box, lv::CodePalette* palette);
-
-    // Binding management
+    // Palette and binding management
 
     lv::QmlCursorInfo* cursorInfo(int position, int length);
-    lv::CodePalette* openBinding(lv::PaletteList* paletteList, int index, QObject* currentApp = 0);
+    lv::QmlEditFragment* openConnection(int position, QObject *currentApp = nullptr);
+    lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position, QObject* currentApp = nullptr);
+    void removeConnection(lv::QmlEditFragment* edit);
+
+    lv::PaletteList *findPalettes(int position, bool unrepeated = false);
+    lv::CodePalette* openPalette(lv::QmlEditFragment* fragment, lv::PaletteList* palette, int index);
+    lv::QmlEditFragment* removePalette(lv::CodePalette* palette);
+
+    lv::CodePalette* openBinding(lv::QmlEditFragment* edit, lv::PaletteList* paletteList, int index);
     void closeBinding(int position, int length);
+
+    bool isForAnObject(lv::QmlEditFragment* palette);
+
+    void frameEdit(QQuickItem *box, lv::QmlEditFragment* palette);
 
     // Direct editing management
 
-    lv::CodePalette *edit(int position, QObject* currentApp = 0);
+    lv::CodePalette *edit(lv::QmlEditFragment* ef);
     void cancelEdit();
 
     // Add Property Management
 
     lv::QmlAddContainer* getAddOptions(int position);
-    void addProperty(int position, const QString& addText);
-    void addItem(int position, const QString& text);
+    int addProperty(
+        int position,
+        const QString& object,
+        const QString& type,
+        const QString& name,
+        bool assignDefault = false);
+    int addItem(int position, const QString& object, const QString& type);
+    void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type, QObject* currentApp = nullptr);
     void updateRuntimeBindings(QObject* obj);
 
     // Scopes
@@ -127,10 +132,10 @@ public slots:
     void updateScope();
 
 signals:
-    /// \brief Triggered before removing a palette
-    void paletteAboutToRemove(lv::CodePalette* palette);
 
 private:
+    void rehighlightSection(int start, int end);
+
     void suggestionsForGlobalQmlContext(
         const QmlCompletionContext& context,
         QList<CodeCompletionSuggestion>& suggestions
@@ -190,6 +195,9 @@ private:
 
     QString extractQuotedString(const QTextCursor& cursor) const;
 
+    QString getBlockIndent(const QTextBlock& bl);
+    bool isBlockEmptySpace(const QTextBlock& bl);
+
     QTextDocument*      m_target;
     QmlJsHighlighter*   m_highlighter;
     QmlJsSettings*      m_settings;
@@ -198,15 +206,15 @@ private:
 
     ProjectDocument*       m_document;
 
-    DocumentQmlScope::Ptr  m_documentScope;
-    ProjectQmlExtension*   m_projectHandler;
     bool                   m_newScope;
     QTimer                 m_timer;
 
-    QList<QObject*>               m_paletteBoxes;
     QLinkedList<QmlEditFragment*> m_edits; // opened palettes
     QmlEditFragment*              m_editingFragment; // editing fragment
 
+    QScopedPointer<CodeQmlHandlerPrivate> d_ptr;
+
+    Q_DECLARE_PRIVATE(CodeQmlHandler)
 };
 
 /// \brief Returns the settings associated with this object.

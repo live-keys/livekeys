@@ -34,7 +34,7 @@ public slots:
     lv::CodePalette *loadAt(int index);
 
 private:
-    int                       m_position;
+    int                   m_position;
     PaletteContainer*     m_paletteContainer;
     QList<PaletteLoader*> m_palettes;
 };

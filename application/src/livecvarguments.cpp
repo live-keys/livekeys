@@ -84,7 +84,7 @@ void LiveCVArguments::initialize(int argc, const char* const argv[]){
         m_logConfiguration = MLNode(MLNode::Type::Object);
         QFile lcf(QString::fromStdString(m_parser->value(logConfigFileOption)));
         if ( !lcf.open(QIODevice::ReadOnly) )
-            THROW_EXCEPTION(lv::Exception, "Failed to open log configuration file: " + lcf.fileName().toStdString(), -1);
+            THROW_EXCEPTION(lv::Exception, "Failed to open log configuration file: " + lcf.fileName().toStdString(), Exception::toCode("Init"));
 
         ml::fromJson(lcf.readAll(), m_logConfiguration);
     } else if ( m_parser->isSet(logConfigOption) ){
@@ -100,7 +100,7 @@ void LiveCVArguments::initialize(int argc, const char* const argv[]){
                 continue;
             int apos = cfs.indexOf('=');
             if ( apos == -1 )
-                THROW_EXCEPTION(lv::Exception, "Failed to parse configuration segment: " + cfs.toStdString(), -1);
+                THROW_EXCEPTION(lv::Exception, "Failed to parse configuration segment: " + cfs.toStdString(), Exception::toCode("Init"));
 
             QString configurationName = "global";
             QString configurationKey = "";
@@ -117,7 +117,7 @@ void LiveCVArguments::initialize(int argc, const char* const argv[]){
             }
 
             if ( configurationName.isEmpty() || configurationKey.isEmpty() || configurationValue.isEmpty() )
-                THROW_EXCEPTION(lv::Exception, "Failed to parse configuration segment: " + cfs.toStdString(), -1);
+                THROW_EXCEPTION(lv::Exception, "Failed to parse configuration segment: " + cfs.toStdString(), Exception::toCode("Init"));
 
             MLNode::StringType cfgname = configurationName.toStdString();
             MLNode::StringType cfgkey  = configurationKey.toStdString();

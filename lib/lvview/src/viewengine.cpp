@@ -80,7 +80,7 @@ QJSValue ViewEngine::evaluate(const QString &jsCode, const QString &fileName, in
 
 void ViewEngine::throwError(const lv::Exception *e, QObject *object){
     QJSValue jsError = m_errorType.callAsConstructor(QJSValueList() << QString::fromStdString(e->message()));
-    jsError.setProperty("code", e->code());
+    jsError.setProperty("code", static_cast<double>(e->code()));
 
     if ( e->hasLocation() ){
         jsError.setProperty("fileName", QString::fromStdString(e->file()));

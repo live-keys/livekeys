@@ -3,7 +3,10 @@
 #include "live/projectfile.h"
 #include "live/documentqmlinfo.h"
 #include "live/codepalette.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
 #include "bindingchannel.h"
+#include "documentqmlscope.h"
 
 #include <QDateTime>
 #include <QVariant>
@@ -19,6 +22,29 @@ QmlCodeConverter::QmlCodeConverter(QmlEditFragment *edit, QObject *parent)
 }
 
 QmlCodeConverter::~QmlCodeConverter(){
+}
+
+QObject *QmlCodeConverter::create(
+        const DocumentQmlScope &scope,
+        const QString &declaration,
+        const QString &path,
+        QObject* parent)
+{
+    QString fullDeclaration;
+    for ( auto it = scope.imports().begin(); it != scope.imports().end(); ++it ){
+        fullDeclaration +=
+            "import " + it->first.path() + " " +
+            QString::number(it->first.versionMajor()) + "." + QString::number(it->first.versionMinor());
+        if ( !it->first.as().isEmpty() ){
+            fullDeclaration += " as " + it->first.as();
+        }
+        fullDeclaration += "\n";
+    }
+    fullDeclaration += "\n" + declaration + "\n";
+
+    QObject* obj = ViewContext::instance().engine()->createObject(fullDeclaration, parent, path);
+
+    return obj;
 }
 
 void QmlCodeConverter::writeProperties(const QJSValue &properties){
@@ -90,21 +116,16 @@ QVariant QmlCodeConverter::parse(){
     return QVariant();
 }
 
-void QmlCodeConverter::updateValue(){
-    CodePalette* lp = m_edit->palette();
-    BindingPath* mainPath = m_edit->bindingChannel()->expressionPath();
-
-    if ( mainPath->listIndex() == -1 )
-        lp->setValueFromBinding(mainPath->property().read());
-    if ( m_edit->bindingUse() ){
+void QmlCodeConverter::updateBindings(){
+    if ( m_edit->bindingPalette() ){
         m_whenBinding.call();
     }
 }
 
-void QmlCodeConverter::updateBindings(){
-    if ( m_edit->bindingUse() ){
-        m_whenBinding.call();
-    }
+void QmlCodeConverter::updateFromPalette(){
+    CodePalette* palette = static_cast<CodePalette*>(parent());
+    if ( palette && m_edit->bindingChannel() )
+        m_edit->bindingChannel()->commit(palette->value());
 }
 
 QString QmlCodeConverter::buildCode(const QJSValue &value){

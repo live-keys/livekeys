@@ -353,6 +353,33 @@ bool ProjectDocument::isActive() const{
     return false;
 }
 
+QString ProjectDocument::peekContent(int position) const{
+    QString result = "";
+    if ( position >= m_textDocument->characterCount() )
+        return result;
+
+    QTextBlock bl = m_textDocument->findBlock(position);
+    QString linePointer;
+    int positionInBlock = position - bl.position();
+
+    for ( int i = 0; i < positionInBlock; ++i )
+          linePointer.append(' ');
+    linePointer.append('^');
+    for ( int i = positionInBlock + 1; i < bl.length(); ++i )
+        linePointer.append(' ');
+
+    QTextBlock prevBl = bl.previous();
+    if ( prevBl.isValid() )
+        result += QString("%1").arg(prevBl.blockNumber(), 5, 10, QChar('0')) + prevBl.text() + "\n";
+    result += QString("%1").arg(bl.blockNumber(), 5, 10, QChar('0')) + bl.text() + "\n";
+    result += QString("%1").arg(bl.blockNumber(), 5, 10, QChar('0')) + linePointer + "\n";
+    QTextBlock nextBl = bl.next();
+    if ( nextBl.isValid() )
+        result += QString("%1").arg(nextBl.blockNumber(), 5, 10, QChar('0')) + nextBl.text();
+
+    return result;
+}
+
 void ProjectDocument::documentContentsChanged(int position, int charsRemoved, int charsAdded){
     QString addedText = "";
     if ( charsAdded == 1 ){

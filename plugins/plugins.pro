@@ -10,6 +10,7 @@ SUBDIRS += \
     live \
     editor \
     editqml \
+    fs \
     lcvcore \
     lcvimgproc \
     lcvfeatures2d \
@@ -24,6 +25,7 @@ lcvfeatures2d.subdir    = $$PWD/lcvfeatures2d
 live.subdir             = $$PWD/live
 editor.subdir           = $$PWD/editor
 editqml.subdir          = $$PWD/editqml
+fs.subdir               = $$PWD/fs
 lcvphoto.subdir         = $$PWD/lcvphoto
 lcvvideo.subdir         = $$PWD/lcvvideo
 

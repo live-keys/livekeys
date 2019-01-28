@@ -48,7 +48,7 @@ CodePalette{
             width: parent.width - 70
             height: 15
             minimumValue: 0
-            value: parent.videoCapture.fps
+            value: parent.videoCapture ? parent.videoCapture.fps : 0
             onValueChanged: {
                 parent.videoCapture.fps = fpsSlider.value
                 extension.writeProperties({

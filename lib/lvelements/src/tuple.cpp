@@ -19,12 +19,13 @@ InstanceProperty *Tuple::addProperty(
         bool isWritable,
         const std::string &notifyEvent)
 {
-    Element::addProperty(name, type, value, isDefault, isWritable, notifyEvent);
+    InstanceProperty* ip = Element::addProperty(name, type, value, isDefault, isWritable, notifyEvent);
     if ( !notifyEvent.empty() ){
         on(notifyEvent, [this, name](const Function::Parameters&){
             propertyChanged(name);
         });
     }
+    return ip;
 }
 
 }} // namespace

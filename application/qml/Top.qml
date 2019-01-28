@@ -231,10 +231,40 @@ Rectangle {
     }
 
     // Commands
-
+/*
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 363
+        color : "transparent"
+        height : commandMArea.containsMouse ? parent.height : parent.height - 5
+        width : 35
+        Image{
+            id : commandImage
+            anchors.centerIn: parent
+            source : "qrc:/images/command.png"
+        }
+        Rectangle{
+            color : "#031626"
+            width : parent.width
+            height : 3
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            visible : commandMArea.containsMouse
+        }
+        Behavior on height{ NumberAnimation{  duration: 100 } }
+        MouseArea{
+            id : commandMArea
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: container.openCommandsMenu()
+        }
+    }
+*/
+    // Configuration
+
+    Rectangle{
+        anchors.left: parent.left
+        anchors.leftMargin: 395
         color : "transparent"
         height : commandMArea.containsMouse ? parent.height : parent.height - 5
         width : 35
@@ -264,10 +294,8 @@ Rectangle {
 
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 395
+        anchors.leftMargin: 435
         color : "transparent"
-//        border.width: 1
-//        border.color: "#031626"
         height : openSettingsArea.containsMouse ? parent.height : parent.height - 5
         width : 35
         Image{
@@ -293,10 +321,8 @@ Rectangle {
     }
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 435
+        anchors.leftMargin: 475
         color : livecv.settings.file('license').highlights > 0 ? "#44130b" : "transparent"
-//        border.width: 1
-//        border.color: "#031626"
         height : openLicenseArea.containsMouse ? parent.height : parent.height - 5
         width : 35
         Image{

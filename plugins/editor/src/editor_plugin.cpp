@@ -23,6 +23,8 @@
 #include "live/liveextension.h"
 #include "live/documenthandler.h"
 
+#include "textsearch.h"
+
 #include <qqml.h>
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
@@ -40,6 +42,8 @@ void EditorPlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::DocumentHandler>(uri, 1, 0, "DocumentHandler");
     qmlRegisterType<lv::CodePalette>(    uri, 1, 0, "CodePalette");
     qmlRegisterType<lv::LiveExtension>(  uri, 1, 0, "LiveExtension");
+
+    qmlRegisterType<lv::TextSearch>(     uri, 1, 0, "TextSearch");
 }
 
 void EditorPlugin::initializeEngine(QQmlEngine *, const char *){

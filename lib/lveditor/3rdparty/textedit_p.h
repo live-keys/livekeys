@@ -108,7 +108,7 @@ class TextEdit : public QQuickImplicitSizeItem
     Q_PROPERTY(int fragmentStart READ fragmentStart WRITE setFragmentStart RESET resetFragmentStart NOTIFY fragmentStartChanged)
     Q_PROPERTY(int fragmentEnd READ fragmentEnd WRITE setFragmentEnd RESET resetFragmentEnd NOTIFY fragmentEndChanged)
     Q_PROPERTY(int lineNumber READ lineNumber NOTIFY lineNumberChanged)
-    Q_PROPERTY(int linePosition READ linePosition NOTIFY linePositionChanged)
+    Q_PROPERTY(int columnNumber READ columnNumber NOTIFY columnNumberChanged)
 public:
     TextEdit(QQuickImplicitSizeItem *parent=nullptr);
 
@@ -310,7 +310,7 @@ public:
     void resetFragmentEnd();
 
     int lineNumber() const;
-    int linePosition() const;
+    int columnNumber() const;
 
     lv::DocumentHandler* documentHandler();
     void setDocumentHandler(lv::DocumentHandler* dh);
@@ -366,7 +366,7 @@ Q_SIGNALS:
     Q_REVISION(6) void bottomPaddingChanged();
     void stateChangeSignal(int blockNum);
     void lineNumberChanged();
-    void linePositionChanged();
+    void columnNumberChanged();
     void fragmentStartChanged();
     void fragmentEndChanged();
 

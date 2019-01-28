@@ -357,8 +357,8 @@ void DocumentQmlValueObjectsVisitor::endVisit(QmlJS::AST::UiPublicMember *ast){
  * \ingroup lveditqmljs
  * \brief Contains the ierarchy of Qml objects and a reference to their AST
  *
- * This class can be used to extract parsed objects and their properties using thei range and position
- * in code..
+ * This class can be used to extract parsed objects and their properties using their range and position
+ * in code.
  */
 
 /**

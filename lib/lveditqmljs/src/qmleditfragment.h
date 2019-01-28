@@ -29,7 +29,10 @@ class CodePalette;
 class BindingPath;
 class BindingChannel;
 
-class LV_EDITQMLJS_EXPORT QmlEditFragment{
+class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
+
+    Q_OBJECT
+    Q_PROPERTY(QObject* visualParent READ visualParent WRITE setVisualParent NOTIFY visualParentChanged)
 
 public:
     /** ProjectDocument section type for this QmlEditFragment */
@@ -39,70 +42,121 @@ public:
     };
 
 public:
-    QmlEditFragment(QmlDeclaration::Ptr declaration, CodePalette* palette = 0);
+    QmlEditFragment(QmlDeclaration::Ptr declaration, QObject* parent = nullptr);
     virtual ~QmlEditFragment();
-
-    int valuePosition() const;
-    int valueLength() const;
-    CodePalette* palette();
 
     void setExpressionPath(BindingPath* bindingPath);
     BindingPath* expressionPath();
     BindingChannel* bindingChannel();
 
-    void setPaletteUse(bool paletteUse);
-    bool paletteUse() const;
+    void setPaletteForBinding(CodePalette* palette);
 
-    void setBindingUse(bool bindingUse);
-    bool bindingUse() const;
+    bool hasPalette(CodePalette* palette);
+    CodePalette* palette(const QString& type);
+    void addPalette(CodePalette* palette);
+    void removePalette(CodePalette* palette);
+    QList<CodePalette*>::iterator begin();
+    QList<CodePalette*>::iterator end();
+
+    void removeBindingPalette();
+    void setBindingPalette(CodePalette* palette);
+
+    void addChildFragment(QmlEditFragment* edit);
+    void removeChildFragment(QmlEditFragment* edit);
+    QmlEditFragment* findChildFragment(QmlEditFragment* edit);
+    const QList<QmlEditFragment*> childFragments();
 
     QmlDeclaration::Ptr declaration() const;
 
     void write(const QString& code);
     QString readValueText() const;
 
+    void updatePaletteValue(CodePalette* palette);
+
+    QObject* visualParent() const;
+    void setVisualParent(QObject* visualParent);
+
+    void emitRemoval();
+
+public slots:
+    int position();
+    int valuePosition() const;
+    int valueLength() const;
+
+    int totalPalettes() const;
+    lv::CodePalette* bindingPalette();
+
+    void updateValue();
+
+signals:
+    void visualParentChanged();
+    void aboutToRemovePalette(lv::CodePalette* palette);
+    void aboutToBeRemoved();
+
 private:
     QmlDeclaration::Ptr  m_declaration;
-    CodePalette*         m_palette;
+
+    QList<CodePalette*>  m_palettes;
+    CodePalette*         m_bindingPalette;
+
+    QList<QmlEditFragment*> m_childFragments;
+
     BindingChannel*      m_bindingChannel;
 
     bool                 m_bindingUse;
     bool                 m_paletteUse;
+    QObject*             m_visualParent;
 };
-
-/// \brief Returns the lv::CodePalette associated with this object.
-inline CodePalette *QmlEditFragment::palette(){
-    return m_palette;
-}
 
 /// \brief Returns the binding channel associated with this object.
 inline BindingChannel *QmlEditFragment::bindingChannel(){
     return m_bindingChannel;
 }
 
-/// \brief Sets wether this edit fragment is used as a visual palette
-inline void QmlEditFragment::setPaletteUse(bool paletteUse){
-    m_paletteUse = paletteUse;
+inline CodePalette *QmlEditFragment::bindingPalette(){
+    return m_bindingPalette;
 }
 
-/// \brief Returns true this edit fragmnet is used as a visual palette
-inline bool QmlEditFragment::paletteUse() const{
-    return m_paletteUse;
+inline bool QmlEditFragment::hasPalette(CodePalette *palette){
+    for ( auto it = begin(); it != end(); ++it ){
+        if ( *it == palette )
+            return true;
+    }
+    return false;
 }
 
-/// \brief Sets wether this edit fragmnet is used as a binding
-inline void QmlEditFragment::setBindingUse(bool bindingUse){
-    m_bindingUse = bindingUse;
+inline QList<CodePalette *>::iterator QmlEditFragment::begin(){
+    return m_palettes.begin();
 }
 
-/// \brief Returns true wether this edit fragment is used as a binding
-inline bool QmlEditFragment::bindingUse() const{
-    return m_bindingUse;
+inline QList<CodePalette *>::iterator QmlEditFragment::end(){
+    return m_palettes.end();
+}
+
+inline const QList<QmlEditFragment *> QmlEditFragment::childFragments(){
+    return m_childFragments;
 }
 
 /// \brief Returns the lv::CodeDeclaration associated with this object.
 inline QmlDeclaration::Ptr QmlEditFragment::declaration() const{
     return m_declaration;
+}
+
+inline QObject *QmlEditFragment::visualParent() const{
+    return m_visualParent;
+}
+
+inline int QmlEditFragment::position(){
+    return m_declaration->position();
+
+}
+
+inline void QmlEditFragment::setVisualParent(QObject *visualParent){
+    if (m_visualParent == visualParent)
+        return;
+
+    m_visualParent = visualParent;
+    emit visualParentChanged();
 }
 
 }// namespace
