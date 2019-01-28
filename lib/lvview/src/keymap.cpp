@@ -241,36 +241,6 @@ QString KeyMap::stringFromKey(const quint32 &key) const
     return result;
 }
 
-QString KeyMap::stringFromKey(const quint32 &key)
-{
-    if (key == Qt::Key_Enter)
-        return "Enter";
-    if (key == Qt::Key_Escape)
-        return "Esc";
-    if (key == Qt::Key_Backspace)
-        return "Bksp";
-    if (key == Qt::Key_Delete)
-        return "Del";
-    if (key == Qt::Key_Tab)
-        return "Tab";
-    if (key == Qt::Key_Home)
-        return "Home";
-    if (key == Qt::Key_End)
-        return "End";
-    if (key == Qt::Key_PageUp)
-        return "PgUp";
-    if (key == Qt::Key_PageDown)
-        return "PgDn";
-    if (key == Qt::Key_Left)
-        return "Left";
-    if (key == Qt::Key_Right)
-        return "Right";
-    if (key == Qt::Key_Space)
-        return "Space";
-
-    return QString(char(key));
-}
-
 KeyMap::KeyCode KeyMap::composeKeyCode(quint32 key, quint32 modifiers){
     return (KeyCode)localModifier(modifiers) << 32 | cleanKey(key);
 }

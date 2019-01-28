@@ -230,36 +230,6 @@ Rectangle {
         }
     }
 
-    // Commands
-/*
-    Rectangle{
-        anchors.left: parent.left
-        anchors.leftMargin: 363
-        color : "transparent"
-        height : commandMArea.containsMouse ? parent.height : parent.height - 5
-        width : 35
-        Image{
-            id : commandImage
-            anchors.centerIn: parent
-            source : "qrc:/images/command.png"
-        }
-        Rectangle{
-            color : "#031626"
-            width : parent.width
-            height : 3
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            visible : commandMArea.containsMouse
-        }
-        Behavior on height{ NumberAnimation{  duration: 100 } }
-        MouseArea{
-            id : commandMArea
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked: container.openCommandsMenu()
-        }
-    }
-*/
     // Configuration
 
     Rectangle{
