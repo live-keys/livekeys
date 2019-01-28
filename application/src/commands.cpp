@@ -117,6 +117,7 @@ QString Commands::add(QObject *object, const QJSValue &commands){
             qCritical("Value given for command is neither a function nor an array: %s", qPrintable(key));
         }
     }
+    m_model->updateAvailableCommands();
 
     return prefix;
 }

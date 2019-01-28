@@ -672,13 +672,13 @@ int TextEdit::fragmentEnd() const {
 
 void TextEdit::setFragmentStart(int frStart) {
     Q_D(TextEdit);
-    d->fragmentStart = frStart;
+    d->fragmentStart = frStart - 1;
     updateFragmentVisibility();
 }
 
 void TextEdit::setFragmentEnd(int frEnd) {
     Q_D(TextEdit);
-    d->fragmentEnd = frEnd;
+    d->fragmentEnd = (frEnd == -1) ? INT_MAX : frEnd -1;
     updateFragmentVisibility();
 }
 
@@ -2623,8 +2623,9 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
 
     if (d->document && dynamic_cast<TextDocumentLayout*>(d->document->documentLayout()))
     {
-        dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->setDirtyPos(d->document->findBlock(pos).blockNumber());
-        getPaletteManager()->setDirtyPos(d->document->findBlock(pos).blockNumber());
+        d->dirtyPosition = d->document->findBlock(pos).blockNumber();
+        dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->setDirtyPos(d->dirtyPosition);
+        getPaletteManager()->setDirtyPos(d->dirtyPosition);
     }
 
     markDirtyNodesForRange(pos, editRange, delta);
@@ -2901,6 +2902,7 @@ void TextEdit::updateTotalLines()
 
     int newTotalLines = d->document->lineCount() + subLines;
     if (d->lineCount != newTotalLines) {
+        if (d->lineCount != 0) updateFragmentBounds(newTotalLines - d->lineCount);
         d->lineCount = newTotalLines;
         emit lineCountChanged();
         updateFragmentVisibility();
@@ -3446,19 +3448,6 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QObject 
     for (int i = lineStart - 1; i < d->document->blockCount(); ++i)
         invalidateBlock(d->document->findBlockByNumber(i));
 
-/*
-    QQuickItem* box = dynamic_cast<QQuickItem*>(palette);
-    if (box)
-    {
-        qDebug() << (-d->paletteManager->drawingOffset(lineStart-1, false)- 30 - 2*(box->y()-38));
-
-
-        if (static_cast<int>(std::round((box->y() - 38) / 7.5)) != lineStart-1)
-            qDebug() << "upm";
-
-        box->setProperty("y", 10-d->paletteManager->drawingOffset(lineStart-1, false));
-    }
-*/
     emit paletteChange(lineStart - 1);
 }
 
@@ -3578,14 +3567,23 @@ void TextEdit::updateFragmentVisibility()
     d->paletteManager->removePalette(d->fragmentStartPalette);
     d->paletteManager->removePalette(d->fragmentEndPalette);
 
-    int lfrStart = max(0,d->fragmentStart-1), lfrEnd = min(d->fragmentEnd-1, d->document->blockCount());
+    int lfrStart = max(0,d->fragmentStart), lfrEnd = min(d->fragmentEnd, d->document->blockCount()-1);
 
     d->paletteManager->paletteAdded(0, lfrStart, 0, d->fragmentStartPalette);
-    d->paletteManager->paletteAdded(lfrEnd, d->document->blockCount() - lfrEnd, 0, d->fragmentEndPalette);
+    d->paletteManager->paletteAdded(lfrEnd+1, d->document->blockCount() - lfrEnd, 0, d->fragmentEndPalette);
 
     dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->setDirtyPos(0);
     getPaletteManager()->setDirtyPos(0);
     dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->textDocumentFinishedUpdating(d->document->blockCount());
+
+    markDirtyNodesForRange(0, d->document->characterCount(), 0); // horrible solution
+}
+
+void TextEdit::updateFragmentBounds(int delta)
+{
+    Q_D(TextEdit);
+    if (d->dirtyPosition < d->fragmentStart) d->fragmentStart += delta;
+    if (d->dirtyPosition <= d->fragmentEnd && d->fragmentEnd != INT_MAX) d->fragmentEnd += delta;
 }
 
 }

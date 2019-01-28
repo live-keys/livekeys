@@ -56,6 +56,44 @@ const KeyMap::Os KeyMap::KEYBOARD_OS = KeyMap::Linux;
 const KeyMap::Modifier KeyMap::CONTROL_OR_COMMAND = KeyMap::Control;
 #endif
 
+std::map<qint32, QString> KeyMap::modifierStrings = {
+    {KeyMap::Command, "cmd"},
+    {KeyMap::Control, "ctrl"},
+    {KeyMap::Alt, "alt"},
+    {KeyMap::Shift, "shift"},
+    {KeyMap::Meta, "meta"}
+};
+
+std::map<quint32, QString> KeyMap::stringsForKeys = {
+    {Qt::Key_Enter, "enter"},
+    {Qt::Key_Escape, "esc"},
+    {Qt::Key_Backspace, "bksp"},
+    {Qt::Key_Delete, "del"},
+    {Qt::Key_Tab, "tab"},
+    {Qt::Key_Home, "home"},
+    {Qt::Key_End, "end"},
+    {Qt::Key_PageUp, "pgup"},
+    {Qt::Key_PageDown, "pgdn"},
+    {Qt::Key_Left, "left"},
+    {Qt::Key_Right, "right"},
+    {Qt::Key_Space, "space"}
+};
+
+std::map<QString, quint32> KeyMap::keysForStrings = {
+    {"enter", Qt::Key_Enter},
+    {"escape", Qt::Key_Escape},
+    {"backspace", Qt::Key_Backspace},
+    {"delete", Qt::Key_Delete},
+    {"tab", Qt::Key_Tab},
+    {"home", Qt::Key_Home},
+    {"end", Qt::Key_End},
+    {"pageup", Qt::Key_PageUp},
+    {"pagedown", Qt::Key_PageDown},
+    {"left", Qt::Key_Left},
+    {"right", Qt::Key_Right},
+    {"space", Qt::Key_Space}
+};
+
 KeyMap::KeyMap(const QString &settingsPath, QObject *parent)
     : QObject(parent)
 {
@@ -79,6 +117,7 @@ void KeyMap::store(KeyMap::KeyCode key, const QString &command, bool isDefault){
         return;
 
     m_commandMap[key] = StoredCommand(command, isDefault);
+    emit keymapChanged();
 }
 
 void KeyMap::store(const QString &keydescription, const QString &command, bool isDefault){
@@ -157,35 +196,26 @@ void KeyMap::readFile(){
     }
 }
 
-quint32 KeyMap::modifierFromString(const QString &modifier){
-    if ( modifier == "cmd" )
-        return KeyMap::Command;
-    else if ( modifier == "ctrl" ){
-        return KeyMap::Control;
-    } else if ( modifier == "alt" ){
-        return KeyMap::Alt;
-    } else if ( modifier == "shift" ){
-        return KeyMap::Shift;
-    } else if ( modifier == "meta" ){
-        return KeyMap::Meta;
-    } else {
-        return 0;
+quint32 KeyMap::modifierFromString(const QString &modifier) const {
+
+    std::map<QString, quint32> inv;
+
+    for (auto el: modifierStrings)
+    {
+        inv[el.second] = static_cast<unsigned int>(el.first);
     }
+
+    return inv[modifier];
 }
 
-QString KeyMap::stringFromModifier(const quint32 &modifier)
+QString KeyMap::stringFromModifier(const quint32 &modifier) const
 {
     std::vector<QString> parts;
-    if (modifier & KeyMap::Command)
-        parts.push_back("Cmd");
-    if (modifier & KeyMap::Control)
-        parts.push_back("Ctrl");
-    if (modifier & KeyMap::Alt)
-        parts.push_back("Alt");
-    if (modifier & KeyMap::Shift)
-        parts.push_back("Shift");
-    if (modifier & KeyMap::Meta)
-        parts.push_back("Meta");
+    for (auto el: modifierStrings)
+    {
+        if (modifier & static_cast<unsigned int>(el.first))
+            parts.push_back(el.second);
+    }
 
     QString result = "";
     for (QString part: parts)
@@ -196,65 +226,19 @@ QString KeyMap::stringFromModifier(const quint32 &modifier)
     return result;
 }
 
-quint32 KeyMap::keyFromString(const QString &key){
-    if ( key == "enter" ){
-        return Qt::Key_Enter;
-    } else if ( key == "escape" ){
-        return Qt::Key_Escape;
-    } else if ( key == "backspace" ){
-        return Qt::Key_Backspace;
-    } else if ( key == "delete" ){
-        return Qt::Key_Delete;
-    } else if ( key == "tab" ){
-        return Qt::Key_Tab;
-    } else if ( key == "home" ){
-        return Qt::Key_Home;
-    } else if ( key == "end" ){
-        return Qt::Key_End;
-    } else if ( key == "pageup" ){
-        return Qt::Key_PageUp;
-    } else if ( key == "pagedown" ){
-        return Qt::Key_PageDown;
-    } else if ( key == "left" ){
-        return Qt::Key_Left;
-    } else if ( key == "right" ){
-        return Qt::Key_Right;
-    } else if ( key == "space" ){
-        return Qt::Key_Space;
-    } else if ( key.size() == 1 ){
-        return key.at(0).toUpper().unicode();
-    }
-    return 0;
+quint32 KeyMap::keyFromString(const QString &key) const {
+    quint32 result = keysForStrings[key];
+    if (result == 0 && key.size() == 1) result = key.at(0).toUpper().unicode();
+
+    return result;
 }
 
-QString KeyMap::stringFromKey(const quint32 &key)
+QString KeyMap::stringFromKey(const quint32 &key) const
 {
-    if (key == Qt::Key_Enter)
-        return "Enter";
-    if (key == Qt::Key_Escape)
-        return "Esc";
-    if (key == Qt::Key_Backspace)
-        return "Bksp";
-    if (key == Qt::Key_Delete)
-        return "Del";
-    if (key == Qt::Key_Tab)
-        return "Tab";
-    if (key == Qt::Key_Home)
-        return "Home";
-    if (key == Qt::Key_End)
-        return "End";
-    if (key == Qt::Key_PageUp)
-        return "PgUp";
-    if (key == Qt::Key_PageDown)
-        return "PgDn";
-    if (key == Qt::Key_Left)
-        return "Left";
-    if (key == Qt::Key_Right)
-        return "Right";
-    if (key == Qt::Key_Space)
-        return "Space";
+    auto result = stringsForKeys[key];
+    if (result == "") result = static_cast<char>(key);
 
-    return QString(char(key));
+    return result;
 }
 
 KeyMap::KeyCode KeyMap::composeKeyCode(quint32 key, quint32 modifiers){

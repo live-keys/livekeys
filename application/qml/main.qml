@@ -152,7 +152,13 @@ ApplicationWindow{
                 font.family: 'Open Sans, Arial, sans-serif'
                 elide: Text.ElideRight
                 width: 130
-                text : project.active && project.active.file ? project.active.file.name : ""
+                text : {
+                    if (!project.active) return "";
+                    if (project.active && project.active.file){
+                        if (project.active.file.name === "") return "untitled";
+                        else return project.active.file.name;
+                    }
+                }
             }
         }
 
@@ -1068,8 +1074,8 @@ ApplicationWindow{
             }
 
             var editorObject = editorFactory.createObject(0)
-            editorObject.fragmentStart = cursorBlock.start
-            editorObject.fragmentEnd = cursorBlock.end
+            editorObject.fragmentStart = cursorBlock.start + 1
+            editorObject.fragmentEnd = cursorBlock.end + 1
             editorObject.height = mainHorizontalSplit.height
 
             var projectViewWidth = projectView.width
@@ -1269,7 +1275,7 @@ ApplicationWindow{
                             onObjectCreationError : {
                                 var lastErrorsText = ''
                                 var lastErrorsLog  = ''
-                                for ( var i = 0; i < errors.length; ++i ){
+                                for ( var i = 0; errors && i < errors.length; ++i ){
                                     var lerror = errors[i]
                                     var errorFile = lerror.fileName
                                     var index = errorFile.lastIndexOf('/')

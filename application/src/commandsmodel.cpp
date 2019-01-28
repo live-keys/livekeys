@@ -11,6 +11,8 @@ CommandsModel::CommandsModel(Commands* commands, KeyMap* keymap) : QAbstractList
     m_roles[CommandsModel::Command]     = "command";
     m_roles[CommandsModel::Description] = "description";
     m_roles[CommandsModel::Shortcuts]   = "shortcuts";
+
+    connect(m_keymap, &KeyMap::keymapChanged, this, &CommandsModel::updateAvailableCommands);
 }
 
 QVariant CommandsModel::data(const QModelIndex &index, int role) const
@@ -63,6 +65,8 @@ void CommandsModel::updateFilter()
 
 void CommandsModel::updateAvailableCommands()
 {
+
+    m_commandEntries.clear();
     auto commandsMap = m_commands->m_commands;
     for (auto it = commandsMap.begin(); it != commandsMap.end(); ++it)
     {

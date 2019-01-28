@@ -22,6 +22,7 @@
 #include <QObject>
 #include <QMap>
 #include <QJSValue>
+#include <map>
 
 namespace lv{
 
@@ -58,6 +59,9 @@ public:
 
     static const KeyMap::Os KEYBOARD_OS;
     static const KeyMap::Modifier CONTROL_OR_COMMAND;
+    static std::map<qint32, QString> modifierStrings;
+    static std::map<quint32, QString> stringsForKeys;
+    static std::map<QString, quint32> keysForStrings;
 
 public:
     KeyMap(const QString& settingsPath, QObject* parent = 0);
@@ -79,11 +83,14 @@ public slots:
     Modifier controlOrCommand();
     void readFile();
 
+Q_SIGNALS:
+    void keymapChanged();
+
 private:
-    quint32 modifierFromString(const QString& modifier);
-    QString stringFromModifier(const quint32& modifier);
-    quint32 keyFromString(const QString& key);
-    QString stringFromKey(const quint32& key);
+    quint32 modifierFromString(const QString& modifier) const;
+    QString stringFromModifier(const quint32& modifier) const;
+    quint32 keyFromString(const QString& key) const;
+    QString stringFromKey(const quint32& key) const;
     KeyCode composeKeyCode(quint32 key, quint32 modifiers);
     QPair<int, KeyCode> composeKeyCode(const QString& keydescription);
     QPair<quint32, quint32> splitKeyCode(KeyCode kc);

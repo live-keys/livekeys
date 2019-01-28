@@ -38,7 +38,7 @@ Rectangle{
     property var document: null
 
     property int fragmentStart: 0
-    property int fragmentEnd: 2147483647
+    property int fragmentEnd: -1
 
     onDocumentChanged: {
         codeHandler.setDocument(document)
