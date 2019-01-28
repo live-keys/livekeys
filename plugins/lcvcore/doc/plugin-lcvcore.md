@@ -463,7 +463,7 @@ Triggered when a seek occurred
 
 {qmlType:VideoWriter}
 {qmlInherits:QtQuick/Item}
-{qmlBrief:Writes video to a file. This is a **static item*.}
+{qmlBrief:Writes video to a file. This is a _**static item**_.}
 
 {qmlProperty:lcvcore#Mat input)
 
