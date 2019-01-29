@@ -7,6 +7,9 @@
 
   <link rel="stylesheet" href="include/bootstrap/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="include/documentation.css">
+  <link rel="stylesheet" href="include/perfect-scrollbar/css/perfect-scrollbar.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 </head>
 
 <body>
@@ -22,6 +25,7 @@
   </div>
 
   <script src="include/jquery/dist/jquery.min.js"></script>
+  <script src="include/perfect-scrollbar/dist/perfect-scrollbar.min.js"></script>
   <script src="include/bootstrap/dist/js/bootstrap.min.js"></script>
 
   <script>
@@ -55,6 +59,9 @@
       }
       // console.log($(this));
     })
+
+    const ps = new PerfectScrollbar('#indexList');
+    
   </script>
 </body>
 
