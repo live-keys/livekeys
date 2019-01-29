@@ -1,0 +1,4 @@
+module fs
+plugin fs
+
+depends QtQuick 2.3

@@ -198,6 +198,7 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
         case QmlJS::Token::LeftBrace:
             blockData->setCollapse(lv::ProjectDocumentBlockData::Collapse, &QmlJsHighlighter::collapse);
             blockData->setStateChangeFlag(true);
+            document()->markContentsDirty(currentBlock().position(), currentBlock().length());
             break;
         case QmlJS::Token::RightBrace:
         case QmlJS::Token::LeftBracket:
@@ -257,7 +258,7 @@ void QmlJsHighlighter::highlightSection(const ProjectDocumentSection::Ptr &secti
     QmlJsSettings& settings = *m_settings;
     if ( section->type() == lv::QmlEditFragment::Section && section->userData() ){
         lv::QmlEditFragment* def = reinterpret_cast<lv::QmlEditFragment*>(section->userData());
-        if ( def->bindingUse() ){
+        if ( def->bindingPalette() ){
             int identifierBegin = def->declaration()->position() - currentBlock().position();
             int identifierEnd   = identifierBegin + def->declaration()->identifierLength();
 
@@ -283,7 +284,7 @@ void QmlJsHighlighter::highlightSection(const ProjectDocumentSection::Ptr &secti
                 blockData->m_exceededSections.append(section);
             }
         }
-        if ( def->paletteUse() ){
+        if ( def->totalPalettes() ){
             int valueBegin = def->valuePosition() - currentBlock().position();
             int valueEnd   = def->valuePosition() + def->valueLength();
 

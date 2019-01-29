@@ -26,6 +26,9 @@ namespace lv{
 
 class LV_EDITOR_EXPORT CodeCompletionContext{
 public:
+    /**
+     * \brief Empty destructor
+     */
     virtual ~CodeCompletionContext(){}
 };
 
@@ -36,6 +39,9 @@ class LV_EDITOR_EXPORT CodeCompletionModel : public QAbstractListModel{
     Q_PROPERTY(int  completionPosition READ completionPosition NOTIFY completionPositionChanged)
 
 public:
+    /**
+     * \brief Roles of the model
+     */
     enum Roles{
         Label = Qt::UserRole + 1,
         Info,
@@ -87,18 +93,30 @@ private:
     bool                            m_isEnabled;
 };
 
+/**
+ * \brief Role names in this model
+ */
 inline QHash<int, QByteArray> CodeCompletionModel::roleNames() const{
     return m_roles;
 }
 
+/**
+ * \brief Getter for completion position
+ */
 inline int CodeCompletionModel::completionPosition() const{
     return m_completionPosition;
 }
 
+/**
+ * \brief Sbows if the model is enabled
+ */
 inline bool CodeCompletionModel::isEnabled() const{
     return m_isEnabled;
 }
 
+/**
+ * \brief Completion position setter
+ */
 inline void CodeCompletionModel::setCompletionPosition(int index){
     if ( index != m_completionPosition ){
         m_completionPosition = index;
@@ -106,10 +124,16 @@ inline void CodeCompletionModel::setCompletionPosition(int index){
     }
 }
 
+/**
+ * \brief Getter of filter
+ */
 inline const QString &CodeCompletionModel::filter() const{
     return m_filter;
 }
 
+/**
+ * \brief Enables the model
+ */
 inline void CodeCompletionModel::enable(){
     if ( !m_isEnabled ){
         m_isEnabled = true;
@@ -117,6 +141,9 @@ inline void CodeCompletionModel::enable(){
     }
 }
 
+/**
+ * \brief Disables the model
+ */
 inline void CodeCompletionModel::disable(){
     if ( m_isEnabled ){
         m_isEnabled = false;
@@ -124,10 +151,16 @@ inline void CodeCompletionModel::disable(){
     }
 }
 
+/**
+ * \brief Returns the number of model entries, specifically filtered suggestions
+ */
 inline int CodeCompletionModel::rowCount(const QModelIndex &) const{
     return m_filteredSuggestions.size();
 }
 
+/**
+ * \brief Completion context getter
+ */
 inline CodeCompletionContext *CodeCompletionModel::completionContext(){
     return m_completionContext;
 }

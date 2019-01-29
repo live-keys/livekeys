@@ -1,4 +1,5 @@
 #include "qmlpropertymodel.h"
+#include "live/visuallogqt.h"
 
 #include <QSet>
 
@@ -9,6 +10,7 @@ QmlPropertyModel::QmlPropertyModel(int addPosition, QObject *parent)
     , m_addPosition(addPosition)
 {
     m_roles[QmlPropertyModel::Label]         = "label";
+    m_roles[QmlPropertyModel::ObjectType]    = "objectType";
     m_roles[QmlPropertyModel::Type]          = "type";
     m_roles[QmlPropertyModel::Documentation] = "documentation";
     m_roles[QmlPropertyModel::Code]          = "code";
@@ -23,6 +25,8 @@ QVariant QmlPropertyModel::data(const QModelIndex &index, int role) const{
         return m_data[dataIndex].label;
     } else if ( role == QmlPropertyModel::Type ){
         return m_data[dataIndex].type;
+    } else if ( role == QmlPropertyModel::ObjectType ){
+        return m_data[dataIndex].objectType;
     } else if ( role == QmlPropertyModel::Documentation ){
         return m_data[dataIndex].documentation;
     } else if ( role == QmlPropertyModel::Code ){
@@ -55,7 +59,7 @@ void QmlPropertyModel::setTypeFilter(const QString &typeFilter){
 QStringList QmlPropertyModel::types() const{
     QSet<QString> types;
     for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
-        types.insert(it->type);
+        types.insert(it->objectType);
     }
 
     QStringList res;
@@ -70,7 +74,7 @@ void QmlPropertyModel::updateFilters(){
     m_filteredData.clear();
     for ( int i = 0; i < m_data.size(); ++i ){
         bool filter = m_data[i].label.startsWith(m_filter, Qt::CaseInsensitive);
-        bool typeFilter = m_typeFilter.isEmpty() ? true : m_data[i].type == m_typeFilter;
+        bool typeFilter = m_typeFilter.isEmpty() ? true : m_data[i].objectType == m_typeFilter;
 
         if ( filter && typeFilter )
             m_filteredData.append(i);
@@ -79,10 +83,12 @@ void QmlPropertyModel::updateFilters(){
 
 QmlPropertyModel::PropertyData::PropertyData(
         const QString &plabel,
+        const QString &pobjectType,
         const QString &ptype,
         const QString &pdoc,
         const QString &pcode)
     : label(plabel)
+    , objectType(pobjectType)
     , type(ptype)
     , documentation(pdoc)
     , code(pcode)

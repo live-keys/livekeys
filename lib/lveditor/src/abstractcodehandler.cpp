@@ -16,24 +16,22 @@
 
 #include "live/abstractcodehandler.h"
 
-/*!
-  \class lv::AbstractCodeHandler
-  \inmodule lveditor_cpp
-
-  Code handler interface for file types.
+/**
+ * \class lv::AbstractCodeHandler
+ * \brief Base class for a code handler, managing assisted completion and custom highlighting
+ *
+ * \ingroup lveditor
  */
 namespace lv{
 
-/*!
-
- */
+/** \brief Blank constructor of AbstractCodeHandler */
 AbstractCodeHandler::AbstractCodeHandler(QObject *parent)
     : QObject(parent)
 {
 }
 
+/** \brief Blank desctructor of AbstractCodeHandler */
 AbstractCodeHandler::~AbstractCodeHandler(){
-
 }
 
 }// namespace

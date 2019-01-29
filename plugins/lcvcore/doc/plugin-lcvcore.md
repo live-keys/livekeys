@@ -11,6 +11,22 @@ import lcvcore 1.0
 {qmlSummary:lcvcore}
 
 
+{qmlType:CvGlobalObject}
+{qmlInherits:qtqml#QtObject}
+{qmlBrief:Singleton type for `cv` object}
+
+{qmlMethod:list matToArray(Mat m}}
+
+Transforms a Mat object into a two dimensional array.
+
+{qmlMethod:assignArrayToMat(list a, Mat m)
+
+Assigns `m` with the given array of values. Array is expected to be two dimensional.
+
+{qmlMethod:Matrix4x4 matrix4x4(Mat m)}
+
+Transorms `m` into a 4 by 4 qml matrix.
+
 
 {qmlType:Mat}
 {qmlInherits:QtQml.QtObject}
@@ -433,7 +449,7 @@ Item to capture screen from
 {qmlType:VideoControls}
 {qmlBrief:Video controls provides a play/pause button and a seekbar for a `lcvcore/VideoCapture`}
 
-{qmlProperty:VideoCapture videoCapture}
+{qmlProperty:lcvcore#VideoCapture videoCapture}
 {qmlBrief: receives the actual videoCapture object}
 
 {qmlSignal:playPauseTriggered(bool paused)}
@@ -445,6 +461,114 @@ Triggered when play/pause state changed
 Triggered when a seek occurred
 
 
+{qmlType:VideoWriter}
+{qmlInherits:QtQuick/Item}
+{qmlBrief:Writes video to a file. This is a _**static item**_.}
+
+{qmlProperty:lcvcore#Mat input)
+
+Input matrix to write. Whenever the input is set, the matrix will be written to a file.
+
+{qmlProperty:int framesWritten}
+
+Number of frames written. This is a read only property.
+
+{qmlMethod:staticLoad(Object parameters)}
+
+Loads the static object. where parameters is an object with the following keys:
+
+ * `filename`: name of the file to write into
+ * `fourcc` : a string based sequence of characters that describes the codec to be
+ used
+ * `fps`: fps of the video
+ * `frameWidth` : video frame width
+ * `frameHeight` : video frame height
+ * `isColor`: boolean flag set to true if the encoder should work with color or greyscale
+ frames. Default is true.
+
+{qmlType:DrawHistogram}
+{qmlInherits:QtQuick#Item}
+{qmlBrief:Draws a histogram given from a set of points}
+
+Example:
+
+```
+
+DrawHistogram{
+    width : 200
+    height : 200
+    maxValue : 200
+    colors : ['#aa007700', '#aa000088']
+    render : DrawHistogram.ConnectedLines
+    values : [
+        [10, 44, 30, 50, 200, 10, 300, 50, 70],
+        [20, 30, 40, 50, 100, 30, 200, 50, 30]
+    ]
+}
+```
+
+{qmlEnum:RenderType}
+
+Type of histogram to render
+
+ * `ConnectedLines` : Points will be connected by a set of lines
+ * `Rectangles` : Rectangle or bar based histogram
+ * `Binary`: Binary histogram
+ * `BinaryConverted`: Int values are expected, which will be converted to binary
+
+{qmlProperty:list colors}
+
+List of colors associated with the indexes of each histogram graph.
+
+{qmlProperty:list values}
+
+List of graphs, each one consisting of a list of values for that graph.
+
+{qmlProperty:real maxValue)
+
+Max value shown in the histogram
+
+{qmlProperty:lcvimgproc#DrawHistogram-RenderType render)
+
+Render type of this histogram
+
+{qmlMethod:setValuesFromIntList(list values)}
+
+Assigns the values from a list of integers.
+
+{qmlMethod:setValuesFromIntListAt(list values, int index))
+
+Assigns only the index specified values from the given list.
 
 
+{qmlType:ColorHistogram}
+{qmlInherits:QtQuick#Item}
+{qmlBrief:Calculates histogram for a given matrix}
+
+{qmlEnum:Selection}
+
+Channel selection to calculate the histogram for the image.
+
+ * `Total` : calculates the lightness of the image
+ * `AllChannels` : Calculates all the channels
+ * `BlueChannel` : Calculates the blue channel
+ * `GreenChannel` : Calculates the green channel
+ * `RedChannel` : Calculates the red channel
+
+{qmlProperty:lcvcore#Mat input}
+
+Input matrix to calculate the histogram for.
+
+{qmlProperty:lcvcore#Mat output}
+
+Output matrix containing the drawn histogram
+
+{qmlProperty:bool fill}
+
+Flag that sets wether to fill the resulting graph.
+
+{qmlProperty:int channel}
+
+Channel to calculate the histogram for. Can be `ColorHistogram.AllChannels` for all the
+channels, or `ColorHistogram.TotalChannels` to calculate the lightness.
 

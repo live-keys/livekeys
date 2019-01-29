@@ -17,11 +17,5 @@ BindingChannel::~BindingChannel(){
     delete m_expressionPath;
 }
 
-void BindingChannel::commitFromFragment(){
-    CodePalette* lp = m_fragment->palette();
-    if ( lp )
-        commit(lp->value());
-}
-
 
 }// namespace

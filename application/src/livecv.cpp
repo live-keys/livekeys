@@ -103,7 +103,7 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
             QString toNetwork = QString::fromStdString(it.value()["toNetwork"].asString());
             int portPos = toNetwork.indexOf(':');
             if ( portPos == -1 )
-                THROW_EXCEPTION(lv::Exception, "Failed to parse port in segment: " + toNetwork.toStdString(), -1);
+                THROW_EXCEPTION(lv::Exception, "Failed to parse port in segment: " + toNetwork.toStdString(), Exception::toCode("Init"));
 
             vlog().addTransport(
                 it.key(),
@@ -127,7 +127,7 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
     livecv->m_settings->setLaunchMode(livecv->m_arguments->launchFlag());
     livecv->m_keymap = new KeyMap(livecv->m_settings->path());
     livecv->m_settings->addConfigFile("keymap", livecv->m_keymap);
-
+    livecv->m_commands->setModel(new CommandsModel(livecv->m_commands, livecv->m_keymap));
     livecv->m_extensions = new Extensions(livecv->m_engine, livecv->m_settings->path());
     livecv->m_settings->addConfigFile("extensions", livecv->m_extensions);
 

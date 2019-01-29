@@ -22,6 +22,7 @@
 #include <QJSValue>
 
 #include "live/keymap.h"
+#include "commandsmodel.h"
 
 namespace lv{
 
@@ -29,11 +30,15 @@ class Commands : public QObject{
 
     Q_OBJECT
 
+    Q_PROPERTY(lv::CommandsModel* model READ model WRITE setModel)
+
     class Node{
     public:
         QJSValue function;
         QJSValue enabled;
+        QJSValue check;
         KeyMap::KeyCode key;
+        QString description;
     };
 
 public:
@@ -41,7 +46,10 @@ public:
     ~Commands();
 
     QString dump();
+    CommandsModel* model() { return m_model; }
+    void setModel(CommandsModel* m) { m_model = m; }
 
+    friend CommandsModel;
 public slots:
     QString add(QObject* object, const QJSValue& command);
     void removeCommandsFor(QObject* object);
@@ -51,6 +59,7 @@ private:
     QStringList getCommandChain(QObject *object);
 
     QHash<QString, Node*> m_commands;
+    CommandsModel* m_model;
 };
 
 }// namespace

@@ -79,10 +79,16 @@ private:
     QString     m_type;
 };
 
+/**
+ * \brief Visual item for this palette
+ */
 inline QQuickItem *CodePalette::item(){
     return m_item;
 }
 
+/**
+ * \brief Item setter
+ */
 inline void CodePalette::setItem(QQuickItem *item){
     if (m_item == item)
         return;
@@ -91,10 +97,16 @@ inline void CodePalette::setItem(QQuickItem *item){
     emit itemChanged();
 }
 
+/**
+ * \brief Property value corresponding to this palette
+ */
 inline const QVariant& CodePalette::value() const{
     return m_value;
 }
 
+/**
+ * \brief Value setter for palette
+ */
 inline void CodePalette::setValue(const QVariant &value){
     if ( (value.canConvert<QObject*>() || m_value != value) && !m_bindingChange ){
         m_value = value;
@@ -102,18 +114,30 @@ inline void CodePalette::setValue(const QVariant &value){
     }
 }
 
+/**
+ * \brief Path setter for palette
+ */
 inline void CodePalette::setPath(const QString &path){
     m_path = path;
 }
 
+/**
+ * \brief Path getter for palette
+ */
 inline const QString& CodePalette::path() const{
     return m_path;
 }
 
+/**
+ * \brief Returns extension for palette
+ */
 inline QObject *CodePalette::extension() const{
     return m_extension;
 }
 
+/**
+ * \brief Extension setter for palette
+ */
 inline void CodePalette::setExtension(QObject *extension, bool own){
     if (m_extension == extension)
         return;
@@ -126,10 +150,16 @@ inline void CodePalette::setExtension(QObject *extension, bool own){
     emit extensionChanged();
 }
 
+/**
+ * \brief Palette type
+ */
 inline QString CodePalette::type() const{
     return m_type;
 }
 
+/**
+ * \brief Type setter for palette
+ */
 inline void CodePalette::setType(QString type){
     if (m_type == type)
         return;
@@ -138,6 +168,9 @@ inline void CodePalette::setType(QString type){
     emit typeChanged();
 }
 
+/**
+ * \brief Shows if palette is currently in the middle of a binding change
+ */
 inline bool CodePalette::isBindingChange() const{
     return m_bindingChange;
 }

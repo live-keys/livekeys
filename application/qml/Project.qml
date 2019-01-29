@@ -41,13 +41,15 @@ Rectangle{
         {
             windowControls.codingMode = 1
             windowControls.wasLiveCoding = true
-            modeButton.text = "On save"
+            modeImage.source = onSaveImage.source
+            modeImage.anchors.rightMargin = onSaveImage.anchors.rightMargin
         }
         if (focusEditor && focusEditor.document && focusEditor.document === project.active && windowControls.wasLiveCoding)
         {
             windowControls.wasLiveCoding = false
             windowControls.codingMode = 0
-            modeButton.text = "Live"
+            modeImage.source = liveImage.source
+            modeImage.anchors.rightMargin = liveImage.anchors.rightMargin
         }
 
         modeContainer.visible = false
@@ -72,11 +74,11 @@ Rectangle{
 
     Component.onCompleted: {
         livecv.commands.add(root, {
-            'close' : closeProject,
-            'open' : openProject,
-            'new' : newProject,
-            'openFile' : openFile,
-            'toggleVisibility' : toggleVisibility
+            'close' : [closeProject, "Close Project"],
+            'open' : [openProject, "Open Project"],
+            'new' : [newProject, "New Project"],
+            'openFile' : [openFile, "Open File"],
+            'toggleVisibility' : [toggleVisibility, "Toggle Visibility"]
         })
     }
 
@@ -194,6 +196,10 @@ Rectangle{
         } else {
             root.windowControls.openFileDialog.open()
         }
+    }
+
+    function openCommandsMenu(){
+        livecv.commands.model.updateAvailableCommands()
     }
 
     function addEntry(parentEntry, isFile){
