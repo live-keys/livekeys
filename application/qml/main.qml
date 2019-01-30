@@ -607,8 +607,8 @@ ApplicationWindow{
 
         property alias content : contentWrap
 
-        function createEmptyEditorBox(){
-            return editorBoxFactory.createObject(contentWrap)
+        function createEmptyEditorBox(parent){
+            return editorBoxFactory.createObject(parent ? parent : contentWrap)
         }
 
         function createEditorBox(child, aroundRect, editorPosition, relativePlacement){
@@ -710,11 +710,6 @@ ApplicationWindow{
                 if ( relativePlacement === 0 || relativePlacement === 2 ){
                     moveXBehavior.enabled = false
                     moveYBehavior.enabled = false
-
-                    // console.log("aroundRectangle", aroundRectangle.width, aroundRectangle.height, aroundRectangle.x, aroundRectangle.y)
-                    // console.log("editorPosition", editorPosition.x, editorPosition.y)
-                    // console.log("relativePlacement", relativePlacement)
-                    // console.log("editorBoxComponent.height", editorBoxComponent.height)
 
                     var startY = editorPosition.y + aroundRectangle.y + 38
 

@@ -18,7 +18,7 @@ class LV_EDITOR_EXPORT PaletteData
 public:
     int m_startBlock;
     int m_lineSpan;
-    int m_palleteHeight;
+    int m_paletteHeight;
     QObject* m_palette;
     int m_paletteSpan;
 
@@ -59,6 +59,7 @@ private:
 
     void linesAdded();
     void linesRemoved();
+    void adjustPalettePosition(PaletteData* pd);
 
 
     friend class TextControl;

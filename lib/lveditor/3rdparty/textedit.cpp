@@ -2234,7 +2234,8 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                             updateNodeTransform(node, nodeOffset);
 
                             // PALETTE
-                            nodeOffset.setY(nodeOffset.y() - d->paletteManager->drawingOffset(block.blockNumber(), false));
+                            int offset = d->paletteManager->drawingOffset(block.blockNumber(), false);
+                            nodeOffset.setY(nodeOffset.y() - offset);
 
                             nodeStart = block.position();
                         }
@@ -3578,7 +3579,7 @@ void TextEdit::updateFragmentVisibility()
     getPaletteManager()->setDirtyPos(0);
     dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->textDocumentFinishedUpdating(d->document->blockCount());
 
-    markDirtyNodesForRange(0, d->document->characterCount(), 0); // horrible solution
+    markDirtyNodesForRange(0, d->document->characterCount(), 0);
 }
 
 void TextEdit::updateFragmentBounds(int delta)
