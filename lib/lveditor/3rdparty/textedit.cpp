@@ -3458,29 +3458,26 @@ void TextEdit::linePaletteRemoved(QObject *palette)
 {
     Q_D(TextEdit);
     int result = d->paletteManager->removePalette(palette);
-    if (result != -1)
+    if (result == -1) return;
+
+    for (int i = result; i < d->document->blockCount(); ++i)
     {
-        for (int i = result; i < d->document->blockCount(); ++i)
-        {
-            invalidateBlock(d->document->findBlockByNumber(i));
-        }
-	emit paletteChange(result);
+        invalidateBlock(d->document->findBlockByNumber(i));
     }
+    emit paletteChange(result);
 }
 
 void TextEdit::linePaletteHeightChanged(QObject *palette, int newHeight)
 {
     Q_D(TextEdit);
     int result = d->paletteManager->resizePalette(palette, newHeight);
-    if (result != -1)
-    {
-        for (int i = result; i < d->document->blockCount(); ++i)
-        {
-            invalidateBlock(d->document->findBlockByNumber(i));
-        }
-        emit paletteChange(result);
+    if (result == -1) return;
 
+    for (int i = result; i < d->document->blockCount(); ++i)
+    {
+        invalidateBlock(d->document->findBlockByNumber(i));
     }
+    emit paletteChange(result);
 }
 
 

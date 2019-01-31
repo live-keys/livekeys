@@ -62,6 +62,54 @@ Item{
             }
         }
 
+        function swapOrAddPalette(swap){
+            var editingFragment = paletteContainer.parent.editingFragment
+            if ( !editingFragment )
+                return
+
+            var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
+            if (palettes.size() ){
+                paletteHeaderList.forceActiveFocus()
+                paletteHeaderList.model = palettes
+                paletteHeaderList.cancelledHandler = function(){
+                    paletteHeaderList.focus = false
+                    paletteHeaderList.model = null
+                }
+                paletteHeaderList.selectedHandler = function(index){
+                    paletteHeaderList.focus = false
+                    paletteHeaderList.model = null
+
+                    var paletteGroup = paletteContainer.parent;
+                    var editorBox = paletteGroup.parent
+
+                    var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
+                    var newPaletteBox = paletteContainer.paletteContainerFactory(paletteGroup)
+
+                    palette.item.x = 5
+                    palette.item.y = 7
+
+                    newPaletteBox.child = palette.item
+                    newPaletteBox.palette = palette
+
+                    newPaletteBox.name = palette.name
+                    newPaletteBox.type = palette.type
+                    newPaletteBox.moveEnabled = paletteContainer.moveEnabled
+                    newPaletteBox.documentHandler = documentHandler
+                    newPaletteBox.cursorRectangle = paletteContainer.cursorRectangle
+                    newPaletteBox.editorPosition = paletteContainer.editorPosition
+                    newPaletteBox.paletteContainerFactory = paletteContainer.paletteContainerFactory
+
+                    if (swap){
+                        paletteContainer.parent = null
+                        paletteContainer.documentHandler.codeHandler.removePalette(paletteContainer.palette)
+                        paletteContainer.destroy()
+                    }
+                    if (editorBox.objectName === "editorBox") // might be redundant
+                        documentHandler.codeHandler.resizedEditFrame(editorBox)
+                }
+            }
+        }
+
         Item{
             id: paletteSwapButton
             anchors.left: parent.left
@@ -76,48 +124,7 @@ Item{
             MouseArea{
                 id: paletteSwapMouse
                 anchors.fill: parent
-                onClicked: {
-                    var editingFragment = paletteContainer.parent.editingFragment
-                    if ( !editingFragment )
-                        return
-
-                    var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
-                    if (palettes.size() ){
-                        paletteHeaderList.forceActiveFocus()
-                        paletteHeaderList.model = palettes
-                        paletteHeaderList.cancelledHandler = function(){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
-                        }
-                        paletteHeaderList.selectedHandler = function(index){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
-
-                            var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-                            var newPaletteBox = paletteContainer.paletteContainerFactory(paletteContainer.parent)
-
-                            palette.item.x = 5
-                            palette.item.y = 7
-
-                            newPaletteBox.child = palette.item
-                            newPaletteBox.palette = palette
-
-                            newPaletteBox.name = palette.name
-                            newPaletteBox.type = palette.type
-                            newPaletteBox.moveEnabled = paletteContainer.moveEnabled
-                            newPaletteBox.documentHandler = documentHandler
-                            newPaletteBox.cursorRectangle = paletteContainer.cursorRectangle
-                            newPaletteBox.editorPosition = paletteContainer.editorPosition
-                            newPaletteBox.paletteContainerFactory = paletteContainer.paletteContainerFactory
-
-                            paletteContainer.documentHandler.codeHandler.removePalette(paletteContainer.palette)
-
-                            paletteContainer.parent.parent.updatePlacement(
-                                paletteContainer.cursorRectangle, paletteContainer.editorPosition, livecv.windowControls().editSpace.placement.top
-                            )
-                        }
-                    }
-                }
+                onClicked: paletteBoxHeader.swapOrAddPalette(true)
             }
         }
         Item{
@@ -134,52 +141,7 @@ Item{
             MouseArea{
                 id: paletteAddMouse
                 anchors.fill: parent
-                onClicked: {
-                    var editingFragment = paletteContainer.parent.editingFragment
-                    if ( !editingFragment )
-                        return
-
-                    var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
-                    if (palettes.size() ){
-                        paletteHeaderList.forceActiveFocus()
-                        paletteHeaderList.model = palettes
-                        paletteHeaderList.cancelledHandler = function(){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
-                        }
-                        paletteHeaderList.selectedHandler = function(index){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
-
-                            var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-
-                            var newPaletteBox = paletteContainer.paletteContainerFactory(paletteContainer.parent)
-
-                            palette.item.x = 5
-                            palette.item.y = 7
-
-
-                            newPaletteBox.child = palette.item
-                            newPaletteBox.palette = palette
-
-                            newPaletteBox.name = palette.name
-                            newPaletteBox.type = palette.type
-                            newPaletteBox.moveEnabled = paletteContainer.moveEnabled
-                            newPaletteBox.documentHandler = documentHandler
-                            newPaletteBox.cursorRectangle = paletteContainer.cursorRectangle
-                            newPaletteBox.editorPosition = paletteContainer.editorPosition
-                            newPaletteBox.paletteContainerFactory = paletteContainer.paletteContainerFactory
-
-                            var box = paletteContainer.parent.parent
-                            if ( box.objectName === "editorBox" ){
-                                paletteContainer.parent.parent.updatePlacement(
-                                    paletteContainer.cursorRectangle, paletteContainer.editorPosition, livecv.windowControls().editSpace.placement.top
-                                )
-                            }
-
-                        }
-                    }
-                }
+                onClicked: paletteBoxHeader.swapOrAddPalette(false)
             }
         }
 

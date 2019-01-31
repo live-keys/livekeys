@@ -79,13 +79,20 @@ void DocumentHandler::requestCursorPosition(int position){
 }
 
 void DocumentHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *box){
-    m_textEdit->linePaletteAdded(lineStart, lineEnd, height + 15, box);
+    m_textEdit->linePaletteAdded(lineStart, lineEnd, height, box);
 }
 
 void DocumentHandler::lineBoxRemoved(QQuickItem *palette)
 {
     m_textEdit->linePaletteRemoved(palette);
 }
+
+void DocumentHandler::lineBoxResized(QQuickItem *palette, int newHeight)
+{
+    m_textEdit->linePaletteHeightChanged(palette, newHeight);
+}
+
+
 
 void DocumentHandler::rehighlightBlock(const QTextBlock &block){
     if ( m_codeHandler )

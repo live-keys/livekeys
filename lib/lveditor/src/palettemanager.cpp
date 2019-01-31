@@ -128,44 +128,56 @@ int PaletteManager::isLineAfterPalette(int blockNumber)
 int  PaletteManager::removePalette(QObject *palette)
 {
     auto it = m_palettes.begin();
+    int result = -1;
     while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
         if (pd->matchesPalette(palette))
         {
-            int result = pd->m_startBlock;
-            m_palettes.erase(it);
-            return result;
+            result = pd->m_startBlock;
+            delete pd;
+            it = m_palettes.erase(it);
+            continue;
+        }
+        if (result != -1)
+        {
+            adjustPalettePosition(pd);
         }
 
         ++it;
     }
 
-    return -1;
+    return result;
 }
 
 int PaletteManager::resizePalette(QObject *palette, int newHeight)
 {
     auto it = m_palettes.begin();
+    int result = -1;
     while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
         if (pd->matchesPalette(palette))
         {
             pd->m_paletteHeight = newHeight;
-            int newPaletteSpan = qCeil(newHeight * 1.0/ this->m_lineHeight);
+            int newPaletteSpan = qCeil((newHeight > 0 ? newHeight + 10 : 0) * 1.0/ this->m_lineHeight);
             if (newPaletteSpan != pd->m_paletteSpan)
             {
+                // if changed, we must move the later palettes accordingly
                 pd->m_paletteSpan = newPaletteSpan;
-                return pd->m_startBlock;
+                result = pd->m_startBlock; ++it; continue;
             }
-            return false;
+            break; // no effective change
+        }
+        if (result != -1)
+        {
+            adjustPalettePosition(pd);
         }
 
         ++it;
     }
 
-    return -1;
+    return result;
 }
 
 void PaletteManager::setDirtyPos(int pos)
