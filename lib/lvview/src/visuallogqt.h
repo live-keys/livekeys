@@ -24,22 +24,37 @@
 
 #include <ostream>
 
-
+/**
+ * Stream output operator for QChars
+ * \ingroup lvview
+ */
 inline std::ostream& operator << (std::ostream &stream, const QChar& val ){
     stream << val.toLatin1();
     return stream;
 }
 
+/**
+ * Stream output operator for QStrings
+ * \ingroup lvview
+ */
 inline std::ostream& operator << (std::ostream &stream, const QString& val ){
     stream << val.toStdString();
     return stream;
 }
 
+/**
+ * Stream output operator for QByteArrays
+ * \ingroup lvview
+ */
 inline std::ostream& operator << (std::ostream &stream, const QByteArray& val ){
     stream << val.data();
     return stream;
 }
 
+/**
+ * Stream output operator for QStringRefs
+ * \ingroup lvview
+ */
 inline std::ostream& operator << (std::ostream &stream, const QStringRef& val ){
     QByteArray utf8 = val.toUtf8();
     stream << utf8.data();
@@ -48,6 +63,10 @@ inline std::ostream& operator << (std::ostream &stream, const QStringRef& val ){
 
 namespace lv{
 
+    /**
+    * Message handler for typical Qt-based messages
+    * \ingroup lvview
+    */
     inline void visualLogMessageHandler(QtMsgType type, const QMessageLogContext& ctx, const QString& msg){
         const char* file = ctx.file     ? ctx.file : "";
         const char* func = ctx.function ? ctx.function : "";

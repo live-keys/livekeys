@@ -61,6 +61,9 @@ public:
 
     void setIndentSize(int size);
 
+    /**
+     * \brief Implementation of the respective function from QQmlParserStatus
+     */
     void classBegin(){}
     void componentComplete();
 
@@ -115,10 +118,18 @@ private:
     bool                  m_editorFocus;
 };
 
+/**
+ * \brief Returns the target text document
+ */
 inline QTextDocument *DocumentHandler::target(){
     return m_targetDoc;
 }
 
+/**
+ * \brief Completion model
+ *
+ * Model of suggestions that we get from the code handler
+ */
 inline lv::CodeCompletionModel *DocumentHandler::completionModel() const{
     return m_completionModel;
 }
@@ -127,10 +138,16 @@ inline TextEdit *DocumentHandler::textEdit(){
     return m_textEdit;
 }
 
+/**
+ * \brief Shows if the editor is in focus
+ */
 inline bool DocumentHandler::editorFocus() const{
     return m_editorFocus;
 }
 
+/**
+ * \brief Sets the focus state of the editor
+ */
 inline void DocumentHandler::setEditorFocus(bool editorFocus){
     if ( m_editorFocus == editorFocus )
         return;
@@ -138,10 +155,16 @@ inline void DocumentHandler::setEditorFocus(bool editorFocus){
     emit editorFocusChanged();
 }
 
+/**
+ * \brief Code handler getter
+ */
 inline AbstractCodeHandler *DocumentHandler::codeHandler(){
     return m_codeHandler;
 }
 
+/**
+ * \brief Indent size setter
+ */
 inline void DocumentHandler::setIndentSize(int size){
     m_indentContent.clear();
     m_indentContent.fill(QChar(' '), size);

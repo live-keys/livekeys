@@ -31,8 +31,18 @@
 
 #include <QDebug>
 
+/**
+ * \class lv::ProjectDocument
+ * \brief Wrapper for any opened document in LiveKeys
+ *
+ *
+ * \ingroup lveditor
+ */
 namespace lv{
 
+/**
+  Default constructor
+*/
 ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *parent)
     : QObject(parent)
     , m_file(file)
@@ -50,11 +60,17 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     m_file->setDocument(this);
 }
 
-void ProjectDocument::resetContent(const QString &content){
+/**
+ * \brief Sets the content of the document
+ */
+void ProjectDocument::setContent(const QString &content){
     m_textDocument->setPlainText(content);
     emit contentChanged();
 }
 
+/**
+ * \brief Open the document in a read states
+ */
 void ProjectDocument::readContent(){
     if ( m_file->path() != "" ){
         addEditingState(ProjectDocument::Read);
@@ -71,6 +87,9 @@ void ProjectDocument::readContent(){
     }
 }
 
+/**
+ * \brief Returns the parent, which is a Project
+ */
 Project *ProjectDocument::parentAsProject(){
     return qobject_cast<Project*>(parent());
 }
@@ -234,6 +253,9 @@ QString ProjectDocument::getCharsRemoved(int position, int count){
     return "";
 }
 
+/**
+ * \brief Adds a marker at the given position
+ */
 ProjectDocumentMarker::Ptr ProjectDocument::addMarker(int position){
     // markers are added in descending order according to their position
     auto it = m_markers.begin();
@@ -247,6 +269,9 @@ ProjectDocumentMarker::Ptr ProjectDocument::addMarker(int position){
     return result;
 }
 
+/**
+ * \brief Removes a given marker
+ */
 void ProjectDocument::removeMarker(ProjectDocumentMarker::Ptr marker){
     auto it = m_markers.begin();
     while ( it != m_markers.end() ){
@@ -258,7 +283,11 @@ void ProjectDocument::removeMarker(ProjectDocumentMarker::Ptr marker){
     }
 }
 
+/**
+  \brief Creates a custom section with the given type, position and length
 
+  \sa lv::ProjectDocumentSection
+*/
 ProjectDocumentSection::Ptr ProjectDocument::createSection(int type, int position, int length){
     ProjectDocumentSection::Ptr section = ProjectDocumentSection::create(this, type, position, length);
 
@@ -288,6 +317,9 @@ ProjectDocumentSection::Ptr ProjectDocument::createSection(int type, int positio
     return section;
 }
 
+/**
+ * \brief Returns the section at the given position
+ */
 ProjectDocumentSection::Ptr ProjectDocument::sectionAt(int position){
     SectionIterator it = m_sections.begin();
     while( it != m_sections.end() ){
@@ -303,6 +335,10 @@ ProjectDocumentSection::Ptr ProjectDocument::sectionAt(int position){
     return ProjectDocumentSection::Ptr(nullptr);
 }
 
+
+/**
+ * \brief Removes section at given position
+ */
 bool ProjectDocument::removeSectionAt(int position){
     SectionIterator it = m_sections.begin();
     while( it != m_sections.end() ){
@@ -322,6 +358,9 @@ bool ProjectDocument::removeSectionAt(int position){
     return false;
 }
 
+/**
+ * \brief Removes section given its pointer
+ */
 void ProjectDocument::removeSection(ProjectDocumentSection::Ptr section){
     int sectionPosition = section->position();
     section->invalidate();
@@ -346,6 +385,9 @@ void ProjectDocument::removeSection(ProjectDocumentSection::Ptr section){
     }
 }
 
+/**
+ * \brief Shows if the current document is active
+ */
 bool ProjectDocument::isActive() const{
     Project* prj = qobject_cast<Project*>(parent());
     if ( prj && prj->active() == this )
@@ -353,6 +395,9 @@ bool ProjectDocument::isActive() const{
     return false;
 }
 
+/**
+ * \brief Shows a small text preview of the text around a given position, including a visual pointer to the position itself
+ */
 QString ProjectDocument::peekContent(int position) const{
     QString result = "";
     if ( position >= m_textDocument->characterCount() )
@@ -380,6 +425,9 @@ QString ProjectDocument::peekContent(int position) const{
     return result;
 }
 
+/**
+ * \brief Slot for tracking text document changes which updates markers and sections
+ */
 void ProjectDocument::documentContentsChanged(int position, int charsRemoved, int charsAdded){
     QString addedText = "";
     if ( charsAdded == 1 ){
@@ -400,6 +448,9 @@ void ProjectDocument::documentContentsChanged(int position, int charsRemoved, in
     setIsDirty(m_textDocument->isModified());
 }
 
+/**
+ * \brief Save modified document to its respective file
+ */
 bool ProjectDocument::save(){
     syncContent();
     if ( m_file->path() != "" ){
@@ -414,6 +465,10 @@ bool ProjectDocument::save(){
     return false;
 }
 
+
+/**
+ * \brief Save document content in a different file
+ */
 bool ProjectDocument::saveAs(const QString &path){
     if ( m_file->path() == path ){
         save();
@@ -434,6 +489,11 @@ bool ProjectDocument::saveAs(const QString &path){
     return false;
 }
 
+/**
+ * \brief Variant of saveAs using QUrl parameter
+ *
+ * \sa ProjectDocument::saveAs(const QString &path)
+ */
 bool ProjectDocument::saveAs(const QUrl &url){
     return saveAs(url.toLocalFile());
 }
@@ -454,10 +514,23 @@ ProjectDocument::~ProjectDocument(){
     }
 }
 
+/**
+ * \class lv::ProjectDocumentAction
+ * \brief Undo/redo implementation for project documents
+ *
+ * \ingroup lveditor
+ */
+
+/**
+ * \brief Undo implementation
+ */
 void ProjectDocumentAction::undo(){
 //    parent->m_content.replace(position, charsAdded.size(), charsRemoved);
 }
 
+/**
+ * \brief Redo implementation
+ */
 void ProjectDocumentAction::redo(){
 //    parent->m_content.replace(position, charsRemoved.size(), charsAdded);
 }
@@ -471,20 +544,36 @@ ProjectDocumentBlockData::~ProjectDocumentBlockData(){
     }
 }
 
+/**
+ * \class lv::ProjectDocumentSection
+ * \brief Dynamic project document section
+ *
+ * The section is defined by its position and length. Similar to the dynamic markers, this gets moved around and modified
+ * along with document changes.
+ * \ingroup lveditor
+ */
+
+/**
+ * \brief Default destructor
+ */
+
 ProjectDocumentSection::~ProjectDocumentSection(){
 }
 
+/** Sets the callback funciton to be called when the text changes */
 void ProjectDocumentSection::onTextChanged(
         std::function<void(ProjectDocumentSection::Ptr, int, int, const QString &)> handler)
 {
     m_textChangedHandler = handler;
 }
 
+/** Make a section invalid and remove it from its parent block */
 void ProjectDocumentSection::invalidate(){
     m_position = -1;
     if ( m_parentBlock )
         m_parentBlock->removeSection(this);
 }
+
 
 void ProjectDocumentBlockData::addSection(ProjectDocumentSection::Ptr section){
     section->m_parentBlock = this;

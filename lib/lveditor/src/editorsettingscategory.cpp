@@ -16,11 +16,23 @@
 
 #include "live/editorsettingscategory.h"
 
+/**
+ * \class lv::EditorSettingsCategory
+ * \brief Extendable class providing an interface for extracting settings from JSON or saving them in JSON
+ * \ingroup lveditor
+ */
+
 namespace lv{
 
+/**
+ * \brief Blank constructor
+ */
 EditorSettingsCategory::EditorSettingsCategory(){
 }
 
+/**
+ * \brief Blank destructor
+ */
 EditorSettingsCategory::~EditorSettingsCategory(){
 }
 

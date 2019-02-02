@@ -21,6 +21,11 @@
 #include <QJSValue>
 #include <QJSValueIterator>
 
+/**
+ * \class lv::KeyMap
+ * \brief Abstraction of a map which pairs up commands with key shortcuts used to run them
+ * \ingroup lvview
+ */
 namespace lv{
 
 /*
@@ -94,6 +99,7 @@ std::map<QString, quint32> KeyMap::keysForStrings = {
     {"space", Qt::Key_Space}
 };
 
+/** Default constructor */
 KeyMap::KeyMap(const QString &settingsPath, QObject *parent)
     : QObject(parent)
 {
@@ -101,9 +107,11 @@ KeyMap::KeyMap(const QString &settingsPath, QObject *parent)
     readFile();
 }
 
+/** Default destructor */
 KeyMap::~KeyMap(){
 }
 
+/** Returns the command paired with the given key */
 QString KeyMap::locateCommand(KeyMap::KeyCode key){
     auto it = m_commandMap.find(key);
     if ( it != m_commandMap.end() )
@@ -112,6 +120,12 @@ QString KeyMap::locateCommand(KeyMap::KeyCode key){
     return "";
 }
 
+
+/**
+ * \brief Store function which pairs the given command with the given key, unless it's not overriding a default command
+ *
+ * The main store function which eventually gets called by all the other variants.
+ */
 void KeyMap::store(KeyMap::KeyCode key, const QString &command, bool isDefault){
     if ( isDefault && !locateCommand(key).isEmpty() )
         return;
@@ -120,6 +134,7 @@ void KeyMap::store(KeyMap::KeyCode key, const QString &command, bool isDefault){
     emit keymapChanged();
 }
 
+/** Store function which pairs the key (given by a description) with a given command */
 void KeyMap::store(const QString &keydescription, const QString &command, bool isDefault){
     QPair<int, KeyMap::KeyCode> pkc = composeKeyCode(keydescription);
     if ( pkc.first == 0 || pkc.first == KeyMap::KEYBOARD_OS ){
@@ -127,6 +142,8 @@ void KeyMap::store(const QString &keydescription, const QString &command, bool i
     }
 }
 
+
+/** Store command given by the QJSValue object */
 void KeyMap::store(const QJSValue &keyObject, bool isDefault){
     QJSValueIterator vit(keyObject);
     while( vit.hasNext() ){
@@ -135,6 +152,7 @@ void KeyMap::store(const QJSValue &keyObject, bool isDefault){
     }
 }
 
+/** Store command under the key given by its components */
 void KeyMap::store(quint32 os, quint32 key, quint32 modifier, const QString &command, bool isDefault){
     if ( os != 0 && os != KEYBOARD_OS )
         return;
@@ -142,14 +160,12 @@ void KeyMap::store(quint32 os, quint32 key, quint32 modifier, const QString &com
     store((KeyCode)modifier << 32 | key, command, isDefault);
 }
 
+/** Locate command for a key given by its components */
 QString KeyMap::locateCommand(quint32 key, quint32 modifiers){
     return locateCommand(composeKeyCode(key, modifiers));
 }
 
-quint32 KeyMap::cleanKey(quint32 key){
-    return key;
-}
-
+/** Returns the modifier containing flags corresponding to the background OS and keys */
 quint32 KeyMap::localModifier(quint32 modifier){
     quint32 result = 0;
 
@@ -175,6 +191,7 @@ quint32 KeyMap::localModifier(quint32 modifier){
     return result;
 }
 
+/** Returns Control or Command depending on the background OS */
 KeyMap::Modifier KeyMap::controlOrCommand(){
     if ( KEYBOARD_OS == KeyMap::Mac )
         return KeyMap::Command;
@@ -182,6 +199,7 @@ KeyMap::Modifier KeyMap::controlOrCommand(){
     return KeyMap::Control;
 }
 
+/** Adds contents of a file to the keymap */
 void KeyMap::readFile(){
     QFile file(m_path);
     if ( file.exists() && file.open(QIODevice::ReadOnly) ){
@@ -242,7 +260,7 @@ QString KeyMap::stringFromKey(const quint32 &key) const
 }
 
 KeyMap::KeyCode KeyMap::composeKeyCode(quint32 key, quint32 modifiers){
-    return (KeyCode)localModifier(modifiers) << 32 | cleanKey(key);
+    return (KeyCode)localModifier(modifiers) << 32 | key;
 }
 
 QPair<int, KeyMap::KeyCode> KeyMap::composeKeyCode(const QString &keydescription){
@@ -284,6 +302,7 @@ QPair<quint32, quint32> KeyMap::splitKeyCode(KeyCode kc){
     return QPair<quint32, quint32>((quint32)(kc >> 32), (quint32)kc); //modifiers first
 }
 
+/** Creates a description of a key code e.g. Ctrl+K */
 QString KeyMap::getKeyCodeDescription(KeyMap::KeyCode kc){
 
     auto split = splitKeyCode(kc);

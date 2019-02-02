@@ -18,6 +18,14 @@
 
 namespace lv{
 
+/**
+ * \class lv::VisualLogEntry
+ * \brief Struct-like class for storing relevant data about a log entry
+ *
+ * \ingroup lvview
+ */
+
+/** Constructor for string-type log entries */
 VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, const QString &p)
     : prefix(pprefix)
     , tag(ptag)
@@ -28,6 +36,7 @@ VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, cons
 {
 }
 
+/** Constructor for objects and/or image log entries */
 VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, QVariant *od, QQmlComponent *c)
     : prefix(pprefix)
     , tag(ptag)
@@ -37,11 +46,19 @@ VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, QVar
 {
 }
 
+/**
+ * \class lv::VisualLogBaseModel
+ * \brief Abstract model of a set of visual log entries, to be extended for concrete usage by the VisualLogModel and VisualLogFilter
+ * \ingroup lvview
+ */
+
+/** Default constructor */
 VisualLogBaseModel::VisualLogBaseModel(QObject *parent)
     : QAbstractListModel(parent){
 
 }
 
+/** Default destructor */
 VisualLogBaseModel::~VisualLogBaseModel(){
 }
 

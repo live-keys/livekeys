@@ -16,14 +16,22 @@
 
 #include "live/incubationcontroller.h"
 
+
+/**
+ * \class lv::IncubationController
+ * \brief Extends the QmlIncubationController
+ * \ingroup lvview
+ */
 namespace lv{
 
+/** Default constructor */
 IncubationController::IncubationController(QObject *parent)
     : QObject(parent)
 {
     startTimer(15);
 }
 
+/** Default destructor */
 IncubationController::~IncubationController(){
 
 }

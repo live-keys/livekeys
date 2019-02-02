@@ -24,8 +24,18 @@
 #include <QQmlContext>
 #include <QThread>
 
+
+/**
+ * \class lv::VisualLogModel
+ * \brief Main model used in visualizing log entries within LiveKeys when the log window is opened
+ *
+ * Receives any type message, whether if it's a string (or a string-displayable object) or an image.
+ * \ingroup lvview
+ */
+
 namespace lv{
 
+/** Default constructor */
 VisualLogModel::VisualLogModel(QQmlEngine *engine)
     : VisualLogBaseModel(engine)
     , m_engine(engine)
@@ -46,9 +56,12 @@ VisualLogModel::VisualLogModel(QQmlEngine *engine)
     );
 }
 
+
+/** Blank destructor */
 VisualLogModel::~VisualLogModel(){
 }
 
+/** Implementation of the respective QAbstractListModel function */
 QVariant VisualLogModel::data(const QModelIndex &index, int role) const{
     if ( index.row() >= m_entries.size() )
         return QVariant();
@@ -61,10 +74,11 @@ QVariant VisualLogModel::data(const QModelIndex &index, int role) const{
     return QVariant();
 }
 
-const VisualLogEntry &VisualLogModel::entryAt(int index){
-    return m_entries.at(index);
-}
-
+/**
+ * \brief Implementation of the respective function from VisualLog::ViewTransport
+ *
+ * Appends the given string message to the list of log entries.
+ */
 void VisualLogModel::onMessage(
         const VisualLog::Configuration *configuration,
         const VisualLog::MessageInfo &messageInfo,
@@ -87,6 +101,11 @@ void VisualLogModel::onMessage(
     }
 }
 
+/**
+ * \brief Implementation of the respective function from VisualLog::ViewTransport
+ *
+ * Appends the log view given via name to the entries
+ */
 void VisualLogModel::onView(
         const VisualLog::Configuration *configuration,
         const VisualLog::MessageInfo &messageInfo,
@@ -105,6 +124,7 @@ void VisualLogModel::onView(
     }
 }
 
+/** Implementation of the respective VisualLogBaseModel function */
 QVariant VisualLogModel::entryDataAt(int index) const{
     const VisualLogEntry& entry = m_entries[index];
     if ( entry.component == 0 ){
@@ -130,14 +150,17 @@ QVariant VisualLogModel::entryDataAt(int index) const{
     }
 }
 
+/** Implementation of the respective VisualLogBaseModel function */
 QString VisualLogModel::entryPrefixAt(int index) const{
     return m_entries[index].prefix;
 }
 
+/** Implementation of the respective VisualLogBaseModel function */
 const VisualLogEntry &VisualLogModel::entryAt(int index) const{
     return m_entries.at(index);
 }
 
+/** Erases all log entries from the model */
 void VisualLogModel::clearValues(){
     beginResetModel();
     m_entries.clear();

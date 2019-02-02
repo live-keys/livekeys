@@ -24,6 +24,11 @@
 
 #include <QMetaType>
 
+/**
+ * \class lv::VisualLogQmlObject
+ * \brief Contains methods to present a Qml output for the visual log
+ * \ingroup lvview
+ */
 namespace lv{
 
 namespace{
@@ -60,34 +65,47 @@ void logHelper(VisualLog::MessageInfo::Level level, const QJSValue& messageOrCat
 
 }// namespace
 
+/** Default constructor */
 VisualLogQmlObject::VisualLogQmlObject(QObject *parent)
     : QObject(parent)
 {
 }
 
+/** Default destructor */
 VisualLogQmlObject::~VisualLogQmlObject(){
 }
 
+/** Fatal messages */
 void VisualLogQmlObject::f(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Fatal, messageOrCategory, message);
 }
 
+/** Error messages */
 void VisualLogQmlObject::e(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Error, messageOrCategory, message);
 }
+
+/** Warning messages */
 void VisualLogQmlObject::w(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Warning, messageOrCategory, message);
 }
+
+/** Info messages */
 void VisualLogQmlObject::i(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Info, messageOrCategory, message);
 }
+
+/** Debug messages */
 void VisualLogQmlObject::d(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Debug, messageOrCategory, message);
 }
+
+/** Verbose messages */
 void VisualLogQmlObject::v(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Verbose, messageOrCategory, message);
 }
 
+/** Configures global vlog object from a given QJSValue object */
 void VisualLogQmlObject::configure(const QString &name, const QJSValue &options){
     MLNode mlopt;
     ml::fromQml(options, mlopt);

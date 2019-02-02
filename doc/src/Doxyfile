@@ -795,7 +795,7 @@ INPUT                  = \
     ../../lib/lveditor \
     ../../lib/lveditqmljs/src/lveditqmljsglobal.h \
     ../../lib/lvelements/src/lvelementsglobal.h \
-    ../../lib/lvview/src \
+    ../../lib/lvview \
     ../../plugins/live \
     ../../plugins/lcvcore \
     ../../plugins/lcvfeatures2d \

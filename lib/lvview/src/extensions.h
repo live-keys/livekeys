@@ -37,14 +37,17 @@ private:
     ViewEngine*          m_engine;
 };
 
+/** Globals getter */
 inline QQmlPropertyMap* Extensions::globals(){
     return m_globals;
 }
 
+/** Begin iterator of extensions */
 inline QMap<std::string, LiveExtension*>::iterator Extensions::begin(){
     return m_extensions.begin();
 }
 
+/** End iterator of extensions */
 inline QMap<std::string, LiveExtension*>::iterator Extensions::end(){
     return m_extensions.end();
 }

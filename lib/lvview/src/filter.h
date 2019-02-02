@@ -25,6 +25,7 @@ namespace lv{
 
 class FilterWorker;
 
+/// @private
 class LV_VIEW_EXPORT Filter{
 
     typedef SharedData* SharedDataPtr;

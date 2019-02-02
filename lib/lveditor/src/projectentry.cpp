@@ -22,8 +22,16 @@
 #include <QDir>
 #include <QUrl>
 
+/**
+ * \class lv::ProjectEntry
+ * \brief An entry within a LiveKeys project, either a folder or a file
+ *
+ * The whole hierarchy is in a tree-like structure
+ * \ingroup lveditor
+ */
 namespace lv {
 
+/** Default constructor */
 ProjectEntry::ProjectEntry(const QString &path, ProjectEntry *parent)
     : QObject(parent)
     , m_isFile(false)
@@ -34,6 +42,7 @@ ProjectEntry::ProjectEntry(const QString &path, ProjectEntry *parent)
         parent->addChildEntry(this);
 }
 
+/** Constructor with a name parameter */
 ProjectEntry::ProjectEntry(const QString &path, const QString &name, ProjectEntry *parent)
     : QObject(parent)
     , m_isFile(false)
@@ -44,6 +53,7 @@ ProjectEntry::ProjectEntry(const QString &path, const QString &name, ProjectEntr
         parent->addChildEntry(this);
 }
 
+/** Complex constructor with an indicator that the entry is a file */
 ProjectEntry::ProjectEntry(
         const QString &path,
         const QString &name,
@@ -58,6 +68,11 @@ ProjectEntry::ProjectEntry(
         parent->addChildEntry(this);
 }
 
+/**
+ * \brief Updates paths of child entries
+ *
+ * Useful when moving folders in LiveKeys and re-updates the sub-entry paths
+ */
 void ProjectEntry::updatePaths(){
     ProjectEntry* parent = parentEntry();
     if ( parent ){
@@ -74,36 +89,48 @@ void ProjectEntry::updatePaths(){
     }
 }
 
+/** Returns the QUrl of the entry path */
 QUrl ProjectEntry::pathUrl() const{
     return QUrl::fromLocalFile(m_path);
 }
 
+/** Blank destructor */
 ProjectEntry::~ProjectEntry(){
 }
 
-ProjectEntry *ProjectEntry::child(int number){
-    return entries().at(number);
+/** Return a child at a given index*/
+ProjectEntry *ProjectEntry::child(int index){
+    return entries().at(index);
 }
 
+/** Adds entry with a given name to this entry */
 ProjectEntry* ProjectEntry::addEntry(const QString &name){
     return new ProjectEntry(m_path, name, this);
 }
 
+/** Adds fuke entry with a given name to this entry */
 ProjectEntry *ProjectEntry::addFileEntry(const QString &name){
     return new ProjectFile(m_path, name, this);
 }
 
+/** Number of entries */
 int ProjectEntry::childCount() const{
     return m_entries.size();
 }
 
-int ProjectEntry::childNumber() const{
+/** Returns the position of this entry within its parent */
+int ProjectEntry::childIndex() const{
     ProjectEntry* p = parentEntry();
     if (p)
         return p->entries().indexOf(const_cast<ProjectEntry*>(this));
     return 0;
 }
 
+/**
+ * \brief Resets all the entries for which that's possible to do
+ *
+ * It's not possible to delete open files!
+ */
 void ProjectEntry::clearItems(){
     for( QList<QObject*>::const_iterator it = children().begin(); it != children().end(); ++it ){
         QObject* child = *it;
@@ -122,6 +149,7 @@ void ProjectEntry::clearItems(){
     m_entries.clear();
 }
 
+/** Sets the parent entry */
 void ProjectEntry::setParentEntry(ProjectEntry *pEntry){
     ProjectEntry* currentParentEntry = parentEntry();
     if ( currentParentEntry == pEntry )
@@ -135,6 +163,7 @@ void ProjectEntry::setParentEntry(ProjectEntry *pEntry){
     setParent(pEntry);
 }
 
+/** Adds child entry */
 void ProjectEntry::addChildEntry(ProjectEntry *entry){
     for ( int i = m_entries.size() - 1; i >= 0; --i ){
         ProjectEntry* listEntry = m_entries[i];
@@ -146,6 +175,7 @@ void ProjectEntry::addChildEntry(ProjectEntry *entry){
     m_entries.prepend(entry);
 }
 
+/** Find a hypothetical insertion point for a given entry */
 int ProjectEntry::findEntryInsertionIndex(ProjectEntry *entry){
     for ( int i = m_entries.size() - 1; i >= 0; --i ){
         ProjectEntry* listEntry = m_entries[i];
@@ -156,10 +186,17 @@ int ProjectEntry::findEntryInsertionIndex(ProjectEntry *entry){
     return 0;
 }
 
+
+/** Remove a child entry */
 void ProjectEntry::removeChildEntry(ProjectEntry *entry){
     m_entries.removeOne(entry);
 }
 
+/**
+ * \brief Sets the name to the current entry, simultaneously changing the path as well
+ *
+ * Useful for e.g. renaming folders
+ */
 void ProjectEntry::setName(const QString &name){
     if (m_name == name)
         return;
