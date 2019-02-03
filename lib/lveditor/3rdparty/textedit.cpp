@@ -2469,6 +2469,7 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     document->setTextWidth(-1);
     auto rect = q->getDocumentLayout()->blockBoundingRect(document->rootFrame()->begin().currentBlock());
     paletteManager->setLineHeight(static_cast<int>(rect.height()));
+    q->updateFragmentVisibility();
 }
 
 void TextEditPrivate::unsetTextDocument()
