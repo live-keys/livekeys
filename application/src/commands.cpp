@@ -41,6 +41,13 @@ QString Commands::dump(){
     return result;
 }
 
+void Commands::setModel(CommandsModel *m)
+{
+    m_model = m;
+    connect(m_model, &CommandsModel::modelChanged, this, &Commands::modelChanged);
+}
+
+
 QString Commands::add(QObject *object, const QJSValue &commands){
     if ( object == 0 || object->objectName() == "" ){
         qCritical("Cannot add commands for unnamed objects.");

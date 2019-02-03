@@ -230,7 +230,7 @@ Rectangle {
         }
     }
 
-    // Configuration
+    // Commands
 
     Rectangle{
         anchors.left: parent.left

@@ -129,6 +129,13 @@ ApplicationWindow{
         onOpenLicense: licenseBox.visible = true
     }
 
+    CommandsMenu {
+        id: commandsMenu
+        anchors.top: header.bottom
+        x: 395
+        z: 200
+    }
+
     Rectangle {
         id: modeWrapper
         anchors.left: parent.left

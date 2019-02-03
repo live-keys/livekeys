@@ -35,13 +35,19 @@ int CommandsModel::rowCount(const QModelIndex &) const{
     return static_cast<int>(m_filteredCommands.size());
 }
 
+QHash<int, QByteArray> CommandsModel::roleNames() const
+{
+    return m_roles;
+}
+
 void CommandsModel::setFilter(const QString &filter){
-    if ( m_filter != filter ){
+    if ( m_filter != filter || filter == ""){
         m_filter = filter;
 
         if ( !m_isIndexing ){
             beginResetModel();
             updateFilter();
+            emit modelChanged(this);
             endResetModel();
         }
     }
@@ -51,14 +57,14 @@ void CommandsModel::updateFilter()
 {
     m_isIndexing = true;
     m_filteredCommands.clear();
-    /*for (auto it: m_commands)
+    for (auto it: m_commandEntries)
     {
         QString desc = it.second.m_description;
-        if (m_filter.size() <= desc && desc.contains(m_filter, Qt::CaseInsensitive))
+        if (m_filter.size() <= desc.size() && desc.contains(m_filter, Qt::CaseInsensitive))
         {
             m_filteredCommands.push_back(it.second);
         }
-    }*/
+    }
     m_isIndexing = false;
 }
 
@@ -85,6 +91,7 @@ void CommandsModel::updateAvailableCommands()
         }
         entry.m_shortcuts += m_keymap->getKeyCodeDescription(key);
     }
+    updateFilter();
 }
 
 

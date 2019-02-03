@@ -199,7 +199,8 @@ Rectangle{
     }
 
     function openCommandsMenu(){
-        livecv.commands.model.updateAvailableCommands()
+        livecv.commands.model.setFilter('')
+        commandsMenu.visible = !commandsMenu.visible
     }
 
     function addEntry(parentEntry, isFile){
