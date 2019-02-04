@@ -50,10 +50,12 @@ public:
 
 std::unique_ptr<ApplicationContext> ApplicationContextPrivate::ApplicationContextPrivate::instance;
 
+/** Default destructor */
 ApplicationContext::~ApplicationContext(){
     delete m_d;
 }
 
+/** Initializer that initalizes the singleton instance of the context */
 void ApplicationContext::initialize(){
     ApplicationContextPrivate::instance.reset(new ApplicationContext);
 }
@@ -93,48 +95,59 @@ void ApplicationContext::initializePaths(){
 #endif
 }
 
+/** Getter of the singleton instance */
 ApplicationContext &ApplicationContext::instance(){
     if ( !ApplicationContextPrivate::instance )
         THROW_EXCEPTION(lv::Exception, "Application context has not been initialized", 1);
     return *ApplicationContextPrivate::instance;
 }
 
+/** Application path getter */
 const std::string &ApplicationContext::applicationPath(){
     return m_d->applicationPath;
 }
 
+/** Release path getter */
 const std::string &ApplicationContext::releasePath(){
     return m_d->releasePath;
 }
 
+/** Application file path getter */
 const std::string &ApplicationContext::applicationFilePath(){
     return m_d->applicationFilePath;
 }
 
+/** Link path getter */
 const std::string &ApplicationContext::linkPath(){
     return m_d->linkPath;
 }
 
+/** Plugin path getter */
 const std::string &ApplicationContext::pluginPath(){
     return m_d->pluginPath;
 }
 
+/** External path getter */
 const std::string &ApplicationContext::externalPath(){
     return m_d->externalPath;
 }
 
+/** Libraries path getter */
 const std::string &ApplicationContext::librariesPath(){
     return m_d->librariesPath;
 }
 
+/** Development path getter */
 const std::string &ApplicationContext::developmentPath(){
     return m_d->developmentPath;
 }
 
+/** Config path getter */
 const std::string &ApplicationContext::configPath(){
     return m_d->configPath;
 }
 
+/** Executable path getter */
 const std::string &ApplicationContext::executablePath(){
     return m_d->executablePath;
 }

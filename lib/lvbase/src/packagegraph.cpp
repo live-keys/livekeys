@@ -36,17 +36,30 @@ public:
     std::map<std::string, PackageGraph::LibraryNode*> libraries;
 };
 
+/**
+ * \class lv::PackageGraph
+ * \brief Structure to represent packages and their dependencies
+ *
+ * It also stores all the libraries, stores in the LibraryNode structure.
+ * We also check for dependency cycles on multiple levels: plugins, packages, Elements files
+ * \ingroup lvbase
+ */
+
+
+/** Default constructor */
 PackageGraph::PackageGraph()
     : m_d(new PackageGraphPrivate)
 {
 }
 
+/** Default destructor */
 PackageGraph::~PackageGraph(){
     clearPackages();
     clearLibraries();
     delete m_d;
 }
 
+/** Loads package in the graph and makes necessary checks */
 void PackageGraph::loadPackage(const Package::Ptr &p, bool addLibraries){
     auto it = m_d->packages.find(p->name());
     if ( it == m_d->packages.end() ){
@@ -93,6 +106,7 @@ void PackageGraph::loadPackage(const Package::Ptr &p, bool addLibraries){
     }
 }
 
+/** Recursive loader that also loads the necessarys dependencies */
 void PackageGraph::loadPackageWithDependencies(
     const Package::Ptr &package, std::list<Package::Reference> &missing, bool addLibraries)
 {
@@ -109,6 +123,7 @@ void PackageGraph::loadPackageWithDependencies(
     }
 }
 
+/** */
 void PackageGraph::addDependency(const Package::Ptr &package, const Package::Ptr &dependsOn){
     auto packageit = m_d->packages.find(package->name());
     if ( packageit == m_d->packages.end() )
@@ -166,6 +181,7 @@ void PackageGraph::addDependency(const Package::Ptr &package, const Package::Ptr
 
 }
 
+/** Check if there are cycles between packages, starting from the given packages */
 PackageGraph::CyclesResult<Package::Ptr> PackageGraph::checkCycles(const Package::Ptr &p){
     auto it = m_d->packages.find(p->name());
     if ( it == m_d->packages.end() )
@@ -182,6 +198,7 @@ PackageGraph::CyclesResult<Package::Ptr> PackageGraph::checkCycles(const Package
     return PackageGraph::CyclesResult<Package::Ptr>(PackageGraph::CyclesResult<Package::Ptr>::NotFound);;
 }
 
+/** Check if there are cycles between plugins, starting from the given plugin */
 PackageGraph::CyclesResult<Plugin::Ptr> PackageGraph::checkCycles(const Plugin::Ptr &p){
     if ( p->context() == nullptr || p->context()->packageGraph != this )
         THROW_EXCEPTION(lv::Exception, "Failed to loaded plugin for cycles:" + p->name(), 2);
@@ -309,6 +326,7 @@ void PackageGraph::addLibrary(const Package::Library &lib){
 
 }
 
+/** Function that loads all the libraries from our internal libraries structure */
 void PackageGraph::loadLibraries(){
     for ( auto it = m_d->libraries.begin(); it != m_d->libraries.end(); ++it ){
         PackageGraph::LibraryNode* libnode = it->second;
@@ -319,10 +337,12 @@ void PackageGraph::loadLibraries(){
     }
 }
 
+/** Clesars all packages from the graph */
 void PackageGraph::clearPackages(){
     m_d->packages.clear();
 }
 
+/** Clears all libraries from the graph */
 void PackageGraph::clearLibraries(){
     for ( auto it = m_d->libraries.begin(); it != m_d->libraries.end(); ++it ){
         delete it->second;
@@ -330,6 +350,7 @@ void PackageGraph::clearLibraries(){
     m_d->libraries.clear();
 }
 
+/** Nice string representation of the PackageGraph */
 std::string PackageGraph::toString() const{
     const PackageGraphPrivate* d = m_d;
 
@@ -359,6 +380,7 @@ std::string PackageGraph::toString() const{
     return ss.str();
 }
 
+/** Finds the package according to the given reference */
 Package::Ptr PackageGraph::findPackage(Package::Reference ref){
     std::vector<std::string> paths = packageImportPaths();
     for ( auto it = paths.begin(); it != paths.end(); ++it ){
@@ -391,7 +413,7 @@ Package::Ptr PackageGraph::findPackage(Package::Reference ref){
 }
 
 /**
- * @brief Finds the package with highest version
+ * @brief Finds the package with the given name and the highest version in the package import paths
  */
 Package::Ptr PackageGraph::findPackage(const std::string &packageName){
     Package::Ptr foundPackage(nullptr);
@@ -413,6 +435,7 @@ Package::Ptr PackageGraph::findPackage(const std::string &packageName){
     return foundPackage;
 }
 
+/** Returns the package with the given name internally */
 Package::Ptr PackageGraph::package(const std::string &name){
     auto it = m_d->packages.find(name);
     if ( it != m_d->packages.end() )
@@ -420,14 +443,17 @@ Package::Ptr PackageGraph::package(const std::string &name){
     return Package::Ptr(nullptr);
 }
 
+/** Returns the package import paths */
 const std::vector<std::string> &PackageGraph::packageImportPaths() const{
     return m_d->packageImportPaths;
 }
 
+/** Package import paths setter */
 void PackageGraph::setPackageImportPaths(const std::vector<std::string> &paths){
     m_d->packageImportPaths = paths;
 }
 
+/** Adds internal package */
 void PackageGraph::addInternalPackage(const Package::Ptr &package){
     auto it = internals().find(package->name());
     if ( it == internals().end() ){
@@ -438,11 +464,14 @@ void PackageGraph::addInternalPackage(const Package::Ptr &package){
     }
 }
 
+/** Returns the internal packages */
 std::map<std::string, Package::Ptr> &PackageGraph::internals(){
     static std::map<std::string, Package::Ptr> internals;
     return internals;
 }
 
+
+/** We assign the default internal context package graph for internal packages */
 void PackageGraph::assignInternalContext(PackageGraph *graph){
     internalsContextOwner() = graph;
     for ( auto it = internals().begin(); it != internals().end(); ++it ){
@@ -450,15 +479,18 @@ void PackageGraph::assignInternalContext(PackageGraph *graph){
     }
 }
 
+/** Internal context package graph */
 PackageGraph *&PackageGraph::internalsContextOwner(){
-    static PackageGraph* pg = nullptr;;
+    static PackageGraph* pg = nullptr;
     return pg;
 }
 
+/** Load plugin given the import segment */
 Plugin::Ptr PackageGraph::loadPlugin(const std::string &importSegment){
     return loadPlugin(splitString(importSegment, '.'));
 }
 
+/** Loads plugin given split-up import segments */
 Plugin::Ptr PackageGraph::loadPlugin(const std::vector<std::string> &importSegments){
     PackageGraphPrivate* d = m_d;
 
@@ -525,6 +557,7 @@ Plugin::Ptr PackageGraph::loadPlugin(const std::vector<std::string> &importSegme
     return Plugin::Ptr(nullptr);
 }
 
+/** Adds plugin dependency */
 void PackageGraph::addDependency(const Plugin::Ptr &plugin, const std::string &dependency){
     Plugin::Ptr dependsOn = loadPlugin(dependency);
     if ( dependsOn == nullptr )
@@ -536,6 +569,7 @@ void PackageGraph::addDependency(const Plugin::Ptr &plugin, const std::string &d
     addDependency(plugin, dependsOn);
 }
 
+/** Adds the dependency needed for this plugin. If not within the same package, we load an entire package instead. */
 void PackageGraph::addDependency(const Plugin::Ptr& plugin, const Plugin::Ptr& dependsOn){
     if ( plugin.get() == dependsOn.get() )
         return;
