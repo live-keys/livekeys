@@ -85,3 +85,211 @@ more blur but more sever outliers will be removed.
 Number of iterations that the algorithm will run. The more iterations the better, but it is
 hard to quantitatively refine this statement, so just use the default and increase it if the
 results are poor.
+
+{qmlType:HueSaturationLightness}
+{qmlInherits:MatFilter}
+{qmlBrief:Controls the hue and saturation of an image}
+
+{qmlProperty:int hue}
+{qmlBrief: Controls the hue}
+
+{qmlProperty:int saturation}
+{qmlBrief: Controls the saturation}
+
+{qmlProperty:int lightness}
+{qmlBrief: Controls the lightness}
+
+{qmlType:Levels}
+{qmlInherits:MatFilter}
+
+
+{qmlProperty:Lightness}
+{qmlBrief:Controls the lightness overall channels}
+
+`[white, contrast, black]`
+
+{qmlProperty:channels}
+{qmlBrief:Recieves the channel index and lightness parameters for the image}
+
+`channel index: [white, contrast, black]`
+
+```
+Levels{
+        lightness: [10, 1.0, 255]
+        channels: {
+            0: [0, 1.0, 170]
+        }
+        ```
+{qmlType:AutoLevels}
+{qmlInherits:MatFilter}
+{qmlBrief:Given the histogram AutoLevels will aoutmatically compute levels of an image.}
+
+
+{qmlType:BrightnessAndContrast}
+{qmlInherits:MatFilter}
+{qmlBrief:Adjust the brightness and the contrast}
+
+{qmlProperty:double brightness}
+
+Can be any value
+
+{qmlProperty:double contrast}
+
+Should be between 0 and 10
+
+{qmlType:Sticher}
+{qmlInherits:MatFilter}
+{qmlBrief:Stiches a set of images toghether based on the list of matrixes and a set of parameters}
+
+
+{qmlType:AlignMTB}
+{qmlInherits:MatFilter}
+{qmlBrief:Takes a list of inputs with a set of parameters and it converts them}
+
+Params:
+
+* **int maxBits**
+* **int excludeRange**
+* **bool cut**
+
+{qmlType:CalibrateDebevec}
+{qmlInherits:MatFilter}
+{qmlBrief:Calibrates the lightness of the image in regard to exsposure setting the image was shot.}
+
+{qmlProperty:QMatList input}
+{qmlBrief:List of images}
+
+{qmlProperty:QList times}
+{qmlBrief:Exposure time}
+
+{qmlProperty:QVariantMap params}
+{qmlBrief:Calibration parameters}
+
+Params:
+
+* **int samples**
+* **float lambda**
+* **bool random**
+
+{qmlProperty:QMat output}
+{qmlBrief:Outputs single image based on calibrations}
+
+Output will contain much more data than the input.
+
+{qmlType:CalibrateRobertson}
+{qmlInherits:MatFilter}
+{qmlBrief:Calibrates the lightness of the image in regard to exsposure setting the image was shot.}
+
+{qmlProperty:QMatList input}
+{qmlBrief:List of images}
+
+{qmlProperty:QList times}
+{qmlBrief:Exposure time}
+
+{qmlProperty:QVariantMap params}
+{qmlBrief:Calibration parameters}
+
+Params:
+
+* **int maxIter**
+* **float threshold**
+
+{qmlProperty:QMat output}
+{qmlBrief:Outputs single image based on calibrations}
+
+Output will contain much more data than the input.
+
+{qmlType:MergeDebevec}
+{qmlBrief:The resulting HDR image is calculated as weighted average of the exposures considering exposure values and camera response.}
+
+Merges images.
+
+If calibrated with **CalibrateDebevec**, **MergeDebevec** must be used.
+
+Parameters:
+
+* **src** vector of input images
+* **dst** result image
+* **times** vector of exposure time values for each image
+* **response** 256x1 matrix with inverse camera response function for each pixel value, it should have the same number of channels as images.
+
+
+{qmlType:MergeRobertson}
+{qmlBrief:The resulting HDR image is calculated as weighted average of the exposures considering exposure values and camera response.}
+
+Merges images.
+
+If calibrated with **CalibrateRobertson**, **MergeRobertson** must be used.
+
+Parameters:
+
+* **src** vector of input images
+* **dst** result image
+* **times** vector of exposure time values for each image
+* **response** 256x1 matrix with inverse camera response function for each pixel value, it should have the same number of channels as images.
+
+{qmlType:ToneMap}
+{qmlBrief:First step of transforming the image from the HDR to something that is viewable by the user}
+
+{qmlProperty:QVariantMap input}
+{qmlProperty:QVariantMap params}
+
+{qmlType:TonemapDrago}
+{qmlInherits:lcvphoto#ToneMap}
+
+Initialize method arguments:
+
+* **float gamma**
+* **float saturation**
+* **float bias**
+
+{qmlType:TonemapDurand}
+{qmlInherits:lcvphoto#ToneMap}
+
+Initialize method arguments:
+
+* **float gamma**
+* **float contrast**
+* **float saturation**
+* **float sigmaSpace**
+* **float sigmaColor**
+
+{qmlType:TonemapMantiuk}
+{qmlInherits:lcvphoto#ToneMap}
+
+Initialize method arguments:
+
+* **float gamma**
+* **float scale**
+* **float saturation**
+
+{qmlType:TonemapReinard}
+{qmlInherits:lcvphoto#ToneMap}
+Initialize method arguments:
+    
+* **float gamma**
+* **float intensity**
+* **float lightAdapt**
+* **float colorAdapt**
+
+{qmlType:LevelSliders}
+{qmlInherits:QtQuick.Rectangle}
+
+{qmlProperty:alias input}
+
+{qmlProperty:lightness}
+
+{qmlProperty:levelByChannel}
+
+
+{qmlType:HueSaturationLightnessSliders}
+
+{qmlProperty:alias hue}
+{qmlInherits:QtQuick.Rectangle}
+{qmlBrief:Hue that's controled by the slider}
+
+{qmlProperty:alias saturation}
+{qmlBrief:Saturation that's controled by the slider}
+
+{qmlProperty:alias lightness}
+{qmlBrief:Lightness that's controled by the slider}

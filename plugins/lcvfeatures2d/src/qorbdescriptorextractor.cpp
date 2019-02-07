@@ -16,7 +16,7 @@
 
 #include "qorbdescriptorextractor.h"
 #include "opencv2/features2d.hpp"
-
+/// \private
 QOrbDescriptorExtractor::QOrbDescriptorExtractor(QQuickItem *parent)
     : QDescriptorExtractor(cv::ORB::create(), parent)
 {
