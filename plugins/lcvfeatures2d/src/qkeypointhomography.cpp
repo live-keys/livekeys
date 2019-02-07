@@ -35,9 +35,6 @@ QKeypointHomography::QKeypointHomography(QQuickItem* parent)
     setFlag(QQuickItem::ItemHasContents, true);
 }
 
-/** 
- * \brief QKeypointHomography desctructor
- */
 QKeypointHomography::~QKeypointHomography(){
 }
 
