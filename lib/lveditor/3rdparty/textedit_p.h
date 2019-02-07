@@ -410,6 +410,7 @@ private:
     void updateTotalLines();
     void invalidateFontCaches();
     void updateFragmentVisibility();
+    void updateFragmentBounds(int delta);
 
 protected:
     TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent = nullptr);

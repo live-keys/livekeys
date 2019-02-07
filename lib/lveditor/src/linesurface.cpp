@@ -96,7 +96,8 @@ void LineSurface::paletteSlot(int blockNum)
 {
     if (!m_document) return;
     auto firstDirtyBlock = m_document->findBlockByNumber(blockNum);
-    m_document->markContentsDirty(firstDirtyBlock.position(), m_document->characterCount() - firstDirtyBlock.position());
+    m_dirtyPos = blockNum;
+    m_document->markContentsDirty(firstDirtyBlock.position() - 1, m_document->characterCount() - firstDirtyBlock.position() + 1);
 
     polish();
     if (isComponentComplete())
@@ -176,7 +177,7 @@ void LineSurface::writeOutBlockStates()
         QTextBlock block = it.currentBlock();
         lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(block.userData());
 
-        QString print(to_string(block.blockNumber()).c_str());
+        QString print(std::to_string(block.blockNumber()).c_str());
         print += " : ";
         if (userData)
         {
@@ -292,7 +293,6 @@ inline void resetEngine(TextNodeEngine *engine, const QColor& textColor, const Q
 QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
 {
     Q_UNUSED(updatePaintNodeData);
-
 
     if (!m_document) {
         if (oldNode) delete oldNode;

@@ -57,22 +57,27 @@ private:
     QMap<QString, QObject*>* m_configFiles;
 };
 
+/** Launch mode getter, shows that the view is available (full screen) */
 inline bool Settings::launchMode() const{
     return m_previewMode;
 }
 
+/** Sets the launch mode */
 inline void Settings::setLaunchMode(bool previewMode){
     m_previewMode = previewMode;
 }
 
+/** Run mode getter, runs it in command line, no UI */
 inline bool Settings::runMode() const{
     return m_runMode;
 }
 
+/** Sets the run mode indicator to the given value */
 inline void Settings::setRunMode(bool runMode){
     m_runMode = runMode;
 }
 
+/** Returns the path of the config folder */
 inline const QString &Settings::path() const{
     return m_path;
 }

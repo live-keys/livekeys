@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "live/projectfilemodel.h"
+#include "projectfilemodel.h"
 #include "live/projectdocumentmodel.h"
 #include "live/projectentry.h"
 #include "live/projectfile.h"
@@ -26,18 +26,29 @@
 
 #include <QDebug>
 
+/**
+ * \class lv::ProjectFileModel
+ * \brief The model of the whole project file system used when opening a project in LiveKeys
+ *
+ * It's a tree-like structure
+ * \ingroup lveditor
+ */
 namespace lv{
 
+/** Default constructor */
 ProjectFileModel::ProjectFileModel(QObject *parent)
     : QAbstractItemModel(parent)
     , m_root(new ProjectEntry(""))
 {
 }
 
+
+/** Default destructor */
 ProjectFileModel::~ProjectFileModel(){
     delete m_root;
 }
 
+/** Override of the standard function from QAbstractItemModel */
 QVariant ProjectFileModel::data(const QModelIndex &index, int role) const{
     if ( index.isValid() && role >= UrlStringRole ){
         ProjectEntry* item = static_cast<ProjectEntry*>(index.internalPointer());
@@ -51,6 +62,7 @@ QVariant ProjectFileModel::data(const QModelIndex &index, int role) const{
     return QVariant();
 }
 
+/** Override of the standard function from QAbstractItemModel */
 QModelIndex ProjectFileModel::index(int row, int column, const QModelIndex &parent) const{
     if (parent.isValid() && parent.column() != 0)
         return QModelIndex();
@@ -77,7 +89,7 @@ QModelIndex ProjectFileModel::parent(const QModelIndex &index) const{
     if (parentItem == m_root)
         return QModelIndex();
 
-    return createIndex(parentItem->childNumber(), 0, parentItem);
+    return createIndex(parentItem->childIndex(), 0, parentItem);
 }
 
 int ProjectFileModel::rowCount(const QModelIndex &parent) const{
@@ -193,7 +205,7 @@ void ProjectFileModel::entryRemoved(const QModelIndex &item){
 }
 
 void ProjectFileModel::entryRemoved(ProjectEntry *entry){
-    entryRemoved(createIndex(entry->childNumber(), 0, entry), entry);
+    entryRemoved(createIndex(entry->childIndex(), 0, entry), entry);
 }
 
 void ProjectFileModel::entryRemoved(const QModelIndex &item, ProjectEntry *entry){
@@ -208,7 +220,7 @@ void ProjectFileModel::entryRemoved(const QModelIndex &item, ProjectEntry *entry
 }
 
 void ProjectFileModel::entryAdded(ProjectEntry *item, ProjectEntry *parent){
-    QModelIndex parentIndex = createIndex(parent->childNumber(), 0, parent);
+    QModelIndex parentIndex = createIndex(parent->childIndex(), 0, parent);
     int insertionIndex = parent->findEntryInsertionIndex(item);
     beginInsertRows(
         parentIndex,
@@ -444,7 +456,7 @@ ProjectEntry* ProjectFileModel::itemAt(const QModelIndex &index) const{
 }
 
 QModelIndex ProjectFileModel::itemIndex(ProjectEntry *entry){
-    return createIndex(entry->childNumber(), 0, entry);
+    return createIndex(entry->childIndex(), 0, entry);
 }
 
 ProjectFile *ProjectFileModel::openExternalFile(const QString &path){

@@ -36,6 +36,7 @@ protected:
     virtual void timerEvent(QTimerEvent*);
 };
 
+/** Implementation of QObject function */
 inline void IncubationController::timerEvent(QTimerEvent *){
     incubateFor(14);
 }

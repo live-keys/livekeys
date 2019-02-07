@@ -28,7 +28,7 @@ namespace lv{
 
 class Project;
 class ProjectDocument;
-class LV_EDITOR_EXPORT ProjectNavigationModel : public QAbstractListModel{
+class ProjectNavigationModel : public QAbstractListModel{
 
     Q_OBJECT
     Q_PROPERTY(bool isIndexing READ isIndexing NOTIFY isIndexingChanged)

@@ -41,16 +41,19 @@ public:
     bool isOpen() const;
 
 signals:
+    /** Signals that the document associated with the file has changed */
     void documentChanged();
 
 private:
     ProjectDocument* m_document;
 };
 
+/** Document getter */
 inline ProjectDocument *ProjectFile::document() const{
     return m_document;
 }
 
+/** Shows if the file is opened */
 inline bool ProjectFile::isOpen() const{
     return m_document != 0;
 }

@@ -65,7 +65,7 @@ QFastNlMeansDenoising::~QFastNlMeansDenoising(){
 void QFastNlMeansDenoising::process(){
     use(createLocker(), [this](){
         const cv::Mat& in = inputMat()->data();
-        cv::Mat& out = *output()->cvMat();
+        cv::Mat out;
         if ( !in.empty() ){ // fastNlMeansDenoising hangs on empty Mat
             bool colorEnabled = m_useColorAlgorithm;
             if ( m_autoDetectColor ){
@@ -78,6 +78,7 @@ void QFastNlMeansDenoising::process(){
                 fastNlMeansDenoising(in, out, m_h, m_templateWindowSize, m_searchWindowSize);
             }
         }
+        *output()->cvMat() = out;
     },
     [this](){
         emit outputChanged();

@@ -12,8 +12,14 @@
 #include <QFile>
 #include <QDebug>
 
+/**
+ * \class lv::Extensions
+ * \brief Object used to store all the extensions of LiveKeys
+ * \ingroup lvview
+ */
 namespace lv{
 
+/** Default constructor */
 Extensions::Extensions(ViewEngine *engine, const QString &settingsPath, QObject *parent)
     : QObject(parent)
     , m_globals(new QQmlPropertyMap(this))
@@ -22,10 +28,12 @@ Extensions::Extensions(ViewEngine *engine, const QString &settingsPath, QObject 
     m_path = QDir::cleanPath(settingsPath + "/extensions.json");
 }
 
+/** Default destructor */
 Extensions::~Extensions(){
     delete m_globals;
 }
 
+/** Loads all the extensions available */
 void Extensions::loadExtensions(){
     QFile file(m_path);
     if ( file.exists() && file.open(QIODevice::ReadOnly) ){
@@ -84,7 +92,7 @@ void Extensions::loadExtensions(){
         }
     }
 }
-
+/** Loads package extension from a given path */
 LiveExtension* Extensions::loadPackageExtension(const std::string &path){
     Package::Ptr p = Package::createFromPath(path);
     if ( p->hasExtension() ){
@@ -93,6 +101,7 @@ LiveExtension* Extensions::loadPackageExtension(const std::string &path){
     return nullptr;
 }
 
+/** Loads package extension from a given package */
 LiveExtension *Extensions::loadPackageExtension(const Package::Ptr &package){
     std::string path = package->extensionAbsolutePath();
     vlog("extensions").v() << "Loading extension: " << path;

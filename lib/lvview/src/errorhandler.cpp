@@ -21,8 +21,14 @@
 
 #include <QDebug>
 
+/**
+ * \class lv::ErrorHandler
+ * \brief Object used inside QML that stops an error from passing it
+ * \ingroup lvview
+ */
 namespace lv{
 
+/** Default constructor */
 ErrorHandler::ErrorHandler(QObject *parent)
     : QObject(parent)
     , m_engine(0)
@@ -31,12 +37,14 @@ ErrorHandler::ErrorHandler(QObject *parent)
 {
 }
 
+/** Default destructor */
 ErrorHandler::~ErrorHandler(){
     if ( m_engine && m_target ){
         m_engine->removeEventFilter(m_target);
     }
 }
 
+/** Implementation of a QQmlParserStatus method */
 void ErrorHandler::componentComplete(){
     m_componentComplete = true;
     if ( !m_target ){
@@ -58,6 +66,8 @@ void ErrorHandler::componentComplete(){
     m_engine->registerErrorHandler(m_target, this);
 }
 
+
+/** Used by the QML view engine to signal error */
 void ErrorHandler::signalError(const QJSValue &err){
     if ( err.property("name").toString() == "FatalException" ){
         emit fatal(err);
@@ -66,10 +76,12 @@ void ErrorHandler::signalError(const QJSValue &err){
     }
 }
 
+/** Used by the QML view engine to signal warning */
 void ErrorHandler::signalWarning(const QJSValue &error){
     emit warning(error);
 }
 
+/** Skips the error handler and propagates the error further */
 void ErrorHandler::skip(const QJSValue &error){
     if ( m_engine ){
         if ( error.property("type").toString() == "Warning" ){
@@ -80,6 +92,7 @@ void ErrorHandler::skip(const QJSValue &error){
     }
 }
 
+/** Sets the target object within the QML hierarchy that it attaches itself to */
 void ErrorHandler::setTarget(QObject *target){
     if (m_target == target)
         return;

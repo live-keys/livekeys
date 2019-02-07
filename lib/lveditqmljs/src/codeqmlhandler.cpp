@@ -1521,7 +1521,7 @@ bool CodeQmlHandler::isForAnObject(lv::QmlEditFragment *ef){
 }
 
 /**
- * \brief Removes a palette given it's container object.
+ * \brief Removes a palette given its container object.
  */
 lv::QmlEditFragment *CodeQmlHandler::removePalette(lv::CodePalette *palette){
     if ( !palette )
@@ -1580,12 +1580,33 @@ void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
     if (!edit)
         return;
 
+    connect(box, &QQuickItem::heightChanged, [this, box](){
+        resizedEditFrame(box);
+    });
+
+
+    connect(box, &QQuickItem::destroyed, [this, box](){
+        removeEditFrame(box);
+    });
+
     int pos = edit->declaration()->position();
     QTextBlock tb = m_document->textDocument()->findBlock(pos);
     QTextBlock tbend = m_document->textDocument()->findBlock(pos + edit->declaration()->length());
 
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, box->height(), box);
+}
+
+void CodeQmlHandler::removeEditFrame(QQuickItem *box)
+{
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    dh->lineBoxRemoved(box);
+}
+
+void CodeQmlHandler::resizedEditFrame(QQuickItem *box)
+{
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    dh->lineBoxResized(box, box->height());
 }
 
 /**

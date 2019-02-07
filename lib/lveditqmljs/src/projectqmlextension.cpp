@@ -166,7 +166,7 @@ void ProjectQmlExtension::registerTypes(const char *uri){
 }
 
 /**
- * \brief Assing initialization params for this object
+ * \brief Assign initialization params for this object
  */
 void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEngine *engine){
     m_project = project;

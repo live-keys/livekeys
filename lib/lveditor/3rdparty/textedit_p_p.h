@@ -116,6 +116,7 @@ public:
         , lastHighlightChangeEnd(0)
         , fragmentStart(0), fragmentStartPalette(new QObject(q_func()))
         , fragmentEnd(INT_MAX), fragmentEndPalette(new QObject(q_func()))
+        , dirtyPosition(0)
         , hAlign(TextEdit::AlignLeft), vAlign(TextEdit::AlignTop)
         , format(TextEdit::PlainText), wrapMode(TextEdit::NoWrap)
 #if defined(QT_QUICK_DEFAULT_TEXT_RENDER_TYPE)
@@ -134,7 +135,7 @@ public:
         , focusOnPress(true), persistentSelection(false), requireImplicitWidth(false)
         , selectByMouse(false), canPaste(false), canPasteValid(false), hAlignImplicit(true)
         , textCached(true), inLayout(false), selectByKeyboard(false), selectByKeyboardSet(false)
-        , hadSelection(false)
+        , hadSelection(false), invalidUntilTheEnd(false)
     {
         fragmentStartPalette->setObjectName("fragmentStartPalette");
         fragmentEndPalette->setObjectName("fragmentEndPalette");
@@ -225,6 +226,7 @@ public:
     QObject* fragmentStartPalette;
     int fragmentEnd;
     QObject* fragmentEndPalette;
+    int dirtyPosition;
 
     TextEdit::HAlignment hAlign;
     TextEdit::VAlignment vAlign;
@@ -256,6 +258,7 @@ public:
     bool selectByKeyboard:1;
     bool selectByKeyboardSet:1;
     bool hadSelection : 1;
+    bool invalidUntilTheEnd: 1;
 };
 
 }

@@ -84,6 +84,9 @@ inline void EditorSettings::addSetting(const QString &key, EditorSettingsCategor
     m_settings[key] = category;
 }
 
+/**
+ * \brief Settings content getter
+ */
 inline const QByteArray &EditorSettings::content() const{
     return m_content;
 }

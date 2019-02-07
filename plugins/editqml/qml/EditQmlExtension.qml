@@ -90,34 +90,27 @@ LiveExtension{
         var paletteBoxGroup = editorBox ? editorBox.child : null
 
         if ( paletteBoxGroup === null ){
-            if ( codeHandler.isForAnObject(ef) ){
-                editorBox = windowControls.editSpace.createEmptyEditorBox()
+            editorBox = windowControls.editSpace.createEmptyEditorBox(editor.textEdit)
+            var forAnObject = codeHandler.isForAnObject(ef)
+            var objectContainer = null
 
-                var objectContainer = root.objectContainerFactory.createObject(windowControls.editSpace.content)
+            if (forAnObject)
+            {
+                objectContainer = root.objectContainerFactory.createObject(windowControls.editSpace.content)
                 objectContainer.editor = editor
                 objectContainer.editingFragment = ef
-
-                paletteBoxGroup = root.paletteGroupFactory.createObject(objectContainer.groupsContainer)
-                paletteBoxGroup.editingFragment = ef
-                paletteBoxGroup.codeHandler = codeHandler
-                ef.visualParent = paletteBoxGroup
-
-                objectContainer.paletteGroup = paletteBoxGroup
-                paletteBoxGroup.x = 5
-
-                editorBox.setChild(objectContainer, rect, cursorCoords, windowControls.editSpace.placement.top)
-
-            } else{
-                editorBox = windowControls.editSpace.createEmptyEditorBox()
-
-                paletteBoxGroup = root.paletteGroupFactory.createObject(windowControls.editSpace.content)
-                paletteBoxGroup.editingFragment = ef
-                ef.visualParent = paletteBoxGroup
-
-                paletteBoxGroup.codeHandler = codeHandler
-                paletteBoxGroup.x = 5
-                editorBox.setChild(paletteBoxGroup, rect, cursorCoords, windowControls.editSpace.placement.top)
             }
+
+            paletteBoxGroup = root.paletteGroupFactory.createObject(forAnObject ? objectContainer.groupsContainer : windowControls.editSpace.content)
+            paletteBoxGroup.editingFragment = ef
+            ef.visualParent = paletteBoxGroup
+
+            paletteBoxGroup.codeHandler = codeHandler
+            paletteBoxGroup.x = 5
+
+            if (forAnObject) objectContainer.paletteGroup = paletteBoxGroup;
+
+            editorBox.setChild(forAnObject ? objectContainer : paletteBoxGroup, rect, cursorCoords, windowControls.editSpace.placement.top)
 
             editorBox.color = "#02070b"
             editorBox.radius = 5

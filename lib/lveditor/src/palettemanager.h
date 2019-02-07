@@ -5,8 +5,6 @@
 #include "qobjectdefs.h"
 #include <list>
 #include "qobject.h"
-using namespace std;
-
 
 namespace lv {
 
@@ -18,9 +16,11 @@ class LV_EDITOR_EXPORT PaletteData
 public:
     int m_startBlock;
     int m_lineSpan;
-    int m_palleteHeight;
+    int m_paletteHeight;
     QObject* m_palette;
     int m_paletteSpan;
+    int m_startPos;
+    int m_endPos;
 
     bool matchesPalette(QObject* p)
     {
@@ -35,7 +35,7 @@ class PaletteManager: public QObject
 public:
     PaletteManager();
 
-    void paletteAdded(int sb, int span, int height, QObject* p);
+    void paletteAdded(int sb, int span, int height, QObject* p, int startPos, int endPos);
     int drawingOffset(int blockNumber, bool forCursor);
     int positionOffset(int y);
     void setTextEdit(TextEdit *value);
@@ -46,19 +46,22 @@ public:
     int isLineAfterPalette(int blockNumber);
     int removePalette(QObject* palette);
     int resizePalette(QObject* palette, int newHeight);
+    std::list<QObject *>* updatePaletteBounds(int pos, int removed, int added);
+
 public Q_SLOTS:
     void setDirtyPos(int pos);
     void lineNumberChange();
 private:
     int m_lineHeight;
     TextEdit *m_textEdit;
-    list<PaletteData*> m_palettes;
+    std::list<PaletteData*> m_palettes;
     int m_dirtyPos;
     int m_prevLineNumber;
     int m_lineNumber;
 
     void linesAdded();
     void linesRemoved();
+    void adjustPalettePosition(PaletteData* pd);
 
 
     friend class TextControl;

@@ -64,5 +64,4 @@ void Filter::deleteLocker(SharedDataLocker* locker){
     delete locker;
 }
 
-
 }// namespace

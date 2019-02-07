@@ -129,6 +129,13 @@ ApplicationWindow{
         onOpenLicense: licenseBox.visible = true
     }
 
+    CommandsMenu {
+        id: commandsMenu
+        anchors.top: header.bottom
+        x: 395
+        z: 200
+    }
+
     Rectangle {
         id: modeWrapper
         anchors.left: parent.left
@@ -148,7 +155,13 @@ ApplicationWindow{
                 font.family: 'Open Sans, Arial, sans-serif'
                 elide: Text.ElideRight
                 width: 130
-                text : project.active && project.active.file ? project.active.file.name : ""
+                text : {
+                    if (!project.active) return "";
+                    if (project.active && project.active.file){
+                        if (project.active.file.name === "") return "untitled";
+                        else return project.active.file.name;
+                    }
+                }
             }
         }
 
@@ -601,8 +614,8 @@ ApplicationWindow{
 
         property alias content : contentWrap
 
-        function createEmptyEditorBox(){
-            return editorBoxFactory.createObject(contentWrap)
+        function createEmptyEditorBox(parent){
+            return editorBoxFactory.createObject(parent ? parent : contentWrap)
         }
 
         function createEditorBox(child, aroundRect, editorPosition, relativePlacement){
@@ -704,11 +717,6 @@ ApplicationWindow{
                 if ( relativePlacement === 0 || relativePlacement === 2 ){
                     moveXBehavior.enabled = false
                     moveYBehavior.enabled = false
-
-                    // console.log("aroundRectangle", aroundRectangle.width, aroundRectangle.height, aroundRectangle.x, aroundRectangle.y)
-                    // console.log("editorPosition", editorPosition.x, editorPosition.y)
-                    // console.log("relativePlacement", relativePlacement)
-                    // console.log("editorBoxComponent.height", editorBoxComponent.height)
 
                     var startY = editorPosition.y + aroundRectangle.y + 38
 
@@ -819,8 +827,8 @@ ApplicationWindow{
             }
 
             var editorObject = editorFactory.createObject(0)
-            editorObject.fragmentStart = cursorBlock.start
-            editorObject.fragmentEnd = cursorBlock.end
+            editorObject.fragmentStart = cursorBlock.start + 1
+            editorObject.fragmentEnd = cursorBlock.end + 1
             editorObject.height = mainHorizontalSplit.height
 
             var projectViewWidth = projectView.width
@@ -1020,7 +1028,7 @@ ApplicationWindow{
                             onObjectCreationError : {
                                 var lastErrorsText = ''
                                 var lastErrorsLog  = ''
-                                for ( var i = 0; i < errors.length; ++i ){
+                                for ( var i = 0; errors && i < errors.length; ++i ){
                                     var lerror = errors[i]
                                     var errorFile = lerror.fileName
                                     var index = errorFile.lastIndexOf('/')
@@ -1245,10 +1253,10 @@ ApplicationWindow{
         id: logo
 
         anchors.top: parent.top
-        anchors.topMargin: 9
+        anchors.topMargin: 5
         anchors.left: parent.left
-        anchors.leftMargin: 14
-        visible: false
+        anchors.leftMargin: 20
+        visible: true
 
         opacity: livecv.settings.launchMode ? 0.3 : 1.0
         source : "qrc:/images/logo.png"
