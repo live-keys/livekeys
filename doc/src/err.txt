@@ -1,45 +1,25 @@
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractorknn.h:25: warning: Compound QBackgroundSubtractorKnn is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qflannbasedmatcher.h:22: warning: Compound QFlannBasedMatcher is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qbruteforcematcher.h:22: warning: Compound QBruteForceMatcher is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qmatchestolocalkeypoint.h:26: warning: Compound QMatchesToLocalKeypoint is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.h:25: warning: Compound QBackgroundSubtractorMog2 is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qsharedmat.h:8: warning: Compound QSharedMat is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatloader.h:25: warning: Compound QMatLoader is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:23: warning: Compound QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qsimpleblobdetector.h:22: warning: Compound QSimpleBlobDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:25: warning: Compound QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:44: warning: Compound QColorHistogramNode is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfreakdescriptorextractor.h:22: warning: Compound QFreakDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:25: warning: Compound QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qorbfeaturedetector.h:22: warning: Compound QOrbFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:23: warning: Compound QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qbriefdescriptorextractor.h:22: warning: Compound QBriefDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qdrawhistogram.cpp:43: warning: Compound QHistogramConnectedLinesRenderer is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfastfeaturedetector.h:22: warning: Compound QFastFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:56: warning: Compound QCalcOpticalFlowPyrLKPrivate is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qbriskfeaturedetector.h:22: warning: Compound QBriskFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatread.h:28: warning: Compound QMatReadNode is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatview.h:22: warning: Compound QMatView is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:22: warning: Compound QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.cpp:31: warning: Compound QCamCaptureThreadPrivate is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.cpp:30: warning: Compound QColorHistogramConnectedLinesRenderer is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdensefeaturedetector.h:22: warning: Compound QDenseFeatureDetector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/lcvcore_plugin.h:22: warning: Compound LcvcorePlugin is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:29: warning: Compound QAbstractColorHistogramRenderer is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qgoodfeaturestotrackdetector.h:22: warning: Compound QGoodFeaturesToTrackDetector is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:28: warning: Compound QAbstractColorHistogramRenderer is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qdrawhistogram.h:41: warning: Compound QDrawHistogramNode is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.cpp:58: warning: Compound QColorHistogramRectanglesRenderer is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qorbdescriptorextractor.h:22: warning: Compound QOrbDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideowriterthread.h:26: warning: Compound QVideoWriterThread is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatlist.h:23: warning: Compound QMatList is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qmserfeaturedetector.h:22: warning: Compound QMSerFeatureDetector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcvglobalobject.h:24: warning: Compound QCvGlobalObject is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/lcvfeatures2d_plugin.h:22: warning: Compound Lcvfeatures2dPlugin is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qstarfeaturedetector.h:22: warning: Compound QStarFeatureDetector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/lcvvideo_plugin.h:22: warning: Compound LcvvideoPlugin is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimwrite.h:25: warning: Compound QImWrite is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qitemcapture.h:10: warning: Compound QItemCapture is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypointtoscenemap.h:29: warning: Compound QKeyPointToSceneMap::ObjectKeypointToScene is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:68: warning: Compound QColorHistogram is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qabsdiff.h:22: warning: Compound QAbsDiff is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:26: warning: Compound QImageFile is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.h:25: warning: Compound QCalcOpticalFlowPyrLK is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/lcvcore_plugin.h:28: warning: Member registerTypes(const char *uri) Q_DECL_OVERRIDE (function) of class LcvcorePlugin is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/lcvcore_plugin.h:29: warning: Member initializeEngine(QQmlEngine *engine, const char *uri) Q_DECL_OVERRIDE (function) of class LcvcorePlugin is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/lcvfeatures2d_plugin.h:28: warning: Member registerTypes(const char *uri) (function) of class Lcvfeatures2dPlugin is not documented.
@@ -57,7 +37,7 @@
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qabsdiff.h:48: warning: Member input2 (property) of class QAbsDiff is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:34: warning: Member renderSingleList(QPainter *painter, const QSize &size, const ushort *values, size_t valuesSize, qreal maxValue, const QColor &color)=0 (function) of class QAbstractColorHistogramRenderer is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:33: warning: Member renderSingleList(QPainter *painter, const QSize &size, const ushort *values, size_t valuesSize, qreal maxValue, const QColor &color)=0 (function) of class QAbstractColorHistogramRenderer is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractor.h:58: warning: Member learningRateChanged() (signal) of class QBackgroundSubtractor is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.h:39: warning: Member inputChanged() (signal) of class QMatFilter is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:41: warning: Member outputChanged() (signal) of class QMatDisplay is not documented.
@@ -104,6 +84,7 @@
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractor.h:61: warning: Member d_ptr (variable) of class QBackgroundSubtractor is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.h:99: warning: Member staticLoad(const QString &id) (slot) of class QBackgroundSubtractorMog2 is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.h:85: warning: Member historyChanged() (signal) of class QBackgroundSubtractorMog2 is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.h:86: warning: Member nmixturesChanged() (signal) of class QBackgroundSubtractorMog2 is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.h:87: warning: Member nShadowDetectionChanged() (signal) of class QBackgroundSubtractorMog2 is not documented.
@@ -152,29 +133,13 @@
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:35: warning: Member output() (function) of class QMatDisplay is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.h:57: warning: Member tau (property) of class QBackgroundSubtractorMog2 is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.h:57: warning: Member varInit (property) of class QBackgroundSubtractorMog2 is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.h:57: warning: Member varMin (property) of class QBackgroundSubtractorMog2 is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.h:57: warning: Member varMax (property) of class QBackgroundSubtractorMog2 is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.h:57: warning: Member varThreshold (property) of class QBackgroundSubtractorMog2 is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.h:57: warning: Member varThresholdGen (property) of class QBackgroundSubtractorMog2 is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractor.h:61: warning: Member d_ptr (variable) of class QBackgroundSubtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qbriefdescriptorextractor.h:27: warning: Member QBriefDescriptorExtractor(QQuickItem *parent=0) (function) of class QBriefDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:35: warning: Member QDescriptorExtractor(QQuickItem *parent=0) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:36: warning: Member QDescriptorExtractor(cv::Ptr< cv::DescriptorExtractor > extractor, QQuickItem *parent=0) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:39: warning: Member keypoints() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:40: warning: Member setKeypoints(QKeyPointVector *keypoints) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:42: warning: Member descriptors() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:43: warning: Member params() const (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:44: warning: Member isBinary() const (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:46: warning: Member descriptorCols() const (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qbriefdescriptorextractor.h:31: warning: Member initialize(const QVariantMap &params) (function) of class QBriefDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:51: warning: Member extractor() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:52: warning: Member initializeExtractor(cv::Ptr< cv::DescriptorExtractor > extractor) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:53: warning: Member componentComplete() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:61: warning: Member compute() (slot) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:62: warning: Member setParams(const QVariantMap &arg) (slot) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:56: warning: Member keypointsChanged() (signal) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:57: warning: Member descriptorsChanged() (signal) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:58: warning: Member paramsChanged() (signal) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member keypoints (property) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member descriptors (property) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member params (property) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member isBinary (property) of class QDescriptorExtractor is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qbriskfeaturedetector.h:27: warning: Member QBriskFeatureDetector(QQuickItem *parent=0) (function) of class QBriskFeatureDetector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qbriskfeaturedetector.h:30: warning: Member initialize(const QVariantMap &settings) (function) of class QBriskFeatureDetector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:35: warning: Member QFeatureDetector(QQuickItem *parent=0) (function) of class QFeatureDetector is not documented.
@@ -217,6 +182,7 @@
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptormatcher.h:114: warning: Member matches (property) of class QDescriptorMatcher is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptormatcher.h:114: warning: Member params (property) of class QDescriptorMatcher is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptormatcher.h:114: warning: Member knn (property) of class QDescriptorMatcher is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.h:52: warning: Member staticLoad(const QString &id) (slot) of class QCalcOpticalFlowPyrLK is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.h:55: warning: Member winSizeChanged() (signal) of class QCalcOpticalFlowPyrLK is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.h:56: warning: Member maxLevelChanged() (signal) of class QCalcOpticalFlowPyrLK is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.h:57: warning: Member minEigThresholdChanged() (signal) of class QCalcOpticalFlowPyrLK is not documented.
@@ -235,88 +201,7 @@
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:35: warning: Member output() (function) of class QMatDisplay is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:62: warning: Member calculateFlow(const Mat &input) (function) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:63: warning: Member draw(cv::Mat &frame, cv::Mat &m) (function) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:64: warning: Member addPoint(const cv::Point &p) (function) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:66: warning: Member totalPoints() const (function) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:69: warning: Member gray (variable) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:70: warning: Member prevGray (variable) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:71: warning: Member winSize (variable) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:72: warning: Member pointColor (variable) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:73: warning: Member termcrit (variable) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:74: warning: Member maxLevel (variable) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:75: warning: Member flags (variable) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:76: warning: Member minEigThreshold (variable) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:78: warning: Member pointState (variable) of class QCalcOpticalFlowPyrLKPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:46: warning: Member switchMat() (slot) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:47: warning: Member staticOpen(const QString &device, const QSize &resolution=QSize()) (slot) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:48: warning: Member staticLoad(const QString &device, const QSize &resolution=QSize()) (slot) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:51: warning: Member deviceChanged() (signal) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:52: warning: Member pausedChanged() (signal) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:53: warning: Member fpsChanged() (signal) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:54: warning: Member resolutionChanged() (signal) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:55: warning: Member init() (signal) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:41: warning: Member outputChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:42: warning: Member linearFilterChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:32: warning: Member QCamCapture(QQuickItem *parent=0) (function) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:35: warning: Member device() const (function) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:37: warning: Member paused() const (function) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:38: warning: Member setPaused(bool paused) (function) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:40: warning: Member fps() const (function) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:41: warning: Member setFps(qreal fps) (function) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:43: warning: Member resolution() const (function) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:35: warning: Member output() (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:58: warning: Member componentComplete() (function) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:87: warning: Member device (property) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:87: warning: Member resolution (property) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:87: warning: Member paused (property) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapture.h:87: warning: Member fps (property) of class QCamCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:50: warning: Member tick() (slot) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:47: warning: Member inactiveMatChanged() (signal) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:30: warning: Member QCamCaptureThread(const QString &device, QObject *parent=0) (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:33: warning: Member output() (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:34: warning: Member timer() (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:35: warning: Member captureWidth() const (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:36: warning: Member captureHeight() const (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:37: warning: Member setCaptureResolution(int width, int height) (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:38: warning: Member device() const (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:40: warning: Member isCaptureOpened() (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:42: warning: Member paused() const (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:43: warning: Member setPaused(bool paused) (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:45: warning: Member processNextFrame() (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.h:53: warning: Member run() (function) of class QCamCaptureThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.cpp:34: warning: Member capture (variable) of class QCamCaptureThreadPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.cpp:35: warning: Member inactiveMat (variable) of class QCamCaptureThreadPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.cpp:37: warning: Member abord (variable) of class QCamCaptureThreadPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.cpp:38: warning: Member inactiveMatReady (variable) of class QCamCaptureThreadPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.cpp:40: warning: Member width (variable) of class QCamCaptureThreadPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.cpp:41: warning: Member height (variable) of class QCamCaptureThreadPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.cpp:43: warning: Member mutex (variable) of class QCamCaptureThreadPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcamcapturethread.cpp:44: warning: Member condition (variable) of class QCamCaptureThreadPrivate is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:78: warning: Member Selection (enumeration) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:100: warning: Member inputChanged() (signal) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:101: warning: Member fillChanged() (signal) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:102: warning: Member channelChanged() (signal) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:103: warning: Member outputChanged() (signal) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:87: warning: Member QColorHistogram(QQuickItem *parent=0) (function) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:90: warning: Member input() const (function) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:91: warning: Member output() const (function) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:92: warning: Member fill() const (function) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:93: warning: Member channel() const (function) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:95: warning: Member setInput(QMat *input) (function) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:96: warning: Member setFill(bool fill) (function) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:97: warning: Member setChannel(int channel) (function) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:106: warning: Member componentComplete() (function) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:107: warning: Member updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *nodeData) (function) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:65: warning: Member input (property) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:65: warning: Member output (property) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:65: warning: Member fill (property) of class QColorHistogram is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:65: warning: Member channel (property) of class QColorHistogram is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.cpp:35: warning: Member renderSingleList(QPainter *painter, const QSize &size, const ushort *values, size_t valuesSize, qreal maxValue, const QColor &color) (function) of class QColorHistogramConnectedLinesRenderer is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:49: warning: Member QColorHistogramNode(QQuickWindow *window) (function) of class QColorHistogramNode is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.h:52: warning: Member render(int channel, const cv::Mat &values, qreal maxValue, QAbstractColorHistogramRenderer *renderer) (function) of class QColorHistogramNode is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcolorhistogram.cpp:63: warning: Member renderSingleList(QPainter *painter, const QSize &size, const ushort *values, size_t valuesSize, qreal maxValue, const QColor &color) (function) of class QColorHistogramRectanglesRenderer is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcvglobalobject.h:35: warning: Member matToArray(QMat *m) (slot) of class QCvGlobalObject is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qcvglobalobject.h:36: warning: Member assignArrayToMat(const QVariantList &a, QMat *m) (slot) of class QCvGlobalObject is not documented.
@@ -406,6 +291,8 @@
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdmatchvector.h:29: warning: Member Type (enumeration) of class QDMatchVector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdmatchvector.h:41: warning: Member matches() (function) of class QDMatchVector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdmatchvector.h:43: warning: Member matches() const (function) of class QDMatchVector is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qdrawhistogram.h:46: warning: Member QDrawHistogramNode(QQuickWindow *window) (function) of class QDrawHistogramNode is not documented.
+/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qdrawhistogram.h:49: warning: Member render(const QVariantList &values, const QVariantList &colors, qreal maxValue, QAbstractHistogramRenderer *renderer) (function) of class QDrawHistogramNode is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdrawmatches.h:53: warning: Member keypoints1Changed() (signal) of class QDrawMatches is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdrawmatches.h:54: warning: Member keypoints2Changed() (signal) of class QDrawMatches is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdrawmatches.h:55: warning: Member matches1to2Changed() (signal) of class QDrawMatches is not documented.
@@ -484,121 +371,6 @@
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptormatcher.h:114: warning: Member matches (property) of class QDescriptorMatcher is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptormatcher.h:114: warning: Member params (property) of class QDescriptorMatcher is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptormatcher.h:114: warning: Member knn (property) of class QDescriptorMatcher is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfreakdescriptorextractor.h:27: warning: Member QFreakDescriptorExtractor(QQuickItem *parent=0) (function) of class QFreakDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:35: warning: Member QDescriptorExtractor(QQuickItem *parent=0) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:36: warning: Member QDescriptorExtractor(cv::Ptr< cv::DescriptorExtractor > extractor, QQuickItem *parent=0) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:39: warning: Member keypoints() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:40: warning: Member setKeypoints(QKeyPointVector *keypoints) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:42: warning: Member descriptors() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:43: warning: Member params() const (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:44: warning: Member isBinary() const (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:46: warning: Member descriptorCols() const (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfreakdescriptorextractor.h:31: warning: Member initialize(const QVariantMap &params) (function) of class QFreakDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:51: warning: Member extractor() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:52: warning: Member initializeExtractor(cv::Ptr< cv::DescriptorExtractor > extractor) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:53: warning: Member componentComplete() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:61: warning: Member compute() (slot) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:62: warning: Member setParams(const QVariantMap &arg) (slot) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:56: warning: Member keypointsChanged() (signal) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:57: warning: Member descriptorsChanged() (signal) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:58: warning: Member paramsChanged() (signal) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member keypoints (property) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member descriptors (property) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member params (property) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member isBinary (property) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qgoodfeaturestotrackdetector.h:31: warning: Member initialize(const QVariantMap &settings) (slot) of class QGoodFeaturesToTrackDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:67: warning: Member setParams(const QVariantMap &arg) (slot) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qgoodfeaturestotrackdetector.h:27: warning: Member QGoodFeaturesToTrackDetector(QQuickItem *parent=0) (function) of class QGoodFeaturesToTrackDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:35: warning: Member QFeatureDetector(QQuickItem *parent=0) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:36: warning: Member QFeatureDetector(cv::Ptr< cv::FeatureDetector > detector, QQuickItem *parent=0) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:45: warning: Member output() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:47: warning: Member mask() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:50: warning: Member keypoints() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:53: warning: Member params() const (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:64: warning: Member updatePaintNode(QSGNode *node, UpdatePaintNodeData *) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:70: warning: Member inputChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:71: warning: Member maskChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:72: warning: Member keypointsChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:73: warning: Member outputChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:74: warning: Member paramsChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:56: warning: Member initialize(const QVariantMap &params) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:58: warning: Member detector() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:59: warning: Member initializeDetector(cv::Ptr< cv::FeatureDetector > detector) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:60: warning: Member detect() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:61: warning: Member componentComplete() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:142: warning: Member input (property) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qdrawhistogram.cpp:48: warning: Member renderSingleList(QPainter *painter, const QSize &size, const QVariantList &values, const QColor &color, qreal maxValue) (function) of class QHistogramConnectedLinesRenderer is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:36: warning: Member Load (enumeration) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:58: warning: Member systemFileChanged(const QString &file) (slot) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:59: warning: Member open(const QString &file) (slot) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:62: warning: Member iscolorChanged() (signal) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:63: warning: Member sourceChanged() (signal) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:64: warning: Member monitorChanged() (signal) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:65: warning: Member init() (signal) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:41: warning: Member outputChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:42: warning: Member linearFilterChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:45: warning: Member QImageFile(QQuickItem *parent=nullptr) (function) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:48: warning: Member source() const (function) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:49: warning: Member setSource(const QString &source) (function) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:51: warning: Member iscolor() const (function) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:52: warning: Member setIscolor(int iscolor) (function) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:54: warning: Member monitor() const (function) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:55: warning: Member setMonitor(bool monitor) (function) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:35: warning: Member output() (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:68: warning: Member componentComplete() (function) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:88: warning: Member source (property) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:88: warning: Member iscolor (property) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimagefile.h:88: warning: Member monitor (property) of class QImageFile is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimwrite.h:38: warning: Member saveImage(const QString &file, QMat *image) (slot) of class QImWrite is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimwrite.h:41: warning: Member paramsChanged() (signal) of class QImWrite is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimwrite.h:31: warning: Member QImWrite(QObject *parent=0) (function) of class QImWrite is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimwrite.h:34: warning: Member params() const (function) of class QImWrite is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimwrite.h:35: warning: Member setParams(const QJSValue &params) (function) of class QImWrite is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qimwrite.h:48: warning: Member params (property) of class QImWrite is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qitemcapture.h:23: warning: Member capture() (slot) of class QItemCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qitemcapture.h:24: warning: Member captureReady(QSize size) (slot) of class QItemCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qitemcapture.h:26: warning: Member windowAttached(QQuickWindow *window) (slot) of class QItemCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qitemcapture.h:27: warning: Member grabImage() (slot) of class QItemCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qitemcapture.h:30: warning: Member captureIsReady(QSize size) (signal) of class QItemCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qitemcapture.h:31: warning: Member captureSourceChanged() (signal) of class QItemCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:41: warning: Member outputChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:42: warning: Member linearFilterChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qitemcapture.h:16: warning: Member QItemCapture(QQuickItem *parent=0) (function) of class QItemCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qitemcapture.h:19: warning: Member setCaptureSource(QQuickItem *captureSource) (function) of class QItemCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qitemcapture.h:20: warning: Member captureSource() (function) of class QItemCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:35: warning: Member output() (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qitemcapture.h:40: warning: Member captureSource (property) of class QItemCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:57: warning: Member ptChanged() (signal) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:58: warning: Member sizeChanged() (signal) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:59: warning: Member angleChanged() (signal) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:60: warning: Member responseChanged() (signal) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:61: warning: Member octaveChanged() (signal) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:62: warning: Member classIdChanged() (signal) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:36: warning: Member QKeyPoint(QObject *parent=0) (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:37: warning: Member QKeyPoint(const cv::KeyPoint &keypoint, QObject *parent=0) (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:40: warning: Member toKeyPoint(cv::KeyPoint &kp) (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:42: warning: Member pt() const (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:43: warning: Member size() const (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:44: warning: Member angle() const (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:45: warning: Member response() const (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:46: warning: Member octave() const (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:47: warning: Member classId() const (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:49: warning: Member setPt(QPointF arg) (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:50: warning: Member setSize(float arg) (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:51: warning: Member setAngle(float arg) (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:52: warning: Member setResponse(float arg) (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:53: warning: Member setOctave(int arg) (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:54: warning: Member setClassId(int arg) (function) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:140: warning: Member pt (property) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:140: warning: Member size (property) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:140: warning: Member angle (property) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:140: warning: Member response (property) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:140: warning: Member octave (property) of class QKeyPoint is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypoint.h:140: warning: Member classId (property) of class QKeyPoint is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypointhomography.h:48: warning: Member setObjectCorners(QVariantList arg) (slot) of class QKeypointHomography is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypointhomography.h:49: warning: Member appendObjectCorners(QVariantList corner) (slot) of class QKeypointHomography is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypointhomography.h:55: warning: Member keypointsToSceneChanged() (signal) of class QKeypointHomography is not documented.
@@ -631,30 +403,6 @@
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypointvector.h:34: warning: Member keypoints() const (function) of class QKeyPointVector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qkeypointvector.h:37: warning: Member cvMat() (function) of class QKeyPointVector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.h:46: warning: Member data() const (function) of class QMat is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.h:42: warning: Member valuesChanged() (signal) of class QMat2DArray is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.h:43: warning: Member typeChanged() (signal) of class QMat2DArray is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:41: warning: Member outputChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:42: warning: Member linearFilterChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.h:30: warning: Member QMat2DArray(QQuickItem *parent=0) (function) of class QMat2DArray is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.h:33: warning: Member values() const (function) of class QMat2DArray is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.h:34: warning: Member setValues(const QVariantList &val) (function) of class QMat2DArray is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.h:36: warning: Member type() const (function) of class QMat2DArray is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.h:37: warning: Member setType(QMat::Type type) (function) of class QMat2DArray is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:35: warning: Member output() (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.h:71: warning: Member values (property) of class QMat2DArray is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.h:71: warning: Member type (property) of class QMat2DArray is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatbuffer.h:36: warning: Member inputChanged() (signal) of class QMatBuffer is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:41: warning: Member outputChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:42: warning: Member linearFilterChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatbuffer.h:29: warning: Member QMatBuffer(QQuickItem *parent=0) (function) of class QMatBuffer is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatbuffer.h:32: warning: Member setInputMat(QMat *input) (function) of class QMatBuffer is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatbuffer.h:33: warning: Member inputMat() (function) of class QMatBuffer is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:35: warning: Member output() (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatbuffer.h:56: warning: Member input (property) of class QMatBuffer is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qmatchestolocalkeypoint.h:54: warning: Member setMatches1to2(QDMatchVector *arg) (slot) of class QMatchesToLocalKeypoint is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qmatchestolocalkeypoint.h:55: warning: Member setTrainKeypointVectors(QList< QObject * > arg) (slot) of class QMatchesToLocalKeypoint is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qmatchestolocalkeypoint.h:56: warning: Member setQueryKeypointVector(QKeyPointVector *arg) (slot) of class QMatchesToLocalKeypoint is not documented.
@@ -678,28 +426,6 @@
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:35: warning: Member output() (function) of class QMatDisplay is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:49: warning: Member matSizeChanged() (signal) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:50: warning: Member colorChanged() (signal) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:51: warning: Member channelsChanged() (signal) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:52: warning: Member typeChanged() (signal) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:41: warning: Member outputChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:42: warning: Member linearFilterChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:31: warning: Member QMatEmpty(QQuickItem *parent=0) (function) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:34: warning: Member matSize() const (function) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:35: warning: Member setMatSize(const QSize &size) (function) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:37: warning: Member color() const (function) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:38: warning: Member setColor(const QColor &color) (function) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:40: warning: Member channels() const (function) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:41: warning: Member setChannels(int channels) (function) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:43: warning: Member type() const (function) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:44: warning: Member setType(QMat::Type type) (function) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:35: warning: Member output() (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:127: warning: Member matSize (property) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:127: warning: Member color (property) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:127: warning: Member channels (property) of class QMatEmpty is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.h:127: warning: Member type (property) of class QMatEmpty is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.h:39: warning: Member inputChanged() (signal) of class QMatFilter is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:41: warning: Member outputChanged() (signal) of class QMatDisplay is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:42: warning: Member linearFilterChanged() (signal) of class QMatDisplay is not documented.
@@ -722,48 +448,10 @@
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatlist.h:35: warning: Member resize(int newSize) (function) of class QMatList is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatlist.h:37: warning: Member asVector() (function) of class QMatList is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatlist.h:38: warning: Member fromVector(const std::vector< cv::Mat > &v) (function) of class QMatList is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatloader.h:34: warning: Member staticLoad(const QString &id, const QJSValue &params) (slot) of class QMatLoader is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatloader.h:30: warning: Member QMatLoader(QQuickItem *parent=0) (function) of class QMatLoader is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatread.h:33: warning: Member QMatReadNode(QQuickWindow *window) (function) of class QMatReadNode is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatread.h:36: warning: Member render(QMat *image, const QFont &font, const QColor &color, int numberWidth=5, bool equalAspectRatio=false) (function) of class QMatReadNode is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:46: warning: Member regionXChanged() (signal) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:47: warning: Member regionYChanged() (signal) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:48: warning: Member regionWidthChanged() (signal) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:49: warning: Member regionHeightChanged() (signal) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.h:39: warning: Member inputChanged() (signal) of class QMatFilter is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:41: warning: Member outputChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:42: warning: Member linearFilterChanged() (signal) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:35: warning: Member regionX() const (function) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:36: warning: Member regionY() const (function) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:37: warning: Member setregionX(int regionX) (function) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:38: warning: Member setregionY(int regionY) (function) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:40: warning: Member regionWidth() const (function) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:41: warning: Member regionHeight() const (function) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:42: warning: Member setRegionWidth(int regionWidth) (function) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:43: warning: Member setRegionHeight(int regionHeight) (function) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.h:32: warning: Member inputMat() (function) of class QMatFilter is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.h:33: warning: Member setInputMat(QMat *mat) (function) of class QMatFilter is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:35: warning: Member output() (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:37: warning: Member linearFilter() const (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.h:38: warning: Member setLinearFilter(bool filter) (function) of class QMatDisplay is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:99: warning: Member regionX (property) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:99: warning: Member regionY (property) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:99: warning: Member regionWidth (property) of class QMatRoi is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatroi.h:99: warning: Member regionHeight (property) of class QMatRoi is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatstate.h:26: warning: Member mat (variable) of class QMatState is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatstate.h:27: warning: Member linearFilter (variable) of class QMatState is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatstate.h:28: warning: Member textureIndex (variable) of class QMatState is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatstate.h:29: warning: Member textureSync (variable) of class QMatState is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatview.h:39: warning: Member matChanged(QMat *arg) (signal) of class QMatView is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatview.h:40: warning: Member linearFilterChanged() (signal) of class QMatView is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatview.h:29: warning: Member QMatView(QQuickItem *parent=0) (function) of class QMatView is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatview.h:32: warning: Member mat() (function) of class QMatView is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatview.h:33: warning: Member setMat(QMat *mat) (function) of class QMatView is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatview.h:35: warning: Member linearFilter() const (function) of class QMatView is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatview.h:36: warning: Member setLinearFilter(bool filter) (function) of class QMatView is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatview.h:43: warning: Member updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData) (function) of class QMatView is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatview.h:73: warning: Member mat (property) of class QMatView is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatview.h:73: warning: Member linearFilter (property) of class QMatView is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qmserfeaturedetector.h:31: warning: Member initialize(const QVariantMap &settings) (slot) of class QMSerFeatureDetector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:67: warning: Member setParams(const QVariantMap &arg) (slot) of class QFeatureDetector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qmserfeaturedetector.h:27: warning: Member QMSerFeatureDetector(QQuickItem *parent=0) (function) of class QMSerFeatureDetector is not documented.
@@ -785,211 +473,5 @@
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:60: warning: Member detect() (function) of class QFeatureDetector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:61: warning: Member componentComplete() (function) of class QFeatureDetector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:142: warning: Member input (property) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qorbdescriptorextractor.h:26: warning: Member QOrbDescriptorExtractor(QQuickItem *parent=0) (function) of class QOrbDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:35: warning: Member QDescriptorExtractor(QQuickItem *parent=0) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:36: warning: Member QDescriptorExtractor(cv::Ptr< cv::DescriptorExtractor > extractor, QQuickItem *parent=0) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:39: warning: Member keypoints() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:40: warning: Member setKeypoints(QKeyPointVector *keypoints) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:42: warning: Member descriptors() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:43: warning: Member params() const (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:44: warning: Member isBinary() const (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:46: warning: Member descriptorCols() const (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qorbdescriptorextractor.h:30: warning: Member initialize(const QVariantMap &params) (function) of class QOrbDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:51: warning: Member extractor() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:52: warning: Member initializeExtractor(cv::Ptr< cv::DescriptorExtractor > extractor) (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:53: warning: Member componentComplete() (function) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:61: warning: Member compute() (slot) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:62: warning: Member setParams(const QVariantMap &arg) (slot) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:56: warning: Member keypointsChanged() (signal) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:57: warning: Member descriptorsChanged() (signal) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:58: warning: Member paramsChanged() (signal) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member keypoints (property) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member descriptors (property) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member params (property) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qdescriptorextractor.h:99: warning: Member isBinary (property) of class QDescriptorExtractor is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qorbfeaturedetector.h:28: warning: Member ScoreType (enumeration) of class QOrbFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qorbfeaturedetector.h:39: warning: Member initialize(const QVariantMap &settings) (slot) of class QOrbFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:67: warning: Member setParams(const QVariantMap &arg) (slot) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qorbfeaturedetector.h:35: warning: Member QOrbFeatureDetector(QQuickItem *parent=0) (function) of class QOrbFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:35: warning: Member QFeatureDetector(QQuickItem *parent=0) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:36: warning: Member QFeatureDetector(cv::Ptr< cv::FeatureDetector > detector, QQuickItem *parent=0) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:45: warning: Member output() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:47: warning: Member mask() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:50: warning: Member keypoints() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:53: warning: Member params() const (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:64: warning: Member updatePaintNode(QSGNode *node, UpdatePaintNodeData *) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:70: warning: Member inputChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:71: warning: Member maskChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:72: warning: Member keypointsChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:73: warning: Member outputChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:74: warning: Member paramsChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:56: warning: Member initialize(const QVariantMap &params) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:58: warning: Member detector() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:59: warning: Member initializeDetector(cv::Ptr< cv::FeatureDetector > detector) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:60: warning: Member detect() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:61: warning: Member componentComplete() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:142: warning: Member input (property) of class QFeatureDetector is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qsharedmat.h:13: warning: Member QSharedMat(QObject *parent=0) (function) of class QSharedMat is not documented.
 /home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.h:46: warning: Member data() const (function) of class QMat is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qsimpleblobdetector.h:27: warning: Member QSimpleBlobDetector(QQuickItem *parent=0) (function) of class QSimpleBlobDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qsimpleblobdetector.h:30: warning: Member initialize(const QVariantMap &settings) (function) of class QSimpleBlobDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:35: warning: Member QFeatureDetector(QQuickItem *parent=0) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:36: warning: Member QFeatureDetector(cv::Ptr< cv::FeatureDetector > detector, QQuickItem *parent=0) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:45: warning: Member output() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:47: warning: Member mask() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:50: warning: Member keypoints() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:53: warning: Member params() const (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:64: warning: Member updatePaintNode(QSGNode *node, UpdatePaintNodeData *) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:67: warning: Member setParams(const QVariantMap &arg) (slot) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:70: warning: Member inputChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:71: warning: Member maskChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:72: warning: Member keypointsChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:73: warning: Member outputChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:74: warning: Member paramsChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:58: warning: Member detector() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:59: warning: Member initializeDetector(cv::Ptr< cv::FeatureDetector > detector) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:60: warning: Member detect() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:61: warning: Member componentComplete() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:142: warning: Member input (property) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qstarfeaturedetector.h:27: warning: Member QStarFeatureDetector(QQuickItem *parent=0) (function) of class QStarFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qstarfeaturedetector.h:30: warning: Member initialize(const QVariantMap &settings) (function) of class QStarFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:35: warning: Member QFeatureDetector(QQuickItem *parent=0) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:36: warning: Member QFeatureDetector(cv::Ptr< cv::FeatureDetector > detector, QQuickItem *parent=0) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:45: warning: Member output() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:47: warning: Member mask() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:50: warning: Member keypoints() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:53: warning: Member params() const (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:64: warning: Member updatePaintNode(QSGNode *node, UpdatePaintNodeData *) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:67: warning: Member setParams(const QVariantMap &arg) (slot) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:70: warning: Member inputChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:71: warning: Member maskChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:72: warning: Member keypointsChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:73: warning: Member outputChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:74: warning: Member paramsChanged() (signal) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:58: warning: Member detector() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:59: warning: Member initializeDetector(cv::Ptr< cv::FeatureDetector > detector) (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:60: warning: Member detect() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:61: warning: Member componentComplete() (function) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvfeatures2d/src/qfeaturedetector.h:142: warning: Member input (property) of class QFeatureDetector is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:61: warning: Member seekTo(int frame) (slot) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:62: warning: Member staticLoad(const QString &file) (slot) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:63: warning: Member staticOpen(const QString &file) (slot) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:66: warning: Member outChanged() (signal) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:67: warning: Member linearFilterChanged() (signal) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:68: warning: Member fileChanged() (signal) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:69: warning: Member pausedChanged() (signal) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:70: warning: Member fpsChanged() (signal) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:71: warning: Member totalFramesChanged() (signal) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:72: warning: Member loopChanged() (signal) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:73: warning: Member init() (signal) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:39: warning: Member file() const (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:41: warning: Member paused() const (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:42: warning: Member setPaused(bool paused) (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:44: warning: Member fps() const (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:45: warning: Member setFps(qreal fps) (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:47: warning: Member totalFrames() const (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:49: warning: Member currentFrame() const (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:51: warning: Member output() (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:53: warning: Member linearFilter() const (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:54: warning: Member setLinearFilter(bool filter) (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:56: warning: Member loop() const (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:57: warning: Member setLoop(bool loop) (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:77: warning: Member componentComplete() (function) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideocapture.h:119: warning: Member file (property) of class QVideoCapture is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideowriterthread.h:31: warning: Member QVideoWriterThread(const QString filename, int fourcc, double fps, const cv::Size &frameSize, bool isColor, QObject *parent=0) (function) of class QVideoWriterThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideowriterthread.h:41: warning: Member run() Q_DECL_OVERRIDE (function) of class QVideoWriterThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideowriterthread.h:42: warning: Member stop() (function) of class QVideoWriterThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideowriterthread.h:43: warning: Member save() (function) of class QVideoWriterThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideowriterthread.h:44: warning: Member isOpen() (function) of class QVideoWriterThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideowriterthread.h:45: warning: Member open() (function) of class QVideoWriterThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideowriterthread.h:47: warning: Member write(QMat *mat) (function) of class QVideoWriterThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qvideowriterthread.h:48: warning: Member framesWritten() const (function) of class QVideoWriterThread is not documented.
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractorknn.cpp:24: warning: Found unknown command `\inmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:143: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:160: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:185: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:210: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:240: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:265: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:291: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:309: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:329: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:349: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:369: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:389: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:410: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:432: warning: Found unknown command `\qmlmethod'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:32: warning: Found unknown command `\qmltype'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:33: warning: Found unknown command `\instantiates'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:34: warning: Found unknown command `\inqmlmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:35: warning: Found unknown command `\inherits'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:36: warning: Found unknown command `\quotefile'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qbackgroundsubtractormog2.cpp:39: warning: Found unknown command `\inmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:46: warning: Found unknown command `\qmltype'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:47: warning: Found unknown command `\instantiates'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:48: warning: Found unknown command `\inqmlmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:49: warning: Found unknown command `\inherits'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:62: warning: expected whitespace after { command
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:64: warning: Found unknown command `\quotefile'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:265: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:292: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:318: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:191: warning: Found unknown command `\qmlmethod'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:206: warning: Found unknown command `\qmlmethod'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:231: warning: Found unknown command `\qmlmethod'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:241: warning: Found unknown command `\qmlmethod'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvvideo/src/qcalcopticalflowpyrlk.cpp:159: warning: Found unknown command `\inmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:84: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:87: warning: Found unknown command `\list'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:95: warning: Found unknown command `\endlist'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:99: warning: Found unknown command `\value'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:100: warning: Found unknown command `\value'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:101: warning: Found unknown command `\value'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:102: warning: Found unknown command `\value'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:103: warning: Found unknown command `\value'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:104: warning: Found unknown command `\value'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:105: warning: Found unknown command `\value'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:133: warning: Found unknown command `\qmlmethod'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:155: warning: Found unknown command `\qmlmethod'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:168: warning: Found unknown command `\qmlmethod'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:184: warning: Found unknown command `\qmlmethod'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:58: warning: Found unknown command `\qmltype'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:59: warning: Found unknown command `\instantiates'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:60: warning: Found unknown command `\inqmlmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:61: warning: Found unknown command `\inherits'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:87: warning: expected whitespace after { command
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:89: warning: Found unknown command `\quotefile'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat.cpp:92: warning: Found unknown command `\inmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.cpp:79: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.cpp:83: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.cpp:33: warning: Found unknown command `\qmltype'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.cpp:34: warning: Found unknown command `\instantiates'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.cpp:35: warning: Found unknown command `\inqmlmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.cpp:36: warning: Found unknown command `\inherits'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.cpp:37: warning: expected whitespace after { command
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmat2darray.cpp:39: warning: Found unknown command `\quotefile'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatbuffer.cpp:34: warning: Found unknown command `\qmltype'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatbuffer.cpp:35: warning: Found unknown command `\instantiates'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatbuffer.cpp:36: warning: Found unknown command `\inqmlmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatbuffer.cpp:37: warning: Found unknown command `\inherits'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatbuffer.cpp:43: warning: Found unknown command `\quotefile'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.cpp:97: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.cpp:108: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.cpp:34: warning: Found unknown command `\qmltype'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.cpp:35: warning: Found unknown command `\instantiates'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.cpp:36: warning: Found unknown command `\inqmlmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.cpp:37: warning: Found unknown command `\inherits'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.cpp:43: warning: Found unknown command `\inmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatdisplay.cpp:47: warning: expected whitespace after { command
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.cpp:32: warning: Found unknown command `\qmltype'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.cpp:33: warning: Found unknown command `\instantiates'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.cpp:34: warning: Found unknown command `\inqmlmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.cpp:35: warning: Found unknown command `\inherits'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatempty.cpp:39: warning: Found unknown command `\quotefile'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.cpp:101: warning: Found unknown command `\qmlproperty'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.cpp:32: warning: Found unknown command `\qmltype'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.cpp:33: warning: Found unknown command `\instantiates'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.cpp:34: warning: Found unknown command `\inqmlmodule'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.cpp:35: warning: Found unknown command `\inherits'
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.cpp:37: warning: expected whitespace after { command
-/home/sholmes/Desktop/lcv-fork-testing/livecv/plugins/lcvcore/src/qmatfilter.cpp:40: warning: Found unknown command `\inmodule'

@@ -22,6 +22,8 @@
 class QMat;
 class QTimer;
 class QCamCaptureThreadPrivate;
+
+/// \private
 class QCamCaptureThread: public QThread{
 
     Q_OBJECT

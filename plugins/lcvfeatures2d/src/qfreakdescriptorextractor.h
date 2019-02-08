@@ -18,7 +18,7 @@
 #define QFREAKDESCRIPTOREXTRACTOR_HPP
 
 #include "qdescriptorextractor.h"
-
+/// \private
 class QFreakDescriptorExtractor : public QDescriptorExtractor{
 
     Q_OBJECT

@@ -21,7 +21,7 @@
 #include <QJSValue>
 #include <vector>
 #include "qmat.h"
-
+/// \private
 class QImWrite : public QObject{
 
     Q_OBJECT

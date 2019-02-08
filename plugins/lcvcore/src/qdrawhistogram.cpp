@@ -40,6 +40,7 @@ QAbstractHistogramRenderer::~QAbstractHistogramRenderer(){
 // QAbstractHistogramRenderer implementations
 // ------------------------------------------
 
+/// \private
 class QHistogramConnectedLinesRenderer : public QAbstractHistogramRenderer{
 
 public:

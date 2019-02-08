@@ -16,7 +16,7 @@
 
 #include "qkeypoint.h"
 #include "opencv2/features2d.hpp"
-/// \private
+
 QKeyPoint::QKeyPoint(QObject *parent)
     : QObject(parent)
     , m_ptX(0)

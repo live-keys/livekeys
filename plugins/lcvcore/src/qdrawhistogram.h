@@ -24,7 +24,6 @@ class QPainter;
 class QOpenGLPaintDevice;
 class QOpenGLFramebufferObject;
 class QOpenGLFunctions;
-
 /// \private
 class QAbstractHistogramRenderer{
 public:
@@ -39,8 +38,6 @@ public:
         qreal maxValue
     ) = 0;
 };
-
-/// \private
 class QDrawHistogramNode : public QObject, public QSGSimpleTextureNode{
 
     Q_OBJECT
