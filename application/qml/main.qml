@@ -1253,10 +1253,10 @@ ApplicationWindow{
         id: logo
 
         anchors.top: parent.top
-        anchors.topMargin: 9
+        anchors.topMargin: 5
         anchors.left: parent.left
-        anchors.leftMargin: 14
-        visible: false
+        anchors.leftMargin: 20
+        visible: true
 
         opacity: livecv.settings.launchMode ? 0.3 : 1.0
         source : "qrc:/images/logo.png"
