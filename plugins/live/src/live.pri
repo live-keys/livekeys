@@ -25,7 +25,9 @@ HEADERS += \
     $$PWD/tuplepropertymap.h \
     $$PWD/qmlobjectlist.h \
     $$PWD/stringbasedloader.h \
-    $$PWD/qmlvariantlist.h
+    $$PWD/qmlvariantlist.h \
+    $$PWD/maparray.h \
+    $$PWD/maparraydata.h
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
@@ -51,4 +53,6 @@ SOURCES += \
     $$PWD/tuplepropertymap.cpp \
     $$PWD/qmlobjectlist.cpp \
     $$PWD/stringbasedloader.cpp \
-    $$PWD/qmlvariantlist.cpp
+    $$PWD/qmlvariantlist.cpp \
+    $$PWD/maparray.cpp \
+    $$PWD/maparraydata.cpp

@@ -33,6 +33,8 @@
 #include "stringbasedloader.h"
 #include "qmlobjectlist.h"
 #include "qmlvariantlist.h"
+#include "maparray.h"
+#include "maparraydata.h"
 
 #include "live/applicationcontext.h"
 #include "live/visuallog.h"
@@ -63,6 +65,8 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::Tuple>(            uri, 1, 0, "Tuple");
     qmlRegisterType<lv::TcpLine>(          uri, 1, 0, "TcpLine");
     qmlRegisterType<lv::TcpAgent>(         uri, 1, 0, "TcpAgent");
+    qmlRegisterType<lv::MapArray>(         uri, 1, 0, "MapArray");
+    qmlRegisterType<lv::MapArrayData>(     uri, 1, 0, "MapArrayData");
     qmlRegisterUncreatableType<lv::QmlObjectList>(
         uri, 1, 0, "QmlObjectList", "QmlObjectList can only be created internally.");
     qmlRegisterUncreatableType<lv::QmlVariantList>(
