@@ -35,17 +35,11 @@ public:
 
     QKeyPointToSceneMap* keypointsToScene() const;
     void setKeypointsToScene(QKeyPointToSceneMap* arg);
-    /**
-    *\brief Image that is used
-    */
+
     QMat* queryImage() const;
-    /**
-    *\brief Specifies object corners
-    */
+
     QVariantList objectCorners() const;
-    /**
-    *\brief Specifies object colors
-    */
+
     QVariantList objectColors() const;
     void setObjectColors(const QVariantList& arg);
 

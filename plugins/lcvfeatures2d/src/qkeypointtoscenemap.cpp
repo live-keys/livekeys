@@ -17,7 +17,7 @@
 #include "qkeypointtoscenemap.h"
 
 /**
-*\class QKeypointToSceneMap
+*\class QKeyPointToSceneMap
 *\ingroup plugin-lcvfeatures2d
 *\brief Mapping from a set of keypoints
 */
@@ -36,4 +36,14 @@ QKeyPointToSceneMap::QKeyPointToSceneMap(QObject *parent)
 QKeyPointToSceneMap::~QKeyPointToSceneMap(){
 
 }
+
+/**
+*\fn lv::QKeyPointToSceneMap::append()
+*\brief Appends object
+*/
+
+/**
+*\fn lv::QKeyPointToSceneMap::resize()
+*\brief Resize the mapping to a specific size(usefull for performance efficiency)
+*/
 

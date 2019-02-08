@@ -30,6 +30,7 @@
 // QAbstractHistogramRenderer definitions
 // --------------------------------------
 
+/// \private
 QAbstractHistogramRenderer::QAbstractHistogramRenderer(){
 }
 
@@ -67,6 +68,7 @@ public:
     }
 };
 
+/// \private
 class QHistogramRectanglesRenderer : public QAbstractHistogramRenderer{
 
 public:
@@ -98,6 +100,7 @@ public:
     }
 };
 
+/// \private
 class QHistogramBinaryRenderer : public QAbstractHistogramRenderer{
 
 public:

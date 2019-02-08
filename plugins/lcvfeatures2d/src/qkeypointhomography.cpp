@@ -34,9 +34,36 @@ QKeypointHomography::QKeypointHomography(QQuickItem* parent)
 {
     setFlag(QQuickItem::ItemHasContents, true);
 }
-
+ /**
+ *\brief QKeypointHomography desctructor
+ */
 QKeypointHomography::~QKeypointHomography(){
 }
+
+/**
+*\fn lv::QKeypointHomography::queryImage()
+*\brief Getter for The image that is used 
+*/
+
+/**
+*\fn lv::QKeypointHomography::setQueryImage()
+*\brief Setter for the image that is used 
+*/
+
+/**
+*\fn lv::QKeypointHomography::objectCorners()
+*\brief Specifies object corners 
+*/
+
+/**
+*\fn lv::QKeypointHomography::objectColors()
+*\brief Specifies object colors
+*/
+
+/**
+*\fn lv::QKeypointHomography::setObjectColors()
+*\brief Setter for the object colors
+*/
 
 QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
     if ( m_keypointsToScene && m_queryImage ){

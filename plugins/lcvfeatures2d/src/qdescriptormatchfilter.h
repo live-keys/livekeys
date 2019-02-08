@@ -38,21 +38,14 @@ public:
     void setMatches1to2(QDMatchVector* arg);
 
     QDMatchVector* matches1to2Out() const;
-    /**
-     * \brief Minimum distance that the match has to the actual outcome.
-     */
+    
     float minDistanceCoeff() const;
     void setMinDistanceCoeff(float arg);
 
-    /**
-     * \brief Maximum distance allowed betwen set of two matches.
-     */
     float maxDistance() const;
     void setMaxDistance(float arg);
 
-    /**
-     * \brief The match betwen the first match and it's next consecutive match.
-     */
+
     float nndrRatio() const;
     void setNndrRatio(float arg);
 

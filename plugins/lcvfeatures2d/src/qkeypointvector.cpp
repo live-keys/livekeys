@@ -39,6 +39,46 @@ QKeyPointVector::QKeyPointVector(QQuickItem *parent)
 QKeyPointVector::~QKeyPointVector(){
 }
 
+/**
+*\fn lv::QKeyPointVector::setMat()
+*\brief Matrix where keypoint are detected from.
+*/
+
+/**
+*\fn lv::QKeyPointVector::createOwnedObject()
+*\brief Creates copy of the vector.
+*/
+
+/**
+*\fn QKeyPointVector::keyPointData()
+*\brief Getting the KeyPointData as the list of objects.
+*/
+
+/**
+*\fn QKeyPointVector::setKeyPointData()
+*\brief Getting the Setter for keyPointData.
+*/
+
+/**
+*\fn QKeyPointVector::appendKeyPoint()
+*\brief Appends keypoint
+*/
+
+/**
+*\fn QKeyPointVector::removeKeyPoint()
+*\brief Removes keypoint
+*/
+
+/**
+*\fn QKeyPointVector::createKeyPoint()
+*\brief Creates keypoint
+*/
+
+/**
+*\fn QKeyPointVector::size()
+*\brief Size of the vector
+*/
+
 QKeyPointVector* QKeyPointVector::createOwnedObject(){
     QKeyPointVector* ownedObject = new QKeyPointVector;
     ownedObject->m_keyPoints     = m_keyPoints;

@@ -45,6 +45,7 @@ private:
 
 };
 
+/// \private
 class QMatRead : public QQuickItem{
 
     Q_OBJECT

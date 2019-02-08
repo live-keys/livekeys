@@ -20,6 +20,7 @@
 #include <QQuickItem>
 #include "qmatfilter.h"
 
+/// \private
 class QOverlapMat : public QMatFilter{
 
     Q_OBJECT
