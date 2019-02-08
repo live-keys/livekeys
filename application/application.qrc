@@ -11,6 +11,7 @@
         <file alias="License.qml">qml/License.qml</file>
         <file alias="MessageDialogMain.qml">qml/MessageDialogMain.qml</file>
         <file alias="LogContainer.qml">qml/LogContainer.qml</file>
+        <file alias="CommandsMenu.qml">qml/CommandsMenu.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>

@@ -38,18 +38,36 @@ namespace lv{
 class ErrorHandler;
 class IncubationController;
 
+/**
+ * \class lv::FatalException
+ * \brief Subclass of the lv::Exception used for unrecoverable errors
+ *
+ *
+ * \ingroup lvview
+ */
 class LV_VIEW_EXPORT FatalException : public lv::Exception{
 
 public:
+    /** Default costructor */
     FatalException(const std::string& message, int code = 0): lv::Exception(message, code){}
+    /** QString variant of the default constructor */
     FatalException(const QString& message, int code = 0) : lv::Exception(message.toStdString(), code){}
+    /** Default destructor */
     virtual ~FatalException(){}
 };
 
+/**
+ * \class lv::InputException
+ * \brief Subclass of the lv::Exception used for configuration errors
+ * \ingroup lvview
+ */
 class LV_VIEW_EXPORT InputException : public lv::Exception{
 public:
+    /** Defautlt constructor */
     InputException(const std::string& message, int code = 0) : lv::Exception(message, code){}
+    /** QString variant of the default constructor */
     InputException(const QString& message, int code = 0) : lv::Exception(message.toStdString(), code){}
+    /** Default destructor */
     virtual ~InputException(){}
 };
 
@@ -60,6 +78,7 @@ class LV_VIEW_EXPORT ViewEngine : public QObject{
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
 
 public:
+    /** Callback function type to be run after the engine finishes compiling */
     typedef void(*CompileHook)(const QString&, const QUrl&, QObject*, QObject*, void*);
 
 private:
@@ -108,12 +127,18 @@ public:
     TypeInfo::Ptr typeInfo(const QMetaType& metaType) const;
 
 signals:
+    /** Signals that we're about to create an object of our compiled code */
     void aboutToCreateObject(const QUrl& file);
+    /** Loading indicator has changed */
     void isLoadingChanged(bool isLoading);
+    /** Object was created */
     void objectCreated(QObject* object);
+    /** Error in object creation */
     void objectCreationError(QJSValue errors);
 
+    /** Emitted when the error is propagated all the way to the application */
     void applicationError(QJSValue error);
+    /** Emitted when the warning is propagated all the way to the application  */
     void applicationWarning(QJSValue warning);
 
 public slots:
@@ -129,9 +154,12 @@ public slots:
 
     void throwError(const QJSValue& error, QObject* object = 0);
     void throwWarning(const QJSValue& error, QObject* object = 0);
+#ifndef DOXYGEN_PRIVATE
+    /// @private
     QString markErrorObject(QObject* object);
+    /// @private
     QJSValue lastErrorsObject() const;
-
+#endif
 private:
     QJSValue toJSError(const QQmlError& error) const;
     QJSValue toJSErrors(const QList<QQmlError>& errors) const;
@@ -154,6 +182,12 @@ private:
     bool m_isLoading;
 };
 
+/**
+ * \brief Allows the engine to register info about a type
+ *
+ * We pass serialization functions that transforms the type into MLNode, which enables logging, as well as a constructor
+ * and a canLog parameters which shows if logging is possible for this type.
+ */
 template<typename T>
 TypeInfo::Ptr ViewEngine::registerQmlTypeInfo(
         const std::function<void(const T&, MLNode&)>& serializeFunction,
@@ -172,18 +206,22 @@ TypeInfo::Ptr ViewEngine::registerQmlTypeInfo(
     return t;
 }
 
+/** Shows if the engine is loading */
 inline bool ViewEngine::isLoading() const{
     return m_isLoading;
 }
 
+/** Sets the loading indicator of the object */
 inline void ViewEngine::setIsLoading(bool isLoading){
     m_isLoading = isLoading;
 }
 
+/** The contained QQmlEngine */
 inline QQmlEngine*ViewEngine::engine(){
     return m_engine;
 }
 
+/** The engine mutex, which is used to lock the engine for use */
 inline QMutex *ViewEngine::engineMutex(){
     return m_engineMutex;
 }

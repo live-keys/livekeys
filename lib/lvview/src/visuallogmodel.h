@@ -42,8 +42,6 @@ public:
     QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
     int rowCount(const QModelIndex &parent) const Q_DECL_OVERRIDE;
 
-    const VisualLogEntry& entryAt(int index);
-
     void onMessage(
         const VisualLog::Configuration* configuration,
         const VisualLog::MessageInfo& messageInfo,
@@ -73,7 +71,9 @@ public slots:
     void clearValues();
 
 signals:
+    /** Width has changed */
     void widthChanged(int width);
+    /** Entry was added */
     void entryAdded();
 
 private:
@@ -87,14 +87,17 @@ private:
     int                            m_width;
 };
 
+/** Implementation of the respective QAbstractListModel function */
 inline int VisualLogModel::rowCount(const QModelIndex &) const{
     return m_entries.size();
 }
 
+/** Returns the width */
 inline int VisualLogModel::width() const{
     return m_width;
 }
 
+/** Sets the width */
 inline void VisualLogModel::setWidth(int width){
     if (m_width == width)
         return;
@@ -103,22 +106,27 @@ inline void VisualLogModel::setWidth(int width){
     emit widthChanged(width);
 }
 
+/** Implementation of the respective VisualLogBaseModel function */
 inline int VisualLogModel::totalEntries() const{
     return m_entries.size();
 }
 
+/** Begin-iterator of the log entries */
 inline QList<VisualLogEntry>::Iterator VisualLogModel::begin(){
     return m_entries.begin();
 }
 
+/** End-iterator of the log entries */
 inline QList<VisualLogEntry>::Iterator VisualLogModel::end(){
     return m_entries.end();
 }
 
+/** Const begin-iterator of the log entries */
 inline QList<VisualLogEntry>::ConstIterator VisualLogModel::begin() const{
     return m_entries.begin();
 }
 
+/** Const end-iterator of the log entries */
 inline QList<VisualLogEntry>::ConstIterator VisualLogModel::end() const{
     return m_entries.end();
 }

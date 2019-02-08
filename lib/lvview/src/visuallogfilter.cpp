@@ -109,6 +109,15 @@ int VisualLogFilter::SearchQuery::locateIn(const QString &str){
 // VisualLogFilter
 // ---------------------------------------------------------------
 
+/**
+ * \class lv::VisualLogFilter
+ * \brief An implementation of the VisualLogBaseModel to represent a filtered set of log entries
+ *
+ * The filter can be applied via tag, prefix or a regular search string
+ * \ingroup lvview
+ */
+
+/** Default constructor */
 VisualLogFilter::VisualLogFilter(QObject *parent)
     : VisualLogBaseModel(parent)
     , m_source(0)
@@ -119,9 +128,11 @@ VisualLogFilter::VisualLogFilter(QObject *parent)
     connect(&m_workerWatcher, SIGNAL(finished()), this, SLOT(refilterReady()));
 }
 
+/** Blank destructor */
 VisualLogFilter::~VisualLogFilter(){
 }
 
+/** Sets the model data source */
 void VisualLogFilter::setSource(VisualLogBaseModel *source){
     if (m_source == source)
         return;
@@ -161,11 +172,13 @@ void VisualLogFilter::setSource(VisualLogBaseModel *source){
     refilter();
 }
 
+/** Implementation of the respective QQmlParserStatus function */
 void VisualLogFilter::componentComplete(){
     m_componentReady = true;
     refilter();
 }
 
+/** Implementation of the respective lv::VisualLogBaseModel/QAbstractListModel function */
 QVariant VisualLogFilter::data(const QModelIndex &index, int role) const{
     if ( index.row() >= m_entries.size() )
         return QVariant();
@@ -178,10 +191,12 @@ QVariant VisualLogFilter::data(const QModelIndex &index, int role) const{
     return QVariant();
 }
 
+/** Implementation of the respective lv::VisualLogBaseModel/QAbstractListModel function */
 int VisualLogFilter::rowCount(const QModelIndex &) const{
     return m_entries.size();
 }
 
+/** Implementation of the respective lv::VisualLogBaseModel function */
 QVariant VisualLogFilter::entryDataAt(int index) const{
     if ( m_source ){
         return m_source->entryDataAt(m_entries[index]);
@@ -190,6 +205,7 @@ QVariant VisualLogFilter::entryDataAt(int index) const{
     return QVariant();
 }
 
+/** Implementation of the respective lv::VisualLogBaseModel function */
 QString VisualLogFilter::entryPrefixAt(int index) const{
     if ( m_source ){
         return m_source->entryPrefixAt(m_entries[index]);
@@ -198,12 +214,14 @@ QString VisualLogFilter::entryPrefixAt(int index) const{
     return QString();
 }
 
+/** Implementation of the respective lv::VisualLogBaseModel function */
 const VisualLogEntry &VisualLogFilter::entryAt(int index) const{
     Q_ASSERT(m_source);
 
     return m_source->entryAt(m_entries[index]);
 }
 
+/** Sets the indexing indicator */
 void VisualLogFilter::setIsIndexing(bool isIndexing){
     if ( m_isIndexing == isIndexing )
         return;
@@ -255,6 +273,7 @@ bool VisualLogFilter::filterEntry(const VisualLogEntry &entry){
     return true;
 }
 
+/** Sets the prefix */
 void VisualLogFilter::setPrefix(QJSValue prefix){
     SearchQuery sq(prefix, ViewContext::instance().engine()->engine());
     if ( sq == m_prefix )
@@ -266,13 +285,19 @@ void VisualLogFilter::setPrefix(QJSValue prefix){
     refilter();
 }
 
+/** The prefix we're filtering by */
 QJSValue VisualLogFilter::prefix() const{
     return m_prefix.toJs(ViewContext::instance().engine()->engine());
 }
 
-// this slot gets called after the worker finishes, but also gets called only after
-// control is returned to the event loop. Any changes in between will be lost, therefore
-// we handle the changes separately, using the m_workerIgnoreResult variable.
+/**
+ * \brief Slot that listens for the ending of indexing in the background.
+ *
+ *
+ * This slot gets called after the worker finishes, but also gets called only after
+ * control is returned to the event loop. Any changes in between will be lost, therefore
+ * we handle the changes separately, using the m_workerIgnoreResult variable.
+ */
 
 void VisualLogFilter::refilterReady(){
     if ( m_workerIgnoreResult ){
@@ -285,14 +310,18 @@ void VisualLogFilter::refilterReady(){
     setIsIndexing(false);
 }
 
+/** Source is destroyed slot */
 void VisualLogFilter::sourceDestroyed(){
     setSource(0);
 }
 
+/** Reacts to changes in the source model */
 void VisualLogFilter::sourceModelReset(){
     refilter();
 }
 
+
+/** Before a reset, we ignore the results of the worker because they're not valid anymore */
 void VisualLogFilter::sourceModelAboutToReset(){
     m_workerIgnoreResult = true;
     m_workerWatcher.waitForFinished();
@@ -301,6 +330,7 @@ void VisualLogFilter::sourceModelAboutToReset(){
     endResetModel();
 }
 
+/** When source model is having rows removed, we ignore the worker results and rebuild */
 void VisualLogFilter::sourceRowsAboutToBeRemoved(const QModelIndex &, int, int to){
     if ( m_workerWatcher.isRunning() ){
         m_workerWatcher.waitForFinished();
@@ -329,6 +359,7 @@ void VisualLogFilter::sourceRowsAboutToBeRemoved(const QModelIndex &, int, int t
     endResetModel();
 }
 
+/** When source model is having rows added, we ignore the worker results and rebuild */
 void VisualLogFilter::sourceRowsInserted(const QModelIndex &, int from, int to){
     if ( m_workerWatcher.isRunning() ){
         m_workerWatcher.waitForFinished();
@@ -362,6 +393,7 @@ void VisualLogFilter::sourceRowsInserted(const QModelIndex &, int from, int to){
     }
 }
 
+/** Sets the actual search string */
 void VisualLogFilter::setSearch(QJSValue search){
     SearchQuery sq(search, ViewContext::instance().engine()->engine());
     if ( sq == m_search )

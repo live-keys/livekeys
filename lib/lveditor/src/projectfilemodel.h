@@ -27,7 +27,7 @@ namespace lv{
 class ProjectEntry;
 class ProjectFile;
 
-class LV_EDITOR_EXPORT ProjectFileModel : public QAbstractItemModel{
+class ProjectFileModel : public QAbstractItemModel{
 
     Q_OBJECT
 

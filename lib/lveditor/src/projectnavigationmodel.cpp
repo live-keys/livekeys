@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "live/projectnavigationmodel.h"
+#include "projectnavigationmodel.h"
 #include "live/projectdocumentmodel.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"

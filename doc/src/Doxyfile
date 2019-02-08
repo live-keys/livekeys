@@ -793,10 +793,9 @@ WARN_LOGFILE           =
 INPUT                  = \
     ../../lib/lvbase \
     ../../lib/lveditor \
-    ../../lib/lveditor/src/lveditorglobal.h \
     ../../lib/lveditqmljs/src/lveditqmljsglobal.h \
     ../../lib/lvelements/src/lvelementsglobal.h \
-    ../../lib/lvview/src \
+    ../../lib/lvview \
     ../../plugins/live \
     ../../plugins/lcvcore \
     ../../plugins/lcvfeatures2d \

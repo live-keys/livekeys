@@ -26,6 +26,13 @@
 #include <QDirIterator>
 #include <QDebug>
 
+/**
+ * \class lv::PaletteContainer
+ * \brief Stores all the palettes that are available in LiveKeys.
+ *
+ * More palettes can get populated when a new plugin is added.
+ * \ingroup lveditor
+ */
 namespace lv{
 
 class PaletteLoader{
@@ -127,6 +134,9 @@ PaletteContainer::~PaletteContainer(){
     delete d_ptr;
 }
 
+/**
+ * \brief Recursively scans the given folder path for plugins
+ */
 void PaletteContainer::scanPalettes(const QString &path){
     QDirIterator dit(path);
     while ( dit.hasNext() ){
@@ -144,6 +154,9 @@ void PaletteContainer::scanPalettes(const QString &path){
     }
 }
 
+/**
+ * \brief Extract the palettes from the given plugin
+ */
 void PaletteContainer::scanPalettes(Plugin::Ptr plugin){
     Q_D(PaletteContainer);
 
@@ -159,12 +172,18 @@ void PaletteContainer::scanPalettes(Plugin::Ptr plugin){
     }
 }
 
+/**
+ * \brief PalleteContainer creator than simultaneously scans the given path and loads them
+ */
 PaletteContainer *PaletteContainer::create(QQmlEngine *engine, const QString &path){
     PaletteContainer* ct = new PaletteContainer(engine);
     ct->scanPalettes(path);
     return ct;
 }
 
+/**
+ * \brief Finds a palette with a specific type
+ */
 PaletteLoader *PaletteContainer::findPalette(const QString &type) const{
     Q_D(const PaletteContainer);
 
@@ -174,6 +193,11 @@ PaletteLoader *PaletteContainer::findPalette(const QString &type) const{
     return it.value();
 }
 
+/**
+ * \brief Find a list of palettes of a given type
+ *
+ * This list is Javascript-owned!
+ */
 PaletteList *PaletteContainer::findPalettes(const QString &type, lv::PaletteList *l){
     Q_D(PaletteContainer);
 
@@ -192,6 +216,9 @@ PaletteList *PaletteContainer::findPalettes(const QString &type, lv::PaletteList
     return l;
 }
 
+/**
+ * \brief Find the number of palettes of a given type
+ */
 int PaletteContainer::countPalettes(const QString &type) const{
     Q_D(const PaletteContainer);
 
@@ -206,14 +233,25 @@ int PaletteContainer::countPalettes(const QString &type) const{
     return result;
 }
 
+/**
+ * \brief Get palette name from the interal PaletteLoader object
+ */
 QString PaletteContainer::paletteName(PaletteLoader *loader){
     return QFileInfo(loader->path()).baseName();
 }
 
+/**
+ * \brief Get palette path from the internal PaletteLoader object
+ */
 const QString &PaletteContainer::palettePath(PaletteLoader *loader){
     return loader->path();
 }
 
+/**
+ * \brief Instantiates a new palette from the PaletteLoader
+ *
+ * Again, this object has Javascript ownership
+ */
 CodePalette *PaletteContainer::createPalette(PaletteLoader *loader){
     Q_D(PaletteContainer);
     CodePalette* cp = loader->getItem(d->engine);
@@ -225,6 +263,9 @@ CodePalette *PaletteContainer::createPalette(PaletteLoader *loader){
     return cp;
 }
 
+/**
+ * \brief Return number of palette inside the container
+ */
 int PaletteContainer::size() const{
     Q_D(const PaletteContainer);
     return d->items.size();

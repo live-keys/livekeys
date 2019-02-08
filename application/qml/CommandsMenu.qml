@@ -1,53 +1,48 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
-import editor 1.0
-import editor.private 1.0
-import base 1.0
 
 Rectangle{
     id: root
     visible: false
     color: "transparent"
-    // signal closeFile(string path)
 
     onVisibleChanged: {
         if ( visible ){
             show()
         } else {
             close()
-            cancel()
         }
 
     }
 
-    //signal cancel()
-    // signal open(string path)
+    width: 400
+    height: 400
 
     function show(){
-        navigationInput.forceActiveFocus()
+        commandsMenuInput.forceActiveFocus()
     }
+
     function close(){
-        documentView.currentIndex = 0
-        navigationInput.text = ''
+        commandsView.currentIndex = 0
+        commandsMenuInput.text = ''
         visible = false
     }
 
-
     Rectangle{
-        id: commandsSearchBox
+        id: commandsMenuInputBox
         anchors.top: parent.top
         anchors.left: parent.left
-        width: parent.width - 150
+        width: parent.width
+        height: 30
 
         color: "#050d13"
-        height: 30
 
         border.color: "#0d1f2d"
         border.width: 1
 
         TextInput{
-            id : navigationInput
+            id : commandsMenuInput
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 16
@@ -61,7 +56,7 @@ Rectangle{
 
             text: ""
             onTextChanged: {
-                project.navigationModel.setFilter(text)
+                livecv.commands.model.setFilter(text)
             }
 
             MouseArea{
@@ -70,18 +65,19 @@ Rectangle{
                 cursorShape: Qt.IBeamCursor
             }
 
+            z: 300
             Keys.onPressed: {
                 if ( event.key === Qt.Key_Down ){
-                    documentView.highlightNext()
+                    commandsView.highlightNext()
                     event.accepted = true
                 } else if ( event.key === Qt.Key_Up ){
-                    documentView.highlightPrev()
+                    commandsView.highlightPrev()
                     event.accepted = true
                 } else if ( event.key === Qt.Key_PageDown ){
-                    documentView.highlightNextPage()
+                    commandsView.highlightNextPage()
                     event.accepted = true
                 } else if ( event.key === Qt.Key_PageUp ){
-                    documentView.highlightPrevPage()
+                    commandsView.highlightPrevPage()
                     event.accepted = true
                 } else if ( event.key === Qt.Key_K && ( event.modifiers & Qt.ControlModifier) ){
                     root.close()
@@ -90,19 +86,21 @@ Rectangle{
                 }
             }
             Keys.onReturnPressed: {
-                root.open(documentView.currentItem.path)
-                root.close()
+                if (commandsView.currentItem) {
+                    livecv.commands.execute(commandsView.currentItem.command)
+                    root.close()
+                }
                 event.accepted = true
             }
             Keys.onEscapePressed: {
                 root.close()
-                root.cancel()
                 event.accepted = true
             }
         }
     }
 
-    Rectangle{
+    /*Rectangle{
+        z: 300
         anchors.fill: parent
         anchors.topMargin: 30
         color: "#030609"
@@ -112,7 +110,6 @@ Rectangle{
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                root.cancel()
                 root.visible = false
                 mouse.accepted = true;
             }
@@ -123,13 +120,17 @@ Rectangle{
             onPressAndHold: mouse.accepted = true;
             onWheel: wheel.accepted = true
         }
-    }
+    }*/
 
     ScrollView{
+        z: 300
         width: parent.width
-        height: parent.height - 35
+        height: commandsView.count * commandsView.delegateHeight > parent.height - commandsMenuInputBox.height ?
+                    parent.height - commandsMenuInputBox.height :
+                    commandsView.count * commandsView.delegateHeight
         anchors.top: parent.top
-        anchors.topMargin: navigationInputBox.height
+        anchors.left: parent.left
+        anchors.topMargin: commandsMenuInputBox.height
 
         style: ScrollViewStyle {
             transientScrollBars: false
@@ -156,8 +157,8 @@ Rectangle{
         }
 
         ListView{
-            id: documentView
-            model : navigationInput.text === '' ? project.documentModel : project.navigationModel
+            id: commandsView
+            model : livecv.commands.model
             width: parent.width
             height: parent.height
             clip: true
@@ -167,65 +168,66 @@ Rectangle{
             boundsBehavior : Flickable.StopAtBounds
             highlightMoveDuration: 100
 
-            property int delegateHeight : 40
+            property int delegateHeight : 20
 
             function highlightNext(){
-                if ( documentView.currentIndex + 1 <  documentView.count ){
-                    documentView.currentIndex++;
+                if ( commandsView.currentIndex + 1 <  commandsView.count ){
+                    commandsView.currentIndex++;
                 } else {
-                    documentView.currentIndex = 0;
+                    commandsView.currentIndex = 0;
                 }
             }
+
             function highlightPrev(){
-                if ( documentView.currentIndex > 0 ){
-                    documentView.currentIndex--;
+                if ( commandsView.currentIndex > 0 ){
+                    commandsView.currentIndex--;
                 } else {
-                    documentView.currentIndex = documentView.count - 1;
+                    commandsView.currentIndex = commandsView.count - 1;
                 }
             }
 
             function highlightNextPage(){
-                var noItems = Math.floor(documentView.height / documentView.delegateHeight)
-                if ( documentView.currentIndex + noItems < documentView.count ){
-                    documentView.currentIndex += noItems;
+                var noItems = Math.floor(commandsView.height / commandsView.delegateHeight)
+                if ( commandsView.currentIndex + noItems < commandsView.count ){
+                    commandsView.currentIndex += noItems;
                 } else {
-                    documentView.currentIndex = documentView.count - 1;
+                    commandsView.currentIndex = commandsView.count - 1;
                 }
             }
             function highlightPrevPage(){
-                var noItems = Math.floor(documentView.height / documentView.delegateHeight)
-                if ( documentView.currentIndex - noItems >= 0 ){
-                    documentView.currentIndex -= noItems;
+                var noItems = Math.floor(commandsView.height / commandsView.delegateHeight)
+                if ( commandsView.currentIndex - noItems >= 0 ){
+                    commandsView.currentIndex -= noItems;
                 } else {
-                    documentView.currentIndex = 0;
+                    commandsView.currentIndex = 0;
                 }
             }
 
+
             delegate: Rectangle{
 
-                property string path: model.path
+                property string command: model.command
 
+                z: 400
                 color: ListView.isCurrentItem ? "#11202d" : "#0a131a"
                 width: root.width
-                height: documentView.delegateHeight
+                height: commandsView.delegateHeight
                 Text{
                     anchors.left: parent.left
                     anchors.leftMargin: 20
-                    text: model.name !== '' ? model.name : 'untitled'
+                    text: model.description
                     color: "#ebebeb"
 
                     font.family: "Open Sans, sans-serif"
                     font.pixelSize: 12
                     font.weight: Font.Light
-                    font.italic: model.isOpen
                 }
-                Text{
-                    anchors.left: parent.left
-                    anchors.leftMargin: 20
-                    anchors.top: parent.top
-                    anchors.topMargin: 20
 
-                    text: model.path
+                Text{
+                    anchors.right: parent.right
+                    anchors.rightMargin: 20
+
+                    text: model.shortcuts
                     color: "#aaa5a5"
 
                     font.family: "Open Sans, sans-serif"
@@ -236,26 +238,8 @@ Rectangle{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        root.open(path)
+                        livecv.commands.execute(model.command)
                         root.close()
-                    }
-                }
-
-                Text{
-                    text: 'x'
-                    width: 30
-                    height: 30
-                    visible : model.isOpen
-                    anchors.right: parent.right
-                    anchors.rightMargin: 0
-                    anchors.verticalCenter: parent.verticalCenter
-                    color: "#acabab"
-                    font.family: "Source Code Pro, sans-serif"
-                    font.pixelSize: 16
-                    font.weight: Font.Light
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: root.closeFile(model.path)
                     }
                 }
             }
@@ -263,19 +247,25 @@ Rectangle{
     }
 
     Rectangle{
-        anchors.centerIn: parent
-        color: "#001122"
-        width: 100
-        height: 100
-        visible: project.navigationModel.isIndexing
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: commandsMenuInputBox.height
+        visible: !commandsView.currentItem
+        z: 400
+        color: "#0a131a"
+        width: root.width
+        height: commandsView.delegateHeight
         Text{
-            anchors.centerIn: parent
-            text: 'Indexing...'
-            color: "#aaa5a5"
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            text: "No available commands"
+            color: "#ebebeb"
+
             font.family: "Open Sans, sans-serif"
             font.pixelSize: 12
             font.weight: Font.Light
+            font.italic: true
         }
-    }
 
+    }
 }

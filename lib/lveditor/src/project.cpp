@@ -17,17 +17,28 @@
 #include "live/project.h"
 #include "live/projectfile.h"
 #include "live/projectentry.h"
-#include "live/projectfilemodel.h"
+#include "projectfilemodel.h"
 #include "live/projectdocument.h"
-#include "live/projectnavigationmodel.h"
+#include "projectnavigationmodel.h"
 #include "live/projectdocumentmodel.h"
 
 #include <QFileInfo>
 #include <QUrl>
 #include <QDebug>
 
+/**
+ * \class lv::Project
+ * \brief Abstraction of the open project in LiveKeys
+ *
+ * Practically a singleton (not enforced), constructed at the start of the application, and destroyed right before closing.
+ * There are two types of projects - file-based projects and folder-based projects.
+ * \ingroup lveditor
+ */
 namespace lv{
 
+/**
+ * \brief Default constructor
+ */
 Project::Project(QObject *parent)
     : QObject(parent)
     , m_fileModel(new ProjectFileModel(this))
@@ -38,19 +49,27 @@ Project::Project(QObject *parent)
 {
 }
 
+/**
+ * \brief Default destructor
+ */
 Project::~Project(){
     delete m_fileModel;
     delete m_navigationModel;
     delete m_documentModel;
 }
 
+/**
+ * \brief Creates a simple demo file project, and closes the previously opened one (if it exists)
+ *
+ * Nameless file with a simple Grid
+ */
 void Project::newProject(){
     m_fileModel->createProject();
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
         ProjectDocument* document = new ProjectDocument(
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false, this
         );
-        document->resetContent("import QtQuick 2.3\n\nGrid{\n}");
+        document->setContent("import QtQuick 2.3\n\nGrid{\n}");
         m_documentModel->openDocument("", document);
         m_active = document;
         m_path   = "";
@@ -59,6 +78,11 @@ void Project::newProject(){
     }
 }
 
+/**
+ * \brief Open project given by the path
+ *
+ * It can be either a single file or an entire folder, as mentioned before
+ */
 void Project::openProject(const QString &path){
     QFileInfo pathInfo(path);
     if ( !pathInfo.exists() ){
@@ -102,6 +126,9 @@ void Project::openProject(const QUrl &url){
     openProject(url.toLocalFile());
 }
 
+/**
+ * \brief Returns the path of the folder of the given file-based project, or the actual folder of a folder-based project
+ */
 QString Project::dir() const{
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile())
         return QFileInfo(m_path).path();
@@ -117,6 +144,11 @@ ProjectFile *Project::relocateDocument(const QString &path, const QString& newPa
     return m_fileModel->openFile(newPath);
 }
 
+/**
+ * \brief Closes the currently opened project
+ *
+ * It doesn't destroy the singleton capital-P Project, simply leaves it in a blank state
+ */
 void Project::closeProject(){
     setActive((ProjectDocument*)0);
     m_documentModel->closeDocuments();
@@ -125,24 +157,42 @@ void Project::closeProject(){
     emit pathChanged("");
 }
 
+/**
+ * \brief QUrl variant of the other openFile function
+ *
+ * \sa Project::openFile(const QString &path, int mode)
+ */
 ProjectDocument *Project::openFile(const QUrl &path, int mode){
     return openFile(path.toLocalFile(), mode);
 }
 
+/**
+ * \brief Opens the file given by the QString path, in the given mode
+ *
+ * If the document is not opened, we use the third openFile function to do so.
+ * If it is, we update its monitoring state.
+ *
+ * \sa Project::openFile(ProjectFile *file, int mode)
+ */
 ProjectDocument *Project::openFile(const QString &path, int mode){
     ProjectDocument* document = isOpened(path);
     if (!document){
         return openFile(m_fileModel->openFile(path), mode);
     } else if ( document->isMonitored() && mode == ProjectDocument::Edit ){
-        m_documentModel->updateDocumeMonitoring(document, false);
+        m_documentModel->updateDocumentMonitoring(document, false);
     } else if ( !document->isMonitored() && mode == ProjectDocument::Monitor ){
         document->readContent();
-        m_documentModel->updateDocumeMonitoring(document, true);
+        m_documentModel->updateDocumentMonitoring(document, true);
     }
 
     return document;
 }
 
+/**
+ * \brief Opens the given file in the given mode, this time using the internal ProjectFile object
+ *
+ * All open documents are immediately added to the document model
+ */
 ProjectDocument *Project::openFile(ProjectFile *file, int mode){
     if (!file)
         return 0;
@@ -156,10 +206,10 @@ ProjectDocument *Project::openFile(ProjectFile *file, int mode){
         document = new ProjectDocument(file, (mode == ProjectDocument::Monitor), this);
         m_documentModel->openDocument(file->path(), document);
     } else if ( document->isMonitored() && mode == ProjectDocument::Edit ){
-        m_documentModel->updateDocumeMonitoring(document, false);
+        m_documentModel->updateDocumentMonitoring(document, false);
     } else if ( !document->isMonitored() && mode == ProjectDocument::Monitor ){
         document->readContent();
-        m_documentModel->updateDocumeMonitoring(document, true);
+        m_documentModel->updateDocumentMonitoring(document, true);
     }
 
     return document;
@@ -177,14 +227,25 @@ void Project::setActive(ProjectFile* file){
     setActive(document);
 }
 
+/**
+ * \brief Shows if the project is of folder type
+ */
 bool Project::isDirProject() const{
     return m_fileModel->root()->childCount() > 0 && !m_fileModel->root()->child(0)->isFile();
 }
 
+/**
+ * \brief QUrl variant of this function
+ *
+ * \sa Project::isFileInProject(const QString &path)
+ */
 bool Project::isFileInProject(const QUrl &path) const{
     return isFileInProject(path.toLocalFile());
 }
 
+/**
+ * \brief Shows if the file given by the QString path is inside this folder-based project
+ */
 bool Project::isFileInProject(const QString &path) const{
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile() )
         return path == m_path;
@@ -192,6 +253,11 @@ bool Project::isFileInProject(const QString &path) const{
         return !path.isEmpty() && path.startsWith(m_path);
 }
 
+/**
+ * \brief Set the active file given its path
+ *
+ * This file is the one actually compiling
+ */
 void Project::setActive(const QString &path){
     ProjectDocument* document = isOpened(path);
     if ( !document ){
@@ -202,6 +268,11 @@ void Project::setActive(const QString &path){
     }
 }
 
+/**
+ * \brief Finds the "best" file in the project to be the inital active file
+ *
+ * The preference is for "main.qml" first, then the first lowercase-named file
+ */
 ProjectFile *Project::lookupBestFocus(ProjectEntry *entry){
     QList<ProjectEntry*> entriesToScan;
     if ( entry->lastCheckTime().isNull() )
@@ -245,10 +316,16 @@ ProjectFile *Project::lookupBestFocus(ProjectEntry *entry){
     return bestEntry;
 }
 
+/**
+ * \brief Checks whether there's a file opened at this specified path
+ */
 ProjectDocument *Project::isOpened(const QString &path){
     return m_documentModel->isOpened(path);
 }
 
+/**
+ * \brief Closes the file given the path
+ */
 void Project::closeFile(const QString &path){
     m_documentModel->closeDocument(path);
 }
@@ -262,6 +339,9 @@ void Project::setActive(ProjectDocument *document){
     }
 }
 
+/**
+ * \brief Returns an absolute path given a relative one
+ */
 QString Project::path(const QString &relative) const{
     return dir() + '/' + relative;
 }

@@ -43,12 +43,24 @@
 #include "textedit_p.h"
 #include "textedit_p_p.h"
 
-
+/**
+ * \class lv::DocumentHandler
+ * \brief The go-to class when it comes to handling documents
+ * Forwards everything to the highlighter, has a completion model in case there's a specific code handler attached to it,
+ * it can auto-complete code, which is all behavior inherited from the AbstractCodeHandler.
+ *
+ * \ingroup lveditor
+ */
 namespace lv{
 
 const QChar DocumentHandler::ParagraphSeparator = QChar(8233);
 const QChar DocumentHandler::NewLine            = QChar('\n');
 
+/**
+ * \brief Default constructor of the DocumentHandler
+ *
+ * Initialized from Editor.qml
+ */
 DocumentHandler::DocumentHandler(QObject *parent)
     : QObject(parent)
     , m_targetDoc(nullptr)
@@ -63,10 +75,18 @@ DocumentHandler::DocumentHandler(QObject *parent)
     setIndentSize(4);
 }
 
+/**
+ * \brief Default destructor of DocumentHandler
+ */
 DocumentHandler::~DocumentHandler(){
     delete m_codeHandler;
 }
 
+/**
+ * \brief TextEdit setter
+ *
+ * Usually from Editor.qml
+ */
 void DocumentHandler::setTextEdit(TextEdit *te){
     m_textEdit = te;
     if (m_targetDoc) {
@@ -74,24 +94,49 @@ void DocumentHandler::setTextEdit(TextEdit *te){
     }
 }
 
+/**
+ * \brief Cursor position request signal emitter
+ *
+ */
 void DocumentHandler::requestCursorPosition(int position){
     emit cursorPositionRequest(position);
 }
 
+/**
+ * \brief Used to add and position the palette inside the editor
+ */
 void DocumentHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *box){
-    m_textEdit->linePaletteAdded(lineStart, lineEnd, height + 15, box);
+    m_textEdit->linePaletteAdded(lineStart, lineEnd, height, box);
 }
 
+/**
+ * \brief Used to remove a specific palette in the editor
+ */
 void DocumentHandler::lineBoxRemoved(QQuickItem *palette)
 {
     m_textEdit->linePaletteRemoved(palette);
 }
 
+/**
+ * \brief Used to resize a given palette
+ */
+void DocumentHandler::lineBoxResized(QQuickItem *palette, int newHeight)
+{
+    m_textEdit->linePaletteHeightChanged(palette, newHeight);
+}
+
+
+/**
+ * \brief Triggers the code handler to call the highlighter on the given block
+ */
 void DocumentHandler::rehighlightBlock(const QTextBlock &block){
     if ( m_codeHandler )
         m_codeHandler->rehighlightBlock(block);
 }
 
+/**
+ * \brief Implementation of the respective function from QQmlParserStatus
+ */
 void DocumentHandler::componentComplete(){
     QQmlContext* ctx = qmlEngine(this)->rootContext();
     EditorGlobalObject* editor = static_cast<EditorGlobalObject*>(ctx->contextProperty("editor").value<QObject*>());
@@ -155,6 +200,9 @@ void DocumentHandler::findCodeHandler(){
     }
 }
 
+/**
+ * \brief Triggers the rehighlighting of blocks in the section given by the position and length
+ */
 void DocumentHandler::rehighlightSection(int position, int length){
     if ( !m_codeHandler )
         return;
@@ -169,6 +217,9 @@ void DocumentHandler::rehighlightSection(int position, int length){
     }
 }
 
+/**
+ * \brief Adds specific completion that the user picked between given position
+ */
 void DocumentHandler::insertCompletion(int from, int to, const QString &completion){
     if ( m_targetDoc ){
         m_projectDocument->addEditingState(ProjectDocument::Assisted);
@@ -184,6 +235,9 @@ void DocumentHandler::insertCompletion(int from, int to, const QString &completi
     }
 }
 
+/**
+ * \brief Slot that is connected to document changes
+ */
 void DocumentHandler::documentContentsChanged(int position, int charsRemoved, int charsAdded){
     AbstractCodeHandler::ContentsTrigger cst = AbstractCodeHandler::Engine;
     if ( m_codeHandler )
@@ -202,6 +256,11 @@ void DocumentHandler::documentContentsChanged(int position, int charsRemoved, in
     }
 }
 
+/**
+ * \brief Slot reacting to cursor position change
+ *
+ * Potentially triggers the assisted completion
+ */
 void DocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
     if ( m_codeHandler && m_editorFocus && cursor.position() == m_textEdit->cursorPosition() &&
          !m_projectDocument->editingStateIs(ProjectDocument::Assisted) &&
@@ -224,6 +283,11 @@ void DocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
     }
 }
 
+/**
+ * \brief Document that the document handler is operating on
+ *
+ * It's a pre-requisite to set the document in order to have any functionality
+ */
 void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
     if ( m_projectDocument ){
         disconnect(m_projectDocument, SIGNAL(formatChanged(int,int)), this, SLOT(documentFormatUpdate(int, int)));
@@ -269,10 +333,16 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
     findCodeHandler();
 }
 
+/**
+ * \brief Slot for changes in document format - triggers a rehighlight
+ */
 void DocumentHandler::documentFormatUpdate(int position, int length){
     rehighlightSection(position, length);
 }
 
+/**
+ * \brief Generates code completion at a given cursor position
+ */
 void DocumentHandler::generateCompletion(int cursorPosition){
     if ( m_targetDoc && m_codeHandler ){
         m_lastChar = QChar();
@@ -289,6 +359,11 @@ void DocumentHandler::generateCompletion(int cursorPosition){
     }
 }
 
+/**
+ * \brief Used to manage indentation of selected text
+ *
+ * When a user presses the Tab button, the whole selected text should move
+ */
 void DocumentHandler::manageIndent(int from, int length, bool undo){
     QTextBlock bl = m_targetDoc->findBlock(from);
     while ( bl.isValid() ){
@@ -321,6 +396,11 @@ void DocumentHandler::manageIndent(int from, int length, bool undo){
     }
 }
 
+/**
+ * \brief Finds the boundaries of the code block containing the cursor position
+ *
+ * Mostly used for fragments
+ */
 QJSValue DocumentHandler::contextBlockRange(int cursorPosition){
     if ( !m_codeHandler || !m_engine )
         return QJSValue();
