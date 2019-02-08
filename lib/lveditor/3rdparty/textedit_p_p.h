@@ -116,7 +116,7 @@ public:
         , lastHighlightChangeEnd(0)
         , fragmentStart(0), fragmentStartPalette(new QObject(q_func()))
         , fragmentEnd(INT_MAX), fragmentEndPalette(new QObject(q_func()))
-        , dirtyPosition(0)
+        , dirtyPosition(0), paintedWidth(0), paintedHeight(0)
         , hAlign(TextEdit::AlignLeft), vAlign(TextEdit::AlignTop)
         , format(TextEdit::PlainText), wrapMode(TextEdit::NoWrap)
 #if defined(QT_QUICK_DEFAULT_TEXT_RENDER_TYPE)
@@ -227,6 +227,9 @@ public:
     int fragmentEnd;
     QObject* fragmentEndPalette;
     int dirtyPosition;
+
+    qreal paintedWidth;
+    qreal paintedHeight;
 
     TextEdit::HAlignment hAlign;
     TextEdit::VAlignment vAlign;

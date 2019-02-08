@@ -60,13 +60,6 @@ QmlEditFragment::~QmlEditFragment(){
         edit->deleteLater();
     }
 
-    for ( auto it = begin(); it != end(); ++it ){
-        CodePalette* cp = *it;
-        cp->deleteLater();
-    }
-    if ( m_bindingPalette )
-        m_bindingPalette->deleteLater();
-
     m_bindingChannel->deleteLater();
 }
 
@@ -208,6 +201,17 @@ void QmlEditFragment::updatePaletteValue(CodePalette *palette){
 void QmlEditFragment::emitRemoval(){
     emit aboutToBeRemoved();
 
+    for ( auto it = begin(); it != end(); ++it ){
+        CodePalette* cp = *it;
+        cp->deleteLater();
+    }
+
+    if ( m_bindingPalette )
+        m_bindingPalette->deleteLater();
+
+
+    m_palettes.clear();
+    m_bindingPalette = nullptr;
 }
 
 void QmlEditFragment::updateValue(){

@@ -16,6 +16,7 @@ QtObject{
     property Item navEditor: null
     property bool wasLiveCoding: null
     property int codingMode: null
+    property int prevWindowState: null
 
     function setActiveItem(item, pane){
         activeItem = item

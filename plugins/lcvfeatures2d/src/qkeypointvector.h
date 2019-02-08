@@ -30,26 +30,46 @@ public:
     explicit QKeyPointVector(QQuickItem *parent = 0);
     ~QKeyPointVector();
 
+    /**
+    *\brief 
+    */
     std::vector<cv::KeyPoint>& keypoints();
     const std::vector<cv::KeyPoint>& keypoints() const;
 
+    /**
+    *\brief Matrix where keypoint are detected from.
+    */
     void setMat(cv::Mat& mat);
     const cv::Mat& cvMat();
 
 public slots:
-
+    /**
+    *\brief Creates copy of the vector.
+    */
     QKeyPointVector* createOwnedObject();
-
+    /**
+    *\Getting the KeyPointData as the list of objects.
+    */
     QList<QObject*> keyPointData();
- 
+    /**
+    *\brief add this
+    */
     void setKeyPointData(const QList<QObject*> data);
-  
+    /**
+    *\brief Appends a keypoint.
+    */
     void appendKeyPoint(QKeyPoint* pt);
-
+    /**
+    *\brief Removes a keypoint.
+    */
     void removeKeyPoint(int position);
-
+    /**
+    *\brief Creates a keypoint
+    */
     QKeyPoint *createKeyPoint();
-    
+    /**
+    *\brief Size of the vector.
+    */
     int size();
 
 private:

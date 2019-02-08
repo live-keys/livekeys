@@ -16,6 +16,7 @@
 
 #include "qsimpleblobdetector.h"
 #include "opencv2/features2d.hpp"
+/// \private
 QSimpleBlobDetector::QSimpleBlobDetector(QQuickItem* parent)
     : QFeatureDetector(cv::SimpleBlobDetector::create(), parent)
 {

@@ -33,13 +33,21 @@ class Q_LCVFEATURES2D_EXPORT QDrawMatches : public QMatDisplay{
 public:
     explicit QDrawMatches(QQuickItem *parent = 0);
     virtual ~QDrawMatches();
-
+     /**
+     * \brief Keypoint from the first source   
+     */
     QKeyPointVector* keypoints1();
     void setKeypoints1(QKeyPointVector* keypoints1);
 
+     /**
+     * \brief Keypoints from the second source
+     */
     QKeyPointVector* keypoints2();
     void setKeypoints2(QKeyPointVector* keypoints2);
 
+     /**
+     * \brief Matches from the first source to second one
+     */
     QDMatchVector* matches1to2();
     void setMatches1to2(QDMatchVector* matches1to2);
 
@@ -58,7 +66,9 @@ signals:
 public slots:
 
 private:
-
+    /**
+    * \brief Filter only specific image.
+    */
     void drawExtractedMatches(const std::vector<cv::DMatch> matches);
 
     QKeyPointVector*  m_keypoints1;

@@ -17,7 +17,7 @@
 #include "qkeypointtoscenemap.h"
 
 /**
-*\class QKeyPointToSceneMap
+*\class QKeypointToSceneMap
 *\ingroup plugin-lcvfeatures2d
 *\brief Mapping from a set of keypoints
 */
