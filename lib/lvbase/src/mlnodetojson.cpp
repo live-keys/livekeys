@@ -21,6 +21,7 @@
 
 #include "rapidjson/reader.h"
 #include "rapidjson/writer.h"
+#include "rapidjson/error/en.h"
 
 using namespace rapidjson;
 
@@ -168,7 +169,13 @@ void fromJson(const char *data, MLNode &n){
 
     Reader reader;
     StringStream ss(data);
-    reader.Parse(ss, handler);
+
+
+    ParseResult pr = reader.Parse(ss, handler);
+    if ( !pr ){
+        THROW_EXCEPTION(lv::Exception,
+            "Failed to parse json: " + std::string(GetParseError_En(pr.Code())) + " at " + std::to_string(pr.Offset()), Exception::toCode("Json"));
+    }
 }
 
 }// namespace ml
