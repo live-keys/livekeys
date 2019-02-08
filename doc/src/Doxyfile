@@ -1,3 +1,21 @@
+Skip to content
+ 
+Search or jump to…
+
+Pull requests
+Issues
+Marketplace
+Explore
+ @herlocksholmes Sign out
+47
+488 72 livecv/livecv
+ Code  Issues 18  Pull requests 1  Projects 0  Wiki  Insights
+livecv/doc/src/Doxyfile
+ede4235  4 hours from now
+@nenad-popovic-91 nenad-popovic-91 Recent commits (January 24-now): Various fixes, palette support, docu…
+@dinusv @nenad-popovic-91 @herlocksholmes
+    
+2484 lines (1933 sloc)  105 KB
 # Doxyfile 1.8.14
 
 # This file describes the settings to be used by the documentation system
@@ -778,7 +796,7 @@ WARN_FORMAT            = "$file:$line: $text"
 # messages should be written. If left blank the output is written to standard
 # error (stderr).
 
-WARN_LOGFILE           = err.txt
+WARN_LOGFILE           =
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
@@ -791,12 +809,15 @@ WARN_LOGFILE           = err.txt
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = \
-../../lib/lvbase \		
-     ../../lib/lveditor \		
-     ../../lib/lveditqmljs/src/lveditqmljsglobal.h \		
-     ../../lib/lvelements/src/lvelementsglobal.h \		
-     ../../lib/lvview \		
-     ../../plugins/live \
+    ../../lib/lvbase \
+    ../../lib/lveditor \
+    ../../lib/lveditqmljs/src/lveditqmljsglobal.h \
+    ../../lib/lvelements/src/lvelementsglobal.h \
+    ../../lib/lvview \
+    ../../plugins/live \
+    ../../plugins/lcvcore \
+    ../../plugins/lcvfeatures2d \
+    ../../plugins/lcvvideo
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -2478,3 +2499,16 @@ GENERATE_LEGEND        = YES
 # This tag requires that the tag HAVE_DOT is set to YES.
 
 DOT_CLEANUP            = YES
+© 2019 GitHub, Inc.
+Terms
+Privacy
+Security
+Status
+Help
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
+Press h to open a hovercard with more details.
