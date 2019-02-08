@@ -92,7 +92,7 @@ void TcpLine::componentComplete(){
 void TcpLine::process(){
     use(createLocker()->write(m_output),
         [this](){
-            Tuple::deserialize(lv::ViewContext::instance().engine(), m_receivedOutput["output"], *m_output);
+            Tuple::deserialize(lv::ViewContext::instance().engine(), m_receivedOutput[""]["output"], *m_output);
         }, [this](){
             emit outputChanged();
         }
