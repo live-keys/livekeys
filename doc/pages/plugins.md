@@ -45,4 +45,3 @@ currently has to be done manually (a package manager is planned in the upcoming 
 the contents of its _plugins_ folder into the _plugins_ folder of your livecv installation and the contents of
 the _dependencies_ folder in case it exists into your live cv \e{dependencies} folder. It's best to restart Live CV in
 order for the new components to be loaded correctly.
-

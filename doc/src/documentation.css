@@ -49,7 +49,7 @@ p {
 }
 
 a {
-  color: #ccc;
+  color: #b77014;
   text-decoration: none;
 }
 
@@ -99,6 +99,7 @@ a:hover {
 }
 
 #indexList a {
+  color: #ccc;
   display: list-item;
   list-style-type: none;
   list-style-position: outside;
