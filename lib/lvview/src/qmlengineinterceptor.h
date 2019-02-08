@@ -10,8 +10,11 @@
 #include <QQmlAbstractUrlInterceptor>
 #include <QQmlNetworkAccessManagerFactory>
 
+
+
 namespace lv{
 
+/// @private
 class LV_VIEW_EXPORT QmlEngineInterceptor : public QNetworkAccessManager{
 
 public:

@@ -37,17 +37,30 @@ class ProjectDocument;
 class ProjectDocumentBlockData;
 class DocumentHandler;
 
+/**
+ * \class lv::ProjectDocumentMarker
+ * \brief Dynamic project document markers
+ *
+ * They get moved with document changes, can also be deleted along with the associated text.
+ * Wrapper around a single document position
+ * \ingroup lveditor
+ */
 class LV_EDITOR_EXPORT ProjectDocumentMarker{
 
 public:
     friend class ProjectDocument;
+    /** Shared pointer to the marker */
     typedef QSharedPointer<ProjectDocumentMarker>       Ptr;
+    /** Const shared pointer to the marker */
     typedef QSharedPointer<const ProjectDocumentMarker> ConstPtr;
 
 public:
+    /** Marker position */
     int position() const{ return m_position; }
+    /** Shows if the marker is valid */
     bool isValid() const{ return m_position != -1; }
     static Ptr create(){ return ProjectDocumentMarker::Ptr(new ProjectDocumentMarker); }
+    /** Default destructor */
     ~ProjectDocumentMarker(){}
 
 private:
@@ -63,22 +76,34 @@ class LV_EDITOR_EXPORT ProjectDocumentSection{
 public:
     friend class ProjectDocument;
     friend class ProjectDocumentBlockData;
+    /** Shared pointer to a section */
     typedef QSharedPointer<ProjectDocumentSection>       Ptr;
+    /** Const shared pointer to a section */
     typedef QSharedPointer<const ProjectDocumentSection> ConstPtr;
 
 public:
+    /** Returns the first position of the section */
     int position() const{ return m_position; }
+    /** Returns the length of the section */
     int length() const{ return m_length; }
+    /** Returns the type of section set by the user */
     int type() const{ return m_type; }
+    /** Shows if the section is still valid */
     bool isValid() const{ return m_position != -1; }
+    /** Resize the section if necessary */
     void resize(int newLength){ m_length = newLength; }
     ~ProjectDocumentSection();
 
+    /** Set the custom user data inside the section */
     void setUserData(void* data){ m_userData = data; }
+    /** Returns the custom user data */
     void* userData(){ return m_userData; }
 
+    /** Returns the document the section belongs to */
     ProjectDocument* document(){ return m_document; }
+    /** Returns the block containing the first position of the section */
     ProjectDocumentBlockData* parentBlock(){ return m_parentBlock; }
+
 
     void onTextChanged(std::function<void(ProjectDocumentSection::Ptr, int, int, const QString &)> handler);
 
@@ -105,9 +130,13 @@ private:
     std::function<void(ProjectDocumentSection::Ptr, int, int, const QString&)> m_textChangedHandler;
 };
 
+/**
+  \private
+*/
 class LV_EDITOR_EXPORT ProjectDocumentAction : public QAbstractUndoItem{
 
 public:
+    /** Default constructor */
     ProjectDocumentAction(
             ProjectDocument* pParent,
             int pPosition,
@@ -135,6 +164,9 @@ public:
 
 typedef std::function<void(const QTextBlock& tb, int& numLines, QString& replacement)> CollapseFunctionType;
 
+/**
+  \private
+*/
 class LV_EDITOR_EXPORT ProjectDocumentBlockData : public QTextBlockUserData{
 
 public:
@@ -185,30 +217,44 @@ class LV_EDITOR_EXPORT ProjectDocument : public QObject{
     Q_ENUMS(OpenMode)
 
 public:
+    /** Iterator through sections */
     typedef QLinkedList<ProjectDocumentSection::Ptr>::iterator       SectionIterator;
+    /** Const iterator through sections */
     typedef QLinkedList<ProjectDocumentSection::Ptr>::const_iterator SectionConstIterator;
 
     friend class ProjectDocumentAction;
     friend class ProjectDocumentMarker;
     friend class ProjectDocumentSection;
 
+    /** Enum containing possible modes of opening documents */
     enum OpenMode{
+        /** The file open in the editor */
         Edit = 0,
+        /** Read-only, but any external change will be reflected */
         Monitor,
+        /** If not opened, will be open for editing. If already monitored, it will not be available for editing. */
         EditIfNotOpen
     };
 
+    /** Editing states of an opened document */
     enum EditingState{
-        Manual   = 0, //     0 : coming from the user
-        Assisted = 1, //     1 : coming from a code completion assistant
-        Silent   = 2, //    10 : does not trigger a recompile
-        Palette  = 6, //   110 : also silent (when a palette edits a section)
-        Runtime  = 10,//  1010 : also silent (comming from a runtime binding)
-        Read     = 16 // 10000 : populate from file, does not signal anything
+        /**     0 : coming from the user */
+        Manual   = 0,
+        /**     1 : coming from a code completion assistant */
+        Assisted = 1,
+        /**    10 : does not trigger a recompile */
+        Silent   = 2,
+        /**   110 : also silent (when a palette edits a section) */
+        Palette  = 6,
+        /**  1010 : also silent (comming from a runtime binding) */
+        Runtime  = 10,
+        /** 10000 : populate from file, does not signal anything */
+        Read     = 16
     };
 
 public:
     explicit ProjectDocument(ProjectFile* file, bool isMonitored, Project *parent);
+    /** Default destructor */
     ~ProjectDocument();
 
     lv::ProjectFile* file() const;
@@ -253,17 +299,22 @@ public:
 
 public slots:
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
-    void resetContent(const QString& content);
+    void setContent(const QString& content);
     void readContent();
     bool save();
     bool saveAs(const QString& path);
     bool saveAs(const QUrl& url);
 
 signals:
+    /** shows dirty state changed */
     void isDirtyChanged();
+    /** shows if monitoring state changed */
     void isMonitoredChanged();
+    /** shows if the file changed */
     void fileChanged();
+    /** shows if the document content changed */
     void contentChanged();
+    /** shows if the format changed */
     void formatChanged(int position, int length);
 
 private:
@@ -295,15 +346,22 @@ private:
     bool          m_isMonitored;
 };
 
+/** \brief File getter */
 inline ProjectFile *ProjectDocument::file() const{
     return m_file;
 }
 
+/**
+ * \brief Returns document content
+ */
 inline QString ProjectDocument::content() const{
     syncContent();
     return m_textDocument->toPlainText();
 }
 
+/**
+ * \brief Sets the "dirty" indicator
+ */
 inline void ProjectDocument::setIsDirty(bool isDirty){
     if ( m_isDirty == isDirty )
         return;
@@ -312,10 +370,16 @@ inline void ProjectDocument::setIsDirty(bool isDirty){
     isDirtyChanged();
 }
 
+/**
+ * \brief Shows if the content's dirty
+ */
 inline bool ProjectDocument::isDirty() const{
     return m_isDirty;
 }
 
+/**
+ * \brief Sets the indicator for monitoring
+ */
 inline void ProjectDocument::setIsMonitored(bool isMonitored){
     if ( m_isMonitored == isMonitored )
         return;
@@ -324,38 +388,67 @@ inline void ProjectDocument::setIsMonitored(bool isMonitored){
     emit isMonitoredChanged();
 }
 
+/**
+ * \brief Shows if the document is monitored
+ */
 inline bool ProjectDocument::isMonitored() const{
     return m_isMonitored;
 }
 
+/**
+ * \brief Returns the timestamp of last modification
+ */
 inline const QDateTime &ProjectDocument::lastModified() const{
     return m_lastModified;
 }
 
+/**
+ * \brief Sets the timestamp of latest modification
+ */
 inline void ProjectDocument::setLastModified(const QDateTime &lastModified){
     m_lastModified = lastModified;
 }
 
+/**
+ * \brief Begin-iterator of the sections
+ */
 inline ProjectDocument::SectionIterator ProjectDocument::sectionsBegin(){
     return m_sections.begin();
 }
 
+/**
+ * \brief End-iterator of the sections
+ */
 inline ProjectDocument::SectionIterator ProjectDocument::sectionsEnd(){
     return m_sections.end();
 }
 
+
+/**
+ * \brief Const begin-iterator of the sections
+ */
 inline ProjectDocument::SectionConstIterator ProjectDocument::sectionsBegin() const{
     return m_sections.begin();
 }
 
+
+/**
+ * \brief Const end-iterator of the sections
+ */
 inline ProjectDocument::SectionConstIterator ProjectDocument::sectionsEnd() const{
     return m_sections.end();
 }
 
+/**
+ * \brief Number of sections
+ */
 inline int ProjectDocument::totalSections() const{
     return m_sections.size();
 }
 
+/**
+ * \brief Shows if the object has any sections
+ */
 inline bool ProjectDocument::hasSections() const{
     return totalSections() > 0;
 }
@@ -364,14 +457,23 @@ inline void ProjectDocument::resetSync() const{
     m_isSynced = false;
 }
 
+/**
+ * \brief Text document which is wrapped inside the ProjectDocument
+ */
 inline QTextDocument *ProjectDocument::textDocument(){
     return m_textDocument;
 }
 
+/**
+ * \brief Adds editing state flag
+ */
 inline void ProjectDocument::addEditingState(EditingState state){
     m_editingState |= state;
 }
 
+/**
+ * \brief Removes the given editing state flag
+ */
 inline void ProjectDocument::removeEditingState(EditingState state){
     if ( m_editingState & state ){
         bool restoreSilent = editingStateIs(ProjectDocument::Palette | ProjectDocument::Runtime);
@@ -382,10 +484,16 @@ inline void ProjectDocument::removeEditingState(EditingState state){
     }
 }
 
+/**
+ * \brief Shows if the editing state includes the given flags
+ */
 inline bool ProjectDocument::editingStateIs(int flag) const{
     return (flag & m_editingState) == flag;
 }
 
+/**
+ * \brief Resets all of the editing state flags
+ */
 inline void ProjectDocument::resetEditingState(){
     m_editingState = 0;
 }

@@ -23,6 +23,7 @@
 
 #include "live/keymap.h"
 #include "commandsmodel.h"
+#include <QDebug>
 
 namespace lv{
 
@@ -30,7 +31,7 @@ class Commands : public QObject{
 
     Q_OBJECT
 
-    Q_PROPERTY(lv::CommandsModel* model READ model WRITE setModel)
+    Q_PROPERTY(CommandsModel* model READ model WRITE setModel NOTIFY modelChanged)
 
     class Node{
     public:
@@ -47,14 +48,14 @@ public:
 
     QString dump();
     CommandsModel* model() { return m_model; }
-    void setModel(CommandsModel* m) { m_model = m; }
-
+    void setModel(CommandsModel* m);
     friend CommandsModel;
 public slots:
     QString add(QObject* object, const QJSValue& command);
     void removeCommandsFor(QObject* object);
     void execute(const QString& command);
-
+Q_SIGNALS:
+    void modelChanged(CommandsModel* model);
 private:
     QStringList getCommandChain(QObject *object);
 

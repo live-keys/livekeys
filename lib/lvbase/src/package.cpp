@@ -50,6 +50,7 @@ Package::~Package(){
     delete m_d;
 }
 
+/** Static method that checks if a package exists in the given folder */
 bool Package::existsIn(const std::string &path){
     QDir d(QString::fromStdString(path));
     if ( !d.exists() )
@@ -59,6 +60,7 @@ bool Package::existsIn(const std::string &path){
     return finfo.exists();
 }
 
+/** Creates a package pointer from that path, considering that path has a package */
 Package::Ptr Package::createFromPath(const std::string &path){
     QString packagePath = QString::fromStdString(path);
     QString packageDirPath;
@@ -88,6 +90,7 @@ Package::Ptr Package::createFromPath(const std::string &path){
     return createFromNode(packageDirPath.toStdString(), packagePath.toStdString(), m);
 }
 
+/** This function actually creates the path pointer that is returned to the above function */
 Package::Ptr Package::createFromNode(const std::string& path, const std::string &filePath, const MLNode &m){
     if ( !m.hasKey("name") || !m.hasKey("version") )
         return Package::Ptr(nullptr);
@@ -209,6 +212,7 @@ Package::Package(const std::string &path, const std::string& filePath, const std
     m_d->context  = nullptr;
 }
 
+/** Function that compares two sets of flags in order for us to select a better library */
 Package::Library::FlagResult Package::Library::compareFlags(const Package::Library &other){
     bool thisHasMore = false;
     bool otherHasMore = false;

@@ -19,6 +19,11 @@
 #include <QDir>
 #include <QQmlEngine>
 
+/**
+ * \class lv::Settings
+ * \brief General settings (on top of Editor settings) that uses a settings folder
+ * \ingroup lvview
+ */
 namespace lv{
 
 Settings::Settings(const QString &path, QObject *parent)
@@ -28,6 +33,7 @@ Settings::Settings(const QString &path, QObject *parent)
 {
 }
 
+/** Default destructor */
 Settings::~Settings(){
     for ( auto it = m_configFiles->begin(); it != m_configFiles->end(); ++it ){
         delete it.value();
@@ -35,6 +41,7 @@ Settings::~Settings(){
     delete m_configFiles;
 }
 
+/** Creator function that creates the settings singleton given the path */
 Settings *Settings::create(const QString &path, QObject *parent){
     if ( !QDir(path).exists() ){
         if ( !QDir().mkdir(path) ){
@@ -44,6 +51,7 @@ Settings *Settings::create(const QString &path, QObject *parent){
     return new Settings(path, parent);
 }
 
+/** Returns the file under the given key */
 QObject *Settings::file(const QString &key){
     auto foundit = m_configFiles->find(key);
     if ( foundit == m_configFiles->end() )
@@ -52,6 +60,7 @@ QObject *Settings::file(const QString &key){
     return *foundit;
 }
 
+/** Adds a config file with a given key */
 void Settings::addConfigFile(const QString &key, QObject *object){
     m_configFiles->insert(key, object);
 }

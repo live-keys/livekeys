@@ -36,6 +36,8 @@ public:
     ~ErrorHandler();
 
     void componentComplete();
+
+    /** Blank implementation of a QQmlParserStatus method */
     void classBegin(){}
 
     void signalError(const QJSValue& error);
@@ -45,13 +47,17 @@ public:
     QObject* target() const;
 
 signals:
+    /** Signals an error */
     void error(QJSValue e);
+    /** Signals a fatal error */
     void fatal(QJSValue e);
+    /** Signals a warning */
     void warning(QJSValue e);
-
+    /** Signals a target change*/
     void targetChanged(QObject* target);
 
 public slots:
+    /** */
     void skip(const QJSValue& error);
 
 private:
@@ -60,6 +66,7 @@ private:
     bool     m_componentComplete;
 };
 
+/** Target getter */
 inline QObject *ErrorHandler::target() const{
     return m_target;
 }

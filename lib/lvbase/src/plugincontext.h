@@ -6,9 +6,16 @@
 
 namespace lv{
 
+/**
+  \class lv::Plugin::Context
+  \brief Presents a context for the given plugin in relation to the package graph
+  \ingroup lvbase
+ */
+
 class LV_BASE_EXPORT Plugin::Context{
 
 public:
+    /** Blank constructor */
     Context(){}
 
     PackageGraph* packageGraph;
@@ -19,6 +26,7 @@ public:
     std::list<Plugin::Ptr> localDependents;
 
 private:
+    // disable copy
     Context(const Plugin::Context&);
     void operator=(const Plugin::Context&);
 };

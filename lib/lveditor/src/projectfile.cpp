@@ -17,23 +17,32 @@
 #include "live/projectfile.h"
 #include <QFileInfo>
 
+/**
+ * \class lv::ProjectFile
+ * \brief Specialization of ProjectEntry for files
+ * \ingroup lveditor
+ */
 namespace lv{
 
+/** Default constructor */
 ProjectFile::ProjectFile(const QString &path, ProjectEntry *parent)
     : ProjectEntry(QFileInfo(path).path(), QFileInfo(path).fileName(), true, parent)
     , m_document(0)
 {
 }
 
+/** Constructor with a name parameter given */
 ProjectFile::ProjectFile(const QString &path, const QString &name, ProjectEntry *parent)
     : ProjectEntry(path, name, true, parent)
     , m_document(0)
 {
 }
 
+/** Blank destructor */
 ProjectFile::~ProjectFile(){
 }
 
+/** Document setter */
 void ProjectFile::setDocument(ProjectDocument *document){
     if ( document == m_document )
         return;

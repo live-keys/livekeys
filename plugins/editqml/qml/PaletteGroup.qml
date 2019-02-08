@@ -26,6 +26,7 @@ Column{
                 } else {
                     if ( box && box.objectName === 'editorBox' ){
                         codeHandler.removeConnection(editingFragment)
+                        codeHandler.removeEditFrame(box);
                     }
                 }
             }

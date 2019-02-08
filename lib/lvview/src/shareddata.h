@@ -31,6 +31,7 @@ class Filter;
 
 //TODO: Optimize size
 
+/// @private
 class LV_VIEW_EXPORT SharedData{
 
 public:

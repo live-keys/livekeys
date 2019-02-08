@@ -32,6 +32,7 @@ class LV_EDITOR_EXPORT ProjectDocumentModel : public QAbstractListModel{
     Q_OBJECT
 
 public:
+    /** Model roles */
     enum Roles{
         Name = Qt::UserRole + 1,
         Path,
@@ -52,7 +53,7 @@ public:
 
     const QHash<QString, ProjectDocument*> openedFiles() const;
 
-    void updateDocumeMonitoring(ProjectDocument* document, bool monitor);
+    void updateDocumentMonitoring(ProjectDocument* document, bool monitor);
 
     void closeDocumentsInPath(const QString& path, bool closeIfActive = false);
     void closeDocument(const QString& path, bool closeIfActive = false);
@@ -69,8 +70,11 @@ public slots:
     QStringList listUnsavedDocumentsInPath(const QString& path);
 
 signals:
+    /** Shows that the given document has changed */
     void monitoredDocumentChanged(lv::ProjectDocument* document);
+    /** Shows that the given document was changed externally */
     void documentChangedOutside(lv::ProjectDocument* document);
+    /** Signals that the document is being closed */
     void aboutToClose(lv::ProjectDocument* document);
 
 private:
@@ -82,6 +86,7 @@ private:
     QFileSystemWatcher* m_fileWatcher;
 };
 
+/** Returns the hashmap containing the open documents */
 inline const QHash<QString, ProjectDocument *> ProjectDocumentModel::openedFiles() const{
     return m_openedFiles;
 }

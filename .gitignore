@@ -1,3 +1,6 @@
 livecv.pro.user
 build/*
 !build/.gitignore
+
+# macOS
+.DS_Store

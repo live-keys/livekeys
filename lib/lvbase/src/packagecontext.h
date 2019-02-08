@@ -7,9 +7,15 @@
 
 namespace lv{
 
+/**
+  \class lv::Package::Context
+  \brief Presents a context for the given package in relation to the package graph
+  \ingroup lvbase
+ */
 class LV_BASE_EXPORT Package::Context{
 
 public:
+    /** Blank constructor */
     Context(){}
 
     PackageGraph* packageGraph;

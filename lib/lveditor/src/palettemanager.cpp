@@ -23,11 +23,15 @@ void PaletteManager::paletteAdded(int sb, int span, int height, QObject *p)
     pd->m_startBlock = sb;
     pd->m_lineSpan = span;
     pd->m_palette = p;
-    pd->m_paletteSpan = qCeil(height*1.0/this->m_lineHeight);
-    pd->m_palleteHeight = height;
+    pd->m_paletteHeight = height;
+    pd->m_paletteSpan = qCeil((height > 0 ? height + 10 : 0)*1.0/this->m_lineHeight);
 
     m_palettes.push_back(pd);
     m_palettes.sort(paletteCmp);
+
+    auto it = m_palettes.begin();
+    while ((*it)->m_startBlock != pd->m_startBlock) ++it;
+    while (it != m_palettes.end()){ adjustPalettePosition((*it)); ++it; }
 }
 
 int PaletteManager::drawingOffset(int blockNumber, bool forCursor)
@@ -124,44 +128,56 @@ int PaletteManager::isLineAfterPalette(int blockNumber)
 int  PaletteManager::removePalette(QObject *palette)
 {
     auto it = m_palettes.begin();
+    int result = -1;
     while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
         if (pd->matchesPalette(palette))
         {
-            int result = pd->m_startBlock;
-            m_palettes.erase(it);
-            return result;
+            result = pd->m_startBlock;
+            delete pd;
+            it = m_palettes.erase(it);
+            continue;
+        }
+        if (result != -1)
+        {
+            adjustPalettePosition(pd);
         }
 
         ++it;
     }
 
-    return -1;
+    return result;
 }
 
 int PaletteManager::resizePalette(QObject *palette, int newHeight)
 {
     auto it = m_palettes.begin();
+    int result = -1;
     while (it != m_palettes.end())
     {
         PaletteData* pd = *it;
         if (pd->matchesPalette(palette))
         {
-            pd->m_palleteHeight = newHeight;
-            int newPaletteSpan = qCeil(newHeight * 1.0/ this->m_lineHeight);
+            pd->m_paletteHeight = newHeight;
+            int newPaletteSpan = qCeil((newHeight > 0 ? newHeight + 10 : 0) * 1.0/ this->m_lineHeight);
             if (newPaletteSpan != pd->m_paletteSpan)
             {
+                // if changed, we must move the later palettes accordingly
                 pd->m_paletteSpan = newPaletteSpan;
-                return pd->m_startBlock;
+                result = pd->m_startBlock; ++it; continue;
             }
-            return false;
+            break; // no effective change
+        }
+        if (result != -1)
+        {
+            adjustPalettePosition(pd);
         }
 
         ++it;
     }
 
-    return -1;
+    return result;
 }
 
 void PaletteManager::setDirtyPos(int pos)
@@ -193,6 +209,7 @@ void PaletteManager::linesAdded()
         }
 
         pd->m_startBlock += delta;
+        adjustPalettePosition(pd);
         ++it;
     }
 }
@@ -217,8 +234,25 @@ void PaletteManager::linesRemoved()
         }
 
         pd->m_startBlock -= delta;
+        adjustPalettePosition(pd);
         ++it;
     }
+}
+
+void PaletteManager::adjustPalettePosition(PaletteData* pd)
+{
+    auto item = dynamic_cast<QQuickItem*>(pd->m_palette);
+    if (!item) return;
+
+    int offset = 0;
+    for (auto it = m_palettes.begin(); it != m_palettes.end() && (*it)->m_startBlock < pd->m_startBlock; ++it)
+    {
+        offset += (*it)->m_paletteSpan-(*it)->m_lineSpan;
+    }
+
+    item->setProperty("x", 20);
+    item->setProperty("y",(pd->m_startBlock+offset)*this->m_lineHeight + (pd->m_paletteSpan * this->m_lineHeight - pd->m_paletteHeight)/2 + 6);
+
 }
 
 

@@ -93,6 +93,7 @@ public:
     void setTag(QString tag);
     void setSearch(QJSValue search);
 
+    /** Implementation of the respective QQmlParserStatus function */
     void classBegin(){}
     void componentComplete();
 
@@ -119,10 +120,15 @@ public slots:
     void sourceRowsInserted(const QModelIndex&, int from, int to);
 
 signals:
+    /** Source has changed */
     void sourceChanged();
+    /** Tag has changed */
     void tagChanged();
+    /** Prefix has changed */
     void prefixChanged();
+    /** Search string has changed */
     void searchChanged();
+    /** Indexing indicator has changed */
     void isIndexingChanged();
 
 private:
@@ -142,18 +148,27 @@ private:
     bool                        m_workerIgnoreResult;
 };
 
+/**
+ * \brief Base model which is the model we're applying the filter too.
+ *
+ * Interestingly, it can be both the main model, or even another filter model!
+ * We could, in theory, have an array or filter models where each one is filtering on the previous one.
+ */
 inline VisualLogBaseModel *VisualLogFilter::source() const{
     return m_source;
 }
 
+/** The tag we're filtering by */
 inline QString VisualLogFilter::tag() const{
     return m_tag;
 }
 
+/** Indicator if the object is currently performing indexing in the background, asynchronously */
 inline bool VisualLogFilter::isIndexing() const{
     return m_isIndexing;
 }
 
+/** Tag setter */
 inline void VisualLogFilter::setTag(QString tag){
     if (m_tag == tag)
         return;
@@ -164,6 +179,7 @@ inline void VisualLogFilter::setTag(QString tag){
     refilter();
 }
 
+/** Total number of entries */
 inline int VisualLogFilter::totalEntries() const{
     return m_entries.size();
 }

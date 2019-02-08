@@ -43,18 +43,30 @@ inline void PaletteList::setPosition(int position){
     m_position = position;
 }
 
+/**
+ * \brief Override of the respective QAbstractListModel function
+ */
 inline int PaletteList::rowCount(const QModelIndex &) const{
     return size();
 }
 
+/**
+ * \brief Remove all appearances of this loader in the palettes
+ */
 inline void PaletteList::remove(PaletteLoader *loader){
     m_palettes.removeAll(loader);
 }
 
+/**
+ * \brief Returns loader at given index
+ */
 inline PaletteLoader *PaletteList::loaderAt(int index){
     return m_palettes.at(index);
 }
 
+/**
+ * \brief Returns position of palette
+ */
 inline int PaletteList::position() const{
     return m_position;
 }

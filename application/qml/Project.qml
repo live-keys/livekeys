@@ -199,7 +199,8 @@ Rectangle{
     }
 
     function openCommandsMenu(){
-        livecv.commands.model.updateAvailableCommands()
+        livecv.commands.model.setFilter('')
+        commandsMenu.visible = !commandsMenu.visible
     }
 
     function addEntry(parentEntry, isFile){
@@ -389,6 +390,14 @@ Rectangle{
             function setActive(){
                 project.setActive(styleData.value)
                 projectView.maintainCodingMode();
+                if (windowControls.codingMode === 1) {
+                    livecv.engine.createObjectAsync(
+                        runSpace.program,
+                        runSpace,
+                        project.active.file.pathUrl(),
+                        project.active
+                    );
+                }
             }
             function openFile(){
                 root.editEntry(styleData.value)
