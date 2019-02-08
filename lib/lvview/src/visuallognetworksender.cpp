@@ -19,11 +19,18 @@
 #include <QTcpSocket>
 #include <QTimer>
 
+/**
+ * \class lv::VisualLogNetworkSender
+ * \brief Implementation of VisualLog::Transport used for sending log messages over a network
+ * \ingroup lvview
+ */
+
 namespace lv{
 
 int VisualLogNetworkSender::RECONNECT_TIMEOUT = 5000;
 int VisualLogNetworkSender::MESSAGE_QUEUE_SIZE = 10000;
 
+/** Default constructor, initialized with an IP address and an appropriate port */
 VisualLogNetworkSender::VisualLogNetworkSender(const QString &ip, int port, QObject *parent)
     : QObject(parent)
     , m_socket(new QTcpSocket(this))
@@ -38,14 +45,17 @@ VisualLogNetworkSender::VisualLogNetworkSender(const QString &ip, int port, QObj
     connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
 }
 
+/** Default destructor */
 VisualLogNetworkSender::~VisualLogNetworkSender(){
     delete m_timer;
 }
 
+/** QString variant of the sendMessage function */
 void VisualLogNetworkSender::sendMessage(const QString &message){
     sendMessage(message.toUtf8());
 }
 
+/** Main, byte-array based function for sending messages over the network */
 void VisualLogNetworkSender::sendMessage(const QByteArray &message){
     if ( m_socket->state() == QTcpSocket::ConnectedState){
         m_socket->write(message + "\n");
@@ -58,16 +68,19 @@ void VisualLogNetworkSender::sendMessage(const QByteArray &message){
     }
 }
 
+/** Standard string variant of the sendMessage function */
 void VisualLogNetworkSender::sendMessage(const std::string &message){
     sendMessage(QByteArray::fromStdString(message));
 }
 
+/** Function that tries to connect to host a limited ammount of times */
 void VisualLogNetworkSender::connectToHost(int maxRetries){
     m_connectRetries    = 0;
     m_connectMaxRetries = maxRetries;
     reconnect();
 }
 
+/** Sends a string-based log message over the network */
 void VisualLogNetworkSender::onMessage(
         const VisualLog::Configuration *configuration,
         const VisualLog::MessageInfo &messageInfo,
@@ -76,6 +89,8 @@ void VisualLogNetworkSender::onMessage(
     sendMessage(messageInfo.prefix(configuration) + message);
 }
 
+
+/** Sends an object-based log entry over the network by converting it into JSON */
 void VisualLogNetworkSender::onObject(
         const VisualLog::Configuration *configuration,
         const VisualLog::MessageInfo &messageInfo,
@@ -91,6 +106,7 @@ void VisualLogNetworkSender::onObject(
     sendMessage(messageData);
 }
 
+/** When socket is connected, we send all the queued messages through */
 void VisualLogNetworkSender::socketConnected(){
     m_connectRetries = 0;
     while ( !m_messageQueue.isEmpty() ){
@@ -98,6 +114,7 @@ void VisualLogNetworkSender::socketConnected(){
     }
 }
 
+/** When socket is disconnected. we notify the user of a failed connecting attempt, or finally notify that we gave up */
 void VisualLogNetworkSender::socketDisconnected(){
     if ( m_connectRetries < m_connectMaxRetries ){
         qWarning(
@@ -109,6 +126,7 @@ void VisualLogNetworkSender::socketDisconnected(){
     }
 }
 
+/** In case of socket error, we notify the user and try again if we have any attempts left */
 void VisualLogNetworkSender::socketError(QAbstractSocket::SocketError){
     m_socket->abort();
     if ( m_connectRetries < m_connectMaxRetries ){
@@ -122,6 +140,7 @@ void VisualLogNetworkSender::socketError(QAbstractSocket::SocketError){
     }
 }
 
+/** Function that attempts to connect to host if we haven't exceeded the maximum number of attempts */
 void VisualLogNetworkSender::reconnect(){
     if ( m_connectRetries < m_connectMaxRetries ){
         m_socket->connectToHost(m_ip, m_port, QTcpSocket::WriteOnly);

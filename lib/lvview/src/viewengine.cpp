@@ -31,11 +31,16 @@
 #include <QCoreApplication>
 
 #include <QQuickItem>
+/**
+ * \class lv::ViewEngine
+ * \brief Main Qml engine
+ * \ingroup lvview
+ */
 
 namespace lv{
 
 
-
+/** Default constructor */
 ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     : QObject(parent)
     , m_engine(engine)
@@ -60,23 +65,44 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     m_engine->globalObject().setProperty("linkError", markErrorFn);
 }
 
+/** Default destructor */
 ViewEngine::~ViewEngine(){
     delete m_engineMutex;
     m_engine->deleteLater();
 }
 
+/** Locks the engine for use until the passed function finishes */
 void ViewEngine::useEngine(std::function<void(QQmlEngine *)> call){
     QMutexLocker engineMutexLock(m_engineMutex);
     call(m_engine);
 }
 
+/** Displays the errors the engine had previously */
 const QList<QQmlError> &ViewEngine::lastErrors() const{
     return m_lastErrors;
 }
 
+/** Evaluates the piece of code given the filename and line number */
 QJSValue ViewEngine::evaluate(const QString &jsCode, const QString &fileName, int lineNumber){
     return m_engine->evaluate(jsCode, fileName, lineNumber);
 }
+
+/**
+ * \brief Function analogue to throwing an exception in regular cpp code, but propagated through javascript
+ *
+ * We use a simple macro, `CREATE_EXCEPTION`, to create exceptions in LiveKeys, which will include the metadata of the code where it was thrown.
+ * Usage example of this function can be found
+ * in qcalibratedebevec.cpp.
+ *
+ * ```
+ * lv::Exception lve = CREATE_EXCEPTION(lv::Exception, e.what(), e.code);
+ * lv::ViewContext::instance().engine()->throwError(&lve, this);
+ * ```
+ *
+ * Calling the throwError manages to capture all the relevant data such as line number, type of error, and even the object from
+ * which it was thrown, and also the stacktrace containing even the relevant Javascript info. The error is propagated until we
+ * reach a relevant error handler (\sa lv::ErrorHandler).
+ */
 
 void ViewEngine::throwError(const lv::Exception *e, QObject *object){
     QJSValue jsError = m_errorType.callAsConstructor(QJSValueList() << QString::fromStdString(e->message()));
@@ -113,7 +139,7 @@ void ViewEngine::throwError(const lv::Exception *e, QObject *object){
     throwError(jsError, object);
 }
 
-
+/** Variant of the same-named function that uses a QQmlError object from which it extracts relevant data */
 void ViewEngine::throwError(const QQmlError &error){
     QJSValue jsError = m_errorType.callAsConstructor(QJSValueList() << error.description());
     jsError.setProperty("fileName", error.url().toString());
@@ -126,6 +152,12 @@ void ViewEngine::throwError(const QQmlError &error){
     throwError(jsError, error.object());
 }
 
+/**
+ * \brief Variant of the same-named function that uses a QJSValue object along with the calling object
+ *
+ * This is the actual function that gets called from the two variants above. The relevant data is converted to
+ * QJSValue and passed to here.
+ */
 void ViewEngine::throwError(const QJSValue &jsError, QObject *object){
     QJSValueIterator it(jsError);
     while (it.hasNext()) {
@@ -145,6 +177,7 @@ void ViewEngine::throwError(const QJSValue &jsError, QObject *object){
 
 }
 
+/** Similar to throwError, but warnings are of lesser importance and can be ignored. Passed to the error handler */
 void ViewEngine::throwWarning(const QString &message, QObject *object, const QString &fileName, int lineNumber){
     QJSValue jsError = m_errorType.callAsConstructor(QJSValueList() << message);
 
@@ -158,6 +191,7 @@ void ViewEngine::throwWarning(const QString &message, QObject *object, const QSt
     throwWarning(jsError, object);
 }
 
+/** The function called by the same-named public function. Passes the warning to the error handler(s) */
 void ViewEngine::throwWarning(const QJSValue &jsError, QObject *object){
     QObject* errorHandler = object;
     while ( errorHandler != 0 ){
@@ -179,18 +213,22 @@ QString ViewEngine::markErrorObject(QObject *object){
     return "(" + key + ")";
 }
 
+/** Shows if the given object has an associated error handler */
 bool ViewEngine::hasErrorHandler(QObject *object){
     return m_errorHandlers.contains(object);
 }
 
+/** Registers a handler for the given object */
 void ViewEngine::registerErrorHandler(QObject *object, ErrorHandler *handler){
     m_errorHandlers[object] = handler;
 }
 
+/** Removes the handler for the given object */
 void ViewEngine::removeErrorHandler(QObject *object){
     m_errorHandlers.remove(object);
 }
 
+/** Added after the compilation is finished, to be run as a callback */
 void ViewEngine::addCompileHook(ViewEngine::CompileHook ch, void *userData){
     CompileHookEntry che;
     che.m_hook = ch;
@@ -199,6 +237,7 @@ void ViewEngine::addCompileHook(ViewEngine::CompileHook ch, void *userData){
     m_compileHooks.append(che);
 }
 
+/** Removes the given compile hook */
 void ViewEngine::removeCompileHook(ViewEngine::CompileHook ch, void *userData){
     for ( auto it = m_compileHooks.begin(); it != m_compileHooks.end(); ++it ){
         if ( it->m_hook == ch && it->m_userData == userData ){
@@ -208,7 +247,7 @@ void ViewEngine::removeCompileHook(ViewEngine::CompileHook ch, void *userData){
     }
 }
 
-
+/** Returns the type info for a given meta-object*/
 TypeInfo::Ptr ViewEngine::typeInfo(const QMetaObject *key) const{
     auto it = m_types.find(key);
     if ( it == m_types.end() )
@@ -216,6 +255,7 @@ TypeInfo::Ptr ViewEngine::typeInfo(const QMetaObject *key) const{
     return it.value();
 }
 
+/** Returns the type info for a given type name */
 TypeInfo::Ptr ViewEngine::typeInfo(const QByteArray &typeName) const{
     auto it = m_typeNames.find(typeName);
     if ( it == m_typeNames.end() )
@@ -224,6 +264,7 @@ TypeInfo::Ptr ViewEngine::typeInfo(const QByteArray &typeName) const{
     return m_types[*it];
 }
 
+/** Returns the type info for a given meta-type by extracting the meta-object and calling the appropriate variant of the getter */
 TypeInfo::Ptr ViewEngine::typeInfo(const QMetaType &metaType) const{
     const QMetaObject* mo = metaType.metaObject();
     if ( !mo )
@@ -232,6 +273,13 @@ TypeInfo::Ptr ViewEngine::typeInfo(const QMetaType &metaType) const{
     return typeInfo(mo);
 }
 
+/**
+ * \brief Main function of the engine, where we pass the code to be compiled asynchronously
+ *
+ * Of extreme importance to the live coding part of LiveKeys, since we use it to compile our custom code.
+ * clearCache is used to indicate that we've changed one of the non-active files which are cached, so the
+ * cache has to be cleared since it's invalid after a change.
+ */
 void ViewEngine::createObjectAsync(
         const QString& qmlCode,
         QObject* parent,
@@ -308,6 +356,7 @@ QJSValue ViewEngine::lastErrorsObject() const{
     return toJSErrors(lastErrors());
 }
 
+/** Synchronous variant of the same creation of object to be used for compilation of our code */
 QObject* ViewEngine::createObject(const QString &qmlCode, QObject *parent, const QUrl &url, bool clearCache){
     QMutexLocker engineMutexLock(m_engineMutex);
 
@@ -342,6 +391,7 @@ QObject* ViewEngine::createObject(const QString &qmlCode, QObject *parent, const
     return obj;
 }
 
+/** Throws errors on these warnings which don't have their own object  */
 void ViewEngine::engineWarnings(const QList<QQmlError> &warnings){
     for ( auto it = warnings.begin(); it != warnings.end(); ++it ){
         const QQmlError& warning = *it;

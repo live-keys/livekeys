@@ -23,6 +23,12 @@
 namespace lv{
 namespace ml{
 
+/**
+* \brief Simple function that outputs the given MLNode in the form of a Qml object
+*
+* Since MLNodes can contain other MLNodes, this can be done recursively
+* \ingroup lvview
+*/
 void toQml(const MLNode &n, QJSValue &result, QJSEngine *engine){
     switch( n.type() ){
     case MLNode::Type::Object: {
@@ -71,6 +77,10 @@ void toQml(const MLNode &n, QJSValue &result, QJSEngine *engine){
     }
 }
 
+/**
+* \brief Simple function that converts the given Qml object into a LiveKeys-friendly MLNode shape
+* \ingroup lvview
+*/
 void fromQml(const QJSValue &value, MLNode &n){
     if ( value.isArray() ){
        QJSValueIterator it(value);

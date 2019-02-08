@@ -17,8 +17,18 @@
 #include "editorglobalobject.h"
 #include "live/project.h"
 #include <QDebug>
+/**
+ * \class lv::EditorGlobalObject
+ * \brief Global object used through LiveKeys just to have access to project and the palette container.
+ *
+ * Used by a lot of different classes just for sharing these two properties from their QML context.
+ * \ingroup lveditor
+ */
 namespace lv{
 
+/**
+ * @brief Default constructor of EditorGlobalObject
+ */
 EditorGlobalObject::EditorGlobalObject(
         Project *project,
         PaletteContainer *paletteContainer,
@@ -29,6 +39,9 @@ EditorGlobalObject::EditorGlobalObject(
 {
 }
 
+/**
+ * \brief Project getter
+ */
 Project *EditorGlobalObject::project(){
     return m_project;
 }

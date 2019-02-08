@@ -26,6 +26,18 @@
 
 namespace lv{
 
+/**
+ * \class lv::EditorSettings
+ * \brief Wrapper around a settings file for the editor
+ *
+ * We create small EditorSettingsCategory objects (that class is extendable) to add custom settings
+ * by assigning a key for each category in a JSON file and fetching it from a settings file.
+ * \ingroup lveditor
+ */
+
+/**
+ * \brief Default constructor
+ */
 EditorSettings::EditorSettings(const QString &path, QObject *parent)
     : QObject(parent)
     , m_fontSize(12)
@@ -33,9 +45,15 @@ EditorSettings::EditorSettings(const QString &path, QObject *parent)
 {
 }
 
+/**
+ * \brief Blank destructor
+ */
 EditorSettings::~EditorSettings(){
 }
 
+/**
+ * \brief Populates the settings from a given JSON object
+ */
 void EditorSettings::fromJson(const QJsonObject &root){
     for( QJsonObject::ConstIterator it = root.begin(); it != root.end(); ++it ){
         if ( it.key() == "font" ){
@@ -54,6 +72,9 @@ void EditorSettings::fromJson(const QJsonObject &root){
     }
 }
 
+/**
+ * @brief Creates a JSON object from the settings
+ */
 QJsonObject EditorSettings::toJson() const{
     QJsonObject root;
 
@@ -71,6 +92,11 @@ QJsonObject EditorSettings::toJson() const{
     return root;
 }
 
+/**
+ * \brief Synchronizes the settings with the file in a bidirectional manner
+ *
+ * If no file, we store the settings in one. If the file is open, we read from it.
+ */
 void EditorSettings::syncWithFile(){
     QFile file(m_path);
     if ( !file.exists() ){
@@ -87,6 +113,9 @@ void EditorSettings::syncWithFile(){
     }
 }
 
+/**
+ * \brief Initializes the settings from given data
+ */
 void EditorSettings::init(const QByteArray &data){
     m_content = data;
     QJsonParseError error;
@@ -98,10 +127,18 @@ void EditorSettings::init(const QByteArray &data){
     fromJson(jsondoc.object());
 }
 
+/**
+ * \brief Sets up the listener for changes to the project document
+ *
+ * This happens when the user opens the settings file in LiveKeys
+ */
 void EditorSettings::documentOpened(lv::ProjectDocument *document){
     connect(document, SIGNAL(isDirtyChanged()), this, SLOT(documentChanged()));
 }
 
+/**
+ * \brief Triggers re-initialization of settings from the settings file on every document change
+ */
 void EditorSettings::documentChanged(){
     ProjectDocument* document = qobject_cast<ProjectDocument*>(sender());
     if ( document ){

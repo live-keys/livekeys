@@ -41,11 +41,12 @@ public:
     Plugin::Context* context;
 };
 
-
+/** Default destructor */
 Plugin::~Plugin(){
     delete m_d;
 }
 
+/** Checks if live.plugin.json exists in the given path */
 bool Plugin::existsIn(const std::string &path){
     QDir d(QString::fromStdString(path));
     if ( !d.exists() )
@@ -55,6 +56,7 @@ bool Plugin::existsIn(const std::string &path){
     return finfo.exists();
 }
 
+/** Creates plugin from a given path */
 Plugin::Ptr Plugin::createFromPath(const std::string &path){
     QString pluginPath = QString::fromStdString(path);
     QString pluginDirPath;
@@ -84,6 +86,7 @@ Plugin::Ptr Plugin::createFromPath(const std::string &path){
     return createFromNode(pluginDirPath.toStdString(), pluginPath.toStdString(), m);
 }
 
+/** Creates plugin from a given MLNode*/
 Plugin::Ptr Plugin::createFromNode(const std::string &path, const std::string &filePath, const MLNode &m){
     if ( !m.hasKey("name") || !m.hasKey("package") )
         return Plugin::Ptr(nullptr);
@@ -134,43 +137,53 @@ Plugin::Ptr Plugin::createFromNode(const std::string &path, const std::string &f
     return pt;
 }
 
+/** Create empty plugin */
 Plugin::Ptr Plugin::createEmpty(const std::string &name){
     Plugin::Ptr pt(new Plugin(name, name, name, ""));
     return pt;
 }
 
+/** Name getter */
 const std::string &Plugin::name() const{
     return m_d->name;
 }
 
+/** Path getter */
 const std::string &Plugin::path() const{
     return m_d->path;
 }
 
+/** File path getter */
 const std::string &Plugin::filePath() const{
     return m_d->filePath;
 }
 
+/** Package getter */
 const std::string &Plugin::package() const{
     return m_d->package;
 }
 
+/** Dependencies getter */
 const std::list<std::string> &Plugin::dependencies() const{
     return m_d->dependencies;
 }
 
+/** Modules getter */
 const std::list<std::string> &Plugin::modules() const{
     return m_d->modules;
 }
 
+/** Library modules getter */
 const std::list<std::string> &Plugin::libraryModules() const{
     return m_d->libraryModules;
 }
 
+/** Palettes getter */
 const std::map<std::string, std::string> &Plugin::palettes() const{
     return m_d->palettes;
 }
 
+/** Assign package graph context */
 void Plugin::assignContext(PackageGraph *graph){
     if ( m_d->context )
         delete m_d->context;
@@ -179,6 +192,7 @@ void Plugin::assignContext(PackageGraph *graph){
     m_d->context->packageGraph = graph;
 }
 
+/** Context getter */
 Plugin::Context *Plugin::context(){
     return m_d->context;
 }

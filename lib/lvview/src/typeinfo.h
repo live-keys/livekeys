@@ -26,6 +26,7 @@
 
 namespace lv{
 
+/// @private
 class LV_VIEW_EXPORT TypeInfo{
 
 public:

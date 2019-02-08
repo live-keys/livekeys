@@ -17,7 +17,7 @@ class CommandsModel : public QAbstractListModel
 
 public:
     enum Roles{
-        Command = Qt::UserRole + 4,
+        Command = Qt::UserRole + 1,
         Description,
         Shortcuts
     };
@@ -38,13 +38,17 @@ public:
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     int rowCount(const QModelIndex &) const;
+    QHash<int, QByteArray> roleNames() const;
+    Q_INVOKABLE void setFilter(const QString &filter);
 
 public Q_SLOTS:
     void updateAvailableCommands();
 
+Q_SIGNALS:
+    void modelChanged(CommandsModel* model);
+
 private:
     void updateFilter();
-    void setFilter(const QString &filter);
 
     std::vector<CommandEntry> m_filteredCommands;
     std::map<QString, CommandEntry> m_commandEntries;

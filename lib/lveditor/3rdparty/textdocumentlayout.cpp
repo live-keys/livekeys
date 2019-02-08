@@ -479,7 +479,7 @@ TextDocumentLayoutPrivate::TextDocumentLayoutPrivate()
       currentLazyLayoutPosition(-1),
       lazyLayoutStepSize(1000),
       lastPageCount(-1),
-      lineManager(new LineManager)
+      lineManager(new LineManager(q_func()))
 {
     showLayoutProgress = true;
     insideDocumentChange = false;
@@ -2280,7 +2280,6 @@ QRectF TextDocumentLayout::blockBoundingRect(const QTextBlock &block) const
     d->ensureLayoutedByPosition(block.position() + block.length());
     QTextFrame *frame = d->document->frameAt(block.position());
     QPointF offset;
-    const int blockPos = block.position();
 
     while (frame) {
         TextFrameData *fd = data(frame);

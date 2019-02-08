@@ -85,14 +85,21 @@ public slots:
     QString path(const QString& relative) const;
 
 signals:
+    /** path changed, means the whole project changed */
     void pathChanged(QString rootPath);
+    /** active file has changed */
     void activeChanged(lv::ProjectDocument* active);
 
+    /** file model changed */
     void fileModelChanged(lv::ProjectFileModel* fileModel);
+    /** navigation model changed */
     void navigationModelChanged(lv::ProjectNavigationModel* navigationModel);
+    /** document model changed */
     void documentModelChanged(lv::ProjectDocumentModel* documentModel);
 
+    /** refers to an internal project directory change, for example renaming */
     void directoryChanged(const QString& rootPath);
+    /** file changed (e.g. on save) */
     void fileChanged(const QString& rootPath);
 
 private:
@@ -110,26 +117,55 @@ private:
     QString          m_path;
 };
 
+/**
+ * \brief Getter of the file model
+ *
+ * The file model represents all of the opened files in the current project
+ */
 inline ProjectFileModel* Project::fileModel(){
     return m_fileModel;
 }
 
+/**
+ * \brief Getter of the navigation model
+ *
+ * Used to search through the project for different files
+ */
 inline ProjectNavigationModel *Project::navigationModel(){
     return m_navigationModel;
 }
 
+/**
+ * \brief Getter of the document model
+ *
+ * Shows all the opened files
+ */
 inline ProjectDocumentModel *Project::documentModel(){
     return m_documentModel;
 }
 
+/**
+ * \brief Getter of the currently active project document
+ */
 inline ProjectDocument *Project::active() const{
     return m_active;
 }
 
+/**
+ * \brief Getter of the root path
+ *
+ * Actual path of the project, whether it's a file- or folder-based project.
+ */
 inline const QString &Project::rootPath() const{
     return m_path;
 }
 
+/**
+ * @brief Getter of the locked file session
+ *
+ * Implemention of the standard read-write model where there can be multiple readers, but a single writer,
+ * and the write mode is locked for access.
+ */
 inline LockedFileIOSession::Ptr Project::lockedFileIO(){
     return m_lockedFileIO;
 }

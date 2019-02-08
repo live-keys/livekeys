@@ -37,14 +37,14 @@ public:
     ProjectEntry(const QString& path, const QString& name, ProjectEntry* parent = 0);
     ~ProjectEntry();
 
-    ProjectEntry *child(int number);
+    ProjectEntry *child(int index);
     ProjectEntry *parentEntry() const;
 
     ProjectEntry* addEntry(const QString& name);
     ProjectEntry* addFileEntry(const QString& name);
 
     int childCount() const;
-    int childNumber() const;
+    int childIndex() const;
 
     const QString& name() const;
     void setName(const QString& name);
@@ -76,7 +76,9 @@ public slots:
     QUrl pathUrl() const;
 
 signals:
+    /** Signals that the name has changed */
     void nameChanged();
+    /** Signals that the path has changed */
     void pathChanged();
 
 protected:
@@ -92,18 +94,23 @@ private:
     QDateTime m_lastCheckTime;
 };
 
+
+/** Name getter */
 inline const QString &ProjectEntry::name() const{
     return m_name;
 }
 
+/** Path getter */
 inline const QString &ProjectEntry::path() const{
     return m_path;
 }
 
+/** Shows if the entry is a file */
 inline bool ProjectEntry::isFile() const{
     return m_isFile;
 }
 
+/** Shows if the entry contains a sub-entry with a given name */
 inline bool ProjectEntry::contains(const QString &name) const{
     foreach( ProjectEntry* entry, m_entries ){
         if ( entry->name() == name )
@@ -112,6 +119,7 @@ inline bool ProjectEntry::contains(const QString &name) const{
     return false;
 }
 
+/** Less-than relational operator of entries, sorting by name */
 inline bool ProjectEntry::operator <(const ProjectEntry &other) const{
     if ( isFile() && !other.isFile() )
         return false;
@@ -120,6 +128,7 @@ inline bool ProjectEntry::operator <(const ProjectEntry &other) const{
     return m_name < other.m_name;
 }
 
+/** Greater-than relational operator of entries, sorting by name */
 inline bool ProjectEntry::operator >(const ProjectEntry &other) const{
     if ( isFile() && !other.isFile() )
         return true;
@@ -128,20 +137,24 @@ inline bool ProjectEntry::operator >(const ProjectEntry &other) const{
     return m_name > other.m_name;
 }
 
+/** Returns the last check time */
 inline const QDateTime &ProjectEntry::lastCheckTime() const{
     return m_lastCheckTime;
 }
 
+/** Sets the last check time */
 inline void ProjectEntry::setLastCheckTime(const QDateTime &lastCheckTime){
     m_lastCheckTime = lastCheckTime;
 }
 
+/** Return the parent of this entry */
 inline ProjectEntry *ProjectEntry::parentEntry() const{
     if ( parent())
         return qobject_cast<ProjectEntry*>(parent());
     return 0;
 }
 
+/** Returns the list of entries */
 inline const QList<ProjectEntry *> &ProjectEntry::entries() const{
     return m_entries;
 }
