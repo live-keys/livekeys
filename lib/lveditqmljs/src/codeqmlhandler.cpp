@@ -1580,6 +1580,15 @@ void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
     if (!edit)
         return;
 
+    connect(box, &QQuickItem::heightChanged, [this, box](){
+        resizedEditFrame(box);
+    });
+
+
+    connect(box, &QQuickItem::destroyed, [this, box](){
+        removeEditFrame(box);
+    });
+
     int pos = edit->declaration()->position();
     QTextBlock tb = m_document->textDocument()->findBlock(pos);
     QTextBlock tbend = m_document->textDocument()->findBlock(pos + edit->declaration()->length());

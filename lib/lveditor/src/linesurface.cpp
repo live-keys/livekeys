@@ -177,7 +177,7 @@ void LineSurface::writeOutBlockStates()
         QTextBlock block = it.currentBlock();
         lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(block.userData());
 
-        QString print(to_string(block.blockNumber()).c_str());
+        QString print(std::to_string(block.blockNumber()).c_str());
         print += " : ";
         if (userData)
         {
