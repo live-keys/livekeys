@@ -29,6 +29,8 @@ public:
 
     void assignResult(MapArrayData* mad, const QVariant& v);
 
+    void clearCurrent();
+
 signals:
     void inputChanged();
     void fChanged();
@@ -37,9 +39,12 @@ signals:
 private:
     QVariantList   m_input;
     QVariantList   m_output;
+
+    QList<QObject*>      m_fObjects;
+    QList<QQmlContext*>  m_fContexts;
+    QList<MapArrayData*> m_fData;
+
     QQmlComponent* m_f;
-    QObject*       m_fObject;
-    MapArrayData*  m_current;
 };
 
 inline const QVariantList &MapArray::input() const{

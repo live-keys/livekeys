@@ -20,6 +20,9 @@ public:
     const QVariant &current() const;
     MapArray* mapArray();
 
+    void setResult(bool result){ m_result = result; }
+    bool result(){ return m_result; }
+
 public slots:
     int index() const;
     void result(const QVariant& value);
@@ -30,6 +33,7 @@ signals:
 private:
     QVariant m_current;
     int      m_index;
+    bool     m_result;
 };
 
 inline const QVariant& MapArrayData::current() const{
