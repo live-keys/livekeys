@@ -1,4 +1,5 @@
 [
+    {"Home" : "index.md"},
     {"Installation" : "installation.md"},
     [
         {"Installation On Windows" : "installation.md#windows"},
@@ -9,10 +10,9 @@
     [
         {"Running Live CV" : "running.md"},
         {"Projects" : "projects.md"},
-        {"Palettes and Bindings" : "palettes-and-bindings.md"},
-        {"Plugin Structure": "plugin-structure.md"}
+        {"Palettes and Bindings" : "palettes-and-bindings.md"}
     ],
-    "Plugins",
+    {"Plugins": "plugins.md"},
     [
         {"base" : "plugin-base.md"},
         [ 
@@ -55,7 +55,7 @@
     "Developer",
     [
         {"Building Live CV": "building.md"},
-        {"Plugins" : "plugins.md"},
+        "Plugins",
         [
             {"Creating a Plugin" : "creating-a-plugin.md"},
             {"Creating a Live CV Plugin" : "creating-a-livecv-plugin.md"},
@@ -87,12 +87,12 @@
                 "../output/md/lvelements-cpp.md>>"
             ]
         ],
-        "Plugin Apis",
+        {"Plugin Apis": "plugin-api.md"},
         [
             {"live" : "../output/md/plugin-live-cpp.md"},
-            {"lcvcore-cpp": "../output/md/plugin-lcvcore-cpp.md"},
-            {"lcvfeatures2d-cpp" : "../output/md/plugin-lcvfeatures2d-cpp.md"},
-            {"lcvvideo-cpp" : "../output/md/plugin-lcvvideo-cpp.md"}
+            {"lcvcore": "../output/md/plugin-lcvcore-cpp.md"},
+            {"lcvfeatures2d" : "../output/md/plugin-lcvfeatures2d-cpp.md"},
+            {"lcvvideo" : "../output/md/plugin-lcvvideo-cpp.md"}
         ]
     ]
 ]

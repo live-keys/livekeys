@@ -2,7 +2,7 @@
 
 Once Live CV has installed, the following window should appear when running the application:
 
-![](../src/images/startscreen.jpg)
+![](images/startscreen.jpg)
 
 The view consists of 4 main components which we will treat in the following sections:
 
@@ -71,7 +71,7 @@ new log line has been added:
 
 | Log Icon | Log Icon with Message |
 | ---------|-----------------------|
-|![](../src/images/logicon.jpg) Log Icon | ![](../src/images/logiconmessage.jpg) Log Icon with Message |
+|![](images/logicon.jpg) Log Icon | ![](images/logiconmessage.jpg) Log Icon with Message |
 
 
 * **Show license box** - Opens up the license agreement box. Some algorithms used through Live CV require the user
@@ -93,13 +93,13 @@ and folders around.
 Files that are opened are shown in bold. If a file isn't saved, it will have the blue dot on top of it's icon, monitored
 files will have the eye symbol next to them and active files will have the green arrow.
 
-![](../src/images/user_running_1.png)
+![](images/user_running_1.png)
 
 ## The Editor
 
-The editor is mostly designed to handle qml and js files. The top of the editor displayes the opened file name, the line and column number and the file navigation button ![](../src/images/user_running_2.png) which opens up the file navigation panel. The file navigation panel initially shows a list of all opened files. When a search is triggered by  typing in the search box, then the file is looked for throughout the project. The files that are opened are always displayed first to provide a faster navigation for the user.
+The editor is mostly designed to handle qml and js files. The top of the editor displayes the opened file name, the line and column number and the file navigation button ![](images/user_running_2.png) which opens up the file navigation panel. The file navigation panel initially shows a list of all opened files. When a search is triggered by  typing in the search box, then the file is looked for throughout the project. The files that are opened are always displayed first to provide a faster navigation for the user.
 
-![](../src/images/user_running_3.png)
+![](images/user_running_3.png)
 
 You can also use the "CTRL+K" key combination to toggle the navigation view.
 
@@ -108,15 +108,15 @@ During code editing, the code completion assist appears automatically. In order 
 the user to find the item he is looking for. For example, properties of a type are grouped by the types inheritance tree,
 each type being displayed on the right side of the menu.
 
-![](../src/images/user_running_4.png)
+![](images/user_running_4.png)
 
 Object types are grouped by imports as well, where the import name is displyed on the right side of the menu
 
-![](../src/images/user_running_5.png)
+![](images/user_running_5.png)
 
 The context menu opened by right clicking will show different actions available whithin that context:
 
-![](../src/images/user_running_6.png)
+![](images/user_running_6.png)
 
 To close the file, use the "x" button next to the file name or press "CTRL+W".
 

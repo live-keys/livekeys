@@ -21,7 +21,6 @@
 #include <QQmlContext>
 #include "opencv2/highgui.hpp"
 
-//TODO: Document
 
 QVideoWriter::QVideoWriter(QQuickItem *parent)
     : QQuickItem(parent)

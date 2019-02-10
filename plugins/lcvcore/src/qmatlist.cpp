@@ -18,8 +18,6 @@
 #include <QQmlEngine>
 #include <QJSValueIterator>
 
-//TODO: Document
-
 QMatList::QMatList(QObject *parent)
      : QAbstractListModel(parent)
 {
