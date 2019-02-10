@@ -897,7 +897,7 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
                             if (ke->key() == Qt::Key_Return)
                             {
                                 LineManager* lm = d->textEdit->getLineManager();
-                                pair<int, int> result(-1, -1);
+                                std::pair<int, int> result(-1, -1);
                                 if (lm)
                                 {
                                     result = lm->isFirstLineOfCollapsedSection(d->cursor.block().blockNumber());
@@ -934,7 +934,7 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
                           ) {
 
                     LineManager* lm = d->textEdit->getLineManager();
-                    pair<int, int> result(-1, -1);
+                    std::pair<int, int> result(-1, -1);
                     if (lm && ke == QKeySequence::Paste)
                     {
                         result = lm->isFirstLineOfCollapsedSection(d->cursor.block().blockNumber());
@@ -1066,7 +1066,7 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
             cursor.setBlockFormat(blockFmt);
         } else {
             QTextCursor localCursor = cursor;
-            pair<int, int> result(-1, -1);
+            std::pair<int, int> result(-1, -1);
             if (textEdit && textEdit->getLineManager())
             {
                 LineManager* lm = textEdit->getLineManager();

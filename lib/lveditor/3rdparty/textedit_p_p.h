@@ -135,7 +135,7 @@ public:
         , focusOnPress(true), persistentSelection(false), requireImplicitWidth(false)
         , selectByMouse(false), canPaste(false), canPasteValid(false), hAlignImplicit(true)
         , textCached(true), inLayout(false), selectByKeyboard(false), selectByKeyboardSet(false)
-        , hadSelection(false)
+        , hadSelection(false), invalidUntilTheEnd(false)
     {
         fragmentStartPalette->setObjectName("fragmentStartPalette");
         fragmentEndPalette->setObjectName("fragmentEndPalette");
@@ -258,6 +258,7 @@ public:
     bool selectByKeyboard:1;
     bool selectByKeyboardSet:1;
     bool hadSelection : 1;
+    bool invalidUntilTheEnd: 1;
 };
 
 }

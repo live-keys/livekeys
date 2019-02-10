@@ -2162,7 +2162,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                 delete (*nodeIterator)->textNode();
                 delete *nodeIterator;
                 nodeIterator = d->textNodeMap.erase(nodeIterator);
-            } while (nodeIterator != d->textNodeMap.end() && (*nodeIterator)->dirty());
+            } while (nodeIterator != d->textNodeMap.end() && (d->invalidUntilTheEnd || (*nodeIterator)->dirty()));
         }
 
         // FIXME: the text decorations could probably be handled separately (only updated for affected textFrames)
@@ -2179,7 +2179,9 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
         rootNode->setMatrix(basePositionMatrix);
 
         QPointF nodeOffset;
-        TextEditPrivate::Node *firstCleanNode = (nodeIterator != d->textNodeMap.end()) ? *nodeIterator : nullptr;
+        TextEditPrivate::Node *firstCleanNode = (nodeIterator != d->textNodeMap.end() && !d->invalidUntilTheEnd) ? *nodeIterator : nullptr;
+
+        d->invalidUntilTheEnd = false;
 
         if (d->document && d->control) {
             QList<QTextFrame *> frames;
@@ -2624,6 +2626,17 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
 
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
+
+    std::list<QObject*>* results = getPaletteManager()->updatePaletteBounds(pos, charsRemoved, charsAdded);
+    if (results)
+    {
+        for (auto it = results->begin(); it != results->end(); ++it)
+        {
+            (*it)->deleteLater();
+        }
+        delete results;
+    }
+
 
     if (d->document && dynamic_cast<TextDocumentLayout*>(d->document->documentLayout()))
     {
@@ -3448,7 +3461,12 @@ void TextEdit::setDocumentHandler(DocumentHandler *dh)
 void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QObject *palette)
 {
     Q_D(TextEdit);
-    d->paletteManager->paletteAdded(lineStart-1, lineEnd - lineStart + 1, height, palette);
+    auto startBlock = d->document->findBlockByNumber(lineStart-1);
+    auto endBlock = d->document->findBlockByNumber(lineEnd-1);
+    int startPos = startBlock.position();
+    int endPos = endBlock.position() + endBlock.length();
+    d->paletteManager->paletteAdded(lineStart-1, lineEnd - lineStart + 1, height, palette, startPos, endPos);
+    d->invalidUntilTheEnd = true;
     for (int i = lineStart - 1; i < d->document->blockCount(); ++i)
         invalidateBlock(d->document->findBlockByNumber(i));
 
@@ -3460,6 +3478,8 @@ void TextEdit::linePaletteRemoved(QObject *palette)
     Q_D(TextEdit);
     int result = d->paletteManager->removePalette(palette);
     if (result == -1) return;
+
+    d->invalidUntilTheEnd = true;
 
     for (int i = result; i < d->document->blockCount(); ++i)
     {
@@ -3473,7 +3493,7 @@ void TextEdit::linePaletteHeightChanged(QObject *palette, int newHeight)
     Q_D(TextEdit);
     int result = d->paletteManager->resizePalette(palette, newHeight);
     if (result == -1) return;
-
+    d->invalidUntilTheEnd = true;
     for (int i = result; i < d->document->blockCount(); ++i)
     {
         invalidateBlock(d->document->findBlockByNumber(i));
@@ -3568,10 +3588,16 @@ void TextEdit::updateFragmentVisibility()
     d->paletteManager->removePalette(d->fragmentStartPalette);
     d->paletteManager->removePalette(d->fragmentEndPalette);
 
-    int lfrStart = max(0,d->fragmentStart), lfrEnd = min(d->fragmentEnd, d->document->blockCount()-1);
+    int lfrStart = std::max(0,d->fragmentStart), lfrEnd = std::min(d->fragmentEnd, d->document->blockCount()-1);
 
-    d->paletteManager->paletteAdded(0, lfrStart, 0, d->fragmentStartPalette);
-    d->paletteManager->paletteAdded(lfrEnd+1, d->document->blockCount() - lfrEnd, 0, d->fragmentEndPalette);
+    QTextBlock endBlock = d->document->findBlockByNumber(lfrStart);
+    d->paletteManager->paletteAdded(0, lfrStart, 0, d->fragmentStartPalette, 0, endBlock.position()+endBlock.length());
+    QTextBlock startBlock;
+    if (lfrEnd != INT_MAX || lfrEnd + 1 <= d->document->blockCount() - 1)
+        startBlock = d->document->findBlockByNumber(lfrEnd + 1);
+    else startBlock = d->document->lastBlock();
+    endBlock = d->document->findBlockByNumber(d->document->blockCount()-1);
+    d->paletteManager->paletteAdded(lfrEnd+1, d->document->blockCount() - lfrEnd, 0, d->fragmentEndPalette, startBlock.position(), endBlock.position()+endBlock.length());
 
     dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->setDirtyPos(0);
     getPaletteManager()->setDirtyPos(0);
