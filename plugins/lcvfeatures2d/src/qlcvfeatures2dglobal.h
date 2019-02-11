@@ -16,7 +16,7 @@
 
 #ifndef QLCVFEATURES2DGLOBAL_H
 #define QLCVFEATURES2DGLOBAL_H
-
+/// \private
 #include <qglobal.h>
 
 /**

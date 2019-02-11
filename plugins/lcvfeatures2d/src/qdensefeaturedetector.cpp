@@ -16,7 +16,7 @@
 
 #include "qdensefeaturedetector.h"
 #include "opencv2/features2d/features2d.hpp"
-
+/// \private
 QDenseFeatureDetector::QDenseFeatureDetector(QQuickItem *parent) :
     QFeatureDetector(new cv::DenseFeatureDetector, parent)
 {

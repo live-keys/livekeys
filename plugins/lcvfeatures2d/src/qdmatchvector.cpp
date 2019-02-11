@@ -16,6 +16,12 @@
 
 #include "qdmatchvector.h"
 
+/**
+ * \class QDMatchVector
+ * \brief Vector containing the actual matches
+ * \ingroup plugin-lcvfeatures2d
+ */
+
 QDMatchVector::QDMatchVector(QQuickItem *parent)
     : QQuickItem(parent)
     , m_type(QDMatchVector::BEST_MATCH)

@@ -6,6 +6,6 @@
   This module contains elements for feature detection and matching. It resembles open cv's features 2D module.
 
   \code
-  import "lcvfeatures2d" 1.0
+  import lcvfeatures2d 1.0
   \endcode
 */

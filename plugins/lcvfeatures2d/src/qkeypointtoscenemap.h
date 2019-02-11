@@ -39,10 +39,14 @@ public:
 public:
     QKeyPointToSceneMap(QObject* parent = 0);
     ~QKeyPointToSceneMap();
-
+    /**
+    *\brief Appends object
+    */
     void append(ObjectKeypointToScene* objkeypointToScene);
     ObjectKeypointToScene* mappingAt(size_t index);
-
+    /**
+    *\brief Resize the mapping to a specific size(usefull for performance efficiency)
+    */
     void resize(size_t size);
 
     Iterator begin();

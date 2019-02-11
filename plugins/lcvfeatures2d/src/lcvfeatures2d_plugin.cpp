@@ -42,7 +42,7 @@
 #include "qkeypointhomography.h"
 
 #include <qqml.h>
-
+/// \private
 void Lcvfeatures2dPlugin::registerTypes(const char *uri){
     // @uri modules.lcvfeatures2d
     qmlRegisterType<QKeyPoint>(                   uri, 1, 0, "KeyPoint");

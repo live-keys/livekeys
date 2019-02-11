@@ -18,12 +18,24 @@
 #include "qkeypoint.h"
 #include <QQmlEngine>
 
+/**
+*\class QKeyPointVector
+*\ingroup plugin-lcvfeatures2d
+*\brief Wrapper around  keypoints
+*/
+
+/**
+*\brief QKeyPointVector constructor
+*/
 QKeyPointVector::QKeyPointVector(QQuickItem *parent)
     : QQuickItem(parent)
 {
     setFlag(QQuickItem::ItemHasContents, false);
 }
 
+/**
+*\brief QKeyPointVector destructor
+*/
 QKeyPointVector::~QKeyPointVector(){
 }
 

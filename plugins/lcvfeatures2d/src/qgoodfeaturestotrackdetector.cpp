@@ -16,7 +16,7 @@
 
 #include "qgoodfeaturestotrackdetector.h"
 #include "opencv2/features2d/features2d.hpp"
-
+/// \private
 QGoodFeaturesToTrackDetector::QGoodFeaturesToTrackDetector(QQuickItem *parent)
     : QFeatureDetector(new cv::GoodFeaturesToTrackDetector, parent)
 

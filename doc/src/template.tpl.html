@@ -49,12 +49,12 @@
       let data = $(this).parent().children(".expandable-data");
       if (data.hasClass("hidden")) {
         data.removeClass("hidden").stop(true, true).slideDown();
-        $(this).text("Show less...");
+        $(this).text("▴");
         // $(this).text("↑");
       } else {
         data.addClass("hidden").stop(true, true).slideUp();
         // $(this).text("↓");
-        $(this).text("Show more...");
+        $(this).text("▸");
 
       }
       // console.log($(this));
