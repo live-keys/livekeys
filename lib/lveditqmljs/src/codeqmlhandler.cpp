@@ -710,9 +710,9 @@ CodeQmlHandler::CodeQmlHandler(
     Q_D(CodeQmlHandler);
     d->projectHandler = projectHandler;
 
-    m_timer.setInterval(1000);
-    m_timer.setSingleShot(true);
-    connect(&m_timer, SIGNAL(timeout()), this, SLOT(updateScope()));
+    m_scopeTimer.setInterval(1000);
+    m_scopeTimer.setSingleShot(true);
+    connect(&m_scopeTimer, SIGNAL(timeout()), this, SLOT(updateScope()));
 
     d->projectHandler->addCodeQmlHandler(this);
     d->projectHandler->scanMonitor()->addScopeListener(this);
@@ -925,8 +925,7 @@ AbstractCodeHandler::ContentsTrigger CodeQmlHandler::documentContentsChanged(int
             }
         }
 
-        if ( !m_document->editingStateIs(ProjectDocument::Silent) )
-            m_timer.start();
+        m_scopeTimer.start();
     }
 
     return r;
@@ -2001,6 +2000,8 @@ int CodeQmlHandler::addProperty(
     cs.endEditBlock();
     m_document->removeEditingState(ProjectDocument::Palette);
 
+    m_scopeTimer.start();
+
     lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     if ( dh ){
         dh->requestCursorPosition(cursorPosition);
@@ -2054,6 +2055,8 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &type){
     cs.insertText(insertionText);
     cs.endEditBlock();
     m_document->removeEditingState(ProjectDocument::Palette);
+
+    m_scopeTimer.start();
 
     lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     if (dh){
