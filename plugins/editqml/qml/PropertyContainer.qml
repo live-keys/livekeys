@@ -142,6 +142,7 @@ Item{
         fontSize: 10
         fontFamily: "Open Sans, sans-serif"
         onFocusChanged : if ( !focus ) model = null
+        z: 2000
 
         property var selectedHandler : function(){}
         property var cancelledHandler : function(index){}
