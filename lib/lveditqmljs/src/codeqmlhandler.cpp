@@ -615,19 +615,18 @@ namespace qmlhandler_helpers{
             }
             for ( int i = 0; i < object->methodCount(); ++i ){
                 LanguageUtils::FakeMetaMethod m = object->method(i);
-                if ( m.methodType() == LanguageUtils::FakeMetaMethod::Method && suggestMethods ){
-                    QString completion =
-                        m.methodName() + "(" + m.parameterNames().join(", ") + ")";
-                        localSuggestions << CodeCompletionSuggestion(
-                            m.methodName() + "()", "function", objectTypeName, completion
-                        );
+                if ( (m.methodType() == LanguageUtils::FakeMetaMethod::Method ||
+                      m.methodType() == LanguageUtils::FakeMetaMethod::Slot) && suggestMethods ){
+                    QString completion = m.methodName() + "(";// + m.parameterNames().join(", ") + ")";
+                    localSuggestions << CodeCompletionSuggestion(
+                        m.methodName() + "()", "function", objectTypeName, completion
+                    );
                 }
                 if ( m.methodType() == LanguageUtils::FakeMetaMethod::Signal && suggestSignals ){
-                    QString completion =
-                        m.methodName() + "(" + m.parameterNames().join(", ") + ")";
-                        localSuggestions << CodeCompletionSuggestion(
-                            m.methodName() + "()", "signal", objectTypeName, completion
-                        );
+                    QString completion = m.methodName() + "(" + m.parameterNames().join(", ") + ")";
+                    localSuggestions << CodeCompletionSuggestion(
+                        m.methodName() + "()", "signal", objectTypeName, completion
+                    );
                 }
                 if ( m.methodType() == LanguageUtils::FakeMetaMethod::Signal && suggestGeneratedSlots ){
                     QString methodName = m.methodName();
@@ -2406,7 +2405,7 @@ void CodeQmlHandler::suggestionsForLeftBind(
                     );
                     typePath = newTypePath;
                 }
-                qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, ": ", suggestions);
+                qmlhandler_helpers::suggestionsForObjectPath(typePath, true, false, false, false, false, ": ", suggestions);
             }
         } else if ( qmlhandler_helpers::isNamespace(scope.document, firstSegment) ){
             if ( context.expressionPath().size() == 2 )
@@ -2422,7 +2421,7 @@ void CodeQmlHandler::suggestionsForLeftBind(
             QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
             QString libraryKey;
             qmlhandler_helpers::getTypePath(scope, typeNamespace, type, typePath, libraryKey);
-            qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, ": ", suggestions);
+            qmlhandler_helpers::suggestionsForObjectPath(typePath, true, false, false, false, false, ": ", suggestions);
         }
         suggestionsForNamespaceTypes("", suggestions);
         suggestionsForNamespaceImports(suggestions);
