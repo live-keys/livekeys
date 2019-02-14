@@ -206,15 +206,12 @@ void LiveCV::loadInternalPlugins(){
         "base", 1, 0, "LiveCommands",    ViewEngine::typeAsPropertyMessage("LiveCommands", "livecv.commands"));
     qmlRegisterUncreatableType<lv::KeyMap>(
         "base", 1, 0, "KeyMap",          ViewEngine::typeAsPropertyMessage("KeyMap", "livecv.keymap"));
-    qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
-        "base", 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type."
-    );
     qmlRegisterUncreatableType<lv::VisualLogModel>(
         "base", 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "livecv.log"));
-    );
     qmlRegisterUncreatableType<lv::VisualLogQmlObject>(
-        "base", 1, 0, "VisualLog", "VisualLog is available through the \'vlog\' property."
-    );
+        "base", 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
+    qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
+        "base", 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type.");
 
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("script",  m_script);
