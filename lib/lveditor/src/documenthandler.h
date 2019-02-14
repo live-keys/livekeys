@@ -61,9 +61,6 @@ public:
 
     void setIndentSize(int size);
 
-    /**
-     * \brief Implementation of the respective function from QQmlParserStatus
-     */
     void classBegin(){}
     void componentComplete();
 

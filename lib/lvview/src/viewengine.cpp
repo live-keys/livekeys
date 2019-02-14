@@ -31,6 +31,24 @@
 #include <QCoreApplication>
 
 #include <QQuickItem>
+
+
+/**
+ * \class lv::FatalException
+ * \brief Subclass of the lv::Exception used for unrecoverable errors
+ *
+ *
+ * \ingroup lvview
+ */
+
+
+/**
+ * \class lv::InputException
+ * \brief Subclass of the lv::Exception used for configuration errors
+ * \ingroup lvview
+ */
+
+
 /**
  * \class lv::ViewEngine
  * \brief Main Qml engine
@@ -271,6 +289,13 @@ TypeInfo::Ptr ViewEngine::typeInfo(const QMetaType &metaType) const{
         return TypeInfo::Ptr(0);
 
     return typeInfo(mo);
+}
+
+/**
+ * \brief Generates a message for uncreatable types that are available as properties
+ */
+QString ViewEngine::typeAsPropertyMessage(const QString &typeName, const QString &propertyName){
+    return typeName + " is available by accessing the \'" + propertyName + "\' property.";
 }
 
 /**

@@ -32,7 +32,7 @@ QDescriptorExtractor::QDescriptorExtractor(QQuickItem *parent)
 
 QDescriptorExtractor::QDescriptorExtractor(cv::Ptr<cv::DescriptorExtractor> extractor, QQuickItem* parent)
     : QQuickItem(parent)
-    , m_extractor(extractor)cv
+    , m_extractor(extractor)
     , m_keypoints(0)
     , m_descriptors(new QMat)
     , m_isBinary(true)
