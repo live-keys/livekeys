@@ -16,7 +16,7 @@
 
 #include "qbriefdescriptorextractor.h"
 #include "opencv2/features2d/features2d.hpp"
-
+/// \private
 QBriefDescriptorExtractor::QBriefDescriptorExtractor(QQuickItem *parent)
     : QDescriptorExtractor(new cv::BriefDescriptorExtractor, parent)
 {

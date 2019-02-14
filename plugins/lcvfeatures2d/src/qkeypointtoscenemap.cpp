@@ -16,11 +16,23 @@
 
 #include "qkeypointtoscenemap.h"
 
+/**
+*\class QKeypointToSceneMap
+*\ingroup plugin-lcvfeatures2d
+*\brief Mapping from a set of keypoints
+*/
+
+/**
+*\brief QKeyPointToSceneMap constructor
+*/
 QKeyPointToSceneMap::QKeyPointToSceneMap(QObject *parent)
     : QObject(parent)
 {
 }
 
+/**
+*\brief QKeyPointToSceneMap destructor
+*/
 QKeyPointToSceneMap::~QKeyPointToSceneMap(){
 
 }

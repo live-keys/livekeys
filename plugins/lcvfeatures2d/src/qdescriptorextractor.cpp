@@ -16,7 +16,11 @@
 
 #include "qdescriptorextractor.h"
 #include "qkeypointvector.h"
-
+/**
+ * \class QDescriptorExtractor
+ * \brief Abstract base class for computing descriptors for image keypoints.
+ * \ingroup plugin-lcvfeatures2d
+ */
 QDescriptorExtractor::QDescriptorExtractor(QQuickItem *parent)
     : QQuickItem(parent)
     , m_extractor()
@@ -28,13 +32,16 @@ QDescriptorExtractor::QDescriptorExtractor(QQuickItem *parent)
 
 QDescriptorExtractor::QDescriptorExtractor(cv::Ptr<cv::DescriptorExtractor> extractor, QQuickItem* parent)
     : QQuickItem(parent)
-    , m_extractor(extractor)
+    , m_extractor(extractor)cv
     , m_keypoints(0)
     , m_descriptors(new QMat)
     , m_isBinary(true)
 {
 }
 
+/**
+ * QDescriptorExtractor destructor
+ */
 QDescriptorExtractor::~QDescriptorExtractor(){
     delete m_descriptors;
 }

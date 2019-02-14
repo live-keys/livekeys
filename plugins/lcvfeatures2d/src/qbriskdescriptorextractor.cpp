@@ -16,7 +16,7 @@
 
 #include "qbriskdescriptorextractor.h"
 #include "opencv2/features2d.hpp"
-
+/// \private
 QBriskDescriptorExtractor::QBriskDescriptorExtractor(QQuickItem *parent) :
     QDescriptorExtractor(cv::BRISK::create(), parent){
 }

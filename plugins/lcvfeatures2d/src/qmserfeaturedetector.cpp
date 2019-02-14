@@ -16,7 +16,7 @@
 
 #include "qmserfeaturedetector.h"
 #include "opencv2/features2d.hpp"
-
+/// \private
 QMSerFeatureDetector::QMSerFeatureDetector(QQuickItem *parent)
     : QFeatureDetector(cv::MSER::create(), parent)
 {

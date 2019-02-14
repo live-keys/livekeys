@@ -71,6 +71,7 @@ Returns a cloned matrix with javascript ownership
 {qmlMethod:Mat createOwnedObject()}
 
 Returns a shallow copied matrix with javascript ownership
+<<<<<<< HEAD
 
 
 {qmlType:MatView}

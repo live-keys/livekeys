@@ -20,6 +20,11 @@
 #include "qmatshader.h"
 #include "opencv2/features2d.hpp"
 
+/**
+ * \class QFeatureDetector
+ * \brief Detects features in an image
+ * \ingroup plugin-lcvfeatures2d
+ */
 QFeatureDetector::QFeatureDetector(QQuickItem *parent)
     : QQuickItem(parent)
     , m_detector(cv::Ptr<cv::FeatureDetector>())

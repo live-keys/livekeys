@@ -16,7 +16,7 @@
 
 #include "qstarfeaturedetector.h"
 #include "opencv2/features2d/features2d.hpp"
-
+/// \private
 QStarFeatureDetector::QStarFeatureDetector(QQuickItem *parent)
     : QFeatureDetector(new cv::StarDetector, parent)
 {
