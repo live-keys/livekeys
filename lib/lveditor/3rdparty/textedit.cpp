@@ -2627,14 +2627,13 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
 
-    std::list<QObject*>* results = getPaletteManager()->updatePaletteBounds(pos, charsRemoved, charsAdded);
-    if (results)
+    std::list<QObject*> results = getPaletteManager()->updatePaletteBounds(pos, charsRemoved, charsAdded);
+    if (!results.empty())
     {
-        for (auto it = results->begin(); it != results->end(); ++it)
+        for (auto it = results.begin(); it != results.end(); ++it)
         {
             (*it)->deleteLater();
         }
-        delete results;
     }
 
 

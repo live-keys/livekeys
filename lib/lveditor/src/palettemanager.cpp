@@ -182,11 +182,10 @@ int PaletteManager::resizePalette(QObject *palette, int newHeight)
     return result;
 }
 
-std::list<QObject *>* PaletteManager::updatePaletteBounds(int pos, int removed, int added)
+std::list<QObject *> PaletteManager::updatePaletteBounds(int pos, int removed, int added)
 {
-    if (m_palettes.empty()) return nullptr;
-
-    auto result = new std::list<QObject*>();
+    std::list<QObject*> result;
+    if (m_palettes.empty()) return result;
     auto it = m_palettes.begin();
     while (it != m_palettes.end()){
         PaletteData* pd = *it;
@@ -200,7 +199,7 @@ std::list<QObject *>* PaletteManager::updatePaletteBounds(int pos, int removed, 
         toBeRemoved = toBeRemoved && (removed > 0);
 
         if (toBeRemoved){
-            result->push_back(pd->m_palette);
+            result.push_back(pd->m_palette);
         } else {
             pd->m_startPos += added - removed;
             pd->m_endPos += added - removed;

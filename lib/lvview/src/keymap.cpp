@@ -18,7 +18,6 @@
 #include "live/mlnodetojson.h"
 #include <QFile>
 #include <QDir>
-#include <ctype.h>
 #include <QJSValue>
 #include <QJSValueIterator>
 
@@ -255,7 +254,7 @@ quint32 KeyMap::keyFromString(const QString &key) const {
 QString KeyMap::stringFromKey(const quint32 &key) const
 {
     auto result = stringsForKeys[key];
-    if (result == "") result = tolower(static_cast<char>(key));
+    if (result == "") result = static_cast<QChar>(QChar::toLower(key));
 
     return result;
 }
