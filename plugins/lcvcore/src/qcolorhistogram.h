@@ -25,7 +25,6 @@ class QPainter;
 class QOpenGLPaintDevice;
 class QOpenGLFramebufferObject;
 class QOpenGLFunctions;
-
 class QAbstractColorHistogramRenderer{
 public:
     QAbstractColorHistogramRenderer(){}
@@ -41,6 +40,7 @@ public:
     ) = 0;
 };
 
+/// \private
 class QColorHistogramNode : public QObject, public QSGSimpleTextureNode{
 
     Q_OBJECT
@@ -64,7 +64,7 @@ private:
     QOpenGLPaintDevice       *m_paintDevice;
     QOpenGLFunctions         *m_glFunctions;
 };
-
+/// \private
 class QColorHistogram : public QQuickItem{
 
     Q_OBJECT

@@ -18,7 +18,7 @@
 #define QMATVIEW_H
 
 #include "qmatdisplay.h"
-
+/// \private
 class QMatView : public QQuickItem{
 
     Q_OBJECT

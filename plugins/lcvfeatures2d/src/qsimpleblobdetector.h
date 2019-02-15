@@ -18,7 +18,7 @@
 #define QSIMPLEBLOBDETECTOR_H
 
 #include "qfeaturedetector.h"
-
+/// \private
 class QSimpleBlobDetector : public QFeatureDetector{
 
     Q_OBJECT

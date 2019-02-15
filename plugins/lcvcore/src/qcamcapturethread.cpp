@@ -27,7 +27,7 @@
 #include <QWaitCondition>
 
 using namespace cv;
-
+/// \private
 class QCamCaptureThreadPrivate{
 
 public:

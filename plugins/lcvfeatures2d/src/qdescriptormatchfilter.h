@@ -38,9 +38,7 @@ public:
     void setMatches1to2(QDMatchVector* arg);
 
     QDMatchVector* matches1to2Out() const;
-    /**
-     * \brief Minimum distance that the match has to the actual outcome.
-     */
+    
     float minDistanceCoeff() const;
     void setMinDistanceCoeff(float arg);
 

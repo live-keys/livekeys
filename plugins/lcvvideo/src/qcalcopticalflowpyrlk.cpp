@@ -20,29 +20,6 @@
 
 using namespace cv;
 
-/*!
-  \qmltype CalcOpticalFlowPyrLK
-  \instantiates QCalcOpticalFlowPyrLK
-  \inqmlmodule lcvvideo
-  \inherits MatFilter
-  \brief Sparse optical flow filter.
-
-  Calculate an optical flow for a sparse feature set using the iterative Lucas-Kanade method with pyramids. The function
-  implements a sparse iterative version of the Lucas-Kanade optical flow in pyramids.
-
-  See http://docs.opencv.org/modules/video/doc/motion_analysis_and_object_tracking.html for details.
-
-  Note that this element manages it's points automatically. You can add a point by using the addPoint() function, or
-  you can get a list of all the points by using the points() getter.
-
-  \code
-  var points = lkflow.points()
-  \endcode
-
-  A sample is available in \b{samples/video/lktracking.qml} :
-
-  \quotefile video/lktracking.qml
-*/
 /// \private
 class QCalcOpticalFlowPointState{
 
@@ -53,6 +30,7 @@ public:
     std::vector<float>   err;
 };
 
+/// \private
 class QCalcOpticalFlowPyrLKPrivate{
 
 public:
@@ -155,18 +133,18 @@ size_t QCalcOpticalFlowPyrLKPrivate::totalPoints() const{
 // QCalcOpticalFlowPyrLK Implementation
 // ------------------------------------
 
-/*!
-   \class QCalcOpticalFlowPyrLK
-   \inmodule lcvvideo_cpp
-   \internal
-   \brief Calculates the sparse optical flow.
+/**
+ *\class QCalcOpticalFlowPyrLK
+ *\ingroup plugin-lcvvideo
+ *\internal
+ *\brief Calculates the sparse optical flow.
  */
 
-/*!
-  \brief QCalcOpticalFlowPyrLK constructor
-
-  Parameters:
-  \a parent
+/**
+ *\brief QCalcOpticalFlowPyrLK constructor
+ *
+ *Parameters:
+ *\a parent
  */
 QCalcOpticalFlowPyrLK::QCalcOpticalFlowPyrLK(QQuickItem *parent)
     : QMatFilter(parent)
@@ -174,38 +152,25 @@ QCalcOpticalFlowPyrLK::QCalcOpticalFlowPyrLK(QQuickItem *parent)
 
 }
 
-/*!
-  \brief QCalcOpticalFlowPyrLK destructor
+/**
+ *\brief QCalcOpticalFlowPyrLK destructor
  */
 QCalcOpticalFlowPyrLK::~QCalcOpticalFlowPyrLK(){
     delete d_ptr;
 }
 
-
-/*!
-  \qmlmethod CalcOpticalFlowPyrLK::addPoint(Point p)
-
-  Add a \a point to track.
- */
-
-/*!
-  \brief Adds a \a point to the vector of points that are currently tracked.
-  \sa CalcOpticalFlowPyrLK::addPoint
+/**
+ *\brief Adds a \a point to the vector of points that are currently tracked.
+ *\sa CalcOpticalFlowPyrLK::addPoint
  */
 void QCalcOpticalFlowPyrLK::addPoint(const QPoint& point){
     Q_D(QCalcOpticalFlowPyrLK);
     d->addPoint(Point(point.x(), point.y()));
 }
 
-/*!
-  \qmlmethod list<Point> CalcOpticalFlowPyrLK::points()
-
-  This method retrieves a copy of the list of points that are currently traked.
- */
-
-/*!
-  \brief Returns the total number of points that are currently tracked as a list of points.
-  \sa CalcOpticalFlowPyrLK::points()
+/**
+ *\brief Returns the total number of points that are currently tracked as a list of points.
+ *\sa CalcOpticalFlowPyrLK::points()
  */
 QList<QPoint> QCalcOpticalFlowPyrLK::points(){
     Q_D(QCalcOpticalFlowPyrLK);
@@ -222,27 +187,13 @@ QList<QPoint> QCalcOpticalFlowPyrLK::points(){
     return base;
 }
 
-/*!
-  \qmlmethod int CalcOpticalFlowPyrLK::totalPoints()
-
-  Returns the total number of points that are currently tracked.
- */
-
-/*!
-  \brief Returns the total number of points that are currently tracked.
+/**
+ *\brief Returns the total number of points that are currently tracked.
  */
 int QCalcOpticalFlowPyrLK::totalPoints() const{
     Q_D(const QCalcOpticalFlowPyrLK);
     return (int)d->totalPoints();
 }
-
-
-
-/*!
-  \qmlmethod CalcOpticalFlowPyrLK::staticLoad(string key)
-
-  Loads the CalcOpticalFlowPyrLK state from the given \a key.
- */
 
 void QCalcOpticalFlowPyrLK::staticLoad(const QString &id){
     Q_D(QCalcOpticalFlowPyrLK);
@@ -255,17 +206,10 @@ void QCalcOpticalFlowPyrLK::staticLoad(const QString &id){
     QMatFilter::transform();
 }
 
-/*!
-  \property QCalcOpticalFlowPyrLK::winSize
-  \sa CalcOpticalFlowPyrLK::winSize
+/**
+ *\property QCalcOpticalFlowPyrLK::winSize
+ *\sa CalcOpticalFlowPyrLK::winSize
  */
-
-/*!
-  \qmlproperty Size CalcOpticalFlowPyrLK::winSize
-
-  Size of the search window at each pyramid level.
- */
-
 
 QSize QCalcOpticalFlowPyrLK::winSize() const{
     Q_D(const QCalcOpticalFlowPyrLK);
@@ -280,18 +224,9 @@ void QCalcOpticalFlowPyrLK::setWinSize(const QSize& winSize){
     }
 }
 
-
-/*!
-  \qmlproperty int CalcOpticalFlowPyrLK::maxLevel
-
-  0-based maximal pyramid level number; if set to 0, pyramids are not used (single level), if set to 1, two levels are
-  used, and so on; if pyramids are passed to input then algorithm will use as many levels as pyramids have but no more
-  than 'maxLevel'.
- */
-
-/*!
-  \property QCalcOpticalFlowPyrLK::maxLevel
-  \sa CalcOpticalFlowPyrLK::maxLevel
+/**
+ *\property QCalcOpticalFlowPyrLK::maxLevel
+ *\sa CalcOpticalFlowPyrLK::maxLevel
  */
 
 int QCalcOpticalFlowPyrLK::maxLevel() const{
@@ -308,18 +243,9 @@ void QCalcOpticalFlowPyrLK::setMaxLevel(int maxLevel){
 }
 
 
-/*!
-  \property QCalcOpticalFlowPyrLK::minEigThreshold
-  \sa CalcOpticalFlowPyrLK::minEigThreshold
- */
-
-/*!
-  \qmlproperty real CalcOpticalFlowPyrLK::minEigThreshold
-
-  The algorithm calculates the minimum eigen value of a 2x2 normal matrix of optical flow equations (this matrix is
-  called a spatial gradient matrix in [Bouguet00]_), divided by number of pixels in a window; if this value is less than
-  'minEigThreshold', then a corresponding feature is filtered out and its flow is not processed, so it allows to remove
-  bad points and get a performance boost.
+/**
+ *\property QCalcOpticalFlowPyrLK::minEigThreshold
+ *\sa CalcOpticalFlowPyrLK::minEigThreshold
  */
 
 double QCalcOpticalFlowPyrLK::minEigThreshold() const{
@@ -335,26 +261,26 @@ void QCalcOpticalFlowPyrLK::setMinEigThreshold(double minEigThreshold){
     }
 }
 
-/*!
-  \fn virtual void QCalcOpticalFlowPyrLK::transform(const cv::Mat& in, cv::Mat& out)
-  \brief Filtering function.
-
-  Parameters :
-  \a in
-  \a out
+/**
+ *\fn virtual void QCalcOpticalFlowPyrLK::transform(const cv::Mat& in, cv::Mat& out)
+ *\brief Filtering function.
+ *
+ *Parameters :
+ *\a in
+ *\a out
  */
 void QCalcOpticalFlowPyrLK::transform(const Mat& in, Mat&){
     Q_D(QCalcOpticalFlowPyrLK);
     d->calculateFlow(in);
 }
 
-/*!
-  \fn virtual QSGNode *QCalcOpticalFlowPyrLK::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData)
-  \brief Draws the points on the output matrix.
-
-  Parameters :
-  \a node
-  \a nodeData
+/**
+ *\fn virtual QSGNode *QCalcOpticalFlowPyrLK::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData)
+ *\brief Draws the points on the output matrix.
+ *
+ *Parameters :
+ *\a node
+ *\a nodeData
  */
 QSGNode* QCalcOpticalFlowPyrLK::updatePaintNode(QSGNode* node, QQuickItem::UpdatePaintNodeData*nodeData){
     Q_D(QCalcOpticalFlowPyrLK);

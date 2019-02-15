@@ -21,7 +21,7 @@
 #include <QPointF>
 
 namespace cv{ class KeyPoint; }
-
+/// \private
 class QKeyPoint : public QObject{
 
     Q_OBJECT

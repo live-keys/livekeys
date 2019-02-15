@@ -19,7 +19,7 @@
 
 #include "qmatdisplay.h"
 #include <QList>
-
+/// \private
 class QMat2DArray : public QMatDisplay{
 
     Q_OBJECT
