@@ -27,13 +27,12 @@ Filter::~Filter(){
 
 }
 
-void Filter::use(
-        Filter::SharedDataLocker *locker,
+void Filter::use(Shared::ReadScope *locker,
         const std::function<void ()> &cb,
         const std::function<void ()> &rs)
 {
     if ( locker ){
-        if( !locker->m_allReserved ){
+        if( !locker->reserved() ){
             delete locker;
             return;
         }
@@ -46,22 +45,6 @@ void Filter::use(
         rs();
         delete locker;
     }
-}
-
-
-
-void Filter::SharedDataLocker::clearReservations(){
-    foreach ( SharedData* sd, m_readLocks )
-        sd->unlockReservation(m_filter);
-    foreach ( SharedData* sd, m_writeLocks )
-        sd->unlockReservation(m_filter);
-}
-
-
-Filter::SharedDataLocker::~SharedDataLocker(){ clearReservations(); }
-
-void Filter::deleteLocker(SharedDataLocker* locker){
-    delete locker;
 }
 
 }// namespace

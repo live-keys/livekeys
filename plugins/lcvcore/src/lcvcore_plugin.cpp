@@ -17,7 +17,6 @@
 #include "lcvcore_plugin.h"
 #include "qcvglobalobject.h"
 #include "qmat.h"
-#include "qsharedmat.h"
 #include "qmatext.h"
 #include "qmatview.h"
 #include "qimread.h"

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QQmlParserStatus>
 #include <QQmlProperty>
-#include "live/shareddata.h"
+#include "live/shared.h"
 #include "live/filter.h"
 #include "live/mlnode.h"
 #include "live/viewengine.h"
@@ -30,8 +30,7 @@ public:
     void classBegin(){}
     void componentComplete();
 
-    bool reserveForRead(Filter::SharedDataLocker* locker, Filter* filter);
-    bool reserveForWrite(Filter::SharedDataLocker* locker, Filter* filter);
+    bool reserveForRead(Shared::ReadScope* locker, Filter* filter);
 
     int totalProperties();
     QHash<QByteArray, int>::ConstIterator propertiesBegin();

@@ -17,7 +17,7 @@
 #include "shareddatateststub.h"
 
 SharedDataTestStub::SharedDataTestStub(QObject *parent)
-    : QObject(parent)
+    : lv::Shared(parent)
 {
 
 }

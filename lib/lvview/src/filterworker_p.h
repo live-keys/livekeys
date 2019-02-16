@@ -45,7 +45,7 @@ public:
 
         FilterWorker::CallEvent* ce = static_cast<FilterWorker::CallEvent*>(event);
         ce->callFilter();
-        delete ce->locker();
+        delete ce->readScope();
         return true;
     }
 

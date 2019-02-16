@@ -42,7 +42,7 @@ FilterWorker::~FilterWorker(){
 
 void FilterWorker::postWork(
         const std::function<void ()> &fnc,
-        Filter::SharedDataLocker *locker)
+        Shared::ReadScope *locker)
 {
     QCoreApplication::postEvent(this, new FilterWorker::CallEvent(fnc, locker));
 }
@@ -50,7 +50,7 @@ void FilterWorker::postWork(
 void FilterWorker::postWork(
         const std::function<void ()> &fnc,
         const std::function<void ()> &cbk,
-        Filter::SharedDataLocker *locker)
+        Shared::ReadScope *locker)
 {
     QCoreApplication::postEvent(this, new FilterWorker::CallEvent(fnc, cbk, locker));
 }
@@ -71,45 +71,45 @@ bool FilterWorker::event(QEvent *ev){
         m_d->postNotify(ce->callbackEvent());
     } else {
         // locker can be deleted now
-        delete ce->locker();
+        delete ce->readScope();
     }
 
     return true;
 }
 
-FilterWorker::CallEvent::CallEvent(const std::function<void ()>& fnc, Filter::SharedDataLocker *locker)
+FilterWorker::CallEvent::CallEvent(const std::function<void ()>& fnc, Shared::ReadScope *locker)
     : QEvent(QEvent::None)
     , m_filter(fnc)
-    , m_locker(locker)
+    , m_readScope(locker)
 {
 }
 
-FilterWorker::CallEvent::CallEvent(std::function<void ()>&& fnc, Filter::SharedDataLocker *locker)
+FilterWorker::CallEvent::CallEvent(std::function<void ()>&& fnc, Shared::ReadScope *locker)
     : QEvent(QEvent::None)
     , m_filter(std::move(fnc))
-    , m_locker(locker)
+    , m_readScope(locker)
 {
 }
 
 FilterWorker::CallEvent::CallEvent(
         const std::function<void ()> &filter,
         const std::function<void ()> &callback,
-        Filter::SharedDataLocker *locker)
+        Shared::ReadScope *locker)
     : QEvent(QEvent::None)
     , m_filter(filter)
     , m_callback(callback)
-    , m_locker(locker)
+    , m_readScope(locker)
 {
 }
 
 FilterWorker::CallEvent::CallEvent(
         std::function<void ()> &&filter,
         std::function<void ()> &&callback,
-        Filter::SharedDataLocker *locker)
+        Shared::ReadScope *locker)
     : QEvent(QEvent::None)
     , m_filter(filter)
     , m_callback(callback)
-    , m_locker(locker)
+    , m_readScope(locker)
 {
 }
 
@@ -117,8 +117,8 @@ void FilterWorker::CallEvent::callFilter(){
     m_filter();
 }
 
-Filter::SharedDataLocker* FilterWorker::CallEvent::locker(){
-    return m_locker;
+Shared::ReadScope *FilterWorker::CallEvent::readScope(){
+    return m_readScope;
 }
 
 bool FilterWorker::CallEvent::hasCallback(){
@@ -126,7 +126,7 @@ bool FilterWorker::CallEvent::hasCallback(){
 }
 
 FilterWorker::CallEvent *FilterWorker::CallEvent::callbackEvent(){
-    return new FilterWorker::CallEvent(m_callback, m_locker);
+    return new FilterWorker::CallEvent(m_callback, m_readScope);
 }
 
 }// namespace

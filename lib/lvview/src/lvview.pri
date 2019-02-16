@@ -9,7 +9,6 @@ HEADERS += \
     $$PWD/keymap.h \
     $$PWD/qmlengineinterceptor.h \
     $$PWD/settings.h \
-    $$PWD/shareddata.h \
     $$PWD/typeinfo.h \
     $$PWD/visuallogbasemodel.h \
     $$PWD/visuallogfilter.h \
@@ -23,7 +22,11 @@ HEADERS += \
     $$PWD/viewengine.h \
     $$PWD/extensions.h \
     $$PWD/liveextension.h \
-    $$PWD/group.h
+    $$PWD/group.h \
+    $$PWD/groupcollector.h \
+    $$PWD/groupcollectorentry.h \
+    $$PWD/memory.h \
+    $$PWD/shared.h
 
 SOURCES += \
     $$PWD/errorhandler.cpp \
@@ -33,7 +36,6 @@ SOURCES += \
     $$PWD/keymap.cpp \
     $$PWD/qmlengineinterceptor.cpp \
     $$PWD/settings.cpp \
-    $$PWD/shareddata.cpp \
     $$PWD/visuallogbasemodel.cpp \
     $$PWD/visuallogfilter.cpp \
     $$PWD/visuallogmodel.cpp \
@@ -45,4 +47,8 @@ SOURCES += \
     $$PWD/viewengine.cpp \
     $$PWD/extensions.cpp \
     $$PWD/liveextension.cpp \
-    $$PWD/group.cpp
+    $$PWD/group.cpp \
+    $$PWD/groupcollector.cpp \
+    $$PWD/groupcollectorentry.cpp \
+    $$PWD/memory.cpp \
+    $$PWD/shared.cpp

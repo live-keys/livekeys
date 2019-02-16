@@ -8,7 +8,6 @@ HEADERS += \
     $$PWD/live/keymap.h \
     $$PWD/live/qmlengineinterceptor.h \
     $$PWD/live/settings.h \
-    $$PWD/live/shareddata.h \
     $$PWD/live/visuallogbasemodel.h \
     $$PWD/live/visuallogfilter.h \
     $$PWD/live/visuallogmodel.h \
@@ -20,4 +19,6 @@ HEADERS += \
     $$PWD/live/lvviewglobal.h \
     $$PWD/live/viewengine.h \
     $$PWD/live/extensions.h \
-    $$PWD/live/liveextension.h
+    $$PWD/live/liveextension.h \
+    $$PWD/live/shared.h \
+    $$PWD/live/memory.h

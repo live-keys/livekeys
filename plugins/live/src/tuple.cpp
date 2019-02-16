@@ -37,40 +37,19 @@ void Tuple::componentComplete(){
     }
 }
 
-bool Tuple::reserveForRead(Filter::SharedDataLocker *locker, Filter *filter){
+bool Tuple::reserveForRead(Shared::ReadScope *locker, Filter *filter){
     const QMetaObject *meta = metaObject();
     for (int i = 0; i < meta->propertyCount(); i++){
         QMetaProperty property = meta->property(i);
         QObject* ob = property.read(this).value<QObject*>();
         if ( ob ){
             Tuple* t = qobject_cast<lv::Tuple*>(ob);
-            SharedData* sd = dynamic_cast<SharedData*>(ob);
+            Shared* sd = dynamic_cast<Shared*>(ob);
             if ( t ){
                 if ( !t->reserveForRead(locker, filter) )
                     return false;
             } else if ( sd ){
                 if ( !locker->read(sd) )
-                    return false;
-            }
-        }
-    }
-
-    return true;
-}
-
-bool Tuple::reserveForWrite(Filter::SharedDataLocker *locker, Filter *filter){
-    const QMetaObject *meta = metaObject();
-    for (int i = 0; i < meta->propertyCount(); i++){
-        QMetaProperty property = meta->property(i);
-        QObject* ob = property.read(this).value<QObject*>();
-        if ( ob ){
-            Tuple* t = qobject_cast<lv::Tuple*>(ob);
-            SharedData* sd = dynamic_cast<SharedData*>(ob);
-            if ( t ){
-                if ( !t->reserveForWrite(locker, filter) )
-                    return false;
-            } else if ( sd ){
-                if ( !locker->write(filter) )
                     return false;
             }
         }

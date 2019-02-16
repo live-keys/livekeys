@@ -10,7 +10,10 @@ DEFINES += Q_LCV
 
 # Dependencies
 
-linkLocalPlugin(live, live)
+linkLocalLibrary(lvbase, lvbase)
+linkLocalLibrary(lvview, lvview)
+
+linkLocalPlugin(live,    live)
 linkLocalPlugin(lcvcore, lcvcore)
 
 # Deploying qml is handled by the plugin.pri configuration

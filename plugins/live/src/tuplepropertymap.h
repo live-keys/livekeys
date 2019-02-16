@@ -9,8 +9,8 @@ namespace lv{
 class TuplePropertyMap{
 
 public:
-    static bool reserveForRead(const QQmlPropertyMap& t, Filter::SharedDataLocker* locker, Filter* filter);
-    static bool reserveForWrite(const QQmlPropertyMap& t, Filter::SharedDataLocker* locker, Filter* filter);
+    static bool reserveForRead(const QQmlPropertyMap& t, Shared::ReadScope* locker, Filter* filter);
+    static bool reserveForWrite(const QQmlPropertyMap& t, Shared::ReadScope* locker, Filter* filter);
 
     static void serialize(lv::ViewEngine* engine, const QQmlPropertyMap& t, MLNode& node);
     static void deserialize(lv::ViewEngine* engine, const MLNode& node, QQmlPropertyMap& t);

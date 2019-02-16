@@ -18,10 +18,11 @@
 #define QMAT_H
 
 #include <QQuickItem>
+#include "live/shared.h"
 #include "opencv2/core.hpp"
 #include "qlcvcoreglobal.h"
 
-class Q_LCVCORE_EXPORT QMat : public QObject{
+class Q_LCVCORE_EXPORT QMat : public lv::Shared{
 
     Q_OBJECT
     Q_ENUMS(Type)
@@ -48,6 +49,8 @@ public:
     static QMat* nullMat();
     static void  cleanUp();
 
+    virtual Shared* reloc();
+
     QMat* clone() const;
 
 public slots:
@@ -59,14 +62,14 @@ public slots:
     QMat*       cloneMat() const;
 
 private:
-    cv::Mat* m_cvmat;
+    cv::Mat* m_internal;
 
     static QMat* m_nullMat;
     
 };
 
 inline cv::Mat *QMat::cvMat(){
-    return m_cvmat;
+    return m_internal;
 }
 
 

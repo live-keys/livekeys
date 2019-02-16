@@ -17,7 +17,8 @@
 #include "lcvphoto_plugin.h"
 
 #include <qqml.h>
-#include "qfastnlmeansdenoisingmulti.h"
+#include <QQmlEngine>
+
 #include "qdenoisetvl1.h"
 #include "qhuesaturationlightness.h"
 #include "qlevels.h"
@@ -37,10 +38,14 @@
 #include "qtonemapmantiuk.h"
 #include "qtonemapreinard.h"
 
+#include "qdenoising.h"
+
+static QObject* denoisingProvider(QQmlEngine* engine, QJSEngine*){
+    return new QDenoising(engine);
+}
+
 void LcvphotoPlugin::registerTypes(const char *uri){
     // @uri modules.lcvphoto
-    qmlRegisterType<QFastNlMeansDenoising>(           uri, 1, 0, "FastNlMeansDenoising");
-    qmlRegisterType<QFastNlMeansDenoisingMulti>(      uri, 1, 0, "FastNlMeansDenoisingMulti");
     qmlRegisterType<QDenoiseTvl1>(                    uri, 1, 0, "DenoiseTvl1");
     qmlRegisterType<QHueSaturationLightness>(         uri, 1, 0, "HueSaturationLightness");
     qmlRegisterType<QLevels>(                         uri, 1, 0, "Levels");
@@ -58,4 +63,6 @@ void LcvphotoPlugin::registerTypes(const char *uri){
     qmlRegisterType<QTonemapDurand>(                  uri, 1, 0, "TonemapDurand");
     qmlRegisterType<QTonemapMantiuk>(                 uri, 1, 0, "TonemapMantiuk");
     qmlRegisterType<QTonemapReinard>(                 uri, 1, 0, "TonemapReinard");
+
+    qmlRegisterSingletonType<QDenoising>(             uri, 1, 0, "Denoising", &denoisingProvider);
 }

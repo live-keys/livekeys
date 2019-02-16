@@ -38,41 +38,41 @@ public:
     public:
         CallEvent(
             const std::function<void()>& filter,
-            Filter::SharedDataLocker* locker = 0);
+            Shared::ReadScope* readScope = nullptr);
         CallEvent(
             std::function<void()>&& filter,
-            Filter::SharedDataLocker* locker = 0);
+            Shared::ReadScope* readScope = nullptr);
         CallEvent(
             const std::function<void()>& filter,
             const std::function<void()>& callCallback,
-            Filter::SharedDataLocker* locker = 0);
+            Shared::ReadScope* readScope = nullptr);
         CallEvent(
             std::function<void()>&& filter,
             std::function<void()>&& callCallback,
-            Filter::SharedDataLocker* locker = 0);
+            Shared::ReadScope* readScope = nullptr);
         void callFilter();
-        Filter::SharedDataLocker *locker();
+        Shared::ReadScope *readScope();
         bool hasCallback();
 
         CallEvent* callbackEvent();
 
     private:
-        std::function<void()>     m_filter;
-        std::function<void()>     m_callback;
-        Filter::SharedDataLocker* m_locker;
+        std::function<void()> m_filter;
+        std::function<void()> m_callback;
+        Shared::ReadScope*    m_readScope;
     };
 
 public:
-    FilterWorker(QObject* parent = 0);
+    FilterWorker(QObject* parent = nullptr);
     virtual ~FilterWorker();
 
     void postWork(
         const std::function<void()>& fnc,
-        Filter::SharedDataLocker* locker = 0);
+        Shared::ReadScope* locker = nullptr);
     void postWork(
         const std::function<void()>& fnc,
         const std::function<void()>& cbk,
-        Filter::SharedDataLocker* locker = 0
+        Shared::ReadScope* locker = nullptr
     );
     void start();
 

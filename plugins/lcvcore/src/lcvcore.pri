@@ -31,7 +31,6 @@ HEADERS += \
     $$PWD/qcvglobalobject.h \
     $$PWD/qimagefile.h \
     $$PWD/qoverlapmat.h \
-    $$PWD/qsharedmat.h \
     $$PWD/qitemcapture.h
 
 SOURCES += \
@@ -65,6 +64,5 @@ SOURCES += \
     $$PWD/qcvglobalobject.cpp \
     $$PWD/qimagefile.cpp \
     $$PWD/qoverlapmat.cpp \
-    $$PWD/qsharedmat.cpp \
     $$PWD/qitemcapture.cpp
 

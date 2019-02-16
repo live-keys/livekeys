@@ -2,7 +2,7 @@
 
 namespace lv{
 
-bool TuplePropertyMap::reserveForRead(const QQmlPropertyMap &t, Filter::SharedDataLocker *locker, Filter *filter){
+bool TuplePropertyMap::reserveForRead(const QQmlPropertyMap &t, Shared::ReadScope *locker, Filter *filter){
     QStringList keys = t.keys();
 
     for (auto it = keys.begin(); it != keys.end(); ++it ){
@@ -10,7 +10,7 @@ bool TuplePropertyMap::reserveForRead(const QQmlPropertyMap &t, Filter::SharedDa
         QObject* ob = t.property(it->toUtf8()).value<QObject*>();
         if ( ob ){
             Tuple* t = qobject_cast<lv::Tuple*>(ob);
-            SharedData* sd = dynamic_cast<SharedData*>(ob);
+            Shared* sd = dynamic_cast<Shared*>(ob);
             if ( t ){
                 if ( !t->reserveForRead(locker, filter) )
                     return false;
@@ -29,7 +29,7 @@ bool TuplePropertyMap::reserveForRead(const QQmlPropertyMap &t, Filter::SharedDa
     return true;
 }
 
-bool TuplePropertyMap::reserveForWrite(const QQmlPropertyMap &t, Filter::SharedDataLocker *locker, Filter *filter){
+bool TuplePropertyMap::reserveForWrite(const QQmlPropertyMap &t, Shared::ReadScope *locker, Filter *filter){
     QStringList keys = t.keys();
 
     for (auto it = keys.begin(); it != keys.end(); ++it ){
@@ -37,13 +37,13 @@ bool TuplePropertyMap::reserveForWrite(const QQmlPropertyMap &t, Filter::SharedD
         QObject* ob = t.property(it->toUtf8()).value<QObject*>();
         if ( ob ){
             Tuple* t = qobject_cast<lv::Tuple*>(ob);
-            SharedData* sd = dynamic_cast<SharedData*>(ob);
+            Shared* sd = dynamic_cast<Shared*>(ob);
             if ( t ){
-                if ( !t->reserveForWrite(locker, filter) )
-                    return false;
+//                if ( !t->reserveForWrite(locker, filter) )
+//                    return false;
             } else if ( sd ){
-                if ( !locker->write(sd) )
-                    return false;
+//                if ( !locker->write(sd) )
+//                    return false;
             } else {
                 QQmlPropertyMap* pm = qobject_cast<QQmlPropertyMap*>(ob);
                 if ( pm ){

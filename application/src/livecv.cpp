@@ -19,6 +19,7 @@
 #include "livecvscript.h"
 #include "commands.h"
 #include "environment.h"
+#include "live/memory.h"
 #include "live/extensions.h"
 
 #include "live/keymap.h"
@@ -73,6 +74,7 @@ LiveCV::LiveCV(QObject *parent)
     , m_log(0)
     , m_vlog(new VisualLogQmlObject) // js ownership
     , m_packageGraph(nullptr)
+    , m_memory(new Memory(this))
     , m_windowControls(nullptr)
 {
     solveImportPaths();
@@ -88,6 +90,7 @@ LiveCV::~LiveCV(){
     delete m_settings;
     delete m_engine;
     delete m_packageGraph;
+    delete m_memory;
 }
 
 LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent){
@@ -208,10 +211,13 @@ void LiveCV::loadInternalPlugins(){
         "base", 1, 0, "KeyMap",          ViewEngine::typeAsPropertyMessage("KeyMap", "livecv.keymap"));
     qmlRegisterUncreatableType<lv::VisualLogModel>(
         "base", 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "livecv.log"));
+    qmlRegisterUncreatableType<lv::Memory>(
+        "base", 1, 0, "Memory", ViewEngine::typeAsPropertyMessage("Memory", "livecv.mem"));
     qmlRegisterUncreatableType<lv::VisualLogQmlObject>(
         "base", 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
     qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
         "base", 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type.");
+
 
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("script",  m_script);
