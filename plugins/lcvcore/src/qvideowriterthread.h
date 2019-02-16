@@ -22,7 +22,7 @@
 #include <QWaitCondition>
 #include "qmat.h"
 #include "opencv2/highgui.hpp"
-
+/// \private
 class QVideoWriterThread : public QThread{
 
     Q_OBJECT

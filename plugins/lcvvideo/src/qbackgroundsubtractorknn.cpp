@@ -20,11 +20,11 @@
 using namespace cv;
 
 
-/*!
-   \class QBackgroundSubtractorKnn
-   \inmodule lcvvideo_cpp
-   \internal
-   \brief K-nearest neigbours based background/foreground segmentation algorithm
+/**
+ *\class QBackgroundSubtractorKnn
+ *\ingroup plugin-lcvvideo
+ *\internal
+ *\brief K-nearest neigbours based background/foreground segmentation algorithm
  */
 
 /// \private
@@ -108,26 +108,26 @@ BackgroundSubtractor* QBackgroundSubtractorKnnPrivate::subtractor(){
 // QBackgroundSubtractorKnn Implementation
 // ---------------------------------------
 
-/*!
-  \brief QBackgroundSubtractorKnn constructor
-
-  Parameters:
-  \a parent
+/**
+ *\brief QBackgroundSubtractorKnn constructor
+ *
+ *Parameters:
+ *\a parent
  */
 QBackgroundSubtractorKnn::QBackgroundSubtractorKnn(QQuickItem *parent) :
     QBackgroundSubtractor(new QBackgroundSubtractorKnnPrivate, parent),
     d_ptr(static_cast<QBackgroundSubtractorKnnPrivate*>(QBackgroundSubtractor::d_ptr)){
 }
 
-/*!
-  \brief QBackgroundSubtractorKnn destructor
+/**
+ *\brief QBackgroundSubtractorKnn destructor
  */
 QBackgroundSubtractorKnn::~QBackgroundSubtractorKnn(){
 }
 
-/*!
-  \property QBackgroundSubtractorKnn::detectShadows
-  \sa BackgroundSubtractorKnn::detectShadows
+/**
+ *\property QBackgroundSubtractorKnn::detectShadows
+ *\sa BackgroundSubtractorKnn::detectShadows
  */
 
 bool QBackgroundSubtractorKnn::detectShadows() const{
@@ -145,9 +145,9 @@ void QBackgroundSubtractorKnn::setDetectShadows(bool detectShadows){
     }
 }
 
-/*!
-  \property QBackgroundSubtractorKnn::dist2Threshold
-  \sa BackgroundSubtractorKnn::dist2Threshold
+/**
+ *\property QBackgroundSubtractorKnn::dist2Threshold
+ *\sa BackgroundSubtractorKnn::dist2Threshold
  */
 
 double QBackgroundSubtractorKnn::dist2Threshold() const{
@@ -165,9 +165,9 @@ void QBackgroundSubtractorKnn::setDist2Threshold(double dist2Threshold){
     }
 }
 
-/*!
-  \property QBackgroundSubtractorKnn::history
-  \sa BackgroundSubtractorKnn::history
+/**
+ *\property QBackgroundSubtractorKnn::history
+ *\sa BackgroundSubtractorKnn::history
  */
 
 int QBackgroundSubtractorKnn::history() const{
@@ -185,9 +185,9 @@ void QBackgroundSubtractorKnn::setHistory(int history){
     }
 }
 
-/*!
-  \property QBackgroundSubtractorKnn::knnSamples
-  \sa BackgroundSubtractorKnn::knnSamples
+/**
+ *\property QBackgroundSubtractorKnn::knnSamples
+ *\sa BackgroundSubtractorKnn::knnSamples
  */
 
 int QBackgroundSubtractorKnn::knnSamples() const{
@@ -205,9 +205,9 @@ void QBackgroundSubtractorKnn::setKnnSamples(int knnSamples){
     }
 }
 
-/*!
-  \property QBackgroundSubtractorKnn::nSamples
-  \sa BackgroundSubtractorKnn::nSamples
+/**
+ *\property QBackgroundSubtractorKnn::nSamples
+ *\sa BackgroundSubtractorKnn::nSamples
  */
 
 int QBackgroundSubtractorKnn::nSamples() const{
@@ -225,9 +225,9 @@ void QBackgroundSubtractorKnn::setNSamples(int nSamples){
     }
 }
 
-/*!
-  \property QBackgroundSubtractorKnn::shadowThreshold
-  \sa BackgroundSubtractorKnn::shadowThreshold
+/**
+ *\property QBackgroundSubtractorKnn::shadowThreshold
+ *\sa BackgroundSubtractorKnn::shadowThreshold
  */
 
 double QBackgroundSubtractorKnn::shadowThreshold() const{
@@ -245,9 +245,9 @@ void QBackgroundSubtractorKnn::setShadowThreshold(double shadowThreshold){
     }
 }
 
-/*!
-  \property QBackgroundSubtractorKnn::shadowValue
-  \sa BackgroundSubtractorKnn::shadowValue
+/**
+ *\property QBackgroundSubtractorKnn::shadowValue
+ *\sa BackgroundSubtractorKnn::shadowValue
  */
 
 int QBackgroundSubtractorKnn::shadowValue() const{

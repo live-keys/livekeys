@@ -20,6 +20,7 @@
 #include "qmatdisplay.h"
 
 class QVideoCaptureThread;
+/// \private
 class QVideoCapture : public QQuickItem{
 
     Q_OBJECT

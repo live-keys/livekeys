@@ -22,7 +22,7 @@
 #include "qmatdisplay.h"
 
 class QFileSystemWatcher;
-
+/// \private
 class QImageFile : public QMatDisplay{
 
     Q_OBJECT

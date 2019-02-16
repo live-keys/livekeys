@@ -7,6 +7,7 @@
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLContext>
 
+/// \private
 class QItemCapture : public QMatDisplay{
 
     Q_OBJECT

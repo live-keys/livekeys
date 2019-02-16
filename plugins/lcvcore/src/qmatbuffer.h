@@ -19,7 +19,7 @@
 
 #include <QQuickItem>
 #include "qmatdisplay.h"
-
+/// \private
 class QMatBuffer : public QMatDisplay{
 
     Q_OBJECT

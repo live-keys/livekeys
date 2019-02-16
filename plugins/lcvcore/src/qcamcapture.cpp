@@ -19,7 +19,7 @@
 #include "qstaticcontainer.h"
 
 #include <QTimer>
-
+/// \private
 QCamCapture::QCamCapture(QQuickItem *parent) :
     QMatDisplay(parent),
     m_device(""),

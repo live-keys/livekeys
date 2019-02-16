@@ -19,21 +19,12 @@
 
 using namespace cv;
 
-/*!
-  \qmltype BackgroundSubtractorMog2
-  \instantiates QBackgroundSubtractorMog2
-  \inqmlmodule lcvvideo
-  \inherits BackgroundSubtractor
-  \brief Gaussian mixture based background/foreground segmentation algorithm.  This is a \b {static item}.
 
-  \quotefile video/backgroundsubtractormog2.qml
-*/
-
-/*!
-   \class QBackgroundSubtractorMog2
-   \inmodule lcvvideo_cpp
-   \internal
-   \brief Gaussian mixture based background/foreground segmentation algorithm.
+/**
+ *\class QBackgroundSubtractorMog2
+ *\ingroup plugin-lcvvideo
+ *\internal
+ *\brief Gaussian mixture based background/foreground segmentation algorithm.
  */
 /// \private
 class QBackgroundSubtractorMog2Private : public QBackgroundSubtractorPrivate{
@@ -116,33 +107,28 @@ BackgroundSubtractor* QBackgroundSubtractorMog2Private::subtractor(){
 // QBackgroundSubtractorMog2 Implementation
 // ------------------------------------
 
-/*!
-  \brief QBackgroundSubtractorMog2 constructor
-
-  Parameters:
-  \a parent
+/**
+ *\brief QBackgroundSubtractorMog2 constructor
+ *
+ *Parameters:
+ *\a parent
  */
 QBackgroundSubtractorMog2::QBackgroundSubtractorMog2(QQuickItem *parent)
     : QBackgroundSubtractor(new QBackgroundSubtractorMog2Private, parent)
     , d_ptr(static_cast<QBackgroundSubtractorMog2Private*>(QBackgroundSubtractor::d_ptr)){
 }
 
-/*!
-  \brief QBackgroundSubtractorMog2 destructor
+/**
+ *\brief QBackgroundSubtractorMog2 destructor
  */
 QBackgroundSubtractorMog2::~QBackgroundSubtractorMog2(){
 }
 
-/*!
-  \property QBackgroundSubtractorMog2::backgroundModel
-  \sa BackgroundSubtractorMog2::backgroundModel
+/**
+ *\property QBackgroundSubtractorMog2::backgroundModel
+ *\sa BackgroundSubtractorMog2::backgroundModel
  */
 
-/*!
-  \qmlproperty Mat BackgroundSubtractorMog2::backgroundModel
-
-  Snapshot of the background model computed by the MOG2 algorithm.
- */
 QMat* QBackgroundSubtractorMog2::backgroundModel(){
     Q_D(QBackgroundSubtractorMog2);
     if ( d->subtractorMog2() )
@@ -150,16 +136,11 @@ QMat* QBackgroundSubtractorMog2::backgroundModel(){
     return &d->backgroundModel;
 }
 
-/*!
-  \property QBackgroundSubtractorMog2::history
-  \sa BackgroundSubtractorMog2::history
+/**
+ *\property QBackgroundSubtractorMog2::history
+ *\sa BackgroundSubtractorMog2::history
  */
 
-/*!
-  \qmlproperty int BackgroundSubtractorMog2::history
-
-  Length of the history. Defaults to 500.
- */
 int QBackgroundSubtractorMog2::history() const{
     Q_D(const QBackgroundSubtractorMog2);
     return d->history;
@@ -175,15 +156,9 @@ void QBackgroundSubtractorMog2::setHistory(int history){
     }
 }
 
-/*!
-  \property QBackgroundSubtractorMog2::nmixtures
-  \sa BackgroundSubtractorMog2::nmixtures
- */
-
-/*!
-  \qmlproperty int BackgroundSubtractorMog2::nmixtures
-
-  Maximum allowed number of mixture components. Defaults to 5.
+/**
+ *\property QBackgroundSubtractorMog2::nmixtures
+ *\sa BackgroundSubtractorMog2::nmixtures
  */
 int QBackgroundSubtractorMog2::nmixtures() const{
     Q_D(const QBackgroundSubtractorMog2);
@@ -200,16 +175,9 @@ void QBackgroundSubtractorMog2::setNmixtures(int nmixtures){
     }
 }
 
-/*!
-  \property QBackgroundSubtractorMog2::nShadowDetection
-  \sa BackgroundSubtractorMog2::nShadowDetection
- */
-
-/*!
-  \qmlproperty int BackgroundSubtractorMog2::nShadowDetection
-
-  The value for marking shadow pixels in the output foreground mask.
-  Must be in the range 0-255. Defaults to 127.
+/**
+ *\property QBackgroundSubtractorMog2::nShadowDetection
+ *\sa BackgroundSubtractorMog2::nShadowDetection
  */
 int QBackgroundSubtractorMog2::nShadowDetection() const{
     Q_D(const QBackgroundSubtractorMog2);
@@ -230,15 +198,9 @@ void QBackgroundSubtractorMog2::setNShadowDetection(int nShadowDetection){
     }
 }
 
-/*!
-  \property QBackgroundSubtractorMog2::detectShadows
-  \sa BackgroundSubtractorMog2::detectShadows
- */
-
-/*!
-  \qmlproperty bool BackgroundSubtractorMog2::detectShadows
-
-  Whether shadow detection should be enabled. Defaults to false.
+/**
+ *\property QBackgroundSubtractorMog2::detectShadows
+ *\sa BackgroundSubtractorMog2::detectShadows
  */
 bool QBackgroundSubtractorMog2::detectShadows() const{
     Q_D(const QBackgroundSubtractorMog2);
@@ -255,16 +217,9 @@ void QBackgroundSubtractorMog2::setDetectShadows(bool detectShadows){
     }
 }
 
-/*!
-  \property QBackgroundSubtractorMog2::backgroundRatio
-  \sa BackgroundSubtractorMog2::backgroundRatio
- */
-
-/*!
-  \qmlproperty double BackgroundSubtractorMog2::backgroundRatio
-
-  Threshold defining whether the component is significant enough to be included into the background model.
-  Defaults to 0.9.
+/**
+ *\property QBackgroundSubtractorMog2::backgroundRatio
+ *\sa BackgroundSubtractorMog2::backgroundRatio
  */
 float QBackgroundSubtractorMog2::backgroundRatio() const{
     Q_D(const QBackgroundSubtractorMog2);
@@ -281,15 +236,9 @@ void QBackgroundSubtractorMog2::setBackgroundRatio(float backgroundRatio){
     }
 }
 
-/*!
-  \property QBackgroundSubtractorMog2::ct
-  \sa BackgroundSubtractorMog2::ct
- */
-
-/*!
-  \qmlproperty double BackgroundSubtractorMog2::ct
-
-  Complexity reduction parameter. Defaults to 0.05.
+/**
+ *\property QBackgroundSubtractorMog2::ct
+ *\sa BackgroundSubtractorMog2::ct
  */
 float QBackgroundSubtractorMog2::ct() const{
     Q_D(const QBackgroundSubtractorMog2);
@@ -306,11 +255,6 @@ void QBackgroundSubtractorMog2::setCt(float ct){
     }
 }
 
-/*!
-  \qmlproperty double BackgroundSubtractorMog2::tau
-
-  Shadow threshold. Defaults to 0.5.
- */
 float QBackgroundSubtractorMog2::tau() const{
     Q_D(const QBackgroundSubtractorMog2);
     return d->tau;
@@ -326,11 +270,6 @@ void QBackgroundSubtractorMog2::setTau(float tau){
     }
 }
 
-/*!
-  \qmlproperty double BackgroundSubtractorMog2::varInit
-
-  Initial variance for the newly generated components. Defaults to 15.
- */
 float QBackgroundSubtractorMog2::varInit() const{
     Q_D(const QBackgroundSubtractorMog2);
     return d->varInit;
@@ -345,12 +284,6 @@ void QBackgroundSubtractorMog2::setVarInit(float varInit){
          emit varInitChanged();
     }
 }
-
-/*!
-  \qmlproperty double BackgroundSubtractorMog2::varMin
-
-  Parameter used to further control the variance. Defaults to 4.
- */
 float QBackgroundSubtractorMog2::varMin() const{
     Q_D(const QBackgroundSubtractorMog2);
     return d->varMin;
@@ -365,12 +298,6 @@ void QBackgroundSubtractorMog2::setVarMin(float varMin){
          emit varMinChanged();
     }
 }
-
-/*!
-  \qmlproperty double BackgroundSubtractorMog2::varMax
-
-  Parameter used to further control the variance. Defaults to 75.
- */
 float QBackgroundSubtractorMog2::varMax() const{
     Q_D(const QBackgroundSubtractorMog2);
     return d->varMax;
@@ -386,12 +313,6 @@ void QBackgroundSubtractorMog2::setVarMax(float varMax){
     }
 }
 
-/*!
-  \qmlproperty double BackgroundSubtractorMog2::varThreshold
-
-  Threshold on the squared Mahalanobis distance to decide whether it is well described by the background model.
-  Defaults to 16.
- */
 float QBackgroundSubtractorMog2::varThreshold() const{
     Q_D(const QBackgroundSubtractorMog2);
     return d->varThreshold;
@@ -406,13 +327,6 @@ void QBackgroundSubtractorMog2::setVarThreshold(float varThreshold){
          emit varThresholdChanged();
     }
 }
-
-/*!
-  \qmlproperty double BackgroundSubtractorMog2::varThresholdGen
-
-  Threshold for the squared Mahalanobis distance that helps decide when a sample is close to the existing components.
-  Defaults to 9.
- */
 float QBackgroundSubtractorMog2::varThresholdGen() const{
     Q_D(const QBackgroundSubtractorMog2);
     return d->varThresholdGen;
@@ -428,12 +342,6 @@ void QBackgroundSubtractorMog2::setVarThresholdGen(float varThresholdGen){
     }
 }
 
-
-/*!
-  \qmlmethod BackgroundSubtractorMog2::staticLoad(string key)
-
-  Loads the BackgroundSubtractorMog2 state from the given \a key.
- */
 void QBackgroundSubtractorMog2::staticLoad(const QString &id){
     Q_D(QBackgroundSubtractorMog2);
     QStaticContainer* container = QStaticContainer::grabFromContext(this);

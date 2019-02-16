@@ -17,9 +17,8 @@
 #define QCAMCAPTURE_H
 
 #include "qmatdisplay.h"
-
 class QCamCaptureThread;
-
+/// \private
 class QCamCapture : public QMatDisplay{
 
     Q_OBJECT
