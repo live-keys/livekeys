@@ -19,11 +19,13 @@ class LV_BASE_EXPORT Plugin{
     DISABLE_COPY(Plugin);
 
 public:
+    /** Shared pointer to plugin */
     typedef std::shared_ptr<Plugin> Ptr;
 
     class Context;
 
 public:
+    /** Default name for a plugin file */
     static const char* fileName;
 
 public:
@@ -37,6 +39,7 @@ public:
     const std::string& name() const;
     const std::string& path() const;
     const std::string& filePath() const;
+    /** Package getter */
     const std::string& package() const;
     const std::list<std::string>& dependencies() const;
     const std::list<std::string>& modules() const;

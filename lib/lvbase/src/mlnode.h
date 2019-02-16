@@ -29,18 +29,39 @@ namespace lv{
 
 class VisualLog;
 
+/**
+ * \class lv::MLOutOfRanceException
+ * \brief Out-of-range exception
+ *
+ * \ingroup lvbase
+ */
 class LV_BASE_EXPORT MLOutOfRanceException: public lv::Exception{
 public:
+    /** Default contructor */
     MLOutOfRanceException(const std::string& message = "", int code = 0) : lv::Exception(message, code){}
 };
 
+/**
+ * \class lv::InvalidMLTypeException
+ * \brief Invalid ML type exception
+ *
+ * \ingroup lvbase
+ */
 class LV_BASE_EXPORT InvalidMLTypeException: public lv::Exception{
 public:
+    /** Default contructor */
     InvalidMLTypeException(const std::string& message = "", int code = 0) : lv::Exception(message, code){}
 };
 
+/**
+ * \class lv::TypeNotSerializableException
+ * \brief Type not serializible exception
+ *
+ * \ingroup lvbase
+ */
 class LV_BASE_EXPORT TypeNotSerializableException: public lv::Exception{
 public:
+    /** Default constructor */
     TypeNotSerializableException(const std::string& message = "", int code = 0) : lv::Exception(message, code){}
 };
 
@@ -114,10 +135,19 @@ public:
     // MLNode::IteratorValue
     // ---------------------
 
+    /**
+     * \class lv::MLNode::IteratorValue
+     * \brief Structure of the result returned by the iterator
+     *
+     * \ingroup lvbase
+     */
     class IteratorValue{
     public:
+        /** Iterator in case of an object */
         ObjectType::iterator objectIterator;
+        /** Iterator in case of an array */
         ArrayType::iterator  arrayIterator;
+        /** Non-iterator for other types of nodes */
         bool                 primitiveIterator;
     };
 
@@ -203,10 +233,19 @@ public:
     // MLNode::ConstIteratorValue
     // --------------------------
 
+    /**
+     * \class lv::MLNode::ConstIteratorValue
+     * \brief Structure of the result returned by the const iterator
+     *
+     * \ingroup lvbase
+     */
     class ConstIteratorValue{
     public:
+        /** Iterator in case of an object */
         ObjectType::const_iterator objectIterator;
+        /** Iterator in case of an array */
         ArrayType::const_iterator  arrayIterator;
+        /** Non-iterator for other types of nodes */
         bool                       primitiveIterator;
     };
 

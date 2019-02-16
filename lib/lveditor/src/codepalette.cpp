@@ -55,9 +55,7 @@ void CodePalette::setValueFromBinding(const QVariant &value){
     m_bindingChange = false;
 }
 
-/**
- * \brief Palette name
- */
+
 QString CodePalette::name() const{
     return QFileInfo(m_path).baseName();
 }

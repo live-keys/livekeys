@@ -7,7 +7,6 @@ HEADERS += \
     $$PWD/filterworker_p.h \
     $$PWD/incubationcontroller.h \
     $$PWD/keymap.h \
-    $$PWD/qmlengineinterceptor.h \
     $$PWD/settings.h \
     $$PWD/shareddata.h \
     $$PWD/typeinfo.h \
@@ -30,7 +29,6 @@ SOURCES += \
     $$PWD/filterworker.cpp \
     $$PWD/incubationcontroller.cpp \
     $$PWD/keymap.cpp \
-    $$PWD/qmlengineinterceptor.cpp \
     $$PWD/settings.cpp \
     $$PWD/shareddata.cpp \
     $$PWD/visuallogbasemodel.cpp \

@@ -45,6 +45,7 @@ public:
      *   they are released
      *
      */
+    /// @private
     class SharedDataLocker{
 
     private:

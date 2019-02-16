@@ -391,12 +391,7 @@ Rectangle{
                 project.setActive(styleData.value)
                 projectView.maintainCodingMode();
                 if (windowControls.codingMode === 1) {
-                    livecv.engine.createObjectAsync(
-                        runSpace.program,
-                        runSpace,
-                        project.active.file.pathUrl(),
-                        project.active
-                    );
+                    createObjectForActive()
                 }
             }
             function openFile(){

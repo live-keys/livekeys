@@ -163,7 +163,6 @@ Item{
         height: propertyContainer.valueContainer ? propertyContainer.valueContainer.height : 0
 
         children: propertyContainer.valueContainer ? [propertyContainer.valueContainer] : []
-        onChildrenChanged: console.log(children.length)
     }
 
 }

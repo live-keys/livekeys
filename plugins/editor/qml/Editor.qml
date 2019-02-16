@@ -69,12 +69,13 @@ Rectangle{
         if ( editor.document.file.name !== '' ){
             editor.document.save()
             if ( project.active && ((controls.codingMode === 0 && project.active !== editor.document) || controls.codingMode === 1)) /* compiling isn't disabled */{
+                var documentList = project.documentModel.listUnsavedDocuments()
                 livecv.engine.createObjectAsync(
                     project.active.content,
                     windowControls.runSpace,
                     project.active.file.pathUrl(),
                     project.active,
-                    true
+                    !(documentList.size === 1 && documentList[0] === project.active)
                 );
             }
         } else {

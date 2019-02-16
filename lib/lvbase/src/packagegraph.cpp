@@ -28,6 +28,7 @@ namespace{
 
 }
 
+/// @private
 class PackageGraphPrivate{
 
 public:
@@ -569,7 +570,7 @@ void PackageGraph::addDependency(const Plugin::Ptr &plugin, const std::string &d
     addDependency(plugin, dependsOn);
 }
 
-/** Adds the dependency needed for this plugin. If not within the same package, we load an entire package instead. */
+/** Add dependency between two given plugins */
 void PackageGraph::addDependency(const Plugin::Ptr& plugin, const Plugin::Ptr& dependsOn){
     if ( plugin.get() == dependsOn.get() )
         return;

@@ -177,7 +177,7 @@ namespace{
 
 // VisualLog::Configuration
 // ---------------------------------------------------------------------
-
+/// @private
 class VisualLog::Configuration{
 
 public:
@@ -252,7 +252,7 @@ void VisualLog::Configuration::closeFile(){
 // VisualLog::ConfigurationContainer
 // ---------------------------------------------------------------------
 
-
+/// @private
 class VisualLog::ConfigurationContainer{
 
 public:
@@ -393,6 +393,7 @@ VisualLog::~VisualLog(){
     delete m_stream;
 }
 
+/** Display enum value as string */
 std::string VisualLog::MessageInfo::levelToString(VisualLog::MessageInfo::Level level){
     switch(level){
     case VisualLog::MessageInfo::Level::Fatal: return "Fatal";
@@ -405,6 +406,7 @@ std::string VisualLog::MessageInfo::levelToString(VisualLog::MessageInfo::Level 
     return std::string();
 }
 
+/** Return enum value from string */
 VisualLog::MessageInfo::Level VisualLog::MessageInfo::levelFromString(const std::string &str){
     std::string strlow = asciiToLower(str);
     if ( strlow == "fatal" ){
@@ -636,14 +638,17 @@ void VisualLog::asObject(const std::string &type, const MLNode &mlvalue){
     }
 }
 
+/** View transport model */
 VisualLog::ViewTransport *VisualLog::model(){
     return m_model;
 }
 
+/** Sets view transport model */
 void VisualLog::setViewTransport(VisualLog::ViewTransport *model){
     m_model = model;
 }
 
+/** Initialize the output from the configuration */
 void VisualLog::init(){
     m_output = m_configuration->m_output;
 }
@@ -682,6 +687,7 @@ void VisualLog::flushHandler(const std::string &data){
     }
 }
 
+/** Flush data to console */
 void VisualLog::flushConsole(const std::string &data){
     vLoggerConsole(data);
 }

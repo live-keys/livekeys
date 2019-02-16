@@ -49,14 +49,27 @@ public:
     class Configuration;
     class ConfigurationContainer;
 
+    /**
+      \class lv::VisualLog::SourceLocation
+      \brief Simple structure containing relevant data about a location of the source
+
+      Location info includes a remote, function name, line number and file name. All of these are optional.
+      \ingroup lvbase
+     */
     class SourceLocation{
     public:
+        /** Default contructor */
         SourceLocation(const std::string& file, int line, const std::string& fileName);
+        /** Contructor with a remote */
         SourceLocation(const std::string& remote, const std::string& file, int line, const std::string& functionName);
 
+        /** Remote */
         std::string remote;
+        /** Source file */
         std::string file;
+        /** Source line */
         int         line;
+        /** Function name */
         std::string functionName;
     };
 
@@ -104,26 +117,42 @@ public:
         mutable QDateTime* m_stamp;
     };
 
+    /**
+     * \class lv::VisualLog::Transport
+     * \brief Abstraction of the transport used to pass non-visual/object messages
+     *
+     * \ingroup lvbase
+     */
     class LV_BASE_EXPORT Transport{
     public:
         virtual ~Transport(){}
+        /** Declaration of the onMessage method */
         virtual void onMessage(const VisualLog::Configuration* configuration,
                                const VisualLog::MessageInfo& messageInfo,
                                const std::string& message) = 0;
+        /** Declaration of the onObject method */
         virtual void onObject(const VisualLog::Configuration* configuration,
                               const VisualLog::MessageInfo& messageInfo,
                               const std::string& type,
                               const MLNode& node) = 0;
     };
 
+    /**
+     * \class lv::VisualLog::ViewTransport
+     * \brief Abstraction of the transport used to pass visual (view) messages
+     *
+     * \ingroup lvbase
+     */
     class LV_BASE_EXPORT ViewTransport{
     public:
         virtual ~ViewTransport(){}
+        /** Declaration of the onMessage method */
         virtual void onMessage(
             const VisualLog::Configuration* configuration,
             const VisualLog::MessageInfo& messageInfo,
             const std::string& message
         ) = 0;
+        /** Declaration of the onView method */
         virtual void onView(
             const VisualLog::Configuration* configuration,
             const VisualLog::MessageInfo& messageInfo,

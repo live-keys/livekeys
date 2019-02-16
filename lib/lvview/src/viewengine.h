@@ -92,6 +92,7 @@ public:
     explicit ViewEngine(QQmlEngine* engine, QObject *parent = 0);
     ~ViewEngine();
 
+    /** Shows if the engine is loading */
     bool isLoading() const;
     void setIsLoading(bool isLoading);
 
@@ -206,7 +207,6 @@ TypeInfo::Ptr ViewEngine::registerQmlTypeInfo(
     return t;
 }
 
-/** Shows if the engine is loading */
 inline bool ViewEngine::isLoading() const{
     return m_isLoading;
 }

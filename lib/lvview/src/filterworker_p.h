@@ -22,7 +22,7 @@
 #include "live/filterworker.h"
 
 namespace lv{
-
+/// @private
 class FilterWorkerPrivate : public QObject{
 
     Q_OBJECT

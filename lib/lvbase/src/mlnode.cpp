@@ -251,6 +251,9 @@ QByteArray MLNode::BytesType::toBase64(){
     return QByteArray::fromRawData(reinterpret_cast<const char*>(m_data), static_cast<int>(m_size)).toBase64();
 }
 
+/**
+ * \brief Converts given string to BytesType
+ */
 MLNode::BytesType MLNode::BytesType::fromBase64(const MLNode::StringType &str){
     QByteArray result = QByteArray::fromBase64(QByteArray::fromRawData(str.c_str(), static_cast<int>(str.size())));
     return MLNode::BytesType(reinterpret_cast<MLNode::ByteType*>(result.data()), result.size());
