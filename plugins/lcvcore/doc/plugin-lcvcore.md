@@ -12,7 +12,7 @@ import lcvcore 1.0
 
 
 {qmlType:CvGlobalObject}
-{qmlInherits:qtqml#QtObject}
+{qmlInherits:external.QtQml#QtObject}
 {qmlBrief:Singleton type for `cv` object}
 
 {qmlMethod:list matToArray(Mat m}}
@@ -29,7 +29,7 @@ Transorms `m` into a 4 by 4 qml matrix.
 
 
 {qmlType:Mat}
-{qmlInherits:QtQml.QtObject}
+{qmlInherits:external.QtQml#QtObject}
 {qmlBrief:Main matrix object with variable types.}
 
 
@@ -71,18 +71,16 @@ Returns a cloned matrix with javascript ownership
 {qmlMethod:Mat createOwnedObject()}
 
 Returns a shallow copied matrix with javascript ownership
-<<<<<<< HEAD
-
 
 {qmlType:MatView}
-{qmlInherits:QtQuick.Item}
+{qmlInherits:external.QtQuick#Item}
 {qmlBrief:Provides a view for a lcvcore/Mat object}
 
 {qmlProperty:bool linearFilter}
 
 smooth the displayed image through linear filtering
 {qmlType:ImRead}
-{qmlInherits:lcvcore.MatDisplay}
+{qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Read an image from the hard drive into a lcvcore.Mat structure.}
 
 To read the image, all you need is to specify the location :
@@ -119,7 +117,7 @@ Can be one of the following:
  * ```ImRead.CV_LOAD_IMAGE_ANYCOLOR```
 
 {qmlType:ImWrite}
-{qmlInherits:QtObject}
+{qmlInherits:external.QtQml#QtObject}
 {qmlBrief:Saves an image to a specified file.}
 
 Parameters:	
@@ -138,7 +136,7 @@ Parameters:
 
 
 {qmlType:MatRoi}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Selects a region of interest (ROI)}
 
 Usage available under _**samples/core/mat2darray.qml**_.
@@ -165,7 +163,7 @@ The width of the seleted region.
 The height of the seleted region.
 
 {qmlType:MatRead}
-{qmlInherits:Item}
+{qmlInherits:external.QtQuick#Item}
 {qmlBrief:Displays a matrixes values in text form}
 
 This element becomes very useful when debugging result images from algorithms. It can be used in combination
@@ -198,7 +196,7 @@ When enabled, each number cell will be resized to a square shape. This is useful
 together with their values. Default is false.
 
 {qmlType:Mat2DArray}
-{qmlInherits:MatDisplay}
+{qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Creates a matrix from a given array of values.}
 
 {qmlProperty:Array values}
@@ -210,7 +208,7 @@ Array of values in the matrix form
 Type of the matrix
 
 {qmlType:MatBuffer}
-{qmlInherits:MatDisplay}
+{qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Keeps the previous frame.}
 
 The MatBuffer type is useful when it comes to video playback and you need to keep reference to a previous frame. The
@@ -220,12 +218,12 @@ samples/imgproc/framedifference.qml
 
  `imgproc/framedifference.qml`
 
-{qmlProperty:QMat MatBuffer input}
+{qmlProperty:Mat input}
 
 Input matrix to store. Whenever a new input is given, the previous one becomes available as output.
 
 {qmlType:MatEmpty}
-{qmlInherits:MatDisplay}
+{qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Creates an empty matrix.}
 
 Use this to create an empty matrix by spcecifying the size, background color, number of channels and type. The
@@ -245,12 +243,12 @@ The background color of the created matrix.
 
 The number of channels of the created matrix.
 
-{qmlProperty:Mat Type type}
+{qmlProperty:Mat.Type type}
 
 The type of the created matrix.
 
 {qmlType:CamCapture}
-{qmlInherits:MatDisplay}
+{qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Captures frames from a connected camera. This is a _**static item**_.}
 
 An example of how to use the cam capture can be found in _**samples/core/camcapture.qml**_ :
@@ -272,7 +270,7 @@ capture playback, however, setting it faster than the actual camera permits will
 rate. This value is not absolute, in fact it depends on a lot of factors like processing time done by Live CV and
 speed by which frames are delivered.
 
-{qmlmethod CamCapture::staticLoad(string device, size resolution)}
+{qmlmethod:CamCapture::staticLoad(string device, size resolution)}
 
 This is an overloaded method for CamCapture::staticLoad
 
@@ -288,7 +286,7 @@ This property can be set to true or false, depending if you want to freeze or co
 
 
 {qmlType:VideoCapture}
-{qmlInherits:Item}
+{qmlInherits:external.QtQuick#Item}
 {qmlBrief:Captures frames from video files.This is a _**static item**_.}
 
 The VideoCapture constantly grabes frames from a video file. The frames are captured at a speed equal to the video's
@@ -346,7 +344,7 @@ Loads the VideoCapture state. [file]() is a link to the file to be opened. This 
 Pause / play the video by setting this property to true or false.
 
 {qmlType:AlphaMerge}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Merges an alpha channel to a matrix.}
 
 Alpha merge is used to merge an alpha channel to a 1 or 3 channel matrix. The alpha channel is a single channel image
@@ -361,7 +359,7 @@ In the sample at samples/imgproc/alphamerge.qml a loaded image is merged with a 
 Mask to merge the input with.
 
 {qmlType:AbsDiff}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Performs an absolute difference between two matrixes.}
 
 The example in **samples/imgproc/framedifference.qml** shows differentiating two consecutive frames in a video to
@@ -400,7 +398,7 @@ Loads the matrix statically, where id is the static id used to capture the matri
 ```
 
 {qmlType:ImageFile}
-{qmlInherits:MatDisplay}
+{qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Read an image from the hard drive into a lcvcore.Mat structure.}
 
 {qmlProperty:string file}
@@ -426,7 +424,7 @@ Can be one of the following:
 Monitors the file for changes and reloads the image if the file has changed.
 
 {qmlType:OverlapMat}
-{qmlInherits:MatDisplay}
+{qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Overlaps 2 matrixes}
 
 {qmlProperty:input2}
@@ -438,7 +436,7 @@ Mat to overlap with
 Mask used when overlaping
 
 {qmlType:ItemCapture}
-{qmlInherits:MatDisplay}
+{qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Captures the screen into a Mat object.}
 
 Available through the `output` property from `MatDisplay`.
@@ -450,7 +448,7 @@ Item to capture screen from
 {qmlType:VideoControls}
 {qmlBrief:Video controls provides a play/pause button and a seekbar for a `lcvcore/VideoCapture`}
 
-{qmlProperty:lcvcore#VideoCapture videoCapture}
+{qmlProperty:VideoCapture videoCapture}
 {qmlBrief: receives the actual videoCapture object}
 
 {qmlSignal:playPauseTriggered(bool paused)}
@@ -463,7 +461,7 @@ Triggered when a seek occurred
 
 
 {qmlType:VideoWriter}
-{qmlInherits:QtQuick/Item}
+{qmlInherits:external.QtQuick#Item}
 {qmlBrief:Writes video to a file. This is a _**static item**_.}
 
 {qmlProperty:lcvcore#Mat input)
@@ -543,7 +541,7 @@ Assigns only the index specified values from the given list.
 
 
 {qmlType:ColorHistogram}
-{qmlInherits:QtQuick#Item}
+{qmlInherits:external.QtQuick#Item}
 {qmlBrief:Calculates histogram for a given matrix}
 
 {qmlEnum:Selection}
@@ -556,11 +554,11 @@ Channel selection to calculate the histogram for the image.
  * `GreenChannel` : Calculates the green channel
  * `RedChannel` : Calculates the red channel
 
-{qmlProperty:lcvcore#Mat input}
+{qmlProperty:Mat input}
 
 Input matrix to calculate the histogram for.
 
-{qmlProperty:lcvcore#Mat output}
+{qmlProperty:Mat output}
 
 Output matrix containing the drawn histogram
 
