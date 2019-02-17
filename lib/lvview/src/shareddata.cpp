@@ -21,38 +21,36 @@
 namespace lv{
 
 SharedData::SharedData()
-    : m_lock(0)
-    , m_reservedWriter(0)
+    : m_reserver(nullptr)
 {
 }
 
 SharedData::~SharedData(){
-    delete m_lock;
+    delete m_reserver;
 }
 
 void SharedData::unlockReservation(Filter *filter){
-    if ( m_reservedWriter ){
-        m_reservedWriter = 0;
-//        releaseObservers();
+    if ( m_reserver->reservedWriter ){
+        m_reserver->reservedWriter = 0;
     } else {
-        m_reserverdReaders.remove(filter);
-        if (m_reserverdReaders.isEmpty() ){
+        m_reserver->reserverdReaders.remove(filter);
+        if (m_reserver->reserverdReaders.isEmpty() ){
             releaseObservers();
         }
     }
 }
 
-bool SharedData::hasLock(){
-    return m_lock;
+bool SharedData::hasReserver(){
+    return (m_reserver ? true : false);
 }
 
-void SharedData::createLock(){
-    m_lock = new QReadWriteLock;
+void SharedData::createReserver(){
+    m_reserver = new SharedData::Reserver;
 }
 
 void SharedData::releaseObservers(){
-    QSet<Filter*> observers = m_observers;
-    m_observers.clear();
+    QSet<Filter*> observers = m_reserver->observers;
+    m_reserver->observers.clear();
     for ( auto it = observers.begin(); it != observers.end(); ++it ){
         (*it)->process();
     }

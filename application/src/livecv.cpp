@@ -224,6 +224,8 @@ void LiveCV::loadInternalPlugins(){
         "base", 1, 0, "VisualLog", "VisualLog is available through the \'livecv.log\' property."
     );
 
+    ViewEngine::registerBaseTypes("base");
+
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("script",  m_script);
     m_engine->engine()->rootContext()->setContextProperty("livecv",  this);

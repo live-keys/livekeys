@@ -29,7 +29,6 @@ class FilterWorker;
 class LV_VIEW_EXPORT Filter{
 
     typedef SharedData* SharedDataPtr;
-    typedef QObject*    QObjectPtr;
 
 public:
     /**
@@ -43,18 +42,17 @@ public:
      *   UI Thread reaches Filter2, Filter2 locks B, C for read and starts processing
      *   UI Thread reaches Filter1 (Filter2 still processing) ==> UI Thread locks to B, C till
      *   they are released
-     *
      */
     class SharedDataLocker{
 
     private:
         bool recurseReadSingle(const SharedDataPtr& sd){
            // create lock if worker thread
-           if ( m_filter->workerThread() && !sd->hasLock())
-               sd->createLock();
+           if ( m_filter->workerThread() && !sd->hasReserver())
+               sd->createReserver();
 
            // no lock => free to process
-           if ( !sd->hasLock() )
+           if ( !sd->hasReserver() )
                return true;
 
            // reserve for read
@@ -68,11 +66,11 @@ public:
 
         bool recurseWriteSingle(const SharedDataPtr& sd){
            // create lock if there's a worker thread
-           if ( m_filter->workerThread() && !sd->hasLock())
-               sd->createLock();
+           if ( m_filter->workerThread() && !sd->hasReserver())
+               sd->createReserver();
 
            // if there's no lock we're free to process
-           if ( !sd->hasLock() )
+           if ( !sd->hasReserver() )
                return true;
 
            // reserve for write
@@ -147,13 +145,8 @@ public:
     Filter();
     virtual ~Filter();
 
-    void setWorkerThread(FilterWorker* worker){
-        m_workerThread = worker;
-    }
-
-    FilterWorker* workerThread(){
-        return m_workerThread;
-    }
+    void setWorkerThread(FilterWorker* worker);
+    FilterWorker* workerThread();
 
     virtual void process(){}
 
@@ -162,12 +155,18 @@ public:
         const std::function<void()>& cb,
         const std::function<void()>& rs);
 
-    SharedDataLocker* createLocker(){
-        return new SharedDataLocker(this);
-    }
+    SharedDataLocker* createLocker();
     void deleteLocker(SharedDataLocker* locker);
 
 };
+
+inline void Filter::setWorkerThread(FilterWorker *worker){
+    m_workerThread = worker;
+}
+
+inline FilterWorker *Filter::workerThread(){
+    return m_workerThread;
+}
 
 }// namespace
 

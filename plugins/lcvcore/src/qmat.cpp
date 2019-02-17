@@ -100,7 +100,7 @@
  */
 QMat::QMat(QObject *parent):
     QObject(parent),
-    m_cvmat(new cv::Mat){
+    m_internal(new cv::Mat){
 }
 
 /*!
@@ -110,7 +110,7 @@ QMat::QMat(QObject *parent):
  */
 QMat::QMat(cv::Mat *mat, QObject *parent):
     QObject(parent),
-    m_cvmat(mat){
+    m_internal(mat){
 }
 
 /**
@@ -119,8 +119,8 @@ QMat::QMat(cv::Mat *mat, QObject *parent):
  */
 QByteArray QMat::buffer(){
     return QByteArray::fromRawData(
-        reinterpret_cast<const char*>(m_cvmat->data),
-        static_cast<int>(m_cvmat->total() * m_cvmat->elemSize())
+        reinterpret_cast<const char*>(m_internal->data),
+        static_cast<int>(m_internal->total() * m_internal->elemSize())
     );
 }
 
@@ -135,7 +135,7 @@ QByteArray QMat::buffer(){
  * @return
  */
 int QMat::channels(){
-    return m_cvmat->channels();
+    return m_internal->channels();
 }
 
 /**
@@ -143,7 +143,7 @@ int QMat::channels(){
  * @return
  */
 int QMat::depth(){
-    return m_cvmat->depth();
+    return m_internal->depth();
 }
 
 /*!
@@ -156,7 +156,7 @@ int QMat::depth(){
   \brief Returns the size of the matrix element
  */
 QSize QMat::dimensions() const{
-    return QSize(m_cvmat->cols, m_cvmat->rows);
+    return QSize(m_internal->cols, m_internal->rows);
 }
 
 
@@ -169,7 +169,7 @@ QSize QMat::dimensions() const{
   \brief Returns a shallow copied matrix that is owned by the javascript engine
  */
 QMat* QMat::createOwnedObject(){
-    cv::Mat* ownedObjectInternal = new cv::Mat(*m_cvmat);
+    cv::Mat* ownedObjectInternal = new cv::Mat(*m_internal);
     QMat*    ownedObject         = new QMat(ownedObjectInternal);
     QQmlEngine::setObjectOwnership(ownedObject, QQmlEngine::JavaScriptOwnership);
     return ownedObject;
@@ -186,7 +186,7 @@ QMat* QMat::createOwnedObject(){
  */
 QMat* QMat::cloneMat() const{
     cv::Mat* clonedMat = new cv::Mat;
-    m_cvmat->copyTo(*clonedMat);
+    m_internal->copyTo(*clonedMat);
     QMat* clonedObject = new QMat(clonedMat);
     QQmlEngine::setObjectOwnership(clonedObject, QQmlEngine::JavaScriptOwnership);
     return clonedObject;
@@ -196,11 +196,11 @@ QMat* QMat::cloneMat() const{
   \brief QMat::~QMat
  */
 QMat::~QMat(){
-    delete m_cvmat;
+    delete m_internal;
 }
 
 const cv::Mat &QMat::data() const{
-    return *m_cvmat;
+    return *m_internal;
 }
 
 QMat* QMat::m_nullMat = 0;
@@ -228,9 +228,26 @@ void QMat::cleanUp(){
  */
 QMat *QMat::clone() const{
     cv::Mat* clonedMat = new cv::Mat;
-    m_cvmat->copyTo(*clonedMat);
+    m_internal->copyTo(*clonedMat);
     QMat* clonedObject = new QMat(clonedMat);
     return clonedObject;
+}
+
+/**
+ * \brief Relocates the matrix to a new address
+ */
+QMat *QMat::reloc(QMat *m){
+    QMat* res = new QMat(m->m_internal);
+    delete m;
+    return res;
+}
+
+const cv::Mat &QMat::internal() const{
+    return *m_internal;
+}
+
+cv::Mat &QMat::internal(){
+    return *m_internal;
 }
 
 /*!

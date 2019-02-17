@@ -49,6 +49,10 @@ public:
     static void  cleanUp();
 
     QMat* clone() const;
+    static QMat* reloc(QMat* m);
+
+    const cv::Mat& internal() const;
+    cv::Mat& internal();
 
 public slots:
     QByteArray  buffer();
@@ -59,14 +63,14 @@ public slots:
     QMat*       cloneMat() const;
 
 private:
-    cv::Mat* m_cvmat;
+    cv::Mat* m_internal;
 
     static QMat* m_nullMat;
     
 };
 
 inline cv::Mat *QMat::cvMat(){
-    return m_cvmat;
+    return m_internal;
 }
 
 

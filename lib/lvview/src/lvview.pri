@@ -22,7 +22,9 @@ HEADERS += \
     $$PWD/lvviewglobal.h \
     $$PWD/viewengine.h \
     $$PWD/extensions.h \
-    $$PWD/liveextension.h
+    $$PWD/liveextension.h \
+    $$PWD/container.h \
+    $$PWD/call.h
 
 SOURCES += \
     $$PWD/errorhandler.cpp \
@@ -43,4 +45,6 @@ SOURCES += \
     $$PWD/viewcontext.cpp \
     $$PWD/viewengine.cpp \
     $$PWD/extensions.cpp \
-    $$PWD/liveextension.cpp
+    $$PWD/liveextension.cpp \
+    $$PWD/container.cpp \
+    $$PWD/call.cpp

@@ -20,19 +20,29 @@
 #include "live/lvviewglobal.h"
 
 #include <QSet>
-#include <QDebug>
 
 class QObject;
-class QReadWriteLock;
 
 namespace lv{
 
 class Filter;
 
-//TODO: Optimize size
-
 /// @private
 class LV_VIEW_EXPORT SharedData{
+
+private:
+    // Reservee class
+    // --------------
+
+    class Reserver{
+    public:
+        Reserver() : reservedWriter(nullptr){}
+
+        Filter*       reservedWriter;
+        QSet<Filter*> reserverdReaders;
+
+        QSet<Filter*> observers;
+    };
 
 public:
     SharedData();
@@ -42,33 +52,29 @@ public:
     bool reserveForRead(Filter* filter);
     bool reserveForWrite(Filter* filter);
 
-    bool hasLock();
-    void createLock();
+    bool hasReserver();
+    void createReserver();
 
 private:
     void releaseObservers();
 
-    QReadWriteLock* m_lock;
-
-    Filter*       m_reservedWriter;
-    QSet<Filter*> m_reserverdReaders;
-    QSet<Filter*> m_observers;
+    Reserver* m_reserver;
 };
 
 inline bool SharedData::reserveForRead(Filter *filter){
-    if ( m_reservedWriter ){
+    if ( m_reserver->reservedWriter ){
         return false;
     }
-    m_reserverdReaders.insert(filter);
+    m_reserver->reserverdReaders.insert(filter);
     return true;
 }
 
 inline bool SharedData::reserveForWrite(Filter *filter){
-    if ( m_reserverdReaders.size() > 0 ){
-        m_observers.insert(filter);
+    if ( m_reserver->reserverdReaders.size() > 0 ){
+        m_reserver->observers.insert(filter);
         return false;
     }
-    m_reservedWriter = filter;
+    m_reserver->reservedWriter = filter;
     return true;
 }
 

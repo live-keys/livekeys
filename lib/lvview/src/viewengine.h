@@ -126,6 +126,8 @@ public:
     TypeInfo::Ptr typeInfo(const QByteArray& typeName) const;
     TypeInfo::Ptr typeInfo(const QMetaType& metaType) const;
 
+    static void registerBaseTypes(const char* uri);
+
 signals:
     /** Signals that we're about to create an object of our compiled code */
     void aboutToCreateObject(const QUrl& file);
