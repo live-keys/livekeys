@@ -19,9 +19,12 @@
 
 #include <QThread>
 
+
 class QMat;
 class QTimer;
 class QVideoCaptureThreadPrivate;
+
+/// \private
 class QVideoCaptureThread: public QThread{
 
     Q_OBJECT

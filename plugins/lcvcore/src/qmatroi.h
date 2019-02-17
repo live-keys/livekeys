@@ -18,7 +18,7 @@
 #define QMATROI_H
 
 #include "qmatfilter.h"
-
+/// \private
 class QMatRoi : public QMatFilter{
 
     Q_OBJECT

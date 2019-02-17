@@ -18,7 +18,7 @@
 #define QGOODFEATURESTOTRACKDETECTOR_HPP
 
 #include "qfeaturedetector.h"
-
+/// \private
 class QGoodFeaturesToTrackDetector : public QFeatureDetector{
 
     Q_OBJECT

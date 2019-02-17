@@ -316,7 +316,80 @@ Rectangle{
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: livecv.commands.execute('window.toggleNavigation')
+                onClicked: {
+                    editorAddRemoveMenu.visible = !editorAddRemoveMenu.visible
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        id: editorAddRemoveMenu
+        visible: false
+        anchors.right: editor.right
+        anchors.topMargin: 30
+        anchors.top: editor.top
+        property int buttonHeight: 30
+        property int buttonWidth: 180
+        opacity: visible ? 1.0 : 0
+        z: 1000
+
+        Behavior on opacity{ NumberAnimation{ duration: 200 } }
+
+
+        Rectangle{
+            id: addEditorButton
+            anchors.top: parent.top
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
+                id: addEditorText
+                text: qsTr("Add Horizontal Editor")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: addEditorArea.containsMouse ? "#969aa1" : "#808691"
+            }
+            MouseArea{
+                id : addEditorArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    editorAddRemoveMenu.visible = false
+                    livecv.commands.execute('window.addHorizontalEditorView')
+                }
+            }
+        }
+
+        Rectangle{
+            id: removeEditorButton
+            anchors.top: addEditorButton.bottom
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
+                id: removeEditorText
+                text: qsTr("Remove Horizontal Editor")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: removeEditorArea.containsMouse ? "#969aa1" : "#808691"
+            }
+            MouseArea{
+                id : removeEditorArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    editorAddRemoveMenu.visible = false
+                    livecv.commands.execute('window.removeHorizontalEditorView')
+                }
             }
         }
     }
@@ -371,7 +444,7 @@ Rectangle{
                     implicitWidth: 10
                     implicitHeight: 10
                     Rectangle {
-                        color: "#061724"
+                        color: "#0d1e30"
                         anchors.fill: parent
                     }
                 }
@@ -456,8 +529,8 @@ Rectangle{
                 textFormat: NewTextEdit.PlainText
 
                 wrapMode: NewTextEdit.NoWrap
-                height : Math.max( flick.height - 20, paintedHeight )
-                width : Math.max( flick.width - 20, paintedWidth )
+                height : Math.max( flick.height - 10, paintedHeight + 15)
+                width : Math.max( flick.width - 10, paintedWidth + 15)
 
                 readOnly: editor.document === null || editor.document.isMonitored
 

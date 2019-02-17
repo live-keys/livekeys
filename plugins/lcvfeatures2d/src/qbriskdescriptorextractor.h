@@ -19,6 +19,7 @@
 
 #include "qdescriptorextractor.h"
 
+/// \private
 class QBriskDescriptorExtractor : public QDescriptorExtractor{
 
     Q_OBJECT

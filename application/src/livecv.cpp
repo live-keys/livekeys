@@ -219,6 +219,8 @@ void LiveCV::loadInternalPlugins(){
         "base", 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type.");
 
 
+    ViewEngine::registerBaseTypes("base");
+
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("script",  m_script);
     m_engine->engine()->rootContext()->setContextProperty("livecv",  this);

@@ -45,7 +45,13 @@ Rectangle{
             id : commandsMenuInput
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 16
+            anchors.leftMargin: 6
+            anchors.right: parent.right
+            anchors.rightMargin: 6
+
+            clip: true
+
+            width: parent.width
 
             color : "#afafaf"
             font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"

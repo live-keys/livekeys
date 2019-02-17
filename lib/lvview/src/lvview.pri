@@ -26,7 +26,9 @@ HEADERS += \
     $$PWD/groupcollector.h \
     $$PWD/groupcollectorentry.h \
     $$PWD/memory.h \
-    $$PWD/shared.h
+    $$PWD/shared.h \
+    $$PWD/container.h \
+    $$PWD/call.h
 
 SOURCES += \
     $$PWD/errorhandler.cpp \
@@ -51,4 +53,6 @@ SOURCES += \
     $$PWD/groupcollector.cpp \
     $$PWD/groupcollectorentry.cpp \
     $$PWD/memory.cpp \
-    $$PWD/shared.cpp
+    $$PWD/shared.cpp \
+    $$PWD/container.cpp \
+    $$PWD/call.cpp

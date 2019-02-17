@@ -19,6 +19,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
+import lcvcore 1.0 as Cv
 import lcvphoto 1.0
 
 CodePalette{
@@ -36,7 +37,7 @@ CodePalette{
                 lightness = levels.lightness
                 levelByChannel = levels.channels ? levels.channels : {}
             } else {
-                input = cv.nullMat
+                input = Cv.MatOp.nullMat
                 lightnews = []
                 levelByChannel = {}
             }
@@ -45,7 +46,7 @@ CodePalette{
         }
 
         color: 'transparent'
-        input: cv.nullMat
+        input: Cv.MatOp.nullMat
         onLightnessChanged: {
             if ( !isBindingChange() ){
                 levels.lightness = lightness

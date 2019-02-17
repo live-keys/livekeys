@@ -46,7 +46,7 @@ public:
     int isLineAfterPalette(int blockNumber);
     int removePalette(QObject* palette);
     int resizePalette(QObject* palette, int newHeight);
-    std::list<QObject *>* updatePaletteBounds(int pos, int removed, int added);
+    std::list<QObject *> updatePaletteBounds(int pos, int removed, int added);
 
 public Q_SLOTS:
     void setDirtyPos(int pos);

@@ -1014,7 +1014,7 @@ int TextEdit::length() const
 qreal TextEdit::contentWidth() const
 {
     Q_D(const TextEdit);
-    return d->contentSize.width();
+    return d->paintedWidth;
 }
 
 /*!
@@ -1026,7 +1026,7 @@ qreal TextEdit::contentWidth() const
 qreal TextEdit::contentHeight() const
 {
     Q_D(const TextEdit);
-    return d->contentSize.height();
+    return d->paintedHeight;
 }
 
 /*!
@@ -2627,14 +2627,13 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
 
-    std::list<QObject*>* results = getPaletteManager()->updatePaletteBounds(pos, charsRemoved, charsAdded);
-    if (results)
+    std::list<QObject*> results = getPaletteManager()->updatePaletteBounds(pos, charsRemoved, charsAdded);
+    if (!results.empty())
     {
-        for (auto it = results->begin(); it != results->end(); ++it)
+        for (auto it = results.begin(); it != results.end(); ++it)
         {
             (*it)->deleteLater();
         }
-        delete results;
     }
 
 
@@ -2818,7 +2817,21 @@ void TextEdit::updateSize()
     d->yoff = topPadding() + TextUtil::alignedY(d->document->size().height(), height() - topPadding() - bottomPadding(), d->vAlign);
     setBaselineOffset(fm.ascent() + d->yoff + d->textMargin);
 
-    QSizeF size(newWidth, newHeight);
+    auto contentStart = d->document->findBlockByNumber(std::max(0,d->fragmentStart));
+    int contentSpan = std::min(d->fragmentEnd, d->document->blockCount()-1) - std::max(0, d->fragmentStart) + 1;
+    int width = 0, height = 0;
+    for (int i = 0; i < contentSpan; i++)
+    {
+        auto rect = d->document->documentLayout()->blockBoundingRect(contentStart);
+        width = std::max(width, static_cast<int>(rect.width()));
+        height += static_cast<int>(rect.height());
+        contentStart = contentStart.next();
+    }
+
+    d->paintedWidth = width;
+    d->paintedHeight = height;
+
+    QSizeF size(d->paintedWidth, d->paintedHeight);
     if (d->contentSize != size) {
         d->contentSize = size;
         emit contentSizeChanged();
@@ -3588,16 +3601,34 @@ void TextEdit::updateFragmentVisibility()
     d->paletteManager->removePalette(d->fragmentStartPalette);
     d->paletteManager->removePalette(d->fragmentEndPalette);
 
-    int lfrStart = std::max(0,d->fragmentStart), lfrEnd = std::min(d->fragmentEnd, d->document->blockCount()-1);
+    // handle fragment start palette
+    int lastPosition;
+    if (d->fragmentStart <= 0)
+    {
+        lastPosition = 0;
+    }
+    else
+    {
+        QTextBlock endBlock = d->document->findBlockByNumber(d->fragmentStart-1);
+        lastPosition = endBlock.position() + endBlock.length();
+    }
+    d->paletteManager->paletteAdded(0, std::max(d->fragmentStart, 0), 0, d->fragmentStartPalette, 0, lastPosition);
 
-    QTextBlock endBlock = d->document->findBlockByNumber(lfrStart);
-    d->paletteManager->paletteAdded(0, lfrStart, 0, d->fragmentStartPalette, 0, endBlock.position()+endBlock.length());
-    QTextBlock startBlock;
-    if (lfrEnd != INT_MAX || lfrEnd + 1 <= d->document->blockCount() - 1)
-        startBlock = d->document->findBlockByNumber(lfrEnd + 1);
-    else startBlock = d->document->lastBlock();
-    endBlock = d->document->findBlockByNumber(d->document->blockCount()-1);
-    d->paletteManager->paletteAdded(lfrEnd+1, d->document->blockCount() - lfrEnd, 0, d->fragmentEndPalette, startBlock.position(), endBlock.position()+endBlock.length());
+    // handle fragment start end
+    int firstPosition;
+    int span;
+    if (d->fragmentEnd >= d->document->blockCount()-1)
+    {
+        firstPosition = d->document->characterCount();
+        span = 0;
+    }
+    else
+    {
+        QTextBlock startBlock = d->document->findBlockByNumber(d->fragmentEnd + 1);
+        firstPosition = startBlock.position();
+        span = d->document->blockCount()-d->fragmentEnd - 1;
+    }
+    d->paletteManager->paletteAdded(std::min(d->fragmentEnd + 1, d->document->blockCount()-1),span,0,d->fragmentEndPalette, firstPosition, d->document->characterCount());
 
     dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->getLineManager()->setDirtyPos(0);
     getPaletteManager()->setDirtyPos(0);

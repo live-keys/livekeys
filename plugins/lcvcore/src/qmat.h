@@ -52,6 +52,10 @@ public:
     virtual Shared* reloc();
 
     QMat* clone() const;
+    static QMat* reloc(QMat* m);
+
+    const cv::Mat& internal() const;
+    cv::Mat& internal();
 
 public slots:
     QByteArray  buffer();

@@ -356,6 +356,8 @@
                       "{release}/bin/plugins": {
                             "live" : "plugins/live",
                             "editor": "plugins/editor",
+                            "editqml": "plugins/editqml",
+                            "fs": "plugins/fs",
                             "lcvcore": "plugins/lcvcore",
                             "lcvimgproc": "plugins/lcvimgproc",
                             "lcvvideo": "plugins/lcvvideo",

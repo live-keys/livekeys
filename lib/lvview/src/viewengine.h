@@ -116,8 +116,10 @@ public:
 
     static QString typeAsPropertyMessage(const QString& typeName, const QString& propertyName);
 
+    static void registerBaseTypes(const char* uri);
+
 signals:
-    /** Signals that we're about to create an object of our compiled code */
+    /** Signals before compiling a new object. */
     void aboutToCreateObject(const QUrl& file);
     /** Loading indicator has changed */
     void isLoadingChanged(bool isLoading);

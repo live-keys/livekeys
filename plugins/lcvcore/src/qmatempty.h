@@ -18,7 +18,7 @@
 #define QMATEMPTY_H
 
 #include "qmatdisplay.h"
-
+/// \private
 class QMatEmpty : public QMatDisplay{
 
     Q_OBJECT

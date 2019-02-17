@@ -24,7 +24,7 @@
  * \ingroup plugin-lcvfeatures2d
  */
 
- /**
+/**
  *\brief QKeypointHomography constructor
  */
 QKeypointHomography::QKeypointHomography(QQuickItem* parent)
@@ -35,8 +35,36 @@ QKeypointHomography::QKeypointHomography(QQuickItem* parent)
     setFlag(QQuickItem::ItemHasContents, true);
 }
 
+/**
+ *\brief QKeypointHomography desctructor
+ */
 QKeypointHomography::~QKeypointHomography(){
 }
+
+/**
+*\fn QKeypointHomography::queryImage()
+*\brief Getter for the query image
+*/
+
+/**
+*\fn QKeypointHomography::setQueryImage()
+*\brief Setter for the query image
+*/
+
+/**
+*\fn QKeypointHomography::objectCorners()
+*\brief Returns object corners
+*/
+
+/**
+*\fn QKeypointHomography::objectColors()
+*\brief Returns object colors
+*/
+
+/**
+*\fn QKeypointHomography::setObjectColors()
+*\brief Setter for the object colors
+*/
 
 QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
     if ( m_keypointsToScene && m_queryImage ){

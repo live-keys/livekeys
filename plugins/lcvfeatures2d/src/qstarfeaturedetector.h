@@ -18,7 +18,7 @@
 #define QSTARFEATUREDETECTOR_H
 
 #include "qfeaturedetector.h"
-
+/// \private
 class QStarFeatureDetector : public QFeatureDetector{
 
     Q_OBJECT

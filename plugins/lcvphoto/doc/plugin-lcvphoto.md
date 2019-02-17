@@ -10,7 +10,7 @@ import lcvphoto 1.0
 {qmlSummary:lcvphoto}
 
 {qmlType:FastNlMeansDenoising}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Denoises a grayscale or color image.}
 
 Performs denoising using the Non-local Means Denoising algorithm.
@@ -42,7 +42,7 @@ Size in pixels of the window that is used to compute weighted average for given 
 Has a large performance impact. Should be odd. Defaults to 21.
 
 {qmlType:FastNlMeansDenoisingMulti}
-{qmlInherits:FastNlMeansDenoising}
+{qmlInherits:lcvphoto#FastNlMeansDenoising}
 {qmlBrief:Denoises a grayscale or color image using multiple frames.}
 
 Variant of FastNlMeansDenoising using a history of frames.
@@ -65,7 +65,7 @@ which requires more memory and processing power and increases output delay.
 Must be an odd number. Defaults to 3.
 
 {qmlType:DenoiseTvl1}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Denoises a grayscale or color image.}
 
 Performs denoising using the primal-dual algorithm.
@@ -87,7 +87,7 @@ hard to quantitatively refine this statement, so just use the default and increa
 results are poor.
 
 {qmlType:HueSaturationLightness}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Controls the hue and saturation of an image}
 
 {qmlProperty:int hue}
@@ -100,7 +100,7 @@ results are poor.
 {qmlBrief: Controls the lightness}
 
 {qmlType:Levels}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 
 
 {qmlProperty:Lightness}
@@ -121,12 +121,12 @@ Levels{
         }
         ```
 {qmlType:AutoLevels}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Given the histogram AutoLevels will aoutmatically compute levels of an image.}
 
 
 {qmlType:BrightnessAndContrast}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Adjust the brightness and the contrast}
 
 {qmlProperty:double brightness}
@@ -138,12 +138,12 @@ Can be any value
 Should be between 0 and 10
 
 {qmlType:Sticher}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Stiches a set of images toghether based on the list of matrixes and a set of parameters}
 
 
 {qmlType:AlignMTB}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Takes a list of inputs with a set of parameters and it converts them}
 
 Params:
@@ -153,7 +153,7 @@ Params:
 * **bool cut**
 
 {qmlType:CalibrateDebevec}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Calibrates the lightness of the image in regard to exsposure setting the image was shot.}
 
 {qmlProperty:QMatList input}
@@ -177,7 +177,7 @@ Params:
 Output will contain much more data than the input.
 
 {qmlType:CalibrateRobertson}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Calibrates the lightness of the image in regard to exsposure setting the image was shot.}
 
 {qmlProperty:QMatList input}
@@ -273,7 +273,7 @@ Initialize method arguments:
 * **float colorAdapt**
 
 {qmlType:LevelSliders}
-{qmlInherits:QtQuick.Rectangle}
+{qmlInherits:external.QtQuick#Rectangle}
 
 {qmlProperty:alias input}
 
@@ -285,7 +285,7 @@ Initialize method arguments:
 {qmlType:HueSaturationLightnessSliders}
 
 {qmlProperty:alias hue}
-{qmlInherits:QtQuick.Rectangle}
+{qmlInherits:external.QtQuick#Rectangle}
 {qmlBrief:Hue that's controled by the slider}
 
 {qmlProperty:alias saturation}

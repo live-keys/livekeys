@@ -9,6 +9,7 @@ namespace lv{
 class Filter;
 class FilterWorker;
 
+/// \private
 class Thread : public QObject{
 
     Q_OBJECT

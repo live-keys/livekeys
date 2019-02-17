@@ -22,6 +22,8 @@
 
 class QJSValue;
 class QFileReader;
+
+/// \private
 class Q_LIVE_EXPORT QStaticFileReader : public QQuickItem{
 
     Q_OBJECT

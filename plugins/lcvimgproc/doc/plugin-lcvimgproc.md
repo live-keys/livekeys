@@ -10,7 +10,7 @@ import lcvimgproc 1.0
 {qmlSummary:lcvimgproc}
 
 {qmlType:PanAndZoom}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:UI component to perform panning and zooming on a given Mat object.}
 
 {qmlProperty:Mat *input*}
@@ -38,7 +38,7 @@ import lcvimgproc 1.0
   color for selection rectangle
 
 {qmlType:Blur}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Blurs an image using the normalized box filter.}
 
   The function smoothes an image using the normalized box filter.
@@ -60,7 +60,7 @@ import lcvimgproc 1.0
 See also [CopyMakeBorder::BorderType]()
 
 {qmlType:Canny}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Finds edges within an image.}
 
   Canny finds edges in the input image image and marks them in the output map edges using the Canny algorithm.
@@ -86,7 +86,7 @@ See also [CopyMakeBorder::BorderType]()
   A flag indicating whether a more accurate L2 norm should be used to calculate the image gradient magnitude.
 
 {qmlType:GaussianBlur}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Blurs an image using a Gaussian filter.}
 
 `imgproc/gaussianblur.qml`
@@ -109,7 +109,7 @@ See also [CopyMakeBorder::BorderType]()
   Pixel extrapolation method (see [CopyMakeBorder::BorderType]() for details).
 
 {qmlType:HoughLinesP}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Finds line segments in a binary image using the probabilistic Hough transform.}
 
 `imgproc/houghlinesp.qml`
@@ -144,7 +144,7 @@ See also [CopyMakeBorder::BorderType]()
   Thickness of the lines being drawn.
 
 {qmlType:HoughLines}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Finds line segments in a binary image using the Hough transform.}
 
 `imgproc/houghlines.qml`
@@ -180,7 +180,7 @@ See also [CopyMakeBorder::BorderType]()
   Thickness of the lines being drawn.
 
 {qmlType:Sobel}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Calculates the first, second, third, or mixed image derivatives using an extended Sobel operator.}
 
 `imgproc/sobeloperator.qml`
@@ -226,7 +226,7 @@ See also [CopyMakeBorder::BorderType]()
 See also [CopyMakeBorder::BorderType](#BorderType)
 
 {qmlType:CvtColor}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Converts an image from one color space to another.}
 
 `imgproc/threshold.qml`
@@ -460,7 +460,7 @@ See also [CopyMakeBorder::BorderType](#BorderType)
   automatically from input and code.
 
 {qmlType:Threshold}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Applies a fixed-level threshold to each element.}
 
   The function applies fixed-level thresholding to a single-channel array. The function is typically used to get a
@@ -496,7 +496,7 @@ See also [CopyMakeBorder::BorderType](#BorderType)
   Maximum value to use with the THRESH_BINARY and THRESH_BINARY_INV thresholding types.
 
 {qmlType:ChannelSelect}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Selects an image channel by its index.}
 
 `imgproc/framedifference.qml`
@@ -506,7 +506,7 @@ See also [CopyMakeBorder::BorderType](#BorderType)
   Channel number.
 
 {qmlType:StructuringElement}
-{qmlInherits:Item}
+{qmlInherits:external.QtQuick#Item}
 {qmlBrief:Creates a structuring element of the specified size and shape for morphological operations.
 }
 
@@ -541,7 +541,7 @@ See also [CopyMakeBorder::BorderType](#BorderType)
   * StructuringElement.MORPH_CROSS A cross-shaped structuring element.
 
 {qmlType:Resize}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Resizes an image.}
 
   Resizes an image according to the specified filter.
@@ -578,7 +578,7 @@ See also [CopyMakeBorder::BorderType](#BorderType)
 
 
 {qmlType:Filter2D}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Converts an image with the specified kernel.}
 
 `imgproc/filter2D.qml`
@@ -616,7 +616,7 @@ See also [CopyMakeBorder::BorderType](#BorderType)
 
 
 {qmlType: Dilate}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Erodes an image by using a specific structuring element.}
 
  `imgproc/erodedilate.qml`
@@ -646,7 +646,7 @@ See also [CopyMakeBorder::BorderType](#BorderType)
   See also [CopyMakeBorder::BorderType]()
 
 {qmlType:Erode}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Dilates an image by using a specific structuring element.}
 
 `imgproc/erodedilate.qml`
@@ -677,7 +677,7 @@ See also [CopyMakeBorder::BorderType](#BorderType)
   See also [CopyMakeBorder::BorderType]()
 
 {qmlType:CopyMakeBorder}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Copies the source image into the middle of the destination image.}
 
   The areas to the left, to the right, above and below the copied source image will be filled with extrapolated pixels
@@ -725,7 +725,7 @@ See also [CopyMakeBorder::BorderType](#BorderType)
   See also [CopyMakeBorder::BorderType]()
 
 {qmlType:MatDraw}
-{qmlInherits:MatDisplay}
+{qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Provides matrix drawing operations.}
 
   Provides the basic set of functions needed in order to draw on a matrix.
@@ -828,7 +828,7 @@ See also [CopyMakeBorder::BorderType](#BorderType)
 
 
 {qmlType:GetPerspectiveTransform}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 
 {qmlBrief:Calculates a perspective transform from four pairs of the corresponding points.}
 
@@ -840,7 +840,7 @@ Parameters:
 See also [GetPerspectiveTransform](https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html#getperspectivetransform)
 
 {qmlType:warpPerspective}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Applies a perspective transformation to an image.}
 
 Parameters:
@@ -856,7 +856,7 @@ Parameters:
 See also [warpPerspective](https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html#void%20warpPerspective(InputArray%20src,%20OutputArray%20dst,%20InputArray%20M,%20Size%20dsize,%20int%20flags,%20int%20borderMode,%20const%20Scalar&%20borderValue))
 
 {qmlType:QCachedWarpPerspective}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Applies a perspective transformation to an image.}
 
   Caches the transformation matrix when initialising, so it's faster and recommended to use for videos.

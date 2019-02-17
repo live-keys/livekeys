@@ -209,7 +209,7 @@ private:
     ProjectDocument*       m_document;
 
     bool                   m_newScope;
-    QTimer                 m_timer;
+    QTimer                 m_scopeTimer;
 
     QLinkedList<QmlEditFragment*> m_edits; // opened palettes
     QmlEditFragment*              m_editingFragment; // editing fragment

@@ -19,6 +19,7 @@
 
 #include "qdescriptorextractor.h"
 
+/// \private
 class QOrbDescriptorExtractor : public QDescriptorExtractor{
 
     Q_OBJECT

@@ -35,13 +35,8 @@ public:
     Filter();
     virtual ~Filter();
 
-    void setWorkerThread(FilterWorker* worker){
-        m_workerThread = worker;
-    }
-
-    FilterWorker* workerThread(){
-        return m_workerThread;
-    }
+    void setWorkerThread(FilterWorker* worker);
+    FilterWorker* workerThread();
 
     virtual void process(){}
 
@@ -49,8 +44,15 @@ public:
         Shared::ReadScope* locker,
         const std::function<void()>& cb,
         const std::function<void()>& rs);
-
 };
+
+inline void Filter::setWorkerThread(FilterWorker *worker){
+    m_workerThread = worker;
+}
+
+inline FilterWorker *Filter::workerThread(){
+    return m_workerThread;
+}
 
 }// namespace
 

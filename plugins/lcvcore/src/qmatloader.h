@@ -21,7 +21,7 @@
 
 class QMat;
 class QJSValue;
-
+/// \private
 class QMatLoader : public QQuickItem{
 
     Q_OBJECT

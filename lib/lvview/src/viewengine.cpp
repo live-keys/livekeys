@@ -19,6 +19,9 @@
 #include "live/errorhandler.h"
 #include "live/incubationcontroller.h"
 
+#include "container.h"
+#include "call.h"
+
 #include <QQmlComponent>
 #include <QQmlIncubator>
 #include <QQmlEngine>
@@ -296,6 +299,14 @@ TypeInfo::Ptr ViewEngine::typeInfo(const QMetaType &metaType) const{
  */
 QString ViewEngine::typeAsPropertyMessage(const QString &typeName, const QString &propertyName){
     return typeName + " is available by accessing the \'" + propertyName + "\' property.";
+}
+
+/**
+ * \brief Register the base types from the view library
+ */
+void ViewEngine::registerBaseTypes(const char *uri){
+    qmlRegisterType<lv::Container>(uri, 1, 0, "Container");
+    qmlRegisterType<lv::Call>(     uri, 1, 0, "Call");
 }
 
 /**

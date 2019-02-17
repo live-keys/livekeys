@@ -18,22 +18,10 @@
 
 using namespace cv;
 
-/*!
-  \qmltype Mat2DArray
-  \instantiates QMat2DArray
-  \inqmlmodule lcvcore
-  \inherits MatDisplay
-  \brief Creates a mat from a 2D javascript array.
-
-  Usage available under \b{samples/core/mat2darray.qml}
-
-  \quotefile core/mat2darray.qml
-*/
-
-/*!
-   \class QMat2DArray
-   \internal
-   \brief Creates a mat from a 2D javascript array.
+/**
+ *\class QMat2DArray
+ *\internal
+ *\brief Creates a mat from a 2D javascript array.
  */
 
 template<typename T> cv::Size assignValuesHelper(const QVariantList& vmat, Mat* m, QMat::Type type){
@@ -69,18 +57,6 @@ QMat2DArray::QMat2DArray(QQuickItem *parent)
 
 QMat2DArray::~QMat2DArray(){
 }
-
-/*!
-  \qmlproperty variant Mat2DArray::values
-
-  The values in js 2d array form.
- */
-
-/*!
-  \qmlproperty Mat::Type Mat2DArray::type
-
-  The type of the matrix.
- */
 
 cv::Size QMat2DArray::assignValues(){
     switch(m_type){

@@ -11,6 +11,7 @@
 
 namespace lv{
 
+/// \private
 class Tuple : public QObject, public QQmlParserStatus{
 
     Q_OBJECT

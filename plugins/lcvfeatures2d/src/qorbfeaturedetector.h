@@ -18,7 +18,7 @@
 #define QORBFEATUREDETECTOR_H
 
 #include "qfeaturedetector.h"
-
+/// \private
 class QOrbFeatureDetector : public QFeatureDetector{
 
     Q_OBJECT

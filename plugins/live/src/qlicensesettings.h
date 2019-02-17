@@ -24,6 +24,7 @@
 
 class QQuickItem;
 
+/// \private
 class Q_LIVE_EXPORT QLiveCVLicense{
 public:
     QString id;
@@ -33,6 +34,7 @@ public:
     bool    highlight;
 };
 
+/// \private
 class Q_LIVE_EXPORT QLicenseSettings : public QAbstractListModel{
 
     Q_OBJECT

@@ -25,6 +25,7 @@ class QPainter;
 class QOpenGLPaintDevice;
 class QOpenGLFramebufferObject;
 class QOpenGLFunctions;
+/// \private
 class QMatReadNode : public QObject, public QSGSimpleTextureNode{
 
     Q_OBJECT
@@ -45,6 +46,7 @@ private:
 
 };
 
+/// \private
 class QMatRead : public QQuickItem{
 
     Q_OBJECT

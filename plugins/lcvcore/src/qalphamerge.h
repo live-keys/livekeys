@@ -17,7 +17,7 @@
 #define QALPHAMERGE_H
 
 #include "qmatfilter.h"
-
+/// \private
 class QAlphaMerge : public QMatFilter{
 
     Q_OBJECT

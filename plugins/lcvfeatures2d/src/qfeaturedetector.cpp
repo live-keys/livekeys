@@ -37,6 +37,46 @@ QFeatureDetector::QFeatureDetector(QQuickItem *parent)
     setFlag(ItemHasContents, true);
 }
 
+/**
+ * \fn lv::QFeatureDetector::inputMat()
+ * \brief The actual image
+*/
+
+/**
+ * \fn lv::QFeatureDetector::setInputMat()
+ * \brief Setter for the image
+*/
+
+/**
+ * \fn lv::QFeatureDetector::output()
+ * \brief Drawn features from the input to another image
+*/
+
+/**
+ * \fn lv::QFeatureDetector::mask()
+ * \brief Limited amount of detections for a specific area
+*/
+
+/**
+ * \fn lv::QFeatureDetector::setMask()
+ * \brief Setter for mask
+*/
+    
+/**
+ * \fn lv::QFeatureDetector::keypoints()
+ * \brief Actual keypoints
+*/
+
+/**
+ * \fn lv::QFeatureDetector::setKeypoints()
+ * \brief Setter for keypoints
+*/
+
+/**
+ * \fn lv::QFeatureDetector::params()
+ * \brief Given parameters
+*/
+
 QFeatureDetector::QFeatureDetector(cv::Ptr<cv::FeatureDetector> detector, QQuickItem* parent)
     : QQuickItem(parent)
     , m_detector(detector)
