@@ -19,6 +19,7 @@
 
 #include <QQuickPaintedItem>
 
+/// \private
 class QTriangle : public QQuickPaintedItem{
 
     Q_OBJECT

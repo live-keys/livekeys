@@ -22,6 +22,8 @@
 #include "qliveglobal.h"
 
 class QScriptCommandLineParser;
+
+///\private
 class QLiveCVMain : public QQuickItem{
 
     Q_OBJECT

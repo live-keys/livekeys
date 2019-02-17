@@ -7,6 +7,7 @@
 
 namespace lv{
 
+/// \private
 class Call : public QObject, public QQmlParserStatus{
 
     Q_OBJECT

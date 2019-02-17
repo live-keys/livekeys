@@ -11,6 +11,7 @@ class QOpenGLPaintDevice;
 class QOpenGLFramebufferObject;
 class QOpenGLFunctions;
 
+/// \private
 class QDrawValueHistoryNode : public QObject, public QSGSimpleTextureNode{
 
     Q_OBJECT
@@ -30,6 +31,7 @@ private:
     QOpenGLFunctions         *m_glFunctions;
 };
 
+/// \private
 class QValueHistory : public QQuickItem{
 
     Q_OBJECT

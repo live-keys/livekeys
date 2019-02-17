@@ -21,6 +21,8 @@
 #include <QQmlParserStatus>
 
 class QTcpServer;
+
+/// \private
 class QLogListener : public QObject, public QQmlParserStatus{
 
     Q_OBJECT

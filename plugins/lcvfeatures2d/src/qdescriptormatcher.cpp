@@ -24,11 +24,7 @@
  */
 
 /**
- * QDescriptorMatcher main constructor
- * 
- * Paramteres:
- * \a parent
- * 
+ * \brief QDescriptorMatcher main constructor
  */
 QDescriptorMatcher::QDescriptorMatcher(QQuickItem *parent)
     : QQuickItem(parent)
@@ -52,7 +48,7 @@ QDescriptorMatcher::QDescriptorMatcher(cv::DescriptorMatcher* matcher, QQuickIte
 }
 
 /**
- * QDescriptorMatcher destructor
+ * \brief QDescriptorMatcher destructor
  */
 QDescriptorMatcher::~QDescriptorMatcher(){
     delete m_matcher;
@@ -63,7 +59,7 @@ QDMatchVector* QDescriptorMatcher::matches(){
 }
 
 /**
- * \brief Adding descriptors
+ * \brief Adds a set of descriptors
  */
 void QDescriptorMatcher::add(QMat* descriptors){
     if ( !descriptors )
@@ -80,7 +76,7 @@ void QDescriptorMatcher::add(QMat* descriptors){
 }
 
 /**
- * Trains QDescriptorMatcher
+ * \brief Trains the matcher
  */
 void QDescriptorMatcher::train(){
     if ( m_matcher ){

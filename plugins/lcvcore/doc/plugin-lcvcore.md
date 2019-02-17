@@ -11,23 +11,6 @@ import lcvcore 1.0
 {qmlSummary:lcvcore}
 
 
-{qmlType:CvGlobalObject}
-{qmlInherits:external.QtQml#QtObject}
-{qmlBrief:Singleton type for `cv` object}
-
-{qmlMethod:list matToArray(Mat m}}
-
-Transforms a Mat object into a two dimensional array.
-
-{qmlMethod:assignArrayToMat(list a, Mat m)
-
-Assigns `m` with the given array of values. Array is expected to be two dimensional.
-
-{qmlMethod:Matrix4x4 matrix4x4(Mat m)}
-
-Transorms `m` into a 4 by 4 qml matrix.
-
-
 {qmlType:Mat}
 {qmlInherits:external.QtQml#QtObject}
 {qmlBrief:Main matrix object with variable types.}
@@ -35,31 +18,28 @@ Transorms `m` into a 4 by 4 qml matrix.
   You can access a matrix's pixels from QML by using the buffer() function, which gives you a js ArrayBuffer. Here's a
   how you can access pixel values from a RGB matrix.
 
-```
+```qml
 ImRead{
-      id : src
-      file : project.path + '/sample.jpg'
-      Component.onCompleted : {
-           var buffer     = output.buffer()
-           var size       = output.dimensions()
-           var channels   = output.channels()
-
-           var bufferview = new Uint8Array(buffer)
-
-           for ( var i = 0; i < size.height; ++i ){
-               for ( var j = 0; j < size.width; ++j ){
-                   var b = bufferview[i * size.width + j * channels + 0]; // get the blue channel
-                   var g = bufferview[i * size.width + j * channels + 1]; // get the green channel
-                   var r = bufferview[i * size.width + j * channels + 2]; // get the red channel
-               }
+    id : src
+    file : project.path + '/sample.jpg'
+    Component.onCompleted : {
+       var buffer     = output.buffer()
+       var size       = output.dimensions()
+       var channels   = output.channels()
+       var bufferview = new Uint8Array(buffer)
+       for ( var i = 0; i < size.height; ++i ){
+           for ( var j = 0; j < size.width; ++j ){
+               var b = bufferview[i * size.width + j * channels + 0]; // get the blue channel
+               var g = bufferview[i * size.width + j * channels + 1]; // get the green channel
+               var r = bufferview[i * size.width + j * channels + 2]; // get the red channel
            }
        }
-  }
-
+    }
+}
 ```
 A sample on accessing and changing matrixes is available in **samples/core/customfilter.qml** :
 
-{qmlProperty: enumeration Mat type}
+{qmlProperty:Mat.Type type}
 
 Matrix type.
 
@@ -74,19 +54,19 @@ The matrix can be one of the following:
  * Mat.CV32F
  * Mat.CV64F
 
-{qmlMethod:ByteArray Mat buffer()}
+{qmlMethod:ByteArray buffer()}
 
 Returns an equivalent ArrayBuffer to access the matrix values
 
-{qmlMethod:int Mat channels()}
+{qmlMethod:int channels()}
 
 Returns the number of channels for the matrix
 
-{qmlMethod:int Mat depth()}
+{qmlMethod:int depth()}
 
 Returns the depth or type of the matrix
 
-{qmlMethod:Size Mat dimensions()}
+{qmlMethod:size dimensions()}
 
 Returns the matrix dimensions
 
@@ -94,17 +74,92 @@ Returns the matrix dimensions
 
 Returns a cloned matrix with javascript ownership
 
-{qmlMethod:Mat Mat createOwnedObject()}
+{qmlMethod:Mat createOwnedObject()}
 
 Returns a shallow copied matrix with javascript ownership
 
+{qmlType:MatOp}
+{qmlInherits:external.QtQml#QtObject}
+{qmlBrief:Singleton type for matrix operations.}
+
+Main object used to create matrices and manage simple operations on them.
+
+Creation examples:
+
+```qml
+import QtQuick 2.3
+import lcvcore 1.0 as Cv
+
+Grid{
+    spacing: 2
+    Cv.MatView{
+         mat: {
+             var m = Cv.MatOp.create(Qt.size(100, 100), Cv.Mat.CV8U, 3)
+             Cv.MatOp.fill(m, "#003333")
+             return m
+         }
+    }
+    Cv.MatView{
+         mat: Cv.MatOp.createFill(Qt.size(100, 100), Cv.Mat.CV8U, 3, "#660000")
+    }
+    Cv.MatView{
+         mat: Cv.MatOp.createFromArray([
+             [0,   100, 0],
+             [150, 0,   250],
+             [0,   200, 0]
+         ])
+         linearFilter: false
+         width: 100
+         height: 100
+    }
+}
+```
+
+{qmlMethod:Mat create(size size, Mat.Type type = Mat.CV8U, int channels = 1)}
+
+Creates a matrix given the size, type and number of channels.
+
+{qmlMethod:Mat createFill(size size, Mat.Type type = Mat.CV8U, int channels, color color)}
+
+Creates a matrix given the size, type and number of channels, and fills it with the specified color.
+
+{qmlMethod:Mat createFromArray(Array a, Mat.Type type = Mat.CV8U)}
+
+Creates a matrix given a 2 dimensional array.
+
+{qmlMethod:fill(Mat m, color color)}
+
+Fills a matrix with the given color.
+
+{qmlMethod:fillWithMask(Mat m, color color, Mat mask)}
+
+Fills a matrix with the given color within the region of the binary mask.
+
+{qmlMethod:Mat crop(Mat m, rect region)}
+
+Crops a matrix by the specified region.
+
+{qmlMethod:Matrix4x4 to4x4Matrix(Mat m)}
+
+Returns a Matrix4x4 qml element from a given matrix `m`. `m` is required to be a `4x4` matrix.
+
+{qmlMethod:Array toArray(Mat m)}
+
+Returns the matrix `m` as a js Array.
+
+
 {qmlType:MatView}
 {qmlInherits:external.QtQuick#Item}
-{qmlBrief:Provides a view for a lcvcore/Mat object}
+{qmlBrief:Displays a Mat as an image.}
+
+{qmlProperty:Mat mat}
+
+The matrix to be displayed.
 
 {qmlProperty:bool linearFilter}
 
-smooth the displayed image through linear filtering
+Smooths the displayed image through linear filtering. Default is `true`.
+
 {qmlType:ImRead}
 {qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Read an image from the hard drive into a lcvcore.Mat structure.}
@@ -160,7 +215,7 @@ Parameters:
 ```
 
 {qmlType:MatDisplay}
-{qmlInherits: Item}
+{qmlInherits:external.QtQuick#Item}
 {qmlBrief: Simple matrix display element.}
 
   This type serves as a base for all other live cv types that require displaying a matrix, which is available in its
@@ -176,13 +231,13 @@ Parameters:
   If set to true, linear filtering will occur when scaling the image on the screen. Default value is true.
 
 {qmlType:MatFilter}
-{qmlInherits:MatDisplay}
-{qmlBrief: Base filter for live cvs filters.}
+{qmlInherits:lcvcore#MatDisplay}
+{qmlBrief:Base filter images.}
 
   By inheriting the MatDisplay type, and by adding an input element and a process of transforming it into an output
-  element to be displayed on screen is considered a **filter type** in live cv.
+  element to be displayed on screen is considered a **filter type**.
 
-{qmlProperty: Mat MatFilter input}
+{qmlProperty:Mat input}
 
   Input matrix to apply the filter to.
 
