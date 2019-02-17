@@ -37,3 +37,13 @@ QKeyPointToSceneMap::~QKeyPointToSceneMap(){
 
 }
 
+/**
+*\fn lv::QKeyPointToSceneMap::append()
+*\brief Appends object
+*/
+
+/**
+*\fn lv::QKeyPointToSceneMap::resize()
+*\brief Resize the mapping to a specific size(usefull for performance efficiency)
+*/
+

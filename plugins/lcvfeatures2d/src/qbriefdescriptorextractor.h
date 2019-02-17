@@ -18,7 +18,7 @@
 #define QBRIEFDESCRIPTOREXTRACTOR_H
 
 #include "qdescriptorextractor.h"
-
+/// \private
 class QBriefDescriptorExtractor : public QDescriptorExtractor{
 
     Q_OBJECT

@@ -22,6 +22,9 @@
  * \ingroup plugin-lcvfeatures2d
  */
 
+/**
+*\brief QDMatchVector constructor
+*/
 QDMatchVector::QDMatchVector(QQuickItem *parent)
     : QQuickItem(parent)
     , m_type(QDMatchVector::BEST_MATCH)
@@ -29,5 +32,18 @@ QDMatchVector::QDMatchVector(QQuickItem *parent)
     setFlag(QQuickItem::ItemHasContents, false);
 }
 
+/**
+*\brief QDMatchVector destructor
+*/
 QDMatchVector::~QDMatchVector(){
 }
+
+/**
+*\fn lv::QDMatchVector::type()
+*\brief Type that was matched
+*/
+
+/**
+*\fn lv::QDMatchVector::setType()
+*\brief Setter for type
+*/

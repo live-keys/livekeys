@@ -17,6 +17,7 @@
 import QtQuick 2.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.2
+import QtQuick.Window 2.3
 import base 1.0
 import editor 1.0
 import editor.private 1.0
@@ -47,6 +48,7 @@ ApplicationWindow{
         navEditor: null
         wasLiveCoding: false
         codingMode: 0
+        prevWindowState: 2
     }
 
     property bool documentsReloaded : false
@@ -63,6 +65,17 @@ ApplicationWindow{
         }
     }
 
+    function toggleFullScreen(){
+        if (root.visibility !== Window.FullScreen){
+            root.controls.prevWindowState = root.visibility
+            root.visibility = Window.FullScreen
+        } else {
+            root.visibility = root.controls.prevWindowState
+        }
+    }
+
+
+
     Component.onCompleted: {
         livecv.commands.add(root, {
             'minimize' : [root.showMinimized, "Minimize"],
@@ -74,7 +87,8 @@ ApplicationWindow{
             'toggleLogPrefix' : [logView.toggleLogPrefix, "Toggle Log Prefix"],
             'addHorizontalEditorView' : [mainVerticalSplit.addHorizontalEditor, "Add Horizontal Editor"],
             'addHorizontalFragmentEditorView': [mainVerticalSplit.addHorizontalFragmentEditor, "Add Horizontal Fragment Editor"],
-            'removeHorizontalEditorView' : [mainVerticalSplit.removeHorizontalEditor, "Remove Horizontal Editor"]
+            'removeHorizontalEditorView' : [mainVerticalSplit.removeHorizontalEditor, "Remove Horizontal Editor"],
+            'toggleFullScreen': [root.toggleFullScreen, "Toggle Fullscreen"]
         })
     }
 

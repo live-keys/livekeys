@@ -48,6 +48,32 @@ QDescriptorMatchFilter::QDescriptorMatchFilter(QQuickItem* parent)
 QDescriptorMatchFilter::~QDescriptorMatchFilter(){
 }
 
+/**
+ * \fn lv::QDescriptorMatchFilter::minDistanceCoeff()
+ * \brief Minimum distance that the match has to the actual outcome.
+*/
+/**
+ * \fn lv::QDescriptorMatchFilter::setMinDistanceCoeff()
+ * \brief Setter for minDistanceCoeff
+*/
+
+/**
+ * \fn lv::QDescriptorMatchFilter::maxDistance()
+ * \brief Maximum distance allowed betwen set of two matches.
+*/
+/**
+ * \fn lv::QDescriptorMatchFilter::setMaxDistance()
+ * \brief Setter for maxDistance
+*/
+
+/**
+ * \fn lv::QDescriptorMatchFilter::nndrRatio()
+ * \brief The match betwen the first match and it's next consecutive match.
+*/
+/**
+ * \fn lv::QDescriptorMatchFilter::setNndrRatio()
+ * \brief Setter for nndrRatio
+*/
 
 QDMatchVector::Type QDescriptorMatchFilter::filterKnnMatches(
         const std::vector<std::vector<cv::DMatch> > &src,

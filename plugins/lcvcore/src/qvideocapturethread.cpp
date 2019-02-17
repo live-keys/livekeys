@@ -30,7 +30,7 @@
 
 
 using namespace cv;
-
+/// \private
 class QVideoCaptureThreadPrivate{
 
 public:
@@ -50,13 +50,11 @@ public:
 
 };
 
-
 /*!
   \class QVideoCaptureThread
   \internal
   \brief Internal video capture thread used by QVideoCapture.
  */
-
 QVideoCaptureThread::QVideoCaptureThread(const QString &file, QObject *parent) :
     QThread(parent),
     m_file(file),

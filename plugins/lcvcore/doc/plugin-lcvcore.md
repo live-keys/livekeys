@@ -32,8 +32,34 @@ Transorms `m` into a 4 by 4 qml matrix.
 {qmlInherits:external.QtQml#QtObject}
 {qmlBrief:Main matrix object with variable types.}
 
+  You can access a matrix's pixels from QML by using the buffer() function, which gives you a js ArrayBuffer. Here's a
+  how you can access pixel values from a RGB matrix.
 
-{qmlEnum:Type}
+```
+ImRead{
+      id : src
+      file : project.path + '/sample.jpg'
+      Component.onCompleted : {
+           var buffer     = output.buffer()
+           var size       = output.dimensions()
+           var channels   = output.channels()
+
+           var bufferview = new Uint8Array(buffer)
+
+           for ( var i = 0; i < size.height; ++i ){
+               for ( var j = 0; j < size.width; ++j ){
+                   var b = bufferview[i * size.width + j * channels + 0]; // get the blue channel
+                   var g = bufferview[i * size.width + j * channels + 1]; // get the green channel
+                   var r = bufferview[i * size.width + j * channels + 2]; // get the red channel
+               }
+           }
+       }
+  }
+
+```
+A sample on accessing and changing matrixes is available in **samples/core/customfilter.qml** :
+
+{qmlProperty: enumeration Mat type}
 
 Matrix type.
 
@@ -48,19 +74,19 @@ The matrix can be one of the following:
  * Mat.CV32F
  * Mat.CV64F
 
-{qmlMethod:ByteArray buffer()}
+{qmlMethod:ByteArray Mat buffer()}
 
 Returns an equivalent ArrayBuffer to access the matrix values
 
-{qmlMethod:int channels()}
+{qmlMethod:int Mat channels()}
 
 Returns the number of channels for the matrix
 
-{qmlMethod:int depth()}
+{qmlMethod:int Mat depth()}
 
 Returns the depth or type of the matrix
 
-{qmlMethod:Size dimensions()}
+{qmlMethod:Size Mat dimensions()}
 
 Returns the matrix dimensions
 
@@ -68,7 +94,7 @@ Returns the matrix dimensions
 
 Returns a cloned matrix with javascript ownership
 
-{qmlMethod:Mat createOwnedObject()}
+{qmlMethod:Mat Mat createOwnedObject()}
 
 Returns a shallow copied matrix with javascript ownership
 
@@ -133,13 +159,38 @@ Parameters:
 
 ```
 
+{qmlType:MatDisplay}
+{qmlInherits: Item}
+{qmlBrief: Simple matrix display element.}
 
+  This type serves as a base for all other live cv types that require displaying a matrix, which is available in its
+  output property. You can choose wether smoothing occurs when scaling the image for display by enabling linear
+  filtering.
+
+{qmlProperty: Mat MatDisplay output}
+
+  This property holds the output element to display on screen.
+
+{qmlProperty: bool MatDisplay linearFilter}
+
+  If set to true, linear filtering will occur when scaling the image on the screen. Default value is true.
+
+{qmlType:MatFilter}
+{qmlInherits:MatDisplay}
+{qmlBrief: Base filter for live cvs filters.}
+
+  By inheriting the MatDisplay type, and by adding an input element and a process of transforming it into an output
+  element to be displayed on screen is considered a **filter type** in live cv.
+
+{qmlProperty: Mat MatFilter input}
+
+  Input matrix to apply the filter to.
 
 {qmlType:MatRoi}
 {qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Selects a region of interest (ROI)}
 
-Usage available under _**samples/core/mat2darray.qml**_.
+Usage available under **samples/core/mat2darray.qml**.
 
 Select a region from an image for further processing. The 'PanAndZoom' component shows how to use a MatRoi to select
 a region from an image, then use a MatRead to read the regions values.
@@ -272,7 +323,7 @@ speed by which frames are delivered.
 
 {qmlmethod:CamCapture::staticLoad(string device, size resolution)}
 
-This is an overloaded method for CamCapture::staticLoad
+This is an overloaded method for CamCapture staticLoad
 
 {qmlMethod:CamCapture staticLoad(string device,size resolution)}
 
@@ -333,7 +384,7 @@ This property holds the url to the file thats opened.
 
 {qmlMethod:VideoCapture staticOpen(string file)}
 
-This is an overloaded method for VideoCapture::staticLoad
+This is an overloaded method for VideoCapture staticLoad
 
 {qmlMethod:VideoCapture staticLoad(string file)}
 

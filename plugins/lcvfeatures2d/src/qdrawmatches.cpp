@@ -24,6 +24,10 @@
  * \brief Draws the found matches of keypoints from two images.
  * \ingroup plugin-lcvfeatures2d
  */
+
+/**
+ *\brief QDrawMatches constructor 
+ */
 QDrawMatches::QDrawMatches(QQuickItem *parent)
     : QMatDisplay(parent)
     , m_keypoints1(0)
@@ -34,9 +38,25 @@ QDrawMatches::QDrawMatches(QQuickItem *parent)
 {
 }
 
+/**
+ *\brief QDrawMatches desctructor
+ */
 QDrawMatches::~QDrawMatches(){
 }
 
+/**
+ * \fn lv::QDrawMatches::keypoints1()
+ * \brief Keypoint from the first source   
+ */
+
+/**
+ * \fn lv::QDrawMatches::keypoints2()
+ * \brief Keypoint from the second source   
+ */
+
+/**
+ * \brief Matches from the first source to second one
+ */
 void QDrawMatches::setMatches1to2(QDMatchVector *matches1to2){
     m_matches = matches1to2;
     emit matches1to2Changed();

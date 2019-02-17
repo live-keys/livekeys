@@ -23,6 +23,7 @@
 #include "qmat.h"
 
 class QVideoWriterThread;
+/// \private
 class QVideoWriter : public QQuickItem{
 
     Q_OBJECT
