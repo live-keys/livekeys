@@ -6,6 +6,7 @@
 
 namespace lv{
 
+/// \private
 class TuplePropertyMap{
 
 public:

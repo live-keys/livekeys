@@ -17,7 +17,6 @@
 #include "live_plugin.h"
 #include "qlivecvmain.h"
 #include "qstaticloader.h"
-#include "qenginemonitor.h"
 #include "qstaticcontainer.h"
 #include "qlicensesettings.h"
 #include "qfilereader.h"
@@ -76,8 +75,6 @@ void LivePlugin::registerTypes(const char *uri){
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){
     QStaticContainer* sc = new QStaticContainer(engine);
     engine->rootContext()->setContextProperty("staticContainer", sc);
-    QEngineMonitor* em = new QEngineMonitor(engine);
-    engine->rootContext()->setContextProperty("engineMonitor", em); //TODO: Remove
 
     QObject* livecv   = engine->rootContext()->contextProperty("livecv").value<QObject*>();
     lv::Settings* settings = static_cast<lv::Settings*>(livecv->property("settings").value<QObject*>());

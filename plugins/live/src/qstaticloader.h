@@ -24,6 +24,7 @@
 
 class QStaticLoaderItem;
 
+/// \private
 class QStaticLoader : public QQuickItem{
 
     Q_OBJECT

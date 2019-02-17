@@ -1025,8 +1025,6 @@ ApplicationWindow{
                             onAboutToCreateObject : {
                                 if (staticContainer)
                                     staticContainer.beforeCompile()
-                                if ( engineMonitor )
-                                    engineMonitor.emitBeforeCompile()
                             }
                             onObjectCreated : {
                                 error.text = ''
@@ -1036,8 +1034,6 @@ ApplicationWindow{
                                 runSpace.item = object;
                                 if ( staticContainer )
                                     staticContainer.afterCompile()
-                                if ( engineMonitor )
-                                    engineMonitor.emitAfterCompile()
                             }
                             onObjectCreationError : {
                                 var lastErrorsText = ''
@@ -1208,8 +1204,6 @@ ApplicationWindow{
                 runSpace.item = 0
                 if ( staticContainer )
                     staticContainer.clearStates()
-                if ( engineMonitor )
-                    engineMonitor.emitTargetChanged()
             }
             if (active)
                 createTimer.restart()

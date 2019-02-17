@@ -19,6 +19,8 @@ namespace lv{
 class Filter;
 class Project;
 class TcpLineSocket;
+
+/// \private
 class TcpLine : public QObject, public QQmlParserStatus, public lv::Filter{
 
     Q_OBJECT

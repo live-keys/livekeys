@@ -15,8 +15,9 @@
 ****************************************************************************/
 
 #include "qlivecvmain.h"
-#include "qenginemonitor.h"
 #include "qscriptcommandlineparser_p.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
 
 #include <QException>
 #include <QQuickView>
@@ -105,10 +106,8 @@ QLiveCVMain::~QLiveCVMain(){
 void QLiveCVMain::componentComplete(){
     QQuickItem::componentComplete();
 
-    QEngineMonitor* em = QEngineMonitor::grabFromContext(this);
-
-    connect(em, SIGNAL(afterCompile()), this, SLOT(afterCompile()));
-    connect(em, SIGNAL(beforeCompile()), this, SLOT(beforeCompile()));
+    connect(lv::ViewContext::instance().engine(), SIGNAL(aboutToCreateObject(QUrl)), this, SLOT(beforeCompile()));
+    connect(lv::ViewContext::instance().engine(), SIGNAL(objectCreated(QObject*)), this, SLOT(afterCompile()));
 
     QObject* obj = qmlContext(this)->contextProperty("script").value<QObject*>();
     m_parser = new QScriptCommandLineParser(obj->property("argvTail").toStringList());
