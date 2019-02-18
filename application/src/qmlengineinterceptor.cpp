@@ -62,12 +62,9 @@ QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstr
     }
     else if (dataType == QQmlAbstractUrlInterceptor::QmlFile && path.isLocalFile()){
         if (m_project->isOpened(path.toLocalFile())){
-            QString str = path.toString();
-            if (str.length() >= 4 && str.left(4) == "file")
-            {
-                return QUrl("memory" + str.right(str.length()-4));
-            }
-            return path;
+            QUrl memoryPath(path);
+            memoryPath.setScheme("memory");
+            return memoryPath;
         }
 
     }
@@ -86,7 +83,9 @@ QNetworkReply *QmlEngineInterceptor::createRequest(
     if (request.url().scheme() == "memory")
     {
         MemoryNetworkReply* mnr = new MemoryNetworkReply();
-        QString content = m_project->openFile(request.url().toLocalFile(), ProjectDocument::Monitor)->content();
+        QUrl url = request.url();
+        url.setScheme("file");
+        QString content = m_project->openFile(url.toLocalFile())->content();
         mnr->setContent(content);
         return mnr;
     }
@@ -96,20 +95,16 @@ QNetworkReply *QmlEngineInterceptor::createRequest(
 
 void QmlEngineInterceptor::interceptEngine(ViewEngine *engine, PackageGraph* packageGraph, Project* project){
     m_project = project;
+    engine->engine()->setNetworkAccessManagerFactory(new QmlEngineInterceptor::Factory);
     engine->engine()->setUrlInterceptor(new QmlEngineInterceptor::UrlInterceptor(engine, packageGraph, project));
 }
 
 void MemoryNetworkReply::setContent(const QString &content)
 {
-    setAttribute(QNetworkRequest::HttpStatusCodeAttribute, 200);
-    setAttribute(QNetworkRequest::HttpReasonPhraseAttribute, "OK");
-    setHeader(QNetworkRequest::ContentTypeHeader, "text/html");
     m_content = content.toUtf8();
     m_offset = 0;
     open(ReadOnly | Unbuffered);
-    setHeader(QNetworkRequest::ContentLengthHeader, QVariant(content.size()));
-    QTimer::singleShot(0, this, SIGNAL(readyRead()));
-    QTimer::singleShot(0, this, SIGNAL(finished()));
+    setFinished(true);
 }
 
 void MemoryNetworkReply::abort(){}

@@ -117,18 +117,47 @@ Rectangle{
             windowControls.messageDialog.show('File contains unsaved changes. Would you like to save them before closing?',
             {
                 button1Name : 'Yes',
-                button1Function : saveFunction,
+                button1Function : function(){
+                    saveFunction()
+                    var documentList = project.documentModel.listUnsavedDocuments()
+                    livecv.engine.createObjectAsync(
+                        project.active.content,
+                        runSpace,
+                        project.active.file.pathUrl(),
+                        project.active,
+                        !(documentList.size === 1 && documentList[0] === project.active)
+                    );
+                },
                 button2Name : 'No',
                 button2Function : function(){
                     windowControls.messageDialog.close()
                     editor.closeDocumentAction()
                     editor.document = project.documentModel.lastOpened()
+                    var documentList = project.documentModel.listUnsavedDocuments()
+                    livecv.engine.createObjectAsync(
+                        project.active.content,
+                        runSpace,
+                        project.active.file.pathUrl(),
+                        project.active,
+                        !(documentList.size === 1 && documentList[0] === project.active)
+                    );
+
                 },
                 button3Name : 'Cancel',
                 button3Function : function(){
                     windowControls.messageDialog.close()
                 },
-                returnPressed : saveFunction
+                returnPressed : function(){
+                    saveFunction()
+                    var documentList = project.documentModel.listUnsavedDocuments()
+                    livecv.engine.createObjectAsync(
+                        project.active.content,
+                        runSpace,
+                        project.active.file.pathUrl(),
+                        project.active,
+                        !(documentList.size === 1 && documentList[0] === project.active)
+                    );
+                },
             })
         } else
             editor.closeDocumentAction()
@@ -496,10 +525,7 @@ Rectangle{
                         editorArea.cursorPosition = position
                     }
                     onContentsChangedManually: {
-                        if ( project.active === editor.document )
-                        {
-                            editor.windowControls.createTimer.restart();
-                        }
+                        editor.windowControls.createTimer.restart();
                     }
                 }
 

@@ -35,34 +35,12 @@ Rectangle{
     property Item focusEditor : null
     property Item navEditor: null
 
-    function maintainCodingMode()
-    {
-        if (focusEditor && focusEditor.document && focusEditor.document !== project.active && windowControls.codingMode === 0)
-        {
-            windowControls.codingMode = 1
-            windowControls.wasLiveCoding = true
-            modeImage.source = onSaveImage.source
-            modeImage.anchors.rightMargin = onSaveImage.anchors.rightMargin
-        }
-        if (focusEditor && focusEditor.document && focusEditor.document === project.active && windowControls.wasLiveCoding)
-        {
-            windowControls.wasLiveCoding = false
-            windowControls.codingMode = 0
-            modeImage.source = liveImage.source
-            modeImage.anchors.rightMargin = liveImage.anchors.rightMargin
-        }
-
-        modeContainer.visible = false
-    }
-
     function setFocusEditor(e){
         if (focusEditor !== e ){
             if (focusEditor) focusEditor.internalFocus = false
             focusEditor = e
             focusEditor.internalFocus = true
         }
-
-        maintainCodingMode();
     }
 
     function setNavEditor(e){
@@ -184,7 +162,6 @@ Rectangle{
             if ( project.active )
             {
                 focusEditor.document = project.active
-                maintainCodingMode();
             }
         })
     }
@@ -210,12 +187,9 @@ Rectangle{
         root.focusEditor.document = project.openFile(
             entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
         )
-
-        maintainCodingMode();
     }
     function editEntry(entry){
         root.focusEditor.document = project.openFile(entry, ProjectDocument.Edit)
-        maintainCodingMode();
     }
     function removeEntry(entry, isFile){
         var message = ''
@@ -389,7 +363,6 @@ Rectangle{
             }
             function setActive(){
                 project.setActive(styleData.value)
-                projectView.maintainCodingMode();
                 if (windowControls.codingMode === 1) {
                     createObjectForActive()
                 }
