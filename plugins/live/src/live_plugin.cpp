@@ -24,7 +24,7 @@
 #include "qtriangle.h"
 #include "qloglistener.h"
 #include "componentsource.h"
-#include "thread.h"
+#include "worker.h"
 #include "tuple.h"
 #include "tcpline.h"
 #include "tcpagent.h"
@@ -60,7 +60,7 @@ void LivePlugin::registerTypes(const char *uri){
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
     qmlRegisterType<lv::StringBasedLoader>(uri, 1, 0, "StringBasedLoader");
     qmlRegisterType<lv::ComponentSource>(  uri, 1, 0, "ComponentSource");
-    qmlRegisterType<lv::Thread>(           uri, 1, 0, "Thread");
+    qmlRegisterType<lv::Worker>(           uri, 1, 0, "Worker");
     qmlRegisterType<lv::Tuple>(            uri, 1, 0, "Tuple");
     qmlRegisterType<lv::TcpLine>(          uri, 1, 0, "TcpLine");
     qmlRegisterType<lv::TcpAgent>(         uri, 1, 0, "TcpAgent");

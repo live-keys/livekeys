@@ -2,9 +2,6 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/errorhandler.h \
-    $$PWD/filter.h \
-    $$PWD/filterworker.h \
-    $$PWD/filterworker_p.h \
     $$PWD/incubationcontroller.h \
     $$PWD/keymap.h \
     $$PWD/qmlengineinterceptor.h \
@@ -28,12 +25,12 @@ HEADERS += \
     $$PWD/memory.h \
     $$PWD/shared.h \
     $$PWD/container.h \
-    $$PWD/call.h
+    $$PWD/act.h \
+    $$PWD/workerthread.h \
+    $$PWD/workerthread_p.h
 
 SOURCES += \
     $$PWD/errorhandler.cpp \
-    $$PWD/filter.cpp \
-    $$PWD/filterworker.cpp \
     $$PWD/incubationcontroller.cpp \
     $$PWD/keymap.cpp \
     $$PWD/qmlengineinterceptor.cpp \
@@ -55,4 +52,5 @@ SOURCES += \
     $$PWD/memory.cpp \
     $$PWD/shared.cpp \
     $$PWD/container.cpp \
-    $$PWD/call.cpp
+    $$PWD/act.cpp \
+    $$PWD/workerthread.cpp

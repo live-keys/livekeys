@@ -2,8 +2,6 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/live/errorhandler.h \
-    $$PWD/live/filter.h \
-    $$PWD/live/filterworker.h \
     $$PWD/live/incubationcontroller.h \
     $$PWD/live/keymap.h \
     $$PWD/live/qmlengineinterceptor.h \
@@ -21,4 +19,6 @@ HEADERS += \
     $$PWD/live/extensions.h \
     $$PWD/live/liveextension.h \
     $$PWD/live/shared.h \
-    $$PWD/live/memory.h
+    $$PWD/live/memory.h \
+    $$PWD/live/act.h \
+    $$PWD/live/workerthread.h

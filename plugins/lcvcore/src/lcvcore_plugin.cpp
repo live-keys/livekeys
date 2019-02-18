@@ -16,15 +16,14 @@
 
 #include "lcvcore_plugin.h"
 #include "qmat.h"
+#include "qwritablemat.h"
 #include "qmatop.h"
 #include "qmatext.h"
 #include "qmatview.h"
 #include "qimread.h"
 #include "qimwrite.h"
-#include "qmatempty.h"
 #include "qmatroi.h"
 #include "qmatread.h"
-#include "qmat2darray.h"
 #include "qcamcapture.h"
 #include "qvideocapture.h"
 #include "qvideowriter.h"
@@ -53,13 +52,12 @@ static QObject* matOpProvider(QQmlEngine *engine, QJSEngine *){
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
     qmlRegisterType<QMat>(                   uri, 1, 0, "Mat");
+    qmlRegisterType<QWritableMat>(           uri, 1, 0, "WritableMat");
     qmlRegisterType<QMatView>(               uri, 1, 0, "MatView");
     qmlRegisterType<QImRead>(                uri, 1, 0, "ImRead");
     qmlRegisterType<QImWrite>(               uri, 1, 0, "ImWrite");
-    qmlRegisterType<QMatEmpty>(              uri, 1, 0, "MatEmpty");
     qmlRegisterType<QMatRoi>(                uri, 1, 0, "MatRoi");
     qmlRegisterType<QMatRead>(               uri, 1, 0, "MatRead");
-    qmlRegisterType<QMat2DArray>(            uri, 1, 0, "Mat2DArray");
     qmlRegisterType<QCamCapture>(            uri, 1, 0, "CamCapture");
     qmlRegisterType<QVideoCapture>(          uri, 1, 0, "VideoCapture");
     qmlRegisterType<QVideoWriter>(           uri, 1, 0, "VideoWriter");

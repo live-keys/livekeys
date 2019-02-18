@@ -24,16 +24,16 @@
 
 namespace lv{
 
-class Filter;
-class Call;
+class Act;
+class Act;
 
 class LV_VIEW_EXPORT Shared : public QObject{
 
 private:
     class Readers{
     public:
-        QSet<Filter*> reserved;
-        Filter*       observer;
+        QSet<Act*> reserved;
+        Act*       observer;
     };
 
 public:
@@ -63,7 +63,7 @@ public:
         }
 
     private:
-        ReadScope(Filter* filter) : m_filter(filter), m_reserved(true){}
+        ReadScope(Act* filter) : m_filter(filter), m_reserved(true){}
         void clear(){ foreach( Shared* sd, m_read ) Shared::release(m_filter, sd); }
 
     public:
@@ -72,7 +72,7 @@ public:
         bool reserved() const{ return m_reserved; }
 
     private:
-        Filter*        m_filter;
+        Act*        m_filter;
         bool           m_reserved;
         QList<Shared*> m_read;
 
@@ -82,10 +82,10 @@ public:
     Shared(QObject* parent = nullptr);
     virtual ~Shared();
 
-    static bool read(Filter* call, Shared* data);
-    static void release(Filter* call, Shared* data);
+    static bool read(Act* call, Shared* data);
+    static void release(Act* call, Shared* data);
 
-    template<typename ...Args> static ReadScope* readScope(Filter* call, Args... args){
+    template<typename ...Args> static ReadScope* readScope(Act* call, Args... args){
         ReadScope* rs = new ReadScope(call);
         if ( !rs->read(args...) )
             rs->m_reserved = false;

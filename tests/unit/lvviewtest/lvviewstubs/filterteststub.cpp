@@ -15,14 +15,14 @@
 ****************************************************************************/
 
 #include "filterteststub.h"
-#include "live/filterworker.h"
+#include "live/workerthread.h"
 
 #include <QDebug>
 
 #include <functional>
 
 FilterTestStub::FilterTestStub(QObject *parent)
-    : QObject(parent)
+    : lv::Act(parent)
     , m_input1(0)
     , m_input2(0)
     , m_output(new SharedDataTestStub(this))

@@ -10,23 +10,23 @@ functionality. QMatDisplay is actually an implementation of QQuickItem that cont
 called **output**. All items that inherit QMatDisplay can work with this property in order to display their processed
 result.
 
-A simple example is the QMatEmpty class which works directly on the output property. Here's a snippet from
-its setType method for the type property:
+A simple example is the QTonemap class which works directly on the output property. Here's a snippet from
+its process method:
 
 ```
-inline void QMatEmpty::setType(QMat::Type type){
-    if ( m_type == type ){
-        m_type = type;
-        emit typeChanged();
-        output()->cvMat()->create(cv::Size(m_matSize.width(), m_matSize.height()), CV_MAKETYPE(m_type, m_channels));
-        output()->cvMat()->setTo(m_colorScalar);
+void QTonemap::process(){
+    if ( m_tonemapper && !m_input->data().empty() && isComponentComplete() ){
+        m_tonemapper->process(m_input->data(), m_store);
+        m_store.convertTo(*output()->cvMat(), CV_8UC3, 255);
+        setImplicitWidth(output()->data().cols);
+        setImplicitHeight(output()->data().rows);
         emit outputChanged();
         update();
     }
 }
 ```
 
-After the type is set, the output mat is recreated and an update is called to display the element on screen.
+After the processing from the tonemapper, the matrix is used to display the element on screen.
 
 In addition to QMatDisplay's functionality, the QMatFilter adds an **input** property and a function that will be used
 by derived classes to implement the actual filtering.
@@ -264,7 +264,7 @@ following test program to test out the filter:
 
 ```
 import QtQuick 2.3
-import lcvcore 1.0
+import lcvcore 1.0 as Cv
 import lcvimgproc 1.0
 import tutorial 1.0
 
@@ -274,21 +274,16 @@ Grid{
 
     property string imagePath : 'path/to/tutorial.jpg'
 
-    ImRead{
+    Cv.ImRead{
         id : imgSource
         file : parent.imagePath
     }
 
-    MatEmpty{
-        id : imgE
-        matSize : imgSource.output.dataSize()
-        channels : 3
-        color : "#997822"
-    }
+    property Mat image2 : Cv.MatOp.create(imgSource.dimensions(), Cv.Mat.8U, 3, "#997822")
 
     AddWeighted{
         input : imgSource.output
-        input2 : imgE.output
+        input2 : image2
         alpha : 0.6
         beta : 0.4
         gamma : 0

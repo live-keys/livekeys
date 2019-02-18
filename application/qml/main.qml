@@ -17,7 +17,7 @@
 import QtQuick 2.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.2
-import QtQuick.Window 2.3
+import QtQuick.Window 2.0
 import base 1.0
 import editor 1.0
 import editor.private 1.0

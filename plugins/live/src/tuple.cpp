@@ -37,7 +37,7 @@ void Tuple::componentComplete(){
     }
 }
 
-bool Tuple::reserveForRead(Shared::ReadScope *locker, Filter *filter){
+bool Tuple::reserveForRead(Shared::ReadScope *locker, Act *filter){
     const QMetaObject *meta = metaObject();
     for (int i = 0; i < meta->propertyCount(); i++){
         QMetaProperty property = meta->property(i);

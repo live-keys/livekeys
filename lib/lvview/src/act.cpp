@@ -1,20 +1,39 @@
-#include "call.h"
+#include "act.h"
+#include "workerthread.h"
 #include <QMetaObject>
 #include <QMetaProperty>
 #include <QQmlProperty>
 
 namespace lv{
 
-Call::Call(QObject *parent)
+Act::Act(QObject *parent)
     : QObject(parent)
     , m_isComponentComplete(false)
+    , m_workerThread(nullptr)
 {
 }
 
-Call::~Call(){
+Act::~Act(){
 }
 
-void Call::componentComplete(){
+void Act::use(Shared::ReadScope *locker, const std::function<void ()> &cb, const std::function<void ()> &rs){
+    if ( locker ){
+        if( !locker->reserved() ){
+            delete locker;
+            return;
+        }
+    }
+
+    if ( workerThread() ){
+        workerThread()->postWork(cb, rs, locker);
+    } else {
+        cb();
+        rs();
+        delete locker;
+    }
+}
+
+void Act::componentComplete(){
     m_isComponentComplete = true;
 
     const QMetaObject* meta = metaObject();

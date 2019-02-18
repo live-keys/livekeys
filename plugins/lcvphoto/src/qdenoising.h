@@ -3,8 +3,9 @@
 
 #include <QObject>
 #include "qmat.h"
-#include "live/filter.h"
+#include "live/act.h"
 
+/// \private
 class QDenoising : public QObject{
 
     Q_OBJECT
@@ -13,8 +14,8 @@ public:
     explicit QDenoising(QObject *parent = nullptr);
 
 public slots:
-    void fastNlMeansAsync(
-        lv::Filter* context,
+    void fastNlMeans(
+        lv::Act* context,
         QMat* input,
         float h = 3,
         int templateWindowSize = 7,
@@ -22,8 +23,8 @@ public slots:
         const QJSValue& allocator = QJSValue()
     );
 
-    void fastNlMeansColoredAsync(
-        lv::Filter* context,
+    void fastNlMeansColored(
+        lv::Act* context,
         QMat* input,
         float h = 3,
         int templateWindowSize = 7,

@@ -32,10 +32,17 @@
 #include "qdilate.h"
 #include "qerode.h"
 #include "qcopymakeborder.h"
-#include "qmatdraw.h"
+#include "qdraw.h"
 #include "qgetperspectivetransform.h"
 #include "qwarpperspective.h"
 #include "qcachedwarpperspective.h"
+
+#include <QQmlEngine>
+
+
+static QObject* drawProvider(QQmlEngine *engine, QJSEngine *){
+    return new QDraw(engine);
+}
 
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
@@ -54,10 +61,11 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QDilate>(                 uri, 1, 0, "Dilate");
     qmlRegisterType<QErode>(                  uri, 1, 0, "Erode");
     qmlRegisterType<QCopyMakeBorder>(         uri, 1, 0, "CopyMakeBorder");
-    qmlRegisterType<QMatDraw>(                uri, 1, 0, "MatDraw");
     qmlRegisterType<QGetPerspectiveTransform>(uri, 1, 0, "GetPerspectiveTransform");
     qmlRegisterType<QWarpPerspective>(        uri, 1, 0, "WarpPerspective");
     qmlRegisterType<QCachedWarpPerspective>(  uri, 1, 0, "CachedWarpPerspective");
+
+    qmlRegisterSingletonType<QDraw>( uri, 1, 0, "Draw", &drawProvider);
 }
 
 

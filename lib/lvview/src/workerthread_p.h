@@ -19,31 +19,31 @@
 
 #include <QObject>
 #include <QCoreApplication>
-#include "live/filterworker.h"
+#include "live/workerthread.h"
 
 namespace lv{
 
-class FilterWorkerPrivate : public QObject{
+class WorkerThreadPrivate : public QObject{
 
     Q_OBJECT
 
 public:
-    explicit FilterWorkerPrivate() : QObject(0){}
-    ~FilterWorkerPrivate(){}
+    explicit WorkerThreadPrivate() : QObject(0){}
+    ~WorkerThreadPrivate(){}
 
     void postNotify(const std::function<void ()>& fnc){
-        QCoreApplication::postEvent(this, new FilterWorker::CallEvent(fnc));
+        QCoreApplication::postEvent(this, new WorkerThread::CallEvent(fnc));
     }
 
-    void postNotify(FilterWorker::CallEvent* evt){
+    void postNotify(WorkerThread::CallEvent* evt){
         QCoreApplication::postEvent(this, evt);
     }
 
     bool event(QEvent *event){
-        if (!dynamic_cast<FilterWorker::CallEvent*>(event))
+        if (!dynamic_cast<WorkerThread::CallEvent*>(event))
             return QObject::event(event);
 
-        FilterWorker::CallEvent* ce = static_cast<FilterWorker::CallEvent*>(event);
+        WorkerThread::CallEvent* ce = static_cast<WorkerThread::CallEvent*>(event);
         ce->callFilter();
         delete ce->readScope();
         return true;

@@ -14,31 +14,26 @@
 **
 ****************************************************************************/
 
-#ifndef QMATDRAW_H
-#define QMATDRAW_H
+#ifndef QDRAW_H
+#define QDRAW_H
 
-#include "qmatdisplay.h"
+#include <QObject>
+#include <QPoint>
+#include <QColor>
+#include <QSize>
+#include "qwritablemat.h"
 
-class QMatDraw : public QMatDisplay{
+class QDraw : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QMat* input READ inputMat WRITE setInputMat NOTIFY inChanged)
 
 public:
-    explicit QMatDraw(QQuickItem *parent = 0);
-    virtual ~QMatDraw();
+    explicit QDraw(QObject *parent = 0);
+    virtual ~QDraw();
 
 public slots:
-    void cleanUp();
     void line(
-            const QPoint& p1,
-            const QPoint& p2,
-            const QColor& color,
-            int thickness = 1,
-            int lineType  = 8,
-            int shift     = 0);
-    void lineOn(
-            QMat* mat,
+            QWritableMat* surface,
             const QPoint& p1,
             const QPoint& p2,
             const QColor& color,
@@ -46,6 +41,7 @@ public slots:
             int lineType  = 8,
             int shift     = 0);
     void rectangle(
+            QWritableMat* surface,
             const QPoint& p1,
             const QPoint& p2,
             const QColor& color,
@@ -53,6 +49,7 @@ public slots:
             int lineType  = 8,
             int shift     = 0);
     void circle(
+            QWritableMat* surface,
             const QPoint& center,
             int radius,
             const QColor& color,
@@ -60,6 +57,7 @@ public slots:
             int lineType  = 8,
             int shift     = 0);
     void ellipse(
+            QWritableMat* surface,
             const QPoint& center,
             const QSize& axes,
             double angle,
@@ -70,40 +68,13 @@ public slots:
             int lineType  = 8,
             int shift     = 0 );
     void fillPoly(
+            QWritableMat* surface,
             const QVariantList& points,
             const QColor& color,
             int lineType = 8,
             int shift    = 0,
             const QPoint& offset = QPoint());
 
-    QMat* inputMat();
-    void setInputMat(QMat* mat);
-
-signals:
-    void inChanged();
-
-private:
-    QMat* m_in;
-
 };
 
-
-inline QMat *QMatDraw::inputMat(){
-    return m_in;
-}
-
-inline void QMatDraw::setInputMat(QMat *mat){
-    if ( mat == 0 )
-        return;
-
-    cv::Mat* matData = mat->cvMat();
-    if ( implicitWidth() != matData->cols || implicitHeight() != matData->rows ){
-        setImplicitWidth(matData->cols);
-        setImplicitHeight(matData->rows);
-    }
-    m_in = mat;
-    cleanUp();
-    emit inChanged();
-}
-
-#endif // QMATDRAW_H
+#endif // QDRAW_H

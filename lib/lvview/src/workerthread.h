@@ -14,21 +14,21 @@
 **
 ****************************************************************************/
 
-#ifndef LVFILTERWORKER_H
-#define LVFILTERWORKER_H
+#ifndef LVWORKERTHREAD_H
+#define LVWORKERTHREAD_H
 
 #include "live/lvviewglobal.h"
-#include "live/filter.h"
+#include "live/act.h"
 #include <QObject>
 #include <QEvent>
 #include <functional>
 
 namespace lv{
 
-class FilterWorkerPrivate;
+class WorkerThreadPrivate;
 
 /// @private
-class LV_VIEW_EXPORT FilterWorker : public QObject{
+class LV_VIEW_EXPORT WorkerThread : public QObject{
 
     Q_OBJECT
 
@@ -63,8 +63,8 @@ public:
     };
 
 public:
-    FilterWorker(QObject* parent = nullptr);
-    virtual ~FilterWorker();
+    WorkerThread(QObject* parent = nullptr);
+    virtual ~WorkerThread();
 
     void postWork(
         const std::function<void()>& fnc,
@@ -80,9 +80,9 @@ public:
 
 private:
     QThread*             m_thread;
-    FilterWorkerPrivate* m_d;
+    WorkerThreadPrivate* m_d;
 };
 
 }// namespace
 
-#endif // LVFILTERWORKER_H
+#endif // LVWORKERTHREAD_H

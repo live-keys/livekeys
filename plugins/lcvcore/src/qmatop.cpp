@@ -119,6 +119,35 @@ QMat *QMatOp::createFromArray(const QVariantList &a, int t){
     return new QMat(m);
 }
 
+QWritableMat *QMatOp::createWritable(const QSize &size, int type, int channels){
+    if ( size.isValid() ){
+        return new QWritableMat(new cv::Mat(size.height(), size.width(), CV_MAKETYPE(type, channels)));
+    }
+
+    lv::Exception e = CREATE_EXCEPTION(lv::Exception, "MatOp: Invalid size specified.", lv::Exception::toCode("qmlsize"));
+    lv::ViewContext::instance().engine()->throwError(&e);
+    return nullptr;
+}
+
+QWritableMat *QMatOp::createWritableFill(const QSize &size, int type, int channels, const QColor &color){
+    if ( size.isValid() ){
+        cv::Mat* m = new cv::Mat(size.height(), size.width(), CV_MAKETYPE(type, channels));
+        m->setTo(toScalar(color));
+
+        return new QWritableMat(m);
+    }
+
+    lv::Exception e = CREATE_EXCEPTION(lv::Exception, "MatOp: Invalid size specified.", lv::Exception::toCode("qmlsize"));
+    lv::ViewContext::instance().engine()->throwError(&e);
+    return nullptr;
+}
+
+QWritableMat *QMatOp::createWritableFromMat(QMat *mat){
+    cv::Mat* m = new cv::Mat;
+    mat->internal().copyTo(*m);
+    return new QWritableMat(m);
+}
+
 void QMatOp::fill(QMat *m, const QColor &color){
     m->internal().setTo(toScalar(color));
 }

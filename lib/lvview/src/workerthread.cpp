@@ -14,22 +14,22 @@
 **
 ****************************************************************************/
 
-#include "filterworker.h"
-#include "filterworker_p.h"
+#include "workerthread.h"
+#include "workerthread_p.h"
 #include <QThread>
 #include <QCoreApplication>
 
 namespace lv{
 
-FilterWorker::FilterWorker(QObject *)
+WorkerThread::WorkerThread(QObject *)
     : QObject(0)
     , m_thread(new QThread)
-    , m_d(new FilterWorkerPrivate)
+    , m_d(new WorkerThreadPrivate)
 {
     moveToThread(m_thread);
 }
 
-FilterWorker::~FilterWorker(){
+WorkerThread::~WorkerThread(){
     m_thread->exit();
     if ( !m_thread->wait(5000) ){
         qCritical("FilterWorker Thread failed to close, forcing quit. This may lead to inconsistent application state.");
@@ -40,30 +40,30 @@ FilterWorker::~FilterWorker(){
     delete m_d;
 }
 
-void FilterWorker::postWork(
+void WorkerThread::postWork(
         const std::function<void ()> &fnc,
         Shared::ReadScope *locker)
 {
-    QCoreApplication::postEvent(this, new FilterWorker::CallEvent(fnc, locker));
+    QCoreApplication::postEvent(this, new WorkerThread::CallEvent(fnc, locker));
 }
 
-void FilterWorker::postWork(
+void WorkerThread::postWork(
         const std::function<void ()> &fnc,
         const std::function<void ()> &cbk,
         Shared::ReadScope *locker)
 {
-    QCoreApplication::postEvent(this, new FilterWorker::CallEvent(fnc, cbk, locker));
+    QCoreApplication::postEvent(this, new WorkerThread::CallEvent(fnc, cbk, locker));
 }
 
-void FilterWorker::start(){
+void WorkerThread::start(){
     m_thread->start();
 }
 
-bool FilterWorker::event(QEvent *ev){
-    if (!dynamic_cast<FilterWorker::CallEvent*>(ev))
+bool WorkerThread::event(QEvent *ev){
+    if (!dynamic_cast<WorkerThread::CallEvent*>(ev))
         return QObject::event(ev);
 
-    FilterWorker::CallEvent* ce = static_cast<FilterWorker::CallEvent*>(ev);
+    WorkerThread::CallEvent* ce = static_cast<WorkerThread::CallEvent*>(ev);
         ce->callFilter();
 
     if ( ce->hasCallback() ){
@@ -77,21 +77,21 @@ bool FilterWorker::event(QEvent *ev){
     return true;
 }
 
-FilterWorker::CallEvent::CallEvent(const std::function<void ()>& fnc, Shared::ReadScope *locker)
+WorkerThread::CallEvent::CallEvent(const std::function<void ()>& fnc, Shared::ReadScope *locker)
     : QEvent(QEvent::None)
     , m_filter(fnc)
     , m_readScope(locker)
 {
 }
 
-FilterWorker::CallEvent::CallEvent(std::function<void ()>&& fnc, Shared::ReadScope *locker)
+WorkerThread::CallEvent::CallEvent(std::function<void ()>&& fnc, Shared::ReadScope *locker)
     : QEvent(QEvent::None)
     , m_filter(std::move(fnc))
     , m_readScope(locker)
 {
 }
 
-FilterWorker::CallEvent::CallEvent(
+WorkerThread::CallEvent::CallEvent(
         const std::function<void ()> &filter,
         const std::function<void ()> &callback,
         Shared::ReadScope *locker)
@@ -102,7 +102,7 @@ FilterWorker::CallEvent::CallEvent(
 {
 }
 
-FilterWorker::CallEvent::CallEvent(
+WorkerThread::CallEvent::CallEvent(
         std::function<void ()> &&filter,
         std::function<void ()> &&callback,
         Shared::ReadScope *locker)
@@ -113,20 +113,20 @@ FilterWorker::CallEvent::CallEvent(
 {
 }
 
-void FilterWorker::CallEvent::callFilter(){
+void WorkerThread::CallEvent::callFilter(){
     m_filter();
 }
 
-Shared::ReadScope *FilterWorker::CallEvent::readScope(){
+Shared::ReadScope *WorkerThread::CallEvent::readScope(){
     return m_readScope;
 }
 
-bool FilterWorker::CallEvent::hasCallback(){
+bool WorkerThread::CallEvent::hasCallback(){
     return m_callback ? true : false;
 }
 
-FilterWorker::CallEvent *FilterWorker::CallEvent::callbackEvent(){
-    return new FilterWorker::CallEvent(m_callback, m_readScope);
+WorkerThread::CallEvent *WorkerThread::CallEvent::callbackEvent(){
+    return new WorkerThread::CallEvent(m_callback, m_readScope);
 }
 
 }// namespace

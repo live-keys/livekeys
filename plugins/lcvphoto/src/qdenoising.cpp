@@ -7,8 +7,8 @@ QDenoising::QDenoising(QObject *parent)
 {
 }
 
-void QDenoising::fastNlMeansAsync(
-        lv::Filter *context,
+void QDenoising::fastNlMeans(
+        lv::Act *context,
         QMat *input,
         float h,
         int templateWindowSize,
@@ -19,10 +19,14 @@ void QDenoising::fastNlMeansAsync(
     if ( rs->reserved() ){
         QMat* m = new QMat;
 
-        context->use(lv::Shared::readScope(context, input),[input, h, templateWindowSize, searchWindowSize, allocator, &m](){
-            cv::fastNlMeansDenoising(input->data(), *m->cvMat(), h, templateWindowSize, searchWindowSize);
-        },[&m](){
-            //TODO: Update context
+        context->use(rs,[input, h, templateWindowSize, searchWindowSize, allocator, &m](){
+            try{
+                cv::fastNlMeansDenoising(input->data(), *m->cvMat(), h, templateWindowSize, searchWindowSize);
+            } catch ( cv::Exception& e ){
+                qCritical("%s", e.msg.c_str());
+            }
+        },[&m, context](){
+            context->setResult(QVariant::fromValue(m));
         });
 
     } else {
@@ -30,8 +34,8 @@ void QDenoising::fastNlMeansAsync(
     }
 }
 
-void QDenoising::fastNlMeansColoredAsync(
-        lv::Filter *context,
+void QDenoising::fastNlMeansColored(
+        lv::Act *context,
         QMat *input,
         float h,
         int templateWindowSize,
@@ -42,10 +46,14 @@ void QDenoising::fastNlMeansColoredAsync(
     if ( rs->reserved() ){
         QMat* m = new QMat;
 
-        context->use(lv::Shared::readScope(context, input),[input, h, templateWindowSize, searchWindowSize, allocator, &m](){
-            cv::fastNlMeansDenoising(input->data(), *m->cvMat(), h, templateWindowSize, searchWindowSize);
-        },[&m](){
-            //TODO: Update context
+        context->use(rs,[input, h, templateWindowSize, searchWindowSize, allocator, &m](){
+            try{
+                cv::fastNlMeansDenoising(input->data(), *m->cvMat(), h, templateWindowSize, searchWindowSize);
+            } catch ( cv::Exception& e ){
+                qCritical("%s", e.msg.c_str());
+            }
+        },[&m, context](){
+            context->setResult(QVariant::fromValue(m));
         });
 
     } else {

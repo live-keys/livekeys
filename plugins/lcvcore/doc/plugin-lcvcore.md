@@ -245,8 +245,6 @@ Parameters:
 {qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Selects a region of interest (ROI)}
 
-Usage available under **samples/core/mat2darray.qml**.
-
 Select a region from an image for further processing. The 'PanAndZoom' component shows how to use a MatRoi to select
 a region from an image, then use a MatRead to read the regions values.
 
@@ -301,18 +299,6 @@ Number of digits to display for each number. Default is 3.
 When enabled, each number cell will be resized to a square shape. This is useful if you want to display pixels
 together with their values. Default is false.
 
-{qmlType:Mat2DArray}
-{qmlInherits:lcvcore#MatDisplay}
-{qmlBrief:Creates a matrix from a given array of values.}
-
-{qmlProperty:Array values}
-
-Array of values in the matrix form
-
-{qmlProperty:lcvcore.Mat.Type}
-
-Type of the matrix
-
 {qmlType:MatBuffer}
 {qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Keeps the previous frame.}
@@ -327,31 +313,6 @@ samples/imgproc/framedifference.qml
 {qmlProperty:Mat input}
 
 Input matrix to store. Whenever a new input is given, the previous one becomes available as output.
-
-{qmlType:MatEmpty}
-{qmlInherits:lcvcore#MatDisplay}
-{qmlBrief:Creates an empty matrix.}
-
-Use this to create an empty matrix by spcecifying the size, background color, number of channels and type. The
-drawing example shows how to create an empty matrix, then use the draw element to draw on its surface.
-
-`imgproc/drawing.qml`
-
-{qmlProperty:Size matSize}
-
-The created matrix size.
-
-{qmlProperty:Color color}
-
-The background color of the created matrix.
-
-{qmlProperty:int channels}
-
-The number of channels of the created matrix.
-
-{qmlProperty:Mat.Type type}
-
-The type of the created matrix.
 
 {qmlType:CamCapture}
 {qmlInherits:lcvcore#MatDisplay}

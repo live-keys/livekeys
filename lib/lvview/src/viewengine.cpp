@@ -20,7 +20,7 @@
 #include "live/incubationcontroller.h"
 
 #include "container.h"
-#include "call.h"
+#include "act.h"
 
 #include <QQmlComponent>
 #include <QQmlIncubator>
@@ -306,7 +306,7 @@ QString ViewEngine::typeAsPropertyMessage(const QString &typeName, const QString
  */
 void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::Container>(uri, 1, 0, "Container");
-    qmlRegisterType<lv::Call>(     uri, 1, 0, "Call");
+    qmlRegisterType<lv::Act>(      uri, 1, 0, "Act");
 }
 
 /**

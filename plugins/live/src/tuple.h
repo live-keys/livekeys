@@ -5,7 +5,7 @@
 #include <QQmlParserStatus>
 #include <QQmlProperty>
 #include "live/shared.h"
-#include "live/filter.h"
+#include "live/act.h"
 #include "live/mlnode.h"
 #include "live/viewengine.h"
 
@@ -31,7 +31,7 @@ public:
     void classBegin(){}
     void componentComplete();
 
-    bool reserveForRead(Shared::ReadScope* locker, Filter* filter);
+    bool reserveForRead(Shared::ReadScope* locker, Act* filter);
 
     int totalProperties();
     QHash<QByteArray, int>::ConstIterator propertiesBegin();

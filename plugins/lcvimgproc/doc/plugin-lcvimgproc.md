@@ -724,108 +724,47 @@ See also [CopyMakeBorder::BorderType](#BorderType)
   Border value if borderType==CopyMakeBorder.BORDER_CONSTANT.
   See also [CopyMakeBorder::BorderType]()
 
-{qmlType:MatDraw}
-{qmlInherits:lcvcore#MatDisplay}
-{qmlBrief:Provides matrix drawing operations.}
+{qmlType:Draw}
+{qmlInherits:external.QtQml#QtQObject}
+{qmlBrief:Singleton. Provides matrix drawing operations.}
 
-  Provides the basic set of functions needed in order to draw on a matrix.
+Provides the basic set of functions needed in order to draw on a matrix.
 
 `imgproc/drawing.qml`
 
-{qmlProperty:Mat input}
 
-  Input surface to draw on.
-
-{qmlMethod:MatDraw cleanUp()}
-
-  Cleans up the matrix surface to it's initial value.
-
-
-{qmlMethod:MatDraw line(Point p1, Point p2, Color color, int thickness, int lineType, int shift)}
+{qmlMethod:line(WritableMat m, Point p1, Point p2, Color color, int thickness, int lineType, int shift)}
 
   Draw a line from point [p1]() to point [p2]() of a specified [color]() and [thickness](). The [lineType]() can be
   4 ( 4-connected line ), 8 (8-connected line, also the default) and -1 (antialiased line). The shift is the number
   of fractional bits in the point coordinates.
 
-{qmlBrief:Draws a line from point [p1]() to point [p2]().}
-
-  Parameters :
-  * [color]()
-  * [thickness]()
-  * [lineType]()
-  * [shift]()
-  See also [MatDraw::line]()
-
-{qmlMethod:MatDraw rectangle(Point p1, Point p2, Color color, int thickness, int lineType, int shift)}
+{qmlMethod:rectangle(WritableMat m, Point p1, Point p2, Color color, int thickness, int lineType, int shift)}
 
   Draw a rectangle from point [p1]() to point [p2]() of a specified [color]() and [thickness](). The [lineType]() can be
   4 ( 4-connected line ), 8 (8-connected line, also the default) and -1 (antialiased line). The shift is the number
   of fractional bits in the point coordinates.
 
-{qmlBrief:Draws a rectangle point [p1]() to point [p2]().}
-
-  Parameters :
-  * [color]()
-  * [thickness]()
-  * [lineType]()
-  * [shift]()
-  See also [MatDraw::rectangle]()
-
-{qmlMethod:MatDraw circle(Point center, int radius, Color color, int thickness, int lineType, int shift)}
+{qmlMethod:circle(WritableMat m, Point center, int radius, Color color, int thickness, int lineType, int shift)}
 
   Draw a circle by specifying its [center point](), [radius](), [color]() and [thickness](). For the lineType and shift, see
   the lin method.
 
-  See also [MatDraw::line]()
-
-{qmlBrief:Draws a circle in [center]() with [radius]().}
-
-  Parameters :
-  * [color]()
-  * [thickness]()
-  * [lineType]()
-  * [shift]()
-
-{qmlMethod:MatDraw ellipse(Point center, Size axes, real angle, real startAngle, real endAngle, Color color,
+{qmlMethod:ellipse(WritableMat m, Point center, Size axes, real angle, real startAngle, real endAngle, Color color,
   int thickness, int lineType, int shift)}
 
   Draw an ellipse in the [center]() point, with its [axes]() (half of the size of the ellipse main axes), rotation
   [angle]() in degrees, [startAngle]() and [endAngle]() of the elliptic arc in degrees and [color](). For the lineType and
   shift see the line method.
 
-  See also [MatDraw::line]()
-
 {qmlBrief:Draws an ellipse.}
 
-  Parameters :
-  * [center]()
-  * [axes]()
-  * [angle]()
-  * [startAngle]()
-  * [endAngle]()
-  * [color]()
-  * [thickness]()
-  * [lineType]()
-  * [shift]()
-
-{qmlMethod:MatDraw fillPoly(variant points, Color color, int lineType, int shift, Point offset)}
+{qmlMethod:fillPoly(WritableMat m, variant points, Color color, int lineType, int shift, Point offset)}
 
   Fills the area bounded by one or more polygons. The [points]() is the array of polygons where each polygon is
   represented by an array of points, the [color]() is the polygons color, the [lineType] is the type of the polygon
   boundaries and the shift is the number of fractional bits in the vertex coordinates. The offset is an optional offset
   of all points of the contours.
-
-  See also [MatDraw::line]()
-
-{qmlBrief:Fills an area bounded by one or more polygons.}
-
-  Parameters :
-  * [points]()
-  * [color]()
-  * [lineType]()
-  * [shift]()
-  * [offset]()
-
 
 {qmlType:GetPerspectiveTransform}
 {qmlInherits:lcvcore#MatFilter}

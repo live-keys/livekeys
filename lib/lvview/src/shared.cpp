@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "live/shared.h"
-#include "live/filter.h"
+#include "live/act.h"
 
 namespace lv{
 
@@ -30,7 +30,7 @@ Shared::~Shared(){
     delete m_readers;
 }
 
-bool Shared::read(Filter *call, Shared *data){
+bool Shared::read(Act *call, Shared *data){
     if ( !Shared::isValid(data) )
         return false;
 
@@ -40,7 +40,7 @@ bool Shared::read(Filter *call, Shared *data){
     return true;
 }
 
-void Shared::release(Filter *call, Shared *data){
+void Shared::release(Act *call, Shared *data){
     if ( data && data->m_readers ){
         data->m_readers->reserved.remove(call);
         if ( data->m_readers->observer )

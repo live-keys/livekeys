@@ -1,6 +1,6 @@
 #include "tcpline.h"
 #include "tcplinesocket.h"
-#include "live/filter.h"
+#include "live/act.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
@@ -19,7 +19,7 @@
 namespace lv{
 
 TcpLine::TcpLine(QObject *parent)
-    : QObject(parent)
+    : lv::Act(parent)
     , m_source(0)
     , m_input(0)
     , m_output(0)
