@@ -611,11 +611,6 @@ ApplicationWindow{
         }
     }
 
-    Component{
-        id: fragmentDocumentFactory
-        DocumentFragment{}
-    }
-
     Item{
         id: editSpace
 
