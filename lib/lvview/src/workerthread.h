@@ -33,6 +33,7 @@ class LV_VIEW_EXPORT WorkerThread : public QObject{
     Q_OBJECT
 
 public:
+    /// @private
     class CallEvent : public QEvent{
 
     public:

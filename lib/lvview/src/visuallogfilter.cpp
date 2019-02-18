@@ -285,7 +285,6 @@ void VisualLogFilter::setPrefix(QJSValue prefix){
     refilter();
 }
 
-/** The prefix we're filtering by */
 QJSValue VisualLogFilter::prefix() const{
     return m_prefix.toJs(ViewContext::instance().engine()->engine());
 }

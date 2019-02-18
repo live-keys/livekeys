@@ -27,6 +27,7 @@ namespace lv{
 class ProjectEntry;
 class ProjectFile;
 
+/// @private
 class ProjectFileModel : public QAbstractItemModel{
 
     Q_OBJECT

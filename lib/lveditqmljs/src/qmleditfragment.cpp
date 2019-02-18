@@ -113,8 +113,13 @@ void QmlEditFragment::removePalette(CodePalette *palette){
             m_palettes.erase(it);
             if ( bindingPalette() != palette )
                 palette->deleteLater();
-            return;
+            break;
         }
+    }
+
+    if (m_palettes.size() == 0)
+    {
+        emit paletteListEmpty();
     }
 }
 

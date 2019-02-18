@@ -16,18 +16,17 @@ Column{
 
             if ( p && p.objectName === "paletteContainer" )
                 p.destroy()
+        }
 
-            if ( editingFragment.totalPalettes() === 1 ){ // no more palettes
-                var box = paletteGroup.parent
-                if ( editingFragment.bindingPalette() ){
-                    if ( box.objectName === 'editorBox' ){
-                        box.destroy()
-                    }
-                } else {
-                    if ( box && box.objectName === 'editorBox' ){
-                        codeHandler.removeConnection(editingFragment)
-                        codeHandler.removeEditFrame(box);
-                    }
+        onPaletteListEmpty: {
+            var box = paletteGroup.parent
+            if ( editingFragment.bindingPalette() ){
+                if ( box.objectName === 'editorBox' ){
+                    box.destroy()
+                }
+            } else {
+                if ( box && box.objectName === 'editorBox' ){
+                    codeHandler.removeConnection(editingFragment)
                 }
             }
 

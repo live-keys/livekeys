@@ -30,6 +30,7 @@ class ExceptionPrivate;
 class LV_BASE_EXPORT Exception : public std::exception{
 
 public:
+    /** unsigned long long */
     typedef unsigned long long Code;
 
 public:
@@ -70,6 +71,7 @@ private:
     ExceptionPrivate* m_d;
 };
 
+/** Create exception of given type */
 template<typename T> T Exception::create(const std::string &message,
         Code code,
         const std::string &file,

@@ -82,6 +82,12 @@ DocumentHandler::~DocumentHandler(){
     delete m_codeHandler;
 }
 
+/** Set the target doc */
+void DocumentHandler::setTarget(QTextDocument *target)
+{
+    m_targetDoc = target;
+}
+
 /**
  * \brief TextEdit setter
  *

@@ -36,7 +36,9 @@ public:
         /** Default constructor */
         Reference(const std::string& n, Version v) : name(n), version(v){}
 
+        /** Reference name */
         std::string name;
+        /** Reference version */
         Version     version;
     };
 
@@ -70,12 +72,17 @@ public:
 
         FlagResult compareFlags(const Library& other);
 
+        /** Package name */
         std::string            name;
+        /** Package path */
         std::string            path;
+        /** Package version */
         Version                version;
+        /** Package flags */
         std::list<std::string> flags;
     };
 
+    /** Default name of the package file */
     static const char* fileName;
 
 public:
@@ -92,6 +99,7 @@ public:
     const std::string& extension() const;
     std::string extensionAbsolutePath() const;
     bool hasExtension() const;
+    /** Returns a map of dependencies with string keys */
     const std::map<std::string, Package::Reference*>& dependencies() const;
     const std::map<std::string, Package::Library*>& libraries() const;
 

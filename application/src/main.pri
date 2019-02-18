@@ -11,7 +11,8 @@ HEADERS += \
     $$PWD/livecvscript.h \
     $$PWD/commands.h \
     $$PWD/environment.h \
-    $$PWD/commandsmodel.h
+    $$PWD/commandsmodel.h \
+    $$PWD/qmlengineinterceptor.h
 
 SOURCES += \
     $$PWD/livecv.cpp \
@@ -20,4 +21,5 @@ SOURCES += \
     $$PWD/main.cpp \
     $$PWD/commands.cpp \
     $$PWD/environment.cpp \
-    $$PWD/commandsmodel.cpp
+    $$PWD/commandsmodel.cpp \
+    $$PWD/qmlengineinterceptor.cpp

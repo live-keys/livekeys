@@ -18,9 +18,13 @@ public:
     /** Blank constructor */
     Context(){}
 
+    /** Package graph */
     PackageGraph* packageGraph;
+    /** Packages dependent on the current one*/
     std::list<Package::Ptr> dependents;
+    /** Dependencies of the package */
     std::list<Package::Ptr> dependencies;
+    /** Plugins */
     std::map<std::string, Plugin::Ptr> plugins;
 
 private:

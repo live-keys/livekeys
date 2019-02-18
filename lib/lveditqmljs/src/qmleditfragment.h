@@ -92,6 +92,7 @@ signals:
     void visualParentChanged();
     void aboutToRemovePalette(lv::CodePalette* palette);
     void aboutToBeRemoved();
+    void paletteListEmpty();
 
 private:
     QmlDeclaration::Ptr  m_declaration;

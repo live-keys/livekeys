@@ -44,7 +44,7 @@
 #include "live/codeqmlhandler.h"
 #include "live/documentqmlinfo.h"
 #include "live/plugininfoextractor.h"
-#include "live/qmlengineinterceptor.h"
+#include "qmlengineinterceptor.h"
 
 #include <QUrl>
 #include <QFileInfo>
@@ -190,7 +190,7 @@ void LiveCV::loadQml(const QUrl &url){
 void LiveCV::loadInternals(){
     loadInternalPackages();
     loadInternalPlugins();
-    QmlEngineInterceptor::interceptEngine(engine(), m_packageGraph);
+    QmlEngineInterceptor::interceptEngine(engine(), m_packageGraph, m_project);
 }
 
 void LiveCV::loadInternalPlugins(){
