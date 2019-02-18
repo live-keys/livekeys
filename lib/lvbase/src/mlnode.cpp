@@ -1445,7 +1445,7 @@ int MLNode::asInt() const{
 /**
  * \brief Returns the MLNode value as bool.
  *
- * If not the appropriate type, an exception is thrown.
+ * Throws exception if node is not of bool type.
  */
 bool MLNode::asBool() const{
     if ( m_type != Type::Boolean )
@@ -1457,7 +1457,7 @@ bool MLNode::asBool() const{
 /**
  * \brief Returns the MLNode value as float.
  *
- * If not the appropriate type, an exception is thrown.
+ * Throws exception if node is not of float type.
  */
 MLNode::FloatType MLNode::asFloat() const{
     if ( m_type != Type::Float )
@@ -1469,7 +1469,7 @@ MLNode::FloatType MLNode::asFloat() const{
 /**
  * \brief Returns the MLNode value as string.
  *
- * If not the appropriate type, an exception is thrown.
+ * Throws exception if node is not of string type.
  */
 const MLNode::StringType &MLNode::asString() const{
     if ( m_type != Type::String )

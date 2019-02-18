@@ -141,9 +141,20 @@ Should be between 0 and 10
 {qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Stiches a set of images toghether based on the list of matrixes and a set of parameters}
 
+{qmlProperty:lcvcore#MatList input}
+
+Matrix input list to the Stitcher.
+
+{qmlProperty:Object params}
+
+Input parameters:
+
+ * `mode` : `Stitcher.Panorama` or `Stitcher.Scans`
+ * `tryUseGpu` : `true` for gpu usage, `false` otherwise
+
 
 {qmlType:AlignMTB}
-{qmlInherits:lcvcore#MatFilter}
+{qmlInherits:MatFilter}
 {qmlBrief:Takes a list of inputs with a set of parameters and it converts them}
 
 Params:
@@ -157,13 +168,14 @@ Params:
 {qmlBrief:Calibrates the lightness of the image in regard to exsposure setting the image was shot.}
 
 {qmlProperty:QMatList input}
-{qmlBrief:List of images}
+
+List of images
 
 {qmlProperty:QList times}
-{qmlBrief:Exposure time}
+Exposure time
 
 {qmlProperty:QVariantMap params}
-{qmlBrief:Calibration parameters}
+Calibration parameters
 
 Params:
 

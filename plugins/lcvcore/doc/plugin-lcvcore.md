@@ -46,13 +46,13 @@ Matrix type.
 The matrix can be one of the following:
 
 
- * Mat.CV8U
- * Mat.CV8S
- * Mat.CV16U
- * Mat.CV16S
- * Mat.CV32S
- * Mat.CV32F
- * Mat.CV64F
+ * `Mat.CV8U`
+ * `Mat.CV8S`
+ * `Mat.CV16U`
+ * `Mat.CV16S`
+ * `Mat.CV32S`
+ * `Mat.CV32F`
+ * `Mat.CV64F`
 
 {qmlMethod:ByteArray buffer()}
 
@@ -185,7 +185,7 @@ ImRead{
 The path to the file to load.
 
 
-{qmlProperty:enumaration isColor}
+{qmlProperty:ImRead.Load isColor}
 
 Color type of the image
 
@@ -201,9 +201,9 @@ Can be one of the following:
 {qmlInherits:external.QtQml#QtObject}
 {qmlBrief:Saves an image to a specified file.}
 
-Parameters:	
+{qmlProperty:Object params}
 
-* params
+Parameters can be one of the following, also dependent on the format the image is saved in:
 
 ```
 {
@@ -214,12 +214,16 @@ Parameters:
 
 ```
 
+{qmlMethod:saveImage(string file, Mat image)}
+
+Save the `image` to a `file` path.
+
 {qmlType:MatDisplay}
 {qmlInherits:external.QtQuick#Item}
 {qmlBrief: Simple matrix display element.}
 
-  This type serves as a base for all other live cv types that require displaying a matrix, which is available in its
-  output property. You can choose wether smoothing occurs when scaling the image for display by enabling linear
+  This type serves as a base for all other types that want to display a matrix, exposed in its
+  `output` property. You can choose wether smoothing occurs when scaling the image by enabling linear
   filtering.
 
 {qmlProperty: Mat MatDisplay output}
@@ -228,14 +232,15 @@ Parameters:
 
 {qmlProperty: bool MatDisplay linearFilter}
 
-  If set to true, linear filtering will occur when scaling the image on the screen. Default value is true.
+  If set to `true`, linear filtering will occur when scaling the image on the screen. Default value is `true`.
 
 {qmlType:MatFilter}
 {qmlInherits:lcvcore#MatDisplay}
-{qmlBrief:Base filter images.}
+{qmlBrief:Base filter for processing images.}
 
-  By inheriting the MatDisplay type, and by adding an input element and a process of transforming it into an output
-  element to be displayed on screen is considered a **filter type**.
+  Inherits the `MatDisplay` type in order to display a `Mat` through it's `output` property, which is the result of
+  processing the `input`. This class doesn't have any processing implemented, however it serves as a base type for most
+  transformations within lcv plugins.
 
 {qmlProperty:Mat input}
 
@@ -245,10 +250,10 @@ Parameters:
 {qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Selects a region of interest (ROI)}
 
-Select a region from an image for further processing. The 'PanAndZoom' component shows how to use a MatRoi to select
+Selects a region from an image for further processing. The 'PanAndZoom' component shows how to use a MatRoi to select
 a region from an image, then use a MatRead to read the regions values.
 
- `imgproc/panandzoom.qml`
+See __*samples/imgproc/panandzoom.qml*__
 
 {qmlProperty:int regionX}
 
@@ -270,13 +275,12 @@ The height of the seleted region.
 {qmlInherits:external.QtQuick#Item}
 {qmlBrief:Displays a matrixes values in text form}
 
-This element becomes very useful when debugging result images from algorithms. It can be used in combination
-with the MatRoi element in order to create a pan-type interaction over a zoomed area in an image. The sample in
-imgproc/panandzoom.qml uses this component.
+Reads an image's values and displays them on the screen in the form of a grid. See the `PanAndZoom` component for more
+details.
 
- `imgproc/panandzoom.qml`
+ See __*samples/imgproc/panandzoom.qml*__
 
-An alternative to the above example is to use a flickable area and use the MatRead over a whole image.
+An alternative to the given example is to use a flickable area and use the `MatRead` over a whole image.
 
 {qmlProperty:int input}
 
@@ -306,9 +310,7 @@ together with their values. Default is false.
 The MatBuffer type is useful when it comes to video playback and you need to keep reference to a previous frame. The
 buffer stores the frame for next usage, so by it's output you actually get the last frame that was passed around in
 the application. It comes in handy in frame differences, as in the example under
-samples/imgproc/framedifference.qml
-
- `imgproc/framedifference.qml`
+__*samples/imgproc/framedifference.qml*__
 
 {qmlProperty:Mat input}
 
@@ -318,9 +320,7 @@ Input matrix to store. Whenever a new input is given, the previous one becomes a
 {qmlInherits:lcvcore#MatDisplay}
 {qmlBrief:Captures frames from a connected camera. This is a _**static item**_.}
 
-An example of how to use the cam capture can be found in _**samples/core/camcapture.qml**_ :
-
- `core/camcapture.qml`
+An example of how to use the cam capture can be found in _**samples/core/camcapture.qml**_.
 
 {qmlProperty:string Device}
 
@@ -343,8 +343,8 @@ This is an overloaded method for CamCapture staticLoad
 
 {qmlMethod:CamCapture staticLoad(string device,size resolution)}
 
-Loads the CamCaptures state. [device]() can be either a link or a device number. The device number should be given
-in string form. Usually a default webcam can be accesed by the '0'. [Resolution]() is optional and stores the
+Loads the CamCaptures state, where `device` can be either a link or a device number. The device number should be given
+in string form. Usually a default webcam can be accesed by '0'. `Resolution` is optional and stores the
 resolution at which to open the capture.
 
 {qmlProperty:bool paused}
@@ -358,23 +358,23 @@ This property can be set to true or false, depending if you want to freeze or co
 
 The VideoCapture constantly grabes frames from a video file. The frames are captured at a speed equal to the video's
 fps, but that is not necessarily to be considered as an absolute value. The speed can be altered manually by
-configuring the fps parameter. A progress bar and a play/pause button can be attached by using the VideoControls type
-in the lcvcontrols module.
+configuring the fps parameter. A progress bar and a play/pause button can be attached by using the
+[VideoControls](qml:lcvcore#VideoControls) type.
 
 The first example in core/videocapture_simple.qml shows a simple video frame grabber, while the second one in
 core/videocapture_controls.qml shows the grabber with the VideoControls attached.
 
-* ```core/videocapture_simple.qml```
+* __*samples/core/videocapture_simple.qml*__
 
-* ```core/videocapture_controls.qml```
+* __*samples/core/videocapture_controls.qml*__
 
-{qmlProperty:Mat VideoCapture output}
+{qmlProperty:Mat output}
 
 Output frame.
 
 {qmlProperty:bool linearFilter}
 
-Perform linear filtering when scaling the matrix to be displayed. The default value is true.
+Perform linear filtering when scaling the matrix to be displayed. The default value is `true`.
 
 {qmlProperty:float fps}
 
@@ -383,14 +383,14 @@ capture playback.
 
 {qmlProperty:bool loop}
 
-If enabled, the video will start over once it's reach the end. By default, this value is disabled.
+If enabled, the video will start over once it's reach the end. By default, this value is `false`.
 
 {qmlProperty:int CurrentFrame}
 
 This property holds the current frame number. If you set this manually, you perform a seek to the specified frame
 number in the video.
 
-{qmlMethod:VideoCapture seek(int frame)}
+{qmlMethod:seek(int frame)}
 
 Perform a seek to the specified [frame]() number.
 
@@ -398,17 +398,17 @@ Perform a seek to the specified [frame]() number.
 
 This property holds the url to the file thats opened.
 
-{qmlMethod:VideoCapture staticOpen(string file)}
+{qmlMethod:staticOpen(string file)}
 
 This is an overloaded method for VideoCapture staticLoad
 
-{qmlMethod:VideoCapture staticLoad(string file)}
+{qmlMethod:staticLoad(string file)}
 
-Loads the VideoCapture state. [file]() is a link to the file to be opened. This also acts a a state identifier.
+Loads the VideoCapture state. `file` is a link to the file to be opened. This also acts a a state identifier.
 
 {qmlProperty:bool paused}
 
-Pause / play the video by setting this property to true or false.
+Pause or play the video.
 
 {qmlType:AlphaMerge}
 {qmlInherits:lcvcore#MatFilter}
@@ -419,7 +419,7 @@ or mask that is loaded within the mask property of this class.
 
 In the sample at samples/imgproc/alphamerge.qml a loaded image is merged with a drawn circle.
 
- `imgproc/alphamerge.qml`
+See **samples/imgproc/alphamerge.qml**
 
 {qmlProperty:Mat mask}
 
@@ -430,48 +430,63 @@ Mask to merge the input with.
 {qmlBrief:Performs an absolute difference between two matrixes.}
 
 The example in **samples/imgproc/framedifference.qml** shows differentiating two consecutive frames in a video to
-calculate the motion. It uses a MatBuffer to store the previous frame :
+calculate the motion. It uses a MatBuffer to store the previous frame:
 
- `quotefile imgproc/framedifference.qml`
+**imgproc/framedifference.qml**
 
 {qmlProperty:Mat input2}
 
 Second input for the subtraction.
 
 {qmlType:MatList}
+{qmlInherits:external.QtModels#AbstractListModel}
 {qmlBrief:Matrix list that can be used as a model.}
 
-* qmlMethod appendMat(Mat mat) appends a matrix to the list
-* qmlMethod removeMat(Mat mat) removes the matrix mat from the list
-* qmlMethod removeAt(int index) removes matrix at index
-* qmlMethod Mat at(int index) returns the matrix at index
-* qmlMethod int size() returns the total matrixes in the list
+{qmlMethod:appendMat(Mat mat)}
+
+Appends a matrix to the list.
+
+{qmlMethod:removeMat(Mat mat)}
+
+Removes the matrix from the list.
+
+{qmlMethod:removeAt(int index)}
+
+Removes the matrix at the given index.
+
+{qmlMethod:Mat at(int index)}
+
+Removes the matrix at the given index.
+
+{qmlMethod:Mat at(int index)}
+
+Returns the matrix at the given index.
+
+{qmlMethod:int size()}
+
+Returns the total matrixes in the list.
 
 {qmlType:MatLoader}
+{qmlInherits:external.QtQuick#item}
 {qmlBrief:Static matrix loader}
 
-qmlMethod Mat staticLoad(string id, Object options)
+{qmlMethod:Mat staticLoad(string id, Object options)}
+
 Loads the matrix statically, where id is the static id used to capture the matrix, and options can be:
 
-```
-{
- 'w' : // width of the matrix
- 'h' : // height of the matrix
- 'ch' : // no of channels of the matrix
- 'type' : // matrix type
- 'color' : // default background color
-}
-
-```
+ * `w` : width of the matrix
+ * `h` : height of the matrix
+ * `ch` : no of channels for the matrix
+ * `type` : matrix type
+ * `color` : background color
 
 {qmlType:ImageFile}
 {qmlInherits:lcvcore#MatDisplay}
-{qmlBrief:Read an image from the hard drive into a lcvcore.Mat structure.}
+{qmlBrief:Read an image from the hard drive into a Mat structure.}
 
 {qmlProperty:string file}
 
 The path to the file to load.
-
 
 {qmlProperty:enumaration isColor}
 
@@ -485,7 +500,6 @@ Can be one of the following:
  * ```ImRead.CV_LOAD_IMAGE_ANYDEPTH```
  * ```ImRead.CV_LOAD_IMAGE_ANYCOLOR```
 
-
 {qmlProperty:monitor}
 
 Monitors the file for changes and reloads the image if the file has changed.
@@ -496,11 +510,11 @@ Monitors the file for changes and reloads the image if the file has changed.
 
 {qmlProperty:input2}
 
-Mat to overlap with
+Mat to overlap with.
 
 {qmlProperty:mask}
 
-Mask used when overlaping
+Mask used when overlaping.
 
 {qmlType:ItemCapture}
 {qmlInherits:lcvcore#MatDisplay}
@@ -510,13 +524,15 @@ Available through the `output` property from `MatDisplay`.
 
 {qmlProperty:Item captureSource}
 
-Item to capture screen from
+Item to capture screen from.
 
 {qmlType:VideoControls}
-{qmlBrief:Video controls provides a play/pause button and a seekbar for a `lcvcore/VideoCapture`}
+{qmlInherits:external.QtQuick#Rectangle}
+{qmlBrief:Video controls provides a play/pause button and a seekbar for `VideoCapture`}
 
 {qmlProperty:VideoCapture videoCapture}
-{qmlBrief: receives the actual videoCapture object}
+
+The actual videoCapture object
 
 {qmlSignal:playPauseTriggered(bool paused)}
 
@@ -531,7 +547,7 @@ Triggered when a seek occurred
 {qmlInherits:external.QtQuick#Item}
 {qmlBrief:Writes video to a file. This is a _**static item**_.}
 
-{qmlProperty:lcvcore#Mat input)
+{qmlProperty:Mat input}
 
 Input matrix to write. Whenever the input is set, the matrix will be written to a file.
 
@@ -541,7 +557,7 @@ Number of frames written. This is a read only property.
 
 {qmlMethod:staticLoad(Object parameters)}
 
-Loads the static object. where parameters is an object with the following keys:
+Loads the static object, where parameters is an object with the following keys:
 
  * `filename`: name of the file to write into
  * `fourcc` : a string based sequence of characters that describes the codec to be
@@ -553,7 +569,7 @@ Loads the static object. where parameters is an object with the following keys:
  frames. Default is true.
 
 {qmlType:DrawHistogram}
-{qmlInherits:QtQuick#Item}
+{qmlInherits:external.QtQuick#Item}
 {qmlBrief:Draws a histogram given from a set of points}
 
 Example:
@@ -590,11 +606,11 @@ List of colors associated with the indexes of each histogram graph.
 
 List of graphs, each one consisting of a list of values for that graph.
 
-{qmlProperty:real maxValue)
+{qmlProperty:real maxValue}
 
 Max value shown in the histogram
 
-{qmlProperty:lcvimgproc#DrawHistogram-RenderType render)
+{qmlProperty:DrawHistogram.RenderType render}
 
 Render type of this histogram
 
@@ -604,8 +620,7 @@ Assigns the values from a list of integers.
 
 {qmlMethod:setValuesFromIntListAt(list values, int index))
 
-Assigns only the index specified values from the given list.
-
+Assigns values from the given list only at the specified index.
 
 {qmlType:ColorHistogram}
 {qmlInherits:external.QtQuick#Item}
@@ -627,7 +642,7 @@ Input matrix to calculate the histogram for.
 
 {qmlProperty:Mat output}
 
-Output matrix containing the drawn histogram
+Output matrix containing the drawn histogram.
 
 {qmlProperty:bool fill}
 
