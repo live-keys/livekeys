@@ -1,12 +1,13 @@
 #ifndef LVMEMORY_H
 #define LVMEMORY_H
 
-#include <QObject>
+#include "live/lvviewglobal.h"
 #include "live/shared.h"
+#include <QObject>
 
 namespace lv{
 
-class Memory : public QObject{
+class LV_VIEW_EXPORT Memory : public QObject{
 
     Q_OBJECT
 
