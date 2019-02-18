@@ -33,7 +33,9 @@ class LV_VIEW_EXPORT VisualLogNetworkSender : public QObject, public VisualLog::
     Q_OBJECT
 
 public:
+    /** Number of milliseconds before the timer timeouts */
     static int RECONNECT_TIMEOUT;
+    /** Size of the message queue */
     static int MESSAGE_QUEUE_SIZE;
 
 public:

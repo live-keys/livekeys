@@ -116,6 +116,7 @@ inline void LiveExtension::setIdentifiers(const std::string &name, const std::st
     m_path = path;
 }
 
+/** Set given intercept menu */
 inline void LiveExtension::setInterceptMenu(QJSValue interceptMenu){
     m_interceptMenu = interceptMenu;
     emit interceptMenuChanged();

@@ -23,6 +23,7 @@
 
 namespace lv{
 
+/** Capture frames up to a given maximum number */
 StackTrace::Ptr StackTrace::capture(int maxFrames){
     StackTrace::Ptr dest(new StackTrace);
 

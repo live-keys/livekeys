@@ -46,7 +46,6 @@ ApplicationWindow{
         activePane : null
         activeItem : null
         navEditor: null
-        wasLiveCoding: false
         codingMode: 0
         prevWindowState: 2
     }
@@ -74,7 +73,16 @@ ApplicationWindow{
         }
     }
 
-
+    function createObjectForActive(){
+        var documentList = project.documentModel.listUnsavedDocuments()
+        livecv.engine.createObjectAsync(
+            project.active.content,
+            runSpace,
+            project.active.file.pathUrl(),
+            project.active,
+            !(documentList.size === 1 && documentList[0] === project.active)
+        );
+    }
 
     Component.onCompleted: {
         livecv.commands.add(root, {
@@ -227,13 +235,7 @@ ApplicationWindow{
             onReleased: compileButtonShape.state = "Released"
             onClicked: {
                 if (project.active){
-                    livecv.engine.createObjectAsync(
-                        project.active.content,
-                        livecv.windowControls().runSpace,
-                        project.active.file.pathUrl(),
-                        project.active,
-                        true
-                    );
+                    createObjectForActive()
                 }
             }
         }
@@ -326,13 +328,7 @@ ApplicationWindow{
                     modeContainer.visible = false
                     modeImage.source = liveImage.source
                     modeImage.anchors.rightMargin = liveImage.anchors.rightMargin
-                    livecv.engine.createObjectAsync(
-                        project.active.content,
-                        runSpace,
-                        project.active.file.pathUrl(),
-                        project.active,
-                        true
-                    );
+                    createObjectForActive()
                 }
             }
         }
@@ -370,7 +366,6 @@ ApplicationWindow{
                     modeContainer.visible = false
                     modeImage.source = onSaveImage.source
                     modeImage.anchors.rightMargin = onSaveImage.anchors.rightMargin
-                    controls.wasLiveCoding = false
                 }
             }
         }
@@ -408,7 +403,6 @@ ApplicationWindow{
                     modeContainer.visible = false
                     modeImage.source = disabledImage.source
                     modeImage.anchors.rightMargin = disabledImage.anchors.rightMargin
-                    controls.wasLiveCoding = false
                 }
             }
         }
@@ -425,13 +419,11 @@ ApplicationWindow{
                 project.openProject(fileOpenDialog.fileUrl)
                 if ( project.active ) {
                     projectView.focusEditor.document = project.active
-                    projectView.maintainCodingMode()
                 }
             } else if ( project.isFileInProject(fileOpenDialog.fileUrl ) ) {
                 var doc = project.openFile(fileOpenDialog.fileUrl, ProjectDocument.Edit)
                 if ( doc ) {
                     projectView.focusEditor.document = doc
-                    projectView.maintainCodingMode()
                 }
             } else {
                 var fileUrl = fileOpenDialog.fileUrl
@@ -445,7 +437,6 @@ ApplicationWindow{
                             function(){
                                 project.openProject(projectUrl)
                                 projectView.focusEditor.document = project.active
-                                projectView.maintainCodingMode()
                             }
                         )
                         messageBox.close()
@@ -460,7 +451,6 @@ ApplicationWindow{
                             function(){
                                 project.openProject(projectUrl)
                                 projectView.focusEditor.document = project.active
-                                projectView.maintainCodingMode()
                             }
                         )
                         messageBox.close()
@@ -488,7 +478,6 @@ ApplicationWindow{
             project.openProject(dirOpenDialog.fileUrl)
             if ( project.active ) {
                 projectView.focusEditor.document = project.active
-                projectView.maintainCodingMode()
             }
         }
         Component.onCompleted: {
@@ -528,18 +517,10 @@ ApplicationWindow{
                 if ( !project.isDirProject() ){
                     project.openProject(fileSaveDialog.fileUrl)
                     projectView.focusEditor.document = project.active
-                    projectView.maintainCodingMode()
                 } else if ( project.isFileInProject(fileSaveDialog.fileUrl ) ){
                     projectView.focusEditor.document = project.openFile(fileSaveDialog.fileUrl, ProjectDocument.Edit)
-                    projectView.maintainCodingMode()
                     if ( project.active && project.active !== projectView.focusEditor.document && controls.codingMode !== 2 /* compiling isn't disabled */){
-                        engine.createObjectAsync(
-                            project.active.content,
-                            runSpace,
-                            project.active.file.pathUrl(),
-                            project.active,
-                            true
-                        );
+                        createObjectForActive()
                     }
                 } else {
                     var fileUrl = fileSaveDialog.fileUrl
@@ -553,7 +534,6 @@ ApplicationWindow{
                                 function(){
                                     project.openProject(projectUrl);
                                     projectView.focusEditor.document = project.active
-                                    projectView.maintainCodingMode()
                                 }
                             )
                             messageBox.close()
@@ -568,7 +548,6 @@ ApplicationWindow{
                                 function(){
                                     project.openProject(projectUrl)
                                     projectView.focusEditor.document = project.active
-                                    projectView.maintainCodingMode()
                                 }
                             )
                             messageBox.close()
@@ -748,9 +727,6 @@ ApplicationWindow{
 
                     var upY = startY - editorBoxComponent.height
                     var downY = startY + aroundRectangle.height + 5
-
-                    // console.log("upY", upY)
-                    // console.log("downY", downY)
 
                     if ( relativePlacement === 0 ){ // top placement
                         editorBoxComponent.y = upY > 0 ? upY : downY
@@ -992,7 +968,6 @@ ApplicationWindow{
                     Item{
                         id: runSpace
                         anchors.fill: parent
-                        property string program: editor.text
                         property variant item
 
                         Timer{
@@ -1001,21 +976,8 @@ ApplicationWindow{
                             running: true
                             repeat : false
                             onTriggered: {
-                                if (project.active === project.inFocus && project.active && controls.codingMode === 0 /* live compile */){
-                                    livecv.engine.createObjectAsync(
-                                        runSpace.program,
-                                        runSpace,
-                                        project.active.file.pathUrl(),
-                                        project.active
-                                    );
-                                } else if ( project.active && controls.codingMode === 0 /* live compile */){
-                                    livecv.engine.createObjectAsync(
-                                        project.active.content,
-                                        runSpace,
-                                        project.active.file.pathUrl(),
-                                        project.active,
-                                        true
-                                    );
+                                if (controls.codingMode === 0){  // live coding
+                                    createObjectForActive()
                                 }
                             }
                         }
@@ -1111,7 +1073,6 @@ ApplicationWindow{
                 visible: false
                 onOpen: {
                     projectView.focusEditor.document = project.openFile(path, ProjectDocument.EditIfNotOpen)
-                    projectView.maintainCodingMode()
                     projectView.focusEditor.forceFocus()
                 }
                 onCloseFile: {
@@ -1125,11 +1086,13 @@ ApplicationWindow{
                                     doc.save()
                                     project.closeFile(path)
                                     messageBox.close()
+                                    createObjectForActive()
                                 },
                                 button2Name : 'No',
                                 button2Function : function(){
                                     project.closeFile(path)
                                     messageBox.close()
+                                    createObjectForActive()
                                 },
                                 button3Name : 'Cancel',
                                 button3Function : function(){
@@ -1139,6 +1102,7 @@ ApplicationWindow{
                                     doc.save()
                                     project.closeFile(path)
                                     messageBox.close()
+                                    createObjectForActive()
                                 }
                             })
                         } else
@@ -1213,21 +1177,8 @@ ApplicationWindow{
     Connections{
         target: project.documentModel
         onMonitoredDocumentChanged : {
-            if (project.active === project.inFocus && controls.codingMode === 0 /* live compile */){
-                engine.createObjectAsync(
-                    runSpace.program,
-                    runSpace,
-                    project.active.file.pathUrl(),
-                    project.active
-                );
-            } else if ( project.active && controls.codingMode === 0 /* live compile */){
-                engine.createObjectAsync(
-                    project.active.content,
-                    runSpace,
-                    project.active.file.pathUrl(),
-                    project.active,
-                    true
-                );
+            if (controls.codingMode === 0){  // live coding
+                createObjectForActive()
             }
         }
         onDocumentChangedOutside : {

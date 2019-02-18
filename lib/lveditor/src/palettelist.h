@@ -39,6 +39,7 @@ private:
     QList<PaletteLoader*> m_palettes;
 };
 
+/** Sets position */
 inline void PaletteList::setPosition(int position){
     m_position = position;
 }
@@ -71,6 +72,7 @@ inline int PaletteList::position() const{
     return m_position;
 }
 
+/** Palettes size */
 inline int PaletteList::size() const{
     return m_palettes.size();
 }

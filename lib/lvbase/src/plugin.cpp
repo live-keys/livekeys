@@ -158,7 +158,6 @@ const std::string &Plugin::filePath() const{
     return m_d->filePath;
 }
 
-/** Package getter */
 const std::string &Plugin::package() const{
     return m_d->package;
 }

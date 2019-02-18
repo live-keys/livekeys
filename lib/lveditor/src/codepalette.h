@@ -37,21 +37,26 @@ public:
     explicit CodePalette(QObject *parent = 0);
     virtual ~CodePalette();
 
+    /** Visual item for this palette */
     QQuickItem* item();
     void setItem(QQuickItem* item);
 
+    /** Property value corresponding to this palette */
     const QVariant &value() const;
     void setValue(const QVariant& value);
     void setValueFromBinding(const QVariant &value);
 
+    /** Palette name */
     QString name() const;
 
     void setPath(const QString& path);
     const QString &path() const;
 
+    /** Returns extension for palette */
     QObject* extension() const;
     void setExtension(QObject* extension, bool own = false);
 
+    /** Palette type */
     QString type() const;
     void setType(QString type);
 
@@ -59,12 +64,18 @@ public slots:
     bool isBindingChange() const;
 
 signals:
+    /** Item changed */
     void itemChanged();
+    /** Value changed */
     void valueChanged();
+    /** Extension changed */
     void extensionChanged();
+    /** Type changed */
     void typeChanged();
 
+    /** Value was initialized */
     void init(const QVariant& value);
+    /** Code changed */
     void codeChanged(const QVariant& value);
 
 private:
@@ -79,9 +90,6 @@ private:
     QString     m_type;
 };
 
-/**
- * \brief Visual item for this palette
- */
 inline QQuickItem *CodePalette::item(){
     return m_item;
 }
@@ -97,9 +105,6 @@ inline void CodePalette::setItem(QQuickItem *item){
     emit itemChanged();
 }
 
-/**
- * \brief Property value corresponding to this palette
- */
 inline const QVariant& CodePalette::value() const{
     return m_value;
 }
@@ -128,9 +133,7 @@ inline const QString& CodePalette::path() const{
     return m_path;
 }
 
-/**
- * \brief Returns extension for palette
- */
+
 inline QObject *CodePalette::extension() const{
     return m_extension;
 }
@@ -150,9 +153,6 @@ inline void CodePalette::setExtension(QObject *extension, bool own){
     emit extensionChanged();
 }
 
-/**
- * \brief Palette type
- */
 inline QString CodePalette::type() const{
     return m_type;
 }

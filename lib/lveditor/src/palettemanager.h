@@ -10,8 +10,8 @@ namespace lv {
 
 class TextEdit;
 
-
-class LV_EDITOR_EXPORT PaletteData
+/// @private
+class PaletteData
 {
 public:
     int m_startBlock;
@@ -28,6 +28,7 @@ public:
     }
 };
 
+/// @private
 class PaletteManager: public QObject
 {
     Q_OBJECT

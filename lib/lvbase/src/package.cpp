@@ -167,9 +167,7 @@ bool Package::hasExtension() const{
     return !m_d->extension.empty();
 }
 
-/** \brief Returns a map of dependencies with string keys */
-
-const std::map<std::string, Package::Reference *>& Package::dependencies() const{
+const std::map<std::string, Package::Reference*>& Package::dependencies() const{
     return m_d->dependencies;
 }
 
@@ -191,6 +189,7 @@ void Package::assignContext(PackageGraph *graph){
     m_d->context->packageGraph = graph;
 }
 
+/** \brief Package graph */
 PackageGraph *Package::contextOwner(){
     if ( m_d->context )
         return m_d->context->packageGraph;

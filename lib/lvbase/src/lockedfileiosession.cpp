@@ -123,6 +123,9 @@ LockedFileIOSession::~LockedFileIOSession(){
     delete m_d;
 }
 
+/**
+ * \brief Creates an instance of the LockedFileIOSession
+ */
 LockedFileIOSession::Ptr LockedFileIOSession::createInstance(){
     return LockedFileIOSession::Ptr(new LockedFileIOSession);
 }

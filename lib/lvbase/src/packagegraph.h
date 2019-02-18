@@ -19,14 +19,24 @@ class LV_BASE_EXPORT PackageGraph{
     DISABLE_COPY(PackageGraph);
 
 public:
+    /**
+     * \class lv::PackageGraph::LibraryNode
+     * \brief Struct to represent a library node
+     *
+     * \ingroup lvbase
+     */
     class LibraryNode{
     public:
+        /** Default constructor */
         LibraryNode(const Package::Library& l) : library(l){}
 
+        /** Library within the node*/
         Package::Library library;
+        /** Shows if it's loaded */
         bool loaded;
     };
 
+    /// @private
     template<typename T>
     class CyclesResult{
 
@@ -53,6 +63,7 @@ public:
 
     void loadPackage(const Package::Ptr& p, bool addLibraries = true);
     void loadPackageWithDependencies(const Package::Ptr& p, std::list<Package::Reference>& missing, bool addLibraries = true);
+    /** Adds the dependency needed for this plugin. If not within the same package, we load an entire package instead. */
     void addDependency(const Package::Ptr& package, const Package::Ptr& dependsOn);
     CyclesResult<Package::Ptr> checkCycles(const Package::Ptr& p);
     CyclesResult<Plugin::Ptr> checkCycles(const Plugin::Ptr& p);
