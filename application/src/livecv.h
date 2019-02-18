@@ -43,6 +43,7 @@ class LiveCVArguments;
 class LiveCVScript;
 class ViewEngine;
 class Settings;
+class Memory;
 class Commands;
 class KeyMap;
 class VisualLogModel;
@@ -64,6 +65,7 @@ class LiveCV : public QObject{
     Q_PROPERTY(lv::Commands*       commands       READ commands   CONSTANT)
     Q_PROPERTY(lv::VisualLogModel* log            READ log        CONSTANT)
     Q_PROPERTY(lv::KeyMap*         keymap         READ keymap     CONSTANT)
+    Q_PROPERTY(lv::Memory*         mem            READ memory     CONSTANT)
     Q_PROPERTY(QQmlPropertyMap*    extensions     READ extensions CONSTANT)
 
 public:
@@ -100,6 +102,7 @@ public:
     Project*    project();
     Commands*   commands();
     KeyMap*     keymap();
+    Memory*     memory();
     QQmlPropertyMap* extensions();
     VisualLogModel* log();
 
@@ -136,6 +139,7 @@ private:
     lv::VisualLogModel*    m_log;
     lv::VisualLogQmlObject*m_vlog;
     lv::PackageGraph*      m_packageGraph;
+    lv::Memory*            m_memory;
     mutable QObject*       m_windowControls;
 };
 
@@ -188,6 +192,10 @@ inline KeyMap *LiveCV::keymap(){
 
 inline VisualLogModel *LiveCV::log(){
     return m_log;
+}
+
+inline Memory *LiveCV::memory(){
+    return m_memory;
 }
 
 inline QString LiveCV::header(){

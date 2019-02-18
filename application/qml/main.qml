@@ -17,7 +17,7 @@
 import QtQuick 2.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.2
-import QtQuick.Window 2.3
+import QtQuick.Window 2.0
 import base 1.0
 import editor 1.0
 import editor.private 1.0
@@ -310,7 +310,7 @@ ApplicationWindow{
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                color: liveArea.containsMouse ? "#969aa1" : "#5e5e5e"
+                color: liveArea.containsMouse ? "#969aa1" : "#808691"
             }
             Image{
                 id : liveImage
@@ -348,7 +348,7 @@ ApplicationWindow{
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                color: onSaveArea.containsMouse ? "#969aa1" : "#5e5e5e"
+                color: onSaveArea.containsMouse ? "#969aa1" : "#808691"
             }
             Image{
                 id : onSaveImage
@@ -385,7 +385,7 @@ ApplicationWindow{
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                color: disabledArea.containsMouse ? "#969aa1" : "#5e5e5e"
+                color: disabledArea.containsMouse ? "#969aa1" : "#808691"
             }
             Image{
                 id : disabledImage
@@ -987,8 +987,6 @@ ApplicationWindow{
                             onAboutToCreateObject : {
                                 if (staticContainer)
                                     staticContainer.beforeCompile()
-                                if ( engineMonitor )
-                                    engineMonitor.emitBeforeCompile()
                             }
                             onObjectCreated : {
                                 error.text = ''
@@ -998,8 +996,6 @@ ApplicationWindow{
                                 runSpace.item = object;
                                 if ( staticContainer )
                                     staticContainer.afterCompile()
-                                if ( engineMonitor )
-                                    engineMonitor.emitAfterCompile()
                             }
                             onObjectCreationError : {
                                 var lastErrorsText = ''
@@ -1172,8 +1168,6 @@ ApplicationWindow{
                 runSpace.item = 0
                 if ( staticContainer )
                     staticContainer.clearStates()
-                if ( engineMonitor )
-                    engineMonitor.emitTargetChanged()
             }
             if (active)
                 createTimer.restart()

@@ -5,9 +5,7 @@ HEADERS += \
     $$PWD/qcamcapturethread.h \
     $$PWD/qdrawhistogram.h \
     $$PWD/qimread.h \
-    $$PWD/qmat2darray.h \
     $$PWD/qmatbuffer.h \
-    $$PWD/qmatempty.h \
     $$PWD/qmatread.h \
     $$PWD/qmatroi.h \
     $$PWD/qvideocapture.h \
@@ -28,11 +26,11 @@ HEADERS += \
     $$PWD/qlcvcoreglobal.h \
     $$PWD/lcvcore_plugin.h \
     $$PWD/qcolorhistogram.h \
-    $$PWD/qcvglobalobject.h \
     $$PWD/qimagefile.h \
     $$PWD/qoverlapmat.h \
-    $$PWD/qsharedmat.h \
-    $$PWD/qitemcapture.h
+    $$PWD/qitemcapture.h \
+    $$PWD/qmatop.h \
+    $$PWD/qwritablemat.h
 
 SOURCES += \
     $$PWD/lcvcore_plugin.cpp \
@@ -42,9 +40,7 @@ SOURCES += \
     $$PWD/qcamcapturethread.cpp \
     $$PWD/qdrawhistogram.cpp \
     $$PWD/qimread.cpp \
-    $$PWD/qmat2darray.cpp \
     $$PWD/qmatbuffer.cpp \
-    $$PWD/qmatempty.cpp \
     $$PWD/qmatread.cpp \
     $$PWD/qmatroi.cpp \
     $$PWD/qvideocapture.cpp \
@@ -62,9 +58,9 @@ SOURCES += \
     $$PWD/qmatstate.cpp \
     $$PWD/qmatloader.cpp \
     $$PWD/qcolorhistogram.cpp \
-    $$PWD/qcvglobalobject.cpp \
     $$PWD/qimagefile.cpp \
     $$PWD/qoverlapmat.cpp \
-    $$PWD/qsharedmat.cpp \
-    $$PWD/qitemcapture.cpp
+    $$PWD/qitemcapture.cpp \
+    $$PWD/qmatop.cpp \
+    $$PWD/qwritablemat.cpp
 

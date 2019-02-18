@@ -4,13 +4,14 @@
 #include <QObject>
 #include <QQmlParserStatus>
 #include <QQmlProperty>
-#include "live/shareddata.h"
-#include "live/filter.h"
+#include "live/shared.h"
+#include "live/act.h"
 #include "live/mlnode.h"
 #include "live/viewengine.h"
 
 namespace lv{
 
+/// \private
 class Tuple : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
@@ -30,8 +31,7 @@ public:
     void classBegin(){}
     void componentComplete();
 
-    bool reserveForRead(Filter::SharedDataLocker* locker, Filter* filter);
-    bool reserveForWrite(Filter::SharedDataLocker* locker, Filter* filter);
+    bool reserveForRead(Shared::ReadScope* locker, Act* filter);
 
     int totalProperties();
     QHash<QByteArray, int>::ConstIterator propertiesBegin();

@@ -7,6 +7,8 @@
 namespace lv{
 
 class MapArrayData;
+
+/// \private
 class MapArray : public QObject{
 
     Q_OBJECT

@@ -7,7 +7,6 @@ HEADERS += \
     $$PWD/qstaticcontainer.h \
     $$PWD/qstaticloader.h \
     $$PWD/qscriptcommandlineparser_p.h \
-    $$PWD/qenginemonitor.h \
     $$PWD/qstaticloaderproperty.h \
     $$PWD/qlicensesettings.h \
     $$PWD/qfilereader.h \
@@ -16,7 +15,6 @@ HEADERS += \
     $$PWD/qvaluehistory.h \
     $$PWD/qloglistener.h \
     $$PWD/qloglistenersocket.h \
-    $$PWD/thread.h \
     $$PWD/tuple.h \
     $$PWD/tcpagent.h \
     $$PWD/tcpline.h \
@@ -27,7 +25,8 @@ HEADERS += \
     $$PWD/stringbasedloader.h \
     $$PWD/qmlvariantlist.h \
     $$PWD/maparray.h \
-    $$PWD/maparraydata.h
+    $$PWD/maparraydata.h \
+    $$PWD/worker.h
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
@@ -35,7 +34,6 @@ SOURCES += \
     $$PWD/qstaticcontainer.cpp \
     $$PWD/qstaticloader.cpp \
     $$PWD/qscriptcommandlineparser.cpp \
-    $$PWD/qenginemonitor.cpp \
     $$PWD/qstaticloaderproperty.cpp \
     $$PWD/qlicensesettings.cpp \
     $$PWD/qfilereader.cpp \
@@ -44,7 +42,6 @@ SOURCES += \
     $$PWD/qvaluehistory.cpp \
     $$PWD/qloglistener.cpp \
     $$PWD/qloglistenersocket.cpp \
-    $$PWD/thread.cpp \
     $$PWD/tuple.cpp \
     $$PWD/tcpagent.cpp \
     $$PWD/tcpline.cpp \
@@ -55,4 +52,5 @@ SOURCES += \
     $$PWD/stringbasedloader.cpp \
     $$PWD/qmlvariantlist.cpp \
     $$PWD/maparray.cpp \
-    $$PWD/maparraydata.cpp
+    $$PWD/maparraydata.cpp \
+    $$PWD/worker.cpp

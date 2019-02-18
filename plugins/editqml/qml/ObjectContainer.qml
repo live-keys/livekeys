@@ -132,7 +132,19 @@ Item{
                     addBoxItem.addContainer = addContainer
 
                     var oct = objectContainer.parent
-                    var rect = Qt.rect(oct.x, oct.y, oct.width, 25)
+
+                    // capture y
+                    var octit = objectContainer
+                    var octY = 0
+                    while ( octit && octit.objectName !== 'editorBox' ){
+                        octY += octit.y
+                        octit = octit.parent
+                    }
+                    if ( octit.objectName === 'editorBox' ){
+                        octY += octit.y
+                    }
+
+                    var rect = Qt.rect(oct.x + 150, octY, oct.width, 25)
                     var cursorCoords = objectContainer.editor.cursorWindowCoords()
 
                     var addBox = livecv.windowControls().editSpace.createEditorBox(
@@ -256,6 +268,7 @@ Item{
         fontSize: 10
         fontFamily: "Open Sans, sans-serif"
         onFocusChanged : if ( !focus ) model = null
+        z: 2000
 
         property var selectedHandler : function(){}
         property var cancelledHandler : function(index){}

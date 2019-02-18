@@ -38,34 +38,22 @@ namespace lv{
 class ErrorHandler;
 class IncubationController;
 
-/**
- * \class lv::FatalException
- * \brief Subclass of the lv::Exception used for unrecoverable errors
- *
- *
- * \ingroup lvview
- */
 class LV_VIEW_EXPORT FatalException : public lv::Exception{
 
 public:
     /** Default costructor */
     FatalException(const std::string& message, int code = 0): lv::Exception(message, code){}
-    /** QString variant of the default constructor */
+    /** QString overload of the default constructor */
     FatalException(const QString& message, int code = 0) : lv::Exception(message.toStdString(), code){}
     /** Default destructor */
     virtual ~FatalException(){}
 };
 
-/**
- * \class lv::InputException
- * \brief Subclass of the lv::Exception used for configuration errors
- * \ingroup lvview
- */
 class LV_VIEW_EXPORT InputException : public lv::Exception{
 public:
     /** Defautlt constructor */
     InputException(const std::string& message, int code = 0) : lv::Exception(message, code){}
-    /** QString variant of the default constructor */
+    /** QString overload of the default constructor */
     InputException(const QString& message, int code = 0) : lv::Exception(message.toStdString(), code){}
     /** Default destructor */
     virtual ~InputException(){}
@@ -127,8 +115,12 @@ public:
     TypeInfo::Ptr typeInfo(const QByteArray& typeName) const;
     TypeInfo::Ptr typeInfo(const QMetaType& metaType) const;
 
+    static QString typeAsPropertyMessage(const QString& typeName, const QString& propertyName);
+
+    static void registerBaseTypes(const char* uri);
+
 signals:
-    /** Signals that we're about to create an object of our compiled code */
+    /** Signals before compiling a new object. */
     void aboutToCreateObject(const QUrl& file);
     /** Loading indicator has changed */
     void isLoadingChanged(bool isLoading);
@@ -155,12 +147,12 @@ public slots:
 
     void throwError(const QJSValue& error, QObject* object = 0);
     void throwWarning(const QJSValue& error, QObject* object = 0);
-#ifndef DOXYGEN_PRIVATE
-    /// @private
+
+    /// \private
     QString markErrorObject(QObject* object);
-    /// @private
+    /// \private
     QJSValue lastErrorsObject() const;
-#endif
+
 private:
     QJSValue toJSError(const QQmlError& error) const;
     QJSValue toJSErrors(const QList<QQmlError>& errors) const;
@@ -186,8 +178,7 @@ private:
 /**
  * \brief Allows the engine to register info about a type
  *
- * We pass serialization functions that transforms the type into MLNode, which enables logging, as well as a constructor
- * and a canLog parameters which shows if logging is possible for this type.
+ * Store a constructor, serialization functions and a logging flag for this type.
  */
 template<typename T>
 TypeInfo::Ptr ViewEngine::registerQmlTypeInfo(

@@ -100,6 +100,12 @@ void DocumentHandler::setTextEdit(TextEdit *te){
     }
 }
 
+
+/**
+ * \fn lv::DocumentHandler::classBegin
+ * \brief Implementation of the respective function from QQmlParserStatus
+ */
+
 /**
  * \brief Cursor position request signal emitter
  *

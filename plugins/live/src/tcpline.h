@@ -8,7 +8,7 @@
 
 #include "tuple.h"
 #include "componentsource.h"
-#include "live/filter.h"
+#include "live/act.h"
 #include "live/mlnode.h"
 
 class QTcpServer;
@@ -16,13 +16,14 @@ class QTcpSocket;
 
 namespace lv{
 
-class Filter;
+class Act;
 class Project;
 class TcpLineSocket;
-class TcpLine : public QObject, public QQmlParserStatus, public lv::Filter{
+
+/// \private
+class TcpLine : public lv::Act{
 
     Q_OBJECT
-    Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(lv::Tuple* input             READ input   WRITE setInput   NOTIFY inputChanged)
     Q_PROPERTY(lv::Tuple* output            READ output  WRITE setOutput  NOTIFY outputChanged)
     Q_PROPERTY(lv::ComponentSource* source  READ source  WRITE setSource  NOTIFY sourceChanged)

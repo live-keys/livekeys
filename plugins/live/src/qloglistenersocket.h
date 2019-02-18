@@ -22,6 +22,8 @@
 #include "live/visuallog.h"
 
 class QTcpSocket;
+
+/// \private
 class QLogListenerSocket : public QObject{
 
     Q_OBJECT

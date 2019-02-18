@@ -40,12 +40,12 @@ QKeyPointVector::~QKeyPointVector(){
 }
 
 /**
-*\fn lv::QKeyPointVector::setMat()
+*QKeyPointVector::setMat()
 *\brief Matrix where keypoint are detected from.
 */
 
 /**
-*\fn lv::QKeyPointVector::createOwnedObject()
+*QKeyPointVector::createOwnedObject()
 *\brief Creates copy of the vector.
 */
 

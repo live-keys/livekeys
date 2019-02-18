@@ -1,7 +1,5 @@
 HEADERS += \
     $$PWD/lcvphoto_plugin.h \
-    $$PWD/qfastnlmeansdenoising.h \
-    $$PWD/qfastnlmeansdenoisingmulti.h \
     $$PWD/qdenoisetvl1.h \
     $$PWD/qbrightnessandcontrast.h \
     $$PWD/qhuesaturationlightness.h \
@@ -17,12 +15,11 @@ HEADERS += \
     $$PWD/qtonemapdurand.h \
     $$PWD/qtonemapmantiuk.h \
     $$PWD/qtonemapreinard.h \
-    $$PWD/qstitcher.h
+    $$PWD/qstitcher.h \
+    $$PWD/qdenoising.h
 
 SOURCES += \
     $$PWD/lcvphoto_plugin.cpp \
-    $$PWD/qfastnlmeansdenoising.cpp \
-    $$PWD/qfastnlmeansdenoisingmulti.cpp \
     $$PWD/qdenoisetvl1.cpp \
     $$PWD/qbrightnessandcontrast.cpp \
     $$PWD/qhuesaturationlightness.cpp \
@@ -38,4 +35,5 @@ SOURCES += \
     $$PWD/qtonemapdurand.cpp \
     $$PWD/qtonemapmantiuk.cpp \
     $$PWD/qtonemapreinard.cpp \
-    $$PWD/qstitcher.cpp
+    $$PWD/qstitcher.cpp \
+    $$PWD/qdenoising.cpp

@@ -10,7 +10,7 @@ import lcvvideo 1.0
 {qmlSummary:lcvvideo}
 
 {qmlType:CalcOpticalFlowPyrLK}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Sparse optical flow filter.}
 
 {qmlMethod:CalcOpticalFlowPyrLK addPoint(Point p)}
@@ -74,7 +74,7 @@ import lcvvideo 1.0
   bad points and get a performance boost.
 
 {qmlType:BackgroundSubtractor}
-{qmlInherits:MatFilter}
+{qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Background subtractor base type.}
 
 {qmlProperty:string learningRate}
@@ -82,7 +82,7 @@ import lcvvideo 1.0
   Learning rate for updating the background model (0 to 1, default is 0).
 
 {qmlType:BackgroundSubtractorMog2}
-{qmlInherits:BackgroundSubtractor}
+{qmlInherits:lcvvideo#BackgroundSubtractor}
 
 {qmlBrief:Gaussian mixture based background/foreground segmentation algorithm.This is a **static item**.}
 
@@ -150,7 +150,7 @@ import lcvvideo 1.0
   Loads the BackgroundSubtractorMog2 state from the given [key]().
 
 {qmlType:BackgroundSubtractorKnn}
-{qmlInherits:BackgroundSubtractor}
+{qmlInherits:lcvvideo#BackgroundSubtractor}
 {qmlBrief:K-nearest neigbours based background/foreground segmentation algorithm.  This is a **static item**.}
 
 {qmlProperty:bool detectShadows}

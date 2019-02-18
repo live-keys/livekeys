@@ -13,6 +13,7 @@ class QQmlContext;
 
 namespace lv{
 
+/// \private
 class TcpAgent : public QObject, public QQmlParserStatus{
 
     Q_OBJECT

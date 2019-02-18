@@ -8,4 +8,4 @@ HEADERS += \
     $$PWD/qlcvcoreglobal.h \
     $$PWD/qmatext.h \
     $$PWD/qmatlist.h \
-    $$PWD/qsharedmat.h
+    $$PWD/qwritablemat.h

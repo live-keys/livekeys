@@ -1,6 +1,6 @@
 #include "tcpline.h"
 #include "tcplinesocket.h"
-#include "live/filter.h"
+#include "live/act.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
@@ -19,7 +19,7 @@
 namespace lv{
 
 TcpLine::TcpLine(QObject *parent)
-    : QObject(parent)
+    : lv::Act(parent)
     , m_source(0)
     , m_input(0)
     , m_output(0)
@@ -61,15 +61,15 @@ void TcpLine::setInput(Tuple *input){
     if ( isAgentInitialized() ){
         TcpLineSocket* tls = agent();
         if ( tls ){
-            SharedDataLocker* locker = createLocker();
-            if ( m_input->reserveForRead(locker, this)){
+//            Shared::ReadScope* locker = createLocker();
+//            if ( m_input->reserveForRead(locker, this)){
 
                 MLNode result;
                 Tuple::serialize(ViewContext::instance().engine(), *input, result);
 
                 tls->sendInput(result);
 
-            }
+//            }
         }
     } else {
         initializeAgent();
@@ -90,7 +90,7 @@ void TcpLine::componentComplete(){
 }
 
 void TcpLine::process(){
-    use(createLocker()->write(m_output),
+    use(/*createLocker()*/nullptr,
         [this](){
             Tuple::deserialize(lv::ViewContext::instance().engine(), m_receivedOutput[""]["output"], *m_output);
         }, [this](){
@@ -177,8 +177,8 @@ void TcpLine::initializeAgent(){
 
     if ( m_source && m_input && m_output ){
 
-        SharedDataLocker* locker = createLocker();
-        if ( m_input->reserveForRead(locker, this) && m_output->reserveForRead(locker, this)){
+//        Shared::ReadScope* locker = createLocker();
+//        if ( /*m_input->reserveForRead(locker, this) && m_output->reserveForRead(locker, this)*/){
 
             m_initializer = MLNode(MLNode::Object);
 
@@ -199,9 +199,9 @@ void TcpLine::initializeAgent(){
 
             a->initialize(m_initializer);
 
-        }
+//        }
 
-        deleteLocker(locker);
+//        deleteLocker(locker);
 
     }
 }

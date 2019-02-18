@@ -2,13 +2,9 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/errorhandler.h \
-    $$PWD/filter.h \
-    $$PWD/filterworker.h \
-    $$PWD/filterworker_p.h \
     $$PWD/incubationcontroller.h \
     $$PWD/keymap.h \
     $$PWD/settings.h \
-    $$PWD/shareddata.h \
     $$PWD/typeinfo.h \
     $$PWD/visuallogbasemodel.h \
     $$PWD/visuallogfilter.h \
@@ -21,16 +17,22 @@ HEADERS += \
     $$PWD/lvviewglobal.h \
     $$PWD/viewengine.h \
     $$PWD/extensions.h \
-    $$PWD/liveextension.h
+    $$PWD/liveextension.h \
+    $$PWD/group.h \
+    $$PWD/groupcollector.h \
+    $$PWD/groupcollectorentry.h \
+    $$PWD/memory.h \
+    $$PWD/shared.h \
+    $$PWD/container.h \
+    $$PWD/act.h \
+    $$PWD/workerthread.h \
+    $$PWD/workerthread_p.h
 
 SOURCES += \
     $$PWD/errorhandler.cpp \
-    $$PWD/filter.cpp \
-    $$PWD/filterworker.cpp \
     $$PWD/incubationcontroller.cpp \
     $$PWD/keymap.cpp \
     $$PWD/settings.cpp \
-    $$PWD/shareddata.cpp \
     $$PWD/visuallogbasemodel.cpp \
     $$PWD/visuallogfilter.cpp \
     $$PWD/visuallogmodel.cpp \
@@ -41,4 +43,12 @@ SOURCES += \
     $$PWD/viewcontext.cpp \
     $$PWD/viewengine.cpp \
     $$PWD/extensions.cpp \
-    $$PWD/liveextension.cpp
+    $$PWD/liveextension.cpp \
+    $$PWD/group.cpp \
+    $$PWD/groupcollector.cpp \
+    $$PWD/groupcollectorentry.cpp \
+    $$PWD/memory.cpp \
+    $$PWD/shared.cpp \
+    $$PWD/container.cpp \
+    $$PWD/act.cpp \
+    $$PWD/workerthread.cpp

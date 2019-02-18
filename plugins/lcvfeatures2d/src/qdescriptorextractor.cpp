@@ -16,6 +16,7 @@
 
 #include "qdescriptorextractor.h"
 #include "qkeypointvector.h"
+
 /**
  * \class QDescriptorExtractor
  * \brief Abstract base class for computing descriptors for image keypoints.

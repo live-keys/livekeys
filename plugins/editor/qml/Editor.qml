@@ -382,7 +382,7 @@ Rectangle{
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                color: addEditorArea.containsMouse ? "#969aa1" : "#5e5e5e"
+                color: addEditorArea.containsMouse ? "#969aa1" : "#808691"
             }
             MouseArea{
                 id : addEditorArea
@@ -410,7 +410,7 @@ Rectangle{
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                color: removeEditorArea.containsMouse ? "#969aa1" : "#5e5e5e"
+                color: removeEditorArea.containsMouse ? "#969aa1" : "#808691"
             }
             MouseArea{
                 id : removeEditorArea
@@ -474,7 +474,7 @@ Rectangle{
                     implicitWidth: 10
                     implicitHeight: 10
                     Rectangle {
-                        color: "#061724"
+                        color: "#0d1e30"
                         anchors.fill: parent
                     }
                 }

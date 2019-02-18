@@ -1,6 +1,6 @@
 import QtQuick 2.5
 import live 1.0
-import lcvcore 1.0
+import lcvcore 1.0 as Cv
 import lcvphoto 1.0
 
 Rectangle{
@@ -40,11 +40,11 @@ Rectangle{
             autoLevels.histogram = autoLevelsHistogram.output
             root.levelByChannel = autoLevels.output
             root.updateSliders()
-            autoLevelsHistogram.input = cv.nullMat
+            autoLevelsHistogram.input = Cv.MatOp.nullMat
         }
     }
 
-    ColorHistogram{
+    Cv.ColorHistogram{
         id: autoLevelsHistogram
         channel: colorHistogram.AllChannels
         visible: false
@@ -93,7 +93,7 @@ Rectangle{
         }
     }
 
-    ColorHistogram{
+    Cv.ColorHistogram{
         id: colorHistogram
 
         anchors.top: channelSelection.bottom
