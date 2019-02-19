@@ -335,7 +335,7 @@ It has two groups of match methods: for matching descriptors of an image with an
 
 Params:
 
-* **queryDescriptors** Query set of descriptors.
+* **querdyDescriptors** Query set of descriptors.
 * **knn** Count of best matches found per each query descriptor or less if a query descriptor has less than k possible matches in total.
 
 {qmlType:BruteForceMatcher}
@@ -352,7 +352,77 @@ params:
 params:
 
 {qmlType:DrawMatches}
+{qmlInherits:lcvfeatures2d#DescriptorMatcher}
 
 Draws matches between two sets of keypoints that were detected and the matches that were found
 Specify match index to focus on specific match
 
+{qmlType:DescriptorMatchFilter}
+{qmlInherits:lcvfeatures2d#DescriptorMatcher}
+
+{qmlProperty:matches1to2}
+{qmlBrief:Matches from the first source to second one.}
+
+{qmlProperty:matches1to2Out}
+{qmlBrief:Output of matches1to2.}
+
+{qmlProperty:minDistanceCoeff}
+{qmlBrief:Minimum distance that the match has to the actual outcome.}
+
+{qmlProperty:maxDistance}
+{qmlBrief:Maximum distance allowed betwen set of two matches.}
+
+{qmlProperty:nndrRatio}
+{qmlBrief:The match betwen the first match and it's next consecutive match.}
+
+{qmlType:KeypointsToSceneMap}
+{qmlInherits:QtQuick.object}
+{qmlProperty:size}
+{qmlBrief: Size of the vector of KeypointsToScene object}
+
+{qmlType:MatchesToLocalKeypoint}
+{qmlInherits:}
+
+{qmlProperty:matches1to2}
+{qmlBrief:Matches from the first source to second one.}
+
+{qmlProperty:trainKeypointVectors}
+
+{qmlProperty:queryKeypointVector}
+
+{qmlProperty:output}
+
+{qmlSignal:matches1to2Changed}
+{qmlBrief:Triggered when matches from the first source to second one are changed.}
+
+{qmlSignal:trainKeypointVectorsChanged}
+{qmlBrief:Trigered when trainKeypointVectors is changed}
+
+{qmlSignal:queryKeypointVectorChanged}
+{qmlBrief:Trigered when queryKeypointVector is changed}
+
+{qmlSignal:outputChanged}
+{qmlBrief:Triggered when output is changed}
+
+{qmlType:KeypointHomography}
+{qmlBrief:Maps the keypoints in one image to the corresponding keypoints in the other image}
+
+{qmlProperty:KeypointsToScene}
+
+{qmlProperty:QueryImage}
+
+{qmlProperty:objectCorners}
+
+{qmlProperty:objectColors}
+
+{qmlSignal:keypointsToSceneChanged}
+{qmlBrief:Triggered when KeypointsToScene is changed.}
+
+{qmlSignal:queryImageChanged}
+{qmlBrief:Triggered when QueryImage is changed.}
+
+{qmlSignal:objectCornersChanged}
+{qmlBrief:Trigered when objectCorners is changed.}
+
+{qmlSignal:objectColorsChanged}
+{qmlBrief:Trigered when objectColors is changed.}
