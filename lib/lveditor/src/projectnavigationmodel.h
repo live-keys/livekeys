@@ -28,6 +28,8 @@ namespace lv{
 
 class Project;
 class ProjectDocument;
+
+/// \private
 class ProjectNavigationModel : public QAbstractListModel{
 
     Q_OBJECT
@@ -40,6 +42,7 @@ public:
         IsOpen
     };
 
+    /// \private
     class Entry{
     public:
         Entry(const QString& pName, const QString& pPath) : name(pName), path(pPath){}

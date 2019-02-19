@@ -82,6 +82,12 @@ DocumentHandler::~DocumentHandler(){
     delete m_codeHandler;
 }
 
+/** Set the target doc */
+void DocumentHandler::setTarget(QTextDocument *target)
+{
+    m_targetDoc = target;
+}
+
 /**
  * \brief TextEdit setter
  *
@@ -93,6 +99,12 @@ void DocumentHandler::setTextEdit(TextEdit *te){
         te->setTextDocument(m_targetDoc);
     }
 }
+
+
+/**
+ * \fn lv::DocumentHandler::classBegin
+ * \brief Implementation of the respective function from QQmlParserStatus
+ */
 
 /**
  * \brief Cursor position request signal emitter

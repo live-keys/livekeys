@@ -52,6 +52,15 @@ EditorSettings::~EditorSettings(){
 }
 
 /**
+ * \fn lv::EditorSettings::initError
+ * \brief Signals error with the given string
+ */
+
+/**
+ * \fn lv::EditorSettings::fontSizeChanged
+ * \brief Signals the fontSize property changed.
+
+/**
  * \brief Populates the settings from a given JSON object
  */
 void EditorSettings::fromJson(const QJsonObject &root){

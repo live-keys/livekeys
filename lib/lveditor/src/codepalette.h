@@ -59,12 +59,18 @@ public slots:
     bool isBindingChange() const;
 
 signals:
+    /** Item changed */
     void itemChanged();
+    /** Value changed */
     void valueChanged();
+    /** Extension changed */
     void extensionChanged();
+    /** Type changed */
     void typeChanged();
 
+    /** Value was initialized */
     void init(const QVariant& value);
+    /** Code changed */
     void codeChanged(const QVariant& value);
 
 private:
@@ -79,9 +85,6 @@ private:
     QString     m_type;
 };
 
-/**
- * \brief Visual item for this palette
- */
 inline QQuickItem *CodePalette::item(){
     return m_item;
 }
@@ -97,9 +100,6 @@ inline void CodePalette::setItem(QQuickItem *item){
     emit itemChanged();
 }
 
-/**
- * \brief Property value corresponding to this palette
- */
 inline const QVariant& CodePalette::value() const{
     return m_value;
 }
@@ -150,9 +150,6 @@ inline void CodePalette::setExtension(QObject *extension, bool own){
     emit extensionChanged();
 }
 
-/**
- * \brief Palette type
- */
 inline QString CodePalette::type() const{
     return m_type;
 }

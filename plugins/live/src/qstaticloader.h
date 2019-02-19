@@ -23,7 +23,9 @@
 #include <QQuickItem>
 
 class QStaticLoaderItem;
-class Q_LIVE_EXPORT QStaticLoader : public QQuickItem{
+
+/// \private
+class QStaticLoader : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(QQmlComponent* source READ source  WRITE setSource  NOTIFY sourceChanged)

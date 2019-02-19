@@ -561,7 +561,8 @@ QmlJS::Bind *DocumentQmlInfo::internalBind(){
 bool DocumentQmlInfo::isObject(const QString &typeString){
     if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
          typeString == "int" || typeString == "list" || typeString == "real" ||
-         typeString == "string" || typeString == "url" || typeString == "var" )
+         typeString == "color" || typeString == "QColor" ||
+         typeString == "string" || typeString == "url" || typeString == "var" || typeString == "QUrl" )
         return false;
     return true;
 }

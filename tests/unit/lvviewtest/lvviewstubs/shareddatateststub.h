@@ -18,9 +18,9 @@
 #define SHAREDDATASTUB_H
 
 #include <QObject>
-#include "live/shareddata.h"
+#include "live/shared.h"
 
-class SharedDataTestStub : public QObject, public lv::SharedData{
+class SharedDataTestStub : public lv::Shared{
 
     Q_OBJECT
 

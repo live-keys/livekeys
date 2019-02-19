@@ -22,6 +22,7 @@
 
 class QBackgroundSubtractorMog2Private;
 
+/// \private
 class QBackgroundSubtractorMog2 : public QBackgroundSubtractor{
 
     Q_OBJECT

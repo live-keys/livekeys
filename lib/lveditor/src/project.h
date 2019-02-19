@@ -52,12 +52,12 @@ public:
     void setActive(const QString& rootPath);
 
     ProjectFile* lookupBestFocus(ProjectEntry* entry);
-
     ProjectDocument* isOpened(const QString& rootPath);
 
     lv::ProjectFileModel* fileModel();
     lv::ProjectNavigationModel* navigationModel();
     lv::ProjectDocumentModel* documentModel();
+
     lv::ProjectDocument*  active() const;
 
     const QString& rootPath() const;

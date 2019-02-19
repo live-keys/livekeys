@@ -37,7 +37,6 @@ public:
     ~EditorSettings();
 
     int fontSize() const;
-
     const QString& path() const;
 
     void fromJson(const QJsonObject& root);
@@ -65,14 +64,19 @@ private:
     QHash<QString, EditorSettingsCategory*> m_settings;
 };
 
+/**
+ * \brief Returns the font size
+ */
 inline int EditorSettings::fontSize() const{
     return m_fontSize;
 }
 
+/** Returns path of the settings */
 inline const QString &EditorSettings::path() const{
     return m_path;
 }
 
+/** Find settings for given key */
 inline EditorSettingsCategory *EditorSettings::settingsFor(const QString &key){
     QHash<QString, EditorSettingsCategory*>::iterator it = m_settings.find(key);
     if ( it == m_settings.end() )
@@ -80,6 +84,7 @@ inline EditorSettingsCategory *EditorSettings::settingsFor(const QString &key){
     return it.value();
 }
 
+/** Add settings for given key */
 inline void EditorSettings::addSetting(const QString &key, EditorSettingsCategory *category){
     m_settings[key] = category;
 }

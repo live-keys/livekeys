@@ -17,25 +17,19 @@
 #include "qkeypointtoscenemap.h"
 
 /**
-*\class QKeypointToSceneMap
-*\ingroup plugin-lcvfeatures2d
-*\brief Mapping from a set of keypoints
-*/
+ *\class QKeyPointToSceneMap
+ *\ingroup plugin-lcvfeatures2d
+ *\brief Mapping from a set of keypoints
+ */
 
 /**
-*\brief QKeyPointToSceneMap constructor
-*/
+ *\brief QKeyPointToSceneMap constructor
+ */
 QKeyPointToSceneMap::QKeyPointToSceneMap(QObject *parent)
     : QObject(parent)
 {
 }
 
-/**
-*\brief QKeyPointToSceneMap destructor
-*/
-QKeyPointToSceneMap::~QKeyPointToSceneMap(){
-
-}
 
 /**
 *\fn lv::QKeyPointToSceneMap::append()
@@ -46,4 +40,14 @@ QKeyPointToSceneMap::~QKeyPointToSceneMap(){
 *\fn lv::QKeyPointToSceneMap::resize()
 *\brief Resize the mapping to a specific size(usefull for performance efficiency)
 */
+
+
+
+/**
+ *\brief QKeyPointToSceneMap destructor
+ */
+QKeyPointToSceneMap::~QKeyPointToSceneMap(){
+
+}
+
 

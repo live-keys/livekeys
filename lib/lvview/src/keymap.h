@@ -51,6 +51,7 @@ public:
     /** unsigned long long */
     typedef unsigned long long KeyCode;
 
+    /// \private
     class StoredCommand{
     public:
         StoredCommand() : isDefault(false){}
@@ -60,10 +61,15 @@ public:
         QString    command;
     };
 
+    /** Indicates which OS is in use, with matching keyboard */
     static const KeyMap::Os KEYBOARD_OS;
+    /** Indicates if the common modifier is the Ctrl or Cmd */
     static const KeyMap::Modifier CONTROL_OR_COMMAND;
+    /** Strings matching the modifiers */
     static std::map<qint32, QString> modifierStrings;
+    /** Short names for common keys */
     static std::map<quint32, QString> stringsForKeys;
+    /** Keys that match the given names */
     static std::map<QString, quint32> keysForStrings;
 
 public:

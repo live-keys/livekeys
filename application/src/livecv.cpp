@@ -19,6 +19,7 @@
 #include "livecvscript.h"
 #include "commands.h"
 #include "environment.h"
+#include "live/memory.h"
 #include "live/extensions.h"
 
 #include "live/keymap.h"
@@ -43,7 +44,7 @@
 #include "live/codeqmlhandler.h"
 #include "live/documentqmlinfo.h"
 #include "live/plugininfoextractor.h"
-#include "live/qmlengineinterceptor.h"
+#include "qmlengineinterceptor.h"
 
 #include <QUrl>
 #include <QFileInfo>
@@ -73,6 +74,7 @@ LiveCV::LiveCV(QObject *parent)
     , m_log(0)
     , m_vlog(new VisualLogQmlObject) // js ownership
     , m_packageGraph(nullptr)
+    , m_memory(new Memory(this))
     , m_windowControls(nullptr)
 {
     solveImportPaths();
@@ -88,6 +90,7 @@ LiveCV::~LiveCV(){
     delete m_settings;
     delete m_engine;
     delete m_packageGraph;
+    delete m_memory;
 }
 
 LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent){
@@ -187,42 +190,36 @@ void LiveCV::loadQml(const QUrl &url){
 void LiveCV::loadInternals(){
     loadInternalPackages();
     loadInternalPlugins();
-    QmlEngineInterceptor::interceptEngine(engine(), m_packageGraph);
+    QmlEngineInterceptor::interceptEngine(engine(), m_packageGraph, m_project);
 }
 
 void LiveCV::loadInternalPlugins(){
-    qmlRegisterType<lv::ErrorHandler>(
-        "base", 1, 0, "ErrorHandler");
+    qmlRegisterType<lv::ErrorHandler>("base", 1, 0, "ErrorHandler");
     qmlRegisterUncreatableType<lv::LiveCV>(
-        "base", 1, 0, "LiveCV", "LiveCV is available through the \'livecv\' property."
-    );
+         "base", 1, 0, "LiveCV",         ViewEngine::typeAsPropertyMessage("LiveCV", "livecv"));
     qmlRegisterUncreatableType<lv::ViewEngine>(
-        "base", 1, 0, "LiveEngine", "LiveEngine is available through \'livecv.engine\' property."
-    );
+        "base", 1, 0, "LiveEngine",      ViewEngine::typeAsPropertyMessage("LiveEngine", "livecv.engine"));
     qmlRegisterUncreatableType<lv::LiveCVScript>(
-        "base", 1, 0, "LiveScript", "LiveScript is available through the \'script\' property"
-    );
+        "base", 1, 0, "LiveScript",      ViewEngine::typeAsPropertyMessage("LiveScript", "script"));
     qmlRegisterUncreatableType<lv::Environment>(
-        "base", 1, 0, "LiveEnvironment", "LiveEnvironment is available through the \'script.environment\' property."
-    );
+        "base", 1, 0, "LiveEnvironment", ViewEngine::typeAsPropertyMessage("LiveEnvironment", "script.environment"));
     qmlRegisterUncreatableType<lv::Settings>(
-        "base", 1, 0, "LiveSettings", "LiveSettings is available through the \'livecv.settings\' property."
-    );
+        "base", 1, 0, "LiveSettings",    ViewEngine::typeAsPropertyMessage("LiveSettings", "livecv.settings"));
     qmlRegisterUncreatableType<lv::Commands>(
-        "base", 1, 0, "LiveCommands", "LiveCommands is available through the \'livecv.commands\' property."
-    );
+        "base", 1, 0, "LiveCommands",    ViewEngine::typeAsPropertyMessage("LiveCommands", "livecv.commands"));
     qmlRegisterUncreatableType<lv::KeyMap>(
-        "base", 1, 0, "KeyMap", "KeyMap is available through the \'livecv.keymap\' property."
-    );
-    qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
-        "base", 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type."
-    );
+        "base", 1, 0, "KeyMap",          ViewEngine::typeAsPropertyMessage("KeyMap", "livecv.keymap"));
     qmlRegisterUncreatableType<lv::VisualLogModel>(
-        "base", 1, 0, "VisualLogModel", "VisualLogModel is available through the \'livecv.log\' property."
-    );
+        "base", 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "livecv.log"));
+    qmlRegisterUncreatableType<lv::Memory>(
+        "base", 1, 0, "Memory", ViewEngine::typeAsPropertyMessage("Memory", "livecv.mem"));
     qmlRegisterUncreatableType<lv::VisualLogQmlObject>(
-        "base", 1, 0, "VisualLog", "VisualLog is available through the \'livecv.log\' property."
-    );
+        "base", 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
+    qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
+        "base", 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type.");
+
+
+    ViewEngine::registerBaseTypes("base");
 
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("script",  m_script);
@@ -231,7 +228,6 @@ void LiveCV::loadInternalPlugins(){
     QJSValue vlogjs  = m_engine->engine()->newQObject(m_vlog);
     m_engine->engine()->globalObject().setProperty("vlog", vlogjs);
 
-//    ApplicationContext::initialize(m_engine, m_settings); TODO: Come back
     ViewContext::initFromEngine(m_engine->engine());
 
     EditorPrivatePlugin ep;

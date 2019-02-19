@@ -11,6 +11,9 @@ DEFINES += Q_LCVFEATURES2D_LIB
 
 # Dependencies
 
+linkLocalLibrary(lvbase, lvbase)
+linkLocalLibrary(lvview, lvview)
+
 linkLocalPlugin(live,    live)
 linkLocalPlugin(lcvcore, lcvcore)
 

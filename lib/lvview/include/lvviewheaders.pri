@@ -2,13 +2,10 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/live/errorhandler.h \
-    $$PWD/live/filter.h \
-    $$PWD/live/filterworker.h \
     $$PWD/live/incubationcontroller.h \
     $$PWD/live/keymap.h \
     $$PWD/live/qmlengineinterceptor.h \
     $$PWD/live/settings.h \
-    $$PWD/live/shareddata.h \
     $$PWD/live/visuallogbasemodel.h \
     $$PWD/live/visuallogfilter.h \
     $$PWD/live/visuallogmodel.h \
@@ -20,4 +17,8 @@ HEADERS += \
     $$PWD/live/lvviewglobal.h \
     $$PWD/live/viewengine.h \
     $$PWD/live/extensions.h \
-    $$PWD/live/liveextension.h
+    $$PWD/live/liveextension.h \
+    $$PWD/live/shared.h \
+    $$PWD/live/memory.h \
+    $$PWD/live/act.h \
+    $$PWD/live/workerthread.h

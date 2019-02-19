@@ -44,7 +44,9 @@ class LV_EDITOR_EXPORT DocumentHandler : public QObject, public QQmlParserStatus
     Q_PROPERTY(bool editorFocus                         READ editorFocus     WRITE setEditorFocus NOTIFY editorFocusChanged)
 
 public:
+    /** Paragraph separator char */
     static const QChar ParagraphSeparator;
+    /** New line char */
     static const QChar NewLine;
 
 public:
@@ -61,9 +63,6 @@ public:
 
     void setIndentSize(int size);
 
-    /**
-     * \brief Implementation of the respective function from QQmlParserStatus
-     */
     void classBegin(){}
     void componentComplete();
 
@@ -80,6 +79,7 @@ public:
     void lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *palette);
     void lineBoxRemoved(QQuickItem *palette);
     void lineBoxResized(QQuickItem *palette, int newHeight);
+
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
@@ -92,10 +92,15 @@ public slots:
     void manageIndent(int from, int length, bool undo = false);
 
 signals:
+    /** Target changed */
     void targetChanged();
+    /** Cursor position change request */
     void cursorPositionRequest(int position);
+    /** Document content was changed manually */
     void contentsChangedManually();
+    /** Editor focus changed */
     void editorFocusChanged();
+    /** Code handler changed */
     void codeHandlerChanged();
 
 private:
@@ -134,6 +139,7 @@ inline lv::CodeCompletionModel *DocumentHandler::completionModel() const{
     return m_completionModel;
 }
 
+/** \brief Returns the TextEdit */
 inline TextEdit *DocumentHandler::textEdit(){
     return m_textEdit;
 }

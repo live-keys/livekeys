@@ -12,6 +12,7 @@ namespace lv{
 class Settings;
 class ViewEngine;
 
+/// \private
 class LV_VIEW_EXPORT ViewContext{
 
 public:

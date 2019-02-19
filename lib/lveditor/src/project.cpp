@@ -122,6 +122,7 @@ void Project::openProject(const QString &path){
     }
 }
 
+/** Opens project given by QUrl */
 void Project::openProject(const QUrl &url){
     openProject(url.toLocalFile());
 }
@@ -215,6 +216,7 @@ ProjectDocument *Project::openFile(ProjectFile *file, int mode){
     return document;
 }
 
+/** Sets given project file as active */
 void Project::setActive(ProjectFile* file){
     if (!file)
         return;

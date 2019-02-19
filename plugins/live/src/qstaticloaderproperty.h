@@ -20,6 +20,7 @@
 #include <QObject>
 #include <QVariant>
 
+/// \private
 class QStaticLoaderProperty : public QObject{
 
     Q_OBJECT

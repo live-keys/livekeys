@@ -15,17 +15,15 @@
 ****************************************************************************/
 
 #include "lcvcore_plugin.h"
-#include "qcvglobalobject.h"
 #include "qmat.h"
-#include "qsharedmat.h"
+#include "qwritablemat.h"
+#include "qmatop.h"
 #include "qmatext.h"
 #include "qmatview.h"
 #include "qimread.h"
 #include "qimwrite.h"
-#include "qmatempty.h"
 #include "qmatroi.h"
 #include "qmatread.h"
-#include "qmat2darray.h"
 #include "qcamcapture.h"
 #include "qvideocapture.h"
 #include "qvideowriter.h"
@@ -46,19 +44,20 @@
 #include <qqml.h>
 #include <QQmlEngine>
 
+
+static QObject* matOpProvider(QQmlEngine *engine, QJSEngine *){
+    return new QMatOp(engine);
+}
+
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
-    qmlRegisterUncreatableType<QCvGlobalObject>(
-        uri, 1, 0, "CvGlobalObject", "CvGlobal Object is available through the \'cv\' property");
-
     qmlRegisterType<QMat>(                   uri, 1, 0, "Mat");
+    qmlRegisterType<QWritableMat>(           uri, 1, 0, "WritableMat");
     qmlRegisterType<QMatView>(               uri, 1, 0, "MatView");
     qmlRegisterType<QImRead>(                uri, 1, 0, "ImRead");
     qmlRegisterType<QImWrite>(               uri, 1, 0, "ImWrite");
-    qmlRegisterType<QMatEmpty>(              uri, 1, 0, "MatEmpty");
     qmlRegisterType<QMatRoi>(                uri, 1, 0, "MatRoi");
     qmlRegisterType<QMatRead>(               uri, 1, 0, "MatRead");
-    qmlRegisterType<QMat2DArray>(            uri, 1, 0, "Mat2DArray");
     qmlRegisterType<QCamCapture>(            uri, 1, 0, "CamCapture");
     qmlRegisterType<QVideoCapture>(          uri, 1, 0, "VideoCapture");
     qmlRegisterType<QVideoWriter>(           uri, 1, 0, "VideoWriter");
@@ -72,12 +71,11 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QImageFile>(             uri, 1, 0, "ImageFile");
     qmlRegisterType<QOverlapMat>(            uri, 1, 0, "OverlapMat");
     qmlRegisterType<QItemCapture>(           uri, 1, 0, "ItemCapture");
+
+    qmlRegisterSingletonType<QMatOp>(        uri, 1, 0, "MatOp", &matOpProvider);
 }
 
-void LcvcorePlugin::initializeEngine(QQmlEngine *engine, const char *){
-    QCvGlobalObject* cvob = new QCvGlobalObject;
-    engine->globalObject().setProperty("cv", engine->newQObject(cvob));
-
+void LcvcorePlugin::initializeEngine(QQmlEngine *, const char *){
     lv::ViewContext::instance().engine()->registerQmlTypeInfo<QMat>(
         &lv::ml::serialize<QMat>,
         &lv::ml::deserialize<QMat>,

@@ -54,6 +54,7 @@ public:
         const QVariant& value
     ) Q_DECL_OVERRIDE;
 
+    /** Returns the width */
     int width() const;
 
     int totalEntries() const Q_DECL_OVERRIDE;
@@ -91,8 +92,6 @@ private:
 inline int VisualLogModel::rowCount(const QModelIndex &) const{
     return m_entries.size();
 }
-
-/** Returns the width */
 inline int VisualLogModel::width() const{
     return m_width;
 }

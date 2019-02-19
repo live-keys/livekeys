@@ -11,6 +11,9 @@ DEFINES += Q_LCVVIDEO_LIB
 
 # Dependencies
 
+linkLocalLibrary(lvbase, lvbase)
+linkLocalLibrary(lvview, lvview)
+
 linkLocalPlugin(live, live)
 linkLocalPlugin(lcvcore, lcvcore)
 

@@ -20,6 +20,7 @@
 #include <QString>
 #include <QList>
 
+/// \private
 class QScriptCommandLineParser{
 
 public:

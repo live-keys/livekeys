@@ -142,6 +142,7 @@ Item{
         fontSize: 10
         fontFamily: "Open Sans, sans-serif"
         onFocusChanged : if ( !focus ) model = null
+        z: 2000
 
         property var selectedHandler : function(){}
         property var cancelledHandler : function(index){}
@@ -163,7 +164,6 @@ Item{
         height: propertyContainer.valueContainer ? propertyContainer.valueContainer.height : 0
 
         children: propertyContainer.valueContainer ? [propertyContainer.valueContainer] : []
-        onChildrenChanged: console.log(children.length)
     }
 
 }

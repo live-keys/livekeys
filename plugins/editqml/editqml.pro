@@ -22,12 +22,6 @@ OTHER_FILES += \
     $$PWD/qml/qmldir \
     $$PWD/qml/live.package.json
 
-#DISTFILES += \
-#    qml/DocumentFragment.qml \
-#    qml/PaletteList.qml \
-#    qml/RefactorList.qml \
-#    qml/AddBox.qml
-
 DISTFILES += \
     qml/AddQmlBox.qml \
     qml/ObjectContainer.qml \

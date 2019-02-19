@@ -16,8 +16,8 @@
 
 #include "filtertest.h"
 #include "filterteststub.h"
-#include "live/filter.h"
-#include "live/filterworker.h"
+#include "live/act.h"
+#include "live/workerthread.h"
 
 using namespace lv;
 
@@ -40,7 +40,7 @@ void FilterTest::testOneProducerOneFilter(){
     }
 
     FilterTestStub* ft = new FilterTestStub;
-    FilterWorker* fw   = new FilterWorker;
+    WorkerThread* fw   = new WorkerThread;
     ft->setWorkerThread(fw);
     fw->start();
 
@@ -78,7 +78,7 @@ void FilterTest::testOneProducerTwoFilters(){
 
     FilterTestStub* filter1 = new FilterTestStub;
     FilterTestStub* filter2 = new FilterTestStub;
-    FilterWorker* fw   = new FilterWorker;
+    WorkerThread* fw   = new WorkerThread;
     filter1->setWorkerThread(fw);
     filter2->setWorkerThread(fw);
     fw->start();

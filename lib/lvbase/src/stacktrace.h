@@ -118,8 +118,11 @@ LV_BASE_EXPORT VisualLog &operator <<(VisualLog &vl, const StackFrame &value);
 class LV_BASE_EXPORT StackTrace{
 
 public:
+    /** vector of StackFrames */
     typedef std::vector<StackFrame>                 Container;
+    /** Const iterator for a stack frame vector */
     typedef std::vector<StackFrame>::const_iterator ConstIterator;
+    /** Shared pointer to StackTrace */
     typedef std::shared_ptr<StackTrace> Ptr;
 
     friend class StackTraceCapture;
@@ -141,14 +144,17 @@ private:
     std::vector<StackFrame>* m_frames;
 };
 
+/** Start iterator or the stackframes */
 inline StackTrace::ConstIterator StackTrace::begin() const{
     return m_frames->cbegin();
 }
 
+/** End iterator of the stackframes */
 inline StackTrace::ConstIterator StackTrace::end() const{
     return m_frames->cend();
 }
 
+/** Number of stackframes */
 inline size_t StackTrace::size() const{
     return m_frames->size();
 }

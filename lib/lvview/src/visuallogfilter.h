@@ -42,6 +42,7 @@ class LV_VIEW_EXPORT VisualLogFilter : public VisualLogBaseModel, public QQmlPar
     Q_PROPERTY(bool                    isIndexing READ isIndexing NOTIFY isIndexingChanged)
 
 private:
+    /// \private
     class SearchQuery{
     public:
         enum Type{
@@ -49,7 +50,7 @@ private:
             String,
             Regexp
         };
-
+        /// \private
         union SearchContainer{
 
             QString* searchString;
@@ -84,9 +85,18 @@ public:
     explicit VisualLogFilter(QObject *parent = nullptr);
     ~VisualLogFilter();
 
+    /**
+     * \brief Base model which is the model we're applying the filter too.
+     *
+     * Interestingly, it can be both the main model, or even another filter model!
+     * We could, in theory, have an array or filter models where each one is filtering on the previous one.
+     */
     lv::VisualLogBaseModel* source() const;
+    /** The tag we're filtering by */
     QString tag() const;
+    /** Returns the query result of the search */
     QJSValue search() const;
+    /** Indicator if the object is currently performing indexing in the background, asynchronously */
     bool isIndexing() const;
 
     void setSource(lv::VisualLogBaseModel* source);
@@ -108,6 +118,8 @@ public:
     void setPrefix(QJSValue prefix);
     void setIsIndexing(bool isIndexing);
 
+
+    /** The prefix we're filtering by */
     QJSValue prefix() const;
 
 public slots:
@@ -148,22 +160,15 @@ private:
     bool                        m_workerIgnoreResult;
 };
 
-/**
- * \brief Base model which is the model we're applying the filter too.
- *
- * Interestingly, it can be both the main model, or even another filter model!
- * We could, in theory, have an array or filter models where each one is filtering on the previous one.
- */
+
 inline VisualLogBaseModel *VisualLogFilter::source() const{
     return m_source;
 }
 
-/** The tag we're filtering by */
 inline QString VisualLogFilter::tag() const{
     return m_tag;
 }
 
-/** Indicator if the object is currently performing indexing in the background, asynchronously */
 inline bool VisualLogFilter::isIndexing() const{
     return m_isIndexing;
 }

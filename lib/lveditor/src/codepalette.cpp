@@ -26,6 +26,26 @@ namespace lv{
  */
 
 /**
+ * \fn lv::CodePalette::value()
+ * \brief Property value corresponding to this palette
+ */
+
+/**
+ * \fn QQuickItem* lv::CodePalette::item()
+ * \brief Visual item for this palette
+ */
+
+/**
+ * \fn lv::CodePalette::type
+ * \brief Returns the palette type
+ */
+
+/**
+ * \fn lv::CodePalette::name
+ * \brief Palette name
+ */
+
+/**
  * \brief Default contructor of CodePalette
  */
 CodePalette::CodePalette(QObject *parent)
@@ -55,9 +75,6 @@ void CodePalette::setValueFromBinding(const QVariant &value){
     m_bindingChange = false;
 }
 
-/**
- * \brief Palette name
- */
 QString CodePalette::name() const{
     return QFileInfo(m_path).baseName();
 }

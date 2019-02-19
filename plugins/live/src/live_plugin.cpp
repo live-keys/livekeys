@@ -17,7 +17,6 @@
 #include "live_plugin.h"
 #include "qlivecvmain.h"
 #include "qstaticloader.h"
-#include "qenginemonitor.h"
 #include "qstaticcontainer.h"
 #include "qlicensesettings.h"
 #include "qfilereader.h"
@@ -25,7 +24,7 @@
 #include "qtriangle.h"
 #include "qloglistener.h"
 #include "componentsource.h"
-#include "thread.h"
+#include "worker.h"
 #include "tuple.h"
 #include "tcpline.h"
 #include "tcpagent.h"
@@ -61,7 +60,7 @@ void LivePlugin::registerTypes(const char *uri){
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
     qmlRegisterType<lv::StringBasedLoader>(uri, 1, 0, "StringBasedLoader");
     qmlRegisterType<lv::ComponentSource>(  uri, 1, 0, "ComponentSource");
-    qmlRegisterType<lv::Thread>(           uri, 1, 0, "Thread");
+    qmlRegisterType<lv::Worker>(           uri, 1, 0, "Worker");
     qmlRegisterType<lv::Tuple>(            uri, 1, 0, "Tuple");
     qmlRegisterType<lv::TcpLine>(          uri, 1, 0, "TcpLine");
     qmlRegisterType<lv::TcpAgent>(         uri, 1, 0, "TcpAgent");
@@ -76,8 +75,6 @@ void LivePlugin::registerTypes(const char *uri){
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){
     QStaticContainer* sc = new QStaticContainer(engine);
     engine->rootContext()->setContextProperty("staticContainer", sc);
-    QEngineMonitor* em = new QEngineMonitor(engine);
-    engine->rootContext()->setContextProperty("engineMonitor", em); //TODO: Remove
 
     QObject* livecv   = engine->rootContext()->contextProperty("livecv").value<QObject*>();
     lv::Settings* settings = static_cast<lv::Settings*>(livecv->property("settings").value<QObject*>());

@@ -78,7 +78,9 @@ public slots:
     void disable();
 
 signals:
+    /** completion position changed */
     void completionPositionChanged(int arg);
+    /** Shows if enabled state changed */
     void isEnabledChanged(bool arg);
 
 private:
@@ -100,16 +102,12 @@ inline QHash<int, QByteArray> CodeCompletionModel::roleNames() const{
     return m_roles;
 }
 
-/**
- * \brief Getter for completion position
- */
+/** \brief Returns completion position */
 inline int CodeCompletionModel::completionPosition() const{
     return m_completionPosition;
 }
 
-/**
- * \brief Sbows if the model is enabled
- */
+/** \brief Shows if completion is enabled */
 inline bool CodeCompletionModel::isEnabled() const{
     return m_isEnabled;
 }

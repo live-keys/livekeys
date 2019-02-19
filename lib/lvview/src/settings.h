@@ -35,12 +35,15 @@ public:
 
     static Settings* create(const QString& path, QObject* parent = 0);
 
+    /** Launch mode getter, shows that the view is available (full screen) */
     bool launchMode() const;
     void setLaunchMode(bool launchMode);
 
+    /** Run mode getter, runs it in command line, no UI */
     bool runMode() const;
     void setRunMode(bool runMode);
 
+    /** Returns the path of the config folder */
     const QString& path() const;
 
 public slots:
@@ -57,7 +60,6 @@ private:
     QMap<QString, QObject*>* m_configFiles;
 };
 
-/** Launch mode getter, shows that the view is available (full screen) */
 inline bool Settings::launchMode() const{
     return m_previewMode;
 }
@@ -67,7 +69,6 @@ inline void Settings::setLaunchMode(bool previewMode){
     m_previewMode = previewMode;
 }
 
-/** Run mode getter, runs it in command line, no UI */
 inline bool Settings::runMode() const{
     return m_runMode;
 }
@@ -77,7 +78,6 @@ inline void Settings::setRunMode(bool runMode){
     m_runMode = runMode;
 }
 
-/** Returns the path of the config folder */
 inline const QString &Settings::path() const{
     return m_path;
 }

@@ -2,7 +2,6 @@
 #include <QQmlContext>
 #include <QQuickItem>
 #include <QQmlEngine>
-#include "live/filter.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"

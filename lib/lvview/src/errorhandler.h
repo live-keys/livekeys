@@ -44,6 +44,8 @@ public:
     void signalWarning(const QJSValue& error);
 
     void setTarget(QObject* target);
+
+    /** Target getter */
     QObject* target() const;
 
 signals:
@@ -66,7 +68,6 @@ private:
     bool     m_componentComplete;
 };
 
-/** Target getter */
 inline QObject *ErrorHandler::target() const{
     return m_target;
 }

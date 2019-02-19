@@ -24,7 +24,7 @@
  * \ingroup plugin-lcvfeatures2d
  */
 
- /**
+/**
  *\brief QKeypointHomography constructor
  */
 QKeypointHomography::QKeypointHomography(QQuickItem* parent)
@@ -34,7 +34,8 @@ QKeypointHomography::QKeypointHomography(QQuickItem* parent)
 {
     setFlag(QQuickItem::ItemHasContents, true);
 }
- /**
+
+/**
  *\brief QKeypointHomography desctructor
  */
 QKeypointHomography::~QKeypointHomography(){

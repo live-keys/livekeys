@@ -24,6 +24,17 @@
 
 namespace lv{
 
+
+/**
+ * \fn lv::EditorSettingsCategory::fromJson
+ * \brief Blank implementation of fromJson
+ */
+
+/**
+ * \fn lv::EditorSettingsCategory::toJson
+ * \brief Dummy implementation of toJson, returning a blank object
+ */
+
 /**
  * \brief Blank constructor
  */
