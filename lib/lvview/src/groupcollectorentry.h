@@ -7,6 +7,7 @@ namespace lv{
 
 class GroupCollector;
 
+/// \private
 class GroupCollectorEntry : public QObject{
 
     Q_OBJECT

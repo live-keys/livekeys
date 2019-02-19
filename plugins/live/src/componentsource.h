@@ -8,6 +8,8 @@
 namespace lv{
 
 class Project;
+
+/// \private
 class ComponentSource : public QObject, public QQmlParserStatus{
 
     Q_OBJECT

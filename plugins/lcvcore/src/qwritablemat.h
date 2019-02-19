@@ -8,6 +8,7 @@
 
 class QMat;
 
+/// \private
 class Q_LCVCORE_EXPORT QWritableMat : public QObject{
 
     Q_OBJECT

@@ -52,39 +52,14 @@ public:
     void setActive(const QString& rootPath);
 
     ProjectFile* lookupBestFocus(ProjectEntry* entry);
-
     ProjectDocument* isOpened(const QString& rootPath);
 
-    /**
-     * \brief Getter of the file model
-     *
-     * The file model represents all of the opened files in the current project
-     */
     lv::ProjectFileModel* fileModel();
-
-    /**
-     * \brief Getter of the navigation model
-     *
-     * Used to search through the project for different files
-     */
     lv::ProjectNavigationModel* navigationModel();
-    /**
-     * \brief Getter of the document model
-     *
-     * Shows all the opened files
-     */
     lv::ProjectDocumentModel* documentModel();
 
-    /**
-     * \brief Getter of the currently active project document
-     */
     lv::ProjectDocument*  active() const;
 
-    /**
-     * \brief Getter of the root path
-     *
-     * Actual path of the project, whether it's a file- or folder-based project.
-     */
     const QString& rootPath() const;
 
     LockedFileIOSession::Ptr lockedFileIO();
@@ -142,23 +117,45 @@ private:
     QString          m_path;
 };
 
-
+/**
+ * \brief Getter of the file model
+ *
+ * The file model represents all of the opened files in the current project
+ */
 inline ProjectFileModel* Project::fileModel(){
     return m_fileModel;
 }
 
+/**
+ * \brief Getter of the navigation model
+ *
+ * Used to search through the project for different files
+ */
 inline ProjectNavigationModel *Project::navigationModel(){
     return m_navigationModel;
 }
 
+/**
+ * \brief Getter of the document model
+ *
+ * Shows all the opened files
+ */
 inline ProjectDocumentModel *Project::documentModel(){
     return m_documentModel;
 }
 
+/**
+ * \brief Getter of the currently active project document
+ */
 inline ProjectDocument *Project::active() const{
     return m_active;
 }
 
+/**
+ * \brief Getter of the root path
+ *
+ * Actual path of the project, whether it's a file- or folder-based project.
+ */
 inline const QString &Project::rootPath() const{
     return m_path;
 }

@@ -35,7 +35,7 @@
  */
 namespace lv{
 
-/// @private
+/// \private
 class PaletteLoader{
 public:
     PaletteLoader(const QString& path, const QString& type)
@@ -112,7 +112,7 @@ void PaletteLoader::handleError(const QQmlComponent &component) const{
 // QLivePaletteContainerPrivate
 // ----------------------------
 
-/// @private
+/// \private
 class PaletteContainerPrivate{
 public:
     typedef QMultiHash<QString, PaletteLoader*> PaletteHash;

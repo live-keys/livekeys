@@ -29,13 +29,7 @@ public:
     EditorSettingsCategory();
     ~EditorSettingsCategory();
 
-    /**
-     * \brief Blank implementation of fromJson
-     */
     virtual void fromJson(const QJsonValue&){}
-    /**
-     * \brief Dummy implementation of toJson, returning a blank object
-     */
     virtual QJsonValue toJson() const{ return QJsonValue(); }
 };
 

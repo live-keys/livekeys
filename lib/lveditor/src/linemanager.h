@@ -9,7 +9,7 @@ namespace lv {
 class CollapsedSection;
 class LineSurface;
 
-/// @private
+/// \private
 class LineManager: public QObject{
 
     Q_OBJECT
@@ -21,7 +21,7 @@ public:
     friend class TextEditPrivate;
 
 public:
-    /// @private
+    /// \private
     class CollapsedSection {
         public:
             int position;

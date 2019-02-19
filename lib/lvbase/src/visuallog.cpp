@@ -177,7 +177,7 @@ namespace{
 
 // VisualLog::Configuration
 // ---------------------------------------------------------------------
-/// @private
+/// \private
 class VisualLog::Configuration{
 
 public:
@@ -252,7 +252,7 @@ void VisualLog::Configuration::closeFile(){
 // VisualLog::ConfigurationContainer
 // ---------------------------------------------------------------------
 
-/// @private
+/// \private
 class VisualLog::ConfigurationContainer{
 
 public:

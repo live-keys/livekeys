@@ -56,11 +56,6 @@ public:
     QTextDocument *target();
     void setTarget(QTextDocument *target);
 
-    /**
-     * \brief Completion model
-     *
-     * Model of suggestions that we get from the code handler
-     */
     CodeCompletionModel* completionModel() const;
 
     void rehighlightBlock(const QTextBlock& block);
@@ -71,19 +66,12 @@ public:
     void classBegin(){}
     void componentComplete();
 
-    /** Returns the TextEdit */
     TextEdit* textEdit();
     void setTextEdit(TextEdit* te);
 
-    /**
-     * \brief Shows if the editor is in focus
-     */
     bool editorFocus() const;
     void setEditorFocus(bool editorFocus);
 
-    /**
-     * \brief Code handler getter
-     */
     AbstractCodeHandler* codeHandler();
 
     void requestCursorPosition(int position);
@@ -91,6 +79,7 @@ public:
     void lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *palette);
     void lineBoxRemoved(QQuickItem *palette);
     void lineBoxResized(QQuickItem *palette, int newHeight);
+
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
@@ -107,7 +96,7 @@ signals:
     void targetChanged();
     /** Cursor position change request */
     void cursorPositionRequest(int position);
-    /** Document content was changed manuallz */
+    /** Document content was changed manually */
     void contentsChangedManually();
     /** Editor focus changed */
     void editorFocusChanged();
@@ -141,14 +130,23 @@ inline QTextDocument *DocumentHandler::target(){
     return m_targetDoc;
 }
 
+/**
+ * \brief Completion model
+ *
+ * Model of suggestions that we get from the code handler
+ */
 inline lv::CodeCompletionModel *DocumentHandler::completionModel() const{
     return m_completionModel;
 }
 
+/** \brief Returns the TextEdit */
 inline TextEdit *DocumentHandler::textEdit(){
     return m_textEdit;
 }
 
+/**
+ * \brief Shows if the editor is in focus
+ */
 inline bool DocumentHandler::editorFocus() const{
     return m_editorFocus;
 }
@@ -163,6 +161,9 @@ inline void DocumentHandler::setEditorFocus(bool editorFocus){
     emit editorFocusChanged();
 }
 
+/**
+ * \brief Code handler getter
+ */
 inline AbstractCodeHandler *DocumentHandler::codeHandler(){
     return m_codeHandler;
 }

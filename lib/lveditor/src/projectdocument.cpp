@@ -31,6 +31,38 @@
 
 #include <QDebug>
 
+
+/**
+ * \class lv::ProjectDocumentMarker
+ * \brief Dynamic project document markers
+ *
+ * Markers are wrappers around a position in a document. They get moved automatically with document changes, and get
+ * deleted when both characters surrounding them are deleted.
+ * \ingroup lveditor
+ */
+
+/**
+ * \fn lv::ProjectDocumentMarker::position
+ * \brief Marker position
+ */
+
+/**
+ * \fn lv::ProjectDocumentMarker::isValid
+ * \brief Shows if the marker is valid
+ */
+
+/**
+ * \fn lv::ProjectDocumentMarker::create
+ * \brief Create a ProjectDocumentMarker
+ */
+
+/**
+ * \fn lv::ProjectDocumentMarker::~ProjectDocumentMarker
+ * \brief Destructor
+ */
+
+
+
 /**
  * \class lv::ProjectDocument
  * \brief Wrapper for any opened document in LiveKeys
@@ -506,6 +538,9 @@ void ProjectDocument::syncContent() const{
     m_isSynced = true;
 }
 
+/**
+ * \brief ProjectDocument destructor
+ */
 ProjectDocument::~ProjectDocument(){
     if ( m_file->parent() == nullptr )
         m_file->deleteLater();
@@ -551,6 +586,51 @@ ProjectDocumentBlockData::~ProjectDocumentBlockData(){
  * The section is defined by its position and length. Similar to the dynamic markers, this gets moved around and modified
  * along with document changes.
  * \ingroup lveditor
+ */
+
+/**
+ * \fn lv::ProjectDocumentSection::position
+ * \brief Returns the first position of the section
+ */
+
+/**
+ * \fn lv::ProjectDocumentSection::length
+ * \brief Returns the length of the section
+ */
+
+/**
+ * \fn lv::ProjectDocumentSection::type
+ * \brief Returns the type of section set by the user
+ */
+
+/**
+ * \fn lv::ProjectDocumentSection::isValid
+ * \brief Shows if the section is still valid
+ */
+
+/**
+ * \fn lv::ProjectDocumentSection::setUserData
+ * \brief Set the custom user data inside the section
+ */
+
+/**
+ * \fn lv::ProjectDocumentSection::userData
+ * \brief Returns the custom user data
+ */
+
+/**
+ * \fn lv::ProjectDocumentSection::document
+ * \brief Returns the document the section belongs to
+ */
+
+/**
+ * \fn lv::ProjectDocumentSection::parentBlock
+ * \brief Returns the block containing the first position of the section
+ */
+
+/**
+ * \fn lv::ProjectDocumentSection::create
+ * \brief Create a ProjectDocumentMarker with given parameters
  */
 
 /**

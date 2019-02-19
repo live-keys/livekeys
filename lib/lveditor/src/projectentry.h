@@ -46,14 +46,11 @@ public:
     int childCount() const;
     int childIndex() const;
 
-    /** Name getter */
     const QString& name() const;
     void setName(const QString& name);
 
-    /** Path getter */
     const QString& path() const;
 
-    /** Shows if the entry is a file */
     bool isFile() const;
 
     void clearItems();
@@ -86,7 +83,7 @@ signals:
 
 protected:
     ProjectEntry(const QString& path, const QString& name, bool isFile, ProjectEntry* parent = 0);
-    /// @private
+    /// \private
     bool m_isFile;
 
 private:
@@ -98,14 +95,17 @@ private:
 };
 
 
+/** Name getter */
 inline const QString &ProjectEntry::name() const{
     return m_name;
 }
 
+/** Path getter */
 inline const QString &ProjectEntry::path() const{
     return m_path;
 }
 
+/** Shows if the entry is a file */
 inline bool ProjectEntry::isFile() const{
     return m_isFile;
 }

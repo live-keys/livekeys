@@ -36,7 +36,7 @@ public:
         bool loaded;
     };
 
-    /// @private
+    /// \private
     template<typename T>
     class CyclesResult{
 

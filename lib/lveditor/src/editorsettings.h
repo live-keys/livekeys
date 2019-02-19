@@ -36,10 +36,7 @@ public:
     explicit EditorSettings(const QString& path, QObject *parent = 0);
     ~EditorSettings();
 
-    /** Returns the font size */
     int fontSize() const;
-
-    /** Returns path of the settings */
     const QString& path() const;
 
     void fromJson(const QJsonObject& root);
@@ -56,9 +53,7 @@ public slots:
     void documentChanged();
 
 signals:
-    /** Signals error with given string */
     void initError(const QString& errorString);
-    /** Font size changed */
     void fontSizeChanged(int fontSize);
 
 private:
@@ -69,10 +64,14 @@ private:
     QHash<QString, EditorSettingsCategory*> m_settings;
 };
 
+/**
+ * \brief Returns the font size
+ */
 inline int EditorSettings::fontSize() const{
     return m_fontSize;
 }
 
+/** Returns path of the settings */
 inline const QString &EditorSettings::path() const{
     return m_path;
 }

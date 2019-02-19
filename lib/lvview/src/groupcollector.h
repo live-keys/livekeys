@@ -8,6 +8,7 @@
 
 namespace lv{
 
+/// \private
 class GroupCollector : public QObject, public QQmlParserStatus{
 
     Q_OBJECT

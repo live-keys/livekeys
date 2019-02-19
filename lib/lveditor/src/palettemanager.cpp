@@ -97,6 +97,7 @@ void PaletteManager::setLineHeight(int value)
     m_lineHeight = value;
 }
 
+/** 0 if not, positive number of lines if yes*/
 int PaletteManager::isLineBeforePalette(int blockNumber)
 {
     auto it = m_palettes.begin();

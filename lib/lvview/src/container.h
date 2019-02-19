@@ -7,6 +7,7 @@
 
 namespace lv{
 
+/// \private
 class Container : public QObject{
 
     Q_OBJECT

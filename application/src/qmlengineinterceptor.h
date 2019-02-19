@@ -36,7 +36,7 @@ private:
     qint64 m_offset;
 };
 
-/// @private
+/// \private
 class QmlEngineInterceptor : public QNetworkAccessManager{
 
 public:

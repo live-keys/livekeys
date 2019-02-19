@@ -51,7 +51,7 @@ public:
     /** unsigned long long */
     typedef unsigned long long KeyCode;
 
-    /// @private
+    /// \private
     class StoredCommand{
     public:
         StoredCommand() : isDefault(false){}

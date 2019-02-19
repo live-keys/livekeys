@@ -28,7 +28,7 @@ namespace{
 
 }
 
-/// @private
+/// \private
 class PackageGraphPrivate{
 
 public:

@@ -20,7 +20,7 @@
 #include <QQmlExtensionPlugin>
 #include "live/lveditorglobal.h"
 
-/// @private
+/// \private
 class LV_EDITOR_EXPORT EditorPrivatePlugin : public QQmlExtensionPlugin{
 
     Q_OBJECT
