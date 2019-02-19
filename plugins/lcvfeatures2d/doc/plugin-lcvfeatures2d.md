@@ -340,6 +340,8 @@ Params:
 
 {qmlType:BruteForceMatcher}
 {qmlInherits:lcvfeatures2d#DescriptorMatcher}
+{qmlBrief:Finds the closest descriptor in the second set
+by trying each one.}
 
 params:
 
@@ -349,13 +351,48 @@ params:
 {qmlType:FlannBasedMatcher}
 {qmlInherits:lcvfeatures2d#DescriptorMatcher}
 
-params:
+{qmlProperty:KDTree}
+
+Params:
+
+**int trees**
+
+{qmlProperty:HierarchicalClustering}
+
+Params:
+
+**int tableNumber**
+
+**int keySize**
+
+**multiProbeLevel**
+
+{qmlProperty:Lsh}
+
+Params:
+
+**int tableNumber**
+
+**int keySize**
+
+**int multiProbeLevel**
 
 {qmlType:DrawMatches}
 {qmlInherits:lcvfeatures2d#DescriptorMatcher}
+{qmlBrief:Draws matches between two sets of keypoints that were detected and the matches that were found
+Specify match index to focus on specific match}
 
-Draws matches between two sets of keypoints that were detected and the matches that were found
-Specify match index to focus on specific match
+{qmlProperty:keypoints1}
+{qmlBrief:Keypoint from the first source}
+
+{qmlProperty:keypoints2}
+{qmlBrief:Keypoint from the second source }
+
+{qmlProperty:matches1to2}
+{qmlBrief:Matches from the first source to second one.}
+
+{qmlProperty:matchIndex}
+{qmlBrief:}
 
 {qmlType:DescriptorMatchFilter}
 {qmlInherits:lcvfeatures2d#DescriptorMatcher}
@@ -381,7 +418,6 @@ Specify match index to focus on specific match
 {qmlBrief: Size of the vector of KeypointsToScene object}
 
 {qmlType:MatchesToLocalKeypoint}
-{qmlInherits:}
 
 {qmlProperty:matches1to2}
 {qmlBrief:Matches from the first source to second one.}
