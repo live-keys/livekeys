@@ -22,6 +22,7 @@
 
 class QBackgroundSubtractorKnnPrivate;
 
+/// \private
 class QBackgroundSubtractorKnn : public QBackgroundSubtractor{
 
     Q_OBJECT

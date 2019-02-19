@@ -43,9 +43,7 @@
  */
 
 /**
- *\brief QMat::QMat
- *
- *Params : \a parent
+ *\brief QMat constructor
  */
 QMat::QMat(QObject *parent)
     : lv::Shared(parent)
@@ -54,11 +52,7 @@ QMat::QMat(QObject *parent)
 }
 
 /**
- *\brief QMat::QMat
- *
- *Params : 
- *\a mat 
- *\a parent
+ *\brief QMat constructor with internal mat
  */
 QMat::QMat(cv::Mat *mat, QObject *parent)
     : lv::Shared(parent)
@@ -68,7 +62,6 @@ QMat::QMat(cv::Mat *mat, QObject *parent)
 
 /**
  * \brief Returns an equivalent ArrayBuffer to access the matrix values
- * \return
  */
 QByteArray QMat::buffer(){
     return QByteArray::fromRawData(
@@ -78,23 +71,21 @@ QByteArray QMat::buffer(){
 }
 
 /**
- * \brief QMat::channels
- * \return
+ * \brief Returns the number of channels
  */
 int QMat::channels(){
     return m_internal->channels();
 }
 
 /**
- * \brief QMat::depth
- * \return
+ * \brief Returns the matrix depth (CV8U, CV16S, ...)
  */
 int QMat::depth(){
     return m_internal->depth();
 }
 
 /**
- *\brief Returns the size of the matrix element
+ * \brief Returns the size of the matrix.
  */
 QSize QMat::dimensions() const{
     return QSize(m_internal->cols, m_internal->rows);
@@ -178,10 +169,16 @@ QMat *QMat::reloc(QMat *m){
     return res;
 }
 
+/**
+ * \brief Returns the internal mat
+ */
 const cv::Mat &QMat::internal() const{
     return *m_internal;
 }
 
+/**
+ * \brief Returns the internal mat
+ */
 cv::Mat &QMat::internal(){
     return *m_internal;
 }

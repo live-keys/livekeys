@@ -24,11 +24,7 @@ import editor.private 1.0
 
 Rectangle{
     id: root
-    color : "#060e17"
-    gradient: Gradient{
-        GradientStop { position: 0.0;  color: "#060e17" }
-        GradientStop { position: 0.01; color: "#060e17" }
-    }
+    color : "#05090e"
     objectName: "project"
 
     property WindowControls windowControls : null
@@ -44,8 +40,7 @@ Rectangle{
     }
 
     function setNavEditor(e){
-        if (navEditor && navEditor !== e)
-        {
+        if (navEditor && navEditor !== e){
             navEditor = e;
         }
     }
@@ -56,7 +51,7 @@ Rectangle{
             'open' : [openProject, "Open Project"],
             'new' : [newProject, "New Project"],
             'openFile' : [openFile, "Open File"],
-            'toggleVisibility' : [toggleVisibility, "Toggle Visibility"]
+            'toggleVisibility' : [toggleVisibility, "Project: Toggle Visibility"]
         })
     }
 
@@ -289,10 +284,92 @@ Rectangle{
     }
 
 
+    Rectangle{
+        id: paneTop
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.right: parent.right
+
+        height: 30
+        color: "#08111a"
+
+        Text{
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 15
+            color: "#808691"
+            text: "Project"
+            font.family: "Open Sans, sans-serif"
+            font.pixelSize: 12
+            font.weight: Font.Normal
+        }
+
+        Item{
+            anchors.right: parent.right
+            width: 30
+            height: parent.height
+
+            Image{
+                id : toggleNavigationImage
+                anchors.centerIn: parent
+                source : "qrc:/images/toggle-navigation.png"
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    projectMenu.visible = !projectMenu.visible
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        id: projectMenu
+        visible: false
+        anchors.right: root.right
+        anchors.topMargin: 30
+        anchors.top: root.top
+        property int buttonHeight: 30
+        property int buttonWidth: 180
+        opacity: visible ? 1.0 : 0
+        z: 1000
+
+        Behavior on opacity{ NumberAnimation{ duration: 200 } }
+
+        Rectangle{
+            id: removeProjectViewButton
+            anchors.top: parent.top
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
+                text: qsTr("Remove Project View")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: removeProjectViewArea.containsMouse ? "#969aa1" : "#808691"
+            }
+            MouseArea{
+                id : removeProjectViewArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    projectMenu.visible = false
+                    toggleVisibility()
+                }
+            }
+        }
+    }
+
+
     TreeView {
         id: view
         model: project.fileModel
-        anchors.topMargin: 10
+        anchors.topMargin: 40
         anchors.leftMargin: 10
         anchors.fill: parent
 
@@ -412,7 +489,7 @@ Rectangle{
                     anchors.left: parent.left
                     anchors.leftMargin: 25
                     anchors.verticalCenter: parent.verticalCenter
-                    color: styleData.value === view.dropEntry ? "#ff0000" : styleData.textColor
+                    color: type === 1 ? "#c6d3de" : styleData.value === view.dropEntry ? "#ff0000" : styleData.textColor
                     text: {
                         styleData.value
                             ? styleData.value.name === ''
@@ -433,8 +510,8 @@ Rectangle{
                         return 0
                     }
 
-                    font.weight: type === 1 ? Font.Bold : Font.Light
-                    font.italic: type === 2
+                    font.weight: Font.Light
+                    font.italic: type === 2 || type === 1
                     readOnly: !entryDelegate.editMode
                     Keys.onReturnPressed: {
                         root.renameEntry(styleData.value, text)
