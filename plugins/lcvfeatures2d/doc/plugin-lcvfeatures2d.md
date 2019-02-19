@@ -335,7 +335,7 @@ It has two groups of match methods: for matching descriptors of an image with an
 
 Params:
 
-* **querdyDescriptors** Query set of descriptors.
+* **queryDescriptors** Query set of descriptors.
 * **knn** Count of best matches found per each query descriptor or less if a query descriptor has less than k possible matches in total.
 
 {qmlType:BruteForceMatcher}
