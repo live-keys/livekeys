@@ -36,9 +36,9 @@ Rectangle{
         width: parent.width
         height: 30
 
-        color: "#050d13"
+        color: "#05090e"
 
-        border.color: "#0d1f2d"
+        border.color: "#0c1117"
         border.width: 1
 
         TextInput{
@@ -215,7 +215,7 @@ Rectangle{
                 property string command: model.command
 
                 z: 400
-                color: ListView.isCurrentItem ? "#11202d" : "#0a131a"
+                color: ListView.isCurrentItem ? "#091927" : "#0b0e11"
                 width: root.width
                 height: commandsView.delegateHeight
                 Text{
