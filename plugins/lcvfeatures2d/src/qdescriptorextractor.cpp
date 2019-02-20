@@ -63,7 +63,10 @@ void QDescriptorExtractor::initializeExtractor(cv::Ptr<cv::DescriptorExtractor> 
     m_extractor = extractor;
     compute();
 }
-/// \todo
+
+/**
+*\brief Implementation from QQuickItem. Triggers a calculation of descriptors if the keypoints have been set.
+*/
 void QDescriptorExtractor::componentComplete(){
     QQuickItem::componentComplete();
     compute();

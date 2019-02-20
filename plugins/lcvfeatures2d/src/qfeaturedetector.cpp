@@ -131,7 +131,7 @@ QFeatureDetector::QFeatureDetector(cv::Ptr<cv::FeatureDetector> detector, QQuick
 }
 
 /**
-*\brief Initializes any internal parameters
+*\brief QFeatureDetector destructor
 */
 QFeatureDetector::~QFeatureDetector(){
     delete m_output;
@@ -167,13 +167,17 @@ void QFeatureDetector::detect(){
     }
 }
 
-/// \todo
+/**
+*\brief Implementation from QQuickItem. Triggers a feature detection if input matrix has been set.
+*/
 void QFeatureDetector::componentComplete(){
     QQuickItem::componentComplete();
     detect();
 }
 
-/// \todo
+/**
+*\brief updatePaintNode() implementation from QQuickItem.
+*/
 QSGNode* QFeatureDetector::updatePaintNode(QSGNode* node, QQuickItem::UpdatePaintNodeData*){
     if ( m_outputDirty )
         drawKeypoints();

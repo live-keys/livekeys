@@ -24,19 +24,19 @@ class Q_LCVCORE_EXPORT QMatState{
 
 public:
     /**
-    *\brief todo
+    *\brief Matrix for which the state is for.
     */
     QMat* mat;
     /**
-    *\brief todo
+    *\brief Linear filtering flag.
     */
     bool  linearFilter;
     /**
-    *\brief todo
+    *\brief Stored index of the texture to be displayed.
     */
     mutable int   textureIndex;
     /**
-    *\brief todo
+    *\brief Stores wether the texture has been loaded (synced with opengl).
     */
     mutable bool  textureSync;
 

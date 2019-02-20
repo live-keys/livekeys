@@ -115,7 +115,7 @@ void QDrawMatches::setMatches1to2(QDMatchVector *matches1to2){
     update();
 }
 /**
-*\brief Implementation from QtQuickItem
+*\brief Implementation from QQuickItem
 */
 QSGNode *QDrawMatches::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData){
 

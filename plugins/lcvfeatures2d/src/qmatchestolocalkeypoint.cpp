@@ -112,7 +112,7 @@ void QMatchesToLocalKeypoint::mapValues(){
 
 /**
  * \fn lv::QMatchesToLocalKeypoint::trainKeypointVectors()
- * \brief todo
+ * \brief Triggers training of the keypoint vectors.
 */
 
 /**
@@ -127,7 +127,7 @@ void QMatchesToLocalKeypoint::mapValues(){
 
 /**
  * \fn lv::QMatchesToLocalKeypoint::queryKeypointVector()
- * \brief todo
+ * \brief Returns the query keypoins.
 */
 
 /**
@@ -158,7 +158,7 @@ void QMatchesToLocalKeypoint::mapValues(){
 
 /**
  * \fn lv::QMatchesToLocalKeypoint::output()
- * \brief Output
+ * \brief Returns the output.
 */
 
 /**
@@ -168,6 +168,6 @@ void QMatchesToLocalKeypoint::mapValues(){
 
 /**
  * \fn lv::QMatchesToLocalKeypoint::componentComplete()
- * \brief todo
+ * \brief Implementation from QQuickItem. Triggers a mapping of the matches if the input has been set.
 */
 

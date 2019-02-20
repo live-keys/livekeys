@@ -53,10 +53,13 @@ QDescriptorMatcher::QDescriptorMatcher(cv::DescriptorMatcher* matcher, QQuickIte
 QDescriptorMatcher::~QDescriptorMatcher(){
     delete m_matcher;
 }
+
 /**
-*\fn lv::QDescriptorMatcher::matches()
 *\brief Returns a number of matches
 */
+QDMatchVector* QDescriptorMatcher::matches(){
+    return m_matches;
+}
 /**
  * \brief Adds a set of descriptors
  */
@@ -133,7 +136,10 @@ void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches
         }
     }
 }
-/// \todo
+
+/**
+*\brief Override from QQuickItem.Calls the matcher.
+*/
 void QDescriptorMatcher::componentComplete(){
     QQuickItem::componentComplete();
     callMatch();
