@@ -12,7 +12,7 @@ import lcvcore 1.0
 
 
 {qmlType:Mat}
-{qmlInherits:external.QtQml#QtObject}
+{qmlInherits:base#Shared}
 {qmlBrief:Main matrix object with variable types.}
 
   You can access a matrix's pixels from QML by using the buffer() function, which gives you a js ArrayBuffer. Here's a
@@ -39,7 +39,7 @@ ImRead{
 ```
 A sample on accessing and changing matrixes is available in **samples/core/customfilter.qml** :
 
-{qmlProperty:Mat.Type type}
+{qmlEnum:Type}
 
 Matrix type.
 
@@ -77,6 +77,32 @@ Returns a cloned matrix with javascript ownership
 {qmlMethod:Mat createOwnedObject()}
 
 Returns a shallow copied matrix with javascript ownership
+
+
+{qmlType:WritableMat}
+{qmlInherits:base#Shared}
+{qmlBrief:Writable matrix object, used mostly for quick operations like drawing}
+
+{qmlMethod:ByteArray buffer()}
+
+Returns an equivalent ArrayBuffer to access the matrix values
+
+{qmlMethod:int channels()}
+
+Returns the number of channels for the matrix
+
+{qmlMethod:int depth()}
+
+Returns the depth or type of the matrix
+
+{qmlMethod:size dimensions()}
+
+Returns the matrix dimensions
+
+{qmlMethod:Mat toMat()}
+
+Returns a [Mat](qml:lcvcore#Mat) object copy of the WritableMat.
+
 
 {qmlType:MatOp}
 {qmlInherits:external.QtQml#QtObject}

@@ -3,30 +3,63 @@
 #include "qmatop.h"
 #include <QQmlEngine>
 
+
+/**
+ * \class QWritableMat
+ * \ingroup plugin-lcvcore
+ * \brief Similar to QMat, but used for quick writeable functions like drawing.
+ *
+ * This class will mostly used to preserve QMat's immutability accross functions.
+ *
+ * To convert to a QMat, use:
+ *
+ * \code
+ * QMat* m = writableMat.toMat();
+ * \endcode
+ */
+
+/**
+ *\brief QWritableMat constructor
+ */
 QWritableMat::QWritableMat(QObject *parent)
     : QObject(parent)
     , m_internal(new cv::Mat)
 {
 }
 
+/**
+ * \brief QWritableMat constructor with internal mat
+ */
 QWritableMat::QWritableMat(cv::Mat *mat, QObject *parent)
     : QObject(parent)
     , m_internal(mat)
 {
 }
 
+/**
+ * \brief QWritableMat destructor
+ */
 QWritableMat::~QWritableMat(){
     delete m_internal;
 }
 
+/**
+ * \brief Returns the internal mat
+ */
 const cv::Mat &QWritableMat::internal() const{
     return *m_internal;
 }
 
+/**
+ * \brief Returns the internal mat
+ */
 cv::Mat &QWritableMat::internal(){
     return *m_internal;
 }
 
+/**
+ * \brief Returns an equivalent ArrayBuffer to access the matrix values
+ */
 QByteArray QWritableMat::buffer(){
     return QByteArray::fromRawData(
         reinterpret_cast<const char*>(m_internal->data),
@@ -34,18 +67,30 @@ QByteArray QWritableMat::buffer(){
                 );
 }
 
+/**
+ * \brief Returns the number of channels
+ */
 int QWritableMat::channels() const{
     return m_internal->channels();
 }
 
+/**
+ * \brief Returns the matrix depth (CV8U, CV16S, ...)
+ */
 int QWritableMat::depth() const{
     return m_internal->depth();
 }
 
+/**
+ * \brief Returns the size of the matrix.
+ */
 QSize QWritableMat::dimensions() const{
     return QSize(m_internal->cols, m_internal->rows);
 }
 
+/**
+ * \brief Returns copied QMat of this object
+ */
 QMat *QWritableMat::toMat() const{
     cv::Mat* m = new cv::Mat;
     m_internal->copyTo(*m);
@@ -53,6 +98,9 @@ QMat *QWritableMat::toMat() const{
     return mwrap;
 }
 
+/**
+ * \brief Fills the matrix with a specified color
+ */
 void QWritableMat::fill(const QColor &color, QMat *mask){
     if ( mask ){
         m_internal->setTo(QMatOp::toScalar(color), mask->internal());
