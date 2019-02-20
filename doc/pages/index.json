@@ -10,7 +10,10 @@
     [
         {"Running Live CV" : "running.md"},
         {"Projects" : "projects.md"},
-        {"Palettes and Bindings" : "palettes-and-bindings.md"}
+        {"Palettes and Bindings" : "palettes-and-bindings.md"},
+        {"Logging" : "logging.md"},
+        {"Error Handling": "errorhandling.md"},
+        {"Configurations" : "configurations.md"}
     ],
     {"Plugins": "plugins.md"},
     [
