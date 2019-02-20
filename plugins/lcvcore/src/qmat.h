@@ -64,12 +64,12 @@ public:
     const cv::Mat& internal() const;
     cv::Mat& internal();
 
-    virtual void recycleSize(int size);
+    virtual void recycleSize(int size) const;
 
 public slots:
-    QByteArray  buffer();
-    int         channels();
-    int         depth();
+    QByteArray  buffer() const;
+    int         channels() const;
+    int         depth() const;
     QSize       dimensions() const;
     QMat*       createOwnedObject();
     QMat*       cloneMat() const;
@@ -77,7 +77,7 @@ public slots:
 private:
     static cv::Mat* memoryAlloc(int width, int height, int type, int channels);
     static size_t memoryIndex(int width, int height, int type, int channels);
-    static size_t memoryIndex(QMat* m);
+    static size_t memoryIndex(const QMat* m);
     static void free(cv::Mat* m);
 
     cv::Mat* m_internal;

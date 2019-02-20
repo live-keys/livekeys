@@ -14,7 +14,8 @@ class LV_VIEW_EXPORT Memory : public QObject{
 
     Q_OBJECT
 
-    template<typename T, typename TI = T::InternalType>
+private:
+    template<typename T, typename TI>
     class Cell{
     public:
         std::list<TI*> objects;
@@ -27,10 +28,18 @@ class LV_VIEW_EXPORT Memory : public QObject{
         TI* takeObject(){ TI* t = objects.front(); objects.pop_front(); return t; }
     };
 
-    template<typename T, typename TI = T::InternalType>
-    class Container{
+    class ContainerBase{
+    public:
+        virtual ~ContainerBase(){}
+    };
+
+    template<typename T, typename TI>
+    class Container : public ContainerBase{
     public:
         std::unordered_map<qint64, Memory::Cell<T, TI>* > m_cells;
+
+        Container(){}
+        ~Container(){}
     };
 
 public:
@@ -52,12 +61,15 @@ public:
 
     template<typename T, typename TI, typename ...Args>
     static void free(T* parent, TI* arg){
-        if ( container<T, TI>().m_cells.empty() )
+        if ( !containerActive() || container<T, TI>().m_cells.empty() ){
             T::free(arg);
+            return;
+        }
         qint64 index = T::memoryIndex(parent);
         auto it = container<T, TI>().m_cells.find(index);
         if ( it == container<T, TI>().m_cells.end() ) {
             T::free(arg);
+            return;
         }
         Cell<T, TI>* cell = it->second;
         if ( cell->allocationSize > cell->objects.size() ){
@@ -66,7 +78,7 @@ public:
     }
 
     template<typename T, typename TI, typename ...Args>
-    static void reserve(T* parent, size_t size){
+    static void reserve(const T* parent, size_t size){
         qint64 index = T::memoryIndex(parent);
         auto it = container<T, TI>().m_cells.find(index);
         if ( it == container<T, TI>().m_cells.end() ) {
@@ -84,10 +96,15 @@ public slots:
     void recycleSize(Shared* o, int size) const;
 
 private:
-    template<typename T, typename TI = T::InternalType>
+    template<typename T, typename TI>
     static Container<T, TI>& container(){
         static Container<T, TI> instance;
         return instance;
+    }
+
+    static bool& containerActive(){
+        static bool containerActive = false;
+        return containerActive;
     }
 };
 
