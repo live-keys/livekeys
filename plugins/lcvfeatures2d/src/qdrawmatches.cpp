@@ -54,6 +54,11 @@ QDrawMatches::~QDrawMatches(){
  * \brief Keypoint from the second source   
  */
 
+ /**
+  * \fn lv::QDrawMatches::drawExtractedMatches()
+  * \brief Filter only specific image.
+  */
+
 /**
  * \brief Matches from the first source to second one
  */

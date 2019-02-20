@@ -214,6 +214,13 @@ Parameters can be one of the following, also dependent on the format the image i
 
 ```
 
+{qmlType:MatDisplay}
+{qmlInherits: Item}
+{qmlBrief: Simple matrix display element.}
+
+  This type serves as a base for all other live cv types that require displaying a matrix, which is available in its
+  output property. You can choose wether smoothing occurs when scaling the image for display by enabling linear
+
 {qmlMethod:saveImage(string file, Mat image)}
 
 Save the `image` to a `file` path.

@@ -30,15 +30,18 @@ QKeyPointToSceneMap::QKeyPointToSceneMap(QObject *parent)
 {
 }
 
-/**
- *\fn QKeyPointToSceneMap::append()
- *\brief Appends an object to the scene
- */
 
 /**
- *\fn QKeyPointToSceneMap::resize()
- *\brief Resize the mapping to a specific size(usefull for performance efficiency)
- */
+*\fn lv::QKeyPointToSceneMap::append()
+*\brief Appends object
+*/
+
+/**
+*\fn lv::QKeyPointToSceneMap::resize()
+*\brief Resize the mapping to a specific size(usefull for performance efficiency)
+*/
+
+
 
 /**
  *\brief QKeyPointToSceneMap destructor

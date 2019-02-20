@@ -18,7 +18,6 @@
 #define QBRISKDESCRIPTOREXTRACTOR_H
 
 #include "qdescriptorextractor.h"
-
 /// \private
 class QBriskDescriptorExtractor : public QDescriptorExtractor{
 
