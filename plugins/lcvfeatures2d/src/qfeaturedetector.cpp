@@ -131,7 +131,7 @@ QFeatureDetector::QFeatureDetector(cv::Ptr<cv::FeatureDetector> detector, QQuick
 }
 
 /**
-*\brief Initializes any internal parameters
+*\brief QFeatureDetector destructor
 */
 QFeatureDetector::~QFeatureDetector(){
     delete m_output;
@@ -167,13 +167,11 @@ void QFeatureDetector::detect(){
     }
 }
 
-/// \todo
 void QFeatureDetector::componentComplete(){
     QQuickItem::componentComplete();
     detect();
 }
 
-/// \todo
 QSGNode* QFeatureDetector::updatePaintNode(QSGNode* node, QQuickItem::UpdatePaintNodeData*){
     if ( m_outputDirty )
         drawKeypoints();

@@ -63,7 +63,7 @@ void QDescriptorExtractor::initializeExtractor(cv::Ptr<cv::DescriptorExtractor> 
     m_extractor = extractor;
     compute();
 }
-/// \todo
+
 void QDescriptorExtractor::componentComplete(){
     QQuickItem::componentComplete();
     compute();

@@ -133,7 +133,7 @@ void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches
         }
     }
 }
-/// \todo
+
 void QDescriptorMatcher::componentComplete(){
     QQuickItem::componentComplete();
     callMatch();

@@ -112,7 +112,7 @@ void QMatchesToLocalKeypoint::mapValues(){
 
 /**
  * \fn lv::QMatchesToLocalKeypoint::trainKeypointVectors()
- * \brief todo
+ * \brief Trains 
 */
 
 /**
@@ -158,7 +158,7 @@ void QMatchesToLocalKeypoint::mapValues(){
 
 /**
  * \fn lv::QMatchesToLocalKeypoint::output()
- * \brief Output
+ * \brief Output of the matching process
 */
 
 /**
