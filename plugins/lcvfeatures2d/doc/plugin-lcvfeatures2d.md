@@ -340,6 +340,8 @@ Params:
 
 {qmlType:BruteForceMatcher}
 {qmlInherits:lcvfeatures2d#DescriptorMatcher}
+{qmlBrief:Finds the closest descriptor in the second set
+by trying each one.}
 
 params:
 
@@ -349,10 +351,114 @@ params:
 {qmlType:FlannBasedMatcher}
 {qmlInherits:lcvfeatures2d#DescriptorMatcher}
 
-params:
+{qmlProperty:KDTree}
+
+Params:
+
+**int trees**
+
+{qmlProperty:HierarchicalClustering}
+
+Params:
+
+**int tableNumber**
+
+**int keySize**
+
+**multiProbeLevel**
+
+{qmlProperty:Lsh}
+
+Params:
+
+**int tableNumber**
+
+**int keySize**
+
+**int multiProbeLevel**
 
 {qmlType:DrawMatches}
+{qmlInherits:lcvfeatures2d#DescriptorMatcher}
+{qmlBrief:Draws matches between two sets of keypoints that were detected and the matches that were found
+Specify match index to focus on specific match}
 
-Draws matches between two sets of keypoints that were detected and the matches that were found
-Specify match index to focus on specific match
+{qmlProperty:keypoints1}
+{qmlBrief:Keypoint from the first source}
 
+{qmlProperty:keypoints2}
+{qmlBrief:Keypoint from the second source }
+
+{qmlProperty:matches1to2}
+{qmlBrief:Matches from the first source to second one.}
+
+{qmlProperty:matchIndex}
+{qmlBrief:}
+
+{qmlType:DescriptorMatchFilter}
+{qmlInherits:lcvfeatures2d#DescriptorMatcher}
+
+{qmlProperty:matches1to2}
+{qmlBrief:Matches from the first source to second one.}
+
+{qmlProperty:matches1to2Out}
+{qmlBrief:Output of matches1to2.}
+
+{qmlProperty:minDistanceCoeff}
+{qmlBrief:Minimum distance that the match has to the actual outcome.}
+
+{qmlProperty:maxDistance}
+{qmlBrief:Maximum distance allowed betwen set of two matches.}
+
+{qmlProperty:nndrRatio}
+{qmlBrief:The match betwen the first match and it's next consecutive match.}
+
+{qmlType:KeypointsToSceneMap}
+{qmlInherits:QtQuick.object}
+{qmlProperty:size}
+{qmlBrief: Size of the vector of KeypointsToScene object}
+
+{qmlType:MatchesToLocalKeypoint}
+
+{qmlProperty:matches1to2}
+{qmlBrief:Matches from the first source to second one.}
+
+{qmlProperty:trainKeypointVectors}
+
+{qmlProperty:queryKeypointVector}
+
+{qmlProperty:output}
+
+{qmlSignal:matches1to2Changed}
+{qmlBrief:Triggered when matches from the first source to second one are changed.}
+
+{qmlSignal:trainKeypointVectorsChanged}
+{qmlBrief:Trigered when trainKeypointVectors is changed}
+
+{qmlSignal:queryKeypointVectorChanged}
+{qmlBrief:Trigered when queryKeypointVector is changed}
+
+{qmlSignal:outputChanged}
+{qmlBrief:Triggered when output is changed}
+
+{qmlType:KeypointHomography}
+{qmlBrief:Maps the keypoints in one image to the corresponding keypoints in the other image}
+
+{qmlProperty:KeypointsToScene}
+
+{qmlProperty:QueryImage}
+
+{qmlProperty:objectCorners}
+
+{qmlProperty:objectColors}
+
+{qmlSignal:keypointsToSceneChanged}
+{qmlBrief:Triggered when KeypointsToScene is changed.}
+
+{qmlSignal:queryImageChanged}
+{qmlBrief:Triggered when QueryImage is changed.}
+
+{qmlSignal:objectCornersChanged}
+{qmlBrief:Trigered when objectCorners is changed.}
+
+{qmlSignal:objectColorsChanged}
+{qmlBrief:Trigered when objectColors is changed.}

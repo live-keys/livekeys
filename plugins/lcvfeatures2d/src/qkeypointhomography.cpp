@@ -42,27 +42,27 @@ QKeypointHomography::~QKeypointHomography(){
 }
 
 /**
-*\fn QKeypointHomography::queryImage()
-*\brief Getter for the query image
+*\fn lv::QKeypointHomography::queryImage()
+*\brief Getter for The image that is used 
 */
 
 /**
-*\fn QKeypointHomography::setQueryImage()
-*\brief Setter for the query image
+*\fn lv::QKeypointHomography::setQueryImage()
+*\brief Setter for the image that is used 
 */
 
 /**
-*\fn QKeypointHomography::objectCorners()
-*\brief Returns object corners
+*\fn lv::QKeypointHomography::objectCorners()
+*\brief Specifies object corners 
 */
 
 /**
-*\fn QKeypointHomography::objectColors()
-*\brief Returns object colors
+*\fn lv::QKeypointHomography::objectColors()
+*\brief Specifies object colors
 */
 
 /**
-*\fn QKeypointHomography::setObjectColors()
+*\fn lv::QKeypointHomography::setObjectColors()
 *\brief Setter for the object colors
 */
 
