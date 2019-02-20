@@ -54,15 +54,15 @@ The matrix can be one of the following:
  * `Mat.CV32F`
  * `Mat.CV64F`
 
-{qmlMethod:ByteArray Mat buffer()}
+{qmlMethod:ByteArray buffer()}
 
 Returns an equivalent ArrayBuffer to access the matrix values
 
-{qmlMethod:int Mat channels()}
+{qmlMethod:int channels()}
 
 Returns the number of channels for the matrix
 
-{qmlMethod:int Mat depth()}
+{qmlMethod:int depth()}
 
 Returns the depth or type of the matrix
 
@@ -74,7 +74,7 @@ Returns the matrix dimensions
 
 Returns a cloned matrix with javascript ownership
 
-{qmlMethod:Mat Mat createOwnedObject()}
+{qmlMethod:Mat createOwnedObject()}
 
 Returns a shallow copied matrix with javascript ownership
 
