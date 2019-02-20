@@ -56,23 +56,24 @@ signals:
     void nndrRatioChanged();
 
 protected:
+    /// \private
     void callFilterMatches();
-
+    /// \private
     QDMatchVector::Type filterKnnMatches(
         const std::vector<std::vector<cv::DMatch> >& src,
         std::vector<std::vector<cv::DMatch> >& dst
     );
-
+    /// \private
     QDMatchVector::Type filterBestMatches(
         const std::vector<std::vector<cv::DMatch> >& src,
         std::vector<std::vector<cv::DMatch> >& dst
     );
-
+    /// \private
     void copyMatches(
         const std::vector<std::vector<cv::DMatch> >& src,
         std::vector<std::vector<cv::DMatch> >& dst
     );
-
+    /// \private
     virtual void componentComplete();
 
 private:

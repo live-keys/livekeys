@@ -63,9 +63,7 @@ void QDescriptorExtractor::initializeExtractor(cv::Ptr<cv::DescriptorExtractor> 
     m_extractor = extractor;
     compute();
 }
-/**
- * \brief todo
- */
+/// \todo
 void QDescriptorExtractor::componentComplete(){
     QQuickItem::componentComplete();
     compute();
@@ -116,7 +114,7 @@ void QDescriptorExtractor::compute(){
 
  /**
  *\fn lv::QDescriptorExtractor::descriptors()
- *\brief todo
+
  */
 
 /**
@@ -126,17 +124,14 @@ void QDescriptorExtractor::compute(){
 
  /**
  *\fn lv::QDescriptorExtractor::isBinary()
- *\brief todo
  */
 
  /**
  *\fn lv::QDescriptorExtractor::descriptorCols()
- *\brief todo
  */
 
  /**
  *\fn lv::QDescriptorExtractor::extractor()
- *\brief todo
  */
 
 

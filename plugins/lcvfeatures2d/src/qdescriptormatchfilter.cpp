@@ -94,27 +94,6 @@ QDescriptorMatchFilter::~QDescriptorMatchFilter(){
 */
 
 /**
- * \fn lv::QDescriptorMatchFilter::callFilterMatches()
- * \brief todo
-*/
-
-/**
- * \fn lv::QDescriptorMatchFilter::filterKnnMatches()
- * \brief todo
-*/
-
-/**
- * \fn lv::QDescriptorMatchFilter::filterBestMatches()
- * \brief todo
-*/
-
-/**
- * \fn lv::QDescriptorMatchFilter::copyMatches()
- * \brief todo
-*/
-
-
-/**
  * \fn lv::QDescriptorMatchFilter::matches1to2()
  * \brief Matches from the first image to the second one
 */
@@ -255,7 +234,9 @@ QDMatchVector::Type QDescriptorMatchFilter::filterBestMatches(
 
     return QDMatchVector::BEST_MATCH;
 }
-
+/**
+*\brief Initializes callFilterMatches
+*/
 void QDescriptorMatchFilter::componentComplete(){
     QQuickItem::componentComplete();
     callFilterMatches();

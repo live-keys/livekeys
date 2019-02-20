@@ -51,9 +51,11 @@ public:
 
 protected:
     virtual void initialize(const QVariantMap& params);
-
+    
+    /// \private
     cv::FeatureDetector* detector();
     void initializeDetector(cv::Ptr<cv::FeatureDetector> detector);
+    /// \private
     virtual void detect();
     virtual void componentComplete();
 

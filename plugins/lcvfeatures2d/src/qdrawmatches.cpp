@@ -114,7 +114,9 @@ void QDrawMatches::setMatches1to2(QDMatchVector *matches1to2){
     m_matchSurfaceDirty = true;
     update();
 }
-
+/**
+*\brief Implementation from QtQuickItem
+*/
 QSGNode *QDrawMatches::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData){
 
     if ( m_keypoints1 &&

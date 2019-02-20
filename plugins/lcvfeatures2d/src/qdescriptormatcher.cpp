@@ -54,11 +54,9 @@ QDescriptorMatcher::~QDescriptorMatcher(){
     delete m_matcher;
 }
 /**
+*\fn lv::QDescriptorMatcher::matches()
 *\brief Returns a number of matches
-QDMatchVector* QDescriptorMatcher::matches(){
-    return m_matches;
-}
-
+*/
 /**
  * \brief Adds a set of descriptors
  */
@@ -91,7 +89,9 @@ void QDescriptorMatcher::train(){
         qWarning("Descriptor Matcher Train: No matcher defined. You need to initialize the matcher manually.");
     }
 }
-
+/**
+*\brief Initializes matcher
+*/
 void QDescriptorMatcher::callMatch(){
     if ( m_matcher && isComponentComplete() ){
         match(m_queryDescriptors, m_matches);
@@ -133,17 +133,20 @@ void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches
         }
     }
 }
-/**
-*\brief todo
-*/
+/// \todo
 void QDescriptorMatcher::componentComplete(){
     QQuickItem::componentComplete();
     callMatch();
 }
-
+/**
+*\brief Initializes any internal parameters
+*/
 void QDescriptorMatcher::initialize(const QVariantMap &){
 }
 
+/**
+*\brief Function used for extending Descriptor matcher
+*/
 void QDescriptorMatcher::initializeMatcher(cv::DescriptorMatcher* matcher){
     delete m_matcher;
     m_matcher = matcher;
@@ -152,7 +155,6 @@ void QDescriptorMatcher::initializeMatcher(cv::DescriptorMatcher* matcher){
 
 /**
 *\fn lv::QDescriptorMatcher::match()
-*\brief todo
 */
 
 /**
@@ -168,6 +170,11 @@ void QDescriptorMatcher::initializeMatcher(cv::DescriptorMatcher* matcher){
 /**
 *\fn lv::QDescriptorMatcher::paramsChanged()
 *\brief Triggered when params are changed
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::queryDescriptors()
+*\brief Inputs
 */
 
 /**

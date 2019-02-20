@@ -16,6 +16,13 @@
 
 #include "qmatchestolocalkeypoint.h"
 #include <stdexcept>
+
+/**
+ * \class QMatchesToLocalKeypoint
+ * \brief add brief
+ * \ingroup plugin-lcvfeatures2d
+ */
+
 /**
 *\brief QMatchesToLocalKeypoint constructor
 */

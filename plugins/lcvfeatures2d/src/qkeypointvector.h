@@ -29,11 +29,13 @@ class Q_LCVFEATURES2D_EXPORT QKeyPointVector : public QQuickItem{
 public:
     explicit QKeyPointVector(QQuickItem *parent = 0);
     ~QKeyPointVector();
-
+    /// \private
     std::vector<cv::KeyPoint>& keypoints();
+    /// \private
     const std::vector<cv::KeyPoint>& keypoints() const;
-
+    /// \private
     void setMat(cv::Mat& mat);
+    /// \private
     const cv::Mat& cvMat();
 
 public slots:

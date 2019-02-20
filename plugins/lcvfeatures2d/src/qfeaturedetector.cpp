@@ -73,7 +73,7 @@ QFeatureDetector::QFeatureDetector(QQuickItem *parent)
     
 /**
  * \fn lv::QFeatureDetector::keypoints()
- * \brief Actual keypoints
+ * \brief Keypoints
 */
 
 /**
@@ -113,7 +113,6 @@ QFeatureDetector::QFeatureDetector(QQuickItem *parent)
 
 /**
  * \fn lv::QFeatureDetector::initialize()
- * \brief todo
 */
 
  /**
@@ -132,28 +131,30 @@ QFeatureDetector::QFeatureDetector(cv::Ptr<cv::FeatureDetector> detector, QQuick
 }
 
 /**
- *\brief QFeatureDetector destructor
- */
+*\brief Initializes any internal parameters
+*/
 QFeatureDetector::~QFeatureDetector(){
     delete m_output;
 }
 
 /**
- *\brief todo
- */
+*\fn lv::QFeatureDetector::initialize()
+*\brief Initializes any internal parameters
+*/
+
 cv::FeatureDetector *QFeatureDetector::detector(){
     return m_detector;
 }
+
 /**
- *\brief todo
- */
+*\brief Function used for extending Feature detector
+*/
 void QFeatureDetector::initializeDetector(cv::Ptr<cv::FeatureDetector> detector){
     m_detector = detector;
     detect();
 }
-/**
- *\brief todo
- */
+
+/// \private
 void QFeatureDetector::detect(){
     if ( m_detector != 0 && !m_in->cvMat()->empty() && isComponentComplete() ){
         m_detector->detect(*m_in->cvMat(), m_keypoints->keypoints(), *m_mask->cvMat());
@@ -165,17 +166,14 @@ void QFeatureDetector::detect(){
         update();
     }
 }
-/**
- *\brief todo
- */
+
+/// \todo
 void QFeatureDetector::componentComplete(){
     QQuickItem::componentComplete();
     detect();
 }
 
-/**
- *\brief todo
- */
+/// \todo
 QSGNode* QFeatureDetector::updatePaintNode(QSGNode* node, QQuickItem::UpdatePaintNodeData*){
     if ( m_outputDirty )
         drawKeypoints();

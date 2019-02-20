@@ -42,6 +42,11 @@ QKeypointHomography::~QKeypointHomography(){
 }
 
 /**
+*\fn lv::QKeypointHomography::keypointsToScene()
+*\brief KeypointsToSceneMap
+*/
+
+/**
 *\fn lv::QKeypointHomography::queryImage()
 *\brief Getter for The image that is used 
 */
@@ -94,7 +99,6 @@ QKeypointHomography::~QKeypointHomography(){
 
 /**
 *\fn lv::QKeypointHomography::keypointsToScene()
-*\brief todo
 */
 
 /**
