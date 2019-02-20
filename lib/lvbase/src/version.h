@@ -9,11 +9,11 @@ namespace lv{
 class LV_BASE_EXPORT Version{
 
 public:
-    /// @private
+    /// \private
     static const long long PATCH_MULTIPLIER;
-    /// @private
+    /// \private
     static const long long MINOR_MULTIPLIER;
-    /// @private
+    /// \private
     static const long long MAJOR_MULTIPLIER;
 
 public:

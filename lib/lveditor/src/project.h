@@ -52,7 +52,6 @@ public:
     void setActive(const QString& rootPath);
 
     ProjectFile* lookupBestFocus(ProjectEntry* entry);
-
     ProjectDocument* isOpened(const QString& rootPath);
 
     /**
@@ -75,9 +74,6 @@ public:
      */
     lv::ProjectDocumentModel* documentModel();
 
-    /**
-     * \brief Getter of the currently active project document
-     */
     lv::ProjectDocument*  active() const;
 
     /**

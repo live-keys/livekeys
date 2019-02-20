@@ -27,7 +27,7 @@ class QQmlContext;
 
 namespace lv{
 
-/// @private
+/// \private
 class LV_VIEW_EXPORT VisualLogEntry{
 public:
     VisualLogEntry(const QString& tag, const QString& prefix, const QString& data);

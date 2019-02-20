@@ -38,8 +38,6 @@ public:
 
     /** Returns the font size */
     int fontSize() const;
-
-    /** Returns path of the settings */
     const QString& path() const;
 
     void fromJson(const QJsonObject& root);
@@ -69,10 +67,14 @@ private:
     QHash<QString, EditorSettingsCategory*> m_settings;
 };
 
+/**
+ * \brief Returns the font size
+ */
 inline int EditorSettings::fontSize() const{
     return m_fontSize;
 }
 
+/** Returns path of the settings */
 inline const QString &EditorSettings::path() const{
     return m_path;
 }

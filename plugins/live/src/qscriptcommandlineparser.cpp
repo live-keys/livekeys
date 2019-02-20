@@ -32,6 +32,7 @@ namespace{
 
 }// namespace
 
+/// \private
 class QScriptCommandLineParser::Option{
 
 public:

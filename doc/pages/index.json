@@ -26,10 +26,6 @@
         [
             "../../plugins/live/doc/plugin-editor.md>>"
         ],
-        {"editqml" : "../../plugins/editqml/doc/plugin-editqml.md"},
-        [
-            "../../plugins/live/doc/plugin-editqml.md>>"
-        ],
         {"lcvcore" : "../../plugins/lcvcore/doc/plugin-lcvcore.md"},
         [
             "../../plugins/live/doc/plugin-lcvcore.md>>"

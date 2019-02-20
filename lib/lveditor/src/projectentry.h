@@ -86,7 +86,7 @@ signals:
 
 protected:
     ProjectEntry(const QString& path, const QString& name, bool isFile, ProjectEntry* parent = 0);
-    /// @private
+    /// \private
     bool m_isFile;
 
 private:

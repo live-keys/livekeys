@@ -23,6 +23,7 @@
 
 class QFileSystemWatcher;
 
+/// \private
 class Q_LIVE_EXPORT QFileReader : public QObject, public QQmlParserStatus{
 
     Q_OBJECT

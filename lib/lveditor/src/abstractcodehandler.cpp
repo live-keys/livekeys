@@ -34,4 +34,31 @@ AbstractCodeHandler::AbstractCodeHandler(QObject *parent)
 AbstractCodeHandler::~AbstractCodeHandler(){
 }
 
+
+/**
+ * \fn lv::AbstractCodeHandler::assistCompletion
+ * \brief Assists code completion when typing
+ */
+
+/**
+ * \fn lv::AbstractCodeHandler::setDocument
+ * \brief Sets the document being worked on
+ */
+
+/**
+ * \fn lv::AbstractCodeHandler::documentContentsChanged
+ * \brief Define on-change behaviour
+ */
+
+
+/**
+ * \fn lv::AbstractCodeHandler::rehighlightBlock
+ * \brief Block highlighting implementation
+ */
+
+/**
+ * \fn lv::AbstractCodeHandler::contextBlock
+ * \brief Returns borders of the block containing the current position
+ */
+
 }// namespace

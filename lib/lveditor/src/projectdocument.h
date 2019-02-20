@@ -37,14 +37,6 @@ class ProjectDocument;
 class ProjectDocumentBlockData;
 class DocumentHandler;
 
-/**
- * \class lv::ProjectDocumentMarker
- * \brief Dynamic project document markers
- *
- * They get moved with document changes, can also be deleted along with the associated text.
- * Wrapper around a single document position
- * \ingroup lveditor
- */
 class LV_EDITOR_EXPORT ProjectDocumentMarker{
 
 public:
@@ -55,13 +47,10 @@ public:
     typedef QSharedPointer<const ProjectDocumentMarker> ConstPtr;
 
 public:
-    /** Marker position */
     int position() const{ return m_position; }
-    /** Shows if the marker is valid */
     bool isValid() const{ return m_position != -1; }
     /** Create a ProjectDocumentMarker */
     static Ptr create(){ return ProjectDocumentMarker::Ptr(new ProjectDocumentMarker); }
-    /** Default destructor */
     ~ProjectDocumentMarker(){}
 
 private:
@@ -83,28 +72,18 @@ public:
     typedef QSharedPointer<const ProjectDocumentSection> ConstPtr;
 
 public:
-    /** Returns the first position of the section */
     int position() const{ return m_position; }
-    /** Returns the length of the section */
     int length() const{ return m_length; }
-    /** Returns the type of section set by the user */
     int type() const{ return m_type; }
-    /** Shows if the section is still valid */
     bool isValid() const{ return m_position != -1; }
-    /** Resize the section if necessary */
     void resize(int newLength){ m_length = newLength; }
     ~ProjectDocumentSection();
 
-    /** Set the custom user data inside the section */
     void setUserData(void* data){ m_userData = data; }
-    /** Returns the custom user data */
     void* userData(){ return m_userData; }
 
-    /** Returns the document the section belongs to */
     ProjectDocument* document(){ return m_document; }
-    /** Returns the block containing the first position of the section */
     ProjectDocumentBlockData* parentBlock(){ return m_parentBlock; }
-
 
     void onTextChanged(std::function<void(ProjectDocumentSection::Ptr, int, int, const QString &)> handler);
 
@@ -256,7 +235,7 @@ public:
 
 public:
     explicit ProjectDocument(ProjectFile* file, bool isMonitored, Project *parent);
-    /** Default destructor */
+
     ~ProjectDocument();
 
     /** \brief File getter */
@@ -269,9 +248,6 @@ public:
 
     void setIsDirty(bool isDirty);
 
-    /**
-     * \brief Shows if the content's dirty
-     */
     bool isDirty() const;
 
     void setIsMonitored(bool isMonitored);
@@ -339,7 +315,6 @@ private:
     QString getCharsRemoved(int position, int count);
 
     ProjectFile*    m_file;
-    // mutable QString m_content;
     QDateTime       m_lastModified;
 
     QTextDocument*   m_textDocument;
@@ -359,6 +334,9 @@ private:
     bool          m_isMonitored;
 };
 
+/**
+ * \brief File getter
+ */
 inline ProjectFile *ProjectDocument::file() const{
     return m_file;
 }

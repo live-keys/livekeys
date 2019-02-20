@@ -42,7 +42,7 @@ class LV_VIEW_EXPORT VisualLogFilter : public VisualLogBaseModel, public QQmlPar
     Q_PROPERTY(bool                    isIndexing READ isIndexing NOTIFY isIndexingChanged)
 
 private:
-    /// @private
+    /// \private
     class SearchQuery{
     public:
         enum Type{
@@ -50,7 +50,7 @@ private:
             String,
             Regexp
         };
-        /// @private
+        /// \private
         union SearchContainer{
 
             QString* searchString;

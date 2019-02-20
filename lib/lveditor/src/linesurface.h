@@ -14,7 +14,7 @@ class LineSurfacePrivate;
 class LineManager;
 class TextNode;
 
-/// @private
+/// \private
 class LineSurface : public QQuickItem
 {
     Q_OBJECT
@@ -28,7 +28,7 @@ public:
     friend class LineManager;
 
 public:
-    /// @private
+    /// \private
     class Node
     {
     public:

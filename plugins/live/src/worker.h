@@ -14,7 +14,7 @@ class Worker : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<QObject> acts READ acts)
-    Q_CLASSINFO("DefaultProperty", "filters")
+    Q_CLASSINFO("DefaultProperty", "acts")
 
 public:
     explicit Worker(QObject *parent = nullptr);

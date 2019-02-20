@@ -58,9 +58,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     QHash<int, QByteArray> roleNames() const;
 
-    /** Returns completion position */
     int completionPosition() const;
-    /** Shows if completion is enabled */
     bool isEnabled() const;
 
     void resetModel();
@@ -104,10 +102,12 @@ inline QHash<int, QByteArray> CodeCompletionModel::roleNames() const{
     return m_roles;
 }
 
+/** \brief Returns completion position */
 inline int CodeCompletionModel::completionPosition() const{
     return m_completionPosition;
 }
 
+/** \brief Shows if completion is enabled */
 inline bool CodeCompletionModel::isEnabled() const{
     return m_isEnabled;
 }

@@ -10,7 +10,7 @@ namespace lv {
 
 class TextEdit;
 
-/// @private
+/// \private
 class PaletteData
 {
 public:
@@ -28,7 +28,7 @@ public:
     }
 };
 
-/// @private
+/// \private
 class PaletteManager: public QObject
 {
     Q_OBJECT
@@ -42,7 +42,6 @@ public:
     void setTextEdit(TextEdit *value);
 
     void setLineHeight(int value);
-    /** 0 if not, positive number of lines if yes*/
     int isLineBeforePalette(int blockNumber);
     int isLineAfterPalette(int blockNumber);
     int removePalette(QObject* palette);

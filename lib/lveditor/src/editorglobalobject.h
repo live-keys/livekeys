@@ -24,7 +24,8 @@ namespace lv{
 
 class Project;
 class PaletteContainer;
-/// @private
+
+/// \private
 class LV_EDITOR_EXPORT EditorGlobalObject : public QObject{
 
     Q_OBJECT

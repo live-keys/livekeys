@@ -6,6 +6,7 @@
 
 namespace lv{
 
+/// \private
 class Group : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
