@@ -5,10 +5,11 @@
 #include <QQmlListProperty>
 #include <functional>
 #include "qliveglobal.h"
+#include "live/shared.h"
 
 namespace lv{
 
-class Q_LIVE_EXPORT QmlObjectList : public QObject{
+class Q_LIVE_EXPORT QmlObjectList : public Shared{
 
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<QObject> items READ items)
@@ -33,7 +34,7 @@ public:
     ~QmlObjectList();
 
     QQmlListProperty<QObject> items();
-    bool isReadOnly() const;
+    bool isConst() const;
 
     template<typename T> static QmlObjectList* create(
         void* data,
@@ -55,18 +56,26 @@ public:
     template<typename T> bool canCast() const;
     template<typename T> T* dataAs();
 
+    void setClone(std::function<QmlObjectList*(const QmlObjectList *)> clone);
+
+public slots:
+    QmlObjectList *cloneConst() const;
+    QmlObjectList* clone() const;
+
 private:
-    static void appendItem(QQmlListProperty<QObject>*, QObject*);
     static int itemCount(QQmlListProperty<QObject>*);
     static QObject* itemAt(QQmlListProperty<QObject>*, int);
+
+    static void appendItem(QQmlListProperty<QObject>*, QObject*);
     static void clearItems(QQmlListProperty<QObject>*);
 
 private:
     void*                 m_data;
     const std::type_info* m_type;
 
-    std::function<int(QmlObjectList*)>            m_itemCount;
-    std::function<QObject*(QmlObjectList*, int)>  m_itemAt;
+    std::function<int(QmlObjectList*)>                  m_itemCount;
+    std::function<QObject*(QmlObjectList*, int)>        m_itemAt;
+    std::function<QmlObjectList*(const QmlObjectList*)> m_clone;
 
     std::function<void(QmlObjectList*, QObject*)> m_appendItem;
     std::function<void(QmlObjectList*)>           m_clearItems;
@@ -108,7 +117,7 @@ inline void *QmlObjectList::data(){
     return m_data;
 }
 
-inline bool QmlObjectList::isReadOnly() const{
+inline bool QmlObjectList::isConst() const{
     return !m_appendItem;
 }
 

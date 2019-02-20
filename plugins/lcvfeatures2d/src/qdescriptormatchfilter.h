@@ -42,15 +42,9 @@ public:
     float minDistanceCoeff() const;
     void setMinDistanceCoeff(float arg);
 
-    /**
-     * \brief Maximum distance allowed betwen set of two matches.
-     */
     float maxDistance() const;
     void setMaxDistance(float arg);
 
-    /**
-     * \brief The match betwen the first match and it's next consecutive match.
-     */
     float nndrRatio() const;
     void setNndrRatio(float arg);
 

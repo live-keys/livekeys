@@ -31,7 +31,7 @@ public:
     void classBegin(){}
     void componentComplete();
 
-    bool reserveForRead(Shared::ReadScope* locker, Act* filter);
+    bool reserveForRead(Shared::RefScope* locker, Act* filter);
 
     int totalProperties();
     QHash<QByteArray, int>::ConstIterator propertiesBegin();

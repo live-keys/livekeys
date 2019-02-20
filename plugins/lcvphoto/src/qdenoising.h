@@ -19,8 +19,7 @@ public slots:
         QMat* input,
         float h = 3,
         int templateWindowSize = 7,
-        int searchWindowSize = 21,
-        const QJSValue& allocator = QJSValue()
+        int searchWindowSize = 21
     );
 
     void fastNlMeansColored(
@@ -28,8 +27,7 @@ public slots:
         QMat* input,
         float h = 3,
         int templateWindowSize = 7,
-        int searchWindowSize = 21,
-        const QJSValue& allocator = QJSValue()
+        int searchWindowSize = 21
     );
 
 };

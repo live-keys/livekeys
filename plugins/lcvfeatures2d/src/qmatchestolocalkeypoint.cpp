@@ -16,7 +16,9 @@
 
 #include "qmatchestolocalkeypoint.h"
 #include <stdexcept>
-
+/**
+*\brief QMatchesToLocalKeypoint constructor
+*/
 QMatchesToLocalKeypoint::QMatchesToLocalKeypoint(QQuickItem *parent)
     : QQuickItem(parent)
     , m_matches1to2(0)
@@ -25,6 +27,9 @@ QMatchesToLocalKeypoint::QMatchesToLocalKeypoint(QQuickItem *parent)
 {
 }
 
+/**
+*\brief QMatchesToLocalKeypoint destructor
+*/
 QMatchesToLocalKeypoint::~QMatchesToLocalKeypoint(){
     delete m_output;
 }
@@ -82,4 +87,80 @@ void QMatchesToLocalKeypoint::mapValues(){
 
     emit outputChanged();
 }
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::matches1to2()
+ * \brief Matches from the first image to the second one
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::setMatches1to2()
+ * \brief Setter for the matches1to2
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::matches1to2Changed()
+ * \brief Triggered when matches1to2 is changed
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::trainKeypointVectors()
+ * \brief todo
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::setTrainKeypointVectors()
+ * \brief Setter for the trainKeypointVectors
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::trainKeypointVectorsChanged()
+ * \brief Triggered when trainKeypointVectors are changed
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::queryKeypointVector()
+ * \brief todo
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::setQueryKeypointVector()
+ * \brief Setter for the queryKeypointVectors
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::queryKeypointVectorChanged()
+ * \brief Triggered when queryKeypointVectors are changed
+*/
+
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::setQueryWithMatches()
+ * \brief Setter for the queryWithMatches
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::setMatches1to2()
+ * \brief Setter for the matches1to2
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::matches1to2Changed()
+ * \brief Triggered when matches1to2 is changed
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::output()
+ * \brief Output
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::outputChanged()
+ * \brief Triggered when output is changed
+*/
+
+/**
+ * \fn lv::QMatchesToLocalKeypoint::componentComplete()
+ * \brief todo
+*/
 

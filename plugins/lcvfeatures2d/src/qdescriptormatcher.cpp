@@ -53,7 +53,8 @@ QDescriptorMatcher::QDescriptorMatcher(cv::DescriptorMatcher* matcher, QQuickIte
 QDescriptorMatcher::~QDescriptorMatcher(){
     delete m_matcher;
 }
-
+/**
+*\brief Returns a number of matches
 QDMatchVector* QDescriptorMatcher::matches(){
     return m_matches;
 }
@@ -132,7 +133,9 @@ void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches
         }
     }
 }
-
+/**
+*\brief todo
+*/
 void QDescriptorMatcher::componentComplete(){
     QQuickItem::componentComplete();
     callMatch();
@@ -146,3 +149,54 @@ void QDescriptorMatcher::initializeMatcher(cv::DescriptorMatcher* matcher){
     m_matcher = matcher;
     callMatch();
 }
+
+/**
+*\fn lv::QDescriptorMatcher::match()
+*\brief todo
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::params()
+*\brief Given parameters
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::setParams()
+*\brief Setter for the params
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::paramsChanged()
+*\brief Triggered when params are changed
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::queryDescriptorsChanged()
+*\brief Triggered when queryDescriptors are changed
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::matchesChanged()
+*\brief Triggered when matches are changed
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::setKnn()
+*\brief Setter for the knn
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::knn()
+*\brief Count of best matches found per each query descriptor or less if a query descriptor has less than k possible matches in total.
+*/
+
+
+/**
+*\fn lv::QDescriptorMatcher::knnChanged()
+*\brief Triggered when knn is changed
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::setQueryDescriptors()
+*\brief Triggered when queryDescriptors are changed
+*/

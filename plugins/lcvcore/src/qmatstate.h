@@ -23,9 +23,21 @@
 class Q_LCVCORE_EXPORT QMatState{
 
 public:
+    /**
+    *\brief todo
+    */
     QMat* mat;
+    /**
+    *\brief todo
+    */
     bool  linearFilter;
+    /**
+    *\brief todo
+    */
     mutable int   textureIndex;
+    /**
+    *\brief todo
+    */
     mutable bool  textureSync;
 
     QMatState();

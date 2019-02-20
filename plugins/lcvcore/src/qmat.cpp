@@ -16,7 +16,8 @@
 
 #include "qmat.h"
 #include <QQmlEngine>
-
+#include "live/memory.h"
+#include "live/visuallog.h"
 
 /**
  *\class QMat
@@ -57,6 +58,20 @@ QMat::QMat(QObject *parent)
 QMat::QMat(cv::Mat *mat, QObject *parent)
     : lv::Shared(parent)
     , m_internal(mat)
+{
+}
+
+/**
+ * \brief QMat memory-based constructor
+ * @param width
+ * @param height
+ * @param type
+ * @param channels
+ * @param parent
+ */
+QMat::QMat(int width, int height, QMat::Type type, int channels, QObject *parent)
+    : lv::Shared(parent)
+    , m_internal(lv::Memory::alloc<QMat, cv::Mat>(width, height, type, channels))
 {
 }
 
@@ -119,6 +134,9 @@ QMat::~QMat(){
     delete m_internal;
 }
 
+/**
+ * \brief Returns the matrix internal data.
+ */
 const cv::Mat &QMat::data() const{
     return *m_internal;
 }
@@ -143,11 +161,16 @@ void QMat::cleanUp(){
     delete m_nullMat;
 }
 
-lv::Shared *QMat::reloc(){
-    QMat* m = new QMat(m_internal, parent());
-    m_internal = new cv::Mat;
-    lv::Shared::invalidate(this);
-    return m;
+cv::Mat *QMat::memoryAlloc(int width, int height, int type, int channels){
+    return new cv::Mat(width, height, CV_MAKETYPE(type, channels));
+}
+
+size_t QMat::memoryIndex(int width, int height, int type, int channels){
+    return (size_t)width << 44 | (size_t)height << 24 | (size_t)channels << 20 | type;
+}
+
+size_t QMat::memoryIndex(QMat *m){
+    return memoryIndex(m->internal().cols, m->internal().rows, m->internal().type(), m->channels());
 }
 
 /**
@@ -181,6 +204,10 @@ const cv::Mat &QMat::internal() const{
  */
 cv::Mat &QMat::internal(){
     return *m_internal;
+}
+
+void QMat::recycleSize(int size){
+    lv::Memory::reserve<QMat, cv::Mat>(this, size);
 }
 
 /*!

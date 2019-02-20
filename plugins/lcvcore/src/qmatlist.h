@@ -19,7 +19,7 @@
 
 #include <QAbstractListModel>
 #include "qmat.h"
-
+/// \private
 class Q_LCVCORE_EXPORT QMatList : public QAbstractListModel{
 
     Q_OBJECT

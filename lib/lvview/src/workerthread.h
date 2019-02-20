@@ -39,20 +39,20 @@ public:
     public:
         CallEvent(
             const std::function<void()>& filter,
-            Shared::ReadScope* readScope = nullptr);
+            Shared::RefScope* readScope = nullptr);
         CallEvent(
             std::function<void()>&& filter,
-            Shared::ReadScope* readScope = nullptr);
+            Shared::RefScope* readScope = nullptr);
         CallEvent(
             const std::function<void()>& filter,
             const std::function<void()>& callCallback,
-            Shared::ReadScope* readScope = nullptr);
+            Shared::RefScope* readScope = nullptr);
         CallEvent(
             std::function<void()>&& filter,
             std::function<void()>&& callCallback,
-            Shared::ReadScope* readScope = nullptr);
+            Shared::RefScope* readScope = nullptr);
         void callFilter();
-        Shared::ReadScope *readScope();
+        Shared::RefScope *readScope();
         bool hasCallback();
 
         CallEvent* callbackEvent();
@@ -60,7 +60,7 @@ public:
     private:
         std::function<void()> m_filter;
         std::function<void()> m_callback;
-        Shared::ReadScope*    m_readScope;
+        Shared::RefScope*    m_readScope;
     };
 
 public:
@@ -69,11 +69,11 @@ public:
 
     void postWork(
         const std::function<void()>& fnc,
-        Shared::ReadScope* locker = nullptr);
+        Shared::RefScope* locker = nullptr);
     void postWork(
         const std::function<void()>& fnc,
         const std::function<void()>& cbk,
-        Shared::ReadScope* locker = nullptr
+        Shared::RefScope* locker = nullptr
     );
     void start();
 

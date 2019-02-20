@@ -48,7 +48,7 @@ void FilterTestStub::process(){
         }
     };
 
-    use(lv::Shared::readScope(this, m_input1, m_input2), cb, [this](){
+    onRun(lv::Shared::refScope(this, m_input1, m_input2), cb, [this](){
         emit this->outputChanged(m_output);
     });
 }

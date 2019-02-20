@@ -2,6 +2,7 @@
 #include "live/exception.h"
 #include "live/viewengine.h"
 #include "live/settings.h"
+#include "live/memory.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -17,15 +18,17 @@ void ViewContext::initFromEngine(QQmlEngine *engine){
 
     ViewEngine* e = qobject_cast<lv::ViewEngine*>(livecv->property("engine").value<QObject*>());
     Settings* s = qobject_cast<lv::Settings*>(livecv->property("settings").value<QObject*>());
-    if ( !e || !s )
+    Memory* m = qobject_cast<lv::Memory*>(livecv->property("mem").value<QObject*>());
+    if ( !e || !s || !m )
         THROW_EXCEPTION(lv::Exception, "Failed to load properties from context", 2);
 
-    m_instance.reset(new ViewContext(e, s));
+    m_instance.reset(new ViewContext(e, s, m));
 }
 
-ViewContext::ViewContext(ViewEngine *engine, Settings *settings)
+ViewContext::ViewContext(ViewEngine *engine, Settings *settings, Memory* memory)
     : m_engine(engine)
     , m_settings(settings)
+    , m_memory(memory)
 {
 }
 

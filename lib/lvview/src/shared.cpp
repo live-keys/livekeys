@@ -16,58 +16,20 @@
 
 #include "live/shared.h"
 #include "live/act.h"
+#include "live/memory.h"
+
+#include <QQmlEngine>
+#include <QQmlContext>
 
 namespace lv{
 
 Shared::Shared(QObject *parent)
     : QObject(parent)
-    , m_isValid(true)
-    , m_readers(nullptr)
+    , m_refs(0)
 {
 }
 
 Shared::~Shared(){
-    delete m_readers;
-}
-
-bool Shared::read(Act *call, Shared *data){
-    if ( !Shared::isValid(data) )
-        return false;
-
-    if ( call->workerThread() )
-        data->readers()->reserved.insert(call);
-
-    return true;
-}
-
-void Shared::release(Act *call, Shared *data){
-    if ( data && data->m_readers ){
-        data->m_readers->reserved.remove(call);
-        if ( data->m_readers->observer )
-            data->m_readers->observer->process();
-    }
-}
-
-bool Shared::isValid(const Shared *data){
-    return (data && data->m_isValid);
-}
-
-void Shared::invalidate(Shared *data){
-    data->m_isValid = false;
-}
-
-Shared *Shared::reloc(){
-    Shared* sd = new Shared();
-    Shared::invalidate(this);
-    return sd;
-}
-
-Shared::Readers *Shared::readers(){
-    if ( !m_readers ){
-        m_readers = new Shared::Readers;
-        m_readers->observer = nullptr;
-    }
-    return m_readers;
 }
 
 }// namespace

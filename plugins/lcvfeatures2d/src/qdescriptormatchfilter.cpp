@@ -52,28 +52,93 @@ QDescriptorMatchFilter::~QDescriptorMatchFilter(){
  * \fn lv::QDescriptorMatchFilter::minDistanceCoeff()
  * \brief Minimum distance that the match has to the actual outcome.
 */
+
 /**
  * \fn lv::QDescriptorMatchFilter::setMinDistanceCoeff()
  * \brief Setter for minDistanceCoeff
 */
 
 /**
+ * \fn lv::QDescriptorMatchFilter::minDistanceCoeffChanged()
+ * \brief Triggered when minDistanceCoeff is changed
+*/
+
+/**
  * \fn lv::QDescriptorMatchFilter::maxDistance()
  * \brief Maximum distance allowed betwen set of two matches.
 */
+
 /**
  * \fn lv::QDescriptorMatchFilter::setMaxDistance()
  * \brief Setter for maxDistance
 */
 
 /**
+ * \fn lv::QDescriptorMatchFilter::maxDistanceChanged()
+ * \brief Triggered when the maxDistance is changed
+*/
+
+/**
  * \fn lv::QDescriptorMatchFilter::nndrRatio()
  * \brief The match betwen the first match and it's next consecutive match.
 */
+
+/**
+ * \fn lv::QDescriptorMatchFilter::nndrRatioChanged()
+ * \brief Triggered when the nndrRatio is changed
+*/
+
 /**
  * \fn lv::QDescriptorMatchFilter::setNndrRatio()
- * \brief Setter for nndrRatio
+ * \brief setter for the nndrRatio
 */
+
+/**
+ * \fn lv::QDescriptorMatchFilter::callFilterMatches()
+ * \brief todo
+*/
+
+/**
+ * \fn lv::QDescriptorMatchFilter::filterKnnMatches()
+ * \brief todo
+*/
+
+/**
+ * \fn lv::QDescriptorMatchFilter::filterBestMatches()
+ * \brief todo
+*/
+
+/**
+ * \fn lv::QDescriptorMatchFilter::copyMatches()
+ * \brief todo
+*/
+
+
+/**
+ * \fn lv::QDescriptorMatchFilter::matches1to2()
+ * \brief Matches from the first image to the second one
+*/
+
+/**
+ * \fn lv::QDescriptorMatchFilter::setMatches1to2()
+ * \brief Setter for the matches1to2
+*/
+
+/**
+ * \fn lv::QDescriptorMatchFilter::matches1to2Changed()
+ * \brief Triggered when matches1to2 is changed
+*/
+
+/**
+ * \fn lv::QDescriptorMatchFilter::matches1to2Out()
+ * \brief matches1to2 output
+*/
+
+/**
+ * \fn lv::QDescriptorMatchFilter::matches1to2OutChanged()
+ * \brief Triggered when matches1to2Out is changed
+*/
+
 
 QDMatchVector::Type QDescriptorMatchFilter::filterKnnMatches(
         const std::vector<std::vector<cv::DMatch> > &src,

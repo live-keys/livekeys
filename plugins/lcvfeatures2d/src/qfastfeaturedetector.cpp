@@ -17,7 +17,6 @@
 #include "qfastfeaturedetector.h"
 #include "opencv2/features2d.hpp"
 
-/// \private
 QFastFeatureDetector::QFastFeatureDetector(QQuickItem *parent)
     : QFeatureDetector(cv::FastFeatureDetector::create(), parent)
 {

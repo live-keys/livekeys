@@ -305,8 +305,9 @@ QString ViewEngine::typeAsPropertyMessage(const QString &typeName, const QString
  * \brief Register the base types from the view library
  */
 void ViewEngine::registerBaseTypes(const char *uri){
-    qmlRegisterType<lv::Container>(uri, 1, 0, "Container");
-    qmlRegisterType<lv::Act>(      uri, 1, 0, "Act");
+    qmlRegisterType<lv::Container>(        uri, 1, 0, "Container");
+    qmlRegisterType<lv::Act>(              uri, 1, 0, "Act");
+    qmlRegisterUncreatableType<lv::Shared>(uri, 1, 0, "Shared", "Shared is of abstract type.");
 }
 
 /**

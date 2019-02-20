@@ -21,6 +21,7 @@
 
 #include <QObject>
 #include <QSet>
+#include <QQmlEngine>
 
 namespace lv{
 
@@ -29,81 +30,84 @@ class Act;
 
 class LV_VIEW_EXPORT Shared : public QObject{
 
-private:
-    class Readers{
-    public:
-        QSet<Act*> reserved;
-        Act*       observer;
-    };
-
 public:
     /**
      * \brief Blocks shared data for reading until destroyed.
      */
-    class ReadScope{
+    class RefScope{
 
     public:
         friend class Shared;
         typedef Shared* SharedPtr;
 
     public:
-        bool readSingle(const SharedPtr& sd){
-            return Shared::read(m_filter, sd);
+        void readSingle(const SharedPtr& sd){
+            Shared::ref(sd);
         }
 
-        template<typename T, typename... Args> bool read(const T& first){
+        template<typename T, typename... Args> void read(const T& first){
             return readSingle(first);
         }
 
-        template<typename T, typename... Args> bool read(const T& first, Args... args){
-            if ( !readSingle(first) )
-                return false;
-
-            return read(args...);
+        template<typename T, typename... Args> void read(const T& first, Args... args){
+            readSingle(first);
+            read(args...);
         }
 
     private:
-        ReadScope(Act* filter) : m_filter(filter), m_reserved(true){}
-        void clear(){ foreach( Shared* sd, m_read ) Shared::release(m_filter, sd); }
+        RefScope(Act* act) : m_act(act){}
+        void clear(){ foreach( Shared* sd, m_refs ) Shared::unref(sd); }
 
     public:
-        ~ReadScope(){ clear(); }
-
-        bool reserved() const{ return m_reserved; }
+        ~RefScope(){ clear(); }
 
     private:
-        Act*        m_filter;
-        bool           m_reserved;
-        QList<Shared*> m_read;
-
+        Act*           m_act;
+        QList<Shared*> m_refs;
     };
 
 public:
     Shared(QObject* parent = nullptr);
     virtual ~Shared();
 
-    static bool read(Act* call, Shared* data);
-    static void release(Act* call, Shared* data);
-
-    template<typename ...Args> static ReadScope* readScope(Act* call, Args... args){
-        ReadScope* rs = new ReadScope(call);
-        if ( !rs->read(args...) )
-            rs->m_reserved = false;
+    template<typename ...Args> static RefScope* refScope(Act* call, Args... args){
+        RefScope* rs = new RefScope(call);
+        rs->read(args...);
 
         return rs;
     }
 
-    static bool isValid(const Shared* data);
-    static void invalidate(Shared* data);
+    static void ref(Shared* data);
+    static void unref(Shared* data);
+    static void ownCpp(Shared* data);
+    static void ownJs(Shared* data);
 
-    virtual Shared* reloc();
+    virtual void recycleSize(int) const{}
 
 private:
-    Readers* readers();
-
-    bool     m_isValid;
-    Readers* m_readers;
+    int m_refs;
 };
+
+inline void Shared::ownCpp(Shared *data){
+    QQmlEngine::setObjectOwnership(data, QQmlEngine::CppOwnership);
+}
+
+inline void Shared::ownJs(Shared *data){
+    QQmlEngine::setObjectOwnership(data, QQmlEngine::JavaScriptOwnership);
+}
+
+inline void Shared::ref(Shared *data){
+    if ( data->m_refs == 0){
+        ownCpp(data);
+        data->m_refs++;
+    }
+}
+
+inline void Shared::unref(Shared *data){
+    if ( --data->m_refs == 0 ){
+        ownJs(data);
+    }
+}
 
 }// namespace
 
