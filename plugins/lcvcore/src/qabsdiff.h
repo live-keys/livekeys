@@ -19,6 +19,7 @@
 
 #include "qmatfilter.h"
 
+/// \private
 class QAbsDiff : public QMatFilter{
 
     Q_OBJECT

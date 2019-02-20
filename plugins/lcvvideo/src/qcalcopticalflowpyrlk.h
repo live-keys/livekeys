@@ -22,6 +22,7 @@
 
 class QCalcOpticalFlowPyrLKPrivate;
 
+/// \private
 class QCalcOpticalFlowPyrLK : public QMatFilter{
 
     Q_OBJECT
