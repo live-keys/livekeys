@@ -26,4 +26,8 @@ void Memory::reloc(){
     gc();
 }
 
+void Memory::recycleSize(Shared *o, int size) const{
+    o->recycleSize(size);
+}
+
 }// namespace

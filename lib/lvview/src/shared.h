@@ -82,6 +82,8 @@ public:
     static void ownCpp(Shared* data);
     static void ownJs(Shared* data);
 
+    virtual void recycleSize(int) const{}
+
 private:
     int m_refs;
 };

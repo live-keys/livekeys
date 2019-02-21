@@ -2,7 +2,9 @@
 #define LVMEMORY_H
 
 #include "live/lvviewglobal.h"
+#include "live/viewcontext.h"
 #include "live/shared.h"
+#include "live/visuallog.h"
 #include <QObject>
 #include <unordered_map>
 
@@ -14,6 +16,7 @@ class LV_VIEW_EXPORT Memory : public QObject{
 
     template<typename T, typename TI = T::InternalType>
     class Cell{
+    public:
         std::list<TI*> objects;
         int            requests;
         size_t         allocationSize;
@@ -21,20 +24,21 @@ class LV_VIEW_EXPORT Memory : public QObject{
         Cell() : requests(0), allocationSize(0){}
 
         bool hasObject(){ return objects.size() > 0; }
-        TI* takeObject(){ return objects.pop_front(); }
+        TI* takeObject(){ TI* t = objects.front(); objects.pop_front(); return t; }
     };
 
     template<typename T, typename TI = T::InternalType>
     class Container{
-        std::unordered_map<qint64, Memory::Cell<T, TI> > m_cells;
+    public:
+        std::unordered_map<qint64, Memory::Cell<T, TI>* > m_cells;
     };
 
 public:
     explicit Memory(QObject *parent = nullptr);
     ~Memory();
 
-    template<typename T, typename TI = T::InternalType, typename ...Args>
-    TI* alloc(Args... args){
+    template<typename T, typename TI, typename ...Args>
+    static TI* alloc(Args... args){
         if ( container<T, TI>().m_cells.empty() )
             return T::memoryAlloc(args...);
         qint64 index = T::memoryIndex(args...);
@@ -42,27 +46,27 @@ public:
         if ( it == container<T, TI>().m_cells.end() ) {
             return T::memoryAlloc(args...);
         }
-        Cell<T, TI>* cell = *it;
+        Cell<T, TI>* cell = it->second;
         return cell->hasObject() ? cell->takeObject() : T::memoryAlloc(args...);
     }
 
-    template<typename T, typename TI = T::InternalType, typename ...Args>
-    void free(T* parent, TI* arg){
+    template<typename T, typename TI, typename ...Args>
+    static void free(T* parent, TI* arg){
         if ( container<T, TI>().m_cells.empty() )
-            T::memoryFree(arg);
+            T::free(arg);
         qint64 index = T::memoryIndex(parent);
         auto it = container<T, TI>().m_cells.find(index);
         if ( it == container<T, TI>().m_cells.end() ) {
-            T::memoryFree(arg);
+            T::free(arg);
         }
-        Cell<T, TI>* cell = *it;
-        if ( cell->allocationsSize > cell->objects.size() ){
+        Cell<T, TI>* cell = it->second;
+        if ( cell->allocationSize > cell->objects.size() ){
             cell->objects.push_back(arg);
         }
     }
 
-    template<typename T, typename TI = T::InternalType, typename ...Args>
-    void reserve(T* parent, size_t size){
+    template<typename T, typename TI, typename ...Args>
+    static void reserve(T* parent, size_t size){
         qint64 index = T::memoryIndex(parent);
         auto it = container<T, TI>().m_cells.find(index);
         if ( it == container<T, TI>().m_cells.end() ) {
@@ -70,16 +74,14 @@ public:
             cell->allocationSize = size;
             Container<T, TI>().m_cells[index] = cell;
         }
-        Cell<T, TI>* cell = *it;
-        if ( cell->allocationsSize > cell->objects.size() ){
-            cell->objects.push_back(arg);
-        }
     }
 
+    static Memory* i(){ return ViewContext::instance().memory(); }
     static void gc();
 
 public slots:
     void reloc();
+    void recycleSize(Shared* o, int size) const;
 
 private:
     template<typename T, typename TI = T::InternalType>

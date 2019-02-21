@@ -22,6 +22,8 @@
 #include "opencv2/core.hpp"
 #include "qlcvcoreglobal.h"
 
+namespace lv{ class Memory; }
+
 class Q_LCVCORE_EXPORT QMat : public lv::Shared{
 
     Q_OBJECT
@@ -40,9 +42,12 @@ public:
         CV64F = CV_64F
     };
 
+    friend class lv::Memory;
+
 public:
-    explicit QMat(QObject *parent = 0);
-    QMat(cv::Mat *mat, QObject *parent = 0);
+    explicit QMat(QObject *parent = nullptr);
+    QMat(cv::Mat *mat, QObject *parent = nullptr);
+    QMat(int width, int height, QMat::Type type, int channels, QObject* parent = nullptr);
     virtual ~QMat();
 
     cv::Mat* cvMat();
@@ -57,6 +62,8 @@ public:
     const cv::Mat& internal() const;
     cv::Mat& internal();
 
+    virtual void recycleSize(int size);
+
 public slots:
     QByteArray  buffer();
     int         channels();
@@ -66,6 +73,11 @@ public slots:
     QMat*       cloneMat() const;
 
 private:
+    static cv::Mat* memoryAlloc(int width, int height, int type, int channels);
+    static size_t memoryIndex(int width, int height, int type, int channels);
+    static size_t memoryIndex(QMat* m);
+    static void free(cv::Mat* m);
+
     cv::Mat* m_internal;
 
     static QMat* m_nullMat;
@@ -76,6 +88,9 @@ inline cv::Mat *QMat::cvMat(){
     return m_internal;
 }
 
+inline void QMat::free(cv::Mat *m){
+    delete m;
+}
 
 
 #endif // QMAT_H

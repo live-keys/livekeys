@@ -16,6 +16,7 @@
 
 #include "live/shared.h"
 #include "live/act.h"
+#include "live/memory.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -30,6 +31,5 @@ Shared::Shared(QObject *parent)
 
 Shared::~Shared(){
 }
-
 
 }// namespace
