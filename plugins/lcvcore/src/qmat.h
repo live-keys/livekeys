@@ -28,6 +28,8 @@ class Q_LCVCORE_EXPORT QMat : public lv::Shared{
     Q_ENUMS(Type)
 
 public:
+    typedef cv::Mat InternalType;
+
     enum Type{
         CV8U  = CV_8U,
         CV8S  = CV_8S,

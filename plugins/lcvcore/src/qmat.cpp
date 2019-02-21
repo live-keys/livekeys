@@ -16,7 +16,7 @@
 
 #include "qmat.h"
 #include <QQmlEngine>
-
+#include "live/memory.h"
 
 /**
  *\class QMat
