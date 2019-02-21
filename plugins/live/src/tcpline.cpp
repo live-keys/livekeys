@@ -90,7 +90,7 @@ void TcpLine::componentComplete(){
 }
 
 void TcpLine::process(){
-    use(/*createLocker()*/nullptr,
+    onRun(/*createLocker()*/nullptr,
         [this](){
             Tuple::deserialize(lv::ViewContext::instance().engine(), m_receivedOutput[""]["output"], *m_output);
         }, [this](){

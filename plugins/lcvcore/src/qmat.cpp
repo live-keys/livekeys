@@ -143,13 +143,6 @@ void QMat::cleanUp(){
     delete m_nullMat;
 }
 
-lv::Shared *QMat::reloc(){
-    QMat* m = new QMat(m_internal, parent());
-    m_internal = new cv::Mat;
-    lv::Shared::invalidate(this);
-    return m;
-}
-
 /**
  *\brief Deep clones the mat
  */

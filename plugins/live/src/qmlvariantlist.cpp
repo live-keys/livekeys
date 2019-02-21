@@ -14,7 +14,7 @@ QmlVariantList::QmlVariantList(
         std::function<void (QmlVariantList *, QVariant)> appendItem,
         std::function<void (QmlVariantList *)> clearItems,
         QObject *parent)
-    : QObject(parent)
+    : Shared(parent)
     , m_data(data)
     , m_type(typeInfo)
     , m_itemList(itemList)
@@ -32,7 +32,7 @@ QmlVariantList::QmlVariantList(
         std::function<int (QmlVariantList *)> itemCount,
         std::function<QVariant(QmlVariantList *, int)> itemAt,
         QObject *parent)
-    : QObject(parent)
+    : Shared(parent)
     , m_data(data)
     , m_type(typeInfo)
     , m_itemList(itemList)
@@ -47,8 +47,8 @@ QmlVariantList::~QmlVariantList(){
 }
 
 void QmlVariantList::setItems(const QVariantList &items){
-    if ( isReadOnly() ){
-        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "QmlVariantList is read only.", 0);
+    if ( isConst() ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is const.", 0);
         lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
@@ -60,6 +60,10 @@ void QmlVariantList::setItems(const QVariantList &items){
         for ( auto it = items.begin(); it != items.end(); ++it )
             appendItem(*it);
     }
+}
+
+void QmlVariantList::setClone(std::function<QmlVariantList*(const QmlVariantList *)> clone){
+    m_clone = clone;
 }
 
 void QmlVariantList::setQuickAssign(std::function<void (QmlVariantList *, QVariantList)> qa){
@@ -78,9 +82,30 @@ int QmlVariantList::itemCount(){
     return m_itemCount(this);
 }
 
+QmlVariantList* QmlVariantList::cloneConst() const{
+    if ( !m_clone ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is not clonable.", 0);
+        lv::ViewContext::instance().engine()->throwError(&e);
+        return nullptr;
+    }
+    QmlVariantList* res = m_clone(this);
+    res->m_appendItem = nullptr;
+    res->m_clearItems = nullptr;
+    return res;
+}
+
+QmlVariantList *QmlVariantList::clone() const{
+    if ( !m_clone ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is not clonable.", 0);
+        lv::ViewContext::instance().engine()->throwError(&e);
+        return nullptr;
+    }
+    return m_clone(this);
+}
+
 void QmlVariantList::clearItems(){
-    if ( isReadOnly() ){
-        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "QmlVariantList is read only.", 0);
+    if ( isConst() ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is const.", 0);
         lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
@@ -88,8 +113,8 @@ void QmlVariantList::clearItems(){
 }
 
 void QmlVariantList::appendItem(QVariant item){
-    if ( isReadOnly() ){
-        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "QmlVariantList is read only.", 0);
+    if ( isConst() ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is const.", 0);
         lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }

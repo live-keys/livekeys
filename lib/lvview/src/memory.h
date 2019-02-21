@@ -15,8 +15,10 @@ public:
     explicit Memory(QObject *parent = nullptr);
     ~Memory();
 
+    static void gc();
+
 public slots:
-    Shared* reloc(Shared* sd);
+    void reloc();
 };
 
 }// namespace

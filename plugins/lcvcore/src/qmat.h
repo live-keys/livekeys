@@ -49,8 +49,6 @@ public:
     static QMat* nullMat();
     static void  cleanUp();
 
-    virtual Shared* reloc();
-
     QMat* clone() const;
     static QMat* reloc(QMat* m);
 

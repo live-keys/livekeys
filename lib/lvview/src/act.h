@@ -33,8 +33,8 @@ public:
 
     virtual void process(){}
 
-    void use(
-        Shared::ReadScope* locker,
+    void onRun(
+        Shared::RefScope* locker,
         const std::function<void()>& cb,
         const std::function<void()>& rs
     );
@@ -43,7 +43,7 @@ public slots:
     void setResult(const QVariant& result);
 
 signals:
-    void trigger();
+    void run();
     void complete();
 
     void resultChanged();

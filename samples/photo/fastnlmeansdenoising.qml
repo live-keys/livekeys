@@ -19,7 +19,7 @@ Grid{
         id: act
         property Mat input: src.output.cloneMat()
         
-        onTrigger: Photo.Denoising.fastNlMeans(act, input, 20, 7, 11)
+        onRun: Photo.Denoising.fastNlMeans(act, input, 20, 7, 11)
         result: null
     }
     

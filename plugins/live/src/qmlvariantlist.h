@@ -5,10 +5,11 @@
 #include <QVariant>
 #include <functional>
 #include "qliveglobal.h"
+#include "live/shared.h"
 
 namespace lv{
 
-class Q_LIVE_EXPORT QmlVariantList : public QObject{
+class Q_LIVE_EXPORT QmlVariantList : public lv::Shared{
 
     Q_OBJECT
     Q_PROPERTY(QVariantList items READ items WRITE setItems)
@@ -57,13 +58,17 @@ public:
 
     void setItems(const QVariantList& items);
 
+    void setClone(std::function<QmlVariantList*(const QmlVariantList *)> clone);
     void setQuickAssign(std::function<void(QmlVariantList*, QVariantList)> qa);
 
 public slots:
     QVariantList items();
     QVariant itemAt(int index);
     int itemCount();
-    bool isReadOnly() const;
+    bool isConst() const;
+
+    QmlVariantList *cloneConst() const;
+    QmlVariantList* clone() const;
 
     void clearItems();
     void appendItem(QVariant item);
@@ -72,13 +77,14 @@ private:
     void*                 m_data;
     const std::type_info* m_type;
 
-    std::function<QVariantList(QmlVariantList*)>       m_itemList;
-    std::function<int(QmlVariantList*)>                m_itemCount;
-    std::function<QVariant(QmlVariantList*, int)>      m_itemAt;
+    std::function<QVariantList(QmlVariantList*)>          m_itemList;
+    std::function<int(QmlVariantList*)>                   m_itemCount;
+    std::function<QVariant(QmlVariantList*, int)>         m_itemAt;
+    std::function<QmlVariantList*(const QmlVariantList*)> m_clone;
 
-    std::function<void(QmlVariantList*, QVariant)>     m_appendItem;
-    std::function<void(QmlVariantList*)>               m_clearItems;
-    std::function<void(QmlVariantList*, QVariantList)> m_quickAssign;
+    std::function<void(QmlVariantList*, QVariant)>        m_appendItem;
+    std::function<void(QmlVariantList*)>                  m_clearItems;
+    std::function<void(QmlVariantList*, QVariantList)>    m_quickAssign;
 };
 
 
@@ -118,7 +124,7 @@ inline void *QmlVariantList::data(){
     return m_data;
 }
 
-inline bool QmlVariantList::isReadOnly() const{
+inline bool QmlVariantList::isConst() const{
     return !m_appendItem;
 }
 

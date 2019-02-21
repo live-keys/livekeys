@@ -6,7 +6,8 @@
 
 namespace lv{
 
-class Q_LIVE_EXPORT StringBasedLoader : public QQuickItem{
+/// \private
+class StringBasedLoader : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(QString source READ source WRITE  setSource NOTIFY sourceChanged)

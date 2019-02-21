@@ -16,20 +16,13 @@ Act::Act(QObject *parent)
 Act::~Act(){
 }
 
-void Act::use(Shared::ReadScope *locker, const std::function<void ()> &cb, const std::function<void ()> &rs){
-    if ( locker ){
-        if( !locker->reserved() ){
-            delete locker;
-            return;
-        }
-    }
-
+void Act::onRun(Shared::RefScope *refScope, const std::function<void ()> &cb, const std::function<void ()> &rs){
     if ( workerThread() ){
-        workerThread()->postWork(cb, rs, locker);
+        workerThread()->postWork(cb, rs, refScope);
     } else {
         cb();
         rs();
-        delete locker;
+        delete refScope;
     }
 }
 
@@ -43,7 +36,7 @@ void Act::componentComplete(){
         QByteArray name = property.name();
         if ( name != "objectName" && name != "result" ){
             QQmlProperty pp(this, name);
-            pp.connectNotifySignal(this, SIGNAL(trigger()));
+            pp.connectNotifySignal(this, SIGNAL(run()));
         }
     }
 
