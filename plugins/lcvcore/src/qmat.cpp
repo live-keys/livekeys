@@ -78,7 +78,7 @@ QMat::QMat(int width, int height, QMat::Type type, int channels, QObject *parent
 /**
  * \brief Returns an equivalent ArrayBuffer to access the matrix values
  */
-QByteArray QMat::buffer(){
+QByteArray QMat::buffer() const{
     return QByteArray::fromRawData(
         reinterpret_cast<const char*>(m_internal->data),
         static_cast<int>(m_internal->total() * m_internal->elemSize())
@@ -88,14 +88,14 @@ QByteArray QMat::buffer(){
 /**
  * \brief Returns the number of channels
  */
-int QMat::channels(){
+int QMat::channels() const{
     return m_internal->channels();
 }
 
 /**
  * \brief Returns the matrix depth (CV8U, CV16S, ...)
  */
-int QMat::depth(){
+int QMat::depth() const{
     return m_internal->depth();
 }
 
@@ -169,7 +169,7 @@ size_t QMat::memoryIndex(int width, int height, int type, int channels){
     return (size_t)width << 44 | (size_t)height << 24 | (size_t)channels << 20 | type;
 }
 
-size_t QMat::memoryIndex(QMat *m){
+size_t QMat::memoryIndex(const QMat *m){
     return memoryIndex(m->internal().cols, m->internal().rows, m->internal().type(), m->channels());
 }
 
@@ -206,7 +206,7 @@ cv::Mat &QMat::internal(){
     return *m_internal;
 }
 
-void QMat::recycleSize(int size){
+void QMat::recycleSize(int size) const{
     lv::Memory::reserve<QMat, cv::Mat>(this, size);
 }
 
