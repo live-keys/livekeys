@@ -724,8 +724,10 @@ CodeQmlHandler::~CodeQmlHandler(){
     Q_D(CodeQmlHandler);
     cancelEdit();
 
-    d->projectHandler->removeCodeQmlHandler(this);
-    d->projectHandler->scanMonitor()->removeScopeListener(this);
+    if ( d->projectHandler ){
+        d->projectHandler->removeCodeQmlHandler(this);
+        d->projectHandler->scanMonitor()->removeScopeListener(this);
+    }
 
     delete m_completionContextFinder;
 }
@@ -947,6 +949,11 @@ void CodeQmlHandler::rehighlightSection(int start, int end){
             break;
         bl = bl.next();
     }
+}
+
+void CodeQmlHandler::resetProjectQmlExtension(){
+    Q_D(CodeQmlHandler);
+    d->projectHandler = nullptr;
 }
 
 /**

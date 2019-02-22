@@ -15,6 +15,7 @@ Memory::Memory(QObject *parent)
 }
 
 Memory::~Memory(){
+    containerActive() = false;
 }
 
 void Memory::gc(){

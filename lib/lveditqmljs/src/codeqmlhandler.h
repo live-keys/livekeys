@@ -54,6 +54,8 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public AbstractCodeHandler{
     Q_OBJECT
     Q_DISABLE_COPY(CodeQmlHandler)
 
+    friend class ProjectQmlExtension;
+
 public:
     explicit CodeQmlHandler(
         ViewEngine* engine,
@@ -137,6 +139,7 @@ signals:
 
 private:
     void rehighlightSection(int start, int end);
+    void resetProjectQmlExtension();
 
     void suggestionsForGlobalQmlContext(
         const QmlCompletionContext& context,

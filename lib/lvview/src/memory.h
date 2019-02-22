@@ -38,6 +38,7 @@ private:
     public:
         std::unordered_map<qint64, Memory::Cell<T, TI>* > m_cells;
 
+        Container(){}
         ~Container(){}
     };
 
@@ -60,12 +61,15 @@ public:
 
     template<typename T, typename TI, typename ...Args>
     static void free(T* parent, TI* arg){
-        if ( container<T, TI>().m_cells.empty() )
+        if ( !containerActive() || container<T, TI>().m_cells.empty() ){
             T::free(arg);
+            return;
+        }
         qint64 index = T::memoryIndex(parent);
         auto it = container<T, TI>().m_cells.find(index);
         if ( it == container<T, TI>().m_cells.end() ) {
             T::free(arg);
+            return;
         }
         Cell<T, TI>* cell = it->second;
         if ( cell->allocationSize > cell->objects.size() ){
@@ -98,9 +102,9 @@ private:
         return instance;
     }
 
-    static std::vector<ContainerBase*>& containers(){
-        static std::vector<ContainerBase*> containers;
-        return containers;
+    static bool& containerActive(){
+        static bool containerActive = false;
+        return containerActive;
     }
 };
 
