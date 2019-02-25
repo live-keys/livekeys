@@ -25,6 +25,10 @@
  * \brief Detects features in an image
  * \ingroup plugin-lcvfeatures2d
  */
+
+ /**
+  *\brief QFeatureDetector constructor
+  */
 QFeatureDetector::QFeatureDetector(QQuickItem *parent)
     : QQuickItem(parent)
     , m_detector(cv::Ptr<cv::FeatureDetector>())
@@ -61,10 +65,15 @@ QFeatureDetector::QFeatureDetector(QQuickItem *parent)
  * \fn lv::QFeatureDetector::setMask()
  * \brief Setter for mask
 */
+
+/**
+ * \fn lv::QFeatureDetector::maskChanged()
+ * \brief Triggered when mask is changed
+*/
     
 /**
  * \fn lv::QFeatureDetector::keypoints()
- * \brief Actual keypoints
+ * \brief Keypoints
 */
 
 /**
@@ -73,10 +82,42 @@ QFeatureDetector::QFeatureDetector(QQuickItem *parent)
 */
 
 /**
+ * \fn lv::QFeatureDetector::keypointsChanged()
+ * \brief Triggered when the keypoints are changed
+*/
+
+/**
  * \fn lv::QFeatureDetector::params()
  * \brief Given parameters
 */
 
+/**
+ * \fn lv::QFeatureDetector::setParams()
+ * \brief Setter for given parameters
+*/
+
+/**
+ * \fn lv::QFeatureDetector::paramsChanged()
+ * \brief Triggered when params are changed
+*/
+
+/**
+ * \fn lv::QFeatureDetector::outputChanged()
+ * \brief Triggered when output is changed
+*/
+
+/**
+ * \fn lv::QFeatureDetector::inputChanged()
+ * \brief Triggered when input is changed
+*/
+
+/**
+ * \fn lv::QFeatureDetector::initialize()
+*/
+
+ /**
+  *\brief QFeatureDetector constructor
+  */
 QFeatureDetector::QFeatureDetector(cv::Ptr<cv::FeatureDetector> detector, QQuickItem* parent)
     : QQuickItem(parent)
     , m_detector(detector)
@@ -89,19 +130,31 @@ QFeatureDetector::QFeatureDetector(cv::Ptr<cv::FeatureDetector> detector, QQuick
     setFlag(ItemHasContents, true);
 }
 
+/**
+*\brief QFeatureDetector destructor
+*/
 QFeatureDetector::~QFeatureDetector(){
     delete m_output;
 }
+
+/**
+*\fn lv::QFeatureDetector::initialize()
+*\brief Initializes any internal parameters
+*/
 
 cv::FeatureDetector *QFeatureDetector::detector(){
     return m_detector;
 }
 
+/**
+*\brief Function used for extending Feature detector
+*/
 void QFeatureDetector::initializeDetector(cv::Ptr<cv::FeatureDetector> detector){
     m_detector = detector;
     detect();
 }
 
+/// \private
 void QFeatureDetector::detect(){
     if ( m_detector != 0 && !m_in->cvMat()->empty() && isComponentComplete() ){
         m_detector->detect(*m_in->cvMat(), m_keypoints->keypoints(), *m_mask->cvMat());
@@ -114,11 +167,17 @@ void QFeatureDetector::detect(){
     }
 }
 
+/**
+*\brief Implementation from QQuickItem. Triggers a feature detection if input matrix has been set.
+*/
 void QFeatureDetector::componentComplete(){
     QQuickItem::componentComplete();
     detect();
 }
 
+/**
+*\brief updatePaintNode() implementation from QQuickItem.
+*/
 QSGNode* QFeatureDetector::updatePaintNode(QSGNode* node, QQuickItem::UpdatePaintNodeData*){
     if ( m_outputDirty )
         drawKeypoints();

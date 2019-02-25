@@ -42,15 +42,9 @@ public:
     float minDistanceCoeff() const;
     void setMinDistanceCoeff(float arg);
 
-    /**
-     * \brief Maximum distance allowed betwen set of two matches.
-     */
     float maxDistance() const;
     void setMaxDistance(float arg);
 
-    /**
-     * \brief The match betwen the first match and it's next consecutive match.
-     */
     float nndrRatio() const;
     void setNndrRatio(float arg);
 
@@ -62,23 +56,24 @@ signals:
     void nndrRatioChanged();
 
 protected:
+    /// \private
     void callFilterMatches();
-
+    /// \private
     QDMatchVector::Type filterKnnMatches(
         const std::vector<std::vector<cv::DMatch> >& src,
         std::vector<std::vector<cv::DMatch> >& dst
     );
-
+    /// \private
     QDMatchVector::Type filterBestMatches(
         const std::vector<std::vector<cv::DMatch> >& src,
         std::vector<std::vector<cv::DMatch> >& dst
     );
-
+    /// \private
     void copyMatches(
         const std::vector<std::vector<cv::DMatch> >& src,
         std::vector<std::vector<cv::DMatch> >& dst
     );
-
+    /// \private
     virtual void componentComplete();
 
 private:

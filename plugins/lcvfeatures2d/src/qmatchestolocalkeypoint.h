@@ -32,6 +32,7 @@ class Q_LCVFEATURES2D_EXPORT QMatchesToLocalKeypoint : public QQuickItem{
     Q_PROPERTY(QKeyPointToSceneMap* output           READ output               NOTIFY outputChanged)
 
 public:
+
     explicit QMatchesToLocalKeypoint(QQuickItem *parent = 0);
     ~QMatchesToLocalKeypoint();
 

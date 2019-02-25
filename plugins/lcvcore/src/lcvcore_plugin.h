@@ -18,7 +18,7 @@
 #define LCVCORE_PLUGIN_H
 
 #include <QQmlExtensionPlugin>
-
+/// \private
 class LcvcorePlugin : public QQmlExtensionPlugin{
 
     Q_OBJECT

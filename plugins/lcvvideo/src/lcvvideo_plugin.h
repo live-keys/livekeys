@@ -18,7 +18,7 @@
 #define LCVVIDEO_PLUGIN_H
 
 #include <QQmlExtensionPlugin>
-
+/// \private
 class LcvvideoPlugin : public QQmlExtensionPlugin{
 
     Q_OBJECT

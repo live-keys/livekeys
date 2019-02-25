@@ -26,14 +26,17 @@ class Q_LCVFEATURES2D_EXPORT QKeyPointToSceneMap : public QObject{
     Q_OBJECT
 
 public:
+    /// \private
     class ObjectKeypointToScene{
     public:
         std::vector<cv::Point2f> objectPoints;
         std::vector<cv::Point2f> scenePoints;
     };
-
+    /// \private
     typedef std::vector<ObjectKeypointToScene*> Container;
+    /// \private
     typedef Container::iterator       Iterator;
+    /// \private
     typedef Container::const_iterator ConstIterator;
 
 public:
@@ -44,10 +47,13 @@ public:
     ObjectKeypointToScene* mappingAt(size_t index);
 
     void resize(size_t size);
-
+    /// \private
     Iterator begin();
+    /// \private
     Iterator end();
+    /// \private
     ConstIterator begin() const;
+    /// \private
     ConstIterator end() const;
 
 public slots:

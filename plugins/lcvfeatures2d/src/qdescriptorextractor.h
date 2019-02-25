@@ -38,16 +38,17 @@ public:
 
     QKeyPointVector* keypoints();
     void setKeypoints(QKeyPointVector* keypoints);
-
+    /// \private
     QMat* descriptors();
     const QVariantMap& params() const;
+    /// \private
     bool isBinary() const;
-
+    /// \private
     virtual int descriptorCols() const;
 
 protected:
     virtual void initialize(const QVariantMap& params);
-
+    /// \private
     cv::Ptr<cv::DescriptorExtractor> extractor();
     void initializeExtractor(cv::Ptr<cv::DescriptorExtractor> extractor);
     virtual void componentComplete();
@@ -79,7 +80,6 @@ inline void QDescriptorExtractor::setKeypoints(QKeyPointVector* keypoints){
     emit keypointsChanged();
     compute();
 }
-
 inline QMat*QDescriptorExtractor::descriptors(){
     return m_descriptors;
 }
@@ -87,11 +87,9 @@ inline QMat*QDescriptorExtractor::descriptors(){
 inline const QVariantMap &QDescriptorExtractor::params() const{
     return m_params;
 }
-
 inline bool QDescriptorExtractor::isBinary() const{
     return m_isBinary;
 }
-
 inline int QDescriptorExtractor::descriptorCols() const{
     return 32;
 }

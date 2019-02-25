@@ -97,7 +97,6 @@ QMatDisplay::~QMatDisplay(){
  *\a nodeData
  */
 
-
 QSGNode *QMatDisplay::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *){
     QMatNode *n = static_cast<QMatNode*>(node);
     if (!node)
@@ -112,3 +111,18 @@ QSGNode *QMatDisplay::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNode
 
     return n;
 }
+
+/**
+ *\fn lv::QMatDisplay::linearFilterChanged()
+ *\brief Triggered when linearFilter is changed
+ */
+
+ /**
+ *\fn lv::QMatDisplay::setLinearFilter()
+ *\brief Setter for linearFilter
+ */
+
+ /**
+ *\fn lv::QMatDisplay::outputChanged()
+ *\brief Triggered when output is changed
+ */

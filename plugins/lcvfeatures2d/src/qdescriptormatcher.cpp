@@ -54,10 +54,12 @@ QDescriptorMatcher::~QDescriptorMatcher(){
     delete m_matcher;
 }
 
+/**
+*\brief Returns a number of matches
+*/
 QDMatchVector* QDescriptorMatcher::matches(){
     return m_matches;
 }
-
 /**
  * \brief Adds a set of descriptors
  */
@@ -90,7 +92,9 @@ void QDescriptorMatcher::train(){
         qWarning("Descriptor Matcher Train: No matcher defined. You need to initialize the matcher manually.");
     }
 }
-
+/**
+*\brief Initializes matcher
+*/
 void QDescriptorMatcher::callMatch(){
     if ( m_matcher && isComponentComplete() ){
         match(m_queryDescriptors, m_matches);
@@ -133,16 +137,79 @@ void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches
     }
 }
 
+/**
+*\brief Override from QQuickItem.Calls the matcher.
+*/
 void QDescriptorMatcher::componentComplete(){
     QQuickItem::componentComplete();
     callMatch();
 }
-
+/**
+*\brief Initializes any internal parameters
+*/
 void QDescriptorMatcher::initialize(const QVariantMap &){
 }
 
+/**
+*\brief Function used for extending Descriptor matcher
+*/
 void QDescriptorMatcher::initializeMatcher(cv::DescriptorMatcher* matcher){
     delete m_matcher;
     m_matcher = matcher;
     callMatch();
 }
+
+/**
+*\fn lv::QDescriptorMatcher::match()
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::params()
+*\brief Given parameters
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::setParams()
+*\brief Setter for the params
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::paramsChanged()
+*\brief Triggered when params are changed
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::queryDescriptors()
+*\brief Inputs
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::queryDescriptorsChanged()
+*\brief Triggered when queryDescriptors are changed
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::matchesChanged()
+*\brief Triggered when matches are changed
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::setKnn()
+*\brief Setter for the knn
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::knn()
+*\brief Count of best matches found per each query descriptor or less if a query descriptor has less than k possible matches in total.
+*/
+
+
+/**
+*\fn lv::QDescriptorMatcher::knnChanged()
+*\brief Triggered when knn is changed
+*/
+
+/**
+*\fn lv::QDescriptorMatcher::setQueryDescriptors()
+*\brief Triggered when queryDescriptors are changed
+*/

@@ -18,7 +18,7 @@
 #define LCVFEATURES2D_PLUGIN_H
 
 #include <QQmlExtensionPlugin>
-
+/// \private
 class Lcvfeatures2dPlugin : public QQmlExtensionPlugin{
 
     Q_OBJECT
