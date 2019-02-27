@@ -6,7 +6,7 @@
 
 namespace lv{
 
-QmlObjectList::QmlObjectList(QObject *parent): QObject(parent)
+QmlObjectList::QmlObjectList(QObject *parent): lv::Shared(parent)
 {
     m_data = new QList<QObject*>;
     m_type = &typeid(QList<QObject*>);
@@ -26,7 +26,7 @@ QmlObjectList::QmlObjectList(
         std::function<void(QmlObjectList*, int)> removeItemAt,
         std::function<void (QmlObjectList *)> clearItems,
         QObject *parent)
-    : QObject(parent)
+    : lv::Shared(parent)
     , m_data(data)
     , m_type(typeInfo)
     , m_itemCount(itemCount)
@@ -43,7 +43,7 @@ QmlObjectList::QmlObjectList(
         std::function<int (QmlObjectList *)> itemCount,
         std::function<QObject *(QmlObjectList *, int)> itemAt,
         QObject *parent)
-    : QObject(parent)
+    : lv::Shared(parent)
     , m_data(data)
     , m_type(typeInfo)
     , m_itemCount(itemCount)
@@ -57,7 +57,7 @@ QmlObjectList::~QmlObjectList(){
 }
 
 QQmlListProperty<QObject> QmlObjectList::items(){
-    if ( !isReadOnly() ){
+    if ( !isConst() ){
         return QQmlListProperty<QObject>(this, this,
                  &QmlObjectList::appendItem,
                  &QmlObjectList::itemCount,
@@ -68,6 +68,32 @@ QQmlListProperty<QObject> QmlObjectList::items(){
                  &QmlObjectList::itemCount,
                  &QmlObjectList::itemAt);
     }
+}
+
+
+void QmlObjectList::setClone(std::function<QmlObjectList *(const QmlObjectList *)> clone){
+    m_clone = clone;
+}
+
+QmlObjectList *QmlObjectList::cloneConst() const{
+    if ( !m_clone ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is not clonable.", 0);
+        lv::ViewContext::instance().engine()->throwError(&e);
+        return nullptr;
+    }
+    QmlObjectList* res = m_clone(this);
+    res->m_appendItem = nullptr;
+    res->m_clearItems = nullptr;
+    return res;
+}
+
+QmlObjectList *QmlObjectList::clone() const{
+    if ( !m_clone ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is not clonable.", 0);
+        lv::ViewContext::instance().engine()->throwError(&e);
+        return nullptr;
+    }
+    return m_clone(this);
 }
 
 QObject *QmlObjectList::itemAt(int index)
@@ -84,8 +110,8 @@ int QmlObjectList::itemCount()
 
 void QmlObjectList::clearItems()
 {
-    if ( isReadOnly() ){
-        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "QmlObjectList is read only.", 0);
+    if ( isConst() ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is const.", 0);
         lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
@@ -94,8 +120,8 @@ void QmlObjectList::clearItems()
 
 void QmlObjectList::appendItem(QObject* item)
 {
-    if ( isReadOnly() ){
-        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "QmlObjectList is read only.", 0);
+    if ( isConst() ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is const.", 0);
         lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
@@ -104,8 +130,8 @@ void QmlObjectList::appendItem(QObject* item)
 
 void QmlObjectList::removeItemAt(int index)
 {
-    if ( isReadOnly() ){
-        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "QmlObjectList is read only.", 0);
+    if ( isConst() ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is const.", 0);
         lv::ViewContext::instance().engine()->throwError(&e);
         return;
     }
@@ -174,8 +200,6 @@ void QmlObjectList::defaultClearItems(QmlObjectList *list)
     auto data = list->dataAs<QList<QObject*>>();
     data->clear();
 }
-
-
 
 
 }// namespace

@@ -44,7 +44,7 @@ Rectangle{
         codeHandler.setDocument(document)
     }
 
-    property color topColor: "#09121c"
+    property color topColor: "#08111a"
 
     color : "#050b12"
     clip : true
@@ -440,7 +440,7 @@ Rectangle{
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             width: lineSurface.width + 5
-            color: editor.topColor
+            color: "#091018"
             clip: true
 
             Flickable{
@@ -452,7 +452,7 @@ Rectangle{
 
                 LineSurface{
                     id: lineSurface
-                    color: "#808691"
+                    color: "#3e464d"
                     Component.onCompleted: {
                         setComponents(editorArea);
                     }

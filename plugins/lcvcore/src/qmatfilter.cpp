@@ -77,8 +77,18 @@ QMatFilter::~QMatFilter(){
 
 
 /**
- *\fn QMatFilter::input()
+ *\fn QMatFilter::inputMat()
  *\sa MatFilter::input
+ */
+
+ /**
+ *\fn QMatFilter::inputChanged()
+ *\brief Triggered when the input is changed
+ */
+
+ /**
+ *\fn QMatFilter::setInputMat()
+ *\brief Setter mofr the InputMat
  */
 
 

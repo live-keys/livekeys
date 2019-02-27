@@ -314,6 +314,7 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::QmlObjectList>(         uri, 1, 0, "ObjectList");
     qmlRegisterType<lv::QmlVariantListModel>(   uri, 1, 0, "VariantListModel");
     qmlRegisterType<lv::QmlObjectListModel>(    uri, 1, 0, "ObjectListModel");
+    qmlRegisterUncreatableType<lv::Shared>(     uri, 1, 0, "Shared", "Shared is of abstract type.");
 }
 
 /**

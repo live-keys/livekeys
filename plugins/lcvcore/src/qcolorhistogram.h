@@ -25,6 +25,8 @@ class QPainter;
 class QOpenGLPaintDevice;
 class QOpenGLFramebufferObject;
 class QOpenGLFunctions;
+
+/// \private
 class QAbstractColorHistogramRenderer{
 public:
     QAbstractColorHistogramRenderer(){}

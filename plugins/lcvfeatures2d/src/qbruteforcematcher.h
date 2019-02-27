@@ -19,6 +19,7 @@
 
 #include "qdescriptormatcher.h"
 
+/// \private
 class QBruteForceMatcher : public QDescriptorMatcher{
 
     Q_OBJECT

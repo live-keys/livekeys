@@ -16,7 +16,8 @@
 
 #include "qmat.h"
 #include <QQmlEngine>
-
+#include "live/memory.h"
+#include "live/visuallog.h"
 
 /**
  *\class QMat
@@ -24,7 +25,7 @@
  *\brief Open cv matrix wrapper.
 
  *The class represents the wrapper for the opencv matrix element to be passed around in the QML structure. To access
- *its cv mat vaue, use the cvMat() function.
+ *it's cv mat value, use the cvMat() function.
 
  *To access it's pixels within qml, use the Mat::buffer() function.
  */
@@ -43,9 +44,7 @@
  */
 
 /**
- *\brief QMat::QMat
- *
- *Params : \a parent
+ *\brief QMat constructor
  */
 QMat::QMat(QObject *parent)
     : lv::Shared(parent)
@@ -54,11 +53,7 @@ QMat::QMat(QObject *parent)
 }
 
 /**
- *\brief QMat::QMat
- *
- *Params : 
- *\a mat 
- *\a parent
+ *\brief QMat constructor with internal mat
  */
 QMat::QMat(cv::Mat *mat, QObject *parent)
     : lv::Shared(parent)
@@ -67,10 +62,23 @@ QMat::QMat(cv::Mat *mat, QObject *parent)
 }
 
 /**
- * \brief Returns an equivalent ArrayBuffer to access the matrix values
- * \return
+ * \brief QMat memory-based constructor
+ * @param width
+ * @param height
+ * @param type
+ * @param channels
+ * @param parent
  */
-QByteArray QMat::buffer(){
+QMat::QMat(int width, int height, QMat::Type type, int channels, QObject *parent)
+    : lv::Shared(parent)
+    , m_internal(lv::Memory::alloc<QMat, cv::Mat>(width, height, type, channels))
+{
+}
+
+/**
+ * \brief Returns an equivalent ArrayBuffer to access the matrix values
+ */
+QByteArray QMat::buffer() const{
     return QByteArray::fromRawData(
         reinterpret_cast<const char*>(m_internal->data),
         static_cast<int>(m_internal->total() * m_internal->elemSize())
@@ -78,23 +86,21 @@ QByteArray QMat::buffer(){
 }
 
 /**
- * \brief QMat::channels
- * \return
+ * \brief Returns the number of channels
  */
-int QMat::channels(){
+int QMat::channels() const{
     return m_internal->channels();
 }
 
 /**
- * \brief QMat::depth
- * \return
+ * \brief Returns the matrix depth (CV8U, CV16S, ...)
  */
-int QMat::depth(){
+int QMat::depth() const{
     return m_internal->depth();
 }
 
 /**
- *\brief Returns the size of the matrix element
+ * \brief Returns the size of the matrix.
  */
 QSize QMat::dimensions() const{
     return QSize(m_internal->cols, m_internal->rows);
@@ -128,6 +134,9 @@ QMat::~QMat(){
     delete m_internal;
 }
 
+/**
+ * \brief Returns the matrix internal data.
+ */
 const cv::Mat &QMat::data() const{
     return *m_internal;
 }
@@ -152,11 +161,16 @@ void QMat::cleanUp(){
     delete m_nullMat;
 }
 
-lv::Shared *QMat::reloc(){
-    QMat* m = new QMat(m_internal, parent());
-    m_internal = new cv::Mat;
-    lv::Shared::invalidate(this);
-    return m;
+cv::Mat *QMat::memoryAlloc(int width, int height, int type, int channels){
+    return new cv::Mat(width, height, CV_MAKETYPE(type, channels));
+}
+
+size_t QMat::memoryIndex(int width, int height, int type, int channels){
+    return (size_t)width << 44 | (size_t)height << 24 | (size_t)channels << 20 | type;
+}
+
+size_t QMat::memoryIndex(const QMat *m){
+    return memoryIndex(m->internal().cols, m->internal().rows, m->internal().type(), m->channels());
 }
 
 /**
@@ -178,12 +192,24 @@ QMat *QMat::reloc(QMat *m){
     return res;
 }
 
+/**
+ * \brief Returns the internal mat
+ */
 const cv::Mat &QMat::internal() const{
     return *m_internal;
 }
 
+/**
+ * \brief Returns the internal mat
+ */
 cv::Mat &QMat::internal(){
     return *m_internal;
+}
+/**
+*\brief Memory allocation
+*/
+void QMat::recycleSize(int size) const{
+    lv::Memory::reserve<QMat, cv::Mat>(this, size);
 }
 
 /*!

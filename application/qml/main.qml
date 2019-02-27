@@ -791,7 +791,7 @@ ApplicationWindow{
         handleDelegate: Rectangle{
             implicitWidth: 1
             implicitHeight: 1
-            color: "#0e1924"
+            color: "#191e23"
         }
 
         function addHorizontalEditor(){
@@ -940,7 +940,7 @@ ApplicationWindow{
                 handleDelegate: Rectangle{
                     implicitWidth: 1
                     implicitHeight: 1
-                    color: "#060d13"
+                    color: "#081019"
                 }
 
                 property var editors: [editor]

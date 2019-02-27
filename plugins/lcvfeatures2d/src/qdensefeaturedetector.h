@@ -18,7 +18,7 @@
 #define QDENSEFEATUREDETECTOR_H
 
 #include "qfeaturedetector.h"
-
+/// \private
 class QDenseFeatureDetector : public QFeatureDetector{
 
     Q_OBJECT

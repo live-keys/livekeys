@@ -39,23 +39,74 @@ QDrawMatches::QDrawMatches(QQuickItem *parent)
 }
 
 /**
- *\brief QDrawMatches desctructor
- */
+*\brief QDrawMatches desctructor
+*/
 QDrawMatches::~QDrawMatches(){
 }
 
 /**
- * \fn lv::QDrawMatches::keypoints1()
- * \brief Keypoint from the first source   
- */
+* \fn lv::QDrawMatches::keypoints1()
+* \brief Keypoint from the first source   
+*/
 
 /**
- * \fn lv::QDrawMatches::keypoints2()
- * \brief Keypoint from the second source   
- */
+* \fn lv::QDrawMatches::setKeypoints1()
+* \brief Setter for the keypoints1   
+*/
 
 /**
- * \brief Matches from the first source to second one
+* \fn lv::QDrawMatches::keypoints1Changed()
+* \brief Triggered when the keypoints1 is changed   
+*/
+
+/**
+* \fn lv::QDrawMatches::keypoints2()
+* \brief Keypoint from the second source   
+*/
+
+/**
+* \fn lv::QDrawMatches::setKeypoints2()
+* \brief Setter for the keypoints2   
+*/
+
+/**
+* \fn lv::QDrawMatches::keypoints2Changed()
+* \brief Triggered when the keypoints2 is changed   
+*/
+
+/**
+* \fn lv::QDrawMatches::matches1to2()
+* \brief Matches from the first image to the second one.
+*/
+
+/**
+* \fn lv::QDrawMatches::matches1to2Changed()
+* \brief Triggered when matches1to2 is changed
+*/
+
+
+/**
+* \fn lv::QDrawMatches::drawExtractedMatches()
+* \brief Filter only specific image.
+*/
+
+/**
+* \fn lv::QDrawMatches::matchIndex()
+* \brief Filter only specific image.
+*/
+
+/**
+* \fn lv::QDrawMatches::setMatchIndex()
+* \brief Setter for the matchIndex
+*/
+
+/**
+* \fn lv::QDrawMatches::matchIndexChanged()
+* \brief Triggered when the matchIndex is changed.
+*/
+
+/**
+ * \brief Setter for the matches1to2
  */
 void QDrawMatches::setMatches1to2(QDMatchVector *matches1to2){
     m_matches = matches1to2;
@@ -63,7 +114,9 @@ void QDrawMatches::setMatches1to2(QDMatchVector *matches1to2){
     m_matchSurfaceDirty = true;
     update();
 }
-
+/**
+*\brief Implementation from QQuickItem
+*/
 QSGNode *QDrawMatches::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData){
 
     if ( m_keypoints1 &&

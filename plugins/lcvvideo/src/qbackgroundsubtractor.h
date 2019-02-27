@@ -50,14 +50,17 @@ public:
     virtual ~QBackgroundSubtractor();
 
     double learningRate() const;
+    /// \private
     void setLearningRate(double rate);
 
     virtual void transform(const cv::Mat& in, cv::Mat& out);
 
 signals:
+    /// \private
     void learningRateChanged();
 
 protected:
+    /// \private
     QBackgroundSubtractorPrivate* const d_ptr;
 
 private:

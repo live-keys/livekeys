@@ -42,7 +42,7 @@ WorkerThread::~WorkerThread(){
 
 void WorkerThread::postWork(
         const std::function<void ()> &fnc,
-        Shared::ReadScope *locker)
+        Shared::RefScope *locker)
 {
     QCoreApplication::postEvent(this, new WorkerThread::CallEvent(fnc, locker));
 }
@@ -50,7 +50,7 @@ void WorkerThread::postWork(
 void WorkerThread::postWork(
         const std::function<void ()> &fnc,
         const std::function<void ()> &cbk,
-        Shared::ReadScope *locker)
+        Shared::RefScope *locker)
 {
     QCoreApplication::postEvent(this, new WorkerThread::CallEvent(fnc, cbk, locker));
 }
@@ -77,14 +77,14 @@ bool WorkerThread::event(QEvent *ev){
     return true;
 }
 
-WorkerThread::CallEvent::CallEvent(const std::function<void ()>& fnc, Shared::ReadScope *locker)
+WorkerThread::CallEvent::CallEvent(const std::function<void ()>& fnc, Shared::RefScope *locker)
     : QEvent(QEvent::None)
     , m_filter(fnc)
     , m_readScope(locker)
 {
 }
 
-WorkerThread::CallEvent::CallEvent(std::function<void ()>&& fnc, Shared::ReadScope *locker)
+WorkerThread::CallEvent::CallEvent(std::function<void ()>&& fnc, Shared::RefScope *locker)
     : QEvent(QEvent::None)
     , m_filter(std::move(fnc))
     , m_readScope(locker)
@@ -94,7 +94,7 @@ WorkerThread::CallEvent::CallEvent(std::function<void ()>&& fnc, Shared::ReadSco
 WorkerThread::CallEvent::CallEvent(
         const std::function<void ()> &filter,
         const std::function<void ()> &callback,
-        Shared::ReadScope *locker)
+        Shared::RefScope *locker)
     : QEvent(QEvent::None)
     , m_filter(filter)
     , m_callback(callback)
@@ -105,7 +105,7 @@ WorkerThread::CallEvent::CallEvent(
 WorkerThread::CallEvent::CallEvent(
         std::function<void ()> &&filter,
         std::function<void ()> &&callback,
-        Shared::ReadScope *locker)
+        Shared::RefScope *locker)
     : QEvent(QEvent::None)
     , m_filter(filter)
     , m_callback(callback)
@@ -117,7 +117,7 @@ void WorkerThread::CallEvent::callFilter(){
     m_filter();
 }
 
-Shared::ReadScope *WorkerThread::CallEvent::readScope(){
+Shared::RefScope *WorkerThread::CallEvent::readScope(){
     return m_readScope;
 }
 

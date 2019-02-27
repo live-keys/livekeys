@@ -20,7 +20,7 @@
 #include "qcalcopticalflowpyrlk.h"
 #include "qbackgroundsubtractormog2.h"
 #include "qbackgroundsubtractorknn.h"
-
+/// \private
 void LcvvideoPlugin::registerTypes(const char *uri){
     // @uri modules.lcvvideo
     qmlRegisterType<QCalcOpticalFlowPyrLK>(     uri, 1, 0, "CalcOpticalFlowPyrLK");

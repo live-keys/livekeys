@@ -9,6 +9,7 @@ class QQmlEngine;
 
 namespace lv{
 
+class Memory;
 class Settings;
 class ViewEngine;
 
@@ -23,14 +24,16 @@ public:
 
     ViewEngine* engine();
     Settings* settings();
+    Memory* memory();
 
 private:
-    ViewContext(ViewEngine* engine, Settings* settings);
+    ViewContext(ViewEngine* engine, Settings* settings, lv::Memory *memory);
 
     static QScopedPointer<ViewContext> m_instance;
 
     ViewEngine* m_engine;
     Settings*   m_settings;
+    Memory*     m_memory;
 
 };
 
@@ -46,6 +49,10 @@ inline ViewEngine *ViewContext::engine(){
 
 inline Settings *ViewContext::settings(){
     return m_settings;
+}
+
+inline Memory *ViewContext::memory(){
+    return m_memory;
 }
 
 }// namespace

@@ -66,6 +66,11 @@ ProjectQmlExtension::ProjectQmlExtension(QObject *parent)
  */
 ProjectQmlExtension::~ProjectQmlExtension(){
     m_engine->removeCompileHook(&ProjectQmlExtension::engineHook, this);
+    for ( auto it = m_codeHandlers.begin(); it != m_codeHandlers.end(); ++it ){
+        CodeQmlHandler* cqh = *it;
+        cqh->resetProjectQmlExtension();
+    }
+    m_codeHandlers.clear();
 }
 
 /**

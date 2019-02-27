@@ -59,7 +59,7 @@ Rectangle{
         color: "#050d13"
         height: 30
 
-        border.color: "#0d1f2d"
+        border.color: "#0c1117"
         border.width: 1
 
         TextInput{
@@ -221,7 +221,7 @@ Rectangle{
 
                 property string path: model.path
 
-                color: ListView.isCurrentItem ? "#11202d" : "#0a131a"
+                color: ListView.isCurrentItem ? "#0b1b2a" : "#0d151b"
                 width: root.width
                 height: documentView.delegateHeight
                 Text{

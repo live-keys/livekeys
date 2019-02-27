@@ -19,7 +19,6 @@
 
 #include <QJsonObject>
 
-/// \private
 QFlannBasedMatcher::QFlannBasedMatcher(QQuickItem* parent)
     : QDescriptorMatcher(0, parent)
 {

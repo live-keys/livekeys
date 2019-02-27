@@ -26,7 +26,7 @@
 
 // QAbstractColorHistogramRenderer implementations
 // -----------------------------------------------
-
+/// \private
 class QColorHistogramConnectedLinesRenderer : public QAbstractColorHistogramRenderer{
 
 public:
@@ -54,7 +54,7 @@ public:
         }
     }
 };
-
+/// \private
 class QColorHistogramRectanglesRenderer : public QAbstractColorHistogramRenderer{
 
 public:

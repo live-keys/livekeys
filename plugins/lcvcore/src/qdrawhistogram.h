@@ -38,6 +38,7 @@ public:
         qreal maxValue
     ) = 0;
 };
+/// \private
 class QDrawHistogramNode : public QObject, public QSGSimpleTextureNode{
 
     Q_OBJECT

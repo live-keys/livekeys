@@ -7,10 +7,12 @@
 #include "qmlobjectlistmodel.h"
 #include "live/lvviewglobal.h"
 #include <QDebug>
+#include "live/shared.h"
 
 namespace lv{
 
-class LV_VIEW_EXPORT QmlObjectList : public QObject{
+class LV_VIEW_EXPORT QmlObjectList : public Shared {
+
 
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<QObject> items READ items)
@@ -39,8 +41,7 @@ public:
     ~QmlObjectList();
 
     QQmlListProperty<QObject> items();
-    bool isReadOnly() const;
-
+    bool isConst() const;
     template<typename T> static QmlObjectList* create(
         void* data,
         std::function<int(QmlObjectList*)> itemCount,
@@ -78,28 +79,34 @@ public:
     static QObject* defaultItemAt(QmlObjectList*, int);
     static void defaultRemoveItemAt(QmlObjectList*, int);
     static void defaultClearItems(QmlObjectList*);
+    void setClone(std::function<QmlObjectList*(const QmlObjectList *)> clone);
+
 public slots:
     QObject* itemAt(int index);
     int itemCount();
-
     void clearItems();
     void appendItem(QObject* item);
     void removeItemAt(int index);
     QmlObjectListModel* model();
 
+    QmlObjectList *cloneConst() const;
+    QmlObjectList* clone() const;
+
 private:
-    static void appendItem(QQmlListProperty<QObject>*, QObject*);
     static int itemCount(QQmlListProperty<QObject>*);
     static void removeItemAt(QQmlListProperty<QObject>*, int);
     static QObject* itemAt(QQmlListProperty<QObject>*, int);
+
+    static void appendItem(QQmlListProperty<QObject>*, QObject*);
     static void clearItems(QQmlListProperty<QObject>*);
 
 private:
     void*                 m_data;
     const std::type_info* m_type;
 
-    std::function<int(QmlObjectList*)>            m_itemCount;
-    std::function<QObject*(QmlObjectList*, int)>  m_itemAt;
+    std::function<int(QmlObjectList*)>                  m_itemCount;
+    std::function<QObject*(QmlObjectList*, int)>        m_itemAt;
+    std::function<QmlObjectList*(const QmlObjectList*)> m_clone;
 
     std::function<void(QmlObjectList*, QObject*)> m_appendItem;
     std::function<void(QmlObjectList*, int)>      m_removeItemAt;
@@ -156,7 +163,7 @@ inline void *QmlObjectList::data(){
     return m_data;
 }
 
-inline bool QmlObjectList::isReadOnly() const{
+inline bool QmlObjectList::isConst() const{
     return !m_appendItem || !m_removeItemAt;
 }
 
