@@ -35,7 +35,10 @@
 
 #include <QQuickItem>
 
-
+#include "qmlvariantlist.h"
+#include "qmlvariantlistmodel.h"
+#include "qmlobjectlist.h"
+#include "qmlobjectlistmodel.h"
 /**
  * \class lv::FatalException
  * \brief Subclass of the lv::Exception used for unrecoverable errors
@@ -305,8 +308,12 @@ QString ViewEngine::typeAsPropertyMessage(const QString &typeName, const QString
  * \brief Register the base types from the view library
  */
 void ViewEngine::registerBaseTypes(const char *uri){
-    qmlRegisterType<lv::Container>(uri, 1, 0, "Container");
-    qmlRegisterType<lv::Act>(      uri, 1, 0, "Act");
+    qmlRegisterType<lv::Container>(             uri, 1, 0, "Container");
+    qmlRegisterType<lv::Act>(                   uri, 1, 0, "Act");
+    qmlRegisterType<lv::QmlVariantList>(        uri, 1, 0, "VariantList");
+    qmlRegisterType<lv::QmlObjectList>(         uri, 1, 0, "ObjectList");
+    qmlRegisterType<lv::QmlVariantListModel>(   uri, 1, 0, "VariantListModel");
+    qmlRegisterType<lv::QmlObjectListModel>(    uri, 1, 0, "ObjectListModel");
 }
 
 /**

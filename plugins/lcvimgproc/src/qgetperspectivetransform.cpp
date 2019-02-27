@@ -59,6 +59,18 @@ void QGetPerspectiveTransform::appendItem(lv::QmlVariantList *list, QVariant ite
         parent->process();
 }
 
+void QGetPerspectiveTransform::removeItemAt(lv::QmlVariantList *list, int index)
+{
+    std::vector<cv::Point2f>* data = list->dataAs<std::vector<cv::Point2f> >();
+    if (index >= data->size()) return;
+
+    data->erase(data->begin()+index);
+
+    QGetPerspectiveTransform* parent = qobject_cast<QGetPerspectiveTransform*>(list->parent());
+    if ( parent )
+        parent->process();
+}
+
 void QGetPerspectiveTransform::clearItems(lv::QmlVariantList *list){
     std::vector<cv::Point2f>* data = list->dataAs<std::vector<cv::Point2f> >();
     data->clear();
@@ -108,6 +120,7 @@ lv::QmlVariantList *QGetPerspectiveTransform::createList(){
         &QGetPerspectiveTransform::itemCount,
         &QGetPerspectiveTransform::itemAt,
         &QGetPerspectiveTransform::appendItem,
+        &QGetPerspectiveTransform::removeItemAt,
         &QGetPerspectiveTransform::clearItems,
         this
     );

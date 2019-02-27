@@ -2,6 +2,7 @@
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
+#include <QJSValueIterator>
 
 namespace helpers{
 
@@ -68,6 +69,69 @@ cv::Scalar QMatOp::toScalar(const QColor &color){
 
 cv::Rect QMatOp::toRect(const QRect &r){
     return cv::Rect(r.x(), r.y(), r.width(), r.height());
+}
+
+void QMatOp::appendItem(lv::QmlObjectList *list, QObject *item)
+{
+    auto data = list->dataAs<std::vector<QMat*>>();
+    data->push_back(qobject_cast<QMat*>(item));
+}
+
+int QMatOp::itemCount(lv::QmlObjectList *list)
+{
+    auto data = list->dataAs<std::vector<QMat*>>();
+    return data->size();
+}
+
+QObject *QMatOp::itemAt(lv::QmlObjectList *list, int idx)
+{
+    auto data = list->dataAs<std::vector<QMat*>>();
+    if (idx >= static_cast<int>(data->size()) || idx < 0) return nullptr;
+    return (*data)[static_cast<unsigned>(idx)];
+}
+
+void QMatOp::removeItemAt(lv::QmlObjectList *list, int idx)
+{
+    auto data = list->dataAs<std::vector<QMat*>>();
+    if (idx >= data->size() || idx < 0) return;
+    data->erase(data->begin()+idx);
+}
+
+void QMatOp::clearItems(lv::QmlObjectList *list)
+{
+    auto data = list->dataAs<std::vector<QMat*>>();
+    for (int i = 0; i < data->size(); ++i) delete (*data)[i];
+    data->clear();
+}
+
+void QMatOp::setupMatObjectList(lv::QmlObjectList *qol, std::vector<QMat*>* dataPtr)
+{
+    std::vector<QMat*>* data = (dataPtr != nullptr) ? dataPtr : new std::vector<QMat*>;
+    qol->populateObjectList<std::vector<QMat*>>(
+        data, &itemCount, &itemAt, &appendItem, &removeItemAt, &clearItems
+    );
+}
+
+void QMatOp::setupMatObjectListFromArray(lv::QmlObjectList *list, const QJSValue &matArray)
+{
+    std::vector<QMat*>* data = new std::vector<QMat*>;
+    if ( matArray.isArray() ){
+        QJSValueIterator it(matArray);
+        while ( it.hasNext() ){
+            it.next();
+            if ( it.name() != "length" ){
+                QMat* m = qobject_cast<QMat*>(it.value().toQObject());
+                if ( m ){
+                    cv::Mat* nmat = new cv::Mat(*m->cvMat());
+                    data->push_back(new QMat(nmat));
+                } else {
+                    data->clear();
+                    break;
+                }
+            }
+        }
+    }
+    QMatOp::setupMatObjectList(list, data);
 }
 
 QMat *QMatOp::create(const QSize &size, int type, int channels){

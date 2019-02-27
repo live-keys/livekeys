@@ -4,22 +4,27 @@
 #include <QObject>
 #include <QVariant>
 #include <functional>
-#include "qliveglobal.h"
+#include "live/lvviewglobal.h"
 
 namespace lv{
 
-class Q_LIVE_EXPORT QmlVariantList : public QObject{
+class QmlVariantListModel;
+
+class LV_VIEW_EXPORT QmlVariantList : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QVariantList items READ items WRITE setItems)
 
 public:
+    explicit QmlVariantList(QObject* parent = nullptr);
+
     QmlVariantList(void* data,
         const std::type_info* typeInfo,
         std::function<QVariantList(QmlVariantList*)> itemList,
         std::function<int(QmlVariantList*)> itemCount,
         std::function<QVariant(QmlVariantList *, int)> itemAt,
         std::function<void(QmlVariantList*, QVariant)> appendItem,
+        std::function<void(QmlVariantList*, int)> removeItemAt,
         std::function<void(QmlVariantList*)> clearItems,
         QObject *parent = nullptr
     );
@@ -39,6 +44,7 @@ public:
         std::function<int(QmlVariantList*)> itemCount,
         std::function<QVariant(QmlVariantList*, int)> itemAt,
         std::function<void(QmlVariantList*, QVariant)> appendItem,
+        std::function<void(QmlVariantList*, int)> removeItemAt,
         std::function<void(QmlVariantList*)> clearItems,
         QObject *parent = nullptr
     );
@@ -59,6 +65,13 @@ public:
 
     void setQuickAssign(std::function<void(QmlVariantList*, QVariantList)> qa);
 
+    static QVariantList defaultItemList(QmlVariantList*);
+    static int defaultItemCount(QmlVariantList*);
+    static QVariant defaultItemAt(QmlVariantList*, int);
+    static void defaultAppendItem(QmlVariantList*, QVariant);
+    static void defaultRemoveItemAt(QmlVariantList*, int);
+    static void defaultClearItems(QmlVariantList*);
+    static void defaultQuickAssign(QmlVariantList*, QVariantList);
 public slots:
     QVariantList items();
     QVariant itemAt(int index);
@@ -67,8 +80,11 @@ public slots:
 
     void clearItems();
     void appendItem(QVariant item);
+    void removeItemAt(int index);
+    QmlVariantListModel* model();
 
 private:
+
     void*                 m_data;
     const std::type_info* m_type;
 
@@ -77,6 +93,7 @@ private:
     std::function<QVariant(QmlVariantList*, int)>      m_itemAt;
 
     std::function<void(QmlVariantList*, QVariant)>     m_appendItem;
+    std::function<void(QmlVariantList*, int)>          m_removeItemAt;
     std::function<void(QmlVariantList*)>               m_clearItems;
     std::function<void(QmlVariantList*, QVariantList)> m_quickAssign;
 };
@@ -88,10 +105,11 @@ template<typename T> QmlVariantList *QmlVariantList::create(
         std::function<int (QmlVariantList *)> itemCount,
         std::function<QVariant(QmlVariantList *, int)> itemAt,
         std::function<void (QmlVariantList *, QVariant)> appendItem,
+        std::function<void(QmlVariantList*, int)> removeItemAt,
         std::function<void (QmlVariantList *)> clearItems,
         QObject *parent)
 {
-    return new QmlVariantList(data, &typeid(T), itemList, itemCount, itemAt, appendItem, clearItems, parent);
+    return new QmlVariantList(data, &typeid(T), itemList, itemCount, itemAt, appendItem, removeItemAt, clearItems, parent);
 }
 
 template<typename T> QmlVariantList *QmlVariantList::create(
@@ -119,7 +137,7 @@ inline void *QmlVariantList::data(){
 }
 
 inline bool QmlVariantList::isReadOnly() const{
-    return !m_appendItem;
+    return !m_appendItem || !m_removeItemAt;
 }
 
 }// namespace

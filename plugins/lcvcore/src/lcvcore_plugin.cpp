@@ -33,7 +33,6 @@
 #include "qdrawhistogram.h"
 #include "qcolorhistogram.h"
 #include "qmatloader.h"
-#include "qmatlist.h"
 #include "qimagefile.h"
 #include "qoverlapmat.h"
 #include "qitemcapture.h"
@@ -66,7 +65,6 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QAbsDiff>(               uri, 1, 0, "AbsDiff");
     qmlRegisterType<QDrawHistogram>(         uri, 1, 0, "DrawHistogram");
     qmlRegisterType<QColorHistogram>(        uri, 1, 0, "ColorHistogram");
-    qmlRegisterType<QMatList>(               uri, 1, 0, "MatList");
     qmlRegisterType<QMatLoader>(             uri, 1, 0, "MatLoader");
     qmlRegisterType<QImageFile>(             uri, 1, 0, "ImageFile");
     qmlRegisterType<QOverlapMat>(            uri, 1, 0, "OverlapMat");

@@ -62,6 +62,7 @@ QString Commands::add(QObject *object, const QJSValue &commands){
     QString prefix = commandChain.join(".");
 
     vlog("commmands").v() << "Adding commands for prefix: " << prefix;
+    if (prefix == "editor") return prefix; // double commands fix
 
     QJSValueIterator vit(commands);
     while( vit.hasNext() ){

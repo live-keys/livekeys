@@ -84,6 +84,38 @@ ApplicationWindow{
         );
     }
 
+    function setLiveCodingMode()
+    {
+        controls.codingMode = 0
+        modeContainer.visible = false
+        modeImage.source = liveImage.source
+        modeImage.anchors.rightMargin = liveImage.anchors.rightMargin
+        createObjectForActive()
+    }
+
+    function setOnSaveCodingMode()
+    {
+        controls.codingMode = 1
+        modeContainer.visible = false
+        modeImage.source = onSaveImage.source
+        modeImage.anchors.rightMargin = onSaveImage.anchors.rightMargin
+    }
+
+    function setDisabledCodingMode()
+    {
+        controls.codingMode = 2
+        modeContainer.visible = false
+        modeImage.source = disabledImage.source
+        modeImage.anchors.rightMargin = disabledImage.anchors.rightMargin
+    }
+
+    function compileActive()
+    {
+        if (project.active){
+            createObjectForActive()
+        }
+    }
+
     Component.onCompleted: {
         livecv.commands.add(root, {
             'minimize' : [root.showMinimized, "Minimize"],
@@ -96,7 +128,11 @@ ApplicationWindow{
             'addHorizontalEditorView' : [mainVerticalSplit.addHorizontalEditor, "Add Horizontal Editor"],
             'addHorizontalFragmentEditorView': [mainVerticalSplit.addHorizontalFragmentEditor, "Add Horizontal Fragment Editor"],
             'removeHorizontalEditorView' : [mainVerticalSplit.removeHorizontalEditor, "Remove Horizontal Editor"],
-            'toggleFullScreen': [root.toggleFullScreen, "Toggle Fullscreen"]
+            'toggleFullScreen': [root.toggleFullScreen, "Toggle Fullscreen"],
+            'setLiveCodingMode': [root.setLiveCodingMode, "Set 'Live' Coding Mode"],
+            'setOnSaveCodingMode': [root.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
+            'setDisabledCodingMode': [root.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
+            'compileActiveFile': [root.compileActive, "Compile Active File"]
         })
     }
 
@@ -323,13 +359,7 @@ ApplicationWindow{
                 id : liveArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: {
-                    controls.codingMode = 0
-                    modeContainer.visible = false
-                    modeImage.source = liveImage.source
-                    modeImage.anchors.rightMargin = liveImage.anchors.rightMargin
-                    createObjectForActive()
-                }
+                onClicked: setLiveCodingMode
             }
         }
 
@@ -361,12 +391,7 @@ ApplicationWindow{
                 id : onSaveArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: {
-                    controls.codingMode = 1
-                    modeContainer.visible = false
-                    modeImage.source = onSaveImage.source
-                    modeImage.anchors.rightMargin = onSaveImage.anchors.rightMargin
-                }
+                onClicked: setOnSaveCodingMode
             }
         }
 
@@ -398,12 +423,7 @@ ApplicationWindow{
                 id : disabledArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: {
-                    controls.codingMode = 2
-                    modeContainer.visible = false
-                    modeImage.source = disabledImage.source
-                    modeImage.anchors.rightMargin = disabledImage.anchors.rightMargin
-                }
+                onClicked: setDisabledCodingMode
             }
         }
     }

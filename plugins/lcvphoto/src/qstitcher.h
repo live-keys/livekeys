@@ -20,12 +20,12 @@
 #include <QQuickItem>
 #include "opencv2/stitching.hpp"
 #include "qmatdisplay.h"
-#include "qmatlist.h"
+#include "live/qmlobjectlist.h"
 
 class QStitcher : public QMatDisplay{
 
     Q_OBJECT
-    Q_PROPERTY(QMatList* input    READ input  WRITE setInput  NOTIFY inputChanged)
+    Q_PROPERTY(lv::QmlObjectList* input    READ input  WRITE setInput  NOTIFY inputChanged)
     Q_PROPERTY(QVariantMap params READ params WRITE setParams NOTIFY paramsChanged)
 
 public:
@@ -48,8 +48,8 @@ public:
 public:
     QStitcher(QQuickItem* parent = nullptr);
 
-    QMatList* input() const;
-    void setInput(QMatList* input);
+    lv::QmlObjectList* input() const;
+    void setInput(lv::QmlObjectList* input);
 
     const QVariantMap &params() const;
 
@@ -65,7 +65,7 @@ public slots:
 private:
     void filter();
 
-    QMatList*             m_input;
+    lv::QmlObjectList*             m_input;
 
 #if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
     cv::Ptr<cv::Stitcher> m_stitcher;
@@ -76,7 +76,7 @@ private:
     QVariantMap m_params;
 };
 
-inline QMatList *QStitcher::input() const{
+inline lv::QmlObjectList *QStitcher::input() const{
     return m_input;
 }
 
@@ -84,7 +84,7 @@ inline const QVariantMap& QStitcher::params() const{
     return m_params;
 }
 
-inline void QStitcher::setInput(QMatList *input){
+inline void QStitcher::setInput(lv::QmlObjectList *input){
     if (m_input == input)
         return;
 
