@@ -49,6 +49,7 @@ public:
 public:
     int position() const{ return m_position; }
     bool isValid() const{ return m_position != -1; }
+    /** Create a ProjectDocumentMarker */
     static Ptr create(){ return ProjectDocumentMarker::Ptr(new ProjectDocumentMarker); }
     ~ProjectDocumentMarker(){}
 
@@ -86,6 +87,7 @@ public:
 
     void onTextChanged(std::function<void(ProjectDocumentSection::Ptr, int, int, const QString &)> handler);
 
+    /** Create a ProjectDocumentMarker with given parameters */
     static Ptr create(int type, int position = -1, int length = 0){
         return ProjectDocumentSection::Ptr(new ProjectDocumentSection(0, type, position, length));
     }
@@ -236,8 +238,12 @@ public:
 
     ~ProjectDocument();
 
+    /** \brief File getter */
     lv::ProjectFile* file() const;
 
+    /**
+     * \brief Returns document content
+     */
     QString content() const;
 
     void setIsDirty(bool isDirty);
@@ -245,6 +251,9 @@ public:
     bool isDirty() const;
 
     void setIsMonitored(bool isMonitored);
+    /**
+     * \brief Shows if the document is monitored
+     */
     bool isMonitored() const;
 
     const QDateTime& lastModified() const;
@@ -332,9 +341,6 @@ inline ProjectFile *ProjectDocument::file() const{
     return m_file;
 }
 
-/**
- * \brief Returns document content
- */
 inline QString ProjectDocument::content() const{
     syncContent();
     return m_textDocument->toPlainText();
@@ -351,9 +357,6 @@ inline void ProjectDocument::setIsDirty(bool isDirty){
     isDirtyChanged();
 }
 
-/**
- * \brief Shows if the content's dirty
- */
 inline bool ProjectDocument::isDirty() const{
     return m_isDirty;
 }
@@ -369,9 +372,7 @@ inline void ProjectDocument::setIsMonitored(bool isMonitored){
     emit isMonitoredChanged();
 }
 
-/**
- * \brief Shows if the document is monitored
- */
+
 inline bool ProjectDocument::isMonitored() const{
     return m_isMonitored;
 }

@@ -2,8 +2,21 @@
 #include "live/viewcontext.h"
 #include "live/exception.h"
 #include "live/viewengine.h"
+#include "qmlvariantlistmodel.h"
 
 namespace lv{
+
+QmlVariantList::QmlVariantList(QObject *parent): Shared(parent)
+{
+    m_data = new QVariantList;
+    m_type = &typeid(QVariantList);
+    m_itemList = &defaultItemList;
+    m_itemAt = &defaultItemAt;
+    m_itemCount = &defaultItemCount;
+    m_appendItem = &defaultAppendItem;
+    m_removeItemAt = &defaultRemoveItemAt;
+    m_quickAssign = &defaultQuickAssign;
+}
 
 QmlVariantList::QmlVariantList(
         void *data,
@@ -12,6 +25,7 @@ QmlVariantList::QmlVariantList(
         std::function<int (QmlVariantList *)> itemCount,
         std::function<QVariant(QmlVariantList *, int)> itemAt,
         std::function<void (QmlVariantList *, QVariant)> appendItem,
+        std::function<void(QmlVariantList*, int)> removeItemAt,
         std::function<void (QmlVariantList *)> clearItems,
         QObject *parent)
     : Shared(parent)
@@ -21,6 +35,7 @@ QmlVariantList::QmlVariantList(
     , m_itemCount(itemCount)
     , m_itemAt(itemAt)
     , m_appendItem(appendItem)
+    , m_removeItemAt(removeItemAt)
     , m_clearItems(clearItems)
 {
 }
@@ -119,6 +134,68 @@ void QmlVariantList::appendItem(QVariant item){
         return;
     }
     m_appendItem(this, item);
+}
+
+void QmlVariantList::removeItemAt(int index)
+{
+    if ( isConst() ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is const.", 0);
+        lv::ViewContext::instance().engine()->throwError(&e);
+        return;
+    }
+    m_removeItemAt(this, index);
+}
+
+QmlVariantListModel *QmlVariantList::model()
+{
+    return new QmlVariantListModel(this);
+}
+
+QVariantList QmlVariantList::defaultItemList(QmlVariantList *list)
+{
+    QVariantList* data = list->dataAs<QVariantList>();
+    return (*data);
+}
+
+int QmlVariantList::defaultItemCount(QmlVariantList *list)
+{
+    QVariantList* data = list->dataAs<QVariantList>();
+    return data->size();
+}
+
+QVariant QmlVariantList::defaultItemAt(QmlVariantList *list, int index)
+{
+    QVariantList* data = list->dataAs<QVariantList>();
+    if (index >= data->size() || index < 0) return QVariant();
+    return data->at(index);
+}
+
+void QmlVariantList::defaultAppendItem(QmlVariantList *list , QVariant item)
+{
+    QVariantList* data = list->dataAs<QVariantList>();
+    data->append(item);
+}
+
+void QmlVariantList::defaultRemoveItemAt(QmlVariantList *list, int index)
+{
+    QVariantList* data = list->dataAs<QVariantList>();
+    if (index >= data->size() || index < 0) return;
+
+}
+
+void QmlVariantList::defaultClearItems(QmlVariantList *list)
+{
+    QVariantList* data = list->dataAs<QVariantList>();
+    data->clear();
+}
+
+void QmlVariantList::defaultQuickAssign(QmlVariantList *qmllist, QVariantList vlist)
+{
+    QVariantList* data = qmllist->dataAs<QVariantList>();
+    for (auto it = vlist.begin(); it != vlist.end(); ++it){
+        QVariant v = *it;
+        data->append(v);
+    }
 }
 
 }// namespace

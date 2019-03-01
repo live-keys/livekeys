@@ -47,7 +47,7 @@ public:
     int removePalette(QObject* palette);
     int resizePalette(QObject* palette, int newHeight);
     std::list<QObject *> updatePaletteBounds(int pos, int removed, int added);
-
+    int totalOffset();
 public Q_SLOTS:
     void setDirtyPos(int pos);
     void lineNumberChange();
@@ -58,6 +58,7 @@ private:
     int m_dirtyPos;
     int m_prevLineNumber;
     int m_lineNumber;
+    int m_totalOffset;
 
     void linesAdded();
     void linesRemoved();

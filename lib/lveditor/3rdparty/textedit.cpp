@@ -2820,16 +2820,22 @@ void TextEdit::updateSize()
     auto contentStart = d->document->findBlockByNumber(std::max(0,d->fragmentStart));
     int contentSpan = std::min(d->fragmentEnd, d->document->blockCount()-1) - std::max(0, d->fragmentStart) + 1;
     int width = 0, height = 0;
+    int lineHeight = 0;
     for (int i = 0; i < contentSpan; i++)
     {
         auto rect = d->document->documentLayout()->blockBoundingRect(contentStart);
         width = std::max(width, static_cast<int>(rect.width()));
+        if (lineHeight == 0) lineHeight = static_cast<int>(rect.height());
         height += static_cast<int>(rect.height());
         contentStart = contentStart.next();
     }
 
     d->paintedWidth = width;
     d->paintedHeight = height;
+
+    if (d->paletteManager){
+        d->paintedHeight -= d->paletteManager->totalOffset()*lineHeight;
+    }
 
     QSizeF size(d->paintedWidth, d->paintedHeight);
     if (d->contentSize != size) {

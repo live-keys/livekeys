@@ -10,6 +10,7 @@ PaletteManager::PaletteManager()
 {
     m_lineNumber = 0;
     m_dirtyPos = -1;
+    m_totalOffset = 0;
 }
 
 bool paletteCmp(PaletteData* a, PaletteData* b)
@@ -30,6 +31,11 @@ void PaletteManager::paletteAdded(int sb, int span, int height, QObject *p, int 
     pd->m_endPos = endPos;
     m_palettes.push_back(pd);
     m_palettes.sort(paletteCmp);
+
+    if (pd->m_palette->objectName() != "fragmentStartPalette" && pd->m_palette->objectName() != "fragmentEndPalette")
+    {
+        m_totalOffset += pd->m_lineSpan - pd->m_paletteSpan;
+    }
 
     auto it = m_palettes.begin();
     while ((*it)->m_startBlock != pd->m_startBlock) ++it;
@@ -137,6 +143,10 @@ int  PaletteManager::removePalette(QObject *palette)
         PaletteData* pd = *it;
         if (pd->matchesPalette(palette))
         {
+            if (pd->m_palette->objectName() != "fragmentStartPalette" && pd->m_palette->objectName() != "fragmentEndPalette")
+            {
+                m_totalOffset -= pd->m_lineSpan - pd->m_paletteSpan;
+            }
             result = pd->m_startBlock;
             delete pd;
             it = m_palettes.erase(it);
@@ -166,8 +176,16 @@ int PaletteManager::resizePalette(QObject *palette, int newHeight)
             int newPaletteSpan = qCeil((newHeight > 0 ? newHeight + 10 : 0) * 1.0/ this->m_lineHeight);
             if (newPaletteSpan != pd->m_paletteSpan)
             {
+                if (pd->m_palette->objectName() != "fragmentStartPalette" && pd->m_palette->objectName() != "fragmentEndPalette")
+                {
+                    m_totalOffset += pd->m_paletteSpan;
+                }
                 // if changed, we must move the later palettes accordingly
                 pd->m_paletteSpan = newPaletteSpan;
+                if (pd->m_palette->objectName() != "fragmentStartPalette" && pd->m_palette->objectName() != "fragmentEndPalette")
+                {
+                    m_totalOffset -= pd->m_paletteSpan;
+                }
                 result = pd->m_startBlock; ++it; continue;
             }
             break; // no effective change
@@ -209,6 +227,11 @@ std::list<QObject *> PaletteManager::updatePaletteBounds(int pos, int removed, i
     }
 
     return result;
+}
+
+int PaletteManager::totalOffset()
+{
+    return m_totalOffset;
 }
 
 void PaletteManager::setDirtyPos(int pos)

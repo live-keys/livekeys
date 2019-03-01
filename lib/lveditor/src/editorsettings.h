@@ -36,6 +36,7 @@ public:
     explicit EditorSettings(const QString& path, QObject *parent = 0);
     ~EditorSettings();
 
+    /** Returns the font size */
     int fontSize() const;
     const QString& path() const;
 
@@ -53,7 +54,9 @@ public slots:
     void documentChanged();
 
 signals:
+    /** Signals error with given string */
     void initError(const QString& errorString);
+    /** Font size changed */
     void fontSizeChanged(int fontSize);
 
 private:
