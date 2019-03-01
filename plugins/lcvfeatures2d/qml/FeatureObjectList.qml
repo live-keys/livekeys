@@ -71,12 +71,7 @@ Rectangle{
 
         source : Item{
 
-            property var objectList : ObjectList {
-                id: sourceObjectList
-                Component.onCompleted: {
-                    Cv.MatOp.setupMatObjectList(sourceObjectList)
-                }
-            }
+            property var objectList : Cv.MatOp.createMatList()
 
             property var keypoints : new Array()
             property var corners : new Array()

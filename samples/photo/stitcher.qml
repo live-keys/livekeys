@@ -19,33 +19,30 @@ Column{
         Cv.ImRead{
             id: imageLeft
             file: project.path('../_images/stitch-left.jpg')
-            onOutputChanged: inputObjectList.initObjectList()
+            onOutputChanged: initInputList()
         }
         Cv.ImRead{
             id: imageMid
             file: project.path('../_images/stitch-mid.jpg')
-            onOutputChanged: inputObjectList.initObjectList()
+            onOutputChanged: initInputList()
 
         }
         Cv.ImRead{
             id: imageRight
             file: project.path('../_images/stitch-right.jpg')
-            onOutputChanged: inputObjectList.initObjectList()
+            onOutputChanged: initInputList()
         }
     }
 
-    ObjectList {
-        id: inputObjectList
-        function initObjectList(){
-            if ( imageLeft.output !== 0 &&  imageMid.output !== 0 && imageRight.output !== 0) {
-                Cv.MatOp.setupMatObjectListFromArray(inputObjectList, [imageLeft.output, imageMid.output, imageRight.output])
-                stitcher.input = inputObjectList
-            }
+    function initObjectList(){
+        if ( imageLeft.output !== 0 &&  imageMid.output !== 0 && imageRight.output !== 0) {
+            stitcher.input = Cv.MatOp.createMatList([imageLeft.output, imageMid.output, imageRight.output])
         }
     }
     
     Stitcher{
         id: stitcher
+        input: null
     }
     
 }

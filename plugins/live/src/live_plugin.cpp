@@ -66,10 +66,6 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::TcpAgent>(         uri, 1, 0, "TcpAgent");
     qmlRegisterType<lv::MapArray>(         uri, 1, 0, "MapArray");
     qmlRegisterType<lv::MapArrayData>(     uri, 1, 0, "MapArrayData");
-    /*qmlRegisterUncreatableType<lv::QmlObjectList>(
-        uri, 1, 0, "QmlObjectList", "QmlObjectList can only be created internally.");
-    qmlRegisterUncreatableType<lv::QmlVariantList>(
-        uri, 1, 0, "QmlVariantList", "QmlVariantList can only be created internally.");*/
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){

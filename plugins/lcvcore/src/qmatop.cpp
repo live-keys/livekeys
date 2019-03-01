@@ -71,48 +71,40 @@ cv::Rect QMatOp::toRect(const QRect &r){
     return cv::Rect(r.x(), r.y(), r.width(), r.height());
 }
 
-void QMatOp::appendItem(lv::QmlObjectList *list, QObject *item)
+void QMatOp::ListOperations::appendItem(lv::QmlObjectList *list, QObject *item)
 {
     auto data = list->dataAs<std::vector<QMat*>>();
     data->push_back(qobject_cast<QMat*>(item));
 }
 
-int QMatOp::itemCount(lv::QmlObjectList *list)
+int QMatOp::ListOperations::itemCount(lv::QmlObjectList *list)
 {
     auto data = list->dataAs<std::vector<QMat*>>();
     return data->size();
 }
 
-QObject *QMatOp::itemAt(lv::QmlObjectList *list, int idx)
+QObject *QMatOp::ListOperations::itemAt(lv::QmlObjectList *list, int idx)
 {
     auto data = list->dataAs<std::vector<QMat*>>();
     if (idx >= static_cast<int>(data->size()) || idx < 0) return nullptr;
     return (*data)[static_cast<unsigned>(idx)];
 }
 
-void QMatOp::removeItemAt(lv::QmlObjectList *list, int idx)
+void QMatOp::ListOperations::removeItemAt(lv::QmlObjectList *list, int idx)
 {
     auto data = list->dataAs<std::vector<QMat*>>();
     if (idx >= data->size() || idx < 0) return;
     data->erase(data->begin()+idx);
 }
 
-void QMatOp::clearItems(lv::QmlObjectList *list)
+void QMatOp::ListOperations::clearItems(lv::QmlObjectList *list)
 {
     auto data = list->dataAs<std::vector<QMat*>>();
     for (int i = 0; i < data->size(); ++i) delete (*data)[i];
     data->clear();
 }
 
-void QMatOp::setupMatObjectList(lv::QmlObjectList *qol, std::vector<QMat*>* dataPtr)
-{
-    std::vector<QMat*>* data = (dataPtr != nullptr) ? dataPtr : new std::vector<QMat*>;
-    qol->populateObjectList<std::vector<QMat*>>(
-        data, &itemCount, &itemAt, &appendItem, &removeItemAt, &clearItems
-    );
-}
-
-void QMatOp::setupMatObjectListFromArray(lv::QmlObjectList *list, const QJSValue &matArray)
+lv::QmlObjectList* QMatOp::createMatList(const QJSValue &matArray)
 {
     std::vector<QMat*>* data = new std::vector<QMat*>;
     if ( matArray.isArray() ){
@@ -131,7 +123,9 @@ void QMatOp::setupMatObjectListFromArray(lv::QmlObjectList *list, const QJSValue
             }
         }
     }
-    QMatOp::setupMatObjectList(list, data);
+    return new lv::QmlObjectList(data, &typeid(std::vector<QMat*>),
+        &ListOperations::itemCount, &ListOperations::itemAt, &ListOperations::appendItem,
+        &ListOperations::removeItemAt, &ListOperations::clearItems, this);
 }
 
 QMat *QMatOp::create(const QSize &size, int type, int channels){

@@ -21,15 +21,16 @@ public:
 
     QMat* nullMat() const;
 
-    static void appendItem(lv::QmlObjectList* list, QObject* item);
-    static int itemCount(lv::QmlObjectList* list);
-    static QObject* itemAt(lv::QmlObjectList* list, int idx);
-    static void removeItemAt(lv::QmlObjectList* list, int idx);
-    static void clearItems(lv::QmlObjectList* list);
+    class ListOperations{
+    public:
+        static void appendItem(lv::QmlObjectList* list, QObject* item);
+        static int itemCount(lv::QmlObjectList* list);
+        static QObject* itemAt(lv::QmlObjectList* list, int idx);
+        static void removeItemAt(lv::QmlObjectList* list, int idx);
+        static void clearItems(lv::QmlObjectList* list);
+   };
 public slots:
-
-    void setupMatObjectList(lv::QmlObjectList* list, std::vector<QMat*>* dataPtr = nullptr);
-    void setupMatObjectListFromArray(lv::QmlObjectList* list, const QJSValue& matArray);
+    lv::QmlObjectList* createMatList(const QJSValue &matArray = QJSValue());
 
     QMat* create(const QSize& size, int type = QMat::CV8U, int channels = 1);
     QMat* createFill(const QSize& size, int type, int channels, const QColor& color);
