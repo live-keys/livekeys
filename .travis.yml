@@ -47,10 +47,13 @@ install:
       brew search opencv;
       brew info opencv@3;
       brew install opencv@3;
-      ls /usr/local/Cellar/opencv;
-      OPENCV_VERSION="$(ls -1 /usr/local/Cellar/opencv)";
+      echo "Open CV environment";
+      ls /usr/local/Cellar;
+      echo "/usr/local/opt"
+      ls /usr/local/opt;
+      OPENCV_VERSION="$(ls -1 /usr/local/Cellar/opencv@3)";
       echo $OPENCV_VERSION;
-      export OPENCV_DIR=/usr/local/Cellar/opencv/$OPENCV_VERSION;
+      export OPENCV_DIR=/usr/local/Cellar/opencv@3/$OPENCV_VERSION;
       echo $OPENCV_DIR;
       echo $PWD;
       cd build;
