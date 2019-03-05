@@ -88,7 +88,7 @@ void LiveCVArguments::initialize(int argc, const char* const argv[]){
 
         ml::fromJson(lcf.readAll(), m_logConfiguration);
     } else if ( m_parser->isSet(logConfigOption) ){
-        // i.e: level:error; global:level=error; global:prefix=%p
+        // i.e: level=error; global:level=error; global:prefix=%p
 
         m_logConfiguration = MLNode(MLNode::Type::Object);
 
