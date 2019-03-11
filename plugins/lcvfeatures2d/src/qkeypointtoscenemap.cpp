@@ -38,7 +38,7 @@ QKeyPointToSceneMap::QKeyPointToSceneMap(QObject *parent)
 
 /**
 *\fn lv::QKeyPointToSceneMap::resize()
-*\brief Resizes the mapping to a specific size(usefull for performance efficiency)
+*\brief Resizes the mapping to a specific size (useful for performance efficiency)
 */
 
 /**

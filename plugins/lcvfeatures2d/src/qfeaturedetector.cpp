@@ -93,7 +93,7 @@ QFeatureDetector::QFeatureDetector(QQuickItem *parent)
 
 /**
  * \fn lv::QFeatureDetector::setParams()
- * \brief Setter for given parameters
+ * \brief Setter for the parameters
 */
 
 /**

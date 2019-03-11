@@ -38,12 +38,9 @@ public:
 
     QKeyPointVector* keypoints();
     void setKeypoints(QKeyPointVector* keypoints);
-    /// \private
     QMat* descriptors();
     const QVariantMap& params() const;
-    /// \private
     bool isBinary() const;
-    /// \private
     virtual int descriptorCols() const;
 
 protected:

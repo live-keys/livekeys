@@ -48,7 +48,7 @@ QKeypointHomography::~QKeypointHomography(){
 
 /**
 *\fn lv::QKeypointHomography::queryImage()
-*\brief Getter for The image that is used 
+*\brief Getter for the image that is used
 */
 
 /**
