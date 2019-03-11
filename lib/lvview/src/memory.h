@@ -10,6 +10,7 @@
 
 namespace lv{
 
+/// \private
 class LV_VIEW_EXPORT Memory : public QObject{
 
     Q_OBJECT

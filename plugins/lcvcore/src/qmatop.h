@@ -21,6 +21,7 @@ public:
 
     QMat* nullMat() const;
 
+    /// \private
     class ListOperations{
     public:
         static void appendItem(lv::QmlObjectList* list, QObject* item);

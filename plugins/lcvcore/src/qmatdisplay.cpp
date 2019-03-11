@@ -91,12 +91,7 @@ QMatDisplay::~QMatDisplay(){
  *\fn virtual QSGNode* QMatDisplay::updatePaintNode(QSGNode*, UpdatePaintNodeData*)
  *
  *\brief Updates the scene graph node with the set matrix.
-
- *Parameters :
- *\a node
- *\a nodeData
  */
-
 QSGNode *QMatDisplay::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *){
     QMatNode *n = static_cast<QMatNode*>(node);
     if (!node)
