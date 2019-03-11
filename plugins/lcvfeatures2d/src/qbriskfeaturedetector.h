@@ -18,7 +18,7 @@
 #define QBRISKFEATUREDETECTOR_H
 
 #include "qfeaturedetector.h"
-
+/// \private
 class QBriskFeatureDetector : public QFeatureDetector{
 
     Q_OBJECT

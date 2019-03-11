@@ -11,3 +11,4 @@ DescriptorExtractorSelection    1.0 DescriptorExtractorSelection.qml
 FeatureObjectList               1.0 FeatureObjectList.qml
 FeatureObjectMatch              1.0 FeatureObjectMatch.qml
 SelectionArea                   1.0 SelectionArea.qml
+SelectionWindow                 1.0 SelectionWindow.qml

@@ -19,14 +19,15 @@
 
 #include <QObject>
 #include <QQmlParserStatus>
-#include "qmatlist.h"
 #include "opencv2/photo.hpp"
+#include "live/qmlobjectlist.h"
+#include "qmat.h"
 
 class QMergeRobertson : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QMatList* input    READ input    WRITE setInput    NOTIFY inputChanged)
+    Q_PROPERTY(lv::QmlObjectList* input    READ input    WRITE setInput    NOTIFY inputChanged)
     Q_PROPERTY(QList<qreal> times   READ times    WRITE setTimes    NOTIFY timesChanged)
     Q_PROPERTY(QMat* response     READ response WRITE setResponse NOTIFY responseChanged)
     Q_PROPERTY(QMat* output       READ output   NOTIFY outputChanged)
@@ -35,12 +36,12 @@ public:
     explicit QMergeRobertson(QObject *parent = nullptr);
     ~QMergeRobertson();
 
-    QMatList* input() const;
+    lv::QmlObjectList* input() const;
     const QList<qreal>& times() const;
     QMat* output() const;
     QMat* response() const;
 
-    void setInput(QMatList* input);
+    void setInput(lv::QmlObjectList* input);
     void setTimes(QList<qreal> times);
     void setResponse(QMat* response);
 
@@ -57,17 +58,17 @@ private:
     void filter();
     bool isComponentComplete();
 
-    QMatList*   m_input;
-    QList<qreal>  m_times;
-    QMat*       m_response;
-    QMat*       m_output;
+    lv::QmlObjectList*  m_input;
+    QList<qreal>        m_times;
+    QMat*               m_response;
+    QMat*               m_output;
 
     cv::Ptr<cv::MergeRobertson> m_mergeRobertson;
 
     bool        m_componentComplete;
 };
 
-inline QMatList *QMergeRobertson::input() const{
+inline lv::QmlObjectList *QMergeRobertson::input() const{
     return m_input;
 }
 
@@ -79,7 +80,7 @@ inline QMat *QMergeRobertson::output() const{
     return m_output;
 }
 
-inline void QMergeRobertson::setInput(QMatList *input){
+inline void QMergeRobertson::setInput(lv::QmlObjectList *input){
     m_input = input;
     emit inputChanged();
 

@@ -205,7 +205,9 @@ const cv::Mat &QMat::internal() const{
 cv::Mat &QMat::internal(){
     return *m_internal;
 }
-
+/**
+*\brief Memory allocation
+*/
 void QMat::recycleSize(int size) const{
     lv::Memory::reserve<QMat, cv::Mat>(this, size);
 }

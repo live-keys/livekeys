@@ -42,9 +42,20 @@ QKeypointHomography::~QKeypointHomography(){
 }
 
 /**
+*\fn lv::QKeypointHomography::keypointsToScene()
+*\brief KeypointsToSceneMap
+*/
+
+/**
 *\fn lv::QKeypointHomography::queryImage()
 *\brief Getter for The image that is used 
 */
+
+/**
+*\fn lv::QKeypointHomography::queryImageChanged()
+*\brief Triggered when the queryImage is changed
+*/
+
 
 /**
 *\fn lv::QKeypointHomography::setQueryImage()
@@ -57,6 +68,21 @@ QKeypointHomography::~QKeypointHomography(){
 */
 
 /**
+*\fn lv::QKeypointHomography::appendObjectCorners()
+*\brief Appends objectCorners
+*/
+
+/**
+*\fn lv::QKeypointHomography::setObjectCorners()
+*\brief Setter for objectCorners
+*/
+
+/**
+*\fn lv::QKeypointHomography::objectCornersChanged()
+*\brief Triggered when the objectCorners are changed
+*/
+
+/**
 *\fn lv::QKeypointHomography::objectColors()
 *\brief Specifies object colors
 */
@@ -65,6 +91,27 @@ QKeypointHomography::~QKeypointHomography(){
 *\fn lv::QKeypointHomography::setObjectColors()
 *\brief Setter for the object colors
 */
+
+/**
+*\fn lv::QKeypointHomography::objectColorsChanged()
+*\brief Triggered when the objectColors are changed
+*/
+
+/**
+*\fn lv::QKeypointHomography::keypointsToScene()
+*/
+
+/**
+*\fn lv::QKeypointHomography::setKeypointsToScene()
+*\brief Setter for the keypointsToScene
+*/
+
+/**
+*\fn lv::QKeypointHomography::keypointsToSceneChanged()
+*\brief Triggered when keypointsToScene is changed
+*/
+
+
 
 QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
     if ( m_keypointsToScene && m_queryImage ){

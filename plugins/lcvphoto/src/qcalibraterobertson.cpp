@@ -21,7 +21,7 @@
 
 QCalibrateRobertson::QCalibrateRobertson(QObject *parent)
     : QObject(parent)
-    , m_input(0)
+    , m_input(nullptr)
     , m_output(new QMat)
     , m_calibrateRobertson(cv::createCalibrateRobertson())
     , m_componentComplete(false)
@@ -29,7 +29,6 @@ QCalibrateRobertson::QCalibrateRobertson(QObject *parent)
 }
 
 QCalibrateRobertson::~QCalibrateRobertson(){
-    delete m_output;
 }
 
 void QCalibrateRobertson::setParams(const QVariantMap &params){
@@ -55,16 +54,26 @@ void QCalibrateRobertson::setParams(const QVariantMap &params){
 void QCalibrateRobertson::filter(){
     if ( m_componentComplete &&
          m_input &&
-         m_input->size() == m_times.size() &&
-         m_input->size() > 0 &&
+         m_input->itemCount() == m_times.size() &&
+         m_input->itemCount() > 0 &&
          m_calibrateRobertson)
     {
         try{
+            auto asVector = [](lv::QmlObjectList* list) -> std::vector<cv::Mat> {
+                std::vector<cv::Mat> result;
+                for (int i = 0; i < list->itemCount(); ++i){
+                    QMat* m = qobject_cast<QMat*>(list->itemAt(i));
+                    if (!m) return std::vector<cv::Mat>();
+                    result.push_back(m->data());
+                }
+                return result;
+            };
+
             std::vector<float> times;
             for ( int i = 0; i < m_times.size(); ++i )
                 times.push_back(m_times[i]);
 
-            m_calibrateRobertson->process(m_input->asVector(), *m_output->cvMat(), times);
+            m_calibrateRobertson->process(asVector(m_input), *m_output->cvMat(), times);
         } catch ( cv::Exception& e ){
             lv::Exception lve = CREATE_EXCEPTION(lv::Exception, e.what(), e.code);
             lv::ViewContext::instance().engine()->throwError(&lve, this);

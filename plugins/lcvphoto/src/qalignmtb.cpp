@@ -18,18 +18,18 @@
 #include "live/viewengine.h"
 #include "live/exception.h"
 #include "live/viewcontext.h"
+#include "qmat.h"
 
 QAlignMTB::QAlignMTB(QObject *parent)
     : QObject(parent)
-    , m_input(0)
-    , m_output(new QMatList)
+    , m_input(nullptr)
+    , m_output(nullptr)
     , m_alignMTB(cv::createAlignMTB())
     , m_componentComplete(false)
 {
 }
 
 QAlignMTB::~QAlignMTB(){
-    delete m_output;
 }
 
 void QAlignMTB::componentComplete(){
@@ -61,11 +61,36 @@ void QAlignMTB::setParams(const QVariantMap &params){
 }
 
 void QAlignMTB::filter(){
-    if ( m_componentComplete && m_input && m_input->size() > 0 && m_alignMTB ){
+    if ( m_componentComplete && m_input && m_input->itemCount() > 0 && m_output && m_alignMTB ){
         try{
-            std::vector<cv::Mat> result = m_output->asVector();
-            m_alignMTB->process(m_input->asVector(), result);
-            m_output->fromVector(result);
+            auto asVector = [](lv::QmlObjectList* list) -> std::vector<cv::Mat> {
+                std::vector<cv::Mat> result;
+                for (int i = 0; i < list->itemCount(); ++i){
+                    QMat* m = qobject_cast<QMat*>(list->itemAt(i));
+                    if (!m) return std::vector<cv::Mat>();
+                    result.push_back(m->data());
+                }
+                return result;
+            };
+
+            std::vector<cv::Mat> outputVector = asVector(m_output);
+            m_alignMTB->process(asVector(m_input), outputVector);
+
+            // clear previous contents
+            for (int i = 0; i < m_output->itemCount(); ++i)
+            {
+                delete qobject_cast<QMat*>(m_output->itemAt(i));
+            }
+            m_output->clearItems();
+
+            // copy contents
+
+            for (int i = 0; i < outputVector.size(); ++i)
+            {
+                cv::Mat* copy = new cv::Mat(outputVector[i]);
+                m_output->appendItem(new QMat(copy));
+            }
+
             emit outputChanged();
         } catch ( cv::Exception& e ){
             lv::Exception lve = CREATE_EXCEPTION(lv::Exception, e.what(), e.code);

@@ -1,6 +1,7 @@
 import QtQuick 2.3
-import lcvcore 1.0
+import lcvcore 1.0 as Cv
 import lcvphoto 1.0
+import base 1.0
 
 Item{
     // This sample shows the usage of the hdr module.
@@ -14,31 +15,34 @@ Item{
         id: loader
         spacing: 5
         
-        ImRead{
+        Cv.ImRead{
             file: project.path('../_images/coast_1.6.jpg')
-            onOutputChanged: {loader.images[0] = output; inputList.initList();}
+            onOutputChanged: {loader.images[0] = output; initInputList();}
         }
-        ImRead{
+        Cv.ImRead{
             file: project.path('../_images/coast_6.jpg')
-            onOutputChanged: {loader.images[1] = output; inputList.initList();}
+            onOutputChanged: {loader.images[1] = output; initInputList();}
         }
-        ImRead{
+        Cv.ImRead{
             file: project.path('../_images/coast_30.jpg')
-            onOutputChanged: {loader.images[2] = output; inputList.initList();}
+            onOutputChanged: {loader.images[2] = output; initInputList();}
         }
         
         property var times:  [1.6, 6, 30]
         property var images: [0, 0, 0]
     }
     
-    MatList{
-        id: inputList
-        function initList(){ fromArray(loader.images)}
-        onEntriesAdded: if ( size() === 3 ) alignMTB.input = inputList
+
+    function initInputList(){
+        if ( loader.images[0] !== 0 &&  loader.images[1] !== 0 && loader.images[2] !== 0) {
+            alignMTB.input = Cv.MatOp.createMatList(loader.images)
+        }
     }
     
     AlignMTB{
         id: alignMTB
+        input: null
+        output: Cv.MatOp.createMatList()
     }
     
     CalibrateRobertson{ 

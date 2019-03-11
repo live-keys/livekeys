@@ -26,7 +26,11 @@ HEADERS += \
     $$PWD/container.h \
     $$PWD/act.h \
     $$PWD/workerthread.h \
-    $$PWD/workerthread_p.h
+    $$PWD/workerthread_p.h \
+    $$PWD/qmlvariantlist.h \
+    $$PWD/qmlvariantlistmodel.h \
+    $$PWD/qmlobjectlist.h \
+    $$PWD/qmlobjectlistmodel.h
 
 SOURCES += \
     $$PWD/errorhandler.cpp \
@@ -51,4 +55,9 @@ SOURCES += \
     $$PWD/shared.cpp \
     $$PWD/container.cpp \
     $$PWD/act.cpp \
-    $$PWD/workerthread.cpp
+    $$PWD/workerthread.cpp \
+    $$PWD/qmlvariantlist.cpp \
+    $$PWD/qmlvariantlistmodel.cpp \
+    $$PWD/qmlobjectlist.cpp \
+    $$PWD/qmlobjectlistmodel.cpp
+

@@ -26,6 +26,9 @@ class Q_LCVFEATURES2D_EXPORT QDMatchVector : public QQuickItem{
     Q_OBJECT
 
 public:
+    /**
+    \brief Type enumeration
+    */
     enum Type{
         BEST_MATCH = 0,
         KNN,
@@ -33,14 +36,9 @@ public:
     };
 
 public:
-    /**
-     * \brief QDMatchVector constructor
-     */
+
     explicit QDMatchVector(QQuickItem *parent = 0);
-    
-    /**
-     * \brief QDMatchVector destructor
-     */
+
     virtual ~QDMatchVector();
 
     /// \private
@@ -49,9 +47,6 @@ public:
     /// \private
     const std::vector<std::vector<cv::DMatch> >& matches() const;
 
-    /**
-     * \brief Type that was matched
-     */
     Type type() const;
     void setType(Type type);
 

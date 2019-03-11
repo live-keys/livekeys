@@ -5,6 +5,7 @@
 #include <QMatrix4x4>
 #include "qmat.h"
 #include "qwritablemat.h"
+#include "live/qmlobjectlist.h"
 
 /// \private
 class QMatOp : public QObject{
@@ -20,7 +21,17 @@ public:
 
     QMat* nullMat() const;
 
+    class ListOperations{
+    public:
+        static void appendItem(lv::QmlObjectList* list, QObject* item);
+        static int itemCount(lv::QmlObjectList* list);
+        static QObject* itemAt(lv::QmlObjectList* list, int idx);
+        static void removeItemAt(lv::QmlObjectList* list, int idx);
+        static void clearItems(lv::QmlObjectList* list);
+   };
 public slots:
+    lv::QmlObjectList* createMatList(const QJSValue &matArray = QJSValue());
+
     QMat* create(const QSize& size, int type = QMat::CV8U, int channels = 1);
     QMat* createFill(const QSize& size, int type, int channels, const QColor& color);
     QMat* createFromArray(const QVariantList& a, int type = QMat::CV8U);

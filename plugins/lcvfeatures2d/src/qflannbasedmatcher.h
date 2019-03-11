@@ -18,7 +18,7 @@
 #define QFLANNBASEDMATCHER_H
 
 #include "qdescriptormatcher.h"
-
+/// \private
 class QFlannBasedMatcher : public QDescriptorMatcher{
 
     Q_OBJECT

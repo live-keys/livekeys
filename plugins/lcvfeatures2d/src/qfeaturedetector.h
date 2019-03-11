@@ -37,39 +37,25 @@ public:
     virtual ~QFeatureDetector();
 
 public:
-    /**
-     * \brief The actual image
-     */
     QMat* inputMat();
     void setInputMat(QMat* mat);
 
-    /**
-     * \brief Drawn features from the input to another image
-     */
     QMat* output();
 
-    /**
-     * \brief Limited amount of detections for a specific area
-     */
     QMat* mask();
     void setMask(QMat* mat);
-    
-    /**
-     * \brief Actual keypoints
-     */
+ 
     QKeyPointVector* keypoints();
     void setKeypoints(QKeyPointVector* keypoints);
-
-    /**
-     * \brief Given parameters
-     */
     const QVariantMap &params() const;
 
 protected:
     virtual void initialize(const QVariantMap& params);
-
+    
+    /// \private
     cv::FeatureDetector* detector();
     void initializeDetector(cv::Ptr<cv::FeatureDetector> detector);
+    /// \private
     virtual void detect();
     virtual void componentComplete();
 

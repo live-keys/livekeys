@@ -2,7 +2,7 @@
 #define QGETPERSPECTIVETRANSFORM_H
 
 #include <QObject>
-#include "qmlvariantlist.h"
+#include "live/qmlvariantlist.h"
 #include "qmat.h"
 
 class QGetPerspectiveTransform : public QObject{
@@ -27,6 +27,7 @@ public:
     static QVariant itemAt(lv::QmlVariantList* list, int index);
 
     static void appendItem(lv::QmlVariantList* list, QVariant item);
+    static void removeItemAt(lv::QmlVariantList* list, int index);
     static void clearItems(lv::QmlVariantList* list);
     static void assignItems(lv::QmlVariantList* list, QVariantList items);
 

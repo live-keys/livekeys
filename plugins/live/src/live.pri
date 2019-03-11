@@ -21,9 +21,7 @@ HEADERS += \
     $$PWD/tcplinesocket.h \
     $$PWD/componentsource.h \
     $$PWD/tuplepropertymap.h \
-    $$PWD/qmlobjectlist.h \
     $$PWD/stringbasedloader.h \
-    $$PWD/qmlvariantlist.h \
     $$PWD/maparray.h \
     $$PWD/maparraydata.h \
     $$PWD/worker.h
@@ -48,9 +46,7 @@ SOURCES += \
     $$PWD/tcplinesocket.cpp \
     $$PWD/componentsource.cpp \
     $$PWD/tuplepropertymap.cpp \
-    $$PWD/qmlobjectlist.cpp \
     $$PWD/stringbasedloader.cpp \
-    $$PWD/qmlvariantlist.cpp \
     $$PWD/maparray.cpp \
     $$PWD/maparraydata.cpp \
     $$PWD/worker.cpp

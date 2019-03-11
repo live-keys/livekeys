@@ -21,4 +21,7 @@ HEADERS += \
     $$PWD/live/shared.h \
     $$PWD/live/memory.h \
     $$PWD/live/act.h \
-    $$PWD/live/workerthread.h
+    $$PWD/live/workerthread.h \
+    $$PWD/live/qmlvariantlist.h \
+    $$PWD/live/qmlobjectlist.h \
+    $$PWD/live/qmlobjectlistmodel.h

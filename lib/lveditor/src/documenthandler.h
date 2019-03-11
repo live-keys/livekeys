@@ -56,6 +56,11 @@ public:
     QTextDocument *target();
     void setTarget(QTextDocument *target);
 
+    /**
+     * \brief Completion model
+     *
+     * Model of suggestions that we get from the code handler
+     */
     CodeCompletionModel* completionModel() const;
 
     void rehighlightBlock(const QTextBlock& block);
@@ -66,12 +71,19 @@ public:
     void classBegin(){}
     void componentComplete();
 
+    /** Returns the TextEdit */
     TextEdit* textEdit();
     void setTextEdit(TextEdit* te);
 
+    /**
+     * \brief Shows if the editor is in focus
+     */
     bool editorFocus() const;
     void setEditorFocus(bool editorFocus);
 
+    /**
+     * \brief Code handler getter
+     */
     AbstractCodeHandler* codeHandler();
 
     void requestCursorPosition(int position);
@@ -130,11 +142,6 @@ inline QTextDocument *DocumentHandler::target(){
     return m_targetDoc;
 }
 
-/**
- * \brief Completion model
- *
- * Model of suggestions that we get from the code handler
- */
 inline lv::CodeCompletionModel *DocumentHandler::completionModel() const{
     return m_completionModel;
 }
@@ -144,9 +151,6 @@ inline TextEdit *DocumentHandler::textEdit(){
     return m_textEdit;
 }
 
-/**
- * \brief Shows if the editor is in focus
- */
 inline bool DocumentHandler::editorFocus() const{
     return m_editorFocus;
 }
@@ -161,9 +165,6 @@ inline void DocumentHandler::setEditorFocus(bool editorFocus){
     emit editorFocusChanged();
 }
 
-/**
- * \brief Code handler getter
- */
 inline AbstractCodeHandler *DocumentHandler::codeHandler(){
     return m_codeHandler;
 }

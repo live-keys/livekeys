@@ -17,7 +17,8 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 import live 1.0
-import lcvcore 1.0
+import lcvcore 1.0 as Cv
+import base 1.0
 import lcvfeatures2d 1.0
 
 Rectangle{
@@ -33,8 +34,8 @@ Rectangle{
     property FeatureDetector featureDetector : FastFeatureDetector{}
     property DescriptorExtractor descriptorExtractor : BriskDescriptorExtractor{}
 
-    signal objectAdded(Mat descriptors, var points, var color)
-    signal objectListLoaded(MatList list, var keypoints, var corners, var colors)
+    signal objectAdded(Cv.Mat descriptors, var points, var color)
+    signal objectListLoaded(ObjectList list, var keypoints, var corners, var colors)
     signal objectListCreated()
 
     function addObject(region, x, y, width, height){
@@ -48,7 +49,7 @@ Rectangle{
         objectListComponent.item.colors.push(generatedColor)
         objectListComponent.item.keypoints.push(keypoints)
         objectListComponent.item.corners.push(corners)
-        objectListComponent.item.objectList.appendMat(root.featureDetector.output.createOwnedObject())
+        objectListComponent.item.objectList.appendItem(root.featureDetector.output.createOwnedObject())
 
         root.descriptorExtractor.keypoints = keypoints
         root.objectAdded(
@@ -70,7 +71,8 @@ Rectangle{
 
         source : Item{
 
-            property var objectList : MatList{}
+            property var objectList : Cv.MatOp.createMatList()
+
             property var keypoints : new Array()
             property var corners : new Array()
             property var colors : new Array()
@@ -78,9 +80,8 @@ Rectangle{
         onItemChanged : itemCreated = true
 
         Component.onCompleted: {
-            if ( itemCreated )
-                root.objectListCreated()
-            trainImages.model = item.objectList
+            staticLoad(root.stateId)
+            root.objectListCreated()
             root.objectListLoaded(item.objectList, item.keypoints, item.corners, item.colors)
         }
     }
@@ -99,12 +100,12 @@ Rectangle{
                 id : trainImages
                 property int selectedIndex : 0
                 height : root.height
-
-                delegate : MatView{
+                model: objectListComponent.item.model
+                delegate : Cv.MatView{
                     id : matView
+                    mat : model.item
+                    width : (parent.height / mat.dimensions().height) * mat.dimensions().width
                     height : parent.height
-                    width : (parent.height / mat.dataSize().height) * mat.dataSize().width
-                    mat : modelData
                     Rectangle{
                         color : objectListComponent.item.colors[index].toString()
                         width : matView.width

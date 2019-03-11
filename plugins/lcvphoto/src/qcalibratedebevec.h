@@ -19,14 +19,15 @@
 
 #include <QObject>
 #include <QQmlParserStatus>
-#include "qmatlist.h"
 #include "opencv2/photo.hpp"
+#include "live/qmlobjectlist.h"
+#include "qmat.h"
 
 class QCalibrateDebevec : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QMatList* input    READ input  WRITE setInput  NOTIFY inputChanged)
+    Q_PROPERTY(lv::QmlObjectList* input    READ input  WRITE setInput  NOTIFY inputChanged)
     Q_PROPERTY(QList<qreal> times READ times  WRITE setTimes  NOTIFY timesChanged)
     Q_PROPERTY(QVariantMap params READ params WRITE setParams NOTIFY paramsChanged)
     Q_PROPERTY(QMat* output       READ output NOTIFY outputChanged)
@@ -35,12 +36,12 @@ public:
     explicit QCalibrateDebevec(QObject *parent = nullptr);
     ~QCalibrateDebevec();
 
-    QMatList* input() const;
+    lv::QmlObjectList* input() const;
     const QList<qreal>& times() const;
     const QVariantMap& params() const;
     QMat* output() const;
 
-    void setInput(QMatList* input);
+    void setInput(lv::QmlObjectList* input);
     void setTimes(QList<qreal> times);
 
     void classBegin() Q_DECL_OVERRIDE{}
@@ -59,7 +60,7 @@ private:
     void filter();
     bool isComponentComplete();
 
-    QMatList*    m_input;
+    lv::QmlObjectList*    m_input;
     QList<qreal> m_times;
     QVariantMap  m_params;
     QMat*        m_output;
@@ -69,7 +70,7 @@ private:
     bool        m_componentComplete;
 };
 
-inline QMatList *QCalibrateDebevec::input() const{
+inline lv::QmlObjectList *QCalibrateDebevec::input() const{
     return m_input;
 }
 
@@ -85,7 +86,7 @@ inline QMat *QCalibrateDebevec::output() const{
     return m_output;
 }
 
-inline void QCalibrateDebevec::setInput(QMatList *input){
+inline void QCalibrateDebevec::setInput(lv::QmlObjectList *input){
     m_input = input;
     emit inputChanged();
 

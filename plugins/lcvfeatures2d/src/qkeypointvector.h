@@ -29,47 +29,29 @@ class Q_LCVFEATURES2D_EXPORT QKeyPointVector : public QQuickItem{
 public:
     explicit QKeyPointVector(QQuickItem *parent = 0);
     ~QKeyPointVector();
-
-    /**
-    *\brief 
-    */
+    /// \private
     std::vector<cv::KeyPoint>& keypoints();
+    /// \private
     const std::vector<cv::KeyPoint>& keypoints() const;
-
-    /**
-    *\brief Matrix where keypoint are detected from.
-    */
+    /// \private
     void setMat(cv::Mat& mat);
+    /// \private
     const cv::Mat& cvMat();
 
 public slots:
-    /**
-    *\brief Creates copy of the vector.
-    */
+
     QKeyPointVector* createOwnedObject();
-    /**
-    *\Getting the KeyPointData as the list of objects.
-    */
+ 
     QList<QObject*> keyPointData();
-    /**
-    *\brief add this
-    */
+  
     void setKeyPointData(const QList<QObject*> data);
-    /**
-    *\brief Appends a keypoint.
-    */
+  
     void appendKeyPoint(QKeyPoint* pt);
-    /**
-    *\brief Removes a keypoint.
-    */
+   
     void removeKeyPoint(int position);
-    /**
-    *\brief Creates a keypoint
-    */
+
     QKeyPoint *createKeyPoint();
-    /**
-    *\brief Size of the vector.
-    */
+ 
     int size();
 
 private:

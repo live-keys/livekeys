@@ -19,26 +19,26 @@
 
 #include <QObject>
 #include <QQmlParserStatus>
-#include "qmatlist.h"
 #include "opencv2/photo.hpp"
+#include "live/qmlobjectlist.h"
 
 class QAlignMTB : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QMatList*    input  READ input  WRITE  setInput  NOTIFY inputChanged)
-    Q_PROPERTY(QVariantMap  params READ params WRITE  setParams NOTIFY paramsChanged)
-    Q_PROPERTY(QMatList*    output READ output NOTIFY outputChanged)
+    Q_PROPERTY(lv::QmlObjectList*    input  READ input  WRITE  setInput    NOTIFY inputChanged)
+    Q_PROPERTY(QVariantMap           params READ params WRITE  setParams   NOTIFY paramsChanged)
+    Q_PROPERTY(lv::QmlObjectList*    output READ output WRITE  setupOutput NOTIFY outputChanged)
 
 public:
     explicit QAlignMTB(QObject *parent = nullptr);
     ~QAlignMTB();
 
-    QMatList* input() const;
-    QMatList* output() const;
+    lv::QmlObjectList* input() const;
+    lv::QmlObjectList* output() const;
 
-    void setInput(QMatList* input);
-
+    void setInput(lv::QmlObjectList* input);
+    void setupOutput(lv::QmlObjectList* output);
     void classBegin() Q_DECL_OVERRIDE{}
     void componentComplete() Q_DECL_OVERRIDE;
 
@@ -56,25 +56,30 @@ private:
     void filter();
     bool isComponentComplete();
 
-    QMatList*             m_input;
-    QMatList*             m_output;
+    lv::QmlObjectList*    m_input;
+    lv::QmlObjectList*    m_output;
     cv::Ptr<cv::AlignMTB> m_alignMTB;
     QVariantMap           m_params;
     bool                  m_componentComplete;
 };
 
-inline QMatList *QAlignMTB::input() const{
+inline lv::QmlObjectList *QAlignMTB::input() const{
     return m_input;
 }
 
-inline QMatList *QAlignMTB::output() const{
+inline lv::QmlObjectList *QAlignMTB::output() const{
     return m_output;
 }
 
-inline void QAlignMTB::setInput(QMatList *input){
+inline void QAlignMTB::setInput(lv::QmlObjectList *input){
     m_input = input;
     emit inputChanged();
 
+    filter();
+}
+
+inline void QAlignMTB::setupOutput(lv::QmlObjectList *output){
+    m_output = output;
     filter();
 }
 

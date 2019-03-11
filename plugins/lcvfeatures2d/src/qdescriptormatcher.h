@@ -59,7 +59,7 @@ signals:
 public slots:
     void add(QMat* descriptors);
     void train();
-
+    /// \private
     void match(QMat* queryDescriptors, QDMatchVector* matches);
     void knnMatch(QMat* queryDescriptors, QDMatchVector* matches, int k = 2);
 

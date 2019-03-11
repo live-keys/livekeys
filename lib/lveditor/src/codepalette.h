@@ -37,21 +37,26 @@ public:
     explicit CodePalette(QObject *parent = 0);
     virtual ~CodePalette();
 
+    /** Visual item for this palette */
     QQuickItem* item();
     void setItem(QQuickItem* item);
 
+    /** Property value corresponding to this palette */
     const QVariant &value() const;
     void setValue(const QVariant& value);
     void setValueFromBinding(const QVariant &value);
 
+    /** Palette name */
     QString name() const;
 
     void setPath(const QString& path);
     const QString &path() const;
 
+    /** Returns extension for palette */
     QObject* extension() const;
     void setExtension(QObject* extension, bool own = false);
 
+    /** Palette type */
     QString type() const;
     void setType(QString type);
 
@@ -128,9 +133,7 @@ inline const QString& CodePalette::path() const{
     return m_path;
 }
 
-/**
- * \brief Returns extension for palette
- */
+
 inline QObject *CodePalette::extension() const{
     return m_extension;
 }
