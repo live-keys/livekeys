@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QQmlParserStatus>
+#include <QQmlEngine>
 
 namespace lv{
 
@@ -18,6 +19,9 @@ public:
 
     void classBegin(){}
     void componentComplete();
+
+    static QByteArray typeDefaultValue(const QByteArray& typeString);
+    static lv::Group* createWithProperties(QQmlEngine* engine, const std::map<QByteArray, QByteArray>& properties);
 
 signals:
     void complete();
