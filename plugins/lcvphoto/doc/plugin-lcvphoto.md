@@ -103,6 +103,7 @@ Controls the saturation
 Controls the lightness
 
 {qmlType:Levels}
+{qmlBrief:Performs levels adjustments on an image.}
 {qmlInherits:lcvcore#MatFilter}
 
 {qmlProperty:lightness}
@@ -264,6 +265,7 @@ Conversion parameters.
 
 
 {qmlType:TonemapDrago}
+{qmlBrief:Drago tonemapper.}
 {qmlInherits:lcvphoto#ToneMap}
 
 Available parameters:
@@ -273,6 +275,7 @@ Available parameters:
 * **float bias**
 
 {qmlType:TonemapDurand}
+{qmlBrief:Durand tonemapper.}
 {qmlInherits:lcvphoto#ToneMap}
 
 Available parameters:
@@ -284,6 +287,7 @@ Available parameters:
 * **float sigmaColor**
 
 {qmlType:TonemapMantiuk}
+{qmlBrief:Mantiuk tonemapper.}
 {qmlInherits:lcvphoto#ToneMap}
 
 Available parameters:
@@ -293,6 +297,7 @@ Available parameters:
 * **float saturation**
 
 {qmlType:TonemapReinard}
+{qmlBrief:Reinard tonemapper.}
 {qmlInherits:lcvphoto#ToneMap}
 
 Available parameters:
@@ -303,6 +308,7 @@ Available parameters:
 * **float colorAdapt**
 
 {qmlType:LevelSliders}
+{qmlBrief:Visual levels sliders.}
 {qmlInherits:external.QtQuick#Rectangle}
 
 {qmlProperty:alias input}
@@ -318,6 +324,7 @@ Contains the set lightness values.
 Contains the set level values per channel.
 
 {qmlType:HueSaturationLightnessSliders}
+{qmlBrief:Visual sliders for hue saturation lightness.}
 {qmlInherits:external.QtQuick#Rectangle}
 
 {qmlProperty:alias hue}
