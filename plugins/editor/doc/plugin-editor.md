@@ -140,7 +140,7 @@ Extension for this palette
 Signals that the value was initialized
 
 {qmlType:LiveExtension}
-{qmlInherits:external.QtCore#Object}
+{qmlInherits:external.QtQml#QtObject}
 {qmlBrief:The class within Qml to be used when we want to add an extension}
 
 An example of an extension is the locally used **EditQmlExtension.qml**.
@@ -172,7 +172,7 @@ Key shortcuts for the given extension
 Extension configuration
 
 {qmlType:DocumentHandler}
-{qmlInherits:external.QtCore#Object, external.QtQml#ParserStatus}
+{qmlInherits:external.QtQml#QtObject}
 {qmlBrief:The go-to class when it comes to handling documents}
 
 Forwards everything to the highlighter, has a completion model in case there's a specific code handler attached to it,

@@ -7,7 +7,7 @@ When an exception is thrown, it can be handled locally through the usual try-cat
 ```
 	try {
 		...
-		throw genericError(new Error("message"), this)
+		throw linkError(new Error("message"), this)
 		...
 	} catch(err) {
 		// handle err
@@ -38,7 +38,7 @@ Item{
 		ParentItem2 {
 			EngineTestStub{
 				Component.onCompleted: {
-					throw handlerError(new Error("error message"), this)
+					throw linkError(new Error("error message"), this)
 				}
 			}
 		}
@@ -58,12 +58,6 @@ In case the exception gets handled by the ErrorHandler, it won't propagate furth
 	}
 ```
 
-If the exception reaches the engine, we can handle it by connecting to the `ViewEngine::applicationError` signal.
-
-```
-	QObject::connect(&engine, &ViewEngine::applicationWarning, ...)
-```
-
 Now, if our error is minor and/or doesn't affect the program corruptively, we can use a Warning instead. All of the above can be said for warning as well, except the obvious renaming to some functions and handlers. In ErrorHandler, the listener for warnings is `onWarning`.
 We can use the same `skip` function to propagate the warning further
 ```
@@ -72,4 +66,3 @@ We can use the same `skip` function to propagate the warning further
 	}
 ```
 
-In case the Warning reaches the engine, we can react by listening to the `ViewEngine::applicationWarning` signal.

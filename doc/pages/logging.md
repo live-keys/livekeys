@@ -26,17 +26,11 @@ Log levels are the following:
 
 in order of importance. 
 In the default configuration, the application message level is `Debug`, while the default message level is `Info`.
-Practically, this means that, without any modifications, the following command:
+
+In Qml, an example logging of a message would like this:
+```qml
+	vlog.i("Test message")
 ```
-	vlog() << "Test message";
-```
-will log the given message at the info level, and it will do so because it's of higher importance than the debug level that the application is set to.
-If we wanted to log the given message at another level, we could do this by suffixing the original `vlog()` call with the first letter of the wanted level:
-```
-	vlog().w() << "warning";
-	vlog().e() << "error";
-	...
-``` 
 ## Command line arguments
 
 We can separate logging command line arguments into those which don't need an argument (flags) and those that do.
@@ -45,7 +39,7 @@ We have the following flags:
 	Setting this flag enables the logger to output messages to the console (this is enabled by default)
    
   * `--log-noview`  
-	Setting this argument will disable logging to the LiveKeys' logger.
+	Setting this argument will disable logging to the LiveKeys interface.
 	
   * `--log-daily`  
 	Setting this flag will create a daily log file, using the log date format set for LiveKeys (see the prefixes section)
