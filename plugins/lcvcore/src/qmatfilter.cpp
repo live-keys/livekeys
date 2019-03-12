@@ -46,7 +46,7 @@
   \endcode
 
 
-  With that all that's left is to register the element to QML, after which you can use it like any other Live CV filter :
+  With that all that's left is to register the element to QML, after which you can use it like any other filter :
 
   \code
   ImRead{

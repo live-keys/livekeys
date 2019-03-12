@@ -19,7 +19,7 @@
 
 /**
  * \class QDescriptorExtractor
- * \brief Abstract base class for computing descriptors for image keypoints.
+ * \brief Abstract base class to compute descriptors for image keypoints.
  * \ingroup plugin-lcvfeatures2d
  */
 
@@ -53,7 +53,7 @@ QDescriptorExtractor::~QDescriptorExtractor(){
     delete m_descriptors;
 }
 /**
- * \brief Initialize QDescriptorExtractor
+ * \brief Initializes QDescriptorExtractor
  */
 void QDescriptorExtractor::initialize(const QVariantMap &){}
 /**
@@ -107,7 +107,7 @@ void QDescriptorExtractor::compute(){
 
  /**
  *\fn lv::QDescriptorExtractor::keypoints()
- *\brief Keypoints
+ *\brief Keypoints getter
  */
 
 /**
@@ -117,24 +117,27 @@ void QDescriptorExtractor::compute(){
 
  /**
  *\fn lv::QDescriptorExtractor::descriptors()
-
+ * Getter for descriptors
  */
 
 /**
  *\fn lv::QDescriptorExtractor::params()
- *\brief Given parameters
+ *\brief Getter for the params.
  */
 
  /**
  *\fn lv::QDescriptorExtractor::isBinary()
+ * Returns true if this descriptor extractor is binary
  */
 
  /**
  *\fn lv::QDescriptorExtractor::descriptorCols()
+ * Returns the number of cols for the descriptor.
  */
 
  /**
  *\fn lv::QDescriptorExtractor::extractor()
+ * Returns the internal extractor.
  */
 
 

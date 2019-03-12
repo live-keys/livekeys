@@ -19,7 +19,7 @@
 
 /**
  * \class QMatchesToLocalKeypoint
- * \brief add brief
+ * \brief Maps matches to local keypoints
  * \ingroup plugin-lcvfeatures2d
  */
 
@@ -112,12 +112,12 @@ void QMatchesToLocalKeypoint::mapValues(){
 
 /**
  * \fn lv::QMatchesToLocalKeypoint::trainKeypointVectors()
- * \brief Triggers training of the keypoint vectors.
+ * \brief Trains the keypoint vectors.
 */
 
 /**
  * \fn lv::QMatchesToLocalKeypoint::setTrainKeypointVectors()
- * \brief Setter for the trainKeypointVectors
+ * \brief Setter for trainKeypointVectors
 */
 
 /**
@@ -163,7 +163,7 @@ void QMatchesToLocalKeypoint::mapValues(){
 
 /**
  * \fn lv::QMatchesToLocalKeypoint::outputChanged()
- * \brief Triggered when output is changed
+ * \brief Triggered when output is changed.
 */
 
 /**

@@ -18,7 +18,7 @@
 
 /**
  * \class QMatState
- * \brief Mat texture state
+ * \brief Matrix texture state
  * \ingroup plugin-lcvcore
  */
 
@@ -35,10 +35,6 @@ QMatState::QMatState()
 
 /**
  * \brief Compares 2 states.
- * 
- * Parameters:
- * 
- * \a other
  */
 int QMatState::compare(const QMatState *other) const{
     if ( textureIndex == -1 && other->textureIndex == -1 ){

@@ -29,7 +29,7 @@
 /**
  * \class QMatShader
  * \ingroup plugin-lcvcore
- * \brief Open cv matrix shader.
+ * \brief Matrix shader.
  */
 
 /**
@@ -50,11 +50,6 @@
 /**
  * \fn void QMatShader::updateState(const QMatState *state, const QMatState *oldState)
  * \brief Loads the matrixes texture.
- * 
- * Parameters:
- * 
- * \a state
- * \a oldState
  */
 
 
@@ -73,12 +68,6 @@ QMatShader::QMatShader()
 
 /**
  * \brief Loads a matrix texture into the gpu program. Returns true on success, false otherwise.
- * 
- * Parameters:
- * 
- * \a mat
- * \a index
- * \a linearFilter
  */
 bool QMatShader::loadTexture(QMat *mat, int index, bool linearFilter){
 

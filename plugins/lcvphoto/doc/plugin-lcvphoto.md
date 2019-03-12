@@ -13,9 +13,9 @@ import lcvphoto 1.0
 {qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Denoises a grayscale or color image.}
 
-Performs denoising using the Non-local Means Denoising algorithm.
+Performs denoising using the Non-local Means Denoising algorithm. Sample in:
 
-`photo/fastnlmeansdenoising.qml`
+`samples/photo/fastnlmeansdenoising.qml`
 
 {qmlProperty:bool colorAlgorithm}
 
@@ -38,7 +38,7 @@ Should be odd. Defaults to 7.
 
 {qmlProperty:int searchWindowSize}
 
-Size in pixels of the window that is used to compute weighted average for given pixel.
+Size in pixels of the window that is used to compute weighted average for a given pixel.
 Has a large performance impact. Should be odd. Defaults to 21.
 
 {qmlType:FastNlMeansDenoisingMulti}
@@ -54,8 +54,8 @@ Usage notes for video input:
 
 - The algorithm is rather slow, which can be a problem for live video processing.
   Tweak the input framerate, searchWindowSize and temporalWindowSize as required.
-- The output will lag (temporalWindowSize-1)/2 frames behind the input.
-- Output will only start when the buffer is filled; expect temporalWindowSize-1
+- The output will lag `(temporalWindowSize - 1) / 2` frames behind the input.
+- Output will only start when the buffer is filled; expect `temporalWindowSize - 1`
   black output frames directly after recompiling the QML.
 
 {qmlProperty:int temporalWindowSize}
@@ -88,38 +88,45 @@ results are poor.
 
 {qmlType:HueSaturationLightness}
 {qmlInherits:lcvcore#MatFilter}
-{qmlBrief:Controls the hue and saturation of an image}
+{qmlBrief:Changes the hue, saturation and lightness of an image}
 
 {qmlProperty:int hue}
-{qmlBrief: Controls the hue}
+
+Controls the hue
 
 {qmlProperty:int saturation}
-{qmlBrief: Controls the saturation}
+
+Controls the saturation
 
 {qmlProperty:int lightness}
-{qmlBrief: Controls the lightness}
+
+Controls the lightness
 
 {qmlType:Levels}
+{qmlBrief:Performs levels adjustments on an image.}
 {qmlInherits:lcvcore#MatFilter}
 
+{qmlProperty:lightness}
 
-{qmlProperty:Lightness}
-{qmlBrief:Controls the lightness overall channels}
+Controls the lightness overall channels
 
 `[white, contrast, black]`
 
 {qmlProperty:channels}
-{qmlBrief:Recieves the channel index and lightness parameters for the image}
+
+Recieves the channel index and lightness parameters for the image.
 
 `channel index: [white, contrast, black]`
 
 ```
 Levels{
-        lightness: [10, 1.0, 255]
-        channels: {
-            0: [0, 1.0, 170]
-        }
-        ```
+    lightness: [10, 1.0, 255]
+    channels: {
+        0: [0, 1.0, 170]
+    }
+}
+```
+
 {qmlType:AutoLevels}
 {qmlInherits:lcvcore#MatFilter}
 {qmlBrief:Given the histogram AutoLevels will aoutmatically compute levels of an image.}
@@ -131,15 +138,15 @@ Levels{
 
 {qmlProperty:double brightness}
 
-Can be any value
+Can be any value.
 
 {qmlProperty:double contrast}
 
-Should be between 0 and 10
+Should be between 0 and 10.
 
 {qmlType:Sticher}
 {qmlInherits:lcvcore#MatFilter}
-{qmlBrief:Stiches a set of images toghether based on the list of matrixes and a set of parameters}
+{qmlBrief:Stiches a set of images toghether based on the list of matrixes and a set of parameters.}
 
 {qmlProperty:lcvcore#MatList input}
 
@@ -155,7 +162,7 @@ Input parameters:
 
 {qmlType:AlignMTB}
 {qmlInherits:MatFilter}
-{qmlBrief:Takes a list of inputs with a set of parameters and it converts them}
+{qmlBrief:Aligns a set of input images in accordance to a list of parameters.}
 
 Params:
 
@@ -165,16 +172,16 @@ Params:
 
 {qmlType:CalibrateDebevec}
 {qmlInherits:lcvcore#MatFilter}
-{qmlBrief:Calibrates the lightness of the image in regard to exsposure setting the image was shot.}
+{qmlBrief:Calibrates the lightness of the image in regards to the exsposure the image was shot in.}
 
-{qmlProperty:QMatList input}
+{qmlProperty:list<Mat> input}
 
-List of images
+List of images.
 
-{qmlProperty:QList times}
-Exposure time
+{qmlProperty:list<double> times}
+List of exposure times.
 
-{qmlProperty:QVariantMap params}
+{qmlProperty:Object params}
 Calibration parameters
 
 Params:
@@ -183,31 +190,36 @@ Params:
 * **float lambda**
 * **bool random**
 
-{qmlProperty:QMat output}
-{qmlBrief:Outputs single image based on calibrations}
+{qmlProperty:Mat output}
+
+Outputs single image based on calibrations
 
 Output will contain much more data than the input.
 
 {qmlType:CalibrateRobertson}
-{qmlInherits:lcvcore#MatFilter}
-{qmlBrief:Calibrates the lightness of the image in regard to exsposure setting the image was shot.}
+{qmlInherits:MatFilter}
+{qmlBrief:Calibrates the lightness of the image in regard to exsposure the image was shot in.}
 
-{qmlProperty:QMatList input}
-{qmlBrief:List of images}
+{qmlProperty:list<Mat> input}
 
-{qmlProperty:QList times}
-{qmlBrief:Exposure time}
+List of images.
 
-{qmlProperty:QVariantMap params}
-{qmlBrief:Calibration parameters}
+{qmlProperty:list<double> times}
+
+Exposure time.
+
+{qmlProperty:Object params}
+
+Calibration parameters.
 
 Params:
 
 * **int maxIter**
 * **float threshold**
 
-{qmlProperty:QMat output}
-{qmlBrief:Outputs single image based on calibrations}
+{qmlProperty:Mat output}
+
+Outputs single image based on calibrations.
 
 Output will contain much more data than the input.
 
@@ -243,22 +255,30 @@ Parameters:
 {qmlType:ToneMap}
 {qmlBrief:First step of transforming the image from the HDR to something that is viewable by the user}
 
-{qmlProperty:QVariantMap input}
-{qmlProperty:QVariantMap params}
+{qmlProperty:Mat input}
+
+Input image,
+
+{qmlProperty:Object params}
+
+Conversion parameters.
+
 
 {qmlType:TonemapDrago}
+{qmlBrief:Drago tonemapper.}
 {qmlInherits:lcvphoto#ToneMap}
 
-Initialize method arguments:
+Available parameters:
 
 * **float gamma**
 * **float saturation**
 * **float bias**
 
 {qmlType:TonemapDurand}
+{qmlBrief:Durand tonemapper.}
 {qmlInherits:lcvphoto#ToneMap}
 
-Initialize method arguments:
+Available parameters:
 
 * **float gamma**
 * **float contrast**
@@ -267,17 +287,20 @@ Initialize method arguments:
 * **float sigmaColor**
 
 {qmlType:TonemapMantiuk}
+{qmlBrief:Mantiuk tonemapper.}
 {qmlInherits:lcvphoto#ToneMap}
 
-Initialize method arguments:
+Available parameters:
 
 * **float gamma**
 * **float scale**
 * **float saturation**
 
 {qmlType:TonemapReinard}
+{qmlBrief:Reinard tonemapper.}
 {qmlInherits:lcvphoto#ToneMap}
-Initialize method arguments:
+
+Available parameters:
     
 * **float gamma**
 * **float intensity**
@@ -285,23 +308,33 @@ Initialize method arguments:
 * **float colorAdapt**
 
 {qmlType:LevelSliders}
+{qmlBrief:Visual levels sliders.}
 {qmlInherits:external.QtQuick#Rectangle}
 
 {qmlProperty:alias input}
 
+Input image.
+
 {qmlProperty:lightness}
+
+Contains the set lightness values.
 
 {qmlProperty:levelByChannel}
 
+Contains the set level values per channel.
 
 {qmlType:HueSaturationLightnessSliders}
+{qmlBrief:Visual sliders for hue saturation lightness.}
+{qmlInherits:external.QtQuick#Rectangle}
 
 {qmlProperty:alias hue}
-{qmlInherits:external.QtQuick#Rectangle}
-{qmlBrief:Hue that's controled by the slider}
+
+Contains the hue that's controled by the slider
 
 {qmlProperty:alias saturation}
-{qmlBrief:Saturation that's controled by the slider}
+
+Contains the saturation that's controled by the slider
 
 {qmlProperty:alias lightness}
-{qmlBrief:Lightness that's controled by the slider}
+
+Contains the lightness that's controled by the slider

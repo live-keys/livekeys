@@ -51,12 +51,12 @@ QKeyPointVector::~QKeyPointVector(){
 
 /**
 *\fn QKeyPointVector::keyPointData()
-*\brief Getting the KeyPointData as the list of objects.
+*\brief Returns the internal data as a list of objects.
 */
 
 /**
 *\fn QKeyPointVector::setKeyPointData()
-*\brief Getting the Setter for keyPointData as the list of objects.
+*\brief Sets the internal data as a list of objects.
 */
 
 /**

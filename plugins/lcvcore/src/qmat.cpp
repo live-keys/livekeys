@@ -25,7 +25,7 @@
  *\brief Open cv matrix wrapper.
 
  *The class represents the wrapper for the opencv matrix element to be passed around in the QML structure. To access
- *it's cv mat value, use the cvMat() function.
+ *it's cv mat value, use the internal() function.
 
  *To access it's pixels within qml, use the Mat::buffer() function.
  */
@@ -34,13 +34,7 @@
 /**
  *\enum QMat::Type
  *
- * **CV8U**
- * **CV8S**
- * **CV16U**
- * **CV16S**
- * **CV32S**
- * **CV32F**
- * **CV64F**
+ * Type of the QMat
  */
 
 /**

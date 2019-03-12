@@ -10,6 +10,7 @@ namespace lv{
 
 class MLNode;
 
+/// \private
 class TcpLineSocket : public QObject{
 
     Q_OBJECT

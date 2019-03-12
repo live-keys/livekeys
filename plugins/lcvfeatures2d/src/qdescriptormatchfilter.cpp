@@ -23,14 +23,8 @@
  */
 
 /**
- * \brief QDescriptorMatchFilter constructror
- * 
- * Parameters:
- * 
- * \a parent
- * 
+ * \brief QDescriptorMatchFilter constructor
  */
-
 QDescriptorMatchFilter::QDescriptorMatchFilter(QQuickItem* parent)
     : QQuickItem(parent)
     , m_matches1to2(0)
@@ -90,7 +84,7 @@ QDescriptorMatchFilter::~QDescriptorMatchFilter(){
 
 /**
  * \fn lv::QDescriptorMatchFilter::setNndrRatio()
- * \brief setter for the nndrRatio
+ * \brief Setter for the nndrRatio
 */
 
 /**

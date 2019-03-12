@@ -138,7 +138,7 @@ void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches
 }
 
 /**
-*\brief Override from QQuickItem.Calls the matcher.
+*\brief Override from QQuickItem. Calls the matcher.
 */
 void QDescriptorMatcher::componentComplete(){
     QQuickItem::componentComplete();
@@ -180,7 +180,7 @@ void QDescriptorMatcher::initializeMatcher(cv::DescriptorMatcher* matcher){
 
 /**
 *\fn lv::QDescriptorMatcher::queryDescriptors()
-*\brief Inputs
+*\brief Getter for the query descriptors.
 */
 
 /**
