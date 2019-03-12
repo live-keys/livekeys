@@ -15,6 +15,7 @@ Row{
         height: parent.height
         backgroundColor: '#191017'
         model: VisualLogFilter{
+            property int width: 0
             id: logFilter
             source: livecv.log
             search: /Output\s[0-9]{1}$/
@@ -25,6 +26,7 @@ Row{
         width: parent.width / 2
         height: parent.height
         model: VisualLogFilter{
+            property int width: 0
             id: logFilter2
             source: livecv.log
             search: "Output 1"

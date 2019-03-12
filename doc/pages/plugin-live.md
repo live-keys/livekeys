@@ -177,7 +177,7 @@ Reacts to data changes inside the file by resyncing local copy of the data.
 Called when the loader is initialized (component complete).
 
 {qmlType:VisualLogFilter}
-{qmlInherits:base#VisualLogBaseModel}
+{qmlInherits:VisualLogBaseModel,external.QtQml#ParserStatus}
 {qmlBrief:Represents a filtered set of log entries}
 
 The filter can be applied via tag, prefix or a regular search string
@@ -251,7 +251,7 @@ The source code of the item
 The created item
 
 {qmlType:ComponentSource}
-{qmlInherits:external.QtQml#QtObject}
+{qmlInherits: QtCore#Object,QtQml#ParserStatus}
 {qmlBrief:Maps its internal source component to a string, together with the imports within the file it was declared on. Can be used to map components that should be created in different processes.}
 
 {qmlProperty:Component source}
@@ -293,7 +293,7 @@ Color of the button
 Signal that we've clicked the button
 
 {qmlType:VisualLogView}
-{qmlInherits:external.QtQuick.Controls#ScrollView} 
+{qmlInherits:external.QtQuick#ScrollView}
 {qmlBrief:A view to display the messages of a visual log filter}
 
 An example can be seen in **samples/live/visuallogfilter.qml**
