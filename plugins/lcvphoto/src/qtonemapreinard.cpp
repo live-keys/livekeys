@@ -17,7 +17,7 @@
 #include "qtonemapreinard.h"
 
 QTonemapReinard::QTonemapReinard(QQuickItem *parent)
-    : QTonemap(cv::createTonemapDurand(), parent)
+    : QTonemap(cv::createTonemapReinhard(), parent)
 {
 }
 
