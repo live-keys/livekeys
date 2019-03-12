@@ -1,5 +1,6 @@
 #include "group.h"
 #include <QQmlComponent>
+#include <QUrl>
 
 namespace lv{
 
@@ -49,10 +50,10 @@ Group *Group::createWithProperties(QQmlEngine *engine, const std::map<QByteArray
     QByteArray propertyWrap = "import base 1.0\nGroup{\n" + propertyString + "}";
 
     QQmlComponent c(engine);
-    c.setData(propertyWrap, "NewGroup.qml");
-    lv::Group* group = qobject_cast<lv::Group>(c.create());
+    c.setData(propertyWrap, QUrl("NewGroup.qml"));
+    lv::Group* group = qobject_cast<lv::Group*>(c.create());
 
-    if ( component->errors().size() > 0 ){
+    if ( c.errors().size() > 0 ){
         qCritical("Failed to load group properties: %s", qPrintable(c.errorString()));
         return nullptr;
     }

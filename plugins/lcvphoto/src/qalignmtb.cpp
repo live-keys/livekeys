@@ -85,7 +85,7 @@ void QAlignMTB::filter(){
 
             // copy contents
 
-            for (int i = 0; i < outputVector.size(); ++i)
+            for (size_t i = 0; i < outputVector.size(); ++i)
             {
                 cv::Mat* copy = new cv::Mat(outputVector[i]);
                 m_output->appendItem(new QMat(copy));

@@ -93,14 +93,14 @@ QObject *QMatOp::ListOperations::itemAt(lv::QmlObjectList *list, int idx)
 void QMatOp::ListOperations::removeItemAt(lv::QmlObjectList *list, int idx)
 {
     auto data = list->dataAs<std::vector<QMat*>>();
-    if (idx >= data->size() || idx < 0) return;
+    if (idx >= static_cast<int>(data->size()) || idx < 0) return;
     data->erase(data->begin()+idx);
 }
 
 void QMatOp::ListOperations::clearItems(lv::QmlObjectList *list)
 {
     auto data = list->dataAs<std::vector<QMat*>>();
-    for (int i = 0; i < data->size(); ++i) delete (*data)[i];
+    for (int i = 0; i < static_cast<int>(data->size()); ++i) delete (*data)[i];
     data->clear();
 }
 
