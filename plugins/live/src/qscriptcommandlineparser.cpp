@@ -18,14 +18,9 @@
 #include <QException>
 
 
-/*!
-   \class lv::ScriptCommandLineParser
-   \inmodule live_cpp
-   \internal
- */
-
 namespace{
 
+    /// \private
     std::exception makeException(const QString& str){
         return std::runtime_error(str.toStdString().c_str());
     }

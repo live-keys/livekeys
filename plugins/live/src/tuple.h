@@ -18,6 +18,7 @@ class Tuple : public QObject, public QQmlParserStatus{
     Q_INTERFACES(QQmlParserStatus)
 
 public:
+    /// \private
     class PropertyDescription{
     public:
         QQmlProperty::PropertyTypeCategory typeCategory;

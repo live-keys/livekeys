@@ -19,6 +19,7 @@
 
 #include <QQmlExtensionPlugin>
 
+/// \private
 class LivePlugin : public QQmlExtensionPlugin{
 
     Q_OBJECT

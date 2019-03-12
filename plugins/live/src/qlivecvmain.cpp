@@ -27,72 +27,6 @@
 #include <QQmlEngine>
 #include <QJSValueIterator>
 
-
-/*!
-   \class lv::QLiveCVMain
-   \inmodule live_cpp
-   \internal
- */
-
-/*!
-  \qmltype Main
-  \instantiates lcv::QLiveCVMain
-  \inqmlmodule live
-  \inherits Item
-  \brief Provides a main script entry to a qml application.
-  \quotefile live/mainscript.qml
- */
-
-/*!
-  \qmlproperty array Main::options
-
-  Configuration options to parse received arguments. There are two types of options. Value types and flag
-  types. Flags are simply checked to see whether they have been set within Live CV.
-
-  \qml
-  Main{
-      id: main
-      options : [
-        { key: ['-f', '--someflag'], describe: 'Enables a feature.' }
-      ]
-  }
-  \endqml
-
-  Then we can check if the option has been set by querying our Main object:
-
-  \code
-  console.log('Flag status: ' + main.isOptionSet('-f'))
-  \endcode
-
-  Value types need an extra 'type' key and an optional 'required' key, which by default is false:
-
-  \qml
-  Main{
-      id: main
-      options : [
-        { key: ['-v', '--value'], type: 'string', describe: 'Receive value.', required: true }
-      ]
-  }
-  \endqml
-
-  The type can be anything used to intuitively describe the value. It does not have to match a qml type.
-  If an option is required and is missing when Live CV is called, then Live CV will exit, and a help text will be
-  displayed to the user.
-
- */
-
-/*!
-  \qmlproperty string Main::version
-
-  Sets the script version.
- */
-
-/*!
-  \qmlsignal Main::run()
-
-  Emited once the arguments are parsed and the script is ready to run.
- */
-
 QLiveCVMain::QLiveCVMain(QQuickItem *parent)
     : QQuickItem(parent)
     , m_parser(0)
@@ -197,22 +131,9 @@ void QLiveCVMain::afterCompile(){
     }
 }
 
-/*!
- \qmlmethod Main::arguments()
-
- Returns the arguments after extracting the parsed options
-
- */
-
 const QStringList &QLiveCVMain::arguments() const{
     return m_parser->arguments();
 }
-
-/*!
-  \qmlmethod Main::option(key)
-
-  Returns the option configured at \a key. Raises a warning if the option was not configured.
- */
 
 QString QLiveCVMain::option(const QString &key) const{
     QScriptCommandLineParser::Option* option = m_parser->findOptionByName(key);
@@ -223,11 +144,6 @@ QString QLiveCVMain::option(const QString &key) const{
     return m_parser->value(option);
 }
 
-/*!
- \qmlmethod bool Main::isOptionSet(key)
-
- Returns true if the option at \a key has been set. False otherwise.
- */
 bool QLiveCVMain::isOptionSet(const QString &key) const{
     QScriptCommandLineParser::Option* option = m_parser->findOptionByName(key);
     if ( !option ){

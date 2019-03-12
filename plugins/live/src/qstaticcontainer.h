@@ -62,6 +62,7 @@ private:
 };
 
 
+/// \private
 class Q_LIVE_EXPORT QStaticTypeContainerBase{
 
 public:
@@ -73,7 +74,7 @@ public:
     virtual void clearStates() = 0;
 };
 
-
+/// \private
 template<typename T>
 class QStaticTypeContainer : public QStaticTypeContainerBase{
 
