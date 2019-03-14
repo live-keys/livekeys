@@ -15,7 +15,6 @@ images in particular. We have a globally available configuration (that starts ou
 ## Log levels
 
 Log levels are the following, in order of importance:
-
  * `Fatal` - Means the program should halt at this point, since the error is irrecoverable and potentially harmful.
  * `Error` - Means the program entered a faulty state and should end. 
  * `Warning` - A potentially harmful mistake that should be rectified, but the program will run nonetheless.
@@ -140,10 +139,10 @@ The most usual parameter for vlog is the tag name e.g. `vlog("tag1")` would use 
 As mentioned above, we can define the level of a message by appending an appropriate function call to the `vlog` object, e.g. `vlog("tag1").d()`.
 We can also configure if as follows
 ```
-	vlog().configure("test", {
+	vlog.configure("test", {
         "level": VisualLog.Error,
         "defaultLevel": VisualLog.Info}
-    });
+  });
  ```
  
 Messages are logged by using the `<<` operator, as seen in several instances above.
@@ -177,7 +176,7 @@ In the image above, we note the ImRead object, whose output can be displayed. It
 
 ### Log window
 
-LiveKeys has a log window which can be opened either by using the `Ctrl+L` shortcut or clicking on the log icon ![log icon](../../doc/src/images/logicon.jpg). 
+LiveKeys has a log window which can be opened either by using the `Ctrl+L` shortcut or clicking on the log icon ![log icon](images/logicon.jpg). 
 This opens the log window where we can see all of our logged messages. In the header, we are given several options:
 * The largest input box can be used to search through the log messages.   
 * The first button opens an additional search box which can be used to search for a particular tag.  
