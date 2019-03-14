@@ -2,6 +2,7 @@
 #include "live/exception.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
+#include "qmlobjectlistmodel.h"
 #include <QJSValueIterator>
 
 namespace lv{

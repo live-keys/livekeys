@@ -4,19 +4,21 @@
 #include <QObject>
 #include <QQmlListProperty>
 #include <functional>
-#include "qmlobjectlistmodel.h"
-#include "live/lvviewglobal.h"
 #include <QDebug>
+
+#include "live/lvviewglobal.h"
 #include "live/shared.h"
 
 namespace lv{
+
+class QmlObjectListModel;
 
 class LV_VIEW_EXPORT QmlObjectList : public Shared {
 
 
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<QObject> items READ items)
-    Q_PROPERTY(lv::QmlObjectListModel* model READ model)
+    Q_PROPERTY(lv::QmlObjectListModel*   model READ model)
 
 public:
     explicit QmlObjectList(QObject* parent = nullptr);
@@ -87,10 +89,10 @@ public slots:
     void clearItems();
     void appendItem(QObject* item);
     void removeItemAt(int index);
-    QmlObjectListModel* model();
+    lv::QmlObjectListModel* model();
 
-    QmlObjectList *cloneConst() const;
-    QmlObjectList* clone() const;
+    lv::QmlObjectList *cloneConst() const;
+    lv::QmlObjectList* clone() const;
 
 private:
     static int itemCount(QQmlListProperty<QObject>*);

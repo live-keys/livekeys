@@ -34,7 +34,6 @@
 
 #include "qtonemap.h"
 #include "qtonemapdrago.h"
-#include "qtonemapdurand.h"
 #include "qtonemapmantiuk.h"
 #include "qtonemapreinard.h"
 
@@ -60,7 +59,6 @@ void LcvphotoPlugin::registerTypes(const char *uri){
     qmlRegisterType<QMergeRobertson>(                 uri, 1, 0, "MergeRobertson");
     qmlRegisterType<QTonemap>(                        uri, 1, 0, "Tonemap");
     qmlRegisterType<QTonemapDrago>(                   uri, 1, 0, "TonemapDrago");
-    qmlRegisterType<QTonemapDurand>(                  uri, 1, 0, "TonemapDurand");
     qmlRegisterType<QTonemapMantiuk>(                 uri, 1, 0, "TonemapMantiuk");
     qmlRegisterType<QTonemapReinard>(                 uri, 1, 0, "TonemapReinard");
 

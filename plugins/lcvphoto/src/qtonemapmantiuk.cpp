@@ -17,7 +17,7 @@
 #include "qtonemapmantiuk.h"
 
 QTonemapMantiuk::QTonemapMantiuk(QQuickItem *parent)
-    : QTonemap(cv::createTonemapDurand(), parent)
+    : QTonemap(cv::createTonemapMantiuk(), parent)
 {
 }
 

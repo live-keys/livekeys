@@ -210,13 +210,6 @@ Module {
         exportMetaObjectRevisions: [0]
     }
     Component {
-        name: "QTonemapDurand"
-        defaultProperty: "data"
-        prototype: "QTonemap"
-        exports: ["lcvphoto/TonemapDurand 1.0"]
-        exportMetaObjectRevisions: [0]
-    }
-    Component {
         name: "QTonemapMantiuk"
         defaultProperty: "data"
         prototype: "QTonemap"

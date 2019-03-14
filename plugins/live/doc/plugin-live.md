@@ -13,7 +13,7 @@ import live 1.0
 {qmlInherits:external.QtQuick#Item}
 {qmlBrief:Provides a main script entry to a qml application.}
 
-An example of use can be found in **samples\live\mainscript.qml**
+An example of use can be found in **samples/live/mainscript.qml**
 
 {qmlProperty:array options}
 
@@ -64,11 +64,11 @@ Returns the arguments after extracting the parsed options
 
 {qmlMethod:string option(string key)}
 
-Returns the option configured at \a key. Raises a warning if the option was not configured.
+Returns the option configured at `key`. Raises a warning if the option was not configured.
 
 {qmlMethod:bool isOptionSet(string key)}
 
-Returns true if the option at \a key has been set. False otherwise.
+Returns true if the option at `key` has been set. False otherwise.
 
 {qmlType:Triangle}
 {qmlInherits:external.QtQuick#Item}
@@ -105,7 +105,7 @@ Returns the color of the triangle.
 {qmlInherits:external.QtQuick#Item}
 {qmlBrief:Creates and stores a component statically. See {Static Items} for more information on statics in Live CV.}
 
-An example is available at **samples\live\staticloader.qml**
+An example is available at **samples/live/staticloader.qml**
 
 {qmlProperty:Component source}
 
@@ -128,7 +128,7 @@ Loads the StaticLoader state. `id` has to be unique for this component when used
 {qmlInherits:external.QtCore#Object, external.QtQml#ParserStatus}
 {qmlBrief:Represents a file reader which extracts the data from a file and potentially monitors changes.}
 
-See a simple example at **samples\live\filereading.qml**
+See a simple example at **samples/live/filereading.qml**
 
 {qmlProperty:string source}
 
@@ -154,7 +154,7 @@ React to a change inside a file by resyncing data.
 {qmlInherits:external.QtQuick#Item}
 {qmlBrief:Loads a given file statically}
 
-An example cna be seen at **samples\live\staticfilereading.qml**
+An example cna be seen at **samples/live/staticfilereading.qml**
 
 {qmlProperty:array data}
 
@@ -182,7 +182,7 @@ Called when the loader is initialized (component complete).
 
 The filter can be applied via tag, prefix or a regular search string
 
-An example can be found in **samples\live\visuallogfilter.qml**
+An example can be found in **samples/live/visuallogfilter.qml**
 
 {qmlProperty:VisualLogBaseModel source}
 
@@ -240,7 +240,7 @@ When source model is having rows added, we ignore the worker results and rebuild
 {qmlInherits:external.QtQuick#Item}
 {qmlBrief:Given a piece of qml code as string, it will create the item}
 
-An example is available at **samples\live\stringbasedloader.qml**
+An example is available at **samples/live/stringbasedloader.qml**
 
 {qmlProperty:string source}
 
@@ -262,7 +262,7 @@ The item whose source code will be copied.
 {qmlInherits:external.QtQuick#Rectangle}
 {qmlBrief:Represents a button with a custom text}
 
-An example can be found at **samples\live\valuehistory.qml**
+An example can be found at **samples/live/valuehistory.qml**
 
 {qmlProperty:string text}
 

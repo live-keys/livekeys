@@ -1,5 +1,7 @@
 #include "group.h"
+#include "live/visuallogqt.h"
 #include <QQmlComponent>
+#include <QUrl>
 
 namespace lv{
 
@@ -43,7 +45,7 @@ QByteArray Group::typeDefaultValue(const QByteArray &typeString){
 Group *Group::createWithProperties(QQmlEngine *engine, const std::map<QByteArray, QByteArray> &properties){
     QByteArray propertyString;
     for ( auto it = properties.begin(); it != properties.end(); ++it ){
-        propertyString += "property " + it->second + " " + it->first + ": " + typeDefaultValue(it->second);
+        propertyString += "property " + it->second + " " + it->first + ": " + typeDefaultValue(it->second) + "\n";
     }
 
     QByteArray propertyWrap = "import base 1.0\nGroup{\n" + propertyString + "}";

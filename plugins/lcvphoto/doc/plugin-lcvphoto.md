@@ -274,17 +274,6 @@ Available parameters:
 * **float saturation**
 * **float bias**
 
-{qmlType:TonemapDurand}
-{qmlBrief:Durand tonemapper.}
-{qmlInherits:lcvphoto#ToneMap}
-
-Available parameters:
-
-* **float gamma**
-* **float contrast**
-* **float saturation**
-* **float sigmaSpace**
-* **float sigmaColor**
 
 {qmlType:TonemapMantiuk}
 {qmlBrief:Mantiuk tonemapper.}

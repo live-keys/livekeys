@@ -31,6 +31,7 @@
 // QLogListenerSocket::ObjectMessageInfo
 // ---------------------------------------------------------------------
 
+/// \private
 class QLogListenerSocket::ObjectMessageInfo{
 public:
     lv::VisualLog::MessageInfo::Level level;

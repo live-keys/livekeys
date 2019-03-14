@@ -12,7 +12,6 @@ HEADERS += \
     $$PWD/qmergerobertson.h \
     $$PWD/qtonemap.h \
     $$PWD/qtonemapdrago.h \
-    $$PWD/qtonemapdurand.h \
     $$PWD/qtonemapmantiuk.h \
     $$PWD/qtonemapreinard.h \
     $$PWD/qstitcher.h \
@@ -32,7 +31,6 @@ SOURCES += \
     $$PWD/qmergerobertson.cpp \
     $$PWD/qtonemap.cpp \
     $$PWD/qtonemapdrago.cpp \
-    $$PWD/qtonemapdurand.cpp \
     $$PWD/qtonemapmantiuk.cpp \
     $$PWD/qtonemapreinard.cpp \
     $$PWD/qstitcher.cpp \

@@ -1,7 +1,5 @@
 # Logging
 
-## Support for logging in LiveKeys
-
 LiveKeys supports complex logging schemes through the use of various options. What makes it special is the possibility of logging _visuals_ as well, 
 images in particular. We have a globally available configuration (that starts out as a pre-defined default configuration) that can be modified via command line arguments or during runtime, which will be explained gradually. On top of the "global" configuration, we can also use our own specific named configurations which we'll refer to as _tags_. The configurable options are as follows:
  * `level` - In the application, this represents the least level a message should have in order to be displayed. 
@@ -16,7 +14,7 @@ images in particular. We have a globally available configuration (that starts ou
 
 ## Log levels
 
-Log levels are the following:
+Log levels are the following, in order of importance:
  * `Fatal` - Means the program should halt at this point, since the error is irrecoverable and potentially harmful.
  * `Error` - Means the program entered a faulty state and should end. 
  * `Warning` - A potentially harmful mistake that should be rectified, but the program will run nonetheless.
@@ -24,10 +22,10 @@ Log levels are the following:
  * `Debug` - To be used for internal purposes in order to e.g. check the state of variables and function calls 
  * `Verbose` - Very detailed messages that could, for example, include the time stamp, locations etc.
 
-in order of importance. 
 In the default configuration, the application message level is `Debug`, while the default message level is `Info`.
 
 In Qml, an example logging of a message would like this:
+
 ```qml
 	vlog.i("Test message")
 ```
@@ -141,27 +139,24 @@ The most usual parameter for vlog is the tag name e.g. `vlog("tag1")` would use 
 As mentioned above, we can define the level of a message by appending an appropriate function call to the `vlog` object, e.g. `vlog("tag1").d()`.
 We can also configure if as follows
 ```
-	vlog().configure("test", {
-        {"level", VisualLog::MessageInfo::Error},
-        {"defaultLevel",     VisualLog::MessageInfo::Info}
-    });
+	vlog.configure("test", {
+        "level": VisualLog.Error,
+        "defaultLevel": VisualLog.Info}
+  });
  ```
  
 Messages are logged by using the `<<` operator, as seen in several instances above.
+
 ```
-	vlog("tag1).d() << "Debug message for tag1"; 
+    vlog("tag1", "Debug message for tag1")
 ```
 
 The use of `vlog` in LiveKeys is slightly different - we use it as an object, define the log level similarly, with the level functions called, and
 the arguments included in parentheses:
+
 ```
 	vlog.d("message1")
-	vlog.e(this, "Error")
-```
-
-We can also use the `configure` function again
-```
-	vlog.configure("name", {...})
+    vlog.e("Error")
 ```
  
 ### Log tags
@@ -175,13 +170,13 @@ A tag can additionally be configured by the `vlog(...).configure()` function.
 
 An interesting feature of our log is the ability to log images as well! They have to be in a QMat form (see documentation of QMat), a matrix representation of the image. The usual source is an ImRead (see documentation).   
 
-![example of visual logging](../../doc/src/images/visual-log.png)
+![example of visual logging](images/visual-log.png)
 
 In the image above, we note the ImRead object, whose output can be displayed. It can be used as a object to be logged (note the `vlog` call), with the result available below, in the log window. 
 
 ### Log window
 
-LiveKeys has a log window which can be opened either by using the `Ctrl+L` shortcut or clicking on the log icon ![log icon](../../doc/src/images/logicon.jpg). 
+LiveKeys has a log window which can be opened either by using the `Ctrl+L` shortcut or clicking on the log icon ![log icon](images/logicon.jpg). 
 This opens the log window where we can see all of our logged messages. In the header, we are given several options:
 * The largest input box can be used to search through the log messages.   
 * The first button opens an additional search box which can be used to search for a particular tag.  

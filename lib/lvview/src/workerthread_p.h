@@ -23,6 +23,7 @@
 
 namespace lv{
 
+/// \private
 class WorkerThreadPrivate : public QObject{
 
     Q_OBJECT

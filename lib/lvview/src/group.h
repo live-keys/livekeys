@@ -1,14 +1,15 @@
 #ifndef LVGROUP_H
 #define LVGROUP_H
 
+#include "live/lvviewglobal.h"
+
 #include <QObject>
 #include <QQmlParserStatus>
 #include <QQmlEngine>
 
 namespace lv{
 
-/// \private
-class Group : public QObject, public QQmlParserStatus{
+class LV_VIEW_EXPORT Group : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
