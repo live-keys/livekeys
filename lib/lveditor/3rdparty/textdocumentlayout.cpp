@@ -479,7 +479,7 @@ TextDocumentLayoutPrivate::TextDocumentLayoutPrivate()
       currentLazyLayoutPosition(-1),
       lazyLayoutStepSize(1000),
       lastPageCount(-1),
-      lineManager(new LineManager(q_func()))
+      lineManager(nullptr)
 {
     showLayoutProgress = true;
     insideDocumentChange = false;
@@ -1910,7 +1910,11 @@ QFixed TextDocumentLayoutPrivate::findY(QFixed yFrom, const TextLayoutStruct *la
 }
 
 TextDocumentLayout::TextDocumentLayout(QTextDocument *doc)
-    : QAbstractTextDocumentLayout(*new TextDocumentLayoutPrivate, doc){}
+    : QAbstractTextDocumentLayout(*new TextDocumentLayoutPrivate, doc)
+{
+    Q_D(TextDocumentLayout);
+    d->lineManager = new LineManager(this);
+}
 
 
 void TextDocumentLayout::draw(QPainter *painter, const PaintContext &context)
@@ -2367,6 +2371,72 @@ void TextDocumentLayout::stateChangeUpdate(int pos)
     d->lineManager->textDocumentFinishedUpdating(this->document()->blockCount());
 }
 
+QTextDocument *TextDocumentLayout::lineDocument()
+{
+    Q_D(TextDocumentLayout);
+    return d->lineManager->m_lineDocument;
+}
+
+void TextDocumentLayout::collapseLines(int pos, int len)
+{
+    Q_D(TextDocumentLayout);
+    d->lineManager->collapseLines(pos,len);
+    emit linesCollapsed(pos, len);
+}
+
+void TextDocumentLayout::expandLines(int pos, int len)
+{
+    Q_D(TextDocumentLayout);
+    d->lineManager->expandLines(pos, len);
+    emit linesExpanded(pos, len);
+}
+
+std::pair<int,int> TextDocumentLayout::isFirstLineOfCollapsedSection(int lineNumber)
+{
+    Q_D(TextDocumentLayout);
+    return d->lineManager->isFirstLineOfCollapsedSection(lineNumber);
+}
+
+std::pair<int,int> TextDocumentLayout::isLineAfterCollapsedSection(int lineNumber)
+{
+    Q_D(TextDocumentLayout);
+    return d->lineManager->isLineAfterCollapsedSection(lineNumber);
+}
+
+QTextDocument *TextDocumentLayout::lineManagerParentDocument()
+{
+    Q_D(TextDocumentLayout);
+    return d->lineManager->m_parentDocument;
+}
+
+void TextDocumentLayout::setLineManagerParentDocument(QTextDocument *doc)
+{
+    Q_D(TextDocumentLayout);
+    d->lineManager->m_parentDocument = doc;
+}
+
+void TextDocumentLayout::setLineDocumentFont(const QFont& font)
+{
+    Q_D(TextDocumentLayout);
+    d->lineManager->setLineDocumentFont(font);
+}
+
+void TextDocumentLayout::setDirtyPos(int pos)
+{
+    Q_D(TextDocumentLayout);
+    d->lineManager->setDirtyPos(pos);
+}
+
+void TextDocumentLayout::textDocumentFinishedUpdating(int newLineNumber)
+{
+    Q_D(TextDocumentLayout);
+    d->lineManager->textDocumentFinishedUpdating(newLineNumber);
+}
+
+void TextDocumentLayout::updateLineSurface(int oldLineNum, int newLineNum, int dirtyPos)
+{
+    emit updateLineSurfaceSignal(oldLineNum, newLineNum, dirtyPos);
+}
 
 qreal TextDocumentLayoutPrivate::scaleToDevice(qreal value) const
 {
