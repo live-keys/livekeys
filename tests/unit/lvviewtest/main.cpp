@@ -22,6 +22,7 @@
 #include "mlnodetoqmltest.h"
 #include "visuallogtest.h"
 #include "filtertest.h"
+#include "grouptest.h"
 
 int main(int argc, char *argv[]){
 
