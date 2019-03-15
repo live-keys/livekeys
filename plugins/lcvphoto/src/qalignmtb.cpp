@@ -19,11 +19,12 @@
 #include "live/exception.h"
 #include "live/viewcontext.h"
 #include "qmat.h"
+#include "qmatext.h"
 
 QAlignMTB::QAlignMTB(QObject *parent)
     : QObject(parent)
     , m_input(nullptr)
-    , m_output(nullptr)
+    , m_output(lv::createMatList())
     , m_alignMTB(cv::createAlignMTB())
     , m_componentComplete(false)
 {

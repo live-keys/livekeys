@@ -15,6 +15,8 @@
 ****************************************************************************/
 
 #include "qmat.h"
+#include "qmatext.h"
+#include "qmatop.h"
 #include <QQmlEngine>
 #include "live/memory.h"
 #include "live/visuallog.h"
@@ -211,3 +213,13 @@ void QMat::recycleSize(int size) const{
   \brief Returns the contained open cv mat.
  */
 
+namespace lv{
+
+lv::QmlObjectList* createMatList(){
+    std::vector<QMat*>* data = new std::vector<QMat*>;
+    return new lv::QmlObjectList(data, &typeid(std::vector<QMat*>),
+        &QMatOp::ListOperations::itemCount, &QMatOp::ListOperations::itemAt, &QMatOp::ListOperations::appendItem,
+        &QMatOp::ListOperations::removeItemAt, &QMatOp::ListOperations::clearItems);
+}
+
+}

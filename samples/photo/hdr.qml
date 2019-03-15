@@ -9,63 +9,48 @@ Item{
     // using either Robertson or Debevec, then tonemapping is applied, which 
     // also converts the resulting image to 8 bit channels.
     
-    height: loader.height
+    height: parent.height
+    width: parent.width
     
     Column{
-        id: loader
-        spacing: 5
-        
-        Cv.ImRead{
-            file: project.path('../_images/coast_1.6.jpg')
-            onOutputChanged: {loader.images[0] = output; initInputList();}
+        Repeater{
+            id: repeater
+            model: ['coast_1.6.jpg', 'coast_6.jpg', 'coast_30.jpg'].map(
+                function(e){ return project.path('../_images/' + e);}).map(
+                function(e){ return Cv.MatIO.read(e); }
+            )
+            property var times:  [1.6, 6, 30]
+            
+            Cv.MatView{
+                mat : modelData
+            }
         }
-        Cv.ImRead{
-            file: project.path('../_images/coast_6.jpg')
-            onOutputChanged: {loader.images[1] = output; initInputList();}
-        }
-        Cv.ImRead{
-            file: project.path('../_images/coast_30.jpg')
-            onOutputChanged: {loader.images[2] = output; initInputList();}
-        }
-        
-        property var times:  [1.6, 6, 30]
-        property var images: [0, 0, 0]
-    }
-    
-
-    function initInputList(){
-        if ( loader.images[0] !== 0 &&  loader.images[1] !== 0 && loader.images[2] !== 0) {
-            alignMTB.input = Cv.MatOp.createMatList(loader.images)
-        }
-    }
+    }         
     
     AlignMTB{
         id: alignMTB
-        input: null
-        output: Cv.MatOp.createMatList()
+        input: Cv.MatOp.createMatList(repeater.model)
     }
     
     CalibrateRobertson{ 
         id: calibrateRobertson
         input: alignMTB.output
-        times: loader.times
+        times: repeater.times
     }
     
     MergeRobertson{
         id: mergeRobertson
         input: alignMTB.output
-        times: loader.times
+        times: repeater.times
         response: calibrateRobertson.output
     }
     
-    TonemapDurand{
-        anchors.left: loader.right
-        anchors.leftMargin: 15
-        anchors.verticalCenter: parent.verticalCenter
+    TonemapDrago{
+        anchors.right: parent.right
+        anchors.top: parent.top
         input: mergeRobertson.output
         params: {
             'gamma': 0.9,
-            'contrast': 2.6,
             'saturation': 0.8
         }
     }

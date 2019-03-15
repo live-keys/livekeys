@@ -18,6 +18,7 @@
 #include "qmat.h"
 #include "qwritablemat.h"
 #include "qmatop.h"
+#include "qmatio.h"
 #include "qmatext.h"
 #include "qmatview.h"
 #include "qimread.h"
@@ -48,6 +49,11 @@ static QObject* matOpProvider(QQmlEngine *engine, QJSEngine *){
     return new QMatOp(engine);
 }
 
+static QObject* matIOProvider(QQmlEngine *engine, QJSEngine *){
+    return new QMatIO(engine);
+}
+
+
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
     qmlRegisterType<QMat>(                   uri, 1, 0, "Mat");
@@ -71,6 +77,7 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QItemCapture>(           uri, 1, 0, "ItemCapture");
 
     qmlRegisterSingletonType<QMatOp>(        uri, 1, 0, "MatOp", &matOpProvider);
+    qmlRegisterSingletonType<QMatIO>(        uri, 1, 0, "MatIO", &matIOProvider);
 }
 
 void LcvcorePlugin::initializeEngine(QQmlEngine *, const char *){
