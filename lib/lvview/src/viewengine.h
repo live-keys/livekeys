@@ -118,6 +118,7 @@ public:
     static QString typeAsPropertyMessage(const QString& typeName, const QString& propertyName);
 
     static void registerBaseTypes(const char* uri);
+    static void initializeBaseTypes(ViewEngine* engine);
 
 signals:
     /** Signals before compiling a new object. */
