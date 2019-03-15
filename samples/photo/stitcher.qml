@@ -34,7 +34,7 @@ Column{
         }
     }
 
-    function initObjectList(){
+    function initInputList(){
         if ( imageLeft.output !== 0 &&  imageMid.output !== 0 && imageRight.output !== 0) {
             stitcher.input = Cv.MatOp.createMatList([imageLeft.output, imageMid.output, imageRight.output])
         }

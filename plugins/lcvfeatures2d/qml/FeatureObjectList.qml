@@ -34,7 +34,7 @@ Rectangle{
     property FeatureDetector featureDetector : FastFeatureDetector{}
     property DescriptorExtractor descriptorExtractor : BriskDescriptorExtractor{}
 
-    signal objectAdded(Cv.Mat descriptors, var points, var color)
+    signal objectAdded(var descriptors, var points, var color)
     signal objectListLoaded(ObjectList list, var keypoints, var corners, var colors)
     signal objectListCreated()
 
@@ -49,7 +49,7 @@ Rectangle{
         objectListComponent.item.colors.push(generatedColor)
         objectListComponent.item.keypoints.push(keypoints)
         objectListComponent.item.corners.push(corners)
-        objectListComponent.item.objectList.appendItem(root.featureDetector.output.createOwnedObject())
+        objectListComponent.item.objectListModel.appendData(root.featureDetector.output.createOwnedObject())
 
         root.descriptorExtractor.keypoints = keypoints
         root.objectAdded(
@@ -72,6 +72,7 @@ Rectangle{
         source : Item{
 
             property var objectList : Cv.MatOp.createMatList()
+            property var objectListModel : objectList.model()
 
             property var keypoints : new Array()
             property var corners : new Array()
@@ -81,6 +82,8 @@ Rectangle{
 
         Component.onCompleted: {
             staticLoad(root.stateId)
+            if ( item.objectList )
+                trainImages.model = item.objectListModel
             root.objectListCreated()
             root.objectListLoaded(item.objectList, item.keypoints, item.corners, item.colors)
         }
@@ -100,7 +103,6 @@ Rectangle{
                 id : trainImages
                 property int selectedIndex : 0
                 height : root.height
-                model: objectListComponent.item.model
                 delegate : Cv.MatView{
                     id : matView
                     mat : model.item
