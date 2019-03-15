@@ -2458,6 +2458,8 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
     QObject::connect(q->getDocumentLayout(), &TextDocumentLayout::linesCollapsed,
                      q, &TextEdit::handleCursorDuringCollapse);
+    QObject::connect(q->getDocumentLayout(), &TextDocumentLayout::linesCollapsed,
+                     q, &TextEdit::checkPalettesWhenCollapsed);
     QObject::connect(q->getDocumentLayout(), &TextDocumentLayout::updateLineSurfaceSignal,
                      q, &TextEdit::updateLineSurface);
 
@@ -2523,6 +2525,11 @@ void TextEditPrivate::init()
 #ifndef QT_NO_CLIPBOARD
     lv_qmlobject_connect(QGuiApplication::clipboard(), QClipboard, SIGNAL(dataChanged()), q, TextEdit, SLOT(q_canPasteChanged()));
 #endif
+
+    fragmentStartPalette = new QQuickItem(q);
+    fragmentEndPalette = new QQuickItem(q);
+    fragmentStartPalette->setObjectName("fragmentStartPalette");
+    fragmentEndPalette->setObjectName("fragmentEndPalette");
 
     paletteManager->setTextEdit(q);
 }
@@ -2620,12 +2627,12 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
 
-    std::list<QObject*> results = getPaletteManager()->updatePaletteBounds(pos, charsRemoved, charsAdded);
+    std::list<QQuickItem*> results = getPaletteManager()->updatePaletteBounds(pos, charsRemoved, charsAdded);
     if (!results.empty())
     {
         for (auto it = results.begin(); it != results.end(); ++it)
         {
-            (*it)->deleteLater();
+            QMetaObject::invokeMethod(*it, "close", Qt::DirectConnection);
         }
     }
 
@@ -3470,7 +3477,7 @@ void TextEdit::setDocumentHandler(DocumentHandler *dh)
     dh->setTextEdit(this);
 }
 
-void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QObject *palette)
+void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem *palette)
 {
     Q_D(TextEdit);
     auto startBlock = d->document->findBlockByNumber(lineStart-1);
@@ -3485,7 +3492,7 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QObject 
     emit paletteChange(lineStart - 1);
 }
 
-void TextEdit::linePaletteRemoved(QObject *palette)
+void TextEdit::linePaletteRemoved(QQuickItem *palette)
 {
     Q_D(TextEdit);
     int result = d->paletteManager->removePalette(palette);
@@ -3500,7 +3507,7 @@ void TextEdit::linePaletteRemoved(QObject *palette)
     emit paletteChange(result);
 }
 
-void TextEdit::linePaletteHeightChanged(QObject *palette, int newHeight)
+void TextEdit::linePaletteHeightChanged(QQuickItem *palette, int newHeight)
 {
     Q_D(TextEdit);
     int result = d->paletteManager->resizePalette(palette, newHeight);
@@ -3581,6 +3588,19 @@ void TextEdit::handleCursorDuringCollapse(int pos, int num)
             d->control->moveCursor(QTextCursor::MoveOperation::Up);
         }
         cursor.endEditBlock();
+    }
+}
+
+void TextEdit::checkPalettesWhenCollapsed(int pos, int num)
+{
+    auto result = getPaletteManager()->deletedOnCollapse(pos, num);
+
+    if (!result.empty())
+    {
+        for (auto it = result.begin(); it != result.end(); ++it)
+        {
+            QMetaObject::invokeMethod(*it, "close", Qt::DirectConnection);
+        }
     }
 }
 

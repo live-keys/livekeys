@@ -315,9 +315,9 @@ public:
     lv::DocumentHandler* documentHandler();
     void setDocumentHandler(lv::DocumentHandler* dh);
 
-    void linePaletteAdded(int lineStart, int lineEnd, int height, QObject* palette);
-    void linePaletteRemoved(QObject* palette);
-    void linePaletteHeightChanged(QObject* palette, int newHeight);
+    void linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem* palette);
+    void linePaletteRemoved(QQuickItem* palette);
+    void linePaletteHeightChanged(QQuickItem* palette, int newHeight);
 Q_SIGNALS:
 
     void textChanged();
@@ -405,6 +405,7 @@ private Q_SLOTS:
     void triggerPreprocess();
     void highlightingDone(const QRectF &);
     void handleCursorDuringCollapse(int pos, int num);
+    void checkPalettesWhenCollapsed(int pos, int num);
 private:
     void markDirtyNodesForRange(int start, int end, int charDelta);
     void updateTotalLines();
