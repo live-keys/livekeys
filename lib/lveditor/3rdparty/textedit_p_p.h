@@ -114,8 +114,8 @@ public:
         , clearSelectionOnFocus(false)
         , lastHighlightChangeStart(INT_MAX)
         , lastHighlightChangeEnd(0)
-        , fragmentStart(0), fragmentStartPalette(new QObject(q_func()))
-        , fragmentEnd(INT_MAX), fragmentEndPalette(new QObject(q_func()))
+        , fragmentStart(0)
+        , fragmentEnd(INT_MAX)
         , dirtyPosition(0), paintedWidth(0), paintedHeight(0)
         , hAlign(TextEdit::AlignLeft), vAlign(TextEdit::AlignTop)
         , format(TextEdit::PlainText), wrapMode(TextEdit::NoWrap)
@@ -136,10 +136,7 @@ public:
         , selectByMouse(false), canPaste(false), canPasteValid(false), hAlignImplicit(true)
         , textCached(true), inLayout(false), selectByKeyboard(false), selectByKeyboardSet(false)
         , hadSelection(false), invalidUntilTheEnd(false)
-    {
-        fragmentStartPalette->setObjectName("fragmentStartPalette");
-        fragmentEndPalette->setObjectName("fragmentEndPalette");
-    }
+    {}
 
     ~TextEditPrivate()
     {
@@ -223,9 +220,9 @@ public:
     int lastHighlightChangeEnd;
 
     int fragmentStart;
-    QObject* fragmentStartPalette;
+    QQuickItem* fragmentStartPalette;
     int fragmentEnd;
-    QObject* fragmentEndPalette;
+    QQuickItem* fragmentEndPalette;
     int dirtyPosition;
 
     qreal paintedWidth;
