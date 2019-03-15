@@ -250,7 +250,6 @@ void LineSurface::setDocument(QTextDocument *doc)
     m_document->rootFrame(); // bug fix
     LineManager* lm = dynamic_cast<LineManager*>(m_document->parent());
     triggerUpdate(m_document->lineCount(), m_document->lineCount(), 0);
-    connect(lm, &LineManager::updateLineSurface, this, &LineSurface::triggerUpdate);
 }
 
 void LineSurface::unsetTextDocument()

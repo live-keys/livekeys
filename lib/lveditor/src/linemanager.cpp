@@ -1,7 +1,7 @@
 #include <queue>
 #include <list>
 #include "linemanager.h"
-#include "linesurface.h"
+#include "textdocumentlayout.h"
 
 namespace lv {
 
@@ -64,10 +64,8 @@ void LineManager::changeLastCharInLineDocumentBlock(int blockNumber, char c)
     cursor.endEditBlock();
 }
 
-void LineManager::updateLineDocument()
+void LineManager::updateLinesInDocuments()
 {
-    auto itSections = m_sections.begin();
-    while (itSections != m_sections.end() && (*itSections)->position < m_dirtyPos) ++itSections;
     int curr = m_dirtyPos;
     auto it = m_lineDocument->rootFrame()->begin();
     for (int i = 0; i < curr; i++)
@@ -80,28 +78,6 @@ void LineManager::updateLineDocument()
         lv::ProjectDocumentBlockData* userData =
                 static_cast<lv::ProjectDocumentBlockData*>(currBlock.userData());
 
-        bool visible = true;
-        if (itSections != m_sections.end())
-        {
-            CollapsedSection* sec = (*itSections);
-            if (curr == sec->position)
-            {
-                userData->collapse();
-                userData->setNumOfCollapsedLines(sec->numberOfLines);
-            }
-            // if we're in a collapsed section, block shouldn't be visible
-            if (curr > sec->position && curr <= sec->position + sec->numberOfLines)
-            {
-                visible = false;
-            }
-            // if we just exited a collapsed section, move to the next one
-            if (curr == sec->position + sec->numberOfLines) ++itSections;
-
-        }
-
-        visible = visible && currBlock.isVisible();
-
-        it.currentBlock().setVisible(visible);
         if (userData) {
             switch (userData->collapseState())
             {
@@ -119,8 +95,8 @@ void LineManager::updateLineDocument()
         }
         ++curr; ++it;
     }
-    auto firstDirtyBlock = m_lineDocument->findBlockByNumber(m_dirtyPos);
-    m_lineDocument->markContentsDirty(firstDirtyBlock.position(), m_lineDocument->characterCount() - firstDirtyBlock.position());
+    auto firstDirtyBlockLine = m_lineDocument->findBlockByNumber(m_dirtyPos);
+    m_lineDocument->markContentsDirty(firstDirtyBlockLine.position(), m_lineDocument->characterCount() - firstDirtyBlockLine.position());
 }
 
 
@@ -133,7 +109,7 @@ void LineManager::collapseLines(int pos, int num) {
 
     std::list<CollapsedSection*> nested;
     auto it = m_sections.begin();
-    showHideTextEditLines(false, pos, num);
+    updateLineVisibility(false, pos, num);
 
     while (it != m_sections.end()) {
         CollapsedSection* sec = *it;
@@ -165,7 +141,7 @@ void LineManager::expandLines(int pos, int num)
     auto it = m_sections.begin();
     while (it != m_sections.end() && (*it)->position != pos) ++it;
 
-    showHideTextEditLines(true, pos, num);
+    updateLineVisibility(true, pos, num);
     if (it != m_sections.end())
     {
         CollapsedSection* sec = *it;
@@ -178,7 +154,7 @@ void LineManager::expandLines(int pos, int num)
         {
             m_sections.push_back(nestedSec);
             m_sections.sort(cmp);
-            showHideTextEditLines(false, nestedSec->position, nestedSec->numberOfLines);
+            updateLineVisibility(false, nestedSec->position, nestedSec->numberOfLines);
         }
 
         delete sec;
@@ -334,9 +310,10 @@ void LineManager::textDocumentFinishedUpdating(int newLineNumber)
             linesRemoved();
     }
 
-    updateLineDocument();
+    updateLinesInDocuments();
+    auto parentLayout = reinterpret_cast<TextDocumentLayout*>(parent());
+    parentLayout->updateLineSurface(m_previousLineNumber, m_lineNumber, m_dirtyPos);
     m_updatePending = false;
-    emit updateLineSurface(m_previousLineNumber, m_lineNumber, m_dirtyPos);
 }
 
 void LineManager::setLineDocumentFont(const QFont &font)
@@ -347,6 +324,30 @@ void LineManager::setLineDocumentFont(const QFont &font)
 void LineManager::setParentDocument(QTextDocument *td)
 {
     m_parentDocument = td;
+}
+
+void LineManager::updateLineVisibility(bool visible, int pos, int num)
+{
+    auto itLine = m_lineDocument->rootFrame()->begin();
+    auto itDoc = m_parentDocument->rootFrame()->begin();
+    Q_ASSERT(m_parentDocument->blockCount() > pos);
+    Q_ASSERT(m_parentDocument->blockCount() >= pos + num);
+    for (int i = 0; i < pos+1; i++, ++itLine, ++itDoc);
+    int startLine = itLine.currentBlock().position();
+    int startDoc = itDoc.currentBlock().position();
+    int lengthLine = 0;
+    int lengthDoc = 0;
+    for (int i = 0; i < num; i++)
+    {
+        itLine.currentBlock().setVisible(visible);
+        lengthLine += itLine.currentBlock().length();
+        itDoc.currentBlock().setVisible(visible);
+        lengthDoc += itDoc.currentBlock().length();
+        ++itLine; ++itDoc;
+    }
+
+    m_lineDocument->markContentsDirty(startLine, lengthLine);
+    m_parentDocument->markContentsDirty(startDoc, lengthDoc);
 }
 
 LineManager::LineManager(QObject *parent)

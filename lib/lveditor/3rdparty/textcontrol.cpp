@@ -52,7 +52,7 @@
 #include <qtimer.h>
 #include <qinputmethod.h>
 #include "qtextdocument.h"
-#include "linemanager.h"
+#include "textdocumentlayout.h"
 
 #include "qtextlist.h"
 #include "qtextdocumentwriter.h"
@@ -896,15 +896,15 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
 
                             if (ke->key() == Qt::Key_Return)
                             {
-                                LineManager* lm = d->textEdit->getLineManager();
+                                auto layout = d->textEdit->getDocumentLayout();
                                 std::pair<int, int> result(-1, -1);
-                                if (lm)
+                                if (layout)
                                 {
-                                    result = lm->isFirstLineOfCollapsedSection(d->cursor.block().blockNumber());
+                                    result = layout->isFirstLineOfCollapsedSection(d->cursor.block().blockNumber());
                                 }
-                                if (lm && result.first != -1)
+                                if (layout && result.first != -1)
                                 {
-                                    lm->expandLines(result.first, result.second);
+                                    layout->expandLines(result.first, result.second);
                                 }
                             }
                             ke->accept();
@@ -933,15 +933,15 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
                            || ke == QKeySequence::SelectAll
                           ) {
 
-                    LineManager* lm = d->textEdit->getLineManager();
+                    auto layout = d->textEdit->getDocumentLayout();
                     std::pair<int, int> result(-1, -1);
-                    if (lm && ke == QKeySequence::Paste)
+                    if (layout && ke == QKeySequence::Paste)
                     {
-                        result = lm->isFirstLineOfCollapsedSection(d->cursor.block().blockNumber());
+                        result = layout->isFirstLineOfCollapsedSection(d->cursor.block().blockNumber());
                     }
                     if (result.first != -1)
                     {
-                        lm->expandLines(result.first, result.second);
+                        layout->expandLines(result.first, result.second);
                     }
 
                     ke->accept();
@@ -1067,10 +1067,9 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
         } else {
             QTextCursor localCursor = cursor;
             std::pair<int, int> result(-1, -1);
-            if (textEdit && textEdit->getLineManager())
+            if (textEdit && textEdit->getDocumentLayout())
             {
-                LineManager* lm = textEdit->getLineManager();
-                result = lm->isLineAfterCollapsedSection(localCursor.block().blockNumber());
+                result = textEdit->getDocumentLayout()->isLineAfterCollapsedSection(localCursor.block().blockNumber());
             }
 
             if (result.first != -1 && localCursor.atBlockStart())
