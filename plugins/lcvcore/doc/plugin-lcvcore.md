@@ -471,34 +471,6 @@ calculate the motion. It uses a MatBuffer to store the previous frame:
 
 Second input for the subtraction.
 
-{qmlType:MatList}
-{qmlInherits:external.QtModels#AbstractListModel}
-{qmlBrief:Matrix list that can be used as a model.}
-
-{qmlMethod:appendMat(Mat mat)}
-
-Appends a matrix to the list.
-
-{qmlMethod:removeMat(Mat mat)}
-
-Removes the matrix from the list.
-
-{qmlMethod:removeAt(int index)}
-
-Removes the matrix at the given index.
-
-{qmlMethod:Mat at(int index)}
-
-Removes the matrix at the given index.
-
-{qmlMethod:Mat at(int index)}
-
-Returns the matrix at the given index.
-
-{qmlMethod:int size()}
-
-Returns the total matrixes in the list.
-
 {qmlType:MatLoader}
 {qmlInherits:external.QtQuick#item}
 {qmlBrief:Static matrix loader}
