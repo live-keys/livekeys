@@ -119,6 +119,26 @@ Creates a read-only clone of the container
 
 Creates a clone of the container
 
+{qmlType:ObjectListModel}
+{qmlInherits:external.QtModels#AbstractListModel}
+{qmlBrief:Model that provides us access to the ObjectList}
+
+{qmlMethod:appendData(Object data)}
+
+Appends a given object to the list
+
+{qmlMethod:removeAt(int index)}
+
+Removes the object at the given index from the list
+
+{qmlMethod:Object at(int index)}
+
+Returns the object at the given index
+
+{qmlMethod:int size()}
+
+Returns the number of items
+
 
 {qmlType:VariantList}
 {qmlInherits:base#Shared}
@@ -168,3 +188,22 @@ Create an immutable clone of the list
 
 Create a clone of the list
 
+{qmlType:VariantListModel}
+{qmlInherits:external.QtModels#AbstractListModel}
+{qmlBrief:Model that provides us access to the VariantList}
+
+{qmlMethod:appendData(var data)}
+
+Appends a given value to the list
+
+{qmlMethod:removeAt(int index)}
+
+Removes the value at the given index from the list
+
+{qmlMethod:var at(int index)}
+
+Returns the value at the given index
+
+{qmlMethod:int size()}
+
+Returns the number of items
