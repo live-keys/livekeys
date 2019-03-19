@@ -18,7 +18,7 @@ bool paletteCmp(PaletteData* a, PaletteData* b)
     return a->m_startBlock < b->m_startBlock;
 }
 
-void PaletteManager::paletteAdded(int sb, int span, int height, QObject *p, int startPos, int endPos)
+void PaletteManager::paletteAdded(int sb, int span, int height, QQuickItem *p, int startPos, int endPos)
 {
     auto pd = new PaletteData();
     pd->m_startBlock = sb;
@@ -134,7 +134,7 @@ int PaletteManager::isLineAfterPalette(int blockNumber)
     return 0;
 }
 
-int  PaletteManager::removePalette(QObject *palette)
+int  PaletteManager::removePalette(QQuickItem *palette)
 {
     auto it = m_palettes.begin();
     int result = -1;
@@ -163,7 +163,7 @@ int  PaletteManager::removePalette(QObject *palette)
     return result;
 }
 
-int PaletteManager::resizePalette(QObject *palette, int newHeight)
+int PaletteManager::resizePalette(QQuickItem *palette, int newHeight)
 {
     auto it = m_palettes.begin();
     int result = -1;
@@ -201,9 +201,9 @@ int PaletteManager::resizePalette(QObject *palette, int newHeight)
     return result;
 }
 
-std::list<QObject *> PaletteManager::updatePaletteBounds(int pos, int removed, int added)
+std::list<QQuickItem *> PaletteManager::updatePaletteBounds(int pos, int removed, int added)
 {
-    std::list<QObject*> result;
+    std::list<QQuickItem*> result;
     if (m_palettes.empty()) return result;
     auto it = m_palettes.begin();
     while (it != m_palettes.end()){
@@ -229,6 +229,31 @@ std::list<QObject *> PaletteManager::updatePaletteBounds(int pos, int removed, i
     return result;
 }
 
+std::list<QQuickItem *> PaletteManager::deletedOnCollapse(int pos, int num)
+{
+    std::list<QQuickItem*> result;
+    if (m_palettes.empty()) return result;
+    auto it = m_palettes.begin();
+
+    while (it != m_palettes.end()){
+        PaletteData* pd = *it;
+        if (pd->m_palette->objectName() == "fragmentStartPalette" || pd->m_palette->objectName() == "fragmentEndPalette" || pd->m_endPos < pos) {
+            ++it;
+            continue;
+        }
+
+        bool toBeRemoved = (pos <= pd->m_startBlock) && ((pd->m_startBlock + pd->m_lineSpan) <= (pos + num));
+
+        if (toBeRemoved){
+            result.push_back(pd->m_palette);
+        }
+
+        ++it;
+    }
+
+    return result;
+}
+
 int PaletteManager::totalOffset()
 {
     return m_totalOffset;
@@ -242,7 +267,7 @@ void PaletteManager::setDirtyPos(int pos)
 void PaletteManager::lineNumberChange()
 {
     m_prevLineNumber = m_lineNumber;
-    m_lineNumber = m_textEdit->lineCount();
+    m_lineNumber = m_textEdit->documentHandler()->target()->blockCount();
     if (m_prevLineNumber == m_lineNumber) return;
 
     if (m_prevLineNumber < m_lineNumber) linesAdded();
@@ -295,7 +320,7 @@ void PaletteManager::linesRemoved()
 
 void PaletteManager::adjustPalettePosition(PaletteData* pd)
 {
-    auto item = dynamic_cast<QQuickItem*>(pd->m_palette);
+    auto item = pd->m_palette;
     if (!item) return;
 
     int offset = 0;

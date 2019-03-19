@@ -649,6 +649,15 @@ ApplicationWindow{
             property Item child : null
             children: child ? [child] : []
 
+            function close(){
+                if (!child) return;
+
+                if (child.objectName === "paletteGroup")
+                    child.codeHandler.removeConnection(child.editingFragment)
+                if (child.objectName === "objectContainer")
+                    child.editor.documentHandler.codeHandler.removeConnection(child.editingFragment)
+            }
+
             Behavior on opacity{
                 NumberAnimation{ duration : 200; easing.type: Easing.OutCubic; }
             }
