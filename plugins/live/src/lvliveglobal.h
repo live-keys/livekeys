@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVEGLOBAL_H
-#define QLIVEGLOBAL_H
+#ifndef LVLIVEGLOBAL_H
+#define LVLIVEGLOBAL_H
 
 #include <qglobal.h>
 
@@ -27,12 +27,12 @@
 
 #ifndef Q_LIVE_STATIC
 #  ifdef Q_LIVE_LIB
-#    define Q_LIVE_EXPORT Q_DECL_EXPORT
+#    define LV_LIVE_EXPORT Q_DECL_EXPORT
 #  else
-#    define Q_LIVE_EXPORT Q_DECL_IMPORT
+#    define LV_LIVE_EXPORT Q_DECL_IMPORT
 #  endif
 #else
-#  define Q_LIVE_EXPORT
+#  define LV_LIVE_EXPORT
 #endif
 
-#endif // QLIVEGLOBAL_H
+#endif // LVLIVEGLOBAL_H

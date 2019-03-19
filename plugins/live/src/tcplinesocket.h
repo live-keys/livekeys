@@ -1,52 +1,70 @@
-#ifndef TCPLINESOCKET_H
-#define TCPLINESOCKET_H
+#ifndef LVTCPLINESOCKET_H
+#define LVTCPLINESOCKET_H
+
+#include "live/lvliveglobal.h"
+#include "live/linecapture.h"
+#include "live/exception.h"
 
 #include <QObject>
 #include <QAbstractSocket>
+#include <QQmlPropertyMap>
 
 class QTcpSocket;
+class QQmlComponent;
+class QQmlContext;
 
 namespace lv{
 
 class MLNode;
+class TcpLineServer;
+class TcpLineResponse;
 
-/// \private
-class TcpLineSocket : public QObject{
+class LV_LIVE_EXPORT TcpLineSocket : public QObject{
 
     Q_OBJECT
 
 public:
-    explicit TcpLineSocket(QTcpSocket* socket, QObject *parent = nullptr);
+    TcpLineSocket(QTcpSocket* socket, QObject *parent = nullptr);
     ~TcpLineSocket();
 
-    const QString& address() const;
+    const QString& address();
 
-    void initialize(const MLNode& data);
-    void sendInput(const MLNode& n);
-    bool isInitialized() const;
+    static void receiveMessage(const LineMessage& message, void* data);
+    void onMessage(const LineMessage& message);
 
-    QByteArray readAll();
+    QQmlPropertyMap* post() const;
 
-signals:
-    void outputReady();
+    void sendError(const QByteArray& type, Exception::Code code, const QString& message);
 
 public slots:
+    void responseValueChanged(const QString& key, const QVariant& value);
     void tcpError(QAbstractSocket::SocketError error);
+    void tcpRead();
 
 private:
+    TcpLineServer* server();
+
     QTcpSocket* m_socket;
     QString     m_address;
     bool        m_initialized;
+
+    LineCapture      m_lineCapture;
+
+    QQmlPropertyMap* m_post;
+    TcpLineResponse* m_response;
+    QQmlComponent*   m_component;
+    QQmlContext*     m_componentContext;
+    QObject*         m_sourceItem;
 };
 
-inline const QString& TcpLineSocket::address() const{
+inline const QString &TcpLineSocket::address(){
     return m_address;
 }
 
-inline bool TcpLineSocket::isInitialized() const{
-    return m_initialized;
+inline QQmlPropertyMap *TcpLineSocket::post() const{
+    return m_post;
 }
 
-} // namespace
+}// namespace
 
-#endif // TCPLINESOCKET_H
+#endif // LVTCPLINESOCKET_H

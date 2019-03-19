@@ -19,7 +19,7 @@
 
 #include <QQuickItem>
 #include <QJSValue>
-#include "qliveglobal.h"
+#include "live/lvliveglobal.h"
 
 class QScriptCommandLineParser;
 
