@@ -92,19 +92,19 @@ void TcpLineConnection::componentComplete(){
 }
 
 void TcpLineConnection::socketConnected(){
-    vlog("tcp-line-client").v() << "Connected to :" + m_address;
+    vlog("tcp-line-client").d() << "Connected to :" + m_address;
 
     emit connectionEstablished();
 }
 
 void TcpLineConnection::socketDisconnected(){
-    vlog("tcp-line-client").w() << "Disconnected from " << m_address << m_socket->errorString();
+    vlog("tcp-line-client").w() << "Disconnected from " << m_address << ": " << m_socket->errorString();
 }
 
 void TcpLineConnection::socketError(QAbstractSocket::SocketError){
     m_socket->abort();
 
-    vlog("tcp-line-client").w() << "Failed to connect to " << m_address << m_socket->errorString();
+    vlog("tcp-line-client").w() << "Failed to connect to " << m_address << ": " << m_socket->errorString();
 
     timer()->start(RECONNECT_TIMEOUT);
 }

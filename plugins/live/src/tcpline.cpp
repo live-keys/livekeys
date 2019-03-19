@@ -5,6 +5,8 @@
 #include "live/visuallogqt.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
+#include "live/mlnode.h"
+#include "live/mlnodetojson.h"
 
 #include <QQmlProperty>
 
@@ -26,20 +28,25 @@ TcpLine::~TcpLine(){
 
 void TcpLine::propertyChanged(TcpLineProperty *property){
     if ( m_componentBuild ){
-
-        MLNode input = MLNode(MLNode::Object);
-        MLNode inputValue;
-
-        QQmlProperty pp(this, property->name());
-
-        TypeInfo::serializeVariant(lv::ViewContext::instance().engine(), pp.read(), inputValue);
-
-        input[property->name().toStdString()] = inputValue;
-
-        vlog("tcp-line").d() << "Sending property to remote: " << property->name();
-
-        m_connection->sendInput(input);
+        sendProperty(property->name());
+    } else {
+        m_propertiesToSend.insert(property->name());
     }
+}
+
+void TcpLine::sendProperty(const QString &propertyName){
+    MLNode input = MLNode(MLNode::Object);
+    MLNode inputValue;
+
+    QQmlProperty pp(this, propertyName);
+
+    TypeInfo::serializeVariant(lv::ViewContext::instance().engine(), pp.read(), inputValue);
+
+    input[propertyName.toStdString()] = inputValue;
+
+    vlog("tcp-line").d() << "Sending property to remote: " << propertyName;
+
+    m_connection->sendInput(input);
 }
 
 void TcpLine::componentComplete(){
@@ -55,6 +62,9 @@ void TcpLine::componentComplete(){
         ){
             QQmlProperty pp(this, property.name());
             if ( pp.hasNotifySignal() ){
+
+                vlog("tcp-line").d() << "Monitoring property; " << property.name();
+
                 TcpLineProperty* tlp = new TcpLineProperty(property.name(), this);
                 m_properties.append(tlp);
                 pp.connectNotifySignal(tlp, SLOT(changed()));
@@ -72,8 +82,6 @@ void TcpLine::setConnection(TcpLineConnection *connection){
     m_connection = connection;
     emit connectionChanged();
 
-    connect(m_connection, SIGNAL(connectionEstablished()), this, SLOT(initialize()));
-
     m_connection->dataCapture().onMessage(&TcpLine::receiveMessage, this);
     m_connection->dataCapture().onError([this](int, const std::string& errorString){
         lv::Exception e = CREATE_EXCEPTION(
@@ -81,6 +89,8 @@ void TcpLine::setConnection(TcpLineConnection *connection){
         );
         lv::ViewContext::instance().engine()->throwError(&e, this);
     });
+
+    connect(m_connection, SIGNAL(connectionEstablished()), this, SLOT(initialize()));
 
     initialize();
 }
@@ -91,12 +101,32 @@ void TcpLine::receiveMessage(const LineMessage &message, void *data){
 }
 
 void TcpLine::onMessage(const LineMessage &message){
-    if ( message.type == LineMessage::Error ){
+    if ( message.type & LineMessage::Error ){
         lv::Exception e = CREATE_EXCEPTION(
             lv::Exception, "TcpLine error: " + std::string(message.data), 0
         );
         lv::ViewContext::instance().engine()->throwError(&e, this);
-    } else if ( message.type == LineMessage::Input ){
+    } else if ( message.type & LineMessage::Input ){
+
+        try{
+            MLNode inputOb;
+            ml::fromJson(message.data.data(), inputOb);
+
+            ViewEngine* engine = ViewContext::instance().engine();
+
+            for ( auto it = inputOb.begin(); it != inputOb.end(); ++it ){
+                m_result->insert(
+                    QByteArray::fromStdString(it.key().c_str()),
+                    TypeInfo::deserializeVariant(engine, it.value())
+                );
+            }
+
+            emit resultChanged();
+
+        } catch ( Exception& e ){
+            lv::ViewContext::instance().engine()->throwError(&e, this);
+            return;
+        }
 
     }
 }
@@ -115,6 +145,11 @@ void TcpLine::initialize(){
         m_connection->sendBuild(source);
 
         m_componentBuild = true;
+
+        for ( auto it = m_properties.begin(); it != m_properties.end(); ++it ){
+            TcpLineProperty* tlp = *it;
+            sendProperty(tlp->name());
+        }
     }
 }
 

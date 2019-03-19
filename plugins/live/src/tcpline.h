@@ -16,7 +16,7 @@ class TcpLine : public QObject, public QQmlParserStatus{
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(lv::ComponentSource* source       READ source     WRITE setSource     NOTIFY sourceChanged)
     Q_PROPERTY(lv::TcpLineConnection* connection READ connection WRITE setConnection NOTIFY connectionChanged)
-    Q_PROPERTY(QQmlPropertyMap* result           READ result     CONSTANT)
+    Q_PROPERTY(QQmlPropertyMap* result           READ result     NOTIFY resultChanged)
     Q_CLASSINFO("DefaultProperty", "source")
 
     friend class TcpLineProperty;
@@ -48,9 +48,11 @@ signals:
     void complete();
     void sourceChanged();
     void connectionChanged();
+    void resultChanged();
 
 private:
     void propertyChanged(TcpLineProperty* property);
+    void sendProperty(const QString& propertyName);
 
     QList<TcpLineProperty*> m_properties;
     bool                    m_componentComplete;
@@ -58,6 +60,8 @@ private:
     lv::ComponentSource*    m_source;
     lv::TcpLineConnection*  m_connection;
     QQmlPropertyMap*        m_result;
+
+    QSet<QString>           m_propertiesToSend;
 };
 
 inline bool TcpLine::isComponentComplete() const{

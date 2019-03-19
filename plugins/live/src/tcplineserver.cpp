@@ -3,6 +3,7 @@
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
+#include "live/visuallogqt.h"
 
 #include "live/mlnode.h"
 #include "live/mlnodetojson.h"
@@ -22,6 +23,7 @@ TcpLineServer::TcpLineServer(QObject* parent)
     : QObject(parent)
     , m_isComponentComplete(false)
     , m_port(TcpLineConnection::DEFAULT_PORT)
+    , m_server(new QTcpServer)
 {
     connect(m_server, &QTcpServer::newConnection, this, &TcpLineServer::newConnection);
 }
@@ -36,7 +38,7 @@ void TcpLineServer::newConnection(){
     connect(socket, SIGNAL(disconnected()), lineSocket, SLOT(deleteLater()));
     m_sockets.append(lineSocket);
 
-    vlog_debug("live-tcpline", "New connection: " + lineSocket->address());
+    vlog("tcpline-server").d() << "New connection from :" << lineSocket->address();
 }
 
 void TcpLineServer::componentComplete(){
@@ -74,6 +76,9 @@ void TcpLineServer::startListening(){
             lv::ViewContext::instance().engine()->throwError(&e);
             return;
         }
+
+        vlog("tcpline-server").d() << "Started listening on " << m_address << ":" << m_port;
+
         emit listening();
     }
 }

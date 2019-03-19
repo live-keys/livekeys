@@ -5,6 +5,7 @@
 #include "live/mlnode.h"
 #include "live/mlnodetojson.h"
 #include "live/typeinfo.h"
+#include "live/visuallogqt.h"
 
 #include "tcplineresponse.h"
 #include "tcplineserver.h"
@@ -21,8 +22,9 @@ TcpLineSocket::TcpLineSocket(QTcpSocket *socket, QObject* parent)
     , m_socket(socket)
     , m_post(new QQmlPropertyMap)
     , m_response(new TcpLineResponse(this))
-    , m_component(nullptr)
+    , m_component(new QQmlComponent())
     , m_componentContext(nullptr)
+    , m_sourceItem(nullptr)
 {
     connect(m_socket, &QTcpSocket::readyRead, this, &TcpLineSocket::tcpRead);
 //    connect(m_socket, &QTcpSocket::error,     this, &TcpLineSocket::tcpError);
@@ -55,13 +57,15 @@ void TcpLineSocket::receiveMessage(const LineMessage &message, void *data){
 void TcpLineSocket::onMessage(const LineMessage &message){
     if ( message.type & LineMessage::Build ){
 
-        QQmlContext* ctx = qmlContext(this);
+        if ( m_sourceItem )
+            delete m_sourceItem;
 
-        m_componentContext = new QQmlContext(ctx);
+        m_componentContext = new QQmlContext(lv::ViewContext::instance().engine()->engine());
         m_componentContext->setContextProperty("post", QVariant::fromValue(m_post));
         m_componentContext->setContextProperty("response", QVariant::fromValue(m_response));
 
-        m_component->setData(message.data, ctx->baseUrl());
+        m_component->setData(message.data, QUrl("Remore.qml"));
+
         m_sourceItem = m_component->create(m_componentContext);
 
     } else if ( message.type & LineMessage::Error ){
@@ -150,7 +154,8 @@ void TcpLineSocket::tcpError(QAbstractSocket::SocketError){
 }
 
 void TcpLineSocket::tcpRead(){
-    m_lineCapture.append(m_socket->readAll());
+    QByteArray ba = m_socket->readAll();
+    m_lineCapture.append(ba);
 }
 
 TcpLineServer *TcpLineSocket::server(){

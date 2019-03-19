@@ -12,9 +12,9 @@ public:
     enum Type{
         Raw  = 1,
         Json = 2,
-        Error = 9,
-        Build = 10,
-        Input = 11
+        Error = 8,
+        Build = 16,
+        Input = 32
     };
 
 public:
