@@ -17,7 +17,7 @@
 #ifndef QSTATICCONTAINER_H
 #define QSTATICCONTAINER_H
 
-#include "qliveglobal.h"
+#include "live/lvliveglobal.h"
 #include <QLinkedList>
 #include <QObject>
 
@@ -31,7 +31,7 @@ class QStaticTypeContainerBase;
 #define debug_static_container(_message)
 #endif
 
-class Q_LIVE_EXPORT QStaticContainer : public QObject{
+class LV_LIVE_EXPORT QStaticContainer : public QObject{
 
     Q_OBJECT
 
@@ -63,7 +63,7 @@ private:
 
 
 /// \private
-class Q_LIVE_EXPORT QStaticTypeContainerBase{
+class LV_LIVE_EXPORT QStaticTypeContainerBase{
 
 public:
     QStaticTypeContainerBase(){}

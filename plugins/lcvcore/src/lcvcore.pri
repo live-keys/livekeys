@@ -29,7 +29,8 @@ HEADERS += \
     $$PWD/qoverlapmat.h \
     $$PWD/qitemcapture.h \
     $$PWD/qmatop.h \
-    $$PWD/qwritablemat.h
+    $$PWD/qwritablemat.h \
+    $$PWD/qmatio.h
 
 SOURCES += \
     $$PWD/lcvcore_plugin.cpp \
@@ -60,5 +61,6 @@ SOURCES += \
     $$PWD/qoverlapmat.cpp \
     $$PWD/qitemcapture.cpp \
     $$PWD/qmatop.cpp \
-    $$PWD/qwritablemat.cpp
+    $$PWD/qwritablemat.cpp \
+    $$PWD/qmatio.cpp
 

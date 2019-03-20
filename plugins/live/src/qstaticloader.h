@@ -17,7 +17,7 @@
 #ifndef QSTATICLOADER_H
 #define QSTATICLOADER_H
 
-#include "qliveglobal.h"
+#include "live/lvliveglobal.h"
 #include <QObject>
 #include <QQmlComponent>
 #include <QQuickItem>

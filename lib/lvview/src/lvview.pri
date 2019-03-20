@@ -30,7 +30,9 @@ HEADERS += \
     $$PWD/qmlvariantlist.h \
     $$PWD/qmlvariantlistmodel.h \
     $$PWD/qmlobjectlist.h \
-    $$PWD/qmlobjectlistmodel.h
+    $$PWD/qmlobjectlistmodel.h \
+    $$PWD/linemessage.h \
+    $$PWD/linecapture.h
 
 SOURCES += \
     $$PWD/errorhandler.cpp \
@@ -59,5 +61,6 @@ SOURCES += \
     $$PWD/qmlvariantlist.cpp \
     $$PWD/qmlvariantlistmodel.cpp \
     $$PWD/qmlobjectlist.cpp \
-    $$PWD/qmlobjectlistmodel.cpp
+    $$PWD/qmlobjectlistmodel.cpp \
+    $$PWD/linecapture.cpp
 

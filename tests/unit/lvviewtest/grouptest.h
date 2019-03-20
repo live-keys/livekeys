@@ -15,8 +15,9 @@ public:
 
 private slots:
     void initTestCase();
+    void serializationTest();
     void propertyCreationTestCase();
-
+    void nestedSerializationTest();
 };
 
 #endif // GROUPTEST_H

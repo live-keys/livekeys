@@ -24,4 +24,6 @@ HEADERS += \
     $$PWD/live/workerthread.h \
     $$PWD/live/qmlvariantlist.h \
     $$PWD/live/qmlobjectlist.h \
-    $$PWD/live/group.h
+    $$PWD/live/group.h \
+    $$PWD/live/linemessage.h \
+    $$PWD/live/linecapture.h

@@ -1,133 +1,85 @@
-#ifndef NETWORKLINE_H
-#define NETWORKLINE_H
+#ifndef LVTCPLINE_H
+#define LVTCPLINE_H
 
 #include <QObject>
-#include <QQmlParserStatus>
-#include <QQmlListProperty>
-#include <QQmlComponent>
-
-#include "tuple.h"
+#include <QQmlPropertyMap>
 #include "componentsource.h"
-#include "live/act.h"
-#include "live/mlnode.h"
-
-class QTcpServer;
-class QTcpSocket;
+#include "tcplineconnection.h"
 
 namespace lv{
 
-class Act;
-class Project;
-class TcpLineSocket;
+class TcpLineProperty;
 
-/// \private
-class TcpLine : public lv::Act{
+class TcpLine : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
-    Q_PROPERTY(lv::Tuple* input             READ input   WRITE setInput   NOTIFY inputChanged)
-    Q_PROPERTY(lv::Tuple* output            READ output  WRITE setOutput  NOTIFY outputChanged)
-    Q_PROPERTY(lv::ComponentSource* source  READ source  WRITE setSource  NOTIFY sourceChanged)
-    Q_PROPERTY(QString address              READ address WRITE setAddress NOTIFY addressChanged)
-    Q_PROPERTY(int port                     READ port    WRITE setPort    NOTIFY portChanged)
+    Q_INTERFACES(QQmlParserStatus)
+    Q_PROPERTY(lv::ComponentSource* source       READ source     WRITE setSource     NOTIFY sourceChanged)
+    Q_PROPERTY(lv::TcpLineConnection* connection READ connection WRITE setConnection NOTIFY connectionChanged)
+    Q_PROPERTY(QQmlPropertyMap* result           READ result     NOTIFY resultChanged)
     Q_CLASSINFO("DefaultProperty", "source")
+
+    friend class TcpLineProperty;
 
 public:
     explicit TcpLine(QObject *parent = nullptr);
     ~TcpLine();
 
-    lv::Tuple* input();
-    lv::Tuple* output();
-    lv::ComponentSource* source();
-    const QString& address() const;
-    int port() const;
+    void classBegin() Q_DECL_OVERRIDE{}
+    void componentComplete() Q_DECL_OVERRIDE;
 
-    void setSource(lv::ComponentSource *source);
-    void setInput(lv::Tuple* input);
-    void setOutput(lv::Tuple* output);
-    void setAddress(const QString& address);
-    void setPort(int port);
+    bool isComponentComplete() const;
 
-    virtual void classBegin(){}
-    virtual void componentComplete();
+    lv::ComponentSource* source() const;
+    void setSource(lv::ComponentSource* source);
 
-    virtual void process();
+    lv::TcpLineConnection* connection() const;
+    void setConnection(lv::TcpLineConnection* connection);
+
+    static void receiveMessage(const LineMessage& message, void* data);
+    void onMessage(const LineMessage& message);
+
+    QQmlPropertyMap* result() const;
 
 public slots:
-    void newConnection();
+    void initialize();
 
 signals:
+    void complete();
     void sourceChanged();
-    void inputChanged();
-    void outputChanged();
-    void addressChanged();
-    void portChanged();
-    void listening();
+    void connectionChanged();
+    void resultChanged();
 
 private:
-    void startListening();
-    void removeSocket(TcpLineSocket *socket);
-    void socketOutputReady(TcpLineSocket *socket);
-    void initializeAgent();
-    bool isAgentInitialized();
-    TcpLineSocket* agent();
+    void propertyChanged(TcpLineProperty* property);
+    void sendProperty(const QString& propertyName);
 
-    lv::ComponentSource*  m_source;
-    lv::Tuple*            m_input;
-    lv::Tuple*            m_output;
-    QByteArray            m_receivedBytes;
-    MLNode                m_receivedOutput;
-    lv::Project*          m_project;
-    QTcpServer*           m_server;
-    QList<TcpLineSocket*> m_sockets;
+    QList<TcpLineProperty*> m_properties;
+    bool                    m_componentComplete;
+    bool                    m_componentBuild;
+    lv::ComponentSource*    m_source;
+    lv::TcpLineConnection*  m_connection;
+    QQmlPropertyMap*        m_result;
 
-    QString            m_address;
-    int                m_port;
-
-    bool               m_componentComplete;
-
-    MLNode             m_initializer;
+    QSet<QString>           m_propertiesToSend;
 };
 
-inline Tuple *TcpLine::input(){
-    return m_input;
+inline bool TcpLine::isComponentComplete() const{
+    return m_componentComplete;
 }
 
-inline Tuple *TcpLine::output(){
-    return m_output;
-}
-
-inline ComponentSource *TcpLine::source(){
+inline ComponentSource *TcpLine::source() const{
     return m_source;
 }
 
-inline const QString &TcpLine::address() const{
-    return m_address;
+inline TcpLineConnection *TcpLine::connection() const{
+    return m_connection;
 }
 
-inline int TcpLine::port() const{
-    return m_port;
-}
-
-inline void TcpLine::setAddress(const QString &address){
-    if (m_address == address)
-        return;
-
-    m_address = address;
-    emit addressChanged();
-
-    startListening();
-}
-
-inline void TcpLine::setPort(int port){
-    if (m_port == port)
-        return;
-
-    m_port = port;
-    emit portChanged();
-
-    startListening();
+inline QQmlPropertyMap *TcpLine::result() const{
+    return m_result;
 }
 
 }// namespace
 
-#endif // NETWORKLINE_H
+#endif // LVTCPLINE_H

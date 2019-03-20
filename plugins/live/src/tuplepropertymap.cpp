@@ -100,7 +100,7 @@ void TuplePropertyMap::serialize(ViewEngine *engine, const QQmlPropertyMap &t, M
                 }
 
                 MLNode obSerialize;
-                ti->serialize(ob, obSerialize);
+                ti->serialize(engine, ob, obSerialize);
                 if ( obSerialize.type() == MLNode::Object ){
                     obSerialize["__type"] = ti->name().toStdString();
                 }
@@ -157,8 +157,7 @@ void TuplePropertyMap::deserialize(ViewEngine *engine, const MLNode &n, QVariant
                     );
                 }
 
-                QObject* ob = ti->newInstance();
-                ti->deserialize(n, ob);
+                QObject* ob = ti->deserialize(engine, n);
                 v.setValue(ob);
             }
         }

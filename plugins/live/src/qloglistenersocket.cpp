@@ -141,17 +141,16 @@ int QLogListenerSocket::isIp(const QByteArray &buffer){
 void QLogListenerSocket::logLine(const QByteArray &buffer){
     if ( m_expectObject ){
         lv::TypeInfo::Ptr ti = lv::ViewContext::instance().engine()->typeInfo(m_expectObject->typeName);
-        QObject* object = ti->newInstance();
 
         lv::VisualLog vl(m_expectObject->level);
         vl.at(m_expectObject->address.toStdString(), "", m_expectObject->line, m_expectObject->functionName.toStdString());
         vl.overrideStamp(m_expectObject->stamp);
 
-        if ( object && !ti.isNull() && ti->isSerializable() && ti->isLoggable() ){
+        if ( !ti.isNull() && ti->isSerializable() && ti->isLoggable() ){
             try{
                 lv::MLNode node;
                 lv::ml::fromJson(buffer, node);
-                ti->deserialize(node, object);
+                QObject* object = ti->deserialize(lv::ViewContext::instance().engine(), node);
                 ti->log(vl, object);
             } catch ( lv::Exception& e ){
                 lv::ViewContext::instance().engine()->throwError(&e, this);

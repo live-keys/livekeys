@@ -18,7 +18,6 @@ class LV_VIEW_EXPORT QmlObjectList : public Shared {
 
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<QObject> items READ items)
-    Q_PROPERTY(lv::QmlObjectListModel*   model READ model)
 
 public:
     explicit QmlObjectList(QObject* parent = nullptr);

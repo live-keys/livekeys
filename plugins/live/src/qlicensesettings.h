@@ -20,12 +20,12 @@
 #include <QObject>
 #include <QHash>
 #include <QAbstractListModel>
-#include "qliveglobal.h"
+#include "live/lvliveglobal.h"
 
 class QQuickItem;
 
 /// \private
-class Q_LIVE_EXPORT QLiveCVLicense{
+class LV_LIVE_EXPORT QLiveCVLicense{
 public:
     QString id;
     QString alias;
@@ -35,7 +35,7 @@ public:
 };
 
 /// \private
-class Q_LIVE_EXPORT QLicenseSettings : public QAbstractListModel{
+class LV_LIVE_EXPORT QLicenseSettings : public QAbstractListModel{
 
     Q_OBJECT
     Q_PROPERTY(int highlights READ highlights NOTIFY highlightsChanged)

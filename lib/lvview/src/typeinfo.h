@@ -26,6 +26,8 @@
 
 namespace lv{
 
+class ViewEngine;
+
 /// \private
 class LV_VIEW_EXPORT TypeInfo{
 
@@ -47,12 +49,19 @@ public:
     const QByteArray& name() const;
 
     bool isSerializable() const;
-    void serialize(const QObject* object, lv::MLNode& node);
-    void deserialize(const lv::MLNode& node, QObject* object);
+    void serialize(ViewEngine* engine, const QObject* object, MLNode& node);
+    QObject* deserialize(ViewEngine* engine, const MLNode& node);
     template<typename T> void addSerialization(
         std::function<void(const T&, MLNode&)> serialize,
         std::function<void(const MLNode&, T&)> deserialize
     );
+    void addSerialization(
+        std::function<void(ViewEngine*, const QObject*, MLNode&)> serialize,
+        std::function<QObject*(ViewEngine*, const MLNode&)> deserialize
+    );
+
+    static void serializeVariant(lv::ViewEngine* engine, const QVariant& v, lv::MLNode& node);
+    static QVariant deserializeVariant(lv::ViewEngine* engine, const lv::MLNode& node);
 
 private:
     TypeInfo(const QByteArray& name);
@@ -62,9 +71,9 @@ private:
     TypeInfo& operator = (const TypeInfo&);
 
     QByteArray m_name;
-    std::function<QObject*()>                              m_constructor;
-    std::function<void(const QObject*, lv::MLNode& node)>  m_serialize;
-    std::function<void(const lv::MLNode& node, QObject*)>  m_deserialize;
+    std::function<QObject*()> m_constructor;
+    std::function<void(ViewEngine*, const QObject*, lv::MLNode&)> m_serialize;
+    std::function<QObject*(ViewEngine*, const lv::MLNode&)>  m_deserialize;
     std::function<void(lv::VisualLog& vl, const QObject*)> m_log;
 };
 
@@ -82,14 +91,25 @@ void TypeInfo::addSerialization(
     std::function<void(const MLNode&, T&)> deserialize)
 {
     if ( serialize && deserialize ){
-        m_serialize = [serialize](const QObject* obj, lv::MLNode& node){
+        m_serialize = [serialize](ViewEngine*, const QObject* obj, lv::MLNode& node){
             const T* objtype = qobject_cast<const T*>(obj);
             serialize(*objtype, node);
         };
-        m_deserialize = [deserialize](const lv::MLNode& node, QObject* obj){
-            T* objtype = qobject_cast<T*>(obj);
+        m_deserialize = [this, deserialize](ViewEngine*, const lv::MLNode& node){
+            T* objtype = qobject_cast<T*>(newInstance());
             deserialize(node, *objtype);
+            return objtype;
         };
+    }
+}
+
+inline void TypeInfo::addSerialization(
+    std::function<void (ViewEngine *, const QObject *, MLNode &)> serialize,
+    std::function<QObject *(ViewEngine *, const MLNode &)> deserialize)
+{
+    if ( serialize && deserialize ){
+        m_serialize = serialize;
+        m_deserialize = deserialize;
     }
 }
 
@@ -119,12 +139,12 @@ inline const QByteArray &TypeInfo::name() const{
     return m_name;
 }
 
-inline void TypeInfo::serialize(const QObject *object, MLNode &node){
-    m_serialize(object, node);
+inline void TypeInfo::serialize(ViewEngine *engine, const QObject *object, MLNode &node){
+    m_serialize(engine, object, node);
 }
 
-inline void TypeInfo::deserialize(const MLNode &node, QObject *object){
-    m_deserialize(node, object);
+inline QObject* TypeInfo::deserialize(ViewEngine* engine, const MLNode &node){
+    return m_deserialize(engine, node);
 }
 
 }// namespace

@@ -19,12 +19,12 @@
 
 #include <QObject>
 #include <QQmlParserStatus>
-#include "qliveglobal.h"
+#include "live/lvliveglobal.h"
 
 class QFileSystemWatcher;
 
 /// \private
-class Q_LIVE_EXPORT QFileReader : public QObject, public QQmlParserStatus{
+class LV_LIVE_EXPORT QFileReader : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)

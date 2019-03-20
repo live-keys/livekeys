@@ -1033,7 +1033,7 @@ void TextDocumentLayoutPrivate::drawListItem(const QPointF &offset, QPainter *pa
     case QTextListFormat::ListLowerRoman:
     case QTextListFormat::ListUpperRoman:
         itemText = static_cast<QTextList *>(object)->itemText(bl);
-#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+#if (QT_VERSION >= QT_VERSION_CHECK(5,10,0))
         size.setWidth(fontMetrics.horizontalAdvance(itemText));
 #else
         size.setWidth(fontMetrics.width(itemText));
@@ -1054,7 +1054,7 @@ void TextDocumentLayoutPrivate::drawListItem(const QPointF &offset, QPainter *pa
     }
 
     QRectF r(pos, size);
-#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+#if (QT_VERSION > QT_VERSION_CHECK(5,10,0))
     qreal xoff = fontMetrics.horizontalAdvance(QLatin1Char(' '));
 #else
     qreal xoff = fontMetrics.width(QLatin1Char(' '));
@@ -1662,7 +1662,7 @@ void TextDocumentLayoutPrivate::layoutBlock(const QTextBlock &bl, int blockPosit
     QFixed extraMargin;
     if (docPrivate->defaultTextOption.flags() & QTextOption::AddSpaceForLineAndParagraphSeparators) {
         QFontMetricsF fm(bl.charFormat().font());
-#if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
+#if (QT_VERSION > QT_VERSION_CHECK(5,10,0))
         extraMargin = QFixed::fromReal(fm.horizontalAdvance(QChar(QChar(0x21B5))));
 #else
         extraMargin = QFixed::fromReal(fm.width(QChar(QChar(0x21B5))));

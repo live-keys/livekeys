@@ -21,6 +21,8 @@
 
 #include "container.h"
 #include "act.h"
+#include "group.h"
+#include "groupcollector.h"
 
 #include <QQmlComponent>
 #include <QQmlIncubator>
@@ -310,11 +312,18 @@ QString ViewEngine::typeAsPropertyMessage(const QString &typeName, const QString
 void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::Container>(             uri, 1, 0, "Container");
     qmlRegisterType<lv::Act>(                   uri, 1, 0, "Act");
+    qmlRegisterType<lv::Group>(                 uri, 1, 0, "Group");
+    qmlRegisterType<lv::GroupCollector>(        uri, 1, 0, "GroupCollector");
     qmlRegisterType<lv::QmlVariantList>(        uri, 1, 0, "VariantList");
     qmlRegisterType<lv::QmlObjectList>(         uri, 1, 0, "ObjectList");
     qmlRegisterType<lv::QmlVariantListModel>(   uri, 1, 0, "VariantListModel");
     qmlRegisterType<lv::QmlObjectListModel>(    uri, 1, 0, "ObjectListModel");
     qmlRegisterUncreatableType<lv::Shared>(     uri, 1, 0, "Shared", "Shared is of abstract type.");
+}
+
+void ViewEngine::initializeBaseTypes(ViewEngine *engine){
+    TypeInfo::Ptr ti = engine->registerQmlTypeInfo<lv::Group>(nullptr, nullptr, [](){return new Group;}, false);
+    ti->addSerialization(&lv::Group::serialize, &lv::Group::deserialize);
 }
 
 /**

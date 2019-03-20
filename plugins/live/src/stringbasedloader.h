@@ -1,7 +1,6 @@
 #ifndef STRINGBASEDLOADER_H
 #define STRINGBASEDLOADER_H
 
-#include "qliveglobal.h"
 #include <QQuickItem>
 
 namespace lv{
