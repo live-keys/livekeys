@@ -33,9 +33,9 @@ public:
     void linesAdded();
     void linesRemoved();
 
-    std::list<CollapsedSection*> & getSections();
     std::pair<int, int> isLineAfterCollapsedSection(int m_lineNumber);
     std::pair<int, int> isFirstLineOfCollapsedSection(int m_lineNumber);
+    bool isHiddenByCollapse(int pos);
     void setDirtyPos(int p);
     void textDocumentFinishedUpdating(int newLineNumber);
     void setLineDocumentFont(const QFont& font);

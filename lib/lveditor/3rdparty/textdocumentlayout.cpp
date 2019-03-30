@@ -2403,6 +2403,12 @@ std::pair<int,int> TextDocumentLayout::isLineAfterCollapsedSection(int lineNumbe
     return d->lineManager->isLineAfterCollapsedSection(lineNumber);
 }
 
+bool TextDocumentLayout::isHiddenByCollapse(int pos)
+{
+    Q_D(TextDocumentLayout);
+    return d->lineManager->isHiddenByCollapse(pos);
+}
+
 QTextDocument *TextDocumentLayout::lineManagerParentDocument()
 {
     Q_D(TextDocumentLayout);

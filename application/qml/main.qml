@@ -48,6 +48,7 @@ ApplicationWindow{
         navEditor: null
         codingMode: 0
         prevWindowState: 2
+        createWindow: newWindow
     }
 
     property bool documentsReloaded : false
@@ -62,6 +63,27 @@ ApplicationWindow{
             }
             editor.forceActiveFocus()
         }
+    }
+
+    Component {
+        id: windowFactory
+
+        Window {
+
+            visible: true
+            width: 800
+            height: 500
+            property var item: recItem
+
+            Rectangle {
+                id: recItem
+                anchors.fill: parent
+            }
+        }
+    }
+
+    function newWindow() {
+        return windowFactory.createObject(root)
     }
 
     function toggleFullScreen(){

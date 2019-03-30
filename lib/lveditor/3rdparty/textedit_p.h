@@ -45,6 +45,9 @@
 #include <QtGui/qtextoption.h>
 #include "documenthandler.h"
 #include "qquickpainteditem.h"
+#ifdef LV_EDITOR_DEBUG
+#include "texteditnodedebugmodel.h"
+#endif
 
 class QTextBlock;
 
@@ -318,6 +321,9 @@ public:
     void linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem* palette);
     void linePaletteRemoved(QQuickItem* palette);
     void linePaletteHeightChanged(QQuickItem* palette, int newHeight);
+#ifdef LV_EDITOR_DEBUG
+    TextEditNodeDebugModel::Entry getDebugEntry(int pos);
+#endif
 Q_SIGNALS:
 
     void textChanged();
@@ -444,6 +450,9 @@ protected:
     friend class LineSurface;
     friend class DocumentHandler;
     friend class TextControl;
+#ifdef LV_EDITOR_DEBUG
+    friend class TextEditNodeDebugModel;
+#endif
 private:
     Q_DISABLE_COPY(TextEdit)
     Q_DECLARE_PRIVATE(TextEdit)

@@ -16,6 +16,7 @@ QtObject{
     property Item navEditor: null
     property int codingMode: null
     property int prevWindowState: null
+    property var createWindow: null
 
     function setActiveItem(item, pane){
         activeItem = item
@@ -44,5 +45,9 @@ QtObject{
             }
             p = p.parent
         }
+    }
+
+    function createNewWindow(){
+        return createWindow();
     }
 }

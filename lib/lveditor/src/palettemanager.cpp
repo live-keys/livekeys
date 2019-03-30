@@ -254,6 +254,21 @@ std::list<QQuickItem *> PaletteManager::deletedOnCollapse(int pos, int num)
     return result;
 }
 
+bool PaletteManager::isLineUnderPalette(int pos)
+{
+    for (auto it = m_palettes.begin(); it != m_palettes.end(); ++it)
+    {
+        PaletteData* pd = *it;
+        if (pos >= pd->m_startBlock + pd->m_lineSpan) continue;
+
+        if (pos < pd->m_startBlock) return false;
+        return true;
+    }
+
+    return false;
+
+}
+
 int PaletteManager::totalOffset()
 {
     return m_totalOffset;

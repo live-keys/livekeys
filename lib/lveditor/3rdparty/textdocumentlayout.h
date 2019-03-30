@@ -112,6 +112,7 @@ public:
     void expandLines(int pos, int len);
     std::pair<int,int> isFirstLineOfCollapsedSection(int lineNumber);
     std::pair<int,int> isLineAfterCollapsedSection(int lineNumber);
+    bool isHiddenByCollapse(int pos);
     QTextDocument* lineManagerParentDocument();
     void setLineManagerParentDocument(QTextDocument* doc);
     void setLineDocumentFont(const QFont& font);

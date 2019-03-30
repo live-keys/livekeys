@@ -67,8 +67,14 @@
 #include "private/qqmlproperty_p.h"
 #include "private/qtextengine_p.h"
 #include "private/qsgadaptationlayer_p.h"
-
 #include <algorithm>
+
+#ifdef LV_EDITOR_DEBUG
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
+#include "live/lockedfileiosession.h"
+#include "qqmlapplicationengine.h"
+#endif
 
 #define LV_ACCURACY 1e-7
 #define lv_qmlobject_connect(Sender, SenderType, Signal, Receiver, ReceiverType, Method) \
@@ -2225,7 +2231,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                         if (!block.isVisible()) continue;
 
                         if (!engine.hasContents()) {
-                            nodeOffset = dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->blockBoundingRect(block).topLeft();
+                            nodeOffset = getDocumentLayout()->blockBoundingRect(block).topLeft();
                             updateNodeTransform(node, nodeOffset);
 
                             // PALETTE
@@ -2452,7 +2458,9 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     q->updateSize();
 
     q->getDocumentLayout()->textDocumentFinishedUpdating(document->blockCount());
-
+#ifdef LV_EDITOR_DEBUG
+    debugModel->updateModel(0, document->blockCount());
+#endif
     QObject::connect(document, &QTextDocument::contentsChange, q, &TextEdit::q_contentsChange);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::updateBlock, q, &TextEdit::invalidateBlock);
     QObject::connect(document->documentLayout(), &QAbstractTextDocumentLayout::update, q, &TextEdit::highlightingDone);
@@ -2530,7 +2538,9 @@ void TextEditPrivate::init()
     fragmentEndPalette = new QQuickItem(q);
     fragmentStartPalette->setObjectName("fragmentStartPalette");
     fragmentEndPalette->setObjectName("fragmentEndPalette");
-
+#ifdef LV_EDITOR_DEBUG
+    debugModel = new TextEditNodeDebugModel(q);
+#endif
     paletteManager->setTextEdit(q);
 }
 
@@ -2635,8 +2645,23 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
             QMetaObject::invokeMethod(*it, "close", Qt::DirectConnection);
         }
     }
+#ifdef LV_EDITOR_DEBUG
+    QObject* livecv    = ViewContext::instance().engine()->engine()->rootContext()->contextProperty("livecv").value<QObject*>();
+    QObject* windowControls;
+    QMetaObject::invokeMethod(livecv, "windowControls", Qt::DirectConnection, Q_RETURN_ARG(QObject*, windowControls));
+    if (windowControls && !d->debugView){
+        QVariant windowVariant;
+        QMetaObject::invokeMethod(windowControls, "createNewWindow", Qt::DirectConnection, Q_RETURN_ARG(QVariant, windowVariant));
+        QQuickWindow* window = qvariant_cast<QQuickWindow*>(windowVariant);
+        QString contents(LockedFileIOSession::createInstance()->readFromFile("C:\\Users\\NeRad\\Desktop\\Github\\livecv\\application\\qml\\TextEditNodeView.qml").c_str());
+        d->debugView = static_cast<QQuickItem*>(ViewContext::instance().engine()->createObject(
+                    contents,
+                    qvariant_cast<QQuickItem*>(window->property("item")),
+                    QUrl(QStringLiteral("qrc:/TextEditNodeView.qml"))));
 
-
+        d->debugView->setProperty("model", QVariant::fromValue(d->debugModel));
+    }
+#endif
     if (d->document && dynamic_cast<TextDocumentLayout*>(d->document->documentLayout()))
     {
         d->dirtyPosition = d->document->findBlock(pos).blockNumber();
@@ -2868,6 +2893,9 @@ void TextEdit::highlightingDone(const QRectF &)
     {
         d->highlightingInProgress = false;
         getDocumentLayout()->textDocumentFinishedUpdating(d->document->blockCount());
+#ifdef LV_EDITOR_DEBUG
+        d->debugModel->updateModel(d->dirtyPosition, d->document->blockCount());
+#endif
     }
 }
 
@@ -2882,6 +2910,9 @@ void TextEdit::stateChangeHandler(const QTextBlock &block)
         dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->stateChangeUpdate(block.blockNumber());
         getPaletteManager()->setDirtyPos(block.blockNumber());
     }
+#ifdef LV_EDITOR_DEBUG
+    d->debugModel->updateModel(block.blockNumber(), d->document->blockCount());
+#endif
 }
 
 void TextEdit::invalidateBlock(const QTextBlock &block)
@@ -3520,7 +3551,20 @@ void TextEdit::linePaletteHeightChanged(QQuickItem *palette, int newHeight)
     emit paletteChange(result);
 }
 
+#ifdef LV_EDITOR_DEBUG
+TextEditNodeDebugModel::Entry TextEdit::getDebugEntry(int pos)
+{
+    Q_D(TextEdit);
+    if (!d->document) return TextEditNodeDebugModel::Entry();
+    QString lineText = getDocumentLayout()->lineDocument()->findBlockByNumber(pos).text();
+    QString blockText = d->document->findBlockByNumber(pos).text();
+    bool hiddenByPalette = d->paletteManager->isLineUnderPalette(pos);
+    bool hiddenByCollapse = getDocumentLayout()->isHiddenByCollapse(pos);
+    int offset = d->paletteManager->drawingOffset(pos, false);
 
+    return TextEditNodeDebugModel::Entry(pos, lineText, blockText, hiddenByCollapse, hiddenByPalette, offset);
+}
+#endif
 
 void TextEdit::clearSelectionOnFocus(bool value){
     Q_D(TextEdit);
@@ -3552,19 +3596,17 @@ void TextEdit::manageExpandCollapse(int pos, bool collapsed)
     if (collapsed)
     {
         userData->collapse();
-        userData->setStateChangeFlag(true);
         int num; QString repl;
         userData->onCollapse()(matchingBlock, num, repl);
         userData->setNumOfCollapsedLines(num);
         userData->setReplacementString(repl);
         getDocumentLayout()->collapseLines(pos, userData->numOfCollapsedLines());
-        stateChangeHandler(matchingBlock);
     } else {
         userData->expand();
-        userData->setStateChangeFlag(true);
         getDocumentLayout()->expandLines(pos, userData->numOfCollapsedLines());
-        stateChangeHandler(matchingBlock);
     }
+    userData->setStateChangeFlag(true);
+    stateChangeHandler(matchingBlock);
 }
 
 void TextEdit::updateLineSurface(int oldLineNum, int newLineNum, int dirtyPos)
@@ -3643,7 +3685,9 @@ void TextEdit::updateFragmentVisibility()
     getPaletteManager()->setDirtyPos(0);
     getDocumentLayout()->setDirtyPos(0);
     getDocumentLayout()->textDocumentFinishedUpdating(d->document->blockCount());
-
+#ifdef LV_EDITOR_DEBUG
+    d->debugModel->updateModel(0, d->document->blockCount());
+#endif
     markDirtyNodesForRange(0, d->document->characterCount(), 0);
 }
 

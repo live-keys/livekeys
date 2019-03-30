@@ -34,4 +34,6 @@
 #  define LV_EDITOR_EXPORT
 #endif
 
+// #define LV_EDITOR_DEBUG
+
 #endif //LVEDITORGLOBAL_H

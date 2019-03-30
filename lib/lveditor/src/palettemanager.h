@@ -48,6 +48,7 @@ public:
     int resizePalette(QQuickItem* palette, int newHeight);
     std::list<QQuickItem *> updatePaletteBounds(int pos, int removed, int added);
     std::list<QQuickItem *> deletedOnCollapse(int pos, int num);
+    bool isLineUnderPalette(int pos);
     int totalOffset();
 public Q_SLOTS:
     void setDirtyPos(int pos);

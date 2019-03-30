@@ -23,7 +23,9 @@ HEADERS += \
     $$PWD/palettemanager.h \
     $$PWD/palettecontainer.h \
     $$PWD/palettelist.h \
-    $$PWD/codepalette.h
+    $$PWD/codepalette.h \
+    $$PWD/texteditnodedebugmodel.h \
+    $$PWD/linecontrol.h
 
 SOURCES += \
     $$PWD/project.cpp \
@@ -46,4 +48,6 @@ SOURCES += \
     $$PWD/palettemanager.cpp \
     $$PWD/palettecontainer.cpp \
     $$PWD/palettelist.cpp \
-    $$PWD/codepalette.cpp
+    $$PWD/codepalette.cpp \
+    $$PWD/texteditnodedebugmodel.cpp \
+    $$PWD/linecontrol.cpp

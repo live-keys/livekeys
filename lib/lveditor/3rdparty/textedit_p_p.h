@@ -131,6 +131,10 @@ public:
 #endif
         , updateType(UpdatePaintNode)
         , highlightingInProgress(false)
+#ifdef LV_EDITOR_DEBUG
+        , debugModel(nullptr)
+        , debugView(nullptr)
+#endif
         , dirty(false), richText(false), cursorVisible(false), cursorPending(false)
         , focusOnPress(true), persistentSelection(false), requireImplicitWidth(false)
         , selectByMouse(false), canPaste(false), canPasteValid(false), hAlignImplicit(true)
@@ -241,7 +245,10 @@ public:
     UpdateType updateType;
 
     bool highlightingInProgress;
-
+#ifdef LV_EDITOR_DEBUG
+    TextEditNodeDebugModel* debugModel;
+    QQuickItem* debugView;
+#endif
     bool dirty : 1;
     bool richText : 1;
     bool cursorVisible : 1;

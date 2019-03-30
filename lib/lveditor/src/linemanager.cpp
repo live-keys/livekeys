@@ -257,11 +257,6 @@ void LineManager::linesRemoved()
     }
 }
 
-std::list<LineManager::CollapsedSection*> & LineManager::getSections()
-{
-    return m_sections;
-}
-
 std::pair<int, int> LineManager::isLineAfterCollapsedSection(int lineNumber)
 {
     auto it = m_sections.begin();
@@ -286,6 +281,20 @@ std::pair<int, int> LineManager::isFirstLineOfCollapsedSection(int lineNumber)
     }
 
     return std::make_pair(-1, -1);
+}
+
+bool LineManager::isHiddenByCollapse(int pos)
+{
+    for (auto it = m_sections.begin(); it != m_sections.end(); ++it)
+    {
+        auto cs = *it;
+        if (pos > cs->position + cs->numberOfLines) continue;
+        if (pos <= cs->position) return false;
+
+        return true;
+    }
+
+    return false;
 }
 
 void LineManager::setDirtyPos(int p)
