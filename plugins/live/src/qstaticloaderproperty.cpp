@@ -19,27 +19,6 @@
 #include <QtQml>
 
 
-/*!
-   \class lv::StaticLoaderProperty
-   \inmodule live_cpp
-   \internal
- */
-
-/*!
-  \qmltype StaticLoaderProperty
-  \instantiates lcv::QStaticLoaderProperty
-  \inqmlmodule live
-  \inherits QtObject
-  \brief Stores a StaticLoader item property and manages it's lifetime (Owns the property if
-  its an object)
- */
-
-/*!
-  \qmlproperty variant StaticLoaderProperty::value
-
-  Value to store.
- */
-
 QStaticLoaderProperty::QStaticLoaderProperty(QObject *parent)
     : QObject(parent)
 {

@@ -108,7 +108,7 @@ void Tuple::serialize(lv::ViewEngine* engine, const lv::Tuple &t, MLNode &node){
                     }
 
                     MLNode obSerialize;
-                    ti->serialize(ob, obSerialize);
+                    ti->serialize(engine, ob, obSerialize);
 
                     if ( obSerialize.type() == MLNode::Object ){
                         obSerialize["__type"] = ti->name().toStdString();
@@ -176,8 +176,7 @@ void Tuple::deserialize(ViewEngine *engine, const MLNode &n, QVariant &v){
                 THROW_EXCEPTION(lv::Exception, "Tuple deserialize: Unknown type: \'" + objectType .toStdString()+ "\'", 0);
             }
 
-            QObject* ob = ti->newInstance();
-            ti->deserialize(n, ob);
+            QObject* ob = ti->deserialize(engine, n);
 
             v.setValue(ob);
         }

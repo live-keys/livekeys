@@ -1,7 +1,6 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
-    $$PWD/qliveglobal.h \
     $$PWD/live_plugin.h \
     $$PWD/qstaticcontainer.h \
     $$PWD/qstaticloader.h \
@@ -15,16 +14,21 @@ HEADERS += \
     $$PWD/qloglistener.h \
     $$PWD/qloglistenersocket.h \
     $$PWD/tuple.h \
-    $$PWD/tcpagent.h \
-    $$PWD/tcpline.h \
-    $$PWD/tcplinesocket.h \
-    $$PWD/componentsource.h \
     $$PWD/tuplepropertymap.h \
     $$PWD/stringbasedloader.h \
     $$PWD/worker.h \
     $$PWD/qmlcomponentmap.h \
     $$PWD/qmlcomponentmapdata.h \
-    $$PWD/qmlmain.h
+    $$PWD/qmlmain.h \
+    $$PWD/tcplineserver.h \
+    $$PWD/tcplinesocket.h \
+    $$PWD/tcplineconnection.h \
+    $$PWD/tcpline.h \
+    $$PWD/tcplineproperty.h \
+    $$PWD/tcplineresponse.h \
+    $$PWD/worker.h \
+    $$PWD/componentsource.h \
+    $$PWD/lvliveglobal.h
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
@@ -40,13 +44,17 @@ SOURCES += \
     $$PWD/qloglistener.cpp \
     $$PWD/qloglistenersocket.cpp \
     $$PWD/tuple.cpp \
-    $$PWD/tcpagent.cpp \
-    $$PWD/tcpline.cpp \
-    $$PWD/tcplinesocket.cpp \
-    $$PWD/componentsource.cpp \
     $$PWD/tuplepropertymap.cpp \
     $$PWD/stringbasedloader.cpp \
     $$PWD/worker.cpp \
     $$PWD/qmlcomponentmap.cpp \
     $$PWD/qmlcomponentmapdata.cpp \
-    $$PWD/qmlmain.cpp
+    $$PWD/qmlmain.cpp \
+    $$PWD/tcplineserver.cpp \
+    $$PWD/tcplinesocket.cpp \
+    $$PWD/tcplineconnection.cpp \
+    $$PWD/tcpline.cpp \
+    $$PWD/tcplineproperty.cpp \
+    $$PWD/tcplineresponse.cpp \
+    $$PWD/worker.cpp \
+    $$PWD/componentsource.cpp

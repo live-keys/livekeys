@@ -94,7 +94,7 @@ public:
     lv::VisualLogBaseModel* source() const;
     /** The tag we're filtering by */
     QString tag() const;
-    /** Returns the query result of the search */
+    /** Returns the search string/regexp */
     QJSValue search() const;
     /** Indicator if the object is currently performing indexing in the background, asynchronously */
     bool isIndexing() const;

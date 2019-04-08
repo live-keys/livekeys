@@ -14,35 +14,22 @@ Column{
     spacing: 5
     
     Row{
-        spacing: 5
-        
-        Cv.ImRead{
-            id: imageLeft
-            file: project.path('../_images/stitch-left.jpg')
-            onOutputChanged: initInputList()
-        }
-        Cv.ImRead{
-            id: imageMid
-            file: project.path('../_images/stitch-mid.jpg')
-            onOutputChanged: initInputList()
-
-        }
-        Cv.ImRead{
-            id: imageRight
-            file: project.path('../_images/stitch-right.jpg')
-            onOutputChanged: initInputList()
-        }
-    }
-
-    function initObjectList(){
-        if ( imageLeft.output !== 0 &&  imageMid.output !== 0 && imageRight.output !== 0) {
-            stitcher.input = Cv.MatOp.createMatList([imageLeft.output, imageMid.output, imageRight.output])
+        Repeater{
+            id: repeater
+            model: ['stitch-left.jpg', 'stitch-mid.jpg', 'stitch-right.jpg'].map(
+                function(e){ return project.path('../_images/' + e);}).map(
+                function(e){ return Cv.MatIO.read(e); }
+            )
+            
+            Cv.MatView{
+                mat : modelData
+            }
         }
     }
     
     Stitcher{
         id: stitcher
-        input: null
+        input: Cv.MatOp.createMatList(repeater.model)
     }
     
 }

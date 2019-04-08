@@ -1,222 +1,166 @@
 #include "tcpline.h"
-#include "tcplinesocket.h"
-#include "live/act.h"
+#include "tcplineproperty.h"
+
+#include "live/typeinfo.h"
+#include "live/visuallogqt.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
-#include "live/exception.h"
-#include "live/documentqmlinfo.h"
-#include "live/lockedfileiosession.h"
-#include "live/project.h"
 #include "live/mlnode.h"
 #include "live/mlnodetojson.h"
 
-#include <QDebug>
-#include <QQmlContext>
-#include <QQmlEngine>
-#include <QTcpServer>
-#include <QTcpSocket>
+#include <QQmlProperty>
 
 namespace lv{
 
 TcpLine::TcpLine(QObject *parent)
-    : lv::Act(parent)
-    , m_source(0)
-    , m_input(0)
-    , m_output(0)
-    , m_project(0)
-    , m_server(new QTcpServer(this))
-    , m_port(1591)
+    : QObject(parent)
     , m_componentComplete(false)
+    , m_componentBuild(false)
+    , m_source(nullptr)
+    , m_connection(nullptr)
+    , m_result(new QQmlPropertyMap)
 {
-    m_project = qobject_cast<lv::Project*>(
-        lv::ViewContext::instance().engine()->engine()->rootContext()->contextProperty("project").value<QObject*>()
-    );
-    if ( !m_project ){
-        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Failed to load 'project' property from context", 0);
-        lv::ViewContext::instance().engine()->throwError(&e);
-    }
-    connect(m_server, SIGNAL(newConnection()), this, SLOT(newConnection()));
 }
 
 TcpLine::~TcpLine(){
+    delete m_result;
 }
 
-void TcpLine::setSource(ComponentSource *source){
-    if ( source == m_source )
-        return;
-
-    m_source = source;
-
-    initializeAgent();
-
-    emit sourceChanged();
-}
-
-void TcpLine::setInput(Tuple *input){
-    m_input = input;
-    emit inputChanged();
-    if ( !m_input )
-        return;
-
-    if ( isAgentInitialized() ){
-        TcpLineSocket* tls = agent();
-        if ( tls ){
-//            Shared::ReadScope* locker = createLocker();
-//            if ( m_input->reserveForRead(locker, this)){
-
-                MLNode result;
-                Tuple::serialize(ViewContext::instance().engine(), *input, result);
-
-                tls->sendInput(result);
-
-//            }
-        }
+void TcpLine::propertyChanged(TcpLineProperty *property){
+    if ( m_componentBuild ){
+        sendProperty(property->name());
     } else {
-        initializeAgent();
+        m_propertiesToSend.insert(property->name());
     }
 }
 
-void TcpLine::setOutput(Tuple *output){
-    m_output = output;
-    emit outputChanged();
+void TcpLine::sendProperty(const QString &propertyName){
+    MLNode input = MLNode(MLNode::Object);
+    MLNode inputValue;
 
-    initializeAgent();
+    QQmlProperty pp(this, propertyName);
+
+    TypeInfo::serializeVariant(lv::ViewContext::instance().engine(), pp.read(), inputValue);
+
+    input[propertyName.toStdString()] = inputValue;
+
+    vlog("tcp-line").d() << "Sending property to remote: " << propertyName;
+
+    m_connection->sendInput(input);
 }
 
 void TcpLine::componentComplete(){
     m_componentComplete = true;
 
-    startListening();
-}
+    const QMetaObject *meta = metaObject();
+    for (int i = 0; i < meta->propertyCount(); i++){
+        QMetaProperty property = meta->property(i);
+        if ( property.name() != QByteArray("objectName") &&
+             property.name() != QByteArray("source") &&
+             property.name() != QByteArray("connection") &&
+             property.name() != QByteArray("result")
+        ){
+            QQmlProperty pp(this, property.name());
+            if ( pp.hasNotifySignal() ){
 
-void TcpLine::process(){
-    onRun(/*createLocker()*/nullptr,
-        [this](){
-            Tuple::deserialize(lv::ViewContext::instance().engine(), m_receivedOutput[""]["output"], *m_output);
-        }, [this](){
-            emit outputChanged();
+                vlog("tcp-line").d() << "Monitoring property; " << property.name();
+
+                TcpLineProperty* tlp = new TcpLineProperty(property.name(), this);
+                m_properties.append(tlp);
+                pp.connectNotifySignal(tlp, SLOT(changed()));
+            }
         }
-    );
-}
-
-void TcpLine::newConnection(){
-    QTcpSocket *socket       = m_server->nextPendingConnection();
-    TcpLineSocket* lineSocket = new TcpLineSocket(socket, this);
-    connect(socket, &QTcpSocket::disconnected, [this, lineSocket](){ removeSocket(lineSocket); } );
-    connect(socket, SIGNAL(disconnected()), lineSocket, SLOT(deleteLater()));
-    connect(socket, &QTcpSocket::readyRead, [this, lineSocket](){ socketOutputReady(lineSocket); });
-    m_sockets.append(lineSocket);
-
-    vlog_debug("live-tcpline", "New connection: " + lineSocket->address());
-
-    if ( !isAgentInitialized() ){
-        initializeAgent();
     }
+
+    emit complete();
 }
 
-void TcpLine::socketOutputReady(TcpLineSocket *socket){
-    if ( socket == agent() ){
-        m_receivedBytes.append(socket->readAll());
-        m_receivedOutput = MLNode(MLNode::Object);
+void TcpLine::setConnection(TcpLineConnection *connection){
+    if (m_connection == connection)
+        return;
+
+    m_connection = connection;
+    emit connectionChanged();
+
+    m_connection->dataCapture().onMessage(&TcpLine::receiveMessage, this);
+    m_connection->dataCapture().onError([this](int, const std::string& errorString){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, "TcpLine message capture error: " + errorString, 0
+        );
+        lv::ViewContext::instance().engine()->throwError(&e, this);
+    });
+
+    connect(m_connection, SIGNAL(connectionEstablished()), this, SLOT(initialize()));
+
+    initialize();
+}
+
+void TcpLine::receiveMessage(const LineMessage &message, void *data){
+    TcpLine* tls = reinterpret_cast<TcpLine*>(data);
+    tls->onMessage(message);
+}
+
+void TcpLine::onMessage(const LineMessage &message){
+    if ( message.type & LineMessage::Error ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, "TcpLine error: " + std::string(message.data), 0
+        );
+        lv::ViewContext::instance().engine()->throwError(&e, this);
+    } else if ( message.type & LineMessage::Input ){
+
         try{
-            ml::fromJson(m_receivedBytes, m_receivedOutput);
-            m_receivedBytes.clear();
-            process();
-        } catch ( lv::Exception& e ){
-            ViewContext::instance().engine()->throwError(&e, this);
+            MLNode inputOb;
+            ml::fromJson(message.data.data(), inputOb);
+
+            ViewEngine* engine = ViewContext::instance().engine();
+
+            for ( auto it = inputOb.begin(); it != inputOb.end(); ++it ){
+                m_result->insert(
+                    QByteArray::fromStdString(it.key().c_str()),
+                    TypeInfo::deserializeVariant(engine, it.value())
+                );
+            }
+
+            emit resultChanged();
+
+        } catch ( Exception& e ){
+            lv::ViewContext::instance().engine()->throwError(&e, this);
+            return;
+        }
+
+    }
+}
+
+void TcpLine::initialize(){
+
+    if ( m_source && m_connection && m_connection->isConnected() ){
+
+        QByteArray source =
+            m_source->importSourceCode().toUtf8() +
+            "\nItem" +
+            m_source->sourceCode().toUtf8();
+
+        vlog("tcp-line").d() << "Initializing remote component.";
+
+        m_connection->sendBuild(source);
+
+        m_componentBuild = true;
+
+        for ( auto it = m_properties.begin(); it != m_properties.end(); ++it ){
+            TcpLineProperty* tlp = *it;
+            sendProperty(tlp->name());
         }
     }
 }
 
-void TcpLine::startListening(){
-    if ( !m_componentComplete )
+void TcpLine::setSource(ComponentSource *source){
+    if (m_source == source)
         return;
 
-    if ( m_server->isListening() ){
-        m_server->close();
-    }
+    m_source = source;
+    emit sourceChanged();
 
-    if ( m_address == "" ){
-        if( !m_server->listen(QHostAddress::Any, m_port) ){
-            lv::Exception e = CREATE_EXCEPTION(
-                lv::Exception, "TcpLine: Cannot open tcp connection.", 0
-            );
-            lv::ViewContext::instance().engine()->throwError(&e);
-            return;
-        }
-        m_address = m_server->serverAddress().toString();
-        vlog_debug("live-tcpline", "Started listening on " + m_address + ":" + QString::number(m_port));
-
-        emit listening();
-    } else {
-        if( !m_server->listen(QHostAddress(m_address), m_port) ){
-            lv::Exception e = CREATE_EXCEPTION(
-                lv::Exception, "TcpLine: Cannot open tcp connection to " + m_address.toStdString() + ".", 0
-            );
-            lv::ViewContext::instance().engine()->throwError(&e);
-            return;
-        }
-        emit listening();
-    }
-}
-
-void TcpLine::removeSocket(TcpLineSocket *socket){
-    for ( auto it = m_sockets.begin(); it != m_sockets.end(); ++it ){
-        if ( *it == socket ){
-            m_sockets.erase(it);
-            return;
-        }
-    }
-}
-
-void TcpLine::initializeAgent(){
-
-    TcpLineSocket* a = agent();
-    if ( !a || !m_componentComplete )
-        return;
-
-    if ( m_source && m_input && m_output ){
-
-//        Shared::ReadScope* locker = createLocker();
-//        if ( /*m_input->reserveForRead(locker, this) && m_output->reserveForRead(locker, this)*/){
-
-            m_initializer = MLNode(MLNode::Object);
-
-            QString source = "Item" + m_source->sourceCode();
-            m_initializer["source"] = source.toStdString();
-            m_initializer["imports"] = m_source->importSourceCode().toStdString();
-
-            MLNode inputResult;
-            Tuple::serialize(ViewContext::instance().engine(), *m_input, inputResult);
-
-            m_initializer["input"] = inputResult;
-
-            MLNode outputResult;
-            Tuple::serialize(ViewContext::instance().engine(), *m_output, outputResult);
-            m_initializer["output"] = outputResult;
-
-            vlog_debug("live-tcpline", "Initializing agent: " + a->address());
-
-            a->initialize(m_initializer);
-
-//        }
-
-//        deleteLocker(locker);
-
-    }
-}
-
-bool TcpLine::isAgentInitialized(){
-    if ( !agent() )
-        return false;
-    return agent()->isInitialized();
-}
-
-TcpLineSocket *TcpLine::agent(){
-    if ( m_sockets.isEmpty() )
-        return 0;
-    return m_sockets.first();
+    initialize();
 }
 
 }// namespace
-

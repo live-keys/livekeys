@@ -230,7 +230,7 @@ void DocumentHandler::rehighlightSection(int position, int length){
 }
 
 /**
- * \brief Adds specific completion that the user picked between given position
+ * \brief Adds specific completion that the user picked between given positions
  */
 void DocumentHandler::insertCompletion(int from, int to, const QString &completion){
     if ( m_targetDoc ){

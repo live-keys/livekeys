@@ -18,49 +18,6 @@
 #include "qstaticcontainer.h"
 #include <QQmlEngine>
 
-/*!
-   \class lv::StaticLoader
-   \inmodule live_cpp
-   \internal
- */
-
-/*!
-  \qmltype StaticLoader
-  \instantiates lcv::QStaticLoader
-  \inqmlmodule live
-  \inherits Item
-  \brief Creates and stores a component statically. See \l {Static Items}{Static Items} for more
-  information on statics in Live CV.
- */
-
-/*!
-  \property lcv::QStaticLoader::source
-  \sa StaticLoader::source
- */
-
-/*!
-  \qmlproperty Component StaticLoader::source
-
-  Component to load statically.
- */
-
-/*!
-  \property lcv::QStaticLoader::item
-  \sa StaticLoader::item
- */
-
-/*!
-  \qmlproperty object StaticLoader::item
-
-  This property holds the top-level object that was loaded
- */
-
-/*!
-  \qmlsignal StaticLoader::itemCreated()
-
-  This signal is emitted when the item is created. This is usually at the start of the application, or when
-  the user calls the staticLoad function with a different state id than the previous compilation.
- */
 
 class QStaticLoaderItem{
 public:
@@ -107,14 +64,6 @@ void QStaticLoader::setSource(QQmlComponent *arg){
         createObject();
     }
 }
-
-
-/*!
-  \qmlmethod StaticLoader::staticLoad(string id)
-
-  Loads the StaticLoader state. \a id has to be unique for this component when used in context with other
-  StaticLoaders.
- */
 
 void QStaticLoader::staticLoad(const QString &id){
     QStaticContainer* container = QStaticContainer::grabFromContext(this);

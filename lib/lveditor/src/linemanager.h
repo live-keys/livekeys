@@ -15,12 +15,6 @@ class LineManager: public QObject{
     Q_OBJECT
 
 public:
-
-    friend class TextControl;
-    friend class TextEdit;
-    friend class TextEditPrivate;
-
-public:
     /// \private
     class CollapsedSection {
         public:
@@ -45,11 +39,9 @@ public:
     void setDirtyPos(int p);
     void textDocumentFinishedUpdating(int newLineNumber);
     void setLineDocumentFont(const QFont& font);
+    QTextDocument* parentDocument() { return m_parentDocument; }
     void setParentDocument(QTextDocument* td);
-
-signals:
-    void updateLineSurface(int prev, int curr, int dirty);
-    void showHideTextEditLines(bool visible, int pos, int num);
+    void updateLineVisibility(bool visible, int pos, int num);
 
 private:
     static bool before(int pos1, int num1, int pos2, int num2);
@@ -58,7 +50,7 @@ private:
     void writeOutContentOfSections();
     void replaceTextInLineDocumentBlock(int blockNumber, std::string s);
     void changeLastCharInLineDocumentBlock(int blockNumber, char c);
-    void updateLineDocument();
+    void updateLinesInDocuments();
 
     std::list<LineManager::CollapsedSection*> m_sections;
     QTextDocument* m_lineDocument;
@@ -67,6 +59,8 @@ private:
     int m_dirtyPos;
     QTextDocument* m_parentDocument;
     bool m_updatePending;
+
+    friend TextDocumentLayout;
 };
 
 }

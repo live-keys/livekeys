@@ -115,7 +115,6 @@ public:
     PaletteManager* getPaletteManager();
     void setLineManager(LineManager* lm);
     void setLineSurface(LineSurface* ls);
-    LineManager *getLineManager();
 
     enum HAlignment {
         AlignLeft = Qt::AlignLeft,
@@ -248,6 +247,7 @@ public:
 
     TextDocumentLayout* getDocumentLayout();
     void manageExpandCollapse(int pos, bool collapsed);
+    void updateLineSurface(int oldLineNum, int newLineNum, int dirtyPos);
 #ifndef QT_NO_IM
     QVariant inputMethodQuery(Qt::InputMethodQuery property) const Q_DECL_OVERRIDE;
     Q_REVISION(4) Q_INVOKABLE QVariant inputMethodQuery(Qt::InputMethodQuery query, QVariant argument) const;
@@ -315,9 +315,9 @@ public:
     lv::DocumentHandler* documentHandler();
     void setDocumentHandler(lv::DocumentHandler* dh);
 
-    void linePaletteAdded(int lineStart, int lineEnd, int height, QObject* palette);
-    void linePaletteRemoved(QObject* palette);
-    void linePaletteHeightChanged(QObject* palette, int newHeight);
+    void linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem* palette);
+    void linePaletteRemoved(QQuickItem* palette);
+    void linePaletteHeightChanged(QQuickItem* palette, int newHeight);
 Q_SIGNALS:
 
     void textChanged();
@@ -404,7 +404,8 @@ private Q_SLOTS:
     void updateSize();
     void triggerPreprocess();
     void highlightingDone(const QRectF &);
-    void showHideLines(bool show, int pos, int num);
+    void handleCursorDuringCollapse(int pos, int num);
+    void checkPalettesWhenCollapsed(int pos, int num);
 private:
     void markDirtyNodesForRange(int start, int end, int charDelta);
     void updateTotalLines();

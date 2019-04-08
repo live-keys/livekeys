@@ -25,18 +25,15 @@
 /*!
   \class QStaticContainer
   \brief Manages static items and assures their deletion when appropriate
-  \inmodule live_cpp
+  \ingroup plugin-live
 
-  Check the section on \l {Creating a Static Item}{creating a static item} on how to use
+  Check the section on [Creating a Static Item](creating-a-static-item.md) on how to use
   this component.
 */
 
 
 /*!
   \brief QStaticContainer constructor
-
-  Parameters:
-  \a parent
  */
 QStaticContainer::QStaticContainer(QObject *parent)
     : QObject(parent)
@@ -86,10 +83,6 @@ void QStaticContainer::statecontainer(QStaticTypeContainerBase *container){
 
 /*!
   \brief Returns the state container associated with the items context.
-
-  Params:
-  \a item
-  \a contextProperty
  */
 QStaticContainer *QStaticContainer::grabFromContext(QQuickItem *item, const QString &contextProperty){
     return static_cast<QStaticContainer*>(qmlContext(item)->contextProperty(contextProperty).value<QObject*>());

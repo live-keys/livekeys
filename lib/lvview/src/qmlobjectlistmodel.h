@@ -8,9 +8,11 @@ namespace lv {
 
 class QmlObjectList;
 
-class LV_VIEW_EXPORT QmlObjectListModel: public QAbstractListModel
-{
+/// \private
+class QmlObjectListModel: public QAbstractListModel{
+
     Q_OBJECT
+
 public:
     explicit QmlObjectListModel(QObject* parent = nullptr) : QAbstractListModel(parent) {}
 

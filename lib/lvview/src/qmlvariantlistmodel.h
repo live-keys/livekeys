@@ -6,9 +6,11 @@
 
 namespace lv {
 
-class QmlVariantListModel: public QAbstractListModel
-{
+/// \private
+class QmlVariantListModel: public QAbstractListModel{
+
     Q_OBJECT
+
 public:
     explicit QmlVariantListModel(QObject* parent = nullptr) : QAbstractListModel(parent) {}
 

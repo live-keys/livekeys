@@ -23,11 +23,8 @@
 #include "qstaticfilereader.h"
 #include "qtriangle.h"
 #include "qloglistener.h"
-#include "componentsource.h"
 #include "worker.h"
 #include "tuple.h"
-#include "tcpline.h"
-#include "tcpagent.h"
 #include "qvaluehistory.h"
 #include "stringbasedloader.h"
 #include "live/qmlobjectlist.h"
@@ -39,6 +36,13 @@
 #include "live/visuallog.h"
 #include "live/settings.h"
 #include "live/visuallogfilter.h"
+
+#include "componentsource.h"
+#include "tcpline.h"
+#include "tcplineconnection.h"
+#include "tcplineproperty.h"
+#include "tcplineresponse.h"
+#include "tcplineserver.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -59,13 +63,17 @@ void LivePlugin::registerTypes(const char *uri){
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
     qmlRegisterType<lv::QmlMain>(          uri, 1, 0, "Main");
     qmlRegisterType<lv::StringBasedLoader>(uri, 1, 0, "StringBasedLoader");
-    qmlRegisterType<lv::ComponentSource>(  uri, 1, 0, "ComponentSource");
     qmlRegisterType<lv::Worker>(           uri, 1, 0, "Worker");
     qmlRegisterType<lv::Tuple>(            uri, 1, 0, "Tuple");
-    qmlRegisterType<lv::TcpLine>(          uri, 1, 0, "TcpLine");
-    qmlRegisterType<lv::TcpAgent>(         uri, 1, 0, "TcpAgent");
     qmlRegisterType<lv::QmlComponentMap>(     uri, 1, 0, "ComponentMap");
     qmlRegisterType<lv::QmlComponentMapData>( uri, 1, 0, "ComponentMapData");
+
+    qmlRegisterType<lv::ComponentSource>(       uri, 1, 0, "ComponentSource");
+    qmlRegisterType<lv::TcpLine>(               uri, 1, 0, "TcpLine");
+    qmlRegisterType<lv::TcpLineConnection>(     uri, 1, 0, "TcpLineConnection");
+    qmlRegisterUncreatableType<lv::TcpLineResponse>(
+        uri, 1, 0, "TcpLineResponse", "TcpLineResponse is part of TcpLine.");
+    qmlRegisterType<lv::TcpLineServer>(         uri, 1, 0, "TcpLineServer");
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){

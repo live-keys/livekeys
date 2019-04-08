@@ -18,13 +18,13 @@
 #define QSTATICFILEREADER_H
 
 #include <QQuickItem>
-#include "qliveglobal.h"
+#include "live/lvliveglobal.h"
 
 class QJSValue;
 class QFileReader;
 
 /// \private
-class Q_LIVE_EXPORT QStaticFileReader : public QQuickItem{
+class LV_LIVE_EXPORT QStaticFileReader : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(QByteArray data READ data NOTIFY dataChanged)
