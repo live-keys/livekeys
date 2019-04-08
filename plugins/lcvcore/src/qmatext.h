@@ -48,7 +48,7 @@ inline void deserialize<QMat>(const MLNode& node, QMat& v){
 } // namespace ml
 
 class QmlObjectList;
-QmlObjectList* createMatList();
+QmlObjectList* Q_LCVCORE_EXPORT createMatList();
 
 inline lv::VisualLog& operator << (lv::VisualLog& vl, const QMat& v){
     vl.asObject("QMat", v);
