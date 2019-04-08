@@ -14,7 +14,7 @@ QVariant QmlObjectListModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-int QmlObjectListModel::rowCount(const QModelIndex &parent) const
+int QmlObjectListModel::rowCount(const QModelIndex &) const
 {
     return m_qmlObjectList->itemCount();
 }

@@ -1,31 +1,31 @@
-#include "maparraydata.h"
-#include "maparray.h"
+#include "qmlcomponentmapdata.h"
+#include "qmlcomponentmap.h"
 
 namespace lv{
 
-MapArrayData::MapArrayData(MapArray *parent)
+QmlComponentMapData::QmlComponentMapData(QmlComponentMap *parent)
     : QObject(parent)
     , m_index(0)
 {
 
 }
 
-void MapArrayData::setCurrent(int index, const QVariant &value){
+void QmlComponentMapData::setCurrent(int index, const QVariant &value){
     m_index   = index;
     m_current = value;
     emit currentChanged();
 }
 
-MapArray *MapArrayData::mapArray(){
-    return qobject_cast<MapArray*>(parent());
+QmlComponentMap *QmlComponentMapData::mapArray(){
+    return qobject_cast<QmlComponentMap*>(parent());
 }
 
-int MapArrayData::index() const{
+int QmlComponentMapData::index() const{
     return m_index;
 }
 
-void MapArrayData::result(const QVariant &value){
-    MapArray* p = mapArray();
+void QmlComponentMapData::result(const QVariant &value){
+    QmlComponentMap* p = mapArray();
     p->assignResult(this, value);
 }
 

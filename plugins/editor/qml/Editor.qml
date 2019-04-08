@@ -45,6 +45,9 @@ Rectangle{
     }
 
     property color topColor: "#08111a"
+    property color lineSurfaceColor: "#091018"
+    property color lineInfoColor:  "#050b12"
+    property color optionsColor: "#04131f"
 
     color : "#050b12"
     clip : true
@@ -305,10 +308,7 @@ Rectangle{
             anchors.right: parent.right
             anchors.rightMargin: 31
             visible : editor.document !== null
-            gradient: Gradient{
-                GradientStop { position: 0.0;  color: "#050b12" }
-                GradientStop { position: 0.30; color: "#050b12" }
-            }
+            color: editor.lineInfoColor
 
             property bool lineAndColumn : true
 
@@ -333,10 +333,7 @@ Rectangle{
             anchors.right: parent.right
             width: 30
             height: parent.height
-            gradient: Gradient{
-                GradientStop { position: 0.0;  color: "#04131f" }
-                GradientStop { position: 0.30; color: "#081019" }
-            }
+            color: editor.optionsColor
 
             Image{
                 id : toggleNavigationImage
@@ -440,7 +437,7 @@ Rectangle{
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             width: lineSurface.width + 5
-            color: "#091018"
+            color: editor.lineSurfaceColor
             clip: true
 
             Flickable{

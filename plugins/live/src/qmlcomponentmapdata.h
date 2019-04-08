@@ -1,26 +1,26 @@
-#ifndef LVMAPARRAYDATA_H
-#define LVMAPARRAYDATA_H
+#ifndef LVCOMPONENTMAPDATA_H
+#define LVCOMPONENTMAPDATA_H
 
 #include <QObject>
 #include <QVariant>
 
 namespace lv{
 
-class MapArray;
+class QmlComponentMap;
 
 /// \private
-class MapArrayData : public QObject{
+class QmlComponentMapData : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QVariant current READ current NOTIFY currentChanged)
 
 public:
-    MapArrayData(MapArray* parent = nullptr);
+    QmlComponentMapData(QmlComponentMap* parent = nullptr);
 
     void setCurrent(int index, const QVariant& value);
 
     const QVariant &current() const;
-    MapArray* mapArray();
+    QmlComponentMap* mapArray();
 
     void setResult(bool result){ m_result = result; }
     bool result(){ return m_result; }
@@ -38,10 +38,10 @@ private:
     bool     m_result;
 };
 
-inline const QVariant& MapArrayData::current() const{
+inline const QVariant& QmlComponentMapData::current() const{
     return m_current;
 }
 
 }// namespace
 
-#endif // LVMAPARRAYDATA_H
+#endif // LVCOMPONENTMAPDATA_H

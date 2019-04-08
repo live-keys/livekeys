@@ -1,5 +1,5 @@
-#include "maparray.h"
-#include "maparraydata.h"
+#include "qmlcomponentmap.h"
+#include "qmlcomponentmapdata.h"
 #include <QQmlEngine>
 #include <QQmlContext>
 
@@ -19,26 +19,31 @@ void resizeList(QList<T> & list, int newSize) {
 
 }
 
-MapArray::MapArray(QObject *parent)
+QmlComponentMap::QmlComponentMap(QObject *parent)
     : QObject(parent)
     , m_f(nullptr)
+    , m_isProcessing(false)
 {
 }
 
-MapArray::~MapArray(){
+QmlComponentMap::~QmlComponentMap(){
     clearCurrent();
 }
 
-void MapArray::process(){
-    if ( !m_input.size() || !m_f){
+void QmlComponentMap::process(){
+    if ( !m_input.size() || !m_f || m_isProcessing){
         return;
     }
+
+    m_isProcessing = true;
+
     clearCurrent();
+    m_output = QVariantList();
 
     resizeList(m_output, m_input.size());
 
     for (auto it = m_input.begin(); it != m_input.end(); ++it ){
-        MapArrayData* dt = new MapArrayData(this);
+        QmlComponentMapData* dt = new QmlComponentMapData(this);
         m_fData.append(dt);
 
         QQmlContext* ctx = new QQmlContext(m_f->creationContext(), this);
@@ -56,7 +61,7 @@ void MapArray::process(){
     }
 }
 
-void MapArray::assignResult(MapArrayData *mad, const QVariant &v){
+void QmlComponentMap::assignResult(QmlComponentMapData *mad, const QVariant &v){
     m_output[mad->index()] = v;
     mad->setResult(true);
 
@@ -66,10 +71,12 @@ void MapArray::assignResult(MapArrayData *mad, const QVariant &v){
             return;
     }
 
+    m_isProcessing = false;
+
     emit outputChanged();
 }
 
-void MapArray::clearCurrent(){
+void QmlComponentMap::clearCurrent(){
     for ( auto it = m_fObjects.begin(); it != m_fObjects.end(); ++it )
         (*it)->deleteLater();
     for ( auto it = m_fContexts.begin(); it != m_fContexts.end(); ++it )

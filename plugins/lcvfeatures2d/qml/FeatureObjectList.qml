@@ -34,7 +34,7 @@ Rectangle{
     property FeatureDetector featureDetector : FastFeatureDetector{}
     property DescriptorExtractor descriptorExtractor : BriskDescriptorExtractor{}
 
-    signal objectAdded(Cv.Mat descriptors, var points, var color)
+    signal objectAdded(var descriptors, var points, var color)
     signal objectListLoaded(ObjectList list, var keypoints, var corners, var colors)
     signal objectListCreated()
 

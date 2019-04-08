@@ -3,7 +3,6 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/qliveglobal.h \
     $$PWD/live_plugin.h \
-    $$PWD/qlivecvmain.h \
     $$PWD/qstaticcontainer.h \
     $$PWD/qstaticloader.h \
     $$PWD/qscriptcommandlineparser_p.h \
@@ -22,13 +21,13 @@ HEADERS += \
     $$PWD/componentsource.h \
     $$PWD/tuplepropertymap.h \
     $$PWD/stringbasedloader.h \
-    $$PWD/maparray.h \
-    $$PWD/maparraydata.h \
-    $$PWD/worker.h
+    $$PWD/worker.h \
+    $$PWD/qmlcomponentmap.h \
+    $$PWD/qmlcomponentmapdata.h \
+    $$PWD/qmlmain.h
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
-    $$PWD/qlivecvmain.cpp \
     $$PWD/qstaticcontainer.cpp \
     $$PWD/qstaticloader.cpp \
     $$PWD/qscriptcommandlineparser.cpp \
@@ -47,6 +46,7 @@ SOURCES += \
     $$PWD/componentsource.cpp \
     $$PWD/tuplepropertymap.cpp \
     $$PWD/stringbasedloader.cpp \
-    $$PWD/maparray.cpp \
-    $$PWD/maparraydata.cpp \
-    $$PWD/worker.cpp
+    $$PWD/worker.cpp \
+    $$PWD/qmlcomponentmap.cpp \
+    $$PWD/qmlcomponentmapdata.cpp \
+    $$PWD/qmlmain.cpp

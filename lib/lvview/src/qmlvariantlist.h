@@ -12,6 +12,7 @@ namespace lv{
 class QmlVariantListModel;
 
 class LV_VIEW_EXPORT QmlVariantList : public lv::Shared{
+
     Q_OBJECT
     Q_PROPERTY(QVariantList items READ items WRITE setItems)
 
@@ -72,6 +73,7 @@ public:
     static void defaultRemoveItemAt(QmlVariantList*, int);
     static void defaultClearItems(QmlVariantList*);
     static void defaultQuickAssign(QmlVariantList*, QVariantList);
+
 public slots:
     QVariantList items();
     QVariant itemAt(int index);

@@ -75,6 +75,10 @@ void QmlObjectList::setClone(std::function<QmlObjectList *(const QmlObjectList *
     m_clone = clone;
 }
 
+void QmlObjectList::setAssignAt(std::function<void (QmlObjectList *, int, QObject *)> assignAt){
+    m_assignAt = assignAt;
+}
+
 QmlObjectList *QmlObjectList::cloneConst() const{
     if ( !m_clone ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is not clonable.", 0);
@@ -94,6 +98,17 @@ QmlObjectList *QmlObjectList::clone() const{
         return nullptr;
     }
     return m_clone(this);
+}
+
+QJSValue QmlObjectList::toArray(){
+    QQmlEngine* engine = lv::ViewContext::instance().engine()->engine();
+    QJSValue result = engine->newArray(itemCount());
+
+    for ( int i = 0; i < itemCount(); ++i ){
+        result.setProperty(i, engine->newQObject(itemAt(i)));
+    }
+
+    return result;
 }
 
 QObject *QmlObjectList::itemAt(int index)
@@ -136,6 +151,16 @@ void QmlObjectList::removeItemAt(int index)
         return;
     }
     m_removeItemAt(this, index);
+}
+
+void QmlObjectList::assignAt(int index, QObject *item){
+    if ( isConst() ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "List is const.", 0);
+        lv::ViewContext::instance().engine()->throwError(&e);
+        return;
+    }
+
+    m_assignAt(this, index, item);
 }
 
 QmlObjectListModel* QmlObjectList::model()
@@ -193,6 +218,13 @@ void QmlObjectList::defaultRemoveItemAt(QmlObjectList *list, int index)
     auto data = list->dataAs<QList<QObject*>>();
     if (index >= data->size() || index < 0) return;
     data->removeAt(index);
+}
+
+void QmlObjectList::defaultAssignAt(QmlObjectList *list , int index, QObject *o)
+{
+    auto data = list->dataAs<QList<QObject*>>();
+    if (index >= data->size() || index < 0) return;
+    (*data)[index] = o;
 }
 
 void QmlObjectList::defaultClearItems(QmlObjectList *list)

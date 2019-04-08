@@ -33,7 +33,7 @@ static QObject* pathProvider(QQmlEngine *engine, QJSEngine *){
 void FsPlugin::registerTypes(const char *uri){
     // @uri fs
     qmlRegisterType<lv::ListDir>(      uri, 1, 0, "ListDir");
-    qmlRegisterSingletonType<lv::Path>(uri, 1, 0, "path", &pathProvider);
+    qmlRegisterSingletonType<lv::Path>(uri, 1, 0, "Path", &pathProvider);
 }
 
 void FsPlugin::initializeEngine(QQmlEngine *, const char *){

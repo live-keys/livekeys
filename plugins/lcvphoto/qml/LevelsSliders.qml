@@ -46,7 +46,7 @@ Rectangle{
 
     Cv.ColorHistogram{
         id: autoLevelsHistogram
-        channel: colorHistogram.AllChannels
+        channel: Cv.ColorHistogram.AllChannels
         visible: false
     }
 
@@ -66,25 +66,25 @@ Rectangle{
     }
 
     function updateSliders(){
-        if ( colorHistogram.channel === ColorHistogram.Total ){
+        if ( colorHistogram.channel === Cv.ColorHistogram.Total ){
             if ( lightness && lightness.length === 3 ){
                 assignSlidersFromValues(lightness[0], lightness[1], lightness[2])
             } else {
                 assignSlidersFromValues(0, 1.0, 255)
             }
-        } else if ( colorHistogram.channel === ColorHistogram.RedChannel ){
+        } else if ( colorHistogram.channel === Cv.ColorHistogram.RedChannel ){
             if ( levelByChannel.hasOwnProperty(2) && levelByChannel[2].length === 3){
                 assignSlidersFromValues(levelByChannel[2][0], levelByChannel[2][1], levelByChannel[2][2])
             } else {
                 assignSlidersFromValues(0, 1.0, 255)
             }
-        } else if ( colorHistogram.channel === ColorHistogram.GreenChannel ){
+        } else if ( colorHistogram.channel === Cv.ColorHistogram.GreenChannel ){
             if ( levelByChannel.hasOwnProperty(1) && levelByChannel[1].length === 3){
                 assignSlidersFromValues(levelByChannel[1][0], levelByChannel[1][1], levelByChannel[1][2])
             } else {
                 assignSlidersFromValues(0, 1.0, 255)
             }
-        } else if ( colorHistogram.channel === ColorHistogram.BlueChannel ){
+        } else if ( colorHistogram.channel === Cv.ColorHistogram.BlueChannel ){
             if ( levelByChannel.hasOwnProperty(0) && levelByChannel[0].length === 3){
                 assignSlidersFromValues(levelByChannel[0][0], levelByChannel[0][1], levelByChannel[0][2])
             } else {
@@ -106,14 +106,14 @@ Rectangle{
         fill: true
         channel: {
             if ( channelSelection.selectedItem === 'RGB' || channelSelection.selectedItem === 'Grey')
-                return ColorHistogram.Total
+                return Cv.ColorHistogram.Total
             else if ( channelSelection.selectedItem === 'Red' )
-                return ColorHistogram.RedChannel
+                return Cv.ColorHistogram.RedChannel
             else if ( channelSelection.selectedItem === 'Green' )
-                return ColorHistogram.GreenChannel
+                return Cv.ColorHistogram.GreenChannel
             else if ( channelSelection.selectedItem === 'Blue' )
-                return ColorHistogram.BlueChannel
-            return ColorHistogram.Total
+                return Cv.ColorHistogram.BlueChannel
+            return Cv.ColorHistogram.Total
         }
         onChannelChanged: root.updateSliders()
     }
@@ -164,17 +164,17 @@ Rectangle{
                 return ax
             }
             onAssignedXChanged: {
-                if ( colorHistogram.channel === ColorHistogram.Total ){
+                if ( colorHistogram.channel === Cv.ColorHistogram.Total ){
                     root.lightness = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
-                } else if ( colorHistogram.channel === ColorHistogram.RedChannel ){
+                } else if ( colorHistogram.channel === Cv.ColorHistogram.RedChannel ){
                     var rc = root.levelByChannel
                     rc[2] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
-                } else if ( colorHistogram.channel === ColorHistogram.GreenChannel ){
+                } else if ( colorHistogram.channel === Cv.ColorHistogram.GreenChannel ){
                     var rc2 = root.levelByChannel
                     rc2[1] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc2
-                } else if ( colorHistogram.channel === ColorHistogram.BlueChannel ){
+                } else if ( colorHistogram.channel === Cv.ColorHistogram.BlueChannel ){
                     var rc3 = root.levelByChannel
                     rc3[0] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc3
@@ -219,17 +219,17 @@ Rectangle{
                 }
             }
             onAssignedXChanged: {
-                if ( colorHistogram.channel === ColorHistogram.Total ){
+                if ( colorHistogram.channel === Cv.ColorHistogram.Total ){
                     root.lightness = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
-                } else if ( colorHistogram.channel === ColorHistogram.RedChannel ){
+                } else if ( colorHistogram.channel === Cv.ColorHistogram.RedChannel ){
                     var rc = root.levelByChannel
                     rc[2] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
-                } else if ( colorHistogram.channel === ColorHistogram.GreenChannel ){
+                } else if ( colorHistogram.channel === Cv.ColorHistogram.GreenChannel ){
                     var rc = root.levelByChannel
                     rc[1] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
-                } else if ( colorHistogram.channel === ColorHistogram.BlueChannel ){
+                } else if ( colorHistogram.channel === Cv.ColorHistogram.BlueChannel ){
                     var rc = root.levelByChannel
                     rc[0] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
@@ -271,17 +271,17 @@ Rectangle{
                 return ax
             }
             onAssignedXChanged: {
-                if ( colorHistogram.channel === ColorHistogram.Total ){
+                if ( colorHistogram.channel === Cv.ColorHistogram.Total ){
                     root.lightness = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
-                } else if ( colorHistogram.channel === ColorHistogram.RedChannel ){
+                } else if ( colorHistogram.channel === Cv.ColorHistogram.RedChannel ){
                     var rc = root.levelByChannel
                     rc[2] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
-                } else if ( colorHistogram.channel === ColorHistogram.GreenChannel ){
+                } else if ( colorHistogram.channel === Cv.ColorHistogram.GreenChannel ){
                     var rc = root.levelByChannel
                     rc[1] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
-                } else if ( colorHistogram.channel === ColorHistogram.BlueChannel ){
+                } else if ( colorHistogram.channel === Cv.ColorHistogram.BlueChannel ){
                     var rc = root.levelByChannel
                     rc[0] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
