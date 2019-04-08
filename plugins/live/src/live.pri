@@ -26,7 +26,6 @@ HEADERS += \
     $$PWD/tcpline.h \
     $$PWD/tcplineproperty.h \
     $$PWD/tcplineresponse.h \
-    $$PWD/worker.h \
     $$PWD/componentsource.h \
     $$PWD/lvliveglobal.h
 
@@ -46,7 +45,6 @@ SOURCES += \
     $$PWD/tuple.cpp \
     $$PWD/tuplepropertymap.cpp \
     $$PWD/stringbasedloader.cpp \
-    $$PWD/worker.cpp \
     $$PWD/qmlcomponentmap.cpp \
     $$PWD/qmlcomponentmapdata.cpp \
     $$PWD/qmlmain.cpp \
