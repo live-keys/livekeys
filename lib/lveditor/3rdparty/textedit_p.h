@@ -56,6 +56,7 @@ namespace lv {
 class TextDocumentLayout;
 class TextEditPrivate;
 class PaletteManager;
+class LineControl;
 class LineManager;
 class LineSurface;
 
@@ -113,9 +114,10 @@ class TextEdit : public QQuickImplicitSizeItem
     Q_PROPERTY(int lineNumber READ lineNumber NOTIFY lineNumberChanged)
     Q_PROPERTY(int columnNumber READ columnNumber NOTIFY columnNumberChanged)
 public:
-    TextEdit(QQuickImplicitSizeItem *parent=nullptr);
+    TextEdit(QQuickImplicitSizeItem *parent=nullptr, bool test = false);
 
     PaletteManager* getPaletteManager();
+    LineControl* lineControl();
     void setLineManager(LineManager* lm);
     void setLineSurface(LineSurface* ls);
 
@@ -420,7 +422,7 @@ private:
     void updateFragmentBounds(int delta);
 
 protected:
-    TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent = nullptr);
+    TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent = nullptr, bool test = true);
 
     void geometryChanged(const QRectF &newGeometry,
                          const QRectF &oldGeometry) Q_DECL_OVERRIDE;

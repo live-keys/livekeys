@@ -215,24 +215,30 @@ namespace {
     };
 }
 
-TextEdit::TextEdit(QQuickImplicitSizeItem *parent)
+TextEdit::TextEdit(QQuickImplicitSizeItem *parent, bool test)
 : QQuickImplicitSizeItem(*(new TextEditPrivate), parent)
 {
     Q_D(TextEdit);
-    d->init();
+    if (!test) d->init();
 }
 
-TextEdit::TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent)
+TextEdit::TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent, bool test)
 : QQuickImplicitSizeItem(dd, parent)
 {
     Q_D(TextEdit);
-    d->init();
+    if (!test) d->init();
 }
 
 PaletteManager *TextEdit::getPaletteManager()
 {
     Q_D(TextEdit);
     return d->paletteManager;
+}
+
+LineControl *TextEdit::lineControl()
+{
+    Q_D(TextEdit);
+    return d->lineControl;
 }
 
 void TextEdit::setLineSurface(LineSurface *ls)
@@ -2235,7 +2241,8 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                             updateNodeTransform(node, nodeOffset);
 
                             // PALETTE
-                            int offset = d->paletteManager->drawingOffset(block.blockNumber(), false);
+                            // int offset = d->paletteManager->drawingOffset(block.blockNumber(), false);
+                            int offset = d->lineControl->drawingOffset(block.blockNumber(), false);
                             nodeOffset.setY(nodeOffset.y() - offset);
 
                             nodeStart = block.position();
@@ -2473,7 +2480,8 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
 
     document->setTextWidth(-1);
     auto rect = q->getDocumentLayout()->blockBoundingRect(document->rootFrame()->begin().currentBlock());
-    paletteManager->setLineHeight(static_cast<int>(rect.height()));
+    //paletteManager->setLineHeight(static_cast<int>(rect.height()));
+    lineControl->setBlockHeight(static_cast<int>(rect.height()));
     q->updateFragmentVisibility();
 }
 
@@ -2541,7 +2549,8 @@ void TextEditPrivate::init()
 #ifdef LV_EDITOR_DEBUG
     debugModel = new TextEditNodeDebugModel(q);
 #endif
-    paletteManager->setTextEdit(q);
+    //paletteManager->setTextEdit(q);
+    lineControl = new LineControl(q);
 }
 
 void TextEditPrivate::resetInputMethod()
@@ -2637,14 +2646,17 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
 
-    std::list<QQuickItem*> results = getPaletteManager()->updatePaletteBounds(pos, charsRemoved, charsAdded);
+    /*std::list<QQuickItem*> results = getPaletteManager()->updatePaletteBounds(pos, charsRemoved, charsAdded);
     if (!results.empty())
     {
         for (auto it = results.begin(); it != results.end(); ++it)
         {
             QMetaObject::invokeMethod(*it, "close", Qt::DirectConnection);
         }
-    }
+    }*/
+
+    d->lineControl->updateSectionBounds(pos, charsRemoved, charsAdded);
+
 #ifdef LV_EDITOR_DEBUG
     QObject* livecv    = ViewContext::instance().engine()->engine()->rootContext()->contextProperty("livecv").value<QObject*>();
     QObject* windowControls;
@@ -2662,11 +2674,12 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
         d->debugView->setProperty("model", QVariant::fromValue(d->debugModel));
     }
 #endif
-    if (d->document && dynamic_cast<TextDocumentLayout*>(d->document->documentLayout()))
+    if (d->document && getDocumentLayout())
     {
         d->dirtyPosition = d->document->findBlock(pos).blockNumber();
         getDocumentLayout()->setDirtyPos(d->dirtyPosition);
-        getPaletteManager()->setDirtyPos(d->dirtyPosition);
+        //getPaletteManager()->setDirtyPos(d->dirtyPosition);
+        d->lineControl->setDirtyPos(d->dirtyPosition);
     }
 
     markDirtyNodesForRange(pos, editRange, delta);
@@ -2858,8 +2871,9 @@ void TextEdit::updateSize()
     d->paintedWidth = width;
     d->paintedHeight = height;
 
-    if (d->paletteManager){
-        d->paintedHeight -= d->paletteManager->totalOffset()*lineHeight;
+    if (d->lineControl){
+        // d->paintedHeight -= d->paletteManager->totalOffset()*lineHeight;
+        d->paintedHeight -= d->lineControl->totalOffset()*lineHeight;
     }
 
     QSizeF size(d->paintedWidth, d->paintedHeight);
@@ -2908,7 +2922,8 @@ void TextEdit::stateChangeHandler(const QTextBlock &block)
     {
         userData->setStateChangeFlag(false);
         dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->stateChangeUpdate(block.blockNumber());
-        getPaletteManager()->setDirtyPos(block.blockNumber());
+        //getPaletteManager()->setDirtyPos(block.blockNumber());
+        if (d->lineControl) d->lineControl->setDirtyPos(block.blockNumber());
     }
 #ifdef LV_EDITOR_DEBUG
     d->debugModel->updateModel(block.blockNumber(), d->document->blockCount());
@@ -3515,7 +3530,8 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QQuickIt
     auto endBlock = d->document->findBlockByNumber(lineEnd-1);
     int startPos = startBlock.position();
     int endPos = endBlock.position() + endBlock.length();
-    d->paletteManager->paletteAdded(lineStart-1, lineEnd - lineStart + 1, height, palette, startPos, endPos);
+
+    d->lineControl->addPalette(lineStart-1,lineEnd - lineStart + 1, palette, startPos, endPos);
     d->invalidUntilTheEnd = true;
     for (int i = lineStart - 1; i < d->document->blockCount(); ++i)
         invalidateBlock(d->document->findBlockByNumber(i));
@@ -3526,22 +3542,28 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QQuickIt
 void TextEdit::linePaletteRemoved(QQuickItem *palette)
 {
     Q_D(TextEdit);
-    int result = d->paletteManager->removePalette(palette);
-    if (result == -1) return;
+    /*int result = d->paletteManager->removePalette(palette);
+    */
+    int result = d->lineControl->removePalette(palette);
 
+    if (result == -1) return;
+/*
     d->invalidUntilTheEnd = true;
 
     for (int i = result; i < d->document->blockCount(); ++i)
     {
         invalidateBlock(d->document->findBlockByNumber(i));
-    }
+    }*/
     emit paletteChange(result);
 }
 
 void TextEdit::linePaletteHeightChanged(QQuickItem *palette, int newHeight)
 {
     Q_D(TextEdit);
-    int result = d->paletteManager->resizePalette(palette, newHeight);
+    // int result = d->paletteManager->resizePalette(palette, newHeight);
+
+    int result = d->lineControl->resizePalette(palette);
+
     if (result == -1) return;
     d->invalidUntilTheEnd = true;
     for (int i = result; i < d->document->blockCount(); ++i)
@@ -3559,9 +3581,11 @@ TextEditNodeDebugModel::Entry TextEdit::getDebugEntry(int pos)
     QString lineText = getDocumentLayout()->lineDocument()->findBlockByNumber(pos).text();
     QString blockText = d->document->findBlockByNumber(pos).text();
     bool hiddenByPalette = d->paletteManager->isLineUnderPalette(pos);
+    // bool hiddenByPalette = d->lineControl->hiddenByPalette(pos);
     bool hiddenByCollapse = getDocumentLayout()->isHiddenByCollapse(pos);
+    // bool hiddenByCollapse = d->lineControl->hiddenByCollapse(pos);
     int offset = d->paletteManager->drawingOffset(pos, false);
-
+    // int offset = d->lineControl->drawingOffset(pos, false);
     return TextEditNodeDebugModel::Entry(pos, lineText, blockText, hiddenByCollapse, hiddenByPalette, offset);
 }
 #endif
@@ -3635,7 +3659,7 @@ void TextEdit::handleCursorDuringCollapse(int pos, int num)
 
 void TextEdit::checkPalettesWhenCollapsed(int pos, int num)
 {
-    auto result = getPaletteManager()->deletedOnCollapse(pos, num);
+    /*auto result = getPaletteManager()->deletedOnCollapse(pos, num);
 
     if (!result.empty())
     {
@@ -3643,15 +3667,18 @@ void TextEdit::checkPalettesWhenCollapsed(int pos, int num)
         {
             QMetaObject::invokeMethod(*it, "close", Qt::DirectConnection);
         }
-    }
+    }*/
 }
 
 void TextEdit::updateFragmentVisibility()
 {
     Q_D(TextEdit);
-    if (!d->document) return;
-    d->paletteManager->removePalette(d->fragmentStartPalette);
-    d->paletteManager->removePalette(d->fragmentEndPalette);
+    if (!d->document || !d->lineControl) return;
+    // d->paletteManager->removePalette(d->fragmentStartPalette);
+    // d->paletteManager->removePalette(d->fragmentEndPalette);
+
+    // d->lineControl->removePalette(d->fragmentStartPalette);
+    // d->lineControl->removePalette(d->fragmentEndPalette);
 
     // handle fragment start palette
     int lastPosition;
@@ -3664,7 +3691,8 @@ void TextEdit::updateFragmentVisibility()
         QTextBlock endBlock = d->document->findBlockByNumber(d->fragmentStart-1);
         lastPosition = endBlock.position() + endBlock.length();
     }
-    d->paletteManager->paletteAdded(0, std::max(d->fragmentStart, 0), 0, d->fragmentStartPalette, 0, lastPosition);
+    //d->paletteManager->paletteAdded(0, std::max(d->fragmentStart, 0), 0, d->fragmentStartPalette, 0, lastPosition);
+    // d->lineControl->addPalette(0, std::max(d->fragmentStart, 0), d->fragmentStartPalette, 0, lastPosition);
 
     // handle fragment start end
     int firstPosition;
@@ -3680,9 +3708,11 @@ void TextEdit::updateFragmentVisibility()
         firstPosition = startBlock.position();
         span = d->document->blockCount()-d->fragmentEnd - 1;
     }
-    d->paletteManager->paletteAdded(std::min(d->fragmentEnd + 1, d->document->blockCount()-1),span,0,d->fragmentEndPalette, firstPosition, d->document->characterCount());
+    //d->paletteManager->paletteAdded(std::min(d->fragmentEnd + 1, d->document->blockCount()-1),span,0,d->fragmentEndPalette, firstPosition, d->document->characterCount());
+    // d->lineControl->addPalette(std::min(d->fragmentEnd + 1, d->document->blockCount()-1),span, d->fragmentEndPalette, firstPosition, d->document->characterCount());
 
-    getPaletteManager()->setDirtyPos(0);
+    //getPaletteManager()->setDirtyPos(0);
+    d->lineControl->setDirtyPos(0);
     getDocumentLayout()->setDirtyPos(0);
     getDocumentLayout()->textDocumentFinishedUpdating(d->document->blockCount());
 #ifdef LV_EDITOR_DEBUG

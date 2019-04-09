@@ -17,6 +17,7 @@
 #include "textedit_p.h"
 #include "linemanager.h"
 #include "palettemanager.h"
+#include "linecontrol.h"
 #include "textdocumentlayout.h"
 
 namespace lv {
@@ -398,7 +399,11 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                         if (!engine.hasContents()) {
                             nodeOffset = m_document->documentLayout()->blockBoundingRect(block).topLeft();
                             updateNodeTransform(node, nodeOffset);
-                            int offset = m_textEdit->getPaletteManager()->drawingOffset(block.blockNumber(), false);
+                            // int offset = m_textEdit->getPaletteManager()->drawingOffset(block.blockNumber(), false);
+
+                            int offset = 0;
+                            if (m_textEdit && m_textEdit->lineControl())
+                                offset = m_textEdit->lineControl()->drawingOffset(block.blockNumber(), false);
                             nodeOffset.setY(nodeOffset.y() - offset);
                         }
 

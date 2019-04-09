@@ -17,4 +17,5 @@ HEADERS += \
     $$PWD/live/editorprivate_plugin.h \
     $$PWD/live/palettecontainer.h \
     $$PWD/live/palettelist.h \
-    $$PWD/live/codepalette.h
+    $$PWD/live/codepalette.h \
+    $$PWD/live/linecontrol.h

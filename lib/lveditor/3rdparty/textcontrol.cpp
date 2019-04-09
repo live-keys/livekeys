@@ -73,7 +73,8 @@
 #include <qmetaobject.h>
 
 #include "textedit_p.h"
-#include "palettemanager.h"
+//#include "palettemanager.h"
+#include "linecontrol.h"
 
 namespace lv {
 
@@ -254,8 +255,10 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
     bool visualNavigation = cursor.visualNavigation();
     cursor.setVisualNavigation(true);
 
-    auto pm = textEdit->getPaletteManager();
-    int result = pm->isLineBeforePalette(cursor.block().blockNumber());
+    // auto pm = textEdit->getPaletteManager();
+    // int result = pm->isLineBeforePalette(cursor.block().blockNumber());
+    LineControl* lc = textEdit->lineControl();
+    int result = lc->isLineBeforePalette(cursor.block().blockNumber());
     if (result != 0)
     {
         if (cursor.atBlockEnd() &&(e == QKeySequence::MoveToNextChar || e ==  QKeySequence::MoveToNextWord || e == QKeySequence::MoveToEndOfLine))
@@ -292,7 +295,7 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 
     }
 
-    result = pm->isLineAfterPalette(cursor.block().blockNumber());
+    result = lc->isLineAfterPalette(cursor.block().blockNumber());
     if (result != 0)
     {
         if (cursor.atBlockStart() &&(e == QKeySequence::MoveToPreviousChar || e ==  QKeySequence::MoveToPreviousWord || e == QKeySequence::MoveToStartOfLine))
@@ -824,7 +827,8 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
         ev = static_cast<QMouseEvent *>(e);
         QPointF mousePos = ev->localPos();
         int oldy = mousePos.y();
-        mousePos.setY(d->textEdit->getPaletteManager()->positionOffset(oldy));
+        // mousePos.setY(d->textEdit->getPaletteManager()->positionOffset(oldy));
+        mousePos.setY(d->textEdit->lineControl()->positionOffset(oldy));
 #if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
         ev->setLocalPos(mousePos);
 #else
@@ -1182,8 +1186,10 @@ QRectF TextControlPrivate::rectForPosition(int position) const
     QTextLine line = layout->lineForTextPosition(relativePos);
 
     QRectF r;
-     int offset = textEdit->getPaletteManager()->drawingOffset(block.blockNumber(), true);
-
+    // int offset = textEdit->getPaletteManager()->drawingOffset(block.blockNumber(), true);
+    int offset = 0;
+    if (textEdit && textEdit->lineControl())
+        offset = textEdit->lineControl()->drawingOffset(block.blockNumber(), true);
     if (line.isValid()) {
         qreal x = line.cursorToX(relativePos);
         qreal w = 0;

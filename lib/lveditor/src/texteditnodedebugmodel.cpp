@@ -42,9 +42,6 @@ QVariant TextEditNodeDebugModel::data(const QModelIndex &index, int role) const
 
 void TextEditNodeDebugModel::updateModel(int pos, int size)
 {
-    qDebug() << pos << size;
-    qDebug() << m_entries.size();
-    qDebug() << m_size;
     if (pos < m_entries.size())
     {
         beginRemoveRows(QModelIndex(), pos, m_entries.size()-1);
