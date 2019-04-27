@@ -109,8 +109,8 @@ class TextEdit : public QQuickImplicitSizeItem
     Q_PROPERTY(qreal bottomPadding READ bottomPadding WRITE setBottomPadding RESET resetBottomPadding NOTIFY bottomPaddingChanged REVISION 6)
     Q_PROPERTY(QString preeditText READ preeditText NOTIFY preeditTextChanged REVISION 7)
     Q_PROPERTY(lv::DocumentHandler* documentHandler READ documentHandler WRITE setDocumentHandler NOTIFY documentHandlerChanged)
-    Q_PROPERTY(int fragmentStart READ fragmentStart WRITE setFragmentStart RESET resetFragmentStart NOTIFY fragmentStartChanged)
-    Q_PROPERTY(int fragmentEnd READ fragmentEnd WRITE setFragmentEnd RESET resetFragmentEnd NOTIFY fragmentEndChanged)
+    Q_PROPERTY(int fragmentStart WRITE setFragmentStart RESET resetFragmentStart NOTIFY fragmentStartChanged)
+    Q_PROPERTY(int fragmentEnd WRITE setFragmentEnd RESET resetFragmentEnd NOTIFY fragmentEndChanged)
     Q_PROPERTY(int lineNumber READ lineNumber NOTIFY lineNumberChanged)
     Q_PROPERTY(int columnNumber READ columnNumber NOTIFY columnNumberChanged)
 public:
@@ -118,7 +118,6 @@ public:
 
     PaletteManager* getPaletteManager();
     LineControl* lineControl();
-    void setLineManager(LineManager* lm);
     void setLineSurface(LineSurface* ls);
 
     enum HAlignment {
@@ -323,6 +322,8 @@ public:
     void linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem* palette);
     void linePaletteRemoved(QQuickItem* palette);
     void linePaletteHeightChanged(QQuickItem* palette, int newHeight);
+
+    void resetLineControl();
 #ifdef LV_EDITOR_DEBUG
     TextEditNodeDebugModel::Entry getDebugEntry(int pos);
 #endif
@@ -418,9 +419,6 @@ private:
     void markDirtyNodesForRange(int start, int end, int charDelta);
     void updateTotalLines();
     void invalidateFontCaches();
-    void updateFragmentVisibility();
-    void updateFragmentBounds(int delta);
-
 protected:
     TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent = nullptr, bool test = true);
 

@@ -56,7 +56,7 @@ public:
 public Q_SLOTS:
     void setDirtyBlockPosition(int pos);
     void paletteSlot(int blockNum);
-    void triggerUpdate(int prev, int curr, int dirty);
+    void triggerUpdate(int lineNumber, int dirty);
 
 Q_SIGNALS:
     void colorChanged(const QColor &color);
@@ -72,8 +72,6 @@ private Q_SLOTS:
 
 private:
     void showHideLines(bool show, int pos, int num);
-    void writeOutBlockStates();
-    void writeOutBlockVisibility();
 
     static inline int numberOfDigits(int i) {
         int res = 0;

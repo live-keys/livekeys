@@ -258,11 +258,12 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
     // auto pm = textEdit->getPaletteManager();
     // int result = pm->isLineBeforePalette(cursor.block().blockNumber());
     LineControl* lc = textEdit->lineControl();
-    int result = lc->isLineBeforePalette(cursor.block().blockNumber());
+    int result = lc->isJumpForwardLine(cursor.block().blockNumber());
     if (result != 0)
     {
         if (cursor.atBlockEnd() &&(e == QKeySequence::MoveToNextChar || e ==  QKeySequence::MoveToNextWord || e == QKeySequence::MoveToEndOfLine))
         {
+            if (result == -1) return false;
             for (int i = 0; i < result; ++i)
                 cursor.movePosition(QTextCursor::Down);
             cursor.movePosition(QTextCursor::EndOfBlock);
@@ -270,6 +271,7 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 
         if (cursor.atBlockEnd() && (e == QKeySequence::SelectNextChar || e == QKeySequence::SelectNextWord || e == QKeySequence::SelectEndOfLine))
         {
+            if (result == -1) return false;
             for (int i = 0; i < result; ++i)
             {
                 cursor.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor);
@@ -279,6 +281,7 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 
         if (e == QKeySequence::MoveToNextLine)
         {
+            if (result == -1) return false;
             for (int i = 0; i < result; ++i)
             {
                 cursor.movePosition(QTextCursor::Down);
@@ -287,6 +290,7 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 
         if (e == QKeySequence::SelectNextLine)
         {
+            if (result == -1) return false;
             for (int i = 0; i < result; ++i)
             {
                 cursor.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor);
@@ -295,11 +299,12 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 
     }
 
-    result = lc->isLineAfterPalette(cursor.block().blockNumber());
+    result = lc->isJumpBackwardsLine(cursor.block().blockNumber());
     if (result != 0)
     {
         if (cursor.atBlockStart() &&(e == QKeySequence::MoveToPreviousChar || e ==  QKeySequence::MoveToPreviousWord || e == QKeySequence::MoveToStartOfLine))
         {
+            if (result == -1) return false;
             for (int i = 0; i < result; ++i)
                 cursor.movePosition(QTextCursor::Up);
             cursor.movePosition(QTextCursor::StartOfBlock);
@@ -307,6 +312,7 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 
         if (cursor.atBlockStart() && (e == QKeySequence::SelectPreviousChar || e == QKeySequence::SelectPreviousWord || e == QKeySequence::SelectStartOfLine))
         {
+            if (result == -1) return false;
             for (int i = 0; i < result; ++i)
             {
                 cursor.movePosition(QTextCursor::Up, QTextCursor::KeepAnchor);
@@ -316,6 +322,8 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 
         if (e == QKeySequence::MoveToPreviousLine)
         {
+
+            if (result == -1) return false;
             for (int i = 0; i < result; ++i)
             {
                 cursor.movePosition(QTextCursor::Up);
@@ -324,6 +332,7 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 
         if (e == QKeySequence::SelectPreviousLine)
         {
+            if (result == -1) return false;
             for (int i = 0; i < result; ++i)
             {
                 cursor.movePosition(QTextCursor::Up, QTextCursor::KeepAnchor);
@@ -900,7 +909,8 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
 
                             if (ke->key() == Qt::Key_Return)
                             {
-                                auto layout = d->textEdit->getDocumentLayout();
+				// TODO
+                                /*auto layout = d->textEdit->getDocumentLayout();
                                 std::pair<int, int> result(-1, -1);
                                 if (layout)
                                 {
@@ -909,7 +919,7 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
                                 if (layout && result.first != -1)
                                 {
                                     layout->expandLines(result.first, result.second);
-                                }
+                                }*/
                             }
                             ke->accept();
                         default:
@@ -937,7 +947,8 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
                            || ke == QKeySequence::SelectAll
                           ) {
 
-                    auto layout = d->textEdit->getDocumentLayout();
+		    // TODO
+                    /*auto layout = d->textEdit->getDocumentLayout();
                     std::pair<int, int> result(-1, -1);
                     if (layout && ke == QKeySequence::Paste)
                     {
@@ -946,7 +957,7 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
                     if (result.first != -1)
                     {
                         layout->expandLines(result.first, result.second);
-                    }
+                    }*/
 
                     ke->accept();
 #endif
@@ -1070,7 +1081,8 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
             cursor.setBlockFormat(blockFmt);
         } else {
             QTextCursor localCursor = cursor;
-            std::pair<int, int> result(-1, -1);
+		// TODO
+            /*std::pair<int, int> result(-1, -1);
             if (textEdit && textEdit->getDocumentLayout())
             {
                 result = textEdit->getDocumentLayout()->isLineAfterCollapsedSection(localCursor.block().blockNumber());
@@ -1080,9 +1092,9 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
             {
                 textEdit->manageExpandCollapse(result.first, false);
             }
-            else {
+            else {*/
                 localCursor.deletePreviousChar();
-            }
+            // }
 
         }
         goto accept;

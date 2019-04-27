@@ -556,9 +556,8 @@ Rectangle{
                 textFormat: NewTextEdit.PlainText
 
                 wrapMode: NewTextEdit.NoWrap
-                height : Math.max( flick.height - 10, paintedHeight + 15)
-                width : Math.max( flick.width - 10, paintedWidth + 15)
-
+                height: paintedHeight
+                width: paintedWidth
                 readOnly: editor.document === null || editor.document.isMonitored
 
                 Keys.onPressed: {

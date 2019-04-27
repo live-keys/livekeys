@@ -570,7 +570,7 @@ void ProjectDocumentAction::redo(){
 //    parent->m_content.replace(position, charsRemoved.size(), charsAdded);
 }
 
-ProjectDocumentBlockData::ProjectDocumentBlockData() : m_collapseState(NoCollapse), m_numOfCollapsedLines(0)
+ProjectDocumentBlockData::ProjectDocumentBlockData() : m_numOfCollapsedLines(0)
     , m_stateChangeFlag(false) {}
 
 ProjectDocumentBlockData::~ProjectDocumentBlockData(){
@@ -675,9 +675,8 @@ void ProjectDocumentBlockData::removeSection(ProjectDocumentSection *section){
         section->m_parentBlock = nullptr;
 }
 
-void ProjectDocumentBlockData::setCollapse(CollapseState state, CollapseFunctionType func)
+void ProjectDocumentBlockData::setCollapse(CollapseFunctionType func)
 {
-    m_collapseState = state;
     m_onCollapse = func;
 
 }
@@ -692,14 +691,15 @@ void ProjectDocumentBlockData::setReplacementString(QString &repl)
     m_replacementString = repl;
 }
 
-ProjectDocumentBlockData::CollapseState ProjectDocumentBlockData::collapseState() { return m_collapseState; }
+// ProjectDocumentBlockData::CollapseState ProjectDocumentBlockData::collapseState() { return m_collapseState; }
 int ProjectDocumentBlockData::numOfCollapsedLines() { return m_numOfCollapsedLines; }
 CollapseFunctionType ProjectDocumentBlockData::onCollapse() { return m_onCollapse; }
 QString& ProjectDocumentBlockData::replacementString() { return m_replacementString; }
 
 void ProjectDocumentBlockData::resetCollapseParams()
 {
-	m_collapseState = NoCollapse;
+    // m_collapseState = NoCollapse;
+    m_collapsable = false;
 	m_replacementString = QString();
 
 }

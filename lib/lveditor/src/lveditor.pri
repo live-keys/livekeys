@@ -18,7 +18,6 @@ HEADERS += \
     $$PWD/lveditorglobal.h \
     $$PWD/editorglobalobject.h \
     $$PWD/editorprivate_plugin.h \
-    $$PWD/linemanager.h \
     $$PWD/linesurface.h \
     $$PWD/palettemanager.h \
     $$PWD/palettecontainer.h \
@@ -43,7 +42,6 @@ SOURCES += \
     $$PWD/editorsettingscategory.cpp \
     $$PWD/editorglobalobject.cpp \
     $$PWD/editorprivate_plugin.cpp \
-    $$PWD/linemanager.cpp \
     $$PWD/linesurface.cpp \
     $$PWD/palettemanager.cpp \
     $$PWD/palettecontainer.cpp \

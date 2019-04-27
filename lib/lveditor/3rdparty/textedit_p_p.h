@@ -115,8 +115,8 @@ public:
         , clearSelectionOnFocus(false)
         , lastHighlightChangeStart(INT_MAX)
         , lastHighlightChangeEnd(0)
-        , fragmentStart(0)
-        , fragmentEnd(INT_MAX)
+        , fragmentStartPalette(nullptr)
+        , fragmentEndPalette(nullptr)
         , dirtyPosition(0), paintedWidth(0), paintedHeight(0)
         , hAlign(TextEdit::AlignLeft), vAlign(TextEdit::AlignTop)
         , format(TextEdit::PlainText), wrapMode(TextEdit::NoWrap)
@@ -225,9 +225,7 @@ public:
     int lastHighlightChangeStart;
     int lastHighlightChangeEnd;
 
-    int fragmentStart;
     QQuickItem* fragmentStartPalette;
-    int fragmentEnd;
     QQuickItem* fragmentEndPalette;
     int dirtyPosition;
 

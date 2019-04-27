@@ -154,7 +154,8 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
             reinterpret_cast<lv::ProjectDocumentBlockData*>(currentBlock().userData());
     if (!blockData) {
         blockData = new lv::ProjectDocumentBlockData;
-        blockData->setCollapse(lv::ProjectDocumentBlockData::NoCollapse, &QmlJsHighlighter::collapse);
+        blockData->setCollapse(&QmlJsHighlighter::collapse);
+        blockData->setCollapsable(false);
         currentBlock().setUserData(blockData);
     } else {
         blockData->resetCollapseParams();
@@ -196,9 +197,11 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
         case QmlJS::Token::RightParenthesis:
             break;
         case QmlJS::Token::LeftBrace:
-            blockData->setCollapse(lv::ProjectDocumentBlockData::Collapse, &QmlJsHighlighter::collapse);
-            blockData->setStateChangeFlag(true);
-            document()->markContentsDirty(currentBlock().position(), currentBlock().length());
+                blockData->setCollapse(&QmlJsHighlighter::collapse);
+                blockData->setStateChangeFlag(true);
+                blockData->setCollapsable(true);
+                document()->markContentsDirty(currentBlock().position(), currentBlock().length());
+
             break;
         case QmlJS::Token::RightBrace:
         case QmlJS::Token::LeftBracket:

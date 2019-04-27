@@ -151,7 +151,6 @@ typedef std::function<void(const QTextBlock& tb, int& numLines, QString& replace
 class LV_EDITOR_EXPORT ProjectDocumentBlockData : public QTextBlockUserData{
 
 public:
-    enum CollapseState {NoCollapse, Collapse, Expand};
 
     ProjectDocumentBlockData();
     ~ProjectDocumentBlockData();
@@ -165,8 +164,7 @@ public:
     QList<int> bracketPositions;
     QString    blockIdentifier;
 
-    void setCollapse(CollapseState state, CollapseFunctionType func);
-    CollapseState collapseState();
+    void setCollapse(CollapseFunctionType func);
     void setReplacementString(QString& string);
     QString &replacementString();
     void setNumOfCollapsedLines(int num);
@@ -174,17 +172,16 @@ public:
     CollapseFunctionType onCollapse();
     void setStateChangeFlag(bool value) {m_stateChangeFlag = value; }
     bool stateChangeFlag() {return m_stateChangeFlag; }
-    void collapse() {m_collapseState = Expand;  }
-    void expand() { m_collapseState = Collapse; }
-
+    bool isCollapsable() { return m_collapsable; }
+    void setCollapsable(bool col) { m_collapsable = col; }
     void resetCollapseParams();
 
 private:
-    CollapseState m_collapseState;
     QString m_replacementString;
     int m_numOfCollapsedLines;
     CollapseFunctionType m_onCollapse;
     bool m_stateChangeFlag;
+    bool m_collapsable;
 };
 
 

@@ -32,7 +32,6 @@
 #include "live/keymap.h"
 #include "live/viewcontext.h"
 #include "linesurface.h"
-#include "linemanager.h"
 
 #include <QCoreApplication>
 #include <QQmlEngine>
@@ -41,7 +40,6 @@
 void EditorPrivatePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::TextEdit>(          uri, 1, 0, "NewTextEdit");
     qmlRegisterType<lv::LineSurface>(       uri, 1, 0, "LineSurface");
-    qmlRegisterType<lv::LineManager>(       uri, 1, 0, "LineManager");
 
     qmlRegisterUncreatableType<lv::ProjectFileModel>(
         uri, 1, 0, "ProjectFileModel", "Cannot create a ProjectFileModel instance.");

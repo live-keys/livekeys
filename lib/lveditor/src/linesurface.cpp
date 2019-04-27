@@ -15,7 +15,6 @@
 #include "private/qtextengine_p.h"
 #include <algorithm>
 #include "textedit_p.h"
-#include "linemanager.h"
 #include "palettemanager.h"
 #include "linecontrol.h"
 #include "textdocumentlayout.h"
@@ -168,70 +167,24 @@ void LineSurface::showHideLines(bool show, int pos, int num)
     m_document->markContentsDirty(start, length);
 }
 
-void LineSurface::writeOutBlockStates()
-{
-
-    qDebug() << "----------blockStates---------------";
-    auto it = m_textEdit->documentHandler()->target()->rootFrame()->begin();
-    while (it != m_textEdit->documentHandler()->target()->rootFrame()->end())
-    {
-        QTextBlock block = it.currentBlock();
-        lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(block.userData());
-
-        QString print(std::to_string(block.blockNumber()).c_str());
-        print += " : ";
-        if (userData)
-        {
-            switch (userData->collapseState())
-            {
-            case lv::ProjectDocumentBlockData::NoCollapse:
-                    print += "NoCollapse"; break;
-            case lv::ProjectDocumentBlockData::Collapse:
-                print += "Collapse"; break;
-            case lv::ProjectDocumentBlockData::Expand:
-                print += "Expand"; break;
-            }
-        } else print += "none";
-
-        qDebug() << print;
-        ++it;
-    }
-}
-
-void LineSurface::writeOutBlockVisibility()
-{
-    if (!m_document) return;
-    qDebug() << "----------visibility---------------";
-    auto it = m_document->rootFrame()->begin();
-    while (it != m_document->rootFrame()->end())
-    {
-        QTextBlock block = it.currentBlock();
-
-        qDebug() << block.blockNumber() << block.isVisible();
-        ++it;
-    }
-}
-
 void LineSurface::mousePressEvent(QMouseEvent* event)
 {
     if (!m_document) return;
-    // find block that was clicked
     int position = m_document->documentLayout()->hitTest(event->localPos(), Qt::FuzzyHit);
     QTextBlock block = m_document->findBlock(position);
     int blockNum = block.blockNumber();
 
-    const QTextBlock& matchingBlock = m_textEdit->documentHandler()->target()->findBlockByNumber(blockNum);
+    int absBlockNum = m_textEdit->lineControl()->visibleToAbsolute(blockNum);
+    const QTextBlock& matchingBlock = m_textEdit->documentHandler()->target()->findBlockByNumber(absBlockNum);
+    const QTextBlock& lineDocBlock = m_document->findBlockByNumber(absBlockNum);
     lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
-    if (userData)
+    if (userData && userData->isCollapsable())
     {
-        if (userData->collapseState() == lv::ProjectDocumentBlockData::Collapse)
-        {
+        QString s = lineDocBlock.text();
+        if (s[s.length()-1] == 'v')
             m_textEdit->manageExpandCollapse(matchingBlock.blockNumber(), true);
-        }
-        else if (userData->collapseState() == lv::ProjectDocumentBlockData::Expand)
-        {
+        else if (s[s.length()-1] == '>')
             m_textEdit->manageExpandCollapse(matchingBlock.blockNumber(), false);
-        }
     }
 }
 
@@ -249,20 +202,20 @@ void LineSurface::setDocument(QTextDocument *doc)
     m_document = doc;
     m_updatePending = false;
     m_document->rootFrame(); // bug fix
-    LineManager* lm = dynamic_cast<LineManager*>(m_document->parent());
-    triggerUpdate(m_document->lineCount(), m_document->lineCount(), 0);
+    triggerUpdate(m_document->lineCount(), 0);
 }
 
 void LineSurface::unsetTextDocument()
 {
     m_document = nullptr;
-    triggerUpdate(m_lineNumber, 0, 0);
+    triggerUpdate(0, 0);
 }
 
-void LineSurface::triggerUpdate(int prev, int curr, int dirty)
+void LineSurface::triggerUpdate(int lineNumber, int dirty)
 {
-    m_previousLineNumber = prev;
-    m_lineNumber = curr;
+    m_previousLineNumber = m_lineNumber;
+    m_lineNumber = lineNumber;
+
     m_dirtyPos = dirty;
     polish();
     if (isComponentComplete())
@@ -322,6 +275,9 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     if (numberOfDigits(m_previousLineNumber) != numberOfDigits(m_lineNumber) || m_dirtyPos >= m_textNodeMap.size()){
         m_dirtyPos = 0;
     }
+
+    m_dirtyPos = 0; // TODO: better solution needed
+
     if (!oldNode  || m_dirtyPos != -1) {
 
         if (!oldNode)
