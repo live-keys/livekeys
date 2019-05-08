@@ -173,7 +173,6 @@ ApplicationWindow{
         modeContainer.visible = false
         modeImage.source = liveImage.source
         modeImage.anchors.rightMargin = liveImage.anchors.rightMargin
-        controls.workspace.project.compile()
     }
 
     function setOnSaveCodingMode()
@@ -192,13 +191,6 @@ ApplicationWindow{
         modeImage.anchors.rightMargin = disabledImage.anchors.rightMargin
     }
 
-    function compileActive()
-    {
-        if (project.active){
-            controls.workspace.project.compile()
-        }
-    }
-
     Component.onCompleted: {
         livecv.commands.add(root, {
             'minimize' : [root.showMinimized, "Minimize"],
@@ -215,7 +207,7 @@ ApplicationWindow{
             'setLiveCodingMode': [root.setLiveCodingMode, "Set 'Live' Coding Mode"],
             'setOnSaveCodingMode': [root.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
             'setDisabledCodingMode': [root.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
-            'compileActiveFile': [root.compileActive, "Compile Active File"]
+            'compileActiveFile': [root.controls.workspace.project.compile, "Compile Active File"]
         })
     }
 
@@ -361,9 +353,7 @@ ApplicationWindow{
             onPressed: compileButtonShape.state = "Pressed"
             onReleased: compileButtonShape.state = "Released"
             onClicked: {
-                if (project.active){
-                    controls.workspace.project.compile()
-                }
+                controls.workspace.project.compile()
             }
         }
 

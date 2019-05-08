@@ -161,6 +161,9 @@ Item{
     }
 
     function compile(){
+        if ( !project.active )
+            return;
+
         var documentList = project.documentModel.listUnsavedDocuments()
         livecv.engine.createObjectAsync(
             project.active.content,
@@ -237,7 +240,7 @@ Item{
 
                 if ( !project.isDirProject() && documentList.length === 1 && documentList[0] === ''){
                     var closeCallback = callback;
-                    var untitledDocument = documentModel.isOpened(documentList[0])
+                    var untitledDocument = project.documentModel.isOpened(documentList[0])
 
                     windowControls.dialogs.saveFile(
                         { filters: [ "Qml files (*.qml)", "All files (*)" ] },

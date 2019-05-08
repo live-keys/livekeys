@@ -71,17 +71,8 @@ Rectangle{
             return;
         if ( editor.document.file.name !== '' ){
             editor.document.save()
-            if ( project.active && ((controls.codingMode === 0 && project.active !== editor.document) || controls.codingMode === 1)) /* compiling isn't disabled */{
+            if ( controls.codingMode === 1 )
                 windowControls.workspace.project.compile()
-                var documentList = project.documentModel.listUnsavedDocuments()
-                livecv.engine.createObjectAsync(
-                    project.active.content,
-                    windowControls.runSpace,
-                    project.active.file.pathUrl(),
-                    project.active,
-                    !(documentList.size === 1 && documentList[0] === project.active)
-                );
-            }
         } else {
             saveAs()
         }
@@ -111,9 +102,8 @@ Rectangle{
                 } else if ( project.isFileInProject(url) ){
 
                     var doc = project.openFile(url, ProjectDocument.Edit)
-                    if ( project.active && project.active !== doc && controls.codingMode !== 2 /* compiling isn't disabled */){
+                    if ( controls.codingMode === 1 )
                         windowControls.workspace.project.compile()
-                    }
 
                     var fe = projectView.findFocusEditor()
                     if ( fe ){
@@ -189,29 +179,13 @@ Rectangle{
                 button1Name : 'Yes',
                 button1Function : function(mbox){
                     saveFunction(mbox)
-                    var documentList = project.documentModel.listUnsavedDocuments()
-                    livecv.engine.createObjectAsync(
-                        project.active.content,
-                        runSpace,
-                        project.active.file.pathUrl(),
-                        project.active,
-                        !(documentList.size === 1 && documentList[0] === project.active)
-                    );
+                    windowControls.workspace.project.compile()
                 },
                 button2Name : 'No',
                 button2Function : function(mbox){
                     mbox.close()
                     editor.closeDocumentAction()
                     editor.document = project.documentModel.lastOpened()
-                    var documentList = project.documentModel.listUnsavedDocuments()
-                    livecv.engine.createObjectAsync(
-                        project.active.content,
-                        runSpace,
-                        project.active.file.pathUrl(),
-                        project.active,
-                        !(documentList.size === 1 && documentList[0] === project.active)
-                    );
-
                 },
                 button3Name : 'Cancel',
                 button3Function : function(mbox){
@@ -219,14 +193,6 @@ Rectangle{
                 },
                 returnPressed : function(mbox){
                     saveFunction(mbox)
-                    var documentList = project.documentModel.listUnsavedDocuments()
-                    livecv.engine.createObjectAsync(
-                        project.active.content,
-                        runSpace,
-                        project.active.file.pathUrl(),
-                        project.active,
-                        !(documentList.size === 1 && documentList[0] === project.active)
-                    );
                 },
             })
         } else
