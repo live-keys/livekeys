@@ -33,7 +33,11 @@ Item{
         interval: 1000
         running: true
         repeat : false
-        onTriggered: root.compile()
+        onTriggered:
+        {
+            if (livecv.windowControls().editor.environment.codingMode === 0)
+                root.compile()
+        }
     }
 
     property Item addEntryOverlay : ProjectAddEntry{
@@ -124,7 +128,8 @@ Item{
     Connections{
         target: project.documentModel
         onMonitoredDocumentChanged : {
-            if (controls.codingMode === 0){  // live coding
+            if (livecv.windowControls().editor.environment.codingMode === 0){  // live coding
+                console.log("here")
                 controls.workspace.project.compile()
             }
         }

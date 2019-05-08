@@ -296,8 +296,8 @@ Rectangle{
             }
             function setActive(){
                 project.setActive(styleData.value)
-                if (windowControls.codingMode === 1) {
-                    windowControls.workspace.project.compile()
+                if (livecv.windowControls().editor.environment.codingMode === 1) {
+                    livecv.windowControls().workspace.project.compile()
                 }
             }
             function openFile(){

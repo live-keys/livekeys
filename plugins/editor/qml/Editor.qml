@@ -71,16 +71,8 @@ Rectangle{
             return;
         if ( editor.document.file.name !== '' ){
             editor.document.save()
-            if ( project.active && ((controls.codingMode === 0 && project.active !== editor.document) || controls.codingMode === 1)) /* compiling isn't disabled */{
+            if ( project.active && ((livecv.windowControls().editor.environment.codingMode === 0 && project.active !== editor.document) || livecv.windowControls().editor.environment.codingMode === 1)) /* compiling isn't disabled */{
                 windowControls.workspace.project.compile()
-                var documentList = project.documentModel.listUnsavedDocuments()
-                livecv.engine.createObjectAsync(
-                    project.active.content,
-                    windowControls.runSpace,
-                    project.active.file.pathUrl(),
-                    project.active,
-                    !(documentList.size === 1 && documentList[0] === project.active)
-                );
             }
         } else {
             saveAs()
@@ -111,8 +103,8 @@ Rectangle{
                 } else if ( project.isFileInProject(url) ){
 
                     var doc = project.openFile(url, ProjectDocument.Edit)
-                    if ( project.active && project.active !== doc && controls.codingMode !== 2 /* compiling isn't disabled */){
-                        windowControls.workspace.project.compile()
+                    if ( project.active && project.active !== doc && livecv.windowControls().editor.environment.codingMode !== 2 /* compiling isn't disabled */){
+                        livecv.windowControls().workspace.project.compile()
                     }
 
                     var fe = projectView.findFocusEditor()

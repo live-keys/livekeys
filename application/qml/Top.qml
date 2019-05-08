@@ -27,6 +27,8 @@ Rectangle {
 
     property color topColor: "#020a11"
     property color bottomColor: "#000509"
+    property alias modeImage: modeImage
+    property var modeContainer: null
 
     gradient: Gradient{
         GradientStop{ position: 0.0; color: topColor}
@@ -313,4 +315,127 @@ Rectangle {
         }
     }
 
+
+    Rectangle {
+        id: modeWrapper
+        anchors.left: parent.left
+        anchors.leftMargin: 550
+        width: 220
+        height: 30
+        color: 'transparent'
+
+        Item{
+            anchors.left: parent.left
+            anchors.leftMargin: 35
+            height : parent.height
+            Text{
+                color :  "#969aa1"
+                anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 12
+                font.family: 'Open Sans, Arial, sans-serif'
+                elide: Text.ElideRight
+                width: 130
+                text : {
+                    if (!project.active) return "";
+                    if (project.active && project.active.file){
+                        if (project.active.file.name === "") return "untitled";
+                        else return project.active.file.name;
+                    }
+                }
+            }
+        }
+
+        Triangle{
+            id: compileButtonShape
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            width: compileButton.containsMouse ? 8 : 7
+            height: compileButton.containsMouse ? 13 : 12
+            state : "Released"
+            rotation: Triangle.Right
+
+            Behavior on height{ NumberAnimation{ duration: 100 } }
+            Behavior on width{ NumberAnimation{ duration: 100 } }
+
+            states: [
+                State {
+                    name: "Pressed"
+                    PropertyChanges { target: compileButtonShape; color: "#487db9"}
+                },
+                State {
+                    name: "Released"
+                    PropertyChanges { target: compileButtonShape; color: compileButton.containsMouse ? "#768aca" : "#bcbdc1"}
+                }
+            ]
+            transitions: [
+                Transition {
+                    from: "Pressed"
+                    to: "Released"
+                    ColorAnimation { target: compileButtonShape; duration: 100}
+                },
+                Transition {
+                    from: "Released"
+                    to: "Pressed"
+                    ColorAnimation { target: compileButtonShape; duration: 100}
+                }
+            ]
+        }
+
+        MouseArea{
+            id : compileButton
+            anchors.left: parent.left
+            anchors.leftMargin: 0
+            width: 50
+            height: 30
+            hoverEnabled: true
+            onPressed: compileButtonShape.state = "Pressed"
+            onReleased: compileButtonShape.state = "Released"
+            onClicked: {
+                if (project.active){
+                    controls.workspace.project.compile()
+                }
+            }
+        }
+
+        Item{
+            width: modeImage.width + modeImage.anchors.rightMargin + 10
+            height: parent.height
+            anchors.right: parent.right
+
+            Image{
+                id : modeImage
+                anchors.right: parent.right
+                anchors.rightMargin: 25
+                anchors.verticalCenter: parent.verticalCenter
+                source: modeContainer.liveImage.source
+            }
+
+            Triangle{
+                anchors.right: parent.right
+                anchors.rightMargin: 7
+                anchors.verticalCenter: parent.verticalCenter
+                width: 9
+                height: 5
+                color: openStatesDropdown.containsMouse ? "#9b6804" : "#bcbdc1"
+                rotation: Triangle.Bottom
+            }
+
+            MouseArea{
+                id : openStatesDropdown
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: modeContainer.visible = !modeContainer.visible
+            }
+        }
+
+
+        Rectangle{
+            width: parent.width
+            height: 1
+            color: "#1a1f25"
+            anchors.bottom: parent.bottom
+        }
+
+    }
 }
