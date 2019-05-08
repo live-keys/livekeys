@@ -147,8 +147,8 @@ Item{
                     var rect = Qt.rect(oct.x + 150, octY, oct.width, 25)
                     var cursorCoords = objectContainer.editor.cursorWindowCoords()
 
-                    var addBox = livecv.windowControls().editSpace.createEditorBox(
-                        addBoxItem, rect, cursorCoords, livecv.windowControls().editSpace.placement.bottom
+                    var addBox = livecv.windowControls().editor.environment.createEditorBox(
+                        addBoxItem, rect, cursorCoords, livecv.windowControls().editor.environment.placement.bottom
                     )
                     addBox.color = 'transparent'
                     addBoxItem.cancel = function(){
@@ -230,7 +230,7 @@ Item{
                     }
 
                     addBoxItem.assignFocus()
-                    livecv.windowControls().setActiveItem(addBox, objectContainer.editor)
+                    livecv.windowControls().workspace.panes.setActiveItem(addBox, objectContainer.editor)
                 }
             }
         }

@@ -18,6 +18,7 @@ Rectangle{
 
     width: 400
     height: 400
+    z: 400
 
     function show(){
         commandsMenuInput.forceActiveFocus()

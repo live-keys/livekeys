@@ -1,6 +1,7 @@
 import QtQuick 2.3
 
-MessageDialogInternal {
+MessageDialogInternal{
+    id: root
 
     function show(
         message,
@@ -13,8 +14,8 @@ MessageDialogInternal {
             button2Function : null,
             button3Name : '',
             button3Function : null,
-            returnPressed : function(){ messageBox.close(); },
-            escapePressed : function(){ messageBox.close(); }
+            returnPressed : function(){ root.close(); },
+            escapePressed : function(){ root.close(); }
         }
         for ( var i in defaults )
             if ( typeof options[i] == 'undefined' )
@@ -33,36 +34,41 @@ MessageDialogInternal {
             messageBoxButton3.callback = options.button3Function
         }
 
-        messageBox.message = message
-        messageBox.returnPressed = options.returnPressed
-        messageBox.escapePressed = options.escapePressed
+        root.message = message
+        root.returnPressed = options.returnPressed
+        root.escapePressed = options.escapePressed
 
-        messageBox.visible = true
-        messageBox.forceActiveFocus()
+        root.visible = true
+        root.forceActiveFocus()
     }
+
     function close(){
-        messageBox.message = ''
-        messageBox.visible = false
+        root.message = ''
+        root.visible = false
         messageBoxButton1.text = ''
         messageBoxButton2.text = ''
         messageBoxButton3.text = ''
+        root.destroy()
         editor.forceFocus()
     }
 
     MessageDialogButton{
         id: messageBoxButton1
         visible : text !== ''
+        onClicked: messageBoxButton1.callback(root)
     }
 
     MessageDialogButton{
         id: messageBoxButton2
         anchors.centerIn: parent
         visible : text !== ''
+        onClicked: messageBoxButton2.callback(root)
     }
 
     MessageDialogButton{
         id: messageBoxButton3
         anchors.right: parent.right
         visible : text !== ''
+        onClicked: messageBoxButton3.callback(root)
     }
 }

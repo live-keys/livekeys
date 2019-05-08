@@ -51,7 +51,7 @@ public:
 
     PluginInfoExtractor *getPluginInfoExtractor(const QString& import);
 
-    static void engineHook(const QString& code, const QUrl& file, QObject* result, QObject* project, void *data);
+    static void engineHook(const QString& code, const QUrl& file, QObject* result, void *data);
 
     void addCodeQmlHandler(CodeQmlHandler* handler);
     void removeCodeQmlHandler(CodeQmlHandler* handler);

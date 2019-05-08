@@ -3,7 +3,6 @@ plugin editor
 
 depends QtQuick 2.3
 
-WindowControls   1.0 WindowControls.qml
 Editor           1.0 Editor.qml
 SuggestionBox    1.0 SuggestionBox.qml
 ContextMenuStyle 1.0 ContextMenuStyle.qml

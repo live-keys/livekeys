@@ -67,7 +67,7 @@ class LV_VIEW_EXPORT ViewEngine : public QObject{
 
 public:
     /** Callback function type to be run after the engine finishes compiling */
-    typedef void(*CompileHook)(const QString&, const QUrl&, QObject*, QObject*, void*);
+    typedef void(*CompileHook)(const QString&, const QUrl&, QObject*, void*);
 
 private:
     class CompileHookEntry{
@@ -120,15 +120,21 @@ public:
     static void registerBaseTypes(const char* uri);
     static void initializeBaseTypes(ViewEngine* engine);
 
+    static QString toErrorString(const QQmlError& error);
+    static QString toErrorString(const QList<QQmlError> &errors);
+
+    QObject* createObject(const QByteArray& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
+    QObject* createObject(const char* qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
+
 signals:
     /** Signals before compiling a new object. */
     void aboutToCreateObject(const QUrl& file);
     /** Loading indicator has changed */
     void isLoadingChanged(bool isLoading);
     /** Object was created */
-    void objectCreated(QObject* object);
+    void objectCreated(QObject* object, const QUrl& file);
     /** Error in object creation */
-    void objectCreationError(QJSValue errors);
+    void objectCreationError(QJSValue errors, const QUrl& file);
 
     /** Emitted when the error is propagated all the way to the application */
     void applicationError(QJSValue error);
@@ -140,7 +146,6 @@ public slots:
         const QString& qmlCode,
         QObject* parent,
         const QUrl& file,
-        QObject *attachment,
         bool clearCache = false
     );
     QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);

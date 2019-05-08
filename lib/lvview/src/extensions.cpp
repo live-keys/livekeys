@@ -17,9 +17,12 @@
  * \brief Object used to store all the extensions of LiveKeys
  * \ingroup lvview
  */
+
 namespace lv{
 
-/** Default constructor */
+/**
+ * \brief Default constructor
+ */
 Extensions::Extensions(ViewEngine *engine, const QString &settingsPath, QObject *parent)
     : QObject(parent)
     , m_globals(new QQmlPropertyMap(this))
