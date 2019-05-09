@@ -36,12 +36,16 @@
 #include "qgetperspectivetransform.h"
 #include "qwarpperspective.h"
 #include "qcachedwarpperspective.h"
+#include "qgeometry.h"
 
 #include <QQmlEngine>
 
 
 static QObject* drawProvider(QQmlEngine *engine, QJSEngine *){
     return new QDraw(engine);
+}
+static QObject* geometryProvider(QQmlEngine *engine, QJSEngine *){
+    return new QGeometry(engine);
 }
 
 void LcvimgprocPlugin::registerTypes(const char *uri){
@@ -66,6 +70,7 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QCachedWarpPerspective>(  uri, 1, 0, "CachedWarpPerspective");
 
     qmlRegisterSingletonType<QDraw>( uri, 1, 0, "Draw", &drawProvider);
+    qmlRegisterSingletonType<QGeometry>( uri, 1, 0, "Geometry", &geometryProvider);
 }
 
 

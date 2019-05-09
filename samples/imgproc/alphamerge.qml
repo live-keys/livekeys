@@ -1,6 +1,6 @@
 import QtQuick 2.3
-import lcvcore 1.0
-import lcvimgproc 1.0
+import lcvcore 1.0 as Cv
+import lcvimgproc 1.0 as Img
 
 Grid{
     
@@ -9,31 +9,29 @@ Grid{
     
     columns : 2
     
-    ImRead{
+    Cv.ImRead{
        id : src
        file : project.dir() + '/../_images/buildings_0246.jpg'
     }
     
-    MatEmpty{
-        id : nullmask
-        matSize : src.output.dataSize()
-    }
-    
-    MatDraw{
+    Cv.MatView{
         id : mask
-        input : nullmask.output
-        onInputChanged : {
-            circle( Qt.point(
-                input.dataSize().width / 2, 
-                input.dataSize().height / 2),
-                input.dataSize().height / 4, 
+        mat : {
+            var maskMat = Cv.MatOp.createWritableFill(
+                src.output.dimensions(), Cv.Mat.CV8U, 1, "#000"
+            )
+            Img.Draw.circle(
+                maskMat, 
+                Qt.point( maskMat.dimensions().width / 2, maskMat.dimensions().height / 2),
+                maskMat.dimensions().height / 4, 
                 "#fff", -1);
+            return maskMat.toMat()
         }
     }
     
-    AlphaMerge{
+    Cv.AlphaMerge{
         input : src.output
-        mask : mask.output
+        mask : mask.mat
     }
     
 }

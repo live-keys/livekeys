@@ -53,6 +53,7 @@ class DocumentHandler;
 class CodeQmlHandler;
 class Extensions;
 class PackageGraph;
+class Layer;
 
 // class LiveCV
 // ------------
@@ -67,6 +68,7 @@ class LiveCV : public QObject{
     Q_PROPERTY(lv::KeyMap*         keymap         READ keymap     CONSTANT)
     Q_PROPERTY(lv::Memory*         mem            READ memory     CONSTANT)
     Q_PROPERTY(QQmlPropertyMap*    extensions     READ extensions CONSTANT)
+    Q_PROPERTY(QQmlPropertyMap*    layers         READ layers     CONSTANT)
 
 public:
     typedef QSharedPointer<LiveCV>       Ptr;
@@ -87,9 +89,15 @@ public:
 
     const QString& dir() const;
 
+    void addDefaultLayers();
+    void addLayer(const QString& name, const QString &layer);
+    void loadLayer(const QString& layerName, std::function<void(Layer *)> onReady = nullptr);
+    void loadLayers(const QStringList& layers, std::function<void(Layer*)> onReady = nullptr);
+
     void loadInternals();
     void loadInternalPlugins();
     void loadInternalPackages();
+
 
     std::vector<std::string> packageImportPaths() const;
 
@@ -105,9 +113,11 @@ public:
     Memory*     memory();
     QQmlPropertyMap* extensions();
     VisualLogModel* log();
+    QQmlPropertyMap* layers();
 
 public slots:
     QObject *windowControls() const;
+    QObject* layerPlaceholder() const;
     QJSValue interceptMenu(QJSValue context);
     void engineError(QJSValue error);
     void projectChanged(const QString& path);
@@ -126,7 +136,6 @@ private:
     ViewEngine*      m_engine;
     LiveCVArguments* m_arguments;
 
-    lv::DocumentHandler* m_codeInterface;
     QString              m_dir;
     QStringList          m_engineImportPaths;
 
@@ -141,6 +150,11 @@ private:
     lv::PackageGraph*      m_packageGraph;
     lv::Memory*            m_memory;
     mutable QObject*       m_windowControls;
+
+    QQmlPropertyMap*       m_layers;
+    QMap<QString, QString> m_storedLayers;
+    Layer*                 m_lastLayer;
+    mutable QObject*       m_layerPlaceholder;
 };
 
 inline int LiveCV::versionMajor(){

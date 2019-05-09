@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLIVECVMAIN_H
-#define QLIVECVMAIN_H
+#ifndef QMLMAIN_H
+#define QMLMAIN_H
 
 #include <QQuickItem>
 #include <QJSValue>
@@ -23,16 +23,18 @@
 
 class QScriptCommandLineParser;
 
+namespace lv{
+
 ///\private
-class QLiveCVMain : public QQuickItem{
+class QmlMain : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(QJSValue options READ options WRITE setOptions NOTIFY optionsChanged)
     Q_PROPERTY(QString version  READ version WRITE setVersion NOTIFY versionChanged)
 
 public:
-    explicit QLiveCVMain(QQuickItem* parent = 0);
-    ~QLiveCVMain();
+    explicit QmlMain(QQuickItem* parent = 0);
+    ~QmlMain();
 
     const QJSValue& options() const;
     const QString& version() const;
@@ -64,20 +66,20 @@ private:
     QScriptCommandLineParser* m_parser;
 };
 
-inline const QJSValue &QLiveCVMain::options() const{
+inline const QJSValue &QmlMain::options() const{
     return m_options;
 }
 
-inline const QString &QLiveCVMain::version() const{
+inline const QString &QmlMain::version() const{
     return m_version;
 }
 
-inline void QLiveCVMain::setOptions(const QJSValue& options){
+inline void QmlMain::setOptions(const QJSValue& options){
     m_options = options;
     emit optionsChanged();
 }
 
-inline void QLiveCVMain::setVersion(const QString &version){
+inline void QmlMain::setVersion(const QString &version){
     if (m_version == version)
         return;
 
@@ -85,4 +87,6 @@ inline void QLiveCVMain::setVersion(const QString &version){
     emit versionChanged();
 }
 
-#endif // QLIVECVMAIN_H
+}// namespace
+
+#endif // QMLMAIN_H

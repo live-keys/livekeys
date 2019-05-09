@@ -1,15 +1,15 @@
-#ifndef MAPARRAY_H
-#define MAPARRAY_H
+#ifndef LVQMLCOMPONENTMAP_H
+#define LVQMLCOMPONENTMAP_H
 
 #include <QObject>
 #include <QQmlComponent>
 
 namespace lv{
 
-class MapArrayData;
+class QmlComponentMapData;
 
 /// \private
-class MapArray : public QObject{
+class QmlComponentMap : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QVariantList input  READ input  WRITE setInput  NOTIFY inputChanged)
@@ -17,8 +17,8 @@ class MapArray : public QObject{
     Q_PROPERTY(QVariantList output READ output NOTIFY outputChanged)
 
 public:
-    explicit MapArray(QObject *parent = nullptr);
-    ~MapArray();
+    explicit QmlComponentMap(QObject *parent = nullptr);
+    ~QmlComponentMap();
 
     void setInput(const QVariantList& input);
     void setF(QQmlComponent* f);
@@ -29,7 +29,7 @@ public:
 
     void process();
 
-    void assignResult(MapArrayData* mad, const QVariant& v);
+    void assignResult(QmlComponentMapData* mad, const QVariant& v);
 
     void clearCurrent();
 
@@ -44,20 +44,22 @@ private:
 
     QList<QObject*>      m_fObjects;
     QList<QQmlContext*>  m_fContexts;
-    QList<MapArrayData*> m_fData;
+    QList<QmlComponentMapData*> m_fData;
+
+    bool                 m_isProcessing;
 
     QQmlComponent* m_f;
 };
 
-inline const QVariantList &MapArray::input() const{
+inline const QVariantList &QmlComponentMap::input() const{
     return m_input;
 }
 
-inline QQmlComponent *MapArray::f() const{
+inline QQmlComponent *QmlComponentMap::f() const{
     return m_f;
 }
 
-inline void MapArray::setInput(const QVariantList &input){
+inline void QmlComponentMap::setInput(const QVariantList &input){
     if (m_input == input)
         return;
 
@@ -66,7 +68,7 @@ inline void MapArray::setInput(const QVariantList &input){
     emit inputChanged();
 }
 
-inline void MapArray::setF(QQmlComponent *f){
+inline void QmlComponentMap::setF(QQmlComponent *f){
     if (m_f == f)
         return;
 
@@ -75,10 +77,10 @@ inline void MapArray::setF(QQmlComponent *f){
     emit fChanged();
 }
 
-inline const QVariantList &MapArray::output() const{
+inline const QVariantList &QmlComponentMap::output() const{
     return m_output;
 }
 
 }// namespace
 
-#endif // MAPARRAY_H
+#endif // LVQMLCOMPONENTMAP_H

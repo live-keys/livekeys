@@ -18,7 +18,8 @@ HEADERS += \
     $$PWD/qgetperspectivetransform.h \
     $$PWD/qwarpperspective.h \
     $$PWD/qcachedwarpperspective.h \
-    $$PWD/qdraw.h
+    $$PWD/qdraw.h \
+    $$PWD/qgeometry.h
 #    $$PWD/qbilateralfilter.h
 
 SOURCES += \
@@ -41,6 +42,7 @@ SOURCES += \
     $$PWD/qgetperspectivetransform.cpp \
     $$PWD/qwarpperspective.cpp \
     $$PWD/qcachedwarpperspective.cpp \
-    $$PWD/qdraw.cpp
+    $$PWD/qdraw.cpp \
+    $$PWD/qgeometry.cpp
 #    $$PWD/qbilateralfilter.cpp
 

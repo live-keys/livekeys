@@ -23,7 +23,6 @@ Rectangle{
     property var callback : function(){}
 
     signal clicked()
-    onClicked: callback()
 
     color: buttonMouseArea.containsMouse ? "#0e2435" : "#0a1a27"
     width: 100

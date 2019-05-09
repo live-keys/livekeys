@@ -52,10 +52,6 @@ Rectangle {
     signal openSettings()
     signal openLicense()
 
-    function questionSave(){
-        messageBox.visible = true
-    }
-
     // New
 
     Rectangle{
@@ -314,78 +310,6 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: container.openLicense()
-        }
-    }
-
-    Rectangle{
-        id : messageBox
-        anchors.left: parent.left
-        anchors.leftMargin: 130
-        height : visible ? parent.height : 0
-        color : "#102235"
-        width : 400
-        visible : false
-        Behavior on height {
-            SpringAnimation { spring: 3; damping: 0.1 }
-        }
-        Text{
-            color : "#bec7ce"
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: 12
-            text : "Would you like to save your current code?"
-            font.family: "Ubuntu Mono, Courier New, Courier"
-        }
-        Rectangle{
-            anchors.left: parent.left
-            anchors.leftMargin: 300
-            height : parent.height
-            width : 50
-            color : "transparent"
-            Text{
-                color : yesMArea.containsMouse ? "#fff" : "#bec7ce"
-                anchors.left: parent.left
-                anchors.leftMargin: 20
-                anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: 12
-                text : "Yes"
-                font.family: "Ubuntu Mono, Courier New, Courier"
-            }
-            MouseArea{
-                id : yesMArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked : {
-                    messageBox.visible = false
-                    container.messageYes()
-                }
-            }
-        }
-        Rectangle{
-            anchors.left: parent.left
-            anchors.leftMargin: 350
-            height : parent.height
-            width : 50
-            color : "transparent"
-            Text{
-                color : noMArea.containsMouse ? "#fff" : "#bec7ce"
-                anchors.left: parent.left
-                anchors.leftMargin: 20
-                anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: 12
-                text : "No"
-                font.family: "Ubuntu Mono, Courier New, Courier"
-            }
-            MouseArea{
-                id : noMArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked : {
-                    container.messageNo()
-                    messageBox.visible = false
-                }
-            }
         }
     }
 

@@ -45,6 +45,9 @@ Rectangle{
     }
 
     property color topColor: "#08111a"
+    property color lineSurfaceColor: "#091018"
+    property color lineInfoColor:  "#050b12"
+    property color optionsColor: "#04131f"
 
     color : "#050b12"
     clip : true
@@ -52,15 +55,15 @@ Rectangle{
     objectName: "editor"
 
     property string objectCommandIndex : livecv.commands.add(editor, {
-        'saveFile' : [ function(){ if ( hasActiveEditor() ) windowControls.activePane.save() }, "Save File"],
-        'saveFileAs' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.saveAs() }, "Save File As"],
-        'closeFile' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.closeDocument() }, "Close File"],
-        'assistCompletion' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.assistCompletion() }, "Assist Completion"],
-        'toggleSize' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.toggleSize() }, "Toggle Size"]
+        'saveFile' : [ function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.save() }, "Save File"],
+        'saveFileAs' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.saveAs() }, "Save File As"],
+        'closeFile' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.closeDocument() }, "Close File"],
+        'assistCompletion' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.assistCompletion() }, "Assist Completion"],
+        'toggleSize' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.toggleSize() }, "Toggle Size"]
     })
 
     function hasActiveEditor(){
-        return windowControls.activePane.objectName === 'editor'
+        return windowControls.workspace.panes.activePane.objectName === 'editor'
     }
 
     function save(){
@@ -68,95 +71,128 @@ Rectangle{
             return;
         if ( editor.document.file.name !== '' ){
             editor.document.save()
-            if ( project.active && ((controls.codingMode === 0 && project.active !== editor.document) || controls.codingMode === 1)) /* compiling isn't disabled */{
-                var documentList = project.documentModel.listUnsavedDocuments()
-                livecv.engine.createObjectAsync(
-                    project.active.content,
-                    windowControls.runSpace,
-                    project.active.file.pathUrl(),
-                    project.active,
-                    !(documentList.size === 1 && documentList[0] === project.active)
-                );
-            }
+            if ( controls.codingMode === 1 )
+                windowControls.workspace.project.compile()
         } else {
-            windowControls.saveFileDialog.open()
+            saveAs()
         }
     }
 
     function saveAs(){
-        windowControls.saveFileDialog.open()
+        windowControls.dialogs.saveFile(
+            { filters: [ "Qml files (*.qml)", "All files (*)" ] },
+            function(url){
+                var editordoc = editor.document
+                if ( !editordoc.saveAs(url) ){
+                    windowControls.dialogs.message(
+                        'Failed to save file to: ' + url,
+                        {
+                            button3Name : 'Ok',
+                            button3Function : function(mbox){
+                                mbox.close()
+                            }
+                        }
+                    )
+                    return;
+                }
+
+                if ( !project.isDirProject() ){
+                    project.openProject(url)
+                    editor.document = project.active
+                } else if ( project.isFileInProject(url) ){
+
+                    var doc = project.openFile(url, ProjectDocument.Edit)
+                    if ( controls.codingMode === 1 )
+                        windowControls.workspace.project.compile()
+
+                    var fe = projectView.findFocusEditor()
+                    if ( fe ){
+                        fe.document = doc
+                    }
+                } else {
+                    var fileUrl = url
+                    windowControls.dialogs.message(
+                        'File is outside project scope. Would you like to open it as a new project?',
+                    {
+                        button1Name : 'Open as project',
+                        button1Function : function(mbox){
+                            var projectUrl = fileUrl
+                            projectView.closeProject(
+                                function(){
+                                    project.openProject(projectUrl);
+                                    editor.document = project.active
+                                }
+                            )
+                            mbox.close()
+                        },
+                        button3Name : 'Cancel',
+                        button3Function : function(mbox){
+                            mbox.close()
+                        },
+                        returnPressed : function(mbox){
+                            var projectUrl = fileUrl
+                            projectView.closeProject(
+                                function(){
+                                    project.openProject(projectUrl)
+                                    editor.document = project.active
+                                }
+                            )
+                            mbox.close()
+                        }
+                    })
+                }
+            }
+        )
     }
 
     function closeDocument(){
         if ( !editor.document )
             return;
         if ( editor.document.isDirty ){
-            var saveFunction = function(){
+            var saveFunction = function(mbox){
                 if ( editor.document.file.name !== '' ){
                     editor.document.save()
                     editor.closeDocumentAction()
                 } else {
-                    windowControls.saveFileDialog.open()
-                    windowControls.saveFileDialog.callback = function(){
-                        if ( !editor.document.saveAs(windowControls.saveFileDialog.fileUrl) ){
-                            windowControls.messageDialog.show(
-                                'Failed to save file to: ' + windowControls.saveFileDialog.fileUrl,
-                                {
-                                    button3Name : 'Ok',
-                                    button3Function : function(){ windowControls.messageDialog.close(); }
-                                }
-                            )
-                            return;
+                    windowControls.dialogs.saveFile(
+                        { filters: [ "Qml files (*.qml)", "All files (*)" ] },
+                        function(url){
+                            if ( !editor.document.saveAs(url) ){
+                                windowControls.dialogs.message(
+                                    'Failed to save file to: ' + url,
+                                    {
+                                        button3Name : 'Ok',
+                                        button3Function : function(){ windowControls.dialogs.messageClose(); }
+                                    }
+                                )
+                                return;
+                            }
+                            editor.closeDocumentAction()
                         }
-                        editor.closeDocumentAction()
-                    }
+                    )
                 }
-                windowControls.messageDialog.close()
+                mbox.close()
             }
 
-            windowControls.messageDialog.show('File contains unsaved changes. Would you like to save them before closing?',
+            windowControls.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
             {
                 button1Name : 'Yes',
-                button1Function : function(){
-                    saveFunction()
-                    var documentList = project.documentModel.listUnsavedDocuments()
-                    livecv.engine.createObjectAsync(
-                        project.active.content,
-                        runSpace,
-                        project.active.file.pathUrl(),
-                        project.active,
-                        !(documentList.size === 1 && documentList[0] === project.active)
-                    );
+                button1Function : function(mbox){
+                    saveFunction(mbox)
+                    windowControls.workspace.project.compile()
                 },
                 button2Name : 'No',
-                button2Function : function(){
-                    windowControls.messageDialog.close()
+                button2Function : function(mbox){
+                    mbox.close()
                     editor.closeDocumentAction()
                     editor.document = project.documentModel.lastOpened()
-                    var documentList = project.documentModel.listUnsavedDocuments()
-                    livecv.engine.createObjectAsync(
-                        project.active.content,
-                        runSpace,
-                        project.active.file.pathUrl(),
-                        project.active,
-                        !(documentList.size === 1 && documentList[0] === project.active)
-                    );
-
                 },
                 button3Name : 'Cancel',
-                button3Function : function(){
-                    windowControls.messageDialog.close()
+                button3Function : function(mbox){
+                    boxm.close()
                 },
-                returnPressed : function(){
-                    saveFunction()
-                    var documentList = project.documentModel.listUnsavedDocuments()
-                    livecv.engine.createObjectAsync(
-                        project.active.content,
-                        runSpace,
-                        project.active.file.pathUrl(),
-                        project.active,
-                        !(documentList.size === 1 && documentList[0] === project.active)
-                    );
+                returnPressed : function(mbox){
+                    saveFunction(mbox)
                 },
             })
         } else
@@ -169,21 +205,21 @@ Rectangle{
 
     function closeDocumentAction(){
         if ( !project.isDirProject() && document === project.active ){
-            windowControls.messageDialog.show(
+            windowControls.dialogs.message(
                 'Closing this file will also close this project. Would you like to close the project?',
             {
                 button1Name : 'Yes',
-                button1Function : function(){
+                button1Function : function(mbox){
                     project.closeProject()
-                    windowControls.messageDialog.close()
+                    mbox.close()
                 },
                 button3Name : 'No',
-                button3Function : function(){
-                    windowControls.messageDialog.close()
+                button3Function : function(mbox){
+                    mbox.close()
                 },
-                returnPressed : function(){
+                returnPressed : function(mbox){
                     project.closeProject()
-                    windowControls.messageDialog.close()
+                    mbox.close()
                 }
             })
         } else {
@@ -270,7 +306,6 @@ Rectangle{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    windowControls.navEditor = editor
                     livecv.commands.execute('window.toggleNavigation')
                 }
             }
@@ -305,10 +340,7 @@ Rectangle{
             anchors.right: parent.right
             anchors.rightMargin: 31
             visible : editor.document !== null
-            gradient: Gradient{
-                GradientStop { position: 0.0;  color: "#050b12" }
-                GradientStop { position: 0.30; color: "#050b12" }
-            }
+            color: editor.lineInfoColor
 
             property bool lineAndColumn : true
 
@@ -333,13 +365,10 @@ Rectangle{
             anchors.right: parent.right
             width: 30
             height: parent.height
-            gradient: Gradient{
-                GradientStop { position: 0.0;  color: "#04131f" }
-                GradientStop { position: 0.30; color: "#081019" }
-            }
+            color: editor.optionsColor
 
             Image{
-                id : toggleNavigationImage
+                id : paneOptions
                 anchors.centerIn: parent
                 source : "qrc:/images/toggle-navigation.png"
             }
@@ -440,7 +469,7 @@ Rectangle{
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             width: lineSurface.width + 5
-            color: "#091018"
+            color: editor.lineSurfaceColor
             clip: true
 
             Flickable{
@@ -525,7 +554,7 @@ Rectangle{
                         editorArea.cursorPosition = position
                     }
                     onContentsChangedManually: {
-                        editor.windowControls.createTimer.restart();
+                        editor.windowControls.workspace.project.compileTimer.restart();
                     }
                 }
 

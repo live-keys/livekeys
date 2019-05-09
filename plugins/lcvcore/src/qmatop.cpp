@@ -80,7 +80,7 @@ void QMatOp::ListOperations::appendItem(lv::QmlObjectList *list, QObject *item)
 int QMatOp::ListOperations::itemCount(lv::QmlObjectList *list)
 {
     auto data = list->dataAs<std::vector<QMat*>>();
-    return data->size();
+    return static_cast<int>(data->size());
 }
 
 QObject *QMatOp::ListOperations::itemAt(lv::QmlObjectList *list, int idx)
@@ -221,6 +221,12 @@ QMat *QMatOp::reloc(QMat *m){
 QMat *QMatOp::crop(QMat *m, const QRect &region){
     QMat* r = new QMat;
     m->internal()(toRect(region)).copyTo(r->internal());
+    return r;
+}
+
+QMat *QMatOp::flip(QMat *m, int direction){
+    QMat* r = new QMat;
+    cv::flip(m->internal(), r->internal(), direction);
     return r;
 }
 

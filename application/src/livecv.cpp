@@ -46,6 +46,8 @@
 #include "live/plugininfoextractor.h"
 #include "qmlengineinterceptor.h"
 
+#include "live/windowlayer.h"
+
 #include <QUrl>
 #include <QFileInfo>
 #include <QDir>
@@ -63,7 +65,6 @@ LiveCV::LiveCV(QObject *parent)
     : QObject(parent)
     , m_engine(new ViewEngine(new QQmlApplicationEngine))
     , m_arguments(new LiveCVArguments(header().toStdString()))
-    , m_codeInterface(0)
     , m_dir(QString::fromStdString(ApplicationContext::instance().applicationPath()))
     , m_project(new Project)
     , m_settings(nullptr)
@@ -76,6 +77,9 @@ LiveCV::LiveCV(QObject *parent)
     , m_packageGraph(nullptr)
     , m_memory(new Memory(this))
     , m_windowControls(nullptr)
+    , m_layers(new QQmlPropertyMap)
+    , m_lastLayer(nullptr)
+    , m_layerPlaceholder(nullptr)
 {
     solveImportPaths();
     m_log = new VisualLogModel(m_engine->engine());
@@ -91,6 +95,7 @@ LiveCV::~LiveCV(){
     delete m_engine;
     delete m_packageGraph;
     delete m_memory;
+    delete m_layers;
 }
 
 LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent){
@@ -162,6 +167,7 @@ void LiveCV::solveImportPaths(){
 }
 
 void LiveCV::loadQml(const QUrl &url){
+    static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);
 
     if ( m_arguments->script() != "" ){
         m_project->openProject(QString::fromStdString(m_arguments->script()));
@@ -183,13 +189,78 @@ void LiveCV::loadQml(const QUrl &url){
             }
         }
     }
+}
 
-    static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);
+void LiveCV::addLayer(const QString &name, const QString &layer){
+    m_storedLayers.insert(name, layer);
+}
+
+void LiveCV::loadLayer(const QString &name, std::function<void (Layer*)> onReady){
+    auto it = m_storedLayers.find(name);
+    if ( it == m_storedLayers.end() )
+        THROW_EXCEPTION(Exception, "Layer not found: " + name.toStdString(), Exception::toCode("~Layer"));
+
+    QString layerUrl = it.value();
+
+    QFile f(layerUrl);
+    if ( !f.open(QFile::ReadOnly) )
+        THROW_EXCEPTION(Exception, "Failed to read file for layer: " + name.toStdString(), Exception::toCode("~File"));
+
+    QByteArray contentBytes = f.readAll();
+
+    QObject* layerObj = m_engine->createObject(contentBytes, m_engine->engine(), layerUrl);
+    if ( !layerObj && m_engine->lastErrors().size() > 0 )
+        THROW_EXCEPTION(
+            Exception, ViewEngine::toErrorString(m_engine->lastErrors()).toStdString(), Exception::toCode("~Component")
+        );
+
+    if ( !layerObj )
+        THROW_EXCEPTION(Exception, "Null layer returned at: " + name.toStdString(), Exception::toCode("~Layer"));
+
+    Layer* layer = static_cast<Layer*>(layerObj);
+    layer->setName(name);
+
+    if ( !layer )
+        THROW_EXCEPTION(Exception, "Object is not of layer type at: " + name.toStdString(), Exception::toCode("~Layer"));
+
+    if ( m_lastLayer)
+        layer->setParent(m_lastLayer);
+    m_lastLayer = layer;
+    m_layers->insert(name, QVariant::fromValue(layer));
+
+    if ( layer->hasView() ){
+        connect(layer, &Layer::viewReady, [this, onReady](Layer* layer, QObject* view){
+            qDebug() << "Layer view ready: " << layer->name();
+            m_layerPlaceholder = view;
+            if ( onReady )
+                onReady(layer);
+        });
+
+        layer->loadView(m_engine, m_layerPlaceholder ? m_layerPlaceholder : m_engine->engine());
+    } else if ( onReady ){
+        onReady(layer);
+    }
+}
+
+void LiveCV::loadLayers(const QStringList &layers, std::function<void (Layer *)> onReady){
+    if ( layers.length() ){
+        QStringList tail = layers;
+        tail.removeFirst();
+        loadLayer(layers.first(), [tail, onReady, this](Layer* l){
+            if ( tail.isEmpty() ){
+                if (onReady)
+                    onReady(l);
+            } else {
+                loadLayers(tail, onReady);
+            }
+        });
+    }
 }
 
 void LiveCV::loadInternals(){
     loadInternalPackages();
     loadInternalPlugins();
+    addDefaultLayers();
     QmlEngineInterceptor::interceptEngine(engine(), m_packageGraph, m_project);
 }
 
@@ -217,7 +288,6 @@ void LiveCV::loadInternalPlugins(){
         "base", 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
     qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
         "base", 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type.");
-
 
     ViewEngine::registerBaseTypes("base");
 
@@ -289,6 +359,11 @@ void LiveCV::loadInternalPackages(){
     }
 }
 
+void LiveCV::addDefaultLayers(){
+    addLayer("window", ":/windowlayer.qml");
+    addLayer("workspace", ":/workspacelayer.qml");
+}
+
 std::vector<std::string> LiveCV::packageImportPaths() const{
     std::vector<std::string> paths;
     paths.push_back(ApplicationContext::instance().pluginPath());
@@ -321,6 +396,10 @@ QQmlPropertyMap *LiveCV::extensions(){
     return nullptr;
 }
 
+QQmlPropertyMap *LiveCV::layers(){
+    return m_layers;
+}
+
 QObject *LiveCV::windowControls() const{
     if ( !m_windowControls ){
         QList<QObject*> rootObjects = static_cast<QQmlApplicationEngine*>(m_engine->engine())->rootObjects();
@@ -331,6 +410,21 @@ QObject *LiveCV::windowControls() const{
         }
     }
     return m_windowControls;
+}
+
+QObject *LiveCV::layerPlaceholder() const{
+    if ( !m_layerPlaceholder ){
+        QList<QObject*> rootObjects = static_cast<QQmlApplicationEngine*>(m_engine->engine())->rootObjects();
+        for ( auto it = rootObjects.begin(); it != rootObjects.end(); ++it ){
+            if ( (*it)->objectName() == "window" ){
+                QObject* controls = (*it)->property("controls").value<QObject*>();
+                QObject* workspace = controls->property("workspace").value<QObject*>();
+                QObject* prj = workspace->property("project").value<QObject*>();
+                m_layerPlaceholder = prj->property("runSpace").value<QObject*>();
+            }
+        }
+    }
+    return m_layerPlaceholder;
 }
 
 QJSValue LiveCV::interceptMenu(QJSValue context){

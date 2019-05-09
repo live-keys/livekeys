@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "qlivecvmain.h"
+#include "qmlmain.h"
 #include "qscriptcommandlineparser_p.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
@@ -27,17 +27,19 @@
 #include <QQmlEngine>
 #include <QJSValueIterator>
 
-QLiveCVMain::QLiveCVMain(QQuickItem *parent)
+namespace lv{
+
+QmlMain::QmlMain(QQuickItem *parent)
     : QQuickItem(parent)
     , m_parser(0)
 {
     setFlag(ItemHasContents, false);
 }
 
-QLiveCVMain::~QLiveCVMain(){
+QmlMain::~QmlMain(){
 }
 
-void QLiveCVMain::componentComplete(){
+void QmlMain::componentComplete(){
     QQuickItem::componentComplete();
 
     connect(lv::ViewContext::instance().engine(), SIGNAL(aboutToCreateObject(QUrl)), this, SLOT(beforeCompile()));
@@ -47,12 +49,12 @@ void QLiveCVMain::componentComplete(){
     m_parser = new QScriptCommandLineParser(obj->property("argvTail").toStringList());
 }
 
-void QLiveCVMain::beforeCompile(){
+void QmlMain::beforeCompile(){
     // Remove before a new compilation takes place (otherwise aftercompile triggers twice)
     disconnect(sender(), SIGNAL(afterCompile()), this, SLOT(afterCompile()));
 }
 
-void QLiveCVMain::afterCompile(){
+void QmlMain::afterCompile(){
     try{
         m_parser->resetScriptOptions();
 
@@ -131,11 +133,11 @@ void QLiveCVMain::afterCompile(){
     }
 }
 
-const QStringList &QLiveCVMain::arguments() const{
+const QStringList &QmlMain::arguments() const{
     return m_parser->arguments();
 }
 
-QString QLiveCVMain::option(const QString &key) const{
+QString QmlMain::option(const QString &key) const{
     QScriptCommandLineParser::Option* option = m_parser->findOptionByName(key);
     if ( !option ){
         qCritical("Failed to find script option: %s", qPrintable(key));
@@ -144,7 +146,7 @@ QString QLiveCVMain::option(const QString &key) const{
     return m_parser->value(option);
 }
 
-bool QLiveCVMain::isOptionSet(const QString &key) const{
+bool QmlMain::isOptionSet(const QString &key) const{
     QScriptCommandLineParser::Option* option = m_parser->findOptionByName(key);
     if ( !option ){
         qCritical("Failed to find script option: %s", qPrintable(key));
@@ -152,3 +154,5 @@ bool QLiveCVMain::isOptionSet(const QString &key) const{
     }
     return m_parser->isSet(option);
 }
+
+}// namespace

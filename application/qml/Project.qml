@@ -22,27 +22,186 @@ import base 1.0
 import editor 1.0
 import editor.private 1.0
 
-Rectangle{
+Item{
     id: root
-    color : "#05090e"
     objectName: "project"
 
-    property WindowControls windowControls : null
-    property Item focusEditor : null
-    property Item navEditor: null
+    property QtObject windowControls : null
+    property QtObject runSpace: null
 
-    function setFocusEditor(e){
-        if (focusEditor !== e ){
-            if (focusEditor) focusEditor.internalFocus = false
-            focusEditor = e
-            focusEditor.internalFocus = true
+    property Timer compileTimer : Timer{
+        interval: 1000
+        running: true
+        repeat : false
+        onTriggered: root.compile()
+    }
+
+    property Item addEntryOverlay : ProjectAddEntry{
+        onAccepted: {
+            if ( isFile ){
+                var f = project.fileModel.addFile(entry, name)
+                if ( f !== null )
+                    project.openFile(f, ProjectDocument.Edit)
+            } else {
+                project.fileModel.addDirectory(entry, name)
+            }
         }
     }
 
-    function setNavEditor(e){
-        if (navEditor && navEditor !== e){
-            navEditor = e;
+    property Item navigation : ProjectNavigation{
+        id: projectNavigation
+        anchors.fill: parent
+        visible: false
+        onOpen: {
+            projectNavigation.parent.document = project.openFile(path, ProjectDocument.EditIfNotOpen)
+            root.windowControls.workspace.panes.setActiveItem(projectNavigation.parent.textEdit, projectNavigation.parent)
         }
+        onCloseFile: {
+            var doc = project.documentModel.isOpened(path)
+            if ( doc ){
+                if ( doc.isDirty ){
+                    root.windowControls.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
+                    {
+                        button1Name : 'Yes',
+                        button1Function : function(mbox){
+                            doc.save()
+                            project.closeFile(path)
+                            mbox.close()
+                            root.compile()
+                        },
+                        button2Name : 'No',
+                        button2Function : function(mbox){
+                            project.closeFile(path)
+                            mbox.close()
+                            root.compile()
+                        },
+                        button3Name : 'Cancel',
+                        button3Function : function(mbox){
+                            mbox.close()
+                        },
+                        returnPressed : function(mbox){
+                            doc.save()
+                            project.closeFile(path)
+                            mbox.close()
+                            root.compile()
+                        }
+                    })
+                } else
+                    project.closeFile(path)
+            }
+        }
+        onCancel: {
+            editor.forceFocus()
+        }
+    }
+
+    Connections{
+        target: project
+        onActiveChanged : {
+            if (root.runSpace.item) {
+                root.runSpace.item.destroy();
+                root.runSpace.item = 0
+                if ( staticContainer )
+                    staticContainer.clearStates()
+            }
+            if (project.active){
+                if ( pathChange ){
+                    var fe = root.findFocusEditor()
+                    if ( fe )
+                        fe.document = project.active
+                }
+
+                root.compileTimer.restart()
+            }
+            pathChange = false
+        }
+
+        property bool pathChange: false
+
+        onPathChanged: pathChange = true
+    }
+
+    Connections{
+        target: project.documentModel
+        onMonitoredDocumentChanged : {
+            if (controls.codingMode === 0){  // live coding
+                controls.workspace.project.compile()
+            }
+        }
+        onDocumentChangedOutside : {
+            root.windowControls.dialogs.message(
+                'File \'' + document.file.path + '\' changed outside Live CV. Would you like to reload it?',
+                {
+                    button1Name : 'Yes',
+                    button1Function : function(mbox){
+                        mbox.close()
+                        document.readContent()
+                        root.documentsReloaded = true
+                    },
+                    button2Name : 'Save',
+                    button2Function : function(mbox){
+                        mbox.close()
+                        document.save()
+                    },
+                    button3Name : 'No',
+                    button3Function : function(mbox){
+                        mbox.close()
+                    }
+                }
+            )
+        }
+    }
+
+    Connections{
+        target: project.fileModel
+        onError : root.windowControls.dialogs.message(message,{
+            button2Name : 'Ok',
+            button2Function : function(mbox){ mbox.close(); }
+        })
+    }
+
+    function compile(){
+        if ( !project.active )
+            return;
+
+        var documentList = project.documentModel.listUnsavedDocuments()
+        livecv.engine.createObjectAsync(
+            project.active.content,
+            livecv.layerPlaceholder(),
+            project.active.file.pathUrl(),
+            project.active,
+            !(documentList.size === 1 && documentList[0] === project.active)
+        );
+    }
+
+    function findFocusEditor(){
+        var ap = livecv.windowControls().workspace.panes.activePane
+        if ( ap.objectName === 'editor' ){
+            return ap;
+        }
+
+        var openPanes = livecv.windowControls().workspace.panes.open
+        for ( var i = 0; i < openPanes.length; ++i ){
+            if ( openPanes[i].objectName === 'editor' )
+                return openPanes[i]
+        }
+
+        return null;
+    }
+
+    function toggleVisibility(){
+        var pfs = null
+
+        var openPanes = livecv.windowControls().workspace.panes.open
+        for ( var i = 0; i < openPanes.length; ++i ){
+            if ( openPanes[i].objectName === 'projectFileSystem' ){
+                pfs = openPanes[i]
+                break
+            }
+        }
+
+        if ( pfs )
+            pfs.width = pfs.width === 0 ? 240 : 0
     }
 
     Component.onCompleted: {
@@ -74,28 +233,32 @@ Rectangle{
             message += unsavedFiles
             message += "Would you like to save them before closing the project?\n"
         }
-        windowControls.messageDialog.show(message, {
+        windowControls.dialogs.message(message, {
             button1Name : 'Yes',
-            button1Function : function(){
-                windowControls.messageDialog.close()
+            button1Function : function(box){
+                box.close()
+
                 if ( !project.isDirProject() && documentList.length === 1 && documentList[0] === ''){
                     var closeCallback = callback;
-                    var untitledDocument = documentModel.isOpened(documentList[0])
-                    fileSaveDialog.callback = function(){
-                        if ( !untitledDocument.saveAs(windowControls.saveFileDialog.fileUrl) ){
-                            windowControls.messageDialog.show(
-                                'Failed to save file to: ' + windowControls.saveFileDialog.fileUrl,
-                                {
-                                    button3Name : 'Ok',
-                                    button3Function : function(){ windowControls.messageDialog.close(); }
-                                }
-                            )
-                            return;
+                    var untitledDocument = project.documentModel.isOpened(documentList[0])
+
+                    windowControls.dialogs.saveFile(
+                        { filters: [ "Qml files (*.qml)", "All files (*)" ] },
+                        function(url){
+                            if ( !untitledDocument.saveAs(url) ){
+                                windowControls.dialogs.message(
+                                    'Failed to save file to: ' + url,
+                                    {
+                                        button3Name : 'Ok',
+                                        button3Function : function(mbox){ mbox.close() }
+                                    }
+                                )
+                                return;
+                            }
+                            project.closeProject()
+                            closeCallback()
                         }
-                        project.closeProject()
-                        closeCallback()
-                    }
-                    windowControls.saveFileDialog.open()
+                    )
                 } else if ( !project.documentModel.saveDocuments() ){
                     var unsavedList = project.documentModel.listUnsavedDocuments()
                     unsavedFiles = '';
@@ -107,622 +270,111 @@ Rectangle{
 
                     message = 'Failed to save the following files:\n'
                     message += unsavedFiles
-                    windowControls.messageDialog.show(message,{
+                    box.close()
+                    windowControls.dialogs.message(message,{
                         button1Name : 'Close',
-                        button1Function : function(){
+                        button1Function : function(mbox){
                             project.closeProject()
-                            windowControls.messageDialog.close()
+                            mbox.close()
                             callback()
                         },
                         button3Name : 'Cancel',
-                        button3Function : function(){
-                            windowControls.messageDialog.close()
+                        button3Function : function(mbox){
+                            mbox.close()
                         },
-                        returnPressed : function(){
+                        returnPressed : function(mbox){
                             project.closeProject()
-                            windowControls.messageDialog.close()
+                            mbox.close()
                             callback()
                         }
                     })
                 } else {
                     project.closeProject()
-                    windowControls.messageDialog.close()
+                    box.close()
                     callback()
                 }
             },
             button2Name : 'No',
-            button2Function : function(){
+            button2Function : function(mbox){
                 project.closeProject()
-                windowControls.messageDialog.close()
+                mbox.close()
                 callback()
             },
             button3Name : 'Cancel',
-            button3Function : function(){
-                windowControls.messageDialog.close()
+            button3Function : function(mbox){
+                mbox.close()
             },
-            returnPressed : function(){
+            returnPressed : function(mbox){
                 project.closeProject()
-                windowControls.messageDialog.close()
+                mbox.close()
             }
         })
     }
     function openProject(){
         root.closeProject(function(){
-            root.windowControls.openDirDialog.open()
+            root.windowControls.dialogs.openDir({}, function(url){
+                project.openProject(url)
+            })
         })
     }
     function newProject(){
         closeProject(function(){
             project.newProject()
-            if ( project.active )
-            {
-                focusEditor.document = project.active
-            }
         })
     }
     function openFile(){
+        var openCallback = function(url){
+            if ( project.rootPath === '' ){
+                project.openProject(url)
+            } else if ( project.isFileInProject(url) ) {
+                var doc = project.openFile(url, ProjectDocument.Edit)
+                if ( doc ) {
+                    var fe = root.findFocusEditor()
+                    if ( fe )
+                        fe.document = doc
+                }
+            } else {
+                var fileUrl = url
+                root.windowControls.dialogs.message(
+                    'File is outside project scope. Would you like to open it as a new project?',
+                {
+                    button1Name : 'Open as project',
+                    button1Function : function(mbox){
+                        var projectUrl = fileUrl
+                        projectView.closeProject(function(){
+                            project.openProject(projectUrl)
+                        })
+                        mbox.close()
+                    },
+                    button3Name : 'Cancel',
+                    button3Function : function(mbox){
+                        mbox.close()
+                    },
+                    returnPressed : function(mbox){
+                        var projectUrl = fileUrl
+                        header.closeProject(
+                            function(){
+                                project.openProject(projectUrl)
+                            }
+                        )
+                        mbox.close()
+                    }
+                })
+            }
+        }
+
         if ( !project.isDirProject() ){
             closeProject(function(){
-                root.windowControls.openFileDialog.open()
+                root.windowControls.dialogs.openFile(
+                    { filters: ["Qml files (*.qml)", "All files (*)"] },
+                    openCallback
+                )
             })
         } else {
-            root.windowControls.openFileDialog.open()
-        }
-    }
-
-    function openCommandsMenu(){
-        livecv.commands.model.setFilter('')
-        commandsMenu.visible = !commandsMenu.visible
-    }
-
-    function addEntry(parentEntry, isFile){
-        projectAddEntry.show(parentEntry, isFile)
-    }
-    function openEntry(entry, monitor){
-        root.focusEditor.document = project.openFile(
-            entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
-        )
-    }
-    function editEntry(entry){
-        root.focusEditor.document = project.openFile(entry, ProjectDocument.Edit)
-    }
-    function removeEntry(entry, isFile){
-        var message = ''
-        if ( entry.isFile ){
-            if ( !entry.isDirty ){
-                message = "Are you sure you want to remove file \'" + entry.path + "\'?"
-            } else
-                message = "Are you sure you want to remove unsaved file \'" + entry.path + "\'?"
-        } else {
-            var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
-            if ( documentList.length === 0 ){
-                message =
-                    "Are you sure you want to remove directory\'" + entry.path + "\' " +
-                    "and all its contents?"
-            } else {
-                var unsavedFiles = '';
-                for ( var i = 0; i < documentList.length; ++i ){
-                    unsavedFiles += documentList[i] + "\n";
-                }
-
-                message = "The following files have unsaved changes:\n";
-                message += unsavedFiles
-                message +=
-                    "Are you sure you want to remove directory \'" + entry.path +
-                    "\' and all its contents?\n"
-            }
-        }
-
-        windowControls.messageDialog.show(message, {
-            button1Name : 'Yes',
-            button1Function : function(){
-                project.fileModel.removeEntry(entry)
-                windowControls.messageDialog.close()
-            },
-            button3Name : 'No',
-            button3Function : function(){
-                windowControls.messageDialog.close()
-            },
-            returnPressed : function(){
-                project.fileModel.removeEntry(entry)
-                windowControls.messageDialog.close()
-            }
-        })
-    }
-    function moveEntry(entry, newParent){
-        var message = ''
-        if ( entry.isFile ){
-            if ( !entry.isDirty ){
-                project.fileModel.moveEntry(entry, newParent)
-                return;
-            }
-            message =
-                "Are you sure you want to move unsaved file \'" + entry.path + "\'?\n" +
-                "All your changes will be lost."
-        } else {
-            var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
-            if ( documentList.length === 0 ){
-                project.fileModel.moveEntry(entry, newParent)
-                return;
-            } else {
-                var unsavedFiles = '';
-                for ( var i = 0; i < documentList.length; ++i ){
-                    unsavedFiles += documentList[i] + "\n";
-                }
-
-                message = "The following files have unsaved changes:\n";
-                message += unsavedFiles
-                message +=
-                    "Are you sure you want to move directory \'" + entry.path +
-                    "\' and all its contents? Unsaved changes will be lost.\n"
-            }
-        }
-
-        windowControls.messageDialog.show(message, {
-            button1Name : 'Yes',
-            button1Function : function(){
-                project.fileModel.moveEntry(entry, newParent)
-                windowControls.messageDialog.close()
-            },
-            button3Name : 'No',
-            button3Function : function(){
-                windowControls.messageDialog.close()
-            },
-            returnPressed : function(){
-                project.fileModel.moveEntry(entry, newParent)
-                windowControls.messageDialog.close()
-            }
-        })
-    }
-
-    function renameEntry(entry, newName){
-        project.fileModel.renameEntry(entry, newName)
-    }
-
-    function toggleVisibility(){
-        root.width = root.width === 0 ? 240 : 0
-    }
-
-
-    Rectangle{
-        id: paneTop
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.right: parent.right
-
-        height: 30
-        color: "#08111a"
-
-        Text{
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: 15
-            color: "#808691"
-            text: "Project"
-            font.family: "Open Sans, sans-serif"
-            font.pixelSize: 12
-            font.weight: Font.Normal
-        }
-
-        Item{
-            anchors.right: parent.right
-            width: 30
-            height: parent.height
-
-            Image{
-                id : toggleNavigationImage
-                anchors.centerIn: parent
-                source : "qrc:/images/toggle-navigation.png"
-            }
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    projectMenu.visible = !projectMenu.visible
-                }
-            }
-        }
-    }
-
-    Rectangle {
-        id: projectMenu
-        visible: false
-        anchors.right: root.right
-        anchors.topMargin: 30
-        anchors.top: root.top
-        property int buttonHeight: 30
-        property int buttonWidth: 180
-        opacity: visible ? 1.0 : 0
-        z: 1000
-
-        Behavior on opacity{ NumberAnimation{ duration: 200 } }
-
-        Rectangle{
-            id: removeProjectViewButton
-            anchors.top: parent.top
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                text: qsTr("Remove Project View")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: removeProjectViewArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : removeProjectViewArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    projectMenu.visible = false
-                    toggleVisibility()
-                }
-            }
-        }
-    }
-
-
-    TreeView {
-        id: view
-        model: project.fileModel
-        anchors.topMargin: 40
-        anchors.leftMargin: 10
-        anchors.fill: parent
-
-        style: TreeViewStyle{
-            backgroundColor: "transparent"
-            transientScrollBars: false
-            handle: Item {
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle {
-                    color: "#0b1f2e"
-                    anchors.fill: parent
-                }
-            }
-            scrollBarBackground: Item{
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle{
-                    anchors.fill: parent
-                    color: "#091823"
-                }
-            }
-            textColor: '#9babb8'
-            decrementControl: null
-            incrementControl: null
-            frame: Rectangle{color: "transparent"}
-            corner: Rectangle{color: "#091823"}
-        }
-
-        property var dropEntry: null
-        property var dragEntry: null
-
-        property var contextDelegate : null
-
-        function setContextDelegate(delegate){
-            if ( contextDelegate !== null )
-                contextDelegate.editMode = false
-            contextDelegate = delegate
-        }
-
-        TableViewColumn {
-            title: "Title"
-            role: "fileName"
-            resizable: true
-        }
-
-        selectionMode: SelectionMode.NoSelection
-
-        headerVisible: false
-
-        itemDelegate: Item{
-            id: entryDelegate
-
-            property bool editMode: false
-
-            function path(){
-                return styleData.value.path
-            }
-            function entry(){
-                return styleData.value
-            }
-            function focusText(){
-                entryData.selectAll()
-                entryData.forceActiveFocus()
-            }
-            function unfocusText(){
-                entryData.activeFocus = false
-            }
-            function setActive(){
-                project.setActive(styleData.value)
-                if (windowControls.codingMode === 1) {
-                    createObjectForActive()
-                }
-            }
-            function openFile(){
-                root.editEntry(styleData.value)
-            }
-            function monitorFile(){
-                root.openEntry(styleData.value, true)
-            }
-
-            function openExternally(){
-                Qt.openUrlExternally(styleData.value.path)
-            }
-
-            Rectangle{
-                id: boundingRect
-                height: 22
-                anchors.left: parent.left
-                anchors.top: parent.top
-                width: entryData.width > 70 ? entryData.width + 30 : 95
-                color: entryDelegate.editMode ? "#1b2934" : "transparent"
-                Image{
-                    anchors.left: parent.left
-                    anchors.leftMargin: 5
-                    anchors.verticalCenter: parent.verticalCenter
-                    source: {
-                        if ( styleData.value && styleData.value.isFile ){
-                            if (styleData.value === (project.active ? project.active.file : null) )
-                                return "qrc:/images/project-file-active.png"
-                            else {
-                                if ( styleData.value.document ){
-                                    if (styleData.value.document.isMonitored)
-                                        return "qrc:/images/project-file-monitor.png"
-                                    else if ( styleData.value.document.isDirty)
-                                        return "qrc:/images/project-file-unsaved.png"
-                                }
-                                return "qrc:/images/project-file.png"
-                            }
-                        } else
-                            return "qrc:/images/project-directory.png"
-                    }
-                }
-
-                TextInput{
-                    id: entryData
-                    anchors.left: parent.left
-                    anchors.leftMargin: 25
-                    anchors.verticalCenter: parent.verticalCenter
-                    color: type === 1 ? "#c6d3de" : styleData.value === view.dropEntry ? "#ff0000" : styleData.textColor
-                    text: {
-                        styleData.value
-                            ? styleData.value.name === ''
-                            ? 'untitled' : styleData.value.name : ''
-                    }
-                    font.family: 'Open Sans, Arial, sans-serif'
-                    font.pixelSize: 12
-                    property int type : {
-                        if (styleData.value){
-                            if ( styleData.value.document ){
-                                if ( root.focusEditor && root.focusEditor.document ){
-                                    if ( root.focusEditor.document.file === styleData.value )
-                                        return 1
-                                }
-                                return 2
-                            }
-                        }
-                        return 0
-                    }
-
-                    font.weight: Font.Light
-                    font.italic: type === 2 || type === 1
-                    readOnly: !entryDelegate.editMode
-                    Keys.onReturnPressed: {
-                        root.renameEntry(styleData.value, text)
-                        entryDelegate.editMode = false
-                    }
-                    Keys.onEscapePressed: {
-                        entryData.text = styleData.value
-                                ? styleData.value.name === ''
-                                ? 'untitled' : styleData.value.name : ''
-                        entryDelegate.editMode = false
-                    }
-                }
-                MouseArea {
-                    id: dragArea
-                    anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    drag.target: parent
-                    drag.onActiveChanged: {
-                        if ( drag.active ){
-                            view.dragEntry = styleData.value
-                            view.collapse(styleData.index)
-                        }
-                        boundingRect.Drag.drop()
-                    }
-                    onClicked: {
-                        if( mouse.button === Qt.RightButton ){
-                            if ( styleData.value.isFile ){
-                                view.setContextDelegate(entryDelegate)
-                                fileContextMenu.popup()
-                            } else if ( styleData.value.path === project.rootPath ){
-                                view.setContextDelegate(entryDelegate)
-                                projectContextMenu.popup()
-                            } else {
-                                view.setContextDelegate(entryDelegate)
-                                dirContextMenu.popup()
-                            }
-                        } else if ( mouse.button === Qt.LeftButton ) {
-                            if ( entryDelegate.editMode){
-                                if (!entryData.focus)
-                                    entryData.forceActiveFocus()
-                                else
-                                    mouse.accepted = false
-                            }
-                            if ( view.contextDelegate )
-                                view.contextDelegate.editMode = false
-                        }
-                    }
-                    onDoubleClicked: {
-                        if ( styleData.value.isFile )
-                            root.openEntry(styleData.value, false)
-                        else {
-                            var modelIndex = project.fileModel.itemIndex(styleData.value)
-                            if (view.isExpanded(modelIndex))
-                                view.collapse(modelIndex)
-                            else
-                                view.expand(modelIndex)
-                        }
-                    }
-                }
-
-                states: [
-                    State {
-                        when: boundingRect.Drag.active
-                        AnchorChanges {
-                            target: boundingRect
-                            anchors.top: undefined
-                            anchors.left: undefined
-                        }
-                        ParentChange {
-                            target: boundingRect
-                            parent: view
-                        }
-                    }
-                ]
-
-                Drag.hotSpot.x: width / 2
-                Drag.hotSpot.y: height / 2
-                Drag.active: dragArea.drag.active
-            }
-        }
-        rowDelegate: Item{
-            height: 22
-        }
-
-        DropArea{
-            anchors.fill: parent
-            onPositionChanged: {
-                view.dropEntry = null
-                var index = view.indexAt(view.flickableItem.contentX + drag.x, view.flickableItem.contentY + drag.y)
-                var item = project.fileModel.itemAt(index)
-                if ( item && item !== view.dragEntry && !item.isFile )
-                    view.dropEntry = item
-            }
-            onDropped: {
-                if ( view.dropEntry !== null ){
-                    root.moveEntry(view.dragEntry, view.dropEntry)
-                    view.dragEntry = null
-                    view.dropEntry = null
-                }
-            }
-        }
-        Connections{
-            target: project.fileModel
-            onProjectNodeChanged : {
-                view.expand(index)
-            }
-        }
-
-        Menu {
-            id: fileContextMenu
-
-            style: ContextMenuStyle{}
-
-            MenuItem{
-                text: "Edit File"
-                onTriggered: {
-                    view.contextDelegate.openFile()
-                }
-            }
-            MenuItem{
-                text: "Monitor file"
-                onTriggered: {
-                    view.contextDelegate.monitorFile()
-                }
-            }
-
-            MenuItem{
-                text: "Set As Active"
-                onTriggered: {
-                    view.contextDelegate.setActive()
-                }
-            }
-            MenuItem {
-                text: "Rename"
-                onTriggered: {
-                    view.contextDelegate.editMode = true
-                    view.contextDelegate.focusText()
-                }
-            }
-            MenuItem {
-                text: "Delete"
-                onTriggered: {
-                    root.removeEntry(view.contextDelegate.entry(), false)
-                }
-            }
-
-        }
-
-        Menu {
-            id: dirContextMenu
-            style: ContextMenuStyle{}
-            MenuItem{
-                text: "Show in Explorer"
-                onTriggered: {
-                    view.contextDelegate.openExternally()
-                }
-            }
-            MenuItem {
-                text: "Rename"
-                onTriggered: {
-                    view.contextDelegate.editMode = true
-                    view.contextDelegate.focusText()
-                }
-            }
-            MenuItem{
-                text: "Delete"
-                onTriggered: {
-                    root.removeEntry(view.contextDelegate.entry(), true)
-                }
-            }
-            MenuItem {
-                text: "Add File"
-                onTriggered: {
-                    root.addEntry(view.contextDelegate.entry(), true)
-                }
-            }
-            MenuItem {
-                text: "Add Directory"
-                onTriggered: {
-                    root.addEntry(view.contextDelegate.entry(), false)
-                }
-            }
-        }
-
-        Menu {
-            id: projectContextMenu
-            style: ContextMenuStyle{}
-            MenuItem{
-                text: "Show in Explorer"
-                onTriggered: {
-                    view.contextDelegate.openExternally()
-                }
-            }
-            MenuItem{
-                text: "Close project"
-                onTriggered: {
-                    root.closeProject(function(){})
-                }
-            }
-            MenuItem {
-                text: "Add File"
-                onTriggered: {
-                    root.addEntry(view.contextDelegate.entry(), true)
-                }
-            }
-            MenuItem {
-                text: "Add Directory"
-                onTriggered: {
-                    root.addEntry(view.contextDelegate.entry(), false)
-                }
-            }
+            root.windowControls.dialogs.openFile(
+                { filters: ["Qml files (*.qml)", "All files (*)"] },
+                openCallback
+            )
         }
     }
 }

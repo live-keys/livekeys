@@ -2,7 +2,6 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/live_plugin.h \
-    $$PWD/qlivecvmain.h \
     $$PWD/qstaticcontainer.h \
     $$PWD/qstaticloader.h \
     $$PWD/qscriptcommandlineparser_p.h \
@@ -17,21 +16,21 @@ HEADERS += \
     $$PWD/tuple.h \
     $$PWD/tuplepropertymap.h \
     $$PWD/stringbasedloader.h \
-    $$PWD/maparray.h \
-    $$PWD/maparraydata.h \
+    $$PWD/worker.h \
+    $$PWD/qmlcomponentmap.h \
+    $$PWD/qmlcomponentmapdata.h \
+    $$PWD/qmlmain.h \
     $$PWD/tcplineserver.h \
     $$PWD/tcplinesocket.h \
     $$PWD/tcplineconnection.h \
     $$PWD/tcpline.h \
     $$PWD/tcplineproperty.h \
     $$PWD/tcplineresponse.h \
-    $$PWD/worker.h \
     $$PWD/componentsource.h \
     $$PWD/lvliveglobal.h
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
-    $$PWD/qlivecvmain.cpp \
     $$PWD/qstaticcontainer.cpp \
     $$PWD/qstaticloader.cpp \
     $$PWD/qscriptcommandlineparser.cpp \
@@ -46,8 +45,9 @@ SOURCES += \
     $$PWD/tuple.cpp \
     $$PWD/tuplepropertymap.cpp \
     $$PWD/stringbasedloader.cpp \
-    $$PWD/maparray.cpp \
-    $$PWD/maparraydata.cpp \
+    $$PWD/qmlcomponentmap.cpp \
+    $$PWD/qmlcomponentmapdata.cpp \
+    $$PWD/qmlmain.cpp \
     $$PWD/tcplineserver.cpp \
     $$PWD/tcplinesocket.cpp \
     $$PWD/tcplineconnection.cpp \

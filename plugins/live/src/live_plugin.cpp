@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "live_plugin.h"
-#include "qlivecvmain.h"
+#include "qmlmain.h"
 #include "qstaticloader.h"
 #include "qstaticcontainer.h"
 #include "qlicensesettings.h"
@@ -29,8 +29,8 @@
 #include "stringbasedloader.h"
 #include "live/qmlobjectlist.h"
 #include "live/qmlvariantlist.h"
-#include "maparray.h"
-#include "maparraydata.h"
+#include "qmlcomponentmap.h"
+#include "qmlcomponentmapdata.h"
 
 #include "live/applicationcontext.h"
 #include "live/visuallog.h"
@@ -52,7 +52,6 @@
 
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
-    qmlRegisterType<QLiveCVMain>(          uri, 1, 0, "Main");
     qmlRegisterType<QTriangle>(            uri, 1, 0, "Triangle");
     qmlRegisterType<QStaticLoader>(        uri, 1, 0, "StaticLoader");
     qmlRegisterType<QFileReader>(          uri, 1, 0, "FileReader");
@@ -62,11 +61,12 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterType<QValueHistory>(        uri, 1, 0, "ValueHistory");
     qmlRegisterUncreatableType<QLicenseSettings>(
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
+    qmlRegisterType<lv::QmlMain>(          uri, 1, 0, "Main");
     qmlRegisterType<lv::StringBasedLoader>(uri, 1, 0, "StringBasedLoader");
     qmlRegisterType<lv::Worker>(           uri, 1, 0, "Worker");
     qmlRegisterType<lv::Tuple>(            uri, 1, 0, "Tuple");
-    qmlRegisterType<lv::MapArray>(         uri, 1, 0, "MapArray");
-    qmlRegisterType<lv::MapArrayData>(     uri, 1, 0, "MapArrayData");
+    qmlRegisterType<lv::QmlComponentMap>(     uri, 1, 0, "ComponentMap");
+    qmlRegisterType<lv::QmlComponentMapData>( uri, 1, 0, "ComponentMapData");
 
     qmlRegisterType<lv::ComponentSource>(       uri, 1, 0, "ComponentSource");
     qmlRegisterType<lv::TcpLine>(               uri, 1, 0, "TcpLine");

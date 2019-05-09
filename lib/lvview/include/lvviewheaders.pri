@@ -26,4 +26,7 @@ HEADERS += \
     $$PWD/live/qmlobjectlist.h \
     $$PWD/live/group.h \
     $$PWD/live/linemessage.h \
-    $$PWD/live/linecapture.h
+    $$PWD/live/linecapture.h \
+    $$PWD/live/workspace.h \
+    $$PWD/live/layer.h \
+    $$PWD/live/windowlayer.h

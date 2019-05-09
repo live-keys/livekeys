@@ -15,7 +15,6 @@ class QmlObjectListModel;
 
 class LV_VIEW_EXPORT QmlObjectList : public Shared {
 
-
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<QObject> items READ items)
 
@@ -43,6 +42,7 @@ public:
 
     QQmlListProperty<QObject> items();
     bool isConst() const;
+
     template<typename T> static QmlObjectList* create(
         void* data,
         std::function<int(QmlObjectList*)> itemCount,
@@ -74,13 +74,14 @@ public:
         std::function<void(QmlObjectList*)> clearItems
     );
 
-
     static void defaultAppendItem(QmlObjectList*, QObject*);
     static int defaultItemCount(QmlObjectList*);
     static QObject* defaultItemAt(QmlObjectList*, int);
     static void defaultRemoveItemAt(QmlObjectList*, int);
+    static void defaultAssignAt(QmlObjectList*list, int index, QObject*o);
     static void defaultClearItems(QmlObjectList*);
     void setClone(std::function<QmlObjectList*(const QmlObjectList *)> clone);
+    void setAssignAt(std::function<void(QmlObjectList*, int, QObject*)> assignAt);
 
 public slots:
     QObject* itemAt(int index);
@@ -88,10 +89,14 @@ public slots:
     void clearItems();
     void appendItem(QObject* item);
     void removeItemAt(int index);
+    void assignAt(int index, QObject* item);
+
     lv::QmlObjectListModel* model();
 
     lv::QmlObjectList *cloneConst() const;
     lv::QmlObjectList* clone() const;
+
+    QJSValue toArray();
 
 private:
     static int itemCount(QQmlListProperty<QObject>*);
@@ -112,6 +117,8 @@ private:
     std::function<void(QmlObjectList*, QObject*)> m_appendItem;
     std::function<void(QmlObjectList*, int)>      m_removeItemAt;
     std::function<void(QmlObjectList*)>           m_clearItems;
+
+    std::function<void(QmlObjectList*, int, QObject*)> m_assignAt;
 
     friend class QmlObjectListModel;
 };
