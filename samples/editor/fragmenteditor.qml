@@ -19,21 +19,12 @@ Item{
             fragmentEditor.document = project.openFile(project.path('fragmenteditor.qml'))
         }
     }
-/*    
-    DocumentFragment{
-        id: fragmentSelection
-        document: project.openFile(project.path('fragmenteditor.qml'))
-        lineStartIndex: staticLineIndex.item.start
-        onLineStartIndexChanged: staticLineIndex.item.start = lineStartIndex
-        lineEndIndex: staticLineIndex.item.end
-        onLineEndIndexChanged: staticLineIndex.item.end = lineEndIndex
-    }
-*/
+
     Editor{
         id: fragmentEditor
         anchors.left: parent.left
-        fragmentStart: 32
-        fragmentEnd: 41
+        fragmentStart: 33
+        fragmentEnd: 39
         height: 500
         width: 600
         windowControls: livecv.windowControls()

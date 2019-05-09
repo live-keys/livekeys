@@ -836,7 +836,6 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
         ev = static_cast<QMouseEvent *>(e);
         QPointF mousePos = ev->localPos();
         int oldy = mousePos.y();
-        // mousePos.setY(d->textEdit->getPaletteManager()->positionOffset(oldy));
         mousePos.setY(d->textEdit->lineControl()->positionOffset(oldy));
 #if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
         ev->setLocalPos(mousePos);
@@ -1015,19 +1014,6 @@ void TextControlPrivate::keyReleaseEvent(QKeyEvent *e)
 void TextControlPrivate::keyPressEvent(QKeyEvent *e)
 {
     Q_Q(TextControl);
-
-/*    //PALETTE TEST
-    static int cnt = 0;
-
-    switch (cnt)
-    {
-    case 0: textEdit->linePaletteAdded(8, 9, 35, textEdit); break;
-    case 1: textEdit->linePaletteAdded(15, 17, 75, nullptr); break;
-    case 2: textEdit->linePaletteRemoved(nullptr); break;
-    case 3: textEdit->linePaletteHeightChanged(textEdit, 55); break;
-    }
-
-    cnt++;*/
 
     if (e->key() == Qt::Key_Back) {
          e->ignore();

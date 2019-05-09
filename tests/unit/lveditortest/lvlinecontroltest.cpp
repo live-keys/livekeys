@@ -22,7 +22,7 @@ void LvLineControlTest::addingSingleCollapse()
     QCOMPARE(m_lineControl->sections().size(), 1);
     auto section = m_lineControl->sections()[0];
     QCOMPARE(section.type, LineControl::LineSection::Collapsed);
-    QCOMPARE(section.range, 3);
+    QCOMPARE(section.range, 4);
     QCOMPARE(section.visibleRange, 1);
     QCOMPARE(section.position, 10);
     QCOMPARE(section.visiblePosition, 10);
@@ -109,13 +109,55 @@ void LvLineControlTest::removeLines()
 
     QCOMPARE(section1.position, 47);
     QCOMPARE(section2.position, 102); // both shifted back
+
+    QCOMPARE(section1.type, LineControl::LineSection::Palette);
+
+    clearLineControl();
 }
+
+void LvLineControlTest::checkVisibleWithNoSections()
+{
+    auto result = m_lineControl->visibleSections(10, 20);
+
+    QCOMPARE(result.size(), 1);
+    QCOMPARE(result[0].start, 10);
+    QCOMPARE(result[0].size, 11);
+    QCOMPARE(result[0].palette, nullptr);
+
+    m_lineControl->addCollapse(10, 4);
+}
+
+void LvLineControlTest::checkBeforeCollapsedSection()
+{
+    auto result = m_lineControl->visibleSections(5,7);
+
+    QCOMPARE(result.size(), 1);
+    QCOMPARE(result[0].start, 5);
+    QCOMPARE(result[0].size, 3);
+    QCOMPARE(result[0].palette, nullptr);
+
+}
+
+void LvLineControlTest::checkWithCollapsedSection()
+{
+    auto result = m_lineControl->visibleSections(9,19);
+    QCOMPARE(result.size(), 3);
+
+
+
+}
+
+
+
 
 
 void LvLineControlTest::cleanupTestCase()
 {
-    for (unsigned i = 0; i < m_lineControl->sections().size(); ++i)
-        if (m_lineControl->sections()[i].type == LineControl::LineSection::Palette) delete m_lineControl->sections()[i].palette;
-    m_lineControl->reset();
+    clearLineControl();
     delete m_lineControl;
+}
+
+void LvLineControlTest::clearLineControl()
+{
+    m_lineControl->reset();
 }

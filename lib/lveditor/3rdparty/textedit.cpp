@@ -669,23 +669,16 @@ void TextEdit::setFragmentStart(int frStart) {
         d->lineControl->removePalette(d->fragmentStartPalette, false);
     }
 
-    if (frStart == 0) return;
+    if (frStart <= 0) return;
 
-    d->fragmentStartPalette = new QQuickItem(this);
-    d->fragmentStartPalette->setHeight(0);
-    // handle fragment start palette
-    int lastPosition;
-    if (frStart == 1)
+    if (!d->document)
     {
-        lastPosition = 0;
-    }
-    else
-    {
-        QTextBlock endBlock = d->document->findBlockByNumber(frStart-2);
-        lastPosition = endBlock.position() + endBlock.length();
+        // save in buffer
+        d->fragmentStart = frStart;
+        return;
     }
 
-    d->lineControl->addPalette(0, frStart-1, d->fragmentStartPalette, 0, lastPosition);
+    addStartPalette(frStart);
 }
 
 void TextEdit::setFragmentEnd(int frEnd) {
@@ -695,23 +688,12 @@ void TextEdit::setFragmentEnd(int frEnd) {
 
     if (frEnd == -1) return;
 
-    d->fragmentEndPalette = new QQuickItem(this);
-    d->fragmentEndPalette->setHeight(0);
-    // handle fragment start end
-    int firstPosition;
-    int span;
-    if (frEnd == d->document->blockCount())
-    {
-        firstPosition = d->document->characterCount();
-        span = 0;
+    if (!d->document) {
+        d->fragmentEnd = frEnd;
+        return;
     }
-    else
-    {
-        QTextBlock startBlock = d->document->findBlockByNumber(frEnd);
-        firstPosition = startBlock.position();
-        span = d->document->blockCount()-frEnd;
-    }
-    d->lineControl->addPalette(frEnd,span, d->fragmentEndPalette, firstPosition, d->document->characterCount());
+
+    addEndPalette(frEnd);
 
 }
 
@@ -2137,6 +2119,56 @@ void TextEdit::invalidateFontCaches()
     }
 }
 
+void TextEdit::addStartPalette(int frStart)
+{
+    Q_D(TextEdit);
+
+    d->fragmentStartPalette = new QQuickItem(this);
+    d->fragmentStartPalette->setHeight(0);
+    // handle fragment start palette
+    int lastPosition;
+    if (frStart == 1)
+    {
+        lastPosition = 0;
+    }
+    else
+    {
+        QTextBlock endBlock = d->document->findBlockByNumber(frStart-2);
+        if (endBlock != QTextBlock())
+            lastPosition = endBlock.position() + endBlock.length();
+        else
+            lastPosition = 0;
+    }
+
+    d->lineControl->addPalette(0, frStart-1, d->fragmentStartPalette, 0, lastPosition);
+}
+
+void TextEdit::addEndPalette(int frEnd)
+{
+    Q_D(TextEdit);
+
+    if (frEnd > d->document->blockCount()) return;
+
+    d->fragmentEndPalette = new QQuickItem(this);
+    d->fragmentEndPalette->setHeight(0);
+    // handle fragment end
+    int firstPosition;
+    int span;
+    if (frEnd == d->document->blockCount())
+    {
+        firstPosition = d->document->characterCount();
+        span = 0;
+    }
+    else
+    {
+        QTextBlock startBlock = d->document->findBlockByNumber(frEnd);
+        firstPosition = startBlock.position();
+        span = d->document->blockCount()-frEnd;
+    }
+    d->lineControl->addPalette(frEnd,span, d->fragmentEndPalette, firstPosition, d->document->characterCount());
+
+}
+
 inline void resetEngine(TextNodeEngine *engine, const QColor& textColor, const QColor& selectedTextColor, const QColor& selectionColor)
 {
     *engine = TextNodeEngine();
@@ -2497,6 +2529,21 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     document->setTextWidth(-1);
     auto rect = q->getDocumentLayout()->blockBoundingRect(document->rootFrame()->begin().currentBlock());
     lineControl->setBlockHeight(static_cast<int>(rect.height()));
+    lineControl->setDirtyPos(0);
+    lineControl->lineNumberChange();
+
+    // handle buffered palettes
+    if (fragmentStart != -1)
+    {
+        q->addStartPalette(fragmentStart);
+        fragmentStart = -1;
+    }
+
+    if (fragmentEnd != -1)
+    {
+        q->addEndPalette(fragmentEnd);
+        fragmentEnd = -1;
+    }
 }
 
 void TextEditPrivate::unsetTextDocument()
@@ -2524,6 +2571,7 @@ void TextEditPrivate::unsetTextDocument()
     }
 
     document = nullptr;
+    lineControl->reset();
 
     q->polish();
     if (q->isComponentComplete()) {
@@ -3529,20 +3577,9 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QQuickIt
     int startPos = startBlock.position();
     int endPos = endBlock.position() + endBlock.length();
 
-    QTextCursor cursor = d->control->textCursor();
-    int cursorBlock = cursor.block().blockNumber();
-
-    if (cursorBlock >= lineStart - 1 && cursorBlock <= lineEnd - 1)
-    {
-        cursor.beginEditBlock();
-        for (int i = 0; i < cursorBlock - lineStart + 2; i++)
-        {
-            d->control->moveCursor(QTextCursor::MoveOperation::Up);
-        }
-        cursor.endEditBlock();
-    }
-
     d->lineControl->addPalette(lineStart-1,lineEnd - lineStart + 1, palette, startPos, endPos);
+    handleCursorDuringAddingSection();
+
     d->invalidUntilTheEnd = true;
     for (int i = lineStart - 1; i < d->document->blockCount(); ++i)
         invalidateBlock(d->document->findBlockByNumber(i));
@@ -3559,9 +3596,11 @@ void TextEdit::linePaletteRemoved(QQuickItem *palette)
 
     d->invalidUntilTheEnd = true;
 
-    for (int i = result; i < d->document->blockCount(); ++i)
-    {
-        invalidateBlock(d->document->findBlockByNumber(i));
+    if (d->document){
+        for (int i = result; i < d->document->blockCount(); ++i)
+        {
+            invalidateBlock(d->document->findBlockByNumber(i));
+        }
     }
     emit paletteChange(result);
 }
@@ -3639,6 +3678,8 @@ void TextEdit::manageExpandCollapse(int pos, bool collapsed)
         userData->setNumOfCollapsedLines(num);
         userData->setReplacementString(repl);
         d->lineControl->addCollapse(pos, userData->numOfCollapsedLines());
+
+        handleCursorDuringAddingSection();
     } else {
         d->lineControl->removeCollapse(pos);
     }
@@ -3658,17 +3699,17 @@ void TextEdit::updateLineSurface(int oldLineNum, int newLineNum, int dirtyPos)
     if (d->lineSurface) d->lineSurface->triggerUpdate(newLineNum, dirtyPos);
 }
 
-void TextEdit::handleCursorDuringCollapse(int pos, int num)
+void TextEdit::handleCursorDuringAddingSection()
 {
     Q_D(TextEdit);
 
     QTextCursor cursor = d->control->textCursor();
     int cursorBlock = cursor.block().blockNumber();
 
-    if (cursorBlock > pos && cursorBlock <= pos + num)
-    {
+    int firstBlock = d->lineControl->firstBlockOfTextBefore(cursorBlock);
+    if (firstBlock != cursorBlock){
         cursor.beginEditBlock();
-        for (int i = 0; i < cursorBlock - pos; i++)
+        for (int i = 0; i < cursorBlock-firstBlock; i++)
         {
             d->control->moveCursor(QTextCursor::MoveOperation::Up);
         }

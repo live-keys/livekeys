@@ -126,7 +126,7 @@ void DocumentHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuic
  */
 void DocumentHandler::lineBoxRemoved(QQuickItem *palette)
 {
-    m_textEdit->linePaletteRemoved(palette);
+    if (m_textEdit) m_textEdit->linePaletteRemoved(palette);
 }
 
 /**
@@ -311,6 +311,7 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
     }
 
     if ( m_codeHandler ){
+        m_codeHandler->aboutToDelete();
         delete m_codeHandler;
         m_codeHandler = nullptr;
     }

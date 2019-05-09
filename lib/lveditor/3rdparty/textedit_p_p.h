@@ -117,6 +117,7 @@ public:
         , lastHighlightChangeEnd(0)
         , fragmentStartPalette(nullptr)
         , fragmentEndPalette(nullptr)
+        , fragmentStart(-1), fragmentEnd(-1)
         , dirtyPosition(0), paintedWidth(0), paintedHeight(0)
         , hAlign(TextEdit::AlignLeft), vAlign(TextEdit::AlignTop)
         , format(TextEdit::PlainText), wrapMode(TextEdit::NoWrap)
@@ -227,6 +228,7 @@ public:
 
     QQuickItem* fragmentStartPalette;
     QQuickItem* fragmentEndPalette;
+    int fragmentStart, fragmentEnd;
     int dirtyPosition;
 
     qreal paintedWidth;

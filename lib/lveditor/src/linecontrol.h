@@ -10,6 +10,15 @@ namespace lv {
 
 class TextEdit;
 
+class LV_EDITOR_EXPORT VisibleSection {
+public:
+    VisibleSection(int sz, int st, QQuickItem* p = nullptr);
+
+    int size;
+    int start;
+    QQuickItem* palette;
+};
+
 class LV_EDITOR_EXPORT LineControl : public QObject
 {
     Q_OBJECT
@@ -65,7 +74,7 @@ public:
 
     bool hiddenByPalette(int blockNumber);
     bool hiddenByCollapse(int blockNumber);
-    int isJumpForwardLine(int blockNumber);
+    int isJumpForwardLine(int blockNumber, bool forCollapse = false);
     int isJumpBackwardsLine(int blockNumber);
     void updateLinesInDocuments();
     QTextDocument* lineDocument();
@@ -73,6 +82,9 @@ public:
 
     int firstContentLine();
     int lastContentLine();
+    int firstBlockOfTextBefore(int lineNumber);
+
+    std::vector<VisibleSection> visibleSections(int firstLine, int lastLine);
 signals:
 
 public slots:
@@ -81,7 +93,7 @@ public slots:
     void deltaLines(int delta);
 private:
     void addLineSection(LineSection ls);
-    void removeLineSection(LineSection ls, bool destroy);
+    void removeLineSection(LineSection ls, bool destroy, bool nesting = false);
     unsigned insertIntoSorted(LineSection ls);
     void calculateVisiblePosition(unsigned pos);
     void offsetAfterIndex(unsigned index, int offset, bool offsetPositions);

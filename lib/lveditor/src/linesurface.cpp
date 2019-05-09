@@ -178,13 +178,17 @@ void LineSurface::mousePressEvent(QMouseEvent* event)
     const QTextBlock& matchingBlock = m_textEdit->documentHandler()->target()->findBlockByNumber(absBlockNum);
     const QTextBlock& lineDocBlock = m_document->findBlockByNumber(absBlockNum);
     lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
-    if (userData && userData->isCollapsable())
+    if (userData && userData->isCollapsible())
     {
         QString s = lineDocBlock.text();
         if (s[s.length()-1] == 'v')
+        {
             m_textEdit->manageExpandCollapse(matchingBlock.blockNumber(), true);
+        }
         else if (s[s.length()-1] == '>')
+        {
             m_textEdit->manageExpandCollapse(matchingBlock.blockNumber(), false);
+        }
     }
 }
 

@@ -39,9 +39,16 @@ void LineControl::addCollapse(int pos, int num)
 {
     LineSection ls(pos, num + 1, 1, LineSection::Collapsed);
 
-    auto doc = m_textEdit->documentHandler()->target();
-    ls.startPos = doc->findBlockByNumber(pos).position();
-    ls.endPos = doc->findBlockByNumber(pos + num).position() + doc->findBlockByNumber(pos + num).length();
+    if (m_textEdit &&
+        m_textEdit->documentHandler() &&
+        m_textEdit->documentHandler()->target()){
+
+        auto doc = m_textEdit->documentHandler()->target();
+
+        ls.startPos = doc->findBlockByNumber(pos).position();
+        ls.endPos = doc->findBlockByNumber(pos + num).position() + doc->findBlockByNumber(pos + num).length();
+
+    }
 
     addLineSection(ls);
 }
@@ -118,17 +125,17 @@ void LineControl::setBlockHeight(int bh)
             m_totalOffset += newVisibleRange - m_sections[i].visibleRange;
         }
     }
+
+    m_dirtyPos = 0;
+    updateLinesInDocuments();
 }
 
 void LineControl::reset()
 {
-    for (unsigned i = 0; i < m_sections.size(); ++i)
-    {
-        if (m_sections[i].type == LineSection::Palette)
-        {
-            QMetaObject::invokeMethod(m_sections[i].palette, "close", Qt::DirectConnection);
-        }
-    }
+    m_prevLineNumber = m_lineNumber;
+    m_lineNumber = 0;
+    m_dirtyPos = -1;
+    linesRemoved();
     m_sections.clear();
 }
 
@@ -272,7 +279,7 @@ bool LineControl::hiddenByCollapse(int blockNumber)
     return false;
 }
 
-int LineControl::isJumpForwardLine(int blockNumber)
+int LineControl::isJumpForwardLine(int blockNumber, bool forCollapse)
 {
     auto lower = std::lower_bound(
         m_sections.begin(), m_sections.end(),
@@ -283,7 +290,7 @@ int LineControl::isJumpForwardLine(int blockNumber)
         switch (lower->type)
         {
         case LineSection::Palette:
-            if (blockNumber + 1 == lower->position)
+            if (blockNumber + 1 == lower->position && !forCollapse)
                 return lower->range;
             break;
         case LineSection::Collapsed:
@@ -291,7 +298,7 @@ int LineControl::isJumpForwardLine(int blockNumber)
                 return lower->range - 1;
             break;
         case LineSection::Fragment:
-            if (blockNumber + 1 == lower->position)
+            if (blockNumber + 1 == lower->position && !forCollapse)
                 return -1;
             break;
         }
@@ -431,9 +438,9 @@ void LineControl::updateLinesInDocuments()
                 static_cast<lv::ProjectDocumentBlockData*>(currBlock.userData());
 
         if (userData) {
-            if (userData->isCollapsable())
+            if (userData->isCollapsible())
             {
-                if (isJumpForwardLine(curr)) // is first line of collapse?
+                if (isJumpForwardLine(curr, true) > 0) // is first line of collapse?
                     changeLastCharInLineDocumentBlock(curr, '>');
                 else
                     changeLastCharInLineDocumentBlock(curr, 'v');
@@ -507,6 +514,114 @@ int LineControl::lastContentLine()
     return blockCount;
 }
 
+int LineControl::firstBlockOfTextBefore(int lineNumber)
+{
+    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(),
+        LineSection(lineNumber, 0, 0, LineSection::Collapsed), LineSection::compare);
+
+    if (upper != m_sections.begin())
+    {
+        auto prev = std::prev(upper);
+        int currResult = lineNumber;
+        while (true)
+        {
+            switch (prev->type)
+            {
+            case LineSection::Collapsed:
+                if (currResult > prev->position && currResult < prev->position + prev->range)
+                {
+                    return prev->position;
+                }
+                return currResult;
+            case LineSection::Palette:
+            case LineSection::Fragment:
+                if (currResult >= prev->position && currResult < prev->position + prev->range)
+                {
+                    currResult = prev->position - 1;
+
+                    if (prev == m_sections.begin())
+                    {
+                        return currResult;
+                    }
+                    prev = std::prev(prev);
+                } else
+                {
+                    return currResult;
+                }
+                break;
+            }
+        }
+
+    }
+
+    return lineNumber;
+}
+
+std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int lastBlock)
+{
+    std::vector<VisibleSection> result;
+    LineSection ls;
+    ls.visiblePosition = firstBlock;
+    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareVisible);
+    if (upper != m_sections.begin() && !m_sections.empty())
+    {
+        int startPos = firstBlock;
+        int total = lastBlock - firstBlock + 1;
+
+        auto curr = std::prev(upper);
+
+        bool over = false;
+        while (total > 0 && !over)
+        {
+            auto next = std::next(curr);
+
+            switch (curr->type)
+            {
+            case LineSection::Palette:
+                if (startPos < curr->visiblePosition + curr->visibleRange)
+                {
+                    int size = curr->visibleRange - (startPos - curr->visiblePosition);
+                    result.push_back(VisibleSection(size, 0, curr->palette));
+                    total -= size;
+                    startPos = curr->visiblePosition + curr->visibleRange;
+                }
+                break;
+
+            case LineSection::Collapsed:
+                if (startPos == curr->visiblePosition)
+                {
+                    result.push_back(VisibleSection(1, curr->position));
+                    total -= 1;
+                    startPos = curr->visiblePosition + 1;
+                }
+                break;
+            case LineSection::Fragment:
+                break;
+            }
+
+            if (next == m_sections.end()) {
+                result.push_back(VisibleSection(std::min(total, m_lineNumber - startPos), startPos - curr->positionOffset()));
+                over = true;
+            } else {
+                if (next->visiblePosition != startPos) // these are lines between line sections
+                {
+                    result.push_back(VisibleSection(std::min(total, next->visiblePosition - startPos), startPos - curr->positionOffset()));
+                    startPos = next->visiblePosition;
+                    total -= std::min(total, next->visiblePosition - startPos);
+                }
+
+                curr = next;
+            }
+
+        }
+
+
+    } else
+        result.push_back(VisibleSection(lastBlock - firstBlock + 1, firstBlock));
+
+    return result;
+}
+
 void LineControl::replaceTextInLineDocumentBlock(int blockNumber, std::string s)
 {
     QTextBlock b = m_lineDocument->findBlockByNumber(blockNumber);
@@ -553,19 +668,25 @@ void LineControl::addLineSection(LineControl::LineSection ls)
         srch++;
     }
 
-    ls.nested = nested;
-
-    for (LineSection l: ls.nested)
+    for (LineSection l: nested)
     {
         if (l.type == LineSection::Collapsed)
         {
-            removeCollapse(l.position);
+            removeLineSection(l, false, true);
         }
         else {
             l.palette->setVisible(false);
-            removeLineSection(l, false);
+            removeLineSection(l, false, true);
         }
     }
+
+
+    for (LineSection l: ls.nested)
+    {
+        nested.push_back(l);
+    }
+
+    ls.nested = nested;
 
     unsigned elementPos = insertIntoSorted(ls);
     calculateVisiblePosition(elementPos);
@@ -581,13 +702,14 @@ void LineControl::addLineSection(LineControl::LineSection ls)
     m_totalOffset += m_sections[elementPos].rangeOffset();
 }
 
-void LineControl::removeLineSection(LineControl::LineSection ls, bool destroy)
+void LineControl::removeLineSection(LineControl::LineSection ls, bool destroy, bool nesting)
 {
     auto lower = std::lower_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compare);
     unsigned index = static_cast<unsigned>(lower-m_sections.begin());
     std::vector<LineSection> nested = lower->nested;
 
-    if (destroy){
+
+    if (lower->type == LineSection::Palette && destroy){
         lower->palette->setVisible(false);
         QMetaObject::invokeMethod(lower->palette, "close", Qt::DirectConnection);
     }
@@ -597,10 +719,14 @@ void LineControl::removeLineSection(LineControl::LineSection ls, bool destroy)
 
     m_sections.erase(lower);
 
-    for (LineSection lsx: nested){
-        if (lsx.type == LineSection::Palette)
-            lsx.palette->setVisible(true);
-        addLineSection(lsx);
+    if (!nesting)
+    {
+        for (LineSection lsx: nested){
+            if (lsx.type == LineSection::Palette){
+                lsx.palette->setVisible(true);
+            }
+            addLineSection(lsx);
+        }
     }
 }
 
@@ -613,6 +739,9 @@ int LineControl::LineSection::positionOffset()
 {
     return visiblePosition - position;
 }
+
+VisibleSection::VisibleSection(int sz, int st, QQuickItem* p):
+    size(sz), start(st), palette(p) {}
 
 
 } // namespace

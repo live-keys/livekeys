@@ -413,12 +413,14 @@ private Q_SLOTS:
     void updateSize();
     void triggerPreprocess();
     void highlightingDone(const QRectF &);
-    void handleCursorDuringCollapse(int pos, int num);
+    void handleCursorDuringAddingSection();
     void checkPalettesWhenCollapsed(int pos, int num);
 private:
     void markDirtyNodesForRange(int start, int end, int charDelta);
     void updateTotalLines();
     void invalidateFontCaches();
+    void addStartPalette(int frStart);
+    void addEndPalette(int frEnd);
 protected:
     TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent = nullptr, bool test = true);
 

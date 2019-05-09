@@ -722,7 +722,6 @@ CodeQmlHandler::CodeQmlHandler(
  */
 CodeQmlHandler::~CodeQmlHandler(){
     Q_D(CodeQmlHandler);
-    cancelEdit();
 
     if ( d->projectHandler ){
         d->projectHandler->removeCodeQmlHandler(this);
@@ -893,16 +892,6 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
     m_target        = document->textDocument();
     m_highlighter->setTarget(m_target);
     d->documentScope = DocumentQmlScope::createEmptyScope(d->projectHandler->scanMonitor()->projectScope());
-
-    if ( m_document ){
-        auto it = m_edits.begin();
-        while( it != m_edits.end() ){
-            QmlEditFragment* edit = *it;
-            it = m_edits.erase(it);
-            edit->emitRemoval();
-            edit->deleteLater();
-        }
-    }
 
     if ( d->projectHandler->scanMonitor()->hasProjectScope() && document != 0 ){
         d->projectHandler->scanMonitor()->scanNewDocumentScope(document->file()->path(), document->content(), this);
@@ -1196,6 +1185,21 @@ QPair<int, int> CodeQmlHandler::contextBlock(int position){
     int start = vs.getBlockStart(position);
     int end   = vs.getBlockEnd(start + 1);
     return QPair<int, int>(start, end);
+}
+
+void CodeQmlHandler::aboutToDelete()
+{
+    cancelEdit();
+
+    if ( m_document ){
+        auto it = m_edits.begin();
+        while( it != m_edits.end() ){
+            QmlEditFragment* edit = *it;
+            it = m_edits.erase(it);
+            edit->emitRemoval();
+            edit->deleteLater();
+        }
+    }
 }
 
 /**
@@ -1585,27 +1589,28 @@ void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
     if (!edit)
         return;
 
-    connect(box, &QQuickItem::heightChanged, [this, box](){
-        resizedEditFrame(box);
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+
+    // add stuff
+    connect(box, &QQuickItem::heightChanged, [dh, box](){
+        dh->lineBoxResized(box, box->height());
     });
 
 
-    connect(box, &QQuickItem::destroyed, [this, box](){
-        removeEditFrame(box);
+    connect(box, &QQuickItem::destroyed, [dh, box](){
+        dh->lineBoxRemoved(box);
     });
 
     int pos = edit->declaration()->position();
     QTextBlock tb = m_document->textDocument()->findBlock(pos);
     QTextBlock tbend = m_document->textDocument()->findBlock(pos + edit->declaration()->length());
 
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, box->height(), box);
 }
 
 void CodeQmlHandler::removeEditFrame(QQuickItem *box)
 {
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    dh->lineBoxRemoved(box);
+    static_cast<DocumentHandler*>(box->parent())->lineBoxRemoved(box);
 }
 
 void CodeQmlHandler::resizedEditFrame(QQuickItem *box)

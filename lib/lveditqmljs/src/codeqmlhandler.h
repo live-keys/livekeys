@@ -77,6 +77,7 @@ public:
     AbstractCodeHandler::ContentsTrigger documentContentsChanged(int position, int charsRemoved, int charsAdded) Q_DECL_OVERRIDE;
     void rehighlightBlock(const QTextBlock& block) Q_DECL_OVERRIDE;
     QPair<int, int> contextBlock(int position) Q_DECL_OVERRIDE;
+    void aboutToDelete() Q_DECL_OVERRIDE;
 
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
     bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);

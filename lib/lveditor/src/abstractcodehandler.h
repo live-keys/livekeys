@@ -62,6 +62,7 @@ public:
     virtual void rehighlightBlock(const QTextBlock &block) = 0;
 
     virtual QPair<int, int> contextBlock(int position) = 0;
+    virtual void aboutToDelete() = 0;
 };
 
 }// namespace

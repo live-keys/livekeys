@@ -172,8 +172,8 @@ public:
     CollapseFunctionType onCollapse();
     void setStateChangeFlag(bool value) {m_stateChangeFlag = value; }
     bool stateChangeFlag() {return m_stateChangeFlag; }
-    bool isCollapsable() { return m_collapsable; }
-    void setCollapsable(bool col) { m_collapsable = col; }
+    bool isCollapsible() { return m_collapsable; }
+    void setCollapsible(bool col) { m_collapsable = col; }
     void resetCollapseParams();
 
 private:

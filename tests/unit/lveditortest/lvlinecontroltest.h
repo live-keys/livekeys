@@ -23,10 +23,17 @@ private slots:
     void removePalette();
     void addLines();
     void removeLines();
+
+    void checkVisibleWithNoSections();
+    void checkBeforeCollapsedSection();
+    void checkWithCollapsedSection();
+
     void cleanupTestCase();
 
 public slots:
 private:
+    void clearLineControl();
+
     lv::LineControl* m_lineControl;
     int m_blockHeight;
 };
