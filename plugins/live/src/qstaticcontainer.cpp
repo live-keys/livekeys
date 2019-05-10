@@ -17,6 +17,9 @@
 #include "qstaticcontainer.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
+
 #include <QQuickWindow>
 #include <QQuickItem>
 #include <QQmlContext>
@@ -38,6 +41,9 @@
 QStaticContainer::QStaticContainer(QObject *parent)
     : QObject(parent)
 {
+
+    connect(lv::ViewContext::instance().engine(), SIGNAL(aboutToCreateObject(QUrl)), this, SLOT(beforeCompile()));
+    connect(lv::ViewContext::instance().engine(), SIGNAL(objectReady(QObject*,QUrl)), this, SLOT(afterCompile()));
 }
 
 /*!

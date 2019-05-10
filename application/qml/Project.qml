@@ -29,13 +29,6 @@ Item{
     property QtObject windowControls : null
     property QtObject runSpace: null
 
-    property Timer compileTimer : Timer{
-        interval: 1000
-        running: true
-        repeat : false
-        onTriggered: root.compile()
-    }
-
     property Item addEntryOverlay : ProjectAddEntry{
         onAccepted: {
             if ( isFile ){
@@ -67,13 +60,11 @@ Item{
                             doc.save()
                             project.closeFile(path)
                             mbox.close()
-                            root.compile()
                         },
                         button2Name : 'No',
                         button2Function : function(mbox){
                             project.closeFile(path)
                             mbox.close()
-                            root.compile()
                         },
                         button3Name : 'Cancel',
                         button3Function : function(mbox){
@@ -83,7 +74,6 @@ Item{
                             doc.save()
                             project.closeFile(path)
                             mbox.close()
-                            root.compile()
                         }
                     })
                 } else
@@ -98,20 +88,12 @@ Item{
     Connections{
         target: project
         onActiveChanged : {
-            if (root.runSpace.item) {
-                root.runSpace.item.destroy();
-                root.runSpace.item = 0
-                if ( staticContainer )
-                    staticContainer.clearStates()
-            }
             if (project.active){
                 if ( pathChange ){
                     var fe = root.findFocusEditor()
                     if ( fe )
                         fe.document = project.active
                 }
-
-                root.compileTimer.restart()
             }
             pathChange = false
         }
@@ -123,11 +105,6 @@ Item{
 
     Connections{
         target: project.documentModel
-        onMonitoredDocumentChanged : {
-            if (controls.codingMode === 0){  // live coding
-                controls.workspace.project.compile()
-            }
-        }
         onDocumentChangedOutside : {
             root.windowControls.dialogs.message(
                 'File \'' + document.file.path + '\' changed outside Live CV. Would you like to reload it?',
@@ -158,20 +135,6 @@ Item{
             button2Name : 'Ok',
             button2Function : function(mbox){ mbox.close(); }
         })
-    }
-
-    function compile(){
-        if ( !project.active )
-            return;
-
-        var documentList = project.documentModel.listUnsavedDocuments()
-        livecv.engine.createObjectAsync(
-            project.active.content,
-            livecv.layerPlaceholder(),
-            project.active.file.pathUrl(),
-            project.active,
-            !(documentList.size === 1 && documentList[0] === project.active)
-        );
     }
 
     function findFocusEditor(){

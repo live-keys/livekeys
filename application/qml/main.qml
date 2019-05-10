@@ -151,7 +151,7 @@ ApplicationWindow{
             project.fileModel.rescanEntries()
             project.documentModel.rescanDocuments()
             if ( documentsReloaded && project.active ){
-                root.controls.workspace.project.compileTimer.restart()
+                project.scheduleRun()
                 documentsReloaded = false
             }
             editor.forceActiveFocus()
@@ -353,7 +353,7 @@ ApplicationWindow{
             onPressed: compileButtonShape.state = "Pressed"
             onReleased: compileButtonShape.state = "Released"
             onClicked: {
-                controls.workspace.project.compile()
+                project.run()
             }
         }
 
@@ -821,23 +821,10 @@ ApplicationWindow{
                     Item{
                         id: runSpace
                         anchors.fill: parent
-                        property variant item
 
                         Connections{
                             target: livecv.engine
-                            onAboutToCreateObject : {
-                                if (staticContainer)
-                                    staticContainer.beforeCompile()
-                            }
-                            onObjectCreated : {
-                                error.text = ''
-                                if (runSpace.item) {
-                                    runSpace.item.destroy();
-                                }
-                                runSpace.item = object;
-                                if ( staticContainer )
-                                    staticContainer.afterCompile()
-                            }
+                            onObjectReady : { error.text = '' }
                             onObjectCreationError : {
                                 var errorMessage = error.wrapMessage(errors)
                                 error.text = errorMessage.rich

@@ -161,7 +161,7 @@ Item{
                             )
 
                             var ef = codeHandler.openNestedConnection(
-                                objectContainer.editingFragment, ppos, livecv.windowControls().runSpace.item
+                                objectContainer.editingFragment, ppos, project.appRoot()
                             )
                             if ( ef ){
 
@@ -204,10 +204,10 @@ Item{
 
                         } else {
                             var opos = codeHandler.addItem(addContainer.itemModel.addPosition, addContainer.objectType, data)
-                            codeHandler.addItemToRuntime(objectContainer.editingFragment, data, livecv.windowControls().runSpace.item)
+                            codeHandler.addItemToRuntime(objectContainer.editingFragment, data, project.appRoot())
 
                             var ef = codeHandler.openNestedConnection(
-                                objectContainer.editingFragment, opos, livecv.windowControls().runSpace.item
+                                objectContainer.editingFragment, opos, project.appRoot()
                             )
 
                             if ( ef ){

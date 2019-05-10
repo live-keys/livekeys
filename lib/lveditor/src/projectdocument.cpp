@@ -490,7 +490,7 @@ bool ProjectDocument::save(){
             setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
             if ( parentAsProject() )
-                emit parentAsProject()->fileChanged(m_file->path());
+                parentAsProject()->documentSaved(this);
             return true;
         }
     }
@@ -515,6 +515,7 @@ bool ProjectDocument::saveAs(const QString &path){
             }
             setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
+            parentAsProject()->documentSaved(this);
             return true;
         }
     }

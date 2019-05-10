@@ -71,8 +71,6 @@ Rectangle{
             return;
         if ( editor.document.file.name !== '' ){
             editor.document.save()
-            if ( controls.codingMode === 1 )
-                windowControls.workspace.project.compile()
         } else {
             saveAs()
         }
@@ -102,9 +100,6 @@ Rectangle{
                 } else if ( project.isFileInProject(url) ){
 
                     var doc = project.openFile(url, ProjectDocument.Edit)
-                    if ( controls.codingMode === 1 )
-                        windowControls.workspace.project.compile()
-
                     var fe = projectView.findFocusEditor()
                     if ( fe ){
                         fe.document = doc
@@ -179,7 +174,6 @@ Rectangle{
                 button1Name : 'Yes',
                 button1Function : function(mbox){
                     saveFunction(mbox)
-                    windowControls.workspace.project.compile()
                 },
                 button2Name : 'No',
                 button2Function : function(mbox){
@@ -552,9 +546,6 @@ Rectangle{
                     onCursorPositionRequest : {
                         editorArea.forceActiveFocus()
                         editorArea.cursorPosition = position
-                    }
-                    onContentsChangedManually: {
-                        editor.windowControls.workspace.project.compileTimer.restart();
                     }
                 }
 

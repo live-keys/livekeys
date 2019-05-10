@@ -66,7 +66,7 @@ LiveCV::LiveCV(QObject *parent)
     , m_engine(new ViewEngine(new QQmlApplicationEngine))
     , m_arguments(new LiveCVArguments(header().toStdString()))
     , m_dir(QString::fromStdString(ApplicationContext::instance().applicationPath()))
-    , m_project(new Project)
+    , m_project(new Project(m_engine))
     , m_settings(nullptr)
     , m_script(nullptr)
     , m_commands(new Commands)
@@ -168,6 +168,8 @@ void LiveCV::solveImportPaths(){
 
 void LiveCV::loadQml(const QUrl &url){
     static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);
+
+    m_project->setRunSpace(layerPlaceholder());
 
     if ( m_arguments->script() != "" ){
         m_project->openProject(QString::fromStdString(m_arguments->script()));

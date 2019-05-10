@@ -296,9 +296,6 @@ Rectangle{
             }
             function setActive(){
                 project.setActive(styleData.value)
-                if (windowControls.codingMode === 1) {
-                    windowControls.workspace.project.compile()
-                }
             }
             function openFile(){
                 root.editEntry(styleData.value)

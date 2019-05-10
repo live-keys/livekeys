@@ -45,7 +45,8 @@
 
 /**
  * \class lv::DocumentHandler
- * \brief The go-to class when it comes to handling documents
+ * \brief Complements TextEdit in handling documents.
+ *
  * Forwards everything to the highlighter, has a completion model in case there's a specific code handler attached to it,
  * it can auto-complete code, which is all behavior inherited from the AbstractCodeHandler.
  *
@@ -251,9 +252,8 @@ void DocumentHandler::insertCompletion(int from, int to, const QString &completi
  * \brief Slot that is connected to document changes
  */
 void DocumentHandler::documentContentsChanged(int position, int charsRemoved, int charsAdded){
-    AbstractCodeHandler::ContentsTrigger cst = AbstractCodeHandler::Engine;
     if ( m_codeHandler )
-         cst = m_codeHandler->documentContentsChanged(position, charsRemoved, charsAdded);
+         m_codeHandler->documentContentsChanged(position, charsRemoved, charsAdded);
 
     if ( !m_projectDocument || m_projectDocument->editingStateIs(ProjectDocument::Read) )
         return;
@@ -263,7 +263,7 @@ void DocumentHandler::documentContentsChanged(int position, int charsRemoved, in
         if ( charsAdded == 1 )
             m_lastChar = m_targetDoc->characterAt(position);
 
-        if ( cst == AbstractCodeHandler::Engine )
+        if ( !m_projectDocument->editingStateIs(ProjectDocument::Overlay) )
             emit contentsChangedManually();
     }
 }

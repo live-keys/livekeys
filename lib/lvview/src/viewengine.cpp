@@ -422,6 +422,8 @@ void ViewEngine::createObjectAsync(
     QObject* obj = incubator.object();
     m_engine->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
 
+    emit objectAcquired(url);
+
     if (parent)
         obj->setParent(parent);
 
@@ -437,7 +439,7 @@ void ViewEngine::createObjectAsync(
     setIsLoading(false);
 
     m_engineMutex->unlock();
-    emit objectCreated(obj, url);
+    emit objectReady(obj, url);
 }
 
 QJSValue ViewEngine::lastErrorsObject() const{

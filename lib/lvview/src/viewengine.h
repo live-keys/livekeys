@@ -129,10 +129,12 @@ public:
 signals:
     /** Signals before compiling a new object. */
     void aboutToCreateObject(const QUrl& file);
+    /** Signals after acquiring a new object, assuring no errors were found. */
+    void objectAcquired(const QUrl& file);
     /** Loading indicator has changed */
     void isLoadingChanged(bool isLoading);
     /** Object was created */
-    void objectCreated(QObject* object, const QUrl& file);
+    void objectReady(QObject* object, const QUrl& file);
     /** Error in object creation */
     void objectCreationError(QJSValue errors, const QUrl& file);
 

@@ -36,15 +36,6 @@ class LV_EDITOR_EXPORT AbstractCodeHandler : public QObject{
     Q_OBJECT
 
 public:
-    /**
-     * \brief Indicates what triggers the content change
-     */
-    enum ContentsTrigger{
-        Engine,
-        Silent
-    };
-
-public:
     explicit AbstractCodeHandler(QObject* parent = 0);
     virtual ~AbstractCodeHandler();
 
@@ -57,7 +48,7 @@ public:
     ) = 0;
 
     virtual void setDocument(ProjectDocument* document) = 0;
-    virtual ContentsTrigger documentContentsChanged(int position, int charsRemoved, int charsAdded) = 0;
+    virtual void documentContentsChanged(int position, int charsRemoved, int charsAdded) = 0;
 
     virtual void rehighlightBlock(const QTextBlock &block) = 0;
 

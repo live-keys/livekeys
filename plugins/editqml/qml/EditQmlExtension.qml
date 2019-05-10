@@ -40,7 +40,7 @@ LiveExtension{
             var rect = editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
 
-            var ef = codeHandler.openConnection(editor.textEdit.cursorPosition, editor.windowControls.workspace.project.runSpace.item)
+            var ef = codeHandler.openConnection(editor.textEdit.cursorPosition, project.appRoot())
             var palette = codeHandler.edit(ef)
 
             var editorBox = windowControls.editor.environment.createEmptyEditorBox()
@@ -83,7 +83,7 @@ LiveExtension{
         var rect = editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
 
-        var ef = codeHandler.openConnection(palettes.position(), editor.windowControls.workspace.project.runSpace.item)
+        var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
         var palette = palettes.size() > 0 ? codeHandler.openPalette(ef, palettes, index) : null
 
         var editorBox = ef.visualParent ? ef.visualParent.parent : null
@@ -146,7 +146,7 @@ LiveExtension{
         var rect = editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
 
-        var ef = codeHandler.openConnection(palettes.position(), editor.windowControls.workspace.project.runSpace.item)
+        var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
         var palette = codeHandler.openPalette(ef, palettes, index)
 
         var editorBox = ef.visualParent ? ef.visualParent.parent : null
@@ -325,7 +325,7 @@ LiveExtension{
             var rect = editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
             if ( palettes.size() === 1 ){
-                var ef = codeHandler.openConnection(palettes.position(), editor.windowControls.workspace.project.runSpace.item)
+                var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
                 codeHandler.openBinding(ef, palettes, 0)
             } else {
                 var palList      = paletteListFactory.createObject()
@@ -346,7 +346,7 @@ LiveExtension{
                     editor.forceFocus()
                     palListBox.destroy()
 
-                    var ef = codeHandler.openConnection(palettes.position(), editor.windowControls.workspace.project.runSpace.item)
+                    var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
                     codeHandler.openBinding(ef, palettes, index)
                 })
             }
