@@ -43,6 +43,8 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::LineSurface>(       uri, 1, 0, "LineSurface");
     qmlRegisterType<lv::LineManager>(       uri, 1, 0, "LineManager");
 
+    qmlRegisterUncreatableType<lv::Project>(
+        uri, 1, 0, "Project", "Cannot create Project instance.");
     qmlRegisterUncreatableType<lv::ProjectFileModel>(
         uri, 1, 0, "ProjectFileModel", "Cannot create a ProjectFileModel instance.");
     qmlRegisterUncreatableType<lv::ProjectDocumentModel>(

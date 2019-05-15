@@ -82,7 +82,7 @@ ApplicationWindow{
                 }
             }
 
-            property QtObject project : Project{
+            property QtObject project : ProjectEnvironment{
                 windowControls: controls
                 runSpace: runSpace
             }
@@ -167,30 +167,6 @@ ApplicationWindow{
         }
     }
 
-    function setLiveCodingMode()
-    {
-        controls.codingMode = 0
-        modeContainer.visible = false
-        modeImage.source = liveImage.source
-        modeImage.anchors.rightMargin = liveImage.anchors.rightMargin
-    }
-
-    function setOnSaveCodingMode()
-    {
-        controls.codingMode = 1
-        modeContainer.visible = false
-        modeImage.source = onSaveImage.source
-        modeImage.anchors.rightMargin = onSaveImage.anchors.rightMargin
-    }
-
-    function setDisabledCodingMode()
-    {
-        controls.codingMode = 2
-        modeContainer.visible = false
-        modeImage.source = disabledImage.source
-        modeImage.anchors.rightMargin = disabledImage.anchors.rightMargin
-    }
-
     Component.onCompleted: {
         livecv.commands.add(root, {
             'minimize' : [root.showMinimized, "Minimize"],
@@ -204,10 +180,10 @@ ApplicationWindow{
             'addHorizontalFragmentEditorView': [mainVerticalSplit.addHorizontalFragmentEditor, "Add Horizontal Fragment Editor"],
             'removeHorizontalEditorView' : [mainVerticalSplit.removeHorizontalEditor, "Remove Horizontal Editor"],
             'toggleFullScreen': [root.toggleFullScreen, "Toggle Fullscreen"],
-            'setLiveCodingMode': [root.setLiveCodingMode, "Set 'Live' Coding Mode"],
-            'setOnSaveCodingMode': [root.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
-            'setDisabledCodingMode': [root.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
-            'compileActiveFile': [root.controls.workspace.project.compile, "Compile Active File"]
+            'setLiveCodingMode': [modeContainer.setLiveCodingMode, "Set 'Live' Coding Mode"],
+            'setOnSaveCodingMode': [modeContainer.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
+            'setDisabledCodingMode': [modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
+            'runProject': [project.run, "Run Project"]
         })
     }
 
@@ -232,6 +208,7 @@ ApplicationWindow{
     Top{
         id : header
         visible: !livecv.settings.launchMode
+        modeContainer: modeContainer
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -277,235 +254,9 @@ ApplicationWindow{
         x: 395
     }
 
-    Rectangle {
-        id: modeWrapper
-        anchors.left: parent.left
-        anchors.leftMargin: 550
-        width: 220
-        height: 30
-        color: 'transparent'
-
-        Item{
-            anchors.left: parent.left
-            anchors.leftMargin: 35
-            height : parent.height
-            Text{
-                color :  "#969aa1"
-                anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: 12
-                font.family: 'Open Sans, Arial, sans-serif'
-                elide: Text.ElideRight
-                width: 130
-                text : {
-                    if (!project.active) return "";
-                    if (project.active && project.active.file){
-                        if (project.active.file.name === "") return "untitled";
-                        else return project.active.file.name;
-                    }
-                }
-            }
-        }
-
-        Triangle{
-            id: compileButtonShape
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            width: compileButton.containsMouse ? 8 : 7
-            height: compileButton.containsMouse ? 13 : 12
-            state : "Released"
-            rotation: Triangle.Right
-
-            Behavior on height{ NumberAnimation{ duration: 100 } }
-            Behavior on width{ NumberAnimation{ duration: 100 } }
-
-            states: [
-                State {
-                    name: "Pressed"
-                    PropertyChanges { target: compileButtonShape; color: "#487db9"}
-                },
-                State {
-                    name: "Released"
-                    PropertyChanges { target: compileButtonShape; color: compileButton.containsMouse ? "#768aca" : "#bcbdc1"}
-                }
-            ]
-            transitions: [
-                Transition {
-                    from: "Pressed"
-                    to: "Released"
-                    ColorAnimation { target: compileButtonShape; duration: 100}
-                },
-                Transition {
-                    from: "Released"
-                    to: "Pressed"
-                    ColorAnimation { target: compileButtonShape; duration: 100}
-                }
-            ]
-        }
-
-        MouseArea{
-            id : compileButton
-            anchors.left: parent.left
-            anchors.leftMargin: 0
-            width: 50
-            height: 30
-            hoverEnabled: true
-            onPressed: compileButtonShape.state = "Pressed"
-            onReleased: compileButtonShape.state = "Released"
-            onClicked: {
-                project.run()
-            }
-        }
-
-        Item{
-            width: modeImage.width + modeImage.anchors.rightMargin + 10
-            height: parent.height
-            anchors.right: parent.right
-
-            Image{
-                id : modeImage
-                anchors.right: parent.right
-                anchors.rightMargin: 25
-                anchors.verticalCenter: parent.verticalCenter
-                source: liveImage.source
-            }
-
-            Triangle{
-                anchors.right: parent.right
-                anchors.rightMargin: 7
-                anchors.verticalCenter: parent.verticalCenter
-                width: 9
-                height: 5
-                color: openStatesDropdown.containsMouse ? "#9b6804" : "#bcbdc1"
-                rotation: Triangle.Bottom
-            }
-
-            MouseArea{
-                id : openStatesDropdown
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: modeContainer.visible = !modeContainer.visible
-            }
-        }
-
-
-        Rectangle{
-            width: parent.width
-            height: 1
-            color: "#1a1f25"
-            anchors.bottom: parent.bottom
-        }
-
-    }
-
-    Rectangle {
+    ModeContainer {
         id: modeContainer
-        visible: false
-        anchors.right: modeWrapper.right
-        anchors.top: modeWrapper.bottom
-        property int buttonHeight: 30
-        property int buttonWidth: 120
-        opacity: visible ? 1.0 : 0
-        z: 1000
-
-        Behavior on opacity{ NumberAnimation{ duration: 200 } }
-
-
-        Rectangle{
-            id: liveButton
-            anchors.top: parent.top
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: liveText
-                text: qsTr("Live")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: liveArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            Image{
-                id : liveImage
-                anchors.right: parent.right
-                anchors.rightMargin: 25
-                anchors.verticalCenter: parent.verticalCenter
-                source : "qrc:/images/live.png"
-            }
-            MouseArea{
-                id : liveArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: setLiveCodingMode
-            }
-        }
-
-        Rectangle{
-            id: onSaveButton
-            anchors.top: liveButton.visible ? liveButton.bottom : parent.top
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: onSaveText
-                text: qsTr("On Save")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: onSaveArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            Image{
-                id : onSaveImage
-                anchors.right: parent.right
-                anchors.rightMargin: 25
-                anchors.verticalCenter: parent.verticalCenter
-                source : "qrc:/images/onsave.png"
-            }
-            MouseArea{
-                id : onSaveArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: setOnSaveCodingMode
-            }
-        }
-
-        Rectangle{
-            id: disabledButton
-            anchors.top: onSaveButton.bottom
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: disabledText
-                text: qsTr("Disabled")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: disabledArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            Image{
-                id : disabledImage
-                anchors.right: parent.right
-                anchors.rightMargin: 28
-                anchors.verticalCenter: parent.verticalCenter
-                source : "qrc:/images/disabled.png"
-            }
-            MouseArea{
-                id : disabledArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: setDisabledCodingMode
-            }
-        }
+        modeWrapper: header
     }
 
     FileDialog {
