@@ -208,7 +208,13 @@ int LineControl::positionOffset(int y)
 
     if (upper != m_sections.begin() && !m_sections.empty()) {
         auto prev = std::prev(upper);
-        if (visibleBlockClicked >= prev->visiblePosition + prev->visibleRange)
+
+        if (upper == m_sections.end() && prev->type == LineSection::Fragment
+            && prev->position != 0)
+        {
+            resultBlock = prev->position - 1;
+        }
+        else if (visibleBlockClicked >= prev->visiblePosition + prev->visibleRange)
         {
             resultBlock = visibleBlockClicked - prev->positionOffset() - prev->rangeOffset();
         }
@@ -433,6 +439,7 @@ void LineControl::updateLinesInDocuments()
     }
     while (it != m_lineDocument->rootFrame()->end())
     {
+        if (!m_textEdit || !m_textEdit->documentHandler()) break;
         auto currBlock = m_textEdit->documentHandler()->target()->findBlockByNumber(curr);
         lv::ProjectDocumentBlockData* userData =
                 static_cast<lv::ProjectDocumentBlockData*>(currBlock.userData());
@@ -557,33 +564,56 @@ int LineControl::firstBlockOfTextBefore(int lineNumber)
     return lineNumber;
 }
 
-std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int lastBlock)
+std::vector<VisibleSection> LineControl::visibleSectionsForViewport(const QRect &rect)
 {
+    int firstBlock = qMax(0, qFloor(rect.y()*1.0/m_blockHeight));
+    int lastBlock = qCeil((rect.y() + rect.height())*1.0/m_blockHeight);
+
+    return visibleSections(firstBlock, lastBlock);
+}
+
+std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int lastBlock)
+{    
     std::vector<VisibleSection> result;
+
+    if (m_sections.empty()) {
+        result.push_back(VisibleSection(std::min(m_lineNumber - firstBlock, lastBlock - firstBlock + 1), firstBlock));
+        return result;
+    }
+
     LineSection ls;
     ls.visiblePosition = firstBlock;
-    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareVisible);
-    if (upper != m_sections.begin() && !m_sections.empty())
+
+    auto next = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareVisible);
+    decltype(next) curr;
+    bool noCurr = false;
+
+    if (next != m_sections.begin())
     {
-        int startPos = firstBlock;
-        int total = lastBlock - firstBlock + 1;
+        curr = std::prev(next);
+    } else {
+        noCurr = true;
+    }
 
-        auto curr = std::prev(upper);
+    int startPos = firstBlock;
+    int total = lastBlock - firstBlock + 1;
 
-        bool over = false;
-        while (total > 0 && !over)
+    while (total > 0)
+    {
+        bool aboveCurr = false;
+        if (!noCurr)
         {
-            auto next = std::next(curr);
-
             switch (curr->type)
             {
             case LineSection::Palette:
                 if (startPos < curr->visiblePosition + curr->visibleRange)
                 {
                     int size = curr->visibleRange - (startPos - curr->visiblePosition);
-                    result.push_back(VisibleSection(size, 0, curr->palette));
-                    total -= size;
+                    result.push_back(VisibleSection(std::min(total, size), 0, curr->palette));
+                    total -= std::min(total, size);
                     startPos = curr->visiblePosition + curr->visibleRange;
+                } else {
+                    aboveCurr = true;
                 }
                 break;
 
@@ -593,31 +623,43 @@ std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int las
                     result.push_back(VisibleSection(1, curr->position));
                     total -= 1;
                     startPos = curr->visiblePosition + 1;
-                }
+                 } else {
+                     aboveCurr = true;
+                 }
                 break;
             case LineSection::Fragment:
+                if (curr->position == 0) {
+                    aboveCurr = true;
+                } else {
+                    noCurr = false;
+                    total = 0; // the end
+                }
                 break;
             }
-
-            if (next == m_sections.end()) {
-                result.push_back(VisibleSection(std::min(total, m_lineNumber - startPos), startPos - curr->positionOffset()));
-                over = true;
-            } else {
-                if (next->visiblePosition != startPos) // these are lines between line sections
-                {
-                    result.push_back(VisibleSection(std::min(total, next->visiblePosition - startPos), startPos - curr->positionOffset()));
-                    startPos = next->visiblePosition;
-                    total -= std::min(total, next->visiblePosition - startPos);
-                }
-
-                curr = next;
-            }
-
         }
 
+        if (noCurr || aboveCurr)
+        {
+            if (next == m_sections.end())
+            {
+                int size = std::min(total, m_lineNumber - startPos + curr->positionOffset() + curr->rangeOffset());
+                if (size > 0) result.push_back(VisibleSection(std::min(total, m_lineNumber - startPos + curr->positionOffset() + curr->rangeOffset()), startPos - curr->positionOffset() - curr->rangeOffset()));
+                total = 0;
+            } else {
+                int size = std::min(total, next->visiblePosition - startPos);
+                if (size > 0)
+                {
+                    result.push_back(VisibleSection(std::min(total, next->visiblePosition - startPos), startPos - next->positionOffset()));
+                    total -= size;
+                }
+                startPos = next->visiblePosition;
 
-    } else
-        result.push_back(VisibleSection(lastBlock - firstBlock + 1, firstBlock));
+                curr = next;
+                next = std::next(next);
+                if (noCurr) noCurr = false;
+            }
+        }
+    }
 
     return result;
 }

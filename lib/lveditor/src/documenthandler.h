@@ -89,8 +89,6 @@ public:
     void requestCursorPosition(int position);
 
     void lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *palette);
-    void lineBoxRemoved(QQuickItem *palette);
-    void lineBoxResized(QQuickItem *palette, int newHeight);
 
 public slots:
     void insertCompletion(int from, int to, const QString& completion);

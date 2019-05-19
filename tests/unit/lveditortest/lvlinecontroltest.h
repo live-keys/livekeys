@@ -25,8 +25,32 @@ private slots:
     void removeLines();
 
     void checkVisibleWithNoSections();
+
     void checkBeforeCollapsedSection();
     void checkWithCollapsedSection();
+    void checkAfterCollapsedSection();
+
+    void checkDocumentSmallerThanViewport();
+
+    void checkBeforePalette();
+    void checkWithPalette();
+    void checkWithPalettePartially1();
+    void checkWithPalettePartially2();
+    void checkAfterPalette();
+
+    void checkWithFragmentStart();
+    void checkFragmentStartAndBigViewport();
+    void checkFragmentStartWithCollapsed();
+
+    void checkWithFragmentEnd();
+    void checkFragmentEndAndBigViewport();
+    void checkFragmentEndWithPalette();
+
+    void checkWithTwoCollapses();
+    void checkSecondCollapse();
+    void checkWithCollapsesAndFragment();
+
+    void checkWithTwoNeighboringPaletes();
 
     void cleanupTestCase();
 
@@ -36,6 +60,7 @@ private:
 
     lv::LineControl* m_lineControl;
     int m_blockHeight;
+    QQuickItem *palettePtr1, *palettePtr2;
 };
 
 #endif // LVLINECONTROLTEST_H

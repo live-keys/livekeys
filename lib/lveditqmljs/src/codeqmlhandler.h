@@ -109,8 +109,6 @@ public slots:
     bool isForAnObject(lv::QmlEditFragment* palette);
 
     void frameEdit(QQuickItem *box, lv::QmlEditFragment* palette);
-    void removeEditFrame(QQuickItem* box);
-    void resizedEditFrame(QQuickItem* box);
 
     // Direct editing management
 
@@ -136,6 +134,7 @@ public slots:
     void newProjectScopeReady();
     void updateScope();
 
+    int handleRightBrace(int cursorPosition);
 signals:
 
 private:

@@ -113,6 +113,8 @@ class TextEdit : public QQuickImplicitSizeItem
     Q_PROPERTY(int fragmentEnd WRITE setFragmentEnd RESET resetFragmentEnd NOTIFY fragmentEndChanged)
     Q_PROPERTY(int lineNumber READ lineNumber NOTIFY lineNumberChanged)
     Q_PROPERTY(int columnNumber READ columnNumber NOTIFY columnNumberChanged)
+    Q_PROPERTY(QRect viewport READ viewport WRITE setViewport NOTIFY viewportChanged)
+    Q_PROPERTY(int totalHeight READ totalHeight NOTIFY totalHeightChanged)
 public:
     TextEdit(QQuickImplicitSizeItem *parent=nullptr, bool test = false);
 
@@ -323,7 +325,14 @@ public:
     void linePaletteRemoved(QQuickItem* palette);
     void linePaletteHeightChanged(QQuickItem* palette, int newHeight);
 
+    QRect viewport() const;
+    void setViewport(QRect view);
+
     void resetLineControl();
+    void updateNodesForViewport();
+
+    int totalHeight() const;
+
 #ifdef LV_EDITOR_DEBUG
     TextEditNodeDebugModel::Entry getDebugEntry(int pos);
 #endif
@@ -378,6 +387,8 @@ Q_SIGNALS:
     void columnNumberChanged();
     void fragmentStartChanged();
     void fragmentEndChanged();
+    void viewportChanged();
+    void totalHeightChanged();
 
     void paletteChange(int blockNumber);
 public Q_SLOTS:

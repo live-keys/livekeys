@@ -2924,6 +2924,12 @@ void TextEdit::updateSize()
     d->paintedWidth = width;
     d->paintedHeight = (d->document->blockCount() + d->lineControl->totalOffset())*lineHeight;
 
+    if (d->totalHeight != static_cast<int>(d->paintedHeight))
+    {
+        d->totalHeight = static_cast<int>(d->paintedHeight);
+        emit totalHeightChanged();
+    }
+
     QSizeF size(d->paintedWidth, d->paintedHeight);
     if (d->contentSize != size) {
         d->contentSize = size;
@@ -3585,6 +3591,15 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QQuickIt
         invalidateBlock(d->document->findBlockByNumber(i));
 
     emit paletteChange(lineStart - 1);
+
+    connect(palette, &QQuickItem::heightChanged, [this, palette](){
+        this->linePaletteHeightChanged(palette, palette->height());
+    });
+
+
+    connect(palette, &QQuickItem::destroyed, [this, palette](){
+        this->linePaletteRemoved(palette);
+    });
 }
 
 void TextEdit::linePaletteRemoved(QQuickItem *palette)
@@ -3621,10 +3636,47 @@ void TextEdit::linePaletteHeightChanged(QQuickItem *palette, int newHeight)
     emit paletteChange(result);
 }
 
+QRect TextEdit::viewport() const
+{
+    Q_D(const TextEdit);
+    return d->viewport;
+}
+
+void TextEdit::setViewport(QRect view)
+{
+    Q_D(TextEdit);
+    if (d->viewport == view) return;
+
+    d->viewport = view;
+    updateNodesForViewport();
+    emit viewportChanged();
+}
+
 void TextEdit::resetLineControl()
 {
     Q_D(TextEdit);
     d->lineControl->reset();
+}
+
+void TextEdit::updateNodesForViewport()
+{
+    Q_D(TextEdit);
+
+    qDebug() << "__________________________";
+    auto result = d->lineControl->visibleSectionsForViewport(d->viewport);
+
+    for (auto sec: result)
+    {
+        qDebug() << sec.start << sec.size << sec.palette;
+    }
+
+    // qDebug() << d->viewport;
+}
+
+int TextEdit::totalHeight() const
+{
+    Q_D(const TextEdit);
+    return d->totalHeight;
 }
 
 #ifdef LV_EDITOR_DEBUG

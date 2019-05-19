@@ -4,6 +4,8 @@
 #include <QQuickItem>
 #include "lveditorglobal.h"
 
+#define SCROLL_BUFFER_SIZE 0
+
 class QTextDocument;
 
 namespace lv {
@@ -84,6 +86,7 @@ public:
     int lastContentLine();
     int firstBlockOfTextBefore(int lineNumber);
 
+    std::vector<VisibleSection> visibleSectionsForViewport(const QRect& rect);
     std::vector<VisibleSection> visibleSections(int firstLine, int lastLine);
 signals:
 

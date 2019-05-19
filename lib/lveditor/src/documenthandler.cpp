@@ -122,23 +122,6 @@ void DocumentHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuic
 }
 
 /**
- * \brief Used to remove a specific palette in the editor
- */
-void DocumentHandler::lineBoxRemoved(QQuickItem *palette)
-{
-    if (m_textEdit) m_textEdit->linePaletteRemoved(palette);
-}
-
-/**
- * \brief Used to resize a given palette
- */
-void DocumentHandler::lineBoxResized(QQuickItem *palette, int newHeight)
-{
-    m_textEdit->linePaletteHeightChanged(palette, newHeight);
-}
-
-
-/**
  * \brief Triggers the code handler to call the highlighter on the given block
  */
 void DocumentHandler::rehighlightBlock(const QTextBlock &block){
@@ -301,6 +284,9 @@ void DocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
  * It's a pre-requisite to set the document in order to have any functionality
  */
 void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
+
+    if (m_projectDocument == document) return;
+
     if ( m_projectDocument ){
         disconnect(m_projectDocument, SIGNAL(formatChanged(int,int)), this, SLOT(documentFormatUpdate(int, int)));
     }

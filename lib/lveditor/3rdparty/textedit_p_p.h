@@ -133,6 +133,7 @@ public:
 #endif
         , updateType(UpdatePaintNode)
         , highlightingInProgress(false)
+        , totalHeight(0)
 #ifdef LV_EDITOR_DEBUG
         , debugModel(nullptr)
         , debugView(nullptr)
@@ -247,6 +248,10 @@ public:
     UpdateType updateType;
 
     bool highlightingInProgress;
+
+    QRect viewport;
+    int totalHeight;
+
 #ifdef LV_EDITOR_DEBUG
     TextEditNodeDebugModel* debugModel;
     QQuickItem* debugView;

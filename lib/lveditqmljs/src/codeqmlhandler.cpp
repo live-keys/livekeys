@@ -754,6 +754,20 @@ void CodeQmlHandler::assistCompletion(
             cursorChange.endEditBlock();
             cursorChange.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
             return;
+        } else if (insertion == '}'){
+            cursorChange = cursor;
+            if (cursor.position() > 5)
+            {
+                QString text = m_target->toPlainText();
+                if (text.mid(cursor.position()-5,4) == "    ")
+                {
+                    cursorChange.beginEditBlock();
+                    for (int i=0; i < 5; i++) cursorChange.deletePreviousChar();
+                    cursorChange.insertText("}");
+                    cursorChange.endEditBlock();
+                }
+            }
+            return;
         } else if ( insertion.category() == QChar::Separator_Line || insertion.category() == QChar::Separator_Paragraph){
             cursorChange = cursor;
             cursorChange.movePosition(QTextCursor::Up);
@@ -928,6 +942,22 @@ void CodeQmlHandler::updateScope(){
     Q_D(CodeQmlHandler);
     if ( d->projectHandler->scanMonitor()->hasProjectScope() && m_document )
         d->projectHandler->scanMonitor()->queueNewDocumentScope(m_document->file()->path(), m_document->content(), this);
+}
+
+int CodeQmlHandler::handleRightBrace(int cursorPosition)
+{
+    if ( cursorPosition > 4 ){
+        QString text = m_target->toPlainText();
+        QTextCursor cursor(m_target);
+        cursor.setPosition(cursorPosition);
+        cursor.beginEditBlock();
+        if( text.mid(cursorPosition - 4, cursorPosition) == "    " ){
+            for (int i = 0; i < 4; i++)
+                cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+        }
+
+    }
+    return cursorPosition;
 }
 
 void CodeQmlHandler::rehighlightSection(int start, int end){
@@ -1591,32 +1621,11 @@ void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
 
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
 
-    // add stuff
-    connect(box, &QQuickItem::heightChanged, [dh, box](){
-        dh->lineBoxResized(box, box->height());
-    });
-
-
-    connect(box, &QQuickItem::destroyed, [dh, box](){
-        dh->lineBoxRemoved(box);
-    });
-
     int pos = edit->declaration()->position();
     QTextBlock tb = m_document->textDocument()->findBlock(pos);
     QTextBlock tbend = m_document->textDocument()->findBlock(pos + edit->declaration()->length());
 
     dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, box->height(), box);
-}
-
-void CodeQmlHandler::removeEditFrame(QQuickItem *box)
-{
-    static_cast<DocumentHandler*>(box->parent())->lineBoxRemoved(box);
-}
-
-void CodeQmlHandler::resizedEditFrame(QQuickItem *box)
-{
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    dh->lineBoxResized(box, box->height());
 }
 
 /**
