@@ -71,11 +71,11 @@ CodePalette{
             }
         }
 
-        SliderLabel{
+        Label{
             anchors.top: parent.top
             text: brightnessSlider.minimumValue
         }
-        SliderLabel{
+        Label{
             anchors.top: parent.top
             anchors.right: parent.right
             text: brightnessSlider.maximumValue
@@ -121,12 +121,12 @@ CodePalette{
             }
         }
 
-        SliderLabel{
+        Label{
             anchors.top: parent.top
             anchors.topMargin: 30
             text: contrastSlider.minimumValue
         }
-        SliderLabel{
+        Label{
             anchors.top: parent.top
             anchors.topMargin: 30
             anchors.right: parent.right

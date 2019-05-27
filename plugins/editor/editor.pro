@@ -21,6 +21,11 @@ OTHER_FILES += \
     qml/qmldir \
     qml/plugins.qmltypes
 
+OTHER_FILES += \
+    qml/style/*.qml \
+    qml/style/qmldir \
+    qml/style/plugins.qmltypes
+
 # Handling the palette
 
 OTHER_FILES *= \

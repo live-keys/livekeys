@@ -13,4 +13,4 @@ JsonFileReader          1.0 JsonFileReader.qml
 StaticJsonFileReader    1.0 StaticJsonFileReader.qml
 VisualLogView           1.0 VisualLogView.qml
 DropDown                1.0 DropDown.qml
-SliderLabel             1.0 SliderLabel.qml
+Label                   1.0 Label.qml
