@@ -97,7 +97,7 @@ script:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then python3 livepm/main.py deploy .. macos_clang_64; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py deploy .. gcc_64; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py deploy .. gcc_64_standalone; fi
-  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+  - if [ "${TRAVIS_OS_NAME}" == "0" ]; then
       python3 livepm/main.py makedoc ..;
       export LIVECV_DOC=$(ls doc*.tar.gz | tail -n +1 | head -1);
       mv ${LIVECV_DOC} livecv-doc.tar.gz;
