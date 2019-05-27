@@ -62,7 +62,6 @@ QString Commands::add(QObject *object, const QJSValue &commands){
     QString prefix = commandChain.join(".");
 
     vlog("commmands").v() << "Adding commands for prefix: " << prefix;
-    if (prefix == "editor") return prefix; // double commands fix
 
     QJSValueIterator vit(commands);
     while( vit.hasNext() ){
@@ -73,6 +72,7 @@ QString Commands::add(QObject *object, const QJSValue &commands){
         if ( vit.value().isCallable() ){
 
             auto it = m_commands.find(key);
+
             if ( it == m_commands.end() ){
                 Commands::Node* n = new Commands::Node;
                 n->function = vit.value();
@@ -83,7 +83,18 @@ QString Commands::add(QObject *object, const QJSValue &commands){
         else if (vit.value().isArray()) {
             QJSValue arr = vit.value();
             unsigned len = static_cast<unsigned>(arr.property("length").toInt());
-            Commands::Node* n = new Commands::Node;
+
+            Commands::Node* n = nullptr;
+
+            auto it = m_commands.find(key);
+
+            if ( it == m_commands.end() ){
+                n = new Commands::Node;
+                m_commands.insert(key, n);
+            } else {
+                n = it.value();
+            }
+
             for (unsigned int i = 0; i <len; i++)
             {
                 QJSValue val = arr.property(i);
@@ -117,9 +128,6 @@ QString Commands::add(QObject *object, const QJSValue &commands){
                 }
                 if (i > 2) break;
             }
-
-            m_commands.insert(key, n);
-
         }
         else {
             qCritical("Value given for command is neither a function nor an array: %s", qPrintable(key));

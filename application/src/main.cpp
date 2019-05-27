@@ -60,7 +60,9 @@ int main(int argc, char *argv[]){
             return 0;
         }
 
-        livecv->loadQml(QUrl(QStringLiteral("qrc:/main.qml")));
+        livecv->loadLayers({"window", "workspace", "editor"}, [livecv](Layer*){
+            livecv->loadProject();
+        });
 
         return app.exec();
 

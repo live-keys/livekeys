@@ -27,7 +27,7 @@ LiveExtension{
     }
 
     function edit(){
-        var activePane = livecv.windowControls().workspace.panes.activePane
+        var activePane = livecv.layers.workspace.panes.activePane
 
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
@@ -35,7 +35,6 @@ LiveExtension{
         {
             var editor = activePane
             var codeHandler = editor.documentHandler.codeHandler
-            var windowControls = livecv.windowControls()
 
             var rect = editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
@@ -43,9 +42,9 @@ LiveExtension{
             var ef = codeHandler.openConnection(editor.textEdit.cursorPosition, project.appRoot())
             var palette = codeHandler.edit(ef)
 
-            var editorBox = windowControls.editor.environment.createEmptyEditorBox()
-            var paletteGroup = root.paletteGroupFactory.createObject(windowControls.editor.environment.content)
-            editorBox.setChild(paletteGroup, rect, cursorCoords, windowControls.editor.environment.placement.top)
+            var editorBox = livecv.layers.editor.environment.createEmptyEditorBox()
+            var paletteGroup = root.paletteGroupFactory.createObject(livecv.layers.editor.environment.content)
+            editorBox.setChild(paletteGroup, rect, cursorCoords, livecv.layers.editor.environment.placement.top)
             paletteGroup.x = 5
             paletteGroup.editingFragment = ef
             paletteGroup.codeHandler = codeHandler
@@ -72,13 +71,12 @@ LiveExtension{
             paletteBox.editorPosition = cursorCoords
             paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
 
-            editorBox.updatePlacement(rect, cursorCoords, windowControls.editor.environment.placement.top)
+            editorBox.updatePlacement(rect, cursorCoords, livecv.layers.editor.environment.placement.top)
         }
     }
 
     function shapePalette(editor, palettes, index){
         var codeHandler = editor.documentHandler.codeHandler
-        var windowControls = livecv.windowControls()
 
         var rect = editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
@@ -90,18 +88,18 @@ LiveExtension{
         var paletteBoxGroup = editorBox ? editorBox.child : null
 
         if ( paletteBoxGroup === null ){
-            editorBox = windowControls.editor.environment.createEmptyEditorBox(editor.textEdit)
+            editorBox = livecv.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
             var forAnObject = codeHandler.isForAnObject(ef)
             var objectContainer = null
 
             if (forAnObject)
             {
-                objectContainer = root.objectContainerFactory.createObject(windowControls.editor.environment.content)
+                objectContainer = root.objectContainerFactory.createObject(livecv.layers.editor.environment.content)
                 objectContainer.editor = editor
                 objectContainer.editingFragment = ef
             }
 
-            paletteBoxGroup = root.paletteGroupFactory.createObject(forAnObject ? objectContainer.groupsContainer : windowControls.editor.environment.content)
+            paletteBoxGroup = root.paletteGroupFactory.createObject(forAnObject ? objectContainer.groupsContainer : livecv.layers.editor.environment.content)
             paletteBoxGroup.editingFragment = ef
             ef.visualParent = paletteBoxGroup
 
@@ -110,7 +108,7 @@ LiveExtension{
 
             if (forAnObject) objectContainer.paletteGroup = paletteBoxGroup;
 
-            editorBox.setChild(forAnObject ? objectContainer : paletteBoxGroup, rect, cursorCoords, windowControls.editor.environment.placement.top)
+            editorBox.setChild(forAnObject ? objectContainer : paletteBoxGroup, rect, cursorCoords, livecv.layers.editor.environment.placement.top)
 
             editorBox.color = "#02070b"
             editorBox.radius = 5
@@ -141,7 +139,6 @@ LiveExtension{
 
     function loadPalette(editor, palettes, index){
         var codeHandler = editor.documentHandler.codeHandler
-        var windowControls = livecv.windowControls()
 
         var rect = editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
@@ -153,9 +150,9 @@ LiveExtension{
         var paletteBoxGroup = editorBox ? editorBox.child : null
 
         if ( paletteBoxGroup === null ){
-            editorBox = windowControls.editor.environment.createEmptyEditorBox()
-            paletteBoxGroup = root.paletteGroupFactory.createObject(windowControls.editor.environment.content)
-            editorBox.setChild(paletteBoxGroup, rect, cursorCoords, windowControls.editor.environment.placement.top)
+            editorBox = livecv.layers.editor.environment.createEmptyEditorBox()
+            paletteBoxGroup = root.paletteGroupFactory.createObject(livecv.layers.editor.environment.content)
+            editorBox.setChild(paletteBoxGroup, rect, cursorCoords, livecv.layers.editor.environment.placement.top)
             paletteBoxGroup.x = 5
             paletteBoxGroup.editingFragment = ef
             paletteBoxGroup.codeHandler = codeHandler
@@ -181,11 +178,11 @@ LiveExtension{
         paletteBox.editorPosition = cursorCoords
         paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
 
-        editorBox.updatePlacement(rect, cursorCoords, windowControls.editor.environment.placement.top)
+        editorBox.updatePlacement(rect, cursorCoords, livecv.layers.editor.environment.placement.top)
     }
 
     function palette(){
-        var activePane = livecv.windowControls().workspace.panes.activePane
+        var activePane = livecv.layers.workspace.panes.activePane
 
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
@@ -193,7 +190,6 @@ LiveExtension{
         {
             var editor = activePane
             var codeHandler = editor.documentHandler.codeHandler
-            var windowControls = livecv.windowControls()
 
             var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
             var rect = editor.getCursorRectangle()
@@ -203,14 +199,14 @@ LiveExtension{
             } else {
                 //Palette list box
                 var palList      = paletteListFactory.createObject()
-                var palListBox   = windowControls.editor.environment.createEditorBox(
-                    palList, rect, cursorCoords, windowControls.editor.environment.placement.bottom
+                var palListBox   = livecv.layers.editor.environment.createEditorBox(
+                    palList, rect, cursorCoords, livecv.layers.editor.environment.placement.bottom
                 )
                 palListBox.color = 'transparent'
                 palList.model    = palettes
                 editor.internalFocus = false
                 palList.forceActiveFocus()
-                windowControls.workspace.panes.setActiveItem(palList, editor)
+                livecv.layers.workspace.panes.setActiveItem(palList, editor)
 
                 palList.cancelled.connect(function(){
                     palList.focus = false
@@ -228,7 +224,7 @@ LiveExtension{
     }
 
     function shape(){
-        var activePane = livecv.windowControls().workspace.panes.activePane
+        var activePane = livecv.layers.workspace.panes.activePane
 
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
@@ -236,7 +232,6 @@ LiveExtension{
         {
             var editor = activePane
             var codeHandler = editor.documentHandler.codeHandler
-            var windowControls = livecv.windowControls()
 
             var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
             var rect = editor.getCursorRectangle()
@@ -248,12 +243,12 @@ LiveExtension{
             } else {
                 //Palette list box
                 var palList      = paletteListFactory.createObject()
-                var palListBox   = windowControls.editor.environment.createEditorBox(palList, rect, cursorCoords, windowControls.editor.environment.placement.bottom)
+                var palListBox   = livecv.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, livecv.layers.editor.environment.placement.bottom)
                 palListBox.color = 'transparent'
                 palList.model    = palettes
                 editor.internalFocus = false
                 palList.forceActiveFocus()
-                windowControls.workspace.panes.setActiveItem(palList, editor)
+                livecv.layers.workspace.panes.setActiveItem(palList, editor)
 
                 palList.cancelled.connect(function(){
                     palList.focus = false
@@ -306,12 +301,12 @@ LiveExtension{
             }
 
             addBoxItem.assignFocus()
-            livecv.windowControls().workspace.panes.setActiveItem(addBox, activePane)
+            livecv.layers.workspace.panes.setActiveItem(addBox, activePane)
         }
     }
 
     function bind(){
-        var activePane = livecv.windowControls().workspace.panes.activePane
+        var activePane = livecv.layers.workspace.panes.activePane
 
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
@@ -319,7 +314,6 @@ LiveExtension{
         {
             var editor = activePane
             var codeHandler = editor.documentHandler.codeHandler
-            var windowControls = livecv.windowControls()
 
             var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, false)
             var rect = editor.getCursorRectangle()
@@ -329,12 +323,12 @@ LiveExtension{
                 codeHandler.openBinding(ef, palettes, 0)
             } else {
                 var palList      = paletteListFactory.createObject()
-                var palListBox   = windowControls.editor.environment.createEditorBox(palList, rect, cursorCoords, windowControls.editor.environment.placement.bottom)
+                var palListBox   = livecv.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, livecv.layers.editor.environment.placement.bottom)
                 palListBox.color = 'transparent'
-                palList.model    = palettes
+                palList.model = palettes
                 editor.internalFocus = false
                 palList.forceActiveFocus()
-                windowControls.workspace.panes.setActiveItem(palList, editor)
+                livecv.layers.workspace.panes.setActiveItem(palList, editor)
 
                 palList.cancelled.connect(function(){
                     palList.focus = false
@@ -354,7 +348,7 @@ LiveExtension{
     }
 
     function unbind(){
-        var activePane = livecv.windowControls().workspace.panes.activePane
+        var activePane = livecv.layers.workspace.panes.activePane
 
         if ( activePane.objectName === 'editor' &&
              activePane.document &&

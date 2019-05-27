@@ -167,7 +167,10 @@ void DocumentHandler::componentComplete(){
     }
 
     m_engine     = static_cast<ViewEngine*>(lg->property("engine").value<lv::ViewEngine*>());
-    m_extensions = static_cast<Extensions*>(lg->property("extensions").value<QQmlPropertyMap*>()->parent());
+
+    QObject* workspace = lg->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
+
+    m_extensions = static_cast<Extensions*>(workspace->property("extensions").value<QQmlPropertyMap*>()->parent());
 
     findCodeHandler();
 }

@@ -33,15 +33,18 @@
 #include "live/viewcontext.h"
 #include "linesurface.h"
 #include "linemanager.h"
+#include "editorlayer.h"
 
 #include <QCoreApplication>
 #include <QQmlEngine>
 #include <QQmlContext>
+#include <QQmlPropertyMap>
 
 void EditorPrivatePlugin::registerTypes(const char *uri){
-    qmlRegisterType<lv::TextEdit>(          uri, 1, 0, "NewTextEdit");
-    qmlRegisterType<lv::LineSurface>(       uri, 1, 0, "LineSurface");
-    qmlRegisterType<lv::LineManager>(       uri, 1, 0, "LineManager");
+    qmlRegisterType<lv::TextEdit>(   uri, 1, 0, "NewTextEdit");
+    qmlRegisterType<lv::LineSurface>(uri, 1, 0, "LineSurface");
+    qmlRegisterType<lv::LineManager>(uri, 1, 0, "LineManager");
+    qmlRegisterType<lv::EditorLayer>(uri, 1, 0, "EditorLayer");
 
     qmlRegisterUncreatableType<lv::Project>(
         uri, 1, 0, "Project", "Cannot create Project instance.");
@@ -81,30 +84,4 @@ void EditorPrivatePlugin::initializeEngine(QQmlEngine *engine, const char *){
     lv::EditorGlobalObject* editor = new lv::EditorGlobalObject(pr, lpc);
 
     engine->rootContext()->setContextProperty("editor", editor);
-
-    QObject* livecv    = engine->rootContext()->contextProperty("livecv").value<QObject*>();
-    if ( livecv ){
-        lv::KeyMap* keymap = static_cast<lv::KeyMap*>(livecv->property("keymap").value<QObject*>());
-        keymap->store(0, Qt::Key_O,           lv::KeyMap::CONTROL_OR_COMMAND, "window.project.openFile");
-        keymap->store(0, Qt::Key_S,           lv::KeyMap::CONTROL_OR_COMMAND, "window.editor.saveFile");
-        keymap->store(0, Qt::Key_S,           lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt, "window.editor.saveFileAs");
-        keymap->store(0, Qt::Key_W,           lv::KeyMap::CONTROL_OR_COMMAND, "window.editor.closeFile");
-
-        keymap->store(0, Qt::Key_Backslash,   lv::KeyMap::CONTROL_OR_COMMAND, "window.project.toggleVisibility");
-        keymap->store(0, Qt::Key_T,           lv::KeyMap::CONTROL_OR_COMMAND, "window.toggleMaximizedRuntime");
-        keymap->store(0, Qt::Key_E,           lv::KeyMap::CONTROL_OR_COMMAND, "window.editor.toggleSize");
-        keymap->store(0, Qt::Key_K,           lv::KeyMap::CONTROL_OR_COMMAND, "window.toggleNavigation");
-        keymap->store(0, Qt::Key_L,           lv::KeyMap::CONTROL_OR_COMMAND, "window.toggleLog");
-        keymap->store(0, Qt::Key_BraceLeft,   lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.addHorizontalEditorView");
-        keymap->store(0, Qt::Key_BracketLeft, lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.addHorizontalEditorView");
-        keymap->store(0, Qt::Key_BraceLeft,   lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt,   "window.addHorizontalFragmentEditorView");
-        keymap->store(0, Qt::Key_BracketLeft, lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt,   "window.addHorizontalFragmentEditorView");
-        keymap->store(0, Qt::Key_BraceRight,  lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.removeHorizontalEditorView");
-        keymap->store(0, Qt::Key_BracketRight,lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.removeHorizontalEditorView");
-
-        keymap->store(lv::KeyMap::Linux,    Qt::Key_Space, lv::KeyMap::Control, "window.editor.assistCompletion");
-        keymap->store(lv::KeyMap::Windows,  Qt::Key_Space, lv::KeyMap::Control, "window.editor.assistCompletion");
-        keymap->store(lv::KeyMap::Mac,      Qt::Key_Space, lv::KeyMap::Alt,     "window.editor.assistCompletion");
-    }
-
 }

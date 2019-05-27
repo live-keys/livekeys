@@ -35,9 +35,7 @@ Rectangle {
         GradientStop{ position: 1.0; color: bottomColor}
     }
 
-    property bool isLogWindowDirty     : false
-    property bool isTextDirty          : false
-
+    property bool isLogWindowDirty: false
     property var licenseSettings: livecv.settings.file('license')
 
     signal messageYes()

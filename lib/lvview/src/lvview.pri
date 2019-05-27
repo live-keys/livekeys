@@ -38,7 +38,10 @@ HEADERS += \
     $$PWD/workspaceipcsink.h \
     $$PWD/layer.h \
     $$PWD/windowlayer.h \
+    $$PWD/commands.h \
+    $$PWD/commandsmodel.h \
     $$PWD/workspacelayer.h
+
 
 SOURCES += \
     $$PWD/errorhandler.cpp \
@@ -74,5 +77,7 @@ SOURCES += \
     $$PWD/workspaceipcsink.cpp \
     $$PWD/layer.cpp \
     $$PWD/windowlayer.cpp \
+    $$PWD/commands.cpp \
+    $$PWD/commandsmodel.cpp \
     $$PWD/workspacelayer.cpp
 

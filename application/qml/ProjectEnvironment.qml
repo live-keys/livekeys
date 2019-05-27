@@ -26,7 +26,7 @@ Item{
     id: root
     objectName: "project"
 
-    property QtObject windowControls : null
+    property QtObject panes: null
     property QtObject runSpace: null
 
     property Item addEntryOverlay : ProjectAddEntry{
@@ -47,13 +47,13 @@ Item{
         visible: false
         onOpen: {
             projectNavigation.parent.document = project.openFile(path, ProjectDocument.EditIfNotOpen)
-            root.windowControls.workspace.panes.setActiveItem(projectNavigation.parent.textEdit, projectNavigation.parent)
+            root.panes.setActiveItem(projectNavigation.parent.textEdit, projectNavigation.parent)
         }
         onCloseFile: {
             var doc = project.documentModel.isOpened(path)
             if ( doc ){
                 if ( doc.isDirty ){
-                    root.windowControls.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
+                    livecv.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
                     {
                         button1Name : 'Yes',
                         button1Function : function(mbox){
@@ -90,7 +90,7 @@ Item{
         onActiveChanged : {
             if (project.active){
                 if ( pathChange ){
-                    var fe = root.findFocusEditor()
+                    var fe = root.panes.focusPane('editor')
                     if ( fe )
                         fe.document = project.active
                 }
@@ -106,7 +106,7 @@ Item{
     Connections{
         target: project.documentModel
         onDocumentChangedOutside : {
-            root.windowControls.dialogs.message(
+            livecv.layers.window.dialogs.message(
                 'File \'' + document.file.path + '\' changed outside Live CV. Would you like to reload it?',
                 {
                     button1Name : 'Yes',
@@ -131,31 +131,16 @@ Item{
 
     Connections{
         target: project.fileModel
-        onError : root.windowControls.dialogs.message(message,{
+        onError : livecv.layers.window.dialogs.message(message,{
             button2Name : 'Ok',
             button2Function : function(mbox){ mbox.close(); }
         })
     }
 
-    function findFocusEditor(){
-        var ap = livecv.windowControls().workspace.panes.activePane
-        if ( ap.objectName === 'editor' ){
-            return ap;
-        }
-
-        var openPanes = livecv.windowControls().workspace.panes.open
-        for ( var i = 0; i < openPanes.length; ++i ){
-            if ( openPanes[i].objectName === 'editor' )
-                return openPanes[i]
-        }
-
-        return null;
-    }
-
     function toggleVisibility(){
         var pfs = null
 
-        var openPanes = livecv.windowControls().workspace.panes.open
+        var openPanes = root.panes.open
         for ( var i = 0; i < openPanes.length; ++i ){
             if ( openPanes[i].objectName === 'projectFileSystem' ){
                 pfs = openPanes[i]
@@ -167,18 +152,25 @@ Item{
             pfs.width = pfs.width === 0 ? 240 : 0
     }
 
-    Component.onCompleted: {
-        livecv.commands.add(root, {
-            'close' : [closeProject, "Close Project"],
-            'open' : [openProject, "Open Project"],
-            'new' : [newProject, "New Project"],
-            'openFile' : [openFile, "Open File"],
-            'toggleVisibility' : [toggleVisibility, "Project: Toggle Visibility"]
-        })
+
+    Connections{
+        target: livecv
+        onLayerReady: {
+            if ( layer.name === 'workspace' ){
+                layer.commands.add(root, {
+                    'close' : [closeProject, "Close Project"],
+                    'open' : [openProject, "Open Project"],
+                    'new' : [newProject, "New Project"],
+                    'openFile' : [openFile, "Open File"],
+                    'toggleVisibility' : [toggleVisibility, "Project: Toggle Visibility"]
+                })
+            }
+        }
     }
 
     function closeProject(callback){
         var documentList = project.documentModel.listUnsavedDocuments()
+        callback = callback ? callback : function(){}
         var message = ''
         if ( documentList.length === 0 ){
             project.closeProject()
@@ -196,7 +188,7 @@ Item{
             message += unsavedFiles
             message += "Would you like to save them before closing the project?\n"
         }
-        windowControls.dialogs.message(message, {
+        livecv.layers.window.dialogs.message(message, {
             button1Name : 'Yes',
             button1Function : function(box){
                 box.close()
@@ -205,11 +197,11 @@ Item{
                     var closeCallback = callback;
                     var untitledDocument = project.documentModel.isOpened(documentList[0])
 
-                    windowControls.dialogs.saveFile(
+                    livecv.layers.window.dialogs.saveFile(
                         { filters: [ "Qml files (*.qml)", "All files (*)" ] },
                         function(url){
                             if ( !untitledDocument.saveAs(url) ){
-                                windowControls.dialogs.message(
+                                livecv.layers.window.dialogs.message(
                                     'Failed to save file to: ' + url,
                                     {
                                         button3Name : 'Ok',
@@ -234,7 +226,7 @@ Item{
                     message = 'Failed to save the following files:\n'
                     message += unsavedFiles
                     box.close()
-                    windowControls.dialogs.message(message,{
+                    livecv.layers.window.dialogs.message(message,{
                         button1Name : 'Close',
                         button1Function : function(mbox){
                             project.closeProject()
@@ -275,7 +267,7 @@ Item{
     }
     function openProject(){
         root.closeProject(function(){
-            root.windowControls.dialogs.openDir({}, function(url){
+            livecv.layers.window.dialogs.openDir({}, function(url){
                 project.openProject(url)
             })
         })
@@ -292,13 +284,13 @@ Item{
             } else if ( project.isFileInProject(url) ) {
                 var doc = project.openFile(url, ProjectDocument.Edit)
                 if ( doc ) {
-                    var fe = root.findFocusEditor()
+                    var fe = root.panes.focusPane('editor')
                     if ( fe )
                         fe.document = doc
                 }
             } else {
                 var fileUrl = url
-                root.windowControls.dialogs.message(
+                livecv.layers.window.dialogs.message(
                     'File is outside project scope. Would you like to open it as a new project?',
                 {
                     button1Name : 'Open as project',
@@ -328,13 +320,13 @@ Item{
 
         if ( !project.isDirProject() ){
             closeProject(function(){
-                root.windowControls.dialogs.openFile(
+                livecv.layers.window.dialogs.openFile(
                     { filters: ["Qml files (*.qml)", "All files (*)"] },
                     openCallback
                 )
             })
         } else {
-            root.windowControls.dialogs.openFile(
+            livecv.layers.window.dialogs.openFile(
                 { filters: ["Qml files (*.qml)", "All files (*)"] },
                 openCallback
             )

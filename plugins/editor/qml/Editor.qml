@@ -34,7 +34,7 @@ Rectangle{
     property alias documentHandler: editorArea.documentHandler
     property alias textEdit: editorArea
 
-    property var windowControls: null
+    property var panes: null
     property var document: null
 
     property int fragmentStart: 0
@@ -54,16 +54,8 @@ Rectangle{
 
     objectName: "editor"
 
-    property string objectCommandIndex : livecv.commands.add(editor, {
-        'saveFile' : [ function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.save() }, "Save File"],
-        'saveFileAs' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.saveAs() }, "Save File As"],
-        'closeFile' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.closeDocument() }, "Close File"],
-        'assistCompletion' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.assistCompletion() }, "Assist Completion"],
-        'toggleSize' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.toggleSize() }, "Toggle Size"]
-    })
-
     function hasActiveEditor(){
-        return windowControls.workspace.panes.activePane.objectName === 'editor'
+        return root.panes.activePane.objectName === 'editor'
     }
 
     function save(){
@@ -77,12 +69,12 @@ Rectangle{
     }
 
     function saveAs(){
-        windowControls.dialogs.saveFile(
+        livecv.layers.window.dialogs.saveFile(
             { filters: [ "Qml files (*.qml)", "All files (*)" ] },
             function(url){
                 var editordoc = editor.document
                 if ( !editordoc.saveAs(url) ){
-                    windowControls.dialogs.message(
+                    livecv.layers.window.dialogs.message(
                         'Failed to save file to: ' + url,
                         {
                             button3Name : 'Ok',
@@ -91,7 +83,7 @@ Rectangle{
                             }
                         }
                     )
-                    return;
+                    return
                 }
 
                 if ( !project.isDirProject() ){
@@ -100,13 +92,13 @@ Rectangle{
                 } else if ( project.isFileInProject(url) ){
 
                     var doc = project.openFile(url, ProjectDocument.Edit)
-                    var fe = projectView.findFocusEditor()
+                    var fe = editor.panes.focusPane('editor')
                     if ( fe ){
                         fe.document = doc
                     }
                 } else {
                     var fileUrl = url
-                    windowControls.dialogs.message(
+                    livecv.layers.window.dialogs.message(
                         'File is outside project scope. Would you like to open it as a new project?',
                     {
                         button1Name : 'Open as project',
@@ -149,15 +141,15 @@ Rectangle{
                     editor.document.save()
                     editor.closeDocumentAction()
                 } else {
-                    windowControls.dialogs.saveFile(
+                    livecv.layers.window.dialogs.saveFile(
                         { filters: [ "Qml files (*.qml)", "All files (*)" ] },
                         function(url){
                             if ( !editor.document.saveAs(url) ){
-                                windowControls.dialogs.message(
+                                livecv.layers.window.dialogs.message(
                                     'Failed to save file to: ' + url,
                                     {
                                         button3Name : 'Ok',
-                                        button3Function : function(){ windowControls.dialogs.messageClose(); }
+                                        button3Function : function(){ livecv.layers.window.dialogs.messageClose(); }
                                     }
                                 )
                                 return;
@@ -169,7 +161,7 @@ Rectangle{
                 mbox.close()
             }
 
-            windowControls.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
+            livecv.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
             {
                 button1Name : 'Yes',
                 button1Function : function(mbox){
@@ -199,7 +191,7 @@ Rectangle{
 
     function closeDocumentAction(){
         if ( !project.isDirProject() && document === project.active ){
-            windowControls.dialogs.message(
+            livecv.layers.window.dialogs.message(
                 'Closing this file will also close this project. Would you like to close the project?',
             {
                 button1Name : 'Yes',
@@ -300,7 +292,7 @@ Rectangle{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    livecv.commands.execute('window.toggleNavigation')
+                    livecv.layers.workspace.commands.execute('window.workspace.toggleNavigation')
                 }
             }
         }
@@ -413,7 +405,7 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     editorAddRemoveMenu.visible = false
-                    livecv.commands.execute('window.addHorizontalEditorView')
+                    livecv.layers.workspace.commands.execute('window.workspace.addHorizontalEditorView')
                 }
             }
         }
@@ -441,7 +433,7 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     editorAddRemoveMenu.visible = false
-                    livecv.commands.execute('window.removeHorizontalEditorView')
+                    livecv.layers.workspace.commands.execute('window.workspace.removeHorizontalEditorView')
                 }
             }
         }
@@ -663,9 +655,9 @@ Rectangle{
                             codeHandler.completionModel.disable()
                         }
                     } else {
-                        var command = livecv.keymap.locateCommand(event.key, event.modifiers)
+                        var command = livecv.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
                         if ( command !== '' ){
-                            livecv.commands.execute(command)
+                            livecv.layers.workspace.commands.execute(command)
                             event.accepted = true
                         }
                     }
@@ -708,7 +700,7 @@ Rectangle{
                         }
                         contextMenu.additionalItems = []
 
-                        var res = livecv.interceptMenu(editor)
+                        var res = livecv.layers.workspace.interceptMenu(editor)
                         for ( var i = 0; i < res.length; ++i ){
                             var menuitem = contextMenu.insertItem(i, res[i].name)
                             menuitem.enabled = res[i].enabled

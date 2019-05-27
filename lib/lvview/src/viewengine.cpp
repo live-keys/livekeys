@@ -331,6 +331,10 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::QmlObjectListModel>(    uri, 1, 0, "ObjectListModel");
     qmlRegisterUncreatableType<lv::Shared>(     uri, 1, 0, "Shared", "Shared is of abstract type.");
     qmlRegisterUncreatableType<lv::Layer>(      uri, 1, 0, "Layer", "Layer is of abstract type.");
+    qmlRegisterUncreatableType<lv::Commands>(
+        uri, 1, 0, "LiveCommands", ViewEngine::typeAsPropertyMessage("LiveCommands", "livecv.layers.workspace.commands"));
+    qmlRegisterUncreatableType<lv::KeyMap>(
+        uri, 1, 0, "KeyMap", ViewEngine::typeAsPropertyMessage("KeyMap", "livecv.layers.workspace.keymap"));
     qmlRegisterType<lv::WindowLayer>(           uri, 1, 0, "WindowLayer");
     qmlRegisterType<lv::WorkspaceLayer>(        uri, 1, 0, "WorkspaceLayer");
 }

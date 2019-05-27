@@ -27,23 +27,23 @@ Rectangle{
     color : "#05090e"
     objectName: "projectFileSystem"
 
-    property QtObject windowControls : null
+    property QtObject panes: null
 
     function addEntry(parentEntry, isFile){
         root.addEntryOverlay.entry = parentEntry
         root.addEntryOverlay.isFile = isFile
 
-        root.windowControls.dialogs.overlayBox(root.addEntryOverlay)
+        livecv.layers.window.dialogs.overlayBox(root.addEntryOverlay)
     }
     function openEntry(entry, monitor){
-        var fe = root.windowControls.workspace.project.findFocusEditor()
+        var fe = root.panes.focusPane('editor')
         if ( fe )
             fe.document = project.openFile(
                 entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
         )
     }
     function editEntry(entry){
-        var fe = root.windowControls.workspace.project.findFocusEditor()
+        var fe = root.panes.focusPane('editor')
         if ( fe )
             fe.document = project.openFile(entry, ProjectDocument.Edit)
     }
@@ -74,7 +74,7 @@ Rectangle{
             }
         }
 
-        windowControls.dialogs.message(message, {
+        livecv.layers.window.dialogs.message(message, {
             button1Name : 'Yes',
             button1Function : function(mbox){
                 project.fileModel.removeEntry(entry)
@@ -119,7 +119,7 @@ Rectangle{
             }
         }
 
-        windowControls.dialogs.message(message, {
+        livecv.layers.window.dialogs.message(message, {
             button1Name : 'Yes',
             button1Function : function(mbox){
                 project.fileModel.moveEntry(entry, newParent)
@@ -180,7 +180,7 @@ Rectangle{
         }
     }
 
-    Rectangle {
+    Rectangle{
         id: projectMenu
         visible: false
         anchors.right: root.right
@@ -200,7 +200,7 @@ Rectangle{
             width: parent.buttonWidth
             height: parent.buttonHeight
             color : "#03070b"
-            Text {
+            Text{
                 text: qsTr("Remove Project View")
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 12
@@ -215,12 +215,11 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     projectMenu.visible = false
-                    toggleVisibility()
+                    livecv.layers.workspace.commands.execute('window.workspace.project.toggleVisibility')
                 }
             }
         }
     }
-
 
     TreeView {
         id: view
@@ -353,7 +352,7 @@ Rectangle{
                     property int type : {
                         if (styleData.value){
                             if ( styleData.value.document ){
-                                var ap = root.windowControls.workspace.panes.activePane
+                                var ap = root.panes.activePane
                                 if ( ap.objectName === 'editor' && ap.document && ap.document.file === styleData.value ){
                                     return 1;
                                 }
@@ -510,7 +509,6 @@ Rectangle{
                     root.removeEntry(view.contextDelegate.entry(), false)
                 }
             }
-
         }
 
         Menu {
@@ -561,7 +559,7 @@ Rectangle{
             MenuItem{
                 text: "Close project"
                 onTriggered: {
-                    root.closeProject(function(){})
+                    livecv.layers.workspace.commands.execute('window.workspace.project.close')
                 }
             }
             MenuItem {

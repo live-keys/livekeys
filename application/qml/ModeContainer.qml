@@ -7,7 +7,6 @@ Rectangle {
 
     property var modeWrapper: null
 
-
     function setLiveCodingMode(){
         project.runTrigger = Project.RunOnChange
         modeContainer.visible = false

@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file alias="main.qml">qml/main.qml</file>
         <file alias="LogWindow.qml">qml/LogWindow.qml</file>
         <file alias="Top.qml">qml/Top.qml</file>
         <file alias="ProjectEnvironment.qml">qml/ProjectEnvironment.qml</file>
@@ -17,10 +16,10 @@
         <file alias="OverlayBox.qml">qml/OverlayBox.qml</file>
         <file alias="ErrorContainer.qml">qml/ErrorContainer.qml</file>
         <file alias="ProjectFileSystem.qml">qml/ProjectFileSystem.qml</file>
-        <file alias="EditorEnvironment.qml">qml/EditorEnvironment.qml</file>
         <file alias="workspace.qml">qml/workspace.qml</file>
         <file alias="workspacelayer.qml">qml/workspacelayer.qml</file>
         <file alias="ModeContainer.qml">qml/ModeContainer.qml</file>
+        <file alias="editorlayer.qml">qml/editorlayer.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>

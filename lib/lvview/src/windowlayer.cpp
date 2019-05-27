@@ -14,6 +14,10 @@ namespace lv{
 
 WindowLayer::WindowLayer(QObject *parent)
     : Layer(parent)
+    , m_window(nullptr)
+    , m_nextViewParent(nullptr)
+    , m_handle(nullptr)
+    , m_dialogs(nullptr)
 {
     setHasView(true);
 }
@@ -32,23 +36,33 @@ void WindowLayer::loadView(ViewEngine* engine, QObject *parent){
     QByteArray contentBytes = f.readAll();
 
     //TODO: loadAsync, connect engine to loading slot, disconnect after
-    QObject* layerObj = engine->createObject(contentBytes, parent, QUrl(path));
+    QObject* layerObj = engine->createObject(contentBytes, parent, QUrl("qrc:/window.qml"));
     if ( !layerObj && engine->lastErrors().size() > 0 )
         THROW_EXCEPTION(
             Exception, ViewEngine::toErrorString(engine->lastErrors()).toStdString(), Exception::toCode("~Component")
         );
 
-    QQuickWindow* w = qobject_cast<QQuickWindow*>(layerObj);
+    m_window = qobject_cast<QQuickWindow*>(layerObj);
 
-    m_nextViewParent = w->contentItem();
+    connect(m_window, &QQuickWindow::activeChanged, this, &WindowLayer::windowActiveChanged);
 
-    //TODO: Extract properties, i.e. dialogs, etc
+    m_nextViewParent = m_window->property("container").value<QObject*>();
+
+    m_dialogs = m_window->property("dialogs").value<QObject*>();
+    m_handle  = m_window->property("handle").value<QObject*>();
+
+    emit dialogsChanged();
+    emit handleChanged();
 
     emit viewReady(this, m_nextViewParent);
 }
 
 QObject *WindowLayer::nextViewParent(){
     return m_nextViewParent;
+}
+
+void WindowLayer::windowActiveChanged(){
+    emit isActiveChanged(m_window->isActive());
 }
 
 }// namespace

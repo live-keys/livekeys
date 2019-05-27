@@ -43,19 +43,24 @@ class Commands : public QObject{
     };
 
 public:
+    friend class CommandsModel;
+
+public:
     explicit Commands(QObject *parent = 0);
     ~Commands();
 
     QString dump();
     CommandsModel* model() { return m_model; }
     void setModel(CommandsModel* m);
-    friend CommandsModel;
+
 public slots:
     QString add(QObject* object, const QJSValue& command);
     void removeCommandsFor(QObject* object);
     void execute(const QString& command);
-Q_SIGNALS:
+
+signals:
     void modelChanged(CommandsModel* model);
+
 private:
     QStringList getCommandChain(QObject *object);
 
