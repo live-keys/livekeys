@@ -27,15 +27,15 @@ Rectangle {
 
     property color topColor: "#020a11"
     property color bottomColor: "#000509"
+    property alias modeImage: modeImage
+    property var modeContainer: null
 
     gradient: Gradient{
         GradientStop{ position: 0.0; color: topColor}
         GradientStop{ position: 1.0; color: bottomColor}
     }
 
-    property bool isLogWindowDirty     : false
-    property bool isTextDirty          : false
-
+    property bool isLogWindowDirty: false
     property var licenseSettings: livecv.settings.file('license')
 
     signal messageYes()
@@ -51,10 +51,6 @@ Rectangle {
 
     signal openSettings()
     signal openLicense()
-
-    function questionSave(){
-        messageBox.visible = true
-    }
 
     // New
 
@@ -317,76 +313,123 @@ Rectangle {
         }
     }
 
-    Rectangle{
-        id : messageBox
-        anchors.left: parent.left
-        anchors.leftMargin: 130
-        height : visible ? parent.height : 0
-        color : "#102235"
-        width : 400
-        visible : false
-        Behavior on height {
-            SpringAnimation { spring: 3; damping: 0.1 }
-        }
-        Text{
-            color : "#bec7ce"
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: 12
-            text : "Would you like to save your current code?"
-            font.family: "Ubuntu Mono, Courier New, Courier"
-        }
-        Rectangle{
-            anchors.left: parent.left
-            anchors.leftMargin: 300
-            height : parent.height
-            width : 50
-            color : "transparent"
-            Text{
-                color : yesMArea.containsMouse ? "#fff" : "#bec7ce"
-                anchors.left: parent.left
-                anchors.leftMargin: 20
-                anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: 12
-                text : "Yes"
-                font.family: "Ubuntu Mono, Courier New, Courier"
-            }
-            MouseArea{
-                id : yesMArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked : {
-                    messageBox.visible = false
-                    container.messageYes()
-                }
-            }
-        }
-        Rectangle{
-            anchors.left: parent.left
-            anchors.leftMargin: 350
-            height : parent.height
-            width : 50
-            color : "transparent"
-            Text{
-                color : noMArea.containsMouse ? "#fff" : "#bec7ce"
-                anchors.left: parent.left
-                anchors.leftMargin: 20
-                anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: 12
-                text : "No"
-                font.family: "Ubuntu Mono, Courier New, Courier"
-            }
-            MouseArea{
-                id : noMArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked : {
-                    container.messageNo()
-                    messageBox.visible = false
-                }
-            }
-        }
-    }
 
+    Rectangle {
+        id: modeWrapper
+        anchors.left: parent.left
+        anchors.leftMargin: 550
+        width: 220
+        height: 30
+        color: 'transparent'
+
+        Item{
+            anchors.left: parent.left
+            anchors.leftMargin: 35
+            height : parent.height
+            Text{
+                color :  "#969aa1"
+                anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 12
+                font.family: 'Open Sans, Arial, sans-serif'
+                elide: Text.ElideRight
+                width: 130
+                text : {
+                    if (!project.active) return "";
+                    if (project.active && project.active.file){
+                        if (project.active.file.name === "") return "untitled";
+                        else return project.active.file.name;
+                    }
+                }
+            }
+        }
+
+        Triangle{
+            id: compileButtonShape
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            width: compileButton.containsMouse ? 8 : 7
+            height: compileButton.containsMouse ? 13 : 12
+            state : "Released"
+            rotation: Triangle.Right
+
+            Behavior on height{ NumberAnimation{ duration: 100 } }
+            Behavior on width{ NumberAnimation{ duration: 100 } }
+
+            states: [
+                State {
+                    name: "Pressed"
+                    PropertyChanges { target: compileButtonShape; color: "#487db9"}
+                },
+                State {
+                    name: "Released"
+                    PropertyChanges { target: compileButtonShape; color: compileButton.containsMouse ? "#768aca" : "#bcbdc1"}
+                }
+            ]
+            transitions: [
+                Transition {
+                    from: "Pressed"
+                    to: "Released"
+                    ColorAnimation { target: compileButtonShape; duration: 100}
+                },
+                Transition {
+                    from: "Released"
+                    to: "Pressed"
+                    ColorAnimation { target: compileButtonShape; duration: 100}
+                }
+            ]
+        }
+
+        MouseArea{
+            id : compileButton
+            anchors.left: parent.left
+            anchors.leftMargin: 0
+            width: 50
+            height: 30
+            hoverEnabled: true
+            onPressed: compileButtonShape.state = "Pressed"
+            onReleased: compileButtonShape.state = "Released"
+            onClicked: { project.run() }
+        }
+
+        Item{
+            width: modeImage.width + modeImage.anchors.rightMargin + 10
+            height: parent.height
+            anchors.right: parent.right
+
+            Image{
+                id : modeImage
+                anchors.right: parent.right
+                anchors.rightMargin: 25
+                anchors.verticalCenter: parent.verticalCenter
+                source: modeContainer.liveImage.source
+            }
+
+            Triangle{
+                anchors.right: parent.right
+                anchors.rightMargin: 7
+                anchors.verticalCenter: parent.verticalCenter
+                width: 9
+                height: 5
+                color: openStatesDropdown.containsMouse ? "#9b6804" : "#bcbdc1"
+                rotation: Triangle.Bottom
+            }
+
+            MouseArea{
+                id : openStatesDropdown
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: modeContainer.visible = !modeContainer.visible
+            }
+        }
+
+
+        Rectangle{
+            width: parent.width
+            height: 1
+            color: "#1a1f25"
+            anchors.bottom: parent.bottom
+        }
+
+    }
 }

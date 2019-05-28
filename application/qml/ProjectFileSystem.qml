@@ -25,166 +25,27 @@ import editor.private 1.0
 Rectangle{
     id: root
     color : "#05090e"
-    objectName: "project"
+    objectName: "projectFileSystem"
 
-    property WindowControls windowControls : null
-    property Item focusEditor : null
-    property Item navEditor: null
-
-    function setFocusEditor(e){
-        if (focusEditor !== e ){
-            if (focusEditor) focusEditor.internalFocus = false
-            focusEditor = e
-            focusEditor.internalFocus = true
-        }
-    }
-
-    function setNavEditor(e){
-        if (navEditor && navEditor !== e){
-            navEditor = e;
-        }
-    }
-
-    Component.onCompleted: {
-        livecv.commands.add(root, {
-            'close' : [closeProject, "Close Project"],
-            'open' : [openProject, "Open Project"],
-            'new' : [newProject, "New Project"],
-            'openFile' : [openFile, "Open File"],
-            'toggleVisibility' : [toggleVisibility, "Project: Toggle Visibility"]
-        })
-    }
-
-    function closeProject(callback){
-        var documentList = project.documentModel.listUnsavedDocuments()
-        var message = ''
-        if ( documentList.length === 0 ){
-            project.closeProject()
-            callback()
-            return;
-        } else if ( !project.isDirProject() ){
-            message = "Your project file has unsaved changes. Would you like to save them before closing it?";
-        } else {
-            var unsavedFiles = '';
-            for ( var i = 0; i < documentList.length; ++i ){
-                unsavedFiles += documentList[i] + "\n";
-            }
-
-            message = "The following files have unsaved changes:\n";
-            message += unsavedFiles
-            message += "Would you like to save them before closing the project?\n"
-        }
-        windowControls.messageDialog.show(message, {
-            button1Name : 'Yes',
-            button1Function : function(){
-                windowControls.messageDialog.close()
-                if ( !project.isDirProject() && documentList.length === 1 && documentList[0] === ''){
-                    var closeCallback = callback;
-                    var untitledDocument = documentModel.isOpened(documentList[0])
-                    fileSaveDialog.callback = function(){
-                        if ( !untitledDocument.saveAs(windowControls.saveFileDialog.fileUrl) ){
-                            windowControls.messageDialog.show(
-                                'Failed to save file to: ' + windowControls.saveFileDialog.fileUrl,
-                                {
-                                    button3Name : 'Ok',
-                                    button3Function : function(){ windowControls.messageDialog.close(); }
-                                }
-                            )
-                            return;
-                        }
-                        project.closeProject()
-                        closeCallback()
-                    }
-                    windowControls.saveFileDialog.open()
-                } else if ( !project.documentModel.saveDocuments() ){
-                    var unsavedList = project.documentModel.listUnsavedDocuments()
-                    unsavedFiles = '';
-                    for ( var i = 0; i < unsavedList.length; ++i ){
-                        if ( unsavedList[i] === '' )
-                            unsavedList[i] = 'untitled'
-                        unsavedFiles += unsavedList[i] + "\n";
-                    }
-
-                    message = 'Failed to save the following files:\n'
-                    message += unsavedFiles
-                    windowControls.messageDialog.show(message,{
-                        button1Name : 'Close',
-                        button1Function : function(){
-                            project.closeProject()
-                            windowControls.messageDialog.close()
-                            callback()
-                        },
-                        button3Name : 'Cancel',
-                        button3Function : function(){
-                            windowControls.messageDialog.close()
-                        },
-                        returnPressed : function(){
-                            project.closeProject()
-                            windowControls.messageDialog.close()
-                            callback()
-                        }
-                    })
-                } else {
-                    project.closeProject()
-                    windowControls.messageDialog.close()
-                    callback()
-                }
-            },
-            button2Name : 'No',
-            button2Function : function(){
-                project.closeProject()
-                windowControls.messageDialog.close()
-                callback()
-            },
-            button3Name : 'Cancel',
-            button3Function : function(){
-                windowControls.messageDialog.close()
-            },
-            returnPressed : function(){
-                project.closeProject()
-                windowControls.messageDialog.close()
-            }
-        })
-    }
-    function openProject(){
-        root.closeProject(function(){
-            root.windowControls.openDirDialog.open()
-        })
-    }
-    function newProject(){
-        closeProject(function(){
-            project.newProject()
-            if ( project.active )
-            {
-                focusEditor.document = project.active
-            }
-        })
-    }
-    function openFile(){
-        if ( !project.isDirProject() ){
-            closeProject(function(){
-                root.windowControls.openFileDialog.open()
-            })
-        } else {
-            root.windowControls.openFileDialog.open()
-        }
-    }
-
-    function openCommandsMenu(){
-        livecv.commands.model.setFilter('')
-        commandsMenu.visible = !commandsMenu.visible
-    }
+    property QtObject panes: null
 
     function addEntry(parentEntry, isFile){
-        projectAddEntry.show(parentEntry, isFile)
+        root.addEntryOverlay.entry = parentEntry
+        root.addEntryOverlay.isFile = isFile
+
+        livecv.layers.window.dialogs.overlayBox(root.addEntryOverlay)
     }
     function openEntry(entry, monitor){
-        root.focusEditor.document = project.openFile(
-            entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
+        var fe = root.panes.focusPane('editor')
+        if ( fe )
+            fe.document = project.openFile(
+                entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
         )
     }
     function editEntry(entry){
-        root.focusEditor.document = project.openFile(entry, ProjectDocument.Edit)
+        var fe = root.panes.focusPane('editor')
+        if ( fe )
+            fe.document = project.openFile(entry, ProjectDocument.Edit)
     }
     function removeEntry(entry, isFile){
         var message = ''
@@ -213,19 +74,19 @@ Rectangle{
             }
         }
 
-        windowControls.messageDialog.show(message, {
+        livecv.layers.window.dialogs.message(message, {
             button1Name : 'Yes',
-            button1Function : function(){
+            button1Function : function(mbox){
                 project.fileModel.removeEntry(entry)
-                windowControls.messageDialog.close()
+                mbox.close()
             },
             button3Name : 'No',
-            button3Function : function(){
-                windowControls.messageDialog.close()
+            button3Function : function(mbox){
+                mbox.close()
             },
-            returnPressed : function(){
+            returnPressed : function(mbox){
                 project.fileModel.removeEntry(entry)
-                windowControls.messageDialog.close()
+                mbox.close()
             }
         })
     }
@@ -258,19 +119,19 @@ Rectangle{
             }
         }
 
-        windowControls.messageDialog.show(message, {
+        livecv.layers.window.dialogs.message(message, {
             button1Name : 'Yes',
-            button1Function : function(){
+            button1Function : function(mbox){
                 project.fileModel.moveEntry(entry, newParent)
-                windowControls.messageDialog.close()
+                mbox.close()
             },
             button3Name : 'No',
-            button3Function : function(){
-                windowControls.messageDialog.close()
+            button3Function : function(mbox){
+                mbox.close()
             },
-            returnPressed : function(){
+            returnPressed : function(mbox){
                 project.fileModel.moveEntry(entry, newParent)
-                windowControls.messageDialog.close()
+                mbox.close()
             }
         })
     }
@@ -278,11 +139,6 @@ Rectangle{
     function renameEntry(entry, newName){
         project.fileModel.renameEntry(entry, newName)
     }
-
-    function toggleVisibility(){
-        root.width = root.width === 0 ? 240 : 0
-    }
-
 
     Rectangle{
         id: paneTop
@@ -310,7 +166,7 @@ Rectangle{
             height: parent.height
 
             Image{
-                id : toggleNavigationImage
+                id : paneOptions
                 anchors.centerIn: parent
                 source : "qrc:/images/toggle-navigation.png"
             }
@@ -324,7 +180,7 @@ Rectangle{
         }
     }
 
-    Rectangle {
+    Rectangle{
         id: projectMenu
         visible: false
         anchors.right: root.right
@@ -344,7 +200,7 @@ Rectangle{
             width: parent.buttonWidth
             height: parent.buttonHeight
             color : "#03070b"
-            Text {
+            Text{
                 text: qsTr("Remove Project View")
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 12
@@ -359,12 +215,11 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     projectMenu.visible = false
-                    toggleVisibility()
+                    livecv.layers.workspace.commands.execute('window.workspace.project.toggleVisibility')
                 }
             }
         }
     }
-
 
     TreeView {
         id: view
@@ -440,9 +295,6 @@ Rectangle{
             }
             function setActive(){
                 project.setActive(styleData.value)
-                if (windowControls.codingMode === 1) {
-                    createObjectForActive()
-                }
             }
             function openFile(){
                 root.editEntry(styleData.value)
@@ -500,9 +352,9 @@ Rectangle{
                     property int type : {
                         if (styleData.value){
                             if ( styleData.value.document ){
-                                if ( root.focusEditor && root.focusEditor.document ){
-                                    if ( root.focusEditor.document.file === styleData.value )
-                                        return 1
+                                var ap = root.panes.activePane
+                                if ( ap.objectName === 'editor' && ap.document && ap.document.file === styleData.value ){
+                                    return 1;
                                 }
                                 return 2
                             }
@@ -657,7 +509,6 @@ Rectangle{
                     root.removeEntry(view.contextDelegate.entry(), false)
                 }
             }
-
         }
 
         Menu {
@@ -708,7 +559,7 @@ Rectangle{
             MenuItem{
                 text: "Close project"
                 onTriggered: {
-                    root.closeProject(function(){})
+                    livecv.layers.workspace.commands.execute('window.workspace.project.close')
                 }
             }
             MenuItem {

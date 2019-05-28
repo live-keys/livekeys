@@ -24,8 +24,11 @@
 #include <QObject>
 #include <QHash>
 
+class QTimer;
+
 namespace lv{
 
+class ViewEngine;
 class ProjectEntry;
 class ProjectFile;
 class ProjectFileModel;
@@ -40,10 +43,19 @@ class LV_EDITOR_EXPORT Project : public QObject{
     Q_PROPERTY(lv::ProjectNavigationModel* navigationModel READ navigationModel NOTIFY navigationModelChanged)
     Q_PROPERTY(lv::ProjectDocumentModel* documentModel     READ documentModel   NOTIFY documentModelChanged)
     Q_PROPERTY(QString rootPath                            READ rootPath        NOTIFY pathChanged)
+    Q_PROPERTY(lv::Project::RunTrigger runTrigger          READ runTrigger      WRITE setRunTrigger NOTIFY runTriggerChanged)
+    Q_ENUMS(RunTrigger)
 
     friend class ProjectFileModel;
     friend class ProjectDocument;
     friend class ProjectDocumentModel;
+
+public:
+    enum RunTrigger{
+        RunManual,
+        RunOnSave,
+        RunOnChange
+    };
 
 public:
     Project(QObject* parent = 0);
@@ -85,6 +97,11 @@ public:
 
     LockedFileIOSession::Ptr lockedFileIO();
 
+    lv::Project::RunTrigger runTrigger() const;
+    void setRunTrigger(lv::Project::RunTrigger runTrigger);
+
+    void setRunSpace(QObject* runSpace);
+
 public slots:
     void newProject();
     void closeProject();
@@ -105,6 +122,15 @@ public slots:
     QString dir() const;
     QString path(const QString& relative) const;
 
+    void scheduleRun();
+    void run();
+
+    QObject* runSpace();
+    QObject* appRoot();
+
+    void engineObjectAcquired(const QUrl& file);
+    void engineObjectReady(QObject* object, const QUrl& file);
+
 signals:
     /** path changed, means the whole project changed */
     void pathChanged(QString rootPath);
@@ -123,9 +149,15 @@ signals:
     /** file changed (e.g. on save) */
     void fileChanged(const QString& rootPath);
 
+    void runTriggerChanged();
+
 private:
+    ViewEngine* engine();
     ProjectFile* relocateDocument(const QString& rootPath, const QString &newPath, ProjectDocument *document);
     void setActive(ProjectDocument* document);
+    void emptyRunSpace();
+    ProjectDocument* createDocument(ProjectFile* file, bool isMonitored);
+    void documentSaved(ProjectDocument* documnet);
 
 private:
     ProjectFileModel*       m_fileModel;
@@ -136,6 +168,10 @@ private:
 
     ProjectDocument* m_active;
     QString          m_path;
+    QTimer*          m_scheduleRunTimer;
+    RunTrigger       m_runTrigger;
+    QObject*         m_runSpace;
+    QObject*         m_appRoot;
 };
 
 
@@ -167,6 +203,25 @@ inline const QString &Project::rootPath() const{
  */
 inline LockedFileIOSession::Ptr Project::lockedFileIO(){
     return m_lockedFileIO;
+}
+
+/**
+ * \brief Returns the trigger type to rerun the project.
+ */
+inline Project::RunTrigger Project::runTrigger() const{
+    return m_runTrigger;
+}
+
+
+/**
+ * \brief Sets the trigger type to rerun the project.
+ */
+inline void Project::setRunTrigger(Project::RunTrigger runTrigger){
+    if (m_runTrigger == runTrigger)
+        return;
+
+    m_runTrigger = runTrigger;
+    emit runTriggerChanged();
 }
 
 

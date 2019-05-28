@@ -32,7 +32,16 @@ HEADERS += \
     $$PWD/qmlobjectlist.h \
     $$PWD/qmlobjectlistmodel.h \
     $$PWD/linemessage.h \
-    $$PWD/linecapture.h
+    $$PWD/linecapture.h \
+    $$PWD/workspace.h \
+    $$PWD/workspaceipc.h \
+    $$PWD/workspaceipcsink.h \
+    $$PWD/layer.h \
+    $$PWD/windowlayer.h \
+    $$PWD/commands.h \
+    $$PWD/commandsmodel.h \
+    $$PWD/workspacelayer.h
+
 
 SOURCES += \
     $$PWD/errorhandler.cpp \
@@ -62,5 +71,13 @@ SOURCES += \
     $$PWD/qmlvariantlistmodel.cpp \
     $$PWD/qmlobjectlist.cpp \
     $$PWD/qmlobjectlistmodel.cpp \
-    $$PWD/linecapture.cpp
+    $$PWD/linecapture.cpp \
+    $$PWD/workspace.cpp \
+    $$PWD/workspaceipc.cpp \
+    $$PWD/workspaceipcsink.cpp \
+    $$PWD/layer.cpp \
+    $$PWD/windowlayer.cpp \
+    $$PWD/commands.cpp \
+    $$PWD/commandsmodel.cpp \
+    $$PWD/workspacelayer.cpp
 

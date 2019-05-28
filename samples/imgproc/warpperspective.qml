@@ -1,5 +1,5 @@
 import QtQuick 2.3
-import lcvcore 1.0
+import lcvcore 1.0 as Cv
 import lcvimgproc 1.0
 
 Grid{    
@@ -9,7 +9,7 @@ Grid{
     // This samples shows the usage of perspective transform
     // between 2 sets of 4 points
 
-    ImRead{
+    Cv.ImRead{
         id: src
         file: project.path('../_images/buildings_0246.jpg')
     }
@@ -27,18 +27,17 @@ Grid{
     }
     
     // Empty matrix to apply the transformation on
-    MatEmpty{
+    
+    Cv.MatView{
         id: bg
-        matSize: "600x400"
-        color: "#000"
-        channels: 3
         visible: false
+        mat : Cv.MatOp.createFill("600x400", Cv.Mat.CV8U, 3, "#000")
     }
     
     WarpPerspective{
         id: warpPerspective
         input: src.output
-        output: bg.output
+        output: bg.mat
         m: persTransform.output
     }
 }

@@ -21,10 +21,13 @@
 #include "live/projectdocument.h"
 #include "projectnavigationmodel.h"
 #include "live/projectdocumentmodel.h"
+#include "live/viewengine.h"
 
 #include <QFileInfo>
 #include <QUrl>
+#include <QQuickItem>
 #include <QDebug>
+#include <QTimer>
 
 /**
  * \class lv::Project
@@ -45,17 +48,27 @@ Project::Project(QObject *parent)
     , m_navigationModel(new ProjectNavigationModel(this))
     , m_documentModel(new ProjectDocumentModel(this))
     , m_lockedFileIO(LockedFileIOSession::createInstance())
-    , m_active(0)
+    , m_active(nullptr)
+    , m_scheduleRunTimer(new QTimer())
+    , m_runTrigger(Project::RunOnChange)
+    , m_runSpace(nullptr)
+    , m_appRoot(nullptr)
 {
+    m_scheduleRunTimer->setInterval(1000);
+    m_scheduleRunTimer->setSingleShot(true);
+    connect(m_scheduleRunTimer, &QTimer::timeout, this, &Project::run);
+    connect(engine(), &ViewEngine::objectAcquired, this, &Project::engineObjectAcquired);
+    connect(engine(), &ViewEngine::objectReady, this, &Project::engineObjectReady);
 }
 
 /**
  * \brief Default destructor
  */
 Project::~Project(){
+    delete m_documentModel;
     delete m_fileModel;
     delete m_navigationModel;
-    delete m_documentModel;
+    delete m_scheduleRunTimer;
 }
 
 /**
@@ -66,15 +79,19 @@ Project::~Project(){
 void Project::newProject(){
     m_fileModel->createProject();
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
-        ProjectDocument* document = new ProjectDocument(
-            qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false, this
+        ProjectDocument* document = createDocument(
+            qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false
         );
+        document->addEditingState(ProjectDocument::Read);
         document->setContent("import QtQuick 2.3\n\nGrid{\n}");
+        document->removeEditingState(ProjectDocument::Read);
         m_documentModel->openDocument("", document);
         m_active = document;
         m_path   = "";
         emit pathChanged("");
         emit activeChanged(m_active);
+
+        scheduleRun();
     }
 }
 
@@ -94,10 +111,9 @@ void Project::openProject(const QString &path){
     m_fileModel->openProject(absolutePath);
 
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
-        ProjectDocument* document = new ProjectDocument(
+        ProjectDocument* document = createDocument(
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)),
-            false,
-            this
+            false
         );
         m_documentModel->openDocument(document->file()->path(), document);
         m_active = document;
@@ -110,16 +126,14 @@ void Project::openProject(const QString &path){
 
         ProjectFile* bestFocus = lookupBestFocus(m_fileModel->root()->child(0));
         if( bestFocus ){
-            ProjectDocument* document = new ProjectDocument(
-                bestFocus,
-                false,
-                this
-            );
+            ProjectDocument* document = createDocument(bestFocus, false);
             m_documentModel->openDocument(document->file()->path(), document);
             m_active = document;
             emit activeChanged(document);
         }
     }
+
+    scheduleRun();
 }
 
 /** Opens project given by QUrl */
@@ -204,7 +218,7 @@ ProjectDocument *Project::openFile(ProjectFile *file, int mode){
         document = m_active;
         m_documentModel->openDocument(file->path(), document);
     } else if (!document){
-        document = new ProjectDocument(file, (mode == ProjectDocument::Monitor), this);
+        document = createDocument(file, (mode == ProjectDocument::Monitor));
         m_documentModel->openDocument(file->path(), document);
     } else if ( document->isMonitored() && mode == ProjectDocument::Edit ){
         m_documentModel->updateDocumentMonitoring(document, false);
@@ -223,7 +237,7 @@ void Project::setActive(ProjectFile* file){
 
     ProjectDocument* document = isOpened(file->path());
     if (!document){
-        document = new ProjectDocument(file, false, this);
+        document = createDocument(file, false);
         m_documentModel->openDocument(file->path(), document);
     }
     setActive(document);
@@ -263,7 +277,7 @@ bool Project::isFileInProject(const QString &path) const{
 void Project::setActive(const QString &path){
     ProjectDocument* document = isOpened(path);
     if ( !document ){
-        document = new ProjectDocument(m_fileModel->openFile(path), false, this);
+        document = createDocument(m_fileModel->openFile(path), false);
     }
     if ( document ){
         setActive(document);
@@ -326,6 +340,13 @@ ProjectDocument *Project::isOpened(const QString &path){
 }
 
 /**
+ * \brief Sets the load position for the project.
+ */
+void Project::setRunSpace(QObject *runSpace){
+    m_runSpace = runSpace;
+}
+
+/**
  * \brief Closes the file given the path
  */
 void Project::closeFile(const QString &path){
@@ -338,7 +359,45 @@ void Project::setActive(ProjectDocument *document){
             delete m_active;
         m_active = document;
         emit activeChanged(document);
+
+        scheduleRun();
     }
+}
+
+void Project::emptyRunSpace(){
+    if ( m_appRoot ){
+        m_appRoot->setParent(nullptr);
+        m_appRoot->deleteLater();
+    }
+}
+
+ProjectDocument *Project::createDocument(ProjectFile *file, bool isMonitored){
+    ProjectDocument* document = new ProjectDocument(file, isMonitored, this);
+
+    connect(document->textDocument(), &QTextDocument::contentsChange, [this, document](int, int, int){
+
+        if ( document->editingStateIs(ProjectDocument::Read) && document->isMonitored() ){
+            if ( m_runTrigger != Project::RunManual )
+                scheduleRun();
+            return;
+        }
+
+        if ( document->editingStateIs(ProjectDocument::Read) ||
+             document->editingStateIs(ProjectDocument::Overlay) ||
+             document->editingStateIs(ProjectDocument::Silent ) )
+        {
+            return;
+        }
+        if ( m_runTrigger == Project::RunOnChange )
+            scheduleRun();
+    });
+    return document;
+}
+
+void Project::documentSaved(ProjectDocument *document){
+    if ( m_runTrigger == Project::RunOnSave )
+        scheduleRun();
+    emit fileChanged(document->file()->path());
 }
 
 /**
@@ -346,6 +405,55 @@ void Project::setActive(ProjectDocument *document){
  */
 QString Project::path(const QString &relative) const{
     return dir() + '/' + relative;
+}
+
+/**
+ * \brief Schedules a run in 1 second. Clears any previous schedule.
+ */
+void Project::scheduleRun(){
+    m_scheduleRunTimer->start();
+}
+
+/**
+ * \brief Run the current project
+ */
+void Project::run(){
+    if ( !m_active )
+        return;
+
+    ViewEngine* e = engine();
+
+    auto documentList = m_documentModel->listUnsavedDocuments();
+    e->createObjectAsync(
+        m_active->content(),
+        m_runSpace,
+        m_active->file()->pathUrl(),
+        !(documentList.size() == 1 && documentList[0] == m_active->file()->path())
+    );
+}
+
+QObject *Project::runSpace(){
+    return m_runSpace;
+}
+
+QObject *Project::appRoot(){
+    return m_appRoot;
+}
+
+void Project::engineObjectAcquired(const QUrl &file){
+    if ( m_active && m_active->file()->path() == file.toLocalFile() ){
+        emptyRunSpace();
+    }
+}
+
+void Project::engineObjectReady(QObject *object, const QUrl &file){
+    if ( m_active && m_active->file()->path() == file.toLocalFile() ){
+        m_appRoot = object;
+    }
+}
+
+ViewEngine *Project::engine(){
+    return qobject_cast<ViewEngine*>(parent());
 }
 
 }// namespace

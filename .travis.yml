@@ -49,12 +49,14 @@ install:
       brew install opencv@3;
       echo "Open CV environment";
       ls /usr/local/Cellar;
-      echo "/usr/local/opt"
+      echo "/usr/local/opt";
       ls /usr/local/opt;
       OPENCV_VERSION="$(ls -1 /usr/local/Cellar/opencv@3)";
       echo $OPENCV_VERSION;
       export OPENCV_DIR=/usr/local/Cellar/opencv@3/$OPENCV_VERSION;
+      export PKG_CONFIG_PATH=$OPENCV_DIR/lib/pkgconfig;
       echo $OPENCV_DIR;
+      echo $PKG_CONFIG_PATH;
       echo $PWD;
       cd build;
       wget https://github.com/livecv/live-pm/archive/master.zip;
@@ -95,7 +97,7 @@ script:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then python3 livepm/main.py deploy .. macos_clang_64; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py deploy .. gcc_64; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py deploy .. gcc_64_standalone; fi
-  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+  - if [ "${TRAVIS_OS_NAME}" == "0" ]; then
       python3 livepm/main.py makedoc ..;
       export LIVECV_DOC=$(ls doc*.tar.gz | tail -n +1 | head -1);
       mv ${LIVECV_DOC} livecv-doc.tar.gz;

@@ -913,23 +913,18 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
 /**
  * \brief DocumentContentsChanged handler
  */
-AbstractCodeHandler::ContentsTrigger CodeQmlHandler::documentContentsChanged(int position, int, int){
-    AbstractCodeHandler::ContentsTrigger r = AbstractCodeHandler::Engine;
+void CodeQmlHandler::documentContentsChanged(int position, int, int){
     if ( !m_document->editingStateIs(ProjectDocument::Silent) ){
         if ( m_editingFragment ){
             if ( position < m_editingFragment->valuePosition() ||
                  position > m_editingFragment->valuePosition() + m_editingFragment->valueLength() )
             {
                 cancelEdit();
-            } else {
-                r = AbstractCodeHandler::Silent;
             }
         }
 
         m_scopeTimer.start();
     }
-
-    return r;
 }
 
 /**
@@ -1241,8 +1236,10 @@ void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
             if ( itEdit == edit ){
                 m_edits.erase(it);
 
-                if ( m_editingFragment == edit )
+                if ( m_editingFragment == edit ){
+                    m_document->removeEditingState(ProjectDocument::Overlay);
                     m_editingFragment = nullptr;
+                }
                 edit->emitRemoval();
                 edit->deleteLater();
                 return;
@@ -1764,15 +1761,16 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
 
     palette->setExtension(new QmlCodeConverter(edit, this), true);
 
-    // Unkown what this does
     connect(palette, &CodePalette::valueChanged, [this, edit](){
         if ( edit->totalPalettes() > 0 ){
             CodePalette* cp = *edit->begin();
             edit->bindingChannel()->commit(cp->value());
         }
+        m_document->removeEditingState(ProjectDocument::Overlay);
         removeEditingFragment(edit);
     });
 
+    m_document->addEditingState(ProjectDocument::Overlay);
     m_editingFragment = edit;
 
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
@@ -1788,6 +1786,7 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
  * \brief Cancels the current editing palette
  */
 void CodeQmlHandler::cancelEdit(){
+    m_document->removeEditingState(ProjectDocument::Overlay);
     if ( m_editingFragment ){
         removeEditingFragment(m_editingFragment);
     }

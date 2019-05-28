@@ -202,8 +202,8 @@ Rectangle{
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: root.isInWindow
-                             ? livecv.commands.execute("window.openLogInEditor")
-                             : livecv.commands.execute("window.openLogInWindow")
+                             ? livecv.layers.workspace.commands.execute("window.workspace.openLogInEditor")
+                             : livecv.layers.workspace.commands.execute("window.workspace.openLogInWindow")
             }
             Behavior on height{ NumberAnimation{  duration: 100 } }
         }

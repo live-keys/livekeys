@@ -23,7 +23,8 @@ HEADERS += \
     $$PWD/palettemanager.h \
     $$PWD/palettecontainer.h \
     $$PWD/palettelist.h \
-    $$PWD/codepalette.h
+    $$PWD/codepalette.h \
+    $$PWD/editorlayer.h
 
 SOURCES += \
     $$PWD/project.cpp \
@@ -46,4 +47,5 @@ SOURCES += \
     $$PWD/palettemanager.cpp \
     $$PWD/palettecontainer.cpp \
     $$PWD/palettelist.cpp \
-    $$PWD/codepalette.cpp
+    $$PWD/codepalette.cpp \
+    $$PWD/editorlayer.cpp

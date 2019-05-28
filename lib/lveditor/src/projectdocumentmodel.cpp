@@ -101,8 +101,6 @@ void ProjectDocumentModel::relocateDocument(const QString &path, const QString &
 
 /** Closes all of the open documents */
 void ProjectDocumentModel::closeDocuments(){
-    Project* p = qobject_cast<Project*>(parent());
-
     if ( m_fileWatcher ){
         QObject::disconnect(m_fileWatcher, SIGNAL(fileChanged(QString)),
                             this, SLOT(monitoredFileChanged(QString)));
@@ -111,10 +109,8 @@ void ProjectDocumentModel::closeDocuments(){
     }
 
     for( QHash<QString, ProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
-        if ( it.value() != p->active() ){
-            emit aboutToClose(it.value());
-            delete it.value();
-        }
+        emit aboutToClose(it.value());
+        delete it.value();
     }
     m_openedFiles.clear();
 

@@ -1,17 +1,25 @@
 <RCC>
     <qresource prefix="/">
-        <file alias="main.qml">qml/main.qml</file>
         <file alias="LogWindow.qml">qml/LogWindow.qml</file>
         <file alias="Top.qml">qml/Top.qml</file>
-        <file alias="Project.qml">qml/Project.qml</file>
+        <file alias="ProjectEnvironment.qml">qml/ProjectEnvironment.qml</file>
         <file alias="MessageDialogButton.qml">qml/MessageDialogButton.qml</file>
         <file alias="MessageDialogInternal.qml">qml/MessageDialogInternal.qml</file>
         <file alias="ProjectNavigation.qml">qml/ProjectNavigation.qml</file>
         <file alias="ProjectAddEntry.qml">qml/ProjectAddEntry.qml</file>
         <file alias="License.qml">qml/License.qml</file>
-        <file alias="MessageDialogMain.qml">qml/MessageDialogMain.qml</file>
+        <file alias="MessageDialogConfirm.qml">qml/MessageDialogConfirm.qml</file>
         <file alias="LogContainer.qml">qml/LogContainer.qml</file>
         <file alias="CommandsMenu.qml">qml/CommandsMenu.qml</file>
+        <file alias="window.qml">qml/window.qml</file>
+        <file alias="windowlayer.qml">qml/windowlayer.qml</file>
+        <file alias="OverlayBox.qml">qml/OverlayBox.qml</file>
+        <file alias="ErrorContainer.qml">qml/ErrorContainer.qml</file>
+        <file alias="ProjectFileSystem.qml">qml/ProjectFileSystem.qml</file>
+        <file alias="workspace.qml">qml/workspace.qml</file>
+        <file alias="workspacelayer.qml">qml/workspacelayer.qml</file>
+        <file alias="ModeContainer.qml">qml/ModeContainer.qml</file>
+        <file alias="editorlayer.qml">qml/editorlayer.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>

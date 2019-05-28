@@ -50,6 +50,7 @@ OTHER_FILES += \
 DISTFILES += \
     qml/MessageDialogMain.qml \
     qml/LogView.qml \
-    qml/CommandsMenu.qml
+    qml/CommandsMenu.qml \
+    qml/editorlayer.qml
 
 

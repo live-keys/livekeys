@@ -53,6 +53,7 @@ class DocumentHandler;
 class CodeQmlHandler;
 class Extensions;
 class PackageGraph;
+class Layer;
 
 // class LiveCV
 // ------------
@@ -62,11 +63,9 @@ class LiveCV : public QObject{
     Q_OBJECT
     Q_PROPERTY(lv::Settings*       settings       READ settings   CONSTANT)
     Q_PROPERTY(lv::ViewEngine*     engine         READ engine     CONSTANT)
-    Q_PROPERTY(lv::Commands*       commands       READ commands   CONSTANT)
     Q_PROPERTY(lv::VisualLogModel* log            READ log        CONSTANT)
-    Q_PROPERTY(lv::KeyMap*         keymap         READ keymap     CONSTANT)
     Q_PROPERTY(lv::Memory*         mem            READ memory     CONSTANT)
-    Q_PROPERTY(QQmlPropertyMap*    extensions     READ extensions CONSTANT)
+    Q_PROPERTY(QQmlPropertyMap*    layers         READ layers     CONSTANT)
 
 public:
     typedef QSharedPointer<LiveCV>       Ptr;
@@ -78,6 +77,7 @@ public:
     static LiveCV::Ptr create(int argc, const char* const argv[], QObject* parent = 0);
 
     void loadQml(const QUrl& url);
+    void loadProject();
 
     static int versionMajor();
     static int versionMinor();
@@ -87,9 +87,16 @@ public:
 
     const QString& dir() const;
 
+    void addDefaultLayers();
+    void addLayer(const QString& name, const QString &layer);
+    void loadLayer(const QString& layerName, std::function<void(Layer *)> onReady = nullptr);
+    void loadLayers(const QStringList& layers, std::function<void(Layer*)> onReady = nullptr);
+
     void loadInternals();
     void loadInternalPlugins();
     void loadInternalPackages();
+
+    void initializeProject();
 
     std::vector<std::string> packageImportPaths() const;
 
@@ -100,19 +107,17 @@ public:
     Settings*   settings();
     ViewEngine* engine();
     Project*    project();
-    Commands*   commands();
-    KeyMap*     keymap();
     Memory*     memory();
-    QQmlPropertyMap* extensions();
     VisualLogModel* log();
+    QQmlPropertyMap* layers();
 
 public slots:
-    QObject *windowControls() const;
-    QJSValue interceptMenu(QJSValue context);
+    QObject* layerPlaceholder() const;
     void engineError(QJSValue error);
     void projectChanged(const QString& path);
 
 signals:
+    void layerReady(lv::Layer* layer);
     void missingPackages();
 
 private:
@@ -126,21 +131,21 @@ private:
     ViewEngine*      m_engine;
     LiveCVArguments* m_arguments;
 
-    lv::DocumentHandler* m_codeInterface;
     QString              m_dir;
     QStringList          m_engineImportPaths;
 
     lv::Project*           m_project;
     lv::Settings*          m_settings;
     lv::LiveCVScript*      m_script;
-    lv::Commands*          m_commands;
-    lv::KeyMap*            m_keymap;
-    lv::Extensions*        m_extensions;
     lv::VisualLogModel*    m_log;
     lv::VisualLogQmlObject*m_vlog;
     lv::PackageGraph*      m_packageGraph;
     lv::Memory*            m_memory;
-    mutable QObject*       m_windowControls;
+
+    QQmlPropertyMap*       m_layers;
+    QMap<QString, QString> m_storedLayers;
+    Layer*                 m_lastLayer;
+    mutable QObject*       m_layerPlaceholder;
 };
 
 inline int LiveCV::versionMajor(){
@@ -180,14 +185,6 @@ inline ViewEngine *LiveCV::engine(){
 
 inline Project *LiveCV::project(){
     return m_project;
-}
-
-inline Commands *LiveCV::commands(){
-    return m_commands;
-}
-
-inline KeyMap *LiveCV::keymap(){
-    return m_keymap;
 }
 
 inline VisualLogModel *LiveCV::log(){

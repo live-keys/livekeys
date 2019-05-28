@@ -1,5 +1,5 @@
 import QtQuick 2.3
-import lcvcore 1.0
+import lcvcore 1.0 as Cv
 import lcvimgproc 1.0
 
 Grid{
@@ -8,26 +8,27 @@ Grid{
     
     columns: 2
     
-    ImRead{
+    Cv.ImRead{
        id : src
        file : project.dir() + '/../_images/buildings_0246.jpg'
     }
     
-    Mat2DArray{
-        id : kernel
-        type : Mat.CV32F
+    Cv.MatView{
+        id: kernel
         width : 200
         height : 200
         linearFilter : false
-        values : [
-            [-0.1, 0.0, 0,1], 
-            [-0.1, 0.0, 0.1], 
-            [-0,1, 0.0, 0.1]]
+        mat : {
+            return Cv.MatOp.createFromArray([
+                [-0.1, 0.0, 0,1], 
+                [-0.1, 0.0, 0.1], 
+                [-0,1, 0.0, 0.1]], Cv.Mat.CV32F)
+        }
     }
     
     Filter2D{
         input : src.output
-        kernel : kernel.output
+        kernel : kernel.mat
         borderType : CopyMakeBorder.BORDER_DEFAULT
     }
 }

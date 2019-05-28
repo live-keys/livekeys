@@ -34,7 +34,7 @@ Rectangle{
     property alias documentHandler: editorArea.documentHandler
     property alias textEdit: editorArea
 
-    property var windowControls: null
+    property var panes: null
     property var document: null
 
     property int fragmentStart: 0
@@ -54,16 +54,8 @@ Rectangle{
 
     objectName: "editor"
 
-    property string objectCommandIndex : livecv.commands.add(editor, {
-        'saveFile' : [ function(){ if ( hasActiveEditor() ) windowControls.activePane.save() }, "Save File"],
-        'saveFileAs' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.saveAs() }, "Save File As"],
-        'closeFile' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.closeDocument() }, "Close File"],
-        'assistCompletion' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.assistCompletion() }, "Assist Completion"],
-        'toggleSize' : [function(){ if ( hasActiveEditor() ) windowControls.activePane.toggleSize() }, "Toggle Size"]
-    })
-
     function hasActiveEditor(){
-        return windowControls.activePane.objectName === 'editor'
+        return root.panes.activePane.objectName === 'editor'
     }
 
     function save(){
@@ -71,95 +63,122 @@ Rectangle{
             return;
         if ( editor.document.file.name !== '' ){
             editor.document.save()
-            if ( project.active && ((controls.codingMode === 0 && project.active !== editor.document) || controls.codingMode === 1)) /* compiling isn't disabled */{
-                var documentList = project.documentModel.listUnsavedDocuments()
-                livecv.engine.createObjectAsync(
-                    project.active.content,
-                    windowControls.runSpace,
-                    project.active.file.pathUrl(),
-                    project.active,
-                    !(documentList.size === 1 && documentList[0] === project.active)
-                );
-            }
         } else {
-            windowControls.saveFileDialog.open()
+            saveAs()
         }
     }
 
     function saveAs(){
-        windowControls.saveFileDialog.open()
+        livecv.layers.window.dialogs.saveFile(
+            { filters: [ "Qml files (*.qml)", "All files (*)" ] },
+            function(url){
+                var editordoc = editor.document
+                if ( !editordoc.saveAs(url) ){
+                    livecv.layers.window.dialogs.message(
+                        'Failed to save file to: ' + url,
+                        {
+                            button3Name : 'Ok',
+                            button3Function : function(mbox){
+                                mbox.close()
+                            }
+                        }
+                    )
+                    return
+                }
+
+                if ( !project.isDirProject() ){
+                    project.openProject(url)
+                    editor.document = project.active
+                } else if ( project.isFileInProject(url) ){
+
+                    var doc = project.openFile(url, ProjectDocument.Edit)
+                    var fe = editor.panes.focusPane('editor')
+                    if ( fe ){
+                        fe.document = doc
+                    }
+                } else {
+                    var fileUrl = url
+                    livecv.layers.window.dialogs.message(
+                        'File is outside project scope. Would you like to open it as a new project?',
+                    {
+                        button1Name : 'Open as project',
+                        button1Function : function(mbox){
+                            var projectUrl = fileUrl
+                            projectView.closeProject(
+                                function(){
+                                    project.openProject(projectUrl);
+                                    editor.document = project.active
+                                }
+                            )
+                            mbox.close()
+                        },
+                        button3Name : 'Cancel',
+                        button3Function : function(mbox){
+                            mbox.close()
+                        },
+                        returnPressed : function(mbox){
+                            var projectUrl = fileUrl
+                            projectView.closeProject(
+                                function(){
+                                    project.openProject(projectUrl)
+                                    editor.document = project.active
+                                }
+                            )
+                            mbox.close()
+                        }
+                    })
+                }
+            }
+        )
     }
 
     function closeDocument(){
         if ( !editor.document )
             return;
         if ( editor.document.isDirty ){
-            var saveFunction = function(){
+            var saveFunction = function(mbox){
                 if ( editor.document.file.name !== '' ){
                     editor.document.save()
                     editor.closeDocumentAction()
                 } else {
-                    windowControls.saveFileDialog.open()
-                    windowControls.saveFileDialog.callback = function(){
-                        if ( !editor.document.saveAs(windowControls.saveFileDialog.fileUrl) ){
-                            windowControls.messageDialog.show(
-                                'Failed to save file to: ' + windowControls.saveFileDialog.fileUrl,
-                                {
-                                    button3Name : 'Ok',
-                                    button3Function : function(){ windowControls.messageDialog.close(); }
-                                }
-                            )
-                            return;
+                    livecv.layers.window.dialogs.saveFile(
+                        { filters: [ "Qml files (*.qml)", "All files (*)" ] },
+                        function(url){
+                            if ( !editor.document.saveAs(url) ){
+                                livecv.layers.window.dialogs.message(
+                                    'Failed to save file to: ' + url,
+                                    {
+                                        button3Name : 'Ok',
+                                        button3Function : function(){ livecv.layers.window.dialogs.messageClose(); }
+                                    }
+                                )
+                                return;
+                            }
+                            editor.closeDocumentAction()
                         }
-                        editor.closeDocumentAction()
-                    }
+                    )
                 }
-                windowControls.messageDialog.close()
+                mbox.close()
             }
 
-            windowControls.messageDialog.show('File contains unsaved changes. Would you like to save them before closing?',
+            livecv.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
             {
                 button1Name : 'Yes',
-                button1Function : function(){
-                    saveFunction()
-                    var documentList = project.documentModel.listUnsavedDocuments()
-                    livecv.engine.createObjectAsync(
-                        project.active.content,
-                        runSpace,
-                        project.active.file.pathUrl(),
-                        project.active,
-                        !(documentList.size === 1 && documentList[0] === project.active)
-                    );
+                button1Function : function(mbox){
+                    saveFunction(mbox)
                 },
                 button2Name : 'No',
-                button2Function : function(){
-                    windowControls.messageDialog.close()
+                button2Function : function(mbox){
+                    mbox.close()
                     editor.closeDocumentAction()
                     editor.document = project.documentModel.lastOpened()
-                    var documentList = project.documentModel.listUnsavedDocuments()
-                    livecv.engine.createObjectAsync(
-                        project.active.content,
-                        runSpace,
-                        project.active.file.pathUrl(),
-                        project.active,
-                        !(documentList.size === 1 && documentList[0] === project.active)
-                    );
-
                 },
                 button3Name : 'Cancel',
-                button3Function : function(){
-                    windowControls.messageDialog.close()
+                button3Function : function(mbox){
+                    boxm.close()
                 },
-                returnPressed : function(){
-                    saveFunction()
-                    var documentList = project.documentModel.listUnsavedDocuments()
-                    livecv.engine.createObjectAsync(
-                        project.active.content,
-                        runSpace,
-                        project.active.file.pathUrl(),
-                        project.active,
-                        !(documentList.size === 1 && documentList[0] === project.active)
-                    );
+                returnPressed : function(mbox){
+                    saveFunction(mbox)
                 },
             })
         } else
@@ -172,21 +191,21 @@ Rectangle{
 
     function closeDocumentAction(){
         if ( !project.isDirProject() && document === project.active ){
-            windowControls.messageDialog.show(
+            livecv.layers.window.dialogs.message(
                 'Closing this file will also close this project. Would you like to close the project?',
             {
                 button1Name : 'Yes',
-                button1Function : function(){
+                button1Function : function(mbox){
                     project.closeProject()
-                    windowControls.messageDialog.close()
+                    mbox.close()
                 },
                 button3Name : 'No',
-                button3Function : function(){
-                    windowControls.messageDialog.close()
+                button3Function : function(mbox){
+                    mbox.close()
                 },
-                returnPressed : function(){
+                returnPressed : function(mbox){
                     project.closeProject()
-                    windowControls.messageDialog.close()
+                    mbox.close()
                 }
             })
         } else {
@@ -273,8 +292,7 @@ Rectangle{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    windowControls.navEditor = editor
-                    livecv.commands.execute('window.toggleNavigation')
+                    livecv.layers.workspace.commands.execute('window.workspace.toggleNavigation')
                 }
             }
         }
@@ -336,7 +354,7 @@ Rectangle{
             color: editor.optionsColor
 
             Image{
-                id : toggleNavigationImage
+                id : paneOptions
                 anchors.centerIn: parent
                 source : "qrc:/images/toggle-navigation.png"
             }
@@ -387,7 +405,7 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     editorAddRemoveMenu.visible = false
-                    livecv.commands.execute('window.addHorizontalEditorView')
+                    livecv.layers.workspace.commands.execute('window.workspace.addHorizontalEditorView')
                 }
             }
         }
@@ -415,7 +433,7 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     editorAddRemoveMenu.visible = false
-                    livecv.commands.execute('window.removeHorizontalEditorView')
+                    livecv.layers.workspace.commands.execute('window.workspace.removeHorizontalEditorView')
                 }
             }
         }
@@ -520,9 +538,6 @@ Rectangle{
                     onCursorPositionRequest : {
                         editorArea.forceActiveFocus()
                         editorArea.cursorPosition = position
-                    }
-                    onContentsChangedManually: {
-                        editor.windowControls.createTimer.restart();
                     }
                 }
 
@@ -640,9 +655,9 @@ Rectangle{
                             codeHandler.completionModel.disable()
                         }
                     } else {
-                        var command = livecv.keymap.locateCommand(event.key, event.modifiers)
+                        var command = livecv.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
                         if ( command !== '' ){
-                            livecv.commands.execute(command)
+                            livecv.layers.workspace.commands.execute(command)
                             event.accepted = true
                         }
                     }
@@ -685,7 +700,7 @@ Rectangle{
                         }
                         contextMenu.additionalItems = []
 
-                        var res = livecv.interceptMenu(editor)
+                        var res = livecv.layers.workspace.interceptMenu(editor)
                         for ( var i = 0; i < res.length; ++i ){
                             var menuitem = contextMenu.insertItem(i, res[i].name)
                             menuitem.enabled = res[i].enabled

@@ -102,7 +102,6 @@ public:
         int      position;
         int      line;
         QString  text;
-
     };
 
     /// Dialect used by the source code of a file

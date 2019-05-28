@@ -23,6 +23,9 @@
 #include "act.h"
 #include "group.h"
 #include "groupcollector.h"
+#include "layer.h"
+#include "windowlayer.h"
+#include "workspacelayer.h"
 
 #include <QQmlComponent>
 #include <QQmlIncubator>
@@ -89,6 +92,14 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     );
     QJSValue markErrorFn = markErrorConstructor.call(QJSValueList() << engine->newQObject(this));
     m_engine->globalObject().setProperty("linkError", markErrorFn);
+
+//    connect(m_engine, &QQmlEngine::quit, QCoreApplication::instance(),
+//                      &QCoreApplication::quit, Qt::QueuedConnection);
+
+//#if (QT_VERSION > QT_VERSION_CHECK(5,8,0))
+//    connect(m_engine, &QQmlEngine::exit, QCoreApplication::instance(),
+//                      &QCoreApplication::exit, Qt::QueuedConnection);
+//#endif
 }
 
 /** Default destructor */
@@ -319,11 +330,40 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::QmlVariantListModel>(   uri, 1, 0, "VariantListModel");
     qmlRegisterType<lv::QmlObjectListModel>(    uri, 1, 0, "ObjectListModel");
     qmlRegisterUncreatableType<lv::Shared>(     uri, 1, 0, "Shared", "Shared is of abstract type.");
+    qmlRegisterUncreatableType<lv::Layer>(      uri, 1, 0, "Layer", "Layer is of abstract type.");
+    qmlRegisterUncreatableType<lv::Commands>(
+        uri, 1, 0, "LiveCommands", ViewEngine::typeAsPropertyMessage("LiveCommands", "livecv.layers.workspace.commands"));
+    qmlRegisterUncreatableType<lv::KeyMap>(
+        uri, 1, 0, "KeyMap", ViewEngine::typeAsPropertyMessage("KeyMap", "livecv.layers.workspace.keymap"));
+    qmlRegisterType<lv::WindowLayer>(           uri, 1, 0, "WindowLayer");
+    qmlRegisterType<lv::WorkspaceLayer>(        uri, 1, 0, "WorkspaceLayer");
 }
 
 void ViewEngine::initializeBaseTypes(ViewEngine *engine){
     TypeInfo::Ptr ti = engine->registerQmlTypeInfo<lv::Group>(nullptr, nullptr, [](){return new Group;}, false);
     ti->addSerialization(&lv::Group::serialize, &lv::Group::deserialize);
+}
+
+QString ViewEngine::toErrorString(const QQmlError &error){
+    QString result;
+    result.sprintf(
+        "\'%s\':%d,%d %s",
+        qPrintable(error.url().toString()),
+        error.line(),
+        error.column(),
+        qPrintable(error.description())
+    );
+
+    return result;
+}
+
+QString ViewEngine::toErrorString(const QList<QQmlError> &errors){
+    QString result;
+    foreach ( const QQmlError& error, errors ){
+        result += toErrorString(error) + "\n";
+    }
+
+    return result;
 }
 
 /**
@@ -337,7 +377,6 @@ void ViewEngine::createObjectAsync(
         const QString& qmlCode,
         QObject* parent,
         const QUrl& url,
-        QObject* attachment,
         bool clearCache)
 {
     m_engineMutex->lock();
@@ -353,7 +392,7 @@ void ViewEngine::createObjectAsync(
     QList<QQmlError> errors = component.errors();
     if ( errors.size() > 0 ){
         m_engineMutex->unlock();
-        emit objectCreationError(toJSErrors(errors));
+        emit objectCreationError(toJSErrors(errors), url);
         return;
     }
 
@@ -370,7 +409,7 @@ void ViewEngine::createObjectAsync(
         setIsLoading(false);
         QJSValue jsErrors = toJSErrors(incubatorErrors);
         m_engineMutex->unlock();
-        emit objectCreationError(jsErrors);
+        emit objectCreationError(jsErrors, url);
         return;
     }
 
@@ -380,12 +419,14 @@ void ViewEngine::createObjectAsync(
         errorObject.setDescription("Component returned null object.");
         QJSValue jsErrors = toJSErrors(QList<QQmlError>() << errorObject);
         m_engineMutex->unlock();
-        emit objectCreationError(jsErrors);
+        emit objectCreationError(jsErrors, url);
         return;
     }
 
     QObject* obj = incubator.object();
     m_engine->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
+
+    emit objectAcquired(url);
 
     if (parent)
         obj->setParent(parent);
@@ -397,27 +438,36 @@ void ViewEngine::createObjectAsync(
     }
 
     for (auto it = m_compileHooks.begin(); it != m_compileHooks.end(); ++it)
-        (it->m_hook)(qmlCode, url, obj, attachment, it->m_userData);
+        (it->m_hook)(qmlCode, url, obj, it->m_userData);
 
     setIsLoading(false);
 
     m_engineMutex->unlock();
-    emit objectCreated(obj);
+    emit objectReady(obj, url);
 }
 
 QJSValue ViewEngine::lastErrorsObject() const{
     return toJSErrors(lastErrors());
 }
 
-/** Synchronous variant of the same creation of object to be used for compilation of our code */
+/**
+ * \brief Creates an object from the given qmlcode synchronously
+ */
 QObject* ViewEngine::createObject(const QString &qmlCode, QObject *parent, const QUrl &url, bool clearCache){
+    return createObject(qmlCode.toUtf8(), parent, url, clearCache);
+}
+
+/**
+ * \brief Creates an object from the given qmlcode synchronously
+ */
+QObject *ViewEngine::createObject(const QByteArray &qmlCode, QObject *parent, const QUrl &file, bool clearCache){
     QMutexLocker engineMutexLock(m_engineMutex);
 
     if ( clearCache )
         m_engine->clearComponentCache();
 
     QQmlComponent component(m_engine);
-    component.setData(qmlCode.toUtf8(), url);
+    component.setData(qmlCode, file);
 
     m_lastErrors = component.errors();
     if ( m_lastErrors.size() > 0 ){
@@ -442,6 +492,10 @@ QObject* ViewEngine::createObject(const QString &qmlCode, QObject *parent, const
     }
 
     return obj;
+}
+
+QObject *ViewEngine::createObject(const char *qmlCode, QObject *parent, const QUrl &file, bool clearCache){
+    return createObject(QByteArray(qmlCode), parent, file, clearCache);
 }
 
 /** Throws errors on these warnings which don't have their own object  */
