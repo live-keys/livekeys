@@ -45,6 +45,7 @@
 #include <QtGui/qtextoption.h>
 #include "documenthandler.h"
 #include "qquickpainteditem.h"
+#include <set>
 #ifdef LV_EDITOR_DEBUG
 #include "texteditnodedebugmodel.h"
 #endif
@@ -116,6 +117,8 @@ class TextEdit : public QQuickImplicitSizeItem
     Q_PROPERTY(QRect viewport READ viewport WRITE setViewport NOTIFY viewportChanged)
     Q_PROPERTY(int totalHeight READ totalHeight NOTIFY totalHeightChanged)
 public:
+
+
     TextEdit(QQuickImplicitSizeItem *parent=nullptr, bool test = false);
 
     PaletteManager* getPaletteManager();
@@ -329,7 +332,7 @@ public:
     void setViewport(QRect view);
 
     void resetLineControl();
-    void updateNodesForViewport();
+    void updateSectionsForViewport();
 
     int totalHeight() const;
 
@@ -425,13 +428,17 @@ private Q_SLOTS:
     void triggerPreprocess();
     void highlightingDone(const QRectF &);
     void handleCursorDuringAddingSection();
-    void checkPalettesWhenCollapsed(int pos, int num);
 private:
-    void markDirtyNodesForRange(int start, int end, int charDelta);
+    std::set<int> markDirtyNodesForRange(int start, int end, int charDelta);
     void updateTotalLines();
     void invalidateFontCaches();
     void addStartPalette(int frStart);
     void addEndPalette(int frEnd);
+    void shiftTextNodes(int delta);
+
+    void deleteAllTextNodes(QString debugMessage = "");
+    void createAllViewportNodes(QString debugMessage = "");
+    void resetNodesAndPalettesAfterPosition(int pos, QString debugMessage = "");
 protected:
     TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent = nullptr, bool test = true);
 

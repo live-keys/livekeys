@@ -49,6 +49,8 @@
 #include <climits>
 #include "palettemanager.h"
 #include "linecontrol.h"
+#include <queue>
+#include <set>
 
 class QTextLayout;
 
@@ -67,20 +69,43 @@ public:
 
     typedef TextEdit Public;
 
+
+    class NodeAction {
+    public:
+        enum NodeActionType {
+            Delete, Create, Shift
+        };
+
+        NodeAction(NodeActionType t, QString debug = QString(""))
+            : type(t)
+            , debugMessage(debug)
+            , yShift(0)
+            , offset(0) {}
+
+        NodeActionType type;
+        std::set<int> nodeNumbers;
+        QString debugMessage;
+        int yShift;
+        int offset;
+    };
+
     class Node
     {
     public:
-        explicit Node(int startPos, TextNode* node)
-            : m_startPos(startPos), m_node(node), m_dirty(false) { }
+        explicit Node(int startPos, int blockNumber, TextNode* node)
+            : m_startPos(startPos), m_blockNumber(blockNumber), m_node(node), m_dirty(false) { }
         TextNode* textNode() const { return m_node; }
         void moveStartPos(int delta) { Q_ASSERT(m_startPos + delta > 0); m_startPos += delta; }
+        void moveBlockNumber(int delta) { m_blockNumber += delta; }
         int startPos() const { return m_startPos; }
+        int blockNumber() const { return m_blockNumber; }
         void setDirty() {
             m_dirty = true; }
         bool dirty() const { return m_dirty; }
 
     private:
         int m_startPos;
+        int m_blockNumber;
         TextNode* m_node;
         bool m_dirty;
     };
@@ -169,7 +194,7 @@ public:
 
     void setNativeCursorEnabled(bool) {}
     void handleFocusEvent(QFocusEvent *event);
-    void addCurrentTextNodeToRoot(TextNodeEngine *, QSGTransformNode *, TextNode*, TextNodeIterator&, int startPos);
+    void addCurrentTextNodeToRoot(TextNodeEngine *, QSGTransformNode *, TextNode*, TextNodeIterator&, int startPos, int blockNumber);
     TextNode* createTextNode();
 
 #ifndef QT_NO_IM
@@ -251,6 +276,9 @@ public:
 
     QRect viewport;
     int totalHeight;
+    std::vector<VisibleSection> sectionsForViewport;
+    std::queue<NodeAction> actionQueue;
+    std::vector<std::pair<int, QQuickItem*>> displayedPalettes;
 
 #ifdef LV_EDITOR_DEBUG
     TextEditNodeDebugModel* debugModel;

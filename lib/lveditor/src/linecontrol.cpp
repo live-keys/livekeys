@@ -609,7 +609,7 @@ std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int las
                 if (startPos < curr->visiblePosition + curr->visibleRange)
                 {
                     int size = curr->visibleRange - (startPos - curr->visiblePosition);
-                    result.push_back(VisibleSection(std::min(total, size), 0, curr->palette));
+                    result.push_back(VisibleSection(std::min(total, size), curr->position, curr->palette));
                     total -= std::min(total, size);
                     startPos = curr->visiblePosition + curr->visibleRange;
                 } else {

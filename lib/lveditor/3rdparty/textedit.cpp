@@ -68,6 +68,7 @@
 #include "private/qtextengine_p.h"
 #include "private/qsgadaptationlayer_p.h"
 #include <algorithm>
+#include <set>
 
 #ifdef LV_EDITOR_DEBUG
 #include "live/viewcontext.h"
@@ -110,6 +111,10 @@ do { \
 } while (0)
 
 namespace lv {
+
+
+typedef QList<TextEditPrivate::Node*>::iterator TextNodeIterator;
+typedef TextEditPrivate::NodeAction Action;
 
 /*!
     \qmltype TextEdit
@@ -2085,7 +2090,6 @@ void TextEdit::triggerPreprocess()
     update();
 }
 
-typedef QList<TextEditPrivate::Node*>::iterator TextNodeIterator;
 
 
 static bool comesBefore(TextEditPrivate::Node* n1, TextEditPrivate::Node* n2)
@@ -2169,6 +2173,229 @@ void TextEdit::addEndPalette(int frEnd)
 
 }
 
+void TextEdit::shiftTextNodes(int delta)
+{
+    Q_D(TextEdit);
+
+    std::set<int> available;
+    auto it = d->textNodeMap.begin();
+    while (it != d->textNodeMap.end() && (*it)->blockNumber() < d->dirtyPosition)
+    {
+        available.insert((*it)->blockNumber());
+        ++it;
+    }
+
+    updateSectionsForViewport();
+    std::set<int> viewport;
+    for (auto sec: d->sectionsForViewport)
+    {
+        if (sec.palette) continue;
+
+        for (int i = 0; i < sec.size; ++i){
+            viewport.insert(sec.start + i);
+        }
+    }
+
+    qDebug() << "viewport" << this;
+    for (auto v: viewport)
+        qDebug() << v;
+
+    Action ad2(Action::Delete, "TextEdit::shiftTextNodes 4");
+    Action ac2(Action::Create, "TextEdit::shiftTextNodes 5");
+
+    if (delta < 0)
+    {        
+        Action ad1(Action::Delete, "TextEdit::shiftTextNodes 1");
+        Action ac1(Action::Create, "TextEdit::shiftTextNodes 2");
+
+        while (it != d->textNodeMap.end() && (*it)->blockNumber() < d->dirtyPosition - delta)
+        {
+            ad1.nodeNumbers.insert((*it)->blockNumber());
+            if ((*it)->blockNumber() == d->dirtyPosition){
+                available.insert(d->dirtyPosition);
+                ac1.nodeNumbers.insert(d->dirtyPosition);
+            }
+            ++it;
+        }
+
+        d->actionQueue.push(ad1);
+        d->actionQueue.push(ac1);
+
+        Action as(Action::Shift, "TextEdit::shiftTextNodes 3");
+
+        while (it != d->textNodeMap.end())
+        {
+            as.nodeNumbers.insert((*it)->blockNumber());
+            available.insert((*it)->blockNumber()+delta);
+            ++it;
+        }
+
+        int lineHeight = static_cast<int>(d->document->documentLayout()->blockBoundingRect(d->document->findBlockByNumber(0)).height());
+        as.yShift = delta * lineHeight;
+        as.offset = delta;
+
+        d->actionQueue.push(as);
+    }
+
+    if (delta > 0)
+    {
+        Action ac1(Action::Create, "TextEdit::shiftTextNodes 6");
+        Action ad1(Action::Delete, "TextEdit::shiftTextNodes 7");
+        Action as(Action::Shift, "TextEdit::shiftTextNodes 8");
+
+        if (it != d->textNodeMap.end() && (*it)->blockNumber() == d->dirtyPosition)
+        {
+            ac1.nodeNumbers.insert(d->dirtyPosition);
+            ad1.nodeNumbers.insert(d->dirtyPosition);
+            ++it;
+        }
+
+        d->actionQueue.push(ad1);
+        d->actionQueue.push(ac1);
+
+        while (it != d->textNodeMap.end())
+        {
+            as.nodeNumbers.insert((*it)->blockNumber());
+            available.insert((*it)->blockNumber() + delta);
+            ++it;
+        }
+
+        int lineHeight = static_cast<int>(d->document->documentLayout()->blockBoundingRect(d->document->findBlockByNumber(0)).height());
+        as.yShift = delta * lineHeight;
+        as.offset = delta;
+
+        d->actionQueue.push(as);
+
+        Action ac2(Action::Create, "TextEdit::shiftTextNodes 9");
+        Action ad2(Action::Delete, "TextEdit::shiftTextNodes 10");
+
+    }
+
+    std::set_difference(available.begin(), available.end(),
+                        viewport.begin(), viewport.end(),
+                        std::inserter(ad2.nodeNumbers, ad2.nodeNumbers.begin()));
+
+    std::set_difference(viewport.begin(), viewport.end(),
+                        available.begin(), available.end(),
+                        std::inserter(ac2.nodeNumbers, ac2.nodeNumbers.begin()));
+
+    d->actionQueue.push(ad2);
+    d->actionQueue.push(ac2);
+
+    polish();
+    if (isComponentComplete()) {
+        d->updateType = TextEditPrivate::UpdatePaintNode;
+        update();
+    }
+}
+
+void TextEdit::deleteAllTextNodes(QString debugMessage)
+{
+    Q_D(TextEdit);
+    if (!d->textNodeMap.empty())
+    {
+        Action ad(Action::Delete, debugMessage);
+        for (auto node: d->textNodeMap)
+            ad.nodeNumbers.insert(node->blockNumber());
+        // OK
+        d->actionQueue.push(ad);
+    }
+
+    if (!d->displayedPalettes.empty())
+    {
+        for (auto p: d->displayedPalettes)
+        {
+            qDebug() << "createAllViewportNodes - visible to false";
+            p.second->setVisible(false);
+        }
+        d->displayedPalettes.clear();
+    }
+
+    // qDebug() << "displayedPalettes: " << d->displayedPalettes.size();
+}
+
+void TextEdit::createAllViewportNodes(QString debugMessage)
+{
+    Q_D(TextEdit);
+    if (!d->sectionsForViewport.empty()){
+        Action ac(Action::Create, "TextEdit::createAllViewportNodes");
+        for (auto section: d->sectionsForViewport)
+        {
+            if (section.palette) {
+                qDebug() << "createAllViewportNodes - visible to true";
+                section.palette->setVisible(true);
+                d->displayedPalettes.push_back(std::make_pair(section.start, section.palette));
+                continue;
+            }
+
+            for (int i = 0; i < section.size; i++)
+                ac.nodeNumbers.insert(section.start + i);
+        }
+        // OK
+        d->actionQueue.push(ac);
+    }
+
+
+    // qDebug() << "displayedPalettes: " << d->displayedPalettes.size();
+}
+
+void TextEdit::resetNodesAndPalettesAfterPosition(int pos, QString debugMessage)
+{
+    Q_D(TextEdit);
+
+    qDebug() << "______________________resetNodes_________________________";
+
+    Action ad(Action::Delete, debugMessage);
+    auto it = d->textNodeMap.begin();
+
+    it = d->textNodeMap.begin();
+    while (it != d->textNodeMap.end() && (*it)->blockNumber() < pos) ++it;
+
+    while (it != d->textNodeMap.end())
+    {
+        ad.nodeNumbers.insert((*it)->blockNumber());
+        ++it;
+    }
+    d->actionQueue.push(ad);
+
+    for (auto it = d->displayedPalettes.begin(); it != d->displayedPalettes.end();)
+    {
+        if (it->first < pos) {
+            ++it;
+            continue;
+        }
+
+        qDebug() << "resetNodesAndPalettesAfterPosition - visible to false";
+        it->second->setVisible(false);
+        it = d->displayedPalettes.erase(it);
+    }
+
+    // qDebug() << "displayedPalettes: " << d->displayedPalettes.size();
+
+    Action ac(Action::Create, debugMessage);
+    for (auto sec: d->sectionsForViewport)
+    {
+        if (sec.palette)
+        {
+            if (sec.start >= pos) {
+                qDebug() << "resetNodesAndPalettesAfterPosition - visible to true";
+                sec.palette->setVisible(true);
+                d->displayedPalettes.push_back(std::make_pair(sec.start, sec.palette));
+            }
+            continue;
+        }
+
+        if (sec.start + sec.size < pos) continue;
+        for (int i = 0; i < sec.size; ++i)
+            if (sec.start + i >= pos)
+                ac.nodeNumbers.insert(sec.start + i);
+    }
+    d->actionQueue.push(ac);
+
+
+    // qDebug() << "displayedPalettes: " << d->displayedPalettes.size();
+}
+
 inline void resetEngine(TextNodeEngine *engine, const QColor& textColor, const QColor& selectedTextColor, const QColor& selectionColor)
 {
     *engine = TextNodeEngine();
@@ -2181,6 +2408,9 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
 {
     Q_UNUSED(updatePaintNodeData);
     Q_D(TextEdit);
+
+
+    qDebug() << "***************************************";
 
     if (!d->document || !d->control) {
         if (oldNode) delete oldNode;
@@ -2203,155 +2433,177 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
     }
 
     RootNode *rootNode = static_cast<RootNode *>(oldNode);
-    TextNodeIterator nodeIterator = d->textNodeMap.begin();
 
-    while (nodeIterator != d->textNodeMap.end() && !(*nodeIterator)->dirty())
-        ++nodeIterator;
+    if (!oldNode)
+        rootNode = new RootNode;
 
     TextNodeEngine engine;
     TextNodeEngine frameDecorationsEngine;
 
+    rootNode->resetFrameDecorations(d->createTextNode());
+    resetEngine(&frameDecorationsEngine, d->color, d->selectedTextColor, d->selectionColor);
+
+    while (!d->actionQueue.empty())
+    {
+
+        Action action = d->actionQueue.front();
+        d->actionQueue.pop();
+
+        if (action.nodeNumbers.empty()) continue;
+        TextNodeIterator nodeIterator = d->textNodeMap.begin();
+
+        if (action.type == Action::Delete)
+        {
+            qDebug() << "Delete action: " << action.nodeNumbers.size() << action.debugMessage;
+            QString blocks;
+            for (auto num: action.nodeNumbers)
+                blocks += (std::to_string(num) + " ").c_str();
+            qDebug() << blocks;
+
+            while (nodeIterator != d->textNodeMap.end())
+            {
+                if (action.nodeNumbers.find((*nodeIterator)->blockNumber()) != action.nodeNumbers.end())
+                {
+                    rootNode->removeChildNode((*nodeIterator)->textNode());
+                    delete (*nodeIterator)->textNode();
+                    delete *nodeIterator;
+                    nodeIterator = d->textNodeMap.erase(nodeIterator);
+                } else ++nodeIterator;
+            }
+
+        }
+
+        if (action.type == Action::Create)
+        {
+            qDebug() << "Create action: " << action.nodeNumbers.size() << action.debugMessage;
+            QString blocks;
+            for (auto num: action.nodeNumbers)
+                blocks += (std::to_string(num) + " ").c_str();
+            qDebug() << blocks;
+
+            TextNode *node = nullptr;
+
+            int nodeStart = 0;
+            int blockNumber = -1;
+            QPointF basePosition(d->xoff, d->yoff);
+            QMatrix4x4 basePositionMatrix;
+            basePositionMatrix.translate(static_cast<float>(basePosition.x()), static_cast<float>(basePosition.y()));
+            rootNode->setMatrix(basePositionMatrix);
+
+            QPointF nodeOffset;
+
+            if (d->document && d->control) {
+                QList<QTextFrame *> frames;
+                frames.append(d->document->rootFrame());
+
+                while (!frames.isEmpty()) { //INFO: Root frame
+                    QTextFrame *textFrame = frames.takeFirst();
+                    frames.append(textFrame->childFrames());
+                    frameDecorationsEngine.addFrameDecorations(d->document, textFrame);
+
+
+                    if (textFrame->firstPosition() > textFrame->lastPosition()
+                            && textFrame->frameFormat().position() != QTextFrameFormat::InFlow) {
+
+                        node = d->createTextNode();
+                        resetEngine(&engine, d->color, d->selectedTextColor, d->selectionColor);
+                        updateNodeTransform(node, dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->frameBoundingRect(textFrame).topLeft());
+                        const int pos = textFrame->firstPosition() - 1;
+                        ProtectedLayoutAccessor *a = static_cast<ProtectedLayoutAccessor *>(d->document->documentLayout());
+                        QTextCharFormat format = a->formatAccessor(pos);
+                        QTextBlock block = textFrame->firstCursorPosition().block();
+                        engine.setCurrentLine(block.layout()->lineForTextPosition(pos - block.position()));
+                        engine.addTextObject(QPointF(0, 0), format, TextNodeEngine::Unselected, d->document,
+                                                      pos, textFrame->frameFormat().position());
+                        nodeStart = pos;
+                        blockNumber = block.blockNumber();
+                    } else {
+                        // Having nodes spanning across frame boundaries will break the current bookkeeping mechanism. We need to prevent that.
+                        QList<int> frameBoundaries;
+                        frameBoundaries.reserve(frames.size());
+                        Q_FOREACH (QTextFrame *frame, frames)
+                            frameBoundaries.append(frame->firstPosition());
+                        std::sort(frameBoundaries.begin(), frameBoundaries.end());
+
+                        for (auto num: action.nodeNumbers)
+                        {
+                            node = d->createTextNode();
+                            resetEngine(&engine, d->color, d->selectedTextColor, d->selectionColor);
+
+                            blockNumber = num;
+                            QTextBlock block = d->document->findBlockByNumber(blockNumber);
+                            nodeStart = block.position();
+
+                            if (!engine.hasContents()) {
+                                nodeOffset = getDocumentLayout()->blockBoundingRect(block).topLeft();
+                                updateNodeTransform(node, nodeOffset);
+
+                                int offset = d->lineControl->drawingOffset(block.blockNumber(), false);
+                                nodeOffset.setY(nodeOffset.y() - offset);
+
+                                nodeStart = block.position();
+                            }
+
+                            engine.addTextBlock(d->document, block, -nodeOffset, d->color, QColor(), selectionStart(), selectionEnd() - 1);
+                            d->addCurrentTextNodeToRoot(&engine, rootNode, node, nodeIterator, nodeStart, blockNumber);
+                        }
+
+                    }
+                }
+            }
+        }
+
+        if (action.type == Action::Shift) {
+            qDebug() << "Shift action: " << action.nodeNumbers.size() << action.debugMessage;
+            QString blocks;
+            for (auto num: action.nodeNumbers)
+                blocks += (std::to_string(num) + " ").c_str();
+            qDebug() << blocks;
+
+            while (nodeIterator != d->textNodeMap.end())
+            {
+                if (action.nodeNumbers.find((*nodeIterator)->blockNumber()) != action.nodeNumbers.end())
+                {
+                    QMatrix4x4 transformMatrix = (*nodeIterator)->textNode()->matrix();
+                    transformMatrix.translate(0.0, static_cast<float>(action.yShift));
+                    (*nodeIterator)->textNode()->setMatrix(transformMatrix);
+                    (*nodeIterator)->moveBlockNumber(action.offset);
+                }
+                ++nodeIterator;
+            }
+        }
+    }
+
+    frameDecorationsEngine.addToSceneGraph(rootNode->frameDecorationsNode, QQuickText::Normal, QColor());
+    // Now prepend the frame decorations since we want them rendered first, with the text nodes and cursor in front.
+    rootNode->prependChildNode(rootNode->frameDecorationsNode);
+
     d->lastHighlightChangeStart = INT_MAX;
     d->lastHighlightChangeEnd   = 0;
 
-    if (!oldNode || nodeIterator < d->textNodeMap.end()) {
 
-        if (!oldNode)
-            rootNode = new RootNode;
+    d->invalidUntilTheEnd = false;
 
-        int firstDirtyPos = 0;
-        if (nodeIterator != d->textNodeMap.end()) {
-            firstDirtyPos = (*nodeIterator)->startPos();
-            do {
-                rootNode->removeChildNode((*nodeIterator)->textNode());
-                delete (*nodeIterator)->textNode();
-                delete *nodeIterator;
-                nodeIterator = d->textNodeMap.erase(nodeIterator);
-            } while (nodeIterator != d->textNodeMap.end() && (d->invalidUntilTheEnd || (*nodeIterator)->dirty()));
+    /////////////////////////////////////////////////////////
+
+    // Q_ASSERT(nodeIterator == d->textNodeMap.end() || (*nodeIterator) == firstCleanNode);
+    // Update the position of the subsequent text blocks.
+    /*if (d->document && firstCleanNode) {
+        QPointF oldOffset = firstCleanNode->textNode()->matrix().map(QPointF(0,0));
+        QPointF currentOffset = dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->blockBoundingRect(d->document->findBlock(firstCleanNode->startPos())).topLeft();
+        QPointF delta = currentOffset - oldOffset;
+        while (nodeIterator != d->textNodeMap.end()) {
+            QMatrix4x4 transformMatrix = (*nodeIterator)->textNode()->matrix();
+            transformMatrix.translate(static_cast<float>(delta.x()), static_cast<float>(delta.y()));
+            (*nodeIterator)->textNode()->setMatrix(transformMatrix);
+            ++nodeIterator;
         }
 
-        // FIXME: the text decorations could probably be handled separately (only updated for affected textFrames)
-        rootNode->resetFrameDecorations(d->createTextNode());
-        resetEngine(&frameDecorationsEngine, d->color, d->selectedTextColor, d->selectionColor);
+    }*/
 
-        TextNode *node = nullptr;
-
-        int currentNodeSize = 0;
-        int nodeStart = firstDirtyPos;
-        QPointF basePosition(d->xoff, d->yoff);
-        QMatrix4x4 basePositionMatrix;
-        basePositionMatrix.translate(static_cast<float>(basePosition.x()), static_cast<float>(basePosition.y()));
-        rootNode->setMatrix(basePositionMatrix);
-
-        QPointF nodeOffset;
-        TextEditPrivate::Node *firstCleanNode = (nodeIterator != d->textNodeMap.end() && !d->invalidUntilTheEnd) ? *nodeIterator : nullptr;
-
-        d->invalidUntilTheEnd = false;
-
-        if (d->document && d->control) {
-            QList<QTextFrame *> frames;
-            frames.append(d->document->rootFrame());
-
-            while (!frames.isEmpty()) { //INFO: Root frame
-                QTextFrame *textFrame = frames.takeFirst();
-                frames.append(textFrame->childFrames());
-                frameDecorationsEngine.addFrameDecorations(d->document, textFrame);
-
-                if (textFrame->lastPosition() < firstDirtyPos || (firstCleanNode && textFrame->firstPosition() >= firstCleanNode->startPos()))
-                    continue;
-
-                //INFO: creating the text node
-                node = d->createTextNode();
-                resetEngine(&engine, d->color, d->selectedTextColor, d->selectionColor);
-
-                if (textFrame->firstPosition() > textFrame->lastPosition()
-                        && textFrame->frameFormat().position() != QTextFrameFormat::InFlow) {
-
-                    updateNodeTransform(node, dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->frameBoundingRect(textFrame).topLeft());
-                    const int pos = textFrame->firstPosition() - 1;
-                    ProtectedLayoutAccessor *a = static_cast<ProtectedLayoutAccessor *>(d->document->documentLayout());
-                    QTextCharFormat format = a->formatAccessor(pos);
-                    QTextBlock block = textFrame->firstCursorPosition().block();
-                    engine.setCurrentLine(block.layout()->lineForTextPosition(pos - block.position()));
-                    engine.addTextObject(QPointF(0, 0), format, TextNodeEngine::Unselected, d->document,
-                                                  pos, textFrame->frameFormat().position());
-                    nodeStart = pos;
-                } else {
-                    // Having nodes spanning across frame boundaries will break the current bookkeeping mechanism. We need to prevent that.
-                    QList<int> frameBoundaries;
-                    frameBoundaries.reserve(frames.size());
-                    Q_FOREACH (QTextFrame *frame, frames)
-                        frameBoundaries.append(frame->firstPosition());
-                    std::sort(frameBoundaries.begin(), frameBoundaries.end());
-
-                    QTextFrame::iterator it = textFrame->begin();
-
-                    while (!it.atEnd()) {
-
-                        QTextBlock block = it.currentBlock();
-                        ++it;
-
-                        if (block.position() < firstDirtyPos)
-                            continue;
-
-                        if (!block.isVisible()) continue;
-
-                        if (!engine.hasContents()) {
-                            nodeOffset = getDocumentLayout()->blockBoundingRect(block).topLeft();
-                            updateNodeTransform(node, nodeOffset);
-
-                            // PALETTE
-                            // int offset = d->paletteManager->drawingOffset(block.blockNumber(), false);
-                            int offset = d->lineControl->drawingOffset(block.blockNumber(), false);
-                            nodeOffset.setY(nodeOffset.y() - offset);
-
-                            nodeStart = block.position();
-                        }
-
-                        engine.addTextBlock(d->document, block, -nodeOffset, d->color, QColor(), selectionStart(), selectionEnd() - 1);
-                        currentNodeSize += block.length();
-
-                        if ((it.atEnd()) || (firstCleanNode && block.next().position() >= firstCleanNode->startPos())) // last node that needed replacing or last block of the frame
-                            break;
-
-                        QList<int>::const_iterator lowerBound = std::lower_bound(frameBoundaries.constBegin(), frameBoundaries.constEnd(), block.next().position());
-                        if (currentNodeSize > nodeBreakingSize || lowerBound == frameBoundaries.constEnd() || *lowerBound > nodeStart) {
-                            currentNodeSize = 0;
-                            d->addCurrentTextNodeToRoot(&engine, rootNode, node, nodeIterator, nodeStart);
-                            node = d->createTextNode();
-                            resetEngine(&engine, d->color, d->selectedTextColor, d->selectionColor);
-                            nodeStart = block.next().position();
-                        }
-                    }
-                }
-                d->addCurrentTextNodeToRoot(&engine, rootNode, node, nodeIterator, nodeStart);
-            }
-        }
-
-
-        frameDecorationsEngine.addToSceneGraph(rootNode->frameDecorationsNode, QQuickText::Normal, QColor());
-        // Now prepend the frame decorations since we want them rendered first, with the text nodes and cursor in front.
-        rootNode->prependChildNode(rootNode->frameDecorationsNode);
-
-        Q_ASSERT(nodeIterator == d->textNodeMap.end() || (*nodeIterator) == firstCleanNode);
-        // Update the position of the subsequent text blocks.
-        if (d->document && firstCleanNode) {
-            QPointF oldOffset = firstCleanNode->textNode()->matrix().map(QPointF(0,0));
-            QPointF currentOffset = dynamic_cast<TextDocumentLayout*>(d->document->documentLayout())->blockBoundingRect(d->document->findBlock(firstCleanNode->startPos())).topLeft();
-            QPointF delta = currentOffset - oldOffset;
-            while (nodeIterator != d->textNodeMap.end()) {
-                QMatrix4x4 transformMatrix = (*nodeIterator)->textNode()->matrix();
-                transformMatrix.translate(static_cast<float>(delta.x()), static_cast<float>(delta.y()));
-                (*nodeIterator)->textNode()->setMatrix(transformMatrix);
-                ++nodeIterator;
-            }
-
-        }
-
-        // Since we iterate over blocks from different text frames that are potentially not sorted
-        // we need to ensure that our list of nodes is sorted again:
-        std::sort(d->textNodeMap.begin(), d->textNodeMap.end(), &comesBefore);
-    }
+    // Since we iterate over blocks from different text frames that are potentially not sorted
+    // we need to ensure that our list of nodes is sorted again:
+    std::sort(d->textNodeMap.begin(), d->textNodeMap.end(), &comesBefore);
 
     if (d->document && d->control && d->cursorComponent == nullptr) {
         QSGRectangleNode* cursor = nullptr;
@@ -2551,7 +2803,6 @@ void TextEditPrivate::unsetTextDocument()
     Q_Q(TextEdit);
     if ( document ){
 
-        q->markDirtyNodesForRange(0, document->characterCount(), 0);
         lineSurface->unsetTextDocument();
 
         QObject::disconnect(document, &QTextDocument::undoAvailable, q, &TextEdit::canUndoChanged);
@@ -2572,6 +2823,8 @@ void TextEditPrivate::unsetTextDocument()
 
     document = nullptr;
     lineControl->reset();
+
+    q->deleteAllTextNodes("TextEdit::unsetTextDocument");
 
     q->polish();
     if (q->isComponentComplete()) {
@@ -2633,11 +2886,15 @@ void TextEdit::q_textChanged()
     emit textChanged();
 }
 
-void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
+std::set<int> TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
 {
+
+    std::set<int> result;
     Q_D(TextEdit);
     if (start == end)
-        return;
+        return result;
+
+
 
     int oldEnd = end;
     bool nodesUpdate = true;
@@ -2657,7 +2914,7 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
 
     if (start == end) nodesUpdate = false;
 
-    TextEditPrivate::Node dummyNode(start, nullptr);
+    TextEditPrivate::Node dummyNode(start, -1, nullptr);
     TextNodeIterator it = std::lower_bound(d->textNodeMap.begin(), d->textNodeMap.end(), &dummyNode, &comesBefore);
     if (nodesUpdate || charDelta)
     {
@@ -2665,7 +2922,7 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
         // that starts at the last position before the edit position. (there might be several because of images)
         if (it != d->textNodeMap.begin()) {
             --it;
-            TextEditPrivate::Node otherDummy((*it)->startPos(), nullptr);
+            TextEditPrivate::Node otherDummy((*it)->startPos(), (*it)->blockNumber(), nullptr);
             it = std::lower_bound(d->textNodeMap.begin(), d->textNodeMap.end(), &otherDummy, &comesBefore);
         }
     }
@@ -2676,7 +2933,8 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
     {
         while (it != d->textNodeMap.end() && (*it)->startPos() <= end)
         {
-            (*it)->setDirty(); ++it;
+            result.insert(it - d->textNodeMap.begin());
+            ++it;
         }
     }
 
@@ -2693,6 +2951,8 @@ void TextEdit::markDirtyNodesForRange(int start, int end, int charDelta)
             ++otherIt;
         }
     }
+
+    return result;
 }
 
 void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
@@ -2701,15 +2961,6 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
 
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
-
-    /*std::list<QQuickItem*> results = getPaletteManager()->updatePaletteBounds(pos, charsRemoved, charsAdded);
-    if (!results.empty())
-    {
-        for (auto it = results.begin(); it != results.end(); ++it)
-        {
-            QMetaObject::invokeMethod(*it, "close", Qt::DirectConnection);
-        }
-    }*/
 
     d->lineControl->updateSectionBounds(pos, charsRemoved, charsAdded);
 
@@ -2736,12 +2987,25 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
         d->lineControl->setDirtyPos(d->dirtyPosition);
     }
 
-    markDirtyNodesForRange(pos, editRange, delta);
+    std::set<int> dirty = markDirtyNodesForRange(pos, editRange, delta);
+
+    Action ad(Action::Delete, "TextEdit::q_contentsChange");
+    Action ac(Action::Create, "TextEdit::q_contentsChange");
+    for (auto nodeNum: dirty)
+    {
+        auto iter = d->textNodeMap.begin() + nodeNum;
+        ad.nodeNumbers.insert((*iter)->blockNumber());
+        ac.nodeNumbers.insert((*iter)->blockNumber());
+    }
+
+    // d->actionQueue.push(ad);
+    // d->actionQueue.push(ac);
 
     d->highlightingInProgress = true;
 
     polish();
     if (isComponentComplete()) {
+        updateSize();
         d->updateType = TextEditPrivate::UpdatePaintNode;
         update();
     }
@@ -2768,7 +3032,21 @@ void TextEdit::updateSelection()
 
     // No need for node updates when we go from an empty selection to another empty selection
     if (d->control->textCursor().hasSelection() || d->hadSelection) {
-        markDirtyNodesForRange(qMin(d->lastSelectionStart, d->control->textCursor().selectionStart()), qMax(d->control->textCursor().selectionEnd(), d->lastSelectionEnd), 0);
+        std::set<int> dirty = markDirtyNodesForRange(qMin(d->lastSelectionStart, d->control->textCursor().selectionStart()), qMax(d->control->textCursor().selectionEnd(), d->lastSelectionEnd), 0);
+
+        Action ad(Action::Delete, "TextEdit::updateSelection");
+        Action ac(Action::Create, "TextEdit::updateSelection");
+        for (auto nodeNum: dirty)
+        {
+            auto iter = d->textNodeMap.begin() + nodeNum;
+            ad.nodeNumbers.insert((*iter)->blockNumber());
+            ac.nodeNumbers.insert((*iter)->blockNumber());
+        }
+
+        d->actionQueue.push(ad);
+        d->actionQueue.push(ac);
+
+
         polish();
         if (isComponentComplete()) {
             d->updateType = TextEditPrivate::UpdatePaintNode;
@@ -2922,11 +3200,14 @@ void TextEdit::updateSize()
     }
 
     d->paintedWidth = width;
-    d->paintedHeight = (d->document->blockCount() + d->lineControl->totalOffset())*lineHeight;
+    // d->paintedHeight = (d->document->blockCount() + d->lineControl->totalOffset())*lineHeight;
 
-    if (d->totalHeight != static_cast<int>(d->paintedHeight))
+    d->paintedHeight = qCeil(d->viewport.height()*1.0/lineHeight)*lineHeight;
+
+    int newTotalHeight = static_cast<int>((d->document->blockCount() + d->lineControl->totalOffset())*lineHeight);
+    if (d->totalHeight != newTotalHeight)
     {
-        d->totalHeight = static_cast<int>(d->paintedHeight);
+        d->totalHeight = newTotalHeight;
         emit totalHeightChanged();
     }
 
@@ -2934,17 +3215,22 @@ void TextEdit::updateSize()
     if (d->contentSize != size) {
         d->contentSize = size;
         emit contentSizeChanged();
-        updateTotalLines();
     }
+
+    updateTotalLines();
 }
 
 void TextEdit::updateWholeDocument()
-{
+{   
     Q_D(TextEdit);
+    if (!d->document) return;
     if (!d->textNodeMap.isEmpty()) {
         Q_FOREACH (TextEditPrivate::Node* node, d->textNodeMap)
             node->setDirty();
     }
+
+    deleteAllTextNodes("TextEdit::updateWholeDocument");
+    createAllViewportNodes("TextEdit::updateWholeDocument");
 
     polish();
     if (isComponentComplete()) {
@@ -2987,13 +3273,29 @@ void TextEdit::invalidateBlock(const QTextBlock &block)
 {
     Q_D(TextEdit);
 
-    markDirtyNodesForRange(block.position(), block.position() + block.length(), 0);
+
+    std::set<int> dirty = markDirtyNodesForRange(block.position(), block.position() + block.length(), 0);
+
 
     stateChangeHandler(block);
 
     polish();
     if (isComponentComplete()) {
         updateSize();
+
+        Action ad(Action::Delete, "TextEdit::invalidateBlock");
+        Action ac(Action::Create, "TextEdit::invalidateBlock");
+        for (auto nodeNum: dirty)
+        {
+            auto iter = d->textNodeMap.begin() + nodeNum;
+            ad.nodeNumbers.insert((*iter)->blockNumber());
+            ac.nodeNumbers.insert((*iter)->blockNumber());
+        }
+
+        // ok
+        d->actionQueue.push(ad);
+        d->actionQueue.push(ac);
+
         d->updateType = TextEditPrivate::UpdatePaintNode;
         update();
     }
@@ -3037,8 +3339,9 @@ void TextEdit::updateTotalLines()
 
     int newTotalLines = d->document->lineCount() + subLines;
     if (d->lineCount != newTotalLines) {
-        d->lineCount = newTotalLines;
         emit lineCountChanged();
+        shiftTextNodes(newTotalLines - d->lineCount);
+        d->lineCount = newTotalLines;
         if (d->lineSurface) d->lineSurface->triggerUpdate(d->document->blockCount(), d->dirtyPosition);
     }
 }
@@ -3125,10 +3428,10 @@ void TextEditPrivate::handleFocusEvent(QFocusEvent *event)
     }
 }
 
-void TextEditPrivate::addCurrentTextNodeToRoot(TextNodeEngine *engine, QSGTransformNode *root, TextNode *node, TextNodeIterator &it, int startPos)
+void TextEditPrivate::addCurrentTextNodeToRoot(TextNodeEngine *engine, QSGTransformNode *root, TextNode *node, TextNodeIterator &it, int startPos, int blockNumber)
 {
     engine->addToSceneGraph(node, QQuickText::Normal, QColor());
-    it = textNodeMap.insert(it, new TextEditPrivate::Node(startPos, node));
+    it = textNodeMap.insert(it, new TextEditPrivate::Node(startPos, blockNumber, node));
     ++it;
     root->appendChildNode(node);
 }
@@ -3586,9 +3889,9 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QQuickIt
     d->lineControl->addPalette(lineStart-1,lineEnd - lineStart + 1, palette, startPos, endPos);
     handleCursorDuringAddingSection();
 
-    d->invalidUntilTheEnd = true;
-    for (int i = lineStart - 1; i < d->document->blockCount(); ++i)
-        invalidateBlock(d->document->findBlockByNumber(i));
+    updateSectionsForViewport();
+
+    resetNodesAndPalettesAfterPosition(lineStart -1);
 
     emit paletteChange(lineStart - 1);
 
@@ -3609,14 +3912,13 @@ void TextEdit::linePaletteRemoved(QQuickItem *palette)
 
     if (result == -1) return;
 
-    d->invalidUntilTheEnd = true;
+    auto it = d->displayedPalettes.begin();
+    while (it != d->displayedPalettes.end() && it->second != palette) ++it;
+    if (it != d->displayedPalettes.end()) d->displayedPalettes.erase(it);
 
-    if (d->document){
-        for (int i = result; i < d->document->blockCount(); ++i)
-        {
-            invalidateBlock(d->document->findBlockByNumber(i));
-        }
-    }
+    updateSectionsForViewport();
+    resetNodesAndPalettesAfterPosition(result);
+
     emit paletteChange(result);
 }
 
@@ -3628,11 +3930,10 @@ void TextEdit::linePaletteHeightChanged(QQuickItem *palette, int newHeight)
     int result = d->lineControl->resizePalette(palette);
 
     if (result == -1) return;
-    d->invalidUntilTheEnd = true;
-    for (int i = result; i < d->document->blockCount(); ++i)
-    {
-        invalidateBlock(d->document->findBlockByNumber(i));
-    }
+
+    updateSectionsForViewport();
+    resetNodesAndPalettesAfterPosition(result);
+
     emit paletteChange(result);
 }
 
@@ -3645,11 +3946,64 @@ QRect TextEdit::viewport() const
 void TextEdit::setViewport(QRect view)
 {
     Q_D(TextEdit);
-    if (d->viewport == view) return;
+    if (d->viewport.y() == view.y() && d->viewport.height() == view.height()) return;
 
     d->viewport = view;
-    updateNodesForViewport();
+    updateSize();
+    auto oldSections = d->sectionsForViewport;
+    updateSectionsForViewport();
     emit viewportChanged();
+
+    std::set<int> oldNodes;
+    std::set<int> newNodes;
+    std::set<QQuickItem*> oldPalettes;
+    std::set<QQuickItem*> newPalettes;
+
+    for (auto sec: oldSections)
+    {
+        if (sec.palette)
+        {
+            oldPalettes.insert(sec.palette);
+            continue;
+        }
+
+        for (int i = 0; i < sec.size; ++i)
+            oldNodes.insert(sec.start + i);
+    }
+
+    for (auto sec: d->sectionsForViewport)
+    {
+        if (sec.palette)
+        {
+            newPalettes.insert(sec.palette);
+            continue;
+        }
+
+        for (int i = 0; i < sec.size; ++i)
+            newNodes.insert(sec.start + i);
+    }
+
+    Action ad(Action::Delete, "TextEdit::updateSectionsForViewport");
+    std::set_difference(oldNodes.begin(), oldNodes.end(),
+                        newNodes.begin(), newNodes.end(),
+                        std::inserter(ad.nodeNumbers, ad.nodeNumbers.end()));
+    qDebug() <<"delete " << ad.nodeNumbers.size();
+    // ok
+    d->actionQueue.push(ad);
+
+    Action ac(Action::Create, "TextEdit::updateSectionsForViewport");
+    std::set_difference(newNodes.begin(), newNodes.end(),
+                        oldNodes.begin(), oldNodes.end(),
+                        std::inserter(ac.nodeNumbers, ac.nodeNumbers.end()));
+    qDebug() <<"create " << ac.nodeNumbers.size();
+    // ok
+    d->actionQueue.push(ac);
+
+    polish();
+    if (isComponentComplete()) {
+        d->updateType = TextEditPrivate::UpdatePaintNode;
+        update();
+    }
 }
 
 void TextEdit::resetLineControl()
@@ -3658,19 +4012,11 @@ void TextEdit::resetLineControl()
     d->lineControl->reset();
 }
 
-void TextEdit::updateNodesForViewport()
+void TextEdit::updateSectionsForViewport()
 {
     Q_D(TextEdit);
 
-    qDebug() << "__________________________";
-    auto result = d->lineControl->visibleSectionsForViewport(d->viewport);
-
-    for (auto sec: result)
-    {
-        qDebug() << sec.start << sec.size << sec.palette;
-    }
-
-    // qDebug() << d->viewport;
+    d->sectionsForViewport = d->lineControl->visibleSectionsForViewport(d->viewport);
 }
 
 int TextEdit::totalHeight() const
@@ -3731,17 +4077,24 @@ void TextEdit::manageExpandCollapse(int pos, bool collapsed)
         userData->setReplacementString(repl);
         d->lineControl->addCollapse(pos, userData->numOfCollapsedLines());
 
+
         handleCursorDuringAddingSection();
     } else {
         d->lineControl->removeCollapse(pos);
     }
+
+    updateSectionsForViewport();
+
     userData->setStateChangeFlag(true);
     stateChangeHandler(matchingBlock);
 
-    d->invalidUntilTheEnd = true;
-    for (int i = pos; i < d->document->blockCount(); ++i)
-    {
-        invalidateBlock(d->document->findBlockByNumber(i));
+    resetNodesAndPalettesAfterPosition(pos);
+
+    polish();
+    if (isComponentComplete()) {
+        updateSize();
+        d->updateType = TextEditPrivate::UpdatePaintNode;
+        update();
     }
 }
 
@@ -3767,19 +4120,6 @@ void TextEdit::handleCursorDuringAddingSection()
         }
         cursor.endEditBlock();
     }
-}
-
-void TextEdit::checkPalettesWhenCollapsed(int pos, int num)
-{
-    /*auto result = getPaletteManager()->deletedOnCollapse(pos, num);
-
-    if (!result.empty())
-    {
-        for (auto it = result.begin(); it != result.end(); ++it)
-        {
-            QMetaObject::invokeMethod(*it, "close", Qt::DirectConnection);
-        }
-    }*/
 }
 
 }
