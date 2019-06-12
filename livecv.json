@@ -215,6 +215,7 @@
                       "Controls/libqtquickcontrolsplugin.so": "plugins/QtQuick/Controls/-",
                       "Controls/qmldir": "plugins/QtQuick/Controls/-",
                       "Controls/*.qmltypes": "plugins/QtQuick/Controls/-",
+                      "Controls/*.qml": "plugins/QtQuick/Controls/-",
                       "Controls/Private" : "plugins/QtQuick/Controls/Private",
                       "Controls/Styles" : "plugins/QtQuick/Controls/Styles",
                       "Dialogs" : "plugins/QtQuick/Dialogs",
@@ -228,7 +229,8 @@
                     "QtQuick.2" : "plugins/QtQuick.2",
                     "QtQml" : "plugins/QtQml",
                     "Qt" : "plugins/Qt",
-                    "QtWebSockets" : "plugins/-"
+                    "QtWebSockets" : "plugins/-",
+                    "QtGraphicalEffects" : "plugins/-"
                   },
                   "{opencv_dir}" : {
                     "libopencv_*.so*" : "external/opencv/-"
