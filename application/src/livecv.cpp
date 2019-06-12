@@ -273,7 +273,6 @@ void LiveCV::loadLayers(const QStringList &layers, std::function<void (Layer *)>
             if ( tail.isEmpty() ){
                 if ( l->hasView() && l->nextViewParent() ){
                     m_layerPlaceholder = l->nextViewParent();
-                    qDebug() << "Assigned layer placeholder";
                 }
                 if (onReady)
                     onReady(l);
