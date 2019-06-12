@@ -215,7 +215,7 @@
                       "Controls/libqtquickcontrolsplugin.so": "plugins/QtQuick/Controls/-",
                       "Controls/qmldir": "plugins/QtQuick/Controls/-",
                       "Controls/*.qmltypes": "plugins/QtQuick/Controls/-",
-		              "Controls/*.qml": "plugins/QtQuick/Controls/-",
+                      "Controls/*.qml": "plugins/QtQuick/Controls/-",
                       "Controls/Private" : "plugins/QtQuick/Controls/Private",
                       "Controls/Styles" : "plugins/QtQuick/Controls/Styles",
                       "Dialogs" : "plugins/QtQuick/Dialogs",
