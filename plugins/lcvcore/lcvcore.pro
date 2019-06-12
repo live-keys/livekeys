@@ -23,7 +23,6 @@ linkLocalPlugin(live, live)
 unix:!macx{
     QMAKE_LFLAGS += \
 	'-Wl,-rpath,\'\$$ORIGIN/../../link\''
-	'-Wl,-rpath,\'\$$ORIGIN/../../external/opencv\'' \
 
 
     createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)
