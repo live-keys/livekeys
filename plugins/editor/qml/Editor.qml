@@ -37,10 +37,16 @@ Rectangle{
     property var panes: null
     property var document: null
 
+    property var paneLocation : []
+    property QtObject paneWindow : null
+    property string paneType: 'editor'
+    property var paneState : { return {} }
+
     property int fragmentStart: 0
     property int fragmentEnd: -1
 
     onDocumentChanged: {
+        paneState = { document : document }
         codeHandler.setDocument(document)
     }
 

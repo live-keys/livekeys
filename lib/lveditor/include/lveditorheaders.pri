@@ -8,7 +8,6 @@ HEADERS += \
     $$PWD/live/codecompletionmodel.h \
     $$PWD/live/codecompletionsuggestion.h \
     $$PWD/live/abstractcodehandler.h \
-    $$PWD/live/projectnavigationmodel.h \
     $$PWD/live/editorsettings.h \
     $$PWD/live/documenthandler.h \
     $$PWD/live/editorsettingscategory.h \
@@ -17,4 +16,9 @@ HEADERS += \
     $$PWD/live/editorprivate_plugin.h \
     $$PWD/live/palettecontainer.h \
     $$PWD/live/palettelist.h \
-    $$PWD/live/codepalette.h
+    $$PWD/live/liveextension.h \
+    $$PWD/live/codepalette.h \
+    $$PWD/live/keymap.h \
+    $$PWD/live/extensions.h \
+    $$PWD/live/workspace.h \
+    $$PWD/live/projectworkspace.h

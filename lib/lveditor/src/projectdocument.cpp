@@ -489,6 +489,7 @@ bool ProjectDocument::save(){
         if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path().toStdString(), m_textDocument->toPlainText().toStdString() ) ){
             setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
+            emit saved();
             if ( parentAsProject() )
                 parentAsProject()->documentSaved(this);
             return true;
@@ -514,6 +515,7 @@ bool ProjectDocument::saveAs(const QString &path){
                 emit fileChanged();
             }
             setIsDirty(false);
+            emit saved();
             m_lastModified = QDateTime::currentDateTime();
             parentAsProject()->documentSaved(this);
             return true;

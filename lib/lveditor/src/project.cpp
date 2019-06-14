@@ -28,6 +28,7 @@
 #include <QQuickItem>
 #include <QDebug>
 #include <QTimer>
+#include <QCryptographicHash>
 
 /**
  * \class lv::Project
@@ -59,6 +60,8 @@ Project::Project(QObject *parent)
     connect(m_scheduleRunTimer, &QTimer::timeout, this, &Project::run);
     connect(engine(), &ViewEngine::objectAcquired, this, &Project::engineObjectAcquired);
     connect(engine(), &ViewEngine::objectReady, this, &Project::engineObjectReady);
+
+    connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, &Project::closeProject);
 }
 
 /**
@@ -165,7 +168,7 @@ ProjectFile *Project::relocateDocument(const QString &path, const QString& newPa
  * It doesn't destroy the singleton capital-P Project, simply leaves it in a blank state
  */
 void Project::closeProject(){
-    setActive((ProjectDocument*)0);
+    setActive((ProjectDocument*)nullptr);
     m_documentModel->closeDocuments();
     m_fileModel->closeProject();
     m_path = "";
@@ -347,6 +350,13 @@ void Project::setRunSpace(QObject *runSpace){
 }
 
 /**
+ * Generates a hash out of a given path
+ */
+QByteArray Project::hashPath(const QByteArray &path){
+    return QCryptographicHash::hash(path, QCryptographicHash::Md5);
+}
+
+/**
  * \brief Closes the file given the path
  */
 void Project::closeFile(const QString &path){
@@ -391,6 +401,9 @@ ProjectDocument *Project::createDocument(ProjectFile *file, bool isMonitored){
         if ( m_runTrigger == Project::RunOnChange )
             scheduleRun();
     });
+
+    emit documentOpened(document);
+
     return document;
 }
 

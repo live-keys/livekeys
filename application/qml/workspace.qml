@@ -36,8 +36,11 @@ Item{
         property Item activeItem : null
         property Item contentWrap : contentWrap
 
-        function add(pane){
+        function add(pane, paneWindow, position){
             open.push(pane)
+
+            livecv.layers.workspace.addPane(pane, paneWindow, position)
+
             if ( !activeItem )
                 activateItem(pane, pane)
         }
@@ -206,7 +209,7 @@ Item{
             }
 
             Component.onCompleted: {
-                root.panes.add(editorComponent)
+                root.panes.add(editorComponent, livecv.layers.window.window(), [2])
                 root.panes.setActiveItem(editorComponent.textEdit, editorComponent)
                 if ( project.active ){
                     editorComponent.document = project.active
@@ -396,7 +399,7 @@ Item{
                     width: 240
                     panes: root.panes
                     Component.onCompleted: {
-                        root.panes.add(projectView)
+                        root.panes.add(projectView, livecv.layers.window.window(), [1])
                     }
                 }
 
@@ -404,14 +407,13 @@ Item{
                     id: editor
                     height: parent.height
                     width: 400
-                    visible : !livecv.settings.launchMode
                     panes: root.panes
                     onInternalActiveFocusChanged: if ( internalFocus ) {
                         root.panes.setActiveItem(editor.textEdit, editor)
                     }
 
                     Component.onCompleted: {
-                        root.panes.add(editor)
+                        root.panes.add(editor, livecv.layers.window.window(), [2])
                         root.panes.setActiveItem(editor.textEdit, editor)
                         if ( project.active ){
                             editor.document = project.active

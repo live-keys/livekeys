@@ -84,8 +84,7 @@ DocumentHandler::~DocumentHandler(){
 }
 
 /** Set the target doc */
-void DocumentHandler::setTarget(QTextDocument *target)
-{
+void DocumentHandler::setTarget(QTextDocument *target){
     m_targetDoc = target;
 }
 
@@ -174,7 +173,6 @@ void DocumentHandler::componentComplete(){
 
     findCodeHandler();
 }
-
 
 void DocumentHandler::readContent(){
     m_targetDoc->setPlainText(m_projectDocument->content());

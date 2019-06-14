@@ -11,7 +11,7 @@
 namespace lv{
 
 class ViewEngine;
-class LV_VIEW_EXPORT Extensions : public QObject{
+class LV_EDITOR_EXPORT Extensions : public QObject{
 
     Q_OBJECT
 

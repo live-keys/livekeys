@@ -29,6 +29,11 @@ Rectangle{
 
     property QtObject panes: null
 
+    property var paneLocation : []
+    property QtObject paneWindow : null
+    property string paneType: 'projectFileSystem'
+    property var paneState : { return {} }
+
     function addEntry(parentEntry, isFile){
         root.addEntryOverlay.entry = parentEntry
         root.addEntryOverlay.isFile = isFile

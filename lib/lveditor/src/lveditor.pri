@@ -7,6 +7,7 @@ HEADERS += \
     $$PWD/projectfile.h \
     $$PWD/projectfilemodel.h \
     $$PWD/projectdocument.h \
+    $$PWD/keymap.h \
     $$PWD/codecompletionmodel.h \
     $$PWD/codecompletionsuggestion.h \
     $$PWD/abstractcodehandler.h \
@@ -20,11 +21,20 @@ HEADERS += \
     $$PWD/editorprivate_plugin.h \
     $$PWD/linemanager.h \
     $$PWD/linesurface.h \
+    $$PWD/extensions.h \
+    $$PWD/liveextension.h \
     $$PWD/palettemanager.h \
     $$PWD/palettecontainer.h \
     $$PWD/palettelist.h \
     $$PWD/codepalette.h \
-    $$PWD/editorlayer.h
+    $$PWD/editorlayer.h \
+    $$PWD/workspace.h \
+    $$PWD/workspaceipc.h \
+    $$PWD/workspaceipcsink.h \
+    $$PWD/workspacelayer.h \
+    $$PWD/commands.h \
+    $$PWD/commandsmodel.h \
+    $$PWD/projectworkspace.h
 
 SOURCES += \
     $$PWD/project.cpp \
@@ -39,6 +49,8 @@ SOURCES += \
     $$PWD/projectdocumentmodel.cpp \
     $$PWD/editorsettings.cpp \
     $$PWD/documenthandler.cpp \
+    $$PWD/extensions.cpp \
+    $$PWD/liveextension.cpp \
     $$PWD/editorsettingscategory.cpp \
     $$PWD/editorglobalobject.cpp \
     $$PWD/editorprivate_plugin.cpp \
@@ -48,4 +60,12 @@ SOURCES += \
     $$PWD/palettecontainer.cpp \
     $$PWD/palettelist.cpp \
     $$PWD/codepalette.cpp \
-    $$PWD/editorlayer.cpp
+    $$PWD/editorlayer.cpp \
+    $$PWD/workspace.cpp \
+    $$PWD/workspaceipc.cpp \
+    $$PWD/workspaceipcsink.cpp \
+    $$PWD/workspacelayer.cpp \
+    $$PWD/keymap.cpp \
+    $$PWD/commands.cpp \
+    $$PWD/commandsmodel.cpp \
+    $$PWD/projectworkspace.cpp

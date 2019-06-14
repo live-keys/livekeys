@@ -17,7 +17,7 @@
 #ifndef LVKEYMAP_H
 #define LVKEYMAP_H
 
-#include "live/lvviewglobal.h"
+#include "live/lveditorglobal.h"
 
 #include <QObject>
 #include <QMap>
@@ -26,7 +26,7 @@
 
 namespace lv{
 
-class LV_VIEW_EXPORT KeyMap : public QObject{
+class LV_EDITOR_EXPORT KeyMap : public QObject{
 
     Q_OBJECT
     Q_ENUMS(Modifier)
@@ -92,7 +92,7 @@ public slots:
     Modifier controlOrCommand();
     void readFile();
 
-Q_SIGNALS:
+signals:
     /** Signals a change in the keymap */
     void keymapChanged();
 

@@ -8,8 +8,6 @@
 #include <QQuickWindow>
 #include <QQuickItem>
 
-#include <QDebug>
-
 namespace lv{
 
 WindowLayer::WindowLayer(QObject *parent)

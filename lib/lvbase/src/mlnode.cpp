@@ -1510,6 +1510,18 @@ const MLNode::ArrayType &MLNode::asArray() const{
 }
 
 /**
+ * \brief Returns the MLNode value as an array.
+ *
+ * The array is actually a vector of MLNodes. If not the appropriate type, an exception is thrown.
+ */
+MLNode::ArrayType &MLNode::asArray(){
+    if ( m_type != Type::Array )
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
+
+    return *m_value.asArray;
+}
+
+/**
  * \brief Returns the MLNode value as an object.
  *
  * If not the appropriate type, an exception is thrown.
@@ -1555,13 +1567,25 @@ bool MLNode::hasKey(const MLNode::StringType &key) const{
 /**
  * \brief Removes a key-value pair from an Object MLNode with the given key.
  *
- * If not a Object, an exception is thrown.
+ * If the node is not an Object, an exception is thrown.
  */
 void MLNode::remove(const MLNode::StringType &key){
     if ( m_type != Type::Object )
         THROW_EXCEPTION(InvalidMLTypeException, "Node is not of object type.", 0);
 
     m_value.asObject->erase(key);
+}
+
+/**
+ * @brief Removes a key from an Array MLNode with the given key.
+ *
+ * If the node is not an Array, an exception is thrown
+ */
+void MLNode::remove(int key){
+    if ( m_type != Type::Array )
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
+
+    m_value.asArray->erase(m_value.asArray->begin() + key);
 }
 
 

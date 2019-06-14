@@ -39,9 +39,9 @@ class LV_EDITOR_EXPORT Project : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(lv::ProjectDocument*  active                READ active          NOTIFY activeChanged)
-    Q_PROPERTY(lv::ProjectFileModel* fileModel             READ fileModel       NOTIFY fileModelChanged)
-    Q_PROPERTY(lv::ProjectNavigationModel* navigationModel READ navigationModel NOTIFY navigationModelChanged)
-    Q_PROPERTY(lv::ProjectDocumentModel* documentModel     READ documentModel   NOTIFY documentModelChanged)
+    Q_PROPERTY(lv::ProjectFileModel* fileModel             READ fileModel       CONSTANT)
+    Q_PROPERTY(lv::ProjectNavigationModel* navigationModel READ navigationModel CONSTANT)
+    Q_PROPERTY(lv::ProjectDocumentModel* documentModel     READ documentModel   CONSTANT)
     Q_PROPERTY(QString rootPath                            READ rootPath        NOTIFY pathChanged)
     Q_PROPERTY(lv::Project::RunTrigger runTrigger          READ runTrigger      WRITE setRunTrigger NOTIFY runTriggerChanged)
     Q_ENUMS(RunTrigger)
@@ -102,6 +102,8 @@ public:
 
     void setRunSpace(QObject* runSpace);
 
+    static QByteArray hashPath(const QByteArray& path);
+
 public slots:
     void newProject();
     void closeProject();
@@ -137,18 +139,15 @@ signals:
     /** active file has changed */
     void activeChanged(lv::ProjectDocument* active);
 
-    /** file model changed */
-    void fileModelChanged(lv::ProjectFileModel* fileModel);
-    /** navigation model changed */
-    void navigationModelChanged(lv::ProjectNavigationModel* navigationModel);
-    /** document model changed */
-    void documentModelChanged(lv::ProjectDocumentModel* documentModel);
+    /** triggers when a document is opened */
+    void documentOpened(lv::ProjectDocument* document);
 
     /** refers to an internal project directory change, for example renaming */
     void directoryChanged(const QString& rootPath);
     /** file changed (e.g. on save) */
     void fileChanged(const QString& rootPath);
 
+    /** run trigger changed */
     void runTriggerChanged();
 
 private:

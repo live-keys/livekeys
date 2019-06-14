@@ -299,8 +299,10 @@ signals:
     void isDirtyChanged();
     /** shows if monitoring state changed */
     void isMonitoredChanged();
-    /** shows if the file changed */
+    /** triggered when the file changed */
     void fileChanged();
+    /** triggered when the document was saved */
+    void saved();
     /** shows if the document content changed */
     void contentChanged();
     /** shows if the format changed */

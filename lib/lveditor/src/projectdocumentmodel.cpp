@@ -113,7 +113,6 @@ void ProjectDocumentModel::closeDocuments(){
         delete it.value();
     }
     m_openedFiles.clear();
-
 }
 
 /** Change the monitoring state of a particular documetn */

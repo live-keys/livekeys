@@ -1,7 +1,7 @@
 #ifndef LIVEEXTENSION_H
 #define LIVEEXTENSION_H
 
-#include "live/lvviewglobal.h"
+#include "live/lveditorglobal.h"
 #include <QObject>
 #include <QJSValue>
 
@@ -9,7 +9,7 @@ namespace lv{
 
 //TODO: Configuration
 
-class LV_VIEW_EXPORT LiveExtension : public QObject{
+class LV_EDITOR_EXPORT LiveExtension : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QObject* globals           READ globals           WRITE setGlobals           NOTIFY globalsChanged)

@@ -2,6 +2,7 @@
 #define LVWORKSPACELAYER_H
 
 #include <QObject>
+#include <QQuickItem>
 #include <QQmlPropertyMap>
 
 #include "live/lvviewglobal.h"
@@ -11,8 +12,13 @@
 #include "commands.h"
 #include "extensions.h"
 
+class QQuickCloseEvent;
+
 namespace lv{
 
+class Project;
+class Workspace;
+class ProjectWorkspace;
 class WorkspaceLayer : public Layer{
 
     Q_OBJECT
@@ -38,6 +44,13 @@ public:
 
 public slots:
     QJSValue interceptMenu(QJSValue context);
+    void addPane(QQuickItem* pane, QWindow* window, const QVariantList& position);
+    void movePane(QQuickItem* pane, QWindow* window, const QVariantList& position);
+    void removePane(QQuickItem* pane);
+
+    void whenWindowClose();
+    void whenProjectOpen(const QString& path, ProjectWorkspace* workspace);
+    void whenProjectClose(ProjectWorkspace* workspace);
 
 signals:
     void projectChanged();
@@ -46,17 +59,20 @@ signals:
 private:
     QObject* m_nextViewParent;
 
-    QObject* m_project;
+    QObject* m_projectEnvironment;
     QObject* m_panes;
 
     Commands* m_commands;
     KeyMap*   m_keymap;
 
-    lv::Extensions* m_extensions;
+    Project*  m_project;
+
+    Extensions* m_extensions;
+    Workspace*  m_workspace;
 };
 
 inline QObject *WorkspaceLayer::project() const{
-    return m_project;
+    return m_projectEnvironment;
 }
 
 inline QObject *WorkspaceLayer::panes() const{

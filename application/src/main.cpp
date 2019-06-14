@@ -60,8 +60,9 @@ int main(int argc, char *argv[]){
             return 0;
         }
 
-        livecv->loadLayers({"window", "workspace", "editor"}, [livecv](Layer*){
-            livecv->loadProject();
+        LiveCV* livecvp = livecv.data();
+        livecv->loadLayers({"window", "workspace", "editor"}, [livecvp](Layer*){
+            livecvp->loadProject();
         });
 
         return app.exec();
@@ -72,6 +73,7 @@ int main(int argc, char *argv[]){
             return e.code();
         } else {
             vlog() << "Uncaught exception: " << e.message().c_str();
+            vlog() << *e.stackTrace();
             return e.code();
         }
     }

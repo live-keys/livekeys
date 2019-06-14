@@ -3,8 +3,6 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/live/errorhandler.h \
     $$PWD/live/incubationcontroller.h \
-    $$PWD/live/keymap.h \
-    $$PWD/live/qmlengineinterceptor.h \
     $$PWD/live/settings.h \
     $$PWD/live/visuallogbasemodel.h \
     $$PWD/live/visuallogfilter.h \
@@ -16,8 +14,6 @@ HEADERS += \
     $$PWD/live/viewcontext.h \
     $$PWD/live/lvviewglobal.h \
     $$PWD/live/viewengine.h \
-    $$PWD/live/extensions.h \
-    $$PWD/live/liveextension.h \
     $$PWD/live/shared.h \
     $$PWD/live/memory.h \
     $$PWD/live/act.h \
@@ -27,6 +23,6 @@ HEADERS += \
     $$PWD/live/group.h \
     $$PWD/live/linemessage.h \
     $$PWD/live/linecapture.h \
-    $$PWD/live/workspace.h \
     $$PWD/live/layer.h \
-    $$PWD/live/windowlayer.h
+    $$PWD/live/windowlayer.h \
+    $$PWD/live/qmlpropertywatcher.h

@@ -42,7 +42,9 @@ ProjectFile::ProjectFile(const QString &path, const QString &name, ProjectEntry 
 ProjectFile::~ProjectFile(){
 }
 
-/** Document setter */
+/**
+ * Document setter
+ */
 void ProjectFile::setDocument(ProjectDocument *document){
     if ( document == m_document )
         return;

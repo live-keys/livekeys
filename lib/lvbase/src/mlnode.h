@@ -417,11 +417,13 @@ public:
     BytesType asBytes() const;
 
     const ArrayType& asArray() const;
+    ArrayType& asArray();
     const ObjectType& asObject() const;
 
     int size() const;
     bool hasKey(const StringType& key) const;
     void remove(const StringType& key);
+    void remove(int key);
 
     std::string typeString() const;
     std::string toString(int indent = -1, int indentStep = 4) const;

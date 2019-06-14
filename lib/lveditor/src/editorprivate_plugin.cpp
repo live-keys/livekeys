@@ -30,10 +30,12 @@
 #include "live/editorglobalobject.h"
 #include "live/applicationcontext.h"
 #include "live/keymap.h"
+#include "live/viewengine.h"
 #include "live/viewcontext.h"
 #include "linesurface.h"
 #include "linemanager.h"
 #include "editorlayer.h"
+#include "workspacelayer.h"
 
 #include <QCoreApplication>
 #include <QQmlEngine>
@@ -41,10 +43,11 @@
 #include <QQmlPropertyMap>
 
 void EditorPrivatePlugin::registerTypes(const char *uri){
-    qmlRegisterType<lv::TextEdit>(   uri, 1, 0, "NewTextEdit");
-    qmlRegisterType<lv::LineSurface>(uri, 1, 0, "LineSurface");
-    qmlRegisterType<lv::LineManager>(uri, 1, 0, "LineManager");
-    qmlRegisterType<lv::EditorLayer>(uri, 1, 0, "EditorLayer");
+    qmlRegisterType<lv::TextEdit>(      uri, 1, 0, "NewTextEdit");
+    qmlRegisterType<lv::LineSurface>(   uri, 1, 0, "LineSurface");
+    qmlRegisterType<lv::LineManager>(   uri, 1, 0, "LineManager");
+    qmlRegisterType<lv::EditorLayer>(   uri, 1, 0, "EditorLayer");
+    qmlRegisterType<lv::WorkspaceLayer>(uri, 1, 0, "WorkspaceLayer");
 
     qmlRegisterUncreatableType<lv::Project>(
         uri, 1, 0, "Project", "Cannot create Project instance.");
@@ -64,6 +67,11 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
     qmlRegisterUncreatableType<lv::EditorSettings>(
         uri, 1, 0, "EditorSettings", "EditorSettings is available through the \'livecv.settings.editor\' property."
     );
+
+    qmlRegisterUncreatableType<lv::Commands>(
+        uri, 1, 0, "LiveCommands", "LiveCommands is available through the \'livecv.layers.workspace.commands\' property.");
+    qmlRegisterUncreatableType<lv::KeyMap>(
+        uri, 1, 0, "KeyMap", "KeyMap is available through the \'livecv.layers.workspace.keymap.\' property.");
 }
 
 void EditorPrivatePlugin::initializeEngine(QQmlEngine *engine, const char *){

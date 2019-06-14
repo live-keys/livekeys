@@ -27,6 +27,7 @@ public:
 
 public slots:
     void windowActiveChanged();
+    QQuickWindow* window() const;
 
 signals:
     void handleChanged();
@@ -47,6 +48,10 @@ inline QObject *WindowLayer::handle() const{
 
 inline QObject *WindowLayer::dialogs() const{
     return m_dialogs;
+}
+
+inline QQuickWindow *WindowLayer::window() const{
+    return m_window;
 }
 
 }// namespace

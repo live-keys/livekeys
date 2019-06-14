@@ -34,9 +34,9 @@
 #include "live/liveextension.h"
 #include "live/packagegraph.h"
 
-#include "live/editorprivate_plugin.h"
 #include "live/project.h"
 #include "live/documenthandler.h"
+#include "live/editorprivate_plugin.h"
 
 #include "live/projectqmlextension.h"
 #include "live/codeqmlhandler.h"
@@ -47,8 +47,8 @@
 #include "live/windowlayer.h"
 
 #include <QUrl>
-#include <QFileInfo>
 #include <QDir>
+#include <QFileInfo>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QJSValue>
@@ -85,11 +85,13 @@ LiveCV::LiveCV(QObject *parent)
 }
 
 LiveCV::~LiveCV(){
+    VisualLog::setViewTransport(nullptr);
     delete m_settings;
     delete m_engine;
     delete m_packageGraph;
     delete m_memory;
     delete m_layers;
+
 }
 
 LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent){
@@ -241,6 +243,8 @@ void LiveCV::loadLayer(const QString &name, std::function<void (Layer*)> onReady
 
     if ( m_lastLayer)
         layer->setParent(m_lastLayer);
+    else
+        layer->setParent(m_engine);
     m_lastLayer = layer;
     m_layers->insert(name, QVariant::fromValue(layer));
 
@@ -273,7 +277,6 @@ void LiveCV::loadLayers(const QStringList &layers, std::function<void (Layer *)>
             if ( tail.isEmpty() ){
                 if ( l->hasView() && l->nextViewParent() ){
                     m_layerPlaceholder = l->nextViewParent();
-                    qDebug() << "Assigned layer placeholder";
                 }
                 if (onReady)
                     onReady(l);

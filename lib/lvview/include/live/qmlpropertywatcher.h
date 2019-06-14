@@ -1,0 +1,1 @@
+#include "../../src/qmlpropertywatcher.h"
