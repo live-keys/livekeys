@@ -36,6 +36,40 @@ Item{
         property Item activeItem : null
         property Item contentWrap : contentWrap
 
+        property var factories : {
+            return {
+                "editor" : function(p, s){
+                    var pane = editorFactory.createObject(p)
+//                    pane.paneState = s
+                    return pane
+                },
+                "projectFileSystem" : function(p, s){
+                    var pane = projectFileSystemFactory.createObject(p)
+//                    pane.paneState = s
+                    return pane
+                }
+            }
+        }
+
+        function createPane(paneType, paneState, panePosition, paneSize){
+
+            if ( paneType in root.panes.factories ){
+
+                var paneFactory = root.panes.factories[paneType]
+                var paneObject = paneFactory(null, paneState)
+                if ( paneSize ){
+                    paneObject.width = paneSize.width
+                    paneObject.height = paneSize.height
+                }
+
+                mainHorizontalSplit.insert(panePosition[0], paneObject)
+                return paneObject
+
+            } else {
+                throw new Error('Key not found: ' + paneType)
+            }
+        }
+
         function add(pane){
             open.push(pane)
             if ( !activeItem )
@@ -206,13 +240,21 @@ Item{
             }
 
             Component.onCompleted: {
-                root.panes.add(editorComponent)
-                root.panes.setActiveItem(editorComponent.textEdit, editorComponent)
                 if ( project.active ){
                     editorComponent.document = project.active
                 }
                 forceFocus()
             }
+        }
+    }
+
+    Component{
+        id: projectFileSystemFactory
+
+        ProjectFileSystem{
+            id: projectView
+            width: 240
+            panes: root.panes
         }
     }
 
@@ -233,27 +275,10 @@ Item{
 
         function addHorizontalEditor(){
             var editorObject = editorFactory.createObject(0)
-            editorObject.height = mainHorizontalSplit.height
+            mainHorizontalSplit.insert(mainHorizontalSplit.panes.length - 1, editorObject)
 
-            var projectViewWidth = projectView.width
-            var viewerWidth = viewer.width
-
-            var editorWidths = []
-            for ( var i = 0; i < mainHorizontalSplit.editors.length; ++i ){
-                editorWidths.push(mainHorizontalSplit.editors[i].width)
-            }
-
-            mainHorizontalSplit.removeItem(viewer)
-            mainHorizontalSplit.addItem(editorObject)
-            mainHorizontalSplit.addItem(viewer)
-
-            projectView.width = projectViewWidth
-            editorObject.width = 400
-            viewer.width = viewer.width - editorObject.width
-
-            for ( var i = 0; i < editorWidths.length; ++i ){
-                mainHorizontalSplit.editors[i].width = editorWidths[i]
-            }
+            root.panes.add(editorObject)
+            root.panes.setActiveItem(editorObject.textEdit, editorObject)
         }
 
         function addHorizontalFragmentEditor(){
@@ -272,27 +297,11 @@ Item{
             var editorObject = editorFactory.createObject(0)
             editorObject.fragmentStart = cursorBlock.start + 1
             editorObject.fragmentEnd = cursorBlock.end + 1
-            editorObject.height = mainHorizontalSplit.height
 
-            var projectViewWidth = projectView.width
-            var viewerWidth = viewer.width
+            mainHorizontalSplit.insert(mainHorizontalSplit.panes.length - 1, editorObject)
 
-            var editorWidths = []
-            for ( var i = 0; i < mainHorizontalSplit.editors.length; ++i ){
-                editorWidths.push(mainHorizontalSplit.editors[i].width)
-            }
-
-            mainHorizontalSplit.removeItem(viewer)
-            mainHorizontalSplit.addItem(editorObject)
-            mainHorizontalSplit.addItem(viewer)
-
-            projectView.width = projectViewWidth
-            editorObject.width = 400
-            viewer.width = viewer.width - editorObject.width
-
-            for ( var i = 0; i < editorWidths.length; ++i ){
-                mainHorizontalSplit.editors[i].width = editorWidths[i]
-            }
+            root.panes.add(editorObject)
+            root.panes.setActiveItem(editorObject.textEdit, editorObject)
         }
 
         function removeHorizontalEditor(){
@@ -386,6 +395,39 @@ Item{
                     implicitWidth: 1
                     implicitHeight: 1
                     color: "#081019"
+                }
+
+                property var panes : [projectView, editor, viewer]
+                property var paneSizes : [240, 400, -1]
+
+                function insert(i, item){
+                    item.height = mainHorizontalSplit.height
+
+                    for ( var j = 0; j < panes.length; ++j ){
+                        if ( paneSizes[j] !== -1 )
+                            paneSizes[j] = panes[j].width
+                    }
+
+                    panes.splice(i, 0, item)
+                    paneSizes.splice(i, 0, item.width)
+
+                    for ( var j = i + 1; j < panes.length; ++j ){
+                        mainHorizontalSplit.removeItem(panes[j])
+                    }
+                    for ( var j = i; j < panes.length; ++j ){
+                        mainHorizontalSplit.addItem(panes[j])
+                    }
+                    for ( var j = 0; j < paneSizes.length; ++j ){
+                        if ( paneSizes[j] !== -1 )
+                            panes[j].width = paneSizes[j]
+                    }
+                }
+
+                function removeAt(i){
+                    mainHorizontalSplit.removeItem(panes[i])
+
+                    panes.splice(i, 1)
+                    paneSizes.splice(i, 1)
                 }
 
                 property var editors: [editor]
