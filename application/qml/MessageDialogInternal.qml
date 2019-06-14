@@ -65,7 +65,7 @@ Rectangle{
                 implicitHeight: 10
                 Rectangle{
                     anchors.fill: parent
-                    color: editor.color
+                    color: editor ? editor.color : 'black'
                 }
             }
             decrementControl: null

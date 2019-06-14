@@ -63,11 +63,11 @@ CodePalette{
             }
         }
 
-        SliderLabel{
+        Label{
             anchors.top: parent.top
             text: intSlider.minimumValue
         }
-        SliderLabel{
+        Label{
             anchors.top: parent.top
             anchors.right: parent.right
             text: intSlider.maximumValue

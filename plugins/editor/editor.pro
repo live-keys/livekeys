@@ -14,12 +14,27 @@ linkLocalLibrary(lveditor, lveditor)
 
 # Source
 
+unix:!macx{
+    QMAKE_LFLAGS += \
+	'-Wl,-rpath,\'\$$ORIGIN/../../link\''
+
+
+    createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)
+    QMAKE_EXTRA_TARGETS    += createlinkdir
+    POST_TARGETDEPS        += createlinkdir
+}
+
 include($$PWD/src/editor.pri)
 
 OTHER_FILES += \
     qml/*.qml \
     qml/qmldir \
     qml/plugins.qmltypes
+
+OTHER_FILES += \
+    qml/style/*.qml \
+    qml/style/qmldir \
+    qml/style/plugins.qmltypes
 
 # Handling the palette
 

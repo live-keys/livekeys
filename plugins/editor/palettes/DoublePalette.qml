@@ -63,12 +63,12 @@ CodePalette{
             }
         }
 
-        SliderLabel{
+        Label{
             anchors.top: parent.top
             text: intSlider.minimumValue
         }
 
-        SliderLabel{
+        Label{
             anchors.top: parent.top
             anchors.right: parent.right
             text: intSlider.maximumValue
@@ -111,12 +111,12 @@ CodePalette{
             }
         }
 
-        SliderLabel{
+        Label{
             anchors.top: parent.top
             anchors.topMargin: 30
             text: fractionalSlider.minimumValue.toFixed(1)
         }
-        SliderLabel{
+        Label{
             anchors.top: parent.top
             anchors.topMargin: 30
             anchors.right: parent.right

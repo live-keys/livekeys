@@ -4,6 +4,7 @@ namespace lv{
 
 Layer::Layer(QObject *parent)
     : QObject(parent)
+    , m_hasView(false)
 {
 
 }

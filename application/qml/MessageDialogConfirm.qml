@@ -49,7 +49,8 @@ MessageDialogInternal{
         messageBoxButton2.text = ''
         messageBoxButton3.text = ''
         root.destroy()
-        editor.forceFocus()
+        if ( editor )
+            editor.forceFocus()
     }
 
     MessageDialogButton{

@@ -136,12 +136,12 @@ CodePalette{
                 }
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 text: hueSlider.minimumValue
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 text: hueSlider.maximumValue
@@ -203,12 +203,12 @@ CodePalette{
                 }
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 text: saturationSlider.minimumValue
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 text: saturationSlider.maximumValue
@@ -270,12 +270,12 @@ CodePalette{
                 }
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 text: valueSlider.minimumValue
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 text: valueSlider.maximumValue
