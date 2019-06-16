@@ -43,7 +43,8 @@ public:
 };
 
 void ProjectWorkspace::State::projectActiveChange(ProjectDocument* document){
-    currentWorkspaceLayout["active"] = Project::hashPath(document->file()->path().toUtf8()).toHex().toStdString();
+    if ( document )
+        currentWorkspaceLayout["active"] = Project::hashPath(document->file()->path().toUtf8()).toHex().toStdString();
 }
 
 void ProjectWorkspace::State::documentOpen(ProjectDocument *document){

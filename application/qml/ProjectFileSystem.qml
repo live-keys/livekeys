@@ -147,9 +147,9 @@ Rectangle{
 
     Rectangle{
         id: paneTop
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.right: parent.right
+        anchors.left: parent ? parent.left : undefined
+        anchors.top: parent ? parent.top : undefined
+        anchors.right: parent ? parent.right : undefined
 
         height: 30
         color: "#08111a"
@@ -231,7 +231,7 @@ Rectangle{
         model: project.fileModel
         anchors.topMargin: 40
         anchors.leftMargin: 10
-        anchors.fill: parent
+        anchors.fill: parent ? parent : undefined
 
         style: TreeViewStyle{
             backgroundColor: "transparent"
@@ -346,7 +346,7 @@ Rectangle{
                     anchors.left: parent.left
                     anchors.leftMargin: 25
                     anchors.verticalCenter: parent.verticalCenter
-                    color: type === 1 ? "#c6d3de" : styleData.value === view.dropEntry ? "#ff0000" : styleData.textColor
+                    color: type === 1 ? "#c6d3de" : view && styleData.value === view.dropEntry ? "#ff0000" : styleData.textColor
                     text: {
                         styleData.value
                             ? styleData.value.name === ''
@@ -358,7 +358,7 @@ Rectangle{
                         if (styleData.value){
                             if ( styleData.value.document ){
                                 var ap = root.panes.activePane
-                                if ( ap.objectName === 'editor' && ap.document && ap.document.file === styleData.value ){
+                                if ( ap && ap.objectName === 'editor' && ap.document && ap.document.file === styleData.value ){
                                     return 1;
                                 }
                                 return 2

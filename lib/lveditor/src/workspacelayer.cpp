@@ -159,12 +159,30 @@ void WorkspaceLayer::whenWindowClose(){
     m_workspace = nullptr;
 }
 
-void WorkspaceLayer::whenProjectOpen(const QString &path, ProjectWorkspace *workspace){
+void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspace){
+    QJSValue v = m_panes->property("createPane").value<QJSValue>();
+
+    QJSValue position = lv::ViewContext::instance().engine()->engine()->newArray(1);
+    position.setProperty(0, 0);
+
+    QJSValue size = lv::ViewContext::instance().engine()->engine()->newArray(1);
+    size.setProperty(0, 240);
+    size.setProperty(1, 240);
+
+    QJSValueList vlist;
+    vlist.append("projectFileSystem");
+    vlist.append(QJSValue());
+    vlist.append(position);
+    vlist.append(size);
+
+    v.call(vlist);
+
     vlog() << "Initialize workspace from layout." << workspace->currentLayout().toString();//TODO
 }
 
-void WorkspaceLayer::whenProjectClose(ProjectWorkspace *workspace){
-    vlog() << "Close workspace layout."; //TODO
+void WorkspaceLayer::whenProjectClose(ProjectWorkspace *){
+    QJSValue v = m_panes->property("clearPanes").value<QJSValue>();
+    v.call();
 }
 
 }// namespace

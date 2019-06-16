@@ -30,6 +30,15 @@ Item{
 
     property Item runSpace : runSpace
 
+    property QtObject style : QtObject{
+        property font errorFont : Qt.font({
+            family: "Source Code Pro, Ubuntu Mono, Courier New, Courier",
+            pixelSize: 12,
+            weight: Font.Normal
+        })
+        property color errorFontColor : "#fff"
+    }
+
     property QtObject panes : QtObject{
         property var open: []
         property Item activePane : null
@@ -44,30 +53,40 @@ Item{
                     return pane
                 },
                 "projectFileSystem" : function(p, s){
-                    var pane = projectFileSystemFactory.createObject(p)
-//                    pane.paneState = s
-                    return pane
+//                    root.projectFileSystemSingle.paneState = s
+                    return root.projectFileSystemSingle
                 }
             }
         }
 
-        function createPane(paneType, paneState, panePosition, paneSize){
+        property var createPane : function(paneType, paneState, panePosition, paneSize){
 
             if ( paneType in root.panes.factories ){
-
                 var paneFactory = root.panes.factories[paneType]
                 var paneObject = paneFactory(null, paneState)
                 if ( paneSize ){
-                    paneObject.width = paneSize.width
-                    paneObject.height = paneSize.height
+                    paneObject.width = paneSize[0]
+                    paneObject.height = paneSize[1]
                 }
 
                 mainHorizontalSplit.insert(panePosition[0], paneObject)
+//                add(paneObject)
+
                 return paneObject
 
             } else {
                 throw new Error('Key not found: ' + paneType)
             }
+        }
+
+        property var clearPanes : function(){
+            for ( var i = mainHorizontalSplit.panes.length; i >= 0; --i ){
+                if ( mainHorizontalSplit.panes[i] !== viewer ){
+//                    livecv.layers.workspace.removePane(mainHorizontalSplit.panes[i])
+                    mainHorizontalSplit.removeAt(i)
+                }
+            }
+            open = []
         }
 
         function add(pane, paneWindow, position){
@@ -110,7 +129,7 @@ Item{
 
         function focusPane(paneType){
             var ap = root.panes.activePane
-            if ( ap.objectName === paneType ){
+            if ( ap && ap.objectName === paneType ){
                 return ap;
             }
 
@@ -141,7 +160,9 @@ Item{
                     project.scheduleRun()
                     documentsReloaded = false
                 }
-                editor.forceActiveFocus()
+
+                if ( root.panes.activePane )
+                    root.panes.activePane.forceActiveFocus()
             }
         }
     }
@@ -249,6 +270,12 @@ Item{
                 forceFocus()
             }
         }
+    }
+
+    property ProjectFileSystem projectFileSystemSingle : ProjectFileSystem{
+        id: projectView
+        width: 240
+        panes: root.panes
     }
 
     Component{
@@ -400,8 +427,8 @@ Item{
                     color: "#081019"
                 }
 
-                property var panes : [projectView, editor, viewer]
-                property var paneSizes : [240, 400, -1]
+                property var panes : [viewer]
+                property var paneSizes : [-1]
 
                 function insert(i, item){
                     item.height = mainHorizontalSplit.height
@@ -427,41 +454,10 @@ Item{
                 }
 
                 function removeAt(i){
-                    mainHorizontalSplit.removeItem(panes[i])
-
+                    var pane = panes[i]
                     panes.splice(i, 1)
                     paneSizes.splice(i, 1)
-                }
-
-                property var editors: [editor]
-
-                ProjectFileSystem{
-                    id: projectView
-                    height: parent.height
-                    width: 240
-                    panes: root.panes
-                    Component.onCompleted: {
-                        root.panes.add(projectView, livecv.layers.window.window(), [1])
-                    }
-                }
-
-                Editor{
-                    id: editor
-                    height: parent.height
-                    width: 400
-                    panes: root.panes
-                    onInternalActiveFocusChanged: if ( internalFocus ) {
-                        root.panes.setActiveItem(editor.textEdit, editor)
-                    }
-
-                    Component.onCompleted: {
-                        root.panes.add(editor, livecv.layers.window.window(), [2])
-                        root.panes.setActiveItem(editor.textEdit, editor)
-                        if ( project.active ){
-                            editor.document = project.active
-                        }
-                        forceFocus()
-                    }
+                    mainHorizontalSplit.removeItem(pane)
                 }
 
                 Rectangle{
@@ -490,10 +486,9 @@ Item{
                         id: error
                         anchors.bottom: parent.bottom
                         width : parent.width
-                        color : editor.color
-                        font.pointSize: editor.font.pointSize
+                        color : root.style.errorFontColor
+                        font: root.style.errorFont
                     }
-
                 }
             }
         }

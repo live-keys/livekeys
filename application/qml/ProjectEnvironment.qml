@@ -91,11 +91,9 @@ Item{
             if (project.active){
                 if ( pathChange ){
                     var fe = root.panes.focusPane('editor')
-                    if ( fe ){
-                        fe.document = project.active
-                    } else {
-                        //TODO: Add pane
-                    }
+                    if ( !fe )
+                        fe = root.panes.createPane('editor', {}, [1], [400, 0])
+                    fe.document = project.active
                 }
             }
             pathChange = false
