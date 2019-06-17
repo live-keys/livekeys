@@ -49,7 +49,7 @@
 #include <climits>
 #include "palettemanager.h"
 #include "linecontrol.h"
-#include <queue>
+#include <deque>
 #include <set>
 
 class QTextLayout;
@@ -73,7 +73,7 @@ public:
     class NodeAction {
     public:
         enum NodeActionType {
-            Delete, Create, Shift
+            Delete, Create, Shift, Refresh
         };
 
         NodeAction(NodeActionType t, QString debug = QString(""))
@@ -158,6 +158,7 @@ public:
 #endif
         , updateType(UpdatePaintNode)
         , highlightingInProgress(false)
+        , viewport(QRect(0,0,0,0))
         , totalHeight(0)
 #ifdef LV_EDITOR_DEBUG
         , debugModel(nullptr)
@@ -277,7 +278,7 @@ public:
     QRect viewport;
     int totalHeight;
     std::vector<VisibleSection> sectionsForViewport;
-    std::queue<NodeAction> actionQueue;
+    std::deque<NodeAction> actionQueue;
     std::vector<std::pair<int, QQuickItem*>> displayedPalettes;
 
 #ifdef LV_EDITOR_DEBUG

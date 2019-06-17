@@ -23,11 +23,11 @@ std::function<bool(LineControl::LineSection, LineControl::LineSection)>
 
 LineControl::LineControl(QObject *parent) :
           QObject(parent)
+        , m_blockHeight(0)
         , m_dirtyPos(0)
         , m_prevLineNumber(0)
         , m_lineNumber(0)
         , m_totalOffset(0)
-        , m_lineDocument(new QTextDocument(this))
 {
     if (!parent) m_textEdit = new TextEdit(nullptr, true);
     else m_textEdit = static_cast<TextEdit*>(parent);
@@ -35,7 +35,7 @@ LineControl::LineControl(QObject *parent) :
     QObject::connect(m_textEdit, &TextEdit::lineCountChanged, this, &LineControl::lineNumberChange);
 }
 
-void LineControl::addCollapse(int pos, int num)
+int LineControl::addCollapse(int pos, int num)
 {
     LineSection ls(pos, num + 1, 1, LineSection::Collapsed);
 
@@ -50,12 +50,12 @@ void LineControl::addCollapse(int pos, int num)
 
     }
 
-    addLineSection(ls);
+    return addLineSection(ls);
 }
 
-void LineControl::removeCollapse(int pos)
+int LineControl::removeCollapse(int pos)
 {
-    removeLineSection(LineSection(pos, 0, 0, LineSection::Collapsed), false);
+    return removeLineSection(LineSection(pos, 0, 0, LineSection::Collapsed), false);
 }
 
 
@@ -126,8 +126,8 @@ void LineControl::setBlockHeight(int bh)
         }
     }
 
-    m_dirtyPos = 0;
-    updateLinesInDocuments();
+    /*m_dirtyPos = 0;
+    updateLinesInDocuments();*/
 }
 
 void LineControl::reset()
@@ -135,7 +135,7 @@ void LineControl::reset()
     m_prevLineNumber = m_lineNumber;
     m_lineNumber = 0;
     m_dirtyPos = -1;
-    linesRemoved();
+    // linesRemoved();
     m_sections.clear();
 }
 
@@ -341,12 +341,12 @@ void LineControl::setDirtyPos(int dirtyPos)
 
 void LineControl::lineNumberChange()
 {
-    m_prevLineNumber = m_lineNumber;
+    //m_prevLineNumber = m_lineNumber;
     m_lineNumber = m_textEdit->documentHandler()->target()->blockCount();
-    if (m_prevLineNumber == m_lineNumber) return;
+    /*if (m_prevLineNumber == m_lineNumber) return;
 
     if (m_prevLineNumber < m_lineNumber) linesAdded();
-    else linesRemoved();
+    else linesRemoved();*/
 }
 
 unsigned LineControl::insertIntoSorted(LineControl::LineSection ls)
@@ -391,116 +391,52 @@ void LineControl::offsetAfterIndex(unsigned index, int offset, bool offsetPositi
     }
 }
 
-void LineControl::linesAdded()
+void LineControl::linesAdded(int newSize)
 {
-    int delta = m_lineNumber - m_prevLineNumber;
-    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(m_dirtyPos, 0,0,LineSection::Collapsed), LineSection::compare);
+//    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(m_dirtyPos, 0,0,LineSection::Collapsed), LineSection::compare);
+//    bool offsetVisible = true;
+//    std::queue<LineSection*> q;
 
-    bool offsetVisible = true;
-    std::queue<LineSection*> q;
+//    if (upper != m_sections.begin() && !m_sections.empty())
+//    {
+//        auto prev = std::prev(upper);
+//        if (m_dirtyPos < prev->position + prev->range)
+//        {
+//            offsetVisible = false;
+//            prev->range += delta;
+//        }
+//    }
 
-    // handles case of adding lines via palette
-    if (upper != m_sections.begin() && !m_sections.empty())
-    {
-        auto prev = std::prev(upper);
-        if (m_dirtyPos < prev->position + prev->range)
-        {
-            offsetVisible = false;
-            prev->range += delta;
-        }
-    }
-
-    offsetAfterIndex(static_cast<unsigned>(upper-m_sections.begin()-1), delta, true);
-
-    QTextCursor cursor(m_lineDocument);
-    cursor.movePosition(QTextCursor::MoveOperation::End);
-    for (int i = m_prevLineNumber + 1; i <= m_lineNumber; i++)
-    {
-        if (i!=1) cursor.insertBlock();
-        std::string s = std::to_string(i) + "  ";
-        if (i < 10) s = " " + s;
-        const QString a(s.c_str());
-
-        cursor.insertText(a);
-    }
-
-    updateLinesInDocuments();
-    m_textEdit->updateLineSurface(m_prevLineNumber, m_lineNumber, m_dirtyPos);
+//    offsetAfterIndex(static_cast<unsigned>(upper-m_sections.begin()-1), delta, true);
 }
 
-void LineControl::updateLinesInDocuments()
-{
-    if (m_dirtyPos < 0) return;
-    int curr = m_dirtyPos;
-    auto it = m_lineDocument->rootFrame()->begin();
-    for (int i = 0; i < curr; i++)
-    {
-        ++it;
-    }
-    while (it != m_lineDocument->rootFrame()->end())
-    {
-        if (!m_textEdit || !m_textEdit->documentHandler()) break;
-        auto currBlock = m_textEdit->documentHandler()->target()->findBlockByNumber(curr);
-        lv::ProjectDocumentBlockData* userData =
-                static_cast<lv::ProjectDocumentBlockData*>(currBlock.userData());
+//void LineControl::linesRemoved()
+//{
+//    int delta = m_lineNumber - m_prevLineNumber;
+//    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(m_dirtyPos, 0,0,LineSection::Collapsed), LineSection::compare);
 
-        if (userData) {
-            if (userData->isCollapsible())
-            {
-                if (isJumpForwardLine(curr, true) > 0) // is first line of collapse?
-                    changeLastCharInLineDocumentBlock(curr, '>');
-                else
-                    changeLastCharInLineDocumentBlock(curr, 'v');
-            } else
-                changeLastCharInLineDocumentBlock(curr, ' ');
+//    // handles case of adding lines via palette
+//    if (upper != m_sections.begin() && !m_sections.empty())
+//    {
+//        auto prev = std::prev(upper);
+//        if (m_dirtyPos < prev->position + prev->range)
+//        {
+//            prev->range += delta;
+//        }
+//    }
 
-            userData->setStateChangeFlag(false);
-        } else changeLastCharInLineDocumentBlock(curr, ' ');
+//    offsetAfterIndex(static_cast<unsigned>(upper-m_sections.begin()-1), delta, true);
 
-        ++curr; ++it;
-    }
+//    for (int i = m_prevLineNumber-1; i >= m_lineNumber; i--)
+//    {
+//        QTextCursor cursor(m_lineDocument->findBlockByNumber(i));
+//        cursor.select(QTextCursor::BlockUnderCursor);
+//        cursor.removeSelectedText();
+//    }
 
-    auto firstDirtyBlockLine = m_lineDocument->findBlockByNumber(m_dirtyPos);
-    m_lineDocument->markContentsDirty(firstDirtyBlockLine.position(), m_lineDocument->characterCount() - firstDirtyBlockLine.position());
-}
-
-void LineControl::linesRemoved()
-{
-    int delta = m_lineNumber - m_prevLineNumber;
-    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(m_dirtyPos, 0,0,LineSection::Collapsed), LineSection::compare);
-
-    // handles case of adding lines via palette
-    if (upper != m_sections.begin() && !m_sections.empty())
-    {
-        auto prev = std::prev(upper);
-        if (m_dirtyPos < prev->position + prev->range)
-        {
-            prev->range += delta;
-        }
-    }
-
-    offsetAfterIndex(static_cast<unsigned>(upper-m_sections.begin()-1), delta, true);
-
-    for (int i = m_prevLineNumber-1; i >= m_lineNumber; i--)
-    {
-        QTextCursor cursor(m_lineDocument->findBlockByNumber(i));
-        cursor.select(QTextCursor::BlockUnderCursor);
-        cursor.removeSelectedText();
-    }
-
-    updateLinesInDocuments();
-    m_textEdit->updateLineSurface(m_prevLineNumber, m_lineNumber, m_dirtyPos);
-}
-
-QTextDocument *LineControl::lineDocument()
-{
-    return m_lineDocument;
-}
-
-void LineControl::setLineDocumentFont(const QFont &font)
-{
-    m_lineDocument->setDefaultFont(font);
-}
+//    updateLinesInDocuments();
+//    m_textEdit->updateLineSurface(m_prevLineNumber, m_lineNumber, m_dirtyPos);
+//}
 
 int LineControl::firstContentLine()
 {
@@ -564,15 +500,19 @@ int LineControl::firstBlockOfTextBefore(int lineNumber)
     return lineNumber;
 }
 
-std::vector<VisibleSection> LineControl::visibleSectionsForViewport(const QRect &rect)
+std::vector<VisibleSection> LineControl::visibleSectionsForViewport(const QRect &rect) const
 {
+    if (m_blockHeight < 1 || rect.width() <0 || rect.height() < 0)
+        return std::vector<VisibleSection>();
+
+
     int firstBlock = qMax(0, qFloor(rect.y()*1.0/m_blockHeight));
     int lastBlock = qCeil((rect.y() + rect.height())*1.0/m_blockHeight);
 
     return visibleSections(firstBlock, lastBlock);
 }
 
-std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int lastBlock)
+std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int lastBlock) const
 {    
     std::vector<VisibleSection> result;
 
@@ -664,44 +604,20 @@ std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int las
     return result;
 }
 
-void LineControl::replaceTextInLineDocumentBlock(int blockNumber, std::string s)
-{
-    QTextBlock b = m_lineDocument->findBlockByNumber(blockNumber);
-    QTextCursor cursor(b);
-    cursor.beginEditBlock();
-    cursor.movePosition(QTextCursor::EndOfBlock);
-    cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveMode::KeepAnchor);
-    cursor.removeSelectedText();
-    cursor.insertText(QString(s.c_str()));
-    cursor.endEditBlock();
-}
-
-void LineControl::changeLastCharInLineDocumentBlock(int blockNumber, char c)
-{
-    QTextBlock b = m_lineDocument->findBlockByNumber(blockNumber);
-    QTextCursor cursor(b);
-    cursor.beginEditBlock();
-    cursor.movePosition(QTextCursor::EndOfBlock);
-    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
-    cursor.removeSelectedText();
-    cursor.insertText(QString(c));
-    cursor.endEditBlock();
-}
-
-
 void LineControl::deltaLines(int delta)
 {
     if (delta == 0) return;
     m_prevLineNumber = m_lineNumber;
     m_lineNumber += delta;
 
-    if (m_prevLineNumber < m_lineNumber) linesAdded();
-    else linesRemoved();
+    /*if (m_prevLineNumber < m_lineNumber) linesAdded();
+    else linesRemoved();*/
 }
 
-void LineControl::addLineSection(LineControl::LineSection ls)
+int LineControl::addLineSection(LineControl::LineSection ls)
 {
     auto srch = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compare);
+    int result = 0;
     std::vector<LineSection> nested;
     while (srch != m_sections.end()
            && srch->position + srch->range < ls.position+ls.range)
@@ -714,11 +630,11 @@ void LineControl::addLineSection(LineControl::LineSection ls)
     {
         if (l.type == LineSection::Collapsed)
         {
-            removeLineSection(l, false, true);
+            result += removeLineSection(l, false, true);
         }
         else {
             l.palette->setVisible(false);
-            removeLineSection(l, false, true);
+            result += removeLineSection(l, false, true);
         }
     }
 
@@ -739,17 +655,20 @@ void LineControl::addLineSection(LineControl::LineSection ls)
         ls.palette->setProperty("y", m_sections[elementPos].visiblePosition * m_blockHeight + (m_sections[elementPos].visibleRange * m_blockHeight - static_cast<int>(ls.palette->height())) / 2);
     }
 
+    result += m_sections[elementPos].rangeOffset();
     if (m_sections[elementPos].visibleRange != m_sections[elementPos].range)
         offsetAfterIndex(elementPos, m_sections[elementPos].rangeOffset(), false);
     m_totalOffset += m_sections[elementPos].rangeOffset();
+
+    return result;
 }
 
-void LineControl::removeLineSection(LineControl::LineSection ls, bool destroy, bool nesting)
+int LineControl::removeLineSection(LineControl::LineSection ls, bool destroy, bool nesting)
 {
     auto lower = std::lower_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compare);
     unsigned index = static_cast<unsigned>(lower-m_sections.begin());
     std::vector<LineSection> nested = lower->nested;
-
+    int result = 0;
 
     if (lower->type == LineSection::Palette && destroy){
         lower->palette->setVisible(false);
@@ -759,6 +678,7 @@ void LineControl::removeLineSection(LineControl::LineSection ls, bool destroy, b
     offsetAfterIndex(index, -m_sections[index].rangeOffset(), false);
     m_totalOffset -= lower->rangeOffset();
 
+    result -= lower->rangeOffset();
     m_sections.erase(lower);
 
     if (!nesting)
@@ -767,17 +687,20 @@ void LineControl::removeLineSection(LineControl::LineSection ls, bool destroy, b
             if (lsx.type == LineSection::Palette){
                 lsx.palette->setVisible(true);
             }
-            addLineSection(lsx);
+            result += addLineSection(lsx);
+
         }
     }
+
+    return result;
 }
 
-int LineControl::LineSection::rangeOffset()
+int LineControl::LineSection::rangeOffset() const
 {
     return visibleRange - range;
 }
 
-int LineControl::LineSection::positionOffset()
+int LineControl::LineSection::positionOffset() const
 {
     return visiblePosition - position;
 }

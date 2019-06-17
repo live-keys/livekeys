@@ -453,6 +453,7 @@ Rectangle{
                 LineSurface{
                     id: lineSurface
                     color: "#3e464d"
+                    viewport: Qt.rect(0,flick.flickableItem.contentY,0,flick.height)
                     Component.onCompleted: {
                         setComponents(editorArea);
                     }

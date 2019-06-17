@@ -2015,8 +2015,7 @@ void TextDocumentLayout::documentChanged(int from, int oldLength, int length)
 
     d->insideDocumentChange = false;
 
-    for (QTextBlock blockIt = startIt; blockIt.isValid() && blockIt != endIt; blockIt = blockIt.next())
-        emit updateBlock(blockIt);
+    emit updateBlockRange(startIt.blockNumber(), endIt.blockNumber());
 
     if (d->showLayoutProgress) {
         const QSizeF newSize = dynamicDocumentSize();

@@ -248,7 +248,7 @@ public:
     bool isReadOnly() const;
 
     TextEditPrivate* getPriv() { Q_D(TextEdit); return d; }
-    void stateChangeHandler(const QTextBlock& block);
+    void stateChangeHandler(int blockNumber);
 
     QRectF cursorRectangle() const;
 
@@ -421,7 +421,8 @@ private Q_SLOTS:
     void createCursor();
     void q_canPasteChanged();
     void updateWholeDocument();
-    void invalidateBlock(const QTextBlock &block);
+    // void invalidateBlock(const QTextBlock &block);
+    void invalidateBlockRange(int first, int last);
     void updateCursor();
     void q_updateAlignment();
     void updateSize();

@@ -101,6 +101,9 @@ public:
 
     bool contentHasAlignment() const;
     void updateLineSurface(int oldLineNum, int newLineNum, int dirtyPos);
+
+signals:
+    void updateBlockRange(int first, int last);
 protected:
     void documentChanged(int from, int oldLength, int length) override;
     void resizeInlineObject(QTextInlineObject item, int posInDocument, const QTextFormat &format) override;

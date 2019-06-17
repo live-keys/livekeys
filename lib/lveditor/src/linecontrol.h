@@ -36,8 +36,8 @@ public:
         static std::function<bool(LineSection, LineSection)> compare;
         static std::function<bool(LineSection, LineSection)> compareVisible;
         static std::function<bool(LineSection, LineSection)> compareBounds;
-        int rangeOffset();
-        int positionOffset();
+        int rangeOffset() const;
+        int positionOffset() const;
 
         int position;
         int range;
@@ -56,8 +56,8 @@ public:
 
     explicit LineControl(QObject *parent = nullptr);
     ~LineControl() {}
-    void addCollapse(int pos, int num);
-    void removeCollapse(int pos);
+    int addCollapse(int pos, int num);
+    int removeCollapse(int pos);
 
     void addPalette(int pos, int span, QQuickItem* p, int startPos, int endPos);
     int resizePalette(QQuickItem* p);
@@ -78,43 +78,36 @@ public:
     bool hiddenByCollapse(int blockNumber);
     int isJumpForwardLine(int blockNumber, bool forCollapse = false);
     int isJumpBackwardsLine(int blockNumber);
-    void updateLinesInDocuments();
-    QTextDocument* lineDocument();
-    void setLineDocumentFont(const QFont& font);
 
     int firstContentLine();
     int lastContentLine();
     int firstBlockOfTextBefore(int lineNumber);
 
-    std::vector<VisibleSection> visibleSectionsForViewport(const QRect& rect);
-    std::vector<VisibleSection> visibleSections(int firstLine, int lastLine);
+    std::vector<VisibleSection> visibleSectionsForViewport(const QRect& rect) const;
+    std::vector<VisibleSection> visibleSections(int firstLine, int lastLine) const;
 signals:
-
+    void lineControlCollapsed();
+    void lineControlExpand();
 public slots:
     void setDirtyPos(int dirtyPos);
     void lineNumberChange();
     void deltaLines(int delta);
 private:
-    void addLineSection(LineSection ls);
-    void removeLineSection(LineSection ls, bool destroy, bool nesting = false);
+    int addLineSection(LineSection ls);
+    int removeLineSection(LineSection ls, bool destroy, bool nesting = false);
     unsigned insertIntoSorted(LineSection ls);
     void calculateVisiblePosition(unsigned pos);
     void offsetAfterIndex(unsigned index, int offset, bool offsetPositions);
-    void linesAdded();
-    void linesRemoved();
-
-    void replaceTextInLineDocumentBlock(int blockNumber, std::string s);
-    void changeLastCharInLineDocumentBlock(int blockNumber, char c);
+    void linesAdded(int newSize);
+    // void linesRemoved();
 
     std::vector<LineSection> m_sections;
     int m_blockHeight;
-
     int m_dirtyPos;
     int m_prevLineNumber;
     int m_lineNumber;
     TextEdit* m_textEdit;
     int m_totalOffset;
-    QTextDocument* m_lineDocument;
 };
 
 }
