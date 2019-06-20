@@ -93,12 +93,27 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
     m_projectEnvironment = layerObj->property("projectEnvironment").value<QObject*>();
     m_panes              = layerObj->property("panes").value<QObject*>();
     m_nextViewParent     = layerObj->property("runSpace").value<QObject*>();
+    QJSValue paneFactories = m_panes->property("factories").value<QJSValue>();
 
     m_keymap->store(0, Qt::Key_O,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.project.openFile");
     m_keymap->store(0, Qt::Key_Backslash, lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.project.toggleVisibility");
     m_keymap->store(0, Qt::Key_T,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleMaximizedRuntime");
     m_keymap->store(0, Qt::Key_K,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleNavigation");
     m_keymap->store(0, Qt::Key_L,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleLog");
+
+
+    for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
+        LiveExtension* le = it.value();
+
+        QJSValue panes = le->panes();
+        if ( panes.isObject() ){
+            QJSValueIterator panesIt(panes);
+            while ( panesIt.hasNext() ){
+                panesIt.next();
+                paneFactories.setProperty(panesIt.name(), panesIt.value());
+            }
+        }
+    }
 
     emit viewReady(this, m_nextViewParent);
 }
@@ -137,6 +152,24 @@ QJSValue WorkspaceLayer::interceptMenu(QJSValue context){
     }
 
     return concat;
+}
+
+QJSValue WorkspaceLayer::interceptFile(const QString &path, int mode){
+    QJSValueList interceptorArgs;
+    interceptorArgs << path << mode;
+
+    for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
+        LiveExtension* le = it.value();
+        if ( le->hasFileInterceptor() ){
+            QJSValue v = le->callFileInterceptor(interceptorArgs);
+            if ( v.isQObject() ){
+                vlog("workspace").v() << "Found file interceptor in extension " << le->name() << ".";
+                return v;
+            }
+        }
+    }
+
+    return QJSValue();
 }
 
 void WorkspaceLayer::addPane(QQuickItem *pane, QWindow *window, const QVariantList &position){

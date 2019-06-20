@@ -33,8 +33,7 @@ Item{
         onAccepted: {
             if ( isFile ){
                 var f = project.fileModel.addFile(entry, name)
-                if ( f !== null )
-                    project.openFile(f, ProjectDocument.Edit)
+                livecv.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
             } else {
                 project.fileModel.addDirectory(entry, name)
             }
@@ -46,6 +45,7 @@ Item{
         anchors.fill: parent
         visible: false
         onOpen: {
+            //TODO: Set focus on parent, then trigger the open file
             projectNavigation.parent.document = project.openFile(path, ProjectDocument.EditIfNotOpen)
             root.panes.setActiveItem(projectNavigation.parent.textEdit, projectNavigation.parent)
         }
@@ -81,7 +81,9 @@ Item{
             }
         }
         onCancel: {
-            editor.forceFocus()
+            var activePane = livecv.layers.workspace.panes.activePane
+            if ( activePane )
+                activePane.forceActiveFocus()
         }
     }
 
@@ -162,7 +164,7 @@ Item{
                     'close' : [closeProject, "Close Project"],
                     'open' : [openProject, "Open Project"],
                     'new' : [newProject, "New Project"],
-                    'openFile' : [openFile, "Open File"],
+                    'openFile' : [openFileDialog, "Open File"],
                     'toggleVisibility' : [toggleVisibility, "Project: Toggle Visibility"]
                 })
             }
@@ -278,17 +280,12 @@ Item{
             project.newProject()
         })
     }
-    function openFile(){
+    function openFileDialog(){
         var openCallback = function(url){
             if ( project.rootPath === '' ){
                 project.openProject(url)
             } else if ( project.isFileInProject(url) ) {
-                var doc = project.openFile(url, ProjectDocument.Edit)
-                if ( doc ) {
-                    var fe = root.panes.focusPane('editor')
-                    if ( fe )
-                        fe.document = doc
-                }
+                openFile(url, ProjectDocument.EditIfNotOpen)
             } else {
                 var fileUrl = url
                 livecv.layers.window.dialogs.message(
@@ -332,6 +329,22 @@ Item{
                 openCallback
             )
         }
+    }
+
+    function openFile(path, mode){
+        var pane = livecv.layers.workspace.interceptFile(path, mode)
+        if ( pane )
+            return pane
+
+        var doc = project.openFile(path, mode)
+        if ( !doc )
+            return;
+        var fe = root.panes.focusPane('editor')
+        if ( !fe ){
+            fe = root.panes.createPane('editor', {}, [1], [400, 400])
+        }
+        fe.document = doc
+        return fe
     }
 }
 

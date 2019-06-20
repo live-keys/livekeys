@@ -215,7 +215,7 @@ Item{
         property string action : ""
 
         onNewProject: root.projectEnvironment.newProject()
-        onOpenFile : root.projectEnvironment.openFile()
+        onOpenFile : root.projectEnvironment.openFileDialog()
         onOpenProject: root.projectEnvironment.openProject()
         onSaveFile : {
             var fe = root.panes.focusPane('editor')
@@ -229,11 +229,10 @@ Item{
         }
 
         onOpenSettings: {
-            var fe = root.panes.focusPane('editor')
-            if ( fe ){
-                fe.document = project.openFile(livecv.settings.file('editor').path, ProjectDocument.Edit);
-                livecv.settings.file('editor').documentOpened(editor.document)
-            }
+            var fe = livecv.layers.workspace.project.openFile(
+                livecv.settings.file('editor').path, ProjectDocument.Edit
+            )
+            livecv.settings.file('editor').documentOpened(fe.document)
         }
 
         property License license : License{}
