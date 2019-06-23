@@ -137,7 +137,6 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
     int bracketLevel         = blockState >> 5;
     int state                = blockState & 15;
 
-
     if (blockState < 0) {
         prevSectionExceeded = false;
         bracketLevel        = 0;

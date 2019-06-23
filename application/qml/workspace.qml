@@ -70,7 +70,7 @@ Item{
                 }
 
                 mainHorizontalSplit.insert(panePosition[0], paneObject)
-//                add(paneObject)
+                add(paneObject, null, panePosition)
 
                 return paneObject
 
@@ -79,17 +79,39 @@ Item{
             }
         }
 
-        property var clearPanes : function(){
-            for ( var i = mainHorizontalSplit.panes.length; i >= 0; --i ){
-                if ( mainHorizontalSplit.panes[i] !== viewer ){
-//                    livecv.layers.workspace.removePane(mainHorizontalSplit.panes[i])
+        property var removePane : function(pane){
+            for ( var i = 0; i < mainHorizontalSplit.panes.length; ++i ){
+                if ( mainHorizontalSplit.panes[i] === pane ){
+                    livecv.layers.workspace.removePane(mainHorizontalSplit.panes[i])
                     mainHorizontalSplit.removeAt(i)
                 }
             }
+
+            var openI = open.indexOf(pane)
+            if ( openI > -1 ){
+                open.splice(openI, 1)
+            }
+            if ( activePane === pane ){
+                activePane = null
+                activeItem = null
+            }
+        }
+
+        property var clearPanes : function(){
+            for ( var i = mainHorizontalSplit.panes.length; i >= 0; --i ){
+                if ( mainHorizontalSplit.panes[i] !== viewer ){
+                    livecv.layers.workspace.removePane(mainHorizontalSplit.panes[i])
+                    mainHorizontalSplit.removeAt(i)
+                }
+            }
+            activePane = null
+            activeItem = null
             open = []
         }
 
         function add(pane, paneWindow, position){
+            pane.paneLocation = position
+            pane.paneWindow = paneWindow
             open.push(pane)
 
             livecv.layers.workspace.addPane(pane, paneWindow, position)
@@ -129,13 +151,14 @@ Item{
 
         function focusPane(paneType){
             var ap = root.panes.activePane
-            if ( ap && ap.objectName === paneType ){
+            if ( ap && ap.paneType === paneType ){
                 return ap;
             }
 
             var openPanes = root.panes.open
+
             for ( var i = 0; i < openPanes.length; ++i ){
-                if ( openPanes[i].objectName === paneType )
+                if ( openPanes[i].paneType === paneType )
                     return openPanes[i]
             }
 
@@ -274,7 +297,7 @@ Item{
 
     property ProjectFileSystem projectFileSystemSingle : ProjectFileSystem{
         id: projectView
-        width: 240
+        width: 300
         panes: root.panes
     }
 
@@ -304,10 +327,7 @@ Item{
         }
 
         function addHorizontalEditor(){
-            var editorObject = editorFactory.createObject(0)
-            mainHorizontalSplit.insert(mainHorizontalSplit.panes.length - 1, editorObject)
-
-            root.panes.add(editorObject)
+            var editorObject = root.panes.createPane('editor', {}, [2], [400, 400])
             root.panes.setActiveItem(editorObject.textEdit, editorObject)
         }
 
@@ -337,7 +357,7 @@ Item{
         function removeHorizontalEditor(){
             var fe = root.panes.focusPane('editor')
             if ( fe )
-                mainHorizontalSplit.removeItem(fe)
+                root.panes.removePane(fe)
         }
 
         function openLogInWindow(){
@@ -444,9 +464,11 @@ Item{
                     for ( var j = i + 1; j < panes.length; ++j ){
                         mainHorizontalSplit.removeItem(panes[j])
                     }
+
                     for ( var j = i; j < panes.length; ++j ){
                         mainHorizontalSplit.addItem(panes[j])
                     }
+
                     for ( var j = 0; j < paneSizes.length; ++j ){
                         if ( paneSizes[j] !== -1 )
                             panes[j].width = paneSizes[j]

@@ -4,6 +4,7 @@
 #include "live/exception.h"
 #include "live/viewcontext.h"
 #include "live/settings.h"
+#include "live/projectfile.h"
 #include "live/liveextension.h"
 #include "live/project.h"
 #include "live/windowlayer.h"
@@ -58,8 +59,6 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     m_workspace = new Workspace(m_project, this);
 
     connect(window, SIGNAL(closing(QQuickCloseEvent*)), this, SLOT(whenWindowClose()));
-    connect(m_workspace, &Workspace::projectOpen, this, &WorkspaceLayer::whenProjectOpen);
-    connect(m_workspace, &Workspace::projectClose, this, &WorkspaceLayer::whenProjectClose);
 
     setHasView(true);
 }
@@ -162,22 +161,84 @@ void WorkspaceLayer::whenWindowClose(){
 void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspace){
     QJSValue v = m_panes->property("createPane").value<QJSValue>();
 
-    QJSValue position = lv::ViewContext::instance().engine()->engine()->newArray(1);
-    position.setProperty(0, 0);
+    const MLNode& layout = workspace->currentLayout();
 
-    QJSValue size = lv::ViewContext::instance().engine()->engine()->newArray(1);
-    size.setProperty(0, 240);
-    size.setProperty(1, 240);
+    QMap<QByteArray, ProjectDocument*> openDocuments;
 
-    QJSValueList vlist;
-    vlist.append("projectFileSystem");
-    vlist.append(QJSValue());
-    vlist.append(position);
-    vlist.append(size);
+    if ( layout.hasKey("documents") && layout["documents"].type() == MLNode::Array ){
+        for ( auto it = layout["documents"].begin(); it != layout["documents"].end(); ++it ){
+            QString path = QString::fromStdString((*it).asString());
+            openDocuments[Project::hashPath(path.toUtf8()).toHex()] = m_project->openFile(path);
+        }
+    }
 
-    v.call(vlist);
+    if ( layout.hasKey("panes") && layout["panes"].size() > 0 ){
+        const MLNode& panes = layout["panes"][0];
 
-    vlog() << "Initialize workspace from layout." << workspace->currentLayout().toString();//TODO
+        int orientation = panes[0].asString() == "h" ? 1 : -1;
+
+        const MLNode::ArrayType& paneItems = panes.asArray();
+
+        for ( size_t i = 1; i < paneItems.size(); ++i ){
+
+            const MLNode& pane = paneItems[i];
+
+            QJSValue position = lv::ViewContext::instance().engine()->engine()->newArray(1);
+            position.setProperty(0, (int)(i - 1) * orientation);
+
+            QJSValue size = lv::ViewContext::instance().engine()->engine()->newArray(1);
+            size.setProperty(0, pane["size"][0].asInt());
+            size.setProperty(1, pane["size"][1].asInt());
+
+            QJSValueList vlist;
+            vlist.append(QString::fromStdString(pane["type"].asString()));
+            vlist.append(QJSValue());
+            vlist.append(position);
+            vlist.append(size);
+
+            QJSValue jsPane = v.call(vlist);
+            QObject* objPane = jsPane.toQObject();
+            QQuickItem* itemPane = qobject_cast<QQuickItem*>(objPane);
+
+            workspace->whenPaneInitialized(itemPane, nullptr);
+
+            QJSValue paneStateInitializer = itemPane->property("paneInitialize").value<QJSValue>();
+            if ( pane.hasKey("state") && paneStateInitializer.isCallable() ){
+                QJSValueList paneInitializerArgs;
+
+                QJSValue jsState = lv::ViewContext::instance().engine()->engine()->newObject();
+
+                MLNode mlState = pane["state"];
+                if ( mlState.hasKey("document") ){
+
+                    QByteArray doc = QByteArray::fromStdString(mlState["document"].asString());
+                    auto it = openDocuments.find(doc);
+                    if ( it != openDocuments.end() ){
+                        ProjectDocument* doc = it.value();
+
+                        QJSValue documentState = lv::ViewContext::instance().engine()->engine()->newQObject(doc);
+                        jsState.setProperty("document", documentState);
+                    }
+
+                    mlState.remove("document");
+                }
+
+                paneInitializerArgs << jsState;
+
+                paneStateInitializer.call(paneInitializerArgs);
+            }
+
+            vlog("appdata").v() << "Initialized pane: " << pane.toString();
+        }
+    }
+
+    if ( layout.hasKey("active") && !openDocuments.isEmpty() ){
+        QByteArray activeKey = QByteArray::fromStdString(layout["active"].asString());
+        auto it = openDocuments.find(activeKey);
+        if ( it != openDocuments.end() ){
+            m_project->setActive(it.value()->file());
+        }
+    }
 }
 
 void WorkspaceLayer::whenProjectClose(ProjectWorkspace *){

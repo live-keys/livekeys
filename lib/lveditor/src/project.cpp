@@ -34,7 +34,7 @@
  * \class lv::Project
  * \brief Abstraction of the open project in LiveKeys
  *
- * Practically a singleton (not enforced), constructed at the start of the application, and destroyed right before closing.
+ * A single instance, constructed at the start of the application, and destroyed right before closing.
  * There are two types of projects - file-based projects and folder-based projects.
  * \ingroup lveditor
  */
@@ -127,12 +127,11 @@ void Project::openProject(const QString &path){
         m_path = absolutePath;
         emit pathChanged(absolutePath);
 
-        ProjectFile* bestFocus = lookupBestFocus(m_fileModel->root()->child(0));
-        if( bestFocus ){
-            ProjectDocument* document = createDocument(bestFocus, false);
-            m_documentModel->openDocument(document->file()->path(), document);
-            m_active = document;
-            emit activeChanged(document);
+        if ( !m_active ){
+            ProjectFile* bestFocus = lookupBestFocus(m_fileModel->root()->child(0));
+            if( bestFocus ){
+                setActive(bestFocus);
+            }
         }
     }
 
@@ -185,9 +184,8 @@ ProjectDocument *Project::openFile(const QUrl &path, int mode){
 }
 
 /**
- * \brief Opens the file given by the QString path, in the given mode
+ * \brief Opens the file given by the \p path, in the given mode
  *
- * If the document is not opened, we use the third openFile function to do so.
  * If it is, we update its monitoring state.
  *
  * \sa Project::openFile(ProjectFile *file, int mode)
