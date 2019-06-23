@@ -41,16 +41,12 @@ Rectangle{
         livecv.layers.window.dialogs.overlayBox(root.addEntryOverlay)
     }
     function openEntry(entry, monitor){
-        var fe = root.panes.focusPane('editor')
-        if ( fe )
-            fe.document = project.openFile(
-                entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
+        livecv.layers.workspace.project.openFile(
+            entry.path, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
         )
     }
     function editEntry(entry){
-        var fe = root.panes.focusPane('editor')
-        if ( fe )
-            fe.document = project.openFile(entry, ProjectDocument.Edit)
+        livecv.layers.workspace.project.openFile(entry.path, ProjectDocument.Edit)
     }
     function removeEntry(entry, isFile){
         var message = ''

@@ -13,6 +13,22 @@ LiveExtension::LiveExtension(QObject *parent) : QObject(parent)
 
 }
 
+/** Returns true if a file interceptor has been set */
+bool LiveExtension::hasFileInterceptor() const{
+    return m_interceptFile.isCallable();
+}
+
+/** Calls the file interceptor with the given values as args */
+QJSValue LiveExtension::callFileInterceptor(const QJSValueList &values){
+    QJSValue result = m_interceptFile.call(values);
+    if ( result.isError() ){
+        qWarning("File intercept error: %s", qPrintable(result.toString()));
+        return QJSValue();
+    }
+
+    return result;
+}
+
 /** Shows if we have a language interceptor */
 bool LiveExtension::hasLanguageInterceptor() const{
     return m_interceptLanguage.isCallable();

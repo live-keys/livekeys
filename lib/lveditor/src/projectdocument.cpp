@@ -86,6 +86,7 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     , m_isSynced(true)
     , m_isMonitored(isMonitored)
 {
+    m_textDocument->setDocumentMargin(0);
     connect(m_textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::documentContentsChanged);
     readContent();
     m_textDocument->setDocumentLayout(new TextDocumentLayout(m_textDocument));

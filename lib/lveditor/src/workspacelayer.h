@@ -44,6 +44,7 @@ public:
 
 public slots:
     QJSValue interceptMenu(QJSValue context);
+    QJSValue interceptFile(const QString& path, int mode);
     void addPane(QQuickItem* pane, QWindow* window, const QVariantList& position);
     void movePane(QQuickItem* pane, QWindow* window, const QVariantList& position);
     void removePane(QQuickItem* pane);

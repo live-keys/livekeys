@@ -107,12 +107,7 @@ Rectangle{
                     project.openProject(url)
                     editor.document = project.active
                 } else if ( project.isFileInProject(url) ){
-
-                    var doc = project.openFile(url, ProjectDocument.Edit)
-                    var fe = editor.panes.focusPane('editor')
-                    if ( fe ){
-                        fe.document = doc
-                    }
+                    livecv.layers.workspace.project.openFile(url, ProjectDocument.Edit)
                 } else {
                     var fileUrl = url
                     livecv.layers.window.dialogs.message(
@@ -192,7 +187,7 @@ Rectangle{
                 },
                 button3Name : 'Cancel',
                 button3Function : function(mbox){
-                    boxm.close()
+                    mbox.close()
                 },
                 returnPressed : function(mbox){
                     saveFunction(mbox)
