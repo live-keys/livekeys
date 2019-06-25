@@ -197,7 +197,8 @@ void ProjectWorkspace::State::paneStateChanged(QQuickItem *pane, const QVariant 
     QJSValue ps = v.value<QJSValue>();
     if ( ps.hasOwnProperty("document") ){
         ProjectDocument* doc = static_cast<ProjectDocument*>(ps.property("document").toQObject());
-        ps.setProperty("document", doc->file()->hashPath());
+        if ( doc )
+            ps.setProperty("document", doc->file()->hashPath());
     }
 
     MLNode paneStateNode;
