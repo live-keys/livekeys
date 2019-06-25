@@ -147,6 +147,8 @@ void Project::openProject(const QUrl &url){
  * \brief Returns the path of the folder of the given file-based project, or the actual folder of a folder-based project
  */
 QString Project::dir() const{
+    if ( m_path.isEmpty() )
+        return m_path;
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile())
         return QFileInfo(m_path).path();
     else
