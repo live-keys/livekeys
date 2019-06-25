@@ -242,7 +242,7 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
                 QJSValue jsState = lv::ViewContext::instance().engine()->engine()->newObject();
 
                 MLNode mlState = pane["state"];
-                if ( mlState.hasKey("document") ){
+                if ( mlState.hasKey("document") && mlState["document"].type() == MLNode::String ){
 
                     QByteArray doc = QByteArray::fromStdString(mlState["document"].asString());
                     auto it = openDocuments.find(doc);
