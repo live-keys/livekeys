@@ -51,8 +51,8 @@ MessageDialogInternal{
         root.destroy()
 
         var aitem = livecv.layers.workspace.panes.activePane
-        if ( activePane )
-            activePane.forceActiveFocus()
+        if ( aitem )
+            aitem.forceActiveFocus()
     }
 
     MessageDialogButton{
