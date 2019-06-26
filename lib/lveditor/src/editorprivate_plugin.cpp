@@ -36,8 +36,8 @@
 #include "linemanager.h"
 #include "editorlayer.h"
 #include "workspacelayer.h"
+#include "themecontainer.h"
 #include "live/theme.h"
-#include "live/themecontainer.h"
 
 #include <QCoreApplication>
 #include <QQmlEngine>

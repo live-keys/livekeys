@@ -8,8 +8,8 @@
 #include "live/lvviewglobal.h"
 #include "live/layer.h"
 #include "live/keymap.h"
-#include "live/themecontainer.h"
 
+#include "themecontainer.h"
 #include "commands.h"
 #include "extensions.h"
 
@@ -20,6 +20,8 @@ namespace lv{
 class Project;
 class Workspace;
 class ProjectWorkspace;
+
+/// \private
 class WorkspaceLayer : public Layer{
 
     Q_OBJECT
