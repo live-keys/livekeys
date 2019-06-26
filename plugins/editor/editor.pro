@@ -34,7 +34,8 @@ OTHER_FILES += \
 OTHER_FILES += \
     qml/style/*.qml \
     qml/style/qmldir \
-    qml/style/plugins.qmltypes
+    qml/style/plugins.qmltypes \
+    qml/style/live.plugin.json
 
 # Handling the palette
 

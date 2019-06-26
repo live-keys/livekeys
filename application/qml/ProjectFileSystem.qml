@@ -143,9 +143,9 @@ Rectangle{
 
     Rectangle{
         id: paneTop
-        anchors.left: parent ? parent.left : undefined
-        anchors.top: parent ? parent.top : undefined
-        anchors.right: parent ? parent.right : undefined
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.right: parent.right
 
         height: 30
         color: "#08111a"
@@ -227,7 +227,7 @@ Rectangle{
         model: project.fileModel
         anchors.topMargin: 40
         anchors.leftMargin: 10
-        anchors.fill: parent ? parent : undefined
+        anchors.fill: parent
 
         style: TreeViewStyle{
             backgroundColor: "transparent"

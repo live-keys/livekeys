@@ -18,6 +18,7 @@
 #include "live/visuallogqt.h"
 #include "live/mlnode.h"
 #include "live/mlnodetojson.h"
+#include "live/mlnodetoqml.h"
 
 namespace lv{
 
@@ -99,16 +100,22 @@ void ProjectWorkspace::State::paneAdded(QQuickItem *pane, QWindow *, const QVari
         currentWorkspaceLayout["panes"].append(MLNode(MLNode::Array));
     }
 
+    QString paneType = pane->property("paneType").toString();
+
     MLNode paneNode(MLNode::Object);
-    paneNode["type"] = pane->property("paneType").toString().toStdString();
+    paneNode["type"] = paneType.toStdString();
     paneNode["size"] = {pane->property("width").toInt(), pane->property("height").toInt()};
     paneNode["state"] = MLNode::Object;
 
     MLNode& paneLookup = currentWorkspaceLayout["panes"][0];
 
+    QList<int> positionIndex;
+
     for ( int i = 0; i < position.size(); ++i ){
         int pos = position[i].toInt();
         int posIndex = pos < 0 ? -pos + 1 : pos + 1;
+
+        positionIndex.append(pos);
 
         if ( posIndex > paneLookup.size() ){
             if ( i == position.size() - 1 ){ // add pane
@@ -136,22 +143,98 @@ void ProjectWorkspace::State::paneAdded(QQuickItem *pane, QWindow *, const QVari
             }
         }
     }
+
+    QStringList positionIndexOutput;
+    for ( auto item : positionIndex )
+        positionIndexOutput.append(QString::number(item));
+
+    vlog("appdata").v() << "Pane " << paneType << " added to layout at [" << positionIndexOutput.join(",") << "]";
 }
 
-void ProjectWorkspace::State::paneSizeChanged(QQuickItem *, const QSize &){
-    //TODO
+void ProjectWorkspace::State::paneSizeChanged(QQuickItem *pane, const QSize &size){
+    QVariantList location = pane->property("paneLocation").toList();
+
+    MLNode* paneLookup = &currentWorkspaceLayout["panes"][0];
+
+    for ( auto it = location.begin(); it != location.end(); ++it ){
+        if ( paneLookup->type() != MLNode::Array )
+            return;
+
+        int position = it->toInt();
+        int pos = position < 0 ? -position : position;
+
+        int posToIndex = pos + 1; // account for 'v' and 'h'
+
+        if ( posToIndex >= paneLookup->size() )
+            return;
+
+        paneLookup = &(*paneLookup)[posToIndex];
+    }
+
+    (*paneLookup)["size"] = {size.width(), size.height()};
 }
 
-void ProjectWorkspace::State::paneStateChanged(QQuickItem *, const QVariant &){
-    //TODO
+void ProjectWorkspace::State::paneStateChanged(QQuickItem *pane, const QVariant &v){
+    QVariantList location = pane->property("paneLocation").toList();
+
+    MLNode* paneLookup = &currentWorkspaceLayout["panes"][0];
+
+    for ( auto it = location.begin(); it != location.end(); ++it ){
+        if ( paneLookup->type() != MLNode::Array )
+            return;
+
+        int position = it->toInt();
+        int pos = position < 0 ? -position : position;
+
+        int posToIndex = pos + 1; // account for 'v' and 'h'
+
+        if ( posToIndex >= paneLookup->size() )
+            return;
+
+        paneLookup = &(*paneLookup)[posToIndex];
+    }
+
+    QJSValue ps = v.value<QJSValue>();
+    if ( ps.hasOwnProperty("document") ){
+        ProjectDocument* doc = static_cast<ProjectDocument*>(ps.property("document").toQObject());
+        if ( doc )
+            ps.setProperty("document", doc->file()->hashPath());
+    }
+
+    MLNode paneStateNode;
+    ml::fromQml(ps, paneStateNode);
+
+    (*paneLookup)["state"] = paneStateNode;
 }
 
 void ProjectWorkspace::State::paneMoved(QQuickItem *, QWindow *, const QVariantList &){
     //TODO
 }
 
-void ProjectWorkspace::State::paneRemoved(QQuickItem *){
-    //TODO
+void ProjectWorkspace::State::paneRemoved(QQuickItem *pane){
+    QVariantList location = pane->property("paneLocation").toList();
+
+    MLNode* paneLookup = &currentWorkspaceLayout["panes"][0];
+
+    for ( int i = 0; i < location.size(); ++i ){
+        if ( paneLookup->type() != MLNode::Array )
+            return;
+
+        int position = location[i].toInt();
+        int pos = position < 0 ? -position : position;
+
+        int posToIndex = pos + 1; // account for 'v' and 'h'
+
+        if ( posToIndex >= paneLookup->size() )
+            return;
+
+        if ( i == location.size() - 1 ){
+            paneLookup->asArray().erase(paneLookup->asArray().begin() + posToIndex);
+            break;
+        }
+
+        paneLookup = &(*paneLookup)[posToIndex];
+    }
 }
 
 // class ProjectWorkspace
@@ -282,6 +365,8 @@ void ProjectWorkspace::initializeFromId(){
     }
 
     //TODO: Delete deprecated workspaces
+    // * use a trigger with timer when any project is opened
+    // * use separate thread
 }
 
 void ProjectWorkspace::initializeDefaults(){
@@ -359,12 +444,36 @@ void ProjectWorkspace::whenWindowVisibilityChanged(){
     emit windowVisibilityChanged(m_window, m_window->visibility());
 }
 
-void ProjectWorkspace::whenPaneAdded(QQuickItem *pane, QWindow *window, const QVariantList &position){
-    connect(pane, &QQuickItem::widthChanged, [this, pane](){
+void ProjectWorkspace::whenPaneInitialized(QQuickItem *pane, QWindow *){
+    connect(pane, &QQuickItem::widthChanged, this, [this, pane](){
         emit paneSizeChanged(pane, QSize(pane->width(), pane->height()));
         m_state->paneSizeChanged(pane, QSize(pane->width(), pane->height()));
     });
-    connect(pane, &QQuickItem::heightChanged, [this, pane](){
+    connect(pane, &QQuickItem::heightChanged, this, [this, pane](){
+        emit paneSizeChanged(pane, QSize(pane->width(), pane->height()));
+        m_state->paneSizeChanged(pane, QSize(pane->width(), pane->height()));
+    });
+
+    QmlPropertyWatcher* paneStateWatcher = new QmlPropertyWatcher(pane, "paneState");
+    if ( paneStateWatcher->isValid() ){
+        paneStateWatcher->onChange([this](const QmlPropertyWatcher& w){
+            QQuickItem* p = static_cast<QQuickItem*>(w.object());
+            QVariant v = w.read();
+            m_state->paneStateChanged(p, v);
+            emit paneStateChanged(p, v);
+        });
+        m_watchers.append(paneStateWatcher);
+    } else {
+        delete paneStateWatcher;
+    }
+}
+
+void ProjectWorkspace::whenPaneAdded(QQuickItem *pane, QWindow *window, const QVariantList &position){
+    connect(pane, &QQuickItem::widthChanged, this, [this, pane](){
+        emit paneSizeChanged(pane, QSize(pane->width(), pane->height()));
+        m_state->paneSizeChanged(pane, QSize(pane->width(), pane->height()));
+    });
+    connect(pane, &QQuickItem::heightChanged, this, [this, pane](){
         emit paneSizeChanged(pane, QSize(pane->width(), pane->height()));
         m_state->paneSizeChanged(pane, QSize(pane->width(), pane->height()));
     });
@@ -399,6 +508,7 @@ void ProjectWorkspace::whenPaneRemoved(QQuickItem *pane){
         }
     }
 
+    m_state->paneRemoved(pane);
     emit paneRemoved(pane);
 }
 

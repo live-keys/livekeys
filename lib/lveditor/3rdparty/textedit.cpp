@@ -1926,6 +1926,9 @@ void TextEdit::mousePressEvent(QMouseEvent *event)
     if (!d->document || !d->control)
     {
         QQuickItem::mousePressEvent(event);
+        if ( d->focusOnPress ){
+            forceActiveFocus(Qt::MouseFocusReason);
+        }
         return;
     }
 

@@ -80,9 +80,8 @@ Item{
             }
         }
         onCancel: {
-            var activePane = livecv.layers.workspace.panes.activePane
-            if ( activePane )
-                activePane.forceActiveFocus()
+            if ( livecv.layers.workspace.panes.activeItem )
+                livecv.layers.workspace.panes.activeItem.forceFocus()
         }
     }
 
@@ -94,7 +93,8 @@ Item{
                     var fe = root.panes.focusPane('editor')
                     if ( !fe )
                         fe = root.panes.createPane('editor', {}, [1], [400, 0])
-                    fe.document = project.active
+                    if ( !fe.document )
+                        fe.document = project.active
                 }
             }
             pathChange = false

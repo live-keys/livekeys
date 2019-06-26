@@ -31,6 +31,12 @@ Rectangle{
     property alias font: editorArea.font
     property alias internalActiveFocus : editorArea.activeFocus
     property alias internalFocus: editorArea.focus
+    onInternalActiveFocusChanged: {
+        if ( panes.activePane !== editor ){
+            panes.activateItem(textEdit, editor)
+        }
+    }
+
     property alias documentHandler: editorArea.documentHandler
     property alias textEdit: editorArea
 
@@ -41,6 +47,11 @@ Rectangle{
     property QtObject paneWindow : null
     property string paneType: 'editor'
     property var paneState : { return {} }
+    property var paneInitialize : function(s){
+        if ( s.document ){
+            document = s.document
+        }
+    }
 
     property int fragmentStart: 0
     property int fragmentEnd: -1

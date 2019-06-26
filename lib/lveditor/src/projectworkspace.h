@@ -58,6 +58,7 @@ public slots:
     void whenWindowRectChanged();
     void whenWindowVisibilityChanged();
 
+    void whenPaneInitialized(QQuickItem* pane, QWindow* window);
     void whenPaneAdded(QQuickItem* pane, QWindow* window, const QVariantList& position);
     void whenPaneMoved(QQuickItem* pane, QWindow* window, const QVariantList& position);
     void whenPaneRemoved(QQuickItem* pane);
