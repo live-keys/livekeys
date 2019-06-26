@@ -45,9 +45,8 @@ Item{
         anchors.fill: parent
         visible: false
         onOpen: {
-            //TODO: Set focus on parent, then trigger the open file
-            projectNavigation.parent.document = project.openFile(path, ProjectDocument.EditIfNotOpen)
             root.panes.setActiveItem(projectNavigation.parent.textEdit, projectNavigation.parent)
+            projectEnvironment.openFile(path, ProjectDocument.EditIfNotOpen)
         }
         onCloseFile: {
             var doc = project.documentModel.isOpened(path)
