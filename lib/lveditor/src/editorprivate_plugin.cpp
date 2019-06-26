@@ -36,6 +36,8 @@
 #include "linemanager.h"
 #include "editorlayer.h"
 #include "workspacelayer.h"
+#include "live/theme.h"
+#include "live/themecontainer.h"
 
 #include <QCoreApplication>
 #include <QQmlEngine>
@@ -72,6 +74,8 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
         uri, 1, 0, "LiveCommands", "LiveCommands is available through the \'livecv.layers.workspace.commands\' property.");
     qmlRegisterUncreatableType<lv::KeyMap>(
         uri, 1, 0, "KeyMap", "KeyMap is available through the \'livecv.layers.workspace.keymap.\' property.");
+    qmlRegisterUncreatableType<lv::ThemeContainer>(
+        uri, 1, 0, "ThemeContainer", "ThemeContainer is available through the \'livecv.layers.workspace.themes.\' property.");
 }
 
 void EditorPrivatePlugin::initializeEngine(QQmlEngine *engine, const char *){

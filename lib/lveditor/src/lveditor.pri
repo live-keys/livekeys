@@ -22,7 +22,6 @@ HEADERS += \
     $$PWD/linemanager.h \
     $$PWD/linesurface.h \
     $$PWD/extensions.h \
-    $$PWD/liveextension.h \
     $$PWD/palettemanager.h \
     $$PWD/palettecontainer.h \
     $$PWD/palettelist.h \
@@ -34,7 +33,10 @@ HEADERS += \
     $$PWD/workspacelayer.h \
     $$PWD/commands.h \
     $$PWD/commandsmodel.h \
-    $$PWD/projectworkspace.h
+    $$PWD/projectworkspace.h \
+    $$PWD/workspaceextension.h \
+    $$PWD/themecontainer.h \
+    $$PWD/theme.h
 
 SOURCES += \
     $$PWD/project.cpp \
@@ -50,7 +52,6 @@ SOURCES += \
     $$PWD/editorsettings.cpp \
     $$PWD/documenthandler.cpp \
     $$PWD/extensions.cpp \
-    $$PWD/liveextension.cpp \
     $$PWD/editorsettingscategory.cpp \
     $$PWD/editorglobalobject.cpp \
     $$PWD/editorprivate_plugin.cpp \
@@ -68,4 +69,7 @@ SOURCES += \
     $$PWD/keymap.cpp \
     $$PWD/commands.cpp \
     $$PWD/commandsmodel.cpp \
-    $$PWD/projectworkspace.cpp
+    $$PWD/projectworkspace.cpp \
+    $$PWD/workspaceextension.cpp \
+    $$PWD/themecontainer.cpp \
+    $$PWD/theme.cpp

@@ -51,6 +51,7 @@ DISTFILES += \
     qml/MessageDialogMain.qml \
     qml/LogView.qml \
     qml/CommandsMenu.qml \
-    qml/editorlayer.qml
+    qml/editorlayer.qml \
+    qml/LiveKeysTheme.qml
 
 

@@ -1,5 +1,5 @@
-#ifndef LIVEEXTENSION_H
-#define LIVEEXTENSION_H
+#ifndef LVWORKSPACEEXTENSION_H
+#define LVWORKSPACEEXTENSION_H
 
 #include "live/lveditorglobal.h"
 #include <QObject>
@@ -9,7 +9,7 @@ namespace lv{
 
 //TODO: Configuration
 
-class LV_EDITOR_EXPORT LiveExtension : public QObject{
+class LV_EDITOR_EXPORT WorkspaceExtension : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QObject* globals           READ globals           WRITE setGlobals           NOTIFY globalsChanged)
@@ -20,9 +20,10 @@ class LV_EDITOR_EXPORT LiveExtension : public QObject{
     Q_PROPERTY(QJSValue commands          READ commands          WRITE setCommands          NOTIFY commandsChanged)
     Q_PROPERTY(QJSValue keyBindings       READ keyBindings       WRITE setKeyBindings       NOTIFY keyBindingsChanged)
     Q_PROPERTY(QJSValue configuration     READ configuration     WRITE setConfiguration     NOTIFY configurationChanged)
+    Q_PROPERTY(QJSValue themes            READ themes            WRITE setThemes            NOTIFY themesChanged)
 
 public:
-    explicit LiveExtension(QObject *parent = 0);
+    explicit WorkspaceExtension(QObject *parent = 0);
 
     /** Returns globals */
     QObject* globals() const{ return m_globals; }
@@ -40,6 +41,8 @@ public:
     QJSValue interceptFile() const{ return m_interceptFile; }
     /** Returns the panes */
     QJSValue panes() const{ return m_panes; }
+    /** Returns the themes */
+    QJSValue themes() const{ return m_themes; }
 
     void setGlobals(QObject* globals);
     void setInterceptLanguage(QJSValue interceptLanguage);
@@ -49,6 +52,7 @@ public:
     void setInterceptMenu(QJSValue interceptMenu);
     void setInterceptFile(QJSValue interceptFile);
     void setPanes(QJSValue panes);
+    void setThemes(QJSValue themes);
 
     void setIdentifiers(const std::string& name, const std::string& path);
     /** Name getter */
@@ -82,6 +86,8 @@ signals:
     void interceptFileChanged();
     /** Signals that the panes property has changed */
     void panesChanged();
+    /** Signals that the themes property has changed */
+    void themesChanged();
 
 private:
     std::string m_name;
@@ -95,62 +101,69 @@ private:
     QJSValue m_interceptMenu;
     QJSValue m_interceptFile;
     QJSValue m_panes;
+    QJSValue m_themes;
 };
 
 /** Globals setter */
-inline void LiveExtension::setGlobals(QObject* globals){
+inline void WorkspaceExtension::setGlobals(QObject* globals){
     m_globals = globals;
     emit globalsChanged();
 }
 
 /** Language interceptor setter */
-inline void LiveExtension::setInterceptLanguage(QJSValue interceptLanguage){
+inline void WorkspaceExtension::setInterceptLanguage(QJSValue interceptLanguage){
     m_interceptLanguage = interceptLanguage;
     emit interceptLanguageChanged();
 }
 
 /** Commands setter */
-inline void LiveExtension::setCommands(QJSValue commands){
+inline void WorkspaceExtension::setCommands(QJSValue commands){
     m_commands = commands;
     emit commandsChanged();
 }
 
 /** Configuration setter */
-inline void LiveExtension::setConfiguration(QJSValue configuration){
+inline void WorkspaceExtension::setConfiguration(QJSValue configuration){
     m_configuration = configuration;
     emit configurationChanged();
 }
 
 /** Key bindings setter */
-inline void LiveExtension::setKeyBindings(QJSValue keybindings){
+inline void WorkspaceExtension::setKeyBindings(QJSValue keybindings){
     m_keybindings = keybindings;
     emit keyBindingsChanged();
 }
 
 /** Identifiers setters (name and path that identify the extension) */
-inline void LiveExtension::setIdentifiers(const std::string &name, const std::string &path){
+inline void WorkspaceExtension::setIdentifiers(const std::string &name, const std::string &path){
     m_name = name;
     m_path = path;
 }
 
 /** Sets the intercept file callback handler */
-inline void LiveExtension::setInterceptFile(QJSValue interceptFile){
+inline void WorkspaceExtension::setInterceptFile(QJSValue interceptFile){
     m_interceptFile = interceptFile;
     emit interceptFileChanged();
 }
 
 /** Set given intercept menu */
-inline void LiveExtension::setInterceptMenu(QJSValue interceptMenu){
+inline void WorkspaceExtension::setInterceptMenu(QJSValue interceptMenu){
     m_interceptMenu = interceptMenu;
     emit interceptMenuChanged();
 }
 
 /** Sets the panes */
-inline void LiveExtension::setPanes(QJSValue panes){
+inline void WorkspaceExtension::setPanes(QJSValue panes){
     m_panes = panes;
     emit panesChanged();
 }
 
+/** Sets the themes */
+inline void WorkspaceExtension::setThemes(QJSValue themes){
+    m_themes = themes;
+    emit themesChanged();
+}
+
 }// namespace
 
-#endif // LIVEEXTENSION_H
+#endif // LVWORKSPACEEXTENSION_H

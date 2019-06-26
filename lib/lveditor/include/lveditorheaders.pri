@@ -16,9 +16,10 @@ HEADERS += \
     $$PWD/live/editorprivate_plugin.h \
     $$PWD/live/palettecontainer.h \
     $$PWD/live/palettelist.h \
-    $$PWD/live/liveextension.h \
     $$PWD/live/codepalette.h \
     $$PWD/live/keymap.h \
     $$PWD/live/extensions.h \
     $$PWD/live/workspace.h \
-    $$PWD/live/projectworkspace.h
+    $$PWD/live/projectworkspace.h \
+    $$PWD/live/theme.h \
+    $$PWD/live/workspaceextension.h

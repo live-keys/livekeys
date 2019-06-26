@@ -56,4 +56,5 @@ DISTFILES += \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/PaletteListView.qml \
-    palettes/EditPalette.qml
+    palettes/EditPalette.qml \
+    qml/WorkspaceTheme.qml
