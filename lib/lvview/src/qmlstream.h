@@ -30,4 +30,4 @@ private:
 
 }// namespace
 
-#endif // QMLSTREAM_H
+#endif // LVQMLSTREAM_H

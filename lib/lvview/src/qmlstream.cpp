@@ -3,8 +3,6 @@
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 
-#include <QDebug>
-
 namespace lv{
 
 QmlStream::QmlStream(QObject *parent)
