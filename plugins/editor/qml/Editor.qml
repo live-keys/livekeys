@@ -52,6 +52,7 @@ Rectangle{
             document = s.document
         }
     }
+    property Item paneFocusItem : editorArea
 
     property int fragmentStart: 0
     property int fragmentEnd: -1

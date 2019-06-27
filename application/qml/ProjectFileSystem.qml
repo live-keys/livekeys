@@ -33,6 +33,7 @@ Rectangle{
     property QtObject paneWindow : null
     property string paneType: 'projectFileSystem'
     property var paneState : { return {} }
+    property var paneFocusItem : root
 
     function addEntry(parentEntry, isFile){
         root.addEntryOverlay.entry = parentEntry
