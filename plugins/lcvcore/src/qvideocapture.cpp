@@ -23,18 +23,6 @@
 
 #include <QTimer>
 
-/*!
-   \class QVideoCapture
-   \internal
-   \brief Captures frames from a video file.
- */
-
-/*!
-  \brief QVideoCapture constructor
-
-  Parameters:
-  \a parent
- */
 QVideoCapture::QVideoCapture(QQuickItem *parent)
     : QQuickItem(parent)
     , m_file("")
@@ -46,21 +34,6 @@ QVideoCapture::QVideoCapture(QQuickItem *parent)
 {
     setFlag(ItemHasContents, true);
 }
-
-/*!
-  \property QVideoCapture::output
-  \sa VideoCapture::output
- */
-
-/*!
-  \property QVideoCapture::linearFilter
-  \sa VideoCapture::linearFilter
- */
-
-/*!
-  \property QVideoCapture::fps
-  \sa VideoCapture::fps
- */
 
 void QVideoCapture::setFps(qreal fps){
     if ( fps != m_fps ){
@@ -76,12 +49,6 @@ void QVideoCapture::setFps(qreal fps){
     }
 }
 
-
-/*!
-  \property QVideoCapture::loop
-  \sa VideoCapture::loop
- */
-
 void QVideoCapture::setLoop(bool loop){
     if ( m_loop != loop ){
         m_loop = loop;
@@ -92,21 +59,11 @@ void QVideoCapture::setLoop(bool loop){
     }
 }
 
-/*!
-  \property QVideoCapture::totalFrames
-  \sa VideoCapture::totalFrames
- */
-
 int QVideoCapture::totalFrames() const{
     if ( m_thread )
         return m_thread->totalFrames();
     return 0;
 }
-
-/*!
-  \property QVideoCapture::currentFrame
-  \sa VideoCapture::currentFrame
- */
 
 int QVideoCapture::currentFrame() const{
     if ( m_thread )
@@ -172,9 +129,6 @@ void QVideoCapture::staticOpen(const QString &file){
     staticLoad(file);
 }
 
-/*!
-  \brief Internal function used to perform a video swap with the video capture thread.
- */
 void QVideoCapture::switchMat(){
     if ( m_thread ){
         m_output = m_thread->output();
@@ -183,11 +137,6 @@ void QVideoCapture::switchMat(){
         update();
     }
 }
-
-/*!
-  \property QVideoCapture::paused
-  \sa VideoCapture::paused
- */
 
 void QVideoCapture::setPaused(bool paused){
     if ( m_thread ){
@@ -208,15 +157,6 @@ bool QVideoCapture::paused() const{
     return false;
 }
 
-/*!
-  \fn virtual QSGNode* QVideoCapture::updatePaintNode(QSGNode*, UpdatePaintNodeData*)
-
-  \brief Updates the scene graph node with the frames matrix.
-
-  Parameters :
-  \a node
-  \a nodeData
- */
 QSGNode *QVideoCapture::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *){
     QMatNode *n = static_cast<QMatNode*>(node);
     if (!node)
@@ -237,9 +177,6 @@ void QVideoCapture::componentComplete(){
     emit init();
 }
 
-/*!
-  \brief QVideoCapture destructor
- */
 QVideoCapture::~QVideoCapture(){
     if (m_thread != 0)
         disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));

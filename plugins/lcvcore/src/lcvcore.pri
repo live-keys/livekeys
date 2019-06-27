@@ -30,7 +30,9 @@ HEADERS += \
     $$PWD/qitemcapture.h \
     $$PWD/qmatop.h \
     $$PWD/qwritablemat.h \
-    $$PWD/qmatio.h
+    $$PWD/qmatio.h \
+    $$PWD/qvideodecoder.h \
+    $$PWD/qvideodecodethread.h
 
 SOURCES += \
     $$PWD/lcvcore_plugin.cpp \
@@ -62,5 +64,7 @@ SOURCES += \
     $$PWD/qitemcapture.cpp \
     $$PWD/qmatop.cpp \
     $$PWD/qwritablemat.cpp \
-    $$PWD/qmatio.cpp
+    $$PWD/qmatio.cpp \
+    $$PWD/qvideodecoder.cpp \
+    $$PWD/qvideodecodethread.cpp
 

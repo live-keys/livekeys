@@ -25,6 +25,7 @@
 #include "groupcollector.h"
 #include "layer.h"
 #include "windowlayer.h"
+#include "qmlstream.h"
 
 #include <QQmlComponent>
 #include <QQmlIncubator>
@@ -331,6 +332,7 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterUncreatableType<lv::Shared>(     uri, 1, 0, "Shared", "Shared is of abstract type.");
     qmlRegisterUncreatableType<lv::Layer>(      uri, 1, 0, "Layer", "Layer is of abstract type.");
     qmlRegisterType<lv::WindowLayer>(           uri, 1, 0, "WindowLayer");
+    qmlRegisterType<lv::QmlStream>(             uri, 1, 0, "Stream");
 }
 
 void ViewEngine::initializeBaseTypes(ViewEngine *engine){
