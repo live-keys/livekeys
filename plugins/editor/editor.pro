@@ -58,4 +58,5 @@ DISTFILES += \
     qml/PaletteListView.qml \
     palettes/EditPalette.qml \
     qml/Pane.qml \
-    qml/PaneWindow.qml
+    qml/PaneWindow.qml \
+    qml/WorkspaceTheme.qml

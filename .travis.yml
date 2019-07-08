@@ -62,7 +62,7 @@ install:
       wget https://github.com/livecv/live-pm/archive/master.zip;
       unzip master.zip;
       mv live-pm-master/* .;
-      wget http://download.qt.io/official_releases/qt/5.11/5.11.1/qt-opensource-mac-x64-5.11.1.dmg;
+      wget http://download.qt.io/archive/qt/5.11/5.11.1/qt-opensource-mac-x64-5.11.1.dmg;
       ls;
       hdiutil attach -mountpoint installqt qt-opensource-mac-x64-5.11.1.dmg;
       ./installqt/qt-opensource-mac-x64-5.11.1.app/Contents/MacOS/qt-opensource-mac-x64-5.11.1 --script resources/install-qt-macos.qs --verbose --silent -platform minimal;
@@ -83,7 +83,7 @@ install:
       wget https://github.com/livecv/live-pm/archive/master.zip;
       unzip master.zip;
       mv live-pm-master/* .;
-      wget http://download.qt.io/official_releases/qt/5.11/5.11.1/qt-opensource-linux-x64-5.11.1.run;
+      wget http://download.qt.io/archive/qt/5.11/5.11.1/qt-opensource-linux-x64-5.11.1.run;
       sudo chmod 777 qt-opensource-linux-x64-5.11.1.run;
       ./qt-opensource-linux-x64-5.11.1.run --script resources/install-qt.qs --verbose --silent -platform minimal;
       export QTDIR=/opt/qt/5.11.1/gcc_64;

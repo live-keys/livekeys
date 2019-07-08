@@ -5,7 +5,7 @@
 #include <QQmlPropertyMap>
 
 #include "live/lvviewglobal.h"
-#include "live/liveextension.h"
+#include "live/workspaceextension.h"
 #include "live/package.h"
 
 namespace lv{
@@ -23,14 +23,14 @@ public:
 
     void loadExtensions();
 
-    QMap<std::string, LiveExtension*>::iterator begin();
-    QMap<std::string, LiveExtension*>::iterator end();
+    QMap<std::string, WorkspaceExtension*>::iterator begin();
+    QMap<std::string, WorkspaceExtension*>::iterator end();
 
 private:
-    LiveExtension* loadPackageExtension(const std::string& path);
-    LiveExtension* loadPackageExtension(const Package::Ptr& package);
+    WorkspaceExtension* loadPackageExtension(const std::string& path);
+    WorkspaceExtension* loadPackageExtension(const Package::Ptr& package);
 
-    QMap<std::string, LiveExtension*> m_extensions;
+    QMap<std::string, WorkspaceExtension*> m_extensions;
 
     QQmlPropertyMap*     m_globals;
     QString              m_path;
@@ -43,12 +43,12 @@ inline QQmlPropertyMap* Extensions::globals(){
 }
 
 /** Begin iterator of extensions */
-inline QMap<std::string, LiveExtension*>::iterator Extensions::begin(){
+inline QMap<std::string, WorkspaceExtension*>::iterator Extensions::begin(){
     return m_extensions.begin();
 }
 
 /** End iterator of extensions */
-inline QMap<std::string, LiveExtension*>::iterator Extensions::end(){
+inline QMap<std::string, WorkspaceExtension*>::iterator Extensions::end(){
     return m_extensions.end();
 }
 

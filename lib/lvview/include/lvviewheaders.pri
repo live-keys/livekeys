@@ -25,4 +25,5 @@ HEADERS += \
     $$PWD/live/linecapture.h \
     $$PWD/live/layer.h \
     $$PWD/live/windowlayer.h \
-    $$PWD/live/qmlpropertywatcher.h
+    $$PWD/live/qmlpropertywatcher.h \
+    $$PWD/live/qmlstream.h

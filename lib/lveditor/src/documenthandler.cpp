@@ -193,7 +193,7 @@ void DocumentHandler::findCodeHandler(){
         QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 
         for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
-            LiveExtension* le = it.value();
+            WorkspaceExtension* le = it.value();
             if ( le->hasLanguageInterceptor() ){
                 QObject* o = le->callLanguageInterceptor(interceptorArgs);
 

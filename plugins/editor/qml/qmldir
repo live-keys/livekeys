@@ -12,3 +12,4 @@ PaneSplitView    1.0 PaneSplitView.qml
 PaneDragItem     1.0 PaneDragItem.qml
 PaneDropArea     1.0 PaneDropArea.qml
 PaneWindow       1.0 PaneWindow.qml
+WorkspaceTheme   1.0 WorkspaceTheme.qml

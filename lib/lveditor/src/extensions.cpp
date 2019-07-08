@@ -71,7 +71,7 @@ void Extensions::loadExtensions(){
                 continue;
 
             if ( Package::existsIn(path.toStdString()) ){
-                LiveExtension* le = loadPackageExtension(path.toStdString());
+                WorkspaceExtension* le = loadPackageExtension(path.toStdString());
                 if ( le ){ // if package has extension
                     vlog("extensions").v() << "Loaded extension from package: " << path;
                 }
@@ -80,7 +80,7 @@ void Extensions::loadExtensions(){
 
         MLNode n(MLNode::Object);
         for ( auto it = begin(); it != end(); ++it ){
-            LiveExtension* le = it.value();
+            WorkspaceExtension* le = it.value();
             n[le->name()] = true;
         }
         std::string data;
@@ -96,7 +96,7 @@ void Extensions::loadExtensions(){
     }
 }
 /** Loads package extension from a given path */
-LiveExtension* Extensions::loadPackageExtension(const std::string &path){
+WorkspaceExtension* Extensions::loadPackageExtension(const std::string &path){
     Package::Ptr p = Package::createFromPath(path);
     if ( p->hasExtension() ){
         return loadPackageExtension(p);
@@ -105,7 +105,7 @@ LiveExtension* Extensions::loadPackageExtension(const std::string &path){
 }
 
 /** Loads package extension from a given package */
-LiveExtension *Extensions::loadPackageExtension(const Package::Ptr &package){
+WorkspaceExtension *Extensions::loadPackageExtension(const Package::Ptr &package){
     std::string path = package->extensionAbsolutePath();
     vlog("extensions").v() << "Loading extension: " << path;
 
@@ -114,7 +114,7 @@ LiveExtension *Extensions::loadPackageExtension(const Package::Ptr &package){
         THROW_EXCEPTION(lv::Exception, "Failed to load component: " + component.errorString().toStdString(), 4);
     }
 
-    LiveExtension* le = qobject_cast<LiveExtension*>(component.create());
+    WorkspaceExtension* le = qobject_cast<WorkspaceExtension*>(component.create());
     if ( !le ){
         THROW_EXCEPTION(lv::Exception, "Extension failed to create or cast to LiveExtension type in: " + path, 3);
     }

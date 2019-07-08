@@ -32,7 +32,8 @@ HEADERS += \
     $$PWD/linecapture.h \
     $$PWD/layer.h \
     $$PWD/windowlayer.h \
-    $$PWD/qmlpropertywatcher.h
+    $$PWD/qmlpropertywatcher.h \
+    $$PWD/qmlstream.h
 
 
 SOURCES += \
@@ -63,5 +64,6 @@ SOURCES += \
     $$PWD/linecapture.cpp \
     $$PWD/layer.cpp \
     $$PWD/windowlayer.cpp \
-    $$PWD/qmlpropertywatcher.cpp
+    $$PWD/qmlpropertywatcher.cpp \
+    $$PWD/qmlstream.cpp
 

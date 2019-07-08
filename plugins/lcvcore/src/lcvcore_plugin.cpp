@@ -38,6 +38,8 @@
 #include "qoverlapmat.h"
 #include "qitemcapture.h"
 
+#include "qvideodecoder.h"
+
 #include "live/viewengine.h"
 #include "live/viewcontext.h"
 
@@ -75,6 +77,8 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QImageFile>(             uri, 1, 0, "ImageFile");
     qmlRegisterType<QOverlapMat>(            uri, 1, 0, "OverlapMat");
     qmlRegisterType<QItemCapture>(           uri, 1, 0, "ItemCapture");
+
+    qmlRegisterType<QVideoDecoder>(          uri, 1, 0, "VideoDecoder");
 
     qmlRegisterSingletonType<QMatOp>(        uri, 1, 0, "MatOp", &matOpProvider);
     qmlRegisterSingletonType<QMatIO>(        uri, 1, 0, "MatIO", &matIOProvider);

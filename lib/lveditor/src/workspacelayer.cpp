@@ -5,9 +5,11 @@
 #include "live/viewcontext.h"
 #include "live/settings.h"
 #include "live/projectfile.h"
-#include "live/liveextension.h"
+#include "live/workspaceextension.h"
 #include "live/project.h"
+#include "live/theme.h"
 #include "live/windowlayer.h"
+#include "live/applicationcontext.h"
 
 #include "live/mlnode.h"
 #include "live/mlnodetoqml.h"
@@ -35,6 +37,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_keymap(nullptr)
     , m_project(nullptr)
     , m_extensions(nullptr)
+    , m_themes(new ThemeContainer("workspace", this))
 {
     Settings* settings = lv::ViewContext::instance().settings();
 
@@ -67,15 +70,48 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
 }
 
 WorkspaceLayer::~WorkspaceLayer(){
+    delete m_themes;
 }
 
 void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
+
+    // load default theme
+
+    m_themes->addTheme("LiveKeys", ":/LiveKeysTheme.qml");
+
     m_extensions->loadExtensions();
 
     for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
-        LiveExtension* le = it.value();
+        WorkspaceExtension* le = it.value();
         m_commands->add(le, le->commands());
         m_keymap->store(le->keyBindings());
+
+        QJSValue themesArray = le->themes();
+
+        if ( !themesArray.isUndefined() ){
+            if ( !themesArray.isArray() ){
+                THROW_EXCEPTION(lv::Exception, "Themes not of array type in extension: " + le->name(), Exception::toCode("~Themes"));
+            }
+            QJSValueIterator themeIt(themesArray);
+            while ( themeIt.hasNext() ){
+                themeIt.next();
+
+                QJSValue themeObject = themeIt.value();
+                if ( themeObject.isObject() )
+                    THROW_EXCEPTION(lv::Exception, "Theme is not of object type in extension: " + le->name(), Exception::toCode("~Themes"));
+                if ( !themeObject.hasOwnProperty("name") )
+                    THROW_EXCEPTION(lv::Exception, "Theme does not have \'name\' property in exctension: " + le->name(), Exception::toCode("~Property"));
+                if ( !themeObject.hasOwnProperty("path") )
+                    THROW_EXCEPTION(lv::Exception, "Theme does not have \'path\' property in exctension: " + le->name(), Exception::toCode("~Property"));
+
+                QString name = themeObject.property("name").toString();
+                QString path = QString::fromStdString(it.key()) + "/'" + themeObject.property("path").toString();
+
+                m_themes->addTheme(name, path);
+            }
+        }
+
+
     }
 
     QString path = ":/workspace.qml";
@@ -103,12 +139,12 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
     m_keymap->store(0, Qt::Key_K,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleNavigation");
     m_keymap->store(0, Qt::Key_L,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleLog");
 
-
     for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
-        LiveExtension* le = it.value();
+        WorkspaceExtension* le = it.value();
 
         QJSValue panes = le->panes();
         if ( panes.isObject() ){
+
             QJSValueIterator panesIt(panes);
             while ( panesIt.hasNext() ){
                 panesIt.next();
@@ -131,7 +167,7 @@ QJSValue WorkspaceLayer::interceptMenu(QJSValue context){
     QJSValueList result;
 
     for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
-        LiveExtension* le = it.value();
+        WorkspaceExtension* le = it.value();
         if ( le->hasMenuInterceptor() ){
             QJSValue v = le->callMenuInterceptor(interceptorArgs);
             if ( v.isArray() ){
@@ -161,7 +197,7 @@ QJSValue WorkspaceLayer::interceptFile(const QString &path, int mode){
     interceptorArgs << path << mode;
 
     for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
-        LiveExtension* le = it.value();
+        WorkspaceExtension* le = it.value();
         if ( le->hasFileInterceptor() ){
             QJSValue v = le->callFileInterceptor(interceptorArgs);
             if ( v.isQObject() ){

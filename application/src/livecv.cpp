@@ -31,7 +31,7 @@
 #include "live/settings.h"
 #include "live/applicationcontext.h"
 #include "live/viewcontext.h"
-#include "live/liveextension.h"
+#include "live/workspaceextension.h"
 #include "live/packagegraph.h"
 
 #include "live/project.h"

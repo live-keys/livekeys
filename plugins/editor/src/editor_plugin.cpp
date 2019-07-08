@@ -20,8 +20,9 @@
 #include "live/applicationcontext.h"
 #include "live/visuallog.h"
 #include "live/settings.h"
-#include "live/liveextension.h"
+#include "live/workspaceextension.h"
 #include "live/documenthandler.h"
+#include "live/theme.h"
 
 #include "textsearch.h"
 
@@ -41,7 +42,8 @@ void EditorPlugin::registerTypes(const char *uri){
     );
     qmlRegisterType<lv::DocumentHandler>(uri, 1, 0, "DocumentHandler");
     qmlRegisterType<lv::CodePalette>(    uri, 1, 0, "CodePalette");
-    qmlRegisterType<lv::LiveExtension>(  uri, 1, 0, "LiveExtension");
+    qmlRegisterType<lv::WorkspaceExtension>(  uri, 1, 0, "LiveExtension");
+    qmlRegisterType<lv::Theme>(  uri, 1, 0, "Theme");
 
     qmlRegisterType<lv::TextSearch>(     uri, 1, 0, "TextSearch");
 }

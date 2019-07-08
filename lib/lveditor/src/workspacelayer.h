@@ -9,6 +9,7 @@
 #include "live/layer.h"
 #include "live/keymap.h"
 
+#include "themecontainer.h"
 #include "commands.h"
 #include "extensions.h"
 
@@ -19,6 +20,8 @@ namespace lv{
 class Project;
 class Workspace;
 class ProjectWorkspace;
+
+/// \private
 class WorkspaceLayer : public Layer{
 
     Q_OBJECT
@@ -26,6 +29,7 @@ class WorkspaceLayer : public Layer{
     Q_PROPERTY(QObject* panes              READ panes      NOTIFY panesChanged)
     Q_PROPERTY(lv::Commands* commands      READ commands   CONSTANT)
     Q_PROPERTY(lv::KeyMap* keymap          READ keymap     CONSTANT)
+    Q_PROPERTY(lv::ThemeContainer* themes  READ themes     CONSTANT)
     Q_PROPERTY(QQmlPropertyMap* extensions READ extensions CONSTANT)
 
 public:
@@ -41,6 +45,7 @@ public:
     lv::Commands* commands() const;
     lv::KeyMap* keymap() const;
     QQmlPropertyMap* extensions() const;
+    lv::ThemeContainer* themes() const;
 
 public slots:
     QJSValue interceptMenu(QJSValue context);
@@ -69,6 +74,7 @@ private:
 
     Commands* m_commands;
     KeyMap*   m_keymap;
+    ThemeContainer* m_themes;
 
     Project*  m_project;
 
@@ -96,6 +102,10 @@ inline QQmlPropertyMap *WorkspaceLayer::extensions() const{
     if ( m_extensions )
         return m_extensions->globals();
     return nullptr;
+}
+
+inline ThemeContainer *WorkspaceLayer::themes() const{
+    return m_themes;
 }
 
 }// namespace

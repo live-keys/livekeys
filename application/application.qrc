@@ -20,6 +20,7 @@
         <file alias="workspacelayer.qml">qml/workspacelayer.qml</file>
         <file alias="ModeContainer.qml">qml/ModeContainer.qml</file>
         <file alias="editorlayer.qml">qml/editorlayer.qml</file>
+        <file alias="LiveKeysTheme.qml">qml/LiveKeysTheme.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>
