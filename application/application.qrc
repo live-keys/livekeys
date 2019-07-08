@@ -44,7 +44,6 @@
         <file alias="project-file-monitor.png">images/project-file-monitor.png</file>
         <file alias="license-check.png">images/license-check.png</file>
         <file alias="log-search-tag.png">images/log-search-tag.png</file>
-        <file alias="log-toggle-window.png">images/log-toggle-window.png</file>
         <file alias="log-view-prefix.png">images/log-view-prefix.png</file>
         <file alias="palette-add.png">images/palette-add.png</file>
         <file alias="palette-add-property.png">images/palette-add-property.png</file>
@@ -64,5 +63,6 @@
         <file alias="top-icon-mode-live.png">images/top-icon-mode-live.png</file>
         <file alias="top-icon-mode-onsave.png">images/top-icon-mode-onsave.png</file>
         <file alias="pane-menu.png">images/pane-menu.png</file>
+        <file alias="pane-move-icon.png">images/pane-move-icon.png</file>
     </qresource>
 </RCC>

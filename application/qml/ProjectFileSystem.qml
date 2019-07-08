@@ -22,19 +22,17 @@ import base 1.0
 import editor 1.0
 import editor.private 1.0
 
-Rectangle{
+Pane{
     id: root
     color : currentTheme ? currentTheme.paneBackground : 'black'
     objectName: "projectFileSystem"
 
     property QtObject panes: null
+    paneFocusItem : root
+    paneType: 'projectFileSystem'
+    paneState : { return {} }
 
-    property var paneLocation : []
-    property QtObject paneWindow : null
-    property string paneType: 'projectFileSystem'
-    property var paneState : { return {} }
-    property var paneFocusItem : root
-
+    property Theme currentTheme : livecv.layers.workspace.themes.current
 
     property Item addEntryOverlay : ProjectAddEntry{
         onAccepted: {
@@ -46,8 +44,6 @@ Rectangle{
             }
         }
     }
-
-    property Theme currentTheme : livecv.layers.workspace.themes.current
 
     function addEntry(parentEntry, isFile){
         root.addEntryOverlay.entry = parentEntry
@@ -165,10 +161,19 @@ Rectangle{
         height: 30
         color: currentTheme ? currentTheme.paneTopBackground : 'black'
 
+        PaneDragItem{
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            onDragStarted: root.panes.__dragStarted(root)
+            onDragFinished: root.panes.__dragFinished(root)
+            display: "Project"
+        }
+
         Text{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 15
+            anchors.leftMargin: 30
             color: "#808691"
             text: "Project"
             font.family: "Open Sans, sans-serif"
@@ -206,12 +211,41 @@ Rectangle{
         property int buttonWidth: 180
         opacity: visible ? 1.0 : 0
         z: 1000
+        color : "#03070b"
 
         Behavior on opacity{ NumberAnimation{ duration: 200 } }
 
         Rectangle{
-            id: removeProjectViewButton
+            id: newWindowEditorButton
             anchors.top: parent.top
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
+                id: newWindowEditorText
+                text: qsTr("Move to new window")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: newWindowEditorArea.containsMouse ? "#969aa1" : "#808691"
+            }
+            MouseArea{
+                id : newWindowEditorArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    projectMenu.visible = false
+                    root.panes.movePaneToNewWindow(root)
+                }
+            }
+        }
+
+        Rectangle{
+            id: removeProjectViewButton
+            anchors.top: newWindowEditorButton.bottom
             anchors.right: parent.right
             width: parent.buttonWidth
             height: parent.buttonHeight
@@ -231,7 +265,7 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     projectMenu.visible = false
-                    livecv.layers.workspace.commands.execute('window.workspace.project.toggleVisibility')
+                    root.panes.removePane(root)
                 }
             }
         }

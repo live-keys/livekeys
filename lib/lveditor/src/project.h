@@ -150,6 +150,9 @@ signals:
     /** run trigger changed */
     void runTriggerChanged();
 
+    /** project is about to close */
+    void aboutToClose();
+
 private:
     ViewEngine* engine();
     ProjectFile* relocateDocument(const QString& rootPath, const QString &newPath, ProjectDocument *document);

@@ -169,9 +169,11 @@ ProjectFile *Project::relocateDocument(const QString &path, const QString& newPa
  * It doesn't destroy the singleton capital-P Project, simply leaves it in a blank state
  */
 void Project::closeProject(){
+    emit aboutToClose();
     setActive((ProjectDocument*)nullptr);
     m_documentModel->closeDocuments();
     m_fileModel->closeProject();
+    emptyRunSpace();
     m_path = "";
     emit pathChanged("");
 }
@@ -376,8 +378,13 @@ void Project::setActive(ProjectDocument *document){
 
 void Project::emptyRunSpace(){
     if ( m_appRoot ){
+        QQuickItem* appRootItem = qobject_cast<QQuickItem*>(m_appRoot);
+        if ( appRootItem ){
+            appRootItem->setParentItem(nullptr);
+        }
         m_appRoot->setParent(nullptr);
         m_appRoot->deleteLater();
+        m_appRoot = nullptr;
     }
 }
 

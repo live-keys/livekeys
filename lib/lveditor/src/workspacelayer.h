@@ -50,19 +50,23 @@ public:
 public slots:
     QJSValue interceptMenu(QJSValue context);
     QJSValue interceptFile(const QString& path, int mode);
-    void addPane(QQuickItem* pane, QWindow* window, const QVariantList& position);
-    void movePane(QQuickItem* pane, QWindow* window, const QVariantList& position);
+    void addPane(QQuickItem* pane, QQuickWindow* window, const QVariantList& position);
     void removePane(QQuickItem* pane);
 
-    void whenWindowClose();
+    void addWindow(QQuickWindow* window);
+    void whenMainWindowClose();
+
     void whenProjectOpen(const QString& path, ProjectWorkspace* workspace);
-    void whenProjectClose(ProjectWorkspace* workspace);
+    void whenProjectClose();
 
 signals:
     void projectChanged();
     void panesChanged();
 
 private:
+    void initializePanes(ProjectWorkspace* workspace, QJSValue panes);
+    void initializePanesAndWindows(ProjectWorkspace* workspace, QJSValue panesAndWindows);
+
     QObject* m_nextViewParent;
 
     QObject* m_projectEnvironment;

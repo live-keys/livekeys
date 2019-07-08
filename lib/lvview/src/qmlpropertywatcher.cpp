@@ -11,7 +11,6 @@ QmlPropertyWatcher::QmlPropertyWatcher(QObject *object, const QString &propertyN
 }
 
 QmlPropertyWatcher::~QmlPropertyWatcher(){
-
 }
 
 void QmlPropertyWatcher::propertyChanged() const{
