@@ -66,6 +66,8 @@ public slots:
     lv::ProjectDocument* isOpened(const QString& path);
     lv::ProjectDocument* lastOpened();
 
+    lv::ProjectDocument* documentByPathHash(const QString& pathHash);
+
     QStringList listUnsavedDocuments();
     QStringList listUnsavedDocumentsInPath(const QString& path);
 

@@ -82,7 +82,7 @@ Item{
         }
         onCancel: {
             if ( livecv.layers.workspace.panes.activeItem )
-                livecv.layers.workspace.panes.activeItem.forceFocus()
+                livecv.layers.workspace.panes.activeItem.forceActiveFocus()
         }
     }
 
@@ -92,10 +92,32 @@ Item{
             if (project.active){
                 if ( pathChange ){
                     var fe = root.panes.focusPane('editor')
-                    if ( !fe )
-                        fe = root.panes.createPane('editor', {}, [1], [400, 0])
-                    if ( !fe.document )
+                    if ( !fe ){
+                        fe = root.panes.createPane('editor', {}, [400, 0])
+
+                        var containerUsed = root.panes.container
+                        if ( containerUsed.orientation === Qt.Vertical ){
+                            for ( var i = 0; i < containerUsed.panes.length; ++i ){
+                                if ( containerUsed.panes[i].paneType === 'splitview' &&
+                                     containerUsed.panes[i].orientation === Qt.Horizontal )
+                                {
+                                    containerUsed = containerUsed.panes[i]
+                                    break
+                                }
+                            }
+                        }
+
+                        root.panes.splitPaneHorizontallyWith(containerUsed, 0, fe)
+
+                        var containerPanes = containerUsed.panes
+                        if ( containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width){
+                            containerPanes[0].width = containerPanes[0].width * 2
+                            fe.width = 400
+                        }
+                    }
+                    if ( !fe.document ){
                         fe.document = project.active
+                    }
                 }
             }
             pathChange = false
@@ -341,7 +363,14 @@ Item{
             return;
         var fe = root.panes.focusPane('editor')
         if ( !fe ){
-            fe = root.panes.createPane('editor', {}, [1], [400, 400])
+            fe = root.panes.createPane('editor', {}, [400, 0])
+            root.panes.container.splitPane(0, fe)
+
+            var containerPanes = root.panes.container.panes
+            if ( containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width){
+                containerPanes[0].width = containerPanes[0].width * 2
+                fe.width = 400
+            }
         }
         fe.document = doc
         return fe

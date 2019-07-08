@@ -74,13 +74,13 @@ void Workspace::whenProjectPathChange(const QString &path){
         emit projectClose(m_currentProjectWorkspace);
         ProjectWorkspace* pw = m_currentProjectWorkspace;
         m_currentProjectWorkspace = nullptr;
-        wl->whenProjectClose(pw);
+        wl->whenProjectClose();
         delete pw;
     } else {
         emit projectClose(m_currentProjectWorkspace);
         ProjectWorkspace* pwold = m_currentProjectWorkspace;
         m_currentProjectWorkspace = nullptr;
-        wl->whenProjectClose(pwold);
+        wl->whenProjectClose();
         delete pwold;
 
         if ( m_recents.isEmpty() || m_recents.front() != path ){
@@ -96,9 +96,9 @@ void Workspace::whenProjectPathChange(const QString &path){
 
         ProjectWorkspace* pw = ProjectWorkspace::create(m_project);
 
+        m_currentProjectWorkspace = pw;
         wl->whenProjectOpen(path, pw);
 
-        m_currentProjectWorkspace = pw;
         emit projectOpen(path, m_currentProjectWorkspace);
     }
 }

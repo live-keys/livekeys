@@ -37,11 +37,11 @@ EditorLayer{
         property Item content : null
 
         function createEmptyEditorBox(parent){
-            return editorBoxFactory.createObject(parent ? parent : livecv.layers.workspace.panes.contentWrap)
+            return editorBoxFactory.createObject(parent ? parent : livecv.layers.workspace.panes.container)
         }
 
         function createEditorBox(child, aroundRect, editorPosition, relativePlacement){
-            var eb = editorBoxFactory.createObject(livecv.layers.workspace.panes.contentWrap)
+            var eb = editorBoxFactory.createObject(livecv.layers.workspace.panes.container)
             eb.setChild(child, aroundRect, editorPosition, relativePlacement)
             return eb;
         }
@@ -101,7 +101,7 @@ EditorLayer{
                         visible = true
 
                         var newX = editorBoxComponent.x - editorBoxComponent.width / 2
-                        var maxX = livecv.layers.workspace.panes.contentWrap.width - editorBoxComponent.width
+                        var maxX = livecv.layers.workspace.panes.container.width - editorBoxComponent.width
                         editorBoxComponent.x = newX < 0 ? 0 : (newX > maxX ? maxX : newX)
 
                         var upY = startY - editorBoxComponent.height
@@ -110,7 +110,7 @@ EditorLayer{
                         if ( relativePlacement === 0 ){ // top placement
                             editorBoxComponent.y = upY > 0 ? upY : downY
                         } else { // bottom placement
-                            editorBoxComponent.y = downY + editorBoxComponent.height < livecv.layers.workspace.panes.contentWrap.height ? downY : upY
+                            editorBoxComponent.y = downY + editorBoxComponent.height < livecv.layers.workspace.panes.container.height ? downY : upY
                         }
                         moveYBehavior.enabled = true
 
@@ -127,7 +127,7 @@ EditorLayer{
                         visible = true
 
                         var newY = editorBoxComponent.y - editorBoxComponent.height / 2
-                        var maxY = livecv.layers.workspace.panes.contentWrap.height - editorBoxComponent.height
+                        var maxY = livecv.layers.workspace.panes.container.height - editorBoxComponent.height
                         editorBoxComponent.y = newY < 0 ? 0 : (newY > maxY ? maxY : newY)
 
                         var upX = startX - editorBoxComponent.width
@@ -136,7 +136,7 @@ EditorLayer{
                         if ( relativePlacement === 1 ){ // right placement
                             editorBoxComponent.x = upX > 0 ? upX : downX
                         } else { // left placement
-                            editorBoxComponent.x = downX + editorBoxComponent.width < livecv.layers.workspace.panes.contentWrap.width ? downX : upX
+                            editorBoxComponent.x = downX + editorBoxComponent.width < livecv.layers.workspace.panes.container.width ? downX : upX
                         }
                         moveXBehavior.enabled = true
                     }
@@ -158,7 +158,7 @@ EditorLayer{
                         visible = true
 
                         var newX = editorBoxComponent.x - editorBoxComponent.width / 2
-                        var maxX = livecv.layers.workspace.panes.contentWrap.width - editorBoxComponent.width
+                        var maxX = livecv.layers.workspace.panes.container.width - editorBoxComponent.width
                         editorBoxComponent.x = newX < 0 ? 0 : (newX > maxX ? maxX : newX)
 
                         var upY = startY - editorBoxComponent.height
@@ -167,7 +167,7 @@ EditorLayer{
                         if ( relativePlacement === 0 ){ // top placement
                             editorBoxComponent.y = upY > 0 ? upY : downY
                         } else { // bottom placement
-                            editorBoxComponent.y = downY + editorBoxComponent.height < livecv.layers.workspace.panes.contentWrap.height ? downY : upY
+                            editorBoxComponent.y = downY + editorBoxComponent.height < livecv.layers.workspace.panes.container.height ? downY : upY
                         }
 
                     } else {
@@ -185,7 +185,7 @@ EditorLayer{
                         visible = true
 
                         var newY = editorBoxComponent.y - editorBoxComponent.height / 2
-                        var maxY = livecv.layers.workspace.panes.contentWrap.height - editorBoxComponent.height
+                        var maxY = livecv.layers.workspace.panes.container.height - editorBoxComponent.height
                         editorBoxComponent.y = newY < 0 ? 0 : (newY > maxY ? maxY : newY)
 
                         var upX = startX - editorBoxComponent.width
@@ -194,7 +194,7 @@ EditorLayer{
                         if ( relativePlacement === 1 ){ // right placement
                             editorBoxComponent.x = upX > 0 ? upX : downX
                         } else { // left placement
-                            editorBoxComponent.x = downX + editorBoxComponent.width < livecv.layers.workspace.panes.contentWrap.width ? downX : upX
+                            editorBoxComponent.x = downX + editorBoxComponent.width < livecv.layers.workspace.panes.container.width ? downX : upX
                         }
                     }
                 }

@@ -249,9 +249,18 @@ bool ProjectDocumentModel::saveDocuments(){
 ProjectDocument *ProjectDocumentModel::lastOpened(){
     if ( m_openedFiles.size() > 0 )
         return *m_openedFiles.begin();
-    return 0;
+    return nullptr;
 }
 
+/** Returns the document given it's path hash, using lv::ProjectEntry::hashPath() */
+ProjectDocument *ProjectDocumentModel::documentByPathHash(const QString &hash){
+    for( auto it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
+        ProjectDocument* d = *it;
+        if ( d->file()->hashPath() == hash )
+            return d;
+    }
+    return nullptr;
+}
 
 /**
  * \brief Shows a list of all unsaved docs

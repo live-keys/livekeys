@@ -21,7 +21,7 @@ import editor 1.0
 import editor.private 1.0
 import base 1.0
 
-Rectangle{
+Pane{
     id : editor
 
     property bool isDirtyMask: true
@@ -43,14 +43,21 @@ Rectangle{
     property var panes: null
     property var document: null
 
-    property var paneLocation : []
-    property QtObject paneWindow : null
-    property string paneType: 'editor'
-    property var paneState : { return {} }
-    property var paneInitialize : function(s){
+    paneType: 'editor'
+    paneState : { return {} }
+    paneInitialize : function(s){
         if ( s.document ){
-            document = s.document
+            if (typeof s.document === 'string' || s.document instanceof String){
+                var d = project.documentModel.documentByPathHash(s.document)
+                document = d
+            } else {
+                document = s.document
+            }
+
         }
+    }
+    paneClone: function(){
+        return editor.panes.createPane('editor', paneState, [editor.width, editor.height])
     }
 
     property int fragmentStart: 0
@@ -264,10 +271,19 @@ Rectangle{
             GradientStop { position: 0.10; color: editor.topColor }
         }
 
-        Text{
+        PaneDragItem{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 15
+            onDragStarted: root.panes.__dragStarted(editor)
+            onDragFinished: root.panes.__dragFinished(editor)
+            display: "current pane"
+        }
+
+        Text{
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 35
             color: "#808691"
             text: {
                 if ( editor.document ){
@@ -403,7 +419,7 @@ Rectangle{
             color : "#03070b"
             Text {
                 id: addEditorText
-                text: qsTr("Add Horizontal Editor")
+                text: qsTr("Split horizontally")
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 12
                 anchors.left: parent.left
@@ -417,21 +433,81 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     editorAddRemoveMenu.visible = false
-                    livecv.layers.workspace.commands.execute('window.workspace.addHorizontalEditorView')
+                    var clone = editor.paneClone()
+                    var index = editor.parentSplitterIndex()
+                    editor.panes.splitPaneHorizontallyWith(editor.parentSplitter, index, clone)
                 }
             }
         }
 
         Rectangle{
-            id: removeEditorButton
+            id: addVerticalEditorButton
             anchors.top: addEditorButton.bottom
             anchors.right: parent.right
             width: parent.buttonWidth
             height: parent.buttonHeight
             color : "#03070b"
             Text {
+                id: addVerticalEditorText
+                text: qsTr("Split vertically")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: addVerticalEditorArea.containsMouse ? "#969aa1" : "#808691"
+            }
+            MouseArea{
+                id : addVerticalEditorArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    editorAddRemoveMenu.visible = false
+                    var clone = editor.paneClone()
+                    var index = editor.parentSplitterIndex()
+                    editor.panes.splitPaneVerticallyWith(editor.parentSplitter, index, clone)
+                }
+            }
+        }
+
+        Rectangle{
+            id: newWindowEditorButton
+            anchors.top: addVerticalEditorButton.bottom
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
+                id: newWindowEditorText
+                text: qsTr("Move to new window")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: newWindowEditorArea.containsMouse ? "#969aa1" : "#808691"
+            }
+            MouseArea{
+                id : newWindowEditorArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    editorAddRemoveMenu.visible = false
+                    editor.panes.movePaneToNewWindow(editor)
+                }
+            }
+        }
+
+        Rectangle{
+            id: removeEditorButton
+            anchors.top: newWindowEditorButton.bottom
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
                 id: removeEditorText
-                text: qsTr("Remove Horizontal Editor")
+                text: qsTr("Remove Split")
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 12
                 anchors.left: parent.left
@@ -445,7 +521,7 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     editorAddRemoveMenu.visible = false
-                    livecv.layers.workspace.commands.execute('window.workspace.removeHorizontalEditorView')
+                    editor.panes.removePane(editor)
                 }
             }
         }

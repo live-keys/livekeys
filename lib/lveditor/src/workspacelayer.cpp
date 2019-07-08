@@ -9,6 +9,9 @@
 #include "live/project.h"
 #include "live/windowlayer.h"
 
+#include "live/mlnode.h"
+#include "live/mlnodetoqml.h"
+
 #include "workspace.h"
 #include "projectworkspace.h"
 
@@ -58,7 +61,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
 
     m_workspace = new Workspace(m_project, this);
 
-    connect(window, SIGNAL(closing(QQuickCloseEvent*)), this, SLOT(whenWindowClose()));
+    connect(window, SIGNAL(closing(QQuickCloseEvent*)), this, SLOT(whenMainWindowClose()));
 
     setHasView(true);
 }
@@ -171,28 +174,40 @@ QJSValue WorkspaceLayer::interceptFile(const QString &path, int mode){
     return QJSValue();
 }
 
-void WorkspaceLayer::addPane(QQuickItem *pane, QWindow *window, const QVariantList &position){
-    if ( m_workspace->currentProjectWorkspace() )
-        m_workspace->currentProjectWorkspace()->whenPaneAdded(pane, window, position);
-}
-
-void WorkspaceLayer::movePane(QQuickItem *pane, QWindow *window, const QVariantList &position){
-    if ( m_workspace->currentProjectWorkspace() )
-        m_workspace->currentProjectWorkspace()->whenPaneMoved(pane, window, position);
+void WorkspaceLayer::addPane(QQuickItem *pane, QQuickWindow *window, const QVariantList &position){
+    try{
+        if ( m_workspace->currentProjectWorkspace() )
+            m_workspace->currentProjectWorkspace()->whenPaneAdded(pane, window, position);
+    } catch ( lv::Exception& e ){
+        lv::ViewContext::instance().engine()->throwError(&e, this);
+    }
 }
 
 void WorkspaceLayer::removePane(QQuickItem *pane){
-    if ( m_workspace->currentProjectWorkspace() )
-        m_workspace->currentProjectWorkspace()->whenPaneRemoved(pane);
+    try{
+        if ( m_workspace->currentProjectWorkspace() )
+            m_workspace->currentProjectWorkspace()->whenPaneRemoved(pane);
+    } catch ( lv::Exception& e ){
+        lv::ViewContext::instance().engine()->throwError(&e, this);
+    }
 }
 
-void WorkspaceLayer::whenWindowClose(){
+void WorkspaceLayer::addWindow(QQuickWindow *window){
+    try{
+        if ( m_workspace->currentProjectWorkspace() )
+            m_workspace->currentProjectWorkspace()->whenWindowOpen(window);
+    } catch ( lv::Exception& e ){
+        lv::ViewContext::instance().engine()->throwError(&e, this);
+    }
+}
+
+void WorkspaceLayer::whenMainWindowClose(){
     delete m_workspace;
     m_workspace = nullptr;
 }
 
 void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspace){
-    QJSValue v = m_panes->property("createPane").value<QJSValue>();
+    QJSValue v = m_panes->property("initializePanes").value<QJSValue>();
 
     const MLNode& layout = workspace->currentLayout();
 
@@ -206,63 +221,17 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
     }
 
     if ( layout.hasKey("panes") && layout["panes"].size() > 0 ){
-        const MLNode& panes = layout["panes"][0];
 
-        int orientation = panes[0].asString() == "h" ? 1 : -1;
+        QQmlEngine* engine = lv::ViewContext::instance().engine()->engine();
 
-        const MLNode::ArrayType& paneItems = panes.asArray();
+        QJSValue jsPanes;
+        ml::toQml(layout["panes"], jsPanes, engine);
 
-        for ( size_t i = 1; i < paneItems.size(); ++i ){
+        QJSValue jsWindows;
+        ml::toQml(layout["windows"], jsWindows, engine);
 
-            const MLNode& pane = paneItems[i];
-
-            QJSValue position = lv::ViewContext::instance().engine()->engine()->newArray(1);
-            position.setProperty(0, (int)(i - 1) * orientation);
-
-            QJSValue size = lv::ViewContext::instance().engine()->engine()->newArray(1);
-            size.setProperty(0, pane["size"][0].asInt());
-            size.setProperty(1, pane["size"][1].asInt());
-
-            QJSValueList vlist;
-            vlist.append(QString::fromStdString(pane["type"].asString()));
-            vlist.append(QJSValue());
-            vlist.append(position);
-            vlist.append(size);
-
-            QJSValue jsPane = v.call(vlist);
-            QObject* objPane = jsPane.toQObject();
-            QQuickItem* itemPane = qobject_cast<QQuickItem*>(objPane);
-
-            workspace->whenPaneInitialized(itemPane, nullptr);
-
-            QJSValue paneStateInitializer = itemPane->property("paneInitialize").value<QJSValue>();
-            if ( pane.hasKey("state") && paneStateInitializer.isCallable() ){
-                QJSValueList paneInitializerArgs;
-
-                QJSValue jsState = lv::ViewContext::instance().engine()->engine()->newObject();
-
-                MLNode mlState = pane["state"];
-                if ( mlState.hasKey("document") && mlState["document"].type() == MLNode::String ){
-
-                    QByteArray doc = QByteArray::fromStdString(mlState["document"].asString());
-                    auto it = openDocuments.find(doc);
-                    if ( it != openDocuments.end() ){
-                        ProjectDocument* doc = it.value();
-
-                        QJSValue documentState = lv::ViewContext::instance().engine()->engine()->newQObject(doc);
-                        jsState.setProperty("document", documentState);
-                    }
-
-                    mlState.remove("document");
-                }
-
-                paneInitializerArgs << jsState;
-
-                paneStateInitializer.call(paneInitializerArgs);
-            }
-
-            vlog("appdata").v() << "Initialized pane: " << pane.toString();
-        }
+        QJSValue initialPanes = v.callWithInstance(engine->newQObject(m_panes), QJSValueList() << jsWindows << jsPanes);
+        initializePanesAndWindows(workspace, initialPanes);
     }
 
     if ( layout.hasKey("active") && !openDocuments.isEmpty() ){
@@ -274,9 +243,61 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
     }
 }
 
-void WorkspaceLayer::whenProjectClose(ProjectWorkspace *){
-    QJSValue v = m_panes->property("clearPanes").value<QJSValue>();
+void WorkspaceLayer::whenProjectClose(){
+    QJSValue v = m_panes->property("__clearPanes").value<QJSValue>();
     v.call();
+}
+
+void WorkspaceLayer::initializePanes(ProjectWorkspace *workspace, QJSValue panes){
+    QJSValueIterator panesIt(panes);
+    while ( panesIt.hasNext() ){
+        panesIt.next();
+        if ( panesIt.name() != "length" ){
+            QObject* pane = panesIt.value().toQObject();
+            QQuickItem* paneItem = qobject_cast<QQuickItem*>(pane);
+            if ( paneItem ){
+                if ( paneItem->property("paneType").toString() == "splitview" ){
+                    QJSValue nestedPanes = paneItem->property("panes").value<QJSValue>();
+                    initializePanes(workspace, nestedPanes);
+                } else {
+                    workspace->whenPaneInitialized(paneItem);
+                }
+            }
+        }
+    }
+}
+
+void WorkspaceLayer::initializePanesAndWindows(ProjectWorkspace *workspace, QJSValue panesAndWindows){
+    if ( panesAndWindows.property("length").toInt() == 2 ){
+        QJSValue windows = panesAndWindows.property(0);
+        QJSValue windowPanes = panesAndWindows.property(1);
+
+        if ( !windows.isArray() || !windowPanes.isArray() ){
+            return;
+        }
+
+        QJSValueIterator windowsIt(windows);
+        if ( windowsIt.hasNext() )
+            windowsIt.next(); // skip application window
+        while ( windowsIt.hasNext() ){
+            windowsIt.next();
+            if ( windowsIt.name() != "length" ){
+                QObject* object = windowsIt.value().toQObject();
+                QQuickWindow* windowObject = qobject_cast<QQuickWindow*>(object);
+
+                workspace->whenWindowInitialized(windowObject);
+            }
+        }
+
+        QJSValueIterator windowPanesIt(windowPanes);
+        while ( windowPanesIt.hasNext() ){
+            windowPanesIt.next();
+            if ( windowPanesIt.name() != "length" ){
+                QJSValue panes = windowPanesIt.value();
+                initializePanes(workspace, panes);
+            }
+        }
+    }
 }
 
 }// namespace

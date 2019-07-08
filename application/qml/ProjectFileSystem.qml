@@ -22,17 +22,15 @@ import base 1.0
 import editor 1.0
 import editor.private 1.0
 
-Rectangle{
+Pane{
     id: root
     color : "#05090e"
     objectName: "projectFileSystem"
 
     property QtObject panes: null
 
-    property var paneLocation : []
-    property QtObject paneWindow : null
-    property string paneType: 'projectFileSystem'
-    property var paneState : { return {} }
+    paneType: 'projectFileSystem'
+    paneState : { return {} }
 
     function addEntry(parentEntry, isFile){
         root.addEntryOverlay.entry = parentEntry

@@ -7,3 +7,8 @@ Editor           1.0 Editor.qml
 SuggestionBox    1.0 SuggestionBox.qml
 ContextMenuStyle 1.0 ContextMenuStyle.qml
 PaletteListView  1.0 PaletteListView.qml
+Pane             1.0 Pane.qml
+PaneSplitView    1.0 PaneSplitView.qml
+PaneDragItem     1.0 PaneDragItem.qml
+PaneDropArea     1.0 PaneDropArea.qml
+PaneWindow       1.0 PaneWindow.qml

@@ -37,17 +37,19 @@ signals:
     void documentMonitorStateChange(ProjectDocument* document, bool isMonitored);
     void documentSave(ProjectDocument* document);
 
-    void windowRectChanged(QWindow* window, const QRect& r);
-    void windowVisibilityChanged(QWindow* window, QWindow::Visibility visibility);
+    void windowOpen(QQuickWindow* window);
+    void windowClose(QQuickWindow* window);
+    void windowRectChanged(QQuickWindow* window, const QRect& r);
+    void windowVisibilityChanged(QQuickWindow* window, QWindow::Visibility visibility);
 
     void paneAdded(QQuickItem* pane, QWindow* window, const QVariantList& position);
     void paneSizeChanged(QQuickItem* pane, const QSize& r);
     void paneStateChanged(QQuickItem* pane, const QVariant& state);
-    void paneMoved(QQuickItem* pane, QWindow* window, const QVariantList& position);
     void paneRemoved(QQuickItem* pane);
 
 public slots:
     void whenProjectActiveChange(ProjectDocument* document);
+    void whenAboutToClose();
 
     void whenDocumentOpen(ProjectDocument* document);
     void whenDocumentClose(ProjectDocument* document);
@@ -55,25 +57,29 @@ public slots:
     void whenDocumentIsMonitoredChanged();
     void whenDocumentSaved();
 
+    void whenWindowInitialized(QQuickWindow* window);
+    void whenWindowOpen(QQuickWindow* window);
+    void whenWindowClose();
     void whenWindowRectChanged();
     void whenWindowVisibilityChanged();
 
-    void whenPaneInitialized(QQuickItem* pane, QWindow* window);
-    void whenPaneAdded(QQuickItem* pane, QWindow* window, const QVariantList& position);
-    void whenPaneMoved(QQuickItem* pane, QWindow* window, const QVariantList& position);
+    void whenPaneInitialized(QQuickItem* pane);
+    void whenPaneAdded(QQuickItem* pane, QQuickWindow* window, const QVariantList& position);
+    void whenPaneSizeChanged();
     void whenPaneRemoved(QQuickItem* pane);
 
 private:
     void initializeFromId();
     void initializeDefaults();
     void initialize();
+    void createLayoutNodes();
 
     Project*        m_project;
     QString         m_id;
-    QQuickWindow*   m_window;
     State*          m_state;
     QString         m_currentWorkspaceId;
 
+    QSet<QQuickItem*>          m_panes;
     QList<QmlPropertyWatcher*> m_watchers;
 };
 
