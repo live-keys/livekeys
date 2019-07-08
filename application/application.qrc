@@ -35,21 +35,13 @@
         <file alias="OpenSans-LightItalic.ttf">fonts/OpenSans-LightItalic.ttf</file>
     </qresource>
     <qresource prefix="/images">
-        <file alias="log.png">images/log.png</file>
         <file alias="logo.png">images/logo.png</file>
-        <file alias="new.png">images/new.png</file>
-        <file alias="open.png">images/open.png</file>
-        <file alias="save.png">images/save.png</file>
         <file alias="project-arrow.png">images/project-arrow.png</file>
         <file alias="project-directory.png">images/project-directory.png</file>
         <file alias="project-file.png">images/project-file.png</file>
         <file alias="project-file-active.png">images/project-file-active.png</file>
         <file alias="project-file-unsaved.png">images/project-file-unsaved.png</file>
-        <file alias="open-directory.png">images/open-directory.png</file>
-        <file alias="toggle-navigation.png">images/toggle-navigation.png</file>
         <file alias="project-file-monitor.png">images/project-file-monitor.png</file>
-        <file alias="license.png">images/license.png</file>
-        <file alias="settings.png">images/settings.png</file>
         <file alias="license-check.png">images/license-check.png</file>
         <file alias="log-search-tag.png">images/log-search-tag.png</file>
         <file alias="log-toggle-window.png">images/log-toggle-window.png</file>
@@ -60,9 +52,17 @@
         <file alias="palette-swap.png">images/palette-swap.png</file>
         <file alias="palette-commit.png">images/palette-commit.png</file>
         <file alias="switch-file.png">images/switch-file.png</file>
-        <file alias="command.png">images/command.png</file>
-        <file alias="live.png">images/live.png</file>
-        <file alias="onsave.png">images/onsave.png</file>
-        <file alias="disabled.png">images/disabled.png</file>
+        <file alias="top-icon-new.png">images/top-icon-new.png</file>
+        <file alias="top-icon-openfile.png">images/top-icon-openfile.png</file>
+        <file alias="top-icon-save.png">images/top-icon-save.png</file>
+        <file alias="top-icon-openproject.png">images/top-icon-openproject.png</file>
+        <file alias="top-icon-openlicense.png">images/top-icon-openlicense.png</file>
+        <file alias="top-icon-opensettings.png">images/top-icon-opensettings.png</file>
+        <file alias="top-icon-runcommand.png">images/top-icon-runcommand.png</file>
+        <file alias="top-icon-viewlog.png">images/top-icon-viewlog.png</file>
+        <file alias="top-icon-mode-disabled.png">images/top-icon-mode-disabled.png</file>
+        <file alias="top-icon-mode-live.png">images/top-icon-mode-live.png</file>
+        <file alias="top-icon-mode-onsave.png">images/top-icon-mode-onsave.png</file>
+        <file alias="pane-menu.png">images/pane-menu.png</file>
     </qresource>
 </RCC>

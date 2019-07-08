@@ -221,7 +221,7 @@ Rectangle{
 
                 property string path: model.path
 
-                color: ListView.isCurrentItem ? "#0b1b2a" : "#0d151b"
+                color: ListView.isCurrentItem ? "#0f1b24" : "#060c10"
                 width: root.width
                 height: documentView.delegateHeight
                 Text{

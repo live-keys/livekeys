@@ -29,17 +29,6 @@ Item{
     property QtObject panes: null
     property QtObject runSpace: null
 
-    property Item addEntryOverlay : ProjectAddEntry{
-        onAccepted: {
-            if ( isFile ){
-                var f = project.fileModel.addFile(entry, name)
-                livecv.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
-            } else {
-                project.fileModel.addDirectory(entry, name)
-            }
-        }
-    }
-
     property Item navigation : ProjectNavigation{
         id: projectNavigation
         anchors.fill: parent
@@ -81,7 +70,7 @@ Item{
         }
         onCancel: {
             if ( livecv.layers.workspace.panes.activeItem )
-                livecv.layers.workspace.panes.activeItem.forceFocus()
+                livecv.layers.workspace.panes.activeItem.forceActiveFocus()
         }
     }
 

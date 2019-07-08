@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
+import editor 1.0
 import live 1.0
 
 Rectangle{
@@ -15,8 +16,9 @@ Rectangle{
     property alias prefixWidth: prefixSplitDragHandle.x
     onPrefixWidthChanged: logList.model.width = logList.width - root.prefixWidth - 5
 
-    property int prefixPadding : 10
+    property Theme currentTheme : livecv.layers.workspace ? livecv.layers.workspace.themes.current : null
 
+    property int prefixPadding : 10
     property int fontSize: 12
 
     property bool prefixVisible : false
@@ -27,6 +29,8 @@ Rectangle{
             prefixVisible = false
         }
     }
+
+    property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
 
     property Component usedDelegate : prefixVisible ? prefixDelegate : noPrefixDelegate
 
@@ -93,14 +97,14 @@ Rectangle{
         id: logViewHeader
         width: parent.width
         height: 30
-        color: root.color
+        color : root.topColor
 
         InputBox{
             id: prefixSearchBox
             anchors.left: parent.left
-            anchors.leftMargin: 5
+            anchors.leftMargin: 3
             anchors.top: parent.top
-            anchors.topMargin: 5
+            anchors.topMargin: 3
             visible: root.prefixVisible
             anchors.fill: undefined
             width: prefixSplitDragHandle.x - root.prefixPadding - 5
@@ -108,22 +112,15 @@ Rectangle{
             text: ''
             color: root.color
             onTextChanged: searchTimer.restart()
-            height: 25
-
-            Rectangle{
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: 1
-                color: "#0c1c2c"
-            }
+            height: 24
         }
 
         Rectangle{
             id: prefixSplitDragHandle
-            color: '#0c1c2c'
-            width: 3
+            color: '#1f2227'
+            width: 2
             visible: root.prefixVisible
-            x: 350
+            x: 348
             anchors.top: parent.top
             anchors.topMargin: 3
             anchors.bottom: parent.bottom
@@ -145,29 +142,23 @@ Rectangle{
             anchors.left: parent.left
             anchors.leftMargin: prefixSearchBox.visible ? root.prefixWidth + 5 : 5
             anchors.right: tagSearchBox.visible ? tagSearchBox.left : parent.right
-            anchors.rightMargin: tagSearchBox.visible ? 10 : 110
+            anchors.rightMargin: tagSearchBox.visible ? 10 : 120
             anchors.top: parent.top
-            anchors.topMargin: 5
+            anchors.topMargin: 3
             anchors.fill: undefined
             text: ''
             onTextChanged : searchTimer.restart()
             color: root.color
-            height: 25
+            height: 24
             border.width: 0
-            Rectangle{
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: 1
-                color: "#0c1c2c"
-            }
         }
 
         InputBox{
             id: tagSearchBox
             anchors.right: parent.right
-            anchors.rightMargin: 110
+            anchors.rightMargin: 120
             anchors.top: parent.top
-            anchors.topMargin: 5
+            anchors.topMargin: 3
             anchors.fill: undefined
             width: 100
             visible: false
@@ -175,18 +166,12 @@ Rectangle{
             onTextChanged : searchTimer.restart()
             border.width: 0
             color: root.color
-            height: 25
-            Rectangle{
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: 1
-                color: "#273057"
-            }
+            height: 24
         }
 
         Rectangle{
             anchors.right: parent.right
-            anchors.rightMargin: 20
+            anchors.rightMargin: 30
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 0
             height : logWindowMouseArea.containsMouse ? parent.height : parent.height - 3
@@ -210,7 +195,7 @@ Rectangle{
 
         Rectangle{
             anchors.right: parent.right
-            anchors.rightMargin: 50
+            anchors.rightMargin: 60
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 0
             height : prefixMouseArea.containsMouse ? parent.height : parent.height - 3
@@ -232,7 +217,7 @@ Rectangle{
 
         Rectangle{
             anchors.right: parent.right
-            anchors.rightMargin: 80
+            anchors.rightMargin: 90
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 0
             height : tagSearchMouseArea.containsMouse ? parent.height : parent.height - 3
@@ -250,6 +235,22 @@ Rectangle{
                 onClicked: tagSearchBox.visible = !tagSearchBox.visible
             }
             Behavior on height{ NumberAnimation{  duration: 100 } }
+        }
+
+        Item{
+            anchors.right: parent.right
+            width: 30
+            height: parent.height
+
+            Image{
+                id : paneOptions
+                anchors.centerIn: parent
+                source : "qrc:/images/pane-menu.png"
+            }
+
+            MouseArea{
+                anchors.fill: parent
+            }
         }
 
         VisualLogFilter{
@@ -273,7 +274,7 @@ Rectangle{
                 implicitWidth: 10
                 implicitHeight: 10
                 Rectangle {
-                    color: "#0b1f2e"
+                    color: "#1f2227"
                     anchors.fill: parent
                 }
             }
@@ -297,7 +298,7 @@ Rectangle{
             anchors.fill: parent
             delegate: root.usedDelegate
 
-            onWidthChanged: logList.model.width = width - root.prefixWidth - root.prefixPadding
+            onWidthChanged: livecv.log.width = width - root.prefixWidth - root.prefixPadding
 
             Connections{
                 target: livecv.log

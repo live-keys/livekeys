@@ -201,7 +201,9 @@ ApplicationWindow{
 
         MessageDialogConfirm{
             anchors.fill: parent
-            color: "#050e16"
+            color: "#02070b"
+            border.width: 1
+            border.color: "#0c151c"
         }
     }
 

@@ -171,6 +171,8 @@ Item{
         runSpace: root.runSpace
     }
 
+    property color paneSplitterColor: "transparent"
+
     property bool documentsReloaded : false
     Connections{
         target: livecv.layers.window
@@ -211,6 +213,8 @@ Item{
                     'setDisabledCodingMode': [modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
                     'runProject': [project.run, "Run Project"]
                 })
+
+                root.paneSplitterColor = layer.themes.current.paneSplitterColor
             }
         }
     }
@@ -231,20 +235,10 @@ Item{
         anchors.left: parent.left
         anchors.right: parent.right
 
-        color: "#08141d"
-
         property var callback : function(){}
 
         property string action : ""
 
-        onNewProject: root.projectEnvironment.newProject()
-        onOpenFile : root.projectEnvironment.openFileDialog()
-        onOpenProject: root.projectEnvironment.openProject()
-        onSaveFile : {
-            var fe = root.panes.focusPane('editor')
-            if ( fe )
-                fe.saveAs()
-        }
         onToggleLogWindow : mainVerticalSplit.toggleLog()
         onOpenCommandsMenu: {
             livecv.layers.workspace.commands.model.setFilter('')
@@ -259,13 +253,13 @@ Item{
         }
 
         property License license : License{}
-        onOpenLicense: {livecv.layers.window.overlayBox(license)}
+        onOpenLicense: {livecv.layers.window.dialogs.overlayBox(license)}
     }
 
     CommandsMenu {
         id: commandsMenu
         anchors.top: header.bottom
-        x: 395
+        x: 355
     }
 
     ModeContainer {
@@ -310,7 +304,6 @@ Item{
         }
     }
 
-
     SplitView{
         id: mainVerticalSplit
         anchors.top : header.bottom
@@ -322,7 +315,7 @@ Item{
         handleDelegate: Rectangle{
             implicitWidth: 1
             implicitHeight: 1
-            color: "#191e23"
+            color: root.paneSplitterColor
         }
 
         function addHorizontalEditor(){
@@ -443,7 +436,7 @@ Item{
                 handleDelegate: Rectangle{
                     implicitWidth: 1
                     implicitHeight: 1
-                    color: "#081019"
+                    color: root.paneSplitterColor
                 }
 
                 property var panes : [viewer]

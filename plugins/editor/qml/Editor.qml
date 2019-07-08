@@ -62,12 +62,14 @@ Rectangle{
         codeHandler.setDocument(document)
     }
 
-    property color topColor: "#08111a"
-    property color lineSurfaceColor: "#091018"
-    property color lineInfoColor:  "#050b12"
-    property color optionsColor: "#04131f"
+    property Theme currentTheme : livecv.layers.workspace.themes.current
 
-    color : "#050b12"
+    property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
+    property color lineSurfaceColor: topColor
+    property color lineInfoColor:  currentTheme ? currentTheme.paneTopBackgroundAlternate : 'black'
+    property color optionsColor: currentTheme ? currentTheme.paneTopBackground : 'black'
+
+    color : livecv.layers.workspace.themes.current.paneBackground
     clip : true
 
     objectName: "editor"
@@ -369,7 +371,7 @@ Rectangle{
             Image{
                 id : paneOptions
                 anchors.centerIn: parent
-                source : "qrc:/images/toggle-navigation.png"
+                source : "qrc:/images/pane-menu.png"
             }
 
             MouseArea{
@@ -502,7 +504,7 @@ Rectangle{
                     implicitWidth: 10
                     implicitHeight: 10
                     Rectangle {
-                        color: "#0d1e30"
+                        color: "#1f2227"
                         anchors.fill: parent
                     }
                 }

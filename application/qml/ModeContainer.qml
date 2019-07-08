@@ -34,7 +34,7 @@ Rectangle {
 
     visible: false
     anchors.left: modeWrapper.left
-    anchors.leftMargin: 770
+    anchors.leftMargin: 740
     anchors.top: modeWrapper.bottom
     property int buttonHeight: 30
     property int buttonWidth: 120
@@ -61,13 +61,19 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             color: liveArea.containsMouse ? "#969aa1" : "#808691"
         }
-        Image{
-            id : liveImage
-            anchors.right: parent.right
-            anchors.rightMargin: 25
+        Item{
+            width: 25
+            height: 25
             anchors.verticalCenter: parent.verticalCenter
-            source : "qrc:/images/live.png"
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+
+            Image{
+                id : liveImage
+                anchors.centerIn: parent
+            }
         }
+
         MouseArea{
             id : liveArea
             anchors.fill: parent
@@ -95,12 +101,18 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             color: onSaveArea.containsMouse ? "#969aa1" : "#808691"
         }
-        Image{
-            id : onSaveImage
-            anchors.right: parent.right
-            anchors.rightMargin: 25
+
+        Item{
+            width: 25
+            height: 25
             anchors.verticalCenter: parent.verticalCenter
-            source : "qrc:/images/onsave.png"
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+
+            Image{
+                id : onSaveImage
+                anchors.centerIn: parent
+            }
         }
         MouseArea{
             id : onSaveArea
@@ -129,13 +141,20 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             color: disabledArea.containsMouse ? "#969aa1" : "#808691"
         }
-        Image{
-            id : disabledImage
-            anchors.right: parent.right
-            anchors.rightMargin: 28
+
+        Item{
+            width: 25
+            height: 25
             anchors.verticalCenter: parent.verticalCenter
-            source : "qrc:/images/disabled.png"
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+
+            Image{
+                id : disabledImage
+                anchors.centerIn: parent
+            }
         }
+
         MouseArea{
             id : disabledArea
             anchors.fill: parent

@@ -3,7 +3,7 @@ import QtQuick 2.5
 Rectangle{
     width: 38
     height: 18
-    color: '#01203a'
+    color: '#0c121d'
     radius: 5
 
     property alias text: labelText.text

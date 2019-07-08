@@ -24,7 +24,7 @@ import editor.private 1.0
 
 Rectangle{
     id: root
-    color : "#05090e"
+    color : currentTheme ? currentTheme.paneBackground : 'black'
     objectName: "projectFileSystem"
 
     property QtObject panes: null
@@ -34,6 +34,20 @@ Rectangle{
     property string paneType: 'projectFileSystem'
     property var paneState : { return {} }
     property var paneFocusItem : root
+
+
+    property Item addEntryOverlay : ProjectAddEntry{
+        onAccepted: {
+            if ( isFile ){
+                var f = project.fileModel.addFile(entry, name)
+                livecv.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
+            } else {
+                project.fileModel.addDirectory(entry, name)
+            }
+        }
+    }
+
+    property Theme currentTheme : livecv.layers.workspace.themes.current
 
     function addEntry(parentEntry, isFile){
         root.addEntryOverlay.entry = parentEntry
@@ -149,7 +163,7 @@ Rectangle{
         anchors.right: parent.right
 
         height: 30
-        color: "#08111a"
+        color: currentTheme ? currentTheme.paneTopBackground : 'black'
 
         Text{
             anchors.verticalCenter: parent.verticalCenter
@@ -170,7 +184,7 @@ Rectangle{
             Image{
                 id : paneOptions
                 anchors.centerIn: parent
-                source : "qrc:/images/toggle-navigation.png"
+                source : "qrc:/images/pane-menu.png"
             }
 
             MouseArea{
@@ -237,7 +251,7 @@ Rectangle{
                 implicitWidth: 10
                 implicitHeight: 10
                 Rectangle {
-                    color: "#0b1f2e"
+                    color: "#1f2227"
                     anchors.fill: parent
                 }
             }
@@ -246,14 +260,14 @@ Rectangle{
                 implicitHeight: 10
                 Rectangle{
                     anchors.fill: parent
-                    color: "#091823"
+                    color: root.color
                 }
             }
             textColor: '#9babb8'
             decrementControl: null
             incrementControl: null
             frame: Rectangle{color: "transparent"}
-            corner: Rectangle{color: "#091823"}
+            corner: Rectangle{color: root.color}
         }
 
         property var dropEntry: null
@@ -315,7 +329,10 @@ Rectangle{
                 anchors.left: parent.left
                 anchors.top: parent.top
                 width: entryData.width > 70 ? entryData.width + 30 : 95
-                color: entryDelegate.editMode ? "#1b2934" : "transparent"
+                color: root.currentTheme
+                       ? (entryDelegate.editMode ? root.currentTheme.projectPaneItemEditBackground
+                                                 : root.currentTheme.projectPaneItemBackground )
+                       : 'transparent'
                 Image{
                     anchors.left: parent.left
                     anchors.leftMargin: 5
@@ -367,6 +384,7 @@ Rectangle{
                     font.weight: Font.Light
                     font.italic: type === 2 || type === 1
                     readOnly: !entryDelegate.editMode
+                    selectionColor: "#3d4856"
                     Keys.onReturnPressed: {
                         root.renameEntry(styleData.value, text)
                         entryDelegate.editMode = false
