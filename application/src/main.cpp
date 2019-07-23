@@ -60,10 +60,7 @@ int main(int argc, char *argv[]){
             return 0;
         }
 
-        LiveCV* livecvp = livecv.data();
-        livecv->loadLayers({"window", "workspace", "editor"}, [livecvp](Layer*){
-            livecvp->loadProject();
-        });
+        livecv->loadDefaultLayers();
 
         return app.exec();
 

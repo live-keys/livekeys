@@ -59,6 +59,13 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     }
 
     QObject* windowLayerOb = lk->property("layers").value<QQmlPropertyMap*>()->property("window").value<QObject*>();
+
+    if ( !windowLayerOb ){
+        Exception e = CREATE_EXCEPTION(lv::Exception, "Workspace layer requires window layer.", Exception::toCode("~layer"));
+        lv::ViewContext::instance().engine()->throwError(&e, this);
+        return;
+    }
+
     WindowLayer* windowLayer = qobject_cast<WindowLayer*>(windowLayerOb);
     QQuickWindow* window = windowLayer->window();
 

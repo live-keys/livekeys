@@ -231,9 +231,19 @@ ApplicationWindow{
         anchors.leftMargin: 20
         visible: true
 
-        opacity: livecv.settings.launchMode ? 0.3 : 1.0
+        opacity: 0.3
         source : "qrc:/images/logo.png"
         z: 2222
+
+
+        Connections{
+            target: livecv
+            onLayerReady: {
+                if ( layer.name === 'workspace' ){
+                    logo.opacity = 1.0
+                }
+            }
+        }
     }
 
 }

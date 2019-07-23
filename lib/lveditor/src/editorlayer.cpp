@@ -17,8 +17,11 @@ EditorLayer::EditorLayer(QObject *parent)
     QObject* livecv = engine->rootContext()->contextProperty("livecv").value<QObject*>();
     QObject* workspace = livecv->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
 
-    if ( !workspace )
+    if ( !workspace ){
+        Exception e = CREATE_EXCEPTION(lv::Exception, "Editor layer requires workspace layer.", Exception::toCode("~layer"));
+        lv::ViewContext::instance().engine()->throwError(&e, this);
         return;
+    }
 
     lv::KeyMap* keymap = static_cast<lv::KeyMap*>(workspace->property("keymap").value<QObject*>());
     if ( keymap ){
