@@ -397,8 +397,8 @@ Pane{
                     color: type === 1 ? "#c6d3de" : view && styleData.value === view.dropEntry ? "#ff0000" : styleData.textColor
                     text: {
                         styleData.value
-                            ? styleData.value.name === ''
-                            ? 'untitled' : styleData.value.name : ''
+                            ? project.fileModel.printableName(styleData.value.name)
+                            : ''
                     }
                     font.family: 'Open Sans, Arial, sans-serif'
                     font.pixelSize: 12
@@ -425,7 +425,7 @@ Pane{
                     }
                     Keys.onEscapePressed: {
                         entryData.text = styleData.value
-                                ? styleData.value.name === ''
+                                ? (!styleData.value.exists())
                                 ? 'untitled' : styleData.value.name : ''
                         entryDelegate.editMode = false
                     }
@@ -614,6 +614,13 @@ Pane{
                 text: "Close project"
                 onTriggered: {
                     livecv.layers.workspace.commands.execute('window.workspace.project.close')
+                }
+            }
+            MenuItem{
+                text: "New document"
+                onTriggered: {
+                    var fe = project.fileModel.addTemporaryFile()
+                    livecv.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
                 }
             }
             MenuItem {

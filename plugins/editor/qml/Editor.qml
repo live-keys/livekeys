@@ -88,7 +88,7 @@ Pane{
     function save(){
         if ( !editor.document )
             return;
-        if ( editor.document.file.name !== '' ){
+        if ( editor.document.file.exists() ){
             editor.document.save()
         } else {
             saveAs()
@@ -156,7 +156,7 @@ Pane{
             return;
         if ( editor.document.isDirty ){
             var saveFunction = function(mbox){
-                if ( editor.document.file.name !== '' ){
+                if ( editor.document.file.exists() ){
                     editor.document.save()
                     editor.closeDocumentAction()
                 } else {
@@ -289,8 +289,10 @@ Pane{
             text: {
                 if ( editor.document ){
                     var filename = editor.document.file.name
-                    if ( filename === '' )
-                        filename = 'untitled'
+                    if ( !editor.document.file.exists() ){
+                        var findex = filename.substring(2)
+                        filename = 'untitled' + (findex === '0' ? '' : findex)
+                    }
                     if ( editor.document.isDirty )
                         filename += '*'
                     return filename;

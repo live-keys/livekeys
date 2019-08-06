@@ -21,6 +21,8 @@
 #include "live/projectfile.h"
 #include "live/project.h"
 
+#include "live/visuallogqt.h"
+
 #include "runnablecontainer.h"
 
 #include <QDir>
@@ -327,6 +329,26 @@ ProjectFile *ProjectFileModel::addFile(ProjectEntry *parentEntry, const QString 
     return fileEntry;
 }
 
+ProjectFile *ProjectFileModel::addTemporaryFile(){
+    ProjectEntry* parentEntry = m_root->child(0);
+
+    int temporaryFiles = 0;
+    for ( auto it = parentEntry->entries().begin(); it != parentEntry->entries().end(); ++it ){
+        ProjectEntry* entry = *it;
+        if ( entry->isFile() ){
+            ProjectFile* file = static_cast<ProjectFile*>(entry);
+            if ( !file->exists() )
+                ++temporaryFiles;
+        }
+    }
+
+    QString name = ":/" + QString::number(temporaryFiles);
+
+    ProjectFile* fileEntry = new ProjectFile(parentEntry->path(), name, 0);
+    entryAdded(fileEntry, parentEntry);
+    return fileEntry;
+}
+
 ProjectEntry* ProjectFileModel::addDirectory(ProjectEntry *parentEntry, const QString &name){
     QString dirPath = QDir::cleanPath(parentEntry->path() + "/" + name);
     QDir d(parentEntry->path());
@@ -508,6 +530,12 @@ ProjectEntry* ProjectFileModel::itemAt(const QModelIndex &index) const{
 
 QModelIndex ProjectFileModel::itemIndex(ProjectEntry *entry){
     return createIndex(entry->childIndex(), 0, entry);
+}
+
+QString ProjectFileModel::printableName(const QString &name){
+    if ( name.startsWith(":/") )
+        return (name.mid(2) == "0" ? "untitled" : ("untitled" + name.mid(2)));
+    return name;
 }
 
 ProjectFile *ProjectFileModel::openExternalFile(const QString &path){

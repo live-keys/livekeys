@@ -105,7 +105,7 @@ void ProjectDocument::setContent(const QString &content){
  * \brief Open the document in a read states
  */
 void ProjectDocument::readContent(){
-    if ( m_file->path() != "" ){
+    if ( m_file->exists() ){
         addEditingState(ProjectDocument::Read);
         m_textDocument->setPlainText(
             QString::fromStdString(parentAsProject()->lockedFileIO()->readFromFile(m_file->path().toStdString()))
@@ -486,7 +486,7 @@ void ProjectDocument::documentContentsChanged(int position, int charsRemoved, in
  */
 bool ProjectDocument::save(){
     syncContent();
-    if ( m_file->path() != "" ){
+    if ( m_file->exists() ){
         if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path().toStdString(), m_textDocument->toPlainText().toStdString() ) ){
             setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();

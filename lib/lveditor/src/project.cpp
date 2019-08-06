@@ -81,8 +81,8 @@ Project::~Project(){
  */
 void Project::newProject(){
     m_active = nullptr;
-    m_fileModel->createProject();
     m_runnables->clearAll();
+    m_fileModel->createProject();
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
         ProjectDocument* document = createDocument(
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false

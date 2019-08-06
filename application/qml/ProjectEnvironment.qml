@@ -206,7 +206,7 @@ Item{
             button1Function : function(box){
                 box.close()
 
-                if ( !project.isDirProject() && documentList.length === 1 && documentList[0] === ''){
+                if ( !project.isDirProject() && documentList.length === 1 && documentList[0] === ':/0'){
                     var closeCallback = callback;
                     var untitledDocument = project.documentModel.isOpened(documentList[0])
 
@@ -231,9 +231,7 @@ Item{
                     var unsavedList = project.documentModel.listUnsavedDocuments()
                     unsavedFiles = '';
                     for ( var i = 0; i < unsavedList.length; ++i ){
-                        if ( unsavedList[i] === '' )
-                            unsavedList[i] = 'untitled'
-                        unsavedFiles += unsavedList[i] + "\n";
+                        unsavedFiles += project.fileModel.printableName(unsavedList[i]) + "\n";
                     }
 
                     message = 'Failed to save the following files:\n'

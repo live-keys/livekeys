@@ -40,6 +40,9 @@ public:
     void setDocument(lv::ProjectDocument* document);
     bool isOpen() const;
 
+public slots:
+    bool exists() const;
+
 signals:
     /** Signals that the document associated with the file has changed */
     void documentChanged();
@@ -56,6 +59,15 @@ inline ProjectDocument *ProjectFile::document() const{
 /** Shows if the file is opened */
 inline bool ProjectFile::isOpen() const{
     return m_document != 0;
+}
+
+/**
+ * \brief Returns true if the file exists or false is a temporarry file
+ */
+inline bool ProjectFile::exists() const{
+    if ( name().startsWith(":/") )
+        return false;
+    return true;
 }
 
 }// namespace
