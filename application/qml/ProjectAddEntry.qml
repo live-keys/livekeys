@@ -31,9 +31,10 @@ Rectangle{
     clip: true
     width: 500
     height: 80
-    color:"#081621"
+    radius: 5
+    color:"#02070b"
     border.width: 1
-    border.color: "#0a1a26"
+    border.color: "#0f1921"
 
     opacity: root.visible ? 1 : 0
     Behavior on opacity{ NumberAnimation{ duration: 250} }
@@ -56,9 +57,9 @@ Rectangle{
         anchors.leftMargin: 14
         width: parent.width - 28
         height: 28
-        color: "#0c1d2a"
+        color: "#0b1319"
         border.width: 1
-        border.color: "#071520"
+        border.color: "#0c1720"
 
         TextInput{
             id: addEntryInput

@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
+import editor 1.0
 import live 1.0
 import editor 1.0
 
@@ -19,8 +20,9 @@ Pane{
     property alias prefixWidth: prefixSplitDragHandle.x
     onPrefixWidthChanged: logList.model.width = logList.width - root.prefixWidth - 5
 
-    property int prefixPadding : 10
+    property Theme currentTheme : livecv.layers.workspace ? livecv.layers.workspace.themes.current : null
 
+    property int prefixPadding : 10
     property int fontSize: 12
 
     property bool prefixVisible : false
@@ -31,6 +33,12 @@ Pane{
             prefixVisible = false
         }
     }
+
+    paneClone: function(){
+        return livecv.layers.workspace.panes.createPane('log', paneState, [root.width, root.height])
+    }
+
+    property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
 
     property Component usedDelegate : prefixVisible ? prefixDelegate : noPrefixDelegate
 
@@ -97,14 +105,23 @@ Pane{
         id: logViewHeader
         width: parent.width
         height: 30
-        color: root.color
+        color : root.topColor
+
+        PaneDragItem{
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            onDragStarted: livecv.layers.workspace.panes.__dragStarted(root)
+            onDragFinished: livecv.layers.workspace.panes.__dragFinished(root)
+            display: "log"
+        }
 
         InputBox{
             id: prefixSearchBox
             anchors.left: parent.left
-            anchors.leftMargin: 5
+            anchors.leftMargin: 20
             anchors.top: parent.top
-            anchors.topMargin: 5
+            anchors.topMargin: 3
             visible: root.prefixVisible
             anchors.fill: undefined
             width: prefixSplitDragHandle.x - root.prefixPadding - 5
@@ -112,22 +129,15 @@ Pane{
             text: ''
             color: root.color
             onTextChanged: searchTimer.restart()
-            height: 25
-
-            Rectangle{
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: 1
-                color: "#0c1c2c"
-            }
+            height: 24
         }
 
         Rectangle{
             id: prefixSplitDragHandle
-            color: '#0c1c2c'
-            width: 3
+            color: '#1f2227'
+            width: 2
             visible: root.prefixVisible
-            x: 350
+            x: 348
             anchors.top: parent.top
             anchors.topMargin: 3
             anchors.bottom: parent.bottom
@@ -147,31 +157,25 @@ Pane{
         InputBox{
             id: logSearchBox
             anchors.left: parent.left
-            anchors.leftMargin: prefixSearchBox.visible ? root.prefixWidth + 5 : 5
+            anchors.leftMargin: prefixSearchBox.visible ? root.prefixWidth + 5 : 20
             anchors.right: tagSearchBox.visible ? tagSearchBox.left : parent.right
-            anchors.rightMargin: tagSearchBox.visible ? 10 : 110
+            anchors.rightMargin: tagSearchBox.visible ? 10 : 90
             anchors.top: parent.top
-            anchors.topMargin: 5
+            anchors.topMargin: 3
             anchors.fill: undefined
             text: ''
             onTextChanged : searchTimer.restart()
             color: root.color
-            height: 25
+            height: 24
             border.width: 0
-            Rectangle{
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: 1
-                color: "#0c1c2c"
-            }
         }
 
         InputBox{
             id: tagSearchBox
             anchors.right: parent.right
-            anchors.rightMargin: 110
+            anchors.rightMargin: 90
             anchors.top: parent.top
-            anchors.topMargin: 5
+            anchors.topMargin: 3
             anchors.fill: undefined
             width: 100
             visible: false
@@ -179,42 +183,12 @@ Pane{
             onTextChanged : searchTimer.restart()
             border.width: 0
             color: root.color
-            height: 25
-            Rectangle{
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: 1
-                color: "#273057"
-            }
+            height: 24
         }
 
         Rectangle{
             anchors.right: parent.right
-            anchors.rightMargin: 20
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 0
-            height : logWindowMouseArea.containsMouse ? parent.height : parent.height - 3
-            width : 25
-            color : "transparent"
-            Image{
-                id : newImage
-                anchors.centerIn: parent
-                source : "qrc:/images/log-toggle-window.png"
-            }
-            MouseArea{
-                id : logWindowMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: root.isInWindow
-                             ? livecv.layers.workspace.commands.execute("window.workspace.openLogInEditor")
-                             : livecv.layers.workspace.commands.execute("window.workspace.openLogInWindow")
-            }
-            Behavior on height{ NumberAnimation{  duration: 100 } }
-        }
-
-        Rectangle{
-            anchors.right: parent.right
-            anchors.rightMargin: 50
+            anchors.rightMargin: 60
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 0
             height : prefixMouseArea.containsMouse ? parent.height : parent.height - 3
@@ -236,7 +210,7 @@ Pane{
 
         Rectangle{
             anchors.right: parent.right
-            anchors.rightMargin: 80
+            anchors.rightMargin: 30
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 0
             height : tagSearchMouseArea.containsMouse ? parent.height : parent.height - 3
@@ -256,8 +230,90 @@ Pane{
             Behavior on height{ NumberAnimation{  duration: 100 } }
         }
 
+        Item{
+            anchors.right: parent.right
+            width: 30
+            height: parent.height
+
+            Image{
+                id : paneOptions
+                anchors.centerIn: parent
+                source : "qrc:/images/pane-menu.png"
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    logMenu.visible = !logMenu.visible
+                }
+            }
+        }
+
         VisualLogFilter{
             id: logFilter
+        }
+    }
+
+    Rectangle{
+        id: logMenu
+        visible: false
+        anchors.right: root.right
+        anchors.topMargin: 30
+        anchors.top: root.top
+        opacity: visible ? 1.0 : 0
+        z: 1000
+        color : "#03070b"
+
+        width: 180
+
+        Behavior on opacity{ NumberAnimation{ duration: 200 } }
+
+        PaneMenuButton{
+            id: splitHorizontally
+            anchors.top: parent.top
+            anchors.right: parent.right
+            text: qsTr("Split Horizontally")
+            onClicked : {
+                logMenu.visible = false
+                var clone = root.paneClone()
+                var index = root.parentSplitterIndex()
+                livecv.layers.workspace.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
+            }
+        }
+
+        PaneMenuButton{
+            id: splitVertically
+            anchors.top: splitHorizontally.bottom
+            anchors.right: parent.right
+            text: qsTr("Split Vertically")
+            onClicked : {
+                logMenu.visible = false
+                var clone = root.paneClone()
+                var index = root.parentSplitterIndex()
+                livecv.layers.workspace.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
+            }
+        }
+
+        PaneMenuButton{
+            id: moveToNewWindow
+            anchors.top: splitVertically.bottom
+            anchors.right: parent.right
+            text: qsTr("Move to New Window")
+            onClicked : {
+                logMenu.visible = false
+                livecv.layers.workspace.panes.movePaneToNewWindow(root)
+            }
+        }
+
+        PaneMenuButton{
+            id: removeLog
+            anchors.top: moveToNewWindow.bottom
+            anchors.right: parent.right
+            text: qsTr("Remove Pane")
+            onClicked : {
+                logMenu.visible = false
+                livecv.layers.workspace.panes.removePane(root)
+            }
         }
     }
 
@@ -277,7 +333,7 @@ Pane{
                 implicitWidth: 10
                 implicitHeight: 10
                 Rectangle {
-                    color: "#0b1f2e"
+                    color: "#1f2227"
                     anchors.fill: parent
                 }
             }
@@ -301,7 +357,7 @@ Pane{
             anchors.fill: parent
             delegate: root.usedDelegate
 
-            onWidthChanged: logList.model.width = width - root.prefixWidth - root.prefixPadding
+            onWidthChanged: livecv.log.width = width - root.prefixWidth - root.prefixPadding
 
             Connections{
                 target: livecv.log

@@ -295,6 +295,8 @@ Item{
         runSpace: root.runSpace
     }
 
+    property color paneSplitterColor: "transparent"
+
     property bool documentsReloaded : false
     Connections{
         target: livecv.layers.window
@@ -334,6 +336,8 @@ Item{
                     'setDisabledCodingMode': [modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
                     'runProject': [project.run, "Run Project"]
                 })
+
+                root.paneSplitterColor = layer.themes.current.paneSplitterColor
             }
         }
     }
@@ -355,20 +359,10 @@ Item{
         anchors.left: parent.left
         anchors.right: parent.right
 
-        color: "#08141d"
-
         property var callback : function(){}
 
         property string action : ""
 
-        onNewProject: root.projectEnvironment.newProject()
-        onOpenFile : root.projectEnvironment.openFileDialog()
-        onOpenProject: root.projectEnvironment.openProject()
-        onSaveFile : {
-            var fe = root.panes.focusPane('editor')
-            if ( fe )
-                fe.saveAs()
-        }
         onToggleLogWindow : {
             var fe = root.panes.focusPane('log')
             if ( !fe ){
@@ -394,13 +388,13 @@ Item{
         }
 
         property License license : License{}
-        onOpenLicense: {livecv.layers.window.overlayBox(license)}
+        onOpenLicense: {livecv.layers.window.dialogs.overlayBox(license)}
     }
 
     CommandsMenu{
         id: commandsMenu
         anchors.top: header.bottom
-        x: 395
+        x: 355
     }
 
     RunnablesMenu{
@@ -503,7 +497,6 @@ Item{
         }
     }
 
-
     Component{
         id: paneSplitViewFactory
 
@@ -567,105 +560,6 @@ Item{
         }
     }
 
-/*
-    SplitView{
-        id: mainVerticalSplit
-        anchors.top : header.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        height : parent.height - header.height
-        orientation: Qt.Vertical
-
-        handleDelegate: Rectangle{
-            implicitWidth: 1
-            implicitHeight: 1
-            color: "#191e23"
-        }
-
-        function addHorizontalEditor(){
-            var editorObject = root.panes.createPane('editor', {}, [2], [400, 400])
-            root.panes.setActiveItem(editorObject.textEdit, editorObject)
-        }
-
-        function addHorizontalFragmentEditor(){
-            var fe = root.panes.focusPane('editor')
-            if ( !fe || !fe.document ){
-                addHorizontalEditor();
-                return
-            }
-
-            var cursorBlock = fe.getCursorFragment()
-            if ( cursorBlock.start === cursorBlock.end ){
-                addHorizontalEditor()
-                return
-            }
-
-            var editorObject = editorFactory.createObject(0)
-            editorObject.fragmentStart = cursorBlock.start + 1
-            editorObject.fragmentEnd = cursorBlock.end + 1
-
-            mainHorizontalSplit.insert(mainHorizontalSplit.panes.length - 1, editorObject)
-
-            root.panes.add(editorObject)
-            root.panes.setActiveItem(editorObject.textEdit, editorObject)
-        }
-
-        function removeHorizontalEditor(){
-            var fe = root.panes.focusPane('editor')
-            if ( fe )
-                root.panes.removePane(fe)
-        }
-
-        function openLogInWindow(){
-            var logItem = logView
-            mainVerticalSplit.removeItem(logView)
-
-            logItem.x = 0
-            logItem.y = 0
-            logItem.width = Qt.binding(function(){ return logWindow.contentWidth; })
-            logItem.height = Qt.binding(function(){ return logWindow.contentHeight; })
-            logItem.isInWindow = true
-
-            logWindow.content = logItem
-            logWindow.show()
-        }
-
-        function openLogInEditor(){
-            var logItem = logWindow.content
-            logWindow.content = null
-            logWindow.close()
-
-            logItem.isInWindow = false
-            logItem.visible = true
-            mainVerticalSplit.addItem(logItem)
-            contentWrap.height = contentWrap.height - 200
-        }
-
-        function toggleLog(){
-            if ( logView.isInWindow ){
-                if ( logView.visible ){
-                    logWindow.close()
-                    logView.visible = false
-                } else {
-                    header.isLogWindowDirty = false
-                    logView.visible = true
-                    logWindow.show()
-                }
-            } else {
-                if ( logView.visible ){
-                    logView.visible = false
-                    mainVerticalSplit.removeItem(logView)
-                } else {
-                    header.isLogWindowDirty = false
-                    logView.visible = true
-                    mainVerticalSplit.addItem(logView)
-                    contentWrap.height = contentWrap.height - 200
-                }
-            }
-        }
-
-    }
-*/
     property LogContainer logView : LogContainer{
         id: logView
         visible: false

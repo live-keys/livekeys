@@ -24,13 +24,26 @@ import editor.private 1.0
 
 Pane{
     id: root
-    color : "#05090e"
+    color : currentTheme ? currentTheme.paneBackground : 'black'
     objectName: "projectFileSystem"
 
     property QtObject panes: null
-
+    paneFocusItem : root
     paneType: 'projectFileSystem'
     paneState : { return {} }
+
+    property Theme currentTheme : livecv.layers.workspace.themes.current
+
+    property Item addEntryOverlay : ProjectAddEntry{
+        onAccepted: {
+            if ( isFile ){
+                var f = project.fileModel.addFile(entry, name)
+                livecv.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
+            } else {
+                project.fileModel.addDirectory(entry, name)
+            }
+        }
+    }
 
     function addEntry(parentEntry, isFile){
         root.addEntryOverlay.entry = parentEntry
@@ -146,12 +159,21 @@ Pane{
         anchors.right: parent.right
 
         height: 30
-        color: "#08111a"
+        color: currentTheme ? currentTheme.paneTopBackground : 'black'
+
+        PaneDragItem{
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            onDragStarted: root.panes.__dragStarted(root)
+            onDragFinished: root.panes.__dragFinished(root)
+            display: "Project"
+        }
 
         Text{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 15
+            anchors.leftMargin: 30
             color: "#808691"
             text: "Project"
             font.family: "Open Sans, sans-serif"
@@ -167,7 +189,7 @@ Pane{
             Image{
                 id : paneOptions
                 anchors.centerIn: parent
-                source : "qrc:/images/toggle-navigation.png"
+                source : "qrc:/images/pane-menu.png"
             }
 
             MouseArea{
@@ -189,12 +211,41 @@ Pane{
         property int buttonWidth: 180
         opacity: visible ? 1.0 : 0
         z: 1000
+        color : "#03070b"
 
         Behavior on opacity{ NumberAnimation{ duration: 200 } }
 
         Rectangle{
-            id: removeProjectViewButton
+            id: newWindowEditorButton
             anchors.top: parent.top
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
+                id: newWindowEditorText
+                text: qsTr("Move to new window")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: newWindowEditorArea.containsMouse ? "#969aa1" : "#808691"
+            }
+            MouseArea{
+                id : newWindowEditorArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    projectMenu.visible = false
+                    root.panes.movePaneToNewWindow(root)
+                }
+            }
+        }
+
+        Rectangle{
+            id: removeProjectViewButton
+            anchors.top: newWindowEditorButton.bottom
             anchors.right: parent.right
             width: parent.buttonWidth
             height: parent.buttonHeight
@@ -214,7 +265,7 @@ Pane{
                 hoverEnabled: true
                 onClicked: {
                     projectMenu.visible = false
-                    livecv.layers.workspace.commands.execute('window.workspace.project.toggleVisibility')
+                    root.panes.removePane(root)
                 }
             }
         }
@@ -234,7 +285,7 @@ Pane{
                 implicitWidth: 10
                 implicitHeight: 10
                 Rectangle {
-                    color: "#0b1f2e"
+                    color: "#1f2227"
                     anchors.fill: parent
                 }
             }
@@ -243,14 +294,14 @@ Pane{
                 implicitHeight: 10
                 Rectangle{
                     anchors.fill: parent
-                    color: "#091823"
+                    color: root.color
                 }
             }
             textColor: '#9babb8'
             decrementControl: null
             incrementControl: null
             frame: Rectangle{color: "transparent"}
-            corner: Rectangle{color: "#091823"}
+            corner: Rectangle{color: root.color}
         }
 
         property var dropEntry: null
@@ -312,7 +363,10 @@ Pane{
                 anchors.left: parent.left
                 anchors.top: parent.top
                 width: entryData.width > 70 ? entryData.width + 30 : 95
-                color: entryDelegate.editMode ? "#1b2934" : "transparent"
+                color: root.currentTheme
+                       ? (entryDelegate.editMode ? root.currentTheme.projectPaneItemEditBackground
+                                                 : root.currentTheme.projectPaneItemBackground )
+                       : 'transparent'
                 Image{
                     anchors.left: parent.left
                     anchors.leftMargin: 5
@@ -364,6 +418,7 @@ Pane{
                     font.weight: Font.Light
                     font.italic: type === 2 || type === 1
                     readOnly: !entryDelegate.editMode
+                    selectionColor: "#3d4856"
                     Keys.onReturnPressed: {
                         root.renameEntry(styleData.value, text)
                         entryDelegate.editMode = false

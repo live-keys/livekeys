@@ -56,6 +56,7 @@ Pane{
 
         }
     }
+    paneFocusItem : editorArea
     paneClone: function(){
         return editor.panes.createPane('editor', paneState, [editor.width, editor.height])
     }
@@ -68,12 +69,14 @@ Pane{
         codeHandler.setDocument(document)
     }
 
-    property color topColor: "#08111a"
-    property color lineSurfaceColor: "#091018"
-    property color lineInfoColor:  "#050b12"
-    property color optionsColor: "#04131f"
+    property Theme currentTheme : livecv.layers.workspace.themes.current
 
-    color : "#050b12"
+    property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
+    property color lineSurfaceColor: topColor
+    property color lineInfoColor:  currentTheme ? currentTheme.paneTopBackgroundAlternate : 'black'
+    property color optionsColor: currentTheme ? currentTheme.paneTopBackground : 'black'
+
+    color : livecv.layers.workspace.themes.current.paneBackground
     clip : true
 
     objectName: "editor"
@@ -271,16 +274,17 @@ Pane{
         PaneDragItem{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 15
+            anchors.leftMargin: 5
             onDragStarted: root.panes.__dragStarted(editor)
             onDragFinished: root.panes.__dragFinished(editor)
-            display: "current pane"
+            display: titleText.text
         }
 
         Text{
+            id: titleText
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 35
+            anchors.leftMargin: 30
             color: "#808691"
             text: {
                 if ( editor.document ){
@@ -380,7 +384,7 @@ Pane{
             Image{
                 id : paneOptions
                 anchors.centerIn: parent
-                source : "qrc:/images/toggle-navigation.png"
+                source : "qrc:/images/pane-menu.png"
             }
 
             MouseArea{
@@ -573,7 +577,7 @@ Pane{
                     implicitWidth: 10
                     implicitHeight: 10
                     Rectangle {
-                        color: "#0d1e30"
+                        color: "#1f2227"
                         anchors.fill: parent
                     }
                 }

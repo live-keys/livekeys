@@ -29,35 +29,26 @@
   <script src="include/bootstrap/dist/js/bootstrap.min.js"></script>
 
   <script>
-    // Removes <hr> before .expandable
-    // Removes empty .expandable
-    $(".expandable").each(function () {
-      $(this).parent().prev().remove();
-      let data = $(this).children(".expandable-data");
-      if (data.hasClass("hidden")) {
-        data.hide();
-      }
-    })
 
     $(".expandable-data").each(function () {
+      if ($(this).hasClass("hidden")) {
+          $(this).hide();
+      }
       if ($(this).children().length == 0)
-        $(this).parent().remove();
+          $(this).parent().remove();
     })
 
-
-    $(".expandable-button").click(function () {
+    $(".expand-link").click(function () {
       let data = $(this).parent().children(".expandable-data");
       if (data.hasClass("hidden")) {
-        data.removeClass("hidden").stop(true, true).slideDown();
-        $(this).text("▴");
-        // $(this).text("↑");
+          data.removeClass("hidden").stop(true, true).slideDown();
+          $(this).text("-");
       } else {
-        data.addClass("hidden").stop(true, true).slideUp();
-        // $(this).text("↓");
-        $(this).text("▸");
+          data.addClass("hidden").stop(true, true).slideUp();
+          $(this).text("+");
 
       }
-      // console.log($(this));
+      return false;
     })
 
     const ps = new PerfectScrollbar('#indexList');

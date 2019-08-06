@@ -52,7 +52,7 @@ LiveExtension{
             editorBox.color = "#02070b"
             editorBox.radius = 5
             editorBox.border.width = 1
-            editorBox.border.color = "#061b24"
+            editorBox.border.color = "#141c25"
 
             var paletteBox = root.paletteContainerFactory.createObject(paletteGroup)
 
@@ -113,7 +113,7 @@ LiveExtension{
             editorBox.color = "#02070b"
             editorBox.radius = 5
             editorBox.border.width = 1
-            editorBox.border.color = "#061b24"
+            editorBox.border.color = "#141c25"
         }
 
         if ( palette || !codeHandler.isForAnObject(ef) ){
@@ -160,7 +160,7 @@ LiveExtension{
             editorBox.color = "#02070b"
             editorBox.radius = 5
             editorBox.border.width = 1
-            editorBox.border.color = "#061b24"
+            editorBox.border.color = "#141c25"
         }
 
         var paletteBox = root.paletteContainerFactory.createObject(paletteBoxGroup)
@@ -266,7 +266,7 @@ LiveExtension{
     }
 
     function add(){
-        var activePane = livecv.windowControls().workspace.panes.activePane
+        var activePane = livecv.layers.workspace.panes.activePane
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
              ( activePane.document.file.path.endsWith('.qml') || activePane.document.file.path === '' ) )
@@ -280,8 +280,8 @@ LiveExtension{
             var addBoxItem = addBoxFactory.createObject()
             addBoxItem.addContainer = addContainer
 
-            var addBox = livecv.windowControls().editor.environment.createEditorBox(
-                addBoxItem, rect, cursorCoords, livecv.windowControls().editor.environemnt.placement.bottom
+            var addBox = livecv.layers.editor.environment.createEditorBox(
+                addBoxItem, rect, cursorCoords, livecv.layers.editor.environemnt.placement.bottom
             )
             addBox.color = 'transparent'
             addBoxItem.cancel = function(){

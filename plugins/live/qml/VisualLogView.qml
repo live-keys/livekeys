@@ -17,7 +17,7 @@ ScrollView{
             implicitWidth: 10
             implicitHeight: 10
             Rectangle {
-                color: "#0b1f2e"
+                color: "#1f2227"
                 anchors.fill: parent
             }
         }

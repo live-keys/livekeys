@@ -74,9 +74,28 @@ a:hover {
   padding-bottom: 30px;
 }
 
+#indexList ul{
+  padding-top: 5px;
+  padding-left: 20px;
+  list-style: none;
+}
+
+#indexList ul li{
+  padding: 3px 0px;
+}
+
 #indexList::-webkit-scrollbar {
   width: 0px;
   background: transparent;
+}
+
+#indexList a:hover{
+  color: #555; 
+}
+
+#indexList .expand-link{
+  padding: 5px;
+  font-family: Courier New, Courier, monospace;
 }
 
 
@@ -88,26 +107,8 @@ a:hover {
   padding: 0;
 }
 
-/* 
-#indexList a {
-  
-} */
-
-#indexList .expandable-data {
-  margin-top: 10px;
-  margin-left: 20px;
-}
-
 #indexList a {
   color: #ccc;
-  display: list-item;
-  list-style-type: none;
-  list-style-position: outside;
-}
-
-#indexList .expandable-button {
-  font-size: 12px;
-  /* text-align: center; */
 }
 
 #indexList .expandable-button:hover {
@@ -116,27 +117,8 @@ a:hover {
   text-decoration: underline;
 }
 
-
-#indexList .level-1 {
-  font-weight: bold;
-  margin: 16px 0 6px 0;
-}
-
-#indexList .level-1.top {
-  margin: 6px 0;
-}
-
-#indexList .level-2 {
-  margin-left: 20px;
-}
-
-
-#indexList .level-3 {
-  margin-left: 40px;
-}
-
-#indexList .level-4 {
-  margin-left: 60px;
+#indexList .expandable-data{
+  margin-left: 10px;
 }
 
 #wrapper {

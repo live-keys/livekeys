@@ -11,7 +11,11 @@ Item{
     
     property string display: ''
     
-    Text { anchors.fill: parent; text: "||"; wrapMode: Text.WordWrap; color: 'white' }
+    Image{
+        anchors.centerIn: parent
+        source : "qrc:/images/pane-move-icon.png"
+    }
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent

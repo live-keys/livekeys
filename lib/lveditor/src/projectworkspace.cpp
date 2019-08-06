@@ -60,7 +60,7 @@ void ProjectWorkspace::State::projectActiveChange(Runnable *runnable){
 void ProjectWorkspace::State::documentOpen(ProjectDocument *document){
     std::string path = document->file()->path().toStdString();
 
-    if ( currentWorkspaceLayout.hasKey("documents") ){
+    if ( currentWorkspaceLayout.hasKey("documents") && currentWorkspaceLayout["documents"].type() == MLNode::Array ){
 
         for ( auto it = currentWorkspaceLayout["documents"].asArray().begin();
               it != currentWorkspaceLayout["documents"].asArray().end(); ++it )

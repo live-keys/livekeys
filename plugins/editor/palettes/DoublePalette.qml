@@ -26,7 +26,7 @@ CodePalette{
 
     item: Rectangle{
         width: 280
-        height: 68
+        height: 60
         color: 'transparent'
 
         Slider{
@@ -49,16 +49,14 @@ CodePalette{
 
             style: SliderStyle{
                 groove: Rectangle {
-                    implicitHeight: 8
-                    color: '#15202c'
+                    implicitHeight: 5
+                    color: '#0b111c'
                 }
                 handle: Rectangle{
-                    width: 8
-                    height: 18
+                    width: 11
+                    height: 11
                     radius: 5
-                    border.width: 1
-                    border.color: '#233569'
-                    color: '#b2b2b2'
+                    color: '#9b9da0'
                 }
             }
         }
@@ -80,7 +78,7 @@ CodePalette{
             anchors.left: parent.left
             anchors.leftMargin: 40
             anchors.top: parent.top
-            anchors.topMargin: 31
+            anchors.topMargin: 26
 
             width: parent.width - 80
 
@@ -97,28 +95,26 @@ CodePalette{
 
             style: SliderStyle{
                 groove: Rectangle {
-                    implicitHeight: 8
-                    color: '#15202c'
+                    implicitHeight: 5
+                    color: '#0b111c'
                 }
                 handle: Rectangle{
-                    width: 8
-                    height: 18
+                    width: 11
+                    height: 11
                     radius: 5
-                    border.width: 1
-                    border.color: '#233569'
-                    color: '#b2b2b2'
+                    color: '#9b9da0'
                 }
             }
         }
 
         Label{
             anchors.top: parent.top
-            anchors.topMargin: 30
+            anchors.topMargin: 25
             text: fractionalSlider.minimumValue.toFixed(1)
         }
         Label{
             anchors.top: parent.top
-            anchors.topMargin: 30
+            anchors.topMargin: 25
             anchors.right: parent.right
             text: fractionalSlider.maximumValue.toFixed(1)
         }
@@ -151,7 +147,7 @@ CodePalette{
                 handle: Rectangle{
                     width: 40
                     height: 6
-                    color: '#b2b2b2'
+                    color: '#9b9da0'
                 }
             }
         }

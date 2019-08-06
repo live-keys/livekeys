@@ -24,7 +24,7 @@ Rectangle{
 
     signal clicked()
 
-    color: buttonMouseArea.containsMouse ? "#0e2435" : "#0a1a27"
+    color: buttonMouseArea.containsMouse ? "#11212c" : "#0b151c"
     width: 100
     height: 30
 

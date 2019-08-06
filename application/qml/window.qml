@@ -201,7 +201,9 @@ ApplicationWindow{
 
         MessageDialogConfirm{
             anchors.fill: parent
-            color: "#050e16"
+            color: "#02070b"
+            border.width: 1
+            border.color: "#0c151c"
         }
     }
 
@@ -229,9 +231,19 @@ ApplicationWindow{
         anchors.leftMargin: 20
         visible: true
 
-        opacity: livecv.settings.launchMode ? 0.3 : 1.0
+        opacity: 0.3
         source : "qrc:/images/logo.png"
         z: 2222
+
+
+        Connections{
+            target: livecv
+            onLayerReady: {
+                if ( layer.name === 'workspace' ){
+                    logo.opacity = 1.0
+                }
+            }
+        }
     }
 
 }

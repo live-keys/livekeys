@@ -91,6 +91,7 @@ public:
     void addLayer(const QString& name, const QString &layer);
     void loadLayer(const QString& layerName, std::function<void(Layer *)> onReady = nullptr);
     void loadLayers(const QStringList& layers, std::function<void(Layer*)> onReady = nullptr);
+    void loadDefaultLayers();
 
     void loadInternals();
     void loadInternalPlugins();

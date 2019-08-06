@@ -125,7 +125,6 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
     QObject::connect(livecv->project(), &Project::activeChanged, livecv->m_script, &LiveCVScript::scriptChanged);
 
     livecv->m_settings = Settings::create(QString::fromStdString(ApplicationContext::instance().configPath()));
-    livecv->m_settings->setLaunchMode(livecv->m_arguments->launchFlag());
 
     return livecv;
 }
@@ -281,6 +280,22 @@ void LiveCV::loadLayers(const QStringList &layers, std::function<void (Layer *)>
                 loadLayers(tail, onReady);
             }
         });
+    }
+}
+
+void LiveCV::loadDefaultLayers(){
+    QStringList layersToLoad = {"window", "workspace", "editor"}; // defaults
+    if ( !m_arguments->layers().isEmpty() ){
+        layersToLoad = m_arguments->layers();
+        layersToLoad.removeAll("base");
+    }
+
+    if ( !layersToLoad.isEmpty() ){
+        loadLayers(layersToLoad, [this](Layer*){
+            loadProject();
+        });
+    } else {
+        loadProject();
     }
 }
 

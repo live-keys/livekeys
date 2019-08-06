@@ -38,7 +38,7 @@ Rectangle{
     Keys.onEscapePressed: root.escapePressed(root)
 
     anchors.centerIn: parent
-    color: "#333"
+    color: "#fff"
     width: 400
     height: messageLabel.height < 100 ? messageLabel.height + 100 : 200
     focus: true
@@ -56,7 +56,7 @@ Rectangle{
                 implicitWidth: 10
                 implicitHeight: 10
                 Rectangle {
-                    color: "#0d1e30"
+                    color: "#222b38"
                     anchors.fill: parent
                 }
             }
@@ -65,13 +65,13 @@ Rectangle{
                 implicitHeight: 10
                 Rectangle{
                     anchors.fill: parent
-                    color: editor ? editor.color : 'black'
+                    color: root.color
                 }
             }
             decrementControl: null
             incrementControl: null
             frame: Item{}
-            corner: Rectangle{color: editor.color}
+            corner: Rectangle{color: root.color}
         }
 
         Text{
@@ -92,10 +92,9 @@ Rectangle{
             font.family: "Open Sans, sans-serif"
             font.weight: Font.Light
         }
-
     }
 
-    Rectangle{
+    Item{
         id: buttonContainer
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 16
@@ -105,7 +104,6 @@ Rectangle{
         anchors.rightMargin: 15
         width: parent.width
         height: 30
-        color: "transparent"
     }
 
 }

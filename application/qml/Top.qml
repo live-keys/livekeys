@@ -24,49 +24,62 @@ Rectangle {
     id : container
     width: 100
     height: 35
+    color: 'transparent'
 
-    property color topColor: "#020a11"
-    property color bottomColor: "#000509"
     property alias modeImage: modeImage
     property var modeContainer: null
     property var runnablesMenu : null
 
-    gradient: Gradient{
-        GradientStop{ position: 0.0; color: topColor}
-        GradientStop{ position: 1.0; color: bottomColor}
-    }
-
     property bool isLogWindowDirty: false
     property var licenseSettings: livecv.settings.file('license')
 
-    signal messageYes()
-    signal messageNo()
-
-    signal newProject()
-    signal openFile()
-    signal openProject()
-    signal saveFile()
     signal openCommandsMenu()
-
     signal toggleLogWindow()
-
     signal openSettings()
     signal openLicense()
 
+    property string newIcon: ""
+    property string saveIcon: ""
+    property string openFileIcon: ""
+    property string openProjectIcon: ""
+
+    property string viewLogIcon: ""
+    property string runCommandIcon: ""
+    property string openSettingsIcon: ""
+    property string openLicenseIcon: ""
+
     // New
 
-    Rectangle{
+    Connections{
+        target: livecv
+        onLayerReady: {
+            if ( layer.name === 'workspace' ){
+                var theme = layer.themes.current
+                container.newIcon = theme.topNewIcon
+                container.saveIcon = theme.topSaveIcon
+                container.openFileIcon = theme.topOpenFileIcon
+                container.openProjectIcon = theme.topOpenProjectIcon
+                container.viewLogIcon = theme.topViewLogIcon
+                container.runCommandIcon = theme.topRunCommandIcon
+                container.openSettingsIcon = theme.topOpenSettingsIcon
+                container.openLicenseIcon = theme.topOpenLicenseIcon
+
+                container.modeContainer.liveImage.source = theme.topLiveModeIcon
+                container.modeContainer.onSaveImage.source = theme.topOnSaveModeIcon
+                container.modeContainer.disabledImage.source = theme.topDisabledModeIcon
+            }
+        }
+    }
+
+    Item{
         anchors.left: parent.left
         anchors.leftMargin: 130
         height : newMArea.containsMouse ? parent.height : parent.height - 5
-        width : 35
-        color : "transparent"
-//        border.width: 1
-//        border.color: "#031626"
+        width : 25
         Image{
             id : newImage
             anchors.centerIn: parent
-            source : "qrc:/images/new.png"
+            source: container.newIcon
         }
         Rectangle{
             color : "#031626"
@@ -81,24 +94,21 @@ Rectangle {
             id : newMArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: container.newProject()
+            onClicked: livecv.layers.workspace.project.newProject()
         }
     }
 
     // Save
 
-    Rectangle{
+    Item{
         anchors.left: parent.left
-        anchors.leftMargin: 170
-        color : "transparent"
-//        border.width: 1
-//        border.color: "#031626"
+        anchors.leftMargin: 130 + 35
         height : saveMArea.containsMouse ? parent.height : parent.height - 5
-        width : 35
+        width : 25
         Image{
             id : saveImage
             anchors.centerIn: parent
-            source : "qrc:/images/save.png"
+            source : container.saveIcon
         }
         Rectangle{
             color : "#031626"
@@ -113,24 +123,25 @@ Rectangle {
             id : saveMArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: container.saveFile();
+            onClicked: {
+                var fe = livecv.layers.workspace.panes.focusPane('editor')
+                if ( fe )
+                    fe.saveAs()
+            }
         }
     }
 
     // Open File
 
-    Rectangle{
+    Item{
         anchors.left: parent.left
-        anchors.leftMargin: 210
-        color : "transparent"
-//        border.width: 1
-//        border.color: "#031626"
+        anchors.leftMargin: 130 + 35 * 2
         height : openMArea.containsMouse ? parent.height : parent.height - 5
-        width : 35
+        width : 25
         Image{
             id : openImage
             anchors.centerIn: parent
-            source : "qrc:/images/open.png"
+            source : container.openFileIcon
         }
         Rectangle{
             color : "#031626"
@@ -145,25 +156,22 @@ Rectangle {
             id : openMArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: container.openFile()
+            onClicked: livecv.layers.workspace.project.openFileDialog()
         }
     }
 
 
     // Open Project
 
-    Rectangle{
+    Item{
         anchors.left: parent.left
-        anchors.leftMargin: 250
-        color : "transparent"
-//        border.width: 1
-//        border.color: "#031626"
+        anchors.leftMargin: 130 + 35 * 3
         height : openProjectMArea.containsMouse ? parent.height : parent.height - 5
-        width : 35
+        width : 25
         Image{
             id : openProjectImage
             anchors.centerIn: parent
-            source : "qrc:/images/open-directory.png"
+            source : container.openProjectIcon
         }
         Rectangle{
             color : "#031626"
@@ -178,24 +186,21 @@ Rectangle {
             id : openProjectMArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: container.openProject()
+            onClicked: livecv.layers.workspace.project.openProject()
         }
     }
 
     // Log Window
 
-    Rectangle{
+    Item{
         anchors.left: parent.left
-        anchors.leftMargin: 330
-        color : "transparent"
-//        border.width: 1
-//        border.color: "#031626"
+        anchors.leftMargin: 220 + 35 * 3
         height : openLogMArea.containsMouse ? parent.height : parent.height - 5
-        width : 35
+        width : 25
         Image{
-            id : openLog
+            id : openLogImage
             anchors.centerIn: parent
-            source : "qrc:/images/log.png"
+            source : container.viewLogIcon
 
             Rectangle{
                 visible : container.isLogWindowDirty
@@ -229,16 +234,15 @@ Rectangle {
 
     // Commands
 
-    Rectangle{
+    Item{
         anchors.left: parent.left
-        anchors.leftMargin: 395
-        color : "transparent"
+        anchors.leftMargin: 220 + 35 * 4
         height : commandMArea.containsMouse ? parent.height : parent.height - 5
-        width : 35
+        width : 25
         Image{
             id : commandImage
             anchors.centerIn: parent
-            source : "qrc:/images/command.png"
+            source : container.runCommandIcon
         }
         Rectangle{
             color : "#031626"
@@ -259,16 +263,15 @@ Rectangle {
 
     // Configuration
 
-    Rectangle{
+    Item{
         anchors.left: parent.left
-        anchors.leftMargin: 435
-        color : "transparent"
+        anchors.leftMargin: 220 + 35 * 5
         height : openSettingsArea.containsMouse ? parent.height : parent.height - 5
-        width : 35
+        width : 25
         Image{
             id : openSettings
             anchors.centerIn: parent
-            source : "qrc:/images/settings.png"
+            source : container.openSettingsIcon
         }
         Rectangle{
             color : "#031626"
@@ -286,16 +289,19 @@ Rectangle {
             onClicked: container.openSettings()
         }
     }
+
+    // Open License
+
     Rectangle{
         anchors.left: parent.left
-        anchors.leftMargin: 475
+        anchors.leftMargin: 220 + 35 * 6
         color : livecv.settings.file('license').highlights > 0 ? "#44130b" : "transparent"
         height : openLicenseArea.containsMouse ? parent.height : parent.height - 5
-        width : 35
+        width : 25
         Image{
             id : openLicense
             anchors.centerIn: parent
-            source : "qrc:/images/license.png"
+            source : container.openLicenseIcon
         }
         Rectangle{
             color : "#031626"
@@ -318,7 +324,7 @@ Rectangle {
     Rectangle {
         id: modeWrapper
         anchors.left: parent.left
-        anchors.leftMargin: 550
+        anchors.leftMargin: 520
         width: 220
         height: 30
         color: 'transparent'
@@ -415,13 +421,20 @@ Rectangle {
             height: parent.height
             anchors.right: parent.right
 
-            Image{
-                id : modeImage
-                anchors.right: parent.right
-                anchors.rightMargin: 25
+            Item{
+                width: 25
+                height: 25
                 anchors.verticalCenter: parent.verticalCenter
-                source: modeContainer.liveImage.source
+                anchors.right: parent.right
+                anchors.rightMargin: 20
+
+                Image{
+                    id : modeImage
+                    anchors.centerIn: parent
+                    source: modeContainer.liveImage.source
+                }
             }
+
 
             Triangle{
                 anchors.right: parent.right
