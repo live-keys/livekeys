@@ -40,6 +40,9 @@ Runnable::Runnable(ViewEngine* engine, QQmlComponent *component, const QString &
 }
 
 Runnable::~Runnable(){
+    if ( m_appRoot ){
+        m_appRoot->deleteLater();
+    }
 }
 
 void Runnable::run(){
