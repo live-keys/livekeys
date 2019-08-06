@@ -115,7 +115,7 @@ Item{
                         }
                     }
                     if ( !fe.document ){
-                        fe.document = project.active
+                        fe.document = project.openFile(project.active.path)
                     }
                 }
             }

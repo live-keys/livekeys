@@ -7,6 +7,7 @@
 #include "live/projectfile.h"
 #include "live/workspaceextension.h"
 #include "live/project.h"
+#include "live/projectfile.h"
 #include "live/theme.h"
 #include "live/windowlayer.h"
 #include "live/applicationcontext.h"
@@ -35,9 +36,9 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_panes(nullptr)
     , m_commands(new Commands)
     , m_keymap(nullptr)
+    , m_themes(new ThemeContainer("workspace", this))
     , m_project(nullptr)
     , m_extensions(nullptr)
-    , m_themes(new ThemeContainer("workspace", this))
 {
     Settings* settings = lv::ViewContext::instance().settings();
 
@@ -274,7 +275,7 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
         QByteArray activeKey = QByteArray::fromStdString(layout["active"].asString());
         auto it = openDocuments.find(activeKey);
         if ( it != openDocuments.end() ){
-            m_project->setActive(it.value()->file());
+            m_project->setActive(it.value()->file()->path());
         }
     }
 }

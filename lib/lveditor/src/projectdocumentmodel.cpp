@@ -129,91 +129,37 @@ void ProjectDocumentModel::updateDocumentMonitoring(ProjectDocument *document, b
 }
 
 /** Close all of the documents within a given folder path */
-void ProjectDocumentModel::closeDocumentsInPath(const QString &path, bool closeIfActive){
+void ProjectDocumentModel::closeDocumentsInPath(const QString &path){
     if ( path.isEmpty() ){
         closeDocument(path);
         return;
     }
 
     QHash<QString, ProjectDocument*>::iterator it = m_openedFiles.begin();
-    Project* p = qobject_cast<Project*>(parent());
     beginResetModel();
     while ( it != m_openedFiles.end() ){
         if ( it.key().startsWith(path) ){
             ProjectDocument* doc = it.value();
             it = m_openedFiles.erase(it);
             emit aboutToClose(it.value());
-            if ( p ){
-                if ( p->active() != doc )
-                    delete doc;
-                else if ( closeIfActive ){
-                    p->setActive((ProjectDocument*)0);
-                }
-            } else {
-                delete doc;
-            }
+            delete doc;
         } else {
             ++it;
         }
     }
 
-    if ( p ){
-        ProjectFile* newActive = 0;
-        if ( p->active() == 0 ){
-            if ( p->fileModel()->root()->childCount() > 0 ){
-                if ( p->fileModel()->root()->child(0)->isFile() )
-                    newActive = qobject_cast<ProjectFile*>(p->fileModel()->root()->child(0));
-                else {
-                    newActive = p->lookupBestFocus(p->fileModel()->root()->child(0));
-                }
-            }
-        }
-
-        if ( p->active() == 0 )
-            p->setActive(newActive);
-
-    }
-
     endResetModel();
 }
 
-/** Close the specific file with a given path */
-void ProjectDocumentModel::closeDocument(const QString &path, bool closeIfActive){
+/**
+ * \brief Close the specific file with a given path
+ */
+void ProjectDocumentModel::closeDocument(const QString &path){
     if ( m_openedFiles.contains(path) ){
         beginResetModel();
         ProjectDocument* document = m_openedFiles.take(path);
-        Project* p = qobject_cast<Project*>(parent());
-        if ( p ){
-            if ( p->active() != document ){
-                emit aboutToClose(document);
-                delete document;
-            } else if ( closeIfActive ){
-                p->setActive((ProjectDocument*)0);
-                emit aboutToClose(document);
-                delete document;
-            } else {
-                if ( document->isDirty() )
-                    document->readContent();
-            }
-
-            ProjectFile* newActive = 0;
-            if ( (p->active() == 0 || m_openedFiles.isEmpty())){
-                if ( p->fileModel()->root()->childCount() > 0 ){
-                    if ( p->fileModel()->root()->child(0)->isFile() )
-                        newActive = qobject_cast<ProjectFile*>(p->fileModel()->root()->child(0));
-                    else {
-                        newActive = p->lookupBestFocus(p->fileModel()->root()->child(0));
-                    }
-                }
-            }
-
-            if ( p->active() == 0 ){
-                p->setActive(newActive);
-            }
-
-        } else  {
-            delete document;
-        }
+        emit aboutToClose(document);
+        delete document;
         endResetModel();
     }
 }

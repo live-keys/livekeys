@@ -48,8 +48,8 @@ public:
     static void debugMessage(const QString& message);
 
 public slots:
-    void beforeCompile();
-    void afterCompile();
+    void beforeCompile(const QUrl&);
+    void afterCompile(QObject*, const QUrl&, QObject*);
     void clearStates();
 
 private:

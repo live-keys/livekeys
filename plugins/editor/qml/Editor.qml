@@ -112,7 +112,6 @@ Pane{
 
                 if ( !project.isDirProject() ){
                     project.openProject(url)
-                    editor.document = project.active
                 } else if ( project.isFileInProject(url) ){
                     livecv.layers.workspace.project.openFile(url, ProjectDocument.Edit)
                 } else {
@@ -126,7 +125,6 @@ Pane{
                             projectView.closeProject(
                                 function(){
                                     project.openProject(projectUrl);
-                                    editor.document = project.active
                                 }
                             )
                             mbox.close()
@@ -140,7 +138,6 @@ Pane{
                             projectView.closeProject(
                                 function(){
                                     project.openProject(projectUrl)
-                                    editor.document = project.active
                                 }
                             )
                             mbox.close()
@@ -209,7 +206,7 @@ Pane{
     }
 
     function closeDocumentAction(){
-        if ( !project.isDirProject() && document === project.active ){
+        if ( !project.isDirProject() && document.file.path === project.active.path ){
             livecv.layers.window.dialogs.message(
                 'Closing this file will also close this project. Would you like to close the project?',
             {
@@ -314,7 +311,6 @@ Pane{
                 id : switchImage
                 anchors.centerIn: parent
                 source : "qrc:/images/switch-file.png"
-                anchors.horizontalCenter: parent.horizontalCenter
             }
 
             MouseArea{

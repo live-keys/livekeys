@@ -53,6 +53,7 @@ DISTFILES += \
     qml/CommandsMenu.qml \
     qml/editorlayer.qml \
     qml/PaneSplitView.qml \
-    qml/LiveKeysTheme.qml
+    qml/LiveKeysTheme.qml \
+    qml/RunnablesMenu.qml
 
 

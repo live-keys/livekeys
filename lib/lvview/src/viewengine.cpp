@@ -369,10 +369,10 @@ QString ViewEngine::toErrorString(const QList<QQmlError> &errors){
  * clearCache is used to indicate that we've changed one of the non-active files which are cached, so the
  * cache has to be cleared since it's invalid after a change.
  */
-void ViewEngine::createObjectAsync(
-        const QString& qmlCode,
+void ViewEngine::createObjectAsync(const QString& qmlCode,
         QObject* parent,
         const QUrl& url,
+        QObject *reference,
         bool clearCache)
 {
     m_engineMutex->lock();
@@ -388,7 +388,7 @@ void ViewEngine::createObjectAsync(
     QList<QQmlError> errors = component.errors();
     if ( errors.size() > 0 ){
         m_engineMutex->unlock();
-        emit objectCreationError(toJSErrors(errors), url);
+        emit objectCreationError(toJSErrors(errors), url, reference);
         return;
     }
 
@@ -405,7 +405,7 @@ void ViewEngine::createObjectAsync(
         setIsLoading(false);
         QJSValue jsErrors = toJSErrors(incubatorErrors);
         m_engineMutex->unlock();
-        emit objectCreationError(jsErrors, url);
+        emit objectCreationError(jsErrors, url, reference);
         return;
     }
 
@@ -415,14 +415,14 @@ void ViewEngine::createObjectAsync(
         errorObject.setDescription("Component returned null object.");
         QJSValue jsErrors = toJSErrors(QList<QQmlError>() << errorObject);
         m_engineMutex->unlock();
-        emit objectCreationError(jsErrors, url);
+        emit objectCreationError(jsErrors, url, reference);
         return;
     }
 
     QObject* obj = incubator.object();
     m_engine->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
 
-    emit objectAcquired(url);
+    emit objectAcquired(url, reference);
 
     if (parent)
         obj->setParent(parent);
@@ -439,7 +439,7 @@ void ViewEngine::createObjectAsync(
     setIsLoading(false);
 
     m_engineMutex->unlock();
-    emit objectReady(obj, url);
+    emit objectReady(obj, url, reference);
 }
 
 QJSValue ViewEngine::lastErrorsObject() const{

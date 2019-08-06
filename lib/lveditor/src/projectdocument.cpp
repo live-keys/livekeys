@@ -423,7 +423,7 @@ void ProjectDocument::removeSection(ProjectDocumentSection::Ptr section){
  */
 bool ProjectDocument::isActive() const{
     Project* prj = qobject_cast<Project*>(parent());
-    if ( prj && prj->active() == this )
+    if ( prj && prj->active() && prj->active()->path() == m_file->path() )
         return true;
     return false;
 }

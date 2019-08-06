@@ -122,10 +122,7 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
     }
 
     livecv->m_script = new LiveCVScript(livecv->m_arguments->scriptArguments());
-    QObject::connect(
-        livecv->m_project, SIGNAL(activeChanged(lv::ProjectDocument*)),
-        livecv->m_script, SLOT(scriptChanged(lv::ProjectDocument*))
-    );
+    QObject::connect(livecv->project(), &Project::activeChanged, livecv->m_script, &LiveCVScript::scriptChanged);
 
     livecv->m_settings = Settings::create(QString::fromStdString(ApplicationContext::instance().configPath()));
     livecv->m_settings->setLaunchMode(livecv->m_arguments->launchFlag());

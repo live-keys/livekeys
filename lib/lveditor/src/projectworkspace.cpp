@@ -30,7 +30,7 @@ namespace lv{
 class ProjectWorkspace::State{
 
 public:
-    void projectActiveChange(ProjectDocument* active);
+    void projectActiveChange(Runnable* runnable);
     void documentOpen(ProjectDocument* document);
     void documentClosed(ProjectDocument* document);
 
@@ -52,9 +52,9 @@ private:
     void setPaneState(MLNode& pane, const QVariant& state);
 };
 
-void ProjectWorkspace::State::projectActiveChange(ProjectDocument* document){
-    if ( document )
-        currentWorkspaceLayout["active"] = Project::hashPath(document->file()->path().toUtf8()).toHex().toStdString();
+void ProjectWorkspace::State::projectActiveChange(Runnable *runnable){
+    if ( runnable )
+        currentWorkspaceLayout["active"] = Project::hashPath(runnable->path().toUtf8()).toHex().toStdString();
 }
 
 void ProjectWorkspace::State::documentOpen(ProjectDocument *document){
@@ -532,9 +532,9 @@ void ProjectWorkspace::initializeDefaults(){
 }
 
 
-void ProjectWorkspace::whenProjectActiveChange(ProjectDocument *document){
-    m_state->projectActiveChange(document);
-    emit projectActiveChange(document);
+void ProjectWorkspace::whenProjectActiveChange(Runnable *runnable){
+    m_state->projectActiveChange(runnable);
+    emit projectActiveChange(runnable);
 }
 
 void ProjectWorkspace::whenAboutToClose(){
