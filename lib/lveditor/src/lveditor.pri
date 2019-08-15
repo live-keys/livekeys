@@ -36,7 +36,9 @@ HEADERS += \
     $$PWD/projectworkspace.h \
     $$PWD/workspaceextension.h \
     $$PWD/themecontainer.h \
-    $$PWD/theme.h
+    $$PWD/theme.h \
+    $$PWD/runnable.h \
+    $$PWD/runnablecontainer.h
 
 SOURCES += \
     $$PWD/project.cpp \
@@ -72,4 +74,6 @@ SOURCES += \
     $$PWD/projectworkspace.cpp \
     $$PWD/workspaceextension.cpp \
     $$PWD/themecontainer.cpp \
-    $$PWD/theme.cpp
+    $$PWD/theme.cpp \
+    $$PWD/runnable.cpp \
+    $$PWD/runnablecontainer.cpp

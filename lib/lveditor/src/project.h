@@ -21,6 +21,8 @@
 #include "live/lockedfileiosession.h"
 #include "live/projectdocument.h"
 
+#include "live/runnable.h"
+
 #include <QObject>
 #include <QHash>
 
@@ -28,20 +30,23 @@ class QTimer;
 
 namespace lv{
 
+class Runnable;
 class ViewEngine;
 class ProjectEntry;
 class ProjectFile;
 class ProjectFileModel;
 class ProjectNavigationModel;
 class ProjectDocumentModel;
+class RunnableContainer;
 
 class LV_EDITOR_EXPORT Project : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lv::ProjectDocument*  active                READ active          NOTIFY activeChanged)
+    Q_PROPERTY(lv::Runnable* active                        READ active          NOTIFY activeChanged)
     Q_PROPERTY(lv::ProjectFileModel* fileModel             READ fileModel       CONSTANT)
     Q_PROPERTY(lv::ProjectNavigationModel* navigationModel READ navigationModel CONSTANT)
     Q_PROPERTY(lv::ProjectDocumentModel* documentModel     READ documentModel   CONSTANT)
+    Q_PROPERTY(lv::RunnableContainer* runnables            READ runnables       CONSTANT)
     Q_PROPERTY(QString rootPath                            READ rootPath        NOTIFY pathChanged)
     Q_PROPERTY(lv::Project::RunTrigger runTrigger          READ runTrigger      WRITE setRunTrigger NOTIFY runTriggerChanged)
     Q_ENUMS(RunTrigger)
@@ -60,8 +65,6 @@ public:
 public:
     Project(QObject* parent = 0);
     ~Project();
-
-    void setActive(const QString& rootPath);
 
     ProjectFile* lookupBestFocus(ProjectEntry* entry);
     ProjectDocument* isOpened(const QString& rootPath);
@@ -86,7 +89,9 @@ public:
      */
     lv::ProjectDocumentModel* documentModel();
 
-    lv::ProjectDocument*  active() const;
+    lv::RunnableContainer* runnables() const;
+
+    lv::Runnable* active() const;
 
     /**
      * \brief Getter of the root path
@@ -104,13 +109,15 @@ public:
 
     static QByteArray hashPath(const QByteArray& path);
 
+
 public slots:
     void newProject();
     void closeProject();
     lv::ProjectDocument* openFile(const QUrl& rootPath, int mode = lv::ProjectDocument::EditIfNotOpen);
     lv::ProjectDocument* openFile(const QString& rootPath, int mode = lv::ProjectDocument::EditIfNotOpen);
     lv::ProjectDocument* openFile(lv::ProjectFile* file, int mode = lv::ProjectDocument::EditIfNotOpen);
-    void setActive(lv::ProjectFile *file);
+
+    void setActive(const QString& rootPath);
 
     bool isDirProject() const;
     bool isFileInProject(const QUrl& rootPath) const;
@@ -130,14 +137,11 @@ public slots:
     QObject* runSpace();
     QObject* appRoot();
 
-    void engineObjectAcquired(const QUrl& file);
-    void engineObjectReady(QObject* object, const QUrl& file);
-
 signals:
     /** path changed, means the whole project changed */
     void pathChanged(QString rootPath);
     /** active file has changed */
-    void activeChanged(lv::ProjectDocument* active);
+    void activeChanged(lv::Runnable* active);
 
     /** triggers when a document is opened */
     void documentOpened(lv::ProjectDocument* document);
@@ -156,8 +160,7 @@ signals:
 private:
     ViewEngine* engine();
     ProjectFile* relocateDocument(const QString& rootPath, const QString &newPath, ProjectDocument *document);
-    void setActive(ProjectDocument* document);
-    void emptyRunSpace();
+    void setActive(Runnable* runnable);
     ProjectDocument* createDocument(ProjectFile* file, bool isMonitored);
     void documentSaved(ProjectDocument* documnet);
 
@@ -165,15 +168,15 @@ private:
     ProjectFileModel*       m_fileModel;
     ProjectNavigationModel* m_navigationModel;
     ProjectDocumentModel*   m_documentModel;
+    RunnableContainer*      m_runnables;
 
     LockedFileIOSession::Ptr m_lockedFileIO;
 
-    ProjectDocument* m_active;
+    Runnable*        m_active;
     QString          m_path;
+    QObject*         m_runspace;
     QTimer*          m_scheduleRunTimer;
     RunTrigger       m_runTrigger;
-    QObject*         m_runSpace;
-    QObject*         m_appRoot;
 };
 
 
@@ -189,7 +192,14 @@ inline ProjectDocumentModel *Project::documentModel(){
     return m_documentModel;
 }
 
-inline ProjectDocument *Project::active() const{
+/**
+ * \brief Returns the opened runnables
+ */
+inline RunnableContainer *Project::runnables() const{
+    return m_runnables;
+}
+
+inline Runnable* Project::active() const{
     return m_active;
 }
 

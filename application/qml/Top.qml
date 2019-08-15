@@ -28,6 +28,7 @@ Rectangle {
 
     property alias modeImage: modeImage
     property var modeContainer: null
+    property var runnablesMenu : null
 
     property bool isLogWindowDirty: false
     property var licenseSettings: livecv.settings.file('license')
@@ -340,11 +341,10 @@ Rectangle {
                 elide: Text.ElideRight
                 width: 130
                 text : {
-                    if (!project.active) return "";
-                    if (project.active && project.active.file){
-                        if (project.active.file.name === "") return "untitled";
-                        else return project.active.file.name;
-                    }
+                    if (!project.active)
+                        return "";
+
+                    return project.active.name
                 }
             }
         }
@@ -396,6 +396,24 @@ Rectangle {
             onPressed: compileButtonShape.state = "Pressed"
             onReleased: compileButtonShape.state = "Released"
             onClicked: { project.run() }
+        }
+
+        Item{
+            anchors.right: parent.right
+            anchors.rightMargin: 50
+            width: 30
+            height: parent.height
+
+            Image{
+                id: switchRunnableImage
+                anchors.centerIn: parent
+                source : "qrc:/images/switch-file.png"
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: container.runnablesMenu.visible = !container.runnablesMenu.visible
+            }
         }
 
         Item{

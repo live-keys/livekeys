@@ -344,7 +344,7 @@ Pane{
                 entryData.activeFocus = false
             }
             function setActive(){
-                project.setActive(styleData.value)
+                project.setActive(styleData.value.path)
             }
             function openFile(){
                 root.editEntry(styleData.value)
@@ -373,7 +373,7 @@ Pane{
                     anchors.verticalCenter: parent.verticalCenter
                     source: {
                         if ( styleData.value && styleData.value.isFile ){
-                            if (styleData.value === (project.active ? project.active.file : null) )
+                            if (project.active && styleData.value.path === project.active.path)
                                 return "qrc:/images/project-file-active.png"
                             else {
                                 if ( styleData.value.document ){

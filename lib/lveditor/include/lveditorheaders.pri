@@ -22,4 +22,5 @@ HEADERS += \
     $$PWD/live/workspace.h \
     $$PWD/live/projectworkspace.h \
     $$PWD/live/theme.h \
-    $$PWD/live/workspaceextension.h
+    $$PWD/live/workspaceextension.h \
+    $$PWD/live/runnable.h

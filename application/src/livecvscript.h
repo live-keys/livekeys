@@ -23,7 +23,7 @@
 namespace lv{
 
 class Environment;
-class ProjectDocument;
+class Runnable;
 
 class LiveCVScript : public QObject{
 
@@ -43,7 +43,7 @@ public:
     lv::Environment* environment();
 
 public slots:
-    void scriptChanged(lv::ProjectDocument* active);
+    void scriptChanged(lv::Runnable* active);
     const QString& name() const;
 
 signals:

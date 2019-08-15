@@ -29,7 +29,7 @@ public:
     const MLNode& currentLayout() const;
 
 signals:
-    void projectActiveChange(ProjectDocument* active);
+    void projectActiveChange(Runnable* active);
 
     void documentOpen(ProjectDocument* document);
     void documentClose(ProjectDocument* document);
@@ -48,7 +48,7 @@ signals:
     void paneRemoved(QQuickItem* pane);
 
 public slots:
-    void whenProjectActiveChange(ProjectDocument* document);
+    void whenProjectActiveChange(Runnable* runnable);
     void whenAboutToClose();
 
     void whenDocumentOpen(ProjectDocument* document);

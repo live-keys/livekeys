@@ -16,9 +16,12 @@
 
 #include "projectfilemodel.h"
 #include "live/projectdocumentmodel.h"
+#include "live/runnable.h"
 #include "live/projectentry.h"
 #include "live/projectfile.h"
 #include "live/project.h"
+
+#include "runnablecontainer.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -345,8 +348,30 @@ bool ProjectFileModel::removeEntry(ProjectEntry *entry){
     Project* p = qobject_cast<Project*>(QObject::parent());
     if ( entry->isFile() ){
         if ( QFile(entry->path()).remove() ){
-            if ( p )
-                p->documentModel()->closeDocument(entry->path(), true);
+            if ( p ){
+                p->documentModel()->closeDocument(entry->path());
+
+                Runnable* r = p->runnables()->runnableAt(entry->path());
+                if ( r ){
+                    if ( p->active() == r ){
+                        p->setActive((Runnable*)nullptr);
+                    }
+
+                    p->runnables()->closeRunnable(r);
+
+                    if ( p->active() == nullptr ){
+                        if ( p->fileModel()->root()->childCount() > 0 ){
+                            if ( p->fileModel()->root()->child(0)->isFile() )
+                                p->setActive("");
+                            else {
+                                ProjectFile* pf = p->lookupBestFocus(p->fileModel()->root()->child(0));
+                                if ( pf )
+                                    p->setActive(pf->path());
+                            }
+                        }
+                    }
+                }
+            }
             entryRemoved(entry);
             return true;
         } else {
@@ -355,8 +380,34 @@ bool ProjectFileModel::removeEntry(ProjectEntry *entry){
         }
     } else {
         if ( QDir(entry->path()).removeRecursively() ){
-            if ( p )
-                p->documentModel()->closeDocumentsInPath(entry->path(), true);
+            if ( p ){
+                p->documentModel()->closeDocumentsInPath(entry->path());
+            }
+
+            QList<Runnable*> runnables = p->runnables()->runnablesInPath(entry->path());
+            for ( auto it = runnables.begin(); it != runnables.end(); ++it ){
+                Runnable* r = *it;
+
+                if ( p->active() == r ){
+                    p->setActive(nullptr);
+                }
+
+                p->runnables()->closeRunnable(r);
+
+            }
+
+            if ( p->active() == nullptr ){
+                if ( p->fileModel()->root()->childCount() > 0 ){
+                    if ( p->fileModel()->root()->child(0)->isFile() )
+                        p->setActive("");
+                    else {
+                        ProjectFile* pf = p->lookupBestFocus(p->fileModel()->root()->child(0));
+                        if ( pf )
+                            p->setActive(pf->path());
+                    }
+                }
+            }
+
             entryRemoved(entry);
             return true;
         } else {

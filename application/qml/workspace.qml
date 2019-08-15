@@ -354,6 +354,7 @@ Item{
     Top{
         id : header
         modeContainer: modeContainer
+        runnablesMenu: runnablesMenu
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -390,10 +391,16 @@ Item{
         onOpenLicense: {livecv.layers.window.dialogs.overlayBox(license)}
     }
 
-    CommandsMenu {
+    CommandsMenu{
         id: commandsMenu
         anchors.top: header.bottom
         x: 355
+    }
+
+    RunnablesMenu{
+        id: runnablesMenu
+        anchors.top: header.bottom
+        x: 550
     }
 
     ModeContainer {

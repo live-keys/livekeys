@@ -55,8 +55,8 @@ public:
 
     void updateDocumentMonitoring(ProjectDocument* document, bool monitor);
 
-    void closeDocumentsInPath(const QString& path, bool closeIfActive = false);
-    void closeDocument(const QString& path, bool closeIfActive = false);
+    void closeDocumentsInPath(const QString& path);
+    void closeDocument(const QString& path);
 
 public slots:
     void rescanDocuments();

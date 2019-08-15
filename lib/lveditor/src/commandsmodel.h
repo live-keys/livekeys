@@ -39,12 +39,12 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     int rowCount(const QModelIndex &) const;
     QHash<int, QByteArray> roleNames() const;
-    Q_INVOKABLE void setFilter(const QString &filter);
 
-public Q_SLOTS:
+public slots:
     void updateAvailableCommands();
+    void setFilter(const QString &filter);
 
-Q_SIGNALS:
+signals:
     void modelChanged(CommandsModel* model);
 
 private:
