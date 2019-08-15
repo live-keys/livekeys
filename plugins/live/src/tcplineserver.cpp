@@ -38,7 +38,7 @@ void TcpLineServer::newConnection(){
     connect(socket, SIGNAL(disconnected()), lineSocket, SLOT(deleteLater()));
     m_sockets.append(lineSocket);
 
-    vlog("tcpline-server").d() << "New connection from :" << lineSocket->address();
+    vlog("tcpline-server").v() << "New connection from :" << lineSocket->address();
 }
 
 void TcpLineServer::componentComplete(){
@@ -77,7 +77,7 @@ void TcpLineServer::startListening(){
             return;
         }
 
-        vlog("tcpline-server").d() << "Started listening on " << m_address << ":" << m_port;
+        vlog("tcpline-server").v() << "Started listening on " << m_address << ":" << m_port;
 
         emit listening();
     }

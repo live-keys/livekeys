@@ -1,29 +1,32 @@
-#ifndef LVTCPLINE_H
-#define LVTCPLINE_H
+#ifndef LVREMOTELINE_H
+#define LVREMOTELINE_H
 
 #include <QObject>
 #include <QQmlPropertyMap>
+#include <QSet>
+
 #include "componentsource.h"
-#include "tcplineconnection.h"
+#include "remotecontainer.h"
 
 namespace lv{
 
-class TcpLineProperty;
+class RemoteLineProperty;
 
-class TcpLine : public QObject, public QQmlParserStatus{
+/// \private
+class RemoteLine : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(lv::ComponentSource* source       READ source     WRITE setSource     NOTIFY sourceChanged)
-    Q_PROPERTY(lv::TcpLineConnection* connection READ connection WRITE setConnection NOTIFY connectionChanged)
-    Q_PROPERTY(QQmlPropertyMap* result           READ result     NOTIFY resultChanged)
+    Q_PROPERTY(lv::ComponentSource* source     READ source     WRITE setSource     NOTIFY sourceChanged)
+    Q_PROPERTY(lv::RemoteContainer* connection READ connection WRITE setConnection NOTIFY connectionChanged)
+    Q_PROPERTY(QQmlPropertyMap* result         READ result     NOTIFY resultChanged)
     Q_CLASSINFO("DefaultProperty", "source")
 
-    friend class TcpLineProperty;
+    friend class RemoteLineProperty;
 
 public:
-    explicit TcpLine(QObject *parent = nullptr);
-    ~TcpLine();
+    explicit RemoteLine(QObject *parent = nullptr);
+    ~RemoteLine();
 
     void classBegin() Q_DECL_OVERRIDE{}
     void componentComplete() Q_DECL_OVERRIDE;
@@ -33,8 +36,8 @@ public:
     lv::ComponentSource* source() const;
     void setSource(lv::ComponentSource* source);
 
-    lv::TcpLineConnection* connection() const;
-    void setConnection(lv::TcpLineConnection* connection);
+    RemoteContainer *connection() const;
+    void setConnection(lv::RemoteContainer* connection);
 
     static void receiveMessage(const LineMessage& message, void* data);
     void onMessage(const LineMessage& message);
@@ -51,35 +54,35 @@ signals:
     void resultChanged();
 
 private:
-    void propertyChanged(TcpLineProperty* property);
+    void propertyChanged(RemoteLineProperty* property);
     void sendProperty(const QString& propertyName);
 
-    QList<TcpLineProperty*> m_properties;
+    QList<RemoteLineProperty*> m_properties;
     bool                    m_componentComplete;
     bool                    m_componentBuild;
     lv::ComponentSource*    m_source;
-    lv::TcpLineConnection*  m_connection;
+    lv::RemoteContainer*    m_connection;
     QQmlPropertyMap*        m_result;
 
     QSet<QString>           m_propertiesToSend;
 };
 
-inline bool TcpLine::isComponentComplete() const{
+inline bool RemoteLine::isComponentComplete() const{
     return m_componentComplete;
 }
 
-inline ComponentSource *TcpLine::source() const{
+inline ComponentSource *RemoteLine::source() const{
     return m_source;
 }
 
-inline TcpLineConnection *TcpLine::connection() const{
+inline RemoteContainer *RemoteLine::connection() const{
     return m_connection;
 }
 
-inline QQmlPropertyMap *TcpLine::result() const{
+inline QQmlPropertyMap *RemoteLine::result() const{
     return m_result;
 }
 
 }// namespace
 
-#endif // LVTCPLINE_H
+#endif // LVREMOTELINE_H
