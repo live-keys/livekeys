@@ -33,7 +33,9 @@ HEADERS += \
     $$PWD/layer.h \
     $$PWD/windowlayer.h \
     $$PWD/qmlpropertywatcher.h \
-    $$PWD/qmlstream.h
+    $$PWD/qmlstream.h \
+    $$PWD/sharedmemoryreadworker.h \
+    $$PWD/sharedmemorywriteworker.h
 
 
 SOURCES += \
@@ -65,5 +67,7 @@ SOURCES += \
     $$PWD/layer.cpp \
     $$PWD/windowlayer.cpp \
     $$PWD/qmlpropertywatcher.cpp \
-    $$PWD/qmlstream.cpp
+    $$PWD/qmlstream.cpp \
+    $$PWD/sharedmemoryreadworker.cpp \
+    $$PWD/sharedmemorywriteworker.cpp
 
