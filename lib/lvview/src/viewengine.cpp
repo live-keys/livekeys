@@ -369,7 +369,8 @@ QString ViewEngine::toErrorString(const QList<QQmlError> &errors){
  * clearCache is used to indicate that we've changed one of the non-active files which are cached, so the
  * cache has to be cleared since it's invalid after a change.
  */
-void ViewEngine::createObjectAsync(const QString& qmlCode,
+void ViewEngine::createObjectAsync(
+        const QString& qmlCode,
         QObject* parent,
         const QUrl& url,
         QObject *reference,

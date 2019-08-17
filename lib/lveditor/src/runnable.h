@@ -10,6 +10,8 @@
 namespace lv{
 
 class ViewEngine;
+class RunnableContainer;
+
 class LV_EDITOR_EXPORT Runnable : public QObject{
 
     Q_OBJECT
@@ -23,8 +25,19 @@ public:
     };
 
 public:
-    Runnable(ViewEngine* engine, const QString &path, const QString& name = "", QObject* parent = nullptr);
-    Runnable(ViewEngine* engine, QQmlComponent* component, const QString& name = "", QObject* parent = nullptr);
+    Runnable(
+        ViewEngine* engine,
+        const QString &path,
+        RunnableContainer* parent,
+        const QString& name = "",
+        const QSet<QString>& activations = QSet<QString>());
+
+    Runnable(
+        ViewEngine* engine,
+        QQmlComponent* component,
+        RunnableContainer* parent,
+        const QString& name = "");
+
     ~Runnable();
 
     const QString& name() const;
@@ -33,7 +46,8 @@ public:
     void setRunSpace(QObject* runspace);
     QObject* appRoot();
 
-    void run();
+    const QSet<QString>& activations() const;
+
 
     const QString& path() const;
 
@@ -42,13 +56,19 @@ public slots:
     void engineObjectReady(QObject* object, const QUrl& file, QObject* ref);
     void engineObjectCreationError(QJSValue errors, const QUrl&, QObject* reference);
 
+    void run();
     QObject* runSpace();
+
+    void _activationContentsChanged(int, int, int);
+    void _documentOpened(ProjectDocument* document);
 
 signals:
     void nameChanged(QString name);
     void runError(QJSValue errors);
+    void objectReady();
 
 private:
+    QObject *createObject(const QByteArray& code, const QUrl& file);
     void emptyRunSpace();
 
     QString               m_name;
@@ -58,6 +78,9 @@ private:
     ViewEngine*           m_engine;
     QObject*              m_appRoot;
     Type                  m_type;
+    QSet<QString>         m_activations;
+    Project*              m_project;
+    QTimer*               m_scheduleTimer;
 };
 
 inline const QString &Runnable::name() const{
@@ -82,6 +105,10 @@ inline QObject *Runnable::runSpace(){
 
 inline QObject *Runnable::appRoot(){
     return m_appRoot;
+}
+
+inline const QSet<QString> &Runnable::activations() const{
+    return m_activations;
 }
 
 inline const QString &Runnable::path() const{

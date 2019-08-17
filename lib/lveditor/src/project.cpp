@@ -92,7 +92,7 @@ void Project::newProject(){
         document->removeEditingState(ProjectDocument::Read);
         m_documentModel->openDocument("", document);
 
-        m_active = new Runnable(engine(), document->file()->path(), "untitled", m_runnables);
+        m_active = new Runnable(engine(), document->file()->path(), m_runnables, "untitled");
         m_active->setRunSpace(m_runspace);
         m_runnables->addRunnable(m_active);
         setActive(m_active);
@@ -127,7 +127,7 @@ void Project::openProject(const QString &path){
         );
         m_documentModel->openDocument(document->file()->path(), document);
 
-        Runnable* r = new Runnable(engine(), document->file()->path(), document->file()->name(), m_runnables);
+        Runnable* r = new Runnable(engine(), document->file()->path(), m_runnables, document->file()->name());
         r->setRunSpace(m_runspace);
         m_runnables->addRunnable(r);
         m_active = r;
@@ -281,10 +281,10 @@ void Project::setActive(const QString &path){
     if ( !r ){
         ProjectDocument* document = isOpened(path);
         if ( document ){
-            r = new Runnable(engine(), document->file()->path(), document->file()->name(), m_runnables);
+            r = new Runnable(engine(), document->file()->path(), m_runnables, document->file()->name());
         } else {
             QFileInfo pathInfo(path);
-            r = new Runnable(engine(), path, pathInfo.fileName(), m_runnables);
+            r = new Runnable(engine(), path, m_runnables, pathInfo.fileName());
         }
 
         m_runnables->addRunnable(r);
@@ -366,6 +366,24 @@ QByteArray Project::hashPath(const QByteArray &path){
 }
 
 /**
+ * \brief Exclude these paths from scheduling a run
+ */
+void Project::excludeRunTriggers(const QSet<QString> &paths){
+    for ( auto it = paths.begin(); it != paths.end(); ++it ){
+        m_excludedRunTriggers.insert(*it);
+    }
+}
+
+/**
+ * \brief Remove these paths from excluding a scheduled run
+ */
+void Project::removeExcludedRunTriggers(const QSet<QString> &paths){
+    for ( auto it = paths.begin(); it != paths.end(); ++it ){
+        m_excludedRunTriggers.remove(*it);
+    }
+}
+
+/**
  * \brief Closes the file given the path
  */
 void Project::closeFile(const QString &path){
@@ -385,6 +403,9 @@ ProjectDocument *Project::createDocument(ProjectFile *file, bool isMonitored){
     ProjectDocument* document = new ProjectDocument(file, isMonitored, this);
 
     connect(document->textDocument(), &QTextDocument::contentsChange, [this, document](int, int, int){
+
+        if ( m_excludedRunTriggers.contains(document->file()->path()) )
+            return;
 
         if ( document->editingStateIs(ProjectDocument::Read) && document->isMonitored() ){
             if ( m_runTrigger != Project::RunManual )

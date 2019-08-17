@@ -109,6 +109,8 @@ public:
 
     static QByteArray hashPath(const QByteArray& path);
 
+    void excludeRunTriggers(const QSet<QString>& paths);
+    void removeExcludedRunTriggers(const QSet<QString>& paths);
 
 public slots:
     void newProject();
@@ -177,6 +179,8 @@ private:
     QObject*         m_runspace;
     QTimer*          m_scheduleRunTimer;
     RunTrigger       m_runTrigger;
+
+    QSet<QString>    m_excludedRunTriggers;
 };
 
 

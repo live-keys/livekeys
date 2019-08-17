@@ -594,8 +594,6 @@ void ProjectWorkspace::whenDocumentSaved(){
 }
 
 void ProjectWorkspace::whenWindowInitialized(QQuickWindow *window){
-    qDebug() << "WINDOW INITIALIZED:" << window;
-
     m_state->windows.append(window);
 
     connect(window, &QQuickWindow::xChanged, this, &ProjectWorkspace::whenWindowRectChanged);

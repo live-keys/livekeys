@@ -126,6 +126,9 @@ public:
     QObject* createObject(const QByteArray& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
     QObject* createObject(const char* qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
 
+    QJSValue toJSErrors(const QList<QQmlError>& errors) const;
+    QJSValue toJSError(const QQmlError& error) const;
+
 signals:
     /** Signals before compiling a new object. */
     void aboutToCreateObject(const QUrl& file);
@@ -163,8 +166,6 @@ public slots:
     QJSValue lastErrorsObject() const;
 
 private:
-    QJSValue toJSError(const QQmlError& error) const;
-    QJSValue toJSErrors(const QList<QQmlError>& errors) const;
 
     QQmlEngine*    m_engine;
     QMutex*        m_engineMutex;

@@ -10,10 +10,16 @@
 #include <QQmlComponent>
 #include <QQuickItem>
 #include <QQmlEngine>
+#include <QTimer>
 
 namespace lv{
 
-Runnable::Runnable(ViewEngine* engine, const QString &path, const QString &name, QObject* parent)
+Runnable::Runnable(
+        ViewEngine* engine,
+        const QString &path,
+        RunnableContainer* parent,
+        const QString &name,
+        const QSet<QString>& activations)
     : QObject(parent)
     , m_name(name)
     , m_path(path)
@@ -22,13 +28,35 @@ Runnable::Runnable(ViewEngine* engine, const QString &path, const QString &name,
     , m_engine(engine)
     , m_appRoot(nullptr)
     , m_type(Runnable::File)
+    , m_activations(activations)
+    , m_scheduleTimer(nullptr)
 {
     connect(engine, &ViewEngine::objectAcquired,      this, &Runnable::engineObjectAcquired);
     connect(engine, &ViewEngine::objectReady,         this, &Runnable::engineObjectReady);
     connect(engine, &ViewEngine::objectCreationError, this, &Runnable::engineObjectCreationError);
+
+    m_project = qobject_cast<Project*>(parent->parent());
+
+    m_project->excludeRunTriggers(m_activations);
+
+    if ( m_activations.size() > 0 ){
+        m_scheduleTimer = new QTimer(this);
+        m_scheduleTimer->setInterval(1000);
+        m_scheduleTimer->setSingleShot(true);
+        connect(m_scheduleTimer, &QTimer::timeout, this, &Runnable::run);
+        connect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
+
+        for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
+            const QString& activation = *it;
+            ProjectDocument* document = m_project->isOpened(activation);
+            if ( document ){
+                connect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
+            }
+        }
+    }
 }
 
-Runnable::Runnable(ViewEngine* engine, QQmlComponent *component, const QString &name, QObject *parent)
+Runnable::Runnable(ViewEngine* engine, QQmlComponent *component, RunnableContainer *parent, const QString &name)
     : QObject(parent)
     , m_name(name)
     , m_component(component)
@@ -36,10 +64,14 @@ Runnable::Runnable(ViewEngine* engine, QQmlComponent *component, const QString &
     , m_engine(engine)
     , m_appRoot(nullptr)
     , m_type(Runnable::Component)
+    , m_scheduleTimer(nullptr)
 {
+    m_project = qobject_cast<Project*>(parent->parent());
 }
 
 Runnable::~Runnable(){
+    m_project->removeExcludedRunTriggers(m_activations);
+
     if ( m_appRoot ){
         m_appRoot->deleteLater();
     }
@@ -50,21 +82,39 @@ void Runnable::run(){
         THROW_EXCEPTION(lv::Exception, "Attempting to trigger a runnable with a null runspace.", Exception::toCode("~runspace"));
     }
 
-    RunnableContainer* container = qobject_cast<RunnableContainer*>(parent());
-    Project* project = qobject_cast<Project*>(container->parent());
-
     if ( m_type == Runnable::File ){
 
-        ProjectDocument* document = project->isOpened(m_path);
+        ProjectDocument* document = m_project->isOpened(m_path);
         if ( document ){
-            auto documentList = project->documentModel()->listUnsavedDocuments();
-            m_engine->createObjectAsync(
-                document->content(),
-                m_runSpace,
-                document->file()->path(),
-                this,
-                !(documentList.size() == 1 && documentList[0] == document->file()->path())
-            );
+            auto documentList = m_project->documentModel()->listUnsavedDocuments();
+
+            if ( m_project->active() == this ){
+                m_engine->createObjectAsync(
+                    document->content(),
+                    m_runSpace,
+                    QUrl::fromLocalFile(document->file()->path()),
+                    this,
+                    !(documentList.size() == 1 && documentList[0] == document->file()->path())
+                );
+            } else {
+                QObject* obj = createObject(document->content().toUtf8(), QUrl::fromLocalFile(m_path));
+
+                if ( obj ){
+
+                    emptyRunSpace();
+
+                    m_appRoot = obj;
+                    obj->setParent(m_runSpace);
+
+                    QQuickItem *parentItem = qobject_cast<QQuickItem*>(m_runSpace);
+                    QQuickItem *item = qobject_cast<QQuickItem*>(obj);
+                    if (parentItem && item){
+                        item->setParentItem(parentItem);
+                    }
+                }
+
+                emit objectReady();
+            }
         } else {
             QFile f(m_path);
             if ( !f.open(QFile::ReadOnly) )
@@ -72,17 +122,90 @@ void Runnable::run(){
 
             QByteArray contentBytes = f.readAll();
 
-            m_engine->createObjectAsync(
-                contentBytes,
-                m_runSpace,
-                m_path,
-                this,
-                true
-            );
+            if ( m_project->active() == this ){
+                m_engine->createObjectAsync(
+                    contentBytes,
+                    m_runSpace,
+                    QUrl::fromLocalFile(m_path),
+                    this,
+                    true
+                );
+            } else {
+                QObject* obj = createObject(contentBytes, QUrl::fromLocalFile(m_path));
+
+                if ( obj ){
+
+                    emptyRunSpace();
+
+                    m_appRoot = obj;
+                    obj->setParent(m_runSpace);
+
+                    QQuickItem *parentItem = qobject_cast<QQuickItem*>(m_runSpace);
+                    QQuickItem *item = qobject_cast<QQuickItem*>(obj);
+                    if (parentItem && item){
+                        item->setParentItem(parentItem);
+                    }
+                }
+
+                emit objectReady();
+            }
+
         }
     } else if ( m_type == Runnable::Component ){
-        //TODO: Empty run space, create new component
+
+        QObject* obj = qobject_cast<QObject*>(m_component->create(m_component->creationContext()));
+        if (!obj){
+            THROW_EXCEPTION(Exception, "Failed to create item: " + m_component->errorString().toStdString(), Exception::toCode("~Component") );
+        }
+
+        emptyRunSpace();
+
+        m_appRoot = obj;
+        obj->setParent(m_runSpace);
+
+        QQuickItem* appRootItem = qobject_cast<QQuickItem*>(obj);
+        QQuickItem* runspaceItem = qobject_cast<QQuickItem*>(m_runSpace);
+
+        if ( appRootItem && runspaceItem ){
+            appRootItem->setParentItem(runspaceItem);
+        }
+
+        emit objectReady();
     }
+}
+
+void Runnable::_activationContentsChanged(int, int, int){
+    m_scheduleTimer->start();
+}
+
+void Runnable::_documentOpened(ProjectDocument *document){
+    if ( m_activations.contains(document->file()->path()) ){
+        connect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
+    }
+}
+
+QObject* Runnable::createObject(const QByteArray &code, const QUrl &file){
+    m_engine->engine()->clearComponentCache();
+
+    QQmlComponent component(m_engine->engine());
+    component.setData(code, file);
+
+    QList<QQmlError> errors = component.errors();
+    if ( errors.size() ){
+        emit runError(m_engine->toJSErrors(errors));
+        return nullptr;
+    }
+
+    QObject* obj = component.create(m_engine->engine()->rootContext());
+    m_engine->engine()->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
+
+    errors = component.errors();
+    if ( errors.size() ){
+        emit runError(m_engine->toJSErrors(errors));
+        return nullptr;
+    }
+
+    return obj;
 }
 
 void Runnable::engineObjectAcquired(const QUrl &, QObject *ref){
@@ -94,6 +217,7 @@ void Runnable::engineObjectAcquired(const QUrl &, QObject *ref){
 void Runnable::engineObjectReady(QObject *object, const QUrl &, QObject *ref){
     if ( ref == this ){
         m_appRoot = object;
+        emit objectReady();
     }
 }
 

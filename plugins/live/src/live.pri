@@ -27,7 +27,8 @@ HEADERS += \
     $$PWD/tcplineproperty.h \
     $$PWD/tcplineresponse.h \
     $$PWD/componentsource.h \
-    $$PWD/lvliveglobal.h
+    $$PWD/lvliveglobal.h \
+    $$PWD/qmlsubproject.h
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
@@ -55,4 +56,5 @@ SOURCES += \
     $$PWD/tcplineproperty.cpp \
     $$PWD/tcplineresponse.cpp \
     $$PWD/worker.cpp \
-    $$PWD/componentsource.cpp
+    $$PWD/componentsource.cpp \
+    $$PWD/qmlsubproject.cpp

@@ -37,6 +37,7 @@
 #include "live/settings.h"
 #include "live/visuallogfilter.h"
 
+#include "qmlsubproject.h"
 #include "componentsource.h"
 #include "tcpline.h"
 #include "tcplineconnection.h"
@@ -74,6 +75,7 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterUncreatableType<lv::TcpLineResponse>(
         uri, 1, 0, "TcpLineResponse", "TcpLineResponse is part of TcpLine.");
     qmlRegisterType<lv::TcpLineServer>(         uri, 1, 0, "TcpLineServer");
+    qmlRegisterType<lv::QmlSubproject>(         uri, 1, 0, "Subproject");
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){
