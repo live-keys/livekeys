@@ -29,6 +29,11 @@
 #include "stringbasedloader.h"
 #include "live/qmlobjectlist.h"
 #include "live/qmlvariantlist.h"
+
+#include "qmlfork.h"
+#include "qmlforknode.h"
+#include "remoteline.h"
+#include "remotecontainer.h"
 #include "qmlcomponentmap.h"
 #include "qmlcomponentmapdata.h"
 
@@ -39,10 +44,8 @@
 
 #include "qmlsubproject.h"
 #include "componentsource.h"
-#include "tcpline.h"
 #include "tcplineconnection.h"
-#include "tcplineproperty.h"
-#include "tcplineresponse.h"
+#include "remotelineresponse.h"
 #include "tcplineserver.h"
 
 #include <qqml.h>
@@ -60,22 +63,27 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::VisualLogFilter>(  uri, 1, 0, "VisualLogFilter");
     qmlRegisterType<QLogListener>(         uri, 1, 0, "LogListener");
     qmlRegisterType<QValueHistory>(        uri, 1, 0, "ValueHistory");
-    qmlRegisterUncreatableType<QLicenseSettings>(
-        uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
     qmlRegisterType<lv::QmlMain>(          uri, 1, 0, "Main");
     qmlRegisterType<lv::StringBasedLoader>(uri, 1, 0, "StringBasedLoader");
     qmlRegisterType<lv::Worker>(           uri, 1, 0, "Worker");
     qmlRegisterType<lv::Tuple>(            uri, 1, 0, "Tuple");
+    qmlRegisterType<lv::QmlFork>(          uri, 1, 0, "Fork");
+    qmlRegisterType<lv::QmlForkNode>(      uri, 1, 0, "ForkNode");
+    qmlRegisterType<lv::ComponentSource>(  uri, 1, 0, "ComponentSource");
+    qmlRegisterType<lv::RemoteLine>(       uri, 1, 0, "RemoteLine");
     qmlRegisterType<lv::QmlComponentMap>(     uri, 1, 0, "ComponentMap");
     qmlRegisterType<lv::QmlComponentMapData>( uri, 1, 0, "ComponentMapData");
 
-    qmlRegisterType<lv::ComponentSource>(       uri, 1, 0, "ComponentSource");
-    qmlRegisterType<lv::TcpLine>(               uri, 1, 0, "TcpLine");
-    qmlRegisterType<lv::TcpLineConnection>(     uri, 1, 0, "TcpLineConnection");
-    qmlRegisterUncreatableType<lv::TcpLineResponse>(
-        uri, 1, 0, "TcpLineResponse", "TcpLineResponse is part of TcpLine.");
+    qmlRegisterUncreatableType<QLicenseSettings>(
+        uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
+
     qmlRegisterType<lv::TcpLineServer>(         uri, 1, 0, "TcpLineServer");
     qmlRegisterType<lv::QmlSubproject>(         uri, 1, 0, "Subproject");
+    qmlRegisterType<lv::TcpLineConnection>(     uri, 1, 0, "TcpLineConnection");
+    qmlRegisterUncreatableType<lv::RemoteLineResponse>(
+        uri, 1, 0, "RemoteLineResponse", "RemoteLineResponse is part of RemoteLine.");
+    qmlRegisterUncreatableType<lv::RemoteContainer>(
+        uri, 1, 0, "RemoteContainer", "RemoteContainer is of abstract type.");
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){

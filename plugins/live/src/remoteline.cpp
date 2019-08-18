@@ -1,5 +1,5 @@
-#include "tcpline.h"
-#include "tcplineproperty.h"
+#include "remoteline.h"
+#include "remotelineproperty.h"
 
 #include "live/typeinfo.h"
 #include "live/visuallogqt.h"
@@ -12,7 +12,7 @@
 
 namespace lv{
 
-TcpLine::TcpLine(QObject *parent)
+RemoteLine::RemoteLine(QObject *parent)
     : QObject(parent)
     , m_componentComplete(false)
     , m_componentBuild(false)
@@ -22,11 +22,11 @@ TcpLine::TcpLine(QObject *parent)
 {
 }
 
-TcpLine::~TcpLine(){
+RemoteLine::~RemoteLine(){
     delete m_result;
 }
 
-void TcpLine::propertyChanged(TcpLineProperty *property){
+void RemoteLine::propertyChanged(RemoteLineProperty *property){
     if ( m_componentBuild ){
         sendProperty(property->name());
     } else {
@@ -34,7 +34,7 @@ void TcpLine::propertyChanged(TcpLineProperty *property){
     }
 }
 
-void TcpLine::sendProperty(const QString &propertyName){
+void RemoteLine::sendProperty(const QString &propertyName){
     MLNode input = MLNode(MLNode::Object);
     MLNode inputValue;
 
@@ -44,12 +44,12 @@ void TcpLine::sendProperty(const QString &propertyName){
 
     input[propertyName.toStdString()] = inputValue;
 
-    vlog("tcp-line").d() << "Sending property to remote: " << propertyName;
+    vlog("remote-line").v() << "Sending property to remote: " << propertyName;
 
     m_connection->sendInput(input);
 }
 
-void TcpLine::componentComplete(){
+void RemoteLine::componentComplete(){
     m_componentComplete = true;
 
     const QMetaObject *meta = metaObject();
@@ -63,9 +63,9 @@ void TcpLine::componentComplete(){
             QQmlProperty pp(this, property.name());
             if ( pp.hasNotifySignal() ){
 
-                vlog("tcp-line").d() << "Monitoring property; " << property.name();
+                vlog("remote-line").v() << "Monitoring property; " << property.name();
 
-                TcpLineProperty* tlp = new TcpLineProperty(property.name(), this);
+                RemoteLineProperty* tlp = new RemoteLineProperty(property.name(), this);
                 m_properties.append(tlp);
                 pp.connectNotifySignal(tlp, SLOT(changed()));
             }
@@ -75,32 +75,32 @@ void TcpLine::componentComplete(){
     emit complete();
 }
 
-void TcpLine::setConnection(TcpLineConnection *connection){
+void RemoteLine::setConnection(RemoteContainer *connection){
     if (m_connection == connection)
         return;
 
     m_connection = connection;
     emit connectionChanged();
 
-    m_connection->dataCapture().onMessage(&TcpLine::receiveMessage, this);
-    m_connection->dataCapture().onError([this](int, const std::string& errorString){
+    m_connection->onMessage(&RemoteLine::receiveMessage, this);
+    m_connection->onError([this](int, const std::string& errorString){
         lv::Exception e = CREATE_EXCEPTION(
             lv::Exception, "TcpLine message capture error: " + errorString, 0
         );
         lv::ViewContext::instance().engine()->throwError(&e, this);
     });
 
-    connect(m_connection, SIGNAL(connectionEstablished()), this, SLOT(initialize()));
+    connect(m_connection, &RemoteContainer::ready, this, &RemoteLine::initialize);
 
     initialize();
 }
 
-void TcpLine::receiveMessage(const LineMessage &message, void *data){
-    TcpLine* tls = reinterpret_cast<TcpLine*>(data);
+void RemoteLine::receiveMessage(const LineMessage &message, void *data){
+    RemoteLine* tls = reinterpret_cast<RemoteLine*>(data);
     tls->onMessage(message);
 }
 
-void TcpLine::onMessage(const LineMessage &message){
+void RemoteLine::onMessage(const LineMessage &message){
     if ( message.type & LineMessage::Error ){
         lv::Exception e = CREATE_EXCEPTION(
             lv::Exception, "TcpLine error: " + std::string(message.data), 0
@@ -131,29 +131,29 @@ void TcpLine::onMessage(const LineMessage &message){
     }
 }
 
-void TcpLine::initialize(){
+void RemoteLine::initialize(){
 
-    if ( m_source && m_connection && m_connection->isConnected() ){
+    if ( m_source && m_connection && m_connection->isReady() ){
 
         QByteArray source =
             m_source->importSourceCode().toUtf8() +
             "\nItem" +
             m_source->sourceCode().toUtf8();
 
-        vlog("tcp-line").d() << "Initializing remote component.";
+        vlog("remote-line").v() << "Initializing remote component.";
 
         m_connection->sendBuild(source);
 
         m_componentBuild = true;
 
         for ( auto it = m_properties.begin(); it != m_properties.end(); ++it ){
-            TcpLineProperty* tlp = *it;
+            RemoteLineProperty* tlp = *it;
             sendProperty(tlp->name());
         }
     }
 }
 
-void TcpLine::setSource(ComponentSource *source){
+void RemoteLine::setSource(ComponentSource *source){
     if (m_source == source)
         return;
 

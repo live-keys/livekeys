@@ -23,12 +23,15 @@ HEADERS += \
     $$PWD/tcplineserver.h \
     $$PWD/tcplinesocket.h \
     $$PWD/tcplineconnection.h \
-    $$PWD/tcpline.h \
-    $$PWD/tcplineproperty.h \
-    $$PWD/tcplineresponse.h \
-    $$PWD/componentsource.h \
     $$PWD/lvliveglobal.h \
-    $$PWD/qmlsubproject.h
+    $$PWD/componentsource.h \
+    $$PWD/qmlsubproject.h \
+    $$PWD/qmlfork.h \
+    $$PWD/qmlforknode.h \
+    $$PWD/remoteline.h \
+    $$PWD/remotelineproperty.h \
+    $$PWD/remotecontainer.h \
+    $$PWD/remotelineresponse.h
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
@@ -52,9 +55,12 @@ SOURCES += \
     $$PWD/tcplineserver.cpp \
     $$PWD/tcplinesocket.cpp \
     $$PWD/tcplineconnection.cpp \
-    $$PWD/tcpline.cpp \
-    $$PWD/tcplineproperty.cpp \
-    $$PWD/tcplineresponse.cpp \
     $$PWD/worker.cpp \
     $$PWD/componentsource.cpp \
-    $$PWD/qmlsubproject.cpp
+    $$PWD/qmlsubproject.cpp \
+    $$PWD/qmlfork.cpp \
+    $$PWD/qmlforknode.cpp \
+    $$PWD/remotecontainer.cpp \
+    $$PWD/remoteline.cpp \
+    $$PWD/remotelineproperty.cpp \
+    $$PWD/remotelineresponse.cpp

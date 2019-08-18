@@ -5,14 +5,14 @@
 
 namespace lv{
 
-class TcpLine;
-class TcpLineProperty : public QObject{
+class RemoteLine;
+class RemoteLineProperty : public QObject{
 
     Q_OBJECT
 
 public:
-    explicit TcpLineProperty(const QString& name, TcpLine *parent = nullptr);
-    ~TcpLineProperty(){}
+    explicit RemoteLineProperty(const QString& name, RemoteLine *parent = nullptr);
+    ~RemoteLineProperty(){}
 
     const QString& name();
 
@@ -20,12 +20,12 @@ public slots:
     void changed();
 
 private:
-    TcpLine* m_line;
+    RemoteLine* m_line;
     QString  m_name;
 
 };
 
-inline const QString &TcpLineProperty::name(){
+inline const QString &RemoteLineProperty::name(){
     return m_name;
 }
 

@@ -14,8 +14,7 @@ namespace lv{
 int TcpLineConnection::RECONNECT_TIMEOUT = 5000;
 
 TcpLineConnection::TcpLineConnection(QObject *parent)
-    : QObject(parent)
-    , m_componentComplete(false)
+    : RemoteContainer(parent)
     , m_socket(new QTcpSocket(this))
     , m_port(TcpLineConnection::DEFAULT_PORT)
     , m_timer(nullptr)
@@ -37,7 +36,7 @@ TcpLineConnection::~TcpLineConnection(){
 }
 
 void TcpLineConnection::connectToHost(){
-    if ( m_componentComplete && m_address != "" && m_port != -1 ){
+    if ( isComponentComplete() && m_address != "" && m_port != -1 ){
         reconnect();
     }
 }
@@ -76,25 +75,33 @@ void TcpLineConnection::sendInput(const MLNode &input){
     QByteArray toSend = LineMessage::create(
         LineMessage::Input | LineMessage::Json,
         inputSerialized.c_str(),
-        inputSerialized.size()
+        (int)inputSerialized.size()
     );
 
     m_socket->write(toSend);
 }
 
-bool TcpLineConnection::isConnected() const{
+void TcpLineConnection::onMessage(std::function<void (const LineMessage &, void *)> handler, void *handlerData){
+    m_dataCapture.onMessage(handler, handlerData);
+}
+
+void TcpLineConnection::onError(std::function<void (int, const std::string &)> handler){
+    m_dataCapture.onError(handler);
+}
+
+bool TcpLineConnection::isReady() const{
     return m_socket->state() == QTcpSocket::ConnectedState;
 }
 
 void TcpLineConnection::componentComplete(){
-    m_componentComplete = true;
+    RemoteContainer::componentComplete();
     connectToHost();
 }
 
 void TcpLineConnection::socketConnected(){
-    vlog("tcp-line-client").d() << "Connected to :" + m_address;
+    vlog("tcp-line-client").v() << "Connected to :" + m_address;
 
-    emit connectionEstablished();
+    emit ready();
 }
 
 void TcpLineConnection::socketDisconnected(){

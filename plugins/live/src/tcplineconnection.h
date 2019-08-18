@@ -7,6 +7,7 @@
 
 #include "live/lvliveglobal.h"
 #include "live/linecapture.h"
+#include "remotecontainer.h"
 
 class QTimer;
 class QTcpSocket;
@@ -15,10 +16,9 @@ namespace lv{
 
 class MLNode;
 
-class LV_LIVE_EXPORT TcpLineConnection : public QObject, public QQmlParserStatus{
+class LV_LIVE_EXPORT TcpLineConnection : public RemoteContainer{
 
     Q_OBJECT
-    Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QString address READ address WRITE setAddress NOTIFY addressChanged)
     Q_PROPERTY(int port        READ port    WRITE setPort    NOTIFY portChanged)
 
@@ -36,12 +36,13 @@ public:
     void sendBuild(const QByteArray& buildData);
     void sendInput(const MLNode& input);
 
+    void onMessage(std::function<void(const LineMessage&, void* data)> handler, void* handlerData = 0);
+    void onError(std::function<void(int, const std::string&)> handler);
+
     QString address() const;
     int port() const;
 
-    LineCapture& dataCapture();
-
-    bool isConnected() const;
+    bool isReady() const;
 
 protected:
     void classBegin() Q_DECL_OVERRIDE{}
@@ -50,7 +51,6 @@ protected:
 signals:
     void addressChanged();
     void portChanged();
-    void connectionEstablished();
 
 public slots:
     void socketConnected();
@@ -65,15 +65,12 @@ public slots:
 private:
     QTimer* timer();
 
-    bool        m_componentComplete;
-
-    LineCapture m_dataCapture;
     QString     m_address;
     QTcpSocket* m_socket;
     int         m_port;
     QTimer*     m_timer;
 
-
+    LineCapture m_dataCapture;
 };
 
 inline QString TcpLineConnection::address() const{
@@ -82,10 +79,6 @@ inline QString TcpLineConnection::address() const{
 
 inline int TcpLineConnection::port() const{
     return m_port;
-}
-
-inline LineCapture &TcpLineConnection::dataCapture(){
-    return m_dataCapture;
 }
 
 inline void TcpLineConnection::setAddress(const QString& address){
