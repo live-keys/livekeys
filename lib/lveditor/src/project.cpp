@@ -90,7 +90,7 @@ void Project::newProject(){
         document->addEditingState(ProjectDocument::Read);
         document->setContent("import QtQuick 2.3\n\nGrid{\n}");
         document->removeEditingState(ProjectDocument::Read);
-        m_documentModel->openDocument("", document);
+        m_documentModel->openDocument(":>/0", document);
 
         m_active = new Runnable(engine(), document->file()->path(), m_runnables, "untitled");
         m_active->setRunSpace(m_runspace);
@@ -277,6 +277,14 @@ bool Project::isFileInProject(const QString &path) const{
  * This file is the one actually compiling
  */
 void Project::setActive(const QString &path){
+    Runnable* r = openRunnable(path);
+    if (r){
+        r->setRunSpace(m_runspace);
+        setActive(r);
+    }
+}
+
+Runnable *Project::openRunnable(const QString &path){
     Runnable* r = m_runnables->runnableAt(path);
     if ( !r ){
         ProjectDocument* document = isOpened(path);
@@ -290,8 +298,8 @@ void Project::setActive(const QString &path){
         m_runnables->addRunnable(r);
     }
 
-    r->setRunSpace(m_runspace);
-    setActive(r);
+
+    return r;
 }
 
 /**

@@ -8,7 +8,9 @@ LiveExtension{
     globals : ProjectQmlExtension{}
     interceptLanguage : function(document, handler, ext){
         var extLower = ext.toLowerCase()
-        if ( extLower === 'js' || extLower === 'qml' || document.file.path === '' ){
+        if ( extLower === 'js' || extLower === 'qml'  ||
+            (document.file.path.length > 3 && document.file.path.substring(0, 3) === ':>/' ) )
+        {
             return globals.createHandler(document, handler)
         }
         return null;

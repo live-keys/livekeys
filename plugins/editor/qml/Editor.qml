@@ -290,7 +290,7 @@ Pane{
                 if ( editor.document ){
                     var filename = editor.document.file.name
                     if ( !editor.document.file.exists() ){
-                        var findex = filename.substring(2)
+                        var findex = filename.substring(3)
                         filename = 'untitled' + (findex === '0' ? '' : findex)
                     }
                     if ( editor.document.isDirty )
