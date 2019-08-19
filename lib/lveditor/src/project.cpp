@@ -90,9 +90,9 @@ void Project::newProject(){
         document->addEditingState(ProjectDocument::Read);
         document->setContent("import QtQuick 2.3\n\nGrid{\n}");
         document->removeEditingState(ProjectDocument::Read);
-        m_documentModel->openDocument(":>0", document);
+        m_documentModel->openDocument("T:0", document);
 
-        m_active = new Runnable(engine(), document->file()->path(), m_runnables, "untitled");
+        m_active = new Runnable(engine(), "T:0", m_runnables, "untitled");
         m_active->setRunSpace(m_runspace);
         m_runnables->addRunnable(m_active);
         setActive(m_active);

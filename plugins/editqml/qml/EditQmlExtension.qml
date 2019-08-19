@@ -10,7 +10,7 @@ LiveExtension{
         var extLower = ext.toLowerCase()
 
         if ( extLower === 'js' || extLower === 'qml'  ||
-            (document.file.name.length > 2 && document.file.name.substring(0, 2) === ':>' ) )
+            (document.file.name.length > 2 && document.file.name.substring(0, 2) === "T:" ) )
         {
             return globals.createHandler(document, handler)
         }

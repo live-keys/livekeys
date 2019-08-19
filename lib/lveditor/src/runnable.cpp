@@ -79,7 +79,7 @@ void Runnable::run(){
                 m_engine->createObjectAsync(
                     document->content(),
                     m_runSpace,
-                    QUrl::fromLocalFile(document->file()->path()),
+                    QUrl::fromLocalFile(m_path),
                     this,
                     !(documentList.size() == 1 && documentList[0] == document->file()->path())
                 );
