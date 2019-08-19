@@ -331,7 +331,7 @@ void ProjectWorkspace::State::windowRectChanged(QQuickWindow *window, const QRec
 void ProjectWorkspace::State::windowVisibilityChanged(QQuickWindow *window, QWindow::Visibility visibility){
     int index = windows.indexOf(window);
 
-    currentWorkspaceLayout["window"][index]["visibility"] = (visibility == QWindow::FullScreen)
+    currentWorkspaceLayout["windows"][index]["visibility"] = (visibility == QWindow::FullScreen)
             ? "fullscreen"
             : (visibility == QWindow::Maximized ? "maximized" : "windowed");
 }
