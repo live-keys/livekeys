@@ -346,6 +346,9 @@ Pane{
             function setActive(){
                 project.setActive(styleData.value.path)
             }
+            function addRunnable(){
+                project.openRunnable(styleData.value.path, [styleData.value.path])
+            }
             function openFile(){
                 root.editEntry(styleData.value)
             }
@@ -550,6 +553,12 @@ Pane{
                     view.contextDelegate.setActive()
                 }
             }
+            MenuItem{
+                text: "Add As Runnable"
+                onTriggered: {
+                    view.contextDelegate.addRunnable()
+                }
+            }
             MenuItem {
                 text: "Rename"
                 onTriggered: {
@@ -611,16 +620,25 @@ Pane{
                 }
             }
             MenuItem{
-                text: "Close project"
+                text: "Close Project"
                 onTriggered: {
                     livecv.layers.workspace.commands.execute('window.workspace.project.close')
                 }
             }
             MenuItem{
-                text: "New document"
+                text: "New Document"
                 onTriggered: {
                     var fe = project.fileModel.addTemporaryFile()
                     livecv.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
+                }
+            }
+
+            MenuItem{
+                text: "New Runnable"
+                onTriggered: {
+                    var fe = project.fileModel.addTemporaryFile()
+                    livecv.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
+                    project.openRunnable(fe.path, [fe.path])
                 }
             }
             MenuItem {

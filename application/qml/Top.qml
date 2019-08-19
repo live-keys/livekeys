@@ -431,7 +431,11 @@ Rectangle {
                 Image{
                     id : modeImage
                     anchors.centerIn: parent
-                    source: modeContainer.liveImage.source
+                    source: project.runTrigger === Project.RunOnChange
+                        ? modeContainer.liveImage.source
+                        : project.runTrigger === Project.RunOnSave
+                            ? container.modeContainer.onSaveImage.source
+                            : container.modeContainer.disabledImage.source
                 }
             }
 

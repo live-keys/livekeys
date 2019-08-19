@@ -37,6 +37,7 @@ Item{
             weight: Font.Normal
         })
         property color errorFontColor : "#fff"
+        property color errorBackgroundColor: "#000"
     }
 
     property QtObject panes : QtObject{
@@ -61,6 +62,12 @@ Item{
                 },
                 "viewer" : function(p, s){
                     return root.viewer
+                },
+                "runView" : function(p, s){
+                    var pane = runViewFactory.createObject(p)
+                    if ( s )
+                        pane.paneInitialize(s)
+                    return pane
                 },
                 "log" : function(p, s){
                     var pane = logFactory.createObject(p)
@@ -334,7 +341,8 @@ Item{
                     'setLiveCodingMode': [modeContainer.setLiveCodingMode, "Set 'Live' Coding Mode"],
                     'setOnSaveCodingMode': [modeContainer.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
                     'setDisabledCodingMode': [modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
-                    'runProject': [project.run, "Run Project"]
+                    'runProject': [project.run, "Run Project"],
+                    'addRunView' : [root.addRunView, "Add Run View"]
                 })
 
                 root.paneSplitterColor = layer.themes.current.paneSplitterColor
@@ -400,12 +408,20 @@ Item{
     RunnablesMenu{
         id: runnablesMenu
         anchors.top: header.bottom
+        onRunnableSelected: {
+            if ( project.active )
+                project.active.setRunSpace(null)
+
+            project.setActive(path)
+        }
         x: 550
     }
 
     ModeContainer {
         id: modeContainer
-        modeWrapper: header
+        onRunTriggerSelected: project.runTrigger = trigger
+        anchors.top: header.bottom
+        x: 620
     }
 
     Component{
@@ -420,6 +436,26 @@ Item{
                 root.panes.setActiveItem(editorComponent.textEdit, editorComponent)
             }
             Component.onCompleted: { forceFocus() }
+        }
+    }
+
+    Component{
+        id: runViewFactory
+
+        RunView{
+            id: runViewComponent
+            panes: root.panes
+        }
+    }
+
+    function addRunView(){
+        var pane = root.panes.createPane('runView', {}, [400, 0])
+
+        var containerUsed = root.panes.container
+        if ( containerUsed.orientation === Qt.Vertical ){
+            root.panes.splitPaneVerticallyWith(containerUsed, containerUsed.panes.length - 1, pane)
+        } else {
+            root.panes.splitPaneHorizontallyWith(containerUsed, containerUsed.panes.length - 1, pane)
         }
     }
 
@@ -482,7 +518,7 @@ Item{
             id: error
             anchors.bottom: parent.bottom
             width : parent.width
-            color : root.style.errorFontColor
+            color : root.style.errorBackgroundColor
             font: root.style.errorFont
         }
     }

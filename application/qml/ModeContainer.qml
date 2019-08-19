@@ -2,30 +2,24 @@ import QtQuick 2.3
 import editor 1.0
 import editor.private 1.0
 
-Rectangle {
+Item{
     id: modeContainer
 
-    property var modeWrapper: null
+    signal runTriggerSelected(int trigger)
 
     function setLiveCodingMode(){
-        project.runTrigger = Project.RunOnChange
         modeContainer.visible = false
-        header.modeImage.source = modeContainer.liveImage.source
-        header.modeImage.anchors.rightMargin = modeContainer.liveImage.anchors.rightMargin
+        modeContainer.runTriggerSelected(Project.RunOnChange)
     }
 
     function setOnSaveCodingMode(){
-        project.runTrigger = Project.RunOnSave
         modeContainer.visible = false
-        header.modeImage.source = modeContainer.onSaveImage.source
-        header.modeImage.anchors.rightMargin = modeContainer.onSaveImage.anchors.rightMargin
+        modeContainer.runTriggerSelected(Project.RunOnSave)
     }
 
     function setDisabledCodingMode(){
-        project.runTrigger = Project.RunManual
         modeContainer.visible = false
-        header.modeImage.source = modeContainer.disabledImage.source
-        header.modeImage.anchors.rightMargin = modeContainer.disabledImage.anchors.rightMargin
+        modeContainer.runTriggerSelected(Project.RunManual)
     }
 
     property alias liveImage: liveImage
@@ -33,16 +27,15 @@ Rectangle {
     property alias disabledImage: disabledImage
 
     visible: false
-    anchors.left: modeWrapper.left
-    anchors.leftMargin: 740
-    anchors.top: modeWrapper.bottom
     property int buttonHeight: 30
     property int buttonWidth: 120
     opacity: visible ? 1.0 : 0
     z: 1000
 
-    Behavior on opacity{ NumberAnimation{ duration: 200 } }
+    width: buttonWidth
+    height: buttonHeight * 3
 
+    Behavior on opacity{ NumberAnimation{ duration: 200 } }
 
     Rectangle{
         id: liveButton

@@ -129,7 +129,7 @@ QHash<int, QByteArray> ProjectFileModel::roleNames() const{
 void ProjectFileModel::createProject(){
     beginResetModel();
     m_root->clearItems();
-    m_root->addFileEntry(":>/0");
+    m_root->addFileEntry(":>0");
     endResetModel();
 }
 
@@ -342,10 +342,11 @@ ProjectFile *ProjectFileModel::addTemporaryFile(){
         }
     }
 
-    QString name = ":>/" + QString::number(temporaryFiles);
+    QString name = ":>" + QString::number(temporaryFiles);
 
     ProjectFile* fileEntry = new ProjectFile(parentEntry->path(), name, 0);
     entryAdded(fileEntry, parentEntry);
+
     return fileEntry;
 }
 
@@ -533,7 +534,7 @@ QModelIndex ProjectFileModel::itemIndex(ProjectEntry *entry){
 }
 
 QString ProjectFileModel::printableName(const QString &name){
-    if ( name.startsWith(":>/") )
+    if ( name.startsWith(":>") )
         return (name.mid(3) == "0" ? "untitled" : ("untitled" + name.mid(3)));
     return name;
 }

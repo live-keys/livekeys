@@ -22,6 +22,7 @@
         <file alias="editorlayer.qml">qml/editorlayer.qml</file>
         <file alias="LiveKeysTheme.qml">qml/LiveKeysTheme.qml</file>
         <file alias="RunnablesMenu.qml">qml/RunnablesMenu.qml</file>
+        <file alias="RunView.qml">qml/RunView.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>
