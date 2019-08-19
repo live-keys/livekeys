@@ -495,7 +495,14 @@ void ProjectFileModel::rescanEntries(ProjectEntry *entry){
     }
 
     foreach( ProjectEntry* childEntry, entry->entries() ){
-        if ( !newEntries.contains(childEntry->name()) ){
+        bool isTemporary = false;
+        if ( childEntry->isFile() ){
+            ProjectFile* entryAsFile = qobject_cast<ProjectFile*>(childEntry);
+            if ( !entryAsFile->exists() )
+                isTemporary = true;
+        }
+
+        if ( !isTemporary && !newEntries.contains(childEntry->name()) ){
             entryRemoved(childEntry);
             if ( childEntry->isFile() ){
                 if ( project )
