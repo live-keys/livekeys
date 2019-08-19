@@ -131,7 +131,7 @@ Pane{
             }
 
             Item{
-                width: modeImage.width + modeImage.anchors.rightMargin + 10
+                width: 35
                 height: parent.height
                 anchors.right: parent.right
 
@@ -156,7 +156,6 @@ Pane{
                     }
                 }
 
-
                 Triangle{
                     anchors.right: parent.right
                     anchors.rightMargin: 7
@@ -175,14 +174,6 @@ Pane{
                         modeSelection.visible = !modeSelection.visible
                     }
                 }
-            }
-
-
-            Rectangle{
-                width: parent.width
-                height: 1
-                color: "#1a1f25"
-                anchors.bottom: parent.bottom
             }
 
         }

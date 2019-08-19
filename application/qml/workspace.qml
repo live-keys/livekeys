@@ -70,6 +70,13 @@ Item{
                     return pane
                 },
                 "log" : function(p, s){
+                    if ( !root.logView.parent ){
+                        root.logView.visible = true
+                        root.logView.parent = p
+                        header.isLogWindowDirty = false
+                        return root.logView
+                    }
+
                     var pane = logFactory.createObject(p)
                     return pane
                 }
@@ -376,10 +383,9 @@ Item{
             if ( !fe ){
                 fe = root.panes.createPane('log', {}, [200, 200])
                 var containerUsed = root.panes.container
-                root.panes.splitPaneVerticallyWith(containerUsed, 0, fe)
+                root.panes.splitPaneVerticallyWith(containerUsed, containerUsed.panes.length - 1, fe)
             } else {
-                var feIndex = fe.parentSplitter.paneIndex(fe)
-                fe.parentSplitter.removeAt(feIndex)
+                root.panes.removePane(fe)
             }
         }
 
@@ -597,14 +603,13 @@ Item{
     }
 
     property LogContainer logView : LogContainer{
-        id: logView
         visible: false
         isInWindow: false
-        width: parent ? parent.width : 0
+        width: 300
         height: 200
 
         onItemAdded: {
-            if ( !visible  )
+            if ( !parent  )
                 header.isLogWindowDirty = true
         }
     }
