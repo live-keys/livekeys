@@ -23,10 +23,11 @@ Item{
     Editor{
         id: fragmentEditor
         anchors.left: parent.left
-        fragmentStart: 33
-        fragmentEnd: 39
+        fragmentStart: 34
+        fragmentEnd: 40
         height: 500
         width: 600
+        textEdit.viewport: Qt.rect(0,0,600, 500)
         windowControls: livecv.windowControls()
     }
     

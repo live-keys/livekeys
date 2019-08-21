@@ -962,10 +962,8 @@ int CodeQmlHandler::handleRightBrace(int cursorPosition)
 
 void CodeQmlHandler::rehighlightSection(int start, int end){
     QTextBlock bl = m_target->findBlock(start);
-    while ( bl.isValid() ){
+    while ( bl.isValid() && bl.position() < end){
         rehighlightBlock(bl);
-        if (bl.position() > end )
-            break;
         bl = bl.next();
     }
 }

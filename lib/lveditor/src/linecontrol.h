@@ -83,11 +83,16 @@ public:
     int lastContentLine();
     int firstBlockOfTextBefore(int lineNumber);
 
+    void collapseChange(int pos, int delta);
+
     std::vector<VisibleSection> visibleSectionsForViewport(const QRect& rect) const;
     std::vector<VisibleSection> visibleSections(int firstLine, int lastLine) const;
 signals:
     void lineControlCollapsed();
     void lineControlExpand();
+    void lineDelta(int delta, int pos, bool internal);
+    void refreshAfterCollapseChange(int pos, int delta);
+    void refreshAfterPaletteChange(int pos, int delta);
 public slots:
     void setDirtyPos(int dirtyPos);
     void lineNumberChange();
@@ -97,9 +102,10 @@ private:
     int removeLineSection(LineSection ls, bool destroy, bool nesting = false);
     unsigned insertIntoSorted(LineSection ls);
     void calculateVisiblePosition(unsigned pos);
-    void offsetAfterIndex(unsigned index, int offset, bool offsetPositions);
-    void linesAdded(int newSize);
-    // void linesRemoved();
+    void offsetAfterIndex(unsigned index, int offset, bool offsetPositions, bool offsetVisible = true);
+    void handleRemovalOfSections(int pos, int removed);
+    void handlePositiveShifting(int pos, int added);
+    bool handleInternalOffsetting(int index, int delta);
 
     std::vector<LineSection> m_sections;
     int m_blockHeight;

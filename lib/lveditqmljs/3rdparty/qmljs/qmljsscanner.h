@@ -61,8 +61,8 @@ public:
         RegExp
     };
 
-    inline Token(): offset(0), length(0), kind(EndOfFile) {}
-    inline Token(int o, int l, Kind k): offset(o), length(l), kind(k) {}
+    inline Token(): offset(0), length(0), kind(EndOfFile), state(-1) {}
+    inline Token(int o, int l, Kind k, int s = -1): offset(o), length(l), kind(k), state(s) {}
     inline int begin() const { return offset; }
     inline int end() const { return offset + length; }
     inline bool is(int k) const { return k == kind; }
@@ -72,6 +72,7 @@ public:
     int offset;
     int length;
     Kind kind;
+    int state;
 };
 
 class QMLJS_EXPORT Scanner

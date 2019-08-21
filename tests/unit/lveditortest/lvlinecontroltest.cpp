@@ -211,7 +211,7 @@ void LvLineControlTest::checkWithPalette()
     QCOMPARE(result[0].size, 2);
     QCOMPARE(result[0].palette, nullptr);
 
-    QCOMPARE(result[1].start, 0); // we don't care about positioning this, it's already been taken care of!
+    QCOMPARE(result[1].start, 10); // we don't care about positioning this, it's already been taken care of!
     QCOMPARE(result[1].size, 4);
     QCOMPARE(result[1].palette, palettePtr1);
 
@@ -230,7 +230,7 @@ void LvLineControlTest::checkWithPalettePartially1()
     QCOMPARE(result[0].size, 2);
     QCOMPARE(result[0].palette, nullptr);
 
-    QCOMPARE(result[1].start, 0);
+    QCOMPARE(result[1].start, 10);
     QCOMPARE(result[1].size, 1);
     QCOMPARE(result[1].palette, palettePtr1);
 }
@@ -241,7 +241,7 @@ void LvLineControlTest::checkWithPalettePartially2()
 
     QCOMPARE(result.size(), 2);
 
-    QCOMPARE(result[0].start, 0);
+    QCOMPARE(result[0].start, 10);
     QCOMPARE(result[0].size, 2);
     QCOMPARE(result[0].palette, palettePtr1);
 
@@ -358,7 +358,7 @@ void LvLineControlTest::checkFragmentEndWithPalette()
     QCOMPARE(result[0].size, 5);
     QCOMPARE(result[0].palette, nullptr);
 
-    QCOMPARE(result[1].start, 0);
+    QCOMPARE(result[1].start, 10);
     QCOMPARE(result[1].size, 7);
     QCOMPARE(result[1].palette, item);
 
@@ -469,12 +469,12 @@ void LvLineControlTest::checkWithTwoNeighboringPaletes()
     QCOMPARE(result[0].size, 5);
     QCOMPARE(result[0].palette, nullptr);
 
-    QCOMPARE(result[1].start, 0);
+    QCOMPARE(result[1].start, 10);
     QCOMPARE(result[1].size, 4);
     QCOMPARE(result[1].palette, palettePtr1);
 
 
-    QCOMPARE(result[2].start, 0);
+    QCOMPARE(result[2].start, 18);
     QCOMPARE(result[2].size, 6);
     QCOMPARE(result[2].palette, palettePtr2);
 

@@ -24,7 +24,8 @@ HEADERS += \
     $$PWD/palettelist.h \
     $$PWD/codepalette.h \
     $$PWD/texteditnodedebugmodel.h \
-    $$PWD/linecontrol.h
+    $$PWD/linecontrol.h \
+    $$PWD/syntaxhighlighter.h
 
 SOURCES += \
     $$PWD/project.cpp \
@@ -48,4 +49,5 @@ SOURCES += \
     $$PWD/palettelist.cpp \
     $$PWD/codepalette.cpp \
     $$PWD/texteditnodedebugmodel.cpp \
-    $$PWD/linecontrol.cpp
+    $$PWD/linecontrol.cpp \
+    $$PWD/syntaxhighlighter.cpp

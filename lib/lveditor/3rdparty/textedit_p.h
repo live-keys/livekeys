@@ -324,7 +324,7 @@ public:
     lv::DocumentHandler* documentHandler();
     void setDocumentHandler(lv::DocumentHandler* dh);
 
-    void linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem* palette);
+    void linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem* palette, int start, int end);
     void linePaletteRemoved(QQuickItem* palette);
     void linePaletteHeightChanged(QQuickItem* palette, int newHeight);
 
@@ -401,6 +401,9 @@ public Q_SLOTS:
     void select(int start, int end);
     void deselect();
     bool isRightToLeft(int start, int end);
+    void refreshAfterCollapseChange(int pos, int delta);
+    void refreshAfterPaletteChange(int pos, int delta);
+
 #ifndef QT_NO_CLIPBOARD
     void cut();
     void copy();
@@ -412,6 +415,7 @@ public Q_SLOTS:
     void remove(int start, int end);
     Q_REVISION(2) void append(const QString &text);
     Q_REVISION(7) void clear();
+    void shiftTextNodes(int delta, int pos, bool internal);
 
 private Q_SLOTS:
     void q_textChanged();
@@ -435,11 +439,9 @@ private:
     void invalidateFontCaches();
     void addStartPalette(int frStart);
     void addEndPalette(int frEnd);
-    void shiftTextNodes(int delta);
 
     void deleteAllTextNodes(QString debugMessage = "");
     void createAllViewportNodes(QString debugMessage = "");
-    void resetNodesAndPalettesAfterPosition(int pos, QString debugMessage = "");
 protected:
     TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent = nullptr, bool test = true);
 

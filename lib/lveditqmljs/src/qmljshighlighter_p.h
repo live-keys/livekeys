@@ -24,6 +24,7 @@
 #include "live/qmleditfragment.h"
 #include "qmljssettings.h"
 #include "qmljs/qmljsscanner.h"
+#include "live/syntaxhighlighter.h"
 
 namespace lv{
 
@@ -31,7 +32,7 @@ namespace lv{
  * \brief The QCodeJSHighlighter is a private class used internally for highlighting.
  * \private
  */
-class QmlJsHighlighter : public QSyntaxHighlighter{
+class QmlJsHighlighter : public SyntaxHighlighter{
 
 public:
     enum LookAheadType{
@@ -55,6 +56,8 @@ public:
 
 protected:
     void highlightBlock(const QString &text);
+    QList<TextFormatRange> highlight(int lastUserState, int position, const QString& text);
+    QList<TextFormatRange> highlightSections(const QList<ProjectDocumentSection::Ptr>&);
     void highlightSection(const ProjectDocumentSection::Ptr& section, ProjectDocumentBlockData *blockData, bool& exceeded);
 
 private:

@@ -54,10 +54,12 @@ public:
     void resetViewportDocument();
     void setViewport(QRect view);
     void clearViewportDocument();
+
+    void checkSectionsAndBounds();
 public Q_SLOTS:
     void setDirtyBlockPosition(int pos);
     void paletteSlot(int blockNum);
-    void triggerUpdate(int lineNumber, int dirty);
+    void triggerUpdate();
     void setLineDocumentFont(const QFont &font);
     void lineNumberChanged();
     QRect viewport() { return m_viewport; }
@@ -110,6 +112,7 @@ private:
     int m_deltaLineNumber;
     bool m_updatePending;
     QRect m_viewport;
+    QRect m_viewportBuffer;
     std::vector<VisibleSection> m_visibleSections;
     std::pair<int, int> m_bounds;
 private:

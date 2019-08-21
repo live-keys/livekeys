@@ -303,6 +303,8 @@ signals:
     /** shows if the format changed */
     void formatChanged(int position, int length);
 
+    void contentsChange(int pos, int removed, int added);
+
 private:
     void syncContent() const;
     void resetSync() const;

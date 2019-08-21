@@ -1058,6 +1058,15 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
     repaintSelection();
 
     if (e->key() == Qt::Key_Backspace && !(e->modifiers() & ~Qt::ShiftModifier)) {
+
+        if (textEdit && textEdit->lineControl())
+        {
+            if (textEdit->lineControl()->isJumpForwardLine(cursor.block().blockNumber(), true) > 0){
+                int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
+                textEdit->lineControl()->collapseChange(cursor.block().blockNumber(), delta);
+            }
+        }
+
         QTextBlockFormat blockFmt = cursor.blockFormat();
         QTextList *list = cursor.currentList();
         if (list && cursor.atBlockStart() && !cursor.hasSelection()) {
@@ -1067,26 +1076,19 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
             cursor.setBlockFormat(blockFmt);
         } else {
             QTextCursor localCursor = cursor;
-		// TODO
-            /*std::pair<int, int> result(-1, -1);
-            if (textEdit && textEdit->getDocumentLayout())
-            {
-                result = textEdit->getDocumentLayout()->isLineAfterCollapsedSection(localCursor.block().blockNumber());
-            }
-
-            if (result.first != -1 && localCursor.atBlockStart())
-            {
-                textEdit->manageExpandCollapse(result.first, false);
-            }
-            else {*/
-                localCursor.deletePreviousChar();
-            // }
-
+            localCursor.deletePreviousChar();
         }
         goto accept;
     }
 #ifndef QT_NO_SHORTCUT
       else if (e == QKeySequence::InsertParagraphSeparator) {
+        if (textEdit && textEdit->lineControl())
+        {
+            if (textEdit->lineControl()->isJumpForwardLine(cursor.block().blockNumber(), true) > 0){
+                int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
+                textEdit->lineControl()->collapseChange(cursor.block().blockNumber(), delta);
+            }
+        }
         cursor.insertBlock();
         e->accept();
         goto accept;
@@ -1110,6 +1112,13 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
            q->cut();
     }
     else if (e == QKeySequence::Paste) {
+        if (textEdit && textEdit->lineControl())
+        {
+            if (textEdit->lineControl()->isJumpForwardLine(cursor.block().blockNumber(), true) > 0){
+                int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
+                textEdit->lineControl()->collapseChange(cursor.block().blockNumber(), delta);
+            }
+        }
         QClipboard::Mode mode = QClipboard::Clipboard;
         q->paste(mode);
     }
@@ -1146,6 +1155,13 @@ process:
     {
         QString text = e->text();
         if (!text.isEmpty() && (text.at(0).isPrint() || text.at(0) == QLatin1Char('\t'))) {
+            if (textEdit && textEdit->lineControl())
+            {
+                if (textEdit->lineControl()->isJumpForwardLine(cursor.block().blockNumber(), true) > 0){
+                    int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
+                    textEdit->lineControl()->collapseChange(cursor.block().blockNumber(), delta);
+                }
+            }
             cursor.insertText(text);
             selectionChanged();
         } else {

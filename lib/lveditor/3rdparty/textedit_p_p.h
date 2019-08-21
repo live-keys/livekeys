@@ -73,20 +73,25 @@ public:
     class NodeAction {
     public:
         enum NodeActionType {
-            Delete, Create, Shift, Refresh
+            Delete, Create, Shift, Refresh, UpdateViewport,
+            DeleteRange, LineChange, EndPoint
         };
 
         NodeAction(NodeActionType t, QString debug = QString(""))
             : type(t)
             , debugMessage(debug)
             , yShift(0)
-            , offset(0) {}
+            , position(0)
+            , offset(0)
+            , internal(false) {}
 
         NodeActionType type;
         std::set<int> nodeNumbers;
         QString debugMessage;
         int yShift;
+        int position;
         int offset;
+        bool internal;
     };
 
     class Node
@@ -97,12 +102,12 @@ public:
         TextNode* textNode() const { return m_node; }
         void moveStartPos(int delta) { Q_ASSERT(m_startPos + delta > 0); m_startPos += delta; }
         void moveBlockNumber(int delta) { m_blockNumber += delta; }
+        void setStartPos(int pos) { m_startPos = pos; }
         int startPos() const { return m_startPos; }
         int blockNumber() const { return m_blockNumber; }
         void setDirty() {
             m_dirty = true; }
         bool dirty() const { return m_dirty; }
-
     private:
         int m_startPos;
         int m_blockNumber;
@@ -168,7 +173,7 @@ public:
         , focusOnPress(true), persistentSelection(false), requireImplicitWidth(false)
         , selectByMouse(false), canPaste(false), canPasteValid(false), hAlignImplicit(true)
         , textCached(true), inLayout(false), selectByKeyboard(false), selectByKeyboardSet(false)
-        , hadSelection(false), invalidUntilTheEnd(false)
+        , hadSelection(false), invalidUntilTheEnd(false), updateLinesFlag(true)
     {}
 
     ~TextEditPrivate()
@@ -302,6 +307,7 @@ public:
     bool selectByKeyboardSet:1;
     bool hadSelection : 1;
     bool invalidUntilTheEnd: 1;
+    bool updateLinesFlag: 1;
 };
 
 }

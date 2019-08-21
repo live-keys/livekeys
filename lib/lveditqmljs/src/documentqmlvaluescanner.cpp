@@ -362,9 +362,11 @@ int DocumentQmlValueScanner::getBlockEnd(QTextBlock &block, int position){
                         it->is(QmlJS::Token::RightBracket) ||
                         it->is(QmlJS::Token::RightParenthesis) )
             {
-                --nestingDepth;
-                if ( nestingDepth < 0 ){
-                    return tokenPosition;
+                if ( tokenPosition > position ){
+                    --nestingDepth;
+                    if ( nestingDepth < 0 ){
+                        return tokenPosition;
+                    }
                 }
             }
         }

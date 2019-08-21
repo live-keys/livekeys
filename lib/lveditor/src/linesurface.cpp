@@ -103,14 +103,8 @@ void LineSurface::paletteSlot(int blockNum)
     m_dirtyPos = blockNum;
     m_document->markContentsDirty(firstDirtyBlock.position() - 1, m_document->characterCount() - firstDirtyBlock.position() + 1);
 
-    polish();
-    if (isComponentComplete())
-    {
-        updateSize();
-        m_updateType = LineSurface::UpdatePaintNode;
 
-        update();
-    }
+    triggerUpdate();
 }
 
 void LineSurface::setDirtyBlockPosition(int pos)
@@ -150,16 +144,25 @@ void LineSurface::setComponents(lv::TextEdit* te)
     m_previousLineNumber = 0;
     m_lineNumber = 0;
 
-    QObject::connect(m_textEdit, &TextEdit::paletteChange, this, &LineSurface::paletteSlot);
-    QObject::connect(m_textEdit, &TextEdit::lineCountChanged, this, &LineSurface::lineNumberChanged);
+    QObject::connect(m_textEdit->lineControl(), &LineControl::lineDelta, this, &LineSurface::lineNumberChanged);
+    QObject::connect(m_textEdit->lineControl(), &LineControl::refreshAfterCollapseChange, this, &LineSurface::triggerUpdate);
+    QObject::connect(m_textEdit->lineControl(), &LineControl::refreshAfterPaletteChange, this, &LineSurface::paletteSlot);
+
+    if (m_viewportBuffer != QRect())
+    {
+        setViewport(m_viewportBuffer);
+        m_viewportBuffer = QRect();
+    }
+    triggerUpdate();
 }
 
 void LineSurface::resetViewportDocument()
 {
+    if (!m_document) return;
     m_document->clear();
     QTextCursor cursor(m_document);
     cursor.movePosition(QTextCursor::MoveOperation::End);
-    for (int i = m_bounds.first+1; i <= m_bounds.second+1; i++)
+    for (int i = m_bounds.first+1; i <= m_bounds.second; i++)
     {
         if (i!=m_bounds.first+1) cursor.insertBlock();
         std::string s = std::to_string(i) + "  ";
@@ -171,29 +174,19 @@ void LineSurface::resetViewportDocument()
 
 
     updateCollapseSymbols();
-//    for (auto it = m_document->begin(); it!=m_document->end(); it = it.next())
-//    {
-//        qDebug() << it.blockNumber() << it.text();
-//    }
 }
 
 void LineSurface::setViewport(QRect view)
 {
-    if (m_viewport.y() == view.y() && m_viewport.height() == view.height()) return;
-    if (!m_lineControl) return;
-
+    if (m_viewport.y() == view.y() && m_viewport.height() == view.height() && m_bounds != std::make_pair(-1,-1)) return;
+    if (!m_lineControl){
+        m_viewportBuffer = view;
+        return;
+    }
 
     m_viewport = view;
-    auto oldSections = m_visibleSections;
-    m_visibleSections = m_lineControl->visibleSectionsForViewport(view);
 
-    auto oldBounds = m_bounds;
-    m_bounds = visibleSectionsBounds();
-
-    if (oldBounds.first != m_bounds.first || oldBounds.second != m_bounds.second)
-    {
-        resetViewportDocument();
-    }
+    checkSectionsAndBounds();
 
     emit viewportChanged(view);
 
@@ -215,6 +208,20 @@ void LineSurface::clearViewportDocument()
         updateSize();
         m_updateType = LineSurface::UpdatePaintNode;
         update();
+    }
+}
+
+void LineSurface::checkSectionsAndBounds()
+{
+    auto oldSections = m_visibleSections;
+    m_visibleSections = m_lineControl->visibleSectionsForViewport(m_viewport);
+
+    auto oldBounds = m_bounds;
+    m_bounds = visibleSectionsBounds();
+
+    if (oldBounds.first != m_bounds.first || oldBounds.second != m_bounds.second)
+    {
+        resetViewportDocument();
     }
 }
 
@@ -313,11 +320,10 @@ std::pair<int, int> LineSurface::visibleSectionsBounds()
 void LineSurface::mousePressEvent(QMouseEvent* event)
 {
     if (!m_document) return;
-    int position = m_document->documentLayout()->hitTest(event->localPos(), Qt::FuzzyHit);
-    QTextBlock block = m_document->findBlock(position);
-    int blockNum = block.blockNumber();
 
-    int absBlockNum = m_textEdit->lineControl()->visibleToAbsolute(blockNum);
+    int visibleBlockNumber = static_cast<int>(event->localPos().y()) / m_textEdit->lineControl()->blockHeight();
+    int absBlockNum = m_textEdit->lineControl()->visibleToAbsolute(visibleBlockNumber);
+
     const QTextBlock& matchingBlock = m_textEdit->documentHandler()->target()->findBlockByNumber(absBlockNum);
     const QTextBlock& lineDocBlock = m_document->findBlockByNumber(absBlockNum - m_bounds.first);
     lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
@@ -361,15 +367,22 @@ void LineSurface::setDocument(QTextDocument *doc)
     if (!doc) return;
     m_document = doc;
     m_updatePending = false;
-    qDebug() << "setDocument";
     m_document->rootFrame(); // bug fix
     triggerUpdate(m_document->lineCount(), 0);
 }
 */
 
 
-void LineSurface::triggerUpdate(int lineNumber, int dirty)
+void LineSurface::triggerUpdate()
 {
+    if (m_viewportBuffer != QRect())
+    {
+        setViewport(m_viewportBuffer);
+        m_viewportBuffer = QRect();
+    }
+
+    checkSectionsAndBounds();
+
     resetViewportDocument();
 
     polish();
@@ -390,6 +403,10 @@ void LineSurface::lineNumberChanged()
 {
     m_previousLineNumber = m_lineNumber;
     m_lineNumber = m_textEdit->documentHandler()->target()->blockCount();
+
+    m_visibleSections = m_lineControl->visibleSectionsForViewport(m_viewport);
+    m_bounds = visibleSectionsBounds();
+    resetViewportDocument();
 }
 
 static bool comesBefore(LineSurface::Node* n1, LineSurface::Node* n2)
@@ -569,7 +586,7 @@ void LineSurface::updateSize()
 {
     if (!m_document) return;
     QSizeF layoutSize = m_document->documentLayout()->documentSize();
-    setImplicitSize(layoutSize.width(), layoutSize.height());
+    setImplicitSize(layoutSize.width(), m_textEdit->totalHeight());
 }
 
 }

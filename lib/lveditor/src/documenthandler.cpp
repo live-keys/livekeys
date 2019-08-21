@@ -117,8 +117,8 @@ void DocumentHandler::requestCursorPosition(int position){
 /**
  * \brief Used to add and position the palette inside the editor
  */
-void DocumentHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *box){
-    m_textEdit->linePaletteAdded(lineStart, lineEnd, height, box);
+void DocumentHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *box, int start, int end){
+    m_textEdit->linePaletteAdded(lineStart, lineEnd, height, box, start, end);
 }
 
 /**

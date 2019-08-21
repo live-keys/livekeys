@@ -263,8 +263,12 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
                             destinationBlock.setUserData(bddestination);
                         }
                     }
+                    ProjectDocumentSection::Ptr nuPtr = ProjectDocumentSection::create(itSection->type(), itSection->position(), itSection->length());
+                    nuPtr->m_document = itSection->m_document;
+                    nuPtr->m_userData = itSection->m_userData;
+                    nuPtr->m_textChangedHandler = itSection->m_textChangedHandler;
+                    bddestination->addSection(nuPtr);
                     seit = bd->m_sections.erase(seit);
-                    bddestination->addSection(itSection);
                     emit formatChanged(destinationBlock.position(), destinationBlock.length());
                     continue;
                 }
@@ -461,6 +465,8 @@ QString ProjectDocument::peekContent(int position) const{
  * \brief Slot for tracking text document changes which updates markers and sections
  */
 void ProjectDocument::documentContentsChanged(int position, int charsRemoved, int charsAdded){
+    emit contentsChange(position, charsRemoved, charsAdded);
+
     QString addedText = "";
     if ( charsAdded == 1 ){
         QChar c = m_textDocument->characterAt(position);
