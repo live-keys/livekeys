@@ -17,7 +17,7 @@ namespace lv{
 
 class MLNode;
 class TcpLineServer;
-class TcpLineResponse;
+class RemoteLineResponse;
 
 class LV_LIVE_EXPORT TcpLineSocket : public QObject{
 
@@ -48,13 +48,13 @@ private:
     QString     m_address;
     bool        m_initialized;
 
-    LineCapture      m_lineCapture;
+    LineCapture         m_lineCapture;
 
-    QQmlPropertyMap* m_post;
-    TcpLineResponse* m_response;
-    QQmlComponent*   m_component;
-    QQmlContext*     m_componentContext;
-    QObject*         m_sourceItem;
+    QQmlPropertyMap*    m_post;
+    RemoteLineResponse* m_response;
+    QQmlComponent*      m_component;
+    QQmlContext*        m_componentContext;
+    QObject*            m_sourceItem;
 };
 
 inline const QString &TcpLineSocket::address(){

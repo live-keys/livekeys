@@ -55,8 +55,8 @@ public:
 
     void updateDocumentMonitoring(ProjectDocument* document, bool monitor);
 
-    void closeDocumentsInPath(const QString& path, bool closeIfActive = false);
-    void closeDocument(const QString& path, bool closeIfActive = false);
+    void closeDocumentsInPath(const QString& path);
+    void closeDocument(const QString& path);
 
 public slots:
     void rescanDocuments();
@@ -65,6 +65,8 @@ public slots:
     bool saveDocuments();
     lv::ProjectDocument* isOpened(const QString& path);
     lv::ProjectDocument* lastOpened();
+
+    lv::ProjectDocument* documentByPathHash(const QString& pathHash);
 
     QStringList listUnsavedDocuments();
     QStringList listUnsavedDocumentsInPath(const QString& path);

@@ -1926,6 +1926,9 @@ void TextEdit::mousePressEvent(QMouseEvent *event)
     if (!d->document || !d->control)
     {
         QQuickItem::mousePressEvent(event);
+        if ( d->focusOnPress ){
+            forceActiveFocus(Qt::MouseFocusReason);
+        }
         return;
     }
 
@@ -2392,7 +2395,6 @@ TextEditPrivate::ExtraData::ExtraData()
 
 void TextEditPrivate::setTextDocument(QTextDocument *doc)
 {
-
     if (document)
         unsetTextDocument();
     Q_Q(TextEdit);
@@ -2436,11 +2438,10 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
         document->setDefaultFont(font);
     }
 
-
-    if (document->documentMargin() != textMargin)
-    {
-        document->setDocumentMargin(textMargin);
-    }
+//    if (document->documentMargin() != textMargin) // disabled due to triggering a change in the document
+//    {
+//        document->setDocumentMargin(textMargin);
+//    }
     document->setUndoRedoEnabled(false); // flush undo buffer.
     document->setUndoRedoEnabled(true);
 

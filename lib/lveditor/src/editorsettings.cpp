@@ -59,6 +59,7 @@ EditorSettings::~EditorSettings(){
 /**
  * \fn lv::EditorSettings::fontSizeChanged
  * \brief Signals the fontSize property changed.
+ */
 
 /**
  * \brief Populates the settings from a given JSON object

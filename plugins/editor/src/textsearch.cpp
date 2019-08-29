@@ -28,8 +28,6 @@ void TextSearch::process(){
         }
     }
 
-    qDebug() << lineIndexes;
-
     if ( !m_value.isEmpty() ){
         int result = m_text.indexOf(m_value);
 

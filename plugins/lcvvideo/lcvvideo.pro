@@ -21,6 +21,16 @@ linkLocalPlugin(lcvcore, lcvcore)
 
 # Source
 
+unix:!macx{
+    QMAKE_LFLAGS += \
+	'-Wl,-rpath,\'\$$ORIGIN/../../link\''
+
+
+    createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)
+    QMAKE_EXTRA_TARGETS    += createlinkdir
+    POST_TARGETDEPS        += createlinkdir
+}
+
 include($$PWD/src/lcvvideo.pri)
 include($$PWD/include/lcvvideoheaders.pri)
 include($$PROJECT_ROOT/project/3rdparty/opencv.pri)

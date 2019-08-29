@@ -26,22 +26,12 @@ namespace lv{
 class LV_VIEW_EXPORT Settings : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(bool launchMode READ launchMode CONSTANT)
-    Q_PROPERTY(bool runMode    READ runMode    CONSTANT)
     Q_PROPERTY(QString path    READ path       CONSTANT)
 
 public:
     ~Settings();
 
     static Settings* create(const QString& path, QObject* parent = 0);
-
-    /** Launch mode getter, shows that the view is available (full screen) */
-    bool launchMode() const;
-    void setLaunchMode(bool launchMode);
-
-    /** Run mode getter, runs it in command line, no UI */
-    bool runMode() const;
-    void setRunMode(bool runMode);
 
     /** Returns the path of the config folder */
     const QString& path() const;
@@ -55,28 +45,8 @@ private:
 
 private:
     QString m_path;
-    bool    m_previewMode;
-    bool    m_runMode;
     QMap<QString, QObject*>* m_configFiles;
 };
-
-inline bool Settings::launchMode() const{
-    return m_previewMode;
-}
-
-/** Sets the launch mode */
-inline void Settings::setLaunchMode(bool previewMode){
-    m_previewMode = previewMode;
-}
-
-inline bool Settings::runMode() const{
-    return m_runMode;
-}
-
-/** Sets the run mode indicator to the given value */
-inline void Settings::setRunMode(bool runMode){
-    m_runMode = runMode;
-}
 
 inline const QString &Settings::path() const{
     return m_path;

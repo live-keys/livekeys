@@ -17,10 +17,8 @@
 #include "livecv.h"
 #include "livecvarguments.h"
 #include "livecvscript.h"
-#include "commands.h"
 #include "environment.h"
 #include "live/memory.h"
-#include "live/extensions.h"
 
 #include "live/keymap.h"
 #include "live/visuallog.h"
@@ -33,12 +31,12 @@
 #include "live/settings.h"
 #include "live/applicationcontext.h"
 #include "live/viewcontext.h"
-#include "live/liveextension.h"
+#include "live/workspaceextension.h"
 #include "live/packagegraph.h"
 
-#include "live/editorprivate_plugin.h"
 #include "live/project.h"
 #include "live/documenthandler.h"
+#include "live/editorprivate_plugin.h"
 
 #include "live/projectqmlextension.h"
 #include "live/codeqmlhandler.h"
@@ -49,8 +47,8 @@
 #include "live/windowlayer.h"
 
 #include <QUrl>
-#include <QFileInfo>
 #include <QDir>
+#include <QFileInfo>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QJSValue>
@@ -66,17 +64,13 @@ LiveCV::LiveCV(QObject *parent)
     , m_engine(new ViewEngine(new QQmlApplicationEngine))
     , m_arguments(new LiveCVArguments(header().toStdString()))
     , m_dir(QString::fromStdString(ApplicationContext::instance().applicationPath()))
-    , m_project(new Project)
+    , m_project(new Project(m_engine))
     , m_settings(nullptr)
     , m_script(nullptr)
-    , m_commands(new Commands)
-    , m_keymap(nullptr)
-    , m_extensions(nullptr)
     , m_log(0)
     , m_vlog(new VisualLogQmlObject) // js ownership
     , m_packageGraph(nullptr)
     , m_memory(new Memory(this))
-    , m_windowControls(nullptr)
     , m_layers(new QQmlPropertyMap)
     , m_lastLayer(nullptr)
     , m_layerPlaceholder(nullptr)
@@ -91,11 +85,13 @@ LiveCV::LiveCV(QObject *parent)
 }
 
 LiveCV::~LiveCV(){
+    VisualLog::setViewTransport(nullptr);
     delete m_settings;
     delete m_engine;
     delete m_packageGraph;
     delete m_memory;
     delete m_layers;
+
 }
 
 LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent){
@@ -126,18 +122,9 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
     }
 
     livecv->m_script = new LiveCVScript(livecv->m_arguments->scriptArguments());
-    QObject::connect(
-        livecv->m_project, SIGNAL(activeChanged(lv::ProjectDocument*)),
-        livecv->m_script, SLOT(scriptChanged(lv::ProjectDocument*))
-    );
+    QObject::connect(livecv->project(), &Project::activeChanged, livecv->m_script, &LiveCVScript::scriptChanged);
 
     livecv->m_settings = Settings::create(QString::fromStdString(ApplicationContext::instance().configPath()));
-    livecv->m_settings->setLaunchMode(livecv->m_arguments->launchFlag());
-    livecv->m_keymap = new KeyMap(livecv->m_settings->path());
-    livecv->m_settings->addConfigFile("keymap", livecv->m_keymap);
-    livecv->m_commands->setModel(new CommandsModel(livecv->m_commands, livecv->m_keymap));
-    livecv->m_extensions = new Extensions(livecv->m_engine, livecv->m_settings->path());
-    livecv->m_settings->addConfigFile("extensions", livecv->m_extensions);
 
     return livecv;
 }
@@ -168,6 +155,33 @@ void LiveCV::solveImportPaths(){
 
 void LiveCV::loadQml(const QUrl &url){
     static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);
+
+    m_project->setRunSpace(layerPlaceholder());
+
+    if ( m_arguments->script() != "" ){
+        m_project->openProject(QString::fromStdString(m_arguments->script()));
+    } else {
+        m_project->newProject();
+    }
+    if ( !m_arguments->monitoredFiles().isEmpty() ){
+        foreach( QString mfile, m_arguments->monitoredFiles() ){
+            if ( !mfile.isEmpty() ){
+                QFileInfo mfileInfo(mfile);
+                if ( mfileInfo.isRelative() ){
+                    m_project->openFile(
+                        QDir::cleanPath(m_project->rootPath() + QDir::separator() + mfile),
+                        ProjectDocument::Monitor
+                    );
+                } else {
+                    m_project->openFile(mfile, ProjectDocument::Monitor);
+                }
+            }
+        }
+    }
+}
+
+void LiveCV::loadProject(){
+    m_project->setRunSpace(layerPlaceholder());
 
     if ( m_arguments->script() != "" ){
         m_project->openProject(QString::fromStdString(m_arguments->script()));
@@ -225,20 +239,29 @@ void LiveCV::loadLayer(const QString &name, std::function<void (Layer*)> onReady
 
     if ( m_lastLayer)
         layer->setParent(m_lastLayer);
+    else
+        layer->setParent(m_engine);
     m_lastLayer = layer;
     m_layers->insert(name, QVariant::fromValue(layer));
 
     if ( layer->hasView() ){
         connect(layer, &Layer::viewReady, [this, onReady](Layer* layer, QObject* view){
-            qDebug() << "Layer view ready: " << layer->name();
-            m_layerPlaceholder = view;
+            vlog("main").v() << "Layer view ready: " << layer->name();
+            if ( view )
+                m_layerPlaceholder = view;
+
+            emit layerReady(layer);
+
             if ( onReady )
                 onReady(layer);
         });
 
         layer->loadView(m_engine, m_layerPlaceholder ? m_layerPlaceholder : m_engine->engine());
-    } else if ( onReady ){
-        onReady(layer);
+    } else {
+        vlog("main").v() << "Layer ready: " << layer->name();
+        emit layerReady(layer);
+        if ( onReady )
+            onReady(layer);
     }
 }
 
@@ -248,12 +271,31 @@ void LiveCV::loadLayers(const QStringList &layers, std::function<void (Layer *)>
         tail.removeFirst();
         loadLayer(layers.first(), [tail, onReady, this](Layer* l){
             if ( tail.isEmpty() ){
+                if ( l->hasView() && l->nextViewParent() ){
+                    m_layerPlaceholder = l->nextViewParent();
+                }
                 if (onReady)
                     onReady(l);
             } else {
                 loadLayers(tail, onReady);
             }
         });
+    }
+}
+
+void LiveCV::loadDefaultLayers(){
+    QStringList layersToLoad = {"window", "workspace", "editor"}; // defaults
+    if ( !m_arguments->layers().isEmpty() ){
+        layersToLoad = m_arguments->layers();
+        layersToLoad.removeAll("base");
+    }
+
+    if ( !layersToLoad.isEmpty() ){
+        loadLayers(layersToLoad, [this](Layer*){
+            loadProject();
+        });
+    } else {
+        loadProject();
     }
 }
 
@@ -276,10 +318,6 @@ void LiveCV::loadInternalPlugins(){
         "base", 1, 0, "LiveEnvironment", ViewEngine::typeAsPropertyMessage("LiveEnvironment", "script.environment"));
     qmlRegisterUncreatableType<lv::Settings>(
         "base", 1, 0, "LiveSettings",    ViewEngine::typeAsPropertyMessage("LiveSettings", "livecv.settings"));
-    qmlRegisterUncreatableType<lv::Commands>(
-        "base", 1, 0, "LiveCommands",    ViewEngine::typeAsPropertyMessage("LiveCommands", "livecv.commands"));
-    qmlRegisterUncreatableType<lv::KeyMap>(
-        "base", 1, 0, "KeyMap",          ViewEngine::typeAsPropertyMessage("KeyMap", "livecv.keymap"));
     qmlRegisterUncreatableType<lv::VisualLogModel>(
         "base", 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "livecv.log"));
     qmlRegisterUncreatableType<lv::Memory>(
@@ -303,14 +341,6 @@ void LiveCV::loadInternalPlugins(){
     EditorPrivatePlugin ep;
     ep.registerTypes("editor.private");
     ep.initializeEngine(m_engine->engine(), "editor.private");
-
-    m_extensions->loadExtensions();
-    for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
-        LiveExtension* le = it.value();
-        m_commands->add(le, le->commands());
-        m_keymap->store(le->keyBindings());
-    }
-
 }
 
 void LiveCV::loadInternalPackages(){
@@ -359,9 +389,35 @@ void LiveCV::loadInternalPackages(){
     }
 }
 
+void LiveCV::initializeProject(){
+    m_project->setRunSpace(layerPlaceholder());
+
+    if ( m_arguments->script() != "" ){
+        m_project->openProject(QString::fromStdString(m_arguments->script()));
+    } else {
+        m_project->newProject();
+    }
+    if ( !m_arguments->monitoredFiles().isEmpty() ){
+        foreach( QString mfile, m_arguments->monitoredFiles() ){
+            if ( !mfile.isEmpty() ){
+                QFileInfo mfileInfo(mfile);
+                if ( mfileInfo.isRelative() ){
+                    m_project->openFile(
+                        QDir::cleanPath(m_project->rootPath() + QDir::separator() + mfile),
+                        ProjectDocument::Monitor
+                    );
+                } else {
+                    m_project->openFile(mfile, ProjectDocument::Monitor);
+                }
+            }
+        }
+    }
+}
+
 void LiveCV::addDefaultLayers(){
     addLayer("window", ":/windowlayer.qml");
     addLayer("workspace", ":/workspacelayer.qml");
+    addLayer("editor", ":/editorlayer.qml");
 }
 
 std::vector<std::string> LiveCV::packageImportPaths() const{
@@ -390,26 +446,8 @@ QByteArray LiveCV::extractPluginInfo(const QString &import) const{
     return extractor->result();
 }
 
-QQmlPropertyMap *LiveCV::extensions(){
-    if ( m_extensions )
-        return m_extensions->globals();
-    return nullptr;
-}
-
 QQmlPropertyMap *LiveCV::layers(){
     return m_layers;
-}
-
-QObject *LiveCV::windowControls() const{
-    if ( !m_windowControls ){
-        QList<QObject*> rootObjects = static_cast<QQmlApplicationEngine*>(m_engine->engine())->rootObjects();
-        for ( auto it = rootObjects.begin(); it != rootObjects.end(); ++it ){
-            if ( (*it)->objectName() == "window" ){
-                m_windowControls = (*it)->property("controls").value<QObject*>();
-            }
-        }
-    }
-    return m_windowControls;
 }
 
 QObject *LiveCV::layerPlaceholder() const{
@@ -425,39 +463,6 @@ QObject *LiveCV::layerPlaceholder() const{
         }
     }
     return m_layerPlaceholder;
-}
-
-QJSValue LiveCV::interceptMenu(QJSValue context){
-
-    QJSValueList interceptorArgs;
-    interceptorArgs << context;
-
-    QJSValueList result;
-
-    for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
-        LiveExtension* le = it.value();
-        if ( le->hasMenuInterceptor() ){
-            QJSValue v = le->callMenuInterceptor(interceptorArgs);
-            if ( v.isArray() ){
-                QJSValueIterator it(v);
-                while ( it.hasNext() ){
-                    it.next();
-                    if ( it.name() != "length" ){
-                        result << it.value();
-                    }
-                }
-            }
-        }
-    }
-
-    QJSValue concat = m_engine->engine()->newArray(result.length());
-    int index = 0;
-    for ( auto it = result.begin(); it != result.end(); ++it ){
-        concat.setProperty(index, *it);
-        ++index;
-    }
-
-    return concat;
 }
 
 void LiveCV::engineError(QJSValue error){

@@ -21,35 +21,50 @@
 #include "live/lockedfileiosession.h"
 #include "live/projectdocument.h"
 
+#include "live/runnable.h"
+
 #include <QObject>
 #include <QHash>
 
+class QTimer;
+
 namespace lv{
 
+class Runnable;
+class ViewEngine;
 class ProjectEntry;
 class ProjectFile;
 class ProjectFileModel;
 class ProjectNavigationModel;
 class ProjectDocumentModel;
+class RunnableContainer;
 
 class LV_EDITOR_EXPORT Project : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lv::ProjectDocument*  active                READ active          NOTIFY activeChanged)
-    Q_PROPERTY(lv::ProjectFileModel* fileModel             READ fileModel       NOTIFY fileModelChanged)
-    Q_PROPERTY(lv::ProjectNavigationModel* navigationModel READ navigationModel NOTIFY navigationModelChanged)
-    Q_PROPERTY(lv::ProjectDocumentModel* documentModel     READ documentModel   NOTIFY documentModelChanged)
+    Q_PROPERTY(lv::Runnable* active                        READ active          NOTIFY activeChanged)
+    Q_PROPERTY(lv::ProjectFileModel* fileModel             READ fileModel       CONSTANT)
+    Q_PROPERTY(lv::ProjectNavigationModel* navigationModel READ navigationModel CONSTANT)
+    Q_PROPERTY(lv::ProjectDocumentModel* documentModel     READ documentModel   CONSTANT)
+    Q_PROPERTY(lv::RunnableContainer* runnables            READ runnables       CONSTANT)
     Q_PROPERTY(QString rootPath                            READ rootPath        NOTIFY pathChanged)
+    Q_PROPERTY(lv::Project::RunTrigger runTrigger          READ runTrigger      WRITE setRunTrigger NOTIFY runTriggerChanged)
+    Q_ENUMS(RunTrigger)
 
     friend class ProjectFileModel;
     friend class ProjectDocument;
     friend class ProjectDocumentModel;
 
 public:
+    enum RunTrigger{
+        RunManual,
+        RunOnSave,
+        RunOnChange
+    };
+
+public:
     Project(QObject* parent = 0);
     ~Project();
-
-    void setActive(const QString& rootPath);
 
     ProjectFile* lookupBestFocus(ProjectEntry* entry);
     ProjectDocument* isOpened(const QString& rootPath);
@@ -74,7 +89,9 @@ public:
      */
     lv::ProjectDocumentModel* documentModel();
 
-    lv::ProjectDocument*  active() const;
+    lv::RunnableContainer* runnables() const;
+
+    lv::Runnable* active() const;
 
     /**
      * \brief Getter of the root path
@@ -85,13 +102,25 @@ public:
 
     LockedFileIOSession::Ptr lockedFileIO();
 
+    lv::Project::RunTrigger runTrigger() const;
+    void setRunTrigger(lv::Project::RunTrigger runTrigger);
+
+    void setRunSpace(QObject* runSpace);
+
+    static QByteArray hashPath(const QByteArray& path);
+
+    void excludeRunTriggers(const QSet<QString>& paths);
+    void removeExcludedRunTriggers(const QSet<QString>& paths);
+
 public slots:
     void newProject();
     void closeProject();
     lv::ProjectDocument* openFile(const QUrl& rootPath, int mode = lv::ProjectDocument::EditIfNotOpen);
     lv::ProjectDocument* openFile(const QString& rootPath, int mode = lv::ProjectDocument::EditIfNotOpen);
     lv::ProjectDocument* openFile(lv::ProjectFile* file, int mode = lv::ProjectDocument::EditIfNotOpen);
-    void setActive(lv::ProjectFile *file);
+
+    void setActive(const QString& rootPath);
+    lv::Runnable* openRunnable(const QString& path, const QStringList& activations = QStringList());
 
     bool isDirProject() const;
     bool isFileInProject(const QUrl& rootPath) const;
@@ -105,37 +134,54 @@ public slots:
     QString dir() const;
     QString path(const QString& relative) const;
 
+    void scheduleRun();
+    void run();
+
+    QObject* runSpace();
+    QObject* appRoot();
+
 signals:
     /** path changed, means the whole project changed */
     void pathChanged(QString rootPath);
     /** active file has changed */
-    void activeChanged(lv::ProjectDocument* active);
+    void activeChanged(lv::Runnable* active);
 
-    /** file model changed */
-    void fileModelChanged(lv::ProjectFileModel* fileModel);
-    /** navigation model changed */
-    void navigationModelChanged(lv::ProjectNavigationModel* navigationModel);
-    /** document model changed */
-    void documentModelChanged(lv::ProjectDocumentModel* documentModel);
+    /** triggers when a document is opened */
+    void documentOpened(lv::ProjectDocument* document);
 
     /** refers to an internal project directory change, for example renaming */
     void directoryChanged(const QString& rootPath);
     /** file changed (e.g. on save) */
     void fileChanged(const QString& rootPath);
 
+    /** run trigger changed */
+    void runTriggerChanged();
+
+    /** project is about to close */
+    void aboutToClose();
+
 private:
+    ViewEngine* engine();
     ProjectFile* relocateDocument(const QString& rootPath, const QString &newPath, ProjectDocument *document);
-    void setActive(ProjectDocument* document);
+    void setActive(Runnable* runnable);
+    ProjectDocument* createDocument(ProjectFile* file, bool isMonitored);
+    void documentSaved(ProjectDocument* documnet);
 
 private:
     ProjectFileModel*       m_fileModel;
     ProjectNavigationModel* m_navigationModel;
     ProjectDocumentModel*   m_documentModel;
+    RunnableContainer*      m_runnables;
 
     LockedFileIOSession::Ptr m_lockedFileIO;
 
-    ProjectDocument* m_active;
+    Runnable*        m_active;
     QString          m_path;
+    QObject*         m_runspace;
+    QTimer*          m_scheduleRunTimer;
+    RunTrigger       m_runTrigger;
+
+    QSet<QString>    m_excludedRunTriggers;
 };
 
 
@@ -151,7 +197,14 @@ inline ProjectDocumentModel *Project::documentModel(){
     return m_documentModel;
 }
 
-inline ProjectDocument *Project::active() const{
+/**
+ * \brief Returns the opened runnables
+ */
+inline RunnableContainer *Project::runnables() const{
+    return m_runnables;
+}
+
+inline Runnable* Project::active() const{
     return m_active;
 }
 
@@ -167,6 +220,25 @@ inline const QString &Project::rootPath() const{
  */
 inline LockedFileIOSession::Ptr Project::lockedFileIO(){
     return m_lockedFileIO;
+}
+
+/**
+ * \brief Returns the trigger type to rerun the project.
+ */
+inline Project::RunTrigger Project::runTrigger() const{
+    return m_runTrigger;
+}
+
+
+/**
+ * \brief Sets the trigger type to rerun the project.
+ */
+inline void Project::setRunTrigger(Project::RunTrigger runTrigger){
+    if (m_runTrigger == runTrigger)
+        return;
+
+    m_runTrigger = runTrigger;
+    emit runTriggerChanged();
 }
 
 

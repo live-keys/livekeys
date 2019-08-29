@@ -18,6 +18,7 @@
 #include "live/exception.h"
 
 #include <QCoreApplication>
+#include <QStandardPaths>
 #include <QDir>
 
 namespace lv{
@@ -46,16 +47,21 @@ public:
     std::string librariesPath;
     std::string developmentPath;
     std::string configPath;
+    std::string appDataPath;
 };
 
 std::unique_ptr<ApplicationContext> ApplicationContextPrivate::ApplicationContextPrivate::instance;
 
-/** Default destructor */
+/**
+ * Default destructor
+ */
 ApplicationContext::~ApplicationContext(){
     delete m_d;
 }
 
-/** Initializer that initalizes the singleton instance of the context */
+/**
+ * Initalizes the singleton instance of the context
+ */
 void ApplicationContext::initialize(){
     ApplicationContextPrivate::instance.reset(new ApplicationContext);
 }
@@ -81,7 +87,6 @@ void ApplicationContext::initializePaths(){
     m_d->librariesPath =  applicationPath() + "/Libraries";
     m_d->developmentPath = applicationPath() + "/Dev";
     m_d->configPath = applicationPath() + "/config";
-
 #else
     m_d->applicationPath = QFileInfo(applicationFilePath).path().toStdString();
     m_d->executablePath = QFileInfo(applicationFilePath).path().toStdString();
@@ -145,6 +150,28 @@ const std::string &ApplicationContext::developmentPath(){
 /** Config path getter */
 const std::string &ApplicationContext::configPath(){
     return m_d->configPath;
+}
+
+/**
+ * Returns the AppData path
+ *
+ * Depending on the platform, this can be:
+ *  - Windows %APPDATA%/LiveKeys
+ *  - macOS $HOME/Library/Application Support/LiveKeys
+ *  - Linux $HOME/.config/LiveKeys
+ */
+const std::string &ApplicationContext::appDataPath(){
+    if ( m_d->appDataPath.empty() ){
+        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        QDir pathDir(path);
+        if ( !pathDir.exists() ){
+            if ( !QDir().mkdir(path) ){
+                THROW_EXCEPTION(lv::Exception, "Failed to create directory: " + path.toStdString(), lv::Exception::toCode("~dir"));
+            }
+        }
+        m_d->appDataPath = path.toStdString();
+    }
+    return m_d->appDataPath;
 }
 
 /** Executable path getter */

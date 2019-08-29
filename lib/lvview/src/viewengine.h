@@ -126,15 +126,20 @@ public:
     QObject* createObject(const QByteArray& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
     QObject* createObject(const char* qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
 
+    QJSValue toJSErrors(const QList<QQmlError>& errors) const;
+    QJSValue toJSError(const QQmlError& error) const;
+
 signals:
     /** Signals before compiling a new object. */
     void aboutToCreateObject(const QUrl& file);
+    /** Signals after acquiring a new object, assuring no errors were found. */
+    void objectAcquired(const QUrl& file, QObject* reference);
     /** Loading indicator has changed */
     void isLoadingChanged(bool isLoading);
     /** Object was created */
-    void objectCreated(QObject* object, const QUrl& file);
+    void objectReady(QObject* object, const QUrl& file, QObject* reference);
     /** Error in object creation */
-    void objectCreationError(QJSValue errors, const QUrl& file);
+    void objectCreationError(QJSValue errors, const QUrl& file, QObject* reference);
 
     /** Emitted when the error is propagated all the way to the application */
     void applicationError(QJSValue error);
@@ -146,6 +151,7 @@ public slots:
         const QString& qmlCode,
         QObject* parent,
         const QUrl& file,
+        QObject* reference = nullptr,
         bool clearCache = false
     );
     QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
@@ -160,8 +166,6 @@ public slots:
     QJSValue lastErrorsObject() const;
 
 private:
-    QJSValue toJSError(const QQmlError& error) const;
-    QJSValue toJSErrors(const QList<QQmlError>& errors) const;
 
     QQmlEngine*    m_engine;
     QMutex*        m_engineMutex;

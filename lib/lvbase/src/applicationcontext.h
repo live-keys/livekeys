@@ -47,6 +47,7 @@ public:
     const std::string& librariesPath();
     const std::string& developmentPath();
     const std::string& configPath();
+    const std::string& appDataPath();
 
 private:
     ApplicationContext();

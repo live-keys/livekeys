@@ -29,9 +29,6 @@ public:
     explicit LiveCVArguments(const std::string &header);
     ~LiveCVArguments();
 
-    bool launchFlag() const;
-    bool runFlag() const;
-    bool consoleFlag() const;
     bool pluginInfoFlag() const;
     const QString& pluginInfoImport() const;
 
@@ -39,6 +36,7 @@ public:
     bool versionFlag() const;
     std::string helpString() const;
 
+    const QStringList& layers() const;
     const QStringList& monitoredFiles() const;
 
     CommandLineParser* parser();
@@ -53,30 +51,14 @@ public:
 private:
     CommandLineParser* m_parser;
 
-    bool m_consoleFlag;
-    bool m_launchFlag;
-    bool m_runFlag;
-
     MLNode m_logConfiguration;
 
     bool m_pluginInfoFlag;
     QString m_pluginInfoImport;
 
     QStringList m_monitoredFiles;
-
+    QStringList m_layers;
 };
-
-inline bool LiveCVArguments::launchFlag() const{
-    return m_launchFlag;
-}
-
-inline bool LiveCVArguments::runFlag() const{
-    return m_runFlag;
-}
-
-inline bool LiveCVArguments::consoleFlag() const{
-    return m_consoleFlag;
-}
 
 inline const QString &LiveCVArguments::pluginInfoImport() const{
     return m_pluginInfoImport;

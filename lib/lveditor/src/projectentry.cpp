@@ -16,6 +16,7 @@
 
 #include "live/projectentry.h"
 #include "live/projectfile.h"
+#include "live/project.h"
 
 #include <QStringList>
 #include <QFileInfo>
@@ -92,6 +93,11 @@ void ProjectEntry::updatePaths(){
 /** Returns the QUrl of the entry path */
 QUrl ProjectEntry::pathUrl() const{
     return QUrl::fromLocalFile(m_path);
+}
+
+/** Returns the path hashed with md5 and converted to hex */
+QString ProjectEntry::hashPath() const{
+    return QString::fromUtf8(Project::hashPath(path().toUtf8()).toHex());
 }
 
 /** Blank destructor */

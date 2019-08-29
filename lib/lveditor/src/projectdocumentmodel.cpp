@@ -101,8 +101,6 @@ void ProjectDocumentModel::relocateDocument(const QString &path, const QString &
 
 /** Closes all of the open documents */
 void ProjectDocumentModel::closeDocuments(){
-    Project* p = qobject_cast<Project*>(parent());
-
     if ( m_fileWatcher ){
         QObject::disconnect(m_fileWatcher, SIGNAL(fileChanged(QString)),
                             this, SLOT(monitoredFileChanged(QString)));
@@ -111,13 +109,10 @@ void ProjectDocumentModel::closeDocuments(){
     }
 
     for( QHash<QString, ProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
-        if ( it.value() != p->active() ){
-            emit aboutToClose(it.value());
-            delete it.value();
-        }
+        emit aboutToClose(it.value());
+        delete it.value();
     }
     m_openedFiles.clear();
-
 }
 
 /** Change the monitoring state of a particular documetn */
@@ -134,91 +129,37 @@ void ProjectDocumentModel::updateDocumentMonitoring(ProjectDocument *document, b
 }
 
 /** Close all of the documents within a given folder path */
-void ProjectDocumentModel::closeDocumentsInPath(const QString &path, bool closeIfActive){
+void ProjectDocumentModel::closeDocumentsInPath(const QString &path){
     if ( path.isEmpty() ){
         closeDocument(path);
         return;
     }
 
     QHash<QString, ProjectDocument*>::iterator it = m_openedFiles.begin();
-    Project* p = qobject_cast<Project*>(parent());
     beginResetModel();
     while ( it != m_openedFiles.end() ){
         if ( it.key().startsWith(path) ){
             ProjectDocument* doc = it.value();
             it = m_openedFiles.erase(it);
             emit aboutToClose(it.value());
-            if ( p ){
-                if ( p->active() != doc )
-                    delete doc;
-                else if ( closeIfActive ){
-                    p->setActive((ProjectDocument*)0);
-                }
-            } else {
-                delete doc;
-            }
+            delete doc;
         } else {
             ++it;
         }
     }
 
-    if ( p ){
-        ProjectFile* newActive = 0;
-        if ( p->active() == 0 ){
-            if ( p->fileModel()->root()->childCount() > 0 ){
-                if ( p->fileModel()->root()->child(0)->isFile() )
-                    newActive = qobject_cast<ProjectFile*>(p->fileModel()->root()->child(0));
-                else {
-                    newActive = p->lookupBestFocus(p->fileModel()->root()->child(0));
-                }
-            }
-        }
-
-        if ( p->active() == 0 )
-            p->setActive(newActive);
-
-    }
-
     endResetModel();
 }
 
-/** Close the specific file with a given path */
-void ProjectDocumentModel::closeDocument(const QString &path, bool closeIfActive){
+/**
+ * \brief Close the specific file with a given path
+ */
+void ProjectDocumentModel::closeDocument(const QString &path){
     if ( m_openedFiles.contains(path) ){
         beginResetModel();
         ProjectDocument* document = m_openedFiles.take(path);
-        Project* p = qobject_cast<Project*>(parent());
-        if ( p ){
-            if ( p->active() != document ){
-                emit aboutToClose(document);
-                delete document;
-            } else if ( closeIfActive ){
-                p->setActive((ProjectDocument*)0);
-                emit aboutToClose(document);
-                delete document;
-            } else {
-                if ( document->isDirty() )
-                    document->readContent();
-            }
-
-            ProjectFile* newActive = 0;
-            if ( (p->active() == 0 || m_openedFiles.isEmpty())){
-                if ( p->fileModel()->root()->childCount() > 0 ){
-                    if ( p->fileModel()->root()->child(0)->isFile() )
-                        newActive = qobject_cast<ProjectFile*>(p->fileModel()->root()->child(0));
-                    else {
-                        newActive = p->lookupBestFocus(p->fileModel()->root()->child(0));
-                    }
-                }
-            }
-
-            if ( p->active() == 0 ){
-                p->setActive(newActive);
-            }
-
-        } else  {
-            delete document;
-        }
+        emit aboutToClose(document);
+        delete document;
         endResetModel();
     }
 }
@@ -254,9 +195,18 @@ bool ProjectDocumentModel::saveDocuments(){
 ProjectDocument *ProjectDocumentModel::lastOpened(){
     if ( m_openedFiles.size() > 0 )
         return *m_openedFiles.begin();
-    return 0;
+    return nullptr;
 }
 
+/** Returns the document given it's path hash, using lv::ProjectEntry::hashPath() */
+ProjectDocument *ProjectDocumentModel::documentByPathHash(const QString &hash){
+    for( auto it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
+        ProjectDocument* d = *it;
+        if ( d->file()->hashPath() == hash )
+            return d;
+    }
+    return nullptr;
+}
 
 /**
  * \brief Shows a list of all unsaved docs

@@ -74,6 +74,7 @@ public slots:
     void moveEntry(lv::ProjectEntry* item, lv::ProjectEntry* parent);
     void renameEntry(lv::ProjectEntry* item, const QString& newName);
     lv::ProjectFile* addFile(lv::ProjectEntry* parentEntry, const QString& name);
+    lv::ProjectFile* addTemporaryFile();
     lv::ProjectEntry* addDirectory(lv::ProjectEntry* parentEntry, const QString& name);
     bool removeEntry(lv::ProjectEntry* entry);
 
@@ -83,6 +84,8 @@ public slots:
     lv::ProjectEntry *itemAt(const QModelIndex& index) const;
 
     QModelIndex itemIndex(lv::ProjectEntry* entry);
+
+    QString printableName(const QString& name);
 
 signals:
     void projectNodeChanged(QModelIndex index);

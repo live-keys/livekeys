@@ -16,9 +16,14 @@
 
 #include "projectfilemodel.h"
 #include "live/projectdocumentmodel.h"
+#include "live/runnable.h"
 #include "live/projectentry.h"
 #include "live/projectfile.h"
 #include "live/project.h"
+
+#include "live/visuallogqt.h"
+
+#include "runnablecontainer.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -124,7 +129,7 @@ QHash<int, QByteArray> ProjectFileModel::roleNames() const{
 void ProjectFileModel::createProject(){
     beginResetModel();
     m_root->clearItems();
-    m_root->addFileEntry("");
+    m_root->addFileEntry("T:0");
     endResetModel();
 }
 
@@ -324,6 +329,27 @@ ProjectFile *ProjectFileModel::addFile(ProjectEntry *parentEntry, const QString 
     return fileEntry;
 }
 
+ProjectFile *ProjectFileModel::addTemporaryFile(){
+    ProjectEntry* parentEntry = m_root->child(0);
+
+    int temporaryFiles = 0;
+    for ( auto it = parentEntry->entries().begin(); it != parentEntry->entries().end(); ++it ){
+        ProjectEntry* entry = *it;
+        if ( entry->isFile() ){
+            ProjectFile* file = static_cast<ProjectFile*>(entry);
+            if ( !file->exists() )
+                ++temporaryFiles;
+        }
+    }
+
+    QString name = "T:" + QString::number(temporaryFiles);
+
+    ProjectFile* fileEntry = new ProjectFile(parentEntry->path(), name, 0);
+    entryAdded(fileEntry, parentEntry);
+
+    return fileEntry;
+}
+
 ProjectEntry* ProjectFileModel::addDirectory(ProjectEntry *parentEntry, const QString &name){
     QString dirPath = QDir::cleanPath(parentEntry->path() + "/" + name);
     QDir d(parentEntry->path());
@@ -345,8 +371,30 @@ bool ProjectFileModel::removeEntry(ProjectEntry *entry){
     Project* p = qobject_cast<Project*>(QObject::parent());
     if ( entry->isFile() ){
         if ( QFile(entry->path()).remove() ){
-            if ( p )
-                p->documentModel()->closeDocument(entry->path(), true);
+            if ( p ){
+                p->documentModel()->closeDocument(entry->path());
+
+                Runnable* r = p->runnables()->runnableAt(entry->path());
+                if ( r ){
+                    if ( p->active() == r ){
+                        p->setActive((Runnable*)nullptr);
+                    }
+
+                    p->runnables()->closeRunnable(r);
+
+                    if ( p->active() == nullptr ){
+                        if ( p->fileModel()->root()->childCount() > 0 ){
+                            if ( p->fileModel()->root()->child(0)->isFile() )
+                                p->setActive("");
+                            else {
+                                ProjectFile* pf = p->lookupBestFocus(p->fileModel()->root()->child(0));
+                                if ( pf )
+                                    p->setActive(pf->path());
+                            }
+                        }
+                    }
+                }
+            }
             entryRemoved(entry);
             return true;
         } else {
@@ -355,8 +403,34 @@ bool ProjectFileModel::removeEntry(ProjectEntry *entry){
         }
     } else {
         if ( QDir(entry->path()).removeRecursively() ){
-            if ( p )
-                p->documentModel()->closeDocumentsInPath(entry->path(), true);
+            if ( p ){
+                p->documentModel()->closeDocumentsInPath(entry->path());
+            }
+
+            QList<Runnable*> runnables = p->runnables()->runnablesInPath(entry->path());
+            for ( auto it = runnables.begin(); it != runnables.end(); ++it ){
+                Runnable* r = *it;
+
+                if ( p->active() == r ){
+                    p->setActive(nullptr);
+                }
+
+                p->runnables()->closeRunnable(r);
+
+            }
+
+            if ( p->active() == nullptr ){
+                if ( p->fileModel()->root()->childCount() > 0 ){
+                    if ( p->fileModel()->root()->child(0)->isFile() )
+                        p->setActive("");
+                    else {
+                        ProjectFile* pf = p->lookupBestFocus(p->fileModel()->root()->child(0));
+                        if ( pf )
+                            p->setActive(pf->path());
+                    }
+                }
+            }
+
             entryRemoved(entry);
             return true;
         } else {
@@ -421,7 +495,14 @@ void ProjectFileModel::rescanEntries(ProjectEntry *entry){
     }
 
     foreach( ProjectEntry* childEntry, entry->entries() ){
-        if ( !newEntries.contains(childEntry->name()) ){
+        bool isTemporary = false;
+        if ( childEntry->isFile() ){
+            ProjectFile* entryAsFile = qobject_cast<ProjectFile*>(childEntry);
+            if ( !entryAsFile->exists() )
+                isTemporary = true;
+        }
+
+        if ( !isTemporary && !newEntries.contains(childEntry->name()) ){
             entryRemoved(childEntry);
             if ( childEntry->isFile() ){
                 if ( project )
@@ -457,6 +538,12 @@ ProjectEntry* ProjectFileModel::itemAt(const QModelIndex &index) const{
 
 QModelIndex ProjectFileModel::itemIndex(ProjectEntry *entry){
     return createIndex(entry->childIndex(), 0, entry);
+}
+
+QString ProjectFileModel::printableName(const QString &name){
+    if ( name.startsWith("T:") )
+        return (name.mid(3) == "0" ? "untitled" : ("untitled" + name.mid(3)));
+    return name;
 }
 
 ProjectFile *ProjectFileModel::openExternalFile(const QString &path){

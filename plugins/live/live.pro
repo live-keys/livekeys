@@ -15,6 +15,16 @@ linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 # Source
 
+unix:!macx{
+    QMAKE_LFLAGS += \
+	'-Wl,-rpath,\'\$$ORIGIN/../../link\''
+
+
+    createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)
+    QMAKE_EXTRA_TARGETS    += createlinkdir
+    POST_TARGETDEPS        += createlinkdir
+}
+
 include($$PWD/src/live.pri)
 include($$PWD/include/liveheaders.pri)
 
@@ -26,4 +36,5 @@ OTHER_FILES += \
 
 DISTFILES += \
     qml/live.package.json \
-    qml/live.plugin.json
+    qml/live.plugin.json \
+    qml/forknode.qml

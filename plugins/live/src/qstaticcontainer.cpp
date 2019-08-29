@@ -17,6 +17,9 @@
 #include "qstaticcontainer.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
+
 #include <QQuickWindow>
 #include <QQuickItem>
 #include <QQmlContext>
@@ -38,6 +41,10 @@
 QStaticContainer::QStaticContainer(QObject *parent)
     : QObject(parent)
 {
+    lv::ViewEngine* engine = lv::ViewContext::instance().engine();
+
+    connect(engine, &lv::ViewEngine::aboutToCreateObject, this, &QStaticContainer::beforeCompile);
+    connect(engine, &lv::ViewEngine::objectReady, this, &QStaticContainer::afterCompile);
 }
 
 /*!
@@ -92,13 +99,13 @@ void QStaticContainer::debugMessage(const QString &message){
     vlog("live-staticcontainer").v() << message;
 }
 
-void QStaticContainer::beforeCompile(){
+void QStaticContainer::beforeCompile(const QUrl &){
     vlog_debug("live-staticcontainer", "-----Before Compile-----");
     for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->beforeCompile();
 }
 
-void QStaticContainer::afterCompile(){
+void QStaticContainer::afterCompile(QObject *, const QUrl &, QObject *){
     vlog_debug("live-staticcontainer", "-----After Compile-----");
     for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->afterCompile();

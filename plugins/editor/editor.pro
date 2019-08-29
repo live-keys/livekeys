@@ -14,12 +14,28 @@ linkLocalLibrary(lveditor, lveditor)
 
 # Source
 
+unix:!macx{
+    QMAKE_LFLAGS += \
+	'-Wl,-rpath,\'\$$ORIGIN/../../link\''
+
+
+    createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)
+    QMAKE_EXTRA_TARGETS    += createlinkdir
+    POST_TARGETDEPS        += createlinkdir
+}
+
 include($$PWD/src/editor.pri)
 
 OTHER_FILES += \
     qml/*.qml \
     qml/qmldir \
     qml/plugins.qmltypes
+
+OTHER_FILES += \
+    qml/style/*.qml \
+    qml/style/qmldir \
+    qml/style/plugins.qmltypes \
+    qml/style/live.plugin.json
 
 # Handling the palette
 
@@ -40,4 +56,8 @@ DISTFILES += \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/PaletteListView.qml \
-    palettes/EditPalette.qml
+    palettes/EditPalette.qml \
+    qml/Pane.qml \
+    qml/PaneWindow.qml \
+    qml/WorkspaceTheme.qml \
+    qml/PaneMenuButton.qml

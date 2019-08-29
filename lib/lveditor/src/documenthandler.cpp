@@ -45,7 +45,8 @@
 
 /**
  * \class lv::DocumentHandler
- * \brief The go-to class when it comes to handling documents
+ * \brief Complements TextEdit in handling documents.
+ *
  * Forwards everything to the highlighter, has a completion model in case there's a specific code handler attached to it,
  * it can auto-complete code, which is all behavior inherited from the AbstractCodeHandler.
  *
@@ -83,8 +84,7 @@ DocumentHandler::~DocumentHandler(){
 }
 
 /** Set the target doc */
-void DocumentHandler::setTarget(QTextDocument *target)
-{
+void DocumentHandler::setTarget(QTextDocument *target){
     m_targetDoc = target;
 }
 
@@ -166,11 +166,13 @@ void DocumentHandler::componentComplete(){
     }
 
     m_engine     = static_cast<ViewEngine*>(lg->property("engine").value<lv::ViewEngine*>());
-    m_extensions = static_cast<Extensions*>(lg->property("extensions").value<QQmlPropertyMap*>()->parent());
+
+    QObject* workspace = lg->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
+
+    m_extensions = static_cast<Extensions*>(workspace->property("extensions").value<QQmlPropertyMap*>()->parent());
 
     findCodeHandler();
 }
-
 
 void DocumentHandler::readContent(){
     m_targetDoc->setPlainText(m_projectDocument->content());
@@ -191,7 +193,7 @@ void DocumentHandler::findCodeHandler(){
         QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 
         for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
-            LiveExtension* le = it.value();
+            WorkspaceExtension* le = it.value();
             if ( le->hasLanguageInterceptor() ){
                 QObject* o = le->callLanguageInterceptor(interceptorArgs);
 
@@ -251,9 +253,8 @@ void DocumentHandler::insertCompletion(int from, int to, const QString &completi
  * \brief Slot that is connected to document changes
  */
 void DocumentHandler::documentContentsChanged(int position, int charsRemoved, int charsAdded){
-    AbstractCodeHandler::ContentsTrigger cst = AbstractCodeHandler::Engine;
     if ( m_codeHandler )
-         cst = m_codeHandler->documentContentsChanged(position, charsRemoved, charsAdded);
+         m_codeHandler->documentContentsChanged(position, charsRemoved, charsAdded);
 
     if ( !m_projectDocument || m_projectDocument->editingStateIs(ProjectDocument::Read) )
         return;
@@ -263,7 +264,7 @@ void DocumentHandler::documentContentsChanged(int position, int charsRemoved, in
         if ( charsAdded == 1 )
             m_lastChar = m_targetDoc->characterAt(position);
 
-        if ( cst == AbstractCodeHandler::Engine )
+        if ( !m_projectDocument->editingStateIs(ProjectDocument::Overlay) )
             emit contentsChangedManually();
     }
 }

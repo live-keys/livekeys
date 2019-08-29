@@ -39,17 +39,13 @@ bool LiveCVArguments::helpFlag() const{
 }
 
 void LiveCVArguments::initialize(int argc, const char* const argv[]){
-    CommandLineParser::Option* launchOption  = m_parser->addFlag({"-l" , "--launch"},
-        "Launches the live cv project with the UI enabled. Does not load the editor.");
-    CommandLineParser::Option* runOption     = m_parser->addFlag({"-r" , "--run"},
-        "Runs the live cv project in cli mode. Enables console logging by default.");
     CommandLineParser::Option* monitorOption  = m_parser->addOption({"-m", "--monitor"},
         "Opens the list of paths in monitor mode.", "list");
     CommandLineParser::Option* pluginInfoOption = m_parser->addOption({"--plugininfo"},
         "Outputs the plugin info to a specified import (e.g. --plugininfo \"live 1.0\".", "string");
 
     CommandLineParser::Option* logToConsoleOption = m_parser->addFlag({"-c", "--log-toconsole"},
-        "Output log data to the console. This is on by default if Live CV is in run mode.");
+        "Output log data to the console.");
     CommandLineParser::Option* logLevelOption = m_parser->addOption({"--log-level"},
         "Log level for the application (Fatal|Error|Warning|Info|Debug|Verbose).", "level");
     CommandLineParser::Option* logToNetworkOption = m_parser->addOption({"--log-tonetwork"},
@@ -73,12 +69,33 @@ void LiveCVArguments::initialize(int argc, const char* const argv[]){
         "Json file configuration for each log parameter. This will cancel out all other log flags. See the "
         "documentation on logging for more inf.", "path");
 
+    CommandLineParser::Option* layers = m_parser->addOption({"-l", "--layers"},
+        "Layers to load when running (i.e. -l window,workspace). Defaults are window,workspace and editor.", "string");
+
+    CommandLineParser::Option* layersRun = m_parser->addFlag({"--run"},
+        "Run project in console mode. This is equivalent to --layers base");
+    CommandLineParser::Option* layersWindow = m_parser->addFlag({"--window"},
+        "Run project in window mode, do not load any workspace. This is equivalent to --layers window");
+
     m_parser->parse(argc, argv);
 
-    m_launchFlag       = m_parser->isSet(launchOption);
-    m_runFlag          = m_parser->isSet(runOption);
     m_pluginInfoFlag   = m_parser->isSet(pluginInfoOption);
     m_pluginInfoImport = QString::fromStdString(m_parser->value(pluginInfoOption));
+
+    QString layersValue = QString::fromStdString(m_parser->value(layers));
+    if ( !layersValue.isEmpty() )
+        m_layers = layersValue.split(',');
+
+    if ( m_parser->isSet(layersRun) ){
+        if ( !m_layers.isEmpty() )
+            THROW_EXCEPTION(Exception, "Both --run and other layer options have been set.", lv::Exception::toCode("Init"));
+        m_layers = QStringList() << "base";
+    }
+    if ( m_parser->isSet(layersWindow) ){
+        if ( !m_layers.isEmpty() )
+            THROW_EXCEPTION(Exception, "Both --window and other layer options have been set.", lv::Exception::toCode("Init"));
+        m_layers = QStringList() << "window";
+    }
 
     if ( m_parser->isSet(logConfigFileOption) ){
         m_logConfiguration = MLNode(MLNode::Type::Object);
@@ -175,6 +192,10 @@ bool LiveCVArguments::versionFlag() const{
 
 std::string LiveCVArguments::helpString() const{
     return m_parser->helpString();
+}
+
+const QStringList &LiveCVArguments::layers() const{
+    return m_layers;
 }
 
 const std::vector<std::string> &LiveCVArguments::scriptArguments() const{

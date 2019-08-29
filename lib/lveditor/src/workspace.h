@@ -1,0 +1,83 @@
+#ifndef LVWORKSPACE_H
+#define LVWORKSPACE_H
+
+#include <QObject>
+#include <QQuickWindow>
+#include "lveditorglobal.h"
+#include "live/mlnode.h"
+#include "live/project.h"
+#include "live/qmlpropertywatcher.h"
+
+namespace lv{
+
+class ProjectWorkspace;
+class WorkspaceLayer;
+
+/// \private
+class LV_EDITOR_EXPORT Workspace : public QObject{
+
+    Q_OBJECT
+
+public:
+    class LV_EDITOR_EXPORT Message{
+
+    public:
+        enum Type{
+            ProjectOpen,
+            ProjectClose,
+            ProjectActiveChange,
+            DocumentOpen,
+            DocumentClose,
+            DocumentMonitor,
+            DocumentContentsChange,
+            WindowRectChange,
+            WindowStateChange
+        };
+
+        typedef QSharedPointer<Message> Ptr;
+        typedef QSharedPointer<const Message> ConstPtr;
+
+    public:
+        Message(Type type, const MLNode& data);
+
+        Type type() const{ return m_type; }
+        const MLNode& data() const{ return m_data; }
+
+    private:
+        Type   m_type;
+        MLNode m_data;
+    };
+
+public:
+    explicit Workspace(Project* project, WorkspaceLayer *parent = nullptr);
+    ~Workspace();
+
+    static QString absolutePath(const QString& appDataPath);
+    static QString absoluteDir(const QString& dir);
+
+    ProjectWorkspace* currentProjectWorkspace() const;
+
+signals:
+    void projectOpen(const QString& path, ProjectWorkspace* workspace);
+    void projectClose(ProjectWorkspace* workspace);
+
+public slots:
+    void whenProjectPathChange(const QString& path);
+
+
+private:
+    void saveRecents();
+
+    Project*             m_project;
+    ProjectWorkspace*    m_currentProjectWorkspace;
+    QLinkedList<QString> m_recents;
+    bool                 m_recentsChanged;
+};
+
+inline ProjectWorkspace *Workspace::currentProjectWorkspace() const{
+    return m_currentProjectWorkspace;
+}
+
+}// namespace
+
+#endif // LVWORKSPACE_H

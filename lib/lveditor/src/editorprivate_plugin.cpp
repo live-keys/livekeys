@@ -21,6 +21,7 @@
 #include "projectfilemodel.h"
 #include "live/projectdocumentmodel.h"
 #include "projectnavigationmodel.h"
+#include "runnablecontainer.h"
 #include "live/project.h"
 #include "live/projectentry.h"
 #include "live/projectfile.h"
@@ -30,25 +31,39 @@
 #include "live/editorglobalobject.h"
 #include "live/applicationcontext.h"
 #include "live/keymap.h"
+#include "live/viewengine.h"
 #include "live/viewcontext.h"
 #include "linesurface.h"
 #include "linemanager.h"
+#include "editorlayer.h"
+#include "workspacelayer.h"
+#include "themecontainer.h"
+#include "live/theme.h"
 
 #include <QCoreApplication>
 #include <QQmlEngine>
 #include <QQmlContext>
+#include <QQmlPropertyMap>
 
 void EditorPrivatePlugin::registerTypes(const char *uri){
-    qmlRegisterType<lv::TextEdit>(          uri, 1, 0, "NewTextEdit");
-    qmlRegisterType<lv::LineSurface>(       uri, 1, 0, "LineSurface");
-    qmlRegisterType<lv::LineManager>(       uri, 1, 0, "LineManager");
+    qmlRegisterType<lv::TextEdit>(      uri, 1, 0, "NewTextEdit");
+    qmlRegisterType<lv::LineSurface>(   uri, 1, 0, "LineSurface");
+    qmlRegisterType<lv::LineManager>(   uri, 1, 0, "LineManager");
+    qmlRegisterType<lv::EditorLayer>(   uri, 1, 0, "EditorLayer");
+    qmlRegisterType<lv::WorkspaceLayer>(uri, 1, 0, "WorkspaceLayer");
 
+    qmlRegisterUncreatableType<lv::Project>(
+        uri, 1, 0, "Project", "Cannot create Project instance.");
     qmlRegisterUncreatableType<lv::ProjectFileModel>(
         uri, 1, 0, "ProjectFileModel", "Cannot create a ProjectFileModel instance.");
     qmlRegisterUncreatableType<lv::ProjectDocumentModel>(
         uri, 1, 0, "ProjectDocumentModel", "Cannot create a ProjectDocumentModel instance.");
     qmlRegisterUncreatableType<lv::ProjectNavigationModel>(
         uri, 1, 0, "ProjectNavigationModel", "Cannot create a ProjectNavigationModel instance.");
+    qmlRegisterUncreatableType<lv::Runnable>(
+        uri, 1, 0, "Runnable", "Cannot create Runnable instance. Use subproject instead.");
+    qmlRegisterUncreatableType<lv::RunnableContainer>(
+        uri, 1, 0, "RunnablesContainer", "Cannot create a RunnablesContainer instance.");
 
     qmlRegisterUncreatableType<lv::ProjectEntry>(
         uri, 1, 0, "ProjectEntry", "ProjectEntry objects are managed by the ProjectFileModel.");
@@ -59,6 +74,13 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
     qmlRegisterUncreatableType<lv::EditorSettings>(
         uri, 1, 0, "EditorSettings", "EditorSettings is available through the \'livecv.settings.editor\' property."
     );
+
+    qmlRegisterUncreatableType<lv::Commands>(
+        uri, 1, 0, "LiveCommands", "LiveCommands is available through the \'livecv.layers.workspace.commands\' property.");
+    qmlRegisterUncreatableType<lv::KeyMap>(
+        uri, 1, 0, "KeyMap", "KeyMap is available through the \'livecv.layers.workspace.keymap.\' property.");
+    qmlRegisterUncreatableType<lv::ThemeContainer>(
+        uri, 1, 0, "ThemeContainer", "ThemeContainer is available through the \'livecv.layers.workspace.themes.\' property.");
 }
 
 void EditorPrivatePlugin::initializeEngine(QQmlEngine *engine, const char *){
@@ -79,30 +101,4 @@ void EditorPrivatePlugin::initializeEngine(QQmlEngine *engine, const char *){
     lv::EditorGlobalObject* editor = new lv::EditorGlobalObject(pr, lpc);
 
     engine->rootContext()->setContextProperty("editor", editor);
-
-    QObject* livecv    = engine->rootContext()->contextProperty("livecv").value<QObject*>();
-    if ( livecv ){
-        lv::KeyMap* keymap = static_cast<lv::KeyMap*>(livecv->property("keymap").value<QObject*>());
-        keymap->store(0, Qt::Key_O,           lv::KeyMap::CONTROL_OR_COMMAND, "window.project.openFile");
-        keymap->store(0, Qt::Key_S,           lv::KeyMap::CONTROL_OR_COMMAND, "window.editor.saveFile");
-        keymap->store(0, Qt::Key_S,           lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt, "window.editor.saveFileAs");
-        keymap->store(0, Qt::Key_W,           lv::KeyMap::CONTROL_OR_COMMAND, "window.editor.closeFile");
-
-        keymap->store(0, Qt::Key_Backslash,   lv::KeyMap::CONTROL_OR_COMMAND, "window.project.toggleVisibility");
-        keymap->store(0, Qt::Key_T,           lv::KeyMap::CONTROL_OR_COMMAND, "window.toggleMaximizedRuntime");
-        keymap->store(0, Qt::Key_E,           lv::KeyMap::CONTROL_OR_COMMAND, "window.editor.toggleSize");
-        keymap->store(0, Qt::Key_K,           lv::KeyMap::CONTROL_OR_COMMAND, "window.toggleNavigation");
-        keymap->store(0, Qt::Key_L,           lv::KeyMap::CONTROL_OR_COMMAND, "window.toggleLog");
-        keymap->store(0, Qt::Key_BraceLeft,   lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.addHorizontalEditorView");
-        keymap->store(0, Qt::Key_BracketLeft, lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.addHorizontalEditorView");
-        keymap->store(0, Qt::Key_BraceLeft,   lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt,   "window.addHorizontalFragmentEditorView");
-        keymap->store(0, Qt::Key_BracketLeft, lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt,   "window.addHorizontalFragmentEditorView");
-        keymap->store(0, Qt::Key_BraceRight,  lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.removeHorizontalEditorView");
-        keymap->store(0, Qt::Key_BracketRight,lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.removeHorizontalEditorView");
-
-        keymap->store(lv::KeyMap::Linux,    Qt::Key_Space, lv::KeyMap::Control, "window.editor.assistCompletion");
-        keymap->store(lv::KeyMap::Windows,  Qt::Key_Space, lv::KeyMap::Control, "window.editor.assistCompletion");
-        keymap->store(lv::KeyMap::Mac,      Qt::Key_Space, lv::KeyMap::Alt,     "window.editor.assistCompletion");
-    }
-
 }

@@ -49,7 +49,10 @@ MessageDialogInternal{
         messageBoxButton2.text = ''
         messageBoxButton3.text = ''
         root.destroy()
-        editor.forceFocus()
+
+        var aitem = livecv.layers.workspace.panes.activePane
+        if ( aitem )
+            aitem.forceActiveFocus()
     }
 
     MessageDialogButton{

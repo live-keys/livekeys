@@ -27,8 +27,6 @@
 
 #include "live/lveditorglobal.h"
 
-#include <QDebug>
-
 namespace lv{
 
 class Project;
@@ -219,18 +217,20 @@ public:
 
     /** Editing states of an opened document */
     enum EditingState{
-        /**     0 : coming from the user */
+        /**      0 : coming from the user */
         Manual   = 0,
-        /**     1 : coming from a code completion assistant */
+        /**      1 : coming from a code completion assistant */
         Assisted = 1,
-        /**    10 : does not trigger a recompile */
+        /**     10 : does not trigger a recompile */
         Silent   = 2,
-        /**   110 : also silent (when a palette edits a section) */
+        /**    110 : also silent (when a palette edits a section) */
         Palette  = 6,
-        /**  1010 : also silent (comming from a runtime binding) */
+        /**   1010 : also silent (comming from a runtime binding) */
         Runtime  = 10,
-        /** 10000 : populate from file, does not signal anything */
-        Read     = 16
+        /**  10000 : populate from file, does not signal anything */
+        Read     = 16,
+        /** 100000 : document under overlay mode, does not signal anything */
+        Overlay  = 32
     };
 
 public:
@@ -299,8 +299,10 @@ signals:
     void isDirtyChanged();
     /** shows if monitoring state changed */
     void isMonitoredChanged();
-    /** shows if the file changed */
+    /** triggered when the file changed */
     void fileChanged();
+    /** triggered when the document was saved */
+    void saved();
     /** shows if the document content changed */
     void contentChanged();
     /** shows if the format changed */

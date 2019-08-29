@@ -14,6 +14,7 @@ namespace lv{
  */
 LineCapture::LineCapture()
     : m_expectSize(0)
+    , m_handlerData(0)
 {
 }
 

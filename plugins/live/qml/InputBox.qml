@@ -26,6 +26,7 @@ Rectangle {
     color : "#050e15"
     
     property color textColor : "#fff"
+    property color textSelectionColor : "#3d4856"
 
 
     property alias text : textInput.text
@@ -40,6 +41,7 @@ Rectangle {
         text: 'Input Box'
         color : root.textColor
         selectByMouse: true
+        selectionColor: root.textSelectionColor
 
         MouseArea{
             anchors.fill: parent

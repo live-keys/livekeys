@@ -21,7 +21,7 @@ import editor 1.0
 import editor.private 1.0
 import base 1.0
 
-Rectangle{
+Pane{
     id : editor
 
     property bool isDirtyMask: true
@@ -31,60 +31,77 @@ Rectangle{
     property alias font: editorArea.font
     property alias internalActiveFocus : editorArea.activeFocus
     property alias internalFocus: editorArea.focus
+    onInternalActiveFocusChanged: {
+        if ( panes.activePane !== editor ){
+            panes.activateItem(textEdit, editor)
+        }
+    }
+
     property alias documentHandler: editorArea.documentHandler
     property alias textEdit: editorArea
 
-    property var windowControls: null
+    property var panes: null
     property var document: null
+
+    paneType: 'editor'
+    paneState : { return {} }
+    paneInitialize : function(s){
+        if ( s.document ){
+            if (typeof s.document === 'string' || s.document instanceof String){
+                var d = project.documentModel.documentByPathHash(s.document)
+                document = d
+            } else {
+                document = s.document
+            }
+
+        }
+    }
+    paneFocusItem : editorArea
+    paneClone: function(){
+        return editor.panes.createPane('editor', paneState, [editor.width, editor.height])
+    }
 
     property int fragmentStart: 0
     property int fragmentEnd: -1
 
     onDocumentChanged: {
+        paneState = { document : document }
         codeHandler.setDocument(document)
     }
 
-    property color topColor: "#08111a"
-    property color lineSurfaceColor: "#091018"
-    property color lineInfoColor:  "#050b12"
-    property color optionsColor: "#04131f"
+    property Theme currentTheme : livecv.layers.workspace.themes.current
 
-    color : "#050b12"
+    property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
+    property color lineSurfaceColor: topColor
+    property color lineInfoColor:  currentTheme ? currentTheme.paneTopBackgroundAlternate : 'black'
+    property color optionsColor: currentTheme ? currentTheme.paneTopBackground : 'black'
+
+    color : livecv.layers.workspace.themes.current.paneBackground
     clip : true
 
     objectName: "editor"
 
-    property string objectCommandIndex : livecv.commands.add(editor, {
-        'saveFile' : [ function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.save() }, "Save File"],
-        'saveFileAs' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.saveAs() }, "Save File As"],
-        'closeFile' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.closeDocument() }, "Close File"],
-        'assistCompletion' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.assistCompletion() }, "Assist Completion"],
-        'toggleSize' : [function(){ if ( hasActiveEditor() ) windowControls.workspace.panes.activePane.toggleSize() }, "Toggle Size"]
-    })
-
     function hasActiveEditor(){
-        return windowControls.workspace.panes.activePane.objectName === 'editor'
+        return root.panes.activePane.objectName === 'editor'
     }
 
     function save(){
         if ( !editor.document )
             return;
-        if ( editor.document.file.name !== '' ){
+        if ( editor.document.file.exists() ){
             editor.document.save()
-            if ( controls.codingMode === 1 )
-                windowControls.workspace.project.compile()
         } else {
             saveAs()
         }
     }
 
     function saveAs(){
-        windowControls.dialogs.saveFile(
+        livecv.layers.window.dialogs.saveFile(
             { filters: [ "Qml files (*.qml)", "All files (*)" ] },
             function(url){
                 var editordoc = editor.document
                 if ( !editordoc.saveAs(url) ){
-                    windowControls.dialogs.message(
+                    livecv.layers.window.dialogs.message(
                         'Failed to save file to: ' + url,
                         {
                             button3Name : 'Ok',
@@ -93,25 +110,16 @@ Rectangle{
                             }
                         }
                     )
-                    return;
+                    return
                 }
 
                 if ( !project.isDirProject() ){
                     project.openProject(url)
-                    editor.document = project.active
                 } else if ( project.isFileInProject(url) ){
-
-                    var doc = project.openFile(url, ProjectDocument.Edit)
-                    if ( controls.codingMode === 1 )
-                        windowControls.workspace.project.compile()
-
-                    var fe = projectView.findFocusEditor()
-                    if ( fe ){
-                        fe.document = doc
-                    }
+                    livecv.layers.workspace.project.openFile(url, ProjectDocument.Edit)
                 } else {
                     var fileUrl = url
-                    windowControls.dialogs.message(
+                    livecv.layers.window.dialogs.message(
                         'File is outside project scope. Would you like to open it as a new project?',
                     {
                         button1Name : 'Open as project',
@@ -120,7 +128,6 @@ Rectangle{
                             projectView.closeProject(
                                 function(){
                                     project.openProject(projectUrl);
-                                    editor.document = project.active
                                 }
                             )
                             mbox.close()
@@ -134,7 +141,6 @@ Rectangle{
                             projectView.closeProject(
                                 function(){
                                     project.openProject(projectUrl)
-                                    editor.document = project.active
                                 }
                             )
                             mbox.close()
@@ -150,19 +156,19 @@ Rectangle{
             return;
         if ( editor.document.isDirty ){
             var saveFunction = function(mbox){
-                if ( editor.document.file.name !== '' ){
+                if ( editor.document.file.exists() ){
                     editor.document.save()
                     editor.closeDocumentAction()
                 } else {
-                    windowControls.dialogs.saveFile(
+                    livecv.layers.window.dialogs.saveFile(
                         { filters: [ "Qml files (*.qml)", "All files (*)" ] },
                         function(url){
                             if ( !editor.document.saveAs(url) ){
-                                windowControls.dialogs.message(
+                                livecv.layers.window.dialogs.message(
                                     'Failed to save file to: ' + url,
                                     {
                                         button3Name : 'Ok',
-                                        button3Function : function(){ windowControls.dialogs.messageClose(); }
+                                        button3Function : function(){ livecv.layers.window.dialogs.messageClose(); }
                                     }
                                 )
                                 return;
@@ -174,12 +180,11 @@ Rectangle{
                 mbox.close()
             }
 
-            windowControls.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
+            livecv.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
             {
                 button1Name : 'Yes',
                 button1Function : function(mbox){
                     saveFunction(mbox)
-                    windowControls.workspace.project.compile()
                 },
                 button2Name : 'No',
                 button2Function : function(mbox){
@@ -189,7 +194,7 @@ Rectangle{
                 },
                 button3Name : 'Cancel',
                 button3Function : function(mbox){
-                    boxm.close()
+                    mbox.close()
                 },
                 returnPressed : function(mbox){
                     saveFunction(mbox)
@@ -204,8 +209,8 @@ Rectangle{
     }
 
     function closeDocumentAction(){
-        if ( !project.isDirProject() && document === project.active ){
-            windowControls.dialogs.message(
+        if ( !project.isDirProject() && document.file.path === project.active.path ){
+            livecv.layers.window.dialogs.message(
                 'Closing this file will also close this project. Would you like to close the project?',
             {
                 button1Name : 'Yes',
@@ -266,16 +271,28 @@ Rectangle{
             GradientStop { position: 0.10; color: editor.topColor }
         }
 
-        Text{
+        PaneDragItem{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 15
+            anchors.leftMargin: 5
+            onDragStarted: root.panes.__dragStarted(editor)
+            onDragFinished: root.panes.__dragFinished(editor)
+            display: titleText.text
+        }
+
+        Text{
+            id: titleText
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 30
             color: "#808691"
             text: {
                 if ( editor.document ){
                     var filename = editor.document.file.name
-                    if ( filename === '' )
-                        filename = 'untitled'
+                    if ( !editor.document.file.exists() ){
+                        var findex = filename.substring(2)
+                        filename = 'untitled' + (findex === '0' ? '' : findex)
+                    }
                     if ( editor.document.isDirty )
                         filename += '*'
                     return filename;
@@ -300,13 +317,12 @@ Rectangle{
                 id : switchImage
                 anchors.centerIn: parent
                 source : "qrc:/images/switch-file.png"
-                anchors.horizontalCenter: parent.horizontalCenter
             }
 
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    livecv.commands.execute('window.toggleNavigation')
+                    livecv.layers.workspace.commands.execute('window.workspace.toggleNavigation')
                 }
             }
         }
@@ -370,7 +386,7 @@ Rectangle{
             Image{
                 id : paneOptions
                 anchors.centerIn: parent
-                source : "qrc:/images/toggle-navigation.png"
+                source : "qrc:/images/pane-menu.png"
             }
 
             MouseArea{
@@ -405,7 +421,7 @@ Rectangle{
             color : "#03070b"
             Text {
                 id: addEditorText
-                text: qsTr("Add Horizontal Editor")
+                text: qsTr("Split horizontally")
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 12
                 anchors.left: parent.left
@@ -419,21 +435,81 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     editorAddRemoveMenu.visible = false
-                    livecv.commands.execute('window.addHorizontalEditorView')
+                    var clone = editor.paneClone()
+                    var index = editor.parentSplitterIndex()
+                    editor.panes.splitPaneHorizontallyWith(editor.parentSplitter, index, clone)
                 }
             }
         }
 
         Rectangle{
-            id: removeEditorButton
+            id: addVerticalEditorButton
             anchors.top: addEditorButton.bottom
             anchors.right: parent.right
             width: parent.buttonWidth
             height: parent.buttonHeight
             color : "#03070b"
             Text {
+                id: addVerticalEditorText
+                text: qsTr("Split vertically")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: addVerticalEditorArea.containsMouse ? "#969aa1" : "#808691"
+            }
+            MouseArea{
+                id : addVerticalEditorArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    editorAddRemoveMenu.visible = false
+                    var clone = editor.paneClone()
+                    var index = editor.parentSplitterIndex()
+                    editor.panes.splitPaneVerticallyWith(editor.parentSplitter, index, clone)
+                }
+            }
+        }
+
+        Rectangle{
+            id: newWindowEditorButton
+            anchors.top: addVerticalEditorButton.bottom
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
+                id: newWindowEditorText
+                text: qsTr("Move to new window")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: newWindowEditorArea.containsMouse ? "#969aa1" : "#808691"
+            }
+            MouseArea{
+                id : newWindowEditorArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    editorAddRemoveMenu.visible = false
+                    editor.panes.movePaneToNewWindow(editor)
+                }
+            }
+        }
+
+        Rectangle{
+            id: removeEditorButton
+            anchors.top: newWindowEditorButton.bottom
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text {
                 id: removeEditorText
-                text: qsTr("Remove Horizontal Editor")
+                text: qsTr("Remove Split")
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 12
                 anchors.left: parent.left
@@ -447,7 +523,7 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     editorAddRemoveMenu.visible = false
-                    livecv.commands.execute('window.removeHorizontalEditorView')
+                    editor.panes.removePane(editor)
                 }
             }
         }
@@ -503,7 +579,7 @@ Rectangle{
                     implicitWidth: 10
                     implicitHeight: 10
                     Rectangle {
-                        color: "#0d1e30"
+                        color: "#1f2227"
                         anchors.fill: parent
                     }
                 }
@@ -552,9 +628,6 @@ Rectangle{
                     onCursorPositionRequest : {
                         editorArea.forceActiveFocus()
                         editorArea.cursorPosition = position
-                    }
-                    onContentsChangedManually: {
-                        editor.windowControls.workspace.project.compileTimer.restart();
                     }
                 }
 
@@ -672,9 +745,9 @@ Rectangle{
                             codeHandler.completionModel.disable()
                         }
                     } else {
-                        var command = livecv.keymap.locateCommand(event.key, event.modifiers)
+                        var command = livecv.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
                         if ( command !== '' ){
-                            livecv.commands.execute(command)
+                            livecv.layers.workspace.commands.execute(command)
                             event.accepted = true
                         }
                     }
@@ -717,7 +790,7 @@ Rectangle{
                         }
                         contextMenu.additionalItems = []
 
-                        var res = livecv.interceptMenu(editor)
+                        var res = livecv.layers.workspace.interceptMenu(editor)
                         for ( var i = 0; i < res.length; ++i ){
                             var menuitem = contextMenu.insertItem(i, res[i].name)
                             menuitem.enabled = res[i].enabled

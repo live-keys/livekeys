@@ -54,7 +54,6 @@ CodePalette{
             root.hsvValue = v
         }
 
-
         property color selectedColor: "#fff"
         onSelectedColorChanged: {
             setHsv(root.selectedColor)
@@ -64,7 +63,7 @@ CodePalette{
         }
 
         width: 280
-        height: 90
+        height: 80
         color: 'transparent'
 
         Rectangle{
@@ -88,7 +87,7 @@ CodePalette{
 
                 style: SliderStyle{
                     groove: Rectangle {
-                        implicitHeight: 8
+                        implicitHeight: 5
                          LinearGradient {
                             anchors.fill: parent
                             start: Qt.point(0, 0)
@@ -126,22 +125,20 @@ CodePalette{
                         }
                     }
                     handle: Rectangle{
-                        width: 8
-                        height: 18
+                        width: 11
+                        height: 11
                         radius: 5
-                        border.width: 1
-                        border.color: '#233569'
-                        color: '#b2b2b2'
+                        color: '#9b9da0'
                     }
                 }
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 text: hueSlider.minimumValue
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 text: hueSlider.maximumValue
@@ -150,7 +147,7 @@ CodePalette{
 
         Rectangle{
             anchors.top: parent.top
-            anchors.topMargin: 30
+            anchors.topMargin: 26
             width: 280
             height: 40
             color: 'transparent'
@@ -173,7 +170,7 @@ CodePalette{
 
                 style: SliderStyle{
                     groove: Rectangle {
-                        implicitHeight: 8
+                        implicitHeight: 5
                          LinearGradient {
                             anchors.fill: parent
                             start: Qt.point(0, 0)
@@ -193,22 +190,20 @@ CodePalette{
                         }
                     }
                     handle: Rectangle{
-                        width: 8
-                        height: 18
+                        width: 11
+                        height: 11
                         radius: 5
-                        border.width: 1
-                        border.color: '#233569'
-                        color: '#b2b2b2'
+                        color: '#9b9da0'
                     }
                 }
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 text: saturationSlider.minimumValue
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 text: saturationSlider.maximumValue
@@ -218,7 +213,7 @@ CodePalette{
 
         Rectangle{
             anchors.top: parent.top
-            anchors.topMargin: 60
+            anchors.topMargin: 51
             width: 280
             height: 40
             color: 'transparent'
@@ -240,7 +235,7 @@ CodePalette{
 
                 style: SliderStyle{
                     groove: Rectangle {
-                        implicitHeight: 8
+                        implicitHeight: 5
                          LinearGradient {
                             anchors.fill: parent
                             start: Qt.point(0, 0)
@@ -260,22 +255,20 @@ CodePalette{
                         }
                     }
                     handle: Rectangle{
-                        width: 8
-                        height: 18
+                        width: 11
+                        height: 11
                         radius: 5
-                        border.width: 1
-                        border.color: '#233569'
-                        color: '#b2b2b2'
+                        color: '#9b9da0'
                     }
                 }
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 text: valueSlider.minimumValue
             }
 
-            SliderLabel{
+            Label{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 text: valueSlider.maximumValue

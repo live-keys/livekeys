@@ -7,7 +7,7 @@
 #include "live/typeinfo.h"
 #include "live/visuallogqt.h"
 
-#include "tcplineresponse.h"
+#include "remotelineresponse.h"
 #include "tcplineserver.h"
 
 #include <QTcpSocket>
@@ -21,11 +21,15 @@ TcpLineSocket::TcpLineSocket(QTcpSocket *socket, QObject* parent)
     : QObject(parent)
     , m_socket(socket)
     , m_post(new QQmlPropertyMap)
-    , m_response(new TcpLineResponse(this))
+    , m_response(new RemoteLineResponse(this))
     , m_component(new QQmlComponent())
     , m_componentContext(nullptr)
     , m_sourceItem(nullptr)
 {
+    m_response->onResponse([this](const QString& propertyName, const QVariant& value){
+        responseValueChanged(propertyName, value);
+    });
+
     connect(m_socket, &QTcpSocket::readyRead, this, &TcpLineSocket::tcpRead);
 //    connect(m_socket, &QTcpSocket::error,     this, &TcpLineSocket::tcpError);
     m_socket->setSocketOption(QAbstractSocket::KeepAliveOption, true);
@@ -45,6 +49,7 @@ TcpLineSocket::~TcpLineSocket(){
         m_socket->disconnectFromHost();
         m_socket->waitForDisconnected(5000);
     }
+    delete m_response;
     delete m_socket;
     delete m_post;
 }
@@ -64,7 +69,7 @@ void TcpLineSocket::onMessage(const LineMessage &message){
         m_componentContext->setContextProperty("post", QVariant::fromValue(m_post));
         m_componentContext->setContextProperty("response", QVariant::fromValue(m_response));
 
-        m_component->setData(message.data, QUrl("Remore.qml"));
+        m_component->setData(message.data, QUrl("Remote.qml"));
 
         m_sourceItem = m_component->create(m_componentContext);
 

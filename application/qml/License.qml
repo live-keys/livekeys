@@ -32,18 +32,18 @@ Rectangle{
 
     Keys.onEscapePressed: root.closeBox()
 
-    property color backgroundColor: "#010d16"
+    property color backgroundColor: "#02070b"
     property color titleColor: "#afafaf"
-    property color containerBackgroundColor: "#081017"
-    property color licenseBackgroundColor: "#010d16"
+    property color containerBackgroundColor: "#02070b"
+    property color licenseBackgroundColor: "#010203"
     property color licenseTextColor: "#93999e"
-    property color licenseItemBackground: "#04121d"
+    property color licenseItemBackground: "#101920"
     property color licenseItemTextColor: "#afafaf"
-    property color licenseItemHighlightBackground: "#051826"
-    property color licenseItemRequiredBackground: "#883120"
-    property color licenseItemRequiredHighlightBackground: "#973826"
-    property color licenseAcceptButtonColor: "#091925"
-    property color licenseAcceptButtonHighlightColor: "#102b40"
+    property color licenseItemHighlightBackground: "#14222e"
+    property color licenseItemRequiredBackground: "#874600"
+    property color licenseItemRequiredHighlightBackground: "#994f00"
+    property color licenseAcceptButtonColor: "#0d1921"
+    property color licenseAcceptButtonHighlightColor: "#101f2a"
     property color licenseAcceptButtonBorder: "#0d2434"
     property color licenseAcceptButtonTextColor: "#93999e"
 
@@ -53,6 +53,8 @@ Rectangle{
     height: 550
     focus: true
     opacity: root.visible ? 1 : 0
+    border.width: 1
+    border.color: "#040e14"
     Behavior on opacity{ NumberAnimation{ duration: 250} }
 
     Rectangle{
@@ -67,7 +69,7 @@ Rectangle{
             color: root.titleColor
             font.pixelSize: 12
             font.family: "Open Sans, sans-serif"
-            font.weight: Font.Light
+//            font.weight: Font.Light
         }
         Rectangle{
             anchors.right: parent.right

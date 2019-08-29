@@ -22,30 +22,42 @@ import base 1.0
 import editor 1.0
 import editor.private 1.0
 
-Rectangle{
+Pane{
     id: root
-    color : "#05090e"
+    color : currentTheme ? currentTheme.paneBackground : 'black'
     objectName: "projectFileSystem"
 
-    property QtObject windowControls : null
+    property QtObject panes: null
+    paneFocusItem : root
+    paneType: 'projectFileSystem'
+    paneState : { return {} }
+
+    property Theme currentTheme : livecv.layers.workspace.themes.current
+
+    property Item addEntryOverlay : ProjectAddEntry{
+        onAccepted: {
+            if ( isFile ){
+                var f = project.fileModel.addFile(entry, name)
+                livecv.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
+            } else {
+                project.fileModel.addDirectory(entry, name)
+            }
+        }
+    }
 
     function addEntry(parentEntry, isFile){
         root.addEntryOverlay.entry = parentEntry
         root.addEntryOverlay.isFile = isFile
 
-        root.windowControls.dialogs.overlayBox(root.addEntryOverlay)
+        livecv.layers.window.dialogs.overlayBox(root.addEntryOverlay)
     }
     function openEntry(entry, monitor){
-        var fe = root.windowControls.workspace.project.findFocusEditor()
-        if ( fe )
-            fe.document = project.openFile(
-                entry, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
+        livecv.layers.workspace.project.openFile(
+            entry.path, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
         )
     }
     function editEntry(entry){
-        var fe = root.windowControls.workspace.project.findFocusEditor()
-        if ( fe )
-            fe.document = project.openFile(entry, ProjectDocument.Edit)
+        livecv.layers.workspace.project.openFile(entry.path, ProjectDocument.Edit)
     }
     function removeEntry(entry, isFile){
         var message = ''
@@ -74,7 +86,7 @@ Rectangle{
             }
         }
 
-        windowControls.dialogs.message(message, {
+        livecv.layers.window.dialogs.message(message, {
             button1Name : 'Yes',
             button1Function : function(mbox){
                 project.fileModel.removeEntry(entry)
@@ -119,7 +131,7 @@ Rectangle{
             }
         }
 
-        windowControls.dialogs.message(message, {
+        livecv.layers.window.dialogs.message(message, {
             button1Name : 'Yes',
             button1Function : function(mbox){
                 project.fileModel.moveEntry(entry, newParent)
@@ -147,12 +159,21 @@ Rectangle{
         anchors.right: parent.right
 
         height: 30
-        color: "#08111a"
+        color: currentTheme ? currentTheme.paneTopBackground : 'black'
+
+        PaneDragItem{
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            onDragStarted: root.panes.__dragStarted(root)
+            onDragFinished: root.panes.__dragFinished(root)
+            display: "Project"
+        }
 
         Text{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 15
+            anchors.leftMargin: 30
             color: "#808691"
             text: "Project"
             font.family: "Open Sans, sans-serif"
@@ -168,7 +189,7 @@ Rectangle{
             Image{
                 id : paneOptions
                 anchors.centerIn: parent
-                source : "qrc:/images/toggle-navigation.png"
+                source : "qrc:/images/pane-menu.png"
             }
 
             MouseArea{
@@ -180,7 +201,7 @@ Rectangle{
         }
     }
 
-    Rectangle {
+    Rectangle{
         id: projectMenu
         visible: false
         anchors.right: root.right
@@ -190,17 +211,46 @@ Rectangle{
         property int buttonWidth: 180
         opacity: visible ? 1.0 : 0
         z: 1000
+        color : "#03070b"
 
         Behavior on opacity{ NumberAnimation{ duration: 200 } }
 
         Rectangle{
-            id: removeProjectViewButton
+            id: newWindowEditorButton
             anchors.top: parent.top
             anchors.right: parent.right
             width: parent.buttonWidth
             height: parent.buttonHeight
             color : "#03070b"
             Text {
+                id: newWindowEditorText
+                text: qsTr("Move to new window")
+                font.family: "Open Sans, sans-serif"
+                font.pixelSize: 12
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                color: newWindowEditorArea.containsMouse ? "#969aa1" : "#808691"
+            }
+            MouseArea{
+                id : newWindowEditorArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    projectMenu.visible = false
+                    root.panes.movePaneToNewWindow(root)
+                }
+            }
+        }
+
+        Rectangle{
+            id: removeProjectViewButton
+            anchors.top: newWindowEditorButton.bottom
+            anchors.right: parent.right
+            width: parent.buttonWidth
+            height: parent.buttonHeight
+            color : "#03070b"
+            Text{
                 text: qsTr("Remove Project View")
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 12
@@ -215,12 +265,11 @@ Rectangle{
                 hoverEnabled: true
                 onClicked: {
                     projectMenu.visible = false
-                    toggleVisibility()
+                    root.panes.removePane(root)
                 }
             }
         }
     }
-
 
     TreeView {
         id: view
@@ -236,7 +285,7 @@ Rectangle{
                 implicitWidth: 10
                 implicitHeight: 10
                 Rectangle {
-                    color: "#0b1f2e"
+                    color: "#1f2227"
                     anchors.fill: parent
                 }
             }
@@ -245,14 +294,14 @@ Rectangle{
                 implicitHeight: 10
                 Rectangle{
                     anchors.fill: parent
-                    color: "#091823"
+                    color: root.color
                 }
             }
             textColor: '#9babb8'
             decrementControl: null
             incrementControl: null
             frame: Rectangle{color: "transparent"}
-            corner: Rectangle{color: "#091823"}
+            corner: Rectangle{color: root.color}
         }
 
         property var dropEntry: null
@@ -295,10 +344,10 @@ Rectangle{
                 entryData.activeFocus = false
             }
             function setActive(){
-                project.setActive(styleData.value)
-                if (windowControls.codingMode === 1) {
-                    windowControls.workspace.project.compile()
-                }
+                project.setActive(styleData.value.path)
+            }
+            function addRunnable(){
+                project.openRunnable(styleData.value.path, [styleData.value.path])
             }
             function openFile(){
                 root.editEntry(styleData.value)
@@ -317,14 +366,17 @@ Rectangle{
                 anchors.left: parent.left
                 anchors.top: parent.top
                 width: entryData.width > 70 ? entryData.width + 30 : 95
-                color: entryDelegate.editMode ? "#1b2934" : "transparent"
+                color: root.currentTheme
+                       ? (entryDelegate.editMode ? root.currentTheme.projectPaneItemEditBackground
+                                                 : root.currentTheme.projectPaneItemBackground )
+                       : 'transparent'
                 Image{
                     anchors.left: parent.left
                     anchors.leftMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
                     source: {
                         if ( styleData.value && styleData.value.isFile ){
-                            if (styleData.value === (project.active ? project.active.file : null) )
+                            if (project.active && styleData.value.path === project.active.path)
                                 return "qrc:/images/project-file-active.png"
                             else {
                                 if ( styleData.value.document ){
@@ -345,19 +397,19 @@ Rectangle{
                     anchors.left: parent.left
                     anchors.leftMargin: 25
                     anchors.verticalCenter: parent.verticalCenter
-                    color: type === 1 ? "#c6d3de" : styleData.value === view.dropEntry ? "#ff0000" : styleData.textColor
+                    color: type === 1 ? "#c6d3de" : view && styleData.value === view.dropEntry ? "#ff0000" : styleData.textColor
                     text: {
                         styleData.value
-                            ? styleData.value.name === ''
-                            ? 'untitled' : styleData.value.name : ''
+                            ? project.fileModel.printableName(styleData.value.name)
+                            : ''
                     }
                     font.family: 'Open Sans, Arial, sans-serif'
                     font.pixelSize: 12
                     property int type : {
                         if (styleData.value){
                             if ( styleData.value.document ){
-                                var ap = root.windowControls.workspace.panes.activePane
-                                if ( ap.objectName === 'editor' && ap.document && ap.document.file === styleData.value ){
+                                var ap = root.panes.activePane
+                                if ( ap && ap.objectName === 'editor' && ap.document && ap.document.file === styleData.value ){
                                     return 1;
                                 }
                                 return 2
@@ -369,13 +421,14 @@ Rectangle{
                     font.weight: Font.Light
                     font.italic: type === 2 || type === 1
                     readOnly: !entryDelegate.editMode
+                    selectionColor: "#3d4856"
                     Keys.onReturnPressed: {
                         root.renameEntry(styleData.value, text)
                         entryDelegate.editMode = false
                     }
                     Keys.onEscapePressed: {
                         entryData.text = styleData.value
-                                ? styleData.value.name === ''
+                                ? (!styleData.value.exists())
                                 ? 'untitled' : styleData.value.name : ''
                         entryDelegate.editMode = false
                     }
@@ -500,6 +553,12 @@ Rectangle{
                     view.contextDelegate.setActive()
                 }
             }
+            MenuItem{
+                text: "Add As Runnable"
+                onTriggered: {
+                    view.contextDelegate.addRunnable()
+                }
+            }
             MenuItem {
                 text: "Rename"
                 onTriggered: {
@@ -513,7 +572,6 @@ Rectangle{
                     root.removeEntry(view.contextDelegate.entry(), false)
                 }
             }
-
         }
 
         Menu {
@@ -562,9 +620,25 @@ Rectangle{
                 }
             }
             MenuItem{
-                text: "Close project"
+                text: "Close Project"
                 onTriggered: {
-                    root.closeProject(function(){})
+                    livecv.layers.workspace.commands.execute('window.workspace.project.close')
+                }
+            }
+            MenuItem{
+                text: "New Document"
+                onTriggered: {
+                    var fe = project.fileModel.addTemporaryFile()
+                    livecv.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
+                }
+            }
+
+            MenuItem{
+                text: "New Runnable"
+                onTriggered: {
+                    var fe = project.fileModel.addTemporaryFile()
+                    livecv.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
+                    project.openRunnable(fe.path, [fe.path])
                 }
             }
             MenuItem {

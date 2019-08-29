@@ -39,7 +39,7 @@ Rectangle{
 
         color: "#05090e"
 
-        border.color: "#0c1117"
+        border.color: "#181d24"
         border.width: 1
 
         TextInput{
@@ -63,7 +63,7 @@ Rectangle{
 
             text: ""
             onTextChanged: {
-                livecv.commands.model.setFilter(text)
+                livecv.layers.workspace.commands.model.setFilter(text)
             }
 
             MouseArea{
@@ -94,7 +94,7 @@ Rectangle{
             }
             Keys.onReturnPressed: {
                 if (commandsView.currentItem) {
-                    livecv.commands.execute(commandsView.currentItem.command)
+                    livecv.layers.workspace.commands.execute(commandsView.currentItem.command)
                     root.close()
                 }
                 event.accepted = true
@@ -145,7 +145,7 @@ Rectangle{
                 implicitWidth: 10
                 implicitHeight: 10
                 Rectangle {
-                    color: "#0b1f2e"
+                    color: "#1f2227"
                     anchors.fill: parent
                 }
             }
@@ -154,18 +154,18 @@ Rectangle{
                 implicitHeight: 10
                 Rectangle{
                     anchors.fill: parent
-                    color: "#091823"
+                    color: "#000509"
                 }
             }
             decrementControl: null
             incrementControl: null
-            frame: Rectangle{color: "transparent"}
+            frame: Item{}
             corner: Rectangle{color: "#091823"}
         }
 
         ListView{
             id: commandsView
-            model : livecv.commands.model
+            model : livecv.layers.workspace.commands.model
             width: parent.width
             height: parent.height
             clip: true
@@ -210,13 +210,12 @@ Rectangle{
                 }
             }
 
-
             delegate: Rectangle{
 
                 property string command: model.command
 
                 z: 400
-                color: ListView.isCurrentItem ? "#091927" : "#0b0e11"
+                color: ListView.isCurrentItem ? "#051d32" : "#000509"
                 width: root.width
                 height: commandsView.delegateHeight
                 Text{
@@ -245,7 +244,7 @@ Rectangle{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        livecv.commands.execute(model.command)
+                        livecv.layers.workspace.commands.execute(model.command)
                         root.close()
                     }
                 }

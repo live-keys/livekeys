@@ -27,6 +27,8 @@ public:
     void onMessage(std::function<void(const LineMessage&, void* data)> handler, void* handlerData = 0);
     void onError(std::function<void(int, const std::string&)> handler);
 
+    unsigned long long expectedSize() const;
+
 private:
     std::function<void(const LineMessage&, void*)> m_handler;
     std::function<void(int, const std::string&)> m_errorHandler;
@@ -43,6 +45,10 @@ inline void LineCapture::onMessage(std::function<void (const LineMessage &, void
 
 inline void LineCapture::onError(std::function<void (int, const std::string &)> handler){
     m_errorHandler = handler;
+}
+
+inline unsigned long long LineCapture::expectedSize() const{
+    return m_expectSize;
 }
 
 }// namespace

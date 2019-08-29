@@ -18,6 +18,9 @@
 #include "environment.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
+#include "live/runnable.h"
+
+#include <QFileInfo>
 
 namespace lv{
 
@@ -45,9 +48,10 @@ LiveCVScript::~LiveCVScript(){
     delete m_environment;
 }
 
-void LiveCVScript::scriptChanged(ProjectDocument *active){
+void LiveCVScript::scriptChanged(lv::Runnable *active){
     if ( active ){
-        m_argv[0] = active->file()->name();
+        QFileInfo finfo(active->path());
+        m_argv[0] = finfo.fileName();
     } else {
         m_argv[0] = "";
     }

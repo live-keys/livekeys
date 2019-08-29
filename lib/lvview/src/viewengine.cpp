@@ -25,7 +25,7 @@
 #include "groupcollector.h"
 #include "layer.h"
 #include "windowlayer.h"
-#include "workspacelayer.h"
+#include "qmlstream.h"
 
 #include <QQmlComponent>
 #include <QQmlIncubator>
@@ -329,10 +329,11 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::QmlObjectList>(         uri, 1, 0, "ObjectList");
     qmlRegisterType<lv::QmlVariantListModel>(   uri, 1, 0, "VariantListModel");
     qmlRegisterType<lv::QmlObjectListModel>(    uri, 1, 0, "ObjectListModel");
-    qmlRegisterUncreatableType<lv::Shared>(     uri, 1, 0, "Shared", "Shared is of abstract type.");
-    qmlRegisterUncreatableType<lv::Layer>(      uri, 1, 0, "Layer", "Layer is of abstract type.");
     qmlRegisterType<lv::WindowLayer>(           uri, 1, 0, "WindowLayer");
-    qmlRegisterType<lv::WorkspaceLayer>(        uri, 1, 0, "WorkspaceLayer");
+    qmlRegisterType<lv::QmlStream>(             uri, 1, 0, "Stream");
+
+    qmlRegisterUncreatableType<lv::Shared>(         uri, 1, 0, "Shared", "Shared is of abstract type.");
+    qmlRegisterUncreatableType<lv::Layer>(          uri, 1, 0, "Layer", "Layer is of abstract type.");
 }
 
 void ViewEngine::initializeBaseTypes(ViewEngine *engine){
@@ -373,6 +374,7 @@ void ViewEngine::createObjectAsync(
         const QString& qmlCode,
         QObject* parent,
         const QUrl& url,
+        QObject *reference,
         bool clearCache)
 {
     m_engineMutex->lock();
@@ -388,7 +390,7 @@ void ViewEngine::createObjectAsync(
     QList<QQmlError> errors = component.errors();
     if ( errors.size() > 0 ){
         m_engineMutex->unlock();
-        emit objectCreationError(toJSErrors(errors), url);
+        emit objectCreationError(toJSErrors(errors), url, reference);
         return;
     }
 
@@ -405,7 +407,7 @@ void ViewEngine::createObjectAsync(
         setIsLoading(false);
         QJSValue jsErrors = toJSErrors(incubatorErrors);
         m_engineMutex->unlock();
-        emit objectCreationError(jsErrors, url);
+        emit objectCreationError(jsErrors, url, reference);
         return;
     }
 
@@ -415,12 +417,14 @@ void ViewEngine::createObjectAsync(
         errorObject.setDescription("Component returned null object.");
         QJSValue jsErrors = toJSErrors(QList<QQmlError>() << errorObject);
         m_engineMutex->unlock();
-        emit objectCreationError(jsErrors, url);
+        emit objectCreationError(jsErrors, url, reference);
         return;
     }
 
     QObject* obj = incubator.object();
     m_engine->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
+
+    emit objectAcquired(url, reference);
 
     if (parent)
         obj->setParent(parent);
@@ -437,7 +441,7 @@ void ViewEngine::createObjectAsync(
     setIsLoading(false);
 
     m_engineMutex->unlock();
-    emit objectCreated(obj, url);
+    emit objectReady(obj, url, reference);
 }
 
 QJSValue ViewEngine::lastErrorsObject() const{

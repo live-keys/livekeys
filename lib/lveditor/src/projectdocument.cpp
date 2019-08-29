@@ -86,6 +86,7 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     , m_isSynced(true)
     , m_isMonitored(isMonitored)
 {
+    m_textDocument->setDocumentMargin(0);
     connect(m_textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::documentContentsChanged);
     readContent();
     m_textDocument->setDocumentLayout(new TextDocumentLayout(m_textDocument));
@@ -104,7 +105,7 @@ void ProjectDocument::setContent(const QString &content){
  * \brief Open the document in a read states
  */
 void ProjectDocument::readContent(){
-    if ( m_file->path() != "" ){
+    if ( m_file->exists() ){
         addEditingState(ProjectDocument::Read);
         m_textDocument->setPlainText(
             QString::fromStdString(parentAsProject()->lockedFileIO()->readFromFile(m_file->path().toStdString()))
@@ -422,7 +423,7 @@ void ProjectDocument::removeSection(ProjectDocumentSection::Ptr section){
  */
 bool ProjectDocument::isActive() const{
     Project* prj = qobject_cast<Project*>(parent());
-    if ( prj && prj->active() == this )
+    if ( prj && prj->active() && prj->active()->path() == m_file->path() )
         return true;
     return false;
 }
@@ -485,12 +486,13 @@ void ProjectDocument::documentContentsChanged(int position, int charsRemoved, in
  */
 bool ProjectDocument::save(){
     syncContent();
-    if ( m_file->path() != "" ){
+    if ( m_file->exists() ){
         if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path().toStdString(), m_textDocument->toPlainText().toStdString() ) ){
             setIsDirty(false);
             m_lastModified = QDateTime::currentDateTime();
+            emit saved();
             if ( parentAsProject() )
-                emit parentAsProject()->fileChanged(m_file->path());
+                parentAsProject()->documentSaved(this);
             return true;
         }
     }
@@ -514,7 +516,9 @@ bool ProjectDocument::saveAs(const QString &path){
                 emit fileChanged();
             }
             setIsDirty(false);
+            emit saved();
             m_lastModified = QDateTime::currentDateTime();
+            parentAsProject()->documentSaved(this);
             return true;
         }
     }

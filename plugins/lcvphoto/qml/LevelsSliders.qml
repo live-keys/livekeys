@@ -309,21 +309,21 @@ Rectangle{
         }
     }
 
-    SliderLabel{
+    Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.left: parent.left
         text: dragBlack.assignedX
     }
 
-    SliderLabel{
+    Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.horizontalCenter: parent.horizontalCenter
         text: dragGrey.assignedX.toFixed(2)
     }
 
-    SliderLabel{
+    Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.right: parent.right

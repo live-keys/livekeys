@@ -60,7 +60,7 @@ int main(int argc, char *argv[]){
             return 0;
         }
 
-        livecv->loadQml(QUrl(QStringLiteral("qrc:/main.qml")));
+        livecv->loadDefaultLayers();
 
         return app.exec();
 
@@ -70,6 +70,7 @@ int main(int argc, char *argv[]){
             return e.code();
         } else {
             vlog() << "Uncaught exception: " << e.message().c_str();
+            vlog() << *e.stackTrace();
             return e.code();
         }
     }

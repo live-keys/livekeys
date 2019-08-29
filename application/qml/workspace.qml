@@ -1,7 +1,617 @@
-import QtQuick 2.3
+/****************************************************************************
+**
+** Copyright (C) 2014-2018 Dinu SV.
+** (contact: mail@dinusv.com)
+** This file is part of Live CV Application.
+**
+** GNU Lesser General Public License Usage
+** This file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+****************************************************************************/
 
-Rectangle{
-    width: 100
-    height: 200
-    color: "red"
+import QtQuick 2.3
+import QtQuick.Dialogs 1.2
+import QtQuick.Controls 1.2
+import QtQuick.Window 2.0
+import base 1.0
+import editor 1.0
+import editor.private 1.0
+import live 1.0
+
+Item{
+    id: root
+    anchors.fill: parent
+    objectName: "workspace"
+
+    property Item runSpace : runSpace
+
+    property QtObject style : QtObject{
+        property font errorFont : Qt.font({
+            family: "Source Code Pro, Ubuntu Mono, Courier New, Courier",
+            pixelSize: 12,
+            weight: Font.Normal
+        })
+        property color errorFontColor : "#fff"
+        property color errorBackgroundColor: "#000"
+    }
+
+    property QtObject panes : QtObject{
+        property Item activePane : null
+        property Item activeItem : null
+        property Item container : mainSplit
+
+        property var openWindows : []
+
+        property var factories : {
+            return {
+                "editor" : function(p, s){
+                    var pane = editorFactory.createObject(p)
+                    if ( s )
+                        pane.paneInitialize(s)
+                    return pane
+                },
+                "projectFileSystem" : function(p, s){
+                    if ( s )
+                        root.projectFileSystemSingle.paneInitialize(s)
+                    return root.projectFileSystemSingle
+                },
+                "viewer" : function(p, s){
+                    return root.viewer
+                },
+                "runView" : function(p, s){
+                    var pane = runViewFactory.createObject(p)
+                    if ( s )
+                        pane.paneInitialize(s)
+                    return pane
+                },
+                "log" : function(p, s){
+                    if ( !root.logView.parent ){
+                        root.logView.visible = true
+                        root.logView.parent = p
+                        header.isLogWindowDirty = false
+                        return root.logView
+                    }
+
+                    var pane = logFactory.createObject(p)
+                    return pane
+                }
+            }
+        }
+
+        function __dragStarted(pane){
+            for ( var i = 0; i < openWindows.length; ++i ){
+                var w = openWindows[i]
+                w.paneDropArea.currentPane = pane
+                w.paneDropArea.model = w.mainSplit.createPositioningModel()
+                w.paneDropArea.visible = true
+            }
+
+            paneDropArea.currentPane = pane
+            paneDropArea.model = mainSplit.createPositioningModel()
+            paneDropArea.visible = true
+        }
+
+        function __dragFinished(pane){
+            paneDropArea.currentPane = null
+            paneDropArea.model = []
+            for ( var i = 0; i < openWindows.length; ++i ){
+                var w = openWindows[i]
+                w.paneDropArea.currentPane = null
+                w.paneDropArea.model = []
+                w.paneDropArea.visible = false
+            }
+            paneDropArea.visible = false
+        }
+
+        function initializeSplitterPanes(splitter, paneConfiguration){
+            var orientation = paneConfiguration[0] === 'h' ? Qt.Horizontal : Qt.Vertical
+            splitter.orientation = orientation
+
+            if ( splitter !== mainSplit ){
+                if ( orientation === Qt.Vertical && paneConfiguration.length > 1 ){
+                    splitter.width = paneConfiguration[1].width
+                } else {
+                    splitter.height = paneConfiguration[1].width
+                }
+            }
+
+            var panesToOpen = []
+            var recurseSplitters = []
+
+            for ( var i = 1; i < paneConfiguration.length; ++i ){
+
+                if ( Array.isArray(paneConfiguration[i]) ){
+                    var split = splitter.createNewSplitter(Qt.Vertical)
+                    panesToOpen.push(split)
+                    recurseSplitters.push(i)
+                } else {
+                    var state = 'state' in paneConfiguration[i] ? paneConfiguration[i].state : null
+                    var pane = createPane(paneConfiguration[i].type, state, paneConfiguration[i].size)
+                    panesToOpen.push(pane)
+                }
+            }
+
+            splitter.initialize(panesToOpen)
+
+            for ( var i = 0; i < recurseSplitters.length; ++i ){
+                var configIndex = recurseSplitters[i]
+                initializeSplitterPanes(panesToOpen[configIndex - 1], paneConfiguration[configIndex])
+            }
+
+            return panesToOpen
+        }
+
+        property var initializePanes : function(windowConfiguration, paneConfiguration){
+            var currentWindowPanes = paneConfiguration[0]
+
+            var initializeStructure = [
+                [livecv.layers.window.window()],
+                initializeSplitterPanes(container, currentWindowPanes)
+            ]
+
+            for ( var i = 1; i < paneConfiguration.length; ++i ){
+                var window = paneWindowFactory.createObject(root)
+                openWindows.push(window)
+                initializeStructure[0].push(window)
+                initializeStructure[1].push(initializeSplitterPanes(window.mainSplit, paneConfiguration[i]))
+
+                window.closing.connect(function(){
+                    var index = openWindows.indexOf(window);
+                    if (index > -1) {
+                        openWindows.splice(index, 1);
+                    }
+                })
+            }
+
+            return initializeStructure
+        }
+
+        property var createPane : function(paneType, paneState, paneSize){
+
+            if ( paneType in root.panes.factories ){
+                var paneFactory = root.panes.factories[paneType]
+                var paneObject = paneFactory(null, paneState)
+                if ( paneSize ){
+                    paneObject.width = paneSize[0]
+                    paneObject.height = paneSize[1]
+                }
+
+                return paneObject
+
+            } else {
+                throw new Error('Key not found: ' + paneType)
+            }
+        }
+
+        property var movePaneToNewWindow : function(pane){
+            removePane(pane)
+
+            var window = paneWindowFactory.createObject(root)
+            openWindows.push(window)
+
+            window.closing.connect(function(){
+                var index = openWindows.indexOf(window);
+                if (index > -1) {
+                    openWindows.splice(index, 1);
+                }
+            })
+
+            livecv.layers.workspace.addWindow(window)
+
+            splitPaneVerticallyWith(window.mainSplit, 0, pane)
+        }
+
+        property var splitPaneHorizontallyWith : function(splitter, index, pane){
+            splitter.splitHorizontally(index, pane)
+
+            livecv.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
+        }
+
+        property var splitPaneVerticallyWith : function(splitter, index, pane){
+            splitter.splitVertically(index, pane)
+
+            livecv.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
+        }
+
+        property var splitPaneHorizontallyBeforeWith : function(splitter, index, pane){
+            splitter.splitHorizontallyBefore(index, pane)
+
+            livecv.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
+        }
+
+        property var splitPaneVerticallyBeforeWith : function(splitter, index, pane){
+            splitter.splitVerticallyBefore(index, pane)
+
+            livecv.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
+        }
+
+        property var removePane : function(pane){
+            if ( pane.parentSplitter ){
+                var split = pane.parentSplitter
+                var paneIndex = split.paneIndex(pane)
+
+                if ( pane.paneType !== 'splitview' )
+                    livecv.layers.workspace.removePane(pane)
+
+                split.removeAt(paneIndex)
+                if ( split.panes.length === 0 && split !== mainSplit ){
+                    removePane(split)
+                }
+            } else if ( pane.paneType === 'splitview' ){
+                if ( pane.currentWindow !== livecv.layers.window.window() ){
+                    pane.currentWindow.close()
+                }
+            }
+        }
+
+        property var __clearPanes : function(){
+            mainSplit.clearPanes()
+            activePane = null
+            activeItem = null
+        }
+
+        function setActiveItem(item, pane){
+            activeItem = item
+            var p = pane ? pane : item
+            while ( p !== null ){
+                if ( p.objectName === 'editor' || p.objectName === 'project' || p.objectName === 'viewer' ){
+                    activePane = p
+                    return
+                }
+                p = p.parent
+            }
+        }
+
+        function activateItem(item, pane){
+            if ( activeItem && activeItem !== item ){
+                activeItem.focus = false
+            }
+
+            activeItem = item
+            activeItem.forceActiveFocus()
+            var p = pane ? pane : item
+            while ( p !== null ){
+                if ( p.objectName === 'editor' || p.objectName === 'project' || p.objectName === 'viewer' ){
+                    activePane = p
+                    return
+                }
+                p = p.parent
+            }
+        }
+
+        function focusPane(paneType){
+            var ap = root.panes.activePane
+            if ( ap && ap.paneType === paneType ){
+                return ap
+            }
+
+            var pane = mainSplit.findPaneByType(paneType)
+            if ( pane )
+                return pane
+
+            for ( var i = 0; i < root.panes.openWindows.length; ++i ){
+                var w = root.panes.openWindows[i]
+                var p = w.mainSplit.findPaneByType(paneType)
+                if ( p )
+                    return p
+            }
+            return null
+        }
+    }
+
+    property QtObject projectEnvironment : ProjectEnvironment{
+        panes: root.panes
+        runSpace: root.runSpace
+    }
+
+    property color paneSplitterColor: "transparent"
+
+    property bool documentsReloaded : false
+    Connections{
+        target: livecv.layers.window
+        onIsActiveChanged : {
+            if ( isActive ){
+                project.navigationModel.requiresReindex()
+                project.fileModel.rescanEntries()
+                project.documentModel.rescanDocuments()
+                if ( documentsReloaded && project.active ){
+                    project.scheduleRun()
+                    documentsReloaded = false
+                }
+
+                if ( root.panes.activePane )
+                    root.panes.activePane.forceActiveFocus()
+            }
+        }
+    }
+
+    Connections{
+        target: livecv
+        onLayerReady: {
+            if ( layer.name === 'workspace' ){
+                layer.commands.add(root, {
+                    'minimize' : [livecv.layers.window.handle.minimize, "Minimize"],
+                    'toggleFullScreen': [livecv.layers.window.handle.toggleFullScreen, "Toggle Fullscreen"],
+                    'toggleNavigation' : [root.toggleNavigation, "Toggle Navigation"],
+//                    'openLogInWindow' : [mainVerticalSplit.openLogInWindow, "Open Log In Window"],
+//                    'openLogInEditor' : [mainVerticalSplit.openLogInEditor, "Open Log In Editor"],
+//                    'toggleLog' : [mainVerticalSplit.toggleLog, "Toggle Log"],
+                    'toggleLogPrefix' : [logView.toggleLogPrefix, "Toggle Log Prefix"],
+//                    'addHorizontalEditorView' : [mainVerticalSplit.addHorizontalEditor, "Add Horizontal Editor"],
+//                    'addHorizontalFragmentEditorView': [mainVerticalSplit.addHorizontalFragmentEditor, "Add Horizontal Fragment Editor"],
+//                    'removeHorizontalEditorView' : [mainVerticalSplit.removeHorizontalEditor, "Remove Horizontal Editor"],
+                    'setLiveCodingMode': [modeContainer.setLiveCodingMode, "Set 'Live' Coding Mode"],
+                    'setOnSaveCodingMode': [modeContainer.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
+                    'setDisabledCodingMode': [modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
+                    'runProject': [project.run, "Run Project"],
+                    'addRunView' : [root.addRunView, "Add Run View"]
+                })
+
+                root.paneSplitterColor = layer.themes.current.paneSplitterColor
+            }
+        }
+    }
+
+    LogWindow{
+        id : logWindow
+        visible : false
+        onVisibleChanged: if (!visible){
+            logView.visible = false
+        }
+        Component.onCompleted: width = root.width
+    }
+
+    Top{
+        id : header
+        modeContainer: modeContainer
+        runnablesMenu: runnablesMenu
+        anchors.top : parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        property var callback : function(){}
+
+        property string action : ""
+
+        onToggleLogWindow : {
+            var fe = root.panes.focusPane('log')
+            if ( !fe ){
+                fe = root.panes.createPane('log', {}, [200, 200])
+                var containerUsed = root.panes.container
+                root.panes.splitPaneVerticallyWith(containerUsed, containerUsed.panes.length - 1, fe)
+            } else {
+                root.panes.removePane(fe)
+            }
+        }
+
+        onOpenCommandsMenu: {
+            livecv.layers.workspace.commands.model.setFilter('')
+            commandsMenu.visible = !commandsMenu.visible
+        }
+
+        onOpenSettings: {
+            var fe = livecv.layers.workspace.project.openFile(
+                livecv.settings.file('editor').path, ProjectDocument.Edit
+            )
+            livecv.settings.file('editor').documentOpened(fe.document)
+        }
+
+        property License license : License{}
+        onOpenLicense: {livecv.layers.window.dialogs.overlayBox(license)}
+    }
+
+    CommandsMenu{
+        id: commandsMenu
+        anchors.top: header.bottom
+        x: 355
+    }
+
+    RunnablesMenu{
+        id: runnablesMenu
+        anchors.top: header.bottom
+        onRunnableSelected: {
+            if ( project.active )
+                project.active.setRunSpace(null)
+
+            project.setActive(path)
+        }
+        x: 550
+    }
+
+    ModeContainer {
+        id: modeContainer
+        onRunTriggerSelected: project.runTrigger = trigger
+        anchors.top: header.bottom
+        x: 620
+    }
+
+    Component{
+        id: editorFactory
+
+        Editor{
+            id: editorComponent
+            height: parent ? parent.height : 0
+            width: 400
+            panes: root.panes
+            onInternalActiveFocusChanged: if ( internalActiveFocus ) {
+                root.panes.setActiveItem(editorComponent.textEdit, editorComponent)
+            }
+            Component.onCompleted: { forceFocus() }
+        }
+    }
+
+    Component{
+        id: runViewFactory
+
+        RunView{
+            id: runViewComponent
+            panes: root.panes
+        }
+    }
+
+    function addRunView(){
+        var pane = root.panes.createPane('runView', {}, [400, 0])
+
+        var containerUsed = root.panes.container
+        if ( containerUsed.orientation === Qt.Vertical ){
+            root.panes.splitPaneVerticallyWith(containerUsed, containerUsed.panes.length - 1, pane)
+        } else {
+            root.panes.splitPaneHorizontallyWith(containerUsed, containerUsed.panes.length - 1, pane)
+        }
+    }
+
+    Component{
+        id: logFactory
+
+        LogContainer{
+            id: logView
+            isInWindow: false
+            width: 300
+            height: 200
+        }
+    }
+
+
+    Component{
+        id: paneWindowFactory
+
+        PaneWindow{
+            id: paneWindow
+            panes: root.panes
+            createNewSplitter : function(orientation){
+                var ob = paneSplitViewFactory.createObject(null)
+                ob.orientation = orientation
+                ob.createNewSplitter = mainSplit.createNewSplitter
+                ob.currentWindow = paneWindow
+                return ob
+            }
+        }
+    }
+
+    property ProjectFileSystem projectFileSystemSingle : ProjectFileSystem{
+        id: projectView
+        width: 300
+        panes: root.panes
+    }
+
+    property Item viewer : Pane{
+        id : viewer
+        objectName: "viewer"
+        paneType: "viewer"
+        color: 'transparent'
+
+        Item{
+            id: runSpace
+            anchors.fill: parent
+        }
+
+        Connections{
+            target: livecv.engine
+            onObjectReady : { error.text = '' }
+            onObjectCreationError : {
+                var errorMessage = error.wrapMessage(errors)
+                error.text = errorMessage.rich
+                console.error(errorMessage.log)
+            }
+        }
+
+        ErrorContainer{
+            id: error
+            anchors.bottom: parent.bottom
+            width : parent.width
+            color : root.style.errorBackgroundColor
+            font: root.style.errorFont
+        }
+    }
+
+    Component{
+        id: projectFileSystemFactory
+
+        ProjectFileSystem{
+            id: projectView
+            width: 240
+            panes: root.panes
+        }
+    }
+
+    Component{
+        id: paneSplitViewFactory
+
+        PaneSplitView{}
+    }
+
+    function toggleNavigation(){
+        var ap = root.panes.activePane
+        if ( ap.objectName === 'editor' ){
+            var navMenu = root.projectEnvironment.navigation
+            navMenu.parent = ap
+            navMenu.visible = !navMenu.visible
+        }
+    }
+
+    PaneSplitView{
+        id: mainSplit
+
+        anchors.top : header.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height : parent.height - header.height
+        orientation: Qt.Vertical
+        currentWindow : livecv.layers.window.window()
+
+        createNewSplitter: function(orientation){
+            var ob = paneSplitViewFactory.createObject(null)
+            ob.orientation = orientation
+            ob.createNewSplitter = mainSplit.createNewSplitter
+            ob.currentWindow = mainSplit.currentWindow
+            return ob
+        }
+    }
+
+    PaneDropArea{
+        id: paneDropArea
+        anchors.top : header.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height : parent.height - header.height
+
+        onDropped : {
+            if ( data.pane === currentPane )
+                return
+
+            var parentSplitter = data.pane.parentSplitter
+            var paneIndex = data.pane.parentSplitterIndex()
+            var clone = currentPane
+
+            root.panes.removePane(currentPane)
+
+            if ( location === paneDropArea.topPosition ){
+                root.panes.splitPaneVerticallyBeforeWith(parentSplitter, paneIndex, clone)
+            } else if ( location === paneDropArea.rightPosition ){
+                root.panes.splitPaneHorizontallyWith(parentSplitter, paneIndex, clone)
+            } else if ( location === paneDropArea.bottomPosition ){
+                root.panes.splitPaneVerticallyWith(parentSplitter, paneIndex, clone)
+            } else if ( location === paneDropArea.leftPosition ){
+                root.panes.splitPaneHorizontallyBeforeWith(parentSplitter, paneIndex, clone)
+            }
+        }
+    }
+
+    property LogContainer logView : LogContainer{
+        visible: false
+        isInWindow: false
+        width: 300
+        height: 200
+
+        onItemAdded: {
+            if ( !parent  )
+                header.isLogWindowDirty = true
+        }
+    }
+
 }

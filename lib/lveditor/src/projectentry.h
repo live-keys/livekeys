@@ -77,6 +77,7 @@ public:
 
 public slots:
     QUrl pathUrl() const;
+    QString hashPath() const;
 
 signals:
     /** Signals that the name has changed */

@@ -3,7 +3,6 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/errorhandler.h \
     $$PWD/incubationcontroller.h \
-    $$PWD/keymap.h \
     $$PWD/settings.h \
     $$PWD/typeinfo.h \
     $$PWD/visuallogbasemodel.h \
@@ -16,8 +15,6 @@ HEADERS += \
     $$PWD/viewcontext.h \
     $$PWD/lvviewglobal.h \
     $$PWD/viewengine.h \
-    $$PWD/extensions.h \
-    $$PWD/liveextension.h \
     $$PWD/group.h \
     $$PWD/groupcollector.h \
     $$PWD/groupcollectorentry.h \
@@ -33,17 +30,17 @@ HEADERS += \
     $$PWD/qmlobjectlistmodel.h \
     $$PWD/linemessage.h \
     $$PWD/linecapture.h \
-    $$PWD/workspace.h \
-    $$PWD/workspaceipc.h \
-    $$PWD/workspaceipcsink.h \
     $$PWD/layer.h \
     $$PWD/windowlayer.h \
-    $$PWD/workspacelayer.h
+    $$PWD/qmlpropertywatcher.h \
+    $$PWD/qmlstream.h \
+    $$PWD/sharedmemoryreadworker.h \
+    $$PWD/sharedmemorywriteworker.h
+
 
 SOURCES += \
     $$PWD/errorhandler.cpp \
     $$PWD/incubationcontroller.cpp \
-    $$PWD/keymap.cpp \
     $$PWD/settings.cpp \
     $$PWD/visuallogbasemodel.cpp \
     $$PWD/visuallogfilter.cpp \
@@ -54,8 +51,6 @@ SOURCES += \
     $$PWD/mlnodetoqml.cpp \
     $$PWD/viewcontext.cpp \
     $$PWD/viewengine.cpp \
-    $$PWD/extensions.cpp \
-    $$PWD/liveextension.cpp \
     $$PWD/group.cpp \
     $$PWD/groupcollector.cpp \
     $$PWD/groupcollectorentry.cpp \
@@ -69,10 +64,10 @@ SOURCES += \
     $$PWD/qmlobjectlist.cpp \
     $$PWD/qmlobjectlistmodel.cpp \
     $$PWD/linecapture.cpp \
-    $$PWD/workspace.cpp \
-    $$PWD/workspaceipc.cpp \
-    $$PWD/workspaceipcsink.cpp \
     $$PWD/layer.cpp \
     $$PWD/windowlayer.cpp \
-    $$PWD/workspacelayer.cpp
+    $$PWD/qmlpropertywatcher.cpp \
+    $$PWD/qmlstream.cpp \
+    $$PWD/sharedmemoryreadworker.cpp \
+    $$PWD/sharedmemorywriteworker.cpp
 
