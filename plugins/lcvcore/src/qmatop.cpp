@@ -281,4 +281,59 @@ QVariantList QMatOp::toArray(QMat *m){
     return values;
 }
 
+QMat *QMatOp::bitwiseXor(QMat *arg1, QMat *arg2)
+{
+    cv::Mat* a1 = arg1->cvMat();
+    cv::Mat* a2 = arg2->cvMat();
+
+    if (a1->rows != a2->rows || a1->cols != a2->cols || a1->type() != a2->type()) return nullptr;
+
+    cv::Mat* resMat = new cv::Mat(a1->rows, a1->cols, a1->type());
+    cv::bitwise_xor(*a1, *a2, *resMat);
+
+    QMat* result = new QMat(resMat);
+    return result;
+
+
+}
+
+QMat *QMatOp::bitwiseOr(QMat *arg1, QMat *arg2)
+{
+    cv::Mat* a1 = arg1->cvMat();
+    cv::Mat* a2 = arg2->cvMat();
+
+    if (a1->rows != a2->rows || a1->cols != a2->cols || a1->type() != a2->type()) return nullptr;
+
+    cv::Mat* resMat = new cv::Mat(a1->rows, a1->cols, a1->type());
+    cv::bitwise_or(*a1, *a2, *resMat);
+
+    QMat* result = new QMat(resMat);
+    return result;
+}
+
+QMat *QMatOp::bitwiseAnd(QMat *arg1, QMat *arg2)
+{
+    cv::Mat* a1 = arg1->cvMat();
+    cv::Mat* a2 = arg2->cvMat();
+
+    if (a1->rows != a2->rows || a1->cols != a2->cols || a1->type() != a2->type()) return nullptr;
+
+    cv::Mat* resMat = new cv::Mat(a1->rows, a1->cols, a1->type());
+    cv::bitwise_and(*a1, *a2, *resMat);
+
+    QMat* result = new QMat(resMat);
+    return result;
+}
+
+QMat *QMatOp::bitwiseNot(QMat *arg)
+{
+    cv::Mat* a1 = arg->cvMat();
+
+    cv::Mat* resMat = new cv::Mat(a1->rows, a1->cols, a1->type());
+    cv::bitwise_not(*a1, *resMat);
+
+    QMat* result = new QMat(resMat);
+    return result;
+}
+
 

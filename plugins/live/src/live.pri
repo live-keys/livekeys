@@ -2,6 +2,7 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/live_plugin.h \
+    $$PWD/qmlcolor.h \
     $$PWD/qstaticcontainer.h \
     $$PWD/qstaticloader.h \
     $$PWD/qscriptcommandlineparser_p.h \
@@ -35,6 +36,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/live_plugin.cpp \
+    $$PWD/qmlcolor.cpp \
     $$PWD/qstaticcontainer.cpp \
     $$PWD/qstaticloader.cpp \
     $$PWD/qscriptcommandlineparser.cpp \

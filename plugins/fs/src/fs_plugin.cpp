@@ -17,6 +17,9 @@
 #include "fs_plugin.h"
 #include "listdir.h"
 #include "path.h"
+#include "dir.h"
+#include "file.h"
+#include "filedescriptor.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -29,11 +32,22 @@ static QObject* pathProvider(QQmlEngine *engine, QJSEngine *){
     return new lv::Path(engine);
 }
 
+static QObject* dirProvider(QQmlEngine *engine, QJSEngine *){
+    return new lv::Dir(engine);
+}
+
+static QObject* fileProvider(QQmlEngine *engine, QJSEngine *){
+    return new lv::File(engine);
+}
 
 void FsPlugin::registerTypes(const char *uri){
     // @uri fs
     qmlRegisterType<lv::ListDir>(      uri, 1, 0, "ListDir");
+    qmlRegisterType<lv::FileDescriptor>(      uri, 1, 0, "FileDescriptor");
     qmlRegisterSingletonType<lv::Path>(uri, 1, 0, "Path", &pathProvider);
+    qmlRegisterSingletonType<lv::Dir>(uri, 1, 0, "Dir", &dirProvider);
+    qmlRegisterSingletonType<lv::File>(uri, 1, 0, "File", &fileProvider);
+
 }
 
 void FsPlugin::initializeEngine(QQmlEngine *, const char *){
