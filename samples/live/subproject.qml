@@ -4,7 +4,7 @@ import live 1.0
 Item{
     
     Subproject{
-        source: Component{
+        sourceComponent: Component{
             
             Rectangle{
                 width: 100
