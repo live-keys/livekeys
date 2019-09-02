@@ -111,7 +111,13 @@ DocumentQmlScope::Ptr DocumentQmlScope::createScope(
         const QString &data,
         ProjectQmlScope::Ptr projectScope)
 {
-    DocumentQmlInfo::Ptr documentInfo = DocumentQmlInfo::create(fileName.isEmpty() ? "untitled.qml" : fileName);
+    QString printName = fileName;
+    int tempAnnotator = fileName.indexOf("T:");
+    if ( tempAnnotator > -1 ){
+        printName = fileName.mid(0, tempAnnotator) + fileName.mid(tempAnnotator + 2 ) + "untitled.qml";
+    }
+
+    DocumentQmlInfo::Ptr documentInfo = DocumentQmlInfo::create(printName);
     documentInfo->parse(data);
     documentInfo->createRanges();
 

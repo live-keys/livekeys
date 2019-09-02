@@ -1298,6 +1298,7 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position, QObject* currentAp
     cursor.setPosition(position);
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
+
     if ( properties.isEmpty() )
         return nullptr;
 
@@ -1310,6 +1311,7 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position, QObject* currentAp
     }
 
     QmlEditFragment* ef = createInjectionChannel(declaration, currentApp);
+
     if ( !ef ){
         return nullptr;
     }
