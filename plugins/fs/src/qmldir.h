@@ -6,11 +6,11 @@
 
 namespace lv {
 
-class Dir : public QObject
+class QmlDir : public QObject
 {
     Q_OBJECT
 public:
-    explicit Dir(QObject *parent = nullptr);
+    explicit QmlDir(QObject *parent = nullptr);
 
 public slots:
     QStringList list(QJSValue path);

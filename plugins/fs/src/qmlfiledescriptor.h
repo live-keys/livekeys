@@ -7,16 +7,16 @@ class QFile;
 
 namespace lv {
 
-class FileDescriptor : public QObject
+class QmlFileDescriptor : public QObject
 {
     Q_OBJECT
 public:
-    FileDescriptor(QObject* parent=nullptr) : QObject(parent), file(nullptr) {}
-    FileDescriptor(QFile* file, QObject *parent = nullptr);
-    FileDescriptor(const FileDescriptor& other);
+    QmlFileDescriptor(QObject* parent=nullptr) : QObject(parent), file(nullptr) {}
+    QmlFileDescriptor(QFile* file, QObject *parent = nullptr);
+    QmlFileDescriptor(const QmlFileDescriptor& other);
 
-    void operator=(const FileDescriptor& other);
-    ~FileDescriptor();
+    void operator=(const QmlFileDescriptor& other);
+    ~QmlFileDescriptor();
 public slots:
     bool isValid();
     void setFile(QFile* f) { file = f; }
@@ -30,7 +30,5 @@ private:
 };
 
 }
-
-Q_DECLARE_METATYPE(lv::FileDescriptor)
 
 #endif // FILEDESCRIPTOR_H

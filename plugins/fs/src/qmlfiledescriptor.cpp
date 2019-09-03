@@ -1,27 +1,28 @@
-#include "filedescriptor.h"
+#include "qmlfiledescriptor.h"
 #include "qfile.h"
 #include <QTextStream>
+#include <QDebug>
 
 namespace lv {
 
-FileDescriptor::FileDescriptor(QFile* f, QObject *parent) : QObject(parent), file(f)
+QmlFileDescriptor::QmlFileDescriptor(QFile* f, QObject *parent) : QObject(parent), file(f)
 {
 
 }
 
-FileDescriptor::FileDescriptor(const FileDescriptor &other)
-{
-    this->file = other.file;
-    this->setParent(other.parent());
-}
-
-void FileDescriptor::operator=(const FileDescriptor &other)
+QmlFileDescriptor::QmlFileDescriptor(const QmlFileDescriptor &other)
 {
     this->file = other.file;
     this->setParent(other.parent());
 }
 
-FileDescriptor::~FileDescriptor()
+void QmlFileDescriptor::operator=(const QmlFileDescriptor &other)
+{
+    this->file = other.file;
+    this->setParent(other.parent());
+}
+
+QmlFileDescriptor::~QmlFileDescriptor()
 {
     if (!file) return;
 
@@ -31,12 +32,12 @@ FileDescriptor::~FileDescriptor()
     file = nullptr;
 }
 
-bool FileDescriptor::isValid()
+bool QmlFileDescriptor::isValid()
 {
     return file && file->isOpen();
 }
 
-void FileDescriptor::close()
+void QmlFileDescriptor::close()
 {
     if (!file) return;
 
@@ -45,20 +46,20 @@ void FileDescriptor::close()
     file = nullptr;
 }
 
-bool FileDescriptor::seek(int pos)
+bool QmlFileDescriptor::seek(int pos)
 {
     if (!file) return false;
 
     return file->seek(pos);
 }
 
-qint64 FileDescriptor::write(QByteArray content)
+qint64 QmlFileDescriptor::write(QByteArray content)
 {
     if (!file) return 0;
     return file->write(content);
 }
 
-qint64 FileDescriptor::writeString(QString text)
+qint64 QmlFileDescriptor::writeString(QString text)
 {
     if (!file || !file->isTextModeEnabled()) return 0;
 
@@ -70,7 +71,7 @@ qint64 FileDescriptor::writeString(QString text)
     return text.length();
 }
 
-QByteArray FileDescriptor::read(qint64 numOfBytes)
+QByteArray QmlFileDescriptor::read(qint64 numOfBytes)
 {
     if (!file) return QByteArray();
 

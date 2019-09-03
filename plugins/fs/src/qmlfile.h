@@ -4,12 +4,12 @@
 #include <QObject>
 #include <QFile>
 #include <QJSValue>
-#include "filedescriptor.h"
+#include "qmlfiledescriptor.h"
 #include <QVariant>
 
 namespace lv {
 
-class File : public QObject
+class QmlFile : public QObject
 {
     Q_OBJECT
     Q_ENUMS(Flags)
@@ -27,13 +27,13 @@ public:
         ExistingOnly = QFile::ExistingOnly
     };
 
-    explicit File(QObject *parent = nullptr);
+    explicit QmlFile(QObject *parent = nullptr);
 
 public slots:
     bool remove(QJSValue path);
     bool rename(QJSValue old, QJSValue nu);
     qint64 size(QJSValue path);
-    lv::FileDescriptor open(QJSValue path, Flags flags);
+    lv::QmlFileDescriptor* open(QJSValue path, Flags flags);
 
 };
 

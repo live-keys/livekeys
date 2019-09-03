@@ -1,49 +1,47 @@
-#include "file.h"
-#include "filedescriptor.h"
+#include "qmlfile.h"
+#include "qmlfiledescriptor.h"
 #include <QFile>
 #include <QVariant>
 
 namespace lv {
 
 
-File::File(QObject *parent) : QObject(parent)
+QmlFile::QmlFile(QObject *parent) : QObject(parent)
 {
 
 }
 
-bool File::remove(QJSValue path)
+bool QmlFile::remove(QJSValue path)
 {
     if (!path.isString()) return false;
 
     return QFile::remove(path.toString());
 }
 
-bool File::rename(QJSValue old, QJSValue nu)
+bool QmlFile::rename(QJSValue old, QJSValue nu)
 {
     if (!old.isString() || !nu.isString()) return false;
 
     return QFile::rename(old.toString(), nu.toString());
 }
 
-qint64 File::size(QJSValue path)
+qint64 QmlFile::size(QJSValue path)
 {
     if (!path.isString()) return 0;
 
     return QFile(path.toString()).size();
 }
 
-lv::FileDescriptor File::open(QJSValue path, File::Flags flags)
+lv::QmlFileDescriptor* QmlFile::open(QJSValue path, QmlFile::Flags flags)
 {
-    FileDescriptor result(nullptr, this);
-    if (!path.isString()) return result;
+    if (!path.isString()) return nullptr;
     QFile* file = new QFile(path.toString());
 
     bool success = file->open(static_cast<QFile::OpenMode>(flags));
-    if (!success) return result;
+    if (!success) return nullptr;
 
-    result.setFile(file);
-
-    return result;
+    QmlFileDescriptor *fd = new QmlFileDescriptor(file, this);
+    return fd;
 
 }
 

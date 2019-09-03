@@ -8,12 +8,12 @@
 
 namespace lv{
 
-class Path : public QObject{
+class QmlPath : public QObject{
 
     Q_OBJECT
 
 public:
-    explicit Path(QObject *parent = nullptr);
+    explicit QmlPath(QObject *parent = nullptr);
 
 public slots:
     QString name(const QString& path);

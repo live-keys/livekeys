@@ -37,7 +37,7 @@
 #include "qimagefile.h"
 #include "qoverlapmat.h"
 #include "qitemcapture.h"
-
+#include "qgradient.h"
 #include "qvideodecoder.h"
 
 #include "live/viewengine.h"
@@ -54,6 +54,11 @@ static QObject* matOpProvider(QQmlEngine *engine, QJSEngine *){
 static QObject* matIOProvider(QQmlEngine *engine, QJSEngine *){
     return new QMatIO(engine);
 }
+
+static QObject* gradientProvider(QQmlEngine *engine, QJSEngine *){
+    return new QGradient(engine);
+}
+
 
 
 void LcvcorePlugin::registerTypes(const char *uri){
@@ -80,8 +85,10 @@ void LcvcorePlugin::registerTypes(const char *uri){
 
     qmlRegisterType<QVideoDecoder>(          uri, 1, 0, "VideoDecoder");
 
-    qmlRegisterSingletonType<QMatOp>(        uri, 1, 0, "MatOp", &matOpProvider);
-    qmlRegisterSingletonType<QMatIO>(        uri, 1, 0, "MatIO", &matIOProvider);
+    qmlRegisterSingletonType<QMatOp>(        uri, 1, 0, "MatOp",        &matOpProvider);
+    qmlRegisterSingletonType<QMatIO>(        uri, 1, 0, "MatIO",        &matIOProvider);
+    qmlRegisterSingletonType<QGradient>(     uri, 1, 0, "Gradient",   &gradientProvider);
+
 }
 
 void LcvcorePlugin::initializeEngine(QQmlEngine *, const char *){

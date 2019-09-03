@@ -1,4 +1,4 @@
-#include "path.h"
+#include "qmlpath.h"
 #include <QFileInfo>
 #include <QJSValueIterator>
 #include <QDebug>
@@ -6,16 +6,16 @@
 
 namespace lv{
 
-Path::Path(QObject *parent)
+QmlPath::QmlPath(QObject *parent)
     : QObject(parent)
 {
 }
 
-QString Path::name(const QString &path){
+QString QmlPath::name(const QString &path){
     return QFileInfo(path).fileName();
 }
 
-QString Path::join(QJSValue part1, QJSValue part2)
+QString QmlPath::join(QJSValue part1, QJSValue part2)
 {
     QString result = "";
     if (part1.isArray())
@@ -36,7 +36,7 @@ QString Path::join(QJSValue part1, QJSValue part2)
     return result;
 }
 
-bool Path::exists(QJSValue path)
+bool QmlPath::exists(QJSValue path)
 {
     if (path.isString())
         return QFileInfo::exists(path.toString());
@@ -44,7 +44,7 @@ bool Path::exists(QJSValue path)
     return false;
 }
 
-QString Path::baseName(QJSValue path)
+QString QmlPath::baseName(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).baseName();
@@ -52,7 +52,7 @@ QString Path::baseName(QJSValue path)
     return "";
 }
 
-QString Path::suffix(QJSValue path)
+QString QmlPath::suffix(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).suffix();
@@ -60,7 +60,7 @@ QString Path::suffix(QJSValue path)
     return "";
 }
 
-QString Path::completeSuffix(QJSValue path)
+QString QmlPath::completeSuffix(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).completeSuffix();
@@ -68,7 +68,7 @@ QString Path::completeSuffix(QJSValue path)
     return "";
 }
 
-QString Path::absolutePath(QJSValue path)
+QString QmlPath::absolutePath(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).absoluteFilePath();
@@ -76,7 +76,7 @@ QString Path::absolutePath(QJSValue path)
     return "";
 }
 
-bool Path::isReadable(QJSValue path)
+bool QmlPath::isReadable(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isReadable();
@@ -84,7 +84,7 @@ bool Path::isReadable(QJSValue path)
     return false;
 }
 
-bool Path::isWritable(QJSValue path)
+bool QmlPath::isWritable(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isWritable();
@@ -92,7 +92,7 @@ bool Path::isWritable(QJSValue path)
     return false;
 }
 
-bool Path::isExecutable(QJSValue path)
+bool QmlPath::isExecutable(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isExecutable();
@@ -100,7 +100,7 @@ bool Path::isExecutable(QJSValue path)
     return false;
 }
 
-bool Path::isHidden(QJSValue path)
+bool QmlPath::isHidden(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isHidden();
@@ -108,7 +108,7 @@ bool Path::isHidden(QJSValue path)
     return false;
 }
 
-bool Path::isNativePath(QJSValue path)
+bool QmlPath::isNativePath(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isNativePath();
@@ -116,7 +116,7 @@ bool Path::isNativePath(QJSValue path)
     return false;
 }
 
-bool Path::isRelative(QJSValue path)
+bool QmlPath::isRelative(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isRelative();
@@ -124,7 +124,7 @@ bool Path::isRelative(QJSValue path)
     return false;
 }
 
-bool Path::isAbsolute(QJSValue path)
+bool QmlPath::isAbsolute(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isAbsolute();
@@ -132,7 +132,7 @@ bool Path::isAbsolute(QJSValue path)
     return false;
 }
 
-bool Path::isFile(QJSValue path)
+bool QmlPath::isFile(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isFile();
@@ -140,7 +140,7 @@ bool Path::isFile(QJSValue path)
     return false;
 }
 
-bool Path::isDir(QJSValue path)
+bool QmlPath::isDir(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isDir();
@@ -148,7 +148,7 @@ bool Path::isDir(QJSValue path)
     return false;
 }
 
-bool Path::isSymLink(QJSValue path)
+bool QmlPath::isSymLink(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isSymLink();
@@ -156,7 +156,7 @@ bool Path::isSymLink(QJSValue path)
     return false;
 }
 
-bool Path::isRoot(QJSValue path)
+bool QmlPath::isRoot(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isRoot();
@@ -164,7 +164,7 @@ bool Path::isRoot(QJSValue path)
     return false;
 }
 
-bool Path::isBundle(QJSValue path)
+bool QmlPath::isBundle(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).isBundle();
@@ -172,7 +172,7 @@ bool Path::isBundle(QJSValue path)
     return false;
 }
 
-QDateTime Path::lastModified(QJSValue path)
+QDateTime QmlPath::lastModified(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).lastModified();
@@ -180,7 +180,7 @@ QDateTime Path::lastModified(QJSValue path)
     return QDateTime();
 }
 
-QDateTime Path::created(QJSValue path)
+QDateTime QmlPath::created(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).created();
@@ -188,7 +188,7 @@ QDateTime Path::created(QJSValue path)
     return QDateTime();
 }
 
-QString Path::owner(QJSValue path)
+QString QmlPath::owner(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).owner();
@@ -196,7 +196,7 @@ QString Path::owner(QJSValue path)
     return "";
 }
 
-uint Path::ownerId(QJSValue path)
+uint QmlPath::ownerId(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).ownerId();
@@ -204,7 +204,7 @@ uint Path::ownerId(QJSValue path)
     return 1;
 }
 
-QString Path::group(QJSValue path)
+QString QmlPath::group(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).group();
@@ -212,7 +212,7 @@ QString Path::group(QJSValue path)
     return "";
 }
 
-uint Path::groupId(QJSValue path)
+uint QmlPath::groupId(QJSValue path)
 {
     if (path.isString())
         return QFileInfo(path.toString()).groupId();
@@ -220,7 +220,7 @@ uint Path::groupId(QJSValue path)
     return 1;
 }
 
-QString Path::parent(QJSValue path)
+QString QmlPath::parent(QJSValue path)
 {
     if (isFile(path))
     {
@@ -235,12 +235,12 @@ QString Path::parent(QJSValue path)
     return QFileInfo(p).dir().path();
 }
 
-QString Path::followSymLink(QJSValue symLink)
+QString QmlPath::followSymLink(QJSValue symLink)
 {
     return QFileInfo(symLink.toString()).symLinkTarget();
 }
 
-bool Path::createSymLink(QJSValue symLinkPath, QJSValue path)
+bool QmlPath::createSymLink(QJSValue symLinkPath, QJSValue path)
 {
     return QFile::link(symLinkPath.toString(), path.toString());
 }
@@ -254,7 +254,7 @@ bool Path::createSymLink(QJSValue symLinkPath, QJSValue path)
     };
 */
 
-int Path::permissions(QJSValue path)
+int QmlPath::permissions(QJSValue path)
 {
     QFile::Permissions perm = QFileInfo(path.toString()).permissions();
 
@@ -274,7 +274,7 @@ int Path::permissions(QJSValue path)
     return result;
 }
 
-bool Path::setPermissions(QJSValue path, QJSValue val)
+bool QmlPath::setPermissions(QJSValue path, QJSValue val)
 {
     if (!val.isNumber()) return false;
     QFile::Permissions result;
