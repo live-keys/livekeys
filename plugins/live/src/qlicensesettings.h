@@ -25,7 +25,7 @@
 class QQuickItem;
 
 /// \private
-class LV_LIVE_EXPORT QLiveCVLicense{
+class LV_LIVE_EXPORT QLicenseEntry{
 public:
     QString id;
     QString alias;
@@ -92,7 +92,7 @@ public slots:
     QString licenseText(const QString& id);
 
 private:
-    QHash<QString, QLiveCVLicense> m_licenses;
+    QHash<QString, QLicenseEntry> m_licenses;
     QHash<int, QByteArray>         m_roles;
     bool                           m_isDirty;
     int                            m_highlights;
@@ -115,7 +115,7 @@ inline bool QLicenseSettings::isDirty() const{
 }
 
 inline bool QLicenseSettings::isLicenseValid(const QString &id){
-    QHash<QString, QLiveCVLicense>::Iterator it = m_licenses.find(id);
+    QHash<QString, QLicenseEntry>::Iterator it = m_licenses.find(id);
     if ( it == m_licenses.end() )
         return false;
     return it->valid;

@@ -16,7 +16,7 @@
 
 #include "livecv.h"
 #include "livecvarguments.h"
-#include "livecvscript.h"
+#include "qmlscript.h"
 #include "environment.h"
 #include "live/memory.h"
 
@@ -121,8 +121,8 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
         vlog().configure(it.key(), it.value());
     }
 
-    livecv->m_script = new LiveCVScript(livecv->m_arguments->scriptArguments());
-    QObject::connect(livecv->project(), &Project::activeChanged, livecv->m_script, &LiveCVScript::scriptChanged);
+    livecv->m_script = new QmlScript(livecv->m_arguments->scriptArguments());
+    QObject::connect(livecv->project(), &Project::activeChanged, livecv->m_script, &QmlScript::scriptChanged);
 
     livecv->m_settings = Settings::create(QString::fromStdString(ApplicationContext::instance().configPath()));
 
@@ -312,7 +312,7 @@ void LiveCV::loadInternalPlugins(){
          "base", 1, 0, "LiveCV",         ViewEngine::typeAsPropertyMessage("LiveCV", "livecv"));
     qmlRegisterUncreatableType<lv::ViewEngine>(
         "base", 1, 0, "LiveEngine",      ViewEngine::typeAsPropertyMessage("LiveEngine", "livecv.engine"));
-    qmlRegisterUncreatableType<lv::LiveCVScript>(
+    qmlRegisterUncreatableType<lv::QmlScript>(
         "base", 1, 0, "LiveScript",      ViewEngine::typeAsPropertyMessage("LiveScript", "script"));
     qmlRegisterUncreatableType<lv::Environment>(
         "base", 1, 0, "LiveEnvironment", ViewEngine::typeAsPropertyMessage("LiveEnvironment", "script.environment"));

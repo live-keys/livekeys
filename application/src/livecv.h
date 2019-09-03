@@ -40,7 +40,7 @@ class QUrl;
 namespace lv{
 
 class LiveCVArguments;
-class LiveCVScript;
+class QmlScript;
 class ViewEngine;
 class Settings;
 class Memory;
@@ -137,7 +137,7 @@ private:
 
     lv::Project*           m_project;
     lv::Settings*          m_settings;
-    lv::LiveCVScript*      m_script;
+    lv::QmlScript*      m_script;
     lv::VisualLogModel*    m_log;
     lv::VisualLogQmlObject*m_vlog;
     lv::PackageGraph*      m_packageGraph;

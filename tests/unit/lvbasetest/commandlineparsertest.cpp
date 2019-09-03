@@ -144,7 +144,7 @@ void CommandLineParserTest::invalidOptiontest(){
 //    const char *argv[] = {"<bin>", "<script>"};
 //    parser.parse(2, argv);
 //    QCOMPARE(parser.isSet(testOption), false);
-//    QVERIFY_EXCEPTION_THROWN(parser.assertIsSet(testOption), QLiveCVCommandLineException);
+//    QVERIFY_EXCEPTION_THROWN(parser.assertIsSet(testOption), Exception);
 //}
 
 //void CommandLineParserTest::scriptOptionTest(){
@@ -175,7 +175,7 @@ void CommandLineParserTest::invalidOptiontest(){
 //    parser.addScriptFlag("--info", "Info Option");
 //    const char *argv[] = {"<bin>", "<script>", "--opt"};
 //    parser.parse(3, argv);
-//    QVERIFY_EXCEPTION_THROWN(parser.parseScriptArguments(), QLiveCVCommandLineException);
+//    QVERIFY_EXCEPTION_THROWN(parser.parseScriptArguments(), Exception);
 //}
 
 
