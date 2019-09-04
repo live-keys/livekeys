@@ -5,7 +5,7 @@
 #include <QJSValue>
 
 namespace lv {
-
+/// \private
 class QmlDir : public QObject
 {
     Q_OBJECT

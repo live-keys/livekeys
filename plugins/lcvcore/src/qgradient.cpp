@@ -1,22 +1,20 @@
 #include "qgradient.h"
 #include <QVector3D>
-#include "qmat.h"
+#include "qwritablemat.h"
 #include "opencv2/core.hpp"
 #include <opencv2/core/matx.hpp>
-
-#define GAMMA 0.43
 
 QGradient::QGradient(QObject *parent) : QObject(parent)
 {
 
 }
 
-void QGradient::draw(QMat* result, QPointF p1, QPointF p2, QColor c1, QColor c2)
+void QGradient::draw(QWritableMat* result, QPointF p1, QPointF p2, QColor c1, QColor c2)
 {
     if (p1 == p2) return;
 
-    auto mat = result->cvMat();
-    if (mat->rows == 0 || mat->cols == 0) return;
+    auto mat = result->internal();
+    if (mat.rows == 0 || mat.cols == 0) return;
 
 
     start = p1; end = p2;
@@ -26,21 +24,21 @@ void QGradient::draw(QMat* result, QPointF p1, QPointF p2, QColor c1, QColor c2)
 
     linearSC = linearFromRGB(startColor);
     linearEC = linearFromRGB(endColor);
-    brightness1 = pow(linearSC.x()+linearSC.y()+linearSC.z(), GAMMA);
-    brightness2 = pow(linearEC.x()+linearEC.y()+linearEC.z(), GAMMA);
+    brightness1 = pow(linearSC.x()+linearSC.y()+linearSC.z(), Gamma);
+    brightness2 = pow(linearEC.x()+linearEC.y()+linearEC.z(), Gamma);
 
-    for (int y = 0; y < mat->rows; ++y)
-    for (int x = 0; x < mat->cols; ++x)
+    for (int y = 0; y < mat.rows; ++y)
+    for (int x = 0; x < mat.cols; ++x)
     {
-        cv::Vec3b& color = mat->at<cv::Vec3b>(cv::Point(x,y));
+        uchar* p = mat.ptr<uchar>(y);
         qreal dist = calculateSignedDistance(QPointF(x,y));
         qreal param = 0.5 + 0.5 * dist / radius;
         if (param < 0.0) param = 0.0;
         if (param > 1.0) param = 1.0;
         QColor colorAt = weightedColor(param);
-        color[2] = colorAt.red();
-        color[1] = colorAt.green();
-        color[0] = colorAt.blue();
+        p[x*mat.channels() + 0] = colorAt.blue();
+        p[x*mat.channels() + 1] = colorAt.green();
+        p[x*mat.channels() + 2] = colorAt.red();
     }
 }
 
@@ -105,7 +103,7 @@ qreal QGradient::weightedValue(qreal v1, qreal v2, qreal t)
 
 QColor QGradient::weightedColor(qreal t)
 {
-    qreal brightness = pow(weightedValue(brightness1, brightness2, t), 1/GAMMA);
+    qreal brightness = pow(weightedValue(brightness1, brightness2, t), 1/Gamma);
     qreal c1 = weightedValue(linearSC.x(), linearEC.x(), t);
     qreal c2 = weightedValue(linearSC.y(), linearEC.y(), t);
     qreal c3 = weightedValue(linearSC.z(), linearEC.z(), t);

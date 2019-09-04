@@ -2,6 +2,9 @@
 #include "qfile.h"
 #include <QTextStream>
 #include <QDebug>
+#include "live/exception.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
 
 namespace lv {
 
@@ -48,20 +51,31 @@ void QmlFileDescriptor::close()
 
 bool QmlFileDescriptor::seek(int pos)
 {
-    if (!file) return false;
-
+    if ( !file ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "No file opened.", Exception::toCode("~File"));
+        lv::ViewContext::instance().engine()->throwError(&e);
+        return false;
+    }
     return file->seek(pos);
 }
 
 qint64 QmlFileDescriptor::write(QByteArray content)
 {
-    if (!file) return 0;
+    if ( !file ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "No file opened.", Exception::toCode("~File"));
+        lv::ViewContext::instance().engine()->throwError(&e);
+        return 0;
+    }
     return file->write(content);
 }
 
 qint64 QmlFileDescriptor::writeString(QString text)
 {
-    if (!file || !file->isTextModeEnabled()) return 0;
+    if ( !file || !file->isTextModeEnabled()){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "No text file opened.", Exception::toCode("~File"));
+        lv::ViewContext::instance().engine()->throwError(&e);
+        return 0;
+    }
 
     int pos = file->pos();
     QTextStream stream(file);
@@ -73,7 +87,11 @@ qint64 QmlFileDescriptor::writeString(QString text)
 
 QByteArray QmlFileDescriptor::read(qint64 numOfBytes)
 {
-    if (!file) return QByteArray();
+    if ( !file ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "No file opened.", Exception::toCode("~File"));
+        lv::ViewContext::instance().engine()->throwError(&e);
+        return QByteArray();
+    }
 
     if (numOfBytes == -1) return file->readAll();
 

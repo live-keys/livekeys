@@ -8,6 +8,7 @@
 
 namespace lv{
 
+/// \private
 class QmlPath : public QObject{
 
     Q_OBJECT
@@ -52,6 +53,8 @@ public slots:
 
     int permissions(QJSValue path);
     bool setPermissions(QJSValue path, QJSValue val);
+
+    static QString removeSlashes(QString s);
 };
 
 }// namespace

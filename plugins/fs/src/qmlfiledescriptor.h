@@ -6,7 +6,7 @@
 class QFile;
 
 namespace lv {
-
+/// \private
 class QmlFileDescriptor : public QObject
 {
     Q_OBJECT

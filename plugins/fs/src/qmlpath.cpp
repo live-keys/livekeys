@@ -23,15 +23,15 @@ QString QmlPath::join(QJSValue part1, QJSValue part2)
         const int length = part1.property("length").toInt();
         for (int i = 0; i < length; ++i) {
             if (result != "") result += "/";
-            result += part1.property(i).toString();
+            result += removeSlashes(part1.property(i).toString());
         }
         return result;
     }
 
     if (part1.isString())
     {
-        result += part1.toString();
-        if (part2.isString()) result += "/" + part2.toString();
+        result += removeSlashes(part1.toString());
+        if (part2.isString()) result += "/" + removeSlashes(part2.toString());
     }
     return result;
 }
@@ -231,7 +231,8 @@ QString QmlPath::parent(QJSValue path)
 
 
     QString p = path.toString();
-    if (p.back() == '/') p = p.left(p.length() - 1);
+    if (p.length() > 0 && p[p.length()-1] == '/')
+        p = p.left(p.length() - 1);
     return QFileInfo(p).dir().path();
 }
 
@@ -294,6 +295,13 @@ bool QmlPath::setPermissions(QJSValue path, QJSValue val)
     if (value & 1)      result = result | QFile::ExeUser;
 
     return QFile::setPermissions(path.toString(), result);
+}
+
+QString QmlPath::removeSlashes(QString s)
+{
+    if (s.length() > 0 && s[0] == '/') s = s.right(s.length()-1);
+    if (s.length() > 0 && s[s.length()-1] == '/') s = s.left(s.length()-1);
+    return s;
 }
 
 }// namespace

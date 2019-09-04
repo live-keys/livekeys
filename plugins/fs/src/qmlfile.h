@@ -8,7 +8,7 @@
 #include <QVariant>
 
 namespace lv {
-
+/// \private
 class QmlFile : public QObject
 {
     Q_OBJECT
