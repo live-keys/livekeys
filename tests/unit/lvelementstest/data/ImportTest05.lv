@@ -1,0 +1,45 @@
+////// live.plugin.json
+
+{
+    "name" : "main",
+    "package": ".",
+    "modules": ["A", "main"]
+}
+
+////// live.package.json
+
+{
+    "name" : "main",
+    "version" : "1.0.0"
+}
+
+////// A.lv.js
+
+class A extends Element{
+    constructor(){
+        super()
+        Element.addProperty(this, "a", {
+            type: "string",
+            value: "class[A]",
+            notify: "aChanged"
+        })
+    }
+}
+module.exports["a"] = new A()
+
+////// main.lv.js
+
+var a = imports.get("a")
+
+module.exports["main"] = class extends Element{
+    constructor(){
+        super()
+        Element.addProperty(this, "a", {
+            type: "string",
+            value: a.a,
+            notify: "aChanged"
+        })
+    }
+}
+
+

@@ -88,8 +88,11 @@ public:
     static void assignInternalContext(PackageGraph *graph);
     static PackageGraph*& internalsContextOwner();
 
-    Plugin::Ptr loadPlugin(const std::string& importSegment);
-    Plugin::Ptr loadPlugin(const std::vector<std::string>& importSegment);
+    Plugin::Ptr createRunningPlugin(const std::string& path);
+    void loadRunningPackageAndPlugin(const Package::Ptr& package, const Plugin::Ptr& plugin);
+
+    Plugin::Ptr loadPlugin(const std::string& importSegment, Plugin::Ptr requestingPlugin = nullptr);
+    Plugin::Ptr loadPlugin(const std::vector<std::string>& importSegment, Plugin::Ptr requestingPlugin = nullptr);
     void addDependency(const Plugin::Ptr& plugin, const std::string& pluginDependency);
     void addDependency(const Plugin::Ptr& plugin, const Plugin::Ptr& dependsOn);
 

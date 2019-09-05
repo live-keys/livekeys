@@ -1,0 +1,45 @@
+// This file creates a packages folder to test imports
+
+
+////// packages/package1/live.plugin.json
+
+{
+    "name" : "package1",
+    "package": ".",
+    "modules": ["A"]
+}
+
+////// packages/package1/live.package.json
+
+{
+    "name" : "package1",
+    "version" : "1.0.0"
+}
+
+
+////// packages/package1/A.lv.js
+
+class A extends Element{
+    toString(){
+        return "class[A]"
+    }
+}
+module.exports["A"] = A
+
+////// main.lv.js
+
+imports.require("package1")
+
+var A = imports.get("A")
+
+module.exports["main"] = class extends Element{
+    constructor(){
+        super()
+        var a = new A();
+        Element.addProperty(this, "a", {
+            type: "string",
+            value: a.toString(),
+            notify: "aChanged"
+        })
+    }
+}

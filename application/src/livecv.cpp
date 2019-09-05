@@ -91,7 +91,6 @@ LiveCV::~LiveCV(){
     delete m_packageGraph;
     delete m_memory;
     delete m_layers;
-
 }
 
 LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent){

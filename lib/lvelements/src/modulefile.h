@@ -31,7 +31,7 @@ public:
     ~ModuleFile();
 
     LocalValue get(Engine* engine, ModuleFile* from, const std::string& name);
-    void parse();
+    void parse(Engine *engine = nullptr);
 
     State state() const;
     const std::string& name() const;

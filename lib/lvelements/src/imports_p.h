@@ -21,11 +21,11 @@ public:
     v8::Local<v8::Object> requireAs(const std::string& importKey);
     v8::Local<v8::Value> get(const std::string& key);
 
+    static void get(const v8::FunctionCallbackInfo<v8::Value>& info);
     static void require(const v8::FunctionCallbackInfo<v8::Value>& info);
     static void requireAs(const v8::FunctionCallbackInfo<v8::Value>& info);
 
-    //TODO: Use setaccessor
-    static void getImport(const v8::Local<v8::String>& property, const v8::PropertyCallbackInfo<v8::Value> info);
+    static void getImport(v8::Local<v8::Name> name, const v8::PropertyCallbackInfo<v8::Value>& info);
 
     static v8::Local<v8::FunctionTemplate> functionTemplate(v8::Isolate* isolate);
 

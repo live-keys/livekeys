@@ -1,0 +1,70 @@
+////// plugin1/subplugin1/live.plugin.json
+
+{
+    "name" : "subplugin1",
+    "package": "..",
+    "modules": ["A", "B"]
+}
+
+////// plugin1/subplugin1/A.lv.js
+
+class A extends Element{
+    toString(){
+        return "class[A]"
+    }
+}
+module.exports["A"] = A
+
+////// plugin1/subplugin1/B.lv.js
+
+class B extends Element{
+    toString(){
+        return "class[B]"
+    }
+}
+module.exports["B"] = B
+
+////// plugin1/subplugin2/live.plugin.json
+
+{
+    "name" : "subplugin2",
+    "package": "..",
+    "modules": ["C"]
+}
+
+////// plugin1/subplugin2/C.lv.js
+
+imports.require(".plugin1.subplugin1")
+
+var B = imports.get("B")
+
+class C extends B{
+}
+module.exports["C"] = C
+
+
+////// plugin1/live.package.json
+
+{
+    "name" : "plugin1",
+    "version" : "1.0.0"
+}
+
+
+////// main.lv.js
+
+imports.require(".plugin1.subplugin2")
+
+var C = imports.get("C")
+
+module.exports["main"] = class extends Element{
+    constructor(){
+        super()
+        var c = new C();
+        Element.addProperty(this, "c", {
+            type: "string",
+            value: c.toString(),
+            notify: "cChanged"
+        })
+    }
+}

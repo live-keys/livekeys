@@ -32,9 +32,11 @@
 #include "jsmemorytest.h"
 #include "jslisttest.h"
 #include "jserrorhandlingtest.h"
+#include "jsinheritancetest.h"
 #include "mlnodetojstest.h"
 #include "lvcompiletest.h"
 #include "jstupletest.h"
+#include "jsimportstest.h"
 
 
 int main(int argc, char *argv[]){

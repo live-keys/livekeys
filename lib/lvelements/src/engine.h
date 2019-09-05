@@ -40,6 +40,9 @@ public:
     static bool isInitialized();
     static void disposeAtExit();
 
+    // Exception CatchData
+    // -------------------
+
     class LV_ELEMENTS_EXPORT CatchData{
 
         friend class Engine;
@@ -69,11 +72,19 @@ private:
     // ------
 
 public:
+    enum ModuleFileType{
+        Lv = 0,
+        CompiledJs,
+        JsOnly
+    };
+    static ModuleFileType moduleLookupType;
+
+public:
     Engine(PackageGraph* pg = nullptr);
     ~Engine();
 
     Object require(ModuleLibrary* module);
-    ElementsPlugin::Ptr require(const std::string& importKey);
+    ElementsPlugin::Ptr require(const std::string& importKey, Plugin::Ptr requestingPlugin = nullptr);
 
     void scope(const std::function<void()> &f);
 
@@ -83,6 +94,7 @@ public:
     Script::Ptr compile(const std::string& str);
     Script::Ptr compileEnclosed(const std::string& str);
     Script::Ptr compileJsFile(const std::string& path);
+    Object loadJsModule(const std::string& path);
 
     Script::Ptr compileElement(const std::string& source);
 
@@ -98,18 +110,25 @@ public:
     void tryCatch(const std::function<void()>& f, const std::function<void(const CatchData&)>& c);
 
     bool hasPendingException();
-    void incrementTryCatchDepth();
-    void decrementTryCatchDepth();
+    void incrementTryCatchNesting();
+    void decrementTryCatchNesting();
     void clearPendingException();
 
+    const std::vector<std::string> packageImportPaths() const;
+    void setPackageImportPaths(const std::vector<std::string>& paths);
+
     void handleError(const std::string& message, const std::string& stack, const std::string& file, int line);
+
+    ModuleFileType moduleFileType() const;
+    void setModuleFileType(ModuleFileType type);
 
 private:
     void importInternals();
     void wrapScriptObject(Element* element);
 
-    bool hasGlobalErrorHandler();
+    int tryCatchNesting();
     void setGlobalErrorHandler(bool value);
+
 
     EnginePrivate* m_d;
 };

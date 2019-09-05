@@ -1,0 +1,91 @@
+// This file holds a simple import of a plugin from a main file.
+
+////// plugin1/live.plugin.json
+
+{
+    "name" : "plugin1",
+    "package": ".",
+    "modules": ["A", "B"]
+}
+
+////// plugin1/live.package.json
+
+{
+    "name" : "plugin1",
+    "version" : "1.0.0"
+}
+
+////// plugin1/A.lv
+
+component default < Element{
+    function toString : (){
+        return "class[A]"
+    }
+}
+
+////// plugin1/A.lv.js
+
+class A extends Element{
+    toString(){
+        return "class[A]"
+    }
+}
+module.exports["A"] = A
+
+
+////// plugin1/B.lv
+
+component default < Element{
+    function toString : (){
+        return "class[B]"
+    }
+}
+
+////// plugin1/B.lv.js
+
+class B extends Element{
+    toString(){
+        return "class[B]"
+    }
+}
+module.exports["B"] = B
+
+////// main.lv
+
+import .plugin1
+
+component default < Element{
+    Element aEl : A{}
+    Element bEl : B{}
+    string a : {
+        return (new A()).toString()
+    }
+    string b : {
+        return (new B()).toString()
+    }
+}
+
+////// main.lv.js
+
+imports.require(".plugin1")
+
+var A = imports.get("A")
+var B = imports.get("B")
+
+module.exports["main"] = class extends Element{
+    constructor(){
+        super()
+        var a = new A();
+        var b = new B();
+        Element.addProperty(this, "a", {
+            type: "string",
+            value: a.toString(),
+            notify: "aChanged"
+        })
+        Element.addProperty(this, "b", {
+            type: "string",
+            value: b.toString(),
+            notify: "bChanged"
+        })
+    }
+}
