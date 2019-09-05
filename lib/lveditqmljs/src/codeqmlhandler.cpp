@@ -78,6 +78,104 @@ QmlScopeSnap::QmlScopeSnap(const ProjectQmlScope::Ptr &pProject, const DocumentQ
 {
 }
 
+/// \private
+class LibraryReference{
+public:
+    LibraryReference() : versionMajor(-1), versionMinor(-1){}
+    LibraryReference(const QString& libPath, QmlLibraryInfo::Ptr libInfo){
+
+        importUri = libInfo->importNamespace();
+        versionMajor = libInfo->importVersionMajor();
+        versionMinor = libInfo->importVersionMinor();
+        path = libPath;
+    }
+
+    bool isValid() const { return versionMajor > 0 && versionMinor > 0; }
+
+    QString importUri;
+    int     versionMajor;
+    int     versionMinor;
+    QString path;
+};
+
+/// \private
+class TypeReference{
+public:
+    QString typeName;
+    LibraryReference library;
+    LanguageUtils::FakeMetaObject::ConstPtr object;
+    QString qmlFile;
+
+    TypeReference(){}
+    TypeReference(const LibraryReference& lib, LanguageUtils::FakeMetaObject::ConstPtr obj)
+        : library(lib)
+        , object(obj)
+    {
+        if ( object ){
+            QList<LanguageUtils::FakeMetaObject::Export> exports = object->exports();
+            for ( auto it = exports.begin(); it != exports.end(); ++it ){
+                const LanguageUtils::FakeMetaObject::Export& e = *it;
+                if ( e.package == library.importUri ){
+                    typeName = e.type;
+                    break;
+                }
+            }
+        }
+    }
+
+    bool isValid() const{ return library.isValid(); }
+
+    QString toString() const{
+        QString result;
+
+        QString ref;
+        if ( object.isNull() ){
+            int index = qmlFile.lastIndexOf("/");
+            if ( index == -1 ){
+                ref = "file \'" + qmlFile + "\'";
+            } else {
+                ref = "file \'" + qmlFile.mid(index) + "\'";
+            }
+        } else {
+            ref = "object " + object->className();
+        }
+
+        result = "Type:" + typeName + " in " + ref + " in [\'" + library.importUri + "\' " +
+                 QString::number(library.versionMinor) + "." + QString::number(library.versionMajor);
+
+        return result;
+    }
+};
+
+/// \private
+class InheritancePath{
+public:
+    QList<TypeReference> nodes;
+
+    QString toString() const{
+        QString result;
+
+        for ( auto it = nodes.begin(); it != nodes.end(); ++it ){
+            result += it->toString() + "\n";
+        }
+
+        return result;
+    }
+
+    void join(const InheritancePath& path){
+        for ( auto it = path.nodes.begin(); it != path.nodes.end(); ++it ){
+            nodes.append(*it);
+        }
+    }
+
+    void append(const TypeReference& tr){
+        nodes.append(tr);
+    }
+
+    bool isEmpty() const{ return nodes.isEmpty(); }
+};
+
+
 
 // CodeQmlHandlerPrivate
 // ----------------------------------------------------------------------------
@@ -98,90 +196,79 @@ namespace qmlhandler_helpers{
 
     /// Retrieve a type from any available libraries to the document scope
 
-    QmlLibraryInfo::ExportVersion getType(
-            const QmlScopeSnap& scope,
-            const QString& name,
-            QString& libraryKey)
-    {
-        QmlLibraryInfo::ExportVersion ev =
-            scope.project->implicitLibraries()->libraryInfo(scope.document->path())->findExport(name);
+    TypeReference getType(const QmlScopeSnap& scope, const QString& name){
+        QmlLibraryInfo::Ptr lib = scope.project->implicitLibraries()->libraryInfo(scope.document->path());
+        QmlLibraryInfo::ExportVersion ev = lib->findExport(name);
         if ( ev.isValid() ){
-            libraryKey = "";
-            return ev;
+            return TypeReference(LibraryReference(scope.document->path(), lib), ev.object);
         }
 
         foreach( const DocumentQmlScope::ImportEntry& imp, scope.document->imports() ){
-            QmlLibraryInfo::ExportVersion ev = scope.project->globalLibraries()->libraryInfo(imp.second)->findExport(name);
+            QmlLibraryInfo::Ptr lib = scope.project->globalLibraries()->libraryInfo(imp.second);
+            QmlLibraryInfo::ExportVersion ev = lib->findExport(name);
             if ( ev.isValid() ){
-                libraryKey = imp.second;
-                return ev;
+                return TypeReference(LibraryReference(imp.second, lib), ev.object);
             }
         }
 
         foreach( const QString& defaultLibrary, scope.project->defaultLibraries() ){
-            QmlLibraryInfo::ExportVersion ev = scope.project->globalLibraries()->libraryInfo(defaultLibrary)->findExport(name);
+            QmlLibraryInfo::Ptr lib = scope.project->globalLibraries()->libraryInfo(defaultLibrary);
+            QmlLibraryInfo::ExportVersion ev = lib->findExport(name);
             if ( ev.isValid() ){
-                libraryKey = defaultLibrary;
-                return ev;
+                return TypeReference(LibraryReference(defaultLibrary, lib), ev.object);
             }
         }
 
-        return QmlLibraryInfo::ExportVersion();
+        return TypeReference();
     }
 
     /// Retrieve a type from a specified namespace. If the namespace is empty, the type is searched through
     /// implicit libraries and default ones as well. Otherwise, only libraries with the imported namespace are
     /// searched.
 
-    QmlLibraryInfo::ExportVersion getType(
-            const QmlScopeSnap& scope,
-            const QString& importNamespace,
-            const QString& name,
-            QString& libraryKey)
-    {
+    TypeReference getType(const QmlScopeSnap& scope, const QString& importNamespace, const QString& name){
         if ( importNamespace.isEmpty() ){
-            QmlLibraryInfo::ExportVersion ev =
-                scope.project->implicitLibraries()->libraryInfo(scope.document->path())->findExport(name);
+            QmlLibraryInfo::Ptr lib = scope.project->implicitLibraries()->libraryInfo(scope.document->path());
+            QmlLibraryInfo::ExportVersion ev = lib->findExport(name);
             if ( ev.isValid() ){
-                libraryKey = "";
-                return ev;
+                return TypeReference(LibraryReference(scope.document->path(), lib), ev.object);
             }
 
             foreach( const QString& defaultLibrary, scope.project->defaultLibraries() ){
-                QmlLibraryInfo::ExportVersion ev = scope.project->globalLibraries()->libraryInfo(defaultLibrary)->findExport(name);
+                QmlLibraryInfo::Ptr lib = scope.project->globalLibraries()->libraryInfo(defaultLibrary);
+                QmlLibraryInfo::ExportVersion ev = lib->findExport(name);
                 if ( ev.isValid() ){
-                    libraryKey = defaultLibrary;
-                    return ev;
+                    return TypeReference(LibraryReference(defaultLibrary, lib), ev.object);
                 }
             }
         }
 
         foreach( const DocumentQmlScope::ImportEntry& imp, scope.document->imports() ){
             if ( imp.first.as() == importNamespace ){
-                QmlLibraryInfo::ExportVersion ev = scope.project->globalLibraries()->libraryInfo(imp.second)->findExport(name);
+                QmlLibraryInfo::Ptr lib = scope.project->globalLibraries()->libraryInfo(imp.second);
+                QmlLibraryInfo::ExportVersion ev = lib->findExport(name);
                 if ( ev.isValid() ){
-                    libraryKey = imp.second;
-                    return ev;
+                    return TypeReference(LibraryReference(imp.second, lib), ev.object);
                 }
             }
         }
 
-        return QmlLibraryInfo::ExportVersion();
+        return TypeReference();
     }
 
-    void generateTypePathFromObject(
-        const QmlScopeSnap& scope,
-        LanguageUtils::FakeMetaObject::ConstPtr& object,
-        QString typeLibrary,
-        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath
-    ){
+    void generateTypePathFromObject(const QmlScopeSnap& scope, const TypeReference& tr, InheritancePath& typePath){
+        LanguageUtils::FakeMetaObject::ConstPtr object = tr.object;
+        QString typeLibrary = tr.library.path;
+
         if ( !object.isNull() && object->superclassName() != "" && object->superclassName() != object->className() ){
             QString typeSuperClass = object->superclassName();
             vlog_debug("editqmljs-codehandler", "Loooking up object \'" + typeSuperClass + "\' from " + typeLibrary);
 
+            LibraryReference libRef;
+
             // Slider -> Slider (Controls) -> Slider(Controls.Private) -> ... (the reason I can go into a loop is recursive library dependencies)
             // Avoid loop? -> keep track of all library dependencies and dont go back -> super type with the same name cannot be from the same library
-            QmlLibraryInfo::Ptr libraryInfo = typeLibrary == ""
+            QmlLibraryInfo::Ptr libraryInfo = (typeLibrary.isEmpty() || typeLibrary == scope.document->path() )
                     ? scope.project->implicitLibraries()->libraryInfo(scope.document->path())
                     : scope.project->globalLibraries()->libraryInfo(typeLibrary);
 
@@ -190,8 +277,10 @@ namespace qmlhandler_helpers{
             if ( superObject.isNull()  ){
                 ProjectQmlScopeContainer* globalLibs = scope.project->globalLibraries();
                 foreach( const QString& libraryDependency, libraryInfo->dependencyPaths() ){
-                    superObject = globalLibs->libraryInfo(libraryDependency)->findObjectByClassName(typeSuperClass);
+                    QmlLibraryInfo::Ptr currentLib = globalLibs->libraryInfo(libraryDependency);
+                    superObject = currentLib->findObjectByClassName(typeSuperClass);
                     if ( !superObject.isNull() ){
+                        libRef = LibraryReference(libraryDependency, currentLib);
                         typeLibrary = libraryDependency;
                         break;
                     }
@@ -199,8 +288,10 @@ namespace qmlhandler_helpers{
 
                 if ( superObject.isNull() ){
                     foreach( const QString& defaultLibrary, scope.project->defaultLibraries() ){
-                        superObject = globalLibs->libraryInfo(defaultLibrary)->findObjectByClassName(typeSuperClass);
+                        QmlLibraryInfo::Ptr currentLib = globalLibs->libraryInfo(defaultLibrary);
+                        superObject = currentLib->findObjectByClassName(typeSuperClass);
                         if ( !superObject.isNull() ){
+                            libRef = LibraryReference(defaultLibrary, currentLib);
                             typeLibrary = defaultLibrary;
                             break;
                         }
@@ -209,20 +300,19 @@ namespace qmlhandler_helpers{
             }
 
             if ( !superObject.isNull() ){
-                typePath.append(superObject);
-                generateTypePathFromObject(scope, superObject, typeLibrary, typePath);
+
+                TypeReference tr(libRef, superObject);
+                typePath.nodes.append(tr);
+                generateTypePathFromObject(scope, tr, typePath);
             }
         }
     }
 
-    void generateTypePathFromClassName(
-        const QmlScopeSnap& scope,
-        const QString& typeName,
-        QString typeLibrary,
-        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath
-    ){
+    InheritancePath generateTypePathFromClassName(
+        const QmlScopeSnap& scope, const QString& typeName, QString typeLibrary)
+    {
         vlog_debug("editqmljs-codehandler", "Looking up type \'" + typeName + "\' from " + typeLibrary);
-        QmlLibraryInfo::Ptr libraryInfo = typeLibrary == ""
+        QmlLibraryInfo::Ptr libraryInfo = (typeLibrary.isEmpty() || typeLibrary == scope.document->path() )
                 ? scope.project->implicitLibraries()->libraryInfo(scope.document->path())
                 : scope.project->globalLibraries()->libraryInfo(typeLibrary);
 
@@ -230,7 +320,8 @@ namespace qmlhandler_helpers{
 
         if ( object.isNull() ){
             foreach( const QString& libraryDependency, libraryInfo->dependencyPaths() ){
-                object = scope.project->globalLibraries()->libraryInfo(libraryDependency)->findObjectByClassName(typeName);
+                libraryInfo = scope.project->globalLibraries()->libraryInfo(libraryDependency);
+                object = libraryInfo->findObjectByClassName(typeName);
                 if ( !object.isNull() ){
                     typeLibrary = libraryDependency;
                     break;
@@ -238,75 +329,61 @@ namespace qmlhandler_helpers{
             }
         }
 
+        InheritancePath typePath;
+
         if ( !object.isNull() ){
-            typePath.append(object);
-            generateTypePathFromObject(scope, object, typeLibrary, typePath);
+            TypeReference tr(LibraryReference(typeLibrary, libraryInfo), object);
+            typePath.nodes.append(tr);
+            generateTypePathFromObject(scope, tr, typePath);
         }
+
+        return typePath;
     }
 
-    void getTypePath(
-        const QmlScopeSnap& scope,
-        const QString& importAs,
-        const QString& name,
-        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
-        QString& libraryKey
-    ){
-        QmlLibraryInfo::ExportVersion ev = getType(scope, importAs, name, libraryKey);
+    InheritancePath getTypePath(const QmlScopeSnap& scope, const QString& importAs, const QString& name){
+        InheritancePath typePath;
 
-        if ( ev.isValid() ){
-            typePath.append(ev.object);
-
-            qmlhandler_helpers::generateTypePathFromObject(
-                scope,
-                ev.object,
-                libraryKey,
-                typePath
-            );
+        TypeReference tr = getType(scope, importAs, name);
+        if ( tr.isValid() ){
+            typePath.append(tr);
+            qmlhandler_helpers::generateTypePathFromObject(scope, tr, typePath);
         }
+        return typePath;
     }
 
-    void getTypePath(
-        const QmlScopeSnap& scope,
-        const QString& name,
-        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
-        QString& libraryKey
-    ){
-        QmlLibraryInfo::ExportVersion ev = getType(scope, name, libraryKey);
+    InheritancePath getTypePath(const QmlScopeSnap& scope, const QString& name){
+        InheritancePath typePath;
 
-        if ( ev.isValid() ){
-            typePath.append(ev.object);
-
-            qmlhandler_helpers::generateTypePathFromObject(
-                scope,
-                ev.object,
-                libraryKey,
-                typePath
-            );
+        TypeReference tr = getType(scope, name);
+        if ( tr.isValid() ){
+            typePath.append(tr);
+            qmlhandler_helpers::generateTypePathFromObject(scope, tr, typePath);
         }
+        return typePath;
     }
 
-    void evaluatePropertyClass(
+    InheritancePath evaluatePropertyClass(
         const QmlScopeSnap& scope,
-        const QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        const InheritancePath& typePath,
         const QString& typeLibraryKey,
-        const QString& propertyName,
-        QList<LanguageUtils::FakeMetaObject::ConstPtr>& propertyTypePath
+        const QString& propertyName
     ){
-        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, typePath ){
+        for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
+            LanguageUtils::FakeMetaObject::ConstPtr object = it->object;
             for ( int i = 0; i < object->propertyCount(); ++i ){
                 if ( object->property(i).name() == propertyName ){
                     if ( object->property(i).isPointer() ){
-                        generateTypePathFromClassName(
+                        return generateTypePathFromClassName(
                             scope,
                             object->property(i).typeName(),
-                            typeLibraryKey,
-                            propertyTypePath
+                            typeLibraryKey
                         );
                     }
-                    return;
+                    return InheritancePath();
                 }
             }
         }
+        return InheritancePath();
     }
 
     /**
@@ -317,7 +394,7 @@ namespace qmlhandler_helpers{
         const QmlScopeSnap& scope,
         const QString& str,
         DocumentQmlInfo::ValueReference& documentValue,
-        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        InheritancePath& typePath,
         QString& typeLibraryKey
     ){
         documentValue = scope.document->info()->valueForId(str);
@@ -326,7 +403,10 @@ namespace qmlhandler_helpers{
 
         QString typeName = scope.document->info()->extractTypeName(documentValue);
         if ( typeName != "" ){
-            getTypePath(scope, typeName, typePath, typeLibraryKey);
+            InheritancePath ipath = getTypePath(scope, typeName);
+            if ( !ipath.isEmpty() ){
+
+            }
         }
 
         return true;
@@ -341,7 +421,7 @@ namespace qmlhandler_helpers{
         const QString& str,
         int position,
         DocumentQmlInfo::ValueReference& parentValue,
-        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        InheritancePath& typePath,
         QString& typeLibraryKey
     ){
         if ( str != "parent" )
@@ -357,7 +437,8 @@ namespace qmlhandler_helpers{
 
         QString typeName = scope.document->info()->extractTypeName(parentValue);
         if ( typeName != "" ){
-            getTypePath(scope, typeName, typePath, typeLibraryKey);
+            InheritancePath ipath = getTypePath(scope, typeName);
+            typeLibraryKey = ipath.nodes.isEmpty() ? "" : ipath.nodes.last().library.path;
         }
 
         return true;
@@ -365,17 +446,19 @@ namespace qmlhandler_helpers{
 
 
     LanguageUtils::FakeMetaProperty getPropertyInObject(
-        const QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        const InheritancePath& typePath,
         const QString& propertyName
     )
     {
-        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, typePath ){
+        for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
+            LanguageUtils::FakeMetaObject::ConstPtr object = it->object;
             for ( int i = 0; i < object->propertyCount(); ++i ){
                 if ( object->property(i).name() == propertyName ){
                     return object->property(i);
                 }
             }
         }
+
         return LanguageUtils::FakeMetaProperty("", "", false, false, false, -1);
     }
 
@@ -419,10 +502,12 @@ namespace qmlhandler_helpers{
             return LanguageUtils::FakeMetaProperty("", "", false, false, false, -1);;
         QString typeNamespace = contextObject.size() > 1 ? contextObject[1] : "";
 
-        QList<LanguageUtils::FakeMetaObject::ConstPtr> contextTypePath;
-        getTypePath(scope, typeNamespace, type, contextTypePath, contextObjectLibrary);
+        InheritancePath contextTypePath = getTypePath(scope, typeNamespace, type);
+        contextObjectLibrary = contextTypePath.nodes.isEmpty() ? "" : contextTypePath.nodes.last().library.path;
 
-        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, contextTypePath ){
+        for ( auto it = contextTypePath.nodes.begin(); it != contextTypePath.nodes.end(); ++it ){
+            TypeReference& tr = *it;
+            LanguageUtils::FakeMetaObject::ConstPtr object = tr.object;
             for ( int i = 0; i < object->propertyCount(); ++i ){
                 if ( object->property(i).name() == propertyName ){
                     isClassName = true;
@@ -430,6 +515,7 @@ namespace qmlhandler_helpers{
                 }
             }
         }
+
         return LanguageUtils::FakeMetaProperty("", "", false, false, false, -1);
     }
 
@@ -461,16 +547,15 @@ namespace qmlhandler_helpers{
             if ( property.revision() == -1 )
                 return property;
 
-            QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+            InheritancePath typePath;
             if ( property.isPointer() ){
                 if ( isClassName ){
-                    qmlhandler_helpers::generateTypePathFromClassName(
-                        scope, property.typeName(), contextObjectLibrary, typePath
+                    typePath = qmlhandler_helpers::generateTypePathFromClassName(
+                        scope, property.typeName(), contextObjectLibrary
                     );
                 } else {
-                    qmlhandler_helpers::getTypePath(
-                        scope, property.typeName(), typePath, contextObjectLibrary
-                    );
+                    typePath = qmlhandler_helpers::getTypePath(scope, property.typeName());
+                    contextObjectLibrary = typePath.isEmpty() ? "" : typePath.nodes.last().library.path;
                     isClassName = true;
                 }
 
@@ -493,7 +578,7 @@ namespace qmlhandler_helpers{
         const QStringList& contextObject,
         const QString& str,
         int position,
-        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        InheritancePath& typePath,
         bool& isPointer,
         QString& libraryKey
     ){
@@ -510,7 +595,8 @@ namespace qmlhandler_helpers{
                     QString propertyType = it.value();
                     isPointer = DocumentQmlInfo::isObject(propertyType);
                     if ( isPointer ){
-                        getTypePath(scope, propertyType, typePath, libraryKey);
+                        typePath = getTypePath(scope, propertyType);
+                        libraryKey = typePath.nodes.isEmpty() ? "" : typePath.nodes.last().library.path;
                     }
                     return true;
                 }
@@ -522,21 +608,23 @@ namespace qmlhandler_helpers{
             return false;
         QString typeNamespace = contextObject.size() > 1 ? contextObject[1] : "";
 
-        QList<LanguageUtils::FakeMetaObject::ConstPtr> contextTypePath;
-        getTypePath(scope, typeNamespace, type, contextTypePath, libraryKey);
+        InheritancePath contextTypePath = getTypePath(scope, typeNamespace, type);
+        libraryKey = contextTypePath.isEmpty() ? "" : contextTypePath.nodes.last().library.path;
 
-        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, contextTypePath ){
+        for ( auto it = contextTypePath.nodes.begin(); it != contextTypePath.nodes.end(); ++it ){
+            LanguageUtils::FakeMetaObject::ConstPtr object =  it->object;
             for ( int i = 0; i < object->propertyCount(); ++i ){
                 if ( object->property(i).name() == str ){
                     QString propertyType = object->property(i).typeName();
                     isPointer = object->property(i).isPointer();
                     if ( isPointer ){
-                        generateTypePathFromClassName(scope, propertyType, libraryKey, typePath);
+                        typePath = generateTypePathFromClassName(scope, propertyType, libraryKey);
                     }
                     return true;
                 }
             }
         }
+
         return false;
     }
 
@@ -547,22 +635,16 @@ namespace qmlhandler_helpers{
         const QmlScopeSnap& scope,
         const QString& importAs,
         const QString& str,
-        QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        InheritancePath& typePath,
         QString& libraryKey)
     {
-        QmlLibraryInfo::ExportVersion ev = getType(
-            scope, importAs, str, libraryKey
-        );
+        TypeReference tr = getType(scope, importAs, str);
+        libraryKey = tr.library.path;
 
-        if ( ev.isValid() ){
-            typePath.append(ev.object);
+        if ( tr.isValid() ){
+            typePath.nodes.append(tr);
 
-            qmlhandler_helpers::generateTypePathFromObject(
-                scope,
-                ev.object,
-                libraryKey,
-                typePath
-            );
+            qmlhandler_helpers::generateTypePathFromObject(scope, tr, typePath);
             return true;
         }
         return false;
@@ -585,7 +667,7 @@ namespace qmlhandler_helpers{
      * @brief Create suggestions from an object type path
      */
     void suggestionsForObjectPath(
-        const QList<LanguageUtils::FakeMetaObject::ConstPtr>& typePath,
+        const InheritancePath& typePath,
         bool suggestProperties,
         bool suggestMethods,
         bool suggestSignals,
@@ -594,7 +676,9 @@ namespace qmlhandler_helpers{
         const QString& suffix,
         QList<CodeCompletionSuggestion>& suggestions
     ){
-        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, typePath ){
+        for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
+            LanguageUtils::FakeMetaObject::ConstPtr object = it->object;
+
             QList<CodeCompletionSuggestion> localSuggestions;
 
             QString objectTypeName = "";
@@ -1028,13 +1112,12 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
                 QString propertyType;
 
                 if ( isClassName && !typeLibraryKey.isEmpty() ){
-                    QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
-                    qmlhandler_helpers::generateTypePathFromClassName(
-                        scope, property.typeName(), typeLibraryKey, typePath
+                    InheritancePath typePath = qmlhandler_helpers::generateTypePathFromClassName(
+                        scope, property.typeName(), typeLibraryKey
                     );
 
-                    if ( typePath.size() > 0 ){
-                        QList<LanguageUtils::FakeMetaObject::Export> exports = typePath.first()->exports();
+                    if ( typePath.nodes.size() > 0 ){
+                        QList<LanguageUtils::FakeMetaObject::Export> exports = typePath.nodes.first().object->exports();
                         if ( exports.size() > 0 )
                             propertyType = exports.first().type;
                     } else {
@@ -1091,12 +1174,11 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
 
                     // If property is retrieved by class name (eg. QQuickItem), convert it to its export name(Item)
                     if ( isClassName && !typeLibraryKey.isEmpty() ){
-                        QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
-                        qmlhandler_helpers::generateTypePathFromClassName(
-                            scope, property.typeName(), typeLibraryKey, typePath
+                        InheritancePath typePath = qmlhandler_helpers::generateTypePathFromClassName(
+                            scope, property.typeName(), typeLibraryKey
                         );
-                        if ( typePath.size() > 0 ){
-                            QList<LanguageUtils::FakeMetaObject::Export> exports = typePath.first()->exports();
+                        if ( typePath.nodes.size() > 0 ){
+                            QList<LanguageUtils::FakeMetaObject::Export> exports = typePath.nodes.first().object->exports();
                             if ( exports.size() > 0 )
                                 propertyType = exports.first().type;
                         }
@@ -1842,11 +1924,11 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
     if ( !ctx->objectTypePath().empty() ){
         QString type = ctx->objectTypeName();
         QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
-        QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
-        QString libraryKey;
-        qmlhandler_helpers::getTypePath(scope, typeNamespace, type, typePath, libraryKey);
+        InheritancePath typePath = qmlhandler_helpers::getTypePath(scope, typeNamespace, type);
 
-        foreach( LanguageUtils::FakeMetaObject::ConstPtr object, typePath ){
+        for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
+            LanguageUtils::FakeMetaObject::ConstPtr object = it->object;
+
             QString objectTypeName = "";
             if ( object->exports().size() > 0 )
                 objectTypeName = object->exports().first().type;
@@ -2391,7 +2473,7 @@ void CodeQmlHandler::suggestionsForLeftBind(
 
     if ( context.expressionPath().size() > 1 ){
         QString firstSegment = context.expressionPath()[0];
-        QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+        InheritancePath typePath;
         bool isPointer = false;
         QString typeLibraryKey;
         if ( qmlhandler_helpers::getProperty(
@@ -2405,16 +2487,12 @@ void CodeQmlHandler::suggestionsForLeftBind(
         ) ){
             if ( isPointer ){
                 for ( int i = 1; i < context.expressionPath().size() - 1; ++i ){
-                    QList<LanguageUtils::FakeMetaObject::ConstPtr> newTypePath;
-
-                    qmlhandler_helpers::evaluatePropertyClass(
+                    typePath = qmlhandler_helpers::evaluatePropertyClass(
                         scope,
                         typePath,
                         typeLibraryKey,
-                        context.expressionPath()[i],
-                        newTypePath
+                        context.expressionPath()[i]
                     );
-                    typePath = newTypePath;
                 }
                 qmlhandler_helpers::suggestionsForObjectPath(typePath, true, false, false, false, false, ": ", suggestions);
             }
@@ -2429,9 +2507,7 @@ void CodeQmlHandler::suggestionsForLeftBind(
         QString type = context.objectTypePath().size() > 0 ? context.objectTypePath()[0] : "";
         if ( type != "" ){
             QString typeNamespace = context.objectTypePath().size() > 1 ? context.objectTypePath()[1] : "";
-            QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
-            QString libraryKey;
-            qmlhandler_helpers::getTypePath(scope, typeNamespace, type, typePath, libraryKey);
+            InheritancePath typePath = qmlhandler_helpers::getTypePath(scope, typeNamespace, type);
             qmlhandler_helpers::suggestionsForObjectPath(typePath, true, false, false, false, false, ": ", suggestions);
         }
         suggestionsForNamespaceTypes("", suggestions);
@@ -2451,7 +2527,7 @@ void CodeQmlHandler::suggestionsForRightBind(
     if ( context.expressionPath().size() > 1 ){
         QString firstSegment = context.expressionPath()[0];
         DocumentQmlInfo::ValueReference value;
-        QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
+        InheritancePath typePath;
         QString typeLibraryKey;
 
 //        QString propertyType;
@@ -2466,13 +2542,7 @@ void CodeQmlHandler::suggestionsForRightBind(
                 if ( valueObj.memberProperties().contains(context.expressionPath()[startSegment])){
                     QString valueType = valueObj.memberProperties()[context.expressionPath()[startSegment]];
                     if ( DocumentQmlInfo::isObject(valueType) ){
-                        typePath.clear();
-                        qmlhandler_helpers::getTypePath(
-                            scope,
-                            valueType,
-                            typePath,
-                            typeLibraryKey
-                        );
+                        typePath = qmlhandler_helpers::getTypePath(scope, valueType);
                     }
                     ++startSegment;
                 }
@@ -2481,16 +2551,12 @@ void CodeQmlHandler::suggestionsForRightBind(
             }
 
             for ( int i = startSegment; i < context.expressionPath().size() - 1; ++i ){
-                QList<LanguageUtils::FakeMetaObject::ConstPtr> newTypePath;
-
-                qmlhandler_helpers::evaluatePropertyClass(
+                typePath = qmlhandler_helpers::evaluatePropertyClass(
                     scope,
                     typePath,
                     typeLibraryKey,
-                    context.expressionPath()[i],
-                    newTypePath
+                    context.expressionPath()[i]
                 );
-                typePath = newTypePath;
             }
 
             qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, "", suggestions);
@@ -2510,13 +2576,11 @@ void CodeQmlHandler::suggestionsForRightBind(
                 if ( valueObj.memberProperties().contains(context.expressionPath()[startSegment])){
                     QString valueType = valueObj.memberProperties()[context.expressionPath()[startSegment]];
                     if ( DocumentQmlInfo::isObject(valueType) ){
-                        typePath.clear();
-                        qmlhandler_helpers::getTypePath(
+                        typePath = qmlhandler_helpers::getTypePath(
                             scope,
-                            valueType,
-                            typePath,
-                            typeLibraryKey
+                            valueType
                         );
+                        typeLibraryKey = typePath.isEmpty() ? "" : typePath.nodes.last().library.path;
                     }
                     ++startSegment;
                 }
@@ -2525,16 +2589,12 @@ void CodeQmlHandler::suggestionsForRightBind(
             }
 
             for ( int i = 1; i < context.expressionPath().size() - 1; ++i ){
-                QList<LanguageUtils::FakeMetaObject::ConstPtr> newTypePath;
-
-                qmlhandler_helpers::evaluatePropertyClass(
+                typePath = qmlhandler_helpers::evaluatePropertyClass(
                     scope,
                     typePath,
                     typeLibraryKey,
-                    context.expressionPath()[i],
-                    newTypePath
+                    context.expressionPath()[i]
                 );
-                typePath = newTypePath;
             }
 
             qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, "", suggestions);
@@ -2550,16 +2610,12 @@ void CodeQmlHandler::suggestionsForRightBind(
         {
             if ( isPointer ){
                 for ( int i = 1; i < context.expressionPath().size() - 1; ++i ){
-                    QList<LanguageUtils::FakeMetaObject::ConstPtr> newTypePath;
-
-                    qmlhandler_helpers::evaluatePropertyClass(
+                    typePath = qmlhandler_helpers::evaluatePropertyClass(
                         scope,
                         typePath,
                         typeLibraryKey,
-                        context.expressionPath()[i],
-                        newTypePath
+                        context.expressionPath()[i]
                     );
-                    typePath = newTypePath;
                 }
                 qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, "", suggestions);
             }
@@ -2580,18 +2636,13 @@ void CodeQmlHandler::suggestionsForRightBind(
             if ( context.expressionPath().size() == 3 ){
 
                 /// get type and enums
-                QmlLibraryInfo::ExportVersion ev = qmlhandler_helpers::getType(
-                    scope, context.expressionPath()[1], firstSegment, typeLibraryKey
+                TypeReference tr = qmlhandler_helpers::getType(
+                    scope, context.expressionPath()[1], firstSegment
                 );
-                if ( ev.isValid() ){
-                    typePath.append(ev.object);
+                if ( tr.isValid() ){
+                    typePath.nodes.append(tr);
 
-                    qmlhandler_helpers::generateTypePathFromObject(
-                        scope,
-                        ev.object,
-                        typeLibraryKey,
-                        typePath
-                    );
+                    qmlhandler_helpers::generateTypePathFromObject(scope, tr, typePath);
 
                     qmlhandler_helpers::suggestionsForObjectPath(
                         typePath, false, false, false, true, false, "", suggestions
@@ -2634,9 +2685,7 @@ void CodeQmlHandler::suggestionsForRightBind(
             if ( type == "" )
                 return;
             QString typeNamespace = context.objectTypePath().size() > 1 ? context.objectTypePath().first() : "";
-            QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
-            QString libraryKey;
-            qmlhandler_helpers::getTypePath(scope, typeNamespace, type, typePath, libraryKey);
+            InheritancePath typePath = qmlhandler_helpers::getTypePath(scope, typeNamespace, type);
             qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, "", suggestions);
             suggestionsForNamespaceTypes("", suggestions);
         }
@@ -2666,9 +2715,7 @@ void CodeQmlHandler::suggestionsForLeftSignalBind(
     if ( type == "" )
         return;
     QString typeNamespace = context.objectTypePath().size() > 1 ? context.objectTypePath()[1] : "";
-    QList<LanguageUtils::FakeMetaObject::ConstPtr> typePath;
-    QString libraryKey;
-    qmlhandler_helpers::getTypePath(scope, typeNamespace, type, typePath, libraryKey);
+    InheritancePath typePath = qmlhandler_helpers::getTypePath(scope, typeNamespace, type);
     qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, true, true, true, ": ", suggestions);
 }
 

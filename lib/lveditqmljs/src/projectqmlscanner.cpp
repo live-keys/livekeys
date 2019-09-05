@@ -395,6 +395,8 @@ QMap<QString, QmlLibraryInfo::Ptr> updateLibrary(
     QmlDirParser dirParser;
     dirParser.parse(QString::fromStdString(lockedFileIO->readFromFile(dir.filePath("qmldir").toStdString())));
 
+    baseLib->setImportNamespace(dirParser.typeNamespace());
+
     /// Add typeinfopaths
 
     QStringList typeInfoPaths;
@@ -577,6 +579,7 @@ QMap<QString, QmlLibraryInfo::Ptr> updateLibrary(
 
             foreach( const QString& newLibraryPath, newLibraryPaths){
                 QmlLibraryInfo::Ptr newLib = QmlLibraryInfo::create();
+                newLib->setImportNamespace(newLibraryImport);
                 newLib->setDependencies(dependencyPaths);
                 newLib->data().setDependencies(snapshot.dependencies);
                 newLib->data().setMetaObjects(it.value());

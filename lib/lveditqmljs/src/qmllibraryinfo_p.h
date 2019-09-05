@@ -92,6 +92,11 @@ public:
     ScanStatus status() const;
     void setStatus(ScanStatus status);
 
+    void setImportNamespace(const QString& importNamespace);
+    const QString& importNamespace() const;
+    int importVersionMinor() const;
+    int importVersionMajor() const;
+
 private:
     QmlLibraryInfo();
     QmlLibraryInfo(const QmlDirParser& parser);
@@ -103,6 +108,10 @@ private:
     QMap<QString, Export> m_exports;
     QmlJS::LibraryInfo    m_data;
     QList<QString>        m_dependencyPaths;
+
+    QString               m_importNamespace;
+    int                   m_importVersionMajor;
+    int                   m_importVersionMinor;
 };
 
 inline QmlLibraryInfo::Ptr QmlLibraryInfo::create(){
@@ -123,6 +132,18 @@ inline QmlLibraryInfo::ScanStatus QmlLibraryInfo::status() const{
 
 inline void QmlLibraryInfo::setStatus(QmlLibraryInfo::ScanStatus status){
     m_status = status;
+}
+
+inline const QString &QmlLibraryInfo::importNamespace() const{
+    return m_importNamespace;
+}
+
+inline int QmlLibraryInfo::importVersionMinor() const{
+    return m_importVersionMinor;
+}
+
+inline int QmlLibraryInfo::importVersionMajor() const{
+    return m_importVersionMajor;
 }
 
 }// namespace

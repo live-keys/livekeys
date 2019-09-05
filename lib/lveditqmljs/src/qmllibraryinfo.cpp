@@ -20,13 +20,18 @@ namespace lv{
 
 QmlLibraryInfo::QmlLibraryInfo()
     : m_status(QmlLibraryInfo::NotScanned)
+    , m_importVersionMajor(0)
+    , m_importVersionMinor(0)
 {
 }
 
 QmlLibraryInfo::QmlLibraryInfo(const QmlDirParser &parser)
     : m_status(QmlLibraryInfo::NotScanned)
     , m_data(parser)
+    , m_importVersionMajor(0)
+    , m_importVersionMinor(0)
 {
+    m_importNamespace = parser.typeNamespace();
 }
 
 QmlLibraryInfo::~QmlLibraryInfo(){
@@ -38,6 +43,12 @@ void QmlLibraryInfo::updateExports(){
         foreach( const LanguageUtils::FakeMetaObject::Export& e, obj->exports() ){
             if ( e.version.isValid() ){
                 m_exports[e.type].versions.append(ExportVersion(e.version.majorVersion(), e.version.minorVersion(), obj));
+                if ( e.version.majorVersion() > m_importVersionMajor ||
+                     ( e.version.majorVersion() == m_importVersionMajor && e.version.minorVersion() > m_importVersionMinor))
+                {
+                    m_importVersionMajor = e.version.majorVersion();
+                    m_importVersionMinor = e.version.minorVersion();
+                }
             }
         }
     }
@@ -88,6 +99,10 @@ LanguageUtils::FakeMetaObject::ConstPtr QmlLibraryInfo::findObjectByClassName(co
 
 void QmlLibraryInfo::setDependencies(const QList<QString> &paths){
     m_dependencyPaths = paths;
+}
+
+void QmlLibraryInfo::setImportNamespace(const QString &importNamespace){
+    m_importNamespace = importNamespace;
 }
 
 }// namespace
