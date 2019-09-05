@@ -54,6 +54,7 @@ DISTFILES += \
     qml/editorlayer.qml \
     qml/PaneSplitView.qml \
     qml/LiveKeysTheme.qml \
-    qml/RunnablesMenu.qml
+    qml/RunnablesMenu.qml \
+    qml/RunView.qml
 
 

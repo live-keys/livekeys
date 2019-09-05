@@ -120,6 +120,7 @@ public slots:
     lv::ProjectDocument* openFile(lv::ProjectFile* file, int mode = lv::ProjectDocument::EditIfNotOpen);
 
     void setActive(const QString& rootPath);
+    lv::Runnable* openRunnable(const QString& path, const QStringList& activations = QStringList());
 
     bool isDirProject() const;
     bool isFileInProject(const QUrl& rootPath) const;

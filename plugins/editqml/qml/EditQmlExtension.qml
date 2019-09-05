@@ -8,10 +8,13 @@ LiveExtension{
     globals : ProjectQmlExtension{}
     interceptLanguage : function(document, handler, ext){
         var extLower = ext.toLowerCase()
-        if ( extLower === 'js' || extLower === 'qml' || document.file.path === '' ){
+
+        if ( extLower === 'js' || extLower === 'qml'  ||
+            (document.file.name.length > 2 && document.file.name.substring(0, 2) === "T:" ) )
+        {
             return globals.createHandler(document, handler)
         }
-        return null;
+        return null
     }
 
     objectName : "editqml"
@@ -22,6 +25,15 @@ LiveExtension{
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
     property Component paletteListFactory : Component{ PaletteListView{} }
 
+    function canBeQml(document){
+        if ( endsWith(document.file.path, '.qml') ||
+            (document.file.name.length > 2 && document.file.name.substring(0, 2) === "T:" ))
+        {
+            return true
+        }
+        return false
+    }
+
     function endsWith(str, suffix){
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
@@ -31,7 +43,7 @@ LiveExtension{
 
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
-             ( endsWith(activePane.document.file.path, 'qml') || activePane.document.file.path === '' ) )
+             canBeQml(activePane.document) )
         {
             var editor = activePane
             var codeHandler = editor.documentHandler.codeHandler
@@ -186,7 +198,7 @@ LiveExtension{
 
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
-             ( endsWith(activePane.document.file.path, 'qml') || activePane.document.file.path === '' ) )
+             canBeQml(activePane.document) )
         {
             var editor = activePane
             var codeHandler = editor.documentHandler.codeHandler
@@ -228,7 +240,7 @@ LiveExtension{
 
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
-             ( endsWith(activePane.document.file.path, 'qml') || activePane.document.file.path === '' ) )
+             canBeQml(activePane.document) )
         {
             var editor = activePane
             var codeHandler = editor.documentHandler.codeHandler
@@ -269,7 +281,7 @@ LiveExtension{
         var activePane = livecv.layers.workspace.panes.activePane
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
-             ( activePane.document.file.path.endsWith('.qml') || activePane.document.file.path === '' ) )
+             canBeQml(activePane.document) )
         {
             var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition)
             if ( !addContainer )
@@ -310,7 +322,7 @@ LiveExtension{
 
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
-             ( endsWith(activePane.document.file.path, 'qml') || activePane.document.file.path === '' ) )
+             canBeQml(activePane.document) )
         {
             var editor = activePane
             var codeHandler = editor.documentHandler.codeHandler
@@ -352,7 +364,7 @@ LiveExtension{
 
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
-             ( endsWith(activePane.document.file.path, 'qml') || activePane.document.file.path === '' ) )
+             canBeQml(activePane.document) )
         {
             var editor = activePane
             var codeHandler = editor.documentHandler.codeHandler
@@ -381,7 +393,8 @@ LiveExtension{
 
     interceptMenu : function(item){
         if ( item.objectName === 'editor' && item.document ){
-            if ( item.document.file.path === '' || endsWith(item.document.file.path, '.qml') ){
+
+            if ( canBeQml(item.document) ){
 
                 var codeHandler = item.documentHandler.codeHandler
                 var cursorInfo = codeHandler.cursorInfo(

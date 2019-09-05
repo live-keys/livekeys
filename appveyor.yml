@@ -35,6 +35,7 @@ build_script:
   - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   - mv live-pm-master/* .
   - python --version
+  - pip install -r requirements.txt
   - python livepm/main.py build .. msvc2015_64
   - python livepm/main.py deploy .. msvc2015_64
   - dir

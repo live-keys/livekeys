@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "livecvscript.h"
+#include "qmlscript.h"
 #include "environment.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
@@ -24,7 +24,7 @@
 
 namespace lv{
 
-LiveCVScript::LiveCVScript(const QStringList &argvTail, QObject *parent)
+QmlScript::QmlScript(const QStringList &argvTail, QObject *parent)
     : QObject(parent)
     , m_argvTail(argvTail)
     , m_environment(new Environment(this))
@@ -33,7 +33,7 @@ LiveCVScript::LiveCVScript(const QStringList &argvTail, QObject *parent)
     m_argv.append(m_argvTail);
 }
 
-LiveCVScript::LiveCVScript(const std::vector<std::string> &argvTail, QObject *parent)
+QmlScript::QmlScript(const std::vector<std::string> &argvTail, QObject *parent)
     : QObject(parent)
     , m_environment(new Environment(this))
 {
@@ -44,11 +44,11 @@ LiveCVScript::LiveCVScript(const std::vector<std::string> &argvTail, QObject *pa
     m_argv.append(m_argvTail);
 }
 
-LiveCVScript::~LiveCVScript(){
+QmlScript::~QmlScript(){
     delete m_environment;
 }
 
-void LiveCVScript::scriptChanged(lv::Runnable *active){
+void QmlScript::scriptChanged(lv::Runnable *active){
     if ( active ){
         QFileInfo finfo(active->path());
         m_argv[0] = finfo.fileName();

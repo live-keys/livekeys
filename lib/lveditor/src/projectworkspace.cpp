@@ -331,7 +331,7 @@ void ProjectWorkspace::State::windowRectChanged(QQuickWindow *window, const QRec
 void ProjectWorkspace::State::windowVisibilityChanged(QQuickWindow *window, QWindow::Visibility visibility){
     int index = windows.indexOf(window);
 
-    currentWorkspaceLayout["window"][index]["visibility"] = visibility == QWindow::FullScreen
+    currentWorkspaceLayout["windows"][index]["visibility"] = (visibility == QWindow::FullScreen)
             ? "fullscreen"
             : (visibility == QWindow::Maximized ? "maximized" : "windowed");
 }
@@ -482,6 +482,16 @@ void ProjectWorkspace::createLayoutNodes(){
     m_state->currentWorkspaceLayout["panes"][0][1].append(viewerPane);
 }
 
+Exception ProjectWorkspace::captureContents(const Exception &e){
+    std::string message = e.message() +
+            "\nWorkspace State Contents:\n---------------\n" +
+            m_state->currentWorkspaceLayout.toString();
+
+    return lv::Exception::create<lv::Exception>(
+        message, e.code(), e.file(), e.line(), e.functionName(), e.stackTrace()
+    );
+}
+
 void ProjectWorkspace::initializeFromId(){
     QString path = m_project->dir();
 
@@ -617,7 +627,8 @@ void ProjectWorkspace::whenWindowOpen(QQuickWindow *window){
     try{
         m_state->windowOpen(window);
     } catch ( lv::Exception& e ){
-        lv::ViewContext::instance().engine()->throwError(&e, this);
+        Exception edetail = captureContents(e);
+        lv::ViewContext::instance().engine()->throwError(&edetail, this);
     }
     emit windowOpen(window);
 }
@@ -634,7 +645,8 @@ void ProjectWorkspace::whenWindowClose(){
     try{
         m_state->windowClose(window);
     } catch ( lv::Exception& e ){
-        lv::ViewContext::instance().engine()->throwError(&e, this);
+        Exception edetail = captureContents(e);
+        lv::ViewContext::instance().engine()->throwError(&edetail, this);
     }
     emit windowClose(window);
 }
@@ -645,7 +657,8 @@ void ProjectWorkspace::whenWindowRectChanged(){
     try{
         m_state->windowRectChanged(window, QRect(window->x(), window->y(), window->width(), window->height()));
     } catch ( lv::Exception& e ){
-        lv::ViewContext::instance().engine()->throwError(&e, this);
+        Exception edetail = captureContents(e);
+        lv::ViewContext::instance().engine()->throwError(&edetail, this);
     }
     emit windowRectChanged(window, QRect(window->x(), window->y(), window->width(), window->height()));
 }
@@ -656,7 +669,8 @@ void ProjectWorkspace::whenWindowVisibilityChanged(){
     try{
         m_state->windowVisibilityChanged(window, window->visibility());
     } catch ( lv::Exception& e ){
-        lv::ViewContext::instance().engine()->throwError(&e, this);
+        Exception edetail = captureContents(e);
+        lv::ViewContext::instance().engine()->throwError(&edetail, this);
     }
     emit windowVisibilityChanged(window, window->visibility());
 }
@@ -674,7 +688,8 @@ void ProjectWorkspace::whenPaneInitialized(QQuickItem *pane){
             try{
                 m_state->paneStateChanged(p, v);
             } catch ( lv::Exception& e ){
-                lv::ViewContext::instance().engine()->throwError(&e, this);
+                Exception edetail = captureContents(e);
+                lv::ViewContext::instance().engine()->throwError(&edetail, this);
             }
             emit paneStateChanged(p, v);
         });
@@ -703,7 +718,8 @@ void ProjectWorkspace::whenPaneAdded(QQuickItem *pane, QQuickWindow *window, con
             try{
                 m_state->paneStateChanged(p, v);
             } catch ( lv::Exception& e ){
-                lv::ViewContext::instance().engine()->throwError(&e, this);
+                Exception edetail = captureContents(e);
+                lv::ViewContext::instance().engine()->throwError(&edetail, this);
             }
             emit paneStateChanged(p, v);
         });
@@ -722,7 +738,8 @@ void ProjectWorkspace::whenPaneSizeChanged(){
     try{
         m_state->paneSizeChanged(pane, QSize(pane->width(), pane->height()));
     } catch ( lv::Exception& e ){
-        lv::ViewContext::instance().engine()->throwError(&e, this);
+        Exception edetail = captureContents(e);
+        lv::ViewContext::instance().engine()->throwError(&edetail, this);
     }
     emit paneSizeChanged(pane, QSize(pane->width(), pane->height()));
 }

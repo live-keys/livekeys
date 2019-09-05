@@ -301,7 +301,10 @@ DocumentQmlInfo::DocumentQmlInfo(const QString &fileName)
     : d_ptr(new DocumentQmlInfoPrivate)
 {
     Q_D(DocumentQmlInfo);
-    DocumentQmlInfo::Dialect dialect = extensionToDialect(QFileInfo(fileName).suffix());
+
+    QString suffix = fileName.indexOf("T:") != -1 ? "qml" : QFileInfo(fileName).suffix();
+
+    DocumentQmlInfo::Dialect dialect = extensionToDialect(suffix);
     if ( dialect == DocumentQmlInfo::Javascript )
         d->internalDoc = QmlJS::Document::create(fileName, QmlJS::Dialect::JavaScript);
     else if ( dialect == DocumentQmlInfo::Qml || fileName == "" ){

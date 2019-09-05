@@ -65,7 +65,7 @@ inline bool ProjectFile::isOpen() const{
  * \brief Returns true if the file exists or false is a temporarry file
  */
 inline bool ProjectFile::exists() const{
-    if ( name().startsWith(":/") )
+    if ( name().startsWith("T:") )
         return false;
     return true;
 }

@@ -74,6 +74,8 @@ private:
     void initialize();
     void createLayoutNodes();
 
+    lv::Exception captureContents(const lv::Exception& e);
+
     Project*        m_project;
     QString         m_id;
     State*          m_state;

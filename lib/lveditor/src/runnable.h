@@ -15,8 +15,9 @@ class RunnableContainer;
 class LV_EDITOR_EXPORT Runnable : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    Q_PROPERTY(QString path READ path CONSTANT)
+    Q_PROPERTY(QString name   READ name       WRITE setName       NOTIFY nameChanged)
+    Q_PROPERTY(int runTrigger READ runTrigger WRITE setRunTrigger NOTIFY runTriggerChanged)
+    Q_PROPERTY(QString path   READ path CONSTANT)
 
 public:
     enum Type{
@@ -43,7 +44,6 @@ public:
     const QString& name() const;
     void setName(const QString& name);
 
-    void setRunSpace(QObject* runspace);
     QObject* appRoot();
 
     const QSet<QString>& activations() const;
@@ -51,19 +51,28 @@ public:
 
     const QString& path() const;
 
+    int runTrigger() const;
+
 public slots:
     void engineObjectAcquired(const QUrl& file, QObject* ref);
     void engineObjectReady(QObject* object, const QUrl& file, QObject* ref);
     void engineObjectCreationError(QJSValue errors, const QUrl&, QObject* reference);
 
     void run();
+
+    void setRunSpace(QObject* runspace);
     QObject* runSpace();
 
     void _activationContentsChanged(int, int, int);
     void _documentOpened(ProjectDocument* document);
+    void _documentSaved();
+
+    void setRunTrigger(int runTrigger);
 
 signals:
-    void nameChanged(QString name);
+    void nameChanged();
+    void runTriggerChanged();
+
     void runError(QJSValue errors);
     void objectReady();
 
@@ -81,6 +90,7 @@ private:
     QSet<QString>         m_activations;
     Project*              m_project;
     QTimer*               m_scheduleTimer;
+    int                   m_runTrigger;
 };
 
 inline const QString &Runnable::name() const{
@@ -92,11 +102,7 @@ inline void Runnable::setName(const QString &name){
         return;
 
     m_name = name;
-    emit nameChanged(m_name);
-}
-
-inline void Runnable::setRunSpace(QObject *runspace){
-    m_runSpace = runspace;
+    emit nameChanged();
 }
 
 inline QObject *Runnable::runSpace(){
@@ -113,6 +119,10 @@ inline const QSet<QString> &Runnable::activations() const{
 
 inline const QString &Runnable::path() const{
     return m_path;
+}
+
+inline int Runnable::runTrigger() const{
+    return m_runTrigger;
 }
 
 }// namespace

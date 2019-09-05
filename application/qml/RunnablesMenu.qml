@@ -15,6 +15,8 @@ Rectangle{
         }
     }
 
+    signal runnableSelected(string path)
+
     width: 220
     height: 400
     z: 400
@@ -93,7 +95,7 @@ Rectangle{
             }
             Keys.onReturnPressed: {
                 if (runnablesView.currentItem) {
-                    project.setActive(runnablesView.currentItem.path)
+                    root.runnableSelected(runnablesView.currentItem.path)
                     root.close()
                 }
                 event.accepted = true
@@ -208,7 +210,7 @@ Rectangle{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        project.setActive(model.path)
+                        root.runnableSelected(model.path)
                         root.close()
                     }
                 }
@@ -228,7 +230,7 @@ Rectangle{
         Text{
             anchors.left: parent.left
             anchors.leftMargin: 20
-            text: "No available commands"
+            text: "No runnables available."
             color: "#ebebeb"
 
             font.family: "Open Sans, sans-serif"
@@ -236,6 +238,5 @@ Rectangle{
             font.weight: Font.Light
             font.italic: true
         }
-
     }
 }

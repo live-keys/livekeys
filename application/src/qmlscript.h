@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef LIVECVSCRIPT_H
-#define LIVECVSCRIPT_H
+#ifndef LVQMLSCRIPT_H
+#define LVQMLSCRIPT_H
 
 #include <QObject>
 #include <QStringList>
@@ -25,7 +25,7 @@ namespace lv{
 class Environment;
 class Runnable;
 
-class LiveCVScript : public QObject{
+class QmlScript : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QStringList  argv             READ argv        NOTIFY argvChanged)
@@ -33,9 +33,9 @@ class LiveCVScript : public QObject{
     Q_PROPERTY(lv::Environment* environment READ environment CONSTANT)
 
 public:
-    LiveCVScript(const QStringList& argvTail, QObject* parent = 0);
-    LiveCVScript(const std::vector<std::string>& argvTail, QObject* parent = 0);
-    ~LiveCVScript();
+    QmlScript(const QStringList& argvTail, QObject* parent = 0);
+    QmlScript(const std::vector<std::string>& argvTail, QObject* parent = 0);
+    ~QmlScript();
 
     const QStringList& argv() const;
     const QStringList& argvTail() const;
@@ -56,19 +56,19 @@ private:
 
 };
 
-inline const QStringList &LiveCVScript::argv() const{
+inline const QStringList &QmlScript::argv() const{
     return m_argv;
 }
 
-inline const QStringList &LiveCVScript::argvTail() const{
+inline const QStringList &QmlScript::argvTail() const{
     return m_argvTail;
 }
 
-inline Environment *LiveCVScript::environment(){
+inline Environment *QmlScript::environment(){
     return m_environment;
 }
 
-inline const QString &LiveCVScript::name() const{
+inline const QString &QmlScript::name() const{
     return m_argv.first();
 }
 

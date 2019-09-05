@@ -90,9 +90,9 @@ void Project::newProject(){
         document->addEditingState(ProjectDocument::Read);
         document->setContent("import QtQuick 2.3\n\nGrid{\n}");
         document->removeEditingState(ProjectDocument::Read);
-        m_documentModel->openDocument("", document);
+        m_documentModel->openDocument("T:0", document);
 
-        m_active = new Runnable(engine(), document->file()->path(), m_runnables, "untitled");
+        m_active = new Runnable(engine(), "T:0", m_runnables, "untitled");
         m_active->setRunSpace(m_runspace);
         m_runnables->addRunnable(m_active);
         setActive(m_active);
@@ -277,21 +277,34 @@ bool Project::isFileInProject(const QString &path) const{
  * This file is the one actually compiling
  */
 void Project::setActive(const QString &path){
+    Runnable* r = openRunnable(path);
+    if (r){
+        r->setRunSpace(m_runspace);
+        setActive(r);
+    }
+}
+
+Runnable *Project::openRunnable(const QString &path, const QStringList &activations){
     Runnable* r = m_runnables->runnableAt(path);
     if ( !r ){
         ProjectDocument* document = isOpened(path);
+
+        QSet<QString> activ;
+        for ( auto it = activations.begin(); it != activations.end(); ++it )
+            activ.insert(*it);
+
         if ( document ){
-            r = new Runnable(engine(), document->file()->path(), m_runnables, document->file()->name());
+            r = new Runnable(engine(), document->file()->path(), m_runnables, document->file()->name(), activ);
         } else {
             QFileInfo pathInfo(path);
-            r = new Runnable(engine(), path, m_runnables, pathInfo.fileName());
+            r = new Runnable(engine(), path, m_runnables, pathInfo.fileName(), activ);
         }
 
         m_runnables->addRunnable(r);
     }
 
-    r->setRunSpace(m_runspace);
-    setActive(r);
+
+    return r;
 }
 
 /**

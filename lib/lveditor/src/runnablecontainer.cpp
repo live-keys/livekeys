@@ -88,9 +88,11 @@ void RunnableContainer::setFilter(const QString &filter){
 
 void RunnableContainer::updateFilters(){
     m_filteredRunnables.clear();
+
     if ( m_filter.isEmpty() ){
-        for ( int i = 0; i < m_runnables.size(); ++i )
+        for ( int i = 0; i < m_runnables.size(); ++i ){
             m_filteredRunnables.append(i);
+        }
     } else {
         for ( int i = 0; i < m_runnables.size(); ++i ){
             Runnable* pr = m_runnables[i];

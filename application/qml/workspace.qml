@@ -37,6 +37,7 @@ Item{
             weight: Font.Normal
         })
         property color errorFontColor : "#fff"
+        property color errorBackgroundColor: "#000"
     }
 
     property QtObject panes : QtObject{
@@ -62,7 +63,20 @@ Item{
                 "viewer" : function(p, s){
                     return root.viewer
                 },
+                "runView" : function(p, s){
+                    var pane = runViewFactory.createObject(p)
+                    if ( s )
+                        pane.paneInitialize(s)
+                    return pane
+                },
                 "log" : function(p, s){
+                    if ( !root.logView.parent ){
+                        root.logView.visible = true
+                        root.logView.parent = p
+                        header.isLogWindowDirty = false
+                        return root.logView
+                    }
+
                     var pane = logFactory.createObject(p)
                     return pane
                 }
@@ -334,7 +348,8 @@ Item{
                     'setLiveCodingMode': [modeContainer.setLiveCodingMode, "Set 'Live' Coding Mode"],
                     'setOnSaveCodingMode': [modeContainer.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
                     'setDisabledCodingMode': [modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
-                    'runProject': [project.run, "Run Project"]
+                    'runProject': [project.run, "Run Project"],
+                    'addRunView' : [root.addRunView, "Add Run View"]
                 })
 
                 root.paneSplitterColor = layer.themes.current.paneSplitterColor
@@ -368,10 +383,9 @@ Item{
             if ( !fe ){
                 fe = root.panes.createPane('log', {}, [200, 200])
                 var containerUsed = root.panes.container
-                root.panes.splitPaneVerticallyWith(containerUsed, 0, fe)
+                root.panes.splitPaneVerticallyWith(containerUsed, containerUsed.panes.length - 1, fe)
             } else {
-                var feIndex = fe.parentSplitter.paneIndex(fe)
-                fe.parentSplitter.removeAt(feIndex)
+                root.panes.removePane(fe)
             }
         }
 
@@ -400,12 +414,20 @@ Item{
     RunnablesMenu{
         id: runnablesMenu
         anchors.top: header.bottom
+        onRunnableSelected: {
+            if ( project.active )
+                project.active.setRunSpace(null)
+
+            project.setActive(path)
+        }
         x: 550
     }
 
     ModeContainer {
         id: modeContainer
-        modeWrapper: header
+        onRunTriggerSelected: project.runTrigger = trigger
+        anchors.top: header.bottom
+        x: 620
     }
 
     Component{
@@ -420,6 +442,26 @@ Item{
                 root.panes.setActiveItem(editorComponent.textEdit, editorComponent)
             }
             Component.onCompleted: { forceFocus() }
+        }
+    }
+
+    Component{
+        id: runViewFactory
+
+        RunView{
+            id: runViewComponent
+            panes: root.panes
+        }
+    }
+
+    function addRunView(){
+        var pane = root.panes.createPane('runView', {}, [400, 0])
+
+        var containerUsed = root.panes.container
+        if ( containerUsed.orientation === Qt.Vertical ){
+            root.panes.splitPaneVerticallyWith(containerUsed, containerUsed.panes.length - 1, pane)
+        } else {
+            root.panes.splitPaneHorizontallyWith(containerUsed, containerUsed.panes.length - 1, pane)
         }
     }
 
@@ -482,7 +524,7 @@ Item{
             id: error
             anchors.bottom: parent.bottom
             width : parent.width
-            color : root.style.errorFontColor
+            color : root.style.errorBackgroundColor
             font: root.style.errorFont
         }
     }
@@ -561,14 +603,13 @@ Item{
     }
 
     property LogContainer logView : LogContainer{
-        id: logView
         visible: false
         isInWindow: false
-        width: parent ? parent.width : 0
+        width: 300
         height: 200
 
         onItemAdded: {
-            if ( !visible  )
+            if ( !parent  )
                 header.isLogWindowDirty = true
         }
     }

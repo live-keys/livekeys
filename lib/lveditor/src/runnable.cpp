@@ -2,6 +2,7 @@
 #include "runnablecontainer.h"
 
 #include "live/exception.h"
+#include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/project.h"
 #include "live/projectfile.h"
@@ -30,30 +31,13 @@ Runnable::Runnable(
     , m_type(Runnable::File)
     , m_activations(activations)
     , m_scheduleTimer(nullptr)
+    , m_runTrigger(Project::RunManual)
 {
     connect(engine, &ViewEngine::objectAcquired,      this, &Runnable::engineObjectAcquired);
     connect(engine, &ViewEngine::objectReady,         this, &Runnable::engineObjectReady);
     connect(engine, &ViewEngine::objectCreationError, this, &Runnable::engineObjectCreationError);
 
     m_project = qobject_cast<Project*>(parent->parent());
-
-    m_project->excludeRunTriggers(m_activations);
-
-    if ( m_activations.size() > 0 ){
-        m_scheduleTimer = new QTimer(this);
-        m_scheduleTimer->setInterval(1000);
-        m_scheduleTimer->setSingleShot(true);
-        connect(m_scheduleTimer, &QTimer::timeout, this, &Runnable::run);
-        connect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
-
-        for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
-            const QString& activation = *it;
-            ProjectDocument* document = m_project->isOpened(activation);
-            if ( document ){
-                connect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
-            }
-        }
-    }
 }
 
 Runnable::Runnable(ViewEngine* engine, QQmlComponent *component, RunnableContainer *parent, const QString &name)
@@ -65,6 +49,7 @@ Runnable::Runnable(ViewEngine* engine, QQmlComponent *component, RunnableContain
     , m_appRoot(nullptr)
     , m_type(Runnable::Component)
     , m_scheduleTimer(nullptr)
+    , m_runTrigger(Project::RunManual)
 {
     m_project = qobject_cast<Project*>(parent->parent());
 }
@@ -79,7 +64,9 @@ Runnable::~Runnable(){
 
 void Runnable::run(){
     if ( !m_runSpace ){
-        THROW_EXCEPTION(lv::Exception, "Attempting to trigger a runnable with a null runspace.", Exception::toCode("~runspace"));
+        Exception e = CREATE_EXCEPTION(lv::Exception, "Attempting to trigger a runnable with a null runspace.", Exception::toCode("~runspace"));
+        lv::ViewContext::instance().engine()->throwError(&e, this);
+        return;
     }
 
     if ( m_type == Runnable::File ){
@@ -92,7 +79,7 @@ void Runnable::run(){
                 m_engine->createObjectAsync(
                     document->content(),
                     m_runSpace,
-                    QUrl::fromLocalFile(document->file()->path()),
+                    QUrl::fromLocalFile(m_path),
                     this,
                     !(documentList.size() == 1 && documentList[0] == document->file()->path())
                 );
@@ -180,8 +167,88 @@ void Runnable::_activationContentsChanged(int, int, int){
 
 void Runnable::_documentOpened(ProjectDocument *document){
     if ( m_activations.contains(document->file()->path()) ){
-        connect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
+        if ( m_runTrigger == Project::RunOnChange ){
+            connect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
+        } else {
+            connect(document, &ProjectDocument::saved, this, &Runnable::_documentSaved);
+        }
     }
+}
+
+void Runnable::_documentSaved(){
+    m_scheduleTimer->start();
+}
+
+void Runnable::setRunTrigger(int runTrigger){
+    if (m_runTrigger == runTrigger)
+        return;
+
+    if ( m_activations.size() ){
+
+        if ( m_runTrigger == Project::RunOnChange ){
+            m_project->removeExcludedRunTriggers(m_activations);
+            m_scheduleTimer->deleteLater();
+            m_scheduleTimer = nullptr;
+            disconnect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
+            for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
+                const QString& activation = *it;
+                ProjectDocument* document = m_project->isOpened(activation);
+                if ( document ){
+                    disconnect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
+                }
+            }
+
+        } else if ( m_runTrigger == Project::RunOnSave ){
+            m_project->removeExcludedRunTriggers(m_activations);
+            m_scheduleTimer->deleteLater();
+            m_scheduleTimer = nullptr;
+            disconnect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
+            for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
+                const QString& activation = *it;
+                ProjectDocument* document = m_project->isOpened(activation);
+                if ( document ){
+                    disconnect(document, &ProjectDocument::saved, this, &Runnable::_documentSaved);
+                }
+            }
+
+        }
+
+        if ( runTrigger == Project::RunOnChange ){
+            m_project->excludeRunTriggers(m_activations);
+            m_scheduleTimer = new QTimer(this);
+            m_scheduleTimer->setInterval(1000);
+            m_scheduleTimer->setSingleShot(true);
+            connect(m_scheduleTimer, &QTimer::timeout, this, &Runnable::run);
+            connect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
+
+            for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
+                const QString& activation = *it;
+                ProjectDocument* document = m_project->isOpened(activation);
+                if ( document ){
+                    connect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
+                }
+            }
+
+        } else if ( m_runTrigger == Project::RunOnSave ){
+            m_project->excludeRunTriggers(m_activations);
+            m_scheduleTimer = new QTimer(this);
+            m_scheduleTimer->setInterval(1000);
+            m_scheduleTimer->setSingleShot(true);
+            connect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
+            for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
+                const QString& activation = *it;
+                ProjectDocument* document = m_project->isOpened(activation);
+                if ( document ){
+                    connect(document, &ProjectDocument::saved, this, &Runnable::_documentSaved);
+                }
+            }
+
+        }
+
+    }
+
+    m_runTrigger = runTrigger;
+    emit runTriggerChanged();
 }
 
 QObject* Runnable::createObject(const QByteArray &code, const QUrl &file){
@@ -237,6 +304,17 @@ void Runnable::emptyRunSpace(){
         m_appRoot->deleteLater();
         m_appRoot = nullptr;
     }
+}
+
+void Runnable::setRunSpace(QObject *runspace){
+    if ( m_runSpace == runspace )
+        return;
+
+    if ( m_runSpace ){
+        emptyRunSpace();
+    }
+
+    m_runSpace = runspace;
 }
 
 }// namespace

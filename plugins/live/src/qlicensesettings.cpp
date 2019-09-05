@@ -60,7 +60,7 @@ QVariant QLicenseSettings::data(const QModelIndex &index, int role) const{
         return QVariant();
 
     int row = index.row();
-    QHash<QString, QLiveCVLicense>::ConstIterator it = m_licenses.begin() + row;
+    QHash<QString, QLicenseEntry>::ConstIterator it = m_licenses.begin() + row;
 
     if ( role == QLicenseSettings::Id ){
         return it.key();
@@ -77,7 +77,7 @@ QVariant QLicenseSettings::data(const QModelIndex &index, int role) const{
 }
 
 bool QLicenseSettings::require(const QString &id, const QString &alias, const QString &text){
-    QHash<QString, QLiveCVLicense>::Iterator it = m_licenses.find(id);
+    QHash<QString, QLicenseEntry>::Iterator it = m_licenses.find(id);
     if ( it == m_licenses.end() ){
         addLicense(id, alias, text, false, true);
         return false;
@@ -88,7 +88,7 @@ bool QLicenseSettings::require(const QString &id, const QString &alias, const QS
         if ( !it->highlight ){
             int row = 0;
             for (
-                QHash<QString, QLiveCVLicense>::Iterator itcount = m_licenses.begin();
+                QHash<QString, QLicenseEntry>::Iterator itcount = m_licenses.begin();
                 itcount != it;
                 ++itcount, ++row
             );
@@ -159,7 +159,7 @@ void QLicenseSettings::fromJson(const QJsonArray& root){
 
 QJsonArray QLicenseSettings::toJson() const{
     QJsonArray root;
-    for( QHash<QString, QLiveCVLicense>::ConstIterator it = m_licenses.begin(); it != m_licenses.end(); ++it ){
+    for( QHash<QString, QLicenseEntry>::ConstIterator it = m_licenses.begin(); it != m_licenses.end(); ++it ){
         QJsonObject licenseOb;
         licenseOb["id"] = it->id;
         licenseOb["alias"] = it->alias;
@@ -187,11 +187,11 @@ QLicenseSettings *QLicenseSettings::grabFromContext(QObject *item,
 }
 
 void QLicenseSettings::acceptLicense(const QString &id){
-    QHash<QString, QLiveCVLicense>::Iterator it = m_licenses.find(id);
+    QHash<QString, QLicenseEntry>::Iterator it = m_licenses.find(id);
     if ( it != m_licenses.end() ){
         if ( it->valid == false ){
             int row = 0;
-            for (QHash<QString, QLiveCVLicense>::Iterator itcount = m_licenses.begin(); itcount != it; ++itcount, ++row );
+            for (QHash<QString, QLicenseEntry>::Iterator itcount = m_licenses.begin(); itcount != it; ++itcount, ++row );
             it->valid     = true;
             if ( it->highlight ){
                 it->highlight = false;
@@ -220,7 +220,7 @@ void QLicenseSettings::addLicense(
         highlight = false;
 
     beginResetModel();
-    QLiveCVLicense license;
+    QLicenseEntry license;
     license.id        = id;
     license.alias     = alias;
     license.text      = text;

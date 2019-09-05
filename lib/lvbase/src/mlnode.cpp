@@ -1195,7 +1195,7 @@ MLNode::~MLNode(){
  */
 MLNode &MLNode::operator[](int index){
     if ( m_type != Type::Array )
-        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type. Requested index: " + std::to_string(index), 0);
 
     return (*m_value.asArray)[index];
 }
@@ -1207,7 +1207,7 @@ MLNode &MLNode::operator[](int index){
  */
 void MLNode::append(const MLNode &value){
     if ( m_type != Type::Array )
-        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type. Cannot append.", 0);
 
     m_value.asArray->push_back(value);
 }
@@ -1228,7 +1228,7 @@ bool MLNode::isNull() const{
  */
 const MLNode &MLNode::operator[](int index) const{
     if ( m_type != Type::Array )
-        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type. Requested index: " + std::to_string(index), 0);
 
     return (*m_value.asArray)[index];
 }
@@ -1240,7 +1240,7 @@ const MLNode &MLNode::operator[](int index) const{
  */
 MLNode &MLNode::operator[](const MLNode::StringType &reference){
     if ( m_type != Type::Object )
-        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of object type.", 0);
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of object type. Requested key: " + reference, 0);
 
     return (*m_value.asObject)[reference];
 }
@@ -1253,7 +1253,7 @@ MLNode &MLNode::operator[](const MLNode::StringType &reference){
 
 const MLNode &MLNode::operator[](const MLNode::StringType &reference) const{
     if ( m_type != Type::Object )
-        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of object type.", 0);
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of object type. Requested key: " + reference, 0);
 
     return (*m_value.asObject)[reference];
 }
@@ -1504,7 +1504,7 @@ MLNode::BytesType MLNode::asBytes() const{
  */
 const MLNode::ArrayType &MLNode::asArray() const{
     if ( m_type != Type::Array )
-        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type. Cannot return as array. ", 0);
 
     return *m_value.asArray;
 }
@@ -1516,7 +1516,7 @@ const MLNode::ArrayType &MLNode::asArray() const{
  */
 MLNode::ArrayType &MLNode::asArray(){
     if ( m_type != Type::Array )
-        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type. Cannot return as array.", 0);
 
     return *m_value.asArray;
 }
@@ -1583,7 +1583,7 @@ void MLNode::remove(const MLNode::StringType &key){
  */
 void MLNode::remove(int key){
     if ( m_type != Type::Array )
-        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type.", 0);
+        THROW_EXCEPTION(InvalidMLTypeException, "Node is not of array type. Cannot remove at index: " + std::to_string(key), 0);
 
     m_value.asArray->erase(m_value.asArray->begin() + key);
 }
