@@ -1,0 +1,50 @@
+// This file contains samples of invalid import types
+
+////// live.plugin.json
+
+{
+    "name" : "main",
+    "package": ".",
+    "modules": ["A", "main"]
+}
+
+////// live.package.json
+
+{
+    "name" : "main",
+    "version" : "1.0.0"
+}
+
+////// A.lv.js
+
+class A{
+    constructor(){
+    }
+}
+
+module.exports["A"] = A
+
+////// B.lv.js
+
+module.exports["B"] = "b"
+
+////// C.lv.js
+
+module.exports[1] = "c"
+
+////// main.lv.js
+
+var a = imports.get("A")
+
+module.exports["main"] = class extends Element{
+    constructor(){
+        super()
+        Element.addProperty(this, "a", {
+            type: "string",
+            value: a.a,
+            notify: "aChanged"
+        })
+    }
+}
+
+

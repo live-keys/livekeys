@@ -71,7 +71,6 @@ void JsObjectTest::simpleObjectInitializationTest(){
 
     ModuleLibrary* m = ModuleLibrary::create(engine, "test");
     m->addType<ElementStub>();
-
     {
         engine->scope([&engine, m](){
             el::Object ob = engine->require(m);

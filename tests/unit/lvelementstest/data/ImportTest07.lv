@@ -1,0 +1,59 @@
+// This file holds a dependency cycle between module files within a plugin
+// plugin1: A <- B <- C <- A
+
+
+////// plugin1/live.plugin.json
+
+{
+    "name" : "plugin1",
+    "package": ".",
+    "modules": ["A", "B", "C"]
+}
+
+////// plugin1/live.package.json
+
+{
+    "name" : "plugin1",
+    "version" : "1.0.0"
+}
+
+////// plugin1/A.lv.js
+
+var B = imports.get("B")
+
+class A extends Element{}
+module.exports["A"] = A
+
+////// plugin1/B.lv.js
+
+var C = imports.get("C")
+
+class B extends Element{}
+module.exports["B"] = B
+
+////// plugin1/C.lv.js
+
+var A = imports.get("A")
+
+class C extends Element{}
+module.exports["C"] = C
+
+
+////// main.lv.js
+
+imports.require(".plugin1")
+
+var A = imports.get("A")
+
+module.exports["main"] = class extends Element{
+    constructor(){
+        super()
+        var a = new A();
+        Element.addProperty(this, "a", {
+            type: "string",
+            value: a.toString(),
+            notify: "aChanged"
+        })
+    }
+}
+

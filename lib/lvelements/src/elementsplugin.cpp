@@ -24,7 +24,7 @@ public:
     std::map<std::string, ModuleFile*> modules;
     std::map<std::string, ModuleLibrary*> libraryModules;
 
-    std::map<std::string, ModuleFile*> exports;
+    std::map<std::string, ModuleFile*> fileExports;
 };
 
 
@@ -58,18 +58,18 @@ ModuleFile *ElementsPlugin::addModuleFile(ElementsPlugin::Ptr &epl, const std::s
 
 ModuleFile *ElementsPlugin::load(const ElementsPlugin::Ptr& epl, const std::string &name){
     ModuleFile* mf = new ModuleFile(epl, name);
-    mf->parse();
+    mf->parse(m_d->engine);
     m_d->modules[name] = mf;
 
     for ( auto it = mf->exports().begin(); it != mf->exports().end(); ++it ){
-        auto storedExport = m_d->exports.find(*it);
-        if ( storedExport != m_d->exports.end() ){
+        auto storedExport = m_d->fileExports.find(*it);
+        if ( storedExport != m_d->fileExports.end() ){
             THROW_EXCEPTION(
                 lv::Exception,
                 "Multiple exports defined for the same module: " + *it + " in " + m_d->plugin->context()->importId,
                 1);
         }
-        m_d->exports[*it] = mf;
+        m_d->fileExports[*it] = mf;
     }
 
     vlog("lvelements-plugin").v() << "Plugin \'" << m_d->plugin->path() << "\' loaded module " << name;
@@ -85,6 +85,10 @@ ModuleLibrary *ElementsPlugin::loadLibrary(const ElementsPlugin::Ptr &, const st
 
 const Plugin::Ptr& ElementsPlugin::plugin() const{
     return m_d->plugin;
+}
+
+const std::map<std::string, ModuleFile *> &ElementsPlugin::fileExports() const{
+    return m_d->fileExports;
 }
 
 ElementsPlugin::ElementsPlugin(Plugin::Ptr plugin, Engine *engine) : m_d(new ElementsPluginPrivate){

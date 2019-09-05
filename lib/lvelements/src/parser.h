@@ -11,7 +11,10 @@ class Parser{
 public:
     Parser();
 
-    static std::list<std::string> parseExportNames(const std::string &module);
+    static std::list<std::string> parseExportNames(const std::string &moduleFile);
+
+private:
+    static std::list<std::string> parseExportNamesJs(const std::string& jsModuleFile);
 };
 
 }} // namespace lv, el

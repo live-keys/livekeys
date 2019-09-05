@@ -31,6 +31,8 @@ public:
     ModuleLibrary* loadLibrary(const ElementsPlugin::Ptr& epl, const std::string& name);
     const Plugin::Ptr &plugin() const;
 
+    const std::map<std::string, ModuleFile*>& fileExports() const;
+
 private:
     ElementsPlugin(Plugin::Ptr plugin, Engine* engine);
 

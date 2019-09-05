@@ -13,6 +13,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <QFileInfo>
 #include "libplatform/libplatform.h"
 #include "v8.h"
 
@@ -61,6 +62,7 @@ public:
         , tryCatchNesting(0)
         , pendingExceptionNesting(-1)
         , hasGlobalErrorHandler(false)
+        , moduleFileType(Engine::Lv)
     {}
 
     Context*                   context;
@@ -81,6 +83,8 @@ public:
     int  pendingExceptionNesting;
     bool hasGlobalErrorHandler;
 
+    Engine::ModuleFileType moduleFileType;
+
     PackageGraph* packageGraph;
     std::map<std::string, ElementsPlugin::Ptr> loadedPlugins;
 
@@ -95,21 +99,6 @@ public: // helpers
 
 };
 
-bool EnginePrivate::isElementConstructor(
-        Engine* engine,
-        const v8::Local<v8::Function> &fnc,
-        const v8::Local<v8::Function> &elementFnc)
-{
-    v8::Local<v8::Value> proto = fnc->Get(v8::String::NewFromUtf8(engine->isolate(), "__proto__"));
-    if ( proto->Equals(elementFnc) )
-        return true;
-
-    v8::Local<v8::Value> v = fnc->GetPrototype();
-    if ( !v->IsFunction() )
-        return false;
-
-    return isElementConstructor(engine, v8::Local<v8::Function>::Cast(v), elementFnc);
-}
 
 void EnginePrivate::messageListener(v8::Local<v8::Message> message, v8::Local<v8::Value> data){
     v8::Local<v8::External> engineData = v8::Local<v8::External>::Cast(data);
@@ -258,14 +247,14 @@ Script::Ptr Engine::compileEnclosed(const std::string &str){
     return sc;
 }
 
-Script::Ptr Engine::compileJsFile(const std::string &str){
+Script::Ptr Engine::compileJsFile(const std::string &path){
     v8::HandleScope handle(isolate());
     v8::Local<v8::Context> context = m_d->context->asLocal();
     v8::Context::Scope context_scope(context);
 
-    std::ifstream file(str, std::ifstream::in | std::ifstream::binary);
+    std::ifstream file(path, std::ifstream::in | std::ifstream::binary);
     if ( !file.is_open() )
-        throw std::exception(); //TODO
+        THROW_EXCEPTION(Exception, "Failed to open file: " + path, Exception::toCode("~ScriptFile"));
 
     std::stringstream sstr;
     sstr << Script::moduleEncloseStart << file.rdbuf() << Script::moduleEncloseEnd;
@@ -274,10 +263,36 @@ Script::Ptr Engine::compileJsFile(const std::string &str){
 
     v8::MaybeLocal<v8::Script> script = v8::Script::Compile(context, source);
     if ( script.IsEmpty() )
-        throw std::exception(); //TODO
+        THROW_EXCEPTION(Exception, "Failed to compile script: " + path, Exception::toCode("~CompileScript"));
 
-    Script::Ptr sc(new Script(this, script.ToLocalChecked(), str));
+    Script::Ptr sc(new Script(this, script.ToLocalChecked(), path));
     return sc;
+}
+
+Object Engine::loadJsModule(const std::string &path){
+    QFileInfo finfo(QString::fromStdString(path));
+    std::string pluginPath = finfo.path().toStdString();
+    std::string fileName = finfo.fileName().toStdString();
+
+    Plugin::Ptr plugin(nullptr);
+    if ( Plugin::existsIn(pluginPath) ){
+        plugin = Plugin::createFromPath(pluginPath);
+        Package::Ptr package = Package::createFromPath(plugin->package());
+        m_d->packageGraph->loadRunningPackageAndPlugin(package, plugin);
+    } else {
+        plugin = m_d->packageGraph->createRunningPlugin(pluginPath);
+    }
+
+    ElementsPlugin::Ptr epl = ElementsPlugin::create(plugin, this);
+    ModuleFile* mf = ElementsPlugin::addModuleFile(epl, fileName);
+
+    Script::Ptr sc = compileJsFile(path);
+    Object m = sc->loadAsModule(mf);
+    if ( m.isNull() )
+        return m;
+
+    LocalObject lm(m);
+    return lm.get(this, "exports").toObject(this);
 }
 
 Script::Ptr Engine::compileElement(const std::string &str){
@@ -285,7 +300,9 @@ Script::Ptr Engine::compileElement(const std::string &str){
     v8::Local<v8::Context> context = m_d->context->asLocal();
     v8::Context::Scope context_scope(context);
 
-    //TODO
+    if ( m_d->moduleFileType == Engine::JsOnly ){
+        return compileJsFile(str + ".js");
+    }
 
     v8::Local<v8::String> source =
         v8::String::NewFromUtf8(isolate(), (Script::moduleEncloseStart + str + Script::moduleEncloseEnd).c_str());
@@ -394,11 +411,37 @@ v8::Local<v8::FunctionTemplate> Engine::importsTemplate(){
     return m_d->importsTemplate.Get(isolate());
 }
 
+
+// A inherits B, means A.prototype.__proto__ == B.prototype
+// js implementation:
+// function inherits(Child, Parent) {
+//    _ = Child.prototype;
+//    while (_ != null) {
+//       if (_ == Parent.prototype)
+//          return true;
+//       _ = _.__proto__;
+//    }
+//    return false;
+// }
+
 bool Engine::isElementConstructor(const Callable &c){
-    v8::Local<v8::Function> f = c.data();
-    v8::Local<v8::Function> elemf = m_d->elementTemplate->data.Get(isolate())->GetFunction();
-    v8::Local<v8::Function> elemfproto = v8::Local<v8::Function>::Cast(elemf->GetPrototype());
-    return m_d->isElementConstructor(this, f, elemfproto);
+    v8::Local<v8::Function> elemClass = m_d->elementTemplate->data.Get(isolate())->GetFunction();
+    v8::Local<v8::Function> childClass = c.data();
+
+    v8::Local<v8::Value> elemClassPrototype = elemClass->Get(v8::String::NewFromUtf8(isolate(), "prototype"));
+    v8::Local<v8::Value> childClassPrototype = childClass->Get(v8::String::NewFromUtf8(isolate(), "prototype"));
+
+    while (childClassPrototype->IsObject()){
+        v8::Maybe<bool> eq = childClassPrototype->Equals(m_d->context->asLocal(), elemClassPrototype);
+        if ( eq.IsJust() && eq.ToChecked()){
+            return true;
+        }
+
+        v8::Local<v8::Object> fncPrototypeCast = v8::Local<v8::Object>::Cast(childClassPrototype);
+        childClassPrototype = fncPrototypeCast->Get(v8::String::NewFromUtf8(isolate(), "__proto__"));
+    }
+
+    return false;
 }
 
 /**
@@ -466,9 +509,9 @@ void Engine::throwError(const Exception *exception, Element *object){
  */
 void Engine::tryCatch(const std::function<void ()> &f, const std::function<void(const Engine::CatchData &)> &c){
     v8::TryCatch tc(m_d->isolate);
-    incrementTryCatchDepth();
+    incrementTryCatchNesting();
     f();
-    decrementTryCatchDepth();
+    decrementTryCatchNesting();
 
     if ( tc.HasCaught() ){
         c(CatchData(this, &tc));
@@ -479,7 +522,7 @@ bool Engine::hasPendingException(){
     return m_d->pendingExceptionNesting >= 0;
 }
 
-void Engine::incrementTryCatchDepth(){
+void Engine::incrementTryCatchNesting(){
     m_d->tryCatchNesting++;
 }
 
@@ -487,7 +530,7 @@ void Engine::incrementTryCatchDepth(){
  * @brief Decrement the nesting depth of trycatch block. Will remove any exception
  * nested below the block
  */
-void Engine::decrementTryCatchDepth(){
+void Engine::decrementTryCatchNesting(){
     if ( m_d->pendingExceptionNesting >= m_d->tryCatchNesting )
         m_d->pendingExceptionNesting = -1;
     m_d->tryCatchNesting--;
@@ -497,9 +540,25 @@ void Engine::clearPendingException(){
     m_d->pendingExceptionNesting = -1;
 }
 
+const std::vector<std::string> Engine::packageImportPaths() const{
+    return m_d->packageGraph->packageImportPaths();
+}
+
+void Engine::setPackageImportPaths(const std::vector<std::string> &paths){
+    m_d->packageGraph->setPackageImportPaths(paths);
+}
+
 void Engine::handleError(const std::string &message, const std::string &stack, const std::string &file, int line){
-    vlog().e() << "Uncaught exception occured:" << message.c_str() << "at " << file.c_str() << "(" << line
+    vlog().e() << "Uncaught exception occured:" << message.c_str() << " at " << file.c_str() << "(" << line
                << ")\n" << stack.c_str();
+}
+
+Engine::ModuleFileType Engine::moduleFileType() const{
+    return m_d->moduleFileType;
+}
+
+void Engine::setModuleFileType(Engine::ModuleFileType type){
+    m_d->moduleFileType = type;
 }
 
 void Engine::importInternals(){
@@ -555,8 +614,8 @@ void Engine::wrapScriptObject(Element *element){
     element->setLifeTimeWithObject(instance);
 }
 
-bool Engine::hasGlobalErrorHandler(){
-    return m_d->hasGlobalErrorHandler;
+int Engine::tryCatchNesting(){
+    return m_d->tryCatchNesting;;
 }
 
 void Engine::setGlobalErrorHandler(bool value){
@@ -585,10 +644,10 @@ Object Engine::require(ModuleLibrary *module){
     return exportsObject;
 }
 
-ElementsPlugin::Ptr Engine::require(const std::string &importKey){
+ElementsPlugin::Ptr Engine::require(const std::string &importKey, Plugin::Ptr requestingPlugin){
     auto foundEp = m_d->loadedPlugins.find(importKey);
     if ( foundEp == m_d->loadedPlugins.end() ){
-        Plugin::Ptr plugin = m_d->packageGraph->loadPlugin(importKey);
+        Plugin::Ptr plugin = m_d->packageGraph->loadPlugin(importKey, requestingPlugin);
         return ElementsPlugin::create(plugin, this);
     } else {
         return foundEp->second;

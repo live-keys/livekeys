@@ -76,7 +76,7 @@ LocalValue ModuleFile::get(Engine* engine, ModuleFile *from, const std::string &
                     }
                 }
 
-                THROW_EXCEPTION(lv::Exception, "Module dependency cycle found :"  + ss.str(), 4);
+                THROW_EXCEPTION(lv::Exception, "Module file dependency cycle found: "  + ss.str(), 4);
             }
         }
 
@@ -97,8 +97,12 @@ LocalValue ModuleFile::get(Engine* engine, ModuleFile *from, const std::string &
     return LocalObject(*m_d->exports).get(engine, name);
 }
 
-void ModuleFile::parse(){
-    m_d->exportNames = Parser::parseExportNames(filePath());
+void ModuleFile::parse(Engine* engine){
+    std::string fp = filePath();
+    if ( engine && engine->moduleFileType() == Engine::JsOnly ){
+        fp += ".js";
+    }
+    m_d->exportNames = Parser::parseExportNames(fp);
     m_d->state = ModuleFile::Parsed;
 }
 

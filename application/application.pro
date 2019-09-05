@@ -3,7 +3,7 @@ TARGET   = livecv
 QT      += qml quick
 
 linkLocalLibrary(lvbase,      lvbase)
-linkLocalLibrary(lvview,     lvview)
+linkLocalLibrary(lvview,      lvview)
 linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
 

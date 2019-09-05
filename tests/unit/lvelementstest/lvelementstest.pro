@@ -24,7 +24,9 @@ HEADERS += \
     $$PWD/lvcompiletest.h \
     mlnodetojstest.h \
     testpack.h \
-    jstupletest.h
+    jstupletest.h \
+    jsimportstest.h \
+    jsinheritancetest.h
 
 SOURCES += \
     $$PWD/main.cpp \
@@ -42,7 +44,9 @@ SOURCES += \
     $$PWD/lvcompiletest.cpp \
     mlnodetojstest.cpp \
     testpack.cpp \
-    jstupletest.cpp
+    jstupletest.cpp \
+    jsimportstest.cpp \
+    jsinheritancetest.cpp
 
 OTHER_FILES += $$PWD/data/*.*
 
@@ -64,3 +68,15 @@ export(first.depends)
 export(testdatacopy.commands)
 
 QMAKE_EXTRA_TARGETS += first testdatacopy
+
+DISTFILES += \
+    data/ImportTest01.lv \
+    data/ImportTest02.lv \
+    data/ImportTest03.lv \
+    data/ImportTest04.lv \
+    data/ImportTest05.lv \
+    data/ImportTest10.lv \
+    data/ImportTest07.lv \
+    data/ImportTest08.lv \
+    data/ImportTest09.lv \
+    data/ImportTest06.lv

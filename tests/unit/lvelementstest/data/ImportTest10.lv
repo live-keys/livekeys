@@ -1,0 +1,110 @@
+// This file creates a dependency cycle between 3 packages
+// packagea <- packageb <- packagec <- packagea
+
+
+////// packages/packagea/live.plugin.json
+
+{
+    "name" : "packagea",
+    "package": ".",
+    "modules": ["A"]
+}
+
+////// packages/packagea/live.package.json
+
+{
+    "name" : "packagea",
+    "version" : "1.0.0"
+}
+
+
+////// packages/packagea/A.lv.js
+
+imports.require("packageb")
+
+var B = imports.get("B")
+
+class A extends Element{
+    toString(){
+        return "class[A]"
+    }
+}
+module.exports["A"] = A
+
+
+
+
+////// packages/packageb/live.plugin.json
+
+{
+    "name" : "packageb",
+    "package": ".",
+    "modules": ["B"]
+}
+
+////// packages/packageb/live.package.json
+
+{
+    "name" : "packageb",
+    "version" : "1.0.0"
+}
+
+
+////// packages/packageb/B.lv.js
+
+imports.require("packagec")
+
+var C = imports.get("C")
+
+class B extends Element{
+    toString(){
+        return "class[A]"
+    }
+}
+module.exports["B"] = A
+
+
+
+
+////// packages/packagec/live.plugin.json
+
+{
+    "name" : "packagec",
+    "package": ".",
+    "modules": ["C"]
+}
+
+////// packages/packagec/live.package.json
+
+{
+    "name" : "packagec",
+    "version" : "1.0.0"
+}
+
+
+////// packages/packagec/C.lv.js
+
+imports.require("packagea")
+
+var A = imports.get("A")
+
+class C extends Element{
+    toString(){
+        return "class[A]"
+    }
+}
+module.exports["C"] = C
+
+
+
+////// main.lv.js
+
+imports.require("packagea")
+
+var A = imports.get("A")
+
+module.exports["main"] = class extends Element{
+    constructor(){
+        super()
+    }
+}

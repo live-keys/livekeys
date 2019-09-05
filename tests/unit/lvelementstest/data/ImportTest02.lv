@@ -1,0 +1,84 @@
+////// live.plugin.json
+
+{
+    "name" : "main",
+    "package": ".",
+    "modules": ["A", "B", "main"]
+}
+
+////// live.package.json
+
+{
+    "name" : "main",
+    "version" : "1.0.0"
+}
+
+////// A.lv
+
+component default < Element{
+    function toString: (){
+        return "class [A]"
+    }
+}
+
+////// A.lv.js
+
+class A extends Element{
+    toString(){
+        return "class[A]"
+    }
+}
+module.exports["A"] = A
+
+////// B.lv.js
+
+component default < Element{
+    function toString: (){
+        return "class [A]"
+    }
+}
+
+////// B.lv.js
+
+class B extends Element{
+    toString(){
+        return "class[B]"
+    }
+}
+module.exports["B"] = B
+
+////// main.lv
+
+component default < Element{
+    string a : {
+        return (new A()).toString()
+    }
+    string b : {
+        return (new B()).toString()
+    }
+}
+
+////// main.lv.js
+
+var A = imports.get("A")
+var B = imports.get("B")
+
+module.exports["main"] = class extends Element{
+    constructor(){
+        super()
+        var a = new A();
+        var b = new B();
+        Element.addProperty(this, "a", {
+            type: "string",
+            value: a.toString(),
+            notify: "aChanged"
+        })
+        Element.addProperty(this, "b", {
+            type: "string",
+            value: b.toString(),
+            notify: "bChanged"
+        })
+    }
+}
+
+

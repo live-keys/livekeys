@@ -53,9 +53,9 @@ Object Script::loadAsModule(ModuleFile* file){
     v8::Local<v8::Context> context = m_d->engine->currentContext()->asLocal();
     v8::Context::Scope context_scope(context);
 
-    if ( !m_d->engine->hasGlobalErrorHandler() ){
+    if ( m_d->engine->tryCatchNesting() == 0){
         v8::TryCatch tc(m_d->engine->isolate());
-        m_d->engine->setGlobalErrorHandler(true);
+        m_d->engine->incrementTryCatchNesting();
 
         Object m = loadAsModuleImpl(file, context);
 
@@ -90,7 +90,7 @@ Object Script::loadAsModule(ModuleFile* file){
             }
         }
 
-        m_d->engine->setGlobalErrorHandler(false);
+        m_d->engine->decrementTryCatchNesting();
 
         return m;
 
@@ -107,8 +107,15 @@ Script::~Script(){
 Object Script::loadAsModuleImpl(ModuleFile *mf, const v8::Local<v8::Context> &context){
     v8::Local<v8::Script> ld = m_d->data.Get(m_d->engine->isolate());
     v8::MaybeLocal<v8::Value> result = ld->Run(context);
-    if ( result.IsEmpty() )
-        throw std::exception(); //TODO
+    if ( result.IsEmpty() ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception,
+            mf->filePath() + ": Failed to run. Result empty.",
+            lv::Exception::toCode("~Run")
+        );
+        m_d->engine->throwError(&e, nullptr);
+        return Object(m_d->engine);
+    }
 
     v8::Local<v8::Function> loadFunction = v8::Local<v8::Function>::Cast(result.ToLocalChecked());
 
@@ -126,6 +133,79 @@ Object Script::loadAsModuleImpl(ModuleFile *mf, const v8::Local<v8::Context> &co
     args[3] = filePath;
 
     loadFunction->Call(context->Global(), 4, args);
+
+
+    v8::Local<v8::Object> moduleValue = v8::Local<v8::Object>::Cast(module.data());
+    v8::Local<v8::String> exportsKey = v8::String::NewFromUtf8(m_d->engine->isolate(), "exports");
+
+    v8::Local<v8::Value> exportsValue = moduleValue->Get(exportsKey);
+    if ( !exportsValue->IsObject() ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception,
+            mf->filePath() + ": module.exports is not an object type.",
+            lv::Exception::toCode("~Key")
+        );
+        m_d->engine->throwError(&e, nullptr);
+        return module.toObject(m_d->engine);
+    }
+
+    v8::Local<v8::Object> exportsObject = v8::Local<v8::Object>::Cast(exportsValue);
+
+    v8::Local<v8::Array> propertyNames = exportsObject->GetOwnPropertyNames();
+    for (uint32_t i = 0; i < propertyNames->Length(); ++i) {
+        v8::Local<v8::Value> key = propertyNames->Get(i);
+
+        if ( !key->IsString() ){
+            lv::Exception e = CREATE_EXCEPTION(
+                lv::Exception,
+                mf->filePath() + ": Given an export key that is not of string type.",
+                lv::Exception::toCode("~Key")
+            );
+            m_d->engine->throwError(&e, nullptr);
+            return module.toObject(m_d->engine);
+        }
+
+        v8::String::Utf8Value utf8_key(key);
+
+        if ( strcmp(*utf8_key, "__shared__") != 0 && strlen(*utf8_key) > 0 ){
+            v8::Local<v8::Value> value = exportsObject->Get(key);
+
+            if ( value->IsFunction() ){
+                v8::Local<v8::Function> func = v8::Local<v8::Function>::Cast(value);
+
+                Callable c(m_d->engine, func);
+                if ( !c.isComponent() ){
+                    lv::Exception e = CREATE_EXCEPTION(
+                        lv::Exception,
+                        mf->filePath() + ": Export at \'" + *utf8_key + "\' is not a component. Class must extend element.",
+                        lv::Exception::toCode("~Component")
+                    );
+                    m_d->engine->throwError(&e, nullptr);
+
+                    return module.toObject(m_d->engine);
+                }
+
+            } else if ( value->IsObject() ){
+                if ( !LocalValue(value).isElement() ){
+                    lv::Exception e = CREATE_EXCEPTION(
+                        lv::Exception,
+                        mf->filePath() + ": Export at \'" + *utf8_key + "\' is an object that's not an element type.",
+                        lv::Exception::toCode("~Element")
+                    );
+                    m_d->engine->throwError(&e, nullptr);
+                    return module.toObject(m_d->engine);
+                }
+            } else {
+                lv::Exception e = CREATE_EXCEPTION(
+                    lv::Exception,
+                    mf->filePath() + ": Export at \'" + *utf8_key + "\' is not a component nor a singleton.",
+                    lv::Exception::toCode("~Component")
+                );
+                m_d->engine->throwError(&e, nullptr);
+                return module.toObject(m_d->engine);
+            }
+        }
+    }
 
     return module.toObject(m_d->engine);
 }

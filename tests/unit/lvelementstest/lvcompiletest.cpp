@@ -37,8 +37,6 @@ void LvCompileTest::test1Js(){
         Object e = exports.toObject(engine);
         LocalObject le(e);
 
-
-
         Callable c = le.get(engine, "Test1").toCallable(engine);
         QVERIFY(c.isComponent());
 

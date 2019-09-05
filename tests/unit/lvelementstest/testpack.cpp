@@ -2,9 +2,11 @@
 
 #include <fstream>
 #include <cctype>
-#include "qdebug.h"
-#include "qdir.h"
+#include <QDir>
+#include <QDirIterator>
+
 #include "live/exception.h"
+#include "live/visuallog.h"
 
 TestPack::TestPack(std::string path)
 {
@@ -17,8 +19,15 @@ void TestPack::unpack(std::string filePath)
     if (!inputStream.is_open())
         THROW_EXCEPTION(lv::Exception, "Can't find the file " + filePath, 1);
 
+    // create test path first
+
+    QDir tempdir(m_path.c_str());
+    if (!tempdir.exists())
+        tempdir.mkpath(".");
+
     std::string line;
     std::ofstream outputStream;
+
     while (std::getline(inputStream, line))
     {
         if (line.length() > 6 && line.substr(0, 6) == "//////")
@@ -32,33 +41,18 @@ void TestPack::unpack(std::string filePath)
                     return !std::isspace(ch);
             }).base(), outputFileName.end());
 
-            std::replace(outputFileName.begin(), outputFileName.end(), '/', '\\');
+            if (outputFileName.length() > 0){
 
-            std::string temp = "";
-            std::vector<std::string> pathParts;
-            for (unsigned i = 0; i < outputFileName.length(); ++i)
-            {
-                if (outputFileName[i] != '\\')
-                    temp += outputFileName[i];
-                else {
-                    if (temp != "") pathParts.push_back(temp);
-                    temp = "";
-                }
-            }
-            if (temp != "") pathParts.push_back(temp);
-
-            temp = m_path;
-            if (outputFileName.length() > 0)
-            {
-                for (unsigned i = 0; i<pathParts.size()-1; ++i)
-                {
-                    temp += "\\" + pathParts[i];
-                    QDir tempdir(temp.c_str());
+                size_t fileNameIndex = outputFileName.rfind('/');
+                if ( fileNameIndex != std::string::npos ){
+                    QDir tempdir(QString::fromStdString(m_path + "/" + outputFileName.substr(0, fileNameIndex)));
                     if (!tempdir.exists())
                         tempdir.mkpath(".");
                 }
-                outputStream.close();
-                outputStream.open((m_path + "\\" + outputFileName).c_str());
+
+                if (outputStream.is_open() )
+                    outputStream.close();
+                outputStream.open((m_path + "/" + outputFileName).c_str());
             }
             continue;
         }
@@ -70,15 +64,29 @@ void TestPack::unpack(std::string filePath)
     outputStream.close();
 }
 
-void TestPack::clear()
-{
-    QString path = m_path.c_str();
-    std::string folderName = m_path.substr(m_path.find_last_of('\\') + 1);
-    QDir dir(path);
+void TestPack::clear(){
+    QDir dir(m_path.c_str());
     dir.removeRecursively();
-    path += "\\..\\";
-    QDir create(path);
-    create.mkpath(folderName.c_str());
+}
+
+std::string TestPack::listLocation(){
+    QDirIterator dit(QString::fromStdString(m_path), QDirIterator::Subdirectories);
+    std::string result;
+    while ( dit.hasNext() ){
+        dit.next();
+        QFileInfo next = dit.fileInfo();
+        if ( next.fileName() != "." && next.fileName() != ".."){
+            if ( next.isFile() ){
+                std::string sizeStr = QString::number(next.size()).toStdString();
+                result += next.filePath().mid((int)m_path.size()).toStdString() + " [Size:" + sizeStr + "]\n";
+            } else {
+                result += next.filePath().mid((int)m_path.size()).toStdString() + "\n";
+            }
+        }
+
+    }
+
+    return result;
 }
 
 
