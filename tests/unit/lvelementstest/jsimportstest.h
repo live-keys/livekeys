@@ -13,6 +13,7 @@ public:
     explicit JsImportsTest(QObject *parent = nullptr);
     ~JsImportsTest(){}
 
+
 private slots:
     void initTestCase();
 
@@ -22,6 +23,7 @@ private slots:
     void samePathSingletonTest();
     void importPluginWithSamePathImportTest();
     void packageImportTest();
+    void importAsTest();
 
     void invalidExportTypeAsObjectTest();
     void invalidExportTypeAsStringTest();
@@ -31,10 +33,6 @@ private slots:
     void moduleFileDependencyCycleTest();
     void pluginDependencyCycleTest();
     void packageDependencyCycleTest();
-
-    //TODO: .lv files
-    //TODO: RequireAs
-
 };
 
 #endif // JSIMPORTSTEST_H

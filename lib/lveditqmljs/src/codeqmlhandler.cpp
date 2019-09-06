@@ -187,7 +187,9 @@ public:
     DocumentQmlScope::Ptr  documentScope;
     ProjectQmlExtension*   projectHandler;
 
-    QmlScopeSnap snapScope(){ return QmlScopeSnap(projectHandler->scanMonitor()->projectScope(), documentScope); }
+    QmlScopeSnap snapScope(){
+        return QmlScopeSnap(projectHandler->scanMonitor()->projectScope(), documentScope);
+    }
 };
 
 

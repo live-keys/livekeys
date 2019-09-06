@@ -16,6 +16,11 @@
     "modules": ["A"]
 }
 
+////// plugin1/subplugina/A.lv
+
+import plugin1.subpluginb
+
+component default < B {}
 
 ////// plugin1/subplugina/A.lv.js
 
@@ -23,7 +28,7 @@ imports.require("plugin1.subpluginb")
 
 var B = imports.get("B")
 
-class A extends Element{}
+class A extends B{}
 module.exports["A"] = A
 
 ////// plugin1/subpluginb/live.plugin.json
@@ -34,6 +39,11 @@ module.exports["A"] = A
     "modules": ["B"]
 }
 
+////// plugin1/subpluginb/B.lv
+
+import plugin1.subpluginc
+
+component default < C {}
 
 ////// plugin1/subpluginb/B.lv.js
 
@@ -41,7 +51,7 @@ imports.require("plugin1.subpluginc")
 
 var C = imports.get("C")
 
-class B extends Element{}
+class B extends C{}
 module.exports["B"] = B
 
 
@@ -53,6 +63,11 @@ module.exports["B"] = B
     "modules": ["C"]
 }
 
+////// plugin1/subpluginc/C.lv
+
+import plugin1.subplugina
+
+component C < A {}
 
 ////// plugin1/subpluginc/C.lv.js
 
@@ -60,5 +75,5 @@ imports.require("plugin1.subplugina")
 
 var A = imports.get("A")
 
-class C extends Element{}
+class C extends A{}
 module.exports["C"] = C

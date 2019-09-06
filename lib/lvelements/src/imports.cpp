@@ -10,9 +10,9 @@ Imports::Imports(Engine *engine, ModuleFile *mf)
     , m_moduleFile(mf)
 {
     v8::Local<v8::Object> obj = engine->importsTemplate()->InstanceTemplate()->NewInstance();
-    m_object.Reset(engine->isolate(), obj);
-
     obj->SetInternalField(0, v8::External::New(engine->isolate(), this));
+
+    m_object.Reset(engine->isolate(), obj);
 }
 
 Imports::~Imports(){
@@ -25,7 +25,6 @@ v8::Local<v8::Object> Imports::object(){
 
 void Imports::require(const std::string &importKey){
     ElementsPlugin::Ptr ep = m_engine->require(importKey, m_moduleFile->plugin()->plugin());
-
     for ( auto it = ep->fileExports().begin(); it != ep->fileExports().end(); ++it ){
         m_exports[it->first] = it->second;
     }
@@ -34,14 +33,17 @@ void Imports::require(const std::string &importKey){
 }
 
 v8::Local<v8::Object> Imports::requireAs(const std::string &importKey){
-    ElementsPlugin::Ptr ep = m_engine->require(importKey);
-    //TODO: Create new imports object
+    Imports* imp = new Imports(m_engine, m_moduleFile);
+    imp->require(importKey);
 
-    return v8::Local<v8::Object>();
+    v8::Local<v8::Object> obj = imp->object();
+
+    imp->m_object.SetWeak(imp, &Imports::weakImportsDestructor, v8::WeakCallbackType::kParameter);
+
+    return obj;
 }
 
 v8::Local<v8::Value> Imports::get(const std::string &key){
-
     ModuleFile* mf = nullptr;
 
     //TODO: Search library exports as well
@@ -112,7 +114,7 @@ void Imports::requireAs(const v8::FunctionCallbackInfo<v8::Value> &info){
     Imports* imports = reinterpret_cast<Imports*>(wrap->Value());
     Engine* engine = reinterpret_cast<Engine*>(info.GetIsolate()->GetData(0));
     if ( info.Length() != 1 ){
-        info.GetIsolate()->ThrowException(v8::String::NewFromUtf8(info.GetIsolate(), "\'imports.require()\' needs one argument."));
+        info.GetIsolate()->ThrowException(v8::String::NewFromUtf8(info.GetIsolate(), "\'imports.requireAs()\' needs one argument."));
         return;
     }
     try{
@@ -166,6 +168,12 @@ v8::Local<v8::FunctionTemplate> Imports::functionTemplate(v8::Isolate *isolate){
     tplInstance->SetHandler(v8::NamedPropertyHandlerConfiguration(&Imports::getImport));
 
     return localTpl;
+}
+
+void Imports::weakImportsDestructor(const v8::WeakCallbackInfo<Imports> &data){
+    Imports* i = data.GetParameter();
+    i->m_object.Reset();
+    delete i;
 }
 
 }} // namespce lv, el

@@ -17,27 +17,48 @@
     "version" : "1.0.0"
 }
 
+////// plugin1/A.lv
+
+component default < B{}
+
 ////// plugin1/A.lv.js
 
 var B = imports.get("B")
 
-class A extends Element{}
+class A extends B{}
 module.exports["A"] = A
+
+////// plugin1/B.lv
+
+component default < C{}
 
 ////// plugin1/B.lv.js
 
 var C = imports.get("C")
 
-class B extends Element{}
+class B extends C{}
 module.exports["B"] = B
+
+////// plugin1/C.lv
+
+component default < A{}
 
 ////// plugin1/C.lv.js
 
 var A = imports.get("A")
 
-class C extends Element{}
+class C extends A{}
 module.exports["C"] = C
 
+////// main.lv
+
+import .plugin1
+
+component default < Element{
+    string a : {
+        (new A()).toString()
+    }
+}
 
 ////// main.lv.js
 

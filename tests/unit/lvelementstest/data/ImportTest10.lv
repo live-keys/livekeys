@@ -17,6 +17,15 @@
     "version" : "1.0.0"
 }
 
+////// packages/packagea/A.lv
+
+import packageb
+
+component default < B{
+    function toString : (){
+        return "class[A]"
+    }
+}
 
 ////// packages/packagea/A.lv.js
 
@@ -24,13 +33,12 @@ imports.require("packageb")
 
 var B = imports.get("B")
 
-class A extends Element{
+class A extends B{
     toString(){
         return "class[A]"
     }
 }
 module.exports["A"] = A
-
 
 
 
@@ -49,6 +57,15 @@ module.exports["A"] = A
     "version" : "1.0.0"
 }
 
+////// packages/packageb/B.lv
+
+import packagec
+
+component default < C{
+    function toString: (){
+        return "class[B]"
+    }
+}
 
 ////// packages/packageb/B.lv.js
 
@@ -56,9 +73,9 @@ imports.require("packagec")
 
 var C = imports.get("C")
 
-class B extends Element{
+class B extends C{
     toString(){
-        return "class[A]"
+        return "class[B]"
     }
 }
 module.exports["B"] = A
@@ -81,6 +98,15 @@ module.exports["B"] = A
     "version" : "1.0.0"
 }
 
+////// packages/packagec/C.lv
+
+import packagea
+
+component default < A{
+    function toString: (){
+        return "class[C]"
+    }
+}
 
 ////// packages/packagec/C.lv.js
 
@@ -88,9 +114,9 @@ imports.require("packagea")
 
 var A = imports.get("A")
 
-class C extends Element{
+class C extends A{
     toString(){
-        return "class[A]"
+        return "class[C]"
     }
 }
 module.exports["C"] = C

@@ -29,6 +29,8 @@ public:
 
     static v8::Local<v8::FunctionTemplate> functionTemplate(v8::Isolate* isolate);
 
+    static void weakImportsDestructor(const v8::WeakCallbackInfo<Imports>& data);
+
 private:
     Engine* m_engine;
     ModuleFile* m_moduleFile;

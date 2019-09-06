@@ -27,7 +27,7 @@ void JsImportsTest::initTestCase(){
 void JsImportsTest::singlePluginImportTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest1.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest01.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -58,7 +58,7 @@ void JsImportsTest::singlePluginImportTest(){
 void JsImportsTest::samePathImportTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest2.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest02.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
 
@@ -90,7 +90,7 @@ void JsImportsTest::samePathImportTest(){
 void JsImportsTest::importPluginWithSamePathImportTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest3.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest03.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -120,7 +120,7 @@ void JsImportsTest::importPluginWithSamePathImportTest(){
 void JsImportsTest::packageImportTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest1.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest09.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -150,7 +150,7 @@ void JsImportsTest::packageImportTest(){
 void JsImportsTest::importPluginThatImportsPlugin(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest4.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest04.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -181,7 +181,7 @@ void JsImportsTest::importPluginThatImportsPlugin(){
 void JsImportsTest::samePathSingletonTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest5.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest05.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -211,7 +211,7 @@ void JsImportsTest::samePathSingletonTest(){
 void JsImportsTest::invalidExportTypeAsObjectTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest6.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest06.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -231,7 +231,7 @@ void JsImportsTest::invalidExportTypeAsObjectTest(){
 void JsImportsTest::invalidExportTypeAsStringTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest6.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest06.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -251,7 +251,7 @@ void JsImportsTest::invalidExportTypeAsStringTest(){
 void JsImportsTest::invalidExportKeyTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest6.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest06.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -271,7 +271,7 @@ void JsImportsTest::invalidExportKeyTest(){
 void JsImportsTest::indirectInvalidExportTypeAsObjectTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest6.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest06.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -291,7 +291,7 @@ void JsImportsTest::indirectInvalidExportTypeAsObjectTest(){
 void JsImportsTest::moduleFileDependencyCycleTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest7.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest07.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -315,7 +315,7 @@ void JsImportsTest::moduleFileDependencyCycleTest(){
 void JsImportsTest::pluginDependencyCycleTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest8.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest08.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -338,7 +338,7 @@ void JsImportsTest::pluginDependencyCycleTest(){
 void JsImportsTest::packageDependencyCycleTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::JsOnly);
-    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest10.lv.js";
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest10.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
     TestPack tp(testPath);
@@ -354,6 +354,36 @@ void JsImportsTest::packageDependencyCycleTest(){
             hadException = true;
         });
         QVERIFY(hadException);
+    });
+
+    delete engine;
+}
+
+void JsImportsTest::importAsTest(){
+    Engine* engine = new Engine;
+    engine->setModuleFileType(Engine::JsOnly);
+    std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest11.lv";
+    std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
+
+    TestPack tp(testPath);
+    tp.unpack(scriptsPath);
+
+    engine->scope([engine, testPath](){
+        Object exports = engine->loadJsModule(testPath + "/main.lv.js");
+
+        LocalObject localExports(exports);
+        LocalValue lv = localExports.get(engine, "main");
+
+        QVERIFY(lv.isCallable());
+        Callable c = lv.toCallable(engine);
+        QVERIFY(c.isComponent());
+
+        Component comp = c.toComponent();
+        Element* el = comp.create(Function::Parameters(0));
+
+        QVERIFY(el != nullptr);
+        QVERIFY(el->get("a").toStdString(engine) == "class[A]");
+        QVERIFY(el->get("b").toStdString(engine) == "class[B]");
     });
 
     delete engine;

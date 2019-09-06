@@ -13,6 +13,12 @@
     "version" : "1.0.0"
 }
 
+////// A.lv
+
+component singleton default < Element{
+    string a : "class[A]"
+}
+
 ////// A.lv.js
 
 class A extends Element{
@@ -26,6 +32,12 @@ class A extends Element{
     }
 }
 module.exports["a"] = new A()
+
+////// main.lv
+
+component default < Element{
+    string a : a.a
+}
 
 ////// main.lv.js
 

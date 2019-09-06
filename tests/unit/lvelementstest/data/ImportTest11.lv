@@ -1,3 +1,5 @@
+// This file holds an import as plugin from a main file
+
 ////// plugin1/live.plugin.json
 
 {
@@ -17,7 +19,7 @@
 
 component default < Element{
     function toString : (){
-        return "classs[A]"
+        return "class[A]"
     }
 }
 
@@ -30,41 +32,51 @@ class A extends Element{
 }
 module.exports["A"] = A
 
+
 ////// plugin1/B.lv
 
-component default < A{
+component default < Element{
     function toString : (){
+        return "class[B]"
     }
 }
 
 ////// plugin1/B.lv.js
 
-var A = imports.get("A")
-
-class B extends A{
+class B extends Element{
+    toString(){
+        return "class[B]"
+    }
 }
 module.exports["B"] = B
 
 ////// main.lv
 
-import .plugin1
+import .plugin1 as plug
 
 component default < Element{
+    string a : {
+        return (new plug.A()).toString()
+    }
     string b : {
-        return (new B()).toString()
+        return (new plug.B()).toString()
     }
 }
 
 ////// main.lv.js
 
-imports.require(".plugin1")
-
-var B = imports.get("B")
+var plug = imports.requireAs(".plugin1")
 
 module.exports["main"] = class extends Element{
     constructor(){
         super()
-        var b = new B();
+        var a = new (plug.get('A'))();
+        var b = new (plug.get('B'))();
+        Element.addProperty(this, "a", {
+            type: "string",
+            value: a.toString(),
+            notify: "aChanged"
+        })
         Element.addProperty(this, "b", {
             type: "string",
             value: b.toString(),

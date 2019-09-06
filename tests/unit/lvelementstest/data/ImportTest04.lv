@@ -6,6 +6,14 @@
     "modules": ["A", "B"]
 }
 
+////// plugin1/subplugin1/A.lv
+
+component default < Element{
+    function toString : (){
+        return "class[A]"
+    }
+}
+
 ////// plugin1/subplugin1/A.lv.js
 
 class A extends Element{
@@ -14,6 +22,14 @@ class A extends Element{
     }
 }
 module.exports["A"] = A
+
+////// plugin1/subplugin1/B.lv
+
+component default < Element{
+    function toString : (){
+        return "class[B]"
+    }
+}
 
 ////// plugin1/subplugin1/B.lv.js
 
@@ -31,6 +47,12 @@ module.exports["B"] = B
     "package": "..",
     "modules": ["C"]
 }
+
+////// plugin1/subplugin2/C.lv
+
+import .plugin1.subplugin1
+
+component default < B{}
 
 ////// plugin1/subplugin2/C.lv.js
 
@@ -50,6 +72,15 @@ module.exports["C"] = C
     "version" : "1.0.0"
 }
 
+////// main.lv
+
+import .plugin1.subplugin2
+
+component default < Element{
+    string c : {
+        return (new C()).toString()
+    }
+}
 
 ////// main.lv.js
 

@@ -16,6 +16,13 @@
     "version" : "1.0.0"
 }
 
+////// packages/package1/A.lv
+
+component default < Element{
+    function toString : (){
+        return "class[A]"
+    }
+}
 
 ////// packages/package1/A.lv.js
 
@@ -25,6 +32,16 @@ class A extends Element{
     }
 }
 module.exports["A"] = A
+
+////// main.lv
+
+import package1
+
+component default < Element{
+    string a : {
+        return (new A()).toString()
+    }
+}
 
 ////// main.lv.js
 

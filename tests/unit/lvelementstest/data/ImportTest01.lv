@@ -55,8 +55,6 @@ module.exports["B"] = B
 import .plugin1
 
 component default < Element{
-    Element aEl : A{}
-    Element bEl : B{}
     string a : {
         return (new A()).toString()
     }

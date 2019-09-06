@@ -22,11 +22,11 @@ HEADERS += \
     $$PWD/jstypestest.h \
     $$PWD/jslisttest.h \
     $$PWD/lvcompiletest.h \
-    mlnodetojstest.h \
-    testpack.h \
-    jstupletest.h \
-    jsimportstest.h \
-    jsinheritancetest.h
+    $$PWD/mlnodetojstest.h \
+    $$PWD/testpack.h \
+    $$PWD/jstupletest.h \
+    $$PWD/jsimportstest.h \
+    $$PWD/jsinheritancetest.h
 
 SOURCES += \
     $$PWD/main.cpp \
@@ -42,11 +42,11 @@ SOURCES += \
     $$PWD/jstypestest.cpp \
     $$PWD/jslisttest.cpp \
     $$PWD/lvcompiletest.cpp \
-    mlnodetojstest.cpp \
-    testpack.cpp \
-    jstupletest.cpp \
-    jsimportstest.cpp \
-    jsinheritancetest.cpp
+    $$PWD/mlnodetojstest.cpp \
+    $$PWD/testpack.cpp \
+    $$PWD/jstupletest.cpp \
+    $$PWD/jsimportstest.cpp \
+    $$PWD/jsinheritancetest.cpp
 
 OTHER_FILES += $$PWD/data/*.*
 
@@ -79,4 +79,5 @@ DISTFILES += \
     data/ImportTest07.lv \
     data/ImportTest08.lv \
     data/ImportTest09.lv \
-    data/ImportTest06.lv
+    data/ImportTest06.lv \
+    data/ImportTest11.lv
