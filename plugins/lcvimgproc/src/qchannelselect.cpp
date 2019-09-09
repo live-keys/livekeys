@@ -42,7 +42,7 @@ QChannelSelect::~QChannelSelect(){
  */
 void QChannelSelect::transform(const cv::Mat &in, cv::Mat &out){
     if ( out.channels() == 3 )
-        cv::cvtColor(out, out, CV_BGR2GRAY);
+        cv::cvtColor(out, out, cv::COLOR_BGR2GRAY);
     if ( !in.empty() ){
         if ( in.channels() == 1 ){
             in.copyTo(out);

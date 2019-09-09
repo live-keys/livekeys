@@ -33,7 +33,7 @@ void QOrbFeatureDetector::initialize(const QVariantMap &settings){
     int edgeThreshold = 31;
     int firstLevel    = 0;
     int WTA_K         = 2;
-    int scoreType     = HARRIS_SCORE;
+    cv::ORB::ScoreType scoreType = cv::ORB::HARRIS_SCORE;
 
     if ( settings.contains("nfeatures") )
         nfeatures = settings["nfeatures"].toInt();
@@ -48,7 +48,7 @@ void QOrbFeatureDetector::initialize(const QVariantMap &settings){
     if ( settings.contains("WTA_K") )
         WTA_K = settings["WTA_K"].toInt();
     if ( settings.contains("scoreType") )
-        scoreType = settings["scoreType"].toInt();
+        scoreType = static_cast<cv::ORB::ScoreType>(settings["scoreType"].toInt());
 
     initializeDetector(cv::ORB::create(nfeatures, scaleFactor, nlevels, edgeThreshold, firstLevel, WTA_K, scoreType));
 }

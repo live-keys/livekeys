@@ -23,6 +23,8 @@ QStitcher::QStitcher(QQuickItem *parent)
     : QMatDisplay(parent)
 #if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
     , m_stitcher(cv::Stitcher::create())
+#elif CV_VERSION_MAJOR >= 4
+    , m_stitcher(cv::Stitcher::create())
 #else
     , m_stitcher(cv::Stitcher::createDefault())
 #endif
@@ -45,7 +47,7 @@ void QStitcher::filter(){
 
             auto vectorInput = asVector(m_input);
 
-            #if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
+            #if (CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2) || CV_VERSION_MAJOR >= 4
                 cv::Stitcher::Status status = m_stitcher->stitch(vectorInput, *output()->cvMat());
             #else
                 cv::Stitcher::Status status = m_stitcher.stitch(vectorInput, *output()->cvMat());
@@ -74,7 +76,7 @@ void QStitcher::setParams(const QVariantMap &params){
     m_params = params;
     emit paramsChanged(m_params);
 
-#if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
+#if (CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2) || CV_VERSION_MAJOR >= 4
     cv::Stitcher::Mode mode = cv::Stitcher::PANORAMA;
     if ( params.contains("mode") )
         mode = static_cast<cv::Stitcher::Mode>(params["mode"].toInt());
@@ -86,6 +88,8 @@ void QStitcher::setParams(const QVariantMap &params){
 
 #if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
     m_stitcher = cv::Stitcher::create(mode, tryUseGpu);
+#elif CV_VERSION_MAJOR >= 4
+    m_stitcher = cv::Stitcher::create(mode);
 #else
     m_stitcher = cv::Stitcher::createDefault(tryUseGpu);
 #endif

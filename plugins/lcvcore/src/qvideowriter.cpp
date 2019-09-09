@@ -74,7 +74,7 @@ void QVideoWriter::staticLoad(const QJSValue &params){
                 if ( fourccstr.length() != 4 ){
                     qWarning("Invalid fourcc codec length. VideoWriter will not work correctly.");
                 } else {
-                    m_fourcc = CV_FOURCC(
+                    m_fourcc = cv::VideoWriter::fourcc(
                         fourccstr[0].toLatin1(),
                         fourccstr[1].toLatin1(),
                         fourccstr[2].toLatin1(),

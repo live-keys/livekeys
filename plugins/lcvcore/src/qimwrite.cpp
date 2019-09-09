@@ -47,13 +47,13 @@ void QImWrite::setParams(const QJSValue &params){
         while( paramsIt.hasNext() ){
             paramsIt.next();
             if ( paramsIt.name() == "jpegQuality" ){
-                m_convertedParams.push_back(CV_IMWRITE_JPEG_QUALITY);
+                m_convertedParams.push_back(cv::IMWRITE_JPEG_QUALITY);
                 m_convertedParams.push_back(paramsIt.value().toInt());
             } else if ( paramsIt.name() == "pngCompression" ){
-                m_convertedParams.push_back(CV_IMWRITE_PNG_COMPRESSION);
+                m_convertedParams.push_back(cv::IMWRITE_PNG_COMPRESSION);
                 m_convertedParams.push_back(paramsIt.value().toInt());
             } else if ( paramsIt.name() == "pxmBinary" ){
-                m_convertedParams.push_back(CV_IMWRITE_PXM_BINARY);
+                m_convertedParams.push_back(cv::IMWRITE_PXM_BINARY);
                 m_convertedParams.push_back(paramsIt.value().toInt());
             }
         }

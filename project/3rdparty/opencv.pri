@@ -65,7 +65,7 @@ win32{
         mkCvDir($$DEPLOY_PATH/external)
         mkCvDir($$DEPLOY_PATH/external/opencv)
         copyCvDll($${OPENCV_DIR_DLLS}/opencv_world$${OPENCV_VERSION}.dll)
-        copyCvDll($${OPENCV_DIR_DLLS}/opencv_ffmpeg$${OPENCV_VERSION_FIND}_64.dll)
+        copyCvDll($${OPENCV_DIR_DLLS}/opencv_videoio_ffmpeg$${OPENCV_VERSION_FIND}_64.dll)
     }
 }
 

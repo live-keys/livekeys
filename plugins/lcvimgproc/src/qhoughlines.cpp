@@ -101,7 +101,7 @@ QSGNode *QHoughLines::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNode
             pt2.y = cvRound(y0 - 1000*(a));
             line( *surface, pt1, pt2,
                   Scalar(m_lineColor.blue(), m_lineColor.green(), m_lineColor.red(), 255),
-                  m_lineThickness, CV_AA );
+                  m_lineThickness, cv::LINE_AA );
         }
         d->outDirty = false;
     }

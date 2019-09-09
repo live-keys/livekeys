@@ -11,7 +11,7 @@ environment:
       PYTHON_ARCH: "64"
 
 install:
-  - choco install opencv -version 3.4.0
+  - choco install opencv -version 4.1.1
   
 before_build:
   - SET ARCH=x64

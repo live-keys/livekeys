@@ -12,13 +12,13 @@ class QGeometry : public QObject{
 
 public:
     enum Interpolation{
-        INTER_NEAREST    = CV_INTER_NN, //!< nearest neighbor interpolation
-        INTER_LINEAR     = CV_INTER_LINEAR, //!< bilinear interpolation
-        INTER_CUBIC      = CV_INTER_CUBIC, //!< bicubic interpolation
-        INTER_AREA       = CV_INTER_AREA, //!< area-based (or super) interpolation
-        INTER_LANCZOS4   = CV_INTER_LANCZOS4, //!< Lanczos interpolation over 8x8 neighborhood
+        INTER_NEAREST    = cv::INTER_NEAREST, //!< nearest neighbor interpolation
+        INTER_LINEAR     = cv::INTER_LINEAR, //!< bilinear interpolation
+        INTER_CUBIC      = cv::INTER_CUBIC, //!< bicubic interpolation
+        INTER_AREA       = cv::INTER_AREA, //!< area-based (or super) interpolation
+        INTER_LANCZOS4   = cv::INTER_LANCZOS4, //!< Lanczos interpolation over 8x8 neighborhood
         INTER_MAX        = 7,
-        WARP_INVERSE_MAP = CV_WARP_INVERSE_MAP
+        WARP_INVERSE_MAP = cv::WARP_INVERSE_MAP
     };
 
 public:

@@ -127,7 +127,7 @@ QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdateP
 
             if ( os->scenePoints.size() > 10 ){
                 std::vector<uchar> outlierMask;
-                cv::Mat H = cv::findHomography(os->objectPoints, os->scenePoints, outlierMask, CV_RANSAC, 4);
+                cv::Mat H = cv::findHomography(os->objectPoints, os->scenePoints, outlierMask, cv::RANSAC, 4);
 
                 size_t outlierCount = 0;
                 for ( size_t k = 0; k < outlierMask.size(); ++k ){
@@ -141,7 +141,7 @@ QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdateP
                 std::vector<cv::Point2f> currentCorners(corners.size());
                 for ( int ci = 0; ci < corners.size(); ++ci ){
                     QPoint p = corners[ci].toPoint();
-                    currentCorners[ci] = cvPoint(p.x(), p.y());
+                    currentCorners[ci] = cv::Point2f(p.x(), p.y());
                 }
 
                 std::vector<cv::Point2f> sceneCorners(corners.size());

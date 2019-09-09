@@ -136,8 +136,8 @@ void QCamCaptureThread::run(){
 
 void QCamCaptureThread::initializeMatSize(){
     Q_D(QCamCaptureThread);
-    d->width = (int)d->capture->get(CV_CAP_PROP_FRAME_WIDTH);
-    d->height = (int)d->capture->get(CV_CAP_PROP_FRAME_HEIGHT);
+    d->width = (int)d->capture->get(cv::CAP_PROP_FRAME_WIDTH);
+    d->height = (int)d->capture->get(cv::CAP_PROP_FRAME_HEIGHT);
     if ( d->width == 0 || d->height == 0 ){ // Sacrifice one frame to get width and height
         if ( d->capture->grab() ){
             cv::Mat firstFrame;
@@ -176,8 +176,8 @@ void QCamCaptureThread::setCaptureResolution(int width, int height){
     Q_D(QCamCaptureThread);
     QMutexLocker lock(&d->mutex);
     if ( d->capture->isOpened() ){
-        d->capture->set(CV_CAP_PROP_FRAME_WIDTH, width);
-        d->capture->set(CV_CAP_PROP_FRAME_HEIGHT, height);
+        d->capture->set(cv::CAP_PROP_FRAME_WIDTH, width);
+        d->capture->set(cv::CAP_PROP_FRAME_HEIGHT, height);
         initializeMatSize();
     }
 }

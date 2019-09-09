@@ -156,7 +156,7 @@ void QFeatureDetector::initializeDetector(cv::Ptr<cv::FeatureDetector> detector)
 
 /// \private
 void QFeatureDetector::detect(){
-    if ( m_detector != 0 && !m_in->cvMat()->empty() && isComponentComplete() ){
+    if ( m_detector != nullptr && !m_in->cvMat()->empty() && isComponentComplete() ){
         m_detector->detect(*m_in->cvMat(), m_keypoints->keypoints(), *m_mask->cvMat());
         cv::Mat inClone = m_in->cvMat()->clone();
         m_keypoints->setMat(inClone);

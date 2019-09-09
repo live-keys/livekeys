@@ -67,7 +67,7 @@ private:
 
     lv::QmlObjectList*             m_input;
 
-#if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
+#if (CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2) || CV_VERSION_MAJOR >= 4
     cv::Ptr<cv::Stitcher> m_stitcher;
 #else
     cv::Stitcher m_stitcher;

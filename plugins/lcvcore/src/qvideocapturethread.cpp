@@ -148,10 +148,10 @@ void QVideoCaptureThread::run(){
                 if ( d->seekRequest != m_framePos ){
                     vlog_debug("cv-videocapture", "Seek request");
                     beginSeek();
-                    d->capture->set(CV_CAP_PROP_POS_FRAMES, d->seekRequest);
-                    m_framePos = (int)d->capture->get(CV_CAP_PROP_POS_FRAMES);
+                    d->capture->set(cv::CAP_PROP_POS_FRAMES, d->seekRequest);
+                    m_framePos = (int)d->capture->get(cv::CAP_PROP_POS_FRAMES);
                     if ( m_framePos != d->seekRequest && m_forceSeek ){
-                        d->capture->set(CV_CAP_PROP_POS_FRAMES, 0);
+                        d->capture->set(cv::CAP_PROP_POS_FRAMES, 0);
                         int i = 0;
                         while ( i < d->seekRequest )
                             d->capture->grab();
@@ -194,9 +194,9 @@ void QVideoCaptureThread::run(){
 
 void QVideoCaptureThread::initializeMatSize(){
     Q_D(QVideoCaptureThread);
-    m_totalFrames = (int)d->capture->get(CV_CAP_PROP_FRAME_COUNT);
-    d->width      = (int)d->capture->get(CV_CAP_PROP_FRAME_WIDTH);
-    d->height     = (int)d->capture->get(CV_CAP_PROP_FRAME_HEIGHT);
+    m_totalFrames = (int)d->capture->get(cv::CAP_PROP_FRAME_COUNT);
+    d->width      = (int)d->capture->get(cv::CAP_PROP_FRAME_WIDTH);
+    d->height     = (int)d->capture->get(cv::CAP_PROP_FRAME_HEIGHT);
     if ( d->width == 0 || d->height == 0 ){ // Sacrifice one frame to get width and height
         if ( d->capture->grab() ){
             cv::Mat firstFrame;
@@ -231,6 +231,6 @@ int QVideoCaptureThread::captureHeight() const{
 double QVideoCaptureThread::captureFps() const{
     Q_D(const QVideoCaptureThread);
     if ( d->capture->isOpened())
-        return d->capture->get(CV_CAP_PROP_FPS);
+        return d->capture->get(cv::CAP_PROP_FPS);
     return 0;
 }

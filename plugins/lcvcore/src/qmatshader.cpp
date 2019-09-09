@@ -82,7 +82,8 @@ bool QMatShader::loadTexture(QMat *mat, int index, bool linearFilter){
 
     // Mat step
     m_glFunctions.glPixelStorei(GL_UNPACK_ALIGNMENT, (mat->cvMat()->step & 3) ? 1 : 4);
-    if ( mat->cvMat()->elemSize() != 0 )
+
+    if ( !mat->cvMat()->empty() )
         m_glFunctions.glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint)( mat->cvMat()->step / mat->cvMat()->elemSize()) );
 
     GLint colorFormat = mat->cvMat()->channels() == 3

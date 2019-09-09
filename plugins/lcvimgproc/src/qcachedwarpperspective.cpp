@@ -81,7 +81,7 @@ void QCachedWarpPerspective::transform(const cv::Mat &in, cv::Mat &out){
         m_cacheDirty = false;
     }
 
-    cv::remap(in, out, *m_cacheMap1, *m_cacheMap2, CV_INTER_LINEAR);
+    cv::remap(in, out, *m_cacheMap1, *m_cacheMap2, cv::INTER_LINEAR);
 }
 
 QSGNode *QCachedWarpPerspective::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *){

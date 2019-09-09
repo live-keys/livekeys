@@ -83,7 +83,7 @@ void QCalcOpticalFlowPyrLKPrivate::calculateFlow(const cv::Mat& input){
     if ( input.channels() == 1 )
         gray = input;
     else
-        cvtColor(input, gray, CV_BGR2GRAY);
+        cvtColor(input, gray, cv::COLOR_BGR2GRAY);
 
     if ( !pointState->currentPoints.empty() ){
 

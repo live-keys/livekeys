@@ -35,7 +35,7 @@ void QHueSaturationLightness::transform(const cv::Mat &in, cv::Mat &out){
     if ( (in.channels() != 3 && in.channels() != 4) || in.depth() != CV_8U )
         return;
 
-    cvtColor(in, m_middle, CV_BGR2HSV);
+    cvtColor(in, m_middle, cv::COLOR_BGR2HSV);
     signed short hue_shift = (m_hue - 180) / 2;
 
     for (int y = 0; y < in.rows; y++){
@@ -81,5 +81,5 @@ void QHueSaturationLightness::transform(const cv::Mat &in, cv::Mat &out){
         }
     }
 
-    cvtColor(m_middle, out, CV_HSV2BGR);
+    cvtColor(m_middle, out, cv::COLOR_HSV2BGR);
 }

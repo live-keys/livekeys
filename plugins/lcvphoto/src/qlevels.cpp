@@ -104,7 +104,7 @@ void QLevels::transform(const cv::Mat &in, cv::Mat &out){
         int channel = 1;
 
         if ( m_temp.channels() == 3 )
-            cv::cvtColor(m_temp, m_temp, CV_BGR2HLS);
+            cv::cvtColor(m_temp, m_temp, cv::COLOR_BGR2HLS);
 
         if ( cfg.lowRange > 0 || cfg.highRange < 255 ){
             if ( cfg.lowRange < 253 && cfg.highRange > 0 ){
@@ -120,7 +120,7 @@ void QLevels::transform(const cv::Mat &in, cv::Mat &out){
         }
 
         if ( m_temp.channels() == 3 )
-            cv::cvtColor(m_temp, m_temp, CV_HLS2BGR);
+            cv::cvtColor(m_temp, m_temp, cv::COLOR_HLS2BGR);
     }
 
     cv::swap(m_temp, out);
