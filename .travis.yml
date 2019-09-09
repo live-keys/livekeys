@@ -25,6 +25,8 @@ addons:
       - libswscale-dev
       - python-dev
       - python-numpy
+      - python3
+      - python3-pip
       - libtbb2
       - libtbb-dev
       - libjpeg-dev
@@ -91,6 +93,7 @@ install:
 
 script:
   - ls
+  - pip install -r livepm/requirements.txt
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then python3 livepm/main.py build .. macos_clang_64; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py build .. gcc_64; fi
   - find .
