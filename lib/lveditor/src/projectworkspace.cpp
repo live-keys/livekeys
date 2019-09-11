@@ -708,7 +708,6 @@ void ProjectWorkspace::whenPaneInitialized(QQuickItem *pane){
 }
 
 void ProjectWorkspace::whenPaneAdded(QQuickItem *pane, QQuickWindow *window, const QVariantList &position){
-    qDebug() << this;
     m_panes.insert(pane);
     connect(pane, &QQuickItem::widthChanged, this, &ProjectWorkspace::whenPaneSizeChanged);
     connect(pane, &QQuickItem::heightChanged, this, &ProjectWorkspace::whenPaneSizeChanged);
