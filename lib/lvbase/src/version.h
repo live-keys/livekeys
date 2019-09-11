@@ -17,14 +17,14 @@ public:
     static const long long MAJOR_MULTIPLIER;
 
 public:
-    Version(int major = 0, int minor = 0, int patch = 0, int revision = 0);
+    Version(int majorNumber = 0, int minorNumber = 0, int patchNumber = 0, int revisionNumber = 0);
     Version(const std::string& versionStr);
     ~Version();
 
-    int major() const;
-    int minor() const;
-    int patch() const;
-    int revision() const;
+    int majorNumber() const;
+    int minorNumber() const;
+    int patchNumber() const;
+    int revisionNumber() const;
 
     bool operator == (const Version& version) const;
     bool operator != (const Version& version) const;
@@ -42,14 +42,14 @@ private:
 /**
  * \brief Returns major version
  */
-inline int Version::major() const{
+inline int Version::majorNumber() const{
     return static_cast<int>(m_version / MAJOR_MULTIPLIER);
 }
 
 /**
  * \brief Returns minor version
  */
-inline int Version::minor() const{
+inline int Version::minorNumber() const{
     long long cutRight = m_version / MINOR_MULTIPLIER;
     return static_cast<int>(cutRight - ((cutRight / 10000) * 10000));
 }
@@ -57,7 +57,7 @@ inline int Version::minor() const{
 /**
  * \brief Returns patch number
  */
-inline int Version::patch() const{
+inline int Version::patchNumber() const{
     long long cutRight = m_version / PATCH_MULTIPLIER;
     return static_cast<int>(cutRight - ((cutRight / 10000) * 10000));
 }
@@ -65,7 +65,7 @@ inline int Version::patch() const{
 /**
  * \brief Returns revision number
  */
-inline int Version::revision() const{
+inline int Version::revisionNumber() const{
     return static_cast<int>(m_version - ((m_version / 10000) * 10000));
 }
 

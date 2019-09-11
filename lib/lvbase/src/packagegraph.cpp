@@ -82,7 +82,7 @@ void PackageGraph::loadPackage(const Package::Ptr &p, bool addLibraries){
         Version oldVersion = existingPackage->version();
         Version newVersion = p->version();
 
-        if ( newVersion.major() != oldVersion.major() ){
+        if ( newVersion.majorNumber() != oldVersion.majorNumber() ){
             THROW_EXCEPTION(
                 lv::Exception,
                 "Incompatible package versions for package \'" + p->name() + "\': " +
@@ -277,7 +277,7 @@ void PackageGraph::addLibrary(const Package::Library &lib){
         Version oldVersion = libnode->library.version;
         Version newVersion = lib.version;
 
-        if ( newVersion.major() != oldVersion.major() ){
+        if ( newVersion.majorNumber() != oldVersion.majorNumber() ){
             THROW_EXCEPTION(
                 lv::Exception,
                 "Incompatible library versions for library \'" + lib.name + "\': " +
@@ -303,7 +303,7 @@ void PackageGraph::addLibrary(const Package::Library &lib){
                 8
             );
         } else if ( flags == Package::Library::HasLess ){ // current library has less
-            if ( newVersion.minor() < oldVersion.minor() ){
+            if ( newVersion.minorNumber() < oldVersion.minorNumber() ){
                 THROW_EXCEPTION(
                     lv::Exception,
                     "Newer library \'" + lib.name + "\' [" + newVersion.toString() + "] has incompatible compilation " +
@@ -316,7 +316,7 @@ void PackageGraph::addLibrary(const Package::Library &lib){
 
             libnode->library = lib;
         } else if ( flags == Package::Library::HasMore ){ // current library has more, do not replace
-            if ( newVersion.minor() > oldVersion.minor() ){
+            if ( newVersion.minorNumber() > oldVersion.minorNumber() ){
                 THROW_EXCEPTION(
                     lv::Exception,
                     "Loaded library \'" + lib.name + "\' [" + oldVersion.toString() + "] has incompatible compilation " +
@@ -396,23 +396,23 @@ Package::Ptr PackageGraph::findPackage(Package::Reference ref){
         std::string path = *it + "/" + ref.name;
         if ( Package::existsIn(path) ){
             Package::Ptr p = Package::createFromPath(path);
-            if ( p->version().major() == ref.version.major() && p->version() > ref.version ){
+            if ( p->version().majorNumber() == ref.version.majorNumber() && p->version() > ref.version ){
                 return p;
             }
         }
 
-        std::string pathMajor = path + "." + std::to_string(ref.version.major());
+        std::string pathMajor = path + "." + std::to_string(ref.version.majorNumber());
         if ( Package::existsIn(pathMajor) ){
             Package::Ptr p = Package::createFromPath(path);
-            if ( p->version().major() == ref.version.major() && p->version() > ref.version ){
+            if ( p->version().majorNumber() == ref.version.majorNumber() && p->version() > ref.version ){
                 return p;
             }
         }
 
-        std::string pathMajorMinor = pathMajor + "." + std::to_string(ref.version.minor());
+        std::string pathMajorMinor = pathMajor + "." + std::to_string(ref.version.minorNumber());
         if ( Package::existsIn(pathMajorMinor) ){
             Package::Ptr p = Package::createFromPath(path);
-            if ( p->version().major() == ref.version.major() && p->version() > ref.version ){
+            if ( p->version().majorNumber() == ref.version.majorNumber() && p->version() > ref.version ){
                 return p;
             }
         }

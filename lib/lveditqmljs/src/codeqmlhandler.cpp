@@ -407,7 +407,8 @@ namespace qmlhandler_helpers{
         if ( typeName != "" ){
             InheritancePath ipath = getTypePath(scope, typeName);
             if ( !ipath.isEmpty() ){
-
+                typePath = ipath;
+                typeLibraryKey = ipath.nodes.last().library.path;
             }
         }
 

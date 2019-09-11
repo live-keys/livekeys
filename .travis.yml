@@ -73,11 +73,11 @@ install:
     fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
       sudo apt-get install -y libtiff5 libtiff5-dev;
-      git clone --single-branch -b 3.4 https://github.com/opencv/opencv.git;
+      git clone --single-branch -b 4.1.1 https://github.com/opencv/opencv.git;
       cd opencv;
       mkdir build;
       cd build;
-      cmake ..;
+      cmake -D CMAKE_BUILD_TYPE=RELEASE -D OPENCV_GENERATE_PKGCONFIG=YES -D BUILD_EXAMPLES=OFF -D BUILD_opencv_apps=OFF -D BUILD_DOCS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_TESTS=OFF ..;
       make -j8;
       sudo make -j8 install;
       export OPENCV_DIR=/usr/local/lib;
@@ -93,7 +93,7 @@ install:
 
 script:
   - ls
-  - pip install -r livepm/requirements.txt
+  - pip3 install -r livepm/requirements.txt
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then python3 livepm/main.py build .. macos_clang_64; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py build .. gcc_64; fi
   - find .

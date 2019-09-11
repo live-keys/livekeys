@@ -14,7 +14,7 @@ unix:!macx{
     QMAKE_LFLAGS += \
         '-Wl,-rpath,\'\$$ORIGIN\'' \
         '-Wl,-rpath,\'\$$ORIGIN/link\'' \
-	'-Wl,-rpath,\'\$$ORIGIN/lib\''
+	    '-Wl,-rpath,\'\$$ORIGIN/lib\''
 
 
     createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)

@@ -25,8 +25,8 @@ const long long Version::MAJOR_MULTIPLIER = Version::MINOR_MULTIPLIER * 10000;
  * Any number of parameters is allowed, the rest default to 0. All numbers except the major version
  * are limited to four digits max by design.
  */
-Version::Version(int major, int minor, int patch, int revision)
-    : m_version(revision + patch * PATCH_MULTIPLIER + minor * MINOR_MULTIPLIER + major * MAJOR_MULTIPLIER )
+Version::Version(int majorNum, int minorNum, int patchNum, int revisionNum)
+    : m_version(revisionNum + patchNum * PATCH_MULTIPLIER + minorNum * MINOR_MULTIPLIER + majorNum * MAJOR_MULTIPLIER )
 {
 }
 
@@ -38,10 +38,10 @@ Version::Version(int major, int minor, int patch, int revision)
  * \sa Version(int major, int minor, int patch, int revision)
  */
 Version::Version(const std::string &versionStr){
-    int major = 0;
-    int minor = 0;
-    int patch = 0;
-    int revision = 0;
+    int majorNum = 0;
+    int minorNum = 0;
+    int patchNum = 0;
+    int revisionNum = 0;
 
     std::vector<std::string> parts;
     std::istringstream is(versionStr);
@@ -51,15 +51,15 @@ Version::Version(const std::string &versionStr){
         parts.push_back(part);
 
     if ( parts.size() > 0 )
-        major = std::stoi(parts[0]);
+        majorNum = std::stoi(parts[0]);
     if ( parts.size() > 1 )
-        minor = std::stoi(parts[1]);
+        minorNum = std::stoi(parts[1]);
     if ( parts.size() > 2 )
-        patch = std::stoi(parts[2]);
+        patchNum = std::stoi(parts[2]);
     if ( parts.size() > 3 )
-        revision = std::stoi(parts[3]);
+        revisionNum = std::stoi(parts[3]);
 
-    m_version = revision + patch * PATCH_MULTIPLIER + minor * MINOR_MULTIPLIER + major * MAJOR_MULTIPLIER;
+    m_version = revisionNum + patchNum * PATCH_MULTIPLIER + minorNum * MINOR_MULTIPLIER + majorNum * MAJOR_MULTIPLIER;
 }
 
 /**
@@ -75,9 +75,9 @@ Version::~Version(){
  */
 std::string Version::toString() const{
     std::stringstream ss;
-    ss << major() << "." << minor() << "." << patch();
-    if ( revision() != 0 )
-        ss << "." << revision();
+    ss << majorNumber() << "." << minorNumber() << "." << patchNumber();
+    if ( revisionNumber() != 0 )
+        ss << "." << revisionNumber();
 
     return ss.str();
 }

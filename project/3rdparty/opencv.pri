@@ -76,7 +76,7 @@ unix{
     macx:QT_CONFIG -= no-pkg-config
 
     CONFIG += link_pkgconfig
-    PKGCONFIG += opencv
+    PKGCONFIG += opencv4
 
     defineTest(deployOpenCV){}
 
