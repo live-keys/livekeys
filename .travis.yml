@@ -47,15 +47,15 @@ install:
       rm '/usr/local/bin/f2py';
       brew install numpy;
       brew search opencv;
-      brew info opencv@3;
-      brew install opencv@3;
+      brew info opencv@4;
+      brew install opencv@4;
       echo "Open CV environment";
       ls /usr/local/Cellar;
       echo "/usr/local/opt";
       ls /usr/local/opt;
-      OPENCV_VERSION="$(ls -1 /usr/local/Cellar/opencv@3)";
+      OPENCV_VERSION="$(ls -1 /usr/local/Cellar/opencv@4)";
       echo $OPENCV_VERSION;
-      export OPENCV_DIR=/usr/local/Cellar/opencv@3/$OPENCV_VERSION;
+      export OPENCV_DIR=/usr/local/Cellar/opencv@4/$OPENCV_VERSION;
       export PKG_CONFIG_PATH=$OPENCV_DIR/lib/pkgconfig;
       echo $OPENCV_DIR;
       echo $PKG_CONFIG_PATH;
@@ -93,7 +93,7 @@ install:
 
 script:
   - ls
-  - pip3 install -r livepm/requirements.txt
+  - pip3 install -r requirements.txt
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then python3 livepm/main.py build .. macos_clang_64; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py build .. gcc_64; fi
   - find .
