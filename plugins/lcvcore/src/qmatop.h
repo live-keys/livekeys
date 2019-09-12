@@ -52,6 +52,11 @@ public slots:
 
     QMatrix4x4 to4x4Matrix(QMat* m);
     QVariantList toArray(QMat* m);
+
+    QMat* bitwiseXor(QMat* arg1, QMat* arg2);
+    QMat* bitwiseOr(QMat* arg1, QMat* arg2);
+    QMat* bitwiseAnd(QMat* arg1, QMat* arg2);
+    QMat* bitwiseNot(QMat* arg);
 };
 
 inline QMat *QMatOp::nullMat() const{

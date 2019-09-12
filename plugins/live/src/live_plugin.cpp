@@ -53,6 +53,12 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QQuickWindow>
+#include "qmlcolor.h"
+
+static QObject* colorProvider(QQmlEngine *engine, QJSEngine *){
+    return new lv::QmlColor(engine);
+}
+
 
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
@@ -84,6 +90,8 @@ void LivePlugin::registerTypes(const char *uri){
         uri, 1, 0, "RemoteLineResponse", "RemoteLineResponse is part of RemoteLine.");
     qmlRegisterUncreatableType<lv::RemoteContainer>(
         uri, 1, 0, "RemoteContainer", "RemoteContainer is of abstract type.");
+
+    qmlRegisterSingletonType<lv::QmlColor>(uri, 1, 0, "Color", &colorProvider);
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){

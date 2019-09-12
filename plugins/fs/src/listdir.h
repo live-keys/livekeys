@@ -4,7 +4,7 @@
 #include <QObject>
 
 namespace lv{
-
+/// \private
 class ListDir : public QObject{
 
     Q_OBJECT
