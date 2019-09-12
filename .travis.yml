@@ -53,9 +53,9 @@ install:
       ls /usr/local/Cellar;
       echo "/usr/local/opt";
       ls /usr/local/opt;
-      OPENCV_VERSION="$(ls -1 /usr/local/Cellar/opencv@4)";
+      OPENCV_VERSION="$(ls -1 /usr/local/Cellar/opencv)";
       echo $OPENCV_VERSION;
-      export OPENCV_DIR=/usr/local/Cellar/opencv@4/$OPENCV_VERSION;
+      export OPENCV_DIR=/usr/local/Cellar/opencv/$OPENCV_VERSION;
       export PKG_CONFIG_PATH=$OPENCV_DIR/lib/pkgconfig;
       echo $OPENCV_DIR;
       echo $PKG_CONFIG_PATH;
