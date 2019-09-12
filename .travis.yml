@@ -93,7 +93,7 @@ install:
 
 script:
   - ls
-  - pip3 install -r requirements.txt
+  - pip3 install -r requirements.txt --user
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then python3 livepm/main.py build .. macos_clang_64; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py build .. gcc_64; fi
   - find .
