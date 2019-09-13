@@ -1,6 +1,7 @@
 livekeys.pro.user
 build/*
 !build/.gitignore
+config.pri
 
 # macOS
 .DS_Store
