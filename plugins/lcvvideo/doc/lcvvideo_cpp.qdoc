@@ -2,9 +2,9 @@
 
   \module lcvvideo_cpp
 
-  \title Live CV Video
+  \title Livekeys Video
 
-  \brief This module contains the cpp implementation of Live CV's video analysis module.
+  \brief This module contains the cpp implementation of Livekeys's video analysis module.
 
   \sa lcvvideo
 

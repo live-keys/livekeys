@@ -365,7 +365,7 @@ ProjectWorkspace::ProjectWorkspace(Project* project, QObject *parent)
 
     QQmlEngine* engine = lv::ViewContext::instance().engine()->engine();
 
-    QObject* lk = engine->rootContext()->contextProperty("livecv").value<QObject*>();
+    QObject* lk = engine->rootContext()->contextProperty("lk").value<QObject*>();
     if ( !lk ){
         qWarning("Failed to find live global object.");
         return;

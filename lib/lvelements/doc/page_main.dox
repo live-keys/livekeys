@@ -9,7 +9,7 @@
 
 //TODO: Table with OSes
 
-@subsection Using Live CV
+@subsection Using Livekeys
 
 
 
@@ -24,7 +24,7 @@
 
 @section Developers Guide
 
-@subsection Building Live CV
+@subsection Building Livekeys
 @subsection Creating Plugins
 
 1. Integrating Live Elements with C++

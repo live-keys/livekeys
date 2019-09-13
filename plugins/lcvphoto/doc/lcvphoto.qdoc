@@ -2,7 +2,7 @@
 
   \qmlmodule lcvphoto
 
-  \title Live CV QML Computational Photography
+  \title Livekeys QML Computational Photography
 
   This module contains elements for photo processing. It resembles open cv's photo module.
 

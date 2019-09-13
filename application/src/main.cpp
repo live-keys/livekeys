@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -19,8 +19,8 @@
 #include <QQmlContext>
 #include <QFileInfo>
 
-#include "livecv.h"
-#include "livecvarguments.h"
+#include "livekeys.h"
+#include "livekeysarguments.h"
 #include "live/libraryloadpath.h"
 #include "live/visuallog.h"
 #include "live/applicationcontext.h"
@@ -36,18 +36,18 @@ int main(int argc, char *argv[]){
     QGuiApplication::addLibraryPath(QString::fromStdString(lv::ApplicationContext::instance().librariesPath()));
 
     QGuiApplication app(argc, argv);
-    QGuiApplication::setApplicationName("Live CV");
-    QGuiApplication::setApplicationVersion(LiveCV::versionString());
+    QGuiApplication::setApplicationName("Livekeys");
+    QGuiApplication::setApplicationVersion(Livekeys::versionString());
 
     try{
-        LiveCV::Ptr livecv = LiveCV::create(argc, argv);
-        livecv->loadInternals();
+        Livekeys::Ptr livekeys = Livekeys::create(argc, argv);
+        livekeys->loadInternals();
 
-        if ( livecv->arguments()->helpFlag() ){
-            printf("%s", livecv->arguments()->helpString().c_str());
+        if ( livekeys->arguments()->helpFlag() ){
+            printf("%s", livekeys->arguments()->helpString().c_str());
             return 0;
-        } else if ( livecv->arguments()->versionFlag() ){
-            printf("%s\n", qPrintable(livecv->versionString()));
+        } else if ( livekeys->arguments()->versionFlag() ){
+            printf("%s\n", qPrintable(livekeys->versionString()));
             return 0;
         }
 
@@ -55,12 +55,12 @@ int main(int argc, char *argv[]){
         if ( QFileInfo(QString::fromStdString(ApplicationContext::instance().externalPath())).exists() )
             LibraryLoadPath::addRecursive(ApplicationContext::instance().externalPath(), ApplicationContext::instance().linkPath());
 
-        if ( livecv->arguments()->pluginInfoFlag() ){
-            printf("%s", livecv->extractPluginInfo(livecv->arguments()->pluginInfoImport()).data());
+        if ( livekeys->arguments()->pluginInfoFlag() ){
+            printf("%s", livekeys->extractPluginInfo(livekeys->arguments()->pluginInfoImport()).data());
             return 0;
         }
 
-        livecv->loadDefaultLayers();
+        livekeys->loadDefaultLayers();
 
         return app.exec();
 

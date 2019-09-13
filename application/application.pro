@@ -1,5 +1,5 @@
 TEMPLATE = app
-TARGET   = livecv
+TARGET   = livekeys
 QT      += qml quick
 
 linkLocalLibrary(lvbase,      lvbase)
@@ -39,8 +39,8 @@ DESTDIR = $$BUILD_PATH/bin
 
 include($$PWD/src/main.pri)
 
-RC_ICONS = $$PWD/icons/livecv.ico
-macx:ICON = $$PWD/icons/livecv.icns
+RC_ICONS = $$PWD/icons/livekeys.ico
+macx:ICON = $$PWD/icons/livekeys.icns
 
 RESOURCES += $$PWD/application.qrc
 

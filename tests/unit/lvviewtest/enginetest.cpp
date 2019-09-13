@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -173,11 +173,11 @@ void EngineTest::engineErrorHandlerTest(){
         isError = true;
     });
 
-    QObject livecvStub;
-    livecvStub.setProperty("engine", QVariant::fromValue(engine));
+    QObject livekeysStub;
+    livekeysStub.setProperty("engine", QVariant::fromValue(engine));
 
     engine->engine()->rootContext()->setContextProperty("engine", engine);
-    engine->engine()->rootContext()->setContextProperty("livecv", &livecvStub);
+    engine->engine()->rootContext()->setContextProperty("lk", &livekeysStub);
     QObject* obj = engine->createObject(
         "import QtQuick 2.3\n import base 1.0\n "
         "Item{\n"
@@ -222,11 +222,11 @@ void EngineTest::engineErrorHandlerSkipTest(){
         isError = true;
     });
 
-    QObject livecvStub;
-    livecvStub.setProperty("engine", QVariant::fromValue(engine));
+    QObject livekeysStub;
+    livekeysStub.setProperty("engine", QVariant::fromValue(engine));
 
     engine->engine()->rootContext()->setContextProperty("engine", engine);
-    engine->engine()->rootContext()->setContextProperty("livecv", &livecvStub);
+    engine->engine()->rootContext()->setContextProperty("lk", &livekeysStub);
     QObject* obj = engine->createObject(
         "import QtQuick 2.3\n import base 1.0\n "
         "Item{\n"
@@ -291,11 +291,11 @@ void EngineTest::jsThrownErrorHandlerTest(){
         isError = true;
     });
 
-    QObject* livecvStub = new QObject;
-    livecvStub->setProperty("engine", QVariant::fromValue(engine));
+    QObject* livekeysStub = new QObject;
+    livekeysStub->setProperty("engine", QVariant::fromValue(engine));
 
     engine->engine()->rootContext()->setContextProperty("engine", engine);
-    engine->engine()->rootContext()->setContextProperty("livecv", livecvStub);
+    engine->engine()->rootContext()->setContextProperty("lk", livekeysStub);
     QObject* obj = engine->createObject(
         "import QtQuick 2.3\n import base 1.0\n "
         "Item{\n"
@@ -321,5 +321,5 @@ void EngineTest::jsThrownErrorHandlerTest(){
     QVERIFY(!isError);
     QVERIFY(obj->property("errorMessage").toString().endsWith("JSTest"));
 
-    delete livecvStub;
+    delete livekeysStub;
 }

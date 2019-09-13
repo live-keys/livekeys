@@ -1,9 +1,9 @@
 import live 1.0
 
 // This sample shows how to create a main script
-// with Live CV that can be executed from the command line
+// with Livekeys that can be executed from the command line
 
-// Run this sample with ./livecv -p "Hello"
+// Run this sample with ./livekeys -p "Hello"
 
 Main{
     options: [  

@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -181,7 +181,7 @@ CommandLineParser::Option *CommandLineParser::findOptionByShortName(const std::s
  */
 std::string CommandLineParser::helpString() const{
     std::stringstream base;
-    base << "\n" << m_d->header << "\n\n" << "Usage:\n\n   livecv [options...] script.qml [args ...]\n\nOptions:\n\n";
+    base << "\n" << m_d->header << "\n\n" << "Usage:\n\n   livekeys [options...] script.qml [args ...]\n\nOptions:\n\n";
     for ( auto it = m_d->options.begin(); it != m_d->options.end(); ++it ){
         for ( auto nameIt = (*it)->shortNames.begin(); nameIt != (*it)->shortNames.end(); ++nameIt ){
             base << std::string("  ") << "-" << *nameIt << ((*it)->type != "" ? " <" + (*it)->type + ">" : "");

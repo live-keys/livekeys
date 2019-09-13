@@ -41,7 +41,7 @@ build_script:
   - dir
 
 artifacts:
-  - path: 'build\livecv-*.zip'
+  - path: 'build\livekeys-*.zip'
     name: Release
 
 deploy:

@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -159,7 +159,7 @@ void DocumentHandler::componentComplete(){
 
     m_project = editor->project();
 
-    QObject* lg = ctx->contextProperty("livecv").value<QObject*>();
+    QObject* lg = ctx->contextProperty("lk").value<QObject*>();
     if ( !lg ){
         qWarning("Failed to find live global object.");
         return;

@@ -1,14 +1,14 @@
-# Contributing to Live CV
+# Contributing to Livekeys
 
-This guide will serve as a quick start for anyone interested in contributing with Live CV. It offers a quick view over:
+This guide will serve as a quick start for anyone interested in contributing with Livekeys. It offers a quick view over:
 
-1. [The Structure of Live CV](structure)
+1. [The Structure of Livekeys](structure)
 2. [Qml Components From C++](qml-components-from-c++)
 3. [Repository organization](repository)
 
 ## Structure
 
-Live CV is split into 3 sections:
+Livekeys is split into 3 sections:
 
  * **the application** containing the visual elements and the runtime types
  * **the editor** containing components for projects and editing
@@ -21,7 +21,7 @@ This section is just quick overview on how to create a qml component from c++. F
  * [Tutorial on qml](http://doc.qt.io/qt-5/qml-tutorial1.html)
  * [QML Types from C++](http://doc.qt.io/qt-5/qtqml-cppintegration-definetypes.html)
  * [Writing QML Extensions](http://doc.qt.io/qt-5/qtqml-tutorials-extending-qml-example.html)
- * [Live CV development documentation](http://livecv.dinusv.com/documentation)
+ * [Livekeys development documentation](https://livekeys.io/documentation)
 
 In terms of c++, qml components are basically classes of a [QObject](http://doc.qt.io/qt-5/qobject.html) subtype registered to the qml meta object system. A component is registered using the [qmlRegisterType](http://doc.qt.io/qt-5/qqmlengine.html#qmlRegisterType-2) function:
 
@@ -29,7 +29,7 @@ In terms of c++, qml components are basically classes of a [QObject](http://doc.
 int qmlRegisterType(const QUrl &url, const char *uri, int versionMajor, int versionMinor, const char *qmlName)
 ```
 
-For example, in lcvimgproc plugin, at [plugins/lcvimgproc/src/lcvimgproc_plugin.cpp](https://github.com/dinusv/livecv/blob/master/plugins/lcvimgproc/src/lcvimgproc_plugin.cpp) you can see how each component is registered:
+For example, in lcvimgproc plugin, at [plugins/lcvimgproc/src/lcvimgproc_plugin.cpp](https://github.com/live-keys/livekeys/blob/master/plugins/lcvimgproc/src/lcvimgproc_plugin.cpp) you can see how each component is registered:
 
 ```cpp
 void LcvimgprocPlugin::registerTypes(const char *uri){ 
@@ -90,17 +90,17 @@ MySample{
 
 ## Repository
 
-Live CV's repository contains the master and development branch. The master branch is considered the stable branch, with all integrated components tested and functional. The **dev** branch is used for the development of Live CV. The branch contains the latest added components, which are not yet fully stable.
+Livekeys's repository contains the master and development branch. The master branch is considered the stable branch, with all integrated components tested and functional. The **dev** branch is used for the development of Livekeys. The branch contains the latest added components, which are not yet fully stable.
 
-The coding style used for Live CV si compatible with Qt's standards, described [here](https://wiki.qt.io/Coding_Conventions), with the addition of exceptions in some cases, for example coming from Open CV.
+The coding style used for Livekeys is compatible with Qt's standards, described [here](https://wiki.qt.io/Coding_Conventions), with the addition of exceptions in some cases, for example coming from Open CV.
 
 Issues have associated labels, some of them handling specific cases:
 
- * *deployment* : dealing with Live CV project files, build and deployment scripts
- * *quickstart* : used for people who want to start contributing to Live CV
+ * *deployment* : dealing with Livekeys project files, build and deployment scripts
+ * *quickstart* : used for people who want to start contributing to Livekeys
  * *easy* : entry level or issues that don't require a lot of time
- * *editor* : related to Live CV's code editor
- * *has-sample* : requires a use case sample within Live CV's sample directory
+ * *editor* : related to Livekeys's code editor
+ * *has-sample* : requires a use case sample within Livekeys's sample directory
  * *opencv* : is related to open cv or an open cv wrapper
  
 If issues are part of a module, the module is usually speciifed at the begining of the issue, e.g. [lcvvideo] Add BackgroundSubtractor{}

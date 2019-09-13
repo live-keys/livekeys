@@ -29,7 +29,7 @@ Row{
         Rectangle{
             width : parent.width 
             height : 100
-            color : LiveCVStyle.darkElementBackgroundColor
+            color : LivekeysStyle.darkElementBackgroundColor
             
             DrawHistogram{
                 id : descriptorHistogram

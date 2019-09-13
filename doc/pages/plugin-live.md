@@ -18,7 +18,7 @@ An example of use can be found in **samples\live\mainscript.qml**
 {qmlProperty:array options}
 
 Configuration options to parse received arguments. There are two types of options. Value types and flag
-types. Flags are simply checked to see whether they have been set within Live CV.
+types. Flags are simply checked to see whether they have been set within Livekeys.
 
 ```qml
 Main{
@@ -47,7 +47,7 @@ Main{
 ```
 
 The type can be anything used to intuitively describe the value. It does not have to match a qml type.
-If an option is required and is missing when Live CV is called, then Live CV will exit, and a help text will be
+If an option is required and is missing when Livekeys is called, then Livekeys will exit, and a help text will be
 displayed to the user.
 
 {qmlProperty:string version}
@@ -103,7 +103,7 @@ Returns the color of the triangle.
 
 {qmlType:StaticLoader}
 {qmlInherits:external.QtQuick#Item}
-{qmlBrief:Creates and stores a component statically. See {Static Items} for more information on statics in Live CV.}
+{qmlBrief:Creates and stores a component statically. See {Static Items} for more information on statics in Livekeys.}
 
 An example is available at **samples\live\staticloader.qml**
 

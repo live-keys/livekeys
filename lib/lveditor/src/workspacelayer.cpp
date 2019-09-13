@@ -53,7 +53,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     QObject* probject = engine->rootContext()->contextProperty("project").value<QObject*>();
     m_project = qobject_cast<lv::Project*>(probject);
 
-    QObject* lk = engine->rootContext()->contextProperty("livecv").value<QObject*>();
+    QObject* lk = engine->rootContext()->contextProperty("lk").value<QObject*>();
     if ( !lk ){
         qWarning("Failed to find live global object.");
         return;

@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef LIVECV_H
-#define LIVECV_H
+#ifndef LVLIVEKEYS_H
+#define LVLIVEKEYS_H
 
 #include <QString>
 #include <QLibrary>
@@ -26,9 +26,9 @@
 // Versioning
 // ----------
 
-#define LIVECV_VERSION_MAJOR 1
-#define LIVECV_VERSION_MINOR 5
-#define LIVECV_VERSION_PATCH 0
+#define LIVEKEYS_VERSION_MAJOR 1
+#define LIVEKEYS_VERSION_MINOR 5
+#define LIVEKEYS_VERSION_PATCH 0
 
 // Forward declarations
 // --------------------
@@ -39,7 +39,7 @@ class QUrl;
 
 namespace lv{
 
-class LiveCVArguments;
+class LivekeysArguments;
 class QmlScript;
 class ViewEngine;
 class Settings;
@@ -55,10 +55,10 @@ class Extensions;
 class PackageGraph;
 class Layer;
 
-// class LiveCV
-// ------------
+// class Livekeys
+// --------------
 
-class LiveCV : public QObject{
+class Livekeys : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(lv::Settings*       settings       READ settings   CONSTANT)
@@ -68,13 +68,13 @@ class LiveCV : public QObject{
     Q_PROPERTY(QQmlPropertyMap*    layers         READ layers     CONSTANT)
 
 public:
-    typedef QSharedPointer<LiveCV>       Ptr;
-    typedef QSharedPointer<const LiveCV> ConstPtr;
+    typedef QSharedPointer<Livekeys>       Ptr;
+    typedef QSharedPointer<const Livekeys> ConstPtr;
 
 public:
-    ~LiveCV();
+    ~Livekeys();
 
-    static LiveCV::Ptr create(int argc, const char* const argv[], QObject* parent = 0);
+    static Livekeys::Ptr create(int argc, const char* const argv[], QObject* parent = 0);
 
     void loadQml(const QUrl& url);
     void loadProject();
@@ -101,7 +101,7 @@ public:
 
     std::vector<std::string> packageImportPaths() const;
 
-    const LiveCVArguments* arguments() const;
+    const LivekeysArguments* arguments() const;
 
     QByteArray extractPluginInfo(const QString& import) const;
 
@@ -122,15 +122,15 @@ signals:
     void missingPackages();
 
 private:
-    LiveCV(QObject* parent = 0);
-    LiveCV(const LiveCV&);
-    LiveCV& operator = (const LiveCV&);
+    Livekeys(QObject* parent = 0);
+    Livekeys(const Livekeys&);
+    Livekeys& operator = (const Livekeys&);
 
     void parseArguments(const QStringList& arguments);
     void solveImportPaths();
 
     ViewEngine*      m_engine;
-    LiveCVArguments* m_arguments;
+    LivekeysArguments* m_arguments;
 
     QString              m_dir;
     QStringList          m_engineImportPaths;
@@ -149,58 +149,58 @@ private:
     mutable QObject*       m_layerPlaceholder;
 };
 
-inline int LiveCV::versionMajor(){
-    return LIVECV_VERSION_MAJOR;
+inline int Livekeys::versionMajor(){
+    return LIVEKEYS_VERSION_MAJOR;
 }
 
-inline int LiveCV::versionMinor(){
-    return LIVECV_VERSION_MINOR;
+inline int Livekeys::versionMinor(){
+    return LIVEKEYS_VERSION_MINOR;
 }
 
-inline int LiveCV::versionPatch(){
-    return LIVECV_VERSION_PATCH;
+inline int Livekeys::versionPatch(){
+    return LIVEKEYS_VERSION_PATCH;
 }
 
-inline QString LiveCV::versionString(){
+inline QString Livekeys::versionString(){
     return
         QString::number(versionMajor()) + "." +
         QString::number(versionMinor()) + "." +
         QString::number(versionPatch());
 }
 
-inline const QString &LiveCV::dir() const{
+inline const QString &Livekeys::dir() const{
     return m_dir;
 }
 
-inline const LiveCVArguments *LiveCV::arguments() const{
+inline const LivekeysArguments *Livekeys::arguments() const{
     return m_arguments;
 }
 
-inline Settings *LiveCV::settings(){
+inline Settings *Livekeys::settings(){
     return m_settings;
 }
 
-inline ViewEngine *LiveCV::engine(){
+inline ViewEngine *Livekeys::engine(){
     return m_engine;
 }
 
-inline Project *LiveCV::project(){
+inline Project *Livekeys::project(){
     return m_project;
 }
 
-inline VisualLogModel *LiveCV::log(){
+inline VisualLogModel *Livekeys::log(){
     return m_log;
 }
 
-inline Memory *LiveCV::memory(){
+inline Memory *Livekeys::memory(){
     return m_memory;
 }
 
-inline QString LiveCV::header(){
-    return " Live CV v" + versionString() + "\n"
+inline QString Livekeys::header(){
+    return " Livekeys v" + versionString() + "\n"
            " --------------------------------------------------- ";
 }
 
 }// namespace
 
-#endif // LIVECV_H
+#endif // LVLIVEKEYS_H

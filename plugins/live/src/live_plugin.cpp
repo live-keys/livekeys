@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -98,8 +98,8 @@ void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){
     QStaticContainer* sc = new QStaticContainer(engine);
     engine->rootContext()->setContextProperty("staticContainer", sc);
 
-    QObject* livecv   = engine->rootContext()->contextProperty("livecv").value<QObject*>();
-    lv::Settings* settings = static_cast<lv::Settings*>(livecv->property("settings").value<QObject*>());
+    QObject* livekeys   = engine->rootContext()->contextProperty("lk").value<QObject*>();
+    lv::Settings* settings = static_cast<lv::Settings*>(livekeys->property("settings").value<QObject*>());
 
     QString settingsPath = settings->path();
     QLicenseSettings* ls = new QLicenseSettings(settingsPath, settings);

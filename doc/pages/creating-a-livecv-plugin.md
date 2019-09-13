@@ -1,6 +1,6 @@
-# Creating a Live CV based Plugin
+# Creating a Livekeys based Plugin
 
-In order to use Open CV types within QtQuick, Live CV provides a set of wrapper libraries. We will be using lcvcore for
+In order to use Open CV types within QtQuick, Livekeys provides a set of wrapper libraries. We will be using lcvcore for
 this scenario since we will need the `QMat` type, so we will link to lcvcore and Open CV from our plugin. In qmake,
 linking to the 2 libraries requires a lot of boiler plate code:
 
@@ -22,25 +22,25 @@ unix{
 
 # Link to lcvcore
 
-PATH_TO_LIVECV = '<path_to_livecv>'
+PATH_TO_LIVEKEYS = '<path_to_livekeys>'
 
-INCLUDEPATH += $$PATH_TO_LIVECV/dev/include/plugins/lcvcore
-LIBS += -L$$PATH_TO_LIVECV/dev/plugins/lcvcore -llcvcore
+INCLUDEPATH += $$PATH_TO_LIVEKEYS/dev/include/plugins/lcvcore
+LIBS += -L$$PATH_TO_LIVEKEYS/dev/plugins/lcvcore -llcvcore
 ```
 
-so to simplify this, Live CV already provides a set of qmake files that simplify these types of operations. The files
-are located in the `project` folder of our Live CV installation directory. We will need the `functions.pri` file,
+so to simplify this, Livekeys already provides a set of qmake files that simplify these types of operations. The files
+are located in the `project` folder of our Livekeys installation directory. We will need the `functions.pri` file,
 together with the `3rdparty/opencv.pri` file included in our `tutorial.pro`:
 
 ```
-LIVECV_BIN_PATH = <path_to_livecv>
-LIVECV_DEV_PATH = $$LIVECV_BIN_PATH/dev
+LIVEKEYS_BIN_PATH = <path_to_livekeys>
+LIVEKEYS_DEV_PATH = $$LIVEKEYS_BIN_PATH/dev
 
-include($$LIVECV_DEV_PATH/project/functions.pri)
-include($$LIVECV_DEV_PATH/project/3rdparty/opencv.pri)
+include($$LIVEKEYS_DEV_PATH/project/functions.pri)
+include($$LIVEKEYS_DEV_PATH/project/3rdparty/opencv.pri)
 ```
 
-`functions.pri` expects us to define `LIVECV_BIN_PATH` and `LIVECV_DEV_PATH`, which are used as locations to
+`functions.pri` expects us to define `LIVEKEYS_BIN_PATH` and `LIVEKEYS_DEV_PATH`, which are used as locations to
 find the plugins we will be linking to. Note that on windows, in order to link to Open CV, you will also need to have
 `OPENCV_DIR` [environment variable](http://docs.opencv.org/2.4/doc/tutorials/introduction/windows_install/windows_install.html)
 set up.
@@ -63,11 +63,11 @@ CONFIG += qt plugin c++11
 TARGET = $$qtLibraryTarget($$TARGET)
 uri = tutorial
 
-LIVECV_BIN_PATH = <path_to_livecv>
-LIVECV_DEV_PATH = $$LIVECV_BIN_PATH/dev
+LIVEKEYS_BIN_PATH = <path_to_livekeys>
+LIVEKEYS_DEV_PATH = $$LIVEKEYS_BIN_PATH/dev
 
-include($$LIVECV_DEV_PATH/project/functions.pri)
-include($$LIVECV_DEV_PATH/project/3rdparty/opencv.pri)
+include($$LIVEKEYS_DEV_PATH/project/functions.pri)
+include($$LIVEKEYS_DEV_PATH/project/3rdparty/opencv.pri)
 
 linkPlugin(lcvcore,  lcvcore)
 
@@ -140,8 +140,8 @@ retrieve the actual cv::Mat contents of a QMat, we use the `cvMat()` getter, whi
 object.
 
 We can now build the library and test it. Just like the steps in the previous part, go to the  **plugins** directory in
-Live CVs installation path, and override the qmldir and the `so` or `dll` files with the newly build ones. Run
-livecv, and you can use the following code to test your plugin:
+Livekeys's installation path, and override the qmldir and the `so` or `dll` files with the newly build ones. Run
+livekeys, and you can use the following code to test your plugin:
 
 ```
 import QtQuick 2.3
@@ -181,7 +181,7 @@ Grid{
 ```
 
 Configure the imagePath property to open an image on your hard drive. If you see a text just below your image with
-a large number, then you have succesfully created a Live CV plugin that counts the number of non zero pixels in an
+a large number, then you have succesfully created a Livekeys plugin that counts the number of non zero pixels in an
 image.
 
 

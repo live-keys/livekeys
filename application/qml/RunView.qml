@@ -13,7 +13,7 @@ Pane{
     color: '#000509'
 
     property var panes: null
-    property Theme currentTheme : livecv.layers.workspace ? livecv.layers.workspace.themes.current : null
+    property Theme currentTheme : lk.layers.workspace ? lk.layers.workspace.themes.current : null
 
     property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
 

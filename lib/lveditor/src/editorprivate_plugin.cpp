@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -72,15 +72,15 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
     qmlRegisterUncreatableType<lv::ProjectDocument>(
         uri, 1, 0, "ProjectDocument", "ProjectDocument objects are managed by the Project class.");
     qmlRegisterUncreatableType<lv::EditorSettings>(
-        uri, 1, 0, "EditorSettings", "EditorSettings is available through the \'livecv.settings.editor\' property."
+        uri, 1, 0, "EditorSettings", "EditorSettings is available through the \'lk.settings.editor\' property."
     );
 
     qmlRegisterUncreatableType<lv::Commands>(
-        uri, 1, 0, "LiveCommands", "LiveCommands is available through the \'livecv.layers.workspace.commands\' property.");
+        uri, 1, 0, "LiveCommands", "LiveCommands is available through the \'lk.layers.workspace.commands\' property.");
     qmlRegisterUncreatableType<lv::KeyMap>(
-        uri, 1, 0, "KeyMap", "KeyMap is available through the \'livecv.layers.workspace.keymap.\' property.");
+        uri, 1, 0, "KeyMap", "KeyMap is available through the \'lk.layers.workspace.keymap.\' property.");
     qmlRegisterUncreatableType<lv::ThemeContainer>(
-        uri, 1, 0, "ThemeContainer", "ThemeContainer is available through the \'livecv.layers.workspace.themes.\' property.");
+        uri, 1, 0, "ThemeContainer", "ThemeContainer is available through the \'lk.layers.workspace.themes.\' property.");
 }
 
 void EditorPrivatePlugin::initializeEngine(QQmlEngine *engine, const char *){

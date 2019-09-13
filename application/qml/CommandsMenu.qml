@@ -63,7 +63,7 @@ Rectangle{
 
             text: ""
             onTextChanged: {
-                livecv.layers.workspace.commands.model.setFilter(text)
+                lk.layers.workspace.commands.model.setFilter(text)
             }
 
             MouseArea{
@@ -94,7 +94,7 @@ Rectangle{
             }
             Keys.onReturnPressed: {
                 if (commandsView.currentItem) {
-                    livecv.layers.workspace.commands.execute(commandsView.currentItem.command)
+                    lk.layers.workspace.commands.execute(commandsView.currentItem.command)
                     root.close()
                 }
                 event.accepted = true
@@ -165,7 +165,7 @@ Rectangle{
 
         ListView{
             id: commandsView
-            model : livecv.layers.workspace.commands.model
+            model : lk.layers.workspace.commands.model
             width: parent.width
             height: parent.height
             clip: true
@@ -244,7 +244,7 @@ Rectangle{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        livecv.layers.workspace.commands.execute(model.command)
+                        lk.layers.workspace.commands.execute(model.command)
                         root.close()
                     }
                 }

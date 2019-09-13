@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -21,7 +21,7 @@
 /**
   \defgroup lvbase lvbase module
 
-  Contains the core components for LiveCV.
+  Contains the core components for Livekeys.
 */
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)

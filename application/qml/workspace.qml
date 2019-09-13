@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -150,7 +150,7 @@ Item{
             var currentWindowPanes = paneConfiguration[0]
 
             var initializeStructure = [
-                [livecv.layers.window.window()],
+                [lk.layers.window.window()],
                 initializeSplitterPanes(container, currentWindowPanes)
             ]
 
@@ -201,7 +201,7 @@ Item{
                 }
             })
 
-            livecv.layers.workspace.addWindow(window)
+            lk.layers.workspace.addWindow(window)
 
             splitPaneVerticallyWith(window.mainSplit, 0, pane)
         }
@@ -209,25 +209,25 @@ Item{
         property var splitPaneHorizontallyWith : function(splitter, index, pane){
             splitter.splitHorizontally(index, pane)
 
-            livecv.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
+            lk.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
         }
 
         property var splitPaneVerticallyWith : function(splitter, index, pane){
             splitter.splitVertically(index, pane)
 
-            livecv.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
+            lk.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
         }
 
         property var splitPaneHorizontallyBeforeWith : function(splitter, index, pane){
             splitter.splitHorizontallyBefore(index, pane)
 
-            livecv.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
+            lk.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
         }
 
         property var splitPaneVerticallyBeforeWith : function(splitter, index, pane){
             splitter.splitVerticallyBefore(index, pane)
 
-            livecv.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
+            lk.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
         }
 
         property var removePane : function(pane){
@@ -236,14 +236,14 @@ Item{
                 var paneIndex = split.paneIndex(pane)
 
                 if ( pane.paneType !== 'splitview' )
-                    livecv.layers.workspace.removePane(pane)
+                    lk.layers.workspace.removePane(pane)
 
                 split.removeAt(paneIndex)
                 if ( split.panes.length === 0 && split !== mainSplit ){
                     removePane(split)
                 }
             } else if ( pane.paneType === 'splitview' ){
-                if ( pane.currentWindow !== livecv.layers.window.window() ){
+                if ( pane.currentWindow !== lk.layers.window.window() ){
                     pane.currentWindow.close()
                 }
             }
@@ -313,7 +313,7 @@ Item{
 
     property bool documentsReloaded : false
     Connections{
-        target: livecv.layers.window
+        target: lk.layers.window
         onIsActiveChanged : {
             if ( isActive ){
                 project.navigationModel.requiresReindex()
@@ -331,12 +331,12 @@ Item{
     }
 
     Connections{
-        target: livecv
+        target: lk
         onLayerReady: {
             if ( layer.name === 'workspace' ){
                 layer.commands.add(root, {
-                    'minimize' : [livecv.layers.window.handle.minimize, "Minimize"],
-                    'toggleFullScreen': [livecv.layers.window.handle.toggleFullScreen, "Toggle Fullscreen"],
+                    'minimize' : [lk.layers.window.handle.minimize, "Minimize"],
+                    'toggleFullScreen': [lk.layers.window.handle.toggleFullScreen, "Toggle Fullscreen"],
                     'toggleNavigation' : [root.toggleNavigation, "Toggle Navigation"],
 //                    'openLogInWindow' : [mainVerticalSplit.openLogInWindow, "Open Log In Window"],
 //                    'openLogInEditor' : [mainVerticalSplit.openLogInEditor, "Open Log In Editor"],
@@ -390,19 +390,19 @@ Item{
         }
 
         onOpenCommandsMenu: {
-            livecv.layers.workspace.commands.model.setFilter('')
+            lk.layers.workspace.commands.model.setFilter('')
             commandsMenu.visible = !commandsMenu.visible
         }
 
         onOpenSettings: {
-            var fe = livecv.layers.workspace.project.openFile(
-                livecv.settings.file('editor').path, ProjectDocument.Edit
+            var fe = lk.layers.workspace.project.openFile(
+                lk.settings.file('editor').path, ProjectDocument.Edit
             )
-            livecv.settings.file('editor').documentOpened(fe.document)
+            lk.settings.file('editor').documentOpened(fe.document)
         }
 
         property License license : License{}
-        onOpenLicense: {livecv.layers.window.dialogs.overlayBox(license)}
+        onOpenLicense: {lk.layers.window.dialogs.overlayBox(license)}
     }
 
     CommandsMenu{
@@ -511,7 +511,7 @@ Item{
         }
 
         Connections{
-            target: livecv.engine
+            target: lk.engine
             onObjectReady : { error.text = '' }
             onObjectCreationError : {
                 var errorMessage = error.wrapMessage(errors)
@@ -562,7 +562,7 @@ Item{
         anchors.right: parent.right
         height : parent.height - header.height
         orientation: Qt.Vertical
-        currentWindow : livecv.layers.window.window()
+        currentWindow : lk.layers.window.window()
 
         createNewSplitter: function(orientation){
             var ob = paneSplitViewFactory.createObject(null)

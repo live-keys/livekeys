@@ -5,8 +5,8 @@
 
 #include(compat.qdocconf)
 
-project = Live CV
-description = Live CV Reference Documentation
+project = Livekeys
+description = Livekeys Reference Documentation
 version = 1.4.0
 
 # The headerdirs variable specifies the directories

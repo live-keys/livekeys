@@ -32,7 +32,7 @@ TARGET      = $$PLUGIN_NAME
 
 win32:{
     DESTDIR    = $$DEPLOY_PATH/dev/plugins/$$PLUGIN_PATH/lib
-    isEmpty(DEPLOY_TO_LIVECV)|equals(DEPLOY_TO_LIVECV, false){
+    isEmpty(DEPLOY_TO_LIVEKEYS)|equals(DEPLOY_TO_LIVEKEYS, false){
         !isEmpty(IS_PACKAGE):equals(IS_PACKAGE, true){
             DESTDIR = $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH/dev
         }

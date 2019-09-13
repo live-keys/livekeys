@@ -12,13 +12,13 @@ namespace lv{
 QScopedPointer<ViewContext> ViewContext::m_instance;
 
 void ViewContext::initFromEngine(QQmlEngine *engine){
-    QObject* livecv = engine->rootContext()->contextProperty("livecv").value<QObject*>();
-    if ( !livecv )
-        THROW_EXCEPTION(lv::Exception, "Failed to load livecv context property.", 1);
+    QObject* livekeys = engine->rootContext()->contextProperty("lk").value<QObject*>();
+    if ( !livekeys )
+        THROW_EXCEPTION(lv::Exception, "Failed to load lk context property.", 1);
 
-    ViewEngine* e = qobject_cast<lv::ViewEngine*>(livecv->property("engine").value<QObject*>());
-    Settings* s = qobject_cast<lv::Settings*>(livecv->property("settings").value<QObject*>());
-    Memory* m = qobject_cast<lv::Memory*>(livecv->property("mem").value<QObject*>());
+    ViewEngine* e = qobject_cast<lv::ViewEngine*>(livekeys->property("engine").value<QObject*>());
+    Settings* s = qobject_cast<lv::Settings*>(livekeys->property("settings").value<QObject*>());
+    Memory* m = qobject_cast<lv::Memory*>(livekeys->property("mem").value<QObject*>());
     if ( !e || !s || !m )
         THROW_EXCEPTION(lv::Exception, "Failed to load properties from context", 2);
 

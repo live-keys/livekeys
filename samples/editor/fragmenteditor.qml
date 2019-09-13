@@ -36,7 +36,7 @@ Item{
         fragmentEnd: 41
         height: 500
         width: 600
-        windowControls: livecv.windowControls()
+        windowControls: lk.windowControls()
     }
     
     Rectangle{

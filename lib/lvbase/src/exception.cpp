@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -38,7 +38,7 @@ Exception::Code encodeSingle(char c){
 /**
  * \class lv::Exception
  *
- * \brief Standard Exception used throughout LiveCV
+ * \brief Standard Exception used throughout Livekeys
  *
  * Contains an internal private object in accordance with the D-pointer design pattern.
  * Currently the structure contains typical Exception parameters such as message, line number,

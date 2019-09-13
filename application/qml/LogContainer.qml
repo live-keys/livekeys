@@ -20,7 +20,7 @@ Pane{
     property alias prefixWidth: prefixSplitDragHandle.x
     onPrefixWidthChanged: logList.model.width = logList.width - root.prefixWidth - 5
 
-    property Theme currentTheme : livecv.layers.workspace ? livecv.layers.workspace.themes.current : null
+    property Theme currentTheme : lk.layers.workspace ? lk.layers.workspace.themes.current : null
 
     property int prefixPadding : 10
     property int fontSize: 12
@@ -35,7 +35,7 @@ Pane{
     }
 
     paneClone: function(){
-        return livecv.layers.workspace.panes.createPane('log', paneState, [root.width, root.height])
+        return lk.layers.workspace.panes.createPane('log', paneState, [root.width, root.height])
     }
 
     property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
@@ -78,7 +78,7 @@ Pane{
         onTriggered: {
             var logFilterActive = prefixSearchBox.text !== '' || logSearchBox.text !== '' || tagSearchBox.text
             if ( logFilterActive ){
-                logFilter.source = livecv.log
+                logFilter.source = lk.log
 
                 var search = logSearchBox.text
                 if ( search.length > 1 && search.startsWith('/') && search.endsWith('/') ){
@@ -95,7 +95,7 @@ Pane{
                 logFilter.tag    = tagSearchBox.text
                 logList.model = logFilter
             } else {
-                logList.model = livecv.log
+                logList.model = lk.log
                 logFilter.source = null
             }
         }
@@ -111,8 +111,8 @@ Pane{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 5
-            onDragStarted: livecv.layers.workspace.panes.__dragStarted(root)
-            onDragFinished: livecv.layers.workspace.panes.__dragFinished(root)
+            onDragStarted: lk.layers.workspace.panes.__dragStarted(root)
+            onDragFinished: lk.layers.workspace.panes.__dragFinished(root)
             display: "log"
         }
 
@@ -277,7 +277,7 @@ Pane{
                 logMenu.visible = false
                 var clone = root.paneClone()
                 var index = root.parentSplitterIndex()
-                livecv.layers.workspace.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
+                lk.layers.workspace.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
             }
         }
 
@@ -290,7 +290,7 @@ Pane{
                 logMenu.visible = false
                 var clone = root.paneClone()
                 var index = root.parentSplitterIndex()
-                livecv.layers.workspace.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
+                lk.layers.workspace.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
             }
         }
 
@@ -301,7 +301,7 @@ Pane{
             text: qsTr("Move to New Window")
             onClicked : {
                 logMenu.visible = false
-                livecv.layers.workspace.panes.movePaneToNewWindow(root)
+                lk.layers.workspace.panes.movePaneToNewWindow(root)
             }
         }
 
@@ -312,7 +312,7 @@ Pane{
             text: qsTr("Remove Pane")
             onClicked : {
                 logMenu.visible = false
-                livecv.layers.workspace.panes.removePane(root)
+                lk.layers.workspace.panes.removePane(root)
             }
         }
     }
@@ -353,14 +353,14 @@ Pane{
 
         ListView{
             id: logList
-            model: livecv.log
+            model: lk.log
             anchors.fill: parent
             delegate: root.usedDelegate
 
-            onWidthChanged: livecv.log.width = width - root.prefixWidth - root.prefixPadding
+            onWidthChanged: lk.log.width = width - root.prefixWidth - root.prefixPadding
 
             Connections{
-                target: livecv.log
+                target: lk.log
                 onRowsInserted : {
                     if ( root.visible && logScroll.flickableItem.contentHeight > logScroll.height )
                         logScroll.flickableItem.contentY = logScroll.flickableItem.contentHeight - logScroll.height

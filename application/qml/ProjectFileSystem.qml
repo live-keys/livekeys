@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -32,13 +32,13 @@ Pane{
     paneType: 'projectFileSystem'
     paneState : { return {} }
 
-    property Theme currentTheme : livecv.layers.workspace.themes.current
+    property Theme currentTheme : lk.layers.workspace.themes.current
 
     property Item addEntryOverlay : ProjectAddEntry{
         onAccepted: {
             if ( isFile ){
                 var f = project.fileModel.addFile(entry, name)
-                livecv.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
+                lk.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
             } else {
                 project.fileModel.addDirectory(entry, name)
             }
@@ -49,15 +49,15 @@ Pane{
         root.addEntryOverlay.entry = parentEntry
         root.addEntryOverlay.isFile = isFile
 
-        livecv.layers.window.dialogs.overlayBox(root.addEntryOverlay)
+        lk.layers.window.dialogs.overlayBox(root.addEntryOverlay)
     }
     function openEntry(entry, monitor){
-        livecv.layers.workspace.project.openFile(
+        lk.layers.workspace.project.openFile(
             entry.path, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
         )
     }
     function editEntry(entry){
-        livecv.layers.workspace.project.openFile(entry.path, ProjectDocument.Edit)
+        lk.layers.workspace.project.openFile(entry.path, ProjectDocument.Edit)
     }
     function removeEntry(entry, isFile){
         var message = ''
@@ -86,7 +86,7 @@ Pane{
             }
         }
 
-        livecv.layers.window.dialogs.message(message, {
+        lk.layers.window.dialogs.message(message, {
             button1Name : 'Yes',
             button1Function : function(mbox){
                 project.fileModel.removeEntry(entry)
@@ -131,7 +131,7 @@ Pane{
             }
         }
 
-        livecv.layers.window.dialogs.message(message, {
+        lk.layers.window.dialogs.message(message, {
             button1Name : 'Yes',
             button1Function : function(mbox){
                 project.fileModel.moveEntry(entry, newParent)
@@ -622,14 +622,14 @@ Pane{
             MenuItem{
                 text: "Close Project"
                 onTriggered: {
-                    livecv.layers.workspace.commands.execute('window.workspace.project.close')
+                    lk.layers.workspace.commands.execute('window.workspace.project.close')
                 }
             }
             MenuItem{
                 text: "New Document"
                 onTriggered: {
                     var fe = project.fileModel.addTemporaryFile()
-                    livecv.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
+                    lk.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
                 }
             }
 
@@ -637,7 +637,7 @@ Pane{
                 text: "New Runnable"
                 onTriggered: {
                     var fe = project.fileModel.addTemporaryFile()
-                    livecv.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
+                    lk.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
                     project.openRunnable(fe.path, [fe.path])
                 }
             }

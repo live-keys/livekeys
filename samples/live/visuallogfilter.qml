@@ -4,7 +4,7 @@ import live 1.0
 Row{
     anchors.fill: parent
     
-    // This sample shows the usage of log filters on livecv's log
+    // This sample shows the usage of log filters on livekeys's log
     // to sort out data into different categories
     
     // You can use regular expressions or strings to match
@@ -17,7 +17,7 @@ Row{
         model: VisualLogFilter{
             property int width: 0
             id: logFilter
-            source: livecv.log
+            source: lk.log
             search: /Output\s[0-9]{1}$/
         }
     }
@@ -28,13 +28,13 @@ Row{
         model: VisualLogFilter{
             property int width: 0
             id: logFilter2
-            source: livecv.log
+            source: lk.log
             search: "Output 1"
         }
     }
 
     Component.onCompleted: {
-        livecv.log.clearValues()
+        lk.log.clearValues()
         for ( var i = 0; i < 5; ++i )
             console.log("Output " + i);
         for ( var i = 10; i < 15; ++i )

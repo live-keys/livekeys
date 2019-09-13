@@ -54,7 +54,7 @@ Column {
 
         ScrollView {
             anchors.fill : parent
-            style : LiveCVScrollStyle {}
+            style : LivekeysScrollStyle {}
 
             Text {
                 id : descriptorValues

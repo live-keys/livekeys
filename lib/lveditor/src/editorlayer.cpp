@@ -14,8 +14,8 @@ EditorLayer::EditorLayer(QObject *parent)
     , m_environment(nullptr)
 {
     QQmlEngine* engine = lv::ViewContext::instance().engine()->engine();
-    QObject* livecv = engine->rootContext()->contextProperty("livecv").value<QObject*>();
-    QObject* workspace = livecv->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
+    QObject* livekeys = engine->rootContext()->contextProperty("lk").value<QObject*>();
+    QObject* workspace = livekeys->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
 
     if ( !workspace ){
         Exception e = CREATE_EXCEPTION(lv::Exception, "Editor layer requires workspace layer.", Exception::toCode("~layer"));

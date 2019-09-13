@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#include "livecv.h"
-#include "livecvarguments.h"
+#include "livekeys.h"
+#include "livekeysarguments.h"
 #include "qmlscript.h"
 #include "environment.h"
 #include "live/memory.h"
@@ -59,10 +59,10 @@
 
 namespace lv{
 
-LiveCV::LiveCV(QObject *parent)
+Livekeys::Livekeys(QObject *parent)
     : QObject(parent)
     , m_engine(new ViewEngine(new QQmlApplicationEngine))
-    , m_arguments(new LiveCVArguments(header().toStdString()))
+    , m_arguments(new LivekeysArguments(header().toStdString()))
     , m_dir(QString::fromStdString(ApplicationContext::instance().applicationPath()))
     , m_project(new Project(m_engine))
     , m_settings(nullptr)
@@ -79,12 +79,12 @@ LiveCV::LiveCV(QObject *parent)
     m_log = new VisualLogModel(m_engine->engine());
 
     connect(m_project, SIGNAL(pathChanged(QString)), SLOT(projectChanged(QString)));
-    connect(m_engine, &ViewEngine::applicationError, this, &LiveCV::engineError);
+    connect(m_engine, &ViewEngine::applicationError, this, &Livekeys::engineError);
 
     VisualLog::setViewTransport(m_log);
 }
 
-LiveCV::~LiveCV(){
+Livekeys::~Livekeys(){
     VisualLog::setViewTransport(nullptr);
     delete m_settings;
     delete m_engine;
@@ -93,14 +93,14 @@ LiveCV::~LiveCV(){
     delete m_layers;
 }
 
-LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent){
-    LiveCV::Ptr livecv = LiveCV::Ptr(new LiveCV(parent));
+Livekeys::Ptr Livekeys::create(int argc, const char * const argv[], QObject *parent){
+    Livekeys::Ptr livekeys = Livekeys::Ptr(new Livekeys(parent));
 
-    livecv->m_arguments->initialize(argc, argv);
+    livekeys->m_arguments->initialize(argc, argv);
 
     qInstallMessageHandler(&visualLogMessageHandler);
 
-    MLNode logconfig = livecv->m_arguments->getLogConfiguration();
+    MLNode logconfig = livekeys->m_arguments->getLogConfiguration();
     for( auto it = logconfig.begin(); it != logconfig.end(); ++it ){
         if ( it.value().hasKey("toNetwork") ){
             QString toNetwork = QString::fromStdString(it.value()["toNetwork"].asString());
@@ -120,12 +120,12 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
         vlog().configure(it.key(), it.value());
     }
 
-    livecv->m_script = new QmlScript(livecv->m_arguments->scriptArguments());
-    QObject::connect(livecv->project(), &Project::activeChanged, livecv->m_script, &QmlScript::scriptChanged);
+    livekeys->m_script = new QmlScript(livekeys->m_arguments->scriptArguments());
+    QObject::connect(livekeys->project(), &Project::activeChanged, livekeys->m_script, &QmlScript::scriptChanged);
 
-    livecv->m_settings = Settings::create(QString::fromStdString(ApplicationContext::instance().configPath()));
+    livekeys->m_settings = Settings::create(QString::fromStdString(ApplicationContext::instance().configPath()));
 
-    return livecv;
+    return livekeys;
 }
 
 /**
@@ -140,7 +140,7 @@ LiveCV::Ptr LiveCV::create(int argc, const char * const argv[], QObject *parent)
  * import plugins.live 1.0
  * \endcode
  */
-void LiveCV::solveImportPaths(){
+void Livekeys::solveImportPaths(){
     m_engineImportPaths = m_engine->engine()->importPathList();
 
     m_engineImportPaths.removeAll(dir());
@@ -152,7 +152,7 @@ void LiveCV::solveImportPaths(){
     m_engine->engine()->setImportPathList(m_engineImportPaths);
 }
 
-void LiveCV::loadQml(const QUrl &url){
+void Livekeys::loadQml(const QUrl &url){
     static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);
 
     m_project->setRunSpace(layerPlaceholder());
@@ -179,7 +179,7 @@ void LiveCV::loadQml(const QUrl &url){
     }
 }
 
-void LiveCV::loadProject(){
+void Livekeys::loadProject(){
     m_project->setRunSpace(layerPlaceholder());
 
     if ( m_arguments->script() != "" ){
@@ -204,11 +204,11 @@ void LiveCV::loadProject(){
     }
 }
 
-void LiveCV::addLayer(const QString &name, const QString &layer){
+void Livekeys::addLayer(const QString &name, const QString &layer){
     m_storedLayers.insert(name, layer);
 }
 
-void LiveCV::loadLayer(const QString &name, std::function<void (Layer*)> onReady){
+void Livekeys::loadLayer(const QString &name, std::function<void (Layer*)> onReady){
     auto it = m_storedLayers.find(name);
     if ( it == m_storedLayers.end() )
         THROW_EXCEPTION(Exception, "Layer not found: " + name.toStdString(), Exception::toCode("~Layer"));
@@ -264,7 +264,7 @@ void LiveCV::loadLayer(const QString &name, std::function<void (Layer*)> onReady
     }
 }
 
-void LiveCV::loadLayers(const QStringList &layers, std::function<void (Layer *)> onReady){
+void Livekeys::loadLayers(const QStringList &layers, std::function<void (Layer *)> onReady){
     if ( layers.length() ){
         QStringList tail = layers;
         tail.removeFirst();
@@ -282,7 +282,7 @@ void LiveCV::loadLayers(const QStringList &layers, std::function<void (Layer *)>
     }
 }
 
-void LiveCV::loadDefaultLayers(){
+void Livekeys::loadDefaultLayers(){
     QStringList layersToLoad = {"window", "workspace", "editor"}; // defaults
     if ( !m_arguments->layers().isEmpty() ){
         layersToLoad = m_arguments->layers();
@@ -298,29 +298,29 @@ void LiveCV::loadDefaultLayers(){
     }
 }
 
-void LiveCV::loadInternals(){
+void Livekeys::loadInternals(){
     loadInternalPackages();
     loadInternalPlugins();
     addDefaultLayers();
     QmlEngineInterceptor::interceptEngine(engine(), m_packageGraph, m_project);
 }
 
-void LiveCV::loadInternalPlugins(){
+void Livekeys::loadInternalPlugins(){
     qmlRegisterType<lv::ErrorHandler>("base", 1, 0, "ErrorHandler");
-    qmlRegisterUncreatableType<lv::LiveCV>(
-         "base", 1, 0, "LiveCV",         ViewEngine::typeAsPropertyMessage("LiveCV", "livecv"));
+    qmlRegisterUncreatableType<lv::Livekeys>(
+        "base", 1, 0, "LiveKeys",        ViewEngine::typeAsPropertyMessage("LiveKeys", "lk"));
     qmlRegisterUncreatableType<lv::ViewEngine>(
-        "base", 1, 0, "LiveEngine",      ViewEngine::typeAsPropertyMessage("LiveEngine", "livecv.engine"));
+        "base", 1, 0, "LiveEngine",      ViewEngine::typeAsPropertyMessage("LiveEngine", "lk.engine"));
     qmlRegisterUncreatableType<lv::QmlScript>(
         "base", 1, 0, "LiveScript",      ViewEngine::typeAsPropertyMessage("LiveScript", "script"));
     qmlRegisterUncreatableType<lv::Environment>(
         "base", 1, 0, "LiveEnvironment", ViewEngine::typeAsPropertyMessage("LiveEnvironment", "script.environment"));
     qmlRegisterUncreatableType<lv::Settings>(
-        "base", 1, 0, "LiveSettings",    ViewEngine::typeAsPropertyMessage("LiveSettings", "livecv.settings"));
+        "base", 1, 0, "LiveSettings",    ViewEngine::typeAsPropertyMessage("LiveSettings", "lk.settings"));
     qmlRegisterUncreatableType<lv::VisualLogModel>(
-        "base", 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "livecv.log"));
+        "base", 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "lk.log"));
     qmlRegisterUncreatableType<lv::Memory>(
-        "base", 1, 0, "Memory", ViewEngine::typeAsPropertyMessage("Memory", "livecv.mem"));
+        "base", 1, 0, "Memory",          ViewEngine::typeAsPropertyMessage("Memory", "lk.mem"));
     qmlRegisterUncreatableType<lv::VisualLogQmlObject>(
         "base", 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
     qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
@@ -330,7 +330,7 @@ void LiveCV::loadInternalPlugins(){
 
     m_engine->engine()->rootContext()->setContextProperty("project", m_project);
     m_engine->engine()->rootContext()->setContextProperty("script",  m_script);
-    m_engine->engine()->rootContext()->setContextProperty("livecv",  this);
+    m_engine->engine()->rootContext()->setContextProperty("lk",  this);
 
     QJSValue vlogjs  = m_engine->engine()->newQObject(m_vlog);
     m_engine->engine()->globalObject().setProperty("vlog", vlogjs);
@@ -342,7 +342,7 @@ void LiveCV::loadInternalPlugins(){
     ep.initializeEngine(m_engine->engine(), "editor.private");
 }
 
-void LiveCV::loadInternalPackages(){
+void Livekeys::loadInternalPackages(){
     if ( m_packageGraph )
         return;
 
@@ -388,7 +388,7 @@ void LiveCV::loadInternalPackages(){
     }
 }
 
-void LiveCV::initializeProject(){
+void Livekeys::initializeProject(){
     m_project->setRunSpace(layerPlaceholder());
 
     if ( m_arguments->script() != "" ){
@@ -413,13 +413,13 @@ void LiveCV::initializeProject(){
     }
 }
 
-void LiveCV::addDefaultLayers(){
+void Livekeys::addDefaultLayers(){
     addLayer("window", ":/windowlayer.qml");
     addLayer("workspace", ":/workspacelayer.qml");
     addLayer("editor", ":/editorlayer.qml");
 }
 
-std::vector<std::string> LiveCV::packageImportPaths() const{
+std::vector<std::string> Livekeys::packageImportPaths() const{
     std::vector<std::string> paths;
     paths.push_back(ApplicationContext::instance().pluginPath());
 
@@ -429,7 +429,7 @@ std::vector<std::string> LiveCV::packageImportPaths() const{
     return paths;
 }
 
-QByteArray LiveCV::extractPluginInfo(const QString &import) const{
+QByteArray Livekeys::extractPluginInfo(const QString &import) const{
 //    TODO: Check result
     lv::ProjectQmlExtension* qmlHandler = new lv::ProjectQmlExtension();
     qmlHandler->setParams(m_settings, m_project, m_engine);
@@ -445,11 +445,11 @@ QByteArray LiveCV::extractPluginInfo(const QString &import) const{
     return extractor->result();
 }
 
-QQmlPropertyMap *LiveCV::layers(){
+QQmlPropertyMap *Livekeys::layers(){
     return m_layers;
 }
 
-QObject *LiveCV::layerPlaceholder() const{
+QObject *Livekeys::layerPlaceholder() const{
     if ( !m_layerPlaceholder ){
         QList<QObject*> rootObjects = static_cast<QQmlApplicationEngine*>(m_engine->engine())->rootObjects();
         for ( auto it = rootObjects.begin(); it != rootObjects.end(); ++it ){
@@ -464,7 +464,7 @@ QObject *LiveCV::layerPlaceholder() const{
     return m_layerPlaceholder;
 }
 
-void LiveCV::engineError(QJSValue error){
+void Livekeys::engineError(QJSValue error){
     QString message = "Uncaught error: " +
             error.property("message").toString() +
             "(code:" + error.property("code").toString() + ")";
@@ -490,7 +490,7 @@ void LiveCV::engineError(QJSValue error){
     vlog().e() << message;
 }
 
-void LiveCV::projectChanged(const QString &path){
+void Livekeys::projectChanged(const QString &path){
     m_engine->engine()->setImportPathList(m_engineImportPaths);
     if ( !path.isEmpty() && QFileInfo(path + "/packages").isDir() )
         m_engine->engine()->addImportPath(path + "/packages");

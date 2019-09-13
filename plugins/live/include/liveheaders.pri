@@ -1,7 +1,6 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
-#    $$PWD/qlivecvarguments.h \
     $$PWD/qstaticcontainer.h \
     $$PWD/qstaticloader.h \
     $$PWD/qfilereader.h \

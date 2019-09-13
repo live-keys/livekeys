@@ -24,7 +24,7 @@ macx{
 #ENABLE_PLUGINTYPES = true
 
 !isEmpty(ENABLE_PLUGINTYPES){
-    message(Plugin Types Enabled: Live CV will use private libraries)
+    message(Plugin Types Enabled: Livekeys will use private libraries)
     QT += core-private qml-private quick-private
     DEFINES += Q_PLUGINTYPES_ENABLED
 }

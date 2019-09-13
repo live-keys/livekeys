@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -41,7 +41,7 @@ Item{
             var doc = project.documentModel.isOpened(path)
             if ( doc ){
                 if ( doc.isDirty ){
-                    livecv.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
+                    lk.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
                     {
                         button1Name : 'Yes',
                         button1Function : function(mbox){
@@ -69,8 +69,8 @@ Item{
             }
         }
         onCancel: {
-            if ( livecv.layers.workspace.panes.activeItem )
-                livecv.layers.workspace.panes.activeItem.forceActiveFocus()
+            if ( lk.layers.workspace.panes.activeItem )
+                lk.layers.workspace.panes.activeItem.forceActiveFocus()
         }
     }
 
@@ -119,8 +119,8 @@ Item{
     Connections{
         target: project.documentModel
         onDocumentChangedOutside : {
-            livecv.layers.window.dialogs.message(
-                'File \'' + document.file.path + '\' changed outside Live CV. Would you like to reload it?',
+            lk.layers.window.dialogs.message(
+                'File \'' + document.file.path + '\' changed outside Livekeys. Would you like to reload it?',
                 {
                     button1Name : 'Yes',
                     button1Function : function(mbox){
@@ -144,7 +144,7 @@ Item{
 
     Connections{
         target: project.fileModel
-        onError : livecv.layers.window.dialogs.message(message,{
+        onError : lk.layers.window.dialogs.message(message,{
             button2Name : 'Ok',
             button2Function : function(mbox){ mbox.close(); }
         })
@@ -167,7 +167,7 @@ Item{
 
 
     Connections{
-        target: livecv
+        target: lk
         onLayerReady: {
             if ( layer.name === 'workspace' ){
                 layer.commands.add(root, {
@@ -201,7 +201,7 @@ Item{
             message += unsavedFiles
             message += "Would you like to save them before closing the project?\n"
         }
-        livecv.layers.window.dialogs.message(message, {
+        lk.layers.window.dialogs.message(message, {
             button1Name : 'Yes',
             button1Function : function(box){
                 box.close()
@@ -210,11 +210,11 @@ Item{
                     var closeCallback = callback;
                     var untitledDocument = project.documentModel.isOpened(documentList[0])
 
-                    livecv.layers.window.dialogs.saveFile(
+                    lk.layers.window.dialogs.saveFile(
                         { filters: [ "Qml files (*.qml)", "All files (*)" ] },
                         function(url){
                             if ( !untitledDocument.saveAs(url) ){
-                                livecv.layers.window.dialogs.message(
+                                lk.layers.window.dialogs.message(
                                     'Failed to save file to: ' + url,
                                     {
                                         button3Name : 'Ok',
@@ -237,7 +237,7 @@ Item{
                     message = 'Failed to save the following files:\n'
                     message += unsavedFiles
                     box.close()
-                    livecv.layers.window.dialogs.message(message,{
+                    lk.layers.window.dialogs.message(message,{
                         button1Name : 'Close',
                         button1Function : function(mbox){
                             project.closeProject()
@@ -278,7 +278,7 @@ Item{
     }
     function openProject(){
         root.closeProject(function(){
-            livecv.layers.window.dialogs.openDir({}, function(url){
+            lk.layers.window.dialogs.openDir({}, function(url){
                 project.openProject(url)
             })
         })
@@ -296,7 +296,7 @@ Item{
                 openFile(url, ProjectDocument.EditIfNotOpen)
             } else {
                 var fileUrl = url
-                livecv.layers.window.dialogs.message(
+                lk.layers.window.dialogs.message(
                     'File is outside project scope. Would you like to open it as a new project?',
                 {
                     button1Name : 'Open as project',
@@ -326,13 +326,13 @@ Item{
 
         if ( !project.isDirProject() ){
             closeProject(function(){
-                livecv.layers.window.dialogs.openFile(
+                lk.layers.window.dialogs.openFile(
                     { filters: ["Qml files (*.qml)", "All files (*)"] },
                     openCallback
                 )
             })
         } else {
-            livecv.layers.window.dialogs.openFile(
+            lk.layers.window.dialogs.openFile(
                 { filters: ["Qml files (*.qml)", "All files (*)"] },
                 openCallback
             )
@@ -340,7 +340,7 @@ Item{
     }
 
     function openFile(path, mode){
-        var pane = livecv.layers.workspace.interceptFile(path, mode)
+        var pane = lk.layers.workspace.interceptFile(path, mode)
         if ( pane )
             return pane
 

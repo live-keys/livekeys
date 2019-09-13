@@ -1,7 +1,7 @@
 # Creating a filter
 
 The [previous section]() described the process of configuring and creating
-a simple QML item using Live CVs functionality. This part will dive into Live CV a bit deeper, as it will describe
+a simple QML item using Livekeyss functionality. This part will dive into Livekeys a bit deeper, as it will describe
 how to display a processed matrix on screen and how to create a filter which does **input to output** processing.
 
 A QML item with a displayable matrix property (for example an item that loads an image from the hard drive, or creates
@@ -68,7 +68,7 @@ is required.
 For this example, we will be implementing the addWeighted function from Open CV in order to show how
 qml properties are implemented.
 
-_This example is available under live-tutorial repository, in [plugins/tutorial/src](https://github.com/livecv/live-tutorial)
+_This example is available under live-tutorial repository, in [plugins/tutorial/src](https://github.com/live-keys/live-tutorial)
 if you want to just see the end result._
 
 The addWeighted function has the following parameters :
@@ -259,7 +259,7 @@ void TutorialPlugin::registerTypes(const char *uri)
 }
 ```
 
-Compile the code, and place the generated dll/so file into Live CV's plugins/tutorial directory. You can use the
+Compile the code, and place the generated dll/so file into Livekeys's plugins/tutorial directory. You can use the
 following test program to test out the filter:
 
 ```

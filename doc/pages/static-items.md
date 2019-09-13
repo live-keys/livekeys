@@ -6,8 +6,8 @@ the user modifies something within the document, every object that was modified 
 reset to its initial value. Unfortunately in some cases this is not the ideal scenario. Take a video player for example.
 After creating the video player and the video starts playing, the user would like to add a set of filters to the video
 in order to adjust its brightness and contrast. Now, whenever a new filter is added, the video starts playing from the
-beginning, making it unsuitable to adjust the filters values. In order to avoid these scenarios, Live CV introduces
-the concept of static items. As a definition, in Live CV, static items are items that keep their state between multiple
+beginning, making it unsuitable to adjust the filters values. In order to avoid these scenarios, Livekeys introduces
+the concept of static items. As a definition, in Livekeys, static items are items that keep their state between multiple
 compilations. They are recognized by requiring the use of the `staticLoad` function. Take the VideoCapture
 for example:
 
@@ -28,7 +28,7 @@ identifier, in this case the identifier is equal to the video file path.
 It's important to note that a state is kept alive between multiple compilations as long as the state is being used in
 each successful consecutive compilation. (If the compilations contain errors, then the state cleaning process does not
 get triggered). If we were to delete the `VideoCapture` or switch it to a different file, then the state
-associated with the previous file would not be used, making Live CV take note of that and clearing the unused space.
+associated with the previous file would not be used, making Livekeys take note of that and clearing the unused space.
 So if we were to come back to the same file, then the progress made previously would be lost again.
 
 In terms of importance, static items can be used in all kinds of scenarios where the user would like to keep a
@@ -44,7 +44,7 @@ the `StaticLoader` is created. The [StaticLoader](StaticLoader) sample shows the
 which is part of the StaticLoaders state gets modified once the user clicks on the color, and will keep its color
 during changes to the code. Note that **any changes to the StaticLoader's contents will not take effect while the
 state identifier is the same**. For example, if we want to change the color from code, or want to add another property
-to the StaticLoaders contents, we need to also change its identifier, since Live CV will not replace the contents of
+to the StaticLoaders contents, we need to also change its identifier, since Livekeys will not replace the contents of
 our state as long as the state is active.
 
 ## Nesting Static Items

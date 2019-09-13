@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -31,7 +31,7 @@ Rectangle {
     property var runnablesMenu : null
 
     property bool isLogWindowDirty: false
-    property var licenseSettings: livecv.settings.file('license')
+    property var licenseSettings: lk.settings.file('license')
 
     signal openCommandsMenu()
     signal toggleLogWindow()
@@ -51,7 +51,7 @@ Rectangle {
     // New
 
     Connections{
-        target: livecv
+        target: lk
         onLayerReady: {
             if ( layer.name === 'workspace' ){
                 var theme = layer.themes.current
@@ -94,7 +94,7 @@ Rectangle {
             id : newMArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: livecv.layers.workspace.project.newProject()
+            onClicked: lk.layers.workspace.project.newProject()
         }
     }
 
@@ -124,7 +124,7 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
-                var fe = livecv.layers.workspace.panes.focusPane('editor')
+                var fe = lk.layers.workspace.panes.focusPane('editor')
                 if ( fe )
                     fe.saveAs()
             }
@@ -156,7 +156,7 @@ Rectangle {
             id : openMArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: livecv.layers.workspace.project.openFileDialog()
+            onClicked: lk.layers.workspace.project.openFileDialog()
         }
     }
 
@@ -186,7 +186,7 @@ Rectangle {
             id : openProjectMArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: livecv.layers.workspace.project.openProject()
+            onClicked: lk.layers.workspace.project.openProject()
         }
     }
 
@@ -295,7 +295,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 220 + 35 * 6
-        color : livecv.settings.file('license').highlights > 0 ? "#44130b" : "transparent"
+        color : lk.settings.file('license').highlights > 0 ? "#44130b" : "transparent"
         height : openLicenseArea.containsMouse ? parent.height : parent.height - 5
         width : 25
         Image{

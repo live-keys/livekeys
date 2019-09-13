@@ -1,6 +1,6 @@
-# Running Live CV
+# Running Livekeys
 
-Once Live CV has installed, the following window should appear when running the application:
+Once Livekeys has installed, the following window should appear when running the application:
 
 ![](images/startscreen.jpg)
 
@@ -11,20 +11,20 @@ The view consists of 4 main components which we will treat in the following sect
 * Editor
 * Viewer
 
-Before we go into each component, it's important to understand how Live CV projects work. A Live CV project consists
+Before we go into each component, it's important to understand how Livekeys projects work. A Livekeys project consists
 of one or multiple Qml source files, which are interpreted and compiled by a qml engine. The qml language is developed
-and maintained by Qt and comes with a ton of elements (as part of QtQuick module), which you can use within Live CV.
-You can find documentation and details on the language and it's elements on Qt's website. Apart from those, Live CV
+and maintained by Qt and comes with a ton of elements (as part of QtQuick module), which you can use within Livekeys.
+You can find documentation and details on the language and it's elements on Qt's website. Apart from those, Livekeys
 comes with its own set of plugins and elements, specialized mostly on live coding and computer vision, which we will
 dive into later on.
 
-Currently Live CV is able to have a single project opened at once, and run a single main file (also called the active
+Currently Livekeys is able to have a single project opened at once, and run a single main file (also called the active
 file) within that project. There are 2 types of projects that can be opened: **file based** or **folder based**. File
 based projects are basically single qml files that are opened and run directly as active files. Folder based projects
 can have one or more qml files out of which one will be the active one. The active file can be changed by the user at
 any time through the project view.
 
-By default, when opening a project folder, Live CV will automatically try to find the file to run whithin that project
+By default, when opening a project folder, Livekeys will automatically try to find the file to run whithin that project
 and set it as active, using the following rules:
 
 * Looking for a _main.qml_ file
@@ -46,11 +46,11 @@ The header contains the following buttons:
 * **Save As** - Opens a dialog to save the opened file. Note that in order to save the file directly, you can use the
 "CTRL+S" key combination.
 * **Open File** - Opens a new file. If the file being opened is outside the currently opened project (and the opened
- project is folder based), then the user will be asked whether Live CV should close the current project and scope
+ project is folder based), then the user will be asked whether Livekeys should close the current project and scope
 to the new one.
-* **Open Project Folder** - Opens a new project folder. Live CV will automatically look for the file to run using the
+* **Open Project Folder** - Opens a new project folder. Livekeys will automatically look for the file to run using the
 above mentioned rules.
-* **Live CV Log Window** - Opens the log window, in which you will either internal messages from Live CV, or custom
+* **Livekeys Log Window** - Opens the log window, in which you will either internal messages from Livekeys, or custom
 debug messages from within the application. The following code for example will show the "Rectangle loaded" message
 within the log window.
 
@@ -64,7 +64,7 @@ Rectangle{
 }
 ```
 
-By default, most error messages will be shown in Live CV's buttom right corner, where a small box with a red border on
+By default, most error messages will be shown in Livekeys's buttom right corner, where a small box with a red border on
 the left opens in case of an error. Since some error messages cannot be displayed there, some of them will appear in
 the log window, so it's a good ideea to chekc there for any notifications. The button will have a circle on it when a
 new log line has been added:
@@ -74,7 +74,7 @@ new log line has been added:
 |![](images/logicon.jpg) Log Icon | ![](images/logiconmessage.jpg) Log Icon with Message |
 
 
-* **Show license box** - Opens up the license agreement box. Some algorithms used through Live CV require the user
+* **Show license box** - Opens up the license agreement box. Some algorithms used through Livekeys require the user
 to accept different licenses, depending on the case. (For example, some may require to be used only in research or
 educational purposes). If an algorithm depends on a specific license, the license button will flickr and the user
 will be required to accept the license in order to activate the specified component or plugin before continuing.

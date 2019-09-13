@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -137,7 +137,7 @@ Rectangle{
 
             ListView{
                 id: licenseList
-                model : livecv.settings.file('license')
+                model : lk.settings.file('license')
                 width: parent.width
                 height: parent.height
                 clip: true
@@ -245,7 +245,7 @@ Rectangle{
                 anchors.topMargin: 12
 
                 text: licenseList.currentItem
-                      ? livecv.settings.file('license').licenseText(licenseList.currentItem.licenseId)
+                      ? lk.settings.file('license').licenseText(licenseList.currentItem.licenseId)
                       : "No license selected."
 
                 width: boxRight.width - 24
@@ -286,7 +286,7 @@ Rectangle{
                 id: acceptButtonArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: livecv.settings.file('license').acceptLicense(licenseList.currentItem.licenseId)
+                onClicked: lk.settings.file('license').acceptLicense(licenseList.currentItem.licenseId)
             }
         }
     }

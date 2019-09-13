@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef LIVECVARGUMENTS_H
-#define LIVECVARGUMENTS_H
+#ifndef LVLIVEKEYSARGUMENTS_H
+#define LVLIVEKEYSARGUMENTS_H
 
 #include <QObject>
 #include "live/mlnode.h"
@@ -23,11 +23,11 @@
 namespace lv{
 
 class CommandLineParser;
-class LiveCVArguments{
+class LivekeysArguments{
 
 public:
-    explicit LiveCVArguments(const std::string &header);
-    ~LiveCVArguments();
+    explicit LivekeysArguments(const std::string &header);
+    ~LivekeysArguments();
 
     bool pluginInfoFlag() const;
     const QString& pluginInfoImport() const;
@@ -60,19 +60,19 @@ private:
     QStringList m_layers;
 };
 
-inline const QString &LiveCVArguments::pluginInfoImport() const{
+inline const QString &LivekeysArguments::pluginInfoImport() const{
     return m_pluginInfoImport;
 }
 
-inline const QStringList &LiveCVArguments::monitoredFiles() const{
+inline const QStringList &LivekeysArguments::monitoredFiles() const{
     return m_monitoredFiles;
 }
 
-inline CommandLineParser *LiveCVArguments::parser(){
+inline CommandLineParser *LivekeysArguments::parser(){
     return m_parser;
 }
 
 
 }// namespace
 
-#endif // LIVECVARGUMENTS_H
+#endif // LVLIVEKEYSARGUMENTS_H

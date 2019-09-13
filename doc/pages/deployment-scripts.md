@@ -1,11 +1,11 @@
 # Deployment Scripts
 
-Deployment scripts are part of Live CVs build, deploy and package process, offering a standardized way to
-create packages. If you will look into Live CVs main repository or the tutorial repository, you will see a file named
-_livecv.json_ and _live.tutorial.json_ respectively. These files describe the contents of the repository in terms of modules
+Deployment scripts are part of Livekeys's build, deploy and package process, offering a standardized way to
+create packages. If you will look into Livekeyss main repository or the tutorial repository, you will see a file named
+_livekeys.json_ and _live.tutorial.json_ respectively. These files describe the contents of the repository in terms of modules
 and dependencies, and the steps required to build, deploy and package the repository with different compilers. The
-files are used by Live CV's [deployment kit](https://github.com/livecv/livecv-deploy-kit) in order to determine the
-repository configuration. Within a Live CV repository, the scripts expect to find a file that starts with _live_ and
+files are used by Livekeys's [package manager](https://github.com/live-keys/livepm) in order to determine the
+repository configuration. Within a Livekeys repository, the scripts expect to find a file that starts with _live_ and
 ends with _.json_ extension.
 
 The files are split into the following main sections:
@@ -13,7 +13,7 @@ The files are split into the following main sections:
 * version: the version of the package
 * name: the name of the package
 * webpage: url of the package
-* dependencies: a list of Live CV dependencies for the package. This does not include third party dependencies (e.g.
+* dependencies: a list of Livekeys dependencies for the package. This does not include third party dependencies (e.g.
 opencv, dlib, etc)
 * components: the components or plugins inside the package
 * releases: a map of releases the the process required to package a release
@@ -22,7 +22,7 @@ The _version_, _name_ and _webpage_ are pretty straightforward, so we will go in
 
 ## Dependencies
 
-_dependencies_ defines a list of livecv packages this current package is dependent on. For each list item, the
+_dependencies_ defines a list of livekeys packages this current package is dependent on. For each list item, the
 following fields are expected:
 
 * name: name of the dependent package

@@ -1,6 +1,38 @@
 # ChangeLog
 
-This file summarises notable changes between Live CV versions.
+This file summarises notable changes between Live Keys versions.
+
+## 1.6.0 - Rename to Livekeys
+
+### Support
+
+   - Updated to Open CV 4
+
+### Features
+
+   - Layer based loading (Current layers: base, window, workspace, editor)).
+   - Support for a FileSystem package. (```import fs```)
+   - Added workspace pane manager.
+   - Added workspace themes.
+   - Added support for packages and dependencies. (Packages are also found in the *packages* folder).
+   - Added Runnables, allowing a user to run multiple files within a project at once.
+   - Added Subprojects.
+   - Support for opening multiple palettes editing the same type.
+   - Runtime code bindings are now done through palettes, which is safer.
+   - Palette implementations now support qml code parsers.
+   - A type's properties can also be edited by composing palettes.
+   - Support for Acts
+
+## 1.5.0
+
+### Support
+
+   - Support for MacOS build and deployment
+
+### Features
+
+   - Support for Palettes and Bindings
+   - Palettes for editing colors, numbers and matrices
 
 ## 1.4.0
 
@@ -13,7 +45,7 @@ This file summarises notable changes between Live CV versions.
 ```lcvfeatures2d``` plugins
    - ```lcvlib``` api has been removed. Plugins like ```lcvcore```, ```live``` expose their types as libraries, so
 the user can now link to them
-   - Added a *project* folder for qmake project files developers can now include to extend Live CV
+   - Added a *project* folder for qmake project files developers can now include to extend Livekeys
 
 ### Features:
    - Editor configuration file
@@ -32,7 +64,7 @@ the user can now link to them
    - Code Completion support
    - Project management 
    - Project file navigation
-   - Script execution and the *live* module (```livecv script.qml```)
+   - Script execution and the *live* module
    - Argument forwarding to qml
 
 ## 1.2.0

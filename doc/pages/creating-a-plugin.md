@@ -1,14 +1,14 @@
 
 # Creating a Plugin
 
-These 4 sections will take you through the basics on building a Live CV plugin. A Live CV plugin is a QtQuick based
+These 4 sections will take you through the basics on building a Livekeys plugin. A Livekeys plugin is a QtQuick based
 plugin with the added difference that it may have external dependencies outside of Qt (Open CV, dlib, etc)
-This makes Qt based plugins compatible in Live CV, however to use Live CV plugins in a QtQuick application
+This makes Qt based plugins compatible in Livekeys, however to use Livekeys plugins in a QtQuick application
 the user must make sure that the application can find the plugins dependencies (which is done automatically by
-Live CV). Before starting, it's important to know the structure and contents of
+Livekeys). Before starting, it's important to know the structure and contents of
 [plugins and plugin packages](Plugins), which is detailed in the user section.
 
-The full project we will be building is also available at [this github repository](https://github.com/livecv/live-tutorial), so if you want to just
+The full project we will be building is also available at [this github repository](https://github.com/live-keys/live-tutorial), so if you want to just
 start hacking through an existing project or get stuck on something, you can use the repository as a reference. The
 repository is also configured as a fully deployable package, which will be described in detail within the [project configuration](Project_Configuration) section.
 
@@ -29,23 +29,23 @@ set up the object class-name to be "CountNonZeroPixels", and **make sure to set 
 
 ![](../src/images/api_creating_3.png)
 
-This path will be required by Live CV when it loads the plugin. From here go to the last step and click **Finish**. You
+This path will be required by Livekeys when it loads the plugin. From here go to the last step and click **Finish**. You
 will notice a project with 2 c++ classes set up. The first one is the tutorial_plugin class, which contains a hook
 method to register all the plugin types or QML items once the plugin loads, and the actual QtQuick item that will do
 the pixel counting.
 
-If we build this plugin, although it doesn't provide any functionality, we can already use it in Live CV. We can test
+If we build this plugin, although it doesn't provide any functionality, we can already use it in Livekeys. We can test
 this if we build the project, and from our build directory we copy the library files ( *.so on linux or *.dll on
-windows) together with your qmldir file into your livecv installation directory, in plugins/tutorial. So we should
+windows) together with your qmldir file into your livekeys installation directory, in plugins/tutorial. So we should
 have the following file structure:
-* livecv/plugins/tutorial/tutorial.so
-* livecv/plugins/tutorial/qmldir
+* livekeys/plugins/tutorial/tutorial.so
+* livekeys/plugins/tutorial/qmldir
 
 or on Windows:
-* livecv/plugins/tutorial/tutorial.dll
-* livecv/plugins/tutorial/qmldir
+* livekeys/plugins/tutorial/tutorial.dll
+* livekeys/plugins/tutorial/qmldir
 
-Next, if we open Live CV and import the tutorial plugin, we can create a `CountNonZeroPixels` object:
+Next, if we open Livekeys and import the tutorial plugin, we can create a `CountNonZeroPixels` object:
 
 ```
 import QtQuick 2.3
@@ -62,5 +62,5 @@ means that we are able to use our plugin successfully.
 If you want to build QtQuick based plugins without any dependencies, from here you can simply start adding your items
 and configure their properties.
 
-In the [following part](Creating_a_Live_CV_based_Plugin) we will look into linking our plugin to Open CV library and
-start working with Live CV types to do the actual pixel counting.
+In the [following part](Creating_a_Livekeys_based_Plugin) we will look into linking our plugin to Open CV library and
+start working with Livekeys types to do the actual pixel counting.

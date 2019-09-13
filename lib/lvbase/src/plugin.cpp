@@ -18,7 +18,7 @@
 
 /**
   \class lv::Plugin
-  \brief Manages a LiveCV plugin.
+  \brief Manages a Livekeys plugin.
   \ingroup lvbase
  */
 

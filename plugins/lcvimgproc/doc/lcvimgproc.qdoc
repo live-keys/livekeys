@@ -2,7 +2,7 @@
 
   \qmlmodule lcvimgproc
 
-  \title Live CV QML Image Processing
+  \title Livekeys QML Image Processing
 
   This module contains elements for image processing. It resembles open cv's imgproc module.
 

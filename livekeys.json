@@ -1,16 +1,16 @@
 {
     "version" : "1.5.0",
-    "name": "livecv",
-    "webpage": "http://livecv.dinusv.com",
+    "name": "livekeys",
+    "webpage": "https://livekeys.io",
     "components" : {
-        "livecv" : {
+        "livekeys" : {
             "version" : "1.5.0",
             "versionsync" : {
                 "README.md": "\\s*(?:\\* \\*\\*Version\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*",
-                "application/src/livecv.h" : [
-                  "(?:\\s*#define LIVECV_VERSION_MAJOR)\\s*([0-9]*)\\s*\n",
-                  "(?:\\s*#define LIVECV_VERSION_MINOR)\\s*([0-9]*)\\s*\n",
-                  "(?:\\s*#define LIVECV_VERSION_PATCH)\\s*([0-9]*)\\s*"
+                "application/src/livekeys.h" : [
+                  "(?:\\s*#define LIVEKEYS_VERSION_MAJOR)\\s*([0-9]*)\\s*\n",
+                  "(?:\\s*#define LIVEKEYS_VERSION_MINOR)\\s*([0-9]*)\\s*\n",
+                  "(?:\\s*#define LIVEKEYS_VERSION_PATCH)\\s*([0-9]*)\\s*"
                 ]
             }
         },
@@ -47,7 +47,7 @@
             "deploy" : [
                 { "copy" : {
                     "{release}/bin" : {
-                        "livecv" : "-",
+                        "livekeys" : "-",
                         "liblvbase.so*" : "-",
                         "liblvview.so*" : "-",
                         "liblveditor.so*" : "-",
@@ -68,7 +68,7 @@
                 }
               },
           { "run" : ["mkdir", "-m", "775", "link"] },
-              { "run" : ["chmod", "755", "livecv"] },
+              { "run" : ["chmod", "755", "livekeys"] },
                 { "populate" : {
                         "plugins/editor/live.package.json":{
                             "release" : "linux",
@@ -166,7 +166,7 @@
             "deploy" : [
                 { "copy" : {
                   "{release}/bin" : {
-                      "livecv" : "-",
+                      "livekeys" : "-",
                       "liblvbase.so*" : "-",
                       "liblvview.so*" : "-",
                       "liblveditor.so*" : "-",
@@ -238,7 +238,7 @@
                 }
               },
               { "run" : ["mkdir", "-m", "775", "link"] },
-              { "run" : ["chmod", "755", "livecv"] },
+              { "run" : ["chmod", "755", "livekeys"] },
               { "write" : {
                   "file": "launcher.sh",
                   "data": [
@@ -248,7 +248,7 @@
                     "export QML2_IMPORT_PATH=`pwd`/plugins\n",
                     "export QT_PLUGIN_PATH=`pwd`/libraries\n",
                     "export QT_QPA_PLATFORM_PLUGIN_PATH=`pwd`/libraries/platforms\n",
-                    "./livecv"
+                    "./livekeys"
                     ]
                   }
               },
@@ -472,7 +472,7 @@
                         "msvcp140.dll": "-",
                         "concrt140.dll": "-"
                       },
-                      "{release}/bin/livecv.exe" : "-",
+                      "{release}/bin/livekeys.exe" : "-",
                       "{release}/bin/lvbase.dll" : "-",
                       "{release}/bin/lvview.dll" : "-",
                       "{release}/bin/lveditor.dll" : "-",
@@ -602,172 +602,172 @@
             ],
             "deploy" : [
                 { "copy" : {
-                    "{release}/bin/livecv.app" : "-",
-                    "{source}/samples" : "livecv.app/Contents/Samples",
-                    "{source}/project" : "livecv.app/Contents/Project",
-                    "{opencv_dir}/lib/libopencv_*": "livecv.app/Contents/Frameworks/OpenCV.framework/Libraries/-",
+                    "{release}/bin/livekeys.app" : "-",
+                    "{source}/samples" : "livekeys.app/Contents/Samples",
+                    "{source}/project" : "livekeys.app/Contents/Project",
+                    "{opencv_dir}/lib/libopencv_*": "livekeys.app/Contents/Frameworks/OpenCV.framework/Libraries/-",
                     "{qtdir}/qml" : {
-                        "Qt" : "livecv.app/Contents/PlugIns/Qt",
-                        "QtCanvas3D" : "livecv.app/Contents/PlugIns/QtCanvas3D",
-                        "QtGraphicalEffects" : "livecv.app/Contents/PlugIns/QtGraphicalEffects",
-                        "QtMultimedia" : "livecv.app/Contents/PlugIns/QtMultimedia",
-                        "QtQml" : "livecv.app/Contents/PlugIns/QtQml",
-                        "QtQuick" : "livecv.app/Contents/PlugIns/QtQuick",
-                        "QtQuick.2" : "livecv.app/Contents/PlugIns/QtQuick.2",
-                        "QtWebSockets" : "livecv.app/Contents/PlugIns/QtWebSockets"
+                        "Qt" : "livekeys.app/Contents/PlugIns/Qt",
+                        "QtCanvas3D" : "livekeys.app/Contents/PlugIns/QtCanvas3D",
+                        "QtGraphicalEffects" : "livekeys.app/Contents/PlugIns/QtGraphicalEffects",
+                        "QtMultimedia" : "livekeys.app/Contents/PlugIns/QtMultimedia",
+                        "QtQml" : "livekeys.app/Contents/PlugIns/QtQml",
+                        "QtQuick" : "livekeys.app/Contents/PlugIns/QtQuick",
+                        "QtQuick.2" : "livekeys.app/Contents/PlugIns/QtQuick.2",
+                        "QtWebSockets" : "livekeys.app/Contents/PlugIns/QtWebSockets"
                     },
                     "{qtdir}/plugins" : {
-                        "imageformats" : "livecv.app/Contents/Libraries/imageformats",
-                        "platforms" : "livecv.app/Contents/Libraries/platforms"
+                        "imageformats" : "livekeys.app/Contents/Libraries/imageformats",
+                        "platforms" : "livekeys.app/Contents/Libraries/platforms"
                     },
                     "{qtdir}/lib" : {
-                        "Qt3DExtras.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DExtras.framework/Versions/5",
-                        "Qt3DInput.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DInput.framework/Versions/5",
-                        "Qt3DLogic.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DLogic.framework/Versions/5",
-                        "Qt3DQuick.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuick.framework/Versions/5",
-                        "Qt3DQuickExtras.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuickExtras.framework/Versions/5",
-                        "Qt3DQuickInput.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuickInput.framework/Versions/5",
-                        "Qt3DQuickRender.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DQuickRender.framework/Versions/5",
-                        "Qt3DRender.framework/Versions/5" : "livecv.app/Contents/Frameworks/Qt3DRender.framework/Versions/5",
-                        "QtConcurrent.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtConcurrent.framework/Versions/5",
-                        "QtCore.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtCore.framework/Versions/5",
-                        "QtDBus.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtDBus.framework/Versions/5",
-                        "QtGui.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtGui.framework/Versions/5",
-                        "QtMacExtras.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMacExtras.framework/Versions/5",
-                        "QtMultimedia.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimedia.framework/Versions/5",
-                        "QtMultimediaQuick.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimediaQuick_p.framework/Versions/5",
-                        "QtMultimediaWidgets.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtMultimediaWidgets.framework/Versions/5",
-                        "QtNetwork.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtNetwork.framework/Versions/5",
-                        "QtNfc.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtNfc.framework/Versions/5",
-                        "QtOpenGL.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtOpenGL.framework/Versions/5",
-                        "QtPositioning.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtPositioning.framework/Versions/5",
-                        "QtPrintSupport.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtPrintSupport.framework/Versions/5",
-                        "QtQml.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQml.framework/Versions/5",
-                        "QtQuick.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQuick.framework/Versions/5",
-                        "QtQuickControls2.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQuickControls2.framework/Versions/5",
-                        "QtQuickParticles.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQuickParticles.framework/Versions/5",
-                        "QtQuickTemplates2.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQuickTemplates2.framework/Versions/5",
-                        "QtQuickWidgets.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtQuickWidgets.framework/Versions/5",
-                        "QtSql.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtSql.framework/Versions/5",
-                        "QtUiPlugin.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtUiPlugin.framework/Versions/5",
-                        "QtWebChannel.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtWebChannel.framework/Versions/5",
-                        "QtWebSockets.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtWebSockets.framework/Versions/5",
-                        "QtWebView.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtWebView.framework/Versions/5",
-                        "QtWidgets.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtWidgets.framework/Versions/5",
-                        "QtXml.framework/Versions/5" : "livecv.app/Contents/Frameworks/QtXml.framework/Versions/5",
-                        "libQt5Bootstrap.a" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5Bootstrap.la" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5OpenGLExtensions.a" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5OpenGLExtensions.la" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5PacketProtocol.a" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5PacketProtocol.la" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5PlatformCompositorSupport.a" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5PlatformCompositorSupport.la" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5QmlDebug.a" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5QmlDebug.la" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5QmlDevTools.a" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5QmlDevTools.la" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5UiTools.a" : "livecv.app/Contents/Frameworks/-",
-                        "libQt5UiTools.la" : "livecv.app/Contents/Frameworks/-",
-                        "libqtfreetype.a" : "livecv.app/Contents/Frameworks/-",
-                        "libqtlibpng.a" : "livecv.app/Contents/Frameworks/-"
+                        "Qt3DExtras.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DExtras.framework/Versions/5",
+                        "Qt3DInput.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DInput.framework/Versions/5",
+                        "Qt3DLogic.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DLogic.framework/Versions/5",
+                        "Qt3DQuick.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DQuick.framework/Versions/5",
+                        "Qt3DQuickExtras.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DQuickExtras.framework/Versions/5",
+                        "Qt3DQuickInput.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DQuickInput.framework/Versions/5",
+                        "Qt3DQuickRender.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DQuickRender.framework/Versions/5",
+                        "Qt3DRender.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DRender.framework/Versions/5",
+                        "QtConcurrent.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtConcurrent.framework/Versions/5",
+                        "QtCore.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtCore.framework/Versions/5",
+                        "QtDBus.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtDBus.framework/Versions/5",
+                        "QtGui.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtGui.framework/Versions/5",
+                        "QtMacExtras.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtMacExtras.framework/Versions/5",
+                        "QtMultimedia.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtMultimedia.framework/Versions/5",
+                        "QtMultimediaQuick.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtMultimediaQuick_p.framework/Versions/5",
+                        "QtMultimediaWidgets.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtMultimediaWidgets.framework/Versions/5",
+                        "QtNetwork.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtNetwork.framework/Versions/5",
+                        "QtNfc.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtNfc.framework/Versions/5",
+                        "QtOpenGL.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtOpenGL.framework/Versions/5",
+                        "QtPositioning.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtPositioning.framework/Versions/5",
+                        "QtPrintSupport.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtPrintSupport.framework/Versions/5",
+                        "QtQml.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQml.framework/Versions/5",
+                        "QtQuick.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQuick.framework/Versions/5",
+                        "QtQuickControls2.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQuickControls2.framework/Versions/5",
+                        "QtQuickParticles.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQuickParticles.framework/Versions/5",
+                        "QtQuickTemplates2.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQuickTemplates2.framework/Versions/5",
+                        "QtQuickWidgets.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQuickWidgets.framework/Versions/5",
+                        "QtSql.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtSql.framework/Versions/5",
+                        "QtUiPlugin.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtUiPlugin.framework/Versions/5",
+                        "QtWebChannel.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtWebChannel.framework/Versions/5",
+                        "QtWebSockets.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtWebSockets.framework/Versions/5",
+                        "QtWebView.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtWebView.framework/Versions/5",
+                        "QtWidgets.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtWidgets.framework/Versions/5",
+                        "QtXml.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtXml.framework/Versions/5",
+                        "libQt5Bootstrap.a" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5Bootstrap.la" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5OpenGLExtensions.a" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5OpenGLExtensions.la" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5PacketProtocol.a" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5PacketProtocol.la" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5PlatformCompositorSupport.a" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5PlatformCompositorSupport.la" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5QmlDebug.a" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5QmlDebug.la" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5QmlDevTools.a" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5QmlDevTools.la" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5UiTools.a" : "livekeys.app/Contents/Frameworks/-",
+                        "libQt5UiTools.la" : "livekeys.app/Contents/Frameworks/-",
+                        "libqtfreetype.a" : "livekeys.app/Contents/Frameworks/-",
+                        "libqtlibpng.a" : "livekeys.app/Contents/Frameworks/-"
                     }
                 }},
                 { "clean" : {
-                    "livecv.app/Contents/PlugIns" : ["*_debug.dylib.dSYM", "*_debug.dylib"],
-                    "livecv.app/Contents/Libraries" : ["*_debug.dylib.dSYM", "*_debug.dylib"],
-                    "livecv.app/Contents/Frameworks" : ["*_debug.dylib.dSYM", "*_debug.dylib", "*Headers", "*_debug", "*.pri"]
+                    "livekeys.app/Contents/PlugIns" : ["*_debug.dylib.dSYM", "*_debug.dylib"],
+                    "livekeys.app/Contents/Libraries" : ["*_debug.dylib.dSYM", "*_debug.dylib"],
+                    "livekeys.app/Contents/Frameworks" : ["*_debug.dylib.dSYM", "*_debug.dylib", "*Headers", "*_debug", "*.pri"]
                 }},
                 { "populate" : {
-                        "livecv.app/Contents/PlugIns/editor/live.package.json":{
+                        "livekeys.app/Contents/PlugIns/editor/live.package.json":{
                             "release" : "macos"
                         },
-                        "livecv.app/Contents/PlugIns/editqml/live.package.json":{
+                        "livekeys.app/Contents/PlugIns/editqml/live.package.json":{
                             "release" : "macos"
                         },
-                        "livecv.app/Contents/PlugIns/fs/live.package.json":{
+                        "livekeys.app/Contents/PlugIns/fs/live.package.json":{
                             "release" : "macos"
                         },
-                        "livecv.app/Contents/PlugIns/live/live.package.json":{
+                        "livekeys.app/Contents/PlugIns/live/live.package.json":{
                             "release" : "macos"
                         },
-                        "livecv.app/Contents/PlugIns/lcvcore/live.package.json":{
+                        "livekeys.app/Contents/PlugIns/lcvcore/live.package.json":{
                             "release" : "macos"
                         },
-                        "livecv.app/Contents/PlugIns/lcvimgproc/live.package.json":{
+                        "livekeys.app/Contents/PlugIns/lcvimgproc/live.package.json":{
                             "release" : "macos"
                         },
-                        "livecv.app/Contents/PlugIns/lcvvideo/live.package.json":{
+                        "livekeys.app/Contents/PlugIns/lcvvideo/live.package.json":{
                             "release" : "macos"
                         },
-                        "livecv.app/Contents/PlugIns/lcvfeatures2d/live.package.json":{
+                        "livekeys.app/Contents/PlugIns/lcvfeatures2d/live.package.json":{
                             "release" : "macos"
                         },
-                        "livecv.app/Contents/PlugIns/lcvphoto/live.package.json":{
+                        "livekeys.app/Contents/PlugIns/lcvphoto/live.package.json":{
                             "release" : "macos"
                         }
                     }
                 },
                 { "dylibrelink" : {
-                    "livecv.app/Contents/PlugIns/lcvcore/liblcvcore.dylib" : {
+                    "livekeys.app/Contents/PlugIns/lcvcore/liblcvcore.dylib" : {
                         "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
                     },
-                    "livecv.app/Contents/PlugIns/lcvimgproc/liblcvimgproc.dylib" : {
+                    "livekeys.app/Contents/PlugIns/lcvimgproc/liblcvimgproc.dylib" : {
                         "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
                     },
-                    "livecv.app/Contents/PlugIns/lcvvideo/liblcvvideo.dylib" : {
+                    "livekeys.app/Contents/PlugIns/lcvvideo/liblcvvideo.dylib" : {
                         "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
                     },
-                    "livecv.app/Contents/PlugIns/lcvphoto/liblcvphoto.dylib" : {
+                    "livekeys.app/Contents/PlugIns/lcvphoto/liblcvphoto.dylib" : {
                         "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
                     },
-                    "livecv.app/Contents/PlugIns/lcvfeatures2d/liblcvfeatures2d.dylib" : {
+                    "livekeys.app/Contents/PlugIns/lcvfeatures2d/liblcvfeatures2d.dylib" : {
                         "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
                     }
                 }},
                 { "dylibaddrpath" : {
-                    "livecv.app/Contents/Frameworks/OpenCV.framework/Libraries/*.dylib" : ["@loader_path"]
+                    "livekeys.app/Contents/Frameworks/OpenCV.framework/Libraries/*.dylib" : ["@loader_path"]
                 }},
                 { "solveincludes": [
                     {
                         "from": "{source}/lib/lvbase/include/live",
                         "source": ["{source}/lib/lvbase/src"],
-                        "to": "livecv.app/Contents/Dev/lvbase/include/live"
+                        "to": "livekeys.app/Contents/Dev/lvbase/include/live"
                     },
                     {
                         "from": "{source}/lib/lvview/include/live",
                         "source": ["{source}/lib/lvview/src"],
-                        "to": "livecv.app/Contents/Dev/lvview/include/live"
+                        "to": "livekeys.app/Contents/Dev/lvview/include/live"
                     },
                     {
                         "from": "{source}/lib/lveditor/include/live",
                         "source": ["{source}/lib/lveditor/src"],
-                        "to": "livecv.app/Contents/Dev/lveditor/include/live"
+                        "to": "livekeys.app/Contents/Dev/lveditor/include/live"
                     },
                     {
                         "from": "{source}/lib/lveditqmljs/include/live",
                         "source": ["{source}/lib/lveditqmljs/src"],
-                        "to": "livecv.app/Contents/Dev/lveditqmljs/include/live"
+                        "to": "livekeys.app/Contents/Dev/lveditqmljs/include/live"
                     },
                     {
                         "from": "{source}/plugins/live/include",
                         "source": ["{source}/plugins/live/src"],
-                        "to": "livecv.app/Contents/Dev/plugins/live/include"
+                        "to": "livekeys.app/Contents/Dev/plugins/live/include"
                     },
                     {
                         "from": "{source}/plugins/lcvcore/include",
                         "source": ["{source}/plugins/lcvcore/src"],
-                        "to": "livecv.app/Contents/Dev/plugins/lcvcore/include"
+                        "to": "livekeys.app/Contents/Dev/plugins/lcvcore/include"
                     },
                     {
                         "from": "{source}/plugins/lcvfeatures2d/include",
                         "source": ["{source}/plugins/lcvfeatures2d/src"],
-                        "to": "livecv.app/Contents/Dev/plugins/lcvfeatures2d/include"
+                        "to": "livekeys.app/Contents/Dev/plugins/lcvfeatures2d/include"
                     },
                     {
                         "from": "{source}/plugins/lcvvideo/include",
                         "source": ["{source}/plugins/lcvvideo/src"],
-                        "to": "livecv.app/Contents/Dev/plugins/lcvvideo/include"
+                        "to": "livekeys.app/Contents/Dev/plugins/lcvvideo/include"
                     }
                 ]
               }

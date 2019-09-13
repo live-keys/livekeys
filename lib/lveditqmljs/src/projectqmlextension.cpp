@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -42,10 +42,10 @@ namespace lv{
  * \ingroup lveditqmljs
  * \brief Main object used throughout qml extension plugin.
  *
- * To capture the object, you can use the globals from livecv:
+ * To capture the object, you can use the workspace layer:
  *
  * \code
- * var projectQmlExtension = livecv.extensions["editqml"].globals
+ * var projectQmlExtension = lk.layers.workspace.extensions["editqml"].globals
  * \endcode
  */
 
@@ -86,7 +86,7 @@ void ProjectQmlExtension::classBegin(){
 void ProjectQmlExtension::componentComplete(){
     if ( !m_scanMonitor ){
         QQmlContext* ctx = qmlEngine(this)->rootContext();
-        QObject* lg = ctx->contextProperty("livecv").value<QObject*>();
+        QObject* lg = ctx->contextProperty("lk").value<QObject*>();
         if ( !lg ){
             qWarning("Failed to find live global object.");
             return;

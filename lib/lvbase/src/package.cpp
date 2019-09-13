@@ -16,7 +16,7 @@
 
 /**
   \class lv::Package
-  \brief Manages a LiveCV package.
+  \brief Manages a Livekeys package.
   \ingroup lvbase
  */
 

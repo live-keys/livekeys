@@ -49,7 +49,7 @@ OTHER_FILES += \
     OTHER_FILES *= $$CONFIG_DIR/*.pri
 }
 
-OTHER_FILES *= livecv.json
+OTHER_FILES *= livekeys.json
 OTHER_FILES *= project/*.pri
 OTHER_FILES *= doc/src/Doxyfile
 OTHER_FILES *= doc/pages/*.md

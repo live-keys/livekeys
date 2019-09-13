@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -58,7 +58,7 @@ QScriptCommandLineParser::~QScriptCommandLineParser(){
 }
 
 QString QScriptCommandLineParser::helpString() const{
-    QString base("\nUsage:\n\n   livecv [...] script.qml [options] [args ...]\n\nScript options:\n\n");
+    QString base("\nUsage:\n\n   livekeys [...] script.qml [options] [args ...]\n\nScript options:\n\n");
     for ( QList<QScriptCommandLineParser::Option*>::const_iterator it = m_options.begin(); it != m_options.end(); ++it ){
         for ( QStringList::const_iterator nameIt = (*it)->shortNames.begin(); nameIt != (*it)->shortNames.end(); ++nameIt ){
             base += QString("  ") + "-" + *nameIt + ((*it)->type != "" ? " <" + (*it)->type + ">" : "");

@@ -1,6 +1,6 @@
 # Creating a static item
 
-In Live CV, static items are items that keep their internal state across multiple compilations. They are mostly used
+In Livekeys, static items are items that keep their internal state across multiple compilations. They are mostly used
 in live coding, since during code changes, the application needs to refresh its items and recrete the scene. Items then
 have to reset to their initial state, therefore all interactions or changes that occured during the execution of the
 application will be lost. The [user section on static items](Static_Items) offers more details about their role and usage.

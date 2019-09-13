@@ -2,9 +2,9 @@
 
   \module lcvphoto_cpp
 
-  \title Live CV Computational Photography
+  \title Livekeys Computational Photography
 
-  \brief This module contains the cpp implementation of the photo processing elements from Live CV.
+  \brief This module contains the cpp implementation of the photo processing elements from Livekeys.
 
   This module currently does not export any c++ functionality
 

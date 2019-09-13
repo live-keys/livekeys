@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -69,14 +69,14 @@ Pane{
         codeHandler.setDocument(document)
     }
 
-    property Theme currentTheme : livecv.layers.workspace.themes.current
+    property Theme currentTheme : lk.layers.workspace.themes.current
 
     property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
     property color lineSurfaceColor: topColor
     property color lineInfoColor:  currentTheme ? currentTheme.paneTopBackgroundAlternate : 'black'
     property color optionsColor: currentTheme ? currentTheme.paneTopBackground : 'black'
 
-    color : livecv.layers.workspace.themes.current.paneBackground
+    color : lk.layers.workspace.themes.current.paneBackground
     clip : true
 
     objectName: "editor"
@@ -96,12 +96,12 @@ Pane{
     }
 
     function saveAs(){
-        livecv.layers.window.dialogs.saveFile(
+        lk.layers.window.dialogs.saveFile(
             { filters: [ "Qml files (*.qml)", "All files (*)" ] },
             function(url){
                 var editordoc = editor.document
                 if ( !editordoc.saveAs(url) ){
-                    livecv.layers.window.dialogs.message(
+                    lk.layers.window.dialogs.message(
                         'Failed to save file to: ' + url,
                         {
                             button3Name : 'Ok',
@@ -116,10 +116,10 @@ Pane{
                 if ( !project.isDirProject() ){
                     project.openProject(url)
                 } else if ( project.isFileInProject(url) ){
-                    livecv.layers.workspace.project.openFile(url, ProjectDocument.Edit)
+                    lk.layers.workspace.project.openFile(url, ProjectDocument.Edit)
                 } else {
                     var fileUrl = url
-                    livecv.layers.window.dialogs.message(
+                    lk.layers.window.dialogs.message(
                         'File is outside project scope. Would you like to open it as a new project?',
                     {
                         button1Name : 'Open as project',
@@ -160,15 +160,15 @@ Pane{
                     editor.document.save()
                     editor.closeDocumentAction()
                 } else {
-                    livecv.layers.window.dialogs.saveFile(
+                    lk.layers.window.dialogs.saveFile(
                         { filters: [ "Qml files (*.qml)", "All files (*)" ] },
                         function(url){
                             if ( !editor.document.saveAs(url) ){
-                                livecv.layers.window.dialogs.message(
+                                lk.layers.window.dialogs.message(
                                     'Failed to save file to: ' + url,
                                     {
                                         button3Name : 'Ok',
-                                        button3Function : function(){ livecv.layers.window.dialogs.messageClose(); }
+                                        button3Function : function(){ lk.layers.window.dialogs.messageClose(); }
                                     }
                                 )
                                 return;
@@ -180,7 +180,7 @@ Pane{
                 mbox.close()
             }
 
-            livecv.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
+            lk.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
             {
                 button1Name : 'Yes',
                 button1Function : function(mbox){
@@ -210,7 +210,7 @@ Pane{
 
     function closeDocumentAction(){
         if ( !project.isDirProject() && document.file.path === project.active.path ){
-            livecv.layers.window.dialogs.message(
+            lk.layers.window.dialogs.message(
                 'Closing this file will also close this project. Would you like to close the project?',
             {
                 button1Name : 'Yes',
@@ -322,7 +322,7 @@ Pane{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    livecv.layers.workspace.commands.execute('window.workspace.toggleNavigation')
+                    lk.layers.workspace.commands.execute('window.workspace.toggleNavigation')
                 }
             }
         }
@@ -648,7 +648,7 @@ Pane{
 
                 color : "#fff"
                 font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
-                font.pixelSize: livecv.settings.file('editor').fontSize
+                font.pixelSize: lk.settings.file('editor').fontSize
                 font.weight: Font.Normal
 
                 selectByMouse: true
@@ -745,9 +745,9 @@ Pane{
                             codeHandler.completionModel.disable()
                         }
                     } else {
-                        var command = livecv.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
+                        var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
                         if ( command !== '' ){
-                            livecv.layers.workspace.commands.execute(command)
+                            lk.layers.workspace.commands.execute(command)
                             event.accepted = true
                         }
                     }
@@ -790,7 +790,7 @@ Pane{
                         }
                         contextMenu.additionalItems = []
 
-                        var res = livecv.layers.workspace.interceptMenu(editor)
+                        var res = lk.layers.workspace.interceptMenu(editor)
                         for ( var i = 0; i < res.length; ++i ){
                             var menuitem = contextMenu.insertItem(i, res[i].name)
                             menuitem.enabled = res[i].enabled

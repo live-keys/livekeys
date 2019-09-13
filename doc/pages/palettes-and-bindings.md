@@ -1,7 +1,7 @@
 # Palettes and Bindings
 
-Palettes and bindings are features in Live CV that offer a new way to experience live coding. Before we describe them,
-there's an intermediate feature in Live CV we will look into that makes both of them possible.
+Palettes and bindings are features in Livekeys that offer a new way to experience live coding. Before we describe them,
+there's an intermediate feature in Livekeys we will look into that makes both of them possible.
 
 ## Direct Editing
 
@@ -9,7 +9,7 @@ Direct editing is the process of changing a property's value from code, without 
 example, we can open up the sample project in _samples/live/palettesandbinding.qml_. Click on the rectangle to start
 its animation, then right click on the `y` property from the main rectangle, then click on edit, and start editing the
 value (the value will be highlighted in blue). After entering a new value, press CTRL+RETURN to commit the change. You
-will see the rectangle has changed its position **without stopping the animation**. Behind the scenes, Live CV tries
+will see the rectangle has changed its position **without stopping the animation**. Behind the scenes, Livekeys tries
 to find the element of the property that is changed. If it succeds, it will allow us to edit the value. After editing,
 it will parse the value, and convert it from code to an actual value in our application.
 This only works on values that can be parsed and converted from code (strings, numbers, etc).

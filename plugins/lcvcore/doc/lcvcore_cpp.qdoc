@@ -2,9 +2,9 @@
 
 \module lcvcore_cpp
 
-\title Live CV Core
+\title Livekeys Core
 
-\brief This module contains the cpp implementation of core elements for Live CV's computer vision code.
+\brief This module contains the cpp implementation of core elements for Livekeys's computer vision code.
 
 \sa lcvcore
 

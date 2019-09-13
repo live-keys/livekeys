@@ -1,6 +1,6 @@
 # Plugin `lcvcore`
 
-This module contains all the main qml elements for Live CV's computer vision code. In comparison to opencv, it is an
+This module contains all the main qml elements for Livekeys's computer vision code. In comparison to opencv, it is an
 actual merge between the core and highgui modules.
 
 ```js
@@ -244,7 +244,7 @@ Parameters can be one of the following, also dependent on the format the image i
 {qmlInherits: Item}
 {qmlBrief: Simple matrix display element.}
 
-  This type serves as a base for all other live cv types that require displaying a matrix, which is available in its
+  This type serves as a base for all other livekeys types that require displaying a matrix, which is available in its
   output property. You can choose wether smoothing occurs when scaling the image for display by enabling linear
 
 {qmlMethod:saveImage(string file, Mat image)}
@@ -367,7 +367,7 @@ Stores the resolution for this cam capture.
 
 By default, this is initialized with the camera's given fps. You can change this value if you want faster/slower
 capture playback, however, setting it faster than the actual camera permits will limit to the camera's maximum
-rate. This value is not absolute, in fact it depends on a lot of factors like processing time done by Live CV and
+rate. This value is not absolute, in fact it depends on a lot of factors like processing time done by Livekeys and
 speed by which frames are delivered.
 
 {qmlmethod:CamCapture::staticLoad(string device, size resolution)}

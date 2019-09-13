@@ -2,9 +2,9 @@
 
   \module lcvimgproc_cpp
 
-  \title Live CV ImgProc
+  \title Livekeys ImgProc
 
-  \brief This module contains the cpp implementation of the image processing elements from Live CV.
+  \brief This module contains the cpp implementation of the image processing elements from Livekeys.
 
   This module currently does not export any c++ functionality
 

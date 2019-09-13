@@ -102,15 +102,15 @@ script:
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py deploy .. gcc_64_standalone; fi
   - if [ "${TRAVIS_OS_NAME}" == "0" ]; then
       python3 livepm/main.py makedoc ..;
-      export LIVECV_DOC=$(ls doc*.tar.gz | tail -n +1 | head -1);
-      mv ${LIVECV_DOC} livecv-doc.tar.gz;
+      export LIVEKEYS_DOC=$(ls doc*.tar.gz | tail -n +1 | head -1);
+      mv ${LIVEKEYS_DOC} livekeys-doc.tar.gz;
     fi
   - ls
 
 before_deploy:
   - ls *.tar.gz
-  - export LIVECV=$(ls live*.tar.gz | tail -n +1 | head -1)
-  - echo ${LIVECV}
+  - export LIVEKEYS=$(ls live*.tar.gz | tail -n +1 | head -1)
+  - echo ${LIVEKEYS}
 
 deploy:
   provider: releases

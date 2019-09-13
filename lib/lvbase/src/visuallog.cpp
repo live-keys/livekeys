@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -25,7 +25,7 @@
 
 /**
  * \class lv::VisualLog
- * \brief Main logging class for LiveCV
+ * \brief Main logging class
  *
  * The way we primarily use this class is through a predefined macro `vlog`. It's defined in the following way
  *

@@ -13,6 +13,6 @@ Item{
         document: project.openFile(project.path('editor.qml'))
         height: parent.height
         width: 400
-        windowControls: livecv.windowControls()
+        windowControls: lk.windowControls()
     }
 }

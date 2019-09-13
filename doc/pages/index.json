@@ -6,9 +6,9 @@
         {"Installation On Linux" : "installation.md#linux"},
         {"Installation On Mac" : "installation.md#macos"}
     ],
-    "Using Live CV",
+    "Using Livekeys",
     [
-        {"Running Live CV" : "running.md"},
+        {"Running Livekeys" : "running.md"},
         {"Projects" : "projects.md"},
         {"Palettes and Bindings" : "palettes-and-bindings.md"},
         {"Logging" : "logging.md"},
@@ -53,11 +53,11 @@
     ],
     "Developer",
     [
-        {"Building Live CV": "building.md"},
+        {"Building Livekeys": "building.md"},
         "Plugins",
         [
             {"Creating a Plugin" : "creating-a-plugin.md"},
-            {"Creating a Live CV Plugin" : "creating-a-livecv-plugin.md"},
+            {"Creating a Livekeys Plugin" : "creating-a-livekeys-plugin.md"},
             {"Creating a Filter" : "creating-a-filter.md"},
             {"Creating a Static Item" : "creating-a-static-item.md"},
             {"Project configuration" : "project-configuration.md"}

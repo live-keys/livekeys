@@ -60,7 +60,7 @@ Rectangle{
         visible : text === "" ? false : true
 
         onLinkActivated: {
-            livecv.layers.workspace.project.openFile(
+            lk.layers.workspace.project.openFile(
                 link.substring(0, link.lastIndexOf(':')), ProjectDocument.EditIfNotOpen
             )
         }

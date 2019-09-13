@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
+** Copyright (C) 2014-2019 Dinu SV.
 ** (contact: mail@dinusv.com)
-** This file is part of Live CV Application.
+** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
 ** This file may be used under the terms of the GNU Lesser
@@ -14,31 +14,31 @@
 **
 ****************************************************************************/
 
-#include "livecvarguments.h"
+#include "livekeysarguments.h"
 #include "live/commandlineparser.h"
 #include "live/mlnodetojson.h"
 #include <QFile>
 
 namespace lv{
 
-LiveCVArguments::LiveCVArguments(const std::string& header)
+LivekeysArguments::LivekeysArguments(const std::string& header)
     : m_parser(new CommandLineParser(header))
 {
 }
 
-LiveCVArguments::~LiveCVArguments(){
+LivekeysArguments::~LivekeysArguments(){
     delete m_parser;
 }
 
-bool LiveCVArguments::pluginInfoFlag() const{
+bool LivekeysArguments::pluginInfoFlag() const{
     return m_pluginInfoFlag;
 }
 
-bool LiveCVArguments::helpFlag() const{
+bool LivekeysArguments::helpFlag() const{
     return m_parser->isSet(m_parser->helpOption());
 }
 
-void LiveCVArguments::initialize(int argc, const char* const argv[]){
+void LivekeysArguments::initialize(int argc, const char* const argv[]){
     CommandLineParser::Option* monitorOption  = m_parser->addOption({"-m", "--monitor"},
         "Opens the list of paths in monitor mode.", "list");
     CommandLineParser::Option* pluginInfoOption = m_parser->addOption({"--plugininfo"},
@@ -51,12 +51,12 @@ void LiveCVArguments::initialize(int argc, const char* const argv[]){
     CommandLineParser::Option* logToNetworkOption = m_parser->addOption({"--log-tonetwork"},
         "Stream log data to the network through TCP/IP.", "url");
     CommandLineParser::Option* logToNoViewOption = m_parser->addFlag({"--log-noview"},
-        "Disable logging to the live cvs logger.");
+        "Disable logging to the Livekeyss logger.");
     CommandLineParser::Option* logFileOption = m_parser->addOption({"-o", "--log-file"},
         "Output log data to a log file.", "path");
     CommandLineParser::Option* logDailyOption = m_parser->addFlag({"--log-daily"},
         "Create daily log files. The \'--log-file\' option is used as the pattern to generate the actual files."
-        "The pattern is specific to Live CVs log date format (i.e. path/to/logfile_%Y_%m_%d.txt). "
+        "The pattern is specific to Livekeyss log date format (i.e. path/to/logfile_%Y_%m_%d.txt). "
         "See the documentation on log prefixes for more details).");
     CommandLineParser::Option* logPrefixOption = m_parser->addOption({"--log-prefix"},
         "Default prefix for messages. See the documentation on logging for more info. To use the standard prefix, "
@@ -182,27 +182,27 @@ void LiveCVArguments::initialize(int argc, const char* const argv[]){
 
 }
 
-const MLNode &LiveCVArguments::getLogConfiguration(){
+const MLNode &LivekeysArguments::getLogConfiguration(){
     return m_logConfiguration;
 }
 
-bool LiveCVArguments::versionFlag() const{
+bool LivekeysArguments::versionFlag() const{
     return m_parser->isSet(m_parser->versionOption());
 }
 
-std::string LiveCVArguments::helpString() const{
+std::string LivekeysArguments::helpString() const{
     return m_parser->helpString();
 }
 
-const QStringList &LiveCVArguments::layers() const{
+const QStringList &LivekeysArguments::layers() const{
     return m_layers;
 }
 
-const std::vector<std::string> &LiveCVArguments::scriptArguments() const{
+const std::vector<std::string> &LivekeysArguments::scriptArguments() const{
     return m_parser->scriptArguments();
 }
 
-const std::string &LiveCVArguments::script() const{
+const std::string &LivekeysArguments::script() const{
     return m_parser->script();
 }
 

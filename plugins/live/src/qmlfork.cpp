@@ -114,7 +114,7 @@ void QmlFork::componentComplete(){
     QDateTime cdt = QDateTime::currentDateTime();
     QString forkId = cdt.toString("yyyyMMddhhmmsszzz");
 
-    QString program = "./livecv";
+    QString program = "./livekeys";
 
     m_fork = new QProcess(this);
 
