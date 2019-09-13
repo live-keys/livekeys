@@ -1,4 +1,4 @@
-<p style="text-align: center;">
+<p align="center" style="text-align: center;">
     <a href="https://livekeys.io/">
         <img
           alt="Livekeys"
