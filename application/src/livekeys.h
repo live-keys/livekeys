@@ -21,6 +21,9 @@
 #include <QLibrary>
 #include <QQmlPropertyMap>
 #include <QJSValue>
+
+#include <functional>
+
 #include "live/package.h"
 
 // Versioning

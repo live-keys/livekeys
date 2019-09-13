@@ -22,9 +22,7 @@ public:
         Append = QFile::Append,
         Truncate = QFile::Truncate,
         Text = QFile::Text,
-        Unbuffered = QFile::Unbuffered,
-        NewOnly = QFile::NewOnly,
-        ExistingOnly = QFile::ExistingOnly
+        Unbuffered = QFile::Unbuffered
     };
 
     explicit QmlFile(QObject *parent = nullptr);
