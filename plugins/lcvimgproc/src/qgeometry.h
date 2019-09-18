@@ -30,6 +30,9 @@ public slots:
     QMat* scale(QMat* input, double fx, double fy, int interpolation);
     QMat* resizeBy(QMat* input, QJSValue ob, int interpolation);
 
+    QMat* getPerspectiveTransform(QVariantList src, QVariantList dst);
+    QVariantList applyPerspectiveTransform(QVariantList points, QMat* warp);
+    void warpTriangles(QMat* src, QMat* dst, QVariantList triangles1, QVariantList triangles2);
 };
 
 #endif // QGEOMETRY_H
