@@ -1,13 +1,14 @@
-#ifndef DIR_H
-#define DIR_H
+#ifndef LVQMLDIR_H
+#define LVQMLDIR_H
 
 #include <QObject>
 #include <QJSValue>
 
 namespace lv {
+
 /// \private
-class QmlDir : public QObject
-{
+class QmlDir : public QObject{
+
     Q_OBJECT
 public:
     explicit QmlDir(QObject *parent = nullptr);
@@ -22,4 +23,4 @@ public slots:
 
 }
 
-#endif // DIR_H
+#endif // LVQMLDIR_H

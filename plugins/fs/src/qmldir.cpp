@@ -7,15 +7,15 @@
 namespace lv {
 
 
-QmlDir::QmlDir(QObject *parent) : QObject(parent)
+QmlDir::QmlDir(QObject *parent)
+    : QObject(parent)
 {
-
 }
 
-QStringList QmlDir::list(QJSValue path)
-{
+QStringList QmlDir::list(QJSValue path){
     QStringList result;
-    if (!path.isString()) return result;
+    if (!path.isString())
+        return result;
 
     if (!QFileInfo(path.toString()).isDir())
         return result;
