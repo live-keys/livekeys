@@ -19,7 +19,7 @@
 #include "live/errorhandler.h"
 #include "live/incubationcontroller.h"
 
-#include "container.h"
+#include "qmlcontainer.h"
 #include "act.h"
 #include "group.h"
 #include "groupcollector.h"
@@ -321,7 +321,7 @@ QString ViewEngine::typeAsPropertyMessage(const QString &typeName, const QString
  * \brief Register the base types from the view library
  */
 void ViewEngine::registerBaseTypes(const char *uri){
-    qmlRegisterType<lv::Container>(             uri, 1, 0, "Container");
+    qmlRegisterType<lv::QmlContainer>(             uri, 1, 0, "Container");
     qmlRegisterType<lv::Act>(                   uri, 1, 0, "Act");
     qmlRegisterType<lv::Group>(                 uri, 1, 0, "Group");
     qmlRegisterType<lv::GroupCollector>(        uri, 1, 0, "GroupCollector");

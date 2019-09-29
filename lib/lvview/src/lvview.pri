@@ -20,7 +20,6 @@ HEADERS += \
     $$PWD/groupcollectorentry.h \
     $$PWD/memory.h \
     $$PWD/shared.h \
-    $$PWD/container.h \
     $$PWD/act.h \
     $$PWD/workerthread.h \
     $$PWD/workerthread_p.h \
@@ -35,7 +34,8 @@ HEADERS += \
     $$PWD/qmlpropertywatcher.h \
     $$PWD/qmlstream.h \
     $$PWD/sharedmemoryreadworker.h \
-    $$PWD/sharedmemorywriteworker.h
+    $$PWD/sharedmemorywriteworker.h \
+    $$PWD/qmlcontainer.h
 
 
 SOURCES += \
@@ -56,7 +56,6 @@ SOURCES += \
     $$PWD/groupcollectorentry.cpp \
     $$PWD/memory.cpp \
     $$PWD/shared.cpp \
-    $$PWD/container.cpp \
     $$PWD/act.cpp \
     $$PWD/workerthread.cpp \
     $$PWD/qmlvariantlist.cpp \
@@ -69,5 +68,6 @@ SOURCES += \
     $$PWD/qmlpropertywatcher.cpp \
     $$PWD/qmlstream.cpp \
     $$PWD/sharedmemoryreadworker.cpp \
-    $$PWD/sharedmemorywriteworker.cpp
+    $$PWD/sharedmemorywriteworker.cpp \
+    $$PWD/qmlcontainer.cpp
 
