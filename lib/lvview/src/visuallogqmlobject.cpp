@@ -81,7 +81,9 @@ void logDetail(VisualLog& vl, const QJSValue& message){
         if ( !ti.isNull() && ti->isLoggable() ){
             ti->log(vl, messageObject);
         } else {
-            vl << "(" << messageObject->metaObject()->className() << " " << messageObject << ")";
+            vl << "(" << messageObject->metaObject()->className() << " " <<
+               (messageObject->objectName().isEmpty() ? "" : "\'" + messageObject->objectName() + "\' ") <<
+                messageObject << ")";
         }
     } else {
         logValue(vl, message);
