@@ -49,8 +49,8 @@ signals:
     void resultChanged();
 
 protected:
-    void classBegin(){}
-    void componentComplete();
+    void classBegin() override{}
+    virtual void componentComplete() override;
 
 private:
     bool          m_isComponentComplete;

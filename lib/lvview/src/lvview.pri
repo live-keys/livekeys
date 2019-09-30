@@ -35,7 +35,10 @@ HEADERS += \
     $$PWD/qmlstream.h \
     $$PWD/sharedmemoryreadworker.h \
     $$PWD/sharedmemorywriteworker.h \
-    $$PWD/qmlcontainer.h
+    $$PWD/qmlcontainer.h \
+    $$PWD/qmlopening.h \
+    $$PWD/qmlfollowup.h \
+    $$PWD/qmlclipboard.h
 
 
 SOURCES += \
@@ -69,5 +72,8 @@ SOURCES += \
     $$PWD/qmlstream.cpp \
     $$PWD/sharedmemoryreadworker.cpp \
     $$PWD/sharedmemorywriteworker.cpp \
-    $$PWD/qmlcontainer.cpp
+    $$PWD/qmlcontainer.cpp \
+    $$PWD/qmlopening.cpp \
+    $$PWD/qmlfollowup.cpp \
+    $$PWD/qmlclipboard.cpp
 

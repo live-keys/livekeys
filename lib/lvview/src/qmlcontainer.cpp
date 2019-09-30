@@ -34,6 +34,29 @@ void QmlContainer::clearChildObjects(){
     m_childObjects.clear();
 }
 
+QObject *QmlContainer::prevChild(QObject *child) const{
+    for ( auto it = m_childObjects.begin(); it != m_childObjects.end(); ++it ){
+        if ( *it == child ){
+            if ( it == m_childObjects.begin() )
+                return nullptr;
+
+            --it;
+            return *it;
+        }
+    }
+    return nullptr;
+}
+
+QObject *QmlContainer::nextChild(QObject *child) const{
+    for ( auto it = m_childObjects.begin(); it != m_childObjects.end(); ++it ){
+        if ( *it == child ){
+            ++it;
+            if ( it != m_childObjects.end() )
+                return *it;
+        }
+    }
+    return nullptr;
+}
 
 void QmlContainer::appendChildObject(QQmlListProperty<QObject>* list, QObject* o){
     reinterpret_cast<QmlContainer*>(list->data)->appendChildObject(o);

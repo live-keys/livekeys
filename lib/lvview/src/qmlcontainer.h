@@ -7,6 +7,9 @@
 
 namespace lv{
 
+//TODO: FollowUp Act
+//TODO: Opening
+
 /// \private
 class QmlContainer : public QObject{
 
@@ -23,6 +26,10 @@ public:
     int childObjectCount() const;
     QObject *childObject(int) const;
     void clearChildObjects();
+
+public slots:
+    QObject* prevChild(QObject* child) const;
+    QObject* nextChild(QObject* child) const;
 
 private:
     static void appendChildObject(QQmlListProperty<QObject>*, QObject*);
