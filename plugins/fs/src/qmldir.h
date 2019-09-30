@@ -15,6 +15,8 @@ public:
 
 public slots:
     QStringList list(QJSValue path);
+    QJSValue listDetail(QJSValue path, QJSValue opt = QJSValue());
+    QJSValue detail(QJSValue path);
     bool mkDir(QJSValue path);
     bool mkPath(QJSValue path);
     bool remove(QJSValue path);
