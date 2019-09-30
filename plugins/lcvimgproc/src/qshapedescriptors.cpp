@@ -115,7 +115,7 @@ QMat *QShapeDescriptors::getMaskFromHullPoints(QVariantList points, QSize size, 
 
     cv::Mat nu = cv::Mat::zeros(size.height(), size.width(), depth);
 
-    cv::fillConvexPoly(nu, &hull8U[0], hull8U.size(), cv::Scalar(255,255,255));
+    cv::fillConvexPoly(nu, &hull8U[0], static_cast<int>(hull8U.size()), cv::Scalar(255,255,255));
 
     QMat* mask = new QMat(new cv::Mat(nu));
     return mask;
