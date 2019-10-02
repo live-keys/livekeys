@@ -1,5 +1,5 @@
-#ifndef LVCONTAINER_H
-#define LVCONTAINER_H
+#ifndef LVQMLCONTAINER_H
+#define LVQMLCONTAINER_H
 
 #include <QObject>
 #include <QVector>
@@ -7,22 +7,29 @@
 
 namespace lv{
 
+//TODO: FollowUp Act
+//TODO: Opening
+
 /// \private
-class Container : public QObject{
+class QmlContainer : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<QObject> childObjects READ childObjects)
     Q_CLASSINFO("DefaultProperty", "childObjects")
 
 public:
-    explicit Container(QObject *parent = 0);
-    ~Container();
+    explicit QmlContainer(QObject *parent = 0);
+    ~QmlContainer();
 
     QQmlListProperty<QObject> childObjects();
     void appendChildObject(QObject* obj);
     int childObjectCount() const;
     QObject *childObject(int) const;
     void clearChildObjects();
+
+public slots:
+    QObject* prevChild(QObject* child) const;
+    QObject* nextChild(QObject* child) const;
 
 private:
     static void appendChildObject(QQmlListProperty<QObject>*, QObject*);
@@ -36,4 +43,4 @@ private:
 
 }// namespace
 
-#endif // LVCONTAINER_H
+#endif // LVQMLCONTAINER_H

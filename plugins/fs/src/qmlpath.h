@@ -1,5 +1,5 @@
-#ifndef LVPATH_H
-#define LVPATH_H
+#ifndef LVQMLPATH_H
+#define LVQMLPATH_H
 
 #include <QObject>
 #include <QJSValue>
@@ -59,4 +59,4 @@ public slots:
 
 }// namespace
 
-#endif // LVPATH_H
+#endif // LVQMLPATH_H

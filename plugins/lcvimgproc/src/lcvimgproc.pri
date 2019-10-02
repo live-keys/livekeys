@@ -11,6 +11,7 @@ HEADERS += \
     $$PWD/qhoughlines.h \
     $$PWD/qhoughlinesp.h \
     $$PWD/qmatresize.h \
+    $$PWD/qshapedescriptors.h \
     $$PWD/qsobel.h \
     $$PWD/qstructuringelement.h \
     $$PWD/qthreshold.h \
@@ -36,6 +37,7 @@ SOURCES += \
     $$PWD/qhoughlines.cpp \
     $$PWD/qhoughlinesp.cpp \
     $$PWD/qmatresize.cpp \
+    $$PWD/qshapedescriptors.cpp \
     $$PWD/qsobel.cpp \
     $$PWD/qstructuringelement.cpp \
     $$PWD/qthreshold.cpp \
