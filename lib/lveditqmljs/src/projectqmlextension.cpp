@@ -198,8 +198,8 @@ void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEn
 /**
  * \brief Creates a CodeQmlHandler for the given \p document
  */
-QObject *ProjectQmlExtension::createHandler(ProjectDocument *, DocumentHandler *handler){
-    return new CodeQmlHandler(m_engine, m_project, m_settings, this, handler);
+QObject *ProjectQmlExtension::createHandler(ProjectDocument* document, DocumentHandler *handler){
+    return new CodeQmlHandler(m_engine, m_project, m_settings, this, document, handler);
 }
 
 }// namespace

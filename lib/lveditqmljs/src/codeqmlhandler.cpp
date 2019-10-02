@@ -440,8 +440,8 @@ namespace qmlhandler_helpers{
 
         QString typeName = scope.document->info()->extractTypeName(parentValue);
         if ( typeName != "" ){
-            InheritancePath ipath = getTypePath(scope, typeName);
-            typeLibraryKey = ipath.nodes.isEmpty() ? "" : ipath.nodes.last().library.path;
+            typePath = getTypePath(scope, typeName);
+            typeLibraryKey = typePath.nodes.isEmpty() ? "" : typePath.nodes.last().library.path;
         }
 
         return true;
@@ -502,7 +502,7 @@ namespace qmlhandler_helpers{
 
         QString type = contextObject.size() > 0 ? contextObject[0] : "";
         if ( type == "" )
-            return LanguageUtils::FakeMetaProperty("", "", false, false, false, -1);;
+            return LanguageUtils::FakeMetaProperty("", "", false, false, false, -1);
         QString typeNamespace = contextObject.size() > 1 ? contextObject[1] : "";
 
         InheritancePath contextTypePath = getTypePath(scope, typeNamespace, type);
@@ -782,10 +782,11 @@ CodeQmlHandler::CodeQmlHandler(
         Project *,
         QmlJsSettings *settings,
         ProjectQmlExtension *projectHandler,
+        ProjectDocument* document,
         DocumentHandler *handler)
     : AbstractCodeHandler(handler)
-    , m_target(0)
-    , m_highlighter(new QmlJsHighlighter(settings, handler, 0))
+    , m_target(nullptr)
+    , m_highlighter(new QmlJsHighlighter(settings, handler, nullptr))
     , m_settings(settings)
     , m_engine(engine->engine())
     , m_completionContextFinder(new QmlCompletionContextFinder)
@@ -802,6 +803,8 @@ CodeQmlHandler::CodeQmlHandler(
 
     d->projectHandler->addCodeQmlHandler(this);
     d->projectHandler->scanMonitor()->addScopeListener(this);
+
+    setDocument(document);
 }
 
 /**
@@ -982,6 +985,10 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
     d->documentScope = DocumentQmlScope::createEmptyScope(d->projectHandler->scanMonitor()->projectScope());
 
     if ( m_document ){
+        connect(m_document->textDocument(), &QTextDocument::contentsChange,
+                this, &CodeQmlHandler::_documentContentsChanged);
+        connect(m_document, &ProjectDocument::formatChanged, this, &CodeQmlHandler::_documentFormatUpdate);
+
         auto it = m_edits.begin();
         while( it != m_edits.end() ){
             QmlEditFragment* edit = *it;
@@ -991,7 +998,7 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
         }
     }
 
-    if ( d->projectHandler->scanMonitor()->hasProjectScope() && document != 0 ){
+    if ( d->projectHandler->scanMonitor()->hasProjectScope() && document != nullptr ){
         d->projectHandler->scanMonitor()->scanNewDocumentScope(document->file()->path(), document->content(), this);
         d->projectHandler->scanner()->queueProjectScan();
     }
@@ -1000,7 +1007,7 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
 /**
  * \brief DocumentContentsChanged handler
  */
-void CodeQmlHandler::documentContentsChanged(int position, int, int){
+void CodeQmlHandler::_documentContentsChanged(int position, int, int){
     if ( !m_document->editingStateIs(ProjectDocument::Silent) ){
         if ( m_editingFragment ){
             if ( position < m_editingFragment->valuePosition() ||
@@ -1012,6 +1019,10 @@ void CodeQmlHandler::documentContentsChanged(int position, int, int){
 
         m_scopeTimer.start();
     }
+}
+
+void CodeQmlHandler::_documentFormatUpdate(int position, int length){
+    rehighlightSection(position, position + length);
 }
 
 /**
@@ -1683,19 +1694,17 @@ void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
     QTextBlock tbend = m_document->textDocument()->findBlock(pos + edit->declaration()->length());
 
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, box->height(), box);
+    dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, static_cast<int>(box->height()), box);
 }
 
-void CodeQmlHandler::removeEditFrame(QQuickItem *box)
-{
+void CodeQmlHandler::removeEditFrame(QQuickItem *box){
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     dh->lineBoxRemoved(box);
 }
 
-void CodeQmlHandler::resizedEditFrame(QQuickItem *box)
-{
+void CodeQmlHandler::resizedEditFrame(QQuickItem *box){
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    dh->lineBoxResized(box, box->height());
+    dh->lineBoxResized(box, static_cast<int>(box->height()));
 }
 
 /**
@@ -1795,9 +1804,7 @@ void CodeQmlHandler::closeBinding(int position, int length){
         }
     }
 
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    if ( dh )
-        dh->rehighlightSection(position, length);
+    rehighlightSection(position, position + length);
 }
 
 /**
@@ -1861,8 +1868,8 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
     m_editingFragment = edit;
 
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    rehighlightSection(edit->valuePosition(), edit->valuePosition() + edit->valueLength());
     if ( dh ){
-        dh->rehighlightSection(edit->valuePosition(), edit->valueLength());
         dh->requestCursorPosition(edit->valuePosition());
     }
 

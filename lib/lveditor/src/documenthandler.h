@@ -50,7 +50,7 @@ public:
     static const QChar NewLine;
 
 public:
-    explicit DocumentHandler(QObject* parent = 0);
+    explicit DocumentHandler(QObject* parent = nullptr);
     ~DocumentHandler();
 
     QTextDocument *target();
@@ -62,9 +62,6 @@ public:
      * Model of suggestions that we get from the code handler
      */
     CodeCompletionModel* completionModel() const;
-
-    void rehighlightBlock(const QTextBlock& block);
-    void rehighlightSection(int position, int length);
 
     void setIndentSize(int size);
 
@@ -97,7 +94,6 @@ public slots:
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
     void cursorWritePositionChanged(QTextCursor cursor);
     void setDocument(lv::ProjectDocument* document, QJSValue options = QJSValue());
-    void documentFormatUpdate(int position, int length);
     void generateCompletion(int cursorPosition);
     QJSValue contextBlockRange(int cursorPosition);
 
