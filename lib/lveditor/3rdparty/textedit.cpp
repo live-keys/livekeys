@@ -2108,9 +2108,9 @@ inline void resetEngine(TextNodeEngine *engine, const QColor& textColor, const Q
     engine->setSelectionColor(selectionColor);
 }
 
-QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
+QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
-    Q_UNUSED(updatePaintNodeData);
+//    Q_UNUSED(updatePaintNodeData);
     Q_D(TextEdit);
 
     if (!d->document || !d->control) {

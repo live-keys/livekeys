@@ -16,14 +16,14 @@ class RemoteContainer : public QObject, public QQmlParserStatus{
 
 public:
     explicit RemoteContainer(QObject* parent = nullptr);
-    virtual ~RemoteContainer();
+    virtual ~RemoteContainer() override;
 
     virtual void sendError(const QByteArray& type, int code, const QString& message);
     virtual void sendBuild(const QByteArray& buildData);
     virtual void sendInput(const MLNode& input);
     virtual bool isReady() const;
 
-    virtual void onMessage(std::function<void(const LineMessage&, void* data)>, void* handlerData = 0);
+    virtual void onMessage(std::function<void(const LineMessage&, void* data)>, void* handlerData = nullptr);
     virtual void onError(std::function<void(int, const std::string&)>);
 
     bool isComponentComplete() const;
