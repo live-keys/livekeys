@@ -7,6 +7,7 @@
         "palettes/IntHistoryPlotPalette.qml": "qml/int",
         "palettes/DoublePalette.qml": "qml/double",
         "palettes/DoubleHistoryPlotPalette.qml": "qml/double",
-        "palettes/ColorPalette.qml": "qml/color"
+        "palettes/ColorPalette.qml": "qml/color",
+        "palettes/PathPalette.qml": "qml/string"
     }
 }

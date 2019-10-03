@@ -297,6 +297,14 @@ bool QmlPath::setPermissions(QJSValue path, QJSValue val)
     return QFile::setPermissions(path.toString(), result);
 }
 
+QString QmlPath::toLocalFile(const QUrl &url){
+    return url.toLocalFile();
+}
+
+QUrl QmlPath::urlFromLocalFile(const QString &path){
+    return QUrl::fromLocalFile(path);
+}
+
 QString QmlPath::removeSlashes(QString s)
 {
     if (s.length() > 0 && s[0] == '/') s = s.right(s.length()-1);

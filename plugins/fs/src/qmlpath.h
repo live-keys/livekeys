@@ -5,6 +5,7 @@
 #include <QJSValue>
 #include <QDateTime>
 #include <QDir>
+#include <QUrl>
 
 namespace lv{
 
@@ -53,6 +54,9 @@ public slots:
 
     int permissions(QJSValue path);
     bool setPermissions(QJSValue path, QJSValue val);
+
+    QString toLocalFile(const QUrl& url);
+    QUrl urlFromLocalFile(const QString& path);
 
     static QString removeSlashes(QString s);
 };

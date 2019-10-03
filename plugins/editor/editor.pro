@@ -53,6 +53,7 @@ QMAKE_EXTRA_TARGETS += first palettecopy
 DISTFILES += \
     palettes/IntHistoryPlotPalette.qml \
     palettes/DoubleHistoryPlotPalette.qml \
+    palettes/PathPalette.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/PaletteListView.qml \

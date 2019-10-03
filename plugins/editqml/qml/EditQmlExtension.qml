@@ -293,7 +293,7 @@ LiveExtension{
             addBoxItem.addContainer = addContainer
 
             var addBox = lk.layers.editor.environment.createEditorBox(
-                addBoxItem, rect, cursorCoords, lk.layers.editor.environemnt.placement.bottom
+                addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
             )
             addBox.color = 'transparent'
             addBoxItem.cancel = function(){
