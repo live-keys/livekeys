@@ -108,119 +108,7 @@ QmlLibraryInfo::ScanStatus loadPluginInfo(
 )
 {
     QMutexLocker engineLocker(engineMutex);
-
-    QObject* requestObject = scanner->requestObject(path);
-    if ( !PluginTypesFacade::isModule(dirParser.typeNamespace()) && requestObject == 0 ){
-
-        /// If module is not loaded, find the library import, and request to load the module by creating
-        /// a component from the engine
-
-        QString uriForPath = projectScope->uriForPath(path);
-
-        if ( uriForPath.isEmpty() || scanner->requestErrorStatus(path) ){
-            vlog_debug("editqmljs-projectscanner", "Library PluginInfo Scan Error: " + path + ", uri:" + uriForPath);
-            return QmlLibraryInfo::ScanError;
-        }
-
-        scanner->addLoadRequest(ProjectQmlScanner::TypeLoadRequest(uriForPath, path));
-        return QmlLibraryInfo::RequiresDependency;
-
-    } else {
-
-        /// If module is loaded, scan objects, solve dependencies, and output library
-
-        QHash<QByteArray, QSet<const QQmlType *> > qmlTypesByCppName;
-        QList<const QQmlType*> nsTypes;
-        PluginTypesFacade::extractTypes(dirParser.typeNamespace(), 0, nsTypes, qmlTypesByCppName);
-
-        QSet<const QMetaObject *> metaTypes;
-        QList<const QMetaObject*> unknownTypes;
-        QStringList dependencies;
-
-        PluginTypesFacade::getTypeDependencies(
-            dirParser.typeNamespace(),
-            nsTypes,
-            qmlTypesByCppName,
-            metaTypes,
-            unknownTypes,
-            dependencies
-        );
-
-        /// Scan dependencies both from qmldir, and from scanned type
-
-        dependencyPaths.clear();
-
-        QHash<QString, QmlDirParser::Component> dirParserDependencies = dirParser.dependencies();
-        QHash<QString, QmlDirParser::Component>::iterator dpdIt;
-        for ( dpdIt = dirParserDependencies.begin(); dpdIt != dirParserDependencies.end(); ++dpdIt ){
-            QStringList localDependencyPaths;
-            projectScope->findQmlLibraryInImports(
-                dpdIt->typeName.replace(".", "/"),
-                dpdIt->majorVersion,
-                dpdIt->minorVersion,
-                localDependencyPaths
-            );
-            foreach( const QString& depPath, localDependencyPaths )
-                if ( !dependencyPaths.contains(depPath) )
-                    dependencyPaths.append(depPath);
-        }
-
-        foreach( QString typeDependency, dependencies ){
-            QStringList localDependencyPaths;
-            projectScope->findQmlLibraryInImports(
-                typeDependency.replace(".", "/"),
-                1,
-                0,
-                localDependencyPaths
-            );
-            foreach( const QString& depPath, localDependencyPaths )
-                if ( !dependencyPaths.contains(depPath) )
-                    dependencyPaths.append(depPath);
-        }
-
-        /// If we have unknown types, check dependencies, if all dependencies have been loaded
-        /// couple loose objects to this library, otherwise its not clear wether loose objects
-        /// are part of this library or not
-
-        if ( unknownTypes.size() > 0 ){
-
-            QList<QmlLibraryInfo::Ptr> dependentLibraries;
-            foreach( const QString& dpath, dependencyPaths ){
-                QmlLibraryInfo::Ptr linfo = projectScope->globalLibraries()->libraryInfo(dpath);
-                if ( linfo->status() == QmlLibraryInfo::NotScanned){
-                    vlog_debug("editqmljs-projectscanner", "QmlInfo for: " + path + " requires " + dpath);
-                    return QmlLibraryInfo::RequiresDependency; /// try again when more libraries are populated
-                }
-                dependentLibraries.append(linfo);
-            }
-
-            /// Insert unknown types that are not present within dependent libraries
-
-            foreach( const QMetaObject* obj, unknownTypes ){
-                LanguageUtils::FakeMetaObject::ConstPtr fakeobj;
-                foreach ( QmlLibraryInfo::Ptr deplib, dependentLibraries ){
-                    fakeobj = deplib->findObjectByClassName(obj->className());
-                    if ( !fakeobj.isNull() )
-                        break;
-                }
-                if ( fakeobj.isNull() )
-                    metaTypes.insert(obj);
-            }
-        }
-
-        QList<QString> dependencyUris;
-        for ( dpdIt = dirParserDependencies.begin(); dpdIt != dirParserDependencies.end(); ++dpdIt ){
-            dependencyUris.append(
-                dpdIt->typeName + " " +
-                QString::number(dpdIt->majorVersion) + "." +
-                QString::number(dpdIt->minorVersion)
-            );
-        }
-
-        PluginTypesFacade::extractPluginInfo(metaTypes, qmlTypesByCppName, dependencyUris, stream);
-
-        return QmlLibraryInfo::Done;
-    }
+    return PluginTypesFacade::loadPluginInfo(projectScope, dirParser, path, scanner, dependencyPaths, stream);
 }
 
 void scanObjectFile(
@@ -613,8 +501,8 @@ ProjectQmlScanner::ProjectQmlScanner(
         LockedFileIOSession::Ptr lockedFileIO,
         QObject *parent)
     : QObject(parent)
-    , m_project(0)
-    , m_lastDocumentScope(0)
+    , m_project(nullptr)
+    , m_lastDocumentScope(nullptr)
     , m_lockedFileIO(lockedFileIO)
     , m_thread(new QThread)
     , m_timer(new QTimer)
