@@ -28,12 +28,13 @@ Rectangle{
     property int fontPixelSize : 14
 
     property color textColor : "#fff"
-    property color backgroundHoverColor : "#082134"
-    property color backgroundColor : "#061a29"
+    property color backgroundHoverColor : "#213355"
+    property color backgroundColor : "#212a4b"
 
     signal clicked()
 
     color : buttonMouseArea.containsMouse ? backgroundHoverColor : backgroundColor
+    clip: true
 
     Text{
         color : root.textColor
