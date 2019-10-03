@@ -37,4 +37,5 @@ DISTFILES += \
     qml/ObjectContainer.qml \
     qml/PaletteGroup.qml \
     qml/PropertyContainer.qml \
-    qml/PaletteContainer.qml
+    qml/PaletteContainer.qml \
+    qml/plugins.qmltypes
