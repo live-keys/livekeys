@@ -26,7 +26,7 @@ class QMatView : public QQuickItem{
     Q_PROPERTY(bool linearFilter READ linearFilter WRITE setLinearFilter NOTIFY linearFilterChanged)
 
 public:
-    explicit QMatView(QQuickItem* parent = 0);
+    explicit QMatView(QQuickItem* parent = nullptr);
     ~QMatView();
 
     QMat* mat();

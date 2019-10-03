@@ -3,6 +3,7 @@
     "package" : ".",
     "palettes" : {
         "palettes/MatPalette.qml" : "qml/Mat",
-        "palettes/VideoCapturePalette.qml": "qml/VideoCapture"
+        "palettes/VideoCapturePalette.qml": "qml/VideoCapture",
+        "palettes/ImageFilePalette.qml" : "qml/ImageFile"
     }
 }
