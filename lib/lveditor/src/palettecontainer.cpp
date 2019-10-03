@@ -39,7 +39,7 @@ namespace lv{
 class PaletteLoader{
 public:
     PaletteLoader(const QString& path, const QString& type)
-        : m_factory(0)
+        : m_factory(nullptr)
         , m_path(path)
         , m_type(type)
     {}
@@ -67,28 +67,28 @@ CodePalette *PaletteLoader::getItem(QQmlEngine *engine){
         if ( m_factory->isError() || m_factory->isNull() ){
             qCritical("Failed to load palette: %s", qPrintable(m_path));
             handleError(*m_factory);
-            return 0;
+            return nullptr;
         }
     }
 
     QObject *obj = m_factory->create();
-    if ( obj == 0 || m_factory->isError() ){
+    if ( obj == nullptr || m_factory->isError() ){
         qCritical("Failed to create object from palette: %s", qPrintable(m_path));
         handleError(*m_factory);
-        return 0;
+        return nullptr;
     }
 
     CodePalette* palette = static_cast<lv::CodePalette*>(obj);
     if ( !palette ){
         qCritical("Failed to load palette: \'%s\'. Value is not a CodePalette type.",
                   qPrintable(m_path));
-        return 0;
+        return nullptr;
     }
 
     if ( palette->type().isEmpty() ){
         qCritical("Failed to load palette: \'%s\'. Palette must have a type defined",
                   qPrintable(m_path));
-        return 0;
+        return nullptr;
     }
 
     vlog_debug("editor-codepaletteloader", "Loaded palette on type: \'" + m_converter->type() + "\' " + m_converter->typeObject());
@@ -165,6 +165,7 @@ void PaletteContainer::scanPalettes(Plugin::Ptr plugin){
     vlog("editor-codepaletteloader").v() << "Scanning plugin: " << plugin->name();
 
     for ( auto it = plugin->palettes().begin(); it != plugin->palettes().end(); ++it ){
+
         QString palettePath = QDir::cleanPath(QString::fromStdString(plugin->path() + "/" + it->first));
         QString type = QString::fromStdString(it->second);
 
