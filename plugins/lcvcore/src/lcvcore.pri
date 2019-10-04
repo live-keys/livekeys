@@ -5,6 +5,7 @@ HEADERS += \
     $$PWD/qcamcapturethread.h \
     $$PWD/qdrawhistogram.h \
     $$PWD/qgradient.h \
+    $$PWD/qimageview.h \
     $$PWD/qimread.h \
     $$PWD/qmatbuffer.h \
     $$PWD/qmatread.h \
@@ -43,6 +44,7 @@ SOURCES += \
     $$PWD/qcamcapturethread.cpp \
     $$PWD/qdrawhistogram.cpp \
     $$PWD/qgradient.cpp \
+    $$PWD/qimageview.cpp \
     $$PWD/qimread.cpp \
     $$PWD/qmatbuffer.cpp \
     $$PWD/qmatread.cpp \
