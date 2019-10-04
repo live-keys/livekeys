@@ -72,9 +72,26 @@ void QmlCodeConverter::writeProperties(const QJSValue &properties){
         leftOverProperties.insert(it.name());
     }
 
+    QString indent = "";
+
     for ( auto it = root->properties.begin(); it != root->properties.end(); ++it ){
         lv::DocumentQmlValueObjects::RangeProperty* p = *it;
         QString propertyName = source.mid(p->begin, p->propertyEnd - p->begin);
+
+        if ( indent.isEmpty() ){
+            int index = p->begin - 1;
+            while (index >= 0) {
+                if ( source[index] == QChar('\n') ){
+                    break;
+                }
+                if ( !source[index].isSpace() )
+                    break;
+                --index;
+            }
+            if ( index + 1 < p->begin - 1){
+                indent = source.mid(index + 1, p->begin - 1 - index);
+            }
+        }
 
         if ( leftOverProperties.contains(propertyName) ){
             source.replace(p->valueBegin, p->end - p->valueBegin, buildCode(properties.property(propertyName)));
@@ -82,8 +99,31 @@ void QmlCodeConverter::writeProperties(const QJSValue &properties){
         }
     }
 
+    int writeIndex = source.length() - 2;
+    while ( writeIndex >= 0 ){
+        if ( !source[writeIndex].isSpace() ){
+            break;
+        }
+        --writeIndex;
+    }
+
+    if ( indent.isEmpty() ){
+        int indentIndex = source.length() - 2;
+        while ( indentIndex >= 0 ){
+            if ( source[indentIndex] == QChar('\n') ){
+                break;
+            }
+            if ( !source[indentIndex].isSpace() )
+                break;
+            --indentIndex;
+        }
+        if ( indentIndex + 1 < source.length() - 2){
+            indent = source.mid(indentIndex + 1, source.length() - 2 - indentIndex) + "    ";
+        }
+    }
+
     for ( auto it = leftOverProperties.begin(); it != leftOverProperties.end(); ++it ){
-        source.insert(source.length() - 1, *it + ": " + buildCode(properties.property(*it)) + "\n");
+        source.insert(writeIndex + 1, "\n" + indent + *it + ": " + buildCode(properties.property(*it)));
     }
 
     m_edit->write(source);
@@ -113,7 +153,6 @@ QVariant QmlCodeConverter::parse(){
 
         return QVariant(val.toDouble());
     }
-    return QVariant();
 }
 
 void QmlCodeConverter::updateBindings(){

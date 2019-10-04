@@ -2131,7 +2131,7 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &type){
         insertionText = "; " + type + "{} ";
         cursorPosition = insertionPosition + type.size() + 3;
     } else { // multiline object declaration
-        QString indent = getBlockIndent(tbStart);
+        QString indent = getBlockIndent(tbStart) + "    ";
         insertionPosition = tbEnd.position();
         QTextBlock tbIt = tbEnd.previous();
         while ( tbIt != tbStart && tbIt.isValid() ){
