@@ -50,6 +50,8 @@ CodePalette{
             minimumValue: 0
             value: parent.videoCapture ? parent.videoCapture.fps : 0
             onValueChanged: {
+                if ( !parent || !parent.videoCapture )
+                    return
                 parent.videoCapture.fps = fpsSlider.value
                 extension.writeProperties({
                     'fps' : fpsSlider.value
