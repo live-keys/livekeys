@@ -200,6 +200,10 @@ QString QmlCodeConverter::buildCode(const QJSValue &value){
         return "new Date(" + year + month + day + hour + minute + second + msecond + ")";
 
     } else if ( value.isObject() ){
+        if ( value.hasOwnProperty("__ref") ){
+            return value.property("__ref").toString();
+        }
+
         QString result = "{";
         bool first = true;
         QJSValueIterator it(value);
