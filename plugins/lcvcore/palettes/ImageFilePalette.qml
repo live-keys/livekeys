@@ -29,13 +29,38 @@ CodePalette{
     item: Item{
         id: imageFileBox
         width: 280
-        height: 30
+        height: 80
 
         property ImageFile imageFile : null
 
+        InputBox{
+            anchors.left: parent.left
+            anchors.leftMargin: 0
+            anchors.top: parent.top
+            anchors.topMargin: 0
+            width: 260
+            radius: 5
+            hintTextColor: "#333"
+            font.family: "Open Sans"
+            font.pixelSize: 12
+            textHint: "Id..."
+
+            onKeyPressed : {
+                if ( event.key === Qt.Key_Return ){
+                    var txt = text
+                    extension.writeProperties({
+                        "id" : { __ref: txt }
+                    })
+                }
+            }
+        }
+
         PathInputBox{
             id: inputBox
-            anchors.fill: parent
+            anchors.top: parent.top
+            anchors.topMargin: 40
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             onPathSelected: {
                 imageFileBox.imageFile.source = path
