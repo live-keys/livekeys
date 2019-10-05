@@ -4,11 +4,12 @@ import fs 1.0 as Fs
 Item{
     id: root
     height: 30
-    width: parent.width - 20
+    width: 240
 
     signal pathSelected(string path)
 
     property alias path: pathInput.text
+    property alias font: pathInput.font
 
     InputBox{
         id: pathInput
