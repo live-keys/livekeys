@@ -277,7 +277,15 @@ LiveExtension{
         }
     }
 
-    function add(){
+    function addProperty(){
+        add(0)
+    }
+
+    function addObject(){
+        add(1)
+    }
+
+    function add(activeIndex){
         var activePane = lk.layers.workspace.panes.activePane
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
@@ -291,6 +299,8 @@ LiveExtension{
             var cursorCoords = activePane.cursorWindowCoords()
             var addBoxItem = addBoxFactory.createObject()
             addBoxItem.addContainer = addContainer
+
+            addBoxItem.activeIndex = activeIndex ? activeIndex : 0
 
             var addBox = lk.layers.editor.environment.createEditorBox(
                 addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
@@ -380,6 +390,8 @@ LiveExtension{
         "edit" :  [edit, "Edit Property Under Cursor"],
         "palette" : [palette, "Pallete for Property Under Cursor"],
         "add" : [add, "Add a Property/Object"],
+        "add_property" : [addProperty, "Add a property."],
+        "add_object" : [addObject, "Add an object."],
         'bind' : [bind, "Bind to Property Under Cursor"],
         'unbind' : [unbind, "Unbind Properties Under Cursor"],
         'shape' : [shape, "Shape This Property Into a Palette"]
@@ -423,8 +435,12 @@ LiveExtension{
                         action : root.commands['unbind'][0],
                         enabled : cursorInfo.canUnbind
                     }, {
-                        name : "Add",
-                        action : root.commands['add'][0],
+                        name : "Add Property",
+                        action : root.commands['add_property'][0],
+                        enabled : true
+                    }, {
+                        name : "Add Object",
+                        action : root.commands['add_object'][0],
                         enabled : true
                     }
                 ]
