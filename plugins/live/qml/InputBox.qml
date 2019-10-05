@@ -25,6 +25,7 @@ Rectangle {
     color : "#070b0f"
     
     property color textColor : "#fff"
+    property color hintTextColor : "#ccc"
     property color textSelectionColor : "#3d4856"
 
     property alias text : textInput.text
@@ -42,7 +43,7 @@ Rectangle {
         font.family : "Ubuntu Mono, Courier New, Courier"
         font.pixelSize: 14
         font.weight : Font.Normal
-        text: textHint
+        text: ''
         color : root.textColor
         selectByMouse: true
         selectionColor: root.textSelectionColor
@@ -51,19 +52,20 @@ Rectangle {
 
         Keys.onPressed : root.keyPressed(event)
 
-        onFocusChanged: {
-            if ( root.textHint && focus && !touched ){
-                touched = true
-                if ( text === root.textHint )
-                    text = ''
-            }
-        }
-
         MouseArea{
             anchors.fill: parent
             acceptedButtons: Qt.NoButton
             cursorShape: Qt.IBeamCursor
         }
+    }
+
+    Text {
+        anchors.fill: parent
+        anchors.margins : textInput.anchors.margins
+        text: root.textHint
+        font: textInput.font
+        color: root.hintTextColor
+        visible: !textInput.text && !textInput.activeFocus
     }
 }
 
