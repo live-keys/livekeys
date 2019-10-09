@@ -1,8 +1,7 @@
-module.exports[__NAME__] = class extends Element{
+module.exports["Test1"] = class Test1 extends Element{
 
     constructor(){
         super()
-        var that = this;
 
         Element.addProperty(this, 'y', {
             type: "int",
@@ -16,7 +15,7 @@ module.exports[__NAME__] = class extends Element{
         })
         Element.addProperty(this, 'x', {
             type: "int",
-            value: function(){ return that.y + that.t },
+            value: function(){ return this.y + this.t }.bind(this),
             bindings: [
                 [this, "yChanged"],
                 [this, "tChanged"]

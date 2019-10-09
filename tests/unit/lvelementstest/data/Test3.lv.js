@@ -1,38 +1,41 @@
 // Note that when dealing with ids, components are only aware of their own context,
 // any child or parent component context will not be available
 
-module.exports[__NAME__] = class extends Container{
+module.exports["Test3"] = class Test3 extends Container{
 
     constructor(){
         super()
-        var that = this
         this.ids = {}
 
-        var elemProp = new Element()
-        this.ids["twenty"] = elemProp
-        elemProp.setParent(this)
-
-        Element.assignId(elemProp, "twenty")
-        Element.addProperty(elemProp, 'x', {
+        var twenty = new Element()
+        twenty.setParent(this)
+        Element.assignId(twenty, "twenty")
+        Element.addProperty(twenty, 'x', {
             type: "int",
             value: 20,
             notify: 'xChanged'
         })
 
+        this.ids["twenty"] = twenty
+
         Element.addProperty(this, "elemProp", {
             type: "Element",
-            value: elemProp,
+            value: twenty,
             notify: "elemPropChanged"
         })
 
-        var child0 = new Element();
-        Element.addProperty(child0, 'y', {
-            type: "int",
-            value: function(){ return that.ids["twenty"].x },
-            notify: 'yChanged',
-            bindings: [[that.ids["twenty"], "xChanged"]]
-        })
+        var children = []
+        var child = null
 
-        Element.assignDefaultProperty(this, [child0])
+        child = new Element();
+        Element.addProperty(child, 'y', {
+            type: "int",
+            value: function(){ return twenty.x }.bind(this),
+            notify: 'yChanged',
+            bindings: [[twenty, "xChanged"]]
+        })
+        children.push(child)
+
+        Element.assignDefaultProperty(this, children)
     }
 }

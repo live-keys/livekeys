@@ -1,9 +1,7 @@
-module.exports[__NAME__] = class extends Container{
+module.exports["Test4"] = class Test4 extends Container{
 
     constructor(){
         super()
-        var that = this;
-        this.someVar = 20
 
         Element.addProperty(this, 'x', {
             type: "int",
@@ -17,27 +15,32 @@ module.exports[__NAME__] = class extends Container{
         })
         Element.addEvent(this, 'dataChanged', [])
         this.on("dataChanged", function(){
-            that.x = 100;
-        });
+            this.x = 100;
+        }.bind(this));
 
-        var child0 = new Element()
-        Element.addProperty(child0, 'k', {
+        var children = []
+        var child = null
+
+        child = new Element()
+        Element.addProperty(child, 'k', {
             type: "int",
             value: 20,
             notify: "kChanged"
         })
 
-        var child1 = new Element()
-        Element.addProperty(child1, 'message', {
+        children.push(child)
+
+        child = new Element()
+        Element.addProperty(child, 'message', {
             type: "string",
             value: "thirty",
             notify: "messageChanged"
         })
+        children.push(child)
 
-        Element.assignDefaultProperty(this, [
-            child0,
-            child1
-        ])
+        Element.assignDefaultProperty(this, children)
+
+        this.someVar = 20
     }
 
 }

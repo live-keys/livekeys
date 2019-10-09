@@ -1,4 +1,4 @@
-module.exports[__NAME__] = class extends Container{
+module.exports["Test2"] = class Test2 extends Container{
 
     constructor(){
         super()
@@ -10,19 +10,22 @@ module.exports[__NAME__] = class extends Container{
             notify: 'xChanged'
         })
 
-        var child0 = new Element()
-        child0.setParent(this)
-        Element.addProperty(child0, 'l', {
+        var children = [];
+        var child = null;
+
+        child = new Element()
+        child.setParent(this)
+        Element.addProperty(child, 'l', {
             type: "int",
-            value: function(){ return child0.parent.x + 20 },
+            value: function(){ return child.parent.x + 20 },
             bindings: [
-                [child0.parent, "xChanged"]
+                [child.parent, "xChanged"]
             ],
             event: 'lChanged'
         })
 
-        Element.assignDefaultProperty(this, [
-            child0
-        ])
+        children.push(child)
+
+        Element.assignDefaultProperty(this, children)
     }
 }

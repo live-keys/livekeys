@@ -12,7 +12,6 @@ component default < Container{
         this.x = 100;
     }
 
-
     Element{
         int k: 20
     }

@@ -16,36 +16,34 @@
 ////// A.lv
 
 component default < Element{
-    function toString: (){
+    fn toString(){
         return "class [A]"
     }
 }
 
 ////// A.lv.js
 
-class A extends Element{
+module.exports["A"] = class A extends Element{
     toString(){
         return "class[A]"
     }
 }
-module.exports["A"] = A
 
 ////// B.lv.js
 
 component default < Element{
-    function toString: (){
+    fn toString(){
         return "class [A]"
     }
 }
 
 ////// B.lv.js
 
-class B extends Element{
+module.exports["B"] = class B extends Element{
     toString(){
         return "class[B]"
     }
 }
-module.exports["B"] = B
 
 ////// main.lv
 
@@ -63,19 +61,23 @@ component default < Element{
 var A = imports.get("A")
 var B = imports.get("B")
 
-module.exports["main"] = class extends Element{
+module.exports["main"] = class main extends Element{
     constructor(){
         super()
         var a = new A();
         var b = new B();
         Element.addProperty(this, "a", {
             type: "string",
-            value: a.toString(),
+            value: (function(){
+                return (new A()).toString()
+            }()),
             notify: "aChanged"
         })
         Element.addProperty(this, "b", {
             type: "string",
-            value: b.toString(),
+            value: (function(){
+                return (new B()).toString()
+            }()),
             notify: "bChanged"
         })
     }
