@@ -25,8 +25,7 @@ component default < B{}
 
 var B = imports.get("B")
 
-class A extends B{}
-module.exports["A"] = A
+module.exports["A"] = class A extends B{}
 
 ////// plugin1/B.lv
 
@@ -36,8 +35,7 @@ component default < C{}
 
 var C = imports.get("C")
 
-class B extends C{}
-module.exports["B"] = B
+module.exports["B"] = class B extends C{}
 
 ////// plugin1/C.lv
 
@@ -47,8 +45,7 @@ component default < A{}
 
 var A = imports.get("A")
 
-class C extends A{}
-module.exports["C"] = C
+module.exports["C"] = class C extends A{}
 
 ////// main.lv
 
@@ -66,13 +63,14 @@ imports.require(".plugin1")
 
 var A = imports.get("A")
 
-module.exports["main"] = class extends Element{
+module.exports["main"] = class main extends Element{
     constructor(){
         super()
-        var a = new A();
         Element.addProperty(this, "a", {
             type: "string",
-            value: a.toString(),
+            value: (function(){
+                (new A()).toString()
+            }()),
             notify: "aChanged"
         })
     }

@@ -43,7 +43,7 @@ component default < Element{
 
 var a = imports.get("a")
 
-module.exports["main"] = class extends Element{
+module.exports["main"] = class main extends Element{
     constructor(){
         super()
         Element.addProperty(this, "a", {

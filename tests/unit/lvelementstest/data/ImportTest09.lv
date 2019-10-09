@@ -19,19 +19,18 @@
 ////// packages/package1/A.lv
 
 component default < Element{
-    function toString : (){
+    fn toString(){
         return "class[A]"
     }
 }
 
 ////// packages/package1/A.lv.js
 
-class A extends Element{
+module.exports["A"] = class A extends Element{
     toString(){
         return "class[A]"
     }
 }
-module.exports["A"] = A
 
 ////// main.lv
 
@@ -49,13 +48,14 @@ imports.require("package1")
 
 var A = imports.get("A")
 
-module.exports["main"] = class extends Element{
+module.exports["main"] = class main extends Element{
     constructor(){
         super()
-        var a = new A();
         Element.addProperty(this, "a", {
             type: "string",
-            value: a.toString(),
+            value: (function(){
+                return (new A()).toString()
+            }()),
             notify: "aChanged"
         })
     }
