@@ -1,6 +1,6 @@
 component default < Container{
 
-    constructor(){
+    constructor(var1, var2){
         this.someVar = 20
     }
 

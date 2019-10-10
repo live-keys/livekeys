@@ -2,47 +2,42 @@ module.exports["Test4"] = class Test4 extends Container{
 
     constructor(){
         super()
+        this.__initialize()
+    }
 
-        Element.addProperty(this, 'x', {
-            type: "int",
-            value: 20,
-            notify: "xChanged"
-        })
-        Element.addProperty(this, 'y', {
-            type: "int",
-            value: 20,
-            notify: "yChanged"
-        })
+    __initialize(){
+        // Declare all parent properties
+        Element.addProperty(this, 'x', {type: 'int', notify: 'xChanged'})
+        Element.addProperty(this, 'y', {type: 'int', notify: 'yChanged'})
         Element.addEvent(this, 'dataChanged', [])
         this.on("dataChanged", function(){
             this.x = 100;
         }.bind(this));
 
-        var children = []
-        var child = null
+        // Assign parent properties
+        this.x = 20
+        this.y = 20
 
-        child = new Element()
-        Element.addProperty(child, 'k', {
-            type: "int",
-            value: 20,
-            notify: "kChanged"
-        })
+        Element.assignDefaultProperty(this, [
+            (function(parent){
+                this.setParent(parent)
 
-        children.push(child)
+                Element.addProperty(this, 'k', {type: "int", notify: 'kChanged'})
 
-        child = new Element()
-        Element.addProperty(child, 'message', {
-            type: "string",
-            value: "thirty",
-            notify: "messageChanged"
-        })
-        children.push(child)
+                this.k = 20
+                return this
+            }.bind(new Element())(this)),
+            (function(parent){
+                this.setParent(parent)
 
-        Element.assignDefaultProperty(this, children)
+                Element.addProperty(this, 'message', {type: 'string', notify: 'messageChanged'})
+                this.message = "thirty"
+                return this
+            }.bind(new Element())(this))
+        ])
 
         this.someVar = 20
     }
-
 }
 
 

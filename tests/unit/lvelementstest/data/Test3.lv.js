@@ -5,37 +5,46 @@ module.exports["Test3"] = class Test3 extends Container{
 
     constructor(){
         super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        // Create all Ids first
         this.ids = {}
 
         var twenty = new Element()
-        twenty.setParent(this)
-        Element.assignId(twenty, "twenty")
-        Element.addProperty(twenty, 'x', {
-            type: "int",
-            value: 20,
-            notify: 'xChanged'
-        })
-
         this.ids["twenty"] = twenty
 
-        Element.addProperty(this, "elemProp", {
-            type: "Element",
-            value: twenty,
-            notify: "elemPropChanged"
-        })
+        // Declare all properties for ids
+        Element.addProperty(twenty, "x", {type: "int", notify: "xChanged"})
 
-        var children = []
-        var child = null
+        // Declare all parent properties
+        Element.addProperty(this, "elemProp", {type: "Element", notify: "elemPropChanged"})
 
-        child = new Element();
-        Element.addProperty(child, 'y', {
-            type: "int",
-            value: function(){ return twenty.x }.bind(this),
-            notify: 'yChanged',
-            bindings: [[twenty, "xChanged"]]
-        })
-        children.push(child)
+        // Assign parent properties
+        this.elemProp = (function(parent){
+            this.setParent(parent)
+            Element.assignId(twenty, "twenty")
+            this.x = 20
+            return this
+        }.bind(twenty)(this))
 
-        Element.assignDefaultProperty(this, children)
+        // Assign all properties
+
+        Element.assignDefaultProperty(this, [
+            (function(parent){
+                this.setParent(parent)
+                Element.addProperty(this, 'y', {type: "int", notify: 'yChanged'})
+
+                Element.assignPropertyExpression(
+                    this,
+                    "y",
+                    function(){ return twenty.x }.bind(this),
+                    [[twenty, "xChanged"]]
+                )
+
+                return this
+            }.bind(new Element())(this))
+        ])
     }
 }

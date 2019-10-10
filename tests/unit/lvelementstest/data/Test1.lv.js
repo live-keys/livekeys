@@ -2,26 +2,26 @@ module.exports["Test1"] = class Test1 extends Element{
 
     constructor(){
         super()
+        this.__initialize()
+    }
 
-        Element.addProperty(this, 'y', {
-            type: "int",
-            value: 20,
-            notify: 'yChanged'
-        })
-        Element.addProperty(this, 't', {
-            type: "int",
-            value: 30,
-            notify: 'tChanged'
-        })
-        Element.addProperty(this, 'x', {
-            type: "int",
-            value: function(){ return this.y + this.t }.bind(this),
-            bindings: [
+    __initialize(){
+        Element.addProperty(this, 'y', {type: "int", notify: 'yChanged'})
+        Element.addProperty(this, 't', {type: "int", notify: 'tChanged'})
+        Element.addProperty(this, 'x', {type: "int", notify: 'xChanged'})
+
+        this.y = 20
+        this.t = 30
+
+        Element.assignPropertyExpression(
+            this,
+            "x",
+            function(){ return this.y + this.t }.bind(this),
+            [
                 [this, "yChanged"],
                 [this, "tChanged"]
-            ],
-            notify: 'xChanged'
-        })
+            ]
+        )
     }
 
 }

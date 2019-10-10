@@ -1,0 +1,19 @@
+component FunctionComponent{
+    fn test(int param1, int param2){
+        console.log(param1, param2)
+
+        component InsideComponent{
+            int x : 200
+        }
+    }
+}
+
+component FunctionCreatesComponent{
+    fn test(int param1, int param2){
+        console.log(param1, param2)
+
+        Element{
+            int x : 200
+        }
+    }
+}

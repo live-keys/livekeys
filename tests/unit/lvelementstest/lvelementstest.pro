@@ -80,4 +80,12 @@ DISTFILES += \
     data/ImportTest08.lv \
     data/ImportTest09.lv \
     data/ImportTest06.lv \
-    data/ImportTest11.lv
+    data/ImportTest11.lv \
+    data/ParserTest1.lv \
+    data/ParserTest1.lv.js \
+    data/ParserTest2.lv \
+    data/ParserTest2.lv.js \
+    data/ParserTest3.lv \
+    data/ParserTest3.lv.js \
+    data/ParserTest4.lv \
+    data/ParserTest4.lv.js
