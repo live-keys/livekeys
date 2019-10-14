@@ -15,7 +15,7 @@
 
 ////// A.lv
 
-component singleton default < Element{
+instance default Element{
     string a : "class[A]"
 }
 
@@ -31,7 +31,16 @@ class A extends Element{
         })
     }
 }
-module.exports["a"] = new A()
+
+module.exports["a"] = (function(parent){
+    this.setParent(parent)
+
+    Element.addProperty(this, "a", { type: "string", notify: "aChanged" })
+    this.a = "class[A]"
+
+    return this
+
+}.bind(new Element())(null))
 
 ////// main.lv
 

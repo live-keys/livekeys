@@ -18,7 +18,7 @@
 ////// plugin1/A.lv
 
 component default < Element{
-    function toString : (){
+    fn toString(){
         return "class[A]"
     }
 }
@@ -35,7 +35,7 @@ module.exports["A"] = class A extends Element{
 ////// plugin1/B.lv
 
 component default < Element{
-    function toString : (){
+    fn toString(){
         return "class[B]"
     }
 }

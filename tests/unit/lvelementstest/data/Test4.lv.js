@@ -1,8 +1,9 @@
 module.exports["Test4"] = class Test4 extends Container{
 
-    constructor(){
+    constructor(var1, var2){
         super()
         this.__initialize()
+        this.someVar = 20
     }
 
     __initialize(){
@@ -35,8 +36,6 @@ module.exports["Test4"] = class Test4 extends Container{
                 return this
             }.bind(new Element())(this))
         ])
-
-        this.someVar = 20
     }
 }
 

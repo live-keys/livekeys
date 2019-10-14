@@ -35,6 +35,6 @@ module.exports["FunctionCreatesComponent"] = class FunctionCreatesComponent exte
             this.x = 200
 
             return this
-        }.bind(new Element())(parent))
+        }.bind(new Element())(this))
     }
 }
