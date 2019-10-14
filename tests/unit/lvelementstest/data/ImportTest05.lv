@@ -21,17 +21,6 @@ instance default Element{
 
 ////// A.lv.js
 
-class A extends Element{
-    constructor(){
-        super()
-        Element.addProperty(this, "a", {
-            type: "string",
-            value: "class[A]",
-            notify: "aChanged"
-        })
-    }
-}
-
 module.exports["a"] = (function(parent){
     this.setParent(parent)
 
