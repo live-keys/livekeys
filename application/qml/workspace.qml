@@ -69,6 +69,12 @@ Item{
                         pane.paneInitialize(s)
                     return pane
                 },
+                "documentation" : function(p, s){
+                    var pane = documentationFactory.createObject(p)
+                    if ( s )
+                        pane.paneInitialize(s)
+                    return pane
+                },
                 "log" : function(p, s){
                     if ( !root.logView.parent ){
                         root.logView.visible = true
@@ -349,7 +355,8 @@ Item{
                     'setOnSaveCodingMode': [modeContainer.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
                     'setDisabledCodingMode': [modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
                     'runProject': [project.run, "Run Project"],
-                    'addRunView' : [root.addRunView, "Add Run View"]
+                    'addRunView' : [root.addRunView, "Add Run View"],
+                    "help" : [root.help, "Help"]
                 })
 
                 root.paneSplitterColor = layer.themes.current.paneSplitterColor
@@ -454,6 +461,15 @@ Item{
         }
     }
 
+    Component{
+        id: documentationFactory
+
+        DocumentationView{
+            id: documentationViewComponent
+            panes: root.panes
+        }
+    }
+
     function addRunView(){
         var pane = root.panes.createPane('runView', {}, [400, 0])
 
@@ -463,6 +479,12 @@ Item{
         } else {
             root.panes.splitPaneHorizontallyWith(containerUsed, containerUsed.panes.length - 1, pane)
         }
+    }
+
+    function help(){
+        var activePane = root.panes.activePane
+        if ( activePane )
+            activePane.paneHelp()
     }
 
     Component{

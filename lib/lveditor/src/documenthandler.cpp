@@ -38,6 +38,7 @@
 #include <QTimer>
 #include <QFileInfo>
 #include <QJSValue>
+#include <QMetaType>
 #include <QJSValueList>
 
 #include "textedit_p.h"
@@ -171,7 +172,6 @@ void DocumentHandler::readContent(){
 }
 
 void DocumentHandler::findCodeHandler(){
-
     if ( m_project && m_engine && m_projectDocument ){
         vlog("editor-documenthandler").v() << "Looking up language handler for: " << m_projectDocument->file()->path();
 
@@ -195,6 +195,15 @@ void DocumentHandler::findCodeHandler(){
 
                     QQmlEngine::setObjectOwnership(ach, QQmlEngine::CppOwnership);
                     m_codeHandler = ach;
+
+                    QList<int> features;
+                    QMetaObject::invokeMethod(
+                        ach, "languageFeatures", Qt::DirectConnection, Q_RETURN_ARG(QList<int>, features)
+                    );
+
+                    for ( int feature : features ){
+                        m_languageFeatures.insert(feature);
+                    }
 
                     emit codeHandlerChanged();
 
@@ -304,6 +313,8 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
 
     emit targetChanged();
 
+    m_languageFeatures.clear();
+
     findCodeHandler();
 }
 
@@ -361,6 +372,10 @@ void DocumentHandler::manageIndent(int from, int length, bool undo){
 
         bl = bl.next();
     }
+}
+
+bool DocumentHandler::has(int feature){
+    return m_languageFeatures.contains(feature);
 }
 
 /**

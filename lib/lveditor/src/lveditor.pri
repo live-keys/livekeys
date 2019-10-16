@@ -2,6 +2,7 @@ INCLUDEPATH += $$PWD \
                $$PWD/../3rdparty
 
 HEADERS += \
+    $$PWD/documentationloader.h \
     $$PWD/project.h \
     $$PWD/projectentry.h \
     $$PWD/projectfile.h \
@@ -38,9 +39,11 @@ HEADERS += \
     $$PWD/themecontainer.h \
     $$PWD/theme.h \
     $$PWD/runnable.h \
-    $$PWD/runnablecontainer.h
+    $$PWD/runnablecontainer.h \
+    $$PWD/documentation.h
 
 SOURCES += \
+    $$PWD/documentationloader.cpp \
     $$PWD/project.cpp \
     $$PWD/projectentry.cpp \
     $$PWD/projectfile.cpp \
@@ -76,4 +79,5 @@ SOURCES += \
     $$PWD/themecontainer.cpp \
     $$PWD/theme.cpp \
     $$PWD/runnable.cpp \
-    $$PWD/runnablecontainer.cpp
+    $$PWD/runnablecontainer.cpp \
+    $$PWD/documentation.cpp

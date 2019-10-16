@@ -549,6 +549,11 @@ bool DocumentQmlInfo::parse(const QString &source){
     return parseResult;
 }
 
+const QList<lv::DocumentQmlInfo::Message> &DocumentQmlInfo::diagnostics() const{
+    Q_D(const DocumentQmlInfo);
+    return d->messages;
+}
+
 /**
  * \brief Return a pointer to the internal QmlJS::Bind object
  */

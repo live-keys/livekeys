@@ -42,6 +42,18 @@ class LV_EDITOR_EXPORT DocumentHandler : public QObject, public QQmlParserStatus
     Q_PROPERTY(lv::CodeCompletionModel* completionModel READ completionModel CONSTANT)
     Q_PROPERTY(lv::AbstractCodeHandler* codeHandler     READ codeHandler     NOTIFY codeHandlerChanged)
     Q_PROPERTY(bool editorFocus                         READ editorFocus     WRITE setEditorFocus NOTIFY editorFocusChanged)
+    Q_ENUMS(LanguageFeatures)
+
+public:
+    enum LanguageFeatures{
+        LanguageHelp = 0,
+        LanguageCodeCompletion,
+        LanguageScope,
+        LanguageHighlighting,
+        LanguageJumpToDef,
+        LanguageFindReferences,
+        LanguageDiagnostics
+    };
 
 public:
     /** Paragraph separator char */
@@ -99,6 +111,8 @@ public slots:
 
     void manageIndent(int from, int length, bool undo = false);
 
+    bool has(int feature);
+
 signals:
     /** Target changed */
     void targetChanged();
@@ -127,6 +141,8 @@ private:
     Extensions*           m_extensions;
     ViewEngine*           m_engine;
     TextEdit*             m_textEdit;
+
+    QSet<int>             m_languageFeatures;
 
     bool                  m_editorFocus;
 };

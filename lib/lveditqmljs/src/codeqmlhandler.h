@@ -90,6 +90,12 @@ public:
     QmlEditFragment* findEditFragmentIn(QmlEditFragment *parent, CodePalette* palette);
 
 public slots:
+    QList<int> languageFeatures() const;
+
+    // Help
+
+    QString help(int position);
+
     // Palette and binding management
 
     lv::QmlCursorInfo* cursorInfo(int position, int length);
@@ -142,6 +148,7 @@ signals:
 private:
     void rehighlightSection(int start, int end);
     void resetProjectQmlExtension();
+    QString getHelpEntity(int position);
 
     void suggestionsForGlobalQmlContext(
         const QmlCompletionContext& context,

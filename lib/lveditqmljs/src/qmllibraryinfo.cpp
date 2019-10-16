@@ -62,6 +62,7 @@ void QmlLibraryInfo::listExports(QStringList *exports){
 
 QmlLibraryInfo::ExportVersion QmlLibraryInfo::findExport(const QString &type){
     QmlLibraryInfo::ExportVersion base;
+
     if ( m_exports.contains(type) ){
         QmlLibraryInfo::Export e = m_exports.value(type);
         foreach( QmlLibraryInfo::ExportVersion ev, e.versions ){
@@ -94,7 +95,7 @@ LanguageUtils::FakeMetaObject::ConstPtr QmlLibraryInfo::findObjectByClassName(co
         if ( obj->className() == name )
             return obj;
     }
-    return LanguageUtils::FakeMetaObject::ConstPtr(0);
+    return LanguageUtils::FakeMetaObject::ConstPtr(nullptr);
 }
 
 void QmlLibraryInfo::setDependencies(const QList<QString> &paths){

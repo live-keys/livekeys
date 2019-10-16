@@ -1,6 +1,6 @@
 TEMPLATE = app
 TARGET   = livekeys
-QT      += qml quick
+QT      += qml quick #webengine
 
 linkLocalLibrary(lvbase,      lvbase)
 linkLocalLibrary(lvview,      lvview)
@@ -48,6 +48,7 @@ OTHER_FILES += \
     $$PWD/qml/*.qml
 
 DISTFILES += \
+    qml/DocumentationView.qml \
     qml/MessageDialogMain.qml \
     qml/LogView.qml \
     qml/CommandsMenu.qml \

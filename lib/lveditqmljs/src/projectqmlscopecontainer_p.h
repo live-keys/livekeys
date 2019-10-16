@@ -48,9 +48,9 @@ private:
 };
 
 inline QmlLibraryInfo::Ptr ProjectQmlScopeContainer::libraryInfo(const QString &path){
-    QmlLibraryInfo::Ptr libinfo(0);
+    QmlLibraryInfo::Ptr libinfo(nullptr);
     m_libraryMutex.lock();
-    libinfo = m_libraries.value(path, QmlLibraryInfo::Ptr(0));
+    libinfo = m_libraries.value(path, QmlLibraryInfo::Ptr(nullptr));
     if ( libinfo.isNull() ){
         libinfo = QmlLibraryInfo::create();
         m_libraries[path] = libinfo;

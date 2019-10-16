@@ -17,6 +17,7 @@
 
 #include "workspace.h"
 #include "projectworkspace.h"
+#include "documentation.h"
 
 #include <QFile>
 #include <QUrl>
@@ -39,6 +40,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_themes(new ThemeContainer("workspace", this))
     , m_project(nullptr)
     , m_extensions(nullptr)
+    , m_documentation(nullptr)
 {
     Settings* settings = lv::ViewContext::instance().settings();
 
@@ -49,9 +51,12 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     m_extensions = new Extensions(lv::ViewContext::instance().engine(), settings->path());
     settings->addConfigFile("extensions", m_extensions);
 
-    QQmlEngine* engine = lv::ViewContext::instance().engine()->engine();
+    ViewEngine* viewEngine = lv::ViewContext::instance().engine();
+    QQmlEngine* engine = viewEngine->engine();
     QObject* probject = engine->rootContext()->contextProperty("project").value<QObject*>();
     m_project = qobject_cast<lv::Project*>(probject);
+
+    m_documentation = new Documentation(viewEngine->packageGraph(), this);
 
     QObject* lk = engine->rootContext()->contextProperty("lk").value<QObject*>();
     if ( !lk ){
@@ -146,6 +151,8 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
     m_keymap->store(0, Qt::Key_T,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleMaximizedRuntime");
     m_keymap->store(0, Qt::Key_K,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleNavigation");
     m_keymap->store(0, Qt::Key_L,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleLog");
+    m_keymap->store(0, Qt::Key_F1,        0,                              "window.workspace.help");
+    m_keymap->store(0, Qt::Key_H,         lv::KeyMap::Alt,                "window.workspace.help");
 
     for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
         WorkspaceExtension* le = it.value();
@@ -290,6 +297,10 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
 void WorkspaceLayer::whenProjectClose(){
     QJSValue v = m_panes->property("__clearPanes").value<QJSValue>();
     v.call();
+}
+
+QString WorkspaceLayer::docsPath() const{
+    return QString::fromStdString(ApplicationContext::instance().docsPath());
 }
 
 void WorkspaceLayer::initializePanes(ProjectWorkspace *workspace, QJSValue panes){

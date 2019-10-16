@@ -27,6 +27,5 @@ HEADERS += \
     $$PWD/live/windowlayer.h \
     $$PWD/live/qmlpropertywatcher.h \
     $$PWD/live/qmlstream.h \
-    $$PWD/live/remotecontainer.h \
     $$PWD/live/sharedmemorywriteworker.h \
     $$PWD/live/sharedmemoryreadworker.h

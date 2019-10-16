@@ -32,7 +32,8 @@ HEADERS += \
     $$PWD/qmleditfragment.h \
     $$PWD/qmldeclaration.h \
     $$PWD/bindingpath.h \
-    $$PWD/qmlcursorinfo.h
+    $$PWD/qmlcursorinfo.h \
+    $$PWD/qmlscopesnap_p.h
 
 SOURCES += \
     $$PWD/documentqmlinfo.cpp \
@@ -63,4 +64,5 @@ SOURCES += \
     $$PWD/qmleditfragment.cpp \
     $$PWD/qmldeclaration.cpp \
     $$PWD/bindingpath.cpp \
-    $$PWD/qmlcursorinfo.cpp
+    $$PWD/qmlcursorinfo.cpp \
+    $$PWD/qmlscopesnap.cpp

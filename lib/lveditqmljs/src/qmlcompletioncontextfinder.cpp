@@ -175,9 +175,17 @@ QmlCompletionContext::ConstPtr QmlCompletionContextFinder::getContext(const QTex
     QStringList objectTypePath = finder.qmlObjectTypeName();
 
     if ( finder.isInImport() && !finder.libVersionImport().isEmpty() ){
+
+
+        QStringList lib;
+        QStringList libAndVersion = finder.libVersionImport().split(" ");
+        for ( const QString& segment : libAndVersion ){
+            lib.append(segment.split("."));
+        }
+
         if ( path.isEmpty() ){
             context |= QmlCompletionContext::InImportVersion;
-            objectTypePath = finder.libVersionImport().split(".");
+            objectTypePath = lib;
         }
     }
 

@@ -12,6 +12,7 @@
 #include "themecontainer.h"
 #include "commands.h"
 #include "extensions.h"
+#include "documentation.h"
 
 class QQuickCloseEvent;
 
@@ -25,16 +26,17 @@ class ProjectWorkspace;
 class WorkspaceLayer : public Layer{
 
     Q_OBJECT
-    Q_PROPERTY(QObject* project            READ project    NOTIFY projectChanged)
-    Q_PROPERTY(QObject* panes              READ panes      NOTIFY panesChanged)
-    Q_PROPERTY(lv::Commands* commands      READ commands   CONSTANT)
-    Q_PROPERTY(lv::KeyMap* keymap          READ keymap     CONSTANT)
-    Q_PROPERTY(lv::ThemeContainer* themes  READ themes     CONSTANT)
-    Q_PROPERTY(QQmlPropertyMap* extensions READ extensions CONSTANT)
+    Q_PROPERTY(QObject* project                 READ project       NOTIFY projectChanged)
+    Q_PROPERTY(QObject* panes                   READ panes         NOTIFY panesChanged)
+    Q_PROPERTY(lv::Commands* commands           READ commands      CONSTANT)
+    Q_PROPERTY(lv::KeyMap* keymap               READ keymap        CONSTANT)
+    Q_PROPERTY(lv::ThemeContainer* themes       READ themes        CONSTANT)
+    Q_PROPERTY(lv::Documentation* documentation READ documentation CONSTANT)
+    Q_PROPERTY(QQmlPropertyMap* extensions      READ extensions    CONSTANT)
 
 public:
     explicit WorkspaceLayer(QObject *parent = nullptr);
-    ~WorkspaceLayer();
+    ~WorkspaceLayer() override;
 
     void loadView(ViewEngine *engine, QObject *parent) Q_DECL_OVERRIDE;
     QObject* nextViewParent() Q_DECL_OVERRIDE;
@@ -46,6 +48,7 @@ public:
     lv::KeyMap* keymap() const;
     QQmlPropertyMap* extensions() const;
     lv::ThemeContainer* themes() const;
+    lv::Documentation* documentation() const;
 
 public slots:
     QJSValue interceptMenu(QJSValue context);
@@ -58,6 +61,8 @@ public slots:
 
     void whenProjectOpen(const QString& path, ProjectWorkspace* workspace);
     void whenProjectClose();
+
+    QString docsPath() const;
 
 signals:
     void projectChanged();
@@ -76,10 +81,11 @@ private:
     KeyMap*   m_keymap;
     ThemeContainer* m_themes;
 
-    Project*  m_project;
+    Project*       m_project;
 
-    Extensions* m_extensions;
-    Workspace*  m_workspace;
+    Extensions*    m_extensions;
+    Workspace*     m_workspace;
+    Documentation* m_documentation;
 };
 
 inline QObject *WorkspaceLayer::project() const{
@@ -106,6 +112,10 @@ inline QQmlPropertyMap *WorkspaceLayer::extensions() const{
 
 inline ThemeContainer *WorkspaceLayer::themes() const{
     return m_themes;
+}
+
+inline Documentation *WorkspaceLayer::documentation() const{
+    return m_documentation;
 }
 
 }// namespace

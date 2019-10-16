@@ -41,8 +41,8 @@ public:
     static int getExpressionExtent(
         QTextDocument* document,
         int position,
-        QStringList* propertyPath = 0,
-        QChar *endDelimiter = 0);
+        QStringList* propertyPath = nullptr,
+        QChar *endDelimiter = nullptr);
 
     int getBlockStart(int position);
     int getBlockEnd(int position);

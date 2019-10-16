@@ -76,6 +76,7 @@ private:
     QString m_libVersion;
 
     int m_propertyNamePosition;
+    bool m_bracePropertyBinding;
 };
 
 } // namespace QmlJS

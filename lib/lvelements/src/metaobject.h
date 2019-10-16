@@ -517,7 +517,7 @@ inline Property::IndexSetFunction MetaObject::indexSet() const{
 inline EventFunction *MetaObject::getEvent(const std::string &name) const{
     auto it = m_events.find(name);
     if ( it == m_events.end() )
-        return 0;
+        return nullptr;
     return it->second;
 }
 

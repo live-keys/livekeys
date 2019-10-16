@@ -33,12 +33,13 @@
 #include "live/keymap.h"
 #include "live/viewengine.h"
 #include "live/viewcontext.h"
+#include "live/theme.h"
 #include "linesurface.h"
 #include "linemanager.h"
 #include "editorlayer.h"
 #include "workspacelayer.h"
 #include "themecontainer.h"
-#include "live/theme.h"
+#include "documentation.h"
 
 #include <QCoreApplication>
 #include <QQmlEngine>
@@ -72,9 +73,10 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
     qmlRegisterUncreatableType<lv::ProjectDocument>(
         uri, 1, 0, "ProjectDocument", "ProjectDocument objects are managed by the Project class.");
     qmlRegisterUncreatableType<lv::EditorSettings>(
-        uri, 1, 0, "EditorSettings", "EditorSettings is available through the \'lk.settings.editor\' property."
-    );
+        uri, 1, 0, "EditorSettings", "EditorSettings is available through the \'lk.settings.editor\' property.");
 
+    qmlRegisterUncreatableType<lv::Documentation>(
+        uri, 1, 0, "Documentation", "Documentation is available through the \'lk.layers.workspace.documentation\' property.");
     qmlRegisterUncreatableType<lv::Commands>(
         uri, 1, 0, "LiveCommands", "LiveCommands is available through the \'lk.layers.workspace.commands\' property.");
     qmlRegisterUncreatableType<lv::KeyMap>(

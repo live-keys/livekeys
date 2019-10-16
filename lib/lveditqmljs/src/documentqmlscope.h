@@ -107,6 +107,8 @@ public:
     int totalImports() const;
     const ImportList& imports() const;
 
+    void transferImports(const ImportList& imports);
+
     void addImport(const Import& key, const QString& path);
 
     DocumentQmlInfo::ConstPtr info() const;

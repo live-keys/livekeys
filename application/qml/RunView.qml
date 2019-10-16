@@ -308,7 +308,7 @@ Pane{
             color : "#03070b"
             Text {
                 id: removePaneText
-                text: qsTr("Remove Split")
+                text: qsTr("Remove Pane")
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 12
                 anchors.left: parent.left

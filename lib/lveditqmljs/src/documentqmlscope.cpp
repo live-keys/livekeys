@@ -206,6 +206,10 @@ bool DocumentQmlScope::hasImport(const DocumentQmlScope::Import &key){
     return false;
 }
 
+void DocumentQmlScope::transferImports(const DocumentQmlScope::ImportList &imports){
+    m_imports = imports;
+}
+
 /// \brief Adds an import \p path to a given \p key.
 void DocumentQmlScope::addImport(const DocumentQmlScope::Import &key, const QString &path){
     m_imports.append(QPair<Import, QString>(key, path));

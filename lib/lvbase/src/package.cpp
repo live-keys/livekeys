@@ -31,6 +31,7 @@ public:
     std::string name;
     std::string path;
     std::string filePath;
+    std::string documentation;
     Version     version;
     std::string extension;
     std::map<std::string, Package::Reference*> dependencies;
@@ -79,7 +80,7 @@ Package::Ptr Package::createFromPath(const std::string &path){
     }
 
     instream.seekg(0, std::ios::end);
-    size_t size = instream.tellg();
+    size_t size = static_cast<size_t>(instream.tellg());
     std::string buffer(size, ' ');
     instream.seekg(0);
     instream.read(&buffer[0], size);
@@ -129,6 +130,10 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
         }
     }
 
+    if ( m.hasKey("documentation" ) ){
+        pt->m_d->documentation = m["documentation"].asString();
+    }
+
     return pt;
 }
 
@@ -145,6 +150,11 @@ const std::string &Package::path() const{
 /** \brief Returns the filepath of the package */
 const std::string &Package::filePath() const{
     return m_d->filePath;
+}
+
+/** \brief Returns the package documentation */
+const std::string &Package::documentation() const{
+    return m_d->documentation;
 }
 
 /** \brief Returns the package version */

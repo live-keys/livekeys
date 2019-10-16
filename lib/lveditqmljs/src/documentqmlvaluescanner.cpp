@@ -122,8 +122,6 @@ bool DocumentQmlValueScanner::operator()(){
             tokens        = m_scanner(block.text(), m_scanner.state());
         }
 
-    } else {
-        //TODO: Non editing document
     }
 
     return false;

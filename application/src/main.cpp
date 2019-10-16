@@ -26,6 +26,8 @@
 #include "live/applicationcontext.h"
 #include "live/exception.h"
 
+//#include <QtWebEngine/QtWebEngine>
+
 using namespace lv;
 
 int main(int argc, char *argv[]){
@@ -38,6 +40,8 @@ int main(int argc, char *argv[]){
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName("Livekeys");
     QGuiApplication::setApplicationVersion(Livekeys::versionString());
+
+//    QtWebEngine::initialize();
 
     try{
         Livekeys::Ptr livekeys = Livekeys::create(argc, argv);

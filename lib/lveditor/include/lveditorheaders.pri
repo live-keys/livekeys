@@ -1,6 +1,7 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/live/documentationloader.h \
     $$PWD/live/project.h \
     $$PWD/live/projectentry.h \
     $$PWD/live/projectfile.h \

@@ -21,6 +21,8 @@ class LV_BASE_EXPORT Package{
 public:
     /** Shared pointer to Package */
     typedef std::shared_ptr<Package> Ptr;
+    /** Const shared pointer to the Package */
+    typedef std::shared_ptr<Package> ConstPtr;
 
     class Context;
 
@@ -93,8 +95,9 @@ public:
     static Package::Ptr createFromNode(const std::string &path, const std::string& filePath, const MLNode& m);
 
     const std::string& name() const;
-    const std::string& path() const;
+    const std::string&path() const;
     const std::string& filePath() const;
+    const std::string& documentation() const;
     const Version& version() const;
     const std::string& extension() const;
     std::string extensionAbsolutePath() const;
