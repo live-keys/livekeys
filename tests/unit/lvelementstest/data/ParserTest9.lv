@@ -1,0 +1,9 @@
+instance default Container{
+    id: root
+    int x : 20
+
+    Element{
+        id: rootChild
+        int y : 10
+    }
+}
