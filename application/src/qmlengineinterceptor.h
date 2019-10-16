@@ -33,7 +33,7 @@ protected:
 
 private:
     QByteArray m_content;
-    qint64 m_offset;
+    qint64     m_offset;
 };
 
 /// \private

@@ -88,4 +88,14 @@ DISTFILES += \
     data/ParserTest3.lv \
     data/ParserTest3.lv.js \
     data/ParserTest4.lv \
-    data/ParserTest4.lv.js
+    data/ParserTest4.lv.js \
+    data/ParserTest5.lv \
+    data/ParserTest5.lv.js \
+    data/ParserTest6.lv \
+    data/ParserTest6.lv.js \
+    data/ParserTest7.lv \
+    data/ParserTest7.lv.js \
+    data/ParserTest8.lv \
+    data/ParserTest8.lv.js \
+    data/ParserTest9.lv \
+    data/ParserTest9.lv.js

@@ -38,16 +38,16 @@ void EngineTest::initTestCase(){
 }
 
 void EngineTest::cppExceptionInObbjectTest(){
-    ViewEngine engine(new QQmlEngine);
+    ViewEngine engine(new QQmlEngine, nullptr);
 
     QObject* obj = engine.createObject(
         "import QtQuick 2.3\n import base 1.0\n "
         "EngineTestStub{}",
-        0,
+                nullptr,
         QUrl::fromLocalFile("enginetest.qml")
     );
 
-    QVERIFY(obj != 0);
+    QVERIFY(obj != nullptr);
 
     bool isException = false;
     try{
@@ -60,7 +60,7 @@ void EngineTest::cppExceptionInObbjectTest(){
 }
 
 void EngineTest::engineExceptionTest(){
-    ViewEngine engine(new QQmlEngine);
+    ViewEngine engine(new QQmlEngine, nullptr);
 
     lv::Exception exception = lv::Exception::create<lv::Exception>(
         "JSTest", 1, "enginetest.cpp", 100, "jsExceptionInObjectTest"
@@ -85,7 +85,7 @@ void EngineTest::engineExceptionTest(){
 }
 
 void EngineTest::engineWarningTest(){
-    ViewEngine engine(new QQmlEngine);
+    ViewEngine engine(new QQmlEngine, nullptr);
 
     bool isWarning = false;
 
@@ -103,7 +103,7 @@ void EngineTest::engineWarningTest(){
 }
 
 void EngineTest::engineObjectExceptionTest(){
-    ViewEngine engine(new QQmlEngine);
+    ViewEngine engine(new QQmlEngine, nullptr);
 
     bool isException = false;
     QObject::connect(&engine, &ViewEngine::applicationError, [&isException, this](QJSValue error){
@@ -122,11 +122,11 @@ void EngineTest::engineObjectExceptionTest(){
         "EngineTestStub{"
             "Component.onCompleted: throwJsError()"
         "}",
-        0,
+        nullptr,
         QUrl::fromLocalFile("enginetest.qml")
     );
 
-    QVERIFY(obj != 0);
+    QVERIFY(obj != nullptr);
 
     QCoreApplication::processEvents();
 
@@ -134,7 +134,7 @@ void EngineTest::engineObjectExceptionTest(){
 }
 
 void EngineTest::engineInternalWarningTest(){
-    ViewEngine engine(new QQmlEngine);
+    ViewEngine engine(new QQmlEngine, nullptr);
 
     bool isWarning = false;
     QObject::connect(&engine, &ViewEngine::applicationWarning, [&isWarning, this](QJSValue error){
@@ -150,11 +150,11 @@ void EngineTest::engineInternalWarningTest(){
         "EngineTestStub{"
             "Component.onCompleted: throwJsWarning()"
         "}",
-        0,
+        nullptr,
         QUrl::fromLocalFile("enginetest.qml")
     );
 
-    QVERIFY(obj != 0);
+    QVERIFY(obj != nullptr);
 
     QCoreApplication::processEvents();
 
@@ -162,7 +162,7 @@ void EngineTest::engineInternalWarningTest(){
 }
 
 void EngineTest::engineErrorHandlerTest(){
-    ViewEngine* engine = new ViewEngine(new QQmlEngine);
+    ViewEngine* engine = new ViewEngine(new QQmlEngine, nullptr);
 
     bool isWarning = false;
     bool isError   = false;
@@ -195,11 +195,11 @@ void EngineTest::engineErrorHandlerTest(){
                 "}\n"
             "}\n"
         "}\n",
-        0,
+        nullptr,
         QUrl::fromLocalFile("enginetest.qml")
     );
 
-    QVERIFY(obj != 0);
+    QVERIFY(obj != nullptr);
 
     QCoreApplication::processEvents();
 
@@ -211,7 +211,7 @@ void EngineTest::engineErrorHandlerTest(){
 }
 
 void EngineTest::engineErrorHandlerSkipTest(){
-    ViewEngine* engine = new ViewEngine(new QQmlEngine);
+    ViewEngine* engine = new ViewEngine(new QQmlEngine, nullptr);
 
     bool isWarning = false;
     bool isError   = false;
@@ -242,11 +242,11 @@ void EngineTest::engineErrorHandlerSkipTest(){
                 "}\n"
             "}\n"
         "}\n",
-        0,
+        nullptr,
         QUrl::fromLocalFile("enginetest.qml")
     );
 
-    QVERIFY(obj != 0);
+    QVERIFY(obj != nullptr);
 
     QCoreApplication::processEvents();
 
@@ -255,7 +255,7 @@ void EngineTest::engineErrorHandlerSkipTest(){
 }
 
 void EngineTest::jsThrownErrorTest(){
-    ViewEngine engine(new QQmlEngine);
+    ViewEngine engine(new QQmlEngine, nullptr);
 
     bool isError = false;
     QObject::connect(&engine, &ViewEngine::applicationError, [&isError, this](QJSValue error){
@@ -271,11 +271,11 @@ void EngineTest::jsThrownErrorTest(){
         "EngineTestStub{"
             "Component.onCompleted: {throw new Error('JSTest');}"
         "}",
-        0,
+        nullptr,
         QUrl::fromLocalFile("enginetest.qml")
     );
 
-    QVERIFY(obj != 0);
+    QVERIFY(obj != nullptr);
 
     QCoreApplication::processEvents();
 
@@ -284,10 +284,10 @@ void EngineTest::jsThrownErrorTest(){
 
 void EngineTest::jsThrownErrorHandlerTest(){
     //See how I can extend exception
-    ViewEngine* engine = new ViewEngine(new QQmlEngine);
+    ViewEngine* engine = new ViewEngine(new QQmlEngine, nullptr);
 
     bool isError = false;
-    QObject::connect(engine, &ViewEngine::applicationError, [&isError, this](QJSValue){
+    QObject::connect(engine, &ViewEngine::applicationError, [&isError](QJSValue){
         isError = true;
     });
 
@@ -310,11 +310,11 @@ void EngineTest::jsThrownErrorHandlerTest(){
                 "}\n"
             "}\n"
         "}\n",
-        0,
+        nullptr,
         QUrl::fromLocalFile("enginetest.qml")
     );
 
-    QVERIFY(obj != 0);
+    QVERIFY(obj != nullptr);
 
     QCoreApplication::processEvents();
 

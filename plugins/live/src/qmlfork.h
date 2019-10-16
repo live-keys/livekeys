@@ -41,7 +41,7 @@ public slots:
     void onSharedMemoryWriteStatusChanged(int status);
 
 protected:
-    void componentComplete();
+    void componentComplete() override;
 
 private:
     std::function<void(const LineMessage&, void*)> m_handler;
