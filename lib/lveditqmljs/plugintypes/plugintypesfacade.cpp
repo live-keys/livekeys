@@ -2,6 +2,7 @@
 
 #ifdef Q_PLUGINTYPES_ENABLED
 
+#include <QtGlobal>
 #include <QtQml/private/qqmlmetatype_p.h>
 #include <QtQml/private/qqmlopenmetaobject_p.h>
 #include <QtQuick/private/qquickevents_p_p.h>
@@ -11,6 +12,9 @@
 #include <QtQml/private/qhashedstring_p.h>
 
 #include "qmlstreamwriter.h"
+
+#include "live/visuallog.h"
+#include "projectqmlscopecontainer_p.h"
 
 #include <iostream>
 #include <algorithm>
@@ -267,10 +271,10 @@ class Dumper{
     QmlStreamWriter *qml;
     QString relocatableModuleUri;
 
-    QHash<QByteArray, QSet<const QQmlType *> > qmlTypesByCppName;
+    QHash<QByteArray, QSet<QQmlType> > qmlTypesByCppName;
 
 public:
-    Dumper(QmlStreamWriter *qml, const QHash<QByteArray, QSet<const QQmlType *> > &qmlTypesCppName)
+    Dumper(QmlStreamWriter *qml, const QHash<QByteArray, QSet<QQmlType> > &qmlTypesCppName)
         : qml(qml)
         , qmlTypesByCppName(qmlTypesCppName)
     {}
@@ -299,7 +303,7 @@ public:
         return exportString;
     }
 
-    void writeMetaContent(const QMetaObject *meta, KnownAttributes *knownAttributes = 0)
+    void writeMetaContent(const QMetaObject *meta, KnownAttributes *knownAttributes = nullptr)
     {
         QSet<QString> implicitSignals;
         for (int index = meta->propertyOffset(); index < meta->propertyCount(); ++index) {
@@ -442,12 +446,16 @@ public:
         if (meta->superClass())
             qml->writeScriptBinding(QLatin1String("prototype"), enquote(convertToId(meta->superClass())));
 
-        QSet<const QQmlType *> qmlTypes = qmlTypesByCppName.value(meta->className());
+        QSet<QQmlType> qmlTypes = qmlTypesByCppName.value(meta->className());
         if (!qmlTypes.isEmpty()) {
-            QHash<QString, const QQmlType *> exports;
+            QHash<QString, QQmlType> exports;
 
-            foreach (const QQmlType *qmlTy, qmlTypes) {
-                const QString exportString = getExportString(qmlTy->qmlTypeName(), qmlTy->majorVersion(), qmlTy->minorVersion());
+            foreach (const QQmlType& qmlTy, qmlTypes){
+                if ( qmlTy.isSingleton() )
+                    isSingleton = true;
+                if ( !qmlTy.isCreatable() )
+                    isUncreatable = true;
+                const QString exportString = getExportString(qmlTy.qmlTypeName(), qmlTy.majorVersion(), qmlTy.minorVersion());
                 exports.insert(exportString, qmlTy);
             }
 
@@ -465,7 +473,7 @@ public:
             // write meta object revisions
             QStringList metaObjectRevisions;
             foreach (const QString &exportString, exportStrings) {
-                int metaObjectRevision = exports[exportString]->metaObjectRevision();
+                int metaObjectRevision = exports[exportString].metaObjectRevision();
                 metaObjectRevisions += QString::number(metaObjectRevision);
             }
             qml->writeArrayBinding(QLatin1String("exportMetaObjectRevisions"), metaObjectRevisions);
@@ -535,7 +543,7 @@ private:
             qml->writeScriptBinding(QLatin1String("isPointer"), QLatin1String("true"));
     }
 
-    void dump(const QMetaProperty &prop, KnownAttributes *knownAttributes = 0)
+    void dump(const QMetaProperty &prop, KnownAttributes *knownAttributes = nullptr)
     {
         int revision = prop.revision();
         QByteArray propName = prop.name();
@@ -551,7 +559,7 @@ private:
     }
 
     void dump(const QMetaMethod &meth, const QSet<QString> &implicitSignals,
-              KnownAttributes *knownAttributes = 0)
+              KnownAttributes *knownAttributes = nullptr)
     {
         if (meth.methodType() == QMetaMethod::Signal) {
             if (meth.access() != QMetaMethod::Public)
@@ -632,18 +640,18 @@ bool PluginTypesFacade::pluginTypesEnabled(){
 void PluginTypesFacade::extractTypes(
         const QString &module,
         QQmlEngine *,
-        QList<const QQmlType *> &types,
-        QHash<QByteArray, QSet<const QQmlType *> > &qmlTypesByCppName)
+        QList<QQmlType> &types,
+        QHash<QByteArray, QSet<QQmlType> > &qmlTypesByCppName)
 {
-    foreach (const QQmlType *ty, QQmlMetaType::qmlTypes()){
-        QString typeModule = ty->qmlTypeName();
+    foreach (const QQmlType& ty, QQmlMetaType::qmlTypes()){
+        QString typeModule = ty.qmlTypeName();
         typeModule = typeModule.mid(0, typeModule.lastIndexOf(QLatin1Char('/')));
 
         if ( typeModule == module )
             types.append(ty);
 
-        if ( ty->metaObject() ){
-            qmlTypesByCppName[convertToId(ty->metaObject())].insert(ty);
+        if ( ty.metaObject() ){
+            qmlTypesByCppName[convertToId(ty.metaObject())].insert(ty);
         }
     }
 }
@@ -655,24 +663,24 @@ bool PluginTypesFacade::isModule(const QString &uri){
 //TODO: Also parse attached objects
 void PluginTypesFacade::getTypeDependencies(
         const QString& module,
-        const QList<const QQmlType *> &types,
-        const QHash<QByteArray, QSet<const QQmlType *> > &qmlTypesByCppName,
+        const QList<QQmlType> &types,
+        const QHash<QByteArray, QSet<QQmlType> > &qmlTypesByCppName,
         QSet<const QMetaObject*>& solvedTypes,
         QList<const QMetaObject *>& unknownTypes,
         QStringList &dependencies)
 {
-    foreach( const QQmlType* ty, types ){
-        const QMetaObject* tyme = ty->metaObject();
+    foreach( const QQmlType& ty, types ){
+        const QMetaObject* tyme = ty.metaObject();
         solvedTypes.insert(tyme);
 
-        while( tyme->superClass() != 0 ){
+        while( tyme->superClass() != nullptr ){
             tyme = tyme->superClass();
             if ( qmlTypesByCppName.contains(convertToId(tyme)) ){
 
                 bool typeHasExport = false;
-                const QSet<const QQmlType*>& tymeexports = qmlTypesByCppName[convertToId(tyme)];
-                foreach( const QQmlType* nestedType, tymeexports ){
-                    QString typeModule = nestedType->qmlTypeName();
+                const QSet<QQmlType>& tymeexports = qmlTypesByCppName[convertToId(tyme)];
+                foreach( const QQmlType& nestedType, tymeexports ){
+                    QString typeModule = nestedType.qmlTypeName();
                     typeModule = typeModule.mid(0, typeModule.lastIndexOf(QLatin1Char('/')));
                     if ( !typeModule.isEmpty() && typeModule != module && !dependencies.contains(typeModule)){
                         dependencies.append(typeModule);
@@ -688,13 +696,135 @@ void PluginTypesFacade::getTypeDependencies(
     }
 }
 
+QmlLibraryInfo::ScanStatus PluginTypesFacade::loadPluginInfo(
+        ProjectQmlScope::Ptr projectScope,
+        const QmlDirParser& dirParser,
+        const QString& path,
+        ProjectQmlScanner* scanner,
+        QStringList& dependencyPaths,
+        QByteArray* stream)
+{
+    QObject* requestObject = scanner->requestObject(path);
+    if ( !PluginTypesFacade::isModule(dirParser.typeNamespace()) && requestObject == nullptr ){
+
+        /// If module is not loaded, find the library import, and request to load the module by creating
+        /// a component from the engine
+
+        QString uriForPath = projectScope->uriForPath(path);
+
+        if ( uriForPath.isEmpty() || scanner->requestErrorStatus(path) ){
+            vlog_debug("editqmljs-projectscanner", "Library PluginInfo Scan Error: " + path + ", uri:" + uriForPath);
+            return QmlLibraryInfo::ScanError;
+        }
+
+        scanner->addLoadRequest(ProjectQmlScanner::TypeLoadRequest(uriForPath, path));
+        return QmlLibraryInfo::RequiresDependency;
+
+    } else {
+
+        /// If module is loaded, scan objects, solve dependencies, and output library
+
+        QHash<QByteArray, QSet<QQmlType> > qmlTypesByCppName;
+        QList<QQmlType> nsTypes;
+        PluginTypesFacade::extractTypes(dirParser.typeNamespace(), nullptr, nsTypes, qmlTypesByCppName);
+
+        QSet<const QMetaObject *> metaTypes;
+        QList<const QMetaObject*> unknownTypes;
+        QStringList dependencies;
+
+        PluginTypesFacade::getTypeDependencies(
+            dirParser.typeNamespace(),
+            nsTypes,
+            qmlTypesByCppName,
+            metaTypes,
+            unknownTypes,
+            dependencies
+        );
+
+        /// Scan dependencies both from qmldir, and from scanned type
+
+        dependencyPaths.clear();
+
+        QHash<QString, QmlDirParser::Component> dirParserDependencies = dirParser.dependencies();
+        QHash<QString, QmlDirParser::Component>::iterator dpdIt;
+        for ( dpdIt = dirParserDependencies.begin(); dpdIt != dirParserDependencies.end(); ++dpdIt ){
+            QStringList localDependencyPaths;
+            projectScope->findQmlLibraryInImports(
+                dpdIt->typeName.replace(".", "/"),
+                dpdIt->majorVersion,
+                dpdIt->minorVersion,
+                localDependencyPaths
+            );
+            foreach( const QString& depPath, localDependencyPaths )
+                if ( !dependencyPaths.contains(depPath) )
+                    dependencyPaths.append(depPath);
+        }
+
+        foreach( QString typeDependency, dependencies ){
+            QStringList localDependencyPaths;
+            projectScope->findQmlLibraryInImports(
+                typeDependency.replace(".", "/"),
+                1,
+                0,
+                localDependencyPaths
+            );
+            foreach( const QString& depPath, localDependencyPaths )
+                if ( !dependencyPaths.contains(depPath) )
+                    dependencyPaths.append(depPath);
+        }
+
+        /// If we have unknown types, check dependencies, if all dependencies have been loaded
+        /// couple loose objects to this library, otherwise its not clear wether loose objects
+        /// are part of this library or not
+
+        if ( unknownTypes.size() > 0 ){
+
+            QList<QmlLibraryInfo::Ptr> dependentLibraries;
+            foreach( const QString& dpath, dependencyPaths ){
+                QmlLibraryInfo::Ptr linfo = projectScope->globalLibraries()->libraryInfo(dpath);
+                if ( linfo->status() == QmlLibraryInfo::NotScanned){
+                    vlog_debug("editqmljs-projectscanner", "QmlInfo for: " + path + " requires " + dpath);
+                    return QmlLibraryInfo::RequiresDependency; /// try again when more libraries are populated
+                }
+                dependentLibraries.append(linfo);
+            }
+
+            /// Insert unknown types that are not present within dependent libraries
+
+            foreach( const QMetaObject* obj, unknownTypes ){
+                LanguageUtils::FakeMetaObject::ConstPtr fakeobj;
+                foreach ( QmlLibraryInfo::Ptr deplib, dependentLibraries ){
+                    fakeobj = deplib->findObjectByClassName(obj->className());
+                    if ( !fakeobj.isNull() )
+                        break;
+                }
+                if ( fakeobj.isNull() )
+                    metaTypes.insert(obj);
+            }
+        }
+
+        QList<QString> dependencyUris;
+        for ( dpdIt = dirParserDependencies.begin(); dpdIt != dirParserDependencies.end(); ++dpdIt ){
+            dependencyUris.append(
+                dpdIt->typeName + " " +
+                QString::number(dpdIt->majorVersion) + "." +
+                QString::number(dpdIt->minorVersion)
+            );
+        }
+
+        PluginTypesFacade::extractPluginInfo(metaTypes, qmlTypesByCppName, dependencyUris, stream);
+
+        return QmlLibraryInfo::Done;
+    }
+}
+
 QString PluginTypesFacade::getTypeName(const QQmlType* type){
     return type->elementName();
 }
 
 void PluginTypesFacade::extractPluginInfo(
         const QSet<const QMetaObject *>& metaTypes,
-        const QHash<QByteArray, QSet<const QQmlType *> > &qmlTypesCppName,
+        const QHash<QByteArray, QSet<QQmlType> > &qmlTypesCppName,
         const QList<QString> &dependencies,
         QByteArray *stream)
 {

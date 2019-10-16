@@ -9,36 +9,34 @@
 ////// plugin1/subplugin1/A.lv
 
 component default < Element{
-    function toString : (){
+    fn toString : (){
         return "class[A]"
     }
 }
 
 ////// plugin1/subplugin1/A.lv.js
 
-class A extends Element{
+module.exports["A"] = class A extends Element{
     toString(){
         return "class[A]"
     }
 }
-module.exports["A"] = A
 
 ////// plugin1/subplugin1/B.lv
 
 component default < Element{
-    function toString : (){
+    fn toString(){
         return "class[B]"
     }
 }
 
 ////// plugin1/subplugin1/B.lv.js
 
-class B extends Element{
+module.exports["B"] = class B extends Element{
     toString(){
         return "class[B]"
     }
 }
-module.exports["B"] = B
 
 ////// plugin1/subplugin2/live.plugin.json
 
@@ -60,10 +58,8 @@ imports.require(".plugin1.subplugin1")
 
 var B = imports.get("B")
 
-class C extends B{
+module.exports["C"] = class C extends B{
 }
-module.exports["C"] = C
-
 
 ////// plugin1/live.package.json
 
@@ -88,13 +84,15 @@ imports.require(".plugin1.subplugin2")
 
 var C = imports.get("C")
 
-module.exports["main"] = class extends Element{
+module.exports["main"] = class main extends Element{
     constructor(){
         super()
         var c = new C();
         Element.addProperty(this, "c", {
             type: "string",
-            value: c.toString(),
+            value: (function(){
+                return (new C()).toString()
+            }()),
             notify: "cChanged"
         })
     }

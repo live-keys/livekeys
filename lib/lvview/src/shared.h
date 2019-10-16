@@ -26,7 +26,6 @@
 namespace lv{
 
 class Act;
-class Act;
 
 class LV_VIEW_EXPORT Shared : public QObject{
 

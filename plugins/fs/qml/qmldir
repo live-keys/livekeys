@@ -2,3 +2,5 @@ module fs
 plugin fs
 
 depends QtQuick 2.3
+
+ResponsiveFolderView 1.0 ResponsiveFolderView.qml

@@ -12,7 +12,7 @@ QVariant QmlVariantListModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-int QmlVariantListModel::rowCount(const QModelIndex &parent) const
+int QmlVariantListModel::rowCount(const QModelIndex &) const
 {
     return m_qmlVariantList->itemCount();
 }

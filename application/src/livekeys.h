@@ -21,13 +21,16 @@
 #include <QLibrary>
 #include <QQmlPropertyMap>
 #include <QJSValue>
+
+#include <functional>
+
 #include "live/package.h"
 
 // Versioning
 // ----------
 
 #define LIVEKEYS_VERSION_MAJOR 1
-#define LIVEKEYS_VERSION_MINOR 5
+#define LIVEKEYS_VERSION_MINOR 6
 #define LIVEKEYS_VERSION_PATCH 0
 
 // Forward declarations
@@ -74,7 +77,7 @@ public:
 public:
     ~Livekeys();
 
-    static Livekeys::Ptr create(int argc, const char* const argv[], QObject* parent = 0);
+    static Livekeys::Ptr create(int argc, const char* const argv[], QObject* parent = nullptr);
 
     void loadQml(const QUrl& url);
     void loadProject();
@@ -122,7 +125,7 @@ signals:
     void missingPackages();
 
 private:
-    Livekeys(QObject* parent = 0);
+    Livekeys(QObject* parent = nullptr);
     Livekeys(const Livekeys&);
     Livekeys& operator = (const Livekeys&);
 

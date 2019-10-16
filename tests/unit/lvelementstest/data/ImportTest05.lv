@@ -15,23 +15,21 @@
 
 ////// A.lv
 
-component singleton default < Element{
+instance default Element{
     string a : "class[A]"
 }
 
 ////// A.lv.js
 
-class A extends Element{
-    constructor(){
-        super()
-        Element.addProperty(this, "a", {
-            type: "string",
-            value: "class[A]",
-            notify: "aChanged"
-        })
-    }
-}
-module.exports["a"] = new A()
+module.exports["a"] = (function(parent){
+    this.setParent(parent)
+
+    Element.addProperty(this, "a", { type: "string", notify: "aChanged" })
+    this.a = "class[A]"
+
+    return this
+
+}.bind(new Element())(null))
 
 ////// main.lv
 
@@ -43,7 +41,7 @@ component default < Element{
 
 var a = imports.get("a")
 
-module.exports["main"] = class extends Element{
+module.exports["main"] = class main extends Element{
     constructor(){
         super()
         Element.addProperty(this, "a", {

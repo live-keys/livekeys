@@ -35,6 +35,7 @@ OTHER_FILES += \
     doc/*.md
 
 DISTFILES += \
+    qml/PathInputBox.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/forknode.qml

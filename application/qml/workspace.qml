@@ -151,7 +151,7 @@ Item{
 
             var initializeStructure = [
                 [lk.layers.window.window()],
-                initializeSplitterPanes(container, currentWindowPanes)
+                [initializeSplitterPanes(container, currentWindowPanes)]
             ]
 
             for ( var i = 1; i < paneConfiguration.length; ++i ){

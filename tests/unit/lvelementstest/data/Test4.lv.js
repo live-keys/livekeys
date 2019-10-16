@@ -1,45 +1,42 @@
-module.exports[__NAME__] = class extends Container{
+module.exports["Test4"] = class Test4 extends Container{
 
-    constructor(){
+    constructor(var1, var2){
         super()
-        var that = this;
+        this.__initialize()
         this.someVar = 20
-
-        Element.addProperty(this, 'x', {
-            type: "int",
-            value: 20,
-            notify: "xChanged"
-        })
-        Element.addProperty(this, 'y', {
-            type: "int",
-            value: 20,
-            notify: "yChanged"
-        })
-        Element.addEvent(this, 'dataChanged', [])
-        this.on("dataChanged", function(){
-            that.x = 100;
-        });
-
-        var child0 = new Element()
-        Element.addProperty(child0, 'k', {
-            type: "int",
-            value: 20,
-            notify: "kChanged"
-        })
-
-        var child1 = new Element()
-        Element.addProperty(child1, 'message', {
-            type: "string",
-            value: "thirty",
-            notify: "messageChanged"
-        })
-
-        Element.assignDefaultProperty(this, [
-            child0,
-            child1
-        ])
     }
 
+    __initialize(){
+        // Declare all parent properties
+        Element.addProperty(this, 'x', {type: 'int', notify: 'xChanged'})
+        Element.addProperty(this, 'y', {type: 'int', notify: 'yChanged'})
+        Element.addEvent(this, 'dataChanged', [])
+        this.on("dataChanged", function(){
+            this.x = 100;
+        }.bind(this));
+
+        // Assign parent properties
+        this.x = 20
+        this.y = 20
+
+        Element.assignDefaultProperty(this, [
+            (function(parent){
+                this.setParent(parent)
+
+                Element.addProperty(this, 'k', {type: "int", notify: 'kChanged'})
+
+                this.k = 20
+                return this
+            }.bind(new Element())(this)),
+            (function(parent){
+                this.setParent(parent)
+
+                Element.addProperty(this, 'message', {type: 'string', notify: 'messageChanged'})
+                this.message = "thirty"
+                return this
+            }.bind(new Element())(this))
+        ])
+    }
 }
 
 

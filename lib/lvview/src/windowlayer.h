@@ -9,11 +9,14 @@ class QQuickWindow;
 
 namespace lv{
 
+class QmlClipboard;
+
 class LV_VIEW_EXPORT WindowLayer : public Layer{
 
     Q_OBJECT
-    Q_PROPERTY(QObject* dialogs READ dialogs NOTIFY dialogsChanged)
-    Q_PROPERTY(QObject* handle  READ handle  NOTIFY handleChanged)
+    Q_PROPERTY(QObject* dialogs            READ dialogs     NOTIFY dialogsChanged)
+    Q_PROPERTY(QObject* handle             READ handle      NOTIFY handleChanged)
+    Q_PROPERTY(lv::QmlClipboard* clipboard READ clipboard   CONSTANT)
 
 public:
     explicit WindowLayer(QObject *parent = nullptr);
@@ -24,6 +27,8 @@ public:
 
     QObject* handle() const;
     QObject* dialogs() const;
+
+    QmlClipboard* clipboard();
 
 public slots:
     void windowActiveChanged();
@@ -38,8 +43,9 @@ private:
     QQuickWindow* m_window;
     QObject* m_nextViewParent;
 
-    QObject* m_handle;
-    QObject* m_dialogs;
+    QObject*      m_handle;
+    QObject*      m_dialogs;
+    QmlClipboard* m_clipboard;
 };
 
 inline QObject *WindowLayer::handle() const{

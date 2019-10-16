@@ -22,6 +22,7 @@
 #include "typeinfo.h"
 #include "viewengine.h"
 
+#include <QJSValueIterator>
 #include <QMetaType>
 
 /**
@@ -33,33 +34,69 @@ namespace lv{
 
 namespace{
 
-void logHelper(VisualLog::MessageInfo::Level level, const QJSValue& messageOrCategory, const QJSValue& message){
-    if ( message.isUndefined() ){
-        if ( messageOrCategory.isQObject() ){
-            QObject* messageObject = messageOrCategory.toQObject();
-            TypeInfo::Ptr ti = ViewContext::instance().engine()->typeInfo(messageObject->metaObject());
-            if ( !ti.isNull() && ti->isLoggable() ){
-                VisualLog vl(level);
-                ti->log(vl, messageObject);
-            } else {
-                VisualLog(level) << "[Object object]";
+void logValue(VisualLog& vl, const QJSValue& message){
+    if ( message.isQObject() ){
+        QObject* messageObject = message.toQObject();
+        vl << "(" << messageObject->metaObject()->className() << " " <<
+           (messageObject->objectName().isEmpty() ? "" : "\'" + messageObject->objectName() + "\' ") <<
+            messageObject << ")";
+    } else if ( message.isArray() ){
+        vl << "[";
+        bool first = true;
+        QJSValueIterator vi(message);
+        while ( vi.next() ){
+            if ( vi.name() != "length" ){
+                if (first)
+                    first = false;
+                else
+                    vl << ",";
+                logValue(vl, vi.value());
             }
+        }
+        vl << "]";
+    } else if ( message.isObject() ){
+        vl << "{";
+        bool first = true;
+        QJSValueIterator vi(message);
+        while ( vi.next() ){
+            if ( message.hasOwnProperty(vi.name()) ){
+                if (first)
+                    first = false;
+                else
+                    vl << ",";
+                vl << vi.name() << ":";
+                logValue(vl, vi.value());
+            }
+        }
+        vl << "}";
+    } else {
+        vl << message.toString();
+    }
+}
+
+void logDetail(VisualLog& vl, const QJSValue& message){
+    if ( message.isQObject() ){
+        QObject* messageObject = message.toQObject();
+        TypeInfo::Ptr ti = ViewContext::instance().engine()->typeInfo(messageObject->metaObject());
+        if ( !ti.isNull() && ti->isLoggable() ){
+            ti->log(vl, messageObject);
         } else {
-            VisualLog(level) << messageOrCategory.toString();
+            vl << "(" << messageObject->metaObject()->className() << " " <<
+               (messageObject->objectName().isEmpty() ? "" : "\'" + messageObject->objectName() + "\' ") <<
+                messageObject << ")";
         }
     } else {
-        if ( message.isQObject() ){
-            QObject* messageObject = messageOrCategory.toQObject();
-            TypeInfo::Ptr ti = ViewContext::instance().engine()->typeInfo(messageObject->metaObject());
-            if ( !ti.isNull() && ti->isLoggable() ){
-                VisualLog vl(level);
-                ti->log(vl, messageObject);
-            } else {
-                VisualLog(level) << "[Object object]";
-            }
-        } else {
-            VisualLog(level) << message.toString();
-        }
+        logValue(vl, message);
+    }
+}
+
+void logHelper(VisualLog::MessageInfo::Level level, const QJSValue& messageOrCategory, const QJSValue& message){
+    if ( message.isUndefined() ){
+        VisualLog vl(level);
+        logDetail(vl, messageOrCategory);
+    } else {
+        VisualLog vl(messageOrCategory.toString().toStdString(), level);
+        logDetail(vl, message);
     }
 }
 

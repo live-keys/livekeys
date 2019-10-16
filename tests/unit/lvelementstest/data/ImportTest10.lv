@@ -22,7 +22,7 @@
 import packageb
 
 component default < B{
-    function toString : (){
+    fn toString(){
         return "class[A]"
     }
 }
@@ -33,13 +33,11 @@ imports.require("packageb")
 
 var B = imports.get("B")
 
-class A extends B{
+module.exports["A"] = class A extends B{
     toString(){
         return "class[A]"
     }
 }
-module.exports["A"] = A
-
 
 
 ////// packages/packageb/live.plugin.json
@@ -73,13 +71,11 @@ imports.require("packagec")
 
 var C = imports.get("C")
 
-class B extends C{
+module.exports["B"] = class B extends C{
     toString(){
         return "class[B]"
     }
 }
-module.exports["B"] = A
-
 
 
 
@@ -114,12 +110,11 @@ imports.require("packagea")
 
 var A = imports.get("A")
 
-class C extends A{
+module.exports["C"] = class C extends A{
     toString(){
         return "class[C]"
     }
 }
-module.exports["C"] = C
 
 
 
@@ -129,7 +124,7 @@ imports.require("packagea")
 
 var A = imports.get("A")
 
-module.exports["main"] = class extends Element{
+module.exports["main"] = class main extends Element{
     constructor(){
         super()
     }

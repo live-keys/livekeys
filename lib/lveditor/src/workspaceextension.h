@@ -23,7 +23,7 @@ class LV_EDITOR_EXPORT WorkspaceExtension : public QObject{
     Q_PROPERTY(QJSValue themes            READ themes            WRITE setThemes            NOTIFY themesChanged)
 
 public:
-    explicit WorkspaceExtension(QObject *parent = 0);
+    explicit WorkspaceExtension(QObject *parent = nullptr);
 
     /** Returns globals */
     QObject* globals() const{ return m_globals; }

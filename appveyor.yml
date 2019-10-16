@@ -49,7 +49,7 @@ deploy:
   description: 'View Changelog.md for further details.'
   provider: GitHub
   auth_token:
-    secure: 'ewCMPMl6d/IVBZ0r/ZApqeh0NgF/0UMMtKTqvQcmTNFb3uK57XFyqbZBHLDICAVC'
+    secure: 'nZiQSOpQIcQKzofe3beUTU1qJxW9WLtZaCLfIdF2Aoa5Nfp2o1x923dfHZfiEaYN'
   artifact: /.*\.zip/
   draft: true
   prerelease: false

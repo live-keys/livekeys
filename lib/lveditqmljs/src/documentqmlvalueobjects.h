@@ -83,7 +83,7 @@ public:
     class LV_EDITQMLJS_EXPORT RangeObject : public RangeItem{
 
     public:
-        RangeObject() : ast(0), parent(0), begin(0), end(0){}
+        RangeObject() : ast(nullptr), parent(nullptr), begin(0), end(0){}
         ~RangeObject(){
             for ( int i = 0; i < children.size(); ++i )
                 delete children[i];

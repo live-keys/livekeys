@@ -18,6 +18,7 @@
 #define QMATVIEW_H
 
 #include "qmatdisplay.h"
+
 /// \private
 class QMatView : public QQuickItem{
 
@@ -26,7 +27,7 @@ class QMatView : public QQuickItem{
     Q_PROPERTY(bool linearFilter READ linearFilter WRITE setLinearFilter NOTIFY linearFilterChanged)
 
 public:
-    explicit QMatView(QQuickItem* parent = 0);
+    explicit QMatView(QQuickItem* parent = nullptr);
     ~QMatView();
 
     QMat* mat();
@@ -52,11 +53,11 @@ inline QMat *QMatView::mat(){
 }
 
 inline void QMatView::setMat(QMat *arg){
-    if ( arg == 0 )
+    if ( arg == nullptr )
         return;
 
     cv::Mat* matData = arg->cvMat();
-    if ( implicitWidth() != matData->cols || implicitHeight() != matData->rows ){
+    if ( static_cast<int>(implicitWidth()) != matData->cols || static_cast<int>(implicitHeight()) != matData->rows ){
         setImplicitWidth(matData->cols);
         setImplicitHeight(matData->rows);
     }

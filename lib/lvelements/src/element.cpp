@@ -397,8 +397,11 @@ void Element::assignPropertyExpression(
     for ( uint32_t i = 0; i < bindingsArray->Length(); ++i ){
         v8::Local<v8::Array> baItem = v8::Local<v8::Array>::Cast(bindingsArray->Get(i));
         if ( baItem->Length() != 2 ){
-            throw std::exception();
-            //TODO: Throw engine exception
+            lv::Exception exc = CREATE_EXCEPTION(
+                lv::Exception, "Bindings require array of dual arrays: [[object, name]].", Exception::toCode("~Binding")
+            );
+            d->engine->throwError(&exc, e);
+            return;
         }
 
         Element* bindingElement  = LocalValue(e->engine(), baItem->Get(0)).toElement(e->engine());

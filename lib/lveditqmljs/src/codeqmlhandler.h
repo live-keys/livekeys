@@ -57,14 +57,14 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public AbstractCodeHandler{
     friend class ProjectQmlExtension;
 
 public:
-    explicit CodeQmlHandler(
-        ViewEngine* engine,
+    explicit CodeQmlHandler(ViewEngine* engine,
         Project* project,
         QmlJsSettings *settings,
         ProjectQmlExtension* projectHandler,
-        DocumentHandler* handler = 0
+        ProjectDocument *document,
+        DocumentHandler* handler = nullptr
     );
-    ~CodeQmlHandler();
+    ~CodeQmlHandler() override;
 
     void assistCompletion(
         const QTextCursor& cursor,
@@ -73,9 +73,8 @@ public:
         CodeCompletionModel* model,
         QTextCursor& cursorChange
     ) Q_DECL_OVERRIDE;
-    void setDocument(ProjectDocument* document) Q_DECL_OVERRIDE;
-    void documentContentsChanged(int position, int charsRemoved, int charsAdded) Q_DECL_OVERRIDE;
-    void rehighlightBlock(const QTextBlock& block) Q_DECL_OVERRIDE;
+    void setDocument(ProjectDocument* document);
+    void rehighlightBlock(const QTextBlock& block);
     QPair<int, int> contextBlock(int position) Q_DECL_OVERRIDE;
 
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
@@ -128,6 +127,9 @@ public slots:
     int addItem(int position, const QString& object, const QString& type);
     void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type, QObject* currentApp = nullptr);
     void updateRuntimeBindings(QObject* obj);
+
+    void _documentContentsChanged(int position, int charsRemoved, int charsAdded);
+    void _documentFormatUpdate(int position, int length);
 
     // Scopes
 

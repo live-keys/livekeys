@@ -56,6 +56,7 @@ export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
 
 DISTFILES += \
+    palettes/ImageFilePalette.qml \
     qml/live.package.json \
     qml/live.plugin.json
 

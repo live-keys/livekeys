@@ -1,28 +1,27 @@
-module.exports[__NAME__] = class extends Container{
+module.exports["Test2"] = class Test2 extends Container{
 
     constructor(){
         super()
-        var that = this;
+        this.__initialize()
+    }
 
-        Element.addProperty(this, 'x', {
-            type: "int",
-            value: 20,
-            notify: 'xChanged'
-        })
+    __initialize(){
+        Element.addProperty(this, 'x', {type: "int", notify: 'xChanged'})
 
-        var child0 = new Element()
-        child0.setParent(this)
-        Element.addProperty(child0, 'l', {
-            type: "int",
-            value: function(){ return child0.parent.x + 20 },
-            bindings: [
-                [child0.parent, "xChanged"]
-            ],
-            event: 'lChanged'
-        })
+        this.x = 20
 
         Element.assignDefaultProperty(this, [
-            child0
+            (function(parent){
+                Element.addProperty(this, 'l', {type: "int", event: 'lChanged'})
+
+                Element.assignPropertyExpression(
+                    this,
+                    "l",
+                    function(){ return parent.x + 20 }.bind(this),
+                    [[parent, "xChanged"]]
+                )
+                return this
+            }.bind(new Element())(this))
         ])
     }
 }

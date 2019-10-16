@@ -37,4 +37,5 @@ OTHER_FILES *= \
 
 DISTFILES += \
     qml/live.package.json \
-    qml/live.plugin.json
+    qml/live.plugin.json \
+    qml/plugins.qmltypes

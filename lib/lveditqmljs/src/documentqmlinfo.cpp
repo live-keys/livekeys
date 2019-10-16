@@ -282,7 +282,7 @@ public:
  * \brief Returns the lv::DocumentQmlInfo::Dialect according to the file \p extension
  */
 DocumentQmlInfo::Dialect DocumentQmlInfo::extensionToDialect(const QString &extension){
-    static QHash<QString, DocumentQmlInfo::Dialect> map;
+    QHash<QString, DocumentQmlInfo::Dialect> map;
     map["js"]         = DocumentQmlInfo::Javascript;
     map["qml"]        = DocumentQmlInfo::Qml;
     map["qmltypes"]   = DocumentQmlInfo::QmlTypeInfo;
@@ -325,7 +325,7 @@ DocumentQmlInfo::Ptr DocumentQmlInfo::create(const QString &fileName){
  */
 QStringList DocumentQmlInfo::extractIds() const{
     Q_D(const DocumentQmlInfo);
-    if ( d->internalDocBind->idEnvironment() == 0 )
+    if ( d->internalDocBind->idEnvironment() == nullptr )
         return QStringList();
 
     IdExtractor extractor;
@@ -346,7 +346,7 @@ const DocumentQmlInfo::ValueReference DocumentQmlInfo::rootObject(){
  */
 const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueForId(const QString &id) const{
     Q_D(const DocumentQmlInfo);
-    if ( d->internalDocBind->idEnvironment() == 0 )
+    if ( d->internalDocBind->idEnvironment() == nullptr )
         return DocumentQmlInfo::ValueReference();
 
     IdValueExtractor valueExtractor(id);
@@ -411,8 +411,8 @@ void DocumentQmlInfo::extractTypeNameRange(const DocumentQmlInfo::ValueReference
 
     if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
         if ( vob->typeName() ){
-            begin = vob->typeName()->firstSourceLocation().begin();
-            end = vob->typeName()->lastSourceLocation().end();
+            begin = static_cast<int>(vob->typeName()->firstSourceLocation().begin());
+            end = static_cast<int>(vob->typeName()->lastSourceLocation().end());
         }
     }
 }
@@ -431,8 +431,8 @@ void DocumentQmlInfo::extractRange(const DocumentQmlInfo::ValueReference &valuer
 
     if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
         if ( vob->initializer() ){
-            begin = vob->initializer()->firstSourceLocation().begin();
-            end = vob->initializer()->lastSourceLocation().end();
+            begin = static_cast<int>(vob->initializer()->firstSourceLocation().begin());
+            end = static_cast<int>(vob->initializer()->lastSourceLocation().end());
         }
     }
 }
@@ -452,7 +452,7 @@ const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueAtPosition(int posit
     Q_D(const DocumentQmlInfo);
 
     DocumentQmlRanges::Range range = d->ranges.findClosestRange(position);
-    if ( range.ast == 0 )
+    if ( range.ast == nullptr )
         return DocumentQmlInfo::ValueReference();
 
     QmlJS::ObjectValue* value = d->internalDocBind->findQmlObject(range.ast);
@@ -481,7 +481,7 @@ const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueAtPosition(
     }
 
     DocumentQmlRanges::Range range = d->ranges.findClosestRange(position);
-    if ( range.ast == 0 )
+    if ( range.ast == nullptr )
         return DocumentQmlInfo::ValueReference();
 
     begin = range.begin;
@@ -506,7 +506,7 @@ const DocumentQmlInfo::ASTReference DocumentQmlInfo::astObjectAtPosition(int pos
  * \returns true if \p vr is null, false otherwise
  */
 bool DocumentQmlInfo::isValueNull(const DocumentQmlInfo::ValueReference& vr) const{
-    return vr.value == 0;
+    return vr.value == nullptr;
 }
 
 /**
@@ -541,7 +541,7 @@ bool DocumentQmlInfo::parse(const QString &source){
 
         d->messages.append(
             DocumentQmlInfo::Message(
-                severity, message.loc.offset, message.loc.startLine, message.message
+                severity, static_cast<int>(message.loc.offset), static_cast<int>(message.loc.startLine), message.message
             )
         );
     }

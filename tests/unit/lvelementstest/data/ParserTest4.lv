@@ -1,0 +1,17 @@
+import xmodule as A
+
+component B{
+    id: C
+
+    fn not1(int d, int e){
+
+        var f = 5
+
+        class G{}
+        function H(){}
+
+        console.log(A, B, c, d, e, F, G, not1, not2)
+    }
+
+    int not2: 10
+}

@@ -23,6 +23,7 @@
 #include "qmatview.h"
 #include "qimread.h"
 #include "qimwrite.h"
+#include "qimageview.h"
 #include "qmatroi.h"
 #include "qmatread.h"
 #include "qcamcapture.h"
@@ -66,6 +67,7 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QMat>(                   uri, 1, 0, "Mat");
     qmlRegisterType<QWritableMat>(           uri, 1, 0, "WritableMat");
     qmlRegisterType<QMatView>(               uri, 1, 0, "MatView");
+    qmlRegisterType<QImageView>(             uri, 1, 0, "ImageView");
     qmlRegisterType<QImRead>(                uri, 1, 0, "ImRead");
     qmlRegisterType<QImWrite>(               uri, 1, 0, "ImWrite");
     qmlRegisterType<QMatRoi>(                uri, 1, 0, "MatRoi");

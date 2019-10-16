@@ -36,7 +36,7 @@ module.exports[1] = "c"
 
 var a = imports.get("A")
 
-module.exports["main"] = class extends Element{
+module.exports["main"] = class main extends Element{
     constructor(){
         super()
         Element.addProperty(this, "a", {

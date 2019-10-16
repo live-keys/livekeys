@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QQmlProperty>
+#include <functional>
 #include "live/lvviewglobal.h"
 
 namespace lv{

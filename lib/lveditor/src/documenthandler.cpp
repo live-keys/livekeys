@@ -139,14 +139,6 @@ void DocumentHandler::lineBoxResized(QQuickItem *palette, int newHeight)
 
 
 /**
- * \brief Triggers the code handler to call the highlighter on the given block
- */
-void DocumentHandler::rehighlightBlock(const QTextBlock &block){
-    if ( m_codeHandler )
-        m_codeHandler->rehighlightBlock(block);
-}
-
-/**
  * \brief Implementation of the respective function from QQmlParserStatus
  */
 void DocumentHandler::componentComplete(){
@@ -203,7 +195,6 @@ void DocumentHandler::findCodeHandler(){
 
                     QQmlEngine::setObjectOwnership(ach, QQmlEngine::CppOwnership);
                     m_codeHandler = ach;
-                    m_codeHandler->setDocument(m_projectDocument);
 
                     emit codeHandlerChanged();
 
@@ -211,23 +202,6 @@ void DocumentHandler::findCodeHandler(){
                 }
             }
         }
-    }
-}
-
-/**
- * \brief Triggers the rehighlighting of blocks in the section given by the position and length
- */
-void DocumentHandler::rehighlightSection(int position, int length){
-    if ( !m_codeHandler )
-        return;
-
-    QTextBlock bl = m_targetDoc->findBlock(position);
-    int end = position + length;
-    while ( bl.isValid() ){
-        m_codeHandler->rehighlightBlock(bl);
-        if (bl.position() > end )
-            break;
-        bl = bl.next();
     }
 }
 
@@ -252,10 +226,7 @@ void DocumentHandler::insertCompletion(int from, int to, const QString &completi
 /**
  * \brief Slot that is connected to document changes
  */
-void DocumentHandler::documentContentsChanged(int position, int charsRemoved, int charsAdded){
-    if ( m_codeHandler )
-         m_codeHandler->documentContentsChanged(position, charsRemoved, charsAdded);
-
+void DocumentHandler::documentContentsChanged(int position, int, int charsAdded){
     if ( !m_projectDocument || m_projectDocument->editingStateIs(ProjectDocument::Read) )
         return;
 
@@ -302,14 +273,7 @@ void DocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
  * It's a pre-requisite to set the document in order to have any functionality
  */
 void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
-    if ( m_projectDocument ){
-        disconnect(m_projectDocument, SIGNAL(formatChanged(int,int)), this, SLOT(documentFormatUpdate(int, int)));
-    }
-
     m_projectDocument = document;
-    if ( document ){
-        connect(m_projectDocument, SIGNAL(formatChanged(int,int)), this, SLOT(documentFormatUpdate(int, int)));
-    }
 
     if ( m_codeHandler ){
         delete m_codeHandler;
@@ -332,11 +296,8 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
             m_targetDoc, SIGNAL(contentsChange(int,int,int)),
             this, SLOT(documentContentsChanged(int,int,int))
         );
-    }
-    else
-    {
-        if (m_textEdit)
-        {
+    } else {
+        if (m_textEdit){
             m_textEdit->setTextDocument(nullptr);
         }
     }
@@ -344,13 +305,6 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
     emit targetChanged();
 
     findCodeHandler();
-}
-
-/**
- * \brief Slot for changes in document format - triggers a rehighlight
- */
-void DocumentHandler::documentFormatUpdate(int position, int length){
-    rehighlightSection(position, length);
 }
 
 /**

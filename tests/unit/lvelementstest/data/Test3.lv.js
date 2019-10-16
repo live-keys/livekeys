@@ -1,38 +1,50 @@
 // Note that when dealing with ids, components are only aware of their own context,
 // any child or parent component context will not be available
 
-module.exports[__NAME__] = class extends Container{
+module.exports["Test3"] = class Test3 extends Container{
 
     constructor(){
         super()
-        var that = this
+        this.__initialize()
+    }
+
+    __initialize(){
+        // Create all Ids first
         this.ids = {}
 
-        var elemProp = new Element()
-        this.ids["twenty"] = elemProp
-        elemProp.setParent(this)
+        var twenty = new Element()
+        this.ids["twenty"] = twenty
 
-        Element.assignId(elemProp, "twenty")
-        Element.addProperty(elemProp, 'x', {
-            type: "int",
-            value: 20,
-            notify: 'xChanged'
-        })
+        // Declare all properties for ids
+        Element.addProperty(twenty, "x", {type: "int", notify: "xChanged"})
 
-        Element.addProperty(this, "elemProp", {
-            type: "Element",
-            value: elemProp,
-            notify: "elemPropChanged"
-        })
+        // Declare all parent properties
+        Element.addProperty(this, "elemProp", {type: "Element", notify: "elemPropChanged"})
 
-        var child0 = new Element();
-        Element.addProperty(child0, 'y', {
-            type: "int",
-            value: function(){ return that.ids["twenty"].x },
-            notify: 'yChanged',
-            bindings: [[that.ids["twenty"], "xChanged"]]
-        })
+        // Assign parent properties
+        this.elemProp = (function(parent){
+            this.setParent(parent)
+            Element.assignId(twenty, "twenty")
+            this.x = 20
+            return this
+        }.bind(twenty)(this))
 
-        Element.assignDefaultProperty(this, [child0])
+        // Assign all properties
+
+        Element.assignDefaultProperty(this, [
+            (function(parent){
+                this.setParent(parent)
+                Element.addProperty(this, 'y', {type: "int", notify: 'yChanged'})
+
+                Element.assignPropertyExpression(
+                    this,
+                    "y",
+                    function(){ return twenty.x }.bind(this),
+                    [[twenty, "xChanged"]]
+                )
+
+                return this
+            }.bind(new Element())(this))
+        ])
     }
 }

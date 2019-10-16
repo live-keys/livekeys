@@ -18,18 +18,23 @@ import QtQuick 2.3
 
 Rectangle {
     id : root
-    anchors.fill: parent
     width: 100
     height: 30
-    border.color : "#031728"
+    border.color : "#323232"
     border.width : 1
-    color : "#050e15"
+    color : "#070b0f"
     
     property color textColor : "#fff"
+    property color hintTextColor : "#ccc"
     property color textSelectionColor : "#3d4856"
 
-
     property alias text : textInput.text
+    property alias font: textInput.font
+
+    property string textHint : ''
+    clip: true
+
+    signal keyPressed(var event)
 
     TextInput{
         id : textInput
@@ -38,16 +43,29 @@ Rectangle {
         font.family : "Ubuntu Mono, Courier New, Courier"
         font.pixelSize: 14
         font.weight : Font.Normal
-        text: 'Input Box'
+        text: ''
         color : root.textColor
         selectByMouse: true
         selectionColor: root.textSelectionColor
+
+        property bool touched : false
+
+        Keys.onPressed : root.keyPressed(event)
 
         MouseArea{
             anchors.fill: parent
             acceptedButtons: Qt.NoButton
             cursorShape: Qt.IBeamCursor
         }
+    }
+
+    Text {
+        anchors.fill: parent
+        anchors.margins : textInput.anchors.margins
+        text: root.textHint
+        font: textInput.font
+        color: root.hintTextColor
+        visible: !textInput.text && !textInput.activeFocus
     }
 }
 

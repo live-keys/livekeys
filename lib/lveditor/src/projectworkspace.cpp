@@ -176,7 +176,7 @@ void ProjectWorkspace::State::paneSizeChanged(QQuickItem *pane, const QSize &siz
     int windowIndex = windows.indexOf(window);
 
     if ( windowIndex < 0 )
-        THROW_EXCEPTION(Exception, "Invalid window index", Exception::toCode("~window"));
+        THROW_EXCEPTION(Exception, "Invalid window index: " + std::to_string(windowIndex), Exception::toCode("~window"));
 
     QList<int> positionIndex;
 
@@ -215,7 +215,7 @@ void ProjectWorkspace::State::paneStateChanged(QQuickItem *pane, const QVariant 
     QQuickWindow* window = qobject_cast<QQuickWindow*>(windowObject);
     int windowIndex = windows.indexOf(window);
     if ( windowIndex < 0 )
-        THROW_EXCEPTION(Exception, "Invalid window index", Exception::toCode("~window"));
+        THROW_EXCEPTION(Exception, "Invalid window index: " + std::to_string(windowIndex), Exception::toCode("~window"));
 
     QList<int> positionIndex;
 
@@ -254,7 +254,7 @@ void ProjectWorkspace::State::paneRemoved(QQuickItem *pane){
     QQuickWindow* window = qobject_cast<QQuickWindow*>(windowObject);
     int windowIndex = windows.indexOf(window);
     if ( windowIndex < 0 )
-        THROW_EXCEPTION(Exception, "Invalid window index", Exception::toCode("~window"));
+        THROW_EXCEPTION(Exception, "Invalid window index: " + std::to_string(windowIndex), Exception::toCode("~window"));
 
     QList<int> positionIndex;
 

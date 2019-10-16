@@ -28,21 +28,21 @@ public:
 
 public:
     explicit TcpLineConnection(QObject *parent = nullptr);
-    ~TcpLineConnection();
+    ~TcpLineConnection() override;
 
     void connectToHost();
 
-    void sendError(const QByteArray& type, int code, const QString& message);
-    void sendBuild(const QByteArray& buildData);
-    void sendInput(const MLNode& input);
+    void sendError(const QByteArray& type, int code, const QString& message) override;
+    void sendBuild(const QByteArray& buildData) override;
+    void sendInput(const MLNode& input) override;
 
-    void onMessage(std::function<void(const LineMessage&, void* data)> handler, void* handlerData = 0);
-    void onError(std::function<void(int, const std::string&)> handler);
+    void onMessage(std::function<void(const LineMessage&, void* data)> handler, void* handlerData = nullptr) override;
+    void onError(std::function<void(int, const std::string&)> handler) override;
 
     QString address() const;
     int port() const;
 
-    bool isReady() const;
+    bool isReady() const override;
 
 protected:
     void classBegin() Q_DECL_OVERRIDE{}

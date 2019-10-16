@@ -72,7 +72,7 @@ public:
         const LocalValue& value,
         bool isWritable,
         const std::string& notify);
-    ~InstanceProperty();
+    ~InstanceProperty() override;
 
     LocalValue read(Element* e) override{ return LocalValue(Property::engine(e), m_value);}
     void write(Element* e, const v8::Local<v8::Value>& params) override;

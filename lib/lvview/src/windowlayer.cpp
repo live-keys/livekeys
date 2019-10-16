@@ -3,6 +3,8 @@
 #include "live/viewengine.h"
 #include "live/exception.h"
 
+#include "qmlclipboard.h"
+
 #include <QFile>
 #include <QUrl>
 #include <QQuickWindow>
@@ -16,15 +18,16 @@ WindowLayer::WindowLayer(QObject *parent)
     , m_nextViewParent(nullptr)
     , m_handle(nullptr)
     , m_dialogs(nullptr)
+    , m_clipboard(nullptr)
 {
     setHasView(true);
 }
 
 WindowLayer::~WindowLayer(){
+    delete m_clipboard;
 }
 
 void WindowLayer::loadView(ViewEngine* engine, QObject *parent){
-
     QString path = ":/window.qml";
 
     QFile f(path);
@@ -61,6 +64,13 @@ QObject *WindowLayer::nextViewParent(){
 
 void WindowLayer::windowActiveChanged(){
     emit isActiveChanged(m_window->isActive());
+}
+
+QmlClipboard *WindowLayer::clipboard(){
+    if ( !m_clipboard ){
+        m_clipboard = new QmlClipboard(this);
+    }
+    return m_clipboard;
 }
 
 }// namespace

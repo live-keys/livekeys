@@ -36,7 +36,7 @@ class LV_EDITOR_EXPORT AbstractCodeHandler : public QObject{
     Q_OBJECT
 
 public:
-    explicit AbstractCodeHandler(QObject* parent = 0);
+    explicit AbstractCodeHandler(QObject* parent = nullptr);
     virtual ~AbstractCodeHandler();
 
     virtual void assistCompletion(
@@ -46,12 +46,6 @@ public:
         CodeCompletionModel* model,
         QTextCursor& cursorChange
     ) = 0;
-
-    virtual void setDocument(ProjectDocument* document) = 0;
-    virtual void documentContentsChanged(int position, int charsRemoved, int charsAdded) = 0;
-
-    virtual void rehighlightBlock(const QTextBlock &block) = 0;
-
     virtual QPair<int, int> contextBlock(int position) = 0;
 };
 

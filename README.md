@@ -1,4 +1,4 @@
-<p style="text-align: center;">
+<p align="center" style="text-align: center;">
     <a href="https://livekeys.io/">
         <img
           alt="Livekeys"
@@ -9,6 +9,8 @@
 </p>
 
 [![Join the chat at https://gitter.im/live-keys/livekeys](https://badges.gitter.im/live-keys/livekeys.svg)](https://gitter.im/live-keys/livekeys?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/live-keys/livekeys.svg?branch=master)](https://travis-ci.org/live-keys/livekeys)
+[![Build status](https://ci.appveyor.com/api/projects/status/3l5t69h7q3gpkec1?svg=true)](https://ci.appveyor.com/project/dinusv/livekeys)
 
  * **Version**: 1.6.0
  * **License**: LGPL

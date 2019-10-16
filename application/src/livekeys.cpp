@@ -67,7 +67,7 @@ Livekeys::Livekeys(QObject *parent)
     , m_project(new Project(m_engine))
     , m_settings(nullptr)
     , m_script(nullptr)
-    , m_log(0)
+    , m_log(nullptr)
     , m_vlog(new VisualLogQmlObject) // js ownership
     , m_packageGraph(nullptr)
     , m_memory(new Memory(this))
