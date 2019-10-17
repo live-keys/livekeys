@@ -42,12 +42,12 @@ public:
     };
 
 public:
-    static QmlDeclaration::Ptr create(const QStringList& identifierChain, ProjectDocument* document = 0);
+    static QmlDeclaration::Ptr create(const QStringList& identifierChain, ProjectDocument* document = nullptr);
     static QmlDeclaration::Ptr create(
         const QStringList &identifierChain,
         const QString& type,
         const QStringList& parentType,
-        ProjectDocument* document = 0
+        ProjectDocument* document = nullptr
     );
     static QmlDeclaration::Ptr create(
         const QStringList &identifierChain,
@@ -55,7 +55,7 @@ public:
         const QStringList& parentType,
         int identifierPosition,
         int identifierLength,
-        ProjectDocument* document = 0
+        ProjectDocument* document = nullptr
     );
 
     ~QmlDeclaration();
@@ -84,12 +84,12 @@ public:
     void setSection(ProjectDocumentSection::Ptr section);
 
 private:
-    QmlDeclaration(const QStringList& identifierChain, ProjectDocument* document = 0);
+    QmlDeclaration(const QStringList& identifierChain, ProjectDocument* document = nullptr);
     QmlDeclaration(
         const QStringList &identifierChain,
         const QString& type,
         const QStringList& parentType,
-        ProjectDocument* document = 0
+        ProjectDocument* document = nullptr
     );
     QmlDeclaration(
         const QStringList &identifierChain,
@@ -97,7 +97,7 @@ private:
         const QStringList& parentType,
         int identifierPosition,
         int identifierLength,
-        ProjectDocument* document = 0
+        ProjectDocument* document = nullptr
     );
 
 private:

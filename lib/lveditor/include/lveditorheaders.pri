@@ -8,7 +8,6 @@ HEADERS += \
     $$PWD/live/projectdocument.h \
     $$PWD/live/codecompletionmodel.h \
     $$PWD/live/codecompletionsuggestion.h \
-    $$PWD/live/abstractcodehandler.h \
     $$PWD/live/editorsettings.h \
     $$PWD/live/documenthandler.h \
     $$PWD/live/editorsettingscategory.h \

@@ -18,7 +18,6 @@
 #define LVCODEQMLHANDLER_H
 
 #include "live/lveditqmljsglobal.h"
-#include "live/abstractcodehandler.h"
 #include "live/projectdocument.h"
 #include "live/documentqmlscope.h"
 #include "live/projectqmlscope.h"
@@ -27,7 +26,9 @@
 #include "live/viewengine.h"
 #include "live/settings.h"
 #include "live/palettelist.h"
+#include "live/codecompletionmodel.h"
 
+#include <QObject>
 #include <QTimer>
 #include <QTextCursor>
 #include <QQmlListProperty>
@@ -49,7 +50,7 @@ class QmlCompletionContextFinder;
 class QmlCompletionContext;
 
 class CodeQmlHandlerPrivate;
-class LV_EDITQMLJS_EXPORT CodeQmlHandler : public AbstractCodeHandler{
+class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
 
     Q_OBJECT
     Q_DISABLE_COPY(CodeQmlHandler)
@@ -72,10 +73,9 @@ public:
         bool manuallyTriggered,
         CodeCompletionModel* model,
         QTextCursor& cursorChange
-    ) Q_DECL_OVERRIDE;
+    );
     void setDocument(ProjectDocument* document);
     void rehighlightBlock(const QTextBlock& block);
-    QPair<int, int> contextBlock(int position) Q_DECL_OVERRIDE;
 
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
     bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);
@@ -116,6 +116,10 @@ public slots:
     void removeEditFrame(QQuickItem* box);
     void resizedEditFrame(QQuickItem* box);
 
+    // Context Block Range
+
+    QJSValue contextBlockRange(int cursorPosition);
+
     // Direct editing management
 
     lv::CodePalette *edit(lv::QmlEditFragment* ef);
@@ -134,8 +138,11 @@ public slots:
     void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type, QObject* currentApp = nullptr);
     void updateRuntimeBindings(QObject* obj);
 
-    void _documentContentsChanged(int position, int charsRemoved, int charsAdded);
-    void _documentFormatUpdate(int position, int length);
+    void suggestCompletion(int cursorPosition);
+
+    void __documentContentsChanged(int position, int charsRemoved, int charsAdded);
+    void __documentFormatUpdate(int position, int length);
+    void __cursorWritePositionChanged(QTextCursor cursor);
 
     // Scopes
 

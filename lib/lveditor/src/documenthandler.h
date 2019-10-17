@@ -26,7 +26,6 @@
 #include "live/projectdocument.h"
 #include "live/lveditorglobal.h"
 #include "live/codecompletionmodel.h"
-#include "live/abstractcodehandler.h"
 
 namespace lv{
 
@@ -40,7 +39,7 @@ class LV_EDITOR_EXPORT DocumentHandler : public QObject, public QQmlParserStatus
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(lv::CodeCompletionModel* completionModel READ completionModel CONSTANT)
-    Q_PROPERTY(lv::AbstractCodeHandler* codeHandler     READ codeHandler     NOTIFY codeHandlerChanged)
+    Q_PROPERTY(QObject*                 codeHandler     READ codeHandler     NOTIFY codeHandlerChanged)
     Q_PROPERTY(bool editorFocus                         READ editorFocus     WRITE setEditorFocus NOTIFY editorFocusChanged)
     Q_ENUMS(LanguageFeatures)
 
@@ -84,6 +83,10 @@ public:
     TextEdit* textEdit();
     void setTextEdit(TextEdit* te);
 
+    int currentCursorPosition() const;
+
+    const QChar& lastAddedChar() const;
+
     /**
      * \brief Shows if the editor is in focus
      */
@@ -93,7 +96,7 @@ public:
     /**
      * \brief Code handler getter
      */
-    AbstractCodeHandler* codeHandler();
+    QObject *codeHandler();
 
     void requestCursorPosition(int position);
 
@@ -104,10 +107,7 @@ public:
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
-    void cursorWritePositionChanged(QTextCursor cursor);
     void setDocument(lv::ProjectDocument* document, QJSValue options = QJSValue());
-    void generateCompletion(int cursorPosition);
-    QJSValue contextBlockRange(int cursorPosition);
 
     void manageIndent(int from, int length, bool undo = false);
 
@@ -133,7 +133,7 @@ private:
     QChar                 m_lastChar;
     QTextDocument*        m_targetDoc;
     CodeCompletionModel*  m_completionModel;
-    AbstractCodeHandler*  m_codeHandler;
+    QObject*              m_codeHandler;
     ProjectDocument*      m_projectDocument;
     int                   m_indentSize;
     QString               m_indentContent;
@@ -163,6 +163,7 @@ inline TextEdit *DocumentHandler::textEdit(){
     return m_textEdit;
 }
 
+/** \brief Returns true if the current editor has focus */
 inline bool DocumentHandler::editorFocus() const{
     return m_editorFocus;
 }
@@ -177,7 +178,7 @@ inline void DocumentHandler::setEditorFocus(bool editorFocus){
     emit editorFocusChanged();
 }
 
-inline AbstractCodeHandler *DocumentHandler::codeHandler(){
+inline QObject *DocumentHandler::codeHandler(){
     return m_codeHandler;
 }
 

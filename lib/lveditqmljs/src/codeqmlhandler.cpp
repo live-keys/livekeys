@@ -239,7 +239,7 @@ CodeQmlHandler::CodeQmlHandler(
         ProjectQmlExtension *projectHandler,
         ProjectDocument* document,
         DocumentHandler *handler)
-    : AbstractCodeHandler(handler)
+    : QObject(handler)
     , m_target(nullptr)
     , m_highlighter(new QmlJsHighlighter(settings, handler, nullptr))
     , m_settings(settings)
@@ -467,8 +467,12 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
 
     if ( m_document ){
         connect(m_document->textDocument(), &QTextDocument::contentsChange,
-                this, &CodeQmlHandler::_documentContentsChanged);
-        connect(m_document, &ProjectDocument::formatChanged, this, &CodeQmlHandler::_documentFormatUpdate);
+                this, &CodeQmlHandler::__documentContentsChanged);
+        connect(m_document, &ProjectDocument::formatChanged, this, &CodeQmlHandler::__documentFormatUpdate);
+        connect(
+            m_document->textDocument(), &QTextDocument::cursorPositionChanged,
+            this, &CodeQmlHandler::__cursorWritePositionChanged
+        );
 
         auto it = m_edits.begin();
         while( it != m_edits.end() ){
@@ -488,7 +492,7 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
 /**
  * \brief DocumentContentsChanged handler
  */
-void CodeQmlHandler::_documentContentsChanged(int position, int, int){
+void CodeQmlHandler::__documentContentsChanged(int position, int, int){
     if ( !m_document->editingStateIs(ProjectDocument::Silent) ){
         if ( m_editingFragment ){
             if ( position < m_editingFragment->valuePosition() ||
@@ -502,8 +506,32 @@ void CodeQmlHandler::_documentContentsChanged(int position, int, int){
     }
 }
 
-void CodeQmlHandler::_documentFormatUpdate(int position, int length){
+void CodeQmlHandler::__documentFormatUpdate(int position, int length){
     rehighlightSection(position, position + length);
+}
+
+/// \private
+void CodeQmlHandler::__cursorWritePositionChanged(QTextCursor cursor){
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    if ( dh && dh->editorFocus() && cursor.position() == dh->currentCursorPosition() &&
+         !m_document->editingStateIs(ProjectDocument::Assisted) &&
+         !m_document->editingStateIs(ProjectDocument::Silent)
+        )
+    {
+        m_document->addEditingState(ProjectDocument::Assisted);
+        QTextCursor newCursor;
+        assistCompletion(
+            cursor,
+            dh->lastAddedChar(),
+            false,
+            dh->completionModel(),
+            newCursor
+        );
+        m_document->removeEditingState(ProjectDocument::Assisted);
+        if ( !newCursor.isNull() ){
+            dh->requestCursorPosition(newCursor.position());
+        }
+    }
 }
 
 /**
@@ -742,14 +770,30 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
         if ( expression.size() > 0 ){
             if ( expressionEndDelimiter == QChar('{') ){ // dealing with an object declaration ( 'Object{' )
 
-                properties.append(QmlDeclaration::create(
-                    QStringList(),
-                    expression.last(),
-                    QStringList(),
-                    propertyPosition,
-                    0,
-                    m_document
-                ));
+                QmlScopeSnap scope = d->snapScope();
+
+                QmlScopeSnap::InheritancePath ipath = scope.getTypePath(expression);
+
+                if ( !ipath.isEmpty() ){
+                    QmlScopeSnap::TypeReference tr = ipath.nodes.first();
+
+                    QString type = "";
+                    if ( !tr.typeName.isEmpty() && !tr.library.importUri.isEmpty() ){
+                        type = tr.library.importUri + "#" + tr.typeName;
+                    } else if ( !tr.object->className().isEmpty() ){
+                        type = tr.object->className();
+                    }
+
+                    properties.append(QmlDeclaration::create(
+                        QStringList(),
+                        type,
+                        QStringList(),
+                        propertyPosition,
+                        0,
+                        m_document
+                    ));
+                }
+
 
             } else { // dealing with a property declaration
                 QmlScopeSnap scope = d->snapScope();
@@ -901,16 +945,6 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(
     }
 
     return nullptr;
-}
-
-/**
- * \brief Returns the block starting position and end position
- */
-QPair<int, int> CodeQmlHandler::contextBlock(int position){
-    DocumentQmlValueScanner vs(m_document, position, 0);
-    int start = vs.getBlockStart(position);
-    int end   = vs.getBlockEnd(start + 1);
-    return QPair<int, int>(start, end);
 }
 
 /**
@@ -1342,6 +1376,23 @@ void CodeQmlHandler::removeEditFrame(QQuickItem *box){
 void CodeQmlHandler::resizedEditFrame(QQuickItem *box){
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     dh->lineBoxResized(box, static_cast<int>(box->height()));
+}
+
+/**
+ * \brief Finds the boundaries of the code block containing the cursor position
+ *
+ * Mostly used for fragments
+ */
+QJSValue CodeQmlHandler::contextBlockRange(int position){
+    DocumentQmlValueScanner vs(m_document, position, 0);
+    int start = vs.getBlockStart(position);
+    int end   = vs.getBlockEnd(start + 1);
+    QJSValue ob = m_engine->newObject();
+
+    ob.setProperty("start", m_target->findBlock(start).blockNumber());
+    ob.setProperty("end", m_target->findBlock(end).blockNumber());
+
+    return ob;
 }
 
 /**
@@ -1893,6 +1944,23 @@ void CodeQmlHandler::updateRuntimeBindings(QObject *runtime){
     for ( auto it = toRemove.begin(); it != toRemove.end(); ++it ){
         removeEditingFragment(*it);
     }
+}
+
+void CodeQmlHandler::suggestCompletion(int cursorPosition){
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    if ( !m_document || !dh )
+        return;
+
+    QTextCursor cursor(m_document->textDocument());
+    cursor.setPosition(cursorPosition);
+    QTextCursor newCursor;
+    assistCompletion(
+        cursor,
+        QChar(),
+        true,
+        dh->completionModel(),
+        newCursor
+    );
 }
 
 /**

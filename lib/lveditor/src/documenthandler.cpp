@@ -48,8 +48,7 @@
  * \class lv::DocumentHandler
  * \brief Complements TextEdit in handling documents.
  *
- * Forwards everything to the highlighter, has a completion model in case there's a specific code handler attached to it,
- * it can auto-complete code, which is all behavior inherited from the AbstractCodeHandler.
+ * Offers infrastructure for code completion, highlighting and other language specifics.
  *
  * \ingroup lveditor
  */
@@ -99,6 +98,14 @@ void DocumentHandler::setTextEdit(TextEdit *te){
     if (m_targetDoc) {
         te->setTextDocument(m_targetDoc);
     }
+}
+
+int DocumentHandler::currentCursorPosition() const{
+    return m_textEdit->cursorPosition();
+}
+
+const QChar &DocumentHandler::lastAddedChar() const{
+    return m_lastChar;
 }
 
 
@@ -188,17 +195,15 @@ void DocumentHandler::findCodeHandler(){
             WorkspaceExtension* le = it.value();
             if ( le->hasLanguageInterceptor() ){
                 QObject* o = le->callLanguageInterceptor(interceptorArgs);
-
-                AbstractCodeHandler* ach = qobject_cast<AbstractCodeHandler*>(o);
-                if ( ach ){
+                if ( o ){
                     vlog("editor-documenthandler").v() << "Found in extension: " << le->name();
 
-                    QQmlEngine::setObjectOwnership(ach, QQmlEngine::CppOwnership);
-                    m_codeHandler = ach;
+                    QQmlEngine::setObjectOwnership(o, QQmlEngine::CppOwnership);
+                    m_codeHandler = o;
 
                     QList<int> features;
                     QMetaObject::invokeMethod(
-                        ach, "languageFeatures", Qt::DirectConnection, Q_RETURN_ARG(QList<int>, features)
+                        o, "languageFeatures", Qt::DirectConnection, Q_RETURN_ARG(QList<int>, features)
                     );
 
                     for ( int feature : features ){
@@ -250,33 +255,6 @@ void DocumentHandler::documentContentsChanged(int position, int, int charsAdded)
 }
 
 /**
- * \brief Slot reacting to cursor position change
- *
- * Potentially triggers the assisted completion
- */
-void DocumentHandler::cursorWritePositionChanged(QTextCursor cursor){
-    if ( m_codeHandler && m_editorFocus && cursor.position() == m_textEdit->cursorPosition() &&
-         !m_projectDocument->editingStateIs(ProjectDocument::Assisted) &&
-         !m_projectDocument->editingStateIs(ProjectDocument::Silent)
-        )
-    {
-        m_projectDocument->addEditingState(ProjectDocument::Assisted);
-        QTextCursor newCursor;
-        m_codeHandler->assistCompletion(
-            cursor,
-            m_lastChar,
-            false,
-            m_completionModel,
-            newCursor
-        );
-        m_projectDocument->removeEditingState(ProjectDocument::Assisted);
-        if ( !newCursor.isNull() ){
-            emit cursorPositionRequest(newCursor.position());
-        }
-    }
-}
-
-/**
  * \brief Document that the document handler is operating on
  *
  * It's a pre-requisite to set the document in order to have any functionality
@@ -291,11 +269,6 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
 
     if (m_projectDocument) {
         m_targetDoc = m_projectDocument->textDocument();
-
-        connect(
-            m_targetDoc, SIGNAL(cursorPositionChanged(QTextCursor)),
-            this, SLOT(cursorWritePositionChanged(QTextCursor))
-        );
 
         if (m_textEdit) {
             m_textEdit->setTextDocument(m_targetDoc);
@@ -316,25 +289,6 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
     m_languageFeatures.clear();
 
     findCodeHandler();
-}
-
-/**
- * \brief Generates code completion at a given cursor position
- */
-void DocumentHandler::generateCompletion(int cursorPosition){
-    if ( m_targetDoc && m_codeHandler ){
-        m_lastChar = QChar();
-        QTextCursor cursor(m_targetDoc);
-        cursor.setPosition(cursorPosition);
-        QTextCursor newCursor;
-        m_codeHandler->assistCompletion(
-            cursor,
-            m_lastChar,
-            true,
-            m_completionModel,
-            newCursor
-        );
-    }
 }
 
 /**
@@ -376,22 +330,6 @@ void DocumentHandler::manageIndent(int from, int length, bool undo){
 
 bool DocumentHandler::has(int feature){
     return m_languageFeatures.contains(feature);
-}
-
-/**
- * \brief Finds the boundaries of the code block containing the cursor position
- *
- * Mostly used for fragments
- */
-QJSValue DocumentHandler::contextBlockRange(int cursorPosition){
-    if ( !m_codeHandler || !m_engine )
-        return QJSValue();
-
-    QPair<int, int> v = m_codeHandler->contextBlock(cursorPosition);
-    QJSValue ob = m_engine->engine()->newObject();
-    ob.setProperty("start", m_targetDoc->findBlock(v.first).blockNumber());
-    ob.setProperty("end", m_targetDoc->findBlock(v.second).blockNumber());
-    return ob;
 }
 
 }// namespace

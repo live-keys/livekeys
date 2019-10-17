@@ -11,7 +11,6 @@ HEADERS += \
     $$PWD/keymap.h \
     $$PWD/codecompletionmodel.h \
     $$PWD/codecompletionsuggestion.h \
-    $$PWD/abstractcodehandler.h \
     $$PWD/projectnavigationmodel.h \
     $$PWD/projectdocumentmodel.h \
     $$PWD/editorsettings.h \
@@ -51,7 +50,6 @@ SOURCES += \
     $$PWD/projectdocument.cpp \
     $$PWD/codecompletionmodel.cpp \
     $$PWD/codecompletionsuggestion.cpp \
-    $$PWD/abstractcodehandler.cpp \
     $$PWD/projectnavigationmodel.cpp \
     $$PWD/projectdocumentmodel.cpp \
     $$PWD/editorsettings.cpp \

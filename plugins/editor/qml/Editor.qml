@@ -240,7 +240,10 @@ Pane{
     }
 
     function getCursorFragment(){
-        return codeHandler.contextBlockRange(editorArea.cursorPosition)
+        if (documentHandler.has(documentHandler.LanguageScope ) ){
+            return codeHandler.contextBlockRange(editorArea.cursorPosition)
+        }
+        return null
     }
 
     function closeDocumentAction(){
@@ -273,7 +276,8 @@ Pane{
     }
 
     function assistCompletion(){
-        codeHandler.generateCompletion(editorArea.cursorPosition)
+        if (documentHandler.has(DocumentHandler.LanguageCodeCompletion))
+            documentHandler.codeHandler.suggestCompletion(editorArea.cursorPosition)
     }
 
     function toggleSize(){
