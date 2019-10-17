@@ -2,7 +2,7 @@
     "name": "lcvphoto",
     "package" : ".",
     "palettes" : {
-        "palettes/LevelsPalette.qml" : "qml/Levels",
-        "palettes/BrightnessAndContrastPalette.qml": "qml/BrightnessAndContrast"
+        "palettes/LevelsPalette.qml" : "qml/lcvphoto#Levels",
+        "palettes/BrightnessAndContrastPalette.qml": "qml/lcvphoto#BrightnessAndContrast"
     }
 }
