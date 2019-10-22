@@ -16,9 +16,10 @@ module.exports["B"] = class B extends Element{
     }
 
     createA(){
-        return (function(){
+        return (function(parent){
+            this.setParent(parent)
             return this
-        }.bind(new A(12, 13)))
+        }.bind(new A(12, 13))(null))
     }
 }
 

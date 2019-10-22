@@ -363,6 +363,17 @@ void DocumentHandler::manageIndent(int from, int length, bool undo){
     }
 }
 
+void DocumentHandler::insertTab(int position)
+{
+    QTextBlock bl = m_targetDoc->findBlock(position);
+    QTextCursor cs(bl);
+    cs.beginEditBlock();
+    cs.setPosition(position);
+    cs.insertText("    ");
+    cs.endEditBlock();
+
+}
+
 /**
  * \brief Finds the boundaries of the code block containing the cursor position
  *

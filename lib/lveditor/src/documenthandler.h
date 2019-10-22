@@ -98,6 +98,7 @@ public slots:
     QJSValue contextBlockRange(int cursorPosition);
 
     void manageIndent(int from, int length, bool undo = false);
+    void insertTab(int position);
 
 signals:
     /** Target changed */
