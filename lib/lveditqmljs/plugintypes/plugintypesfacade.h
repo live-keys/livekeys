@@ -20,22 +20,20 @@ public:
     static bool pluginTypesEnabled();
 
     static void extractTypes(
-        const QString& module,
-        QQmlEngine* engine,
-        QList<QQmlType> &types,
-        QHash<QByteArray, QSet<QQmlType> > &qmlTypesByCppName
-    );
+            const QString &,
+            QQmlEngine *,
+            QList<const QQmlType *> &,
+            QHash<QByteArray, QSet<const QQmlType *> > &);
 
     static bool isModule(const QString& uri);
 
     static void getTypeDependencies(
-        const QString &module,
-        const QList<QQmlType> &types,
-        const QHash<QByteArray, QSet<QQmlType> >& qmlTypesByCppName,
-        QSet<const QMetaObject *> &solvedTypes,
-        QList<const QMetaObject *> &unknownTypes,
-        QStringList& dependencies
-    );
+            const QString &,
+            const QList<const QQmlType *> &,
+            const QHash<QByteArray, QSet<const QQmlType *> > &,
+            QSet<const QMetaObject *> &,
+            QList<const QMetaObject *> &,
+            QStringList &);
 
     static QmlLibraryInfo::ScanStatus loadPluginInfo(
             ProjectQmlScope::Ptr projectScope,
@@ -43,16 +41,15 @@ public:
             const QString& path,
             ProjectQmlScanner* scanner,
             QStringList& dependencyPaths,
-            QByteArray* stream);
+            QByteArray* stream) { return QmlLibraryInfo::ScanStatus::NotScanned; }
 
     static QString getTypeName(const QQmlType* type);
 
     static void extractPluginInfo(
-        const QSet<const QMetaObject *> &metaTypes,
-        const QHash<QByteArray, QSet<QQmlType> > &qmlTypesByCppName,
-        const QList<QString>& dependencies,
-        QByteArray* stream
-    );
+            const QSet<const QMetaObject *> &,
+            const QHash<QByteArray, QSet<const QQmlType *> > &,
+            const QList<QString> &,
+            QByteArray *);
 
 };
 
