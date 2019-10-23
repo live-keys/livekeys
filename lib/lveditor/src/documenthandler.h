@@ -111,6 +111,7 @@ public slots:
 
     void manageIndent(int from, int length, bool undo = false);
     void insertTab(int position);
+    void handleClosingBrace(int position);
 
     bool has(int feature);
 

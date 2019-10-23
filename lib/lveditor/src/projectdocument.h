@@ -286,6 +286,9 @@ public:
     bool editingStateIs(int flag) const;
     void resetEditingState();
 
+    int lastCursorPosition();
+    void setLastCursorPosition(int pos);
+
 public slots:
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
     void setContent(const QString& content);
@@ -334,6 +337,7 @@ private:
     bool          m_isDirty;
     mutable bool  m_isSynced;
     bool          m_isMonitored;
+    int           m_lastCursorPosition;
 };
 
 /**
