@@ -747,9 +747,7 @@ Pane{
                             )
                             event.accepted = true
                         } else {
-                            var clastpost = cursorPosition
-                            editorArea.text = editorArea.text.slice(0, clastpost) + "    " + editorArea.text.slice(clastpost)
-                            editorArea.cursorPosition = clastpost + 4
+                            codeHandler.insertTab(cursorPosition)
                             event.accepted = true
                         }
                     } else if ( event.key === Qt.Key_Backtab ){

@@ -328,6 +328,17 @@ void DocumentHandler::manageIndent(int from, int length, bool undo){
     }
 }
 
+void DocumentHandler::insertTab(int position)
+{
+    QTextBlock bl = m_targetDoc->findBlock(position);
+    QTextCursor cs(bl);
+    cs.beginEditBlock();
+    cs.setPosition(position);
+    cs.insertText("    ");
+    cs.endEditBlock();
+
+}
+
 bool DocumentHandler::has(int feature){
     return m_languageFeatures.contains(feature);
 }

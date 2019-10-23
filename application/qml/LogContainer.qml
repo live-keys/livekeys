@@ -34,6 +34,10 @@ Pane{
         }
     }
 
+    function reset(){
+        lk.log.clearValues()
+    }
+
     paneClone: function(){
         return lk.layers.workspace.panes.createPane('log', paneState, [root.width, root.height])
     }
@@ -173,7 +177,7 @@ Pane{
         InputBox{
             id: tagSearchBox
             anchors.right: parent.right
-            anchors.rightMargin: 90
+            anchors.rightMargin: 120
             anchors.top: parent.top
             anchors.topMargin: 3
             anchors.fill: undefined
@@ -184,6 +188,24 @@ Pane{
             border.width: 0
             color: root.color
             height: 24
+        }
+
+        Rectangle{
+            anchors.right: parent.right
+            anchors.rightMargin: 90
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 0
+            height : clearLog.containsMouse ? parent.height : parent.height - 3
+            width : 25
+            color : "red"
+
+            MouseArea{
+                id : clearLog
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: root.reset()
+            }
+            Behavior on height{ NumberAnimation{  duration: 100 } }
         }
 
         Rectangle{
