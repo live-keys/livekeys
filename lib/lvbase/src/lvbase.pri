@@ -19,7 +19,8 @@ HEADERS += \
     $$PWD/version.h \
     $$PWD/packagegraph.h \
     $$PWD/plugincontext.h \
-    $$PWD/packagecontext.h
+    $$PWD/packagecontext.h \
+    $$PWD/utf8.h
 
 SOURCES += \
     $$PWD/exception.cpp \
@@ -34,7 +35,8 @@ SOURCES += \
     $$PWD/package.cpp \
     $$PWD/plugin.cpp \
     $$PWD/version.cpp \
-    $$PWD/packagegraph.cpp
+    $$PWD/packagegraph.cpp \
+    $$PWD/utf8.cpp
 
 win32{
     SOURCES += $$PWD/stacktrace_win.cpp
