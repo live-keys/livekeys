@@ -22,15 +22,15 @@ public:
     static void extractTypes(
             const QString &,
             QQmlEngine *,
-            QList<const QQmlType *> &,
-            QHash<QByteArray, QSet<const QQmlType *> > &);
+            QList<QQmlType> &,
+            QHash<QByteArray, QSet<QQmlType> > &);
 
     static bool isModule(const QString& uri);
 
     static void getTypeDependencies(
             const QString &,
-            const QList<const QQmlType *> &,
-            const QHash<QByteArray, QSet<const QQmlType *> > &,
+            const QList<QQmlType> &,
+            const QHash<QByteArray, QSet<QQmlType> >& ,
             QSet<const QMetaObject *> &,
             QList<const QMetaObject *> &,
             QStringList &);
@@ -41,13 +41,13 @@ public:
             const QString& path,
             ProjectQmlScanner* scanner,
             QStringList& dependencyPaths,
-            QByteArray* stream) { return QmlLibraryInfo::ScanStatus::NotScanned; }
+            QByteArray* stream);
 
     static QString getTypeName(const QQmlType* type);
 
     static void extractPluginInfo(
             const QSet<const QMetaObject *> &,
-            const QHash<QByteArray, QSet<const QQmlType *> > &,
+            const QHash<QByteArray, QSet<QQmlType> > &,
             const QList<QString> &,
             QByteArray *);
 

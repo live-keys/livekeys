@@ -339,22 +339,6 @@ void DocumentHandler::insertTab(int position)
 
 }
 
-/**
- * \brief Finds the boundaries of the code block containing the cursor position
- *
- * Mostly used for fragments
- */
-QJSValue DocumentHandler::contextBlockRange(int cursorPosition){
-    if ( !m_codeHandler || !m_engine )
-        return QJSValue();
-
-    QPair<int, int> v = m_codeHandler->contextBlock(cursorPosition);
-    QJSValue ob = m_engine->engine()->newObject();
-    ob.setProperty("start", m_targetDoc->findBlock(v.first).blockNumber());
-    ob.setProperty("end", m_targetDoc->findBlock(v.second).blockNumber());
-    return ob;
-}
-
 bool DocumentHandler::has(int feature){
     return m_languageFeatures.contains(feature);
 }
