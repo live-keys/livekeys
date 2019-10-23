@@ -125,7 +125,7 @@ qint64 MemoryNetworkReply::readData(char *data, qint64 maxSize)
         return -1;
 
     qint64 number = qMin(maxSize, m_content.size() - m_offset);
-    memcpy(data, m_content.constData() + m_offset, number);
+    memcpy(data, m_content.constData() + m_offset, static_cast<size_t>(number));
     m_offset += number;
 
     return number;

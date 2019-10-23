@@ -36,15 +36,16 @@ class QMutex;
 namespace lv{
 
 class ErrorHandler;
+class PackageGraph;
 class IncubationController;
 
 class LV_VIEW_EXPORT FatalException : public lv::Exception{
 
 public:
     /** Default costructor */
-    FatalException(const std::string& message, int code = 0): lv::Exception(message, code){}
+    FatalException(const std::string& message, Exception::Code code = 0): lv::Exception(message, code){}
     /** QString overload of the default constructor */
-    FatalException(const QString& message, int code = 0) : lv::Exception(message.toStdString(), code){}
+    FatalException(const QString& message, Exception::Code code = 0) : lv::Exception(message.toStdString(), code){}
     /** Default destructor */
     virtual ~FatalException(){}
 };
@@ -52,9 +53,9 @@ public:
 class LV_VIEW_EXPORT InputException : public lv::Exception{
 public:
     /** Defautlt constructor */
-    InputException(const std::string& message, int code = 0) : lv::Exception(message, code){}
+    InputException(const std::string& message, Exception::Code code = 0) : lv::Exception(message, code){}
     /** QString overload of the default constructor */
-    InputException(const QString& message, int code = 0) : lv::Exception(message.toStdString(), code){}
+    InputException(const QString& message, Exception::Code code = 0) : lv::Exception(message.toStdString(), code){}
     /** Default destructor */
     virtual ~InputException(){}
 };
@@ -77,7 +78,7 @@ private:
     };
 
 public:
-    explicit ViewEngine(QQmlEngine* engine, QObject *parent = 0);
+    explicit ViewEngine(QQmlEngine* engine, QObject *parent = nullptr);
     ~ViewEngine();
 
     /** Shows if the engine is loading */
@@ -92,10 +93,10 @@ public:
     QMutex* engineMutex();
 
     QJSValue evaluate(const QString& jsCode, const QString &fileName = QString(), int lineNumber = 1);
-    void throwError(const Exception *e, QObject* object = 0);
+    void throwError(const Exception *e, QObject* object = nullptr);
     void throwError(const QQmlError& error);
 
-    void throwWarning(const QString& message, QObject* object = 0, const QString& fileName = QString(), int lineNumber = 0);
+    void throwWarning(const QString& message, QObject* object = nullptr, const QString& fileName = QString(), int lineNumber = 0);
 
     bool hasErrorHandler(QObject* object);
     void registerErrorHandler(QObject* object, ErrorHandler* handler);
@@ -129,6 +130,9 @@ public:
     QJSValue toJSErrors(const QList<QQmlError>& errors) const;
     QJSValue toJSError(const QQmlError& error) const;
 
+    const PackageGraph* packageGraph() const;
+    void setPackageGraph(PackageGraph* pg);
+
 signals:
     /** Signals before compiling a new object. */
     void aboutToCreateObject(const QUrl& file);
@@ -157,8 +161,8 @@ public slots:
     QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
     void engineWarnings(const QList<QQmlError>& warnings);
 
-    void throwError(const QJSValue& error, QObject* object = 0);
-    void throwWarning(const QJSValue& error, QObject* object = 0);
+    void throwError(const QJSValue& error, QObject* object = nullptr);
+    void throwWarning(const QJSValue& error, QObject* object = nullptr);
 
     /// \private
     QString markErrorObject(QObject* object);
@@ -166,12 +170,12 @@ public slots:
     QJSValue lastErrorsObject() const;
 
 private:
-
-    QQmlEngine*    m_engine;
-    QMutex*        m_engineMutex;
-    QQmlIncubator* m_incubator;
+    QQmlEngine*           m_engine;
+    QMutex*               m_engineMutex;
+    QQmlIncubator*        m_incubator;
     IncubationController* m_incubationController;
-    QJSValue       m_errorType;
+    QJSValue              m_errorType;
+    PackageGraph*         m_packageGraph;
 
     QLinkedList<CompileHookEntry> m_compileHooks;
 
@@ -225,6 +229,11 @@ inline QQmlEngine*ViewEngine::engine(){
 /** The engine mutex, which is used to lock the engine for use */
 inline QMutex *ViewEngine::engineMutex(){
     return m_engineMutex;
+}
+
+/** Returns the package graph of the engine */
+inline const PackageGraph *ViewEngine::packageGraph() const{
+    return m_packageGraph;
 }
 
 }// namespace

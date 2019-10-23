@@ -31,7 +31,7 @@ class LV_VIEW_EXPORT Settings : public QObject{
 public:
     ~Settings();
 
-    static Settings* create(const QString& path, QObject* parent = 0);
+    static Settings* create(const QString& path, QObject* parent = nullptr);
 
     /** Returns the path of the config folder */
     const QString& path() const;
@@ -41,7 +41,7 @@ public slots:
     void addConfigFile(const QString& key, QObject* object);
 
 private:
-    Settings(const QString& path, QObject* parent = 0);
+    Settings(const QString& path, QObject* parent = nullptr);
 
 private:
     QString m_path;

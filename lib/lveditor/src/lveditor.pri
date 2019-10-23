@@ -2,6 +2,7 @@ INCLUDEPATH += $$PWD \
                $$PWD/../3rdparty
 
 HEADERS += \
+    $$PWD/documentationloader.h \
     $$PWD/project.h \
     $$PWD/projectentry.h \
     $$PWD/projectfile.h \
@@ -10,7 +11,6 @@ HEADERS += \
     $$PWD/keymap.h \
     $$PWD/codecompletionmodel.h \
     $$PWD/codecompletionsuggestion.h \
-    $$PWD/abstractcodehandler.h \
     $$PWD/projectnavigationmodel.h \
     $$PWD/projectdocumentmodel.h \
     $$PWD/editorsettings.h \
@@ -38,9 +38,11 @@ HEADERS += \
     $$PWD/themecontainer.h \
     $$PWD/theme.h \
     $$PWD/runnable.h \
-    $$PWD/runnablecontainer.h
+    $$PWD/runnablecontainer.h \
+    $$PWD/documentation.h
 
 SOURCES += \
+    $$PWD/documentationloader.cpp \
     $$PWD/project.cpp \
     $$PWD/projectentry.cpp \
     $$PWD/projectfile.cpp \
@@ -48,7 +50,6 @@ SOURCES += \
     $$PWD/projectdocument.cpp \
     $$PWD/codecompletionmodel.cpp \
     $$PWD/codecompletionsuggestion.cpp \
-    $$PWD/abstractcodehandler.cpp \
     $$PWD/projectnavigationmodel.cpp \
     $$PWD/projectdocumentmodel.cpp \
     $$PWD/editorsettings.cpp \
@@ -76,4 +77,5 @@ SOURCES += \
     $$PWD/themecontainer.cpp \
     $$PWD/theme.cpp \
     $$PWD/runnable.cpp \
-    $$PWD/runnablecontainer.cpp
+    $$PWD/runnablecontainer.cpp \
+    $$PWD/documentation.cpp

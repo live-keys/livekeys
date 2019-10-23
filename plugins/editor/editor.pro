@@ -61,4 +61,6 @@ DISTFILES += \
     qml/Pane.qml \
     qml/PaneWindow.qml \
     qml/WorkspaceTheme.qml \
-    qml/PaneMenuButton.qml
+    qml/PaneMenuButton.qml \
+    qml/loaddocs.qml \
+    qml/loadqtdocs.qml

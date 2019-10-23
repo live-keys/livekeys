@@ -42,6 +42,13 @@ Rectangle{
         return ""
     }
 
+    function getDocumentation(){
+        if ( pluginList.currentItem ){
+            return pluginList.currentItem.documentation
+        }
+        return ""
+    }
+
     function highlightNext(){
         if ( pluginList.currentIndex + 1 <  pluginList.count ){
             pluginList.currentIndex++;
@@ -123,6 +130,7 @@ Rectangle{
 
                 Rectangle{
                     property string completion: model.completion
+                    property string documentation: model.documentation
 
                     width : pluginList.width
                     height : 25

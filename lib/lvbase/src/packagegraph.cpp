@@ -25,7 +25,6 @@ namespace{
         tokens.push_back(text.substr(start));
         return tokens;
     }
-
 }
 
 /// \private
@@ -196,7 +195,7 @@ PackageGraph::CyclesResult<Package::Ptr> PackageGraph::checkCycles(const Package
         if ( cr.found() )
             return cr;
     }
-    return PackageGraph::CyclesResult<Package::Ptr>(PackageGraph::CyclesResult<Package::Ptr>::NotFound);;
+    return PackageGraph::CyclesResult<Package::Ptr>(PackageGraph::CyclesResult<Package::Ptr>::NotFound);
 }
 
 /** Check if there are cycles between plugins, starting from the given plugin */
@@ -212,7 +211,7 @@ PackageGraph::CyclesResult<Plugin::Ptr> PackageGraph::checkCycles(const Plugin::
         if ( cr.found() )
             return cr;
     }
-    return PackageGraph::CyclesResult<Plugin::Ptr>(PackageGraph::CyclesResult<Plugin::Ptr>::NotFound);;
+    return PackageGraph::CyclesResult<Plugin::Ptr>(PackageGraph::CyclesResult<Plugin::Ptr>::NotFound);
 }
 
 PackageGraph::CyclesResult<Package::Ptr> PackageGraph::checkCycles(
@@ -390,7 +389,7 @@ std::string PackageGraph::toString() const{
 /**
  * \brief Finds the package according to the given reference
  */
-Package::Ptr PackageGraph::findPackage(Package::Reference ref){
+Package::Ptr PackageGraph::findPackage(Package::Reference ref) const{
     std::vector<std::string> paths = packageImportPaths();
     for ( auto it = paths.begin(); it != paths.end(); ++it ){
         std::string path = *it + "/" + ref.name;
@@ -424,7 +423,7 @@ Package::Ptr PackageGraph::findPackage(Package::Reference ref){
 /**
  * \brief Finds the package with the given name and the highest version in the package import paths
  */
-Package::Ptr PackageGraph::findPackage(const std::string &packageName){
+Package::Ptr PackageGraph::findPackage(const std::string &packageName) const{
     Package::Ptr foundPackage(nullptr);
 
     std::vector<std::string> paths = packageImportPaths();
@@ -444,8 +443,41 @@ Package::Ptr PackageGraph::findPackage(const std::string &packageName){
     return foundPackage;
 }
 
+Package::Ptr PackageGraph::findLoadedPackage(const std::string &packageName){
+    PackageGraphPrivate* d = m_d;
+    auto it = d->packages.find(packageName); // find in loaded packages
+    if ( it != d->packages.end() )
+        return it->second;
+
+    auto internalIt = internals().find(packageName); // find in internals
+    if ( internalIt != internals().end() )
+        return internalIt->second;
+
+    return Package::Ptr(nullptr);
+}
+
+Package::ConstPtr PackageGraph::findLoadedPackage(const std::string &packageName) const{
+    const PackageGraphPrivate* d = m_d;
+    auto it = d->packages.find(packageName); // find in loaded packages
+    if ( it != d->packages.end() )
+        return it->second;
+
+    auto internalIt = internals().find(packageName); // find in internals
+    if ( internalIt != internals().end() )
+        return internalIt->second;
+
+    return Package::ConstPtr(nullptr);
+}
+
 /** Returns the package with the given name internally */
 Package::Ptr PackageGraph::package(const std::string &name){
+    auto it = m_d->packages.find(name);
+    if ( it != m_d->packages.end() )
+        return it->second;
+    return Package::Ptr(nullptr);
+}
+
+Package::ConstPtr PackageGraph::package(const std::string &name) const{
     auto it = m_d->packages.find(name);
     if ( it != m_d->packages.end() )
         return it->second;

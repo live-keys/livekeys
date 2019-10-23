@@ -489,13 +489,13 @@ QStringList DocumentQmlValueObjects::RangeProperty::name() const{
 
     if ( ast->kind == QmlJS::AST::Node::Kind_UiScriptBinding ){
         QmlJS::AST::UiQualifiedId* qi = static_cast<QmlJS::AST::UiScriptBinding*>(ast)->qualifiedId;
-        while ( qi != 0 ){
+        while ( qi != nullptr ){
             base.append(qi->name.toString());
             qi = qi->next;
         }
     } else if ( ast->kind == QmlJS::AST::Node::Kind_UiObjectBinding ){
         QmlJS::AST::UiQualifiedId* qi = static_cast<QmlJS::AST::UiObjectBinding*>(ast)->qualifiedId;
-        while ( qi != 0 ){
+        while ( qi != nullptr ){
             base.append(qi->name.toString());
             qi = qi->next;
         }

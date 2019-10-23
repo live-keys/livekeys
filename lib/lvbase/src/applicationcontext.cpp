@@ -43,6 +43,7 @@ public:
     std::string applicationFilePath;
     std::string linkPath;
     std::string pluginPath;
+    std::string docsPath;
     std::string externalPath;
     std::string librariesPath;
     std::string developmentPath;
@@ -84,6 +85,7 @@ void ApplicationContext::initializePaths(){
     m_d->linkPath = applicationPath() + "/Link";
     m_d->pluginPath = applicationPath() + "/PlugIns";
     m_d->externalPath = applicationPath() + "/External";
+    m_d->docsPath = applicationPath() + "/Docs";
     m_d->librariesPath =  applicationPath() + "/Libraries";
     m_d->developmentPath = applicationPath() + "/Dev";
     m_d->configPath = applicationPath() + "/config";
@@ -93,6 +95,7 @@ void ApplicationContext::initializePaths(){
     m_d->releasePath = QFileInfo(applicationFilePath).path().toStdString();
     m_d->linkPath = applicationPath() + "/link";
     m_d->pluginPath = applicationPath() + "/plugins";
+    m_d->docsPath = applicationPath() + "/docs";
     m_d->externalPath = applicationPath() + "/external";
     m_d->librariesPath = applicationPath() + "/libraries";
     m_d->developmentPath = applicationPath() + "/dev";
@@ -125,6 +128,11 @@ const std::string &ApplicationContext::applicationFilePath(){
 /** Link path getter */
 const std::string &ApplicationContext::linkPath(){
     return m_d->linkPath;
+}
+
+/** Docs path */
+const std::string &ApplicationContext::docsPath(){
+    return m_d->docsPath;
 }
 
 /** Plugin path getter */

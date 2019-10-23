@@ -31,11 +31,13 @@ CodeCompletionSuggestion::CodeCompletionSuggestion(
         const QString &label,
         const QString &info,
         const QString &category,
-        const QString &completion)
+        const QString &completion,
+        const QString &documentation)
     : m_label(label)
     , m_info(info)
     , m_category(category)
     , m_completion(completion)
+    , m_documentation((documentation))
 {
 }
 

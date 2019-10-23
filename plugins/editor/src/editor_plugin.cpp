@@ -23,6 +23,7 @@
 #include "live/workspaceextension.h"
 #include "live/documenthandler.h"
 #include "live/theme.h"
+#include "live/documentationloader.h"
 
 #include "textsearch.h"
 
@@ -37,13 +38,11 @@ void EditorPlugin::registerTypes(const char *uri){
     qmlRegisterUncreatableType<lv::PaletteList>(
         uri, 1, 0, "PaletteList", "PaletteList can be accessed through a DocumentHandler."
     );
-    qmlRegisterUncreatableType<lv::AbstractCodeHandler>(
-        uri, 1, 0, "AbstractCodeHandler", "AbstractCodeHandler is of abstract type."
-    );
     qmlRegisterType<lv::DocumentHandler>(uri, 1, 0, "DocumentHandler");
-    qmlRegisterType<lv::CodePalette>(    uri, 1, 0, "CodePalette");
-    qmlRegisterType<lv::WorkspaceExtension>(  uri, 1, 0, "LiveExtension");
-    qmlRegisterType<lv::Theme>(  uri, 1, 0, "Theme");
+    qmlRegisterType<lv::CodePalette>(uri, 1, 0, "CodePalette");
+    qmlRegisterType<lv::WorkspaceExtension>(uri, 1, 0, "LiveExtension");
+    qmlRegisterType<lv::Theme>(uri, 1, 0, "Theme");
+    qmlRegisterType<lv::DocumentationLoader>(uri, 1, 0, "DocumentationLoader");
 
     qmlRegisterType<lv::TextSearch>(     uri, 1, 0, "TextSearch");
 }

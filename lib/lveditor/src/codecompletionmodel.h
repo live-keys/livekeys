@@ -51,7 +51,7 @@ public:
     };
 
 public:
-    CodeCompletionModel(QObject* parent = 0);
+    CodeCompletionModel(QObject* parent = nullptr);
     ~CodeCompletionModel();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;

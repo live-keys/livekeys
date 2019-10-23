@@ -136,7 +136,7 @@ public:
     QStringList extractIds() const;
     const ValueReference rootObject();
     const ValueReference valueForId(const QString& id) const;
-    DocumentQmlObject extractValueObject(const ValueReference& value, ValueReference *parent = 0) const;
+    DocumentQmlObject extractValueObject(const ValueReference& value, ValueReference *parent = nullptr) const;
     QString extractTypeName(const ValueReference& value) const;
     void extractTypeNameRange(const ValueReference& value, int& begin, int& end);
     void extractRange(const ValueReference& value, int& begin, int& end);
@@ -150,6 +150,7 @@ public:
 
     bool isParsedCorrectly() const;
     bool parse(const QString& source);
+    const QList<DocumentQmlInfo::Message>& diagnostics() const;
 
     QmlJS::Bind* internalBind();
 

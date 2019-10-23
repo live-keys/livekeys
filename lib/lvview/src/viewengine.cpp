@@ -18,6 +18,7 @@
 #include "live/exception.h"
 #include "live/errorhandler.h"
 #include "live/incubationcontroller.h"
+#include "live/packagegraph.h"
 
 #include "qmlcontainer.h"
 #include "act.h"
@@ -47,6 +48,7 @@
 #include "qmlvariantlistmodel.h"
 #include "qmlobjectlist.h"
 #include "qmlobjectlistmodel.h"
+
 /**
  * \class lv::FatalException
  * \brief Subclass of the lv::Exception used for unrecoverable errors
@@ -79,6 +81,7 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     , m_engineMutex(new QMutex)
     , m_incubator(new QQmlIncubator(QQmlIncubator::Asynchronous))
     , m_incubationController(new IncubationController)
+    , m_packageGraph(nullptr)
 {
     m_engine->setIncubationController(m_incubationController);
     m_engine->setOutputWarningsToStandardError(true);
@@ -160,8 +163,8 @@ void ViewEngine::throwError(const lv::Exception *e, QObject *object){
 
     if ( e->hasStackTrace() ){
         StackTrace::Ptr st = e->stackTrace();
-        QJSValue stackTrace = m_engine->newArray(static_cast<int>(st->size()));
-        int i = 0;
+        QJSValue stackTrace = m_engine->newArray(static_cast<quint32>(st->size()));
+        quint32 i = 0;
         for ( auto it = st->begin(); it != st->end(); ++it ){
             stackTrace.setProperty(i++, QString::fromStdString(it->functionName()) + "(" + it->fileName().c_str() + ":" + QString::number(it->line()) + ")");
         }
@@ -204,7 +207,7 @@ void ViewEngine::throwError(const QJSValue &jsError, QObject *object){
         it.next();
     }
     QObject* errorHandler = object;
-    while ( errorHandler != 0 ){
+    while ( errorHandler != nullptr ){
         auto it = m_errorHandlers.find(errorHandler);
         if ( it != m_errorHandlers.end() ){
             it.value()->signalError(jsError);
@@ -234,7 +237,7 @@ void ViewEngine::throwWarning(const QString &message, QObject *object, const QSt
 /** The function called by the same-named public function. Passes the warning to the error handler(s) */
 void ViewEngine::throwWarning(const QJSValue &jsError, QObject *object){
     QObject* errorHandler = object;
-    while ( errorHandler != 0 ){
+    while ( errorHandler != nullptr ){
         auto it = m_errorHandlers.find(errorHandler);
         if ( it != m_errorHandlers.end() ){
             it.value()->signalWarning(jsError);
@@ -291,7 +294,7 @@ void ViewEngine::removeCompileHook(ViewEngine::CompileHook ch, void *userData){
 TypeInfo::Ptr ViewEngine::typeInfo(const QMetaObject *key) const{
     auto it = m_types.find(key);
     if ( it == m_types.end() )
-        return TypeInfo::Ptr(0);
+        return TypeInfo::Ptr(nullptr);
     return it.value();
 }
 
@@ -299,7 +302,7 @@ TypeInfo::Ptr ViewEngine::typeInfo(const QMetaObject *key) const{
 TypeInfo::Ptr ViewEngine::typeInfo(const QByteArray &typeName) const{
     auto it = m_typeNames.find(typeName);
     if ( it == m_typeNames.end() )
-        return TypeInfo::Ptr(0);
+        return TypeInfo::Ptr(nullptr);
 
     return m_types[*it];
 }
@@ -308,7 +311,7 @@ TypeInfo::Ptr ViewEngine::typeInfo(const QByteArray &typeName) const{
 TypeInfo::Ptr ViewEngine::typeInfo(const QMetaType &metaType) const{
     const QMetaObject* mo = metaType.metaObject();
     if ( !mo )
-        return TypeInfo::Ptr(0);
+        return TypeInfo::Ptr(nullptr);
 
     return typeInfo(mo);
 }
@@ -324,6 +327,7 @@ QString ViewEngine::typeAsPropertyMessage(const QString &typeName, const QString
  * \brief Register the base types from the view library
  */
 void ViewEngine::registerBaseTypes(const char *uri){
+    qmlRegisterType<lv::ErrorHandler>(          uri, 1, 0, "ErrorHandler");
     qmlRegisterType<lv::QmlContainer>(          uri, 1, 0, "Container");
     qmlRegisterType<lv::Act>(                   uri, 1, 0, "Act");
     qmlRegisterType<lv::QmlOpening>(            uri, 1, 0, "Opening");
@@ -338,8 +342,8 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::QmlClipboard>(          uri, 1, 0, "Clipboard");
     qmlRegisterType<lv::QmlStream>(             uri, 1, 0, "Stream");
 
-    qmlRegisterUncreatableType<lv::Shared>(         uri, 1, 0, "Shared", "Shared is of abstract type.");
-    qmlRegisterUncreatableType<lv::Layer>(          uri, 1, 0, "Layer", "Layer is of abstract type.");
+    qmlRegisterUncreatableType<lv::Shared>(       uri, 1, 0, "Shared", "Shared is of abstract type.");
+    qmlRegisterUncreatableType<lv::Layer>(        uri, 1, 0, "Layer", "Layer is of abstract type.");
 }
 
 void ViewEngine::initializeBaseTypes(ViewEngine *engine){
@@ -474,16 +478,16 @@ QObject *ViewEngine::createObject(const QByteArray &qmlCode, QObject *parent, co
     component.setData(qmlCode, file);
 
     m_lastErrors = component.errors();
-    if ( m_lastErrors.size() > 0 ){
-        return 0;
+    if ( !m_lastErrors.isEmpty() ){
+        return nullptr;
     }
 
     QObject* obj = component.create(m_engine->rootContext());
     m_engine->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
 
     m_lastErrors = component.errors();
-    if ( m_lastErrors.size() > 0 ){
-        return 0;
+    if ( !m_lastErrors.isEmpty() ){
+        return nullptr;
     }
 
     if (parent)
@@ -506,7 +510,7 @@ QObject *ViewEngine::createObject(const char *qmlCode, QObject *parent, const QU
 void ViewEngine::engineWarnings(const QList<QQmlError> &warnings){
     for ( auto it = warnings.begin(); it != warnings.end(); ++it ){
         const QQmlError& warning = *it;
-        if ( warning.object() == 0 ){
+        if ( warning.object() == nullptr ){
             QString description = warning.description();
             int errorObjectEnd = description.lastIndexOf(")");
             if ( errorObjectEnd == description.length() - 1 ){
@@ -539,9 +543,15 @@ QJSValue ViewEngine::toJSError(const QQmlError &error) const{
     return qmlErrOjbect;
 }
 
+void ViewEngine::setPackageGraph(PackageGraph *pg){
+    if ( m_packageGraph )
+        THROW_EXCEPTION(lv::Exception, "Package graph has already been set.", Exception::toCode("PackageGraph"));
+    m_packageGraph = pg;
+}
+
 QJSValue ViewEngine::toJSErrors(const QList<QQmlError> &errors) const{
-    QJSValue val = m_engine->newArray(errors.length());
-    int i = 0;
+    QJSValue val = m_engine->newArray(static_cast<uint>(errors.length()));
+    uint i = 0;
     foreach( const QQmlError& error, errors ){
         val.setProperty(i++, toJSError(error));
     }

@@ -46,7 +46,7 @@ void QmlSubproject::componentComplete(){
 
         if ( m_label.isEmpty() ){
             QString label;
-            label.sprintf("%8p", (void*)m_runnable);
+            label.sprintf("%8p", static_cast<void*>(m_runnable));
             setLabel("S: " + label);
             m_runnable->setName("S: " + label);
         }
@@ -68,7 +68,7 @@ void QmlSubproject::componentComplete(){
 
         if ( m_label.isEmpty() ){
             QString label;
-            label.sprintf("%8p", (void*)m_runnable);
+            label.sprintf("%8p", static_cast<void*>(m_runnable));
             setLabel("S: " + label);
             m_runnable->setName("S: " + label);
         }

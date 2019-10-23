@@ -19,7 +19,6 @@
 
 #include "live/lveditqmljsglobal.h"
 #include "live/documenthandler.h"
-#include "live/abstractcodehandler.h"
 #include "live/palettecontainer.h"
 
 #include <QObject>
@@ -40,7 +39,7 @@ class LV_EDITQMLJS_EXPORT ProjectQmlExtension : public QObject, public QQmlParse
     Q_INTERFACES(QQmlParserStatus)
 
 public:
-    ProjectQmlExtension(QObject* parent = 0);
+    ProjectQmlExtension(QObject* parent = nullptr);
     virtual ~ProjectQmlExtension();
 
     void classBegin();

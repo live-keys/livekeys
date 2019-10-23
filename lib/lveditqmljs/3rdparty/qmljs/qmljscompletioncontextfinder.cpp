@@ -34,6 +34,8 @@
 #include <QTextDocument>
 #include <QStringList>
 
+#include <QDebug>
+
 using namespace QmlJS;
 
 /*
@@ -52,6 +54,7 @@ CompletionContextFinder::CompletionContextFinder(const QTextCursor &cursor)
     , m_inStringLiteral(false)
     , m_inImport(false)
     , m_propertyNamePosition(-1)
+    , m_bracePropertyBinding(false)
 {
     QTextBlock lastBlock = cursor.block();
     if (lastBlock.next().isValid())
@@ -76,9 +79,9 @@ CompletionContextFinder::CompletionContextFinder(const QTextCursor &cursor)
             --m_startTokenIndex;
     }
 
-    getQmlObjectTypeName(m_startTokenIndex);
     checkBinding();
     checkImport();
+    getQmlObjectTypeName(m_startTokenIndex);
 }
 
 void CompletionContextFinder::getQmlObjectTypeName(int startTokenIndex)
@@ -139,6 +142,7 @@ void CompletionContextFinder::checkBinding()
     bool delimiterFound = false;
     bool identifierExpected = false;
     bool dotExpected = false;
+    bool leftBraceFound = false;
     while (!delimiterFound) {
         if (i < 0) {
             if (!readLine())
@@ -149,11 +153,20 @@ void CompletionContextFinder::checkBinding()
         }
 
         const Token &token = yyLinizerState.tokens.at(i);
-        //qDebug() << "Token:" << yyLine->mid(token.begin(), token.length);
+//        qDebug() << "Token:" << yyLine->mid(token.begin(), token.length);
+
+        if ( leftBraceFound && token.kind != Token::Colon ){
+            m_bracePropertyBinding = false;
+            delimiterFound = true;
+            break;
+        }
 
         switch (token.kind) {
         case Token::RightBrace:
         case Token::LeftBrace:
+            m_bracePropertyBinding = true;
+            leftBraceFound = true;
+            break;
         case Token::Semicolon:
             delimiterFound = true;
             break;
@@ -163,6 +176,7 @@ void CompletionContextFinder::checkBinding()
             identifierExpected = true;
             dotExpected = false;
             m_behaviorBinding = false;
+            leftBraceFound = false;
             m_bindingPropertyName.clear();
             break;
 
@@ -376,8 +390,13 @@ int CompletionContextFinder::findOpeningBrace(int startTokenIndex)
     if (startTokenIndex == -1)
         readLine();
 
-    Token::Kind nestedClosing = Token::EndOfFile;
-    int nestingCount = 0;
+    // In case we are within a brace for a right binding, then we need to take that
+    // int account. The previous method 'checkBinding()' has set a flag, if the
+    // binding contained a brace or not.
+    // i.e. : Item{ width: 200 } vs Item{ width: { return 200 } }
+    // If we are in the second case, we assume a nesting of 1 from the start.
+    Token::Kind nestedClosing = m_bracePropertyBinding ? Token::RightBrace : Token::EndOfFile;
+    int nestingCount = m_bracePropertyBinding ? 1 : 0;
 
     for (int i = 0; i < BigRoof; ++i) {
         if (i != 0 || startTokenIndex == -1)

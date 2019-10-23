@@ -29,13 +29,15 @@ public:
         const QString& label,
         const QString& info,
         const QString& category,
-        const QString& completion);
+        const QString& completion,
+        const QString& documentation = "");
     ~CodeCompletionSuggestion();
 
     const QString& label() const;
     const QString& info() const;
     const QString& category() const;
     const QString& completion() const;
+    const QString& documentation() const;
 
     static bool compare(const CodeCompletionSuggestion& first, const CodeCompletionSuggestion& second);
 
@@ -44,6 +46,7 @@ private:
     QString m_info;
     QString m_category;
     QString m_completion;
+    QString m_documentation;
 };
 
 /**
@@ -58,6 +61,13 @@ inline const QString &CodeCompletionSuggestion::label() const{
  */
 inline const QString &CodeCompletionSuggestion::completion() const{
     return m_completion;
+}
+
+/**
+ * \brief Documentation getter
+ */
+inline const QString &CodeCompletionSuggestion::documentation() const{
+    return m_documentation;
 }
 
 /**

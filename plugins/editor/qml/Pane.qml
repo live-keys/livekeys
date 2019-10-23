@@ -26,6 +26,10 @@ Rectangle{
         return parentSplitter ? parentSplitter.currentWindow : null
     }
 
+    property var paneHelp : function(){
+        return null
+    }
+
     property string paneType: ''
     property var paneState : { return {} }
     property var paneInitialize : function(s){}

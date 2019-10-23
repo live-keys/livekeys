@@ -42,6 +42,7 @@ public:
     const std::string& releasePath();
     const std::string& applicationFilePath();
     const std::string& linkPath();
+    const std::string& docsPath();
     const std::string& pluginPath();
     const std::string& externalPath();
     const std::string& librariesPath();

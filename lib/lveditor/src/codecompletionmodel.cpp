@@ -35,7 +35,7 @@ namespace lv{
 */
 CodeCompletionModel::CodeCompletionModel(QObject *parent)
     : QAbstractListModel(parent)
-    , m_completionContext(0)
+    , m_completionContext(nullptr)
     , m_completionPosition(0)
     , m_isEnabled(false)
 {
@@ -67,7 +67,7 @@ QVariant CodeCompletionModel::data(const QModelIndex &index, int role) const{
     } else if ( role == CodeCompletionModel::Completion ){
         return m_suggestions[suggestionIndex].completion();
     } else if ( role == CodeCompletionModel::Documentation ){
-        return m_suggestions[suggestionIndex].info();
+        return m_suggestions[suggestionIndex].documentation();
     }
     return QVariant();
 }

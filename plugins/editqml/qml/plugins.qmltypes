@@ -282,10 +282,9 @@ Module {
         }
     }
     Component { name: "QAbstractListModel"; prototype: "QAbstractItemModel" }
-    Component { name: "lv::AbstractCodeHandler"; prototype: "QObject" }
     Component {
         name: "lv::CodeQmlHandler"
-        prototype: "lv::AbstractCodeHandler"
+        prototype: "QObject"
         exports: ["editqml/CodeQmlHandler 1.0"]
         exportMetaObjectRevisions: [0]
         Method {

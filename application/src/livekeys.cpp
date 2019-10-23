@@ -56,7 +56,6 @@
 #include <QQuickWindow>
 #include <QGuiApplication>
 
-
 namespace lv{
 
 Livekeys::Livekeys(QObject *parent)
@@ -306,7 +305,6 @@ void Livekeys::loadInternals(){
 }
 
 void Livekeys::loadInternalPlugins(){
-    qmlRegisterType<lv::ErrorHandler>("base", 1, 0, "ErrorHandler");
     qmlRegisterUncreatableType<lv::Livekeys>(
         "base", 1, 0, "LiveKeys",        ViewEngine::typeAsPropertyMessage("LiveKeys", "lk"));
     qmlRegisterUncreatableType<lv::ViewEngine>(
@@ -349,9 +347,12 @@ void Livekeys::loadInternalPackages(){
     m_packageGraph = new PackageGraph;
     PackageGraph::internalsContextOwner() = m_packageGraph;
 
+    m_engine->setPackageGraph(m_packageGraph);
+
     std::vector<std::string> internalPackages = {
         "editor",
         "editqml",
+        "fs",
         "live",
         "lcvcore",
         "lcvfeatures2d",
@@ -382,7 +383,8 @@ void Livekeys::loadInternalPackages(){
     for ( auto it = qtPackages.begin(); it != qtPackages.end(); ++it ){
         Package::Ptr package = Package::createFromNode(*it, "", {
             {"name", *it},
-            {"version", QT_VERSION_STR}
+            {"version", QT_VERSION_STR},
+            {"documentation", "editor/loadqtdocs.qml"}
         });
         PackageGraph::addInternalPackage(package);
     }

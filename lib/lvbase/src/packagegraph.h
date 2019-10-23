@@ -76,9 +76,14 @@ public:
 
     std::string toString() const;
 
-    Package::Ptr findPackage(Package::Reference ref);
-    Package::Ptr findPackage(const std::string& packageName);
+    Package::Ptr findPackage(Package::Reference ref) const;
+    Package::Ptr findPackage(const std::string& packageName) const;
+
+    Package::Ptr findLoadedPackage(const std::string& name);
+    Package::ConstPtr findLoadedPackage(const std::string& name) const;
+
     Package::Ptr package(const std::string& name);
+    Package::ConstPtr package(const std::string& name) const;
     const std::vector<std::string>& packageImportPaths() const;
     void setPackageImportPaths(const std::vector<std::string>& paths);
 

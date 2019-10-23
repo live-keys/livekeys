@@ -53,9 +53,44 @@ Pane{
             } else {
                 document = s.document
             }
-
         }
     }
+
+    paneHelp : function(){
+        if ( documentHandler && documentHandler.has(DocumentHandler.LanguageHelp) ){
+            var helpPath = ''
+            if ( codeHandler.completionModel.isEnabled ){
+                helpPath = qmlSuggestionBox.getDocumentation()
+            } else {
+                helpPath = documentHandler.codeHandler.help(editorArea.cursorPosition)
+            }
+            if ( helpPath.length > 0 ){
+//                var docItem = lk.layers.workspace.documentation.load(helpPath)
+                var docItem = null // documentation is currently disabled
+                if ( docItem ){
+                    var docPane = mainSplit.findPaneByType('documentation')
+                    if ( !docPane ){
+                        var storeWidth = editor.width
+                        docPane = editor.panes.createPane('documentation', {}, [editor.width, editor.height])
+
+                        console.log(docPane)
+
+                        var index = editor.parentSplitterIndex()
+                        editor.panes.splitPaneHorizontallyWith(editor.parentSplitter, index, docPane)
+
+                        editor.width = storeWidth
+                        docPane.width = storeWidth
+                    }
+                    docPane.pageTitle = helpPath
+                    docPane.page = docItem
+                }
+            }
+
+        }
+
+        return null
+    }
+
     paneFocusItem : editorArea
     paneClone: function(){
         return editor.panes.createPane('editor', paneState, [editor.width, editor.height])
@@ -205,7 +240,10 @@ Pane{
     }
 
     function getCursorFragment(){
-        return codeHandler.contextBlockRange(editorArea.cursorPosition)
+        if (documentHandler.has(documentHandler.LanguageScope ) ){
+            return codeHandler.contextBlockRange(editorArea.cursorPosition)
+        }
+        return null
     }
 
     function closeDocumentAction(){
@@ -238,7 +276,8 @@ Pane{
     }
 
     function assistCompletion(){
-        codeHandler.generateCompletion(editorArea.cursorPosition)
+        if (documentHandler.has(DocumentHandler.LanguageCodeCompletion))
+            documentHandler.codeHandler.suggestCompletion(editorArea.cursorPosition)
     }
 
     function toggleSize(){
@@ -509,7 +548,7 @@ Pane{
             color : "#03070b"
             Text {
                 id: removeEditorText
-                text: qsTr("Remove Split")
+                text: qsTr("Remove Pane")
                 font.family: "Open Sans, sans-serif"
                 font.pixelSize: 12
                 anchors.left: parent.left

@@ -26,13 +26,13 @@ public:
     void setChildren(LocalValue children);
 
     static LocalValue at(List* l, int index){
-        return LocalValue(l->engine(), l->dataAs<std::vector<Element*>*>()->at(index));
+        return LocalValue(l->engine(), l->dataAs<std::vector<Element*>*>()->at(static_cast<size_t>(index)));
     }
     static int length(List* l){
         return static_cast<int>(l->dataAs<std::vector<Element*>*>()->size());
     }
     static void assign(List* l, int index, LocalValue value){
-        (*l->dataAs<std::vector<Element*>*>())[index] = value.toElement(l->engine());
+        (*l->dataAs<std::vector<Element*>*>())[static_cast<size_t>(index)] = value.toElement(l->engine());
 
     }
     static void append(List* l, LocalValue value){
