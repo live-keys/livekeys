@@ -16,6 +16,7 @@
 
 #include "live/applicationcontext.h"
 #include "live/exception.h"
+#include "live/mlnode.h"
 
 #include <QCoreApplication>
 #include <QStandardPaths>
@@ -49,6 +50,8 @@ public:
     std::string developmentPath;
     std::string configPath;
     std::string appDataPath;
+
+    MLNode      defaults;
 };
 
 std::unique_ptr<ApplicationContext> ApplicationContextPrivate::ApplicationContextPrivate::instance;
@@ -63,13 +66,14 @@ ApplicationContext::~ApplicationContext(){
 /**
  * Initalizes the singleton instance of the context
  */
-void ApplicationContext::initialize(){
-    ApplicationContextPrivate::instance.reset(new ApplicationContext);
+void ApplicationContext::initialize(const lv::MLNode &defaults){
+    ApplicationContextPrivate::instance.reset(new ApplicationContext(defaults));
 }
 
-ApplicationContext::ApplicationContext()
+ApplicationContext::ApplicationContext(const lv::MLNode &defaults)
     : m_d(new ApplicationContextPrivate)
 {
+    m_d->defaults = defaults;
     initializePaths();
 }
 
@@ -180,6 +184,13 @@ const std::string &ApplicationContext::appDataPath(){
         m_d->appDataPath = path.toStdString();
     }
     return m_d->appDataPath;
+}
+
+/**
+ * \brief Returns the startup configuration for Livekeys
+ */
+const MLNode &ApplicationContext::startupConfiguration(){
+    return m_d->defaults;
 }
 
 /** Executable path getter */

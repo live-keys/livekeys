@@ -40,7 +40,7 @@
 
 
 int main(int argc, char *argv[]){
-    lv::ApplicationContext::initialize();
+    lv::ApplicationContext::initialize({});
 
     QCoreApplication app(argc, argv);
     app.setAttribute(Qt::AA_Use96Dpi, true);

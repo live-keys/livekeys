@@ -24,7 +24,7 @@ class QString;
 
 namespace lv{
 
-class ViewEngine;
+class MLNode;
 class Settings;
 
 class ApplicationContextPrivate;
@@ -34,7 +34,7 @@ class LV_BASE_EXPORT ApplicationContext{
 public:
     ~ApplicationContext();
 
-    static void initialize();
+    static void initialize(const MLNode& defaults);
     static ApplicationContext& instance();
 
     const std::string& applicationPath();
@@ -50,8 +50,10 @@ public:
     const std::string& configPath();
     const std::string& appDataPath();
 
+    const MLNode& startupConfiguration();
+
 private:
-    ApplicationContext();
+    ApplicationContext(const MLNode& defaults);
     void initializePaths();
 
     static std::string applicationFilePathImpl();

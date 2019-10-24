@@ -115,6 +115,8 @@ public:
     VisualLogModel* log();
     QQmlPropertyMap* layers();
 
+    static const MLNode& startupConfiguration();
+
 public slots:
     QObject* layerPlaceholder() const;
     void engineError(QJSValue error);
