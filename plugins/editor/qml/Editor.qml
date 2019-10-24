@@ -706,17 +706,7 @@ Pane{
                     if ( (event.key === Qt.Key_BracketRight && (event.modifiers === Qt.ShiftModifier) ) ||
                          (event.key === Qt.Key_BraceRight) ){
 
-                        //TODO: Move to codehandler
-                        if ( cursorPosition > 4 ){
-                            var clastpos = cursorPosition
-                            if( editorArea.text.substring(cursorPosition - 4, cursorPosition) === "    " ){
-                                editorArea.text = editorArea.text.slice(0, clastpos - 4) + "}" + editorArea.text.slice(clastpos)
-                                cursorPosition = clastpos - 3
-                            } else {
-                                editorArea.text = editorArea.text.slice(0, clastpos) + "}" + editorArea.text.slice(clastpos)
-                                cursorPosition = clastpos + 1
-                            }
-                        }
+                        codeHandler.handleClosingBrace(cursorPosition)
                         event.accepted = true
 
                     } else if ( event.key === Qt.Key_PageUp ){
@@ -747,9 +737,7 @@ Pane{
                             )
                             event.accepted = true
                         } else {
-                            var clastpost = cursorPosition
-                            editorArea.text = editorArea.text.slice(0, clastpost) + "    " + editorArea.text.slice(clastpost)
-                            editorArea.cursorPosition = clastpost + 4
+                            codeHandler.insertTab(cursorPosition)
                             event.accepted = true
                         }
                     } else if ( event.key === Qt.Key_Backtab ){

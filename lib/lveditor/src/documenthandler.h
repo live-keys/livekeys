@@ -110,6 +110,8 @@ public slots:
     void setDocument(lv::ProjectDocument* document, QJSValue options = QJSValue());
 
     void manageIndent(int from, int length, bool undo = false);
+    void insertTab(int position);
+    void handleClosingBrace(int position);
 
     bool has(int feature);
 

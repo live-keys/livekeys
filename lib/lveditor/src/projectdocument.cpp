@@ -85,6 +85,7 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     , m_isDirty(false)
     , m_isSynced(true)
     , m_isMonitored(isMonitored)
+    , m_lastCursorPosition(-1)
 {
     m_textDocument->setDocumentMargin(0);
     connect(m_textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::documentContentsChanged);
@@ -456,6 +457,16 @@ QString ProjectDocument::peekContent(int position) const{
         result += QString("%1").arg(nextBl.blockNumber(), 5, 10, QChar('0')) + nextBl.text();
 
     return result;
+}
+
+int ProjectDocument::lastCursorPosition()
+{
+    return m_lastCursorPosition;
+}
+
+void ProjectDocument::setLastCursorPosition(int pos)
+{
+    m_lastCursorPosition = pos;
 }
 
 /**

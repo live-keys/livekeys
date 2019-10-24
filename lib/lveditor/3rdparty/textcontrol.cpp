@@ -74,6 +74,7 @@
 
 #include "textedit_p.h"
 #include "palettemanager.h"
+#include <cctype>
 
 namespace lv {
 
@@ -1001,18 +1002,28 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
 {
     Q_Q(TextControl);
 
-/*    //PALETTE TEST
-    static int cnt = 0;
-
-    switch (cnt)
+    if (e->key() == Qt::Key_Home && !cursor.atBlockStart())
     {
-    case 0: textEdit->linePaletteAdded(8, 9, 35, textEdit); break;
-    case 1: textEdit->linePaletteAdded(15, 17, 75, nullptr); break;
-    case 2: textEdit->linePaletteRemoved(nullptr); break;
-    case 3: textEdit->linePaletteHeightChanged(textEdit, 55); break;
-    }
+        QString blockText = cursor.block().text();
+        int i = 0;
+        while (i != blockText.length() && std::isspace(blockText.at(i).toLatin1()))
+            i++;
 
-    cnt++;*/
+        int cursorPos = cursor.position() - cursor.block().position();
+        if (i == blockText.length() || cursorPos <= i)
+        {
+            // move to beginning
+            cursor.movePosition(QTextCursor::StartOfBlock);
+        }
+        else
+        {
+            // move to first non-space position
+            for (int k = 0; k < cursorPos - i; k++)
+                cursor.movePosition(QTextCursor::PreviousCharacter);
+        }
+
+        goto accept;
+    }
 
     if (e->key() == Qt::Key_Back) {
          e->ignore();

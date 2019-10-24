@@ -1665,7 +1665,7 @@ void TextEdit::setReadOnly(bool r)
     if (d->control)
     {
         d->control->setTextInteractionFlags(flags);
-        d->control->moveCursor(QTextCursor::End);
+        // d->control->moveCursor(QTextCursor::End);
     }
 
 #ifndef QT_NO_IM
