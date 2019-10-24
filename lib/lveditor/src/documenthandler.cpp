@@ -260,6 +260,13 @@ void DocumentHandler::documentContentsChanged(int position, int, int charsAdded)
  * It's a pre-requisite to set the document in order to have any functionality
  */
 void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
+
+
+    if (m_projectDocument && m_textEdit)
+    {
+        m_projectDocument->setLastCursorPosition(m_textEdit->cursorPosition());
+    }
+
     m_projectDocument = document;
 
     if ( m_codeHandler ){
@@ -272,6 +279,10 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
 
         if (m_textEdit) {
             m_textEdit->setTextDocument(m_targetDoc);
+            if (m_projectDocument->lastCursorPosition() != -1)
+            {
+                m_textEdit->setCursorPosition(m_projectDocument->lastCursorPosition());
+            }
         }
 
         connect(
@@ -336,6 +347,27 @@ void DocumentHandler::insertTab(int position)
     cs.setPosition(position);
     cs.insertText("    ");
     cs.endEditBlock();
+
+}
+
+void DocumentHandler::handleClosingBrace(int position)
+{
+    if (!m_textEdit || !m_targetDoc || position < 4) return;
+
+    QTextCursor cursor(m_targetDoc);
+    cursor.beginEditBlock();
+
+    if (m_textEdit->text().mid(position - 4, 4) == "    ")
+    {
+        cursor.setPosition(position-4);
+        cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, 4);
+        cursor.removeSelectedText();
+    } else {
+        cursor.setPosition(position);
+    }
+
+    cursor.insertText("}");
+    cursor.endEditBlock();
 
 }
 
