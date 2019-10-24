@@ -48,6 +48,9 @@
 #include <QtCore/qlist.h>
 #include <climits>
 #include "palettemanager.h"
+#include "linecontrol.h"
+#include <deque>
+#include <set>
 
 class QTextLayout;
 
@@ -66,20 +69,48 @@ public:
 
     typedef TextEdit Public;
 
+
+    class NodeAction {
+    public:
+        enum NodeActionType {
+            Delete, Create, Shift, Refresh, UpdateViewport,
+            DeleteRange, LineChange, EndPoint
+        };
+
+        NodeAction(NodeActionType t, QString debug = QString(""))
+            : type(t)
+            , debugMessage(debug)
+            , yShift(0)
+            , position(0)
+            , offset(0)
+            , internal(false) {}
+
+        NodeActionType type;
+        std::set<int> nodeNumbers;
+        QString debugMessage;
+        int yShift;
+        int position;
+        int offset;
+        bool internal;
+    };
+
     class Node
     {
     public:
-        explicit Node(int startPos, TextNode* node)
-            : m_startPos(startPos), m_node(node), m_dirty(false) { }
+        explicit Node(int startPos, int blockNumber, TextNode* node)
+            : m_startPos(startPos), m_blockNumber(blockNumber), m_node(node), m_dirty(false) { }
         TextNode* textNode() const { return m_node; }
         void moveStartPos(int delta) { Q_ASSERT(m_startPos + delta > 0); m_startPos += delta; }
+        void moveBlockNumber(int delta) { m_blockNumber += delta; }
+        void setStartPos(int pos) { m_startPos = pos; }
         int startPos() const { return m_startPos; }
+        int blockNumber() const { return m_blockNumber; }
         void setDirty() {
             m_dirty = true; }
         bool dirty() const { return m_dirty; }
-
     private:
         int m_startPos;
+        int m_blockNumber;
         TextNode* m_node;
         bool m_dirty;
     };
@@ -109,13 +140,14 @@ public:
         : readOnly(false), color(QRgb(0xFF000000)), selectionColor(QRgb(0xFF000080)), selectedTextColor(QRgb(0xFFFFFFFF))
         , textMargin(0.0), xoff(0), yoff(0)
         , font(sourceFont), documentHandler(nullptr), cursorComponent(nullptr), cursorItem(nullptr), document(nullptr), control(nullptr)
-        , paletteManager(new PaletteManager), lineSurface(nullptr)
+        /*, paletteManager(new PaletteManager)*/, lineControl(nullptr), lineSurface(nullptr)
         , lastSelectionStart(0), lastSelectionEnd(0), lineCount(0)
         , clearSelectionOnFocus(false)
         , lastHighlightChangeStart(INT_MAX)
         , lastHighlightChangeEnd(0)
-        , fragmentStart(0)
-        , fragmentEnd(INT_MAX)
+        , fragmentStartPalette(nullptr)
+        , fragmentEndPalette(nullptr)
+        , fragmentStart(-1), fragmentEnd(-1)
         , dirtyPosition(0), paintedWidth(0), paintedHeight(0)
         , hAlign(TextEdit::AlignLeft), vAlign(TextEdit::AlignTop)
         , format(TextEdit::PlainText), wrapMode(TextEdit::NoWrap)
@@ -131,11 +163,17 @@ public:
 #endif
         , updateType(UpdatePaintNode)
         , highlightingInProgress(false)
+        , viewport(QRect(0,0,0,0))
+        , totalHeight(0)
+#ifdef LV_EDITOR_DEBUG
+        , debugModel(nullptr)
+        , debugView(nullptr)
+#endif
         , dirty(false), richText(false), cursorVisible(false), cursorPending(false)
         , focusOnPress(true), persistentSelection(false), requireImplicitWidth(false)
         , selectByMouse(false), canPaste(false), canPasteValid(false), hAlignImplicit(true)
         , textCached(true), inLayout(false), selectByKeyboard(false), selectByKeyboardSet(false)
-        , hadSelection(false), invalidUntilTheEnd(false)
+        , hadSelection(false), invalidUntilTheEnd(false), updateLinesFlag(true)
     {}
 
     ~TextEditPrivate()
@@ -162,7 +200,7 @@ public:
 
     void setNativeCursorEnabled(bool) {}
     void handleFocusEvent(QFocusEvent *event);
-    void addCurrentTextNodeToRoot(TextNodeEngine *, QSGTransformNode *, TextNode*, TextNodeIterator&, int startPos);
+    void addCurrentTextNodeToRoot(TextNodeEngine *, QSGTransformNode *, TextNode*, TextNodeIterator&, int startPos, int blockNumber);
     TextNode* createTextNode();
 
 #ifndef QT_NO_IM
@@ -203,6 +241,7 @@ public:
     QList<Node*> textNodeMap;
 
     PaletteManager *paletteManager;
+    LineControl* lineControl;
     LineSurface* lineSurface;
 
     int lastSelectionStart;
@@ -219,10 +258,9 @@ public:
     int lastHighlightChangeStart;
     int lastHighlightChangeEnd;
 
-    int fragmentStart;
     QQuickItem* fragmentStartPalette;
-    int fragmentEnd;
     QQuickItem* fragmentEndPalette;
+    int fragmentStart, fragmentEnd;
     int dirtyPosition;
 
     qreal paintedWidth;
@@ -242,6 +280,16 @@ public:
 
     bool highlightingInProgress;
 
+    QRect viewport;
+    int totalHeight;
+    std::vector<VisibleSection> sectionsForViewport;
+    std::deque<NodeAction> actionQueue;
+    std::vector<std::pair<int, QQuickItem*>> displayedPalettes;
+
+#ifdef LV_EDITOR_DEBUG
+    TextEditNodeDebugModel* debugModel;
+    QQuickItem* debugView;
+#endif
     bool dirty : 1;
     bool richText : 1;
     bool cursorVisible : 1;
@@ -259,6 +307,7 @@ public:
     bool selectByKeyboardSet:1;
     bool hadSelection : 1;
     bool invalidUntilTheEnd: 1;
+    bool updateLinesFlag: 1;
 };
 
 }

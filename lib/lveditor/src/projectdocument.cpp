@@ -265,8 +265,12 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
                             destinationBlock.setUserData(bddestination);
                         }
                     }
+                    ProjectDocumentSection::Ptr nuPtr = ProjectDocumentSection::create(itSection->type(), itSection->position(), itSection->length());
+                    nuPtr->m_document = itSection->m_document;
+                    nuPtr->m_userData = itSection->m_userData;
+                    nuPtr->m_textChangedHandler = itSection->m_textChangedHandler;
+                    bddestination->addSection(nuPtr);
                     seit = bd->m_sections.erase(seit);
-                    bddestination->addSection(itSection);
                     emit formatChanged(destinationBlock.position(), destinationBlock.length());
                     continue;
                 }
@@ -473,6 +477,8 @@ void ProjectDocument::setLastCursorPosition(int pos)
  * \brief Slot for tracking text document changes which updates markers and sections
  */
 void ProjectDocument::documentContentsChanged(int position, int charsRemoved, int charsAdded){
+    emit contentsChange(position, charsRemoved, charsAdded);
+
     QString addedText = "";
     if ( charsAdded == 1 ){
         QChar c = m_textDocument->characterAt(position);
@@ -585,7 +591,7 @@ void ProjectDocumentAction::redo(){
 //    parent->m_content.replace(position, charsRemoved.size(), charsAdded);
 }
 
-ProjectDocumentBlockData::ProjectDocumentBlockData() : m_collapseState(NoCollapse), m_numOfCollapsedLines(0)
+ProjectDocumentBlockData::ProjectDocumentBlockData() : m_numOfCollapsedLines(0)
     , m_stateChangeFlag(false) {}
 
 ProjectDocumentBlockData::~ProjectDocumentBlockData(){
@@ -690,9 +696,8 @@ void ProjectDocumentBlockData::removeSection(ProjectDocumentSection *section){
         section->m_parentBlock = nullptr;
 }
 
-void ProjectDocumentBlockData::setCollapse(CollapseState state, CollapseFunctionType func)
+void ProjectDocumentBlockData::setCollapse(CollapseFunctionType func)
 {
-    m_collapseState = state;
     m_onCollapse = func;
 
 }
@@ -707,14 +712,15 @@ void ProjectDocumentBlockData::setReplacementString(QString &repl)
     m_replacementString = repl;
 }
 
-ProjectDocumentBlockData::CollapseState ProjectDocumentBlockData::collapseState() { return m_collapseState; }
+// ProjectDocumentBlockData::CollapseState ProjectDocumentBlockData::collapseState() { return m_collapseState; }
 int ProjectDocumentBlockData::numOfCollapsedLines() { return m_numOfCollapsedLines; }
 CollapseFunctionType ProjectDocumentBlockData::onCollapse() { return m_onCollapse; }
 QString& ProjectDocumentBlockData::replacementString() { return m_replacementString; }
 
 void ProjectDocumentBlockData::resetCollapseParams()
 {
-	m_collapseState = NoCollapse;
+    // m_collapseState = NoCollapse;
+    m_collapsable = false;
 	m_replacementString = QString();
 
 }

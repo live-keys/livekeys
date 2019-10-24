@@ -1,4 +1,4 @@
-#include "palettemanager.h"
+/*#include "palettemanager.h"
 #include <qmath.h>
 #include "qdebug.h"
 #include "textedit_p.h"
@@ -103,7 +103,7 @@ void PaletteManager::setLineHeight(int value)
     m_lineHeight = value;
 }
 
-/** 0 if not, positive number of lines if yes*/
+// 0 if not, positive number of lines if yes
 int PaletteManager::isLineBeforePalette(int blockNumber)
 {
     auto it = m_palettes.begin();
@@ -254,6 +254,21 @@ std::list<QQuickItem *> PaletteManager::deletedOnCollapse(int pos, int num)
     return result;
 }
 
+bool PaletteManager::isLineUnderPalette(int pos)
+{
+    for (auto it = m_palettes.begin(); it != m_palettes.end(); ++it)
+    {
+        PaletteData* pd = *it;
+        if (pos >= pd->m_startBlock + pd->m_lineSpan) continue;
+
+        if (pos < pd->m_startBlock) return false;
+        return true;
+    }
+
+    return false;
+
+}
+
 int PaletteManager::totalOffset()
 {
     return m_totalOffset;
@@ -337,3 +352,4 @@ void PaletteManager::adjustPalettePosition(PaletteData* pd)
 
 
 }
+*/

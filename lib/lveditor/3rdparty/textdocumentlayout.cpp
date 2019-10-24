@@ -50,9 +50,7 @@
 #include <qvarlengtharray.h>
 #include <limits.h>
 #include <qbasictimer.h>
-
 #include <algorithm>
-#include "linemanager.h"
 
 #ifdef LAYOUT_DEBUG
 #define LDEBUG qDebug()
@@ -416,8 +414,6 @@ public:
     qreal idealWidth;
     bool contentHasAlignment;
 
-    LineManager* lineManager;
-
     QFixed blockIndent(const QTextBlockFormat &blockFormat) const;
 
     void drawFrame(const QPointF &offset, QPainter *painter, const QAbstractTextDocumentLayout::PaintContext &context,
@@ -478,8 +474,7 @@ TextDocumentLayoutPrivate::TextDocumentLayoutPrivate()
       cursorWidth(1),
       currentLazyLayoutPosition(-1),
       lazyLayoutStepSize(1000),
-      lastPageCount(-1),
-      lineManager(nullptr)
+      lastPageCount(-1)
 {
     showLayoutProgress = true;
     insideDocumentChange = false;
@@ -1910,11 +1905,7 @@ QFixed TextDocumentLayoutPrivate::findY(QFixed yFrom, const TextLayoutStruct *la
 }
 
 TextDocumentLayout::TextDocumentLayout(QTextDocument *doc)
-    : QAbstractTextDocumentLayout(*new TextDocumentLayoutPrivate, doc)
-{
-    Q_D(TextDocumentLayout);
-    d->lineManager = new LineManager(this);
-}
+    : QAbstractTextDocumentLayout(*new TextDocumentLayoutPrivate, doc){}
 
 
 void TextDocumentLayout::draw(QPainter *painter, const PaintContext &context)
@@ -2024,8 +2015,7 @@ void TextDocumentLayout::documentChanged(int from, int oldLength, int length)
 
     d->insideDocumentChange = false;
 
-    for (QTextBlock blockIt = startIt; blockIt.isValid() && blockIt != endIt; blockIt = blockIt.next())
-        emit updateBlock(blockIt);
+    emit updateBlockRange(startIt.blockNumber(), endIt.blockNumber());
 
     if (d->showLayoutProgress) {
         const QSizeF newSize = dynamicDocumentSize();
@@ -2356,86 +2346,6 @@ bool TextDocumentLayout::contentHasAlignment() const
 {
     Q_D(const TextDocumentLayout);
     return d->contentHasAlignment;
-}
-
-LineManager *TextDocumentLayout::getLineManager()
-{
-    Q_D(TextDocumentLayout);
-    return d->lineManager;
-}
-
-void TextDocumentLayout::stateChangeUpdate(int pos)
-{
-    Q_D(TextDocumentLayout);
-    d->lineManager->setDirtyPos(pos);
-    d->lineManager->textDocumentFinishedUpdating(this->document()->blockCount());
-}
-
-QTextDocument *TextDocumentLayout::lineDocument()
-{
-    Q_D(TextDocumentLayout);
-    return d->lineManager->m_lineDocument;
-}
-
-void TextDocumentLayout::collapseLines(int pos, int len)
-{
-    Q_D(TextDocumentLayout);
-    d->lineManager->collapseLines(pos,len);
-    emit linesCollapsed(pos, len);
-}
-
-void TextDocumentLayout::expandLines(int pos, int len)
-{
-    Q_D(TextDocumentLayout);
-    d->lineManager->expandLines(pos, len);
-    emit linesExpanded(pos, len);
-}
-
-std::pair<int,int> TextDocumentLayout::isFirstLineOfCollapsedSection(int lineNumber)
-{
-    Q_D(TextDocumentLayout);
-    return d->lineManager->isFirstLineOfCollapsedSection(lineNumber);
-}
-
-std::pair<int,int> TextDocumentLayout::isLineAfterCollapsedSection(int lineNumber)
-{
-    Q_D(TextDocumentLayout);
-    return d->lineManager->isLineAfterCollapsedSection(lineNumber);
-}
-
-QTextDocument *TextDocumentLayout::lineManagerParentDocument()
-{
-    Q_D(TextDocumentLayout);
-    return d->lineManager->m_parentDocument;
-}
-
-void TextDocumentLayout::setLineManagerParentDocument(QTextDocument *doc)
-{
-    Q_D(TextDocumentLayout);
-    d->lineManager->m_parentDocument = doc;
-}
-
-void TextDocumentLayout::setLineDocumentFont(const QFont& font)
-{
-    Q_D(TextDocumentLayout);
-    d->lineManager->setLineDocumentFont(font);
-}
-
-void TextDocumentLayout::setDirtyPos(int pos)
-{
-    Q_D(TextDocumentLayout);
-    d->lineManager->setDirtyPos(pos);
-}
-
-void TextDocumentLayout::textDocumentFinishedUpdating(int newLineNumber)
-{
-    Q_D(TextDocumentLayout);
-    d->lineManager->textDocumentFinishedUpdating(newLineNumber);
-}
-
-void TextDocumentLayout::updateLineSurface(int oldLineNum, int newLineNum, int dirtyPos)
-{
-    emit updateLineSurfaceSignal(oldLineNum, newLineNum, dirtyPos);
 }
 
 qreal TextDocumentLayoutPrivate::scaleToDevice(qreal value) const

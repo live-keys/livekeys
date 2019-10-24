@@ -1,4 +1,4 @@
-#ifndef PALETTEMANAGER_H
+/*#ifndef PALETTEMANAGER_H
 #define PALETTEMANAGER_H
 
 #include "lveditorglobal.h"
@@ -36,29 +36,30 @@ class PaletteManager: public QObject
 public:
     PaletteManager();
 
-    void paletteAdded(int sb, int span, int height, QQuickItem* p, int startPos, int endPos);
+    void paletteAdded(int sb, int span, int height, QQuickItem* p, int startPos, int endPos);//
     int drawingOffset(int blockNumber, bool forCursor);
     int positionOffset(int y);
-    void setTextEdit(TextEdit *value);
+    void setTextEdit(TextEdit *value);//
 
-    void setLineHeight(int value);
+    void setLineHeight(int value);//
     int isLineBeforePalette(int blockNumber);
     int isLineAfterPalette(int blockNumber);
-    int removePalette(QQuickItem* palette);
-    int resizePalette(QQuickItem* palette, int newHeight);
+    int removePalette(QQuickItem* palette);//
+    int resizePalette(QQuickItem* palette, int newHeight);//
     std::list<QQuickItem *> updatePaletteBounds(int pos, int removed, int added);
     std::list<QQuickItem *> deletedOnCollapse(int pos, int num);
-    int totalOffset();
+    bool isLineUnderPalette(int pos);
+    int totalOffset();//
 public Q_SLOTS:
-    void setDirtyPos(int pos);
-    void lineNumberChange();
+    void setDirtyPos(int pos);//
+    void lineNumberChange();//
 private:
-    int m_lineHeight;
-    TextEdit *m_textEdit;
+    int m_lineHeight;//
+    TextEdit *m_textEdit;//
     std::list<PaletteData*> m_palettes;
-    int m_dirtyPos;
-    int m_prevLineNumber;
-    int m_lineNumber;
+    int m_dirtyPos;//
+    int m_prevLineNumber;//
+    int m_lineNumber;//
     int m_totalOffset;
 
     void linesAdded();
@@ -73,3 +74,4 @@ private:
 }
 
 #endif // PALETTEMANAGER_H
+*/

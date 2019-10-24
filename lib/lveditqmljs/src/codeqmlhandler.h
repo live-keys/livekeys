@@ -73,9 +73,12 @@ public:
         bool manuallyTriggered,
         CodeCompletionModel* model,
         QTextCursor& cursorChange
-    );
-    void setDocument(ProjectDocument* document);
-    void rehighlightBlock(const QTextBlock& block);
+    ) Q_DECL_OVERRIDE;
+    void setDocument(ProjectDocument* document) Q_DECL_OVERRIDE;
+    // AbstractCodeHandler::ContentsTrigger documentContentsChanged(int position, int charsRemoved, int charsAdded) Q_DECL_OVERRIDE;
+    void rehighlightBlock(const QTextBlock& block) Q_DECL_OVERRIDE;
+    // QPair<int, int> contextBlock(int position) Q_DECL_OVERRIDE;
+    // void aboutToDelete() Q_DECL_OVERRIDE;
 
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
     bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);
@@ -113,11 +116,6 @@ public slots:
     bool isForAnObject(lv::QmlEditFragment* palette);
 
     void frameEdit(QQuickItem *box, lv::QmlEditFragment* palette);
-    void removeEditFrame(QQuickItem* box);
-    void resizedEditFrame(QQuickItem* box);
-
-    // Context Block Range
-
     QJSValue contextBlockRange(int cursorPosition);
 
     // Direct editing management
@@ -150,6 +148,7 @@ public slots:
     void newProjectScopeReady();
     void updateScope();
 
+    // int handleRightBrace(int cursorPosition);
 signals:
 
 private:

@@ -45,6 +45,10 @@
 #include <QtGui/qtextoption.h>
 #include "documenthandler.h"
 #include "qquickpainteditem.h"
+#include <set>
+#ifdef LV_EDITOR_DEBUG
+#include "texteditnodedebugmodel.h"
+#endif
 
 class QTextBlock;
 
@@ -53,6 +57,7 @@ namespace lv {
 class TextDocumentLayout;
 class TextEditPrivate;
 class PaletteManager;
+class LineControl;
 class LineManager;
 class LineSurface;
 
@@ -105,15 +110,19 @@ class TextEdit : public QQuickImplicitSizeItem
     Q_PROPERTY(qreal bottomPadding READ bottomPadding WRITE setBottomPadding RESET resetBottomPadding NOTIFY bottomPaddingChanged REVISION 6)
     Q_PROPERTY(QString preeditText READ preeditText NOTIFY preeditTextChanged REVISION 7)
     Q_PROPERTY(lv::DocumentHandler* documentHandler READ documentHandler WRITE setDocumentHandler NOTIFY documentHandlerChanged)
-    Q_PROPERTY(int fragmentStart READ fragmentStart WRITE setFragmentStart RESET resetFragmentStart NOTIFY fragmentStartChanged)
-    Q_PROPERTY(int fragmentEnd READ fragmentEnd WRITE setFragmentEnd RESET resetFragmentEnd NOTIFY fragmentEndChanged)
+    Q_PROPERTY(int fragmentStart WRITE setFragmentStart RESET resetFragmentStart NOTIFY fragmentStartChanged)
+    Q_PROPERTY(int fragmentEnd WRITE setFragmentEnd RESET resetFragmentEnd NOTIFY fragmentEndChanged)
     Q_PROPERTY(int lineNumber READ lineNumber NOTIFY lineNumberChanged)
     Q_PROPERTY(int columnNumber READ columnNumber NOTIFY columnNumberChanged)
+    Q_PROPERTY(QRect viewport READ viewport WRITE setViewport NOTIFY viewportChanged)
+    Q_PROPERTY(int totalHeight READ totalHeight NOTIFY totalHeightChanged)
 public:
-    TextEdit(QQuickImplicitSizeItem *parent=nullptr);
+
+
+    TextEdit(QQuickImplicitSizeItem *parent=nullptr, bool test = false);
 
     PaletteManager* getPaletteManager();
-    void setLineManager(LineManager* lm);
+    LineControl* lineControl();
     void setLineSurface(LineSurface* ls);
 
     enum HAlignment {
@@ -239,7 +248,7 @@ public:
     bool isReadOnly() const;
 
     TextEditPrivate* getPriv() { Q_D(TextEdit); return d; }
-    void stateChangeHandler(const QTextBlock& block);
+    void stateChangeHandler(int blockNumber);
 
     QRectF cursorRectangle() const;
 
@@ -315,9 +324,21 @@ public:
     lv::DocumentHandler* documentHandler();
     void setDocumentHandler(lv::DocumentHandler* dh);
 
-    void linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem* palette);
+    void linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem* palette, int start, int end);
     void linePaletteRemoved(QQuickItem* palette);
     void linePaletteHeightChanged(QQuickItem* palette, int newHeight);
+
+    QRect viewport() const;
+    void setViewport(QRect view);
+
+    void resetLineControl();
+    void updateSectionsForViewport();
+
+    int totalHeight() const;
+
+#ifdef LV_EDITOR_DEBUG
+    TextEditNodeDebugModel::Entry getDebugEntry(int pos);
+#endif
 Q_SIGNALS:
 
     void textChanged();
@@ -369,6 +390,8 @@ Q_SIGNALS:
     void columnNumberChanged();
     void fragmentStartChanged();
     void fragmentEndChanged();
+    void viewportChanged();
+    void totalHeightChanged();
 
     void paletteChange(int blockNumber);
 public Q_SLOTS:
@@ -378,6 +401,9 @@ public Q_SLOTS:
     void select(int start, int end);
     void deselect();
     bool isRightToLeft(int start, int end);
+    void refreshAfterCollapseChange(int pos, int delta);
+    void refreshAfterPaletteChange(int pos, int delta);
+
 #ifndef QT_NO_CLIPBOARD
     void cut();
     void copy();
@@ -389,6 +415,7 @@ public Q_SLOTS:
     void remove(int start, int end);
     Q_REVISION(2) void append(const QString &text);
     Q_REVISION(7) void clear();
+    void shiftTextNodes(int delta, int pos, bool internal);
 
 private Q_SLOTS:
     void q_textChanged();
@@ -398,23 +425,25 @@ private Q_SLOTS:
     void createCursor();
     void q_canPasteChanged();
     void updateWholeDocument();
-    void invalidateBlock(const QTextBlock &block);
+    // void invalidateBlock(const QTextBlock &block);
+    void invalidateBlockRange(int first, int last);
     void updateCursor();
     void q_updateAlignment();
     void updateSize();
     void triggerPreprocess();
     void highlightingDone(const QRectF &);
-    void handleCursorDuringCollapse(int pos, int num);
-    void checkPalettesWhenCollapsed(int pos, int num);
+    void handleCursorDuringAddingSection();
 private:
-    void markDirtyNodesForRange(int start, int end, int charDelta);
+    std::set<int> markDirtyNodesForRange(int start, int end, int charDelta);
     void updateTotalLines();
     void invalidateFontCaches();
-    void updateFragmentVisibility();
-    void updateFragmentBounds(int delta);
+    void addStartPalette(int frStart);
+    void addEndPalette(int frEnd);
 
+    void deleteAllTextNodes(QString debugMessage = "");
+    void createAllViewportNodes(QString debugMessage = "");
 protected:
-    TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent = nullptr);
+    TextEdit(TextEditPrivate &dd, QQuickImplicitSizeItem *parent = nullptr, bool test = true);
 
     void geometryChanged(const QRectF &newGeometry,
                          const QRectF &oldGeometry) Q_DECL_OVERRIDE;
@@ -444,6 +473,9 @@ protected:
     friend class LineSurface;
     friend class DocumentHandler;
     friend class TextControl;
+#ifdef LV_EDITOR_DEBUG
+    friend class TextEditNodeDebugModel;
+#endif
 private:
     Q_DISABLE_COPY(TextEdit)
     Q_DECLARE_PRIVATE(TextEdit)

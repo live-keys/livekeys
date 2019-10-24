@@ -20,6 +20,7 @@
 #include "qmat.h"
 #include "live/visuallog.h"
 #include "live/mlnode.h"
+#include "qlcvcoreglobal.h"
 
 namespace lv{ namespace ml{
 

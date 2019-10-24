@@ -189,8 +189,11 @@ QList<Token> Scanner::operator()(const QString &text, int startState)
 
     int index = 0;
 
+    int stateBuffer;
+
     if (multiLineState(_state) == MultiLineComment) {
         int start = -1;
+        stateBuffer = _state;
         while (index < text.length()) {
             const QChar ch = text.at(index);
 
@@ -210,14 +213,15 @@ QList<Token> Scanner::operator()(const QString &text, int startState)
             }
         }
 
-        if (_scanComments && start != -1)
-            tokens.append(Token(start, index - start, Token::Comment));
+        if (_scanComments && start != -1) {
+            tokens.append(Token(start, index - start, Token::Comment, stateBuffer));
+        }
     } else if (multiLineState(_state) == MultiLineStringDQuote || multiLineState(_state) == MultiLineStringSQuote) {
         const QChar quote = (_state == MultiLineStringDQuote ? QLatin1Char('"') : QLatin1Char('\''));
         const int start = index;
+        stateBuffer = _state;
         while (index < text.length()) {
             const QChar ch = text.at(index);
-
             if (ch == quote)
                 break;
             else if (index + 1 < text.length() && ch == QLatin1Char('\\'))
@@ -230,7 +234,7 @@ QList<Token> Scanner::operator()(const QString &text, int startState)
             setMultiLineState(&_state, Normal);
         }
         if (start < index)
-            tokens.append(Token(start, index - start, Token::String));
+            tokens.append(Token(start, index - start, Token::String, stateBuffer));
         setRegexpMayFollow(&_state, false);
     }
 
@@ -240,17 +244,19 @@ QList<Token> Scanner::operator()(const QString &text, int startState)
         QChar la; // lookahead char
         if (index + 1 < text.length())
             la = text.at(index + 1);
+        stateBuffer = _state;
 
         switch (ch.unicode()) {
         case '/':
             if (la == QLatin1Char('/')) {
                 if (_scanComments)
-                    tokens.append(Token(index, text.length() - index, Token::Comment));
+                    tokens.append(Token(index, text.length() - index, Token::Comment, stateBuffer));
                 index = text.length();
             } else if (la == QLatin1Char('*')) {
                 const int start = index;
                 index += 2;
                 setMultiLineState(&_state, MultiLineComment);
+                stateBuffer = _state;
                 while (index < text.length()) {
                     const QChar ch = text.at(index);
                     QChar la;
@@ -266,14 +272,14 @@ QList<Token> Scanner::operator()(const QString &text, int startState)
                     }
                 }
                 if (_scanComments)
-                    tokens.append(Token(start, index - start, Token::Comment));
+                    tokens.append(Token(start, index - start, Token::Comment, stateBuffer));
             } else if (regexpMayFollow(_state)) {
                 const int end = findRegExpEnd(text, index);
-                tokens.append(Token(index, end - index, Token::RegExp));
+                tokens.append(Token(index, end - index, Token::RegExp, stateBuffer));
                 index = end;
                 setRegexpMayFollow(&_state, false);
             } else {
-                tokens.append(Token(index++, 1, Token::Delimiter));
+                tokens.append(Token(index++, 1, Token::Delimiter, stateBuffer));
                 setRegexpMayFollow(&_state, true);
             }
             break;
@@ -302,9 +308,11 @@ QList<Token> Scanner::operator()(const QString &text, int startState)
                     setMultiLineState(&_state, MultiLineStringDQuote);
                 else
                     setMultiLineState(&_state, MultiLineStringSQuote);
+                stateBuffer = _state;
             }
 
-            tokens.append(Token(start, index - start, Token::String));
+
+            tokens.append(Token(start, index - start, Token::String, stateBuffer));
             setRegexpMayFollow(&_state, false);
         } break;
 
@@ -314,65 +322,65 @@ QList<Token> Scanner::operator()(const QString &text, int startState)
                 do {
                     ++index;
                 } while (index < text.length() && isNumberChar(text.at(index)));
-                tokens.append(Token(start, index - start, Token::Number));
+                tokens.append(Token(start, index - start, Token::Number, stateBuffer));
                 break;
             }
-            tokens.append(Token(index++, 1, Token::Dot));
+            tokens.append(Token(index++, 1, Token::Dot, stateBuffer));
             setRegexpMayFollow(&_state, false);
             break;
 
          case '(':
-            tokens.append(Token(index++, 1, Token::LeftParenthesis));
+            tokens.append(Token(index++, 1, Token::LeftParenthesis, stateBuffer));
             setRegexpMayFollow(&_state, true);
             break;
 
          case ')':
-            tokens.append(Token(index++, 1, Token::RightParenthesis));
+            tokens.append(Token(index++, 1, Token::RightParenthesis, stateBuffer));
             setRegexpMayFollow(&_state, false);
             break;
 
          case '[':
-            tokens.append(Token(index++, 1, Token::LeftBracket));
+            tokens.append(Token(index++, 1, Token::LeftBracket, stateBuffer));
             setRegexpMayFollow(&_state, true);
             break;
 
          case ']':
-            tokens.append(Token(index++, 1, Token::RightBracket));
+            tokens.append(Token(index++, 1, Token::RightBracket, stateBuffer));
             setRegexpMayFollow(&_state, false);
             break;
 
          case '{':
-            tokens.append(Token(index++, 1, Token::LeftBrace));
+            tokens.append(Token(index++, 1, Token::LeftBrace, stateBuffer));
             setRegexpMayFollow(&_state, true);
             break;
 
          case '}':
-            tokens.append(Token(index++, 1, Token::RightBrace));
+            tokens.append(Token(index++, 1, Token::RightBrace, stateBuffer));
             setRegexpMayFollow(&_state, false);
             break;
 
          case ';':
-            tokens.append(Token(index++, 1, Token::Semicolon));
+            tokens.append(Token(index++, 1, Token::Semicolon, stateBuffer));
             setRegexpMayFollow(&_state, true);
             break;
 
          case ':':
-            tokens.append(Token(index++, 1, Token::Colon));
+            tokens.append(Token(index++, 1, Token::Colon, stateBuffer));
             setRegexpMayFollow(&_state, true);
             break;
 
          case ',':
-            tokens.append(Token(index++, 1, Token::Comma));
+            tokens.append(Token(index++, 1, Token::Comma, stateBuffer));
             setRegexpMayFollow(&_state, true);
             break;
 
         case '+':
         case '-':
             if (la == ch) {
-                tokens.append(Token(index, 2, Token::Delimiter));
+                tokens.append(Token(index, 2, Token::Delimiter, stateBuffer));
                 index += 2;
             } else {
-                tokens.append(Token(index++, 1, Token::Delimiter));
+                tokens.append(Token(index++, 1, Token::Delimiter, stateBuffer));
             }
             setRegexpMayFollow(&_state, true);
             break;
@@ -387,7 +395,7 @@ QList<Token> Scanner::operator()(const QString &text, int startState)
                 do {
                     ++index;
                 } while (index < text.length() && isNumberChar(text.at(index)));
-                tokens.append(Token(start, index - start, Token::Number));
+                tokens.append(Token(start, index - start, Token::Number, stateBuffer));
                 setRegexpMayFollow(&_state, false);
             } else if (ch.isLetter() || ch == QLatin1Char('_') || ch == QLatin1Char('$')) {
                 const int start = index;
@@ -396,12 +404,12 @@ QList<Token> Scanner::operator()(const QString &text, int startState)
                 } while (index < text.length() && isIdentifierChar(text.at(index)));
 
                 if (isKeyword(text.mid(start, index - start)))
-                    tokens.append(Token(start, index - start, Token::Keyword)); // ### fixme
+                    tokens.append(Token(start, index - start, Token::Keyword, stateBuffer)); // ### fixme
                 else
-                    tokens.append(Token(start, index - start, Token::Identifier));
+                    tokens.append(Token(start, index - start, Token::Identifier, stateBuffer));
                 setRegexpMayFollow(&_state, false);
             } else {
-                tokens.append(Token(index++, 1, Token::Delimiter));
+                tokens.append(Token(index++, 1, Token::Delimiter, stateBuffer));
                 setRegexpMayFollow(&_state, true);
             }
         } // end of switch

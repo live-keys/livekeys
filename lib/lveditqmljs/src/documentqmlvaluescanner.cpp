@@ -122,6 +122,8 @@ bool DocumentQmlValueScanner::operator()(){
             tokens        = m_scanner(block.text(), m_scanner.state());
         }
 
+    } else {
+        //TODO: Non editing document
     }
 
     return false;
@@ -360,9 +362,11 @@ int DocumentQmlValueScanner::getBlockEnd(QTextBlock &block, int position){
                         it->is(QmlJS::Token::RightBracket) ||
                         it->is(QmlJS::Token::RightParenthesis) )
             {
-                --nestingDepth;
-                if ( nestingDepth < 0 ){
-                    return tokenPosition;
+                if ( tokenPosition > position ){
+                    --nestingDepth;
+                    if ( nestingDepth < 0 ){
+                        return tokenPosition;
+                    }
                 }
             }
         }

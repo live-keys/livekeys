@@ -15,8 +15,8 @@
 #include "private/qtextengine_p.h"
 #include <algorithm>
 #include "textedit_p.h"
-#include "linemanager.h"
 #include "palettemanager.h"
+#include "linecontrol.h"
 #include "textdocumentlayout.h"
 
 namespace lv {
@@ -52,16 +52,20 @@ namespace {
 }
 
 LineSurface::LineSurface(QQuickItem *parent)
-: QQuickItem(parent)
-, m_color(QRgb(0xFF000000))
-, m_font(QFont()), m_document(nullptr)
-, m_updateType(UpdatePaintNode)
-, m_textEdit(nullptr), m_previousLineNumber(0)
-, m_lineNumber(0), m_dirtyPos(0)
-, m_updatePending(false)
+    : QQuickItem(parent)
+    , m_color(QRgb(0xFF000000))
+    , m_font(QFont())
+    , m_lineControl(nullptr)
+    , m_document(new QTextDocument(this))
+    , m_updateType(UpdatePaintNode)
+    , m_textEdit(nullptr), m_previousLineNumber(0)
+    , m_lineNumber(0), m_dirtyPos(0)
+    , m_updatePending(false)
 {
     setFlag(QQuickItem::ItemHasContents);
     setAcceptHoverEvents(true);
+    m_document->documentLayout(); // bug fix
+    m_document->rootFrame(); // bug fix
 }
 
 LineSurface::~LineSurface()
@@ -99,14 +103,8 @@ void LineSurface::paletteSlot(int blockNum)
     m_dirtyPos = blockNum;
     m_document->markContentsDirty(firstDirtyBlock.position() - 1, m_document->characterCount() - firstDirtyBlock.position() + 1);
 
-    polish();
-    if (isComponentComplete())
-    {
-        updateSize();
-        m_updateType = LineSurface::UpdatePaintNode;
 
-        update();
-    }
+    triggerUpdate();
 }
 
 void LineSurface::setDirtyBlockPosition(int pos)
@@ -137,6 +135,8 @@ void LineSurface::setComponents(lv::TextEdit* te)
 {
     m_textEdit = te;
     te->setLineSurface(this);
+    m_lineControl = te->lineControl();
+    setLineDocumentFont(te->font());
     setFlag(QQuickItem::ItemHasContents);
     setAcceptedMouseButtons(Qt::AllButtons);
 
@@ -144,7 +144,85 @@ void LineSurface::setComponents(lv::TextEdit* te)
     m_previousLineNumber = 0;
     m_lineNumber = 0;
 
-    QObject::connect(m_textEdit, &TextEdit::paletteChange, this, &LineSurface::paletteSlot);
+    QObject::connect(m_textEdit->lineControl(), &LineControl::lineDelta, this, &LineSurface::lineNumberChanged);
+    QObject::connect(m_textEdit->lineControl(), &LineControl::refreshAfterCollapseChange, this, &LineSurface::triggerUpdate);
+    QObject::connect(m_textEdit->lineControl(), &LineControl::refreshAfterPaletteChange, this, &LineSurface::paletteSlot);
+
+    if (m_viewportBuffer != QRect())
+    {
+        setViewport(m_viewportBuffer);
+        m_viewportBuffer = QRect();
+    }
+    triggerUpdate();
+}
+
+void LineSurface::resetViewportDocument()
+{
+    if (!m_document) return;
+    m_document->clear();
+    QTextCursor cursor(m_document);
+    cursor.movePosition(QTextCursor::MoveOperation::End);
+    for (int i = m_bounds.first+1; i <= m_bounds.second; i++)
+    {
+        if (i!=m_bounds.first+1) cursor.insertBlock();
+        std::string s = std::to_string(i) + "  ";
+        if (i < 10) s = " " + s;
+        const QString a(s.c_str());
+
+        cursor.insertText(a);
+    }
+
+
+    updateCollapseSymbols();
+}
+
+void LineSurface::setViewport(QRect view)
+{
+    if (m_viewport.y() == view.y() && m_viewport.height() == view.height() && m_bounds != std::make_pair(-1,-1)) return;
+    if (!m_lineControl){
+        m_viewportBuffer = view;
+        return;
+    }
+
+    m_viewport = view;
+
+    checkSectionsAndBounds();
+
+    emit viewportChanged(view);
+
+    polish();
+    if (isComponentComplete())
+    {
+        updateSize();
+        m_updateType = LineSurface::UpdatePaintNode;
+        update();
+    }
+}
+
+void LineSurface::clearViewportDocument()
+{
+    m_document->clear();
+    polish();
+    if (isComponentComplete())
+    {
+        updateSize();
+        m_updateType = LineSurface::UpdatePaintNode;
+        update();
+    }
+}
+
+void LineSurface::checkSectionsAndBounds()
+{
+    auto oldSections = m_visibleSections;
+    m_visibleSections = m_lineControl->visibleSectionsForViewport(m_viewport);
+
+    auto oldBounds = m_bounds;
+    m_bounds = visibleSectionsBounds();
+
+    if (oldBounds.first != m_bounds.first || oldBounds.second != m_bounds.second)
+    {
+        resetViewportDocument();
+    }
 }
 
 void LineSurface::showHideLines(bool show, int pos, int num)
@@ -167,69 +245,111 @@ void LineSurface::showHideLines(bool show, int pos, int num)
     m_document->markContentsDirty(start, length);
 }
 
-void LineSurface::writeOutBlockStates()
+void LineSurface::changeLastCharInViewportDocumentBlock(int blockNumber, char c)
 {
-
-    qDebug() << "----------blockStates---------------";
-    auto it = m_textEdit->documentHandler()->target()->rootFrame()->begin();
-    while (it != m_textEdit->documentHandler()->target()->rootFrame()->end())
-    {
-        QTextBlock block = it.currentBlock();
-        lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(block.userData());
-
-        QString print(std::to_string(block.blockNumber()).c_str());
-        print += " : ";
-        if (userData)
-        {
-            switch (userData->collapseState())
-            {
-            case lv::ProjectDocumentBlockData::NoCollapse:
-                    print += "NoCollapse"; break;
-            case lv::ProjectDocumentBlockData::Collapse:
-                print += "Collapse"; break;
-            case lv::ProjectDocumentBlockData::Expand:
-                print += "Expand"; break;
-            }
-        } else print += "none";
-
-        qDebug() << print;
-        ++it;
-    }
+    QTextBlock b = m_document->findBlockByNumber(blockNumber);
+    QTextCursor cursor(b);
+    cursor.beginEditBlock();
+    cursor.movePosition(QTextCursor::EndOfBlock);
+    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
+    cursor.removeSelectedText();
+    cursor.insertText(QString(c));
+    cursor.endEditBlock();
 }
 
-void LineSurface::writeOutBlockVisibility()
+void LineSurface::replaceTextInViewportDocumentBlock(int blockNumber, std::string s)
 {
-    if (!m_document) return;
-    qDebug() << "----------visibility---------------";
-    auto it = m_document->rootFrame()->begin();
-    while (it != m_document->rootFrame()->end())
-    {
-        QTextBlock block = it.currentBlock();
+    QTextBlock b = m_document->findBlockByNumber(blockNumber);
+    QTextCursor cursor(b);
+    cursor.beginEditBlock();
+    cursor.movePosition(QTextCursor::EndOfBlock);
+    cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveMode::KeepAnchor);
+    cursor.removeSelectedText();
+    cursor.insertText(QString(s.c_str()));
+    cursor.endEditBlock();
+}
 
-        qDebug() << block.blockNumber() << block.isVisible();
-        ++it;
+void LineSurface::updateCollapseSymbols()
+{
+    int curr = m_bounds.first;
+    auto it = m_document->rootFrame()->begin();
+    while (it != m_document->rootFrame()->end() && curr < m_bounds.second)
+    {
+        if (!m_textEdit || !m_textEdit->documentHandler()) break;
+        auto currBlock = m_textEdit->documentHandler()->target()->findBlockByNumber(curr);
+        lv::ProjectDocumentBlockData* userData =
+                static_cast<lv::ProjectDocumentBlockData*>(currBlock.userData());
+
+        if (userData) {
+            if (userData->isCollapsible())
+            {
+                if (m_lineControl->isJumpForwardLine(curr, true) > 0) // is first line of collapse?
+                    changeLastCharInViewportDocumentBlock(curr-m_bounds.first, '>');
+                else
+                    changeLastCharInViewportDocumentBlock(curr-m_bounds.first, 'v');
+            } else
+                changeLastCharInViewportDocumentBlock(curr-m_bounds.first, ' ');
+
+            userData->setStateChangeFlag(false);
+        } else changeLastCharInViewportDocumentBlock(curr-m_bounds.first, ' ');
+
+        ++curr; ++it;
     }
+
+}
+
+std::pair<int, int> LineSurface::visibleSectionsBounds()
+{
+    int start = -1;
+    for (auto it = m_visibleSections.begin(); it != m_visibleSections.end(); ++it)
+    {
+        if (it->palette) continue;
+
+        start = it->start;
+        break;
+    }
+
+    if (start == -1) return std::make_pair(-1, -1);
+
+    auto rit = m_visibleSections.rbegin();
+    while (rit->palette) ++rit;
+
+    return std::make_pair(start, rit->start + rit->size);
 }
 
 void LineSurface::mousePressEvent(QMouseEvent* event)
 {
     if (!m_document) return;
-    // find block that was clicked
-    int position = m_document->documentLayout()->hitTest(event->localPos(), Qt::FuzzyHit);
-    QTextBlock block = m_document->findBlock(position);
-    int blockNum = block.blockNumber();
 
-    const QTextBlock& matchingBlock = m_textEdit->documentHandler()->target()->findBlockByNumber(blockNum);
+    int visibleBlockNumber = static_cast<int>(event->localPos().y()) / m_textEdit->lineControl()->blockHeight();
+    int absBlockNum = m_textEdit->lineControl()->visibleToAbsolute(visibleBlockNumber);
+
+    const QTextBlock& matchingBlock = m_textEdit->documentHandler()->target()->findBlockByNumber(absBlockNum);
+    const QTextBlock& lineDocBlock = m_document->findBlockByNumber(absBlockNum - m_bounds.first);
     lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
-    if (userData)
+    if (userData && userData->isCollapsible())
     {
-        if (userData->collapseState() == lv::ProjectDocumentBlockData::Collapse)
+        QString s = lineDocBlock.text();
+        if (s[s.length()-1] == 'v')
         {
             m_textEdit->manageExpandCollapse(matchingBlock.blockNumber(), true);
         }
-        else if (userData->collapseState() == lv::ProjectDocumentBlockData::Expand)
+        else if (s[s.length()-1] == '>')
         {
             m_textEdit->manageExpandCollapse(matchingBlock.blockNumber(), false);
+        }
+
+
+        m_visibleSections = m_lineControl->visibleSectionsForViewport(m_viewport);
+        m_bounds = visibleSectionsBounds();
+        resetViewportDocument();
+        polish();
+
+        if (isComponentComplete())
+        {
+            updateSize();
+            m_updateType = LineSurface::UpdatePaintNode;
+            update();
         }
     }
 }
@@ -241,28 +361,30 @@ void LineSurface::triggerPreprocess()
     polish();
     update();
 }
-
+/*
 void LineSurface::setDocument(QTextDocument *doc)
 {
     if (!doc) return;
     m_document = doc;
     m_updatePending = false;
     m_document->rootFrame(); // bug fix
-    LineManager* lm = dynamic_cast<LineManager*>(m_document->parent());
-    triggerUpdate(m_document->lineCount(), m_document->lineCount(), 0);
+    triggerUpdate(m_document->lineCount(), 0);
 }
+*/
 
-void LineSurface::unsetTextDocument()
-{
-    m_document = nullptr;
-    triggerUpdate(m_lineNumber, 0, 0);
-}
 
-void LineSurface::triggerUpdate(int prev, int curr, int dirty)
+void LineSurface::triggerUpdate()
 {
-    m_previousLineNumber = prev;
-    m_lineNumber = curr;
-    m_dirtyPos = dirty;
+    if (m_viewportBuffer != QRect())
+    {
+        setViewport(m_viewportBuffer);
+        m_viewportBuffer = QRect();
+    }
+
+    checkSectionsAndBounds();
+
+    resetViewportDocument();
+
     polish();
     if (isComponentComplete())
     {
@@ -270,6 +392,21 @@ void LineSurface::triggerUpdate(int prev, int curr, int dirty)
         m_updateType = LineSurface::UpdatePaintNode;
         update();
     }
+}
+
+void LineSurface::setLineDocumentFont(const QFont &font)
+{
+    m_document->setDefaultFont(font);
+}
+
+void LineSurface::lineNumberChanged()
+{
+    m_previousLineNumber = m_lineNumber;
+    m_lineNumber = m_textEdit->documentHandler()->target()->blockCount();
+
+    m_visibleSections = m_lineControl->visibleSectionsForViewport(m_viewport);
+    m_bounds = visibleSectionsBounds();
+    resetViewportDocument();
 }
 
 static bool comesBefore(LineSurface::Node* n1, LineSurface::Node* n2)
@@ -321,6 +458,9 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
     if (numberOfDigits(m_previousLineNumber) != numberOfDigits(m_lineNumber) || m_dirtyPos >= m_textNodeMap.size()){
         m_dirtyPos = 0;
     }
+
+    m_dirtyPos = 0; // TODO: better solution needed
+
     if (!oldNode  || m_dirtyPos != -1) {
 
         if (!oldNode)
@@ -398,7 +538,10 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
                         if (!engine.hasContents()) {
                             nodeOffset = m_document->documentLayout()->blockBoundingRect(block).topLeft();
                             updateNodeTransform(node, nodeOffset);
-                            int offset = m_textEdit->getPaletteManager()->drawingOffset(block.blockNumber(), false);
+
+                            int offset = m_bounds.first * m_textEdit->lineControl()->blockHeight();
+                            if (m_textEdit && m_textEdit->lineControl())
+                                offset += m_textEdit->lineControl()->drawingOffset(block.blockNumber() + m_bounds.first, false);
                             nodeOffset.setY(nodeOffset.y() - offset);
                         }
 
@@ -443,7 +586,7 @@ void LineSurface::updateSize()
 {
     if (!m_document) return;
     QSizeF layoutSize = m_document->documentLayout()->documentSize();
-    setImplicitSize(layoutSize.width(), layoutSize.height());
+    setImplicitSize(layoutSize.width(), m_textEdit->totalHeight());
 }
 
 }

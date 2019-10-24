@@ -19,7 +19,6 @@ HEADERS += \
     $$PWD/lveditorglobal.h \
     $$PWD/editorglobalobject.h \
     $$PWD/editorprivate_plugin.h \
-    $$PWD/linemanager.h \
     $$PWD/linesurface.h \
     $$PWD/extensions.h \
     $$PWD/palettemanager.h \
@@ -40,6 +39,9 @@ HEADERS += \
     $$PWD/runnable.h \
     $$PWD/runnablecontainer.h \
     $$PWD/documentation.h
+    $$PWD/texteditnodedebugmodel.h \
+    $$PWD/linecontrol.h \
+    $$PWD/syntaxhighlighter.h
 
 SOURCES += \
     $$PWD/documentationloader.cpp \
@@ -58,24 +60,11 @@ SOURCES += \
     $$PWD/editorsettingscategory.cpp \
     $$PWD/editorglobalobject.cpp \
     $$PWD/editorprivate_plugin.cpp \
-    $$PWD/linemanager.cpp \
     $$PWD/linesurface.cpp \
     $$PWD/palettemanager.cpp \
     $$PWD/palettecontainer.cpp \
     $$PWD/palettelist.cpp \
     $$PWD/codepalette.cpp \
-    $$PWD/editorlayer.cpp \
-    $$PWD/workspace.cpp \
-    $$PWD/workspaceipc.cpp \
-    $$PWD/workspaceipcsink.cpp \
-    $$PWD/workspacelayer.cpp \
-    $$PWD/keymap.cpp \
-    $$PWD/commands.cpp \
-    $$PWD/commandsmodel.cpp \
-    $$PWD/projectworkspace.cpp \
-    $$PWD/workspaceextension.cpp \
-    $$PWD/themecontainer.cpp \
-    $$PWD/theme.cpp \
-    $$PWD/runnable.cpp \
-    $$PWD/runnablecontainer.cpp \
-    $$PWD/documentation.cpp
+    $$PWD/texteditnodedebugmodel.cpp \
+    $$PWD/linecontrol.cpp \
+    $$PWD/syntaxhighlighter.cpp

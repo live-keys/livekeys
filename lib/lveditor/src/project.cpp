@@ -36,7 +36,7 @@
  * \class lv::Project
  * \brief Abstraction of the open project in LiveKeys
  *
- * A single instance, constructed at the start of the application, and destroyed right before closing.
+ * Practically a singleton (not enforced), constructed at the start of the application, and destroyed right before closing.
  * There are two types of projects - file-based projects and folder-based projects.
  * \ingroup lveditor
  */
@@ -71,6 +71,7 @@ Project::~Project(){
     delete m_documentModel;
     delete m_fileModel;
     delete m_navigationModel;
+    delete m_documentModel;
     delete m_scheduleRunTimer;
 }
 
@@ -87,6 +88,10 @@ void Project::newProject(){
         ProjectDocument* document = createDocument(
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false
         );
+	        
+	/*ProjectDocument* document = new ProjectDocument(
+            qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false, this
+        );*/
         document->addEditingState(ProjectDocument::Read);
         document->setContent("import QtQuick 2.3\n\nGrid{\n}");
         document->removeEditingState(ProjectDocument::Read);
@@ -125,6 +130,12 @@ void Project::openProject(const QString &path){
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)),
             false
         );
+
+        /*ProjectDocument* document = new ProjectDocument(
+            qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)),
+            false,
+            this
+        );*/
         m_documentModel->openDocument(document->file()->path(), document);
 
         Runnable* r = new Runnable(engine(), document->file()->path(), m_runnables, document->file()->name());
@@ -145,6 +156,18 @@ void Project::openProject(const QString &path){
                 setActive(bestFocus->path());
             }
         }
+
+        /*ProjectFile* bestFocus = lookupBestFocus(m_fileModel->root()->child(0));
+        if( bestFocus ){
+            ProjectDocument* document = new ProjectDocument(
+                bestFocus,
+                false,
+                this
+            );
+            m_documentModel->openDocument(document->file()->path(), document);
+            m_active = document;
+            emit activeChanged(document);
+        }*/
     }
 
     scheduleRun();
@@ -202,6 +225,7 @@ ProjectDocument *Project::openFile(const QUrl &path, int mode){
 /**
  * \brief Opens the file given by the \p path, in the given mode
  *
+ * If the document is not opened, we use the third openFile function to do so.
  * If it is, we update its monitoring state.
  *
  * \sa Project::openFile(ProjectFile *file, int mode)
@@ -231,6 +255,11 @@ ProjectDocument *Project::openFile(ProjectFile *file, int mode){
 
     ProjectDocument* document = isOpened(file->path());
 
+    /*if ( !document && m_active != nullptr && m_active->file() == file ){
+        document = m_active;
+        m_documentModel->openDocument(file->path(), document);
+    } else if (!document){
+        document = new ProjectDocument(file, (mode == ProjectDocument::Monitor), this);*/
     if (!document){
         document = createDocument(file, (mode == ProjectDocument::Monitor));
         m_documentModel->openDocument(file->path(), document);
@@ -244,6 +273,18 @@ ProjectDocument *Project::openFile(ProjectFile *file, int mode){
     return document;
 }
 
+/** Sets given project file as active */
+void Project::setActive(ProjectFile* file){
+    if (!file)
+        return;
+
+    ProjectDocument* document = isOpened(file->path());
+    if (!document){
+        document = new ProjectDocument(file, false, this);
+        m_documentModel->openDocument(file->path(), document);
+    }
+    setActive(document);
+}
 
 /**
  * \brief Shows if the project is of folder type

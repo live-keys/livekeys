@@ -104,8 +104,6 @@ Item{
                         paletteContainer.documentHandler.codeHandler.removePalette(paletteContainer.palette)
                         paletteContainer.destroy()
                     }
-                    if (editorBox.objectName === "editorBox") // might be redundant
-                        documentHandler.codeHandler.resizedEditFrame(editorBox)
                 }
             }
         }

@@ -61,7 +61,6 @@ class QTextListFormat;
 namespace lv {
 
 class TextDocumentLayoutPrivate;
-class LineManager;
 
 class TextDocumentLayout : public QAbstractTextDocumentLayout
 {
@@ -101,28 +100,10 @@ public:
     qreal idealWidth() const;
 
     bool contentHasAlignment() const;
-
-    LineManager* getLineManager();
-    void stateChangeUpdate(int pos);
-
-
-    // line manager wrappers
-    QTextDocument* lineDocument();
-    void collapseLines(int pos, int len);
-    void expandLines(int pos, int len);
-    std::pair<int,int> isFirstLineOfCollapsedSection(int lineNumber);
-    std::pair<int,int> isLineAfterCollapsedSection(int lineNumber);
-    QTextDocument* lineManagerParentDocument();
-    void setLineManagerParentDocument(QTextDocument* doc);
-    void setLineDocumentFont(const QFont& font);
-
-    void setDirtyPos(int pos);
-    void textDocumentFinishedUpdating(int newLineNumber);
     void updateLineSurface(int oldLineNum, int newLineNum, int dirtyPos);
-Q_SIGNALS:
-    void linesCollapsed(int pos, int len);
-    void linesExpanded(int pos, int len);
-    void updateLineSurfaceSignal(int oldLineNum, int newLineNum, int dirtyPos);
+
+signals:
+    void updateBlockRange(int first, int last);
 protected:
     void documentChanged(int from, int oldLength, int length) override;
     void resizeInlineObject(QTextInlineObject item, int posInDocument, const QTextFormat &format) override;

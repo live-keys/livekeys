@@ -267,7 +267,6 @@ CodeQmlHandler::CodeQmlHandler(
  */
 CodeQmlHandler::~CodeQmlHandler(){
     Q_D(CodeQmlHandler);
-    cancelEdit();
 
     if ( d->projectHandler ){
         d->projectHandler->removeCodeQmlHandler(this);
@@ -299,6 +298,20 @@ void CodeQmlHandler::assistCompletion(
             cursorChange.insertText("}");
             cursorChange.endEditBlock();
             cursorChange.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+            return;
+        } else if (insertion == '}'){
+            cursorChange = cursor;
+            if (cursor.position() > 5)
+            {
+                QString text = m_target->toPlainText();
+                if (text.mid(cursor.position()-5,4) == "    ")
+                {
+                    cursorChange.beginEditBlock();
+                    for (int i=0; i < 5; i++) cursorChange.deletePreviousChar();
+                    cursorChange.insertText("}");
+                    cursorChange.endEditBlock();
+                }
+            }
             return;
         } else if ( insertion.category() == QChar::Separator_Line || insertion.category() == QChar::Separator_Paragraph){
             cursorChange = cursor;
@@ -465,25 +478,7 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
     m_highlighter->setTarget(m_target);
     d->documentScope = DocumentQmlScope::createEmptyScope(d->projectHandler->scanMonitor()->projectScope());
 
-    if ( m_document ){
-        connect(m_document->textDocument(), &QTextDocument::contentsChange,
-                this, &CodeQmlHandler::__documentContentsChanged);
-        connect(m_document, &ProjectDocument::formatChanged, this, &CodeQmlHandler::__documentFormatUpdate);
-        connect(
-            m_document->textDocument(), &QTextDocument::cursorPositionChanged,
-            this, &CodeQmlHandler::__cursorWritePositionChanged
-        );
-
-        auto it = m_edits.begin();
-        while( it != m_edits.end() ){
-            QmlEditFragment* edit = *it;
-            it = m_edits.erase(it);
-            edit->emitRemoval();
-            edit->deleteLater();
-        }
-    }
-
-    if ( d->projectHandler->scanMonitor()->hasProjectScope() && document != nullptr ){
+    if ( d->projectHandler->scanMonitor()->hasProjectScope() && document != 0 ){
         d->projectHandler->scanMonitor()->scanNewDocumentScope(document->file()->path(), document->content(), this);
         d->projectHandler->scanner()->queueProjectScan();
     }
@@ -543,12 +538,26 @@ void CodeQmlHandler::updateScope(){
         d->projectHandler->scanMonitor()->queueNewDocumentScope(m_document->file()->path(), m_document->content(), this);
 }
 
+int CodeQmlHandler::handleRightBrace(int cursorPosition)
+{
+    if ( cursorPosition > 4 ){
+        QString text = m_target->toPlainText();
+        QTextCursor cursor(m_target);
+        cursor.setPosition(cursorPosition);
+        cursor.beginEditBlock();
+        if( text.mid(cursorPosition - 4, cursorPosition) == "    " ){
+            for (int i = 0; i < 4; i++)
+                cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+        }
+
+    }
+    return cursorPosition;
+}
+
 void CodeQmlHandler::rehighlightSection(int start, int end){
     QTextBlock bl = m_target->findBlock(start);
-    while ( bl.isValid() ){
+    while ( bl.isValid() && bl.position() < end){
         rehighlightBlock(bl);
-        if (bl.position() > end )
-            break;
         bl = bl.next();
     }
 }
@@ -946,6 +955,31 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(
 
     return nullptr;
 }
+
+/**
+ * \brief Returns the block starting position and end position
+ */
+/*QPair<int, int> CodeQmlHandler::contextBlock(int position){
+    DocumentQmlValueScanner vs(m_document, position, 0);
+    int start = vs.getBlockStart(position);
+    int end   = vs.getBlockEnd(start + 1);
+    return QPair<int, int>(start, end);
+}*/
+
+/*void CodeQmlHandler::aboutToDelete()
+{
+    cancelEdit();
+
+    if ( m_document ){
+        auto it = m_edits.begin();
+        while( it != m_edits.end() ){
+            QmlEditFragment* edit = *it;
+            it = m_edits.erase(it);
+            edit->emitRemoval();
+            edit->deleteLater();
+        }
+    }
+}*/
 
 /**
  * \brief Adds an editing fragment to the current document
@@ -1351,20 +1385,12 @@ void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
     if (!edit)
         return;
 
-    connect(box, &QQuickItem::heightChanged, [this, box](){
-        resizedEditFrame(box);
-    });
-
-
-    connect(box, &QQuickItem::destroyed, [this, box](){
-        removeEditFrame(box);
-    });
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
 
     int pos = edit->declaration()->position();
     QTextBlock tb = m_document->textDocument()->findBlock(pos);
     QTextBlock tbend = m_document->textDocument()->findBlock(pos + edit->declaration()->length());
 
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, static_cast<int>(box->height()), box);
 }
 
