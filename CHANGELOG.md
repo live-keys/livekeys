@@ -2,6 +2,14 @@
 
 This file summarises notable changes between Live Keys versions.
 
+## 1.6.1
+
+### Bug Fixes
+
+    - Fixed code completion in some scenarios where the context was off
+    - Cursor position is now remembered when switching documents
+    - Fixed editor scrolling during some indenting scenarios
+
 ## 1.6.0 - Rename to Livekeys
 
 ### Support

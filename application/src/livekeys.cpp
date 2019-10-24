@@ -349,44 +349,30 @@ void Livekeys::loadInternalPackages(){
 
     m_engine->setPackageGraph(m_packageGraph);
 
-    std::vector<std::string> internalPackages = {
-        "editor",
-        "editqml",
-        "fs",
-        "live",
-        "lcvcore",
-        "lcvfeatures2d",
-        "lcvimgproc",
-        "lcvphoto",
-        "lcvvideo"
-    };
+    const MLNode& defaults = ApplicationContext::instance().startupConfiguration();
+    if ( defaults.hasKey("internalPackages") ){
+        const MLNode& internalPackages = defaults["internalPackages"];
 
-    for ( auto it = internalPackages.begin(); it != internalPackages.end(); ++it ){
+        for ( auto it = internalPackages.asArray().begin(); it != internalPackages.asArray().end(); ++it ){
 
-        std::string packagePath = ApplicationContext::instance().pluginPath() + "/" + *it;
+            std::string packagePath = ApplicationContext::instance().pluginPath() + "/" + it->asString();
 
-        if ( Package::existsIn(packagePath) ){
-            PackageGraph::addInternalPackage(Package::createFromPath(packagePath));
+            if ( Package::existsIn(packagePath) ){
+                PackageGraph::addInternalPackage(Package::createFromPath(packagePath));
+            }
         }
     }
 
-    std::vector<std::string> qtPackages = {
-        "Qt",
-        "QtQml",
-        "QtQuick",
-        "QtCanvas3D",
-        "QtGraphicalEffects",
-        "QtMultimedia",
-        "QtWebSockets"
-    };
-
-    for ( auto it = qtPackages.begin(); it != qtPackages.end(); ++it ){
-        Package::Ptr package = Package::createFromNode(*it, "", {
-            {"name", *it},
-            {"version", QT_VERSION_STR},
-            {"documentation", "editor/loadqtdocs.qml"}
-        });
-        PackageGraph::addInternalPackage(package);
+    if ( defaults.hasKey("internalQtPackages") ){
+        const MLNode& qtPackages = defaults["internalQtPackages"];
+        for ( auto it = qtPackages.asArray().begin(); it != qtPackages.asArray().end(); ++it ){
+            Package::Ptr package = Package::createFromNode(it->asString(), "", {
+                {"name", *it},
+                {"version", QT_VERSION_STR},
+                {"documentation", "editor/loadqtdocs.qml"}
+            });
+            PackageGraph::addInternalPackage(package);
+        }
     }
 }
 
@@ -416,9 +402,13 @@ void Livekeys::initializeProject(){
 }
 
 void Livekeys::addDefaultLayers(){
-    addLayer("window", ":/windowlayer.qml");
-    addLayer("workspace", ":/workspacelayer.qml");
-    addLayer("editor", ":/editorlayer.qml");
+    const MLNode& defaults = ApplicationContext::instance().startupConfiguration();
+    if ( defaults.hasKey("layers") ){
+        const MLNode& layers = defaults["layers"];
+        for ( auto it = layers.begin(); it != layers.end(); ++it ){
+            addLayer(QString::fromStdString(it.key()), QString::fromStdString(it.value().asString()));
+        }
+    }
 }
 
 std::vector<std::string> Livekeys::packageImportPaths() const{
@@ -449,6 +439,37 @@ QByteArray Livekeys::extractPluginInfo(const QString &import) const{
 
 QQmlPropertyMap *Livekeys::layers(){
     return m_layers;
+}
+
+const MLNode &Livekeys::startupConfiguration(){
+    static MLNode config = {
+        {"layers", {
+             {"window",    ":/windowlayer.qml"},
+             {"workspace", ":/workspacelayer.qml"},
+             {"editor",    ":/editorlayer.qml"}
+         }},
+         {"internalPackages",{
+              "editor",
+              "editqml",
+              "fs",
+              "live",
+              "lcvcore",
+              "lcvfeatures2d",
+              "lcvimgproc",
+              "lcvphoto",
+              "lcvvideo"
+          }},
+         {"internalQtPackages",{
+              "Qt",
+              "QtQml",
+              "QtQuick",
+              "QtCanvas3D",
+              "QtGraphicalEffects",
+              "QtMultimedia",
+              "QtWebSockets"
+          }}
+    };
+    return config;
 }
 
 QObject *Livekeys::layerPlaceholder() const{

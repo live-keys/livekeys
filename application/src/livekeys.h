@@ -31,7 +31,7 @@
 
 #define LIVEKEYS_VERSION_MAJOR 1
 #define LIVEKEYS_VERSION_MINOR 6
-#define LIVEKEYS_VERSION_PATCH 0
+#define LIVEKEYS_VERSION_PATCH 1
 
 // Forward declarations
 // --------------------
@@ -114,6 +114,8 @@ public:
     Memory*     memory();
     VisualLogModel* log();
     QQmlPropertyMap* layers();
+
+    static const MLNode& startupConfiguration();
 
 public slots:
     QObject* layerPlaceholder() const;

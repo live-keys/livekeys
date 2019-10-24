@@ -32,7 +32,7 @@ using namespace lv;
 
 int main(int argc, char *argv[]){
 
-    ApplicationContext::initialize();
+    ApplicationContext::initialize(Livekeys::startupConfiguration());
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::addLibraryPath(QString::fromStdString(lv::ApplicationContext::instance().librariesPath()));

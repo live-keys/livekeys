@@ -1,10 +1,10 @@
 {
-    "version" : "1.6.0",
+    "version" : "1.6.1",
     "name": "livekeys",
     "webpage": "https://livekeys.io",
     "components" : {
         "livekeys" : {
-            "version" : "1.6.0",
+            "version" : "1.6.1",
             "versionsync" : {
                 "README.md": "\\s*(?:\\* \\*\\*Version\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*",
                 "application/src/livekeys.h" : [
