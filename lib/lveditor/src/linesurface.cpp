@@ -15,7 +15,6 @@
 #include "private/qtextengine_p.h"
 #include <algorithm>
 #include "textedit_p.h"
-#include "palettemanager.h"
 #include "linecontrol.h"
 #include "textdocumentlayout.h"
 
@@ -201,7 +200,7 @@ void LineSurface::setViewport(QRect view)
 
 void LineSurface::clearViewportDocument()
 {
-    m_document->clear();
+    if (m_document) m_document->clear();
     polish();
     if (isComponentComplete())
     {

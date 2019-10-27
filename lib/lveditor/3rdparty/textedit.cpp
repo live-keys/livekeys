@@ -2959,7 +2959,7 @@ void TextEditPrivate::unsetTextDocument()
 
     document = nullptr;
     lineControl->reset();
-    lineSurface->clearViewportDocument();
+    if (lineSurface) lineSurface->clearViewportDocument();
 
     q->deleteAllTextNodes("unsetTextDocument");
 

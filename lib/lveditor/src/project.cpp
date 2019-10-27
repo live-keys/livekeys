@@ -273,19 +273,6 @@ ProjectDocument *Project::openFile(ProjectFile *file, int mode){
     return document;
 }
 
-/** Sets given project file as active */
-void Project::setActive(ProjectFile* file){
-    if (!file)
-        return;
-
-    ProjectDocument* document = isOpened(file->path());
-    if (!document){
-        document = new ProjectDocument(file, false, this);
-        m_documentModel->openDocument(file->path(), document);
-    }
-    setActive(document);
-}
-
 /**
  * \brief Shows if the project is of folder type
  */

@@ -697,7 +697,7 @@ Pane{
 
                     color : "#fff"
                     font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
-                    font.pixelSize: livecv.settings.file('editor').fontSize
+                    font.pixelSize: lk.settings.file('editor').fontSize
                     font.weight: Font.Normal
 
                     selectByMouse: true
@@ -785,9 +785,9 @@ Pane{
                                 codeHandler.completionModel.disable()
                             }
                         } else {
-                            var command = livecv.keymap.locateCommand(event.key, event.modifiers)
+                            var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
                             if ( command !== '' ){
-                                livecv.commands.execute(command)
+                                lk.layers.workspace.commands.execute(command)
                                 event.accepted = true
                             }
                         }

@@ -1,9 +1,12 @@
 module.exports["A"] = class A extends Element{
     constructor(a, b){
         super()
+        this.__initialize()
         this.a = a
         this.b = b
     }
+    
+    __initialize(){}
 
     otherFunction(a){
         this.a = a

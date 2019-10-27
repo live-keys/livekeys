@@ -47,7 +47,6 @@
 #include <QtQml/qqml.h>
 #include <QtCore/qlist.h>
 #include <climits>
-#include "palettemanager.h"
 #include "linecontrol.h"
 #include <deque>
 #include <set>

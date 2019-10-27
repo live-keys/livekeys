@@ -74,9 +74,6 @@ public:
      */
     CodeCompletionModel* completionModel() const;
 
-    void rehighlightBlock(const QTextBlock& block);
-    void rehighlightSection(int position, int length);
-
     void setIndentSize(int size);
 
     void classBegin(){}
@@ -108,11 +105,7 @@ public:
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
     void documentContentsChanged(int position, int charsRemoved, int charsAdded);
-    // void cursorWritePositionChanged(QTextCursor cursor);
     void setDocument(lv::ProjectDocument* document, QJSValue options = QJSValue());
-    // void documentFormatUpdate(int position, int length);
-    // void generateCompletion(int cursorPosition);
-    // QJSValue contextBlockRange(int cursorPosition);
 
     void manageIndent(int from, int length, bool undo = false);
     void insertTab(int position);
@@ -131,6 +124,8 @@ signals:
     void editorFocusChanged();
     /** Code handler changed */
     void codeHandlerChanged();
+    /** Triggered just before the handler is to be destroyed */
+    void aboutToDeleteHandler();
 
 private:
     void readContent();

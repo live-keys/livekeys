@@ -255,6 +255,8 @@ CodeQmlHandler::CodeQmlHandler(
     m_scopeTimer.setInterval(1000);
     m_scopeTimer.setSingleShot(true);
     connect(&m_scopeTimer, SIGNAL(timeout()), this, SLOT(updateScope()));
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    connect(dh, SIGNAL(aboutToDeleteHandler()), this, SLOT(aboutToDelete()));
 
     d->projectHandler->addCodeQmlHandler(this);
     d->projectHandler->scanMonitor()->addScopeListener(this);
@@ -536,22 +538,6 @@ void CodeQmlHandler::updateScope(){
     Q_D(CodeQmlHandler);
     if ( d->projectHandler->scanMonitor()->hasProjectScope() && m_document )
         d->projectHandler->scanMonitor()->queueNewDocumentScope(m_document->file()->path(), m_document->content(), this);
-}
-
-int CodeQmlHandler::handleRightBrace(int cursorPosition)
-{
-    if ( cursorPosition > 4 ){
-        QString text = m_target->toPlainText();
-        QTextCursor cursor(m_target);
-        cursor.setPosition(cursorPosition);
-        cursor.beginEditBlock();
-        if( text.mid(cursorPosition - 4, cursorPosition) == "    " ){
-            for (int i = 0; i < 4; i++)
-                cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
-        }
-
-    }
-    return cursorPosition;
 }
 
 void CodeQmlHandler::rehighlightSection(int start, int end){
@@ -956,17 +942,7 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(
     return nullptr;
 }
 
-/**
- * \brief Returns the block starting position and end position
- */
-/*QPair<int, int> CodeQmlHandler::contextBlock(int position){
-    DocumentQmlValueScanner vs(m_document, position, 0);
-    int start = vs.getBlockStart(position);
-    int end   = vs.getBlockEnd(start + 1);
-    return QPair<int, int>(start, end);
-}*/
-
-/*void CodeQmlHandler::aboutToDelete()
+void CodeQmlHandler::aboutToDelete()
 {
     cancelEdit();
 
@@ -979,7 +955,7 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(
             edit->deleteLater();
         }
     }
-}*/
+}
 
 /**
  * \brief Adds an editing fragment to the current document
@@ -1393,7 +1369,7 @@ void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
 
     dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, static_cast<int>(box->height()), box);
 }
-
+/*
 void CodeQmlHandler::removeEditFrame(QQuickItem *box){
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     dh->lineBoxRemoved(box);
@@ -1403,7 +1379,7 @@ void CodeQmlHandler::resizedEditFrame(QQuickItem *box){
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     dh->lineBoxResized(box, static_cast<int>(box->height()));
 }
-
+*/
 /**
  * \brief Finds the boundaries of the code block containing the cursor position
  *

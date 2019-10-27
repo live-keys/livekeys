@@ -73,12 +73,10 @@ public:
         bool manuallyTriggered,
         CodeCompletionModel* model,
         QTextCursor& cursorChange
-    ) Q_DECL_OVERRIDE;
-    void setDocument(ProjectDocument* document) Q_DECL_OVERRIDE;
-    // AbstractCodeHandler::ContentsTrigger documentContentsChanged(int position, int charsRemoved, int charsAdded) Q_DECL_OVERRIDE;
-    void rehighlightBlock(const QTextBlock& block) Q_DECL_OVERRIDE;
+    );
+    void setDocument(ProjectDocument* document);
+    void rehighlightBlock(const QTextBlock& block);
     // QPair<int, int> contextBlock(int position) Q_DECL_OVERRIDE;
-    // void aboutToDelete() Q_DECL_OVERRIDE;
 
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
     bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);
@@ -148,7 +146,7 @@ public slots:
     void newProjectScopeReady();
     void updateScope();
 
-    // int handleRightBrace(int cursorPosition);
+    void aboutToDelete();
 signals:
 
 private:
