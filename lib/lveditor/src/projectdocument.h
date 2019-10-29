@@ -27,8 +27,6 @@
 
 #include "live/lveditorglobal.h"
 
-#include <QDebug>
-
 namespace lv{
 
 class Project;

@@ -89,9 +89,6 @@ void Project::newProject(){
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false
         );
 	        
-	/*ProjectDocument* document = new ProjectDocument(
-            qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false, this
-        );*/
         document->addEditingState(ProjectDocument::Read);
         document->setContent("import QtQuick 2.3\n\nGrid{\n}");
         document->removeEditingState(ProjectDocument::Read);
@@ -131,11 +128,6 @@ void Project::openProject(const QString &path){
             false
         );
 
-        /*ProjectDocument* document = new ProjectDocument(
-            qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)),
-            false,
-            this
-        );*/
         m_documentModel->openDocument(document->file()->path(), document);
 
         Runnable* r = new Runnable(engine(), document->file()->path(), m_runnables, document->file()->name());
@@ -156,18 +148,6 @@ void Project::openProject(const QString &path){
                 setActive(bestFocus->path());
             }
         }
-
-        /*ProjectFile* bestFocus = lookupBestFocus(m_fileModel->root()->child(0));
-        if( bestFocus ){
-            ProjectDocument* document = new ProjectDocument(
-                bestFocus,
-                false,
-                this
-            );
-            m_documentModel->openDocument(document->file()->path(), document);
-            m_active = document;
-            emit activeChanged(document);
-        }*/
     }
 
     scheduleRun();
@@ -251,15 +231,10 @@ ProjectDocument *Project::openFile(const QString &path, int mode){
  */
 ProjectDocument *Project::openFile(ProjectFile *file, int mode){
     if (!file)
-        return 0;
+        return nullptr;
 
     ProjectDocument* document = isOpened(file->path());
 
-    /*if ( !document && m_active != nullptr && m_active->file() == file ){
-        document = m_active;
-        m_documentModel->openDocument(file->path(), document);
-    } else if (!document){
-        document = new ProjectDocument(file, (mode == ProjectDocument::Monitor), this);*/
     if (!document){
         document = createDocument(file, (mode == ProjectDocument::Monitor));
         m_documentModel->openDocument(file->path(), document);

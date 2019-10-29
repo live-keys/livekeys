@@ -351,26 +351,6 @@ void DocumentHandler::insertTab(int position)
 
 }
 
-void DocumentHandler::handleClosingBrace(int position)
-{
-    if (!m_textEdit || !m_targetDoc || position < 4) return;
-
-    QTextCursor cursor(m_targetDoc);
-    cursor.beginEditBlock();
-
-    if (m_textEdit->text().mid(position - 4, 4) == "    ")
-    {
-        cursor.setPosition(position-4);
-        cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, 4);
-        cursor.removeSelectedText();
-    } else {
-        cursor.setPosition(position);
-    }
-
-    cursor.insertText("}");
-    cursor.endEditBlock();
-
-}
 
 bool DocumentHandler::has(int feature){
     return m_languageFeatures.contains(feature);

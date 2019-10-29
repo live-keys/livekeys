@@ -716,13 +716,7 @@ Pane{
 
 
                     Keys.onPressed: {
-                        if ( (event.key === Qt.Key_BracketRight && (event.modifiers === Qt.ShiftModifier) ) ||
-                            (event.key === Qt.Key_BraceRight) ){
-
-                            codeHandler.handleClosingBrace(cursorPosition)
-                            event.accepted = true
-
-                        } else if ( event.key === Qt.Key_PageUp ){
+                        if ( event.key === Qt.Key_PageUp ){
                             if ( codeHandler.completionModel.isEnabled ){
                                 qmlSuggestionBox.highlightPrevPage()
                             } else {

@@ -76,7 +76,6 @@ public:
     );
     void setDocument(ProjectDocument* document);
     void rehighlightBlock(const QTextBlock& block);
-    // QPair<int, int> contextBlock(int position) Q_DECL_OVERRIDE;
 
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
     bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);

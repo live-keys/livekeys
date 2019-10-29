@@ -303,10 +303,12 @@ void CodeQmlHandler::assistCompletion(
             return;
         } else if (insertion == '}'){
             cursorChange = cursor;
-            if (cursor.position() > 5)
+            if (cursor.positionInBlock() >= 5)
             {
-                QString text = m_target->toPlainText();
-                if (text.mid(cursor.position()-5,4) == "    ")
+                QTextBlock block = m_target->findBlock(cursor.position());
+                QString text = block.text();
+
+                if (text.mid(cursor.positionInBlock()-5,4) == "    ")
                 {
                     cursorChange.beginEditBlock();
                     for (int i=0; i < 5; i++) cursorChange.deletePreviousChar();
@@ -480,7 +482,25 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
     m_highlighter->setTarget(m_target);
     d->documentScope = DocumentQmlScope::createEmptyScope(d->projectHandler->scanMonitor()->projectScope());
 
-    if ( d->projectHandler->scanMonitor()->hasProjectScope() && document != 0 ){
+    if ( m_document ){
+        connect(m_document->textDocument(), &QTextDocument::contentsChange,
+                this, &CodeQmlHandler::__documentContentsChanged);
+        connect(m_document, &ProjectDocument::formatChanged, this, &CodeQmlHandler::__documentFormatUpdate);
+        connect(
+            m_document->textDocument(), &QTextDocument::cursorPositionChanged,
+            this, &CodeQmlHandler::__cursorWritePositionChanged
+        );
+
+        auto it = m_edits.begin();
+        while( it != m_edits.end() ){
+            QmlEditFragment* edit = *it;
+            it = m_edits.erase(it);
+            edit->emitRemoval();
+            edit->deleteLater();
+        }
+    }
+
+    if ( d->projectHandler->scanMonitor()->hasProjectScope() && document != nullptr ){
         d->projectHandler->scanMonitor()->scanNewDocumentScope(document->file()->path(), document->content(), this);
         d->projectHandler->scanner()->queueProjectScan();
     }
