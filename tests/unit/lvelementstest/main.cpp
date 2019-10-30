@@ -37,6 +37,7 @@
 #include "lvcompiletest.h"
 #include "jstupletest.h"
 #include "jsimportstest.h"
+#include "lvparsetest.h"
 
 
 int main(int argc, char *argv[]){
