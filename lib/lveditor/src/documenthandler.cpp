@@ -125,25 +125,25 @@ void DocumentHandler::requestCursorPosition(int position){
 /**
  * \brief Used to add and position the palette inside the editor
  */
-void DocumentHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *box){
-    m_textEdit->linePaletteAdded(lineStart, lineEnd, height, box);
+void DocumentHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *box, int start, int end){
+    m_textEdit->linePaletteAdded(lineStart, lineEnd, height, box, start, end);
 }
 
-/**
- * \brief Used to remove a specific palette in the editor
- */
-void DocumentHandler::lineBoxRemoved(QQuickItem *palette)
-{
-    m_textEdit->linePaletteRemoved(palette);
-}
+///**
+// * \brief Used to remove a specific palette in the editor
+// */
+//void DocumentHandler::lineBoxRemoved(QQuickItem *palette)
+//{
+//    m_textEdit->linePaletteRemoved(palette);
+//}
 
-/**
- * \brief Used to resize a given palette
- */
-void DocumentHandler::lineBoxResized(QQuickItem *palette, int newHeight)
-{
-    m_textEdit->linePaletteHeightChanged(palette, newHeight);
-}
+///**
+// * \brief Used to resize a given palette
+// */
+//void DocumentHandler::lineBoxResized(QQuickItem *palette, int newHeight)
+//{
+//    m_textEdit->linePaletteHeightChanged(palette, newHeight);
+//}
 
 
 /**
@@ -270,6 +270,7 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
     m_projectDocument = document;
 
     if ( m_codeHandler ){
+        emit aboutToDeleteHandler();
         delete m_codeHandler;
         m_codeHandler = nullptr;
     }
@@ -350,26 +351,6 @@ void DocumentHandler::insertTab(int position)
 
 }
 
-void DocumentHandler::handleClosingBrace(int position)
-{
-    if (!m_textEdit || !m_targetDoc || position < 4) return;
-
-    QTextCursor cursor(m_targetDoc);
-    cursor.beginEditBlock();
-
-    if (m_textEdit->text().mid(position - 4, 4) == "    ")
-    {
-        cursor.setPosition(position-4);
-        cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, 4);
-        cursor.removeSelectedText();
-    } else {
-        cursor.setPosition(position);
-    }
-
-    cursor.insertText("}");
-    cursor.endEditBlock();
-
-}
 
 bool DocumentHandler::has(int feature){
     return m_languageFeatures.contains(feature);

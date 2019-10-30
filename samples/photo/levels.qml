@@ -12,7 +12,7 @@ Grid{
     }
     
     Levels{
-        lightness: [10, 1.0, 255]
+        lightness: [10, 1.5, 120]
         channels: {
             0: [0, 1.0, 170]
         }

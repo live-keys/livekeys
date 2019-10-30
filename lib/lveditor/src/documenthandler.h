@@ -100,9 +100,7 @@ public:
 
     void requestCursorPosition(int position);
 
-    void lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *palette);
-    void lineBoxRemoved(QQuickItem *palette);
-    void lineBoxResized(QQuickItem *palette, int newHeight);
+    void lineBoxAdded(int lineStart, int lineEnd, int height, QQuickItem *palette, int start = -1, int end = -1);
 
 public slots:
     void insertCompletion(int from, int to, const QString& completion);
@@ -111,7 +109,6 @@ public slots:
 
     void manageIndent(int from, int length, bool undo = false);
     void insertTab(int position);
-    void handleClosingBrace(int position);
 
     bool has(int feature);
 
@@ -126,6 +123,8 @@ signals:
     void editorFocusChanged();
     /** Code handler changed */
     void codeHandlerChanged();
+    /** Triggered just before the handler is to be destroyed */
+    void aboutToDeleteHandler();
 
 private:
     void readContent();

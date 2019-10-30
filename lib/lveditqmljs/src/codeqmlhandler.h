@@ -113,11 +113,6 @@ public slots:
     bool isForAnObject(lv::QmlEditFragment* palette);
 
     void frameEdit(QQuickItem *box, lv::QmlEditFragment* palette);
-    void removeEditFrame(QQuickItem* box);
-    void resizedEditFrame(QQuickItem* box);
-
-    // Context Block Range
-
     QJSValue contextBlockRange(int cursorPosition);
 
     // Direct editing management
@@ -150,6 +145,7 @@ public slots:
     void newProjectScopeReady();
     void updateScope();
 
+    void aboutToDelete();
 signals:
 
 private:

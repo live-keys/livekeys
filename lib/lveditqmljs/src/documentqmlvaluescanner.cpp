@@ -36,95 +36,92 @@ DocumentQmlValueScanner::~DocumentQmlValueScanner(){
 bool DocumentQmlValueScanner::operator()(){
 
     int startFrom = m_position + m_length;
-    if ( m_document->textDocument() ){
-        QTextBlock block = m_document->textDocument()->findBlock(startFrom);
-        int blockTrim    = startFrom - block.position();
+    if (!m_document->textDocument()) return false;
 
-        while ( block.isValid() ){
-            m_colonPosition = findColonInTokenSet(m_scanner(block.text().mid(blockTrim) ) );
-            if ( m_colonPosition == -2 )
-                return false;
-            else if ( m_colonPosition == -1 ){
-                block = block.next();
-                blockTrim = 0;
-            } else {
-                m_colonPosition += blockTrim + block.position();
-                break;
-            }
-        }
-        if ( m_colonPosition == -1 )
+    QTextBlock block = m_document->textDocument()->findBlock(startFrom);
+    int blockTrim    = startFrom - block.position();
+
+    while ( block.isValid() ){
+        m_colonPosition = findColonInTokenSet(m_scanner(block.text().mid(blockTrim) ) );
+        if ( m_colonPosition == -2 )
             return false;
+        else if ( m_colonPosition == -1 ){
+            block = block.next();
+            blockTrim = 0;
+        } else {
+            m_colonPosition += blockTrim + block.position();
+            break;
+        }
+    }
+    if ( m_colonPosition == -1 )
+        return false;
 
 
-        blockTrim = m_colonPosition + 1 - block.position();
+    blockTrim = m_colonPosition + 1 - block.position();
 
-        QList<QmlJS::Token> tokens = m_scanner(block.text().mid(blockTrim));
+    QList<QmlJS::Token> tokens = m_scanner(block.text().mid(blockTrim));
 
-        int nestingDepth        = 0;
-        bool identifierExpected = true;
+    int nestingDepth        = 0;
+    bool identifierExpected = true;
 
-        m_valueEnd        = 0;
-        int blockPosition = block.position() + blockTrim;
+    m_valueEnd        = 0;
+    int blockPosition = block.position() + blockTrim;
 
-        while(true){
-            for ( QList<QmlJS::Token>::iterator it = tokens.begin(); it != tokens.end(); ++it ){
-                if ( m_valuePosition == -1 )
-                    m_valuePosition = blockPosition + it->offset;
+    while(true){
+        for ( QList<QmlJS::Token>::iterator it = tokens.begin(); it != tokens.end(); ++it ){
+            if ( m_valuePosition == -1 )
+                m_valuePosition = blockPosition + it->offset;
 
-                if ( it->is(QmlJS::Token::LeftBrace) ||
-                     it->is(QmlJS::Token::LeftParenthesis) ||
-                     it->is(QmlJS::Token::LeftBracket ) )
-                {
-                    identifierExpected = true;
-                    ++nestingDepth;
-                } else if ( it->is(QmlJS::Token::RightBrace ) ||
-                            it->is(QmlJS::Token::RightBracket) ||
-                            it->is(QmlJS::Token::RightParenthesis) )
-                {
-                    --nestingDepth;
-                    if ( nestingDepth < 0 ){
+            if ( it->is(QmlJS::Token::LeftBrace) ||
+                 it->is(QmlJS::Token::LeftParenthesis) ||
+                 it->is(QmlJS::Token::LeftBracket ) )
+            {
+                identifierExpected = true;
+                ++nestingDepth;
+            } else if ( it->is(QmlJS::Token::RightBrace ) ||
+                        it->is(QmlJS::Token::RightBracket) ||
+                        it->is(QmlJS::Token::RightParenthesis) )
+            {
+                --nestingDepth;
+                if ( nestingDepth < 0 ){
+                    return true;
+                }
+                identifierExpected = false;
+                m_valueEnd = blockPosition + it->offset + it->length;
+
+            // There's no point iterating tokens inside brackets
+            } else if ( nestingDepth == 0 ){
+
+                if ( it->is(QmlJS::Token::Identifier) || it->is(QmlJS::Token::Keyword) ){
+                    if ( !identifierExpected )
                         return true;
-                    }
-                    identifierExpected = false;
+
+                    if ( it->is(QmlJS::Token::Identifier) )
+                        identifierExpected = false;
                     m_valueEnd = blockPosition + it->offset + it->length;
 
-                // There's no point iterating tokens inside brackets
-                } else if ( nestingDepth == 0 ){
+                } else if ( it->is(QmlJS::Token::RegExp) ||
+                            it->is(QmlJS::Token::String) ||
+                            it->is(QmlJS::Token::Number) )
+                {
+                    identifierExpected = false;
+                    m_valueEnd = blockPosition + it->offset + it->length;
+                } else if ( it->is(QmlJS::Token::Semicolon) ){
+                    return true;
 
-                    if ( it->is(QmlJS::Token::Identifier) || it->is(QmlJS::Token::Keyword) ){
-                        if ( !identifierExpected )
-                            return true;
-
-                        if ( it->is(QmlJS::Token::Identifier) )
-                            identifierExpected = false;
-                        m_valueEnd = blockPosition + it->offset + it->length;
-
-                    } else if ( it->is(QmlJS::Token::RegExp) ||
-                                it->is(QmlJS::Token::String) ||
-                                it->is(QmlJS::Token::Number) )
-                    {
-                        identifierExpected = false;
-                        m_valueEnd = blockPosition + it->offset + it->length;
-                    } else if ( it->is(QmlJS::Token::Semicolon) ){
-                        return true;
-
-                    } else if ( !it->is(QmlJS::Token::Comment) ){
-                        identifierExpected = true;
-                    }
+                } else if ( !it->is(QmlJS::Token::Comment) ){
+                    identifierExpected = true;
                 }
             }
-
-            block = block.next();
-            if ( !block.isValid() ){
-                return false;
-            }
-            blockPosition = block.position();
-            tokens        = m_scanner(block.text(), m_scanner.state());
         }
 
+        block = block.next();
+        if ( !block.isValid() ){
+            return false;
+        }
+        blockPosition = block.position();
+        tokens        = m_scanner(block.text(), m_scanner.state());
     }
-
-    return false;
 
 }
 
@@ -360,9 +357,11 @@ int DocumentQmlValueScanner::getBlockEnd(QTextBlock &block, int position){
                         it->is(QmlJS::Token::RightBracket) ||
                         it->is(QmlJS::Token::RightParenthesis) )
             {
-                --nestingDepth;
-                if ( nestingDepth < 0 ){
-                    return tokenPosition;
+                if ( tokenPosition > position ){
+                    --nestingDepth;
+                    if ( nestingDepth < 0 ){
+                        return tokenPosition;
+                    }
                 }
             }
         }

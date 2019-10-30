@@ -255,6 +255,8 @@ CodeQmlHandler::CodeQmlHandler(
     m_scopeTimer.setInterval(1000);
     m_scopeTimer.setSingleShot(true);
     connect(&m_scopeTimer, SIGNAL(timeout()), this, SLOT(updateScope()));
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    connect(dh, SIGNAL(aboutToDeleteHandler()), this, SLOT(aboutToDelete()));
 
     d->projectHandler->addCodeQmlHandler(this);
     d->projectHandler->scanMonitor()->addScopeListener(this);
@@ -267,7 +269,6 @@ CodeQmlHandler::CodeQmlHandler(
  */
 CodeQmlHandler::~CodeQmlHandler(){
     Q_D(CodeQmlHandler);
-    cancelEdit();
 
     if ( d->projectHandler ){
         d->projectHandler->removeCodeQmlHandler(this);
@@ -299,6 +300,22 @@ void CodeQmlHandler::assistCompletion(
             cursorChange.insertText("}");
             cursorChange.endEditBlock();
             cursorChange.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+            return;
+        } else if (insertion == '}'){
+            cursorChange = cursor;
+            if (cursor.positionInBlock() >= 5)
+            {
+                QTextBlock block = m_target->findBlock(cursor.position());
+                QString text = block.text();
+
+                if (text.mid(cursor.positionInBlock()-5,4) == "    ")
+                {
+                    cursorChange.beginEditBlock();
+                    for (int i=0; i < 5; i++) cursorChange.deletePreviousChar();
+                    cursorChange.insertText("}");
+                    cursorChange.endEditBlock();
+                }
+            }
             return;
         } else if ( insertion.category() == QChar::Separator_Line || insertion.category() == QChar::Separator_Paragraph){
             cursorChange = cursor;
@@ -545,10 +562,8 @@ void CodeQmlHandler::updateScope(){
 
 void CodeQmlHandler::rehighlightSection(int start, int end){
     QTextBlock bl = m_target->findBlock(start);
-    while ( bl.isValid() ){
+    while ( bl.isValid() && bl.position() < end){
         rehighlightBlock(bl);
-        if (bl.position() > end )
-            break;
         bl = bl.next();
     }
 }
@@ -945,6 +960,21 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(
     }
 
     return nullptr;
+}
+
+void CodeQmlHandler::aboutToDelete()
+{
+    cancelEdit();
+
+    if ( m_document ){
+        auto it = m_edits.begin();
+        while( it != m_edits.end() ){
+            QmlEditFragment* edit = *it;
+            it = m_edits.erase(it);
+            edit->emitRemoval();
+            edit->deleteLater();
+        }
+    }
 }
 
 /**
@@ -1351,23 +1381,15 @@ void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
     if (!edit)
         return;
 
-    connect(box, &QQuickItem::heightChanged, [this, box](){
-        resizedEditFrame(box);
-    });
-
-
-    connect(box, &QQuickItem::destroyed, [this, box](){
-        removeEditFrame(box);
-    });
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
 
     int pos = edit->declaration()->position();
     QTextBlock tb = m_document->textDocument()->findBlock(pos);
     QTextBlock tbend = m_document->textDocument()->findBlock(pos + edit->declaration()->length());
 
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, static_cast<int>(box->height()), box);
 }
-
+/*
 void CodeQmlHandler::removeEditFrame(QQuickItem *box){
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     dh->lineBoxRemoved(box);
@@ -1377,7 +1399,7 @@ void CodeQmlHandler::resizedEditFrame(QQuickItem *box){
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     dh->lineBoxResized(box, static_cast<int>(box->height()));
 }
-
+*/
 /**
  * \brief Finds the boundaries of the code block containing the cursor position
  *

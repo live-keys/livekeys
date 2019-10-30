@@ -24,6 +24,7 @@
         <file alias="RunnablesMenu.qml">qml/RunnablesMenu.qml</file>
         <file alias="RunView.qml">qml/RunView.qml</file>
         <file alias="DocumentationView.qml">qml/DocumentationView.qml</file>
+        <file alias="TextEditNodeView.qml">qml/TextEditNodeView.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>

@@ -35,7 +35,6 @@
 #include "live/viewcontext.h"
 #include "live/theme.h"
 #include "linesurface.h"
-#include "linemanager.h"
 #include "editorlayer.h"
 #include "workspacelayer.h"
 #include "themecontainer.h"
@@ -49,7 +48,6 @@
 void EditorPrivatePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::TextEdit>(      uri, 1, 0, "NewTextEdit");
     qmlRegisterType<lv::LineSurface>(   uri, 1, 0, "LineSurface");
-    qmlRegisterType<lv::LineManager>(   uri, 1, 0, "LineManager");
     qmlRegisterType<lv::EditorLayer>(   uri, 1, 0, "EditorLayer");
     qmlRegisterType<lv::WorkspaceLayer>(uri, 1, 0, "WorkspaceLayer");
 

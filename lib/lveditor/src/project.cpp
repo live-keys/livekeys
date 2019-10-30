@@ -36,7 +36,7 @@
  * \class lv::Project
  * \brief Abstraction of the open project in LiveKeys
  *
- * A single instance, constructed at the start of the application, and destroyed right before closing.
+ * Practically a singleton (not enforced), constructed at the start of the application, and destroyed right before closing.
  * There are two types of projects - file-based projects and folder-based projects.
  * \ingroup lveditor
  */
@@ -71,6 +71,7 @@ Project::~Project(){
     delete m_documentModel;
     delete m_fileModel;
     delete m_navigationModel;
+    delete m_documentModel;
     delete m_scheduleRunTimer;
 }
 
@@ -87,6 +88,7 @@ void Project::newProject(){
         ProjectDocument* document = createDocument(
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false
         );
+	        
         document->addEditingState(ProjectDocument::Read);
         document->setContent("import QtQuick 2.3\n\nGrid{\n}");
         document->removeEditingState(ProjectDocument::Read);
@@ -125,6 +127,7 @@ void Project::openProject(const QString &path){
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)),
             false
         );
+
         m_documentModel->openDocument(document->file()->path(), document);
 
         Runnable* r = new Runnable(engine(), document->file()->path(), m_runnables, document->file()->name());
@@ -202,6 +205,7 @@ ProjectDocument *Project::openFile(const QUrl &path, int mode){
 /**
  * \brief Opens the file given by the \p path, in the given mode
  *
+ * If the document is not opened, we use the third openFile function to do so.
  * If it is, we update its monitoring state.
  *
  * \sa Project::openFile(ProjectFile *file, int mode)
@@ -227,7 +231,7 @@ ProjectDocument *Project::openFile(const QString &path, int mode){
  */
 ProjectDocument *Project::openFile(ProjectFile *file, int mode){
     if (!file)
-        return 0;
+        return nullptr;
 
     ProjectDocument* document = isOpened(file->path());
 
@@ -243,7 +247,6 @@ ProjectDocument *Project::openFile(ProjectFile *file, int mode){
 
     return document;
 }
-
 
 /**
  * \brief Shows if the project is of folder type

@@ -1,15 +1,18 @@
 module.exports["FunctionComponent"] = class FunctionComponent extends Element{
     constructor(){
         super()
+        this.__initialize()
     }
+    
+    __initialize(){}
 
     test(param1, param2){
         console.log(param1, param2)
-
+        
         class InsideComponent extends Element{
             constructor(){
                 super()
-                __initialize()
+                this.__initialize()
             }
 
             __initialize(){
@@ -23,7 +26,10 @@ module.exports["FunctionComponent"] = class FunctionComponent extends Element{
 module.exports["FunctionCreatesComponent"] = class FunctionCreatesComponent extends Element{
     constructor(){
         super()
+        this.__initialize()
     }
+
+    __initialize(){}
 
     test(param1, param2){
         console.log(param1, param2)
