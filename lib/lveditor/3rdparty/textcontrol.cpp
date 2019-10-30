@@ -46,7 +46,6 @@
 #include <qcoreapplication.h>
 #include <qfont.h>
 #include <qevent.h>
-#include <qdebug.h>
 #include <qdrag.h>
 #include <qclipboard.h>
 #include <qtimer.h>

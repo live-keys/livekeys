@@ -53,7 +53,7 @@ Rectangle {
     Connections{
         target: lk
         onLayerReady: {
-            if ( layer.name === 'workspace' ){
+            if (layer && layer.name === 'workspace' ){
                 var theme = layer.themes.current
                 container.newIcon = theme.topNewIcon
                 container.saveIcon = theme.topSaveIcon

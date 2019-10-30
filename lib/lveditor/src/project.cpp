@@ -71,7 +71,6 @@ Project::~Project(){
     delete m_documentModel;
     delete m_fileModel;
     delete m_navigationModel;
-    delete m_documentModel;
     delete m_scheduleRunTimer;
 }
 
