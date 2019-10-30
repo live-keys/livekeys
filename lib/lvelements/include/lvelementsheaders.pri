@@ -21,4 +21,5 @@ HEADERS += \
     $$PWD/live/elements/container.h \
     $$PWD/live/elements/mlnodetojs.h \
     $$PWD/live/elements/modulelibrary.h \
-    $$PWD/live/elements/elementsplugin.h
+    $$PWD/live/elements/elementsplugin.h \
+    $$PWD/live/elements/parser.h

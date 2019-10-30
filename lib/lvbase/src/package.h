@@ -3,6 +3,7 @@
 
 #include "live/lvbaseglobal.h"
 #include "live/version.h"
+#include "live/utf8.h"
 
 #include <memory>
 #include <list>
@@ -39,9 +40,9 @@ public:
         Reference(const std::string& n, Version v) : name(n), version(v){}
 
         /** Reference name */
-        std::string name;
+        Utf8    name;
         /** Reference version */
-        Version     version;
+        Version version;
     };
 
     /**
@@ -75,11 +76,11 @@ public:
         FlagResult compareFlags(const Library& other);
 
         /** Package name */
-        std::string            name;
+        Utf8 name;
         /** Package path */
-        std::string            path;
+        Utf8 path;
         /** Package version */
-        Version                version;
+        Version version;
         /** Package flags */
         std::list<std::string> flags;
     };
@@ -95,7 +96,7 @@ public:
     static Package::Ptr createFromNode(const std::string &path, const std::string& filePath, const MLNode& m);
 
     const std::string& name() const;
-    const std::string&path() const;
+    const std::string& path() const;
     const std::string& filePath() const;
     const std::string& documentation() const;
     const Version& version() const;
