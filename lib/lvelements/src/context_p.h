@@ -4,7 +4,7 @@
 #include "live/elements/lvelementsglobal.h"
 #include "live/elements/engine.h"
 
-#include "v8.h"
+#include "v8nowarnings.h"
 
 namespace lv{ namespace el{
 

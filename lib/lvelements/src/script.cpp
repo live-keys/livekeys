@@ -6,7 +6,7 @@
 #include "live/elements/element.h"
 #include "modulefile.h"
 #include "imports_p.h"
-#include "v8.h"
+#include "v8nowarnings.h"
 
 #include <QFileInfo>
 

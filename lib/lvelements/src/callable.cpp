@@ -5,7 +5,7 @@
 #include "live/elements/component.h"
 #include "element_p.h"
 #include "context_p.h"
-#include "v8.h"
+#include "v8nowarnings.h"
 
 namespace lv{ namespace el{
 

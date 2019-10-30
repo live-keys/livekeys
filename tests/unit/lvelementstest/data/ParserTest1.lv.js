@@ -16,6 +16,7 @@ module.exports["A"] = class A extends Element{
 module.exports["B"] = class B extends Element{
     constructor(){
         super()
+        this.__initialize()
     }
 
     createA(){

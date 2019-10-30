@@ -1,10 +1,12 @@
 TEMPLATE = lib
 TARGET   = lvelements
 QT      -= gui
-CONFIG  += c++11 console
+CONFIG  += c++14 console
 CONFIG  -= app_bundle
 
 linkLocalLibrary(lvbase, lvbase)
+
+INCLUDEPATH += $$PROJECT_ROOT/lib/lvbase/3rdparty/utf8proc
 
 win32:{
     DESTDIR    = $$DEPLOY_PATH/dev/$$TARGET/lib
@@ -31,6 +33,8 @@ QMAKE_MAC_SDK = macosx10.9
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
+include(3rdparty/treesitter.pri)
+include(3rdparty/treesitterelements.pri)
 
 include($$PROJECT_ROOT/project/3rdparty/v8.pri)
 include($$PWD/include/lvelementsheaders.pri)

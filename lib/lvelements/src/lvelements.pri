@@ -15,6 +15,7 @@ HEADERS += \
     $$PWD/component.h \
     $$PWD/constructor.h \
     $$PWD/method.h \
+    $$PWD/v8nowarnings.h \
     $$PWD/lvelementsglobal.h \
     $$PWD/callable.h \
     $$PWD/object.h \
@@ -29,9 +30,11 @@ HEADERS += \
     $$PWD/elementsplugin.h \
     $$PWD/imports_p.h \
     $$PWD/modulelibrary.h \
-    $$PWD/parser.h \
+    $$PWD/elementsparser.h \
     $$PWD/moduleloader.h \
-    $$PWD/tuple.h
+    $$PWD/tuple.h \
+    $$PWD/elementsnodes_p.h \
+    $$PWD/elementssections_p.h
 
 SOURCES += \
     $$PWD/function.cpp \
@@ -58,5 +61,7 @@ SOURCES += \
     $$PWD/elementsplugin.cpp \
     $$PWD/imports.cpp \
     $$PWD/modulelibrary.cpp \
-    $$PWD/parser.cpp \
-    $$PWD/tuple.cpp
+    $$PWD/elementsparser.cpp \
+    $$PWD/tuple.cpp \
+    $$PWD/elementsnodes.cpp \
+    $$PWD/elementssections.cpp

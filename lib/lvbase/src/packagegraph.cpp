@@ -263,13 +263,13 @@ PackageGraph::CyclesResult<Plugin::Ptr> PackageGraph::checkCycles(
  \li If it has more compliation flags, than the minor version must be higher or equal to the added library
  */
 void PackageGraph::addLibrary(const Package::Library &lib){
-    auto it = m_d->libraries.find(lib.name);
+    auto it = m_d->libraries.find(lib.name.data());
     if ( it == m_d->libraries.end() ){
         PackageGraph::LibraryNode* libnode = new PackageGraph::LibraryNode(lib);
         libnode->loaded  = false;
-        m_d->libraries[lib.name] = libnode;
+        m_d->libraries[lib.name.data()] = libnode;
 
-        vlog("lvbase-packagegraph").d() << "Added library \'" << lib.name << "\' [" + lib.version.toString() << "]";
+        vlog("lvbase-packagegraph").d() << "Added library \'" << lib.name.data() << "\' [" + lib.version.toString() << "]";
 
     } else {
         PackageGraph::LibraryNode* libnode = it->second;
@@ -279,14 +279,14 @@ void PackageGraph::addLibrary(const Package::Library &lib){
         if ( newVersion.majorNumber() != oldVersion.majorNumber() ){
             THROW_EXCEPTION(
                 lv::Exception,
-                "Incompatible library versions for library \'" + lib.name + "\': " +
+                "Incompatible library versions for library \'" + lib.name.data() + "\': " +
                 oldVersion.toString() + " vs " + newVersion.toString(), 6);
         }
 
         if ( newVersion > oldVersion && libnode->loaded ){
             THROW_EXCEPTION(
                 lv::Exception,
-                "New library version provided for library \'" + lib.name + "\', however older library has already " +
+                "New library version provided for library \'" + lib.name.data() + "\', however older library has already " +
                 "been loaded: " + oldVersion.toString() + " vs " + newVersion.toString(), 7);
         }
 
@@ -298,19 +298,19 @@ void PackageGraph::addLibrary(const Package::Library &lib){
         } else if ( flags == Package::Library::Different ){
             THROW_EXCEPTION(
                 lv::Exception,
-                "Incompatible library compilation for library \'"  + lib.name + "\'",
+                "Incompatible library compilation for library \'"  + lib.name.data() + "\'",
                 8
             );
         } else if ( flags == Package::Library::HasLess ){ // current library has less
             if ( newVersion.minorNumber() < oldVersion.minorNumber() ){
                 THROW_EXCEPTION(
                     lv::Exception,
-                    "Newer library \'" + lib.name + "\' [" + newVersion.toString() + "] has incompatible compilation " +
+                    "Newer library \'" + lib.name.data() + "\' [" + newVersion.toString() + "] has incompatible compilation " +
                     "flags than older library \'" + oldVersion.toString() + "\', ", 10);
             }
 
             vlog("lvbase-packagegraph").d() <<
-                "Replaced library \'" << lib.name << "\' from [" << libnode->library.version.toString() << "] to [" <<
+                "Replaced library \'" << lib.name.data() << "\' from [" << libnode->library.version.toString() << "] to [" <<
                 lib.version.toString() << "]";
 
             libnode->library = lib;
@@ -318,7 +318,7 @@ void PackageGraph::addLibrary(const Package::Library &lib){
             if ( newVersion.minorNumber() > oldVersion.minorNumber() ){
                 THROW_EXCEPTION(
                     lv::Exception,
-                    "Loaded library \'" + lib.name + "\' [" + oldVersion.toString() + "] has incompatible compilation " +
+                    "Loaded library \'" + lib.name.data() + "\' [" + oldVersion.toString() + "] has incompatible compilation " +
                     "flags than newer library \'" + newVersion.toString() + "\', ", 10);
             }
         }
@@ -331,7 +331,7 @@ void PackageGraph::loadLibraries(){
     for ( auto it = m_d->libraries.begin(); it != m_d->libraries.end(); ++it ){
         PackageGraph::LibraryNode* libnode = it->second;
         if ( !libnode->loaded ){
-            LibraryLoadPath::addRecursive(libnode->library.path, ApplicationContext::instance().linkPath());
+            LibraryLoadPath::addRecursive(libnode->library.path.data(), ApplicationContext::instance().linkPath());
             libnode->loaded = true;
         }
     }
@@ -378,7 +378,7 @@ std::string PackageGraph::toString() const{
     ss << "Libraries:" << std::endl;
     for ( auto it = d->libraries.begin(); it != d->libraries.end(); ++it ){
         PackageGraph::LibraryNode* libnode = it->second;
-        ss << "  " << libnode->library.name << "[" << libnode->library.version.toString() << "]:" << (libnode->loaded ? "loaded" : "not loaded") << std::endl;
+        ss << "  " << libnode->library.name.data() << "[" << libnode->library.version.toString() << "]:" << (libnode->loaded ? "loaded" : "not loaded") << std::endl;
     }
 
     ss << std::endl;
@@ -392,7 +392,7 @@ std::string PackageGraph::toString() const{
 Package::Ptr PackageGraph::findPackage(Package::Reference ref) const{
     std::vector<std::string> paths = packageImportPaths();
     for ( auto it = paths.begin(); it != paths.end(); ++it ){
-        std::string path = *it + "/" + ref.name;
+        std::string path = *it + "/" + ref.name.data();
         if ( Package::existsIn(path) ){
             Package::Ptr p = Package::createFromPath(path);
             if ( p->version().majorNumber() == ref.version.majorNumber() && p->version() > ref.version ){

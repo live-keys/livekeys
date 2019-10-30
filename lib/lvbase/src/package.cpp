@@ -111,7 +111,7 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
         MLNode::ObjectType dep = m["dependencies"].asObject();
         for ( auto it = dep.begin(); it != dep.end(); ++it ){
             Package::Reference* dep = new Package::Reference(it->first, Version(it->second.asString()));
-            pt->m_d->dependencies[dep->name] = dep;
+            pt->m_d->dependencies[dep->name.data()] = dep;
         }
     }
 

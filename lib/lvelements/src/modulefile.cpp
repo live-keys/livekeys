@@ -1,6 +1,6 @@
 #include "modulefile.h"
 #include "imports_p.h"
-#include "parser.h"
+#include "live/elements/parser.h"
 #include "live/exception.h"
 #include "live/plugin.h"
 #include "live/plugincontext.h"
