@@ -15,7 +15,7 @@
 #include <iomanip>
 #include <QFileInfo>
 #include "libplatform/libplatform.h"
-#include "v8.h"
+#include "v8nowarnings.h"
 
 namespace lv{ namespace el{
 

@@ -17,6 +17,11 @@
 #ifndef LVEXCEPTION_H
 #define LVEXCEPTION_H
 
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+#pragma warning(push)
+#pragma warning(disable : 4275)
+#endif
+
 #include <exception>
 #include <string>
 
@@ -72,7 +77,8 @@ private:
 };
 
 /** Create exception of given type */
-template<typename T> T Exception::create(const std::string &message,
+template<typename T> T Exception::create(
+        const std::string &message,
         Code code,
         const std::string &file,
         int line,
@@ -94,5 +100,9 @@ template<typename T> T Exception::create(const std::string &message,
 #define THROW_EXCEPTION(_type, _message, _code) \
     throw CREATE_EXCEPTION(_type, _message, _code)
 
+
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+#pragma warning(pop)
+#endif
 
 #endif // LVEXCEPTION_H
