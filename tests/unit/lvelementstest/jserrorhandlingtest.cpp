@@ -70,7 +70,7 @@ void JsErrorHandlingTest::testException(){
     engine->scope([engine](){
         engine->tryCatch([engine](){
             engine->compileEnclosed("throw new Error('Test Js Exception', 'testfile', 12);")->run();
-        }, [engine](const Engine::CatchData& cd){
+        }, [](const Engine::CatchData& cd){
             QVERIFY(cd.message() == "Test Js Exception");
         });
     });
@@ -90,7 +90,7 @@ void JsErrorHandlingTest::testExceptionWithLink(){
 
         engine->tryCatch([engine](){
             engine->compileEnclosed("throw linkError(new Error('Test Js Exception'), jsError)")->run();
-        }, [engine, jsError](const Engine::CatchData& cd){
+        }, [jsError](const Engine::CatchData& cd){
             QVERIFY(cd.message() == "Test Js Exception");
             QVERIFY(cd.object() == jsError);
         });
@@ -119,7 +119,7 @@ void JsErrorHandlingTest::testExceptionFromFunction(){
 
         engine->tryCatch([engine](){
             engine->compileEnclosed("JsErrorHandlingStub.errorFunction();")->run();
-        }, [engine](const Engine::CatchData& cd){
+        }, [](const Engine::CatchData& cd){
             QVERIFY(cd.fileName().find("errorhandlingtest.cpp") != std::string::npos);
             QVERIFY(cd.message() == "TestException");
             QVERIFY(cd.object() == nullptr);
@@ -184,7 +184,7 @@ void JsErrorHandlingTest::testExceptionFromProperty()
 
         engine->tryCatch([engine](){
             engine->compileEnclosed("jsError.errorProperty = 100;")->run();
-        }, [engine, jsError](const Engine::CatchData& cd){
+        }, [jsError](const Engine::CatchData& cd){
             QVERIFY(cd.fileName().find("errorhandlingtest.cpp") != std::string::npos);
             QVERIFY(cd.message() == "TestException");
             QVERIFY(cd.object() == jsError);
