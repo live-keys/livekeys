@@ -448,6 +448,15 @@ const MLNode &Livekeys::startupConfiguration(){
              {"workspace", ":/workspacelayer.qml"},
              {"editor",    ":/editorlayer.qml"}
          }},
+        {"workspace", {
+            {"extensions", {
+                 {
+                     {"package", "editqml"},
+                     {"enabled", true},
+                     {"component", "EditQmlExtension.qml"}
+                 }
+            }}
+         }},
          {"internalPackages",{
               "editor",
               "editqml",

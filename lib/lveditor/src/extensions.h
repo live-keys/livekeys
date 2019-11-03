@@ -27,8 +27,8 @@ public:
     QMap<std::string, WorkspaceExtension*>::iterator end();
 
 private:
-    WorkspaceExtension* loadPackageExtension(const std::string& path);
-    WorkspaceExtension* loadPackageExtension(const Package::Ptr& package);
+    WorkspaceExtension* loadPackageExtension(const std::string& path, const std::string& component);
+    WorkspaceExtension* loadPackageExtension(const Package::Ptr& package, const std::string& component);
 
     QMap<std::string, WorkspaceExtension*> m_extensions;
 
