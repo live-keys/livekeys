@@ -18,7 +18,8 @@
 #define LVQMLSCRIPT_H
 
 #include <QObject>
-#include <QStringList>
+#include <QJSValue>
+#include <QQmlEngine>
 
 namespace lv{
 
@@ -28,39 +29,38 @@ class Runnable;
 class QmlScript : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QStringList  argv             READ argv        NOTIFY argvChanged)
-    Q_PROPERTY(QStringList  argvTail         READ argvTail    CONSTANT)
+    Q_PROPERTY(QJSValue  argv               READ argv        NOTIFY argvChanged)
+    Q_PROPERTY(QJSValue  argvTail           READ argvTail    CONSTANT)
     Q_PROPERTY(lv::Environment* environment READ environment CONSTANT)
 
 public:
-    QmlScript(const QStringList& argvTail, QObject* parent = 0);
-    QmlScript(const std::vector<std::string>& argvTail, QObject* parent = 0);
+    QmlScript(QQmlEngine* engine, const std::vector<std::string>& argvTail, QObject* parent = nullptr);
     ~QmlScript();
 
-    const QStringList& argv() const;
-    const QStringList& argvTail() const;
+    const QJSValue& argv() const;
+    const QJSValue& argvTail() const;
 
     lv::Environment* environment();
 
 public slots:
     void scriptChanged(lv::Runnable* active);
-    const QString& name() const;
+    QString name() const;
 
 signals:
     void argvChanged();
 
 private:
-    QStringList       m_argvTail;
-    QStringList       m_argv;
+    QJSValue       m_argvTail;
+    QJSValue       m_argv;
     lv::Environment* m_environment;
 
 };
 
-inline const QStringList &QmlScript::argv() const{
+inline const QJSValue &QmlScript::argv() const{
     return m_argv;
 }
 
-inline const QStringList &QmlScript::argvTail() const{
+inline const QJSValue &QmlScript::argvTail() const{
     return m_argvTail;
 }
 
@@ -68,8 +68,8 @@ inline Environment *QmlScript::environment(){
     return m_environment;
 }
 
-inline const QString &QmlScript::name() const{
-    return m_argv.first();
+inline QString QmlScript::name() const{
+    return m_argv.property(0).toString();
 }
 
 }// namespace

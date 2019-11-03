@@ -106,8 +106,6 @@ public:
 
     const LivekeysArguments* arguments() const;
 
-    QByteArray extractPluginInfo(const QString& import) const;
-
     Settings*   settings();
     ViewEngine* engine();
     Project*    project();

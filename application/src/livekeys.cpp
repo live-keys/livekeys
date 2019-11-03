@@ -119,7 +119,7 @@ Livekeys::Ptr Livekeys::create(int argc, const char * const argv[], QObject *par
         vlog().configure(it.key(), it.value());
     }
 
-    livekeys->m_script = new QmlScript(livekeys->m_arguments->scriptArguments());
+    livekeys->m_script = new QmlScript(livekeys->engine()->engine(),livekeys->m_arguments->scriptArguments());
     QObject::connect(livekeys->project(), &Project::activeChanged, livekeys->m_script, &QmlScript::scriptChanged);
 
     livekeys->m_settings = Settings::create(QString::fromStdString(ApplicationContext::instance().configPath()));
@@ -419,22 +419,6 @@ std::vector<std::string> Livekeys::packageImportPaths() const{
         paths.push_back(m_project->dir().toStdString() + "/packages");
     }
     return paths;
-}
-
-QByteArray Livekeys::extractPluginInfo(const QString &import) const{
-//    TODO: Check result
-    lv::ProjectQmlExtension* qmlHandler = new lv::ProjectQmlExtension();
-    qmlHandler->setParams(m_settings, m_project, m_engine);
-
-    lv::PluginInfoExtractor* extractor = qmlHandler->getPluginInfoExtractor(import);
-    if ( extractor ){
-        extractor->waitForResult(10000);
-        if (extractor->timedOut() ){
-            return "Error: Timed out\n";
-        }
-    }
-
-    return extractor->result();
 }
 
 QQmlPropertyMap *Livekeys::layers(){

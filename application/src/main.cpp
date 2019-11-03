@@ -59,11 +59,6 @@ int main(int argc, char *argv[]){
         if ( QFileInfo(QString::fromStdString(ApplicationContext::instance().externalPath())).exists() )
             LibraryLoadPath::addRecursive(ApplicationContext::instance().externalPath(), ApplicationContext::instance().linkPath());
 
-        if ( livekeys->arguments()->pluginInfoFlag() ){
-            printf("%s", livekeys->extractPluginInfo(livekeys->arguments()->pluginInfoImport()).data());
-            return 0;
-        }
-
         livekeys->loadDefaultLayers();
 
         return app.exec();

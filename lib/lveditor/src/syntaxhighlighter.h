@@ -91,7 +91,7 @@ public slots:
 
 protected:
     virtual void highlightBlock(const QString &text) = 0;
-    virtual void documentChanged(int pos, int charsAdded, int charsRemoved) {}
+    virtual void documentChanged(int, int, int) {}
     virtual QList<TextFormatRange> highlight(int lastUserState, int position, const QString& text) = 0;
     virtual QList<TextFormatRange> highlightSections(const QList<ProjectDocumentSection::Ptr>&) = 0;
 
