@@ -675,9 +675,6 @@ Pane{
                             editorArea.forceActiveFocus()
                             editorArea.cursorPosition = position
                         }
-                        onContentsChangedManually: {
-                            editor.windowControls.createTimer.restart();
-                        }
                     }
 
 
