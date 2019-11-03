@@ -4065,7 +4065,13 @@ QRect TextEdit::viewport() const
 void TextEdit::setViewport(QRect view)
 {
     Q_D(TextEdit);
-    if (d->viewport.y() == view.y() && d->viewport.height() == view.height()) return;
+
+    if (d->viewport.x() == view.x() &&
+        d->viewport.y() == view.y() &&
+        d->viewport.width() == view.width() &&
+        d->viewport.height() == view.height())
+        return;
+
 
     d->viewport = view;
     updateSize();
