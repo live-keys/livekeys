@@ -2,6 +2,7 @@
 #define LVPARSER_H
 
 #include "live/elements/lvelementsglobal.h"
+#include "live/elements/sourcerange.h"
 
 #include <string>
 #include <list>
@@ -14,7 +15,29 @@ class LV_ELEMENTS_EXPORT Parser{
 
 public:
     typedef void* AST;
-    class ASTNodeRef;
+
+    class ASTRef{
+
+        friend class lv::el::Parser;
+
+    public:
+        ASTRef();
+        ASTRef(const ASTRef& other);
+        ~ASTRef();
+
+        ASTRef& operator = (const ASTRef& other);
+
+        SourceRange range() const;
+        uint32_t childCount() const;
+        ASTRef childAt(uint32_t index) const;
+        ASTRef parent() const;
+        std::string typeString() const;
+
+    private:
+        ASTRef(void* node);
+
+        void* m_node;
+    };
 
     class LV_ELEMENTS_EXPORT ComparisonResult{
 

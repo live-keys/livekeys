@@ -45,7 +45,7 @@ public:
 
 public:
     QmlJsSettings();
-    ~QmlJsSettings();
+    virtual ~QmlJsSettings();
 
     void fromJson(const QJsonValue &json) Q_DECL_OVERRIDE;
     QJsonValue toJson() const Q_DECL_OVERRIDE;
@@ -70,7 +70,6 @@ private:
     static QHash<QString, ColorComponent> m_formatRoles;
 
     QHash<ColorComponent, QTextCharFormat> m_formats;
-
 };
 
 inline QTextCharFormat &QmlJsSettings::operator[](const QString &key){

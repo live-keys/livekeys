@@ -90,7 +90,7 @@ public slots:
     void _q_delayedRehighlight();
 
 protected:
-    virtual void highlightBlock(const QString &text) = 0;
+//    virtual void highlightBlock(const QString &text) = 0;
     virtual void documentChanged(int, int, int) {}
     virtual QList<TextFormatRange> highlight(int lastUserState, int position, const QString& text) = 0;
     virtual QList<TextFormatRange> highlightSections(const QList<ProjectDocumentSection::Ptr>&) = 0;

@@ -63,7 +63,7 @@ public:
 
     void _q_reformatBlocks(int from, int charsRemoved, int charsAdded);
     void reformatBlocks(int from, int charsRemoved, int charsAdded);
-    bool reformatBlock(const QTextBlock &block);
+//    bool reformatBlock(const QTextBlock &block);
 
     inline void rehighlight(QTextCursor &cursor, QTextCursor::MoveOperation operation) {
         inReformatBlocks = true;
@@ -315,22 +315,22 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
     formatChanges.clear();
 }
 
-bool SyntaxHighlighterPrivate::reformatBlock(const QTextBlock &block)
-{
-    Q_Q(SyntaxHighlighter);
+//bool SyntaxHighlighterPrivate::reformatBlock(const QTextBlock &block)
+//{
+//    Q_Q(SyntaxHighlighter);
 
-    Q_ASSERT_X(!currentBlock.isValid(), "SyntaxHighlighter::reformatBlock()", "reFormatBlock() called recursively");
+//    Q_ASSERT_X(!currentBlock.isValid(), "SyntaxHighlighter::reformatBlock()", "reFormatBlock() called recursively");
 
-    currentBlock = block;
+//    currentBlock = block;
 
-    formatChanges.fill(QTextCharFormat(), block.length() - 1);
-    q->highlightBlock(block.text());
-    bool formatsChanged = applyFormatChanges();
+//    formatChanges.fill(QTextCharFormat(), block.length() - 1);
+//    q->highlightBlock(block.text());
+//    bool formatsChanged = applyFormatChanges();
 
-    currentBlock = QTextBlock();
+//    currentBlock = QTextBlock();
 
-    return formatsChanged;
-}
+//    return formatsChanged;
+//}
 
 void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<SyntaxHighlighter::TextFormatRange> &textFormatRanges, bool setStates)
 {

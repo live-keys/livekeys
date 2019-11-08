@@ -1,0 +1,4 @@
+module editlv
+plugin editlv
+
+depends QtQuick 2.3

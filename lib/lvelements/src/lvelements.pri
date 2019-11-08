@@ -1,9 +1,13 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/cursorcontext.h \
     $$PWD/function.h \
     $$PWD/engine.h \
+    $$PWD/languageinfo.h \
     $$PWD/metaobject.h \
+    $$PWD/parseddocument.h \
+    $$PWD/sourcerange.h \
     $$PWD/value.h \
     $$PWD/element.h \
     $$PWD/element_p.h \
@@ -37,9 +41,13 @@ HEADERS += \
     $$PWD/elementssections_p.h
 
 SOURCES += \
+    $$PWD/cursorcontext.cpp \
     $$PWD/function.cpp \
     $$PWD/engine.cpp \
+    $$PWD/languageinfo.cpp \
     $$PWD/metaobject.cpp \
+    $$PWD/parseddocument.cpp \
+    $$PWD/sourcerange.cpp \
     $$PWD/value.cpp \
     $$PWD/element.cpp \
     $$PWD/property.cpp \

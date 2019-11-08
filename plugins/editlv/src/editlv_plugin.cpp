@@ -14,25 +14,22 @@
 **
 ****************************************************************************/
 
-#ifndef LVEDITORSETTINGSCATEGORY_H
-#define LVEDITORSETTINGSCATEGORY_H
+#include "editlv_plugin.h"
 
-#include <QJsonObject>
+#include <qqml.h>
+#include <QQmlApplicationEngine>
+#include <QQmlEngine>
+#include <QQmlContext>
+#include <QQuickWindow>
 
-#include "live/lveditorglobal.h"
+#include "languagelvhandler.h"
+#include "languagelvextension.h"
 
-namespace lv{
+void EditLvPlugin::registerTypes(const char *uri){
+    // @uri editqml
+    qmlRegisterUncreatableType<lv::LanguageLvHandler>(  uri, 1, 0, "LanguageLvHandler", "LanguageLvHandler is created through LanguageLvExtension");
+    qmlRegisterType<lv::LanguageLvExtension>(uri, 1, 0, "LanguageLvExtension");
+}
 
-class LV_EDITOR_EXPORT EditorSettingsCategory{
-
-public:
-    EditorSettingsCategory();
-    virtual ~EditorSettingsCategory();
-
-    virtual void fromJson(const QJsonValue&){}
-    virtual QJsonValue toJson() const{ return QJsonValue(); }
-};
-
-}// namespace
-
-#endif // LVEDITORSETTINGSCATEGORY_H
+void EditLvPlugin::initializeEngine(QQmlEngine *, const char *){
+}

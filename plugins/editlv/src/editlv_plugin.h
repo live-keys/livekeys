@@ -14,25 +14,18 @@
 **
 ****************************************************************************/
 
-#ifndef LVEDITORSETTINGSCATEGORY_H
-#define LVEDITORSETTINGSCATEGORY_H
+#ifndef LVEDITOR_PLUGIN_H
+#define LVEDITOR_PLUGIN_H
 
-#include <QJsonObject>
+#include <QQmlExtensionPlugin>
 
-#include "live/lveditorglobal.h"
+class EditLvPlugin : public QQmlExtensionPlugin{
 
-namespace lv{
-
-class LV_EDITOR_EXPORT EditorSettingsCategory{
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
 
 public:
-    EditorSettingsCategory();
-    virtual ~EditorSettingsCategory();
-
-    virtual void fromJson(const QJsonValue&){}
-    virtual QJsonValue toJson() const{ return QJsonValue(); }
+    void registerTypes(const char *uri) Q_DECL_OVERRIDE;
+    void initializeEngine(QQmlEngine *engine, const char *uri) Q_DECL_OVERRIDE;
 };
-
-}// namespace
-
-#endif // LVEDITORSETTINGSCATEGORY_H
+#endif // LVEDITOR_PLUGIN_H
