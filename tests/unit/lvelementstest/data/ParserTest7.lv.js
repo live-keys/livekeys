@@ -1,4 +1,4 @@
-module.exports["ParserTest7"] = class ParserTest6 extends Container{
+module.exports["ParserTest7"] = class ParserTest7 extends Container{
 
     constructor(){
         super()

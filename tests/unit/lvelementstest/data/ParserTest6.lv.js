@@ -10,10 +10,10 @@ module.exports["ParserTest6"] = class ParserTest6 extends Container{
 
     __initialize(){
         // Declare all parent properties
-        Element.addProperty(this, "elemProp", {type: "component", notify: "elemPropChanged"})
+        Element.addProperty(this, "ElemProp", {type: "component", notify: "ElemPropChanged"})
 
         // Assign parent properties
-        this.elemProp = class T extends Element{
+        this.ElemProp = class T extends Element{
 
             constructor(){
                 super()
@@ -23,8 +23,8 @@ module.exports["ParserTest6"] = class ParserTest6 extends Container{
             __initialize(){
                 this.ids = {}
 
-                this.ids['twenty'] = this
                 var twenty = this
+                this.ids['twenty'] = twenty
 
                 Element.addProperty(this, "x", {type: "int", notify: "xChanged"})
                 this.x = 20

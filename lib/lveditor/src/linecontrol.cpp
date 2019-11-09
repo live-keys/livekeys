@@ -342,19 +342,9 @@ void LineControl::lineNumberChange()
     if (m_prevLineNumber == m_lineNumber) return;
 
     int delta = m_lineNumber - m_prevLineNumber;
-    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(m_dirtyPos, 0,0,LineSection::Collapsed), LineSection::compare);
-
     bool internal = false;
-    if (upper != m_sections.begin() && !m_sections.empty())
-    {
-        auto prev = std::prev(upper);
-        if (m_dirtyPos < prev->position + prev->range)
-        {
-            internal = handleInternalOffsetting(prev-m_sections.begin(), delta);
-        }
-    }
 
-    offsetAfterIndex(static_cast<unsigned>(upper-m_sections.begin() -1), delta, true, !internal);
+    handleLineChange(delta, internal);
 
     emit lineDelta(delta, m_dirtyPos, internal);
 
@@ -657,6 +647,22 @@ bool LineControl::handleInternalOffsetting(int index, int delta)
     return true;
 }
 
+void LineControl::handleLineChange(int delta, bool& internal)
+{
+    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(m_dirtyPos, 0,0,LineSection::Collapsed), LineSection::compare);
+
+    if (upper != m_sections.begin() && !m_sections.empty())
+    {
+        auto prev = std::prev(upper);
+        if (m_dirtyPos < prev->position + prev->range)
+        {
+            internal = handleInternalOffsetting(prev-m_sections.begin(), delta);
+        }
+    }
+
+    offsetAfterIndex(static_cast<unsigned>(upper-m_sections.begin() -1), delta, true, !internal);
+}
+
 int LineControl::firstContentLine()
 {
     if (m_sections.empty()) return 0;
@@ -834,8 +840,9 @@ void LineControl::deltaLines(int delta)
     m_prevLineNumber = m_lineNumber;
     m_lineNumber += delta;
 
-    /*if (m_prevLineNumber < m_lineNumber) linesAdded();
-    else linesRemoved();*/
+    bool internal = false;
+
+    handleLineChange(delta, internal);
 }
 
 int LineControl::addLineSection(LineControl::LineSection ls)

@@ -105,7 +105,7 @@ void LvParseTest::propertyNewExpressionParseTest(){
 
     el::Parser parser;
 
-    std::string conversion = parser.toJs(contents);
+    std::string conversion = parser.toJs(contents, "ParserTest5");
 
     el::Parser::AST* conversionAST = parser.parse(conversion);
     el::Parser::AST* expectedAST   = parser.parse(expect);
@@ -124,7 +124,7 @@ void LvParseTest::propertyDeclarationParseTest(){
 
     el::Parser parser;
 
-    std::string conversion = parser.toJs(contents);
+    std::string conversion = parser.toJs(contents, "ParserTest6");
 
     el::Parser::AST* conversionAST = parser.parse(conversion);
     el::Parser::AST* expectedAST   = parser.parse(expect);
@@ -143,7 +143,7 @@ void LvParseTest::propertyExpressionsParseTest(){
 
     el::Parser parser;
 
-    std::string conversion = parser.toJs(contents);
+    std::string conversion = parser.toJs(contents, "ParserTest7");
 
     el::Parser::AST* conversionAST = parser.parse(conversion);
     el::Parser::AST* expectedAST   = parser.parse(expect);
@@ -162,7 +162,7 @@ void LvParseTest::taggedStringParseTest(){
 
     el::Parser parser;
 
-    std::string conversion = parser.toJs(contents);
+    std::string conversion = parser.toJs(contents, "ParserTest8");
 
     el::Parser::AST* conversionAST = parser.parse(conversion);
     el::Parser::AST* expectedAST   = parser.parse(expect);
@@ -181,7 +181,27 @@ void LvParseTest::instanceParseTest(){
 
     el::Parser parser;
 
-    std::string conversion = parser.toJs(contents);
+    std::string conversion = parser.toJs(contents, "ParserTest9");
+
+    el::Parser::AST* conversionAST = parser.parse(conversion);
+    el::Parser::AST* expectedAST   = parser.parse(expect);
+
+    el::Parser::ComparisonResult compare = parser.compare(expect, expectedAST, conversion, conversionAST);
+
+    parser.destroy(conversionAST);
+    parser.destroy(expectedAST);
+
+    QVERIFY(compare.isEqual());
+}
+
+void LvParseTest::namespaceInheritance()
+{
+    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/ParserTest10.lv");
+    std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/ParserTest10.lv.js");
+
+    el::Parser parser;
+
+    std::string conversion = parser.toJs(contents, "ParserTest10");
 
     el::Parser::AST* conversionAST = parser.parse(conversion);
     el::Parser::AST* expectedAST   = parser.parse(expect);

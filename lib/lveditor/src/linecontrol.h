@@ -107,6 +107,8 @@ private:
     void handlePositiveShifting(int pos, int added);
     bool handleInternalOffsetting(int index, int delta);
 
+    void handleLineChange(int delta, bool& internal);
+
     std::vector<LineSection> m_sections;
     int m_blockHeight;
     int m_dirtyPos;

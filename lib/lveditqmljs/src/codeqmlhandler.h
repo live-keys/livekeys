@@ -68,7 +68,7 @@ public:
     ~CodeQmlHandler() override;
 
     void assistCompletion(
-        const QTextCursor& cursor,
+        QTextCursor& cursor,
         const QChar& insertion,
         bool manuallyTriggered,
         CodeCompletionModel* model,

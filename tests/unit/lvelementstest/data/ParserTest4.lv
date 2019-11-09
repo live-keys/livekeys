@@ -10,7 +10,7 @@ component B{
         class G{}
         function H(){}
 
-        console.log(A, B, c, d, e, F, G, not1, not2)
+        console.log(A, B, C, d, e, f, G, not1, not2)
     }
 
     int not2: 10

@@ -67,6 +67,8 @@ Parser::ComparisonResult Parser::compare(
             cr.m_source2Row = ts_node_start_point(node2).row;
             cr.m_source2Offset = ts_node_start_byte(node2);
 
+            cr.m_errorString = "Different node types: " + std::string(ts_node_type(node1)) + " != " + std::string(ts_node_type(node2));
+
             return cr;
         }
 
@@ -83,12 +85,13 @@ Parser::ComparisonResult Parser::compare(
                 cr.m_source2Row = ts_node_start_point(node2).row;
                 cr.m_source2Offset = ts_node_start_byte(node2);
 
+                cr.m_errorString = "Different identifiers: " + slice(source1, node1) + " != " + slice(source2, node2);
+
                 return cr;
             }
         }
 
-        if (strcmp(ts_node_type(node1), "string") == 0 ||
-            strcmp(ts_node_type(node1), "number") == 0)
+        if (strcmp(ts_node_type(node1), "number") == 0)
         {
             if ( strcmp(slice(source1, node1).c_str(), slice(source2, node2).c_str()) != 0 ){
                 ComparisonResult cr(false);
@@ -100,14 +103,55 @@ Parser::ComparisonResult Parser::compare(
                 cr.m_source2Row = ts_node_start_point(node2).row;
                 cr.m_source2Offset = ts_node_start_byte(node2);
 
+                cr.m_errorString = "Different number values: " + slice(source1, node1) + " != " + slice(source2, node2);
+
                 return cr;
             }
         }
 
+        if (strcmp(ts_node_type(node1), "string") == 0)
+        {
+            std::string value1 = slice(source1, node1);
+            std::string value2 = slice(source2, node2);
+
+            value1 = value1.substr(1, value1.length()-2);
+            value2 = value2.substr(1, value2.length()-2);
+            if ( strcmp(value1.c_str(), value2.c_str()) != 0 ){
+                ComparisonResult cr(false);
+                cr.m_source1Col = ts_node_start_point(node1).column;
+                cr.m_source1Row = ts_node_start_point(node1).row;
+                cr.m_source1Offset = ts_node_start_byte(node1);
+
+                cr.m_source2Col = ts_node_start_point(node2).column;
+                cr.m_source2Row = ts_node_start_point(node2).row;
+                cr.m_source2Offset = ts_node_start_byte(node2);
+
+
+
+                cr.m_errorString = "Different string values: " + value1 + " ("+ ts_node_type(node1)+ ") != " + value2 + " ("+ ts_node_type(node2)+ ")";
+
+                cr.m_errorString += "\n*";
+                for (uint32_t i = 0; i < ts_node_child_count(ts_node_parent(node1)); ++i){
+                    TSNode ch = ts_node_child(ts_node_parent(node1), i);
+                    cr.m_errorString += slice(source1, ch) + "*";
+                }
+                cr.m_errorString += "\n*";
+                for (uint32_t i = 0; i < ts_node_child_count(ts_node_parent(node2)); ++i){
+                    TSNode ch = ts_node_child(ts_node_parent(node2), i);
+                    cr.m_errorString += slice(source2, ch) + "*";
+                }
+                cr.m_errorString += "\n";
+
+                return cr;
+            }
+        }
+
+        if (strcmp(ts_node_type(node1), "string") != 0) // don't take single and double quotes into consideration
         for (uint32_t i = 0; i < ts_node_child_count(node1); ++i)
             if ( strcmp( ts_node_type(ts_node_child(node1, i)), "comment") != 0 )
                 q1.push(ts_node_child(node1, i));
 
+        if (strcmp(ts_node_type(node2), "string") != 0) // don't take single and double quotes into consideration
         for (uint32_t i = 0; i < ts_node_child_count(node2); ++i)
             if ( strcmp( ts_node_type(ts_node_child(node2, i)), "comment") != 0 )
                 q2.push(ts_node_child(node2, i));
@@ -121,6 +165,17 @@ Parser::ComparisonResult Parser::compare(
             cr.m_source2Col = ts_node_start_point(node2).column;
             cr.m_source2Row = ts_node_start_point(node2).row;
             cr.m_source2Offset = ts_node_start_byte(node2);
+
+            cr.m_errorString = "Different child count: " + std::string(ts_node_type(node1)) + "(" + std::to_string(ts_node_child_count(node1)) + ") != "  + std::string(ts_node_type(node2)) + "(" + std::to_string(ts_node_child_count(node2)) + ")";
+
+            cr.m_errorString += "\n";
+            for (uint32_t i = 0; i < ts_node_child_count(node1); ++i)
+                cr.m_errorString += std::string(ts_node_type(ts_node_child(node1, i))) + " ";
+            cr.m_errorString += "\n";
+            for (uint32_t i = 0; i < ts_node_child_count(node2); ++i)
+                cr.m_errorString += std::string(ts_node_type(ts_node_child(node2, i))) + " ";
+            cr.m_errorString += "\n";
+
 
             return cr;
         }
@@ -136,23 +191,29 @@ std::string Parser::toString(Parser::AST *ast){
     return result;
 }
 
-std::string Parser::toJs(const std::string &contents) const{
+std::string Parser::toJs(const std::string &contents, const std::string filename) const{
     Parser::AST* ast = parse(contents);
 
-    std::string result = toJs(contents, ast);
+    std::string result = toJs(contents, ast, filename);
 
     destroy(ast);
 
     return result;
 }
 
-std::string Parser::toJs(const std::string& contents, AST *ast) const{
+std::string Parser::toJs(const std::string& contents, AST *ast, const std::string filename) const{
     if ( !ast )
         return nullptr;
 
     std::string result;
 
     BaseNode* root = el::BaseNode::visit(ast);
+
+    if (!filename.empty())
+    {
+        ProgramNode* pn = dynamic_cast<ProgramNode*>(root);
+        pn->setFilename(filename);
+    }
 
     el::JSSection* section = new el::JSSection;
     section->from = 0;

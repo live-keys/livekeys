@@ -10,12 +10,12 @@ module.exports["NestingTest"] = class NestingTest extends Container{
         // initialize ids
         var e1 = new Element()
         this.ids['e1'] = e1
+        
+        var enested = new Element()
+        this.ids['enested'] = enested
 
         var c1  = new Container()
         this.ids['c1'] = c1
-
-        var enested = new Element()
-        this.ids['enested'] = enested
 
         // declare properties for ids
         Element.addProperty(e1, 'x', {type: 'int', notify: 'xChanged'})
@@ -44,7 +44,7 @@ module.exports["NestingTest"] = class NestingTest extends Container{
                     }.bind(enested)(this))
                 ])
                 return this
-            }).bind(c1)(this)
+            }.bind(c1)(this))
         ])
     }
 }
