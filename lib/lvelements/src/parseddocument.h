@@ -11,9 +11,10 @@ namespace lv{ namespace el{
 class LV_ELEMENTS_EXPORT ParsedDocument{
 
 public:
-    std::vector<ImportInfo> extractImports(const std::string& source, Parser::AST* ast);
-    CursorContext findCursorContext(Parser::AST* ast, int position);
-    DocumentInfo::Ptr extractInfo(const std::string& source, Parser::AST* ast);
+    static std::vector<ImportInfo> extractImports(const std::string& source, Parser::AST* ast);
+    static DocumentInfo::Ptr extractInfo(const std::string& source, Parser::AST* ast);
+
+    static CursorContext findCursorContext(Parser::AST* ast, int position);
 };
 
 }} // namespace lv, el

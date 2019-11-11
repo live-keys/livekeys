@@ -79,7 +79,7 @@ Parser::~Parser(){
 }
 
 Parser::AST *Parser::parse(const std::string &source) const{
-    return reinterpret_cast<Parser::AST*>(ts_parser_parse_string(m_parser, NULL, source.c_str(), (uint32_t)source.size()));
+    return reinterpret_cast<Parser::AST*>(ts_parser_parse_string(m_parser, nullptr, source.c_str(), (uint32_t)source.size()));
 }
 
 void Parser::destroy(Parser::AST *ast) const{

@@ -1,4 +1,8 @@
 #include "parseddocument.h"
+#include "live/visuallog.h"
+
+#include "tree_sitter/parser.h"
+#include "tree_sitter/api.h"
 
 namespace lv{ namespace el{
 
@@ -13,7 +17,7 @@ CursorContext ParsedDocument::findCursorContext(Parser::AST */*ast*/, int /*posi
 }
 
 //TODO
-DocumentInfo::Ptr ParsedDocument::extractInfo(const std::string &source, Parser::AST *ast){
+DocumentInfo::Ptr ParsedDocument::extractInfo(const std::string &, Parser::AST *){
     return DocumentInfo::Ptr(nullptr);
 }
 

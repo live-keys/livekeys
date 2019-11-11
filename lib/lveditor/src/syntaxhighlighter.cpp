@@ -622,6 +622,7 @@ void SyntaxHighlighter::rehighlightBlock(const QTextBlock &block)
 
 void SyntaxHighlighter::_q_reformatBlocks(int from, int charsRemoved, int charsAdded){
     Q_D(SyntaxHighlighter);
+    documentChanged(from, charsRemoved, charsAdded);
     d->_q_reformatBlocks(from, charsRemoved, charsAdded);
 }
 

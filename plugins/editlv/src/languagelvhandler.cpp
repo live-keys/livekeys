@@ -23,7 +23,7 @@ LanguageLvHandler::LanguageLvHandler(
         DocumentHandler *handler)
     : QObject(handler)
     , d_ptr(new LanguageLvHandlerPrivate)
-    , m_highlighter(new LanguageLvHighlighter(settings, handler, nullptr))
+    , m_highlighter(new LanguageLvHighlighter(settings, handler, document ? document->textDocument() : nullptr))
     , m_settings(settings)
     , m_engine(engine->engine())
     , m_document(document)

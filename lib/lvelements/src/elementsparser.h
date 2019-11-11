@@ -80,6 +80,8 @@ public:
 
     static std::list<std::string> parseExportNames(const std::string &moduleFile);
 
+    TSParser* internal() const{ return m_parser; }
+
 private:
     static std::list<std::string> parseExportNamesJs(const std::string& jsModuleFile);
 

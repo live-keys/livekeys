@@ -12,77 +12,34 @@ namespace lv{
 class EditLvSettings : public EditorSettingsCategory{
 
 public:
-    enum ColorComponent{
-        Text,
-        Comment,
-        Number,
-        String,
-        Operator,
-        Identifier,
-        Keyword,
-        BuiltIn,
-        LvProperty,
-        LvType,
-        LvRuntimeBoundProperty,
-        LvRuntimeModifiedValue,
-        LvEdit
-    };
-
-public:
     EditLvSettings();
     virtual ~EditLvSettings() override;
-
 
     void fromJson(const QJsonValue &json) override;
     QJsonValue toJson() const override;
 
-    bool hasKey(const QString& key);
+    bool hasKey(const std::string &key);
 
-    QTextCharFormat& operator[](const QString& key);
-    QTextCharFormat& operator[](const ColorComponent& key);
-
-    QTextCharFormat operator[](const QString& key) const;
-    QTextCharFormat operator[](const ColorComponent& key) const;
-
-    static QHash<QString, ColorComponent>::ConstIterator rolesBegin();
-    static QHash<QString, ColorComponent>::ConstIterator rolesEnd();
+    QTextCharFormat& operator[](const std::string& key);
+    QTextCharFormat operator[](const std::string& key) const;
 
 private:
     QTextCharFormat createFormat(const QColor& foreground);
     QTextCharFormat createFormat(const QColor& foreground, const QColor& background);
 
-    static QHash<QString, ColorComponent> createFormatRoles();
-    static QHash<QString, ColorComponent> m_formatRoles;
-
-    QHash<ColorComponent, QTextCharFormat> m_formats;
+    QMap<std::string, QTextCharFormat> m_formats;
 };
 
-inline QTextCharFormat &EditLvSettings::operator[](const QString &key){
-    return m_formats[m_formatRoles[key]];
+inline bool EditLvSettings::hasKey(const std::string &key){
+    return m_formats.contains(key);
 }
 
-inline QTextCharFormat &EditLvSettings::operator[](const EditLvSettings::ColorComponent &key){
+inline QTextCharFormat &EditLvSettings::operator[](const std::string &key){
     return m_formats[key];
 }
 
-inline QTextCharFormat EditLvSettings::operator[](const QString &key) const{
-    return m_formats[m_formatRoles[key]];
-}
-
-inline QTextCharFormat EditLvSettings::operator[](const EditLvSettings::ColorComponent &key) const{
+inline QTextCharFormat EditLvSettings::operator[](const std::string &key) const{
     return m_formats[key];
-}
-
-inline bool EditLvSettings::hasKey(const QString &key){
-    return m_formatRoles.contains(key);
-}
-
-inline QHash<QString, EditLvSettings::ColorComponent>::ConstIterator EditLvSettings::rolesBegin(){
-    return m_formatRoles.begin();
-}
-
-inline QHash<QString, EditLvSettings::ColorComponent>::ConstIterator EditLvSettings::rolesEnd(){
-    return m_formatRoles.end();
 }
 
 inline QTextCharFormat EditLvSettings::createFormat(const QColor &foreground){
