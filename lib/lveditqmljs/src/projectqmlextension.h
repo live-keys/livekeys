@@ -72,7 +72,7 @@ private:
     QmlJsSettings*         m_settings;
     ProjectQmlScanMonitor* m_scanMonitor;
     QList<CodeQmlHandler*> m_codeHandlers;
-    PaletteContainer*  m_paletteContainer;
+    PaletteContainer*      m_paletteContainer;
 };
 
 /// \brief Returns the lv::ProjectQmlScanMonitor associated with this object.

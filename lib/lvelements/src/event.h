@@ -355,10 +355,10 @@ public:
     }
 
     virtual EventConnection* append(Element* emitter, Event::Id eid, const Callable& f) override{
-        Engine* eng = elementEngine(emitter);
+//        Engine* eng = elementEngine(emitter);
 
         EventConnectionFunction<const Function::Parameters&>* ecf =
-            new EventConnectionFunction<const Function::Parameters&>( emitter, eid, [emitter, eng, f](const Function::Parameters& p){
+            new EventConnectionFunction<const Function::Parameters&>( emitter, eid, [emitter, /*eng,*/ f](const Function::Parameters& p){
                 f.call(emitter, p);
             });
 
@@ -367,9 +367,9 @@ public:
     }
 
     virtual EventConnection* append(Element* emitter, Event::Id eid, std::function<void(const Function::Parameters&)> f) override{
-        Engine* eng = elementEngine(emitter);
+//        Engine* eng = elementEngine(emitter);
         EventConnectionFunction<const Function::Parameters&>* ecf =
-            new EventConnectionFunction<const Function::Parameters&>( emitter, eid, [emitter, eng, f](const Function::Parameters& p){
+            new EventConnectionFunction<const Function::Parameters&>( emitter, eid, [/*emitter, eng, */f](const Function::Parameters& p){
                 f(p);
             });
 

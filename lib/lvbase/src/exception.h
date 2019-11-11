@@ -66,7 +66,7 @@ public:
         const std::string& file = "",
         int line = 0,
         const std::string& functionName = "",
-        StackTrace::Ptr stackTrace = StackTrace::Ptr(0)
+        StackTrace::Ptr stackTrace = StackTrace::Ptr(nullptr)
     );
 
 private:

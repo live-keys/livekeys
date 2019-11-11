@@ -33,7 +33,6 @@ public:
     std::string filePath;
     std::string documentation;
     Version     version;
-    std::string extension;
     std::map<std::string, Package::Reference*> dependencies;
     std::map<std::string, Package::Library*>   libraries;
 
@@ -99,14 +98,6 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
 
     Package::Ptr pt(new Package(path, filePath, m["name"].asString(), Version(m["version"].asString())));
 
-    if (m.hasKey("extension") ){
-        pt->m_d->extension = m["extension"].asString();
-        QFileInfo finfo(QString::fromStdString(path + "/" + pt->m_d->extension));
-        if ( !finfo.exists() ){
-            THROW_EXCEPTION(lv::Exception, std::string("Extension doesn\'t exist at path: ") + pt->m_d->extension, 2);
-        }
-    }
-
     if ( m.hasKey("dependencies") ){
         MLNode::ObjectType dep = m["dependencies"].asObject();
         for ( auto it = dep.begin(); it != dep.end(); ++it ){
@@ -160,21 +151,6 @@ const std::string &Package::documentation() const{
 /** \brief Returns the package version */
 const Version &Package::version() const{
     return m_d->version;
-}
-
-/** \brief Returns the package extension */
-const std::string &Package::extension() const{
-    return m_d->extension;
-}
-
-/** \brief Returns the absolute path concatenation of the path and extension */
-std::string Package::extensionAbsolutePath() const{
-    return m_d->path + "/" + m_d->extension;
-}
-
-/** \brief Returns an indicator that the extension exists */
-bool Package::hasExtension() const{
-    return !m_d->extension.empty();
 }
 
 const std::map<std::string, Package::Reference*>& Package::dependencies() const{

@@ -1,9 +1,14 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/live/elements/cursorcontext.h \
     $$PWD/live/elements/function.h \
     $$PWD/live/elements/engine.h \
+    $$PWD/live/elements/languageinfo.h \
+    $$PWD/live/elements/languagequery.h \
     $$PWD/live/elements/metaobject.h \
+    $$PWD/live/elements/parseddocument.h \
+    $$PWD/live/elements/sourcerange.h \
     $$PWD/live/elements/value.h \
     $$PWD/live/elements/element.h \
     $$PWD/live/elements/event.h \

@@ -13,10 +13,56 @@
 
 namespace lv{ namespace el{
 
-class Parser::ASTNodeRef{
-public:
-    TSNode node;
-};
+
+Parser::ASTRef::ASTRef()
+    : m_node(new TSNode){
+}
+
+Parser::ASTRef::ASTRef(const Parser::ASTRef &other)
+    : m_node(new TSNode(*reinterpret_cast<TSNode*>(other.m_node)))
+{
+}
+
+Parser::ASTRef::~ASTRef(){
+    TSNode* node = reinterpret_cast<TSNode*>(m_node);
+    delete node;
+}
+
+Parser::ASTRef &Parser::ASTRef::operator =(const Parser::ASTRef &other){
+    TSNode* node = reinterpret_cast<TSNode*>(m_node);
+    *node = *reinterpret_cast<TSNode*>(other.m_node);
+    return *this;
+}
+
+SourceRange Parser::ASTRef::range() const{
+    TSNode* node = reinterpret_cast<TSNode*>(m_node);
+    return SourceRange(ts_node_start_byte(*node), ts_node_end_byte((*node)));
+}
+
+uint32_t Parser::ASTRef::childCount() const{
+    TSNode* node = reinterpret_cast<TSNode*>(m_node);
+    return ts_node_child_count(*node);
+}
+
+Parser::ASTRef Parser::ASTRef::childAt(uint32_t index) const{
+    TSNode* node = reinterpret_cast<TSNode*>(m_node);
+    return Parser::ASTRef(new TSNode(ts_node_child(*node, index)));
+}
+
+Parser::ASTRef Parser::ASTRef::parent() const{
+    TSNode* node = reinterpret_cast<TSNode*>(m_node);
+    return Parser::ASTRef(new TSNode(ts_node_parent(*node)));
+}
+
+std::string Parser::ASTRef::typeString() const{
+    TSNode* node = reinterpret_cast<TSNode*>(m_node);
+    return ts_node_type(*node);
+}
+
+Parser::ASTRef::ASTRef(void *node)
+    : m_node(node)
+{
+}
 
 std::string slice(const std::string& source, TSNode& node){
     return source.substr(ts_node_start_byte(node), ts_node_end_byte(node) - ts_node_start_byte(node));
@@ -33,7 +79,7 @@ Parser::~Parser(){
 }
 
 Parser::AST *Parser::parse(const std::string &source) const{
-    return reinterpret_cast<Parser::AST*>(ts_parser_parse_string(m_parser, NULL, source.c_str(), (uint32_t)source.size()));
+    return reinterpret_cast<Parser::AST*>(ts_parser_parse_string(m_parser, nullptr, source.c_str(), (uint32_t)source.size()));
 }
 
 void Parser::destroy(Parser::AST *ast) const{

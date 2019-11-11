@@ -23,10 +23,12 @@
 #include <QQuickWindow>
 
 #include "live/projectqmlextension.h"
+#include "qmlplugininfoextractor.h"
 
 void EditQmlPlugin::registerTypes(const char *uri){
     // @uri editqml
     lv::ProjectQmlExtension::registerTypes(uri);
+    qmlRegisterType<lv::QmlPluginInfoExtractor>(uri, 1, 0, "PluginInfoExtractor");
 }
 
 void EditQmlPlugin::initializeEngine(QQmlEngine *, const char *){

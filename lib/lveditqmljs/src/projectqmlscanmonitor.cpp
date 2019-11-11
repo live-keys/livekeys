@@ -42,7 +42,7 @@ ProjectQmlScanMonitor::ProjectQmlScanMonitor(
     , m_scanner(new ProjectQmlScanner(engine->engine(), engine->engineMutex(), project->lockedFileIO()))
     , m_project(project)
     , m_engine(engine)
-    , m_projectScope(0)
+    , m_projectScope(nullptr)
 {
     connect(project, SIGNAL(pathChanged(QString)),      SLOT(newProject(QString)));
     connect(project, SIGNAL(directoryChanged(QString)), SLOT(directoryChanged(QString)));
@@ -136,7 +136,7 @@ void ProjectQmlScanMonitor::loadImport(const QString &import){
         return;
     }
     QObject* obj = component.create(m_engine->engine()->rootContext());
-    if ( obj == 0 ){
+    if ( obj == nullptr ){
         m_scanner->updateLoadRequest(import, 0, true);
     } else {
         m_scanner->updateLoadRequest(import, obj, false);

@@ -19,29 +19,26 @@
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
 #include "live/runnable.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
+#include "live/exception.h"
 
 #include <QFileInfo>
+#include <QQmlEngine>
 
 namespace lv{
 
-QmlScript::QmlScript(const QStringList &argvTail, QObject *parent)
+QmlScript::QmlScript(QQmlEngine* engine, const std::vector<std::string> &argvTail, QObject *parent)
     : QObject(parent)
-    , m_argvTail(argvTail)
     , m_environment(new Environment(this))
 {
-    m_argv.append("");
-    m_argv.append(m_argvTail);
-}
+    m_argv = engine->newArray(static_cast<quint32>(argvTail.size() + 1));
+    m_argvTail = engine->newArray(static_cast<quint32>(argvTail.size()));
 
-QmlScript::QmlScript(const std::vector<std::string> &argvTail, QObject *parent)
-    : QObject(parent)
-    , m_environment(new Environment(this))
-{
-    for ( auto it = argvTail.begin(); it != argvTail.end(); ++it ){
-        m_argvTail.append(QString::fromStdString(*it));
+    for ( quint32 i = 0; i < static_cast<quint32>(argvTail.size()); ++i ){
+        m_argv.setProperty(i + 1, QString::fromStdString(argvTail[static_cast<size_t>(i)]));
+        m_argvTail.setProperty(i, QString::fromStdString(argvTail[static_cast<size_t>(i)]));
     }
-    m_argv.append("");
-    m_argv.append(m_argvTail);
 }
 
 QmlScript::~QmlScript(){
@@ -51,9 +48,9 @@ QmlScript::~QmlScript(){
 void QmlScript::scriptChanged(lv::Runnable *active){
     if ( active ){
         QFileInfo finfo(active->path());
-        m_argv[0] = finfo.fileName();
+        m_argv.setProperty(0, finfo.fileName());
     } else {
-        m_argv[0] = "";
+        m_argv.setProperty(0, "");
     }
 }
 

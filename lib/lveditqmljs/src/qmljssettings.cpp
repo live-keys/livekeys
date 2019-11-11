@@ -40,7 +40,7 @@ QmlJsSettings::QmlJsSettings()
 QmlJsSettings::~QmlJsSettings(){
 }
 
-void QmlJsSettings::fromJson(const QJsonValue &json){;
+void QmlJsSettings::fromJson(const QJsonValue &json){
     QJsonObject obj = json.toObject();
     if ( obj.contains("style") ){
         QJsonObject style = obj["style"].toObject();

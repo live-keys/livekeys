@@ -53,7 +53,7 @@ public:
         ProjectQmlExtension* projectHandler,
         Project* project,
         ViewEngine*  engine,
-        QObject* parent = 0
+        QObject* parent = nullptr
     );
     ~ProjectQmlScanMonitor();
 

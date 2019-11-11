@@ -118,7 +118,7 @@ void CodeCompletionModel::setCompletionContext(CodeCompletionContext *context){
  */
 void CodeCompletionModel::removeCompletionContext(){
     delete m_completionContext;
-    m_completionContext = 0;
+    m_completionContext = nullptr;
 }
 
 /**

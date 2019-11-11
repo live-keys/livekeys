@@ -55,7 +55,7 @@ Settings *Settings::create(const QString &path, QObject *parent){
 QObject *Settings::file(const QString &key){
     auto foundit = m_configFiles->find(key);
     if ( foundit == m_configFiles->end() )
-        return 0;
+        return nullptr;
     qmlEngine(this)->setObjectOwnership(*foundit, QQmlEngine::CppOwnership);
     return *foundit;
 }

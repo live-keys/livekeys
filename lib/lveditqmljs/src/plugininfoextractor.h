@@ -31,7 +31,7 @@ class LV_EDITQMLJS_EXPORT PluginInfoExtractor : public QObject{
     Q_OBJECT
 
 public:
-    explicit PluginInfoExtractor(ProjectQmlScanner* scanner, const QString& path, QObject *parent = 0);
+    explicit PluginInfoExtractor(ProjectQmlScanner* scanner, const QString& path, QObject *parent = nullptr);
     ~PluginInfoExtractor();
     const QByteArray result() const;
     bool isDone() const;
@@ -40,6 +40,7 @@ public:
     void waitForResult(int msTimeout);
 
 signals:
+    void resultReady();
 
 public slots:
     void newProjectScope();

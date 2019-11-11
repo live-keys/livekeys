@@ -1,5 +1,4 @@
 {
     "name" : "editqml",
-    "version" : "1.0.0",
-    "extension" : "EditQmlExtension.qml"
+    "version" : "1.0.0"
 }

@@ -28,7 +28,7 @@ Extensions::Extensions(ViewEngine *engine, const QString &settingsPath, QObject 
     , m_globals(new QQmlPropertyMap(this))
     , m_engine(engine)
 {
-    m_path = QDir::cleanPath(settingsPath + "/extensions.json");
+    m_path = QDir::cleanPath(settingsPath + "/workspace.json");
 }
 
 /** Default destructor */
@@ -39,74 +39,72 @@ Extensions::~Extensions(){
 /** Loads all the extensions available */
 void Extensions::loadExtensions(){
     QFile file(m_path);
-    if ( file.exists() && file.open(QIODevice::ReadOnly) ){
-        vlog("extensions").v() << "Reading extensions file: " << m_path;
 
+    MLNode extensionConfiguration;
+
+    if ( !file.exists() ){
+        const MLNode& startupcfg = ApplicationContext::instance().startupConfiguration();
+        if ( startupcfg.hasKey("workspace") )
+            extensionConfiguration = startupcfg["workspace"]["extensions"];
+
+        if ( file.open(QIODevice::WriteOnly) ){
+            std::string r;
+            MLNode n(MLNode::Object);
+            n["extensions"] = extensionConfiguration;
+
+            ml::toJson(n, r);
+
+            vlog("extensions").v() << "Saving extensions file to: " << m_path;
+
+            file.write(r.c_str(), static_cast<int>(r.length()));
+            file.close();
+        }
+    } else if ( file.open(QIODevice::ReadOnly) ){
         MLNode n;
         QByteArray fileContents = file.readAll();
         ml::fromJson(fileContents.data(), n);
-        if ( n.type() == MLNode::Object ){
-            for ( auto it = n.begin(); it != n.end(); ++it ){
-                QFileInfo fpath(QString::fromStdString(it.key()));
 
-                std::string packagePath;
-                if ( fpath.isRelative() ){
-                    packagePath = ApplicationContext::instance().pluginPath() + "/" + it.key();
-                } else {
-                    packagePath = it.key();
-                }
-
-                loadPackageExtension(packagePath);
-
-                vlog("extensions").v() << "Loaded extension:" << packagePath;
-            }
+        if ( n.hasKey("extensions") ){
+            extensionConfiguration = n["extensions"];
         }
-    } else {
-        vlog("extensions").v() << "Acquiring installed extensions...";
+    }
 
-        QDirIterator it(QString::fromStdString(ApplicationContext::instance().pluginPath()));
-        while ( it.hasNext() ){
-            QString path = it.next();
-            if ( it.fileName() == "." || it.fileName() == ".." )
-                continue;
+    MLNode::ArrayType extensionArray = extensionConfiguration.asArray();
 
-            if ( Package::existsIn(path.toStdString()) ){
-                WorkspaceExtension* le = loadPackageExtension(path.toStdString());
+    for ( auto it = extensionArray.begin(); it != extensionArray.end(); ++it ){
+        MLNode currentExt = *it;
+
+        bool isEnabled = currentExt["enabled"].asBool();
+        if ( isEnabled ){
+            std::string packageName = currentExt["package"].asString();
+            std::string packagePath = packageName;
+            QFileInfo fpath(QString::fromStdString(packagePath));
+            if ( fpath.isRelative() ){
+                packagePath = ApplicationContext::instance().pluginPath() + "/" + packageName;
+            }
+            std::string component = currentExt["component"].asString();
+
+            if ( Package::existsIn(packagePath) ){
+                WorkspaceExtension* le = loadPackageExtension(packagePath, component);
                 if ( le ){ // if package has extension
-                    vlog("extensions").v() << "Loaded extension from package: " << path;
+                    vlog("extensions").v() << "Loaded extension from package: " << packagePath;
                 }
             }
-        }
-
-        MLNode n(MLNode::Object);
-        for ( auto it = begin(); it != end(); ++it ){
-            WorkspaceExtension* le = it.value();
-            n[le->name()] = true;
-        }
-        std::string data;
-        ml::toJson(n, data);
-
-        vlog("extensions").v() << "Saving extensions file to: " << m_path;
-
-        QFile file(m_path);
-        if ( file.open(QIODevice::WriteOnly) ){
-            file.write(data.c_str());
-            file.close();
         }
     }
 }
+
 /** Loads package extension from a given path */
-WorkspaceExtension* Extensions::loadPackageExtension(const std::string &path){
+WorkspaceExtension* Extensions::loadPackageExtension(const std::string &path, const std::string& component){
     Package::Ptr p = Package::createFromPath(path);
-    if ( p->hasExtension() ){
-        return loadPackageExtension(p);
-    }
-    return nullptr;
+    if ( !p )
+        return nullptr;
+    return loadPackageExtension(p, component);
 }
 
 /** Loads package extension from a given package */
-WorkspaceExtension *Extensions::loadPackageExtension(const Package::Ptr &package){
-    std::string path = package->extensionAbsolutePath();
+WorkspaceExtension *Extensions::loadPackageExtension(const Package::Ptr &package, const std::string& componentName){
+    std::string path = package->path() + "/" + componentName;
     vlog("extensions").v() << "Loading extension: " << path;
 
     QQmlComponent component(m_engine->engine(), QUrl::fromLocalFile(QString::fromStdString(path)), this);

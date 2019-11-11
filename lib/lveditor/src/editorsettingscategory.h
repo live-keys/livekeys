@@ -27,7 +27,7 @@ class LV_EDITOR_EXPORT EditorSettingsCategory{
 
 public:
     EditorSettingsCategory();
-    ~EditorSettingsCategory();
+    virtual ~EditorSettingsCategory();
 
     virtual void fromJson(const QJsonValue&){}
     virtual QJsonValue toJson() const{ return QJsonValue(); }

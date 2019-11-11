@@ -92,8 +92,10 @@ void PluginInfoExtractor::newProjectScope(){
         m_timeout->start();
         m_result.clear();
         m_isDone = m_scanner->tryToExtractPluginInfo(m_path, &m_result);
-        if ( m_isDone )
+        if ( m_isDone ){
             m_timeout->stop();
+            emit resultReady();
+        }
     }
 }
 

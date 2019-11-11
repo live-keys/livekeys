@@ -58,7 +58,8 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
     friend class ProjectQmlExtension;
 
 public:
-    explicit CodeQmlHandler(ViewEngine* engine,
+    explicit CodeQmlHandler(
+        ViewEngine* engine,
         Project* project,
         QmlJsSettings *settings,
         ProjectQmlExtension* projectHandler,

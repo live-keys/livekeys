@@ -53,16 +53,9 @@ private:
 
     MLNode m_logConfiguration;
 
-    bool m_pluginInfoFlag;
-    QString m_pluginInfoImport;
-
     QStringList m_monitoredFiles;
     QStringList m_layers;
 };
-
-inline const QString &LivekeysArguments::pluginInfoImport() const{
-    return m_pluginInfoImport;
-}
 
 inline const QStringList &LivekeysArguments::monitoredFiles() const{
     return m_monitoredFiles;

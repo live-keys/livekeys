@@ -240,7 +240,7 @@ void JsImportsTest::invalidExportTypeAsStringTest(){
     engine->scope([engine, testPath](){
         engine->tryCatch([engine, testPath](){
             engine->loadJsModule(testPath + "/B.lv.js");
-        }, [engine](const Engine::CatchData& cd){
+        }, [](const Engine::CatchData& cd){
             QVERIFY(cd.message().find("Export at 'B' is not a component nor a singleton.") != std::string::npos);
         });
     });
@@ -260,7 +260,7 @@ void JsImportsTest::invalidExportKeyTest(){
     engine->scope([engine, testPath](){
         engine->tryCatch([engine, testPath](){
             engine->loadJsModule(testPath + "/C.lv.js");
-        }, [engine](const Engine::CatchData& cd){
+        }, [](const Engine::CatchData& cd){
             QVERIFY(cd.message().find("Given an export key that is not of string type.") != std::string::npos);
         });
     });
@@ -280,7 +280,7 @@ void JsImportsTest::indirectInvalidExportTypeAsObjectTest(){
     engine->scope([engine, testPath](){
         engine->tryCatch([engine, testPath](){
             engine->loadJsModule(testPath + "/main.lv.js");
-        }, [engine](const Engine::CatchData& cd){
+        }, [](const Engine::CatchData& cd){
             QVERIFY(cd.message().find("Export at 'A' is not a component.") != std::string::npos);
         });
     });
@@ -301,7 +301,7 @@ void JsImportsTest::moduleFileDependencyCycleTest(){
         bool hadException = false;
         engine->tryCatch([engine, testPath](){
             engine->loadJsModule(testPath + "/main.lv.js");
-        }, [engine, &hadException](const Engine::CatchData& cd){
+        }, [&hadException](const Engine::CatchData& cd){
             QVERIFY(cd.message().find("Module file dependency cycle found") != std::string::npos);
             hadException = true;
         });
@@ -325,7 +325,7 @@ void JsImportsTest::pluginDependencyCycleTest(){
         bool hadException = false;
         engine->tryCatch([engine, testPath](){
             engine->loadJsModule(testPath + "/plugin1/subplugina/A.lv.js");
-        }, [engine, &hadException](const Engine::CatchData& cd){
+        }, [&hadException](const Engine::CatchData& cd){
             QVERIFY(cd.message().find("Plugin dependency cycle found") != std::string::npos);
             hadException = true;
         });
@@ -349,7 +349,7 @@ void JsImportsTest::packageDependencyCycleTest(){
         bool hadException = false;
         engine->tryCatch([engine, testPath](){
             engine->loadJsModule(testPath + "/main.lv.js");
-        }, [engine, &hadException](const Engine::CatchData& cd){
+        }, [&hadException](const Engine::CatchData& cd){
             QVERIFY(cd.message().find("Package dependency cycle found") != std::string::npos);
             hadException = true;
         });

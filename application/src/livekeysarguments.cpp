@@ -30,10 +30,6 @@ LivekeysArguments::~LivekeysArguments(){
     delete m_parser;
 }
 
-bool LivekeysArguments::pluginInfoFlag() const{
-    return m_pluginInfoFlag;
-}
-
 bool LivekeysArguments::helpFlag() const{
     return m_parser->isSet(m_parser->helpOption());
 }
@@ -41,8 +37,6 @@ bool LivekeysArguments::helpFlag() const{
 void LivekeysArguments::initialize(int argc, const char* const argv[]){
     CommandLineParser::Option* monitorOption  = m_parser->addOption({"-m", "--monitor"},
         "Opens the list of paths in monitor mode.", "list");
-    CommandLineParser::Option* pluginInfoOption = m_parser->addOption({"--plugininfo"},
-        "Outputs the plugin info to a specified import (e.g. --plugininfo \"live 1.0\".", "string");
 
     CommandLineParser::Option* logToConsoleOption = m_parser->addFlag({"-c", "--log-toconsole"},
         "Output log data to the console.");
@@ -78,9 +72,6 @@ void LivekeysArguments::initialize(int argc, const char* const argv[]){
         "Run project in window mode, do not load any workspace. This is equivalent to --layers window");
 
     m_parser->parse(argc, argv);
-
-    m_pluginInfoFlag   = m_parser->isSet(pluginInfoOption);
-    m_pluginInfoImport = QString::fromStdString(m_parser->value(pluginInfoOption));
 
     QString layersValue = QString::fromStdString(m_parser->value(layers));
     if ( !layersValue.isEmpty() )
