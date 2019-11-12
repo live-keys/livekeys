@@ -7,6 +7,7 @@
 #include "live/exception.h"
 
 #include <memory>
+#include <map>
 
 namespace lv{ namespace el{
 
@@ -36,6 +37,8 @@ public:
         SourceRange captureRange(uint16_t captureIndex);
         uint32_t captureId(uint16_t captureIndex);
 
+        void temp();
+
         ~Cursor();
 
     private:
@@ -45,6 +48,12 @@ public:
 
         void* m_cursor;
         void* m_currentMatch;
+    };
+
+    class LV_ELEMENTS_EXPORT PredicateData{
+    public:
+        SourceRange m_range;
+        Utf8        m_value;
     };
 
     typedef std::shared_ptr<LanguageQuery>       Ptr;
@@ -60,10 +69,15 @@ public:
     Cursor::Ptr exec(Parser::AST* ast);
     Cursor::Ptr exec(Parser::AST* ast, uint32_t start, uint32_t end);
 
+    bool predicateMatch(const Cursor::Ptr& cursor, void* payload = nullptr);
+
+    void addPredicate(const std::string& name, std::function<bool(const std::vector<PredicateData>&, void* payload)> callback);
+
 private:
     DISABLE_COPY(LanguageQuery);
 
     LanguageQuery(void* query);
+    std::map<std::string, std::function<bool(const std::vector<PredicateData>&, void* payload)> > m_predicates;
     void* m_query;
 };
 

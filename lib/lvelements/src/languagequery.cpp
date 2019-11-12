@@ -130,6 +130,54 @@ LanguageQuery::Cursor::Ptr LanguageQuery::exec(Parser::AST *ast, uint32_t start,
     return cursor;
 }
 
+bool LanguageQuery::predicateMatch(const Cursor::Ptr &cursor, void *payload){
+    TSQuery* query = reinterpret_cast<TSQuery*>(m_query);
+    uint32_t length;
+    const TSQueryPredicateStep* step = ts_query_predicates_for_pattern(query, cursor->matchPatternIndex(), &length);
+    if ( length == 0 )
+        return true;
+
+    std::string functionToCall;
+    uint32_t strLen = 0;
+
+    std::vector<LanguageQuery::PredicateData> args;
+
+    for( uint32_t i = 0; i < length; ++i ){
+        if ( functionToCall.empty() ){
+            functionToCall = ts_query_string_value_for_id(query, step[i].value_id, &strLen);
+        } else if ( step[i].type == TSQueryPredicateStepTypeString ){
+            LanguageQuery::PredicateData pd;
+            pd.m_value = ts_query_string_value_for_id(query, step[i].value_id, &strLen);
+            args.push_back(pd);
+        } else if ( step[i].type == TSQueryPredicateStepTypeCapture ){
+            uint16_t captures = cursor->totalMatchCaptures();
+            for ( uint16_t captureIndex = 0; captureIndex < captures; ++captureIndex ){
+                uint32_t captureId = cursor->captureId(captureIndex);
+                if ( captureId == step[i].value_id ){
+                    LanguageQuery::PredicateData pd;
+                    pd.m_range = cursor->captureRange(captureIndex);
+                    args.push_back(pd);
+                    break;
+                }
+            }
+        } else if ( step[i].type == TSQueryPredicateStepTypeDone ){
+            auto it = m_predicates.find(functionToCall);
+            if ( it == m_predicates.end() ){
+                THROW_EXCEPTION(Exception, "LanguageQuery: Failed to find function \'" + functionToCall + "\'", Exception::toCode("~Function"));
+            }
+            if ( !it->second(args, payload) )
+                return false;
+            functionToCall = "";
+        }
+    }
+
+    return true;
+}
+
+void LanguageQuery::addPredicate(const std::string &name, std::function<bool (const std::vector<LanguageQuery::PredicateData> &, void *)> callback){
+    m_predicates[name] = callback;
+}
+
 LanguageQuery::LanguageQuery(void *query)
     : m_query(query)
 {
