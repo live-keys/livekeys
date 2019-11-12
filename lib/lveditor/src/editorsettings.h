@@ -33,7 +33,7 @@ class LV_EDITOR_EXPORT EditorSettings : public QObject{
     Q_PROPERTY(QString path READ path     CONSTANT)
 
 public:
-    explicit EditorSettings(const QString& path, QObject *parent = 0);
+    explicit EditorSettings(const QString& path, QObject *parent = nullptr);
     ~EditorSettings();
 
     /** Returns the font size */
@@ -83,7 +83,7 @@ inline const QString &EditorSettings::path() const{
 inline EditorSettingsCategory *EditorSettings::settingsFor(const QString &key){
     QHash<QString, EditorSettingsCategory*>::iterator it = m_settings.find(key);
     if ( it == m_settings.end() )
-        return 0;
+        return nullptr;
     return it.value();
 }
 

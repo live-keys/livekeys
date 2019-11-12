@@ -20,6 +20,8 @@ public:
 
     void setTarget(QTextDocument* target);
 
+    static bool predicateEq(const std::vector<el::LanguageQuery::PredicateData>& args, void* payload);
+
 protected:
     void documentChanged(int, int, int)  override;
     QList<TextFormatRange> highlight(int lastUserState, int position, const QString& text) override;

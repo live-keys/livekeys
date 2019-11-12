@@ -20,9 +20,12 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
         "(false) @constant.builtin \n"
         "(comment) @comment \n"
         "(string) @string \n"
+        "\"=\" @operator \n"
+        "((identifier) @keyword (eq? @keyword \"Element\")) \n"
         "(number) @number";
 
     m_languageQuery = el::LanguageQuery::create(m_parser, pattern);
+    m_languageQuery->addPredicate("eq?", &LanguageLvHighlighter::predicateEq);
 
     uint32_t totalCaptures = m_languageQuery->captureCount();
     for( uint32_t i = 0; i < totalCaptures; ++i ){
@@ -36,6 +39,27 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
 LanguageLvHighlighter::~LanguageLvHighlighter(){
 }
 
+bool LanguageLvHighlighter::predicateEq(const std::vector<el::LanguageQuery::PredicateData> &args, void *payload){
+    QTextDocument* doc = reinterpret_cast<QTextDocument*>(payload);
+    if ( args.size() != 2 )
+        THROW_EXCEPTION(lv::Exception, "Predicate eq? requires 2 arguments.", Exception::toCode("~Arguments"));
+
+    QString compare1;
+    QString compare2;
+    if ( args[0].m_range.isValid() ){
+        compare1 = doc->toPlainText().mid(args[0].m_range.from(), args[0].m_range.length());
+    } else {
+        compare1 = QString::fromStdString(args[0].m_value.data());
+    }
+    if ( args[1].m_range.isValid() ){
+        compare2 = doc->toPlainText().mid(args[1].m_range.from(), args[1].m_range.length());
+    } else {
+        compare2 = QString::fromStdString(args[1].m_value.data());
+    }
+
+    return compare1 == compare2;
+}
+
 void LanguageLvHighlighter::documentChanged(int, int, int){
     QTextDocument* doc = static_cast<QTextDocument*>(parent());
     std::string content = doc->toPlainText().toStdString();
@@ -46,6 +70,7 @@ void LanguageLvHighlighter::documentChanged(int, int, int){
 QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
         int lastUserState, int position, const QString &text)
 {
+    QTextDocument* doc = static_cast<QTextDocument*>(parent());
     QList<SyntaxHighlighter::TextFormatRange> ranges;
 
     if ( !m_currentAst )
@@ -55,18 +80,19 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
     while ( cursor->nextMatch() ){
         uint16_t captures = cursor->totalMatchCaptures();
 
+        if ( m_languageQuery->predicateMatch(cursor, doc) ){
+            for ( uint16_t captureIndex = 0; captureIndex < captures; ++captureIndex ){
+                uint32_t captureId = cursor->captureId(captureIndex);
 
-        for ( uint16_t captureIndex = 0; captureIndex < captures; ++captureIndex ){
-            uint32_t captureId = cursor->captureId(captureIndex);
-
-            el::SourceRange range = cursor->captureRange(0);
-            TextFormatRange r;
-            r.start = static_cast<int>(range.from());
-            r.length = static_cast<int>(range.length());
-            r.userstate = 0;
-            r.userstateFollows = 0;
-            r.format = m_captureToFormatMap[captureId];
-            ranges.append(r);
+                el::SourceRange range = cursor->captureRange(0);
+                TextFormatRange r;
+                r.start = static_cast<int>(range.from());
+                r.length = static_cast<int>(range.length());
+                r.userstate = 0;
+                r.userstateFollows = 0;
+                r.format = m_captureToFormatMap[captureId];
+                ranges.append(r);
+            }
         }
     }
 
