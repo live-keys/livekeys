@@ -96,8 +96,7 @@ TSFieldId ts_language_field_id_for_name(
   for (TSSymbol i = 1; i < count + 1; i++) {
     switch (strncmp(name, self->field_names[i], name_length)) {
       case 0:
-        if (self->field_names[i][name_length] == 0) return i;
-        break;
+        return i;
       case -1:
         return 0;
       default:

@@ -45,8 +45,7 @@ struct TSLexer {
   void (*advance)(TSLexer *, bool);
   void (*mark_end)(TSLexer *);
   uint32_t (*get_column)(TSLexer *);
-  bool (*is_at_included_range_start)(const TSLexer *);
-  bool (*eof)(const TSLexer *);
+  bool (*is_at_included_range_start)(TSLexer *);
 };
 
 typedef enum {
@@ -127,7 +126,6 @@ struct TSLanguage {
 #define START_LEXER()           \
   bool result = false;          \
   bool skip = false;            \
-  bool eof = false;             \
   int32_t lookahead;            \
   goto start;                   \
   next_state:                   \

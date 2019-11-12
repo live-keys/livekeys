@@ -12,10 +12,41 @@ typedef enum {
   TSHighlightUnknownScope,
   TSHighlightTimeout,
   TSHighlightInvalidLanguage,
-  TSHighlightInvalidUtf8,
-  TSHighlightInvalidRegex,
-  TSHighlightInvalidQuery,
 } TSHighlightError;
+
+// The list of scopes which can be styled for syntax highlighting.
+// When constructing a `TSHighlighter`, you need to construct an
+// `attribute_strings` array whose elements correspond to these values.
+enum TSHighlightValue {
+  TSHighlightValueAttribute,
+  TSHighlightValueComment,
+  TSHighlightValueConstant,
+  TSHighlightValueConstantBuiltin,
+  TSHighlightValueConstructor,
+  TSHighlightValueConstructorBuiltin,
+  TSHighlightValueEmbedded,
+  TSHighlightValueEscape,
+  TSHighlightValueFunction,
+  TSHighlightValueFunctionBuiltin,
+  TSHighlightValueKeyword,
+  TSHighlightValueNumber,
+  TSHighlightValueOperator,
+  TSHighlightValueProperty,
+  TSHighlightValuePropertyBuiltin,
+  TSHighlightValuePunctuation,
+  TSHighlightValuePunctuationBracket,
+  TSHighlightValuePunctuationDelimiter,
+  TSHighlightValuePunctuationSpecial,
+  TSHighlightValueString,
+  TSHighlightValueStringSpecial,
+  TSHighlightValueTag,
+  TSHighlightValueType,
+  TSHighlightValueTypeBuiltin,
+  TSHighlightValueVariable,
+  TSHighlightValueVariableBuiltin,
+  TSHighlightValueVariableParameter,
+  TSHighlightValueUnknown,
+};
 
 typedef struct TSHighlighter TSHighlighter;
 typedef struct TSHighlightBuffer TSHighlightBuffer;
@@ -23,9 +54,7 @@ typedef struct TSHighlightBuffer TSHighlightBuffer;
 // Construct a `TSHighlighter` by providing a list of strings containing
 // the HTML attributes that should be applied for each highlight value.
 TSHighlighter *ts_highlighter_new(
-  const char **highlight_names,
-  const char **attribute_strings,
-  uint32_t highlight_count
+  const char **attribute_strings
 );
 
 // Delete a syntax highlighter.
@@ -38,22 +67,17 @@ void ts_highlighter_delete(TSHighlighter *);
 // with that language. You can also optionally provide an 'injection regex',
 // which is used to detect when this language has been embedded in a document
 // written in a different language.
-TSHighlightError ts_highlighter_add_language(
+int ts_highlighter_add_language(
   TSHighlighter *self,
   const char *scope_name,
-  const char *injection_regex,
   const TSLanguage *language,
-  const char *highlight_query,
-  const char *injection_query,
-  const char *locals_query,
-  uint32_t highlight_query_len,
-  uint32_t injection_query_len,
-  uint32_t locals_query_len
+  const char *property_sheet_json,
+  const char *injection_regex
 );
 
 // Compute syntax highlighting for a given document. You must first
 // create a `TSHighlightBuffer` to hold the output.
-TSHighlightError ts_highlighter_highlight(
+int ts_highlighter_highlight(
   const TSHighlighter *self,
   const char *scope_name,
   const char *source_code,

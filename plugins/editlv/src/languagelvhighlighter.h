@@ -21,6 +21,7 @@ public:
     void setTarget(QTextDocument* target);
 
     static bool predicateEq(const std::vector<el::LanguageQuery::PredicateData>& args, void* payload);
+    static bool predicateEqOr(const std::vector<el::LanguageQuery::PredicateData>& args, void* payload);
 
 protected:
     void documentChanged(int, int, int)  override;
@@ -28,6 +29,8 @@ protected:
     QList<TextFormatRange> highlightSections(const QList<ProjectDocumentSection::Ptr>&) override;
 
 private:
+    static QString slice(QTextDocument* doc, int from, int to);
+
     el::Parser             m_parser;
     el::LanguageQuery::Ptr m_languageQuery;
     EditLvSettings*        m_settings;

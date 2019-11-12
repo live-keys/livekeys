@@ -1299,7 +1299,7 @@
     }
   },
   {
-    "type": "formal_type_parameters",
+    "type": "formal_type_parameter",
     "named": true,
     "fields": {
       "parameter_type": {
@@ -1314,8 +1314,8 @@
       }
     },
     "children": {
-      "multiple": true,
-      "required": false,
+      "multiple": false,
+      "required": true,
       "types": [
         {
           "type": "_destructuring_pattern",
@@ -1331,6 +1331,21 @@
         },
         {
           "type": "rest_parameter",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "formal_type_parameters",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "formal_type_parameter",
           "named": true
         }
       ]

@@ -438,7 +438,12 @@ const MLNode &Livekeys::startupConfiguration(){
                      {"package", "editqml"},
                      {"enabled", true},
                      {"component", "EditQmlExtension.qml"}
-                 }
+                 }/*,
+                 {
+                     {"package", "editlv"},
+                     {"enabled", true},
+                     {"component", "EditLvExtension.qml"}
+                 }*/
             }}
          }},
          {"internalPackages",{

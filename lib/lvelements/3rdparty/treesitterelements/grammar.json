@@ -6006,7 +6006,7 @@
                   "members": [
                     {
                       "type": "SYMBOL",
-                      "name": "_formal_type_parameter"
+                      "name": "formal_type_parameter"
                     },
                     {
                       "type": "REPEAT",
@@ -6019,7 +6019,7 @@
                           },
                           {
                             "type": "SYMBOL",
-                            "name": "_formal_type_parameter"
+                            "name": "formal_type_parameter"
                           }
                         ]
                       }
@@ -6051,7 +6051,7 @@
         }
       ]
     },
-    "_formal_type_parameter": {
+    "formal_type_parameter": {
       "type": "SEQ",
       "members": [
         {
