@@ -774,6 +774,7 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
             int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
                 m_target, cursor.position(), &expression, &expressionEndDelimiter
             );
+
             propertyLength = (cursor.position() - propertyPosition) + advancedLength;
 
         } else if ( ctx->context() & QmlCompletionContext::InRhsofBinding ){
@@ -1432,6 +1433,7 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
         cursor.setPosition(position + length, QTextCursor::KeepAnchor);
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
+
     if ( properties.isEmpty() )
         return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 
