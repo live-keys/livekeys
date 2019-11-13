@@ -14,7 +14,6 @@ HEADERS += \
     $$PWD/editorlayer.h \
     $$PWD/editorprivate_plugin.h \
     $$PWD/editorsettings.h \
-    $$PWD/editorsettingscategory.h \
     $$PWD/extensions.h \
     $$PWD/keymap.h \
     $$PWD/linecontrol.h \
@@ -55,7 +54,6 @@ SOURCES += \
     $$PWD/editorlayer.cpp \
     $$PWD/editorprivate_plugin.cpp \
     $$PWD/editorsettings.cpp \
-    $$PWD/editorsettingscategory.cpp \
     $$PWD/extensions.cpp \
     $$PWD/keymap.cpp \
     $$PWD/linecontrol.cpp \

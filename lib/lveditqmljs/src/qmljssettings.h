@@ -17,14 +17,18 @@
 #ifndef LVQMLJSSETTINGS_H
 #define LVQMLJSSETTINGS_H
 
-#include "live/editorsettingscategory.h"
 #include <QHash>
 #include <QTextCharFormat>
+
+#include "live/mlnode.h"
+#include "live/editorsettings.h"
 
 namespace lv{
 
 /// \private
-class QmlJsSettings : public EditorSettingsCategory{
+class QmlJsSettings : public QObject{
+
+    Q_OBJECT
 
 public:
     enum ColorComponent{
@@ -44,11 +48,11 @@ public:
     };
 
 public:
-    QmlJsSettings();
+    QmlJsSettings(EditorSettings* parent = nullptr);
     virtual ~QmlJsSettings();
 
-    void fromJson(const QJsonValue &json) Q_DECL_OVERRIDE;
-    QJsonValue toJson() const Q_DECL_OVERRIDE;
+    void fromJson(const MLNode &json);
+    MLNode toJson() const;
 
     bool hasKey(const QString& key);
 
@@ -61,6 +65,8 @@ public:
     static QHash<QString, ColorComponent>::ConstIterator rolesBegin();
     static QHash<QString, ColorComponent>::ConstIterator rolesEnd();
 
+public slots:
+    void __refresh();
 
 private:
     QTextCharFormat createFormat(const QColor& foreground);

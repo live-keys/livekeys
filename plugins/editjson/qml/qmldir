@@ -1,0 +1,4 @@
+module editjson
+plugin editjson
+
+depends QtQuick 2.3

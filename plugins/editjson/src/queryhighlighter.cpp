@@ -1,44 +1,36 @@
-#include "languagelvhighlighter.h"
+#include "queryhighlighter.h"
 
 #include "live/elements/parseddocument.h"
 #include "live/visuallog.h"
 
 namespace lv{
 
-LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentHandler *, QTextDocument *parent)
+
+QueryHighlighter::QueryHighlighter(
+        const MLNode &settings,
+        const std::string &pattern,
+        DocumentHandler *handler,
+        QTextDocument *parent)
     : SyntaxHighlighter(parent)
     , m_languageQuery(nullptr)
-    , m_settings(settings)
     , m_currentAst(nullptr)
 {
-    // capture index to formats
-
-    std::string pattern =
-        "(this) @variable.builtin \n"
-        "(super) @variable.builtin \n"
-        "(true) @constant.builtin \n"
-        "(false) @constant.builtin \n"
-        "(comment) @comment \n"
-        "(string) @string \n"
-        "\"=\" @operator \n"
-        "(number) @number";
-
     m_languageQuery = el::LanguageQuery::create(m_parser, pattern);
-    m_languageQuery->addPredicate("eq?", &LanguageLvHighlighter::predicateEq);
+    m_languageQuery->addPredicate("eq?", &QueryHighlighter::predicateEq);
 
-    uint32_t totalCaptures = m_languageQuery->captureCount();
-    for( uint32_t i = 0; i < totalCaptures; ++i ){
-        m_captureToFormatMap.insert(i, (*m_settings)[m_languageQuery->captureName(i)]);
-    }
+//    uint32_t totalCaptures = m_languageQuery->captureCount();
+//    for( uint32_t i = 0; i < totalCaptures; ++i ){
+//        m_captureToFormatMap.insert(i, (*m_settings)[m_languageQuery->captureName(i)]);
+//    }
 
-    std::string content = parent->toPlainText().toStdString();
-    m_currentAst = m_parser.parse(content);
+//    std::string content = parent->toPlainText().toStdString();
+    //    m_currentAst = m_parser.parse(content);
 }
 
-LanguageLvHighlighter::~LanguageLvHighlighter(){
+QueryHighlighter::~QueryHighlighter(){
 }
 
-bool LanguageLvHighlighter::predicateEq(const std::vector<el::LanguageQuery::PredicateData> &args, void *payload){
+bool QueryHighlighter::predicateEq(const std::vector<el::LanguageQuery::PredicateData> &args, void *payload){
     QTextDocument* doc = reinterpret_cast<QTextDocument*>(payload);
     if ( args.size() != 2 )
         THROW_EXCEPTION(lv::Exception, "Predicate eq? requires 2 arguments.", Exception::toCode("~Arguments"));
@@ -59,14 +51,14 @@ bool LanguageLvHighlighter::predicateEq(const std::vector<el::LanguageQuery::Pre
     return compare1 == compare2;
 }
 
-void LanguageLvHighlighter::documentChanged(int, int, int){
+void QueryHighlighter::documentChanged(int, int, int){
     QTextDocument* doc = static_cast<QTextDocument*>(parent());
     std::string content = doc->toPlainText().toStdString();
     m_parser.destroy(m_currentAst);
     m_currentAst = m_parser.parse(content);
 }
 
-QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
+QList<SyntaxHighlighter::TextFormatRange> QueryHighlighter::highlight(
         int lastUserState, int position, const QString &text)
 {
     QTextDocument* doc = static_cast<QTextDocument*>(parent());
@@ -98,7 +90,7 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
     return ranges;
 }
 
-QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlightSections(const QList<ProjectDocumentSection::Ptr> &){
+QList<SyntaxHighlighter::TextFormatRange> QueryHighlighter::highlightSections(const QList<ProjectDocumentSection::Ptr> &){
     return QList<SyntaxHighlighter::TextFormatRange>();
 }
 

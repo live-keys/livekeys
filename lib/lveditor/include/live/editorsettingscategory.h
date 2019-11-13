@@ -1,1 +1,0 @@
-#include "../../src/editorsettingscategory.h"

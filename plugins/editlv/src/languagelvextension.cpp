@@ -14,7 +14,7 @@ namespace lv{
 
 LanguageLvExtension::LanguageLvExtension(QObject *parent)
     : QObject(parent)
-    , m_settings(new EditLvSettings())
+    , m_settings(nullptr)
     , m_scanMonitor(nullptr)
 {
 }
@@ -51,7 +51,10 @@ void LanguageLvExtension::componentComplete(){
         m_scanMonitor = new ProjectLvMonitor(this, m_project, m_engine);
 
         lv::EditorSettings* editorSettings = qobject_cast<lv::EditorSettings*>(settings->file("editor"));
-        editorSettings->addSetting("lv", m_settings);
+
+        m_settings = new EditLvSettings(editorSettings);
+
+        editorSettings->write("lv", m_settings->toJson());
         editorSettings->syncWithFile();
     }
 }

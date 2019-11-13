@@ -13,10 +13,9 @@ class LV_ELEMENTS_EXPORT ParsedDocument{
 public:
     static std::vector<ImportInfo> extractImports(const std::string& source, Parser::AST* ast);
     static DocumentInfo::Ptr extractInfo(const std::string& source, Parser::AST* ast);
-
     static CursorContext findCursorContext(Parser::AST* ast, int position);
 };
 
 }} // namespace lv, el
 
-#endif // PARSEDDOCUMENT_H
+#endif // LVPARSEDDOCUMENT_H

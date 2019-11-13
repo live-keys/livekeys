@@ -17,7 +17,7 @@
 #include "live/editorsettings.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
-#include "live/editorsettingscategory.h"
+#include "live/mlnodetojson.h"
 
 #include <QFile>
 #include <QJsonObject>
@@ -30,7 +30,7 @@ namespace lv{
  * \class lv::EditorSettings
  * \brief Wrapper around a settings file for the editor
  *
- * We create small EditorSettingsCategory objects (that class is extendable) to add custom settings
+ * We create small category nodes to add custom settings
  * by assigning a key for each category in a JSON file and fetching it from a settings file.
  * \ingroup lveditor
  */
@@ -64,20 +64,16 @@ EditorSettings::~EditorSettings(){
 /**
  * \brief Populates the settings from a given JSON object
  */
-void EditorSettings::fromJson(const QJsonObject &root){
-    for( QJsonObject::ConstIterator it = root.begin(); it != root.end(); ++it ){
+void EditorSettings::fromJson(const MLNode &root){
+    for( auto it = root.begin(); it != root.end(); ++it ){
         if ( it.key() == "font" ){
-            QJsonObject fontObj = it.value().toObject();
-            if ( fontObj.contains("size") ){
-                m_fontSize = fontObj["size"].toInt();
+            MLNode n = it.value();
+            if ( n.hasKey("size") ){
+                m_fontSize = n["size"].asInt();
                 emit fontSizeChanged(m_fontSize);
             }
         } else {
-            EditorSettingsCategory* category = settingsFor(it.key());
-            if ( category )
-                category->fromJson(it.value());
-            else
-                qCritical("Failed to find settings for: %s", qPrintable(it.key()));
+            m_settings[QString::fromStdString(it.key())] = it.value();
         }
     }
 }
@@ -85,18 +81,15 @@ void EditorSettings::fromJson(const QJsonObject &root){
 /**
  * @brief Creates a JSON object from the settings
  */
-QJsonObject EditorSettings::toJson() const{
-    QJsonObject root;
+lv::MLNode EditorSettings::toJson() const{
+    MLNode root;
 
-    QJsonObject font;
+    MLNode font;
     font["size"] = m_fontSize;
     root["font"] = font;
 
-    for ( QHash<QString, EditorSettingsCategory*>::ConstIterator it = m_settings.begin();
-          it != m_settings.end();
-          ++it
-    ){
-        root[it.key()] = it.value()->toJson();
+    for ( auto it = m_settings.begin(); it != m_settings.end(); ++it){
+        root[it.key().toStdString()] = it.value();
     }
 
     return root;
@@ -110,7 +103,9 @@ QJsonObject EditorSettings::toJson() const{
 void EditorSettings::syncWithFile(){
     QFile file(m_path);
     if ( !file.exists() ){
-        m_content = QJsonDocument(toJson()).toJson(QJsonDocument::Indented);
+        std::string result;
+        ml::toJson(toJson(), result);
+        m_content = QByteArray::fromStdString(result);
         if ( file.open(QIODevice::WriteOnly) ){
             file.write(m_content);
             file.close();
@@ -127,14 +122,10 @@ void EditorSettings::syncWithFile(){
  * \brief Initializes the settings from given data
  */
 void EditorSettings::init(const QByteArray &data){
-    m_content = data;
-    QJsonParseError error;
-    QJsonDocument jsondoc = QJsonDocument::fromJson(data, &error);
-    if ( error.error != QJsonParseError::NoError ){
-        emit initError(error.errorString());
-        qCritical("Failed to parse settings file: %s", qPrintable(error.errorString()));
-    }
-    fromJson(jsondoc.object());
+    MLNode n;
+    ml::fromJson(data.constData(), n);
+    fromJson(n);
+    emit refresh();
 }
 
 /**

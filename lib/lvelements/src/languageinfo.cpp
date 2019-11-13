@@ -273,7 +273,7 @@ size_t ModuleInfo::totalTypes() const{
     return m_types.size();
 }
 
-const TypeInfo::Ptr &ModuleInfo::typeAt(size_t index) const{
+TypeInfo::ConstPtr ModuleInfo::typeAt(size_t index) const{
     return m_types.at(index);
 }
 
@@ -295,6 +295,21 @@ const DocumentInfo::Ptr &ModuleInfo::unresolvedDocumentAt(size_t index) const{
 
 void ModuleInfo::addUnresolvedDocument(const DocumentInfo::Ptr &document){
     m_unresolvedDocuments.push_back(document);
+}
+
+size_t ModuleInfo::totalDependencies() const{
+    return m_dependencies.size();
+}
+
+const Utf8 &ModuleInfo::dependencyAt(size_t index) const{
+    return m_dependencies.at(index);
+}
+
+void ModuleInfo::addDependency(const Utf8 &dep){
+    for ( auto it = m_dependencies.begin(); it != m_dependencies.end(); ++it )
+        if ( *it == dep )
+            return;
+    m_dependencies.push_back(dep);
 }
 
 // ImportInfo
@@ -321,6 +336,13 @@ size_t ImportInfo::totalSegments() const{
 
 const Utf8 &ImportInfo::segmentAt(size_t index) const{
     return m_segments.at(index);
+}
+
+std::vector<std::string> ImportInfo::segments() const{
+    std::vector<std::string> result;
+    for ( auto it = m_segments.begin(); it != m_segments.end(); ++it )
+        result.push_back((*it).data());
+    return result;
 }
 
 }}// namespace lv, el
