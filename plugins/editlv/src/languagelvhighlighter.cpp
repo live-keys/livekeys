@@ -115,16 +115,16 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
         ") \n"
         /*===============================*/
         "(new_component_expression"
-        "   name: (identifier) @identifier)\n"
+        "   name: (identifier) @type)\n"
         /*==============================*/
         "(component_declaration"
-        "    name: (identifier) @identifier"
+        "    name: (identifier) @type"
         ") \n"
         /*==============================*/
-        "(component_heritage (identifier) @identifier) \n"
+        "(component_heritage (identifier) @type) \n"
         /*==============================*/
         "(typed_function_declaration "
-        "    name: (property_identifier) @identifier) \n"
+        "    name: (property_identifier) @property) \n"
         /*==============================*/
         "(identifier_property_assignment name: \"id\" @property)"
         /*==============================*/
