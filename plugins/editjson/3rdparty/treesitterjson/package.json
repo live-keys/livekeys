@@ -1,0 +1,22 @@
+{
+  "name": "tree-sitter-json",
+  "version": "0.15.0",
+  "description": "JSON grammar for tree-sitter",
+  "main": "index.js",
+  "keywords": [
+    "parser",
+    "json"
+  ],
+  "author": "Max Brunsfeld",
+  "license": "MIT",
+  "dependencies": {
+    "nan": "^2.0.0"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.15.9"
+  },
+  "scripts": {
+    "build": "tree-sitter generate && node-gyp build",
+    "test": "tree-sitter test"
+  }
+}
