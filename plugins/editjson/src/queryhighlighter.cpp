@@ -7,9 +7,10 @@ namespace lv{
 
 
 QueryHighlighter::QueryHighlighter(
+        QmlLanguageObject* language,
         const MLNode &settings,
         const std::string &pattern,
-        DocumentHandler *handler,
+        DocumentHandler *,
         QTextDocument *parent)
     : SyntaxHighlighter(parent)
     , m_languageQuery(nullptr)
@@ -18,13 +19,27 @@ QueryHighlighter::QueryHighlighter(
     m_languageQuery = el::LanguageQuery::create(m_parser, pattern);
     m_languageQuery->addPredicate("eq?", &QueryHighlighter::predicateEq);
 
-//    uint32_t totalCaptures = m_languageQuery->captureCount();
-//    for( uint32_t i = 0; i < totalCaptures; ++i ){
-//        m_captureToFormatMap.insert(i, (*m_settings)[m_languageQuery->captureName(i)]);
-//    }
+    QMap<std::string, QTextCharFormat> styleMap;
+    for ( auto it = settings.begin(); it != settings.end(); ++it ){
+        QTextCharFormat fmt;
+        if ( it.value().type() == MLNode::Object ){
+            fmt.setBackground(QBrush(QColor(QString::fromStdString(it.value()["background"].asString()))));
+            fmt.setForeground(QBrush(QColor(QString::fromStdString(it.value()["foreground"].asString()))));
+        } else {
+            fmt.clearBackground();
+            fmt.setForeground(QBrush(QColor(QString::fromStdString(it.value().asString()))));
+        }
+        styleMap[it.key()] = fmt;
+    }
 
+    uint32_t totalCaptures = m_languageQuery->captureCount();
+    for( uint32_t i = 0; i < totalCaptures; ++i ){
+        m_captureToFormatMap.insert(i, styleMap[m_languageQuery->captureName(i)]);
+    }
+
+    //TODO: Create parser from language
 //    std::string content = parent->toPlainText().toStdString();
-    //    m_currentAst = m_parser.parse(content);
+//        m_currentAst = m_parser.parse(content);
 }
 
 QueryHighlighter::~QueryHighlighter(){

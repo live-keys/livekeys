@@ -10,12 +10,12 @@ class QmlLanguageObject : public QObject{
     Q_OBJECT
 
 public:
-    explicit QmlLanguageObject(void* language, QObject *parent = nullptr);
+    explicit QmlLanguageObject(const void* language, QObject *parent = nullptr);
 
-    void* language(){ return m_language; }
+    const void* language(){ return m_language; }
 
 private:
-    void* m_language;
+    const void* m_language;
 };
 
 }// namespace

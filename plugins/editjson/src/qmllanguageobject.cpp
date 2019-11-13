@@ -2,7 +2,7 @@
 
 namespace lv{
 
-QmlLanguageObject::QmlLanguageObject(void *language, QObject *parent)
+QmlLanguageObject::QmlLanguageObject(const void *language, QObject *parent)
     : QObject(parent)
     , m_language(language)
 {

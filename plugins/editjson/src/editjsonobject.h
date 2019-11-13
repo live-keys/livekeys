@@ -10,12 +10,26 @@
 
 #include "qmllanguageobject.h"
 
+#include "tree_sitter/parser.h"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+const TSLanguage *tree_sitter_json(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+
 namespace lv{
 
 class EditJsonObject : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lv::QmlLanguageObject language READ language CONSTANT)
+    Q_PROPERTY(lv::QmlLanguageObject* language READ language CONSTANT)
 
 public:
     EditJsonObject(QQmlEngine *parent = nullptr);

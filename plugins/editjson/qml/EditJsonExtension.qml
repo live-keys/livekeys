@@ -23,6 +23,12 @@ LiveExtension{
             var handler = Ej.EditJsonObject.createHandler(
                 document, handler, "json", root.settings
             )
+            handler.setLanguage(Ej.EditJsonObject.language)
+            handler.createHighlighter(
+                "(string) @string \n" +
+                "(number) @number \n",
+                root.settings["style"]
+            )
             return handler
         }
         return null

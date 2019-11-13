@@ -14,7 +14,9 @@ EditJsonObject::EditJsonObject(QQmlEngine* parent)
     , m_engine(nullptr)
     , m_editorSettings(nullptr)
 {
-    m_language = new QmlLanguageObject(nullptr, this);
+    const TSLanguage* lang = tree_sitter_json();
+
+    m_language = new QmlLanguageObject(lang, this);
 
     QQmlContext* ctx = parent->rootContext();
     QObject* lg = ctx->contextProperty("lk").value<QObject*>();

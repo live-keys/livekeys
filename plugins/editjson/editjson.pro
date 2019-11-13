@@ -19,13 +19,13 @@ unix:!macx{
     QMAKE_LFLAGS += \
 	'-Wl,-rpath,\'\$$ORIGIN/../../link\''
 
-
     createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)
     QMAKE_EXTRA_TARGETS    += createlinkdir
     POST_TARGETDEPS        += createlinkdir
 }
 
 include($$PWD/src/editjson.pri)
+include($$PWD/3rdparty/treesitterjson.pri)
 
 OTHER_FILES += \
     $$PWD/qml/*.qml \

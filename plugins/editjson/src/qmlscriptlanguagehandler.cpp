@@ -173,7 +173,7 @@ void QmlScriptLanguageHandler::suggestCompletion(int cursorPosition){
         true,
         dh->completionModel(),
         newCursor
-                );
+    );
 }
 
 void QmlScriptLanguageHandler::setLanguage(QmlLanguageObject *language){
@@ -181,7 +181,18 @@ void QmlScriptLanguageHandler::setLanguage(QmlLanguageObject *language){
 }
 
 void QmlScriptLanguageHandler::createHighlighter(const QString &capturePattern, const QJSValue &highlights){
+    if ( !m_language ){
+        lv::Exception e = CREATE_EXCEPTION(Exception, "No language specified when creating highlighter", Exception::toCode("~Language"));
+        m_engine->throwError(&e, this);
+        return;
+    }
 
+    MLNode hlnode;
+    ml::fromQml(highlights, hlnode);
+
+    DocumentHandler* doc = qobject_cast<DocumentHandler*>(parent());
+
+    m_highlighter = new QueryHighlighter(m_language, hlnode, capturePattern.toStdString(), doc, m_document->textDocument());
 }
 
 void QmlScriptLanguageHandler::__documentFormatUpdate(int /*position*/, int /*length*/){

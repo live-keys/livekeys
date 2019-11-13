@@ -11,6 +11,8 @@
 #include "live/elements/parser.h"
 #include "live/elements/languagequery.h"
 
+#include "qmllanguageobject.h"
+
 namespace lv{
 
 class QueryHighlighter : public SyntaxHighlighter{
@@ -19,6 +21,7 @@ class QueryHighlighter : public SyntaxHighlighter{
 
 public:
     explicit QueryHighlighter(
+        QmlLanguageObject* language,
         const MLNode& settings,
         const std::string& pattern,
         DocumentHandler* handler,
