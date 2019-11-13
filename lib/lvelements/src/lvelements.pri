@@ -6,6 +6,7 @@ HEADERS += \
     $$PWD/engine.h \
     $$PWD/languageinfo.h \
     $$PWD/languagequery.h \
+    $$PWD/languagescanner.h \
     $$PWD/metaobject.h \
     $$PWD/parseddocument.h \
     $$PWD/sourcerange.h \
@@ -47,6 +48,7 @@ SOURCES += \
     $$PWD/engine.cpp \
     $$PWD/languageinfo.cpp \
     $$PWD/languagequery.cpp \
+    $$PWD/languagescanner.cpp \
     $$PWD/metaobject.cpp \
     $$PWD/parseddocument.cpp \
     $$PWD/sourcerange.cpp \

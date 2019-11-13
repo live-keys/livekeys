@@ -69,6 +69,8 @@ public:
     size_t totalSegments() const;
     const Utf8& segmentAt(size_t index) const;
 
+    std::vector<std::string> segments() const;
+
 private:
     bool              m_isRelative;
     std::vector<Utf8> m_segments;
@@ -192,7 +194,7 @@ public:
     const Utf8& path() const;
 
     size_t totalTypes() const;
-    const TypeInfo::Ptr& typeAt(size_t index) const;
+    TypeInfo::ConstPtr typeAt(size_t index) const;
     void addType(const TypeInfo::Ptr& type);
 
     void updateScanStatus(ScanStatus status);
@@ -202,12 +204,17 @@ public:
     const DocumentInfo::Ptr& unresolvedDocumentAt(size_t index) const;
     void addUnresolvedDocument(const DocumentInfo::Ptr& document);
 
+    size_t totalDependencies() const;
+    const Utf8& dependencyAt(size_t index) const;
+    void addDependency(const Utf8& dep);
+
 private:
     ModuleInfo(Utf8 importUri, Utf8 path, const std::vector<TypeInfo::Ptr>& types = std::vector<TypeInfo::Ptr>());
 
     Utf8       m_importUri;
     Utf8       m_path;
     ScanStatus m_scanStatus;
+    std::vector<Utf8>              m_dependencies;
     std::vector<DocumentInfo::Ptr> m_unresolvedDocuments;
     std::vector<TypeInfo::Ptr>     m_types;
 };

@@ -55,7 +55,7 @@ namespace lv{
  */
 ProjectQmlExtension::ProjectQmlExtension(QObject *parent)
     : QObject(parent)
-    , m_settings(new QmlJsSettings())
+    , m_settings(nullptr)
     , m_scanMonitor(nullptr)
     , m_paletteContainer(nullptr)
 {
@@ -180,7 +180,7 @@ void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEn
     m_scanMonitor = new ProjectQmlScanMonitor(this, m_project, m_engine);
 
     lv::EditorSettings* editorSettings = qobject_cast<lv::EditorSettings*>(settings->file("editor"));
-    editorSettings->addSetting("qmljs", m_settings);
+    m_settings = new QmlJsSettings(editorSettings);
     editorSettings->syncWithFile();
 
     m_engine->addCompileHook(&ProjectQmlExtension::engineHook, this);

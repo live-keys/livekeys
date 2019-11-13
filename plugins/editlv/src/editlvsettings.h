@@ -2,26 +2,33 @@
 #define LVEDITLVSETTINGS_H
 
 #include <QObject>
-#include "live/editorsettingscategory.h"
 #include <QHash>
 #include <QTextCharFormat>
+
+#include "live/mlnode.h"
+#include "live/editorsettings.h"
 
 namespace lv{
 
 /// \private
-class EditLvSettings : public EditorSettingsCategory{
+class EditLvSettings : public QObject{
+
+    Q_OBJECT
 
 public:
-    EditLvSettings();
+    EditLvSettings(EditorSettings* parent = nullptr);
     virtual ~EditLvSettings() override;
 
-    void fromJson(const QJsonValue &json) override;
-    QJsonValue toJson() const override;
+    void fromJson(const MLNode &json);
+    MLNode toJson() const;
 
     bool hasKey(const std::string &key);
 
     QTextCharFormat& operator[](const std::string& key);
     QTextCharFormat operator[](const std::string& key) const;
+
+public slots:
+    void __refresh();
 
 private:
     QTextCharFormat createFormat(const QColor& foreground);

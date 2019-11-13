@@ -12,7 +12,6 @@ HEADERS += \
     $$PWD/live/projectnavigationmodel.h \
     $$PWD/live/editorsettings.h \
     $$PWD/live/documenthandler.h \
-    $$PWD/live/editorsettingscategory.h \
     $$PWD/live/lveditorglobal.h \
     $$PWD/live/editorglobalobject.h \
     $$PWD/live/editorprivate_plugin.h \

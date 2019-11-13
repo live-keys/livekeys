@@ -19,13 +19,13 @@
 
 #include <QObject>
 #include <QHash>
+
 #include "live/lveditorglobal.h"
-#include <QDebug>
+#include "live/mlnode.h"
 
 namespace lv{
 
 class ProjectDocument;
-class EditorSettingsCategory;
 class LV_EDITOR_EXPORT EditorSettings : public QObject{
 
     Q_OBJECT
@@ -40,11 +40,11 @@ public:
     int fontSize() const;
     const QString& path() const;
 
-    void fromJson(const QJsonObject& root);
-    QJsonObject toJson() const;
+    void fromJson(const MLNode &root);
+    MLNode toJson() const;
 
-    EditorSettingsCategory* settingsFor(const QString& key);
-    void addSetting(const QString& key, EditorSettingsCategory* category);
+    MLNode readFor(const QString& key);
+    void write(const QString& key, const MLNode& settings);
 
 public slots:
     void syncWithFile();
@@ -53,18 +53,21 @@ public slots:
     void documentOpened(lv::ProjectDocument* document);
     void documentChanged();
 
+
 signals:
     /** Signals error with given string */
     void initError(const QString& errorString);
     /** Font size changed */
     void fontSizeChanged(int fontSize);
+    /** Signals when a resync is done from the file */
+    void refresh();
 
 private:
     int        m_fontSize;
     QString    m_path;
     QByteArray m_content;
 
-    QHash<QString, EditorSettingsCategory*> m_settings;
+    QHash<QString, MLNode> m_settings;
 };
 
 /**
@@ -80,16 +83,16 @@ inline const QString &EditorSettings::path() const{
 }
 
 /** Find settings for given key */
-inline EditorSettingsCategory *EditorSettings::settingsFor(const QString &key){
-    QHash<QString, EditorSettingsCategory*>::iterator it = m_settings.find(key);
+inline MLNode EditorSettings::readFor(const QString &key){
+    auto it = m_settings.find(key);
     if ( it == m_settings.end() )
-        return nullptr;
+        return MLNode();
     return it.value();
 }
 
-/** Add settings for given key */
-inline void EditorSettings::addSetting(const QString &key, EditorSettingsCategory *category){
-    m_settings[key] = category;
+/** Write settings for given key */
+inline void EditorSettings::write(const QString &key, const MLNode& settings){
+    m_settings[key] = settings;
 }
 
 /**

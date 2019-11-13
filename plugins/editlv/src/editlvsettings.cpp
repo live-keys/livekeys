@@ -2,13 +2,17 @@
 
 namespace lv{
 
-EditLvSettings::EditLvSettings()
+EditLvSettings::EditLvSettings(EditorSettings* parent)
+    : QObject(parent)
 {
+    if ( parent )
+        connect(parent, &EditorSettings::refresh, this, &EditLvSettings::__refresh);
+
     m_formats["text"]            = createFormat("#fff");
     m_formats["comment"]         = createFormat("#56748a");
     m_formats["number"]          = createFormat("#ba761d");
     m_formats["string"]          = createFormat("#86a930");
-    m_formats["operator"]        = createFormat("#bc900c");
+    m_formats["operator"]        = createFormat("#86a930");
     m_formats["identifier"]      = createFormat("#93672f");
     m_formats["keyword"]         = createFormat("#a0a000");
     m_formats["variable.builtin"]= createFormat("#93672f");
@@ -19,51 +23,67 @@ EditLvSettings::EditLvSettings()
     m_formats["runtimeBound"]    = createFormat("#26539f");
     m_formats["runtimeModified"] = createFormat("#0080a0");
     m_formats["runtimeEdit"]     = createFormat("#fff", "#0b273f");
+
+    if ( parent ){
+        MLNode s = parent->readFor("lv");
+        if ( s.type() == MLNode::Object )
+            fromJson(s);
+        else
+            parent->write("lv", toJson());
+    }
 }
 
 
 EditLvSettings::~EditLvSettings(){
 }
 
-void EditLvSettings::fromJson(const QJsonValue &json){
-    QJsonObject obj = json.toObject();
-    if ( obj.contains("style") ){
-        QJsonObject style = obj["style"].toObject();
-        for ( QJsonObject::iterator it = style.begin(); it != style.end(); ++it ){
-            QTextCharFormat& fmt = (*this)[it.key().toStdString()];
-            if ( it.value().isObject() ){
-                QJsonObject styleOb = it.value().toObject();
-                fmt.setBackground(QBrush(QColor(styleOb["background"].toString())));
-                fmt.setForeground(QBrush(QColor(styleOb["foreground"].toString())));
+void EditLvSettings::fromJson(const MLNode &obj){
+    if ( obj.hasKey("style") ){
+        MLNode style = obj["style"];
+        for ( auto it = style.begin(); it != style.end(); ++it ){
+            QTextCharFormat& fmt = (*this)[it.key()];
+            if ( it.value().type() == MLNode::Object ){
+                fmt.setBackground(QBrush(QColor(QString::fromStdString(it.value()["background"].asString()))));
+                fmt.setForeground(QBrush(QColor(QString::fromStdString(it.value()["foreground"].asString()))));
             } else {
                 fmt.clearBackground();
-                fmt.setForeground(QBrush(QColor(it.value().toString())));
+                fmt.setForeground(QBrush(QColor(QString::fromStdString(it.value().asString()))));
             }
         }
     }
 }
 
-QJsonValue EditLvSettings::toJson() const{
-    QJsonObject obj;
+MLNode EditLvSettings::toJson() const{
+    MLNode root(MLNode::Object);
+    MLNode style(MLNode::Object);
 
-    QJsonObject style;
-    for ( auto it = m_formats.begin(); it != m_formats.end(); ++it )
-    {
-        const QTextCharFormat& fmt = it.value();
+    for ( auto it = m_formats.begin(); it != m_formats.end(); ++it ){
+
+        QTextCharFormat fmt = it.value();
 
         if ( fmt.background().style() != Qt::NoBrush ){
-            QJsonObject highlightob;
-            highlightob["foreground"] = fmt.foreground().color().name();
-            highlightob["background"] = fmt.background().color().name();
-            style[QString::fromStdString(it.key())] = highlightob;
+            MLNode highlightob(MLNode::Object);
+            highlightob["foreground"] = fmt.foreground().color().name().toStdString();
+            highlightob["background"] = fmt.background().color().name().toStdString();
+            style[it.key()] = highlightob;
         } else {
-            style[QString::fromStdString(it.key())] = fmt.foreground().color().name();
+            style[it.key()] = fmt.foreground().color().name().toStdString();
         }
     }
 
-    obj["style"] = style;
+    root["style"] = style;
 
-    return obj;
+    return root;
+}
+
+void EditLvSettings::__refresh(){
+    EditorSettings* settings = qobject_cast<EditorSettings*>(parent());
+    if ( !settings )
+        return;
+
+    MLNode s = settings->readFor("lv");
+    if ( s.type() == MLNode::Object )
+        fromJson(s);
 }
 
 

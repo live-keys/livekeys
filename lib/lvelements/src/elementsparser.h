@@ -14,6 +14,10 @@ namespace lv{ namespace el{
 class LV_ELEMENTS_EXPORT Parser{
 
 public:
+    typedef std::shared_ptr<Parser>       Ptr;
+    typedef std::shared_ptr<const Parser> ConstPtr;
+
+public:
     typedef void* AST;
 
     class ASTRef{

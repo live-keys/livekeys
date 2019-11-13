@@ -14,37 +14,18 @@
 **
 ****************************************************************************/
 
-#include "live/editorsettingscategory.h"
+#ifndef LVEDITJSON_PLUGIN_H
+#define LVEDITJSON_PLUGIN_H
 
-/**
- * \class lv::EditorSettingsCategory
- * \brief Extendable class providing an interface for extracting settings from JSON or saving them in JSON
- * \ingroup lveditor
- */
+#include <QQmlExtensionPlugin>
 
-namespace lv{
+class EditJsonPlugin : public QQmlExtensionPlugin{
 
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
 
-/**
- * \fn lv::EditorSettingsCategory::fromJson
- * \brief Blank implementation of fromJson
- */
-
-/**
- * \fn lv::EditorSettingsCategory::toJson
- * \brief Dummy implementation of toJson, returning a blank object
- */
-
-/**
- * \brief Blank constructor
- */
-EditorSettingsCategory::EditorSettingsCategory(){
-}
-
-/**
- * \brief Blank destructor
- */
-EditorSettingsCategory::~EditorSettingsCategory(){
-}
-
-}// namespace
+public:
+    void registerTypes(const char *uri) Q_DECL_OVERRIDE;
+    void initializeEngine(QQmlEngine *engine, const char *uri) Q_DECL_OVERRIDE;
+};
+#endif // LVEDITJSON_PLUGIN_H

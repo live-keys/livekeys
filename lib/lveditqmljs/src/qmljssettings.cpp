@@ -19,8 +19,12 @@
 
 namespace lv{
 
-QmlJsSettings::QmlJsSettings()
+QmlJsSettings::QmlJsSettings(EditorSettings *parent)
+    : QObject(parent)
 {
+    if ( parent )
+        connect(parent, &EditorSettings::refresh, this, &QmlJsSettings::__refresh);
+
     m_formats[QmlJsSettings::Text]        = createFormat("#fff");
     m_formats[QmlJsSettings::Comment]     = createFormat("#56748a");
     m_formats[QmlJsSettings::Number]      = createFormat("#ba761d");
@@ -35,50 +39,64 @@ QmlJsSettings::QmlJsSettings()
     m_formats[QmlJsSettings::QmlRuntimeBoundProperty] = createFormat("#26539f");
     m_formats[QmlJsSettings::QmlRuntimeModifiedValue] = createFormat("#0080a0");
     m_formats[QmlJsSettings::QmlEdit] = createFormat("#fff", "#0b273f");
+
+    MLNode s = parent->readFor("qmljs");
+    if ( s.type() == MLNode::Object )
+        fromJson(s);
+    else
+        parent->write("qmljs", toJson());
 }
 
 QmlJsSettings::~QmlJsSettings(){
 }
 
-void QmlJsSettings::fromJson(const QJsonValue &json){
-    QJsonObject obj = json.toObject();
-    if ( obj.contains("style") ){
-        QJsonObject style = obj["style"].toObject();
-        for ( QJsonObject::iterator it = style.begin(); it != style.end(); ++it ){
-            QTextCharFormat& fmt = (*this)[it.key()];
-            if ( it.value().isObject() ){
-                QJsonObject styleOb = it.value().toObject();
-                fmt.setBackground(QBrush(QColor(styleOb["background"].toString())));
-                fmt.setForeground(QBrush(QColor(styleOb["foreground"].toString())));
+void QmlJsSettings::fromJson(const MLNode &obj){
+    if ( obj.hasKey("style") ){
+        MLNode style = obj["style"];
+        for ( auto it = style.begin(); it != style.end(); ++it ){
+            QTextCharFormat& fmt = (*this)[QString::fromStdString(it.key())];
+            if ( it.value().type() == MLNode::Object ){
+                fmt.setBackground(QBrush(QColor(QString::fromStdString(it.value()["background"].asString()))));
+                fmt.setForeground(QBrush(QColor(QString::fromStdString(it.value()["foreground"].asString()))));
             } else {
                 fmt.clearBackground();
-                fmt.setForeground(QBrush(QColor(it.value().toString())));
+                fmt.setForeground(QBrush(QColor(QString::fromStdString(it.value().asString()))));
             }
         }
     }
 }
 
-QJsonValue QmlJsSettings::toJson() const{
-    QJsonObject obj;
+MLNode QmlJsSettings::toJson() const{
+    MLNode root(MLNode::Object);
+    MLNode style(MLNode::Object);
 
-    QJsonObject style;
     for ( auto it = QmlJsSettings::rolesBegin(); it != QmlJsSettings::rolesEnd(); ++it )
     {
         const QTextCharFormat& fmt = (*this)[it.value()];
 
         if ( fmt.background().style() != Qt::NoBrush ){
-            QJsonObject highlightob;
-            highlightob["foreground"] = fmt.foreground().color().name();
-            highlightob["background"] = fmt.background().color().name();
-            style[it.key()] = highlightob;
+            MLNode highlightob(MLNode::Object);
+            highlightob["foreground"] = fmt.foreground().color().name().toStdString();
+            highlightob["background"] = fmt.background().color().name().toStdString();
+            style[it.key().toStdString()] = highlightob;
         } else {
-            style[it.key()] = fmt.foreground().color().name();
+            style[it.key().toStdString()] = fmt.foreground().color().name().toStdString();
         }
     }
 
-    obj["style"] = style;
+    root["style"] = style;
 
-    return obj;
+    return root;
+}
+
+void QmlJsSettings::__refresh(){
+    EditorSettings* settings = qobject_cast<EditorSettings*>(parent());
+    if ( !settings )
+        return;
+
+    MLNode s = settings->readFor("qmljs");
+    if ( s.type() == MLNode::Object )
+        fromJson(s);
 }
 
 QHash<QString, QmlJsSettings::ColorComponent> QmlJsSettings::m_formatRoles = QmlJsSettings::createFormatRoles();
