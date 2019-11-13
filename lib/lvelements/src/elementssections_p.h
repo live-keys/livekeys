@@ -2,7 +2,7 @@
 #define LVELEMENTSSECTIONS_H
 
 #include <vector>
-#include "elementsparser.h"
+#include "languageparser.h"
 #include "live/utf8.h"
 
 namespace lv{ namespace el{

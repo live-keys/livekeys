@@ -1,9 +1,9 @@
-#include "elementsparser.h"
+#include "languageparser.h"
 #include "tree_sitter/api.h"
 #include "tree_sitter/parser.h"
 
 #include "elementsparserinternal.h"
-#include "elementsnodes_p.h"
+#include "languagenodes_p.h"
 #include "elementssections_p.h"
 
 #include "live/visuallog.h"
@@ -14,52 +14,52 @@
 namespace lv{ namespace el{
 
 
-Parser::ASTRef::ASTRef()
+LanguageParser::ASTRef::ASTRef()
     : m_node(new TSNode){
 }
 
-Parser::ASTRef::ASTRef(const Parser::ASTRef &other)
+LanguageParser::ASTRef::ASTRef(const LanguageParser::ASTRef &other)
     : m_node(new TSNode(*reinterpret_cast<TSNode*>(other.m_node)))
 {
 }
 
-Parser::ASTRef::~ASTRef(){
+LanguageParser::ASTRef::~ASTRef(){
     TSNode* node = reinterpret_cast<TSNode*>(m_node);
     delete node;
 }
 
-Parser::ASTRef &Parser::ASTRef::operator =(const Parser::ASTRef &other){
+LanguageParser::ASTRef &LanguageParser::ASTRef::operator =(const LanguageParser::ASTRef &other){
     TSNode* node = reinterpret_cast<TSNode*>(m_node);
     *node = *reinterpret_cast<TSNode*>(other.m_node);
     return *this;
 }
 
-SourceRange Parser::ASTRef::range() const{
+SourceRange LanguageParser::ASTRef::range() const{
     TSNode* node = reinterpret_cast<TSNode*>(m_node);
     return SourceRange(ts_node_start_byte(*node), ts_node_end_byte((*node)));
 }
 
-uint32_t Parser::ASTRef::childCount() const{
+uint32_t LanguageParser::ASTRef::childCount() const{
     TSNode* node = reinterpret_cast<TSNode*>(m_node);
     return ts_node_child_count(*node);
 }
 
-Parser::ASTRef Parser::ASTRef::childAt(uint32_t index) const{
+LanguageParser::ASTRef LanguageParser::ASTRef::childAt(uint32_t index) const{
     TSNode* node = reinterpret_cast<TSNode*>(m_node);
-    return Parser::ASTRef(new TSNode(ts_node_child(*node, index)));
+    return LanguageParser::ASTRef(new TSNode(ts_node_child(*node, index)));
 }
 
-Parser::ASTRef Parser::ASTRef::parent() const{
+LanguageParser::ASTRef LanguageParser::ASTRef::parent() const{
     TSNode* node = reinterpret_cast<TSNode*>(m_node);
-    return Parser::ASTRef(new TSNode(ts_node_parent(*node)));
+    return LanguageParser::ASTRef(new TSNode(ts_node_parent(*node)));
 }
 
-std::string Parser::ASTRef::typeString() const{
+std::string LanguageParser::ASTRef::typeString() const{
     TSNode* node = reinterpret_cast<TSNode*>(m_node);
     return ts_node_type(*node);
 }
 
-Parser::ASTRef::ASTRef(void *node)
+LanguageParser::ASTRef::ASTRef(void *node)
     : m_node(node)
 {
 }
@@ -68,27 +68,36 @@ std::string slice(const std::string& source, TSNode& node){
     return source.substr(ts_node_start_byte(node), ts_node_end_byte(node) - ts_node_start_byte(node));
 }
 
-Parser::Parser()
+LanguageParser::LanguageParser(Language *language)
     : m_parser(ts_parser_new())
+    , m_language(language)
 {
-    ts_parser_set_language(m_parser, tree_sitter_elements());
+    ts_parser_set_language(m_parser, reinterpret_cast<const TSLanguage*>(language));
 }
 
-Parser::~Parser(){
+LanguageParser::~LanguageParser(){
     ts_parser_delete(m_parser);
 }
 
-Parser::AST *Parser::parse(const std::string &source) const{
-    return reinterpret_cast<Parser::AST*>(ts_parser_parse_string(m_parser, nullptr, source.c_str(), (uint32_t)source.size()));
+LanguageParser::Ptr LanguageParser::create(LanguageParser::Language *language){
+    return LanguageParser::Ptr(new LanguageParser(language));
 }
 
-void Parser::destroy(Parser::AST *ast) const{
+LanguageParser::Ptr LanguageParser::createForElements(){
+    return LanguageParser::Ptr(new LanguageParser(tree_sitter_elements()));
+}
+
+LanguageParser::AST *LanguageParser::parse(const std::string &source) const{
+    return reinterpret_cast<LanguageParser::AST*>(ts_parser_parse_string(m_parser, nullptr, source.c_str(), static_cast<uint32_t>(source.size())));
+}
+
+void LanguageParser::destroy(LanguageParser::AST *ast) const{
     if ( ast )
         ts_tree_delete(reinterpret_cast<TSTree*>(ast));
 }
 
-Parser::ComparisonResult Parser::compare(
-    const std::string &source1, Parser::AST *ast1, const std::string &source2, Parser::AST *ast2)
+LanguageParser::ComparisonResult LanguageParser::compare(
+    const std::string &source1, LanguageParser::AST *ast1, const std::string &source2, LanguageParser::AST *ast2)
 {
     TSTree* tree1 = reinterpret_cast<TSTree*>(ast1);
     TSTree* tree2 = reinterpret_cast<TSTree*>(ast2);
@@ -230,15 +239,15 @@ Parser::ComparisonResult Parser::compare(
     return ComparisonResult(true);
 }
 
-std::string Parser::toString(Parser::AST *ast){
+std::string LanguageParser::toString(LanguageParser::AST *ast){
     char* str = ts_node_string(ts_tree_root_node(reinterpret_cast<TSTree*>(ast)));
     std::string result(str);
     free(str);
     return result;
 }
 
-std::string Parser::toJs(const std::string &contents, const std::string filename) const{
-    Parser::AST* ast = parse(contents);
+std::string LanguageParser::toJs(const std::string &contents, const std::string filename) const{
+    LanguageParser::AST* ast = parse(contents);
 
     std::string result = toJs(contents, ast, filename);
 
@@ -247,7 +256,7 @@ std::string Parser::toJs(const std::string &contents, const std::string filename
     return result;
 }
 
-std::string Parser::toJs(const std::string& contents, AST *ast, const std::string filename) const{
+std::string LanguageParser::toJs(const std::string& contents, AST *ast, const std::string filename) const{
     if ( !ast )
         return nullptr;
 
@@ -280,7 +289,7 @@ std::string Parser::toJs(const std::string& contents, AST *ast, const std::strin
     return result;
 }
 
-std::list<std::string> Parser::parseExportNames(const std::string& moduleFile){
+std::list<std::string> LanguageParser::parseExportNames(const std::string& moduleFile){
     if ( moduleFile.rfind(".lv.js") != std::string::npos ){
         return parseExportNamesJs(moduleFile);
     }
@@ -289,7 +298,11 @@ std::list<std::string> Parser::parseExportNames(const std::string& moduleFile){
     return exportNames;
 }
 
-std::list<std::string> Parser::parseExportNamesJs(const std::string &jsModuleFile){
+LanguageParser::Language *LanguageParser::language() const{
+    return m_language;
+}
+
+std::list<std::string> LanguageParser::parseExportNamesJs(const std::string &jsModuleFile){
     std::ifstream instream(jsModuleFile, std::ifstream::in | std::ifstream::binary);
     if ( !instream.is_open() ){
         THROW_EXCEPTION(lv::Exception, std::string("Cannot open file: ") + jsModuleFile, Exception::toCode("~Path"));
@@ -316,7 +329,7 @@ std::list<std::string> Parser::parseExportNamesJs(const std::string &jsModuleFil
     return exportNames;
 }
 
-Parser::ComparisonResult::ComparisonResult(bool isEqual)
+LanguageParser::ComparisonResult::ComparisonResult(bool isEqual)
     : m_isEqual(isEqual)
     , m_source1Col(0)
     , m_source1Row(0)

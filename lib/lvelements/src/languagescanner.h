@@ -5,7 +5,7 @@
 #include "live/elements/languageinfo.h"
 #include "live/packagegraph.h"
 #include "live/lockedfileiosession.h"
-#include "live/elements/parser.h"
+#include "live/elements/languageparser.h"
 
 #include <memory>
 #include <functional>
@@ -21,7 +21,7 @@ public:
 public:
     ~LanguageScanner();
 
-    static LanguageScanner::Ptr create(Parser::Ptr parser, LockedFileIOSession::Ptr io);
+    static LanguageScanner::Ptr create(LanguageParser::Ptr parser, LockedFileIOSession::Ptr io);
 
     ModuleInfo::Ptr parseModule(const std::string& importUri);
     void onModuleReady(const std::function<void(ModuleInfo::ConstPtr)> callback);
@@ -34,7 +34,7 @@ public:
     std::list<ModuleInfo::Ptr>::iterator locateModuleInQueue(const std::string& importUri);
 
 private:
-    LanguageScanner(Parser::Ptr parser, LockedFileIOSession::Ptr io);
+    LanguageScanner(LanguageParser::Ptr parser, LockedFileIOSession::Ptr io);
     DISABLE_COPY(LanguageScanner);
 
     void resolveModule(ModuleInfo::Ptr module);
@@ -45,7 +45,7 @@ private:
     std::map<std::string, ModuleInfo::ConstPtr> m_loadedModules;
     std::function<void(ModuleInfo::ConstPtr)>   m_onModuleReady;
 
-    Parser::Ptr                                 m_parser;
+    LanguageParser::Ptr                                 m_parser;
     LockedFileIOSession::Ptr                    m_io;
 };
 

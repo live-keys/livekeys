@@ -11,18 +11,19 @@ struct TSParser;
 
 namespace lv{ namespace el{
 
-class LV_ELEMENTS_EXPORT Parser{
+class LV_ELEMENTS_EXPORT LanguageParser{
 
 public:
-    typedef std::shared_ptr<Parser>       Ptr;
-    typedef std::shared_ptr<const Parser> ConstPtr;
+    typedef std::shared_ptr<LanguageParser>       Ptr;
+    typedef std::shared_ptr<const LanguageParser> ConstPtr;
 
 public:
     typedef void* AST;
+    typedef const void Language;
 
     class ASTRef{
 
-        friend class lv::el::Parser;
+        friend class lv::el::LanguageParser;
 
     public:
         ASTRef();
@@ -45,7 +46,7 @@ public:
 
     class LV_ELEMENTS_EXPORT ComparisonResult{
 
-        friend class Parser;
+        friend class LanguageParser;
 
     public:
         ComparisonResult(bool isEqual);
@@ -74,8 +75,10 @@ public:
     };
 
 public:
-    Parser();
-    ~Parser();
+    ~LanguageParser();
+
+    static Ptr create(Language* language);
+    static Ptr createForElements();
 
     AST* parse(const std::string& input) const;
     void destroy(AST* ast) const;
@@ -88,14 +91,18 @@ public:
     static std::list<std::string> parseExportNames(const std::string &moduleFile);
 
     TSParser* internal() const{ return m_parser; }
+    Language* language() const;
 
 private:
     static std::list<std::string> parseExportNamesJs(const std::string& jsModuleFile);
 
-    DISABLE_COPY(Parser);
-    //TODO: Add pointer access
+    LanguageParser(Language* language);
+
+    LanguageParser();
+    DISABLE_COPY(LanguageParser);
 
     TSParser* m_parser;
+    Language* m_language;
 };
 
 }} // namespace lv, el

@@ -7,6 +7,7 @@ namespace lv{
 
 LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentHandler *, QTextDocument *parent)
     : SyntaxHighlighter(parent)
+    , m_parser(el::LanguageParser::createForElements())
     , m_languageQuery(nullptr)
     , m_settings(settings)
     , m_currentAst(nullptr)
@@ -131,10 +132,9 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
         "     parameter_type: (identifier) @type"
         ") \n"
         /*==============================*/
-
     ;
 
-    m_languageQuery = el::LanguageQuery::create(m_parser, pattern);
+    m_languageQuery = el::LanguageQuery::create(m_parser->language(), pattern);
     m_languageQuery->addPredicate("eq?", &LanguageLvHighlighter::predicateEq);
     m_languageQuery->addPredicate("eq-or?", &LanguageLvHighlighter::predicateEqOr);
 
@@ -144,7 +144,7 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
     }
 
     std::string content = parent->toPlainText().toStdString();
-    m_currentAst = m_parser.parse(content);
+    m_currentAst = m_parser->parse(content);
 }
 
 LanguageLvHighlighter::~LanguageLvHighlighter(){
@@ -201,8 +201,8 @@ bool LanguageLvHighlighter::predicateEqOr(const std::vector<el::LanguageQuery::P
 void LanguageLvHighlighter::documentChanged(int, int, int){
     QTextDocument* doc = static_cast<QTextDocument*>(parent());
     std::string content = doc->toPlainText().toStdString();
-    m_parser.destroy(m_currentAst);
-    m_currentAst = m_parser.parse(content);
+    m_parser->destroy(m_currentAst);
+    m_currentAst = m_parser->parse(content);
 }
 
 QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(

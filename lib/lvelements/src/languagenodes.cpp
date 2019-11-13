@@ -1,4 +1,4 @@
-#include "elementsnodes_p.h"
+#include "languagenodes_p.h"
 
 #include <QDebug>
 #include <queue>
@@ -27,7 +27,7 @@ BaseNode::~BaseNode(){
     }
 }
 
-BaseNode *BaseNode::visit(Parser::AST *ast){
+BaseNode *BaseNode::visit(LanguageParser::AST *ast){
     TSTree* tree = reinterpret_cast<TSTree*>(ast);
     TSNode root_node = ts_tree_root_node(tree);
 

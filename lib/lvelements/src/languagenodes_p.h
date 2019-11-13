@@ -9,7 +9,7 @@
 #include "tree_sitter/api.h"
 #include "tree_sitter/parser.h"
 #include "elementssections_p.h"
-#include "elementsparser.h"
+#include "languageparser.h"
 
 namespace lv{ namespace el{
 
@@ -44,7 +44,7 @@ public:
     std::string astString() const;
     virtual std::string toString(int indent = 0) const;
 
-    static BaseNode* visit(Parser::AST* ast);
+    static BaseNode* visit(LanguageParser::AST* ast);
     static void checkIdentifierDeclared(const std::string& source, BaseNode* node, std::string id);
     const std::string& typeString() const{ return m_typeString; }
 
@@ -286,7 +286,7 @@ class ArgumentsNode : public BaseNode{
     friend class BaseNode;
 public:
     ArgumentsNode(const TSNode& node) : BaseNode(node, "Arguments"){}
-    virtual std::string toString(int indent = 0) const;
+    virtual std::string toString(int indent = 0) const override;
     virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0) override;
 
 };
@@ -336,7 +336,7 @@ class ComponentDeclarationNode : public JsBlockNode{
     friend class BaseNode;
 public:
     ComponentDeclarationNode(const TSNode& node);
-    virtual std::string toString(int indent = 0) const;
+    virtual std::string toString(int indent = 0) const override;
     virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0) override;
 
     void pushToProperties(PropertyDeclarationNode* prop){ m_properties.push_back(prop); }
@@ -361,7 +361,7 @@ class NewComponentExpressionNode : public JsBlockNode{
     friend class ComponentBodyNode;
 public:
     NewComponentExpressionNode(const TSNode& node);
-    virtual std::string toString(int indent = 0) const;
+    virtual std::string toString(int indent = 0) const override;
     virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0) override;
 
     IdentifierNode* id() { return m_id; }

@@ -4,7 +4,7 @@
 
 namespace lv{ namespace el{
 
-LanguageScanner::LanguageScanner(Parser::Ptr parser, LockedFileIOSession::Ptr io)
+LanguageScanner::LanguageScanner(LanguageParser::Ptr parser, LockedFileIOSession::Ptr io)
     : m_packageGraph(new PackageGraph)
     , m_parser(parser)
     , m_io(io)
@@ -27,7 +27,7 @@ void LanguageScanner::resolveModule(ModuleInfo::Ptr module){
 LanguageScanner::~LanguageScanner(){
 }
 
-LanguageScanner::Ptr LanguageScanner::create(Parser::Ptr parser, LockedFileIOSession::Ptr io){
+LanguageScanner::Ptr LanguageScanner::create(LanguageParser::Ptr parser, LockedFileIOSession::Ptr io){
     return LanguageScanner::Ptr(new LanguageScanner(parser, io));
 }
 
@@ -63,7 +63,7 @@ ModuleInfo::Ptr LanguageScanner::parseModule(const std::string &importUri){
     for ( auto it = files.begin(); it != files.end(); ++it ){
         std::string filePath = plugin->filePath() + "/" + *it + ".lv";
         std::string content = m_io->readFromFile(filePath);
-        Parser::AST* ast = m_parser->parse(content);
+        LanguageParser::AST* ast = m_parser->parse(content);
         DocumentInfo::Ptr info = ParsedDocument::extractInfo(content, ast);
 
         for ( size_t i = 0; i < info->totalImports(); ++i ){

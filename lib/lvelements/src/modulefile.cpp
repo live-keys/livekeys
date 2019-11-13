@@ -1,6 +1,6 @@
 #include "modulefile.h"
 #include "imports_p.h"
-#include "live/elements/parser.h"
+#include "live/elements/languageparser.h"
 #include "live/exception.h"
 #include "live/plugin.h"
 #include "live/plugincontext.h"
@@ -102,7 +102,7 @@ void ModuleFile::parse(Engine* engine){
     if ( engine && engine->moduleFileType() == Engine::JsOnly ){
         fp += ".js";
     }
-    m_d->exportNames = Parser::parseExportNames(fp);
+    m_d->exportNames = LanguageParser::parseExportNames(fp);
     m_d->state = ModuleFile::Parsed;
 }
 
