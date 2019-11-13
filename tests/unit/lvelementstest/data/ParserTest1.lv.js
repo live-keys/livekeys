@@ -9,7 +9,7 @@ module.exports["A"] = class A extends Element{
     __initialize(){}
 
     otherFunction(a){
-        this.a = a
+        this.a = a;
     }
 }
 
@@ -18,6 +18,8 @@ module.exports["B"] = class B extends Element{
         super()
         this.__initialize()
     }
+    
+    __initialize(){}
 
     createA(){
         return (function(parent){
@@ -30,7 +32,7 @@ module.exports["B"] = class B extends Element{
 module.exports["C"] = class C extends Element{
     constructor(){
         super()
-        __initialize()
+        this.__initialize()
     }
 
     __initialize(){
@@ -45,18 +47,21 @@ module.exports["C"] = class C extends Element{
 module.exports["D"] = class D extends Container{
     constructor(){
         super()
-        __initialize()
+        this.__initialize()
     }
 
     __initialize(){
         Element.assignDefaultProperty(this, [
             (function(parent){
+                this.setParent(parent)
                 return this
             }.bind(new A(12, 13))(this)),
             (function(parent){
+              this.setParent(parent)
               return this
             }.bind(new A(14, 15))(this)),
             (function(parent){
+              this.setParent(parent)
               return this
             }.bind(new A(16, 17))(this))
         ])

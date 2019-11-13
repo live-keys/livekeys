@@ -14,6 +14,10 @@ public:
     explicit LvParseTest(QObject *parent = 0);
     ~LvParseTest(){}
 
+private slots:
+    void initTestCase();
+
+    void constructorParseTest();
     void functionParseTest();
     void nestingAndShortIdParseTest();
     void scopeParseTest();
@@ -22,11 +26,7 @@ public:
     void propertyExpressionsParseTest();
     void taggedStringParseTest();
     void instanceParseTest();
-
-private slots:
-    void initTestCase();
-    void constructorParseTest();
-
+    void namespaceInheritance();
 private:
     lv::LockedFileIOSession::Ptr m_fileSession;
     std::string                  m_scriptPath;

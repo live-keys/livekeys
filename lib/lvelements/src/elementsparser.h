@@ -60,6 +60,8 @@ public:
         int source2Row() const{ return m_source2Row; }
         int source2Offset() const{ return m_source2Offset; }
 
+        std::string errorString() const{ return m_errorString; }
+
     private:
         bool m_isEqual;
         int  m_source1Col;
@@ -68,6 +70,7 @@ public:
         int  m_source2Col;
         int  m_source2Row;
         int  m_source2Offset;
+        std::string m_errorString;
     };
 
 public:
@@ -79,8 +82,8 @@ public:
     ComparisonResult compare(const std::string& source1, AST* ast1, const std::string& source2, AST* ast2);
     std::string toString(AST* ast);
 
-    std::string toJs(const std::string &contents) const;
-    std::string toJs(const std::string &contents, AST* ast) const;
+    std::string toJs(const std::string &contents, const std::string filename = "") const;
+    std::string toJs(const std::string &contents, AST* ast, const std::string filename = "") const;
 
     static std::list<std::string> parseExportNames(const std::string &moduleFile);
 

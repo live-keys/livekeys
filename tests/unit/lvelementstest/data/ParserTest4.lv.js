@@ -16,7 +16,7 @@ module.exports["B"] = class B extends Element{
         this.ids["C"] = C
 
         Element.addProperty(this, 'not2', {type: "int", notify: 'not2Changed'})
-        this.not2 = 20
+        this.not2 = 10
     }
 
     not1(d, e){
@@ -25,6 +25,6 @@ module.exports["B"] = class B extends Element{
         class G{}
         function H(){}
 
-        console.log(A, B, c, d, e, F, G, not1, not2)
+        console.log(A, B, C, d, e, f, G, not1, not2)
     }
 }

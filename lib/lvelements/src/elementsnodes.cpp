@@ -49,8 +49,11 @@ void BaseNode::checkIdentifierDeclared(const std::string& source, BaseNode *node
     BaseNode* prog = nullptr;
     while (node)
     {
-        JsBlockNode* hasIds = static_cast<JsBlockNode*>(node);
-        if (!node->parent()) prog = node;
+        JsBlockNode* hasIds = dynamic_cast<JsBlockNode*>(node);
+        if (!node->parent())
+        {
+            prog = node;
+        }
         if (hasIds)
         {
             for (auto it = hasIds->m_declarations.begin(); it != hasIds->m_declarations.end(); ++it)
@@ -64,7 +67,7 @@ void BaseNode::checkIdentifierDeclared(const std::string& source, BaseNode *node
     }
 
     // at this point, we should've reached the Program node
-    ProgramNode* program = static_cast<ProgramNode*>(prog);
+    ProgramNode* program = dynamic_cast<ProgramNode*>(prog);
     program->undeclared().insert(id);
 }
 
@@ -192,6 +195,10 @@ void BaseNode::visit(BaseNode *parent, const TSNode &node){
         visitNewTaggedComponentExpression(parent, node);
     } else if ( strcmp(ts_node_type(node), "tagged_type_string") == 0 ){
         visitTaggedString(parent, node);
+    } else if ( strcmp(ts_node_type(node), "variable_declaration") == 0 ){
+        visitVariableDeclaration(parent, node);
+    } else if ( strcmp(ts_node_type(node), "new_expression") == 0 ){
+        visitNewExpression(parent, node);
     } else {
         visitChildren(parent, node);
     }
@@ -247,6 +254,10 @@ void BaseNode::visitImportPath(BaseNode *parent, const TSNode &node){
 void BaseNode::visitComponentDeclaration(BaseNode *parent, const TSNode &node){
     ComponentDeclarationNode* enode = new ComponentDeclarationNode(node);
     parent->insert(enode);
+    if (parent->typeString() == "PropertyDeclaration")
+    {
+        static_cast<PropertyDeclarationNode*>(parent)->m_componentDeclaration = enode;
+    }
     uint32_t count = ts_node_child_count(node);
     for ( uint32_t i = 0; i < count; ++i ){
         TSNode child = ts_node_child(node, i);
@@ -369,7 +380,7 @@ void BaseNode::visitPropertyDeclaration(BaseNode *parent, const TSNode &node){
         } else if ( strcmp(ts_node_type(child), "property_identifier") == 0 ){
             enode->m_name = new IdentifierNode(child);
             enode->m_name->setParent(enode);
-            moveToDeclarations(parent, enode->m_name);
+            // moveToDeclarations(parent, enode->m_name);
         } else if ( strcmp(ts_node_type(child), "expression_statement") == 0 ){
             enode->m_expression = new BindableExpressionNode(child);
             enode->m_expression->setParent(enode);
@@ -378,6 +389,9 @@ void BaseNode::visitPropertyDeclaration(BaseNode *parent, const TSNode &node){
             enode->m_statementBlock = new StatementBlockNode(child);
             enode->m_statementBlock->setParent(enode);
             visitChildren(enode->m_statementBlock, child);
+        } else if (strcmp(ts_node_type(child),"component_declaration") == 0) {
+            visitComponentDeclaration(enode, child);
+
         }
     }
 
@@ -411,6 +425,8 @@ void BaseNode::visitMemberExpression(BaseNode *parent, const TSNode &node){
         if (p->typeString() == "ClassDeclaration") break;
         if (p->typeString() == "PropertyDeclaration")
         {
+            auto child = enode->children()[0];
+            if (child->typeString() != "MemberExpression" && child->typeString() != "Identifier") break;
             p->as<PropertyDeclarationNode>()->pushToBindings(enode);
             break;
         }
@@ -440,6 +456,16 @@ void BaseNode::visitPropertyAssignment(BaseNode *parent, const TSNode &node){
             enode->m_expression->setParent(enode);
             visitChildren(enode->m_expression, child);
         }
+    }
+
+    if (parent->parent() && parent->parent()->typeString() == "ComponentDeclaration")
+    {
+        parent->parent()->as<ComponentDeclarationNode>()->pushToAssignments(enode);
+    }
+
+    if (parent->parent() && parent->parent()->typeString() == "NewComponentExpression")
+    {
+        parent->parent()->as<NewComponentExpressionNode>()->pushToAssignments(enode);
     }
 }
 
@@ -510,6 +536,7 @@ void BaseNode::visitListenerDeclaration(BaseNode *parent, const TSNode &node){
             }
         } else if ( strcmp(ts_node_type(child), "statement_block") == 0 ){
             enode->m_body = new JsBlockNode(child);
+            enode->m_body->setParent(enode);
             visitChildren(enode->m_body, child);
         }
     }
@@ -536,6 +563,7 @@ void BaseNode::visitMethodDefinition(BaseNode *parent, const TSNode &node){
             }
         } else if ( strcmp(ts_node_type(child), "statement_block") == 0 ){
             enode->m_body = new JsBlockNode(child);
+            enode->m_body->setParent(enode);
             visitChildren(enode->m_body, child);
         }
     }
@@ -558,15 +586,28 @@ void BaseNode::visitTypedFunctionDeclaration(BaseNode *parent, const TSNode &nod
                 for ( uint32_t j = 0; j < paramterCount; j += 2 ){
                     TSNode paramType = ts_node_named_child(child, j);
                     TSNode paramName = ts_node_named_child(child, j + 1);
+
+                    auto typeNode = new IdentifierNode(paramType);
+                    auto nameNode = new IdentifierNode(paramName);
+
                     enode->m_parameters->m_parameters.push_back(
-                        std::make_pair(new IdentifierNode(paramType), new IdentifierNode(paramName))
+                        std::make_pair(typeNode, nameNode)
                     );
                 }
             }
         } else if ( strcmp(ts_node_type(child), "statement_block") == 0 ){
             enode->m_body = new JsBlockNode(child);
+            enode->m_body->setParent(enode);
             visitChildren(enode->m_body, child);
         }
+    }
+
+    if (enode->m_body)
+    for (unsigned i = 0; i != enode->m_parameters->m_parameters.size(); ++i)
+    {
+        auto pair = enode->m_parameters->m_parameters[i];
+
+        moveToDeclarations(enode->m_body, pair.second);
     }
 }
 
@@ -633,7 +674,8 @@ void BaseNode::visitCallExpression(BaseNode *parent, const TSNode &node)
         TSNode child = ts_node_child(node, i);
         if ( strcmp(ts_node_type(child), "arguments") == 0 ){
             enode->m_arguments = new ArgumentsNode(child);
-            enode->m_arguments->setParent(enode);
+            enode->insert(enode->m_arguments);
+            visitChildren(enode->m_arguments, child);
         } else if ( strcmp(ts_node_type(child), "super") == 0 ) {
             enode->isSuper = true;
             if (parent->parent() && parent->parent()->parent()
@@ -652,6 +694,25 @@ void BaseNode::visitNewTaggedComponentExpression(BaseNode *parent, const TSNode 
     NewTaggedComponentExpressionNode* tagnode = new NewTaggedComponentExpressionNode(node);
     parent->insert(tagnode);
     visitChildren(tagnode, node);
+
+    // for default property components
+    BaseNode* p = parent;
+    if (p->typeString() == "ComponentBody")
+    {
+        auto body = p->as<ComponentBodyNode>();
+        if (body->parent()->typeString() == "ComponentDeclaration")
+        {
+            auto decl = body->parent()->as<ComponentDeclarationNode>();
+            decl->pushToDefault(tagnode);
+
+        }
+        else if (body->parent()->typeString() == "NewComponentExpression")
+        {
+            auto expr = body->parent()->as<NewComponentExpressionNode>();
+            expr->pushToDefault(tagnode);
+        }
+
+    }
 }
 
 void BaseNode::visitTaggedString(BaseNode *parent, const TSNode &node)
@@ -665,6 +726,14 @@ void BaseNode::visitFunctionDeclaration(BaseNode *parent, const TSNode &node)
     FunctionDeclarationNode* fnode = new FunctionDeclarationNode(node);
     parent->insert(fnode);
     visitChildren(fnode, node);
+
+    for (auto it = fnode->children().begin(); it != fnode->children().end(); ++it)
+        if ((*it)->typeString() == "Identifier")
+        {
+            // this must be the id!
+            IdentifierNode* id = static_cast<IdentifierNode*>(*it);
+            moveToDeclarations(parent, id);
+        }
 }
 
 void BaseNode::visitClassDeclaration(BaseNode *parent, const TSNode &node)
@@ -672,6 +741,54 @@ void BaseNode::visitClassDeclaration(BaseNode *parent, const TSNode &node)
     ClassDeclarationNode* fnode = new ClassDeclarationNode(node);
     parent->insert(fnode);
     visitChildren(fnode, node);
+
+    for (auto it = fnode->children().begin(); it != fnode->children().end(); ++it)
+        if ((*it)->typeString() == "Identifier")
+        {
+            // this must be the id!
+            IdentifierNode* id = static_cast<IdentifierNode*>(*it);
+            moveToDeclarations(parent, id);
+        }
+}
+
+void BaseNode::visitVariableDeclaration(BaseNode *parent, const TSNode &node)
+{
+    VariableDeclarationNode* vdn = new VariableDeclarationNode(node);
+    parent->insert(vdn);
+
+    uint32_t count = ts_node_child_count(node);
+    for ( uint32_t i = 0; i < count; ++i ){
+        TSNode child = ts_node_child(node, i);
+        if ( strcmp(ts_node_type(child), "variable_declarator") == 0 ){
+            VariableDeclaratorNode* decl = new VariableDeclaratorNode(child);
+            decl->setParent(vdn);
+            vdn->m_declarators.push_back(decl);
+
+
+
+            uint32_t subcount = ts_node_child_count(child);
+
+            for ( uint32_t k = 0; k < subcount; ++k ){
+                TSNode smaller_child = ts_node_child(child, k);
+
+                if ( strcmp(ts_node_type(smaller_child), "identifier") == 0 ){
+                    IdentifierNode* id = new IdentifierNode(smaller_child);
+                    decl->insert(id);
+                    moveToDeclarations(decl, id);
+                }
+            }
+        } else {
+            visit(vdn, child);
+        }
+    }
+
+}
+
+void BaseNode::visitNewExpression(BaseNode *parent, const TSNode &node)
+{
+    NewExpressionNode* nenode = new NewExpressionNode(node);
+    parent->insert(nenode);
+    visitChildren(nenode, node);
 }
 
 std::string ImportNode::toString(int indent) const{
@@ -710,9 +827,9 @@ void ImportNode::convertToJs(const std::string &source, std::vector<ElementsInse
     }
 
     if ( m_importAs ){
-        *compose << ("var " + slice(source, m_importAs) + " = imports.requireAs(\'" + importSegments + "\');");
+        *compose << ("var " + slice(source, m_importAs) + " = imports.requireAs(\'" + importSegments + "\')\n");
     } else {
-        *compose << ("imports.require(\'" + importSegments + "\');");
+        *compose << ("imports.require(\'" + importSegments + "\')\n");
     }
 
     fragments.push_back(compose);
@@ -867,11 +984,21 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
 
     std::string name = slice(source, m_name);
 
+    if (name == "default")
+    {
+        BaseNode* p = this;
+        while (p && p->typeString() != "Program") p = p->parent();
+        if (p) {
+            ProgramNode* program = dynamic_cast<ProgramNode*>(p);
+            if (program) name = program->filename();
+        }
+    }
+
     *compose << indent(indentValue);
 
     if (parent() && parent()->typeString() == "Program")
     {
-        *compose << "module.exports[\"" << name << "\"] = ";
+        *compose << "\nmodule.exports[\"" << name << "\"] = ";
     }
 
     std::string heritage = "";
@@ -918,7 +1045,7 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
                  << indent(indentValue + 1) << "}\n\n";
     }
 
-    *compose << indent(indentValue + 1) << "__initialize(){";
+    *compose << indent(indentValue + 1) << "__initialize(){\n";
 
     if (m_id || !m_idComponents.empty())
         *compose << indent(indentValue + 1) << "this.ids = {}\n\n";
@@ -944,16 +1071,16 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
         for (int idx = 0; idx<properties.size(); ++idx)
         {
             *compose << indent(indentValue + 1) << "Element.addProperty(" << id << ", '" << slice(source, properties[idx]->name())
-                     << "', { type: '" << slice(source, properties[idx]->type()) << "', notify: '"
-                     << slice(source, properties[idx]->name()) << "Changed' })\n";
+                     << "', { type: \"" << slice(source, properties[idx]->type()) << "\", notify: \""
+                     << slice(source, properties[idx]->name()) << "Changed\" })\n";
         }
     }
 
     for (int i=0; i < m_properties.size(); ++i)
     {
         *compose << indent(indentValue + 1) << "Element.addProperty(this, '" << slice(source, m_properties[i]->name())
-                 << "', { type: '" << slice(source, m_properties[i]->type()) << "', notify: '"
-                 << slice(source, m_properties[i]->name()) << "Changed' })\n";
+                 << "', { type: \"" << slice(source, m_properties[i]->type()) << "\", notify: \""
+                 << slice(source, m_properties[i]->name()) << "Changed\" })\n";
     }
 
 
@@ -965,16 +1092,26 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
                      << slice(source, m_properties[i]->name())
                      << "',\n function(){ return " << slice(source, m_properties[i]->expression()) << "}.bind(this),\n"
                      << "[\n";
+            std::set<std::pair<std::string, std::string>> bindingPairs;
             for (auto idx = m_properties[i]->bindings().begin(); idx != m_properties[i]->bindings().end(); ++idx)
             {
                 BaseNode* node = *idx;
-                if (idx != m_properties[i]->bindings().begin()) *compose << ",\n";
                 if (node->typeString() == "MemberExpression")
                 {
-
                     MemberExpressionNode* men = node->as<MemberExpressionNode>();
-                    *compose << "[ " << slice(source, men->children()[0]) << ", '"
-                            <<  slice(source, men->children()[1]) << "Changed' ]";
+
+                    std::pair<std::string, std::string> pair = std::make_pair(
+                        slice(source, men->children()[0]),
+                        slice(source, men->children()[1])
+                    );
+
+                    if (bindingPairs.find(pair) == bindingPairs.end())
+                    {
+                        if (!bindingPairs.empty()) *compose << ",\n";
+                        *compose << "[ " << pair.first << ", '" <<  pair.second << "Changed' ]";
+                        bindingPairs.insert(pair);
+                    }
+
                 }
             }
             *compose << "]\n)\n";
@@ -983,7 +1120,7 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
         {
             *compose << "this." << slice(source,m_properties[i]->name())
                      << " = ";
-            if (m_properties[i]->expression()->children().size() == 1
+            if (m_properties[i]->expression() && m_properties[i]->expression()->children().size() == 1
                     && m_properties[i]->expression()->children()[0]->typeString() == "NewComponentExpression")
             {
                 auto nce = m_properties[i]->expression()->children()[0]->as<NewComponentExpressionNode>();
@@ -997,8 +1134,20 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
                 for (auto s: flat) *compose << s;
                 delete section;
             }
-            else {
+            else if (m_properties[i]->expression()){
                 *compose << slice(source, m_properties[i]->expression()) << "\n";
+            }
+            else if (m_properties[i]->componentDeclaration())
+            {
+                auto cd = m_properties[i]->componentDeclaration();
+                el::JSSection* section = new el::JSSection;
+                section->from = cd->startByte();
+                section->to = cd->endByte();
+                cd->convertToJs(source, section->m_children);
+                std::vector<std::string> flat;
+                section->flatten(source, flat);
+                for (auto s: flat) *compose << s;
+                delete section;
             }
             *compose << "\n\n";
         }
@@ -1067,7 +1216,7 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
             JSSection* jssection = new JSSection;
             jssection->from = mdn->startByte();
             jssection->to   = mdn->endByte();
-            *compose << jssection;
+            *compose << jssection << "\n";
             mdn->body()->convertToJs(source, jssection->m_children);
         } else if ( c->typeString() == "TypedFunctionDeclaration" ){
             TypedFunctionDeclarationNode* tfdn = c->as<TypedFunctionDeclarationNode>();
@@ -1091,7 +1240,7 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
             jssection->flatten(source, flat);
             for (auto s: flat)
             {
-                *compose << s;
+                *compose << s << "\n";
             }
             delete jssection;
 
@@ -1113,8 +1262,21 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
     std::string name = slice(source, m_name);
 
     if (m_instance)
-        *compose << "module.exports[\"" << slice(source, m_instance) << "\"] = ";
+    {
+        std::string instance_name = slice(source, m_instance);
 
+        if (instance_name == "default")
+        {
+            BaseNode* p = this;
+            while (p && p->typeString() != "Program") p = p->parent();
+            if (p) {
+                ProgramNode* program = dynamic_cast<ProgramNode*>(p);
+                if (program) instance_name = program->filename();
+            }
+        }
+
+        *compose << "module.exports[\"" << instance_name << "\"] = ";
+    }
     *compose << ("(function(parent){\n    this.setParent(parent)\n");
 
     if (!m_id)
@@ -1135,16 +1297,26 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
                          << slice(source, m_properties[i]->name())
                          << "',\n function(){ return " << slice(source, m_properties[i]->expression()) << "}.bind(this),\n"
                          << "[\n";
+                std::set<std::pair<std::string, std::string>> bindingPairs;
                 for (auto idx = m_properties[i]->bindings().begin(); idx != m_properties[i]->bindings().end(); ++idx)
                 {
                     BaseNode* node = *idx;
-                    if (idx != m_properties[i]->bindings().begin()) *compose << ",\n";
                     if (node->typeString() == "MemberExpression")
                     {
-
                         MemberExpressionNode* men = node->as<MemberExpressionNode>();
-                        *compose << "[ " << slice(source, men->children()[0]) << ", '"
-                                <<  slice(source, men->children()[1]) << "Changed' ]";
+
+                        std::pair<std::string, std::string> pair = std::make_pair(
+                            slice(source, men->children()[0]),
+                            slice(source, men->children()[1])
+                        );
+
+                        if (bindingPairs.find(pair) == bindingPairs.end())
+                        {
+                            if (!bindingPairs.empty()) *compose << ",\n";
+                            *compose << "[ " << pair.first << ", '" <<  pair.second << "Changed' ]";
+                            bindingPairs.insert(pair);
+                        }
+
                     }
                 }
                 *compose << "]\n)\n";
@@ -1153,16 +1325,26 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
                          << slice(source, m_properties[i]->name())
                          << "',\n function()" << slice(source, m_properties[i]->statementBlock()) << ".bind(this),\n"
                          << "[\n";
+                std::set<std::pair<std::string, std::string>> bindingPairs;
                 for (auto idx = m_properties[i]->bindings().begin(); idx != m_properties[i]->bindings().end(); ++idx)
                 {
                     BaseNode* node = *idx;
-                    if (idx != m_properties[i]->bindings().begin()) *compose << ",\n";
                     if (node->typeString() == "MemberExpression")
                     {
-
                         MemberExpressionNode* men = node->as<MemberExpressionNode>();
-                        *compose << "[ " << slice(source, men->children()[0]) << ", '"
-                                <<  slice(source, men->children()[1]) << "Changed' ]";
+
+                        std::pair<std::string, std::string> pair = std::make_pair(
+                            slice(source, men->children()[0]),
+                            slice(source, men->children()[1])
+                        );
+
+                        if (bindingPairs.find(pair) == bindingPairs.end())
+                        {
+                            if (!bindingPairs.empty()) *compose << ",\n";
+                            *compose << "[ " << pair.first << ", '" <<  pair.second << "Changed' ]";
+                            bindingPairs.insert(pair);
+                        }
+
                     }
                 }
                 *compose << "]\n)\n";
@@ -1177,18 +1359,25 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
                          << " = " << slice(source, m_properties[i]->expression()) << "\n";
             }
             else if (m_properties[i]->statementBlock()) {
-                *compose << "Element.assignPropertyExpression(this,\n '" << slice(source, m_properties[i]->name())
-                         << "',\n function()" <<  slice(source, m_properties[i]->statementBlock())
-                         << ",\n [])\n\n";
+                *compose << "this." << slice(source,m_properties[i]->name()) << " = "
+                         << "(function()" <<  slice(source, m_properties[i]->statementBlock()) << "())\n\n";
             }
         }
     }
 
+    for (unsigned i=0; i<m_assignments.size(); ++i){
+        if (m_assignments[i]->m_expression)
+        {
+            *compose << "this." << slice(source,m_assignments[i]->m_name)
+                     << " = " << slice(source, m_assignments[i]->m_expression) << "\n";
+        }
+
+    }
 
     if (!m_default.empty())
     {
         *compose << "Element.assignDefaultProperty(this, [\n";
-        for (int i = 0; i < m_default.size(); ++i)
+        for (unsigned i = 0; i < m_default.size(); ++i)
         {
             if (i != 0) *compose << ",\n";
             el::JSSection* section = new el::JSSection;
@@ -1197,7 +1386,7 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
             m_default[i]->convertToJs(source, section->m_children);
             std::vector<std::string> flat;
             section->flatten(source, flat);
-            for (auto s: flat) *compose << s;
+            for (auto s: flat) *compose << s << "\n";
             delete section;
         }
         *compose << "\n]\n)\n";
@@ -1206,10 +1395,6 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
 
     for ( auto it = m_body->children().begin(); it != m_body->children().end(); ++it ){
         BaseNode* c = *it;
-
-        if (c->typeString() == "NewTaggedComponentExpression") {
-            c->as<NewTaggedComponentExpressionNode>()->convertToJs(source, fragments, indentValue);
-        }
 
         if ( c->typeString() == "EventDeclaration"){
             EventDeclarationNode* edn = c->as<EventDeclarationNode>();
@@ -1362,6 +1547,7 @@ PropertyDeclarationNode::PropertyDeclarationNode(const TSNode &node)
     , m_type(nullptr)
     , m_expression(nullptr)
     , m_statementBlock(nullptr)
+    , m_componentDeclaration(nullptr)
 {
 }
 
@@ -1593,7 +1779,7 @@ void NewTaggedComponentExpressionNode::convertToJs(const std::string &source, st
             std::replace(value.begin(), value.end(), '\n', ' ');
             std::replace(value.begin(), value.end(), '\t', ' ');
 
-            Utf8::trim(value);
+            Utf8::trimRight(value);
 
             std::string result = "";
             unsigned i = 0;
@@ -1606,9 +1792,9 @@ void NewTaggedComponentExpressionNode::convertToJs(const std::string &source, st
                 } else if (value[i] == '\\') {
                     if (i == value.length() -1) break;
                     ++i;
-                    if (value[i] == 'n') result += '\n';
+                    if (value[i] == 'n') result += "\\n";
                     if (value[i] == 's') result += ' ';
-                    if (value[i] == '\\') result += '\\';
+                    if (value[i] == '\\') result += "\\\\";
                     ++i;
                 } else {
                     result += value[i];
@@ -1629,6 +1815,58 @@ void NewTaggedComponentExpressionNode::convertToJs(const std::string &source, st
     *compose << indent(indentValue + 1) << "}.bind(new " << name << "(\"" << value << "\"))(this))\n";
 
     fragments.push_back(compose);
+}
+
+std::string ArgumentsNode::toString(int indent) const
+{
+    std::string result;
+    if ( indent > 0 )
+        result.assign(indent * 2, ' ');
+
+    result += "Arguments " + rangeString() + "\n";
+
+    for (auto it = children().begin(); it != children().end(); ++it)
+        result += (*it)->toString(indent >= 0 ? indent + 1 : indent);
+
+    return result;
+}
+
+void ArgumentsNode::convertToJs(const std::string &source, std::vector<ElementsInsertion *> &fragments, int indent)
+{
+    ElementsInsertion* compose = new ElementsInsertion;
+    compose->from = startByte();
+    compose->to = endByte();
+
+    for (auto child: children())
+    {
+        if (child->typeString() == "Identifier")
+        {
+            checkIdentifierDeclared(source, this, slice(source, child));
+        }
+    }
+
+    *compose << slice(source, this);
+
+    fragments.push_back(compose);
+}
+
+std::string VariableDeclarationNode::toString(int indent) const
+{
+    std::string result;
+    if ( indent > 0 )
+        result.assign(indent * 2, ' ');
+
+    result += "VariableDeclaration " + rangeString() + "\n";
+
+    for (int i = 0; i < m_declarators.size(); i++)
+    {
+        result += m_declarators[i]->toString(indent >= 0 ? indent + 1 : indent);
+    }
+
+    for (auto it = children().begin(); it != children().end(); ++it)
+        result += (*it)->toString(indent >= 0 ? indent + 1 : indent);
+
+    return result;
 }
 
 }} // namespace lv, el

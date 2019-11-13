@@ -1,11 +1,10 @@
 // Create all Ids first
-var root = new Container()
 var rootChild = new Element()
+var root = new Container()
 
 // Declare all properties for ids
-Element.addProperty(root, "x", {type: "int", notify: "xChanged"})
-
 Element.addProperty(rootChild, "y", {type: "int", notify: "yChanged"})
+Element.addProperty(root, "x", {type: "int", notify: "xChanged"})
 
 // Assign module
 module.exports["ParserTest9"] = (function(parent){

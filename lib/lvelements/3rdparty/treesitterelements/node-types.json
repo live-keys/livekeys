@@ -842,6 +842,10 @@
             "named": true
           },
           {
+            "type": "new_tagged_component_expression",
+            "named": true
+          },
+          {
             "type": "property_assignment",
             "named": true
           },
@@ -916,7 +920,7 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
@@ -928,6 +932,21 @@
   },
   {
     "type": "component_identifier",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "component_instance",
     "named": true,
     "fields": {},
     "children": {
@@ -1280,7 +1299,7 @@
     }
   },
   {
-    "type": "formal_type_parameters",
+    "type": "formal_type_parameter",
     "named": true,
     "fields": {
       "parameter_type": {
@@ -1295,8 +1314,8 @@
       }
     },
     "children": {
-      "multiple": true,
-      "required": false,
+      "multiple": false,
+      "required": true,
       "types": [
         {
           "type": "_destructuring_pattern",
@@ -1312,6 +1331,21 @@
         },
         {
           "type": "rest_parameter",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "formal_type_parameters",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "formal_type_parameter",
           "named": true
         }
       ]
@@ -2060,11 +2094,19 @@
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
           "type": "component_body",
+          "named": true
+        },
+        {
+          "type": "component_identifier",
+          "named": true
+        },
+        {
+          "type": "component_instance",
           "named": true
         }
       ]
@@ -2178,6 +2220,32 @@
           },
           {
             "type": "undefined",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "new_tagged_component_expression",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "text": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tagged_type_string",
             "named": true
           }
         ]
@@ -2676,6 +2744,21 @@
           }
         ]
       }
+    }
+  },
+  {
+    "type": "tagged_type_string",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "escape_sequence",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -3416,16 +3499,16 @@
     "named": false
   },
   {
+    "type": "`",
+    "named": false
+  },
+  {
     "type": "escape_sequence",
     "named": true
   },
   {
     "type": "comment",
     "named": true
-  },
-  {
-    "type": "`",
-    "named": false
   },
   {
     "type": "${",
@@ -3505,6 +3588,10 @@
   },
   {
     "type": "#",
+    "named": false
+  },
+  {
+    "type": "instance",
     "named": false
   },
   {

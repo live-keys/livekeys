@@ -97,7 +97,8 @@ private:
     static void visitTaggedString(BaseNode* parent, const TSNode& node);
     static void visitFunctionDeclaration(BaseNode* parent, const TSNode& node);
     static void visitClassDeclaration(BaseNode* parent, const TSNode& node);
-
+    static void visitVariableDeclaration(BaseNode* parent, const TSNode& node);
+    static void visitNewExpression(BaseNode* parent, const TSNode& node);
 
     BaseNode*              m_parent;
     TSNode                 m_node;
@@ -117,6 +118,12 @@ public:
     FunctionDeclarationNode(const TSNode& node, const std::string& typeString = "FunctionDeclaration") : BaseNode(node, typeString){}
 };
 
+class NewExpressionNode: public BaseNode {
+    friend class BaseNode;
+public:
+    NewExpressionNode(const TSNode& node) : BaseNode(node, "NewExpression"){}
+};
+
 class JsBlockNode : public BaseNode{
     friend class BaseNode;
 public:
@@ -129,9 +136,10 @@ private:
 class ProgramNode : public JsBlockNode {
     friend class BaseNode;
 public:
-    ProgramNode(const TSNode& node) : JsBlockNode(node, "Program"){}
+    ProgramNode(const TSNode& node) : JsBlockNode(node, "Program") {}
     std::set<std::string>& undeclared() { return m_undeclared; }
-
+    void setFilename(std::string fn){ m_fileName = fn; }
+    std::string filename() const { return m_fileName; }
 protected:
     virtual void insert(BaseNode *child);
     virtual std::string toString(int indent = 0) const;
@@ -141,6 +149,7 @@ private:
     std::vector<ImportNode*>    m_imports;
     std::vector<ComponentDeclarationNode*> m_exports;
     std::set<std::string> m_undeclared;
+    std::string m_fileName;
 
     std::vector<NewComponentExpressionNode*> m_idComponents;
 
@@ -150,6 +159,21 @@ class IdentifierNode : public BaseNode{
     friend class BaseNode;
 public:
     IdentifierNode(const TSNode& node) : BaseNode(node, "Identifier"){}
+};
+
+class VariableDeclaratorNode : public BaseNode{
+    friend class BaseNode;
+public:
+    VariableDeclaratorNode(const TSNode& node) : BaseNode(node, "VariableDeclarator"){}
+};
+
+class VariableDeclarationNode : public BaseNode{
+    friend class BaseNode;
+public:
+    VariableDeclarationNode(const TSNode& node) : BaseNode(node, "VariableDeclaration"){}
+    virtual std::string toString(int indent = 0) const;
+private:
+    std::vector<VariableDeclaratorNode*> m_declarators;
 };
 
 
@@ -244,27 +268,30 @@ public:
     IdentifierNode* name() const{ return m_name; }
     BindableExpressionNode* expression() const{ return m_expression; }
     StatementBlockNode* statementBlock() const {return m_statementBlock; }
+    ComponentDeclarationNode* componentDeclaration() const { return m_componentDeclaration; }
 
-    void pushToBindings(BaseNode* bn) { m_bindings.insert(bn); }
+    void pushToBindings(BaseNode* bn) { m_bindings.push_back(bn); }
     bool hasBindings() { return m_bindings.size() > 0; }
-    std::set<BaseNode*>& bindings() { return m_bindings; }
+    std::vector<BaseNode*>& bindings() { return m_bindings; }
 private:
     IdentifierNode* m_type;
     IdentifierNode* m_name;
     BindableExpressionNode* m_expression;
     StatementBlockNode* m_statementBlock;
-
-    std::set<BaseNode*> m_bindings;
+    ComponentDeclarationNode* m_componentDeclaration;
+    std::vector<BaseNode*> m_bindings;
 };
 
 class ArgumentsNode : public BaseNode{
     friend class BaseNode;
 public:
     ArgumentsNode(const TSNode& node) : BaseNode(node, "Arguments"){}
+    virtual std::string toString(int indent = 0) const;
+    virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0) override;
+
 };
 
 class ClassDeclarationNode : public BaseNode{
-    friend class BaseNode;
 public:
     ClassDeclarationNode(const TSNode& node) : BaseNode(node, "ClassDeclaration"){}
 };
@@ -274,10 +301,15 @@ class PropertyAssignmentNode : public JsBlockNode{
 public:
     PropertyAssignmentNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const;
+    // virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0) override;
+
 private:
     IdentifierNode* m_type;
     IdentifierNode* m_name;
     BindableExpressionNode* m_expression;
+
+    friend class BaseNode;
+    friend class NewComponentExpressionNode;
 };
 
 class PublicFieldDeclarationNode : public BaseNode{
@@ -309,7 +341,10 @@ public:
 
     void pushToProperties(PropertyDeclarationNode* prop){ m_properties.push_back(prop); }
     void pushToIdComponents(NewComponentExpressionNode* nce){ m_idComponents.push_back(nce); }
-    void pushToDefault(NewComponentExpressionNode* nce){ m_default.push_back(nce); }
+    void pushToDefault(BaseNode* nce){ m_default.push_back(nce); }
+
+    void pushToAssignments(PropertyAssignmentNode* ass) { m_assignments.push_back(ass); }
+    std::vector<PropertyAssignmentNode*>& assignments() { return m_assignments; }
 private:
     IdentifierNode* m_name;
     IdentifierNode* m_id;
@@ -317,8 +352,9 @@ private:
     ComponentBodyNode* m_body;
 
     std::vector<PropertyDeclarationNode*> m_properties;
-    std::vector<NewComponentExpressionNode*> m_default;
+    std::vector<BaseNode*> m_default;
     std::vector<NewComponentExpressionNode*> m_idComponents;
+    std::vector<PropertyAssignmentNode*> m_assignments;
 };
 
 class NewComponentExpressionNode : public JsBlockNode{
@@ -333,7 +369,10 @@ public:
     ArgumentsNode* arguments() { return m_arguments; }
     void pushToProperties(PropertyDeclarationNode* prop){ m_properties.push_back(prop); }
     std::vector<PropertyDeclarationNode*>& properties() { return m_properties; }
-    void pushToDefault(NewComponentExpressionNode* nce){ m_default.push_back(nce); }
+    void pushToAssignments(PropertyAssignmentNode* ass) { m_assignments.push_back(ass); }
+    std::vector<PropertyAssignmentNode*>& assignments() { return m_assignments; }
+
+    void pushToDefault(BaseNode* nce){ m_default.push_back(nce); }
 private:
     IdentifierNode* m_name;
     IdentifierNode* m_id;
@@ -341,8 +380,9 @@ private:
     ArgumentsNode* m_arguments;
     IdentifierNode* m_instance;
 
-    std::vector<NewComponentExpressionNode*> m_default;
+    std::vector<BaseNode*> m_default;
     std::vector<PropertyDeclarationNode*> m_properties;
+    std::vector<PropertyAssignmentNode*> m_assignments;
 
     friend class BaseNode;
 

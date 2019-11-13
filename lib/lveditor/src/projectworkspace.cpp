@@ -581,7 +581,8 @@ void ProjectWorkspace::whenDocumentClose(ProjectDocument *document){
     emit documentClose(document);
 }
 
-void ProjectWorkspace::whenDocumentContentsChanged(int p, int a, int r){
+void ProjectWorkspace::whenDocumentContentsChanged(int p, int r, int a){
+
     QTextDocument* textDocument = static_cast<QTextDocument*>(sender());
     ProjectDocument* document = static_cast<ProjectDocument*>(textDocument->parent());
 

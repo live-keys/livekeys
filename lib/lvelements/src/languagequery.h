@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <map>
+#include <functional>
 
 namespace lv{ namespace el{
 

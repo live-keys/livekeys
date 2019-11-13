@@ -284,7 +284,7 @@ CodeQmlHandler::~CodeQmlHandler(){
  * Handles bracket and paranthesis auto-completion together with suggestions population.
  */
 void CodeQmlHandler::assistCompletion(
-        const QTextCursor& cursor,
+        QTextCursor& cursor,
         const QChar& insertion,
         bool manuallyTriggered,
         CodeCompletionModel* model,
@@ -302,18 +302,17 @@ void CodeQmlHandler::assistCompletion(
             cursorChange.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
             return;
         } else if (insertion == '}'){
-            cursorChange = cursor;
             if (cursor.positionInBlock() >= 5)
             {
                 QTextBlock block = m_target->findBlock(cursor.position());
                 QString text = block.text();
 
                 if (text.mid(cursor.positionInBlock()-5,4) == "    ")
-                {
-                    cursorChange.beginEditBlock();
-                    for (int i=0; i < 5; i++) cursorChange.deletePreviousChar();
-                    cursorChange.insertText("}");
-                    cursorChange.endEditBlock();
+                {    
+                    cursor.beginEditBlock();
+                    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor, 5);
+                    cursor.insertText("}");
+                    cursor.endEditBlock();
                 }
             }
             return;
