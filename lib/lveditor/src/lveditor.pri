@@ -14,6 +14,7 @@ HEADERS += \
     $$PWD/editorlayer.h \
     $$PWD/editorprivate_plugin.h \
     $$PWD/editorsettings.h \
+    $$PWD/editorsettingscategory.h \
     $$PWD/extensions.h \
     $$PWD/keymap.h \
     $$PWD/linecontrol.h \
@@ -32,6 +33,7 @@ HEADERS += \
     $$PWD/runnable.h \
     $$PWD/runnablecontainer.h \
     $$PWD/syntaxhighlighter.h \
+    $$PWD/textdocumentdata.h \
     $$PWD/texteditnodedebugmodel.h \
     $$PWD/theme.h \
     $$PWD/themecontainer.h \
@@ -54,6 +56,7 @@ SOURCES += \
     $$PWD/editorlayer.cpp \
     $$PWD/editorprivate_plugin.cpp \
     $$PWD/editorsettings.cpp \
+    $$PWD/editorsettingscategory.cpp \
     $$PWD/extensions.cpp \
     $$PWD/keymap.cpp \
     $$PWD/linecontrol.cpp \
@@ -71,6 +74,7 @@ SOURCES += \
     $$PWD/runnable.cpp \
     $$PWD/runnablecontainer.cpp \
     $$PWD/syntaxhighlighter.cpp \
+    $$PWD/textdocumentdata.cpp \
     $$PWD/texteditnodedebugmodel.cpp \
     $$PWD/theme.cpp \
     $$PWD/themecontainer.cpp \
@@ -79,4 +83,3 @@ SOURCES += \
     $$PWD/workspaceipc.cpp \
     $$PWD/workspaceipcsink.cpp \
     $$PWD/workspacelayer.cpp
-

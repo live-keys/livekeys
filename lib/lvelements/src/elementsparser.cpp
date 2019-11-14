@@ -1,5 +1,4 @@
 #include "elementsparser.h"
-#include "tree_sitter/api.h"
 #include "tree_sitter/parser.h"
 
 #include "elementsparserinternal.h"
@@ -80,6 +79,21 @@ Parser::~Parser(){
 
 Parser::AST *Parser::parse(const std::string &source) const{
     return reinterpret_cast<Parser::AST*>(ts_parser_parse_string(m_parser, nullptr, source.c_str(), (uint32_t)source.size()));
+}
+
+void Parser::editParseTree(Parser::AST*& ast, TSInputEdit& edit, TSInput& input)
+{
+    TSTree* tree = reinterpret_cast<TSTree*>(ast);
+    if (tree)
+    {
+        // existing tree means we need to do an edit
+        ts_tree_edit(tree, &edit);
+
+    }
+    TSTree* new_tree = ts_parser_parse(m_parser, tree, input);
+
+    ast = reinterpret_cast<el::Parser::AST*>(new_tree);
+
 }
 
 void Parser::destroy(Parser::AST *ast) const{

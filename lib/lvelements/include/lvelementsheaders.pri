@@ -9,6 +9,7 @@ HEADERS += \
     $$PWD/live/elements/metaobject.h \
     $$PWD/live/elements/parseddocument.h \
     $$PWD/live/elements/sourcerange.h \
+    $$PWD/live/elements/treesitterapi.h \
     $$PWD/live/elements/value.h \
     $$PWD/live/elements/element.h \
     $$PWD/live/elements/event.h \

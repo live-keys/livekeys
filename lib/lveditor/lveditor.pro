@@ -5,6 +5,7 @@ CONFIG  += qt
 
 linkLocalLibrary(lvbase, lvbase)
 linkLocalLibrary(lvview, lvview)
+linkLocalLibrary(lvelements, lvelements)
 
 macx{
     QMAKE_LFLAGS += \
