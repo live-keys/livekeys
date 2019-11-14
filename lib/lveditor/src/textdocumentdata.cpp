@@ -17,8 +17,6 @@ std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTex
     unsigned i = 0;
     unsigned total = 0;
 
-    qDebug() << "velicina dokumenta: " << document->characterCount();
-
     std::pair<unsigned, unsigned> start, old_end, new_end;
 
     if (!rows.empty())
@@ -41,7 +39,7 @@ std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTex
         start.first = 0;
         start.second = 0;
 
-        rows.push_back(std::vector<ushort>());
+        rows.push_back(std::u16string());
     }
 
 
@@ -85,7 +83,7 @@ std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTex
         {
             for (int i = 0; i < new_end.first - old_end.first; ++i)
             {
-                rows.insert(rows.begin() + start.first, std::vector<ushort>());
+                rows.insert(rows.begin() + start.first, std::u16string());
             }
         } else {
             for (int i = 0; i < old_end.first - new_end.first; ++i)
@@ -99,11 +97,11 @@ std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTex
     int finalBlockNumber = document->lastBlock().blockNumber();
     for (unsigned i = start.first; i <= new_end.first; ++i)
     {
-        std::vector<ushort> vec;
+        std::u16string u16s;
         QString text = block.text();
-        for (int idx = 0; idx < text.length(); ++idx) vec.push_back(text[idx].unicode());
-        if (i != finalBlockNumber) vec.push_back(QChar('\n').unicode());
-        rows[i] = vec;
+        for (int idx = 0; idx < text.length(); ++idx) u16s.push_back(text[idx].unicode());
+        if (i != finalBlockNumber) u16s.push_back(QChar('\n').unicode());
+        rows[i] = u16s;
         block = block.next();
     }
 
@@ -121,7 +119,7 @@ void TextDocumentData::clear()
     // rows.push_back(std::vector<ushort>());
 }
 
-std::vector<ushort> &TextDocumentData::rowAt(unsigned i)
+std::u16string &TextDocumentData::rowAt(unsigned i)
 {
     return rows[i];
 }

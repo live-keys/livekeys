@@ -22,6 +22,7 @@ lveditqmljs.depends  = lveditor
 
 !isEmpty(BUILD_ELEMENTS){
     SUBDIRS += lvelements
+    lveditor.depends = lvelements
     lvelements.subdir  = $$PWD/lvelements
     lvelements.depends = lvbase
 }

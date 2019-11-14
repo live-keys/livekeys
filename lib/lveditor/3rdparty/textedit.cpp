@@ -4198,7 +4198,7 @@ const char *TextEdit::parsingCallback(void *payload, uint32_t, TSPoint position,
         *bytes_read = 0;
         return nullptr;
     }
-    std::vector<ushort>& row = textDocumentData->rowAt(position.row);
+    std::u16string& row = textDocumentData->rowAt(position.row);
     if (position.column >= row.size() * ushortsize)
     {
         *bytes_read = 0;
@@ -4206,7 +4206,7 @@ const char *TextEdit::parsingCallback(void *payload, uint32_t, TSPoint position,
     }
 
     *bytes_read = row.size()*ushortsize - position.column;
-    return reinterpret_cast<char*>(row.data() + position.column / ushortsize);
+    return reinterpret_cast<const char*>(row.data() + position.column / ushortsize);
 }
 
 #ifdef LV_EDITOR_DEBUG
