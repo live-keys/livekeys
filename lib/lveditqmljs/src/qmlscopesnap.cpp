@@ -444,7 +444,14 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::propertyInType(
                     );
                 } else {
                     QmlScopeSnap::PropertyReference pref(
-                        object->property(i),
+                        LanguageUtils::FakeMetaProperty(
+                            object->property(i).name(),
+                            DocumentQmlInfo::toQmlPrimitive(object->property(i).typeName()),
+                            object->property(i).isList(),
+                            object->property(i).isWritable(),
+                            object->property(i).isPointer(),
+                            object->property(i).revision()
+                        ),
                         false,
                         InheritancePath(),
                         classTypePath
@@ -521,7 +528,14 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::getProperty(
                     );
                 } else {
                     QmlScopeSnap::PropertyReference pref(
-                        object->property(i),
+                        LanguageUtils::FakeMetaProperty(
+                            object->property(i).name(),
+                            DocumentQmlInfo::toQmlPrimitive(object->property(i).typeName()),
+                            object->property(i).isList(),
+                            object->property(i).isWritable(),
+                            object->property(i).isPointer(),
+                            object->property(i).revision()
+                        ),
                         false,
                         InheritancePath(),
                         contextTypePath

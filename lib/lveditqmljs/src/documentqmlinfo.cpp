@@ -575,6 +575,16 @@ bool DocumentQmlInfo::isObject(const QString &typeString){
     return true;
 }
 
+QString DocumentQmlInfo::toQmlPrimitive(const QString &cppPrimitive){
+    if ( cppPrimitive == "QColor" )
+        return "color";
+    else if ( cppPrimitive == "QUrl" )
+        return "url";
+    else if ( cppPrimitive == "QString")
+        return "string";
+    return cppPrimitive;
+}
+
 /**
  * \brief Returns the default value to be assigned for a given qml type
  */
@@ -649,7 +659,17 @@ DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects(const DocumentQmlInf
  * If the match is set, then the \p path value will be udpated.
  */
 void DocumentQmlInfo::traverseBindingPath(BindingPath *path, QObject *root){
-    traversePath(path, path->root(), root);
+    if ( !path->root() )
+        return;
+    if ( path->root()->child == nullptr ){
+        QQmlProperty prop(root->parent());
+        if( !prop.isValid() )
+            return;
+        path->updateConnection(prop, 0);
+    }
+
+
+    traversePath(path, path->root()->child, root);
 }
 
 /**
@@ -663,7 +683,27 @@ BindingPath *DocumentQmlInfo::findDeclarationPath(
     if ( !root )
         return nullptr;
 
-    BindingPath::Node* n = findDeclarationPathImpl(root, declaration);
+    BindingPath::Node* n = nullptr;
+
+    if ( root->begin == declaration->position() ){ // cover the case of root being the actual object
+        declaration->setValuePositionOffset(0);
+        declaration->setValueLength(root->end - root->begin);
+
+        BindingPath::IndexNode* indexNode = new BindingPath::IndexNode;
+        indexNode->index = 0;
+        n = indexNode;
+
+    } else {
+        BindingPath::Node* result = findDeclarationPathImpl(root, declaration);
+        if ( result ){
+            BindingPath::IndexNode* indexNode = new BindingPath::IndexNode;
+            indexNode->index = 0;
+            indexNode->child = result;
+            result->parent = indexNode;
+            n = indexNode;
+        }
+    }
+
     if ( !n )
         return nullptr;
 

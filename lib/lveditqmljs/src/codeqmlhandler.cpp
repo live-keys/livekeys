@@ -780,6 +780,25 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
         } else if ( ctx->context() & QmlCompletionContext::InRhsofBinding ){
             expression     = ctx->propertyPath();
             propertyLength = DocumentQmlValueScanner::getExpressionExtent(m_target, ctx->propertyPosition());
+        } else if ( ctx->context() == 0 ){
+            expression = ctx->expressionPath();
+
+            QTextBlock cursorBlock = cursor.block();
+            QString cursorBlockText = cursorBlock.text();
+            propertyPosition = cursorBlock.position();
+            for ( auto it = cursorBlockText.begin(); it != cursorBlockText.end(); ++it ){
+                if ( !it->isSpace( ) )
+                    break;
+                ++propertyPosition;
+            }
+
+            int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
+                m_target, cursor.position(), &expression, &expressionEndDelimiter
+            );
+            propertyLength = (cursor.position() - propertyPosition) + advancedLength;
+
+            if ( expressionEndDelimiter != '{' )
+                expression = QStringList();
         }
 
         if ( expression.size() > 0 ){
@@ -1810,7 +1829,8 @@ int CodeQmlHandler::addProperty(
     cs.endEditBlock();
     m_document->removeEditingState(ProjectDocument::Palette);
 
-    m_scopeTimer.start();
+    m_scopeTimer.stop();
+    updateScope();
 
     lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     if ( dh ){
@@ -1866,7 +1886,8 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &type){
     cs.endEditBlock();
     m_document->removeEditingState(ProjectDocument::Palette);
 
-    m_scopeTimer.start();
+    m_scopeTimer.stop();
+    updateScope();
 
     lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     if (dh){

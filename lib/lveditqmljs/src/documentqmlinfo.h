@@ -56,7 +56,7 @@ public:
             , parent(p)
         {}
         /// \brief ValueReference destructor
-        ValueReference() : value(0), parent(0){}
+        ValueReference() : value(nullptr), parent(nullptr){}
 
         const QmlJS::Value* value;
         const DocumentQmlInfo* parent;
@@ -67,7 +67,7 @@ public:
         /// \brief ASTReference constructor
         ASTReference(QmlJS::AST::Node* n) : node(n){}
         /// \brief ASTReference destructor
-        ASTReference() : node(0){}
+        ASTReference() : node(nullptr){}
 
         QmlJS::AST::Node* node;
     };
@@ -155,6 +155,7 @@ public:
     QmlJS::Bind* internalBind();
 
     static bool isObject(const QString& typeString);
+    static QString toQmlPrimitive(const QString& cppPrimitive);
     static QString typeDefaultValue(const QString& typeString);
 
     QString path() const;
