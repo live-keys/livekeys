@@ -628,6 +628,8 @@ void SyntaxHighlighter::_q_reformatBlocks(int from, int charsRemoved, int charsA
 
 void SyntaxHighlighter::_q_delayedRehighlight(){
     Q_D(SyntaxHighlighter);
+    QTextDocument* doc = static_cast<QTextDocument*>(parent());
+    documentChanged(0, 0, doc ? doc->characterCount() : INT_MAX);
     d->_q_delayedRehighlight();
 }
 

@@ -2935,14 +2935,6 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
         fragmentEnd = -1;
     }
 
-    textDocumentData->contentsChange(document, 0, 0, document->characterCount() -1);
-
-    TSInput input = {textDocumentData, TextEdit::parsingCallback, TSInputEncodingUTF16};
-    TSInputEdit edit;
-
-    parser->editParseTree(parseTree, edit, input);
-
-    qDebug() << parser->toString(parseTree).c_str();
 }
 
 void TextEditPrivate::unsetTextDocument()
@@ -2964,15 +2956,6 @@ void TextEditPrivate::unsetTextDocument()
         control->disconnect();
         delete control;
         control = nullptr;
-    }
-
-
-    textDocumentData->clear();
-
-    if (parseTree)
-    {
-        parser->destroy(parseTree);
-        parseTree = nullptr;
     }
 
     document = nullptr;
@@ -3115,35 +3098,6 @@ std::set<int> TextEdit::markDirtyNodesForRange(int start, int end, int charDelta
 void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
 {
     Q_D(TextEdit);
-
-    qDebug() << pos << charsRemoved << charsAdded;
-    if (d->document)
-    {
-        for (QTextBlock block = d->document->begin(); block != d->document->end(); block = block.next())
-        {
-            qDebug() << block.position() << ":" << block.length();
-        }
-    }
-
-    qDebug() << "________________________________________________";
-    qDebug() << "document size: " << d->document->characterCount() -1;
-
-    std::vector<std::pair<unsigned, unsigned>> editPoints =
-            d->textDocumentData->contentsChange(d->document, pos, charsRemoved, charsAdded);
-
-    uint32_t start = pos*sizeof(ushort)/sizeof(char);
-    uint32_t old_end = (pos + charsRemoved)*sizeof(ushort)/sizeof(char);
-    uint32_t new_end = (pos + charsAdded)*sizeof(ushort)/sizeof(char);
-
-    TSInputEdit edit = {start, old_end, new_end,
-                        TSPoint{editPoints[0].first, editPoints[0].second},
-                        TSPoint{editPoints[1].first, editPoints[1].second},
-                        TSPoint{editPoints[2].first, editPoints[2].second}};
-    TSInput input = {d->textDocumentData, TextEdit::parsingCallback, TSInputEncodingUTF16};
-
-    d->parser->editParseTree(d->parseTree, edit, input);
-
-    qDebug() << d->parser->toString(d->parseTree).c_str();
 
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
@@ -4184,29 +4138,6 @@ int TextEdit::totalHeight() const
 {
     Q_D(const TextEdit);
     return d->totalHeight;
-}
-
-const char *TextEdit::parsingCallback(void *payload, uint32_t, TSPoint position, uint32_t *bytes_read)
-{
-    TextDocumentData* textDocumentData = reinterpret_cast<TextDocumentData*>(payload);
-    unsigned ushortsize = sizeof(ushort) / sizeof(char);
-
-    qDebug() << "parsing callback: " << position.row << position.column;
-
-    if (position.row >= textDocumentData->size())
-    {
-        *bytes_read = 0;
-        return nullptr;
-    }
-    std::u16string& row = textDocumentData->rowAt(position.row);
-    if (position.column >= row.size() * ushortsize)
-    {
-        *bytes_read = 0;
-        return nullptr;
-    }
-
-    *bytes_read = row.size()*ushortsize - position.column;
-    return reinterpret_cast<const char*>(row.data() + position.column / ushortsize);
 }
 
 #ifdef LV_EDITOR_DEBUG

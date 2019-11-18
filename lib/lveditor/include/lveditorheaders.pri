@@ -22,6 +22,7 @@ HEADERS += \
     $$PWD/live/syntaxhighlighter.h \
     $$PWD/live/keymap.h \
     $$PWD/live/extensions.h \
+    $$PWD/live/textdocumentdata.h \
     $$PWD/live/workspace.h \
     $$PWD/live/projectworkspace.h \
     $$PWD/live/theme.h \

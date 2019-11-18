@@ -11,7 +11,8 @@ LiveExtension{
                 "text" : "#fff",
                 "number" : "#ba761d",
                 "string" : "#86a930",
-                "operator" : "#86a930"
+                "operator" : "#86a930",
+                "constant.builtin": "#93672f"
             }
         }
     }
@@ -26,7 +27,12 @@ LiveExtension{
             handler.setLanguage(Ej.EditJsonObject.language)
             handler.createHighlighter(
                 "(string) @string \n" +
-                "(number) @number \n",
+                "(number) @number \n" +
+                "\"+\" @operator \n" +
+                "\"-\" @operator \n" +
+                "(true) @constant.builtin \n" +
+                "(false) @constant.builtin \n" +
+                "(null) @constant.builtin \n",
                 root.settings["style"]
             )
             return handler

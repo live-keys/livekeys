@@ -12,6 +12,7 @@
 #include "live/elements/languagequery.h"
 
 #include "qmllanguageobject.h"
+#include "live/textdocumentdata.h"
 
 namespace lv{
 
@@ -39,6 +40,7 @@ private:
     el::Parser             m_parser;
     el::LanguageQuery::Ptr m_languageQuery;
     el::Parser::AST*       m_currentAst;
+    TextDocumentData*      m_textDocumentData;
 
     QMap<uint32_t, QTextCharFormat> m_captureToFormatMap;
 };

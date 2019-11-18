@@ -339,9 +339,6 @@ public:
 
     int totalHeight() const;
 
-    static const char* parsingCallback(void *payload, uint32_t byte_index, TSPoint position, uint32_t *bytes_read);
-
-
 #ifdef LV_EDITOR_DEBUG
     TextEditNodeDebugModel::Entry getDebugEntry(int pos);
 #endif

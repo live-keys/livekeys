@@ -166,9 +166,6 @@ public:
         , highlightingInProgress(false)
         , viewport(QRect(0,0,0,0))
         , totalHeight(0)
-        , textDocumentData(new TextDocumentData())
-        , parser(new el::Parser())
-        , parseTree(nullptr)
 #ifdef LV_EDITOR_DEBUG
         , debugModel(nullptr)
         , debugView(nullptr)
@@ -183,9 +180,6 @@ public:
     ~TextEditPrivate()
     {
         qDeleteAll(textNodeMap);
-        delete textDocumentData;
-        if (parseTree) parser->destroy(parseTree);
-        delete parser;
     }
 
 
@@ -292,10 +286,6 @@ public:
     std::vector<VisibleSection> sectionsForViewport;
     std::deque<NodeAction> actionQueue;
     std::vector<std::pair<int, QQuickItem*>> displayedPalettes;
-
-    TextDocumentData* textDocumentData;
-    el::Parser* parser;
-    el::Parser::AST* parseTree;
 
 #ifdef LV_EDITOR_DEBUG
     TextEditNodeDebugModel* debugModel;
