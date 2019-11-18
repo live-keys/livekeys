@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "live/projectdocumentmodel.h"
-#include "live/projectdocument.h"
+#include "live/document.h"
 #include "live/projectfile.h"
 #include "projectfilemodel.h"
 #include "live/project.h"
@@ -35,7 +35,7 @@ namespace lv{
 /** Default constructor */
 ProjectDocumentModel::ProjectDocumentModel(Project *project)
     : QAbstractListModel(project)
-    , m_fileWatcher(0)
+    , m_fileWatcher(nullptr)
 {
     m_roles[ProjectDocumentModel::Name]   = "name";
     m_roles[ProjectDocumentModel::Path]   = "path";
@@ -59,7 +59,7 @@ int ProjectDocumentModel::rowCount(const QModelIndex &) const{
 QVariant ProjectDocumentModel::data(const QModelIndex &index, int role) const{
     if ( index.row() < 0 || index.row() >= m_openedFiles.size() )
         return QVariant();
-    QHash<QString, ProjectDocument*>::const_iterator it = m_openedFiles.constBegin() + index.row();
+    QHash<QString, Document*>::const_iterator it = m_openedFiles.constBegin() + index.row();
 
     if ( role == ProjectDocumentModel::Name ){
         return it.value()->file()->name();
@@ -79,7 +79,7 @@ QHash<int, QByteArray> ProjectDocumentModel::roleNames() const{
 
 
 /** Adds a document to the model */
-void ProjectDocumentModel::openDocument(const QString &path, ProjectDocument *document){
+void ProjectDocumentModel::openDocument(const QString &path, Document *document){
     beginResetModel();
     m_openedFiles[path] = document;
     if ( document->isMonitored() )
@@ -88,7 +88,7 @@ void ProjectDocumentModel::openDocument(const QString &path, ProjectDocument *do
 }
 
 /** Changes the path of a document */
-void ProjectDocumentModel::relocateDocument(const QString &path, const QString &newPath, ProjectDocument *document){
+void ProjectDocumentModel::relocateDocument(const QString &path, const QString &newPath, Document *document){
     beginResetModel();
     m_openedFiles.take(path);
     m_openedFiles[newPath] = document;
@@ -105,10 +105,10 @@ void ProjectDocumentModel::closeDocuments(){
         QObject::disconnect(m_fileWatcher, SIGNAL(fileChanged(QString)),
                             this, SLOT(monitoredFileChanged(QString)));
         m_fileWatcher->deleteLater();
-        m_fileWatcher = 0;
+        m_fileWatcher = nullptr;
     }
 
-    for( QHash<QString, ProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
+    for( QHash<QString, Document*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         emit aboutToClose(it.value());
         delete it.value();
     }
@@ -116,7 +116,7 @@ void ProjectDocumentModel::closeDocuments(){
 }
 
 /** Change the monitoring state of a particular documetn */
-void ProjectDocumentModel::updateDocumentMonitoring(ProjectDocument *document, bool monitor){
+void ProjectDocumentModel::updateDocumentMonitoring(Document *document, bool monitor){
     if ( document->isMonitored() != monitor ){
         if ( monitor ){
             fileWatcher()->addPath(document->file()->path());
@@ -135,11 +135,11 @@ void ProjectDocumentModel::closeDocumentsInPath(const QString &path){
         return;
     }
 
-    QHash<QString, ProjectDocument*>::iterator it = m_openedFiles.begin();
+    QHash<QString, Document*>::iterator it = m_openedFiles.begin();
     beginResetModel();
     while ( it != m_openedFiles.end() ){
         if ( it.key().startsWith(path) ){
-            ProjectDocument* doc = it.value();
+            Document* doc = it.value();
             it = m_openedFiles.erase(it);
             emit aboutToClose(it.value());
             delete doc;
@@ -157,7 +157,7 @@ void ProjectDocumentModel::closeDocumentsInPath(const QString &path){
 void ProjectDocumentModel::closeDocument(const QString &path){
     if ( m_openedFiles.contains(path) ){
         beginResetModel();
-        ProjectDocument* document = m_openedFiles.take(path);
+        Document* document = m_openedFiles.take(path);
         emit aboutToClose(document);
         delete document;
         endResetModel();
@@ -166,7 +166,7 @@ void ProjectDocumentModel::closeDocument(const QString &path){
 
 /** Check for changes inside the open files (by comparing last mod timestamps) */
 void ProjectDocumentModel::rescanDocuments(){
-    for( QHash<QString, ProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
+    for( QHash<QString, Document*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         QDateTime modifiedDate = QFileInfo(it.key()).lastModified();
         if ( modifiedDate > it.value()->lastModified() && !it.value()->isMonitored() )
             emit documentChangedOutside(it.value());
@@ -175,7 +175,7 @@ void ProjectDocumentModel::rescanDocuments(){
 
 /** Re-reads content of a monitored file that changed */
 void ProjectDocumentModel::monitoredFileChanged(const QString &path){
-    ProjectDocument* doc = m_openedFiles[path];
+    Document* doc = m_openedFiles[path];
     doc->readContent();
     emit monitoredDocumentChanged(doc);
 }
@@ -183,7 +183,7 @@ void ProjectDocumentModel::monitoredFileChanged(const QString &path){
 /** Saves all changed documents */
 bool ProjectDocumentModel::saveDocuments(){
     bool saved = true;
-    for( QHash<QString, ProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
+    for( QHash<QString, Document*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         if ( it.value()->isDirty() )
             if ( !it.value()->save() )
                 saved = false;
@@ -192,16 +192,16 @@ bool ProjectDocumentModel::saveDocuments(){
 }
 
 /** Returns last opened file */
-ProjectDocument *ProjectDocumentModel::lastOpened(){
+Document *ProjectDocumentModel::lastOpened(){
     if ( m_openedFiles.size() > 0 )
         return *m_openedFiles.begin();
     return nullptr;
 }
 
 /** Returns the document given it's path hash, using lv::ProjectEntry::hashPath() */
-ProjectDocument *ProjectDocumentModel::documentByPathHash(const QString &hash){
+Document *ProjectDocumentModel::documentByPathHash(const QString &hash){
     for( auto it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
-        ProjectDocument* d = *it;
+        Document* d = *it;
         if ( d->file()->hashPath() == hash )
             return d;
     }
@@ -215,7 +215,7 @@ ProjectDocument *ProjectDocumentModel::documentByPathHash(const QString &hash){
  */
 QStringList ProjectDocumentModel::listUnsavedDocuments(){
     QStringList base;
-    for( QHash<QString, ProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
+    for( QHash<QString, Document*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         if ( it.value()->isDirty() )
             base.append(it.value()->file()->path());
     }
@@ -229,7 +229,7 @@ QStringList ProjectDocumentModel::listUnsavedDocuments(){
  */
 QStringList ProjectDocumentModel::listUnsavedDocumentsInPath(const QString &path){
     QStringList base;
-    for( QHash<QString, ProjectDocument*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
+    for( QHash<QString, Document*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         if ( it.key().startsWith(path) ){
             if ( it.value()->isDirty() )
                 base.append(it.value()->file()->path());
@@ -252,10 +252,10 @@ QFileSystemWatcher *ProjectDocumentModel::fileWatcher(){
  *
  * By definition, if the file is inside this model, it's opened!
  */
-ProjectDocument *ProjectDocumentModel::isOpened(const QString &path){
+Document *ProjectDocumentModel::isOpened(const QString &path){
     if ( m_openedFiles.contains(path) )
         return m_openedFiles[path];
-    return 0;
+    return nullptr;
 }
 
 

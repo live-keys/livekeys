@@ -26,6 +26,7 @@
 #include <functional>
 
 #include "live/lveditorglobal.h"
+#include "live/document.h"
 
 namespace lv{
 
@@ -183,14 +184,9 @@ private:
 };
 
 
-class LV_EDITOR_EXPORT ProjectDocument : public QObject{
+class LV_EDITOR_EXPORT ProjectDocument : public Document{
 
     Q_OBJECT
-    Q_PROPERTY(lv::ProjectFile* file  READ file        NOTIFY fileChanged)
-    Q_PROPERTY(QString content        READ content     NOTIFY contentChanged)
-    Q_PROPERTY(bool isMonitored       READ isMonitored NOTIFY isMonitoredChanged)
-    Q_PROPERTY(bool isDirty           READ isDirty     WRITE  setIsDirty     NOTIFY isDirtyChanged)
-    Q_ENUMS(OpenMode)
 
 public:
     /** Iterator through sections */
@@ -201,16 +197,6 @@ public:
     friend class ProjectDocumentAction;
     friend class ProjectDocumentMarker;
     friend class ProjectDocumentSection;
-
-    /** Enum containing possible modes of opening documents */
-    enum OpenMode{
-        /** The file open in the editor */
-        Edit = 0,
-        /** Read-only, but any external change will be reflected */
-        Monitor,
-        /** If not opened, will be open for editing. If already monitored, it will not be available for editing. */
-        EditIfNotOpen
-    };
 
     /** Editing states of an opened document */
     enum EditingState{
@@ -232,33 +218,14 @@ public:
 
 public:
     explicit ProjectDocument(ProjectFile* file, bool isMonitored, Project *parent);
-
-    ~ProjectDocument();
-
-    /** \brief File getter */
-    lv::ProjectFile* file() const;
-
-    /**
-     * \brief Returns document content
-     */
-    QString content() const;
-
-    void setIsDirty(bool isDirty);
-
-    bool isDirty() const;
-
-    void setIsMonitored(bool isMonitored);
-    /**
-     * \brief Shows if the document is monitored
-     */
-    bool isMonitored() const;
-
-    const QDateTime& lastModified() const;
-    void setLastModified(const QDateTime& lastModified);
-
-    Project* parentAsProject();
+    ~ProjectDocument() override;
 
     QTextDocument* textDocument();
+
+    bool isActive() const;
+
+    QByteArray content() override;
+    void setContent(const QByteArray &content) override;
 
     ProjectDocumentMarker::Ptr addMarker(int position);
     void removeMarker(ProjectDocumentMarker::Ptr marker);
@@ -274,8 +241,6 @@ public:
     bool removeSectionAt(int position);
     void removeSection(ProjectDocumentSection::Ptr section);
 
-    bool isActive() const;
-
     QString peekContent(int position) const;
 
     void addEditingState(EditingState type);
@@ -286,28 +251,17 @@ public:
     int lastCursorPosition();
     void setLastCursorPosition(int pos);
 
+    static ProjectDocument* castFrom(Document* document);
+
 public slots:
-    void documentContentsChanged(int position, int charsRemoved, int charsAdded);
-    void setContent(const QString& content);
-    void readContent();
-    bool save();
-    bool saveAs(const QString& path);
-    bool saveAs(const QUrl& url);
+    void __documentContentsChanged(int position, int charsRemoved, int charsAdded);
+
+    virtual void readContent() override;
 
 signals:
-    /** shows dirty state changed */
-    void isDirtyChanged();
-    /** shows if monitoring state changed */
-    void isMonitoredChanged();
-    /** triggered when the file changed */
-    void fileChanged();
-    /** triggered when the document was saved */
-    void saved();
-    /** shows if the document content changed */
-    void contentChanged();
     /** shows if the format changed */
     void formatChanged(int position, int length);
-
+    /** triggered when a contents changed inside the document */
     void contentsChange(int pos, int removed, int added);
 
 private:
@@ -317,9 +271,6 @@ private:
     void updateMarkers(int position, int charsRemoved, int addedText);
     void updateSectionBlocks(int position, const QString& addedText);
     QString getCharsRemoved(int position, int count);
-
-    ProjectFile*    m_file;
-    QDateTime       m_lastModified;
 
     QTextDocument*   m_textDocument;
 
@@ -333,68 +284,9 @@ private:
     mutable QLinkedList<ProjectDocumentAction>::iterator m_lastChange;
 
     mutable int   m_editingState;
-    bool          m_isDirty;
     mutable bool  m_isSynced;
-    bool          m_isMonitored;
     int           m_lastCursorPosition;
 };
-
-/**
- * \brief File getter
- */
-inline ProjectFile *ProjectDocument::file() const{
-    return m_file;
-}
-
-inline QString ProjectDocument::content() const{
-    syncContent();
-    return m_textDocument->toPlainText();
-}
-
-/**
- * \brief Sets the "dirty" indicator
- */
-inline void ProjectDocument::setIsDirty(bool isDirty){
-    if ( m_isDirty == isDirty )
-        return;
-
-    m_isDirty = isDirty;
-    isDirtyChanged();
-}
-
-inline bool ProjectDocument::isDirty() const{
-    return m_isDirty;
-}
-
-/**
- * \brief Sets the indicator for monitoring
- */
-inline void ProjectDocument::setIsMonitored(bool isMonitored){
-    if ( m_isMonitored == isMonitored )
-        return;
-
-    m_isMonitored = isMonitored;
-    emit isMonitoredChanged();
-}
-
-
-inline bool ProjectDocument::isMonitored() const{
-    return m_isMonitored;
-}
-
-/**
- * \brief Returns the timestamp of last modification
- */
-inline const QDateTime &ProjectDocument::lastModified() const{
-    return m_lastModified;
-}
-
-/**
- * \brief Sets the timestamp of latest modification
- */
-inline void ProjectDocument::setLastModified(const QDateTime &lastModified){
-    m_lastModified = lastModified;
-}
 
 /**
  * \brief Begin-iterator of the sections

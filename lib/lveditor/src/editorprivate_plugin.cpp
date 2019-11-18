@@ -68,6 +68,8 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
         uri, 1, 0, "ProjectEntry", "ProjectEntry objects are managed by the ProjectFileModel.");
     qmlRegisterUncreatableType<lv::ProjectFile>(
         uri, 1, 0, "ProjectFile", "ProjectFile objects are managed by the ProjectFileModel.");
+    qmlRegisterUncreatableType<lv::Document>(
+        uri, 1, 0, "Document", "Document objects are managed by the Project class.");
     qmlRegisterUncreatableType<lv::ProjectDocument>(
         uri, 1, 0, "ProjectDocument", "ProjectDocument objects are managed by the Project class.");
     qmlRegisterUncreatableType<lv::EditorSettings>(

@@ -85,7 +85,7 @@ QNetworkReply *QmlEngineInterceptor::createRequest(
         MemoryNetworkReply* mnr = new MemoryNetworkReply();
         QUrl url = request.url();
         url.setScheme("file");
-        QString content = m_project->openFile(url.toLocalFile())->content();
+        QString content = m_project->openTextFile(url.toLocalFile())->content();
         mnr->setContent(content);
         return mnr;
     }

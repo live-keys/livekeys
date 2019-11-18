@@ -31,8 +31,8 @@ class ProjectWorkspace::State{
 
 public:
     void projectActiveChange(Runnable* runnable);
-    void documentOpen(ProjectDocument* document);
-    void documentClosed(ProjectDocument* document);
+    void documentOpen(Document* document);
+    void documentClosed(Document* document);
 
     void windowOpen(QQuickWindow* window);
     void windowClose(QQuickWindow* window);
@@ -57,7 +57,7 @@ void ProjectWorkspace::State::projectActiveChange(Runnable *runnable){
         currentWorkspaceLayout["active"] = Project::hashPath(runnable->path().toUtf8()).toHex().toStdString();
 }
 
-void ProjectWorkspace::State::documentOpen(ProjectDocument *document){
+void ProjectWorkspace::State::documentOpen(Document *document){
     std::string path = document->file()->path().toStdString();
 
     if ( currentWorkspaceLayout.hasKey("documents") && currentWorkspaceLayout["documents"].type() == MLNode::Array ){
@@ -76,7 +76,7 @@ void ProjectWorkspace::State::documentOpen(ProjectDocument *document){
     }
 }
 
-void ProjectWorkspace::State::documentClosed(ProjectDocument *document){
+void ProjectWorkspace::State::documentClosed(Document *document){
     std::string path = document->file()->path().toStdString();
     for ( int i = 0; i < currentWorkspaceLayout["documents"].size(); ++i ){
         if ( currentWorkspaceLayout["documents"][i].asString() == path ){
@@ -567,8 +567,11 @@ void ProjectWorkspace::whenAboutToClose(){
     m_watchers.clear();
 }
 
-void ProjectWorkspace::whenDocumentOpen(ProjectDocument *document){
-    connect(document->textDocument(), &QTextDocument::contentsChange, this, &ProjectWorkspace::whenDocumentContentsChanged);
+void ProjectWorkspace::whenDocumentOpen(Document *document){
+    ProjectDocument* pd = ProjectDocument::castFrom(document);
+    if ( pd )
+        connect(pd->textDocument(), &QTextDocument::contentsChange, this, &ProjectWorkspace::whenDocumentContentsChanged);
+
     connect(document, &ProjectDocument::isMonitoredChanged, this, &ProjectWorkspace::whenDocumentIsMonitoredChanged);
     connect(document, &ProjectDocument::saved, this, &ProjectWorkspace::whenDocumentSaved);
 
@@ -576,7 +579,7 @@ void ProjectWorkspace::whenDocumentOpen(ProjectDocument *document){
     emit documentOpen(document);
 }
 
-void ProjectWorkspace::whenDocumentClose(ProjectDocument *document){
+void ProjectWorkspace::whenDocumentClose(Document *document){
     m_state->documentClosed(document);
     emit documentClose(document);
 }
@@ -739,12 +742,12 @@ void ProjectWorkspace::whenPaneAdded(QQuickItem *pane, QQuickWindow *window, con
 void ProjectWorkspace::whenPaneSizeChanged(){
     QQuickItem* pane = qobject_cast<QQuickItem*>(sender());
     try{
-        m_state->paneSizeChanged(pane, QSize(pane->width(), pane->height()));
+        m_state->paneSizeChanged(pane, QSize(static_cast<int>(pane->width()), static_cast<int>(pane->height())));
     } catch ( lv::Exception& e ){
         Exception edetail = captureContents(e);
         lv::ViewContext::instance().engine()->throwError(&edetail, this);
     }
-    emit paneSizeChanged(pane, QSize(pane->width(), pane->height()));
+    emit paneSizeChanged(pane, QSize(static_cast<int>(pane->width()), static_cast<int>(pane->height())));
 }
 
 void ProjectWorkspace::whenPaneRemoved(QQuickItem *pane){

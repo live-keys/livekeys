@@ -71,7 +71,7 @@ void Runnable::run(){
 
     if ( m_type == Runnable::File ){
 
-        ProjectDocument* document = m_project->isOpened(m_path);
+        ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(m_path));
         if ( document ){
             auto documentList = m_project->documentModel()->listUnsavedDocuments();
 
@@ -84,7 +84,7 @@ void Runnable::run(){
                     !(documentList.size() == 1 && documentList[0] == document->file()->path())
                 );
             } else {
-                QObject* obj = createObject(document->content().toUtf8(), QUrl::fromLocalFile(m_path));
+                QObject* obj = createObject(document->content(), QUrl::fromLocalFile(m_path));
 
                 if ( obj ){
 
@@ -165,10 +165,14 @@ void Runnable::_activationContentsChanged(int, int, int){
     m_scheduleTimer->start();
 }
 
-void Runnable::_documentOpened(ProjectDocument *document){
+void Runnable::_documentOpened(Document *document){
+    ProjectDocument* pd = ProjectDocument::castFrom(document);
+    if ( !pd )
+        return;
+
     if ( m_activations.contains(document->file()->path()) ){
         if ( m_runTrigger == Project::RunOnChange ){
-            connect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
+            connect(pd->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
         } else {
             connect(document, &ProjectDocument::saved, this, &Runnable::_documentSaved);
         }
@@ -192,7 +196,7 @@ void Runnable::setRunTrigger(int runTrigger){
             disconnect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
             for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
                 const QString& activation = *it;
-                ProjectDocument* document = m_project->isOpened(activation);
+                ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
                 if ( document ){
                     disconnect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
                 }
@@ -205,7 +209,7 @@ void Runnable::setRunTrigger(int runTrigger){
             disconnect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
             for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
                 const QString& activation = *it;
-                ProjectDocument* document = m_project->isOpened(activation);
+                ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
                 if ( document ){
                     disconnect(document, &ProjectDocument::saved, this, &Runnable::_documentSaved);
                 }
@@ -223,7 +227,7 @@ void Runnable::setRunTrigger(int runTrigger){
 
             for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
                 const QString& activation = *it;
-                ProjectDocument* document = m_project->isOpened(activation);
+                ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
                 if ( document ){
                     connect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
                 }
@@ -237,7 +241,7 @@ void Runnable::setRunTrigger(int runTrigger){
             connect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
             for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
                 const QString& activation = *it;
-                ProjectDocument* document = m_project->isOpened(activation);
+                ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
                 if ( document ){
                     connect(document, &ProjectDocument::saved, this, &Runnable::_documentSaved);
                 }

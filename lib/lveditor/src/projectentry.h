@@ -33,8 +33,8 @@ class LV_EDITOR_EXPORT ProjectEntry : public QObject{
     Q_PROPERTY(bool    isFile READ isFile CONSTANT)
 
 public:
-    explicit ProjectEntry(const QString& path, ProjectEntry *parent = 0);
-    ProjectEntry(const QString& path, const QString& name, ProjectEntry* parent = 0);
+    explicit ProjectEntry(const QString& path, ProjectEntry *parent = nullptr);
+    ProjectEntry(const QString& path, const QString& name, ProjectEntry* parent = nullptr);
     ~ProjectEntry();
 
     ProjectEntry *child(int index);
@@ -86,7 +86,7 @@ signals:
     void pathChanged();
 
 protected:
-    ProjectEntry(const QString& path, const QString& name, bool isFile, ProjectEntry* parent = 0);
+    ProjectEntry(const QString& path, const QString& name, bool isFile, ProjectEntry* parent = nullptr);
     /// \private
     bool m_isFile;
 
@@ -152,7 +152,7 @@ inline void ProjectEntry::setLastCheckTime(const QDateTime &lastCheckTime){
 inline ProjectEntry *ProjectEntry::parentEntry() const{
     if ( parent())
         return qobject_cast<ProjectEntry*>(parent());
-    return 0;
+    return nullptr;
 }
 
 /** Returns the list of entries */

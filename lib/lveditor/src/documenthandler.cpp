@@ -174,10 +174,6 @@ void DocumentHandler::componentComplete(){
     findCodeHandler();
 }
 
-void DocumentHandler::readContent(){
-    m_targetDoc->setPlainText(m_projectDocument->content());
-}
-
 void DocumentHandler::findCodeHandler(){
     if ( m_project && m_engine && m_projectDocument ){
         vlog("editor-documenthandler").v() << "Looking up language handler for: " << m_projectDocument->file()->path();

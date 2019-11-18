@@ -7,8 +7,6 @@
 
 namespace lv{
 
-//TODO: Configuration
-
 class LV_EDITOR_EXPORT WorkspaceExtension : public QObject{
 
     Q_OBJECT

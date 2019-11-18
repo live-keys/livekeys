@@ -57,6 +57,8 @@ QMAKE_EXTRA_TARGETS += first palettecopy
 
 DISTFILES += \
     palettes/ImageFilePalette.qml \
+    qml/EditCvExtension.qml \
+    qml/MatViewPane.qml \
     qml/live.package.json \
     qml/live.plugin.json
 

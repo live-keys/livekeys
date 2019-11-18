@@ -147,7 +147,7 @@ std::string LockedFileIOSession::readFromFile(const std::string &path){
     }
 
     instream.seekg(0, std::ios::end);
-    size_t size = instream.tellg();
+    size_t size = static_cast<size_t>(instream.tellg());
     std::string buffer(size, ' ');
     instream.seekg(0);
     instream.read(&buffer[0], size);
@@ -164,6 +164,10 @@ std::string LockedFileIOSession::readFromFile(const std::string &path){
  * The return value is an indicator of a successful write.
  */
 bool LockedFileIOSession::writeToFile(const std::string &path, const std::string &data){
+    return writeToFile(path, data.c_str(), data.length());
+}
+
+bool LockedFileIOSession::writeToFile(const std::string &path, const char *data, size_t length){
     m_d->getLock(path)->lockForWrite();
 
     QFile fileInput(path.c_str());
@@ -173,7 +177,7 @@ bool LockedFileIOSession::writeToFile(const std::string &path, const std::string
         return false;
     }
 
-    fileInput.write(data.c_str(), data.size());
+    fileInput.write(data, static_cast<int>(length));
     fileInput.close();
 
     m_d->releaseLock(path);

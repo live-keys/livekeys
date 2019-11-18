@@ -198,7 +198,7 @@ QJSValue WorkspaceLayer::interceptMenu(QJSValue context){
     }
 
     QJSValue concat = lv::ViewContext::instance().engine()->engine()->newArray(result.length());
-    int index = 0;
+    quint32 index = 0;
     for ( auto it = result.begin(); it != result.end(); ++it ){
         concat.setProperty(index, *it);
         ++index;
@@ -267,7 +267,8 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
     if ( layout.hasKey("documents") && layout["documents"].type() == MLNode::Array ){
         for ( auto it = layout["documents"].begin(); it != layout["documents"].end(); ++it ){
             QString path = QString::fromStdString((*it).asString());
-            openDocuments[Project::hashPath(path.toUtf8()).toHex()] = m_project->openFile(path);
+            ProjectDocument* doc = m_project->openTextFile(path);
+            openDocuments[Project::hashPath(path.toUtf8()).toHex()] = doc;
         }
     }
 

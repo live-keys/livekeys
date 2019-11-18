@@ -76,6 +76,12 @@ QString QmlPath::absolutePath(QJSValue path)
     return "";
 }
 
+bool QmlPath::hasExtensions(const QString &path, QJSValue extensions){
+    if ( extensions.isString() )
+        return path.endsWith("." + extensions.toString());
+    return false;
+}
+
 bool QmlPath::isReadable(QJSValue path)
 {
     if (path.isString())

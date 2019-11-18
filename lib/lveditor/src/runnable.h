@@ -64,7 +64,7 @@ public slots:
     QObject* runSpace();
 
     void _activationContentsChanged(int, int, int);
-    void _documentOpened(ProjectDocument* document);
+    void _documentOpened(Document* document);
     void _documentSaved();
 
     void setRunTrigger(int runTrigger);

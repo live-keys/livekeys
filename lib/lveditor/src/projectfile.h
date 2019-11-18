@@ -24,20 +24,20 @@
 
 namespace lv{
 
-class ProjectDocument;
+class Document;
 
 class LV_EDITOR_EXPORT ProjectFile : public ProjectEntry{
 
     Q_OBJECT
-    Q_PROPERTY(lv::ProjectDocument* document READ document NOTIFY documentChanged)
+    Q_PROPERTY(lv::Document* document READ document NOTIFY documentChanged)
 
 public:
-    explicit ProjectFile(const QString& path, ProjectEntry *parent = 0);
+    explicit ProjectFile(const QString& path, ProjectEntry *parent = nullptr);
     ProjectFile(const QString &path, const QString& name, ProjectEntry *parent);
     ~ProjectFile();
 
-    ProjectDocument* document() const;
-    void setDocument(lv::ProjectDocument* document);
+    Document* document() const;
+    void setDocument(lv::Document* document);
     bool isOpen() const;
 
 public slots:
@@ -48,17 +48,17 @@ signals:
     void documentChanged();
 
 private:
-    ProjectDocument* m_document;
+    Document* m_document;
 };
 
 /** Document getter */
-inline ProjectDocument *ProjectFile::document() const{
+inline Document *ProjectFile::document() const{
     return m_document;
 }
 
 /** Shows if the file is opened */
 inline bool ProjectFile::isOpen() const{
-    return m_document != 0;
+    return m_document != nullptr;
 }
 
 /**

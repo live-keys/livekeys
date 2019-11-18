@@ -7,6 +7,7 @@ HEADERS += \
     $$PWD/codepalette.h \
     $$PWD/commands.h \
     $$PWD/commandsmodel.h \
+    $$PWD/document.h \
     $$PWD/documentation.h \
     $$PWD/documentationloader.h \
     $$PWD/documenthandler.h \
@@ -47,6 +48,7 @@ SOURCES += \
     $$PWD/codepalette.cpp \
     $$PWD/commands.cpp \
     $$PWD/commandsmodel.cpp \
+    $$PWD/document.cpp \
     $$PWD/documentation.cpp \
     $$PWD/documentationloader.cpp \
     $$PWD/documenthandler.cpp \
