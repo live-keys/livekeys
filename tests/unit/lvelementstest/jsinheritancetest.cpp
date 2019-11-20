@@ -23,7 +23,7 @@ void JsInheritanceTest::initTestCase(){
 void JsInheritanceTest::directElementTest(){
     Engine* engine = new Engine();
     engine->scope([&engine](){
-        Value v = engine->compileEnclosed("return Element;")->run();
+        Value v = engine->compileJsEnclosed("return Element;")->run();
         QVERIFY(v.type() == Value::Stored::Callable);
         QVERIFY(v.asCallable().isComponent());
     });
@@ -33,7 +33,7 @@ void JsInheritanceTest::directElementTest(){
 void JsInheritanceTest::objectPosingAsElementTest(){
     Engine* engine = new Engine();
     engine->scope([&engine](){
-        Value v = engine->compileEnclosed("return Object;")->run();
+        Value v = engine->compileJsEnclosed("return Object;")->run();
         QVERIFY(v.type() == Value::Stored::Callable);
         QVERIFY(!v.asCallable().isComponent());
     });
@@ -43,7 +43,7 @@ void JsInheritanceTest::objectPosingAsElementTest(){
 void JsInheritanceTest::stringPosingAsElementTest(){
     Engine* engine = new Engine();
     engine->scope([&engine](){
-        Value v = engine->compileEnclosed("return String;")->run();
+        Value v = engine->compileJsEnclosed("return String;")->run();
         QVERIFY(v.type() == Value::Stored::Callable);
         QVERIFY(!v.asCallable().isComponent());
     });
@@ -53,7 +53,7 @@ void JsInheritanceTest::stringPosingAsElementTest(){
 void JsInheritanceTest::directInheritanceTest(){
     Engine* engine = new Engine();
     engine->scope([&engine](){
-        Value v = engine->compileEnclosed("class A extends Element{}; return A;")->run();
+        Value v = engine->compileJsEnclosed("class A extends Element{}; return A;")->run();
         QVERIFY(v.type() == Value::Stored::Callable);
         QVERIFY(v.asCallable().isComponent());
     });
@@ -63,7 +63,7 @@ void JsInheritanceTest::directInheritanceTest(){
 void JsInheritanceTest::indirectInheritanceTest(){
     Engine* engine = new Engine();
     engine->scope([&engine](){
-        Value v = engine->compileEnclosed("class A extends Element{}; class B extends A{}; return B;")->run();
+        Value v = engine->compileJsEnclosed("class A extends Element{}; class B extends A{}; return B;")->run();
         QVERIFY(v.type() == Value::Stored::Callable);
         QVERIFY(v.asCallable().isComponent());
     });
@@ -73,7 +73,7 @@ void JsInheritanceTest::indirectInheritanceTest(){
 void JsInheritanceTest::threeLevelInheritanceTest(){
     Engine* engine = new Engine();
     engine->scope([&engine](){
-        Value v = engine->compileEnclosed(
+        Value v = engine->compileJsEnclosed(
             "class A extends Element{}; class B extends A{}; class C extends B{}; return C;"
         )->run();
         QVERIFY(v.type() == Value::Stored::Callable);
@@ -85,7 +85,7 @@ void JsInheritanceTest::threeLevelInheritanceTest(){
 void JsInheritanceTest::indirectCppInheritanceTest(){
     Engine* engine = new Engine();
     engine->scope([&engine](){
-        Value v = engine->compileEnclosed("class A extends Container{}; return A;")->run();
+        Value v = engine->compileJsEnclosed("class A extends Container{}; return A;")->run();
         QVERIFY(v.type() == Value::Stored::Callable);
         QVERIFY(v.asCallable().isComponent());
     });

@@ -204,7 +204,7 @@ void JsEventTest::callEventTest(){
 
             LocalObject globalObject(engine->currentContext());
             globalObject.set(engine, "jsEvent", LocalValue(engine, jsEvent));
-            engine->compileEnclosed("jsEvent.pinged(2000);")->run();
+            engine->compileJsEnclosed("jsEvent.pinged(2000);")->run();
 
             QCOMPARE(pingNumber, 2000);
 
@@ -228,7 +228,7 @@ void JsEventTest::registerListenerTest()
             globalObject.set(engine, "jsEvent", LocalValue(engine, jsEvent));
             globalObject.set(engine, "jsEventLastPing", LocalValue(engine, 0));
 
-            engine->compileEnclosed("jsEvent.on('pinged', function(number){ jsEventLastPing = number; });")->run();
+            engine->compileJsEnclosed("jsEvent.on('pinged', function(number){ jsEventLastPing = number; });")->run();
 
             jsEvent->pinged(2000);
             int pingNumber = globalObject.get(engine, "jsEventLastPing").toInt32(engine);
@@ -277,7 +277,7 @@ void JsEventTest::triggerEventThroughMetaTest(){
             globalObject.set(engine, "jsEvent", LocalValue(engine, jsEvent));
             globalObject.set(engine, "jsEventLastPing", LocalValue(engine, 0));
 
-            engine->compileEnclosed("jsEvent.on('pinged', function(number){ jsEventLastPing = number; });")->run();
+            engine->compileJsEnclosed("jsEvent.on('pinged', function(number){ jsEventLastPing = number; });")->run();
 
             Function::Parameters p(1);
             p.assign(0, LocalValue(engine, 2000));
@@ -305,14 +305,14 @@ void JsEventTest::addEventJsCallInJsTest()
             LocalObject globalObject(engine->currentContext());
             globalObject.set(engine, "jsEvent", LocalValue(engine, jsEvent));
 
-            engine->compileEnclosed("Element.addEvent(jsEvent, 'customEvent', ['int']);")->run();
+            engine->compileJsEnclosed("Element.addEvent(jsEvent, 'customEvent', ['int']);")->run();
 
             int eventValue = 0;
             jsEvent->on("customEvent", [&engine, &eventValue](const Function::Parameters& p){
                 eventValue = p.at(engine, 0).toInt32(engine);
             });
 
-            engine->compileEnclosed("jsEvent.customEvent(200);")->run();
+            engine->compileJsEnclosed("jsEvent.customEvent(200);")->run();
 
             QCOMPARE(eventValue, 200);
 
@@ -338,7 +338,7 @@ void JsEventTest::addEventListenInJsTest(){
             std::vector<std::string> eventTypes = {"int"};
             Element::addEvent(jsEvent, "customEvent", eventTypes);
 
-            engine->compileEnclosed("jsEvent.on('customEvent', function(number){ jsEventLastValue = number; });")->run();
+            engine->compileJsEnclosed("jsEvent.on('customEvent', function(number){ jsEventLastValue = number; });")->run();
 
             Function::Parameters p(1);
             p.assign(0, LocalValue(engine, 2000));
@@ -369,35 +369,35 @@ void JsEventTest::eventTypesTest(){
             jsEvent->on("boolEvent", [&boolEventValue, engine](const Function::Parameters& p){
                 boolEventValue = p.at(engine, 0).toBool(engine);
             });
-            engine->compileEnclosed("jsEvent.boolEvent(true);")->run();
+            engine->compileJsEnclosed("jsEvent.boolEvent(true);")->run();
             QCOMPARE(boolEventValue, true);
 
             Value::Int32 intEventValue = 0;
             jsEvent->on("intEvent", [&intEventValue, engine](const Function::Parameters& p){
                 intEventValue = p.at(engine, 0).toInt32(engine);
             });
-            engine->compileEnclosed("jsEvent.intEvent(200);")->run();
+            engine->compileJsEnclosed("jsEvent.intEvent(200);")->run();
             QCOMPARE(intEventValue, 200);
 
             Value::Int64 int64EventValue = 0;
             jsEvent->on("int64Event", [&int64EventValue, engine](const Function::Parameters& p){
                 int64EventValue = p.at(engine, 0).toInt64(engine);
             });
-            engine->compileEnclosed("jsEvent.int64Event(300);")->run();
+            engine->compileJsEnclosed("jsEvent.int64Event(300);")->run();
             QCOMPARE(int64EventValue, 300);
 
             Value::Number numberEventValue = 0;
             jsEvent->on("numberEvent", [&numberEventValue, engine](const Function::Parameters& p){
                 numberEventValue = p.at(engine, 0).toNumber(engine);
             });
-            engine->compileEnclosed("jsEvent.numberEvent(300.300);")->run();
+            engine->compileJsEnclosed("jsEvent.numberEvent(300.300);")->run();
             QCOMPARE(numberEventValue, 300.300);
 
             std::string stdStringEventValue;
             jsEvent->on("stdStringEvent", [&stdStringEventValue, engine](const Function::Parameters& p){
                 stdStringEventValue = p.at(engine, 0).toStdString(engine);
             });
-            engine->compileEnclosed("jsEvent.stdStringEvent('asd');")->run();
+            engine->compileJsEnclosed("jsEvent.stdStringEvent('asd');")->run();
             QVERIFY(stdStringEventValue == "asd");
 
             Callable callableEventValue(engine);
@@ -405,7 +405,7 @@ void JsEventTest::eventTypesTest(){
             jsEvent->on("callableEvent", [&callableEventValue, engine](const Function::Parameters& p){
                 callableEventValue = p.at(engine, 0).toCallable(engine);
             });
-            engine->compileEnclosed("jsEvent.callableEvent(function(){ return 20; });")->run();
+            engine->compileJsEnclosed("jsEvent.callableEvent(function(){ return 20; });")->run();
             QVERIFY(!callableEventValue.isNull());
             QVERIFY(callableEventValue.call(engine, Function::Parameters(0)).toInt32(engine) == 20);
 
@@ -413,7 +413,7 @@ void JsEventTest::eventTypesTest(){
             jsEvent->on("bufferEvent", [&bufferEventValue, engine](const Function::Parameters& p){
                 bufferEventValue = p.at(engine, 0).toBuffer(engine);
             });
-            engine->compileEnclosed("jsEvent.bufferEvent(new ArrayBuffer(8));")->run();
+            engine->compileJsEnclosed("jsEvent.bufferEvent(new ArrayBuffer(8));")->run();
             QVERIFY(bufferEventValue.size() == 8);
 
             Object objectEventValue(engine);
@@ -421,7 +421,7 @@ void JsEventTest::eventTypesTest(){
             jsEvent->on("objectEvent", [&objectEventValue, engine](const Function::Parameters& p){
                 objectEventValue = p.at(engine, 0).toObject(engine);
             });
-            engine->compileEnclosed("jsEvent.objectEvent({a : 1, b: 20.2});")->run();
+            engine->compileJsEnclosed("jsEvent.objectEvent({a : 1, b: 20.2});")->run();
             QVERIFY(!objectEventValue.isNull());
             LocalObject localObjectEventValue(objectEventValue);
             QVERIFY(localObjectEventValue.get(engine, std::string("a")).toInt32(engine) == 1);
@@ -435,17 +435,17 @@ void JsEventTest::eventTypesTest(){
                 else
                     localValueEventValue = p.at(engine, 0).toStdString(engine);
             });
-            engine->compileEnclosed("jsEvent.localValueEvent('asd');")->run();
+            engine->compileJsEnclosed("jsEvent.localValueEvent('asd');")->run();
             QVERIFY(localValueEventValue == "asd");
 
-            engine->compileEnclosed("jsEvent.localValueEvent(200);")->run();
+            engine->compileJsEnclosed("jsEvent.localValueEvent(200);")->run();
             QVERIFY(localValueEventIntValue == 200);
 
             Value valueEventValue;
             jsEvent->on("valueEvent", [&valueEventValue, engine](const Function::Parameters& p){
                 valueEventValue = p.at(engine, 0).toValue(engine);
             });
-            engine->compileEnclosed("jsEvent.valueEvent({a: 1, b: 20.2});")->run();
+            engine->compileJsEnclosed("jsEvent.valueEvent({a: 1, b: 20.2});")->run();
             Object valueEventObject = valueEventValue.asObject();
             QVERIFY(!valueEventObject.isNull());
             LocalObject valueEventLocalObject(valueEventObject);
@@ -459,14 +459,14 @@ void JsEventTest::eventTypesTest(){
             jsEvent->on("elementEvent", [&elementEventValue, engine](const Function::Parameters& p){
                 elementEventValue = p.at(engine, 0).toElement(engine);
             });
-            engine->compileEnclosed("jsEvent.elementEvent(triggeredElement);")->run();
+            engine->compileJsEnclosed("jsEvent.elementEvent(triggeredElement);")->run();
             QVERIFY(elementEventValue == triggeredElement);
 
             Element* userElementEventValue = nullptr;
             jsEvent->on("userElementEvent", [&userElementEventValue, engine](const Function::Parameters& p){
                 userElementEventValue = p.at(engine, 0).toElement(engine);
             });
-            engine->compileEnclosed("jsEvent.userElementEvent(jsEvent);")->run();
+            engine->compileJsEnclosed("jsEvent.userElementEvent(jsEvent);")->run();
             QVERIFY(userElementEventValue == jsEvent);
 
             delete triggeredElement;
@@ -493,7 +493,7 @@ void JsEventTest::eventInheritanceTest(){
             jsEvent->on("intEvent", [&intEventValue, engine](const Function::Parameters& p){
                 intEventValue = p.at(engine, 0).toInt32(engine);
             });
-            engine->compileEnclosed("jsEvent.intEvent(200);")->run();
+            engine->compileJsEnclosed("jsEvent.intEvent(200);")->run();
             QCOMPARE(intEventValue, 200);
 
             jsEvent->intEvent2(400);
@@ -503,7 +503,7 @@ void JsEventTest::eventInheritanceTest(){
             jsEvent->on("int64Event", [&int64EventValue, engine](const Function::Parameters& p){
                 int64EventValue = p.at(engine, 0).toInt64(engine);
             });
-            engine->compileEnclosed("jsEvent.int64Event(300);")->run();
+            engine->compileJsEnclosed("jsEvent.int64Event(300);")->run();
             QCOMPARE(int64EventValue, 300);
 
             delete jsEvent;

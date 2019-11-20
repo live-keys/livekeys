@@ -294,6 +294,11 @@ std::list<std::string> LanguageParser::parseExportNames(const std::string& modul
         return parseExportNamesJs(moduleFile);
     }
 
+    //TODO: Read file contents
+    return parseExportNames(moduleFile, "", nullptr);
+}
+
+std::list<std::string> LanguageParser::parseExportNames(const std::string &/*moduleFile*/, const std::string &/*content*/, LanguageParser::AST */*ast*/){
     std::list<std::string> exportNames;
     return exportNames;
 }

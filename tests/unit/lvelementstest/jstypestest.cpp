@@ -21,14 +21,14 @@ void JsTypesTest::pointTypeTest(){
     Engine* engine = new Engine();
     {
         engine->scope([&engine](){
-            Value v = engine->compileEnclosed("return new Point(20, 20);")->run();
+            Value v = engine->compileJsEnclosed("return new Point(20, 20);")->run();
             Object o = v.asObject();
             QVERIFY(o.isPoint());
             double x, y;
             o.toPoint(x, y);
             QVERIFY(x == 20 && y == 20);
 
-            o = engine->compileEnclosed("class TT extends Point{}; return new TT();")->run().asObject();
+            o = engine->compileJsEnclosed("class TT extends Point{}; return new TT();")->run().asObject();
             QVERIFY(o.isPoint());
         });
     }
@@ -39,14 +39,14 @@ void JsTypesTest::sizeTypeTest(){
     Engine* engine = new Engine();
     {
         engine->scope([&engine](){
-            Value v = engine->compileEnclosed("return new Size(20, 20);")->run();
+            Value v = engine->compileJsEnclosed("return new Size(20, 20);")->run();
             Object o = v.asObject();
             QVERIFY(o.isSize());
             double w, h;
             o.toSize(w, h);
             QVERIFY(w == 20 && h == 20);
 
-            o = engine->compileEnclosed("class TT extends Size{}; return new TT();")->run().asObject();
+            o = engine->compileJsEnclosed("class TT extends Size{}; return new TT();")->run().asObject();
             QVERIFY(o.isSize());
         });
     }
@@ -57,7 +57,7 @@ void JsTypesTest::rectangleTypeTest(){
     Engine* engine = new Engine();
     {
         engine->scope([&engine](){
-            Value v = engine->compileEnclosed("return new Rectangle(1, 2, 3, 4);")->run();
+            Value v = engine->compileJsEnclosed("return new Rectangle(1, 2, 3, 4);")->run();
             Object o = v.asObject();
             QVERIFY(o.isRectangle());
             double x, y, w, h;
@@ -65,7 +65,7 @@ void JsTypesTest::rectangleTypeTest(){
             QVERIFY(x == 1 && y == 2);
             QVERIFY(w == 3 && h == 4);
 
-            o = engine->compileEnclosed("class TT extends Rectangle{}; return new TT();")->run().asObject();
+            o = engine->compileJsEnclosed("class TT extends Rectangle{}; return new TT();")->run().asObject();
             QVERIFY(o.isRectangle());
         });
     }
@@ -76,7 +76,7 @@ void JsTypesTest::dateTypeTest(){
     Engine* engine = new Engine();
     {
         engine->scope([&engine](){
-            Value v = engine->compileEnclosed("return new Date();")->run();
+            Value v = engine->compileJsEnclosed("return new Date();")->run();
             Object o = v.asObject();
             QVERIFY(o.isDate());
         });

@@ -69,7 +69,7 @@ void JsErrorHandlingTest::testException(){
 
     engine->scope([engine](){
         engine->tryCatch([engine](){
-            engine->compileEnclosed("throw new Error('Test Js Exception', 'testfile', 12);")->run();
+            engine->compileJsEnclosed("throw new Error('Test Js Exception', 'testfile', 12);")->run();
         }, [](const Engine::CatchData& cd){
             QVERIFY(cd.message() == "Test Js Exception");
         });
@@ -89,7 +89,7 @@ void JsErrorHandlingTest::testExceptionWithLink(){
         globalObject.set(engine, "jsError", LocalValue(engine, jsError));
 
         engine->tryCatch([engine](){
-            engine->compileEnclosed("throw linkError(new Error('Test Js Exception'), jsError)")->run();
+            engine->compileJsEnclosed("throw linkError(new Error('Test Js Exception'), jsError)")->run();
         }, [jsError](const Engine::CatchData& cd){
             QVERIFY(cd.message() == "Test Js Exception");
             QVERIFY(cd.object() == jsError);
@@ -118,7 +118,7 @@ void JsErrorHandlingTest::testExceptionFromFunction(){
 
 
         engine->tryCatch([engine](){
-            engine->compileEnclosed("JsErrorHandlingStub.errorFunction();")->run();
+            engine->compileJsEnclosed("JsErrorHandlingStub.errorFunction();")->run();
         }, [](const Engine::CatchData& cd){
             QVERIFY(cd.fileName().find("errorhandlingtest.cpp") != std::string::npos);
             QVERIFY(cd.message() == "TestException");
@@ -151,7 +151,7 @@ void JsErrorHandlingTest::testExceptionFromMethod()
 
 
         engine->tryCatch([engine](){
-            engine->compileEnclosed("jsError.errorMethod();")->run();
+            engine->compileJsEnclosed("jsError.errorMethod();")->run();
         }, [engine, jsError](const Engine::CatchData& cd){
             QVERIFY(cd.fileName().find("errorhandlingtest.cpp") != std::string::npos);
             QVERIFY(cd.message() == "TestException");
@@ -183,7 +183,7 @@ void JsErrorHandlingTest::testExceptionFromProperty()
         globalObject.set(engine, "jsError", LocalValue(engine, jsError));
 
         engine->tryCatch([engine](){
-            engine->compileEnclosed("jsError.errorProperty = 100;")->run();
+            engine->compileJsEnclosed("jsError.errorProperty = 100;")->run();
         }, [jsError](const Engine::CatchData& cd){
             QVERIFY(cd.fileName().find("errorhandlingtest.cpp") != std::string::npos);
             QVERIFY(cd.message() == "TestException");

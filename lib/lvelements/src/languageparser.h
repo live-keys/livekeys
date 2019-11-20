@@ -88,13 +88,14 @@ public:
     std::string toJs(const std::string &contents, const std::string filename = "") const;
     std::string toJs(const std::string &contents, AST* ast, const std::string filename = "") const;
 
-    static std::list<std::string> parseExportNames(const std::string &moduleFile);
+    std::list<std::string> parseExportNames(const std::string &moduleFile);
+    std::list<std::string> parseExportNames(const std::string& moduleFile, const std::string& content, AST* ast);
 
     TSParser* internal() const{ return m_parser; }
     Language* language() const;
 
 private:
-    static std::list<std::string> parseExportNamesJs(const std::string& jsModuleFile);
+    std::list<std::string> parseExportNamesJs(const std::string& jsModuleFile);
 
     LanguageParser(Language* language);
 

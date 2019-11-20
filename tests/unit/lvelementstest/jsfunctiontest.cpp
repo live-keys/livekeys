@@ -99,47 +99,47 @@ void JsFunctionTest::typesTest(){
             globalObject.set(engine, "e", LocalValue(engine, e));
             globalObject.set(engine, "FunctionStub", lo.get(engine, "FunctionStub"));
 
-            Value v = engine->compileEnclosed("return FunctionStub.boolReturnType(true);")->run();
+            Value v = engine->compileJsEnclosed("return FunctionStub.boolReturnType(true);")->run();
             QCOMPARE(v.asBool(), true);
 
-            v = engine->compileEnclosed("return FunctionStub.intReturnType(20);")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.intReturnType(20);")->run();
             QCOMPARE(v.asInt32(), 20);
 
-            v = engine->compileEnclosed("return FunctionStub.int64ReturnType(40);")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.int64ReturnType(40);")->run();
             QCOMPARE(v.asInt64(), 40);
 
-            v = engine->compileEnclosed("return FunctionStub.numberReturnType(20.2);")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.numberReturnType(20.2);")->run();
             QCOMPARE(v.asNumber(), 20.2);
 
-            v = engine->compileEnclosed("return FunctionStub.stringReturnType('123');")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.stringReturnType('123');")->run();
             QVERIFY(v.asObject().toString() == "123");
 
-            v = engine->compileEnclosed("return FunctionStub.callableReturnType(function(){ return 2; });")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.callableReturnType(function(){ return 2; });")->run();
             QVERIFY(v.type() == Value::Stored::Callable);
             QVERIFY(v.asCallable().call(engine, Function::Parameters(0)).toInt32(engine) == 2);
 
-            v = engine->compileEnclosed("return FunctionStub.objectReturnType({a: 2, b: 30});")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.objectReturnType({a: 2, b: 30});")->run();
             QVERIFY(v.type() == Value::Stored::Object);
             LocalObject vo(v.asObject());
             QVERIFY(vo.get(engine, "a").toInt32(engine) == 2);
             QVERIFY(vo.get(engine, "b").toInt32(engine) == 30);
 
-            v = engine->compileEnclosed("return FunctionStub.localValueReturnType(2);")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.localValueReturnType(2);")->run();
             QVERIFY(v.asInt32() == 2);
 
-            v = engine->compileEnclosed("return FunctionStub.valueReturnType('123');")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.valueReturnType('123');")->run();
             QVERIFY(v.asObject().toString() == "123");
 
-            v = engine->compileEnclosed("return FunctionStub.bufferReturnType(new ArrayBuffer(8));")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.bufferReturnType(new ArrayBuffer(8));")->run();
             QVERIFY(v.asObject().toBuffer().size() == 8);
 
-            v = engine->compileEnclosed("return FunctionStub.elementReturnType(e);")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.elementReturnType(e);")->run();
             QVERIFY(v.asElement() == e);
 
-            v = engine->compileEnclosed("return FunctionStub.userElementReturnType(e);")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.userElementReturnType(e);")->run();
             QVERIFY(v.asElement() == e);
 
-            v = engine->compileEnclosed("return FunctionStub.intNoParameterReturnType();")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.intNoParameterReturnType();")->run();
             QVERIFY(v.asInt32() == 200);
 
             Value::Int32 intReturn     = 0;
@@ -148,7 +148,7 @@ void JsFunctionTest::typesTest(){
                 intReturn = v1;
                 numberReturn = v2;
             };
-            engine->compileEnclosed("return FunctionStub.voidReturnType(2, 20.2);")->run();
+            engine->compileJsEnclosed("return FunctionStub.voidReturnType(2, 20.2);")->run();
             QCOMPARE(intReturn, 2);
             QCOMPARE(numberReturn, 20.2);
 
@@ -160,13 +160,13 @@ void JsFunctionTest::typesTest(){
                 param1 = v2;
                 param2 = v3;
             };
-            v = engine->compileEnclosed("return FunctionStub.variableParametersType(3, 30.3, '123');")->run();
+            v = engine->compileJsEnclosed("return FunctionStub.variableParametersType(3, 30.3, '123');")->run();
             QCOMPARE(v.asInt32(), 3);
             QVERIFY(param0 == 3);
             QVERIFY(param1 == 30.3);
             QVERIFY(param2 == "123");
 
-            v = engine->compileEnclosed("FunctionStub.variableParametersVoidType(4, 40.4, '1234');")->run();
+            v = engine->compileJsEnclosed("FunctionStub.variableParametersVoidType(4, 40.4, '1234');")->run();
             QVERIFY(v.isNull());
             QVERIFY(param0 == 4);
             QVERIFY(param1 == 40.4);

@@ -14,7 +14,7 @@ class QItemCapture : public QMatDisplay{
     Q_PROPERTY(QQuickItem* captureSource READ captureSource WRITE setCaptureSource NOTIFY captureSourceChanged)
 
 public:
-    QItemCapture(QQuickItem* parent = 0);
+    QItemCapture(QQuickItem* parent = nullptr);
     ~QItemCapture();
 
     void setCaptureSource(QQuickItem* captureSource);

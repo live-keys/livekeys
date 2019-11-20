@@ -6,6 +6,7 @@
 #include "live/elements/value.h"
 #include "live/elements/script.h"
 #include "live/elements/elementsplugin.h"
+#include "live/elements/languageparser.h"
 #include "live/packagegraph.h"
 
 namespace lv{
@@ -74,10 +75,9 @@ private:
 public:
     enum ModuleFileType{
         Lv = 0,
-        CompiledJs,
+        LvOrJs,
         JsOnly
     };
-    static ModuleFileType moduleLookupType;
 
 public:
     Engine(PackageGraph* pg = nullptr);
@@ -91,12 +91,16 @@ public:
     v8::Isolate* isolate();
 
     Context* currentContext() const;
-    Script::Ptr compile(const std::string& str);
-    Script::Ptr compileEnclosed(const std::string& str);
-    Script::Ptr compileJsFile(const std::string& path);
-    Object loadJsModule(const std::string& path);
 
-    Script::Ptr compileElement(const std::string& source);
+    Script::Ptr compileJs(const std::string& str);
+    Script::Ptr compileJsEnclosed(const std::string& str);
+    Script::Ptr compileJsModuleFile(const std::string& path);
+
+    Script::Ptr compileModuleFile(const std::string& path);
+    Script::Ptr compileModuleSource(const std::string& path, const std::string& source);
+
+    Object loadFile(const std::string& path);
+    Object loadJsFile(const std::string& path);
 
     ComponentTemplate* registerTemplate(const MetaObject* mo);
     v8::Local<v8::FunctionTemplate> pointTemplate();
@@ -121,6 +125,8 @@ public:
 
     ModuleFileType moduleFileType() const;
     void setModuleFileType(ModuleFileType type);
+
+    const LanguageParser::Ptr& parser() const;
 
 private:
     void importInternals();

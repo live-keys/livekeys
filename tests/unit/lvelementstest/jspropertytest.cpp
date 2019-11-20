@@ -396,13 +396,13 @@ void JsPropertyTest::propertyTypes(){
             QCOMPARE(e->stdStringProperty(), s);
             QCOMPARE(e->get("stdStringProperty").toStdString(engine), s);
 
-            Callable callable = engine->compileEnclosed("return function(){ return 20; }")->run().asCallable();
+            Callable callable = engine->compileJsEnclosed("return function(){ return 20; }")->run().asCallable();
             QVERIFY(!callable.isNull());
             e->set("callableProperty", LocalValue(engine, callable));
             QVERIFY(e->callableProperty().call(engine, Function::Parameters(0)).toInt32(engine) == 20);
             QVERIFY(e->get("callableProperty").toCallable(engine) == callable);
 
-            Object o = engine->compileEnclosed("return { a : 2 };")->run().asObject();
+            Object o = engine->compileJsEnclosed("return { a : 2 };")->run().asObject();
             QVERIFY(!o.isNull());
             e->set("objectProperty", LocalValue(engine, o));
             LocalObject lo(e->objectProperty());
@@ -462,7 +462,7 @@ void JsPropertyTest::propertyTypes(){
             LocalObject globalObject(engine->currentContext());
             globalObject.set(engine, "e", LocalValue(engine, e));
             globalObject.set(engine, "ps", LocalValue(engine, ps));
-            engine->compileEnclosed(
+            engine->compileJsEnclosed(
                 "e.boolProperty = true; "
                 "e.intProperty = 7; "
                 "e.int64Property = 77;"
@@ -667,7 +667,7 @@ void JsPropertyTest::jsDynamicPropertyWithAssignedExpression(){
             globalObject.set(engine, "x", LocalValue(engine, x));
             globalObject.set(engine, "y", LocalValue(engine, y));
 
-            Script::Ptr s = engine->compile(
+            Script::Ptr s = engine->compileJs(
                 "Element.assignPropertyExpression("
                     "e, 'p', function(){ return x.value + y.value; }, [[x, 'valueChanged'], [y,'valueChanged']]"
                 ");"
@@ -717,7 +717,7 @@ void JsPropertyTest::jsDynamicPropertyWithAddedExpression(){
             globalObject.set(engine, "x", LocalValue(engine, x));
             globalObject.set(engine, "y", LocalValue(engine, y));
 
-            Script::Ptr s = engine->compile(
+            Script::Ptr s = engine->compileJs(
                 "Element.addProperty(e, 'p', {"
                     "type: 'int',"
                     "value: function(){ return x.value + y.value; },"
