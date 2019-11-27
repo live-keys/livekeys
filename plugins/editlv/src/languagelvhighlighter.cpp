@@ -144,6 +144,8 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
         m_captureToFormatMap.insert(i, (*m_settings)[m_languageQuery->captureName(i)]);
     }
 
+    m_captureToFormatMap.insert(UINT_MAX, (*m_settings)["text"]);
+
     std::string content = parent->toPlainText().toStdString();
     m_currentAst = m_parser.parse(content);
 }
@@ -228,6 +230,8 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
     if ( !m_currentAst )
         return ranges;
 
+
+    qDebug() << "query exec: " << position << text.length();
     el::LanguageQuery::Cursor::Ptr cursor = m_languageQuery->exec(m_currentAst, position * sizeof(ushort), (position + text.length())* sizeof(ushort));
     while ( cursor->nextMatch() ){
         uint16_t captures = cursor->totalMatchCaptures();
@@ -240,13 +244,45 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
                 TextFormatRange r;
                 r.start = static_cast<int>(range.from()) / sizeof(ushort);
                 r.length = static_cast<int>(range.length()) / sizeof(ushort);
-                r.userstate = 0;
+
+                auto name = m_languageQuery->captureName(captureId);
+
+                if (name == "string")
+                {
+                    QString checkText = text.mid(r.start, r.length);
+                    r.userstate = checkText.contains('\n') ? 2 : 0; // multiline string
+
+                }
+                else if (name == "comment")
+                {
+                    QString checkText = text.mid(r.start, r.length);
+                    r.userstate = checkText.contains('\n') ? 1 : 0; // multiline comment
+                } else
+                    r.userstate = 0;
+
                 r.userstateFollows = 0;
                 r.format = m_captureToFormatMap[captureId];
+
+                qDebug() << "highlight: " << r.start << r.length << name.c_str();
                 ranges.append(r);
             }
         }
     }
+
+    if (ranges.empty())
+    {
+        TextFormatRange r;
+        r.start = position;
+        r.length = text.length();
+        r.userstate = 0;
+        r.userstateFollows = 0;
+        r.format = m_captureToFormatMap[UINT_MAX]; // regular text
+
+        qDebug() << UINT_MAX << r.format.foreground().color();
+
+        ranges.append(r);
+    }
+
 
     return ranges;
 }

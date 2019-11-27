@@ -250,6 +250,7 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
     }
 
     int lastBlockState = lastBlock.userState();
+    qDebug() << "highlight 1";
     auto textFormatRangeList = q->highlight(prevState, formatsChangedStartPosition, text);
     distributeFormats(startBlock, textFormatRangeList);
 
@@ -287,6 +288,11 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
         text = text.left(text.length()-1);
 
         lastBlockState = lastBlock.userState();
+
+        qDebug() << text << lastBlockState;
+
+
+        qDebug() << "highlight 2";
         textFormatRangeList = q->highlight(prevState, startBlock.position(), text);
         distributeFormats(startBlock, textFormatRangeList);
 
@@ -313,6 +319,8 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
     }
 
     formatChanges.clear();
+
+    qDebug() << "_________________________________________";
 }
 
 //bool SyntaxHighlighterPrivate::reformatBlock(const QTextBlock &block)
@@ -367,6 +375,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                     bd->setCollapse(func);
                 } else bd->setCollapsible(false);
                 if (setStates) currentBlock.setUserState(stateToSet);
+                qDebug() << "a: assigned state: " << stateToSet << " to block:" << currentBlock.blockNumber();
                 formatsChanged = false;
             }
             currentBlock = currentBlock.next();
@@ -447,12 +456,14 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
             bd->setCollapsible(tfr.collapsible);
             bd->setCollapse(tfr.function);
             if (setStates) currentBlock.setUserState(tfr.userstate);
+            qDebug() << "x: assigned state: " << tfr.userstate << " to block:" << currentBlock.blockNumber();
 
             int end = tfr.start + tfr.length;
             while (true) // handle blocks contained within range completely
             {
                 currentBlock = currentBlock.next();
                 layout = currentBlock.layout();
+                if (!currentBlock.isValid() || !layout) break;
                 ranges = layout->formats();
                 shouldCollapse = false;
 
@@ -475,7 +486,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                     formatsChanged = true;
                 }
 
-                if (end < currentBlock.position() || end >= currentBlock.position() + currentBlock.length()) break;
+                if (end <= currentBlock.position()) break;
 
                 formatRange.start = 0;
                 formatRange.length = currentBlock.length();
@@ -491,42 +502,50 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                 ranges << formatRange;
                 layout->setFormats(ranges);
                 if (setStates) currentBlock.setUserState(tfr.userstate);
+                qDebug() << "b: assigned state: " << tfr.userstate << " to block:" << currentBlock.blockNumber();
             }
 
-            // handle block where range ends
-            formatRange.start = 0;
-            formatRange.length = tfr.start+tfr.length - currentBlock.position();
-            formatRange.format = tfr.format;
+            if (currentBlock.isValid())
+            {
+                // handle block where range ends
+                formatRange.start = 0;
+                formatRange.length = tfr.start+tfr.length - currentBlock.position();
+                formatRange.format = tfr.format;
 
-            if (preeditAreaLength != 0) {
-                if (formatRange.start >= preeditAreaStart)
-                    formatRange.start += preeditAreaLength;
-                else if (formatRange.start + formatRange.length >= preeditAreaStart)
-                    formatRange.length += preeditAreaLength;
+                if (preeditAreaLength != 0) {
+                    if (formatRange.start >= preeditAreaStart)
+                        formatRange.start += preeditAreaLength;
+                    else if (formatRange.start + formatRange.length >= preeditAreaStart)
+                        formatRange.length += preeditAreaLength;
+                }
+
+                ranges << formatRange;
+                formatsChanged = true;
+
+                bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
+                if (!bd){
+
+                    bd = new ProjectDocumentBlockData;
+                    currentBlock.setUserData(bd);
+                }
+
+                bd->setCollapsible(tfr.collapsible);
+                bd->setCollapse(tfr.function);
+                if (setStates) stateToSet = tfr.userstateFollows;
+                qDebug() << "c: assigned state: " << tfr.userstateFollows << " to block:" << currentBlock.blockNumber();
+
+                // tbd
             }
 
-            ranges << formatRange;
-            formatsChanged = true;
-
-            bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
-            if (!bd){
-
-                bd = new ProjectDocumentBlockData;
-                currentBlock.setUserData(bd);
-            }
-
-            bd->setCollapsible(tfr.collapsible);
-            bd->setCollapse(tfr.function);
-            if (setStates) stateToSet = tfr.userstateFollows;
-
-            // tbd
         }
         blockSwitched = false;
     }
 
-    if (formatsChanged)
+    if (formatsChanged && layout)
     {
         layout->setFormats(ranges);
+
+        if (!currentBlock.isValid()) return;
         auto bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
         if (!bd){
 
@@ -539,6 +558,8 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
             bd->setCollapse(func);
         } else bd->setCollapsible(false);
         if (setStates) currentBlock.setUserState(stateToSet);
+        qDebug() << "d: assigned state: " << stateToSet << " to block:" << currentBlock.blockNumber();
+
         // formatsChanged = false;
     }
 

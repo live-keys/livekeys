@@ -55,7 +55,6 @@ SOURCES += \
     $$PWD/editorlayer.cpp \
     $$PWD/editorprivate_plugin.cpp \
     $$PWD/editorsettings.cpp \
-    # $$PWD/editorsettingscategory.cpp \
     $$PWD/extensions.cpp \
     $$PWD/keymap.cpp \
     $$PWD/linecontrol.cpp \
