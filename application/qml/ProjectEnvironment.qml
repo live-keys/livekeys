@@ -104,7 +104,7 @@ Item{
                         }
                     }
                     if ( !fe.document ){
-                        fe.document = project.openFile(project.active.path)
+                        fe.document = project.openTextFile(project.active.path)
                     }
                 }
             }
@@ -344,7 +344,7 @@ Item{
         if ( pane )
             return pane
 
-        var doc = project.openFile(path, mode)
+        var doc = project.openTextFile(path, mode)
         if ( !doc )
             return;
         var fe = root.panes.focusPane('editor')

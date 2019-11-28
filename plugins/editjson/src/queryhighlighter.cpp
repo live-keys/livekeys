@@ -13,11 +13,13 @@ QueryHighlighter::QueryHighlighter(
         DocumentHandler *,
         QTextDocument *parent)
     : SyntaxHighlighter(parent)
+    , m_parser(nullptr)
     , m_languageQuery(nullptr)
     , m_currentAst(nullptr)
     , m_textDocumentData(new TextDocumentData)
 {
-    m_languageQuery = el::LanguageQuery::create(m_parser, pattern);
+    m_parser = el::LanguageParser::create(language->language());
+    m_languageQuery = el::LanguageQuery::create(language->language(), pattern);
     m_languageQuery->addPredicate("eq?", &QueryHighlighter::predicateEq);
 
     QMap<std::string, QTextCharFormat> styleMap;
@@ -38,9 +40,8 @@ QueryHighlighter::QueryHighlighter(
         m_captureToFormatMap.insert(i, styleMap[m_languageQuery->captureName(i)]);
     }
 
-    //TODO: Create parser from language
-//    std::string content = parent->toPlainText().toStdString();
-//        m_currentAst = m_parser.parse(content);
+    std::string content = parent->toPlainText().toStdString();
+        m_currentAst = m_parser->parse(content);
 }
 
 QueryHighlighter::~QueryHighlighter(){

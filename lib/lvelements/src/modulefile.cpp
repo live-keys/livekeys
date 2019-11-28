@@ -1,6 +1,6 @@
 #include "modulefile.h"
 #include "imports_p.h"
-#include "live/elements/parser.h"
+#include "live/elements/languageparser.h"
 #include "live/exception.h"
 #include "live/plugin.h"
 #include "live/plugincontext.h"
@@ -88,7 +88,7 @@ LocalValue ModuleFile::get(Engine* engine, ModuleFile *from, const std::string &
 
     m_d->state = ModuleFile::Loading;
 
-    m_d->script  = engine->compileElement(plugin()->plugin()->path() + "/" + m_d->name + ".lv");
+    m_d->script  = engine->compileModuleFile(plugin()->plugin()->path() + "/" + m_d->name + ".lv");
     initializeImportsExports(engine);
     m_d->script->loadAsModule(this);
 
@@ -98,11 +98,13 @@ LocalValue ModuleFile::get(Engine* engine, ModuleFile *from, const std::string &
 }
 
 void ModuleFile::parse(Engine* engine){
+    if ( !engine )
+        return;
     std::string fp = filePath();
-    if ( engine && engine->moduleFileType() == Engine::JsOnly ){
+    if ( engine->moduleFileType() == Engine::JsOnly ){
         fp += ".js";
     }
-    m_d->exportNames = Parser::parseExportNames(fp);
+    m_d->exportNames = engine->parser()->parseExportNames(fp);
     m_d->state = ModuleFile::Parsed;
 }
 

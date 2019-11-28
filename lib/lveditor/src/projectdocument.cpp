@@ -76,56 +76,35 @@ namespace lv{
   Default constructor
 */
 ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *parent)
-    : QObject(parent)
-    , m_file(file)
+    : Document(file, parent)
     , m_textDocument(new QTextDocument(this))
     , m_iteratingSections(false)
     , m_lastChange(m_changes.end())
     , m_editingState(0)
-    , m_isDirty(false)
     , m_isSynced(true)
-    , m_isMonitored(isMonitored)
     , m_lastCursorPosition(-1)
 {
-    m_textDocument->setDocumentMargin(0);
-    connect(m_textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::documentContentsChanged);
+    setIsMonitored(isMonitored);
     readContent();
+    m_textDocument->setDocumentMargin(0);
+    connect(m_textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::__documentContentsChanged);
     m_textDocument->setDocumentLayout(new TextDocumentLayout(m_textDocument));
-    m_file->setDocument(this);
 }
 
-/**
- * \brief Sets the content of the document
- */
-void ProjectDocument::setContent(const QString &content){
-    m_textDocument->setPlainText(content);
-    emit contentChanged();
-}
-
-/**
- * \brief Open the document in a read states
- */
 void ProjectDocument::readContent(){
-    if ( m_file->exists() ){
+    if ( file()->exists() ){
         addEditingState(ProjectDocument::Read);
         m_textDocument->setPlainText(
-            QString::fromStdString(parentAsProject()->lockedFileIO()->readFromFile(m_file->path().toStdString()))
+            QString::fromStdString(parentAsProject()->lockedFileIO()->readFromFile(file()->path().toStdString()))
         );
         removeEditingState(ProjectDocument::Read);
         m_textDocument->setModified(false);
-        m_lastModified = QFileInfo(m_file->path()).lastModified();
+        setLastModified(QFileInfo(file()->path()).lastModified());
         m_changes.clear();
         m_lastChange = m_changes.end();
         m_isSynced = true;
         emit contentChanged();
     }
-}
-
-/**
- * \brief Returns the parent, which is a Project
- */
-Project *ProjectDocument::parentAsProject(){
-    return qobject_cast<Project*>(parent());
 }
 
 /**
@@ -428,9 +407,23 @@ void ProjectDocument::removeSection(ProjectDocumentSection::Ptr section){
  */
 bool ProjectDocument::isActive() const{
     Project* prj = qobject_cast<Project*>(parent());
-    if ( prj && prj->active() && prj->active()->path() == m_file->path() )
+    if ( prj && prj->active() && prj->active()->path() == file()->path() )
         return true;
     return false;
+}
+
+/**
+ * \brief Overrides Document::content
+ */
+QByteArray ProjectDocument::content(){
+    return m_textDocument->toPlainText().toUtf8();
+}
+
+/**
+ * \brief Overrides Document::setContent
+ */
+void ProjectDocument::setContent(const QByteArray &content){
+    m_textDocument->setPlainText(QString::fromUtf8(content));
 }
 
 /**
@@ -473,10 +466,14 @@ void ProjectDocument::setLastCursorPosition(int pos)
     m_lastCursorPosition = pos;
 }
 
+ProjectDocument *ProjectDocument::castFrom(Document *document){
+    return qobject_cast<ProjectDocument*>(document);
+}
+
 /**
  * \brief Slot for tracking text document changes which updates markers and sections
  */
-void ProjectDocument::documentContentsChanged(int position, int charsRemoved, int charsAdded){
+void ProjectDocument::__documentContentsChanged(int position, int charsRemoved, int charsAdded){
     emit contentsChange(position, charsRemoved, charsAdded);
 
     QString addedText = "";
@@ -498,59 +495,6 @@ void ProjectDocument::documentContentsChanged(int position, int charsRemoved, in
     setIsDirty(m_textDocument->isModified());
 }
 
-/**
- * \brief Save modified document to its respective file
- */
-bool ProjectDocument::save(){
-    syncContent();
-    if ( m_file->exists() ){
-        if ( parentAsProject()->lockedFileIO()->writeToFile(m_file->path().toStdString(), m_textDocument->toPlainText().toStdString() ) ){
-            setIsDirty(false);
-            m_lastModified = QDateTime::currentDateTime();
-            emit saved();
-            if ( parentAsProject() )
-                parentAsProject()->documentSaved(this);
-            return true;
-        }
-    }
-    return false;
-}
-
-
-/**
- * \brief Save document content in a different file
- */
-bool ProjectDocument::saveAs(const QString &path){
-    if ( m_file->path() == path ){
-        save();
-    } else if ( path != "" ){
-        syncContent();
-        if ( parentAsProject()->lockedFileIO()->writeToFile(path.toStdString(), m_textDocument->toPlainText().toStdString() ) ){
-            ProjectFile* file = parentAsProject()->relocateDocument(m_file->path(), path, this);
-            if ( file ){
-                m_file->setDocument(nullptr);
-                m_file = file;
-                emit fileChanged();
-            }
-            setIsDirty(false);
-            emit saved();
-            m_lastModified = QDateTime::currentDateTime();
-            parentAsProject()->documentSaved(this);
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
- * \brief Variant of saveAs using QUrl parameter
- *
- * \sa ProjectDocument::saveAs(const QString &path)
- */
-bool ProjectDocument::saveAs(const QUrl &url){
-    return saveAs(url.toLocalFile());
-}
-
 void ProjectDocument::syncContent() const{
     while ( m_lastChange != m_changes.end() ){
         m_lastChange->redo();
@@ -563,11 +507,6 @@ void ProjectDocument::syncContent() const{
  * \brief ProjectDocument destructor
  */
 ProjectDocument::~ProjectDocument(){
-    if ( m_file->parent() == nullptr )
-        m_file->deleteLater();
-    else {
-        m_file->setDocument(nullptr);
-    }
 }
 
 /**

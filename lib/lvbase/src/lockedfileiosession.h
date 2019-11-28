@@ -41,6 +41,7 @@ public:
 
     std::string readFromFile(const std::string& path);
     bool writeToFile(const std::string& path, const std::string& data);
+    bool writeToFile(const std::string& path, const char* data, size_t length);
 
 private:
     LockedFileIOSession();

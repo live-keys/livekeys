@@ -117,7 +117,7 @@ void ProjectNavigationModel::requiresReindex(){
 void ProjectNavigationModel::updateFilters(){
     m_filteredOpenedFiles.clear();
     ProjectDocumentModel* dm = m_project->documentModel();
-    for( QHash<QString, ProjectDocument*>::const_iterator it = dm->openedFiles().begin();
+    for( QHash<QString, Document*>::const_iterator it = dm->openedFiles().begin();
          it != dm->openedFiles().end();
          ++it )
     {

@@ -10,15 +10,21 @@ class LvCompileTest: public QObject{
     Q_TEST_RUNNER_SUITE
 
 public:
-    LvCompileTest(QObject* parent = 0);
+    LvCompileTest(QObject* parent = nullptr);
     ~LvCompileTest(){}
 
 private slots:
     void initTestCase();
+
     void test1Js();
     void test2Js();
     void test3Js();
     void test4Js();
+
+    void test1Lv();
+    void test2Lv();
+    void test3Lv();
+    void test4Lv();
 
 };
 

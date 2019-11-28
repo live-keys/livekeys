@@ -127,7 +127,6 @@ signals:
     void aboutToDeleteHandler();
 
 private:
-    void readContent();
     void findCodeHandler();
     void updateCodeHandlerTarget();
 

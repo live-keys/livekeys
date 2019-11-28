@@ -139,6 +139,8 @@ int DocumentQmlValueScanner::getExpressionExtent(
 
     int propertyLength = 0;
 
+    bool wasSpace = false;
+
     int positionInBlock = position - block.position();
     while( block.isValid() ){
         QString blockText = block.text().mid(positionInBlock);
@@ -148,10 +150,20 @@ int DocumentQmlValueScanner::getExpressionExtent(
                     expressionPath->append(lastWord);
                     lastWord = "";
                 }
-            } else if ( blockCh->isLetterOrNumber() || *blockCh == QChar::fromLatin1('_') ){
+                wasSpace = false;
+            } else if ( blockCh->isLetter() || *blockCh == QChar::fromLatin1('_') ){
                 if ( expressionPath )
                     lastWord += *blockCh;
-            } else if ( !blockCh->isSpace() ){
+                wasSpace = false;
+            } else if ( blockCh->isNumber() ){
+                if ( wasSpace )
+                    return 0;
+                if ( expressionPath )
+                    lastWord += *blockCh;
+                wasSpace = false;
+            } else if ( blockCh->isSpace( ) ){
+                wasSpace = true;
+            } else {
                 if ( expressionPath )
                     expressionPath->append(lastWord);
                 if ( endDelimiter )
@@ -162,6 +174,7 @@ int DocumentQmlValueScanner::getExpressionExtent(
         }
 
         block           = block.next();
+        wasSpace        = true;
         positionInBlock = 0;
     }
 

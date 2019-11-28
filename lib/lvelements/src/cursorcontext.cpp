@@ -55,7 +55,7 @@
  * \code
  * component T < Element{ prop : 200 }
  *                          ^ context = CompletionContext::InLeftOfDeclaration | CompletionContext::InElements
- *                            expressionPath = {"pr"}
+ *                            expressionPath = {RangeFor<pr>}
  *                            objectType = RangeFor<Element>
  * \endcode
  *
@@ -106,17 +106,25 @@
  *                        expressionPath = {RangeFor<this>, RangeFor<font>, RangeFor<s>}
  *                        objectType = RangeFor<T>
  *                        propertyPath = {RangeFor<prop>}
- *                        propertyRange = RangeFor<prop>
  * \endcode
  *
  *
  * \code
- * T{ prop : this.font.size }
+ * T{ int declaredProp : this.font.size }
  *                      ^ context = CompletionContext::InRightOfDeclaration | CompletionContext::InElements
  *                        expressionPath = {RangeFor<this>, RangeFor<font>, RangeFor<s>}
  *                        objectType = RangeFor<T>
- *                        propertyPath = {RangeFor<prop>}
- *                        propertyRange = RangeFor<prop>
+ *                        propertyPath = {RangeFor<declaredProp>}
+ *                        propertyDeclaredType = RangeFor<int>
+ * \endcode
+ *
+ * \code
+ * T{ fn declaredFunction(){ return 0 }
+ *                              ^ context = CompletionContext::InRightOfDeclaration | CompletionContext::InElements
+ *                                expressionPath = {RangeFor<ret>}
+ *                                objectType = RangeFor<T>
+ *                                propertyPath = {RangeFor<declaredFunction>}
+ *                                propertyDeclaredType = RangeFor<fn>
  * \endcode
  *
  */

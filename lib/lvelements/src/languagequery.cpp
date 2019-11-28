@@ -64,12 +64,12 @@ LanguageQuery::Cursor::~Cursor(){
 // LanguageQuery
 // -----------------------------------------------------------------------------
 
-LanguageQuery::Ptr LanguageQuery::create(const Parser &parser, const std::string &queryString){
+LanguageQuery::Ptr LanguageQuery::create(LanguageParser::Language* language, const std::string &queryString){
     uint32_t errorOffset;
     TSQueryError errorType;
 
     TSQuery * query = ts_query_new(
-      ts_parser_language(parser.internal()),
+      reinterpret_cast<const TSLanguage*>(language),
       queryString.c_str(),
       static_cast<uint32_t>(queryString.size()),
       &errorOffset,
@@ -102,7 +102,7 @@ std::string LanguageQuery::captureName(uint32_t captureIndex) const{
     return std::string(captureName, captureLength);
 }
 
-LanguageQuery::Cursor::Ptr LanguageQuery::exec(Parser::AST *ast){
+LanguageQuery::Cursor::Ptr LanguageQuery::exec(LanguageParser::AST *ast){
     TSTree* tree = reinterpret_cast<TSTree*>(ast);
     TSNode root = ts_tree_root_node(tree);
 
@@ -115,7 +115,7 @@ LanguageQuery::Cursor::Ptr LanguageQuery::exec(Parser::AST *ast){
     return cursor;
 }
 
-LanguageQuery::Cursor::Ptr LanguageQuery::exec(Parser::AST *ast, uint32_t start, uint32_t end){
+LanguageQuery::Cursor::Ptr LanguageQuery::exec(LanguageParser::AST *ast, uint32_t start, uint32_t end){
     TSTree* tree = reinterpret_cast<TSTree*>(ast);
     TSNode root = ts_tree_root_node(tree);
 

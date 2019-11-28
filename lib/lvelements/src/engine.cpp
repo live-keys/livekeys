@@ -62,6 +62,7 @@ public:
         , pendingExceptionNesting(-1)
         , hasGlobalErrorHandler(false)
         , moduleFileType(Engine::Lv)
+        , parser(LanguageParser::createForElements())
     {}
 
     Context*                   context;
@@ -84,6 +85,8 @@ public:
 
     Engine::ModuleFileType moduleFileType;
 
+    LanguageParser::Ptr parser;
+
     PackageGraph* packageGraph;
     std::map<std::string, ElementsPlugin::Ptr> loadedPlugins;
 
@@ -97,7 +100,6 @@ public: // helpers
     static void messageListener(v8::Local<v8::Message> message, v8::Local<v8::Value> data);
 
 };
-
 
 void EnginePrivate::messageListener(v8::Local<v8::Message> message, v8::Local<v8::Value> data){
     v8::Local<v8::External> engineData = v8::Local<v8::External>::Cast(data);
@@ -201,7 +203,7 @@ Context *Engine::currentContext() const{
     return m_d->context;
 }
 
-Script::Ptr Engine::compile(const std::string &str){
+Script::Ptr Engine::compileJs(const std::string &str){
     v8::HandleScope handle(isolate());
     v8::Local<v8::Context> context = m_d->context->asLocal();
     v8::Context::Scope context_scope(context);
@@ -234,7 +236,7 @@ Script::Ptr Engine::compile(const std::string &str){
  * @param str
  * @return
  */
-Script::Ptr Engine::compileEnclosed(const std::string &str){
+Script::Ptr Engine::compileJsEnclosed(const std::string &str){
     v8::HandleScope handle(isolate());
     v8::Local<v8::Context> context = m_d->context->asLocal();
     v8::Context::Scope context_scope(context);
@@ -246,7 +248,7 @@ Script::Ptr Engine::compileEnclosed(const std::string &str){
     return sc;
 }
 
-Script::Ptr Engine::compileJsFile(const std::string &path){
+Script::Ptr Engine::compileJsModuleFile(const std::string &path){
     v8::HandleScope handle(isolate());
     v8::Local<v8::Context> context = m_d->context->asLocal();
     v8::Context::Scope context_scope(context);
@@ -268,7 +270,46 @@ Script::Ptr Engine::compileJsFile(const std::string &path){
     return sc;
 }
 
-Object Engine::loadJsModule(const std::string &path){
+Script::Ptr Engine::compileModuleFile(const std::string &path){
+    //TODO: Add caching
+    //TODO: Add JsOnly, etc
+    std::ifstream file(path, std::ifstream::in | std::ifstream::binary);
+    if ( !file.is_open() )
+        THROW_EXCEPTION(Exception, "Failed to open file: " + path, Exception::toCode("~ScriptFile"));
+
+    file.seekg(0, std::ios::end);
+    size_t size = static_cast<size_t>(file.tellg());
+    std::string buffer(size, ' ');
+    file.seekg(0);
+    file.read(&buffer[0], size);
+
+    return compileModuleSource(path, buffer);
+}
+
+Script::Ptr Engine::compileModuleSource(const std::string &path, const std::string &source){
+    std::string jssource = m_d->parser->toJs(source, QFileInfo(QString::fromStdString(path)).baseName().toStdString());
+
+    v8::HandleScope handle(isolate());
+    v8::Local<v8::Context> context = m_d->context->asLocal();
+    v8::Context::Scope context_scope(context);
+
+    std::ifstream file(path, std::ifstream::in | std::ifstream::binary);
+    if ( !file.is_open() )
+        THROW_EXCEPTION(Exception, "Failed to open file: " + path, Exception::toCode("~ScriptFile"));
+
+    std::string jssourceEnclosed = Script::moduleEncloseStart + jssource + Script::moduleEncloseEnd;
+
+    v8::Local<v8::String> sourceLocal = v8::String::NewFromUtf8(isolate(), jssourceEnclosed.c_str());
+
+    v8::MaybeLocal<v8::Script> script = v8::Script::Compile(context, sourceLocal);
+    if ( script.IsEmpty() )
+        THROW_EXCEPTION(Exception, "Failed to compile script: " + path, Exception::toCode("~CompileScript"));
+
+    Script::Ptr sc(new Script(this, script.ToLocalChecked(), path));
+    return sc;
+}
+
+Object Engine::loadJsFile(const std::string &path){
     QFileInfo finfo(QString::fromStdString(path));
     std::string pluginPath = finfo.path().toStdString();
     std::string fileName = finfo.fileName().toStdString();
@@ -285,7 +326,7 @@ Object Engine::loadJsModule(const std::string &path){
     ElementsPlugin::Ptr epl = ElementsPlugin::create(plugin, this);
     ModuleFile* mf = ElementsPlugin::addModuleFile(epl, fileName);
 
-    Script::Ptr sc = compileJsFile(path);
+    Script::Ptr sc = compileJsModuleFile(path);
     Object m = sc->loadAsModule(mf);
     if ( m.isNull() )
         return m;
@@ -294,20 +335,30 @@ Object Engine::loadJsModule(const std::string &path){
     return lm.get(this, "exports").toObject(this);
 }
 
-Script::Ptr Engine::compileElement(const std::string &str){
-    v8::HandleScope handle(isolate());
-    v8::Local<v8::Context> context = m_d->context->asLocal();
-    v8::Context::Scope context_scope(context);
+Object Engine::loadFile(const std::string &path){
+    QFileInfo finfo(QString::fromStdString(path));
+    std::string pluginPath = finfo.path().toStdString();
+    std::string fileName = finfo.fileName().toStdString();
 
-    if ( m_d->moduleFileType == Engine::JsOnly ){
-        return compileJsFile(str + ".js");
+    Plugin::Ptr plugin(nullptr);
+    if ( Plugin::existsIn(pluginPath) ){
+        plugin = Plugin::createFromPath(pluginPath);
+        Package::Ptr package = Package::createFromPath(plugin->package());
+        m_d->packageGraph->loadRunningPackageAndPlugin(package, plugin);
+    } else {
+        plugin = m_d->packageGraph->createRunningPlugin(pluginPath);
     }
 
-    v8::Local<v8::String> source =
-        v8::String::NewFromUtf8(isolate(), (Script::moduleEncloseStart + str + Script::moduleEncloseEnd).c_str());
+    ElementsPlugin::Ptr epl = ElementsPlugin::create(plugin, this);
+    ModuleFile* mf = ElementsPlugin::addModuleFile(epl, fileName);
 
-    Script::Ptr sc(new Script(this, v8::Script::Compile(context, source).ToLocalChecked()));
-    return sc;
+    Script::Ptr sc = compileModuleFile(path);
+    Object m = sc->loadAsModule(mf);
+    if ( m.isNull() )
+        return m;
+
+    LocalObject lm(m);
+    return lm.get(this, "exports").toObject(this);
 }
 
 ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
@@ -354,7 +405,7 @@ ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
             tplInstance->SetAccessor(
                 v8::String::NewFromUtf8(isolate(), propIt->first.c_str()),
                 &Property::ptrGetImplementation,
-                0,
+                nullptr,
                 pdata
             );
         }
@@ -558,6 +609,10 @@ Engine::ModuleFileType Engine::moduleFileType() const{
 
 void Engine::setModuleFileType(Engine::ModuleFileType type){
     m_d->moduleFileType = type;
+}
+
+const LanguageParser::Ptr &Engine::parser() const{
+    return m_d->parser;
 }
 
 void Engine::importInternals(){

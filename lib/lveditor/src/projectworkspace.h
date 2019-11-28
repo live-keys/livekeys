@@ -31,8 +31,8 @@ public:
 signals:
     void projectActiveChange(Runnable* active);
 
-    void documentOpen(ProjectDocument* document);
-    void documentClose(ProjectDocument* document);
+    void documentOpen(Document* document);
+    void documentClose(Document* document);
     void documentContentsChange(ProjectDocument* document, int from, int to, const QString& addedText);
     void documentMonitorStateChange(ProjectDocument* document, bool isMonitored);
     void documentSave(ProjectDocument* document);
@@ -51,8 +51,8 @@ public slots:
     void whenProjectActiveChange(Runnable* runnable);
     void whenAboutToClose();
 
-    void whenDocumentOpen(ProjectDocument* document);
-    void whenDocumentClose(ProjectDocument* document);
+    void whenDocumentOpen(Document *document);
+    void whenDocumentClose(Document* document);
     void whenDocumentContentsChanged(int p, int a, int r);
     void whenDocumentIsMonitoredChanged();
     void whenDocumentSaved();

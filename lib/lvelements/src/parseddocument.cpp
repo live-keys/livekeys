@@ -7,17 +7,17 @@
 namespace lv{ namespace el{
 
 //TODO
-std::vector<ImportInfo> ParsedDocument::extractImports(const std::string &/*source*/, Parser::AST */*ast*/){
+std::vector<ImportInfo> ParsedDocument::extractImports(const std::string &/*source*/, LanguageParser::AST */*ast*/){
     return std::vector<ImportInfo>();
 }
 
 //TODO
-CursorContext ParsedDocument::findCursorContext(Parser::AST */*ast*/, int /*position*/){
+CursorContext ParsedDocument::findCursorContext(LanguageParser::AST */*ast*/, int /*position*/){
     return CursorContext(0, std::vector<SourceRange>());
 }
 
 //TODO
-DocumentInfo::Ptr ParsedDocument::extractInfo(const std::string &, Parser::AST *){
+DocumentInfo::Ptr ParsedDocument::extractInfo(const std::string &, LanguageParser::AST *){
     return DocumentInfo::Ptr(nullptr);
 }
 

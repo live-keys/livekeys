@@ -84,7 +84,7 @@ void Project::newProject(){
     m_runnables->clearAll();
     m_fileModel->createProject();
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
-        ProjectDocument* document = createDocument(
+        ProjectDocument* document = createTextDocument(
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false
         );
 	        
@@ -122,7 +122,7 @@ void Project::openProject(const QString &path){
     m_fileModel->openProject(absolutePath);
 
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
-        ProjectDocument* document = createDocument(
+        ProjectDocument* document = createTextDocument(
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)),
             false
         );
@@ -169,7 +169,7 @@ QString Project::dir() const{
         return m_path;
 }
 
-ProjectFile *Project::relocateDocument(const QString &path, const QString& newPath, ProjectDocument* document){
+ProjectFile *Project::relocateDocument(const QString &path, const QString& newPath, Document *document){
     m_documentModel->relocateDocument(path, newPath, document);
     QString absoluteNewPath = QFileInfo(newPath).absoluteFilePath();
     if (absoluteNewPath.indexOf(m_path) == 0 )
@@ -197,8 +197,8 @@ void Project::closeProject(){
  *
  * \sa Project::openFile(const QString &path, int mode)
  */
-ProjectDocument *Project::openFile(const QUrl &path, int mode){
-    return openFile(path.toLocalFile(), mode);
+ProjectDocument *Project::openTextFile(const QUrl &path, int mode){
+    return openTextFile(path.toLocalFile(), mode);
 }
 
 /**
@@ -209,8 +209,63 @@ ProjectDocument *Project::openFile(const QUrl &path, int mode){
  *
  * \sa Project::openFile(ProjectFile *file, int mode)
  */
-ProjectDocument *Project::openFile(const QString &path, int mode){
-    ProjectDocument* document = isOpened(path);
+ProjectDocument *Project::openTextFile(const QString &path, int mode){
+    Document* document = isOpened(path);
+
+    ProjectDocument* projectDocument = ProjectDocument::castFrom(document);
+    if ( document && !projectDocument ){
+        closeFile(document->file()->path());
+    }
+
+    if (!projectDocument){
+        return openTextFile(m_fileModel->openFile(path), mode);
+    } else if ( projectDocument->isMonitored() && mode == ProjectDocument::Edit ){
+        m_documentModel->updateDocumentMonitoring(projectDocument, false);
+    } else if ( !projectDocument->isMonitored() && mode == ProjectDocument::Monitor ){
+        projectDocument->readContent();
+        m_documentModel->updateDocumentMonitoring(projectDocument, true);
+    }
+
+    return projectDocument;
+}
+
+/**
+ * \brief Opens the given file in the given mode, this time using the internal ProjectFile object
+ *
+ * All open documents are immediately added to the document model
+ */
+ProjectDocument *Project::openTextFile(ProjectFile *file, int mode){
+    if (!file)
+        return nullptr;
+
+    Document* document = isOpened(file->path());
+
+    ProjectDocument* projectDocument = ProjectDocument::castFrom(document);
+    if ( document && !projectDocument ){
+        closeFile(document->file()->path());
+    }
+
+    if (!projectDocument){
+        projectDocument = createTextDocument(file, (mode == ProjectDocument::Monitor));
+        m_documentModel->openDocument(file->path(), projectDocument);
+    } else if ( projectDocument->isMonitored() && mode == ProjectDocument::Edit ){
+        m_documentModel->updateDocumentMonitoring(projectDocument, false);
+    } else if ( !projectDocument->isMonitored() && mode == ProjectDocument::Monitor ){
+        projectDocument->readContent();
+        m_documentModel->updateDocumentMonitoring(projectDocument, true);
+    }
+
+    return projectDocument;
+}
+
+Document *Project::openFile(const QString &path, int mode){
+    Document* document = isOpened(path);
+
+    if ( ProjectDocument::castFrom(document) ){
+        closeFile(document->file()->path());
+        document = nullptr;
+    }
+
     if (!document){
         return openFile(m_fileModel->openFile(path), mode);
     } else if ( document->isMonitored() && mode == ProjectDocument::Edit ){
@@ -223,16 +278,15 @@ ProjectDocument *Project::openFile(const QString &path, int mode){
     return document;
 }
 
-/**
- * \brief Opens the given file in the given mode, this time using the internal ProjectFile object
- *
- * All open documents are immediately added to the document model
- */
-ProjectDocument *Project::openFile(ProjectFile *file, int mode){
+Document *Project::openFile(ProjectFile *file, int mode){
     if (!file)
         return nullptr;
 
-    ProjectDocument* document = isOpened(file->path());
+    Document* document = isOpened(file->path());
+    if ( ProjectDocument::castFrom(document) ){
+        closeFile(document->file()->path());
+        document = nullptr;
+    }
 
     if (!document){
         document = createDocument(file, (mode == ProjectDocument::Monitor));
@@ -289,7 +343,7 @@ void Project::setActive(const QString &path){
 Runnable *Project::openRunnable(const QString &path, const QStringList &activations){
     Runnable* r = m_runnables->runnableAt(path);
     if ( !r ){
-        ProjectDocument* document = isOpened(path);
+        ProjectDocument* document = ProjectDocument::castFrom(isOpened(path));
 
         QSet<QString> activ;
         for ( auto it = activations.begin(); it != activations.end(); ++it )
@@ -319,7 +373,7 @@ ProjectFile *Project::lookupBestFocus(ProjectEntry *entry){
     if ( entry->lastCheckTime().isNull() )
         m_fileModel->expandEntry(entry);
 
-    ProjectFile* bestEntry = 0;
+    ProjectFile* bestEntry = nullptr;
 
     foreach( ProjectEntry* childEntry, entry->entries() ){
         if ( childEntry->isFile() ){
@@ -360,7 +414,7 @@ ProjectFile *Project::lookupBestFocus(ProjectEntry *entry){
 /**
  * \brief Checks whether there's a file opened at this specified path
  */
-ProjectDocument *Project::isOpened(const QString &path){
+Document *Project::isOpened(const QString &path){
     return m_documentModel->isOpened(path);
 }
 
@@ -414,7 +468,7 @@ void Project::setActive(Runnable* runnable){
     }
 }
 
-ProjectDocument *Project::createDocument(ProjectFile *file, bool isMonitored){
+ProjectDocument *Project::createTextDocument(ProjectFile *file, bool isMonitored){
     ProjectDocument* document = new ProjectDocument(file, isMonitored, this);
 
     connect(document->textDocument(), &QTextDocument::contentsChange, [this, document](int, int, int){
@@ -443,9 +497,13 @@ ProjectDocument *Project::createDocument(ProjectFile *file, bool isMonitored){
     return document;
 }
 
-void Project::documentSaved(ProjectDocument *document){
-    if ( m_runTrigger == Project::RunOnSave )
-        scheduleRun();
+Document *Project::createDocument(ProjectFile *file, bool isMonitored){
+    Document* document = new Document(file, isMonitored, this);
+    emit documentOpened(document);
+    return document;
+}
+
+void Project::documentSaved(Document *document){
     emit fileChanged(document->file()->path());
 }
 

@@ -2,7 +2,7 @@
 #define LVLANGUAGEQUERY_H
 
 #include "live/elements/lvelementsglobal.h"
-#include "live/elements/parser.h"
+#include "live/elements/languageparser.h"
 
 #include "live/exception.h"
 
@@ -61,14 +61,14 @@ public:
     typedef std::shared_ptr<const LanguageQuery> ConstPtr;
 
 public:
-    static LanguageQuery::Ptr create(const Parser& parser, const std::string& query);
+    static LanguageQuery::Ptr create(LanguageParser::Language *, const std::string& query);
     ~LanguageQuery();
 
     uint32_t captureCount() const;
     std::string captureName(uint32_t captureIndex) const;
 
-    Cursor::Ptr exec(Parser::AST* ast);
-    Cursor::Ptr exec(Parser::AST* ast, uint32_t start, uint32_t end);
+    Cursor::Ptr exec(LanguageParser::AST* ast);
+    Cursor::Ptr exec(LanguageParser::AST* ast, uint32_t start, uint32_t end);
 
     bool predicateMatch(const Cursor::Ptr& cursor, void* payload = nullptr);
 
@@ -76,9 +76,10 @@ public:
 
 private:
     DISABLE_COPY(LanguageQuery);
-
     LanguageQuery(void* query);
+
     std::map<std::string, std::function<bool(const std::vector<PredicateData>&, void* payload)> > m_predicates;
+
     void* m_query;
 };
 

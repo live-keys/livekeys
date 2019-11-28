@@ -144,7 +144,7 @@ void EditorSettings::documentChanged(){
     ProjectDocument* document = qobject_cast<ProjectDocument*>(sender());
     if ( document ){
         if ( !document->isDirty() && document->file()->path() == m_path ){
-            init(document->content().toUtf8());
+            init(document->content());
         }
     }
 }

@@ -73,8 +73,6 @@ Pane{
                         var storeWidth = editor.width
                         docPane = editor.panes.createPane('documentation', {}, [editor.width, editor.height])
 
-                        console.log(docPane)
-
                         var index = editor.parentSplitterIndex()
                         editor.panes.splitPaneHorizontallyWith(editor.parentSplitter, index, docPane)
 

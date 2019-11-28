@@ -5,6 +5,8 @@ HEADERS += \
     $$PWD/function.h \
     $$PWD/engine.h \
     $$PWD/languageinfo.h \
+    $$PWD/languagenodes_p.h \
+    $$PWD/languageparser.h \
     $$PWD/languagequery.h \
     $$PWD/languagescanner.h \
     $$PWD/metaobject.h \
@@ -36,10 +38,8 @@ HEADERS += \
     $$PWD/elementsplugin.h \
     $$PWD/imports_p.h \
     $$PWD/modulelibrary.h \
-    $$PWD/elementsparser.h \
     $$PWD/moduleloader.h \
     $$PWD/tuple.h \
-    $$PWD/elementsnodes_p.h \
     $$PWD/elementssections_p.h
 
 SOURCES += \
@@ -47,6 +47,8 @@ SOURCES += \
     $$PWD/function.cpp \
     $$PWD/engine.cpp \
     $$PWD/languageinfo.cpp \
+    $$PWD/languagenodes.cpp \
+    $$PWD/languageparser.cpp \
     $$PWD/languagequery.cpp \
     $$PWD/languagescanner.cpp \
     $$PWD/metaobject.cpp \
@@ -73,7 +75,5 @@ SOURCES += \
     $$PWD/elementsplugin.cpp \
     $$PWD/imports.cpp \
     $$PWD/modulelibrary.cpp \
-    $$PWD/elementsparser.cpp \
     $$PWD/tuple.cpp \
-    $$PWD/elementsnodes.cpp \
     $$PWD/elementssections.cpp

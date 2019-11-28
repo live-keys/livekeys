@@ -27,14 +27,14 @@ namespace lv{
 /** Default constructor */
 ProjectFile::ProjectFile(const QString &path, ProjectEntry *parent)
     : ProjectEntry(QFileInfo(path).path(), QFileInfo(path).fileName(), true, parent)
-    , m_document(0)
+    , m_document(nullptr)
 {
 }
 
 /** Constructor with a name parameter given */
 ProjectFile::ProjectFile(const QString &path, const QString &name, ProjectEntry *parent)
     : ProjectEntry(path, name, true, parent)
-    , m_document(0)
+    , m_document(nullptr)
 {
 }
 
@@ -45,7 +45,7 @@ ProjectFile::~ProjectFile(){
 /**
  * Document setter
  */
-void ProjectFile::setDocument(ProjectDocument *document){
+void ProjectFile::setDocument(Document *document){
     if ( document == m_document )
         return;
 

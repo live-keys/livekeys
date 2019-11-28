@@ -8,7 +8,7 @@
 
 #include "live/mlnode.h"
 
-#include "live/elements/parser.h"
+#include "live/elements/languageparser.h"
 #include "live/elements/languagequery.h"
 
 #include "qmllanguageobject.h"
@@ -37,9 +37,9 @@ protected:
     QList<TextFormatRange> highlightSections(const QList<ProjectDocumentSection::Ptr>&) override;
 
 private:
-    el::Parser             m_parser;
+    el::LanguageParser::Ptr             m_parser;
     el::LanguageQuery::Ptr m_languageQuery;
-    el::Parser::AST*       m_currentAst;
+    el::LanguageParser::AST*       m_currentAst;
     TextDocumentData*      m_textDocumentData;
 
     QMap<uint32_t, QTextCharFormat> m_captureToFormatMap;

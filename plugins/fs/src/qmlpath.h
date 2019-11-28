@@ -26,6 +26,8 @@ public slots:
     QString completeSuffix(QJSValue path);
     QString absolutePath(QJSValue path);
 
+    bool hasExtensions(const QString& path, QJSValue extensions);
+
     bool isReadable(QJSValue path);
     bool isWritable(QJSValue path);
     bool isExecutable(QJSValue path);

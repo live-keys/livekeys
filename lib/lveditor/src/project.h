@@ -20,6 +20,7 @@
 #include "live/lveditorglobal.h"
 #include "live/lockedfileiosession.h"
 #include "live/projectdocument.h"
+#include "live/document.h"
 
 #include "live/runnable.h"
 
@@ -52,6 +53,7 @@ class LV_EDITOR_EXPORT Project : public QObject{
     Q_ENUMS(RunTrigger)
 
     friend class ProjectFileModel;
+    friend class Document;
     friend class ProjectDocument;
     friend class ProjectDocumentModel;
 
@@ -63,11 +65,11 @@ public:
     };
 
 public:
-    Project(QObject* parent = 0);
+    Project(QObject* parent = nullptr);
     ~Project();
 
     ProjectFile* lookupBestFocus(ProjectEntry* entry);
-    ProjectDocument* isOpened(const QString& rootPath);
+    Document* isOpened(const QString& rootPath);
 
     /**
      * \brief Getter of the file model
@@ -115,9 +117,12 @@ public:
 public slots:
     void newProject();
     void closeProject();
-    lv::ProjectDocument* openFile(const QUrl& rootPath, int mode = lv::ProjectDocument::EditIfNotOpen);
-    lv::ProjectDocument* openFile(const QString& rootPath, int mode = lv::ProjectDocument::EditIfNotOpen);
-    lv::ProjectDocument* openFile(lv::ProjectFile* file, int mode = lv::ProjectDocument::EditIfNotOpen);
+    lv::ProjectDocument* openTextFile(const QUrl& rootPath, int mode = lv::Document::EditIfNotOpen);
+    lv::ProjectDocument* openTextFile(const QString& rootPath, int mode = lv::Document::EditIfNotOpen);
+    lv::ProjectDocument* openTextFile(lv::ProjectFile* file, int mode = lv::Document::EditIfNotOpen);
+
+    lv::Document* openFile(const QString& path, int mode = lv::Document::EditIfNotOpen);
+    lv::Document* openFile(lv::ProjectFile* file, int mode = lv::Document::EditIfNotOpen);
 
     void setActive(const QString& rootPath);
     lv::Runnable* openRunnable(const QString& path, const QStringList& activations = QStringList());
@@ -147,7 +152,7 @@ signals:
     void activeChanged(lv::Runnable* active);
 
     /** triggers when a document is opened */
-    void documentOpened(lv::ProjectDocument* document);
+    void documentOpened(lv::Document* document);
 
     /** refers to an internal project directory change, for example renaming */
     void directoryChanged(const QString& rootPath);
@@ -162,10 +167,11 @@ signals:
 
 private:
     ViewEngine* engine();
-    ProjectFile* relocateDocument(const QString& rootPath, const QString &newPath, ProjectDocument *document);
+    ProjectFile* relocateDocument(const QString& rootPath, const QString &newPath, Document *document);
     void setActive(Runnable* runnable);
-    ProjectDocument* createDocument(ProjectFile* file, bool isMonitored);
-    void documentSaved(ProjectDocument* documnet);
+    ProjectDocument* createTextDocument(ProjectFile* file, bool isMonitored);
+    Document* createDocument(ProjectFile* file, bool isMonitored);
+    void documentSaved(Document *documnet);
 
 private:
     ProjectFileModel*       m_fileModel;

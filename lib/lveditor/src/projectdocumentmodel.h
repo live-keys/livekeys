@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef LVPROJECTDOCUMENTMODEL_H
-#define LVPROJECTDOCUMENTMODEL_H
+#ifndef LVProjectDocumentModel_H
+#define LVProjectDocumentModel_H
 
 #include <QAbstractListModel>
 
@@ -26,7 +26,7 @@ class QFileSystemWatcher;
 namespace lv{
 
 class Project;
-class ProjectDocument;
+class Document;
 class LV_EDITOR_EXPORT ProjectDocumentModel : public QAbstractListModel{
 
     Q_OBJECT
@@ -47,13 +47,13 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     QHash<int, QByteArray> roleNames() const;
 
-    void openDocument(const QString& path, ProjectDocument* document);
-    void relocateDocument(const QString& path, const QString& newPath, ProjectDocument* document);
+    void openDocument(const QString& path, Document* document);
+    void relocateDocument(const QString& path, const QString& newPath, Document* document);
     void closeDocuments();
 
-    const QHash<QString, ProjectDocument*> openedFiles() const;
+    const QHash<QString, Document*> openedFiles() const;
 
-    void updateDocumentMonitoring(ProjectDocument* document, bool monitor);
+    void updateDocumentMonitoring(Document* document, bool monitor);
 
     void closeDocumentsInPath(const QString& path);
     void closeDocument(const QString& path);
@@ -63,36 +63,36 @@ public slots:
     void monitoredFileChanged(const QString& path);
 
     bool saveDocuments();
-    lv::ProjectDocument* isOpened(const QString& path);
-    lv::ProjectDocument* lastOpened();
+    lv::Document* isOpened(const QString& path);
+    lv::Document* lastOpened();
 
-    lv::ProjectDocument* documentByPathHash(const QString& pathHash);
+    lv::Document* documentByPathHash(const QString& pathHash);
 
     QStringList listUnsavedDocuments();
     QStringList listUnsavedDocumentsInPath(const QString& path);
 
 signals:
     /** Shows that the given document has changed */
-    void monitoredDocumentChanged(lv::ProjectDocument* document);
+    void monitoredDocumentChanged(lv::Document* document);
     /** Shows that the given document was changed externally */
-    void documentChangedOutside(lv::ProjectDocument* document);
+    void documentChangedOutside(lv::Document* document);
     /** Signals that the document is being closed */
-    void aboutToClose(lv::ProjectDocument* document);
+    void aboutToClose(lv::Document* document);
 
 private:
     QHash<int, QByteArray> m_roles;
 
-    QHash<QString, ProjectDocument*> m_openedFiles;
+    QHash<QString, Document*> m_openedFiles;
 
     QFileSystemWatcher* fileWatcher();
     QFileSystemWatcher* m_fileWatcher;
 };
 
 /** Returns the hashmap containing the open documents */
-inline const QHash<QString, ProjectDocument *> ProjectDocumentModel::openedFiles() const{
+inline const QHash<QString, Document *> ProjectDocumentModel::openedFiles() const{
     return m_openedFiles;
 }
 
 }// namespace
 
-#endif // LVPROJECTDOCUMENTMODEL_H
+#endif // LVProjectDocumentModel_H

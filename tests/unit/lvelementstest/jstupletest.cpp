@@ -23,7 +23,7 @@ void JsTupleTest::propertyAdditionTest(){
     Engine* engine = new Engine();
     {
         engine->scope([engine](){
-            Script::Ptr s = engine->compileEnclosed(
+            Script::Ptr s = engine->compileJsEnclosed(
                 "var t = new Tuple();"
                 "var propertiesChanged = [];"
                 "t.on('propertyChanged', function(name){ propertiesChanged.push(name); });"

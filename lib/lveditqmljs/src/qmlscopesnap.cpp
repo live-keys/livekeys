@@ -425,7 +425,9 @@ QmlScopeSnap::InheritancePath QmlScopeSnap::propertyTypePath(
     return InheritancePath();
 }
 
-QmlScopeSnap::PropertyReference QmlScopeSnap::propertyInType(const QmlScopeSnap::InheritancePath &classTypePath, const QString &propertyName) const{
+QmlScopeSnap::PropertyReference QmlScopeSnap::propertyInType(
+        const QmlScopeSnap::InheritancePath &classTypePath, const QString &propertyName) const
+{
     for ( auto it = classTypePath.nodes.begin(); it != classTypePath.nodes.end(); ++it ){
         LanguageUtils::FakeMetaObject::ConstPtr object = it->object;
         for ( int i = 0; i < object->propertyCount(); ++i ){
@@ -442,7 +444,14 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::propertyInType(const QmlScopeSnap:
                     );
                 } else {
                     QmlScopeSnap::PropertyReference pref(
-                        object->property(i),
+                        LanguageUtils::FakeMetaProperty(
+                            object->property(i).name(),
+                            DocumentQmlInfo::toQmlPrimitive(object->property(i).typeName()),
+                            object->property(i).isList(),
+                            object->property(i).isWritable(),
+                            object->property(i).isPointer(),
+                            object->property(i).revision()
+                        ),
                         false,
                         InheritancePath(),
                         classTypePath
@@ -506,14 +515,34 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::getProperty(
         for ( int i = 0; i < object->propertyCount(); ++i ){
             if ( object->property(i).name() == propertyName ){
                 QString propertyType = object->property(i).typeName();
-                bool isPointer = object->property(i).isPointer();
 
-                return QmlScopeSnap::PropertyReference(
-                    object->property(i),
-                    true,
-                    isPointer ? generateTypePathFromClassName(propertyType, it->library.path) : InheritancePath(),
-                    contextTypePath
-                );
+                if ( DocumentQmlInfo::isObject(propertyType) ){
+                    bool isPointer = object->property(i).isPointer();
+
+                    return QmlScopeSnap::PropertyReference(
+                        object->property(i),
+                        true,
+                        isPointer ?
+                                generateTypePathFromClassName(propertyType, it->library.path) : InheritancePath(),
+                        contextTypePath
+                    );
+                } else {
+                    QmlScopeSnap::PropertyReference pref(
+                        LanguageUtils::FakeMetaProperty(
+                            object->property(i).name(),
+                            DocumentQmlInfo::toQmlPrimitive(object->property(i).typeName()),
+                            object->property(i).isList(),
+                            object->property(i).isWritable(),
+                            object->property(i).isPointer(),
+                            object->property(i).revision()
+                        ),
+                        false,
+                        InheritancePath(),
+                        contextTypePath
+                    );
+                    pref.isPrimitive = true;
+                    return pref;
+                }
             }
         }
     }

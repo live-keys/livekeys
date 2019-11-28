@@ -59,22 +59,22 @@ void JsListTest::testFunctions(){
             LocalObject globalObject(engine->currentContext());
             globalObject.set(engine, "l", LocalValue(engine, l));
 
-            engine->compileEnclosed("l.append(20);")->run();
+            engine->compileJsEnclosed("l.append(20);")->run();
             QVERIFY(l->length() == 1);
             QVERIFY(l->at(0).toInt32(engine) == 20);
-            engine->compileEnclosed("l.append(2);")->run();
+            engine->compileJsEnclosed("l.append(2);")->run();
             QVERIFY(l->length() == 2);
             QVERIFY(l->at(1).toInt32(engine) == 2);
-            engine->compileEnclosed("l.assign(0, 11);")->run();
+            engine->compileJsEnclosed("l.assign(0, 11);")->run();
             QVERIFY(l->at(0).toInt32(engine) == 11);
             QVERIFY(listData[0] == 11);
-            QVERIFY(engine->compileEnclosed("return l.at(0);")->run().asInt32() == 11);
-            QVERIFY(engine->compileEnclosed("return l[0];")->run().asInt32() == 11);
+            QVERIFY(engine->compileJsEnclosed("return l.at(0);")->run().asInt32() == 11);
+            QVERIFY(engine->compileJsEnclosed("return l[0];")->run().asInt32() == 11);
 
-            engine->compileEnclosed("l[0] = 15;")->run();
-            QVERIFY(engine->compileEnclosed("return l[0];")->run().asInt32() == 15);
+            engine->compileJsEnclosed("l[0] = 15;")->run();
+            QVERIFY(engine->compileJsEnclosed("return l[0];")->run().asInt32() == 15);
 
-            QVERIFY(engine->compileEnclosed("return l.length;")->run().asInt32() == 2);
+            QVERIFY(engine->compileJsEnclosed("return l.length;")->run().asInt32() == 2);
 
             delete l;
         });

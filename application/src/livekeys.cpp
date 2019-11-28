@@ -166,12 +166,12 @@ void Livekeys::loadQml(const QUrl &url){
             if ( !mfile.isEmpty() ){
                 QFileInfo mfileInfo(mfile);
                 if ( mfileInfo.isRelative() ){
-                    m_project->openFile(
+                    m_project->openTextFile(
                         QDir::cleanPath(m_project->rootPath() + QDir::separator() + mfile),
                         ProjectDocument::Monitor
                     );
                 } else {
-                    m_project->openFile(mfile, ProjectDocument::Monitor);
+                    m_project->openTextFile(mfile, ProjectDocument::Monitor);
                 }
             }
         }
@@ -191,12 +191,12 @@ void Livekeys::loadProject(){
             if ( !mfile.isEmpty() ){
                 QFileInfo mfileInfo(mfile);
                 if ( mfileInfo.isRelative() ){
-                    m_project->openFile(
+                    m_project->openTextFile(
                         QDir::cleanPath(m_project->rootPath() + QDir::separator() + mfile),
                         ProjectDocument::Monitor
                     );
                 } else {
-                    m_project->openFile(mfile, ProjectDocument::Monitor);
+                    m_project->openTextFile(mfile, ProjectDocument::Monitor);
                 }
             }
         }
@@ -389,12 +389,12 @@ void Livekeys::initializeProject(){
             if ( !mfile.isEmpty() ){
                 QFileInfo mfileInfo(mfile);
                 if ( mfileInfo.isRelative() ){
-                    m_project->openFile(
+                    m_project->openTextFile(
                         QDir::cleanPath(m_project->rootPath() + QDir::separator() + mfile),
                         ProjectDocument::Monitor
                     );
                 } else {
-                    m_project->openFile(mfile, ProjectDocument::Monitor);
+                    m_project->openTextFile(mfile, ProjectDocument::Monitor);
                 }
             }
         }
@@ -438,7 +438,7 @@ const MLNode &Livekeys::startupConfiguration(){
                      {"package", "editqml"},
                      {"enabled", true},
                      {"component", "EditQmlExtension.qml"}
-                 },
+                 }/*,
                  {
                      {"package", "editlv"},
                      {"enabled", true},
@@ -449,6 +449,7 @@ const MLNode &Livekeys::startupConfiguration(){
                      {"enabled", true},
                      {"component", "EditJsonExtension.qml"}
                  }
+                 }*/
             }}
          }},
          {"internalPackages",{

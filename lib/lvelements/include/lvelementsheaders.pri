@@ -5,6 +5,7 @@ HEADERS += \
     $$PWD/live/elements/function.h \
     $$PWD/live/elements/engine.h \
     $$PWD/live/elements/languageinfo.h \
+    $$PWD/live/elements/languageparser.h \
     $$PWD/live/elements/languagequery.h \
     $$PWD/live/elements/metaobject.h \
     $$PWD/live/elements/parseddocument.h \
@@ -27,5 +28,4 @@ HEADERS += \
     $$PWD/live/elements/container.h \
     $$PWD/live/elements/mlnodetojs.h \
     $$PWD/live/elements/modulelibrary.h \
-    $$PWD/live/elements/elementsplugin.h \
-    $$PWD/live/elements/parser.h
+    $$PWD/live/elements/elementsplugin.h

@@ -14,7 +14,7 @@ class QMatOp : public QObject{
     Q_PROPERTY(QMat* nullMat READ nullMat CONSTANT)
 
 public:
-    explicit QMatOp(QObject *parent = 0);
+    explicit QMatOp(QObject *parent = nullptr);
 
     static cv::Scalar toScalar(const QColor& color);
     static cv::Rect toRect(const QRect& r);

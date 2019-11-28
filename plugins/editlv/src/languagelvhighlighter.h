@@ -7,7 +7,7 @@
 #include "live/documenthandler.h"
 #include "live/syntaxhighlighter.h"
 
-#include "live/elements/parser.h"
+#include "live/elements/languageparser.h"
 #include "live/elements/languagequery.h"
 #include "live/textdocumentdata.h"
 
@@ -32,10 +32,10 @@ protected:
 private:
     static QString slice(QTextDocument* doc, int from, int to);
 
-    el::Parser             m_parser;
+    el::LanguageParser::Ptr             m_parser;
     el::LanguageQuery::Ptr m_languageQuery;
     EditLvSettings*        m_settings;
-    el::Parser::AST*       m_currentAst;
+    el::LanguageParser::AST*       m_currentAst;
     TextDocumentData*      m_textDocumentData;
 
     QMap<uint32_t, QTextCharFormat> m_captureToFormatMap;
