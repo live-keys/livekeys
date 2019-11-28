@@ -146,7 +146,8 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
 
     m_captureToFormatMap.insert(UINT_MAX, (*m_settings)["text"]);
 
-    std::string content = parent->toPlainText().toStdString();
+    QString qContents = parent->toPlainText() + QChar(8203);
+    std::string content = qContents.toStdString();
     m_currentAst = m_parser.parse(content);
 }
 
@@ -230,8 +231,7 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
     if ( !m_currentAst )
         return ranges;
 
-
-    qDebug() << "query exec: " << position << text.length();
+    qDebug() << "highlight: " << text;
     el::LanguageQuery::Cursor::Ptr cursor = m_languageQuery->exec(m_currentAst, position * sizeof(ushort), (position + text.length())* sizeof(ushort));
     while ( cursor->nextMatch() ){
         uint16_t captures = cursor->totalMatchCaptures();
@@ -242,8 +242,8 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
 
                 el::SourceRange range = cursor->captureRange(0);
                 TextFormatRange r;
-                r.start = static_cast<int>(range.from()) / sizeof(ushort);
-                r.length = static_cast<int>(range.length()) / sizeof(ushort);
+                r.start = fmax(static_cast<int>(range.from()) / sizeof(ushort), position);
+                r.length = fmin(static_cast<int>(range.length()) / sizeof(ushort), position + text.length());
 
                 auto name = m_languageQuery->captureName(captureId);
 
@@ -257,6 +257,10 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
                 {
                     QString checkText = text.mid(r.start, r.length);
                     r.userstate = checkText.contains('\n') ? 1 : 0; // multiline comment
+                    qDebug() << "\n\n=======================\n";
+                    qDebug() << "assigned user state: " << r.userstate << " for comment";
+                    qDebug() << "\n\n=======================\n";
+
                 } else
                     r.userstate = 0;
 
@@ -277,8 +281,6 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
         r.userstate = 0;
         r.userstateFollows = 0;
         r.format = m_captureToFormatMap[UINT_MAX]; // regular text
-
-        qDebug() << UINT_MAX << r.format.foreground().color();
 
         ranges.append(r);
     }

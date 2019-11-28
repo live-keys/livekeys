@@ -239,7 +239,9 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
 
         text += block.text();
 
-        if (block != lastBlock) text += "\n"; // check how QTextCursor selects this
+        if (block != doc->lastBlock()) text += "\n"; // check how QTextCursor selects this
+        else text += QString(QChar(8203)).toStdString().c_str();
+
 
         if ( formatsChangedStartPosition == -1 ) {
             formatsChangedStartPosition = block.position();
@@ -294,6 +296,8 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
 
         qDebug() << "highlight 2";
         textFormatRangeList = q->highlight(prevState, startBlock.position(), text);
+
+        qDebug() << "num of formats: " << textFormatRangeList.size();
         distributeFormats(startBlock, textFormatRangeList);
 
         /*if (!sectionList.empty())
@@ -358,7 +362,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
     {
         // qDebug() << tfr.start << tfr.length << tfr.format.foreground().color();
 
-        while (tfr.start < currentBlock.position() || tfr.start >= currentBlock.position() + currentBlock.length())
+        while (currentBlock.isValid() && (tfr.start < currentBlock.position() || tfr.start >= currentBlock.position() + currentBlock.length()))
         {
             if (formatsChanged)
             {
@@ -379,14 +383,22 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                 formatsChanged = false;
             }
             currentBlock = currentBlock.next();
-            layout = currentBlock.layout();
-            ranges = layout->formats();
+
+            if (!currentBlock.isValid())
+            {
+                layout = nullptr;
+                ranges = QVector<QTextLayout::FormatRange>();
+            }
+            else {
+                layout = currentBlock.layout();
+                ranges = layout->formats();
+            }
             blockSwitched = true;
             shouldCollapse = false;
             func = nullptr;
         }
 
-        if (blockSwitched)
+        if (blockSwitched && currentBlock.isValid() && layout)
         {
             preeditAreaStart = layout->preeditAreaPosition();
             preeditAreaLength = layout->preeditAreaText().length();
@@ -410,7 +422,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
 
         QTextLayout::FormatRange formatRange;
 
-        if (tfr.start + tfr.length < currentBlock.position() + currentBlock.length()) // single block case
+        if (currentBlock.isValid() && tfr.start + tfr.length < currentBlock.position() + currentBlock.length()) // single block case
         {
             formatRange.start = tfr.start - currentBlock.position();
             formatRange.length = tfr.length;
@@ -598,9 +610,14 @@ void SyntaxHighlighter::setDocument(QTextDocument *doc)
         QTextCursor cursor(d->doc);
         cursor.beginEditBlock();
         for (QTextBlock blk = d->doc->begin(); blk.isValid(); blk = blk.next())
-            blk.layout()->clearFormats();
+        {
+            blk.layout()->setFormats(QVector<QTextLayout::FormatRange>());
+            d->doc->markContentsDirty(blk.position(), blk.length());
+        }
+        //{ blk.layout()->clearFormats(); }
         cursor.endEditBlock();
     }
+
     d->doc = doc;
     if (d->doc) {
         connect(d->doc, SIGNAL(contentsChange(int,int,int)),

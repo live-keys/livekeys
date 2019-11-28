@@ -103,6 +103,10 @@ std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTex
         QString text = block.text();
         for (int idx = 0; idx < text.length(); ++idx) u16s.push_back(text[idx].unicode());
         if (i != finalBlockNumber) u16s.push_back(QChar('\n').unicode());
+        else
+        {
+            u16s.push_back(8203);
+        }
         rows[i] = u16s;
         block = block.next();
     }
