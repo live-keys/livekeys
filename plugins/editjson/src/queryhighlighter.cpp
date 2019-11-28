@@ -84,7 +84,7 @@ void QueryHighlighter::documentChanged(int pos, int removed, int added){
                         TSPoint{editPoints[2].first, editPoints[2].second}};
     TSInput input = {m_textDocumentData, TextDocumentData::parsingCallback, TSInputEncodingUTF16};
 
-    m_parser.editParseTree(m_currentAst, edit, input);
+    m_parser->editParseTree(m_currentAst, edit, input);
 }
 
 QList<SyntaxHighlighter::TextFormatRange> QueryHighlighter::highlight(

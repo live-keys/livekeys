@@ -1,4 +1,3 @@
-#include "elementsparser.h"
 #include "languageparser.h"
 #include "tree_sitter/api.h"
 #include "tree_sitter/parser.h"
@@ -95,7 +94,7 @@ void LanguageParser::editParseTree(LanguageParser::AST*& ast, TSInputEdit& edit,
     }
     TSTree* new_tree = ts_parser_parse(m_parser, tree, input);
 
-    ast = reinterpret_cast<el::Parser::AST*>(new_tree);
+    ast = reinterpret_cast<el::LanguageParser::AST*>(new_tree);
 
 }
 

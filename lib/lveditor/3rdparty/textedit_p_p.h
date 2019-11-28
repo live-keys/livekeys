@@ -51,7 +51,7 @@
 #include <deque>
 #include <set>
 #include "textdocumentdata.h"
-#include "live/elements/parser.h"
+#include "live/elements/languageparser.h"
 
 class QTextLayout;
 

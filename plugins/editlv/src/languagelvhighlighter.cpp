@@ -149,7 +149,7 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
 
     QString qContents = parent->toPlainText() + QChar(8203);
     std::string content = qContents.toStdString();
-    m_currentAst = m_parser.parse(content);
+    m_currentAst = m_parser->parse(content);
 }
 
 LanguageLvHighlighter::~LanguageLvHighlighter(){
@@ -220,7 +220,7 @@ void LanguageLvHighlighter::documentChanged(int pos, int removed, int added){
                         TSPoint{editPoints[2].first, editPoints[2].second}};
     TSInput input = {m_textDocumentData, TextDocumentData::parsingCallback, TSInputEncodingUTF16};
 
-    m_parser.editParseTree(m_currentAst, edit, input);
+    m_parser->editParseTree(m_currentAst, edit, input);
 }
 
 QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
