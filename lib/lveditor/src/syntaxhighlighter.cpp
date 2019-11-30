@@ -252,7 +252,7 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
     }
 
     int lastBlockState = lastBlock.userState();
-    qDebug() << "highlight 1";
+    // qDebug() << "highlight 1";
     auto textFormatRangeList = q->highlight(prevState, formatsChangedStartPosition, text);
     distributeFormats(startBlock, textFormatRangeList);
 
@@ -291,13 +291,13 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
 
         lastBlockState = lastBlock.userState();
 
-        qDebug() << text << lastBlockState;
+        // qDebug() << text << lastBlockState;
 
 
-        qDebug() << "highlight 2";
+        // qDebug() << "highlight 2";
         textFormatRangeList = q->highlight(prevState, startBlock.position(), text);
 
-        qDebug() << "num of formats: " << textFormatRangeList.size();
+        // qDebug() << "num of formats: " << textFormatRangeList.size();
         distributeFormats(startBlock, textFormatRangeList);
 
         /*if (!sectionList.empty())
@@ -324,7 +324,7 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
 
     formatChanges.clear();
 
-    qDebug() << "_________________________________________";
+    // qDebug() << "_________________________________________";
 }
 
 //bool SyntaxHighlighterPrivate::reformatBlock(const QTextBlock &block)
@@ -379,7 +379,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                     bd->setCollapse(func);
                 } else bd->setCollapsible(false);
                 if (setStates) currentBlock.setUserState(stateToSet);
-                qDebug() << "a: assigned state: " << stateToSet << " to block:" << currentBlock.blockNumber();
+                // qDebug() << "a: assigned state: " << stateToSet << " to block:" << currentBlock.blockNumber();
                 formatsChanged = false;
             }
             currentBlock = currentBlock.next();
@@ -468,7 +468,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
             bd->setCollapsible(tfr.collapsible);
             bd->setCollapse(tfr.function);
             if (setStates) currentBlock.setUserState(tfr.userstate);
-            qDebug() << "x: assigned state: " << tfr.userstate << " to block:" << currentBlock.blockNumber();
+            // qDebug() << "x: assigned state: " << tfr.userstate << " to block:" << currentBlock.blockNumber();
 
             int end = tfr.start + tfr.length;
             while (true) // handle blocks contained within range completely
@@ -514,7 +514,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                 ranges << formatRange;
                 layout->setFormats(ranges);
                 if (setStates) currentBlock.setUserState(tfr.userstate);
-                qDebug() << "b: assigned state: " << tfr.userstate << " to block:" << currentBlock.blockNumber();
+                // qDebug() << "b: assigned state: " << tfr.userstate << " to block:" << currentBlock.blockNumber();
             }
 
             if (currentBlock.isValid())
@@ -544,7 +544,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                 bd->setCollapsible(tfr.collapsible);
                 bd->setCollapse(tfr.function);
                 if (setStates) stateToSet = tfr.userstateFollows;
-                qDebug() << "c: assigned state: " << tfr.userstateFollows << " to block:" << currentBlock.blockNumber();
+                // qDebug() << "c: assigned state: " << tfr.userstateFollows << " to block:" << currentBlock.blockNumber();
 
                 // tbd
             }
@@ -570,7 +570,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
             bd->setCollapse(func);
         } else bd->setCollapsible(false);
         if (setStates) currentBlock.setUserState(stateToSet);
-        qDebug() << "d: assigned state: " << stateToSet << " to block:" << currentBlock.blockNumber();
+        // qDebug() << "d: assigned state: " << stateToSet << " to block:" << currentBlock.blockNumber();
 
         // formatsChanged = false;
     }

@@ -232,7 +232,7 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
     if ( !m_currentAst )
         return ranges;
 
-    qDebug() << "highlight: " << text;
+    // qDebug() << "highlight: " << text;
     el::LanguageQuery::Cursor::Ptr cursor = m_languageQuery->exec(m_currentAst, position * sizeof(ushort), (position + text.length())* sizeof(ushort));
     while ( cursor->nextMatch() ){
         uint16_t captures = cursor->totalMatchCaptures();
@@ -258,9 +258,9 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
                 {
                     QString checkText = text.mid(r.start, r.length);
                     r.userstate = checkText.contains('\n') ? 1 : 0; // multiline comment
-                    qDebug() << "\n\n=======================\n";
-                    qDebug() << "assigned user state: " << r.userstate << " for comment";
-                    qDebug() << "\n\n=======================\n";
+//                    qDebug() << "\n\n=======================\n";
+//                    qDebug() << "assigned user state: " << r.userstate << " for comment";
+//                    qDebug() << "\n\n=======================\n";
 
                 } else
                     r.userstate = 0;
@@ -268,7 +268,7 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
                 r.userstateFollows = 0;
                 r.format = m_captureToFormatMap[captureId];
 
-                qDebug() << "highlight: " << r.start << r.length << name.c_str();
+//              qDebug() << "highlight: " << r.start << r.length << name.c_str();
                 ranges.append(r);
             }
         }

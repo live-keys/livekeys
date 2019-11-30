@@ -204,7 +204,7 @@ int DocumentQmlValueScanner::getBlockStart(int position){
                  it->is(QmlJS::Token::LeftParenthesis) ||
                  it->is(QmlJS::Token::LeftBracket ) )
             {
-                if ( tokenPosition > position )
+                if ( tokenPosition < position )
                     --nestingDepth;
                 if ( nestingDepth == 0 ){
                     return tokenPosition;

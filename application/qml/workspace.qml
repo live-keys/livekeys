@@ -526,6 +526,7 @@ Item{
         objectName: "viewer"
         paneType: "viewer"
         color: 'transparent'
+        property var error: error
 
         Item{
             id: runSpace
