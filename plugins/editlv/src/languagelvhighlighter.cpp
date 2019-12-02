@@ -224,7 +224,7 @@ void LanguageLvHighlighter::documentChanged(int pos, int removed, int added){
 }
 
 QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
-        int lastUserState, int position, const QString &text)
+        int, int position, const QString &text)
 {
     QTextDocument* doc = static_cast<QTextDocument*>(parent());
     QList<SyntaxHighlighter::TextFormatRange> ranges;
@@ -232,7 +232,6 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
     if ( !m_currentAst )
         return ranges;
 
-    // qDebug() << "highlight: " << text;
     el::LanguageQuery::Cursor::Ptr cursor = m_languageQuery->exec(m_currentAst, position * sizeof(ushort), (position + text.length())* sizeof(ushort));
     while ( cursor->nextMatch() ){
         uint16_t captures = cursor->totalMatchCaptures();
@@ -242,33 +241,32 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
                 uint32_t captureId = cursor->captureId(captureIndex);
 
                 el::SourceRange range = cursor->captureRange(0);
-                TextFormatRange r;
-                r.start = fmax(static_cast<int>(range.from()) / sizeof(ushort), position);
-                r.length = fmin(static_cast<int>(range.length()) / sizeof(ushort), position + text.length());
+                int from = static_cast<int>(range.from()) / sizeof(ushort);
+                int length = static_cast<int>(range.length()) / sizeof(ushort);
 
+                TextFormatRange r;
+                r.start = fmax(from, position);
+                r.length = fmin(from + length, position + text.length()) - r.start;
+                r.userstate = 0;
                 auto name = m_languageQuery->captureName(captureId);
 
                 if (name == "string")
                 {
-                    QString checkText = text.mid(r.start, r.length);
-                    r.userstate = checkText.contains('\n') ? 2 : 0; // multiline string
-
+                    r.userstate = 2;
+                    if (r.start + r.length == from + length) r.userstateFollows = 0;
+                    else r.userstateFollows = 2;
                 }
                 else if (name == "comment")
                 {
-                    QString checkText = text.mid(r.start, r.length);
-                    r.userstate = checkText.contains('\n') ? 1 : 0; // multiline comment
-//                    qDebug() << "\n\n=======================\n";
-//                    qDebug() << "assigned user state: " << r.userstate << " for comment";
-//                    qDebug() << "\n\n=======================\n";
-
-                } else
+                    r.userstate = 1;
+                    if (r.start + r.length == from + length) r.userstateFollows = 0;
+                    else r.userstateFollows = 1;
+                } else {
                     r.userstate = 0;
-
-                r.userstateFollows = 0;
+                    r.userstateFollows = 0;
+                }
                 r.format = m_captureToFormatMap[captureId];
 
-//              qDebug() << "highlight: " << r.start << r.length << name.c_str();
                 ranges.append(r);
             }
         }

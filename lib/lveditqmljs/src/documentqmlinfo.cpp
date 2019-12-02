@@ -184,6 +184,7 @@ namespace{
                 if ( prop.propertyTypeCategory() == QQmlProperty::Object ){
                     traversePath(path, n->child, prop.read().value<QObject*>());
                 } else if ( prop.propertyTypeCategory() == QQmlProperty::List ){
+                    // qDebug() << "THIS IS THE SPOT";                    
                     QQmlListReference ppref = qvariant_cast<QQmlListReference>(prop.read());
                     if ( ppref.canAt() && ppref.canCount() && ppref.count() > in->index ){
                         traversePath(path, n->child, ppref.at(in->index));

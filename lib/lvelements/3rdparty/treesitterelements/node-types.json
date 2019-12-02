@@ -2608,21 +2608,6 @@
     }
   },
   {
-    "type": "string",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "escape_sequence",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "subscript_expression",
     "named": true,
     "fields": {
@@ -3491,12 +3476,8 @@
     "named": false
   },
   {
-    "type": "\"",
-    "named": false
-  },
-  {
-    "type": "'",
-    "named": false
+    "type": "string",
+    "named": true
   },
   {
     "type": "`",
