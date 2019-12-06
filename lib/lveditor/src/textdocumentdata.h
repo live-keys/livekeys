@@ -3,7 +3,6 @@
 
 #include <vector>
 #include "live/lveditorglobal.h"
-#include "live/elements/treesitterapi.h"
 
 typedef unsigned short int ushort;
 
@@ -20,7 +19,6 @@ public:
     std::u16string &rowAt(unsigned i);
     unsigned size() { return rows.size(); }
 
-    static const char* parsingCallback(void *payload, uint32_t byte_index, TSPoint position, uint32_t *bytes_read);
 private:
     std::vector<std::u16string> rows;
 };

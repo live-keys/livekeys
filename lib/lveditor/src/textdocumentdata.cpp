@@ -130,26 +130,7 @@ std::u16string &TextDocumentData::rowAt(unsigned i)
     return rows[i];
 }
 
-const char *TextDocumentData::parsingCallback(void *payload, uint32_t, TSPoint position, uint32_t *bytes_read)
-{
-    TextDocumentData* textDocumentData = reinterpret_cast<TextDocumentData*>(payload);
-    unsigned ushortsize = sizeof(ushort) / sizeof(char);
 
-    if (position.row >= textDocumentData->size())
-    {
-        *bytes_read = 0;
-        return nullptr;
-    }
-    std::u16string& row = textDocumentData->rowAt(position.row);
-    if (position.column >= row.size() * ushortsize)
-    {
-        *bytes_read = 0;
-        return nullptr;
-    }
-
-    *bytes_read = row.size()*ushortsize - position.column;
-    return reinterpret_cast<const char*>(row.data() + position.column / ushortsize);
-}
 
 
 } // namespace

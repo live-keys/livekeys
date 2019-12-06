@@ -50,9 +50,6 @@
 #include "texteditnodedebugmodel.h"
 #endif
 
-#include "live/elements/treesitterapi.h"
-
-
 class QTextBlock;
 
 namespace lv {

@@ -30,6 +30,7 @@ public:
     ~QueryHighlighter() override;
 
     static bool predicateEq(const std::vector<el::LanguageQuery::PredicateData>& args, void* payload);
+    static const char *parsingCallback(void *payload, uint32_t, TSPoint position, uint32_t *bytes_read);
 
 protected:
     void documentChanged(int, int, int)  override;

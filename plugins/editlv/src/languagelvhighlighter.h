@@ -23,7 +23,7 @@ public:
 
     static bool predicateEq(const std::vector<el::LanguageQuery::PredicateData>& args, void* payload);
     static bool predicateEqOr(const std::vector<el::LanguageQuery::PredicateData>& args, void* payload);
-
+    static const char *parsingCallback(void *payload, uint32_t, TSPoint position, uint32_t *bytes_read);
 protected:
     void documentChanged(int, int, int)  override;
     QList<TextFormatRange> highlight(int lastUserState, int position, const QString& text) override;

@@ -68,6 +68,27 @@ bool QueryHighlighter::predicateEq(const std::vector<el::LanguageQuery::Predicat
     return compare1 == compare2;
 }
 
+const char *QueryHighlighter::parsingCallback(void *payload, uint32_t, TSPoint position, uint32_t *bytes_read)
+{
+    TextDocumentData* textDocumentData = reinterpret_cast<TextDocumentData*>(payload);
+    unsigned ushortsize = sizeof(ushort) / sizeof(char);
+
+    if (position.row >= textDocumentData->size())
+    {
+        *bytes_read = 0;
+        return nullptr;
+    }
+    std::u16string& row = textDocumentData->rowAt(position.row);
+    if (position.column >= row.size() * ushortsize)
+    {
+        *bytes_read = 0;
+        return nullptr;
+    }
+
+    *bytes_read = row.size()*ushortsize - position.column;
+    return reinterpret_cast<const char*>(row.data() + position.column / ushortsize);
+}
+
 void QueryHighlighter::documentChanged(int pos, int removed, int added){
     QTextDocument* doc = static_cast<QTextDocument*>(parent());
 
@@ -82,7 +103,7 @@ void QueryHighlighter::documentChanged(int pos, int removed, int added){
                         TSPoint{editPoints[0].first, editPoints[0].second},
                         TSPoint{editPoints[1].first, editPoints[1].second},
                         TSPoint{editPoints[2].first, editPoints[2].second}};
-    TSInput input = {m_textDocumentData, TextDocumentData::parsingCallback, TSInputEncodingUTF16};
+    TSInput input = {m_textDocumentData, QueryHighlighter::parsingCallback, TSInputEncodingUTF16};
 
     m_parser->editParseTree(m_currentAst, edit, input);
 }
