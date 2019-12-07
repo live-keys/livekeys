@@ -59,6 +59,8 @@ public:
     const std::string &script() const;
     const std::vector<std::string>& scriptArguments() const;
 
+    const std::vector<std::string>& arguments() const;
+
     std::string helpString() const;
     std::vector<std::string> optionNames(Option* option) const;
 

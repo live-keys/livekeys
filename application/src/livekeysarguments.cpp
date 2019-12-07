@@ -193,6 +193,10 @@ const std::vector<std::string> &LivekeysArguments::scriptArguments() const{
     return m_parser->scriptArguments();
 }
 
+const std::vector<std::string> &LivekeysArguments::arguments() const{
+    return m_parser->arguments();
+}
+
 const std::string &LivekeysArguments::script() const{
     return m_parser->script();
 }

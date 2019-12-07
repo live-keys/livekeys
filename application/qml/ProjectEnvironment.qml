@@ -181,12 +181,11 @@ Item{
         }
     }
 
-    function closeProject(callback){
+    function checkUnsavedFiles(callback){
         var documentList = project.documentModel.listUnsavedDocuments()
         callback = callback ? callback : function(){}
         var message = ''
         if ( documentList.length === 0 ){
-            project.closeProject()
             callback()
             return;
         } else if ( !project.isDirProject() ){
@@ -240,7 +239,6 @@ Item{
                     lk.layers.window.dialogs.message(message,{
                         button1Name : 'Close',
                         button1Function : function(mbox){
-                            project.closeProject()
                             mbox.close()
                             callback()
                         },
@@ -249,20 +247,17 @@ Item{
                             mbox.close()
                         },
                         returnPressed : function(mbox){
-                            project.closeProject()
                             mbox.close()
                             callback()
                         }
                     })
                 } else {
-                    project.closeProject()
                     box.close()
                     callback()
                 }
             },
             button2Name : 'No',
             button2Function : function(mbox){
-                project.closeProject()
                 mbox.close()
                 callback()
             },
@@ -271,28 +266,41 @@ Item{
                 mbox.close()
             },
             returnPressed : function(mbox){
-                project.closeProject()
                 mbox.close()
+                callback()
             }
         })
     }
+
+    function closeProject(callback){
+        root.checkUnsavedFiles(function(){
+            project.closeProject()
+            if ( callback )
+                callback()
+        })
+
+    }
     function openProject(){
-        root.closeProject(function(){
+        root.checkUnsavedFiles(function(){
             lk.layers.window.dialogs.openDir({}, function(url){
+                project.closeProject()
                 project.openProject(url)
+//                lk.openProjectInstance(url)
             })
         })
     }
     function newProject(){
         closeProject(function(){
             project.newProject()
+//            lk.newProjectInstance()
         })
     }
+
     function openFileDialog(){
         var openCallback = function(url){
             if ( project.rootPath === '' ){
                 project.openProject(url)
-            } else if ( project.isFileInProject(url) ) {
+            } else if ( project.isFileInProject(url) ){
                 openFile(url, ProjectDocument.EditIfNotOpen)
             } else {
                 var fileUrl = url
@@ -302,7 +310,7 @@ Item{
                     button1Name : 'Open as project',
                     button1Function : function(mbox){
                         var projectUrl = fileUrl
-                        projectView.closeProject(function(){
+                        root.closeProject(function(){
                             project.openProject(projectUrl)
                         })
                         mbox.close()
@@ -313,11 +321,9 @@ Item{
                     },
                     returnPressed : function(mbox){
                         var projectUrl = fileUrl
-                        header.closeProject(
-                            function(){
-                                project.openProject(projectUrl)
-                            }
-                        )
+                        root.closeProject(function(){
+                            project.openProject(projectUrl)
+                        })
                         mbox.close()
                     }
                 })
@@ -325,10 +331,13 @@ Item{
         }
 
         if ( !project.isDirProject() ){
-            closeProject(function(){
+            root.checkUnsavedFiles(function(){
                 lk.layers.window.dialogs.openFile(
                     { filters: ["Qml files (*.qml)", "All files (*)"] },
-                    openCallback
+                    function(url){
+                        project.closeProject()
+                        project.openProject(url)
+                    }
                 )
             })
         } else {

@@ -34,6 +34,8 @@ public:
     std::string              header;
     std::string              version;
 
+    std::vector<std::string> arguments;
+
     std::string              script;
     std::vector<std::string> scriptArguments;
 };
@@ -257,6 +259,8 @@ void CommandLineParser::parse(int argc, const char * const argv[]){
         int i = 1;
         while ( i < argc ){
             if ( argv[i][0] == '-' ){
+                m_d->arguments.push_back(argv[i]);
+
                 if ( argv[i][1] == '-' ){
                     CommandLineParser::Option* option = findOptionByLongName(std::string(&argv[i][2]), m_d->options);
                     if ( !option )
@@ -270,6 +274,8 @@ void CommandLineParser::parse(int argc, const char * const argv[]){
                             THROW_EXCEPTION(CommandLineParserException, std::string("No value given for option: ") + argv[i - 1], 7);
                         option->isSet = true;
                         option->value = argv[i];
+
+                        m_d->arguments.push_back(argv[i]);
                     }
                 } else {
                     CommandLineParser::Option* option = findOptionByShortName(std::string(&argv[i][1]), m_d->options);
@@ -284,8 +290,10 @@ void CommandLineParser::parse(int argc, const char * const argv[]){
                             THROW_EXCEPTION(CommandLineParserException, std::string("No value given for option: ") + argv[i - 1], 9);
                         option->isSet = true;
                         option->value = argv[i];
+                        m_d->arguments.push_back(argv[i]);
                     }
                 }
+
             } else {
                 m_d->script = argv[i];
                 ++i;
@@ -319,6 +327,13 @@ const std::string &CommandLineParser::script() const{
  */
 const std::vector<std::string> &CommandLineParser::scriptArguments() const{
     return m_d->scriptArguments;
+}
+
+/**
+ * \brief Returns the arguments listed before the script
+ */
+const std::vector<std::string> &CommandLineParser::arguments() const{
+    return m_d->arguments;
 }
 
 }// namespace
