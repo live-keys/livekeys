@@ -83,6 +83,21 @@ LanguageParser::Ptr LanguageParser::create(LanguageParser::Language *language){
     return LanguageParser::Ptr(new LanguageParser(language));
 }
 
+void LanguageParser::editParseTree(LanguageParser::AST*& ast, TSInputEdit& edit, TSInput& input)
+{
+    TSTree* tree = reinterpret_cast<TSTree*>(ast);
+    if (tree)
+    {
+        // existing tree means we need to do an edit
+        ts_tree_edit(tree, &edit);
+
+    }
+    TSTree* new_tree = ts_parser_parse(m_parser, tree, input);
+
+    ast = reinterpret_cast<el::LanguageParser::AST*>(new_tree);
+
+}
+
 LanguageParser::Ptr LanguageParser::createForElements(){
     return LanguageParser::Ptr(new LanguageParser(tree_sitter_elements()));
 }

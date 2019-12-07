@@ -82,9 +82,8 @@ void EditorSettings::fromJson(const MLNode &root){
  * @brief Creates a JSON object from the settings
  */
 lv::MLNode EditorSettings::toJson() const{
-    MLNode root;
-
-    MLNode font;
+    MLNode root(MLNode::Object);
+    MLNode font(MLNode::Object);
     font["size"] = m_fontSize;
     root["font"] = font;
 

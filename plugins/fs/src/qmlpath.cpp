@@ -79,6 +79,20 @@ QString QmlPath::absolutePath(QJSValue path)
 bool QmlPath::hasExtensions(const QString &path, QJSValue extensions){
     if ( extensions.isString() )
         return path.endsWith("." + extensions.toString());
+    else if (extensions.isArray())
+    {
+        QJSValueIterator it(extensions);
+        while ( it.hasNext() ){
+            it.next();
+
+            QJSValue ext = it.value();
+            if (ext.isString())
+            {
+                if (path.endsWith("." + ext.toString()))
+                    return true;
+            }
+        }
+    }
     return false;
 }
 

@@ -6,6 +6,8 @@
 
 #include <string>
 #include <list>
+#include <vector>
+#include "live/elements/treesitterapi.h"
 
 struct TSParser;
 
@@ -81,6 +83,7 @@ public:
     static Ptr createForElements();
 
     AST* parse(const std::string& input) const;
+    void editParseTree(LanguageParser::AST*& ast, TSInputEdit& edit, TSInput& input);
     void destroy(AST* ast) const;
     ComparisonResult compare(const std::string& source1, AST* ast1, const std::string& source2, AST* ast2);
     std::string toString(AST* ast);

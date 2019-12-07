@@ -11,6 +11,7 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
     , m_languageQuery(nullptr)
     , m_settings(settings)
     , m_currentAst(nullptr)
+    , m_textDocumentData(new TextDocumentData)
 {
     // capture index to formats
 
@@ -132,6 +133,7 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
         "     parameter_type: (identifier) @type"
         ") \n"
         /*==============================*/
+
     ;
 
     m_languageQuery = el::LanguageQuery::create(m_parser->language(), pattern);
@@ -143,7 +145,10 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
         m_captureToFormatMap.insert(i, (*m_settings)[m_languageQuery->captureName(i)]);
     }
 
-    std::string content = parent->toPlainText().toStdString();
+    m_captureToFormatMap.insert(UINT_MAX, (*m_settings)["text"]);
+
+    QString qContents = parent->toPlainText() + QChar(8203);
+    std::string content = qContents.toStdString();
     m_currentAst = m_parser->parse(content);
 }
 
@@ -198,15 +203,49 @@ bool LanguageLvHighlighter::predicateEqOr(const std::vector<el::LanguageQuery::P
     return false;
 }
 
-void LanguageLvHighlighter::documentChanged(int, int, int){
+const char *LanguageLvHighlighter::parsingCallback(void *payload, uint32_t, TSPoint position, uint32_t *bytes_read)
+{
+    TextDocumentData* textDocumentData = reinterpret_cast<TextDocumentData*>(payload);
+    unsigned ushortsize = sizeof(ushort) / sizeof(char);
+
+    if (position.row >= textDocumentData->size())
+    {
+        *bytes_read = 0;
+        return nullptr;
+    }
+    std::u16string& row = textDocumentData->rowAt(position.row);
+    if (position.column >= row.size() * ushortsize)
+    {
+        *bytes_read = 0;
+        return nullptr;
+    }
+
+    *bytes_read = row.size()*ushortsize - position.column;
+    return reinterpret_cast<const char*>(row.data() + position.column / ushortsize);
+}
+
+void LanguageLvHighlighter::documentChanged(int pos, int removed, int added){
+
     QTextDocument* doc = static_cast<QTextDocument*>(parent());
-    std::string content = doc->toPlainText().toStdString();
-    m_parser->destroy(m_currentAst);
-    m_currentAst = m_parser->parse(content);
+
+    std::vector<std::pair<unsigned, unsigned>> editPoints =
+            m_textDocumentData->contentsChange(doc, pos, removed, added);
+
+    uint32_t start = pos*sizeof(ushort)/sizeof(char);
+    uint32_t old_end = (pos + removed)*sizeof(ushort)/sizeof(char);
+    uint32_t new_end = (pos + added)*sizeof(ushort)/sizeof(char);
+
+    TSInputEdit edit = {start, old_end, new_end,
+                        TSPoint{editPoints[0].first, editPoints[0].second},
+                        TSPoint{editPoints[1].first, editPoints[1].second},
+                        TSPoint{editPoints[2].first, editPoints[2].second}};
+    TSInput input = {m_textDocumentData, LanguageLvHighlighter::parsingCallback, TSInputEncodingUTF16};
+
+    m_parser->editParseTree(m_currentAst, edit, input);
 }
 
 QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
-        int lastUserState, int position, const QString &text)
+        int, int position, const QString &text)
 {
     QTextDocument* doc = static_cast<QTextDocument*>(parent());
     QList<SyntaxHighlighter::TextFormatRange> ranges;
@@ -214,7 +253,7 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
     if ( !m_currentAst )
         return ranges;
 
-    el::LanguageQuery::Cursor::Ptr cursor = m_languageQuery->exec(m_currentAst, position, position + text.length());
+    el::LanguageQuery::Cursor::Ptr cursor = m_languageQuery->exec(m_currentAst, position * sizeof(ushort), (position + text.length())* sizeof(ushort));
     while ( cursor->nextMatch() ){
         uint16_t captures = cursor->totalMatchCaptures();
 
@@ -223,16 +262,49 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
                 uint32_t captureId = cursor->captureId(captureIndex);
 
                 el::SourceRange range = cursor->captureRange(0);
+                int from = static_cast<int>(range.from()) / sizeof(ushort);
+                int length = static_cast<int>(range.length()) / sizeof(ushort);
+
                 TextFormatRange r;
-                r.start = static_cast<int>(range.from());
-                r.length = static_cast<int>(range.length());
+                r.start = fmax(from, position);
+                r.length = fmin(from + length, position + text.length()) - r.start;
                 r.userstate = 0;
-                r.userstateFollows = 0;
+                auto name = m_languageQuery->captureName(captureId);
+
+                if (name == "string")
+                {
+                    r.userstate = 2;
+                    if (r.start + r.length == from + length) r.userstateFollows = 0;
+                    else r.userstateFollows = 2;
+                }
+                else if (name == "comment")
+                {
+                    r.userstate = 1;
+                    if (r.start + r.length == from + length) r.userstateFollows = 0;
+                    else r.userstateFollows = 1;
+                } else {
+                    r.userstate = 0;
+                    r.userstateFollows = 0;
+                }
                 r.format = m_captureToFormatMap[captureId];
+
                 ranges.append(r);
             }
         }
     }
+
+    if (ranges.empty())
+    {
+        TextFormatRange r;
+        r.start = position;
+        r.length = text.length();
+        r.userstate = 0;
+        r.userstateFollows = 0;
+        r.format = m_captureToFormatMap[UINT_MAX]; // regular text
+
+        ranges.append(r);
+    }
+
 
     return ranges;
 }

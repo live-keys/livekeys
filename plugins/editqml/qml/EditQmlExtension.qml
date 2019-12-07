@@ -96,6 +96,13 @@ LiveExtension{
         var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
         var palette = palettes.size() > 0 ? codeHandler.openPalette(ef, palettes, index) : null
 
+        if (!ef)
+        {
+            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't shape palette of a non-running program"
+            console.error("Error: Can't shape palette of a non-running program")
+            return
+        }
+
         var editorBox = ef.visualParent ? ef.visualParent.parent : null
         var paletteBoxGroup = editorBox ? editorBox.child : null
 
@@ -156,6 +163,14 @@ LiveExtension{
         var cursorCoords = editor.cursorWindowCoords()
 
         var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
+
+        if (!ef)
+        {
+            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-running program"
+            console.error("Error: Can't create a palette in a non-running program")
+            return
+        }
+
         var palette = codeHandler.openPalette(ef, palettes, index)
 
         var editorBox = ef.visualParent ? ef.visualParent.parent : null

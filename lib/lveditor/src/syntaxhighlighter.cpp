@@ -239,7 +239,8 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
 
         text += block.text();
 
-        if (block != lastBlock) text += "\n"; // check how QTextCursor selects this
+        if (block != doc->lastBlock()) text += "\n"; // check how QTextCursor selects this
+        else text += QString(QChar(8203)).toStdString().c_str();
 
         if ( formatsChangedStartPosition == -1 ) {
             formatsChangedStartPosition = block.position();
@@ -336,21 +337,19 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
 {
     auto currentBlock = startBlock;
     QTextLayout* layout = currentBlock.layout();
-    QVector<QTextLayout::FormatRange> ranges = layout->formats();
+    QVector<QTextLayout::FormatRange> ranges;// = layout->formats();
 
     bool blockSwitched = true;
     bool formatsChanged = false;
     int stateToSet = -1;
-    int preeditAreaStart = layout->preeditAreaPosition();
-    int preeditAreaLength = layout->preeditAreaText().length();
+//    int preeditAreaStart = layout->preeditAreaPosition();
+//    int preeditAreaLength = layout->preeditAreaText().length();
     bool shouldCollapse = false;
     CollapseFunctionType func = nullptr;
 
     for (auto tfr: textFormatRanges)
     {
-        // qDebug() << tfr.start << tfr.length << tfr.format.foreground().color();
-
-        while (tfr.start < currentBlock.position() || tfr.start >= currentBlock.position() + currentBlock.length())
+        while (currentBlock.isValid() && (tfr.start < currentBlock.position() || tfr.start >= currentBlock.position() + currentBlock.length()))
         {
             if (formatsChanged)
             {
@@ -370,49 +369,60 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                 formatsChanged = false;
             }
             currentBlock = currentBlock.next();
-            layout = currentBlock.layout();
-            ranges = layout->formats();
+
+            if (!currentBlock.isValid())
+            {
+                layout = nullptr;
+                //ranges = QVector<QTextLayout::FormatRange>();
+            }
+            else {
+                layout = currentBlock.layout();
+                //ranges = layout->formats();
+            }
+
+            ranges = QVector<QTextLayout::FormatRange>();
             blockSwitched = true;
             shouldCollapse = false;
             func = nullptr;
         }
 
-        if (blockSwitched)
-        {
-            preeditAreaStart = layout->preeditAreaPosition();
-            preeditAreaLength = layout->preeditAreaText().length();
+//        if (blockSwitched && currentBlock.isValid() && layout)
+//        {
+//            preeditAreaStart = layout->preeditAreaPosition();
+//            preeditAreaLength = layout->preeditAreaText().length();
 
-            if (preeditAreaLength != 0) {
-                auto isOutsidePreeditArea = [=](const QTextLayout::FormatRange &range) {
-                    return range.start < preeditAreaStart
-                            || range.start + range.length > preeditAreaStart + preeditAreaLength;
-                };
-                const auto it = std::remove_if(ranges.begin(), ranges.end(),
-                                               isOutsidePreeditArea);
-                if (it != ranges.end()) {
-                    ranges.erase(it, ranges.end());
-                    formatsChanged = true;
-                }
-            } else if (!ranges.isEmpty()) {
-                ranges.clear();
-                formatsChanged = true;
-            }
-        }
+//            if (preeditAreaLength != 0) {
+//                auto isOutsidePreeditArea = [=](const QTextLayout::FormatRange &range) {
+//                    return range.start < preeditAreaStart
+//                            || range.start + range.length > preeditAreaStart + preeditAreaLength;
+//                };
+//                const auto it = std::remove_if(ranges.begin(), ranges.end(),
+//                                               isOutsidePreeditArea);
+//                if (it != ranges.end()) {
+//                    ranges.erase(it, ranges.end());
+//                    formatsChanged = true;
+//                }
+//            } else if (!ranges.isEmpty()) {
+//                ranges.clear();
+//                formatsChanged = true;
+//            }
+//        }
 
         QTextLayout::FormatRange formatRange;
 
-        if (tfr.start + tfr.length < currentBlock.position() + currentBlock.length()) // single block case
+        if (currentBlock.isValid() && tfr.start + tfr.length <= currentBlock.position() + currentBlock.length()) // single block case
         {
             formatRange.start = tfr.start - currentBlock.position();
             formatRange.length = tfr.length;
             formatRange.format = tfr.format;
 
-            if (preeditAreaLength != 0) {
-                if (formatRange.start >= preeditAreaStart)
-                    formatRange.start += preeditAreaLength;
-                else if (formatRange.start + formatRange.length >= preeditAreaStart)
-                    formatRange.length += preeditAreaLength;
-            }
+//            if (preeditAreaLength != 0) {
+//                if (formatRange.start >= preeditAreaStart)
+//                    formatRange.start += preeditAreaLength;
+//                else if (formatRange.start + formatRange.length >= preeditAreaStart)
+//                    formatRange.length += preeditAreaLength;
+//            }
+
 
             ranges << formatRange;
             formatsChanged = true;
@@ -429,12 +439,12 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
             formatRange.length = currentBlock.position() + currentBlock.length() - tfr.start;
             formatRange.format = tfr.format;
 
-            if (preeditAreaLength != 0) {
-                if (formatRange.start >= preeditAreaStart)
-                    formatRange.start += preeditAreaLength;
-                else if (formatRange.start + formatRange.length >= preeditAreaStart)
-                    formatRange.length += preeditAreaLength;
-            }
+//            if (preeditAreaLength != 0) {
+//                if (formatRange.start >= preeditAreaStart)
+//                    formatRange.start += preeditAreaLength;
+//                else if (formatRange.start + formatRange.length >= preeditAreaStart)
+//                    formatRange.length += preeditAreaLength;
+//            }
 
             ranges << formatRange;
             layout->setFormats(ranges);
@@ -453,80 +463,89 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
             {
                 currentBlock = currentBlock.next();
                 layout = currentBlock.layout();
-                ranges = layout->formats();
+                if (!currentBlock.isValid() || !layout) break;
+                // ranges = layout->formats();
+                ranges = QVector<QTextLayout::FormatRange>();
+
                 shouldCollapse = false;
 
-                preeditAreaStart = layout->preeditAreaPosition();
-                preeditAreaLength = layout->preeditAreaText().length();
+//                preeditAreaStart = layout->preeditAreaPosition();
+//                preeditAreaLength = layout->preeditAreaText().length();
 
-                if (preeditAreaLength != 0) {
-                    auto isOutsidePreeditArea = [=](const QTextLayout::FormatRange &range) {
-                        return range.start < preeditAreaStart
-                                || range.start + range.length > preeditAreaStart + preeditAreaLength;
-                    };
-                    const auto it = std::remove_if(ranges.begin(), ranges.end(),
-                                                   isOutsidePreeditArea);
-                    if (it != ranges.end()) {
-                        ranges.erase(it, ranges.end());
-                        formatsChanged = true;
-                    }
-                } else if (!ranges.isEmpty()) {
-                    ranges.clear();
-                    formatsChanged = true;
-                }
+//                if (preeditAreaLength != 0) {
+//                    auto isOutsidePreeditArea = [=](const QTextLayout::FormatRange &range) {
+//                        return range.start < preeditAreaStart
+//                                || range.start + range.length > preeditAreaStart + preeditAreaLength;
+//                    };
+//                    const auto it = std::remove_if(ranges.begin(), ranges.end(),
+//                                                   isOutsidePreeditArea);
+//                    if (it != ranges.end()) {
+//                        ranges.erase(it, ranges.end());
+//                        formatsChanged = true;
+//                    }
+//                } else if (!ranges.isEmpty()) {
+//                    ranges.clear();
+//                    formatsChanged = true;
+//                }
 
-                if (end < currentBlock.position() || end >= currentBlock.position() + currentBlock.length()) break;
+                if (end <= currentBlock.position()) break;
 
                 formatRange.start = 0;
                 formatRange.length = currentBlock.length();
                 formatRange.format = tfr.format;
 
-                if (preeditAreaLength != 0) {
-                    if (formatRange.start >= preeditAreaStart)
-                        formatRange.start += preeditAreaLength;
-                    else if (formatRange.start + formatRange.length >= preeditAreaStart)
-                        formatRange.length += preeditAreaLength;
-                }
+//                if (preeditAreaLength != 0) {
+//                    if (formatRange.start >= preeditAreaStart)
+//                        formatRange.start += preeditAreaLength;
+//                    else if (formatRange.start + formatRange.length >= preeditAreaStart)
+//                        formatRange.length += preeditAreaLength;
+//                }
 
                 ranges << formatRange;
                 layout->setFormats(ranges);
                 if (setStates) currentBlock.setUserState(tfr.userstate);
             }
 
-            // handle block where range ends
-            formatRange.start = 0;
-            formatRange.length = tfr.start+tfr.length - currentBlock.position();
-            formatRange.format = tfr.format;
+            if (currentBlock.isValid() && end < currentBlock.position())
+            {
+                // handle block where range ends
+                formatRange.start = 0;
+                formatRange.length = tfr.start+tfr.length - currentBlock.position();
+                formatRange.format = tfr.format;
 
-            if (preeditAreaLength != 0) {
-                if (formatRange.start >= preeditAreaStart)
-                    formatRange.start += preeditAreaLength;
-                else if (formatRange.start + formatRange.length >= preeditAreaStart)
-                    formatRange.length += preeditAreaLength;
+//                if (preeditAreaLength != 0) {
+//                    if (formatRange.start >= preeditAreaStart)
+//                        formatRange.start += preeditAreaLength;
+//                    else if (formatRange.start + formatRange.length >= preeditAreaStart)
+//                        formatRange.length += preeditAreaLength;
+//                }
+
+                ranges << formatRange;
+                formatsChanged = true;
+
+                bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
+                if (!bd){
+
+                    bd = new ProjectDocumentBlockData;
+                    currentBlock.setUserData(bd);
+                }
+
+                bd->setCollapsible(tfr.collapsible);
+                bd->setCollapse(tfr.function);
+                if (setStates) stateToSet = tfr.userstateFollows;
+
+                // tbd
             }
 
-            ranges << formatRange;
-            formatsChanged = true;
-
-            bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
-            if (!bd){
-
-                bd = new ProjectDocumentBlockData;
-                currentBlock.setUserData(bd);
-            }
-
-            bd->setCollapsible(tfr.collapsible);
-            bd->setCollapse(tfr.function);
-            if (setStates) stateToSet = tfr.userstateFollows;
-
-            // tbd
         }
         blockSwitched = false;
     }
 
-    if (formatsChanged)
+    if (formatsChanged && layout)
     {
         layout->setFormats(ranges);
+
+        if (!currentBlock.isValid()) return;
         auto bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
         if (!bd){
 
@@ -539,6 +558,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
             bd->setCollapse(func);
         } else bd->setCollapsible(false);
         if (setStates) currentBlock.setUserState(stateToSet);
+
         // formatsChanged = false;
     }
 
@@ -577,9 +597,14 @@ void SyntaxHighlighter::setDocument(QTextDocument *doc)
         QTextCursor cursor(d->doc);
         cursor.beginEditBlock();
         for (QTextBlock blk = d->doc->begin(); blk.isValid(); blk = blk.next())
-            blk.layout()->clearFormats();
+        {
+            blk.layout()->setFormats(QVector<QTextLayout::FormatRange>());
+            d->doc->markContentsDirty(blk.position(), blk.length());
+        }
+        //{ blk.layout()->clearFormats(); }
         cursor.endEditBlock();
     }
+
     d->doc = doc;
     if (d->doc) {
         connect(d->doc, SIGNAL(contentsChange(int,int,int)),
@@ -628,6 +653,8 @@ void SyntaxHighlighter::_q_reformatBlocks(int from, int charsRemoved, int charsA
 
 void SyntaxHighlighter::_q_delayedRehighlight(){
     Q_D(SyntaxHighlighter);
+    QTextDocument* doc = static_cast<QTextDocument*>(parent());
+    documentChanged(0, 0, doc ? doc->characterCount() : INT_MAX);
     d->_q_delayedRehighlight();
 }
 
