@@ -39,6 +39,8 @@ addons:
 install:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       brew install openssl;
+      brew install wget;
+      wget --help;
       brew update;
       brew install python3;
       sudo mkdir /opt/qt;
