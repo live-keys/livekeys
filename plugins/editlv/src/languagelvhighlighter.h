@@ -32,11 +32,11 @@ protected:
 private:
     static QString slice(QTextDocument* doc, int from, int to);
 
-    el::LanguageParser::Ptr             m_parser;
-    el::LanguageQuery::Ptr m_languageQuery;
-    EditLvSettings*        m_settings;
-    el::LanguageParser::AST*       m_currentAst;
-    TextDocumentData*      m_textDocumentData;
+    el::LanguageParser::Ptr  m_parser;
+    el::LanguageQuery::Ptr   m_languageQuery;
+    EditLvSettings*          m_settings;
+    el::LanguageParser::AST* m_currentAst;
+    TextDocumentData*        m_textDocumentData;
 
     QMap<uint32_t, QTextCharFormat> m_captureToFormatMap;
 };

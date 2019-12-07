@@ -38,10 +38,10 @@ protected:
     QList<TextFormatRange> highlightSections(const QList<ProjectDocumentSection::Ptr>&) override;
 
 private:
-    el::LanguageParser::Ptr             m_parser;
-    el::LanguageQuery::Ptr m_languageQuery;
-    el::LanguageParser::AST*       m_currentAst;
-    TextDocumentData*      m_textDocumentData;
+    el::LanguageParser::Ptr  m_parser;
+    el::LanguageQuery::Ptr   m_languageQuery;
+    el::LanguageParser::AST* m_currentAst;
+    TextDocumentData*        m_textDocumentData;
 
     QMap<uint32_t, QTextCharFormat> m_captureToFormatMap;
 };
