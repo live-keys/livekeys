@@ -443,6 +443,11 @@ const MLNode &Livekeys::startupConfiguration(){
                      {"package", "editlv"},
                      {"enabled", true},
                      {"component", "EditLvExtension.qml"}
+                 },
+                 {
+                     {"package", "editjson"},
+                     {"enabled", true},
+                     {"component", "EditJsonExtension.qml"}
                  }*/
             }}
          }},
