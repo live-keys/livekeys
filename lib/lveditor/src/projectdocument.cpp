@@ -29,9 +29,6 @@
 #include <QTextDocumentFragment>
 #include <QFileInfo>
 
-#include <QDebug>
-
-
 /**
  * \class lv::ProjectDocumentMarker
  * \brief Dynamic project document markers
@@ -85,10 +82,10 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     , m_lastCursorPosition(-1)
 {
     setIsMonitored(isMonitored);
-    readContent();
     m_textDocument->setDocumentMargin(0);
-    connect(m_textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::__documentContentsChanged);
     m_textDocument->setDocumentLayout(new TextDocumentLayout(m_textDocument));
+    readContent();
+    connect(m_textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::__documentContentsChanged);
 }
 
 void ProjectDocument::readContent(){
