@@ -50,7 +50,6 @@
 #include "linecontrol.h"
 #include <deque>
 #include <set>
-#include "textdocumentdata.h"
 
 class QTextLayout;
 

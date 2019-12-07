@@ -448,7 +448,6 @@ const MLNode &Livekeys::startupConfiguration(){
                      {"package", "editjson"},
                      {"enabled", true},
                      {"component", "EditJsonExtension.qml"}
-                 }
                  }*/
             }}
          }},

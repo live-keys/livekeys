@@ -2934,7 +2934,6 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
         q->addEndPalette(fragmentEnd);
         fragmentEnd = -1;
     }
-
 }
 
 void TextEditPrivate::unsetTextDocument()
@@ -3099,10 +3098,9 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
 {
     Q_D(TextEdit);
 
+
     const int editRange = pos + qMax(charsAdded, charsRemoved);
     const int delta = charsAdded - charsRemoved;
-
-
 
 #ifdef LV_EDITOR_DEBUG
     QObject* livecv    = ViewContext::instance().engine()->engine()->rootContext()->contextProperty("livecv").value<QObject*>();

@@ -83,3 +83,4 @@ SOURCES += \
     $$PWD/workspaceipc.cpp \
     $$PWD/workspaceipcsink.cpp \
     $$PWD/workspacelayer.cpp
+

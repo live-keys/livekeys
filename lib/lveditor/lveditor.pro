@@ -5,9 +5,7 @@ CONFIG  += qt
 
 linkLocalLibrary(lvbase, lvbase)
 linkLocalLibrary(lvview, lvview)
-!isEmpty(BUILD_ELEMENTS){
-linkLocalLibrary(lvelements, lvelements)
-}
+
 macx{
     QMAKE_LFLAGS += \
         '-Wl,-rpath,\'@executable_path/../Link\'' \

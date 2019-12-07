@@ -242,7 +242,6 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
         if (block != doc->lastBlock()) text += "\n"; // check how QTextCursor selects this
         else text += QString(QChar(8203)).toStdString().c_str();
 
-
         if ( formatsChangedStartPosition == -1 ) {
             formatsChangedStartPosition = block.position();
         }
@@ -289,7 +288,6 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
         text = text.left(text.length()-1);
 
         lastBlockState = lastBlock.userState();
-
         textFormatRangeList = q->highlight(prevState, startBlock.position(), text);
         distributeFormats(startBlock, textFormatRangeList);
 

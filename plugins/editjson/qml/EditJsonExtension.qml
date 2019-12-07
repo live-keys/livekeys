@@ -28,8 +28,6 @@ LiveExtension{
             handler.createHighlighter(
                 "(string) @string \n" +
                 "(number) @number \n" +
-                "\"+\" @operator \n" +
-                "\"-\" @operator \n" +
                 "(true) @constant.builtin \n" +
                 "(false) @constant.builtin \n" +
                 "(null) @constant.builtin \n",
