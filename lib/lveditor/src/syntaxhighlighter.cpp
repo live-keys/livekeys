@@ -239,8 +239,8 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
 
         text += block.text();
 
-        if (block != doc->lastBlock()) text += "\n"; // check how QTextCursor selects this
-        else text += QString(QChar(8203)).toStdString().c_str();
+        if (block != lastBlock) text += "\n"; // check how QTextCursor selects this
+        // else text += QString(QChar(8203)).toStdString().c_str();
 
         if ( formatsChangedStartPosition == -1 ) {
             formatsChangedStartPosition = block.position();
@@ -409,134 +409,88 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
 //        }
 
         QTextLayout::FormatRange formatRange;
-
-        if (currentBlock.isValid() && tfr.start + tfr.length <= currentBlock.position() + currentBlock.length()) // single block case
-        {
-            formatRange.start = tfr.start - currentBlock.position();
-            formatRange.length = tfr.length;
-            formatRange.format = tfr.format;
-
-//            if (preeditAreaLength != 0) {
-//                if (formatRange.start >= preeditAreaStart)
-//                    formatRange.start += preeditAreaLength;
-//                else if (formatRange.start + formatRange.length >= preeditAreaStart)
-//                    formatRange.length += preeditAreaLength;
-//            }
-
-
-            ranges << formatRange;
-            formatsChanged = true;
-            if (tfr.function)
+        if (currentBlock.isValid()){
+            if (tfr.start + tfr.length <= currentBlock.position() + currentBlock.length()) // single block case
             {
-                shouldCollapse = tfr.collapsible;
-                func = tfr.function;
-            }
-            if (setStates) stateToSet = tfr.userstateFollows;
-        } else {
-
-            // handle end of current block
-            formatRange.start = tfr.start - currentBlock.position();
-            formatRange.length = currentBlock.position() + currentBlock.length() - tfr.start;
-            formatRange.format = tfr.format;
-
-//            if (preeditAreaLength != 0) {
-//                if (formatRange.start >= preeditAreaStart)
-//                    formatRange.start += preeditAreaLength;
-//                else if (formatRange.start + formatRange.length >= preeditAreaStart)
-//                    formatRange.length += preeditAreaLength;
-//            }
-
-            ranges << formatRange;
-            layout->setFormats(ranges);
-            ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
-            if (!bd){
-
-                bd = new ProjectDocumentBlockData;
-                currentBlock.setUserData(bd);
-            }
-            bd->setCollapsible(tfr.collapsible);
-            bd->setCollapse(tfr.function);
-            if (setStates) currentBlock.setUserState(tfr.userstate);
-
-            int end = tfr.start + tfr.length;
-            while (true) // handle blocks contained within range completely
-            {
-                currentBlock = currentBlock.next();
-                layout = currentBlock.layout();
-                if (!currentBlock.isValid() || !layout) break;
-                // ranges = layout->formats();
-                ranges = QVector<QTextLayout::FormatRange>();
-
-                shouldCollapse = false;
-
-//                preeditAreaStart = layout->preeditAreaPosition();
-//                preeditAreaLength = layout->preeditAreaText().length();
-
-//                if (preeditAreaLength != 0) {
-//                    auto isOutsidePreeditArea = [=](const QTextLayout::FormatRange &range) {
-//                        return range.start < preeditAreaStart
-//                                || range.start + range.length > preeditAreaStart + preeditAreaLength;
-//                    };
-//                    const auto it = std::remove_if(ranges.begin(), ranges.end(),
-//                                                   isOutsidePreeditArea);
-//                    if (it != ranges.end()) {
-//                        ranges.erase(it, ranges.end());
-//                        formatsChanged = true;
-//                    }
-//                } else if (!ranges.isEmpty()) {
-//                    ranges.clear();
-//                    formatsChanged = true;
-//                }
-
-                if (end <= currentBlock.position()) break;
-
-                formatRange.start = 0;
-                formatRange.length = currentBlock.length();
+                formatRange.start = tfr.start - currentBlock.position();
+                formatRange.length = tfr.length;
                 formatRange.format = tfr.format;
-
-//                if (preeditAreaLength != 0) {
-//                    if (formatRange.start >= preeditAreaStart)
-//                        formatRange.start += preeditAreaLength;
-//                    else if (formatRange.start + formatRange.length >= preeditAreaStart)
-//                        formatRange.length += preeditAreaLength;
-//                }
-
-                ranges << formatRange;
-                layout->setFormats(ranges);
-                if (setStates) currentBlock.setUserState(tfr.userstate);
-            }
-
-            if (currentBlock.isValid() && end < currentBlock.position())
-            {
-                // handle block where range ends
-                formatRange.start = 0;
-                formatRange.length = tfr.start+tfr.length - currentBlock.position();
-                formatRange.format = tfr.format;
-
-//                if (preeditAreaLength != 0) {
-//                    if (formatRange.start >= preeditAreaStart)
-//                        formatRange.start += preeditAreaLength;
-//                    else if (formatRange.start + formatRange.length >= preeditAreaStart)
-//                        formatRange.length += preeditAreaLength;
-//                }
 
                 ranges << formatRange;
                 formatsChanged = true;
+                if (tfr.function)
+                {
+                    shouldCollapse = tfr.collapsible;
+                    func = tfr.function;
+                }
+                if (setStates) stateToSet = tfr.userstateFollows;
+            } else {
 
-                bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
+                // handle end of current block
+                formatRange.start = tfr.start - currentBlock.position();
+                formatRange.length = currentBlock.position() + currentBlock.length() - tfr.start;
+                formatRange.format = tfr.format;
+
+                ranges << formatRange;
+                layout->setFormats(ranges);
+                ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
                 if (!bd){
 
                     bd = new ProjectDocumentBlockData;
                     currentBlock.setUserData(bd);
                 }
-
                 bd->setCollapsible(tfr.collapsible);
                 bd->setCollapse(tfr.function);
-                if (setStates) stateToSet = tfr.userstateFollows;
+                if (setStates) currentBlock.setUserState(tfr.userstate);
 
-                // tbd
+                int end = tfr.start + tfr.length;
+                while (true) // handle blocks contained within range completely
+                {
+                    currentBlock = currentBlock.next();
+
+                    layout = currentBlock.layout();
+                    if (!currentBlock.isValid() || !layout) break;
+                    // ranges = layout->formats();
+                    ranges = QVector<QTextLayout::FormatRange>();
+
+                    shouldCollapse = false;
+
+                    if (end <= currentBlock.position()) break;
+
+                    formatRange.start = 0;
+                    formatRange.length = currentBlock.length();
+                    formatRange.format = tfr.format;
+
+                    ranges << formatRange;
+                    layout->setFormats(ranges);
+                    if (setStates) currentBlock.setUserState(tfr.userstate);
+                }
+
+                if (currentBlock.isValid() && end < currentBlock.position())
+                {
+                    // handle block where range ends
+                    formatRange.start = 0;
+                    formatRange.length = tfr.start+tfr.length - currentBlock.position();
+                    formatRange.format = tfr.format;
+
+                    ranges << formatRange;
+                    formatsChanged = true;
+
+                    bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
+                    if (!bd){
+
+                        bd = new ProjectDocumentBlockData;
+                        currentBlock.setUserData(bd);
+                    }
+
+                    bd->setCollapsible(tfr.collapsible);
+                    bd->setCollapse(tfr.function);
+                    if (setStates) stateToSet = tfr.userstateFollows;
+
+                    // tbd
+                }
+
             }
-
         }
         blockSwitched = false;
     }
