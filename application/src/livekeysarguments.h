@@ -43,6 +43,7 @@ public:
 
     const std::string &script() const;
     const std::vector<std::string>& scriptArguments() const;
+    const std::vector<std::string>& arguments() const;
 
     void initialize(int argc, const char* const argv[]);
 

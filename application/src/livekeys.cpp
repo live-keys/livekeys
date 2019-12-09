@@ -55,6 +55,7 @@
 #include <QJSValueIterator>
 #include <QQuickWindow>
 #include <QGuiApplication>
+#include <QProcess>
 
 namespace lv{
 
@@ -531,6 +532,47 @@ void Livekeys::projectChanged(const QString &path){
             emit missingPackages();
         }
     }
+}
+
+void Livekeys::newProjectInstance(){
+    QProcess* fork = new QProcess();
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    fork->setProcessEnvironment(env);
+
+    QString program = "./livekeys";
+
+    QStringList arguments;
+
+    std::vector<std::string> args = m_arguments->arguments();
+    for ( const std::string& arg : args ){
+        arguments.append(QString::fromStdString(arg));
+    }
+
+    fork->startDetached(program, arguments);
+    fork->waitForStarted();
+    QCoreApplication::exit(0);
+}
+
+void Livekeys::openProjectInstance(const QUrl &path){
+    QProcess* fork = new QProcess();
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    fork->setProcessEnvironment(env);
+
+    QString program = "./livekeys";
+
+    QStringList arguments;
+
+    std::vector<std::string> args = m_arguments->arguments();
+    for ( const std::string& arg : args ){
+        arguments.append(QString::fromStdString(arg));
+    }
+    arguments.append(path.toLocalFile());
+
+    fork->startDetached(program, arguments);
+    fork->waitForStarted();
+    QCoreApplication::exit(0);
 }
 
 }// namespace
