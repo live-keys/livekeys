@@ -58,6 +58,9 @@ Runnable::~Runnable(){
     m_project->removeExcludedRunTriggers(m_activations);
 
     if ( m_appRoot ){
+        m_appRoot->setParent(nullptr);
+        auto item = qobject_cast<QQuickItem*>(m_appRoot);
+        if (item) item->setParentItem(nullptr);
         m_appRoot->deleteLater();
     }
 }
