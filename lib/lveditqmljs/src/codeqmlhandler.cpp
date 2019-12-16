@@ -1807,17 +1807,19 @@ int CodeQmlHandler::addProperty(
         QString indent = getBlockIndent(tbStart);
         insertionPosition = tbEnd.position();
         QTextBlock tbIt = tbEnd.previous();
+        bool found = false;
         while ( tbIt != tbStart && tbIt.isValid() ){
             if ( !isBlockEmptySpace(tbIt) ){
                 indent = getBlockIndent(tbIt);
                 insertionPosition = tbIt.position() + tbIt.length();
+                found = true;
                 break;
             }
             tbIt = tbIt.previous();
         }
 
-        insertionText = indent + name + ": " + (assignDefault ? DocumentQmlInfo::typeDefaultValue(type) : "") + "\n";
-        cursorPosition = insertionPosition + indent.size() + name.size() + 2;
+        insertionText = indent + (found ? "" : "    ")+ name + ": " + (assignDefault ? DocumentQmlInfo::typeDefaultValue(type) : "") + "\n";
+        cursorPosition = insertionPosition + indent.size() + (found ? 0:4) + name.size() + 2;
     }
 
 
