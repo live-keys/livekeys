@@ -14,21 +14,23 @@
 **
 ****************************************************************************/
 
-#ifndef QSCRIPTCOMMANDLINEPARSER_H
-#define QSCRIPTCOMMANDLINEPARSER_H
+#ifndef SCRIPTCOMMANDLINEPARSER_H
+#define SCRIPTCOMMANDLINEPARSER_H
 
 #include <QString>
 #include <QList>
 
+namespace lv{
+
 /// \private
-class QScriptCommandLineParser{
+class ScriptCommandLineParser{
 
 public:
     class Option;
 
 public:
-    QScriptCommandLineParser(const QStringList& argvTail);
-    ~QScriptCommandLineParser();
+    ScriptCommandLineParser(const QStringList& argvTail);
+    ~ScriptCommandLineParser();
 
     Option* helpOption();
     Option* versionOption();
@@ -63,17 +65,18 @@ private:
     Option*        m_versionOption;
 };
 
-inline const QStringList &QScriptCommandLineParser::arguments(){
+inline const QStringList &ScriptCommandLineParser::arguments(){
     return m_arguments;
 }
 
-inline QScriptCommandLineParser::Option *QScriptCommandLineParser::helpOption(){
+inline ScriptCommandLineParser::Option *ScriptCommandLineParser::helpOption(){
     return m_helpOption;
 }
 
-inline QScriptCommandLineParser::Option *QScriptCommandLineParser::versionOption(){
+inline ScriptCommandLineParser::Option *ScriptCommandLineParser::versionOption(){
     return m_versionOption;
 }
 
+}// namespace
 
-#endif // QSCRIPTCOMMANDLINEPARSER_H
+#endif // SCRIPTCOMMANDLINEPARSER_H

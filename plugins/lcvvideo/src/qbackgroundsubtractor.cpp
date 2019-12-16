@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "qbackgroundsubtractor.h"
-#include "qstaticcontainer.h"
+#include "live/staticcontainer.h"
 
 using namespace cv;
 

@@ -1,5 +1,5 @@
-#ifndef QVALUEHISTORY_H
-#define QVALUEHISTORY_H
+#ifndef LVVALUEHISTORY_H
+#define LVVALUEHISTORY_H
 
 #include <QQuickItem>
 #include <QLinkedList>
@@ -11,14 +11,16 @@ class QOpenGLPaintDevice;
 class QOpenGLFramebufferObject;
 class QOpenGLFunctions;
 
+namespace lv{
+
 /// \private
-class QDrawValueHistoryNode : public QObject, public QSGSimpleTextureNode{
+class DrawValueHistoryNode : public QObject, public QSGSimpleTextureNode{
 
     Q_OBJECT
 
 public:
-    QDrawValueHistoryNode(QQuickWindow* window);
-    ~QDrawValueHistoryNode();
+    DrawValueHistoryNode(QQuickWindow* window);
+    ~DrawValueHistoryNode();
 
     void render(const QLinkedList<double>& values, double minVal, double maxVal, const QColor &color);
 
@@ -32,7 +34,7 @@ private:
 };
 
 /// \private
-class QValueHistory : public QQuickItem{
+class ValueHistory : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(double currentValue    READ currentValue    WRITE setCurrentValue    NOTIFY currentValueChanged)
@@ -48,8 +50,8 @@ public:
     };
 
 public:
-    QValueHistory(QQuickItem* parent = 0);
-    ~QValueHistory();
+    ValueHistory(QQuickItem* parent = 0);
+    ~ValueHistory();
 
     double currentValue() const;
     double maxDisplayValue() const;
@@ -81,27 +83,27 @@ private:
     QLinkedList<double> m_values;
 };
 
-inline double QValueHistory::currentValue() const{
+inline double ValueHistory::currentValue() const{
     return m_values.size() > 0 ? m_values.last() : -1;
 }
 
-inline double QValueHistory::maxDisplayValue() const{
+inline double ValueHistory::maxDisplayValue() const{
     return m_maxDisplayValue;
 }
 
-inline double QValueHistory::minDisplayValue() const{
+inline double ValueHistory::minDisplayValue() const{
     return m_minDisplayValue;
 }
 
-inline int QValueHistory::maxHistory() const{
+inline int ValueHistory::maxHistory() const{
     return m_maxHistory;
 }
 
-inline const QColor &QValueHistory::renderColor() const{
+inline const QColor &ValueHistory::renderColor() const{
     return m_displayColor;
 }
 
-inline void QValueHistory::setCurrentValue(double currentValue){
+inline void ValueHistory::setCurrentValue(double currentValue){
     m_values.append(currentValue);
     if ( m_values.size() > m_maxHistory )
         m_values.pop_front();
@@ -110,7 +112,7 @@ inline void QValueHistory::setCurrentValue(double currentValue){
     update();
 }
 
-inline void QValueHistory::setMaxDisplayValue(double maxDisplayValue){
+inline void ValueHistory::setMaxDisplayValue(double maxDisplayValue){
     if ( m_maxDisplayValue != maxDisplayValue ){
         m_maxDisplayValue = maxDisplayValue;
         emit maxDisplayValueChanged();
@@ -118,7 +120,7 @@ inline void QValueHistory::setMaxDisplayValue(double maxDisplayValue){
     }
 }
 
-inline void QValueHistory::setMinDisplayValue(double minDisplayValue){
+inline void ValueHistory::setMinDisplayValue(double minDisplayValue){
     if ( m_minDisplayValue != minDisplayValue ){
         m_minDisplayValue = minDisplayValue;
         emit minDisplayValueChanged();
@@ -126,7 +128,7 @@ inline void QValueHistory::setMinDisplayValue(double minDisplayValue){
     }
 }
 
-inline void QValueHistory::setMaxHistory(int maxHistory){
+inline void ValueHistory::setMaxHistory(int maxHistory){
     if ( m_maxHistory == maxHistory || maxHistory < 1 )
         return;
 
@@ -139,7 +141,7 @@ inline void QValueHistory::setMaxHistory(int maxHistory){
     update();
 }
 
-inline void QValueHistory::setRenderColor(const QColor &color){
+inline void ValueHistory::setRenderColor(const QColor &color){
     if ( color == m_displayColor )
         return;
 
@@ -149,4 +151,6 @@ inline void QValueHistory::setRenderColor(const QColor &color){
     update();
 }
 
-#endif // QVALUEHISTORY
+} // namespace
+
+#endif // LVVALUEHISTORY_H

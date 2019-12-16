@@ -21,9 +21,9 @@
 #include <QJSValue>
 #include "live/lvliveglobal.h"
 
-class QScriptCommandLineParser;
-
 namespace lv{
+
+class ScriptCommandLineParser;
 
 ///\private
 class QmlMain : public QQuickItem{
@@ -58,12 +58,11 @@ signals:
     void versionChanged();
     void run();
 
-
 private:
     QJSValue m_options;
     QString  m_version;
 
-    QScriptCommandLineParser* m_parser;
+    ScriptCommandLineParser* m_parser;
 };
 
 inline const QJSValue &QmlMain::options() const{

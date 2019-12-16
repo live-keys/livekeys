@@ -16,7 +16,7 @@
 
 #include "qmatloader.h"
 #include "qmat.h"
-#include "qstaticcontainer.h"
+#include "live/staticcontainer.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 
@@ -76,7 +76,7 @@ QMatLoader::~QMatLoader(){
 }
 
 QMat *QMatLoader::staticLoad(const QString &id, const QJSValue &params){
-    QStaticContainer* container = QStaticContainer::grabFromContext(this);
+    lv::StaticContainer* container = lv::StaticContainer::grabFromContext(this);
     QMat* m = container->get<QMat>(id);
     if ( !m ){
         QMatLoaderParams mparams = QMatLoaderParams::parse(params);

@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLICENSESETTINGS_H
-#define QLICENSESETTINGS_H
+#ifndef LVLICENSESETTINGS_H
+#define LVLICENSESETTINGS_H
 
 #include <QObject>
 #include <QHash>
@@ -24,8 +24,10 @@
 
 class QQuickItem;
 
+namespace lv{
+
 /// \private
-class LV_LIVE_EXPORT QLicenseEntry{
+class LV_LIVE_EXPORT LicenseEntry{
 public:
     QString id;
     QString alias;
@@ -35,7 +37,7 @@ public:
 };
 
 /// \private
-class LV_LIVE_EXPORT QLicenseSettings : public QAbstractListModel{
+class LV_LIVE_EXPORT LicenseSettings : public QAbstractListModel{
 
     Q_OBJECT
     Q_PROPERTY(int highlights READ highlights NOTIFY highlightsChanged)
@@ -48,8 +50,8 @@ class LV_LIVE_EXPORT QLicenseSettings : public QAbstractListModel{
     };
 
 public:
-    explicit QLicenseSettings(const QString& settingsPath, QObject *parent = 0);
-    ~QLicenseSettings();
+    explicit LicenseSettings(const QString& settingsPath, QObject *parent = 0);
+    ~LicenseSettings();
 
     int rowCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
@@ -67,7 +69,7 @@ public:
 
     bool isDirty() const;
 
-    static QLicenseSettings* grabFromContext(
+    static LicenseSettings* grabFromContext(
         QObject* item,
         const QString& settingsProperty = "settings",
         const QString& contextProperty = "license"
@@ -92,7 +94,7 @@ public slots:
     QString licenseText(const QString& id);
 
 private:
-    QHash<QString, QLicenseEntry> m_licenses;
+    QHash<QString, LicenseEntry> m_licenses;
     QHash<int, QByteArray>         m_roles;
     bool                           m_isDirty;
     int                            m_highlights;
@@ -102,23 +104,25 @@ private:
     QString                        m_errorText;
 };
 
-inline QHash<int, QByteArray> QLicenseSettings::roleNames() const{
+inline QHash<int, QByteArray> LicenseSettings::roleNames() const{
     return m_roles;
 }
 
-inline int QLicenseSettings::highlights() const{
+inline int LicenseSettings::highlights() const{
     return m_highlights;
 }
 
-inline bool QLicenseSettings::isDirty() const{
+inline bool LicenseSettings::isDirty() const{
     return m_isDirty;
 }
 
-inline bool QLicenseSettings::isLicenseValid(const QString &id){
-    QHash<QString, QLicenseEntry>::Iterator it = m_licenses.find(id);
+inline bool LicenseSettings::isLicenseValid(const QString &id){
+    QHash<QString, LicenseEntry>::Iterator it = m_licenses.find(id);
     if ( it == m_licenses.end() )
         return false;
     return it->valid;
 }
 
-#endif // QLICENSESETTINGS_H
+}// namespace
+
+#endif // LVLICENSESETTINGS_H

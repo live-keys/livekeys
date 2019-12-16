@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "qbackgroundsubtractormog2.h"
-#include "qstaticcontainer.h"
+#include "live/staticcontainer.h"
 
 using namespace cv;
 
@@ -344,7 +344,7 @@ void QBackgroundSubtractorMog2::setVarThresholdGen(float varThresholdGen){
 
 void QBackgroundSubtractorMog2::staticLoad(const QString &id){
     Q_D(QBackgroundSubtractorMog2);
-    QStaticContainer* container = QStaticContainer::grabFromContext(this);
+    lv::StaticContainer* container = lv::StaticContainer::grabFromContext(this);
     d->m_subtractorMog2 = container->get<Ptr<BackgroundSubtractorMOG2> >(id);
     if ( !d->m_subtractorMog2 ){
         d->m_subtractorMog2 = d->createSubtractor();

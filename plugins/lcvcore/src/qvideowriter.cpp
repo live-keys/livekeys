@@ -16,7 +16,7 @@
 
 #include "qvideowriter.h"
 #include "qvideowriterthread.h"
-#include "qstaticcontainer.h"
+#include "live/staticcontainer.h"
 #include <QJSValueIterator>
 #include <QQmlContext>
 #include "opencv2/highgui.hpp"
@@ -93,7 +93,7 @@ void QVideoWriter::staticLoad(const QJSValue &params){
         }
     }
 
-    QStaticContainer* container = qmlContext(this)->contextProperty("staticContainer").value<QStaticContainer*>();
+    lv::StaticContainer* container = qmlContext(this)->contextProperty("staticContainer").value<lv::StaticContainer*>();
     m_thread = container->get<QVideoWriterThread>(getKey(
         filename, m_fourcc, m_fps, m_frameSize
     ));

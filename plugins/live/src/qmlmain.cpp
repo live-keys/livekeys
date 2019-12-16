@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "qmlmain.h"
-#include "qscriptcommandlineparser_p.h"
+#include "scriptcommandlineparser_p.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 
@@ -46,7 +46,7 @@ void QmlMain::componentComplete(){
     connect(lv::ViewContext::instance().engine(), SIGNAL(objectReady(QObject*,QUrl)), this, SLOT(afterCompile()));
 
     QObject* obj = qmlContext(this)->contextProperty("script").value<QObject*>();
-    m_parser = new QScriptCommandLineParser(obj->property("argvTail").toStringList());
+    m_parser = new ScriptCommandLineParser(obj->property("argvTail").toStringList());
 }
 
 void QmlMain::beforeCompile(){
@@ -58,7 +58,7 @@ void QmlMain::afterCompile(){
     try{
         m_parser->resetScriptOptions();
 
-        QList<QScriptCommandLineParser::Option*> requiredOptions;
+        QList<ScriptCommandLineParser::Option*> requiredOptions;
 
         if ( !m_options.isArray() ){
             qCritical("Unknown options type, expected array.");
@@ -99,7 +99,7 @@ void QmlMain::afterCompile(){
             if ( type == "" ){
                 m_parser->addFlag(keys, describe);
             } else {
-                QScriptCommandLineParser::Option* parserOpt = m_parser->addOption(keys, describe, type);
+                ScriptCommandLineParser::Option* parserOpt = m_parser->addOption(keys, describe, type);
                 bool required = option.hasOwnProperty("required") ? option.property("required").toBool() : false;
                 if ( required )
                     requiredOptions.append(parserOpt);
@@ -118,7 +118,7 @@ void QmlMain::afterCompile(){
             return;
         }
 
-        foreach( QScriptCommandLineParser::Option* option, requiredOptions ){
+        foreach( ScriptCommandLineParser::Option* option, requiredOptions ){
             if ( !m_parser->isSet(option) ){
                 qCritical("Failed to find required option: %s", qPrintable(m_parser->optionNames(option).first()));
                 printf("%s", qPrintable(m_parser->helpString()));
@@ -138,7 +138,7 @@ const QStringList &QmlMain::arguments() const{
 }
 
 QString QmlMain::option(const QString &key) const{
-    QScriptCommandLineParser::Option* option = m_parser->findOptionByName(key);
+    ScriptCommandLineParser::Option* option = m_parser->findOptionByName(key);
     if ( !option ){
         qCritical("Failed to find script option: %s", qPrintable(key));
         return "";
@@ -147,7 +147,7 @@ QString QmlMain::option(const QString &key) const{
 }
 
 bool QmlMain::isOptionSet(const QString &key) const{
-    QScriptCommandLineParser::Option* option = m_parser->findOptionByName(key);
+    ScriptCommandLineParser::Option* option = m_parser->findOptionByName(key);
     if ( !option ){
         qCritical("Failed to find script option: %s", qPrintable(key));
         return "";

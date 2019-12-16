@@ -14,16 +14,18 @@
 **
 ****************************************************************************/
 
-#ifndef QLOGLISTENER_H
-#define QLOGLISTENER_H
+#ifndef LVLOGLISTENER_H
+#define LVLOGLISTENER_H
 
 #include <QObject>
 #include <QQmlParserStatus>
 
 class QTcpServer;
 
+namespace lv{
+
 /// \private
-class QLogListener : public QObject, public QQmlParserStatus{
+class LogListener : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
@@ -32,8 +34,8 @@ class QLogListener : public QObject, public QQmlParserStatus{
     Q_PROPERTY(QStringList allowedIps READ allowedIps WRITE setAllowedIps NOTIFY allowedIpsChanged)
 
 public:
-    explicit QLogListener(QObject *parent = nullptr);
-    ~QLogListener();
+    explicit LogListener(QObject *parent = nullptr);
+    ~LogListener();
 
     QString address() const;
     int port() const;
@@ -66,16 +68,18 @@ private:
     bool        m_componentComplete;
 };
 
-inline QString QLogListener::address() const{
+inline QString LogListener::address() const{
     return m_address;
 }
 
-inline int QLogListener::port() const{
+inline int LogListener::port() const{
     return m_port;
 }
 
-inline const QStringList &QLogListener::allowedIps() const{
+inline const QStringList &LogListener::allowedIps() const{
     return m_allowedIps;
 }
 
-#endif // QLOGLISTENER_H
+}// namespace
+
+#endif // LVLOGLISTENER_H

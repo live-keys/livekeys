@@ -14,26 +14,28 @@
 **
 ****************************************************************************/
 
-#ifndef QSTATICLOADER_H
-#define QSTATICLOADER_H
+#ifndef LVSTATICLOADER_H
+#define LVSTATICLOADER_H
 
 #include "live/lvliveglobal.h"
 #include <QObject>
 #include <QQmlComponent>
 #include <QQuickItem>
 
-class QStaticLoaderItem;
+namespace lv{
+
+class StaticLoaderItem;
 
 /// \private
-class QStaticLoader : public QQuickItem{
+class StaticLoader : public QQuickItem{
 
     Q_OBJECT
     Q_PROPERTY(QQmlComponent* source READ source  WRITE setSource  NOTIFY sourceChanged)
     Q_PROPERTY(QObject*       item   READ item    NOTIFY itemChanged)
 
 public:
-    explicit QStaticLoader(QQuickItem *parent = 0);
-    ~QStaticLoader();
+    explicit StaticLoader(QQuickItem *parent = 0);
+    ~StaticLoader();
 
     QQmlComponent* source() const;
     QObject* item() const;
@@ -51,12 +53,14 @@ private:
     void createObject();
 
     QQmlComponent*     m_source;
-    QStaticLoaderItem* m_data;
+    StaticLoaderItem* m_data;
 
 };
 
-inline QQmlComponent *QStaticLoader::source() const{
+inline QQmlComponent *StaticLoader::source() const{
     return m_source;
 }
 
-#endif // QSTATICLOADER_H
+}// namespace
+
+#endif // LVSTATICLOADER_H

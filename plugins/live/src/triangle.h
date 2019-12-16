@@ -14,13 +14,15 @@
 **
 ****************************************************************************/
 
-#ifndef QTRIANGLE_H
-#define QTRIANGLE_H
+#ifndef LVTRIANGLE_H
+#define LVTRIANGLE_H
 
 #include <QQuickPaintedItem>
 
+namespace lv{
+
 /// \private
-class QTriangle : public QQuickPaintedItem{
+class Triangle : public QQuickPaintedItem{
 
     Q_OBJECT
     Q_PROPERTY(int rotation READ rotation WRITE setRotation NOTIFY rotationChanged)
@@ -36,7 +38,7 @@ public:
     };
 
 public:
-    explicit QTriangle(QQuickItem *parent = nullptr);
+    explicit Triangle(QQuickItem *parent = nullptr);
 
     const QColor& color() const;
     void setColor(const QColor color);
@@ -60,11 +62,11 @@ private:
     QPointF m_points[3];
 };
 
-inline const QColor& QTriangle::color() const{
+inline const QColor& Triangle::color() const{
     return m_color;
 }
 
-inline void QTriangle::setColor(const QColor color){
+inline void Triangle::setColor(const QColor color){
     if ( m_color != color ){
         m_color = color;
         update();
@@ -72,11 +74,11 @@ inline void QTriangle::setColor(const QColor color){
     }
 }
 
-inline int QTriangle::rotation() const{
+inline int Triangle::rotation() const{
      return m_rotation;
 }
 
-inline void QTriangle::setRotation(int rotation){
+inline void Triangle::setRotation(int rotation){
      if ( m_rotation != rotation ){
          m_rotation = rotation;
          updatePath();
@@ -85,4 +87,6 @@ inline void QTriangle::setRotation(int rotation){
     }
 }
 
-#endif // QTRIANGLE_H
+}// namespace
+
+#endif // LVTRIANGLE_H

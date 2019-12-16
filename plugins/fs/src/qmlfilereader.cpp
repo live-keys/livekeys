@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "qfilereader.h"
+#include "qmlfilereader.h"
 #include "live/applicationcontext.h"
 #include "live/exception.h"
 #include "live/viewengine.h"
@@ -22,21 +22,23 @@
 #include <QFile>
 #include <QFileSystemWatcher>
 
-QFileReader::QFileReader(QObject *parent)
+namespace lv{
+
+QmlFileReader::QmlFileReader(QObject *parent)
     : QObject(parent)
     , m_componentComplete(false)
     , m_watcher(0)
 {
 }
 
-QFileReader::~QFileReader(){
+QmlFileReader::~QmlFileReader(){
     if ( m_watcher ){
         disconnect(m_watcher, SIGNAL(fileChanged(QString)), this, SLOT(systemFileChanged(QString)));
         m_watcher->deleteLater();
     }
 }
 
-void QFileReader::setSource(QString source){
+void QmlFileReader::setSource(QString source){
     if (m_source == source)
         return;
     if ( m_watcher ){
@@ -52,7 +54,7 @@ void QFileReader::setSource(QString source){
     resync();
 }
 
-void QFileReader::setMonitor(bool monitor){
+void QmlFileReader::setMonitor(bool monitor){
     if ( monitor ){
         if ( !m_watcher ){
             m_watcher = new QFileSystemWatcher;
@@ -69,11 +71,11 @@ void QFileReader::setMonitor(bool monitor){
     emit monitorChanged();
 }
 
-void QFileReader::systemFileChanged(const QString &){
+void QmlFileReader::systemFileChanged(const QString &){
     resync();
 }
 
-void QFileReader::resync(){
+void QmlFileReader::resync(){
     if ( m_componentComplete && m_source != "" ){
         QFile fileInput(m_source);
         if ( !fileInput.open(QIODevice::ReadOnly ) ){
@@ -85,3 +87,5 @@ void QFileReader::resync(){
         emit dataChanged(m_data);
     }
 }
+
+}// namespace

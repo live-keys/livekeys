@@ -14,34 +14,36 @@
 **
 ****************************************************************************/
 
-#include "qtriangle.h"
+#include "triangle.h"
 #include <QPainter>
 
-QTriangle::QTriangle(QQuickItem *parent)
+namespace lv{
+
+Triangle::Triangle(QQuickItem *parent)
     : QQuickPaintedItem(parent)
     , m_rotation(0)
     , m_color("#000000")
 {
 }
 
-void QTriangle::updatePath(){
+void Triangle::updatePath(){
     switch (m_rotation){
-    case QTriangle::Top:
+    case Triangle::Top:
         m_points[0] = QPointF(boundingRect().center().x(), boundingRect().top());
         m_points[1] = boundingRect().bottomLeft();
         m_points[2] = boundingRect().bottomRight();
         break;
-    case QTriangle::Right:
+    case Triangle::Right:
         m_points[0] = QPointF(boundingRect().right(), boundingRect().center().y());
         m_points[1] = boundingRect().bottomLeft();
         m_points[2] = boundingRect().topLeft();
         break;
-    case QTriangle::Bottom:
+    case Triangle::Bottom:
         m_points[0] = QPointF(boundingRect().center().x(), boundingRect().bottom());
         m_points[1] = boundingRect().topLeft();
         m_points[2] = boundingRect().topRight();
         break;
-    case QTriangle::Left:
+    case Triangle::Left:
         m_points[0] = QPointF(boundingRect().left(), boundingRect().center().y());
         m_points[1] = boundingRect().topRight();
         m_points[2] = boundingRect().bottomRight();
@@ -49,7 +51,7 @@ void QTriangle::updatePath(){
     }
 }
 
-void QTriangle::paint(QPainter *painter){
+void Triangle::paint(QPainter *painter){
     if ( m_lastBoundingRect != boundingRect() ){
         m_lastBoundingRect.setRect( boundingRect().x(), boundingRect().y(), boundingRect().width(), boundingRect().height() );
         updatePath();
@@ -59,3 +61,5 @@ void QTriangle::paint(QPainter *painter){
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->drawPolygon(m_points, 3, Qt::OddEvenFill);
 }
+
+}// namespace

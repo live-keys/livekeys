@@ -14,21 +14,23 @@
 **
 ****************************************************************************/
 
-#ifndef QSTATICLOADERPROPERTY_H
-#define QSTATICLOADERPROPERTY_H
+#ifndef LVSTATICLOADERPROPERTY_H
+#define LVSTATICLOADERPROPERTY_H
 
 #include <QObject>
 #include <QVariant>
 
+namespace lv{
+
 /// \private
-class QStaticLoaderProperty : public QObject{
+class StaticLoaderProperty : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QVariant value READ value WRITE setValue NOTIFY valueChanged)
 
 public:
-    explicit QStaticLoaderProperty(QObject *parent = 0);
-    ~QStaticLoaderProperty();
+    explicit StaticLoaderProperty(QObject *parent = 0);
+    ~StaticLoaderProperty();
 
     const QVariant& value() const;
     void setValue(const QVariant& value);
@@ -41,8 +43,10 @@ private:
 
 };
 
-inline const QVariant &QStaticLoaderProperty::value() const{
+inline const QVariant &StaticLoaderProperty::value() const{
     return m_value;
 }
 
-#endif // QSTATICLOADERPROPERTY_H
+}// namespace
+
+#endif // LVSTATICLOADERPROPERTY_H

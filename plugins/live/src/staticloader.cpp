@@ -14,15 +14,16 @@
 **
 ****************************************************************************/
 
-#include "qstaticloader.h"
-#include "qstaticcontainer.h"
+#include "staticloader.h"
+#include "live/staticcontainer.h"
 #include <QQmlEngine>
 
+namespace lv{
 
-class QStaticLoaderItem{
+class StaticLoaderItem{
 public:
-    QStaticLoaderItem() : item(0){}
-    ~QStaticLoaderItem(){
+    StaticLoaderItem() : item(0){}
+    ~StaticLoaderItem(){
         if ( item )
             delete item;
     }
@@ -30,14 +31,14 @@ public:
     QObject* item;
 };
 
-QStaticLoader::QStaticLoader(QQuickItem *parent)
+StaticLoader::StaticLoader(QQuickItem *parent)
     : QQuickItem(parent)
     , m_source(0)
     , m_data(0)
 {
 }
 
-QStaticLoader::~QStaticLoader(){
+StaticLoader::~StaticLoader(){
     if ( m_data ){
         m_data->item->setParent(0);
         QQuickItem* item = qobject_cast<QQuickItem*>(m_data->item);
@@ -47,13 +48,13 @@ QStaticLoader::~QStaticLoader(){
 }
 
 
-QObject *QStaticLoader::item() const{
+QObject *StaticLoader::item() const{
     if ( m_data )
         return m_data->item;
     return 0;
 }
 
-void QStaticLoader::setSource(QQmlComponent *arg){
+void StaticLoader::setSource(QQmlComponent *arg){
     if ( m_source == arg )
         return;
 
@@ -65,12 +66,12 @@ void QStaticLoader::setSource(QQmlComponent *arg){
     }
 }
 
-void QStaticLoader::staticLoad(const QString &id){
-    QStaticContainer* container = QStaticContainer::grabFromContext(this);
-    m_data = container->get<QStaticLoaderItem>(id);
+void StaticLoader::staticLoad(const QString &id){
+    StaticContainer* container = StaticContainer::grabFromContext(this);
+    m_data = container->get<StaticLoaderItem>(id);
     if ( !m_data ){
-        m_data = new QStaticLoaderItem;
-        container->set<QStaticLoaderItem>(id, m_data);
+        m_data = new StaticLoaderItem;
+        container->set<StaticLoaderItem>(id, m_data);
 
         if ( m_source ){
             createObject();
@@ -88,7 +89,7 @@ void QStaticLoader::staticLoad(const QString &id){
 
 }
 
-void QStaticLoader::createObject(){
+void StaticLoader::createObject(){
     QObject* obj = qobject_cast<QObject*>(m_source->create(m_source->creationContext()));
     if ( obj == 0 ){
         qCritical("StaticLoader: Failed to create item: %s", qPrintable(m_source->errorString()));
@@ -106,3 +107,4 @@ void QStaticLoader::createObject(){
     emit itemCreated();
 }
 
+}// namespace
