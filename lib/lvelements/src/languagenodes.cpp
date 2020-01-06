@@ -580,12 +580,15 @@ void BaseNode::visitTypedFunctionDeclaration(BaseNode *parent, const TSNode &nod
             enode->m_name = new IdentifierNode(child);
         } else if ( strcmp(ts_node_type(child), "formal_type_parameters") == 0 ){
             enode->m_parameters = new ParameterListNode(child);
-            uint32_t paramterCount = ts_node_named_child_count(child);
+            uint32_t paramterCount = ts_node_child_count(child);
 
-            if ( paramterCount % 2 == 0 ){
-                for ( uint32_t j = 0; j < paramterCount; j += 2 ){
-                    TSNode paramType = ts_node_named_child(child, j);
-                    TSNode paramName = ts_node_named_child(child, j + 1);
+            for (int pc = 0; pc < paramterCount; ++pc)
+            {
+                TSNode ftpc = ts_node_child(child, pc);
+                if (strcmp(ts_node_type(ftpc), "formal_type_parameter") == 0)
+                {
+                    TSNode paramType = ts_node_child(ftpc, 0);
+                    TSNode paramName = ts_node_child(ftpc, 1);
 
                     auto typeNode = new IdentifierNode(paramType);
                     auto nameNode = new IdentifierNode(paramName);
@@ -1285,6 +1288,9 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
         *compose << "Element.addProperty(this, '" << slice(source, m_properties[i]->name())
                  << "', { type: '" << slice(source, m_properties[i]->type()) << "', notify: '"
                  << slice(source, m_properties[i]->name()) << "Changed' })\n";
+    }
+    else {
+        *compose << "Element.assignId(" << slice(source,m_id) << ", \"" << slice(source,m_id) << "\")\n";
     }
 
     for (int i=0; i<m_properties.size(); ++i)

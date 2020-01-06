@@ -961,7 +961,7 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(
         QmlDeclaration::Ptr declaration,
         QObject *runtime)
 {
-    if ( m_document && m_document->isActive() ){
+    if ( m_document && m_document->isActive()/* && !m_document->isDirty()*/){
 
         BindingPath* bp = DocumentQmlInfo::findDeclarationPath(m_target->toPlainText(), m_document, declaration);
         if ( !bp )

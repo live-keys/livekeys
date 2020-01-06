@@ -223,6 +223,8 @@ public:
     QTextDocument* textDocument();
 
     bool isActive() const;
+//    bool isDirty() const;
+//    void setDirty(bool dirty);
 
     QByteArray content() override;
     void setContent(const QByteArray &content) override;
@@ -253,6 +255,7 @@ public:
 
     static ProjectDocument* castFrom(Document* document);
 
+    void resetCollapseSignal(int blockNumber){ emit resetCollapse(blockNumber); }
 public slots:
     void __documentContentsChanged(int position, int charsRemoved, int charsAdded);
 
@@ -263,7 +266,8 @@ signals:
     void formatChanged(int position, int length);
     /** triggered when a contents changed inside the document */
     void contentsChange(int pos, int removed, int added);
-
+    /** triggered when we need to reset collapse state */
+    void resetCollapse(int blockNumber);
 private:
     void syncContent() const;
     void resetSync() const;
@@ -286,6 +290,7 @@ private:
     mutable int   m_editingState;
     mutable bool  m_isSynced;
     int           m_lastCursorPosition;
+//    mutable bool  m_isDirty;
 };
 
 /**

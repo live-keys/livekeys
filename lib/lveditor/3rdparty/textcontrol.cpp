@@ -1113,7 +1113,7 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
         goto accept;
     }
 #ifndef QT_NO_SHORTCUT
-      else if (e == QKeySequence::InsertParagraphSeparator) {
+      else if (e == QKeySequence::InsertParagraphSeparator || (e->key() == Qt::Key_Return && (e->modifiers() & Qt::ShiftModifier))) {
         if (textEdit && textEdit->lineControl())
         {
             if (textEdit->lineControl()->isJumpForwardLine(cursor.block().blockNumber(), true) > 0){

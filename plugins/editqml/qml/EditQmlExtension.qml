@@ -166,8 +166,8 @@ LiveExtension{
 
         if (!ef)
         {
-            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-running program"
-            console.error("Error: Can't create a palette in a non-running program")
+            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
+            console.error("Error: Can't create a palette in a non-compiled program")
             return
         }
 

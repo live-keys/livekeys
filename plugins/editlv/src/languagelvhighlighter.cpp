@@ -2,6 +2,7 @@
 
 #include "live/elements/parseddocument.h"
 #include "live/visuallog.h"
+#include "live/elements/parseddocument.h"
 
 namespace lv{
 
@@ -127,13 +128,13 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
         "(typed_function_declaration "
         "    name: (property_identifier) @property) \n"
         /*==============================*/
-        "(identifier_property_assignment name: \"id\" @property)"
+        "(identifier_property_assignment name: \"id\" @property) \n"
         /*==============================*/
         "(formal_type_parameter"
-        "     parameter_type: (identifier) @type"
+        "     parameter_type: (identifier) @type \n"
         ") \n"
         /*==============================*/
-
+        "(regex_pattern) @builtin \n"
     ;
 
     m_languageQuery = el::LanguageQuery::create(m_parser->language(), pattern);
@@ -145,10 +146,10 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
         m_captureToFormatMap.insert(i, (*m_settings)[m_languageQuery->captureName(i)]);
     }
 
+    m_captureToFormatMap.insert(UINT_MAX-1, (*m_settings)["comment"]);
     m_captureToFormatMap.insert(UINT_MAX, (*m_settings)["text"]);
 
-    QString qContents = parent->toPlainText() + QChar(8203);
-    std::string content = qContents.toStdString();
+    std::string content = parent->toPlainText().toStdString();
     m_currentAst = m_parser->parse(content);
 }
 
@@ -163,12 +164,12 @@ bool LanguageLvHighlighter::predicateEq(const std::vector<el::LanguageQuery::Pre
     QString compare1;
     QString compare2;
     if ( args[0].m_range.isValid() ){
-        compare1 = slice(doc, args[0].m_range.from(), args[0].m_range.from() + args[0].m_range.length());
+        compare1 = slice(doc, args[0].m_range.from() / sizeof(ushort), (args[0].m_range.from() + args[0].m_range.length()) / sizeof(ushort));
     } else {
         compare1 = QString::fromStdString(args[0].m_value.data());
     }
     if ( args[1].m_range.isValid() ){
-        compare2 = slice(doc, args[1].m_range.from(), args[1].m_range.from() + args[1].m_range.length());
+        compare2 = slice(doc, args[1].m_range.from() / sizeof(ushort), (args[1].m_range.from() + args[1].m_range.length())  / sizeof(ushort));
     } else {
         compare2 = QString::fromStdString(args[1].m_value.data());
     }
@@ -184,7 +185,7 @@ bool LanguageLvHighlighter::predicateEqOr(const std::vector<el::LanguageQuery::P
     QString compare1;
     QString compare2;
     if ( args[0].m_range.isValid() ){
-        compare1 = slice(doc, args[0].m_range.from(), args[0].m_range.from() + args[0].m_range.length());
+        compare1 = slice(doc, args[0].m_range.from() / sizeof(ushort), (args[0].m_range.from() + args[0].m_range.length()) / sizeof(ushort));
     } else {
         compare1 = QString::fromStdString(args[0].m_value.data());
     }
@@ -192,7 +193,7 @@ bool LanguageLvHighlighter::predicateEqOr(const std::vector<el::LanguageQuery::P
     for (int i = 1; i < args.size(); ++i)
     {
         if ( args[i].m_range.isValid() ){
-            compare2 = slice(doc, args[i].m_range.from(), args[i].m_range.from() + args[i].m_range.length());
+            compare2 = slice(doc, args[i].m_range.from() / sizeof(ushort), (args[i].m_range.from() + args[i].m_range.length())  / sizeof(ushort));
         } else {
             compare2 = QString::fromStdString(args[i].m_value.data());
         }

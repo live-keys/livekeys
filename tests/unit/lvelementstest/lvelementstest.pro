@@ -27,6 +27,7 @@ HEADERS += \
     $$PWD/jstupletest.h \
     $$PWD/jsimportstest.h \
     $$PWD/jsinheritancetest.h \
+    lvelparseddocumenttest.h \
     lvparsetest.h
 
 SOURCES += \
@@ -48,6 +49,7 @@ SOURCES += \
     $$PWD/jstupletest.cpp \
     $$PWD/jsimportstest.cpp \
     $$PWD/jsinheritancetest.cpp \
+    lvelparseddocumenttest.cpp \
     lvparsetest.cpp
 
 OTHER_FILES += $$PWD/data/*.*

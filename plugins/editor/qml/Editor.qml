@@ -703,8 +703,8 @@ Pane{
 
                     wrapMode: NewTextEdit.NoWrap
 
-                    height: paintedHeight
-                    width: paintedWidth
+                    height: Math.max(paintedHeight, flick.height)
+                    width: Math.max(paintedWidth, flick.width)
 
                     readOnly: editor.document === null || editor.document.isMonitored
 
