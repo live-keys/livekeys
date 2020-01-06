@@ -14,24 +14,25 @@
 **
 ****************************************************************************/
 
-#include "qstaticloaderproperty.h"
+#include "staticloaderproperty.h"
 #include <QQmlEngine>
 #include <QtQml>
 
+namespace lv{
 
-QStaticLoaderProperty::QStaticLoaderProperty(QObject *parent)
+StaticLoaderProperty::StaticLoaderProperty(QObject *parent)
     : QObject(parent)
 {
 }
 
-QStaticLoaderProperty::~QStaticLoaderProperty(){
+StaticLoaderProperty::~StaticLoaderProperty(){
     if ( m_value.canConvert<QObject*>() ){
         QObject* valueObj = m_value.value<QObject*>();
         valueObj->deleteLater();
     }
 }
 
-void QStaticLoaderProperty::setValue(const QVariant& value){
+void StaticLoaderProperty::setValue(const QVariant& value){
     if (m_value == value)
         return;
 
@@ -49,3 +50,4 @@ void QStaticLoaderProperty::setValue(const QVariant& value){
     emit valueChanged();
 }
 
+}// namespace

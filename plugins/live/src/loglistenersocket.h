@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef QLOGLISTENERSOCKET_H
-#define QLOGLISTENERSOCKET_H
+#ifndef LVLOGLISTENERSOCKET_H
+#define LVLOGLISTENERSOCKET_H
 
 #include <QObject>
 #include <QAbstractSocket>
@@ -23,16 +23,18 @@
 
 class QTcpSocket;
 
+namespace lv{
+
 /// \private
-class QLogListenerSocket : public QObject{
+class LogListenerSocket : public QObject{
 
     Q_OBJECT
 
 public:
     const int MinimumPrefixSize = 34;
 
-    explicit QLogListenerSocket(QTcpSocket* socket, QObject *parent = nullptr);
-    ~QLogListenerSocket();
+    explicit LogListenerSocket(QTcpSocket* socket, QObject *parent = nullptr);
+    ~LogListenerSocket();
 
     const QString& address() const;
 
@@ -61,8 +63,10 @@ private:
     ObjectMessageInfo* m_expectObject;
 };
 
-inline const QString &QLogListenerSocket::address() const{
+inline const QString &LogListenerSocket::address() const{
     return m_address;
 }
 
-#endif // QLOGLISTENERSOCKET_H
+} // namespace
+
+#endif // LVLOGLISTENERSOCKET_H

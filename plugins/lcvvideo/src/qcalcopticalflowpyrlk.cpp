@@ -16,7 +16,7 @@
 
 #include "qcalcopticalflowpyrlk.h"
 #include "opencv2/video/tracking.hpp"
-#include "qstaticcontainer.h"
+#include "live/staticcontainer.h"
 
 using namespace cv;
 
@@ -197,7 +197,7 @@ int QCalcOpticalFlowPyrLK::totalPoints() const{
 
 void QCalcOpticalFlowPyrLK::staticLoad(const QString &id){
     Q_D(QCalcOpticalFlowPyrLK);
-    QStaticContainer* container = QStaticContainer::grabFromContext(this);
+    lv::StaticContainer* container = lv::StaticContainer::grabFromContext(this);
     d->pointState = container->get<QCalcOpticalFlowPointState>(id);
     if ( !d->pointState ){
         d->pointState = new QCalcOpticalFlowPointState;

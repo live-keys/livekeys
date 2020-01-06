@@ -18,7 +18,7 @@
 #include "qvideocapturethread.h"
 #include "qmatnode.h"
 #include "qmatshader.h"
-#include "qstaticcontainer.h"
+#include "live/staticcontainer.h"
 #include <QSGSimpleMaterial>
 
 #include <QTimer>
@@ -87,7 +87,7 @@ void QVideoCapture::staticLoad(const QString &file){
     if (m_thread != 0)
         disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
 
-    QStaticContainer* container = QStaticContainer::grabFromContext(this);
+    lv::StaticContainer* container = lv::StaticContainer::grabFromContext(this);
     m_thread = container->get<QVideoCaptureThread>(file);
     if ( !m_thread ){
         m_thread = new QVideoCaptureThread(file);

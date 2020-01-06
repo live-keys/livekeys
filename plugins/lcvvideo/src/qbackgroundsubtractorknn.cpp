@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "qbackgroundsubtractorknn.h"
-#include "qstaticcontainer.h"
+#include "live/staticcontainer.h"
 
 using namespace cv;
 
@@ -267,7 +267,7 @@ void QBackgroundSubtractorKnn::setShadowValue(int shadowValue){
 
 void QBackgroundSubtractorKnn::staticLoad(const QString &id){
     Q_D(QBackgroundSubtractorKnn);
-    QStaticContainer* container = QStaticContainer::grabFromContext(this);
+    lv::StaticContainer* container = lv::StaticContainer::grabFromContext(this);
     d->m_subtractorKnn = container->get< Ptr<BackgroundSubtractorKNN> >(id);
     if ( !d->m_subtractorKnn ){
         d->m_subtractorKnn = d->createSubtractor();

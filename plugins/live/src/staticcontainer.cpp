@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "qstaticcontainer.h"
+#include "live/staticcontainer.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
 #include "live/viewcontext.h"
@@ -26,7 +26,7 @@
 
 
 /*!
-  \class QStaticContainer
+  \class lv::StaticContainer
   \brief Manages static items and assures their deletion when appropriate
   \ingroup plugin-live
 
@@ -34,24 +34,25 @@
   this component.
 */
 
+namespace lv{
 
 /*!
-  \brief QStaticContainer constructor
+  \brief lv::StaticContainer constructor
  */
-QStaticContainer::QStaticContainer(QObject *parent)
+StaticContainer::StaticContainer(QObject *parent)
     : QObject(parent)
 {
     lv::ViewEngine* engine = lv::ViewContext::instance().engine();
 
-    connect(engine, &lv::ViewEngine::aboutToCreateObject, this, &QStaticContainer::beforeCompile);
-    connect(engine, &lv::ViewEngine::objectReady, this, &QStaticContainer::afterCompile);
+    connect(engine, &ViewEngine::aboutToCreateObject, this, &StaticContainer::beforeCompile);
+    connect(engine, &ViewEngine::objectReady,         this, &StaticContainer::afterCompile);
 }
 
 /*!
- \brief QStaticContainer destructor
+ \brief lv::StaticContainer destructor
  */
-QStaticContainer::~QStaticContainer(){
-    for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
+StaticContainer::~StaticContainer(){
+    for ( QLinkedList<StaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         delete *it;
     m_stateContainerList.clear();
 }
@@ -59,60 +60,62 @@ QStaticContainer::~QStaticContainer(){
 /*!
   \brief Private method used internally to store the \a container to be cleaned up later.
  */
-void QStaticContainer::statecontainer(QStaticTypeContainerBase *container){
+void StaticContainer::statecontainer(StaticTypeContainerBase *container){
     m_stateContainerList.append(container);
 }
 
 /*!
-  \fn T *QStaticContainer::get(const QString &key)
+  \fn T *lv::StaticContainer::get(const QString &key)
   \brief Returns the value given at \a key or 0 if it doesnt exist.
 */
 
 /*!
-  \fn void QStaticContainer::set(const QString &key, T *value)
+  \fn void lv::StaticContainer::set(const QString &key, T *value)
   \brief Stores the \a value at \a key.
 */
 
 /*!
-  \fn void QStaticContainer::beforeCompile()
+  \fn void lv::StaticContainer::beforeCompile()
   \brief Private slot used to receive beforeCompile signals from the engine
 */
 
 /*!
-  \fn void QStaticContainer::afterCompile()
+  \fn void lv::StaticContainer::afterCompile()
   \brief Private slot used to receive afterCompile signals from the engine
 */
 
 /*!
-  \fn void QStaticContainer::clearStates()
+  \fn void lv::StaticContainer::clearStates()
   \brief Private slot used to receive targetChanged signals from the engine
 */
 
 /*!
   \brief Returns the state container associated with the items context.
  */
-QStaticContainer *QStaticContainer::grabFromContext(QQuickItem *item, const QString &contextProperty){
-    return static_cast<QStaticContainer*>(qmlContext(item)->contextProperty(contextProperty).value<QObject*>());
+StaticContainer *StaticContainer::grabFromContext(QQuickItem *item, const QString &contextProperty){
+    return static_cast<StaticContainer*>(qmlContext(item)->contextProperty(contextProperty).value<QObject*>());
 }
 
-void QStaticContainer::debugMessage(const QString &message){
+void StaticContainer::debugMessage(const QString &message){
     vlog("live-staticcontainer").v() << message;
 }
 
-void QStaticContainer::beforeCompile(const QUrl &){
+void StaticContainer::beforeCompile(const QUrl &){
     vlog_debug("live-staticcontainer", "-----Before Compile-----");
-    for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
+    for ( QLinkedList<StaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->beforeCompile();
 }
 
-void QStaticContainer::afterCompile(QObject *, const QUrl &, QObject *){
+void StaticContainer::afterCompile(QObject *, const QUrl &, QObject *){
     vlog_debug("live-staticcontainer", "-----After Compile-----");
-    for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
+    for ( QLinkedList<StaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->afterCompile();
 }
 
-void QStaticContainer::clearStates(){
+void StaticContainer::clearStates(){
     vlog_debug("live-staticcontainer", "-----Clear States-----");
-    for ( QLinkedList<QStaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
+    for ( QLinkedList<StaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->clearStates();
 }
+
+}// namespace

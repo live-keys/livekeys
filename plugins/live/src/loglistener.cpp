@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#include "qloglistener.h"
-#include "qloglistenersocket.h"
+#include "loglistener.h"
+#include "loglistenersocket.h"
 #include "live/applicationcontext.h"
 #include "live/exception.h"
 #include "live/viewengine.h"
@@ -25,7 +25,9 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
-QLogListener::QLogListener(QObject *parent)
+namespace lv{
+
+LogListener::LogListener(QObject *parent)
     : QObject(parent)
     , m_port(1590)
     , m_server(new QTcpServer(this))
@@ -34,10 +36,10 @@ QLogListener::QLogListener(QObject *parent)
     connect(m_server, SIGNAL(newConnection()), this, SLOT(newConnection()));
 }
 
-QLogListener::~QLogListener(){
+LogListener::~LogListener(){
 }
 
-void QLogListener::setAddress(QString address){
+void LogListener::setAddress(QString address){
     if (m_address == address)
         return;
 
@@ -47,7 +49,7 @@ void QLogListener::setAddress(QString address){
     startListening();
 }
 
-void QLogListener::setPort(int port){
+void LogListener::setPort(int port){
     if (m_port == port)
         return;
 
@@ -57,15 +59,15 @@ void QLogListener::setPort(int port){
     startListening();
 }
 
-void QLogListener::componentComplete(){
+void LogListener::componentComplete(){
     m_componentComplete = true;
     startListening();
 }
 
-void QLogListener::newConnection(){
+void LogListener::newConnection(){
     QTcpSocket *socket = m_server->nextPendingConnection();
     if ( m_allowedIps.isEmpty() || m_allowedIps.contains(socket->peerAddress().toString()) ){
-        QLogListenerSocket* logListener = new QLogListenerSocket(socket, this);
+        LogListenerSocket* logListener = new LogListenerSocket(socket, this);
         connect(socket, SIGNAL(disconnected()), logListener, SLOT(deleteLater()));
     } else {
         socket->disconnect();
@@ -74,7 +76,7 @@ void QLogListener::newConnection(){
     }
 }
 
-void QLogListener::startListening(){
+void LogListener::startListening(){
     if ( !m_componentComplete )
         return;
 
@@ -100,7 +102,7 @@ void QLogListener::startListening(){
     }
 }
 
-void QLogListener::setAllowedIps(const QStringList& allowedIps){
+void LogListener::setAllowedIps(const QStringList& allowedIps){
     if (m_allowedIps == allowedIps)
         return;
 
@@ -109,3 +111,5 @@ void QLogListener::setAllowedIps(const QStringList& allowedIps){
 
     //TODO: Cleanup connections
 }
+
+}// namespace

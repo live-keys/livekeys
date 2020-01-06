@@ -16,16 +16,14 @@
 
 #include "live_plugin.h"
 #include "qmlmain.h"
-#include "qstaticloader.h"
-#include "qstaticcontainer.h"
-#include "qlicensesettings.h"
-#include "qfilereader.h"
-#include "qstaticfilereader.h"
-#include "qtriangle.h"
-#include "qloglistener.h"
+#include "staticloader.h"
+#include "live/staticcontainer.h"
+#include "licensesettings.h"
+#include "triangle.h"
+#include "loglistener.h"
 #include "worker.h"
 #include "tuple.h"
-#include "qvaluehistory.h"
+#include "valuehistory.h"
 #include "stringbasedloader.h"
 #include "live/qmlobjectlist.h"
 #include "live/qmlvariantlist.h"
@@ -62,25 +60,23 @@ static QObject* colorProvider(QQmlEngine *engine, QJSEngine *){
 
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
-    qmlRegisterType<QTriangle>(            uri, 1, 0, "Triangle");
-    qmlRegisterType<QStaticLoader>(        uri, 1, 0, "StaticLoader");
-    qmlRegisterType<QFileReader>(          uri, 1, 0, "FileReader");
-    qmlRegisterType<QStaticFileReader>(    uri, 1, 0, "StaticFileReader");
-    qmlRegisterType<lv::VisualLogFilter>(  uri, 1, 0, "VisualLogFilter");
-    qmlRegisterType<QLogListener>(         uri, 1, 0, "LogListener");
-    qmlRegisterType<QValueHistory>(        uri, 1, 0, "ValueHistory");
-    qmlRegisterType<lv::QmlMain>(          uri, 1, 0, "Main");
-    qmlRegisterType<lv::StringBasedLoader>(uri, 1, 0, "StringBasedLoader");
-    qmlRegisterType<lv::Worker>(           uri, 1, 0, "Worker");
-    qmlRegisterType<lv::Tuple>(            uri, 1, 0, "Tuple");
-    qmlRegisterType<lv::QmlFork>(          uri, 1, 0, "Fork");
-    qmlRegisterType<lv::QmlForkNode>(      uri, 1, 0, "ForkNode");
-    qmlRegisterType<lv::ComponentSource>(  uri, 1, 0, "ComponentSource");
-    qmlRegisterType<lv::RemoteLine>(       uri, 1, 0, "RemoteLine");
+    qmlRegisterType<lv::Triangle>(            uri, 1, 0, "Triangle");
+    qmlRegisterType<lv::StaticLoader>(        uri, 1, 0, "StaticLoader");
+    qmlRegisterType<lv::VisualLogFilter>(     uri, 1, 0, "VisualLogFilter");
+    qmlRegisterType<lv::LogListener>(         uri, 1, 0, "LogListener");
+    qmlRegisterType<lv::ValueHistory>(        uri, 1, 0, "ValueHistory");
+    qmlRegisterType<lv::QmlMain>(             uri, 1, 0, "Main");
+    qmlRegisterType<lv::StringBasedLoader>(   uri, 1, 0, "StringBasedLoader");
+    qmlRegisterType<lv::Worker>(              uri, 1, 0, "Worker");
+    qmlRegisterType<lv::Tuple>(               uri, 1, 0, "Tuple");
+    qmlRegisterType<lv::QmlFork>(             uri, 1, 0, "Fork");
+    qmlRegisterType<lv::QmlForkNode>(         uri, 1, 0, "ForkNode");
+    qmlRegisterType<lv::ComponentSource>(     uri, 1, 0, "ComponentSource");
+    qmlRegisterType<lv::RemoteLine>(          uri, 1, 0, "RemoteLine");
     qmlRegisterType<lv::QmlComponentMap>(     uri, 1, 0, "ComponentMap");
     qmlRegisterType<lv::QmlComponentMapData>( uri, 1, 0, "ComponentMapData");
 
-    qmlRegisterUncreatableType<QLicenseSettings>(
+    qmlRegisterUncreatableType<lv::LicenseSettings>(
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
 
     qmlRegisterType<lv::TcpLineServer>(         uri, 1, 0, "TcpLineServer");
@@ -95,13 +91,13 @@ void LivePlugin::registerTypes(const char *uri){
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){
-    QStaticContainer* sc = new QStaticContainer(engine);
+    lv::StaticContainer* sc = new lv::StaticContainer(engine);
     engine->rootContext()->setContextProperty("staticContainer", sc);
 
     QObject* livekeys   = engine->rootContext()->contextProperty("lk").value<QObject*>();
     lv::Settings* settings = static_cast<lv::Settings*>(livekeys->property("settings").value<QObject*>());
 
     QString settingsPath = settings->path();
-    QLicenseSettings* ls = new QLicenseSettings(settingsPath, settings);
+    lv::LicenseSettings* ls = new lv::LicenseSettings(settingsPath, settings);
     settings->addConfigFile("license", ls);
 }

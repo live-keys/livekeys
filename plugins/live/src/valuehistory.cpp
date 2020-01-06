@@ -1,4 +1,4 @@
-#include "qvaluehistory.h"
+#include "valuehistory.h"
 #include "live/applicationcontext.h"
 #include "live/viewengine.h"
 #include "live/viewcontext.h"
@@ -12,10 +12,12 @@
 
 #include <QPainter>
 
+namespace lv{
+
 // QDrawValueHistoryNode definition
 // --------------------------------
 
-QDrawValueHistoryNode::QDrawValueHistoryNode(QQuickWindow* window)
+DrawValueHistoryNode::DrawValueHistoryNode(QQuickWindow* window)
     : m_fbo(0)
     , m_texture(0)
     , m_window(window)
@@ -26,7 +28,7 @@ QDrawValueHistoryNode::QDrawValueHistoryNode(QQuickWindow* window)
     m_glFunctions->initializeOpenGLFunctions();
 }
 
-QDrawValueHistoryNode::~QDrawValueHistoryNode(){
+DrawValueHistoryNode::~DrawValueHistoryNode(){
     delete m_texture;
     delete m_fbo;
     delete m_painter;
@@ -34,7 +36,7 @@ QDrawValueHistoryNode::~QDrawValueHistoryNode(){
     delete m_glFunctions;
 }
 
-void QDrawValueHistoryNode::render(const QLinkedList<double> &values, double minVal, double maxVal, const QColor& color){
+void DrawValueHistoryNode::render(const QLinkedList<double> &values, double minVal, double maxVal, const QColor& color){
     QSize size = rect().size().toSize();
 
     if ( !m_fbo ){
@@ -87,35 +89,35 @@ void QDrawValueHistoryNode::render(const QLinkedList<double> &values, double min
 }
 
 
-QValueHistory::QValueHistory(QQuickItem *parent)
+ValueHistory::ValueHistory(QQuickItem *parent)
     : QQuickItem(parent)
-    , m_maxDisplayValue(QValueHistory::Auto)
-    , m_minDisplayValue(QValueHistory::Auto)
+    , m_maxDisplayValue(ValueHistory::Auto)
+    , m_minDisplayValue(ValueHistory::Auto)
     , m_maxHistory(400)
     , m_displayColor(QColor(255, 255, 255))
 {
     setFlag(ItemHasContents, true);
 }
 
-QValueHistory::~QValueHistory(){
+ValueHistory::~ValueHistory(){
 }
 
-QSGNode *QValueHistory::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *){
+QSGNode *ValueHistory::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *){
     if ( m_values.size() < 2 )
         return oldNode;
     if ( boundingRect().isEmpty() )
         return oldNode;
 
-    QDrawValueHistoryNode* node = static_cast<QDrawValueHistoryNode*>(oldNode);
+    DrawValueHistoryNode* node = static_cast<DrawValueHistoryNode*>(oldNode);
     if ( !node )
-        node = new QDrawValueHistoryNode(window());
+        node = new DrawValueHistoryNode(window());
 
     node->setRect(boundingRect());
 
     double maxValue = m_maxDisplayValue;
     double minValue = m_minDisplayValue;
 
-    if ( maxValue == QValueHistory::Auto ){
+    if ( maxValue == ValueHistory::Auto ){
         maxValue = INT_MIN;
         for ( auto it = m_values.begin(); it != m_values.end(); ++it ){
             if ( *it > maxValue ){
@@ -123,7 +125,7 @@ QSGNode *QValueHistory::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePain
             }
         }
     }
-    if ( minValue == QValueHistory::Auto ){
+    if ( minValue == ValueHistory::Auto ){
         minValue = INT_MAX;
         for ( auto it = m_values.begin(); it != m_values.end(); ++it ){
             if ( *it < minValue ){
@@ -132,7 +134,7 @@ QSGNode *QValueHistory::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePain
         }
     }
 
-    if ( minValue == maxValue && m_minDisplayValue != QValueHistory::Auto && m_maxDisplayValue != QValueHistory::Auto){
+    if ( minValue == maxValue && m_minDisplayValue != ValueHistory::Auto && m_maxDisplayValue != ValueHistory::Auto){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "ValueHistory error: minDisplayValue == maxDisplayValue.", 0);
         lv::ViewContext::instance().engine()->throwError(&e);
         return node;
@@ -143,3 +145,5 @@ QSGNode *QValueHistory::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePain
     return node;
 
 }
+
+}// namespace

@@ -1,0 +1,1 @@
+#include "../src/staticcontainer.h"

@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "qloglistenersocket.h"
+#include "loglistenersocket.h"
 #include "live/applicationcontext.h"
 #include "live/visuallogqt.h"
 #include "live/exception.h"
@@ -28,11 +28,13 @@
 #include <QTcpSocket>
 #include <QDateTime>
 
-// QLogListenerSocket::ObjectMessageInfo
+namespace lv{
+
+// LogListenerSocket::ObjectMessageInfo
 // ---------------------------------------------------------------------
 
 /// \private
-class QLogListenerSocket::ObjectMessageInfo{
+class LogListenerSocket::ObjectMessageInfo{
 public:
     lv::VisualLog::MessageInfo::Level level;
     int line;
@@ -42,10 +44,10 @@ public:
     QDateTime stamp;
 };
 
-// QLogListenerSocket
+// LogListenerSocket
 // ---------------------------------------------------------------------
 
-QLogListenerSocket::QLogListenerSocket(QTcpSocket* socket, QObject *parent)
+LogListenerSocket::LogListenerSocket(QTcpSocket* socket, QObject *parent)
     : QObject(parent)
     , m_socket(socket)
     , m_expectObject(0)
@@ -58,7 +60,7 @@ QLogListenerSocket::QLogListenerSocket(QTcpSocket* socket, QObject *parent)
     m_address = m_socket->peerAddress().toString();
 }
 
-QLogListenerSocket::~QLogListenerSocket(){
+LogListenerSocket::~LogListenerSocket(){
     if ( m_socket->state() == QTcpSocket::ConnectedState ){
         m_socket->disconnectFromHost();
         m_socket->waitForDisconnected(5000);
@@ -66,7 +68,7 @@ QLogListenerSocket::~QLogListenerSocket(){
     delete m_socket;
 }
 
-void QLogListenerSocket::tcpRead(){
+void LogListenerSocket::tcpRead(){
     QByteArray received = m_socket->readAll();
     int lastCut = 0;
     for ( int i = 0; i < received.size(); ++i ){
@@ -80,14 +82,14 @@ void QLogListenerSocket::tcpRead(){
         m_buffer = received.mid(lastCut);
 }
 
-void QLogListenerSocket::tcpError(QAbstractSocket::SocketError){
+void LogListenerSocket::tcpError(QAbstractSocket::SocketError){
     lv::Exception e = CREATE_EXCEPTION(
         lv::Exception, "Log listener socket error: " + m_socket->errorString().toStdString(), 0
     );
     lv::ViewContext::instance().engine()->throwError(&e);
 }
 
-bool QLogListenerSocket::isPrefix(
+bool LogListenerSocket::isPrefix(
         const QByteArray &buffer,
         int dateIndex,
         int &levelIndex,
@@ -128,7 +130,7 @@ bool QLogListenerSocket::isPrefix(
     return true;
 }
 
-int QLogListenerSocket::isIp(const QByteArray &buffer){
+int LogListenerSocket::isIp(const QByteArray &buffer){
     for ( int i = 0; i < buffer.size(); ++i ){
         if ( buffer[i] == '>' && i < buffer.size() - 1 && buffer[i + 1] == ' ' && i >= 6)
             return i;
@@ -138,7 +140,7 @@ int QLogListenerSocket::isIp(const QByteArray &buffer){
     return -1;
 }
 
-void QLogListenerSocket::logLine(const QByteArray &buffer){
+void LogListenerSocket::logLine(const QByteArray &buffer){
     if ( m_expectObject ){
         lv::TypeInfo::Ptr ti = lv::ViewContext::instance().engine()->typeInfo(m_expectObject->typeName);
 
@@ -199,7 +201,7 @@ void QLogListenerSocket::logLine(const QByteArray &buffer){
                          buffer[separatorIndex + 2] == '\\' &&
                          buffer[separatorIndex + 3] == '@' )
                     {
-                        m_expectObject = new QLogListenerSocket::ObjectMessageInfo;
+                        m_expectObject = new LogListenerSocket::ObjectMessageInfo;
                         m_expectObject->address      = buffer.mid(dateIndex) + m_address;
                         m_expectObject->level        = level;
                         m_expectObject->functionName = functionName;
@@ -219,7 +221,7 @@ void QLogListenerSocket::logLine(const QByteArray &buffer){
 
         if ( buffer.size() > 3 && buffer[0] == '\\' && buffer[1] == '@' )
         {
-            m_expectObject = new QLogListenerSocket::ObjectMessageInfo;
+            m_expectObject = new LogListenerSocket::ObjectMessageInfo;
             m_expectObject->stamp = QDateTime::currentDateTime();
             m_expectObject->typeName = buffer.mid(2);
         } else {
@@ -227,3 +229,5 @@ void QLogListenerSocket::logLine(const QByteArray &buffer){
         }
     }
 }
+
+} // namespace

@@ -16,7 +16,7 @@
 
 #include "qcamcapture.h"
 #include "qcamcapturethread.h"
-#include "qstaticcontainer.h"
+#include "live/staticcontainer.h"
 
 #include <QTimer>
 /// \private
@@ -59,7 +59,7 @@ void QCamCapture::staticLoad(const QString &device, const QSize &resolution){
     if (m_thread != 0)
         disconnect( m_thread, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
 
-    QStaticContainer* container = QStaticContainer::grabFromContext(this);
+    lv::StaticContainer* container = lv::StaticContainer::grabFromContext(this);
     m_thread = container->get<QCamCaptureThread>(device);
     if ( !m_thread ){
         m_thread = new QCamCaptureThread(device);

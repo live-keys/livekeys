@@ -14,17 +14,18 @@
 **
 ****************************************************************************/
 
-#ifndef QFILEREADER_H
-#define QFILEREADER_H
+#ifndef LVQMLFILEREADER_H
+#define LVQMLFILEREADER_H
 
 #include <QObject>
 #include <QQmlParserStatus>
-#include "live/lvliveglobal.h"
 
 class QFileSystemWatcher;
 
+namespace lv{
+
 /// \private
-class LV_LIVE_EXPORT QFileReader : public QObject, public QQmlParserStatus{
+class QmlFileReader : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
@@ -33,8 +34,8 @@ class LV_LIVE_EXPORT QFileReader : public QObject, public QQmlParserStatus{
     Q_PROPERTY(QByteArray data READ data    NOTIFY dataChanged)
 
 public:
-    explicit QFileReader(QObject *parent = 0);
-    virtual ~QFileReader();
+    explicit QmlFileReader(QObject *parent = 0);
+    virtual ~QmlFileReader();
 
     const QByteArray& data() const;
 
@@ -66,25 +67,27 @@ private:
     QFileSystemWatcher* m_watcher;
 };
 
-inline const QByteArray &QFileReader::data() const{
+inline const QByteArray &QmlFileReader::data() const{
     return m_data;
 }
 
-inline QString QFileReader::source() const{
+inline QString QmlFileReader::source() const{
     return m_source;
 }
 
-inline void QFileReader::componentComplete(){
+inline void QmlFileReader::componentComplete(){
     m_componentComplete = true;
     resync();
 }
 
-inline bool QFileReader::monitor() const{
+inline bool QmlFileReader::monitor() const{
     return (m_watcher != 0);
 }
 
-inline QString QFileReader::asString(const QByteArray &data){
+inline QString QmlFileReader::asString(const QByteArray &data){
     return QString::fromUtf8(data);
 }
 
-#endif // QFILEREADER_H
+}// namespace
+
+#endif // LVQMLFILEREADER_H
