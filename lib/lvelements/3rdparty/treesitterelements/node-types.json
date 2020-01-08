@@ -2108,6 +2108,10 @@
         {
           "type": "component_instance",
           "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
         }
       ]
     }

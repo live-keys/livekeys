@@ -493,3 +493,31 @@ void LvElParsedDocumentTest::testCursorContext11()
     QVERIFY(!result.objectImportNamespace().isValid());
     QVERIFY(!result.propertyDeclaredType().isValid());
 }
+
+void LvElParsedDocumentTest::testCursorContext12()
+{
+    std::string testString = "import view as View\n"
+                             "View.T{ prop : 200}";
+
+    auto ast = m_parser->parse(testString);
+    lv::el::CursorContext result = lv::el::ParsedDocument::findCursorContext(ast, 30);
+
+
+    QVERIFY(result.context() == (lv::el::CursorContext::InLeftOfDeclaration | lv::el::CursorContext::InElements));
+    auto path = result.expressionPath();
+    QVERIFY(path.size() == 1);
+
+
+    QVERIFY(path[0].from() == 28);
+    QVERIFY(path[0].length() == 2);
+
+    QVERIFY(result.objectType().from() == 25);
+    QVERIFY(result.objectType().length() == 1);
+
+    QVERIFY(result.objectImportNamespace().from() == 20);
+    QVERIFY(result.objectImportNamespace().length() == 4);
+
+    QVERIFY(result.propertyPath().size() == 0);
+
+    QVERIFY(!result.propertyDeclaredType().isValid());
+}

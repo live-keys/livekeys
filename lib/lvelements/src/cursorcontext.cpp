@@ -86,7 +86,7 @@
  *
  * Imported types have a separate property that needs to be assigned, called objectImportNamespace:
  *
- * \code // TODO
+ * \code
  * import view as View
  * View.T{ prop : 200}
  *           ^ context = CompletionContext::InLeftOfDeclaration | CompletionContext::InElements

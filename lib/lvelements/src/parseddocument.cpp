@@ -103,11 +103,47 @@ CursorContext ParsedDocument::findCursorContext(LanguageParser::AST *ast, int po
                 }
             }
 
-            if (strcmp(ts_node_type(parent), "new_component_expression") == 0)
+            if (strcmp(ts_node_type(parent), "new_component_expression") == 0 )
             {
-                TSNode objectTypeNode = ts_node_child(parent, 0);
-                objectType = SourceRange(ts_node_start_byte(objectTypeNode), ts_node_end_byte(objectTypeNode) - ts_node_start_byte(objectTypeNode));
+                auto ncec = ts_node_child_count(parent);
+                auto body_pos = ts_node_start_byte(ts_node_child(parent, ncec-1));
+                if (position <= body_pos)
+                {
+                    if (ncec == 4)
+                    {
+                        auto name_pos = ts_node_start_byte(ts_node_child(parent, 2));
+                        auto import_start =  ts_node_start_byte(ts_node_child(parent, 0));
+                        if (position >= name_pos)
+                        {
+                            auto import_length = ts_node_end_byte(ts_node_child(parent, 0)) - import_start;
+                            objectImportNamespace = SourceRange(import_start, import_length);
+                            objectType = SourceRange(name_pos, position - name_pos);
+                        } else {
+                            objectImportNamespace = SourceRange(import_start, position - import_start);
+                        }
 
+                    } else { // ncec = 2
+                        auto type_start = ts_node_start_byte(ts_node_child(parent, 0));
+                        objectType = SourceRange(type_start, position - type_start);
+                    }
+                } else {
+                    if (ncec == 4)
+                    {
+
+                        auto import_start =  ts_node_start_byte(ts_node_child(parent, 0));
+                        auto import_length = ts_node_end_byte(ts_node_child(parent, 0)) - import_start;
+                        objectImportNamespace = SourceRange(import_start, import_length);
+                        auto type_start = ts_node_start_byte(ts_node_child(parent, 2));
+                        auto type_length = ts_node_end_byte(ts_node_child(parent, 2)) - type_start;
+                        objectType = SourceRange(type_start, type_length);
+
+
+                    } else { // ncec = 2
+                        auto type_start = ts_node_start_byte(ts_node_child(parent, 0));
+                        auto type_length = ts_node_end_byte(ts_node_child(parent, 0)) - type_start;
+                        objectType = SourceRange(type_start, type_length);
+                    }
+                }
             }
 
             int delimiter_pos = ts_node_start_byte(ts_node_child(curr, isAssign? 1: 2)); // position of :
