@@ -514,6 +514,11 @@ void BaseNode::visitEventDeclaration(BaseNode *parent, const TSNode &node){
             }
         }
     }
+
+    if (parent->parent() && parent->parent()->typeString() == "ComponentDeclaration")
+    {
+        parent->parent()->as<ComponentDeclarationNode>()->m_events.push_back(enode);
+    }
 }
 
 void BaseNode::visitListenerDeclaration(BaseNode *parent, const TSNode &node){
@@ -539,6 +544,11 @@ void BaseNode::visitListenerDeclaration(BaseNode *parent, const TSNode &node){
             enode->m_body->setParent(enode);
             visitChildren(enode->m_body, child);
         }
+    }
+
+    if (parent->parent() && parent->parent()->typeString() == "ComponentDeclaration")
+    {
+        parent->parent()->as<ComponentDeclarationNode>()->m_listeners.push_back(enode);
     }
 }
 
@@ -1086,6 +1096,44 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
                  << slice(source, m_properties[i]->name()) << "Changed\" })\n";
     }
 
+    for (int i = 0; i < m_events.size(); ++i)
+    {
+        std::string paramList = "";
+        if ( m_events[i]->parameterList() ){
+            ParameterListNode* pdn = m_events[i]->parameterList()->as<ParameterListNode>();
+            for ( auto it = pdn->parameters().begin(); it != pdn->parameters().end(); ++it ){
+                if ( it != pdn->parameters().begin() )
+                    paramList += ",";
+                paramList += "[" + slice(source, it->first) + "," + slice(source, it->second) + "]";
+            }
+        }
+
+        *compose << indent(indentValue + 1) << ("Element.addEvent(this, \'" + slice(source, m_events[i]->name()) + "\', [" + paramList + "])\n");
+    }
+
+    for (int i = 0; i < m_listeners.size(); ++i)
+    {
+        std::string paramList = "";
+        if ( m_listeners[i]->parameterList() ){
+            ParameterListNode* pdn = m_listeners[i]->parameterList()->as<ParameterListNode>();
+            for ( auto pit = pdn->parameters().begin(); pit != pdn->parameters().end(); ++pit ){
+                if ( pit != pdn->parameters().begin() )
+                    paramList += ",";
+                paramList += slice(source, pit->second);
+            }
+        }
+
+        *compose << "this.on(\'" << slice(source, m_listeners[i]->name()) << "\', function(" << paramList << ")";
+        JSSection* jssection = new JSSection;
+        jssection->from = m_listeners[i]->body()->startByte();
+        jssection->to   = m_listeners[i]->body()->endByte();
+        m_listeners[i]->convertToJs(source, jssection->m_children);
+        std::vector<std::string> flat;
+        jssection->flatten(source, flat);
+        for (auto s: flat) *compose << s;
+        *compose << ".bind(this));\n";
+
+    }
 
     for (int i=0; i<m_properties.size(); ++i)
     {
@@ -1181,39 +1229,7 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
 
         BaseNode* c = *it;
 
-        if ( c->typeString() == "EventDeclaration"){
-            EventDeclarationNode* edn = c->as<EventDeclarationNode>();
-
-            std::string paramList = "";
-            if ( edn->parameterList() ){
-                ParameterListNode* pdn = edn->parameterList()->as<ParameterListNode>();
-                for ( auto it = pdn->parameters().begin(); it != pdn->parameters().end(); ++it ){
-                    if ( it != pdn->parameters().begin() )
-                        paramList += ",";
-                    paramList += "[" + slice(source, it->first) + "," + slice(source, it->second) + "]";
-                }
-            }
-
-            *compose << ("Element.addEvent(this, \'" + slice(source, edn->name()) + "\', [" + paramList + "])\n");
-        } else if ( c->typeString() == "ListenerDeclaration" ){
-            ListenerDeclarationNode* ldn = c->as<ListenerDeclarationNode>();
-
-            std::string paramList = "";
-            if ( ldn->parameterList() ){
-                ParameterListNode* pdn = ldn->parameterList()->as<ParameterListNode>();
-                for ( auto pit = pdn->parameters().begin(); pit != pdn->parameters().end(); ++pit ){
-                    if ( pit != pdn->parameters().begin() )
-                        paramList += ",";
-                    paramList += slice(source, pit->second);
-                }
-            }
-            JSSection* jssection = new JSSection;
-            jssection->from = ldn->body()->startByte();
-            jssection->to   = ldn->body()->endByte();
-            *compose << "this.on(\'" << slice(source, ldn->name()) << "\', function(" << paramList << ")" << jssection << "\n";
-
-            ldn->body()->convertToJs(source, jssection->m_children);
-        } else if ( c->typeString() == "MethodDefinition"){
+        if ( c->typeString() == "MethodDefinition"){
             MethodDefinitionNode* mdn = c->as<MethodDefinitionNode>();
 
             JSSection* jssection = new JSSection;

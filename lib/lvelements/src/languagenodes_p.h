@@ -352,6 +352,8 @@ private:
     ComponentBodyNode* m_body;
 
     std::vector<PropertyDeclarationNode*> m_properties;
+    std::vector<EventDeclarationNode*> m_events;
+    std::vector<ListenerDeclarationNode*> m_listeners;
     std::vector<BaseNode*> m_default;
     std::vector<NewComponentExpressionNode*> m_idComponents;
     std::vector<PropertyAssignmentNode*> m_assignments;
