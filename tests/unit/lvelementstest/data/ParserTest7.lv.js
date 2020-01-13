@@ -26,6 +26,7 @@ module.exports["ParserTest7"] = class ParserTest7 extends Container{
                     function(){ return parent.a + parent.b }.bind(this),
                     [[parent, "aChanged"], [parent, "bChanged"]]
                 )
+                Element.assignDefaultProperty(null)
                 return this
             }.bind(new Element())(this)),
 
@@ -45,6 +46,8 @@ module.exports["ParserTest7"] = class ParserTest7 extends Container{
                     // only b gets bound, 'parent.a' is not in the binding scope
                     [[parent, "bChanged"]]
                 )
+                Element.assignDefaultProperty(null)
+
                 return this
             }.bind(new Element())(this)),
 
@@ -68,6 +71,7 @@ module.exports["ParserTest7"] = class ParserTest7 extends Container{
                     // should activate their bindings
                     [[parent, "aChanged"], [parent, "bChanged"]]
                 )
+                Element.assignDefaultProperty(null)
 
                 return this
             }.bind(new Element())(this)),
@@ -90,6 +94,8 @@ module.exports["ParserTest7"] = class ParserTest7 extends Container{
                     result += (new A()).field;
                     return result
                 }())
+                Element.assignDefaultProperty(null)
+
                 return this
             }.bind(new Element())(this))
         ])

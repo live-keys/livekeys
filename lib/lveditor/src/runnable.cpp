@@ -79,6 +79,7 @@ void Runnable::run(){
             auto documentList = m_project->documentModel()->listUnsavedDocuments();
 
             if ( m_project->active() == this ){
+//                document->setDirty(false);
                 m_engine->createObjectAsync(
                     document->content(),
                     m_runSpace,

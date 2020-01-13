@@ -17,7 +17,7 @@ EditLvSettings::EditLvSettings(EditorSettings* parent)
     m_formats["keyword"]         = createFormat("#a0a000");
     m_formats["variable.builtin"]= createFormat("#93672f");
     m_formats["constant.builtin"]= createFormat("#93672f");
-    m_formats["bultin"]          = createFormat("#93672f");
+    m_formats["builtin"]         = createFormat("#93672f");
     m_formats["property"]        = createFormat("#ccc");
     m_formats["type"]            = createFormat("#0080a0");
     m_formats["runtimeBound"]    = createFormat("#26539f");

@@ -55,7 +55,7 @@
 #include <QTimer>
 #include "textdocumentlayout.h"
 #include "linesurface.h"
-
+#include "live/projectdocument.h"
 #include <QtGlobal>
 
 #if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
@@ -2276,6 +2276,15 @@ void TextEdit::refreshAfterPaletteChange(int pos, int delta)
     }
 }
 
+void TextEdit::checkResetCollapse(int blockNumber)
+{
+    Q_D(TextEdit);
+    if (d->lineControl->isJumpForwardLine(blockNumber, true) != 0)
+    {
+        manageExpandCollapse(blockNumber, false);
+    }
+}
+
 inline void resetEngine(TextNodeEngine *engine, const QColor& textColor, const QColor& selectedTextColor, const QColor& selectionColor)
 {
     *engine = TextNodeEngine();
@@ -2882,6 +2891,9 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     lv_qmlobject_connect(document, QTextDocument, SIGNAL(undoAvailable(bool)), q, TextEdit, SIGNAL(canUndoChanged()));
     lv_qmlobject_connect(document, QTextDocument, SIGNAL(redoAvailable(bool)), q, TextEdit, SIGNAL(canRedoChanged()));
 
+    ProjectDocument* projectDocument = static_cast<ProjectDocument*>(document->parent());
+    lv_qmlobject_connect(projectDocument, ProjectDocument, SIGNAL(resetCollapse(int)), q, TextEdit, SLOT(checkResetCollapse(int)));
+
     if (document->defaultFont() != font && font.pixelSize() > 0)
     {
         document->setDefaultFont(font);
@@ -3123,6 +3135,11 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
     {
         d->dirtyPosition = d->document->findBlock(pos).blockNumber();
         d->lineControl->setDirtyPos(d->dirtyPosition);
+
+        if (lineControl()->isJumpForwardLine(d->dirtyPosition, true) > 0){
+            int delta = lineControl()->removeCollapse(d->dirtyPosition);
+            lineControl()->collapseChange(d->dirtyPosition, delta);
+        }
 
         int newTotalLines = d->document->blockCount();
         if (d->lineCount != newTotalLines) {

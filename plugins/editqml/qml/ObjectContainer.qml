@@ -201,7 +201,11 @@ Item{
                                     propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
                                 }
                             }
-
+                            else {
+                                lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
+                                console.error("Error: Can't create a palette in a non-compiled program")
+                                return
+                            }
                         } else {
                             var opos = codeHandler.addItem(addContainer.itemModel.addPosition, addContainer.objectType, data)
                             codeHandler.addItemToRuntime(objectContainer.editingFragment, data, project.appRoot())

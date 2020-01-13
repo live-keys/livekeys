@@ -271,6 +271,9 @@ Script::Ptr Engine::compileJsModuleFile(const std::string &path){
 }
 
 Script::Ptr Engine::compileModuleFile(const std::string &path){
+    if ( moduleFileType() == Engine::JsOnly ){
+            return compileJsModuleFile(path + ".js");
+    }
     //TODO: Add caching
     //TODO: Add JsOnly, etc
     std::ifstream file(path, std::ifstream::in | std::ifstream::binary);

@@ -13,7 +13,6 @@ public:
     explicit JsImportsTest(QObject *parent = nullptr);
     ~JsImportsTest(){}
 
-
 private slots:
     void initTestCase();
 

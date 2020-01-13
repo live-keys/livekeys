@@ -19,6 +19,22 @@
 
 namespace lv{
 
+const std::string QmlJsSettings::formatStrings[] = {
+    "Text",
+    "Comment",
+    "Number",
+    "String",
+    "Operator",
+    "Identifier",
+    "Keyword",
+    "BuiltIn",
+    "QmlProperty",
+    "QmlType",
+    "QmlRuntimeBoundProperty",
+    "QmlRuntimeModifiedValue",
+    "QmlEdit"
+};
+
 QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     : QObject(parent)
 {

@@ -17,7 +17,7 @@
 
 component default < Element{
     fn toString(){
-        return "class [A]"
+        return "class[A]"
     }
 }
 
@@ -29,11 +29,11 @@ module.exports["A"] = class A extends Element{
     }
 }
 
-////// B.lv.js
+////// B.lv
 
 component default < Element{
     fn toString(){
-        return "class [A]"
+        return "class[B]"
     }
 }
 

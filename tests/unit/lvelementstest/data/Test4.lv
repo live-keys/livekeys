@@ -8,7 +8,7 @@ component default < Container{
     int y: 20
 
     event dataChanged()
-    on dataChanged : function(){
+    on dataChanged : () => {
         this.x = 100;
     }
 

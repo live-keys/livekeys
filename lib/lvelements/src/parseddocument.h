@@ -14,6 +14,11 @@ public:
     static std::vector<ImportInfo> extractImports(const std::string& source, LanguageParser::AST* ast);
     static DocumentInfo::Ptr extractInfo(const std::string& source, LanguageParser::AST* ast);
     static CursorContext findCursorContext(LanguageParser::AST* ast, int position);
+private:
+    static void treePath(LanguageParser::AST* ast, int position, std::vector<TSNode>& result);
+    static TypeInfo::Ptr extractType(const std::string& source, TSNode node);
+
+    static std::string slice(const std::string& source, TSNode node);
 };
 
 }} // namespace lv, el

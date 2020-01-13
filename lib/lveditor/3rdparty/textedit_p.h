@@ -403,7 +403,7 @@ public Q_SLOTS:
     bool isRightToLeft(int start, int end);
     void refreshAfterCollapseChange(int pos, int delta);
     void refreshAfterPaletteChange(int pos, int delta);
-
+    void checkResetCollapse(int blockNumber);
 #ifndef QT_NO_CLIPBOARD
     void cut();
     void copy();
