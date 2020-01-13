@@ -82,6 +82,7 @@ public:
     QTextDocument *document() const;
     static QString stateToString(int state);
 
+    static const int StateMask;
 public slots:
     void rehighlight();
     void rehighlightBlock(const QTextBlock &block);

@@ -6,6 +6,13 @@
 
 namespace lv{ namespace el{
 
+std::string ParsedDocument::slice(const std::string &source, TSNode node)
+{
+    auto start = ts_node_start_byte(node);
+    auto end = ts_node_end_byte(node);
+    return source.substr(start, end-start);
+}
+
 std::vector<ImportInfo> ParsedDocument::extractImports(const std::string &source, LanguageParser::AST *ast){
     TSTree* tree = reinterpret_cast<TSTree*>(ast);
     TSNode root_node = ts_tree_root_node(tree);
@@ -34,13 +41,10 @@ std::vector<ImportInfo> ParsedDocument::extractImports(const std::string &source
                     auto import_child_count = ts_node_child_count(import_child);
                     for (int k = 0; k < import_child_count; k+=2)
                     {
-                        TSNode seg = ts_node_child(import_child, k);
-                        std::string str = source.substr(ts_node_start_byte(seg), ts_node_end_byte(seg) - ts_node_start_byte(seg));
-                        segs.push_back(Utf8(str));
+                        segs.push_back(slice(source, ts_node_child(import_child, k)));
                     }
                 } else if (strcmp(ts_node_type(import_child), "import_as") == 0) {
-                    auto aliasNode = ts_node_child(import_child, 1);
-                    alias = source.substr(ts_node_start_byte(aliasNode), ts_node_end_byte(aliasNode) - ts_node_start_byte(aliasNode));
+                    alias = slice(source, ts_node_child(import_child, 1));
                 }
                 ++j;
             }
@@ -321,11 +325,7 @@ TypeInfo::Ptr ParsedDocument::extractType(const std::string& source, TSNode node
 
         if (strcmp(ts_node_type(cdChild), "identifier") == 0)
         {
-            auto start = ts_node_start_byte(cdChild);
-            auto length = ts_node_end_byte(cdChild) - start;
-            typeName = source.substr(start, length);
-
-
+            typeName = slice(source, cdChild);
         }
         else if (strcmp(ts_node_type(cdChild), "component_heritage") == 0)
         {
@@ -344,23 +344,13 @@ TypeInfo::Ptr ParsedDocument::extractType(const std::string& source, TSNode node
 
                 if (strcmp(ts_node_type(component_body_child), "property_declaration") == 0)
                 {
-                    auto start1 = ts_node_start_byte(ts_node_child(component_body_child, 0));
-                    auto length1 = ts_node_end_byte(ts_node_child(component_body_child, 0)) - start1;
-                    Utf8 type = source.substr(start1, length1);
-
-                    auto start2 = ts_node_start_byte(ts_node_child(component_body_child, 1));
-                    auto length2 = ts_node_end_byte(ts_node_child(component_body_child, 1)) - start2;
-                    Utf8 name = source.substr(start2, length2);
-
+                    Utf8 type = slice(source, ts_node_child(component_body_child, 0));
+                    Utf8 name = slice(source, ts_node_child(component_body_child, 1));
                     properties.push_back(PropertyInfo(name, type));
                 }
                 else if (strcmp(ts_node_type(component_body_child), "typed_function_declaration") == 0 || strcmp(ts_node_type(component_body_child), "event_declaration") == 0)
                 {
-                    TSNode funcNameNode = ts_node_child(component_body_child, 1);
-                    auto start1 = ts_node_start_byte(funcNameNode);
-                    auto length1 = ts_node_end_byte(funcNameNode) - start1;
-                    Utf8 funcName = source.substr(start1, length1);
-
+                    Utf8 funcName = slice(source, ts_node_child(component_body_child, 1));
                     FunctionInfo fi(funcName);
 
                     TSNode formal_type_parameters = ts_node_child(component_body_child, 2);
@@ -368,17 +358,7 @@ TypeInfo::Ptr ParsedDocument::extractType(const std::string& source, TSNode node
                     for (int ftpcidx = 1; ftpcidx < ftpc; ftpcidx+=2)
                     {
                         TSNode formal_type_parameter = ts_node_child(formal_type_parameters, ftpcidx);
-                        TSNode typeNode = ts_node_child(formal_type_parameter, 0);
-                        TSNode nameNode = ts_node_child(formal_type_parameter, 1);
-
-                        auto start1 = ts_node_start_byte(typeNode);
-                        auto length1 = ts_node_end_byte(typeNode) - start1;
-
-                        auto start2 = ts_node_start_byte(nameNode);
-                        auto length2 = ts_node_end_byte(nameNode) - start2;
-
-                        fi.addParameter(source.substr(start2, length2), source.substr(start1, length1));
-
+                        fi.addParameter(slice(source, ts_node_child(formal_type_parameter, 1)), slice(source, ts_node_child(formal_type_parameter, 0)));
                     }
                     if (strcmp(ts_node_type(component_body_child), "typed_function_declaration") == 0)
                         functions.push_back(fi);
@@ -433,13 +413,10 @@ DocumentInfo::Ptr ParsedDocument::extractInfo(const std::string &source, Languag
                     auto import_child_count = ts_node_child_count(import_child);
                     for (int k = 0; k < import_child_count; k+=2)
                     {
-                        TSNode seg = ts_node_child(import_child, k);
-                        std::string str = source.substr(ts_node_start_byte(seg), ts_node_end_byte(seg) - ts_node_start_byte(seg));
-                        segs.push_back(Utf8(str));
+                        segs.push_back(slice(source, ts_node_child(import_child, k)));
                     }
                 } else if (strcmp(ts_node_type(import_child), "import_as") == 0) {
-                    auto aliasNode = ts_node_child(import_child, 1);
-                    alias = source.substr(ts_node_start_byte(aliasNode), ts_node_end_byte(aliasNode) - ts_node_start_byte(aliasNode));
+                    alias = slice(source, ts_node_child(import_child, 1));
                 }
                 ++j;
             }

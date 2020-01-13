@@ -17,6 +17,8 @@ public:
 private:
     static void treePath(LanguageParser::AST* ast, int position, std::vector<TSNode>& result);
     static TypeInfo::Ptr extractType(const std::string& source, TSNode node);
+
+    static std::string slice(const std::string& source, TSNode node);
 };
 
 }} // namespace lv, el

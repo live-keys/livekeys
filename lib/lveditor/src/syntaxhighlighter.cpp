@@ -178,6 +178,8 @@ void SyntaxHighlighterPrivate::populateSectionList(QList<ProjectDocumentSection:
     }
 }
 
+const int SyntaxHighlighter::StateMask = 15;
+
 QString SyntaxHighlighter::stateToString(int state)
 {
     if (state == -1) return "blank";
@@ -350,7 +352,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                 layout->setFormats(ranges);
                 ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
 
-                if (setStates && (stateToSet & 15) != 0 && bd && bd->isCollapsible())
+                if (setStates && (stateToSet & SyntaxHighlighter::StateMask) != 0 && bd && bd->isCollapsible())
                 {
                     projectDocument->resetCollapseSignal(currentBlock.blockNumber());
                 }
@@ -434,7 +436,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                 layout->setFormats(ranges);
                 ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
 
-                if (setStates && (tfr.userstate & 15) != 0 && bd && bd->isCollapsible())
+                if (setStates && (tfr.userstate & SyntaxHighlighter::StateMask) != 0 && bd && bd->isCollapsible())
                 {
                     projectDocument->resetCollapseSignal(currentBlock.blockNumber());
                 }
@@ -470,7 +472,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                     layout->setFormats(ranges);
 
                     ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
-                    if (setStates && (tfr.userstate & 15) != 0 && bd && bd->isCollapsible())
+                    if (setStates && (tfr.userstate & SyntaxHighlighter::StateMask) != 0 && bd && bd->isCollapsible())
                     {
                         projectDocument->resetCollapseSignal(currentBlock.blockNumber());
                     }
@@ -512,7 +514,7 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
 
         if (!currentBlock.isValid()) return;
         ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
-        if (setStates && (stateToSet & 15) != 0 && bd && bd->isCollapsible())
+        if (setStates && (stateToSet & SyntaxHighlighter::StateMask) != 0 && bd && bd->isCollapsible())
         {
             projectDocument->resetCollapseSignal(currentBlock.blockNumber());
         }
