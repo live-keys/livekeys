@@ -16,28 +16,28 @@ public:
 private slots:
     void initTestCase();
 
-    void testExtractImports1();
-    void testExtractImports2();
-    void testExtractImports3();
-    void testExtractImports4();
+    void extractImports1Test();
+    void extractImports2Test();
+    void extractImports3Test();
+    void extractImports4Test();
 
-    void testExtractInfo1();
-    void testExtractInfo2();
-    void testExtractInfo3();
-    void testExtractInfo4();
+    void extractInfo1Test();
+    void extractInfo2Test();
+    void extractInfo3Test();
+    void extractInfo4Test();
 
-    void testCursorContext1();
-    void testCursorContext2();
-    void testCursorContext3();
-    void testCursorContext4();
-    void testCursorContext5();
-    void testCursorContext6();
-    void testCursorContext7();
-    void testCursorContext8();
-    void testCursorContext9();
-    void testCursorContext10();
-    void testCursorContext11();
-    void testCursorContext12();
+    void cursorContext1Test();
+    void cursorContext2Test();
+    void cursorContext3Test();
+    void cursorContext4Test();
+    void cursorContext5Test();
+    void cursorContext6Test();
+    void cursorContext7Test();
+    void cursorContext8Test();
+    void cursorContext9Test();
+    void cursorContext10Test();
+    void cursorContext11Test();
+    void cursorContext12Test();
 
 private:
     lv::el::LanguageParser::Ptr m_parser;

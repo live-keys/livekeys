@@ -17,7 +17,7 @@ void LvElParsedDocumentTest::initTestCase()
     m_parser = lv::el::LanguageParser::createForElements();
 }
 
-void LvElParsedDocumentTest::testExtractImports1()
+void LvElParsedDocumentTest::extractImports1Test()
 {
     std::string testString = "import a.b";
     auto ast = m_parser->parse(testString);
@@ -35,7 +35,7 @@ void LvElParsedDocumentTest::testExtractImports1()
     QVERIFY(res0.importAs() == "");
 }
 
-void LvElParsedDocumentTest::testExtractImports2()
+void LvElParsedDocumentTest::extractImports2Test()
 {
     std::string testString = "import a\nimport .path.rel\n";
     auto ast = m_parser->parse(testString);
@@ -56,7 +56,7 @@ void LvElParsedDocumentTest::testExtractImports2()
     QVERIFY(res0.importAs() == "");
 }
 
-void LvElParsedDocumentTest::testExtractImports3()
+void LvElParsedDocumentTest::extractImports3Test()
 {
     std::string testString = "import .path.rel.morerel as Test";
     auto ast = m_parser->parse(testString);
@@ -69,7 +69,7 @@ void LvElParsedDocumentTest::testExtractImports3()
     QVERIFY(res0.importAs() == "Test");
 }
 
-void LvElParsedDocumentTest::testExtractImports4()
+void LvElParsedDocumentTest::extractImports4Test()
 {
     std::string testString = "import .path.rel.morerel as Test\n"
                              "import a\n"
@@ -84,7 +84,7 @@ void LvElParsedDocumentTest::testExtractImports4()
     QVERIFY(result.size() == 4);
 }
 
-void LvElParsedDocumentTest::testExtractInfo1()
+void LvElParsedDocumentTest::extractInfo1Test()
 {
     std::string testString = "import .path.rel.morerel as Test\n"
                              "\n"
@@ -119,7 +119,7 @@ void LvElParsedDocumentTest::testExtractInfo1()
 
 }
 
-void LvElParsedDocumentTest::testExtractInfo2()
+void LvElParsedDocumentTest::extractInfo2Test()
 {
     std::string testString = "component A < Object { int a : b; c: d }\n"
                              "instance Insta B { int x: y\n"
@@ -171,7 +171,7 @@ void LvElParsedDocumentTest::testExtractInfo2()
     QVERIFY(type2->propertyAt(1).name() == "z");
 }
 
-void LvElParsedDocumentTest::testExtractInfo3()
+void LvElParsedDocumentTest::extractInfo3Test()
 {
     std::string testString = "instance Insta B {\n"
                              "    int x: y\n"
@@ -213,7 +213,7 @@ void LvElParsedDocumentTest::testExtractInfo3()
 
 }
 
-void LvElParsedDocumentTest::testExtractInfo4()
+void LvElParsedDocumentTest::extractInfo4Test()
 {
     std::string testString = "import .path.Cloud as C\n"
                              "component B < C.Element {\n"
@@ -246,7 +246,7 @@ void LvElParsedDocumentTest::testExtractInfo4()
     QVERIFY(type->functionAt(0).returnType() == "");
 }
 
-void LvElParsedDocumentTest::testCursorContext1()
+void LvElParsedDocumentTest::cursorContext1Test()
 {
     std::string testString = "import path.to.import";
 
@@ -272,7 +272,7 @@ void LvElParsedDocumentTest::testCursorContext1()
     QVERIFY(!result.propertyDeclaredType().isValid());
 }
 
-void LvElParsedDocumentTest::testCursorContext2()
+void LvElParsedDocumentTest::cursorContext2Test()
 {
     std::string testString = "import path.to.import";
 
@@ -295,7 +295,7 @@ void LvElParsedDocumentTest::testCursorContext2()
     QVERIFY(!result.propertyDeclaredType().isValid());
 }
 
-void LvElParsedDocumentTest::testCursorContext3()
+void LvElParsedDocumentTest::cursorContext3Test()
 {
     std::string testString = "import path.to.import";
 
@@ -311,7 +311,7 @@ void LvElParsedDocumentTest::testCursorContext3()
     QVERIFY(!result.propertyDeclaredType().isValid());
 }
 
-void LvElParsedDocumentTest::testCursorContext4()
+void LvElParsedDocumentTest::cursorContext4Test()
 {
     std::string testString = "import path.to.import";
 
@@ -327,7 +327,7 @@ void LvElParsedDocumentTest::testCursorContext4()
     QVERIFY(!result.propertyDeclaredType().isValid());
 }
 
-void LvElParsedDocumentTest::testCursorContext5()
+void LvElParsedDocumentTest::cursorContext5Test()
 {
     std::string testString = "component A {\n"
                              "   function a(){\n"
@@ -347,7 +347,7 @@ void LvElParsedDocumentTest::testCursorContext5()
     QVERIFY(!result.propertyDeclaredType().isValid());
 }
 
-void LvElParsedDocumentTest::testCursorContext6()
+void LvElParsedDocumentTest::cursorContext6Test()
 {
     std::string testString = "component T < Element{ prop : 200 }";
 
@@ -369,7 +369,7 @@ void LvElParsedDocumentTest::testCursorContext6()
     QVERIFY(!result.propertyDeclaredType().isValid());
 }
 
-void LvElParsedDocumentTest::testCursorContext7()
+void LvElParsedDocumentTest::cursorContext7Test()
 {
     std::string testString = "component T < Element{ int prop : 200 }";
 
@@ -394,7 +394,7 @@ void LvElParsedDocumentTest::testCursorContext7()
     QVERIFY(result.propertyPath().size() == 0);
 }
 
-void LvElParsedDocumentTest::testCursorContext8()
+void LvElParsedDocumentTest::cursorContext8Test()
 {
     std::string testString = "component T < Element{ on complete: () => {} }";
 
@@ -418,7 +418,7 @@ void LvElParsedDocumentTest::testCursorContext8()
     QVERIFY(result.propertyPath().size() == 0);
 }
 
-void LvElParsedDocumentTest::testCursorContext9()
+void LvElParsedDocumentTest::cursorContext9Test()
 {
     std::string testString = "T{ prop : 200 }";
 
@@ -440,7 +440,7 @@ void LvElParsedDocumentTest::testCursorContext9()
     QVERIFY(result.propertyPath().size() == 0);
 }
 
-void LvElParsedDocumentTest::testCursorContext10()
+void LvElParsedDocumentTest::cursorContext10Test()
 {
     std::string testString = "T{ prop : this.font.size }";
 
@@ -471,7 +471,7 @@ void LvElParsedDocumentTest::testCursorContext10()
     QVERIFY(!result.propertyDeclaredType().isValid());
 }
 
-void LvElParsedDocumentTest::testCursorContext11()
+void LvElParsedDocumentTest::cursorContext11Test()
 {
     std::string testString = "T{ prop : this.font.size }";
 
@@ -494,7 +494,7 @@ void LvElParsedDocumentTest::testCursorContext11()
     QVERIFY(!result.propertyDeclaredType().isValid());
 }
 
-void LvElParsedDocumentTest::testCursorContext12()
+void LvElParsedDocumentTest::cursorContext12Test()
 {
     std::string testString = "import view as View\n"
                              "View.T{ prop : 200}";

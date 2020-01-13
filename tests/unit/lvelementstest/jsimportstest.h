@@ -13,32 +13,25 @@ public:
     explicit JsImportsTest(QObject *parent = nullptr);
     ~JsImportsTest(){}
 
-
-    void importPluginThatImportsPlugin();
-    void samePathSingletonTest();
-    void importPluginWithSamePathImportTest();
-    void importAsTest();
-    void indirectInvalidExportTypeAsObjectTest();
-    void packageDependencyCycleTest();
 private slots:
     void initTestCase();
 
     void singlePluginImportTest();
     void samePathImportTest();
-    //void importPluginThatImportsPlugin();
-    //void samePathSingletonTest();
-    //void importPluginWithSamePathImportTest();
+    void importPluginThatImportsPlugin();
+    void samePathSingletonTest();
+    void importPluginWithSamePathImportTest();
     void packageImportTest();
-    //void importAsTest();
+    void importAsTest();
 
     void invalidExportTypeAsObjectTest();
     void invalidExportTypeAsStringTest();
     void invalidExportKeyTest();
-    //void indirectInvalidExportTypeAsObjectTest();
+    void indirectInvalidExportTypeAsObjectTest();
 
     void moduleFileDependencyCycleTest();
     void pluginDependencyCycleTest();
-    //void packageDependencyCycleTest();
+    void packageDependencyCycleTest();
 };
 
 #endif // JSIMPORTSTEST_H

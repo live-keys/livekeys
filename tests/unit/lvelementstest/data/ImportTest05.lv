@@ -21,7 +21,7 @@ instance default Element{
 
 ////// A.lv.js
 
-module.exports["a"] = (function(parent){
+module.exports["A"] = (function(parent){
     this.setParent(parent)
 
     Element.addProperty(this, "a", { type: "string", notify: "aChanged" })
@@ -39,7 +39,7 @@ component default < Element{
 
 ////// main.lv.js
 
-var a = imports.get("a")
+var a = imports.get("A")
 
 module.exports["main"] = class main extends Element{
     constructor(){
