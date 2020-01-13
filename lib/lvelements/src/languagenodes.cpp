@@ -430,7 +430,13 @@ void BaseNode::visitMemberExpression(BaseNode *parent, const TSNode &node){
             p->as<PropertyDeclarationNode>()->pushToBindings(enode);
             break;
         }
-
+        if (p->typeString() == "PropertyAssignment")
+        {
+            auto child = enode->children()[0];
+            if (child->typeString() != "MemberExpression" && child->typeString() != "Identifier") break;
+            p->as<PropertyAssignmentNode>()->m_bindings.push_back(enode);
+            break;
+        }
         p = p->parent();
     }
 
@@ -446,15 +452,28 @@ void BaseNode::visitPropertyAssignment(BaseNode *parent, const TSNode &node){
     PropertyAssignmentNode* enode = new PropertyAssignmentNode(node);
     parent->insert(enode);
     uint32_t count = ts_node_child_count(node);
-    for ( uint32_t i = 0; i < count; ++i ){
-        TSNode child = ts_node_child(node, i);
-        if ( strcmp(ts_node_type(child), "property_identifier") == 0 ){
-            enode->m_name = new IdentifierNode(child);
-            enode->m_name->setParent(enode);
-        } else if ( strcmp(ts_node_type(child), "expression_statement") == 0 ){
-            enode->m_expression = new BindableExpressionNode(child);
+    if (count >= 1)
+    {
+        TSNode lhs = ts_node_child(node, 0);
+        if (strcmp(ts_node_type(lhs), "identifier") == 0 || strcmp(ts_node_type(lhs), "property_identifier") == 0)
+        {
+            enode->m_property = new IdentifierNode(lhs);
+        }
+        else if (strcmp(ts_node_type(lhs), "member_expression") == 0)
+        {
+            enode->m_property = new MemberExpressionNode(lhs);
+            visitChildren(enode->m_property, lhs);
+        }
+        if (enode->m_property)
+            enode->m_property->setParent(enode);
+    }
+    if (count >= 3)
+    {
+        TSNode rhs = ts_node_child(node, 2);
+        if ( strcmp(ts_node_type(rhs), "expression_statement") == 0 ){
+            enode->m_expression = new BindableExpressionNode(rhs);
             enode->m_expression->setParent(enode);
-            visitChildren(enode->m_expression, child);
+            visitChildren(enode->m_expression, rhs);
         }
     }
 
@@ -1220,6 +1239,8 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
             delete section;
         }
         *compose << "\n]\n)\n";
+    } else {
+        *compose << "Element.assignDefaultProperty(null)\n\n";
     }
 
     *compose << "}\n\n";
@@ -1388,10 +1409,53 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
     }
 
     for (unsigned i=0; i<m_assignments.size(); ++i){
-        if (m_assignments[i]->m_expression)
+
+        if (m_assignments[i]->m_bindings.size() > 0)
         {
-            *compose << "this." << slice(source,m_assignments[i]->m_name)
-                     << " = " << slice(source, m_assignments[i]->m_expression) << "\n";
+            if (m_assignments[i]->m_expression)
+            {
+                *compose << "Element.assignPropertyExpression(this,\n '"
+                         << slice(source, m_properties[i]->name())
+                         << "',\n function(){ return " << slice(source, m_assignments[i]->m_expression) << "}.bind(this),\n"
+                         << "[\n";
+                std::set<std::pair<std::string, std::string>> bindingPairs;
+                for (auto idx = m_assignments[i]->m_bindings.begin(); idx != m_assignments[i]->m_bindings.end(); ++idx)
+                {
+                    BaseNode* node = *idx;
+                    if (node->typeString() == "MemberExpression")
+                    {
+                        MemberExpressionNode* men = node->as<MemberExpressionNode>();
+
+                        std::pair<std::string, std::string> pair = std::make_pair(
+                            slice(source, men->children()[0]),
+                            slice(source, men->children()[1])
+                        );
+
+                        if (bindingPairs.find(pair) == bindingPairs.end())
+                        {
+                            if (!bindingPairs.empty()) *compose << ",\n";
+                            *compose << "[ " << pair.first << ", '" <<  pair.second << "Changed' ]";
+                            bindingPairs.insert(pair);
+                        }
+
+                    }
+                }
+                *compose << "]\n)\n";
+            }
+        }
+        else {
+            if (m_assignments[i]->m_expression && m_assignments[i]->m_property)
+            {
+                if (m_assignments[i]->m_property->typeString() == "Identifier")
+                {
+                    *compose << "this.";
+                }
+
+                //qDebug() << "praperti: " << m_assignments[i]->m_property;
+
+                *compose << slice(source,m_assignments[i]->m_property)
+                         << " = " << slice(source, m_assignments[i]->m_expression) << "\n";
+            }
         }
 
     }
@@ -1412,6 +1476,8 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
             delete section;
         }
         *compose << "\n]\n)\n";
+    } else {
+        *compose << "Element.assignDefaultProperty(null)\n\n";
     }
 
 
@@ -1597,7 +1663,7 @@ std::string PropertyDeclarationNode::toString(int indent) const{
 
 PropertyAssignmentNode::PropertyAssignmentNode(const TSNode &node)
     : JsBlockNode(node, "PropertyAssignment")
-    , m_name(nullptr)
+    , m_property(nullptr)
     , m_expression(nullptr)
 {
 }
@@ -1607,8 +1673,8 @@ std::string PropertyAssignmentNode::toString(int indent) const{
    if ( indent > 0 )
        result.assign(indent * 2, ' ');
     std::string name = "";
-    if ( m_name )
-        name = "(name " + m_name->rangeString() + ")";
+    if ( m_property )
+        name = "(property " + m_property->rangeString() + ")";
     result += "PropertyAssignment " + rangeString() + name + "\n";
     if ( m_expression )
         result += m_expression->toString(indent >= 0 ? indent + 1 : indent);
