@@ -409,6 +409,16 @@ bool ProjectDocument::isActive() const{
     return false;
 }
 
+/*bool ProjectDocument::isDirty() const
+{
+    return m_isDirty;
+}
+
+void ProjectDocument::setDirty(bool dirty)
+{
+    m_isDirty = dirty;
+}*/
+
 /**
  * \brief Overrides Document::content
  */
@@ -472,6 +482,7 @@ ProjectDocument *ProjectDocument::castFrom(Document *document){
  */
 void ProjectDocument::__documentContentsChanged(int position, int charsRemoved, int charsAdded){
     emit contentsChange(position, charsRemoved, charsAdded);
+    //m_isDirty = true;
 
     QString addedText = "";
     if ( charsAdded == 1 ){

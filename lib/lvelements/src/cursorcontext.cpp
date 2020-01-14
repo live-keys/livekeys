@@ -112,13 +112,13 @@
  * \code
  * T{ int declaredProp : this.font.size }
  *                      ^ context = CompletionContext::InRightOfDeclaration | CompletionContext::InElements
- *                        expressionPath = {RangeFor<this>, RangeFor<font>, RangeFor<s>}
+ *                        expressionPath = {}
  *                        objectType = RangeFor<T>
  *                        propertyPath = {RangeFor<declaredProp>}
  *                        propertyDeclaredType = RangeFor<int>
  * \endcode
  *
- * \code
+ * \code // TODO
  * T{ fn declaredFunction(){ return 0 }
  *                              ^ context = CompletionContext::InRightOfDeclaration | CompletionContext::InElements
  *                                expressionPath = {RangeFor<ret>}
@@ -147,6 +147,11 @@ CursorContext::CursorContext(int context,
 }
 
 CursorContext::~CursorContext(){
+}
+
+int CursorContext::context() const
+{
+    return m_context;
 }
 
 Utf8 CursorContext::contextString() const{

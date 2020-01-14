@@ -17,6 +17,8 @@ module.exports["B"] = class B extends Element{
 
         Element.addProperty(this, 'not2', {type: "int", notify: 'not2Changed'})
         this.not2 = 10
+
+        Element.assignDefaultProperty(null)
     }
 
     not1(d, e){

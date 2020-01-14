@@ -27,8 +27,9 @@ HEADERS += \
     $$PWD/jstupletest.h \
     $$PWD/jsimportstest.h \
     $$PWD/jsinheritancetest.h \
-    lvparsetest.h \
-    metaobjecttypeinfotest.h
+    $$PWD/lvparsetest.h \
+    $$PWD/metaobjecttypeinfotest.h \
+    $$PWD/lvelparseddocumenttest.h
 
 SOURCES += \
     $$PWD/main.cpp \
@@ -49,8 +50,9 @@ SOURCES += \
     $$PWD/jstupletest.cpp \
     $$PWD/jsimportstest.cpp \
     $$PWD/jsinheritancetest.cpp \
-    lvparsetest.cpp \
-    metaobjecttypeinfotest.cpp
+    $$PWD/lvparsetest.cpp \
+    $$PWD/metaobjecttypeinfotest.cpp \
+    $$PWD/lvelparseddocumenttest.cpp
 
 OTHER_FILES += $$PWD/data/*.*
 

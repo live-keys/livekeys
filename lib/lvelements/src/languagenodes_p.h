@@ -304,9 +304,9 @@ public:
     // virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0) override;
 
 private:
-    IdentifierNode* m_type;
-    IdentifierNode* m_name;
+    BaseNode* m_property;
     BindableExpressionNode* m_expression;
+    std::vector<BaseNode*> m_bindings;
 
     friend class BaseNode;
     friend class NewComponentExpressionNode;
@@ -352,6 +352,8 @@ private:
     ComponentBodyNode* m_body;
 
     std::vector<PropertyDeclarationNode*> m_properties;
+    std::vector<EventDeclarationNode*> m_events;
+    std::vector<ListenerDeclarationNode*> m_listeners;
     std::vector<BaseNode*> m_default;
     std::vector<NewComponentExpressionNode*> m_idComponents;
     std::vector<PropertyAssignmentNode*> m_assignments;

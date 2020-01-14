@@ -959,8 +959,7 @@ bool CodeQmlHandler::findDeclarationValue(int position, int length, int &valuePo
  * each component resides, and use those binding paths to connect the position of the
  * code structure to the same values within the runtime.
  */
-QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr declaration)
-{
+QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr declaration){
     Q_D(CodeQmlHandler);
     Project* project = d->projectHandler->project();
 

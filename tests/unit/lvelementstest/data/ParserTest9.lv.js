@@ -9,6 +9,7 @@ Element.addProperty(root, "x", {type: "int", notify: "xChanged"})
 // Assign module
 module.exports["ParserTest9"] = (function(parent){
     this.setParent(parent)
+    Element.assignId(root, "root")
 
     // assign properties
     this.x = 20
@@ -17,7 +18,9 @@ module.exports["ParserTest9"] = (function(parent){
     Element.assignDefaultProperty(this, [
         (function(parent){
             this.setParent(parent)
+            Element.assignId(rootChild, "rootChild")
             this.y = 10
+            Element.assignDefaultProperty(null)
             return this
         }.bind(rootChild)(this))
     ])
