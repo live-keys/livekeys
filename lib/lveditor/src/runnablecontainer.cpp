@@ -77,6 +77,10 @@ QList<Runnable *> RunnableContainer::runnablesInPath(const QString &path){
     return result;
 }
 
+Runnable *RunnableContainer::runnableAt(int index){
+    return m_runnables.at(index);
+}
+
 void RunnableContainer::setFilter(const QString &filter){
     if ( m_filter != filter ){
         m_filter = filter;

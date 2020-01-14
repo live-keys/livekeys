@@ -46,13 +46,13 @@ v8::Local<v8::Object> Imports::requireAs(const std::string &importKey){
 v8::Local<v8::Value> Imports::get(const std::string &key){
     ModuleFile* mf = nullptr;
 
-    //TODO: Search library exports as well
     ElementsPlugin::Ptr currentPlugin = m_moduleFile->plugin();
     auto currentPluginExportSearch = currentPlugin->fileExports().find(key);
     if ( currentPluginExportSearch != currentPlugin->fileExports().end() ){
         mf = currentPluginExportSearch->second;
     }
 
+    //TODO: Search library exports as well
     auto exportSearch = m_exports.find(key);
     if ( exportSearch != m_exports.end() ){
         mf = exportSearch->second;

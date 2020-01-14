@@ -18,10 +18,10 @@
 #define FILTERTESTSTUB_H
 
 #include <QObject>
-#include "live/act.h"
+#include "live/qmlact.h"
 #include "shareddatateststub.h"
 
-class FilterTestStub : public lv::Act{
+class FilterTestStub : public lv::QmlAct{
 
     Q_OBJECT
     Q_PROPERTY(SharedDataTestStub* input1 READ input1 WRITE setInput1 NOTIFY input1Changed)

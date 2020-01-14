@@ -25,14 +25,17 @@
 #include "qmlcompletioncontextfinder.h"
 #include "projectqmlscopecontainer_p.h"
 #include "qmllibraryinfo_p.h"
-#include "plugininfoextractor.h"
-#include "plugintypesfacade.h"
 #include "documentqmlvaluescanner_p.h"
 #include "documentqmlvalueobjects.h"
 #include "qmljsbuiltintypes_p.h"
 #include "qmljshighlighter_p.h"
-#include "bindingchannel.h"
+#include "qmlbindingchannel.h"
+#include "qmlbindingspan.h"
 #include "qmlcursorinfo.h"
+#include "qmlcodeconverter.h"
+#include "qmladdcontainer.h"
+#include "qmlscopesnap_p.h"
+#include "qmlusagegraphscanner.h"
 
 #include "live/documenthandler.h"
 #include "live/codecompletionsuggestion.h"
@@ -44,9 +47,8 @@
 #include "live/visuallogqt.h"
 #include "live/editorglobalobject.h"
 #include "live/palettecontainer.h"
-#include "qmlcodeconverter.h"
-#include "qmladdcontainer.h"
-#include "qmlscopesnap_p.h"
+#include "live/qmlpropertywatcher.h"
+#include "live/runnablecontainer.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -69,7 +71,7 @@ public:
     DocumentQmlScope::Ptr  documentScope;
     ProjectQmlExtension*   projectHandler;
 
-    QmlScopeSnap snapScope(){
+    QmlScopeSnap snapScope() const{
         return QmlScopeSnap(projectHandler->scanMonitor()->projectScope(), documentScope);
     }
 };
@@ -802,7 +804,7 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
         }
 
         if ( expression.size() > 0 ){
-            if ( expressionEndDelimiter == QChar('{') ){ // dealing with an object declaration ( 'Object{' )
+            if ( expressionEndDelimiter == QChar('{') ){ // dealing with an object list declaration ( 'Object{' )
 
                 QmlScopeSnap scope = d->snapScope();
 
@@ -957,25 +959,37 @@ bool CodeQmlHandler::findDeclarationValue(int position, int length, int &valuePo
  * each component resides, and use those binding paths to connect the position of the
  * code structure to the same values within the runtime.
  */
-QmlEditFragment *CodeQmlHandler::createInjectionChannel(
-        QmlDeclaration::Ptr declaration,
-        QObject *runtime)
+QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr declaration)
 {
-    if ( m_document && m_document->isActive() ){
+    Q_D(CodeQmlHandler);
+    Project* project = d->projectHandler->project();
 
-        BindingPath* bp = DocumentQmlInfo::findDeclarationPath(m_target->toPlainText(), m_document, declaration);
+    if ( m_document ){
+        QmlBindingPath::Ptr bp = DocumentQmlInfo::findDeclarationPath(m_target->toPlainText(), m_document, declaration);
         if ( !bp )
             return nullptr;
 
-        DocumentQmlInfo::traverseBindingPath(bp, runtime);
-        if ( !bp->hasConnection() ){
-            delete bp;
-            return nullptr;
+        Runnable* r = project->runnables()->runnableAt(bp->rootFile());
+
+        if (r && r->type() != Runnable::LvFile ){
+            QmlBindingChannel::Ptr bc = DocumentQmlInfo::traverseBindingPath(bp, r);
+            if ( !bc || !bc->hasConnection() )
+                return nullptr;
+
+            QmlEditFragment* ef = new QmlEditFragment(declaration);
+            bc->setEnabled(true);
+            ef->bindingSpan()->setExpressionPath(bp);
+            ef->bindingSpan()->setInputChannel(bc);
+            ef->bindingSpan()->addOutputChannel(bc);
+            return ef;
         }
 
-        QmlEditFragment* ef = new QmlEditFragment(declaration);
-        ef->bindingChannel()->setExpressionPath(bp);
-        return ef;
+        QString fileName = declaration->document()->file()->name();
+        if ( fileName.length() && fileName.front().isUpper() ){ // if component
+            QmlEditFragment* ef = new QmlEditFragment(declaration);
+            ef->bindingModel(this);
+            return ef;
+        }
     }
 
     return nullptr;
@@ -1093,6 +1107,177 @@ QmlEditFragment *CodeQmlHandler::findEditFragmentIn(QmlEditFragment* parent, Cod
     return nullptr;
 }
 
+void CodeQmlHandler::suggestionsForProposedExpression(QmlDeclaration::Ptr declaration, const QString &expression, CodeCompletionModel *model) const{
+    Q_D(const CodeQmlHandler);
+
+    QmlScopeSnap scope = d->snapScope();
+
+    QStringList expressionPathNotTrimmed = expression.split(".");
+    QStringList expressionPath;
+    for ( const QString& expr : expressionPathNotTrimmed ){
+        expressionPath.append(expr.trimmed());
+    }
+
+    int completionPosition = expression.lastIndexOf(".");
+    completionPosition++; // will be '0' if not found
+
+    model->setCompletionPosition(completionPosition);
+    QString filter = expressionPath.size() > 0 ? expressionPath.last() : "";
+
+    int cursorPosition = declaration->valuePosition();
+
+    QList<CodeCompletionSuggestion> suggestions;
+
+    if ( expressionPath.size() > 1 ){
+        QStringList expressionPathHead = expressionPath;
+        expressionPathHead.removeLast();
+
+        QmlScopeSnap::ExpressionChain expression = scope.evaluateExpression(
+            declaration->parentType(), expressionPathHead, cursorPosition
+        );
+
+        if ( expression.lastSegmentType() == QmlScopeSnap::ExpressionChain::ObjectNode ){
+            suggestionsForValueObject(expression.documentValueObject, suggestions, true, true, false, true);
+            qmlhandler_helpers::suggestionsForObjectPath(expression.typeReference, true, true, false, false, false, "", suggestions);
+        } else if ( expression.lastSegmentType() == QmlScopeSnap::ExpressionChain::ClassNode ){
+            suggestionsForValueObject(expression.documentValueObject, suggestions, true, true, false, true);
+            qmlhandler_helpers::suggestionsForObjectPath(expression.typeReference, true, true, false, true, false, "", suggestions);
+        } else if ( expression.lastSegmentType() == QmlScopeSnap::ExpressionChain::NamespaceNode ){
+            suggestionsForNamespaceTypes(expression.importAs, suggestions);
+        } else if ( expression.lastSegmentType() == QmlScopeSnap::ExpressionChain::PropertyNode ){
+            qmlhandler_helpers::suggestionsForObjectPath(expression.propertyChain.last().propertyTypePath, true, true, false, false, false, "", suggestions);
+        }
+    } else {
+        suggestions << CodeCompletionSuggestion("parent", "id", "", "parent");
+        suggestionsForDocumentsIds(suggestions);
+        DocumentQmlInfo::ValueReference documentValue = scope.document->info()->valueAtPosition(cursorPosition);
+        if ( !scope.document->info()->isValueNull(documentValue) )
+            suggestionsForValueObject(
+                scope.document->info()->extractValueObject(documentValue),
+                suggestions,
+                true,
+                true,
+                false,
+                true
+            );
+
+        QmlScopeSnap::InheritancePath typePath = scope.getTypePath(declaration->parentType());
+        qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, false, false, false, "", suggestions);
+    }
+
+    if ( !suggestions.isEmpty() ){
+        model->enable();
+    }
+
+    model->setSuggestions(suggestions, filter);
+}
+
+bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const QString &expression){
+    Q_D(const CodeQmlHandler);
+
+    QmlScopeSnap scope = d->snapScope();
+
+    Project* project = d->projectHandler->project();
+
+    QStringList expressionPathNotTrimmed = expression.split(".");
+    QStringList expressionPath;
+    for ( const QString& expr : expressionPathNotTrimmed ){
+        expressionPath.append(expr.trimmed());
+    }
+
+    int cursorPosition = edit->declaration()->valuePosition();
+
+    QmlScopeSnap::ExpressionChain expressionChain = scope.evaluateExpression(
+        edit->declaration()->parentType(), expressionPath, cursorPosition
+    );
+
+    qDebug() << expressionChain.toString(false);
+
+    if ( !expressionChain.isValid() ){
+        //TODO: Error
+        qWarning("ERROR: Failed to evaluate expression.");
+        return false;
+    }
+
+    // The watcher is a child of the receiver in order to be deleted
+    // when the receiver is deleted and not point to a null location
+
+    QmlBindingPath::Ptr bp = nullptr;
+
+    if ( expressionChain.isId ){ // <id>.<property...>
+        // TODO: get binding path of id, then continue
+
+    } else if ( expressionChain.isParent ){ // <parent...>.<property...>
+
+        // TODO: current binding path -> parent, then append property chain to current binding path
+
+    } else { // <property...>
+        // clone current binding path, append properties to it
+
+        bp = edit->bindingSpan()->expressionPath()->clone();
+        QmlBindingPath::Node* n = bp->root();
+        if ( n ){
+            while ( n->child )
+                n = n->child;
+        }
+
+        if ( n && n->type() == QmlBindingPath::Node::Property ){
+            if ( n->parent ){
+                n = n->parent;
+                delete n->child;
+                n->child = nullptr;
+            } else {
+                delete n;
+                n = nullptr;
+            }
+        }
+
+        for ( const QmlScopeSnap::PropertyReference& prop : expressionChain.propertyChain){
+            QmlBindingPath::PropertyNode* pn = new QmlBindingPath::PropertyNode;
+            pn->propertyName = prop.property.name();
+            pn->objectName = QStringList() << prop.classTypePath.nodes.first().typeName;
+
+            if ( n ){
+                pn->parent = n;
+                n->child = pn;
+            }
+        }
+    }
+
+    //TODO: Will need to search each Runnable from the bindingPath
+
+//    if ( project->appRoot() && bp ){
+
+//        DocumentQmlInfo::traverseBindingPath(bp, project->appRoot());
+
+//        if ( !bp->hasConnection() ){
+//            //TODO: Error
+//            qWarning("Failed to find binding channel.");
+//        }
+
+//        //TODO: Check if receiver already has a watcher on this property and remove it
+//        BindingPath::Ptr receivingPath = edit->bindingChannel()->expressionPath();
+
+//        QmlPropertyWatcher* watcher = new QmlPropertyWatcher(bp->property());
+
+//        if ( receivingPath->property().isValid() && receivingPath->property().object() ){
+//            QQmlProperty pp = receivingPath->property();
+//            pp.write(watcher->read());
+//            watcher->onChange([pp](const QmlPropertyWatcher& watcher){
+//                pp.write(watcher.read());
+//            });
+//            watcher->setParent(receivingPath->property().object());
+//        }
+//    }
+
+    return true;
+}
+
+QmlUsageGraphScanner *CodeQmlHandler::createScanner(){
+    Q_D(CodeQmlHandler);
+    return new QmlUsageGraphScanner(d->projectHandler->project(), d->snapScope());
+}
+
 QList<int> CodeQmlHandler::languageFeatures() const{
     return {
         DocumentHandler::LanguageHelp,
@@ -1106,7 +1291,9 @@ QString CodeQmlHandler::help(int position){
     return getHelpEntity(position);
 }
 
-QmlEditFragment *CodeQmlHandler::openConnection(int position, QObject* currentApp){
+QmlEditFragment *CodeQmlHandler::openConnection(int position, QObject* /*currentApp*/){
+    Q_D(CodeQmlHandler);
+
     if ( !m_document )
         return nullptr;
 
@@ -1126,7 +1313,7 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position, QObject* currentAp
             return edit;
     }
 
-    QmlEditFragment* ef = createInjectionChannel(declaration, currentApp);
+    QmlEditFragment* ef = createInjectionChannel(declaration);
 
     if ( !ef ){
         return nullptr;
@@ -1159,9 +1346,9 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position, QObject* currentAp
         }
     });
 
-    BindingPath* mainPath = ef->bindingChannel()->expressionPath();
-    if ( mainPath->listIndex() == -1 ){
-        mainPath->property().connectNotifySignal(ef, SLOT(updateValue()));
+    QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->inputChannel();
+    if ( inputChannel && inputChannel->listIndex() == -1 ){
+        inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
     }
 
     addEditingFragment(ef);
@@ -1195,7 +1382,7 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
             return edit;
     }
 
-    QmlEditFragment* ef = createInjectionChannel(declaration, currentApp);
+    QmlEditFragment* ef = createInjectionChannel(declaration);
     if ( !ef ){
         return nullptr;
     }
@@ -1227,9 +1414,9 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
         }
     });
 
-    BindingPath* mainPath = ef->bindingChannel()->expressionPath();
-    if ( mainPath->listIndex() == -1 ){
-        mainPath->property().connectNotifySignal(ef, SLOT(updateValue()));
+    QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->inputChannel();
+    if ( inputChannel && inputChannel->listIndex() == -1 ){
+        inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
     }
 
     editParent->addChildFragment(ef);
@@ -1271,6 +1458,12 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated){
     QmlDeclaration::Ptr declaration = properties.first();
 
     PaletteList* lpl = d->projectHandler->paletteContainer()->findPalettes("qml/" + declaration->type());
+    if ( declaration->isListDeclaration() ){
+        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", lpl);
+    } else {
+        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", lpl);
+    }
+
     lpl->setPosition(declaration->position());
     if ( unrepeated ){
         for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
@@ -1588,7 +1781,7 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
     connect(palette, &CodePalette::valueChanged, [this, edit](){
         if ( edit->totalPalettes() > 0 ){
             CodePalette* cp = *edit->begin();
-            edit->bindingChannel()->commit(cp->value());
+            edit->bindingSpan()->commit(cp->value());
         }
         m_document->removeEditingState(ProjectDocument::Overlay);
         removeEditingFragment(edit);
@@ -1904,36 +2097,42 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &type
     if ( !edit || !currentApp )
         return;
 
-    BindingPath* bp = edit->bindingChannel()->expressionPath();
-    QQmlProperty& p = bp->property();
+    const QList<QmlBindingChannel::Ptr>& outputChannels = edit->bindingSpan()->outputChannels();
+    for ( auto it = outputChannels.begin(); it != outputChannels.end(); ++it ){
+        QmlBindingChannel::Ptr bc = *it;
 
-    QObject* result = QmlCodeConverter::create(
-        *d->documentScope, type + "{}", "temp"
-    );
+        if ( bc->canModify() ){
+            QQmlProperty& p = bc->property();
 
-    if ( p.propertyTypeCategory() == QQmlProperty::List ){
-        QQmlListReference ppref = qvariant_cast<QQmlListReference>(p.read());
-        QObject* obat = ppref.at(bp->listIndex());
+            QObject* result = QmlCodeConverter::create(
+                *d->documentScope, type + "{}", "temp"
+            );
 
-        QQmlProperty assignmentProperty(obat);
-        if ( assignmentProperty.propertyTypeCategory() == QQmlProperty::List ){
-            QQmlListReference assignmentList = qvariant_cast<QQmlListReference>(assignmentProperty.read());
-            vlog("editqmljs-codehandler").v() <<
-                "Adding : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
-                "property " << assignmentProperty.name();
-            if ( assignmentList.canAppend() ){
-                assignmentList.append(result);
-                return;
+            if ( p.propertyTypeCategory() == QQmlProperty::List ){
+                QQmlListReference ppref = qvariant_cast<QQmlListReference>(p.read());
+                QObject* obat = ppref.at(bc->listIndex());
+
+                QQmlProperty assignmentProperty(obat);
+                if ( assignmentProperty.propertyTypeCategory() == QQmlProperty::List ){
+                    QQmlListReference assignmentList = qvariant_cast<QQmlListReference>(assignmentProperty.read());
+                    vlog("editqmljs-codehandler").v() <<
+                        "Adding : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
+                        "property " << assignmentProperty.name();
+                    if ( assignmentList.canAppend() ){
+                        assignmentList.append(result);
+                        return;
+                    }
+                } else {
+                    vlog("editqmljs-codehandler").v() <<
+                        "Assigning : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
+                        "property " << assignmentProperty.name();
+                    assignmentProperty.write(QVariant::fromValue(result));
+                    return;
+                }
+            } else {
+                //TODO: Property based asignment
             }
-        } else {
-            vlog("editqmljs-codehandler").v() <<
-                "Assigning : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
-                "property " << assignmentProperty.name();
-            assignmentProperty.write(QVariant::fromValue(result));
-            return;
         }
-    } else {
-        //TODO: Property based asignment
     }
 }
 
@@ -1948,44 +2147,45 @@ void CodeQmlHandler::updateRuntimeBindings(QObject *runtime){
 
     QList<QmlEditFragment*> toRemove;
 
-    auto it = m_edits.begin();
-    while ( it != m_edits.end() ){
-        QmlEditFragment* ef = *it;
+    //TODO: Move per runnable and bindingChannel
 
-        BindingPath* bp = DocumentQmlInfo::findDeclarationPath(objects->root(), ef->declaration());
-        if ( !bp ){
-            vlog("editqmljs-codehandler").v() <<
-                "Disconnecting \'" + ef->bindingChannel()->expressionPath()->toString() << "\' due to lack of binding path.";
-            toRemove.append(ef);
+//    auto it = m_edits.begin();
+//    while ( it != m_edits.end() ){
+//        QmlEditFragment* ef = *it;
 
-        } else if ( *(ef->bindingChannel()->expressionPath()) != *bp ){
-            vlog("editqmljs-codehandler").v() <<
-                "Disconnecting \'" + ef->bindingChannel()->expressionPath()->toString() << "\' due to change of binding path.";
-            toRemove.append(ef);
+//        BindingPath::Ptr bp = DocumentQmlInfo::findDeclarationPath(objects->root(), ef->declaration());
+//        if ( !bp ){
+//            vlog("editqmljs-codehandler").v() <<
+//                "Disconnecting \'" + ef->bindingChannel()->expressionPath()->toString() << "\' due to lack of binding path.";
+//            toRemove.append(ef);
 
-        } else {
-            delete bp;
-            DocumentQmlInfo::traverseBindingPath(ef->bindingChannel()->expressionPath(), runtime);
-            if ( !ef->bindingChannel()->expressionPath()->hasConnection() ){
-                vlog("editqmljs-codehandler").v() <<
-                    "Disconnecting \'" + ef->bindingChannel()->expressionPath()->toString() << "\' due to missing root path.";
-                toRemove.append(ef);
-            } else {
-                vlog("editqmljs-codehandler").v() <<
-                    "Updating \'" + ef->bindingChannel()->expressionPath()->toString() << "\' connection.";
+//        } else if ( *(ef->bindingChannel()->expressionPath()) != *bp ){
+//            vlog("editqmljs-codehandler").v() <<
+//                "Disconnecting \'" + ef->bindingChannel()->expressionPath()->toString() << "\' due to change of binding path.";
+//            toRemove.append(ef);
 
-                BindingPath* mainPath = ef->bindingChannel()->expressionPath();
-                if ( mainPath->listIndex() == -1 ){
-                    mainPath->property().connectNotifySignal(ef, SLOT(updateValue()));
-                }
-                for ( auto palIt = ef->begin(); palIt != ef->end(); ++palIt ){
-                    ef->updatePaletteValue(*palIt);
-                }
-            }
-        }
+//        } else {
+//            DocumentQmlInfo::traverseBindingPath(ef->bindingChannel()->expressionPath(), runtime);
+//            if ( !ef->bindingChannel()->expressionPath()->hasConnection() ){
+//                vlog("editqmljs-codehandler").v() <<
+//                    "Disconnecting \'" + ef->bindingChannel()->expressionPath()->toString() << "\' due to missing root path.";
+//                toRemove.append(ef);
+//            } else {
+//                vlog("editqmljs-codehandler").v() <<
+//                    "Updating \'" + ef->bindingChannel()->expressionPath()->toString() << "\' connection.";
 
-         ++it;
-     }
+//                BindingPath::Ptr mainPath = ef->bindingChannel()->expressionPath();
+//                if ( mainPath->listIndex() == -1 ){
+//                    mainPath->property().connectNotifySignal(ef, SLOT(updateValue()));
+//                }
+//                for ( auto palIt = ef->begin(); palIt != ef->end(); ++palIt ){
+//                    ef->updatePaletteValue(*palIt);
+//                }
+//            }
+//        }
+
+//         ++it;
+//     }
 
     for ( auto it = toRemove.begin(); it != toRemove.end(); ++it ){
         removeEditingFragment(*it);
@@ -2090,7 +2290,7 @@ void CodeQmlHandler::suggestionsForValueObject(
         bool extractProperties,
         bool extractFunctions,
         bool extractSlots,
-        bool extractSignals)
+        bool extractSignals) const
 {
     if ( extractProperties ){
         for (
@@ -2158,9 +2358,9 @@ void CodeQmlHandler::suggestionsForValueObject(
 
 void CodeQmlHandler::suggestionsForNamespaceTypes(
     const QString &typeNameSpace,
-    QList<CodeCompletionSuggestion> &suggestions)
+    QList<CodeCompletionSuggestion> &suggestions) const
 {
-    Q_D(CodeQmlHandler);
+    Q_D(const CodeQmlHandler);
     QmlScopeSnap scope = d->snapScope();
 
     if ( typeNameSpace.isEmpty() ){
@@ -2219,8 +2419,8 @@ void CodeQmlHandler::suggestionsForNamespaceImports(QList<CodeCompletionSuggesti
     suggestions << localSuggestions;
 }
 
-void CodeQmlHandler::suggestionsForDocumentsIds(QList<CodeCompletionSuggestion> &suggestions){
-    Q_D(CodeQmlHandler);
+void CodeQmlHandler::suggestionsForDocumentsIds(QList<CodeCompletionSuggestion> &suggestions) const{
+    Q_D(const CodeQmlHandler);
     QStringList ids = d->documentScope->info()->extractIds();
     ids.sort();
     foreach( const QString& id, ids ){

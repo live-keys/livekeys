@@ -117,6 +117,6 @@ private:
     Setter m_setter;
 };
 
-}} // namespace lv, script
+}} // namespace lv, el
 
 #endif // LVPROPERTY_H

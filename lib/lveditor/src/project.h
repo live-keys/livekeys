@@ -65,7 +65,7 @@ public:
     };
 
 public:
-    Project(QObject* parent = nullptr);
+    Project(el::Engine* engine, QObject* parent = nullptr);
     ~Project();
 
     ProjectFile* lookupBestFocus(ProjectEntry* entry);
@@ -145,6 +145,8 @@ public slots:
     QObject* runSpace();
     QObject* appRoot();
 
+    el::Engine* engine();
+
 signals:
     /** path changed, means the whole project changed */
     void pathChanged(QString rootPath);
@@ -166,7 +168,7 @@ signals:
     void aboutToClose();
 
 private:
-    ViewEngine* engine();
+    ViewEngine* viewEngine();
     ProjectFile* relocateDocument(const QString& rootPath, const QString &newPath, Document *document);
     void setActive(Runnable* runnable);
     ProjectDocument* createTextDocument(ProjectFile* file, bool isMonitored);
@@ -188,6 +190,7 @@ private:
     RunTrigger       m_runTrigger;
 
     QSet<QString>    m_excludedRunTriggers;
+    el::Engine*      m_engine;
 };
 
 
@@ -245,6 +248,13 @@ inline void Project::setRunTrigger(Project::RunTrigger runTrigger){
 
     m_runTrigger = runTrigger;
     emit runTriggerChanged();
+}
+
+/**
+ * \brief Returns the Elements engine associated with this project.
+ */
+inline el::Engine *Project::engine(){
+    return m_engine;
 }
 
 

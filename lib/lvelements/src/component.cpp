@@ -13,4 +13,4 @@ Element *Component::create(const Function::Parameters &params){
     return m_constructor.callAsConstructor(m_engine, params).toElement(m_engine);
 }
 
-}} // namespace lv, script
+}} // namespace lv, el

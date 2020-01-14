@@ -20,7 +20,7 @@ class LV_ELEMENTS_EXPORT Container : public Element{
 
 public:
     Container(Engine* engine);
-    ~Container();
+    ~Container() override;
 
     LocalValue children();
     void setChildren(LocalValue children);

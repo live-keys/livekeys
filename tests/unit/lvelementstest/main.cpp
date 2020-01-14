@@ -38,7 +38,7 @@
 #include "jstupletest.h"
 #include "jsimportstest.h"
 #include "lvparsetest.h"
-
+#include "metaobjecttypeinfotest.h"
 
 int main(int argc, char *argv[]){
     lv::ApplicationContext::initialize({});

@@ -22,7 +22,7 @@
 #include <functional>
 
 FilterTestStub::FilterTestStub(QObject *parent)
-    : lv::Act(parent)
+    : lv::QmlAct(parent)
     , m_input1(0)
     , m_input2(0)
     , m_output(new SharedDataTestStub(this))
@@ -48,7 +48,7 @@ void FilterTestStub::process(){
         }
     };
 
-    onRun(lv::Shared::refScope(this, m_input1, m_input2), cb, [this](){
-        emit this->outputChanged(m_output);
-    });
+//    onRun(lv::Shared::refScope(this, m_input1, m_input2), cb, [this](){
+//        emit this->outputChanged(m_output);
+//    });
 }

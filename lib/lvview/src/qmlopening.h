@@ -1,12 +1,12 @@
 #ifndef LVQMLOPENING_H
 #define LVQMLOPENING_H
 
-#include "act.h"
+#include "qmlact.h"
 
 namespace lv{
 
 /// \private
-class QmlOpening : public Act{
+class QmlOpening : public QmlAct{
 
     Q_OBJECT
 

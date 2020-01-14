@@ -114,4 +114,4 @@ const Value &InstanceProperty::value() const{
     return m_value;
 }
 
-}} // namespace lv, script
+}} // namespace lv, el

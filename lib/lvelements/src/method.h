@@ -45,6 +45,9 @@ public:
         m_less = nullptr;
         m_ptr = &Function::methodPtrImplementation<C>;
         m_totalArguments  = sizeof...(Args);
+        m_declaration =
+            TypeName<RT>::capture(TypeNameOptions::None) +
+            "(" + TypeName<Args...>::capture(TypeNameOptions::None) + ")";
         m_unwrapFunction = [this](const Function::CallInfo& params){
             Method::callMethod(
                 params.engine(),
@@ -71,6 +74,7 @@ public:
         m_less           = nullptr;
         m_ptr            = &Function::methodPtrImplementation<C>;
         m_totalArguments = sizeof...(Args);
+        m_declaration = "void(" + TypeName<Args...>::capture(TypeNameOptions::None) + ")";
         m_unwrapFunction = [this](const Function::CallInfo& params){
             Method::callVoidMethod(
                 m_function, typename meta::make_indexes<Args...>::type(), params
@@ -116,6 +120,7 @@ public:
         m_less = nullptr;
         m_ptr = &Function::methodPtrImplementation<C>;
         m_totalArguments  = 0;
+        m_declaration = TypeName<RT>::capture(TypeNameOptions::None) + "(Optional)";
         m_unwrapFunction = [this](const Function::CallInfo& params){
             Function::checkReturn(params.engine(), params, m_function(params.template that<C>(), params));
         };
@@ -139,6 +144,7 @@ public:
         m_less           = nullptr;
         m_ptr            = &Function::methodPtrImplementation<C>;
         m_totalArguments = 0;
+        m_declaration = "void(Optional)";
         m_unwrapFunction = [this](const Function::CallInfo& params){
             m_function(params.template that<C>(), params);
             return LocalValue(params.engine());
@@ -154,6 +160,6 @@ private:
 
 
 
-}} // namespace lv, script
+}} // namespace lv, el
 
 #endif // LVMETHOD_H

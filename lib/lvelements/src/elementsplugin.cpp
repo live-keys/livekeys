@@ -21,7 +21,7 @@ class ElementsPluginPrivate{
 public:
     Plugin::Ptr plugin;
     Engine*     engine;
-    std::map<std::string, ModuleFile*> modules;
+    std::map<std::string, ModuleFile*> fileModules;
     std::map<std::string, ModuleLibrary*> libraryModules;
 
     std::map<std::string, ModuleFile*> fileExports;
@@ -40,7 +40,7 @@ ElementsPlugin::Ptr ElementsPlugin::create(Plugin::Ptr plugin, Engine *engine){
     ElementsPlugin::Ptr epl(new ElementsPlugin(plugin, engine));
 
     for ( auto it = plugin->modules().begin(); it != plugin->modules().end(); ++it ){
-        epl->m_d->modules[*it] = epl->load(epl, *it);
+        epl->m_d->fileModules[*it] = epl->load(epl, *it);
     }
     for ( auto it = plugin->libraryModules().begin(); it != plugin->libraryModules().end(); ++it ){
         epl->m_d->libraryModules[*it] = epl->loadLibrary(epl, *it);
@@ -52,14 +52,14 @@ ElementsPlugin::Ptr ElementsPlugin::create(Plugin::Ptr plugin, Engine *engine){
 ModuleFile *ElementsPlugin::addModuleFile(ElementsPlugin::Ptr &epl, const std::string &name){
     ModuleFile* mf = new ModuleFile(epl, name);
     mf->initializeImportsExports(epl->m_d->engine);
-    epl->m_d->modules[name] = mf;
+    epl->m_d->fileModules[name] = mf;
     return mf;
 }
 
 ModuleFile *ElementsPlugin::load(const ElementsPlugin::Ptr& epl, const std::string &name){
     ModuleFile* mf = new ModuleFile(epl, name);
     mf->parse(m_d->engine);
-    m_d->modules[name] = mf;
+    m_d->fileModules[name] = mf;
 
     for ( auto it = mf->exports().begin(); it != mf->exports().end(); ++it ){
         auto storedExport = m_d->fileExports.find(*it);

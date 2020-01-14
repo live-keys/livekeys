@@ -97,6 +97,9 @@ public:
     int importVersionMinor() const;
     int importVersionMajor() const;
 
+    void setFiles(const QMap<QString, QString>& files);
+    const QMap<QString, QString> files() const;
+
 private:
     QmlLibraryInfo();
     QmlLibraryInfo(const QmlDirParser& parser);
@@ -112,6 +115,8 @@ private:
     QString               m_importNamespace;
     int                   m_importVersionMajor;
     int                   m_importVersionMinor;
+
+    QMap<QString, QString> m_files;
 };
 
 inline QmlLibraryInfo::Ptr QmlLibraryInfo::create(){

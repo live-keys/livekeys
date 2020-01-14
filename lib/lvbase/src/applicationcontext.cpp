@@ -18,6 +18,8 @@
 #include "live/exception.h"
 #include "live/mlnode.h"
 
+#include "librarytable.h"
+
 #include <QCoreApplication>
 #include <QStandardPaths>
 #include <QDir>
@@ -52,6 +54,8 @@ public:
     std::string appDataPath;
 
     MLNode      defaults;
+
+    LibraryTable* libraries;
 };
 
 std::unique_ptr<ApplicationContext> ApplicationContextPrivate::ApplicationContextPrivate::instance;
@@ -60,6 +64,7 @@ std::unique_ptr<ApplicationContext> ApplicationContextPrivate::ApplicationContex
  * Default destructor
  */
 ApplicationContext::~ApplicationContext(){
+    delete m_d->libraries;
     delete m_d;
 }
 
@@ -74,6 +79,7 @@ ApplicationContext::ApplicationContext(const lv::MLNode &defaults)
     : m_d(new ApplicationContextPrivate)
 {
     m_d->defaults = defaults;
+    m_d->libraries = new LibraryTable;
     initializePaths();
 }
 
@@ -191,6 +197,10 @@ const std::string &ApplicationContext::appDataPath(){
  */
 const MLNode &ApplicationContext::startupConfiguration(){
     return m_d->defaults;
+}
+
+LibraryTable *ApplicationContext::libraries(){
+    return m_d->libraries;
 }
 
 /** Executable path getter */

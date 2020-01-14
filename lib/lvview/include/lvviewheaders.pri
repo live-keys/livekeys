@@ -3,6 +3,7 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/live/errorhandler.h \
     $$PWD/live/incubationcontroller.h \
+    $$PWD/live/qmlact.h \
     $$PWD/live/settings.h \
     $$PWD/live/visuallogbasemodel.h \
     $$PWD/live/visuallogfilter.h \
@@ -16,7 +17,6 @@ HEADERS += \
     $$PWD/live/viewengine.h \
     $$PWD/live/shared.h \
     $$PWD/live/memory.h \
-    $$PWD/live/act.h \
     $$PWD/live/workerthread.h \
     $$PWD/live/qmlvariantlist.h \
     $$PWD/live/qmlobjectlist.h \

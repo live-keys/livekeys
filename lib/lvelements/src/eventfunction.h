@@ -5,6 +5,7 @@
 #include "live/elements/function.h"
 #include "live/elements/method.h"
 #include "live/elements/event.h"
+#include "live/typename.h"
 
 namespace lv{ namespace el{
 
@@ -37,6 +38,7 @@ public:
         m_less = nullptr;
         m_ptr = &Function::methodPtrImplementation<C>;
         m_totalArguments  = sizeof...(Args);
+        m_declaration = "Event(" + TypeName<Args...>::capture(TypeNameOptions::None) + ")";
         m_unwrapFunction = [this](const Function::CallInfo& params){
             if ( params.length() != m_totalArguments ){
                 params.throwError(params.engine(), "Invalid number of arguments supplied to event");

@@ -108,6 +108,15 @@ Item{
             }
         }
 
+        function viewPaletteConnections(){
+            var editingFragment = paletteContainer.parent.editingFragment
+            if ( !editingFragment )
+                return
+
+            paletteConnection.forceActiveFocus()
+            paletteConnection.model = editingFragment.bindingModel(documentHandler.codeHandler)
+        }
+
         Item{
             id: paletteSwapButton
             anchors.left: parent.left
@@ -155,6 +164,30 @@ Item{
             color: '#82909b'
         }
 
+
+        Item{
+            id: paletteConnectionButton
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            anchors.verticalCenter: parent.verticalCenter
+            width: 15
+            height: 20
+//            Image{
+//                anchors.centerIn: parent
+//                source: "qrc:/images/palette-add.png"
+//            }
+            Text{
+                anchors.verticalCenter: parent.verticalCenter
+                text: 'P'
+                color: '#ffffff'
+            }
+            MouseArea{
+                id: paletteConnectionMouse
+                anchors.fill: parent
+                onClicked: paletteBoxHeader.viewPaletteConnections()
+            }
+        }
+
         Item{
             anchors.right: parent.right
             anchors.rightMargin: 0
@@ -199,6 +232,25 @@ Item{
 
         onPaletteSelected: selectedHandler(index)
         onCancelled : cancelledHandler()
+    }
 
+    PaletteConnection{
+        id: paletteConnection
+        visible: model ? true : false
+        anchors.top: parent.top
+        anchors.topMargin: 24
+        width: parent.width
+        color: "#0a141c"
+        selectionColor: "#0d2639"
+        fontSize: 10
+        fontFamily: "Open Sans, sans-serif"
+        onFocusChanged : if ( !focus ) model = null
+
+        property var selectedHandler : function(){}
+        property var cancelledHandler : function(index){}
+
+        //TODO
+//        onPaletteSelected: selectedHandler(index)
+//        onCancelled : cancelledHandler()
     }
 }

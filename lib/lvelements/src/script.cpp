@@ -216,4 +216,4 @@ Script::Script(Engine *engine, const v8::Local<v8::Script> &value, const std::st
     m_d->path = path;
 }
 
-}} // namespace lv, script
+}} // namespace lv, el

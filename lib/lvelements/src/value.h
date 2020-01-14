@@ -173,6 +173,7 @@ public:
     bool isCallable() const;
     bool isBuffer() const;
     bool isObject() const;
+    bool isArray() const;
     bool isElement() const;
 
     template <typename T> static LocalValue createValue(Engine* engine, const T& val){
@@ -224,6 +225,6 @@ template<> LV_ELEMENTS_EXPORT Buffer convertFromV8(Engine* engine, const v8::Loc
 template<> LV_ELEMENTS_EXPORT LocalValue convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
 template<> LV_ELEMENTS_EXPORT Element* convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
 
-}} // namespace lv, script
+}} // namespace lv, el
 
 #endif // LVVALUE_H

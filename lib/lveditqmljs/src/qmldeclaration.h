@@ -80,6 +80,8 @@ public:
     int valueLength() const;
     void setValueLength(int valueLength);
 
+    bool isListDeclaration() const;
+
     ProjectDocumentSection::Ptr section();
     void setSection(ProjectDocumentSection::Ptr section);
 
@@ -184,6 +186,11 @@ inline int QmlDeclaration::valueLength() const{
 /// \brief Sets the value length of this declaration
 inline void QmlDeclaration::setValueLength(int valueLength){
     m_section->resize(m_identifierLength + m_valueOffset + valueLength);
+}
+
+/// \brief Checks wether this is a list-child declaration instead of a property-based one
+inline bool QmlDeclaration::isListDeclaration() const{
+    return m_parentType.isEmpty();
 }
 
 /// \brief Returns the current lv::ProjectDocument section.

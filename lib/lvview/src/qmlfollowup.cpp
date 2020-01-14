@@ -8,14 +8,14 @@
 namespace lv{
 
 QmlFollowUp::QmlFollowUp(QObject *parent)
-    : Act(parent)
+    : QmlAct(parent)
     , m_prevAct(nullptr)
 {
 }
 
 void QmlFollowUp::_whenPrevChanged(){
     m_prev = m_prevAct->result();
-    emit Act::run();
+    __triggerRun();
 }
 
 void QmlFollowUp::componentComplete(){
@@ -25,26 +25,26 @@ void QmlFollowUp::componentComplete(){
             lv::Exception, "FollowUp: Parent needs to be of container type.", Exception::toCode("~cast")
         );
         lv::ViewContext::instance().engine()->throwError(&e, this);
-        Act::componentComplete();
+        QmlAct::componentComplete();
         return;
     }
 
-    m_prevAct = qobject_cast<Act*>(parentContainer->prevChild(this));
+    m_prevAct = qobject_cast<QmlAct*>(parentContainer->prevChild(this));
     if ( !m_prevAct ){
         Exception e = CREATE_EXCEPTION(
             lv::Exception, "FollowUp: No previous act found.", Exception::toCode("~act")
         );
         lv::ViewContext::instance().engine()->throwError(&e, this);
-        Act::componentComplete();
+        QmlAct::componentComplete();
         return;
     }
 
-    connect(m_prevAct, &Act::resultChanged, this, &QmlFollowUp::_whenPrevChanged);
+    connect(m_prevAct, &QmlAct::resultChanged, this, &QmlFollowUp::_whenPrevChanged);
 
-    Act::componentComplete();
+    QmlAct::componentComplete();
 
-    if ( m_prevAct->result().isValid() ){
-        emit Act::run();
+    if ( !m_prevAct->result().isUndefined() ){
+        __triggerRun();
     }
 }
 

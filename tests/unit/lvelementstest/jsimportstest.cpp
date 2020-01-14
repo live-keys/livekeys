@@ -61,7 +61,6 @@ void JsImportsTest::samePathImportTest(){
     std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/ImportTest02.lv";
     std::string testPath = (QCoreApplication::applicationDirPath() + "/test").toStdString();
 
-
     TestPack tp(testPath);
     tp.unpack(scriptsPath);
 

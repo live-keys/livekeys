@@ -1,4 +1,5 @@
 #include "languageinfo.h"
+#include "live/elements/metaobject.h"
 
 namespace lv{ namespace el{
 
@@ -59,6 +60,35 @@ const std::pair<Utf8, Utf8> &FunctionInfo::parameter(size_t index) const{
     return m_parameters.at(index);
 }
 
+FunctionInfo FunctionInfo::extractFromDeclaration(const std::string& name, const std::string &declaration){
+    size_t argStart = declaration.find('(');
+    size_t argEnd   = declaration.find(')');
+    if ( argStart == std::string::npos || argEnd == std::string::npos )
+        return FunctionInfo(name);
+
+    std::string returnType = declaration.substr(0, argStart);
+
+    FunctionInfo fi(name, returnType.empty() ? "" : "cpp/" + returnType);
+
+    const char* str = declaration.c_str() + argStart + 1;
+
+    do{
+        const char *begin = str;
+
+        while(*str != ',' && *str != ')' && *str)
+            str++;
+
+        if ( begin != str ){
+            fi.addParameter("", "cpp/" + std::string(begin, str));
+        }
+
+        if ( *str == ')' )
+            break;
+    } while (0 != *str++);
+
+    return fi;
+}
+
 // PropertyInfo
 // ------------------------------------------------------------
 
@@ -85,6 +115,7 @@ const Utf8 &PropertyInfo::typeName() const{
 TypeInfo::TypeInfo(Utf8 name, Utf8 inheritsName, bool isCreatable, bool isInstance)
     : m_typeName(name)
     , m_inherits(inheritsName)
+    , m_constructor("")
     , m_isCreatable(isCreatable)
     , m_isInstance(isInstance)
 {
@@ -121,16 +152,12 @@ bool TypeInfo::isInstance() const{
     return m_isInstance;
 }
 
-size_t TypeInfo::totalEnums() const{
-    return m_enums.size();
+void TypeInfo::setConstructor(const FunctionInfo &constructor){
+    m_constructor = constructor;
 }
 
-const EnumInfo &TypeInfo::enumAt(size_t index) const{
-    return m_enums.at(index);
-}
-
-void TypeInfo::addEnum(const EnumInfo &enumInfo){
-    m_enums.push_back(enumInfo);
+const FunctionInfo &TypeInfo::getConstructor() const{
+    return m_constructor;
 }
 
 size_t TypeInfo::totalProperties() const{
@@ -157,6 +184,18 @@ void TypeInfo::addFunction(const FunctionInfo &fnInfo){
     m_functions.push_back(fnInfo);
 }
 
+size_t TypeInfo::totalMethods() const{
+    return m_methods.size();
+}
+
+const FunctionInfo &TypeInfo::methodAt(size_t index) const{
+    return m_methods.at(index);
+}
+
+void TypeInfo::addMethod(const FunctionInfo &functionInfo){
+    m_methods.push_back(functionInfo);
+}
+
 size_t TypeInfo::totalEvents() const{
     return m_events.size();
 }
@@ -167,6 +206,45 @@ const FunctionInfo &TypeInfo::eventAt(size_t index) const{
 
 void TypeInfo::addEvent(const FunctionInfo &eventInfo){
     m_events.push_back(eventInfo);
+}
+
+TypeInfo::Ptr TypeInfo::extract(const MetaObject &mo, const Utf8 &uri, bool isInstance, bool isCreatable){
+    std::string name = uri.length() == 0 ? "u/" + mo.name() : "lv/" + uri.data() + "#" + mo.name();
+
+    TypeInfo::Ptr ti = TypeInfo::create(name, mo.base() ? "cpp/" + mo.base()->fullName() : "", isInstance, isCreatable);
+    ti->setClassName("cpp/" + mo.fullName());
+
+    // Constructor
+    if ( mo.constructor() ){
+        Constructor* c = mo.constructor();
+        ti->setConstructor(FunctionInfo::extractFromDeclaration("constructor", c->getDeclaration()));
+    }
+
+    // Properties
+    for ( auto propIt = mo.ownPropertiesBegin(); propIt != mo.ownPropertiesEnd(); ++propIt ){
+        Property* p = propIt->second;
+        ti->addProperty(PropertyInfo(p->name(), "cpp/" + p->type()));
+    }
+
+    // Methods
+    for ( auto funcIt = mo.ownMethodsBegin(); funcIt != mo.ownMethodsEnd(); ++funcIt ){
+        Function* f = funcIt->second;
+        ti->addMethod(FunctionInfo::extractFromDeclaration(funcIt->first, f->getDeclaration()));
+    }
+
+    // Functions
+    for ( auto funcIt = mo.functionsBegin(); funcIt != mo.functionsEnd(); ++funcIt ){
+        Function* f = funcIt->second;
+        ti->addFunction(FunctionInfo::extractFromDeclaration(funcIt->first, f->getDeclaration()));
+    }
+
+    // Events
+    for ( auto eventIt = mo.ownEventsBegin(); eventIt != mo.ownEventsEnd(); ++eventIt ){
+        Function* f = eventIt->second;
+        ti->addEvent(FunctionInfo::extractFromDeclaration(eventIt->first, f->getDeclaration()));
+    }
+
+    return ti;
 }
 
 

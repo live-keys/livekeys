@@ -36,6 +36,7 @@ public:
 
     Element* create(const Function::CallInfo& params){ return m_unwrapConstructor(params); }
     size_t totalArguments() const{ return m_totalArguments; }
+    const std::string& getDeclaration() const{ return m_declaration; }
     Constructor* less() const { return m_less; }
 
     template<typename C, typename ...Args>
@@ -46,6 +47,7 @@ protected:
 
     std::function<Element*(const Function::CallInfo&)> m_unwrapConstructor;
     size_t       m_totalArguments;
+    std::string  m_declaration;
     Constructor* m_less;
 };
 
@@ -71,6 +73,7 @@ public:
         : Constructor(&Constructor::ptrImplementation<C>, sizeof...(Args), nullptr)
     {
         m_unwrapConstructor = Constructor::createUnwrapConstructor<C, Args...>(this);
+        m_declaration = "(" + TypeName<Args...>::capture(TypeNameOptions::None) + ")";
     }
 
     static Element* createNative(Engine* engine, Args ...args){
@@ -87,6 +90,6 @@ Constructor::UnwrapFunction Constructor::createUnwrapConstructor(ConcreteConstru
 }
 
 
-}}// namespace lv, script
+}}// namespace lv, el
 
 #endif // LVCONSTRUCTOR_H

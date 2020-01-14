@@ -2,7 +2,7 @@
 
 namespace lv{
 
-bool TuplePropertyMap::reserveForRead(const QQmlPropertyMap &t, Shared::RefScope *locker, Act *filter){
+bool TuplePropertyMap::reserveForRead(const QQmlPropertyMap &t, Shared::RefScope *locker, QmlAct *filter){
     QStringList keys = t.keys();
 
     for (auto it = keys.begin(); it != keys.end(); ++it ){
@@ -29,7 +29,7 @@ bool TuplePropertyMap::reserveForRead(const QQmlPropertyMap &t, Shared::RefScope
     return true;
 }
 
-bool TuplePropertyMap::reserveForWrite(const QQmlPropertyMap &t, Shared::RefScope *locker, Act *filter){
+bool TuplePropertyMap::reserveForWrite(const QQmlPropertyMap &t, Shared::RefScope *locker, QmlAct *filter){
     QStringList keys = t.keys();
 
     for (auto it = keys.begin(); it != keys.end(); ++it ){

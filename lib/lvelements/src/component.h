@@ -24,6 +24,6 @@ private:
     Callable m_constructor;
 };
 
-}} // namespace lv, script
+}} // namespace lv, el
 
 #endif // LVCOMPONENT_H

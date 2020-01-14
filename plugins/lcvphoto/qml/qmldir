@@ -5,3 +5,4 @@ depends lcvcore 1.0
 
 LevelsSliders                 1.0 LevelsSliders.qml
 HueSaturationLightnessSliders 1.0 HueSaturationLightnessSliders.qml
+FastNlMeansDenoising_         1.0 FastNlMeansDenoising_.qml

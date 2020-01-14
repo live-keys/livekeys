@@ -26,8 +26,11 @@
 namespace lv{
 
 class CodePalette;
-class BindingPath;
-class BindingChannel;
+class CodeQmlHandler;
+class QmlBindingPath;
+class QmlBindingChannel;
+class QmlBindingSpan;
+class QmlBindingSpanModel;
 
 class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
 
@@ -45,9 +48,7 @@ public:
     QmlEditFragment(QmlDeclaration::Ptr declaration, QObject* parent = nullptr);
     virtual ~QmlEditFragment();
 
-    void setExpressionPath(BindingPath* bindingPath);
-    BindingPath* expressionPath();
-    BindingChannel* bindingChannel();
+    QmlBindingSpan* bindingSpan();
 
     void setPaletteForBinding(CodePalette* palette);
 
@@ -78,6 +79,7 @@ public:
 
     void emitRemoval();
 
+
 public slots:
     int position();
     int valuePosition() const;
@@ -85,6 +87,7 @@ public slots:
 
     int totalPalettes() const;
     lv::CodePalette* bindingPalette();
+    lv::QmlBindingSpanModel *bindingModel(lv::CodeQmlHandler* codeHandler);
 
     void updateValue();
 
@@ -102,16 +105,18 @@ private:
 
     QList<QmlEditFragment*> m_childFragments;
 
-    BindingChannel*      m_bindingChannel;
+    QmlBindingSpan*         m_bindingSpan;
 
     bool                 m_bindingUse;
     bool                 m_paletteUse;
     QObject*             m_visualParent;
+
+    QmlBindingSpanModel*    m_bindingSpanModel;
 };
 
 /// \brief Returns the binding channel associated with this object.
-inline BindingChannel *QmlEditFragment::bindingChannel(){
-    return m_bindingChannel;
+inline QmlBindingSpan *QmlEditFragment::bindingSpan(){
+    return m_bindingSpan;
 }
 
 inline CodePalette *QmlEditFragment::bindingPalette(){

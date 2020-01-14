@@ -48,6 +48,7 @@ class QmlJsSettings;
 class QmlAddContainer;
 class QmlCompletionContextFinder;
 class QmlCompletionContext;
+class QmlUsageGraphScanner;
 
 class CodeQmlHandlerPrivate;
 class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
@@ -80,7 +81,7 @@ public:
 
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
     bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);
-    QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property, QObject* runtime);
+    QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property);
 
     bool addEditingFragment(QmlEditFragment *edit);
     void removeEditingFragment(QmlEditFragment* edit);
@@ -89,6 +90,11 @@ public:
 
     QmlEditFragment* findEditFragment(CodePalette* palette);
     QmlEditFragment* findEditFragmentIn(QmlEditFragment *parent, CodePalette* palette);
+
+    void suggestionsForProposedExpression(QmlDeclaration::Ptr declaration, const QString& expression, CodeCompletionModel* model) const;
+    bool findBindingForExpression(QmlEditFragment* edit, const QString& expression);
+
+    QmlUsageGraphScanner* createScanner();
 
 public slots:
     QList<int> languageFeatures() const;
@@ -182,18 +188,18 @@ private:
         bool extractFunctions,
         bool extractSlots,
         bool extractSignals
-    );
+    ) const;
 
     void suggestionsForNamespaceTypes(
         const QString& typeNameSpace,
         QList<CodeCompletionSuggestion>& suggestions
-    );
+    ) const;
     void suggestionsForNamespaceImports(
         QList<CodeCompletionSuggestion>& suggestions
     );
     void suggestionsForDocumentsIds(
         QList<CodeCompletionSuggestion>& suggestions
-    );
+    ) const;
 
     void suggestionsForLeftBind(
         const QmlCompletionContext& context,

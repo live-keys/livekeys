@@ -3,6 +3,7 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/errorhandler.h \
     $$PWD/incubationcontroller.h \
+    $$PWD/qmlact.h \
     $$PWD/settings.h \
     $$PWD/typeinfo.h \
     $$PWD/visuallogbasemodel.h \
@@ -20,7 +21,6 @@ HEADERS += \
     $$PWD/groupcollectorentry.h \
     $$PWD/memory.h \
     $$PWD/shared.h \
-    $$PWD/act.h \
     $$PWD/workerthread.h \
     $$PWD/workerthread_p.h \
     $$PWD/qmlvariantlist.h \
@@ -44,6 +44,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/errorhandler.cpp \
     $$PWD/incubationcontroller.cpp \
+    $$PWD/qmlact.cpp \
     $$PWD/settings.cpp \
     $$PWD/visuallogbasemodel.cpp \
     $$PWD/visuallogfilter.cpp \
@@ -59,7 +60,6 @@ SOURCES += \
     $$PWD/groupcollectorentry.cpp \
     $$PWD/memory.cpp \
     $$PWD/shared.cpp \
-    $$PWD/act.cpp \
     $$PWD/workerthread.cpp \
     $$PWD/qmlvariantlist.cpp \
     $$PWD/qmlvariantlistmodel.cpp \

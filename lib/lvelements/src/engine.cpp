@@ -271,6 +271,9 @@ Script::Ptr Engine::compileJsModuleFile(const std::string &path){
 }
 
 Script::Ptr Engine::compileModuleFile(const std::string &path){
+    if ( moduleFileType() == Engine::JsOnly ){
+        return compileJsModuleFile(path + ".js");
+    }
     //TODO: Add caching
     //TODO: Add JsOnly, etc
     std::ifstream file(path, std::ifstream::in | std::ifstream::binary);
@@ -361,13 +364,40 @@ Object Engine::loadFile(const std::string &path){
     return lm.get(this, "exports").toObject(this);
 }
 
+Object Engine::loadFile(const std::string &path, const std::string &content){
+    QFileInfo finfo(QString::fromStdString(path));
+    std::string pluginPath = finfo.path().toStdString();
+    std::string fileName = finfo.fileName().toStdString();
+
+    Plugin::Ptr plugin(nullptr);
+    if ( Plugin::existsIn(pluginPath) ){
+        plugin = Plugin::createFromPath(pluginPath);
+        Package::Ptr package = Package::createFromPath(plugin->package());
+        m_d->packageGraph->loadRunningPackageAndPlugin(package, plugin);
+    } else {
+        plugin = m_d->packageGraph->createRunningPlugin(pluginPath);
+    }
+
+    ElementsPlugin::Ptr epl = ElementsPlugin::create(plugin, this);
+    ModuleFile* mf = ElementsPlugin::addModuleFile(epl, fileName);
+
+    Script::Ptr sc = compileModuleSource(path, content);
+    Object m = sc->loadAsModule(mf);
+    if ( m.isNull() )
+        return m;
+
+    LocalObject lm(m);
+    return lm.get(this, "exports").toObject(this);
+}
+
 ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
     auto it = m_d->registeredTemplates.find(t);
     if ( it != m_d->registeredTemplates.end() )
         return it->second;
 
     v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate());
-    tpl->SetCallHandler(t->constructor()->ptr());
+    if ( t->constructor() )
+        tpl->SetCallHandler(t->constructor()->ptr());
     tpl->SetClassName(v8::String::NewFromUtf8(isolate(), t->name().c_str()));
 
     v8::Local<v8::ObjectTemplate> tplInstance = tpl->InstanceTemplate();
@@ -669,7 +699,7 @@ void Engine::wrapScriptObject(Element *element){
 }
 
 int Engine::tryCatchNesting(){
-    return m_d->tryCatchNesting;;
+    return m_d->tryCatchNesting;
 }
 
 void Engine::setGlobalErrorHandler(bool value){
@@ -686,13 +716,20 @@ Object Engine::require(ModuleLibrary *module){
     v8::Local<v8::Object> base = v8::Object::New(m_d->isolate);
     Object exportsObject(this, base);
 
-    for ( auto it = module->begin(); it != module->end(); ++it ){
+    for ( auto it = module->typesBegin(); it != module->typesEnd(); ++it ){
         const MetaObject* t = it->second;
 
         ComponentTemplate* ctpl = registerTemplate(t);
         v8::Local<v8::FunctionTemplate> tpl = ctpl->data.Get(isolate());
 
         base->Set(v8::String::NewFromUtf8(isolate(), t->name().c_str()), tpl->GetFunction());
+    }
+
+    for ( auto it = module->instancesBegin(); it != module->instancesEnd(); ++it ){
+        std::string name = it->first;
+        Element* e       = it->second;
+        v8::Local<v8::Object> lo = ElementPrivate::localObject(e);
+        base->Set(v8::String::NewFromUtf8(isolate(), name.c_str()), lo);
     }
 
     return exportsObject;
@@ -797,4 +834,4 @@ Engine::CatchData::CatchData(Engine *engine, v8::TryCatch *tc)
 {
 }
 
-}} // namespace lv, script
+}} // namespace lv, el

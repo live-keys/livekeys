@@ -62,8 +62,8 @@ DocumentQmlValueObjectsVisitor::~DocumentQmlValueObjectsVisitor(){
 
 void DocumentQmlValueObjectsVisitor::operator()(QmlJS::AST::Node* astroot){
     delete m_parent->m_root;
-    m_parent->m_root = 0;
-    m_lastAppend = 0;
+    m_parent->m_root = nullptr;
+    m_lastAppend = nullptr;
     if ( astroot )
         astroot->accept(this);
 }
@@ -73,6 +73,7 @@ bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiObjectDefinition *ast){
         DocumentQmlValueObjects::RangeObject* obj = new DocumentQmlValueObjects::RangeObject;
         obj->ast   = ast;
         obj->begin = ast->firstSourceLocation().begin();
+        obj->identifierEnd = ast->firstSourceLocation().end();
         obj->end   = ast->initializer->rbraceToken.end();
         if ( !m_parent->m_root ){
             m_parent->m_root = obj;
@@ -105,7 +106,7 @@ bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiScriptBinding *ast){
 }
 
 bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiObjectBinding *ast){
-    DocumentQmlValueObjects::RangeProperty* property = 0;
+    DocumentQmlValueObjects::RangeProperty* property = nullptr;
     if ( m_lastAppend && m_lastAppend->getAst()->kind == QmlJS::AST::Node::Kind_UiPublicMember ){
         property = static_cast<DocumentQmlValueObjects::RangeProperty*>(m_lastAppend);
     } else {
@@ -123,6 +124,7 @@ bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiObjectBinding *ast){
     DocumentQmlValueObjects::RangeObject* obj = new DocumentQmlValueObjects::RangeObject;
     obj->ast   = ast;
     obj->begin = ast->initializer->firstSourceLocation().begin();
+    obj->identifierEnd = ast->initializer->firstSourceLocation().end();
     obj->end   = ast->initializer->lastSourceLocation().end();
 
     property->child = obj;
@@ -470,7 +472,7 @@ QString DocumentQmlValueObjects::toStringRecursive(
 
     QString base = indentStr + "<Property:" + QString::number(property->begin) + "," + QString::number(property->end) + ">\n";
 
-    if ( property->child != 0 )
+    if ( property->child != nullptr )
         base += toStringRecursive(property->child, indent + 1);
 
     return base;

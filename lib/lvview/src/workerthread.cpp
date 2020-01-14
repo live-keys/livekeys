@@ -16,43 +16,57 @@
 
 #include "workerthread.h"
 #include "workerthread_p.h"
+#include "live/visuallog.h"
+
+#include <QtDebug>
+
 #include <QThread>
 #include <QCoreApplication>
 
 namespace lv{
 
-WorkerThread::WorkerThread(QObject *)
-    : QObject(0)
+WorkerThread::WorkerThread(const QList<QString>& actSources, QObject *)
+    : QObject(nullptr)
+    , m_engine(nullptr)
     , m_thread(new QThread)
-    , m_d(new WorkerThreadPrivate)
+    , m_actFunctionsSource(actSources)
+    , m_d(new WorkerThreadPrivate(this))
 {
     moveToThread(m_thread);
 }
 
 WorkerThread::~WorkerThread(){
     m_thread->exit();
-    if ( !m_thread->wait(5000) ){
+    if ( !m_thread->wait(1500) ){
         qCritical("FilterWorker Thread failed to close, forcing quit. This may lead to inconsistent application state.");
         m_thread->terminate();
         m_thread->wait();
     }
     delete m_thread;
+    delete m_engine;
     delete m_d;
 }
 
-void WorkerThread::postWork(
-        const std::function<void ()> &fnc,
-        Shared::RefScope *locker)
-{
-    QCoreApplication::postEvent(this, new WorkerThread::CallEvent(fnc, locker));
-}
+void WorkerThread::postWork(QmlAct *caller, const QVariantList &values, const QList<Shared *> objectTransfers){
 
-void WorkerThread::postWork(
-        const std::function<void ()> &fnc,
-        const std::function<void ()> &cbk,
-        Shared::RefScope *locker)
-{
-    QCoreApplication::postEvent(this, new WorkerThread::CallEvent(fnc, cbk, locker));
+    for ( Shared* obj : objectTransfers ){
+        obj->moveToThread(m_thread);
+    }
+
+    int index = m_acts.indexOf(caller);
+
+    if ( caller->run().isArray() ){
+        QJSValue obj = caller->run().property(0);
+        QObject* o = obj.toVariant().value<QObject*>();
+
+        QObject* oclone = o->metaObject()->newInstance();
+        oclone->moveToThread(m_thread);
+        oclone->setParent(m_engine);
+
+        m_specialFunctions.insert(index, qMakePair(oclone, caller->run().property(1).toString()));
+    }
+
+    QCoreApplication::postEvent(this, new WorkerThread::CallEvent(index, values));
 }
 
 void WorkerThread::start(){
@@ -63,70 +77,56 @@ bool WorkerThread::event(QEvent *ev){
     if (!dynamic_cast<WorkerThread::CallEvent*>(ev))
         return QObject::event(ev);
 
-    WorkerThread::CallEvent* ce = static_cast<WorkerThread::CallEvent*>(ev);
-        ce->callFilter();
+    if ( !m_engine ){
+        m_engine = new QJSEngine;
+        m_engine->installExtensions(QJSEngine::ConsoleExtension);
+        for ( const QString& src : m_actFunctionsSource ){
+            QJSValue c = m_engine->evaluate(src);
+            m_actFunctions.append(c);
+        }
+        for ( auto it = m_specialFunctions.begin(); it != m_specialFunctions.end(); ++it ){
+            int index    = it.key();
+            QObject* o   = it.value().first;
+            QString prop = it.value().second;
 
-    if ( ce->hasCallback() ){
-        // locker will be deleted in the callback
-        m_d->postNotify(ce->callbackEvent());
-    } else {
-        // locker can be deleted now
-        delete ce->readScope();
+            QString objectName = "F" + QString::number(index);
+
+            m_engine->globalObject().setProperty(objectName, m_engine->newQObject(o));
+            QJSValue c = m_engine->evaluate(objectName + "." + prop);
+            m_actFunctions[index] = c;
+        }
     }
+
+    WorkerThread::CallEvent* ce = static_cast<WorkerThread::CallEvent*>(ev);
+    QVariantList values = ce->m_args.toList();
+
+    QJSValueList args;
+    for ( const QVariant& v : values ){
+        args.append(Shared::transfer(v, m_engine));
+    }
+
+    QJSValue r = m_actFunctions[ce->m_callerIndex].call(args);
+
+    QList<Shared*> robj;
+    QVariant rv = Shared::transfer(r, robj);
+
+    QmlAct* a = m_acts.at(ce->m_callerIndex);
+    for ( Shared* sh : robj ){
+        QObject* o = static_cast<QObject*>(sh);
+        o->moveToThread(a->thread());
+    }
+
+    m_d->postNotify(new WorkerThread::CallEvent(ce->m_callerIndex, rv));
 
     return true;
 }
 
-WorkerThread::CallEvent::CallEvent(const std::function<void ()>& fnc, Shared::RefScope *locker)
+WorkerThread::CallEvent::CallEvent(int callerIndex, const QVariant &args, const QList<Shared *> &transferObjects)
     : QEvent(QEvent::None)
-    , m_filter(fnc)
-    , m_readScope(locker)
+    , m_callerIndex(callerIndex)
+    , m_args(args)
+    , m_transferObjects(transferObjects)
 {
-}
-
-WorkerThread::CallEvent::CallEvent(std::function<void ()>&& fnc, Shared::RefScope *locker)
-    : QEvent(QEvent::None)
-    , m_filter(std::move(fnc))
-    , m_readScope(locker)
-{
-}
-
-WorkerThread::CallEvent::CallEvent(
-        const std::function<void ()> &filter,
-        const std::function<void ()> &callback,
-        Shared::RefScope *locker)
-    : QEvent(QEvent::None)
-    , m_filter(filter)
-    , m_callback(callback)
-    , m_readScope(locker)
-{
-}
-
-WorkerThread::CallEvent::CallEvent(
-        std::function<void ()> &&filter,
-        std::function<void ()> &&callback,
-        Shared::RefScope *locker)
-    : QEvent(QEvent::None)
-    , m_filter(filter)
-    , m_callback(callback)
-    , m_readScope(locker)
-{
-}
-
-void WorkerThread::CallEvent::callFilter(){
-    m_filter();
-}
-
-Shared::RefScope *WorkerThread::CallEvent::readScope(){
-    return m_readScope;
-}
-
-bool WorkerThread::CallEvent::hasCallback(){
-    return m_callback ? true : false;
-}
-
-WorkerThread::CallEvent *WorkerThread::CallEvent::callbackEvent(){
-    return new WorkerThread::CallEvent(m_callback, m_readScope);
 }
 
 }// namespace
