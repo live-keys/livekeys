@@ -103,7 +103,6 @@ QObject *Group::deserialize(ViewEngine *engine, const MLNode &node){
             }
             case MLNode::Type::Bytes:{
                 THROW_EXCEPTION(lv::Exception, "Unexpected bytes type.", 0);
-                return nullptr;
             }
             case MLNode::Type::String:{
                 properties[QByteArray::fromStdString(it->first)] = "string";

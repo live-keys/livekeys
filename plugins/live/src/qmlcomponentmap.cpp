@@ -21,8 +21,8 @@ void resizeList(QList<T> & list, int newSize) {
 
 QmlComponentMap::QmlComponentMap(QObject *parent)
     : QObject(parent)
-    , m_f(nullptr)
     , m_isProcessing(false)
+    , m_f(nullptr)
 {
 }
 

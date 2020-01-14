@@ -22,7 +22,6 @@
 #include "triangle.h"
 #include "loglistener.h"
 #include "worker.h"
-#include "tuple.h"
 #include "valuehistory.h"
 #include "stringbasedloader.h"
 #include "live/qmlobjectlist.h"
@@ -57,7 +56,6 @@ static QObject* colorProvider(QQmlEngine *engine, QJSEngine *){
     return new lv::QmlColor(engine);
 }
 
-
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
     qmlRegisterType<lv::Triangle>(            uri, 1, 0, "Triangle");
@@ -68,7 +66,6 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlMain>(             uri, 1, 0, "Main");
     qmlRegisterType<lv::StringBasedLoader>(   uri, 1, 0, "StringBasedLoader");
     qmlRegisterType<lv::Worker>(              uri, 1, 0, "Worker");
-    qmlRegisterType<lv::Tuple>(               uri, 1, 0, "Tuple");
     qmlRegisterType<lv::QmlFork>(             uri, 1, 0, "Fork");
     qmlRegisterType<lv::QmlForkNode>(         uri, 1, 0, "ForkNode");
     qmlRegisterType<lv::ComponentSource>(     uri, 1, 0, "ComponentSource");

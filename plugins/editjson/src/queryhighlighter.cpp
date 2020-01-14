@@ -7,7 +7,6 @@
 
 namespace lv{
 
-
 QueryHighlighter::QueryHighlighter(
         QmlLanguageObject* language,
         const MLNode &settings,
