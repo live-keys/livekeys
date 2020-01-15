@@ -21,6 +21,7 @@
 #include "qmlfile.h"
 #include "qmlfilereader.h"
 #include "qmlfiledescriptor.h"
+#include "qmlfilestream.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -44,7 +45,8 @@ void FsPlugin::registerTypes(const char *uri){
     // @uri fs
     qmlRegisterType<lv::ListDir>(          uri, 1, 0, "ListDir");
     qmlRegisterType<lv::QmlFileDescriptor>(uri, 1, 0, "FileDescriptor");
-    qmlRegisterType<lv::QmlFileReader>(    uri, 1, 0, "QmlFileReader");
+    qmlRegisterType<lv::QmlFileReader>(    uri, 1, 0, "FileReader");
+    qmlRegisterType<lv::QmlFileStream>(    uri, 1, 0, "FileStream");
     qmlRegisterSingletonType<lv::QmlPath>( uri, 1, 0, "Path", &pathProvider);
     qmlRegisterSingletonType<lv::QmlDir>(  uri, 1, 0, "Dir", &dirProvider);
     qmlRegisterSingletonType<lv::QmlFile>( uri, 1, 0, "File", &fileProvider);

@@ -34,7 +34,7 @@ class QmlFileReader : public QObject, public QQmlParserStatus{
     Q_PROPERTY(QByteArray data READ data    NOTIFY dataChanged)
 
 public:
-    explicit QmlFileReader(QObject *parent = 0);
+    explicit QmlFileReader(QObject *parent = nullptr);
     virtual ~QmlFileReader();
 
     const QByteArray& data() const;

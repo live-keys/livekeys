@@ -7,7 +7,7 @@ Act{
     id: act
     property Mat input: null
     property real h: 3
-    property int templateWindowSize:
+    property int templateWindowSize: 21
     property int searchWindowSize: 21
 
     run: [Photo.Denoising, 'fastNlMeans']

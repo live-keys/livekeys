@@ -18,6 +18,9 @@ public:
     ~QmlStream();
 
     void push(QObject* object);
+    void push(const QJSValue& value);
+
+    void forward(QObject* object, std::function<void(QObject*, const QJSValue& val)> fn);
 
 public slots:
     void forward(const QJSValue& callback);
@@ -26,6 +29,9 @@ private:
     QQmlEngine*  m_engine;
     QJSValue     m_callbackForward;
     QQmlProperty m_objectForward;
+
+    QObject*     m_object;
+    std::function<void(QObject*, const QJSValue& val)> m_functionForward;
 };
 
 }// namespace

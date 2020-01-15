@@ -4,6 +4,7 @@ HEADERS += \
     $$PWD/live/errorhandler.h \
     $$PWD/live/incubationcontroller.h \
     $$PWD/live/qmlact.h \
+    $$PWD/live/qmlstreamfilter.h \
     $$PWD/live/settings.h \
     $$PWD/live/visuallogbasemodel.h \
     $$PWD/live/visuallogfilter.h \

@@ -539,6 +539,8 @@ void Engine::throwError(const Exception *exception, Element *object){
     v8::Local<v8::Value> e = v8::Exception::Error(
         v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()));
 
+    //TODO: Capture the engine stack trace as well
+
     v8::Local<v8::Object> o = v8::Local<v8::Object>::Cast(e);
 
     if ( exception->hasStackTrace() ){

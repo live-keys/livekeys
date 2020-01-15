@@ -20,6 +20,7 @@
 #include <QObject>
 #include <QCoreApplication>
 #include "live/workerthread.h"
+#include "qmlstreamfilter.h"
 
 namespace lv{
 
@@ -41,8 +42,20 @@ public:
             return QObject::event(event);
 
         WorkerThread::CallEvent* ce = static_cast<WorkerThread::CallEvent*>(event);
-        QmlAct* a = m_worker->acts()[ce->m_callerIndex];
-        a->setResult(ce->m_args);
+
+        QObject* caller = m_worker->acts()[ce->m_callerIndex];
+        QmlAct* act = qobject_cast<QmlAct*>(caller);
+        if ( act ){
+            act->setResult(ce->m_args);
+        } else {
+            QmlStreamFilter* sf = qobject_cast<QmlStreamFilter*>(caller);
+            if( sf ){
+                sf->pushResult(ce->m_args);
+            }
+        }
+
+        m_worker->m_isWorking = false;
+        m_worker->postNextInProcessQueue();
 
         return true;
     }

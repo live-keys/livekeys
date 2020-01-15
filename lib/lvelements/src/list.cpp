@@ -50,12 +50,12 @@ List::~List(){
 }
 
 LocalValue List::atImpl(List *l, int){
-    throw std::exception(); //TODO
+    throw std::exception(); //TODO, js exception
     return LocalValue(l->engine());
 }
 
 int List::lengthImpl(List*){
-    throw std::exception();
+    throw std::exception(); //TODO js exception
     return 0;
 }
 

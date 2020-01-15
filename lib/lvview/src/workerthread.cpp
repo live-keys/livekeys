@@ -16,7 +16,8 @@
 
 #include "workerthread.h"
 #include "workerthread_p.h"
-#include "live/visuallog.h"
+#include "live/visuallogqt.h"
+#include "qmlstreamfilter.h"
 
 #include <QtDebug>
 
@@ -27,6 +28,7 @@ namespace lv{
 
 WorkerThread::WorkerThread(const QList<QString>& actSources, QObject *)
     : QObject(nullptr)
+    , m_isWorking(false)
     , m_engine(nullptr)
     , m_thread(new QThread)
     , m_actFunctionsSource(actSources)
@@ -47,13 +49,38 @@ WorkerThread::~WorkerThread(){
     delete m_d;
 }
 
-void WorkerThread::postWork(QmlAct *caller, const QVariantList &values, const QList<Shared *> objectTransfers){
+void WorkerThread::postWork(QmlStreamFilter *caller, const QVariant &value, const QList<Shared *> objectTransfers){
+    if ( m_isWorking ){
+        m_toExecute.removeOne(caller);
+        m_toExecute.prepend(caller);
+        return;
+    }
+
+    m_isWorking = true;
 
     for ( Shared* obj : objectTransfers ){
         obj->moveToThread(m_thread);
     }
 
-    int index = m_acts.indexOf(caller);
+    int index = m_calls.indexOf(caller);
+
+    QCoreApplication::postEvent(this, new WorkerThread::CallEvent(index, QVariantList() << value));
+}
+
+void WorkerThread::postWork(QmlAct *caller, const QVariantList &values, const QList<Shared *> objectTransfers){
+    if ( m_isWorking ){
+        m_toExecute.removeOne(caller);
+        m_toExecute.prepend(caller);
+        return;
+    }
+
+    m_isWorking = true;
+
+    for ( Shared* obj : objectTransfers ){
+        obj->moveToThread(m_thread);
+    }
+
+    int index = m_calls.indexOf(caller);
 
     if ( caller->run().isArray() ){
         QJSValue obj = caller->run().property(0);
@@ -71,6 +98,10 @@ void WorkerThread::postWork(QmlAct *caller, const QVariantList &values, const QL
 
 void WorkerThread::start(){
     m_thread->start();
+}
+
+bool WorkerThread::isWorking() const{
+    return m_isWorking;
 }
 
 bool WorkerThread::event(QEvent *ev){
@@ -110,7 +141,7 @@ bool WorkerThread::event(QEvent *ev){
     QList<Shared*> robj;
     QVariant rv = Shared::transfer(r, robj);
 
-    QmlAct* a = m_acts.at(ce->m_callerIndex);
+    QObject* a = m_calls.at(ce->m_callerIndex);
     for ( Shared* sh : robj ){
         QObject* o = static_cast<QObject*>(sh);
         o->moveToThread(a->thread());
@@ -119,6 +150,23 @@ bool WorkerThread::event(QEvent *ev){
     m_d->postNotify(new WorkerThread::CallEvent(ce->m_callerIndex, rv));
 
     return true;
+}
+
+void WorkerThread::postNextInProcessQueue(){
+    if ( !m_toExecute.isEmpty() ){
+        QObject* caller = m_toExecute.front();
+        m_toExecute.pop_front();
+
+        QmlAct* act = qobject_cast<QmlAct*>(caller);
+        if ( act ){
+            act->__triggerRun();
+        } else {
+            QmlStreamFilter* sf = qobject_cast<QmlStreamFilter*>(caller);
+            if( sf ){
+                sf->triggerRun();
+            }
+        }
+    }
 }
 
 WorkerThread::CallEvent::CallEvent(int callerIndex, const QVariant &args, const QList<Shared *> &transferObjects)
