@@ -16,31 +16,48 @@
 ////// plugin1/A.lv
 
 component default < Element{
-    function toString : (){
-        return "classs[A]"
+    fn toString(){
+        return "class[A]"
     }
 }
 
 ////// plugin1/A.lv.js
 
 module.exports["A"] = class A extends Element{
-    toString(){
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        //Element.assignDefaultProperty(null)
+    }
+
+    toString()
+    {
         return "class[A]"
     }
 }
 
 ////// plugin1/B.lv
 
-component default < A{
-    function toString : (){
-    }
-}
+component default < A{}
 
 ////// plugin1/B.lv.js
 
 var A = imports.get("A")
 
 module.exports["B"] = class B extends A{
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+    }
+
 }
 
 ////// main.lv
@@ -62,13 +79,14 @@ var B = imports.get("B")
 module.exports["main"] = class main extends Element{
     constructor(){
         super()
-        var b = new B();
-        Element.addProperty(this, "b", {
-            type: "string",
-            value: (function(){
-                return (new B()).toString()
-            }()),
-            notify: "bChanged"
-        })
+        this.__initialize()
+    }
+
+    __initialize(){
+        Element.addProperty(this, 'b', { type: "string", notify: "bChanged" })
+        this.b = (function(){
+            return (new B()).toString()
+        }())
+
     }
 }

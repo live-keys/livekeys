@@ -27,7 +27,18 @@ component default < Element{
 ////// packages/package1/A.lv.js
 
 module.exports["A"] = class A extends Element{
-    toString(){
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        //Element.assignDefaultProperty(null)
+    }
+
+    toString()
+    {
         return "class[A]"
     }
 }
@@ -51,12 +62,14 @@ var A = imports.get("A")
 module.exports["main"] = class main extends Element{
     constructor(){
         super()
-        Element.addProperty(this, "a", {
-            type: "string",
-            value: (function(){
-                return (new A()).toString()
-            }()),
-            notify: "aChanged"
-        })
+        this.__initialize()
     }
+
+    __initialize(){
+        Element.addProperty(this, 'a', { type: "string", notify: "aChanged" })
+        this.a = (function(){
+            return (new A()).toString()
+        }())
+    }
+
 }

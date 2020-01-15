@@ -9,7 +9,7 @@
 ////// plugin1/subplugin1/A.lv
 
 component default < Element{
-    fn toString : (){
+    fn toString(){
         return "class[A]"
     }
 }
@@ -17,7 +17,18 @@ component default < Element{
 ////// plugin1/subplugin1/A.lv.js
 
 module.exports["A"] = class A extends Element{
-    toString(){
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        //Element.assignDefaultProperty(null)
+    }
+
+    toString()
+    {
         return "class[A]"
     }
 }
@@ -33,7 +44,18 @@ component default < Element{
 ////// plugin1/subplugin1/B.lv.js
 
 module.exports["B"] = class B extends Element{
-    toString(){
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        //Element.assignDefaultProperty(null)
+    }
+
+    toString()
+    {
         return "class[B]"
     }
 }
@@ -59,6 +81,15 @@ imports.require(".plugin1.subplugin1")
 var B = imports.get("B")
 
 module.exports["C"] = class C extends B{
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+    }
+
 }
 
 ////// plugin1/live.package.json
@@ -87,13 +118,14 @@ var C = imports.get("C")
 module.exports["main"] = class main extends Element{
     constructor(){
         super()
-        var c = new C();
-        Element.addProperty(this, "c", {
-            type: "string",
-            value: (function(){
-                return (new C()).toString()
-            }()),
-            notify: "cChanged"
-        })
+        this.__initialize()
+    }
+
+    __initialize(){
+        Element.addProperty(this, 'c', { type: "string", notify: "cChanged" })
+        this.c = (function(){
+            return (new C()).toString()
+        }())
+
     }
 }

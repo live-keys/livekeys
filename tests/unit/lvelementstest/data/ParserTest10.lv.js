@@ -8,7 +8,7 @@ module.exports["ParserTest10"] = class ParserTest10 extends namespace.Comp {
     }
 
     __initialize(){
-        Element.assignDefaultProperty(null)
+        // Element.assignDefaultProperty(null)
     }
 
 }

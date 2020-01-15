@@ -86,7 +86,7 @@ public:
     void editParseTree(LanguageParser::AST*& ast, TSInputEdit& edit, TSInput& input);
     void destroy(AST* ast) const;
     ComparisonResult compare(const std::string& source1, AST* ast1, const std::string& source2, AST* ast2);
-    std::string toString(AST* ast);
+    std::string toString(AST* ast) const;
 
     std::string toJs(const std::string &contents, const std::string filename = "") const;
     std::string toJs(const std::string &contents, AST* ast, const std::string filename = "") const;

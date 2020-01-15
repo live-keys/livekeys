@@ -25,7 +25,16 @@ component default < B{}
 
 var B = imports.get("B")
 
-module.exports["A"] = class A extends B{}
+module.exports["A"] = class A extends B{
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){}
+
+}
 
 ////// plugin1/B.lv
 
@@ -35,7 +44,15 @@ component default < C{}
 
 var C = imports.get("C")
 
-module.exports["B"] = class B extends C{}
+module.exports["B"] = class B extends C{
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){}
+}
 
 ////// plugin1/C.lv
 
@@ -45,7 +62,15 @@ component default < A{}
 
 var A = imports.get("A")
 
-module.exports["C"] = class C extends A{}
+module.exports["C"] = class C extends A{
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){}
+}
 
 ////// main.lv
 
@@ -53,7 +78,7 @@ import .plugin1
 
 component default < Element{
     string a : {
-        (new A()).toString()
+        return (new A()).toString()
     }
 }
 
@@ -66,13 +91,14 @@ var A = imports.get("A")
 module.exports["main"] = class main extends Element{
     constructor(){
         super()
-        Element.addProperty(this, "a", {
-            type: "string",
-            value: (function(){
-                (new A()).toString()
-            }()),
-            notify: "aChanged"
-        })
+        this.__initialize()
     }
-}
 
+    __initialize(){
+        Element.addProperty(this, 'a', { type: "string", notify: "aChanged" })
+        this.a = (function(){
+            return (new A()).toString()
+        }())
+    }
+
+}

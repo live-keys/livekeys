@@ -31,7 +31,7 @@ module.exports["NestingTest"] = class NestingTest extends Container{
                     function(){ return enested.y }.bind(this),
                     [[enested, "yChanged"]]
                 )
-                Element.assignDefaultProperty(null)
+                // Element.assignDefaultProperty(null)
                 return this
             }.bind(e1)(this)),
             (function(parent){
@@ -42,7 +42,7 @@ module.exports["NestingTest"] = class NestingTest extends Container{
                         this.setParent(parent)
                         Element.assignId(enested, "enested")
                         this.y = 200
-                        Element.assignDefaultProperty(null)
+                        // Element.assignDefaultProperty(null)
                         return this
                     }.bind(enested)(this))
                 ])
@@ -70,7 +70,7 @@ module.exports["ShortIdTest"] = class ShortIdTest extends Container{
                 this.setParent(parent)
                 Element.assignId(e1, "e1")
                 this.x = 10
-                Element.assignDefaultProperty(null)
+                // Element.assignDefaultProperty(null)
 
                 return this
             }.bind(e1)(this))
