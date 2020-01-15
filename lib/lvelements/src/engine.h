@@ -100,6 +100,7 @@ public:
     Script::Ptr compileModuleSource(const std::string& path, const std::string& source);
 
     Object loadFile(const std::string& path);
+    Object loadFile(const std::string& path, const std::string& content);
     Object loadJsFile(const std::string& path);
 
     ComponentTemplate* registerTemplate(const MetaObject* mo);
@@ -139,6 +140,6 @@ private:
     EnginePrivate* m_d;
 };
 
-}} // namespace lv, script
+}} // namespace lv, el
 
 #endif // LVENGINE_H

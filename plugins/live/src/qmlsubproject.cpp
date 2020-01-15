@@ -63,7 +63,7 @@ void QmlSubproject::componentComplete(){
         if ( sourceMonitor() )
             activations.insert(m_source);
 
-        m_runnable = new Runnable(engine, m_source, m_project->runnables(), m_label, activations);
+        m_runnable = new Runnable(engine, m_project->engine(), m_source, m_project->runnables(), m_label, activations);
         m_runnable->setRunSpace(this);
 
         if ( m_label.isEmpty() ){
@@ -84,7 +84,7 @@ void QmlSubproject::componentComplete(){
 
 
 QObject* QmlSubproject::root() const{
-    return m_runnable ? m_runnable->appRoot() : nullptr;
+    return m_runnable ? m_runnable->viewRoot() : nullptr;
 }
 
 }// namespace

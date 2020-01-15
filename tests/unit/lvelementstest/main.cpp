@@ -39,6 +39,7 @@
 #include "jsimportstest.h"
 #include "lvimportstest.h"
 #include "lvparsetest.h"
+#include "metaobjecttypeinfotest.h"
 #include "lvelparseddocumenttest.h"
 
 int main(int argc, char *argv[]){

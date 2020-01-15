@@ -18,7 +18,7 @@
 #define LVWORKERTHREAD_H
 
 #include "live/lvviewglobal.h"
-#include "live/act.h"
+#include "live/qmlact.h"
 #include <QObject>
 #include <QEvent>
 #include <functional>
@@ -36,53 +36,49 @@ public:
     /// \private
     class CallEvent : public QEvent{
 
+        friend class WorkerThread;
+        friend class WorkerThreadPrivate;
+
     public:
         CallEvent(
-            const std::function<void()>& filter,
-            Shared::RefScope* readScope = nullptr);
-        CallEvent(
-            std::function<void()>&& filter,
-            Shared::RefScope* readScope = nullptr);
-        CallEvent(
-            const std::function<void()>& filter,
-            const std::function<void()>& callCallback,
-            Shared::RefScope* readScope = nullptr);
-        CallEvent(
-            std::function<void()>&& filter,
-            std::function<void()>&& callCallback,
-            Shared::RefScope* readScope = nullptr);
-        void callFilter();
-        Shared::RefScope *readScope();
-        bool hasCallback();
+            int callerIndex,
+            const QVariant& args = QVariant(),
+            const QList<Shared*>& transferObjects = QList<Shared*>()
+        );
 
-        CallEvent* callbackEvent();
+        CallEvent* callbackEvent(const QVariant& v);
 
     private:
-        std::function<void()> m_filter;
-        std::function<void()> m_callback;
-        Shared::RefScope*    m_readScope;
+        int            m_callerIndex;
+        QVariant       m_args;
+        QList<Shared*> m_transferObjects;
     };
 
 public:
-    WorkerThread(QObject* parent = nullptr);
+    WorkerThread(const QList<QString>& sources, QObject* parent = nullptr);
     virtual ~WorkerThread();
 
-    void postWork(
-        const std::function<void()>& fnc,
-        Shared::RefScope* locker = nullptr);
-    void postWork(
-        const std::function<void()>& fnc,
-        const std::function<void()>& cbk,
-        Shared::RefScope* locker = nullptr
-    );
+    void postWork(QmlAct* caller, const QVariantList &values, const QList<Shared*> objectTransfers);
+
     void start();
+
+    QList<QmlAct*>& acts();
 
     bool event(QEvent * ev);
 
 private:
+    QJSEngine*           m_engine;
     QThread*             m_thread;
+    QList<lv::QmlAct*>    m_acts;
+    QList<QString>       m_actFunctionsSource;
+    QList<QJSValue>      m_actFunctions;
+    QMap<int, QPair<QObject*, QString> > m_specialFunctions;
     WorkerThreadPrivate* m_d;
 };
+
+inline QList<QmlAct *> &WorkerThread::acts(){
+    return m_acts;
+}
 
 }// namespace
 

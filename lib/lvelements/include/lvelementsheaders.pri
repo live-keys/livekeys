@@ -8,6 +8,7 @@ HEADERS += \
     $$PWD/live/elements/languageparser.h \
     $$PWD/live/elements/languagequery.h \
     $$PWD/live/elements/metaobject.h \
+    $$PWD/live/elements/moduleloader.h \
     $$PWD/live/elements/parseddocument.h \
     $$PWD/live/elements/sourcerange.h \
     $$PWD/live/elements/treesitterapi.h \

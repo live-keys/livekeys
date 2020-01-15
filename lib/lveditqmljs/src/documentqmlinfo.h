@@ -39,7 +39,9 @@ namespace QmlJS{
 namespace lv{
 
 class ProjectDocument;
-class BindingPath;
+class Runnable;
+class QmlBindingPath;
+class QmlBindingChannel;
 class DocumentQmlInfoPrivate;
 
 
@@ -164,11 +166,12 @@ public:
     DocumentQmlValueObjects::Ptr createObjects() const;
     DocumentQmlValueObjects::Ptr createObjects(const ASTReference& ast) const;
 
-    static void traverseBindingPath(BindingPath* path, QObject* root);
-    static BindingPath* findDeclarationPath(
+    static QSharedPointer<QmlBindingChannel> traverseBindingPath(QSharedPointer<QmlBindingPath> path, Runnable* r);
+    static QSharedPointer<QmlBindingPath> findDeclarationPath(
+            ProjectDocument* document,
             DocumentQmlValueObjects::RangeObject *object,
             QmlDeclaration::Ptr declaration);
-    static BindingPath *findDeclarationPath(
+    static QSharedPointer<QmlBindingPath> findDeclarationPath(
         const QString& source,
         ProjectDocument* document,
         QmlDeclaration::Ptr declaration);

@@ -18,7 +18,7 @@ public:
 
 ModuleLibrary::~ModuleLibrary(){
     ModuleLoader::DestroyLoaderFunction deleteFunction =
-        reinterpret_cast<ModuleLoader::DestroyLoaderFunction>(m_d->library->resolve("destroyLoader"));
+        reinterpret_cast<ModuleLoader::DestroyLoaderFunction>(m_d->library->resolve("destroyModuleLoader"));
 
     if ( !deleteFunction )
         vlog().e() << "Failed to find delete function for ModuleLoader in :" << m_d->path << ". This may result in memory leaks";
@@ -41,7 +41,7 @@ ModuleLibrary *ModuleLibrary::load(Engine* engine, const std::string &path){
     ml->m_d->library = library;
 
     ModuleLoader::CreateLoaderFunction loaderFunction =
-        reinterpret_cast<ModuleLoader::CreateLoaderFunction>(library->resolve("createLoader"));
+        reinterpret_cast<ModuleLoader::CreateLoaderFunction>(library->resolve("createModuleLoader"));
 
     if ( !loaderFunction )
         THROW_EXCEPTION(lv::Exception, "Failed to find loader function in library: " + path, 1);
@@ -60,6 +60,14 @@ void ModuleLibrary::initializeExports(){
         m_d->exports = new Object(m_d->engine);
         *m_d->exports = m_d->engine->require(this);
     }
+}
+
+void ModuleLibrary::addInstance(const std::string &name, Element *element){
+    m_instances[name] = element;
+}
+
+Engine *ModuleLibrary::engine(){
+    return m_d->engine;
 }
 
 ModuleLibrary::ModuleLibrary(Engine* engine, const std::string &path)

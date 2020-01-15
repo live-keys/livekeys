@@ -8,15 +8,21 @@
 #include "live/projectfile.h"
 #include "live/projectdocumentmodel.h"
 
+#include <QFileInfo>
 #include <QQmlComponent>
 #include <QQuickItem>
 #include <QQmlEngine>
 #include <QTimer>
 
+#ifdef BUILD_ELEMENTS
+#include"live/elements/engine.h"
+#endif
+
 namespace lv{
 
 Runnable::Runnable(
-        ViewEngine* engine,
+        ViewEngine* viwEngine,
+        el::Engine* e,
         const QString &path,
         RunnableContainer* parent,
         const QString &name,
@@ -26,16 +32,21 @@ Runnable::Runnable(
     , m_path(path)
     , m_component(nullptr)
     , m_runSpace(nullptr)
-    , m_engine(engine)
-    , m_appRoot(nullptr)
-    , m_type(Runnable::File)
+    , m_viewEngine(viwEngine)
+    , m_viewRoot(nullptr)
+    , m_type(Runnable::QmlFile)
     , m_activations(activations)
     , m_scheduleTimer(nullptr)
     , m_runTrigger(Project::RunManual)
+    , m_engine(e)
 {
-    connect(engine, &ViewEngine::objectAcquired,      this, &Runnable::engineObjectAcquired);
-    connect(engine, &ViewEngine::objectReady,         this, &Runnable::engineObjectReady);
-    connect(engine, &ViewEngine::objectCreationError, this, &Runnable::engineObjectCreationError);
+    QString ext = QFileInfo(path).suffix();
+    if ( ext == "lv" && m_engine )
+        m_type = Runnable::LvFile;
+
+    connect(viwEngine, &ViewEngine::objectAcquired,      this, &Runnable::engineObjectAcquired);
+    connect(viwEngine, &ViewEngine::objectReady,         this, &Runnable::engineObjectReady);
+    connect(viwEngine, &ViewEngine::objectCreationError, this, &Runnable::engineObjectCreationError);
 
     m_project = qobject_cast<Project*>(parent->parent());
 }
@@ -45,9 +56,9 @@ Runnable::Runnable(ViewEngine* engine, QQmlComponent *component, RunnableContain
     , m_name(name)
     , m_component(component)
     , m_runSpace(nullptr)
-    , m_engine(engine)
-    , m_appRoot(nullptr)
-    , m_type(Runnable::Component)
+    , m_viewEngine(engine)
+    , m_viewRoot(nullptr)
+    , m_type(Runnable::QmlComponent)
     , m_scheduleTimer(nullptr)
     , m_runTrigger(Project::RunManual)
 {
@@ -57,22 +68,16 @@ Runnable::Runnable(ViewEngine* engine, QQmlComponent *component, RunnableContain
 Runnable::~Runnable(){
     m_project->removeExcludedRunTriggers(m_activations);
 
-    if ( m_appRoot ){
-        m_appRoot->setParent(nullptr);
-        auto item = qobject_cast<QQuickItem*>(m_appRoot);
+    if ( m_viewRoot ){
+        m_viewRoot->setParent(nullptr);
+        auto item = qobject_cast<QQuickItem*>(m_viewRoot);
         if (item) item->setParentItem(nullptr);
-        m_appRoot->deleteLater();
+        m_viewRoot->deleteLater();
     }
 }
 
 void Runnable::run(){
-    if ( !m_runSpace ){
-        Exception e = CREATE_EXCEPTION(lv::Exception, "Attempting to trigger a runnable with a null runspace.", Exception::toCode("~runspace"));
-        lv::ViewContext::instance().engine()->throwError(&e, this);
-        return;
-    }
-
-    if ( m_type == Runnable::File ){
+    if ( m_type == Runnable::QmlFile ){
 
         ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(m_path));
         if ( document ){
@@ -80,7 +85,7 @@ void Runnable::run(){
 
             if ( m_project->active() == this ){
 //                document->setDirty(false);
-                m_engine->createObjectAsync(
+                m_viewEngine->createObjectAsync(
                     document->content(),
                     m_runSpace,
                     QUrl::fromLocalFile(m_path),
@@ -94,7 +99,7 @@ void Runnable::run(){
 
                     emptyRunSpace();
 
-                    m_appRoot = obj;
+                    m_viewRoot = obj;
                     obj->setParent(m_runSpace);
 
                     QQuickItem *parentItem = qobject_cast<QQuickItem*>(m_runSpace);
@@ -114,7 +119,7 @@ void Runnable::run(){
             QByteArray contentBytes = f.readAll();
 
             if ( m_project->active() == this ){
-                m_engine->createObjectAsync(
+                m_viewEngine->createObjectAsync(
                     contentBytes,
                     m_runSpace,
                     QUrl::fromLocalFile(m_path),
@@ -128,7 +133,7 @@ void Runnable::run(){
 
                     emptyRunSpace();
 
-                    m_appRoot = obj;
+                    m_viewRoot = obj;
                     obj->setParent(m_runSpace);
 
                     QQuickItem *parentItem = qobject_cast<QQuickItem*>(m_runSpace);
@@ -142,7 +147,7 @@ void Runnable::run(){
             }
 
         }
-    } else if ( m_type == Runnable::Component ){
+    } else if ( m_type == Runnable::QmlComponent ){
 
         QObject* obj = qobject_cast<QObject*>(m_component->create(m_component->creationContext()));
         if (!obj){
@@ -151,7 +156,7 @@ void Runnable::run(){
 
         emptyRunSpace();
 
-        m_appRoot = obj;
+        m_viewRoot = obj;
         obj->setParent(m_runSpace);
 
         QQuickItem* appRootItem = qobject_cast<QQuickItem*>(obj);
@@ -162,6 +167,30 @@ void Runnable::run(){
         }
 
         emit objectReady();
+    } else if ( m_type == Runnable::LvFile ){
+        ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(m_path));
+
+        std::string content;
+
+        if ( document ){
+            content = document->content().toStdString();
+        } else {
+            content = m_project->lockedFileIO()->readFromFile(m_path.toStdString());
+        }
+
+#ifdef BUILD_ELEMENTS
+        try{
+            el::Object o = m_engine->loadFile(m_path.toStdString(), content);
+            std::string componentName = QFileInfo(m_path).baseName().toStdString();
+            el::LocalObject lo(o);
+            el::LocalValue lval = lo.get(m_engine, componentName);
+
+            el::Element* e = lval.toElement(m_engine);
+            m_runtimeRoot = e;
+        } catch ( lv::Exception& e ){
+            vlog().e() << e.message();
+        }
+#endif
     }
 }
 
@@ -259,24 +288,28 @@ void Runnable::setRunTrigger(int runTrigger){
     emit runTriggerChanged();
 }
 
-QObject* Runnable::createObject(const QByteArray &code, const QUrl &file){
-    m_engine->engine()->clearComponentCache();
+void Runnable::runLv(){
+    //TODO
+}
 
-    QQmlComponent component(m_engine->engine());
+QObject* Runnable::createObject(const QByteArray &code, const QUrl &file){
+    m_viewEngine->engine()->clearComponentCache();
+
+    QQmlComponent component(m_viewEngine->engine());
     component.setData(code, file);
 
     QList<QQmlError> errors = component.errors();
     if ( errors.size() ){
-        emit runError(m_engine->toJSErrors(errors));
+        emit runError(m_viewEngine->toJSErrors(errors));
         return nullptr;
     }
 
-    QObject* obj = component.create(m_engine->engine()->rootContext());
-    m_engine->engine()->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
+    QObject* obj = component.create(m_viewEngine->engine()->rootContext());
+    m_viewEngine->engine()->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
 
     errors = component.errors();
     if ( errors.size() ){
-        emit runError(m_engine->toJSErrors(errors));
+        emit runError(m_viewEngine->toJSErrors(errors));
         return nullptr;
     }
 
@@ -291,7 +324,7 @@ void Runnable::engineObjectAcquired(const QUrl &, QObject *ref){
 
 void Runnable::engineObjectReady(QObject *object, const QUrl &, QObject *ref){
     if ( ref == this ){
-        m_appRoot = object;
+        m_viewRoot = object;
         emit objectReady();
     }
 }
@@ -303,14 +336,14 @@ void Runnable::engineObjectCreationError(QJSValue errors, const QUrl &, QObject 
 }
 
 void Runnable::emptyRunSpace(){
-    if ( m_appRoot ){
-        QQuickItem* appRootItem = qobject_cast<QQuickItem*>(m_appRoot);
+    if ( m_viewRoot ){
+        QQuickItem* appRootItem = qobject_cast<QQuickItem*>(m_viewRoot);
         if ( appRootItem ){
             appRootItem->setParentItem(nullptr);
         }
-        m_appRoot->setParent(nullptr);
-        m_appRoot->deleteLater();
-        m_appRoot = nullptr;
+        m_viewRoot->setParent(nullptr);
+        m_viewRoot->deleteLater();
+        m_viewRoot = nullptr;
     }
 }
 

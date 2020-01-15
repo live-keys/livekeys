@@ -58,6 +58,8 @@ class Extensions;
 class PackageGraph;
 class Layer;
 
+namespace el{ class Engine; }
+
 // class Livekeys
 // --------------
 
@@ -94,7 +96,7 @@ public:
     void addLayer(const QString& name, const QString &layer);
     void loadLayer(const QString& layerName, std::function<void(Layer *)> onReady = nullptr);
     void loadLayers(const QStringList& layers, std::function<void(Layer*)> onReady = nullptr);
-    void loadDefaultLayers();
+    int exec(const QGuiApplication& app);
 
     void loadInternals();
     void loadInternalPlugins();
@@ -131,14 +133,18 @@ private:
     Livekeys(const Livekeys&);
     Livekeys& operator = (const Livekeys&);
 
+    void loadDefaultLayers();
+    int execElements(const QGuiApplication& app);
     void parseArguments(const QStringList& arguments);
     void solveImportPaths();
 
-    ViewEngine*      m_engine;
+    ViewEngine*        m_viewEngine;
     LivekeysArguments* m_arguments;
 
     QString              m_dir;
     QStringList          m_engineImportPaths;
+
+    lv::el::Engine*        m_engine;
 
     lv::Project*           m_project;
     lv::Settings*          m_settings;
@@ -186,7 +192,7 @@ inline Settings *Livekeys::settings(){
 }
 
 inline ViewEngine *Livekeys::engine(){
-    return m_engine;
+    return m_viewEngine;
 }
 
 inline Project *Livekeys::project(){

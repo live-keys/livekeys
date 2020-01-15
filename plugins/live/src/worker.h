@@ -3,16 +3,19 @@
 
 #include <QObject>
 #include <QQmlListProperty>
+#include <QQmlParserStatus>
 
 namespace lv{
 
-class Act;
+class Project;
+class QmlAct;
 class WorkerThread;
 
 /// \private
-class Worker : public QObject{
+class Worker : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
+    Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QQmlListProperty<QObject> acts READ acts)
     Q_CLASSINFO("DefaultProperty", "acts")
 
@@ -26,15 +29,22 @@ public:
     QObject *act(int index) const;
     void clearActs();
 
+    void componentComplete();
+    void classBegin(){}
+
 private:
+    void extractSource();
+
     static void appendAct(QQmlListProperty<QObject>*, QObject*);
     static int actCount(QQmlListProperty<QObject>*);
     static QObject* act(QQmlListProperty<QObject>*, int);
     static void clearActs(QQmlListProperty<QObject>*);
 
 private:
-    QList<lv::Act*> m_acts;
-    WorkerThread*   m_filterWorker;
+    Project*          m_project;
+    bool              m_componentComplete;
+    QList<QString>    m_actSource;
+    WorkerThread*     m_filterWorker;
 
 };
 

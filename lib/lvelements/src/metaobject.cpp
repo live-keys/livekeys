@@ -9,4 +9,4 @@ MetaObject::MetaObject()
 
 }
 
-}}// namespace lv, script
+}}// namespace lv, el

@@ -15,16 +15,21 @@ Grid{
        file : project.dir() + '/../_images/object_101_piano_query.jpg'
     }
     
-    Act{
-        id: act
-        property Mat input: src.output.cloneMat()
+    Worker{
+        id: worker
         
-        onRun: Photo.Denoising.fastNlMeans(act, input, 20, 7, 11)
-        result: null
+        Act{
+            id: act
+            
+            property Mat input: src.output.cloneMat()
+            
+            run: [Photo.Denoising, 'fastNlMeans']
+            args: ["$input", 21, 3, 21]
+        }
     }
     
     MatView{
-        mat: act.result
+        mat: act.result ? act.result : null
     }
     
 }

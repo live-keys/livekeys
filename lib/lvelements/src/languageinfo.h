@@ -9,6 +9,8 @@
 
 namespace lv{ namespace el{
 
+class MetaObject;
+
 class LV_ELEMENTS_EXPORT EnumInfo{
 
 public:
@@ -37,6 +39,8 @@ public:
     void addParameter(const Utf8& name, const Utf8& typeName);
     size_t parameterCount() const;
     const std::pair<Utf8, Utf8>& parameter(size_t index) const;
+
+    static FunctionInfo extractFromDeclaration(const std::string& name, const std::string& declaration);
 
 private:
     Utf8 m_name;
@@ -95,9 +99,8 @@ public:
     bool isCreatable() const;
     bool isInstance() const;
 
-    size_t totalEnums() const;
-    const EnumInfo& enumAt(size_t index) const;
-    void addEnum(const EnumInfo& enumInfo);
+    void setConstructor(const FunctionInfo& constructor);
+    const FunctionInfo& getConstructor() const;
 
     size_t totalProperties() const;
     const PropertyInfo& propertyAt(size_t index) const;
@@ -107,9 +110,15 @@ public:
     const FunctionInfo& functionAt(size_t index) const;
     void addFunction(const FunctionInfo& functionInfo);
 
+    size_t totalMethods() const;
+    const FunctionInfo& methodAt(size_t index) const;
+    void addMethod(const FunctionInfo& functionInfo);
+
     size_t totalEvents() const;
     const FunctionInfo& eventAt(size_t index) const;
     void addEvent(const FunctionInfo& eventInfo);
+
+    static TypeInfo::Ptr extract(const MetaObject& mo, const Utf8 &uri = "", bool isInstance = false, bool isCreatable = true);
 
 private:
     TypeInfo(Utf8 name, Utf8 inheritsName, bool isCreatable, bool isInstance);
@@ -117,10 +126,11 @@ private:
     Utf8                      m_typeName;
     Utf8                      m_className;
     Utf8                      m_inherits;
-    std::vector<EnumInfo>     m_enums;
     std::vector<PropertyInfo> m_properties;
     std::vector<FunctionInfo> m_functions;
+    std::vector<FunctionInfo> m_methods;
     std::vector<FunctionInfo> m_events;
+    FunctionInfo              m_constructor;
     bool                      m_isCreatable;
     bool                      m_isInstance;
 };
@@ -223,7 +233,7 @@ private:
 
 namespace ml{
 
-//TODO: Add serialization
+//TODO: Add serialization, and deserialization
 
 } // namespace ml
 

@@ -404,23 +404,29 @@ void Element::assignPropertyExpression(
             return;
         }
 
-        Element* bindingElement  = LocalValue(e->engine(), baItem->Get(0)).toElement(e->engine());
-        std::string bindingEvent = LocalValue(e->engine(), baItem->Get(1)).toStdString(e->engine());
+        LocalValue bindingElementValue = LocalValue(e->engine(), baItem->Get(0));
+        if ( bindingElementValue.isElement() ){
+            Element* bindingElement  = bindingElementValue.toElement(e->engine());
+            std::string bindingEvent = LocalValue(e->engine(), baItem->Get(1)).toStdString(e->engine());
 
-        EventConnection* bec = bindingElement->on(bindingEvent, [be](const Function::Parameters&){
-            be->run();
-        });
+            EventConnection* bec = bindingElement->on(bindingEvent, [be](const Function::Parameters&){
+                be->run();
+            });
 
-        be->bindables.push_back(bec);
+            be->bindables.push_back(bec);
+        }
     }
 }
 
 void Element::assignDefaultProperty(Element *e, LocalValue value){
-    if ( e->defaultProperty().empty() )
-        throw std::exception();
+    if ( !value.isNull() ){
+        if ( e->defaultProperty().empty() )
+            throw std::exception();
 
-    Property* p = e->property(e->defaultProperty());
-    p->write(e, value.data());
+        Property* p = e->property(e->defaultProperty());
+        p->write(e, value.data());
+    }
+    e->onReady();
 }
 
 void Element::assignId(Element *e, const std::string &id){
@@ -646,4 +652,4 @@ Element *ElementPrivate::elementFromObject(const v8::Local<v8::Object> &object){
     return reinterpret_cast<Element*>(ptr);
 }
 
-}}// namespace lv, namespace script
+}}// namespace lv, el

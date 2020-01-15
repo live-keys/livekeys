@@ -5,8 +5,12 @@
 #include "live/codepalette.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
-#include "bindingchannel.h"
+#include "qmlbindingchannel.h"
+#include "qmlbindingspan.h"
 #include "documentqmlscope.h"
+
+#include "live/codecompletionmodel.h"
+#include "live/codeqmlhandler.h"
 
 #include <QDateTime>
 #include <QVariant>
@@ -161,10 +165,45 @@ void QmlCodeConverter::updateBindings(){
     }
 }
 
+void QmlCodeConverter::suggestionsForExpression(const QString &expression, CodeCompletionModel *model){
+    QObject* editParent = m_edit->parent();
+    CodeQmlHandler* qmlHandler = nullptr;
+    while ( editParent ){
+        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
+        if ( qmlHandler )
+            break;
+
+        editParent = editParent->parent();
+    }
+
+    if (qmlHandler){
+        qmlHandler->suggestionsForProposedExpression(m_edit->declaration(), expression, model);
+    }
+}
+
+bool QmlCodeConverter::bindExpression(const QString &expression){
+    QObject* editParent = m_edit->parent();
+    CodeQmlHandler* qmlHandler = nullptr;
+    while ( editParent ){
+        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
+        if ( qmlHandler )
+            break;
+
+        editParent = editParent->parent();
+    }
+
+    if (qmlHandler){
+        return qmlHandler->findBindingForExpression(m_edit, expression);
+    }
+
+    return false;
+}
+
 void QmlCodeConverter::updateFromPalette(){
     CodePalette* palette = static_cast<CodePalette*>(parent());
-    if ( palette && m_edit->bindingChannel() )
-        m_edit->bindingChannel()->commit(palette->value());
+    if ( palette && m_edit->bindingSpan() ){
+        m_edit->bindingSpan()->commit(palette->value());
+    }
 }
 
 QString QmlCodeConverter::buildCode(const QJSValue &value){

@@ -59,7 +59,7 @@ class ElementPrivate;
  */
 class LV_ELEMENTS_EXPORT Element{
 
-    META_OBJECT{
+    BASE_META_OBJECT{
         META_OBJECT_DESCRIBE(Element)
             .constructor()
             .scriptMethod<void, LocalValue, Callable>("on", &Element::on)
@@ -163,6 +163,10 @@ public:
     LocalValue get(const std::string& name);
     void set(const std::string& name, const LocalValue& value);
 
+    // Ready
+    // -----
+
+    virtual void onReady(){}
 
 protected:
     template<typename ...Args> Event notify(Event::Id eventId, Args... args);
@@ -257,6 +261,6 @@ inline Event Element::notifyFromInstance(Event::Id eventId, const Function::Para
     return Event();
 }
 
-}} // namespace lv, script
+}} // namespace lv, el
 
 #endif // LVELEMENT_H

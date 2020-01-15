@@ -111,7 +111,7 @@ QmlLibraryInfo::ScanStatus loadPluginInfo(
     return PluginTypesFacade::loadPluginInfo(projectScope, dirParser, path, scanner, dependencyPaths, stream);
 }
 
-void scanObjectFile(
+bool scanObjectFile(
     ProjectQmlScope::Ptr projectScope,
     const QString& libraryPath,
     const QString& componentName,
@@ -125,7 +125,7 @@ void scanObjectFile(
     DocumentQmlInfo::Ptr documentInfo = DocumentQmlInfo::create(filePath);
     bool parseResult = documentInfo->parse(fileData);
     if ( !parseResult )
-        return;
+        return false;
 
     QList<DocumentQmlScope::Import> imports = DocumentQmlScope::extractImports(documentInfo);
     QList<QString> paths;
@@ -160,6 +160,8 @@ void scanObjectFile(
     );
     fmo->addExport(componentName, libraryPath, componentVersion);
     objects.append(fmo);
+
+    return true;
 }
 
 void scanQmlDirForQmlExports(
@@ -172,6 +174,7 @@ void scanQmlDirForQmlExports(
 {
     QList<QString> dependencyPaths = library->dependencyPaths();
     QList<LanguageUtils::FakeMetaObject::ConstPtr> objects;
+    QMap<QString, QString> scannedFiles;
     vlog_debug("editqmljs-projectscanner", "Scanning qmldir components in: " + path);
 
     QHash<QString, QmlDirParser::Component> components = dirParser.components();
@@ -185,7 +188,7 @@ void scanQmlDirForQmlExports(
 
         QString filePath = QDir::cleanPath(path + QDir::separator() + it->fileName);
         if ( QFile::exists(filePath) ){
-            scanObjectFile(
+            if ( scanObjectFile(
                 projectScope,
                 path,
                 it->typeName,
@@ -194,7 +197,9 @@ void scanQmlDirForQmlExports(
                 LanguageUtils::ComponentVersion(it->majorVersion, it->minorVersion),
                 dependencyPaths,
                 objects
-            );
+            )){
+                scannedFiles.insert(it->typeName, it->fileName);
+            }
         } else {
             qWarning("Warning: Qml file does not exist for parsing: %s", qPrintable(filePath));
         }
@@ -207,6 +212,7 @@ void scanQmlDirForQmlExports(
     }
 
     library->data().setMetaObjects(objects);
+    library->setFiles(scannedFiles);
     library->setStatus(QmlLibraryInfo::NoPrototypeLink);
     library->setDependencies(dependencyPaths);
     library->updateExports();
@@ -222,6 +228,7 @@ void scanPathForQmlExports(
 {
     QList<QString> dependencyPaths = library->dependencyPaths();
     QList<LanguageUtils::FakeMetaObject::ConstPtr> objects;
+    QMap<QString, QString> scannedFiles;
     vlog_debug("editqmljs-projectscanner", "Scannig path: " + path);
 
     QDirIterator dit(path);
@@ -235,7 +242,7 @@ void scanPathForQmlExports(
         if ( !info.fileName().at(0).isUpper() )
             continue;
 
-        scanObjectFile(
+        if ( scanObjectFile(
             projectScope,
             path,
             info.baseName(),
@@ -244,10 +251,13 @@ void scanPathForQmlExports(
             LanguageUtils::ComponentVersion(1, 0),
             dependencyPaths,
             objects
-        );
+        )){
+            scannedFiles.insert(info.baseName(), info.fileName());
+        }
     }
 
     library->data().setMetaObjects(objects);
+    library->setFiles(scannedFiles);
     library->setStatus(QmlLibraryInfo::NoPrototypeLink);
     library->setDependencies(dependencyPaths);
     library->updateExports();

@@ -29,12 +29,8 @@ class WorkerThreadPrivate : public QObject{
     Q_OBJECT
 
 public:
-    explicit WorkerThreadPrivate() : QObject(0){}
+    explicit WorkerThreadPrivate(WorkerThread* worker) : QObject(nullptr), m_worker(worker){}
     ~WorkerThreadPrivate(){}
-
-    void postNotify(const std::function<void ()>& fnc){
-        QCoreApplication::postEvent(this, new WorkerThread::CallEvent(fnc));
-    }
 
     void postNotify(WorkerThread::CallEvent* evt){
         QCoreApplication::postEvent(this, evt);
@@ -45,13 +41,14 @@ public:
             return QObject::event(event);
 
         WorkerThread::CallEvent* ce = static_cast<WorkerThread::CallEvent*>(event);
-        ce->callFilter();
-        delete ce->readScope();
+        QmlAct* a = m_worker->acts()[ce->m_callerIndex];
+        a->setResult(ce->m_args);
+
         return true;
     }
 
 private:
-
+    WorkerThread* m_worker;
 
 };
 

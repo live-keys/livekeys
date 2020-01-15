@@ -45,7 +45,7 @@ namespace lv{
 /**
  * \brief Default constructor
  */
-Project::Project(QObject *parent)
+Project::Project(el::Engine *engine, QObject *parent)
     : QObject(parent)
     , m_fileModel(new ProjectFileModel(this))
     , m_navigationModel(new ProjectNavigationModel(this))
@@ -56,6 +56,7 @@ Project::Project(QObject *parent)
     , m_runspace(nullptr)
     , m_scheduleRunTimer(new QTimer())
     , m_runTrigger(Project::RunOnChange)
+    , m_engine(engine)
 {
     m_scheduleRunTimer->setInterval(1000);
     m_scheduleRunTimer->setSingleShot(true);
@@ -93,7 +94,7 @@ void Project::newProject(){
         document->removeEditingState(ProjectDocument::Read);
         m_documentModel->openDocument("T:0", document);
 
-        m_active = new Runnable(engine(), "T:0", m_runnables, "untitled");
+        m_active = new Runnable(viewEngine(), m_engine, "T:0", m_runnables, "untitled");
         m_active->setRunSpace(m_runspace);
         m_runnables->addRunnable(m_active);
         setActive(m_active);
@@ -129,7 +130,7 @@ void Project::openProject(const QString &path){
 
         m_documentModel->openDocument(document->file()->path(), document);
 
-        Runnable* r = new Runnable(engine(), document->file()->path(), m_runnables, document->file()->name());
+        Runnable* r = new Runnable(viewEngine(), m_engine, document->file()->path(), m_runnables, document->file()->name());
         r->setRunSpace(m_runspace);
         m_runnables->addRunnable(r);
         m_active = r;
@@ -184,7 +185,8 @@ ProjectFile *Project::relocateDocument(const QString &path, const QString& newPa
  */
 void Project::closeProject(){
     emit aboutToClose();
-    setActive((Runnable*)nullptr);
+    Runnable* r = nullptr;
+    setActive(r);
     m_documentModel->closeDocuments();
     m_fileModel->closeProject();
     m_runnables->clearAll();
@@ -350,10 +352,10 @@ Runnable *Project::openRunnable(const QString &path, const QStringList &activati
             activ.insert(*it);
 
         if ( document ){
-            r = new Runnable(engine(), document->file()->path(), m_runnables, document->file()->name(), activ);
+            r = new Runnable(viewEngine(), m_engine, document->file()->path(), m_runnables, document->file()->name(), activ);
         } else {
             QFileInfo pathInfo(path);
-            r = new Runnable(engine(), path, m_runnables, pathInfo.fileName(), activ);
+            r = new Runnable(viewEngine(), m_engine, path, m_runnables, pathInfo.fileName(), activ);
         }
 
         m_runnables->addRunnable(r);
@@ -536,10 +538,10 @@ QObject *Project::runSpace(){
 }
 
 QObject *Project::appRoot(){
-    return m_active ? m_active->appRoot() : nullptr;
+    return m_active ? m_active->viewRoot() : nullptr;
 }
 
-ViewEngine *Project::engine(){
+ViewEngine *Project::viewEngine(){
     return qobject_cast<ViewEngine*>(parent());
 }
 

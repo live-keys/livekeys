@@ -25,7 +25,7 @@
 
 namespace lv{
 
-class Act;
+class QmlAct;
 
 class LV_VIEW_EXPORT Shared : public QObject{
 
@@ -54,14 +54,14 @@ public:
         }
 
     private:
-        RefScope(Act* act) : m_act(act){}
+        RefScope(QmlAct* act) : m_act(act){}
         void clear(){ foreach( Shared* sd, m_refs ) Shared::unref(sd); }
 
     public:
         ~RefScope(){ clear(); }
 
     private:
-        Act*           m_act;
+        QmlAct*           m_act;
         QList<Shared*> m_refs;
     };
 
@@ -69,7 +69,8 @@ public:
     Shared(QObject* parent = nullptr);
     virtual ~Shared();
 
-    template<typename ...Args> static RefScope* refScope(Act* call, Args... args){
+
+    template<typename ...Args> static RefScope* refScope(QmlAct* call, Args... args){
         RefScope* rs = new RefScope(call);
         rs->read(args...);
 
@@ -82,6 +83,12 @@ public:
     static void ownJs(Shared* data);
 
     virtual void recycleSize(int) const{}
+
+    static QJSValue transfer(const QVariant& v, QJSEngine* engine);
+    static QVariant transfer(const QJSValue& v, QList<Shared*>& shared);
+    static QVariant transfer(const QVariant& v, QList<Shared*>& shared);
+
+    virtual Shared* transfer(){ return nullptr; }
 
 private:
     int m_refs;

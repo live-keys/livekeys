@@ -110,7 +110,6 @@ void LvElParsedDocumentTest::extractInfo1Test()
     QVERIFY(type->inheritsName() == "Element");
     QVERIFY(!type->isInstance());
     QVERIFY(!type->isCreatable());
-    QVERIFY(type->totalEnums() == 0);
     QVERIFY(type->totalEvents() == 0);
     QVERIFY(type->totalFunctions() == 0);
     QVERIFY(type->totalProperties() == 1);
@@ -131,7 +130,6 @@ void LvElParsedDocumentTest::extractInfo2Test()
     auto ast = m_parser->parse(testString);
     lv::el::DocumentInfo::Ptr result = lv::el::ParsedDocument::extractInfo(testString, ast);
 
-
     QVERIFY(result->totalImports() == 0);
     QVERIFY(result->totalTypes() == 2);
 
@@ -140,7 +138,6 @@ void LvElParsedDocumentTest::extractInfo2Test()
     QVERIFY(type->inheritsName() == "Object");
     QVERIFY(!type->isInstance());
     QVERIFY(!type->isCreatable());
-    QVERIFY(type->totalEnums() == 0);
     QVERIFY(type->totalEvents() == 0);
     QVERIFY(type->totalFunctions() == 0);
     QVERIFY(type->totalProperties() == 1);
@@ -153,7 +150,6 @@ void LvElParsedDocumentTest::extractInfo2Test()
     QVERIFY(type2->typeName() == "B");
     QVERIFY(type2->inheritsName() == "Element");
     QVERIFY(!type2->isCreatable());
-    QVERIFY(type2->totalEnums() == 0);
 
     QVERIFY(type2->totalEvents() == 1);
     QVERIFY(type2->eventAt(0).name() == "a");
@@ -193,7 +189,6 @@ void LvElParsedDocumentTest::extractInfo3Test()
     QVERIFY(type->inheritsName() == "Element");
     QVERIFY(type->isInstance());
     QVERIFY(!type->isCreatable());
-    QVERIFY(type->totalEnums() == 0);
     QVERIFY(type->totalEvents() == 0);
     QVERIFY(type->totalFunctions() == 1);
     QVERIFY(type->totalProperties() == 1);
@@ -236,7 +231,6 @@ void LvElParsedDocumentTest::extractInfo4Test()
     QVERIFY(type->inheritsName() == "C.Element");
     QVERIFY(!type->isInstance());
     QVERIFY(!type->isCreatable());
-    QVERIFY(type->totalEnums() == 0);
     QVERIFY(type->totalEvents() == 0);
     QVERIFY(type->totalFunctions() == 1);
     QVERIFY(type->totalProperties() == 1);

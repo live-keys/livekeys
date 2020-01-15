@@ -34,4 +34,4 @@ void EventConnection::remove(EventConnection *conn){
     emitter->removeListeningConnection(conn);
 }
 
-}} // namespace lv, script
+}} // namespace lv, el

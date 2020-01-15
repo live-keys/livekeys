@@ -272,6 +272,10 @@ bool LocalValue::isObject() const{
     return m_d->data->IsObject();
 }
 
+bool LocalValue::isArray() const{
+    return m_d->data->IsArray();
+}
+
 bool LocalValue::isElement() const{
     if ( !m_d->data->IsObject() )
         return false;
@@ -509,4 +513,4 @@ Element *Value::asElement() const{
 
 
 
-}}// namespace lv, namespace script
+}}// namespace lv, el

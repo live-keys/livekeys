@@ -43,7 +43,7 @@ public:
     class TypeLoadRequest{
     public:
         TypeLoadRequest(const QString& uri, const QString& path)
-            : importUri(uri), libraryPath(path), object(0), isError(false)
+            : importUri(uri), libraryPath(path), object(nullptr), isError(false)
         {}
         ~TypeLoadRequest(){ delete object; }
 

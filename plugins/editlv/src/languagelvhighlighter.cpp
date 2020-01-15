@@ -4,6 +4,8 @@
 #include "live/visuallog.h"
 #include "live/elements/parseddocument.h"
 
+#include <math.h>
+
 namespace lv{
 
 LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentHandler *, QTextDocument *parent)

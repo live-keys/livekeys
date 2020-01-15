@@ -21,7 +21,8 @@
 #include "live/packagegraph.h"
 
 #include "qmlcontainer.h"
-#include "act.h"
+#include "qmlact.h"
+#include "qmlact.h"
 #include "qmlfollowup.h"
 #include "qmlopening.h"
 #include "group.h"
@@ -329,7 +330,7 @@ QString ViewEngine::typeAsPropertyMessage(const QString &typeName, const QString
 void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::ErrorHandler>(          uri, 1, 0, "ErrorHandler");
     qmlRegisterType<lv::QmlContainer>(          uri, 1, 0, "Container");
-    qmlRegisterType<lv::Act>(                   uri, 1, 0, "Act");
+    qmlRegisterType<lv::QmlAct>(                uri, 1, 0, "Act");
     qmlRegisterType<lv::QmlOpening>(            uri, 1, 0, "Opening");
     qmlRegisterType<lv::QmlFollowUp>(           uri, 1, 0, "FollowUp");
     qmlRegisterType<lv::Group>(                 uri, 1, 0, "Group");

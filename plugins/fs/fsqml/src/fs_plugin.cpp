@@ -28,7 +28,6 @@
 #include <QQmlContext>
 #include <QQuickWindow>
 
-
 static QObject* pathProvider(QQmlEngine *engine, QJSEngine *){
     return new lv::QmlPath(engine);
 }
@@ -49,7 +48,6 @@ void FsPlugin::registerTypes(const char *uri){
     qmlRegisterSingletonType<lv::QmlPath>( uri, 1, 0, "Path", &pathProvider);
     qmlRegisterSingletonType<lv::QmlDir>(  uri, 1, 0, "Dir", &dirProvider);
     qmlRegisterSingletonType<lv::QmlFile>( uri, 1, 0, "File", &fileProvider);
-
 }
 
 void FsPlugin::initializeEngine(QQmlEngine *, const char *){

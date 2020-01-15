@@ -64,8 +64,11 @@ LocalValue Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::V
 template<>
 Element *Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
     v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast((*info)[index]);
-    if (vo->IsNull()) return nullptr;
+    if ( vo->IsNull() )
+        return nullptr;
+
     if ( vo->InternalFieldCount() != 1 ){
+        //TODO: Engine::captureStackTrace
         Engine* engine = reinterpret_cast<Engine*>(info->GetIsolate()->GetData(0));
         lv::Exception exc = CREATE_EXCEPTION(lv::Exception, "Value cannot be converted to an Element type or subtype.", 1);
         engine->throwError(&exc, nullptr);
@@ -222,6 +225,7 @@ Element *Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::
 
     v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(args[index]);
     if ( vo->InternalFieldCount() != 1 ){
+        //TODO: Engine::captureStackTrace
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Value cannot be converted to an Element type or subtype.", 1);
         engine->throwError(&e, nullptr);
         return nullptr;
@@ -243,4 +247,4 @@ void Function::assignReturnValue(const LocalValue &val, const v8::FunctionCallba
 }
 
 
-}} // namespace lv, namespace script
+}} // namespace lv, el

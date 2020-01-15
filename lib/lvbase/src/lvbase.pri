@@ -2,7 +2,9 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/exception.h \
+    $$PWD/library.h \
     $$PWD/libraryloadpath.h \
+    $$PWD/librarytable.h \
     $$PWD/lvbaseglobal.h \
     $$PWD/stacktrace.h \
     $$PWD/commandlineparser.h \
@@ -10,6 +12,7 @@ HEADERS += \
     $$PWD/applicationcontext.h \
     $$PWD/mlnode.h \
     $$PWD/mlnodetojson.h \
+    $$PWD/typename.h \
     $$PWD/visuallog.h \
     $$PWD/indextuple.h \
     $$PWD/functionargs.h \
@@ -25,11 +28,14 @@ HEADERS += \
 SOURCES += \
     $$PWD/exception.cpp \
     $$PWD/commandlineparser.cpp \
+    $$PWD/library.cpp \
+    $$PWD/librarytable.cpp \
     $$PWD/lockedfileiosession.cpp \
     $$PWD/applicationcontext.cpp \
     $$PWD/mlnode.cpp \
     $$PWD/mlnodetojson.cpp \
     $$PWD/libraryloadpath.cpp \
+    $$PWD/typename.cpp \
     $$PWD/visuallog.cpp \
     $$PWD/stacktrace.cpp \
     $$PWD/package.cpp \

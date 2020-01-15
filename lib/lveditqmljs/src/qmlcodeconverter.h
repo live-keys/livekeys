@@ -11,6 +11,7 @@ namespace lv{
 
 class QmlEditFragment;
 class DocumentQmlScope;
+class CodeCompletionModel;
 
 /// \private
 class QmlCodeConverter : public QObject{
@@ -39,6 +40,8 @@ public slots:
     void write(const QJSValue options);
     QVariant parse();
     void updateBindings();
+    void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model);
+    bool bindExpression(const QString& expression);
 
     void updateFromPalette();
 

@@ -39,6 +39,7 @@ void EditorPlugin::registerTypes(const char *uri){
         uri, 1, 0, "PaletteList", "PaletteList can be accessed through a DocumentHandler."
     );
     qmlRegisterType<lv::DocumentHandler>(uri, 1, 0, "DocumentHandler");
+    qmlRegisterType<lv::CodeCompletionModel>(uri, 1, 0, "CodeCompletionModel");
     qmlRegisterType<lv::CodePalette>(uri, 1, 0, "CodePalette");
     qmlRegisterType<lv::WorkspaceExtension>(uri, 1, 0, "LiveExtension");
     qmlRegisterType<lv::Theme>(uri, 1, 0, "Theme");

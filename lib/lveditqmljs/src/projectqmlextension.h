@@ -61,6 +61,8 @@ public:
 
     void setParams(Settings *settings, Project* project, ViewEngine* engine);
 
+    Project* project();
+
 public slots:
     QObject* createHandler(ProjectDocument* document, DocumentHandler* handler);
 
@@ -83,6 +85,11 @@ inline ProjectQmlScanMonitor *ProjectQmlExtension::scanMonitor(){
 /// \brief Returns the lv::PaletteContainer associated with this object.
 inline PaletteContainer *ProjectQmlExtension::paletteContainer(){
     return m_paletteContainer;
+}
+
+/// \brief Returns the global lv::Project
+inline Project *ProjectQmlExtension::project(){
+    return m_project;
 }
 
 }// namespace

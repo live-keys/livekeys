@@ -3,8 +3,9 @@
 #include "live/elements/parseddocument.h"
 #include "live/visuallog.h"
 
-namespace lv{
+#include <math.h>
 
+namespace lv{
 
 QueryHighlighter::QueryHighlighter(
         QmlLanguageObject* language,

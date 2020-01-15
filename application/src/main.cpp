@@ -59,9 +59,7 @@ int main(int argc, char *argv[]){
         if ( QFileInfo(QString::fromStdString(ApplicationContext::instance().externalPath())).exists() )
             LibraryLoadPath::addRecursive(ApplicationContext::instance().externalPath(), ApplicationContext::instance().linkPath());
 
-        livekeys->loadDefaultLayers();
-
-        return app.exec();
+        return livekeys->exec(app);
 
     } catch ( lv::Exception& e ){
         if ( e.code() == Exception::toCode("Init") ){

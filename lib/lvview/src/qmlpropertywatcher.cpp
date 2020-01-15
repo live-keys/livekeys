@@ -10,6 +10,14 @@ QmlPropertyWatcher::QmlPropertyWatcher(QObject *object, const QString &propertyN
         m_property.connectNotifySignal(this, SLOT(propertyChanged()));
 }
 
+QmlPropertyWatcher::QmlPropertyWatcher(const QQmlProperty &p, QObject *parent)
+    : QObject(parent)
+    , m_property(p)
+{
+    if ( m_property.isValid() )
+        m_property.connectNotifySignal(this, SLOT(propertyChanged()));
+}
+
 QmlPropertyWatcher::~QmlPropertyWatcher(){
 }
 
