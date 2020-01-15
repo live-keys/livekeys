@@ -21,7 +21,6 @@
 #include "testrunner.h"
 #include "mlnodetoqmltest.h"
 #include "visuallogtest.h"
-#include "filtertest.h"
 #include "grouptest.h"
 #include "linecapturetest.h"
 

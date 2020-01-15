@@ -1284,9 +1284,9 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
             delete section;
         }
         *compose << "\n]\n)\n";
-    } else {
+    }/* else {
         *compose << "Element.assignDefaultProperty(null)\n\n";
-    }
+    }*/
 
     *compose << "}\n\n";
 
@@ -1519,9 +1519,9 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
             delete section;
         }
         *compose << "\n]\n)\n";
-    } else {
+    }/* else {
         *compose << "Element.assignDefaultProperty(null)\n\n";
-    }
+    }*/
 
 
     for ( auto it = m_body->children().begin(); it != m_body->children().end(); ++it ){
@@ -1900,8 +1900,10 @@ void NewTaggedComponentExpressionNode::convertToJs(const std::string &source, st
     std::string name, value;
     for (auto child: children())
     {
-        if (child->typeString() == "Identifier")
+        if (child->typeString() == "Identifier") {
             name = slice(source, child);
+            checkIdentifierDeclared(source, child, name);
+        }
         else
         {
             value = slice(source, child);

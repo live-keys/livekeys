@@ -5,7 +5,7 @@ module.exports["FunctionComponent"] = class FunctionComponent extends Element{
     }
     
     __initialize(){
-        Element.assignDefaultProperty(null)
+        // Element.assignDefaultProperty(null)
     }
 
     test(param1, param2){
@@ -20,7 +20,7 @@ module.exports["FunctionComponent"] = class FunctionComponent extends Element{
             __initialize(){
                 Element.addProperty(this, 'x', {type: 'int', notify: 'xChanged'})
                 this.x = 200
-                Element.assignDefaultProperty(null)
+                // Element.assignDefaultProperty(null)
             }
         }
     }
@@ -33,7 +33,7 @@ module.exports["FunctionCreatesComponent"] = class FunctionCreatesComponent exte
     }
 
     __initialize(){
-        Element.assignDefaultProperty(null)
+        // Element.assignDefaultProperty(null)
     }
 
     test(param1, param2){
@@ -44,7 +44,7 @@ module.exports["FunctionCreatesComponent"] = class FunctionCreatesComponent exte
 
             Element.addProperty(this, 'x', {type: 'int', notify: 'xChanged'})
             this.x = 200
-            Element.assignDefaultProperty(null)
+            // Element.assignDefaultProperty(null)
             return this
         }.bind(new Element())(null))
     }

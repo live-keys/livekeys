@@ -312,6 +312,7 @@ int Livekeys::exec(const QGuiApplication& app){
 }
 
 int Livekeys::execElements(const QGuiApplication &app){
+#ifdef BUILD_ELEMENTS
     int result = 0;
     m_engine->setPackageImportPaths({lv::ApplicationContext::instance().pluginPath()});
     m_engine->scope([&result, this, &app](){
@@ -319,6 +320,10 @@ int Livekeys::execElements(const QGuiApplication &app){
         result = app.exec();
     });
     return result;
+#else
+    vlog().i() << "Elements currently not built";
+    return 0;
+#endif
 }
 
 void Livekeys::loadDefaultLayers(){

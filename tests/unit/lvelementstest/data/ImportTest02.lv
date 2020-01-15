@@ -101,7 +101,7 @@ module.exports["main"] = class main extends Element{
             return (new B()).toString()
         }())
 
-        // Element.assignDefaultProperty(null)
+        //Element.assignDefaultProperty(null)
 
     }
 }

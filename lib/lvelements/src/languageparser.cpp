@@ -254,7 +254,7 @@ LanguageParser::ComparisonResult LanguageParser::compare(
     return ComparisonResult(true);
 }
 
-std::string LanguageParser::toString(LanguageParser::AST *ast){
+std::string LanguageParser::toString(LanguageParser::AST *ast) const {
     char* str = ts_node_string(ts_tree_root_node(reinterpret_cast<TSTree*>(ast)));
     std::string result(str);
     free(str);
