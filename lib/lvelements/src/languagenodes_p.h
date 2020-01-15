@@ -99,6 +99,7 @@ private:
     static void visitClassDeclaration(BaseNode* parent, const TSNode& node);
     static void visitVariableDeclaration(BaseNode* parent, const TSNode& node);
     static void visitNewExpression(BaseNode* parent, const TSNode& node);
+    static void visitReturnStatement(BaseNode* parent, const TSNode& node);
 
     BaseNode*              m_parent;
     TSNode                 m_node;
@@ -116,6 +117,12 @@ class FunctionDeclarationNode: public BaseNode {
     friend class BaseNode;
 public:
     FunctionDeclarationNode(const TSNode& node, const std::string& typeString = "FunctionDeclaration") : BaseNode(node, typeString){}
+};
+
+class ReturnStatementNode: public BaseNode {
+    friend class BaseNode;
+public:
+    ReturnStatementNode(const TSNode& node, const std::string& typeString = "ReturnStatement") : BaseNode(node, typeString){}
 };
 
 class NewExpressionNode: public BaseNode {
@@ -218,7 +225,11 @@ public:
 class ImportNode : public BaseNode{
     friend class BaseNode;
 public:
-    ImportNode(const TSNode& node) : BaseNode(node, "Import"), m_importPath(nullptr), m_importAs(nullptr){}
+    ImportNode(const TSNode& node)
+        : BaseNode(node, "Import")
+        , m_importPath(nullptr)
+        , m_isRelative(false)
+        , m_importAs(nullptr){}
     virtual std::string toString(int indent = 0) const;
 
     virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& fragments, int indent = 0);
@@ -226,6 +237,7 @@ protected:
     virtual void insert(BaseNode *child);
 private:
     ImportPathNode* m_importPath;
+    bool m_isRelative;
     IdentifierNode* m_importAs;
 };
 

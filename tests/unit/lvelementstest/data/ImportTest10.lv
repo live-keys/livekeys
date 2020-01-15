@@ -34,7 +34,18 @@ imports.require("packageb")
 var B = imports.get("B")
 
 module.exports["A"] = class A extends B{
-    toString(){
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        //Element.assignDefaultProperty(null)
+    }
+
+    toString()
+    {
         return "class[A]"
     }
 }
@@ -60,7 +71,7 @@ module.exports["A"] = class A extends B{
 import packagec
 
 component default < C{
-    function toString: (){
+    fn toString(){
         return "class[B]"
     }
 }
@@ -72,7 +83,18 @@ imports.require("packagec")
 var C = imports.get("C")
 
 module.exports["B"] = class B extends C{
-    toString(){
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        //Element.assignDefaultProperty(null)
+    }
+
+    toString()
+    {
         return "class[B]"
     }
 }
@@ -99,7 +121,7 @@ module.exports["B"] = class B extends C{
 import packagea
 
 component default < A{
-    function toString: (){
+    fn toString(){
         return "class[C]"
     }
 }
@@ -111,7 +133,18 @@ imports.require("packagea")
 var A = imports.get("A")
 
 module.exports["C"] = class C extends A{
-    toString(){
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        //Element.assignDefaultProperty(null)
+    }
+
+    toString()
+    {
         return "class[C]"
     }
 }

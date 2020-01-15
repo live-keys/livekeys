@@ -229,11 +229,6 @@ CursorContext ParsedDocument::findCursorContext(LanguageParser::AST *ast, int po
             return CursorContext(context, expressionPath, propertyPath, propertyDeclaredType, objectType, objectImportNamespace);
         }
 
-        if (strcmp(type, "typed_function_declaration") == 0)
-        {
-            // TODO: Ask Dinu
-        }
-
         if (strcmp(type, "import_path") == 0)
         {
             auto count = ts_node_child_count(curr);

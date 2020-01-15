@@ -18,37 +18,57 @@
 ////// plugin1/A.lv
 
 component default < Element{
-    function toString : (){
+    fn toString(){
         return "class[A]"
     }
 }
 
 ////// plugin1/A.lv.js
 
-class A extends Element{
-    toString(){
+module.exports["A"] = class A extends Element{
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        //Element.assignDefaultProperty(null)
+    }
+
+    toString()
+    {
         return "class[A]"
     }
 }
-module.exports["A"] = A
 
 
 ////// plugin1/B.lv
 
 component default < Element{
-    function toString : (){
+    fn toString(){
         return "class[B]"
     }
 }
 
 ////// plugin1/B.lv.js
 
-class B extends Element{
-    toString(){
+module.exports["B"] = class B extends Element{
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        //Element.assignDefaultProperty(null)
+    }
+
+    toString()
+    {
         return "class[B]"
     }
 }
-module.exports["B"] = B
 
 ////// main.lv
 
@@ -67,20 +87,23 @@ component default < Element{
 
 var plug = imports.requireAs(".plugin1")
 
-module.exports["main"] = class extends Element{
+module.exports["main"] = class main extends Element{
     constructor(){
         super()
-        var a = new (plug.get('A'))();
-        var b = new (plug.get('B'))();
-        Element.addProperty(this, "a", {
-            type: "string",
-            value: a.toString(),
-            notify: "aChanged"
-        })
-        Element.addProperty(this, "b", {
-            type: "string",
-            value: b.toString(),
-            notify: "bChanged"
-        })
+        this.__initialize()
+    }
+
+    __initialize(){
+        Element.addProperty(this, 'a', { type: "string", notify: "aChanged" })
+        Element.addProperty(this, 'b', { type: "string", notify: "bChanged" })
+
+        this.a = (function(){
+            return (new plug.A()).toString()
+        }())
+
+        this.b = (function(){
+            return (new plug.B()).toString()
+        }())
+
     }
 }

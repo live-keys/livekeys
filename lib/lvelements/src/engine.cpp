@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <QFileInfo>
 #include "v8nowarnings.h"
+#include <QDateTime>
 
 namespace lv{ namespace el{
 
@@ -274,19 +275,57 @@ Script::Ptr Engine::compileModuleFile(const std::string &path){
     if ( moduleFileType() == Engine::JsOnly ){
             return compileJsModuleFile(path + ".js");
     }
-    //TODO: Add caching
-    //TODO: Add JsOnly, etc
-    std::ifstream file(path, std::ifstream::in | std::ifstream::binary);
-    if ( !file.is_open() )
-        THROW_EXCEPTION(Exception, "Failed to open file: " + path, Exception::toCode("~ScriptFile"));
 
-    file.seekg(0, std::ios::end);
-    size_t size = static_cast<size_t>(file.tellg());
-    std::string buffer(size, ' ');
-    file.seekg(0);
-    file.read(&buffer[0], size);
+    if (m_d->moduleFileType == Engine::JsOnly)
+    {
+        std::string resPath = path;
+        if (path.substr(path.length()-3) != ".js")
+            resPath += ".js";
+        QFileInfo fileInfo = QFileInfo(QString(resPath.c_str()));
+        if (!fileInfo.exists())
+        {
+            fileInfo = QFileInfo(QString((path).c_str()));
+            resPath = path;
+            if (!fileInfo.exists())
+                THROW_EXCEPTION(Exception, "Failed to open .lv file: " + path, Exception::toCode("~ScriptFile"));
+        }
+        QFile file(QString(resPath.c_str()));
+        file.open(QFile::Text | QFile::ReadOnly);
+        QString text = file.readAll();
+        return compileModuleSource(resPath, text.toStdString());
+    } else if (m_d->moduleFileType == Engine::Lv){
+        QFileInfo fileInfo(QString((path).c_str()));
+        if (!fileInfo.exists()) return nullptr;
+        QFile file(QString(path.c_str()));
+        file.open(QFile::Text | QFile::ReadOnly);
+        QString text = file.readAll();
+        return compileModuleSource(path, text.toStdString());
+    } else if (m_d->moduleFileType == Engine::LvOrJs){
+        QFileInfo fi1(path.c_str());
+        QFileInfo fi2((path+".js").c_str());
+        if (!fi1.exists())
+            THROW_EXCEPTION(Exception, "Failed to open .lv file: " + path, Exception::toCode("~ScriptFile"));
+        if (!fi2.exists())
+        {
+            QFile file(QString(path.c_str()));
+            file.open(QFile::Text | QFile::ReadOnly);
+            QString text = file.readAll();
+            return compileModuleSource(path, text.toStdString());
+        }
+        if (fi2.lastModified() > fi1.lastModified())
+        {
+            QFile file(QString((path+".js").c_str()));
+            file.open(QFile::Text | QFile::ReadOnly);
+            QString text = file.readAll();
+            return compileModuleSource(path+".js", text.toStdString());
+        }
+        QFile file(QString(path.c_str()));
+        file.open(QFile::Text | QFile::ReadOnly);
+        QString text = file.readAll();
+        return compileModuleSource(path, text.toStdString());
+    }
 
-    return compileModuleSource(path, buffer);
+    return nullptr;
 }
 
 Script::Ptr Engine::compileModuleSource(const std::string &path, const std::string &source){
@@ -316,6 +355,7 @@ Object Engine::loadJsFile(const std::string &path){
     QFileInfo finfo(QString::fromStdString(path));
     std::string pluginPath = finfo.path().toStdString();
     std::string fileName = finfo.fileName().toStdString();
+    std::string baseName = finfo.baseName().toStdString();
 
     Plugin::Ptr plugin(nullptr);
     if ( Plugin::existsIn(pluginPath) ){
@@ -327,7 +367,7 @@ Object Engine::loadJsFile(const std::string &path){
     }
 
     ElementsPlugin::Ptr epl = ElementsPlugin::create(plugin, this);
-    ModuleFile* mf = ElementsPlugin::addModuleFile(epl, fileName);
+    ModuleFile* mf = ElementsPlugin::addModuleFile(epl, baseName);
 
     Script::Ptr sc = compileJsModuleFile(path);
     Object m = sc->loadAsModule(mf);

@@ -34,22 +34,28 @@ module.exports["A"] = (function(parent){
 ////// main.lv
 
 component default < Element{
-    string a : a.a
+    string a : A.a
 }
 
 ////// main.lv.js
 
-var a = imports.get("A")
+var A = imports.get("A")
 
 module.exports["main"] = class main extends Element{
     constructor(){
         super()
-        Element.addProperty(this, "a", {
-            type: "string",
-            value: a.a,
-            notify: "aChanged"
-        })
+        this.__initialize()
     }
+
+    __initialize(){
+        Element.addProperty(this, 'a', { type: "string", notify: "aChanged" })
+        Element.assignPropertyExpression(this,
+            'a',
+            function(){ return A.a }.bind(this),
+            [ [ A, 'aChanged' ] ]
+        )
+    }
+
 }
 
 

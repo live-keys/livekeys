@@ -28,7 +28,13 @@ imports.require("plugin1.subpluginb")
 
 var B = imports.get("B")
 
-module.exports["A"] = class A extends B{}
+module.exports["A"] = class A extends B{
+    constructor(){
+        super()
+        this.__initialize()
+    }
+    __initialize(){}
+}
 
 ////// plugin1/subpluginb/live.plugin.json
 
@@ -50,7 +56,13 @@ imports.require("plugin1.subpluginc")
 
 var C = imports.get("C")
 
-module.exports["B"] = class B extends C{}
+module.exports["B"] = class B extends C{
+    constructor(){
+        super()
+        this.__initialize()
+    }
+    __initialize(){}
+}
 
 
 ////// plugin1/subpluginc/live.plugin.json
@@ -73,4 +85,10 @@ imports.require("plugin1.subplugina")
 
 var A = imports.get("A")
 
-module.exports["C"] = class C extends A{}
+module.exports["C"] = class C extends A{
+    constructor(){
+        super()
+        this.__initialize()
+    }
+    __initialize(){}
+}
