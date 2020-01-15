@@ -7,7 +7,7 @@ module.exports["A"] = class A extends Element{
     }
     
     __initialize(){
-        Element.assignDefaultProperty(null)
+        // Element.assignDefaultProperty(null)
     }
 
     otherFunction(a){
@@ -22,13 +22,13 @@ module.exports["B"] = class B extends Element{
     }
     
     __initialize(){
-        Element.assignDefaultProperty(null)
+        // Element.assignDefaultProperty(null)
     }
 
     createA(){
         return (function(parent){
             this.setParent(parent)
-            Element.assignDefaultProperty(null)
+            // Element.assignDefaultProperty(null)
             return this
         }.bind(new A(12, 13))(null))
     }
@@ -47,7 +47,7 @@ module.exports["C"] = class C extends Element{
         this.c1 = 200
         this.c2 = 300
 
-        Element.assignDefaultProperty(null)
+        // Element.assignDefaultProperty(null)
     }
 }
 
@@ -61,17 +61,17 @@ module.exports["D"] = class D extends Container{
         Element.assignDefaultProperty(this, [
             (function(parent){
                 this.setParent(parent)
-                Element.assignDefaultProperty(null)
+                // Element.assignDefaultProperty(null)
                 return this
             }.bind(new A(12, 13))(this)),
             (function(parent){
               this.setParent(parent)
-              Element.assignDefaultProperty(null)
+              // Element.assignDefaultProperty(null)
               return this
             }.bind(new A(14, 15))(this)),
             (function(parent){
               this.setParent(parent)
-              Element.assignDefaultProperty(null)
+              // Element.assignDefaultProperty(null)
               return this
             }.bind(new A(16, 17))(this))
         ])

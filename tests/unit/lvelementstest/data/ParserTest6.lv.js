@@ -29,7 +29,7 @@ module.exports["ParserTest6"] = class ParserTest6 extends Container{
                 Element.addProperty(this, "x", {type: "int", notify: "xChanged"})
                 this.x = 20
 
-                Element.assignDefaultProperty(null)
+                // Element.assignDefaultProperty(null)
             }
         }
 
@@ -46,7 +46,7 @@ module.exports["ParserTest6"] = class ParserTest6 extends Container{
                     function(){ return new parent.ElemProp() }.bind(this),
                     [[parent, "ElemPropChanged"]]
                 )
-                Element.assignDefaultProperty(null)
+                // Element.assignDefaultProperty(null)
                 return this
             }.bind(new Element())(this))
         ])

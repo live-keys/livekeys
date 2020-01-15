@@ -199,7 +199,9 @@ void BaseNode::visit(BaseNode *parent, const TSNode &node){
         visitVariableDeclaration(parent, node);
     } else if ( strcmp(ts_node_type(node), "new_expression") == 0 ){
         visitNewExpression(parent, node);
-    } else {
+    } else if ( strcmp(ts_node_type(node), "return_statement") == 0 ){
+        visitReturnStatement(parent, node);
+    }else {
         visitChildren(parent, node);
     }
 }
@@ -224,6 +226,8 @@ void BaseNode::visitImport(BaseNode *parent, const TSNode &node){
             importNode->m_importAs = in;
             in->setParent(importNode);
             moveToDeclarations(parent, in);
+        } else if ( strcmp(ts_node_type(child), ".") == 0){
+            importNode->m_isRelative = true;
         } else if ( strcmp(ts_node_type(child), "import_path") == 0 ){
             visitImportPath(importNode, child);
         }
@@ -823,6 +827,13 @@ void BaseNode::visitNewExpression(BaseNode *parent, const TSNode &node)
     visitChildren(nenode, node);
 }
 
+void BaseNode::visitReturnStatement(BaseNode *parent, const TSNode &node)
+{
+    ReturnStatementNode* rsnode = new ReturnStatementNode(node);
+    parent->insert(rsnode);
+    visitChildren(rsnode, node);
+}
+
 std::string ImportNode::toString(int indent) const{
     std::string result;
     if ( indent > 0 )
@@ -852,9 +863,11 @@ void ImportNode::convertToJs(const std::string &source, std::vector<ElementsInse
 
     std::string importSegments;
 
-    for ( IdentifierNode* node : m_importPath->segments() ){
-        if ( !importSegments.empty() )
-            importSegments += ".";
+    if (m_isRelative) importSegments = ".";
+    auto segments = m_importPath->segments();
+    for (int i=0; i<segments.size(); ++i){
+        auto node = segments[i];
+        if (i!=0) importSegments += ".";
         importSegments += slice(source, node);
     }
 
@@ -949,6 +962,7 @@ void ProgramNode::convertToJs(const std::string &source, std::vector<ElementsIns
         for (int i = 0; i < m_idComponents.size();++i)
         {
             *compose << "var " << slice(source, m_idComponents[i]->id()) << " = new " << slice(source, m_idComponents[i]->name());
+            checkIdentifierDeclared(source, m_idComponents[i]->name(), slice(source, m_idComponents[i]->name()));
             if (m_idComponents[i]->arguments()) *compose << slice(source, m_idComponents[i]->arguments()) << "\n";
             else *compose << "()\n";
         }
@@ -1182,6 +1196,12 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
                         bindingPairs.insert(pair);
                     }
 
+                    BaseNode* left = men->children()[0];
+                    while (left->typeString() != "Identifier")
+                        left = left->children()[0];
+
+                    checkIdentifierDeclared(source, left, slice(source, left));
+
                 }
             }
             *compose << "]\n)\n";
@@ -1219,6 +1239,31 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
                 for (auto s: flat) *compose << s;
                 delete section;
             }
+            else if (m_properties[i]->statementBlock())
+            {
+                *compose << "(function()" << slice(source, m_properties[i]->statementBlock())<< "())\n\n";
+
+                std::queue<BaseNode*> q;
+                q.push(m_properties[i]->statementBlock());
+                while (!q.empty())
+                {
+                    BaseNode* b = q.front(); q.pop();
+                    if (b->typeString() == "NewExpression" /*|| other stuff*/)
+                    {
+                        for (auto child: b->children())
+                        {
+                            if (child->typeString() == "Identifier")
+                                checkIdentifierDeclared(source, child, slice(source, child));
+                        }
+                    } else {
+                        for (auto child: b->children())
+                        {
+                            q.push(child);
+                        }
+                    }
+                }
+            }
+
             *compose << "\n\n";
         }
     }
@@ -1239,9 +1284,9 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
             delete section;
         }
         *compose << "\n]\n)\n";
-    } else {
+    }/* else {
         *compose << "Element.assignDefaultProperty(null)\n\n";
-    }
+    }*/
 
     *compose << "}\n\n";
 
@@ -1451,8 +1496,6 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
                     *compose << "this.";
                 }
 
-                //qDebug() << "praperti: " << m_assignments[i]->m_property;
-
                 *compose << slice(source,m_assignments[i]->m_property)
                          << " = " << slice(source, m_assignments[i]->m_expression) << "\n";
             }
@@ -1476,9 +1519,9 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
             delete section;
         }
         *compose << "\n]\n)\n";
-    } else {
+    }/* else {
         *compose << "Element.assignDefaultProperty(null)\n\n";
-    }
+    }*/
 
 
     for ( auto it = m_body->children().begin(); it != m_body->children().end(); ++it ){
@@ -1550,6 +1593,7 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
     if (!m_id)
     {
         *compose << "new " << slice(source, m_name);
+        checkIdentifierDeclared(source, m_name, slice(source, m_name));
         if (!m_arguments) *compose << "()";
         else *compose << slice(source, m_arguments);
     } else {
@@ -1856,8 +1900,10 @@ void NewTaggedComponentExpressionNode::convertToJs(const std::string &source, st
     std::string name, value;
     for (auto child: children())
     {
-        if (child->typeString() == "Identifier")
+        if (child->typeString() == "Identifier") {
             name = slice(source, child);
+            checkIdentifierDeclared(source, child, name);
+        }
         else
         {
             value = slice(source, child);

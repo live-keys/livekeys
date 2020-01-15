@@ -19,7 +19,7 @@ module.exports["ParserTest5"] = class ParserTest5 extends Container{
             Element.addProperty(this, "x", {type: "int", notify: "xChanged"})
             // Assign properties
             this.x = 20
-            Element.assignDefaultProperty(null)
+            // Element.assignDefaultProperty(null)
             return this
         }.bind(new Element())(this))
 
@@ -31,7 +31,7 @@ module.exports["ParserTest5"] = class ParserTest5 extends Container{
                 Element.addProperty(this, 'y', {type: "int", notify: 'yChanged'})
 
                 this.y = 20
-                Element.assignDefaultProperty(null)
+                // Element.assignDefaultProperty(null)
                 return this
             }.bind(new Element())(this))
         ])

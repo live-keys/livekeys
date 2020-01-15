@@ -18,11 +18,9 @@ private slots:
 
     void singlePluginImportTest();
     void samePathImportTest();
+    void importPluginWithSamePathImportTest();
     void importPluginThatImportsPlugin();
     void samePathSingletonTest();
-    void importPluginWithSamePathImportTest();
-    void packageImportTest();
-    void importAsTest();
 
     void invalidExportTypeAsObjectTest();
     void invalidExportTypeAsStringTest();
@@ -31,7 +29,9 @@ private slots:
 
     void moduleFileDependencyCycleTest();
     void pluginDependencyCycleTest();
+    void packageImportTest();
     void packageDependencyCycleTest();
+    void importAsTest();
 };
 
 #endif // JSIMPORTSTEST_H

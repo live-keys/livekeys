@@ -20,7 +20,7 @@ module.exports["ParserTest9"] = (function(parent){
             this.setParent(parent)
             Element.assignId(rootChild, "rootChild")
             this.y = 10
-            Element.assignDefaultProperty(null)
+            // Element.assignDefaultProperty(null)
             return this
         }.bind(rootChild)(this))
     ])
