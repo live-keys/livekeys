@@ -11,7 +11,7 @@
 
 namespace lv{
 
-class QmlEditFragment;
+class QmlBindingSpan;
 
 /// \private
 class QmlBindingChannel : public QObject{
@@ -52,13 +52,17 @@ public:
     void commit(const QVariant& value);
 
 public slots:
+    void __runableReady();
+
+signals:
+    void runnableObjectReady();
 
 private:
-    QmlBindingPath::Ptr   m_bindingPath;
-    Runnable*          m_runnable;
-    QQmlProperty       m_property;
-    int                m_listIndex;
-    bool               m_enabled;
+    QmlBindingPath::Ptr m_bindingPath;
+    Runnable*           m_runnable;
+    QQmlProperty        m_property;
+    int                 m_listIndex;
+    bool                m_enabled;
 };
 
 inline bool QmlBindingChannel::hasConnection() const{
@@ -78,8 +82,8 @@ inline void QmlBindingChannel::setEnabled(bool enable){
 }
 
 inline void QmlBindingChannel::updateConnection(const QQmlProperty &property, int listIndex){
-     m_property = property;
-     m_listIndex = listIndex;
+    m_property = property;
+    m_listIndex = listIndex;
 }
 
 inline void QmlBindingChannel::clearConnection(){

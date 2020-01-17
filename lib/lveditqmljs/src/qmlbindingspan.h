@@ -40,7 +40,7 @@ public:
     const QmlBindingChannel::Ptr& inputChannel() const;
 
 private:
-    QmlEditFragment*           m_fragment;
+    QmlEditFragment*              m_fragment;
     QmlBindingPath::Ptr           m_expressionPath;
     QList<QmlBindingChannel::Ptr> m_outputChannels;
     QmlBindingChannel::Ptr        m_inputChannel;

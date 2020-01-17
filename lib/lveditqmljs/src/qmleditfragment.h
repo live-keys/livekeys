@@ -79,7 +79,6 @@ public:
 
     void emitRemoval();
 
-
 public slots:
     int position();
     int valuePosition() const;
@@ -90,6 +89,8 @@ public slots:
     lv::QmlBindingSpanModel *bindingModel(lv::CodeQmlHandler* codeHandler);
 
     void updateValue();
+
+    void __inputRunnableObjectReady();
 
 signals:
     void visualParentChanged();
