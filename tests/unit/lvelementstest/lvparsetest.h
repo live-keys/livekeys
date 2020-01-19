@@ -27,6 +27,8 @@ private slots:
     void taggedStringParseTest();
     void instanceParseTest();
     void namespaceInheritance();
+    void testScenarioTest();
+
 private:
     lv::LockedFileIOSession::Ptr m_fileSession;
     std::string                  m_scriptPath;

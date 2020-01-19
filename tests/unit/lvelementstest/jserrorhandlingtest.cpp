@@ -102,11 +102,14 @@ void JsErrorHandlingTest::testExceptionWithLink(){
 void JsErrorHandlingTest::testExceptionFromFunction(){
     Engine* engine = new Engine;
 
-    ModuleLibrary* m = ModuleLibrary::create(engine, "test");
-    m->addType<JsErrorHandlingStub>();
+    engine->scope([engine](){
+        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
 
-    engine->scope([engine, m](){
-        Object o  = engine->require(m);
+        ModuleLibrary* m = ModuleLibrary::create(engine, "");
+        m->addType<JsErrorHandlingStub>();
+        epl->addModuleLibrary(m);
+
+        Object o  = epl->collectExportsObject();
         LocalObject lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
@@ -116,7 +119,6 @@ void JsErrorHandlingTest::testExceptionFromFunction(){
         globalObject.set(engine, "JsErrorHandlingStub", lo.get(engine, "JsErrorHandlingStub"));
         globalObject.set(engine, "jsError", LocalValue(engine, jsError));
 
-
         engine->tryCatch([engine](){
             engine->compileJsEnclosed("JsErrorHandlingStub.errorFunction();")->run();
         }, [](const Engine::CatchData& cd){
@@ -124,22 +126,22 @@ void JsErrorHandlingTest::testExceptionFromFunction(){
             QVERIFY(cd.message() == "TestException");
             QVERIFY(cd.object() == nullptr);
         });
-
         delete jsError;
     });
 
     delete engine;
 }
 
-void JsErrorHandlingTest::testExceptionFromMethod()
-{
+void JsErrorHandlingTest::testExceptionFromMethod(){
     Engine* engine = new Engine;
 
-    ModuleLibrary* m = ModuleLibrary::create(engine, "test");
-    m->addType<JsErrorHandlingStub>();
+    engine->scope([engine](){
+        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ModuleLibrary* m = ModuleLibrary::create(engine, "");
+        m->addType<JsErrorHandlingStub>();
+        epl->addModuleLibrary(m);
 
-    engine->scope([engine, m](){
-        Object o  = engine->require(m);
+        Object o  = epl->collectExportsObject();
         LocalObject lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
@@ -152,7 +154,7 @@ void JsErrorHandlingTest::testExceptionFromMethod()
 
         engine->tryCatch([engine](){
             engine->compileJsEnclosed("jsError.errorMethod();")->run();
-        }, [engine, jsError](const Engine::CatchData& cd){
+        }, [jsError](const Engine::CatchData& cd){
             QVERIFY(cd.fileName().find("errorhandlingtest.cpp") != std::string::npos);
             QVERIFY(cd.message() == "TestException");
             QVERIFY(cd.object() == jsError);
@@ -168,11 +170,13 @@ void JsErrorHandlingTest::testExceptionFromProperty()
 {
     Engine* engine = new Engine;
 
-    ModuleLibrary* m = ModuleLibrary::create(engine, "test");
-    m->addType<JsErrorHandlingStub>();
+    engine->scope([engine](){
+        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ModuleLibrary* m = ModuleLibrary::create(engine, "");
+        m->addType<JsErrorHandlingStub>();
+        epl->addModuleLibrary(m);
 
-    engine->scope([engine, m](){
-        Object o  = engine->require(m);
+        Object o  = epl->collectExportsObject();
         LocalObject lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
@@ -200,11 +204,13 @@ void JsErrorHandlingTest::testExceptionPropagation(){
 
     Engine* engine = new Engine;
 
-    ModuleLibrary* m = ModuleLibrary::create(engine, "test");
-    m->addType<JsErrorHandlingStub>();
+    engine->scope([engine](){
+        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ModuleLibrary* m = ModuleLibrary::create(engine, "");
+        m->addType<JsErrorHandlingStub>();
+        epl->addModuleLibrary(m);
 
-    engine->scope([engine, m](){
-        Object o  = engine->require(m);
+        Object o  = epl->collectExportsObject();
         LocalObject lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
@@ -236,11 +242,15 @@ void JsErrorHandlingTest::testExceptionPropagation(){
 void JsErrorHandlingTest::testExceptionPropagationFromJs(){
     Engine* engine = new Engine;
 
-    ModuleLibrary* m = ModuleLibrary::create(engine, "test");
-    m->addType<JsErrorHandlingStub>();
 
-    engine->scope([engine, m](){
-        Object o  = engine->require(m);
+    engine->scope([engine](){
+        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+
+        ModuleLibrary* m = ModuleLibrary::create(engine, "");
+        m->addType<JsErrorHandlingStub>();
+        epl->addModuleLibrary(m);
+
+        Object o  = epl->collectExportsObject();
         LocalObject lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
@@ -273,11 +283,15 @@ void JsErrorHandlingTest::testExceptionRethrowPropagation()
 {
     Engine* engine = new Engine;
 
-    ModuleLibrary* m = ModuleLibrary::create(engine, "test");
-    m->addType<JsErrorHandlingStub>();
 
-    engine->scope([engine, m](){
-        Object o  = engine->require(m);
+    engine->scope([engine](){
+        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+
+        ModuleLibrary* m = ModuleLibrary::create(engine, "");
+        m->addType<JsErrorHandlingStub>();
+        epl->addModuleLibrary(m);
+
+        Object o  = epl->collectExportsObject();
         LocalObject lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);

@@ -750,12 +750,12 @@ void Engine::setGlobalErrorHandler(bool value){
 
 // Module caching
 
-Object Engine::require(ModuleLibrary *module){
+Object Engine::require(ModuleLibrary *module, const Object& o){
     v8::HandleScope handle(isolate());
     v8::Local<v8::Context> context = m_d->context->asLocal();
     v8::Context::Scope context_scope(context);
 
-    v8::Local<v8::Object> base = v8::Object::New(m_d->isolate);
+    v8::Local<v8::Object> base = o.data();
     Object exportsObject(this, base);
 
     for ( auto it = module->typesBegin(); it != module->typesEnd(); ++it ){

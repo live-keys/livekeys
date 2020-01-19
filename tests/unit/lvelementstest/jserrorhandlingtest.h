@@ -10,9 +10,8 @@ class JsErrorHandlingTest : public QObject{
     Q_TEST_RUNNER_SUITE
 
 public:
-    JsErrorHandlingTest(QObject* parent = 0);
+    JsErrorHandlingTest(QObject* parent = nullptr);
     ~JsErrorHandlingTest(){}
-
 
 private slots:
     void initTestCase();

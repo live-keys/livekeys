@@ -213,3 +213,25 @@ void LvParseTest::namespaceInheritance()
 
     QVERIFY(compare.isEqual());
 }
+
+void LvParseTest::testScenarioTest(){
+    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/ParserTest11.lv");
+//    std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/ParserTest10.lv.js");
+
+    el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
+
+    std::string conversion = parser->toJs(contents, "ParserTest11");
+
+    el::LanguageParser::AST* conversionAST = parser->parse(conversion);
+
+    vlog() << conversion;
+
+//    el::LanguageParser::AST* expectedAST   = parser->parse(expect);
+
+//    el::LanguageParser::ComparisonResult compare = parser->compare(expect, expectedAST, conversion, conversionAST);
+
+//    parser->destroy(conversionAST);
+//    parser->destroy(expectedAST);
+
+//    QVERIFY(compare.isEqual());
+}

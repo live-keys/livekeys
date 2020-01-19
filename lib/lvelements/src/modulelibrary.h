@@ -20,7 +20,7 @@ public:
     static ModuleLibrary* create(Engine* engine, const std::string& path);
     static ModuleLibrary* load(Engine *engine, const std::string& path);
 
-    void initializeExports();
+    void loadExports(const Object &exportsObject);
 
     void addInstance(const std::string& name, Element* element);
     template<typename T> void addType();
@@ -32,6 +32,8 @@ public:
     std::map<std::string, Element*>::iterator instancesEnd();
 
     Engine* engine();
+
+    const std::string& path() const;
 
 private:
     ModuleLibrary(Engine* engine, const std::string& path);

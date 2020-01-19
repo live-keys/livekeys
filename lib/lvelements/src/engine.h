@@ -83,7 +83,7 @@ public:
     Engine(PackageGraph* pg = nullptr);
     ~Engine();
 
-    Object require(ModuleLibrary* module);
+    Object require(ModuleLibrary* module, const Object& o);
     ElementsPlugin::Ptr require(const std::string& importKey, Plugin::Ptr requestingPlugin = nullptr);
 
     void scope(const std::function<void()> &f);
