@@ -44,6 +44,8 @@ public:
 
     void onReady() override;
 
+    int exec();
+
 public:
     Event childrenChanged();
     Event beforeEachChanged();
