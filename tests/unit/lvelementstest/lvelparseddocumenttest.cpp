@@ -314,7 +314,8 @@ void LvElParsedDocumentTest::cursorContext4Test()
 
     QVERIFY(result.context() == 0);
     auto path = result.expressionPath();
-    QVERIFY(path.size() == 0);
+
+    QVERIFY(path.size() == 1); // import keyword!
     QVERIFY(!result.objectType().isValid());
     QVERIFY(!result.objectImportNamespace().isValid());
     QVERIFY(result.propertyPath().size() == 0);
@@ -332,7 +333,7 @@ void LvElParsedDocumentTest::cursorContext5Test()
     auto ast = m_parser->parse(testString);
     lv::el::CursorContext result = lv::el::ParsedDocument::findCursorContext(ast, 52);
 
-    QVERIFY(result.context() == lv::el::CursorContext::InStringLiteral);
+    QVERIFY(result.context() == (lv::el::CursorContext::InStringLiteral | lv::el::CursorContext::InElements)); // TODO: Ask Dinu
     auto path = result.expressionPath();
     QVERIFY(path.size() == 0);
     QVERIFY(!result.objectType().isValid());
@@ -513,5 +514,32 @@ void LvElParsedDocumentTest::cursorContext12Test()
 
     QVERIFY(result.propertyPath().size() == 0);
 
+    QVERIFY(!result.propertyDeclaredType().isValid());
+}
+
+void LvElParsedDocumentTest::cursorContext13Test()
+{
+    std::string testString = "T{\n"
+                             "    fn declaredFunction(){\n"
+                             "        return 0\n"
+                             "    }\n"
+                             "}";
+
+    auto ast = m_parser->parse(testString);
+    lv::el::CursorContext result = lv::el::ParsedDocument::findCursorContext(ast, 43);
+
+    QVERIFY(result.context() == (lv::el::CursorContext::InElements));
+    auto path = result.expressionPath();
+    QVERIFY(path.size() == 1);
+
+
+    QVERIFY(path[0].from() == 38);
+    QVERIFY(path[0].length() == 5);
+
+    QVERIFY(result.objectType().from() == 0);
+    QVERIFY(result.objectType().length() == 1);
+
+    QVERIFY(!result.objectImportNamespace().isValid());
+    QVERIFY(result.propertyPath().size() == 0); // TODO: Ask Dinu
     QVERIFY(!result.propertyDeclaredType().isValid());
 }

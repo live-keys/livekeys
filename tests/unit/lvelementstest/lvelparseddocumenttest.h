@@ -38,6 +38,7 @@ private slots:
     void cursorContext10Test();
     void cursorContext11Test();
     void cursorContext12Test();
+    void cursorContext13Test();
 
 private:
     lv::el::LanguageParser::Ptr m_parser;

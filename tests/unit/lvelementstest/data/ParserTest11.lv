@@ -1,0 +1,5 @@
+import package
+
+T {
+    a.b.c: 20
+}

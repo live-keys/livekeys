@@ -4,7 +4,7 @@
 #include "live/elements/lvelementsglobal.h"
 #include "live/elements/sourcerange.h"
 #include "live/utf8.h"
-
+#include <set>
 #include <vector>
 
 namespace lv{ namespace el{
@@ -50,6 +50,8 @@ public:
     SourceRange              m_propertyDeclaredType;
     SourceRange              m_objectType;
     SourceRange              m_objectImportNamespace;
+
+    static std::set<std::string> keywords;
 };
 
 inline const std::vector<SourceRange> &CursorContext::expressionPath() const{

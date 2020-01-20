@@ -213,3 +213,39 @@ void LvParseTest::namespaceInheritance()
 
     QVERIFY(compare.isEqual());
 }
+
+void LvParseTest::testComplexPropertyAssignment()
+{
+    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/ParserTest11.lv");
+    std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/ParserTest11.lv.js");
+
+    el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
+
+    std::string conversion = parser->toJs(contents, "ParserTest11");
+
+    el::LanguageParser::AST* conversionAST = parser->parse(conversion);
+    el::LanguageParser::AST* expectedAST   = parser->parse(expect);
+
+    el::LanguageParser::ComparisonResult compare = parser->compare(expect, expectedAST, conversion, conversionAST);
+
+    parser->destroy(conversionAST);
+    parser->destroy(expectedAST);
+}
+
+void LvParseTest::testSimplePropertyAssignment()
+{
+    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/ParserTest12.lv");
+    std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/ParserTest12.lv.js");
+
+    el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
+
+    std::string conversion = parser->toJs(contents, "ParserTest12");
+
+    el::LanguageParser::AST* conversionAST = parser->parse(conversion);
+    el::LanguageParser::AST* expectedAST   = parser->parse(expect);
+
+    el::LanguageParser::ComparisonResult compare = parser->compare(expect, expectedAST, conversion, conversionAST);
+
+    parser->destroy(conversionAST);
+    parser->destroy(expectedAST);
+}

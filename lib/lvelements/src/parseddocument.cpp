@@ -73,82 +73,14 @@ CursorContext ParsedDocument::findCursorContext(LanguageParser::AST *ast, int po
         TSNode& curr = path[idx];
         auto type = ts_node_type(curr);
 
+        if (CursorContext::keywords.find(type) != CursorContext::keywords.end())
+        {
+            expressionPath.push_back(SourceRange(ts_node_start_byte(curr), position - ts_node_start_byte(curr)));
+        }
+
         if (strcmp(type, "property_declaration") == 0 || strcmp(type, "property_assignment") == 0 || strcmp(type, "listener_declaration") == 0)
         {
-
             bool isAssign = strcmp(type, "property_assignment") == 0;
-            int owner = idx-1;
-            while (owner >= 0)
-            {
-                auto ownerType = ts_node_type(path[owner]);
-                if (strcmp(ownerType, "component_declaration") == 0
-                 || strcmp(ownerType, "new_component_expression") == 0)
-                    break;
-                --owner;
-            }
-            if (owner == -1) return CursorContext(context, expressionPath);
-
-            TSNode& parent = path[owner];
-            if (strcmp(ts_node_type(parent), "component_declaration") == 0)
-            {
-                if (ts_node_child_count(parent) >= 3 && strcmp(ts_node_type(ts_node_child(parent, 2)), "component_heritage") == 0)
-                {
-                    TSNode heritage = ts_node_child(parent, 2);
-                    auto heritage_count = ts_node_child_count(heritage);
-                    TSNode objectTypeNode = ts_node_child(heritage, heritage_count-1);
-                    objectType = SourceRange(ts_node_start_byte(objectTypeNode), ts_node_end_byte(objectTypeNode) - ts_node_start_byte(objectTypeNode));
-
-                    if (heritage_count == 4)
-                    {
-                        TSNode importNode = ts_node_child(heritage, 1);
-                        objectImportNamespace = SourceRange(ts_node_start_byte(importNode), ts_node_end_byte(importNode) - ts_node_start_byte(importNode));
-
-                    }
-                }
-            }
-
-            if (strcmp(ts_node_type(parent), "new_component_expression") == 0 )
-            {
-                auto ncec = ts_node_child_count(parent);
-                auto body_pos = ts_node_start_byte(ts_node_child(parent, ncec-1));
-                if (position <= body_pos)
-                {
-                    if (ncec == 4)
-                    {
-                        auto name_pos = ts_node_start_byte(ts_node_child(parent, 2));
-                        auto import_start =  ts_node_start_byte(ts_node_child(parent, 0));
-                        if (position >= name_pos)
-                        {
-                            auto import_length = ts_node_end_byte(ts_node_child(parent, 0)) - import_start;
-                            objectImportNamespace = SourceRange(import_start, import_length);
-                            objectType = SourceRange(name_pos, position - name_pos);
-                        } else {
-                            objectImportNamespace = SourceRange(import_start, position - import_start);
-                        }
-
-                    } else { // ncec = 2
-                        auto type_start = ts_node_start_byte(ts_node_child(parent, 0));
-                        objectType = SourceRange(type_start, position - type_start);
-                    }
-                } else {
-                    if (ncec == 4)
-                    {
-
-                        auto import_start =  ts_node_start_byte(ts_node_child(parent, 0));
-                        auto import_length = ts_node_end_byte(ts_node_child(parent, 0)) - import_start;
-                        objectImportNamespace = SourceRange(import_start, import_length);
-                        auto type_start = ts_node_start_byte(ts_node_child(parent, 2));
-                        auto type_length = ts_node_end_byte(ts_node_child(parent, 2)) - type_start;
-                        objectType = SourceRange(type_start, type_length);
-
-
-                    } else { // ncec = 2
-                        auto type_start = ts_node_start_byte(ts_node_child(parent, 0));
-                        auto type_length = ts_node_end_byte(ts_node_child(parent, 0)) - type_start;
-                        objectType = SourceRange(type_start, type_length);
-                    }
-                }
-            }
 
             int delimiter_pos = ts_node_start_byte(ts_node_child(curr, isAssign? 1: 2)); // position of :
             if (position < delimiter_pos) context = CursorContext::InLeftOfDeclaration;
@@ -223,6 +155,73 @@ CursorContext ParsedDocument::findCursorContext(LanguageParser::AST *ast, int po
                         expressionPath.push_back(SourceRange(mstart, (position < mend ? position : mend)-mstart));
 
                     std::reverse(expressionPath.begin(), expressionPath.end());
+                }
+            }
+
+            continue;
+        }
+
+        if (strcmp(type, "component_declaration") == 0)
+        {
+            context |= CursorContext::InElements;
+            if (ts_node_child_count(curr) >= 3 && strcmp(ts_node_type(ts_node_child(curr, 2)), "component_heritage") == 0)
+            {
+                TSNode heritage = ts_node_child(curr, 2);
+                auto heritage_count = ts_node_child_count(heritage);
+                TSNode objectTypeNode = ts_node_child(heritage, heritage_count-1);
+                objectType = SourceRange(ts_node_start_byte(objectTypeNode), ts_node_end_byte(objectTypeNode) - ts_node_start_byte(objectTypeNode));
+
+                if (heritage_count == 4)
+                {
+                    TSNode importNode = ts_node_child(heritage, 1);
+                    objectImportNamespace = SourceRange(ts_node_start_byte(importNode), ts_node_end_byte(importNode) - ts_node_start_byte(importNode));
+
+                }
+            }
+
+            return CursorContext(context, expressionPath, propertyPath, propertyDeclaredType, objectType, objectImportNamespace);
+        }
+
+        if (strcmp(type, "new_component_expression") == 0 )
+        {
+            context |= CursorContext::InElements;
+            auto ncec = ts_node_child_count(curr);
+            auto body_pos = ts_node_start_byte(ts_node_child(curr, ncec-1));
+            if (position <= body_pos)
+            {
+                if (ncec == 4)
+                {
+                    auto name_pos = ts_node_start_byte(ts_node_child(curr, 2));
+                    auto import_start =  ts_node_start_byte(ts_node_child(curr, 0));
+                    if (position >= name_pos)
+                    {
+                        auto import_length = ts_node_end_byte(ts_node_child(curr, 0)) - import_start;
+                        objectImportNamespace = SourceRange(import_start, import_length);
+                        objectType = SourceRange(name_pos, position - name_pos);
+                    } else {
+                        objectImportNamespace = SourceRange(import_start, position - import_start);
+                    }
+
+                } else { // ncec = 2
+                    auto type_start = ts_node_start_byte(ts_node_child(curr, 0));
+                    objectType = SourceRange(type_start, position - type_start);
+                }
+            } else {
+                if (ncec == 4)
+                {
+
+                    auto import_start =  ts_node_start_byte(ts_node_child(curr, 0));
+                    auto import_length = ts_node_end_byte(ts_node_child(curr, 0)) - import_start;
+                    objectImportNamespace = SourceRange(import_start, import_length);
+                    auto type_start = ts_node_start_byte(ts_node_child(curr, 2));
+                    auto type_length = ts_node_end_byte(ts_node_child(curr, 2)) - type_start;
+                    objectType = SourceRange(type_start, type_length);
+
+
+                } else { // ncec = 2
+                    auto type_start = ts_node_start_byte(ts_node_child(curr, 0));
+                    auto type_length = ts_node_end_byte(ts_node_child(curr, 0)) - type_start;
+                    objectType = SourceRange(type_start, type_length);
                 }
             }
 
