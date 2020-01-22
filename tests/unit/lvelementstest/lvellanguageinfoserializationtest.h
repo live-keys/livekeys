@@ -17,23 +17,23 @@ public:
 
 private slots:
     void initTestCase();
-    void enumInfoToJsonTest();
-    void fromJsonToEnumInfoTest();
-    void functionInfoToJsonTest();
-    void fromJsonToFunctionInfoTest();
-    void propertyInfoToJsonTest();
-    void fromJsonToPropertyInfoTest();
-    void importInfoToJsonTest();
-    void fromJsonToImportInfoNoAliasTest();
-    void fromJsonToImportInfoTest();
-    void typeInfoToJsonTest();
-    void fromJsonToTypeInfoTest();
-    void inheritanceInfoToJsonTest();
-    void fromJsonToInheritanceInfoTest();
-    void documentInfoToJsonTest();
-    void fromJsonToDocumentInfoTest();
-    void moduleInfoToJsonTest();
-    void fromJsonToModuleInfoTest();
+    void enumInfoToMLNodeTest();
+    void fromMLNodeToEnumInfoTest();
+    void functionInfoToMLNodeTest();
+    void fromMLNodeToFunctionInfoTest();
+    void propertyInfoToMLNodeTest();
+    void fromMLNodeToPropertyInfoTest();
+    void importInfoToMLNodeTest();
+    void fromMLNodeToImportInfoNoAliasTest();
+    void fromMLNodeToImportInfoTest();
+    void typeInfoToMLNodeTest();
+    void fromMLNodeToTypeInfoTest();
+    void inheritanceInfoToMLNodeTest();
+    void fromMLNodeToInheritanceInfoTest();
+    void documentInfoToMLNodeTest();
+    void fromMLNodeToDocumentInfoTest();
+    void moduleInfoToMLNodeTest();
+    void fromMLNodeToModuleInfoTest();
 };
 
 #endif // LVELLANGUAGEINFOSERIALIZATIONTEST_H

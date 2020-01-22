@@ -21,8 +21,8 @@ public:
     size_t keyCount() const;
     Utf8 key(size_t index) const;
 
-    MLNode toJson() const;
-    void fromJson(const MLNode& node);
+    MLNode toMLNode() const;
+    void fromMLNode(const MLNode& node);
 
     Utf8 name() { return m_name; }
 private:
@@ -46,8 +46,8 @@ public:
 
     static FunctionInfo extractFromDeclaration(const std::string& name, const std::string& declaration);
 
-    MLNode toJson() const;
-    void fromJson(const MLNode& node);
+    MLNode toMLNode() const;
+    void fromMLNode(const MLNode& node);
 private:
     Utf8 m_name;
     Utf8 m_returnType;
@@ -63,8 +63,8 @@ public:
     const Utf8& name() const;
     const Utf8& typeName() const;
 
-    MLNode toJson() const;
-    void fromJson(const MLNode& node);
+    MLNode toMLNode() const;
+    void fromMLNode(const MLNode& node);
 
 private:
     Utf8 m_name;
@@ -84,8 +84,8 @@ public:
 
     std::vector<std::string> segments() const;
 
-    MLNode toJson() const;
-    void fromJson(const MLNode& node);
+    MLNode toMLNode() const;
+    void fromMLNode(const MLNode& node);
 private:
     bool              m_isRelative;
     std::vector<Utf8> m_segments;
@@ -131,8 +131,8 @@ public:
 
     static TypeInfo::Ptr extract(const MetaObject& mo, const Utf8 &uri = "", bool isInstance = false, bool isCreatable = true);
 
-    MLNode toJson() const;
-    void fromJson(const MLNode& node);
+    MLNode toMLNode() const;
+    void fromMLNode(const MLNode& node);
 private:
     TypeInfo(Utf8 name, Utf8 inheritsName, bool isCreatable, bool isInstance);
 
@@ -158,8 +158,8 @@ public:
     const TypeInfo::Ptr& typeAt(size_t index) const;
     void addType(const TypeInfo::Ptr& type);
 
-    MLNode toJson() const;
-    void fromJson(const MLNode& node);
+    MLNode toMLNode() const;
+    void fromMLNode(const MLNode& node);
 private:
     std::vector<TypeInfo::Ptr> m_types;
 };
@@ -190,8 +190,8 @@ public:
     void updateScanStatus(ScanStatus status);
     ScanStatus scanStatus() const;
 
-    MLNode toJson() const;
-    void fromJson(const MLNode& node);
+    MLNode toMLNode() const;
+    void fromMLNode(const MLNode& node);
 private:
     DocumentInfo(const std::vector<TypeInfo::Ptr>& types = std::vector<TypeInfo::Ptr>());
 
@@ -235,8 +235,8 @@ public:
     const Utf8& dependencyAt(size_t index) const;
     void addDependency(const Utf8& dep);
 
-    MLNode toJson() const;
-    void fromJson(const MLNode& node);
+    MLNode toMLNode() const;
+    void fromMLNode(const MLNode& node);
 private:
     ModuleInfo(Utf8 importUri, Utf8 path, const std::vector<TypeInfo::Ptr>& types = std::vector<TypeInfo::Ptr>());
 

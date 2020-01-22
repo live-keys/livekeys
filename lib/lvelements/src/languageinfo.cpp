@@ -28,7 +28,7 @@ Utf8 EnumInfo::key(size_t index) const{
     return m_keys.at(index);
 }
 
-MLNode EnumInfo::toJson() const
+MLNode EnumInfo::toMLNode() const
 {
     MLNode result(MLNode::Object);
     MLNode rhs(MLNode::Object);
@@ -44,7 +44,7 @@ MLNode EnumInfo::toJson() const
     return result;
 }
 
-void EnumInfo::fromJson(const MLNode &node)
+void EnumInfo::fromMLNode(const MLNode &node)
 {
     auto nit = node.begin();
     m_name = nit.key();
@@ -119,7 +119,7 @@ FunctionInfo FunctionInfo::extractFromDeclaration(const std::string& name, const
     return fi;
 }
 
-MLNode FunctionInfo::toJson() const
+MLNode FunctionInfo::toMLNode() const
 {
     MLNode result(MLNode::Object);
     MLNode rhs(MLNode::Object);
@@ -137,7 +137,7 @@ MLNode FunctionInfo::toJson() const
     return result;
 }
 
-void FunctionInfo::fromJson(const MLNode &node)
+void FunctionInfo::fromMLNode(const MLNode &node)
 {
     auto nit = node.begin();
     m_name = nit.key();
@@ -173,12 +173,12 @@ const Utf8 &PropertyInfo::typeName() const{
     return m_typeName;
 }
 
-MLNode PropertyInfo::toJson() const
+MLNode PropertyInfo::toMLNode() const
 {
     return {{m_name.data(), m_typeName.data()}};
 }
 
-void PropertyInfo::fromJson(const MLNode &node)
+void PropertyInfo::fromMLNode(const MLNode &node)
 {
     auto nit = node.begin();
 
@@ -324,7 +324,7 @@ TypeInfo::Ptr TypeInfo::extract(const MetaObject &mo, const Utf8 &uri, bool isIn
     return ti;
 }
 
-MLNode TypeInfo::toJson() const
+MLNode TypeInfo::toMLNode() const
 {
     MLNode result(MLNode::Object);
     result["is_creatable"] = m_isCreatable;
@@ -334,32 +334,32 @@ MLNode TypeInfo::toJson() const
     if (m_inherits != "")
         result["inherits"] = m_inherits.data();
 
-    result["constructor"] = m_constructor.toJson();
+    result["constructor"] = m_constructor.toMLNode();
 
     MLNode properties(MLNode::Array);
     for (int i = 0; i<m_properties.size();++i)
-        properties.append(m_properties[i].toJson());
+        properties.append(m_properties[i].toMLNode());
     result["properties"] = properties;
 
     MLNode functions(MLNode::Array);
     for (int i = 0; i<m_functions.size();++i)
-        functions.append(m_functions[i].toJson());
+        functions.append(m_functions[i].toMLNode());
     result["functions"] = functions;
 
     MLNode methods(MLNode::Array);
     for (int i = 0; i<m_methods.size();++i)
-        methods.append(m_methods[i].toJson());
+        methods.append(m_methods[i].toMLNode());
     result["methods"] = methods;
 
     MLNode events(MLNode::Array);
     for (int i = 0; i<m_events.size();++i)
-        events.append(m_events[i].toJson());
+        events.append(m_events[i].toMLNode());
     result["events"] = events;
 
     return result;
 }
 
-void TypeInfo::fromJson(const MLNode &node)
+void TypeInfo::fromMLNode(const MLNode &node)
 {
     MLNode::ObjectType object = node.asObject();
 
@@ -376,7 +376,7 @@ void TypeInfo::fromJson(const MLNode &node)
     {
         MLNode property = prop_array[i];
         PropertyInfo pi("");
-        pi.fromJson(property);
+        pi.fromMLNode(property);
         m_properties.push_back(pi);
     }
 
@@ -386,7 +386,7 @@ void TypeInfo::fromJson(const MLNode &node)
     {
         MLNode function = func_array[i];
         FunctionInfo fi({});
-        fi.fromJson(function);
+        fi.fromMLNode(function);
         m_functions.push_back(fi);
     }
 
@@ -396,7 +396,7 @@ void TypeInfo::fromJson(const MLNode &node)
     {
         MLNode method = meth_array[i];
         FunctionInfo fi({});
-        fi.fromJson(method);
+        fi.fromMLNode(method);
         m_methods.push_back(fi);
     }
 
@@ -406,7 +406,7 @@ void TypeInfo::fromJson(const MLNode &node)
     {
         MLNode event = ev_array[i];
         FunctionInfo fi({});
-        fi.fromJson(event);
+        fi.fromMLNode(event);
         m_events.push_back(fi);
     }
 }
@@ -435,24 +435,24 @@ void InheritanceInfo::addType(const TypeInfo::Ptr &type){
     m_types.push_back(type);
 }
 
-MLNode InheritanceInfo::toJson() const
+MLNode InheritanceInfo::toMLNode() const
 {
     MLNode result(MLNode::Array);
 
     for (int i = 0; i < m_types.size();++i)
     {
-        result.append(m_types[i]->toJson());
+        result.append(m_types[i]->toMLNode());
     }
     return result;
 }
 
-void InheritanceInfo::fromJson(const MLNode &node)
+void InheritanceInfo::fromMLNode(const MLNode &node)
 {
     MLNode::ArrayType arr = node.asArray();
     for (int i = 0; i<arr.size();++i)
     {
         TypeInfo::Ptr ti = TypeInfo::create("","", false, false);
-        ti->fromJson(arr.at(i));
+        ti->fromMLNode(arr.at(i));
         m_types.push_back(ti);
     }
 }
@@ -506,7 +506,7 @@ DocumentInfo::ScanStatus DocumentInfo::scanStatus() const{
     return m_status;
 }
 
-MLNode DocumentInfo::toJson() const
+MLNode DocumentInfo::toMLNode() const
 {
     MLNode result(MLNode::Object);
     result["status"] = m_status;
@@ -514,21 +514,21 @@ MLNode DocumentInfo::toJson() const
     MLNode imports(MLNode::Array);
     for (int i = 0; i < m_imports.size(); ++i)
     {
-        imports.append(m_imports[i].toJson());
+        imports.append(m_imports[i].toMLNode());
     }
     result["imports"] = imports;
 
     MLNode types(MLNode::Array);
     for (int i =0; i<m_types.size();++i)
     {
-        types.append(m_types[i]->toJson());
+        types.append(m_types[i]->toMLNode());
     }
     result["types"] = types;
 
     return result;
 }
 
-void DocumentInfo::fromJson(const MLNode &node)
+void DocumentInfo::fromMLNode(const MLNode &node)
 {
     MLNode::ObjectType object = node.asObject();
     m_status = static_cast<DocumentInfo::ScanStatus>(object.at("status").asInt());
@@ -537,7 +537,7 @@ void DocumentInfo::fromJson(const MLNode &node)
     for (int i = 0; i < imports.size(); ++i)
     {
         ImportInfo ii({});
-        ii.fromJson(imports.at(i));
+        ii.fromMLNode(imports.at(i));
         m_imports.push_back(ii);
     }
 
@@ -545,7 +545,7 @@ void DocumentInfo::fromJson(const MLNode &node)
     for (int i =0; i<types.size(); ++i)
     {
         TypeInfo::Ptr ti = TypeInfo::create("", "", false, false);
-        ti->fromJson(types.at(i));
+        ti->fromMLNode(types.at(i));
         m_types.push_back(ti);
     }
 }
@@ -620,7 +620,7 @@ void ModuleInfo::addDependency(const Utf8 &dep){
     m_dependencies.push_back(dep);
 }
 
-MLNode ModuleInfo::toJson() const
+MLNode ModuleInfo::toMLNode() const
 {
     MLNode result(MLNode::Object);
 
@@ -635,18 +635,18 @@ MLNode ModuleInfo::toJson() const
 
     MLNode dox(MLNode::Array);
     for (int i=0;i<m_unresolvedDocuments.size();++i)
-        dox.append(m_unresolvedDocuments[i]->toJson());
+        dox.append(m_unresolvedDocuments[i]->toMLNode());
     result["unresolved"] = dox;
 
     MLNode types(MLNode::Array);
     for (int i =0; i<m_types.size();++i)
-        types.append(m_types[i]->toJson());
+        types.append(m_types[i]->toMLNode());
     result["types"] = types;
 
     return result;
 }
 
-void ModuleInfo::fromJson(const MLNode &node)
+void ModuleInfo::fromMLNode(const MLNode &node)
 {
     auto object = node.asObject();
     m_importUri = object.at("import_uri").asString();
@@ -663,7 +663,7 @@ void ModuleInfo::fromJson(const MLNode &node)
     for (int i =0; i < unr.size();++i)
     {
         DocumentInfo::Ptr di = DocumentInfo::create();
-        di->fromJson(unr.at(i));
+        di->fromMLNode(unr.at(i));
         m_unresolvedDocuments.push_back(di);
     }
 
@@ -671,7 +671,7 @@ void ModuleInfo::fromJson(const MLNode &node)
     for (int i =0; i<types.size();++i)
     {
         TypeInfo::Ptr ti = TypeInfo::create("","", false, false);
-        ti->fromJson(types.at(i));
+        ti->fromMLNode(types.at(i));
         m_types.push_back(ti);
     }
 }
@@ -709,7 +709,7 @@ std::vector<std::string> ImportInfo::segments() const{
     return result;
 }
 
-MLNode ImportInfo::toJson() const
+MLNode ImportInfo::toMLNode() const
 {
     MLNode result(MLNode::Object);
 
@@ -727,7 +727,7 @@ MLNode ImportInfo::toJson() const
     return result;
 }
 
-void ImportInfo::fromJson(const MLNode &node)
+void ImportInfo::fromMLNode(const MLNode &node)
 {
     MLNode::ObjectType obj = node.asObject();
 

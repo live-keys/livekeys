@@ -21,14 +21,14 @@ void LvElLanguageInfoSerializationTest::initTestCase()
 
 }
 
-void LvElLanguageInfoSerializationTest::enumInfoToJsonTest()
+void LvElLanguageInfoSerializationTest::enumInfoToMLNodeTest()
 {
     EnumInfo einfo("TestEnum");
     einfo.addKey("RED", 2);
     einfo.addKey("GREEN", 4);
     einfo.addKey("BLUE", 6);
 
-    MLNode result = einfo.toJson();
+    MLNode result = einfo.toMLNode();
 
     QVERIFY(!result.isNull());
     QVERIFY(result.type() == MLNode::Object);
@@ -47,7 +47,7 @@ void LvElLanguageInfoSerializationTest::enumInfoToJsonTest()
 
 }
 
-void LvElLanguageInfoSerializationTest::fromJsonToEnumInfoTest()
+void LvElLanguageInfoSerializationTest::fromMLNodeToEnumInfoTest()
 {
     MLNode node = {
         {"TestEnum", {
@@ -58,7 +58,7 @@ void LvElLanguageInfoSerializationTest::fromJsonToEnumInfoTest()
     };
 
     EnumInfo a("dummyName");
-    a.fromJson(node);
+    a.fromMLNode(node);
 
     QVERIFY(a.name() == "TestEnum");
     QVERIFY(a.keyCount()==3);
@@ -73,14 +73,14 @@ void LvElLanguageInfoSerializationTest::fromJsonToEnumInfoTest()
 
 }
 
-void LvElLanguageInfoSerializationTest::functionInfoToJsonTest()
+void LvElLanguageInfoSerializationTest::functionInfoToMLNodeTest()
 {
     FunctionInfo fi("testFunction", "int");
     fi.addParameter("a", "int");
     fi.addParameter("b", "string");
     fi.addParameter("c", "Object");
 
-    MLNode functionNode = fi.toJson();
+    MLNode functionNode = fi.toMLNode();
 
     QVERIFY(!functionNode.isNull());
     QVERIFY(functionNode.size() == 1);
@@ -117,7 +117,7 @@ void LvElLanguageInfoSerializationTest::functionInfoToJsonTest()
     QVERIFY(par2.begin().value().asString() == "Object");
 }
 
-void LvElLanguageInfoSerializationTest::fromJsonToFunctionInfoTest()
+void LvElLanguageInfoSerializationTest::fromMLNodeToFunctionInfoTest()
 {
     MLNode node;
     std::string json = "{ \"testFunction\": {\n"
@@ -128,7 +128,7 @@ void LvElLanguageInfoSerializationTest::fromJsonToFunctionInfoTest()
     ml::fromJson(json, node);
 
     FunctionInfo res("","");
-    res.fromJson(node);
+    res.fromMLNode(node);
 
     QVERIFY(res.name() == "testFunction");
     QVERIFY(res.returnType() == "int");
@@ -142,11 +142,11 @@ void LvElLanguageInfoSerializationTest::fromJsonToFunctionInfoTest()
     QVERIFY(res.parameter(2).second == "Object");
 }
 
-void LvElLanguageInfoSerializationTest::propertyInfoToJsonTest()
+void LvElLanguageInfoSerializationTest::propertyInfoToMLNodeTest()
 {
     PropertyInfo pi("property", "type");
 
-    MLNode node = pi.toJson();
+    MLNode node = pi.toMLNode();
     QVERIFY(!node.isNull());
     QVERIFY(node.size() == 1);
 
@@ -155,22 +155,22 @@ void LvElLanguageInfoSerializationTest::propertyInfoToJsonTest()
     QVERIFY(obj.at("property").asString() == "type");
 }
 
-void LvElLanguageInfoSerializationTest::fromJsonToPropertyInfoTest()
+void LvElLanguageInfoSerializationTest::fromMLNodeToPropertyInfoTest()
 {
     MLNode node = {{"property", "type"}};
 
     PropertyInfo pi("","");
-    pi.fromJson(node);
+    pi.fromMLNode(node);
 
     QVERIFY(pi.name() == "property");
     QVERIFY(pi.typeName() == "type");
 }
 
-void LvElLanguageInfoSerializationTest::importInfoToJsonTest()
+void LvElLanguageInfoSerializationTest::importInfoToMLNodeTest()
 {
     ImportInfo i({Utf8("a"), Utf8("b"), Utf8("c")}, Utf8("Alias"), true);
 
-    MLNode result = i.toJson();
+    MLNode result = i.toMLNode();
 
     QVERIFY(!result.isNull());
     QVERIFY(result.type() == MLNode::Object);
@@ -197,7 +197,7 @@ void LvElLanguageInfoSerializationTest::importInfoToJsonTest()
     QVERIFY(obj.at("import_as").asString() == "Alias");
 }
 
-void LvElLanguageInfoSerializationTest::fromJsonToImportInfoNoAliasTest()
+void LvElLanguageInfoSerializationTest::fromMLNodeToImportInfoNoAliasTest()
 {
     std::string json = "{\"segments\": [\"a\",\"b\",\"c\"], \"is_relative\": false}";
     MLNode node;
@@ -207,7 +207,7 @@ void LvElLanguageInfoSerializationTest::fromJsonToImportInfoNoAliasTest()
     std::vector<Utf8> dummy;
     ImportInfo ii(dummy);
 
-    ii.fromJson(node);
+    ii.fromMLNode(node);
 
     QVERIFY(ii.isRelative() == false);
     QVERIFY(ii.segments().size() == 3);
@@ -221,7 +221,7 @@ void LvElLanguageInfoSerializationTest::fromJsonToImportInfoNoAliasTest()
 
 }
 
-void LvElLanguageInfoSerializationTest::fromJsonToImportInfoTest()
+void LvElLanguageInfoSerializationTest::fromMLNodeToImportInfoTest()
 {
     std::string json = "{\"segments\": [\"package\"], \"is_relative\": true, \"import_as\": \"Qualifier\"}";
     MLNode node;
@@ -231,7 +231,7 @@ void LvElLanguageInfoSerializationTest::fromJsonToImportInfoTest()
     std::vector<Utf8> dummy;
     ImportInfo ii(dummy);
 
-    ii.fromJson(node);
+    ii.fromMLNode(node);
 
     QVERIFY(ii.isRelative() == true);
     QVERIFY(ii.segments().size() == 1);
@@ -241,7 +241,7 @@ void LvElLanguageInfoSerializationTest::fromJsonToImportInfoTest()
 
 }
 
-void LvElLanguageInfoSerializationTest::typeInfoToJsonTest()
+void LvElLanguageInfoSerializationTest::typeInfoToMLNodeTest()
 {
     TypeInfo::Ptr ti = TypeInfo::create("Type", "Element", false, false);
 
@@ -263,7 +263,7 @@ void LvElLanguageInfoSerializationTest::typeInfoToJsonTest()
     cons.addParameter("m", "int");
     ti->setConstructor(cons);
 
-    MLNode result = ti->toJson();
+    MLNode result = ti->toMLNode();
 
     QVERIFY(!result.isNull());
     QVERIFY(result.type() == MLNode::Object);
@@ -294,7 +294,7 @@ void LvElLanguageInfoSerializationTest::typeInfoToJsonTest()
     QVERIFY(object.at("events").size() == 2);
 }
 
-void LvElLanguageInfoSerializationTest::fromJsonToTypeInfoTest()
+void LvElLanguageInfoSerializationTest::fromMLNodeToTypeInfoTest()
 {
     std::string json = "{\"class_name\":\"\","
                        "\"constructor\":{\"constructor\":{\"parameters\":[{\"m\":\"int\"}],\"return_type\":\"\"}},"
@@ -310,7 +310,7 @@ void LvElLanguageInfoSerializationTest::fromJsonToTypeInfoTest()
     ml::fromJson(json, node);
 
     TypeInfo::Ptr ti = TypeInfo::create("","", false, false);
-    ti->fromJson(node);
+    ti->fromMLNode(node);
 
     QVERIFY(ti->typeName() == "Type");
     QVERIFY(ti->inheritsName() == "Element");
@@ -323,13 +323,13 @@ void LvElLanguageInfoSerializationTest::fromJsonToTypeInfoTest()
     QVERIFY(ti->totalProperties() == 2);
 }
 
-void LvElLanguageInfoSerializationTest::inheritanceInfoToJsonTest()
+void LvElLanguageInfoSerializationTest::inheritanceInfoToMLNodeTest()
 {
     InheritanceInfo ii;
     ii.addType(TypeInfo::create("a","", true, true));
     ii.addType(TypeInfo::create("b", "Container", false, true));
 
-    MLNode result = ii.toJson();
+    MLNode result = ii.toMLNode();
 
     QVERIFY(!result.isNull());
     QVERIFY(result.type() == MLNode::Array);
@@ -342,7 +342,7 @@ void LvElLanguageInfoSerializationTest::inheritanceInfoToJsonTest()
 
 }
 
-void LvElLanguageInfoSerializationTest::fromJsonToInheritanceInfoTest()
+void LvElLanguageInfoSerializationTest::fromMLNodeToInheritanceInfoTest()
 {
     std::string json = "[{\"class_name\":\"\",\"constructor\":{\"\":{\"parameters\":[],\"return_type\":\"\"}},\"events\":[],\"functions\":[],\"is_creatable\":true,\"is_instance\":true,\"methods\":[],\"properties\":[],\"type_name\":\"a\"},{\"class_name\":\"\",\"constructor\":{\"\":{\"parameters\":[],\"return_type\":\"\"}},\"events\":[],\"functions\":[],\"inherits\":\"Container\",\"is_creatable\":false,\"is_instance\":true,\"methods\":[],\"properties\":[],\"type_name\":\"b\"}]";
     MLNode node;
@@ -350,13 +350,13 @@ void LvElLanguageInfoSerializationTest::fromJsonToInheritanceInfoTest()
     ml::fromJson(json, node);
 
     InheritanceInfo ii;
-    ii.fromJson(node);
+    ii.fromMLNode(node);
 
     QVERIFY(ii.totalTypes() == 2);
 }
 
 
-void LvElLanguageInfoSerializationTest::documentInfoToJsonTest()
+void LvElLanguageInfoSerializationTest::documentInfoToMLNodeTest()
 {
     auto di = DocumentInfo::create();
     di->addType(TypeInfo::create("a", "b", false, false));
@@ -367,7 +367,7 @@ void LvElLanguageInfoSerializationTest::documentInfoToJsonTest()
 
     di->updateScanStatus(DocumentInfo::ScanStatus::Ready);
 
-    MLNode res = di->toJson();
+    MLNode res = di->toMLNode();
 
     QVERIFY(!res.isNull());
     QVERIFY(res.type() == MLNode::Object);
@@ -383,14 +383,14 @@ void LvElLanguageInfoSerializationTest::documentInfoToJsonTest()
     QVERIFY(object.at("status").asInt() ==DocumentInfo::ScanStatus::Ready);
 }
 
-void LvElLanguageInfoSerializationTest::fromJsonToDocumentInfoTest()
+void LvElLanguageInfoSerializationTest::fromMLNodeToDocumentInfoTest()
 {
     std::string json = "{\"imports\":[{\"is_relative\":false,\"segments\":[\"a\"]},{\"is_relative\":false,\"segments\":[\"a\",\"c\"]}],\"status\":1,\"types\":[{\"class_name\":\"\",\"constructor\":{\"\":{\"parameters\":[],\"return_type\":\"\"}},\"events\":[],\"functions\":[],\"inherits\":\"b\",\"is_creatable\":false,\"is_instance\":false,\"methods\":[],\"properties\":[],\"type_name\":\"a\"},{\"class_name\":\"\",\"constructor\":{\"\":{\"parameters\":[],\"return_type\":\"\"}},\"events\":[],\"functions\":[],\"inherits\":\"c\",\"is_creatable\":true,\"is_instance\":false,\"methods\":[],\"properties\":[],\"type_name\":\"b\"}]}";
     MLNode node;
     ml::fromJson(json, node);
 
     DocumentInfo::Ptr di = DocumentInfo::create();
-    di->fromJson(node);
+    di->fromMLNode(node);
 
     QVERIFY(di->scanStatus() == DocumentInfo::ScanStatus::Ready);
     QVERIFY(di->totalTypes() == 2);
@@ -398,7 +398,7 @@ void LvElLanguageInfoSerializationTest::fromJsonToDocumentInfoTest()
 
 }
 
-void LvElLanguageInfoSerializationTest::moduleInfoToJsonTest()
+void LvElLanguageInfoSerializationTest::moduleInfoToMLNodeTest()
 {
     ModuleInfo::Ptr mi = ModuleInfo::create("importimport", "path");
     mi->updateScanStatus(ModuleInfo::ScanStatus::Parsed);
@@ -416,7 +416,7 @@ void LvElLanguageInfoSerializationTest::moduleInfoToJsonTest()
     mi->addType(ti2);
     mi->addType(ti3);
 
-    MLNode result = mi->toJson();
+    MLNode result = mi->toMLNode();
 
     QVERIFY(!result.isNull());
     QVERIFY(result.type() == MLNode::Object);
@@ -441,14 +441,14 @@ void LvElLanguageInfoSerializationTest::moduleInfoToJsonTest()
     QVERIFY(object.at("types").asArray().size() == 2);
 }
 
-void LvElLanguageInfoSerializationTest::fromJsonToModuleInfoTest()
+void LvElLanguageInfoSerializationTest::fromMLNodeToModuleInfoTest()
 {
     std::string json = "{\"dependencies\":[\"package1\",\"plugin2\",\"module3\"],\"import_uri\":\"importimport\",\"path\":\"path\",\"status\":2,\"types\":[{\"class_name\":\"\",\"constructor\":{\"\":{\"parameters\":[],\"return_type\":\"\"}},\"events\":[],\"functions\":[],\"inherits\":\"a\",\"is_creatable\":false,\"is_instance\":true,\"methods\":[],\"properties\":[],\"type_name\":\"type2\"},{\"class_name\":\"\",\"constructor\":{\"\":{\"parameters\":[],\"return_type\":\"\"}},\"events\":[],\"functions\":[],\"inherits\":\"b\",\"is_creatable\":false,\"is_instance\":true,\"methods\":[],\"properties\":[],\"type_name\":\"type3\"}],\"unresolved\":[{\"imports\":[],\"status\":0,\"types\":[{\"class_name\":\"\",\"constructor\":{\"\":{\"parameters\":[],\"return_type\":\"\"}},\"events\":[],\"functions\":[],\"is_creatable\":false,\"is_instance\":false,\"methods\":[],\"properties\":[],\"type_name\":\"type1\"}]}]}";
     MLNode node;
     ml::fromJson(json, node);
 
     ModuleInfo::Ptr mi = ModuleInfo::create("","");
-    mi->fromJson(node);
+    mi->fromMLNode(node);
 
     QVERIFY(mi->importUri() == "importimport");
     QVERIFY(mi->path() == "path");
