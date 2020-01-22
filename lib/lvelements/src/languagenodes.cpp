@@ -1457,8 +1457,15 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
         {
             if (m_assignments[i]->m_expression)
             {
-                *compose << "Element.assignPropertyExpression(this,\n '"
-                         << slice(source, m_properties[i]->name())
+                // this spot here
+                auto& property = m_assignments[i]->m_property;
+                std::string object = "this";
+                for (int x = 0; x<property.size()-1; x++)
+                {
+                    object += "." + slice(source, property[x]);
+                }
+                *compose << "Element.assignPropertyExpression(object,\n '"
+                         << slice(source, property[property.size()-1])
                          << "',\n function(){ return " << slice(source, m_assignments[i]->m_expression) << "}.bind(this),\n"
                          << "[\n";
                 std::set<std::pair<std::string, std::string>> bindingPairs;
