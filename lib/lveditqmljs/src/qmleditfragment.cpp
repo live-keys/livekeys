@@ -241,4 +241,11 @@ void QmlEditFragment::updateValue(){
     }
 }
 
+void QmlEditFragment::__inputRunnableObjectReady(){
+    QmlBindingChannel::Ptr inputChannel = bindingSpan()->inputChannel();
+    if ( inputChannel && inputChannel->listIndex() == -1 ){
+        inputChannel->property().connectNotifySignal(this, SLOT(updateValue()));
+    }
+}
+
 }// namespace

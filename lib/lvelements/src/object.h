@@ -44,8 +44,6 @@ public:
     Object& operator = (const Object& other);
     bool operator == (const Object& other);
 
-    //TODO: Add get set methods
-
     bool isNull() const;
     bool isString() const;
 
@@ -63,8 +61,9 @@ public:
     std::string toString() const;
     Buffer toBuffer() const;
 
-protected:
     v8::Local<v8::Object> data() const;
+
+protected:
     static Object create(ObjectPrivate* d, int* ref);
     Object(ObjectPrivate* d, int* ref);
 

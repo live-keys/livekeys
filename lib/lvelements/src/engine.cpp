@@ -579,6 +579,8 @@ void Engine::throwError(const Exception *exception, Element *object){
     v8::Local<v8::Value> e = v8::Exception::Error(
         v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()));
 
+    //TODO: Capture the engine stack trace as well
+
     v8::Local<v8::Object> o = v8::Local<v8::Object>::Cast(e);
 
     if ( exception->hasStackTrace() ){
@@ -748,12 +750,12 @@ void Engine::setGlobalErrorHandler(bool value){
 
 // Module caching
 
-Object Engine::require(ModuleLibrary *module){
+Object Engine::require(ModuleLibrary *module, const Object& o){
     v8::HandleScope handle(isolate());
     v8::Local<v8::Context> context = m_d->context->asLocal();
     v8::Context::Scope context_scope(context);
 
-    v8::Local<v8::Object> base = v8::Object::New(m_d->isolate);
+    v8::Local<v8::Object> base = o.data();
     Object exportsObject(this, base);
 
     for ( auto it = module->typesBegin(); it != module->typesEnd(); ++it ){

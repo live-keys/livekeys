@@ -1,4 +1,5 @@
 #include "testcase.h"
+#include "tester.h"
 #include "live/elements/object.h"
 #include "live/visuallog.h"
 
@@ -53,14 +54,58 @@ const std::vector<Element*> TestCase::data() const{
 
 void TestCase::onReady(){
     m_ready = true;
+}
 
-    //TODO: run scenarios
-    // run before all
-    // for each scenario
-     // run before each
-     // run
-     // run after each
-    // run after all
+int TestCase::exec(){
+    Engine* e = engine();
+
+    if ( !m_beforeAll.isNull() ){
+        e->tryCatch([e, this](){
+            m_beforeAll.call(e, Function::Parameters(0));
+        }, [](const Engine::CatchData& cd){
+            vlog().e() << "TestCase 'BeforeAll' Error in \'" << cd.fileName() << "\': " << cd.message() << cd.stack();
+            return -1;
+        });
+    }
+
+    for( auto it = m_data.begin(); it != m_data.end(); ++it ){
+        Element* el = *it;
+        Scenario* scenario = el->cast<Scenario>();
+        if ( scenario ){
+
+            if ( !m_beforeEach.isNull() ){
+                //TODO: Catch engine exception
+                m_beforeEach.call(engine(), Function::Parameters(0));
+            }
+
+            {
+                Tester* tester = new Tester(engine());
+                Function::Parameters p(1);
+                p.assign(0, LocalValue(engine(), tester));
+
+                //TODO: Catch engine exception:
+                //TODO: Configure specialized exception
+                scenario->run().call(scenario, p);
+
+                delete tester;
+            }
+
+            if ( !m_afterEach.isNull() ){
+                //TODO: Catch engine exception
+                m_afterEach.call(engine(), Function::Parameters(0));
+            }
+        }
+    }
+
+    if ( !m_afterAll.isNull() ){
+        e->tryCatch([this](){
+            m_afterAll.call(engine(), Function::Parameters(0));
+        }, [](const Engine::CatchData& cd){
+            vlog().e() << "TestCase 'BeforeAll' Error in \'" << cd.fileName() << "\': " << cd.message() << cd.stack();
+            return -2;
+        });
+    }
+    return 0;
 }
 
 }} // namespace lv, el

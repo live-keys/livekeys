@@ -1,9 +1,12 @@
 #include "qmlact.h"
+#include "workerthread.h"
+
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
 #include "live/shared.h"
-#include "workerthread.h"
+#include "live/visuallogqt.h"
+
 #include <QMetaObject>
 #include <QMetaProperty>
 #include <QQmlProperty>
@@ -30,6 +33,7 @@ void QmlAct::componentComplete(){
 
     // capture args
     if ( m_args.isArray() ){
+
         QJSValueIterator it(m_args);
         int index = 0;
         while ( it.next() ){
@@ -88,6 +92,12 @@ void QmlAct::setResult(const QJSValue &result){
 
 void QmlAct::__triggerRun(){
     if ( m_workerThread ){
+
+        if ( m_workerThread->isWorking() ){
+            m_workerThread->postWork(this, QVariantList(), QList<Shared*>());
+            return;
+        }
+
         QVariantList args;
 
         QList<Shared*> objectTransfer;

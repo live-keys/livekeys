@@ -19,8 +19,10 @@
 
 #include "live/lvviewglobal.h"
 #include "live/qmlact.h"
+#include "live/qmlstreamfilter.h"
 #include <QObject>
 #include <QEvent>
+#include <QLinkedList>
 #include <functional>
 
 namespace lv{
@@ -31,6 +33,8 @@ class WorkerThreadPrivate;
 class LV_VIEW_EXPORT WorkerThread : public QObject{
 
     Q_OBJECT
+
+    friend class WorkerThreadPrivate;
 
 public:
     /// \private
@@ -58,26 +62,32 @@ public:
     WorkerThread(const QList<QString>& sources, QObject* parent = nullptr);
     virtual ~WorkerThread();
 
+    void postWork(QmlStreamFilter* caller, const QVariant& value, const QList<Shared*> objectTransfers);
     void postWork(QmlAct* caller, const QVariantList &values, const QList<Shared*> objectTransfers);
 
     void start();
+    bool isWorking() const;
 
-    QList<QmlAct*>& acts();
+    QList<QObject*>& acts();
 
     bool event(QEvent * ev);
 
 private:
+    void postNextInProcessQueue();
+
+    bool                 m_isWorking;
     QJSEngine*           m_engine;
     QThread*             m_thread;
-    QList<lv::QmlAct*>    m_acts;
+    QList<QObject*>      m_calls;
     QList<QString>       m_actFunctionsSource;
     QList<QJSValue>      m_actFunctions;
     QMap<int, QPair<QObject*, QString> > m_specialFunctions;
+    QLinkedList<QObject*> m_toExecute;
     WorkerThreadPrivate* m_d;
 };
 
-inline QList<QmlAct *> &WorkerThread::acts(){
-    return m_acts;
+inline QList<QObject*> &WorkerThread::acts(){
+    return m_calls;
 }
 
 }// namespace

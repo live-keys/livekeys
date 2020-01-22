@@ -12,8 +12,8 @@ class Tester : public Element{
         META_OBJECT_DESCRIBE(Tester)
             .base<Element>()
             .constructor()
-            .scriptMethod("assert", &Tester::assertImpl)
-            .scriptMethod("exists", &Tester::assertThrowsImpl)
+            .scriptMethod("assert",       &Tester::assertImpl)
+            .scriptMethod("assertThrows", &Tester::assertThrowsImpl)
         META_OBJECT_CLOSE
     }
 

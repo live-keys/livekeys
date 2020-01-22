@@ -321,7 +321,7 @@ int Livekeys::execElements(const QGuiApplication &app){
     });
     return result;
 #else
-    vlog().i() << "Elements currently not built";
+    vlog().e() << "Support for elements is disabled.";
     return 0;
 #endif
 }

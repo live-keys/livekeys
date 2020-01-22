@@ -30,6 +30,7 @@
 #include "layer.h"
 #include "windowlayer.h"
 #include "qmlstream.h"
+#include "qmlstreamfilter.h"
 #include "qmlclipboard.h"
 
 #include <QQmlComponent>
@@ -342,6 +343,7 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::WindowLayer>(           uri, 1, 0, "WindowLayer");
     qmlRegisterType<lv::QmlClipboard>(          uri, 1, 0, "Clipboard");
     qmlRegisterType<lv::QmlStream>(             uri, 1, 0, "Stream");
+    qmlRegisterType<lv::QmlStreamFilter>(       uri, 1, 0, "StreamFilter");
 
     qmlRegisterUncreatableType<lv::Shared>(       uri, 1, 0, "Shared", "Shared is of abstract type.");
     qmlRegisterUncreatableType<lv::Layer>(        uri, 1, 0, "Layer", "Layer is of abstract type.");

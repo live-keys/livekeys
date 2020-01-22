@@ -124,7 +124,7 @@ LocalValue::LocalValue(Engine *engine, const Value &value)
             m_d = new LocalValuePrivate(ElementPrivate::localObject(value.asElement()));
         break;
     default:
-        throw std::exception();
+        throw std::exception(); // cpp
     }
 }
 
@@ -349,7 +349,7 @@ Element *convertFromV8(Engine *, const v8::Local<v8::Value> &value){
 
     v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(value);
     if ( vo->InternalFieldCount() != 1 )
-        throw std::exception(); // not an element
+        throw std::exception(); // not an element, js exception
 
     v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(vo->GetInternalField(0));
     void* ptr = wrap->Value();

@@ -1,6 +1,7 @@
 #include "worker.h"
 #include "live/workerthread.h"
 #include "live/qmlact.h"
+#include "live/qmlstreamfilter.h"
 #include "live/applicationcontext.h"
 #include "live/viewcontext.h"
 #include "live/exception.h"
@@ -53,13 +54,20 @@ void Worker::appendAct(QObject * filter){
     if ( f ){
         f->setWorkerThread(m_filterWorker);
         m_filterWorker->acts().append(f);
-    } else {
-        lv::Exception lve = CREATE_EXCEPTION(
-            lv::Exception, std::string("Object not of filter type: ") + filter->metaObject()->className(), 2
-        );
-        lv::ViewContext::instance().engine()->throwError(&lve, this);
         return;
     }
+
+    lv::QmlStreamFilter* sf = qobject_cast<QmlStreamFilter*>(filter);
+    if ( sf ){
+        sf->setWorkerThread(m_filterWorker);
+        m_filterWorker->acts().append(sf);
+        return;
+    }
+
+    lv::Exception lve = CREATE_EXCEPTION(
+        lv::Exception, std::string("Object not of filter type: ") + filter->metaObject()->className(), 2
+    );
+    lv::ViewContext::instance().engine()->throwError(&lve, this);
 }
 
 int Worker::actCount() const{

@@ -4,6 +4,7 @@ HEADERS += \
     $$PWD/errorhandler.h \
     $$PWD/incubationcontroller.h \
     $$PWD/qmlact.h \
+    $$PWD/qmlstreamfilter.h \
     $$PWD/settings.h \
     $$PWD/typeinfo.h \
     $$PWD/visuallogbasemodel.h \
@@ -45,6 +46,7 @@ SOURCES += \
     $$PWD/errorhandler.cpp \
     $$PWD/incubationcontroller.cpp \
     $$PWD/qmlact.cpp \
+    $$PWD/qmlstreamfilter.cpp \
     $$PWD/settings.cpp \
     $$PWD/visuallogbasemodel.cpp \
     $$PWD/visuallogfilter.cpp \

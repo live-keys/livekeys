@@ -2,11 +2,13 @@
 
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
+#include "live/visuallogqt.h"
 
 namespace lv{
 
 QmlStream::QmlStream(QObject *parent)
     : QObject(parent)
+    , m_object(nullptr)
 {
     m_engine = lv::ViewContext::instance().engine()->engine();
 }
@@ -20,6 +22,21 @@ void QmlStream::push(QObject *object){
     } else if ( m_objectForward.isWritable() ){
         m_objectForward.write(QVariant::fromValue(object));
     }
+}
+
+void QmlStream::push(const QJSValue &value){
+    if ( m_callbackForward.isCallable() ){
+        m_callbackForward.call(QJSValueList() << value);
+    } else if ( m_objectForward.isWritable() ){
+        m_objectForward.write(value.toVariant());
+    } else if ( m_object ){
+        m_functionForward(m_object, value);
+    }
+}
+
+void QmlStream::forward(QObject *object, std::function<void (QObject *, const QJSValue &)> fn){
+    m_object = object;
+    m_functionForward = fn;
 }
 
 void QmlStream::forward(const QJSValue &callback){

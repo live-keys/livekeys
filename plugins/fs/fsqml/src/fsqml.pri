@@ -7,6 +7,7 @@ HEADERS += \
     $$PWD/qmlfile.h \
     $$PWD/qmlfilereader.h \
     $$PWD/qmlfiledescriptor.h \
+    $$PWD/qmlfilestream.h \
     $$PWD/qmlpath.h
 
 SOURCES += \
@@ -16,4 +17,5 @@ SOURCES += \
     $$PWD/qmlfile.cpp \
     $$PWD/qmlfilereader.cpp \
     $$PWD/qmlfiledescriptor.cpp \
+    $$PWD/qmlfilestream.cpp \
     $$PWD/qmlpath.cpp
