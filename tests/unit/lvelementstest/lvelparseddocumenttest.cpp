@@ -333,7 +333,7 @@ void LvElParsedDocumentTest::cursorContext5Test()
     auto ast = m_parser->parse(testString);
     lv::el::CursorContext result = lv::el::ParsedDocument::findCursorContext(ast, 52);
 
-    QVERIFY(result.context() == (lv::el::CursorContext::InStringLiteral | lv::el::CursorContext::InElements)); // TODO: Ask Dinu
+    QVERIFY(result.context() == (lv::el::CursorContext::InStringLiteral | lv::el::CursorContext::InElements));
     auto path = result.expressionPath();
     QVERIFY(path.size() == 0);
     QVERIFY(!result.objectType().isValid());
@@ -528,7 +528,7 @@ void LvElParsedDocumentTest::cursorContext13Test()
     auto ast = m_parser->parse(testString);
     lv::el::CursorContext result = lv::el::ParsedDocument::findCursorContext(ast, 43);
 
-    QVERIFY(result.context() == (lv::el::CursorContext::InElements));
+    QVERIFY(result.context() == (lv::el::CursorContext::InElements)); // \ inrightofdeclaration
     auto path = result.expressionPath();
     QVERIFY(path.size() == 1);
 
@@ -540,6 +540,6 @@ void LvElParsedDocumentTest::cursorContext13Test()
     QVERIFY(result.objectType().length() == 1);
 
     QVERIFY(!result.objectImportNamespace().isValid());
-    QVERIFY(result.propertyPath().size() == 0); // TODO: Ask Dinu
+    QVERIFY(result.propertyPath().size() == 0);
     QVERIFY(!result.propertyDeclaredType().isValid());
 }

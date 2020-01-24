@@ -1457,7 +1457,6 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
         {
             if (m_assignments[i]->m_expression)
             {
-                // this spot here
                 auto& property = m_assignments[i]->m_property;
                 std::string object = "this";
                 for (int x = 0; x<property.size()-1; x++)
