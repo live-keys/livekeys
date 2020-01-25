@@ -30,7 +30,8 @@ HEADERS += \
     $$PWD/lvparsetest.h \
     $$PWD/metaobjecttypeinfotest.h \
     $$PWD/lvimportstest.h \
-    $$PWD/lvelparseddocumenttest.h
+    $$PWD/lvelparseddocumenttest.h \
+    $$PWD/lvellanguageinfoserializationtest.h
 
 SOURCES += \
     $$PWD/main.cpp \
@@ -54,7 +55,8 @@ SOURCES += \
     $$PWD/lvparsetest.cpp \
     $$PWD/metaobjecttypeinfotest.cpp \
     $$PWD/lvimportstest.cpp \
-    $$PWD/lvelparseddocumenttest.cpp
+    $$PWD/lvelparseddocumenttest.cpp \
+    $$PWD/lvellanguageinfoserializationtest.cpp
 
 OTHER_FILES += $$PWD/data/*.*
 

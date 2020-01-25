@@ -131,6 +131,14 @@
 
 namespace lv{ namespace el{
 
+std::set<std::string> CursorContext::keywords = {
+    "as", "async", "await", "break", "case", "catch", "class",
+    "const", "continue", "debugger", "default", "delete", "else",
+    "extends", "finally", "for", "function", "get", "if", "import",
+    "in", "instanceof", "let", "new", "of", "return", "set", "static",
+    "switch", "target", "throw", "try", "typeof", "var", "void", "while",
+    "with", "yield", "component", "fn", "constructor", "instance" };
+
 CursorContext::CursorContext(int context,
         const std::vector<SourceRange> &expressionPath,
         const std::vector<SourceRange> &propertyPath,

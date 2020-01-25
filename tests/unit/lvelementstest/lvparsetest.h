@@ -27,6 +27,8 @@ private slots:
     void taggedStringParseTest();
     void instanceParseTest();
     void namespaceInheritance();
+    void testComplexPropertyAssignment();
+    void testSimplePropertyAssignment();
     void testScenarioTest();
 
 private:
