@@ -26,6 +26,7 @@
 #include "stringbasedloader.h"
 #include "live/qmlobjectlist.h"
 #include "live/qmlvariantlist.h"
+#include "eventrelay.h"
 
 #include "qmlfork.h"
 #include "qmlforknode.h"
@@ -54,6 +55,10 @@
 
 static QObject* colorProvider(QQmlEngine *engine, QJSEngine *){
     return new lv::QmlColor(engine);
+}
+
+static QObject* eventRelayProvider(QQmlEngine *engine, QJSEngine *){
+    return new lv::EventRelay(engine);
 }
 
 void LivePlugin::registerTypes(const char *uri){
@@ -85,6 +90,7 @@ void LivePlugin::registerTypes(const char *uri){
         uri, 1, 0, "RemoteContainer", "RemoteContainer is of abstract type.");
 
     qmlRegisterSingletonType<lv::QmlColor>(uri, 1, 0, "Color", &colorProvider);
+    qmlRegisterSingletonType<lv::EventRelay>(uri, 1, 0, "EventRelay", &eventRelayProvider);
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){
