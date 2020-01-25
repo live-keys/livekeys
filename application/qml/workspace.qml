@@ -440,7 +440,7 @@ Item{
     Component{
         id: editorFactory
 
-        Editor{
+        EditorPane{
             id: editorComponent
             height: parent ? parent.height : 0
             width: 400
@@ -448,7 +448,9 @@ Item{
             onInternalActiveFocusChanged: if ( internalActiveFocus ) {
                 root.panes.setActiveItem(editorComponent.textEdit, editorComponent)
             }
-            Component.onCompleted: { forceFocus() }
+            Component.onCompleted: {
+                editorComponent.editor.forceFocus()
+            }
         }
     }
 
