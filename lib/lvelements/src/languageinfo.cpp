@@ -28,6 +28,36 @@ Utf8 EnumInfo::key(size_t index) const{
     return m_keys.at(index);
 }
 
+MLNode EnumInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+    MLNode rhs(MLNode::Object);
+
+    int count = m_keys.size();
+    for (int i=0; i<count; ++i)
+    {
+        rhs[m_keys.at(i).data()] = m_values.at(i);
+    }
+
+    result[m_name.data()] = rhs;
+
+    return result;
+}
+
+void EnumInfo::fromMLNode(const MLNode &node)
+{
+    auto nit = node.begin();
+    m_name = nit.key();
+    MLNode values = nit.value();
+
+    for (auto it = values.begin(); it != values.end(); ++it)
+    {
+        m_keys.push_back(it.key());
+        m_values.push_back(it.value().asInt());
+    }
+
+}
+
 // FunctionInfo
 // ------------------------------------------------------------
 
@@ -89,6 +119,40 @@ FunctionInfo FunctionInfo::extractFromDeclaration(const std::string& name, const
     return fi;
 }
 
+MLNode FunctionInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+    MLNode rhs(MLNode::Object);
+
+    rhs["return_type"] = m_returnType.data();
+    MLNode params(MLNode::Array);
+    for (int i=0; i<m_parameters.size(); ++i)
+    {
+        params.append(MLNode({{m_parameters[i].first.data(), m_parameters[i].second.data()}}));
+    }
+
+    rhs["parameters"] = params;
+    result[m_name.data()] = rhs;
+
+    return result;
+}
+
+void FunctionInfo::fromMLNode(const MLNode &node)
+{
+    auto nit = node.begin();
+    m_name = nit.key();
+    MLNode rest = nit.value();
+    m_returnType = rest["return_type"].asString();
+    MLNode arr = rest["parameters"];
+    MLNode::ArrayType arrnode = arr.asArray();
+    for (auto it=arrnode.begin(); it != arrnode.end(); ++it)
+    {
+        Utf8 name = it->begin().key();
+        Utf8 type = it->begin().value().asString();
+        m_parameters.push_back(std::make_pair(name, type));
+    }
+}
+
 // PropertyInfo
 // ------------------------------------------------------------
 
@@ -107,6 +171,19 @@ const Utf8 &PropertyInfo::name() const{
 
 const Utf8 &PropertyInfo::typeName() const{
     return m_typeName;
+}
+
+MLNode PropertyInfo::toMLNode() const
+{
+    return {{m_name.data(), m_typeName.data()}};
+}
+
+void PropertyInfo::fromMLNode(const MLNode &node)
+{
+    auto nit = node.begin();
+
+    m_name = nit.key();
+    m_typeName = nit.value().asString();
 }
 
 // TypeInfo
@@ -247,6 +324,93 @@ TypeInfo::Ptr TypeInfo::extract(const MetaObject &mo, const Utf8 &uri, bool isIn
     return ti;
 }
 
+MLNode TypeInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+    result["is_creatable"] = m_isCreatable;
+    result["is_instance"] = m_isInstance;
+    result["type_name"] = m_typeName.data();
+    result["class_name"] = m_className.data();
+    if (m_inherits != "")
+        result["inherits"] = m_inherits.data();
+
+    result["constructor"] = m_constructor.toMLNode();
+
+    MLNode properties(MLNode::Array);
+    for (int i = 0; i<m_properties.size();++i)
+        properties.append(m_properties[i].toMLNode());
+    result["properties"] = properties;
+
+    MLNode functions(MLNode::Array);
+    for (int i = 0; i<m_functions.size();++i)
+        functions.append(m_functions[i].toMLNode());
+    result["functions"] = functions;
+
+    MLNode methods(MLNode::Array);
+    for (int i = 0; i<m_methods.size();++i)
+        methods.append(m_methods[i].toMLNode());
+    result["methods"] = methods;
+
+    MLNode events(MLNode::Array);
+    for (int i = 0; i<m_events.size();++i)
+        events.append(m_events[i].toMLNode());
+    result["events"] = events;
+
+    return result;
+}
+
+void TypeInfo::fromMLNode(const MLNode &node)
+{
+    MLNode::ObjectType object = node.asObject();
+
+    m_typeName = object.at("type_name").asString();
+    m_className = object.at("class_name").asString();
+    if (object.find("inherits") != object.end())
+        m_inherits = object.at("inherits").asString();
+    m_isInstance = object.at("is_instance").asBool();
+    m_isCreatable = object.at("is_creatable").asBool();
+
+    MLNode prop = object.at("properties");
+    MLNode::ArrayType prop_array = prop.asArray();
+    for (int i = 0; i < prop_array.size(); ++i)
+    {
+        MLNode property = prop_array[i];
+        PropertyInfo pi("");
+        pi.fromMLNode(property);
+        m_properties.push_back(pi);
+    }
+
+    MLNode func = object.at("functions");
+    MLNode::ArrayType func_array = func.asArray();
+    for (int i = 0; i < func_array.size(); ++i)
+    {
+        MLNode function = func_array[i];
+        FunctionInfo fi({});
+        fi.fromMLNode(function);
+        m_functions.push_back(fi);
+    }
+
+    MLNode meth = object.at("methods");
+    MLNode::ArrayType meth_array = meth.asArray();
+    for (int i = 0; i < meth_array.size(); ++i)
+    {
+        MLNode method = meth_array[i];
+        FunctionInfo fi({});
+        fi.fromMLNode(method);
+        m_methods.push_back(fi);
+    }
+
+    MLNode ev = object.at("events");
+    MLNode::ArrayType ev_array = ev.asArray();
+    for (int i = 0; i < ev_array.size(); ++i)
+    {
+        MLNode event = ev_array[i];
+        FunctionInfo fi({});
+        fi.fromMLNode(event);
+        m_events.push_back(fi);
+    }
+}
+
 
 // InheritanceInfo
 // ------------------------------------------------------------
@@ -269,6 +433,28 @@ const TypeInfo::Ptr &InheritanceInfo::typeAt(size_t index) const{
 
 void InheritanceInfo::addType(const TypeInfo::Ptr &type){
     m_types.push_back(type);
+}
+
+MLNode InheritanceInfo::toMLNode() const
+{
+    MLNode result(MLNode::Array);
+
+    for (int i = 0; i < m_types.size();++i)
+    {
+        result.append(m_types[i]->toMLNode());
+    }
+    return result;
+}
+
+void InheritanceInfo::fromMLNode(const MLNode &node)
+{
+    MLNode::ArrayType arr = node.asArray();
+    for (int i = 0; i<arr.size();++i)
+    {
+        TypeInfo::Ptr ti = TypeInfo::create("","", false, false);
+        ti->fromMLNode(arr.at(i));
+        m_types.push_back(ti);
+    }
 }
 
 
@@ -318,6 +504,50 @@ void DocumentInfo::updateScanStatus(DocumentInfo::ScanStatus status){
 
 DocumentInfo::ScanStatus DocumentInfo::scanStatus() const{
     return m_status;
+}
+
+MLNode DocumentInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+    result["status"] = m_status;
+
+    MLNode imports(MLNode::Array);
+    for (int i = 0; i < m_imports.size(); ++i)
+    {
+        imports.append(m_imports[i].toMLNode());
+    }
+    result["imports"] = imports;
+
+    MLNode types(MLNode::Array);
+    for (int i =0; i<m_types.size();++i)
+    {
+        types.append(m_types[i]->toMLNode());
+    }
+    result["types"] = types;
+
+    return result;
+}
+
+void DocumentInfo::fromMLNode(const MLNode &node)
+{
+    MLNode::ObjectType object = node.asObject();
+    m_status = static_cast<DocumentInfo::ScanStatus>(object.at("status").asInt());
+
+    auto imports = object.at("imports").asArray();
+    for (int i = 0; i < imports.size(); ++i)
+    {
+        ImportInfo ii({});
+        ii.fromMLNode(imports.at(i));
+        m_imports.push_back(ii);
+    }
+
+    auto types = object.at("types").asArray();
+    for (int i =0; i<types.size(); ++i)
+    {
+        TypeInfo::Ptr ti = TypeInfo::create("", "", false, false);
+        ti->fromMLNode(types.at(i));
+        m_types.push_back(ti);
+    }
 }
 
 
@@ -390,6 +620,62 @@ void ModuleInfo::addDependency(const Utf8 &dep){
     m_dependencies.push_back(dep);
 }
 
+MLNode ModuleInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+
+    result["import_uri"] = m_importUri.data();
+    result["path"] = m_path.data();
+    result["status"] = m_scanStatus;
+
+    MLNode deps(MLNode::Array);
+    for (int i = 0; i<m_dependencies.size();++i)
+        deps.append(m_dependencies[i].data());
+    result["dependencies"] = deps;
+
+    MLNode dox(MLNode::Array);
+    for (int i=0;i<m_unresolvedDocuments.size();++i)
+        dox.append(m_unresolvedDocuments[i]->toMLNode());
+    result["unresolved"] = dox;
+
+    MLNode types(MLNode::Array);
+    for (int i =0; i<m_types.size();++i)
+        types.append(m_types[i]->toMLNode());
+    result["types"] = types;
+
+    return result;
+}
+
+void ModuleInfo::fromMLNode(const MLNode &node)
+{
+    auto object = node.asObject();
+    m_importUri = object.at("import_uri").asString();
+    m_path = object.at("path").asString();
+    m_scanStatus = static_cast<ModuleInfo::ScanStatus>(object.at("status").asInt());
+
+    auto deps = object.at("dependencies").asArray();
+    for (int i =0; i<deps.size();++i)
+    {
+        m_dependencies.push_back(deps.at(i).asString());
+    }
+
+    auto unr = object.at("unresolved").asArray();
+    for (int i =0; i < unr.size();++i)
+    {
+        DocumentInfo::Ptr di = DocumentInfo::create();
+        di->fromMLNode(unr.at(i));
+        m_unresolvedDocuments.push_back(di);
+    }
+
+    auto types = object.at("types").asArray();
+    for (int i =0; i<types.size();++i)
+    {
+        TypeInfo::Ptr ti = TypeInfo::create("","", false, false);
+        ti->fromMLNode(types.at(i));
+        m_types.push_back(ti);
+    }
+}
+
 // ImportInfo
 // ------------------------------------------------------------
 
@@ -421,6 +707,40 @@ std::vector<std::string> ImportInfo::segments() const{
     for ( auto it = m_segments.begin(); it != m_segments.end(); ++it )
         result.push_back((*it).data());
     return result;
+}
+
+MLNode ImportInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+
+    result["is_relative"] = m_isRelative;
+    MLNode segs(MLNode::Array);
+    for (int i=0; i<m_segments.size();++i)
+    {
+        segs.append(m_segments[i].data());
+    }
+    result["segments"] = segs;
+
+    if (m_importAs != "")
+        result["import_as"] = m_importAs.data();
+
+    return result;
+}
+
+void ImportInfo::fromMLNode(const MLNode &node)
+{
+    MLNode::ObjectType obj = node.asObject();
+
+    m_isRelative = obj.at("is_relative").asBool();
+    MLNode::ArrayType arr = obj.at("segments").asArray();
+
+    for (int i=0;i<arr.size();++i)
+    {
+        m_segments.push_back(Utf8(arr.at(i).asString()));
+    }
+
+    if (obj.find("import_as") != obj.end())
+        m_importAs = obj.at("import_as").asString();
 }
 
 }}// namespace lv, el

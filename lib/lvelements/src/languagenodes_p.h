@@ -316,7 +316,7 @@ public:
     // virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0) override;
 
 private:
-    BaseNode* m_property;
+    std::vector<IdentifierNode*> m_property;
     BindableExpressionNode* m_expression;
     std::vector<BaseNode*> m_bindings;
 

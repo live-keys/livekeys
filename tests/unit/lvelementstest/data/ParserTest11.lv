@@ -1,11 +1,5 @@
-import test
+import package
 
-instance default TestCase{
-
-    Scenario{
-        describe: "assert true test"
-        run: (t) => {
-            t.assert(true)
-        }
-    }
+T {
+    a.b.c: 20
 }

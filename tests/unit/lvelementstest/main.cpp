@@ -41,6 +41,7 @@
 #include "lvparsetest.h"
 #include "metaobjecttypeinfotest.h"
 #include "lvelparseddocumenttest.h"
+#include "lvellanguageinfoserializationtest.h"
 
 int main(int argc, char *argv[]){
     lv::ApplicationContext::initialize({});
