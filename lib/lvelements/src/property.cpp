@@ -101,7 +101,11 @@ InstanceProperty::~InstanceProperty(){
 
 void InstanceProperty::write(Element *e, const v8::Local<v8::Value> &param){
     if ( !isWritable() )
-        throw std::exception(); // TODO: Switch to engine exception
+    {
+        auto exc = CREATE_EXCEPTION(lv::Exception, "Can't write into a non-writable property", lv::Exception::toCode("~InstanceProperty"));
+        e->engine()->throwError(&exc, e);
+        return;
+    }
     m_value = LocalValue(Property::engine(e), param).toValue(e->engine());
     if ( !changedEvent().empty() ){
         Function::Parameters p(1);

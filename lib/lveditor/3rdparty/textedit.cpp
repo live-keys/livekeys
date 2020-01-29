@@ -3364,6 +3364,13 @@ void TextEdit::updateSize()
 
     d->paintedHeight = d->totalHeight; // bug fix
 
+    int newTotalWidth = width;
+    if (d->totalWidth != newTotalWidth)
+    {
+        d->totalWidth = newTotalWidth;
+        emit totalWidthChanged();
+    }
+
     QSizeF size(d->paintedWidth, d->paintedHeight);
     if (d->contentSize != size) {
         d->contentSize = size;
@@ -4153,6 +4160,12 @@ int TextEdit::totalHeight() const
 {
     Q_D(const TextEdit);
     return d->totalHeight;
+}
+
+int TextEdit::totalWidth() const
+{
+    Q_D(const TextEdit);
+    return d->totalWidth;
 }
 
 #ifdef LV_EDITOR_DEBUG

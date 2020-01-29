@@ -116,6 +116,8 @@ class TextEdit : public QQuickImplicitSizeItem
     Q_PROPERTY(int columnNumber READ columnNumber NOTIFY columnNumberChanged)
     Q_PROPERTY(QRect viewport READ viewport WRITE setViewport NOTIFY viewportChanged)
     Q_PROPERTY(int totalHeight READ totalHeight NOTIFY totalHeightChanged)
+    Q_PROPERTY(int totalWidth READ totalWidth NOTIFY totalWidthChanged)
+
 public:
 
 
@@ -335,6 +337,7 @@ public:
     void updateSectionsForViewport();
 
     int totalHeight() const;
+    int totalWidth() const;
 
 #ifdef LV_EDITOR_DEBUG
     TextEditNodeDebugModel::Entry getDebugEntry(int pos);
@@ -392,6 +395,7 @@ Q_SIGNALS:
     void fragmentEndChanged();
     void viewportChanged();
     void totalHeightChanged();
+    void totalWidthChanged();
 
     void paletteChange(int blockNumber);
 public Q_SLOTS:

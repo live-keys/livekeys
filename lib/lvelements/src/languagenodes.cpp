@@ -161,6 +161,8 @@ void BaseNode::visit(BaseNode *parent, const TSNode &node){
         visitComponentDeclaration(parent, node);
     } else if ( strcmp(ts_node_type(node), "new_component_expression") == 0 ){
         visitNewComponentExpression(parent, node);
+    } else if ( strcmp(ts_node_type(node), "arrow_function") == 0 ){
+        visitArrowFunction(parent, node);
     } else if ( strcmp(ts_node_type(node), "component_body") == 0 ){
         visitComponentBody(parent, node);
     } else if ( strcmp(ts_node_type(node), "class_declaration") == 0 ){
@@ -201,7 +203,13 @@ void BaseNode::visit(BaseNode *parent, const TSNode &node){
         visitNewExpression(parent, node);
     } else if ( strcmp(ts_node_type(node), "return_statement") == 0 ){
         visitReturnStatement(parent, node);
-    }else {
+    } else if ( strcmp(ts_node_type(node), "ERROR") == 0 ){
+        SyntaxException se = CREATE_EXCEPTION(SyntaxException, "Syntax error has happened", Exception::toCode("~LanguageNodes"));
+        BaseNode* p = parent;
+        while (p && p->typeString() == "Program") p = p->parent();
+        se.setParseLocation(ts_node_start_point(node).row, ts_node_start_point(node).column, ts_node_start_byte(node), p ? static_cast<ProgramNode*>(p)->m_fileName : "");
+        throw se;
+    } else {
         visitChildren(parent, node);
     }
 }
@@ -427,6 +435,8 @@ void BaseNode::visitMemberExpression(BaseNode *parent, const TSNode &node){
         if (p->typeString() == "MemberExpression") break;
         if (p->typeString() == "FunctionDeclaration") break;
         if (p->typeString() == "ClassDeclaration") break;
+        if (p->typeString() == "ArrowFunction") break;
+        if (p->typeString() == "CallExpression") break;
         if (p->typeString() == "PropertyDeclaration")
         {
             auto child = enode->children()[0];
@@ -476,6 +486,10 @@ void BaseNode::visitPropertyAssignment(BaseNode *parent, const TSNode &node){
             enode->m_expression = new BindableExpressionNode(rhs);
             enode->m_expression->setParent(enode);
             visitChildren(enode->m_expression, rhs);
+        } else if (strcmp(ts_node_type(rhs),"statement_block") == 0) {
+            enode->m_statementBlock = new StatementBlockNode(rhs);
+            enode->m_statementBlock->setParent(enode);
+            visitChildren(enode->m_statementBlock, rhs);
         }
     }
 
@@ -830,6 +844,13 @@ void BaseNode::visitReturnStatement(BaseNode *parent, const TSNode &node)
     ReturnStatementNode* rsnode = new ReturnStatementNode(node);
     parent->insert(rsnode);
     visitChildren(rsnode, node);
+}
+
+void BaseNode::visitArrowFunction(BaseNode *parent, const TSNode &node)
+{
+    ArrowFunctionNode* afnode = new ArrowFunctionNode(node);
+    parent->insert(afnode);
+    visitChildren(afnode, node);
 }
 
 std::string ImportNode::toString(int indent) const{
@@ -1463,9 +1484,9 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
                 {
                     object += "." + slice(source, property[x]);
                 }
-                *compose << "Element.assignPropertyExpression(object,\n '"
+                *compose << "Element.assignPropertyExpression(" << object << ",\n '"
                          << slice(source, property[property.size()-1])
-                         << "',\n function(){ return " << slice(source, m_assignments[i]->m_expression) << "}.bind(this),\n"
+                         << "',\n function(){ return " << slice(source, m_assignments[i]->m_expression) << "}.bind(" << object << "),\n"
                          << "[\n";
                 std::set<std::pair<std::string, std::string>> bindingPairs;
                 for (auto idx = m_assignments[i]->m_bindings.begin(); idx != m_assignments[i]->m_bindings.end(); ++idx)
@@ -1503,6 +1524,16 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
                 }
 
                 *compose << " = " << slice(source, m_assignments[i]->m_expression) << "\n\n";
+            }
+            else if (m_assignments[i]->m_statementBlock) {
+                std::string propName = "this";
+
+                for (int prop=0; prop<m_assignments[i]->m_property.size(); ++prop)
+                {
+                    propName += "." + slice(source, m_assignments[i]->m_property[prop]);
+                }
+                *compose << propName << " = "
+                         << "(function()" <<  slice(source, m_assignments[i]->m_statementBlock) << "())\n\n";
             }
         }
 
