@@ -1,6 +1,7 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/eventrelay.h \
     $$PWD/live_plugin.h \
     $$PWD/qmlcolor.h \
     $$PWD/stringbasedloader.h \
@@ -31,6 +32,7 @@ HEADERS += \
     $$PWD/staticcontainer.h
 
 SOURCES += \
+    $$PWD/eventrelay.cpp \
     $$PWD/live_plugin.cpp \
     $$PWD/qmlcolor.cpp \
     $$PWD/stringbasedloader.cpp \

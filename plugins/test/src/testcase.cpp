@@ -79,13 +79,26 @@ int TestCase::exec(){
             }
 
             {
-                Tester* tester = new Tester(engine());
-                Function::Parameters p(1);
-                p.assign(0, LocalValue(engine(), tester));
+                bool except = false;
 
-                //TODO: Catch engine exception:
-                //TODO: Configure specialized exception
-                scenario->run().call(scenario, p);
+                Tester* tester = new Tester(engine());
+                tester->setParent(scenario);
+
+                engine()->tryCatch([scenario, tester, this](){
+
+                    Function::Parameters p(1);
+                    p.assign(0, LocalValue(engine(), tester));
+
+                    scenario->run().call(scenario, p);
+
+                }, [&except, scenario](const Engine::CatchData& cd){
+                    except = true;
+                    vlog("test").i() << " * " << scenario->describe() <<  " : " << "FAIL";
+                    vlog("test").i() << "     " << cd.message();
+                });
+
+                if ( !except )
+                    vlog("test").i() << " * " << scenario->describe() <<  " : " << "PASS";
 
                 delete tester;
             }

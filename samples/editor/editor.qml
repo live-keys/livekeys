@@ -12,7 +12,6 @@ Item{
         anchors.centerIn: parent
         document: project.openFile(project.path('editor.qml'))
         height: parent.height
-        width: 400
-        windowControls: lk.windowControls()
+        width: 450
     }
 }

@@ -261,9 +261,10 @@ ProjectDocument *Project::openTextFile(ProjectFile *file, int mode){
 }
 
 Document *Project::openFile(const QString &path, int mode){
+
     Document* document = isOpened(path);
 
-    if ( ProjectDocument::castFrom(document) ){
+    if ( document && !ProjectDocument::castFrom(document) ){
         closeFile(document->file()->path());
         document = nullptr;
     }
