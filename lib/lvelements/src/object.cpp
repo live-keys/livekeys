@@ -73,6 +73,10 @@ Object Object::create(Engine *engine){
     return Object(engine, v8::Object::New(engine->isolate()));
 }
 
+Object Object::createArray(Engine *engine, int length){
+    return Object(engine, v8::Array::New(engine->isolate(), length));
+}
+
 std::string Object::toString() const{
     if ( m_d->data.IsEmpty() )
         return std::string();
@@ -259,6 +263,40 @@ void LocalObject::set(const LocalValue &key, const LocalValue &value){
 
 void LocalObject::set(Engine *engine, const std::string &key, const LocalValue &value){
     set(LocalValue(engine, key), value);
+}
+
+
+class LocalArrayPrivate{
+public:
+    LocalArrayPrivate(const v8::Local<v8::Array>& o) : data(o){}
+
+    v8::Local<v8::Array> data;
+};
+
+
+LocalArray::LocalArray(Object o)
+    : m_d(new LocalArrayPrivate(v8::Local<v8::Array>::Cast(o.data()))){
+}
+
+LocalArray::LocalArray(Engine *, const LocalValue &lval)
+    : m_d(new LocalArrayPrivate(v8::Local<v8::Array>::Cast(lval.data())))
+{
+}
+
+LocalArray::~LocalArray(){
+    delete m_d;
+}
+
+int LocalArray::length() const{
+    return static_cast<int>(m_d->data->Length());
+}
+
+LocalValue LocalArray::get(int index){
+    return m_d->data->Get(static_cast<uint32_t>(index));
+}
+
+void LocalArray::set(int index, const LocalValue &value){
+    m_d->data->Set(static_cast<uint32_t>(index), value.data());
 }
 
 

@@ -13,17 +13,15 @@ HEADERS += \
     $$PWD/enginetest.h \
     $$PWD/mlnodetoqmltest.h \
     $$PWD/visuallogtest.h \
-    $$PWD/filtertest.h \
-    grouptest.h \
-    linecapturetest.h
+    $$PWD/grouptest.h \
+    $$PWD/linecapturetest.h
 
 SOURCES += \
     $$PWD/main.cpp \
     $$PWD/enginetest.cpp \
     $$PWD/mlnodetoqmltest.cpp \
     $$PWD/visuallogtest.cpp \
-    $$PWD/filtertest.cpp \
-    grouptest.cpp \
-    linecapturetest.cpp
+    $$PWD/grouptest.cpp \
+    $$PWD/linecapturetest.cpp
 
 

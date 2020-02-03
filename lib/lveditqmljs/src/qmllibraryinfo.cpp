@@ -106,4 +106,12 @@ void QmlLibraryInfo::setImportNamespace(const QString &importNamespace){
     m_importNamespace = importNamespace;
 }
 
+void QmlLibraryInfo::setFiles(const QMap<QString, QString> &files){
+    m_files = files;
+}
+
+const QMap<QString, QString> QmlLibraryInfo::files() const{
+    return m_files;
+}
+
 }// namespace

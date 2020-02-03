@@ -10,6 +10,7 @@
 
 #include <fstream>
 #include <queue>
+#include "engine.h"
 
 namespace lv{ namespace el{
 
@@ -71,8 +72,19 @@ std::string slice(const std::string& source, TSNode& node){
 LanguageParser::LanguageParser(Language *language)
     : m_parser(ts_parser_new())
     , m_language(language)
+    , m_engine(nullptr)
 {
     ts_parser_set_language(m_parser, reinterpret_cast<const TSLanguage*>(language));
+}
+
+Engine *LanguageParser::engine() const
+{
+    return m_engine;
+}
+
+void LanguageParser::setEngine(Engine *engine)
+{
+    m_engine = engine;
 }
 
 LanguageParser::~LanguageParser(){
@@ -254,7 +266,7 @@ LanguageParser::ComparisonResult LanguageParser::compare(
     return ComparisonResult(true);
 }
 
-std::string LanguageParser::toString(LanguageParser::AST *ast){
+std::string LanguageParser::toString(LanguageParser::AST *ast) const {
     char* str = ts_node_string(ts_tree_root_node(reinterpret_cast<TSTree*>(ast)));
     std::string result(str);
     free(str);
@@ -277,7 +289,14 @@ std::string LanguageParser::toJs(const std::string& contents, AST *ast, const st
 
     std::string result;
 
-    BaseNode* root = el::BaseNode::visit(ast);
+    BaseNode* root = nullptr;
+    try {
+        root = el::BaseNode::visit(ast);
+    } catch (SyntaxException exc){
+        if (m_engine)
+            m_engine->throwError(&exc, nullptr);
+        return "";
+    }
 
     if (!filename.empty())
     {
@@ -358,6 +377,34 @@ LanguageParser::ComparisonResult::ComparisonResult(bool isEqual)
     , m_source2Row(0)
     , m_source2Offset(0)
 {
+}
+
+int SyntaxException::parsedLine() const
+{
+    return m_parsedLine;
+}
+
+int SyntaxException::parsedColumn() const
+{
+    return m_parsedColumn;
+}
+
+int SyntaxException::parsedOffset() const
+{
+    return m_parsedOffset;
+}
+
+std::string SyntaxException::parsedFile() const
+{
+    return m_parsedFile;
+}
+
+void SyntaxException::setParseLocation(int line, int col, int offset, const std::string &file)
+{
+    m_parsedLine = line;
+    m_parsedColumn = col;
+    m_parsedOffset = offset;
+    m_parsedFile = file;
 }
 
 }} // namespace lv, el

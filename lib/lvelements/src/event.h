@@ -435,6 +435,6 @@ private:
     std::list<std::list<EventConnectionFunction<const Function::Parameters&>* >::iterator*> m_callIterators;
 };
 
-}} // namespace lv, namespace script
+}} // namespace lv, el
 
 #endif // LVEVENT_H

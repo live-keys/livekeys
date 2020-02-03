@@ -2,6 +2,7 @@
 #define TEXTDOCUMENTDATA_H
 
 #include <vector>
+#include <string>
 #include "live/lveditorglobal.h"
 
 typedef unsigned short int ushort;

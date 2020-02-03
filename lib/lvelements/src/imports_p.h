@@ -36,6 +36,7 @@ private:
     ModuleFile* m_moduleFile;
     v8::Persistent<v8::Object> m_object;
     std::map<std::string, ModuleFile*> m_exports;
+    std::list<Object>               m_libraryExports;
     std::map<std::string, Imports*> m_imports;
 };
 

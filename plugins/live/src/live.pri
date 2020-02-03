@@ -1,10 +1,9 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/eventrelay.h \
     $$PWD/live_plugin.h \
     $$PWD/qmlcolor.h \
-    $$PWD/tuple.h \
-    $$PWD/tuplepropertymap.h \
     $$PWD/stringbasedloader.h \
     $$PWD/worker.h \
     $$PWD/qmlcomponentmap.h \
@@ -33,10 +32,9 @@ HEADERS += \
     $$PWD/staticcontainer.h
 
 SOURCES += \
+    $$PWD/eventrelay.cpp \
     $$PWD/live_plugin.cpp \
     $$PWD/qmlcolor.cpp \
-    $$PWD/tuple.cpp \
-    $$PWD/tuplepropertymap.cpp \
     $$PWD/stringbasedloader.cpp \
     $$PWD/qmlcomponentmap.cpp \
     $$PWD/qmlcomponentmapdata.cpp \

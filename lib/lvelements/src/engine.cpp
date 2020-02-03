@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <QFileInfo>
 #include "v8nowarnings.h"
+#include <QDateTime>
 
 namespace lv{ namespace el{
 
@@ -271,22 +272,64 @@ Script::Ptr Engine::compileJsModuleFile(const std::string &path){
 }
 
 Script::Ptr Engine::compileModuleFile(const std::string &path){
-    //TODO: Add caching
-    //TODO: Add JsOnly, etc
-    std::ifstream file(path, std::ifstream::in | std::ifstream::binary);
-    if ( !file.is_open() )
-        THROW_EXCEPTION(Exception, "Failed to open file: " + path, Exception::toCode("~ScriptFile"));
+    if ( moduleFileType() == Engine::JsOnly ){
+        return compileJsModuleFile(path + ".js");
+    }
 
-    file.seekg(0, std::ios::end);
-    size_t size = static_cast<size_t>(file.tellg());
-    std::string buffer(size, ' ');
-    file.seekg(0);
-    file.read(&buffer[0], size);
+    if (m_d->moduleFileType == Engine::JsOnly)
+    {
+        std::string resPath = path;
+        if (path.substr(path.length()-3) != ".js")
+            resPath += ".js";
+        QFileInfo fileInfo = QFileInfo(QString(resPath.c_str()));
+        if (!fileInfo.exists())
+        {
+            fileInfo = QFileInfo(QString((path).c_str()));
+            resPath = path;
+            if (!fileInfo.exists())
+                THROW_EXCEPTION(Exception, "Failed to open .lv file: " + path, Exception::toCode("~ScriptFile"));
+        }
+        QFile file(QString(resPath.c_str()));
+        file.open(QFile::Text | QFile::ReadOnly);
+        QString text = file.readAll();
+        return compileModuleSource(resPath, text.toStdString());
+    } else if (m_d->moduleFileType == Engine::Lv){
+        QFileInfo fileInfo(QString((path).c_str()));
+        if (!fileInfo.exists()) return nullptr;
+        QFile file(QString(path.c_str()));
+        file.open(QFile::Text | QFile::ReadOnly);
+        QString text = file.readAll();
+        return compileModuleSource(path, text.toStdString());
+    } else if (m_d->moduleFileType == Engine::LvOrJs){
+        QFileInfo fi1(path.c_str());
+        QFileInfo fi2((path+".js").c_str());
+        if (!fi1.exists())
+            THROW_EXCEPTION(Exception, "Failed to open .lv file: " + path, Exception::toCode("~ScriptFile"));
+        if (!fi2.exists())
+        {
+            QFile file(QString(path.c_str()));
+            file.open(QFile::Text | QFile::ReadOnly);
+            QString text = file.readAll();
+            return compileModuleSource(path, text.toStdString());
+        }
+        if (fi2.lastModified() > fi1.lastModified())
+        {
+            QFile file(QString((path+".js").c_str()));
+            file.open(QFile::Text | QFile::ReadOnly);
+            QString text = file.readAll();
+            return compileModuleSource(path+".js", text.toStdString());
+        }
+        QFile file(QString(path.c_str()));
+        file.open(QFile::Text | QFile::ReadOnly);
+        QString text = file.readAll();
+        return compileModuleSource(path, text.toStdString());
+    }
 
-    return compileModuleSource(path, buffer);
+    return nullptr;
 }
 
 Script::Ptr Engine::compileModuleSource(const std::string &path, const std::string &source){
+    m_d->parser->setEngine(this);
     std::string jssource = m_d->parser->toJs(source, QFileInfo(QString::fromStdString(path)).baseName().toStdString());
 
     v8::HandleScope handle(isolate());
@@ -313,6 +356,7 @@ Object Engine::loadJsFile(const std::string &path){
     QFileInfo finfo(QString::fromStdString(path));
     std::string pluginPath = finfo.path().toStdString();
     std::string fileName = finfo.fileName().toStdString();
+    std::string baseName = finfo.baseName().toStdString();
 
     Plugin::Ptr plugin(nullptr);
     if ( Plugin::existsIn(pluginPath) ){
@@ -324,7 +368,7 @@ Object Engine::loadJsFile(const std::string &path){
     }
 
     ElementsPlugin::Ptr epl = ElementsPlugin::create(plugin, this);
-    ModuleFile* mf = ElementsPlugin::addModuleFile(epl, fileName);
+    ModuleFile* mf = ElementsPlugin::addModuleFile(epl, baseName);
 
     Script::Ptr sc = compileJsModuleFile(path);
     Object m = sc->loadAsModule(mf);
@@ -361,13 +405,40 @@ Object Engine::loadFile(const std::string &path){
     return lm.get(this, "exports").toObject(this);
 }
 
+Object Engine::loadFile(const std::string &path, const std::string &content){
+    QFileInfo finfo(QString::fromStdString(path));
+    std::string pluginPath = finfo.path().toStdString();
+    std::string fileName = finfo.fileName().toStdString();
+
+    Plugin::Ptr plugin(nullptr);
+    if ( Plugin::existsIn(pluginPath) ){
+        plugin = Plugin::createFromPath(pluginPath);
+        Package::Ptr package = Package::createFromPath(plugin->package());
+        m_d->packageGraph->loadRunningPackageAndPlugin(package, plugin);
+    } else {
+        plugin = m_d->packageGraph->createRunningPlugin(pluginPath);
+    }
+
+    ElementsPlugin::Ptr epl = ElementsPlugin::create(plugin, this);
+    ModuleFile* mf = ElementsPlugin::addModuleFile(epl, fileName);
+
+    Script::Ptr sc = compileModuleSource(path, content);
+    Object m = sc->loadAsModule(mf);
+    if ( m.isNull() )
+        return m;
+
+    LocalObject lm(m);
+    return lm.get(this, "exports").toObject(this);
+}
+
 ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
     auto it = m_d->registeredTemplates.find(t);
     if ( it != m_d->registeredTemplates.end() )
         return it->second;
 
     v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate());
-    tpl->SetCallHandler(t->constructor()->ptr());
+    if ( t->constructor() )
+        tpl->SetCallHandler(t->constructor()->ptr());
     tpl->SetClassName(v8::String::NewFromUtf8(isolate(), t->name().c_str()));
 
     v8::Local<v8::ObjectTemplate> tplInstance = tpl->InstanceTemplate();
@@ -506,17 +577,44 @@ bool Engine::isElementConstructor(const Callable &c){
  * than that of the exception.
  */
 void Engine::throwError(const Exception *exception, Element *object){
-    v8::Local<v8::Value> e = v8::Exception::Error(
-        v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()));
+    v8::Local<v8::Value> e;
+    auto se = static_cast<const SyntaxException*>(exception);
+    if (se)
+    {
+        e = v8::Exception::SyntaxError(
+            v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()));
+    }
+    else {
+        e = v8::Exception::Error(
+            v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()));
+    }
 
     v8::Local<v8::Object> o = v8::Local<v8::Object>::Cast(e);
+    std::stringstream stackCapture;
+
+    v8::Local<v8::StackTrace> st = v8::StackTrace::CurrentStackTrace(isolate(), 128, v8::StackTrace::kScriptName);
+    int jsStackFrameSize = st->GetFrameCount();
+    for (int i = 0; i<jsStackFrameSize; ++i)
+    {
+        if (i!=0) stackCapture << "\n";
+        v8::Local<v8::StackFrame> sf = st->GetFrame(i);
+        v8::String::Utf8Value scriptName(sf->GetScriptName());
+        v8::String::Utf8Value functionName(sf->GetFunctionName());
+
+        stackCapture << "at ";
+        if (functionName.length() != 0)
+            stackCapture << *functionName;
+        stackCapture << "(";
+        if (scriptName.length() != 0)
+            stackCapture << *scriptName;
+        stackCapture << ":" <<  sf->GetLineNumber() << ")";
+    }
 
     if ( exception->hasStackTrace() ){
-        std::stringstream stackCapture;
 
         StackTrace::Ptr est = exception->stackTrace();
         for ( auto it = est->begin(); it != est->end(); ++it ){
-            if ( it != est->begin() )
+            if ( it != est->begin() || jsStackFrameSize > 0)
                 stackCapture << "\n";
 
             const StackFrame& sf = *it;
@@ -529,24 +627,39 @@ void Engine::throwError(const Exception *exception, Element *object){
             }
         }
 
-
-        v8::Local<v8::String> stackKey = v8::String::NewFromUtf8(isolate(), "stack", v8::String::kInternalizedString);
-        v8::Local<v8::String> stackValue = v8::String::NewFromUtf8(isolate(), stackCapture.str().c_str(), v8::String::kInternalizedString);
-
-        o->Set(stackKey, stackValue);
     }
 
-    if ( object ){
-        v8::Local<v8::String> objectKey = v8::String::NewFromUtf8(isolate(), "object", v8::String::kInternalizedString);
-        o->Set(objectKey, ElementPrivate::localObject(object));
+    v8::Local<v8::String> stackKey = v8::String::NewFromUtf8(isolate(), "stack", v8::String::kInternalizedString);
+    v8::Local<v8::String> stackValue = v8::String::NewFromUtf8(isolate(), stackCapture.str().c_str(), v8::String::kInternalizedString);
+
+    o->Set(stackKey, stackValue);
+
+    if (se) {
+        v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::String::kInternalizedString);
+        o->Set(lineNumberKey, v8::Integer::New(isolate(), se->parsedLine()));
+
+
+        v8::Local<v8::String> columnKey = v8::String::NewFromUtf8(isolate(), "column", v8::String::kInternalizedString);
+        o->Set(columnKey, v8::Integer::New(isolate(), se->parsedColumn()));
+
+        v8::Local<v8::String> offsetKey = v8::String::NewFromUtf8(isolate(), "offset", v8::String::kInternalizedString);
+        o->Set(offsetKey, v8::Integer::New(isolate(), se->parsedColumn()));
+
+        v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::String::kInternalizedString);
+        o->Set(fileNameKey, v8::String::NewFromUtf8(isolate(), se->fileName().c_str(), v8::String::kInternalizedString));
     }
+    else {
+        if ( object ){
+            v8::Local<v8::String> objectKey = v8::String::NewFromUtf8(isolate(), "object", v8::String::kInternalizedString);
+            o->Set(objectKey, ElementPrivate::localObject(object));
+        }
 
-    v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::String::kInternalizedString);
-    o->Set(fileNameKey, v8::String::NewFromUtf8(isolate(), exception->file().c_str(), v8::String::kInternalizedString));
+        v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::String::kInternalizedString);
+        o->Set(fileNameKey, v8::String::NewFromUtf8(isolate(), exception->file().c_str(), v8::String::kInternalizedString));
 
-    v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::String::kInternalizedString);
-    o->Set(lineNumberKey, v8::Integer::New(isolate(), exception->line()));
-
+        v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::String::kInternalizedString);
+        o->Set(lineNumberKey, v8::Integer::New(isolate(), exception->line()));
+    }
 
     m_d->pendingExceptionNesting = m_d->tryCatchNesting;
     m_d->isolate->ThrowException(e);
@@ -669,7 +782,7 @@ void Engine::wrapScriptObject(Element *element){
 }
 
 int Engine::tryCatchNesting(){
-    return m_d->tryCatchNesting;;
+    return m_d->tryCatchNesting;
 }
 
 void Engine::setGlobalErrorHandler(bool value){
@@ -678,21 +791,28 @@ void Engine::setGlobalErrorHandler(bool value){
 
 // Module caching
 
-Object Engine::require(ModuleLibrary *module){
+Object Engine::require(ModuleLibrary *module, const Object& o){
     v8::HandleScope handle(isolate());
     v8::Local<v8::Context> context = m_d->context->asLocal();
     v8::Context::Scope context_scope(context);
 
-    v8::Local<v8::Object> base = v8::Object::New(m_d->isolate);
+    v8::Local<v8::Object> base = o.data();
     Object exportsObject(this, base);
 
-    for ( auto it = module->begin(); it != module->end(); ++it ){
+    for ( auto it = module->typesBegin(); it != module->typesEnd(); ++it ){
         const MetaObject* t = it->second;
 
         ComponentTemplate* ctpl = registerTemplate(t);
         v8::Local<v8::FunctionTemplate> tpl = ctpl->data.Get(isolate());
 
         base->Set(v8::String::NewFromUtf8(isolate(), t->name().c_str()), tpl->GetFunction());
+    }
+
+    for ( auto it = module->instancesBegin(); it != module->instancesEnd(); ++it ){
+        std::string name = it->first;
+        Element* e       = it->second;
+        v8::Local<v8::Object> lo = ElementPrivate::localObject(e);
+        base->Set(v8::String::NewFromUtf8(isolate(), name.c_str()), lo);
     }
 
     return exportsObject;
@@ -797,4 +917,4 @@ Engine::CatchData::CatchData(Engine *engine, v8::TryCatch *tc)
 {
 }
 
-}} // namespace lv, script
+}} // namespace lv, el

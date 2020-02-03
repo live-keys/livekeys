@@ -31,6 +31,7 @@
 #include "qmlitemmodel.h"
 #include "qmladdcontainer.h"
 #include "qmleditfragment.h"
+#include "qmlbindingspanmodel.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -168,6 +169,8 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         uri, 1, 0, "QmlPropertyModel", "QmlPropertyModel can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlItemModel>(
         uri, 1, 0, "QmlItemModel", "QmlItemModel can only be accessed through the qmledit extension.");
+    qmlRegisterUncreatableType<lv::QmlBindingSpanModel>(
+        uri, 1, 0, "BindingSpanModel", "BindingSpanModel can only be accessed through the qmledit extension.");
 }
 
 /**

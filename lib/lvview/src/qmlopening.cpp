@@ -3,13 +3,13 @@
 namespace lv{
 
 QmlOpening::QmlOpening(QObject *parent)
-    : Act(parent)
+    : QmlAct(parent)
 {
 }
 
 void QmlOpening::componentComplete(){
-    Act::componentComplete();
-    emit Act::run();
+    QmlAct::componentComplete();
+    __triggerRun();
 }
 
 

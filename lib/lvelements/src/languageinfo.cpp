@@ -1,4 +1,5 @@
 #include "languageinfo.h"
+#include "live/elements/metaobject.h"
 
 namespace lv{ namespace el{
 
@@ -25,6 +26,36 @@ size_t EnumInfo::keyCount() const{
 
 Utf8 EnumInfo::key(size_t index) const{
     return m_keys.at(index);
+}
+
+MLNode EnumInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+    MLNode rhs(MLNode::Object);
+
+    int count = m_keys.size();
+    for (int i=0; i<count; ++i)
+    {
+        rhs[m_keys.at(i).data()] = m_values.at(i);
+    }
+
+    result[m_name.data()] = rhs;
+
+    return result;
+}
+
+void EnumInfo::fromMLNode(const MLNode &node)
+{
+    auto nit = node.begin();
+    m_name = nit.key();
+    MLNode values = nit.value();
+
+    for (auto it = values.begin(); it != values.end(); ++it)
+    {
+        m_keys.push_back(it.key());
+        m_values.push_back(it.value().asInt());
+    }
+
 }
 
 // FunctionInfo
@@ -59,6 +90,69 @@ const std::pair<Utf8, Utf8> &FunctionInfo::parameter(size_t index) const{
     return m_parameters.at(index);
 }
 
+FunctionInfo FunctionInfo::extractFromDeclaration(const std::string& name, const std::string &declaration){
+    size_t argStart = declaration.find('(');
+    size_t argEnd   = declaration.find(')');
+    if ( argStart == std::string::npos || argEnd == std::string::npos )
+        return FunctionInfo(name);
+
+    std::string returnType = declaration.substr(0, argStart);
+
+    FunctionInfo fi(name, returnType.empty() ? "" : "cpp/" + returnType);
+
+    const char* str = declaration.c_str() + argStart + 1;
+
+    do{
+        const char *begin = str;
+
+        while(*str != ',' && *str != ')' && *str)
+            str++;
+
+        if ( begin != str ){
+            fi.addParameter("", "cpp/" + std::string(begin, str));
+        }
+
+        if ( *str == ')' )
+            break;
+    } while (0 != *str++);
+
+    return fi;
+}
+
+MLNode FunctionInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+    MLNode rhs(MLNode::Object);
+
+    rhs["return_type"] = m_returnType.data();
+    MLNode params(MLNode::Array);
+    for (int i=0; i<m_parameters.size(); ++i)
+    {
+        params.append(MLNode({{m_parameters[i].first.data(), m_parameters[i].second.data()}}));
+    }
+
+    rhs["parameters"] = params;
+    result[m_name.data()] = rhs;
+
+    return result;
+}
+
+void FunctionInfo::fromMLNode(const MLNode &node)
+{
+    auto nit = node.begin();
+    m_name = nit.key();
+    MLNode rest = nit.value();
+    m_returnType = rest["return_type"].asString();
+    MLNode arr = rest["parameters"];
+    MLNode::ArrayType arrnode = arr.asArray();
+    for (auto it=arrnode.begin(); it != arrnode.end(); ++it)
+    {
+        Utf8 name = it->begin().key();
+        Utf8 type = it->begin().value().asString();
+        m_parameters.push_back(std::make_pair(name, type));
+    }
+}
+
 // PropertyInfo
 // ------------------------------------------------------------
 
@@ -79,12 +173,26 @@ const Utf8 &PropertyInfo::typeName() const{
     return m_typeName;
 }
 
+MLNode PropertyInfo::toMLNode() const
+{
+    return {{m_name.data(), m_typeName.data()}};
+}
+
+void PropertyInfo::fromMLNode(const MLNode &node)
+{
+    auto nit = node.begin();
+
+    m_name = nit.key();
+    m_typeName = nit.value().asString();
+}
+
 // TypeInfo
 // ------------------------------------------------------------
 
 TypeInfo::TypeInfo(Utf8 name, Utf8 inheritsName, bool isCreatable, bool isInstance)
     : m_typeName(name)
     , m_inherits(inheritsName)
+    , m_constructor("")
     , m_isCreatable(isCreatable)
     , m_isInstance(isInstance)
 {
@@ -121,16 +229,12 @@ bool TypeInfo::isInstance() const{
     return m_isInstance;
 }
 
-size_t TypeInfo::totalEnums() const{
-    return m_enums.size();
+void TypeInfo::setConstructor(const FunctionInfo &constructor){
+    m_constructor = constructor;
 }
 
-const EnumInfo &TypeInfo::enumAt(size_t index) const{
-    return m_enums.at(index);
-}
-
-void TypeInfo::addEnum(const EnumInfo &enumInfo){
-    m_enums.push_back(enumInfo);
+const FunctionInfo &TypeInfo::getConstructor() const{
+    return m_constructor;
 }
 
 size_t TypeInfo::totalProperties() const{
@@ -157,6 +261,18 @@ void TypeInfo::addFunction(const FunctionInfo &fnInfo){
     m_functions.push_back(fnInfo);
 }
 
+size_t TypeInfo::totalMethods() const{
+    return m_methods.size();
+}
+
+const FunctionInfo &TypeInfo::methodAt(size_t index) const{
+    return m_methods.at(index);
+}
+
+void TypeInfo::addMethod(const FunctionInfo &functionInfo){
+    m_methods.push_back(functionInfo);
+}
+
 size_t TypeInfo::totalEvents() const{
     return m_events.size();
 }
@@ -167,6 +283,132 @@ const FunctionInfo &TypeInfo::eventAt(size_t index) const{
 
 void TypeInfo::addEvent(const FunctionInfo &eventInfo){
     m_events.push_back(eventInfo);
+}
+
+TypeInfo::Ptr TypeInfo::extract(const MetaObject &mo, const Utf8 &uri, bool isInstance, bool isCreatable){
+    std::string name = uri.length() == 0 ? "u/" + mo.name() : "lv/" + uri.data() + "#" + mo.name();
+
+    TypeInfo::Ptr ti = TypeInfo::create(name, mo.base() ? "cpp/" + mo.base()->fullName() : "", isInstance, isCreatable);
+    ti->setClassName("cpp/" + mo.fullName());
+
+    // Constructor
+    if ( mo.constructor() ){
+        Constructor* c = mo.constructor();
+        ti->setConstructor(FunctionInfo::extractFromDeclaration("constructor", c->getDeclaration()));
+    }
+
+    // Properties
+    for ( auto propIt = mo.ownPropertiesBegin(); propIt != mo.ownPropertiesEnd(); ++propIt ){
+        Property* p = propIt->second;
+        ti->addProperty(PropertyInfo(p->name(), "cpp/" + p->type()));
+    }
+
+    // Methods
+    for ( auto funcIt = mo.ownMethodsBegin(); funcIt != mo.ownMethodsEnd(); ++funcIt ){
+        Function* f = funcIt->second;
+        ti->addMethod(FunctionInfo::extractFromDeclaration(funcIt->first, f->getDeclaration()));
+    }
+
+    // Functions
+    for ( auto funcIt = mo.functionsBegin(); funcIt != mo.functionsEnd(); ++funcIt ){
+        Function* f = funcIt->second;
+        ti->addFunction(FunctionInfo::extractFromDeclaration(funcIt->first, f->getDeclaration()));
+    }
+
+    // Events
+    for ( auto eventIt = mo.ownEventsBegin(); eventIt != mo.ownEventsEnd(); ++eventIt ){
+        Function* f = eventIt->second;
+        ti->addEvent(FunctionInfo::extractFromDeclaration(eventIt->first, f->getDeclaration()));
+    }
+
+    return ti;
+}
+
+MLNode TypeInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+    result["is_creatable"] = m_isCreatable;
+    result["is_instance"] = m_isInstance;
+    result["type_name"] = m_typeName.data();
+    result["class_name"] = m_className.data();
+    if (m_inherits != "")
+        result["inherits"] = m_inherits.data();
+
+    result["constructor"] = m_constructor.toMLNode();
+
+    MLNode properties(MLNode::Array);
+    for (int i = 0; i<m_properties.size();++i)
+        properties.append(m_properties[i].toMLNode());
+    result["properties"] = properties;
+
+    MLNode functions(MLNode::Array);
+    for (int i = 0; i<m_functions.size();++i)
+        functions.append(m_functions[i].toMLNode());
+    result["functions"] = functions;
+
+    MLNode methods(MLNode::Array);
+    for (int i = 0; i<m_methods.size();++i)
+        methods.append(m_methods[i].toMLNode());
+    result["methods"] = methods;
+
+    MLNode events(MLNode::Array);
+    for (int i = 0; i<m_events.size();++i)
+        events.append(m_events[i].toMLNode());
+    result["events"] = events;
+
+    return result;
+}
+
+void TypeInfo::fromMLNode(const MLNode &node)
+{
+    MLNode::ObjectType object = node.asObject();
+
+    m_typeName = object.at("type_name").asString();
+    m_className = object.at("class_name").asString();
+    if (object.find("inherits") != object.end())
+        m_inherits = object.at("inherits").asString();
+    m_isInstance = object.at("is_instance").asBool();
+    m_isCreatable = object.at("is_creatable").asBool();
+
+    MLNode prop = object.at("properties");
+    MLNode::ArrayType prop_array = prop.asArray();
+    for (int i = 0; i < prop_array.size(); ++i)
+    {
+        MLNode property = prop_array[i];
+        PropertyInfo pi("");
+        pi.fromMLNode(property);
+        m_properties.push_back(pi);
+    }
+
+    MLNode func = object.at("functions");
+    MLNode::ArrayType func_array = func.asArray();
+    for (int i = 0; i < func_array.size(); ++i)
+    {
+        MLNode function = func_array[i];
+        FunctionInfo fi({});
+        fi.fromMLNode(function);
+        m_functions.push_back(fi);
+    }
+
+    MLNode meth = object.at("methods");
+    MLNode::ArrayType meth_array = meth.asArray();
+    for (int i = 0; i < meth_array.size(); ++i)
+    {
+        MLNode method = meth_array[i];
+        FunctionInfo fi({});
+        fi.fromMLNode(method);
+        m_methods.push_back(fi);
+    }
+
+    MLNode ev = object.at("events");
+    MLNode::ArrayType ev_array = ev.asArray();
+    for (int i = 0; i < ev_array.size(); ++i)
+    {
+        MLNode event = ev_array[i];
+        FunctionInfo fi({});
+        fi.fromMLNode(event);
+        m_events.push_back(fi);
+    }
 }
 
 
@@ -191,6 +433,28 @@ const TypeInfo::Ptr &InheritanceInfo::typeAt(size_t index) const{
 
 void InheritanceInfo::addType(const TypeInfo::Ptr &type){
     m_types.push_back(type);
+}
+
+MLNode InheritanceInfo::toMLNode() const
+{
+    MLNode result(MLNode::Array);
+
+    for (int i = 0; i < m_types.size();++i)
+    {
+        result.append(m_types[i]->toMLNode());
+    }
+    return result;
+}
+
+void InheritanceInfo::fromMLNode(const MLNode &node)
+{
+    MLNode::ArrayType arr = node.asArray();
+    for (int i = 0; i<arr.size();++i)
+    {
+        TypeInfo::Ptr ti = TypeInfo::create("","", false, false);
+        ti->fromMLNode(arr.at(i));
+        m_types.push_back(ti);
+    }
 }
 
 
@@ -240,6 +504,50 @@ void DocumentInfo::updateScanStatus(DocumentInfo::ScanStatus status){
 
 DocumentInfo::ScanStatus DocumentInfo::scanStatus() const{
     return m_status;
+}
+
+MLNode DocumentInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+    result["status"] = m_status;
+
+    MLNode imports(MLNode::Array);
+    for (int i = 0; i < m_imports.size(); ++i)
+    {
+        imports.append(m_imports[i].toMLNode());
+    }
+    result["imports"] = imports;
+
+    MLNode types(MLNode::Array);
+    for (int i =0; i<m_types.size();++i)
+    {
+        types.append(m_types[i]->toMLNode());
+    }
+    result["types"] = types;
+
+    return result;
+}
+
+void DocumentInfo::fromMLNode(const MLNode &node)
+{
+    MLNode::ObjectType object = node.asObject();
+    m_status = static_cast<DocumentInfo::ScanStatus>(object.at("status").asInt());
+
+    auto imports = object.at("imports").asArray();
+    for (int i = 0; i < imports.size(); ++i)
+    {
+        ImportInfo ii({});
+        ii.fromMLNode(imports.at(i));
+        m_imports.push_back(ii);
+    }
+
+    auto types = object.at("types").asArray();
+    for (int i =0; i<types.size(); ++i)
+    {
+        TypeInfo::Ptr ti = TypeInfo::create("", "", false, false);
+        ti->fromMLNode(types.at(i));
+        m_types.push_back(ti);
+    }
 }
 
 
@@ -312,6 +620,62 @@ void ModuleInfo::addDependency(const Utf8 &dep){
     m_dependencies.push_back(dep);
 }
 
+MLNode ModuleInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+
+    result["import_uri"] = m_importUri.data();
+    result["path"] = m_path.data();
+    result["status"] = m_scanStatus;
+
+    MLNode deps(MLNode::Array);
+    for (int i = 0; i<m_dependencies.size();++i)
+        deps.append(m_dependencies[i].data());
+    result["dependencies"] = deps;
+
+    MLNode dox(MLNode::Array);
+    for (int i=0;i<m_unresolvedDocuments.size();++i)
+        dox.append(m_unresolvedDocuments[i]->toMLNode());
+    result["unresolved"] = dox;
+
+    MLNode types(MLNode::Array);
+    for (int i =0; i<m_types.size();++i)
+        types.append(m_types[i]->toMLNode());
+    result["types"] = types;
+
+    return result;
+}
+
+void ModuleInfo::fromMLNode(const MLNode &node)
+{
+    auto object = node.asObject();
+    m_importUri = object.at("import_uri").asString();
+    m_path = object.at("path").asString();
+    m_scanStatus = static_cast<ModuleInfo::ScanStatus>(object.at("status").asInt());
+
+    auto deps = object.at("dependencies").asArray();
+    for (int i =0; i<deps.size();++i)
+    {
+        m_dependencies.push_back(deps.at(i).asString());
+    }
+
+    auto unr = object.at("unresolved").asArray();
+    for (int i =0; i < unr.size();++i)
+    {
+        DocumentInfo::Ptr di = DocumentInfo::create();
+        di->fromMLNode(unr.at(i));
+        m_unresolvedDocuments.push_back(di);
+    }
+
+    auto types = object.at("types").asArray();
+    for (int i =0; i<types.size();++i)
+    {
+        TypeInfo::Ptr ti = TypeInfo::create("","", false, false);
+        ti->fromMLNode(types.at(i));
+        m_types.push_back(ti);
+    }
+}
+
 // ImportInfo
 // ------------------------------------------------------------
 
@@ -343,6 +707,40 @@ std::vector<std::string> ImportInfo::segments() const{
     for ( auto it = m_segments.begin(); it != m_segments.end(); ++it )
         result.push_back((*it).data());
     return result;
+}
+
+MLNode ImportInfo::toMLNode() const
+{
+    MLNode result(MLNode::Object);
+
+    result["is_relative"] = m_isRelative;
+    MLNode segs(MLNode::Array);
+    for (int i=0; i<m_segments.size();++i)
+    {
+        segs.append(m_segments[i].data());
+    }
+    result["segments"] = segs;
+
+    if (m_importAs != "")
+        result["import_as"] = m_importAs.data();
+
+    return result;
+}
+
+void ImportInfo::fromMLNode(const MLNode &node)
+{
+    MLNode::ObjectType obj = node.asObject();
+
+    m_isRelative = obj.at("is_relative").asBool();
+    MLNode::ArrayType arr = obj.at("segments").asArray();
+
+    for (int i=0;i<arr.size();++i)
+    {
+        m_segments.push_back(Utf8(arr.at(i).asString()));
+    }
+
+    if (obj.find("import_as") != obj.end())
+        m_importAs = obj.at("import_as").asString();
 }
 
 }}// namespace lv, el

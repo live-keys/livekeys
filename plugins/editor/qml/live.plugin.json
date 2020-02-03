@@ -3,6 +3,7 @@
     "package" : ".",
     "palettes" : {
         "palettes/EditPalette.qml" : "edit/qml",
+        "palettes/ConnectionPalette.qml": "qml/property",
         "palettes/IntPalette.qml": "qml/int",
         "palettes/IntHistoryPlotPalette.qml": "qml/int",
         "palettes/DoublePalette.qml": "qml/double",

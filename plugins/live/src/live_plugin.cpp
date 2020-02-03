@@ -22,11 +22,11 @@
 #include "triangle.h"
 #include "loglistener.h"
 #include "worker.h"
-#include "tuple.h"
 #include "valuehistory.h"
 #include "stringbasedloader.h"
 #include "live/qmlobjectlist.h"
 #include "live/qmlvariantlist.h"
+#include "eventrelay.h"
 
 #include "qmlfork.h"
 #include "qmlforknode.h"
@@ -57,6 +57,9 @@ static QObject* colorProvider(QQmlEngine *engine, QJSEngine *){
     return new lv::QmlColor(engine);
 }
 
+static QObject* eventRelayProvider(QQmlEngine *engine, QJSEngine *){
+    return new lv::EventRelay(engine);
+}
 
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
@@ -68,7 +71,6 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlMain>(             uri, 1, 0, "Main");
     qmlRegisterType<lv::StringBasedLoader>(   uri, 1, 0, "StringBasedLoader");
     qmlRegisterType<lv::Worker>(              uri, 1, 0, "Worker");
-    qmlRegisterType<lv::Tuple>(               uri, 1, 0, "Tuple");
     qmlRegisterType<lv::QmlFork>(             uri, 1, 0, "Fork");
     qmlRegisterType<lv::QmlForkNode>(         uri, 1, 0, "ForkNode");
     qmlRegisterType<lv::ComponentSource>(     uri, 1, 0, "ComponentSource");
@@ -88,6 +90,7 @@ void LivePlugin::registerTypes(const char *uri){
         uri, 1, 0, "RemoteContainer", "RemoteContainer is of abstract type.");
 
     qmlRegisterSingletonType<lv::QmlColor>(uri, 1, 0, "Color", &colorProvider);
+    qmlRegisterSingletonType<lv::EventRelay>(uri, 1, 0, "EventRelay", &eventRelayProvider);
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){

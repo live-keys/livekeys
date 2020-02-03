@@ -12,6 +12,11 @@ namespace lv{
 class ViewEngine;
 class RunnableContainer;
 
+namespace el{
+    class Engine;
+    class Element;
+}
+
 class LV_EDITOR_EXPORT Runnable : public QObject{
 
     Q_OBJECT
@@ -21,13 +26,15 @@ class LV_EDITOR_EXPORT Runnable : public QObject{
 
 public:
     enum Type{
-        File,
-        Component
+        QmlFile,
+        QmlComponent,
+        LvFile
     };
 
 public:
     Runnable(
-        ViewEngine* engine,
+        ViewEngine* viwEngine,
+        el::Engine* engine,
         const QString &path,
         RunnableContainer* parent,
         const QString& name = "",
@@ -44,14 +51,16 @@ public:
     const QString& name() const;
     void setName(const QString& name);
 
-    QObject* appRoot();
+    QObject* viewRoot();
+    el::Element* elementRoot();
 
     const QSet<QString>& activations() const;
-
 
     const QString& path() const;
 
     int runTrigger() const;
+
+    Type type() const;
 
 public slots:
     void engineObjectAcquired(const QUrl& file, QObject* ref);
@@ -77,6 +86,8 @@ signals:
     void objectReady();
 
 private:
+    void runLv();
+
     QObject *createObject(const QByteArray& code, const QUrl& file);
     void emptyRunSpace();
 
@@ -84,13 +95,15 @@ private:
     QString               m_path;
     QQmlComponent*        m_component;
     QObject*              m_runSpace;
-    ViewEngine*           m_engine;
-    QObject*              m_appRoot;
+    ViewEngine*           m_viewEngine;
+    QObject*              m_viewRoot;
     Type                  m_type;
     QSet<QString>         m_activations;
     Project*              m_project;
     QTimer*               m_scheduleTimer;
     int                   m_runTrigger;
+    el::Engine*           m_engine;
+    el::Element*          m_runtimeRoot;
 };
 
 inline const QString &Runnable::name() const{
@@ -109,8 +122,8 @@ inline QObject *Runnable::runSpace(){
     return m_runSpace;
 }
 
-inline QObject *Runnable::appRoot(){
-    return m_appRoot;
+inline QObject *Runnable::viewRoot(){
+    return m_viewRoot;
 }
 
 inline const QSet<QString> &Runnable::activations() const{
@@ -123,6 +136,10 @@ inline const QString &Runnable::path() const{
 
 inline int Runnable::runTrigger() const{
     return m_runTrigger;
+}
+
+inline Runnable::Type Runnable::type() const{
+    return m_type;
 }
 
 }// namespace

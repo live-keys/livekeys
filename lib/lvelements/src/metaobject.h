@@ -11,6 +11,7 @@
 #include "live/elements/property.h"
 #include "live/elements/event.h"
 #include "live/elements/eventfunction.h"
+#include "live/typename.h"
 
 #include <string>
 #include <functional>
@@ -106,7 +107,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, T(C::*getter)(), void(C::*setter)(T), const std::string& notify){
             m_properties[name] = new SpecializedProperty<C, T, T(C::*)(), void(C::*)(T)>(
-                name, typeid(T).name(), true, notify, getter, setter
+                name, TypeName<T>::capture(TypeNameOptions::None), true, notify, getter, setter
             );
             return *this;
         }
@@ -114,7 +115,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, T(C::*getter)() const, void(C::*setter)(T), const std::string& notify){
             m_properties[name] = new SpecializedProperty<C, T, T(C::*)() const, void(C::*)(T)>(
-                name, typeid(T).name(), true, notify, getter, setter
+                name, TypeName<T>::capture(TypeNameOptions::None), true, notify, getter, setter
             );
             return *this;
         }
@@ -122,7 +123,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, const T&(C::*getter)(), void(C::*setter)(T), const std::string& notify){
             m_properties[name] = new SpecializedProperty<C, T, const T&(C::*)(), void(C::*)(T)>(
-                name, typeid(T).name(), true, notify, getter, setter
+                name, TypeName<T>::capture(TypeNameOptions::None), true, notify, getter, setter
             );
             return *this;
         }
@@ -130,7 +131,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, const T&(C::*getter)() const, void(C::*setter)(T), const std::string& notify){
             m_properties[name] = new SpecializedProperty<C, T, const T&(C::*)() const, void(C::*)(T)>(
-                name, typeid(T).name(), true, notify, getter, setter
+                name, TypeName<T>::capture(TypeNameOptions::None), true, notify, getter, setter
             );
             return *this;
         }
@@ -140,7 +141,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, T(C::*getter)(), void(C::*setter)(const T&), const std::string& notify){
             m_properties[name] = new SpecializedProperty<C, T, T(C::*)(), void(C::*)(const T&)>(
-                name, typeid(T).name(), true, notify, getter, setter
+                name, TypeName<T>::capture(TypeNameOptions::None), true, notify, getter, setter
             );
             return *this;
         }
@@ -148,7 +149,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, T(C::*getter)() const, void(C::*setter)(const T&), const std::string& notify){
             m_properties[name] = new SpecializedProperty<C, T, T(C::*)() const, void(C::*)(const T&)>(
-                name, typeid(T).name(), true, notify, getter, setter
+                name, TypeName<T>::capture(TypeNameOptions::None), true, notify, getter, setter
             );
             return *this;
         }
@@ -156,7 +157,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, const T&(C::*getter)(), void(C::*setter)(const T&), const std::string& notify){
             m_properties[name] = new SpecializedProperty<C, T, const T&(C::*)(), void(C::*)(const T&)>(
-                name, typeid(T).name(), true, notify, getter, setter
+                name, TypeName<T>::capture(TypeNameOptions::None), true, notify, getter, setter
             );
             return *this;
         }
@@ -164,7 +165,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, const T&(C::*getter)() const, void(C::*setter)(const T&), const std::string& notify){
             m_properties[name] = new SpecializedProperty<C, T, const T&(C::*)() const, void(C::*)(const T&)>(
-                name, typeid(T).name(), true, notify, getter, setter
+                name, TypeName<T>::capture(TypeNameOptions::None), true, notify, getter, setter
             );
             return *this;
         }
@@ -174,7 +175,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, T(C::*getter)(), const std::string& notify = ""){
             m_properties[name] = new SpecializedProperty<C, T, T(C::*)(), void(C::*)(T)>(
-                name, typeid(T).name(), false, notify, getter, nullptr
+                name, TypeName<T>::capture(TypeNameOptions::None), false, notify, getter, nullptr
             );
             return *this;
         }
@@ -182,7 +183,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, T(C::*getter)() const, const std::string& notify = ""){
             m_properties[name] = new SpecializedProperty<C, T, T(C::*)() const, void(C::*)(T)>(
-                name, typeid(T).name(), true, notify, getter, nullptr
+                name, TypeName<T>::capture(TypeNameOptions::None), true, notify, getter, nullptr
             );
             return *this;
         }
@@ -190,7 +191,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, const T&(C::*getter)(), const std::string& notify = ""){
             m_properties[name] = new SpecializedProperty<C, T, const T&(C::*)(), void(C::*)(T)>(
-                name, typeid(T).name(), true, notify, getter, nullptr
+                name, TypeName<T>::capture(TypeNameOptions::None), true, notify, getter, nullptr
             );
             return *this;
         }
@@ -198,7 +199,7 @@ public:
         template<typename T>
         Builder& scriptProperty(const std::string& name, const T&(C::*getter)() const, const std::string& notify = ""){
             m_properties[name] = new SpecializedProperty<C, T, const T&(C::*)() const, void(C::*)(T)>(
-                name, typeid(T).name(), true, notify, getter, nullptr
+                name, TypeName<T>::capture(TypeNameOptions::None), true, notify, getter, nullptr
             );
             return *this;
         }
@@ -263,6 +264,7 @@ public:
 
     private:
         std::string                           m_name;
+        std::string                           m_fullName;
         const MetaObject*                     m_base;
         MetaObject::Id                        m_typeId;
         std::map<std::string, Function*>      m_methods;
@@ -284,11 +286,13 @@ public:
     MetaObject();
 
     const std::string& name() const{ return m_name; }
+    const std::string& fullName() const{ return m_fullName; }
 
     template<typename T>
     static MetaObject fromBuilder(const MetaObject::Builder<T>& builder){
         MetaObject mo;
         mo.m_name          = builder.m_name;
+        mo.m_fullName      = builder.m_fullName;
         mo.m_base          = builder.m_base;
         mo.m_typeId        = builder.m_typeId;
         mo.m_functions     = builder.m_functions;
@@ -387,6 +391,7 @@ public:
 
 private:
     std::string                           m_name;
+    std::string                           m_fullName;
     const MetaObject*                     m_base;
     MetaObject::Id                        m_typeId;
     std::map<std::string, Function*>      m_functions;
@@ -418,6 +423,7 @@ private:
 template<typename C>
 MetaObject::Builder<C>::Builder(const std::string &name)
     : m_name(name)
+    , m_fullName(TypeName<C>::capture())
     , m_base(nullptr)
     , m_constructor(nullptr)
     , m_indexGet(nullptr)
@@ -549,16 +555,22 @@ inline void MetaObject::log(VisualLog &vl, const Element *object) const{
     m_log(vl, object);
 }
 
-}} // namespace lv, namespace script
+}} // namespace lv, el
 
 
 
 // Meta object Macros
 // -----------------------------------------------------------------------------------
 
-#define META_OBJECT \
+
+#define BASE_META_OBJECT \
 public: \
     virtual const MetaObject& typeMetaObject() const { return metaObject(); } \
+    public:static const lv::el::MetaObject& metaObject()
+
+#define META_OBJECT \
+public: \
+    virtual const MetaObject& typeMetaObject() const override{ return metaObject(); } \
     public:static const lv::el::MetaObject& metaObject()
 
 #define META_OBJECT_DESCRIBE(_name) \

@@ -7,6 +7,7 @@
 
 #include "live/meta/functionargs.h"
 #include "live/meta/indextuple.h"
+#include "live/typename.h"
 
 #include <functional>
 #include <vector>
@@ -194,10 +195,13 @@ public:
     FunctionPointer ptr(){ return m_ptr; }
     void assignLess(Function* f){ m_less = f;}
 
+    const std::string& getDeclaration(){ return m_declaration; }
+
 protected:
     std::function<void(const Function::CallInfo& params)> m_unwrapFunction;
 
     size_t          m_totalArguments;
+    std::string     m_declaration;
     FunctionPointer m_ptr;
     Function*       m_less;
 
@@ -262,6 +266,9 @@ public:
         m_less = nullptr;
         m_ptr = &Function::ptrImplementation;
         m_totalArguments  = sizeof...(Args);
+        m_declaration =
+            TypeName<RT>::capture(TypeNameOptions::None) +
+            "(" + TypeName<Args...>::capture(TypeNameOptions::None) + ")";
         m_unwrapFunction = [this](const Function::CallInfo& params){
             Function::callFunction(
                 params.engine(), m_function, typename meta::make_indexes<Args...>::type(), params
@@ -288,6 +295,7 @@ public:
         m_less           = nullptr;
         m_ptr            = &Function::ptrImplementation;
         m_totalArguments = sizeof...(Args);
+        m_declaration = "void(" + TypeName<Args...>::capture(TypeNameOptions::None) + ")";
         m_unwrapFunction = [this](const Function::CallInfo& params){
             Function::callVoidFunction(
                 m_function, typename meta::make_indexes<Args...>::type(), params
@@ -332,6 +340,7 @@ public:
         m_less = nullptr;
         m_ptr = &Function::ptrImplementation;
         m_totalArguments  = 0;
+        m_declaration = TypeName<RT>::capture(TypeNameOptions::None) + "(Optional)";
         m_unwrapFunction = [this](const Function::CallInfo& params){
             Function::checkReturn(params.engine(), params, m_function(params));
         };
@@ -354,6 +363,7 @@ public:
         m_less           = nullptr;
         m_ptr            = &Function::ptrImplementation;
         m_totalArguments = 0;
+        m_declaration = "void(Optional)";
         m_unwrapFunction = [this](const Function::CallInfo& params){
             m_function(params);
         };
@@ -367,6 +377,6 @@ private:
 };
 
 
-}}// namespace lv, script
+}}// namespace lv, el
 
 #endif // LVFUNCTION_H

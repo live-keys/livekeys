@@ -2,6 +2,7 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/live/exception.h \
+    $$PWD/live/library.h \
     $$PWD/live/libraryloadpath.h \
     $$PWD/live/lvbaseglobal.h \
     $$PWD/live/lvglobal.h \
@@ -11,6 +12,7 @@ HEADERS += \
     $$PWD/live/applicationcontext.h \
     $$PWD/live/mlnode.h \
     $$PWD/live/mlnodetojson.h \
+    $$PWD/live/typename.h \
     $$PWD/live/visuallog.h \
     $$PWD/live/meta/indextuple.h \
     $$PWD/live/meta/functionargs.h \

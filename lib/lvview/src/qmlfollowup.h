@@ -1,21 +1,21 @@
 #ifndef LVQMLFOLLOWUP_H
 #define LVQMLFOLLOWUP_H
 
-#include "act.h"
+#include "qmlact.h"
 
 namespace lv{
 
 /// \private
-class QmlFollowUp : public Act{
+class QmlFollowUp : public QmlAct{
 
     Q_OBJECT
-    Q_PROPERTY(QVariant prev READ prev NOTIFY prevChanged)
+    Q_PROPERTY(QJSValue prev READ prev NOTIFY prevChanged)
 
 public:
-    explicit QmlFollowUp(QObject *parent = 0);
-    ~QmlFollowUp(){}
+    explicit QmlFollowUp(QObject *parent = nullptr);
+    ~QmlFollowUp() override{}
 
-    QVariant prev() const;
+    QJSValue prev() const;
 
 public slots:
     void _whenPrevChanged();
@@ -27,11 +27,11 @@ protected:
     void componentComplete() override;
 
 private:
-    Act*     m_prevAct;
-    QVariant m_prev;
+    QmlAct*  m_prevAct;
+    QJSValue m_prev;
 };
 
-inline QVariant QmlFollowUp::prev() const{
+inline QJSValue QmlFollowUp::prev() const{
     return m_prev;
 }
 

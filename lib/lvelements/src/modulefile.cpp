@@ -101,9 +101,9 @@ void ModuleFile::parse(Engine* engine){
     if ( !engine )
         return;
     std::string fp = filePath();
-    if ( engine->moduleFileType() == Engine::JsOnly ){
+    //if ( engine->moduleFileType() == Engine::JsOnly ){
         fp += ".js";
-    }
+    //}
     m_d->exportNames = engine->parser()->parseExportNames(fp);
     m_d->state = ModuleFile::Parsed;
 }

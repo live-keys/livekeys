@@ -45,7 +45,7 @@
 #include <qtextcursor.h>
 #include <qdebug.h>
 #include <qtimer.h>
-
+#include "live/projectdocument.h"
 #include <algorithm>
 
 namespace lv{
@@ -178,6 +178,8 @@ void SyntaxHighlighterPrivate::populateSectionList(QList<ProjectDocumentSection:
     }
 }
 
+const int SyntaxHighlighter::StateMask = 15;
+
 QString SyntaxHighlighter::stateToString(int state)
 {
     if (state == -1) return "blank";
@@ -240,7 +242,6 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
         text += block.text();
 
         if (block != lastBlock) text += "\n"; // check how QTextCursor selects this
-        // else text += QString(QChar(8203)).toStdString().c_str();
 
         if ( formatsChangedStartPosition == -1 ) {
             formatsChangedStartPosition = block.position();
@@ -291,13 +292,6 @@ void SyntaxHighlighterPrivate::reformatBlocks(int from, int charsRemoved, int ch
         textFormatRangeList = q->highlight(prevState, startBlock.position(), text);
         distributeFormats(startBlock, textFormatRangeList);
 
-        /*if (!sectionList.empty())
-        {
-            textFormatRangeList.clear();
-            textFormatRangeList = q->highlightSections(sectionList);
-            distributeFormats(startBlock, textFormatRangeList);
-            sectionList.clear();
-        }*/
     }
 
     block = doc->findBlock(from);
@@ -347,6 +341,8 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
     bool shouldCollapse = false;
     CollapseFunctionType func = nullptr;
 
+    ProjectDocument* projectDocument = static_cast<ProjectDocument*>(doc->parent());
+
     for (auto tfr: textFormatRanges)
     {
         while (currentBlock.isValid() && (tfr.start < currentBlock.position() || tfr.start >= currentBlock.position() + currentBlock.length()))
@@ -355,6 +351,11 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
             {
                 layout->setFormats(ranges);
                 ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
+
+                if (setStates && (stateToSet & SyntaxHighlighter::StateMask) != 0 && bd && bd->isCollapsible())
+                {
+                    projectDocument->resetCollapseSignal(currentBlock.blockNumber());
+                }
                 if (!bd){
 
                     bd = new ProjectDocumentBlockData;
@@ -434,6 +435,12 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
                 ranges << formatRange;
                 layout->setFormats(ranges);
                 ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
+
+                if (setStates && (tfr.userstate & SyntaxHighlighter::StateMask) != 0 && bd && bd->isCollapsible())
+                {
+                    projectDocument->resetCollapseSignal(currentBlock.blockNumber());
+                }
+
                 if (!bd){
 
                     bd = new ProjectDocumentBlockData;
@@ -463,6 +470,12 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
 
                     ranges << formatRange;
                     layout->setFormats(ranges);
+
+                    ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
+                    if (setStates && (tfr.userstate & SyntaxHighlighter::StateMask) != 0 && bd && bd->isCollapsible())
+                    {
+                        projectDocument->resetCollapseSignal(currentBlock.blockNumber());
+                    }
                     if (setStates) currentBlock.setUserState(tfr.userstate);
                 }
 
@@ -500,7 +513,11 @@ void SyntaxHighlighterPrivate::distributeFormats(QTextBlock startBlock, QList<Sy
         layout->setFormats(ranges);
 
         if (!currentBlock.isValid()) return;
-        auto bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
+        ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(currentBlock.userData());
+        if (setStates && (stateToSet & SyntaxHighlighter::StateMask) != 0 && bd && bd->isCollapsible())
+        {
+            projectDocument->resetCollapseSignal(currentBlock.blockNumber());
+        }
         if (!bd){
 
             bd = new ProjectDocumentBlockData;

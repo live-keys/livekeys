@@ -17,8 +17,12 @@
 #include "live/qmleditfragment.h"
 #include "live/qmldeclaration.h"
 #include "live/codepalette.h"
+#include "live/projectdocument.h"
+#include "live/projectfile.h"
 #include "qmlcodeconverter.h"
-#include "bindingchannel.h"
+#include "qmlbindingchannel.h"
+#include "qmlbindingspan.h"
+#include "qmlbindingspanmodel.h"
 
 namespace lv{
 
@@ -42,8 +46,9 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *paren
     : QObject(parent)
     , m_declaration(declaration)
     , m_bindingPalette(nullptr)
-    , m_bindingChannel(new BindingChannel(this))
+    , m_bindingSpan(new QmlBindingSpan(this))
     , m_visualParent(nullptr)
+    , m_bindingSpanModel(nullptr)
 {
 }
 
@@ -60,7 +65,8 @@ QmlEditFragment::~QmlEditFragment(){
         edit->deleteLater();
     }
 
-    m_bindingChannel->deleteLater();
+    delete m_bindingSpanModel;
+    delete m_bindingSpan;
 }
 
 /**
@@ -76,20 +82,6 @@ int QmlEditFragment::valuePosition() const{
  */
 int QmlEditFragment::valueLength() const{
     return m_declaration->valueLength();
-}
-
-/**
- * \brief Sets the main expressions \p bindingPath
- */
-void QmlEditFragment::setExpressionPath(BindingPath *bindingPath){
-    m_bindingChannel->setExpressionPath(bindingPath);
-}
-
-/**
- * \brief Returns the main expressions binding path
- */
-BindingPath *QmlEditFragment::expressionPath(){
-    return m_bindingChannel->expressionPath();
 }
 
 CodePalette *QmlEditFragment::palette(const QString &type){
@@ -194,12 +186,15 @@ QString QmlEditFragment::readValueText() const{
 }
 
 void QmlEditFragment::updatePaletteValue(CodePalette *palette){
-    BindingPath* mainPath = bindingChannel()->expressionPath();
-    if ( mainPath->listIndex() == -1 ){
-        palette->setValueFromBinding(mainPath->property().read());
+    QmlBindingChannel::Ptr inputChannel = bindingSpan()->inputChannel();
+    if ( !inputChannel )
+        return;
+
+    if ( inputChannel->listIndex() == -1 ){
+        palette->setValueFromBinding(inputChannel->property().read());
     } else {
-        QQmlListReference ppref = qvariant_cast<QQmlListReference>(mainPath->property().read());
-        palette->setValueFromBinding(QVariant::fromValue(ppref.at(mainPath->listIndex())));
+        QQmlListReference ppref = qvariant_cast<QQmlListReference>(inputChannel->property().read());
+        palette->setValueFromBinding(QVariant::fromValue(ppref.at(inputChannel->listIndex())));
     }
 }
 
@@ -219,19 +214,37 @@ void QmlEditFragment::emitRemoval(){
     m_bindingPalette = nullptr;
 }
 
-void QmlEditFragment::updateValue(){
-    BindingPath* mainPath = bindingChannel()->expressionPath();
+QmlBindingSpanModel* QmlEditFragment::bindingModel(lv::CodeQmlHandler *codeHandler){
+    if ( !m_bindingSpanModel ){
+        m_bindingSpanModel = new QmlBindingSpanModel(this);
+        QString fileName = declaration()->document()->file()->name();
+        if ( fileName.length() && fileName.front().isUpper() ){
+            m_bindingSpanModel->initializeScanner(codeHandler);
+        }
+    }
+    return m_bindingSpanModel;
+}
 
-    if ( mainPath->listIndex() == -1 ){
+void QmlEditFragment::updateValue(){
+    QmlBindingChannel::Ptr inputPath = bindingSpan()->inputChannel();
+
+    if ( inputPath && inputPath->listIndex() == -1 ){
         for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
             CodePalette* cp = *it;
-            cp->setValueFromBinding(mainPath->property().read());
+            cp->setValueFromBinding(inputPath->property().read());
         }
         if ( m_bindingPalette ){
-            m_bindingPalette->setValueFromBinding(mainPath->property().read());
+            m_bindingPalette->setValueFromBinding(inputPath->property().read());
             QmlCodeConverter* cvt = static_cast<QmlCodeConverter*>(m_bindingPalette->extension());
             cvt->whenBinding().call();
         }
+    }
+}
+
+void QmlEditFragment::__inputRunnableObjectReady(){
+    QmlBindingChannel::Ptr inputChannel = bindingSpan()->inputChannel();
+    if ( inputChannel && inputChannel->listIndex() == -1 ){
+        inputChannel->property().connectNotifySignal(this, SLOT(updateValue()));
     }
 }
 

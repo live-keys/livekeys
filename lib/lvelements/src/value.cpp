@@ -124,7 +124,7 @@ LocalValue::LocalValue(Engine *engine, const Value &value)
             m_d = new LocalValuePrivate(ElementPrivate::localObject(value.asElement()));
         break;
     default:
-        throw std::exception();
+        THROW_EXCEPTION(lv::Exception, "Invalid Value type", Exception::toCode("~LocalValue"));
     }
 }
 
@@ -272,6 +272,10 @@ bool LocalValue::isObject() const{
     return m_d->data->IsObject();
 }
 
+bool LocalValue::isArray() const{
+    return m_d->data->IsArray();
+}
+
 bool LocalValue::isElement() const{
     if ( !m_d->data->IsObject() )
         return false;
@@ -339,13 +343,17 @@ Buffer convertFromV8(Engine *, const v8::Local<v8::Value> &value){
 }
 
 template<>
-Element *convertFromV8(Engine *, const v8::Local<v8::Value> &value){
+Element *convertFromV8(Engine *e, const v8::Local<v8::Value> &value){
     if ( value->IsNullOrUndefined() )
         return nullptr;
 
     v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(value);
     if ( vo->InternalFieldCount() != 1 )
-        throw std::exception(); // not an element
+    {
+        auto exc = CREATE_EXCEPTION(lv::Exception, "Given value is not an Element", lv::Exception::toCode("~Value"));
+        e->throwError(&exc, nullptr);
+        return nullptr;
+    }
 
     v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(vo->GetInternalField(0));
     void* ptr = wrap->Value();
@@ -465,19 +473,19 @@ bool Value::isNull() const{
 
 bool Value::asBool() const{
     if ( m_type != Value::Stored::Boolean )
-        throw std::exception();
+        THROW_EXCEPTION(lv::Exception, "Can't cast value into Boolean type", Exception::toCode("~Value"));
     return (bool)(m_data.asInteger);
 }
 
 Value::Int32 Value::asInt32() const{
     if ( m_type != Value::Stored::Integer )
-        throw std::exception();
+        THROW_EXCEPTION(lv::Exception, "Can't cast value into Int32 type", Exception::toCode("~Value"));
     return (Value::Int32)(m_data.asInteger);
 }
 
 Value::Int64 Value::asInt64() const{
     if ( m_type != Value::Stored::Integer )
-        throw std::exception();
+        THROW_EXCEPTION(lv::Exception, "Can't cast value into Int64 type", Exception::toCode("~Value"));
     return (Value::Int64)(m_data.asInteger);
 }
 
@@ -486,27 +494,27 @@ Value::Number Value::asNumber() const{
         return m_data.asNumber;
     if ( m_type == Value::Stored::Integer )
         return m_data.asInteger;
-    throw std::exception();
+    THROW_EXCEPTION(lv::Exception, "Can't cast value into Number type", Exception::toCode("~Value"));
 }
 
 Object Value::asObject() const{
     if ( m_type != Value::Stored::Object )
-        throw std::exception();
+        THROW_EXCEPTION(lv::Exception, "Can't cast value into Object type", Exception::toCode("~Value"));
     return *(m_data.asObject);
 }
 
 Callable Value::asCallable() const{
     if ( m_type != Value::Stored::Callable )
-        throw std::exception();
+        THROW_EXCEPTION(lv::Exception, "Can't cast value into Callable", Exception::toCode("~Value"));
     return *(m_data.asCallable);
 }
 
 Element *Value::asElement() const{
     if ( m_type != Value::Stored::Element )
-        throw std::exception();
+        THROW_EXCEPTION(lv::Exception, "Can't cast value into Element", Exception::toCode("~Value"));
     return m_data.asElement;
 }
 
 
 
-}}// namespace lv, namespace script
+}}// namespace lv, el

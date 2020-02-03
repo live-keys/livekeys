@@ -34,6 +34,7 @@ public:
     void clearAll();
 
     QList<Runnable*> runnablesInPath(const QString& path);
+    Runnable* runnableAt(int index);
 
 signals:
 

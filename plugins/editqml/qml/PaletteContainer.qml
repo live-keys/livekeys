@@ -6,12 +6,14 @@ import editor.private 1.0
 
 Item{
     id: paletteContainer
-    width: child ? child.width + 10 : 0
-    height: child ? child.height + 25 : 0
+    width: child ? child.width + (condition? 10 :0) : 0
+    height: child ? child.height + (condition? 25 :0) : 0
     objectName: "paletteContainer"
 
     property Item child : null
     property QtObject palette : null
+
+    property bool condition: palette && !palette.minimized
 
     property string name : ''
     property string type : ''
@@ -40,6 +42,7 @@ Item{
         width: paletteContainer.parent ? paletteContainer.parent.width : paletteContainer.width
         clip: true
 
+        visible: condition
         MouseArea{
             id: paletteBoxMoveArea
             anchors.fill: parent
@@ -108,6 +111,15 @@ Item{
             }
         }
 
+        function viewPaletteConnections(){
+            var editingFragment = paletteContainer.parent.editingFragment
+            if ( !editingFragment )
+                return
+
+            paletteConnection.forceActiveFocus()
+            paletteConnection.model = editingFragment.bindingModel(documentHandler.codeHandler)
+        }
+
         Item{
             id: paletteSwapButton
             anchors.left: parent.left
@@ -155,36 +167,90 @@ Item{
             color: '#82909b'
         }
 
+
         Item{
+            id: paletteConnectionButton
             anchors.right: parent.right
-            anchors.rightMargin: 0
+            anchors.rightMargin: 40
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
+//            Image{
+//                anchors.centerIn: parent
+//                source: "qrc:/images/palette-add.png"
+//            }
             Text{
                 anchors.verticalCenter: parent.verticalCenter
-                text: 'x'
+                text: 'P'
                 color: '#ffffff'
             }
             MouseArea{
-                id: paletteCloseArea
+                id: paletteConnectionMouse
                 anchors.fill: parent
-                onClicked: {
-                    documentHandler.codeHandler.removePalette(paletteContainer.palette)
-                }
+                onClicked: paletteBoxHeader.viewPaletteConnections()
+            }
+        }
+
+
+    }
+
+    Item{
+        id: closeButton
+        anchors.right: condition? paletteBoxHeader.right : paletteChild.right
+        anchors.rightMargin: 0
+        anchors.top: condition? paletteBoxHeader.top : paletteChild.top
+        anchors.topMargin: condition? 3:10
+        width: 10
+        height: 15
+
+        z: 2000
+        Text{
+            anchors.verticalCenter: parent.verticalCenter
+            text: 'x'
+            color: '#ffffff'
+        }
+        MouseArea{
+            id: paletteCloseArea
+            anchors.fill: parent
+            onClicked: {
+                documentHandler.codeHandler.removePalette(paletteContainer.palette)
+            }
+        }
+    }
+
+    Triangle{
+        id: minimizeButton
+        anchors.right: condition? paletteBoxHeader.right : paletteChild.right
+        anchors.rightMargin: 20
+        anchors.top: condition? paletteBoxHeader.top : paletteChild.top
+        anchors.topMargin: condition? 8:15
+        width: 10
+        height: 8
+        color: "white"
+        rotation: Triangle.Top
+        z: 2000
+        MouseArea{
+            id: switchMinimized
+            anchors.fill: parent
+            onClicked: {
+                if (palette)
+                    palette.minimized = !palette.minimized
+                    if (palette.minimized) minimizeButton.rotation = Triangle.Top
+                    else minimizeButton.rotation = Triangle.Bottom
             }
         }
     }
 
     Item{
+        id: paletteChild
         anchors.fill: parent
-        anchors.topMargin: 25
+        anchors.topMargin: condition? 25:0
         children: parent.child ? [parent.child] : []
     }
 
     PaletteListView{
         id: paletteHeaderList
-        visible: model ? true : false
+        visible: condition && (model ? true:false)
         anchors.top: parent.top
         anchors.topMargin: 24
         width: parent.width
@@ -199,6 +265,25 @@ Item{
 
         onPaletteSelected: selectedHandler(index)
         onCancelled : cancelledHandler()
+    }
 
+    PaletteConnection{
+        id: paletteConnection
+        visible: condition && (model ? true:false)
+        anchors.top: parent.top
+        anchors.topMargin: 24
+        width: parent.width
+        color: "#0a141c"
+        selectionColor: "#0d2639"
+        fontSize: 10
+        fontFamily: "Open Sans, sans-serif"
+        onFocusChanged : if ( !focus ) model = null
+
+        property var selectedHandler : function(){}
+        property var cancelledHandler : function(index){}
+
+        //TODO
+//        onPaletteSelected: selectedHandler(index)
+//        onCancelled : cancelledHandler()
     }
 }

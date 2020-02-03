@@ -47,6 +47,7 @@ public:
         QmlEdit
     };
 
+    static const std::string formatStrings[];
 public:
     QmlJsSettings(EditorSettings* parent = nullptr);
     virtual ~QmlJsSettings();

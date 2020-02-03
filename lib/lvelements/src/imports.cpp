@@ -29,7 +29,10 @@ void Imports::require(const std::string &importKey){
         m_exports[it->first] = it->second;
     }
 
-    //TODO: Should store all module library exports as well
+    const std::list<ModuleLibrary*>& libraries = ep->libraryModules();
+    if ( libraries.size() > 0 ){
+        m_libraryExports.push_back(ep->libraryExports());
+    }
 }
 
 v8::Local<v8::Object> Imports::requireAs(const std::string &importKey){
@@ -46,11 +49,19 @@ v8::Local<v8::Object> Imports::requireAs(const std::string &importKey){
 v8::Local<v8::Value> Imports::get(const std::string &key){
     ModuleFile* mf = nullptr;
 
-    //TODO: Search library exports as well
     ElementsPlugin::Ptr currentPlugin = m_moduleFile->plugin();
     auto currentPluginExportSearch = currentPlugin->fileExports().find(key);
     if ( currentPluginExportSearch != currentPlugin->fileExports().end() ){
         mf = currentPluginExportSearch->second;
+    }
+
+    v8::Local<v8::String> v8key = v8::String::NewFromUtf8(m_engine->isolate(), key.c_str());
+
+    for ( auto it = m_libraryExports.begin(); it != m_libraryExports.end(); ++it ){
+        v8::Local<v8::Object> vo = it->data();
+        if ( vo->Has(v8key) ){
+            return vo->Get(v8key);
+        }
     }
 
     auto exportSearch = m_exports.find(key);

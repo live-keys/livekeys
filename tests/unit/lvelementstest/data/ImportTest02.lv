@@ -17,30 +17,52 @@
 
 component default < Element{
     fn toString(){
-        return "class [A]"
+        return "class[A]"
     }
 }
 
 ////// A.lv.js
 
 module.exports["A"] = class A extends Element{
-    toString(){
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        //Element.assignDefaultProperty(null)
+    }
+
+    toString()
+    {
         return "class[A]"
     }
 }
 
-////// B.lv.js
+////// B.lv
 
 component default < Element{
     fn toString(){
-        return "class [A]"
+        return "class[B]"
     }
 }
 
 ////// B.lv.js
 
 module.exports["B"] = class B extends Element{
-    toString(){
+
+    constructor(){
+        super()
+        this.__initialize()
+    }
+
+    __initialize(){
+        //Element.assignDefaultProperty(null)
+    }
+
+    toString()
+    {
         return "class[B]"
     }
 }
@@ -64,23 +86,22 @@ var B = imports.get("B")
 module.exports["main"] = class main extends Element{
     constructor(){
         super()
+        this.__initialize()
+    }
 
-        Element.addProperty(this, "a", {
-            type: "string",
-            notify: "aChanged"
-        })
-        Element.addProperty(this, "b", {
-            type: "string",
-            notify: "bChanged"
-        })
+    __initialize(){
+        Element.addProperty(this, 'a', { type: "string", notify: "aChanged" })
+        Element.addProperty(this, 'b', { type: "string", notify: "bChanged" })
 
         this.a = (function(){
             return (new A()).toString()
-        }.bind(this)())
+        }())
 
         this.b = (function(){
             return (new B()).toString()
-        }.bind(this)())
+        }())
+
+        //Element.assignDefaultProperty(null)
 
     }
 }

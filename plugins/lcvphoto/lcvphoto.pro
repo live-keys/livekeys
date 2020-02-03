@@ -57,6 +57,7 @@ QMAKE_EXTRA_TARGETS += first palettecopy
 # Distfiles
 
 DISTFILES += \
+    qml/FastNlMeansDenoising_.qml \
     qml/LevelsSliders.qml \
     qml/HueSaturationLightnessSliders.qml \
     qml/live.package.json \

@@ -73,7 +73,8 @@ void JsObjectTest::simpleObjectInitializationTest(){
     m->addType<ElementStub>();
     {
         engine->scope([&engine, m](){
-            el::Object ob = engine->require(m);
+            el::Object ob = el::Object::create(engine);
+            engine->require(m, ob);
 
             LocalObject lo(ob);
             LocalValue v = lo.get(engine, "ElementStub");

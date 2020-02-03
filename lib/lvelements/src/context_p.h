@@ -33,6 +33,6 @@ inline Engine *Context::engine() const{
     return m_engine;
 }
 
-}} // namespace lv, script
+}} // namespace lv, el
 
 #endif // LVCONTEXT_H

@@ -8,10 +8,31 @@
 #include <list>
 #include <vector>
 #include "live/elements/treesitterapi.h"
+#include "live/exception.h"
 
 struct TSParser;
 
 namespace lv{ namespace el{
+
+class Engine;
+
+class LV_ELEMENTS_EXPORT SyntaxException: public lv::Exception{
+public:
+    /** Default contructor */
+    SyntaxException(const std::string& message = "", int code = 0) : lv::Exception(message, code){}
+
+    int parsedLine() const;
+    int parsedColumn() const;
+    int parsedOffset() const;
+    std::string parsedFile() const;
+    void setParseLocation(int, int, int, const std::string&);
+private:
+    int m_parsedLine;
+    int m_parsedColumn;
+    int m_parsedOffset;
+    std::string m_parsedFile;
+};
+
 
 class LV_ELEMENTS_EXPORT LanguageParser{
 
@@ -86,7 +107,7 @@ public:
     void editParseTree(LanguageParser::AST*& ast, TSInputEdit& edit, TSInput& input);
     void destroy(AST* ast) const;
     ComparisonResult compare(const std::string& source1, AST* ast1, const std::string& source2, AST* ast2);
-    std::string toString(AST* ast);
+    std::string toString(AST* ast) const;
 
     std::string toJs(const std::string &contents, const std::string filename = "") const;
     std::string toJs(const std::string &contents, AST* ast, const std::string filename = "") const;
@@ -96,6 +117,10 @@ public:
 
     TSParser* internal() const{ return m_parser; }
     Language* language() const;
+
+
+    Engine *engine() const;
+    void setEngine(Engine *engine);
 
 private:
     std::list<std::string> parseExportNamesJs(const std::string& jsModuleFile);
@@ -107,6 +132,7 @@ private:
 
     TSParser* m_parser;
     Language* m_language;
+    Engine*   m_engine;
 };
 
 }} // namespace lv, el

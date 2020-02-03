@@ -99,6 +99,8 @@ private:
     static void visitClassDeclaration(BaseNode* parent, const TSNode& node);
     static void visitVariableDeclaration(BaseNode* parent, const TSNode& node);
     static void visitNewExpression(BaseNode* parent, const TSNode& node);
+    static void visitReturnStatement(BaseNode* parent, const TSNode& node);
+    static void visitArrowFunction(BaseNode* parent, const TSNode& node);
 
     BaseNode*              m_parent;
     TSNode                 m_node;
@@ -112,10 +114,22 @@ public:
     NumberNode(const TSNode& node, const std::string& typeString = "Number") : BaseNode(node, typeString){}
 };
 
+class ArrowFunctionNode: public BaseNode {
+    friend class BaseNode;
+public:
+    ArrowFunctionNode(const TSNode& node, const std::string& typeString = "ArrowFunction") : BaseNode(node, typeString){}
+};
+
 class FunctionDeclarationNode: public BaseNode {
     friend class BaseNode;
 public:
     FunctionDeclarationNode(const TSNode& node, const std::string& typeString = "FunctionDeclaration") : BaseNode(node, typeString){}
+};
+
+class ReturnStatementNode: public BaseNode {
+    friend class BaseNode;
+public:
+    ReturnStatementNode(const TSNode& node, const std::string& typeString = "ReturnStatement") : BaseNode(node, typeString){}
 };
 
 class NewExpressionNode: public BaseNode {
@@ -218,7 +232,11 @@ public:
 class ImportNode : public BaseNode{
     friend class BaseNode;
 public:
-    ImportNode(const TSNode& node) : BaseNode(node, "Import"), m_importPath(nullptr), m_importAs(nullptr){}
+    ImportNode(const TSNode& node)
+        : BaseNode(node, "Import")
+        , m_importPath(nullptr)
+        , m_isRelative(false)
+        , m_importAs(nullptr){}
     virtual std::string toString(int indent = 0) const;
 
     virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& fragments, int indent = 0);
@@ -226,6 +244,7 @@ protected:
     virtual void insert(BaseNode *child);
 private:
     ImportPathNode* m_importPath;
+    bool m_isRelative;
     IdentifierNode* m_importAs;
 };
 
@@ -304,9 +323,10 @@ public:
     // virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0) override;
 
 private:
-    IdentifierNode* m_type;
-    IdentifierNode* m_name;
+    std::vector<IdentifierNode*> m_property;
     BindableExpressionNode* m_expression;
+    std::vector<BaseNode*> m_bindings;
+    StatementBlockNode* m_statementBlock;
 
     friend class BaseNode;
     friend class NewComponentExpressionNode;
@@ -352,6 +372,8 @@ private:
     ComponentBodyNode* m_body;
 
     std::vector<PropertyDeclarationNode*> m_properties;
+    std::vector<EventDeclarationNode*> m_events;
+    std::vector<ListenerDeclarationNode*> m_listeners;
     std::vector<BaseNode*> m_default;
     std::vector<NewComponentExpressionNode*> m_idComponents;
     std::vector<PropertyAssignmentNode*> m_assignments;

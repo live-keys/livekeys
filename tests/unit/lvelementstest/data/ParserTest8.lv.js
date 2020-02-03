@@ -1,5 +1,12 @@
 imports.require('typing')
 
+var A = imports.get('A')
+var Article = imports.get('Article')
+var B = imports.get('B')
+var H1 = imports.get('H1')
+var P = imports.get('P')
+var T = imports.get('T')
+
 module.exports["ParserTest8"] = (function(parent){
     this.setParent(parent)
 

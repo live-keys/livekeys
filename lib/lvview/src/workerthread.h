@@ -18,9 +18,11 @@
 #define LVWORKERTHREAD_H
 
 #include "live/lvviewglobal.h"
-#include "live/act.h"
+#include "live/qmlact.h"
+#include "live/qmlstreamfilter.h"
 #include <QObject>
 #include <QEvent>
+#include <QLinkedList>
 #include <functional>
 
 namespace lv{
@@ -32,57 +34,61 @@ class LV_VIEW_EXPORT WorkerThread : public QObject{
 
     Q_OBJECT
 
+    friend class WorkerThreadPrivate;
+
 public:
     /// \private
     class CallEvent : public QEvent{
 
+        friend class WorkerThread;
+        friend class WorkerThreadPrivate;
+
     public:
         CallEvent(
-            const std::function<void()>& filter,
-            Shared::RefScope* readScope = nullptr);
-        CallEvent(
-            std::function<void()>&& filter,
-            Shared::RefScope* readScope = nullptr);
-        CallEvent(
-            const std::function<void()>& filter,
-            const std::function<void()>& callCallback,
-            Shared::RefScope* readScope = nullptr);
-        CallEvent(
-            std::function<void()>&& filter,
-            std::function<void()>&& callCallback,
-            Shared::RefScope* readScope = nullptr);
-        void callFilter();
-        Shared::RefScope *readScope();
-        bool hasCallback();
+            int callerIndex,
+            const QVariant& args = QVariant(),
+            const QList<Shared*>& transferObjects = QList<Shared*>()
+        );
 
-        CallEvent* callbackEvent();
+        CallEvent* callbackEvent(const QVariant& v);
 
     private:
-        std::function<void()> m_filter;
-        std::function<void()> m_callback;
-        Shared::RefScope*    m_readScope;
+        int            m_callerIndex;
+        QVariant       m_args;
+        QList<Shared*> m_transferObjects;
     };
 
 public:
-    WorkerThread(QObject* parent = nullptr);
+    WorkerThread(const QList<QString>& sources, QObject* parent = nullptr);
     virtual ~WorkerThread();
 
-    void postWork(
-        const std::function<void()>& fnc,
-        Shared::RefScope* locker = nullptr);
-    void postWork(
-        const std::function<void()>& fnc,
-        const std::function<void()>& cbk,
-        Shared::RefScope* locker = nullptr
-    );
+    void postWork(QmlStreamFilter* caller, const QVariant& value, const QList<Shared*> objectTransfers);
+    void postWork(QmlAct* caller, const QVariantList &values, const QList<Shared*> objectTransfers);
+
     void start();
+    bool isWorking() const;
+
+    QList<QObject*>& acts();
 
     bool event(QEvent * ev);
 
 private:
+    void postNextInProcessQueue();
+
+    bool                 m_isWorking;
+    QJSEngine*           m_engine;
     QThread*             m_thread;
+    QList<QObject*>      m_calls;
+    QList<QString>       m_actFunctionsSource;
+    QList<QJSValue>      m_actFunctions;
+    QMap<int, QPair<QObject*, QString> > m_specialFunctions;
+    QLinkedList<QObject*> m_toExecute;
     WorkerThreadPrivate* m_d;
 };
+
+inline QList<QObject*> &WorkerThread::acts(){
+    return m_calls;
+}
 
 }// namespace
 

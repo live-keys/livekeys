@@ -47,4 +47,7 @@ lcvvideo.depends      = lcvcore live
     SUBDIRS += editjson
     editjson.depends = live
     editjson.subdir = $$PWD/editjson
+
+    SUBDIRS += test
+    test.subdir = $$PWD/test
 }

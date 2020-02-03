@@ -20,6 +20,7 @@
 #include <QObject>
 #include <QCoreApplication>
 #include "live/workerthread.h"
+#include "qmlstreamfilter.h"
 
 namespace lv{
 
@@ -29,12 +30,8 @@ class WorkerThreadPrivate : public QObject{
     Q_OBJECT
 
 public:
-    explicit WorkerThreadPrivate() : QObject(0){}
+    explicit WorkerThreadPrivate(WorkerThread* worker) : QObject(nullptr), m_worker(worker){}
     ~WorkerThreadPrivate(){}
-
-    void postNotify(const std::function<void ()>& fnc){
-        QCoreApplication::postEvent(this, new WorkerThread::CallEvent(fnc));
-    }
 
     void postNotify(WorkerThread::CallEvent* evt){
         QCoreApplication::postEvent(this, evt);
@@ -45,13 +42,26 @@ public:
             return QObject::event(event);
 
         WorkerThread::CallEvent* ce = static_cast<WorkerThread::CallEvent*>(event);
-        ce->callFilter();
-        delete ce->readScope();
+
+        QObject* caller = m_worker->acts()[ce->m_callerIndex];
+        QmlAct* act = qobject_cast<QmlAct*>(caller);
+        if ( act ){
+            act->setResult(ce->m_args);
+        } else {
+            QmlStreamFilter* sf = qobject_cast<QmlStreamFilter*>(caller);
+            if( sf ){
+                sf->pushResult(ce->m_args);
+            }
+        }
+
+        m_worker->m_isWorking = false;
+        m_worker->postNextInProcessQueue();
+
         return true;
     }
 
 private:
-
+    WorkerThread* m_worker;
 
 };
 

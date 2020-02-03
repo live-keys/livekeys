@@ -7,4 +7,4 @@ EventFunction::EventFunction(Event::Id id)
 {
 }
 
-}} // namespace lv, script
+}} // namespace lv, el

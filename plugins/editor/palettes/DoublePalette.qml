@@ -24,9 +24,11 @@ CodePalette{
     id: palette
     type : "qml/double"
 
+    property bool minimized: true
+
     item: Rectangle{
-        width: 280
-        height: 60
+        width: 380 + (minimized? 50:0)
+        height: 30
         color: 'transparent'
 
         Slider{
@@ -34,8 +36,8 @@ CodePalette{
             anchors.top: parent.top
             anchors.topMargin: 1
             anchors.left: parent.left
-            anchors.leftMargin: 40
-            width: parent.width - 80
+            anchors.leftMargin: leftLabel.width + 3
+            width: parent.width - leftLabel.width - rightLabel.width - 10 - (minimized?50:0)
             height: 15
             minimumValue: 0
             value: 0
@@ -61,32 +63,23 @@ CodePalette{
             }
         }
 
-        Label{
-            anchors.top: parent.top
-            text: intSlider.minimumValue
-        }
-
-        Label{
-            anchors.top: parent.top
-            anchors.right: parent.right
-            text: intSlider.maximumValue
-        }
-
         Slider{
             id: fractionalSlider
 
             anchors.left: parent.left
-            anchors.leftMargin: 40
+            anchors.leftMargin: leftLabel.width + 3
             anchors.top: parent.top
-            anchors.topMargin: 26
+            anchors.topMargin: 15
 
-            width: parent.width - 80
+            width: intSlider.width
 
-            height: 15
+            height: 10
             minimumValue: 0
             value: 0
             onValueChanged: {
-                palette.value = intSlider.value + fractionalSlider.value
+                if (fractionalSlider.value !== 1.0)
+                    palette.value = intSlider.value + fractionalSlider.value
+
                 if ( !palette.isBindingChange() )
                     extension.write(palette.value)
             }
@@ -95,62 +88,89 @@ CodePalette{
 
             style: SliderStyle{
                 groove: Rectangle {
-                    implicitHeight: 5
-                    color: '#0b111c'
+                    implicitHeight: 1
+                    color: 'transparent'
                 }
-                handle: Rectangle{
-                    width: 11
-                    height: 11
-                    radius: 5
+                handle: Triangle{
+                    width: 8
+                    height: 8
                     color: '#9b9da0'
+                    rotation: Triangle.Top
                 }
             }
         }
 
         Label{
+            id: leftLabel
+            mode: 1
             anchors.top: parent.top
-            anchors.topMargin: 25
-            text: fractionalSlider.minimumValue.toFixed(1)
+            anchors.left: parent.left
+            up: function(){
+                if (intSlider.minimumValue === 0 && intSlider.maximumValue > 25)
+                    intSlider.minimumValue = 25
+                else if (intSlider.minimumValue === -25 && intSlider.maximumValue > 0)
+                    intSlider.minimumValue = 0
+                else if (intSlider.minimumValue < 0 && intSlider.minimumValue / 2 < intSlider.maximumValue)
+                    intSlider.minimumValue = intSlider.minimumValue / 2
+                else if (intSlider.minimumValue > 0 && 2*intSlider.minimumValue < intSlider.maximumValue)
+                    intSlider.minimumValue = 2*intSlider.minimumValue
+
+                if (intSlider.value < intSlider.minimumValue )
+                    intSlider.value = intSlider.minimumValue
+            }
+            down: function(){
+                if (intSlider.minimumValue === 0)
+                    intSlider.minimumValue = -25
+                else if (intSlider.minimumValue === 25)
+                    intSlider.minimumValue = 0
+                else if (intSlider.minimumValue < 0)
+                    intSlider.minimumValue = 2*intSlider.minimumValue
+                else if (intSlider.minimumValue > 0)
+                    intSlider.minimumValue = intSlider.minimumValue / 2
+
+                if (intSlider.value < intSlider.minimumValue )
+                    intSlider.value = intSlider.minimumValue
+            }
+            text: intSlider.minimumValue
         }
+
         Label{
+            id: rightLabel
+            mode: 2
             anchors.top: parent.top
-            anchors.topMargin: 25
             anchors.right: parent.right
-            text: fractionalSlider.maximumValue.toFixed(1)
+            anchors.rightMargin: minimized? 50:0
+
+            up: function(){
+                if (intSlider.maximumValue === 0)
+                    intSlider.maximumValue = 25
+                else if (intSlider.maximumValue === -25)
+                    intSlider.maximumValue = 0
+                else if (intSlider.maximumValue > 0)
+                    intSlider.maximumValue = 2*intSlider.maximumValue
+                else if (intSlider.maximumValue < 0)
+                    intSlider.maximumValue = intSlider.maximumValue / 2
+
+                if (intSlider.value > intSlider.maximumValue)
+                    intSlider.value = intSlider.maximumValue
+            }
+            down: function(){
+                if (intSlider.maximumValue === 0 && intSlider.minimumValue < -25)
+                    intSlider.maximumValue = -25
+                else if (intSlider.maximumValue === 25 && intSlider.minimumValue < 0)
+                    intSlider.maximumValue = 0
+                else if (intSlider.maximumValue < 0 && 2*intSlider.maximumValue > intSlider.minimumValue)
+                    intSlider.maximumValue = 2*intSlider.maximumValue
+                else if (intSlider.maximumValue > 0 && intSlider.maximumValue / 2 > intSlider.minimumValue)
+                    intSlider.maximumValue = intSlider.maximumValue / 2
+
+                if (intSlider.value > intSlider.maximumValue)
+                    intSlider.value = intSlider.maximumValue
+            }
+
+            text: intSlider.maximumValue
         }
 
-        Slider{
-            id: zoomSlider
-            width: parent.width
-            height: 15
-            minimumValue: 0
-            value: 0
-            onValueChanged: {
-                var intMaxValue = value * value
-                if ( intMaxValue < intSlider.value ){
-                    var sqrt = Math.ceil(Math.sqrt(Math.floor(intSlider.value)))
-                    zoomSlider.value = 15 > sqrt ? 15 : sqrt
-                } else
-                    intSlider.maximumValue = value * value
-            }
-            stepSize: 1.0
-            maximumValue: 200
-
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 0
-
-            style: SliderStyle{
-                groove: Rectangle {
-                    implicitHeight: 6
-                    color: "transparent"
-                }
-                handle: Rectangle{
-                    width: 40
-                    height: 6
-                    color: '#9b9da0'
-                }
-            }
-        }
     }
 
     onExtensionChanged: {
@@ -160,9 +180,6 @@ CodePalette{
     }
 
     onInit: {
-        var sqrt = Math.ceil(Math.sqrt(Math.floor(value))) + 1
-        zoomSlider.value = 15 > sqrt ? 15 : sqrt
-
         intSlider.value = Math.floor(value)
         fractionalSlider.value = value - intSlider.value
     }

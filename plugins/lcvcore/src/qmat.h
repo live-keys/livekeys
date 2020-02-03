@@ -65,6 +65,7 @@ public:
     cv::Mat& internal();
 
     virtual void recycleSize(int size) const;
+    virtual Shared* transfer(){ return clone(); }
 
 public slots:
     QByteArray  buffer() const;

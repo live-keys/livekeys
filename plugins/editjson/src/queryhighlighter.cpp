@@ -3,8 +3,9 @@
 #include "live/elements/parseddocument.h"
 #include "live/visuallog.h"
 
-namespace lv{
+#include <math.h>
 
+namespace lv{
 
 QueryHighlighter::QueryHighlighter(
         QmlLanguageObject* language,
@@ -19,7 +20,7 @@ QueryHighlighter::QueryHighlighter(
     , m_textDocumentData(new TextDocumentData)
 {
     m_parser = el::LanguageParser::create(language->language());
-    m_languageQuery = el::LanguageQuery::create(language->language(), pattern);
+    m_languageQuery = el::LanguageQuery::create(m_parser->language(), pattern);
     m_languageQuery->addPredicate("eq?", &QueryHighlighter::predicateEq);
 
     QMap<std::string, QTextCharFormat> styleMap;
@@ -126,11 +127,25 @@ QList<SyntaxHighlighter::TextFormatRange> QueryHighlighter::highlight(
                 uint32_t captureId = cursor->captureId(captureIndex);
 
                 el::SourceRange range = cursor->captureRange(0);
+                int from = static_cast<int>(range.from()) / sizeof(ushort);
+                int length = static_cast<int>(range.length()) / sizeof(ushort);
+
                 TextFormatRange r;
-                r.start = static_cast<int>(range.from()) / sizeof(ushort);
-                r.length = static_cast<int>(range.length()) / sizeof(ushort);
+                r.start = fmax(from, position);
+                r.length = fmin(from + length, position + text.length()) - r.start;
                 r.userstate = 0;
-                r.userstateFollows = 0;
+                auto name = m_languageQuery->captureName(captureId);
+
+                if (name == "string")
+                {
+                    r.userstate = 2;
+                    if (r.start + r.length == from + length) r.userstateFollows = 0;
+                    else r.userstateFollows = 2;
+                } else {
+                    r.userstate = 0;
+                    r.userstateFollows = 0;
+                }
+
                 r.format = m_captureToFormatMap[captureId];
                 ranges.append(r);
             }

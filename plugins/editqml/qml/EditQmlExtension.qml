@@ -48,7 +48,7 @@ LiveExtension{
             var editor = activePane
             var codeHandler = editor.documentHandler.codeHandler
 
-            var rect = editor.getCursorRectangle()
+            var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
 
             var ef = codeHandler.openConnection(editor.textEdit.cursorPosition, project.appRoot())
@@ -90,7 +90,7 @@ LiveExtension{
     function shapePalette(editor, palettes, index){
         var codeHandler = editor.documentHandler.codeHandler
 
-        var rect = editor.getCursorRectangle()
+        var rect = editor.editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
 
         var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
@@ -159,15 +159,15 @@ LiveExtension{
     function loadPalette(editor, palettes, index){
         var codeHandler = editor.documentHandler.codeHandler
 
-        var rect = editor.getCursorRectangle()
+        var rect = editor.editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
 
         var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
 
         if (!ef)
         {
-            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-running program"
-            console.error("Error: Can't create a palette in a non-running program")
+            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
+            console.error("Error: Can't create a palette in a non-compiled program")
             return
         }
 
@@ -219,7 +219,7 @@ LiveExtension{
             var codeHandler = editor.documentHandler.codeHandler
 
             var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
-            var rect = editor.getCursorRectangle()
+            var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
             if ( palettes.size() === 1 ){
                 root.loadPalette(editor, palettes, 0)
@@ -237,12 +237,12 @@ LiveExtension{
 
                 palList.cancelled.connect(function(){
                     palList.focus = false
-                    editor.forceFocus()
+                    editor.editor.forceFocus()
                     palListBox.destroy()
                 })
                 palList.paletteSelected.connect(function(index){
                     palList.focus = false
-                    editor.forceFocus()
+                    editor.editor.forceFocus()
                     palListBox.destroy()
                     root.loadPalette(editor, palettes, index)
                 })
@@ -261,7 +261,7 @@ LiveExtension{
             var codeHandler = editor.documentHandler.codeHandler
 
             var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
-            var rect = editor.getCursorRectangle()
+            var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
             if ( palettes.size() === 0 ){
                 root.shapePalette(editor, palettes, -1)
@@ -279,12 +279,12 @@ LiveExtension{
 
                 palList.cancelled.connect(function(){
                     palList.focus = false
-                    editor.forceFocus()
+                    editor.editor.forceFocus()
                     palListBox.destroy()
                 })
                 palList.paletteSelected.connect(function(index){
                     palList.focus = false
-                    editor.forceFocus()
+                    editor.editor.forceFocus()
                     palListBox.destroy()
                     root.shapePalette(editor, palettes, index)
                 })
@@ -353,7 +353,7 @@ LiveExtension{
             var codeHandler = editor.documentHandler.codeHandler
 
             var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, false)
-            var rect = editor.getCursorRectangle()
+            var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
             if ( palettes.size() === 1 ){
                 var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
@@ -369,12 +369,12 @@ LiveExtension{
 
                 palList.cancelled.connect(function(){
                     palList.focus = false
-                    editor.forceFocus()
+                    editor.editor.forceFocus()
                     palListBox.destroy()
                 })
                 palList.paletteSelected.connect(function(index){
                     palList.focus = false
-                    editor.forceFocus()
+                    editor.editor.forceFocus()
                     palListBox.destroy()
 
                     var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
@@ -419,7 +419,7 @@ LiveExtension{
     }
 
     interceptMenu : function(item){
-        if ( item.objectName === 'editor' && item.document ){
+        if ( item.objectName === 'editorType' && item.document ){
 
             if ( canBeQml(item.document) ){
 

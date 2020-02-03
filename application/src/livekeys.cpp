@@ -57,29 +57,39 @@
 #include <QGuiApplication>
 #include <QProcess>
 
+#ifdef BUILD_ELEMENTS
+#include "live/elements/engine.h"
+#endif
+
 namespace lv{
 
 Livekeys::Livekeys(QObject *parent)
     : QObject(parent)
-    , m_engine(new ViewEngine(new QQmlApplicationEngine))
+    , m_viewEngine(new ViewEngine(new QQmlApplicationEngine))
     , m_arguments(new LivekeysArguments(header().toStdString()))
     , m_dir(QString::fromStdString(ApplicationContext::instance().applicationPath()))
-    , m_project(new Project(m_engine))
+#ifdef BUILD_ELEMENTS
+    , m_engine(new lv::el::Engine)
+#else
+    , m_engine(nullptr)
+#endif
+    , m_project(new Project(m_engine, m_viewEngine))
     , m_settings(nullptr)
     , m_script(nullptr)
     , m_log(nullptr)
     , m_vlog(new VisualLogQmlObject) // js ownership
     , m_packageGraph(nullptr)
     , m_memory(new Memory(this))
+
     , m_layers(new QQmlPropertyMap)
     , m_lastLayer(nullptr)
     , m_layerPlaceholder(nullptr)
 {
     solveImportPaths();
-    m_log = new VisualLogModel(m_engine->engine());
+    m_log = new VisualLogModel(m_viewEngine->engine());
 
     connect(m_project, SIGNAL(pathChanged(QString)), SLOT(projectChanged(QString)));
-    connect(m_engine, &ViewEngine::applicationError, this, &Livekeys::engineError);
+    connect(m_viewEngine, &ViewEngine::applicationError, this, &Livekeys::engineError);
 
     VisualLog::setViewTransport(m_log);
 }
@@ -87,13 +97,23 @@ Livekeys::Livekeys(QObject *parent)
 Livekeys::~Livekeys(){
     VisualLog::setViewTransport(nullptr);
     delete m_settings;
-    delete m_engine;
+    delete m_viewEngine;
     delete m_packageGraph;
     delete m_memory;
     delete m_layers;
+
+#ifdef BUILD_ELEMENTS
+    delete m_engine;
+    el::Engine::dispose();
+#endif
 }
 
 Livekeys::Ptr Livekeys::create(int argc, const char * const argv[], QObject *parent){
+#ifdef BUILD_ELEMENTS
+    std::string blobsPath = lv::ApplicationContext::instance().externalPath() + "/v8";
+    lv::el::Engine::initialize(blobsPath);
+#endif
+
     Livekeys::Ptr livekeys = Livekeys::Ptr(new Livekeys(parent));
 
     livekeys->m_arguments->initialize(argc, argv);
@@ -141,7 +161,7 @@ Livekeys::Ptr Livekeys::create(int argc, const char * const argv[], QObject *par
  * \endcode
  */
 void Livekeys::solveImportPaths(){
-    m_engineImportPaths = m_engine->engine()->importPathList();
+    m_engineImportPaths = m_viewEngine->engine()->importPathList();
 
     m_engineImportPaths.removeAll(dir());
     m_engineImportPaths.removeAll(QString::fromStdString(ApplicationContext::instance().executablePath()));
@@ -149,11 +169,11 @@ void Livekeys::solveImportPaths(){
     // Add the plugins directory to the import paths
     m_engineImportPaths.append(QString::fromStdString(ApplicationContext::instance().pluginPath()));
 
-    m_engine->engine()->setImportPathList(m_engineImportPaths);
+    m_viewEngine->engine()->setImportPathList(m_engineImportPaths);
 }
 
 void Livekeys::loadQml(const QUrl &url){
-    static_cast<QQmlApplicationEngine*>(m_engine->engine())->load(url);
+    static_cast<QQmlApplicationEngine*>(m_viewEngine->engine())->load(url);
 
     m_project->setRunSpace(layerPlaceholder());
 
@@ -221,10 +241,10 @@ void Livekeys::loadLayer(const QString &name, std::function<void (Layer*)> onRea
 
     QByteArray contentBytes = f.readAll();
 
-    QObject* layerObj = m_engine->createObject(contentBytes, m_engine->engine(), layerUrl);
-    if ( !layerObj && m_engine->lastErrors().size() > 0 )
+    QObject* layerObj = m_viewEngine->createObject(contentBytes, m_viewEngine->engine(), layerUrl);
+    if ( !layerObj && m_viewEngine->lastErrors().size() > 0 )
         THROW_EXCEPTION(
-            Exception, ViewEngine::toErrorString(m_engine->lastErrors()).toStdString(), Exception::toCode("~Component")
+            Exception, ViewEngine::toErrorString(m_viewEngine->lastErrors()).toStdString(), Exception::toCode("~Component")
         );
 
     if ( !layerObj )
@@ -239,7 +259,7 @@ void Livekeys::loadLayer(const QString &name, std::function<void (Layer*)> onRea
     if ( m_lastLayer)
         layer->setParent(m_lastLayer);
     else
-        layer->setParent(m_engine);
+        layer->setParent(m_viewEngine);
     m_lastLayer = layer;
     m_layers->insert(name, QVariant::fromValue(layer));
 
@@ -255,7 +275,7 @@ void Livekeys::loadLayer(const QString &name, std::function<void (Layer*)> onRea
                 onReady(layer);
         });
 
-        layer->loadView(m_engine, m_layerPlaceholder ? m_layerPlaceholder : m_engine->engine());
+        layer->loadView(m_viewEngine, m_layerPlaceholder ? m_layerPlaceholder : m_viewEngine->engine());
     } else {
         vlog("main").v() << "Layer ready: " << layer->name();
         emit layerReady(layer);
@@ -280,6 +300,30 @@ void Livekeys::loadLayers(const QStringList &layers, std::function<void (Layer *
             }
         });
     }
+}
+
+int Livekeys::exec(const QGuiApplication& app){
+#ifdef BUILD_ELEMENTS
+    return execElements(app);
+#else
+    loadDefaultLayers();
+    return app.exec();
+#endif
+}
+
+int Livekeys::execElements(const QGuiApplication &app){
+#ifdef BUILD_ELEMENTS
+    int result = 0;
+    m_engine->setPackageImportPaths({lv::ApplicationContext::instance().pluginPath()});
+    m_engine->scope([&result, this, &app](){
+        loadDefaultLayers();
+        result = app.exec();
+    });
+    return result;
+#else
+    vlog().e() << "Support for elements is disabled.";
+    return 0;
+#endif
 }
 
 void Livekeys::loadDefaultLayers(){
@@ -327,18 +371,18 @@ void Livekeys::loadInternalPlugins(){
 
     ViewEngine::registerBaseTypes("base");
 
-    m_engine->engine()->rootContext()->setContextProperty("project", m_project);
-    m_engine->engine()->rootContext()->setContextProperty("script",  m_script);
-    m_engine->engine()->rootContext()->setContextProperty("lk",  this);
+    m_viewEngine->engine()->rootContext()->setContextProperty("project", m_project);
+    m_viewEngine->engine()->rootContext()->setContextProperty("script",  m_script);
+    m_viewEngine->engine()->rootContext()->setContextProperty("lk",  this);
 
-    QJSValue vlogjs  = m_engine->engine()->newQObject(m_vlog);
-    m_engine->engine()->globalObject().setProperty("vlog", vlogjs);
+    QJSValue vlogjs  = m_viewEngine->engine()->newQObject(m_vlog);
+    m_viewEngine->engine()->globalObject().setProperty("vlog", vlogjs);
 
-    ViewContext::initFromEngine(m_engine->engine());
+    ViewContext::initFromEngine(m_viewEngine->engine());
 
     EditorPrivatePlugin ep;
     ep.registerTypes("editor.private");
-    ep.initializeEngine(m_engine->engine(), "editor.private");
+    ep.initializeEngine(m_viewEngine->engine(), "editor.private");
 }
 
 void Livekeys::loadInternalPackages(){
@@ -348,7 +392,7 @@ void Livekeys::loadInternalPackages(){
     m_packageGraph = new PackageGraph;
     PackageGraph::internalsContextOwner() = m_packageGraph;
 
-    m_engine->setPackageGraph(m_packageGraph);
+    m_viewEngine->setPackageGraph(m_packageGraph);
 
     const MLNode& defaults = ApplicationContext::instance().startupConfiguration();
     if ( defaults.hasKey("internalPackages") ){
@@ -478,7 +522,7 @@ const MLNode &Livekeys::startupConfiguration(){
 
 QObject *Livekeys::layerPlaceholder() const{
     if ( !m_layerPlaceholder ){
-        QList<QObject*> rootObjects = static_cast<QQmlApplicationEngine*>(m_engine->engine())->rootObjects();
+        QList<QObject*> rootObjects = static_cast<QQmlApplicationEngine*>(m_viewEngine->engine())->rootObjects();
         for ( auto it = rootObjects.begin(); it != rootObjects.end(); ++it ){
             if ( (*it)->objectName() == "window" ){
                 QObject* controls = (*it)->property("controls").value<QObject*>();
@@ -518,9 +562,9 @@ void Livekeys::engineError(QJSValue error){
 }
 
 void Livekeys::projectChanged(const QString &path){
-    m_engine->engine()->setImportPathList(m_engineImportPaths);
+    m_viewEngine->engine()->setImportPathList(m_engineImportPaths);
     if ( !path.isEmpty() && QFileInfo(path + "/packages").isDir() )
-        m_engine->engine()->addImportPath(path + "/packages");
+        m_viewEngine->engine()->addImportPath(path + "/packages");
 
     m_packageGraph->clearPackages();
     m_packageGraph->setPackageImportPaths(packageImportPaths());

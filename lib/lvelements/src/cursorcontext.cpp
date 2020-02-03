@@ -112,13 +112,13 @@
  * \code
  * T{ int declaredProp : this.font.size }
  *                      ^ context = CompletionContext::InRightOfDeclaration | CompletionContext::InElements
- *                        expressionPath = {RangeFor<this>, RangeFor<font>, RangeFor<s>}
+ *                        expressionPath = {}
  *                        objectType = RangeFor<T>
  *                        propertyPath = {RangeFor<declaredProp>}
  *                        propertyDeclaredType = RangeFor<int>
  * \endcode
  *
- * \code
+ * \code // TODO
  * T{ fn declaredFunction(){ return 0 }
  *                              ^ context = CompletionContext::InRightOfDeclaration | CompletionContext::InElements
  *                                expressionPath = {RangeFor<ret>}
@@ -130,6 +130,14 @@
  */
 
 namespace lv{ namespace el{
+
+std::set<std::string> CursorContext::keywords = {
+    "as", "async", "await", "break", "case", "catch", "class",
+    "const", "continue", "debugger", "default", "delete", "else",
+    "extends", "finally", "for", "function", "get", "if", "import",
+    "in", "instanceof", "let", "new", "of", "return", "set", "static",
+    "switch", "target", "throw", "try", "typeof", "var", "void", "while",
+    "with", "yield", "component", "fn", "constructor", "instance" };
 
 CursorContext::CursorContext(int context,
         const std::vector<SourceRange> &expressionPath,
@@ -147,6 +155,11 @@ CursorContext::CursorContext(int context,
 }
 
 CursorContext::~CursorContext(){
+}
+
+int CursorContext::context() const
+{
+    return m_context;
 }
 
 Utf8 CursorContext::contextString() const{

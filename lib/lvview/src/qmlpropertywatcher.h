@@ -13,7 +13,8 @@ class LV_VIEW_EXPORT QmlPropertyWatcher : public QObject{
     Q_OBJECT
 
 public:
-    explicit QmlPropertyWatcher(QObject* object, const QString& propertyName, QObject *parent = nullptr);
+    QmlPropertyWatcher(QObject* object, const QString& propertyName, QObject *parent = nullptr);
+    QmlPropertyWatcher(const QQmlProperty& p, QObject* parent = nullptr);
     ~QmlPropertyWatcher();
 
     QVariant read() const;

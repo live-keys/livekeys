@@ -26,6 +26,7 @@ module.exports["Test4"] = class Test4 extends Container{
                 Element.addProperty(this, 'k', {type: "int", notify: 'kChanged'})
 
                 this.k = 20
+
                 return this
             }.bind(new Element())(this)),
             (function(parent){

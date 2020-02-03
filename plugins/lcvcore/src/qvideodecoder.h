@@ -50,7 +50,7 @@ public:
     };
 
 public:
-    explicit QVideoDecoder(QObject *parent = 0);
+    explicit QVideoDecoder(QObject *parent = nullptr);
     virtual ~QVideoDecoder();
 
     bool paused() const;

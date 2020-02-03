@@ -50,12 +50,14 @@ List::~List(){
 }
 
 LocalValue List::atImpl(List *l, int){
-    throw std::exception(); //TODO
+    lv::Exception e = CREATE_EXCEPTION(lv::Exception, "at function is unavailable for Lists", lv::Exception::toCode("~List"));
+    l->engine()->throwError(&e, nullptr);
     return LocalValue(l->engine());
 }
 
-int List::lengthImpl(List*){
-    throw std::exception();
+int List::lengthImpl(List *l){
+    lv::Exception e = CREATE_EXCEPTION(lv::Exception, "length function is unavailable for Lists", lv::Exception::toCode("~List"));
+    l->engine()->throwError(&e, nullptr);
     return 0;
 }
 

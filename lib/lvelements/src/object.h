@@ -32,6 +32,7 @@ class LV_ELEMENTS_EXPORT Object{
 
     friend class LocalValue;
     friend class LocalObject;
+    friend class LocalArray;
     friend class Engine;
 
 public:
@@ -42,8 +43,6 @@ public:
 
     Object& operator = (const Object& other);
     bool operator == (const Object& other);
-
-    //TODO: Add get set methods
 
     bool isNull() const;
     bool isString() const;
@@ -58,11 +57,13 @@ public:
     double toDate() const;
 
     static Object create(Engine* engine);
+    static Object createArray(Engine* engine, int length = 0);
     std::string toString() const;
     Buffer toBuffer() const;
 
-protected:
     v8::Local<v8::Object> data() const;
+
+protected:
     static Object create(ObjectPrivate* d, int* ref);
     Object(ObjectPrivate* d, int* ref);
 
@@ -95,6 +96,28 @@ private:
     LocalObject(const v8::Local<v8::Object>& vo);
 
     LocalObjectPrivate* m_d;
+};
+
+class LocalArrayPrivate;
+
+/**
+ * @brief A scoped array used for accessing object properties
+ */
+class LV_ELEMENTS_EXPORT LocalArray{
+public:
+    LocalArray(Object o);
+    LocalArray(Engine* engine, const LocalValue& lval);
+    ~LocalArray();
+
+    int length() const;
+
+    LocalValue get(int index);
+    void set(int index, const LocalValue& value);
+
+private:
+    DISABLE_COPY(LocalArray);
+
+    LocalArrayPrivate* m_d;
 };
 
 

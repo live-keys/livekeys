@@ -51,9 +51,12 @@ export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy
 
 DISTFILES += \
+    palettes/ConnectionPalette.qml \
     palettes/IntHistoryPlotPalette.qml \
     palettes/DoubleHistoryPlotPalette.qml \
     palettes/PathPalette.qml \
+    qml/EditorPane.qml \
+    qml/PaletteConnection.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/PaletteListView.qml \

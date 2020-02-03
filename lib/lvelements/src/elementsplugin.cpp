@@ -4,6 +4,9 @@
 
 #include "live/plugincontext.h"
 #include "live/exception.h"
+#include "live/elements/engine.h"
+
+#include "v8nowarnings.h"
 
 namespace lv{ namespace el{
 
@@ -19,20 +22,30 @@ namespace lv{ namespace el{
 
 class ElementsPluginPrivate{
 public:
+    ElementsPluginPrivate(Engine* e) : engine(e), libraryExports(Object::create(e)){}
+
     Plugin::Ptr plugin;
     Engine*     engine;
-    std::map<std::string, ModuleFile*> modules;
-    std::map<std::string, ModuleLibrary*> libraryModules;
-
+    Object      libraryExports;
+    std::map<std::string, ModuleFile*> fileModules;
     std::map<std::string, ModuleFile*> fileExports;
+
+    std::list<ModuleLibrary*>          libraries;
 };
 
 
+ElementsPlugin::ElementsPlugin(Plugin::Ptr plugin, Engine *engine)
+    : m_d(new ElementsPluginPrivate(engine))
+{
+    m_d->plugin = plugin;
+}
+
+
 ElementsPlugin::~ElementsPlugin(){
-    for ( auto it = m_d->libraryModules.begin(); it != m_d->libraryModules.end(); ++it ){
-        delete it->second;
+    for ( auto it = m_d->libraries.begin(); it != m_d->libraries.end(); ++it ){
+        delete *it;
     }
-    m_d->libraryModules.clear();
+    m_d->libraries.clear();
     delete m_d;
 }
 
@@ -40,10 +53,14 @@ ElementsPlugin::Ptr ElementsPlugin::create(Plugin::Ptr plugin, Engine *engine){
     ElementsPlugin::Ptr epl(new ElementsPlugin(plugin, engine));
 
     for ( auto it = plugin->modules().begin(); it != plugin->modules().end(); ++it ){
-        epl->m_d->modules[*it] = epl->load(epl, *it);
+        epl->m_d->fileModules[*it] = epl->load(epl, *it);
     }
+
     for ( auto it = plugin->libraryModules().begin(); it != plugin->libraryModules().end(); ++it ){
-        epl->m_d->libraryModules[*it] = epl->loadLibrary(epl, *it);
+        vlog() << "LOADING LIBRARY:" << *it;
+        ModuleLibrary* lib = ModuleLibrary::load(epl->m_d->engine, *it);
+        lib->loadExports(epl->m_d->libraryExports);
+        epl->m_d->libraries.push_back(lib);
     }
 
     return epl;
@@ -52,14 +69,19 @@ ElementsPlugin::Ptr ElementsPlugin::create(Plugin::Ptr plugin, Engine *engine){
 ModuleFile *ElementsPlugin::addModuleFile(ElementsPlugin::Ptr &epl, const std::string &name){
     ModuleFile* mf = new ModuleFile(epl, name);
     mf->initializeImportsExports(epl->m_d->engine);
-    epl->m_d->modules[name] = mf;
+    epl->m_d->fileModules[name] = mf;
     return mf;
+}
+
+void ElementsPlugin::addModuleLibrary(ModuleLibrary *library){
+    m_d->libraries.push_back(library);
+    library->loadExports(m_d->libraryExports);
 }
 
 ModuleFile *ElementsPlugin::load(const ElementsPlugin::Ptr& epl, const std::string &name){
     ModuleFile* mf = new ModuleFile(epl, name);
     mf->parse(m_d->engine);
-    m_d->modules[name] = mf;
+    m_d->fileModules[name] = mf;
 
     for ( auto it = mf->exports().begin(); it != mf->exports().end(); ++it ){
         auto storedExport = m_d->fileExports.find(*it);
@@ -77,23 +99,38 @@ ModuleFile *ElementsPlugin::load(const ElementsPlugin::Ptr& epl, const std::stri
     return mf;
 }
 
-ModuleLibrary *ElementsPlugin::loadLibrary(const ElementsPlugin::Ptr &, const std::string &name){
-    ModuleLibrary* lib = ModuleLibrary::load(m_d->engine, name);
-    lib->initializeExports();
-    return lib;
-}
-
 const Plugin::Ptr& ElementsPlugin::plugin() const{
     return m_d->plugin;
+}
+
+Object ElementsPlugin::collectExportsObject(){
+    v8::Local<v8::Object> result = v8::Object::New(m_d->engine->isolate());
+
+    v8::Local<v8::Object> lo = m_d->libraryExports.data();
+    v8::Local<v8::Array> pn = lo->GetOwnPropertyNames();
+
+    for (uint32_t i = 0; i < pn->Length(); ++i) {
+        v8::Local<v8::Value> key = pn->Get(i);
+        v8::Local<v8::Value> value = lo->Get(key);
+
+        result->Set(key, value);
+    }
+
+    //TODO: Capture file exports
+
+    return Object(m_d->engine, result);
+}
+
+const Object &ElementsPlugin::libraryExports() const{
+    return m_d->libraryExports;
 }
 
 const std::map<std::string, ModuleFile *> &ElementsPlugin::fileExports() const{
     return m_d->fileExports;
 }
 
-ElementsPlugin::ElementsPlugin(Plugin::Ptr plugin, Engine *engine) : m_d(new ElementsPluginPrivate){
-    m_d->plugin = plugin;
-    m_d->engine = engine;
+const std::list<ModuleLibrary *> &ElementsPlugin::libraryModules() const{
+    return m_d->libraries;
 }
 
 }} // namespace lv, el

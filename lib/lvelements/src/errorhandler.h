@@ -30,7 +30,7 @@ public:
 
 public:
     ErrorHandler(Engine* engine);
-    ~ErrorHandler();
+    ~ErrorHandler() override;
 
     void setTarget(Element* target);
     Element* target(){ return m_target; }
