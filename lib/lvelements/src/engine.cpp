@@ -329,6 +329,7 @@ Script::Ptr Engine::compileModuleFile(const std::string &path){
 }
 
 Script::Ptr Engine::compileModuleSource(const std::string &path, const std::string &source){
+    m_d->parser->setEngine(this);
     std::string jssource = m_d->parser->toJs(source, QFileInfo(QString::fromStdString(path)).baseName().toStdString());
 
     v8::HandleScope handle(isolate());
@@ -576,19 +577,44 @@ bool Engine::isElementConstructor(const Callable &c){
  * than that of the exception.
  */
 void Engine::throwError(const Exception *exception, Element *object){
-    v8::Local<v8::Value> e = v8::Exception::Error(
-        v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()));
-
-    //TODO: Capture the engine stack trace as well
+    v8::Local<v8::Value> e;
+    auto se = static_cast<const SyntaxException*>(exception);
+    if (se)
+    {
+        e = v8::Exception::SyntaxError(
+            v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()));
+    }
+    else {
+        e = v8::Exception::Error(
+            v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()));
+    }
 
     v8::Local<v8::Object> o = v8::Local<v8::Object>::Cast(e);
+    std::stringstream stackCapture;
+
+    v8::Local<v8::StackTrace> st = v8::StackTrace::CurrentStackTrace(isolate(), 128, v8::StackTrace::kScriptName);
+    int jsStackFrameSize = st->GetFrameCount();
+    for (int i = 0; i<jsStackFrameSize; ++i)
+    {
+        if (i!=0) stackCapture << "\n";
+        v8::Local<v8::StackFrame> sf = st->GetFrame(i);
+        v8::String::Utf8Value scriptName(sf->GetScriptName());
+        v8::String::Utf8Value functionName(sf->GetFunctionName());
+
+        stackCapture << "at ";
+        if (functionName.length() != 0)
+            stackCapture << *functionName;
+        stackCapture << "(";
+        if (scriptName.length() != 0)
+            stackCapture << *scriptName;
+        stackCapture << ":" <<  sf->GetLineNumber() << ")";
+    }
 
     if ( exception->hasStackTrace() ){
-        std::stringstream stackCapture;
 
         StackTrace::Ptr est = exception->stackTrace();
         for ( auto it = est->begin(); it != est->end(); ++it ){
-            if ( it != est->begin() )
+            if ( it != est->begin() || jsStackFrameSize > 0)
                 stackCapture << "\n";
 
             const StackFrame& sf = *it;
@@ -601,24 +627,39 @@ void Engine::throwError(const Exception *exception, Element *object){
             }
         }
 
-
-        v8::Local<v8::String> stackKey = v8::String::NewFromUtf8(isolate(), "stack", v8::String::kInternalizedString);
-        v8::Local<v8::String> stackValue = v8::String::NewFromUtf8(isolate(), stackCapture.str().c_str(), v8::String::kInternalizedString);
-
-        o->Set(stackKey, stackValue);
     }
 
-    if ( object ){
-        v8::Local<v8::String> objectKey = v8::String::NewFromUtf8(isolate(), "object", v8::String::kInternalizedString);
-        o->Set(objectKey, ElementPrivate::localObject(object));
+    v8::Local<v8::String> stackKey = v8::String::NewFromUtf8(isolate(), "stack", v8::String::kInternalizedString);
+    v8::Local<v8::String> stackValue = v8::String::NewFromUtf8(isolate(), stackCapture.str().c_str(), v8::String::kInternalizedString);
+
+    o->Set(stackKey, stackValue);
+
+    if (se) {
+        v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::String::kInternalizedString);
+        o->Set(lineNumberKey, v8::Integer::New(isolate(), se->parsedLine()));
+
+
+        v8::Local<v8::String> columnKey = v8::String::NewFromUtf8(isolate(), "column", v8::String::kInternalizedString);
+        o->Set(columnKey, v8::Integer::New(isolate(), se->parsedColumn()));
+
+        v8::Local<v8::String> offsetKey = v8::String::NewFromUtf8(isolate(), "offset", v8::String::kInternalizedString);
+        o->Set(offsetKey, v8::Integer::New(isolate(), se->parsedColumn()));
+
+        v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::String::kInternalizedString);
+        o->Set(fileNameKey, v8::String::NewFromUtf8(isolate(), se->fileName().c_str(), v8::String::kInternalizedString));
     }
+    else {
+        if ( object ){
+            v8::Local<v8::String> objectKey = v8::String::NewFromUtf8(isolate(), "object", v8::String::kInternalizedString);
+            o->Set(objectKey, ElementPrivate::localObject(object));
+        }
 
-    v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::String::kInternalizedString);
-    o->Set(fileNameKey, v8::String::NewFromUtf8(isolate(), exception->file().c_str(), v8::String::kInternalizedString));
+        v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::String::kInternalizedString);
+        o->Set(fileNameKey, v8::String::NewFromUtf8(isolate(), exception->file().c_str(), v8::String::kInternalizedString));
 
-    v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::String::kInternalizedString);
-    o->Set(lineNumberKey, v8::Integer::New(isolate(), exception->line()));
-
+        v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::String::kInternalizedString);
+        o->Set(lineNumberKey, v8::Integer::New(isolate(), exception->line()));
+    }
 
     m_d->pendingExceptionNesting = m_d->tryCatchNesting;
     m_d->isolate->ThrowException(e);

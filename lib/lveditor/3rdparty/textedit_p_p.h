@@ -164,6 +164,7 @@ public:
         , highlightingInProgress(false)
         , viewport(QRect(0,0,0,0))
         , totalHeight(0)
+        , totalWidth(0)
 #ifdef LV_EDITOR_DEBUG
         , debugModel(nullptr)
         , debugView(nullptr)
@@ -281,6 +282,7 @@ public:
 
     QRect viewport;
     int totalHeight;
+    int totalWidth;
     std::vector<VisibleSection> sectionsForViewport;
     std::deque<NodeAction> actionQueue;
     std::vector<std::pair<int, QQuickItem*>> displayedPalettes;

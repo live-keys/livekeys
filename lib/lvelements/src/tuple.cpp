@@ -21,9 +21,14 @@ InstanceProperty *Tuple::addProperty(
 {
     InstanceProperty* ip = Element::addProperty(name, type, value, isDefault, isWritable, notifyEvent);
     if ( !notifyEvent.empty() ){
-        on(notifyEvent, [this, name](const Function::Parameters&){
-            propertyChanged(name);
-        });
+        try {
+            on(notifyEvent, [this, name](const Function::Parameters&){
+                propertyChanged(name);
+            });
+        } catch (lv::Exception exc){
+            engine()->throwError(&exc, nullptr);
+            return nullptr;
+        }
     }
     return ip;
 }

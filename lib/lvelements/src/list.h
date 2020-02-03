@@ -102,20 +102,29 @@ inline LocalValue List::at(int index){
 }
 
 inline void List::assign(int index, const LocalValue& v){
-    if (!m_assign )
-        throw std::exception();
+    if (!m_assign)
+    {
+        auto exc = CREATE_EXCEPTION(lv::Exception, "Assignment function doesn't exist", lv::Exception::toCode("~List"));
+        engine()->throwError(&exc, nullptr);
+    }
     m_assign(this, index, v);
 }
 
 inline void List::append(const LocalValue &v){
     if (!m_append)
-        throw std::exception();
+    {
+        auto exc = CREATE_EXCEPTION(lv::Exception, "Append function doesn't exist", lv::Exception::toCode("~List"));
+        engine()->throwError(&exc, nullptr);
+    }
     m_append(this, v);
 }
 
 inline void List::clear(){
     if (!m_clear)
-        throw std::exception();
+    {
+        auto exc = CREATE_EXCEPTION(lv::Exception, "Clearing function doesn't exist", lv::Exception::toCode("~List"));
+        engine()->throwError(&exc, nullptr);
+    }
     m_clear(this);
 }
 

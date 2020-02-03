@@ -158,7 +158,7 @@ EventConnection* Element::on(const std::string &key, std::function<void (const F
     } else { // search locally
         auto evIt = m_d->instanceEvents.find(key);
         if ( evIt == m_d->instanceEvents.end() )
-            throw std::exception();
+            THROW_EXCEPTION(lv::Exception, "Event under given key can't be found", lv::Exception::toCode("~Element"));
 
         InstanceEvent* ie = evIt->second;
 
@@ -226,7 +226,7 @@ void Element::trigger(const std::string &eventKey, const Function::Parameters &p
     } else {
         auto evIt = m_d->instanceEvents.find(eventKey);
         if ( evIt == m_d->instanceEvents.end() )
-            throw std::exception();
+            THROW_EXCEPTION(lv::Exception, "Can't trigger event with given key", lv::Exception::toCode("~Element"));
 
         InstanceEvent* ie = evIt->second;
         eventId = ie->m_eventId;
@@ -244,7 +244,7 @@ void Element::addEvent(Element *e, const std::string &ekey, const std::vector<st
     ElementPrivate* d = e->m_d;
 
     if ( d->instanceEvents.find(ekey) != d->instanceEvents.end() )
-        throw std::exception();
+        THROW_EXCEPTION(lv::Exception, "Event with given key already exists.", lv::Exception::toCode("~Element"));
 
     InstanceEvent* ie = new InstanceEvent(
         e, EventIdGenerator::concatenate(0, 0, d->instanceEvents.size()), static_cast<int>(types.size())
@@ -266,7 +266,11 @@ void Element::addEvent(Element *e, LocalValue eventKey, LocalValue types){
     std::string ekey = eventKey.toStdString(e->engine());
 
     if ( d->instanceEvents.find(ekey) != d->instanceEvents.end() )
-        throw std::exception();
+    {
+        auto exc = CREATE_EXCEPTION(lv::Exception, "An event with the same name already exists.", lv::Exception::toCode("~Element"));
+        e->engine()->throwError(&exc, e);
+        return;
+    }
 
     v8::Local<v8::Array> typesArray = v8::Local<v8::Array>::Cast(types.data());
 
@@ -384,13 +388,18 @@ void Element::assignPropertyExpression(
     be->element = e;
     be->property = p;
     be->isActive = false;
-    be->monitoringConnection = e->on(p->changedEvent(), [be](const Function::Parameters&){
-        if ( be->isActive ){
-            be->isActive = false;
-        } else {
-            be->element->clearPropertyBoundExpression(be->propertyName);
-        }
-    });
+    try {
+        be->monitoringConnection = e->on(p->changedEvent(), [be](const Function::Parameters&){
+            if ( be->isActive ){
+                be->isActive = false;
+            } else {
+                be->element->clearPropertyBoundExpression(be->propertyName);
+            }
+        });
+    } catch (lv::Exception exc) {
+        e->engine()->throwError(&exc, e);
+        return;
+    }
     d->boundPropertyExpressions[name] = be;
 
     v8::Local<v8::Array> bindingsArray = v8::Local<v8::Array>::Cast(bindings.data());
@@ -409,11 +418,15 @@ void Element::assignPropertyExpression(
             Element* bindingElement  = bindingElementValue.toElement(e->engine());
             std::string bindingEvent = LocalValue(e->engine(), baItem->Get(1)).toStdString(e->engine());
 
-            EventConnection* bec = bindingElement->on(bindingEvent, [be](const Function::Parameters&){
-                be->run();
-            });
-
-            be->bindables.push_back(bec);
+            try {
+                EventConnection* bec = bindingElement->on(bindingEvent, [be](const Function::Parameters&){
+                    be->run();
+                });
+                be->bindables.push_back(bec);
+            } catch (lv::Exception exc) {
+                e->engine()->throwError(&exc, e);
+                return;
+            }
         }
     }
 }
@@ -421,7 +434,11 @@ void Element::assignPropertyExpression(
 void Element::assignDefaultProperty(Element *e, LocalValue value){
     if ( !value.isNull() ){
         if ( e->defaultProperty().empty() )
-            throw std::exception();
+        {
+            auto exc = CREATE_EXCEPTION(lv::Exception, "Default property doesn't exist", lv::Exception::toCode("~Element"));
+            e->engine()->throwError(&exc, e);
+            return;
+        }
 
         Property* p = e->property(e->defaultProperty());
         p->write(e, value.data());
@@ -462,10 +479,18 @@ InstanceProperty* Element::addProperty(
     ElementPrivate* d = m_d;
 
     if ( d->instanceProperties.find(name) != d->instanceProperties.end() )
-        throw std::exception();
+    {
+        auto exc = CREATE_EXCEPTION(lv::Exception, "A property under such name already exists", lv::Exception::toCode("~Element"));
+        engine()->throwError(&exc, this);
+        return nullptr;
+    }
 
     if ( isDefault && !d->defaultProperty.empty() )
-        throw std::exception();
+    {
+        auto exc = CREATE_EXCEPTION(lv::Exception, "Default property already exists", lv::Exception::toCode("~Element"));
+        engine()->throwError(&exc, this);
+        return nullptr;
+    }
 
     InstanceProperty* ip = new InstanceProperty(this, name, type, value, isWritable, notifyEvent);
     d->instanceProperties[name] = ip;
@@ -539,7 +564,11 @@ bool Element::hasProperty(const std::string &name) const{
 LocalValue Element::get(const std::string &name){
     Property* p = property(name);
     if ( !p )
-        throw std::exception();
+    {
+        auto exc = CREATE_EXCEPTION(lv::Exception, "Property with the given name doesn't exist", lv::Exception::toCode("~Element"));
+        engine()->throwError(&exc, this);
+        return LocalValue(engine());
+    }
 
     return p->read(this);
 }
@@ -547,7 +576,11 @@ LocalValue Element::get(const std::string &name){
 void Element::set(const std::string &name, const LocalValue &value){
     Property* p = property(name);
     if ( !p )
-        throw std::exception();
+    {
+        auto exc = CREATE_EXCEPTION(lv::Exception, "Property with the given name doesn't exist", lv::Exception::toCode("~Element"));
+        engine()->throwError(&exc, this);
+        return;
+    }
 
     p->write(this, value.data());
 }
@@ -636,7 +669,9 @@ v8::Local<v8::Object> ElementPrivate::localObject(Element *element){
     ElementPrivate* d = element->m_d;
     if ( d->persistent.IsEmpty() ){
         if ( !d->engine )
-            throw std::exception();
+        {
+            THROW_EXCEPTION(lv::Exception, "Engine should be assigned to Element", lv::Exception::toCode("~ElementPrivate"));
+        }
 
         d->engine->wrapScriptObject(element);
     }

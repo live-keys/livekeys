@@ -261,20 +261,20 @@ Rectangle{
         frameVisible: false
 
         function ensureVisible(r){
-            if (!root.internalActiveFocus )
+            if (!editor.internalActiveFocus )
                 return;
             if (flickableItem.contentX >= r.x)
                 flickableItem.contentX = r.x;
             else if (flickableItem.contentX + width <= r.x + r.width + 20)
                 flickableItem.contentX = r.x + r.width - width + 20;
-            /*if (flickableItem.contentY >= r.y)
+            if (flickableItem.contentY >= r.y)
                 flickableItem.contentY = r.y;
             else if (flickableItem.contentY + height <= r.y + r.height + 20)
                 flickableItem.contentY = r.y + r.height - height + 20;
-            */
         }
 
         flickableItem.contentHeight: textEdit.totalHeight
+        flickableItem.contentWidth: editorArea.totalWidth + 10
 
         Flickable {
             id: editorFlickable
