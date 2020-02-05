@@ -52,6 +52,10 @@ public:
         std::string r = own.get();
 #else
         std::string r = typeid(TR).name();
+        size_t spacePosition = r.find_first_of(" ");
+        if (spacePosition != std::string::npos) {
+            r = r.substr(spacePosition + 1);
+        }
 #endif
 
         if ( options & TypeNameOptions::Qualifiers){

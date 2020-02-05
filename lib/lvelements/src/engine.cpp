@@ -578,7 +578,7 @@ bool Engine::isElementConstructor(const Callable &c){
  */
 void Engine::throwError(const Exception *exception, Element *object){
     v8::Local<v8::Value> e;
-    auto se = static_cast<const SyntaxException*>(exception);
+    auto se = dynamic_cast<const SyntaxException*>(exception);
     if (se)
     {
         e = v8::Exception::SyntaxError(

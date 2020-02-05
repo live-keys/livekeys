@@ -23,7 +23,6 @@ private slots:
     void testExceptionPropagation();
     void testExceptionPropagationFromJs();
     void testExceptionRethrowPropagation();
-
 };
 
 #endif // JSERRORHANDLINGTEST_H
