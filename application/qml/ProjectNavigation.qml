@@ -34,7 +34,6 @@ Rectangle{
             close()
             cancel()
         }
-
     }
 
     signal cancel()

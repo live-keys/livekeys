@@ -2191,6 +2191,19 @@ void CodeQmlHandler::updateRuntimeBindings(QObject *runtime){
     }
 }
 
+QJSValue CodeQmlHandler::getDocumentIds(){
+    Q_D(CodeQmlHandler);
+    QmlScopeSnap scope = d->snapScope();
+    QStringList ids = scope.document->info()->extractIds();
+
+    QJSValue result = m_engine->newArray(ids.length());
+
+    for ( int i = 0; i < ids.length(); ++i ){
+        result.setProperty(i, ids[i]);
+    }
+    return result;
+}
+
 void CodeQmlHandler::suggestCompletion(int cursorPosition){
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     if ( !m_document || !dh )

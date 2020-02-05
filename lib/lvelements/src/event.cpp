@@ -18,13 +18,22 @@ void InstanceEvent::callbackImplementation(const v8::FunctionCallbackInfo<v8::Va
         p.assign(i, info[i]);
     }
 
-    ie->call(p);
+    try {
+        ie->call(p);
+    }
+    catch (lv::Exception exc)
+    {
+        ie->m_parent->engine()->throwError(&exc, ie->m_parent);
+        return;
+    }
 
 }
 
 void InstanceEvent::call(const Function::Parameters &params){
     if ( params.length() != m_numArguments )
-        throw std::exception();
+    {
+        THROW_EXCEPTION(lv::Exception, "Wrong number of function arguments", lv::Exception::toCode("~InstanceEvent"));
+    }
 
     m_parent->notifyFromInstance(m_eventId, params);
 }

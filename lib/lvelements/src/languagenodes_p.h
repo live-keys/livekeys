@@ -100,6 +100,7 @@ private:
     static void visitVariableDeclaration(BaseNode* parent, const TSNode& node);
     static void visitNewExpression(BaseNode* parent, const TSNode& node);
     static void visitReturnStatement(BaseNode* parent, const TSNode& node);
+    static void visitArrowFunction(BaseNode* parent, const TSNode& node);
 
     BaseNode*              m_parent;
     TSNode                 m_node;
@@ -111,6 +112,12 @@ class NumberNode: public BaseNode {
     friend class BaseNode;
 public:
     NumberNode(const TSNode& node, const std::string& typeString = "Number") : BaseNode(node, typeString){}
+};
+
+class ArrowFunctionNode: public BaseNode {
+    friend class BaseNode;
+public:
+    ArrowFunctionNode(const TSNode& node, const std::string& typeString = "ArrowFunction") : BaseNode(node, typeString){}
 };
 
 class FunctionDeclarationNode: public BaseNode {
@@ -319,6 +326,7 @@ private:
     std::vector<IdentifierNode*> m_property;
     BindableExpressionNode* m_expression;
     std::vector<BaseNode*> m_bindings;
+    StatementBlockNode* m_statementBlock;
 
     friend class BaseNode;
     friend class NewComponentExpressionNode;

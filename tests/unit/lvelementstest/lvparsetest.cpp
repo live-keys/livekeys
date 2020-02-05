@@ -261,7 +261,7 @@ void LvParseTest::testScenarioTest(){
 
     el::LanguageParser::AST* conversionAST = parser->parse(conversion);
 
-    vlog() << conversion;
+//    vlog() << conversion;
 
 //    el::LanguageParser::AST* expectedAST   = parser->parse(expect);
 
