@@ -30,8 +30,12 @@ QString QmlPath::join(QJSValue part1, QJSValue part2)
 
     if (part1.isString())
     {
-        result += removeSlashes(part1.toString());
-        if (part2.isString()) result += "/" + removeSlashes(part2.toString());
+        result = part1.toString();
+        if (result.length() > 0 && result[result.length() - 1] == '/')
+            result = result.left(result.length() - 1);
+
+        if (part2.isString())
+            result += "/" + removeSlashes(part2.toString());
     }
     return result;
 }
@@ -74,6 +78,10 @@ QString QmlPath::absolutePath(QJSValue path)
         return QFileInfo(path.toString()).absoluteFilePath();
 
     return "";
+}
+
+QString QmlPath::dir(const QString &str){
+    return QFileInfo(str).path();
 }
 
 bool QmlPath::hasExtensions(const QString &path, QJSValue extensions){

@@ -260,6 +260,8 @@ public slots:
     void __documentContentsChanged(int position, int charsRemoved, int charsAdded);
 
     virtual void readContent() override;
+    QString substring(int from, int length) const;
+    void insert(int from, int length, const QString& text);
 
 signals:
     /** shows if the format changed */

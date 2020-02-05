@@ -54,6 +54,9 @@ const std::vector<Element*> TestCase::data() const{
 
 void TestCase::onReady(){
     m_ready = true;
+    if ( !parent() ){
+        exec();
+    }
 }
 
 int TestCase::exec(){
@@ -89,7 +92,10 @@ int TestCase::exec(){
                     Function::Parameters p(1);
                     p.assign(0, LocalValue(engine(), tester));
 
-                    scenario->run().call(scenario, p);
+                    //TODO: Check if run() is null
+                    vlog() << scenario->run().isNull();
+                    if ( !scenario->run().isNull() )
+                        scenario->run().call(scenario, p);
 
                 }, [&except, scenario](const Engine::CatchData& cd){
                     except = true;

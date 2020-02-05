@@ -466,7 +466,7 @@ Item{
     Component{
         id: documentationFactory
 
-        DocumentationView{
+        DocumentationViewPane{
             id: documentationViewComponent
             panes: root.panes
         }

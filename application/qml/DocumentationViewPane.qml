@@ -26,11 +26,20 @@ Pane{
         height: 30
         color: root.topColor
 
+        PaneDragItem{
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            onDragStarted: root.panes.__dragStarted(root)
+            onDragFinished: root.panes.__dragFinished(root)
+            display: titleText.text
+        }
+
         Text{
             id: titleText
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 5
+            anchors.leftMargin: 30
             color: "#808691"
             text: root.pageTitle
             font.family: "Open Sans, sans-serif"

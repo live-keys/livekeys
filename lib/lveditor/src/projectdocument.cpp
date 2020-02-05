@@ -463,6 +463,27 @@ QString ProjectDocument::peekContent(int position) const{
     return result;
 }
 
+QString ProjectDocument::substring(int from, int length) const{
+    QTextCursor tc(m_textDocument);
+    tc.setPosition(from);
+    tc.setPosition(from + length, QTextCursor::KeepAnchor);
+    return tc.selectedText();
+}
+
+void ProjectDocument::insert(int from, int length, const QString &text){
+    addEditingState(ProjectDocument::Assisted);
+
+    QTextCursor tc(m_textDocument);
+    tc.beginEditBlock();
+    tc.setPosition(from);
+    tc.setPosition(from + length, QTextCursor::KeepAnchor);
+    tc.removeSelectedText();
+    tc.insertText(text);
+    tc.endEditBlock();
+
+    removeEditingState(ProjectDocument::Assisted);
+}
+
 int ProjectDocument::lastCursorPosition()
 {
     return m_lastCursorPosition;
