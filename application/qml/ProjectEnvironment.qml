@@ -151,18 +151,37 @@ Item{
     }
 
     function toggleVisibility(){
-        var pfs = null
+        var pfs = root.panes.focusPane('projectFileSystem')
 
-        var openPanes = root.panes.open
-        for ( var i = 0; i < openPanes.length; ++i ){
-            if ( openPanes[i].objectName === 'projectFileSystem' ){
-                pfs = openPanes[i]
-                break
+        if (pfs)
+        {
+            root.panes.removePane(pfs)
+        }
+        else
+        {
+            pfs = root.panes.createPane('projectFileSystem')
+
+            var containerUsed = root.panes.container
+            if ( containerUsed.orientation === Qt.Vertical ){
+                for ( var i = 0; i < containerUsed.panes.length; ++i ){
+                    if ( containerUsed.panes[i].paneType === 'splitview' &&
+                         containerUsed.panes[i].orientation === Qt.Horizontal )
+                    {
+                        containerUsed = containerUsed.panes[i]
+                        break
+                    }
+                }
+            }
+
+            root.panes.splitPaneHorizontallyBeforeWith(containerUsed, 0, pfs)
+
+            var containerPanes = containerUsed.panes
+            if ( (containerPanes.length > 2 && containerPanes[2].width > 300 + containerPanes[0].width) || containerUsed.width === 0 ){
+                containerPanes[0].width = containerPanes[0].width * 2
+                pfs.width = 300
             }
         }
 
-        if ( pfs )
-            pfs.width = pfs.width === 0 ? 240 : 0
     }
 
 

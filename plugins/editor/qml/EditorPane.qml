@@ -45,6 +45,8 @@ Pane{
 
     property var panes: null
 
+    property bool codeOnly: true
+
     paneType: 'editor'
     paneState : { return {} }
     paneInitialize : function(s){
@@ -182,7 +184,7 @@ Pane{
             width: 24
             height: parent.height
             anchors.right: parent.right
-            anchors.rightMargin: 109
+            anchors.rightMargin: 140
             visible : root.document !== null
 
             Image{
@@ -195,6 +197,27 @@ Pane{
                 anchors.fill: parent
                 onClicked: {
                     lk.layers.workspace.commands.execute('window.workspace.toggleNavigation')
+                }
+            }
+        }
+
+        Rectangle{
+            anchors.right: parent.right
+            anchors.rightMargin: 110
+            width: 30
+            height: parent.height
+            color: root.optionsColor
+
+            Image{
+                id : codeDesignToggle
+                anchors.centerIn: parent
+                source : "qrc:/images/switch-to-" + (codeOnly? "source": "design") + ".png"
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    codeOnly = !codeOnly
                 }
             }
         }

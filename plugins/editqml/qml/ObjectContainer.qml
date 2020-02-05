@@ -17,6 +17,9 @@ Item{
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
     property Component paletteGroupFactory : Component{ PaletteGroup{} }
 
+    property int titleHeight: 30
+    property bool compact: false
+
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
         onAboutToBeRemoved : {
@@ -30,16 +33,40 @@ Item{
         }
     }
 
-    width: container.width < 200 ? 200 : container.width
-    height: container.height < 10 ? 30 : container.height + 20
+    width: container.width < 200 ? 200 : container.width + 50
+    height: container.height < 10 || compact ? 30 : container.height + 20
 
-    Item{
+    Rectangle{
         id: objectContainerTitle
-        height: 20
-        width: parent.width
+        height: titleHeight
+        width: parent.width + 10
+        color: '#062945'
+
+        Item{
+            anchors.left: parent.left
+            anchors.leftMargin: 12
+            anchors.verticalCenter: parent.verticalCenter
+            width: 15
+            height: 20
+            Text{
+                anchors.verticalCenter: parent.verticalCenter
+                text: compact ? '>' : 'v'
+                color: '#ffffff'
+
+                font.pixelSize: 15
+            }
+            MouseArea{
+                id: compactObjectButton
+                anchors.fill: parent
+                onClicked: {
+                    compact = !compact
+                }
+            }
+        }
+
         Text{
             anchors.left: parent.left
-            anchors.leftMargin: 10
+            anchors.leftMargin: 40
             anchors.right: parent.right
             anchors.rightMargin: 30
             anchors.verticalCenter: parent.verticalCenter
@@ -47,6 +74,44 @@ Item{
             clip: true
             color: '#82909b'
         }
+
+        Item{
+            id: eraseButton
+            anchors.right: parent.right
+            anchors.rightMargin: 80
+            anchors.verticalCenter: parent.verticalCenter
+            width: 15
+            height: 80
+            Image{
+                anchors.centerIn: parent
+                source: "qrc:/images/palette-erase-object.png"
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                }
+            }
+        }
+
+
+        Item{
+            id: connectionsButton
+            anchors.right: parent.right
+            anchors.rightMargin: 60
+            anchors.verticalCenter: parent.verticalCenter
+            width: 15
+            height: 20
+            Image{
+                anchors.centerIn: parent
+                source: "qrc:/images/palette-connections.png"
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                }
+            }
+        }
+
 
         Item{
             id: paletteAddButton
@@ -91,7 +156,7 @@ Item{
 
                             newPaletteBox.name = palette.name
                             newPaletteBox.type = palette.type
-                            newPaletteBox.moveEnabled = false
+                            newPaletteBox.moveEnabledSet = false
                             newPaletteBox.documentHandler = editor.documentHandler
                             newPaletteBox.cursorRectangle = paletteGroup.cursorRectangle
                             newPaletteBox.editorPosition = paletteGroup.editorPosition
@@ -220,6 +285,7 @@ Item{
                                 childObjectContainer.editor = objectContainer.editor
                                 childObjectContainer.editingFragment = ef
                                 childObjectContainer.title = data
+                                childObjectContainer.x = 50
 
                                 var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
                                 paletteBoxGroup.editingFragment = ef
@@ -265,7 +331,7 @@ Item{
         id: paletteHeaderList
         visible: model ? true : false
         anchors.top: parent.top
-        anchors.topMargin: 20
+        anchors.topMargin: titleHeight
         width: 250
         color: "#0a141c"
         selectionColor: "#0d2639"
@@ -285,8 +351,8 @@ Item{
         id: container
 
         anchors.top: parent.top
-        anchors.topMargin: 20
-
+        anchors.topMargin: titleHeight
+        visible: !compact
         spacing: 20
         width: {
             var maxWidth = 0;
@@ -299,6 +365,7 @@ Item{
             return maxWidth
         }
         height: {
+            if (compact) return 0
             var totalHeight = 0;
             if ( children.length > 0 ){
                 for ( var i = 0; i < children.length; ++i ){

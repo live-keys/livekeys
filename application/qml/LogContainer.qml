@@ -197,8 +197,12 @@ Pane{
             anchors.bottomMargin: 0
             height : clearLog.containsMouse ? parent.height : parent.height - 3
             width : 25
-            color : "red"
-
+            color : "transparent"
+            Image{
+                id : clearLogImage
+                anchors.centerIn: parent
+                source : "qrc:/images/log-clear.png"
+            }
             MouseArea{
                 id : clearLog
                 anchors.fill: parent

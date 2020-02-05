@@ -28,20 +28,22 @@ Item{
         }
     }
 
-    width: container.width + 150
+    width: container.width + 120
     height: container.height > 30 ? container.height + 5 : 35
 
     Rectangle{
         id: propertyContainerLabel
         anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: 50
+        anchors.top: parent.top
+        anchors.topMargin: 10
         height: 20
         width: 100
         color: "#062944"
         radius: 10
         Text{
             anchors.left: parent.left
-            anchors.leftMargin: 10
+            anchors.leftMargin: 30
             anchors.right: parent.right
             anchors.rightMargin: 30
             anchors.verticalCenter: parent.verticalCenter
@@ -52,10 +54,33 @@ Item{
     }
 
     Item{
+        anchors.left: parent.left
+        anchors.leftMargin: 60
+        anchors.top: parent.top
+        anchors.topMargin: 10
+        width: 15
+        height: 20
+        Text{
+            anchors.verticalCenter: parent.verticalCenter
+            text: 'x'
+            color: '#ffffff'
+        }
+        MouseArea{
+            id: propertyCloseArea
+            anchors.fill: parent
+            onClicked: {
+                propertyContainer.documentHandler.codeHandler.removeConnection(propertyContainer.editingFragment)
+            }
+        }
+    }
+
+    Item{
         id: paletteAddButton
         anchors.left: parent.left
-        anchors.leftMargin: 110
+        anchors.leftMargin: 120
         anchors.top: parent.top
+        anchors.topMargin: 12
+
         width: 15
         height: 20
         Image{
@@ -91,7 +116,7 @@ Item{
 
                             newPaletteBox.child = palette.item
                             newPaletteBox.palette = palette
-                            newPaletteBox.moveEnabled = false
+                            newPaletteBox.moveEnabledSet = false
 
                             newPaletteBox.name = palette.name
                             newPaletteBox.type = palette.type
@@ -111,25 +136,7 @@ Item{
     }
 
 
-    Item{
-        anchors.left: parent.left
-        anchors.leftMargin: 130
-        anchors.top: parent.top
-        width: 15
-        height: 20
-        Text{
-            anchors.verticalCenter: parent.verticalCenter
-            text: 'x'
-            color: '#ffffff'
-        }
-        MouseArea{
-            id: propertyCloseArea
-            anchors.fill: parent
-            onClicked: {
-                propertyContainer.documentHandler.codeHandler.removeConnection(propertyContainer.editingFragment)
-            }
-        }
-    }
+
 
     PaletteListView{
         id: paletteHeaderList
@@ -158,7 +165,7 @@ Item{
         anchors.topMargin: 5
 
         anchors.left: parent.left
-        anchors.leftMargin: 140
+        anchors.leftMargin: 160
 
         width: propertyContainer.valueContainer ? propertyContainer.valueContainer.width : 0
         height: propertyContainer.valueContainer ? propertyContainer.valueContainer.height : 0
