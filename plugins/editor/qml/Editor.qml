@@ -274,7 +274,7 @@ Rectangle{
         }
 
         flickableItem.contentHeight: textEdit.totalHeight
-        flickableItem.contentWidth: editorArea.totalWidth + 10
+        flickableItem.contentWidth: textEdit.totalWidth + 10
 
         Flickable {
             id: editorFlickable
