@@ -21,6 +21,7 @@ import QtQuick.Controls.Styles 1.4
 import base 1.0
 import editor 1.0
 import editor.private 1.0
+import fs 1.0 as Fs
 
 Item{
     id: root
@@ -28,6 +29,10 @@ Item{
 
     property QtObject panes: null
     property QtObject runSpace: null
+
+    property var documentationViewFactory : Component{
+        DocumentationView{}
+    }
 
     property Item navigation : ProjectNavigation{
         id: projectNavigation
@@ -371,6 +376,26 @@ Item{
         var pane = lk.layers.workspace.interceptFile(path, mode)
         if ( pane )
             return pane
+
+        if ( Fs.Path.hasExtensions(path, 'html')){
+            if ( Fs.Path.hasExtensions(path, 'doc.html')){
+//                var docItem = documentationViewFactory.createObject()
+                var docItem = null // documentation is currently disabled
+                if ( docItem ){
+                    docItem.loadDocumentationHtml(path)
+                    var docPane = mainSplit.findPaneByType('documentation')
+                    if ( !docPane ){
+                        var storeWidth = root.width
+                        docPane = root.panes.createPane('documentation', {}, [400, 400])
+                        root.panes.container.splitPane(0, docPane)
+                    }
+                    docPane.pageTitle = Fs.Path.baseName(path)
+                    docPane.page = docItem
+
+                    return docPane
+                }
+            }
+        }
 
         var doc = project.openTextFile(path, mode)
         if ( !doc )

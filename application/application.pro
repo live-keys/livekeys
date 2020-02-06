@@ -54,7 +54,7 @@ OTHER_FILES += \
     $$PWD/qml/*.qml
 
 DISTFILES += \
-    qml/DocumentationView.qml \
+    qml/DocumentationViewPane.qml \
     qml/MessageDialogMain.qml \
     qml/LogView.qml \
     qml/CommandsMenu.qml \

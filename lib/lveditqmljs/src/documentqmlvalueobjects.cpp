@@ -416,14 +416,14 @@ QList<DocumentQmlValueObjects::RangeProperty*> DocumentQmlValueObjects::properti
         RangeObject *root)
 {
     QList<DocumentQmlValueObjects::RangeProperty*> properties;
-    if ( root == 0 )
+    if ( root == nullptr )
         root = m_root;
 
     for ( int i = 0; i < root->properties.size(); ++i ){
         if ( root->properties[i]->begin >= start && root->properties[i]->propertyEnd <= end ){
             properties.append(root->properties[i]);
         } else if (
-                root->properties[i]->child != 0 &&
+                root->properties[i]->child != nullptr &&
                 ( root->properties[i]->child->begin < end  || root->properties[i]->child->end > start )
             )
         {

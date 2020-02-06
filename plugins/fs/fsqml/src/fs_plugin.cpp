@@ -22,6 +22,7 @@
 #include "qmlfilereader.h"
 #include "qmlfiledescriptor.h"
 #include "qmlfilestream.h"
+#include "qmlurlinfo.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -41,15 +42,21 @@ static QObject* fileProvider(QQmlEngine *engine, QJSEngine *){
     return new lv::QmlFile(engine);
 }
 
+static QObject* urlInfoProvider(QQmlEngine *engine, QJSEngine *){
+    return new lv::QmlUrlInfo(engine);
+}
+
+
 void FsPlugin::registerTypes(const char *uri){
     // @uri fs
-    qmlRegisterType<lv::ListDir>(          uri, 1, 0, "ListDir");
-    qmlRegisterType<lv::QmlFileDescriptor>(uri, 1, 0, "FileDescriptor");
-    qmlRegisterType<lv::QmlFileReader>(    uri, 1, 0, "FileReader");
-    qmlRegisterType<lv::QmlFileStream>(    uri, 1, 0, "FileStream");
-    qmlRegisterSingletonType<lv::QmlPath>( uri, 1, 0, "Path", &pathProvider);
-    qmlRegisterSingletonType<lv::QmlDir>(  uri, 1, 0, "Dir", &dirProvider);
-    qmlRegisterSingletonType<lv::QmlFile>( uri, 1, 0, "File", &fileProvider);
+    qmlRegisterType<lv::ListDir>(            uri, 1, 0, "ListDir");
+    qmlRegisterType<lv::QmlFileDescriptor>(  uri, 1, 0, "FileDescriptor");
+    qmlRegisterType<lv::QmlFileReader>(      uri, 1, 0, "FileReader");
+    qmlRegisterType<lv::QmlFileStream>(      uri, 1, 0, "FileStream");
+    qmlRegisterSingletonType<lv::QmlPath>(   uri, 1, 0, "Path", &pathProvider);
+    qmlRegisterSingletonType<lv::QmlDir>(    uri, 1, 0, "Dir", &dirProvider);
+    qmlRegisterSingletonType<lv::QmlFile>(   uri, 1, 0, "File", &fileProvider);
+    qmlRegisterSingletonType<lv::QmlUrlInfo>(uri, 1, 0, "UrlInfo", &urlInfoProvider);
 }
 
 void FsPlugin::initializeEngine(QQmlEngine *, const char *){

@@ -1,9 +1,11 @@
 #ifndef LVLIBRARYTABLE_H
 #define LVLIBRARYTABLE_H
 
+#include "live/lvbaseglobal.h"
+
 namespace lv{
 
-class LibraryTable{
+class LV_BASE_EXPORT LibraryTable{
 
 public:
     LibraryTable();

@@ -55,8 +55,10 @@ DISTFILES += \
     palettes/IntHistoryPlotPalette.qml \
     palettes/DoubleHistoryPlotPalette.qml \
     palettes/PathPalette.qml \
+    qml/DocumentationView.qml \
     qml/EditorPane.qml \
     qml/PaletteConnection.qml \
+    qml/WorkspaceControl.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/PaletteListView.qml \
@@ -65,5 +67,6 @@ DISTFILES += \
     qml/PaneWindow.qml \
     qml/WorkspaceTheme.qml \
     qml/PaneMenuButton.qml \
+    qml/LoadingAnimation.qml \
     qml/loaddocs.qml \
     qml/loadqtdocs.qml

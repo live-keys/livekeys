@@ -24,11 +24,17 @@
 
 #include "live/projectqmlextension.h"
 #include "qmlplugininfoextractor.h"
+#include "qmldocumentsyntax.h"
+#include "qmldocumentsyntaxvalue.h"
 
 void EditQmlPlugin::registerTypes(const char *uri){
     // @uri editqml
     lv::ProjectQmlExtension::registerTypes(uri);
     qmlRegisterType<lv::QmlPluginInfoExtractor>(uri, 1, 0, "PluginInfoExtractor");
+    qmlRegisterType<lv::QmlDocumentSyntax>(     uri, 1, 0, "QmlDocumentSyntax");
+
+    qmlRegisterUncreatableType<lv::QmlDocumentSyntaxValue>(
+        uri, 1, 0, "QmlDocumentSyntaxValue", "\'QmlDocumentSyntaxValue\' is available through the QmlDocumentSyntax object.");
 }
 
 void EditQmlPlugin::initializeEngine(QQmlEngine *, const char *){

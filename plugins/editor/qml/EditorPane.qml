@@ -68,6 +68,7 @@ Pane{
             } else {
                 helpPath = documentHandler.codeHandler.help(textEdit.cursorPosition)
             }
+
             if ( helpPath.length > 0 ){
 //                var docItem = lk.layers.workspace.documentation.load(helpPath)
                 var docItem = null // documentation is currently disabled
@@ -110,6 +111,7 @@ Pane{
 
     objectName: "editor"
 
+    function closeDocument(){ editor.closeDocument() }
     function save(){ editor.save()}
     function saveAs(){ editor.saveAs() }
     function closeDocumentAction(){ editor.closeDocumentAction() }
@@ -433,4 +435,3 @@ Pane{
     }
 
 }
-

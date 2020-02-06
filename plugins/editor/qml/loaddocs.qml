@@ -27,35 +27,12 @@ DocumentationLoader{
         var filePath = docUrl + '/' + htmlPath
         var url = "file://" + filePath + htmlHash
 
-        var f = Fs.File.open(filePath, Fs.File.ReadOnly)
-        if (f){
-            var contents = f.readAll().toString()
-
-            var styledContents = contents.replace('</head>',
-                '<style>\n' +
-                    '#main{padding: 0px;}\n' +
-                    '#wrapper{padding: 15px;max-width: 100%;flex: 0 0 100%;background-color: #03090d;}\n' +
-                    '#indexList{display: none;}\n' +
-                '</style></head>\n')
-
-            docPage.loadHtml(styledContents, url)
-        }
+        docPage.loadDocumentationHtml(url)
 
         return docPage
     }
 
-    property string styleSourceCode : ''
-
     property var pageFactory : Component{
-
-        WebEngineView{
-            anchors.fill: parent ? parent : undefined
-
-            property WebEngineScript userScript : WebEngineScript{
-                name: "indexTableRemoval"
-                sourceCode: root.styleSourceCode
-            }
-            userScripts: [userScript]
-        }
+        DocumentationView{}
     }
 }
