@@ -61,8 +61,7 @@ LiveExtension{
             paletteGroup.editingFragment = ef
             paletteGroup.codeHandler = codeHandler
             ef.visualParent = paletteGroup
-            editorBox.color = "#02070b"
-            editorBox.radius = 5
+            editorBox.color = "black"
             editorBox.border.width = 1
             editorBox.border.color = "#141c25"
 
@@ -123,14 +122,12 @@ LiveExtension{
             ef.visualParent = paletteBoxGroup
 
             paletteBoxGroup.codeHandler = codeHandler
-            paletteBoxGroup.x = 5
 
             if (forAnObject) objectContainer.paletteGroup = paletteBoxGroup;
 
             editorBox.setChild(forAnObject ? objectContainer : paletteBoxGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
 
-            editorBox.color = "#02070b"
-            editorBox.radius = 5
+            editorBox.color = "black"
             editorBox.border.width = 1
             editorBox.border.color = "#141c25"
         }
@@ -146,7 +143,7 @@ LiveExtension{
 
             paletteBox.name = palette.name
             paletteBox.type = palette.type
-            paletteBox.moveEnabled = false
+            paletteBox.moveEnabledSet = false
             paletteBox.documentHandler = editor.documentHandler
             paletteBox.cursorRectangle = rect
             paletteBox.editorPosition = cursorCoords
@@ -180,12 +177,10 @@ LiveExtension{
             editorBox = lk.layers.editor.environment.createEmptyEditorBox()
             paletteBoxGroup = root.paletteGroupFactory.createObject(lk.layers.editor.environment.content)
             editorBox.setChild(paletteBoxGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
-            paletteBoxGroup.x = 5
             paletteBoxGroup.editingFragment = ef
             paletteBoxGroup.codeHandler = codeHandler
             ef.visualParent = paletteBoxGroup
-            editorBox.color = "#02070b"
-            editorBox.radius = 5
+            editorBox.color = "black"
             editorBox.border.width = 1
             editorBox.border.color = "#141c25"
         }

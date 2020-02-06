@@ -24,10 +24,8 @@ CodePalette{
     id: palette
     type : "qml/double"
 
-    property bool minimized: true
-
     item: Rectangle{
-        width: 380 + (minimized? 50:0)
+        width: 380
         height: 30
         color: 'transparent'
 
@@ -37,7 +35,7 @@ CodePalette{
             anchors.topMargin: 1
             anchors.left: parent.left
             anchors.leftMargin: leftLabel.width + 3
-            width: parent.width - leftLabel.width - rightLabel.width - 10 - (minimized?50:0)
+            width: parent.width - leftLabel.width - rightLabel.width - 10
             height: 15
             minimumValue: 0
             value: 0
@@ -139,7 +137,6 @@ CodePalette{
             mode: 2
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.rightMargin: minimized? 50:0
 
             up: function(){
                 if (intSlider.maximumValue === 0)

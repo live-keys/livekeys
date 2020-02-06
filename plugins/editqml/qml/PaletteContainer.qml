@@ -6,14 +6,17 @@ import editor.private 1.0
 
 Item{
     id: paletteContainer
-    width: child ? child.width + (condition? 10 :0) : 0
-    height: child ? child.height + (condition? 25 :0) : 0
+    width: child ? child.width  + (compact? compactHeaderWidth: 0) : 0
+    height: child ? child.height + (compact? 0 : normalHeaderHeight) : 0
     objectName: "paletteContainer"
+
+    property int compactHeaderWidth: 40
+    property int normalHeaderHeight: 35
+
+    property bool compact: true
 
     property Item child : null
     property QtObject palette : null
-
-    property bool condition: palette && !palette.minimized
 
     property string name : ''
     property string type : ''
@@ -23,7 +26,8 @@ Item{
 
     property alias paletteSwapVisible : paletteSwapButton.visible
     property alias paletteAddVisible : paletteAddButton.visible
-    property alias moveEnabled : paletteBoxMoveArea.enabled
+    property bool moveEnabledSet : true
+    property alias moveEnabledGet: paletteBoxMoveArea.enabled
 
     property double titleLeftMargin : 50
     property double titleRightMargin : 50
@@ -36,14 +40,23 @@ Item{
         onClicked: paletteContainer.child.forceActiveFocus()
     }
 
-    Item{
+    Rectangle{
         id: paletteBoxHeader
-        height: 24
-        width: paletteContainer.parent ? paletteContainer.parent.width : paletteContainer.width
-        clip: true
+        height: compact && child
+                    ? child.height
+                    : normalHeaderHeight
+        width: !compact && child
+                    ? (paletteContainer.parent ? paletteContainer.parent.width : paletteContainer.width) + 10
+                    : compactHeaderWidth
 
-        visible: condition
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.leftMargin: compact && child ? child.width + 10: 0
+        clip: true
+        color: compact? "black":"#141c25"
+
         MouseArea{
+            enabled: !compact && moveEnabledSet
             id: paletteBoxMoveArea
             anchors.fill: parent
             cursorShape: enabled ? Qt.SizeAllCursor : Qt.ArrowCursor
@@ -96,7 +109,7 @@ Item{
 
                     newPaletteBox.name = palette.name
                     newPaletteBox.type = palette.type
-                    newPaletteBox.moveEnabled = paletteContainer.moveEnabled
+                    newPaletteBox.moveEnabled = paletteContainer.moveEnabledGet
                     newPaletteBox.documentHandler = documentHandler
                     newPaletteBox.cursorRectangle = paletteContainer.cursorRectangle
                     newPaletteBox.editorPosition = paletteContainer.editorPosition
@@ -127,6 +140,7 @@ Item{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
+            visible: !compact && moveEnabledSet
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-swap.png"
@@ -138,6 +152,7 @@ Item{
             }
         }
         Item{
+            visible: !compact && moveEnabledSet
             id: paletteAddButton
             anchors.left: parent.left
             anchors.leftMargin: 25
@@ -156,9 +171,10 @@ Item{
         }
 
         Text{
+            visible: !compact
             id: paletteBoxTitle
             anchors.left: parent.left
-            anchors.leftMargin: paletteContainer.titleLeftMargin
+            anchors.leftMargin: !compact && moveEnabledSet ? paletteContainer.titleLeftMargin : 10
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: paletteContainer.titleRightMargin
@@ -175,10 +191,8 @@ Item{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
-//            Image{
-//                anchors.centerIn: parent
-//                source: "qrc:/images/palette-add.png"
-//            }
+            visible: !compact
+
             Text{
                 anchors.verticalCenter: parent.verticalCenter
                 text: 'P'
@@ -192,65 +206,79 @@ Item{
         }
 
 
-    }
+        Rectangle {
+            id: rightButtons
+            color: compact? "#131a24" : "transparent"
+            width: 35
+            height: 24
+            radius: compact? 5: 0
 
-    Item{
-        id: closeButton
-        anchors.right: condition? paletteBoxHeader.right : paletteChild.right
-        anchors.rightMargin: 0
-        anchors.top: condition? paletteBoxHeader.top : paletteChild.top
-        anchors.topMargin: condition? 3:10
-        width: 10
-        height: 15
+            anchors.top: parent.top
+            anchors.topMargin: 5
+            anchors.right: parent.right
+            anchors.rightMargin: 3
 
-        z: 2000
-        Text{
-            anchors.verticalCenter: parent.verticalCenter
-            text: 'x'
-            color: '#ffffff'
-        }
-        MouseArea{
-            id: paletteCloseArea
-            anchors.fill: parent
-            onClicked: {
-                documentHandler.codeHandler.removePalette(paletteContainer.palette)
+
+            Triangle{
+                id: minimizeButton
+                width: 10
+                height: 8
+                color: "white"
+
+                anchors.top: parent.top
+                anchors.topMargin: 8
+                anchors.left: parent.left
+                anchors.leftMargin: 5
+
+                rotation: Triangle.Top
+                MouseArea{
+                    id: switchMinimized
+                    anchors.fill: parent
+                    onClicked: {
+                        if (palette)
+                            compact = !compact
+                            if (compact) minimizeButton.rotation = Triangle.Top
+                            else minimizeButton.rotation = Triangle.Bottom
+                    }
+                }
             }
-        }
-    }
 
-    Triangle{
-        id: minimizeButton
-        anchors.right: condition? paletteBoxHeader.right : paletteChild.right
-        anchors.rightMargin: 20
-        anchors.top: condition? paletteBoxHeader.top : paletteChild.top
-        anchors.topMargin: condition? 8:15
-        width: 10
-        height: 8
-        color: "white"
-        rotation: Triangle.Top
-        z: 2000
-        MouseArea{
-            id: switchMinimized
-            anchors.fill: parent
-            onClicked: {
-                if (palette)
-                    palette.minimized = !palette.minimized
-                    if (palette.minimized) minimizeButton.rotation = Triangle.Top
-                    else minimizeButton.rotation = Triangle.Bottom
+            Item{
+                id: closeButton
+                width: 10
+                height: 15
+                anchors.top: parent.top
+                anchors.topMargin: 3
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+
+                Text{
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: 'x'
+                    color: '#ffffff'
+                }
+                MouseArea{
+                    id: paletteCloseArea
+                    anchors.fill: parent
+                    onClicked: {
+                        documentHandler.codeHandler.removePalette(paletteContainer.palette)
+                    }
+                }
             }
         }
     }
 
     Item{
         id: paletteChild
-        anchors.fill: parent
-        anchors.topMargin: condition? 25:0
+        anchors.top: compact? parent.top : paletteBoxHeader.top
+        anchors.topMargin: compact? 0:paletteBoxHeader.height
+        anchors.left: parent.left
         children: parent.child ? [parent.child] : []
     }
 
     PaletteListView{
         id: paletteHeaderList
-        visible: condition && (model ? true:false)
+        visible: model ? true:false
         anchors.top: parent.top
         anchors.topMargin: 24
         width: parent.width
@@ -269,7 +297,7 @@ Item{
 
     PaletteConnection{
         id: paletteConnection
-        visible: condition && (model ? true:false)
+        visible: model ? true:false
         anchors.top: parent.top
         anchors.topMargin: 24
         width: parent.width
