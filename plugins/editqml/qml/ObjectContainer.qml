@@ -18,7 +18,40 @@ Item{
     property Component paletteGroupFactory : Component{ PaletteGroup{} }
 
     property int titleHeight: 30
-    property bool compact: false
+    property bool compact: true
+
+    function expand(){
+        var connections = editor.documentHandler.codeHandler.openNestedObjects(editingFragment)
+        for ( var i = 0; i < connections.length; ++i ){
+            var ef = connections[i]
+            var childObjectContainer = objectContainerFactory.createObject(container)
+
+            childObjectContainer.editor = objectContainer.editor
+            childObjectContainer.editingFragment = ef
+            childObjectContainer.title = ef.type()
+            childObjectContainer.x = 50
+
+            var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
+            paletteBoxGroup.editingFragment = ef
+            paletteBoxGroup.codeHandler = editor.documentHandler.codeHandler
+            ef.visualParent = paletteBoxGroup
+
+            childObjectContainer.paletteGroup = paletteBoxGroup
+            paletteBoxGroup.x = 5
+        }
+
+        compact = false
+    }
+
+    function collapse(){
+        var editingFragmentChildren = editingFragment.getChildFragments()
+        for ( var i = 0; i < editingFragmentChildren.length; ++i ){
+            var edit = editingFragmentChildren[i]
+            editor.documentHandler.codeHandler.removeConnection(edit)
+        }
+
+        compact = true
+    }
 
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
@@ -59,7 +92,10 @@ Item{
                 id: compactObjectButton
                 anchors.fill: parent
                 onClicked: {
-                    compact = !compact
+                    if ( objectContainer.compact )
+                        expand()
+                    else
+                        collapse()
                 }
             }
         }
@@ -89,6 +125,7 @@ Item{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
+                    editor.documentHandler.codeHandler.deleteObject(editingFragment)
                 }
             }
         }

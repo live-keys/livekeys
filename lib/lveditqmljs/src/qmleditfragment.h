@@ -51,6 +51,7 @@ public:
     QmlBindingSpan* bindingSpan();
 
     void setPaletteForBinding(CodePalette* palette);
+    void setRelativeBinding(const QSharedPointer<QmlBindingPath>& bp);
 
     bool hasPalette(CodePalette* palette);
     CodePalette* palette(const QString& type);
@@ -77,6 +78,9 @@ public:
     QObject* visualParent() const;
     void setVisualParent(QObject* visualParent);
 
+    QmlEditFragment* parentFragment();
+    QmlEditFragment* rootFragment();
+
     void emitRemoval();
 
 public slots:
@@ -87,6 +91,10 @@ public slots:
     int totalPalettes() const;
     lv::CodePalette* bindingPalette();
     lv::QmlBindingSpanModel *bindingModel(lv::CodeQmlHandler* codeHandler);
+
+    QString type() const;
+
+    QList<QObject*> getChildFragments() const;
 
     void updateValue();
 
@@ -106,7 +114,8 @@ private:
 
     QList<QmlEditFragment*> m_childFragments;
 
-    QmlBindingSpan*         m_bindingSpan;
+    QmlBindingSpan*                m_bindingSpan;
+    QSharedPointer<QmlBindingPath> m_relativeBinding;
 
     bool                 m_bindingUse;
     bool                 m_paletteUse;

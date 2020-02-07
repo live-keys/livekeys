@@ -107,8 +107,10 @@ public slots:
 
     lv::QmlCursorInfo* cursorInfo(int position, int length);
     lv::QmlEditFragment* openConnection(int position, QObject *currentApp = nullptr);
-    lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position, QObject* currentApp = nullptr);
+    lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
+    QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
     void removeConnection(lv::QmlEditFragment* edit);
+    void deleteObject(lv::QmlEditFragment* edit);
 
     lv::PaletteList *findPalettes(int position, bool unrepeated = false);
     lv::CodePalette* openPalette(lv::QmlEditFragment* fragment, lv::PaletteList* palette, int index);
