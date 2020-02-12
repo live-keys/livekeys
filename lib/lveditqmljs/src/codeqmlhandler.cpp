@@ -446,7 +446,7 @@ void CodeQmlHandler::assistCompletion(
             expressionPathHead.removeLast();
 
             QmlScopeSnap::ExpressionChain expression = scope.evaluateExpression(
-                ctx->objectTypePath(), expressionPathHead, cursor.position()
+                scope.quickObjectDeclarationType(ctx->objectTypePath()), expressionPathHead, cursor.position()
             );
 
             if ( expression.lastSegmentType() == QmlScopeSnap::ExpressionChain::ObjectNode ){
@@ -648,7 +648,7 @@ QString CodeQmlHandler::getHelpEntity(int position){
                     }
                 } else { // property declaration
                     QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
-                        ctx->objectTypePath(), expression, cursor.position()
+                        scope.quickObjectDeclarationType(ctx->objectTypePath()), expression, cursor.position()
                     );
 
                     if ( propChain.size() == expression.size() && propChain.size() > 0 ){
@@ -684,7 +684,7 @@ QString CodeQmlHandler::getHelpEntity(int position){
             QmlScopeSnap scope = d->snapScope();
 
             QmlScopeSnap::ExpressionChain expressionChain = scope.evaluateExpression(
-                ctx->objectTypePath(), expression, cursor.position()
+                scope.quickObjectDeclarationType(ctx->objectTypePath()), expression, cursor.position()
             );
 
             if ( expressionChain.lastSegmentType() == QmlScopeSnap::ExpressionChain::ObjectNode ){
@@ -811,6 +811,7 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
                 QmlScopeSnap::InheritancePath ipath = scope.getTypePath(expression);
 
                 if ( !ipath.isEmpty() ){
+
                     QmlScopeSnap::TypeReference tr = ipath.nodes.first();
 
                     QString type = "";
@@ -822,8 +823,8 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
 
                     properties.append(QmlDeclaration::create(
                         QStringList(),
-                        type,
-                        QStringList(),
+                        ipath.languageType(),
+                        QmlLanguageType(),
                         propertyPosition,
                         0,
                         m_document
@@ -835,27 +836,15 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
                 QmlScopeSnap scope = d->snapScope();
 
                 QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
-                    ctx->objectTypePath(), expression, cursor.position()
+                    scope.quickObjectDeclarationType(ctx->objectTypePath()), expression, cursor.position()
                 );
 
                 if ( propChain.size() == expression.size() && propChain.size() > 0 ){
                     QmlScopeSnap::PropertyReference& propref = propChain.last();
-
-                    QString propertyType = "";
-                    if ( propref.isPrimitive ){
-                        propertyType = propref.property.typeName();
-                    } else if ( !propref.propertyTypePath.isEmpty() ){
-                        QmlScopeSnap::TypeReference tr = propref.propertyTypePath.nodes.first();
-                        if ( !tr.typeName.isEmpty() && !tr.library.importUri.isEmpty() ){
-                            propertyType = tr.library.importUri + "#" + tr.typeName;
-                        } else if ( !tr.object->className().isEmpty() ){
-                            propertyType = tr.object->className();
-                        }
-                    }
-
-                    if ( !propertyType.isEmpty() ){
+                    QmlLanguageType qlt = propref.propertyType();
+                    if ( !qlt.isEmpty() ){
                         properties.append(QmlDeclaration::create(
-                            expression, propertyType, ctx->objectTypePath(), propertyPosition, propertyLength, m_document
+                            expression, propref.propertyType(), propref.propertyObjectType(), propertyPosition, propertyLength, m_document
                         ));
                     }
 
@@ -883,32 +872,34 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
                 QString propertyType = rp->type();
 
                 if ( propertyType.isEmpty() ){
-
                     QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
-                        rp->object(), rp->name(), rp->begin
+                        scope.quickObjectDeclarationType(rp->object()), rp->name(), rp->begin
                     );
 
                     if ( propChain.size() == rp->name().size() && propChain.size() > 0 ){
                         QmlScopeSnap::PropertyReference& propref = propChain.last();
-
-                        QString propertyType = "";
-                        if ( propref.isPrimitive ){
-                            propertyType = propref.property.typeName();
-                        } else if ( !propref.propertyTypePath.isEmpty() ){
-                            QmlScopeSnap::TypeReference tr = propref.propertyTypePath.nodes.first();
-                            if ( !tr.typeName.isEmpty() && !tr.library.importUri.isEmpty() ){
-                                propertyType = tr.library.importUri + "#" + tr.typeName;
-                            } else if ( !tr.object->className().isEmpty() ){
-                                propertyType = tr.object->className();
-                            }
-                        }
+                        properties.append(QmlDeclaration::create(
+                            rp->name(),
+                            propref.propertyType(),
+                            propref.propertyObjectType(),
+                            rp->begin,
+                            rp->propertyEnd - rp->begin,
+                            m_document
+                        ));
                     }
-                }
-
-                if ( !propertyType.isEmpty() ){
-                    properties.append(QmlDeclaration::create(
-                        rp->name(), propertyType, rp->object(), rp->begin, rp->propertyEnd - rp->begin, m_document
-                    ));
+                } else {
+                    QmlLanguageType qlt;
+                    if ( DocumentQmlInfo::isObject(propertyType) ){
+                        QmlScopeSnap::TypeReference tr = scope.getType(propertyType);
+                    } else {
+                        qlt = QmlLanguageType(QmlLanguageType::Qml, rp->type());
+                    }
+                    if ( !qlt.isEmpty() ){
+                        QmlScopeSnap::TypeReference tr = scope.getType(rp->object());
+                        properties.append(QmlDeclaration::create(
+                            rp->name(), qlt, tr.languageType(), rp->begin, rp->propertyEnd - rp->begin, m_document
+                        ));
+                    }
                 }
             }
         }
@@ -1453,19 +1444,11 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
             QmlScopeSnap::InheritancePath obPath = scope.getTypePath(obNs, obName);
 
             if ( !obPath.isEmpty() ){
-                QmlScopeSnap::TypeReference tr = obPath.nodes.first();
-
-                QString type = "";
-                if ( !tr.typeName.isEmpty() && !tr.library.importUri.isEmpty() ){
-                    type = tr.library.importUri + "#" + tr.typeName;
-                } else if ( !tr.object->className().isEmpty() ){
-                    type = tr.object->className();
-                }
 
                 QmlDeclaration::Ptr declaration = QmlDeclaration::create(
                     QStringList(),
-                    type,
-                    QStringList(),
+                    obPath.languageType(),
+                    QmlLanguageType(),
                     child->begin,
                     0,
                     m_document
@@ -1568,7 +1551,7 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated){
 
     QmlDeclaration::Ptr declaration = properties.first();
 
-    PaletteList* lpl = d->projectHandler->paletteContainer()->findPalettes("qml/" + declaration->type());
+    PaletteList* lpl = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join());
     if ( declaration->isListDeclaration() ){
         lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", lpl);
     } else {
@@ -1641,7 +1624,7 @@ lv::CodePalette* CodeQmlHandler::openPalette(lv::QmlEditFragment* edit, lv::Pale
 }
 
 bool CodeQmlHandler::isForAnObject(lv::QmlEditFragment *ef){
-    return DocumentQmlInfo::isObject(ef->declaration()->type());
+    return isForAnObject(ef->declaration());
 }
 
 /**
@@ -1763,12 +1746,15 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
     if ( properties.size() == 1 ){
         QmlDeclaration::Ptr firstdecl = properties.first();
 
-        if ( DocumentQmlInfo::isObject(firstdecl->type()) )
+        qDebug() << "FOUND 1 property";
+        qDebug() << firstdecl->type().join();
+
+        if ( isForAnObject(firstdecl) )
             canShape = true;
 
         canEdit = true;
 
-        int paletteCount = d->projectHandler->paletteContainer()->countPalettes("qml/" + firstdecl->type());
+        int paletteCount = d->projectHandler->paletteContainer()->countPalettes(firstdecl->type().join());
         if ( paletteCount > 0 ){
             int totalLoadedPalettes = 0;
             canBind = true;
@@ -2567,7 +2553,7 @@ void CodeQmlHandler::suggestionsForLeftBind(
         QString firstSegment = context.expressionPath()[0];
 
         QmlScopeSnap::PropertyReference propRef = scope.getProperty(
-            context.objectTypePath(), firstSegment, cursorPosition
+            scope.quickObjectDeclarationType(context.objectTypePath()), firstSegment, cursorPosition
         );
 
         if ( propRef.isValid() ) {
@@ -2616,7 +2602,7 @@ void CodeQmlHandler::suggestionsForRightBind(
         expressionPathHead.removeLast();
 
         QmlScopeSnap::ExpressionChain expression = scope.evaluateExpression(
-            context.objectTypePath(), expressionPathHead, cursorPosition
+            scope.quickObjectDeclarationType(context.objectTypePath()), expressionPathHead, cursorPosition
         );
 
         if ( expression.lastSegmentType() == QmlScopeSnap::ExpressionChain::ObjectNode ){
@@ -2725,6 +2711,12 @@ bool CodeQmlHandler::isBlockEmptySpace(const QTextBlock &bl){
             return false;
 
     return true;
+}
+
+bool CodeQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
+    if ( !declaration->type().path().isEmpty() )
+        return false;
+    return DocumentQmlInfo::isObject(declaration->type().name());
 }
 
 }// namespace

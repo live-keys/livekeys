@@ -225,6 +225,7 @@ private:
 
     QString getBlockIndent(const QTextBlock& bl);
     bool isBlockEmptySpace(const QTextBlock& bl);
+    bool isForAnObject(const QmlDeclaration::Ptr& declaration);
 
     QTextDocument*      m_target;
     QmlJsHighlighter*   m_highlighter;

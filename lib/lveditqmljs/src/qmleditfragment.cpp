@@ -112,6 +112,20 @@ int QmlEditFragment::valueLength() const{
     return m_declaration->valueLength();
 }
 
+/**
+ * \brief Returns true if this fragment edits an object
+ */
+bool QmlEditFragment::isForObject() const{
+    return m_declaration->isForObject();
+}
+
+/**
+ * \brief Returns true if this fragment edits a property
+ */
+bool QmlEditFragment::isForProperty() const{
+    return m_declaration->isForProperty();
+}
+
 CodePalette *QmlEditFragment::palette(const QString &type){
     for ( auto it = begin(); it != end(); ++it ){
         CodePalette* current = *it;
@@ -269,7 +283,7 @@ QmlBindingSpanModel* QmlEditFragment::bindingModel(lv::CodeQmlHandler *codeHandl
 }
 
 QString QmlEditFragment::type() const{
-    return m_declaration->type();
+    return m_declaration->type().join();
 }
 
 QList<QObject *> QmlEditFragment::getChildFragments() const{

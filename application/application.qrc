@@ -73,5 +73,7 @@
         <file alias="switch-to-source.png">images/switch-to-source.png</file>
         <file alias="palette-erase-object.png">images/palette-erase-object.png</file>
         <file alias="palette-connections.png">images/palette-connections.png</file>
+        <file alias="palette-connection-component.png">images/palette-connection-component.png</file>
+        <file alias="palette-connection-file.png">images/palette-connection-file.png</file>
     </qresource>
 </RCC>

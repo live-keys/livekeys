@@ -2,60 +2,69 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import base 1.0
+import live 1.0
+import editor 1.0
 import editor.private 1.0
 
 Rectangle{
     id: root
 
-    width: 180
-    height: paletteList.contentHeight > maxHeight ? maxHeight : paletteList.contentHeight + 5
+    width: 400
+    height: connectionList.contentHeight > maxHeight
+        ? maxHeight + loadingAnimation.height
+        : connectionList.contentHeight + 5 + loadingAnimation.height
     color: "#03070a"
-    opacity: 0.95
+    border.width: 1
+    border.color: "#333"
+    z: 3000
 
-    property color selectionColor: "#091927"
-    property alias suggestionCount : paletteList.count
-    property alias model : paletteList.model
-    property string fontFamily: 'Courier New, Courier'
+    focus: false
+
+    property color connectionRunnableColor: "#1b1e1f"
+    property color selectionColor: "#094966"
+    property alias connectionCount : connectionList.count
+    property alias model : connectionList.model
+    property string fontFamily: 'Open Sans, sans-serif'
     property int maxHeight: 160
     property int fontSize: 12
     property int smallFontSize: 9
+
+    property bool isScanning: model ? model.isScanning : false
 
     signal paletteSelected(int index)
     signal cancelled()
 
     function highlightNext(){
-        if ( paletteList.currentIndex + 1 <  paletteList.count ){
-            paletteList.currentIndex++;
+        if ( connectionList.currentIndex + 1 <  connectionList.count ){
+            connectionList.currentIndex++;
         } else {
-            paletteList.currentIndex = 0;
+            connectionList.currentIndex = 0;
         }
     }
     function highlightPrev(){
-        if ( paletteList.currentIndex > 0 ){
-            paletteList.currentIndex--;
+        if ( connectionList.currentIndex > 0 ){
+            connectionList.currentIndex--;
         } else {
-            paletteList.currentIndex = paletteList.count - 1;
+            connectionList.currentIndex = connectionList.count - 1;
         }
     }
 
     function highlightNextPage(){
-        var noItems = Math.floor(paletteList.height / 25)
-        if ( paletteList.currentIndex + noItems < paletteList.count ){
-            paletteList.currentIndex += noItems;
+        var noItems = Math.floor(connectionList.height / 25)
+        if ( connectionList.currentIndex + noItems < connectionList.count ){
+            connectionList.currentIndex += noItems;
         } else {
-            paletteList.currentIndex = paletteList.count - 1;
+            connectionList.currentIndex = connectionList.count - 1;
         }
     }
     function highlightPrevPage(){
-        var noItems = Math.floor(paletteList.height / 25)
-        if ( paletteList.currentIndex - noItems >= 0 ){
-            paletteList.currentIndex -= noItems;
+        var noItems = Math.floor(connectionList.height / 25)
+        if ( connectionList.currentIndex - noItems >= 0 ){
+            connectionList.currentIndex -= noItems;
         } else {
-            paletteList.currentIndex = 0;
+            connectionList.currentIndex = 0;
         }
     }
-
-    focus: false
 
     Keys.onPressed: {
         if ( event.key === Qt.Key_PageUp ){
@@ -71,7 +80,7 @@ Rectangle{
             highlightPrev()
             event.accepted = true
         } else if ( event.key === Qt.Key_Return || event.key === Qt.Key_Enter ){
-            root.paletteSelected(paletteList.currentIndex)
+            root.paletteSelected(connectionList.currentIndex)
             event.accepted = true
         } else if ( event.key === Qt.Key_Escape ){
             root.cancelled()
@@ -80,10 +89,14 @@ Rectangle{
     }
 
     ScrollView{
+        id: connectionListScroll
         anchors.top : parent.top
 
-        height : root.height
-        width: root.width
+        height : root.height - loadingAnimation.height - 2
+        width: root.width - 2
+        flickableItem.contentWidth: controlledWidth
+
+        property double controlledWidth: connectionList.contentWidth
 
         style: ScrollViewStyle {
             transientScrollBars: false
@@ -110,11 +123,11 @@ Rectangle{
         }
 
         ListView{
-            id : paletteList
-            anchors.fill: parent
-            anchors.rightMargin: 2
-            anchors.bottomMargin: 5
+            id : connectionList
+            anchors.top: parent.top
             anchors.topMargin: 0
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 5
             visible: true
             opacity: root.opacity
 
@@ -126,62 +139,189 @@ Rectangle{
 
             delegate: Component{
 
-                Rectangle{
+                Item{
                     id: connectionView
-                    width : paletteList.width
+                    width: labelBox.width + modelSplitterRow.width + 80
                     height : 25
-                    color : ListView.isCurrentItem ? root.selectionColor : "transparent"
 
                     property var modelPath : model.path
+                    property bool isEnabled: model.isConnected
+                    property bool isInput: connectionList.model.inputPathIndex === index
 
-                    Text{
-                        id: label
-                        anchors.left: parent.left
-                        anchors.leftMargin: 10
+                    Component.onCompleted: {
+                        if ( width > connectionListScroll.controlledWidth )
+                            connectionListScroll.controlledWidth = width
+                    }
+
+                    Rectangle{
+                        width: label.width + 25
+                        height: parent.height - 5
+                        color: root.connectionRunnableColor
                         anchors.verticalCenter: parent.verticalCenter
+                        id: labelBox
 
-                        font.family: root.fontFamily
-                        font.pixelSize: root.fontSize
+                        Text{
+                            id: label
+                            anchors.left: parent.left
+                            anchors.leftMargin: 15
+                            anchors.verticalCenter: parent.verticalCenter
 
-                        color: "#fafafa"
-//                        text: model.name
-                        text: model.runnableName
+                            font.family: root.fontFamily
+                            font.pixelSize: root.fontSize
 
-                        Component.onCompleted: {
-                            console.log(model.path)
-                            console.log(model.isConnected)
+                            color: "#fafafa"
+                            text: model.runnableName
                         }
                     }
 
-                    Row{
-                        anchors.left: label.right
-                        anchors.leftMargin: 10
-                        spacing: 5
+                    Triangle{
+                        width: 10
+                        color: labelBox.color
+                        height: labelBox.height
+                        rotation: Triangle.Right
+                        anchors.left: labelBox.right
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    Item{
                         height: parent.height
-                        Repeater{
+                        width: modelSplitterRow.width
+                        clip: true
+                        anchors.left: labelBox.right
+                        anchors.leftMargin: 30
+
+                        Row{
+                            id: modelSplitterRow
+                            spacing: 5
+                            Repeater{
+                                id: modelSplitter
+                                model: connectionView.modelPath
+
+                                Item{
+                                    anchors.top: parent.top
+                                    height: 25
+                                    width: pathIcon.width + pathText.width + pathSplitter.width + (pathIcon.visible ? 18 : 8 )
+
+                                    property int type: 0
+
+                                    Image{
+                                        id: pathIcon
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        visible: modelData[0] === 'F' || modelData[0] === 'C'
+                                        source: modelData[0] === 'F'
+                                            ? "qrc:/images/palette-connection-file.png"
+                                            : modelData[0] === 'C'
+                                                ? "qrc:/images/palette-connection-component.png"
+                                                : ""
+                                    }
+
+                                    Text{
+                                        id: pathText
+                                        anchors.left: pathIcon.right
+                                        anchors.leftMargin: pathIcon.visible ? 8 : 0
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        font.family: root.fontFamily
+                                        font.pixelSize: root.fontSize
+                                        color: "#83878b"
+                                        text: modelData.substr(2)
+                                    }
+
+                                    Text{
+                                        id: pathSplitter
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        font.family: root.fontFamily
+                                        font.pixelSize: root.fontSize + 2
+                                        font.weight: Font.Bold
+                                        color: "#83878b"
+                                        anchors.left: pathText.right
+                                        anchors.leftMargin: 8
+                                        text: '>'
+                                        visible: modelSplitter.model.length !== index + 1
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+                    Rectangle{
+                        height: parent.height
+                        width: 50
+                        color: root.color
+                        anchors.top: parent.top
+                        anchors.topMargin: 1
+                        anchors.left: parent.left
+                        anchors.leftMargin: connectionList.width - width + connectionListScroll.flickableItem.contentX
+
+                        property bool isEnabled: parent.isEnabled
+                        property bool isInput: parent.isInput
+
+                        Rectangle{
+                            width: parent.isEnabled ? 7 : 2
+                            height: parent.isEnabled ? 7 : 2
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+                            anchors.leftMargin: parent.isEnabled ? 7 : 10
+                            color: "#878e99"
+                        }
+
+                        MouseArea{
+                            width: 20
                             height: parent.height
-                            model: connectionView.modelPath
-                            Text{
-                                anchors.verticalCenter: parent.verticalCenter
-                                font.family: root.fontFamily
-                                font.pixelSize: root.fontSize
-                                color: "#fafafa"
-                                text: modelData
+                            anchors.left: parent.left
+                            onClicked: {
+                                if ( parent.isEnabled ){
+                                    connectionList.model.setPathConnection(index, false)
+                                } else {
+                                    connectionList.model.setPathConnection(index, true)
+                                }
+                            }
+                        }
+
+
+                        Rectangle{
+                            width: parent.isInput ? 7 : 2
+                            height: parent.isInput ? 7 : 2
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.right: parent.right
+                            radius: 3
+                            anchors.rightMargin: parent.isInput ? 12 : 15
+                            color: "#878e99"
+                        }
+
+                        MouseArea{
+                            width: 20
+                            height: parent.height
+                            anchors.right: parent.right
+                            anchors.rightMargin: 5
+                            onClicked: {
+                                connectionList.model.makePathInput(index)
                             }
                         }
                     }
 
 
-//                    MouseArea{
-//                        anchors.fill: parent
-//                        hoverEnabled: true
-//                        onEntered: paletteList.currentIndex = index
-//                        onClicked: root.paletteSelected(index)
-//                    }
+                    Rectangle{
+                        height: 1
+                        width: connectionList.width > connectionListScroll.controlledWidth  ? connectionList.width - 10 : connectionListScroll.controlledWidth - 10
+                        anchors.left: parent.left
+                        anchors.leftMargin: 5
+                        anchors.bottom: parent.bottom
+                        color: ListView.isCurrentItem ? root.selectionColor : "#24282e"
+                    }
+
                 }
             }
-
         }
+    }
+
+    LoadingAnimation{
+        id: loadingAnimation
+        visible: root.isScanning
+        height: visible ? 10 : 0
+        width: 40
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
     }
 }
 

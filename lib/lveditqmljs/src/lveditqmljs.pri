@@ -12,6 +12,7 @@ HEADERS += \
     $$PWD/qmljshighlighter_p.h \
     $$PWD/qmlcompletioncontext.h \
     $$PWD/qmlcompletioncontextfinder.h \
+    $$PWD/qmllanguagetype.h \
     $$PWD/qmllibraryinfo_p.h \
     $$PWD/documentqmlscope.h \
     $$PWD/projectqmlscanner_p.h \
@@ -48,6 +49,7 @@ SOURCES += \
     $$PWD/qmlidvisitor.cpp \
     $$PWD/documentqmlobject.cpp \
     $$PWD/qmlcompletioncontext.cpp \
+    $$PWD/qmllanguagetype.cpp \
     $$PWD/qmllibraryinfo.cpp \
     $$PWD/qmlcompletioncontextfinder.cpp \
     $$PWD/projectqmlscope.cpp \

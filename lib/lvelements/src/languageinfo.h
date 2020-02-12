@@ -31,6 +31,30 @@ private:
     std::vector<int>  m_values;
 };
 
+class LV_ELEMENTS_EXPORT TypeReference{
+
+public:
+    TypeReference(uint32_t language = 'u', const Utf8& name = "", const Utf8& path = "");
+
+    static TypeReference split(const Utf8& typeId);
+    Utf8 join() const;
+    bool isEmpty() const;
+
+    const Utf8& name() const;
+    const Utf8& path() const;
+    uint32_t language() const;
+    Utf8 languageString() const;
+
+    static Utf8 languageString(uint32_t languageId);
+    static uint32_t languageId(const Utf8& languageString);
+    static uint32_t languageId(char l0, char l1, char l2, char l3);
+
+private:
+    uint32_t m_language;
+    Utf8     m_name;
+    Utf8     m_path;
+};
+
 class LV_ELEMENTS_EXPORT FunctionInfo{
 
 public:

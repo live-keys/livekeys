@@ -21,6 +21,7 @@
 
 #include "live/lveditqmljsglobal.h"
 #include "live/projectdocument.h"
+#include "live/qmllanguagetype.h"
 
 namespace lv{
 
@@ -42,17 +43,18 @@ public:
     };
 
 public:
-    static QmlDeclaration::Ptr create(const QStringList& identifierChain, ProjectDocument* document = nullptr);
+    static QmlDeclaration::Ptr create(
+        const QStringList& identifierChain,
+        ProjectDocument* document = nullptr);
     static QmlDeclaration::Ptr create(
         const QStringList &identifierChain,
-        const QString& type,
-        const QStringList& parentType,
+        const QmlLanguageType& type,
+        const QmlLanguageType& parentType,
         ProjectDocument* document = nullptr
     );
-    static QmlDeclaration::Ptr create(
-        const QStringList &identifierChain,
-        const QString& type,
-        const QStringList& parentType,
+    static QmlDeclaration::Ptr create(const QStringList &identifierChain,
+        const QmlLanguageType &type,
+        const QmlLanguageType &parentType,
         int identifierPosition,
         int identifierLength,
         ProjectDocument* document = nullptr
@@ -67,8 +69,8 @@ public:
     int valuePosition() const;
 
     const QStringList& identifierChain() const;
-    const QString& type() const;
-    const QStringList& parentType() const;
+    const QmlLanguageType &type() const;
+    const QmlLanguageType& parentType() const;
 
     ProjectDocument* document();
 
@@ -85,18 +87,23 @@ public:
     ProjectDocumentSection::Ptr section();
     void setSection(ProjectDocumentSection::Ptr section);
 
+    bool isForObject() const;
+    bool isForProperty() const;
+
 private:
-    QmlDeclaration(const QStringList& identifierChain, ProjectDocument* document = nullptr);
+    QmlDeclaration(
+        const QStringList& identifierChain,
+        ProjectDocument* document = nullptr);
     QmlDeclaration(
         const QStringList &identifierChain,
-        const QString& type,
-        const QStringList& parentType,
+        const QmlLanguageType& type,
+        const QmlLanguageType& parentType,
         ProjectDocument* document = nullptr
     );
     QmlDeclaration(
         const QStringList &identifierChain,
-        const QString& type,
-        const QStringList& parentType,
+        const QmlLanguageType &type,
+        const QmlLanguageType &parentType,
         int identifierPosition,
         int identifierLength,
         ProjectDocument* document = nullptr
@@ -105,16 +112,14 @@ private:
 private:
     Q_DISABLE_COPY(QmlDeclaration)
 
-
     ProjectDocumentSection::Ptr m_section;
 
-    int         m_identifierLength;
-    QStringList m_identifierChain;
-    QString     m_type;
-    QStringList m_parentType;
+    int             m_identifierLength;
+    QStringList     m_identifierChain;
+    QmlLanguageType m_type;
+    QmlLanguageType m_parentType;
 
-
-    int         m_valueOffset;
+    int             m_valueOffset;
 
     ProjectDocument* m_document;
 };
@@ -147,12 +152,12 @@ inline const QStringList &QmlDeclaration::identifierChain() const{
 }
 
 /// \brief Returns the type of this declaration
-inline const QString &QmlDeclaration::type() const{
+inline const QmlLanguageType &QmlDeclaration::type() const{
     return m_type;
 }
 
-/// \brief Returns the paret type for this declaration
-inline const QStringList &QmlDeclaration::parentType() const{
+/// \brief Returns the object type for this declaration
+inline const QmlLanguageType &QmlDeclaration::parentType() const{
     return m_parentType;
 }
 
