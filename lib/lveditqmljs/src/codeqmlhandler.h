@@ -27,6 +27,7 @@
 #include "live/settings.h"
 #include "live/palettelist.h"
 #include "live/codecompletionmodel.h"
+#include "live/qmlimportsmodel.h"
 
 #include <QObject>
 #include <QTimer>
@@ -80,6 +81,7 @@ public:
     void rehighlightBlock(const QTextBlock& block);
 
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
+    void getImports(const QTextCursor& cursor);
     bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);
     QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property);
 
@@ -120,7 +122,12 @@ public slots:
     bool isForAnObject(lv::QmlEditFragment* palette);
 
     void frameEdit(QQuickItem *box, lv::QmlEditFragment* palette);
+    void addImportsShape(QQuickItem* box, lv::QmlImportsModel* model);
     QJSValue contextBlockRange(int cursorPosition);
+
+    lv::QmlImportsModel* importsModel();
+    void addLineAtPosition(QString line, int pos);
+    void removeLineAtPosition(int pos);
 
     // Direct editing management
 
@@ -237,6 +244,7 @@ private:
 
     QLinkedList<QmlEditFragment*> m_edits; // opened palettes
     QmlEditFragment*              m_editingFragment; // editing fragment
+    QList<QTextBlock>             m_imports;
 
     QScopedPointer<CodeQmlHandlerPrivate> d_ptr;
 

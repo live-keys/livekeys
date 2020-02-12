@@ -9,6 +9,7 @@ HEADERS += \
     $$PWD/qmlbindingspan.h \
     $$PWD/qmlbindingspanmodel.h \
     $$PWD/qmlidvisitor_p.h \
+    $$PWD/qmlimportsmodel.h \
     $$PWD/qmljshighlighter_p.h \
     $$PWD/qmlcompletioncontext.h \
     $$PWD/qmlcompletioncontextfinder.h \
@@ -48,6 +49,7 @@ SOURCES += \
     $$PWD/qmlidvisitor.cpp \
     $$PWD/documentqmlobject.cpp \
     $$PWD/qmlcompletioncontext.cpp \
+    $$PWD/qmlimportsmodel.cpp \
     $$PWD/qmllibraryinfo.cpp \
     $$PWD/qmlcompletioncontextfinder.cpp \
     $$PWD/projectqmlscope.cpp \

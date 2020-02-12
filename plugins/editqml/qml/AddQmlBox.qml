@@ -36,12 +36,15 @@ Rectangle{
     property string fontFamily: 'Open Sans, Courier'
     property int fontSize: 12
     property int smallFontSize: 9
+    property var codeQmlHandler: null
 
     property int activeIndex : 0
+    property bool idChecked: true
     onActiveIndexChanged: {
         searchInput.text = ''
         root.addContainer.propertyModel.setFilter('')
         root.addContainer.itemModel.setFilter('')
+        if (activeIndex === 1) idChecked = true
     }
 
     property ListView activeList : activeIndex === 0 ? propertyList : itemList
@@ -145,10 +148,136 @@ Rectangle{
         }
     }
 
+    Item {
+        id: idInputItem
+        visible: activeIndex === 1
+        height: 30
+        width: parent.width
+        anchors.top: parent.top
+        anchors.topMargin: 25
+
+        Rectangle {
+            x: 15
+            y: 5
+            width: 16
+            height: 16
+            border.width: 2
+            border.color: "#0d1f2d"
+            color: "black"
+
+            Rectangle {
+                color: "#0d1f2d"
+                width: 8
+                height: 8
+                x: 4
+                y: 4
+                visible: idChecked
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    idChecked = !idChecked
+                }
+            }
+        }
+
+        Text {
+            x: 45
+            y: 3
+            text: "Id"
+            color : "#efefef"
+            font.family: "Open Sans, sans-serif"
+            font.pixelSize: 14
+            font.weight: Font.Normal
+        }
+
+        Rectangle {
+            x: 60
+            y: 5
+            border.width: 1
+            border.color: "#0d1f2d"
+            width: parent.width - 80
+            height: 18
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            color: "black"
+            TextInput{
+                id : idInput
+                property bool userInput: false
+
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.leftMargin: 8
+                anchors.right: parent.right
+                anchors.rightMargin: 8
+
+                width: parent.width > implicitWidth ? parent.width : implicitWidth
+
+                color : "#afafaf"
+                font.family: "Open Sans, Courier"
+                font.pixelSize: 14
+                font.weight: Font.Light
+
+                selectByMouse: true
+
+                text: {
+                    if (!itemList || !itemList.currentItem) return text
+
+                    if (!userInput)
+                    {
+                        var id = itemList.currentItem.code
+                        var result = id[0].toLowerCase() + id.substring(1)
+                        var index = 1
+                        if (codeQmlHandler)
+                        {
+
+                            var origResult = result
+                            var docIds = codeQmlHandler.getDocumentIds()
+
+                            while (true)
+                            {
+                                var found = false
+                                for (var i=0; i<docIds.length;++i)
+                                    if (docIds[i] === result)
+                                    {
+                                        found = true
+                                        break
+                                    }
+                                if (!found) break
+                                index++
+                                result = origResult + index
+                            }
+
+                            return result
+                        }
+
+                        return result
+                    }
+
+                    return text
+                }
+
+                MouseArea{
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: Qt.IBeamCursor
+                }
+
+                Keys.onPressed: {
+                    if (focus)
+                    {
+                        userInput = true
+                    }
+                }
+            }
+        }
+
+    }
+
     Rectangle{
         id: searchInputBox
         anchors.top: parent.top
-        anchors.topMargin: 25
+        anchors.topMargin: idInputItem && idInputItem.visible? 55 : 25
         anchors.left: parent.left
         anchors.leftMargin: 1
         width: parent.width - 1
@@ -175,10 +304,6 @@ Rectangle{
             font.weight: Font.Light
 
             selectByMouse: true
-            onFocusChanged: {
-                if ( !focus )
-                    root.cancel()
-            }
 
             text: ""
             onTextChanged: {
@@ -214,7 +339,9 @@ Rectangle{
                 if ( root.activeIndex === 0 ){
                     root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
                 } else {
-                    root.accept(itemList.currentItem.importSpace, itemList.currentItem.code)
+                    var result = itemList.currentItem.code
+                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
+                    root.accept(itemList.currentItem.importSpace, result)
                 }
             }
             Keys.onEscapePressed: {
@@ -226,14 +353,14 @@ Rectangle{
     Item{
         id: propertiesContainer
         anchors.fill: parent
-        anchors.topMargin: 55
+        anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
         visible: root.activeIndex === 0
 
         ScrollView{
             anchors.top : parent.top
             anchors.left: parent.left
 
-            height : root.height - 55
+            height : root.height - propertiesContainer.anchors.topMargin
             width: root.width / 2
 
             style: ScrollViewStyle {
@@ -316,7 +443,7 @@ Rectangle{
             anchors.top : parent.top
             anchors.right: parent.right
 
-            height : root.height - 55
+            height : root.height - propertiesContainer.anchors.topMargin
             width: root.width / 2
 
             style: ScrollViewStyle {
@@ -406,14 +533,14 @@ Rectangle{
     Item{
         id: itemsContainer
         anchors.fill: parent
-        anchors.topMargin: 55
+        anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
         visible: root.activeIndex === 1
 
         ScrollView{
             anchors.top : parent.top
             anchors.left: parent.left
 
-            height : root.height - 55
+            height : root.height - itemsContainer.anchors.topMargin
             width: root.width / 2
 
             style: ScrollViewStyle {
@@ -497,7 +624,7 @@ Rectangle{
             anchors.top : parent.top
             anchors.right: parent.right
 
-            height : root.height - 55
+            height : root.height - itemsContainer.anchors.topMargin
             width: root.width / 2
 
             style: ScrollViewStyle {
@@ -571,7 +698,9 @@ Rectangle{
                                 if ( root.activeIndex === 0 ){
                                     root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
                                 } else {
-                                    root.accept(itemList.currentItem.importSpace, itemList.currentItem.code)
+                                    var result = itemList.currentItem.code
+                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
+                                    root.accept(itemList.currentItem.importSpace, result)
                                 }
                             }
                         }
@@ -580,6 +709,10 @@ Rectangle{
 
             }
         }
+    }
+
+    Keys.onEscapePressed: {
+        root.cancel()
     }
 
 }

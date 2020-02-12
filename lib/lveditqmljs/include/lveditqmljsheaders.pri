@@ -12,4 +12,5 @@ HEADERS += \
     $$PWD/live/lveditqmljsglobal.h \
     $$PWD/live/projectqmlextension.h \
     $$PWD/live/qmleditfragment.h \
-    $$PWD/live/qmldeclaration.h
+    $$PWD/live/qmldeclaration.h \
+    $$PWD/live/qmlimportsmodel.h

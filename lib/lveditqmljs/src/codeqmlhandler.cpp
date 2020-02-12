@@ -920,6 +920,75 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
     return properties;
 }
 
+
+void CodeQmlHandler::getImports(const QTextCursor& cursor){
+    Q_D(CodeQmlHandler);
+
+    QList<QTextBlock> result;
+
+    auto origBlock = cursor.block();
+    QTextCursor hackCursor(origBlock);
+    if (origBlock.next().isValid())
+    {
+        hackCursor = QTextCursor(origBlock.next());
+    }
+    else {
+        hackCursor.movePosition(QTextCursor::EndOfBlock);
+    }
+
+    QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(hackCursor);
+    if (ctx->context() & QmlCompletionContext::InImport)
+    {
+        QTextBlock iter1 = origBlock;
+        while (true)
+        {
+            iter1 = iter1.previous();
+            if (!iter1.isValid()) break;
+
+            QTextCursor c1(iter1.next());
+            if (iter1.text().length() != 0 &&
+                !(m_completionContextFinder->getContext(c1)->context() & QmlCompletionContext::InImport))
+                break;
+
+        }
+        if (!iter1.isValid()) iter1 = origBlock.document()->firstBlock();
+
+
+        QTextBlock iter2 = origBlock;
+        while (true)
+        {
+            iter2 = iter2.next();
+            if (!iter2.isValid()) break;
+            if (iter2.text().length() == 0) continue;
+
+            QTextCursor c2(iter2);
+            if (iter2.next().isValid())
+            {
+                c2 = QTextCursor(iter2.next());
+            }
+            else {
+                c2.movePosition(QTextCursor::EndOfBlock);
+            }
+            int context = m_completionContextFinder->getContext(c2)->context();
+            if (!(context & QmlCompletionContext::InImport))
+                break;
+
+        }
+
+        // imports are between iter1 and iter2
+        for (auto it = iter1; it != iter2; it = it.next())
+        {
+            if (it.text() != "")
+            {
+                result.push_back(it);
+            }
+
+        }
+    }
+
+
+    m_imports = result;
+}
 /**
  * \brief Given a declaration identifier \p position and \p length, get the \p valuePosition and \p valueEnd
  * for that declaration
@@ -1600,6 +1669,22 @@ void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
 
     dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, static_cast<int>(box->height()), box);
 }
+
+void CodeQmlHandler::addImportsShape(QQuickItem *box, QmlImportsModel *model)
+{
+    if (!model) return;
+
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    int first = model->firstBlock();
+    int last = model->lastBlock();
+
+    if (first == -1) return;
+
+    dh->lineBoxAdded(first, last + 1, static_cast<int>(box->height()), box);
+
+}
+
+
 /*
 void CodeQmlHandler::removeEditFrame(QQuickItem *box){
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
@@ -1628,6 +1713,48 @@ QJSValue CodeQmlHandler::contextBlockRange(int position){
     return ob;
 }
 
+lv::QmlImportsModel *CodeQmlHandler::importsModel()
+{
+    lv::QmlImportsModel* result = new lv::QmlImportsModel(this);
+    for (auto block: m_imports)
+    {
+        QStringList parts = block.text().split(" ");
+        result->addItem(parts[1], parts[2], "", block.blockNumber());
+    }
+
+    return result;
+}
+
+void CodeQmlHandler::addLineAtPosition(QString line, int pos)
+{
+    if (!m_target) return;
+    QTextCursor c(m_target);
+    if (pos == 0)
+    {
+        c.beginEditBlock();
+        c.insertText(line + "\n");
+        c.endEditBlock();
+    } else {
+        auto block = m_target->findBlockByNumber(pos-1);
+        c = QTextCursor(block);
+        c.beginEditBlock();
+        c.movePosition(QTextCursor::EndOfBlock);
+        c.insertText("\n" + line);
+        c.endEditBlock();
+    }
+}
+
+void CodeQmlHandler::removeLineAtPosition(int pos)
+{
+    if (!m_target) return;
+    auto block = m_target->findBlockByNumber(pos);
+    QTextCursor c(block);
+    c.beginEditBlock();
+    c.select(QTextCursor::BlockUnderCursor);
+    c.removeSelectedText();
+    c.endEditBlock();
+}
+
 /**
  * \brief Receive different qml based information about a given cursor position
  */
@@ -1644,8 +1771,9 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
         cursor.setPosition(position + length, QTextCursor::KeepAnchor);
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
+    getImports(cursor);
 
-    if ( properties.isEmpty() )
+    if ( properties.isEmpty() && m_imports.empty())
         return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 
     if ( properties.size() == 1 ){
@@ -1684,6 +1812,13 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
                 canAdjust = true;
             }
         }
+    } else if (m_imports.size() > 0)
+    {
+        canBind = false;
+        canUnbind = false;
+        canEdit = false;
+        canAdjust = false;
+        canShape = true;
     }
     return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 }
@@ -2037,13 +2172,25 @@ int CodeQmlHandler::addProperty(
 /**
  * \brief Adds an item given the \p addText at the specitied \p position
  */
-int CodeQmlHandler::addItem(int position, const QString &, const QString &type){
+int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype){
     DocumentQmlValueScanner qvs(m_document, position, 1);
     int blockStart = qvs.getBlockStart(position) + 1;
     int blockEnd = qvs.getBlockEnd(position);
 
     QTextBlock tbStart = m_target->findBlock(blockStart);
     QTextBlock tbEnd   = m_target->findBlock(blockEnd);
+
+    QString id, type;
+    int idx = ctype.indexOf('#');
+
+    if (idx != -1)
+    {
+        type = ctype.left(idx);
+        id = ctype.mid(idx+1);
+    }
+    else {
+        type = ctype;
+    }
 
     QString insertionText;
     int insertionPosition = position;
@@ -2053,7 +2200,9 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &type){
 
     if ( tbStart == tbEnd ){ // inline object declaration
         insertionPosition = blockEnd;
-        insertionText = "; " + type + "{} ";
+        insertionText = "; " + type + "{";
+        if (id != "") insertionText += " id: " + id + " ";
+        insertionText += "} ";
         cursorPosition = insertionPosition + type.size() + 3;
     } else { // multiline object declaration
         QString indent = getBlockIndent(tbStart) + "    ";
@@ -2068,7 +2217,9 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &type){
             tbIt = tbIt.previous();
         }
 
-        insertionText = indent + type + "{\n" + indent + "}\n";
+        insertionText = indent + type + "{\n";
+        if (id != "") insertionText += indent + "    id: " + id + "\n";
+        insertionText += indent + "}\n";
         cursorPosition = insertionPosition + indent.size() + type.size() + 1;
     }
 
