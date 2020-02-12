@@ -124,13 +124,18 @@ LiveExtension{
 
             paletteBoxGroup.codeHandler = codeHandler
 
-            if (forAnObject) objectContainer.paletteGroup = paletteBoxGroup;
+            if (forAnObject)
+                objectContainer.paletteGroup = paletteBoxGroup;
 
             editorBox.setChild(forAnObject ? objectContainer : paletteBoxGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
 
             editorBox.color = "black"
             editorBox.border.width = 1
             editorBox.border.color = "#141c25"
+
+
+            if (forAnObject)
+                objectContainer.expand()
         }
 
         if ( palette || !codeHandler.isForAnObject(ef) ){

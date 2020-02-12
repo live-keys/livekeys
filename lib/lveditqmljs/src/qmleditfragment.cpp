@@ -69,6 +69,34 @@ QmlEditFragment::~QmlEditFragment(){
     delete m_bindingSpan;
 }
 
+void QmlEditFragment::setRelativeBinding(const QSharedPointer<QmlBindingPath> &bp){
+
+    QmlBindingPath::Ptr bindingToParent = bp;
+
+    QmlEditFragment* parent = parentFragment();
+    if( parent && parent->parentFragment() ){
+        bindingToParent = QmlBindingPath::join(parent->m_relativeBinding, bindingToParent);
+    }
+
+    m_relativeBinding = bindingToParent;
+
+    QmlEditFragment* root = rootFragment();
+    if ( !root )
+        return;
+
+    QList<QmlBindingChannel::Ptr> bc = root->bindingSpan()->outputChannels();
+    for ( auto it = bc.begin(); it != bc.end(); ++it ){
+        QmlBindingChannel::Ptr& bc = *it;
+        if ( bc->isEnabled() ){
+            QmlBindingPath::Ptr newbp = QmlBindingPath::join(bc->bindingPath(), m_relativeBinding, false);
+            Runnable* r = bc->runnable();
+            QmlBindingChannel::Ptr newbc = DocumentQmlInfo::traverseBindingPath(newbp, r);
+            newbc->setEnabled(true);
+            bindingSpan()->addOutputChannel(newbc);
+        }
+    }
+}
+
 /**
  * \brief Returns the lv::QmlDeclaration's value postion
  */
@@ -82,6 +110,20 @@ int QmlEditFragment::valuePosition() const{
  */
 int QmlEditFragment::valueLength() const{
     return m_declaration->valueLength();
+}
+
+/**
+ * \brief Returns true if this fragment edits an object
+ */
+bool QmlEditFragment::isForObject() const{
+    return m_declaration->isForObject();
+}
+
+/**
+ * \brief Returns true if this fragment edits a property
+ */
+bool QmlEditFragment::isForProperty() const{
+    return m_declaration->isForProperty();
 }
 
 CodePalette *QmlEditFragment::palette(const QString &type){
@@ -198,6 +240,21 @@ void QmlEditFragment::updatePaletteValue(CodePalette *palette){
     }
 }
 
+QmlEditFragment *QmlEditFragment::parentFragment(){
+    return qobject_cast<QmlEditFragment*>(parent());
+}
+
+QmlEditFragment *QmlEditFragment::rootFragment(){
+    QmlEditFragment* root = parentFragment();
+    if ( !root )
+        return nullptr;
+
+    while ( root->parentFragment() ){
+        root = root->parentFragment();
+    }
+    return root;
+}
+
 void QmlEditFragment::emitRemoval(){
     emit aboutToBeRemoved();
 
@@ -223,6 +280,17 @@ QmlBindingSpanModel* QmlEditFragment::bindingModel(lv::CodeQmlHandler *codeHandl
         }
     }
     return m_bindingSpanModel;
+}
+
+QString QmlEditFragment::type() const{
+    return m_declaration->type().join();
+}
+
+QList<QObject *> QmlEditFragment::getChildFragments() const{
+    QList<QObject*> result;
+    for (QmlEditFragment* edit : m_childFragments)
+        result.append(edit);
+    return result;
 }
 
 void QmlEditFragment::updateValue(){

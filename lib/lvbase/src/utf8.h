@@ -31,10 +31,10 @@ public:
     size_t find(const std::string& str, size_t offset = 0) const;
     size_t find(const Utf8& str, size_t offset = 0) const;
 
-    size_t findLast(char ch, size_t offset = 0) const;
-    size_t findLast(const char* str, size_t offset = 0) const;
-    size_t findLast(const std::string& str, size_t offset = 0) const;
-    size_t findLast(const Utf8& str, size_t offset = 0) const;
+    size_t findLast(char ch, size_t offset = std::string::npos) const;
+    size_t findLast(const char* str, size_t offset = std::string::npos) const;
+    size_t findLast(const std::string& str, size_t offset = std::string::npos) const;
+    size_t findLast(const Utf8& str, size_t offset = std::string::npos) const;
 
     Utf8 substr(size_t start, size_t length) const;
 

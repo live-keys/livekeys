@@ -110,10 +110,10 @@ void QmlBindingPath::appendIndex(int index){
     }
 }
 
-QmlBindingPath::Ptr QmlBindingPath::join(QmlBindingPath::ConstPtr src1, QmlBindingPath::ConstPtr src2){
+QmlBindingPath::Ptr QmlBindingPath::join(QmlBindingPath::ConstPtr src1, QmlBindingPath::ConstPtr src2, bool firstIndex){
+    // firstIndex: avoid first index, since that represents the root of the file
     QmlBindingPath::Ptr result = src1->clone();
     QmlBindingPath::Node* n = src2->root();
-    bool firstIndex = true; // avoid first index, since that's represents the root of the file
     while ( n ){
         if ( n->type() == QmlBindingPath::Node::File ){
             QmlBindingPath::FileNode* fnode = static_cast<QmlBindingPath::FileNode*>(n);

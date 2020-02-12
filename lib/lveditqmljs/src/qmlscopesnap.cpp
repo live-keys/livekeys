@@ -72,6 +72,16 @@ QString QmlScopeSnap::TypeReference::toString() const{
     return result;
 }
 
+QmlLanguageType QmlScopeSnap::TypeReference::languageType() const{
+    if ( !typeName.isEmpty() && !library.importUri.isEmpty() ){
+        return QmlLanguageType(QmlLanguageType::Qml, typeName, library.importUri);
+    } else if ( !object->className().isEmpty() ){
+        return QmlLanguageType(QmlLanguageType::Cpp, object->className());
+    }
+
+    return QmlLanguageType();
+}
+
 // QmlScopeSnap::InheritancePath
 // -----------------------------------------------------------------------------------------------
 
@@ -97,6 +107,13 @@ void QmlScopeSnap::InheritancePath::append(const QmlScopeSnap::TypeReference &tr
 
 bool QmlScopeSnap::InheritancePath::isEmpty() const{
     return nodes.isEmpty();
+}
+
+QmlLanguageType QmlScopeSnap::InheritancePath::languageType() const{
+    if ( isEmpty() )
+        return QmlLanguageType();
+
+    return nodes.first().languageType();
 }
 
 // QmlScopeSnap::PropertyReference
@@ -244,24 +261,6 @@ QmlScopeSnap::TypeReference QmlScopeSnap::getType(const QString &name) const{
     return TypeReference();
 }
 
-QmlScopeSnap::InheritancePath QmlScopeSnap::getTypePath(const QString &name) const{
-    InheritancePath typePath;
-
-    TypeReference tr = getType(name);
-    if ( tr.isValid() ){
-        typePath.append(tr);
-        typePath.join(generateTypePathFromObject(tr));
-    }
-    return typePath;
-}
-
-QmlScopeSnap::InheritancePath QmlScopeSnap::getTypePath(const QStringList& typeAndImport) const{
-    if ( typeAndImport.isEmpty() )
-        return InheritancePath();
-    if ( typeAndImport.size() == 1 )
-        return getTypePath(typeAndImport[0]);
-    return getTypePath(typeAndImport[0], typeAndImport[1]);
-}
 
 /// Retrieve a type from a specified namespace. If the namespace is empty, the type is searched through
 /// implicit libraries and default ones as well. Otherwise, only libraries with the imported namespace are
@@ -297,6 +296,14 @@ QmlScopeSnap::TypeReference QmlScopeSnap::getType(const QString &importNamespace
     return TypeReference();
 }
 
+QmlScopeSnap::TypeReference QmlScopeSnap::getType(const QStringList &typeAndImport){
+    if ( typeAndImport.isEmpty() )
+        return TypeReference();
+    if ( typeAndImport.size() == 1 )
+        return getType(typeAndImport[0]);
+    return getType(typeAndImport[0], typeAndImport[1]);
+}
+
 QmlScopeSnap::InheritancePath QmlScopeSnap::getTypePath(const QString &importAs, const QString &name) const{
     InheritancePath typePath;
 
@@ -305,6 +312,50 @@ QmlScopeSnap::InheritancePath QmlScopeSnap::getTypePath(const QString &importAs,
     if ( tr.isValid() ){
         typePath.append(tr);
         typePath.join(generateTypePathFromObject(tr));
+    }
+
+    return typePath;
+}
+
+QmlScopeSnap::InheritancePath QmlScopeSnap::getTypePath(const QString &name) const{
+    InheritancePath typePath;
+
+    TypeReference tr = getType(name);
+    if ( tr.isValid() ){
+        typePath.append(tr);
+        typePath.join(generateTypePathFromObject(tr));
+    }
+    return typePath;
+}
+
+QmlScopeSnap::InheritancePath QmlScopeSnap::getTypePath(const QStringList& typeAndImport) const{
+    if ( typeAndImport.isEmpty() )
+        return InheritancePath();
+    if ( typeAndImport.size() == 1 )
+        return getTypePath(typeAndImport[0]);
+    return getTypePath(typeAndImport[0], typeAndImport[1]);
+}
+
+QmlScopeSnap::InheritancePath QmlScopeSnap::getTypePath(const QmlLanguageType &languageType) const{
+    InheritancePath typePath;
+
+    if ( languageType.language() == QmlLanguageType::Unknown )
+        return getTypePath(languageType.name());
+
+    QmlLibraryInfo::Ptr lib = project->globalLibraries()->libraryInfo(languageType.path());
+    if ( !lib.isNull() ){
+        QmlLibraryInfo::ExportVersion ev;
+
+        if ( languageType.language() == QmlLanguageType::Qml ){
+            ev = lib->findExport(languageType.name());
+        } else {
+            ev = lib->findExportByClassName(languageType.name());
+        }
+        if ( ev.isValid() ){
+            TypeReference tr(LibraryReference(languageType.path(), lib), ev.object);
+            typePath.append(tr);
+            typePath.join(generateTypePathFromObject(tr));
+        }
     }
 
     return typePath;
@@ -482,7 +533,7 @@ LanguageUtils::FakeMetaProperty QmlScopeSnap::getPropertyInObject(
 }
 
 QmlScopeSnap::PropertyReference QmlScopeSnap::getProperty(
-        const QStringList &contextObject, const QString &propertyName, int position) const
+        const QmlLanguageType &contextObject, const QString &propertyName, int position) const
 {
     DocumentQmlInfo::ValueReference documentValue = document->info()->valueAtPosition(position);
     if ( !document->info()->isValueNull(documentValue) ){
@@ -557,7 +608,7 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::getProperty(
 // The list will be shorter than the chain size if one of the properties cannot be found.
 
 QList<QmlScopeSnap::PropertyReference> QmlScopeSnap::getProperties(
-        const QStringList &context, const QStringList &propertyChain, int position) const
+        const QmlLanguageType &context, const QStringList &propertyChain, int position) const
 {
     if ( propertyChain.isEmpty() )
         return QList<QmlScopeSnap::PropertyReference>();
@@ -567,7 +618,6 @@ QList<QmlScopeSnap::PropertyReference> QmlScopeSnap::getProperties(
     QmlScopeSnap::PropertyReference propRef = getProperty(context, propertyChain.first(), position);
     if ( propRef.property.revision() == -1 )
         return result;
-
 
     result.append(propRef);
 
@@ -621,7 +671,7 @@ QList<QmlScopeSnap::PropertyReference> QmlScopeSnap::getProperties(
 }
 
 QmlScopeSnap::ExpressionChain QmlScopeSnap::evaluateExpression(
-        const QStringList &contextObject, const QStringList &expression, int position) const
+        const QmlLanguageType &contextObject, const QStringList &expression, int position) const
 {
     QmlScopeSnap::ExpressionChain result(expression);
     if ( expression.isEmpty() )
@@ -741,6 +791,24 @@ QmlScopeSnap::ExpressionChain QmlScopeSnap::evaluateExpression(
     return result;
 }
 
+QString QmlScopeSnap::importToUri(const QString &name) const{
+    foreach( const DocumentQmlScope::ImportEntry& imp, document->imports() ){
+        if ( imp.first.as() == name ){
+            return imp.second;
+        }
+    }
+    return "";
+}
+
+QmlLanguageType QmlScopeSnap::quickObjectDeclarationType(const QStringList &declaration) const{
+    if ( declaration.isEmpty() )
+        return QmlLanguageType();
+    if ( declaration.size() == 1 ){
+        return QmlLanguageType(QmlLanguageType::Unknown, declaration[0]);
+    }
+    return QmlLanguageType(QmlLanguageType::Qml, declaration[1], importToUri(declaration[0]));
+}
+
 bool QmlScopeSnap::isImport(const QString &name) const{
     foreach( const DocumentQmlScope::ImportEntry& imp, document->imports() ){
         if ( imp.first.as() == name ){
@@ -793,6 +861,18 @@ QString QmlScopeSnap::PropertyReference::toString(const QList<QmlScopeSnap::Prop
     }
 
     return result;
+}
+
+QmlLanguageType QmlScopeSnap::PropertyReference::propertyType() const{
+    if ( isPrimitive ){
+        return QmlLanguageType(QmlLanguageType::Qml, property.typeName());
+    } else {
+        return propertyTypePath.languageType();
+    }
+}
+
+QmlLanguageType QmlScopeSnap::PropertyReference::propertyObjectType() const{
+    return classTypePath.languageType();
 }
 
 

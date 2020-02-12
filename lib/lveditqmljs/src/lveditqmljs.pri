@@ -7,12 +7,13 @@ HEADERS += \
     $$PWD/qmlbindingchannel.h \
     $$PWD/qmlbindingpath.h \
     $$PWD/qmlbindingspan.h \
+    $$PWD/qmlimportsmodel.h \
     $$PWD/qmlbindingspanmodel.h \
     $$PWD/qmlidvisitor_p.h \
-    $$PWD/qmlimportsmodel.h \
     $$PWD/qmljshighlighter_p.h \
     $$PWD/qmlcompletioncontext.h \
     $$PWD/qmlcompletioncontextfinder.h \
+    $$PWD/qmllanguagetype.h \
     $$PWD/qmllibraryinfo_p.h \
     $$PWD/documentqmlscope.h \
     $$PWD/projectqmlscanner_p.h \
@@ -49,7 +50,7 @@ SOURCES += \
     $$PWD/qmlidvisitor.cpp \
     $$PWD/documentqmlobject.cpp \
     $$PWD/qmlcompletioncontext.cpp \
-    $$PWD/qmlimportsmodel.cpp \
+    $$PWD/qmllanguagetype.cpp \
     $$PWD/qmllibraryinfo.cpp \
     $$PWD/qmlcompletioncontextfinder.cpp \
     $$PWD/projectqmlscope.cpp \
@@ -72,5 +73,6 @@ SOURCES += \
     $$PWD/qmleditfragment.cpp \
     $$PWD/qmldeclaration.cpp \
     $$PWD/qmlcursorinfo.cpp \
+    $$PWD/qmlimportsmodel.cpp \
     $$PWD/qmlscopesnap.cpp \
     $$PWD/qmlusagegraphscanner.cpp

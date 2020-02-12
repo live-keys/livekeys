@@ -440,6 +440,42 @@ QList<DocumentQmlValueObjects::RangeProperty*> DocumentQmlValueObjects::properti
     return properties;
 }
 
+QList<DocumentQmlValueObjects::RangeObject *> DocumentQmlValueObjects::objectsBetween(int start, int end, DocumentQmlValueObjects::RangeObject *root){
+    QList<DocumentQmlValueObjects::RangeObject*> objects;
+    if ( root == nullptr )
+        root = m_root;
+
+    for ( int i = 0; i < root->children.size(); ++i ){
+        if ( root->children[i]->begin >= start && root->children[i]->end <= end ){
+            objects.append(root->children[i]);
+        }
+        if ( root->children[i]->begin < end || root->children[i]->end > start ){
+            objects.append(objectsBetween(start, end, root->children[i]));
+        }
+    }
+
+    return objects;
+}
+
+DocumentQmlValueObjects::RangeObject *DocumentQmlValueObjects::objectAtPosition(int position, RangeObject* root){
+    if ( root == nullptr )
+        root = m_root;
+
+    if ( root->begin == position )
+        return root;
+
+
+    for ( int i = 0; i < root->children.size(); ++i ){
+        if ( root->children[i]->begin <= position && root->children[i]->end >= position ){
+            DocumentQmlValueObjects::RangeObject* ro = objectAtPosition(position, root->children[i]);
+            if (ro)
+                return ro;
+        }
+    }
+
+    return nullptr;
+}
+
 QString DocumentQmlValueObjects::toStringRecursive(
         DocumentQmlValueObjects::RangeObject *object,
         int indent) const
