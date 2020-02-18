@@ -36,7 +36,6 @@ HEADERS += \
     $$PWD/qmlcodeconverter.h \
     $$PWD/qmleditfragment.h \
     $$PWD/qmldeclaration.h \
-    $$PWD/qmlcursorinfo.h \
     $$PWD/qmlscopesnap_p.h \
     $$PWD/qmlusagegraphscanner.h
 
@@ -72,7 +71,6 @@ SOURCES += \
     $$PWD/qmlcodeconverter.cpp \
     $$PWD/qmleditfragment.cpp \
     $$PWD/qmldeclaration.cpp \
-    $$PWD/qmlcursorinfo.cpp \
     $$PWD/qmlimportsmodel.cpp \
     $$PWD/qmlscopesnap.cpp \
     $$PWD/qmlusagegraphscanner.cpp

@@ -7,7 +7,6 @@
 #include "qmljsbuiltintypes_p.h"
 #include "qmljshighlighter_p.h"
 #include "qmlbindingchannel.h"
-#include "qmlcursorinfo.h"
 #include "projectqmlscope.h"
 #include "projectqmlscopecontainer_p.h"
 #include "documentqmlscope.h"

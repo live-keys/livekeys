@@ -42,7 +42,6 @@ class ProjectQmlScanner;
 class ProjectQmlExtension;
 class PluginInfoExtractor;
 
-class QmlCursorInfo;
 class QmlEditFragment;
 class QmlJsHighlighter;
 class QmlJsSettings;
@@ -106,7 +105,7 @@ public slots:
 
     // Palette and binding management
 
-    lv::QmlCursorInfo* cursorInfo(int position, int length);
+    QJSValue cursorInfo(int position, int length);
     lv::QmlEditFragment* openConnection(int position, QObject *currentApp = nullptr);
     lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
     QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
@@ -166,6 +165,8 @@ public slots:
 signals:
 
 private:
+    QJSValue createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape);
+
     void rehighlightSection(int start, int end);
     void resetProjectQmlExtension();
     QString getHelpEntity(int position);

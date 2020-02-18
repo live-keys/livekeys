@@ -1000,6 +1000,17 @@ void CodeQmlHandler::aboutToDelete()
     }
 }
 
+QJSValue CodeQmlHandler::createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape)
+{
+    QJSValue result = m_engine->newObject();
+    result.setProperty("canBind", canBind);
+    result.setProperty("canUnbind", canUnbind);
+    result.setProperty("canEdit", canEdit);
+    result.setProperty("canAdjust", canAdjust);
+    result.setProperty("canShape", canShape);
+    return result;
+}
+
 /**
  * \brief Adds an editing fragment to the current document
  */
@@ -1797,12 +1808,12 @@ void CodeQmlHandler::removeLineAtPosition(int pos)
 /**
  * \brief Receive different qml based information about a given cursor position
  */
-QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
+QJSValue CodeQmlHandler::cursorInfo(int position, int length){
     Q_D(CodeQmlHandler);
     bool canBind = false, canUnbind = false, canEdit = false, canAdjust = false, canShape = false;
 
     if ( !m_document )
-        return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
+        return createCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 
     QTextCursor cursor(m_target);
     cursor.setPosition(position);
@@ -1818,7 +1829,7 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
 
 
     if ( properties.isEmpty())
-        return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
+        return createCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 
     if ( properties.size() == 1 ){
         QmlDeclaration::Ptr firstdecl = properties.first();
@@ -1857,7 +1868,7 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
             }
         }
     }
-    return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
+    return createCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 }
 
 /**
