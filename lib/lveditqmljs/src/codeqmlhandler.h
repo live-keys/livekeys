@@ -81,7 +81,6 @@ public:
     void rehighlightBlock(const QTextBlock& block);
 
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
-    void getImports(const QTextCursor& cursor);
     bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);
     QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property);
 
@@ -247,7 +246,6 @@ private:
 
     QLinkedList<QmlEditFragment*> m_edits; // opened palettes
     QmlEditFragment*              m_editingFragment; // editing fragment
-    QList<QTextBlock>             m_imports;
 
     QScopedPointer<CodeQmlHandlerPrivate> d_ptr;
 

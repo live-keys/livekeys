@@ -309,9 +309,7 @@ void CompletionContextFinder::checkImport()
             }
             stop = true;
             break;
-        case Token::Semicolon:
-            --i;
-            continue;
+
         default:
             stop = true;
             break;

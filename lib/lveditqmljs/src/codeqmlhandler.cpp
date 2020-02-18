@@ -37,6 +37,9 @@
 #include "qmlscopesnap_p.h"
 #include "qmlusagegraphscanner.h"
 
+#include "qmljs/parser/qmljsast_p.h"
+#include "qmljs/qmljsbind.h"
+
 #include "live/documenthandler.h"
 #include "live/codecompletionsuggestion.h"
 #include "live/projectfile.h"
@@ -908,75 +911,6 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
     return properties;
 }
 
-
-void CodeQmlHandler::getImports(const QTextCursor& cursor){
-    Q_D(CodeQmlHandler);
-
-    QList<QTextBlock> result;
-
-    auto origBlock = cursor.block();
-    QTextCursor hackCursor(origBlock);
-    if (origBlock.next().isValid())
-    {
-        hackCursor = QTextCursor(origBlock.next());
-    }
-    else {
-        hackCursor.movePosition(QTextCursor::EndOfBlock);
-    }
-
-    QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(hackCursor);
-    if (ctx->context() & QmlCompletionContext::InImport)
-    {
-        QTextBlock iter1 = origBlock;
-        while (true)
-        {
-            iter1 = iter1.previous();
-            if (!iter1.isValid()) break;
-
-            QTextCursor c1(iter1.next());
-            if (iter1.text().length() != 0 &&
-                !(m_completionContextFinder->getContext(c1)->context() & QmlCompletionContext::InImport))
-                break;
-
-        }
-        if (!iter1.isValid()) iter1 = origBlock.document()->firstBlock();
-
-
-        QTextBlock iter2 = origBlock;
-        while (true)
-        {
-            iter2 = iter2.next();
-            if (!iter2.isValid()) break;
-            if (iter2.text().length() == 0) continue;
-
-            QTextCursor c2(iter2);
-            if (iter2.next().isValid())
-            {
-                c2 = QTextCursor(iter2.next());
-            }
-            else {
-                c2.movePosition(QTextCursor::EndOfBlock);
-            }
-            int context = m_completionContextFinder->getContext(c2)->context();
-            if (!(context & QmlCompletionContext::InImport))
-                break;
-
-        }
-
-        // imports are between iter1 and iter2
-        for (auto it = iter1; it != iter2; it = it.next())
-        {
-            if (it.text() != "")
-            {
-                result.push_back(it);
-            }
-
-        }
-    }
-
-
-    m_imports = result;
-}
 /**
  * \brief Given a declaration identifier \p position and \p length, get the \p valuePosition and \p valueEnd
  * for that declaration
@@ -1811,10 +1745,20 @@ QJSValue CodeQmlHandler::contextBlockRange(int position){
 lv::QmlImportsModel *CodeQmlHandler::importsModel()
 {
     lv::QmlImportsModel* result = new lv::QmlImportsModel(this);
-    for (auto block: m_imports)
-    {
-        QStringList parts = block.text().split(" ");
-        result->addItem(parts[1], parts[2], "", block.blockNumber());
+
+    QString source = m_target->toPlainText();
+    DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(m_document->file()->path());
+    if ( docinfo->parse(source) ){
+        auto imports = docinfo->internalBind()->imports();
+        for ( QList<QmlJS::ImportInfo>::iterator it = imports.begin(); it != imports.end(); ++it ){
+
+            QString module = it->name();
+            QString version = it->version().majorVersion() != -1 ? (QString::number(it->version().majorVersion()) + "." + QString::number(it->version().minorVersion())) : "";
+            QString qual = it->as();
+            int line = it->ast()? (it->ast()->importToken.startLine-1) : -1;
+
+            result->addItem(module, version, qual, line);
+        }
     }
 
     return result;
@@ -1866,9 +1810,14 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
         cursor.setPosition(position + length, QTextCursor::KeepAnchor);
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
-    getImports(cursor);
 
-    if ( properties.isEmpty() && m_imports.empty())
+    QmlCompletionContext::ConstPtr qcc = m_completionContextFinder->getContext(cursor);
+    if ( qcc->context() & QmlCompletionContext::InImport || qcc->context() & QmlCompletionContext::InImportVersion ){
+        canShape = true;
+    }
+
+
+    if ( properties.isEmpty())
         return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 
     if ( properties.size() == 1 ){
@@ -1907,13 +1856,6 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
                 canAdjust = true;
             }
         }
-    } else if (m_imports.size() > 0)
-    {
-        canBind = false;
-        canUnbind = false;
-        canEdit = false;
-        canAdjust = false;
-        canShape = true;
     }
     return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 }
