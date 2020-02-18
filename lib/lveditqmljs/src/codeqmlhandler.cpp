@@ -1746,9 +1746,6 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
     if ( properties.size() == 1 ){
         QmlDeclaration::Ptr firstdecl = properties.first();
 
-        qDebug() << "FOUND 1 property";
-        qDebug() << firstdecl->type().join();
-
         if ( isForAnObject(firstdecl) )
             canShape = true;
 
@@ -2715,7 +2712,7 @@ bool CodeQmlHandler::isBlockEmptySpace(const QTextBlock &bl){
 
 bool CodeQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
     if ( !declaration->type().path().isEmpty() )
-        return false;
+        return true;
     return DocumentQmlInfo::isObject(declaration->type().name());
 }
 
