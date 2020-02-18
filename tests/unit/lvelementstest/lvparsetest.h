@@ -30,6 +30,7 @@ private slots:
     void testComplexPropertyAssignment();
     void testSimplePropertyAssignment();
     void testScenarioTest();
+    void nestedLanguageScannerTest();
 
 private:
     lv::LockedFileIOSession::Ptr m_fileSession;
