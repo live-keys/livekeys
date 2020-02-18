@@ -13,7 +13,6 @@ namespace lv{
 class QmlBindingPath{
 
 public:
-    friend class BindingChannel;
 
     typedef QSharedPointer<QmlBindingPath> Ptr;
     typedef QSharedPointer<QmlBindingPath> ConstPtr;

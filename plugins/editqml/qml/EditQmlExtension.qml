@@ -24,6 +24,7 @@ LiveExtension{
     property Component objectContainerFactory: Component{ ObjectContainer{} }
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
     property Component paletteListFactory : Component{ PaletteListView{} }
+    property Component importsContainerFactory: Component { ImportsContainer{} }
 
     function canBeQml(document){
         if ( endsWith(document.file.path, '.qml') ||
@@ -263,8 +264,13 @@ LiveExtension{
             var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
             var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
-            if ( palettes.size() === 0 ){
-                root.shapePalette(editor, palettes, -1)
+
+            var imports = codeHandler.importsModel()
+
+            if ( !palettes || palettes.size() === 0 ){
+                var importsContainer = importsContainerFactory.createObject(editor.textEdit)
+                importsContainer.model = imports
+                codeHandler.addImportsShape(importsContainer, imports)
             } else if ( palettes.size() === 1 ){
                 root.shapePalette(editor, palettes, 0)
             } else {
@@ -314,6 +320,7 @@ LiveExtension{
             var cursorCoords = activePane.cursorWindowCoords()
             var addBoxItem = addBoxFactory.createObject()
             addBoxItem.addContainer = addContainer
+            addBoxItem.codeQmlHandler = activePane.documentHandler.codeHandler
 
             addBoxItem.activeIndex = activeIndex ? activeIndex : 0
 

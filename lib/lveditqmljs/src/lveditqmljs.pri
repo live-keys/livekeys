@@ -7,6 +7,7 @@ HEADERS += \
     $$PWD/qmlbindingchannel.h \
     $$PWD/qmlbindingpath.h \
     $$PWD/qmlbindingspan.h \
+    $$PWD/qmlimportsmodel.h \
     $$PWD/qmlbindingspanmodel.h \
     $$PWD/qmlidvisitor_p.h \
     $$PWD/qmljshighlighter_p.h \
@@ -72,5 +73,6 @@ SOURCES += \
     $$PWD/qmleditfragment.cpp \
     $$PWD/qmldeclaration.cpp \
     $$PWD/qmlcursorinfo.cpp \
+    $$PWD/qmlimportsmodel.cpp \
     $$PWD/qmlscopesnap.cpp \
     $$PWD/qmlusagegraphscanner.cpp

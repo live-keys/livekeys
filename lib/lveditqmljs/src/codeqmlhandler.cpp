@@ -37,6 +37,9 @@
 #include "qmlscopesnap_p.h"
 #include "qmlusagegraphscanner.h"
 
+#include "qmljs/parser/qmljsast_p.h"
+#include "qmljs/qmljsbind.h"
+
 #include "live/documenthandler.h"
 #include "live/codecompletionsuggestion.h"
 #include "live/projectfile.h"
@@ -1695,6 +1698,22 @@ void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
 
     dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, static_cast<int>(box->height()), box);
 }
+
+void CodeQmlHandler::addImportsShape(QQuickItem *box, QmlImportsModel *model)
+{
+    if (!model) return;
+
+    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    int first = model->firstBlock();
+    int last = model->lastBlock();
+
+    if (first == -1) return;
+
+    dh->lineBoxAdded(first, last + 1, static_cast<int>(box->height()), box);
+
+}
+
+
 /*
 void CodeQmlHandler::removeEditFrame(QQuickItem *box){
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
@@ -1723,6 +1742,58 @@ QJSValue CodeQmlHandler::contextBlockRange(int position){
     return ob;
 }
 
+lv::QmlImportsModel *CodeQmlHandler::importsModel()
+{
+    lv::QmlImportsModel* result = new lv::QmlImportsModel(this);
+
+    QString source = m_target->toPlainText();
+    DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(m_document->file()->path());
+    if ( docinfo->parse(source) ){
+        auto imports = docinfo->internalBind()->imports();
+        for ( QList<QmlJS::ImportInfo>::iterator it = imports.begin(); it != imports.end(); ++it ){
+
+            QString module = it->name();
+            QString version = it->version().majorVersion() != -1 ? (QString::number(it->version().majorVersion()) + "." + QString::number(it->version().minorVersion())) : "";
+            QString qual = it->as();
+            int line = it->ast()? (it->ast()->importToken.startLine-1) : -1;
+
+            result->addItem(module, version, qual, line);
+        }
+    }
+
+    return result;
+}
+
+void CodeQmlHandler::addLineAtPosition(QString line, int pos)
+{
+    if (!m_target) return;
+    QTextCursor c(m_target);
+    if (pos == 0)
+    {
+        c.beginEditBlock();
+        c.insertText(line + "\n");
+        c.endEditBlock();
+    } else {
+        auto block = m_target->findBlockByNumber(pos-1);
+        c = QTextCursor(block);
+        c.beginEditBlock();
+        c.movePosition(QTextCursor::EndOfBlock);
+        c.insertText("\n" + line);
+        c.endEditBlock();
+    }
+}
+
+void CodeQmlHandler::removeLineAtPosition(int pos)
+{
+    if (!m_target) return;
+    auto block = m_target->findBlockByNumber(pos);
+    QTextCursor c(block);
+    c.beginEditBlock();
+    c.select(QTextCursor::BlockUnderCursor);
+    c.removeSelectedText();
+    c.endEditBlock();
+}
+
 /**
  * \brief Receive different qml based information about a given cursor position
  */
@@ -1740,7 +1811,13 @@ QmlCursorInfo *CodeQmlHandler::cursorInfo(int position, int length){
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
 
-    if ( properties.isEmpty() )
+    QmlCompletionContext::ConstPtr qcc = m_completionContextFinder->getContext(cursor);
+    if ( qcc->context() & QmlCompletionContext::InImport || qcc->context() & QmlCompletionContext::InImportVersion ){
+        canShape = true;
+    }
+
+
+    if ( properties.isEmpty())
         return new QmlCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
 
     if ( properties.size() == 1 ){
@@ -2132,13 +2209,25 @@ int CodeQmlHandler::addProperty(
 /**
  * \brief Adds an item given the \p addText at the specitied \p position
  */
-int CodeQmlHandler::addItem(int position, const QString &, const QString &type){
+int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype){
     DocumentQmlValueScanner qvs(m_document, position, 1);
     int blockStart = qvs.getBlockStart(position) + 1;
     int blockEnd = qvs.getBlockEnd(position);
 
     QTextBlock tbStart = m_target->findBlock(blockStart);
     QTextBlock tbEnd   = m_target->findBlock(blockEnd);
+
+    QString id, type;
+    int idx = ctype.indexOf('#');
+
+    if (idx != -1)
+    {
+        type = ctype.left(idx);
+        id = ctype.mid(idx+1);
+    }
+    else {
+        type = ctype;
+    }
 
     QString insertionText;
     int insertionPosition = position;
@@ -2148,7 +2237,9 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &type){
 
     if ( tbStart == tbEnd ){ // inline object declaration
         insertionPosition = blockEnd;
-        insertionText = "; " + type + "{} ";
+        insertionText = "; " + type + "{";
+        if (id != "") insertionText += " id: " + id + " ";
+        insertionText += "} ";
         cursorPosition = insertionPosition + type.size() + 3;
     } else { // multiline object declaration
         QString indent = getBlockIndent(tbStart) + "    ";
@@ -2163,7 +2254,9 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &type){
             tbIt = tbIt.previous();
         }
 
-        insertionText = indent + type + "{\n" + indent + "}\n";
+        insertionText = indent + type + "{\n";
+        if (id != "") insertionText += indent + "    id: " + id + "\n";
+        insertionText += indent + "}\n";
         cursorPosition = insertionPosition + indent.size() + type.size() + 1;
     }
 
