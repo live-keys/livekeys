@@ -718,18 +718,11 @@ MLNode ModuleInfo::toMLNode() const
     MLNode result(MLNode::Object);
 
     result["import_uri"] = m_importUri.data();
-    result["path"] = m_path.data();
-    result["status"] = m_scanStatus;
 
     MLNode deps(MLNode::Array);
     for (int i = 0; i<m_dependencies.size();++i)
         deps.append(m_dependencies[i].data());
     result["dependencies"] = deps;
-
-    MLNode dox(MLNode::Array);
-    for (int i=0;i<m_unresolvedDocuments.size();++i)
-        dox.append(m_unresolvedDocuments[i]->toMLNode());
-    result["unresolved"] = dox;
 
     MLNode types(MLNode::Array);
     for (int i =0; i<m_types.size();++i)
@@ -743,21 +736,11 @@ void ModuleInfo::fromMLNode(const MLNode &node)
 {
     auto object = node.asObject();
     m_importUri = object.at("import_uri").asString();
-    m_path = object.at("path").asString();
-    m_scanStatus = static_cast<ModuleInfo::ScanStatus>(object.at("status").asInt());
 
     auto deps = object.at("dependencies").asArray();
     for (int i =0; i<deps.size();++i)
     {
         m_dependencies.push_back(deps.at(i).asString());
-    }
-
-    auto unr = object.at("unresolved").asArray();
-    for (int i =0; i < unr.size();++i)
-    {
-        DocumentInfo::Ptr di = DocumentInfo::create();
-        di->fromMLNode(unr.at(i));
-        m_unresolvedDocuments.push_back(di);
     }
 
     auto types = object.at("types").asArray();

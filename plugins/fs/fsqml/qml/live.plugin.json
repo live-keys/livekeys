@@ -1,4 +1,5 @@
 {
     "name": "fs",
-    "package" : "."
+    "package" : ".",
+    "libraryModules" : ["lvfs"]
 }

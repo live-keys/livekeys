@@ -48,6 +48,9 @@ lcvvideo.depends      = lcvcore live
     editjson.depends = live
     editjson.subdir = $$PWD/editjson
 
+    SUBDIRS += language
+    language.subdir = $$PWD/language
+
     SUBDIRS += test
     test.subdir = $$PWD/test
 }

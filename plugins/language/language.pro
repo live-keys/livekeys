@@ -1,8 +1,8 @@
-PLUGIN_NAME = fs
-PLUGIN_PATH = fs
+PLUGIN_NAME = language
+PLUGIN_PATH = language
 
 TEMPLATE = lib
-TARGET   = lvfs
+TARGET   = lvlanguage
 CONFIG  += qt unversioned_libname skip_target_version_ext
 
 linkLocalLibrary(lvbase,     lvbase)
@@ -42,4 +42,24 @@ unix:!macx{
     POST_TARGETDEPS        += createlinkdir
 }
 
-include($$PWD/src/fslv.pri)
+
+include($$PWD/src/language.pri)
+
+OTHER_FILES += \
+    lv/*.lv \
+    lv/live.package.json \
+    lv/live.plugin.json
+
+# --- Handling the lv deployment ---
+
+PLUGIN_LV_DIR = $$_PRO_FILE_PWD_/lv
+
+!exists($$PLUGIN_LV_DIR){
+    warning(Expected folder $$PLUGIN_LV_DIR)
+    qmlcopy.commands =
+} else {
+    qmlcopy.commands = $$deployDirCommand($$PLUGIN_LV_DIR, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH)
+}
+
+QMAKE_EXTRA_TARGETS += qmlcopy
+POST_TARGETDEPS += qmlcopy

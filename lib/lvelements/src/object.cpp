@@ -49,7 +49,20 @@ Object::Object(Engine* engine, const v8::Local<v8::Object> &data)
         m_d = new ObjectPrivate(engine, data);
         m_ref = new int;
         m_d->ref = m_ref;
-        data->Set(v8::String::NewFromUtf8(engine->isolate(), "__shared__"), v8::External::New(engine->isolate(), m_d));
+        v8::Maybe<bool> result = data->DefineOwnProperty(
+            engine->currentContext()->asLocal(),
+            v8::String::NewFromUtf8(engine->isolate(), "__shared__"),
+            v8::External::New(engine->isolate(), m_d),
+            v8::DontEnum
+        );
+        if ( result.IsNothing() || !result.ToChecked() ){
+            THROW_EXCEPTION(
+                Exception,
+                "Object::Object: Assertion failed when defining the '__shared__' property. This"
+                "will result in undefined behaviour.",
+                Exception::toCode("~Assertion")
+            );
+        }
     }
 
     ++(*m_ref);
@@ -263,6 +276,15 @@ void LocalObject::set(const LocalValue &key, const LocalValue &value){
 
 void LocalObject::set(Engine *engine, const std::string &key, const LocalValue &value){
     set(LocalValue(engine, key), value);
+}
+
+bool LocalObject::has(Engine* engine, const LocalValue &key) const{
+    v8::Maybe<bool> result = m_d->data->HasOwnProperty(engine->currentContext()->asLocal(), v8::Local<v8::Name>::Cast(key.data()));
+    return result.IsJust() && result.ToChecked();
+}
+
+LocalValue LocalObject::ownProperties() const{
+    return LocalValue(m_d->data->GetOwnPropertyNames());
 }
 
 

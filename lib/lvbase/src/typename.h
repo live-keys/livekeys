@@ -23,14 +23,6 @@ public:
     static std::string capture(int options = TypeNameOptions::Qualifiers){ return options > 0 ? "":""; }
 };
 
-
-//template<> class TypeName<std::string> {
-//public:
-//    static std::string capture(int options = TypeNameOptions::Qualifiers){
-//        return "std::string";
-//    }
-//};
-
 template<typename T1, typename T2, typename... T> class TypeName<T1, T2, T...> {
 public:
     static std::string capture(int options = TypeNameOptions::Qualifiers){
@@ -72,6 +64,34 @@ public:
         return r;
     }
 
+};
+
+
+template<> class TypeName<std::string> {
+public:
+    static std::string capture(int options = TypeNameOptions::Qualifiers);
+};
+
+inline std::string TypeName<std::string>::capture(int) {
+    return "std::string";
+}
+
+template<> class TypeName<const std::string&> {
+public:
+    static std::string capture(int options = TypeNameOptions::Qualifiers){
+        if ( options & TypeNameOptions::Qualifiers )
+            return "const std::string&";
+        return "std::string";
+    }
+};
+
+template<> class TypeName<std::string&> {
+public:
+    static std::string capture(int options = TypeNameOptions::Qualifiers){
+        if ( options & TypeNameOptions::Qualifiers )
+            return "std::string&";
+        return "std::string";
+    }
 };
 
 
