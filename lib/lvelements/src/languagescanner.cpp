@@ -80,6 +80,11 @@ ModuleInfo::Ptr LanguageScanner::parseModule(const std::string &importUri){
     return module;
 }
 
+void LanguageScanner::queueModule(const std::string &importUri){
+    ModuleInfo::Ptr module = parseModule(importUri);
+    queueModule(module);
+}
+
 void LanguageScanner::queueModule(const ModuleInfo::Ptr &module){
     auto it = locateModuleInQueue(module->importUri().data());
     if ( it != m_modulesToLoad.end() )
@@ -138,6 +143,14 @@ std::list<ModuleInfo::Ptr>::iterator LanguageScanner::locateModuleInQueue(const 
         }
     }
     return m_modulesToLoad.end();
+}
+
+void LanguageScanner::setPackageImportPaths(const std::vector<std::string> &paths){
+    m_packageGraph->setPackageImportPaths(paths);
+}
+
+const std::vector<std::string> &LanguageScanner::packageImportPaths() const{
+    return m_packageGraph->packageImportPaths();
 }
 
 }} // namespace lv, el

@@ -7,6 +7,7 @@ HEADERS += \
     $$PWD/live/elements/languageinfo.h \
     $$PWD/live/elements/languageparser.h \
     $$PWD/live/elements/languagequery.h \
+    $$PWD/live/elements/languagescanner.h \
     $$PWD/live/elements/metaobject.h \
     $$PWD/live/elements/moduleloader.h \
     $$PWD/live/elements/parseddocument.h \
