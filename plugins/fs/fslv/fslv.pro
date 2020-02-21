@@ -2,7 +2,7 @@ PLUGIN_NAME = fs
 PLUGIN_PATH = fs
 
 TEMPLATE = lib
-TARGET   = fslv
+TARGET   = lvfs
 CONFIG  += qt unversioned_libname skip_target_version_ext
 
 linkLocalLibrary(lvbase,     lvbase)
