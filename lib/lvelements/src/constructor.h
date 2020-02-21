@@ -28,6 +28,7 @@ public:
     {}
 
     template<class T> static void ptrImplementation(const v8::FunctionCallbackInfo<v8::Value>& info);
+    static void nullImplementation(const v8::FunctionCallbackInfo<v8::Value>& info);
 
     static void bindLifeTimeWithObject(Element* e, const v8::FunctionCallbackInfo<v8::Value>& info);
     static void assignSelfReturnValue(const v8::FunctionCallbackInfo<v8::Value>& info);
