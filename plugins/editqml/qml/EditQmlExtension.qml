@@ -265,12 +265,19 @@ LiveExtension{
             var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
 
-            var imports = codeHandler.importsModel()
-
-            if ( !palettes || palettes.size() === 0 ){
+            if (codeHandler.isInImports(editor.textEdit.cursorPosition))
+            {
+                var imports = codeHandler.importsModel()
                 var importsContainer = importsContainerFactory.createObject(editor.textEdit)
                 importsContainer.model = imports
                 codeHandler.addImportsShape(importsContainer, imports)
+                return
+            }
+
+
+            if ( !palettes || palettes.size() === 0 ){
+                root.shapePalette(editor, palettes, -1)
+
             } else if ( palettes.size() === 1 ){
                 root.shapePalette(editor, palettes, 0)
             } else {

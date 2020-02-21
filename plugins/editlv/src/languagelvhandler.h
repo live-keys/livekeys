@@ -13,6 +13,8 @@
 #include "live/codecompletionmodel.h"
 
 #include "editlvsettings.h"
+#include "documenttree.h"
+#include "live/elements/cursorcontext.h"
 
 namespace lv{
 
@@ -63,6 +65,12 @@ public slots:
     void __aboutToDelete();
 
 private:
+    void suggestionsForImport(const el::CursorContext& ctx, QList<CodeCompletionSuggestion>& suggestions);
+    void suggestionsForListener(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
+    void suggestionsForLeftOfDeclaration(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
+    void suggestionsForRightOfDeclaration(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
+    void defaultSuggestions(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
+
     LanguageLvExtension* m_extension;
 
     QScopedPointer<LanguageLvHandlerPrivate> d_ptr;
@@ -71,6 +79,7 @@ private:
     EditLvSettings*        m_settings;
     QQmlEngine*            m_engine;
     ProjectDocument*       m_document;
+    el::DocumentTree*      m_documentTree;
 
     bool   m_newScope;
     QTimer m_scopeTimer;

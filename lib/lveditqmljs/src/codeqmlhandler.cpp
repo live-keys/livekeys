@@ -31,7 +31,6 @@
 #include "qmljshighlighter_p.h"
 #include "qmlbindingchannel.h"
 #include "qmlbindingspan.h"
-#include "qmlcursorinfo.h"
 #include "qmlcodeconverter.h"
 #include "qmladdcontainer.h"
 #include "qmlscopesnap_p.h"
@@ -1000,7 +999,7 @@ void CodeQmlHandler::aboutToDelete()
     }
 }
 
-QJSValue CodeQmlHandler::createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape)
+QJSValue CodeQmlHandler::createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports)
 {
     QJSValue result = m_engine->newObject();
     result.setProperty("canBind", canBind);
@@ -1008,6 +1007,7 @@ QJSValue CodeQmlHandler::createCursorInfo(bool canBind, bool canUnbind, bool can
     result.setProperty("canEdit", canEdit);
     result.setProperty("canAdjust", canAdjust);
     result.setProperty("canShape", canShape);
+    result.setProperty("inImports", inImports);
     return result;
 }
 
@@ -1869,6 +1869,20 @@ QJSValue CodeQmlHandler::cursorInfo(int position, int length){
         }
     }
     return createCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
+}
+
+bool CodeQmlHandler::isInImports(int position)
+{
+    QTextCursor cursor(m_target);
+    cursor.setPosition(position);
+
+
+    QmlCompletionContext::ConstPtr qcc = m_completionContextFinder->getContext(cursor);
+    if ( qcc->context() & QmlCompletionContext::InImport || qcc->context() & QmlCompletionContext::InImportVersion ){
+        return true;
+    }
+
+    return false;
 }
 
 /**

@@ -106,6 +106,7 @@ public slots:
     // Palette and binding management
 
     QJSValue cursorInfo(int position, int length);
+    bool isInImports(int position);
     lv::QmlEditFragment* openConnection(int position, QObject *currentApp = nullptr);
     lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
     QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
@@ -165,7 +166,7 @@ public slots:
 signals:
 
 private:
-    QJSValue createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape);
+    QJSValue createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports = false);
 
     void rehighlightSection(int start, int end);
     void resetProjectQmlExtension();

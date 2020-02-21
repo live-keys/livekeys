@@ -12,6 +12,7 @@ linkLocalLibrary(lvbase,      lvbase)
 linkLocalLibrary(lvview,      lvview)
 linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lvelements,  lvelements)
+linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 # Source
 

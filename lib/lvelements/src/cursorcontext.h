@@ -17,7 +17,8 @@ public:
         InElements = 2,
         InLeftOfDeclaration = 4,
         InRightOfDeclaration = 8,
-        InStringLiteral = 16
+        InStringLiteral = 16,
+        InRelativeImport = 32
     };
 
 public:
