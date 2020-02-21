@@ -1,6 +1,5 @@
 #include "codeconverter.h"
 #include "live/projectfile.h"
-#include "live/documentqmlinfo.h"
 #include "live/codepalette.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
@@ -60,12 +59,7 @@ void CodeConverter::writeProperties(const QJSValue &properties){
     int valueLength   = m_edit->declaration()->valueLength();
     QString source    = m_edit->declaration()->document()->content().mid(valuePosition, valueLength);
 
-    lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create(m_edit->declaration()->document()->file()->path());
-    if ( !docinfo->parse(source) )
-        return;
-
-    lv::DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
-    lv::DocumentQmlValueObjects::RangeObject* root = objects->root();
+    // TODO: ELEMENTS (ParsedDocument stuff)
 
     QSet<QString> leftOverProperties;
 
@@ -77,30 +71,7 @@ void CodeConverter::writeProperties(const QJSValue &properties){
 
     QString indent = "";
 
-    for ( auto it = root->properties.begin(); it != root->properties.end(); ++it ){
-        lv::DocumentQmlValueObjects::RangeProperty* p = *it;
-        QString propertyName = source.mid(p->begin, p->propertyEnd - p->begin);
-
-        if ( indent.isEmpty() ){
-            int index = p->begin - 1;
-            while (index >= 0) {
-                if ( source[index] == QChar('\n') ){
-                    break;
-                }
-                if ( !source[index].isSpace() )
-                    break;
-                --index;
-            }
-            if ( index + 1 < p->begin - 1){
-                indent = source.mid(index + 1, p->begin - 1 - index);
-            }
-        }
-
-        if ( leftOverProperties.contains(propertyName) ){
-            source.replace(p->valueBegin, p->end - p->valueBegin, buildCode(properties.property(propertyName)));
-            leftOverProperties.remove(propertyName);
-        }
-    }
+    // TODO: ELEMENTS
 
     int writeIndex = source.length() - 2;
     while ( writeIndex >= 0 ){

@@ -115,6 +115,11 @@ Declaration::Ptr Declaration::create(
 Declaration::~Declaration(){
 }
 
+lv::ProjectDocument *Declaration::document()
+{
+    return m_document;
+}
+
 /// \brief Returns true if this declaration is for an object
 bool Declaration::isForObject() const{
     return m_valueOffset == 0;

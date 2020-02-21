@@ -17,7 +17,7 @@
 #ifndef LVEDITFRAGMENT_H
 #define LVEDITFRAGMENT_H
 
-#include "live/qmldeclaration.h"
+#include "declaration.h"
 #include <QVariant>
 #include <QQmlProperty>
 #include <memory>
@@ -47,7 +47,7 @@ public:
     };
 
 public:
-    LvEditFragment(QmlDeclaration::Ptr declaration, QObject* parent = nullptr);
+    LvEditFragment(el::Declaration::Ptr declaration, QObject* parent = nullptr);
     virtual ~LvEditFragment();
 
     BindingSpan* bindingSpan();
@@ -70,7 +70,7 @@ public:
     LvEditFragment* findChildFragment(LvEditFragment* edit);
     const QList<LvEditFragment*> childFragments();
 
-    QmlDeclaration::Ptr declaration() const;
+    el::Declaration::Ptr declaration() const;
 
     void write(const QString& code);
     QString readValueText() const;
@@ -112,7 +112,7 @@ signals:
     void paletteListEmpty();
 
 private:
-    QmlDeclaration::Ptr                 m_declaration;
+    el::Declaration::Ptr                m_declaration;
 
     QList<CodePalette*>                 m_palettes;
     CodePalette*                        m_bindingPalette;
@@ -159,7 +159,7 @@ inline const QList<LvEditFragment *> LvEditFragment::childFragments(){
 }
 
 /// \brief Returns the lv::CodeDeclaration associated with this object.
-inline QmlDeclaration::Ptr LvEditFragment::declaration() const{
+inline el::Declaration::Ptr LvEditFragment::declaration() const{
     return m_declaration;
 }
 

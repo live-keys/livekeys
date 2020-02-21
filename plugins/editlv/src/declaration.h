@@ -19,6 +19,7 @@
 
 #include <memory>
 #include "live/elements/languageinfo.h"
+#include "live/projectdocument.h"
 
 namespace lv{ namespace el {
 
@@ -30,8 +31,8 @@ public:
     /** Shared const pointer to Declaration */
     typedef std::shared_ptr<const Declaration> ConstPtr;
 
-    friend class ProjectDocument;
-    friend class DocumentHandler;
+    friend class lv::ProjectDocument;
+    friend class lv::DocumentHandler;
 
     /** ProjectDocument section type. */
     enum SectionType{
@@ -70,7 +71,7 @@ public:
     const TypeReference &type() const;
     const TypeReference& parentType() const;
 
-    ProjectDocument* document();
+    lv::ProjectDocument *document();
 
     int length() const;
 

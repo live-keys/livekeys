@@ -1,5 +1,4 @@
 #include "lveditfragment.h"
-#include "live/qmldeclaration.h"
 #include "live/codepalette.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
@@ -10,7 +9,7 @@
 
 namespace lv{
 
-LvEditFragment::LvEditFragment(QmlDeclaration::Ptr declaration, QObject *parent)
+LvEditFragment::LvEditFragment(el::Declaration::Ptr declaration, QObject *parent)
     : QObject(parent)
     , m_declaration(declaration)
     , m_bindingPalette(nullptr)
@@ -21,16 +20,16 @@ LvEditFragment::LvEditFragment(QmlDeclaration::Ptr declaration, QObject *parent)
 }
 
 LvEditFragment::~LvEditFragment(){
-    ProjectDocumentSection::Ptr section = declaration()->section();
-    ProjectDocument* doc = section->document();
-    doc->removeSection(section);
+    // ProjectDocumentSection::Ptr section = declaration()->section(); TODO: ELEMENTS
+//    ProjectDocument* doc = section->document();
+//    doc->removeSection(section);
 
     for ( auto it = childFragments().begin(); it != childFragments().end(); ++it ){
         LvEditFragment* edit = *it;
         edit->deleteLater();
     }
 
-    //delete m_bindingSpanModel;
+    delete m_bindingSpanModel;
     delete m_bindingSpan;
 }
 
@@ -232,7 +231,7 @@ BindingSpanModel* LvEditFragment::bindingModel(lv::LanguageLvHandler *codeHandle
 }
 
 QString LvEditFragment::type() const{
-    return m_declaration->type().join();
+    return QString::fromStdString(m_declaration->type().join().data());
 }
 
 QList<QObject *> LvEditFragment::getChildFragments() const{
