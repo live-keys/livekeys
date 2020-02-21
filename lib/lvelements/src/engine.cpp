@@ -89,6 +89,7 @@ public:
     LanguageParser::Ptr parser;
 
     PackageGraph* packageGraph;
+    Engine::FileInterceptor* fileInterceptor;
     std::map<std::string, ElementsPlugin::Ptr> loadedPlugins;
 
 public: // helpers
@@ -156,6 +157,27 @@ void Engine::disposeAtExit(){
     }
 }
 
+// Engine Input
+// -------------------------------------------------------------------------------------------
+
+Engine::FileInterceptor::FileInterceptor(LockedFileIOSession::Ptr fileInput)
+    : m_fileInput(fileInput)
+{
+    if ( !m_fileInput )
+        m_fileInput = LockedFileIOSession::createInstance();
+}
+
+Engine::FileInterceptor::~FileInterceptor(){
+}
+
+std::string Engine::FileInterceptor::readFile(const std::string &path){
+    return m_fileInput->readFromFile(path);
+}
+
+const LockedFileIOSession::Ptr &Engine::FileInterceptor::fileInput() const{
+    return m_fileInput;
+}
+
 // Engine Implementation
 // --------------------------------------------------------------------------------------------
 
@@ -185,7 +207,8 @@ Engine::Engine(PackageGraph *pg)
     v8::Local<v8::External> listenerData = v8::External::New(isolate(), this);
     m_d->isolate->AddMessageListener(&EnginePrivate::messageListener, listenerData);
 
-    m_d->packageGraph = (pg == nullptr) ? new PackageGraph : pg;
+    m_d->packageGraph    = (pg == nullptr) ? new PackageGraph : pg;
+    m_d->fileInterceptor = new Engine::FileInterceptor;
 
     importInternals();
 }
@@ -437,8 +460,11 @@ ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
         return it->second;
 
     v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate());
-    if ( t->constructor() )
+    if ( t->constructor() ){
         tpl->SetCallHandler(t->constructor()->ptr());
+    } else {
+        tpl->SetCallHandler(&Constructor::nullImplementation);
+    }
     tpl->SetClassName(v8::String::NewFromUtf8(isolate(), t->name().c_str()));
 
     v8::Local<v8::ObjectTemplate> tplInstance = tpl->InstanceTemplate();
@@ -726,6 +752,15 @@ void Engine::setModuleFileType(Engine::ModuleFileType type){
 
 const LanguageParser::Ptr &Engine::parser() const{
     return m_d->parser;
+}
+
+const Engine::FileInterceptor *Engine::fileInterceptor() const{
+    return m_d->fileInterceptor;
+}
+
+void Engine::setFileInterceptor(Engine::FileInterceptor *fileInterceptor){
+    delete m_d->fileInterceptor;
+    m_d->fileInterceptor = fileInterceptor;
 }
 
 void Engine::importInternals(){
