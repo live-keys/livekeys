@@ -27,6 +27,7 @@
 #include "live/settings.h"
 #include "live/palettelist.h"
 #include "live/codecompletionmodel.h"
+#include "live/qmlimportsmodel.h"
 
 #include <QObject>
 #include <QTimer>
@@ -122,7 +123,12 @@ public slots:
     bool isForAnObject(lv::QmlEditFragment* palette);
 
     void frameEdit(QQuickItem *box, lv::QmlEditFragment* palette);
+    void addImportsShape(QQuickItem* box, lv::QmlImportsModel* model);
     QJSValue contextBlockRange(int cursorPosition);
+
+    lv::QmlImportsModel* importsModel();
+    void addLineAtPosition(QString line, int pos);
+    void removeLineAtPosition(int pos);
 
     // Direct editing management
 

@@ -232,6 +232,7 @@ Item{
 
                     var addBoxItem = objectContainer.addBoxFactory.createObject()
                     addBoxItem.addContainer = addContainer
+                    addBoxItem.codeQmlHandler = codeHandler
 
                     var oct = objectContainer.parent
 
