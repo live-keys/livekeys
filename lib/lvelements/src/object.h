@@ -19,6 +19,7 @@ class Engine;
 class Context;
 class LocalValue;
 class Callable;
+class LocalArray;
 
 class ObjectPrivate;
 
@@ -90,6 +91,10 @@ public:
     void set(int index, const LocalValue& value);
     void set(const LocalValue& key, const LocalValue& value);
     void set(Engine* engine, const std::string& key, const LocalValue& value);
+
+    bool has(Engine* engine, const LocalValue& key) const;
+
+    LocalValue ownProperties() const;
 
 private:
     DISABLE_COPY(LocalObject);
