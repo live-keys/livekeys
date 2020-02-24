@@ -23,7 +23,6 @@
 #include "live/editorsettings.h"
 #include "live/editorglobalobject.h"
 #include "qmljssettings.h"
-#include "qmlcursorinfo.h"
 #include "qmlcodeconverter.h"
 #include "projectqmlscanner_p.h"
 #include "projectqmlscanmonitor_p.h"
@@ -155,7 +154,6 @@ void ProjectQmlExtension::removeCodeQmlHandler(CodeQmlHandler *handler){
  */
 void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterType<lv::ProjectQmlExtension>(uri, 1, 0, "ProjectQmlExtension");
-    qmlRegisterType<lv::QmlCursorInfo>(      uri, 1, 0, "QmlCursorInfo");
 
     qmlRegisterUncreatableType<lv::QmlEditFragment>(
         uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.documentHandler.codeQmlHandler.");

@@ -285,8 +285,6 @@ void LvParseTest::nestedLanguageScannerTest(){
 
     std::string conversion = parser->toJs(contents, "ParserTest14");
 
-    vlog() << conversion;
-
     el::LanguageParser::AST* conversionAST = parser->parse(conversion);
     el::LanguageParser::AST* expectedAST   = parser->parse(expect);
 

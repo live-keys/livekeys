@@ -6,6 +6,10 @@
 
 #include "languagelvextension.h"
 #include "editlvsettings.h"
+#include "live/elements/cursorcontext.h"
+#include "live/elements/parseddocument.h"
+#include <QQmlEngine>
+#include "live/projectfile.h"
 
 namespace lv{
 
@@ -23,14 +27,17 @@ LanguageLvHandler::LanguageLvHandler(
         DocumentHandler *handler)
     : QObject(handler)
     , d_ptr(new LanguageLvHandlerPrivate)
-    , m_highlighter(new LanguageLvHighlighter(settings, handler, document ? document->textDocument() : nullptr))
     , m_settings(settings)
     , m_engine(engine->engine())
     , m_document(document)
+    , m_documentTree(new el::DocumentTree(document))
     , m_newScope(false)
+
 {
     Q_D(LanguageLvHandler);
     d->languageExtension = languageExtension;
+
+    m_highlighter = new LanguageLvHighlighter(settings, handler, m_documentTree, document ? document->textDocument() : nullptr);
 
     m_scopeTimer.setInterval(1000);
     m_scopeTimer.setSingleShot(true);
@@ -41,7 +48,6 @@ LanguageLvHandler::LanguageLvHandler(
     connect(dh, &DocumentHandler::aboutToDeleteHandler, this, &LanguageLvHandler::__aboutToDelete);
 
     d->languageExtension->addLanguageHandler(this);
-//    d->projectHandler->scanMonitor()->addScopeListener(this);
 
     m_highlighter->setTarget(m_document->textDocument());
 
@@ -141,26 +147,26 @@ void LanguageLvHandler::assistCompletion(
         } else if ( insertion == '\"' ) {
             cursorChange = cursor;
             cursorChange.movePosition(QTextCursor::Left);
-//            QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursorChange);
-//            if ( !(ctx->context() & QmlCompletionContext::InStringLiteral) ){
-//                cursorChange.beginEditBlock();
-//                cursorChange.insertText("\"");
-//                cursorChange.endEditBlock();
-//            } else {
-//                cursorChange.movePosition(QTextCursor::Right);
-//            }
+            el::CursorContext ctx = el::ParsedDocument::findCursorContext(m_documentTree->ast(), cursor.position());
+            if ( !(ctx.context() & el::CursorContext::InStringLiteral) ){
+                cursorChange.beginEditBlock();
+                cursorChange.insertText("\"");
+                cursorChange.endEditBlock();
+            } else {
+                cursorChange.movePosition(QTextCursor::Right);
+            }
             return;
         } else if ( insertion == '\'' ) {
             cursorChange = cursor;
             cursorChange.movePosition(QTextCursor::Left);
-//            QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursorChange);
-//            if ( !(ctx->context() & QmlCompletionContext::InStringLiteral) ){
-//                cursorChange.beginEditBlock();
-//                cursorChange.insertText("\'");
-//                cursorChange.endEditBlock();
-//            } else {
-//                cursorChange.movePosition(QTextCursor::Right);
-//            }
+            el::CursorContext ctx = el::ParsedDocument::findCursorContext(m_documentTree->ast(), cursor.position());
+            if ( !(ctx.context() & el::CursorContext::InStringLiteral) ){
+                cursorChange.beginEditBlock();
+                cursorChange.insertText("\'");
+                cursorChange.endEditBlock();
+            } else {
+                cursorChange.movePosition(QTextCursor::Right);
+            }
             return;
 
         } else if ( insertion != QChar('.') && !insertion.isLetterOrNumber() ){
@@ -172,7 +178,59 @@ void LanguageLvHandler::assistCompletion(
         return;
     }
 
-    //TODO: Get completion context
+    if (!m_documentTree->ast())
+        return;
+
+    auto ctx = el::ParsedDocument::findCursorContext(m_documentTree->ast(), 2*cursor.position());
+    QString filter;
+    if (ctx.expressionPath().size() > 0){
+        auto last = ctx.expressionPath().back();
+        filter = m_document->substring(static_cast<int>(last.from()),static_cast<int>(last.length()));
+    }
+
+    model->setCompletionPosition(
+        cursor.position() -
+        (ctx.expressionPath().size() > 0 ? static_cast<int>(ctx.expressionPath().back().length()) : 0)
+    );
+
+//    if( filter == "" && insertion.isNumber() ){
+//        model->setFilter(insertion);
+//        return;
+//    }
+
+    QList<CodeCompletionSuggestion> suggestions;
+    if ( ctx.context() & el::CursorContext::InImport ){
+        suggestionsForImport(ctx, suggestions);
+        model->setSuggestions(suggestions, filter);
+    } else if ( ctx.context() & el::CursorContext::InLeftOfDeclaration ){
+        auto propertyDeclaredType = ctx.propertyDeclaredType();
+        if (m_documentTree->slice(propertyDeclaredType) == "on")
+        {
+            suggestionsForListener(ctx, cursor.position(), suggestions);
+            model->setSuggestions(suggestions, filter);
+
+        } else {
+            suggestionsForLeftOfDeclaration(ctx, cursor.position(), suggestions);
+            model->setSuggestions(suggestions, filter);
+
+        }
+    } else if ( ctx.context() & el::CursorContext::InRightOfDeclaration ){
+        suggestionsForRightOfDeclaration(ctx, cursor.position(), suggestions);
+        model->setSuggestions(suggestions, filter);
+    } else {
+        defaultSuggestions(ctx, cursor.position(), suggestions);
+
+        if ( ctx.expressionPath().size() > 1 ){
+            // TODO: ELEMENTS
+            model->setSuggestions(suggestions, filter);
+        } else {
+            // suggestionsForGlobalContext(*ctx, suggestions); TODO: ELEMENTS
+            // suggestionsForNamespaceTypes(ctx.expressionPath().size() > 1 ? ctx.expressionPath().first() : "", suggestions);
+            model->setSuggestions(suggestions, filter);
+        }
+
+}
+
 }
 
 QList<int> LanguageLvHandler::languageFeatures() const{
@@ -243,6 +301,41 @@ void LanguageLvHandler::__updateScope(){
 
 void LanguageLvHandler::__aboutToDelete(){
     //TODO
+}
+
+void LanguageLvHandler::suggestionsForImport(const el::CursorContext &ctx, QList<CodeCompletionSuggestion> &suggestions)
+{
+    if (ctx.context() & el::CursorContext::InRelativeImport)
+    {
+        auto folderPath = m_document->file()->parentEntry()->path();
+    }
+    else {
+        foreach (const QString& importPath, m_engine->importPathList()){
+            //suggestionsForRecursiveImport(0, importPath, ctx.expressionPath(), suggestions); // TODO: ELEMENTS
+        }
+    }
+    std::sort(suggestions.begin(), suggestions.end(), &CodeCompletionSuggestion::compare);
+
+}
+
+void LanguageLvHandler::suggestionsForListener(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
+{
+
+}
+
+void LanguageLvHandler::suggestionsForLeftOfDeclaration(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
+{
+
+}
+
+void LanguageLvHandler::suggestionsForRightOfDeclaration(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
+{
+
+}
+
+void LanguageLvHandler::defaultSuggestions(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
+{
+
 }
 
 }// namespace
