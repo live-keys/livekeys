@@ -306,6 +306,10 @@ LiveExtension{
         add(1)
     }
 
+    function addEvent(){
+        add(2)
+    }
+
     function add(activeIndex){
         var activePane = lk.layers.workspace.panes.activePane
         if ( activePane.objectName === 'editor' &&
@@ -336,10 +340,12 @@ LiveExtension{
                     activePane.documentHandler.codeHandler.addProperty(
                         addContainer.propertyModel.addPosition, addContainer.objectType, type, data
                     )
-                } else {
+                } else if ( addBoxItem.activeIndex === 1 ){
                     activePane.documentHandler.codeHandler.addItem(
                         addContainer.itemModel.addPosition, addContainer.objectType, data
                     )
+                } else if ( addBoxItem.activeIndex === 2 ){
+                    // TODO
                 }
                 addBox.destroy()
             }
@@ -414,6 +420,7 @@ LiveExtension{
         "add" : [add, "Add a Property/Object"],
         "add_property" : [addProperty, "Add a property."],
         "add_object" : [addObject, "Add an object."],
+        "add_event" : [addEvent, "Add an event."],
         'bind' : [bind, "Bind to Property Under Cursor"],
         'unbind' : [unbind, "Unbind Properties Under Cursor"],
         'shape' : [shape, "Shape This Property Into a Palette"]
@@ -463,6 +470,10 @@ LiveExtension{
                     }, {
                         name : "Add Object",
                         action : root.commands['add_object'][0],
+                        enabled : true
+                    }, {
+                        name : "Add Event",
+                        action : root.commands['add_event'][0],
                         enabled : true
                     }
                 ]
