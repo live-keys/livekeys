@@ -7,4 +7,3 @@ AddQmlBox 1.0 AddQmlBox.qml
 PaletteGroup 1.0 PaletteGroup.qml
 ObjectContainer 1.0 ObjectContainer.qml
 PaletteContainer 1.0 PaletteContainer.qml
-ImportsContainer 1.0 ImportsContainer.qml

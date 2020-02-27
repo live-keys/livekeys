@@ -123,7 +123,6 @@ public slots:
     bool isForAnObject(lv::QmlEditFragment* palette);
 
     void frameEdit(QQuickItem *box, lv::QmlEditFragment* palette);
-    void addImportsShape(QQuickItem* box, lv::QmlImportsModel* model);
     QJSValue contextBlockRange(int cursorPosition);
 
     lv::QmlImportsModel* importsModel();
