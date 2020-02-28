@@ -58,6 +58,8 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
 
     friend class ProjectQmlExtension;
 
+    Q_PROPERTY(int numberOfConnections READ numberOfConnections NOTIFY numberOfConnectionsChanged)
+
 public:
     explicit CodeQmlHandler(
         ViewEngine* engine,
@@ -96,6 +98,8 @@ public:
 
     QmlUsageGraphScanner* createScanner();
 
+    int numberOfConnections();
+
 public slots:
     QList<int> languageFeatures() const;
 
@@ -128,6 +132,10 @@ public slots:
     lv::QmlImportsModel* importsModel();
     void addLineAtPosition(QString line, int pos);
     void removeLineAtPosition(int pos);
+    void removeAllEditingFragments();
+
+    int findImportsPosition(int blockPos);
+    int findRootPosition(int blockPos);
 
     // Direct editing management
 
@@ -163,7 +171,7 @@ public slots:
 
     void aboutToDelete();
 signals:
-
+    void numberOfConnectionsChanged();
 private:
     QJSValue createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports = false);
 

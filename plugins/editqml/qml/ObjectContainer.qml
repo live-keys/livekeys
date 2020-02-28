@@ -350,7 +350,7 @@ Item{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
-            visible: !objectContainer.editingFragment.parentFragment()
+            visible: !(objectContainer.editingFragment && objectContainer.editingFragment.parentFragment())
             Text{
                 anchors.verticalCenter: parent.verticalCenter
                 text: 'x'

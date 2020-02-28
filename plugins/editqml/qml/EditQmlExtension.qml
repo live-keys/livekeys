@@ -298,6 +298,27 @@ LiveExtension{
         }
     }
 
+    function shapeAll(){
+        var activePane = lk.layers.workspace.panes.activePane
+        if ( activePane.objectName !== 'editor' ||
+             !activePane.document ||
+             !canBeQml(activePane.document) ) return
+
+        var editor = activePane
+        var codeHandler = editor.documentHandler.codeHandler
+
+        var imports = codeHandler.importsModel()
+
+        var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
+        var rootPosition = codeHandler.findRootPosition(imports.lastBlock())
+
+        var paletteImports = codeHandler.findPalettes(importsPosition, true)
+        if (paletteImports) root.shapePalette(editor, paletteImports, 0)
+
+        var paletteRoot = codeHandler.findPalettes(rootPosition, true)
+        if (paletteRoot) root.shapePalette(editor, paletteRoot, 0)
+    }
+
     function addProperty(){
         add(0)
     }
@@ -423,7 +444,8 @@ LiveExtension{
         "add_event" : [addEvent, "Add an event."],
         'bind' : [bind, "Bind to Property Under Cursor"],
         'unbind' : [unbind, "Unbind Properties Under Cursor"],
-        'shape' : [shape, "Shape This Property Into a Palette"]
+        'shape' : [shape, "Shape This Property Into a Palette"],
+        'shape_all' : [shapeAll, "Shape all the code"]
     }
 
     keyBindings : {
@@ -475,6 +497,10 @@ LiveExtension{
                         name : "Add Event",
                         action : root.commands['add_event'][0],
                         enabled : true
+                    }, {
+                        name: "Shape all",
+                        action: root.commands['shape_all'][0],
+                        enabled: true
                     }
                 ]
             }

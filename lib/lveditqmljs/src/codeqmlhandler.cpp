@@ -1030,6 +1030,7 @@ bool CodeQmlHandler::addEditingFragment(QmlEditFragment *edit){
     }
 
     m_edits.insert(it, edit);
+    emit numberOfConnectionsChanged();
 
     return true;
 }
@@ -1053,6 +1054,7 @@ void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
 
             if ( itEdit == edit ){
                 m_edits.erase(it);
+                emit numberOfConnectionsChanged();
 
                 if ( m_editingFragment == edit ){
                     m_document->removeEditingState(ProjectDocument::Overlay);
@@ -1071,6 +1073,47 @@ void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
             parentEf->removeChildFragment(edit);
         }
     }
+}
+
+void CodeQmlHandler::removeAllEditingFragments()
+{
+    while (!m_edits.empty())
+    {
+        removeEditingFragment(*m_edits.begin());
+    }
+}
+
+int CodeQmlHandler::findImportsPosition(int blockPos)
+{
+    if (blockPos == -1) return 0;
+    auto block = m_document->textDocument()->findBlockByNumber(blockPos);
+    return block.position() + 7; // e.g. import ^QtQuick
+}
+
+int CodeQmlHandler::findRootPosition(int blockPos)
+{
+    auto block = m_document->textDocument()->findBlockByNumber(blockPos + 1);
+
+    auto reg = QRegExp("\\s*");
+    while (block.isValid())
+    {
+        if (reg.exactMatch(block.text()))
+        {
+            block = block.next();
+            continue;
+        }
+
+        break;
+    }
+
+    if (!block.isValid()) return 0;
+
+    int position = block.position();
+    auto text = block.text();
+    int i = 0;
+    while (text[i].isSpace()) ++i;
+
+    return position + i;
 }
 
 QmlEditFragment *CodeQmlHandler::findEditFragment(CodePalette *palette){
@@ -1277,6 +1320,11 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
 QmlUsageGraphScanner *CodeQmlHandler::createScanner(){
     Q_D(CodeQmlHandler);
     return new QmlUsageGraphScanner(d->projectHandler->project(), d->snapScope());
+}
+
+int CodeQmlHandler::numberOfConnections()
+{
+    return m_edits.size();
 }
 
 QList<int> CodeQmlHandler::languageFeatures() const{
