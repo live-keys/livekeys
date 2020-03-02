@@ -3,10 +3,10 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/errorhandler.h \
     $$PWD/incubationcontroller.h \
+    $$PWD/metainfo.h \
     $$PWD/qmlact.h \
     $$PWD/qmlstreamfilter.h \
     $$PWD/settings.h \
-    $$PWD/typeinfo.h \
     $$PWD/visuallogbasemodel.h \
     $$PWD/visuallogfilter.h \
     $$PWD/visuallogmodel.h \
@@ -45,6 +45,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/errorhandler.cpp \
     $$PWD/incubationcontroller.cpp \
+    $$PWD/metainfo.cpp \
     $$PWD/qmlact.cpp \
     $$PWD/qmlstreamfilter.cpp \
     $$PWD/settings.cpp \
@@ -53,7 +54,6 @@ SOURCES += \
     $$PWD/visuallogmodel.cpp \
     $$PWD/visuallogqmlobject.cpp \
     $$PWD/visuallognetworksender.cpp \
-    $$PWD/typeinfo.cpp \
     $$PWD/mlnodetoqml.cpp \
     $$PWD/viewcontext.cpp \
     $$PWD/viewengine.cpp \

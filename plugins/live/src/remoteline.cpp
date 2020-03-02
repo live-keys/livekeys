@@ -1,7 +1,7 @@
 #include "remoteline.h"
 #include "remotelineproperty.h"
 
-#include "live/typeinfo.h"
+#include "live/metainfo.h"
 #include "live/visuallogqt.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
@@ -40,7 +40,7 @@ void RemoteLine::sendProperty(const QString &propertyName){
 
     QQmlProperty pp(this, propertyName);
 
-    TypeInfo::serializeVariant(lv::ViewContext::instance().engine(), pp.read(), inputValue);
+    MetaInfo::serializeVariant(lv::ViewContext::instance().engine(), pp.read(), inputValue);
 
     input[propertyName.toStdString()] = inputValue;
 
@@ -117,7 +117,7 @@ void RemoteLine::onMessage(const LineMessage &message){
             for ( auto it = inputOb.begin(); it != inputOb.end(); ++it ){
                 m_result->insert(
                     QByteArray::fromStdString(it.key().c_str()),
-                    TypeInfo::deserializeVariant(engine, it.value())
+                    MetaInfo::deserializeVariant(engine, it.value())
                 );
             }
 

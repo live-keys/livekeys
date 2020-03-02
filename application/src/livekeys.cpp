@@ -16,8 +16,6 @@
 
 #include "livekeys.h"
 #include "livekeysarguments.h"
-#include "qmlscript.h"
-#include "environment.h"
 #include "live/memory.h"
 
 #include "live/keymap.h"
@@ -75,7 +73,6 @@ Livekeys::Livekeys(QObject *parent)
 #endif
     , m_project(new Project(m_engine, m_viewEngine))
     , m_settings(nullptr)
-    , m_script(nullptr)
     , m_log(nullptr)
     , m_vlog(new VisualLogQmlObject) // js ownership
     , m_packageGraph(nullptr)
@@ -115,7 +112,6 @@ Livekeys::Ptr Livekeys::create(int argc, const char * const argv[], QObject *par
 #endif
 
     Livekeys::Ptr livekeys = Livekeys::Ptr(new Livekeys(parent));
-
     livekeys->m_arguments->initialize(argc, argv);
 
     qInstallMessageHandler(&visualLogMessageHandler);
@@ -140,8 +136,7 @@ Livekeys::Ptr Livekeys::create(int argc, const char * const argv[], QObject *par
         vlog().configure(it.key(), it.value());
     }
 
-    livekeys->m_script = new QmlScript(livekeys->engine()->engine(),livekeys->m_arguments->scriptArguments());
-    QObject::connect(livekeys->project(), &Project::activeChanged, livekeys->m_script, &QmlScript::scriptChanged);
+    ApplicationContext::instance().setScriptArguments(livekeys->m_arguments->scriptArguments());
 
     livekeys->m_settings = Settings::create(QString::fromStdString(ApplicationContext::instance().configPath()));
 
@@ -350,39 +345,18 @@ void Livekeys::loadInternals(){
 }
 
 void Livekeys::loadInternalPlugins(){
-    qmlRegisterUncreatableType<lv::Livekeys>(
-        "base", 1, 0, "LiveKeys",        ViewEngine::typeAsPropertyMessage("LiveKeys", "lk"));
-    qmlRegisterUncreatableType<lv::ViewEngine>(
-        "base", 1, 0, "LiveEngine",      ViewEngine::typeAsPropertyMessage("LiveEngine", "lk.engine"));
-    qmlRegisterUncreatableType<lv::QmlScript>(
-        "base", 1, 0, "LiveScript",      ViewEngine::typeAsPropertyMessage("LiveScript", "script"));
-    qmlRegisterUncreatableType<lv::Environment>(
-        "base", 1, 0, "LiveEnvironment", ViewEngine::typeAsPropertyMessage("LiveEnvironment", "script.environment"));
-    qmlRegisterUncreatableType<lv::Settings>(
-        "base", 1, 0, "LiveSettings",    ViewEngine::typeAsPropertyMessage("LiveSettings", "lk.settings"));
-    qmlRegisterUncreatableType<lv::VisualLogModel>(
-        "base", 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "lk.log"));
-    qmlRegisterUncreatableType<lv::Memory>(
-        "base", 1, 0, "Memory",          ViewEngine::typeAsPropertyMessage("Memory", "lk.mem"));
-    qmlRegisterUncreatableType<lv::VisualLogQmlObject>(
-        "base", 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
-    qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
-        "base", 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type.");
-
-    ViewEngine::registerBaseTypes("base");
+//    qmlRegisterUncreatableType<lv::Livekeys>(
+//        "base", 1, 0, "LiveKeys",        ViewEngine::typeAsPropertyMessage("LiveKeys", "lk"));
 
     m_viewEngine->engine()->rootContext()->setContextProperty("project", m_project);
-    m_viewEngine->engine()->rootContext()->setContextProperty("script",  m_script);
     m_viewEngine->engine()->rootContext()->setContextProperty("lk",  this);
 
     QJSValue vlogjs  = m_viewEngine->engine()->newQObject(m_vlog);
     m_viewEngine->engine()->globalObject().setProperty("vlog", vlogjs);
 
-    ViewContext::initFromEngine(m_viewEngine->engine());
-
     EditorPrivatePlugin ep;
     ep.registerTypes("editor.private");
-    ep.initializeEngine(m_viewEngine->engine(), "editor.private");
+    ep.initializeEngine(m_viewEngine, m_settings, "editor.private");
 }
 
 void Livekeys::loadInternalPackages(){

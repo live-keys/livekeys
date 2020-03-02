@@ -14,4 +14,4 @@ HEADERS += \
     $$PWD/live/qmleditfragment.h \
     $$PWD/live/qmldeclaration.h \
     $$PWD/live/qmlimportsmodel.h \
-    $$PWD/live/qmllanguagetype.h
+    $$PWD/live/qmllanguageinfo.h

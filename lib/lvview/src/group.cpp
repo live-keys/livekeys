@@ -1,7 +1,7 @@
 #include "group.h"
 #include "live/visuallogqt.h"
 #include "live/viewengine.h"
-#include "live/typeinfo.h"
+#include "live/metainfo.h"
 #include <QQmlComponent>
 #include <QUrl>
 
@@ -78,7 +78,7 @@ void Group::serialize(ViewEngine *engine, const QObject *o, MLNode &node){
         if ( property.name() != QByteArray("objectName") ){
 
             MLNode r;
-            TypeInfo::serializeVariant(engine, property.read(o), r);
+            MetaInfo::serializeVariant(engine, property.read(o), r);
             node[property.name()] = r;
         }
     }
@@ -129,7 +129,7 @@ QObject *Group::deserialize(ViewEngine *engine, const MLNode &node){
     Group* gr = Group::createWithProperties(engine->engine(), properties);
     for ( auto it = node.asObject().begin(); it != node.asObject().end(); ++it ){
         if ( it->first != "__type" ){
-            gr->setProperty(it->first.c_str(), TypeInfo::deserializeVariant(engine, it->second));
+            gr->setProperty(it->first.c_str(), MetaInfo::deserializeVariant(engine, it->second));
         }
     }
 

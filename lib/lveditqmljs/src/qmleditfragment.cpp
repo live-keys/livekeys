@@ -126,6 +126,10 @@ bool QmlEditFragment::isForProperty() const{
     return m_declaration->isForProperty();
 }
 
+bool QmlEditFragment::isForSlot() const{
+    return m_declaration->isForSlot();
+}
+
 CodePalette *QmlEditFragment::palette(const QString &type){
     for ( auto it = begin(); it != end(); ++it ){
         CodePalette* current = *it;

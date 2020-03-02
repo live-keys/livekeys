@@ -1,0 +1,5 @@
+{
+    "name": "base",
+    "package" : ".",
+    "libraryModules" : ["lvbase"]
+}

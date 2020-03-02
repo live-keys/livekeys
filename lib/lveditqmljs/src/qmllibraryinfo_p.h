@@ -19,6 +19,7 @@
 
 #include "languageutils/componentversion.h"
 #include "qmljs/qmljsdocument.h"
+#include "live/qmllanguageinfo.h"
 
 #include <QMap>
 
@@ -62,10 +63,24 @@ public:
         QList<ExportVersion> versions;
     };
 
-
 public:
     typedef QSharedPointer<QmlLibraryInfo>       Ptr;
     typedef QSharedPointer<const QmlLibraryInfo> ConstPtr;
+
+public:
+    /// \private
+    class Reference{
+    public:
+        Reference();
+        Reference(const QString& libPath, QmlLibraryInfo::Ptr libInfo);
+
+        bool isValid() const;
+        QString uri() const;
+
+    public:
+        QString             path;
+        QmlLibraryInfo::Ptr lib;
+    };
 
 public:
     static Ptr create();
@@ -83,6 +98,7 @@ public:
     ExportVersion findExport(const QString& name);
     ExportVersion findExportByClassName(const QString& name);
     LanguageUtils::FakeMetaObject::ConstPtr findObjectByClassName(const QString& name);
+    LanguageUtils::FakeMetaObject::ConstPtr findObject(const QString& name, QmlTypeReference::Language lang);
 
     void setDependencies(const QList<QString> &paths);
     const QList<QString>& dependencyPaths() const;
@@ -107,7 +123,6 @@ private:
 private:
     void addExport();
 
-    ScanStatus            m_status;
     QMap<QString, Export> m_exports;
     QmlJS::LibraryInfo    m_data;
     QList<QString>        m_dependencyPaths;
@@ -117,6 +132,7 @@ private:
     int                   m_importVersionMinor;
 
     QMap<QString, QString> m_files;
+    ScanStatus             m_status;
 };
 
 inline QmlLibraryInfo::Ptr QmlLibraryInfo::create(){

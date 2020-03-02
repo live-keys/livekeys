@@ -18,7 +18,7 @@ import QtQuick 2.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.2
 import QtQuick.Window 2.0
-import base 1.0
+import base 1.0 as B
 import editor 1.0
 import editor.private 1.0
 import live 1.0
@@ -125,7 +125,7 @@ ApplicationWindow{
         title: "Please choose a file"
         nameFilters: ["All files (*)" ]
         selectExisting : true
-        visible : script.environment.os.platform === 'linux' ? true : false // fixes a display bug in some linux distributions
+        visible : B.Script.environment.os.platform === 'linux' ? true : false // fixes a display bug in some linux distributions
 
         property var callback: null
 
@@ -138,7 +138,7 @@ ApplicationWindow{
         }
 
         Component.onCompleted: {
-            if ( script.environment.os.platform === 'darwin' )
+            if ( B.Script.environment.os.platform === 'darwin' )
                 folder = '~' // fixes a warning message that the path was constructed with an empty filename
             visible = false
             close()
@@ -152,7 +152,7 @@ ApplicationWindow{
         selectMultiple : false
         selectFolder : true
 
-        visible : script.environment.os.platform === 'linux' ? true : false /// fixes a display bug in some linux distributions
+        visible : B.Script.environment.os.platform === 'linux' ? true : false /// fixes a display bug in some linux distributions
 
         property var callback: null
 
@@ -165,7 +165,7 @@ ApplicationWindow{
         }
 
         Component.onCompleted: {
-            if ( script.environment.os.platform === 'darwin' )
+            if ( B.Script.environment.os.platform === 'darwin' )
                 folder = '~' // fixes a warning message that the path was constructed with an empty filename
             visible = false
             close()
@@ -177,7 +177,7 @@ ApplicationWindow{
         title: "Please choose a file"
         nameFilters: ["All files (*)"]
         selectExisting : false
-        visible : script.environment.os.platform === 'linux' ? true : false /// fixes a display bug in some linux distributions
+        visible : B.Script.environment.os.platform === 'linux' ? true : false /// fixes a display bug in some linux distributions
 
         property var callback: null
 
@@ -189,7 +189,7 @@ ApplicationWindow{
             fileSaveDialog.callback = null
         }
         Component.onCompleted: {
-            if ( script.environment.os.platform === 'darwin' )
+            if ( B.Script.environment.os.platform === 'darwin' )
                 folder = '~' // fixes a warning message that the path was constructed with an empty filename
             visible: false
             close()

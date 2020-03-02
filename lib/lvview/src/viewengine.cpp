@@ -19,6 +19,7 @@
 #include "live/errorhandler.h"
 #include "live/incubationcontroller.h"
 #include "live/packagegraph.h"
+#include "live/applicationcontext.h"
 
 #include "qmlcontainer.h"
 #include "qmlact.h"
@@ -32,8 +33,13 @@
 #include "qmlstream.h"
 #include "qmlstreamfilter.h"
 #include "qmlclipboard.h"
+#include "live/settings.h"
+#include "live/memory.h"
+#include "live/visuallogmodel.h"
+#include "live/visuallogqmlobject.h"
 
 #include <QQmlComponent>
+#include <QQmlContext>
 #include <QQmlIncubator>
 #include <QQmlEngine>
 #include <QQuickItem>
@@ -293,27 +299,27 @@ void ViewEngine::removeCompileHook(ViewEngine::CompileHook ch, void *userData){
 }
 
 /** Returns the type info for a given meta-object*/
-TypeInfo::Ptr ViewEngine::typeInfo(const QMetaObject *key) const{
+MetaInfo::Ptr ViewEngine::typeInfo(const QMetaObject *key) const{
     auto it = m_types.find(key);
     if ( it == m_types.end() )
-        return TypeInfo::Ptr(nullptr);
+        return MetaInfo::Ptr(nullptr);
     return it.value();
 }
 
 /** Returns the type info for a given type name */
-TypeInfo::Ptr ViewEngine::typeInfo(const QByteArray &typeName) const{
+MetaInfo::Ptr ViewEngine::typeInfo(const QByteArray &typeName) const{
     auto it = m_typeNames.find(typeName);
     if ( it == m_typeNames.end() )
-        return TypeInfo::Ptr(nullptr);
+        return MetaInfo::Ptr(nullptr);
 
     return m_types[*it];
 }
 
 /** Returns the type info for a given meta-type by extracting the meta-object and calling the appropriate variant of the getter */
-TypeInfo::Ptr ViewEngine::typeInfo(const QMetaType &metaType) const{
+MetaInfo::Ptr ViewEngine::typeInfo(const QMetaType &metaType) const{
     const QMetaObject* mo = metaType.metaObject();
     if ( !mo )
-        return TypeInfo::Ptr(nullptr);
+        return MetaInfo::Ptr(nullptr);
 
     return typeInfo(mo);
 }
@@ -345,12 +351,25 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::QmlStream>(             uri, 1, 0, "Stream");
     qmlRegisterType<lv::QmlStreamFilter>(       uri, 1, 0, "StreamFilter");
 
-    qmlRegisterUncreatableType<lv::Shared>(       uri, 1, 0, "Shared", "Shared is of abstract type.");
-    qmlRegisterUncreatableType<lv::Layer>(        uri, 1, 0, "Layer", "Layer is of abstract type.");
+    qmlRegisterUncreatableType<lv::Shared>(     uri, 1, 0, "Shared", "Shared is of abstract type.");
+    qmlRegisterUncreatableType<lv::Layer>(      uri, 1, 0, "Layer", "Layer is of abstract type.");
+
+    qmlRegisterUncreatableType<lv::ViewEngine>(
+        uri, 1, 0, "LiveEngine",      ViewEngine::typeAsPropertyMessage("LiveEngine", "lk.engine"));
+    qmlRegisterUncreatableType<lv::Settings>(
+        uri, 1, 0, "LiveSettings",    ViewEngine::typeAsPropertyMessage("LiveSettings", "lk.settings"));
+    qmlRegisterUncreatableType<lv::VisualLogModel>(
+        uri, 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "lk.log"));
+    qmlRegisterUncreatableType<lv::Memory>(
+        uri, 1, 0, "Memory",          ViewEngine::typeAsPropertyMessage("Memory", "lk.mem"));
+    qmlRegisterUncreatableType<lv::VisualLogQmlObject>(
+        uri, 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
+    qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
+        uri, 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type.");
 }
 
 void ViewEngine::initializeBaseTypes(ViewEngine *engine){
-    TypeInfo::Ptr ti = engine->registerQmlTypeInfo<lv::Group>(nullptr, nullptr, [](){return new Group;}, false);
+    MetaInfo::Ptr ti = engine->registerQmlTypeInfo<lv::Group>(nullptr, nullptr, [](){return new Group;}, false);
     ti->addSerialization(&lv::Group::serialize, &lv::Group::deserialize);
 }
 

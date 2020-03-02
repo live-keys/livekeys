@@ -32,7 +32,6 @@
 #include "live/applicationcontext.h"
 #include "live/keymap.h"
 #include "live/viewengine.h"
-#include "live/viewcontext.h"
 #include "live/theme.h"
 #include "linesurface.h"
 #include "editorlayer.h"
@@ -85,22 +84,22 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
         uri, 1, 0, "ThemeContainer", "ThemeContainer is available through the \'lk.layers.workspace.themes.\' property.");
 }
 
-void EditorPrivatePlugin::initializeEngine(QQmlEngine *engine, const char *){
-    lv::ViewContext::initFromEngine(engine);
+void EditorPrivatePlugin::initializeEngine(QQmlEngine *, const char *){
 
-    lv::EditorSettings* editorSettings = new lv::EditorSettings(
-        lv::ViewContext::instance().settings()->path() + "/editor.json"
-    );
-    lv::ViewContext::instance().settings()->addConfigFile("editor", editorSettings);
+}
 
-    QObject* prob = engine->rootContext()->contextProperty("project").value<QObject*>();
+void EditorPrivatePlugin::initializeEngine(lv::ViewEngine *engine, lv::Settings *settings, const char *){
+    lv::EditorSettings* editorSettings = new lv::EditorSettings(settings->path() + "/editor.json");
+    settings->addConfigFile("editor", editorSettings);
+
+    QObject* prob = engine->engine()->rootContext()->contextProperty("project").value<QObject*>();
     lv::Project* pr = qobject_cast<lv::Project*>(prob);
 
     lv::PaletteContainer* lpc = lv::PaletteContainer::create(
-        engine, QString::fromStdString(lv::ApplicationContext::instance().pluginPath())
+        engine->engine(), QString::fromStdString(lv::ApplicationContext::instance().pluginPath())
     );
 
     lv::EditorGlobalObject* editor = new lv::EditorGlobalObject(pr, lpc);
 
-    engine->rootContext()->setContextProperty("editor", editor);
+    engine->engine()->rootContext()->setContextProperty("editor", editor);
 }

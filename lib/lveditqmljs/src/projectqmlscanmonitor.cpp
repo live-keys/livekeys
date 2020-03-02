@@ -132,12 +132,12 @@ void ProjectQmlScanMonitor::loadImport(const QString &import){
     component.setData(code, QUrl::fromLocalFile("loading.qml"));
     if ( component.errors().size() > 0 ){
         vlog_debug("editqmljs-scanmonitor", "Importing object error: " + component.errorString());
-        m_scanner->updateLoadRequest(import, 0, true);
+        m_scanner->updateLoadRequest(import, nullptr, true);
         return;
     }
     QObject* obj = component.create(m_engine->engine()->rootContext());
     if ( obj == nullptr ){
-        m_scanner->updateLoadRequest(import, 0, true);
+        m_scanner->updateLoadRequest(import, nullptr, true);
     } else {
         m_scanner->updateLoadRequest(import, obj, false);
     }
@@ -145,13 +145,13 @@ void ProjectQmlScanMonitor::loadImport(const QString &import){
 PluginInfoExtractor* ProjectQmlScanMonitor::getPluginInfoExtractor(const QString &import){
     if ( !PluginTypesFacade::pluginTypesEnabled() ){
         qCritical("Plugin types not available in this build.");
-        return 0;
+        return nullptr;
     }
 
     QmlLibraryDependency parsedImport = QmlLibraryDependency::parse(import);
     if ( !parsedImport.isValid() ){
         qCritical("Invalid import: %s", qPrintable(import));
-        return 0;
+        return nullptr;
     }
 
     m_projectScope = ProjectQmlScope::create(m_engine->engine());
@@ -167,7 +167,7 @@ PluginInfoExtractor* ProjectQmlScanMonitor::getPluginInfoExtractor(const QString
 
     if ( paths.size() == 0 ){
         qCritical("Failed to find import path: %s", qPrintable(import));
-        return 0;
+        return nullptr;
     }
 
     PluginInfoExtractor* extractor = new PluginInfoExtractor(m_projectHandler->scanner(), paths.first(), this);

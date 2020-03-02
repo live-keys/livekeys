@@ -29,7 +29,7 @@ public:
     /**
      * \brief Empty destructor
      */
-    virtual ~CodeCompletionContext(){}
+    virtual ~CodeCompletionContext();
 };
 
 class LV_EDITOR_EXPORT CodeCompletionModel : public QAbstractListModel{

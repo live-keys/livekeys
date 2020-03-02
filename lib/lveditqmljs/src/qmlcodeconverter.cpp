@@ -165,7 +165,7 @@ void QmlCodeConverter::updateBindings(){
     }
 }
 
-void QmlCodeConverter::suggestionsForExpression(const QString &expression, CodeCompletionModel *model){
+void QmlCodeConverter::suggestionsForExpression(const QString &expression, CodeCompletionModel *model, bool suggestFunctions){
     QObject* editParent = m_edit->parent();
     CodeQmlHandler* qmlHandler = nullptr;
     while ( editParent ){
@@ -177,7 +177,7 @@ void QmlCodeConverter::suggestionsForExpression(const QString &expression, CodeC
     }
 
     if (qmlHandler){
-        qmlHandler->suggestionsForProposedExpression(m_edit->declaration(), expression, model);
+        qmlHandler->suggestionsForProposedExpression(m_edit->declaration(), expression, model, suggestFunctions);
     }
 }
 
@@ -194,6 +194,24 @@ bool QmlCodeConverter::bindExpression(const QString &expression){
 
     if (qmlHandler){
         return qmlHandler->findBindingForExpression(m_edit, expression);
+    }
+
+    return false;
+}
+
+bool QmlCodeConverter::bindFunctionExpression(const QString &expression){
+    QObject* editParent = m_edit->parent();
+    CodeQmlHandler* qmlHandler = nullptr;
+    while ( editParent ){
+        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
+        if ( qmlHandler )
+            break;
+
+        editParent = editParent->parent();
+    }
+
+    if (qmlHandler){
+        return qmlHandler->findFunctionBindingForExpression(m_edit, expression);
     }
 
     return false;

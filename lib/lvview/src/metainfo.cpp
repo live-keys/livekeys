@@ -14,29 +14,29 @@
 **
 ****************************************************************************/
 
-#include "typeinfo.h"
+#include "metainfo.h"
 #include <QVariant>
 #include "live/viewengine.h"
 #include "live/group.h"
 
 namespace lv{
 
-TypeInfo::TypeInfo(const QByteArray &name)
+MetaInfo::MetaInfo(const QByteArray &name)
     : m_name(name)
     , m_serialize(nullptr)
     , m_log(nullptr)
 {
 }
 
-TypeInfo::~TypeInfo(){
+MetaInfo::~MetaInfo(){
 
 }
 
-TypeInfo::Ptr TypeInfo::create(const QByteArray &name){
-    return TypeInfo::Ptr(new TypeInfo(name));
+MetaInfo::Ptr MetaInfo::create(const QByteArray &name){
+    return MetaInfo::Ptr(new MetaInfo(name));
 }
 
-void TypeInfo::serializeVariant(ViewEngine *engine, const QVariant &v, MLNode &node){
+void MetaInfo::serializeVariant(ViewEngine *engine, const QVariant &v, MLNode &node){
     if ( v.type() == QVariant::UInt ||
          v.type() == QVariant::ULongLong ||
          v.type() == QVariant::Int ||
@@ -56,7 +56,7 @@ void TypeInfo::serializeVariant(ViewEngine *engine, const QVariant &v, MLNode &n
         if ( mo->inherits(&lv::Group::staticMetaObject))
             mo = &lv::Group::staticMetaObject;
 
-        TypeInfo::Ptr ti = engine->typeInfo(mo);
+        MetaInfo::Ptr ti = engine->typeInfo(mo);
         if ( ti.isNull() || !ti->isSerializable() ){
             node = MLNode(MLNode::Object);
             lv::Exception e = CREATE_EXCEPTION(
@@ -81,19 +81,19 @@ void TypeInfo::serializeVariant(ViewEngine *engine, const QVariant &v, MLNode &n
 
         for ( auto it = vl.begin(); it != vl.end(); ++it ){
             MLNode result;
-            TypeInfo::serializeVariant(engine, *it, result);
+            MetaInfo::serializeVariant(engine, *it, result);
             node.append(result);
         }
     }
 }
 
-QVariant TypeInfo::deserializeVariant(ViewEngine *engine, const MLNode &n){
+QVariant MetaInfo::deserializeVariant(ViewEngine *engine, const MLNode &n){
     switch( n.type() ){
     case MLNode::Type::Object: {
         //Object / QVariantMap
         if ( n.hasKey("__type") ){
             QByteArray objectType = QByteArray(n["__type"].asString().c_str());
-            TypeInfo::Ptr ti = engine->typeInfo(objectType);
+            MetaInfo::Ptr ti = engine->typeInfo(objectType);
             if ( ti.isNull() || !ti->isSerializable() ){
                 THROW_EXCEPTION(lv::Exception, "Tuple deserialize: Unknown type: \'" + objectType .toStdString()+ "\'", 0);
             }

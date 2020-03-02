@@ -160,12 +160,12 @@ bool QmlUsageGraphScanner::checkEntry(const QmlUsageGraphScanner::BindingEntry &
 
             } else if ( imp.importType() == DocumentQmlScope::Import::Library ){
                 // find library by uri
-                QPair<QString, QmlLibraryInfo::Ptr> pqli = projectScope->globalLibraries()->libraryInfoByNamespace(imp.path());
-                QmlLibraryInfo::Ptr qli = pqli.second;
+                QmlLibraryInfo::Reference pqli = projectScope->globalLibraries()->libraryInfoByNamespace(imp.path());
+                QmlLibraryInfo::Ptr qli = pqli.lib;
                 if ( qli ){
                     QmlLibraryInfo::ExportVersion ev = qli->findExport(entry.componentName);
                     if ( ev.isValid() ){
-                        if ( entry.componentPath.startsWith(pqli.first)){
+                        if ( entry.componentPath.startsWith(pqli.path)){
                             return true;
                         }
                     }

@@ -56,6 +56,8 @@ public:
     MLNode      defaults;
 
     LibraryTable* libraries;
+
+    std::vector<std::string> scriptArguments;
 };
 
 std::unique_ptr<ApplicationContext> ApplicationContextPrivate::ApplicationContextPrivate::instance;
@@ -197,6 +199,14 @@ const std::string &ApplicationContext::appDataPath(){
  */
 const MLNode &ApplicationContext::startupConfiguration(){
     return m_d->defaults;
+}
+
+void ApplicationContext::setScriptArguments(const std::vector<std::string> &args){
+    m_d->scriptArguments = args;
+}
+
+const std::vector<std::string> ApplicationContext::scriptArguments() const{
+    return m_d->scriptArguments;
 }
 
 LibraryTable *ApplicationContext::libraries(){

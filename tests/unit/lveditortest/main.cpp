@@ -4,6 +4,7 @@
 
 #include "testrunner.h"
 #include "lvlinecontroltest.h"
+#include "live/visuallog.h"
 #include <iostream>
 
 int main(int argc, char *argv[]){
@@ -16,7 +17,7 @@ int main(int argc, char *argv[]){
         result = lv::TestRunner::runTests(argc, argv);
     } catch (std::exception e)
     {
-        qDebug() << e.what();
+        vlog("test-main") << e.what();
     }
     return result;
 }

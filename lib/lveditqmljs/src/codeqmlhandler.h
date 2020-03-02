@@ -92,8 +92,13 @@ public:
     QmlEditFragment* findEditFragment(CodePalette* palette);
     QmlEditFragment* findEditFragmentIn(QmlEditFragment *parent, CodePalette* palette);
 
-    void suggestionsForProposedExpression(QmlDeclaration::Ptr declaration, const QString& expression, CodeCompletionModel* model) const;
+    void suggestionsForProposedExpression(
+        QmlDeclaration::Ptr declaration,
+        const QString& expression,
+        CodeCompletionModel* model,
+        bool suggestFunctions = false) const;
     bool findBindingForExpression(QmlEditFragment* edit, const QString& expression);
+    bool findFunctionBindingForExpression(QmlEditFragment* edit, const QString& expression);
 
     QmlUsageGraphScanner* createScanner();
 
@@ -146,7 +151,7 @@ public slots:
         bool assignDefault = false);
     int addItem(int position, const QString& object, const QString& type);
     void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type, QObject* currentApp = nullptr);
-    void updateRuntimeBindings(QObject* obj);
+    void updateRuntimeBindings();
 
     QJSValue getDocumentIds();
 
@@ -192,7 +197,7 @@ private:
     );
 
     void suggestionsForValueObject(
-        const DocumentQmlObject& object,
+        const QmlTypeInfo& object,
         QList<CodeCompletionSuggestion>& suggestions,
         bool extractProperties,
         bool extractFunctions,

@@ -15,9 +15,8 @@
 #include "qmljs/qmljsscanner.h"
 #include "projectqmlscanner_p.h"
 #include "projectqmlscanmonitor_p.h"
-#include "documentqmlobject.h"
-#include "documentqmlobject_p.h"
-#include "qmllanguagetype.h"
+#include "qmllanguageinfo.h"
+#include "qmllanguageinfo_p.h"
 
 namespace lv{
 
@@ -26,75 +25,37 @@ class QmlScopeSnap{
 
 public:
     /// \private
-    class LibraryReference{
-    public:
-        LibraryReference();
-        LibraryReference(const QString& libPath, QmlLibraryInfo::Ptr libInfo);
-
-        bool isValid() const;
-
-    public:
-        QString importUri;
-        int     versionMajor;
-        int     versionMinor;
-        QString path;
-    };
-
-    /// \private
-    class TypeReference{
-    public:
-        TypeReference();
-        TypeReference(const LibraryReference& lib, LanguageUtils::FakeMetaObject::ConstPtr obj);
-
-        bool isValid() const;
-        QString toString() const;
-        QmlLanguageType languageType() const;
-
-    public:
-        QString typeName;
-        LibraryReference library;
-        LanguageUtils::FakeMetaObject::ConstPtr object;
-        QString qmlFile;
-    };
-
-    /// \private
-    class InheritancePath{
-    public:
-        QString toString() const;
-        void join(const InheritancePath& path);
-        void append(const TypeReference& tr);
-        bool isEmpty() const;
-
-        QmlLanguageType languageType() const;
-    public:
-        QList<TypeReference> nodes;
-    };
-
-    /// \private
     class PropertyReference{
     public:
         PropertyReference();
 
         PropertyReference(
-            const LanguageUtils::FakeMetaProperty& property,
+            const QmlPropertyInfo& property,
             bool isClassName,
-            const InheritancePath& propertyType,
-            const InheritancePath& classType);
+            const QmlInheritanceInfo& resultType,
+            const QmlInheritanceInfo& classType);
+
+        PropertyReference(
+            const QmlFunctionInfo& property,
+            bool isClassName,
+            const QmlInheritanceInfo& resultType,
+            const QmlInheritanceInfo& classType);
 
         bool isValid() const;
         QString toString() const;
 
         static QString toString(const QList<PropertyReference>& propertyChain);
 
-        QmlLanguageType propertyType() const;
-        QmlLanguageType propertyObjectType() const;
+        QmlTypeReference resultType() const;
+        QmlTypeReference propertyObjectType() const;
 
     public:
-        LanguageUtils::FakeMetaProperty property;
+        QmlPropertyInfo property;
+        QmlFunctionInfo functionInfo;
         bool isPrimitive;
         bool typeIsClassName;
-        InheritancePath propertyTypePath;
-        InheritancePath classTypePath;
+        QmlInheritanceInfo resultTypePath;
+        QmlInheritanceInfo classTypePath;
     };
 
     /// \private
@@ -127,7 +88,7 @@ public:
 
         QString importAs;
 
-        InheritancePath typeReference;
+        QmlInheritanceInfo typeReference;
         bool isClass;
         bool isId;
         bool isParent;
@@ -135,43 +96,45 @@ public:
         QString enumName;
 
         QList<PropertyReference> propertyChain;
-        DocumentQmlObject documentValueObject;
+        QmlTypeInfo documentValueObject;
     };
 
 public:
     QmlScopeSnap(const ProjectQmlScope::Ptr& project, const DocumentQmlScope::Ptr& document);
 
-    TypeReference getType(const QString& name) const;
-    TypeReference getType(const QString& importNamespace, const QString& typeName) const;
-    TypeReference getType(const QStringList& typeAndImport);
+    QmlTypeInfo getType(const QString& name) const;
+    QmlTypeInfo getType(const QString& importNamespace, const QString& typeName) const;
+    QmlTypeInfo getType(const QStringList& typeAndImport);
+    QmlTypeInfo getTypeFromContextLibrary(
+        const QString& typeName,
+        const QString& libraryUri,
+        QmlTypeReference::Language language = QmlTypeReference::Cpp) const;
 
-    InheritancePath getTypePath(const QString& name) const;
-    InheritancePath getTypePath(const QStringList& typeAndImport) const;
-    InheritancePath getTypePath(const QString& importAs, const QString& name) const;
-    InheritancePath getTypePath(const QmlLanguageType& languageType) const;
+    QmlInheritanceInfo getTypePath(const QString& name) const;
+    QmlInheritanceInfo getTypePath(const QStringList& typeAndImport) const;
+    QmlInheritanceInfo getTypePath(const QString& importAs, const QString& name) const;
+    QmlInheritanceInfo getTypePath(const QmlTypeReference& languageType) const;
 
+    QmlLibraryInfo::Reference libraryFromUri(const QString& uri) const;
+    QmlLibraryInfo::Reference libraryFromType(const QmlTypeReference& tr) const;
 
-    InheritancePath generateTypePathFromObject(const TypeReference& tr) const;
-    InheritancePath generateTypePathFromClassName(const QString& typeName, QString typeLibrary) const;
+    QmlInheritanceInfo generateTypePathFromObject(const QmlTypeInfo& tr) const;
+    QmlInheritanceInfo generateTypePathFromClassName(const QString& typeName, QString typeLibrary) const;
 
-    InheritancePath propertyTypePath(const InheritancePath& classTypePath, const QString& propertyName) const;
-    PropertyReference propertyInType(const InheritancePath& classTypePath, const QString& propertyName) const;
+    QmlInheritanceInfo propertyTypePath(const QmlInheritanceInfo& classTypePath, const QString& propertyName) const;
+    PropertyReference propertyInType(const QmlInheritanceInfo& classTypePath, const QString& propertyName) const;
 
-    LanguageUtils::FakeMetaProperty getPropertyInObject(
-        const QmlScopeSnap::InheritancePath& typePath,
-        const QString& propertyName
-    ) const;
+    PropertyReference getProperty(const QmlTypeReference &contextObject, const QString& propertyName, int position) const;
+    QmlFunctionInfo getSignal(const QmlTypeReference& contextObject, const QString& signalName, int position) const;
+    QList<PropertyReference> getProperties(const QmlTypeReference &context, const QStringList& propertyChain, int position) const;
+    QList<PropertyReference> getProperties(const QmlInheritanceInfo& typePath, const QStringList& propertyChain) const;
 
-    PropertyReference getProperty(const QmlLanguageType &contextObject, const QString& propertyName, int position) const;
-    QList<PropertyReference> getProperties(const QmlLanguageType &context, const QStringList& propertyChain, int position) const;
-    QList<PropertyReference> getProperties(const InheritancePath& typePath, const QStringList& propertyChain) const;
-
-    ExpressionChain evaluateExpression(const QmlLanguageType &contextObject, const QStringList& expression, int position) const;
+    ExpressionChain evaluateExpression(const QmlTypeReference &contextObject, const QStringList& expression, int position) const;
 
     QString importToUri(const QString& name) const;
-    QmlLanguageType quickObjectDeclarationType(const QStringList &declaration) const;
+    QmlTypeReference quickObjectDeclarationType(const QStringList &declaration) const;
     bool isImport(const QString& name) const;
-    bool isEnum(const InheritancePath& classTypePath, const QString& name) const;
+    bool isEnum(const QmlInheritanceInfo& classTypePath, const QString& name) const;
 
 public:
     ProjectQmlScope::Ptr  project;

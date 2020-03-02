@@ -18,6 +18,16 @@
 
 namespace lv{
 
+// CodeCompletionContext
+// ----------------------------------------------------------------------------
+
+CodeCompletionContext::~CodeCompletionContext(){
+}
+
+
+// CodeCompletionModel
+// ----------------------------------------------------------------------------
+
 /**
  * \class lv::CodeCompletionContext
  * \ingroup lveditor
@@ -133,5 +143,6 @@ void CodeCompletionModel::updateFilters(){
     if ( m_filteredSuggestions.isEmpty() )
         disable();
 }
+
 
 }// namespace

@@ -60,7 +60,7 @@ void QmlAct::componentComplete(){
         QByteArray name = property.name();
         if ( name != "objectName" && name != "result" ){
             QQmlProperty pp(this, name);
-            pp.connectNotifySignal(this, SLOT(__triggerRun()));
+            pp.connectNotifySignal(this, SLOT(exec()));
         }
     }
 
@@ -86,11 +86,16 @@ void QmlAct::setResult(const QVariant &result){
 }
 
 void QmlAct::setResult(const QJSValue &result){
+    if ( result.isError() ){
+        Exception e = CREATE_EXCEPTION(lv::Exception, "Act Error: " + result.toString().toStdString(), Exception::toCode("~ActFnRun"));
+        ViewContext::instance().engine()->throwError(&e, this);
+        return;
+    }
     m_result = result;
     emit resultChanged();
 }
 
-void QmlAct::__triggerRun(){
+void QmlAct::exec(){
     if ( m_workerThread ){
 
         if ( m_workerThread->isWorking() ){
