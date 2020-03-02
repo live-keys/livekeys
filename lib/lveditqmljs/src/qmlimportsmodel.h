@@ -40,13 +40,14 @@ public:
     QmlImportsModel(QObject* parent = nullptr);
     ~QmlImportsModel(){}
 
-    int firstBlock();
-    int lastBlock();
     int count(){ return m_data.size(); }
 
 public slots:
     void commit(QString m, QString v, QString q);
     void erase(int pos);
+
+    int firstBlock();
+    int lastBlock();
 signals:
     void countChanged();
 private:

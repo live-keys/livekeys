@@ -1,8 +1,6 @@
 #include "bindingchannel.h"
 #include "live/codepalette.h"
-#include "live/qmleditfragment.h"
 #include "live/runnable.h"
-#include "live/documentqmlinfo.h"
 #include <QObject>
 
 namespace lv{

@@ -45,7 +45,7 @@ Pane{
 
     property var panes: null
 
-    property bool codeOnly: true
+    property bool codeOnly: !(documentHandler.codeHandler && documentHandler.codeHandler.numberOfConnections !== 0)
 
     paneType: 'editor'
     paneState : { return {} }
@@ -213,13 +213,26 @@ Pane{
             Image{
                 id : codeDesignToggle
                 anchors.centerIn: parent
-                source : "qrc:/images/switch-to-" + (codeOnly? "source": "design") + ".png"
+                source : "qrc:/images/switch-to-" + (codeOnly? "design": "source") + ".png"
             }
 
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    codeOnly = !codeOnly
+
+                    if (!codeOnly)
+                    {
+                        if (documentHandler.codeHandler)
+                        {
+                            documentHandler.codeHandler.removeAllEditingFragments()
+                        }
+                        // close all fragments
+                    } else {
+                        lk.layers.workspace.commands.execute("editqml.shape_all")
+                        // shape all
+                    }
+
+
                 }
             }
         }

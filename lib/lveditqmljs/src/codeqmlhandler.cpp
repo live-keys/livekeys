@@ -1030,6 +1030,7 @@ bool CodeQmlHandler::addEditingFragment(QmlEditFragment *edit){
     }
 
     m_edits.insert(it, edit);
+    emit numberOfConnectionsChanged();
 
     return true;
 }
@@ -1053,6 +1054,7 @@ void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
 
             if ( itEdit == edit ){
                 m_edits.erase(it);
+                emit numberOfConnectionsChanged();
 
                 if ( m_editingFragment == edit ){
                     m_document->removeEditingState(ProjectDocument::Overlay);
@@ -1071,6 +1073,47 @@ void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
             parentEf->removeChildFragment(edit);
         }
     }
+}
+
+void CodeQmlHandler::removeAllEditingFragments()
+{
+    while (!m_edits.empty())
+    {
+        removeEditingFragment(*m_edits.begin());
+    }
+}
+
+int CodeQmlHandler::findImportsPosition(int blockPos)
+{
+    if (blockPos == -1) return 0;
+    auto block = m_document->textDocument()->findBlockByNumber(blockPos);
+    return block.position() + 7; // e.g. import ^QtQuick
+}
+
+int CodeQmlHandler::findRootPosition(int blockPos)
+{
+    auto block = m_document->textDocument()->findBlockByNumber(blockPos + 1);
+
+    auto reg = QRegExp("\\s*");
+    while (block.isValid())
+    {
+        if (reg.exactMatch(block.text()))
+        {
+            block = block.next();
+            continue;
+        }
+
+        break;
+    }
+
+    if (!block.isValid()) return 0;
+
+    int position = block.position();
+    auto text = block.text();
+    int i = 0;
+    while (text[i].isSpace()) ++i;
+
+    return position + i;
 }
 
 QmlEditFragment *CodeQmlHandler::findEditFragment(CodePalette *palette){
@@ -1279,6 +1322,11 @@ QmlUsageGraphScanner *CodeQmlHandler::createScanner(){
     return new QmlUsageGraphScanner(d->projectHandler->project(), d->snapScope());
 }
 
+int CodeQmlHandler::numberOfConnections()
+{
+    return m_edits.size();
+}
+
 QList<int> CodeQmlHandler::languageFeatures() const{
     return {
         DocumentHandler::LanguageHelp,
@@ -1302,9 +1350,43 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position, QObject* /*current
     cursor.setPosition(position);
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
+    bool inImports = isInImports(position);
 
-    if ( properties.isEmpty() )
+    if ( properties.isEmpty() && !inImports)
         return nullptr;
+
+    if (inImports)
+    {
+        QmlDeclaration::Ptr importDecl = QmlDeclaration::create(QStringList(), QmlLanguageType(QmlLanguageType::Qml, "import"), QmlLanguageType(QmlLanguageType::Qml), m_document);
+        QmlEditFragment* ef = new QmlEditFragment(importDecl);
+
+        auto model = importsModel();
+
+        int startPosition = m_target->findBlockByNumber(model->firstBlock()).position();
+        auto lastBlock = m_target->findBlockByNumber(model->lastBlock());
+        int length = lastBlock.position() + lastBlock.length() - startPosition;
+        ef->declaration()->setSection(
+            m_document->createSection(QmlEditFragment::Section, startPosition, length)
+        );
+        ef->declaration()->section()->setUserData(ef);
+
+        ef->declaration()->section()->onTextChanged(
+                    [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
+        {
+            auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
+            int length = editingFragment->declaration()->valueLength();
+            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+
+        });
+
+        addEditingFragment(ef);
+        ef->setParent(this);
+        DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+        if ( dh )
+            dh->requestCursorPosition(ef->position());
+
+        return ef;
+    }
 
     QmlDeclaration::Ptr declaration = properties.first();
 
@@ -1560,8 +1642,15 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated){
     cursor.setPosition(position);
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
-    if ( properties.isEmpty() )
+    bool inImports = isInImports(position);
+    if ( properties.isEmpty() && !inImports )
         return nullptr;
+
+    if (inImports){
+        PaletteList* importList = d->projectHandler->paletteContainer()->findPalettes("qml/import");
+        importList->setPosition(position);
+        return importList;
+    }
 
     QmlDeclaration::Ptr declaration = properties.first();
 
@@ -1710,32 +1799,6 @@ void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
     dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, static_cast<int>(box->height()), box);
 }
 
-void CodeQmlHandler::addImportsShape(QQuickItem *box, QmlImportsModel *model)
-{
-    if (!model) return;
-
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    int first = model->firstBlock();
-    int last = model->lastBlock();
-
-    if (first == -1) return;
-
-    dh->lineBoxAdded(first, last + 1, static_cast<int>(box->height()), box);
-
-}
-
-
-/*
-void CodeQmlHandler::removeEditFrame(QQuickItem *box){
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    dh->lineBoxRemoved(box);
-}
-
-void CodeQmlHandler::resizedEditFrame(QQuickItem *box){
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    dh->lineBoxResized(box, static_cast<int>(box->height()));
-}
-*/
 /**
  * \brief Finds the boundaries of the code block containing the cursor position
  *
@@ -1827,6 +1890,24 @@ QJSValue CodeQmlHandler::cursorInfo(int position, int length){
         canShape = true;
     }
 
+    if (qcc->context() == 0 && importsModel()->rowCount() == 0)
+    {
+        // check if blank
+        if (position == 0) canShape = true;
+        else {
+            bool isBlank = true;
+            for (int i = 0; i<position; i++)
+            {
+                if (!m_document->textDocument()->characterAt(i).isSpace())
+                {
+                    isBlank = false;
+                    break;
+                }
+            }
+            if (isBlank) canShape = true;
+        }
+
+    }
 
     if ( properties.isEmpty())
         return createCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
@@ -1880,6 +1961,25 @@ bool CodeQmlHandler::isInImports(int position)
     QmlCompletionContext::ConstPtr qcc = m_completionContextFinder->getContext(cursor);
     if ( qcc->context() & QmlCompletionContext::InImport || qcc->context() & QmlCompletionContext::InImportVersion ){
         return true;
+    }
+
+    if (qcc->context() == 0 && importsModel()->rowCount() == 0)
+    {
+        // check if blank
+        if (position == 0) return true;
+        else {
+            bool isBlank = true;
+            for (int i = 0; i<position; i++)
+            {
+                if (!m_document->textDocument()->characterAt(i).isSpace())
+                {
+                    isBlank = false;
+                    break;
+                }
+            }
+            if (isBlank) return true;
+        }
+
     }
 
     return false;
@@ -2831,6 +2931,9 @@ bool CodeQmlHandler::isBlockEmptySpace(const QTextBlock &bl){
 bool CodeQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
     if ( !declaration->type().path().isEmpty() )
         return true;
+    if (declaration->type().name() == "import")
+        return false;
+
     return DocumentQmlInfo::isObject(declaration->type().name());
 }
 
