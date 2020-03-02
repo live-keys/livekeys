@@ -10,6 +10,7 @@
         "palettes/DoublePalette.qml": "qml/double",
         "palettes/DoubleHistoryPlotPalette.qml": "qml/double",
         "palettes/ColorPalette.qml": "qml/color",
-        "palettes/PathPalette.qml": "qml/string"
+        "palettes/PathPalette.qml": "qml/string",
+        "palettes/ImportsPalette.qml": "qml/import"
     }
 }

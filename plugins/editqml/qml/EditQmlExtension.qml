@@ -24,7 +24,6 @@ LiveExtension{
     property Component objectContainerFactory: Component{ ObjectContainer{} }
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
     property Component paletteListFactory : Component{ PaletteListView{} }
-    property Component importsContainerFactory: Component { ImportsContainer{} }
 
     function canBeQml(document){
         if ( endsWith(document.file.path, '.qml') ||
@@ -95,6 +94,10 @@ LiveExtension{
 
         var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
         var palette = palettes.size() > 0 ? codeHandler.openPalette(ef, palettes, index) : null
+        if (codeHandler.isInImports(palettes.position()))
+        {
+            palette.item.model = codeHandler.importsModel()
+        }
 
         if (!ef)
         {
@@ -265,12 +268,9 @@ LiveExtension{
             var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
 
-            var imports = codeHandler.importsModel()
-
             if ( !palettes || palettes.size() === 0 ){
-                var importsContainer = importsContainerFactory.createObject(editor.textEdit)
-                importsContainer.model = imports
-                codeHandler.addImportsShape(importsContainer, imports)
+                root.shapePalette(editor, palettes, -1)
+
             } else if ( palettes.size() === 1 ){
                 root.shapePalette(editor, palettes, 0)
             } else {
@@ -298,12 +298,37 @@ LiveExtension{
         }
     }
 
+    function shapeAll(){
+        var activePane = lk.layers.workspace.panes.activePane
+        if ( activePane.objectName !== 'editor' ||
+             !activePane.document ||
+             !canBeQml(activePane.document) ) return
+
+        var editor = activePane
+        var codeHandler = editor.documentHandler.codeHandler
+
+        var imports = codeHandler.importsModel()
+
+        var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
+        var rootPosition = codeHandler.findRootPosition(imports.lastBlock())
+
+        var paletteImports = codeHandler.findPalettes(importsPosition, true)
+        if (paletteImports) root.shapePalette(editor, paletteImports, 0)
+
+        var paletteRoot = codeHandler.findPalettes(rootPosition, true)
+        if (paletteRoot) root.shapePalette(editor, paletteRoot, 0)
+    }
+
     function addProperty(){
         add(0)
     }
 
     function addObject(){
         add(1)
+    }
+
+    function addEvent(){
+        add(2)
     }
 
     function add(activeIndex){
@@ -336,10 +361,12 @@ LiveExtension{
                     activePane.documentHandler.codeHandler.addProperty(
                         addContainer.propertyModel.addPosition, addContainer.objectType, type, data
                     )
-                } else {
+                } else if ( addBoxItem.activeIndex === 1 ){
                     activePane.documentHandler.codeHandler.addItem(
                         addContainer.itemModel.addPosition, addContainer.objectType, data
                     )
+                } else if ( addBoxItem.activeIndex === 2 ){
+                    // TODO
                 }
                 addBox.destroy()
             }
@@ -414,9 +441,11 @@ LiveExtension{
         "add" : [add, "Add a Property/Object"],
         "add_property" : [addProperty, "Add a property."],
         "add_object" : [addObject, "Add an object."],
+        "add_event" : [addEvent, "Add an event."],
         'bind' : [bind, "Bind to Property Under Cursor"],
         'unbind' : [unbind, "Unbind Properties Under Cursor"],
-        'shape' : [shape, "Shape This Property Into a Palette"]
+        'shape' : [shape, "Shape This Property Into a Palette"],
+        'shape_all' : [shapeAll, "Shape all the code"]
     }
 
     keyBindings : {
@@ -464,6 +493,14 @@ LiveExtension{
                         name : "Add Object",
                         action : root.commands['add_object'][0],
                         enabled : true
+                    }, {
+                        name : "Add Event",
+                        action : root.commands['add_event'][0],
+                        enabled : true
+                    }, {
+                        name: "Shape all",
+                        action: root.commands['shape_all'][0],
+                        enabled: true
                     }
                 ]
             }

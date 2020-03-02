@@ -10,13 +10,14 @@
 #include "live/elements/languageparser.h"
 #include "live/elements/languagequery.h"
 #include "live/textdocumentdata.h"
+#include "documenttree.h"
 
 namespace lv{
 
 class LanguageLvHighlighter : public SyntaxHighlighter{
 
 public:
-    explicit LanguageLvHighlighter(EditLvSettings* settings, DocumentHandler* handler, QTextDocument *parent = nullptr);
+    explicit LanguageLvHighlighter(EditLvSettings* settings, DocumentHandler* handler, el::DocumentTree* tree, QTextDocument *parent = nullptr);
     ~LanguageLvHighlighter() override;
 
     void setTarget(QTextDocument* target);
@@ -32,10 +33,9 @@ protected:
 private:
     static QString slice(QTextDocument* doc, int from, int to);
 
-    el::LanguageParser::Ptr  m_parser;
     el::LanguageQuery::Ptr   m_languageQuery;
     EditLvSettings*          m_settings;
-    el::LanguageParser::AST* m_currentAst;
+    el::DocumentTree*        m_documentTree;
     TextDocumentData*        m_textDocumentData;
 
     QMap<uint32_t, QTextCharFormat> m_captureToFormatMap;

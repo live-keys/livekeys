@@ -30,9 +30,9 @@ Item{
     property QtObject panes: null
     property QtObject runSpace: null
 
-    property var documentationViewFactory : Component{
-        DocumentationView{}
-    }
+//    property var documentationViewFactory : Component{
+//        DocumentationView{}
+//    }
 
     property Item navigation : ProjectNavigation{
         id: projectNavigation

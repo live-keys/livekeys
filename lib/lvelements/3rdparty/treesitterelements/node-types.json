@@ -96,10 +96,6 @@
         "named": true
       },
       {
-        "type": "import",
-        "named": true
-      },
-      {
         "type": "jsx_element",
         "named": true
       },
@@ -2160,10 +2156,6 @@
           },
           {
             "type": "identifier",
-            "named": true
-          },
-          {
-            "type": "import",
             "named": true
           },
           {

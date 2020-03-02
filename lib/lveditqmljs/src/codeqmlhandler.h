@@ -42,7 +42,6 @@ class ProjectQmlScanner;
 class ProjectQmlExtension;
 class PluginInfoExtractor;
 
-class QmlCursorInfo;
 class QmlEditFragment;
 class QmlJsHighlighter;
 class QmlJsSettings;
@@ -58,6 +57,8 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
     Q_DISABLE_COPY(CodeQmlHandler)
 
     friend class ProjectQmlExtension;
+
+    Q_PROPERTY(int numberOfConnections READ numberOfConnections NOTIFY numberOfConnectionsChanged)
 
 public:
     explicit CodeQmlHandler(
@@ -102,6 +103,8 @@ public:
 
     QmlUsageGraphScanner* createScanner();
 
+    int numberOfConnections();
+
 public slots:
     QList<int> languageFeatures() const;
 
@@ -111,7 +114,8 @@ public slots:
 
     // Palette and binding management
 
-    lv::QmlCursorInfo* cursorInfo(int position, int length);
+    QJSValue cursorInfo(int position, int length);
+    bool isInImports(int position);
     lv::QmlEditFragment* openConnection(int position, QObject *currentApp = nullptr);
     lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
     QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
@@ -128,12 +132,15 @@ public slots:
     bool isForAnObject(lv::QmlEditFragment* palette);
 
     void frameEdit(QQuickItem *box, lv::QmlEditFragment* palette);
-    void addImportsShape(QQuickItem* box, lv::QmlImportsModel* model);
     QJSValue contextBlockRange(int cursorPosition);
 
     lv::QmlImportsModel* importsModel();
     void addLineAtPosition(QString line, int pos);
     void removeLineAtPosition(int pos);
+    void removeAllEditingFragments();
+
+    int findImportsPosition(int blockPos);
+    int findRootPosition(int blockPos);
 
     // Direct editing management
 
@@ -169,8 +176,10 @@ public slots:
 
     void aboutToDelete();
 signals:
-
+    void numberOfConnectionsChanged();
 private:
+    QJSValue createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports = false);
+
     void rehighlightSection(int start, int end);
     void resetProjectQmlExtension();
     QString getHelpEntity(int position);

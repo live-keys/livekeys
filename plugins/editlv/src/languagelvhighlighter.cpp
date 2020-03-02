@@ -8,12 +8,11 @@
 
 namespace lv{
 
-LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentHandler *, QTextDocument *parent)
+LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentHandler *, el::DocumentTree* tree, QTextDocument *parent)
     : SyntaxHighlighter(parent)
-    , m_parser(el::LanguageParser::createForElements())
     , m_languageQuery(nullptr)
     , m_settings(settings)
-    , m_currentAst(nullptr)
+    , m_documentTree(tree)
     , m_textDocumentData(new TextDocumentData)
 {
     // capture index to formats
@@ -139,7 +138,7 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
         "(regex_pattern) @builtin \n"
     ;
 
-    m_languageQuery = el::LanguageQuery::create(m_parser->language(), pattern);
+    m_languageQuery = el::LanguageQuery::create(m_documentTree->parser()->language(), pattern);
     m_languageQuery->addPredicate("eq?", &LanguageLvHighlighter::predicateEq);
     m_languageQuery->addPredicate("eq-or?", &LanguageLvHighlighter::predicateEqOr);
 
@@ -151,8 +150,7 @@ LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentH
     m_captureToFormatMap.insert(UINT_MAX-1, (*m_settings)["comment"]);
     m_captureToFormatMap.insert(UINT_MAX, (*m_settings)["text"]);
 
-    std::string content = parent->toPlainText().toStdString();
-    m_currentAst = m_parser->parse(content);
+    m_documentTree->parse();
 }
 
 LanguageLvHighlighter::~LanguageLvHighlighter(){
@@ -244,7 +242,7 @@ void LanguageLvHighlighter::documentChanged(int pos, int removed, int added){
                         TSPoint{editPoints[2].first, editPoints[2].second}};
     TSInput input = {m_textDocumentData, LanguageLvHighlighter::parsingCallback, TSInputEncodingUTF16};
 
-    m_parser->editParseTree(m_currentAst, edit, input);
+    m_documentTree->editParseTree(edit, input);
 }
 
 QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
@@ -253,10 +251,10 @@ QList<SyntaxHighlighter::TextFormatRange> LanguageLvHighlighter::highlight(
     QTextDocument* doc = static_cast<QTextDocument*>(parent());
     QList<SyntaxHighlighter::TextFormatRange> ranges;
 
-    if ( !m_currentAst )
+    if ( !m_documentTree->ast() )
         return ranges;
 
-    el::LanguageQuery::Cursor::Ptr cursor = m_languageQuery->exec(m_currentAst, position * sizeof(ushort), (position + text.length())* sizeof(ushort));
+    el::LanguageQuery::Cursor::Ptr cursor = m_languageQuery->exec(m_documentTree->ast(), position * sizeof(ushort), (position + text.length())* sizeof(ushort));
     while ( cursor->nextMatch() ){
         uint16_t captures = cursor->totalMatchCaptures();
 

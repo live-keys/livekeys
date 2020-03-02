@@ -47,7 +47,14 @@ Rectangle{
         if (activeIndex === 1) idChecked = true
     }
 
-    property ListView activeList : activeIndex === 0 ? propertyList : itemList
+    property ListView activeList : {
+        switch(activeIndex){
+            case 0: return propertyList
+            case 1: return itemList
+            case 2: return eventList
+        }
+    }
+
 
     function assignFocus(){
         searchInput.forceActiveFocus()
@@ -106,14 +113,24 @@ Rectangle{
         font.pixelSize: 12
         font.weight: Font.Normal
 
-        text: addContainer ? (activeIndex === 0 ? "Properties" : "Items") + " for " + addContainer.objectType : ""
+        text: {
+            if (!addContainer) return ""
+            var result;
+            switch (activeIndex) {
+                case 0: result = "Properties"; break;
+                case 1: result = "Items"; break;
+                case 2: result = "Events"; break;
+            }
+
+            result = result + " for "  + addContainer.objectType
+        }
     }
 
     TextButton{
         anchors.top: parent.top
         anchors.topMargin: 3
         anchors.right: parent.right
-        anchors.rightMargin: 73
+        anchors.rightMargin: 144
         text: 'Property'
         height: 22
         width: 70
@@ -132,7 +149,7 @@ Rectangle{
         anchors.top: parent.top
         anchors.topMargin: 3
         anchors.right: parent.right
-        anchors.rightMargin: 2
+        anchors.rightMargin: 73
         text: 'Object'
         height: 22
         width: 70
@@ -145,6 +162,25 @@ Rectangle{
 
         onClicked : {
             root.activeIndex = 1
+        }
+    }
+
+    TextButton{
+        anchors.top: parent.top
+        anchors.topMargin: 3
+        anchors.right: parent.right
+        anchors.rightMargin: 2
+        text: 'Event'
+        height: 22
+        width: 70
+        fontPixelSize: 12
+        backgroundColor: isActive ? "#061a29" : "#111"
+        fontFamily: "Open Sans, sans-serif"
+        radius: 5
+
+        property bool isActive : activeIndex === 2
+        onClicked : {
+            root.activeIndex = 2
         }
     }
 
@@ -518,8 +554,10 @@ Rectangle{
                             onDoubleClicked: {
                                 if ( root.activeIndex === 0 ){
                                     root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                                } else {
+                                } else if (root.activeIndex === 1){
                                     root.accept(itemList.currentItem.importSpace, itemList.currentItem.code)
+                                } else if (root.activeIndex === 2){
+                                    // TODO
                                 }
                             }
                         }
@@ -697,10 +735,12 @@ Rectangle{
                             onDoubleClicked: {
                                 if ( root.activeIndex === 0 ){
                                     root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                                } else {
+                                } else if (root.activeIndex === 1){
                                     var result = itemList.currentItem.code
                                     if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
                                     root.accept(itemList.currentItem.importSpace, result)
+                                } else if (root.activeIndex === 2){
+                                    // TODO
                                 }
                             }
                         }
@@ -709,6 +749,187 @@ Rectangle{
 
             }
         }
+    }
+
+    Item {
+        id: eventsContainer
+        anchors.fill: parent
+        anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
+        visible: root.activeIndex === 2
+
+        ScrollView{
+            anchors.top : parent.top
+            anchors.left: parent.left
+
+            height : root.height - propertiesContainer.anchors.topMargin
+            width: root.width / 2
+
+            style: ScrollViewStyle {
+                transientScrollBars: false
+                handle: Item {
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle {
+                        color: "#0b1f2e"
+                        anchors.fill: parent
+                    }
+                }
+                scrollBarBackground: Item{
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle{
+                        anchors.fill: parent
+                        color: root.color
+                    }
+                }
+                decrementControl: null
+                incrementControl: null
+                frame: Rectangle{color: "transparent"}
+                corner: Rectangle{color: root.color}
+            }
+
+            ListView{
+                id : eventsCategoryList
+                anchors.fill: parent
+                anchors.rightMargin: 2
+                anchors.bottomMargin: 5
+                anchors.topMargin: 0
+                visible: true
+                opacity: root.opacity
+
+                model: root.addContainer ? root.addContainer.eventModel.types() : null
+
+                currentIndex: 0
+                onCountChanged: currentIndex = 0
+
+                boundsBehavior : Flickable.StopAtBounds
+                highlightMoveDuration: 100
+
+                delegate: Component{
+
+                    Rectangle{
+                        width : eventsCategoryList.width
+                        height : 25
+                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
+                        Text{
+                            id: label
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            font.family: root.fontFamily
+                            font.pixelSize: root.fontSize
+                            font.weight: Font.Light
+
+                            color: "#fafafa"
+                            text: modelData
+                        }
+
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: {
+                                eventsCategoryList.currentIndex = index
+                                if ( modelData === 'All' )
+                                    root.addContainer.propertyModel.setTypeFilter('')
+                                else
+                                    root.addContainer.propertyModel.setTypeFilter(modelData)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ScrollView{
+            anchors.top : parent.top
+            anchors.right: parent.right
+
+            height : root.height - eventsContainer.anchors.topMargin
+            width: root.width / 2
+
+            style: ScrollViewStyle {
+                transientScrollBars: false
+                handle: Item {
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle {
+                        color: "#0b1f2e"
+                        anchors.fill: parent
+                    }
+                }
+                scrollBarBackground: Item{
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle{
+                        anchors.fill: parent
+                        color: root.color
+                    }
+                }
+                decrementControl: null
+                incrementControl: null
+                frame: Rectangle{color: "transparent"}
+                corner: Rectangle{color: root.color}
+            }
+
+            ListView{
+                id : eventList
+                anchors.fill: parent
+                anchors.rightMargin: 2
+                anchors.bottomMargin: 5
+                anchors.topMargin: 0
+                visible: true
+                opacity: root.opacity
+                model: root.addContainer ? root.addContainer.eventModel : null
+
+                currentIndex: 0
+                onCountChanged: currentIndex = 0
+
+                boundsBehavior : Flickable.StopAtBounds
+                highlightMoveDuration: 100
+
+                delegate: Component{
+
+                    Rectangle{
+                        property string code: model.code
+
+                        width : eventList.width
+                        height : 25
+                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
+                        Text{
+                            id: label
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            font.family: root.fontFamily
+                            font.pixelSize: root.fontSize
+                            font.weight: Font.Light
+
+                            color: "#fafafa"
+                            text: model.label
+                        }
+
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: {
+                                eventList.currentIndex = index
+                            }
+                            onDoubleClicked: {
+                                if ( root.activeIndex === 0 ){
+                                    // TODO
+                                } else if (root.activeIndex === 1){
+                                    // TODO
+                                }  else if (root.activeIndex === 2){
+                                    // TODO
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+
     }
 
     Keys.onEscapePressed: {
