@@ -29,7 +29,7 @@ Item{
             childObjectContainer.editor = objectContainer.editor
             childObjectContainer.editingFragment = ef
             childObjectContainer.title = ef.type()
-            childObjectContainer.x = 50
+            childObjectContainer.x = 70
 
             var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
             paletteBoxGroup.editingFragment = ef
@@ -66,7 +66,7 @@ Item{
         }
     }
 
-    width: container.width < 200 ? 200 : container.width + 50
+    width: container.width < 200 ? 200 : container.width + 70
     height: container.height < 10 || compact ? 30 : container.height + 20
 
     Rectangle{
@@ -269,6 +269,7 @@ Item{
                             if ( ef ){
 
                                 var propertyContainer = propertyContainerFactory.createObject(container)
+                                container.sortChildren()
 
                                 propertyContainer.title = data
                                 propertyContainer.documentHandler = objectContainer.editor.documentHandler
@@ -319,11 +320,11 @@ Item{
 
                             if ( ef ){
                                 var childObjectContainer = objectContainerFactory.createObject(container)
-
+                                container.sortChildren()
                                 childObjectContainer.editor = objectContainer.editor
                                 childObjectContainer.editingFragment = ef
                                 childObjectContainer.title = data
-                                childObjectContainer.x = 50
+                                childObjectContainer.x = 70
 
                                 var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
                                 paletteBoxGroup.editingFragment = ef
@@ -422,6 +423,30 @@ Item{
                 return totalHeight + (children.length - 1) * spacing
             else
                 return totalHeight
+        }
+
+        function sortChildren(){
+
+            if (!objectContainer.parent) return
+            if (children.length === 0) return
+
+            var childrenCopy = []
+            childrenCopy.push(children[0])
+            for (var i=1; i<children.length; ++i)
+            {
+                if (!children[i]) continue
+                if (children[i].objectName === "propertyContainer")
+                    childrenCopy.push(children[i])
+            }
+
+            for (var i=1; i<children.length; ++i)
+            {
+                if (!children[i]) continue
+                if (children[i].objectName === "objectContainer")
+                    childrenCopy.push(children[i])
+            }
+
+            children = childrenCopy
         }
     }
 
