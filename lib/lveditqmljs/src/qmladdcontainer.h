@@ -17,7 +17,7 @@ class QmlAddContainer : public QObject{
     Q_OBJECT
     Q_PROPERTY(lv::QmlItemModel*     itemModel     READ itemModel     CONSTANT)
     Q_PROPERTY(lv::QmlPropertyModel* propertyModel READ propertyModel CONSTANT)
-    Q_PROPERTY(lv::QmlEventModel*    eventModel    READ eventModel CONSTANT)
+    Q_PROPERTY(lv::QmlEventModel*    eventModel    READ eventModel    CONSTANT)
     Q_PROPERTY(QString               objectType    READ objectType    CONSTANT)
 
 public:

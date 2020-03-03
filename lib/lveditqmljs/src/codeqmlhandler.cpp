@@ -1113,7 +1113,7 @@ int CodeQmlHandler::findRootPosition(int blockPos)
     int i = 0;
     while (text[i].isSpace()) ++i;
 
-    return position + i;
+    return position + i + 1;
 }
 
 QmlEditFragment *CodeQmlHandler::findEditFragment(CodePalette *palette){
@@ -2162,6 +2162,26 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
             if ( object->exports().size() > 0 )
                 objectTypeName = object->exports().first().type;
 
+            for (int i = 0; i<object->methodCount(); ++i)
+            {
+                auto method = object->method(i);
+                if (method.methodType() == LanguageUtils::FakeMetaMethod::Signal)
+                {
+                    auto name = method.methodName();
+                    name = QString("on") + name[0].toUpper() + name.mid(1);
+
+
+                    addContainer->eventModel()->addItem(QmlEventModel::EventData(
+                        name,
+                        objectTypeName,
+                        "method",
+                        "", //TODO: Find library path
+                        name
+                    ));
+
+                }
+            }
+
             for ( int i = 0; i < object->propertyCount(); ++i ){
                 if ( !object->property(i).name().startsWith("__") ){
                     addContainer->propertyModel()->addItem(QmlPropertyModel::PropertyData(
@@ -2331,6 +2351,99 @@ int CodeQmlHandler::addProperty(
     return cursorPosition - name.size() - 2;
 }
 
+int CodeQmlHandler::addEvent(
+        int position,
+        const QString &object,
+        const QString &type,
+        const QString &name)
+{
+    DocumentQmlValueScanner qvs(m_document, position, 1);
+    int blockStart = qvs.getBlockStart(position) + 1;
+    int blockEnd = qvs.getBlockEnd(position);
+
+    QTextBlock tbStart = m_target->findBlock(blockStart);
+    QTextBlock tbEnd   = m_target->findBlock(blockEnd);
+
+    QString insertionText;
+    int insertionPosition = position;
+    int cursorPosition = position;
+
+    // Check whether the property is already added
+
+    QTextCursor sourceSelection(m_target);
+    sourceSelection.setPosition(blockStart);
+    sourceSelection.setPosition(blockEnd, QTextCursor::KeepAnchor);
+
+    QString source = object + "{" + sourceSelection.selectedText().replace(QChar(QChar::ParagraphSeparator), "\n") + "}";
+
+    lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create(m_document->file()->path());
+    if ( docinfo->parse(source) ){
+        lv::DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
+        lv::DocumentQmlValueObjects::RangeObject* root = objects->root();
+
+        for ( auto it = root->properties.begin(); it != root->properties.end(); ++it ){
+            lv::DocumentQmlValueObjects::RangeProperty* p = *it;
+            QString propertyName = source.mid(p->begin, p->propertyEnd - p->begin);
+            if ( propertyName == name ){ // property already exists, simply position the cursor accordingly
+                lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+
+                int sourceOffset = blockStart - 1 - object.size();
+
+                if ( dh ){
+                    dh->requestCursorPosition(sourceOffset + p->valueBegin);
+                }
+                return sourceOffset + p->begin;
+            }
+        }
+    }
+
+    // Check where to insert the property
+
+    if ( tbStart == tbEnd ){ // inline object declaration
+        insertionPosition = blockEnd;
+        insertionText = "; " + name + ": {    }    ";
+        cursorPosition = insertionPosition + name.size() + 5;
+    } else { // multiline object declaration
+        QString indent = getBlockIndent(tbStart);
+        insertionPosition = tbEnd.position();
+        QTextBlock tbIt = tbEnd.previous();
+        bool found = false;
+        while ( tbIt != tbStart && tbIt.isValid() ){
+            if ( !isBlockEmptySpace(tbIt) ){
+                indent = getBlockIndent(tbIt);
+                insertionPosition = tbIt.position() + tbIt.length();
+                found = true;
+                break;
+            }
+            tbIt = tbIt.previous();
+        }
+
+        insertionText = indent + (found ? "" : "    ")+ name + ": {\n"
+                + indent +(found ? "    " : "        ")+ "\n"
+                + indent + (found ? "" : "    ")+"}\n";
+        cursorPosition = insertionPosition + 2*indent.size() + (found ? 4:12) + name.size() + 4;
+    }
+
+
+    m_document->addEditingState(ProjectDocument::Palette);
+    QTextCursor cs(m_target);
+    cs.setPosition(insertionPosition);
+    cs.beginEditBlock();
+    cs.insertText(insertionText);
+    cs.endEditBlock();
+    m_document->removeEditingState(ProjectDocument::Palette);
+
+    m_scopeTimer.stop();
+    updateScope();
+
+    lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    if ( dh ){
+        dh->requestCursorPosition(cursorPosition);
+    }
+
+    return cursorPosition - name.size() - 2;
+}
+
 /**
  * \brief Adds an item given the \p addText at the specitied \p position
  */
@@ -2404,10 +2517,18 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     return cursorPosition - 1 - type.size();
 }
 
-void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &type, QObject *currentApp){
+void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, QObject *currentApp){
     Q_D(CodeQmlHandler);
     if ( !edit || !currentApp )
         return;
+
+    QString type; QString id;
+    if (ctype.contains('#'))
+    {
+        auto spl = ctype.split('#');
+        type = spl[0];
+        id = spl[1];
+    } else type = ctype;
 
     const QList<QmlBindingChannel::Ptr>& outputChannels = edit->bindingSpan()->outputChannels();
     for ( auto it = outputChannels.begin(); it != outputChannels.end(); ++it ){

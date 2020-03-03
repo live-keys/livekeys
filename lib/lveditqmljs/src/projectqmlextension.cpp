@@ -167,6 +167,8 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         uri, 1, 0, "QmlPropertyModel", "QmlPropertyModel can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlItemModel>(
         uri, 1, 0, "QmlItemModel", "QmlItemModel can only be accessed through the qmledit extension.");
+    qmlRegisterUncreatableType<lv::QmlEventModel>(
+        uri, 1, 0, "QmlEventModel", "QmlEventModel can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlBindingSpanModel>(
         uri, 1, 0, "BindingSpanModel", "BindingSpanModel can only be accessed through the qmledit extension.");
 }

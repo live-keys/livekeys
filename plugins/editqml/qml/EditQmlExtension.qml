@@ -366,7 +366,9 @@ LiveExtension{
                         addContainer.itemModel.addPosition, addContainer.objectType, data
                     )
                 } else if ( addBoxItem.activeIndex === 2 ){
-                    // TODO
+                    activePane.documentHandler.codeHandler.addEvent(
+                        addContainer.itemModel.addPosition, addContainer.objectType, type, data
+                    )
                 }
                 addBox.destroy()
             }

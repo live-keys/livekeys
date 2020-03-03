@@ -309,7 +309,7 @@ Item{
                                 console.error("Error: Can't create a palette in a non-compiled program")
                                 return
                             }
-                        } else {
+                        } else if ( addBoxItem.activeIndex === 1 ){
                             var opos = codeHandler.addItem(addContainer.itemModel.addPosition, addContainer.objectType, data)
                             codeHandler.addItemToRuntime(objectContainer.editingFragment, data, project.appRoot())
 
@@ -333,6 +333,12 @@ Item{
                                 childObjectContainer.paletteGroup = paletteBoxGroup
                                 paletteBoxGroup.x = 5
                             }
+                        } else if ( addBoxItem.activeIndex === 2 ){
+                            var ppos = codeHandler.addEvent(
+                                addContainer.propertyModel.addPosition, addContainer.objectType, type, data
+                            )
+
+                            // TODO: Add event palette too
                         }
                         addBox.destroy()
                     }
