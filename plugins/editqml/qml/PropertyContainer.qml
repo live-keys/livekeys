@@ -27,17 +27,17 @@ Item{
             propertyContainer.destroy()
         }
     }
-
+    property int topMarginParam: 12
     width: container.width + 120
-    height: container.height > 30 ? container.height + 5 : 35
+    height: container.height > 35 ? container.height + 10 : 45
 
     Rectangle{
         id: propertyContainerLabel
         anchors.left: parent.left
-        anchors.leftMargin: 50
+        anchors.leftMargin: 25
         anchors.top: parent.top
-        anchors.topMargin: 10
-        height: 20
+        anchors.topMargin: 5 + topMarginParam
+        height: 21
         width: 100
         color: "#062944"
         radius: 10
@@ -55,9 +55,9 @@ Item{
 
     Item{
         anchors.left: parent.left
-        anchors.leftMargin: 60
+        anchors.leftMargin: 35
         anchors.top: parent.top
-        anchors.topMargin: 10
+        anchors.topMargin: 5 + topMarginParam
         width: 15
         height: 20
         Text{
@@ -77,9 +77,9 @@ Item{
     Item{
         id: paletteAddButton
         anchors.left: parent.left
-        anchors.leftMargin: 120
+        anchors.leftMargin: 95
         anchors.top: parent.top
-        anchors.topMargin: 12
+        anchors.topMargin: 7 + topMarginParam
 
         width: 15
         height: 20
@@ -142,7 +142,7 @@ Item{
         id: paletteHeaderList
         visible: model ? true : false
         anchors.top: parent.top
-        anchors.topMargin: 20
+        anchors.topMargin: 15 + topMarginParam
         width: 250
         color: "#0a141c"
         selectionColor: "#0d2639"
@@ -162,10 +162,9 @@ Item{
         id: container
 
         anchors.top: parent.top
-        anchors.topMargin: 5
-
+        anchors.topMargin: 10
         anchors.left: parent.left
-        anchors.leftMargin: 160
+        anchors.leftMargin: 140
 
         width: propertyContainer.valueContainer ? propertyContainer.valueContainer.width : 0
         height: propertyContainer.valueContainer ? propertyContainer.valueContainer.height : 0
