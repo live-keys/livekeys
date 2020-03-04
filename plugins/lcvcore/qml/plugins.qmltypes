@@ -445,7 +445,7 @@ Module {
         name: "QMatRoi"
         defaultProperty: "data"
         prototype: "QMatFilter"
-        exports: ["lcvcore/MatRoi 1.0"]
+        exports: ["lcvcore/Crop 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "regionX"; type: "int" }
         Property { name: "regionY"; type: "int" }

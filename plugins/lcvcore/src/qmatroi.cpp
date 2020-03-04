@@ -33,6 +33,8 @@ QMatRoi::QMatRoi(QQuickItem *parent)
     : QMatFilter(parent)
     , m_regionX(0)
     , m_regionY(0)
+    , m_regionWidth(0)
+    , m_regionHeight(0)
 {
 }
 
