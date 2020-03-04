@@ -320,4 +320,9 @@ void QmlEditFragment::__inputRunnableObjectReady(){
     }
 }
 
+bool QmlEditFragment::isRoot()
+{
+    return parentFragment() != nullptr;
+}
+
 }// namespace
