@@ -157,6 +157,7 @@ public slots:
         const QString& name,
         bool assignDefault = false);
     int addItem(int position, const QString& object, const QString& type);
+    int addEvent(int position, const QString &object, const QString &type, const QString &name);
     void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type, QObject* currentApp = nullptr);
     void updateRuntimeBindings();
 

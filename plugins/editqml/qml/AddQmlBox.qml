@@ -44,6 +44,7 @@ Rectangle{
         searchInput.text = ''
         root.addContainer.propertyModel.setFilter('')
         root.addContainer.itemModel.setFilter('')
+        root.addContainer.eventModel.setFilter('')
         if (activeIndex === 1) idChecked = true
     }
 
@@ -345,8 +346,10 @@ Rectangle{
             onTextChanged: {
                 if ( root.activeIndex === 0 ){
                     root.addContainer.propertyModel.setFilter(text)
-                } else {
+                } else if ( root.activeIndex === 1 ){
                     root.addContainer.itemModel.setFilter(text)
+                } else if ( root.activeIndex === 2 ) {
+                    root.addContainer.eventModel.setFilter(text)
                 }
             }
 
@@ -374,10 +377,13 @@ Rectangle{
             Keys.onReturnPressed: {
                 if ( root.activeIndex === 0 ){
                     root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                } else {
+                } else if ( root.activeIndex === 1 ){
                     var result = itemList.currentItem.code
                     if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
                     root.accept(itemList.currentItem.importSpace, result)
+                } else if ( root.activeIndex === 2 ){
+                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
+
                 }
             }
             Keys.onEscapePressed: {
@@ -555,9 +561,11 @@ Rectangle{
                                 if ( root.activeIndex === 0 ){
                                     root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
                                 } else if (root.activeIndex === 1){
-                                    root.accept(itemList.currentItem.importSpace, itemList.currentItem.code)
+                                    var result = itemList.currentItem.code
+                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
+                                    root.accept(itemList.currentItem.importSpace, result)
                                 } else if (root.activeIndex === 2){
-                                    // TODO
+                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
                                 }
                             }
                         }
@@ -740,7 +748,7 @@ Rectangle{
                                     if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
                                     root.accept(itemList.currentItem.importSpace, result)
                                 } else if (root.activeIndex === 2){
-                                    // TODO
+                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
                                 }
                             }
                         }
@@ -916,11 +924,13 @@ Rectangle{
                             }
                             onDoubleClicked: {
                                 if ( root.activeIndex === 0 ){
-                                    // TODO
+                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
                                 } else if (root.activeIndex === 1){
-                                    // TODO
+                                    var result = itemList.currentItem.code
+                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
+                                    root.accept(itemList.currentItem.importSpace, result)
                                 }  else if (root.activeIndex === 2){
-                                    // TODO
+                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
                                 }
                             }
                         }
