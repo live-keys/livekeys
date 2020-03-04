@@ -25,8 +25,8 @@ CodePalette{
     type : "qml/int"
 
     item: Rectangle{
-        width: 280
-        height: 40
+        width: 330
+        height: 30
         color: 'transparent'
 
         Slider{

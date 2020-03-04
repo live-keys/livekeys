@@ -20,8 +20,7 @@
 #include "qmljs/qmljsscanner.h"
 #include "projectqmlscanner_p.h"
 #include "projectqmlscanmonitor_p.h"
-#include "documentqmlobject.h"
-#include "documentqmlobject_p.h"
+
 #include "qmlcompletioncontextfinder.h"
 #include "projectqmlscopecontainer_p.h"
 #include "qmllibraryinfo_p.h"
@@ -1254,7 +1253,7 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
         edit->declaration()->parentType(), expressionPath, cursorPosition
     );
 
-    qDebug() << expressionChain.toString(false);
+    // qDebug() << expressionChain.toString(false);
 
     if ( !expressionChain.isValid() ){
         //TODO: Error
@@ -1349,7 +1348,7 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
 
     int cursorPosition = edit->declaration()->position();
 
-    qDebug() << expressionPath;
+    // qDebug() << expressionPath;
 
     QmlScopeSnap::ExpressionChain expressionChain = scope.evaluateExpression(
         edit->declaration()->parentType(), expressionPath, cursorPosition
@@ -1446,7 +1445,7 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
         QmlBindingChannel::Ptr signalChannel = *it;
         if ( signalChannel->isEnabled() ){
             QmlBindingChannel::Ptr functionChannel = DocumentQmlInfo::traverseBindingPath(bp, signalChannel->runnable());
-            qDebug() << functionChannel->hasConnection();
+            // qDebug() << functionChannel->hasConnection();
             if ( functionChannel.isNull() || !functionChannel->hasConnection() ){
                 qWarning("Failed to find binding channel at: %s", qPrintable(bp->toString()));
             } else {
@@ -2031,10 +2030,10 @@ QJSValue CodeQmlHandler::cursorInfo(int position, int length){
         cursor.setPosition(position + length, QTextCursor::KeepAnchor);
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
-    qDebug() << properties.length();
-    if ( properties.length() ){
+//    qDebug() << properties.length();
+//    if ( properties.length() ){
 
-    }
+//    }
 
     QmlCompletionContext::ConstPtr qcc = m_completionContextFinder->getContext(cursor);
     if ( qcc->context() & QmlCompletionContext::InImport || qcc->context() & QmlCompletionContext::InImportVersion ){

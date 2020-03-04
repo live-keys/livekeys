@@ -25,7 +25,7 @@ CodePalette{
     type : "qml/double"
 
     item: Rectangle{
-        width: 380
+        width: 330
         height: 30
         color: 'transparent'
 
