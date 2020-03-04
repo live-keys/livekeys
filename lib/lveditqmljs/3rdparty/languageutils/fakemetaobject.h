@@ -93,6 +93,7 @@ public:
     void setMethodName(const QString &name);
 
     void setReturnType(const QString &type);
+    const QString& returnType() const;
 
     QStringList parameterNames() const;
     QStringList parameterTypes() const;
@@ -144,7 +145,7 @@ public:
 };
 
 class LANGUAGEUTILS_EXPORT FakeMetaObject {
-    Q_DISABLE_COPY(FakeMetaObject);
+    Q_DISABLE_COPY(FakeMetaObject)
 
 public:
     typedef QSharedPointer<FakeMetaObject> Ptr;

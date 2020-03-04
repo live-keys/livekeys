@@ -14,35 +14,18 @@
 **
 ****************************************************************************/
 
-#include "live/documentqmlobject.h"
+#ifndef LVBASE_PLUGIN_H
+#define LVBASE_PLUGIN_H
 
-namespace lv{
+#include <QQmlExtensionPlugin>
 
+class BasePlugin : public QQmlExtensionPlugin{
 
-/**
- * \class DocumentQmlObject
- * \ingroup lveditqmljs
- * \brief Stores information about a QmlObject from a document
- */
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
 
-
-/**
- * \class DocumentQmlObject::FunctionValue
- * \ingroup lveditqmljs
- * \brief Stores information about a QmlObject function
- */
-
-/**
- * \brief DocumentQmlObject constructor
- */
-DocumentQmlObject::DocumentQmlObject(){
-}
-
-
-/**
- * \brief DocumentQmlObject destructor
- */
-DocumentQmlObject::~DocumentQmlObject(){
-}
-
-} // namespace
+public:
+    void registerTypes(const char *uri) Q_DECL_OVERRIDE;
+    void initializeEngine(QQmlEngine *engine, const char *uri) Q_DECL_OVERRIDE;
+};
+#endif // LVEDITOR_PLUGIN_H

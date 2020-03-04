@@ -4,6 +4,7 @@
 #include "live/lvviewglobal.h"
 #include "live/exception.h"
 #include <QScopedPointer>
+#include <QStringList>
 
 class QQmlEngine;
 
@@ -34,7 +35,6 @@ private:
     ViewEngine* m_engine;
     Settings*   m_settings;
     Memory*     m_memory;
-
 };
 
 inline ViewContext &ViewContext::instance(){

@@ -21,6 +21,7 @@
 #include "live/documentqmlobject.h"
 #include "live/documentqmlvalueobjects.h"
 #include "live/qmldeclaration.h"
+#include "live/qmllanguageinfo.h"
 
 #include <QQmlProperty>
 #include <QSharedPointer>
@@ -138,9 +139,15 @@ public:
     QStringList extractIds() const;
     const ValueReference rootObject();
     const ValueReference valueForId(const QString& id) const;
-    DocumentQmlObject extractValueObject(const ValueReference& value, ValueReference *parent = nullptr) const;
+    lv::QmlTypeInfo extractValueObject(const ValueReference& value, ValueReference *parent = nullptr) const;
+    lv::QmlTypeInfo extractValueObjectWithExport(
+            const ValueReference& value,
+            const QString& componentName,
+            const QString& libraryPath,
+            int vMajor,
+            int vMinor) const;
     QString extractTypeName(const ValueReference& value) const;
-    void extractTypeNameRange(const ValueReference& value, int& begin, int& end);
+    void extractTypeNameRange(const ValueReference& value, int& begin, int& end) const;
     void extractRange(const ValueReference& value, int& begin, int& end);
 
     void createRanges();
@@ -155,10 +162,6 @@ public:
     const QList<DocumentQmlInfo::Message>& diagnostics() const;
 
     QmlJS::Bind* internalBind();
-
-    static bool isObject(const QString& typeString);
-    static QString toQmlPrimitive(const QString& cppPrimitive);
-    static QString typeDefaultValue(const QString& typeString);
 
     QString path() const;
     QString componentName() const;

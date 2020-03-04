@@ -17,7 +17,7 @@
 #include "projectqmlscanner_p.h"
 #include "projectqmlscopecontainer_p.h"
 #include "qmllibraryinfo_p.h"
-#include "documentqmlobject_p.h"
+#include "qmllanguageinfo_p.h"
 #include "documentqmlscope.h"
 #include "live/lockedfileiosession.h"
 #include "live/visuallog.h"
@@ -55,10 +55,9 @@ public:
 /// \private
 void updateLibraryPrototypes(
         ProjectQmlScope::Ptr projectScope,
-        const QString &path,
+        const QString &,
         QmlLibraryInfo::Ptr library)
 {
-    Q_UNUSED(path);
     int missingDependencies = 0;
     foreach( const QString& dependency, library->dependencyPaths() ){
         QmlLibraryInfo::Ptr linfo = projectScope->globalLibraries()->libraryInfo(dependency);
@@ -155,10 +154,15 @@ bool scanObjectFile(
         }
     }
 
-    LanguageUtils::FakeMetaObject::Ptr fmo = metaObjectFromQmlObject(
-        documentInfo->extractValueObject(documentInfo->rootObject())
+    LanguageUtils::FakeMetaObject::ConstPtr fmo = QmlTypeInfoPrivate::typeObject(
+        documentInfo->extractValueObjectWithExport(
+            documentInfo->rootObject(),
+            componentName,
+            libraryPath,
+            componentVersion.majorVersion(),
+            componentVersion.minorVersion()
+        )
     );
-    fmo->addExport(componentName, libraryPath, componentVersion);
     objects.append(fmo);
 
     return true;
@@ -694,7 +698,7 @@ QObject *ProjectQmlScanner::requestObject(const QString &path){
             return req.object;
         }
     }
-    return 0;
+    return nullptr;
 }
 
 bool ProjectQmlScanner::hasRequest(const QString &path) const{

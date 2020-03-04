@@ -31,7 +31,7 @@ public:
     ~ProjectQmlScopeContainer(){}
 
     QmlLibraryInfo::Ptr libraryInfo(const QString& path);
-    QPair<QString, QmlLibraryInfo::Ptr> libraryInfoByNamespace(const QString& uri);
+    QmlLibraryInfo::Reference libraryInfoByNamespace(const QString& uri);
     bool libraryExists(const QString& path);
     void assignLibrary(const QString& path, QmlLibraryInfo::Ptr libinfo);
     void assignLibraries(const QHash<QString, QmlLibraryInfo::Ptr>& libinfos);
@@ -63,12 +63,12 @@ inline QmlLibraryInfo::Ptr ProjectQmlScopeContainer::libraryInfo(const QString &
     return libinfo;
 }
 
-inline QPair<QString, QmlLibraryInfo::Ptr> ProjectQmlScopeContainer::libraryInfoByNamespace(const QString &uri){
-    QPair<QString, QmlLibraryInfo::Ptr> result("", nullptr);
+inline QmlLibraryInfo::Reference ProjectQmlScopeContainer::libraryInfoByNamespace(const QString &uri){
+    QmlLibraryInfo::Reference result;
     m_libraryMutex.lock();
     for ( auto it = m_libraries.begin(); it != m_libraries.end(); ++it ){
         if ( it.value()->importNamespace() == uri ){
-            result = QPair<QString, QmlLibraryInfo::Ptr>(it.key(), it.value());
+            result = QmlLibraryInfo::Reference(it.key(), it.value());
             break;
         }
     }

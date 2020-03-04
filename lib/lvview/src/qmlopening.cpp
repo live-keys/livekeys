@@ -9,7 +9,7 @@ QmlOpening::QmlOpening(QObject *parent)
 
 void QmlOpening::componentComplete(){
     QmlAct::componentComplete();
-    __triggerRun();
+    exec();
 }
 
 

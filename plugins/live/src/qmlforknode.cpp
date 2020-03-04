@@ -53,7 +53,7 @@ void QmlForkNode::responseValueChanged(const QString &key, const QVariant &value
     MLNode n(MLNode::Object);
 
     MLNode result;
-    TypeInfo::serializeVariant(ViewContext::instance().engine(), value, result);
+    MetaInfo::serializeVariant(ViewContext::instance().engine(), value, result);
 
     n[key.toStdString()] = result;
 
@@ -150,7 +150,7 @@ void QmlForkNode::onSharedMemoryMessage(const QByteArray &message, int type, int
             for ( auto it = inputOb.begin(); it != inputOb.end(); ++it ){
                 m_post->insert(
                     QByteArray::fromStdString(it.key().c_str()),
-                    TypeInfo::deserializeVariant(engine, it.value())
+                    MetaInfo::deserializeVariant(engine, it.value())
                 );
             }
         } catch ( Exception& e ){

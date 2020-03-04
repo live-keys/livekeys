@@ -1,0 +1,4 @@
+module base
+plugin base
+
+depends QtQuick 2.3

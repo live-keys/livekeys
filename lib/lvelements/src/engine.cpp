@@ -487,7 +487,6 @@ ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
 
     // Properties
     for ( auto propIt = t->ownPropertiesBegin(); propIt != t->ownPropertiesEnd(); ++propIt ){
-//        qDebug() << "Adding property:" << propIt->first.c_str();
         Property* p = propIt->second;
         v8::Local<v8::External> pdata = v8::External::New(isolate(), p);
 
@@ -511,7 +510,6 @@ ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
     // Methods
     v8::Local<v8::Template> tplPrototype = tpl->PrototypeTemplate(); // for methods and events
     for ( auto funcIt = t->ownMethodsBegin(); funcIt != t->ownMethodsEnd(); ++funcIt ){
-//        qDebug() << "Adding method:" << funcIt->first.c_str();
         Function* f = funcIt->second;
         v8::Local<v8::External> fdata = v8::External::New(isolate(), f);
         tplPrototype->Set(isolate(), funcIt->first.c_str(), v8::FunctionTemplate::New(isolate(), f->ptr(), fdata));
@@ -519,7 +517,6 @@ ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
 
     // Events
     for ( auto eventIt = t->ownEventsBegin(); eventIt != t->ownEventsEnd(); ++eventIt ){
-//        qDebug() << "Adding event:" << eventIt->first.c_str();
         Function* f = eventIt->second;
         v8::Local<v8::External> fdata = v8::External::New(isolate(), f);
         tplPrototype->Set(isolate(), eventIt->first.c_str(), v8::FunctionTemplate::New(isolate(), f->ptr(), fdata));
@@ -528,7 +525,6 @@ ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
     // Functions
     v8::Local<v8::Function> ftpl = tpl->GetFunction();
     for ( auto funcIt = t->functionsBegin(); funcIt != t->functionsEnd(); ++funcIt ){
-//        qDebug() << "Adding function:" << funcIt->first.c_str();
         Function* f = funcIt->second;
         v8::Local<v8::External> fdata = v8::External::New(isolate(), f);
         ftpl->Set(

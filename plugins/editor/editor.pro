@@ -56,6 +56,7 @@ DISTFILES += \
     palettes/IntHistoryPlotPalette.qml \
     palettes/DoubleHistoryPlotPalette.qml \
     palettes/PathPalette.qml \
+    palettes/TriggerPalette.qml \
     qml/DocumentationView.qml \
     qml/EditorPane.qml \
     qml/PaletteConnection.qml \

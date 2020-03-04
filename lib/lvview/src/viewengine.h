@@ -25,7 +25,7 @@
 
 #include "live/lvviewglobal.h"
 #include "live/exception.h"
-#include "live/typeinfo.h"
+#include "live/metainfo.h"
 #include "live/mlnode.h"
 
 class QQmlEngine;
@@ -105,20 +105,21 @@ public:
     void addCompileHook(CompileHook ch, void* userData);
     void removeCompileHook(CompileHook ch, void* userData);
 
-    template<typename T> TypeInfo::Ptr registerQmlTypeInfo(
+    template<typename T> MetaInfo::Ptr registerQmlTypeInfo(
         const std::function<void(const T&, MLNode&)>& serializeFunction,
         const std::function<void(const MLNode&, T&)>& deserializeFunction,
         const std::function<QObject*()>& constructorFunction,
         bool canLog
     );
 
-    TypeInfo::Ptr typeInfo(const QMetaObject *type) const;
-    TypeInfo::Ptr typeInfo(const QByteArray& typeName) const;
-    TypeInfo::Ptr typeInfo(const QMetaType& metaType) const;
+    MetaInfo::Ptr typeInfo(const QMetaObject *type) const;
+    MetaInfo::Ptr typeInfo(const QByteArray& typeName) const;
+    MetaInfo::Ptr typeInfo(const QMetaType& metaType) const;
 
     static QString typeAsPropertyMessage(const QString& typeName, const QString& propertyName);
 
     static void registerBaseTypes(const char* uri);
+
     static void initializeBaseTypes(ViewEngine* engine);
 
     static QString toErrorString(const QQmlError& error);
@@ -183,7 +184,7 @@ private:
     QMap<QObject*, ErrorHandler*> m_errorHandlers;
     QMap<QString,  QObject*>      m_errorObjects;
 
-    QHash<const QMetaObject*, TypeInfo::Ptr> m_types;
+    QHash<const QMetaObject*, MetaInfo::Ptr> m_types;
     QHash<QString, const QMetaObject*>       m_typeNames;
 
     bool m_isLoading;
@@ -195,13 +196,13 @@ private:
  * Store a constructor, serialization functions and a logging flag for this type.
  */
 template<typename T>
-TypeInfo::Ptr ViewEngine::registerQmlTypeInfo(
+MetaInfo::Ptr ViewEngine::registerQmlTypeInfo(
         const std::function<void(const T&, MLNode&)>& serializeFunction,
         const std::function<void(const MLNode&, T&)>& deserializeFunction,
         const std::function<QObject*()>& constructorFunction,
         bool canLog)
 {
-    TypeInfo::Ptr t = TypeInfo::create(T::staticMetaObject.className());
+    MetaInfo::Ptr t = MetaInfo::create(T::staticMetaObject.className());
     t->addSerialization<T>(serializeFunction, deserializeFunction);
     t->addConstructor(constructorFunction);
     if ( canLog )

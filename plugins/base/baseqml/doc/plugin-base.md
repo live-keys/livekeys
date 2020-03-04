@@ -16,7 +16,7 @@ For the concepts behind logging in LiveKeys, check out the Logging page.
 
 Example of logging:
 ```qml
-	vlog.d("Hello world!")
+    vlog.d("Hello world!")
 ```
 
 
@@ -28,7 +28,7 @@ Contains methods to present a Qml output for the visual log.
 
 ## Summary
 
- Members                        | Descriptions                                
+ Members                        | Descriptions
 --------------------------------|---------------------------------------------
 `public  `[`VisualLogQmlObject`](#classlv_1_1VisualLogQmlObject_1ac3a27d9bb38cd9f189c95f8a79d61257)`(QObject * parent)` | Default constructor
 `public  `[`~VisualLogQmlObject`](#classlv_1_1VisualLogQmlObject_1a54f3f38b1658241041748e82f8f1deb3)`()` | Default destructor
@@ -44,7 +44,7 @@ Contains methods to present a Qml output for the visual log.
 {qmlType:LiveScript}
 {qmlBrief:A wrapper class for running a script, containing command arguments and LiveKeys environment data}
 
-It's available throughout QML in LiveKeys through the `script` property. 
+It's available throughout QML in LiveKeys through the `script` property.
 
 {qmlProperty:list argv}
 
@@ -69,7 +69,7 @@ Returns the name of the script.
 {qmlType:Environment}
 {qmlBrief:Container for parameters of the environment LiveKeys is running in.}
 
-It's available throughout QML in LiveKeys through the `script.environment` property. 
+It's available throughout QML in LiveKeys through the `script.environment` property.
 
 {qmlProperty:QVariantMap os}
 
@@ -109,7 +109,7 @@ Removes item at given index
 
 {qmlMethod:ObjectListModel model()}
 
-Returns model 
+Returns model
 
 {qmlMethod:ObjectList cloneConst()}
 

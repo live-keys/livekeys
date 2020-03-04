@@ -7,6 +7,7 @@ TEMPLATE = subdirs
 # Optional build modules
 
 SUBDIRS += \
+    base \
     live \
     editor \
     editqml \

@@ -21,6 +21,7 @@
 #include "qmljs/parser/qmljsast_p.h"
 #include "qmljs/qmljsdescribevalue.h"
 #include "live/documentqmlobject.h"
+#include "qmllanguageinfo_p.h"
 #include <QMap>
 
 namespace lv{
@@ -46,7 +47,7 @@ class IdValueExtractor : public QmlJS::MemberProcessor{
 public:
     IdValueExtractor(const QString& name)
         : m_name(name)
-        , m_value(0)
+        , m_value(nullptr)
     {
     }
 
@@ -68,7 +69,7 @@ private:
 /// \private
 class ValueMemberExtractor : public QmlJS::MemberProcessor{
 public:
-    ValueMemberExtractor(DocumentQmlObject* object) : m_parent(0), m_object(object)
+    ValueMemberExtractor(LanguageUtils::FakeMetaObject::Ptr object) : m_parent(nullptr), m_object(object)
     {}
 
     bool processProperty(const QString &name, const QmlJS::Value *value, const QmlJS::PropertyInfo&) override{
@@ -77,18 +78,18 @@ public:
             m_parent = value;
             return true;
         } else if ( const QmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
-            type = (vr->ast() != 0) ? vr->ast()->memberType.toString() : QString("object");
+            type = (vr->ast() != nullptr) ? vr->ast()->memberType.toString() : QString("object");
         } else if ( const QmlJS::ASTFunctionValue* fv = value->asAstFunctionValue() ){
             type = "function";
-            DocumentQmlObject::FunctionValue mf;
+            QmlFunctionInfo mf;
             mf.name = name;
             for( int i = 0; i < fv->namedArgumentCount(); ++i ){
-                mf.arguments.append(QPair<QString, QString>(fv->argumentName(i), ""));
+                mf.addParameter(fv->argumentName(i), QmlTypeReference(QmlTypeReference::Qml, "var"));
             }
-            m_object->addFunction(mf);
+            QmlTypeInfoPrivate::appendFunction(m_object, mf);
             return true;
         }
-        m_object->addProperty(name, type);
+        QmlTypeInfoPrivate::appendProperty(m_object, QmlPropertyInfo(name, QmlTypeReference(QmlTypeReference::Unknown, type)));
         return true;
     }
     bool processEnumerator(const QString &, const QmlJS::Value *) override
@@ -98,41 +99,38 @@ public:
     bool processSignal(const QString &name, const QmlJS::Value *value) override
     {
         if ( const QmlJS::ASTSignal* vs = value->asAstSignal() ){
-            DocumentQmlObject::FunctionValue mf;
+            QmlFunctionInfo mf;
             mf.name = name;
+            mf.functionType = QmlFunctionInfo::Signal;
             for( int i = 0; i < vs->namedArgumentCount(); ++i ){
-                mf.arguments.append(QPair<QString, QString>(vs->argumentName(i), ""));
+                mf.addParameter(vs->argumentName(i), QmlTypeReference(QmlTypeReference::Qml, "var"));
             }
-            m_object->addSignal(mf);
+            QmlTypeInfoPrivate::appendFunction(m_object, mf);
         }
         return true;
     }
-    bool processSlot(const QString &name, const QmlJS::Value *value) override
+    bool processSlot(const QString &name, const QmlJS::Value *) override
     {
-        if ( const QmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
-            m_object->addSlot(name, vr->ast()->name.toString());
-        } else {
-            m_object->addSlot(name, "");
-        }
+        QmlFunctionInfo mf;
+        mf.name = name;
+        mf.functionType = QmlFunctionInfo::SlotGenerated;
+        QmlTypeInfoPrivate::appendFunction(m_object, mf);
         return true;
     }
-    bool processGeneratedSlot(const QString &name, const QmlJS::Value *value) override
+    bool processGeneratedSlot(const QString &name, const QmlJS::Value *) override
     {
-        if ( const QmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
-            m_object->addSlot(name, vr->ast()->name.toString());
-        } else if ( const QmlJS::ASTSignal* vs = value->asAstSignal() ){
-            m_object->addSlot(name, vs->ast()->name.toString());
-        } else {
-            m_object->addSlot(name, "");
-        }
+        QmlFunctionInfo mf;
+        mf.name = name;
+        mf.functionType = QmlFunctionInfo::SlotGenerated;
+        QmlTypeInfoPrivate::appendFunction(m_object, mf);
         return true;
     }
 
     const QmlJS::Value* parent(){ return m_parent; }
 
 private:
-    const QmlJS::Value* m_parent;
-    DocumentQmlObject* m_object;
+    const QmlJS::Value*                m_parent;
+    LanguageUtils::FakeMetaObject::Ptr m_object;
 };
 
 }// namespace

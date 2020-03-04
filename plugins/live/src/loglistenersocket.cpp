@@ -142,7 +142,7 @@ int LogListenerSocket::isIp(const QByteArray &buffer){
 
 void LogListenerSocket::logLine(const QByteArray &buffer){
     if ( m_expectObject ){
-        lv::TypeInfo::Ptr ti = lv::ViewContext::instance().engine()->typeInfo(m_expectObject->typeName);
+        lv::MetaInfo::Ptr ti = lv::ViewContext::instance().engine()->typeInfo(m_expectObject->typeName);
 
         lv::VisualLog vl(m_expectObject->level);
         vl.at(m_expectObject->address.toStdString(), "", m_expectObject->line, m_expectObject->functionName.toStdString());

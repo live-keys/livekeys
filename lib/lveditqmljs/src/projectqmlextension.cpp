@@ -127,7 +127,7 @@ void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *res
 
     for ( auto it = that->m_codeHandlers.begin(); it != that->m_codeHandlers.end(); ++it ){
         CodeQmlHandler* h = *it;
-        h->updateRuntimeBindings(result);
+        h->updateRuntimeBindings();
     }
 }
 

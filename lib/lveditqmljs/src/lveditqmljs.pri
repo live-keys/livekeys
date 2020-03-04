@@ -3,7 +3,6 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/documentqmlinfo.h \
     $$PWD/documentqmlranges_p.h \
-    $$PWD/documentqmlobject.h \
     $$PWD/qmlbindingchannel.h \
     $$PWD/qmlbindingpath.h \
     $$PWD/qmlbindingspan.h \
@@ -14,12 +13,12 @@ HEADERS += \
     $$PWD/qmljshighlighter_p.h \
     $$PWD/qmlcompletioncontext.h \
     $$PWD/qmlcompletioncontextfinder.h \
-    $$PWD/qmllanguagetype.h \
+    $$PWD/qmllanguageinfo.h \
+    $$PWD/qmllanguageinfo_p.h \
     $$PWD/qmllibraryinfo_p.h \
     $$PWD/documentqmlscope.h \
     $$PWD/projectqmlscanner_p.h \
     $$PWD/qmllibrarydependency.h \
-    $$PWD/documentqmlobject_p.h \
     $$PWD/projectqmlscope.h \
     $$PWD/projectqmlscopecontainer_p.h \
     $$PWD/plugininfoextractor.h \
@@ -49,9 +48,8 @@ SOURCES += \
     $$PWD/qmlbindingspanmodel.cpp \
     $$PWD/qmleventmodel.cpp \
     $$PWD/qmlidvisitor.cpp \
-    $$PWD/documentqmlobject.cpp \
     $$PWD/qmlcompletioncontext.cpp \
-    $$PWD/qmllanguagetype.cpp \
+    $$PWD/qmllanguageinfo.cpp \
     $$PWD/qmllibraryinfo.cpp \
     $$PWD/qmlcompletioncontextfinder.cpp \
     $$PWD/projectqmlscope.cpp \

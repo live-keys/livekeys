@@ -40,8 +40,9 @@ public slots:
     void write(const QJSValue options);
     QVariant parse();
     void updateBindings();
-    void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model);
+    void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
     bool bindExpression(const QString& expression);
+    bool bindFunctionExpression(const QString& expression);
 
     void updateFromPalette();
 

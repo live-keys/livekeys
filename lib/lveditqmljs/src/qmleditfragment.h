@@ -89,6 +89,7 @@ public slots:
 
     bool isForObject() const;
     bool isForProperty() const;
+    bool isForSlot() const;
 
     int totalPalettes() const;
     lv::QmlEditFragment* parentFragment();

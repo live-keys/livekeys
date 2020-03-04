@@ -54,7 +54,7 @@ CodePalette{
             text: ''
             onTextChanged: {
                 if ( !autoTextChange ){
-                   extension.suggestionsForExpression(input.text, palette.codeModel)
+                   extension.suggestionsForExpression(input.text, palette.codeModel, false)
                }
             }
 
@@ -102,7 +102,7 @@ CodePalette{
                     }
 
                 } else if ( event.key === Qt.Key_Space && event.modifiers & Qt.AltModifier ){
-                    extension.suggestionsForExpression(input.text, palette.codeModel)
+                    extension.suggestionsForExpression(input.text, palette.codeModel, false)
                     event.accepted = true
                 }
             }

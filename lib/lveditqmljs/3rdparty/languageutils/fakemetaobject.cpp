@@ -128,6 +128,10 @@ void FakeMetaMethod::setMethodName(const QString &name)
 void FakeMetaMethod::setReturnType(const QString &type)
 { m_returnType = type; }
 
+const QString &FakeMetaMethod::returnType() const{
+return m_returnType;
+}
+
 QStringList FakeMetaMethod::parameterNames() const
 { return m_paramNames; }
 

@@ -53,6 +53,9 @@ public:
 
     const MLNode& startupConfiguration();
 
+    void setScriptArguments(const std::vector<std::string>& args);
+    const std::vector<std::string> scriptArguments() const;
+
     LibraryTable* libraries();
 
 private:

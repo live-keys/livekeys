@@ -18,18 +18,44 @@
 
 namespace lv{
 
+// QmlLibraryInfo::Reference
+// -----------------------------------------------------------------------------------------------
+
+QmlLibraryInfo::Reference::Reference()
+    : lib(QmlLibraryInfo::create())
+{
+}
+
+QmlLibraryInfo::Reference::Reference(const QString &libPath, QmlLibraryInfo::Ptr libInfo)
+    : path(libPath)
+    , lib(libInfo)
+{
+}
+
+bool QmlLibraryInfo::Reference::isValid() const {
+    return lib && lib->status() == QmlLibraryInfo::Done;
+}
+
+QString QmlLibraryInfo::Reference::uri() const{
+    return lib ? lib->importNamespace() : "";
+}
+
+
+// QmlLibraryInfo
+// -----------------------------------------------------------------------------------------------
+
 QmlLibraryInfo::QmlLibraryInfo()
-    : m_status(QmlLibraryInfo::NotScanned)
-    , m_importVersionMajor(0)
+    : m_importVersionMajor(0)
     , m_importVersionMinor(0)
+    , m_status(QmlLibraryInfo::NotScanned)
 {
 }
 
 QmlLibraryInfo::QmlLibraryInfo(const QmlDirParser &parser)
-    : m_status(QmlLibraryInfo::NotScanned)
-    , m_data(parser)
+    : m_data(parser)
     , m_importVersionMajor(0)
     , m_importVersionMinor(0)
+    , m_status(QmlLibraryInfo::NotScanned)
 {
     m_importNamespace = parser.typeNamespace();
 }
@@ -96,6 +122,17 @@ LanguageUtils::FakeMetaObject::ConstPtr QmlLibraryInfo::findObjectByClassName(co
             return obj;
     }
     return LanguageUtils::FakeMetaObject::ConstPtr(nullptr);
+}
+
+LanguageUtils::FakeMetaObject::ConstPtr QmlLibraryInfo::findObject(const QString &name, QmlTypeReference::Language lang){
+    if ( lang == QmlTypeReference::Cpp ){
+        return findObjectByClassName(name);
+    } else if ( lang == QmlTypeReference::Qml ){
+        QmlLibraryInfo::ExportVersion ev = findExport(name);
+        if ( ev.isValid() )
+            return ev.object;
+    }
+    return nullptr;
 }
 
 void QmlLibraryInfo::setDependencies(const QList<QString> &paths){

@@ -159,8 +159,17 @@ namespace{
             QmlBindingPath::PropertyNode* pn = static_cast<QmlBindingPath::PropertyNode*>(n);
 
             QQmlProperty prop(object, pn->propertyName);
-            if ( !prop.isValid() )
-                return QmlBindingChannel::Ptr(nullptr);
+            if ( !prop.isValid() ){
+                int findex = pn->propertyName.indexOf('(');
+                if ( findex == -1 )
+                    return QmlBindingChannel::Ptr(nullptr);
+
+                QByteArray upname = pn->propertyName.toUtf8();
+                int methodIndex = object->metaObject()->indexOfMethod(upname.data());
+                if ( methodIndex >= 0 ){
+                    return QmlBindingChannel::create(path, r, QQmlProperty(object, "objectName"), object->metaObject()->method(methodIndex));
+                }
+            }
 
             if ( n->child == nullptr ){
                 return QmlBindingChannel::create(path, r, prop);
@@ -357,34 +366,69 @@ const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueForId(const QString 
     return DocumentQmlInfo::ValueReference(valueExtractor.value(), this);
 }
 
+
 /**
  * \brief Extracts a usable object given a value reference.
  *
  * For example, you can use this class together with lv::DocumentQmlInfo::valueForId() to inspect
  * a specific object defined with an id within the qml document.
  */
-DocumentQmlObject DocumentQmlInfo::extractValueObject(
-        const ValueReference &valueref,
-        ValueReference *parent) const
+lv::QmlTypeInfo DocumentQmlInfo::extractValueObject(
+        const DocumentQmlInfo::ValueReference &valueref, DocumentQmlInfo::ValueReference *parent) const
 {
-    DocumentQmlObject vodata;
+    lv::QmlTypeInfo vodata;
     if ( isValueNull(valueref) || valueref.parent != this )
         return vodata;
 
     if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
-        if ( vob->typeName() )
-            vodata.setTypeName(vob->typeName()->name.toString());
 
-        ValueMemberExtractor extractor(&vodata);
+        LanguageUtils::FakeMetaObject::Ptr fmo(new LanguageUtils::FakeMetaObject);
+
+        ValueMemberExtractor extractor(fmo);
         vob->processMembers(&extractor);
         if ( parent ){
             parent->value = extractor.parent();
             parent->parent = this;
         }
+
+        vodata = QmlTypeInfoPrivate::fromMetaObject(fmo, path());
+
+        if ( vob->typeName() )
+            vodata.setExportType(QmlTypeReference(QmlTypeReference::Qml, vob->typeName()->name.toString()));
     }
 
     return vodata;
- }
+}
+
+QmlTypeInfo DocumentQmlInfo::extractValueObjectWithExport(
+        const DocumentQmlInfo::ValueReference &valueref,
+        const QString &componentName,
+        const QString &libraryPath,
+        int vMajor,
+        int vMinor) const
+{
+
+    lv::QmlTypeInfo vodata;
+    if ( isValueNull(valueref) || valueref.parent != this )
+        return vodata;
+
+    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
+
+        LanguageUtils::FakeMetaObject::Ptr fmo(new LanguageUtils::FakeMetaObject);
+
+        ValueMemberExtractor extractor(fmo);
+        vob->processMembers(&extractor);
+
+        fmo->addExport(componentName, libraryPath, LanguageUtils::ComponentVersion(vMajor, vMinor));
+
+        vodata = QmlTypeInfoPrivate::fromMetaObject(fmo, path());
+
+        if ( vob->typeName() )
+            vodata.setExportType(QmlTypeReference(QmlTypeReference::Qml, vob->typeName()->name.toString()));
+    }
+
+    return vodata;
+}
 
 /**
  * \brief Extract the name of the type given by this value reference.
@@ -405,7 +449,7 @@ QString DocumentQmlInfo::extractTypeName(const DocumentQmlInfo::ValueReference &
  *
  * \p begin and \p end will be populated with the given range, or -1 if the range cannot be extracted
  */
-void DocumentQmlInfo::extractTypeNameRange(const DocumentQmlInfo::ValueReference &valueref, int &begin, int &end){
+void DocumentQmlInfo::extractTypeNameRange(const DocumentQmlInfo::ValueReference &valueref, int &begin, int &end) const{
     if ( isValueNull(valueref) || valueref.parent != this ){
         begin = -1;
         end = -1;
@@ -563,55 +607,6 @@ const QList<lv::DocumentQmlInfo::Message> &DocumentQmlInfo::diagnostics() const{
 QmlJS::Bind *DocumentQmlInfo::internalBind(){
     Q_D(DocumentQmlInfo);
     return d->internalDocBind;
-}
-
-/**
- * \brief Check wether a given type is an object or not
- * \returns true if \p typeString is an object, false otherwise
- */
-bool DocumentQmlInfo::isObject(const QString &typeString){
-    if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
-         typeString == "int" || typeString == "list" || typeString == "real" ||
-         typeString == "color" || typeString == "QColor" ||
-         typeString == "string" || typeString == "url" || typeString == "var" || typeString == "QUrl" )
-        return false;
-    return true;
-}
-
-QString DocumentQmlInfo::toQmlPrimitive(const QString &cppPrimitive){
-    if ( cppPrimitive == "QColor" )
-        return "color";
-    else if ( cppPrimitive == "QUrl" )
-        return "url";
-    else if ( cppPrimitive == "QString")
-        return "string";
-    return cppPrimitive;
-}
-
-/**
- * \brief Returns the default value to be assigned for a given qml type
- */
-QString DocumentQmlInfo::typeDefaultValue(const QString &typeString){
-    if ( typeString == "bool" )
-        return "false";
-    else if ( typeString == "double" || typeString == "int" || typeString == "enumeration" || typeString == "real" )
-        return "0";
-    else if ( typeString == "list" )
-        return "[]";
-    else if ( typeString == "string" || typeString == "url " || typeString == "QUrl" || typeString == "QString" )
-        return "\"\"";
-    else if ( typeString == "color" || typeString == "QColor" )
-        return "\"transparent\"";
-    else if ( typeString == "point" || typeString == "QPoint" )
-        return "\"0x0\"";
-    else if ( typeString == "size" || typeString == "QSize" )
-        return "\"0x0\"";
-    else if ( typeString == "rect" || typeString == "QRect" )
-        return "\50,50,100x100\"";
-    else if ( typeString == "var" )
-        return "undefined";
-    else
-        return "null";
 }
 
 /**

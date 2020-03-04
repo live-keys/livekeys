@@ -21,7 +21,7 @@
 
 #include "live/lveditqmljsglobal.h"
 #include "live/projectdocument.h"
-#include "live/qmllanguagetype.h"
+#include "live/qmllanguageinfo.h"
 
 namespace lv{
 
@@ -48,13 +48,13 @@ public:
         ProjectDocument* document = nullptr);
     static QmlDeclaration::Ptr create(
         const QStringList &identifierChain,
-        const QmlLanguageType& type,
-        const QmlLanguageType& parentType,
+        const QmlTypeReference& type,
+        const QmlTypeReference& parentType,
         ProjectDocument* document = nullptr
     );
     static QmlDeclaration::Ptr create(const QStringList &identifierChain,
-        const QmlLanguageType &type,
-        const QmlLanguageType &parentType,
+        const QmlTypeReference &type,
+        const QmlTypeReference &parentType,
         int identifierPosition,
         int identifierLength,
         ProjectDocument* document = nullptr
@@ -69,8 +69,8 @@ public:
     int valuePosition() const;
 
     const QStringList& identifierChain() const;
-    const QmlLanguageType &type() const;
-    const QmlLanguageType& parentType() const;
+    const QmlTypeReference &type() const;
+    const QmlTypeReference& parentType() const;
 
     ProjectDocument* document();
 
@@ -89,6 +89,7 @@ public:
 
     bool isForObject() const;
     bool isForProperty() const;
+    bool isForSlot() const;
 
 private:
     QmlDeclaration(
@@ -96,14 +97,14 @@ private:
         ProjectDocument* document = nullptr);
     QmlDeclaration(
         const QStringList &identifierChain,
-        const QmlLanguageType& type,
-        const QmlLanguageType& parentType,
+        const QmlTypeReference& type,
+        const QmlTypeReference& parentType,
         ProjectDocument* document = nullptr
     );
     QmlDeclaration(
         const QStringList &identifierChain,
-        const QmlLanguageType &type,
-        const QmlLanguageType &parentType,
+        const QmlTypeReference &type,
+        const QmlTypeReference &parentType,
         int identifierPosition,
         int identifierLength,
         ProjectDocument* document = nullptr
@@ -116,8 +117,8 @@ private:
 
     int             m_identifierLength;
     QStringList     m_identifierChain;
-    QmlLanguageType m_type;
-    QmlLanguageType m_parentType;
+    QmlTypeReference m_type;
+    QmlTypeReference m_parentType;
 
     int             m_valueOffset;
 
@@ -152,12 +153,12 @@ inline const QStringList &QmlDeclaration::identifierChain() const{
 }
 
 /// \brief Returns the type of this declaration
-inline const QmlLanguageType &QmlDeclaration::type() const{
+inline const QmlTypeReference &QmlDeclaration::type() const{
     return m_type;
 }
 
 /// \brief Returns the object type for this declaration
-inline const QmlLanguageType &QmlDeclaration::parentType() const{
+inline const QmlTypeReference &QmlDeclaration::parentType() const{
     return m_parentType;
 }
 
