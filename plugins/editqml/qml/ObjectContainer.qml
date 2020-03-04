@@ -29,7 +29,7 @@ Item{
             childObjectContainer.editor = objectContainer.editor
             childObjectContainer.editingFragment = ef
             childObjectContainer.title = ef.type()
-            childObjectContainer.x = 50
+            childObjectContainer.x = 40
 
             var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
             paletteBoxGroup.editingFragment = ef
@@ -66,11 +66,12 @@ Item{
         }
     }
 
-    width: container.width < 200 ? 200 : container.width + 50
-    height: container.height < 10 || compact ? 30 : container.height + 20
+    width: container.width < 160 ? 200 : container.width + 40
+    height: container.height < 10 || compact ? 30 : container.height + titleHeight + 10 // top margin
 
     Rectangle{
         id: objectContainerTitle
+        y: 10
         height: titleHeight
         width: parent.width + 10
         color: '#062945'
@@ -103,18 +104,18 @@ Item{
         Text{
             anchors.left: parent.left
             anchors.leftMargin: 40
-            anchors.right: parent.right
-            anchors.rightMargin: 30
+            width: parent.width - 140 + (closeObjectItem.visible ? 0 : 18)
             anchors.verticalCenter: parent.verticalCenter
             text: objectContainer.title
             clip: true
+            elide: Text.ElideRight
             color: '#82909b'
         }
 
         Item{
             id: eraseButton
             anchors.right: parent.right
-            anchors.rightMargin: 80 - (closeObjectItem.visible ? 0 : 15)
+            anchors.rightMargin: 80 - (closeObjectItem.visible ? 0 : 18)
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 80
@@ -134,7 +135,7 @@ Item{
         Item{
             id: connectionsButton
             anchors.right: parent.right
-            anchors.rightMargin: 60 - (closeObjectItem.visible ? 0 : 15)
+            anchors.rightMargin: 60 - (closeObjectItem.visible ? 0 : 18)
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
@@ -153,7 +154,7 @@ Item{
         Item{
             id: paletteAddButton
             anchors.right: parent.right
-            anchors.rightMargin: 40 - (closeObjectItem.visible ? 0 : 15)
+            anchors.rightMargin: 40 - (closeObjectItem.visible ? 0 : 18)
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
@@ -209,7 +210,7 @@ Item{
         Item{
             id: composeButton
             anchors.right: parent.right
-            anchors.rightMargin: 20  - (closeObjectItem.visible ? 0 : 15)
+            anchors.rightMargin: 22  - (closeObjectItem.visible ? 0 : 18)
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
@@ -269,6 +270,7 @@ Item{
                             if ( ef ){
 
                                 var propertyContainer = propertyContainerFactory.createObject(container)
+                                container.sortChildren()
 
                                 propertyContainer.title = data
                                 propertyContainer.documentHandler = objectContainer.editor.documentHandler
@@ -303,13 +305,14 @@ Item{
                                     propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
                                     propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
                                 }
+                                if (compact) expand()
                             }
                             else {
                                 lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
                                 console.error("Error: Can't create a palette in a non-compiled program")
                                 return
                             }
-                        } else {
+                        } else if ( addBoxItem.activeIndex === 1 ){
                             var opos = codeHandler.addItem(addContainer.itemModel.addPosition, addContainer.objectType, data)
                             codeHandler.addItemToRuntime(objectContainer.editingFragment, data, project.appRoot())
 
@@ -319,11 +322,11 @@ Item{
 
                             if ( ef ){
                                 var childObjectContainer = objectContainerFactory.createObject(container)
-
+                                container.sortChildren()
                                 childObjectContainer.editor = objectContainer.editor
                                 childObjectContainer.editingFragment = ef
                                 childObjectContainer.title = data
-                                childObjectContainer.x = 50
+                                childObjectContainer.x = 40
 
                                 var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
                                 paletteBoxGroup.editingFragment = ef
@@ -332,7 +335,55 @@ Item{
 
                                 childObjectContainer.paletteGroup = paletteBoxGroup
                                 paletteBoxGroup.x = 5
+                                if (compact) expand()
                             }
+                        } else if ( addBoxItem.activeIndex === 2 ){
+                            var ppos = codeHandler.addEvent(
+                                addContainer.eventModel.addPosition, addContainer.objectType, type, data
+                            )
+
+                            var ef = codeHandler.openNestedConnection(
+                                objectContainer.editingFragment, ppos, project.appRoot()
+                            )
+                            if ( ef ){
+                                var propertyContainer = propertyContainerFactory.createObject(container)
+                                container.sortChildren()
+
+                                propertyContainer.title = data
+                                propertyContainer.documentHandler = objectContainer.editor.documentHandler
+                                propertyContainer.propertyContainerFactory = propertyContainerFactory
+
+                                propertyContainer.editor = objectContainer.editor
+                                propertyContainer.editingFragment = ef
+
+
+                                if ( codeHandler.isForAnObject(ef) ){
+
+                                    var childObjectContainer = objectContainerFactory.createObject(container)
+
+                                    childObjectContainer.editor = objectContainer.editor
+                                    childObjectContainer.editingFragment = ef
+                                    childObjectContainer.title = type
+
+                                    var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
+                                    paletteBoxGroup.editingFragment = ef
+                                    paletteBoxGroup.codeHandler = codeHandler
+                                    ef.visualParent = paletteBoxGroup
+
+                                    childObjectContainer.paletteGroup = paletteBoxGroup
+                                    paletteBoxGroup.x = 5
+
+                                    propertyContainer.valueContainer = childObjectContainer
+                                    propertyContainer.paletteAddButtonVisible = false
+
+                                } else {
+                                    propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
+                                    propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
+                                    propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
+                                }
+                            }
+                            if (compact) expand()
+                            // TODO: Add event palette too
                         }
                         addBox.destroy()
                     }
@@ -346,15 +397,15 @@ Item{
         Item{
             id: closeObjectItem
             anchors.right: parent.right
-            anchors.rightMargin: 0
-            anchors.verticalCenter: parent.verticalCenter
-            width: 15
+            anchors.rightMargin: -4
+            anchors.top: parent.top
+            width: 20
             height: 20
             visible: !(objectContainer.editingFragment && objectContainer.editingFragment.parentFragment())
             Text{
-                anchors.verticalCenter: parent.verticalCenter
                 text: 'x'
                 color: '#ffffff'
+                font.pixelSize: 20
             }
             MouseArea{
                 id: paletteCloseArea
@@ -371,7 +422,7 @@ Item{
         id: paletteHeaderList
         visible: model ? true : false
         anchors.top: parent.top
-        anchors.topMargin: titleHeight
+        anchors.topMargin: titleHeight + 10
         width: 250
         color: "#0a141c"
         selectionColor: "#0d2639"
@@ -391,9 +442,9 @@ Item{
         id: container
 
         anchors.top: parent.top
-        anchors.topMargin: titleHeight
+        anchors.topMargin: titleHeight + 10
         visible: !compact
-        spacing: 20
+        spacing: 0
         width: {
             var maxWidth = 0;
             if ( children.length > 0 ){
@@ -417,8 +468,31 @@ Item{
             else
                 return totalHeight
         }
+
+        function sortChildren(){
+
+            if (!objectContainer.parent) return
+            if (children.length === 0) return
+
+            var childrenCopy = []
+            childrenCopy.push(children[0])
+            for (var i=1; i<children.length; ++i)
+            {
+                if (!children[i]) continue
+                if (children[i].objectName === "propertyContainer")
+                    childrenCopy.push(children[i])
+            }
+
+            for (var i=1; i<children.length; ++i)
+            {
+                if (!children[i]) continue
+                if (children[i].objectName === "objectContainer")
+                    childrenCopy.push(children[i])
+            }
+
+            children = childrenCopy
+        }
     }
 
 
 }
-

@@ -8,6 +8,8 @@ namespace lv {
 class QmlEventModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(int addPosition READ addPosition CONSTANT)
+
 public:
 
     /// \private

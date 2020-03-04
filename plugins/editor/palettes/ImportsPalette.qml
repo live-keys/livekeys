@@ -21,9 +21,6 @@ CodePalette{
 
         property alias model: itemList.model
         property bool addImportVisible: false
-        onAddImportVisibleChanged: {
-            console.log("aiv changed to: " + addImportVisible)
-        }
 
         ListView{
             id : itemList

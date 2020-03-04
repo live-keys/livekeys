@@ -19,6 +19,7 @@
 
 #include <string>
 #include "live/lvbaseglobal.h"
+#include <vector>
 
 class QString;
 
