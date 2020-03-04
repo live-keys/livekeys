@@ -78,7 +78,6 @@ public:
     QObject* visualParent() const;
     void setVisualParent(QObject* visualParent);
 
-    QmlEditFragment* parentFragment();
     QmlEditFragment* rootFragment();
 
     void emitRemoval();
@@ -88,7 +87,12 @@ public slots:
     int valuePosition() const;
     int valueLength() const;
 
+    bool isForObject() const;
+    bool isForProperty() const;
+    bool isForSlot() const;
+
     int totalPalettes() const;
+    lv::QmlEditFragment* parentFragment();
     lv::CodePalette* bindingPalette();
     lv::QmlBindingSpanModel *bindingModel(lv::CodeQmlHandler* codeHandler);
 

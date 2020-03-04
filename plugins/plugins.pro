@@ -7,6 +7,7 @@ TEMPLATE = subdirs
 # Optional build modules
 
 SUBDIRS += \
+    base \
     live \
     editor \
     editqml \
@@ -47,6 +48,9 @@ lcvvideo.depends      = lcvcore live
     SUBDIRS += editjson
     editjson.depends = live
     editjson.subdir = $$PWD/editjson
+
+    SUBDIRS += language
+    language.subdir = $$PWD/language
 
     SUBDIRS += test
     test.subdir = $$PWD/test

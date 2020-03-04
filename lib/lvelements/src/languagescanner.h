@@ -26,12 +26,16 @@ public:
     ModuleInfo::Ptr parseModule(const std::string& importUri);
     void onModuleReady(const std::function<void(ModuleInfo::ConstPtr)> callback);
 
+    void queueModule(const std::string& importUri);
     void queueModule(const ModuleInfo::Ptr& module);
 
     void consumeQueue(size_t max);
 
     bool hasModule(const std::string &importUri);
     std::list<ModuleInfo::Ptr>::iterator locateModuleInQueue(const std::string& importUri);
+
+    void setPackageImportPaths(const std::vector<std::string>& paths);
+    const std::vector<std::string>& packageImportPaths() const;
 
 private:
     LanguageScanner(LanguageParser::Ptr parser, LockedFileIOSession::Ptr io);

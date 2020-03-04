@@ -15,7 +15,7 @@ QmlFollowUp::QmlFollowUp(QObject *parent)
 
 void QmlFollowUp::_whenPrevChanged(){
     m_prev = m_prevAct->result();
-    __triggerRun();
+    exec();
 }
 
 void QmlFollowUp::componentComplete(){
@@ -44,7 +44,7 @@ void QmlFollowUp::componentComplete(){
     QmlAct::componentComplete();
 
     if ( !m_prevAct->result().isUndefined() ){
-        __triggerRun();
+        exec();
     }
 }
 

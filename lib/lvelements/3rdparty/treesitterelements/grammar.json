@@ -2494,10 +2494,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "import"
-        },
-        {
-          "type": "SYMBOL",
           "name": "object"
         },
         {

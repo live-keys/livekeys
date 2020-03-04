@@ -1,6 +1,7 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/bindingpath.h \
     $$PWD/cursorcontext.h \
     $$PWD/function.h \
     $$PWD/engine.h \
@@ -43,6 +44,7 @@ HEADERS += \
     $$PWD/elementssections_p.h
 
 SOURCES += \
+    $$PWD/bindingpath.cpp \
     $$PWD/cursorcontext.cpp \
     $$PWD/function.cpp \
     $$PWD/engine.cpp \

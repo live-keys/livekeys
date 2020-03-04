@@ -52,9 +52,11 @@ QMAKE_EXTRA_TARGETS += first palettecopy
 
 DISTFILES += \
     palettes/ConnectionPalette.qml \
+    palettes/ImportsPalette.qml \
     palettes/IntHistoryPlotPalette.qml \
     palettes/DoubleHistoryPlotPalette.qml \
     palettes/PathPalette.qml \
+    palettes/TriggerPalette.qml \
     qml/DocumentationView.qml \
     qml/EditorPane.qml \
     qml/PaletteConnection.qml \

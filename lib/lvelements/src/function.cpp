@@ -124,6 +124,8 @@ Engine *Function::CallInfo::engine() const{
 
 void *Function::CallInfo::internalField() const{
     v8::Local<v8::Object> self = m_info->This();
+    if ( self->InternalFieldCount() != 1 )
+        return nullptr;
     v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
     return wrap->Value();
 }

@@ -129,8 +129,12 @@ Item{
             if ( !editingFragment )
                 return
 
-            paletteConnection.forceActiveFocus()
-            paletteConnection.model = editingFragment.bindingModel(documentHandler.codeHandler)
+            if ( paletteConnection.model ){
+                paletteConnection.model = null
+            } else {
+                paletteConnection.forceActiveFocus()
+                paletteConnection.model = editingFragment.bindingModel(documentHandler.codeHandler)
+            }
         }
 
         Item{
@@ -193,10 +197,9 @@ Item{
             height: 20
             visible: !compact
 
-            Text{
-                anchors.verticalCenter: parent.verticalCenter
-                text: 'P'
-                color: '#ffffff'
+            Image{
+                anchors.centerIn: parent
+                source: "qrc:/images/palette-connections.png"
             }
             MouseArea{
                 id: paletteConnectionMouse

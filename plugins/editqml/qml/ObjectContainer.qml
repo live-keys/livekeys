@@ -114,7 +114,7 @@ Item{
         Item{
             id: eraseButton
             anchors.right: parent.right
-            anchors.rightMargin: 80
+            anchors.rightMargin: 80 - (closeObjectItem.visible ? 0 : 15)
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 80
@@ -134,7 +134,7 @@ Item{
         Item{
             id: connectionsButton
             anchors.right: parent.right
-            anchors.rightMargin: 60
+            anchors.rightMargin: 60 - (closeObjectItem.visible ? 0 : 15)
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
@@ -153,7 +153,7 @@ Item{
         Item{
             id: paletteAddButton
             anchors.right: parent.right
-            anchors.rightMargin: 40
+            anchors.rightMargin: 40 - (closeObjectItem.visible ? 0 : 15)
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
@@ -209,7 +209,7 @@ Item{
         Item{
             id: composeButton
             anchors.right: parent.right
-            anchors.rightMargin: 20
+            anchors.rightMargin: 20  - (closeObjectItem.visible ? 0 : 15)
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
@@ -232,6 +232,7 @@ Item{
 
                     var addBoxItem = objectContainer.addBoxFactory.createObject()
                     addBoxItem.addContainer = addContainer
+                    addBoxItem.codeQmlHandler = codeHandler
 
                     var oct = objectContainer.parent
 
@@ -343,11 +344,13 @@ Item{
         }
 
         Item{
+            id: closeObjectItem
             anchors.right: parent.right
             anchors.rightMargin: 0
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
+            visible: !(objectContainer.editingFragment && objectContainer.editingFragment.parentFragment())
             Text{
                 anchors.verticalCenter: parent.verticalCenter
                 text: 'x'

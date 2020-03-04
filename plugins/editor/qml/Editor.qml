@@ -301,10 +301,8 @@ Rectangle{
 
                 property int lastLength: 0
 
-                onCursorRectangleChanged: {
-                    flick.ensureVisible(cursorRectangle)
-                }
                 onCursorPositionChanged: {
+                    flick.ensureVisible(cursorRectangle)
                     /// disable the model if no text has changed, let the code handler decide otherwise
                     if ( length === lastLength )
                         codeHandler.completionModel.disable()

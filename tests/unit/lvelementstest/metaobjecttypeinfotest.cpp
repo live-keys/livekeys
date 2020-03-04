@@ -48,3 +48,29 @@ void MetaObjectTypeInfoTest::containerTest(){
     QVERIFY(ti->propertyAt(0).name() == "children");
     QVERIFY(ti->propertyAt(0).typeName() == "cpp/lv::el::LocalValue");
 }
+
+void MetaObjectTypeInfoTest::typeReferenceTest(){
+    QVERIFY(TypeReference::languageString(TypeReference::languageId("qml")) == "qml");
+    QVERIFY(TypeReference::languageString(TypeReference::languageId("cpp")) == "cpp");
+
+    TypeReference trtest;
+    QVERIFY(trtest.languageString() == "u");
+
+    TypeReference trtest2 = TypeReference::split("qml/lvbase#Act");
+    QVERIFY(trtest2.languageString() == "qml");
+    QVERIFY(trtest2.path() == "lvbase");
+    QVERIFY(trtest2.name() == "Act");
+    QVERIFY(trtest2.join() == "qml/lvbase#Act");
+
+    TypeReference trtest3 = TypeReference::split("Act");
+    QVERIFY(trtest3.languageString() == "u");
+    QVERIFY(trtest3.path() == "");
+    QVERIFY(trtest3.name() == "Act");
+    QVERIFY(trtest3.join() == "u/#Act");
+
+    TypeReference trtest4 = TypeReference::split("u/#Act");
+    QVERIFY(trtest4.languageString() == "u");
+    QVERIFY(trtest4.path() == "");
+    QVERIFY(trtest4.name() == "Act");
+    QVERIFY(trtest4.join() == "u/#Act");
+}

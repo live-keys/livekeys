@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef TYPEINFO_H
-#define TYPEINFO_H
+#ifndef METAINFO_H
+#define METAINFO_H
 
 #include <QByteArray>
 #include <QSharedPointer>
@@ -29,13 +29,13 @@ namespace lv{
 class ViewEngine;
 
 /// \private
-class LV_VIEW_EXPORT TypeInfo{
+class LV_VIEW_EXPORT MetaInfo{
 
 public:
-    typedef QSharedPointer<TypeInfo> Ptr;
+    typedef QSharedPointer<MetaInfo> Ptr;
 
 public:
-    ~TypeInfo();
+    ~MetaInfo();
 
     static Ptr create(const QByteArray& name);
 
@@ -64,11 +64,11 @@ public:
     static QVariant deserializeVariant(lv::ViewEngine* engine, const lv::MLNode& node);
 
 private:
-    TypeInfo(const QByteArray& name);
+    MetaInfo(const QByteArray& name);
 
     // disable copy
-    TypeInfo(const TypeInfo&);
-    TypeInfo& operator = (const TypeInfo&);
+    MetaInfo(const MetaInfo&);
+    MetaInfo& operator = (const MetaInfo&);
 
     QByteArray m_name;
     std::function<QObject*()> m_constructor;
@@ -78,7 +78,7 @@ private:
 };
 
 template<typename T>
-void TypeInfo::addLogging(){
+void MetaInfo::addLogging(){
     m_log = [](lv::VisualLog& vl, const QObject* obj){
         const T* objtype = qobject_cast<const T*>(obj);
         vl.object(*objtype);
@@ -86,7 +86,7 @@ void TypeInfo::addLogging(){
 }
 
 template<typename T>
-void TypeInfo::addSerialization(
+void MetaInfo::addSerialization(
     std::function<void(const T &, MLNode &)> serialize,
     std::function<void(const MLNode&, T&)> deserialize)
 {
@@ -103,7 +103,7 @@ void TypeInfo::addSerialization(
     }
 }
 
-inline void TypeInfo::addSerialization(
+inline void MetaInfo::addSerialization(
     std::function<void (ViewEngine *, const QObject *, MLNode &)> serialize,
     std::function<QObject *(ViewEngine *, const MLNode &)> deserialize)
 {
@@ -113,40 +113,40 @@ inline void TypeInfo::addSerialization(
     }
 }
 
-inline bool TypeInfo::isSerializable() const{
+inline bool MetaInfo::isSerializable() const{
     return m_serialize ? true : false;
 }
 
-inline bool TypeInfo::isLoggable() const{
+inline bool MetaInfo::isLoggable() const{
     return m_log ? true : false;
 }
 
-inline void TypeInfo::log(VisualLog &vl, const QObject *object){
+inline void MetaInfo::log(VisualLog &vl, const QObject *object){
     m_log(vl, object);
 }
 
-inline void TypeInfo::addConstructor(std::function<QObject *()> ctor){
+inline void MetaInfo::addConstructor(std::function<QObject *()> ctor){
     m_constructor = ctor;
 }
 
-inline QObject *TypeInfo::newInstance(){
+inline QObject *MetaInfo::newInstance(){
     if ( m_constructor )
         return m_constructor();
-    return 0;
+    return nullptr;
 }
 
-inline const QByteArray &TypeInfo::name() const{
+inline const QByteArray &MetaInfo::name() const{
     return m_name;
 }
 
-inline void TypeInfo::serialize(ViewEngine *engine, const QObject *object, MLNode &node){
+inline void MetaInfo::serialize(ViewEngine *engine, const QObject *object, MLNode &node){
     m_serialize(engine, object, node);
 }
 
-inline QObject* TypeInfo::deserialize(ViewEngine* engine, const MLNode &node){
+inline QObject* MetaInfo::deserialize(ViewEngine* engine, const MLNode &node){
     return m_deserialize(engine, node);
 }
 
 }// namespace
 
-#endif // TYPEINFO_H
+#endif // METAINFO_H

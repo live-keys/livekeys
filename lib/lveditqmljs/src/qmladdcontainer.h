@@ -4,6 +4,7 @@
 #include "live/lveditqmljsglobal.h"
 #include "qmlpropertymodel.h"
 #include "qmlitemmodel.h"
+#include "qmleventmodel.h"
 
 #include <QObject>
 
@@ -16,6 +17,7 @@ class QmlAddContainer : public QObject{
     Q_OBJECT
     Q_PROPERTY(lv::QmlItemModel*     itemModel     READ itemModel     CONSTANT)
     Q_PROPERTY(lv::QmlPropertyModel* propertyModel READ propertyModel CONSTANT)
+    Q_PROPERTY(lv::QmlEventModel*    eventModel    READ eventModel CONSTANT)
     Q_PROPERTY(QString               objectType    READ objectType    CONSTANT)
 
 public:
@@ -24,6 +26,8 @@ public:
 
     lv::QmlItemModel* itemModel() const;
     lv::QmlPropertyModel* propertyModel() const;
+    lv::QmlEventModel* eventModel() const;
+
     QString objectType() const;
 
 private:
@@ -32,6 +36,7 @@ private:
     QStringList           m_objectTypePath;
     lv::QmlItemModel*     m_itemModel;
     lv::QmlPropertyModel* m_propertyModel;
+    lv::QmlEventModel*    m_eventModel;
 };
 
 inline QmlItemModel* QmlAddContainer::itemModel() const{
@@ -41,6 +46,11 @@ inline QmlItemModel* QmlAddContainer::itemModel() const{
 inline QmlPropertyModel* QmlAddContainer::propertyModel() const{
     return m_propertyModel;
 }
+
+inline QmlEventModel* QmlAddContainer::eventModel() const{
+    return m_eventModel;
+}
+
 
 inline QString QmlAddContainer::objectType() const{
     return m_objectTypePath.join(".");

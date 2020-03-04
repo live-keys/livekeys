@@ -231,6 +231,8 @@ void LvParseTest::testComplexPropertyAssignment()
 
     parser->destroy(conversionAST);
     parser->destroy(expectedAST);
+
+    QVERIFY(compare.isEqual());
 }
 
 void LvParseTest::testSimplePropertyAssignment()
@@ -249,6 +251,8 @@ void LvParseTest::testSimplePropertyAssignment()
 
     parser->destroy(conversionAST);
     parser->destroy(expectedAST);
+
+    QVERIFY(compare.isEqual());
 }
 
 void LvParseTest::testScenarioTest(){
@@ -270,5 +274,24 @@ void LvParseTest::testScenarioTest(){
 //    parser->destroy(conversionAST);
 //    parser->destroy(expectedAST);
 
-//    QVERIFY(compare.isEqual());
+    //    QVERIFY(compare.isEqual());
+}
+
+void LvParseTest::nestedLanguageScannerTest(){
+    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/ParserTest14.lv");
+    std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/ParserTest14.lv.js");
+
+    el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
+
+    std::string conversion = parser->toJs(contents, "ParserTest14");
+
+    el::LanguageParser::AST* conversionAST = parser->parse(conversion);
+    el::LanguageParser::AST* expectedAST   = parser->parse(expect);
+
+    el::LanguageParser::ComparisonResult compare = parser->compare(expect, expectedAST, conversion, conversionAST);
+
+    parser->destroy(conversionAST);
+    parser->destroy(expectedAST);
+
+    QVERIFY(compare.isEqual());
 }

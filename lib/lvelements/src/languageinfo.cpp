@@ -58,6 +58,99 @@ void EnumInfo::fromMLNode(const MLNode &node)
 
 }
 
+// Typename
+// ------------------------------------------------------------
+
+TypeReference::TypeReference(uint32_t language, const Utf8 &name, const Utf8 &path)
+    : m_language(language)
+    , m_name(name)
+    , m_path(path)
+{
+}
+
+TypeReference TypeReference::split(const Utf8 &typeId){
+    size_t languageSplit = typeId.find('/');
+    size_t nameSplit     = typeId.findLast('#');
+
+    if ( languageSplit == std::string::npos ){
+        if ( nameSplit == std::string::npos ){
+            return TypeReference('u', typeId);
+        } else {
+            return TypeReference('u', typeId.substr(0, nameSplit), typeId.data().substr(nameSplit + 1));
+        }
+    } else {
+        uint32_t language = TypeReference::languageId(typeId.substr(0, languageSplit));
+        if ( nameSplit == std::string::npos ){
+            return TypeReference(language, typeId.data().substr(languageSplit + 1));
+        } else {
+            return TypeReference(language, typeId.data().substr(nameSplit + 1), typeId.substr(languageSplit + 1, nameSplit - languageSplit - 1));
+        }
+    }
+}
+
+Utf8 TypeReference::join() const{
+    return languageString() + "/" + m_path + "#" + m_name;
+}
+
+bool TypeReference::isEmpty() const{
+    return m_name.length() == 0;
+}
+
+const Utf8 &TypeReference::name() const{
+    return m_name;
+}
+
+const Utf8 &TypeReference::path() const{
+    return m_path;
+}
+
+uint32_t TypeReference::language() const{
+    return m_language;
+}
+
+Utf8 TypeReference::languageString() const{
+    return languageString(m_language);
+}
+
+Utf8 TypeReference::languageString(uint32_t languageId){
+    std::string s;
+
+    char c;
+    c = static_cast<char>((languageId >> 24) & 0xFF);
+    if ( c )
+        s.push_back(c);
+    c = static_cast<char>((languageId >> 16) & 0xFF);
+    if ( c )
+        s.push_back(c);
+    c = static_cast<char>((languageId >> 8) & 0xFF);
+    if ( c )
+        s.push_back(c);
+    c = static_cast<char>(languageId & 0xFF);
+    if ( c )
+        s.push_back(c);
+    return s;
+}
+
+uint32_t TypeReference::languageId(const Utf8 &languageString){
+    if ( languageString.length() == 4 ){
+        return languageId(languageString[0], languageString[1], languageString[2], languageString[3]);
+    } else if ( languageString.length() == 3 ){
+        return languageId(languageString[0], languageString[1], languageString[2], 0);
+    } else if ( languageString.length() == 2 ){
+        return languageId(languageString[0], languageString[1], 0, 0);
+    } else if ( languageString.length() == 1 ){
+        return languageId(languageString[0], 0, 0, 0);
+    }
+    return 0;
+}
+
+uint32_t TypeReference::languageId(char l0, char l1, char l2, char l3){
+    return
+        static_cast<uint32_t>(l0 << 24) | static_cast<uint32_t>(l1 << 16) |
+        static_cast<uint32_t>(l2 << 8)  | static_cast<uint32_t>(l3);
+
+}
+
 // FunctionInfo
 // ------------------------------------------------------------
 
@@ -625,18 +718,11 @@ MLNode ModuleInfo::toMLNode() const
     MLNode result(MLNode::Object);
 
     result["import_uri"] = m_importUri.data();
-    result["path"] = m_path.data();
-    result["status"] = m_scanStatus;
 
     MLNode deps(MLNode::Array);
     for (int i = 0; i<m_dependencies.size();++i)
         deps.append(m_dependencies[i].data());
     result["dependencies"] = deps;
-
-    MLNode dox(MLNode::Array);
-    for (int i=0;i<m_unresolvedDocuments.size();++i)
-        dox.append(m_unresolvedDocuments[i]->toMLNode());
-    result["unresolved"] = dox;
 
     MLNode types(MLNode::Array);
     for (int i =0; i<m_types.size();++i)
@@ -650,21 +736,11 @@ void ModuleInfo::fromMLNode(const MLNode &node)
 {
     auto object = node.asObject();
     m_importUri = object.at("import_uri").asString();
-    m_path = object.at("path").asString();
-    m_scanStatus = static_cast<ModuleInfo::ScanStatus>(object.at("status").asInt());
 
     auto deps = object.at("dependencies").asArray();
     for (int i =0; i<deps.size();++i)
     {
         m_dependencies.push_back(deps.at(i).asString());
-    }
-
-    auto unr = object.at("unresolved").asArray();
-    for (int i =0; i < unr.size();++i)
-    {
-        DocumentInfo::Ptr di = DocumentInfo::create();
-        di->fromMLNode(unr.at(i));
-        m_unresolvedDocuments.push_back(di);
     }
 
     auto types = object.at("types").asArray();

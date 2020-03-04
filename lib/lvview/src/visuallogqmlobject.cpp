@@ -19,7 +19,7 @@
 #include "mlnodetoqml.h"
 #include "live/viewcontext.h"
 #include "visuallogqt.h"
-#include "typeinfo.h"
+#include "metainfo.h"
 #include "viewengine.h"
 
 #include <QJSValueIterator>
@@ -77,7 +77,7 @@ void logValue(VisualLog& vl, const QJSValue& message){
 void logDetail(VisualLog& vl, const QJSValue& message){
     if ( message.isQObject() ){
         QObject* messageObject = message.toQObject();
-        TypeInfo::Ptr ti = ViewContext::instance().engine()->typeInfo(messageObject->metaObject());
+        MetaInfo::Ptr ti = ViewContext::instance().engine()->typeInfo(messageObject->metaObject());
         if ( !ti.isNull() && ti->isLoggable() ){
             ti->log(vl, messageObject);
         } else {

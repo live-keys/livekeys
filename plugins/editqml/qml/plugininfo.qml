@@ -1,8 +1,8 @@
 import QtQuick 2.3
 import editqml 1.0
-import base 1.0
+import base 1.0 as B
 
-Container{
+B.Container{
 
     PluginInfoExtractor{
         id: pie
@@ -22,11 +22,11 @@ Container{
         }
     }
 
-    Opening{
-        onRun: {
-            if ( script.argvTail.length === 1 ){
+    B.Opening{
+        run: function(){
+            if ( B.Script.argvTail.length === 1 ){
                 timer.start()
-                pie.importUri = script.argvTail[0]
+                pie.importUri = B.Script.argvTail[0]
             } else {
                 vlog.e("Script requires one argument: plugininfo <name>");
                 Qt.quit(1)

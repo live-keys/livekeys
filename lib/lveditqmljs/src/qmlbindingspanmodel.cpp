@@ -49,12 +49,14 @@ QVariant QmlBindingSpanModel::data(const QModelIndex &index, int role) const{
     return QVariant();
 }
 
-void QmlBindingSpanModel::makePathInput(int){
-    //TODO
-//    if ( m_inputIndex != index && index < m_entries.size() ){
-//        m_inputIndex = index;
-//        emit inputPathIndexChanged(index);
-//    }
+void QmlBindingSpanModel::makePathInput(int index){
+    QmlBindingSpan* bspan = m_edit->bindingSpan();
+    int currentIndex = inputPathIndex();
+    if ( currentIndex != index && index < bspan->outputChannels().size() ){
+        bspan->setInputChannel(bspan->outputChannels()[index]);
+        //TODO: Propagate to all child edits
+        emit inputPathIndexChanged(index);
+    }
 }
 
 void QmlBindingSpanModel::setPathConnection(int index, bool connection){
@@ -66,6 +68,8 @@ void QmlBindingSpanModel::setPathConnection(int index, bool connection){
     QmlBindingChannel::Ptr c = bspan->outputChannels().at(index);
     if ( c->isEnabled() != connection ){
         c->setEnabled(connection);
+
+        emit dataChanged(createIndex(index, 0), createIndex(index, 0));
         //TODO: Propagate to all child edits
         emit pathConnectionChanged(index, connection);
     }
@@ -110,7 +114,15 @@ QStringList QmlBindingSpanModel::createPath(const QmlBindingPath::Ptr &bp) const
 }
 
 int QmlBindingSpanModel::inputPathIndex() const{
-    //TODO
+    QmlBindingSpan* b = m_edit->bindingSpan();
+    if ( !b->inputChannel() )
+        return -1;
+
+    for ( int i = 0; i < b->outputChannels().size(); ++i ){
+        if ( b->outputChannels()[i] == b->inputChannel() ){
+            return i;
+        }
+    }
     return -1;
 }
 
@@ -128,10 +140,7 @@ void QmlBindingSpanModel::initializeScanner(CodeQmlHandler* qmlHandler){
     componentName = componentName.mid(0, componentName.indexOf('.'));
 
     m_scanner->setSearchComponent(componentPath, componentName);
-
-    //TODO: m_scanner->start()
-
-    m_scanner->run();
+    m_scanner->start();
 }
 
 }// namespace

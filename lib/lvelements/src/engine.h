@@ -8,6 +8,7 @@
 #include "live/elements/elementsplugin.h"
 #include "live/elements/languageparser.h"
 #include "live/packagegraph.h"
+#include "live/lockedfileiosession.h"
 
 namespace lv{
 
@@ -64,6 +65,20 @@ public:
 
         Engine*       m_engine;
         v8::TryCatch* m_tryCatch;
+    };
+
+    // File reading functionality
+    // --------------------------
+
+    class LV_ELEMENTS_EXPORT FileInterceptor{
+    public:
+        FileInterceptor(LockedFileIOSession::Ptr fileInput = nullptr);
+        virtual ~FileInterceptor();
+
+        virtual std::string readFile(const std::string& path);
+        const LockedFileIOSession::Ptr& fileInput() const;
+    private:
+        LockedFileIOSession::Ptr m_fileInput;
     };
 
 private:
@@ -128,6 +143,9 @@ public:
     void setModuleFileType(ModuleFileType type);
 
     const LanguageParser::Ptr& parser() const;
+
+    const FileInterceptor* fileInterceptor() const;
+    void setFileInterceptor(FileInterceptor* fileInterceptor);
 
 private:
     void importInternals();

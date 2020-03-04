@@ -19,6 +19,8 @@
 
 #include <QQmlExtensionPlugin>
 #include "live/lveditorglobal.h"
+#include "live/viewengine.h"
+#include "live/settings.h"
 
 /// \private
 class LV_EDITOR_EXPORT EditorPrivatePlugin : public QQmlExtensionPlugin{
@@ -32,6 +34,7 @@ public:
 
     void registerTypes(const char* uri) Q_DECL_OVERRIDE;
     void initializeEngine(QQmlEngine* engine, const char* uri) Q_DECL_OVERRIDE;
+    void initializeEngine(lv::ViewEngine* engine, lv::Settings* settings, const char* uri);
 };
 
 #endif // LVEDITOR_PRIVATE_PLUGIN_H

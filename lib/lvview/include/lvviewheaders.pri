@@ -3,6 +3,7 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/live/errorhandler.h \
     $$PWD/live/incubationcontroller.h \
+    $$PWD/live/metainfo.h \
     $$PWD/live/qmlact.h \
     $$PWD/live/qmlstreamfilter.h \
     $$PWD/live/settings.h \
@@ -11,7 +12,6 @@ HEADERS += \
     $$PWD/live/visuallogmodel.h \
     $$PWD/live/visuallognetworksender.h \
     $$PWD/live/visuallogqt.h \
-    $$PWD/live/typeinfo.h \
     $$PWD/live/mlnodetoqml.h \
     $$PWD/live/viewcontext.h \
     $$PWD/live/lvviewglobal.h \

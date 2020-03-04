@@ -18,6 +18,8 @@ private slots:
 
     void elementTest();
     void containerTest();
+
+    void typeReferenceTest();
 };
 
 #endif // METAOBJECTTYPEINFOTEST_H

@@ -57,8 +57,8 @@ QmlDeclaration::QmlDeclaration(const QStringList &identifierChain, ProjectDocume
 /// Receives \p identifierChain, \p identifierType, \p parentType and a \p document
 QmlDeclaration::QmlDeclaration(
         const QStringList &identifierChain,
-        const QString &identifierType,
-        const QStringList &parentType,
+        const QmlTypeReference &identifierType,
+        const QmlTypeReference &parentType,
         ProjectDocument *document)
     : m_section(ProjectDocumentSection::create(QmlDeclaration::Section))
     , m_identifierLength(0)
@@ -76,8 +76,8 @@ QmlDeclaration::QmlDeclaration(
 /// a \p identifierPosition, a \p identifierLength and a \p document
 QmlDeclaration::QmlDeclaration(
         const QStringList &identifierChain,
-        const QString &identifierType,
-        const QStringList &parentType,
+        const QmlTypeReference &identifierType,
+        const QmlTypeReference &parentType,
         int identifierPosition,
         int identifierLength,
         ProjectDocument *document)
@@ -106,8 +106,8 @@ QmlDeclaration::Ptr QmlDeclaration::create(const QStringList &identifierChain, P
  */
 QmlDeclaration::Ptr QmlDeclaration::create(
         const QStringList &identifierChain,
-        const QString &type,
-        const QStringList &parentType,
+        const QmlTypeReference &type,
+        const QmlTypeReference &parentType,
         ProjectDocument *document)
 {
     return QmlDeclaration::Ptr(new QmlDeclaration(identifierChain, type, parentType, document));
@@ -121,8 +121,8 @@ QmlDeclaration::Ptr QmlDeclaration::create(
  */
 QmlDeclaration::Ptr QmlDeclaration::create(
         const QStringList &identifierChain,
-        const QString &type,
-        const QStringList &parentType,
+        const QmlTypeReference &type,
+        const QmlTypeReference &parentType,
         int identifierPosition,
         int identifierLength,
         ProjectDocument *document)
@@ -139,6 +139,21 @@ QmlDeclaration::Ptr QmlDeclaration::create(
 
 /// \brief QmlDeclaration destructor
 QmlDeclaration::~QmlDeclaration(){
+}
+
+/// \brief Returns true if this declaration is for an object
+bool QmlDeclaration::isForObject() const{
+    return m_valueOffset == 0;
+}
+
+/// \brief Returns true if this declaration is for a property
+bool QmlDeclaration::isForProperty() const{
+    return !isForObject();
+}
+
+/// \brief Returns true if this declaration is for a slot
+bool QmlDeclaration::isForSlot() const{
+    return m_type.language() == QmlTypeReference::Qml && m_type.name() == "slot";
 }
 
 }// namespace

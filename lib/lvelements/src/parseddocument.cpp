@@ -232,6 +232,16 @@ CursorContext ParsedDocument::findCursorContext(LanguageParser::AST *ast, int po
         {
             auto count = ts_node_child_count(curr);
             context = CursorContext::InImport | CursorContext::InElements;
+
+            auto parent = ts_node_parent(curr);
+
+            auto parent_count = ts_node_child_count(parent);
+
+            if (parent_count == 3)
+            {
+                context |=  CursorContext::InRelativeImport;
+            }
+
             for (int ip = 0; ip < count; ip+=2)
             {
                 auto start = ts_node_start_byte(ts_node_child(curr, ip));

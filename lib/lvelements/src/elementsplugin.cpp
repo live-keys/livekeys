@@ -57,7 +57,6 @@ ElementsPlugin::Ptr ElementsPlugin::create(Plugin::Ptr plugin, Engine *engine){
     }
 
     for ( auto it = plugin->libraryModules().begin(); it != plugin->libraryModules().end(); ++it ){
-        vlog() << "LOADING LIBRARY:" << *it;
         ModuleLibrary* lib = ModuleLibrary::load(epl->m_d->engine, *it);
         lib->loadExports(epl->m_d->libraryExports);
         epl->m_d->libraries.push_back(lib);

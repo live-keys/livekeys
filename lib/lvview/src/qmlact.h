@@ -44,7 +44,7 @@ public:
     void setResult(const QVariant& result);
 
 public slots:
-    void __triggerRun();
+    void exec();
 
 signals:
     void complete();

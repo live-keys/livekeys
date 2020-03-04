@@ -159,7 +159,7 @@ void WorkerThread::postNextInProcessQueue(){
 
         QmlAct* act = qobject_cast<QmlAct*>(caller);
         if ( act ){
-            act->__triggerRun();
+            act->exec();
         } else {
             QmlStreamFilter* sf = qobject_cast<QmlStreamFilter*>(caller);
             if( sf ){

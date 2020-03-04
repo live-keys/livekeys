@@ -27,6 +27,7 @@
 #include "live/settings.h"
 #include "live/palettelist.h"
 #include "live/codecompletionmodel.h"
+#include "live/qmlimportsmodel.h"
 
 #include <QObject>
 #include <QTimer>
@@ -41,7 +42,6 @@ class ProjectQmlScanner;
 class ProjectQmlExtension;
 class PluginInfoExtractor;
 
-class QmlCursorInfo;
 class QmlEditFragment;
 class QmlJsHighlighter;
 class QmlJsSettings;
@@ -57,6 +57,8 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
     Q_DISABLE_COPY(CodeQmlHandler)
 
     friend class ProjectQmlExtension;
+
+    Q_PROPERTY(int numberOfConnections READ numberOfConnections NOTIFY numberOfConnectionsChanged)
 
 public:
     explicit CodeQmlHandler(
@@ -91,10 +93,17 @@ public:
     QmlEditFragment* findEditFragment(CodePalette* palette);
     QmlEditFragment* findEditFragmentIn(QmlEditFragment *parent, CodePalette* palette);
 
-    void suggestionsForProposedExpression(QmlDeclaration::Ptr declaration, const QString& expression, CodeCompletionModel* model) const;
+    void suggestionsForProposedExpression(
+        QmlDeclaration::Ptr declaration,
+        const QString& expression,
+        CodeCompletionModel* model,
+        bool suggestFunctions = false) const;
     bool findBindingForExpression(QmlEditFragment* edit, const QString& expression);
+    bool findFunctionBindingForExpression(QmlEditFragment* edit, const QString& expression);
 
     QmlUsageGraphScanner* createScanner();
+
+    int numberOfConnections();
 
 public slots:
     QList<int> languageFeatures() const;
@@ -105,7 +114,8 @@ public slots:
 
     // Palette and binding management
 
-    lv::QmlCursorInfo* cursorInfo(int position, int length);
+    QJSValue cursorInfo(int position, int length);
+    bool isInImports(int position);
     lv::QmlEditFragment* openConnection(int position, QObject *currentApp = nullptr);
     lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
     QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
@@ -124,6 +134,14 @@ public slots:
     void frameEdit(QQuickItem *box, lv::QmlEditFragment* palette);
     QJSValue contextBlockRange(int cursorPosition);
 
+    lv::QmlImportsModel* importsModel();
+    void addLineAtPosition(QString line, int pos);
+    void removeLineAtPosition(int pos);
+    void removeAllEditingFragments();
+
+    int findImportsPosition(int blockPos);
+    int findRootPosition(int blockPos);
+
     // Direct editing management
 
     lv::CodePalette *edit(lv::QmlEditFragment* ef);
@@ -140,7 +158,7 @@ public slots:
         bool assignDefault = false);
     int addItem(int position, const QString& object, const QString& type);
     void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type, QObject* currentApp = nullptr);
-    void updateRuntimeBindings(QObject* obj);
+    void updateRuntimeBindings();
 
     QJSValue getDocumentIds();
 
@@ -158,8 +176,10 @@ public slots:
 
     void aboutToDelete();
 signals:
-
+    void numberOfConnectionsChanged();
 private:
+    QJSValue createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports = false);
+
     void rehighlightSection(int start, int end);
     void resetProjectQmlExtension();
     QString getHelpEntity(int position);
@@ -186,7 +206,7 @@ private:
     );
 
     void suggestionsForValueObject(
-        const DocumentQmlObject& object,
+        const QmlTypeInfo& object,
         QList<CodeCompletionSuggestion>& suggestions,
         bool extractProperties,
         bool extractFunctions,
@@ -225,6 +245,7 @@ private:
 
     QString getBlockIndent(const QTextBlock& bl);
     bool isBlockEmptySpace(const QTextBlock& bl);
+    bool isForAnObject(const QmlDeclaration::Ptr& declaration);
 
     QTextDocument*      m_target;
     QmlJsHighlighter*   m_highlighter;

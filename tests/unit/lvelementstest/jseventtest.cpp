@@ -255,7 +255,7 @@ void JsEventTest::registerListenerThroughMetaTest(){
             jsEvent->on("pinged", [&pingNumber, engine](const Function::Parameters& p){
                 pingNumber = p.at(engine, 0).toInt32(engine);
             });
-            jsEvent->pinged(2000);;
+            jsEvent->pinged(2000);
             QCOMPARE(pingNumber, 2000);
 
             delete jsEvent;
