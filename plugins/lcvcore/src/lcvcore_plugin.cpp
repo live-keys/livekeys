@@ -60,8 +60,6 @@ static QObject* gradientProvider(QQmlEngine *engine, QJSEngine *){
     return new QGradient(engine);
 }
 
-
-
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
     qmlRegisterType<QMat>(                   uri, 1, 0, "Mat");
@@ -71,6 +69,7 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QImRead>(                uri, 1, 0, "ImRead");
     qmlRegisterType<QImWrite>(               uri, 1, 0, "ImWrite");
     qmlRegisterType<QMatRoi>(                uri, 1, 0, "MatRoi");
+    qmlRegisterType<QMatRoi>(                uri, 1, 0, "Crop");
     qmlRegisterType<QMatRead>(               uri, 1, 0, "MatRead");
     qmlRegisterType<QCamCapture>(            uri, 1, 0, "CamCapture");
     qmlRegisterType<QVideoCapture>(          uri, 1, 0, "VideoCapture");

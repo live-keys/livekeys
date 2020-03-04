@@ -39,7 +39,7 @@ Item{
         anchors.topMargin: 5 + topMarginParam
         height: 21
         width: 100
-        color: "#062944"
+        color: "#24282e"
         radius: 10
         Text{
             anchors.left: parent.left
