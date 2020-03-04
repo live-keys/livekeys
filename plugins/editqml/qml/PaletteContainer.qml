@@ -224,9 +224,9 @@ Item{
 
             Triangle{
                 id: minimizeButton
-                width: 10
+                width: 8
                 height: 8
-                color: "white"
+                color: "#9b9da0"
 
                 anchors.top: parent.top
                 anchors.topMargin: 8

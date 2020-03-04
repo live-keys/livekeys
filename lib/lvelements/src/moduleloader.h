@@ -19,7 +19,7 @@ public:
     virtual void load(ModuleLibrary* library) = 0;
 };
 
-ModuleLoader::~ModuleLoader(){}
+inline ModuleLoader::~ModuleLoader(){}
 
 }} // namespace lv, el
 

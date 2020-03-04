@@ -290,6 +290,10 @@ QString QmlEditFragment::type() const{
     return m_declaration->type().join();
 }
 
+QString QmlEditFragment::typeName() const{
+    return m_declaration->type().name();
+}
+
 QList<QObject *> QmlEditFragment::getChildFragments() const{
     QList<QObject*> result;
     for (QmlEditFragment* edit : m_childFragments)

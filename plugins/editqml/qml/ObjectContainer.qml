@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import live 1.0
 import editor 1.0
 import editor.private 1.0
 
@@ -28,7 +29,7 @@ Item{
 
             childObjectContainer.editor = objectContainer.editor
             childObjectContainer.editingFragment = ef
-            childObjectContainer.title = ef.type()
+            childObjectContainer.title = ef.typeName()
             childObjectContainer.x = 40
 
             var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
@@ -71,7 +72,6 @@ Item{
 
     Rectangle{
         id: objectContainerTitle
-        y: 10
         height: titleHeight
         width: parent.width + 10
         color: '#062945'
@@ -81,13 +81,13 @@ Item{
             anchors.leftMargin: 12
             anchors.verticalCenter: parent.verticalCenter
             width: 15
-            height: 20
-            Text{
+            height: titleHeight
+            Triangle{
+                width: 8
+                height: 8
+                color: '#9b9da0'
                 anchors.verticalCenter: parent.verticalCenter
-                text: compact ? '>' : 'v'
-                color: '#ffffff'
-
-                font.pixelSize: 15
+                rotation: compact ? Triangle.Right : Triangle.Bottom
             }
             MouseArea{
                 id: compactObjectButton
@@ -118,7 +118,7 @@ Item{
             anchors.rightMargin: 80 - (closeObjectItem.visible ? 0 : 18)
             anchors.verticalCenter: parent.verticalCenter
             width: 15
-            height: 80
+            height: titleHeight
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-erase-object.png"
@@ -405,7 +405,9 @@ Item{
             Text{
                 text: 'x'
                 color: '#ffffff'
-                font.pixelSize: 20
+                font.pixelSize: 18
+                font.family: "Open Sans"
+                font.weight: Font.Light
             }
             MouseArea{
                 id: paletteCloseArea

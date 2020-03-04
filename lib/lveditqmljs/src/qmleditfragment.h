@@ -97,6 +97,7 @@ public slots:
     lv::QmlBindingSpanModel *bindingModel(lv::CodeQmlHandler* codeHandler);
 
     QString type() const;
+    QString typeName() const;
 
     QList<QObject*> getChildFragments() const;
 
