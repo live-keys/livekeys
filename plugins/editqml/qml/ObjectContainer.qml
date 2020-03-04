@@ -303,6 +303,7 @@ Item{
                                     propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
                                     propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
                                 }
+                                if (compact) expand()
                             }
                             else {
                                 lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
@@ -332,7 +333,55 @@ Item{
 
                                 childObjectContainer.paletteGroup = paletteBoxGroup
                                 paletteBoxGroup.x = 5
+                                if (compact) expand()
                             }
+                        } else if ( addBoxItem.activeIndex === 2 ){
+                            var ppos = codeHandler.addEvent(
+                                addContainer.eventModel.addPosition, addContainer.objectType, type, data
+                            )
+
+                            var ef = codeHandler.openNestedConnection(
+                                objectContainer.editingFragment, ppos, project.appRoot()
+                            )
+                            if ( ef ){
+                                var propertyContainer = propertyContainerFactory.createObject(container)
+                                container.sortChildren()
+
+                                propertyContainer.title = data
+                                propertyContainer.documentHandler = objectContainer.editor.documentHandler
+                                propertyContainer.propertyContainerFactory = propertyContainerFactory
+
+                                propertyContainer.editor = objectContainer.editor
+                                propertyContainer.editingFragment = ef
+
+
+                                if ( codeHandler.isForAnObject(ef) ){
+
+                                    var childObjectContainer = objectContainerFactory.createObject(container)
+
+                                    childObjectContainer.editor = objectContainer.editor
+                                    childObjectContainer.editingFragment = ef
+                                    childObjectContainer.title = type
+
+                                    var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
+                                    paletteBoxGroup.editingFragment = ef
+                                    paletteBoxGroup.codeHandler = codeHandler
+                                    ef.visualParent = paletteBoxGroup
+
+                                    childObjectContainer.paletteGroup = paletteBoxGroup
+                                    paletteBoxGroup.x = 5
+
+                                    propertyContainer.valueContainer = childObjectContainer
+                                    propertyContainer.paletteAddButtonVisible = false
+
+                                } else {
+                                    propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
+                                    propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
+                                    propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
+                                }
+                            }
+                            if (compact) expand()
+                            // TODO: Add event palette too
                         }
                         addBox.destroy()
                     }
