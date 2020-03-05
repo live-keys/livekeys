@@ -161,7 +161,7 @@ public:
     bool isDeclaredInCpp() const;
 
     static bool isObject(const QString& declarationType);
-    static QString toQmlPrimitive(const QString& cppPrimitive);
+    static QmlTypeReference toQmlPrimitive(const QmlTypeReference &cppPrimitive);
     static QString typeDefaultValue(const QString& typeString);
 
 private:
