@@ -67,11 +67,14 @@ Item{
         }
     }
 
+    property int topSpacing: editingFragment && !editingFragment.isRoot() ? 0 : 10
+
     width: container.width < 160 ? 200 : container.width + 40
-    height: container.height < 10 || compact ? 30 : container.height + titleHeight + 10 // top margin
+    height: container.height < 10 || compact ? 40 : container.height + titleHeight + topSpacing
 
     Rectangle{
         id: objectContainerTitle
+        y: topSpacing
         height: titleHeight
         width: parent.width + 10
         color: '#062945'
@@ -424,7 +427,7 @@ Item{
         id: paletteHeaderList
         visible: model ? true : false
         anchors.top: parent.top
-        anchors.topMargin: titleHeight + 10
+        anchors.topMargin: titleHeight + topSpacing
         width: 250
         color: "#0a141c"
         selectionColor: "#0d2639"
@@ -444,7 +447,7 @@ Item{
         id: container
 
         anchors.top: parent.top
-        anchors.topMargin: titleHeight + 10
+        anchors.topMargin: titleHeight + topSpacing
         visible: !compact
         spacing: 0
         width: {

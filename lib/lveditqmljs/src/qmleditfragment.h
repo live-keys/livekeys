@@ -105,6 +105,7 @@ public slots:
 
     void __inputRunnableObjectReady();
 
+    bool isRoot();
 signals:
     void visualParentChanged();
     void aboutToRemovePalette(lv::CodePalette* palette);

@@ -119,6 +119,7 @@ LiveExtension{
                 objectContainer = root.objectContainerFactory.createObject(lk.layers.editor.environment.content)
                 objectContainer.editor = editor
                 objectContainer.editingFragment = ef
+                objectContainer.title = ef.typeName()
             }
 
             paletteBoxGroup = root.paletteGroupFactory.createObject(forAnObject ? objectContainer.groupsContainer : lk.layers.editor.environment.content)
