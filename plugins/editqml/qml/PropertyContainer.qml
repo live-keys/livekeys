@@ -38,14 +38,14 @@ Item{
         anchors.top: parent.top
         anchors.topMargin: 5 + topMarginParam
         height: 21
-        width: 100
+        width: 110
         color: "#24282e"
         radius: 10
         Text{
             anchors.left: parent.left
-            anchors.leftMargin: 30
+            anchors.leftMargin: 25
             anchors.right: parent.right
-            anchors.rightMargin: 30
+            anchors.rightMargin: 15
             anchors.verticalCenter: parent.verticalCenter
             text: propertyContainer.title
             clip: true
@@ -77,7 +77,7 @@ Item{
     Item{
         id: paletteAddButton
         anchors.left: parent.left
-        anchors.leftMargin: 95
+        anchors.leftMargin: 115
         anchors.top: parent.top
         anchors.topMargin: 7 + topMarginParam
 

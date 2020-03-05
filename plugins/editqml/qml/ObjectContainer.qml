@@ -30,7 +30,7 @@ Item{
             childObjectContainer.editor = objectContainer.editor
             childObjectContainer.editingFragment = ef
             childObjectContainer.title = ef.typeName()
-            childObjectContainer.x = 40
+            childObjectContainer.x = 20
 
             var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
             paletteBoxGroup.editingFragment = ef
@@ -77,6 +77,7 @@ Item{
         y: topSpacing
         height: titleHeight
         width: parent.width + 10
+        radius: 3
         color: '#062945'
 
         Item{
