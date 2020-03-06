@@ -190,7 +190,6 @@ namespace qmlhandler_helpers{
                 }
             }
             if ( suggestGeneratedSlots ){
-                // TODO for SIGNALS
                 for ( int i = 0; i < object->propertyCount(); ++i ){
                     if ( !object->property(i).name().startsWith("__") ){
                         QString propertyName = object->property(i).name();
@@ -2334,13 +2333,27 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
 
             for ( int i = 0; i < object->propertyCount(); ++i ){
                 if ( !object->property(i).name().startsWith("__") ){
+                    QString propertyName = object->property(i).name();
                     addContainer->propertyModel()->addItem(QmlPropertyModel::PropertyData(
-                        object->property(i).name(),
+                        propertyName,
                         objectTypeName,
                         object->property(i).typeName(),
                         "", //TODO: Find library path
-                        object->property(i).name())
+                        propertyName)
                     );
+                    if ( propertyName.size() > 0 )
+                        propertyName[0] = propertyName[0].toUpper();
+
+                    if (propertyName != "ObjectName"){
+                        propertyName = "on" + propertyName + "Changed";
+                        addContainer->eventModel()->addItem(QmlEventModel::EventData(
+                            propertyName,
+                            objectTypeName,
+                            "method",
+                            "", //TODO: Find library path
+                            propertyName
+                        ));
+                    }
                 }
             }
             addContainer->propertyModel()->updateFilters();
@@ -3134,6 +3147,8 @@ bool CodeQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
     if ( !declaration->type().path().isEmpty() )
         return true;
     if (declaration->type().name() == "import")
+        return false;
+    if (declaration->type().name() == "slot")
         return false;
     return QmlTypeInfo::isObject(declaration->type().name());
 }
