@@ -1519,9 +1519,25 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position, QObject* /*current
         ef->declaration()->section()->onTextChanged(
                     [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
         {
+//            auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
+//            int length = editingFragment->declaration()->valueLength();
+//            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+
+            auto projectDocument = section->document();
             auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
-            int length = editingFragment->declaration()->valueLength();
-            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+
+            if ( projectDocument->editingStateIs(ProjectDocument::Runtime) ){
+
+                int length = editingFragment->declaration()->valueLength();
+                editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+
+            } else if ( !projectDocument->editingStateIs(ProjectDocument::Silent) ){
+                removeEditingFragment(editingFragment);
+            } else {
+                int length = editingFragment->declaration()->valueLength();
+                editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+            }
+
         });
 
         addEditingFragment(ef);
@@ -1824,7 +1840,6 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated){
                         }
                     }
                 }
-
             }
         }
     }
@@ -1986,6 +2001,9 @@ lv::QmlImportsModel *CodeQmlHandler::importsModel()
 void CodeQmlHandler::addLineAtPosition(QString line, int pos)
 {
     if (!m_target) return;
+
+    m_document->addEditingState(ProjectDocument::Palette);
+
     QTextCursor c(m_target);
     if (pos == 0)
     {
@@ -2000,17 +2018,21 @@ void CodeQmlHandler::addLineAtPosition(QString line, int pos)
         c.insertText("\n" + line);
         c.endEditBlock();
     }
+
+    m_document->removeEditingState(ProjectDocument::Palette);
 }
 
 void CodeQmlHandler::removeLineAtPosition(int pos)
 {
     if (!m_target) return;
     auto block = m_target->findBlockByNumber(pos);
+    m_document->addEditingState(ProjectDocument::Palette);
     QTextCursor c(block);
     c.beginEditBlock();
     c.select(QTextCursor::BlockUnderCursor);
     c.removeSelectedText();
     c.endEditBlock();
+    m_document->removeEditingState(ProjectDocument::Palette);
 }
 
 /**

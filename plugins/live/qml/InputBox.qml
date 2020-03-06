@@ -24,6 +24,7 @@ Rectangle {
     border.width : 1
     color : "#070b0f"
     
+    property real margins: 6
     property color textColor : "#fff"
     property color hintTextColor : "#ccc"
     property color textSelectionColor : "#3d4856"
@@ -39,7 +40,7 @@ Rectangle {
     TextInput{
         id : textInput
         anchors.fill: parent
-        anchors.margins : 6
+        anchors.margins : root.margins
         font.family : "Ubuntu Mono, Courier New, Courier"
         font.pixelSize: 14
         font.weight : Font.Normal

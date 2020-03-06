@@ -259,18 +259,20 @@ bool QmlTypeInfo::isObject(const QString &typeString){
 if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
      typeString == "int" || typeString == "list" || typeString == "real" ||
      typeString == "color" || typeString == "QColor" ||
-     typeString == "string" || typeString == "url" || typeString == "var" || typeString == "QUrl" )
+     typeString == "string" || typeString == "QString" || typeString == "url" || typeString == "var" || typeString == "QUrl" )
     return false;
 return true;
 }
 
-QString QmlTypeInfo::toQmlPrimitive(const QString &cppPrimitive){
-    if ( cppPrimitive == "QColor" )
-        return "color";
-    else if ( cppPrimitive == "QUrl" )
-        return "url";
-    else if ( cppPrimitive == "QString")
-        return "string";
+QmlTypeReference QmlTypeInfo::toQmlPrimitive(const QmlTypeReference &cppPrimitive){
+    if ( cppPrimitive.language() == QmlTypeReference::Cpp ){
+        if ( cppPrimitive.name() == "QColor" )
+            return QmlTypeReference(QmlTypeReference::Qml, "color");
+        else if ( cppPrimitive.name() == "QUrl" )
+            return QmlTypeReference(QmlTypeReference::Qml, "url");
+        else if ( cppPrimitive.name() == "QString")
+            return QmlTypeReference(QmlTypeReference::Qml, "string");
+    }
     return cppPrimitive;
 }
 

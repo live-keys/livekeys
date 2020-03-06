@@ -8,25 +8,22 @@ CodePalette{
     id: palette
     type : "qml/import"
 
-    item: Rectangle {
+    item: Item{
 
         id: importsContainer
         visible: true
         objectName: "importsContainer"
-        width: 360
-        height: itemList.height + addImport.height
-        color: "black"
-        border.width: 3
-        border.color: "#141c25"
+        width: 280
+        height: itemList.height + addImport.height + 5
 
         property alias model: itemList.model
-        property bool addImportVisible: false
+        property bool addImportVisible: true
 
         ListView{
             id : itemList
 
-            width: 310
-            height: model ? (model.count  * 28) : 50
+            width: 280
+            height: model ? (model.count  * 25) : 50
 
             anchors.rightMargin: 2
             anchors.bottomMargin: 5
@@ -49,86 +46,25 @@ CodePalette{
                     width : itemList.width
                     height : 25
 
-                    Rectangle {
-                        border.width: 1
-                        border.color: "#141c25"
-                        color: "black"
+                    Item{
                         anchors.left: parent.left
-                        anchors.leftMargin: 10
+                        anchors.leftMargin: 12
 
                         anchors.top: parent.top
                         anchors.topMargin: 5
 
-                        width: 160
+                        width: 250
                         height: 20
                         Text{
                             id: moduleText
                             anchors.fill: parent
-                            anchors.leftMargin: 10
 
                             font.family: itemList.fontFamily
                             font.pixelSize: itemList.fontSize
                             font.weight: Font.Light
 
                             color: "#fafafa"
-                            text: model.module
-
-                        }
-                    }
-
-
-                    Rectangle {
-                        border.width: 1
-                        border.color: "#141c25"
-                        color: "black"
-                        anchors.left: parent.left
-                        anchors.leftMargin: 180
-
-                        anchors.top: parent.top
-                        anchors.topMargin: 5
-
-                        width: 40
-                        height: 20
-                        Text{
-                            id: versionText
-                            anchors.fill: parent
-                            anchors.leftMargin: 10
-
-                            font.family: itemList.fontFamily
-                            font.pixelSize: itemList.fontSize
-                            font.weight: Font.Light
-
-                            color: "#fafafa"
-                            text: model.version
-
-                        }
-                    }
-
-
-
-                    Rectangle {
-                        border.width: 1
-                        border.color: "#141c25"
-                        color: "black"
-                        anchors.left: parent.left
-                        anchors.leftMargin: 230
-
-                        anchors.top: parent.top
-                        anchors.topMargin: 5
-
-                        width: 40
-                        height: 20
-                        Text{
-                            id: qualifierInput
-                            anchors.fill: parent
-                            anchors.leftMargin: 10
-
-                            font.family: itemList.fontFamily
-                            font.pixelSize: itemList.fontSize
-                            font.weight: Font.Light
-
-                            color: "#fafafa"
-                            text: model.qualifier
+                            text: model.module + ' ' + model.version + ' as ' + model.qualifier
 
                         }
                     }
@@ -153,99 +89,83 @@ CodePalette{
 
         }
 
-
         Item{
             id: addImport
             visible: importsContainer.addImportVisible || !importsContainer.model || (importsContainer.model && importsContainer.model.count === 0)
             width : itemList.width
-            height : visible ? 25 : 0
+            height : visible ? 20 : 0
 
             anchors.bottom: parent.bottom
+            anchors.bottomMargin: 5
 
+            InputBox{
+                id: moduleInput
 
-            Rectangle {
-                border.width: 1
-                border.color: "white"
-                color: "black"
                 anchors.left: parent.left
                 anchors.leftMargin: 10
+                margins: 2
+                radius: 3
+                color: 'transparent'
+
+                hintTextColor: "#494949"
+                border.color : "#232427"
 
                 anchors.top: parent.top
                 anchors.topMargin: 5
 
-                width: 160
-                height: 20
-                TextInput{
-                    id: moduleInput
-                    anchors.fill: parent
-                    anchors.leftMargin: 10
+                font.family: "Open Sans"
+                font.pixelSize: 12
 
-                    font.family: itemList.fontFamily
-                    font.pixelSize: itemList.fontSize
-                    font.weight: Font.Light
-                    selectByMouse: true
-                    color: "white"
-                }
+                width: 140
+                height: 20
+                textHint: 'Path...'
             }
 
 
-            Rectangle {
-                border.width: 1
-                border.color: "white"
-                color: "black"
+            InputBox{
+                id: versionInput
                 anchors.left: parent.left
-                anchors.leftMargin: 180
+                anchors.leftMargin: 152
+                margins: 2
+                radius: 3
+                color: 'transparent'
 
+                hintTextColor: "#494949"
+                border.color : "#232427"
                 anchors.top: parent.top
                 anchors.topMargin: 5
+
+                font.family: "Open Sans"
+                font.pixelSize: 12
 
                 width: 40
                 height: 20
-                TextInput{
-                    id: versionInput
-                    anchors.fill: parent
-                    anchors.leftMargin: 10
-                    selectByMouse: true
-
-                    font.family: itemList.fontFamily
-                    font.pixelSize: itemList.fontSize
-                    font.weight: Font.Light
-
-                    color: "white"
-
-                }
+                textHint: '0.0'
             }
 
-
-
-            Rectangle {
-                border.width: 1
-                border.color: "white"
-                color: "black"
+            InputBox{
+                id: qualifierInput
                 anchors.left: parent.left
-                anchors.leftMargin: 230
+                anchors.leftMargin: 194
+                margins: 2
+                radius: 3
+                color: 'transparent'
 
+                hintTextColor: "#494949"
+
+                border.color : "#232427"
                 anchors.top: parent.top
                 anchors.topMargin: 5
 
+                font.family: "Open Sans"
+                font.pixelSize: 12
+
                 width: 40
                 height: 20
-                TextInput{
-                    id: qualifierInput
-                    anchors.fill: parent
-                    anchors.leftMargin: 10
-                    selectByMouse: true
-
-                    font.family: itemList.fontFamily
-                    font.pixelSize: itemList.fontSize
-                    font.weight: Font.Light
-
-                    color: "white"
-
-                }
+                textHint: 'As...'
             }
 
-            Rectangle{
+            Item{
                 id: commitImportButton
                 anchors.right: parent.right
                 anchors.rightMargin: 15
@@ -253,7 +173,16 @@ CodePalette{
                 anchors.topMargin: 7
                 width: 15
                 height: 15
-                color: "red"
+
+                Text{
+                    anchors.centerIn: parent
+                    text: '+'
+                    color: "white"
+                    font.pixelSize: 15
+                    font.family: "Open Sans"
+                    font.weight: Font.Normal
+                }
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -261,42 +190,11 @@ CodePalette{
                         moduleInput.text = ""
                         versionInput.text = ""
                         qualifierInput.text = ""
-                        importsContainer.addImportVisible = false
                     }
                 }
             }
         }
 
-        Image{
-            anchors.top: parent.top
-            anchors.topMargin: 8
-            anchors.right: parent.right
-            anchors.rightMargin: 25
-            source : "qrc:/images/palette-add-property.png"
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    importsContainer.addImportVisible = true
-                }
-            }
-        }
-
-
-        Text {
-            anchors.top: parent.top
-            anchors.topMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-
-            text: "x"
-            color: "white"
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    importsContainer.destroy()
-                }
-            }
-        }
     }
 
     onExtensionChanged: {
