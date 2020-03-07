@@ -1267,7 +1267,39 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
     QmlBindingPath::Ptr bp = nullptr;
 
     if ( expressionChain.isId ){ // <id>.<property...>
-        // TODO: get binding path of id, then continue
+        DocumentQmlInfo::ValueReference documentValue = scope.document->info()->valueForId(expressionPath.first());
+
+        int begin;
+        int end;
+        scope.document->info()->extractTypeNameRange(documentValue, begin, end);
+
+        QTextCursor cursor(m_document->textDocument());
+        cursor.setPosition(end);
+        QList<QmlDeclaration::Ptr> declarations = getDeclarations(cursor);
+
+        QmlBindingPath::Ptr newBp = DocumentQmlInfo::findDeclarationPath(
+            m_document->textDocument()->toPlainText(),
+            m_document,
+            declarations.first());
+
+        bp = newBp;
+
+        QmlBindingPath::Node* n = bp->root();
+        if ( n ){
+            while ( n->child )
+                n = n->child;
+        }
+
+        for ( const QmlScopeSnap::PropertyReference& prop : expressionChain.propertyChain){
+            QmlBindingPath::PropertyNode* pn = new QmlBindingPath::PropertyNode;
+            QString propertyName = prop.property.isValid() ? prop.property.name : prop.functionInfo.definition();
+            pn->propertyName = propertyName;
+            pn->objectName = QStringList() << prop.classTypePath.nodes.first().prefereredType().join();
+            if ( n ){
+                pn->parent = n;
+                n->child = pn;
+            }
+        }
 
     } else if ( expressionChain.isParent ){ // <parent...>.<property...>
 
@@ -1338,8 +1370,6 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
 
     QmlScopeSnap scope = d->snapScope();
 
-//    Project* project = d->projectHandler->project();
-
     QStringList expressionPathNotTrimmed = expression.split(".");
     QStringList expressionPath;
     for ( const QString& expr : expressionPathNotTrimmed ){
@@ -1347,8 +1377,6 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
     }
 
     int cursorPosition = edit->declaration()->position();
-
-    // qDebug() << expressionPath;
 
     QmlScopeSnap::ExpressionChain expressionChain = scope.evaluateExpression(
         edit->declaration()->parentType(), expressionPath, cursorPosition
@@ -1365,7 +1393,7 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
 
     QmlBindingPath::Ptr bp = nullptr;
 
-    if ( expressionChain.isId ){ // <id>.<property...>s
+    if ( expressionChain.isId ){ // <id>.<property...>
         DocumentQmlInfo::ValueReference documentValue = scope.document->info()->valueForId(expressionPath.first());
 
         int begin;
@@ -1402,6 +1430,7 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
 
     } else if ( expressionChain.isParent ){ // <parent...>.<property...>
 
+        // TODO: Add BindingPath::parentObject(), recurse through properties while last index, and last index node
         // TODO: current binding path -> parent, then append property chain to current binding path
 
     } else { // <property...>
@@ -1445,7 +1474,6 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
         QmlBindingChannel::Ptr signalChannel = *it;
         if ( signalChannel->isEnabled() ){
             QmlBindingChannel::Ptr functionChannel = DocumentQmlInfo::traverseBindingPath(bp, signalChannel->runnable());
-            // qDebug() << functionChannel->hasConnection();
             if ( functionChannel.isNull() || !functionChannel->hasConnection() ){
                 qWarning("Failed to find binding channel at: %s", qPrintable(bp->toString()));
             } else {
@@ -1697,7 +1725,7 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
             QString currentObDeclaration = m_document->substring(child->begin, child->identifierEnd - child->begin);
             int splitter = currentObDeclaration.indexOf('.');
             QString obName = currentObDeclaration.mid(splitter + 1);
-            QString obNs   = splitter == -1 ? "" : currentObDeclaration.mid(0, splitter);
+            QString obNs   = splitter == -1 ? "" : currentObDeclaration.mid(0, splitter);;
 
             QmlInheritanceInfo obPath = scope.getTypePath(obNs, obName);
 
@@ -2052,10 +2080,6 @@ QJSValue CodeQmlHandler::cursorInfo(int position, int length){
         cursor.setPosition(position + length, QTextCursor::KeepAnchor);
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
-//    qDebug() << properties.length();
-//    if ( properties.length() ){
-
-//    }
 
     QmlCompletionContext::ConstPtr qcc = m_completionContextFinder->getContext(cursor);
     if ( qcc->context() & QmlCompletionContext::InImport || qcc->context() & QmlCompletionContext::InImportVersion ){

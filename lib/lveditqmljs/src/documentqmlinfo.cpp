@@ -419,6 +419,8 @@ QmlTypeInfo DocumentQmlInfo::extractValueObjectWithExport(
         ValueMemberExtractor extractor(fmo);
         vob->processMembers(&extractor);
 
+        fmo->setClassName("qml/" + componentName);
+        fmo->setSuperclassName("qml/" + vob->typeName()->name.toString());
         fmo->addExport(componentName, libraryPath, LanguageUtils::ComponentVersion(vMajor, vMinor));
 
         vodata = QmlTypeInfoPrivate::fromMetaObject(fmo, path());

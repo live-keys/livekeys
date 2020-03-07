@@ -37,7 +37,11 @@ QmlTypeReference::Language QmlTypeReference::language() const{
 }
 
 QString QmlTypeReference::languageString() const{
-    return m_language == QmlTypeReference::Qml ? "qml" : QmlTypeReference::Cpp ? "cpp" : "u";
+    if ( m_language == QmlTypeReference::Qml )
+        return "qml";
+    if ( m_language == QmlTypeReference::Cpp )
+        return "cpp";
+    return "u";
 }
 
 bool QmlTypeReference::isEmpty() const{
@@ -326,8 +330,16 @@ QmlTypeInfo QmlTypeInfoPrivate::fromMetaObject(LanguageUtils::FakeMetaObject::Co
         }
     }
 
-    qti.m_classType = QmlTypeReference(QmlTypeReference::Cpp, fmo->className(), foundPackage);
-    qti.m_inherits = QmlTypeReference(QmlTypeReference::Cpp, fmo->superclassName());
+    if ( !fmo->className().startsWith("qml/") ){
+        qti.m_classType = QmlTypeReference(QmlTypeReference::Qml, fmo->className(), libraryUri);
+    } else {
+        qti.m_classType = QmlTypeReference(QmlTypeReference::Qml, fmo->className().mid(4), libraryUri);
+    }
+    if ( fmo->superclassName().startsWith("qml/") ){
+        qti.m_inherits = QmlTypeReference(QmlTypeReference::Unknown, fmo->superclassName().mid(4), "");
+    } else {
+        qti.m_inherits = QmlTypeReference(QmlTypeReference::Cpp, fmo->superclassName());
+    }
 
     return qti;
 }
@@ -432,7 +444,7 @@ QmlTypeReference QmlInheritanceInfo::languageType() const{
     if ( isEmpty() )
         return QmlTypeReference();
 
-    return nodes.first().exportType();
+    return nodes.first().prefereredType();
 }
 
 

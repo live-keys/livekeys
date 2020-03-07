@@ -185,6 +185,16 @@ void scanQmlDirForQmlExports(
 
     int componentCount = 0; // eliminate "className" which is also treated as a component
 
+    auto deps = dirParser.dependencies();
+    for ( auto it = deps.begin(); it != deps.end(); ++it ){
+        projectScope->findQmlLibraryInImports(
+            it.key(),
+            it.value().majorVersion,
+            it.value().minorVersion,
+            dependencyPaths
+        );
+    }
+
     QHash<QString, QmlDirParser::Component>::iterator it;
     for ( it = components.begin(); it != components.end(); ++it ){
         if ( it.key() == "classname" )
@@ -218,7 +228,7 @@ void scanQmlDirForQmlExports(
     library->data().setMetaObjects(objects);
     library->setFiles(scannedFiles);
     library->setStatus(QmlLibraryInfo::NoPrototypeLink);
-    library->setDependencies(dependencyPaths);
+    library->data().setDependencies(dependencyPaths);
     library->updateExports();
 
     updateLibraryPrototypes(projectScope, path, library);
@@ -498,7 +508,7 @@ QMap<QString, QmlLibraryInfo::Ptr> updateLibrary(
     QStringList concatenatedDependencies = baseLib->data().dependencies() + snapshot.dependencies;
     QList<LanguageUtils::FakeMetaObject::ConstPtr> concatenatedObjects = baseLib->data().metaObjects() + snapshot.objects;
 
-    baseLib->setDependencies(dependencyPaths);
+    baseLib->setDependencies(concatenatedDependencies);
     baseLib->data().setDependencies(concatenatedDependencies);
     baseLib->data().setMetaObjects(concatenatedObjects);
     baseLib->data().setModuleApis(snapshot.moduleApis);

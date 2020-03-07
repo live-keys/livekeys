@@ -260,6 +260,7 @@ QmlInheritanceInfo QmlScopeSnap::getTypePath(const QString &name) const{
         typePath.append(tr);
         typePath.join(generateTypePathFromObject(tr));
     }
+
     return typePath;
 }
 
@@ -588,9 +589,6 @@ QmlScopeSnap::ExpressionChain QmlScopeSnap::evaluateExpression(
 
         QStringList expressionTail = expression;
         expressionTail.removeFirst();
-
-        qDebug() << result.typeReference.languageType().join();
-        qDebug() << expressionTail;
 
         result.propertyChain = getProperties(result.typeReference, expressionTail);
         return result;
