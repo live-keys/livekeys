@@ -126,22 +126,22 @@ bool scanObjectFile(
     if ( !parseResult )
         return false;
 
-    QList<DocumentQmlScope::Import> imports = DocumentQmlScope::extractImports(documentInfo);
+    QList<DocumentQmlInfo::Import> imports = documentInfo->imports();
     QList<QString> paths;
-    foreach( const DocumentQmlScope::Import import, imports ){
-        if (import.importType() == DocumentQmlScope::Import::Directory) {
+    foreach( const DocumentQmlInfo::Import import, imports ){
+        if (import.importType() == DocumentQmlInfo::Import::Directory) {
             projectScope->findQmlLibraryInPath(
-                import.path(),
+                import.uri(),
                 false,
                 paths
             );
         }
 
-        if (import.importType() == DocumentQmlScope::Import::Library) {
+        if (import.importType() == DocumentQmlInfo::Import::Library) {
             if (!import.isVersionValid())
                 continue;
             projectScope->findQmlLibraryInImports(
-                import.path(),
+                import.uri(),
                 import.versionMajor(),
                 import.versionMinor(),
                 paths

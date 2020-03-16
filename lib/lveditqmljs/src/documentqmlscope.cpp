@@ -38,40 +38,6 @@ namespace lv{
  * DocumentQmlScopes are mostly used internally, expecially by the lv::CodeQmlHandler
  */
 
-/**
- * \class lv::DocumentQmlScope::Import
- * \ingroup lveditqmljs
- * \brief Import data associated with a lv::DocumentQmlScope
- */
-
-/**
- * \property lv::DocumentQmlScope::Import::NoVersion
- * \brief Value used to check wether a version is valid or not
- */
-
-// QDocumentQmlScope::Import implementation
-// ----------------------------------------
-
-/**
- * \brief Import constructor
- *
- * Takes an \p importType, the \p path of the import, the \p as namespace in which to import for this
- * document and the two versions: \p vMajor, \p vMinor
- */
-DocumentQmlScope::Import::Import(
-        DocumentQmlScope::Import::Type importType,
-        const QString &path,
-        const QString& as,
-        int vMajor,
-        int vMinor)
-    : m_type(importType)
-    , m_path(path)
-    , m_as(as)
-    , m_versionMajor(vMajor)
-    , m_versionMinor(vMinor)
-{
-}
-
 // QDocumentQmlScope implementation
 // --------------------------------
 
@@ -124,95 +90,35 @@ DocumentQmlScope::Ptr DocumentQmlScope::createScope(
     DocumentQmlScope::Ptr documentScope(new DocumentQmlScope(projectScope, documentInfo));
     projectScope->addImplicitLibrary(documentInfo->path());
 
-    QList<DocumentQmlScope::Import> imports = extractImports(documentInfo);
-    foreach( DocumentQmlScope::Import import, imports ){
-
-        if( !documentScope->hasImport(import) ){
-            QList<QString> paths;
-            if (import.importType() == DocumentQmlScope::Import::Directory) {
-                projectScope->findQmlLibraryInPath(
-                    import.path(),
-                    false,
-                    paths
-                );
-                if ( paths.isEmpty() ){
-                    import.setImportType(Import::Invalid);
-                    documentScope->addImport(import, import.path());
-                }
-                foreach (const QString& path, paths )
-                    documentScope->addImport(import, path);
-            }
-            if (import.importType() == DocumentQmlScope::Import::Library) {
-                if (!import.isVersionValid())
-                    continue;
-                projectScope->findQmlLibraryInImports(
-                    import.path(),
-                    import.versionMajor(),
-                    import.versionMinor(),
-                    paths
-                );
-                if ( paths.isEmpty() ){
-                    import.setImportType(Import::Invalid);
-                    documentScope->addImport(import, import.path());
-                }
-                foreach (const QString& path, paths )
-                    documentScope->addImport(import, path);
+    const DocumentQmlInfo::ImportList& imports = documentInfo->imports();
+    for( const DocumentQmlInfo::Import& import: imports ){
+        QList<QString> paths;
+        if (import.importType() == DocumentQmlInfo::Import::Directory) {
+            projectScope->findQmlLibraryInPath(
+                import.uri(),
+                false,
+                paths
+            );
+            if ( paths.isEmpty() ){
+                documentInfo->updateImportType(import.uri(), DocumentQmlInfo::Import::Invalid);
             }
         }
-
+        if (import.importType() == DocumentQmlInfo::Import::Library) {
+            if (!import.isVersionValid())
+                continue;
+            projectScope->findQmlLibraryInImports(
+                import.uri(),
+                import.versionMajor(),
+                import.versionMinor(),
+                paths
+            );
+            if ( paths.isEmpty() ){
+                documentInfo->updateImportType(import.uri(), DocumentQmlInfo::Import::Invalid);
+            }
+        }
     }
 
     return documentScope;
-}
-
-
-/**
- * \brief Extracts the list of imports from the given \p documentInfo.
- */
-QList<DocumentQmlScope::Import> DocumentQmlScope::extractImports(DocumentQmlInfo::Ptr documentInfo){
-    QList<DocumentQmlScope::Import> imports;
-    QList<QmlJS::ImportInfo> importInfos = documentInfo->internalBind()->imports();
-
-    for ( QList<QmlJS::ImportInfo>::iterator it = importInfos.begin(); it != importInfos.end(); ++it ){
-        QmlJS::ImportKey impKey(*it);
-        Import::Type importType;
-        switch(impKey.type){
-        case QmlJS::ImportType::Invalid:           importType = Import::Invalid; break;
-        case QmlJS::ImportType::Library:           importType = Import::Library; break;
-        case QmlJS::ImportType::Directory:         importType = Import::Directory; break;
-        case QmlJS::ImportType::ImplicitDirectory: importType = Import::ImplicitDirectory; break;
-        case QmlJS::ImportType::File:              importType = Import::File; break;
-        case QmlJS::ImportType::UnknownFile:       importType = Import::UnknownFile; break;
-        default:                                   importType = Import::Invalid;
-        }
-
-        imports << Import(
-           importType,
-           it->path(),
-           it->as(),
-           it->version().majorVersion(),
-           it->version().minorVersion()
-       );
-    }
-    return imports;
-}
-
-/// \brief Checks for a given import \p key and \returns true if it exists, false otherwise
-bool DocumentQmlScope::hasImport(const DocumentQmlScope::Import &key){
-    foreach( const ImportEntry& imp, m_imports ){
-        if ( imp.first == key )
-            return true;
-    }
-    return false;
-}
-
-void DocumentQmlScope::transferImports(const DocumentQmlScope::ImportList &imports){
-    m_imports = imports;
-}
-
-/// \brief Adds an import \p path to a given \p key.
-void DocumentQmlScope::addImport(const DocumentQmlScope::Import &key, const QString &path){
-    m_imports.append(QPair<Import, QString>(key, path));
 }
 
 

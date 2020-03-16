@@ -106,18 +106,6 @@ namespace qmlhandler_helpers{
         return true;
     }
 
-    /**
-     * @brief isNamespace
-     */
-    bool isNamespace(DocumentQmlScope::Ptr documentScope, const QString& str){
-        foreach( const DocumentQmlScope::ImportEntry& imp, documentScope->imports() ){
-            if ( imp.first.as() == str ){
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     /**
      * @brief Create suggestions from an object type path
@@ -693,10 +681,10 @@ QString CodeQmlHandler::getHelpEntity(int position){
                 }
 
             } else if ( expressionChain.lastSegmentType() == QmlScopeSnap::ExpressionChain::NamespaceNode ){
-
-                foreach( const DocumentQmlScope::ImportEntry& imp, scope.document->imports() ){
-                    if ( imp.first.as() == expression.first() ){
-                        return "qml/" + imp.first.path();
+                DocumentQmlInfo::Ptr di = scope.document->info();
+                foreach( const DocumentQmlInfo::Import& imp, di->imports() ){
+                    if ( imp.as() == expression.first() ){
+                        return "qml/" + imp.uri();
                     }
                 }
 
@@ -2397,12 +2385,12 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
 
 
     QStringList exports;
-    scope.project->implicitLibraries()->libraryInfo(scope.document->path())->listExports(&exports);
+    scope.project->implicitLibraries()->libraryInfo(scope.document->info()->path())->listExports(&exports);
 
     foreach( const QString& e, exports ){
-        if ( e != scope.document->componentName() ){
+        if ( e != scope.document->info()->componentName() ){
             addContainer->itemModel()->addItem(
-                QmlItemModel::ItemData(e, "implicit", scope.document->path(), e)
+                QmlItemModel::ItemData(e, "implicit", scope.document->info()->path(), e)
             );
         }
     }
@@ -2421,25 +2409,26 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
 
     QSet<QString> imports;
 
-    foreach( const DocumentQmlScope::ImportEntry& imp, scope.document->imports() ){
-        if ( imp.first.as() != "" ){
-            imports.insert(imp.first.as());
+    foreach( const DocumentQmlInfo::Import& imp, scope.document->info()->imports() ){
+        if ( imp.as() != "" ){
+            imports.insert(imp.as());
         }
     }
     imports.insert("");
 
     for ( QSet<QString>::iterator it = imports.begin(); it != imports.end(); ++it ){
 
-        foreach( const DocumentQmlScope::ImportEntry& imp, scope.document->imports() ){
-            if ( imp.first.as() == *it ){
+        foreach( const DocumentQmlInfo::Import& imp, scope.document->info()->imports() ){
+            if ( imp.as() == *it ){
                 QStringList exports;
-                scope.project->globalLibraries()->libraryInfo(imp.second)->listExports(&exports);
-                int segmentPosition = imp.second.lastIndexOf('/');
-                QString libraryName = imp.second.mid(segmentPosition + 1);
+                QmlLibraryInfo::Reference lr = scope.project->globalLibraries()->libraryInfoByNamespace(imp.uri());
+                if ( !lr.lib.isNull() ){
+                    lr.lib->listExports(&exports);
+                }
 
                 foreach( const QString& e, exports ){
                     addContainer->itemModel()->addItem(
-                        QmlItemModel::ItemData(e, libraryName, libraryName, e)
+                        QmlItemModel::ItemData(e, imp.uri(), imp.uri(), e)
                     );
                 }
             }
@@ -2816,8 +2805,8 @@ void CodeQmlHandler::suggestCompletion(int cursorPosition){
  */
 void CodeQmlHandler::newDocumentScopeReady(const QString &, lv::DocumentQmlScope::Ptr documentScope){
     Q_D(CodeQmlHandler);
-    if ( !documentScope->info()->isParsedCorrectly() && documentScope->imports().isEmpty() ){
-        documentScope->transferImports(d->documentScope->imports());
+    if ( !documentScope->info()->isParsedCorrectly() && documentScope->info()->imports().isEmpty() ){
+        documentScope->info()->transferImports(d->documentScope->info()->imports());
     }
 
     d->documentScope = documentScope;
@@ -2938,10 +2927,10 @@ void CodeQmlHandler::suggestionsForNamespaceTypes(
 
     if ( typeNameSpace.isEmpty() ){
         QStringList exports;
-        scope.project->implicitLibraries()->libraryInfo(scope.document->path())->listExports(&exports);
+        scope.project->implicitLibraries()->libraryInfo(scope.document->info()->path())->listExports(&exports);
 
         foreach( const QString& e, exports ){
-            if ( e != scope.document->componentName() )
+            if ( e != scope.document->info()->componentName() )
                 suggestions << CodeCompletionSuggestion(e, "", "implicit", e);
         }
 
@@ -2955,18 +2944,16 @@ void CodeQmlHandler::suggestionsForNamespaceTypes(
         }
     }
 
-    foreach( const DocumentQmlScope::ImportEntry& imp, scope.document->imports() ){
-        if ( imp.first.as() == typeNameSpace ){
+    foreach( const DocumentQmlInfo::Import& imp, scope.document->info()->imports() ){
+        if ( imp.as() == typeNameSpace ){
             QStringList exports;
-
-            QmlLibraryInfo::Ptr libinfo = scope.project->globalLibraries()->libraryInfo(imp.second);
-
-            libinfo->listExports(&exports);
-            int segmentPosition = imp.second.lastIndexOf('/');
-            QString libraryName = imp.second.mid(segmentPosition + 1);
+            QmlLibraryInfo::Reference lr = scope.project->globalLibraries()->libraryInfoByNamespace(imp.uri());
+            if ( lr.lib ){
+                lr.lib->listExports(&exports);
+            }
 
             foreach( const QString& e, exports ){
-                suggestions << CodeCompletionSuggestion(e, "", libraryName, e, "qml/" + libinfo->importNamespace() + "#" + e);
+                suggestions << CodeCompletionSuggestion(e, "", imp.uri(), e, "qml/" + lr.lib->importNamespace() + "#" + e);
             }
         }
     }
@@ -2979,12 +2966,12 @@ void CodeQmlHandler::suggestionsForNamespaceImports(QList<CodeCompletionSuggesti
 
     QList<CodeCompletionSuggestion> localSuggestions;
 
-    foreach( const DocumentQmlScope::ImportEntry& imp, document->imports() ){
-        if ( imp.first.as() != "" ){
-            imports[imp.first.as()] = imp.first.path();
+    foreach( const DocumentQmlInfo::Import& imp, document->info()->imports() ){
+        if ( imp.as() != "" ){
+            imports[imp.as()] = imp.uri();
         }
     }
-    for ( QMap<QString, QString>::iterator it = imports.begin(); it != imports.end(); ++it ){
+    for ( auto it = imports.begin(); it != imports.end(); ++it ){
         localSuggestions << CodeCompletionSuggestion(it.key(), "import", it.value(), it.key());
     }
     std::sort(localSuggestions.begin(), localSuggestions.end(), &CodeCompletionSuggestion::compare);
@@ -3032,7 +3019,7 @@ void CodeQmlHandler::suggestionsForLeftBind(
                 if ( !typePath.isEmpty() )
                     qmlhandler_helpers::suggestionsForObjectPath(typePath, true, false, false, false, false, ": ", suggestions);
             }
-        } else if ( qmlhandler_helpers::isNamespace(scope.document, firstSegment) ){
+        } else if ( scope.document->info()->hasImportAs(firstSegment) ){
             if ( context.expressionPath().size() == 2 )
                 suggestionsForNamespaceTypes(firstSegment, suggestions);
         }

@@ -51,6 +51,61 @@ class LV_EDITQMLJS_EXPORT DocumentQmlInfo{
     Q_DISABLE_COPY(DocumentQmlInfo)
 
 public:
+    class Import{
+
+    public:
+        static const int NoVersion;
+
+        /** Import type */
+        enum Type{
+            /** Invalid type */
+            Invalid,
+            /** Library based import with qmldir file. */
+            Library,
+            /** Directory based import */
+            Directory,
+            /** Implicit import */
+            ImplicitDirectory,
+            /** Js file import */
+            File,
+            /** Unknown file import */
+            UnknownFile
+        };
+
+        Import(
+            Type importType,
+            const QString& uri,
+            const QString& as = "",
+            int vMajor = NoVersion,
+            int vMinor = NoVersion
+        );
+
+        void updateUri(const QString& uri);
+        void setImportType(Type importType);
+
+        Type importType() const;
+
+        const QString& uri() const;
+        const QString& relativeUri() const;
+        const QString& as() const;
+        int versionMajor() const;
+        int versionMinor() const;
+        bool isVersionValid() const;
+
+        bool operator ==(const Import& other) const;
+
+    private:
+        Type    m_type;
+        QString m_uri;
+        QString m_relativeUri;
+        QString m_as;
+        int     m_versionMajor;
+        int     m_versionMinor;
+    };
+
+    /** List of import entries */
+    typedef QList<Import> ImportList;
+
     class ValueReference{
     public:
         /// \brief ValueReference constructor
@@ -181,11 +236,77 @@ public:
 
     ~DocumentQmlInfo();
 
+    void updateImportType(const QString& uri, Import::Type type);
+    bool hasImport(const Import& key) const;
+    bool hasImport(const QString& importUri) const;
+    bool hasImportAs(const QString& asKey) const;
+    int totalImports() const;
+    const ImportList& imports() const;
+
+    void transferImports(const ImportList& imports);
+    void addImport(const Import& key);
+
 private:
     QScopedPointer<DocumentQmlInfoPrivate> d_ptr;
+    QList<Import> extractImports();
 
     Q_DECLARE_PRIVATE(DocumentQmlInfo)
 };
+
+
+/// \brief Returns the major version of this import
+inline int DocumentQmlInfo::Import::versionMajor() const{
+    return m_versionMajor;
+}
+
+/// \brief Returns the minor version of this import
+inline int DocumentQmlInfo::Import::versionMinor() const{
+    return m_versionMinor;
+}
+
+/// \brief Returns true if this version is valid, false otherwise
+inline bool DocumentQmlInfo::Import::isVersionValid() const{
+    return m_versionMajor >= 0 && m_versionMinor >= 0;
+}
+
+/// \brief Returns true if this object is the same as \p other, false otherwise
+inline bool DocumentQmlInfo::Import::operator ==(const DocumentQmlInfo::Import &other) const{
+    if ( uri() != other.uri() )
+        return false;
+    if ( versionMajor() != other.versionMajor() )
+        return false;
+    return versionMinor() == other.versionMinor();
+}
+
+/// \brief Returns the path of this import
+inline const QString &DocumentQmlInfo::Import::uri() const{
+    return m_uri;
+}
+
+/// \brief Updates the import uri for this import
+inline void DocumentQmlInfo::Import::updateUri(const QString &uri){
+    m_uri = uri;
+}
+
+inline void DocumentQmlInfo::Import::setImportType(DocumentQmlInfo::Import::Type importType){
+    m_type = importType;
+}
+
+/// \brief Returns the import type for this import
+inline DocumentQmlInfo::Import::Type DocumentQmlInfo::Import::importType() const{
+    return m_type;
+}
+
+/// \brief Returns the namespace this import was declared in
+inline const QString &DocumentQmlInfo::Import::as() const{
+    return m_as;
+}
+
+/// \brief Returns the import relative uri.
+inline const QString &DocumentQmlInfo::Import::relativeUri() const{
+    return m_relativeUri;
+}
+
 
 }// namespace
 

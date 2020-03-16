@@ -138,14 +138,15 @@ QmlScopeSnap::QmlScopeSnap(const ProjectQmlScope::Ptr &p, const DocumentQmlScope
 /// Retrieve a type from any available libraries to the document scope
 
 QmlTypeInfo QmlScopeSnap::getType(const QString &name) const{
-    QmlLibraryInfo::Ptr lib = project->implicitLibraries()->libraryInfo(document->path());
+    QmlLibraryInfo::Ptr lib = project->implicitLibraries()->libraryInfo(document->info()->path());
     QmlLibraryInfo::ExportVersion ev = lib->findExport(name);
     if ( ev.isValid() ){
         return QmlTypeInfoPrivate::fromMetaObject(ev.object, lib->importNamespace());
     }
 
-    foreach( const DocumentQmlScope::ImportEntry& imp, document->imports() ){
-        QmlLibraryInfo::Ptr lib = project->globalLibraries()->libraryInfo(imp.second);
+    foreach( const DocumentQmlInfo::Import& imp, document->info()->imports() ){
+        QmlLibraryInfo::Reference lref = project->globalLibraries()->libraryInfoByNamespace(imp.uri());
+        QmlLibraryInfo::Ptr lib = lref.lib;
         QmlLibraryInfo::ExportVersion ev = lib->findExport(name);
         if ( ev.isValid() ){
             return QmlTypeInfoPrivate::fromMetaObject(ev.object, lib->importNamespace());
@@ -170,7 +171,7 @@ QmlTypeInfo QmlScopeSnap::getType(const QString &name) const{
 
 QmlTypeInfo QmlScopeSnap::getType(const QString &importNamespace, const QString &name) const{
     if ( importNamespace.isEmpty() ){
-        QmlLibraryInfo::Ptr lib = project->implicitLibraries()->libraryInfo(document->path());
+        QmlLibraryInfo::Ptr lib = project->implicitLibraries()->libraryInfo(document->info()->path());
         QmlLibraryInfo::ExportVersion ev = lib->findExport(name);
         if ( ev.isValid() ){
             return QmlTypeInfoPrivate::fromMetaObject(ev.object, lib->importNamespace());
@@ -185,12 +186,15 @@ QmlTypeInfo QmlScopeSnap::getType(const QString &importNamespace, const QString 
         }
     }
 
-    foreach( const DocumentQmlScope::ImportEntry& imp, document->imports() ){
-        if ( imp.first.as() == importNamespace ){
-            QmlLibraryInfo::Ptr lib = project->globalLibraries()->libraryInfo(imp.second);
-            QmlLibraryInfo::ExportVersion ev = lib->findExport(name);
-            if ( ev.isValid() ){
-                return QmlTypeInfoPrivate::fromMetaObject(ev.object, lib->importNamespace());
+    foreach( const DocumentQmlInfo::Import& imp, document->info()->imports() ){
+        if ( imp.as() == importNamespace ){
+            QmlLibraryInfo::Reference lr = project->globalLibraries()->libraryInfoByNamespace(imp.uri());
+            QmlLibraryInfo::Ptr lib = lr.lib;
+            if ( lib ){
+                QmlLibraryInfo::ExportVersion ev = lib->findExport(name);
+                if ( ev.isValid() ){
+                    return QmlTypeInfoPrivate::fromMetaObject(ev.object, lib->importNamespace());
+                }
             }
         }
     }
@@ -323,7 +327,7 @@ QmlInheritanceInfo QmlScopeSnap::generateTypePathFromObject(const QmlTypeInfo &t
     if ( !tr.inherits().isEmpty() && tr.inherits().name() != tr.prefereredType().name() ){
         QmlLibraryInfo::Reference ref = libraryFromType(tr.prefereredType());
         if ( !ref.isValid() )
-            ref = QmlLibraryInfo::Reference(document->path(), project->implicitLibraries()->libraryInfo(document->path()));
+            ref = QmlLibraryInfo::Reference(document->info()->path(), project->implicitLibraries()->libraryInfo(document->info()->path()));
 
         vlog_debug("editqmljs-codehandler", "Loooking up object \'" + tr.preferredType().name() + "\' from " + ref.path());
 
@@ -341,8 +345,8 @@ QmlInheritanceInfo QmlScopeSnap::generateTypePathFromObject(const QmlTypeInfo &t
 
 QmlInheritanceInfo QmlScopeSnap::generateTypePathFromClassName(const QString &typeName, QString typeLibrary) const{
     vlog_debug("editqmljs-codehandler", "Looking up type \'" + typeName + "\' from " + typeLibrary);
-    QmlLibraryInfo::Ptr libraryInfo = (typeLibrary.isEmpty() || typeLibrary == document->path() )
-            ? project->implicitLibraries()->libraryInfo(document->path())
+    QmlLibraryInfo::Ptr libraryInfo = (typeLibrary.isEmpty() || typeLibrary == document->info()->path() )
+            ? project->implicitLibraries()->libraryInfo(document->info()->path())
             : project->globalLibraries()->libraryInfo(typeLibrary);
 
     LanguageUtils::FakeMetaObject::ConstPtr object = libraryInfo->findObjectByClassName(typeName);
@@ -680,9 +684,9 @@ QmlScopeSnap::ExpressionChain QmlScopeSnap::evaluateExpression(
 }
 
 QString QmlScopeSnap::importToUri(const QString &name) const{
-    foreach( const DocumentQmlScope::ImportEntry& imp, document->imports() ){
-        if ( imp.first.as() == name ){
-            return imp.second;
+    foreach( const DocumentQmlInfo::Import& imp, document->info()->imports() ){
+        if ( imp.as() == name ){
+            return imp.uri();
         }
     }
     return "";
@@ -698,8 +702,8 @@ QmlTypeReference QmlScopeSnap::quickObjectDeclarationType(const QStringList &dec
 }
 
 bool QmlScopeSnap::isImport(const QString &name) const{
-    foreach( const DocumentQmlScope::ImportEntry& imp, document->imports() ){
-        if ( imp.first.as() == name ){
+    foreach( const DocumentQmlInfo::Import& imp, document->info()->imports() ){
+        if ( imp.as() == name ){
             return true;
         }
     }
