@@ -136,15 +136,15 @@ bool QmlUsageGraphScanner::checkEntry(const QmlUsageGraphScanner::BindingEntry &
 
     DocumentQmlInfo::Ptr documentInfo = DocumentQmlInfo::create(file);
     if ( documentInfo->parse(content) ){
-        QList<DocumentQmlScope::Import> imports = DocumentQmlScope::extractImports(documentInfo);
+        QList<DocumentQmlInfo::Import> imports = m_scopeSnap.document->info()->imports();
         for ( auto it = imports.begin(); it != imports.end(); ++it ){
-            DocumentQmlScope::Import& imp = *it;
+            DocumentQmlInfo::Import& imp = *it;
 
-            if ( imp.importType() == DocumentQmlScope::Import::Directory ){
+            if ( imp.importType() == DocumentQmlInfo::Import::Directory ){
                 // find library by path
-                QmlLibraryInfo::Ptr qli = projectScope->globalLibraries()->libraryInfo(imp.path());
+                QmlLibraryInfo::Ptr qli = projectScope->globalLibraries()->libraryInfo(imp.uri());
                 if ( !qli )
-                    qli = projectScope->implicitLibraries()->libraryInfo(imp.path());
+                    qli = projectScope->implicitLibraries()->libraryInfo(imp.uri());
 
                 if ( qli ){
                     QStringList exports;
@@ -152,15 +152,15 @@ bool QmlUsageGraphScanner::checkEntry(const QmlUsageGraphScanner::BindingEntry &
 
                     QmlLibraryInfo::ExportVersion ev = qli->findExport(entry.componentName);
                     if ( ev.isValid() ){
-                        if ( entry.componentPath.startsWith(imp.path())){
+                        if ( entry.componentPath.startsWith(imp.uri())){
                             return true;
                         }
                     }
                 }
 
-            } else if ( imp.importType() == DocumentQmlScope::Import::Library ){
+            } else if ( imp.importType() == DocumentQmlInfo::Import::Library ){
                 // find library by uri
-                QmlLibraryInfo::Reference pqli = projectScope->globalLibraries()->libraryInfoByNamespace(imp.path());
+                QmlLibraryInfo::Reference pqli = projectScope->globalLibraries()->libraryInfoByNamespace(imp.uri());
                 QmlLibraryInfo::Ptr qli = pqli.lib;
                 if ( qli ){
                     QmlLibraryInfo::ExportVersion ev = qli->findExport(entry.componentName);

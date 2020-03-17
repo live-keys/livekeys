@@ -64,8 +64,7 @@ CodePalette{
                             font.weight: Font.Light
 
                             color: "#fafafa"
-                            text: model.module + ' ' + model.version + ' as ' + model.qualifier
-
+                            text: model.module + ' ' + model.version + (model.qualifier !== '' ? ' as ' + model.qualifier : '')
                         }
                     }
 

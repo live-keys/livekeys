@@ -9,7 +9,7 @@ Row{
     property string imagePath : project.dir() + '/../_images/buildings_0246.jpg'
             
     ImRead{
-        id : sc      
+        id : sc
         visible: false
         file : parent.imagePath
     }

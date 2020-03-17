@@ -72,9 +72,9 @@ bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiObjectDefinition *ast){
     if (ast->initializer && ast->initializer->lbraceToken.length){
         DocumentQmlValueObjects::RangeObject* obj = new DocumentQmlValueObjects::RangeObject;
         obj->ast   = ast;
-        obj->begin = ast->firstSourceLocation().begin();
-        obj->identifierEnd = ast->firstSourceLocation().end();
-        obj->end   = ast->initializer->rbraceToken.end();
+        obj->begin = static_cast<int>(ast->firstSourceLocation().begin());
+        obj->identifierEnd = static_cast<int>(ast->qualifiedTypeNameId->lastSourceLocation().end());
+        obj->end   = static_cast<int>(ast->initializer->rbraceToken.end());
         if ( !m_parent->m_root ){
             m_parent->m_root = obj;
             m_lastAppend = obj;
@@ -91,11 +91,11 @@ bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiScriptBinding *ast){
     DocumentQmlValueObjects::RangeProperty* property = new DocumentQmlValueObjects::RangeProperty;
     property->ast         = ast;
     property->parent      = m_lastAppend;
-    property->begin       = ast->firstSourceLocation().begin();
-    property->propertyEnd = ast->firstSourceLocation().end();
+    property->begin       = static_cast<int>(ast->firstSourceLocation().begin());
+    property->propertyEnd = static_cast<int>(ast->firstSourceLocation().end());
     if ( ast->statement )
-        property->valueBegin = ast->statement->firstSourceLocation().begin();
-    property->end        = ast->lastSourceLocation().end();
+        property->valueBegin = static_cast<int>(ast->statement->firstSourceLocation().begin());
+    property->end        = static_cast<int>(ast->lastSourceLocation().end());
     m_lastAppend->appendProperty(property);
 
     if ( QmlJS::AST::cast<QmlJS::AST::Block *>(ast->statement)){

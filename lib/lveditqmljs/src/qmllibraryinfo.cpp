@@ -127,7 +127,7 @@ LanguageUtils::FakeMetaObject::ConstPtr QmlLibraryInfo::findObjectByClassName(co
 LanguageUtils::FakeMetaObject::ConstPtr QmlLibraryInfo::findObject(const QString &name, QmlTypeReference::Language lang){
     if ( lang == QmlTypeReference::Cpp ){
         return findObjectByClassName(name);
-    } else if ( lang == QmlTypeReference::Qml ){
+    } else if ( lang == QmlTypeReference::Qml || lang == QmlTypeReference::Unknown ){
         QmlLibraryInfo::ExportVersion ev = findExport(name);
         if ( ev.isValid() )
             return ev.object;

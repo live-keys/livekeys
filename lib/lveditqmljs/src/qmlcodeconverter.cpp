@@ -35,12 +35,14 @@ QObject *QmlCodeConverter::create(
         QObject* parent)
 {
     QString fullDeclaration;
-    for ( auto it = scope.imports().begin(); it != scope.imports().end(); ++it ){
+    DocumentQmlInfo::ConstPtr info = scope.info();
+
+    for ( auto it = info->imports().begin(); it != info->imports().end(); ++it ){
         fullDeclaration +=
-            "import " + it->first.path() + " " +
-            QString::number(it->first.versionMajor()) + "." + QString::number(it->first.versionMinor());
-        if ( !it->first.as().isEmpty() ){
-            fullDeclaration += " as " + it->first.as();
+            "import " + it->uri() + " " +
+            QString::number(it->versionMajor()) + "." + QString::number(it->versionMinor());
+        if ( !it->as().isEmpty() ){
+            fullDeclaration += " as " + it->as();
         }
         fullDeclaration += "\n";
     }

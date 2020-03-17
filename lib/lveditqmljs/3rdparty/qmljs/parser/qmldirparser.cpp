@@ -54,6 +54,19 @@ static int parseInt(const QStringRef &str, bool *ok)
     return number;
 }
 
+static bool parseVersion(const QString &str, int *major, int *minor)
+{
+    const int dotIndex = str.indexOf(QLatin1Char('.'));
+    if (dotIndex != -1 && str.indexOf(QLatin1Char('.'), dotIndex + 1) == -1) {
+        bool ok = false;
+        *major = parseInt(QStringRef(&str, 0, dotIndex), &ok);
+        if (ok)
+            *minor = parseInt(QStringRef(&str, dotIndex + 1, str.length() - dotIndex - 1), &ok);
+        return ok;
+    }
+    return false;
+}
+
 QmlDirParser::QmlDirParser()
 {
 }
@@ -212,6 +225,21 @@ bool QmlDirParser::parse(const QString &source)
                         }
                     }
                 }
+            }
+        } else if (sections[0] == QLatin1String("depends")) {
+            if (sectionCount != 3) {
+                reportError(lineNumber, 0,
+                            QStringLiteral("depends requires 2 arguments, but %1 were provided").arg(sectionCount - 1));
+                continue;
+            }
+
+            int major, minor;
+            if (parseVersion(sections[2], &major, &minor)) {
+                Component entry(sections[1], QString(), major, minor);
+                entry.internal = true;
+                _dependencies.insert(entry.typeName, entry);
+            } else {
+                reportError(lineNumber, 0, QStringLiteral("invalid version %1, expected <major>.<minor>").arg(sections[2]));
             }
         } else if (sections[0] == QLatin1String("typeinfo")) {
             if (sectionCount != 2) {

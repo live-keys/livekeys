@@ -216,6 +216,7 @@ class DocumentQmlInfoPrivate{
 public:
     QmlJS::Document::MutablePtr     internalDoc;
     QmlJS::Bind*                    internalDocBind;
+    DocumentQmlInfo::ImportList     imports;
     DocumentQmlRanges               ranges;
     QList<DocumentQmlInfo::Message> messages;
 };
@@ -419,6 +420,8 @@ QmlTypeInfo DocumentQmlInfo::extractValueObjectWithExport(
         ValueMemberExtractor extractor(fmo);
         vob->processMembers(&extractor);
 
+        fmo->setClassName("qml/" + componentName);
+        fmo->setSuperclassName("qml/" + vob->typeName()->name.toString());
         fmo->addExport(componentName, libraryPath, LanguageUtils::ComponentVersion(vMajor, vMinor));
 
         vodata = QmlTypeInfoPrivate::fromMetaObject(fmo, path());
@@ -593,6 +596,8 @@ bool DocumentQmlInfo::parse(const QString &source){
         );
     }
 
+    d->imports = extractImports();
+
     return parseResult;
 }
 
@@ -607,6 +612,34 @@ const QList<lv::DocumentQmlInfo::Message> &DocumentQmlInfo::diagnostics() const{
 QmlJS::Bind *DocumentQmlInfo::internalBind(){
     Q_D(DocumentQmlInfo);
     return d->internalDocBind;
+}
+
+QList<DocumentQmlInfo::Import> DocumentQmlInfo::extractImports(){
+    QList<DocumentQmlInfo::Import> imports;
+    QList<QmlJS::ImportInfo> importInfos = internalBind()->imports();
+
+    for ( QList<QmlJS::ImportInfo>::iterator it = importInfos.begin(); it != importInfos.end(); ++it ){
+        QmlJS::ImportKey impKey(*it);
+        Import::Type importType;
+        switch(impKey.type){
+        case QmlJS::ImportType::Invalid:           importType = Import::Invalid; break;
+        case QmlJS::ImportType::Library:           importType = Import::Library; break;
+        case QmlJS::ImportType::Directory:         importType = Import::Directory; break;
+        case QmlJS::ImportType::ImplicitDirectory: importType = Import::ImplicitDirectory; break;
+        case QmlJS::ImportType::File:              importType = Import::File; break;
+        case QmlJS::ImportType::UnknownFile:       importType = Import::UnknownFile; break;
+        default:                                   importType = Import::Invalid;
+        }
+
+        imports << Import(
+           importType,
+           it->path(),
+           it->as(),
+           it->version().majorVersion(),
+           it->version().minorVersion()
+       );
+    }
+    return imports;
 }
 
 /**
@@ -748,6 +781,92 @@ QSharedPointer<lv::QmlBindingPath> DocumentQmlInfo::findDeclarationPath(
  * \brief DocumentQmlInfo destructor
  */
 DocumentQmlInfo::~DocumentQmlInfo(){
+}
+
+/**
+ * \class lv::DocumentQmlScope::Import
+ * \ingroup lveditqmljs
+ * \brief Import data associated with a lv::DocumentQmlScope
+ */
+
+/**
+ * \property lv::DocumentQmlScope::Import::NoVersion
+ * \brief Value used to check wether a version is valid or not
+ */
+
+// DocumentQmlInfo::Import implementation
+// ----------------------------------------
+
+/**
+ * \brief Import constructor
+ *
+ * Takes an \p importType, the \p path of the import, the \p as namespace in which to import for this
+ * document and the two versions: \p vMajor, \p vMinor
+ */
+DocumentQmlInfo::Import::Import(
+        DocumentQmlInfo::Import::Type importType,
+        const QString &path,
+        const QString& as,
+        int vMajor,
+        int vMinor)
+    : m_type(importType)
+    , m_uri(path)
+    , m_relativeUri(path)
+    , m_as(as)
+    , m_versionMajor(vMajor)
+    , m_versionMinor(vMinor)
+{
+}
+
+bool DocumentQmlInfo::hasImport(const DocumentQmlInfo::Import &key) const{
+    foreach( const DocumentQmlInfo::Import& imp, d_ptr->imports ){
+        if ( imp == key )
+            return true;
+    }
+    return false;
+}
+
+bool DocumentQmlInfo::hasImport(const QString &importUri) const{
+    foreach( const DocumentQmlInfo::Import& imp, d_ptr->imports ){
+        if ( imp.uri() == importUri )
+            return true;
+    }
+    return false;
+}
+
+bool DocumentQmlInfo::hasImportAs(const QString &asKey) const{
+    foreach( const DocumentQmlInfo::Import& imp, d_ptr->imports ){
+        if ( imp.uri() == asKey )
+            return true;
+    }
+    return false;
+}
+
+/// \brief Returns the total number of imports for this lv::ProjectDocument.
+int DocumentQmlInfo::totalImports() const{
+    return d_ptr->imports.size();
+}
+
+/// \brief Returns the ImportList associated with this object.
+const DocumentQmlInfo::ImportList &DocumentQmlInfo::imports() const{
+    return d_ptr->imports;
+}
+
+void DocumentQmlInfo::transferImports(const DocumentQmlInfo::ImportList &imports){
+    d_ptr->imports = imports;
+}
+
+/// \brief Adds an import \p path to a given \p key.
+void DocumentQmlInfo::addImport(const DocumentQmlInfo::Import &key){
+    d_ptr->imports.append(key);
+}
+
+/// \brief Updates the import at the given uri type.
+void DocumentQmlInfo::updateImportType(const QString &uri, DocumentQmlInfo::Import::Type type){
+    for( DocumentQmlInfo::Import& imp: d_ptr->imports ){
+        if ( imp.uri() == uri )
+            imp.setImportType(type);
+    }
 }
 
 }// namespace
