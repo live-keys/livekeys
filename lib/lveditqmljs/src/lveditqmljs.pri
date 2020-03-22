@@ -6,7 +6,6 @@ HEADERS += \
     $$PWD/qmlbindingchannel.h \
     $$PWD/qmlbindingpath.h \
     $$PWD/qmlbindingspan.h \
-    $$PWD/qmleventmodel.h \
     $$PWD/qmlimportsmodel.h \
     $$PWD/qmlbindingspanmodel.h \
     $$PWD/qmlidvisitor_p.h \
@@ -30,13 +29,12 @@ HEADERS += \
     $$PWD/projectqmlextension.h \
     $$PWD/projectqmlscanmonitor_p.h \
     $$PWD/qmljsbuiltintypes_p.h \
-    $$PWD/qmlpropertymodel.h \
-    $$PWD/qmlitemmodel.h \
     $$PWD/qmladdcontainer.h \
     $$PWD/qmlcodeconverter.h \
     $$PWD/qmleditfragment.h \
     $$PWD/qmldeclaration.h \
     $$PWD/qmlscopesnap_p.h \
+    $$PWD/qmlsuggestionmodel.h \
     $$PWD/qmlusagegraphscanner.h
 
 SOURCES += \
@@ -46,7 +44,6 @@ SOURCES += \
     $$PWD/qmlbindingpath.cpp \
     $$PWD/qmlbindingspan.cpp \
     $$PWD/qmlbindingspanmodel.cpp \
-    $$PWD/qmleventmodel.cpp \
     $$PWD/qmlidvisitor.cpp \
     $$PWD/qmlcompletioncontext.cpp \
     $$PWD/qmllanguageinfo.cpp \
@@ -65,12 +62,11 @@ SOURCES += \
     $$PWD/projectqmlextension.cpp \
     $$PWD/projectqmlscanmonitor.cpp \
     $$PWD/qmljsbuiltintypes.cpp \
-    $$PWD/qmlpropertymodel.cpp \
-    $$PWD/qmlitemmodel.cpp \
     $$PWD/qmladdcontainer.cpp \
     $$PWD/qmlcodeconverter.cpp \
     $$PWD/qmleditfragment.cpp \
     $$PWD/qmldeclaration.cpp \
     $$PWD/qmlimportsmodel.cpp \
     $$PWD/qmlscopesnap.cpp \
+    $$PWD/qmlsuggestionmodel.cpp \
     $$PWD/qmlusagegraphscanner.cpp

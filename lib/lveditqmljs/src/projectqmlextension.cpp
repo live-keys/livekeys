@@ -26,8 +26,6 @@
 #include "qmlcodeconverter.h"
 #include "projectqmlscanner_p.h"
 #include "projectqmlscanmonitor_p.h"
-#include "qmlpropertymodel.h"
-#include "qmlitemmodel.h"
 #include "qmladdcontainer.h"
 #include "qmleditfragment.h"
 #include "qmlbindingspanmodel.h"
@@ -163,12 +161,8 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         uri, 1, 0, "QmlCodeConverter", "QmlCodeConverter can only be accessed through the Palette.attachment.");
     qmlRegisterUncreatableType<lv::QmlAddContainer>(
         uri, 1, 0, "QmlAddContainer", "QmlAddContainer can only be accessed through the qmledit extension.");
-    qmlRegisterUncreatableType<lv::QmlPropertyModel>(
-        uri, 1, 0, "QmlPropertyModel", "QmlPropertyModel can only be accessed through the qmledit extension.");
-    qmlRegisterUncreatableType<lv::QmlItemModel>(
-        uri, 1, 0, "QmlItemModel", "QmlItemModel can only be accessed through the qmledit extension.");
-    qmlRegisterUncreatableType<lv::QmlEventModel>(
-        uri, 1, 0, "QmlEventModel", "QmlEventModel can only be accessed through the qmledit extension.");
+    qmlRegisterUncreatableType<lv::QmlSuggestionModel>(
+        uri, 1, 0, "QmlSuggestionModel", "QmlSuggestionModel can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlBindingSpanModel>(
         uri, 1, 0, "BindingSpanModel", "BindingSpanModel can only be accessed through the qmledit extension.");
 }

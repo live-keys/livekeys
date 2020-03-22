@@ -119,6 +119,7 @@ public slots:
     lv::QmlEditFragment* openConnection(int position, QObject *currentApp = nullptr);
     lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
     QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
+    QList<QObject*> openNestedProperties(lv::QmlEditFragment* edit);
     void removeConnection(lv::QmlEditFragment* edit);
     void deleteObject(lv::QmlEditFragment* edit);
 

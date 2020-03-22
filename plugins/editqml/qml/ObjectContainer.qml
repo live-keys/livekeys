@@ -23,6 +23,8 @@ Item{
 
     function expand(){
         var connections = editor.documentHandler.codeHandler.openNestedObjects(editingFragment)
+        var properties = editor.documentHandler.codeHandler.openNestedProperties(editingFragment)
+
         for ( var i = 0; i < connections.length; ++i ){
             var ef = connections[i]
             var childObjectContainer = objectContainerFactory.createObject(container)
@@ -41,6 +43,23 @@ Item{
             paletteBoxGroup.x = 5
         }
 
+        for (var j = 0; j < properties.length; ++j){
+            var efp = properties[j]
+            var propertyContainer = propertyContainerFactory.createObject(container)
+            propertyContainer.z = 3000 + properties.length - j
+            container.sortChildren()
+
+            propertyContainer.title = efp.identifier()
+            propertyContainer.documentHandler = objectContainer.editor.documentHandler
+            propertyContainer.propertyContainerFactory = propertyContainerFactory
+
+            propertyContainer.editor = objectContainer.editor
+            propertyContainer.editingFragment = efp
+
+            propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
+            propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
+            propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
+        }
         compact = false
     }
 

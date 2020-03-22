@@ -51,6 +51,8 @@
 #include "live/qmlpropertywatcher.h"
 #include "live/runnablecontainer.h"
 
+#include "qmlsuggestionmodel.h"
+
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QFileInfo>
@@ -1535,10 +1537,6 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position, QObject* /*current
         ef->declaration()->section()->onTextChanged(
                     [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
         {
-//            auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
-//            int length = editingFragment->declaration()->valueLength();
-//            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
-
             auto projectDocument = section->document();
             auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
 
@@ -1712,7 +1710,7 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
             QString currentObDeclaration = m_document->substring(child->begin, child->identifierEnd - child->begin);
             int splitter = currentObDeclaration.indexOf('.');
             QString obName = currentObDeclaration.mid(splitter + 1);
-            QString obNs   = splitter == -1 ? "" : currentObDeclaration.mid(0, splitter);;
+            QString obNs   = splitter == -1 ? "" : currentObDeclaration.mid(0, splitter);
 
             QmlInheritanceInfo obPath = scope.getTypePath(obNs, obName);
 
@@ -1764,6 +1762,115 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                 fragments.append(ef);
 
             }
+        }
+    }
+
+    return fragments;
+}
+
+QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
+{
+    Q_D(CodeQmlHandler);
+
+    QList<QObject*> fragments;
+
+    QmlScopeSnap scope = d->snapScope();
+
+    QString source = m_target->toPlainText();
+    DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(m_document->file()->path());
+    docinfo->parse(source);
+
+    DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
+    DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(edit->position());
+
+    if ( currentOb ){
+        for ( int i = 0; i < currentOb->properties.size(); ++i ){
+
+            QmlDeclaration::Ptr property = nullptr;
+            DocumentQmlValueObjects::RangeProperty* rp = currentOb->properties[i];
+
+            QString propertyType = rp->type();
+
+            if (rp->name().size() == 1 && rp->name()[0] == "id") continue;
+
+            if ( propertyType.isEmpty() ){
+
+                QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
+                    scope.quickObjectDeclarationType(rp->object()), rp->name(), rp->begin
+                );
+
+                if ( propChain.size() == rp->name().size() && propChain.size() > 0 ){
+                    QmlScopeSnap::PropertyReference& propref = propChain.last();
+                    property = QmlDeclaration::create(
+                        rp->name(),
+                        propref.resultType(),
+                        propref.propertyObjectType(),
+                        rp->begin,
+                        rp->propertyEnd - rp->begin,
+                        m_document
+                    );
+                }
+            } else {
+                QmlTypeReference qlt;
+                if ( QmlTypeInfo::isObject(propertyType) ){
+                    QmlTypeInfo tr = scope.getType(propertyType);
+                } else {
+                    qlt = QmlTypeReference(QmlTypeReference::Qml, rp->type());
+                }
+                if ( !qlt.isEmpty() ){
+                    QmlTypeInfo tr = scope.getType(rp->object());
+
+                    property = QmlDeclaration::create(
+                        rp->name(), qlt, tr.prefereredType(), rp->begin, rp->propertyEnd - rp->begin, m_document
+                    );
+                }
+            }
+
+            QmlEditFragment* ef = createInjectionChannel(property);
+            if (!ef) continue;
+
+            QTextCursor codeCursor(m_target);
+            codeCursor.setPosition(ef->valuePosition());
+            codeCursor.setPosition(ef->valuePosition() + ef->valueLength(), QTextCursor::KeepAnchor);
+
+            ef->declaration()->setSection(m_document->createSection(
+                QmlEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
+            ));
+            ef->declaration()->section()->setUserData(ef);
+            ef->declaration()->section()->onTextChanged(
+                        [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
+            {
+                auto projectDocument = section->document();
+                auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
+
+                if ( projectDocument->editingStateIs(ProjectDocument::Runtime) ){
+
+                    int length = editingFragment->declaration()->valueLength();
+                    editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+
+                } else if ( !projectDocument->editingStateIs(ProjectDocument::Silent) ){
+                    removeEditingFragment(editingFragment);
+                } else {
+                    int length = editingFragment->declaration()->valueLength();
+                    editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+                }
+            });
+
+            QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->inputChannel();
+            if ( inputChannel && inputChannel->listIndex() == -1 ){
+                inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
+            }
+
+            edit->addChildFragment(ef);
+            ef->setParent(edit);
+
+            rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
+
+            DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+            if ( dh )
+                dh->requestCursorPosition(ef->valuePosition());
+
+            fragments.push_back(ef);
         }
     }
 
@@ -2354,13 +2461,16 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                     name = QString("on") + name[0].toUpper() + name.mid(1);
 
 
-                    addContainer->eventModel()->addItem(QmlEventModel::EventData(
-                        name,
-                        objectTypeName,
-                        "method",
-                        "", //TODO: Find library path
-                        name
-                    ));
+                    addContainer->eventModel()->addItem(
+                        QmlSuggestionModel::ItemData(
+                            name,
+                            objectTypeName,
+                            "method",
+                            "",
+                            "", //TODO: Find library path
+                            name
+                        )
+                    );
 
                 }
             }
@@ -2368,25 +2478,31 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
             for ( int i = 0; i < object->propertyCount(); ++i ){
                 if ( !object->property(i).name().startsWith("__") ){
                     QString propertyName = object->property(i).name();
-                    addContainer->propertyModel()->addItem(QmlPropertyModel::PropertyData(
-                        propertyName,
-                        objectTypeName,
-                        object->property(i).typeName(),
-                        "", //TODO: Find library path
-                        propertyName)
+                    addContainer->propertyModel()->addItem(
+                        QmlSuggestionModel::ItemData(
+                            propertyName,
+                            objectTypeName,
+                            object->property(i).typeName(),
+                            "",
+                            "", //TODO: Find library path
+                            propertyName
+                        )
                     );
                     if ( propertyName.size() > 0 )
                         propertyName[0] = propertyName[0].toUpper();
 
                     if (propertyName != "ObjectName"){
                         propertyName = "on" + propertyName + "Changed";
-                        addContainer->eventModel()->addItem(QmlEventModel::EventData(
-                            propertyName,
-                            objectTypeName,
-                            "method",
-                            "", //TODO: Find library path
-                            propertyName
-                        ));
+                        addContainer->eventModel()->addItem(
+                            QmlSuggestionModel::ItemData(
+                                propertyName,
+                                objectTypeName,
+                                "method",
+                                "",
+                                "", //TODO: Find library path
+                                propertyName
+                            )
+                        );
                     }
                 }
             }
@@ -2403,7 +2519,14 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
     foreach( const QString& e, exports ){
         if ( e != scope.document->info()->componentName() ){
             addContainer->itemModel()->addItem(
-                QmlItemModel::ItemData(e, "implicit", scope.document->info()->path(), e)
+                QmlSuggestionModel::ItemData(
+                    e,
+                    "",
+                    "",
+                    "implicit",
+                    scope.document->info()->path(),
+                    e
+                )
             );
         }
     }
@@ -2413,7 +2536,13 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
         scope.project->globalLibraries()->libraryInfo(defaultLibrary)->listExports(&exports);
         foreach( const QString& e, exports ){
             addContainer->itemModel()->addItem(
-                QmlItemModel::ItemData(e, "QtQml", "QtQml", e)
+                QmlSuggestionModel::ItemData(
+                    e,
+                    "",
+                    "",
+                    "QtQml",
+                    "QtQml",
+                    e)
             );
         }
     }
@@ -2441,7 +2570,13 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
 
                 foreach( const QString& e, exports ){
                     addContainer->itemModel()->addItem(
-                        QmlItemModel::ItemData(e, imp.uri(), imp.uri(), e)
+                        QmlSuggestionModel::ItemData(
+                            e,
+                            "",
+                            "",
+                            imp.uri(),
+                            imp.uri(),
+                            e)
                     );
                 }
             }
