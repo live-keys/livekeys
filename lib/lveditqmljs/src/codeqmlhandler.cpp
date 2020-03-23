@@ -1527,7 +1527,7 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position, QObject* /*current
         auto model = importsModel();
 
         int startPosition = m_target->findBlockByNumber(model->firstBlock()).position();
-        auto lastBlock = m_target->findBlockByNumber(model->lastBlock());
+        auto lastBlock = m_target->findBlockByNumber(model->lastBlock()-1);
         int length = lastBlock.position() + lastBlock.length() - startPosition;
         ef->declaration()->setSection(
             m_document->createSection(QmlEditFragment::Section, startPosition, length)
