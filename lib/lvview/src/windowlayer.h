@@ -20,10 +20,11 @@ class LV_VIEW_EXPORT WindowLayer : public Layer{
 
 public:
     explicit WindowLayer(QObject *parent = nullptr);
-    ~WindowLayer();
+    ~WindowLayer() override;
 
-    void loadView(ViewEngine *engine, QObject* parent) Q_DECL_OVERRIDE;
-    QObject* nextViewParent() Q_DECL_OVERRIDE;
+    void loadView(ViewEngine *engine, QObject* parent) override;
+    QObject* nextViewParent() override;
+    QObject * viewRoot() override;
 
     QObject* handle() const;
     QObject* dialogs() const;

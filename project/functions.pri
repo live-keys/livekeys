@@ -64,7 +64,7 @@ defineTest(linkLocalLibrary){
 
     LIB_NAME = $$2
     LIB_INCLUDE_PATH = $$PROJECT_ROOT/lib/$$1/include
-    !isEmpty($$3):LIB_INCLUDE_PATH=$$3
+    !isEmpty(3):LIB_INCLUDE_PATH=$$3
 
     # use *= instead of += to prevent duplications of link path cofigurations
     LIBS *= -L$$LIB_PATH
@@ -120,7 +120,7 @@ defineTest(linkLocalPlugin){
 
     LIB_NAME = $$2
     LIB_INCLUDE_PATH = $$PROJECT_ROOT/plugins/$$1/include
-    !isEmpty($$3):LIB_INCLUDE_PATH=$$3
+    !isEmpty(3):LIB_INCLUDE_PATH=$$3
 
     # use *= instead of += to prevent duplications of link path cofigurations
     LIBS *= -L$$LIB_PATH
@@ -187,7 +187,7 @@ defineTest(linkPlugin){
     LIB_NAME = $$2
     LIB_INCLUDE_PATH = $$libraryIncludePath()/plugins/$$1/include
 
-    !isEmpty($$3):LIB_INCLUDE_PATH=$$3
+    !isEmpty(3):LIB_INCLUDE_PATH=$$3
 
     # use *= instead of += to prevent duplications of link path cofigurations
     LIBS *= -L$$LIB_PATH

@@ -8,12 +8,9 @@
 #include "qmljshighlighter_p.h"
 #include "qmlbindingchannel.h"
 #include "projectqmlscope.h"
-#include "projectqmlscopecontainer_p.h"
-#include "documentqmlscope.h"
 
 #include "qmljs/qmljsscanner.h"
-#include "projectqmlscanner_p.h"
-#include "projectqmlscanmonitor_p.h"
+#include "qmlprojectmonitor_p.h"
 #include "qmllanguageinfo.h"
 #include "qmllanguageinfo_p.h"
 
@@ -95,16 +92,16 @@ public:
         QString enumName;
 
         QList<PropertyReference> propertyChain;
-        QmlTypeInfo documentValueObject;
+        QmlTypeInfo::Ptr documentValueObject;
     };
 
 public:
-    QmlScopeSnap(const ProjectQmlScope::Ptr& project, const DocumentQmlScope::Ptr& document);
+    QmlScopeSnap(const ProjectQmlScope::Ptr& project, const DocumentQmlInfo::Ptr& document);
 
-    QmlTypeInfo getType(const QString& name) const;
-    QmlTypeInfo getType(const QString& importNamespace, const QString& typeName) const;
-    QmlTypeInfo getType(const QStringList& typeAndImport);
-    QmlTypeInfo getTypeFromContextLibrary(
+    QmlTypeInfo::Ptr getType(const QString& name) const;
+    QmlTypeInfo::Ptr getType(const QString& importNamespace, const QString& typeName) const;
+    QmlTypeInfo::Ptr getType(const QStringList& typeAndImport);
+    QmlTypeInfo::Ptr getTypeFromContextLibrary(
         const QString& typeName,
         const QString& libraryUri,
         QmlTypeReference::Language language = QmlTypeReference::Cpp) const;
@@ -114,10 +111,10 @@ public:
     QmlInheritanceInfo getTypePath(const QString& importAs, const QString& name) const;
     QmlInheritanceInfo getTypePath(const QmlTypeReference& languageType) const;
 
-    QmlLibraryInfo::Reference libraryFromUri(const QString& uri) const;
-    QmlLibraryInfo::Reference libraryFromType(const QmlTypeReference& tr) const;
+    QmlLibraryInfo::Ptr libraryFromUri(const QString& uri) const;
+    QmlLibraryInfo::Ptr libraryFromType(const QmlTypeReference& tr) const;
 
-    QmlInheritanceInfo generateTypePathFromObject(const QmlTypeInfo& tr) const;
+    QmlInheritanceInfo generateTypePathFromObject(const QmlTypeInfo::Ptr &tr) const;
     QmlInheritanceInfo generateTypePathFromClassName(const QString& typeName, QString typeLibrary) const;
 
     QmlInheritanceInfo propertyTypePath(const QmlInheritanceInfo& classTypePath, const QString& propertyName) const;
@@ -136,8 +133,8 @@ public:
     bool isEnum(const QmlInheritanceInfo& classTypePath, const QString& name) const;
 
 public:
-    ProjectQmlScope::Ptr  project;
-    DocumentQmlScope::Ptr document;
+    ProjectQmlScope::Ptr project;
+    DocumentQmlInfo::Ptr document;
 };
 
 }// namespace

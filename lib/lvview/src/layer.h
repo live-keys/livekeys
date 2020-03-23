@@ -24,7 +24,8 @@ public:
     void setName(const QString &name);
 
     virtual void loadView(ViewEngine *, QObject*){}
-    virtual QObject* nextViewParent(){ return nullptr;}
+    virtual QObject* nextViewParent(){ return nullptr; }
+    virtual QObject* viewRoot(){return nullptr;}
 
 protected:
     void setHasView(bool flag);

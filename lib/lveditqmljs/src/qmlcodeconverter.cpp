@@ -7,7 +7,6 @@
 #include "live/viewengine.h"
 #include "qmlbindingchannel.h"
 #include "qmlbindingspan.h"
-#include "documentqmlscope.h"
 
 #include "live/codecompletionmodel.h"
 #include "live/codeqmlhandler.h"
@@ -29,13 +28,12 @@ QmlCodeConverter::~QmlCodeConverter(){
 }
 
 QObject *QmlCodeConverter::create(
-        const DocumentQmlScope &scope,
+        const DocumentQmlInfo::ConstPtr &info,
         const QString &declaration,
         const QString &path,
         QObject* parent)
 {
     QString fullDeclaration;
-    DocumentQmlInfo::ConstPtr info = scope.info();
 
     for ( auto it = info->imports().begin(); it != info->imports().end(); ++it ){
         fullDeclaration +=

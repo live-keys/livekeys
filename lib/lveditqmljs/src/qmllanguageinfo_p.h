@@ -26,17 +26,10 @@ namespace lv{
 class QmlTypeInfoPrivate{
 
 public:
-    static QmlTypeInfo fromMetaObject(LanguageUtils::FakeMetaObject::ConstPtr fmo, const QString& libraryUri = "");
+    static QmlTypeInfo::Ptr fromMetaObject(LanguageUtils::FakeMetaObject::ConstPtr fmo, const QString& libraryUri = "");
     static QmlFunctionInfo fromMetaMethod(const QmlTypeInfo& parent, const LanguageUtils::FakeMetaMethod& method);
     static QmlPropertyInfo fromMetaProperty(const QmlTypeInfo& parent, const LanguageUtils::FakeMetaProperty& prop);
-    static const LanguageUtils::FakeMetaObject::ConstPtr typeObject(const QmlTypeInfo& ti);
-
-
-    static void appendProperty(LanguageUtils::FakeMetaObject::Ptr object, const QmlPropertyInfo& prop);
-    static void appendFunction(LanguageUtils::FakeMetaObject::Ptr object, const QmlFunctionInfo& finfo);
-
-public:
-    LanguageUtils::FakeMetaObject::ConstPtr object;
+    static QmlEnumInfo fromMetaEnum(const LanguageUtils::FakeMetaEnum& prop);
 };
 
 } // namespace

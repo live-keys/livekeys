@@ -2,11 +2,12 @@
 #define LVQMLPLUGININFOEXTRACTOR_H
 
 #include <QObject>
+#include <QQmlEngine>
 
 namespace lv{
 
 class ProjectQmlExtension;
-class PluginInfoExtractor;
+class QmlLanguageScanner;
 
 class QmlPluginInfoExtractor : public QObject{
 
@@ -20,17 +21,18 @@ public:
     void setImportUri(const QString& importUri);
     QString importUri() const;
 
+public slots:
+    void printResult(const QString& data);
+
 signals:
     void importUriChanged();
     void pluginInfoReady(const QString& data);
-
-public slots:
-    void __pluginInfoReady();
+    void message(int level, QString value);
 
 private:
-    ProjectQmlExtension* m_qmlExtension;
-    PluginInfoExtractor* m_extractor;
+    QmlLanguageScanner*  m_languageScanner;
     QString              m_importUri;
+    QQmlEngine*          m_engine;
 };
 
 inline QString QmlPluginInfoExtractor::importUri() const{

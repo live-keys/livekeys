@@ -6,11 +6,11 @@
 #include <QVariant>
 
 #include "live/lveditqmljsglobal.h"
+#include "live/documentqmlinfo.h"
 
 namespace lv{
 
 class QmlEditFragment;
-class DocumentQmlScope;
 class CodeCompletionModel;
 
 /// \private
@@ -29,7 +29,7 @@ public:
     QmlEditFragment* editingFragment();
 
     static QObject* create(
-        const DocumentQmlScope& scope,
+        const DocumentQmlInfo::ConstPtr& info,
         const QString& declaration,
         const QString& path,
         QObject* parent = nullptr

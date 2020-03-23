@@ -35,6 +35,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     : Layer(parent)
     , m_projectEnvironment(nullptr)
     , m_panes(nullptr)
+    , m_viewRoot(nullptr)
     , m_commands(new Commands)
     , m_keymap(nullptr)
     , m_themes(new ThemeContainer("workspace", this))
@@ -135,15 +136,16 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
 
     QByteArray contentBytes = f.readAll();
 
-    QObject* layerObj = engine->createObject(contentBytes, parent, QUrl("qrc:/workspace.qml"));
-    if ( !layerObj && engine->lastErrors().size() > 0 )
+    m_viewRoot = engine->createObject(contentBytes, parent, QUrl("qrc:/workspace.qml"));
+    engine->engine()->setObjectOwnership(m_viewRoot, QQmlEngine::CppOwnership);
+    if ( !m_viewRoot && engine->lastErrors().size() > 0 )
         THROW_EXCEPTION(
             Exception, ViewEngine::toErrorString(engine->lastErrors()).toStdString(), Exception::toCode("~Component")
         );
 
-    m_projectEnvironment = layerObj->property("projectEnvironment").value<QObject*>();
-    m_panes              = layerObj->property("panes").value<QObject*>();
-    m_nextViewParent     = layerObj->property("runSpace").value<QObject*>();
+    m_projectEnvironment = m_viewRoot->property("projectEnvironment").value<QObject*>();
+    m_panes              = m_viewRoot->property("panes").value<QObject*>();
+    m_nextViewParent     = m_viewRoot->property("runSpace").value<QObject*>();
     QJSValue paneFactories = m_panes->property("factories").value<QJSValue>();
 
     m_keymap->store(0, Qt::Key_O,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.project.openFile");
@@ -175,6 +177,10 @@ QObject *WorkspaceLayer::nextViewParent(){
     return m_nextViewParent;
 }
 
+QObject *WorkspaceLayer::viewRoot(){
+    return m_viewRoot;
+}
+
 QJSValue WorkspaceLayer::interceptMenu(QJSValue context){
     QJSValueList interceptorArgs;
     interceptorArgs << context;
@@ -186,11 +192,11 @@ QJSValue WorkspaceLayer::interceptMenu(QJSValue context){
         if ( le->hasMenuInterceptor() ){
             QJSValue v = le->callMenuInterceptor(interceptorArgs);
             if ( v.isArray() ){
-                QJSValueIterator it(v);
-                while ( it.hasNext() ){
-                    it.next();
-                    if ( it.name() != "length" ){
-                        result << it.value();
+                QJSValueIterator vit(v);
+                while ( vit.hasNext() ){
+                    vit.next();
+                    if ( vit.name() != "length" ){
+                        result << vit.value();
                     }
                 }
             }

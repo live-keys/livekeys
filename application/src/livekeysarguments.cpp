@@ -23,6 +23,7 @@ namespace lv{
 
 LivekeysArguments::LivekeysArguments(const std::string& header)
     : m_parser(new CommandLineParser(header))
+    , m_globalScript(false)
 {
 }
 
@@ -70,6 +71,8 @@ void LivekeysArguments::initialize(int argc, const char* const argv[]){
         "Run project in console mode. This is equivalent to --layers base");
     CommandLineParser::Option* layersWindow = m_parser->addFlag({"--window"},
         "Run project in window mode, do not load any workspace. This is equivalent to --layers window");
+    CommandLineParser::Option* globalScript = m_parser->addFlag({"--global"},
+        "Run project by looking its path up in the global packages folder.");
 
     m_parser->parse(argc, argv);
 
@@ -86,6 +89,9 @@ void LivekeysArguments::initialize(int argc, const char* const argv[]){
         if ( !m_layers.isEmpty() )
             THROW_EXCEPTION(Exception, "Both --window and other layer options have been set.", lv::Exception::toCode("Init"));
         m_layers = QStringList() << "window";
+    }
+    if ( m_parser->isSet(globalScript) ){
+        m_globalScript = true;
     }
 
     if ( m_parser->isSet(logConfigFileOption) ){
@@ -179,6 +185,10 @@ const MLNode &LivekeysArguments::getLogConfiguration(){
 
 bool LivekeysArguments::versionFlag() const{
     return m_parser->isSet(m_parser->versionOption());
+}
+
+bool LivekeysArguments::globalFlag() const{
+    return m_globalScript;
 }
 
 std::string LivekeysArguments::helpString() const{

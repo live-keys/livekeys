@@ -15,9 +15,10 @@
 ****************************************************************************/
 
 #include "live/projectqmlscope.h"
-#include "projectqmlscopecontainer_p.h"
+#include "live/visuallogqt.h"
 #include "qmllibrarydependency.h"
-#include "qmllibraryinfo_p.h"
+#include "qmllanguagescanner.h"
+#include "qmllanguagescanmonitor.h"
 
 #include "qmljs/qmljsdocument.h"
 #include "qmljs/qmljsinterpreter.h"
@@ -44,110 +45,142 @@ namespace lv{
  * lv::ProjectQmlScope::create function.
  */
 
-ProjectQmlScope::ProjectQmlScope(QQmlEngine *engine)
-    : d_globalLibraries(new ProjectQmlScopeContainer)
-    , d_implicitLibraries(new ProjectQmlScopeContainer)
+ProjectQmlScope::ProjectQmlScope(LockedFileIOSession::Ptr ioSession, QQmlEngine *engine, QObject *parent)
+    : QObject(parent)
     , m_defaultImportPaths(engine->importPathList())
+    , m_scanMonitor(new QmlLanguageScanMonitor(new QmlLanguageScanner(ioSession, engine->importPathList())))
+    , m_monitorThread(new QThread)
+    , m_scanTimer(new QTimer)
 {
+    m_scanTimer->setInterval(5000);
+    m_scanTimer->setSingleShot(false);
+
+    m_scanMonitor->moveToThread(m_monitorThread);
+
+    connect(this, &ProjectQmlScope::__processQueue, m_scanMonitor, &QmlLanguageScanMonitor::processQueue);
+    connect(m_scanTimer, &QTimer::timeout,          m_scanMonitor, &QmlLanguageScanMonitor::processQueue);
+    connect(m_scanMonitor, &QmlLanguageScanMonitor::libraryUpdates, this, &ProjectQmlScope::__libraryUpdates);
+
+    m_scanTimer->start();
+    m_monitorThread->start();
+
     QStringList versionSegments = QString(QML_VERSION_STR).split(".");
     int versionMajor = versionSegments.length() > 0 ? versionSegments[0].toInt() : 2;
     int versionMinor = versionSegments.length() > 1 ? versionSegments[1].toInt() : 0;
 
-    QList<QString> paths;
-    findQmlLibraryInImports("QtQml", versionMajor, versionMinor, paths);
-    findQmlLibraryInImports("QtQml/Models", versionMajor, versionMinor, paths);
+    QmlLibraryInfo::Ptr qtqml = findQmlLibraryInImports(m_defaultImportPaths, "QtQml", versionMajor, versionMinor);
+    QmlLibraryInfo::Ptr qtqmlModels = findQmlLibraryInImports(m_defaultImportPaths, "QtQml.Models", versionMajor, versionMinor);
 
-    addDefaultLibraries(paths);
+    if ( qtqml ){
+        if ( !m_defaultLibraries.contains(qtqml->uri()) ){
+            m_defaultLibraries.append(qtqml->uri());
+        }
+        queueLibrary(qtqml);
+    }
+    if ( qtqmlModels ){
+        if ( !m_defaultLibraries.contains(qtqmlModels->uri()) ){
+            m_defaultLibraries.append(qtqmlModels->uri());
+        }
+        queueLibrary(qtqmlModels);
+    }
+
+}
+
+void ProjectQmlScope::queueLibrary(const QmlLibraryInfo::Ptr &lib){
+    m_scanMonitor->queueLibrary(lib);
+    if ( !m_scanMonitor->isProcessing() ){
+        emit __processQueue();
+        m_scanTimer->start();
+    }
 }
 
 /**
  * \brief ProjectQmlScope destructor
  */
 ProjectQmlScope::~ProjectQmlScope(){
+    m_scanMonitor->requestStop();
+    if ( !m_monitorThread->wait(100) ){
+        m_monitorThread->terminate();
+        m_monitorThread->wait();
+    }
+    delete m_scanTimer;
+    delete m_scanMonitor;
+    delete m_monitorThread;
 }
 
 /**
  * \brief Creates a new ProjectQmlScope object
  */
-ProjectQmlScope::Ptr ProjectQmlScope::create(QQmlEngine *engine){
-    return ProjectQmlScope::Ptr(new ProjectQmlScope(engine));
+ProjectQmlScope::Ptr ProjectQmlScope::create(LockedFileIOSession::Ptr ioSession, QQmlEngine *engine, QObject *parent){
+    return ProjectQmlScope::Ptr(new ProjectQmlScope(ioSession, engine));
 }
 
-/**
- * \brief Finds a libraries paths given it's uri
- */
-void ProjectQmlScope::findQmlLibraryInImports(
-        const QString &path,
+QmlLibraryInfo::Ptr ProjectQmlScope::findQmlLibraryInImports(
+        const QStringList &importPaths,
+        QString uri,
         int versionMajor,
-        int versionMinor,
-        QList<QString> &paths)
+        int versionMinor)
 {
-    QList<QString> newPaths;
-    QString importUri = path;
-    importUri.replace('/', '.') += " " + QString::number(versionMajor) + "." + QString::number(versionMinor);
-    if ( m_importToPaths.contains(importUri) ){
-        paths.append(m_importToPaths.value(importUri));
-        return;
-    }
+    QString path = uri.replace('.', '/');
 
-    foreach( const QString& importPath, m_defaultImportPaths ){
-        findQmlLibrary(
+    for( const QString& importPath: importPaths ){
+        QmlLibraryInfo::Ptr lib = findQmlLibraryInImports(
+            uri,
             QDir::cleanPath(importPath + QDir::separator() + path),
             versionMajor,
-            versionMinor,
-            newPaths
+            versionMinor
         );
-        if ( !newPaths.isEmpty() ) // avoid duplicates in multiple import paths
-            break;
+        if ( lib )
+            return lib;
     }
 
-    if ( !newPaths.isEmpty() )
-        m_importToPaths[importUri] = newPaths;
-
-    paths << newPaths;
+    return nullptr;
 }
 
-/**
- * \brief Finds a qml library in a given path
- */
-void ProjectQmlScope::findQmlLibrary(
-        const QString &path,
+QmlLibraryInfo::Ptr ProjectQmlScope::findQmlLibraryInImports(
+        const QString &uri,
+        const QString fullPath,
         int versionMajor,
-        int versionMinor,
-        QList<QString>& paths)
+        int versionMinor)
 {
     QString pathMajorMinor = QString::fromLatin1("%1.%2.%3").arg(
-        path, QString::number(versionMajor), QString::number(versionMinor)
+        fullPath, QString::number(versionMajor), QString::number(versionMinor)
     );
     QString pathMajor = QString::fromLatin1("%1.%2").arg(
-        path, QString::number(versionMajor)
+        fullPath, QString::number(versionMajor)
     );
 
-    findQmlLibraryInPath(pathMajorMinor, true, paths);
-    findQmlLibraryInPath(pathMajor, true, paths);
-    findQmlLibraryInPath(path, true, paths);
+    QmlLibraryInfo::Ptr lib;
+    lib = findQmlLibraryInPath(uri, pathMajorMinor, true);
+    if ( !lib )
+        lib = findQmlLibraryInPath(uri, pathMajor, true);
+
+    if ( !lib )
+        lib = findQmlLibraryInPath(uri, fullPath, true);
+
+    if ( lib )
+        lib->updateImportInfo(versionMajor, versionMinor);
+
+    return lib;
 }
 
-/**
- * \brief Finds a qml library in a given path.
- */
-void ProjectQmlScope::findQmlLibraryInPath(const QString &path, bool requiresQmlDir, QList<QString>& paths){
-    if ( d_globalLibraries->libraryExists(path) ){
-        paths.append(path);
-        return;
-    }
-
-    const QDir dir(path);
+QmlLibraryInfo::Ptr ProjectQmlScope::findQmlLibraryInPath(
+        const QString &uri,
+        const QString& fullPath,
+        bool requiresQmlDir)
+{
+    const QDir dir(fullPath);
     if ( !dir.exists() )
-        return;
+        return nullptr;
 
     QFile dirFile(dir.filePath("qmldir"));
     if( !dirFile.exists() ){
         if ( !requiresQmlDir ){
-            d_globalLibraries->assignLibrary(path, QmlLibraryInfo::create());
-            paths.append(path);
+            QmlLibraryInfo::Ptr li = QmlLibraryInfo::create(uri);
+            li->setPath(fullPath);
+            return li;
         }
-        return;
+        return nullptr;
     }
 
     dirFile.open(QFile::ReadOnly);
@@ -155,30 +188,94 @@ void ProjectQmlScope::findQmlLibraryInPath(const QString &path, bool requiresQml
     QmlDirParser dirParser;
     dirParser.parse(QString::fromUtf8(dirFile.readAll()));
 
-    d_globalLibraries->assignLibrary(path, QmlLibraryInfo::create(dirParser));
-    paths.append(path);
+    QmlLibraryInfo::Ptr linfo = QmlLibraryInfo::create(dirParser);
+    linfo->setPath(fullPath);
+    return linfo;
 }
 
-/**
- * \brief Adds a library as implicit
- */
-void ProjectQmlScope::addImplicitLibrary(const QString &path){
-    if ( !d_implicitLibraries->libraryExists(path) )
-        d_implicitLibraries->assignLibrary(path, QmlLibraryInfo::create());
+QmlLibraryInfo::Ptr ProjectQmlScope::addQmlGlobalLibrary(const QString &uri, int major, int minor){
+    auto fit = m_libraries.find(uri);
+    if ( fit != m_libraries.end() ){
+        return fit.value();
+    }
+
+    QmlLibraryInfo::Ptr lib = findQmlLibraryInImports(m_defaultImportPaths, uri, major, minor);
+    if ( lib ){
+        m_libraries[lib->uri()] = lib;
+        queueLibrary(lib);
+        return lib;
+    }
+    return nullptr;
+}
+
+QmlLibraryInfo::Ptr ProjectQmlScope::addQmlProjectLibrary(const QString &uri){
+    auto fit = m_libraries.find(uri);
+    if ( fit != m_libraries.end() ){
+        return fit.value();
+    }
+
+    QmlLibraryInfo::Ptr lib = findQmlLibraryInPath(uri, uri, false);
+    if ( lib ){
+        m_libraries[lib->uri()] = lib;
+        queueLibrary(lib);
+        return lib;
+    }
+    return nullptr;
 }
 
 /**
  * \brief Returns the total number of global libraries
  */
 int ProjectQmlScope::totalLibraries() const{
-    return d_globalLibraries->totalLibraries();
+    return m_libraries.size();
 }
 
-/**
- * \brief Returns the total number of implicit libraries
- */
-int ProjectQmlScope::totalImplicitLibraries() const{
-    return d_implicitLibraries->totalLibraries();
+QList<QmlLibraryInfo::Ptr> ProjectQmlScope::getLibrariesInPath(const QString &path){
+    QList<QmlLibraryInfo::Ptr> libraries;
+    m_libraryMutex.lock();
+    for( auto it = m_libraries.begin(); it != m_libraries.end(); ++it ){
+        if ( it.key().startsWith(path) ){
+            libraries.append(it.value());
+        }
+    }
+    m_libraryMutex.unlock();
+    return libraries;
+}
+
+void ProjectQmlScope::resetLibrariesInPath(const QString &path){
+    m_libraryMutex.lock();
+    for( auto it = m_libraries.begin(); it != m_libraries.end(); ++it ){
+        if ( it.key().startsWith(path) ){
+            it.value()->setStatus(QmlLibraryInfo::NotScanned);
+            //HERE
+        }
+    }
+    m_libraryMutex.unlock();
+}
+
+void ProjectQmlScope::resetLibrary(const QString &path){
+    m_libraryMutex.lock();
+    if ( m_libraries.contains(path) ) //HERE
+        m_libraries[path]->setStatus(QmlLibraryInfo::NotScanned);
+    m_libraryMutex.unlock();
+}
+
+QString ProjectQmlScope::toString(){
+    QString result;
+    m_libraryMutex.lock();
+    for( auto it = m_libraries.begin(); it != m_libraries.end(); ++it ){
+        QmlLibraryInfo::ConstPtr linfo = it.value();
+        result += linfo->uri() + "[" + linfo->statusString() + "]\n";
+    }
+    m_libraryMutex.unlock();
+    return result;
+}
+
+void ProjectQmlScope::__libraryUpdates(){
+    auto libs = m_scanMonitor->detachLibraries();
+    for ( auto lib : libs ){
+        m_libraries[lib->uri()] = lib;
+    }
 }
 
 /**
@@ -193,6 +290,47 @@ QString ProjectQmlScope::uriForPath(const QString &path){
         }
     }
     return bestmatch;
+}
+
+QmlLibraryInfo::Ptr ProjectQmlScope::libraryInfo(const QString &path){
+    QmlLibraryInfo::Ptr libinfo(nullptr);
+    m_libraryMutex.lock();
+    libinfo = m_libraries.value(path, QmlLibraryInfo::Ptr(nullptr));
+    if ( libinfo.isNull() ){
+        libinfo = QmlLibraryInfo::create(path);
+        m_libraries[path] = libinfo;
+    }
+    m_libraryMutex.unlock();
+    return libinfo;
+}
+
+bool ProjectQmlScope::libraryExists(const QString &path){
+    m_libraryMutex.lock();
+    bool contains = m_libraries.contains(path);
+    m_libraryMutex.unlock();
+    return contains;
+}
+
+void ProjectQmlScope::addLibrary(const QString &path){
+    assignLibrary(path, QmlLibraryInfo::create(path));
+}
+
+void ProjectQmlScope::assignLibrary(const QString &path, lv::QmlLibraryInfo::Ptr libinfo){
+    m_libraryMutex.lock();
+    m_libraries[path] = libinfo;
+    m_libraryMutex.unlock();
+}
+
+void ProjectQmlScope::assignLibraries(const QHash<QString, QmlLibraryInfo::Ptr> &libinfos){
+    m_libraryMutex.lock();
+    for( auto it = libinfos.begin(); it != libinfos.end(); ++it ){
+        m_libraries[it.key()] = it.value();
+    }
+    m_libraryMutex.unlock();
+}
+
+QmlLanguageScanner *ProjectQmlScope::languageScanner(){
+    return m_scanMonitor->languageScanner();
 }
 
 }// namespace

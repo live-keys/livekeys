@@ -229,6 +229,8 @@ public:
     QByteArray content() override;
     void setContent(const QByteArray &content) override;
 
+    const QString& contentString();
+
     ProjectDocumentMarker::Ptr addMarker(int position);
     void removeMarker(ProjectDocumentMarker::Ptr marker);
 
@@ -288,6 +290,9 @@ private:
 
     QLinkedList<ProjectDocumentAction>      m_changes;
     mutable QLinkedList<ProjectDocumentAction>::iterator m_lastChange;
+
+    QString       m_contentString;
+    bool          m_contentStringDirty;
 
     mutable int   m_editingState;
     mutable bool  m_isSynced;

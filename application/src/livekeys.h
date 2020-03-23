@@ -80,7 +80,6 @@ public:
 
     static Livekeys::Ptr create(int argc, const char* const argv[], QObject* parent = nullptr);
 
-    void loadQml(const QUrl& url);
     void loadProject();
 
     static int versionMajor();
@@ -100,8 +99,6 @@ public:
     void loadInternals();
     void loadInternalPlugins();
     void loadInternalPackages();
-
-    void initializeProject();
 
     std::vector<std::string> packageImportPaths() const;
 
