@@ -21,7 +21,7 @@
 #include <QSet>
 
 #include "live/projectqmlscope.h"
-#include "live/documentqmlscope.h"
+#include "live/qmllanguagescanner.h"
 
 namespace lv{
 
@@ -30,68 +30,56 @@ class Project;
 class CodeQmlHandler;
 class ProjectQmlScanner;
 class ProjectQmlExtension;
-class PluginInfoExtractor;
 
 /// \private
-class ProjectQmlScanMonitor : public QObject{
+class QmlProjectMonitor : public QObject{
 
     Q_OBJECT
 
     friend class ProjectQmlExtension;
 
 public:
-    /// \private
-    class DocumentQmlScopeTransport{
-    public:
-        QString path;
-        CodeQmlHandler* codeHandler;
-        DocumentQmlScope::Ptr documentScope;
-    };
 
 public:
-    explicit ProjectQmlScanMonitor(
+    explicit QmlProjectMonitor(
         ProjectQmlExtension* projectHandler,
         Project* project,
         ViewEngine*  engine,
         QObject* parent = nullptr
     );
-    ~ProjectQmlScanMonitor();
+    ~QmlProjectMonitor();
 
-    void scanNewDocumentScope(const QString& path, const QString& content, CodeQmlHandler* codeHandler);
-    void queueNewDocumentScope(const QString& path, const QString& content, CodeQmlHandler* codeHandler);
+    void queueDocumentScan(const QString& path, const QString& content, CodeQmlHandler* codeHandler);
 
     void removeScopeListener(CodeQmlHandler* handler);
     void addScopeListener(CodeQmlHandler* handler);
-
-    PluginInfoExtractor *getPluginInfoExtractor(const QString& import);
 
     ProjectQmlScope::Ptr projectScope();
     bool hasProjectScope();
 
 signals:
+    void requestDocumentScan(const QString& path, const QString& content, CodeQmlHandler* handler);
 
 public slots:
-    void newDocumentScope(ProjectQmlScanMonitor::DocumentQmlScopeTransport* dstransport);
-    void newProjectScope();
+    void newDocumentScan(QmlLanguageScanner::DocumentTransport* dstransport);
+
     void newProject(const QString& path);
     void directoryChanged(const QString& path);
     void fileChanged(const QString& path);
-    void loadImport(const QString& import);
 
 private:
     ProjectQmlExtension*  m_projectHandler;
-    ProjectQmlScanner*    m_scanner;
     Project*              m_project;
-    ViewEngine*               m_engine;
+    ViewEngine*           m_engine;
     QSet<CodeQmlHandler*> m_scopeListeners;
     ProjectQmlScope::Ptr  m_projectScope;
 };
 
-inline ProjectQmlScope::Ptr ProjectQmlScanMonitor::projectScope(){
+inline ProjectQmlScope::Ptr QmlProjectMonitor::projectScope(){
     return m_projectScope;
 }
 
-inline bool ProjectQmlScanMonitor::hasProjectScope(){
+inline bool QmlProjectMonitor::hasProjectScope(){
     return !m_projectScope.isNull();
 }
 

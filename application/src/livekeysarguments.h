@@ -34,6 +34,7 @@ public:
 
     bool helpFlag() const;
     bool versionFlag() const;
+    bool globalFlag() const;
     std::string helpString() const;
 
     const QStringList& layers() const;
@@ -53,6 +54,8 @@ private:
     CommandLineParser* m_parser;
 
     MLNode m_logConfiguration;
+
+    bool        m_globalScript;
 
     QStringList m_monitoredFiles;
     QStringList m_layers;

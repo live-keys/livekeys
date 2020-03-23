@@ -4,7 +4,6 @@
 #include "live/projectdocument.h"
 #include "live/runnablecontainer.h"
 #include "live/visuallogqt.h"
-#include "live/documentqmlscope.h"
 
 namespace lv{
 
@@ -136,22 +135,19 @@ bool QmlUsageGraphScanner::checkEntry(const QmlUsageGraphScanner::BindingEntry &
 
     DocumentQmlInfo::Ptr documentInfo = DocumentQmlInfo::create(file);
     if ( documentInfo->parse(content) ){
-        QList<DocumentQmlInfo::Import> imports = m_scopeSnap.document->info()->imports();
+        QList<DocumentQmlInfo::Import> imports = m_scopeSnap.document->imports();
         for ( auto it = imports.begin(); it != imports.end(); ++it ){
             DocumentQmlInfo::Import& imp = *it;
 
             if ( imp.importType() == DocumentQmlInfo::Import::Directory ){
                 // find library by path
-                QmlLibraryInfo::Ptr qli = projectScope->globalLibraries()->libraryInfo(imp.uri());
+                QmlLibraryInfo::Ptr qli = projectScope->libraryInfo(imp.uri());
                 if ( !qli )
-                    qli = projectScope->implicitLibraries()->libraryInfo(imp.uri());
+                    qli = projectScope->libraryInfo(imp.uri());
 
                 if ( qli ){
-                    QStringList exports;
-                    qli->listExports(&exports);
-
-                    QmlLibraryInfo::ExportVersion ev = qli->findExport(entry.componentName);
-                    if ( ev.isValid() ){
+                    QmlTypeInfo::Ptr ti = qli->typeInfoByName(entry.componentName);
+                    if ( ti ){
                         if ( entry.componentPath.startsWith(imp.uri())){
                             return true;
                         }
@@ -160,12 +156,11 @@ bool QmlUsageGraphScanner::checkEntry(const QmlUsageGraphScanner::BindingEntry &
 
             } else if ( imp.importType() == DocumentQmlInfo::Import::Library ){
                 // find library by uri
-                QmlLibraryInfo::Reference pqli = projectScope->globalLibraries()->libraryInfoByNamespace(imp.uri());
-                QmlLibraryInfo::Ptr qli = pqli.lib;
+                QmlLibraryInfo::Ptr qli = projectScope->libraryInfo(imp.uri());
                 if ( qli ){
-                    QmlLibraryInfo::ExportVersion ev = qli->findExport(entry.componentName);
-                    if ( ev.isValid() ){
-                        if ( entry.componentPath.startsWith(pqli.path)){
+                    QmlTypeInfo::Ptr ti = qli->typeInfoByName(entry.componentName);
+                    if ( ti ){
+                        if ( entry.componentPath.startsWith(qli->path())){
                             return true;
                         }
                     }
@@ -175,10 +170,10 @@ bool QmlUsageGraphScanner::checkEntry(const QmlUsageGraphScanner::BindingEntry &
 
         // check library in the same folder
         QString implicitPath = file.mid(0, file.lastIndexOf('/'));
-        QmlLibraryInfo::Ptr qli = projectScope->implicitLibraries()->libraryInfo(implicitPath);
+        QmlLibraryInfo::Ptr qli = projectScope->libraryInfo(implicitPath);
         if ( qli ){
-            QmlLibraryInfo::ExportVersion ev = qli->findExport(entry.componentName);
-            if ( ev.isValid() ){
+            QmlTypeInfo::Ptr ti = qli->typeInfoByName(entry.componentName);
+            if ( ti ){
                 return true;
             }
         }
@@ -193,64 +188,56 @@ void QmlUsageGraphScanner::run(){
 
     QmlScopeSnap& scope = m_scopeSnap;
 
-    vlog("editqmljs-usagegraph").v() <<
-        "Number of implicit libraries: " << scope.project->implicitLibraries()->totalLibraries();
-
-    ProjectQmlScopeContainer* implicits = scope.project->implicitLibraries();
-    ProjectQmlScopeContainer* globalLibs = scope.project->globalLibraries();
-    auto libs = globalLibs->getLibrariesInPath(m_project->dir());
-
-    auto implicitLibs = implicits->getLibrariesInPath(m_project->dir());
-    for ( auto lit = implicitLibs.begin(); lit != implicitLibs.end(); ++lit){
-        libs.insert(lit.key(), lit.value());
-    }
+    auto libs = scope.project->getLibrariesInPath(m_project->dir());
 
     vlog("editqmljs-usagegraph").v() << "Number of libraries to scan: " << libs.size();
 
     QMap<QString, QList<QmlBindingPath::Ptr> > usageGraph;
 
     for ( auto it = libs.begin(); it != libs.end(); ++it ){
-        QmlJS::LibraryInfo linfo = it.value()->data();
-        auto linfoc = linfo.components();
-
-        auto exports = it.value()->exports();
-
-        vlog("editqmljs-usagegraph").v() << "Library \'" << it.key() << "\' total exports: " << exports.size();
-
-        QMap<QString, QString> scannedFiles =  it.value()->files();
-        for ( auto fit = scannedFiles.begin(); fit != scannedFiles.end(); ++fit ){
-            QString filePath = it.key() + "/" + fit.value();
-
-            std::string content = m_project->lockedFileIO()->readFromFile(filePath.toStdString());
-            QString qcontent = QString::fromStdString(content);
-
-            DocumentQmlInfo::Ptr documentInfo = DocumentQmlInfo::create(filePath);
-            if ( documentInfo->parse(qcontent) ){
-                lv::DocumentQmlValueObjects::Ptr objects = documentInfo->createObjects();
-                lv::DocumentQmlValueObjects::RangeObject* root = objects->root();
-
-                QmlBindingPath::Ptr bp = QmlBindingPath::create();
-                bp->appendFile(filePath);
-                bp->appendComponent(documentInfo->componentName(), it.value()->importNamespace());
-                bp->appendIndex(0);
-                QList<QmlUsageGraphScanner::BindingEntry> objectDeclarations = extractRanges(root, bp, qcontent, filePath);
-
-                for ( const QmlUsageGraphScanner::BindingEntry& od: objectDeclarations ){
-                    auto usageIt = usageGraph.find(od.componentName);
-                    if ( usageIt == usageGraph.end() ){
-                        usageGraph.insert(od.componentName, QList<QmlBindingPath::Ptr>() << od.path);
-                    } else {
-                        usageIt.value().append(od.path);
-                    }
-                }
-            }
-
-            if ( m_stopRequest )
-                return;
-        }
 
         if ( m_stopRequest )
             return;
+
+        QmlLibraryInfo::ConstPtr linfo = *it;
+        int totalExports = 0;
+        for ( auto eit = linfo->exports().begin(); eit != linfo->exports().end(); ++eit ){
+            const QmlTypeInfo::Ptr& ti = eit.value();
+            if ( ti->document().isValid() ){
+                QString filePath = ti->document().path;
+
+                std::string content = m_project->lockedFileIO()->readFromFile(filePath.toStdString());
+                QString qcontent = QString::fromStdString(content);
+
+                DocumentQmlInfo::Ptr documentInfo = DocumentQmlInfo::create(filePath);
+                if ( documentInfo->parse(qcontent) ){
+                    lv::DocumentQmlValueObjects::Ptr objects = documentInfo->createObjects();
+                    lv::DocumentQmlValueObjects::RangeObject* root = objects->root();
+
+                    QmlBindingPath::Ptr bp = QmlBindingPath::create();
+                    bp->appendFile(filePath);
+                    bp->appendComponent(documentInfo->componentName(), (*it)->uri());
+                    bp->appendIndex(0);
+                    QList<QmlUsageGraphScanner::BindingEntry> objectDeclarations = extractRanges(root, bp, qcontent, filePath);
+
+                    for ( const QmlUsageGraphScanner::BindingEntry& od: objectDeclarations ){
+                        auto usageIt = usageGraph.find(od.componentName);
+                        if ( usageIt == usageGraph.end() ){
+                            usageGraph.insert(od.componentName, QList<QmlBindingPath::Ptr>() << od.path);
+                        } else {
+                            usageIt.value().append(od.path);
+                        }
+                    }
+                }
+
+                if ( m_stopRequest )
+                    return;
+
+                ++totalExports;
+            }
+        }
+
+        vlog("editqmljs-usagegraph").v() << "Library \'" << (*it)->uri() << "\' total exports: " << totalExports;
     }
 
     // Store runnables as a map of string and content

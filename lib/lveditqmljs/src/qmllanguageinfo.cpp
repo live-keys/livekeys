@@ -19,6 +19,8 @@
 
 #include "live/visuallogqt.h"
 
+#include "qmljs/parser/qmldirparser_p.h"
+
 namespace lv{
 
 // QmlTypeReference
@@ -129,36 +131,41 @@ QString lv::QmlFunctionInfo::toString() const{
 // ----------------------------------------------------------------------------
 
 QmlTypeInfo::QmlTypeInfo()
-    : m_d(new QmlTypeInfoPrivate)
 {
-    m_d->object.reset(new LanguageUtils::FakeMetaObject());
 }
 
-QmlTypeInfo::QmlTypeInfo(const lv::QmlTypeInfo &other)
-    : m_d(new QmlTypeInfoPrivate)
-{
-    m_exportType = other.m_exportType;
-    m_classType  = other.m_classType;
-    m_inherits   = other.m_inherits;
-    m_document   = other.m_document;
-    m_d->object  = other.m_d->object;
+QmlTypeInfo::Ptr QmlTypeInfo::create(){
+    return QmlTypeInfo::Ptr(new QmlTypeInfo);
+}
+
+QmlTypeInfo::Ptr QmlTypeInfo::clone(const QmlTypeInfo::ConstPtr &other){
+    QmlTypeInfo::Ptr cl = QmlTypeInfo::Ptr(new QmlTypeInfo);
+    cl->m_exportType = other->m_exportType;
+    cl->m_classType = other->m_classType;
+    cl->m_inherits = other->m_inherits;
+    cl->m_document = other->m_document;
+    cl->m_isSingleton = other->m_isSingleton;
+    cl->m_isCreatable = other->m_isCreatable;
+    cl->m_isComposite = other->m_isComposite;
+    cl->m_properties = other->m_properties;
+    cl->m_methods = other->m_methods;
+    cl->m_enums = other->m_enums;
+    return cl;
 }
 
 QmlTypeInfo::~QmlTypeInfo(){
-    delete m_d;
-}
-
-QmlTypeInfo &lv::QmlTypeInfo::operator =(const QmlTypeInfo &other){
-    m_exportType = other.m_exportType;
-    m_classType  = other.m_classType;
-    m_inherits   = other.m_inherits;
-    m_document   = other.m_document;
-    m_d->object  = other.m_d->object;
-    return *this;
 }
 
 void QmlTypeInfo::setExportType(const QmlTypeReference &exportType){
     m_exportType = exportType;
+}
+
+void QmlTypeInfo::setClassType(const QmlTypeReference &classType){
+    m_classType = classType;
+}
+
+void QmlTypeInfo::setInheritanceType(const QmlTypeReference &inheritsType){
+    m_inherits = inheritsType;
 }
 
 const QmlTypeReference &QmlTypeInfo::exportType() const{
@@ -179,42 +186,68 @@ const QmlTypeReference &QmlTypeInfo::prefereredType() const{
     return m_exportType;
 }
 
-const QString &QmlTypeInfo::document() const{
+const QmlDocumentReference &QmlTypeInfo::document() const{
     return m_document;
 }
 
+void QmlTypeInfo::setDocument(const QmlDocumentReference &doc){
+    m_document = doc;
+}
+
 int QmlTypeInfo::totalProperties() const{
-    return m_d->object->propertyCount();
+    return m_properties.size();
 }
 
 QmlPropertyInfo QmlTypeInfo::propertyAt(int index) const{
-    return QmlTypeInfoPrivate::fromMetaProperty(*this, m_d->object->property(index));
+    return m_properties.at(index);
 }
 
 QmlPropertyInfo QmlTypeInfo::propertyAt(const QString &name) const{
-    for ( int i = 0; i < m_d->object->propertyCount(); ++i ){
-        if ( m_d->object->property(i).name() == name ){
-            return QmlTypeInfoPrivate::fromMetaProperty(*this, m_d->object->property(i));
-        }
+    for ( auto prop : m_properties ){
+        if ( prop.name == name )
+            return prop;
     }
     return QmlPropertyInfo();
 }
 
+void QmlTypeInfo::appendProperty(const QmlPropertyInfo &prop){
+    m_properties.append(prop);
+}
+
 int QmlTypeInfo::totalFunctions() const{
-    return m_d->object->methodCount();
+    return m_methods.size();
 }
 
 QmlFunctionInfo QmlTypeInfo::functionAt(int index) const{
-    return QmlTypeInfoPrivate::fromMetaMethod(*this, m_d->object->method(index));
+    return m_methods.at(index);
 }
 
 QmlFunctionInfo QmlTypeInfo::functionAt(const QString &name) const{
-    for ( int i = 0; i < m_d->object->methodCount(); ++i ){
-        if ( m_d->object->method(i).methodName() == name ){
-            return QmlTypeInfoPrivate::fromMetaMethod(*this, m_d->object->method(i));
-        }
+    for ( auto m : m_methods ){
+        if ( m.name == name )
+            return m;
     }
     return QmlFunctionInfo();
+}
+
+void QmlTypeInfo::appendFunction(const QmlFunctionInfo &function){
+    m_methods.append(function);
+}
+
+int QmlTypeInfo::totalEnums() const{
+    return m_enums.size();
+}
+
+QmlEnumInfo QmlTypeInfo::enumAt(int index) const{
+    return m_enums.at(index);
+}
+
+QmlEnumInfo QmlTypeInfo::enumAt(const QString &name) const{
+    for ( auto enumInfo : m_enums ){
+        if ( enumInfo.name == name )
+            return enumInfo;
+    }
+    return QmlEnumInfo();
 }
 
 bool QmlTypeInfo::isValid() const{
@@ -225,12 +258,12 @@ QString QmlTypeInfo::toString() const{
     QString result;
 
     QString ref;
-    if ( !m_document.isEmpty() ){
-        int index = m_document.lastIndexOf("/");
+    if ( m_document.isValid() ){
+        int index = m_document.path.lastIndexOf("/");
         if ( index == -1 ){
-            ref = "file \'" + m_document + "\'";
+            ref = "file \'" + m_document.path + "\'";
         } else {
-            ref = "file \'" + m_document.mid(index) + "\'";
+            ref = "file \'" + m_document.path.mid(index) + "\'";
         }
     }
 
@@ -248,11 +281,23 @@ QString QmlTypeInfo::toString() const{
 }
 
 bool QmlTypeInfo::isDeclaredInQml() const{
-    return !m_document.isEmpty();
+    return m_document.isValid();
 }
 
 bool QmlTypeInfo::isDeclaredInCpp() const{
     return !isDeclaredInQml();
+}
+
+bool QmlTypeInfo::isSingleton() const{
+    return m_isSingleton;
+}
+
+bool QmlTypeInfo::isComposite() const{
+    return m_isComposite;
+}
+
+bool QmlTypeInfo::isCreatable() const{
+    return m_isCreatable;
 }
 
 /**
@@ -310,11 +355,10 @@ QString QmlTypeInfo::typeDefaultValue(const QString &typeString){
 // QmlTypeInfoPrivate
 // ----------------------------------------------------------------------------
 
-QmlTypeInfo QmlTypeInfoPrivate::fromMetaObject(LanguageUtils::FakeMetaObject::ConstPtr fmo,
+QmlTypeInfo::Ptr QmlTypeInfoPrivate::fromMetaObject(LanguageUtils::FakeMetaObject::ConstPtr fmo,
         const QString& libraryUri)
 {
-    QmlTypeInfo qti;
-    qti.m_d->object = fmo;
+    QmlTypeInfo::Ptr qti = QmlTypeInfo::create();
 
     QString foundPackage;
 
@@ -323,7 +367,7 @@ QmlTypeInfo QmlTypeInfoPrivate::fromMetaObject(LanguageUtils::FakeMetaObject::Co
         for ( auto it = exports.begin(); it != exports.end(); ++it ){
             const LanguageUtils::FakeMetaObject::Export& e = *it;
             if ( e.package == libraryUri || libraryUri.isEmpty() ){
-                qti.m_exportType = QmlTypeReference(QmlTypeReference::Qml, e.type, e.package);
+                qti->m_exportType = QmlTypeReference(QmlTypeReference::Qml, e.type, e.package);
                 foundPackage = e.package;
                 break;
             }
@@ -331,15 +375,28 @@ QmlTypeInfo QmlTypeInfoPrivate::fromMetaObject(LanguageUtils::FakeMetaObject::Co
     }
 
     if ( !fmo->className().startsWith("qml/") ){
-        qti.m_classType = QmlTypeReference(QmlTypeReference::Qml, fmo->className(), libraryUri);
+        qti->m_classType = QmlTypeReference(QmlTypeReference::Cpp, fmo->className(), libraryUri);
     } else {
-        qti.m_classType = QmlTypeReference(QmlTypeReference::Qml, fmo->className().mid(4), libraryUri);
+        qti->m_classType = QmlTypeReference(QmlTypeReference::Qml, fmo->className().mid(4), libraryUri);
     }
     if ( fmo->superclassName().startsWith("qml/") ){
-        qti.m_inherits = QmlTypeReference(QmlTypeReference::Unknown, fmo->superclassName().mid(4), "");
+        qti->m_inherits = QmlTypeReference(QmlTypeReference::Unknown, fmo->superclassName().mid(4), "");
     } else {
-        qti.m_inherits = QmlTypeReference(QmlTypeReference::Cpp, fmo->superclassName());
+        qti->m_inherits = QmlTypeReference(QmlTypeReference::Cpp, fmo->superclassName());
     }
+
+    for ( int i = 0; i < fmo->methodCount(); ++i ){
+        qti->m_methods.append(QmlTypeInfoPrivate::fromMetaMethod(*qti, fmo->method(i)));
+    }
+    for ( int i = 0; i < fmo->propertyCount(); ++i ){
+        qti->m_properties.append(QmlTypeInfoPrivate::fromMetaProperty(*qti, fmo->property(i)));
+    }
+    for ( int i = 0; i < fmo->enumeratorCount(); ++i ){
+        qti->m_enums.append(QmlTypeInfoPrivate::fromMetaEnum(fmo->enumerator(i)));
+    }
+    qti->m_isComposite = fmo->isComposite();
+    qti->m_isCreatable = fmo->isCreatable();
+    qti->m_isSingleton = fmo->isSingleton();
 
     return qti;
 }
@@ -391,26 +448,12 @@ QmlPropertyInfo QmlTypeInfoPrivate::fromMetaProperty(const QmlTypeInfo &parent, 
     return qpi;
 }
 
-const LanguageUtils::FakeMetaObject::ConstPtr QmlTypeInfoPrivate::typeObject(const QmlTypeInfo &ti){
-    return ti.m_d->object;
-}
-
-void QmlTypeInfoPrivate::appendProperty(LanguageUtils::FakeMetaObject::Ptr object, const QmlPropertyInfo &prop){
-    LanguageUtils::FakeMetaProperty fmp(
-        prop.name, prop.typeName.name(), prop.isList, prop.isWritable, prop.isPointer, 0
-    );
-    object->addProperty(fmp);
-}
-
-void QmlTypeInfoPrivate::appendFunction(LanguageUtils::FakeMetaObject::Ptr object, const QmlFunctionInfo &finfo){
-    LanguageUtils::FakeMetaMethod fmm(finfo.name);
-    fmm.setMethodType(finfo.functionType);
-    fmm.setReturnType(finfo.returnType.name());
-
-    for ( auto it = finfo.parameters.begin(); it != finfo.parameters.end(); ++it ){
-        fmm.addParameter(it->first, it->second.name());
-    }
-    object->addMethod(fmm);
+QmlEnumInfo QmlTypeInfoPrivate::fromMetaEnum(const LanguageUtils::FakeMetaEnum &e){
+    QmlEnumInfo qei;
+    qei.name = e.name();
+    qei.keys = e.keys();
+    qei.values = e.values();
+    return qei;
 }
 
 // QmlInheritanceInfo
@@ -420,7 +463,7 @@ QString QmlInheritanceInfo::toString() const{
     QString result;
 
     for ( auto it = nodes.begin(); it != nodes.end(); ++it ){
-        result += it->toString() + "\n";
+        result += (*it)->toString() + "\n";
     }
 
     return result;
@@ -432,8 +475,9 @@ void QmlInheritanceInfo::join(const QmlInheritanceInfo &path){
     }
 }
 
-void QmlInheritanceInfo::append(const QmlTypeInfo &tr){
-    nodes.append(tr);
+void QmlInheritanceInfo::append(const QmlTypeInfo::Ptr &tr){
+    if ( tr )
+        nodes.append(tr);
 }
 
 bool QmlInheritanceInfo::isEmpty() const{
@@ -444,7 +488,7 @@ QmlTypeReference QmlInheritanceInfo::languageType() const{
     if ( isEmpty() )
         return QmlTypeReference();
 
-    return nodes.first().prefereredType();
+    return nodes.first()->prefereredType();
 }
 
 
@@ -468,6 +512,189 @@ QmlPropertyInfo::QmlPropertyInfo(const QString &n, const QmlTypeReference &tn, c
 
 bool QmlPropertyInfo::isValid() const{
     return !name.isEmpty();
+}
+
+
+// QmlLibraryInfo
+// -----------------------------------------------------------------------------------------------
+
+QmlLibraryInfo::QmlLibraryInfo()
+    : m_importVersionMajor(0)
+    , m_importVersionMinor(0)
+    , m_status(QmlLibraryInfo::NotScanned)
+{
+}
+
+QmlLibraryInfo::QmlLibraryInfo(const QmlDirParser &parser)
+    : m_importVersionMajor(0)
+    , m_importVersionMinor(0)
+    , m_status(QmlLibraryInfo::NotScanned)
+{
+    m_uri = parser.typeNamespace();
+}
+
+QmlLibraryInfo::Ptr QmlLibraryInfo::clone(const QmlLibraryInfo::ConstPtr &linfo){
+    QmlLibraryInfo::Ptr cl = QmlLibraryInfo::Ptr(new QmlLibraryInfo);
+    cl->m_dependencies = linfo->dependencies();
+    cl->m_path = linfo->m_path;
+    cl->m_uri = linfo->m_uri;
+    cl->m_importVersionMajor = linfo->m_importVersionMajor;
+    cl->m_importVersionMinor = linfo->m_importVersionMinor;
+    cl->m_status = linfo->m_status;
+
+    for ( auto it = linfo->m_exports.begin(); it != linfo->m_exports.end(); ++it ){
+        cl->m_exports.insert(it.key(), QmlTypeInfo::clone(it.value()));
+    }
+
+    return cl;
+}
+
+QmlLibraryInfo::~QmlLibraryInfo(){
+}
+
+QStringList QmlLibraryInfo::listExports() const{
+    return m_exports.keys();
+}
+
+QmlTypeInfo::Ptr QmlLibraryInfo::typeInfoByName(const QString &exportName){
+    auto it = m_exports.find(exportName);
+    if ( it != m_exports.end() )
+        return it.value();
+    return nullptr;
+}
+
+QmlTypeInfo::Ptr QmlLibraryInfo::typeInfoByClassName(const QString &className){
+    for ( auto it = m_exports.begin(); it != m_exports.end(); ++it ){
+        QmlTypeInfo::Ptr tr = it.value();
+        if ( tr->classType().name() == className )
+            return tr;
+    }
+    for ( auto it = m_internals.begin(); it != m_internals.end(); ++it ){
+        QmlTypeInfo::Ptr tr = *it;
+        if ( tr->classType().name() == className )
+            return tr;
+    }
+    return nullptr;
+}
+
+QmlTypeInfo::Ptr QmlLibraryInfo::typeInfo(const QString &name, QmlTypeReference::Language language){
+    if ( language == QmlTypeReference::Cpp ){
+        return typeInfoByClassName(name);
+    } else if ( language == QmlTypeReference::Qml || language == QmlTypeReference::Unknown ){
+        return typeInfoByName(name);
+    }
+    return nullptr;
+}
+
+void QmlLibraryInfo::updateImportInfo(int versionMajor, int versionMinor){
+    m_importVersionMajor = versionMajor;
+    m_importVersionMinor = versionMinor;
+}
+
+void QmlLibraryInfo::addType(const QmlTypeInfo::Ptr &typeExport){
+    if ( !typeExport->exportType().isEmpty() ){
+        m_exports[typeExport->exportType().name()] = typeExport;
+    } else {
+        m_internals.append(typeExport);
+    }
+}
+
+void QmlLibraryInfo::addDependency(const QString &dependency){
+    if ( !m_dependencies.contains(dependency) )
+        m_dependencies.append(dependency);
+}
+
+void QmlLibraryInfo::addDependencies(const QStringList &dependencies){
+    for ( const QString& dep : dependencies ){
+        addDependency(dep);
+    }
+}
+
+QmlLibraryInfo::Ptr QmlLibraryInfo::create(const QString &uri){
+    QmlLibraryInfo::Ptr c(new QmlLibraryInfo);
+    c->m_uri = uri;
+    return c;
+}
+
+QmlLibraryInfo::Ptr lv::QmlLibraryInfo::create(const QmlDirParser &parser){
+    return QmlLibraryInfo::Ptr(new QmlLibraryInfo(parser));
+}
+
+const QMap<QString, QmlTypeInfo::Ptr> &QmlLibraryInfo::exports() const{
+    return m_exports;
+}
+
+QmlLibraryInfo::ScanStatus QmlLibraryInfo::status() const{
+    return m_status;
+}
+
+void QmlLibraryInfo::setStatus(QmlLibraryInfo::ScanStatus status){
+    m_status = status;
+}
+
+QString QmlLibraryInfo::statusString() const{
+    if ( m_status == QmlLibraryInfo::NotScanned ){
+        return "NotScanned";
+    } else if ( m_status == QmlLibraryInfo::WaitingOnProcess ){
+        return "WaitingOnProcess";
+    } else if ( m_status == QmlLibraryInfo::ScanError ){
+        return "ScanError";
+    } else if ( m_status == QmlLibraryInfo::NoPrototypeLink ){
+        return "NoPrototypeLink";
+    } else if ( m_status == QmlLibraryInfo::RequiresDependency ){
+        return "RequiresDependency";
+    } else {
+        return "Done";
+    }
+}
+
+void QmlLibraryInfo::setPath(const QString &path){
+    m_path = path;
+}
+
+const QString &QmlLibraryInfo::path() const{
+    return m_path;
+}
+
+const QString &QmlLibraryInfo::uri() const{
+    return m_uri;
+}
+
+QStringList QmlLibraryInfo::uriSegments() const{
+    if ( m_path != m_uri )
+        return m_uri.split(".");
+    return QStringList() << m_uri;
+}
+
+QString QmlLibraryInfo::importStatement() const{
+    return m_uri + " " + QString::number(m_importVersionMajor) + "." + QString::number(m_importVersionMinor);
+}
+
+int QmlLibraryInfo::importVersionMinor() const{
+    return m_importVersionMinor;
+}
+
+int QmlLibraryInfo::importVersionMajor() const{
+    return m_importVersionMajor;
+}
+
+const QList<QString> &QmlLibraryInfo::dependencies() const{
+    return m_dependencies;
+}
+
+void QmlLibraryInfo::updateUri(const QString &uri){
+    m_uri = uri;
+}
+
+QString QmlLibraryInfo::toString() const{
+    QString result = "Library: " + m_uri;
+    result += "\nDependencies: " + m_dependencies.join(",") + "\n";
+
+    for ( auto it = m_exports.begin(); it != m_exports.end(); ++it ){
+        result += "  " + it.value()->toString() + "\n";
+    }
+
+    return result;
 }
 
 } // namespace

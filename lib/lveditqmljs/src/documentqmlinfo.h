@@ -190,17 +190,16 @@ protected:
 
 public:
     static Ptr create(const QString& fileName);
+    static Ptr createAndParse(const QString& fileName, const QString& source);
 
     QStringList extractIds() const;
     const ValueReference rootObject();
     const ValueReference valueForId(const QString& id) const;
-    lv::QmlTypeInfo extractValueObject(const ValueReference& value, ValueReference *parent = nullptr) const;
-    lv::QmlTypeInfo extractValueObjectWithExport(
+    lv::QmlTypeInfo::Ptr extractValueObject(const ValueReference& value, ValueReference *parent = nullptr) const;
+    lv::QmlTypeInfo::Ptr extractValueObjectWithExport(
             const ValueReference& value,
             const QString& componentName,
-            const QString& libraryPath,
-            int vMajor,
-            int vMinor) const;
+            const QString& libraryPath) const;
     QString extractTypeName(const ValueReference& value) const;
     void extractTypeNameRange(const ValueReference& value, int& begin, int& end) const;
     void extractRange(const ValueReference& value, int& begin, int& end);

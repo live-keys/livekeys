@@ -4,9 +4,7 @@
 #include "live/lveditqmljsglobal.h"
 #include <QQmlEngine>
 #include <QList>
-#include "qmllibraryinfo_p.h"
 #include "projectqmlscope.h"
-#include "projectqmlscanner_p.h"
 
 namespace lv{
 
@@ -36,12 +34,10 @@ public:
             QStringList &);
 
     static QmlLibraryInfo::ScanStatus loadPluginInfo(
-            ProjectQmlScope::Ptr projectScope,
-            const QmlDirParser& dirParser,
-            const QString& path,
-            ProjectQmlScanner* scanner,
-            QStringList& dependencyPaths,
-            QByteArray* stream);
+            QmlLanguageScanner *scanner,
+            QmlLibraryInfo::Ptr lib,
+            QQmlEngine *engine,
+            QByteArray *stream);
 
     static QString getTypeName(const QQmlType* type);
 

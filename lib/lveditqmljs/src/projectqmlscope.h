@@ -23,18 +23,24 @@
 #include <QList>
 #include <QHash>
 #include <QSharedPointer>
+#include <QMutex>
 
 #include "live/lveditqmljsglobal.h"
+#include "live/qmllanguageinfo.h"
+#include "live/lockedfileiosession.h"
 
 class QQmlEngine;
 namespace QmlJS{ class LibraryInfo; }
 
-
 namespace lv{
 
-class ProjectQmlScopeContainer;
-class LV_EDITQMLJS_EXPORT ProjectQmlScope{
+class QmlLanguageScanMonitor;
+class QmlLanguageScanner;
+class CodeQmlHandler;
 
+class LV_EDITQMLJS_EXPORT ProjectQmlScope : public QObject{
+
+    Q_OBJECT
     Q_DISABLE_COPY(ProjectQmlScope)
 
 public:
@@ -47,33 +53,28 @@ public:
 public:
     ~ProjectQmlScope();
 
-    static Ptr create(QQmlEngine* engine);
+    static Ptr create(LockedFileIOSession::Ptr ioSession, QQmlEngine* engine, QObject* parent = nullptr);
 
-    void findQmlLibraryInImports(
-        const QString& path,
+    static QmlLibraryInfo::Ptr findQmlLibraryInImports(
+        const QStringList& importPaths,
+        QString uri,
         int versionMajor,
-        int versionMinor,
-        QList<QString>& paths
+        int versionMinor
     );
-    void findQmlLibrary(
-        const QString& path,
+    static QmlLibraryInfo::Ptr findQmlLibraryInImports(
+        const QString& uri,
+        const QString fullPath,
         int versionMajor,
-        int versionMinor,
-        QList<QString>& paths
+        int versionMinor
     );
-    void findQmlLibraryInPath(
-        const QString &path,
-        bool requiresQmlDir,
-        QList<QString>& paths
+    static QmlLibraryInfo::Ptr findQmlLibraryInPath(
+        const QString& uri,
+        const QString &fullPath,
+        bool requiresQmlDir
     );
 
-    void addImplicitLibrary(const QString& path);
-
-    int totalLibraries() const;
-    int totalImplicitLibraries() const;
-
-    ProjectQmlScopeContainer* globalLibraries();
-    ProjectQmlScopeContainer* implicitLibraries();
+    QmlLibraryInfo::Ptr addQmlGlobalLibrary(const QString& uri, int major, int minor);
+    QmlLibraryInfo::Ptr addQmlProjectLibrary(const QString& uri);
 
     QList<QString> pathsForImport(const QString& importUri);
     QString uriForPath(const QString& path);
@@ -81,30 +82,44 @@ public:
     void addDefaultLibraries(const QList<QString>& paths);
     const QList<QString>& defaultLibraries() const;
 
-private:
-    ProjectQmlScope(QQmlEngine* engine);
+    QmlLibraryInfo::Ptr libraryInfo(const QString& path);
+    bool libraryExists(const QString& path);
+    void addLibrary(const QString& path);
+    void assignLibrary(const QString& path, QmlLibraryInfo::Ptr libinfo);
+    void assignLibraries(const QHash<QString, QmlLibraryInfo::Ptr> &libinfos);
+    int totalLibraries() const;
+
+    QList<QmlLibraryInfo::Ptr> getLibrariesInPath(const QString& path);
+
+    void resetLibrariesInPath(const QString& path);
+    void resetLibrary(const QString& path);
+
+    QString toString();
+
+    QmlLanguageScanner* languageScanner();
+
+public slots:
+    void __libraryUpdates();
+
+signals:
+    void __processQueue();
 
 private:
-    QScopedPointer<ProjectQmlScopeContainer> d_globalLibraries;
-    QScopedPointer<ProjectQmlScopeContainer> d_implicitLibraries;
+    ProjectQmlScope(LockedFileIOSession::Ptr ioSession, QQmlEngine* engine, QObject* parent = nullptr);
+    void queueLibrary(const QmlLibraryInfo::Ptr& lib);
 
-    QList<QString> m_defaultLibraries;
-
+private:
+    QList<QString>                  m_defaultLibraries;
     QHash<QString, QList<QString> > m_importToPaths;
+    QStringList                     m_defaultImportPaths;
 
-    QSet<QString> m_monitoredPaths;
-    QStringList m_defaultImportPaths;
+    QmlLanguageScanMonitor* m_scanMonitor;
+    QThread*                m_monitorThread;
+    QTimer*                 m_scanTimer;
+
+    QMutex m_libraryMutex;
+    QHash<QString, QmlLibraryInfo::Ptr> m_libraries;
 };
-
-/// \brief Returns the global libraries container
-inline ProjectQmlScopeContainer *ProjectQmlScope::globalLibraries(){
-    return d_globalLibraries.data();
-}
-
-/// \brief Returns the implicit libraries container
-inline ProjectQmlScopeContainer *ProjectQmlScope::implicitLibraries(){
-    return d_implicitLibraries.data();
-}
 
 /// \brief Returns the stored paths for an import uri.
 inline QList<QString> ProjectQmlScope::pathsForImport(const QString &importUri){
@@ -116,8 +131,9 @@ inline QList<QString> ProjectQmlScope::pathsForImport(const QString &importUri){
 /// \brief Adds a set of paths to the default libraries.
 inline void ProjectQmlScope::addDefaultLibraries(const QList<QString> &paths){
     foreach( const QString& path, paths ){
-        if ( !m_defaultLibraries.contains(path) )
+        if ( !m_defaultLibraries.contains(path) ){
             m_defaultLibraries.append(path);
+        }
     }
 }
 

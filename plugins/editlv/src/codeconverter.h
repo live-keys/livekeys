@@ -9,7 +9,6 @@
 namespace lv{
 
 class LvEditFragment;
-//class DocumentQmlScope;
 class CodeCompletionModel;
 
 /// \private

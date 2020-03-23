@@ -20,6 +20,7 @@
 #include "live/lveditqmljsglobal.h"
 #include "live/documenthandler.h"
 #include "live/palettecontainer.h"
+#include "live/qmllanguageinfo.h"
 
 #include <QObject>
 #include <QQmlParserStatus>
@@ -31,8 +32,8 @@ class QmlJsSettings;
 class ProjectQmlScope;
 class CodeQmlHandler;
 class ProjectQmlScanner;
-class ProjectQmlScanMonitor;
-class PluginInfoExtractor;
+class QmlProjectMonitor;
+class QmlLanguageScanner;
 class LV_EDITQMLJS_EXPORT ProjectQmlExtension : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
@@ -45,10 +46,7 @@ public:
     void classBegin();
     void componentComplete();
 
-    ProjectQmlScanMonitor* scanMonitor();
-    ProjectQmlScanner* scanner();
-
-    PluginInfoExtractor *getPluginInfoExtractor(const QString& import);
+    QmlProjectMonitor* scanMonitor();
 
     static void engineHook(const QString& code, const QUrl& file, QObject* result, void *data);
 
@@ -63,6 +61,12 @@ public:
 
     Project* project();
 
+    static QmlLibraryInfo::ScanStatus loadPluginInfoInternal(
+        QmlLanguageScanner *scanner,
+        QmlLibraryInfo::Ptr lib,
+        QQmlEngine *engine,
+        QByteArray *stream);
+
 public slots:
     QObject* createHandler(ProjectDocument* document, DocumentHandler* handler);
 
@@ -72,13 +76,13 @@ private:
     Project*               m_project;
     ViewEngine*            m_engine;
     QmlJsSettings*         m_settings;
-    ProjectQmlScanMonitor* m_scanMonitor;
+    QmlProjectMonitor* m_scanMonitor;
     QList<CodeQmlHandler*> m_codeHandlers;
     PaletteContainer*      m_paletteContainer;
 };
 
 /// \brief Returns the lv::ProjectQmlScanMonitor associated with this object.
-inline ProjectQmlScanMonitor *ProjectQmlExtension::scanMonitor(){
+inline QmlProjectMonitor *ProjectQmlExtension::scanMonitor(){
     return m_scanMonitor;
 }
 

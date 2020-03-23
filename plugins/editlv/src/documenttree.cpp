@@ -21,7 +21,7 @@ ProjectDocument *DocumentTree::document() const
 void DocumentTree::parse()
 {
 
-    auto content = m_document->textDocument()->toPlainText().toStdString();
+    auto content = m_document->contentString().toStdString();
     m_ast = m_parser->parse(content);
 }
 

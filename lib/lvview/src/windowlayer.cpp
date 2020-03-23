@@ -9,6 +9,7 @@
 #include <QUrl>
 #include <QQuickWindow>
 #include <QQuickItem>
+#include <QQmlEngine>
 
 namespace lv{
 
@@ -44,6 +45,7 @@ void WindowLayer::loadView(ViewEngine* engine, QObject *parent){
         );
 
     m_window = qobject_cast<QQuickWindow*>(layerObj);
+    engine->engine()->setObjectOwnership(m_window, QQmlEngine::CppOwnership);
 
     connect(m_window, &QQuickWindow::activeChanged, this, &WindowLayer::windowActiveChanged);
 
@@ -71,6 +73,10 @@ QmlClipboard *WindowLayer::clipboard(){
         m_clipboard = new QmlClipboard(this);
     }
     return m_clipboard;
+}
+
+QObject *WindowLayer::viewRoot(){
+    return m_window;
 }
 
 }// namespace

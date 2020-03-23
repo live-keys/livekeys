@@ -67,6 +67,8 @@ public:
     bool hasKey(const QString &key) const;
     void addToHash(QCryptographicHash &hash) const;
 
+    QList<int> values() const;
+
     QString describe(int baseIndent = 0) const;
     QString toString() const;
 };

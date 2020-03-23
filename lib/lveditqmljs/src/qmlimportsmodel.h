@@ -48,11 +48,13 @@ public slots:
 
     int firstBlock();
     int lastBlock();
+
 signals:
     void countChanged();
+
 private:
-    std::vector<ItemData>         m_data;
-    QHash<int, QByteArray>        m_roles;
+    QList<ItemData>        m_data;
+    QHash<int, QByteArray> m_roles;
 
 };
 

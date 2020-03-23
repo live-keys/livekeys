@@ -24,8 +24,7 @@
 #include "live/editorglobalobject.h"
 #include "qmljssettings.h"
 #include "qmlcodeconverter.h"
-#include "projectqmlscanner_p.h"
-#include "projectqmlscanmonitor_p.h"
+#include "qmlprojectmonitor_p.h"
 #include "qmlpropertymodel.h"
 #include "qmlitemmodel.h"
 #include "qmladdcontainer.h"
@@ -106,20 +105,6 @@ void ProjectQmlExtension::componentComplete(){
 }
 
 /**
- * \brief Returns the the qml scanner associated with this object.
- */
-ProjectQmlScanner *ProjectQmlExtension::scanner(){
-    return m_scanMonitor->m_scanner;
-}
-
-/**
- * \brief Returns the lv::PluginInfoExtractor associated with this object.
- */
-PluginInfoExtractor *ProjectQmlExtension::getPluginInfoExtractor(const QString &import){
-    return m_scanMonitor->getPluginInfoExtractor(import);
-}
-
-/**
  * \brief Hook that get's executed for each engine recompile, notifying all codeHandlers assigned to this object.
  */
 void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *result, void* data){
@@ -180,7 +165,7 @@ void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEn
     m_project = project;
     m_engine = engine;
 
-    m_scanMonitor = new ProjectQmlScanMonitor(this, m_project, m_engine);
+    m_scanMonitor = new QmlProjectMonitor(this, m_project, m_engine);
 
     lv::EditorSettings* editorSettings = qobject_cast<lv::EditorSettings*>(settings->file("editor"));
     m_settings = new QmlJsSettings(editorSettings);
@@ -195,6 +180,15 @@ void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEn
     }
 
     m_paletteContainer = editor->paletteContainer();
+}
+
+QmlLibraryInfo::ScanStatus ProjectQmlExtension::loadPluginInfoInternal(
+        QmlLanguageScanner *scanner,
+        QmlLibraryInfo::Ptr lib,
+        QQmlEngine *engine,
+        QByteArray *stream)
+{
+    return PluginTypesFacade::loadPluginInfo(scanner, lib, engine, stream);
 }
 
 
