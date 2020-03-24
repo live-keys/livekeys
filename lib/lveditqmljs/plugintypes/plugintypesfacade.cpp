@@ -858,7 +858,7 @@ QmlLibraryInfo::ScanStatus PluginTypesFacade::loadPluginInfo(
         QmlLanguageScanner *,
         QmlLibraryInfo::Ptr,
         QQmlEngine *,
-        QByteArray *);
+        QByteArray *)
 {
     return QmlLibraryInfo::Done;
 }

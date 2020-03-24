@@ -1893,16 +1893,19 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
                 }
             } else {
                 QmlTypeReference qlt;
-                if ( QmlTypeInfo::isObject(propertyType) ){
-                    QmlTypeInfo tr = scope.getType(propertyType);
-                } else {
+//                if ( QmlTypeInfo::isObject(propertyType) ){
+//                    QmlTypeInfo::Ptr tr = scope.getType(propertyType);
+//                } else {
+//                    qlt = QmlTypeReference(QmlTypeReference::Qml, rp->type());
+//                }
+                if ( !QmlTypeInfo::isObject(propertyType) ){
                     qlt = QmlTypeReference(QmlTypeReference::Qml, rp->type());
                 }
                 if ( !qlt.isEmpty() ){
-                    QmlTypeInfo tr = scope.getType(rp->object());
+                    QmlTypeInfo::Ptr tr = scope.getType(rp->object());
 
                     property = QmlDeclaration::create(
-                        rp->name(), qlt, tr.prefereredType(), rp->begin, rp->propertyEnd - rp->begin, m_document
+                        rp->name(), qlt, tr->prefereredType(), rp->begin, rp->propertyEnd - rp->begin, m_document
                     );
                 }
             }
@@ -2554,7 +2557,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                     addContainer->propertyModel()->addItem(
                         QmlSuggestionModel::ItemData(
                             propertyName,
-                            "", 
+                            "",//ti->prefereredType().join(),
                             "", 
                             "", 
                             "",
@@ -2602,7 +2605,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                     "",
                     "",
                     "implicit",
-                    scope.document->info()->path(),
+                    scope.document->path(),
                     e
                 )
             );

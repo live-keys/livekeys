@@ -25,7 +25,6 @@
 #include "qmljssettings.h"
 #include "qmlcodeconverter.h"
 #include "qmlprojectmonitor_p.h"
-#include "qmlpropertymodel.h"
 #include "qmladdcontainer.h"
 #include "qmleditfragment.h"
 #include "qmlbindingspanmodel.h"

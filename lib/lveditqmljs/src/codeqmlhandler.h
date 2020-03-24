@@ -27,6 +27,7 @@
 #include "live/palettelist.h"
 #include "live/codecompletionmodel.h"
 #include "live/qmlimportsmodel.h"
+#include "live/documentqmlinfo.h"
 
 #include <QObject>
 #include <QTimer>
