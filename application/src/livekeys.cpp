@@ -39,7 +39,6 @@
 #include "live/projectqmlextension.h"
 #include "live/codeqmlhandler.h"
 #include "live/documentqmlinfo.h"
-#include "live/plugininfoextractor.h"
 #include "qmlengineinterceptor.h"
 
 #include "live/windowlayer.h"
@@ -93,11 +92,18 @@ Livekeys::Livekeys(QObject *parent)
 
 Livekeys::~Livekeys(){
     VisualLog::setViewTransport(nullptr);
+
+    //TODO: Quickfix on warning when closing.
+    if ( m_layers->contains("workspace") ){
+        Layer* l = qobject_cast<Layer*>(m_layers->value("workspace").value<QObject*>());
+        delete l->viewRoot();
+    }
+
+    delete m_layers;
     delete m_settings;
     delete m_viewEngine;
     delete m_packageGraph;
     delete m_memory;
-    delete m_layers;
 
 #ifdef BUILD_ELEMENTS
     delete m_engine;
@@ -167,38 +173,18 @@ void Livekeys::solveImportPaths(){
     m_viewEngine->engine()->setImportPathList(m_engineImportPaths);
 }
 
-void Livekeys::loadQml(const QUrl &url){
-    static_cast<QQmlApplicationEngine*>(m_viewEngine->engine())->load(url);
-
-    m_project->setRunSpace(layerPlaceholder());
-
-    if ( m_arguments->script() != "" ){
-        m_project->openProject(QString::fromStdString(m_arguments->script()));
-    } else {
-        m_project->newProject();
-    }
-    if ( !m_arguments->monitoredFiles().isEmpty() ){
-        foreach( QString mfile, m_arguments->monitoredFiles() ){
-            if ( !mfile.isEmpty() ){
-                QFileInfo mfileInfo(mfile);
-                if ( mfileInfo.isRelative() ){
-                    m_project->openTextFile(
-                        QDir::cleanPath(m_project->rootPath() + QDir::separator() + mfile),
-                        ProjectDocument::Monitor
-                    );
-                } else {
-                    m_project->openTextFile(mfile, ProjectDocument::Monitor);
-                }
-            }
-        }
-    }
-}
-
 void Livekeys::loadProject(){
     m_project->setRunSpace(layerPlaceholder());
 
     if ( m_arguments->script() != "" ){
-        m_project->openProject(QString::fromStdString(m_arguments->script()));
+        QString projPath = QString::fromStdString(m_arguments->script());
+        if ( m_arguments->globalFlag() && !QFileInfo(projPath).isAbsolute() ){
+            m_project->openProject(
+                QString::fromStdString(ApplicationContext::instance().pluginPath()) + "/" + projPath + ".qml"
+            );
+        } else {
+            m_project->openProject(projPath);
+        }
     } else {
         m_project->newProject();
     }
@@ -259,15 +245,15 @@ void Livekeys::loadLayer(const QString &name, std::function<void (Layer*)> onRea
     m_layers->insert(name, QVariant::fromValue(layer));
 
     if ( layer->hasView() ){
-        connect(layer, &Layer::viewReady, [this, onReady](Layer* layer, QObject* view){
-            vlog("main").v() << "Layer view ready: " << layer->name();
+        connect(layer, &Layer::viewReady, [this, onReady](Layer* l, QObject* view){
+            vlog("main").v() << "Layer view ready: " << l->name();
             if ( view )
                 m_layerPlaceholder = view;
 
-            emit layerReady(layer);
+            emit layerReady(l);
 
             if ( onReady )
-                onReady(layer);
+                onReady(l);
         });
 
         layer->loadView(m_viewEngine, m_layerPlaceholder ? m_layerPlaceholder : m_viewEngine->engine());
@@ -391,31 +377,6 @@ void Livekeys::loadInternalPackages(){
                 {"documentation", "editor/loadqtdocs.qml"}
             });
             PackageGraph::addInternalPackage(package);
-        }
-    }
-}
-
-void Livekeys::initializeProject(){
-    m_project->setRunSpace(layerPlaceholder());
-
-    if ( m_arguments->script() != "" ){
-        m_project->openProject(QString::fromStdString(m_arguments->script()));
-    } else {
-        m_project->newProject();
-    }
-    if ( !m_arguments->monitoredFiles().isEmpty() ){
-        foreach( QString mfile, m_arguments->monitoredFiles() ){
-            if ( !mfile.isEmpty() ){
-                QFileInfo mfileInfo(mfile);
-                if ( mfileInfo.isRelative() ){
-                    m_project->openTextFile(
-                        QDir::cleanPath(m_project->rootPath() + QDir::separator() + mfile),
-                        ProjectDocument::Monitor
-                    );
-                } else {
-                    m_project->openTextFile(mfile, ProjectDocument::Monitor);
-                }
-            }
         }
     }
 }

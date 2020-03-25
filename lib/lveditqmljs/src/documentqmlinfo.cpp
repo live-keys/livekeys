@@ -333,6 +333,12 @@ DocumentQmlInfo::Ptr DocumentQmlInfo::create(const QString &fileName){
     return DocumentQmlInfo::Ptr(new DocumentQmlInfo(fileName));
 }
 
+DocumentQmlInfo::Ptr DocumentQmlInfo::createAndParse(const QString &fileName, const QString &source){
+    DocumentQmlInfo::Ptr r = create(fileName);
+    r->parse(source);
+    return r;
+}
+
 /**
  * \brief Extract the declared id's within a qml document.
  */
@@ -374,60 +380,46 @@ const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueForId(const QString 
  * For example, you can use this class together with lv::DocumentQmlInfo::valueForId() to inspect
  * a specific object defined with an id within the qml document.
  */
-lv::QmlTypeInfo DocumentQmlInfo::extractValueObject(
+lv::QmlTypeInfo::Ptr DocumentQmlInfo::extractValueObject(
         const DocumentQmlInfo::ValueReference &valueref, DocumentQmlInfo::ValueReference *parent) const
 {
-    lv::QmlTypeInfo vodata;
+    lv::QmlTypeInfo::Ptr vodata = lv::QmlTypeInfo::create();
     if ( isValueNull(valueref) || valueref.parent != this )
         return vodata;
 
     if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
 
-        LanguageUtils::FakeMetaObject::Ptr fmo(new LanguageUtils::FakeMetaObject);
-
-        ValueMemberExtractor extractor(fmo);
+        ValueMemberExtractor extractor(vodata);
         vob->processMembers(&extractor);
         if ( parent ){
             parent->value = extractor.parent();
             parent->parent = this;
         }
 
-        vodata = QmlTypeInfoPrivate::fromMetaObject(fmo, path());
-
         if ( vob->typeName() )
-            vodata.setExportType(QmlTypeReference(QmlTypeReference::Qml, vob->typeName()->name.toString()));
+            vodata->setExportType(QmlTypeReference(QmlTypeReference::Qml, vob->typeName()->name.toString()));
     }
 
     return vodata;
 }
 
-QmlTypeInfo DocumentQmlInfo::extractValueObjectWithExport(
+QmlTypeInfo::Ptr DocumentQmlInfo::extractValueObjectWithExport(
         const DocumentQmlInfo::ValueReference &valueref,
         const QString &componentName,
-        const QString &libraryPath,
-        int vMajor,
-        int vMinor) const
+        const QString &libraryPath) const
 {
-
-    lv::QmlTypeInfo vodata;
+    lv::QmlTypeInfo::Ptr vodata = lv::QmlTypeInfo::create();
     if ( isValueNull(valueref) || valueref.parent != this )
         return vodata;
 
     if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
 
-        LanguageUtils::FakeMetaObject::Ptr fmo(new LanguageUtils::FakeMetaObject);
-
-        ValueMemberExtractor extractor(fmo);
+        ValueMemberExtractor extractor(vodata);
         vob->processMembers(&extractor);
-
-        fmo->setClassName("qml/" + componentName);
-        fmo->setSuperclassName("qml/" + vob->typeName()->name.toString());
-        fmo->addExport(componentName, libraryPath, LanguageUtils::ComponentVersion(vMajor, vMinor));
-
-        vodata = QmlTypeInfoPrivate::fromMetaObject(fmo, path());
+        vodata->setExportType(QmlTypeReference(QmlTypeReference::Qml, componentName, libraryPath));
 
         if ( vob->typeName() )
-            vodata.setExportType(QmlTypeReference(QmlTypeReference::Qml, vob->typeName()->name.toString()));
+            vodata->setInheritanceType(QmlTypeReference(QmlTypeReference::Unknown, vob->typeName()->name.toString()));
     }
 
     return vodata;
@@ -633,7 +625,7 @@ QList<DocumentQmlInfo::Import> DocumentQmlInfo::extractImports(){
 
         imports << Import(
            importType,
-           it->path(),
+           (importType == Import::Library ? it->name() : it->path()),
            it->as(),
            it->version().majorVersion(),
            it->version().minorVersion()
@@ -784,13 +776,13 @@ DocumentQmlInfo::~DocumentQmlInfo(){
 }
 
 /**
- * \class lv::DocumentQmlScope::Import
+ * \class lv::DocumentQmlInfo::Import
  * \ingroup lveditqmljs
- * \brief Import data associated with a lv::DocumentQmlScope
+ * \brief Import data associated with a lv::DocumentQmlInfo
  */
 
 /**
- * \property lv::DocumentQmlScope::Import::NoVersion
+ * \property lv::DocumentQmlInfo::Import::NoVersion
  * \brief Value used to check wether a version is valid or not
  */
 

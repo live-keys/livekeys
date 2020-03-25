@@ -23,6 +23,8 @@
 #include <QMap>
 #include <QSharedPointer>
 
+class QmlDirParser;
+
 namespace lv{
 
 // QmlTypeReference
@@ -54,6 +56,17 @@ private:
     Language m_language;
     QString  m_path;
     QString  m_name;
+};
+
+// QmlEnumInfo
+// ---------------------------------------------
+
+class LV_EDITQMLJS_EXPORT QmlEnumInfo{
+
+public:
+    QString        name;
+    QList<QString> keys;
+    QList<int>     values;
 };
 
 // QmlFunctionInfo
@@ -121,38 +134,60 @@ public:
     QmlTypeReference objectType;
 };
 
+// QmlDocumentReference
+// ---------------------------------------------
+
+class LV_EDITQMLJS_EXPORT QmlDocumentReference{
+
+public:
+    bool isValid() const{ return !path.isEmpty(); }
+
+    QString     path;
+    QStringList dependencies;
+};
 
 // QmlTypeInfo
 // ---------------------------------------------
-
 
 class LV_EDITQMLJS_EXPORT QmlTypeInfo{
 
     friend class QmlTypeInfoPrivate;
 
 public:
-    QmlTypeInfo();
-    QmlTypeInfo(const QmlTypeInfo& other);
+    typedef QSharedPointer<QmlTypeInfo>       Ptr;
+    typedef QSharedPointer<const QmlTypeInfo> ConstPtr;
+
+public:
+    static Ptr create();
+    static Ptr clone(const QmlTypeInfo::ConstPtr& other);
+
     ~QmlTypeInfo();
 
-    QmlTypeInfo& operator = (const QmlTypeInfo& other);
-
     void setExportType(const QmlTypeReference& exportType);
+    void setClassType(const QmlTypeReference& classType);
+    void setInheritanceType(const QmlTypeReference& inheritsType);
 
     const QmlTypeReference& exportType() const;
     const QmlTypeReference& classType() const;
     const QmlTypeReference& inherits() const;
     const QmlTypeReference& prefereredType() const;
-    const QString& document() const;
+    const QmlDocumentReference& document() const;
+
+    void setDocument(const QmlDocumentReference& doc);
 
     int totalProperties() const;
     QmlPropertyInfo propertyAt(int index) const;
     QmlPropertyInfo propertyAt(const QString& name) const;
-
+    void appendProperty(const QmlPropertyInfo& prop);
 
     int totalFunctions() const;
     QmlFunctionInfo functionAt(int index) const;
     QmlFunctionInfo functionAt(const QString& name) const;
+    void appendFunction(const QmlFunctionInfo& function);
+
+    int totalEnums() const;
+    QmlEnumInfo enumAt(int index) const;
+    QmlEnumInfo enumAt(const QString& name) const;
 
     bool isValid() const;
     QString toString() const;
@@ -160,31 +195,121 @@ public:
     bool isDeclaredInQml() const;
     bool isDeclaredInCpp() const;
 
+    bool isSingleton() const;
+    bool isComposite() const;
+    bool isCreatable() const;
+
     static bool isObject(const QString& declarationType);
     static QmlTypeReference toQmlPrimitive(const QmlTypeReference &cppPrimitive);
     static QString typeDefaultValue(const QString& typeString);
 
 private:
-    QmlTypeReference m_exportType;
-    QmlTypeReference m_classType;
-    QmlTypeReference m_inherits;
-    QString          m_document;
-    QmlTypeInfoPrivate* m_d;
+    QmlTypeInfo();
+    QmlTypeInfo(const QmlTypeInfo&);
+    QmlTypeInfo& operator=(const QmlTypeInfo&);
+
+    QmlTypeReference       m_exportType;
+    QmlTypeReference       m_classType;
+    QmlTypeReference       m_inherits;
+    QmlDocumentReference   m_document;
+    bool                   m_isSingleton;
+    bool                   m_isCreatable;
+    bool                   m_isComposite;
+
+    QList<QmlPropertyInfo> m_properties;
+    QList<QmlFunctionInfo> m_methods;
+    QList<QmlEnumInfo>     m_enums;
 };
 
 // QmlInheritanceInfo
 // ---------------------------------------------
 
-class QmlInheritanceInfo{
+class LV_EDITQMLJS_EXPORT QmlInheritanceInfo{
 public:
     QString toString() const;
     void join(const QmlInheritanceInfo& path);
-    void append(const QmlTypeInfo& tr);
+    void append(const QmlTypeInfo::Ptr& tr);
     bool isEmpty() const;
 
     QmlTypeReference languageType() const;
 public:
-    QList<QmlTypeInfo> nodes;
+    QList<QmlTypeInfo::Ptr> nodes;
+};
+
+// QmlLibraryInfo
+// ---------------------------------------------
+
+class LV_EDITQMLJS_EXPORT QmlLibraryInfo{
+
+public:
+    enum ScanStatus{
+        NotScanned = 0,
+        WaitingOnProcess,
+        ScanError,
+        NoPrototypeLink,
+        RequiresDependency,
+        Done
+    };
+
+public:
+    typedef QSharedPointer<QmlLibraryInfo>       Ptr;
+    typedef QSharedPointer<const QmlLibraryInfo> ConstPtr;
+
+public:
+    static Ptr create(const QString& uri);
+    static Ptr create(const QmlDirParser& parser);
+    static Ptr clone(const QmlLibraryInfo::ConstPtr& linfo);
+
+    ~QmlLibraryInfo();
+
+    const QMap<QString, QmlTypeInfo::Ptr>& exports() const;
+
+    QStringList listExports() const;
+    QmlTypeInfo::Ptr typeInfoByName(const QString& exportName);
+    QmlTypeInfo::Ptr typeInfoByClassName(const QString& className);
+    QmlTypeInfo::Ptr typeInfo(const QString& name, QmlTypeReference::Language language);
+
+    void updateImportInfo(int versionMajor, int versionMinor);
+
+    ScanStatus status() const;
+    void setStatus(ScanStatus status);
+
+    QString statusString() const;
+
+    void setPath(const QString& path);
+
+    const QString& path() const;
+    const QString& uri() const;
+    QStringList uriSegments() const;
+
+    QString importStatement() const;
+
+    int importVersionMinor() const;
+    int importVersionMajor() const;
+
+    void addType(const QmlTypeInfo::Ptr& typeExport);
+    void addDependency(const QString& dependency);
+    void addDependencies(const QStringList& dependencies);
+    const QList<QString>& dependencies() const;
+
+    void updateUri(const QString& uri);
+
+    QString toString() const;
+
+private:
+    QmlLibraryInfo();
+    QmlLibraryInfo(const QmlDirParser& parser);
+
+private:
+    QMap<QString, QmlTypeInfo::Ptr> m_exports;
+    QList<QmlTypeInfo::Ptr>         m_internals;
+    QList<QString>                  m_dependencies;
+
+    QString               m_path;
+    QString               m_uri;
+    int                   m_importVersionMajor;
+    int                   m_importVersionMinor;
+    ScanStatus            m_status;
 };
 
 }// namespace

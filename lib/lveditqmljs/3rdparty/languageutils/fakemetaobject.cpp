@@ -82,6 +82,9 @@ void FakeMetaEnum::addToHash(QCryptographicHash &hash) const
         hash.addData(reinterpret_cast<const char *>(&value), sizeof(value));
 }
 
+QList<int> FakeMetaEnum::values() const
+{ return m_values; }
+
 QString FakeMetaEnum::describe(int baseIndent) const
 {
     QString newLine = QString::fromLatin1("\n") + QString::fromLatin1(" ").repeated(baseIndent);

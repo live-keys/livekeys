@@ -69,7 +69,7 @@ private:
 /// \private
 class ValueMemberExtractor : public QmlJS::MemberProcessor{
 public:
-    ValueMemberExtractor(LanguageUtils::FakeMetaObject::Ptr object) : m_parent(nullptr), m_object(object)
+    ValueMemberExtractor(QmlTypeInfo::Ptr object) : m_parent(nullptr), m_object(object)
     {}
 
     bool processProperty(const QString &name, const QmlJS::Value *value, const QmlJS::PropertyInfo&) override{
@@ -86,10 +86,10 @@ public:
             for( int i = 0; i < fv->namedArgumentCount(); ++i ){
                 mf.addParameter(fv->argumentName(i), QmlTypeReference(QmlTypeReference::Qml, "var"));
             }
-            QmlTypeInfoPrivate::appendFunction(m_object, mf);
+            m_object->appendFunction(mf);
             return true;
         }
-        QmlTypeInfoPrivate::appendProperty(m_object, QmlPropertyInfo(name, QmlTypeReference(QmlTypeReference::Unknown, type)));
+        m_object->appendProperty(QmlPropertyInfo(name, QmlTypeReference(QmlTypeReference::Unknown, type)));
         return true;
     }
     bool processEnumerator(const QString &, const QmlJS::Value *) override
@@ -105,7 +105,7 @@ public:
             for( int i = 0; i < vs->namedArgumentCount(); ++i ){
                 mf.addParameter(vs->argumentName(i), QmlTypeReference(QmlTypeReference::Qml, "var"));
             }
-            QmlTypeInfoPrivate::appendFunction(m_object, mf);
+            m_object->appendFunction(mf);
         }
         return true;
     }
@@ -114,7 +114,7 @@ public:
         QmlFunctionInfo mf;
         mf.name = name;
         mf.functionType = QmlFunctionInfo::SlotGenerated;
-        QmlTypeInfoPrivate::appendFunction(m_object, mf);
+        m_object->appendFunction(mf);
         return true;
     }
     bool processGeneratedSlot(const QString &name, const QmlJS::Value *) override
@@ -122,15 +122,15 @@ public:
         QmlFunctionInfo mf;
         mf.name = name;
         mf.functionType = QmlFunctionInfo::SlotGenerated;
-        QmlTypeInfoPrivate::appendFunction(m_object, mf);
+        m_object->appendFunction(mf);
         return true;
     }
 
     const QmlJS::Value* parent(){ return m_parent; }
 
 private:
-    const QmlJS::Value*                m_parent;
-    LanguageUtils::FakeMetaObject::Ptr m_object;
+    const QmlJS::Value*  m_parent;
+    QmlTypeInfo::Ptr     m_object;
 };
 
 }// namespace

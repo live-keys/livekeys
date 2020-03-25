@@ -82,4 +82,4 @@ void QmlImportsModel::addItem(const QString &m, const QString &v, const QString 
 QmlImportsModel::ItemData::ItemData(const QString &m, const QString &v, const QString &q, int l)
     : module(m), version(v), qualifier(q), line(l) {}
 
-}
+} // namespace

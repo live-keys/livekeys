@@ -7,7 +7,7 @@ B.Container{
     PluginInfoExtractor{
         id: pie
         onPluginInfoReady: {
-            console.log(data)
+            printResult(data)
             Qt.quit(0)
         }
     }

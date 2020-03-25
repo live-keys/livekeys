@@ -7,7 +7,6 @@ linkLocalLibrary(lvview,      lvview)
 linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
 
-
 !isEmpty(BUILD_ELEMENTS){
     DEFINES += BUILD_ELEMENTS
     linkLocalLibrary(lvelements, lvelements)

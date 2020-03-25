@@ -1,7 +1,7 @@
 TEMPLATE = lib
 TARGET   = lveditqmljs
 QT      += core qml quick xml
-CONFIG  += qt c++11
+CONFIG  += qt c++14
 
 linkLocalLibrary(lvbase,   lvbase)
 linkLocalLibrary(lvview,  lvview)

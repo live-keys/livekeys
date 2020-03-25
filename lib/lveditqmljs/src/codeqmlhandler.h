@@ -19,7 +19,6 @@
 
 #include "live/lveditqmljsglobal.h"
 #include "live/projectdocument.h"
-#include "live/documentqmlscope.h"
 #include "live/projectqmlscope.h"
 #include "live/qmldeclaration.h"
 #include "live/lockedfileiosession.h"
@@ -40,7 +39,6 @@ namespace lv{
 
 class ProjectQmlScanner;
 class ProjectQmlExtension;
-class PluginInfoExtractor;
 
 class QmlEditFragment;
 class QmlJsHighlighter;
@@ -104,6 +102,8 @@ public:
     QmlUsageGraphScanner* createScanner();
 
     int numberOfConnections();
+
+    void newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo);
 
 public slots:
     QList<int> languageFeatures() const;
@@ -171,13 +171,14 @@ public slots:
 
     // Scopes
 
-    void newDocumentScopeReady(const QString& path, DocumentQmlScope::Ptr documentScope);
     void newProjectScopeReady();
     void updateScope();
 
     void aboutToDelete();
+
 signals:
     void numberOfConnectionsChanged();
+
 private:
     QJSValue createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports = false);
 
@@ -205,15 +206,6 @@ private:
         const QStringList& expression,
         QList<CodeCompletionSuggestion>& suggestions
     );
-
-    void suggestionsForValueObject(
-        const QmlTypeInfo& object,
-        QList<CodeCompletionSuggestion>& suggestions,
-        bool extractProperties,
-        bool extractFunctions,
-        bool extractSlots,
-        bool extractSignals
-    ) const;
 
     void suggestionsForNamespaceTypes(
         const QString& typeNameSpace,

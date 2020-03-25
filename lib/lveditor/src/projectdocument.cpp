@@ -80,6 +80,7 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     , m_editingState(0)
     , m_isSynced(true)
     , m_lastCursorPosition(-1)
+    , m_contentStringDirty(true)
 {
     setIsMonitored(isMonitored);
     m_textDocument->setDocumentMargin(0);
@@ -423,7 +424,7 @@ void ProjectDocument::setDirty(bool dirty)
  * \brief Overrides Document::content
  */
 QByteArray ProjectDocument::content(){
-    return m_textDocument->toPlainText().toUtf8();
+    return contentString().toUtf8();
 }
 
 /**
@@ -431,6 +432,14 @@ QByteArray ProjectDocument::content(){
  */
 void ProjectDocument::setContent(const QByteArray &content){
     m_textDocument->setPlainText(QString::fromUtf8(content));
+}
+
+const QString& ProjectDocument::contentString(){
+    if ( m_contentStringDirty ){
+        m_contentString = m_textDocument->toPlainText();
+        m_contentStringDirty = false;
+    }
+    return m_contentString;
 }
 
 /**
@@ -502,6 +511,7 @@ ProjectDocument *ProjectDocument::castFrom(Document *document){
  * \brief Slot for tracking text document changes which updates markers and sections
  */
 void ProjectDocument::__documentContentsChanged(int position, int charsRemoved, int charsAdded){
+    m_contentStringDirty = true;
     emit contentsChange(position, charsRemoved, charsAdded);
     //m_isDirty = true;
 

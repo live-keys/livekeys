@@ -71,7 +71,8 @@ Runnable::~Runnable(){
     if ( m_viewRoot ){
         m_viewRoot->setParent(nullptr);
         auto item = qobject_cast<QQuickItem*>(m_viewRoot);
-        if (item) item->setParentItem(nullptr);
+        if (item)
+            item->setParentItem(nullptr);
         m_viewRoot->deleteLater();
     }
 }

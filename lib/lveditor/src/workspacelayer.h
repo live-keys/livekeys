@@ -38,8 +38,9 @@ public:
     explicit WorkspaceLayer(QObject *parent = nullptr);
     ~WorkspaceLayer() override;
 
-    void loadView(ViewEngine *engine, QObject *parent) Q_DECL_OVERRIDE;
-    QObject* nextViewParent() Q_DECL_OVERRIDE;
+    void loadView(ViewEngine *engine, QObject *parent) override;
+    QObject* nextViewParent() override;
+    QObject * viewRoot() override;
 
     QObject* project() const;
     QObject* panes() const;
@@ -76,6 +77,7 @@ private:
 
     QObject* m_projectEnvironment;
     QObject* m_panes;
+    QObject* m_viewRoot;
 
     Commands* m_commands;
     KeyMap*   m_keymap;

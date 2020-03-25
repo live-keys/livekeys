@@ -13,11 +13,11 @@ namespace lv{
 
 QmlFork::QmlFork(QObject *parent)
     : RemoteContainer(parent)
-    , m_handlerData(0)
+    , m_handlerData(nullptr)
     , m_fork(nullptr)
+    , m_forkready(false)
     , m_readSocket(nullptr)
     , m_writeSocket(nullptr)
-    , m_forkready(false)
 {
 }
 
