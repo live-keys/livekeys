@@ -858,6 +858,7 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
     } else { // multiple declarations were selected
 
         DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(m_document->file()->path());
+
         docinfo->parse(m_target->toPlainText());
 
         DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();

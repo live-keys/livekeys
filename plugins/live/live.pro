@@ -36,6 +36,7 @@ OTHER_FILES += \
 
 DISTFILES += \
     qml/PathInputBox.qml \
+    qml/ResizeArea.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/forknode.qml

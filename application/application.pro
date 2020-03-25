@@ -1,6 +1,6 @@
 TEMPLATE = app
 TARGET   = livekeys
-QT      += qml quick #webengine
+QT      += qml quick webengine
 
 linkLocalLibrary(lvbase,      lvbase)
 linkLocalLibrary(lvview,      lvview)

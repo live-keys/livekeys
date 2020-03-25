@@ -26,7 +26,7 @@
 #include "live/applicationcontext.h"
 #include "live/exception.h"
 
-//#include <QtWebEngine/QtWebEngine>
+#include <QtWebEngine/QtWebEngine>
 
 using namespace lv;
 
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]){
     QGuiApplication::setApplicationName("Livekeys");
     QGuiApplication::setApplicationVersion(Livekeys::versionString());
 
-//    QtWebEngine::initialize();
+    QtWebEngine::initialize();
 
     try{
         Livekeys::Ptr livekeys = Livekeys::create(argc, argv);
