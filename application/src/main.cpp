@@ -26,7 +26,7 @@
 #include "live/applicationcontext.h"
 #include "live/exception.h"
 
-//#include <QtWebEngine/QtWebEngine>
+#include <QtWebEngine/QtWebEngine>
 
 using namespace lv;
 
@@ -43,8 +43,6 @@ int main(int argc, char *argv[]){
 
     app.setOrganizationName("Livekeys");
     app.setOrganizationDomain("Livekeys");
-
-//    QtWebEngine::initialize();
 
     try{
         Livekeys::Ptr livekeys = Livekeys::create(argc, argv);

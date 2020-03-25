@@ -70,8 +70,7 @@ Pane{
             }
 
             if ( helpPath.length > 0 ){
-//                var docItem = lk.layers.workspace.documentation.load(helpPath)
-                var docItem = null // documentation is currently disabled
+                var docItem = lk.layers.workspace.documentation.load(helpPath)
                 if ( docItem ){
                     var docPane = mainSplit.findPaneByType('documentation')
                     if ( !docPane ){
