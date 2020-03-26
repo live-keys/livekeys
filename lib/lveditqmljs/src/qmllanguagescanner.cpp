@@ -339,6 +339,7 @@ QList<QmlTypeInfo::Ptr> QmlLanguageScanner::scanTypeInfoStream(
             typeModule = "<cpp>";
         }
 
+
         if ( !typeModule.isEmpty() ){
             if ( typeModule == "<cpp>" || typeModule == lib->uri() ){
                 lib->addType(QmlTypeInfoPrivate::fromMetaObject(it.value(), lib->uri()));
@@ -349,12 +350,6 @@ QList<QmlTypeInfo::Ptr> QmlLanguageScanner::scanTypeInfoStream(
     }
 
     return result;
-}
-
-QList<QmlTypeInfo::Ptr> QmlLanguageScanner::scanTypeInfoInternal(
-        const QString &typeInfo, const QmlLibraryInfo::Ptr &lib)
-{
-    return QList<QmlTypeInfo::Ptr>();
 }
 
 QmlTypeInfo::Ptr QmlLanguageScanner::scanObjectFile(

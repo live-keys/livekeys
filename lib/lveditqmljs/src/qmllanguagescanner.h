@@ -57,7 +57,6 @@ private:
     QList<QmlTypeInfo::Ptr> scanTypeInfoStream(
         const QString& typeInfoPath, const QByteArray& stream, const QmlLibraryInfo::Ptr& lib
     );
-    QList<QmlTypeInfo::Ptr> scanTypeInfoInternal(const QString& typeInfo, const QmlLibraryInfo::Ptr& lib);
     QmlTypeInfo::Ptr scanObjectFile(
         QmlLibraryInfo::Ptr lib,
         const QString& filePath,
