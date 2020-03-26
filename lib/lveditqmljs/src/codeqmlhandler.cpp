@@ -111,7 +111,7 @@ public:
     }
 
     void documentQueuedForScanning(){
-        m_documentValueObjectsSync = true;
+        m_documentBackgroundParseSync = true;
     }
 
     void documentChanged(){
@@ -129,12 +129,12 @@ public:
     }
 
 private:
+    DocumentQmlInfo::Ptr         m_documentInfo;
+    DocumentQmlValueObjects::Ptr m_documentObjects;
+
     bool                  m_documentParseSync;
     bool                  m_documentBackgroundParseSync;
     bool                  m_documentValueObjectsSync;
-
-    DocumentQmlInfo::Ptr         m_documentInfo;
-    DocumentQmlValueObjects::Ptr m_documentObjects;
 };
 
 namespace qmlhandler_helpers{
@@ -566,7 +566,7 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
 
     if ( d->projectHandler->scanMonitor()->hasProjectScope() && document != nullptr ){
         d->documentQueuedForScanning();
-        d->projectHandler->scanMonitor()->queueDocumentScan(document->file()->path(), document->content(), this);
+        d->projectHandler->scanMonitor()->queueDocumentScan(document->file()->path(), document->contentString(), this);
     }
 }
 
@@ -1173,30 +1173,16 @@ int CodeQmlHandler::findImportsPosition(int blockPos)
     return block.position() + 7; // e.g. import ^QtQuick
 }
 
-int CodeQmlHandler::findRootPosition(int blockPos)
-{
-    auto block = m_document->textDocument()->findBlockByNumber(blockPos + 1);
+int CodeQmlHandler::findRootPosition(){
+    Q_D(CodeQmlHandler);
 
-    auto reg = QRegExp("\\s*");
-    while (block.isValid())
-    {
-        if (reg.exactMatch(block.text()))
-        {
-            block = block.next();
-            continue;
-        }
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
 
-        break;
+    if ( d->documentObjects()->root() ){
+        return d->documentObjects()->root()->begin;
     }
-
-    if (!block.isValid()) return 0;
-
-    int position = block.position();
-    auto text = block.text();
-    int i = 0;
-    while (text[i].isSpace()) ++i;
-
-    return position + i + 1;
+    return -1;
 }
 
 QmlEditFragment *CodeQmlHandler::findEditFragment(CodePalette *palette){
@@ -1718,7 +1704,6 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
         return nullptr;
 
     QmlDeclaration::Ptr declaration = properties.first();
-
     for ( auto it = editParent->childFragments().begin(); it != editParent->childFragments().end(); ++it ){
         QmlEditFragment* edit = *it;
         if ( edit->declaration()->position() == declaration->position() )

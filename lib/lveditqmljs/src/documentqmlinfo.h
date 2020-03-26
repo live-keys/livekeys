@@ -220,6 +220,8 @@ public:
     QString path() const;
     QString componentName() const;
 
+    QString source() const;
+
     DocumentQmlValueObjects::Ptr createObjects() const;
     DocumentQmlValueObjects::Ptr createObjects(const ASTReference& ast) const;
 

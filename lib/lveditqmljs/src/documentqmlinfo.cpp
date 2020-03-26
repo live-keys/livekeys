@@ -19,6 +19,7 @@
 #include "live/qmldeclaration.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
+#include "live/visuallogqt.h"
 #include "qmlbindingchannel.h"
 
 #include "qmljs/qmljsdocument.h"
@@ -650,12 +651,18 @@ QString DocumentQmlInfo::componentName() const{
     return d->internalDoc->componentName();
 }
 
+QString DocumentQmlInfo::source() const{
+    Q_D(const DocumentQmlInfo);
+    return d->internalDoc->source();
+}
+
 /**
  * \brief Visit the AST and create the objects defined in this document
  * \returns A pointer to the lv::DocumentQmlValueObjects
  */
 DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects() const{
     Q_D(const DocumentQmlInfo);
+
     DocumentQmlValueObjects::Ptr objects = DocumentQmlValueObjects::create();
     objects->visit(d->internalDoc->ast());
     return objects;
