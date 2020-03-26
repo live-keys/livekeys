@@ -9,7 +9,21 @@ QmlLanguageScanMonitor::QmlLanguageScanMonitor(QmlLanguageScanner *scanner, QObj
 {
     m_scanner->onLibraryUpdate([this](QmlLibraryInfo::Ptr lib, int queueSize){
         m_collectedLibraries.append(QmlLibraryInfo::clone(lib));
+
         if ( m_collectedLibraries.size() > 5 || queueSize == 0 ){
+
+            m_librariesMutex.lock();
+            m_libraries = m_collectedLibraries;
+            m_librariesMutex.unlock();
+
+            m_collectedLibraries.clear();
+
+            emit libraryUpdates();
+        }
+    });
+
+    m_scanner->onQueueFinished([this](){
+        if ( m_collectedLibraries.size() ){
 
             m_librariesMutex.lock();
             m_libraries = m_collectedLibraries;

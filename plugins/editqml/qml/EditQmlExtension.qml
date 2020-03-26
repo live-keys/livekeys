@@ -316,8 +316,11 @@ LiveExtension{
         var paletteImports = codeHandler.findPalettes(importsPosition, true)
         if (paletteImports) root.shapePalette(editor, paletteImports, 0)
 
-        var paletteRoot = codeHandler.findPalettes(rootPosition, true)
-        if (paletteRoot) root.shapePalette(editor, paletteRoot, 0)
+        if ( rootPosition >= 0){
+            var paletteRoot = codeHandler.findPalettes(rootPosition, true)
+            if (paletteRoot)
+                root.shapePalette(editor, paletteRoot, 0)
+        }
     }
 
     function addProperty(){

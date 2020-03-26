@@ -142,7 +142,7 @@ public slots:
     void removeAllEditingFragments();
 
     int findImportsPosition(int blockPos);
-    int findRootPosition(int blockPos);
+    int findRootPosition();
 
     // Direct editing management
 
