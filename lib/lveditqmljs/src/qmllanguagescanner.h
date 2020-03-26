@@ -34,6 +34,7 @@ public:
     void queueLibrary(const QmlLibraryInfo::Ptr& lib);
 
     void onLibraryUpdate(std::function<void(QmlLibraryInfo::Ptr, int)> listener);
+    void onQueueFinished(std::function<void()> listener);
     void onMessage(std::function<void(int, const QString& message)> listener);
 
     bool isProcessing() const;
@@ -70,7 +71,8 @@ private:
     QMutex                           m_queueMutex;
     QLinkedList<QmlLibraryInfo::Ptr> m_queue;
 
-    std::function<void(QmlLibraryInfo::Ptr, int)> m_updateListener;
+    std::function<void(QmlLibraryInfo::Ptr, int)>    m_updateListener;
+    std::function<void()>                            m_queueFinished;
     std::function<void(int, const QString& message)> m_messageListener;
 
     QHash<QString, QmlLibraryInfo::Ptr> m_libraries;
@@ -84,6 +86,10 @@ private:
 
 inline void QmlLanguageScanner::onLibraryUpdate(std::function<void (QmlLibraryInfo::Ptr, int)> listener){
     m_updateListener = listener;
+}
+
+inline void QmlLanguageScanner::onQueueFinished(std::function<void ()> listener){
+    m_queueFinished = listener;
 }
 
 inline bool QmlLanguageScanner::isProcessing() const{

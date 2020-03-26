@@ -136,6 +136,9 @@ void QmlLanguageScanner::processQueue(){
         }
     }
 
+    if ( m_queueFinished )
+        m_queueFinished();
+
     m_isProcessing = false;
 }
 
