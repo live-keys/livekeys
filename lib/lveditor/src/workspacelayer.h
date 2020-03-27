@@ -50,6 +50,7 @@ public:
     QQmlPropertyMap* extensions() const;
     lv::ThemeContainer* themes() const;
     lv::Documentation* documentation() const;
+    Workspace* workspace() const;
 
 public slots:
     QJSValue interceptMenu(QJSValue context);
@@ -118,6 +119,10 @@ inline ThemeContainer *WorkspaceLayer::themes() const{
 
 inline Documentation *WorkspaceLayer::documentation() const{
     return m_documentation;
+}
+
+inline Workspace *WorkspaceLayer::workspace() const{
+    return m_workspace;
 }
 
 }// namespace

@@ -57,8 +57,11 @@ public:
 
     ProjectWorkspace* currentProjectWorkspace() const;
 
+    static Workspace* getFromContext(QQmlContext* context);
+
 signals:
-    void projectOpen(const QString& path, ProjectWorkspace* workspace);
+    void projectOpen(const QString& path);
+    void projectInitialized(const QString& path, ProjectWorkspace* workspace);
     void projectClose(ProjectWorkspace* workspace);
 
 public slots:

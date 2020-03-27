@@ -1537,6 +1537,7 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
                 if ( functionChannel->method().isValid() && functionChannel->property().object() ){
                     QMetaMethod signalMethod = signalChannel->property().method();
                     QMetaMethod slotMethod = functionChannel->method();
+                    disconnect(signalChannel->property().object(), signalMethod, nullptr, QMetaMethod());
                     connect(signalChannel->property().object(), signalMethod, functionChannel->property().object(), slotMethod);
                 }
             }

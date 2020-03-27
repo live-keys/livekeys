@@ -96,10 +96,12 @@ void Workspace::whenProjectPathChange(const QString &path){
 
         ProjectWorkspace* pw = ProjectWorkspace::create(m_project);
 
+        emit projectOpen(path);
+
         m_currentProjectWorkspace = pw;
         wl->whenProjectOpen(path, pw);
 
-        emit projectOpen(path, m_currentProjectWorkspace);
+        emit projectInitialized(path, m_currentProjectWorkspace);
     }
 }
 
@@ -139,6 +141,20 @@ QString Workspace::absoluteDir(const QString &dir){
         QDir().mkdir(d);
     }
     return d;
+}
+
+Workspace *Workspace::getFromContext(QQmlContext *ctx){
+    QObject* lk = ctx->contextProperty("lk").value<QObject*>();
+    if ( !lk ){
+        return nullptr;
+    }
+
+    QObject* workspaceLayerOb = lk->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
+    WorkspaceLayer* wlayer = static_cast<WorkspaceLayer*>(workspaceLayerOb);
+    if ( !wlayer )
+        return nullptr;
+
+    return wlayer->workspace();
 }
 
 }// namespace

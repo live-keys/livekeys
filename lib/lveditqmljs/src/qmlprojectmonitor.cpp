@@ -29,10 +29,10 @@
 
 namespace lv{
 
-QmlProjectMonitor::QmlProjectMonitor(
-        ProjectQmlExtension *projectHandler,
+QmlProjectMonitor::QmlProjectMonitor(ProjectQmlExtension *projectHandler,
         Project *project,
         ViewEngine *engine,
+        Workspace *workspace,
         QObject *parent)
     : QObject(parent)
     , m_projectHandler(projectHandler)
@@ -40,9 +40,9 @@ QmlProjectMonitor::QmlProjectMonitor(
     , m_engine(engine)
     , m_projectScope(nullptr)
 {
-    connect(project, SIGNAL(pathChanged(QString)),      SLOT(newProject(QString)));
-    connect(project, SIGNAL(directoryChanged(QString)), SLOT(directoryChanged(QString)));
-    connect(project, SIGNAL(fileChanged(QString)),      SLOT(fileChanged(QString)));
+    connect(workspace, &Workspace::projectOpen, this, &QmlProjectMonitor::newProject);
+    connect(project, &Project::directoryChanged, this, &QmlProjectMonitor::directoryChanged);
+    connect(project, &Project::fileChanged, this, &QmlProjectMonitor::fileChanged);
 
     newProject(project->rootPath());
 }
