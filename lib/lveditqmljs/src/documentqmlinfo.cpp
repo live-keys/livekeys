@@ -429,15 +429,21 @@ QmlTypeInfo::Ptr DocumentQmlInfo::extractValueObjectWithExport(
 /**
  * \brief Extract the name of the type given by this value reference.
  */
-QString DocumentQmlInfo::extractTypeName(const DocumentQmlInfo::ValueReference &valueref) const{
+QStringList DocumentQmlInfo::extractTypeName(const DocumentQmlInfo::ValueReference &valueref) const{
     if ( isValueNull(valueref) || valueref.parent != this )
-        return "";
+        return QStringList();
 
-    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() )
-        if ( vob->typeName() )
-            return vob->typeName()->name.toString();
+    QStringList result;
+    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
+        if ( vob->typeName() ){
+            result << vob->typeName()->name.toString();
 
-    return "";
+            if ( vob->typeName()->next )
+                result << vob->typeName()->next->name.toString();
+        }
+    }
+
+    return result;
 }
 
 /**

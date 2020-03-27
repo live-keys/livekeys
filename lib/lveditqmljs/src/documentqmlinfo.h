@@ -200,7 +200,7 @@ public:
             const ValueReference& value,
             const QString& componentName,
             const QString& libraryPath) const;
-    QString extractTypeName(const ValueReference& value) const;
+    QStringList extractTypeName(const ValueReference& value) const;
     void extractTypeNameRange(const ValueReference& value, int& begin, int& end) const;
     void extractRange(const ValueReference& value, int& begin, int& end);
 

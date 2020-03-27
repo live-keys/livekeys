@@ -139,35 +139,6 @@ private:
 
 namespace qmlhandler_helpers{
 
-    /**
-     * @brief Checks wether value is a valid id in the given document scope.
-     * Outputs the object path and object value if true.
-     */
-    bool isId(
-        const QmlScopeSnap& scope,
-        const QString& str,
-        DocumentQmlInfo::ValueReference& documentValue,
-        QmlInheritanceInfo& typePath,
-        QString& typeLibraryKey
-    ){
-        documentValue = scope.document->valueForId(str);
-        if ( scope.document->isValueNull(documentValue) )
-            return false;
-
-        QString typeName = scope.document->extractTypeName(documentValue);
-        if ( typeName != "" ){
-            QmlInheritanceInfo ipath = scope.getTypePath(typeName);
-            if ( !ipath.isEmpty() ){
-                typePath = ipath;
-
-                QmlLibraryInfo::Ptr lib = scope.libraryFromUri(ipath.nodes.last()->prefereredType().path());
-                if ( lib )
-                    typeLibraryKey = lib->uri();
-            }
-        }
-        return true;
-    }
-
     void suggestionsForObject(
         const QmlTypeInfo::Ptr& ti,
         bool suggestProperties,
@@ -502,7 +473,6 @@ void CodeQmlHandler::assistCompletion(
         suggestionsForRightBind(*ctx, cursor.position(), suggestions);
         model->setSuggestions(suggestions, filter);
     } else {
-
         if ( ctx->expressionPath().size() > 1 ){
             QmlScopeSnap scope = d_ptr->snapScope();
 
@@ -1296,8 +1266,6 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
 
     QmlScopeSnap scope = d->snapScope();
 
-//    Project* project = d->projectHandler->project();
-
     QStringList expressionPathNotTrimmed = expression.split(".");
     QStringList expressionPath;
     for ( const QString& expr : expressionPathNotTrimmed ){
@@ -1309,8 +1277,6 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
     QmlScopeSnap::ExpressionChain expressionChain = scope.evaluateExpression(
         edit->declaration()->parentType(), expressionPath, cursorPosition
     );
-
-    // qDebug() << expressionChain.toString(false);
 
     if ( !expressionChain.isValid() ){
         //TODO: Error
@@ -1360,7 +1326,17 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
 
     } else if ( expressionChain.isParent ){ // <parent...>.<property...>
 
-        // TODO: current binding path -> parent, then append property chain to current binding path
+        bp = edit->bindingSpan()->expressionPath()->parentObjectPath();
+        if ( !bp )
+            return false;
+
+
+        for ( const QmlScopeSnap::PropertyReference& prop : expressionChain.propertyChain){
+            bp->appendProperty(
+                prop.property.name,
+                QStringList() << prop.classTypePath.nodes.first()->prefereredType().join()
+            );
+        }
 
     } else { // <property...>
         // clone current binding path, append properties to it
@@ -1404,17 +1380,31 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
             if ( !writeChannel->hasConnection() ){
                 qWarning("Failed to find binding channel at: %s", qPrintable(writeChannel->bindingPath()->toString()));
             } else {
-                //TODO: Check if receiver already has a watcher on this property and remove it
-
-                QmlPropertyWatcher* watcher = new QmlPropertyWatcher(writeChannel->property());
+                // width is the receiving, need to remove the previous listening channel
 
                 if ( receivingChannel->property().isValid() && receivingChannel->property().object() ){
-                    QQmlProperty pp = receivingChannel->property();
-                    pp.write(watcher->read());
-                    watcher->onChange([pp](const QmlPropertyWatcher& ww){
-                        pp.write(ww.read());
+                    QQmlProperty recivingProperty = receivingChannel->property();
+
+                    QByteArray watcherName = "__" + recivingProperty.name().toUtf8() + "Watcher";
+                    QVariant previousWatcherVariant = recivingProperty.object()->property(watcherName);
+                    if ( previousWatcherVariant.isValid() ){
+                        QObject* previousWatcher = previousWatcherVariant.value<QObject*>();
+                        delete previousWatcher;
+                        recivingProperty.object()->setProperty(watcherName, QVariant());
+                    }
+
+                    QmlPropertyWatcher* watcher = new QmlPropertyWatcher(writeChannel->property());
+
+                    // receiving channel vs write channel
+                    // clearing up stuff
+                    recivingProperty.write(watcher->read());
+                    watcher->onChange([recivingProperty](const QmlPropertyWatcher& ww){
+                        recivingProperty.write(ww.read());
                     });
+                    // delete the watcher with the receiving channel
                     watcher->setParent(receivingChannel->property().object());
+
+                    recivingProperty.object()->setProperty(watcherName, QVariant::fromValue(watcher));
                 }
             }
         }
@@ -1487,8 +1477,18 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
 
     } else if ( expressionChain.isParent ){ // <parent...>.<property...>
 
-        // TODO: Add BindingPath::parentObject(), recurse through properties while last index, and last index node
-        // TODO: current binding path -> parent, then append property chain to current binding path
+        bp = edit->bindingSpan()->expressionPath()->parentObjectPath();
+        if ( !bp )
+            return false;
+
+
+        for ( const QmlScopeSnap::PropertyReference& prop : expressionChain.propertyChain){
+
+            bp->appendProperty(
+                prop.property.isValid() ? prop.property.name : prop.functionInfo.definition(),
+                QStringList() << prop.classTypePath.nodes.first()->prefereredType().join()
+            );
+        }
 
     } else { // <property...>
         // clone current binding path, append properties to it
@@ -1510,6 +1510,7 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
                 n = nullptr;
             }
         }
+
 
         for ( const QmlScopeSnap::PropertyReference& prop : expressionChain.propertyChain){
             QmlBindingPath::PropertyNode* pn = new QmlBindingPath::PropertyNode;
@@ -1533,6 +1534,7 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
             QmlBindingChannel::Ptr functionChannel = DocumentQmlInfo::traverseBindingPath(bp, signalChannel->runnable());
             if ( functionChannel.isNull() || !functionChannel->hasConnection() ){
                 qWarning("Failed to find binding channel at: %s", qPrintable(bp->toString()));
+                return false;
             } else {
                 if ( functionChannel->method().isValid() && functionChannel->property().object() ){
                     QMetaMethod signalMethod = signalChannel->property().method();
