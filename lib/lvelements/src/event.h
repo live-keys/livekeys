@@ -255,7 +255,7 @@ public:
     virtual EventConnection* append(Element* emitter, Event::Id eid, const Callable& f) override{
         Engine* eng = elementEngine(emitter);
         EventConnectionFunction<Args...>* ecf = new EventConnectionFunction<Args...>( emitter, eid, [emitter, eng, f](Args ...args){
-            f.call(emitter, Function::Parameters({LocalValue::createValue<Args>(eng, args)...})); }
+            f.call(emitter, Function::Parameters({ScopedValue::createValue<Args>(eng, args)...})); }
         );
         append(ecf);
         return ecf;
@@ -264,7 +264,7 @@ public:
     virtual EventConnection* append(Element* emitter, Event::Id eid, std::function<void(const Function::Parameters&)> f) override{
         Engine* eng = elementEngine(emitter);
         EventConnectionFunction<Args...>* ecf = new EventConnectionFunction<Args...>( emitter, eid, [emitter, eng, f](Args ...args){
-            f(Function::Parameters({LocalValue::createValue<Args>(eng, args)...})); }
+            f(Function::Parameters({ScopedValue::createValue<Args>(eng, args)...})); }
         );
         append(ecf);
         return ecf;

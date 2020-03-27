@@ -46,7 +46,7 @@ Buffer Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value
 template<>
 Value Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
     Engine* engine = reinterpret_cast<Engine*>(info->GetIsolate()->GetData(0));
-    return LocalValue(engine, (*info)[index]).toValue(engine);
+    return ScopedValue(engine, (*info)[index]).toValue(engine);
 }
 
 template<>
@@ -57,8 +57,8 @@ Callable Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Val
 }
 
 template<>
-LocalValue Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
-    return LocalValue((*info)[index]);
+ScopedValue Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
+    return ScopedValue((*info)[index]);
 }
 
 template<>
@@ -81,8 +81,8 @@ Element *Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Val
 }
 
 
-LocalValue Function::CallInfo::at(size_t index) const{
-    return LocalValue((*m_info)[static_cast<int>(index)]);
+ScopedValue Function::CallInfo::at(size_t index) const{
+    return ScopedValue((*m_info)[static_cast<int>(index)]);
 }
 
 size_t Function::CallInfo::length() const{
@@ -139,7 +139,7 @@ Function::Parameters::Parameters(int length)
 {
 }
 
-Function::Parameters::Parameters(const std::initializer_list<LocalValue> &init)
+Function::Parameters::Parameters(const std::initializer_list<ScopedValue> &init)
     : m_length(static_cast<int>(init.size()))
     , m_args(new v8::Local<v8::Value>[static_cast<int>(init.size())])
 {
@@ -153,7 +153,7 @@ Function::Parameters::~Parameters(){
     delete[] m_args;
 }
 
-void Function::Parameters::assign(int index, const LocalValue &ref){
+void Function::Parameters::assign(int index, const ScopedValue &ref){
     m_args[index] = ref.data();
 }
 
@@ -161,8 +161,8 @@ void Function::Parameters::assign(int index, const v8::Local<v8::Value> &value){
     m_args[index] = value;
 }
 
-LocalValue Function::Parameters::at(Engine *engine, int index) const{
-    return LocalValue(engine, m_args[index]);
+ScopedValue Function::Parameters::at(Engine *engine, int index) const{
+    return ScopedValue(engine, m_args[index]);
 }
 
 int Function::Parameters::length() const{
@@ -211,13 +211,13 @@ Buffer Function::Parameters::extractValue(Engine *, const v8::Local<v8::Value> *
 }
 
 template<>
-LocalValue Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Value> *args, int index){
-    return LocalValue(engine, args[index]);
+ScopedValue Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Value> *args, int index){
+    return ScopedValue(engine, args[index]);
 }
 
 template<>
 Value Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Value> *args, int index){
-    return LocalValue(engine, args[index]).toValue(engine);
+    return ScopedValue(engine, args[index]).toValue(engine);
 }
 
 template<>
@@ -244,7 +244,7 @@ Element *Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::
 // -------------------------------------------------------------------------------
 
 
-void Function::assignReturnValue(const LocalValue &val, const v8::FunctionCallbackInfo<v8::Value> &info){
+void Function::assignReturnValue(const ScopedValue &val, const v8::FunctionCallbackInfo<v8::Value> &info){
     info.GetReturnValue().Set(val.data());
 }
 

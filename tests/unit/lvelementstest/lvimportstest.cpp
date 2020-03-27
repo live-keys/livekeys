@@ -32,9 +32,9 @@ void LvImportsTest::singlePluginImportTest(){
 
     engine->scope([engine, testPath](){
         Object exports = engine->loadFile(testPath + "/main.lv");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -64,9 +64,9 @@ void LvImportsTest::samePathImportTest()
 
     engine->scope([engine, testPath](){
         Object exports = engine->loadFile(testPath + "/main.lv");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -97,9 +97,9 @@ void LvImportsTest::importPluginWithSamePathImportTest()
 
     engine->scope([engine, testPath](){
         Object exports = engine->loadFile(testPath + "/main.lv");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -128,9 +128,9 @@ void LvImportsTest::importPluginThatImportsPlugin()
 
     engine->scope([engine, testPath](){
         Object exports = engine->loadFile(testPath + "/main.lv");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -159,9 +159,9 @@ void LvImportsTest::samePathSingletonTest()
 
     engine->scope([engine, testPath](){
         Object exports = engine->loadFile(testPath + "/main.lv");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -239,9 +239,9 @@ void LvImportsTest::packageImportTest()
     engine->scope([engine, testPath](){
         engine->setPackageImportPaths({testPath + "/packages"});
         Object exports = engine->loadFile(testPath + "/main.lv");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -270,8 +270,8 @@ void LvImportsTest::importAsTest()
     engine->scope([engine, testPath](){
         Object exports = engine->loadFile(testPath + "/main.lv");
 
-        LocalObject localExports(exports);
-        LocalValue lv = localExports.get(engine, "main");
+        Object::Accessor localExports(exports);
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);

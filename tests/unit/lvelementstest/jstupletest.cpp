@@ -47,7 +47,7 @@ void JsTupleTest::propertyAdditionTest(){
             );
             Value v = s->run();
             Object o = v.asObject();
-            LocalObject lo(o);
+            Object::Accessor lo(o);
 
             int totalPropertiesChanged = lo.get(engine, "length").toInt32(engine);
             QVERIFY(totalPropertiesChanged == 2);

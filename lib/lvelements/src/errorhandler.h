@@ -35,10 +35,10 @@ public:
     void setTarget(Element* target);
     Element* target(){ return m_target; }
 
-    void rethrow(LocalValue e);
+    void rethrow(ScopedValue e);
 
 public:
-    Event error(LocalValue data){
+    Event error(ScopedValue data){
         static Event::Id eid = eventId(&ErrorHandler::error);
         return notify(eid, data);
     }

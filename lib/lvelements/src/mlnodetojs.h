@@ -9,8 +9,8 @@ namespace lv{
 
 namespace ml{
 
-void LV_ELEMENTS_EXPORT toJs(const MLNode& n, el::LocalValue& v, el::Engine* engine);
-void LV_ELEMENTS_EXPORT fromJs(const el::LocalValue& v, MLNode& n, el::Engine *engine);
+void LV_ELEMENTS_EXPORT toJs(const MLNode& n, el::ScopedValue& v, el::Engine* engine);
+void LV_ELEMENTS_EXPORT fromJs(const el::ScopedValue& v, MLNode& n, el::Engine *engine);
 
 } // namespace ml
 } // namespace

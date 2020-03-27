@@ -30,11 +30,11 @@ void LvCompileTest::test1Lv(){
         ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test1");
 
         Object m = sc->loadAsModule(mf);
-        LocalObject lm(m);
-        LocalValue exports = lm.get(engine, "exports");
+        Object::Accessor lm(m);
+        ScopedValue exports = lm.get(engine, "exports");
 
         Object e = exports.toObject(engine);
-        LocalObject le(e);
+        Object::Accessor le(e);
 
         Callable c = le.get(engine, "Test1").toCallable(engine);
         QVERIFY(c.isComponent());
@@ -51,16 +51,16 @@ void LvCompileTest::test1Lv(){
         QVERIFY(elem->hasProperty("x"));
         QVERIFY(elem->get("x").toInt32(engine) == 50);
 
-        elem->set("y", LocalValue(engine, 100));
+        elem->set("y", ScopedValue(engine, 100));
         QVERIFY(elem->get("x").toInt32(engine) == 130);
 
-        elem->set("t", LocalValue(engine, 200));
+        elem->set("t", ScopedValue(engine, 200));
         QVERIFY(elem->get("x").toInt32(engine) == 300);
 
-        elem->set("x", LocalValue(engine, 100));
+        elem->set("x", ScopedValue(engine, 100));
         QVERIFY(elem->get("x").toInt32(engine) == 100);
 
-        elem->set("y", LocalValue(engine, 1000));
+        elem->set("y", ScopedValue(engine, 1000));
         QVERIFY(elem->get("x").toInt32(engine) == 100);
     });
 
@@ -77,11 +77,11 @@ void LvCompileTest::test2Lv(){
         ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test2");
 
         Object m = sc->loadAsModule(mf);
-        LocalObject lm(m);
-        LocalValue exports = lm.get(engine, "exports");
+        Object::Accessor lm(m);
+        ScopedValue exports = lm.get(engine, "exports");
 
         Object e = exports.toObject(engine);
-        LocalObject le(e);
+        Object::Accessor le(e);
 
         Callable c = le.get(engine, "Test2").toCallable(engine);
         QVERIFY(c.isComponent());
@@ -100,7 +100,7 @@ void LvCompileTest::test2Lv(){
         QVERIFY(child0->hasProperty("l"));
         QVERIFY(child0->get("l").toInt32(engine) == 40);
 
-        elem->set("x", LocalValue(engine, 100));
+        elem->set("x", ScopedValue(engine, 100));
         QVERIFY(child0->get("l").toInt32(engine) == 120);
     });
 
@@ -118,11 +118,11 @@ void LvCompileTest::test3Lv(){
         ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test3");
 
         Object m = sc->loadAsModule(mf);
-        LocalObject lm(m);
-        LocalValue exports = lm.get(engine, "exports");
+        Object::Accessor lm(m);
+        ScopedValue exports = lm.get(engine, "exports");
 
         Object e = exports.toObject(engine);
-        LocalObject le(e);
+        Object::Accessor le(e);
 
         Callable c = le.get(engine, "Test3").toCallable(engine);
         QVERIFY(c.isComponent());
@@ -145,7 +145,7 @@ void LvCompileTest::test3Lv(){
         QVERIFY(child0->hasProperty("y"));
         QVERIFY(child0->get("y").toInt32(engine) == 20);
 
-        elem->get("elemProp").toElement(engine)->set("x", LocalValue(engine, 100));
+        elem->get("elemProp").toElement(engine)->set("x", ScopedValue(engine, 100));
         QVERIFY(child0->get("y").toInt32(engine) == 100);
     });
 
@@ -163,11 +163,11 @@ void LvCompileTest::test4Lv(){
         ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test4");
 
         Object m = sc->loadAsModule(mf);
-        LocalObject lm(m);
-        LocalValue exports = lm.get(engine, "exports");
+        Object::Accessor lm(m);
+        ScopedValue exports = lm.get(engine, "exports");
 
         Object e = exports.toObject(engine);
-        LocalObject le(e);
+        Object::Accessor le(e);
 
         Callable c = le.get(engine, "Test4").toCallable(engine);
         QVERIFY(c.isComponent());
@@ -210,11 +210,11 @@ void LvCompileTest::test1Js(){
         ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test1");
 
         Object m = sc->loadAsModule(mf);
-        LocalObject lm(m);
-        LocalValue exports = lm.get(engine, "exports");
+        Object::Accessor lm(m);
+        ScopedValue exports = lm.get(engine, "exports");
 
         Object e = exports.toObject(engine);
-        LocalObject le(e);
+        Object::Accessor le(e);
 
         Callable c = le.get(engine, "Test1").toCallable(engine);
         QVERIFY(c.isComponent());
@@ -231,16 +231,16 @@ void LvCompileTest::test1Js(){
         QVERIFY(elem->hasProperty("x"));
         QVERIFY(elem->get("x").toInt32(engine) == 50);
 
-        elem->set("y", LocalValue(engine, 100));
+        elem->set("y", ScopedValue(engine, 100));
         QVERIFY(elem->get("x").toInt32(engine) == 130);
 
-        elem->set("t", LocalValue(engine, 200));
+        elem->set("t", ScopedValue(engine, 200));
         QVERIFY(elem->get("x").toInt32(engine) == 300);
 
-        elem->set("x", LocalValue(engine, 100));
+        elem->set("x", ScopedValue(engine, 100));
         QVERIFY(elem->get("x").toInt32(engine) == 100);
 
-        elem->set("y", LocalValue(engine, 1000));
+        elem->set("y", ScopedValue(engine, 1000));
         QVERIFY(elem->get("x").toInt32(engine) == 100);
     });
 
@@ -257,11 +257,11 @@ void LvCompileTest::test2Js(){
         ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test2");
 
         Object m = sc->loadAsModule(mf);
-        LocalObject lm(m);
-        LocalValue exports = lm.get(engine, "exports");
+        Object::Accessor lm(m);
+        ScopedValue exports = lm.get(engine, "exports");
 
         Object e = exports.toObject(engine);
-        LocalObject le(e);
+        Object::Accessor le(e);
 
         Callable c = le.get(engine, "Test2").toCallable(engine);
         QVERIFY(c.isComponent());
@@ -280,7 +280,7 @@ void LvCompileTest::test2Js(){
         QVERIFY(child0->hasProperty("l"));
         QVERIFY(child0->get("l").toInt32(engine) == 40);
 
-        elem->set("x", LocalValue(engine, 100));
+        elem->set("x", ScopedValue(engine, 100));
         QVERIFY(child0->get("l").toInt32(engine) == 120);
     });
 
@@ -298,11 +298,11 @@ void LvCompileTest::test3Js(){
         ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test3");
 
         Object m = sc->loadAsModule(mf);
-        LocalObject lm(m);
-        LocalValue exports = lm.get(engine, "exports");
+        Object::Accessor lm(m);
+        ScopedValue exports = lm.get(engine, "exports");
 
         Object e = exports.toObject(engine);
-        LocalObject le(e);
+        Object::Accessor le(e);
 
         Callable c = le.get(engine, "Test3").toCallable(engine);
         QVERIFY(c.isComponent());
@@ -325,7 +325,7 @@ void LvCompileTest::test3Js(){
         QVERIFY(child0->hasProperty("y"));
         QVERIFY(child0->get("y").toInt32(engine) == 20);
 
-        elem->get("elemProp").toElement(engine)->set("x", LocalValue(engine, 100));
+        elem->get("elemProp").toElement(engine)->set("x", ScopedValue(engine, 100));
         QVERIFY(child0->get("y").toInt32(engine) == 100);
     });
 
@@ -343,11 +343,11 @@ void LvCompileTest::test4Js(){
         ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test4");
 
         Object m = sc->loadAsModule(mf);
-        LocalObject lm(m);
-        LocalValue exports = lm.get(engine, "exports");
+        Object::Accessor lm(m);
+        ScopedValue exports = lm.get(engine, "exports");
 
         Object e = exports.toObject(engine);
-        LocalObject le(e);
+        Object::Accessor le(e);
 
         Callable c = le.get(engine, "Test4").toCallable(engine);
         QVERIFY(c.isComponent());

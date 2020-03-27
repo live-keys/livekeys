@@ -30,7 +30,7 @@ public:
     Object extract(const std::string& uri);
 
 public:
-    Event moduleReady(LocalValue value){
+    Event moduleReady(ScopedValue value){
         static Event::Id eid = eventId(&ModuleInfoCapture::moduleReady);
         return notify(eid, value);
     }

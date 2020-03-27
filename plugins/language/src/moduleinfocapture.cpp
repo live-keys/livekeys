@@ -51,12 +51,12 @@ Object ModuleInfoCapture::extract(const std::string &uri){
 void ModuleInfoCapture::readModule(){
     ElementsPlugin::Ptr ep = engine()->require(m_current->importUri().data());
     Object epexports = ep->collectExportsObject();
-    LocalObject lo(epexports);
-    LocalValue lokeys = lo.ownProperties();
-    LocalArray lokeysArray(engine(), lokeys);
+    Object::Accessor lo(epexports);
+    ScopedValue lokeys = lo.ownProperties();
+    Object::ArrayAccessor lokeysArray(engine(), lokeys);
 
     for ( int i = 0; i < lokeysArray.length(); ++i ){
-        LocalValue exportValue = lo.get(lokeysArray.get(i));
+        ScopedValue exportValue = lo.get(lokeysArray.get(i));
         if ( exportValue.isElement() ){
             TypeInfo::Ptr ti = TypeInfo::extract(
                 exportValue.toElement(engine())->typeMetaObject(), m_current->importUri(), true, false
@@ -72,7 +72,7 @@ void ModuleInfoCapture::readModule(){
 
     MLNode moduleInfoMl = m_current->toMLNode();
 
-    LocalValue result(engine());
+    ScopedValue result(engine());
     ml::toJs(moduleInfoMl, result, engine());
 
     moduleReady(result);
