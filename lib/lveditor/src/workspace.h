@@ -59,6 +59,8 @@ public:
 
     static Workspace* getFromContext(QQmlContext* context);
 
+    bool wasRecentsFileFound() const;
+
 signals:
     void projectOpen(const QString& path);
     void projectInitialized(const QString& path, ProjectWorkspace* workspace);
@@ -75,10 +77,15 @@ private:
     ProjectWorkspace*    m_currentProjectWorkspace;
     QLinkedList<QString> m_recents;
     bool                 m_recentsChanged;
+    bool                 m_recentsFileFound;
 };
 
 inline ProjectWorkspace *Workspace::currentProjectWorkspace() const{
     return m_currentProjectWorkspace;
+}
+
+inline bool Workspace::wasRecentsFileFound() const{
+    return m_recentsFileFound;
 }
 
 }// namespace

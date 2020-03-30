@@ -35,12 +35,14 @@ Workspace::Workspace(Project *project, WorkspaceLayer *parent)
     : QObject(parent)
     , m_project(project)
     , m_currentProjectWorkspace(nullptr)
+    , m_recentsFileFound(false)
 {
     connect(m_project, &Project::pathChanged, this, &Workspace::whenProjectPathChange);
 
     QString recentsPath = absolutePath("workspaces.json");
     QFile recentsFile(recentsPath);
     if ( recentsFile.exists() && recentsFile.open(QIODevice::ReadOnly) ){
+        m_recentsFileFound = true;
 
         try{
             vlog("appdata").v() << "Loading recent projects from file: " << recentsPath;
@@ -108,8 +110,7 @@ void Workspace::whenProjectPathChange(const QString &path){
 void Workspace::saveRecents(){
     QString recentsPath = absolutePath("workspaces.json");
     QFile recentsFile(recentsPath);
-    if ( m_recentsChanged && recentsFile.open(QIODevice::WriteOnly) ){
-
+    if ( (m_recentsChanged || m_recents.empty()) && recentsFile.open(QIODevice::WriteOnly) ){
         MLNode recents(MLNode::Array);
 
         for ( auto it = m_recents.begin(); it != m_recents.end(); ++it ){

@@ -25,6 +25,7 @@
         <file alias="RunView.qml">qml/RunView.qml</file>
         <file alias="DocumentationViewPane.qml">qml/DocumentationViewPane.qml</file>
         <file alias="TextEditNodeView.qml">qml/TextEditNodeView.qml</file>
+        <file alias="StartupBox.qml">qml/StartupBox.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>

@@ -159,6 +159,8 @@ Item{
         }
 
         property var initializePanes : function(windowConfiguration, paneConfiguration){
+            removeStartupBox()
+
             var currentWindowPanes = paneConfiguration[0]
 
             var initializeStructure = [
@@ -265,6 +267,20 @@ Item{
             mainSplit.clearPanes()
             activePane = null
             activeItem = null
+        }
+
+        property var removeStartupBox : function(){
+            if ( root.startupBox ){
+                root.startupBox.destroy()
+                root.startupBox = null
+            }
+        }
+
+        property var initializeStartupBox : function(){
+            if ( !root.startupBox ){
+                var startup = startupBoxFactory.createObject()
+                root.startupBox = lk.layers.window.dialogs.overlayBox(startup)
+            }
         }
 
         function setActiveItem(item, pane){
@@ -486,6 +502,15 @@ Item{
             panes: root.panes
         }
     }
+
+    Component{
+        id: startupBoxFactory
+
+        StartupBox{
+        }
+    }
+
+    property Item startupBox : null
 
     function addRunView(){
         var pane = root.panes.createPane('runView', {}, [400, 0])

@@ -53,7 +53,6 @@ class VisualLogQmlObject;
 class Project;
 class DocumentHandler;
 class CodeQmlHandler;
-class Extensions;
 class PackageGraph;
 class Layer;
 
