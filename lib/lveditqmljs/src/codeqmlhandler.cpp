@@ -1222,6 +1222,32 @@ QmlEditFragment *CodeQmlHandler::findEditFragmentIn(QmlEditFragment* parent, Cod
     return nullptr;
 }
 
+lv::QmlEditFragment *CodeQmlHandler::findObjectFragmentByPosition(int position)
+{
+    QmlEditFragment* result = nullptr;
+    QLinkedList<QmlEditFragment*> q;
+    for (auto it = m_edits.begin(); it != m_edits.end(); ++it)
+    {
+        q.push_back(*it);
+    }
+
+    while (!q.empty())
+    {
+        auto edit = q.front(); q.pop_front();
+        int lower = edit->declaration()->position();
+        int upper = lower + edit->declaration()->length();
+        if (edit->declaration()->isForObject() && position >= lower && position <= upper)
+        {
+            q.clear();
+            result = edit;
+            for (auto it = edit->childFragments().begin(); it != edit->childFragments().end(); ++it)
+                q.push_back(*it);
+        }
+
+    }
+    return result;
+}
+
 void CodeQmlHandler::suggestionsForProposedExpression(
         QmlDeclaration::Ptr declaration,
         const QString &expression,

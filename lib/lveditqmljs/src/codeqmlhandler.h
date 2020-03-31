@@ -112,6 +112,7 @@ public slots:
     // Help
 
     QString help(int position);
+    lv::QmlEditFragment* findObjectFragmentByPosition(int position);
 
     // Palette and binding management
 

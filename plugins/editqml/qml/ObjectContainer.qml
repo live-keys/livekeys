@@ -18,6 +18,10 @@ Item{
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
     property Component paletteGroupFactory : Component{ PaletteGroup{} }
 
+    function createNewContainer(parent){
+        return objectContainerFactory.createObject(parent)
+    }
+
     property int titleHeight: 30
     property bool compact: true
 

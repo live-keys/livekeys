@@ -8,7 +8,7 @@ WebEngineView{
     anchors.fill: parent ? parent : undefined
 
     function loadDocumentationHtml(filePath){
-        root.url = "file://" + filePath
+        root.url = "file:///" + filePath
         root.loadedHovers = null
     }
 
@@ -81,6 +81,7 @@ WebEngineView{
 
                 for (var key in result) {
                     var enterPath = Fs.Path.join(path, Fs.UrlInfo.path(result[key][0]))
+                    enterPath = "file:///" + enterPath
                     var enterControl = null
 
                     var component = Qt.createComponent(enterPath);
@@ -98,6 +99,7 @@ WebEngineView{
                     }
 
                     var leavePath = Fs.Path.join(path, Fs.UrlInfo.path(result[key][1]))
+                    leavePath = "file:///" + leavePath
                     var leaveControl = null
 
                     component = Qt.createComponent(leavePath);
@@ -134,12 +136,13 @@ WebEngineView{
                     var path = Fs.UrlInfo.path(request.url)
                     path = Fs.Path.join(Fs.Path.dir(Fs.UrlInfo.toLocalFile(root.url)), path)
 
+                    path = "file:///" + path
                     var component = Qt.createComponent(path);
                     if (component.status === Component.Ready){
                         var control = component.createObject(root);
 
                         if (typeof control.run === "function") {
-                            control.run(lk.layers.workspace)
+                            control.run(lk.layers.workspace, project)
                         }
 
                         control.destroy()
