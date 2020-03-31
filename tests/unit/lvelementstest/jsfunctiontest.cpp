@@ -43,7 +43,7 @@ class FunctionStub : public Element{
     static const std::string& stringReturnType(const std::string& value){ return value;}
     static Callable callableReturnType(const Callable& value){ return value; }
     static Object objectReturnType(const Object& value){ return value; }
-    static LocalValue localValueReturnType(LocalValue value){ return value; }
+    static ScopedValue localValueReturnType(ScopedValue value){ return value; }
     static Value valueReturnType(Value value){ return value; }
     static Buffer bufferReturnType(Buffer value){ return value; }
     static Element* elementReturnType(Element* value){ return value;}
@@ -93,13 +93,13 @@ void JsFunctionTest::typesTest(){
         epl->addModuleLibrary(m);
 
         Object o  = epl->collectExportsObject();
-        LocalObject lo(o);
+        Object::Accessor lo(o);
 
         FunctionStub* fs = new FunctionStub(engine);
         fs->ref();
 
-        LocalObject globalObject(engine->currentContext());
-        globalObject.set(engine, "e", LocalValue(engine, fs));
+        Object::Accessor globalObject(engine->currentContext());
+        globalObject.set(engine, "e", ScopedValue(engine, fs));
         globalObject.set(engine, "FunctionStub", lo.get(engine, "FunctionStub"));
 
         Value v = engine->compileJsEnclosed("return FunctionStub.boolReturnType(true);")->run();
@@ -123,7 +123,7 @@ void JsFunctionTest::typesTest(){
 
         v = engine->compileJsEnclosed("return FunctionStub.objectReturnType({a: 2, b: 30});")->run();
         QVERIFY(v.type() == Value::Stored::Object);
-        LocalObject vo(v.asObject());
+        Object::Accessor vo(v.asObject());
         QVERIFY(vo.get(engine, "a").toInt32(engine) == 2);
         QVERIFY(vo.get(engine, "b").toInt32(engine) == 30);
 

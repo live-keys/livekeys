@@ -13,6 +13,7 @@ SUBDIRS += \
     editqml \
     fs \
     workspace \
+    squareone \
     lcvcore \
     lcvimgproc \
     lcvfeatures2d \

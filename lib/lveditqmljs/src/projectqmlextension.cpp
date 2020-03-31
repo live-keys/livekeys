@@ -98,7 +98,10 @@ void ProjectQmlExtension::componentComplete(){
         Project* project = static_cast<Project*>(ctx->contextProperty("project").value<QObject*>());
         if ( !project ){ qWarning("Failed to find project object."); return; }
 
-        setParams(settings, project, engine);
+        Workspace* workspace = Workspace::getFromContext(ctx);
+        if ( !workspace ){ qWarning("Failed to find workspace object."); return; }
+
+        setParams(settings, project, engine, workspace);
     }
 }
 
@@ -155,11 +158,11 @@ void ProjectQmlExtension::registerTypes(const char *uri){
 /**
  * \brief Assign initialization params for this object
  */
-void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEngine *engine){
+void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEngine *engine, Workspace *workspace){
     m_project = project;
     m_engine = engine;
 
-    m_scanMonitor = new QmlProjectMonitor(this, m_project, m_engine);
+    m_scanMonitor = new QmlProjectMonitor(this, m_project, m_engine, workspace);
 
     lv::EditorSettings* editorSettings = qobject_cast<lv::EditorSettings*>(settings->file("editor"));
     m_settings = new QmlJsSettings(editorSettings);

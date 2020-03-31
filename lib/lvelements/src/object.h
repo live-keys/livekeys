@@ -17,9 +17,8 @@ namespace lv{ namespace el{
 class Element;
 class Engine;
 class Context;
-class LocalValue;
+class ScopedValue;
 class Callable;
-class LocalArray;
 
 class ObjectPrivate;
 
@@ -31,10 +30,56 @@ class ObjectPrivate;
  */
 class LV_ELEMENTS_EXPORT Object{
 
-    friend class LocalValue;
-    friend class LocalObject;
-    friend class LocalArray;
+    friend class ScopedValue;
+    friend class Accessor;
+    friend class ArrayAccessor;
     friend class Engine;
+
+public:
+    class AccessorPrivate;
+
+    class LV_ELEMENTS_EXPORT Accessor{
+    public:
+        Accessor(Object o);
+        Accessor(Context* context);
+        ~Accessor();
+
+        ScopedValue get(int index);
+        ScopedValue get(const ScopedValue& key);
+        ScopedValue get(Engine* engine, const std::string& str);
+        void set(int index, const ScopedValue& value);
+        void set(const ScopedValue& key, const ScopedValue& value);
+        void set(Engine* engine, const std::string& key, const ScopedValue& value);
+
+        bool has(Engine* engine, const ScopedValue& key) const;
+
+        ScopedValue ownProperties() const;
+
+    private:
+        DISABLE_COPY(Accessor);
+        Accessor(const v8::Local<v8::Object>& vo);
+
+        AccessorPrivate* m_d;
+    };
+
+    class ArrayAccessorPrivate;
+
+    class LV_ELEMENTS_EXPORT ArrayAccessor{
+    public:
+        ArrayAccessor(Object o);
+        ArrayAccessor(Engine* engine, const ScopedValue& lval);
+        ~ArrayAccessor();
+
+        int length() const;
+
+        ScopedValue get(int index);
+        void set(int index, const ScopedValue& value);
+
+    private:
+        DISABLE_COPY(ArrayAccessor);
+
+        ArrayAccessorPrivate* m_d;
+    };
 
 public:
     Object(Engine* engine);
@@ -70,59 +115,6 @@ protected:
 
     ObjectPrivate* m_d;
     int*           m_ref;
-};
-
-
-class LocalObjectPrivate;
-
-/**
- * @brief A scoped object used for accessing object properties
- */
-class LV_ELEMENTS_EXPORT LocalObject{
-
-public:
-    LocalObject(Object o);
-    LocalObject(Context* context);
-    ~LocalObject();
-
-    LocalValue get(int index);
-    LocalValue get(const LocalValue& key);
-    LocalValue get(Engine* engine, const std::string& str);
-    void set(int index, const LocalValue& value);
-    void set(const LocalValue& key, const LocalValue& value);
-    void set(Engine* engine, const std::string& key, const LocalValue& value);
-
-    bool has(Engine* engine, const LocalValue& key) const;
-
-    LocalValue ownProperties() const;
-
-private:
-    DISABLE_COPY(LocalObject);
-    LocalObject(const v8::Local<v8::Object>& vo);
-
-    LocalObjectPrivate* m_d;
-};
-
-class LocalArrayPrivate;
-
-/**
- * @brief A scoped array used for accessing object properties
- */
-class LV_ELEMENTS_EXPORT LocalArray{
-public:
-    LocalArray(Object o);
-    LocalArray(Engine* engine, const LocalValue& lval);
-    ~LocalArray();
-
-    int length() const;
-
-    LocalValue get(int index);
-    void set(int index, const LocalValue& value);
-
-private:
-    DISABLE_COPY(LocalArray);
-
-    LocalArrayPrivate* m_d;
 };
 
 

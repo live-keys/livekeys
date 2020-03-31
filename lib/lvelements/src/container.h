@@ -12,7 +12,7 @@ class LV_ELEMENTS_EXPORT Container : public Element{
         META_OBJECT_DESCRIBE(Container)
             .constructor()
             .base<Element>()
-            .scriptProperty<LocalValue>("children", &Container::children, &Container::setChildren, "childrenChanged")
+            .scriptProperty<ScopedValue>("children", &Container::children, &Container::setChildren, "childrenChanged")
             .scriptDefaultProperty("children")
             .scriptEvent("childrenChanged", &Container::childrenChanged)
         META_OBJECT_CLOSE
@@ -22,20 +22,20 @@ public:
     Container(Engine* engine);
     ~Container() override;
 
-    LocalValue children();
-    void setChildren(LocalValue children);
+    ScopedValue children();
+    void setChildren(ScopedValue children);
 
-    static LocalValue at(List* l, int index){
-        return LocalValue(l->engine(), l->dataAs<std::vector<Element*>*>()->at(static_cast<size_t>(index)));
+    static ScopedValue at(List* l, int index){
+        return ScopedValue(l->engine(), l->dataAs<std::vector<Element*>*>()->at(static_cast<size_t>(index)));
     }
     static int length(List* l){
         return static_cast<int>(l->dataAs<std::vector<Element*>*>()->size());
     }
-    static void assign(List* l, int index, LocalValue value){
+    static void assign(List* l, int index, ScopedValue value){
         (*l->dataAs<std::vector<Element*>*>())[static_cast<size_t>(index)] = value.toElement(l->engine());
 
     }
-    static void append(List* l, LocalValue value){
+    static void append(List* l, ScopedValue value){
         l->dataAs<std::vector<Element*>*>()->push_back(value.toElement(l->engine()));
     }
     static void clear(List* l){

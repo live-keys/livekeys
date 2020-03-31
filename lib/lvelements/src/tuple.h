@@ -22,7 +22,7 @@ public:
     virtual InstanceProperty *addProperty(
         const std::string& name,
         const std::string& type,
-        LocalValue value,
+        ScopedValue value,
         bool isDefault,
         bool isWritable,
         const std::string& notifyEvent

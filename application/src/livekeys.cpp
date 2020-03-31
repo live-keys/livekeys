@@ -185,8 +185,6 @@ void Livekeys::loadProject(){
         } else {
             m_project->openProject(projPath);
         }
-    } else {
-        m_project->newProject();
     }
     if ( !m_arguments->monitoredFiles().isEmpty() ){
         foreach( QString mfile, m_arguments->monitoredFiles() ){
@@ -429,6 +427,18 @@ const MLNode &Livekeys::startupConfiguration(){
                      {"enabled", true},
                      {"component", "EditJsonExtension.qml"}
                  }*/
+            }},
+            {"tutorials", {
+                 {
+                     {"package", "squareone"},
+                     {"enabled", true}
+                 }
+            }},
+            {"samples", {
+                 {
+                     {"package", "workspace"},
+                     {"enabled", true}
+                 }
             }}
          }},
          {"internalPackages",{

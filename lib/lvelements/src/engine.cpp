@@ -398,7 +398,7 @@ Object Engine::loadJsFile(const std::string &path){
     if ( m.isNull() )
         return m;
 
-    LocalObject lm(m);
+    Object::Accessor lm(m);
     return lm.get(this, "exports").toObject(this);
 }
 
@@ -424,7 +424,7 @@ Object Engine::loadFile(const std::string &path){
     if ( m.isNull() )
         return m;
 
-    LocalObject lm(m);
+    Object::Accessor lm(m);
     return lm.get(this, "exports").toObject(this);
 }
 
@@ -450,7 +450,7 @@ Object Engine::loadFile(const std::string &path, const std::string &content){
     if ( m.isNull() )
         return m;
 
-    LocalObject lm(m);
+    Object::Accessor lm(m);
     return lm.get(this, "exports").toObject(this);
 }
 

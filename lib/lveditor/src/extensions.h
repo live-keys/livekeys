@@ -15,21 +15,20 @@ class LV_EDITOR_EXPORT Extensions : public QObject{
 
     Q_OBJECT
 
+    friend class WorkspaceLayer;
+
 public:
-    Extensions(ViewEngine* engine, const QString& settingsPath, QObject *parent = 0);
+    Extensions(ViewEngine* engine, const QString& settingsPath, QObject *parent = nullptr);
     ~Extensions();
 
     QQmlPropertyMap *globals();
 
-    void loadExtensions();
-
     QMap<std::string, WorkspaceExtension*>::iterator begin();
     QMap<std::string, WorkspaceExtension*>::iterator end();
 
-private:
-    WorkspaceExtension* loadPackageExtension(const std::string& path, const std::string& component);
-    WorkspaceExtension* loadPackageExtension(const Package::Ptr& package, const std::string& component);
+    const QString& path() const;
 
+private:
     QMap<std::string, WorkspaceExtension*> m_extensions;
 
     QQmlPropertyMap*     m_globals;

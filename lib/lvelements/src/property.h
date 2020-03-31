@@ -11,8 +11,8 @@ class LV_ELEMENTS_EXPORT Property{
 public:
     friend class Element;
 
-    typedef LocalValue(*IndexGetFunction)(Element*,int);
-    typedef void(*IndexSetFunction)(Element*,int,LocalValue);
+    typedef ScopedValue(*IndexGetFunction)(Element*,int);
+    typedef void(*IndexSetFunction)(Element*,int,ScopedValue);
 
 public:
     Property(
@@ -23,7 +23,7 @@ public:
     virtual ~Property();
 
 protected:
-    virtual LocalValue read(Element* e) = 0;
+    virtual ScopedValue read(Element* e) = 0;
     virtual void write(Element* e, const v8::Local<v8::Value>& params) = 0;
 
 public:
@@ -69,12 +69,12 @@ public:
         Element *e,
         const std::string& name,
         const std::string& type,
-        const LocalValue& value,
+        const ScopedValue& value,
         bool isWritable,
         const std::string& notify);
     ~InstanceProperty() override;
 
-    LocalValue read(Element* e) override{ return LocalValue(Property::engine(e), m_value);}
+    ScopedValue read(Element* e) override{ return ScopedValue(Property::engine(e), m_value);}
     void write(Element* e, const v8::Local<v8::Value>& params) override;
 
     const Value& value() const;
@@ -101,9 +101,9 @@ public:
     }
 
 protected:
-    virtual LocalValue read(Element* e){
+    virtual ScopedValue read(Element* e){
         C* c = static_cast<C*>(e);
-        return LocalValue(Property::engine(e), (c->*m_getter)());
+        return ScopedValue(Property::engine(e), (c->*m_getter)());
     }
 
     virtual void write(Element* e, const v8::Local<v8::Value>& value){

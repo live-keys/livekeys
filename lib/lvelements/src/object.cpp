@@ -224,100 +224,103 @@ v8::Local<v8::Object> Object::data() const{
 
 
 
-// LocalObject implementation
+// Object::Accessor implementation
 // ----------------------------------------------------------------------
 
-class LocalObjectPrivate{
+class Object::AccessorPrivate{
 public:
-    LocalObjectPrivate(const v8::Local<v8::Object>& o) : data(o){}
+    AccessorPrivate(const v8::Local<v8::Object>& o) : data(o){}
 
     v8::Local<v8::Object> data;
 };
 
 
-LocalObject::LocalObject(Object o)
-    : m_d(new LocalObjectPrivate(o.data()))
+Object::Accessor::Accessor(Object o)
+    : m_d(new Object::AccessorPrivate(o.data()))
 {
 }
 
-LocalObject::LocalObject(Context *context)
-    : m_d(new LocalObjectPrivate(context->asLocal()->Global()))
+Object::Accessor::Accessor(Context *context)
+    : m_d(new Object::AccessorPrivate(context->asLocal()->Global()))
 {
 }
 
-LocalObject::LocalObject(const v8::Local<v8::Object> &vo)
-    : m_d(new LocalObjectPrivate(vo))
+Object::Accessor::Accessor(const v8::Local<v8::Object> &vo)
+    : m_d(new Object::AccessorPrivate(vo))
 {
 }
 
-LocalObject::~LocalObject(){
+Object::Accessor::~Accessor(){
     delete m_d;
 }
 
-LocalValue LocalObject::get(int index){
-    return LocalValue(m_d->data->Get(index));
+ScopedValue Object::Accessor::get(int index){
+    return ScopedValue(m_d->data->Get(static_cast<uint32_t>(index)));
 }
 
-LocalValue LocalObject::get(const LocalValue &key){
+ScopedValue Object::Accessor::get(const ScopedValue &key){
     return m_d->data->Get(key.data());
 }
 
-LocalValue LocalObject::get(Engine *engine, const std::string &str){
-    return get(LocalValue(engine, str));
+ScopedValue Object::Accessor::get(Engine *engine, const std::string &str){
+    return get(ScopedValue(engine, str));
 }
 
-void LocalObject::set(int index, const LocalValue &value){
-    m_d->data->Set(index, value.data());
+void Object::Accessor::set(int index, const ScopedValue &value){
+    m_d->data->Set(static_cast<uint32_t>(index), value.data());
 }
 
-void LocalObject::set(const LocalValue &key, const LocalValue &value){
+void Object::Accessor::set(const ScopedValue &key, const ScopedValue &value){
     m_d->data->Set(key.data(), value.data());
 }
 
-void LocalObject::set(Engine *engine, const std::string &key, const LocalValue &value){
-    set(LocalValue(engine, key), value);
+void Object::Accessor::set(Engine *engine, const std::string &key, const ScopedValue &value){
+    set(ScopedValue(engine, key), value);
 }
 
-bool LocalObject::has(Engine* engine, const LocalValue &key) const{
+bool Object::Accessor::has(Engine* engine, const ScopedValue &key) const{
     v8::Maybe<bool> result = m_d->data->HasOwnProperty(engine->currentContext()->asLocal(), v8::Local<v8::Name>::Cast(key.data()));
     return result.IsJust() && result.ToChecked();
 }
 
-LocalValue LocalObject::ownProperties() const{
-    return LocalValue(m_d->data->GetOwnPropertyNames());
+ScopedValue Object::Accessor::ownProperties() const{
+    return ScopedValue(m_d->data->GetOwnPropertyNames());
 }
 
 
-class LocalArrayPrivate{
+// Object::ArrayAccessor implementation
+// ----------------------------------------------------------------------
+
+class Object::ArrayAccessorPrivate{
 public:
-    LocalArrayPrivate(const v8::Local<v8::Array>& o) : data(o){}
+    ArrayAccessorPrivate(const v8::Local<v8::Array>& o) : data(o){}
 
     v8::Local<v8::Array> data;
 };
 
 
-LocalArray::LocalArray(Object o)
-    : m_d(new LocalArrayPrivate(v8::Local<v8::Array>::Cast(o.data()))){
+Object::ArrayAccessor::ArrayAccessor(Object o)
+    : m_d(new Object::ArrayAccessorPrivate(v8::Local<v8::Array>::Cast(o.data()))){
 }
 
-LocalArray::LocalArray(Engine *, const LocalValue &lval)
-    : m_d(new LocalArrayPrivate(v8::Local<v8::Array>::Cast(lval.data())))
+Object::ArrayAccessor::ArrayAccessor(Engine *, const ScopedValue &lval)
+    : m_d(new Object::ArrayAccessorPrivate(v8::Local<v8::Array>::Cast(lval.data())))
 {
 }
 
-LocalArray::~LocalArray(){
+Object::ArrayAccessor::~ArrayAccessor(){
     delete m_d;
 }
 
-int LocalArray::length() const{
+int Object::ArrayAccessor::length() const{
     return static_cast<int>(m_d->data->Length());
 }
 
-LocalValue LocalArray::get(int index){
+ScopedValue Object::ArrayAccessor::get(int index){
     return m_d->data->Get(static_cast<uint32_t>(index));
 }
 
-void LocalArray::set(int index, const LocalValue &value){
+void Object::ArrayAccessor::set(int index, const ScopedValue &value){
     m_d->data->Set(static_cast<uint32_t>(index), value.data());
 }
 

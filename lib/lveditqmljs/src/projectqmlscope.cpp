@@ -255,8 +255,9 @@ void ProjectQmlScope::resetLibrariesInPath(const QString &path){
 
 void ProjectQmlScope::resetLibrary(const QString &path){
     m_libraryMutex.lock();
-    if ( m_libraries.contains(path) ) //HERE
+    if ( m_libraries.contains(path) ){ //HERE
         m_libraries[path]->setStatus(QmlLibraryInfo::NotScanned);
+    }
     m_libraryMutex.unlock();
 }
 

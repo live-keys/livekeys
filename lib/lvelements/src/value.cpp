@@ -24,42 +24,42 @@ public:
 };
 
 
-LocalValue::LocalValue(Engine *engine)
+ScopedValue::ScopedValue(Engine *engine)
     : m_d(new LocalValuePrivate(v8::Undefined(engine->isolate())))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
-LocalValue::LocalValue(Engine *engine, bool val)
+ScopedValue::ScopedValue(Engine *engine, bool val)
     : m_d(new LocalValuePrivate(v8::Boolean::New(engine->isolate(), val)))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
-LocalValue::LocalValue(Engine *engine, Value::Int32 val)
+ScopedValue::ScopedValue(Engine *engine, Value::Int32 val)
     : m_d(new LocalValuePrivate(v8::Integer::New(engine->isolate(), val)))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
-LocalValue::LocalValue(Engine *engine, Value::Int64 val)
+ScopedValue::ScopedValue(Engine *engine, Value::Int64 val)
     : m_d(new LocalValuePrivate(v8::Integer::New(engine->isolate(), val)))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
-LocalValue::LocalValue(Engine *engine, Value::Number val)
+ScopedValue::ScopedValue(Engine *engine, Value::Number val)
     : m_d(new LocalValuePrivate(v8::Number::New(engine->isolate(), val)))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
-LocalValue::LocalValue(Engine *engine, const std::string &val)
+ScopedValue::ScopedValue(Engine *engine, const std::string &val)
     : m_d(nullptr)
     , m_ref(new int)
 {
@@ -68,35 +68,35 @@ LocalValue::LocalValue(Engine *engine, const std::string &val)
     ++(*m_ref);
 }
 
-LocalValue::LocalValue(Engine *, Callable val)
+ScopedValue::ScopedValue(Engine *, Callable val)
     : m_d(new LocalValuePrivate(val.data()))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
-LocalValue::LocalValue(Engine *, Object val)
+ScopedValue::ScopedValue(Engine *, Object val)
     : m_d(new LocalValuePrivate(val.data()))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
-LocalValue::LocalValue(Engine *engine, const Buffer &val)
+ScopedValue::ScopedValue(Engine *engine, const Buffer &val)
     : m_d(new LocalValuePrivate(v8::ArrayBuffer::New(engine->isolate(), val.data(), val.size())))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
-LocalValue::LocalValue(Engine *, Element* val)
+ScopedValue::ScopedValue(Engine *, Element* val)
     : m_d(new LocalValuePrivate(ElementPrivate::localObject(val)))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
-LocalValue::LocalValue(Engine *engine, const Value &value)
+ScopedValue::ScopedValue(Engine *engine, const Value &value)
     : m_d(nullptr)
     , m_ref(new int)
 {
@@ -128,21 +128,21 @@ LocalValue::LocalValue(Engine *engine, const Value &value)
     }
 }
 
-LocalValue::LocalValue(Engine *, const LocalValue &other)
+ScopedValue::ScopedValue(Engine *, const ScopedValue &other)
     : m_d(other.m_d)
     , m_ref(other.m_ref)
 {
     ++(*m_ref);
 }
 
-LocalValue::LocalValue(const LocalValue &other)
+ScopedValue::ScopedValue(const ScopedValue &other)
     : m_d(other.m_d)
     , m_ref(other.m_ref)
 {
     ++(*m_ref);
 }
 
-LocalValue::~LocalValue(){
+ScopedValue::~ScopedValue(){
     --(*m_ref);
     if ( *m_ref == 0 ){
         delete m_ref;
@@ -150,7 +150,7 @@ LocalValue::~LocalValue(){
     }
 }
 
-LocalValue &LocalValue::operator =(const LocalValue &other){
+ScopedValue &ScopedValue::operator =(const ScopedValue &other){
     if ( this != &other ){
         --(*m_ref);
         if ( *m_ref == 0 ){
@@ -164,43 +164,43 @@ LocalValue &LocalValue::operator =(const LocalValue &other){
     return *this;
 }
 
-bool LocalValue::operator ==(const LocalValue &other){
+bool ScopedValue::operator ==(const ScopedValue &other){
     return ( m_d == other.m_d && m_ref == other.m_ref );
 }
 
-const v8::Local<v8::Value> &LocalValue::data() const{
+const v8::Local<v8::Value> &ScopedValue::data() const{
     return m_d->data;
 }
 
-bool LocalValue::toBool(Engine*) const{
+bool ScopedValue::toBool(Engine*) const{
     return m_d->data->BooleanValue();
 }
 
-Value::Int32 LocalValue::toInt32(Engine *engine) const{
+Value::Int32 ScopedValue::toInt32(Engine *engine) const{
     return m_d->data->ToInt32(engine->isolate())->Value();
 }
 
-Value::Int64 LocalValue::toInt64(Engine *engine) const{
+Value::Int64 ScopedValue::toInt64(Engine *engine) const{
     return (Value::Int64)m_d->data->ToNumber(engine->isolate())->Value();
 }
 
-Value::Number LocalValue::toNumber(Engine *engine) const{
+Value::Number ScopedValue::toNumber(Engine *engine) const{
     return m_d->data->ToNumber(engine->isolate())->Value();
 }
 
-std::string LocalValue::toStdString(Engine *engine) const{
+std::string ScopedValue::toStdString(Engine *engine) const{
     return *v8::String::Utf8Value(m_d->data->ToString(engine->isolate()));
 }
 
-Callable LocalValue::toCallable(Engine* engine) const{
+Callable ScopedValue::toCallable(Engine* engine) const{
     return Callable(engine, v8::Local<v8::Function>::Cast(m_d->data));
 }
 
-Buffer LocalValue::toBuffer(Engine *) const{
+Buffer ScopedValue::toBuffer(Engine *) const{
     return Buffer(v8::Local<v8::ArrayBuffer>::Cast(m_d->data));
 }
 
-Object LocalValue::toObject(Engine *engine) const{
+Object ScopedValue::toObject(Engine *engine) const{
     if ( isString() && !isObject() ){
         v8::Local<v8::String> vs = m_d->data->ToString();
         v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(v8::StringObject::New(vs));
@@ -213,7 +213,7 @@ Object LocalValue::toObject(Engine *engine) const{
     }
 }
 
-Element *LocalValue::toElement(Engine*) const{
+Element *ScopedValue::toElement(Engine*) const{
     if ( m_d->data->IsNullOrUndefined() )
         return nullptr;
 
@@ -221,7 +221,7 @@ Element *LocalValue::toElement(Engine*) const{
     return ElementPrivate::elementFromObject(vo);
 }
 
-Value LocalValue::toValue(Engine* engine) const{
+Value ScopedValue::toValue(Engine* engine) const{
     if ( isBool() ){
         return Value(toBool(engine));
     } else if ( isInt() ){
@@ -240,43 +240,43 @@ Value LocalValue::toValue(Engine* engine) const{
     return Value();
 }
 
-bool LocalValue::isNull() const{
+bool ScopedValue::isNull() const{
     return m_d->data->IsNull();
 }
 
-bool LocalValue::isBool() const{
+bool ScopedValue::isBool() const{
     return m_d->data->IsBoolean();
 }
 
-bool LocalValue::isInt() const{
+bool ScopedValue::isInt() const{
     return m_d->data->IsInt32();
 }
 
-bool LocalValue::isNumber() const{
+bool ScopedValue::isNumber() const{
     return m_d->data->IsNumber();
 }
 
-bool LocalValue::isString() const{
+bool ScopedValue::isString() const{
     return m_d->data->IsStringObject() || m_d->data->IsString();
 }
 
-bool LocalValue::isCallable() const{
+bool ScopedValue::isCallable() const{
     return m_d->data->IsFunction();
 }
 
-bool LocalValue::isBuffer() const{
+bool ScopedValue::isBuffer() const{
     return m_d->data->IsArrayBuffer();
 }
 
-bool LocalValue::isObject() const{
+bool ScopedValue::isObject() const{
     return m_d->data->IsObject();
 }
 
-bool LocalValue::isArray() const{
+bool ScopedValue::isArray() const{
     return m_d->data->IsArray();
 }
 
-bool LocalValue::isElement() const{
+bool ScopedValue::isElement() const{
     if ( !m_d->data->IsObject() )
         return false;
 
@@ -284,7 +284,7 @@ bool LocalValue::isElement() const{
     return vo->InternalFieldCount() == 1;
 }
 
-LocalValue::LocalValue(const v8::Local<v8::Value> &data)
+ScopedValue::ScopedValue(const v8::Local<v8::Value> &data)
     : m_d(new LocalValuePrivate(data))
     , m_ref(new int)
 {
@@ -328,13 +328,13 @@ Object convertFromV8(Engine *engine, const v8::Local<v8::Value> &value){
 }
 
 template<>
-LocalValue convertFromV8(Engine *engine, const v8::Local<v8::Value> &value){
-    return LocalValue(engine, value);
+ScopedValue convertFromV8(Engine *engine, const v8::Local<v8::Value> &value){
+    return ScopedValue(engine, value);
 }
 
 template<>
 Value convertFromV8(Engine *engine, const v8::Local<v8::Value> &value){
-    return LocalValue(engine, value).toValue(engine);
+    return ScopedValue(engine, value).toValue(engine);
 }
 
 template<>

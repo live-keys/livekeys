@@ -85,8 +85,8 @@ void JsErrorHandlingTest::testExceptionWithLink(){
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
         jsError->ref();
 
-        LocalObject globalObject(engine->currentContext());
-        globalObject.set(engine, "jsError", LocalValue(engine, jsError));
+        Object::Accessor globalObject(engine->currentContext());
+        globalObject.set(engine, "jsError", ScopedValue(engine, jsError));
 
         engine->tryCatch([engine](){
             engine->compileJsEnclosed("throw linkError(new Error('Test Js Exception'), jsError)")->run();
@@ -110,14 +110,14 @@ void JsErrorHandlingTest::testExceptionFromFunction(){
         epl->addModuleLibrary(m);
 
         Object o  = epl->collectExportsObject();
-        LocalObject lo(o);
+        Object::Accessor lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
         jsError->ref();
 
-        LocalObject globalObject(engine->currentContext());
+        Object::Accessor globalObject(engine->currentContext());
         globalObject.set(engine, "JsErrorHandlingStub", lo.get(engine, "JsErrorHandlingStub"));
-        globalObject.set(engine, "jsError", LocalValue(engine, jsError));
+        globalObject.set(engine, "jsError", ScopedValue(engine, jsError));
 
         engine->tryCatch([engine](){
             engine->compileJsEnclosed("JsErrorHandlingStub.errorFunction();")->run();
@@ -142,14 +142,14 @@ void JsErrorHandlingTest::testExceptionFromMethod(){
         epl->addModuleLibrary(m);
 
         Object o  = epl->collectExportsObject();
-        LocalObject lo(o);
+        Object::Accessor lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
         jsError->ref();
 
-        LocalObject globalObject(engine->currentContext());
+        Object::Accessor globalObject(engine->currentContext());
         globalObject.set(engine, "JsErrorHandlingStub", lo.get(engine, "JsErrorHandlingStub"));
-        globalObject.set(engine, "jsError", LocalValue(engine, jsError));
+        globalObject.set(engine, "jsError", ScopedValue(engine, jsError));
 
 
         engine->tryCatch([engine](){
@@ -177,14 +177,14 @@ void JsErrorHandlingTest::testExceptionFromProperty()
         epl->addModuleLibrary(m);
 
         Object o  = epl->collectExportsObject();
-        LocalObject lo(o);
+        Object::Accessor lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
         jsError->ref();
 
-        LocalObject globalObject(engine->currentContext());
+        Object::Accessor globalObject(engine->currentContext());
         globalObject.set(engine, "JsErrorHandlingStub", lo.get(engine, "JsErrorHandlingStub"));
-        globalObject.set(engine, "jsError", LocalValue(engine, jsError));
+        globalObject.set(engine, "jsError", ScopedValue(engine, jsError));
 
         engine->tryCatch([engine](){
             engine->compileJsEnclosed("jsError.errorProperty = 100;")->run();
@@ -211,14 +211,14 @@ void JsErrorHandlingTest::testExceptionPropagation(){
         epl->addModuleLibrary(m);
 
         Object o  = epl->collectExportsObject();
-        LocalObject lo(o);
+        Object::Accessor lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
         jsError->ref();
 
-        LocalObject globalObject(engine->currentContext());
+        Object::Accessor globalObject(engine->currentContext());
         globalObject.set(engine, "JsErrorHandlingStub", lo.get(engine, "JsErrorHandlingStub"));
-        globalObject.set(engine, "jsError", LocalValue(engine, jsError));
+        globalObject.set(engine, "jsError", ScopedValue(engine, jsError));
 
 //        engine->compileElement(
 //            "var c = new Container();"
@@ -251,14 +251,14 @@ void JsErrorHandlingTest::testExceptionPropagationFromJs(){
         epl->addModuleLibrary(m);
 
         Object o  = epl->collectExportsObject();
-        LocalObject lo(o);
+        Object::Accessor lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
         jsError->ref();
 
-        LocalObject globalObject(engine->currentContext());
+        Object::Accessor globalObject(engine->currentContext());
         globalObject.set(engine, "JsErrorHandlingStub", lo.get(engine, "JsErrorHandlingStub"));
-        globalObject.set(engine, "jsError", LocalValue(engine, jsError));
+        globalObject.set(engine, "jsError", ScopedValue(engine, jsError));
 
 //        engine->compileElement(
 //            "var c = new Container();"
@@ -292,14 +292,14 @@ void JsErrorHandlingTest::testExceptionRethrowPropagation()
         epl->addModuleLibrary(m);
 
         Object o  = epl->collectExportsObject();
-        LocalObject lo(o);
+        Object::Accessor lo(o);
 
         JsErrorHandlingStub* jsError = new JsErrorHandlingStub(engine);
         jsError->ref();
 
-        LocalObject globalObject(engine->currentContext());
+        Object::Accessor globalObject(engine->currentContext());
         globalObject.set(engine, "JsErrorHandlingStub", lo.get(engine, "JsErrorHandlingStub"));
-        globalObject.set(engine, "jsError", LocalValue(engine, jsError));
+        globalObject.set(engine, "jsError", ScopedValue(engine, jsError));
 
         // Container c1
         //   ErrorHandler e1

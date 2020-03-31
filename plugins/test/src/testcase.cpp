@@ -18,24 +18,24 @@ TestCase::TestCase(Engine* engine)
 TestCase::~TestCase(){
 }
 
-LocalValue TestCase::children(){
+ScopedValue TestCase::children(){
     Object o = Object::createArray(engine(), static_cast<int>(m_data.size()));
-    LocalArray la(o);
+    Object::ArrayAccessor la(o);
     for ( int i = 0; i < static_cast<int>(m_data.size()); ++i ){
-        la.set(i, LocalValue(engine(), m_data[static_cast<size_t>(i)]));
+        la.set(i, ScopedValue(engine(), m_data[static_cast<size_t>(i)]));
     }
-    return LocalValue(engine(), o);
+    return ScopedValue(engine(), o);
 }
 
-void TestCase::setChildren(LocalValue children){
+void TestCase::setChildren(ScopedValue children){
     for( Element* e: m_data ){
         e->setParent(nullptr);
     }
     m_data.clear();
     if ( children.isArray() ){
-        LocalArray la(engine(), children);
+        Object::ArrayAccessor la(engine(), children);
         for ( int i = 0; i < la.length(); ++i ){
-            LocalValue lval = la.get(i);
+            ScopedValue lval = la.get(i);
             if ( lval.isElement() ){
                 Element* el = lval.toElement(engine());
                 if (el){
@@ -90,7 +90,7 @@ int TestCase::exec(){
                 engine()->tryCatch([scenario, tester, this](){
 
                     Function::Parameters p(1);
-                    p.assign(0, LocalValue(engine(), tester));
+                    p.assign(0, ScopedValue(engine(), tester));
 
                     //TODO: Check if run() is null
                     vlog() << scenario->run().isNull();

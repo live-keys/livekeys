@@ -22,7 +22,7 @@ public:
 
     void run(){
         isActive = true;
-        LocalValue v = expression.call(element->engine(), Function::Parameters(0));
+        ScopedValue v = expression.call(element->engine(), Function::Parameters(0));
         property->write(element, v.data());
     }
 };

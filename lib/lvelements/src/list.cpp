@@ -14,7 +14,7 @@ List::List(Engine *engine)
 
 List::List(Engine *engine,
         void *data,
-        const std::function<LocalValue (List *, int)> &at,
+        const std::function<ScopedValue (List *, int)> &at,
         const std::function<int (List *)> &length,
         bool isObservable)
     : Element(engine)
@@ -27,10 +27,10 @@ List::List(Engine *engine,
 
 List::List(Engine *engine,
         void *data,
-        const std::function<LocalValue (List *, int)> &at,
+        const std::function<ScopedValue (List *, int)> &at,
         const std::function<int (List *)> &length,
-        const std::function<void (List *, int, LocalValue)> &assign,
-        const std::function<void (List *, LocalValue)> &append,
+        const std::function<void (List *, int, ScopedValue)> &assign,
+        const std::function<void (List *, ScopedValue)> &append,
         const std::function<void (List *)> &clear,
         bool isObservable)
     : Element(engine)
@@ -49,10 +49,10 @@ List::~List(){
         m_dataDestructor(this);
 }
 
-LocalValue List::atImpl(List *l, int){
+ScopedValue List::atImpl(List *l, int){
     lv::Exception e = CREATE_EXCEPTION(lv::Exception, "at function is unavailable for Lists", lv::Exception::toCode("~List"));
     l->engine()->throwError(&e, nullptr);
-    return LocalValue(l->engine());
+    return ScopedValue(l->engine());
 }
 
 int List::lengthImpl(List *l){

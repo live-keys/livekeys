@@ -1,5 +1,5 @@
 #include "workspacelayer.h"
-#include "live/visuallog.h"
+#include "live/visuallogqt.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
 #include "live/viewcontext.h"
@@ -14,13 +14,11 @@
 
 #include "live/mlnode.h"
 #include "live/mlnodetoqml.h"
+#include "live/mlnodetojson.h"
 
 #include "workspace.h"
 #include "projectworkspace.h"
 #include "documentation.h"
-
-#include <QFile>
-#include <QUrl>
 
 #include <QQuickItem>
 #include <QQmlEngine>
@@ -28,8 +26,18 @@
 #include <QQmlPropertyMap>
 #include <QJSValueIterator>
 #include <QJSValue>
+#include <QFileInfo>
+#include <QFile>
+#include <QUrl>
 
 namespace lv{
+
+//HERE
+
+// TODO: load samples
+// TODO: add live.package.json file to workspace
+// TODO: Remove project::newProject being triggered
+// TODO: Create new default qml template for startup screen.
 
 WorkspaceLayer::WorkspaceLayer(QObject *parent)
     : Layer(parent)
@@ -52,12 +60,12 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     m_extensions = new Extensions(lv::ViewContext::instance().engine(), settings->path());
     settings->addConfigFile("extensions", m_extensions);
 
-    ViewEngine* viewEngine = lv::ViewContext::instance().engine();
-    QQmlEngine* engine = viewEngine->engine();
+    m_engine = lv::ViewContext::instance().engine();
+    QQmlEngine* engine = m_engine->engine();
     QObject* probject = engine->rootContext()->contextProperty("project").value<QObject*>();
     m_project = qobject_cast<lv::Project*>(probject);
 
-    m_documentation = new Documentation(viewEngine->packageGraph(), this);
+    m_documentation = new Documentation(m_engine->packageGraph(), this);
 
     QObject* lk = engine->rootContext()->contextProperty("lk").value<QObject*>();
     if ( !lk ){
@@ -93,7 +101,7 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
 
     m_themes->addTheme("LiveKeys", ":/LiveKeysTheme.qml");
 
-    m_extensions->loadExtensions();
+    loadConfigurations();
 
     for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
         WorkspaceExtension* le = it.value();
@@ -170,6 +178,8 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
         }
     }
 
+    m_panes->property("initializeStartupBox").value<QJSValue>().call();
+
     emit viewReady(this, m_nextViewParent);
 }
 
@@ -203,7 +213,7 @@ QJSValue WorkspaceLayer::interceptMenu(QJSValue context){
         }
     }
 
-    QJSValue concat = lv::ViewContext::instance().engine()->engine()->newArray(result.length());
+    QJSValue concat = lv::ViewContext::instance().engine()->engine()->newArray(static_cast<uint32_t>(result.length()));
     quint32 index = 0;
     for ( auto it = result.begin(); it != result.end(); ++it ){
         concat.setProperty(index, *it);
@@ -310,6 +320,10 @@ QString WorkspaceLayer::docsPath() const{
     return QString::fromStdString(ApplicationContext::instance().docsPath());
 }
 
+bool WorkspaceLayer::wasRecentsFileFound() const{
+    return m_workspace->wasRecentsFileFound();
+}
+
 void WorkspaceLayer::initializePanes(ProjectWorkspace *workspace, QJSValue panes){
     QJSValueIterator panesIt(panes);
     while ( panesIt.hasNext() ){
@@ -360,6 +374,144 @@ void WorkspaceLayer::initializePanesAndWindows(ProjectWorkspace *workspace, QJSV
             }
         }
     }
+}
+
+void WorkspaceLayer::loadConfigurations(){
+    QFile file(m_extensions->path());
+
+    MLNode extensionConfiguration;
+    MLNode tutorialsConfiguration = MLNode(MLNode::Array);
+    MLNode samplesConfiguration = MLNode(MLNode::Array);
+
+    if ( !file.exists() ){
+        const MLNode& startupcfg = ApplicationContext::instance().startupConfiguration();
+        if ( startupcfg.hasKey("workspace") ){
+            extensionConfiguration = startupcfg["workspace"]["extensions"];
+            tutorialsConfiguration = startupcfg["workspace"]["tutorials"];
+            samplesConfiguration   = startupcfg["workspace"]["samples"];
+        }
+
+        if ( file.open(QIODevice::WriteOnly) ){
+            std::string r;
+            MLNode n(MLNode::Object);
+            n["extensions"] = extensionConfiguration;
+            n["samples"]    = samplesConfiguration;
+            n["tutorials"]  = tutorialsConfiguration;
+
+            ml::toJson(n, r);
+
+            vlog("extensions").v() << "Saving extensions file to: " << m_extensions->path();
+
+            file.write(r.c_str(), static_cast<int>(r.length()));
+            file.close();
+        }
+    } else if ( file.open(QIODevice::ReadOnly) ){
+        MLNode n;
+        QByteArray fileContents = file.readAll();
+        ml::fromJson(fileContents.data(), n);
+
+        if ( n.hasKey("extensions") ){
+            extensionConfiguration = n["extensions"];
+        }
+        if ( n.hasKey("samples") ){
+            samplesConfiguration = n["samples"];
+        }
+        if ( n.hasKey("tutorials") ){
+            tutorialsConfiguration = n["tutorials"];
+        }
+    }
+
+    MLNode::ArrayType extensionArray = extensionConfiguration.asArray();
+
+    for ( auto it = extensionArray.begin(); it != extensionArray.end(); ++it ){
+        MLNode currentExt = *it;
+
+        bool isEnabled = currentExt["enabled"].asBool();
+        if ( isEnabled ){
+            std::string packageName = currentExt["package"].asString();
+            std::string packagePath = packageName;
+            QFileInfo fpath(QString::fromStdString(packagePath));
+            if ( fpath.isRelative() ){
+                packagePath = ApplicationContext::instance().pluginPath() + "/" + packageName;
+            }
+            std::string component = currentExt["component"].asString();
+
+            if ( Package::existsIn(packagePath) ){
+                WorkspaceExtension* le = loadPackageExtension(packagePath, component);
+                if ( le ){ // if package has extension
+                    vlog("extensions").v() << "Loaded extension from package: " << packagePath;
+                }
+            }
+        }
+    }
+
+    MLNode::ArrayType tutorialsArray = tutorialsConfiguration.asArray();
+    for( auto it = tutorialsArray.begin(); it != tutorialsArray.end(); ++it ){
+        bool isEnabled = (*it)["enabled"].asBool();
+        std::string packageName = (*it)["package"].asString();
+        if ( isEnabled ){
+            std::string packagePath = ApplicationContext::instance().pluginPath() + "/" + packageName;
+            if ( Package::existsIn(packagePath) ){
+                Package::Ptr p = Package::createFromPath(packagePath);
+                if ( p ){
+                    //TODO #426: Store in model
+//                    vlog() << "Package : " << p->name() << " tutorials label : " << p->workspaceTutorialsLabel();
+//                    for ( auto section : p->workspaceTutorialsSections() ){
+//                        vlog() << "Tutorial: " << section.first;
+//                        vlog() << "In path: " << p->path() + "/" + section.second;
+//                    }
+                }
+            }
+        }
+    }
+
+    MLNode::ArrayType samplesArray = samplesConfiguration.asArray();
+    for( auto it = samplesArray.begin(); it != samplesArray.end(); ++it ){
+        bool isEnabled = (*it)["enabled"].asBool();
+        std::string packageName = (*it)["package"].asString();
+        if ( isEnabled ){
+            std::string packagePath = ApplicationContext::instance().pluginPath() + "/" + packageName;
+            if ( Package::existsIn(packagePath) ){
+                Package::Ptr p = Package::createFromPath(packagePath);
+                if ( p ){
+                    //TODO #426: Store in model
+//                    vlog() << "Package : " << p->name();
+//                    for ( auto sample : p->workspaceSamples() ){
+//                        vlog() << "Sample: " << sample;
+//                    }
+                }
+            }
+        }
+    }
+}
+
+WorkspaceExtension *WorkspaceLayer::loadPackageExtension(const std::string &path, const std::string &component){
+    Package::Ptr p = Package::createFromPath(path);
+    if ( !p )
+        return nullptr;
+    return loadPackageExtension(p, component);
+}
+
+WorkspaceExtension *WorkspaceLayer::loadPackageExtension(const Package::Ptr &package, const std::string &componentName){
+    std::string path = package->path() + "/" + componentName;
+    vlog("extensions").v() << "Loading extension: " << path;
+
+    QQmlComponent component(m_engine->engine(), QUrl::fromLocalFile(QString::fromStdString(path)), m_extensions);
+    if ( component.isError() ){
+        THROW_EXCEPTION(lv::Exception, "Failed to load component: " + component.errorString().toStdString(), 4);
+    }
+
+    WorkspaceExtension* le = qobject_cast<WorkspaceExtension*>(component.create());
+    if ( !le ){
+        THROW_EXCEPTION(lv::Exception, "Extension failed to create or cast to LiveExtension type in: " + path, 3);
+    }
+
+    le->setIdentifiers(package->name(), path);
+    le->setParent(m_extensions);
+    m_extensions->m_extensions.insert(le->name(), le);
+    m_extensions->m_globals->insert(QString::fromStdString(le->name()), QVariant::fromValue(le->globals()));
+
+    return le;
 }
 
 }// namespace

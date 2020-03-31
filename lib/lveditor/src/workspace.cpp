@@ -35,12 +35,14 @@ Workspace::Workspace(Project *project, WorkspaceLayer *parent)
     : QObject(parent)
     , m_project(project)
     , m_currentProjectWorkspace(nullptr)
+    , m_recentsFileFound(false)
 {
     connect(m_project, &Project::pathChanged, this, &Workspace::whenProjectPathChange);
 
     QString recentsPath = absolutePath("workspaces.json");
     QFile recentsFile(recentsPath);
     if ( recentsFile.exists() && recentsFile.open(QIODevice::ReadOnly) ){
+        m_recentsFileFound = true;
 
         try{
             vlog("appdata").v() << "Loading recent projects from file: " << recentsPath;
@@ -96,18 +98,19 @@ void Workspace::whenProjectPathChange(const QString &path){
 
         ProjectWorkspace* pw = ProjectWorkspace::create(m_project);
 
+        emit projectOpen(path);
+
         m_currentProjectWorkspace = pw;
         wl->whenProjectOpen(path, pw);
 
-        emit projectOpen(path, m_currentProjectWorkspace);
+        emit projectInitialized(path, m_currentProjectWorkspace);
     }
 }
 
 void Workspace::saveRecents(){
     QString recentsPath = absolutePath("workspaces.json");
     QFile recentsFile(recentsPath);
-    if ( m_recentsChanged && recentsFile.open(QIODevice::WriteOnly) ){
-
+    if ( (m_recentsChanged || m_recents.empty()) && recentsFile.open(QIODevice::WriteOnly) ){
         MLNode recents(MLNode::Array);
 
         for ( auto it = m_recents.begin(); it != m_recents.end(); ++it ){
@@ -139,6 +142,20 @@ QString Workspace::absoluteDir(const QString &dir){
         QDir().mkdir(d);
     }
     return d;
+}
+
+Workspace *Workspace::getFromContext(QQmlContext *ctx){
+    QObject* lk = ctx->contextProperty("lk").value<QObject*>();
+    if ( !lk ){
+        return nullptr;
+    }
+
+    QObject* workspaceLayerOb = lk->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
+    WorkspaceLayer* wlayer = static_cast<WorkspaceLayer*>(workspaceLayerOb);
+    if ( !wlayer )
+        return nullptr;
+
+    return wlayer->workspace();
 }
 
 }// namespace

@@ -421,6 +421,13 @@ const MLNode &ProjectWorkspace::currentLayout() const{
     return m_state->currentWorkspaceLayout;
 }
 
+QString ProjectWorkspace::projectPath() const{
+    if ( m_project->active() && !m_project->isDirProject() ){
+        return m_project->active()->path();
+    } else
+        return m_project->dir();
+}
+
 ProjectWorkspace *ProjectWorkspace::create(Project *project, QObject *parent){
 
     ProjectWorkspace* pw = new ProjectWorkspace(project, parent);
@@ -432,7 +439,8 @@ ProjectWorkspace *ProjectWorkspace::create(Project *project, QObject *parent){
 }
 
 void ProjectWorkspace::initialize(){
-    QString path = m_project->dir();
+    QString path = projectPath();
+
     QFileInfo pathinfo(path);
 
     if ( path.isEmpty() || !pathinfo.exists() )
@@ -495,7 +503,7 @@ Exception ProjectWorkspace::captureContents(const Exception &e){
 }
 
 void ProjectWorkspace::initializeFromId(){
-    QString path = m_project->dir();
+    QString path = projectPath();
 
     m_currentWorkspaceId = "";
     m_state->currentWorkspaceLayout = MLNode(MLNode::Object);
@@ -536,7 +544,7 @@ void ProjectWorkspace::initializeDefaults(){
     m_currentWorkspaceId = "";
     m_state->currentWorkspaceLayout = MLNode(MLNode::Object);
 
-    QString path = m_project->dir();
+    QString path = projectPath();
     if ( !path.isEmpty() )
         m_currentWorkspaceId = Project::hashPath(path.toUtf8()).toHex();
 

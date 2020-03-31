@@ -13,7 +13,7 @@ class TestCase : public Element{
         META_OBJECT_DESCRIBE(TestCase)
             .constructor()
             .base<Element>()
-            .scriptProperty<LocalValue>("children", &TestCase::children, &TestCase::setChildren, "childrenChanged")
+            .scriptProperty<ScopedValue>("children", &TestCase::children, &TestCase::setChildren, "childrenChanged")
             .scriptProperty<Callable>("beforeEach", &TestCase::beforeEach, &TestCase::setBeforeEach, "beforeEachChanged")
             .scriptProperty<Callable>("afterEach", &TestCase::afterEach, &TestCase::setAfterEach, "afterEachChanged")
             .scriptProperty<Callable>("beforeAll", &TestCase::beforeAll, &TestCase::setBeforeAll, "beforeAllChanged")
@@ -27,8 +27,8 @@ public:
     TestCase(Engine* engine);
     ~TestCase() override;
 
-    LocalValue children();
-    void setChildren(LocalValue children);
+    ScopedValue children();
+    void setChildren(ScopedValue children);
 
     const std::vector<Element*> data() const;
 

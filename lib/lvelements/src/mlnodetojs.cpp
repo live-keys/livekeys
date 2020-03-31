@@ -100,13 +100,13 @@ void fromJs(const v8::Local<v8::Value> v, MLNode& n, el::Engine* engine){
 }// namespace
 
 
-void toJs(const MLNode &n, el::LocalValue &v, el::Engine *engine){
+void toJs(const MLNode &n, el::ScopedValue &v, el::Engine *engine){
     v8::Local<v8::Value> result;
     toJs(n, result, engine);
-    v = el::LocalValue(result);
+    v = el::ScopedValue(result);
 }
 
-void fromJs(const el::LocalValue &v, MLNode &n, el::Engine* engine){
+void fromJs(const el::ScopedValue &v, MLNode &n, el::Engine* engine){
     fromJs(v.data(), n, engine);
 }
 

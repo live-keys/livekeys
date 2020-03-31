@@ -137,7 +137,7 @@ QmlBindingPath::Ptr QmlBindingPath::join(QmlBindingPath::ConstPtr src1, QmlBindi
     return result;
 }
 
-QmlBindingPath::Ptr QmlBindingPath::clone(){
+QmlBindingPath::Ptr QmlBindingPath::clone() const{
     QmlBindingPath::Node* cpy     = nullptr;
     QmlBindingPath::Node* cpyroot = nullptr;
 
@@ -198,6 +198,24 @@ QmlBindingPath::Ptr QmlBindingPath::clone(){
     bp->m_root = cpyroot;
     bp->m_documentPath = m_documentPath;
     return bp;
+}
+
+QmlBindingPath::Ptr QmlBindingPath::parentObjectPath() const{
+
+    QmlBindingPath::Ptr result = clone();
+    QmlBindingPath::Node* n = result->lastNode();
+    while ( n && n->type() != QmlBindingPath::Node::Index ){
+        n = n->parent;
+    }
+
+    if (!n || !n->parent)
+        return nullptr;
+
+    n = n->parent;
+    delete n->child;
+    n->child = nullptr;
+
+    return result;
 }
 
 QString QmlBindingPath::rootFile() const{

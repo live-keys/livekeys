@@ -49,7 +49,7 @@ public:
             return static_cast<T>(extractValue<Element*>(info, index));
         }
 
-        LocalValue at(size_t index) const;
+        ScopedValue at(size_t index) const;
         size_t length() const;
 
         void* userData();
@@ -78,13 +78,13 @@ public:
 
     public:
         Parameters(int length);
-        Parameters(const std::initializer_list<LocalValue>& init);
+        Parameters(const std::initializer_list<ScopedValue>& init);
         ~Parameters();
 
-        void assign(int index, const LocalValue& ref);
+        void assign(int index, const ScopedValue& ref);
         void assign(int index, const v8::Local<v8::Value>& value);
 
-        LocalValue at(Engine* engine, int index) const;
+        ScopedValue at(Engine* engine, int index) const;
         int length() const;
 
         template<int index, typename T> T getValue(Engine* engine) const{
@@ -101,7 +101,7 @@ public:
     };
 
 public:
-    static void assignReturnValue(const el::LocalValue& val, const v8::FunctionCallbackInfo<v8::Value>& info);
+    static void assignReturnValue(const el::ScopedValue& val, const v8::FunctionCallbackInfo<v8::Value>& info);
 
     static void ptrImplementation(const v8::FunctionCallbackInfo<v8::Value>& info){
         Function::CallInfo pr(&info);
@@ -121,7 +121,7 @@ public:
         if ( params.clearedPendingException(engine) )
             return;
 
-        LocalValue lv(engine, rt);
+        ScopedValue lv(engine, rt);
         params.assignReturnValue(lv.data());
     }
 
@@ -216,7 +216,7 @@ template<> LV_ELEMENTS_EXPORT Callable Function::CallInfo::extractValue(v8::Func
 template<> LV_ELEMENTS_EXPORT Object Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
 template<> LV_ELEMENTS_EXPORT Buffer Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
 template<> LV_ELEMENTS_EXPORT Value Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> LV_ELEMENTS_EXPORT LocalValue Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
+template<> LV_ELEMENTS_EXPORT ScopedValue Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
 template<> LV_ELEMENTS_EXPORT Element* Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
 
 
@@ -233,7 +233,7 @@ template<> LV_ELEMENTS_EXPORT Callable Function::Parameters::extractValue(Engine
 template<> LV_ELEMENTS_EXPORT Object Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
 template<> LV_ELEMENTS_EXPORT Buffer Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
 template<> LV_ELEMENTS_EXPORT Value Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> LV_ELEMENTS_EXPORT LocalValue Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
+template<> LV_ELEMENTS_EXPORT ScopedValue Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
 template<> LV_ELEMENTS_EXPORT Element* Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
 
 
@@ -253,7 +253,7 @@ public:
         std::is_same<ReturnType, Callable>::value ||
         std::is_same<ReturnType, Buffer>::value ||
         std::is_same<ReturnType, Object>::value ||
-        std::is_same<ReturnType, LocalValue>::value ||
+        std::is_same<ReturnType, ScopedValue>::value ||
         std::is_same<ReturnType, Value>::value ||
         std::is_pointer<ReturnType>::value,
         "Return type is not convertible to script value."
@@ -327,7 +327,7 @@ public:
         std::is_same<ReturnType, Callable>::value ||
         std::is_same<ReturnType, Buffer>::value ||
         std::is_same<ReturnType, Object>::value ||
-        std::is_same<ReturnType, LocalValue>::value ||
+        std::is_same<ReturnType, ScopedValue>::value ||
         std::is_same<ReturnType, Value>::value ||
         std::is_pointer<ReturnType>::value,
         "Return type is not convertible to script value."

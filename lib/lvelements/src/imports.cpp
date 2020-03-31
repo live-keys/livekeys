@@ -73,7 +73,7 @@ v8::Local<v8::Value> Imports::get(const std::string &key){
         THROW_EXCEPTION(Exception, "Failed to find import at key: " + key, Exception::toCode("~Import"));
     }
 
-    LocalValue vl = mf->get(m_engine, m_moduleFile, key);
+    ScopedValue vl = mf->get(m_engine, m_moduleFile, key);
     v8::Local<v8::Value> value = vl.data();
     return value;
 }
