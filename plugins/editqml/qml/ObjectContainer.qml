@@ -21,6 +21,8 @@ Item{
     property alias compact: objectContainer.compact
     property alias topSpacing: objectContainer.topSpacing
 
+    property alias paletteGroupFactory: objectContainer.paletteGroupFactory
+
     width: objectContainer.width
     height: objectContainer.pane ? 30 : objectContainer.height
 
