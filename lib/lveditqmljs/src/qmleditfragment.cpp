@@ -294,6 +294,13 @@ QString QmlEditFragment::typeName() const{
     return m_declaration->type().name();
 }
 
+QString QmlEditFragment::identifier() const
+{
+    const QStringList& ic = m_declaration->identifierChain();
+    if (ic.size() == 0) return "";
+    return ic[ic.size()-1];
+}
+
 QList<QObject *> QmlEditFragment::getChildFragments() const{
     QList<QObject*> result;
     for (QmlEditFragment* edit : m_childFragments)

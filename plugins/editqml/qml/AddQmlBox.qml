@@ -838,9 +838,9 @@ Rectangle{
                             onClicked: {
                                 eventsCategoryList.currentIndex = index
                                 if ( modelData === 'All' )
-                                    root.addContainer.propertyModel.setTypeFilter('')
+                                    root.addContainer.eventModel.setTypeFilter('')
                                 else
-                                    root.addContainer.propertyModel.setTypeFilter(modelData)
+                                    root.addContainer.eventModel.setTypeFilter(modelData)
                             }
                         }
                     }
