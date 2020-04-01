@@ -2572,21 +2572,16 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                     addContainer->propertyModel()->addItem(
                         QmlSuggestionModel::ItemData(
                             propertyName,
-                            "",
+                            ti->prefereredType().name(),
+                            ti->propertyAt(i).typeName.name(),
                             "", 
-                            "", 
-                            "",
-                            ""
-//                        ti->prefereredType().join(),
-//                        ti->propertyAt(i).typeName,
-//                        "",
-//                        ti->exportType().join() + "." + ti->propertyAt(i).name,
-//                        ti->propertyAt(i).name
+                            ti->exportType().join() + "." + propertyName,
+                            propertyName
                         )
                     );
                 }
 
-                /*
+
                 if ( propertyName.size() > 0 )
                     propertyName[0] = propertyName[0].toUpper();
 
@@ -2595,7 +2590,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                     addContainer->eventModel()->addItem(
                         QmlSuggestionModel::ItemData(
                             propertyName,
-                            objectTypeName,
+                            ti->prefereredType().name(),
                             "method",
                             "",
                             "", //TODO: Find library path
@@ -2603,9 +2598,10 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                         )
                     );
                 }
-*/
             }
             addContainer->propertyModel()->updateFilters();
+            addContainer->eventModel()->updateFilters();
+
         }
     }
 
