@@ -1,12 +1,13 @@
 PLUGIN_NAME = squareone
 PLUGIN_PATH = squareone
 
-TEMPLATE = subdirs
 
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
 include($$getGlobalFile(plugin.pri))
 
 uri = squareone
+
+TEMPLATE = subdirs
 
 # Deploy the tutorials
 

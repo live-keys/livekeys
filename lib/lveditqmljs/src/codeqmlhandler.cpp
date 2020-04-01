@@ -47,6 +47,7 @@
 #include "live/palettecontainer.h"
 #include "live/qmlpropertywatcher.h"
 #include "live/runnablecontainer.h"
+#include "live/hookcontainer.h"
 
 #include "qmlsuggestionmodel.h"
 
@@ -1030,6 +1031,21 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
 
         QString fileName = declaration->document()->file()->name();
         if ( fileName.length() && fileName.front().isUpper() ){ // if component
+            RunnableContainer* rc = project->runnables();
+            int totalRunnables = rc->rowCount();
+            for ( int i = 0; i < totalRunnables; ++i ){
+                Runnable* run = rc->runnableAt(i);
+                if ( !run->name().isEmpty() && run->type() == Runnable::QmlFile ){
+                    HookContainer* hooks = qobject_cast<HookContainer*>(
+                        run->viewContext()->contextProperty("hooks").value<QObject*>()
+                    );
+
+                    if ( hooks ){
+                        //TODO
+                    }
+                }
+            }
+
             QmlEditFragment* ef = new QmlEditFragment(declaration);
             ef->bindingModel(this);
             return ef;

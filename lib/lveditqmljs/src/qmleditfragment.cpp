@@ -275,13 +275,13 @@ void QmlEditFragment::emitRemoval(){
     m_bindingPalette = nullptr;
 }
 
-QmlBindingSpanModel* QmlEditFragment::bindingModel(lv::CodeQmlHandler *codeHandler){
+QmlBindingSpanModel* QmlEditFragment::bindingModel(lv::CodeQmlHandler *){
     if ( !m_bindingSpanModel ){
         m_bindingSpanModel = new QmlBindingSpanModel(this);
-        QString fileName = declaration()->document()->file()->name();
-        if ( fileName.length() && fileName.front().isUpper() ){
-            m_bindingSpanModel->initializeScanner(codeHandler);
-        }
+//        QString fileName = declaration()->document()->file()->name();
+//        if ( fileName.length() && fileName.front().isUpper() ){
+//            m_bindingSpanModel->initializeScanner(codeHandler);
+//        }
     }
     return m_bindingSpanModel;
 }

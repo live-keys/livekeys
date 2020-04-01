@@ -52,6 +52,7 @@ public:
     void setName(const QString& name);
 
     QObject* viewRoot();
+    QQmlContext* viewContext();
     el::Element* elementRoot();
 
     const QSet<QString>& activations() const;
@@ -126,6 +127,10 @@ inline QObject *Runnable::runSpace(){
 
 inline QObject *Runnable::viewRoot(){
     return m_viewRoot;
+}
+
+inline QQmlContext *Runnable::viewContext(){
+    return m_viewContext;
 }
 
 inline const QSet<QString> &Runnable::activations() const{
