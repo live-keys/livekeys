@@ -1410,8 +1410,6 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
             } else {
                 // width is the receiving, need to remove the previous listening channel
                 
-                QmlPropertyWatcher* watcher = new QmlPropertyWatcher(writeChannel->property());
-
                 if ( receivingChannel->property().isValid() && receivingChannel->property().object() ){
                     QQmlProperty recivingProperty = receivingChannel->property();
 
