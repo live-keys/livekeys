@@ -34,7 +34,8 @@ HEADERS += \
     $$PWD/qmlscopesnap_p.h \
     $$PWD/qmlusagegraphscanner.h \
     $$PWD/qmllanguagescanner.h \
-    $$PWD/qmllanguagescanmonitor.h
+    $$PWD/qmllanguagescanmonitor.h \
+    $$PWD/qmlbuilder.h
 
 SOURCES += \
     $$PWD/documentqmlinfo.cpp \
@@ -68,4 +69,5 @@ SOURCES += \
     $$PWD/qmlscopesnap.cpp \
     $$PWD/qmlusagegraphscanner.cpp \
     $$PWD/qmllanguagescanner.cpp \
-    $$PWD/qmllanguagescanmonitor.cpp
+    $$PWD/qmllanguagescanmonitor.cpp \
+    $$PWD/qmlbuilder.cpp

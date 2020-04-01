@@ -1,6 +1,7 @@
 #include "runnable.h"
 #include "runnablecontainer.h"
 
+#include "live/hookcontainer.h"
 #include "live/exception.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
@@ -11,6 +12,7 @@
 #include <QFileInfo>
 #include <QQmlComponent>
 #include <QQuickItem>
+#include <QQmlContext>
 #include <QQmlEngine>
 #include <QTimer>
 
@@ -34,6 +36,7 @@ Runnable::Runnable(
     , m_runSpace(nullptr)
     , m_viewEngine(viwEngine)
     , m_viewRoot(nullptr)
+    , m_viewContext(nullptr)
     , m_type(Runnable::QmlFile)
     , m_activations(activations)
     , m_scheduleTimer(nullptr)
@@ -85,21 +88,26 @@ void Runnable::run(){
             auto documentList = m_project->documentModel()->listUnsavedDocuments();
 
             if ( m_project->active() == this ){
-//                document->setDirty(false);
+
+                QQmlContext* ctx = createContext();
+
                 m_viewEngine->createObjectAsync(
                     document->content(),
                     m_runSpace,
                     QUrl::fromLocalFile(m_path),
                     this,
+                    ctx,
                     !(documentList.size() == 1 && documentList[0] == document->file()->path())
                 );
             } else {
-                QObject* obj = createObject(document->content(), QUrl::fromLocalFile(m_path));
+                QQmlContext* ctx = createContext();
+                QObject* obj = createObject(document->content(), QUrl::fromLocalFile(m_path), ctx);
 
                 if ( obj ){
 
                     emptyRunSpace();
 
+                    m_viewContext = ctx;
                     m_viewRoot = obj;
                     obj->setParent(m_runSpace);
 
@@ -108,6 +116,8 @@ void Runnable::run(){
                     if (parentItem && item){
                         item->setParentItem(parentItem);
                     }
+                } else {
+                    ctx->deleteLater();
                 }
 
                 emit objectReady();
@@ -120,20 +130,24 @@ void Runnable::run(){
             QByteArray contentBytes = f.readAll();
 
             if ( m_project->active() == this ){
+                QQmlContext* ctx = createContext();
+
                 m_viewEngine->createObjectAsync(
                     contentBytes,
                     m_runSpace,
                     QUrl::fromLocalFile(m_path),
                     this,
+                    ctx,
                     true
                 );
             } else {
-                QObject* obj = createObject(contentBytes, QUrl::fromLocalFile(m_path));
+                QQmlContext* ctx = createContext();
+                QObject* obj = createObject(contentBytes, QUrl::fromLocalFile(m_path), ctx);
 
                 if ( obj ){
-
                     emptyRunSpace();
 
+                    m_viewContext = ctx;
                     m_viewRoot = obj;
                     obj->setParent(m_runSpace);
 
@@ -142,6 +156,8 @@ void Runnable::run(){
                     if (parentItem && item){
                         item->setParentItem(parentItem);
                     }
+                } else {
+                    ctx->deleteLater();
                 }
 
                 emit objectReady();
@@ -293,7 +309,7 @@ void Runnable::runLv(){
     //TODO
 }
 
-QObject* Runnable::createObject(const QByteArray &code, const QUrl &file){
+QObject* Runnable::createObject(const QByteArray &code, const QUrl &file, QQmlContext *context){
     m_viewEngine->engine()->clearComponentCache();
 
     QQmlComponent component(m_viewEngine->engine());
@@ -305,7 +321,7 @@ QObject* Runnable::createObject(const QByteArray &code, const QUrl &file){
         return nullptr;
     }
 
-    QObject* obj = component.create(m_viewEngine->engine()->rootContext());
+    QObject* obj = component.create(context);
     m_viewEngine->engine()->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
 
     errors = component.errors();
@@ -317,21 +333,30 @@ QObject* Runnable::createObject(const QByteArray &code, const QUrl &file){
     return obj;
 }
 
+QQmlContext *Runnable::createContext(){
+    QQmlContext* ctx = new QQmlContext(m_viewEngine->engine()->rootContext());
+    HookContainer* hooks = new HookContainer(m_project->dir(), this, ctx);
+    ctx->setContextProperty("hooks", hooks);
+    return ctx;
+}
+
 void Runnable::engineObjectAcquired(const QUrl &, QObject *ref){
     if ( ref == this ){
         emptyRunSpace();
     }
 }
 
-void Runnable::engineObjectReady(QObject *object, const QUrl &, QObject *ref){
+void Runnable::engineObjectReady(QObject *object, const QUrl &, QObject *ref, QQmlContext* context){
     if ( ref == this ){
-        m_viewRoot = object;
+        m_viewRoot    = object;
+        m_viewContext = context;
         emit objectReady();
     }
 }
 
-void Runnable::engineObjectCreationError(QJSValue errors, const QUrl &, QObject *ref){
+void Runnable::engineObjectCreationError(QJSValue errors, const QUrl &, QObject *ref, QQmlContext *context){
     if ( ref == this ){
+        delete context;
         emit runError(errors);
     }
 }
@@ -345,6 +370,8 @@ void Runnable::emptyRunSpace(){
         m_viewRoot->setParent(nullptr);
         m_viewRoot->deleteLater();
         m_viewRoot = nullptr;
+        m_viewContext->deleteLater();
+        m_viewContext = nullptr;
     }
 }
 

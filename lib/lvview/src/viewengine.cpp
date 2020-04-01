@@ -407,6 +407,7 @@ void ViewEngine::createObjectAsync(
         QObject* parent,
         const QUrl& url,
         QObject *reference,
+        QQmlContext* context,
         bool clearCache)
 {
     m_engineMutex->lock();
@@ -422,12 +423,15 @@ void ViewEngine::createObjectAsync(
     QList<QQmlError> errors = component.errors();
     if ( errors.size() > 0 ){
         m_engineMutex->unlock();
-        emit objectCreationError(toJSErrors(errors), url, reference);
+        emit objectCreationError(toJSErrors(errors), url, reference, context);
         return;
     }
 
+    if ( !context )
+        context = m_engine->rootContext();
+
     QQmlIncubator incubator;
-    component.create(incubator, m_engine->rootContext());
+    component.create(incubator, context);
     setIsLoading(true);
 
     while (incubator.isLoading()) {
@@ -439,7 +443,7 @@ void ViewEngine::createObjectAsync(
         setIsLoading(false);
         QJSValue jsErrors = toJSErrors(incubatorErrors);
         m_engineMutex->unlock();
-        emit objectCreationError(jsErrors, url, reference);
+        emit objectCreationError(jsErrors, url, reference, context);
         return;
     }
 
@@ -449,11 +453,12 @@ void ViewEngine::createObjectAsync(
         errorObject.setDescription("Component returned null object.");
         QJSValue jsErrors = toJSErrors(QList<QQmlError>() << errorObject);
         m_engineMutex->unlock();
-        emit objectCreationError(jsErrors, url, reference);
+        emit objectCreationError(jsErrors, url, reference, context);
         return;
     }
 
     QObject* obj = incubator.object();
+
     m_engine->setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
 
     emit objectAcquired(url, reference);
@@ -473,7 +478,7 @@ void ViewEngine::createObjectAsync(
     setIsLoading(false);
 
     m_engineMutex->unlock();
-    emit objectReady(obj, url, reference);
+    emit objectReady(obj, url, reference, context);
 }
 
 QJSValue ViewEngine::lastErrorsObject() const{

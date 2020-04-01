@@ -28,6 +28,7 @@
 #endif
 
 class QQuickItem;
+class QQmlContext;
 class QQuickWindow;
 
 namespace lv{
@@ -52,7 +53,7 @@ public:
 
 public slots:
     void beforeCompile(const QUrl&);
-    void afterCompile(QObject*, const QUrl&, QObject*);
+    void afterCompile(QObject*, const QUrl&, QObject*, QQmlContext*);
     void clearStates();
 
 private:

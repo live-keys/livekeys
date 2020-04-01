@@ -106,7 +106,7 @@ void StaticContainer::beforeCompile(const QUrl &){
         (*it)->beforeCompile();
 }
 
-void StaticContainer::afterCompile(QObject *, const QUrl &, QObject *){
+void StaticContainer::afterCompile(QObject *, const QUrl &, QObject *, QQmlContext*){
     vlog_debug("live-staticcontainer", "-----After Compile-----");
     for ( QLinkedList<StaticTypeContainerBase*>::iterator it = m_stateContainerList.begin(); it != m_stateContainerList.end(); ++it )
         (*it)->afterCompile();

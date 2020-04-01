@@ -30,6 +30,7 @@
 
 class QQmlEngine;
 class QQmlError;
+class QQmlContext;
 class QQmlIncubator;
 class QMutex;
 
@@ -142,9 +143,9 @@ signals:
     /** Loading indicator has changed */
     void isLoadingChanged(bool isLoading);
     /** Object was created */
-    void objectReady(QObject* object, const QUrl& file, QObject* reference);
+    void objectReady(QObject* object, const QUrl& file, QObject* reference, QQmlContext* context);
     /** Error in object creation */
-    void objectCreationError(QJSValue errors, const QUrl& file, QObject* reference);
+    void objectCreationError(QJSValue errors, const QUrl& file, QObject* reference, QQmlContext* context);
 
     /** Emitted when the error is propagated all the way to the application */
     void applicationError(QJSValue error);
@@ -157,6 +158,7 @@ public slots:
         QObject* parent,
         const QUrl& file,
         QObject* reference = nullptr,
+        QQmlContext* context = nullptr,
         bool clearCache = false
     );
     QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
