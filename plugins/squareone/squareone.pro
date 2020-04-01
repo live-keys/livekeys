@@ -24,3 +24,6 @@ OTHER_FILES += \
     tutorials/workspace/*.* \
     tutorials/filters/*.*
 
+DISTFILES += \
+    tutorials/workspace/live.project.json
+
