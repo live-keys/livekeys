@@ -16,3 +16,4 @@ DropDown                1.0 DropDown.qml
 Label                   1.0 Label.qml
 PathInputBox            1.0 PathInputBox.qml
 ResponsiveListView      1.0 ResponsiveListView.qml
+ResizeArea              1.0 ResizeArea.qml

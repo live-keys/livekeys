@@ -28,6 +28,7 @@
 namespace lv{
 
 class Settings;
+class Workspace;
 class QmlJsSettings;
 class ProjectQmlScope;
 class CodeQmlHandler;
@@ -57,7 +58,7 @@ public:
 
     static void registerTypes(const char* uri);
 
-    void setParams(Settings *settings, Project* project, ViewEngine* engine);
+    void setParams(Settings *settings, Project* project, ViewEngine* engine, Workspace* workspace);
 
     Project* project();
 
@@ -76,7 +77,7 @@ private:
     Project*               m_project;
     ViewEngine*            m_engine;
     QmlJsSettings*         m_settings;
-    QmlProjectMonitor* m_scanMonitor;
+    QmlProjectMonitor*     m_scanMonitor;
     QList<CodeQmlHandler*> m_codeHandlers;
     PaletteContainer*      m_paletteContainer;
 };

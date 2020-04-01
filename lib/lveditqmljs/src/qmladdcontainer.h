@@ -2,10 +2,7 @@
 #define LVQMLADDCONTAINER_H
 
 #include "live/lveditqmljsglobal.h"
-#include "qmlpropertymodel.h"
-#include "qmlitemmodel.h"
-#include "qmleventmodel.h"
-
+#include "qmlsuggestionmodel.h"
 #include <QObject>
 
 namespace lv{
@@ -15,39 +12,39 @@ namespace lv{
 class QmlAddContainer : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lv::QmlItemModel*     itemModel     READ itemModel     CONSTANT)
-    Q_PROPERTY(lv::QmlPropertyModel* propertyModel READ propertyModel CONSTANT)
-    Q_PROPERTY(lv::QmlEventModel*    eventModel    READ eventModel    CONSTANT)
-    Q_PROPERTY(QString               objectType    READ objectType    CONSTANT)
+    Q_PROPERTY(lv::QmlSuggestionModel*      itemModel     READ itemModel     CONSTANT)
+    Q_PROPERTY(lv::QmlSuggestionModel*      propertyModel READ propertyModel CONSTANT)
+    Q_PROPERTY(lv::QmlSuggestionModel*      eventModel    READ eventModel    CONSTANT)
+    Q_PROPERTY(QString                      objectType    READ objectType    CONSTANT)
 
 public:
     explicit QmlAddContainer(int addPosition, const QStringList& objectType, QObject *parent = 0);
     ~QmlAddContainer();
 
-    lv::QmlItemModel* itemModel() const;
-    lv::QmlPropertyModel* propertyModel() const;
-    lv::QmlEventModel* eventModel() const;
+    lv::QmlSuggestionModel* itemModel() const;
+    lv::QmlSuggestionModel* propertyModel() const;
+    lv::QmlSuggestionModel* eventModel() const;
 
     QString objectType() const;
 
 private:
-    int                   m_objectBegin;
-    QString               m_objectIndentation;
-    QStringList           m_objectTypePath;
-    lv::QmlItemModel*     m_itemModel;
-    lv::QmlPropertyModel* m_propertyModel;
-    lv::QmlEventModel*    m_eventModel;
+    int                         m_objectBegin;
+    QString                     m_objectIndentation;
+    QStringList                 m_objectTypePath;
+    lv::QmlSuggestionModel*     m_itemModel;
+    lv::QmlSuggestionModel*     m_propertyModel;
+    lv::QmlSuggestionModel*     m_eventModel;
 };
 
-inline QmlItemModel* QmlAddContainer::itemModel() const{
+inline QmlSuggestionModel* QmlAddContainer::itemModel() const{
     return m_itemModel;
 }
 
-inline QmlPropertyModel* QmlAddContainer::propertyModel() const{
+inline QmlSuggestionModel* QmlAddContainer::propertyModel() const{
     return m_propertyModel;
 }
 
-inline QmlEventModel* QmlAddContainer::eventModel() const{
+inline QmlSuggestionModel* QmlAddContainer::eventModel() const{
     return m_eventModel;
 }
 

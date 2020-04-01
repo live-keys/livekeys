@@ -466,7 +466,7 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::getProperty(
             return QmlScopeSnap::PropertyReference(
                 prop,
                 prop.typeName.language() == QmlTypeReference::Cpp,
-                prop.isPointer ? getTypePath(prop.typeName.name()) : QmlInheritanceInfo(),
+                prop.isPointer ? generateTypePathFromClassName(prop.typeName.name(), currentType->prefereredType().path()) : QmlInheritanceInfo(),
                 contextTypePath
             );
         }
@@ -581,8 +581,8 @@ QmlScopeSnap::ExpressionChain QmlScopeSnap::evaluateExpression(
     DocumentQmlInfo::ValueReference documentValue = document->valueForId(expression.first());
     if ( !document->isValueNull(documentValue) ){
         QmlTypeInfo::Ptr valueObj = document->extractValueObject(documentValue);
-        QString typeName = document->extractTypeName(documentValue);
-        if ( typeName != "" ){
+        QStringList typeName = document->extractTypeName(documentValue);
+        if ( typeName.size() ){
             result.typeReference = getTypePath(typeName);
         }
 
@@ -605,20 +605,28 @@ QmlScopeSnap::ExpressionChain QmlScopeSnap::evaluateExpression(
 
         DocumentQmlInfo::ValueReference parentValue;
         document->extractValueObject(documentValue, &parentValue);
+
         if ( document->isValueNull(parentValue) )
             return result;
 
         result.documentValueObject = document->extractValueObject(parentValue);
 
-        QString typeName = document->extractTypeName(documentValue);
-        if ( typeName != "" ){
+        QStringList typeName = document->extractTypeName(parentValue);
+        if ( typeName.size() ){
             result.typeReference = getTypePath(typeName);
         }
 
         QStringList expressionTail = expression;
         expressionTail.removeFirst();
 
-        result.propertyChain = getProperties(result.typeReference, expressionTail);
+        QmlTypeReference qtr = quickObjectDeclarationType(typeName);
+
+        int begin, end;
+        document->extractTypeNameRange(parentValue, begin, end);
+        if ( begin == -1 )
+            return result;
+
+        result.propertyChain = getProperties(qtr, expressionTail, begin);
         return result;
     } else {
 

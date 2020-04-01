@@ -213,7 +213,7 @@ EventConnection *Element::on(const std::string &key, Callable callback){
     }
 }
 
-void Element::on(LocalValue eventKey, Callable callback){
+void Element::on(ScopedValue eventKey, Callable callback){
     on(eventKey.toStdString(engine()), callback);
 }
 
@@ -261,7 +261,7 @@ void Element::addEvent(Element *e, const std::string &ekey, const std::vector<st
     }
 }
 
-void Element::addEvent(Element *e, LocalValue eventKey, LocalValue types){
+void Element::addEvent(Element *e, ScopedValue eventKey, ScopedValue types){
     ElementPrivate* d = e->m_d;
     std::string ekey = eventKey.toStdString(e->engine());
 
@@ -310,10 +310,10 @@ void Element::addEvent(Element *e, LocalValue eventKey, LocalValue types){
  *
  * @return
  */
-void Element::addProperty(Element *e, LocalValue propertyName, LocalValue propertyOptions){
+void Element::addProperty(Element *e, ScopedValue propertyName, ScopedValue propertyOptions){
     std::string name = propertyName.toStdString(e->engine());
     std::string type = "variant";
-    LocalValue value(e->engine());
+    ScopedValue value(e->engine());
     bool isDefault   = false;
     bool isWritable  = true;
     std::string notifyEvent;
@@ -346,9 +346,9 @@ void Element::addProperty(Element *e, LocalValue propertyName, LocalValue proper
         v8::Local<v8::String> bindingsKey = v8::String::NewFromUtf8(e->engine()->isolate(), "bindings");
         if ( v->IsFunction() && options->Has(bindingsKey) ){
             e->addProperty(name, type, value, isDefault, isWritable, notifyEvent);
-            assignPropertyExpression(e, propertyName, LocalValue(v), LocalValue(options->Get(bindingsKey)));
+            assignPropertyExpression(e, propertyName, ScopedValue(v), ScopedValue(options->Get(bindingsKey)));
         } else {
-            value = LocalValue(e->engine(), v);
+            value = ScopedValue(e->engine(), v);
             e->addProperty(name, type, value, isDefault, isWritable, notifyEvent);
         }
     } else {
@@ -358,9 +358,9 @@ void Element::addProperty(Element *e, LocalValue propertyName, LocalValue proper
 
 void Element::assignPropertyExpression(
         Element *e,
-        LocalValue propertyName,
-        LocalValue propertyExpression,
-        LocalValue bindings)
+        ScopedValue propertyName,
+        ScopedValue propertyExpression,
+        ScopedValue bindings)
 {
     ElementPrivate* d = e->m_d;
 
@@ -379,7 +379,7 @@ void Element::assignPropertyExpression(
     }
 
     // Assign value
-    LocalValue v = expression.call(e->engine(), Function::Parameters(0));
+    ScopedValue v = expression.call(e->engine(), Function::Parameters(0));
     p->write(e, v.data());
 
     // Create monitoring expression
@@ -413,10 +413,10 @@ void Element::assignPropertyExpression(
             return;
         }
 
-        LocalValue bindingElementValue = LocalValue(e->engine(), baItem->Get(0));
+        ScopedValue bindingElementValue = ScopedValue(e->engine(), baItem->Get(0));
         if ( bindingElementValue.isElement() ){
             Element* bindingElement  = bindingElementValue.toElement(e->engine());
-            std::string bindingEvent = LocalValue(e->engine(), baItem->Get(1)).toStdString(e->engine());
+            std::string bindingEvent = ScopedValue(e->engine(), baItem->Get(1)).toStdString(e->engine());
 
             try {
                 EventConnection* bec = bindingElement->on(bindingEvent, [be](const Function::Parameters&){
@@ -431,7 +431,7 @@ void Element::assignPropertyExpression(
     }
 }
 
-void Element::assignDefaultProperty(Element *e, LocalValue value){
+void Element::assignDefaultProperty(Element *e, ScopedValue value){
     if ( !value.isNull() ){
         if ( e->defaultProperty().empty() )
         {
@@ -471,7 +471,7 @@ const std::string &Element::getId() const{
 InstanceProperty* Element::addProperty(
         const std::string &name,
         const std::string &type,
-        LocalValue value,
+        ScopedValue value,
         bool isDefault,
         bool isWritable,
         const std::string &notifyEvent)
@@ -561,19 +561,19 @@ bool Element::hasProperty(const std::string &name) const{
     return property(name) != 0;
 }
 
-LocalValue Element::get(const std::string &name){
+ScopedValue Element::get(const std::string &name){
     Property* p = property(name);
     if ( !p )
     {
         auto exc = CREATE_EXCEPTION(lv::Exception, "Property with the given name doesn't exist", lv::Exception::toCode("~Element"));
         engine()->throwError(&exc, this);
-        return LocalValue(engine());
+        return ScopedValue(engine());
     }
 
     return p->read(this);
 }
 
-void Element::set(const std::string &name, const LocalValue &value){
+void Element::set(const std::string &name, const ScopedValue &value){
     Property* p = property(name);
     if ( !p )
     {

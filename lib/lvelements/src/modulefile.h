@@ -30,7 +30,7 @@ public:
 public:
     ~ModuleFile();
 
-    LocalValue get(Engine* engine, ModuleFile* from, const std::string& name);
+    ScopedValue get(Engine* engine, ModuleFile* from, const std::string& name);
     void parse(Engine *engine = nullptr);
 
     State state() const;
@@ -40,7 +40,7 @@ public:
     const ElementsPlugin::Ptr& plugin() const;
     const std::list<std::string>& exports() const;
     Imports* imports();
-    LocalValue createObject(Engine *engine) const;
+    ScopedValue createObject(Engine *engine) const;
 
 private:
     void initializeImportsExports(Engine* engine);

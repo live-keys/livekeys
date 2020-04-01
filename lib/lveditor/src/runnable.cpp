@@ -199,8 +199,8 @@ void Runnable::run(){
         try{
             el::Object o = m_engine->loadFile(m_path.toStdString(), content);
             std::string componentName = QFileInfo(m_path).baseName().toStdString();
-            el::LocalObject lo(o);
-            el::LocalValue lval = lo.get(m_engine, componentName);
+            el::Object::Accessor lo(o);
+            el::ScopedValue lval = lo.get(m_engine, componentName);
 
             el::Element* e = lval.toElement(m_engine);
             m_runtimeRoot = e;

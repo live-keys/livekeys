@@ -35,6 +35,7 @@ OTHER_FILES += \
 DISTFILES += \
     qml/AddQmlBox.qml \
     qml/ObjectContainer.qml \
+    qml/ObjectContainerTop.qml \
     qml/PaletteGroup.qml \
     qml/PropertyContainer.qml \
     qml/PaletteContainer.qml \

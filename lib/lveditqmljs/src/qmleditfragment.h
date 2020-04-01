@@ -98,6 +98,7 @@ public slots:
 
     QString type() const;
     QString typeName() const;
+    QString identifier() const;
 
     QList<QObject*> getChildFragments() const;
 

@@ -19,17 +19,17 @@ public:
         return new List(engine, data, &at, &length, &assign, &append, &clear);
     }
 
-    static LocalValue at(List* l, int index){
-        return LocalValue(l->engine(), l->dataAs<std::vector<int>*>()->at(index));
+    static ScopedValue at(List* l, int index){
+        return ScopedValue(l->engine(), l->dataAs<std::vector<int>*>()->at(index));
     }
     static int length(List* l){
         return static_cast<int>(l->dataAs<std::vector<int>*>()->size());
     }
-    static void assign(List* l, int index, LocalValue value){
+    static void assign(List* l, int index, ScopedValue value){
         (*l->dataAs<std::vector<int>*>())[index] = value.toInt32(l->engine());
 
     }
-    static void append(List* l, LocalValue value){
+    static void append(List* l, ScopedValue value){
         l->dataAs<std::vector<int>*>()->push_back(value.toInt32(l->engine()));
     }
     static void clear(List* l){
@@ -56,8 +56,8 @@ void JsListTest::testFunctions(){
             List* l = WritableListStub::createList(engine, &listData);
             l->ref();
 
-            LocalObject globalObject(engine->currentContext());
-            globalObject.set(engine, "l", LocalValue(engine, l));
+            Object::Accessor globalObject(engine->currentContext());
+            globalObject.set(engine, "l", ScopedValue(engine, l));
 
             engine->compileJsEnclosed("l.append(20);")->run();
             QVERIFY(l->length() == 1);

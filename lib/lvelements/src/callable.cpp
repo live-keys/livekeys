@@ -111,20 +111,20 @@ Component Callable::toComponent() const{
     return Component(m_d->engine, *this);
 }
 
-LocalValue Callable::call(Element *that, const Function::Parameters &params) const{
+ScopedValue Callable::call(Element *that, const Function::Parameters &params) const{
     v8::Local<v8::Function> local = m_d->data.Get(that->engine()->isolate());
     v8::Local<v8::Object> localThat = ElementPrivate::localObject(that);
-    return LocalValue(local->Call(localThat, params.m_length, params.m_args));
+    return ScopedValue(local->Call(localThat, params.m_length, params.m_args));
 }
 
-LocalValue Callable::call(Engine *engine, const Function::Parameters &params) const{
+ScopedValue Callable::call(Engine *engine, const Function::Parameters &params) const{
     v8::Local<v8::Function> local = m_d->data.Get(engine->isolate());
-    return LocalValue(local->Call(engine->currentContext()->asLocal()->Global(), params.m_length, params.m_args));
+    return ScopedValue(local->Call(engine->currentContext()->asLocal()->Global(), params.m_length, params.m_args));
 }
 
-LocalValue Callable::callAsConstructor(Engine *engine, const Function::Parameters &params) const{
+ScopedValue Callable::callAsConstructor(Engine *engine, const Function::Parameters &params) const{
     v8::Local<v8::Function> local = m_d->data.Get(engine->isolate());
-    return LocalValue(local->CallAsConstructor(engine->currentContext()->asLocal(), params.m_length, params.m_args).ToLocalChecked());
+    return ScopedValue(local->CallAsConstructor(engine->currentContext()->asLocal(), params.m_length, params.m_args).ToLocalChecked());
 }
 
 v8::Local<v8::Function> Callable::data() const{

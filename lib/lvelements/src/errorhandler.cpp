@@ -38,7 +38,7 @@ void ErrorHandler::setTarget(Element *target){
     targetChanged();
 }
 
-void ErrorHandler::rethrow(LocalValue e){
+void ErrorHandler::rethrow(ScopedValue e){
     Element* current = m_target;
     if ( current )
         current = m_target->parent();
@@ -67,7 +67,7 @@ void ErrorHandler::rethrow(LocalValue e){
 
 void ErrorHandler::handlerError(const v8::Local<v8::Value> &exception, const ErrorData &ed){
     m_lastError = ed;
-    error(LocalValue(exception));
+    error(ScopedValue(exception));
 }
 
 }} // namespace lv, el

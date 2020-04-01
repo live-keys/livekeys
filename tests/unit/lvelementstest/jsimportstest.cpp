@@ -35,9 +35,9 @@ void JsImportsTest::singlePluginImportTest(){
 
     engine->scope([engine, testPath](){
         Object exports = engine->loadJsFile(testPath + "/main.lv.js");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -66,9 +66,9 @@ void JsImportsTest::samePathImportTest(){
 
     engine->scope([engine, testPath](){
         Object exports = engine->loadJsFile(testPath + "/main.lv.js");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -97,9 +97,9 @@ void JsImportsTest::importPluginWithSamePathImportTest(){
 
     engine->scope([engine, testPath](){
         Object exports = engine->loadJsFile(testPath + "/main.lv.js");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -128,9 +128,9 @@ void JsImportsTest::packageImportTest(){
     engine->scope([engine, testPath](){
         engine->setPackageImportPaths({testPath + "/packages"});
         Object exports = engine->loadJsFile(testPath + "/main.lv.js");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -157,9 +157,9 @@ void JsImportsTest::importPluginThatImportsPlugin(){
 
     engine->scope([engine, testPath](){
         Object exports = engine->loadJsFile(testPath + "/main.lv.js");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -188,9 +188,9 @@ void JsImportsTest::samePathSingletonTest(){
 
     engine->scope([engine, testPath](){
         Object exports = engine->loadJsFile(testPath + "/main.lv.js");
-        LocalObject localExports(exports);
+        Object::Accessor localExports(exports);
 
-        LocalValue lv = localExports.get(engine, "main");
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);
@@ -370,8 +370,8 @@ void JsImportsTest::importAsTest(){
     engine->scope([engine, testPath](){
         Object exports = engine->loadJsFile(testPath + "/main.lv.js");
 
-        LocalObject localExports(exports);
-        LocalValue lv = localExports.get(engine, "main");
+        Object::Accessor localExports(exports);
+        ScopedValue lv = localExports.get(engine, "main");
 
         QVERIFY(lv.isCallable());
         Callable c = lv.toCallable(engine);

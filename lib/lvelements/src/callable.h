@@ -16,7 +16,7 @@ class CallablePrivate;
  */
 class LV_ELEMENTS_EXPORT Callable{
 
-    friend class LocalValue;
+    friend class ScopedValue;
     friend class Engine;
 
 public:
@@ -32,9 +32,9 @@ public:
     bool isComponent() const;
     Component toComponent() const;
 
-    LocalValue call(Element *that, const Function::Parameters& params) const;
-    LocalValue call(Engine* engine, const Function::Parameters& params) const;
-    LocalValue callAsConstructor(Engine* engine, const Function::Parameters& params) const;
+    ScopedValue call(Element *that, const Function::Parameters& params) const;
+    ScopedValue call(Engine* engine, const Function::Parameters& params) const;
+    ScopedValue callAsConstructor(Engine* engine, const Function::Parameters& params) const;
 
 private:
     v8::Local<v8::Function> data() const;

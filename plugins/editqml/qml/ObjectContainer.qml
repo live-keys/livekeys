@@ -4,172 +4,203 @@ import editor 1.0
 import editor.private 1.0
 
 Item{
-    id: objectContainer
-
-    property string title: "Object"
+    id: root
     objectName: "objectContainer"
 
-    property Item paletteGroup : null
+    property alias paletteGroup: objectContainer.paletteGroup
     property alias groupsContainer: container
-    property QtObject editingFragment : null
-    property Item editor: null
-    property Component addBoxFactory: Component{ AddQmlBox{} }
-    property Component propertyContainerFactory: Component{ PropertyContainer{} }
-    property Component paletteContainerFactory: Component{ PaletteContainer{} }
-    property Component paletteGroupFactory : Component{ PaletteGroup{} }
 
-    property int titleHeight: 30
-    property bool compact: true
-
-    function expand(){
-        var connections = editor.documentHandler.codeHandler.openNestedObjects(editingFragment)
-        for ( var i = 0; i < connections.length; ++i ){
-            var ef = connections[i]
-            var childObjectContainer = objectContainerFactory.createObject(container)
-
-            childObjectContainer.editor = objectContainer.editor
-            childObjectContainer.editingFragment = ef
-            childObjectContainer.title = ef.typeName()
-            childObjectContainer.x = 20
-
-            var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
-            paletteBoxGroup.editingFragment = ef
-            paletteBoxGroup.codeHandler = editor.documentHandler.codeHandler
-            ef.visualParent = paletteBoxGroup
-
-            childObjectContainer.paletteGroup = paletteBoxGroup
-            paletteBoxGroup.x = 5
-        }
-
-        compact = false
+    function createNewContainer(parent){
+        return objectContainerFactory.createObject(parent)
     }
 
-    function collapse(){
-        var editingFragmentChildren = editingFragment.getChildFragments()
-        for ( var i = 0; i < editingFragmentChildren.length; ++i ){
-            var edit = editingFragmentChildren[i]
-            editor.documentHandler.codeHandler.removeConnection(edit)
-        }
+    property alias editingFragment : objectContainer.editingFragment
+    property alias editor : objectContainer.editor
+    property alias title : objectContainer.title
+    property alias titleHeight : objectContainer.titleHeight
+    property alias compact: objectContainer.compact
+    property alias topSpacing: objectContainer.topSpacing
 
-        compact = true
-    }
+    property alias paletteGroupFactory: objectContainer.paletteGroupFactory
 
-    property Connections editingFragmentRemovals: Connections{
-        target: editingFragment
-        onAboutToBeRemoved : {
-            var p = objectContainer.parent
-            if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
-                p.destroy()
-            } else { // if this is nested
-                //TODO: Check if this is nested within a property container
-                objectContainer.destroy()
-            }
-        }
-    }
+    width: objectContainer.width
+    height: objectContainer.pane ? 30 : objectContainer.height
 
-    property int topSpacing: editingFragment && !editingFragment.isRoot() ? 0 : 10
-
-    width: container.width < 160 ? 200 : container.width + 40
-    height: container.height < 10 || compact ? 40 : container.height + titleHeight + topSpacing
-
-    Rectangle{
-        id: objectContainerTitle
-        y: topSpacing
-        height: titleHeight
-        width: parent.width + 10
+    property Rectangle placeHolder : Rectangle{
+        height: 30
+        width: root.width
+        color: "#222"
         radius: 3
-        color: '#062945'
-
-        Item{
-            anchors.left: parent.left
-            anchors.leftMargin: 12
-            anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: titleHeight
-            Triangle{
-                width: 8
-                height: 8
-                color: '#9b9da0'
-                anchors.verticalCenter: parent.verticalCenter
-                rotation: compact ? Triangle.Right : Triangle.Bottom
-            }
-            MouseArea{
-                id: compactObjectButton
-                anchors.fill: parent
-                onClicked: {
-                    if ( objectContainer.compact )
-                        expand()
-                    else
-                        collapse()
-                }
-            }
-        }
-
         Text{
             anchors.left: parent.left
-            anchors.leftMargin: 40
-            width: parent.width - 140 + (closeObjectItem.visible ? 0 : 18)
+            anchors.leftMargin: 10
+            width: parent.width - 20
             anchors.verticalCenter: parent.verticalCenter
             text: objectContainer.title
             clip: true
             elide: Text.ElideRight
             color: '#82909b'
         }
+    }
+
+    function expand(){
+        objectContainer.expand()
+    }
+
+    function collapse(){
+        objectContainer.collapse()
+    }
+
+    Item{
+        id: objectContainer
+
+        property string title: "Object"
+
+        property Item paletteGroup : null
+        property alias groupsContainer: container
+        property QtObject editingFragment : null
+        property Item editor: null
+
+
+        property Item pane : null
+        property Item wrapper : root
+
+        property Component addBoxFactory: Component{ AddQmlBox{} }
+        property Component propertyContainerFactory: Component{ PropertyContainer{} }
+        property Component paletteContainerFactory: Component{ PaletteContainer{} }
+        property Component paletteGroupFactory : Component{ PaletteGroup{} }
+
+        property int titleHeight: 30
+        property bool compact: true
+
+        property int topSpacing: editingFragment && !editingFragment.isRoot() ? 0 : 10
+
+        width: container.width < 160 ? 200 : container.width + 40
+        height: container.height < 10 || compact ? 40 : titleHeight + objectContainerTitleWrap.height + topSpacing
+
+        function closeAsPane(){
+            objectContainerTitle.parent = objectContainerTitleWrap
+            objectContainer.parent = objectContainer.wrapper
+            objectContainer.pane.removePane()
+            objectContainer.pane = null
+            root.placeHolder.parent = null
+        }
+
+        function expand(){
+            var connections = editor.documentHandler.codeHandler.openNestedObjects(editingFragment)
+            for ( var i = 0; i < connections.length; ++i ){
+                var ef = connections[i]
+                var childObjectContainer = objectContainerFactory.createObject(container)
+
+                childObjectContainer.editor = objectContainer.editor
+                childObjectContainer.editingFragment = ef
+                childObjectContainer.title = ef.typeName()
+                childObjectContainer.x = 20
+
+                var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
+                paletteBoxGroup.editingFragment = ef
+                paletteBoxGroup.codeHandler = editor.documentHandler.codeHandler
+                ef.visualParent = paletteBoxGroup
+
+                childObjectContainer.paletteGroup = paletteBoxGroup
+                paletteBoxGroup.x = 5
+            }
+
+            var properties = editor.documentHandler.codeHandler.openNestedProperties(editingFragment)
+            for (var j = 0; j < properties.length; ++j){
+                var efp = properties[j]
+                var propertyContainer = propertyContainerFactory.createObject(container)
+                propertyContainer.z = 3000 + properties.length - j
+                container.sortChildren()
+
+                propertyContainer.title = efp.identifier()
+                propertyContainer.documentHandler = objectContainer.editor.documentHandler
+                propertyContainer.propertyContainerFactory = propertyContainerFactory
+
+                propertyContainer.editor = objectContainer.editor
+                propertyContainer.editingFragment = efp
+
+                propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
+                propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
+                propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
+            }
+
+            compact = false
+        }
+
+        function collapse(){
+            var editingFragmentChildren = editingFragment.getChildFragments()
+            for ( var i = 0; i < editingFragmentChildren.length; ++i ){
+                var edit = editingFragmentChildren[i]
+                editor.documentHandler.codeHandler.removeConnection(edit)
+            }
+
+            compact = true
+        }
+
+        property Connections editingFragmentRemovals: Connections{
+            target: editingFragment
+            onAboutToBeRemoved : {
+                var p = root.parent
+                if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
+                    p.destroy()
+                } else { // if this is nested
+                    //TODO: Check if this is nested within a property container
+                    if ( objectContainer.pane )
+                        objectContainer.closeAsPane()
+                    root.destroy()
+                }
+            }
+        }
 
         Item{
-            id: eraseButton
-            anchors.right: parent.right
-            anchors.rightMargin: 80 - (closeObjectItem.visible ? 0 : 18)
-            anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: titleHeight
-            Image{
-                anchors.centerIn: parent
-                source: "qrc:/images/palette-erase-object.png"
-            }
-            MouseArea{
+            id: objectContainerTitleWrap
+            y: topSpacing
+            height: objectContainer.pane ? 0 : titleHeight
+            width: parent.width + 10
+
+            ObjectContainerTop{
+                id: objectContainerTitle
                 anchors.fill: parent
-                onClicked: {
+                compact: objectContainer.compact
+                color: objectContainer.pane ? objectContainer.pane.topColor : '#062945'
+
+                onToggleCompact: {
+                    if ( objectContainer.compact )
+                        expand()
+                    else
+                        collapse()
+                }
+                onErase: {
                     editor.documentHandler.codeHandler.deleteObject(editingFragment)
                 }
-            }
-        }
+                onOpenConnections: {
 
-
-        Item{
-            id: connectionsButton
-            anchors.right: parent.right
-            anchors.rightMargin: 60 - (closeObjectItem.visible ? 0 : 18)
-            anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 20
-            Image{
-                anchors.centerIn: parent
-                source: "qrc:/images/palette-connections.png"
-            }
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
                 }
-            }
-        }
+                onPaletteToPane : {
+                    if ( objectContainer.pane === null ){
+                        var objectPane = lk.layers.workspace.panes.createPane('objectPalette', {}, [400, 400])
+                        lk.layers.workspace.panes.splitPaneHorizontallyWith(
+                            objectContainer.editor.parentSplitter,
+                            objectContainer.editor.parentSplitterIndex(),
+                            objectPane
+                        )
 
-
-        Item{
-            id: paletteAddButton
-            anchors.right: parent.right
-            anchors.rightMargin: 40 - (closeObjectItem.visible ? 0 : 18)
-            anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 20
-            Image{
-                anchors.centerIn: parent
-                source: "qrc:/images/palette-add.png"
-            }
-            MouseArea{
-                id: paletteAddMouse
-                anchors.fill: parent
-                onClicked: {
+                        objectContainerTitle.parent = objectPane.paneHeaderContent
+                        objectPane.objectContainer = objectContainer
+                        objectPane.title = objectContainer.title
+                        objectContainer.pane = objectPane
+                        root.placeHolder.parent = root
+                    } else {
+                        objectContainer.closeAsPane()
+                    }
+                }
+                onClose : {
+                    if ( objectContainer.pane )
+                        objectContainer.closeAsPane()
+                    editor.documentHandler.codeHandler.removeConnection(objectContainer.editingFragment)
+                }
+                onAddPalette: {
                     var editingFragment = objectContainer.editingFragment
                     if ( !editingFragment )
                         return
@@ -208,23 +239,7 @@ Item{
                         }
                     }
                 }
-            }
-        }
-
-        Item{
-            id: composeButton
-            anchors.right: parent.right
-            anchors.rightMargin: 22  - (closeObjectItem.visible ? 0 : 18)
-            anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 20
-            Image{
-                anchors.centerIn: parent
-                source: "qrc:/images/palette-add-property.png"
-            }
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
+                onCompose : {
                     var codeHandler = objectContainer.editor.documentHandler.codeHandler
 
                     var position =
@@ -398,107 +413,83 @@ Item{
             }
         }
 
-        Item{
-            id: closeObjectItem
-            anchors.right: parent.right
-            anchors.rightMargin: -4
+        PaletteListView{
+            id: paletteHeaderList
+            visible: model ? true : false
             anchors.top: parent.top
-            width: 20
-            height: 20
-            visible: !(objectContainer.editingFragment && objectContainer.editingFragment.parentFragment())
-            Text{
-                text: 'x'
-                color: '#ffffff'
-                font.pixelSize: 18
-                font.family: "Open Sans"
-                font.weight: Font.Light
-            }
-            MouseArea{
-                id: paletteCloseArea
-                anchors.fill: parent
-                onClicked: {
-                    editor.documentHandler.codeHandler.removeConnection(objectContainer.editingFragment)
+            anchors.topMargin: titleHeight + topSpacing
+            width: 250
+            color: "#0a141c"
+            selectionColor: "#0d2639"
+            fontSize: 10
+            fontFamily: "Open Sans, sans-serif"
+            onFocusChanged : if ( !focus ) model = null
+            z: 2000
+
+            property var selectedHandler : function(){}
+            property var cancelledHandler : function(index){}
+
+            onPaletteSelected: selectedHandler(index)
+            onCancelled : cancelledHandler()
+        }
+
+        Column{
+            id: container
+
+            anchors.top: parent.top
+            anchors.topMargin: objectContainerTitleWrap.height + topSpacing
+            visible: !compact
+            spacing: 0
+            width: {
+                var maxWidth = 0;
+                if ( children.length > 0 ){
+                    for ( var i = 0; i < children.length; ++i ){
+                        if ( children[i].width > maxWidth )
+                            maxWidth = children[i].width
+                    }
                 }
+                return maxWidth
+            }
+            height: {
+                if (compact) return 0
+                var totalHeight = 0;
+                if ( children.length > 0 ){
+                    for ( var i = 0; i < children.length; ++i ){
+                        totalHeight += children[i].height
+                    }
+                }
+                if ( children.length > 1 )
+                    return totalHeight + (children.length - 1) * spacing
+                else
+                    return totalHeight
+            }
+
+            function sortChildren(){
+
+                if (!objectContainer.parent) return
+                if (children.length === 0) return
+
+                var childrenCopy = []
+                childrenCopy.push(children[0])
+                for (var i=1; i<children.length; ++i)
+                {
+                    if (!children[i]) continue
+                    if (children[i].objectName === "propertyContainer")
+                        childrenCopy.push(children[i])
+                }
+
+                for (var i=1; i<children.length; ++i)
+                {
+                    if (!children[i]) continue
+                    if (children[i].objectName === "objectContainer")
+                        childrenCopy.push(children[i])
+                }
+
+                children = childrenCopy
             }
         }
+
+
 
     }
-
-    PaletteListView{
-        id: paletteHeaderList
-        visible: model ? true : false
-        anchors.top: parent.top
-        anchors.topMargin: titleHeight + topSpacing
-        width: 250
-        color: "#0a141c"
-        selectionColor: "#0d2639"
-        fontSize: 10
-        fontFamily: "Open Sans, sans-serif"
-        onFocusChanged : if ( !focus ) model = null
-        z: 2000
-
-        property var selectedHandler : function(){}
-        property var cancelledHandler : function(index){}
-
-        onPaletteSelected: selectedHandler(index)
-        onCancelled : cancelledHandler()
-    }
-
-    Column{
-        id: container
-
-        anchors.top: parent.top
-        anchors.topMargin: titleHeight + topSpacing
-        visible: !compact
-        spacing: 0
-        width: {
-            var maxWidth = 0;
-            if ( children.length > 0 ){
-                for ( var i = 0; i < children.length; ++i ){
-                    if ( children[i].width > maxWidth )
-                        maxWidth = children[i].width
-                }
-            }
-            return maxWidth
-        }
-        height: {
-            if (compact) return 0
-            var totalHeight = 0;
-            if ( children.length > 0 ){
-                for ( var i = 0; i < children.length; ++i ){
-                    totalHeight += children[i].height
-                }
-            }
-            if ( children.length > 1 )
-                return totalHeight + (children.length - 1) * spacing
-            else
-                return totalHeight
-        }
-
-        function sortChildren(){
-
-            if (!objectContainer.parent) return
-            if (children.length === 0) return
-
-            var childrenCopy = []
-            childrenCopy.push(children[0])
-            for (var i=1; i<children.length; ++i)
-            {
-                if (!children[i]) continue
-                if (children[i].objectName === "propertyContainer")
-                    childrenCopy.push(children[i])
-            }
-
-            for (var i=1; i<children.length; ++i)
-            {
-                if (!children[i]) continue
-                if (children[i].objectName === "objectContainer")
-                    childrenCopy.push(children[i])
-            }
-
-            children = childrenCopy
-        }
-    }
-
-
 }

@@ -19,6 +19,7 @@
 #include "live/qmldeclaration.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
+#include "live/visuallogqt.h"
 #include "qmlbindingchannel.h"
 
 #include "qmljs/qmljsdocument.h"
@@ -428,15 +429,21 @@ QmlTypeInfo::Ptr DocumentQmlInfo::extractValueObjectWithExport(
 /**
  * \brief Extract the name of the type given by this value reference.
  */
-QString DocumentQmlInfo::extractTypeName(const DocumentQmlInfo::ValueReference &valueref) const{
+QStringList DocumentQmlInfo::extractTypeName(const DocumentQmlInfo::ValueReference &valueref) const{
     if ( isValueNull(valueref) || valueref.parent != this )
-        return "";
+        return QStringList();
 
-    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() )
-        if ( vob->typeName() )
-            return vob->typeName()->name.toString();
+    QStringList result;
+    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
+        if ( vob->typeName() ){
+            result << vob->typeName()->name.toString();
 
-    return "";
+            if ( vob->typeName()->next )
+                result << vob->typeName()->next->name.toString();
+        }
+    }
+
+    return result;
 }
 
 /**
@@ -650,12 +657,18 @@ QString DocumentQmlInfo::componentName() const{
     return d->internalDoc->componentName();
 }
 
+QString DocumentQmlInfo::source() const{
+    Q_D(const DocumentQmlInfo);
+    return d->internalDoc->source();
+}
+
 /**
  * \brief Visit the AST and create the objects defined in this document
  * \returns A pointer to the lv::DocumentQmlValueObjects
  */
 DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects() const{
     Q_D(const DocumentQmlInfo);
+
     DocumentQmlValueObjects::Ptr objects = DocumentQmlValueObjects::create();
     objects->visit(d->internalDoc->ast());
     return objects;

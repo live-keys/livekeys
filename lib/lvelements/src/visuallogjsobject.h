@@ -44,7 +44,7 @@ public:
         }
 
         v8::String::Utf8Value utfKey(info[0]->ToString(info.GetIsolate()));
-        LocalValue val(info[1]);
+        ScopedValue val(info[1]);
 
         MLNode mlopt;
         ml::fromJs(val, mlopt, engine);

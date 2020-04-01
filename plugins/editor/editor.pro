@@ -59,6 +59,7 @@ DISTFILES += \
     palettes/TriggerPalette.qml \
     qml/DocumentationView.qml \
     qml/EditorPane.qml \
+    qml/ObjectPalettePane.qml \
     qml/PaletteConnection.qml \
     qml/WorkspaceControl.qml \
     qml/live.package.json \

@@ -105,7 +105,7 @@ void JsMemoryTest::jsAllocationTest(){
     {
         MemoryStub* e = new MemoryStub(engine);
         engine->scope([&engine, &e](){
-            LocalValue v(engine, e);
+            ScopedValue v(engine, e);
 
             QCOMPARE(MemoryStub::refs(), 1);
             MemoryStub* p = new MemoryStub(engine);

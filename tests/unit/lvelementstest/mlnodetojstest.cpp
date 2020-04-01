@@ -38,27 +38,27 @@ void MLNodeToJsTest::jsConvertTest(){
             {"null", nullptr}
         };
 
-        LocalValue jv(engine);
+        ScopedValue jv(engine);
         ml::toJs(n, jv, engine);
 
         QVERIFY(jv.isObject());
 
         Object o = jv.toObject(engine);
-        LocalObject lo(o);
+        Object::Accessor lo(o);
 
         QVERIFY(lo.get(engine, "object").isObject());
         Object oo = lo.get(engine, "object").toObject(engine);
-        LocalObject loo(oo);
+        Object::Accessor loo(oo);
 
         QVERIFY(loo.get(engine, "string").isString());
         QVERIFY(loo.get(engine, "string").toStdString(engine) == "value1");
         QVERIFY(loo.get(engine, "key2").isInt());
         QVERIFY(loo.get(engine, "key2").toInt32(engine) == 100);
 
-        LocalValue jvarray = lo.get(engine, "array");
+        ScopedValue jvarray = lo.get(engine, "array");
         QVERIFY(jvarray.isObject());
         Object oa = jvarray.toObject(engine);
-        LocalObject loa(oa);
+        Object::Accessor loa(oa);
 
         int oaLen = loa.get(engine, "length").toInt32(engine);
         QVERIFY(oaLen == 3);

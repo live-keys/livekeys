@@ -200,7 +200,7 @@ public:
             const ValueReference& value,
             const QString& componentName,
             const QString& libraryPath) const;
-    QString extractTypeName(const ValueReference& value) const;
+    QStringList extractTypeName(const ValueReference& value) const;
     void extractTypeNameRange(const ValueReference& value, int& begin, int& end) const;
     void extractRange(const ValueReference& value, int& begin, int& end);
 
@@ -219,6 +219,8 @@ public:
 
     QString path() const;
     QString componentName() const;
+
+    QString source() const;
 
     DocumentQmlValueObjects::Ptr createObjects() const;
     DocumentQmlValueObjects::Ptr createObjects(const ASTReference& ast) const;

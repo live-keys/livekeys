@@ -28,6 +28,8 @@ public:
 
     const MLNode& currentLayout() const;
 
+    QString projectPath() const;
+
 signals:
     void projectActiveChange(Runnable* active);
 

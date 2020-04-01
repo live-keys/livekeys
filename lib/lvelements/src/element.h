@@ -62,11 +62,11 @@ class LV_ELEMENTS_EXPORT Element{
     BASE_META_OBJECT{
         META_OBJECT_DESCRIBE(Element)
             .constructor()
-            .scriptMethod<void, LocalValue, Callable>("on", &Element::on)
+            .scriptMethod<void, ScopedValue, Callable>("on", &Element::on)
             .scriptMethod("setParent", &Element::setParent)
             .scriptProperty<Element*>("parent", &Element::parent)
             .scriptFunction("assignDefaultProperty", &Element::assignDefaultProperty)
-            .scriptFunction<void, Element*, LocalValue, LocalValue>("addEvent", &Element::addEvent)
+            .scriptFunction<void, Element*, ScopedValue, ScopedValue>("addEvent", &Element::addEvent)
             .scriptFunction("addProperty", &Element::addProperty)
             .scriptFunction("assignPropertyExpression", &Element::assignPropertyExpression)
             .scriptFunction("assignId", &Element::assignId)
@@ -74,7 +74,7 @@ class LV_ELEMENTS_EXPORT Element{
     }
 
     friend class Engine;
-    friend class LocalValue;
+    friend class ScopedValue;
     friend class ElementPrivate;
     friend class InstanceEvent;
 
@@ -119,19 +119,19 @@ public:
 
     EventConnection* on(const std::string& key, std::function<void(const Function::Parameters&)> f);
     EventConnection* on(const std::string& key, Callable callback);
-    void on(LocalValue eventKey, Callable callback);
+    void on(ScopedValue eventKey, Callable callback);
 
     void trigger(const std::string& eventKey, const Function::Parameters& params);
 
     static void addEvent(Element *e, const std::string& key, const std::vector<std::string>& types);
-    static void addEvent(Element* e, LocalValue eventKey, LocalValue types);
-    static void addProperty(Element* e, LocalValue propertyName, LocalValue propertyOptions);
+    static void addEvent(Element* e, ScopedValue eventKey, ScopedValue types);
+    static void addProperty(Element* e, ScopedValue propertyName, ScopedValue propertyOptions);
     static void assignPropertyExpression(
         Element* e,
-        LocalValue propertyName,
-        LocalValue propertyExpression,
-        LocalValue bindings);
-    static void assignDefaultProperty(Element* e, LocalValue value);
+        ScopedValue propertyName,
+        ScopedValue propertyExpression,
+        ScopedValue bindings);
+    static void assignDefaultProperty(Element* e, ScopedValue value);
     static void assignId(Element* e, const std::string& id);
 
     void clearPropertyBoundExpression(const std::string& propertyName);
@@ -151,7 +151,7 @@ public:
     virtual InstanceProperty *addProperty(
         const std::string& name,
         const std::string& type,
-        LocalValue value,
+        ScopedValue value,
         bool isDefault,
         bool isWritable,
         const std::string& notifyEvent
@@ -160,8 +160,8 @@ public:
     Property* property(const std::string& name);
     Property* property(const std::string& name) const;
     bool hasProperty(const std::string& name) const;
-    LocalValue get(const std::string& name);
-    void set(const std::string& name, const LocalValue& value);
+    ScopedValue get(const std::string& name);
+    void set(const std::string& name, const ScopedValue& value);
 
     // Ready
     // -----

@@ -6,6 +6,7 @@ HEADERS += \
     $$PWD/metainfo.h \
     $$PWD/qmlact.h \
     $$PWD/qmlstreamfilter.h \
+    $$PWD/qmlwatcher.h \
     $$PWD/settings.h \
     $$PWD/visuallogbasemodel.h \
     $$PWD/visuallogfilter.h \
@@ -48,6 +49,7 @@ SOURCES += \
     $$PWD/metainfo.cpp \
     $$PWD/qmlact.cpp \
     $$PWD/qmlstreamfilter.cpp \
+    $$PWD/qmlwatcher.cpp \
     $$PWD/settings.cpp \
     $$PWD/visuallogbasemodel.cpp \
     $$PWD/visuallogfilter.cpp \

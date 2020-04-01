@@ -68,7 +68,7 @@ class PropertyTypesStub : public Element{
                                             &PropertyTypesStub::setObjectProperty,
                                             "callablePropertyChanged")
 
-            .scriptProperty<lv::el::LocalValue>("localValueProperty",
+            .scriptProperty<lv::el::ScopedValue>("localValueProperty",
                                                 &PropertyTypesStub::localValueProperty,
                                                 &PropertyTypesStub::setLocalValueProperty,
                                                 "localValuePropertyChanged")
@@ -188,8 +188,8 @@ class PropertyTypesStub : public Element{
         objectPropertyChanged();
     }
 
-    lv::el::LocalValue localValueProperty() const{ return lv::el::LocalValue(engine(), m_localValueProperty); }
-    void setLocalValueProperty(lv::el::LocalValue value){
+    lv::el::ScopedValue localValueProperty() const{ return lv::el::ScopedValue(engine(), m_localValueProperty); }
+    void setLocalValueProperty(lv::el::ScopedValue value){
         lv::el::Value v = value.toValue(engine());
 
         if ( m_localValueProperty == v )
@@ -356,7 +356,7 @@ void JsPropertyTest::propertyTypes(){
             QCOMPARE(e->boolProperty(), true);
             QCOMPARE(e->get("boolProperty").toBool(engine), true);
 
-            e->set("boolProperty", LocalValue(engine, false));
+            e->set("boolProperty", ScopedValue(engine, false));
             QCOMPARE(e->boolProperty(), false);
             QCOMPARE(e->get("boolProperty").toBool(engine), false);
 
@@ -364,7 +364,7 @@ void JsPropertyTest::propertyTypes(){
             QCOMPARE(e->intProperty(), 20);
             QCOMPARE(e->get("intProperty").toInt32(engine), 20);
 
-            e->set("intProperty", LocalValue(engine, 40));
+            e->set("intProperty", ScopedValue(engine, 40));
             QCOMPARE(e->intProperty(), 40);
             QCOMPARE(e->get("intProperty").toInt32(engine), 40);
 
@@ -372,7 +372,7 @@ void JsPropertyTest::propertyTypes(){
             QCOMPARE(e->int64Property(), 30);
             QCOMPARE(e->get("int64Property").toInt64(engine), 30);
 
-            e->set("int64Property", LocalValue(engine, 50));
+            e->set("int64Property", ScopedValue(engine, 50));
             QCOMPARE(e->int64Property(), 50);
             QCOMPARE(e->get("int64Property").toInt32(engine), 50);
 
@@ -382,7 +382,7 @@ void JsPropertyTest::propertyTypes(){
             QCOMPARE(e->get("numberProperty").toNumber(engine), v);
 
             v = 50.3;
-            e->set("numberProperty", LocalValue(engine, v));
+            e->set("numberProperty", ScopedValue(engine, v));
             QCOMPARE(e->numberProperty(), v);
             QCOMPARE(e->get("numberProperty").toNumber(engine), v);
 
@@ -392,34 +392,34 @@ void JsPropertyTest::propertyTypes(){
             QCOMPARE(e->get("stdStringProperty").toStdString(engine), s);
 
             s = "987";
-            e->set("stdStringProperty", LocalValue(engine, s));
+            e->set("stdStringProperty", ScopedValue(engine, s));
             QCOMPARE(e->stdStringProperty(), s);
             QCOMPARE(e->get("stdStringProperty").toStdString(engine), s);
 
             Callable callable = engine->compileJsEnclosed("return function(){ return 20; }")->run().asCallable();
             QVERIFY(!callable.isNull());
-            e->set("callableProperty", LocalValue(engine, callable));
+            e->set("callableProperty", ScopedValue(engine, callable));
             QVERIFY(e->callableProperty().call(engine, Function::Parameters(0)).toInt32(engine) == 20);
             QVERIFY(e->get("callableProperty").toCallable(engine) == callable);
 
             Object o = engine->compileJsEnclosed("return { a : 2 };")->run().asObject();
             QVERIFY(!o.isNull());
-            e->set("objectProperty", LocalValue(engine, o));
-            LocalObject lo(e->objectProperty());
-            QCOMPARE(lo.get(LocalValue(engine, std::string("a"))).toInt32(engine), 2);
+            e->set("objectProperty", ScopedValue(engine, o));
+            Object::Accessor lo(e->objectProperty());
+            QCOMPARE(lo.get(ScopedValue(engine, std::string("a"))).toInt32(engine), 2);
             QVERIFY(e->objectProperty() == o);
 
-            e->set("localValueProperty", LocalValue(engine, 200.0));
+            e->set("localValueProperty", ScopedValue(engine, 200.0));
             QCOMPARE(e->localValueProperty().toNumber(engine), 200.0);
             QCOMPARE(e->get("localValueProperty").toNumber(engine), 200.0);
-            e->set("localValueProperty", LocalValue(engine, std::string("abc")));
+            e->set("localValueProperty", ScopedValue(engine, std::string("abc")));
             QCOMPARE(e->localValueProperty().toStdString(engine), std::string("abc"));
             QCOMPARE(e->get("localValueProperty").toStdString(engine), std::string("abc"));
 
-            e->set("valueProperty", LocalValue(engine, 100.0));
+            e->set("valueProperty", ScopedValue(engine, 100.0));
             QCOMPARE(e->valueProperty().asNumber(), 100.0);
             QCOMPARE(e->get("valueProperty").toValue(engine).asNumber(), 100.0);
-            e->set("valueProperty", LocalValue(engine, callable));
+            e->set("valueProperty", ScopedValue(engine, callable));
             QVERIFY(e->valueProperty().asCallable() == callable);
             QVERIFY(e->get("valueProperty").toValue(engine).asCallable() == callable);
 
@@ -434,34 +434,34 @@ void JsPropertyTest::propertyTypes(){
             QVERIFY(e->get("bufferProperty").toBuffer(engine).size() == bufferSize);
             QVERIFY(e->get("bufferProperty").toBuffer(engine).isExternal());
 
-            e->set("bufferProperty", LocalValue(engine, Buffer(nullptr, 0)));
+            e->set("bufferProperty", ScopedValue(engine, Buffer(nullptr, 0)));
             QVERIFY(e->bufferProperty().size() == 0);
             QVERIFY(e->bufferProperty().data() == nullptr);
             QVERIFY(e->get("bufferProperty").toBuffer(engine).size() == 0);
             delete []buffer;
 
             Element* elemProperty = new Element(engine);
-            e->set("elementProperty", LocalValue(engine, elemProperty));
+            e->set("elementProperty", ScopedValue(engine, elemProperty));
             QVERIFY(e->elementProperty() == elemProperty);
             QVERIFY(e->get("elementProperty").toElement(engine) == elemProperty);
-            e->set("elementProperty", LocalValue(engine));
+            e->set("elementProperty", ScopedValue(engine));
             QVERIFY(e->elementProperty() == nullptr);
             delete elemProperty;
 
             ReadOnlyPropertyStub* userElemProperty = new ReadOnlyPropertyStub(engine);
-            LocalValue vvv(engine, userElemProperty);
+            ScopedValue vvv(engine, userElemProperty);
 
             e->set("userElementProperty", vvv);
             QVERIFY(e->get("userElementProperty").toElement(engine) == userElemProperty);
-            e->set("userElementProperty", LocalValue(engine));
+            e->set("userElementProperty", ScopedValue(engine));
             QVERIFY(e->userElementProperty() == nullptr);
             delete userElemProperty;
 
             Element* ps = new ReadOnlyPropertyStub(engine);
 
-            LocalObject globalObject(engine->currentContext());
-            globalObject.set(engine, "e", LocalValue(engine, e));
-            globalObject.set(engine, "ps", LocalValue(engine, ps));
+            Object::Accessor globalObject(engine->currentContext());
+            globalObject.set(engine, "e", ScopedValue(engine, e));
+            globalObject.set(engine, "ps", ScopedValue(engine, ps));
             engine->compileJsEnclosed(
                 "e.boolProperty = true; "
                 "e.intProperty = 7; "
@@ -484,10 +484,10 @@ void JsPropertyTest::propertyTypes(){
             QVERIFY(e->numberProperty() == 70);
             QVERIFY(e->stdStringProperty() == std::string("abcd"));
             QVERIFY(e->callableProperty().call(engine, Function::Parameters(0)).toInt32(engine) == 700);
-            LocalObject lop(e->objectProperty());
-            QVERIFY(lop.get(LocalValue(engine, std::string("b"))).toInt32(engine) == 7);
+            Object::Accessor lop(e->objectProperty());
+            QVERIFY(lop.get(ScopedValue(engine, std::string("b"))).toInt32(engine) == 7);
             QVERIFY(e->localValueProperty().toStdString(engine) == "abcd");
-            QVERIFY(LocalValue(engine, e->valueProperty()).toStdString(engine) == "abcd");
+            QVERIFY(ScopedValue(engine, e->valueProperty()).toStdString(engine) == "abcd");
             QVERIFY(e->bufferProperty().size() == 8);
             QVERIFY(e->elementProperty() == e);
             QVERIFY(e->userElementProperty() == ps);
@@ -528,7 +528,7 @@ void JsPropertyTest::propertyInheritance(){
             e2->setIntProperty(100);
 
             // Sset the derived int property
-            e2->set("intProperty", LocalValue(engine, 20));
+            e2->set("intProperty", ScopedValue(engine, 20));
             QCOMPARE(e2->intProperty(), 100);
             QCOMPARE(e2->intOverrideProperty(), 20);
             QCOMPARE(e2->get("intProperty").toInt32(engine), 20);
@@ -547,7 +547,7 @@ void JsPropertyTest::dynamicReadOnlyProperty(){
         engine->scope([engine](){
             Element* e = new Element(engine);
             e->ref();
-            e->addProperty("p", "int", LocalValue(engine, 200), false, false, "");
+            e->addProperty("p", "int", ScopedValue(engine, 200), false, false, "");
             QVERIFY(e->hasProperty("p"));
             QCOMPARE(e->get("p").toInt32(engine), 200);
             delete e;
@@ -563,10 +563,10 @@ void JsPropertyTest::dynamicProperty(){
         engine->scope([&engine](){
             Element* e = new Element(engine);
             e->ref();
-            e->addProperty("p", "int", LocalValue(engine, 200), false, true, "pChanged");
+            e->addProperty("p", "int", ScopedValue(engine, 200), false, true, "pChanged");
             QVERIFY(e->hasProperty("p"));
 
-            e->set("p", LocalValue(engine, 300));
+            e->set("p", ScopedValue(engine, 300));
             QCOMPARE(e->get("p").toInt32(engine), 300);
 
             delete e;
@@ -601,14 +601,14 @@ void JsPropertyTest::dynamicPropertyWithEvent(){
         engine->scope([&engine](){
             Element* e = new Element(engine);
             e->ref();
-            e->addProperty("p", "int", LocalValue(engine, 200), false, true, "pChanged");
+            e->addProperty("p", "int", ScopedValue(engine, 200), false, true, "pChanged");
             QVERIFY(e->hasProperty("p"));
 
             int pValue = 0;
             e->on("pChanged", [&pValue, e](const Function::Parameters&){
                 pValue = e->get("p").toInt32(e->engine());
             });
-            e->set("p", LocalValue(engine, 300));
+            e->set("p", ScopedValue(engine, 300));
 
             QCOMPARE(pValue, 300);
 
@@ -629,7 +629,7 @@ void JsPropertyTest::dynamicDefaultProperty(){
         engine->scope([&engine](){
             Element* e = new Element(engine);
             e->ref();
-            e->addProperty("p", "int", LocalValue(engine, 200), true, true, "pChanged");
+            e->addProperty("p", "int", ScopedValue(engine, 200), true, true, "pChanged");
             QVERIFY(e->hasProperty("p"));
 
             QCOMPARE(e->get(e->defaultProperty()).toInt32(engine), 200);
@@ -651,21 +651,21 @@ void JsPropertyTest::jsDynamicPropertyWithAssignedExpression(){
         engine->scope([engine](){
             Element* e = new Element(engine);
             e->ref();
-            e->addProperty("p", "int", LocalValue(engine, 50), false, true, "pChanged");
+            e->addProperty("p", "int", ScopedValue(engine, 50), false, true, "pChanged");
             QVERIFY(e->hasProperty("p"));
 
             Element* x = new Element(engine);
-            x->addProperty("value", "int", LocalValue(engine, 200), false, true, "valueChanged");
+            x->addProperty("value", "int", ScopedValue(engine, 200), false, true, "valueChanged");
             QVERIFY(x->hasProperty("value"));
 
             Element* y = new Element(engine);
-            y->addProperty("value", "int", LocalValue(engine, 200), false, true, "valueChanged");
+            y->addProperty("value", "int", ScopedValue(engine, 200), false, true, "valueChanged");
             QVERIFY(y->hasProperty("value"));
 
-            LocalObject globalObject(engine->currentContext());
-            globalObject.set(engine, "e", LocalValue(engine, e));
-            globalObject.set(engine, "x", LocalValue(engine, x));
-            globalObject.set(engine, "y", LocalValue(engine, y));
+            Object::Accessor globalObject(engine->currentContext());
+            globalObject.set(engine, "e", ScopedValue(engine, e));
+            globalObject.set(engine, "x", ScopedValue(engine, x));
+            globalObject.set(engine, "y", ScopedValue(engine, y));
 
             Script::Ptr s = engine->compileJs(
                 "Element.assignPropertyExpression("
@@ -676,18 +676,18 @@ void JsPropertyTest::jsDynamicPropertyWithAssignedExpression(){
 
             QCOMPARE(e->get("p").toInt32(engine), 400);
 
-            x->set("value", LocalValue(engine, 500));
+            x->set("value", ScopedValue(engine, 500));
             QCOMPARE(e->get("p").toInt32(engine), 700);
 
-            y->set("value", LocalValue(engine, 400));
+            y->set("value", ScopedValue(engine, 400));
             QCOMPARE(e->get("p").toInt32(engine), 900);
 
             // Reset the binding
-            e->set("p", LocalValue(engine, 200));
+            e->set("p", ScopedValue(engine, 200));
             QCOMPARE(e->get("p").toInt32(engine), 200);
 
             // Check binding reset
-            x->set("value", LocalValue(engine, 300));
+            x->set("value", ScopedValue(engine, 300));
             QCOMPARE(e->get("p").toInt32(engine), 200);
 
             delete e;
@@ -705,17 +705,17 @@ void JsPropertyTest::jsDynamicPropertyWithAddedExpression(){
             e->ref();
 
             Element* x = new Element(engine);
-            x->addProperty("value", "int", LocalValue(engine, 200), false, true, "valueChanged");
+            x->addProperty("value", "int", ScopedValue(engine, 200), false, true, "valueChanged");
             QVERIFY(x->hasProperty("value"));
 
             Element* y = new Element(engine);
-            y->addProperty("value", "int", LocalValue(engine, 200), false, true, "valueChanged");
+            y->addProperty("value", "int", ScopedValue(engine, 200), false, true, "valueChanged");
             QVERIFY(y->hasProperty("value"));
 
-            LocalObject globalObject(engine->currentContext());
-            globalObject.set(engine, "e", LocalValue(engine, e));
-            globalObject.set(engine, "x", LocalValue(engine, x));
-            globalObject.set(engine, "y", LocalValue(engine, y));
+            Object::Accessor globalObject(engine->currentContext());
+            globalObject.set(engine, "e", ScopedValue(engine, e));
+            globalObject.set(engine, "x", ScopedValue(engine, x));
+            globalObject.set(engine, "y", ScopedValue(engine, y));
 
             Script::Ptr s = engine->compileJs(
                 "Element.addProperty(e, 'p', {"
@@ -731,18 +731,18 @@ void JsPropertyTest::jsDynamicPropertyWithAddedExpression(){
 
             QCOMPARE(e->get("p").toInt32(engine), 400);
 
-            x->set("value", LocalValue(engine, 500));
+            x->set("value", ScopedValue(engine, 500));
             QCOMPARE(e->get("p").toInt32(engine), 700);
 
-            y->set("value", LocalValue(engine, 400));
+            y->set("value", ScopedValue(engine, 400));
             QCOMPARE(e->get("p").toInt32(engine), 900);
 
             // Reset the binding
-            e->set("p", LocalValue(engine, 200));
+            e->set("p", ScopedValue(engine, 200));
             QCOMPARE(e->get("p").toInt32(engine), 200);
 
             // Check binding reset
-            x->set("value", LocalValue(engine, 300));
+            x->set("value", ScopedValue(engine, 300));
             QCOMPARE(e->get("p").toInt32(engine), 200);
 
             delete e;

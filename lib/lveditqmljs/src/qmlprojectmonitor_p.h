@@ -22,6 +22,7 @@
 
 #include "live/projectqmlscope.h"
 #include "live/qmllanguagescanner.h"
+#include "live/workspace.h"
 
 namespace lv{
 
@@ -45,6 +46,7 @@ public:
         ProjectQmlExtension* projectHandler,
         Project* project,
         ViewEngine*  engine,
+        Workspace* workspace,
         QObject* parent = nullptr
     );
     ~QmlProjectMonitor();

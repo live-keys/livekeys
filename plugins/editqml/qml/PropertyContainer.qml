@@ -30,6 +30,7 @@ Item{
     property int topMarginParam: 12
     width: container.width + 120
     height: container.height > 35 ? container.height + 10 : 45
+    z: 3000
 
     Rectangle{
         id: propertyContainerLabel
@@ -149,7 +150,7 @@ Item{
         fontSize: 10
         fontFamily: "Open Sans, sans-serif"
         onFocusChanged : if ( !focus ) model = null
-        z: 2000
+        z: 3000
 
         property var selectedHandler : function(){}
         property var cancelledHandler : function(index){}

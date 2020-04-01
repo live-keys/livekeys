@@ -409,7 +409,7 @@ void ProjectWorkspace::save() const{
             std::string result;
             ml::toJson(m_state->currentWorkspaceLayout, result);
 
-            layoutFile.write(result.c_str(), result.size());
+            layoutFile.write(result.c_str(), static_cast<qint64>(result.size()));
 
         } catch ( Exception& e ){
             vlog().w() << "Failed to save file \'" << layoutFile.fileName() << "\': " + e.message();
@@ -419,6 +419,13 @@ void ProjectWorkspace::save() const{
 
 const MLNode &ProjectWorkspace::currentLayout() const{
     return m_state->currentWorkspaceLayout;
+}
+
+QString ProjectWorkspace::projectPath() const{
+    if ( m_project->active() && !m_project->isDirProject() ){
+        return m_project->active()->path();
+    } else
+        return m_project->dir();
 }
 
 ProjectWorkspace *ProjectWorkspace::create(Project *project, QObject *parent){
@@ -432,7 +439,8 @@ ProjectWorkspace *ProjectWorkspace::create(Project *project, QObject *parent){
 }
 
 void ProjectWorkspace::initialize(){
-    QString path = m_project->dir();
+    QString path = projectPath();
+
     QFileInfo pathinfo(path);
 
     if ( path.isEmpty() || !pathinfo.exists() )
@@ -495,7 +503,7 @@ Exception ProjectWorkspace::captureContents(const Exception &e){
 }
 
 void ProjectWorkspace::initializeFromId(){
-    QString path = m_project->dir();
+    QString path = projectPath();
 
     m_currentWorkspaceId = "";
     m_state->currentWorkspaceLayout = MLNode(MLNode::Object);
@@ -523,6 +531,24 @@ void ProjectWorkspace::initializeFromId(){
         }
     } else {
         createLayoutNodes();
+
+        if ( m_project->isDirProject() ){
+            QString projectFilePath = m_project->path("live.project.json");
+            if ( QFileInfo(projectFilePath).exists() ){
+                QFile projectFile(projectFilePath);
+                if ( projectFile.open(QIODevice::ReadOnly) ){
+                    QByteArray contents = projectFile.readAll();
+
+                    MLNode projectFileData;
+                    ml::fromJson(contents.constData(), projectFileData);
+
+                    if ( projectFileData.hasKey("layout") ){
+                        m_state->currentWorkspaceLayout["panes"][0] = projectFileData["layout"];
+                    }
+                }
+
+            }
+        }
     }
 
     //TODO: Delete deprecated workspaces
@@ -536,7 +562,7 @@ void ProjectWorkspace::initializeDefaults(){
     m_currentWorkspaceId = "";
     m_state->currentWorkspaceLayout = MLNode(MLNode::Object);
 
-    QString path = m_project->dir();
+    QString path = projectPath();
     if ( !path.isEmpty() )
         m_currentWorkspaceId = Project::hashPath(path.toUtf8()).toHex();
 

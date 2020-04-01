@@ -41,9 +41,9 @@ Value Script::run(){
     v8::Local<v8::Script> ld = m_d->data.Get(m_d->engine->isolate());
     v8::MaybeLocal<v8::Value> result = ld->Run(context);
     if ( result.IsEmpty() )
-        return LocalValue(m_d->engine).toValue(m_d->engine);
+        return ScopedValue(m_d->engine).toValue(m_d->engine);
     else
-        return LocalValue(result.ToLocalChecked()).toValue(m_d->engine);
+        return ScopedValue(result.ToLocalChecked()).toValue(m_d->engine);
 
     return Value();
 }
@@ -119,7 +119,7 @@ Object Script::loadAsModuleImpl(ModuleFile *mf, const v8::Local<v8::Context> &co
 
     v8::Local<v8::Function> loadFunction = v8::Local<v8::Function>::Cast(result.ToLocalChecked());
 
-    LocalValue module = mf->createObject(m_d->engine);
+    ScopedValue module = mf->createObject(m_d->engine);
 
     v8::Local<v8::String> name = v8::String::NewFromUtf8(
         m_d->engine->isolate(), mf->name().c_str(), v8::String::kInternalizedString);
@@ -186,7 +186,7 @@ Object Script::loadAsModuleImpl(ModuleFile *mf, const v8::Local<v8::Context> &co
                 }
 
             } else if ( value->IsObject() ){
-                if ( !LocalValue(value).isElement() ){
+                if ( !ScopedValue(value).isElement() ){
                     lv::Exception e = CREATE_EXCEPTION(
                         lv::Exception,
                         mf->filePath() + ": Export at \'" + *utf8_key + "\' is an object that's not an element type.",

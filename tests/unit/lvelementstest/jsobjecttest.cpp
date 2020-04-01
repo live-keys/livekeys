@@ -76,8 +76,8 @@ void JsObjectTest::simpleObjectInitializationTest(){
             el::Object ob = el::Object::create(engine);
             engine->require(m, ob);
 
-            LocalObject lo(ob);
-            LocalValue v = lo.get(engine, "ElementStub");
+            Object::Accessor lo(ob);
+            ScopedValue v = lo.get(engine, "ElementStub");
             QVERIFY(v.isCallable());
 
             Callable c = v.toCallable(engine);
@@ -86,7 +86,7 @@ void JsObjectTest::simpleObjectInitializationTest(){
             Component comp = c.toComponent();
 
             Function::Parameters p(1);
-            p.assign(0, LocalValue(engine, 15));
+            p.assign(0, ScopedValue(engine, 15));
 
             Element* el = comp.create(p);
             QCOMPARE(std::string("ElementStub"), el->typeMetaObject().name());

@@ -50,6 +50,7 @@ public:
     QQmlPropertyMap* extensions() const;
     lv::ThemeContainer* themes() const;
     lv::Documentation* documentation() const;
+    Workspace* workspace() const;
 
 public slots:
     QJSValue interceptMenu(QJSValue context);
@@ -65,6 +66,8 @@ public slots:
 
     QString docsPath() const;
 
+    bool wasRecentsFileFound() const;
+
 signals:
     void projectChanged();
     void panesChanged();
@@ -72,6 +75,10 @@ signals:
 private:
     void initializePanes(ProjectWorkspace* workspace, QJSValue panes);
     void initializePanesAndWindows(ProjectWorkspace* workspace, QJSValue panesAndWindows);
+
+    void loadConfigurations();
+    WorkspaceExtension* loadPackageExtension(const std::string& path, const std::string& component);
+    WorkspaceExtension* loadPackageExtension(const Package::Ptr& package, const std::string& component);
 
     QObject* m_nextViewParent;
 
@@ -84,6 +91,7 @@ private:
     ThemeContainer* m_themes;
 
     Project*       m_project;
+    ViewEngine*    m_engine;
 
     Extensions*    m_extensions;
     Workspace*     m_workspace;
@@ -118,6 +126,10 @@ inline ThemeContainer *WorkspaceLayer::themes() const{
 
 inline Documentation *WorkspaceLayer::documentation() const{
     return m_documentation;
+}
+
+inline Workspace *WorkspaceLayer::workspace() const{
+    return m_workspace;
 }
 
 }// namespace

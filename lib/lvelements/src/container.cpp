@@ -13,11 +13,11 @@ Container::~Container(){
     delete m_children;
 }
 
-LocalValue Container::children(){
-    return LocalValue(engine(), m_children);
+ScopedValue Container::children(){
+    return ScopedValue(engine(), m_children);
 }
 
-void Container::setChildren(LocalValue children){
+void Container::setChildren(ScopedValue children){
     v8::Local<v8::Value> data = children.data();
     foreach( Element* e, m_data ){
         e->setParent(nullptr);
@@ -27,7 +27,7 @@ void Container::setChildren(LocalValue children){
     if ( data->IsArray()){
         v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(data);
         for ( unsigned int i = 0; i < arr->Length(); ++i ){
-            LocalValue v(arr->Get(i));
+            ScopedValue v(arr->Get(i));
             Element* e = v.toElement(engine());
             e->setParent(this);
             m_data.push_back(e);

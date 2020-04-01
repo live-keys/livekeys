@@ -36,6 +36,10 @@ public:
     std::map<std::string, Package::Reference*> dependencies;
     std::map<std::string, Package::Library*>   libraries;
 
+    std::string workspaceTutorialLabel;
+    std::vector<std::pair<std::string, std::string> > workspaceTutorialSections;
+    std::vector<std::string> workspaceSamples;
+
     Package::Context* context;
 };
 
@@ -125,6 +129,27 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
         pt->m_d->documentation = m["documentation"].asString();
     }
 
+    if ( m.hasKey("workspace") ){
+        const MLNode& workspace = m["workspace"];
+        if ( workspace.hasKey("tutorials") ){
+            const MLNode& tutorials = workspace["tutorials"];
+            pt->m_d->workspaceTutorialLabel = tutorials["label"].asString();
+
+            MLNode::ArrayType sections = tutorials["sections"].asArray();
+            for ( auto it = sections.begin(); it != sections.end(); ++it ){
+                pt->m_d->workspaceTutorialSections.push_back(
+                    std::make_pair((*it)["label"].asString(), (*it)["link"].asString())
+                );
+            }
+        }
+        if ( workspace.hasKey("samples") ){
+            MLNode::ArrayType sections = workspace["samples"].asArray();
+            for ( auto it = sections.begin(); it != sections.end(); ++it ){
+                pt->m_d->workspaceSamples.push_back((*it)["link"].asString());
+            }
+        }
+    }
+
     return pt;
 }
 
@@ -185,6 +210,22 @@ PackageGraph *Package::contextOwner(){
 /** \brief Returns the current context if any has been assigned, nullptr otherwise. */
 Package::Context *Package::context(){
     return m_d->context;
+}
+
+bool Package::hasWorkspace() const{
+    return m_d->workspaceTutorialSections.size() > 0;
+}
+
+const std::string &Package::workspaceTutorialsLabel() const{
+    return m_d->workspaceTutorialLabel;
+}
+
+const std::vector<std::pair<std::string, std::string> > &Package::workspaceTutorialsSections() const{
+    return m_d->workspaceTutorialSections;
+}
+
+const std::vector<std::string> &Package::workspaceSamples(){
+    return m_d->workspaceSamples;
 }
 
 Package::Package(const std::string &path, const std::string& filePath, const std::string &name, const Version &version)

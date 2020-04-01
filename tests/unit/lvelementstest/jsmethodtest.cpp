@@ -42,7 +42,7 @@ class MethodStub : public Element{
     const std::string& stringReturnType(const std::string& value){ return value;}
     Callable callableReturnType(const Callable& value){ return value; }
     Object objectReturnType(const Object& value){ return value; }
-    LocalValue localValueReturnType(LocalValue value){ return value; }
+    ScopedValue localValueReturnType(ScopedValue value){ return value; }
     Value valueReturnType(Value value){ return value; }
     Buffer bufferReturnType(Buffer value){ return value; }
     Element* elementReturnType(Element* value){ return value;}
@@ -96,13 +96,13 @@ void JsMethodTest::typesTest(){
         epl->addModuleLibrary(m);
 
         Object o  = epl->collectExportsObject();
-        LocalObject lo(o);
+        Object::Accessor lo(o);
 
         MethodStub* e = new MethodStub(engine);
         e->ref();
 
-        LocalObject globalObject(engine->currentContext());
-        globalObject.set(engine, "e", LocalValue(engine, e));
+        Object::Accessor globalObject(engine->currentContext());
+        globalObject.set(engine, "e", ScopedValue(engine, e));
 
         Value v = engine->compileJsEnclosed("return e.intReturnType(20);")->run();
         QCOMPARE(v.asInt32(), 20);
@@ -122,7 +122,7 @@ void JsMethodTest::typesTest(){
 
         v = engine->compileJsEnclosed("return e.objectReturnType({a: 2, b: 30});")->run();
         QVERIFY(v.type() == Value::Stored::Object);
-        LocalObject vo(v.asObject());
+        Object::Accessor vo(v.asObject());
         QVERIFY(vo.get(engine, "a").toInt32(engine) == 2);
         QVERIFY(vo.get(engine, "b").toInt32(engine) == 30);
 

@@ -316,8 +316,11 @@ LiveExtension{
         var paletteImports = codeHandler.findPalettes(importsPosition, true)
         if (paletteImports) root.shapePalette(editor, paletteImports, 0)
 
-        var paletteRoot = codeHandler.findPalettes(rootPosition, true)
-        if (paletteRoot) root.shapePalette(editor, paletteRoot, 0)
+        if ( rootPosition >= 0){
+            var paletteRoot = codeHandler.findPalettes(rootPosition, true)
+            if (paletteRoot)
+                root.shapePalette(editor, paletteRoot, 0)
+        }
     }
 
     function addProperty(){
@@ -360,7 +363,7 @@ LiveExtension{
             addBoxItem.accept = function(type, data){
                 if ( addBoxItem.activeIndex === 0 ){
                     activePane.documentHandler.codeHandler.addProperty(
-                        addContainer.propertyModel.addPosition, addContainer.objectType, type, data
+                        addContainer.propertyModel.addPosition, addContainer.objectType, type, data, true
                     )
                 } else if ( addBoxItem.activeIndex === 1 ){
                     activePane.documentHandler.codeHandler.addItem(

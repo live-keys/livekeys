@@ -185,7 +185,7 @@ const std::string &ApplicationContext::appDataPath(){
         QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
         QDir pathDir(path);
         if ( !pathDir.exists() ){
-            if ( !QDir().mkdir(path) ){
+            if ( !QDir().mkpath(path) ){
                 THROW_EXCEPTION(lv::Exception, "Failed to create directory: " + path.toStdString(), lv::Exception::toCode("~dir"));
             }
         }

@@ -79,7 +79,7 @@ public:
         static Event::Id eid = eventId(&JsEventTypes::objectEvent);
         return notify(eid, value);
     }
-    Event localValueEvent(LocalValue value){
+    Event localValueEvent(ScopedValue value){
         static Event::Id eid = eventId(&JsEventTypes::localValueEvent);
         return notify(eid, value);
     }
@@ -202,8 +202,8 @@ void JsEventTest::callEventTest(){
                 pingNumber = number;
             });
 
-            LocalObject globalObject(engine->currentContext());
-            globalObject.set(engine, "jsEvent", LocalValue(engine, jsEvent));
+            Object::Accessor globalObject(engine->currentContext());
+            globalObject.set(engine, "jsEvent", ScopedValue(engine, jsEvent));
             engine->compileJsEnclosed("jsEvent.pinged(2000);")->run();
 
             QCOMPARE(pingNumber, 2000);
@@ -224,9 +224,9 @@ void JsEventTest::registerListenerTest()
             JsEventStub* jsEvent = new JsEventStub(engine);
             jsEvent->ref();
 
-            LocalObject globalObject(engine->currentContext());
-            globalObject.set(engine, "jsEvent", LocalValue(engine, jsEvent));
-            globalObject.set(engine, "jsEventLastPing", LocalValue(engine, 0));
+            Object::Accessor globalObject(engine->currentContext());
+            globalObject.set(engine, "jsEvent", ScopedValue(engine, jsEvent));
+            globalObject.set(engine, "jsEventLastPing", ScopedValue(engine, 0));
 
             engine->compileJsEnclosed("jsEvent.on('pinged', function(number){ jsEventLastPing = number; });")->run();
 
@@ -273,14 +273,14 @@ void JsEventTest::triggerEventThroughMetaTest(){
             JsEventStub* jsEvent = new JsEventStub(engine);
             jsEvent->ref();
 
-            LocalObject globalObject(engine->currentContext());
-            globalObject.set(engine, "jsEvent", LocalValue(engine, jsEvent));
-            globalObject.set(engine, "jsEventLastPing", LocalValue(engine, 0));
+            Object::Accessor globalObject(engine->currentContext());
+            globalObject.set(engine, "jsEvent", ScopedValue(engine, jsEvent));
+            globalObject.set(engine, "jsEventLastPing", ScopedValue(engine, 0));
 
             engine->compileJsEnclosed("jsEvent.on('pinged', function(number){ jsEventLastPing = number; });")->run();
 
             Function::Parameters p(1);
-            p.assign(0, LocalValue(engine, 2000));
+            p.assign(0, ScopedValue(engine, 2000));
             jsEvent->trigger("pinged", p);
 
             int pingNumber = globalObject.get(engine, "jsEventLastPing").toInt32(engine);
@@ -302,8 +302,8 @@ void JsEventTest::addEventJsCallInJsTest()
             JsEventStub* jsEvent = new JsEventStub(engine);
             jsEvent->ref();
 
-            LocalObject globalObject(engine->currentContext());
-            globalObject.set(engine, "jsEvent", LocalValue(engine, jsEvent));
+            Object::Accessor globalObject(engine->currentContext());
+            globalObject.set(engine, "jsEvent", ScopedValue(engine, jsEvent));
 
             engine->compileJsEnclosed("Element.addEvent(jsEvent, 'customEvent', ['int']);")->run();
 
@@ -331,9 +331,9 @@ void JsEventTest::addEventListenInJsTest(){
             JsEventStub* jsEvent = new JsEventStub(engine);
             jsEvent->ref();
 
-            LocalObject globalObject(engine->currentContext());
-            globalObject.set(engine, "jsEvent", LocalValue(engine, jsEvent));
-            globalObject.set(engine, "jsEventLastValue", LocalValue(engine, 0));
+            Object::Accessor globalObject(engine->currentContext());
+            globalObject.set(engine, "jsEvent", ScopedValue(engine, jsEvent));
+            globalObject.set(engine, "jsEventLastValue", ScopedValue(engine, 0));
 
             std::vector<std::string> eventTypes = {"int"};
             Element::addEvent(jsEvent, "customEvent", eventTypes);
@@ -341,7 +341,7 @@ void JsEventTest::addEventListenInJsTest(){
             engine->compileJsEnclosed("jsEvent.on('customEvent', function(number){ jsEventLastValue = number; });")->run();
 
             Function::Parameters p(1);
-            p.assign(0, LocalValue(engine, 2000));
+            p.assign(0, ScopedValue(engine, 2000));
 
             jsEvent->trigger("customEvent", p);
             int pingNumber = globalObject.get(engine, "jsEventLastValue").toInt32(engine);
@@ -362,8 +362,8 @@ void JsEventTest::eventTypesTest(){
             JsEventTypes* jsEvent = new JsEventTypes(engine);
             jsEvent->ref();
 
-            LocalObject globalObject(engine->currentContext());
-            globalObject.set(engine, "jsEvent", LocalValue(engine, jsEvent));
+            Object::Accessor globalObject(engine->currentContext());
+            globalObject.set(engine, "jsEvent", ScopedValue(engine, jsEvent));
 
             bool boolEventValue = false;
             jsEvent->on("boolEvent", [&boolEventValue, engine](const Function::Parameters& p){
@@ -423,7 +423,7 @@ void JsEventTest::eventTypesTest(){
             });
             engine->compileJsEnclosed("jsEvent.objectEvent({a : 1, b: 20.2});")->run();
             QVERIFY(!objectEventValue.isNull());
-            LocalObject localObjectEventValue(objectEventValue);
+            Object::Accessor localObjectEventValue(objectEventValue);
             QVERIFY(localObjectEventValue.get(engine, std::string("a")).toInt32(engine) == 1);
             QVERIFY(localObjectEventValue.get(engine, std::string("b")).toNumber(engine) == 20.2);
 
@@ -448,14 +448,14 @@ void JsEventTest::eventTypesTest(){
             engine->compileJsEnclosed("jsEvent.valueEvent({a: 1, b: 20.2});")->run();
             Object valueEventObject = valueEventValue.asObject();
             QVERIFY(!valueEventObject.isNull());
-            LocalObject valueEventLocalObject(valueEventObject);
+            Object::Accessor valueEventLocalObject(valueEventObject);
             QVERIFY(valueEventLocalObject.get(engine, std::string("a")).toInt32(engine) == 1);
             QVERIFY(valueEventLocalObject.get(engine, std::string("b")).toNumber(engine) == 20.2);
 
             Element* triggeredElement = new Element(engine);
             triggeredElement->ref();
             Element* elementEventValue = nullptr;
-            globalObject.set(engine, "triggeredElement", LocalValue(engine, triggeredElement));
+            globalObject.set(engine, "triggeredElement", ScopedValue(engine, triggeredElement));
             jsEvent->on("elementEvent", [&elementEventValue, engine](const Function::Parameters& p){
                 elementEventValue = p.at(engine, 0).toElement(engine);
             });
@@ -485,8 +485,8 @@ void JsEventTest::eventInheritanceTest(){
             JsEventTypesInheritLevel2Stub* jsEvent = new JsEventTypesInheritLevel2Stub(engine);
             jsEvent->ref();
 
-            LocalObject globalObject(engine->currentContext());
-            globalObject.set(engine, "jsEvent", LocalValue(engine, jsEvent));
+            Object::Accessor globalObject(engine->currentContext());
+            globalObject.set(engine, "jsEvent", ScopedValue(engine, jsEvent));
 
 
             Value::Int32 intEventValue = 0;
@@ -524,7 +524,7 @@ void JsEventTest::eventOnProperty(){
             e->on("eventPropertyChanged", [&pValue, e](const Function::Parameters&){
                 pValue = e->get("eventProperty").toInt32(e->engine());
             });
-            e->set("eventProperty", LocalValue(engine, 300));
+            e->set("eventProperty", ScopedValue(engine, 300));
 
             QCOMPARE(pValue, 300);
 
@@ -541,14 +541,14 @@ void JsEventTest::eventOnCustomProperty(){
         engine->scope([&engine](){
             Element* e = new Element(engine);
             e->ref();
-            e->addProperty("p", "int", LocalValue(engine, 200), false, true, "pChanged");
+            e->addProperty("p", "int", ScopedValue(engine, 200), false, true, "pChanged");
             QVERIFY(e->hasProperty("p"));
 
             int pValue = 0;
             e->on("pChanged", [&pValue, e](const Function::Parameters&){
                 pValue = e->get("p").toInt32(e->engine());
             });
-            e->set("p", LocalValue(engine, 300));
+            e->set("p", ScopedValue(engine, 300));
 
             QCOMPARE(pValue, 300);
 

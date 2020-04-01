@@ -87,7 +87,8 @@ public:
     void appendIndex(int index);
 
     static QmlBindingPath::Ptr join(QmlBindingPath::ConstPtr src1, QmlBindingPath::ConstPtr src2, bool firstIndex = true);
-    QmlBindingPath::Ptr clone();
+    QmlBindingPath::Ptr clone() const;
+    QmlBindingPath::Ptr parentObjectPath() const;
 
     QString rootFile() const;
 

@@ -30,7 +30,7 @@ public:
     List(
         Engine* engine,
         void* data,
-        const std::function<LocalValue(List*, int)>& at,
+        const std::function<ScopedValue(List*, int)>& at,
         const std::function<int(List*)>& length,
         bool isObservable
     );
@@ -38,30 +38,30 @@ public:
     List(
         Engine* engine,
         void* data,
-        const std::function<LocalValue(List*, int)>& at,
+        const std::function<ScopedValue(List*, int)>& at,
         const std::function<int(List*)>& length,
-        const std::function<void(List*, int, LocalValue)>& assign,
-        const std::function<void(List*, LocalValue)>& append,
+        const std::function<void(List*, int, ScopedValue)>& assign,
+        const std::function<void(List*, ScopedValue)>& append,
         const std::function<void(List*)>& clear,
         bool isObservable = false
     );
     ~List();
 
-    static LocalValue atImpl(List* l, int index);
+    static ScopedValue atImpl(List* l, int index);
     static int lengthImpl(List* l);
 
     void setDataDestructor(std::function<void(List*)> d);
 
     bool isWritable() const;
     int length();
-    LocalValue at(int index);
-    void assign(int index, const LocalValue &v);
-    void append(const LocalValue& v);
+    ScopedValue at(int index);
+    void assign(int index, const ScopedValue &v);
+    void append(const ScopedValue& v);
     void clear();
     bool isObservable() const;
 
-    static LocalValue indexGetter(Element* e, int index);
-    static void indexSetter(Element* e, int index, LocalValue value);
+    static ScopedValue indexGetter(Element* e, int index);
+    static void indexSetter(Element* e, int index, ScopedValue value);
 
     void* data();
     template<typename T> T dataAs(){ return reinterpret_cast<T>(m_data); }
@@ -75,10 +75,10 @@ private:
     void* m_data;
     bool  m_isObservable;
 
-    std::function<LocalValue(List*, int)>       m_at;
+    std::function<ScopedValue(List*, int)>       m_at;
     std::function<int(List*)>                   m_length;
-    std::function<void(List*, int, LocalValue)> m_assign;
-    std::function<void(List*, LocalValue)>      m_append;
+    std::function<void(List*, int, ScopedValue)> m_assign;
+    std::function<void(List*, ScopedValue)>      m_append;
     std::function<void(List*)>                  m_clear;
     std::function<void(List*)>                  m_dataDestructor;
 };
@@ -97,11 +97,11 @@ inline int List::length(){
     return m_length(this);
 }
 
-inline LocalValue List::at(int index){
+inline ScopedValue List::at(int index){
     return m_at(this, index);
 }
 
-inline void List::assign(int index, const LocalValue& v){
+inline void List::assign(int index, const ScopedValue& v){
     if (!m_assign)
     {
         auto exc = CREATE_EXCEPTION(lv::Exception, "Assignment function doesn't exist", lv::Exception::toCode("~List"));
@@ -110,7 +110,7 @@ inline void List::assign(int index, const LocalValue& v){
     m_assign(this, index, v);
 }
 
-inline void List::append(const LocalValue &v){
+inline void List::append(const ScopedValue &v){
     if (!m_append)
     {
         auto exc = CREATE_EXCEPTION(lv::Exception, "Append function doesn't exist", lv::Exception::toCode("~List"));
@@ -132,11 +132,11 @@ inline bool List::isObservable() const{
     return m_isObservable;
 }
 
-inline LocalValue List::indexGetter(Element *e, int index){
+inline ScopedValue List::indexGetter(Element *e, int index){
     return e->cast<List>()->at(index);
 }
 
-inline void List::indexSetter(Element *e, int index, LocalValue value){
+inline void List::indexSetter(Element *e, int index, ScopedValue value){
     e->cast<List>()->assign(index, value);
 }
 

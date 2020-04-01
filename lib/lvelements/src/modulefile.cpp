@@ -36,9 +36,9 @@ ModuleFile::~ModuleFile(){
     delete m_d;
 }
 
-LocalValue ModuleFile::get(Engine* engine, ModuleFile *from, const std::string &name){
+ScopedValue ModuleFile::get(Engine* engine, ModuleFile *from, const std::string &name){
     if ( m_d->state == ModuleFile::Ready )
-        return LocalObject(*m_d->exports).get(engine, name);
+        return Object::Accessor(*m_d->exports).get(engine, name);
 
     if ( from == this )
         THROW_EXCEPTION(
@@ -94,7 +94,7 @@ LocalValue ModuleFile::get(Engine* engine, ModuleFile *from, const std::string &
 
     m_d->state = ModuleFile::Ready;
 
-    return LocalObject(*m_d->exports).get(engine, name);
+    return Object::Accessor(*m_d->exports).get(engine, name);
 }
 
 void ModuleFile::parse(Engine* engine){
@@ -136,9 +136,9 @@ Imports *ModuleFile::imports(){
     return m_d->imports;
 }
 
-LocalValue ModuleFile::createObject(Engine* engine) const{
+ScopedValue ModuleFile::createObject(Engine* engine) const{
     v8::Local<v8::Object> obj = v8::Object::New(engine->isolate());
-    v8::Local<v8::Value> exports = LocalValue(engine, *m_d->exports).data();
+    v8::Local<v8::Value> exports = ScopedValue(engine, *m_d->exports).data();
 
     v8::Local<v8::String> exportsKey = v8::String::NewFromUtf8(
         engine->isolate(), "exports", v8::String::kInternalizedString
@@ -153,7 +153,7 @@ LocalValue ModuleFile::createObject(Engine* engine) const{
     obj->Set(exportsKey, exports);
     obj->Set(pathKey, pathStr);
 
-    return LocalValue(obj);
+    return ScopedValue(obj);
 }
 
 void ModuleFile::initializeImportsExports(Engine *engine){

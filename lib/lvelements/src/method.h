@@ -32,7 +32,7 @@ public:
         std::is_same<ReturnType, Callable>::value ||
         std::is_same<ReturnType, Buffer>::value ||
         std::is_same<ReturnType, Object>::value ||
-        std::is_same<ReturnType, LocalValue>::value ||
+        std::is_same<ReturnType, ScopedValue>::value ||
         std::is_same<ReturnType, Value>::value ||
         std::is_pointer<ReturnType>::value,
         "Return type is not convertible to script value."
@@ -79,7 +79,7 @@ public:
             Method::callVoidMethod(
                 m_function, typename meta::make_indexes<Args...>::type(), params
             );
-            return LocalValue(params.engine());
+            return ScopedValue(params.engine());
         };
     }
 
@@ -107,7 +107,7 @@ public:
         std::is_same<ReturnType, std::string>::value ||
         std::is_same<ReturnType, Callable>::value ||
         std::is_same<ReturnType, Object>::value ||
-        std::is_same<ReturnType, LocalValue>::value ||
+        std::is_same<ReturnType, ScopedValue>::value ||
         std::is_same<ReturnType, Value>::value ||
         std::is_pointer<ReturnType>::value,
         "Return type is not convertible to script value."
@@ -147,7 +147,7 @@ public:
         m_declaration = "void(Optional)";
         m_unwrapFunction = [this](const Function::CallInfo& params){
             m_function(params.template that<C>(), params);
-            return LocalValue(params.engine());
+            return ScopedValue(params.engine());
         };
     }
 

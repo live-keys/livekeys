@@ -38,7 +38,7 @@ namespace lv{ namespace el{
 class Element;
 class Engine;
 class Context;
-class LocalValue;
+class ScopedValue;
 class Component;
 class Function;
 class Callable;
@@ -124,32 +124,32 @@ class LocalValuePrivate;
 /**
  * @brief Stores a reference to a script value.
  */
-class LV_ELEMENTS_EXPORT LocalValue{
+class LV_ELEMENTS_EXPORT ScopedValue{
 
     friend class Callable;
     friend class Script;
-    friend class LocalObject;
+    friend class Object::Accessor;
 
 public:
-    LocalValue(Engine* engine);
-    LocalValue(Engine* engine, bool val);
-    LocalValue(Engine* engine, Value::Int32 val);
-    LocalValue(Engine* engine, Value::Int64 val);
-    LocalValue(Engine* engine, Value::Number val);
-    LocalValue(Engine* engine, const std::string& val);
-    LocalValue(Engine* engine, Callable val);
-    LocalValue(Engine* engine, Object val);
-    LocalValue(Engine* engine, const Buffer& val);
-    LocalValue(Engine* engine, Element *val);
-    LocalValue(Engine* engine, const Value& value);
-    LocalValue(Engine* engine, const LocalValue& other); // TODO: This can be eliminated through specialization
-    LocalValue(const LocalValue& other);
-    LocalValue(const v8::Local<v8::Value>& data);
-    ~LocalValue();
+    ScopedValue(Engine* engine);
+    ScopedValue(Engine* engine, bool val);
+    ScopedValue(Engine* engine, Value::Int32 val);
+    ScopedValue(Engine* engine, Value::Int64 val);
+    ScopedValue(Engine* engine, Value::Number val);
+    ScopedValue(Engine* engine, const std::string& val);
+    ScopedValue(Engine* engine, Callable val);
+    ScopedValue(Engine* engine, Object val);
+    ScopedValue(Engine* engine, const Buffer& val);
+    ScopedValue(Engine* engine, Element *val);
+    ScopedValue(Engine* engine, const Value& value);
+    ScopedValue(Engine* engine, const ScopedValue& other); // TODO: This can be eliminated through specialization
+    ScopedValue(const ScopedValue& other);
+    ScopedValue(const v8::Local<v8::Value>& data);
+    ~ScopedValue();
 
-    LocalValue& operator = (const LocalValue& other);
+    ScopedValue& operator = (const ScopedValue& other);
 
-    bool operator == (const LocalValue& other);
+    bool operator == (const ScopedValue& other);
 
     const v8::Local<v8::Value>& data() const;
 
@@ -176,8 +176,8 @@ public:
     bool isArray() const;
     bool isElement() const;
 
-    template <typename T> static LocalValue createValue(Engine* engine, const T& val){
-        return LocalValue(engine, val);
+    template <typename T> static ScopedValue createValue(Engine* engine, const T& val){
+        return ScopedValue(engine, val);
     }
 
 private:
@@ -194,7 +194,7 @@ template<> struct ScriptToV8<bool>{          using type = v8::Boolean; };
 template<> struct ScriptToV8<int>{           using type = v8::Integer; };
 template<> struct ScriptToV8<long long>{     using type = v8::Integer; };
 template<> struct ScriptToV8<double>{        using type = v8::Number; };
-template<> struct ScriptToV8<LocalValue>{    using type = v8::Value; };
+template<> struct ScriptToV8<ScopedValue>{    using type = v8::Value; };
 
 // Conversion Functions
 // --------------------
@@ -207,7 +207,7 @@ template<> LV_ELEMENTS_EXPORT v8::Local<v8::Integer> convertToV8<int>(Engine* en
 template<> LV_ELEMENTS_EXPORT v8::Local<v8::Integer> convertToV8<long long>(Engine* engine, const long long& value);
 template<> LV_ELEMENTS_EXPORT v8::Local<v8::Number> convertToV8<double>(Engine* engine, const double& value);
 template<> LV_ELEMENTS_EXPORT v8::Local<v8::Object> convertToV8<Element*>(Engine* engine, Element* const& value);
-template<> LV_ELEMENTS_EXPORT v8::Local<v8::Value> convertToV8(Engine* engine, const LocalValue& value);
+template<> LV_ELEMENTS_EXPORT v8::Local<v8::Value> convertToV8(Engine* engine, const ScopedValue& value);
 
 template<typename T> T convertFromV8(Engine* engine, const v8::Local<v8::Value>& value){
     return static_cast<T>(convertFromV8<Element*>(engine, value));
@@ -222,7 +222,7 @@ template<> LV_ELEMENTS_EXPORT Callable convertFromV8(Engine *engine, const v8::L
 template<> LV_ELEMENTS_EXPORT Object convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
 template<> LV_ELEMENTS_EXPORT Value convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
 template<> LV_ELEMENTS_EXPORT Buffer convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
-template<> LV_ELEMENTS_EXPORT LocalValue convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
+template<> LV_ELEMENTS_EXPORT ScopedValue convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
 template<> LV_ELEMENTS_EXPORT Element* convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
 
 }} // namespace lv, el

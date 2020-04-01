@@ -108,6 +108,11 @@ public:
     PackageGraph* contextOwner();
     Context* context();
 
+    bool hasWorkspace() const;
+    const std::string& workspaceTutorialsLabel() const;
+    const std::vector<std::pair<std::string, std::string> >& workspaceTutorialsSections() const;
+    const std::vector<std::string>& workspaceSamples();
+
 private:
     Package(const std::string& path, const std::string& filePath, const std::string& name, const Version& version);
 

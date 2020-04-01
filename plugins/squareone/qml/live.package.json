@@ -1,0 +1,16 @@
+{
+    "name" : "squareone",
+    "version" : "1.0.0",
+    "workspace" : {
+        "tutorials" : {
+            "label" : "Square One",
+            "sections" : [{
+                "label" : "1. Workspace",
+                "link" : "tutorials/workspace"
+            },{
+                "label" : "2. Filters",
+                "link" : "tutorials/filters"
+            }]
+        }
+    }
+}

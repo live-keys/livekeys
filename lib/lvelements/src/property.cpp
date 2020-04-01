@@ -81,14 +81,14 @@ void Property::ptrIndexSetterImplementation(
     v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
     void* ptr = wrap->Value();
     Element* e = reinterpret_cast<Element*>(ptr);
-    e->typeMetaObject().indexSet()(e, static_cast<int>(index), LocalValue(value));
+    e->typeMetaObject().indexSet()(e, static_cast<int>(index), ScopedValue(value));
 }
 
 InstanceProperty::InstanceProperty(
         Element* e,
         const std::string &name,
         const std::string &type,
-        const LocalValue &value,
+        const ScopedValue &value,
         bool isWritable,
         const std::string &notify)
     : Property(name, type, isWritable, notify)
@@ -106,7 +106,7 @@ void InstanceProperty::write(Element *e, const v8::Local<v8::Value> &param){
         e->engine()->throwError(&exc, e);
         return;
     }
-    m_value = LocalValue(Property::engine(e), param).toValue(e->engine());
+    m_value = ScopedValue(Property::engine(e), param).toValue(e->engine());
     if ( !changedEvent().empty() ){
         Function::Parameters p(1);
         p.assign(0, param);

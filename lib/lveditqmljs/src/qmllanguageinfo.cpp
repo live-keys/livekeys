@@ -545,6 +545,9 @@ QmlLibraryInfo::Ptr QmlLibraryInfo::clone(const QmlLibraryInfo::ConstPtr &linfo)
     for ( auto it = linfo->m_exports.begin(); it != linfo->m_exports.end(); ++it ){
         cl->m_exports.insert(it.key(), QmlTypeInfo::clone(it.value()));
     }
+    for ( auto it = linfo->m_internals.begin(); it != linfo->m_internals.end(); ++it ){
+        cl->m_internals.append(QmlTypeInfo::clone(*it));
+    }
 
     return cl;
 }
@@ -688,10 +691,15 @@ void QmlLibraryInfo::updateUri(const QString &uri){
 
 QString QmlLibraryInfo::toString() const{
     QString result = "Library: " + m_uri;
-    result += "\nDependencies: " + m_dependencies.join(",") + "\n";
+    result += "\nDependencies: " + m_dependencies.join(",") + "\nExports:\n";
 
     for ( auto it = m_exports.begin(); it != m_exports.end(); ++it ){
         result += "  " + it.value()->toString() + "\n";
+    }
+
+    result += "Internals:\n";
+    for ( auto it = m_internals.begin(); it != m_internals.end(); ++it ){
+        result += "  " + (*it)->toString() + "\n";
     }
 
     return result;
