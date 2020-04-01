@@ -363,7 +363,7 @@ LiveExtension{
             addBoxItem.accept = function(type, data){
                 if ( addBoxItem.activeIndex === 0 ){
                     activePane.documentHandler.codeHandler.addProperty(
-                        addContainer.propertyModel.addPosition, addContainer.objectType, type, data
+                        addContainer.propertyModel.addPosition, addContainer.objectType, type, data, true
                     )
                 } else if ( addBoxItem.activeIndex === 1 ){
                     activePane.documentHandler.codeHandler.addItem(

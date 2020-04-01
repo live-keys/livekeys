@@ -9,12 +9,19 @@ Item{
 
     property alias paletteGroup: objectContainer.paletteGroup
     property alias groupsContainer: container
+
+    function createNewContainer(parent){
+        return objectContainerFactory.createObject(parent)
+    }
+
     property alias editingFragment : objectContainer.editingFragment
     property alias editor : objectContainer.editor
     property alias title : objectContainer.title
     property alias titleHeight : objectContainer.titleHeight
     property alias compact: objectContainer.compact
     property alias topSpacing: objectContainer.topSpacing
+
+    property alias paletteGroupFactory: objectContainer.paletteGroupFactory
 
     width: objectContainer.width
     height: objectContainer.pane ? 30 : objectContainer.height
@@ -97,6 +104,25 @@ Item{
 
                 childObjectContainer.paletteGroup = paletteBoxGroup
                 paletteBoxGroup.x = 5
+            }
+
+            var properties = editor.documentHandler.codeHandler.openNestedProperties(editingFragment)
+            for (var j = 0; j < properties.length; ++j){
+                var efp = properties[j]
+                var propertyContainer = propertyContainerFactory.createObject(container)
+                propertyContainer.z = 3000 + properties.length - j
+                container.sortChildren()
+
+                propertyContainer.title = efp.identifier()
+                propertyContainer.documentHandler = objectContainer.editor.documentHandler
+                propertyContainer.propertyContainerFactory = propertyContainerFactory
+
+                propertyContainer.editor = objectContainer.editor
+                propertyContainer.editingFragment = efp
+
+                propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
+                propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
+                propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
             }
 
             compact = false
