@@ -11,38 +11,35 @@ QmlBindingSpan::QmlBindingSpan(QmlEditFragment* fragment)
 }
 
 QmlBindingSpan::~QmlBindingSpan(){
-    if ( m_inputChannel ){
-        QObject::disconnect(m_inputChannel.data(), &QmlBindingChannel::runnableObjectReady, nullptr, nullptr);
+    if ( m_connectionChannel ){
+        QObject::disconnect(m_connectionChannel.data(), &QmlBindingChannel::runnableObjectReady, nullptr, nullptr);
     }
 }
 
-void QmlBindingSpan::setInputChannel(QmlBindingChannel::Ptr bc){
-    if ( m_inputChannel ){
+void QmlBindingSpan::setConnectionChannel(QmlBindingChannel::Ptr bc){
+    if ( m_connectionChannel ){
         QObject::disconnect(
-            m_inputChannel.data(), &QmlBindingChannel::runnableObjectReady,
+            m_connectionChannel.data(), &QmlBindingChannel::runnableObjectReady,
             m_fragment, &QmlEditFragment::__inputRunnableObjectReady);
     }
 
-    m_inputChannel = bc;
+    m_connectionChannel = bc;
 
-    if ( m_inputChannel ){
+    if ( m_connectionChannel ){
         QObject::connect(
-            m_inputChannel.data(), &QmlBindingChannel::runnableObjectReady,
+            m_connectionChannel.data(), &QmlBindingChannel::runnableObjectReady,
             m_fragment, &QmlEditFragment::__inputRunnableObjectReady);
     }
 }
 
-void QmlBindingSpan::addOutputChannel(QmlBindingChannel::Ptr bc){
+void QmlBindingSpan::addChannel(QmlBindingChannel::Ptr bc){
     m_outputChannels.append(bc);
 }
 
 void QmlBindingSpan::commit(const QVariant &value){
-    for ( auto it = m_outputChannels.begin(); it != m_outputChannels.end(); ++it ){
-        QmlBindingChannel::Ptr& bc = *it;
-        if ( bc->canModify() ){
-            if ( bc->listIndex() == -1 ){
-                bc->property().write(value);
-            }
+    if ( m_connectionChannel && m_connectionChannel->canModify() ){
+        if ( m_connectionChannel->listIndex() == -1 ){
+            m_connectionChannel->property().write(value);
         }
     }
 }

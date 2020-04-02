@@ -84,7 +84,7 @@ void QmlEditFragment::setRelativeBinding(const QSharedPointer<QmlBindingPath> &b
     if ( !root )
         return;
 
-    QList<QmlBindingChannel::Ptr> bc = root->bindingSpan()->outputChannels();
+    QList<QmlBindingChannel::Ptr> bc = root->bindingSpan()->channels();
     for ( auto it = bc.begin(); it != bc.end(); ++it ){
         QmlBindingChannel::Ptr& bc = *it;
         if ( bc->isEnabled() ){
@@ -92,7 +92,7 @@ void QmlEditFragment::setRelativeBinding(const QSharedPointer<QmlBindingPath> &b
             Runnable* r = bc->runnable();
             QmlBindingChannel::Ptr newbc = DocumentQmlInfo::traverseBindingPath(newbp, r);
             newbc->setEnabled(true);
-            bindingSpan()->addOutputChannel(newbc);
+            bindingSpan()->addChannel(newbc);
         }
     }
 }
@@ -128,6 +128,19 @@ bool QmlEditFragment::isForProperty() const{
 
 bool QmlEditFragment::isForSlot() const{
     return m_declaration->isForSlot();
+}
+
+bool QmlEditFragment::isBuilder() const{
+    if ( m_bindingSpan->connectionChannel() )
+        return m_bindingSpan->connectionChannel()->isBuilder();
+    return false;
+}
+
+void QmlEditFragment::rebuild(){
+    if ( !isBuilder() || !m_bindingSpan->connectionChannel() )
+        return;
+
+    m_bindingSpan->connectionChannel()->rebuild();
 }
 
 CodePalette *QmlEditFragment::palette(const QString &type){
@@ -232,7 +245,7 @@ QString QmlEditFragment::readValueText() const{
 }
 
 void QmlEditFragment::updatePaletteValue(CodePalette *palette){
-    QmlBindingChannel::Ptr inputChannel = bindingSpan()->inputChannel();
+    QmlBindingChannel::Ptr inputChannel = bindingSpan()->connectionChannel();
     if ( !inputChannel )
         return;
 
@@ -309,7 +322,7 @@ QList<QObject *> QmlEditFragment::getChildFragments() const{
 }
 
 void QmlEditFragment::updateValue(){
-    QmlBindingChannel::Ptr inputPath = bindingSpan()->inputChannel();
+    QmlBindingChannel::Ptr inputPath = bindingSpan()->connectionChannel();
 
     if ( inputPath && inputPath->listIndex() == -1 ){
         for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
@@ -325,7 +338,7 @@ void QmlEditFragment::updateValue(){
 }
 
 void QmlEditFragment::__inputRunnableObjectReady(){
-    QmlBindingChannel::Ptr inputChannel = bindingSpan()->inputChannel();
+    QmlBindingChannel::Ptr inputChannel = bindingSpan()->connectionChannel();
     if ( inputChannel && inputChannel->listIndex() == -1 ){
         inputChannel->property().connectNotifySignal(this, SLOT(updateValue()));
     }

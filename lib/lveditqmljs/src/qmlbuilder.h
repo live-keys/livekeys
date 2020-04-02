@@ -23,6 +23,8 @@ public:
     void setSourceComponent(QQmlComponent* sourceComponent);
     void setSource(const QString& source);
 
+    void rebuild();
+
 public slots:
     void __updateImplicitWidth();
     void __updateImplicitHeight();
@@ -36,6 +38,8 @@ protected:
     void componentComplete() override;
 
 private:
+    void build();
+
     QQmlComponent* m_sourceComponent;
     QString        m_source;
     QObject*       m_object;

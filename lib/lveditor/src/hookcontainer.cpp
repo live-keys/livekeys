@@ -28,4 +28,25 @@ void HookContainer::insertKey(const QString &file, const QString &id, QObject *o
     idIt.value().append(obj);
 }
 
+QStringList HookContainer::entriesForFile(const QString &sourceFile){
+    auto it = m_entries.find(sourceFile);
+    if ( it == m_entries.end() )
+        return QStringList();
+
+    return it.value().keys();
+}
+
+QList<QObject *> HookContainer::entriesFor(const QString &file, const QString &id){
+    auto it = m_entries.find(file);
+    if ( it == m_entries.end() ){
+        return QList<QObject*>();
+    }
+
+    auto idIt = it.value().find(id);
+    if ( idIt == it.value().end() )
+        return QList<QObject*>();
+
+    return idIt.value();
+}
+
 }// namespace

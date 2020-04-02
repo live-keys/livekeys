@@ -9,6 +9,9 @@
 #include "live/visuallogqt.h"
 #include "live/hookcontainer.h"
 
+#include "live/project.h"
+#include "live/projectdocument.h"
+
 namespace lv{
 
 QmlBuilder::QmlBuilder(QQuickItem *parent)
@@ -25,6 +28,13 @@ void QmlBuilder::setSource(const QString &source){
 
     m_source = source;
     emit sourceChanged();
+}
+
+void QmlBuilder::rebuild(){
+    m_object->deleteLater();
+    m_object = nullptr;
+
+    build();
 }
 
 void QmlBuilder::__updateImplicitWidth(){
@@ -52,14 +62,34 @@ void QmlBuilder::componentComplete(){
     HookContainer* hk = qobject_cast<HookContainer*>(ctx->contextProperty("hooks").value<QObject*>());
     hk->insertKey(m_source, id, this);
 
+    build();
+}
+
+void QmlBuilder::build(){
+    QQmlContext* ctx = qmlContext(this);
     QQmlEngine* engine = qmlEngine(this);
 
+    Project* proj = qobject_cast<Project*>(ctx->contextProperty("project").value<QObject*>());
+
+    ProjectDocument* doc = qobject_cast<ProjectDocument*>(proj->isOpened(m_source));
+    QByteArray contentBytes;
+    if ( doc ){
+        contentBytes = doc->content();
+    } else {
+        QFile f(m_source);
+        if ( !f.open(QFile::ReadOnly) ){
+            Exception e = CREATE_EXCEPTION(Exception, "Failed to read file for running:" + m_source.toStdString(), Exception::toCode("~File"));
+            return;
+        }
+        contentBytes = f.readAll();
+    }
+
     QQmlComponent component(engine);
-    component.loadUrl(QUrl::fromLocalFile(m_source));
+    component.setData(contentBytes, m_source);
 
     QList<QQmlError> errors = component.errors();
     if ( errors.size() ){
-        qDebug() << "HAVE ERRORS";
+        qDebug() << "ERRORS: " << component.errorString();
 //        emit runError(m_viewEngine->toJSErrors(errors));
         return;
     }
@@ -67,7 +97,7 @@ void QmlBuilder::componentComplete(){
     m_object = component.create(ctx);
     errors = component.errors();
     if ( errors.size() ){
-        qDebug() << "HAVE ERRORS";
+        qDebug() << "ERRORS" << component.errorString();
 //        emit runError(m_viewEngine->toJSErrors(errors));
         return;
     }

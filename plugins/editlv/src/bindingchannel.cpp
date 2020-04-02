@@ -23,6 +23,7 @@ BindingChannel::BindingChannel(el::BindingPath::Ptr bindingPath, Runnable *runna
     , m_runnable(runnable)
     , m_listIndex(-1)
     , m_enabled(false)
+    , m_builder(false)
 {
     connect(runnable, &Runnable::objectReady, this, &BindingChannel::__runnableReady);
 }

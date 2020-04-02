@@ -33,17 +33,17 @@ public:
 
     void commit(const QVariant& value);
 
-    void addOutputChannel(BindingChannel::Ptr bc);
-    const QList<BindingChannel::Ptr>& outputChannels() const;
+    void connectChannel(BindingChannel::Ptr bc);
+    const BindingChannel::Ptr& connectedChannel() const;
 
-    void setInputChannel(BindingChannel::Ptr bc);
-    const BindingChannel::Ptr& inputChannel() const;
+    const QList<BindingChannel::Ptr>& channels() const;
 
 private:
     LvEditFragment*                 m_fragment;
     el::BindingPath::Ptr            m_expressionPath;
-    QList<BindingChannel::Ptr>      m_outputChannels;
-    BindingChannel::Ptr             m_inputChannel;
+
+    QList<BindingChannel::Ptr>      m_channels;
+    BindingChannel::Ptr             m_connectedChannel;
 };
 
 
@@ -55,12 +55,12 @@ inline el::BindingPath::Ptr BindingSpan::expressionPath(){
     return m_expressionPath;
 }
 
-inline const QList<BindingChannel::Ptr> &BindingSpan::outputChannels() const{
-    return m_outputChannels;
+inline const BindingChannel::Ptr &BindingSpan::connectedChannel() const{
+    return m_connectedChannel;
 }
 
-inline const BindingChannel::Ptr &BindingSpan::inputChannel() const{
-    return m_inputChannel;
+inline const QList<BindingChannel::Ptr> &BindingSpan::channels() const{
+    return m_channels;
 }
 
 }// namespace

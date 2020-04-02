@@ -10,7 +10,8 @@ Rectangle{
 
     signal toggleCompact()
     signal erase()
-    signal openConnections()
+    signal rebuild()
+    signal toggleConnections()
     signal addPalette()
     signal compose()
     signal paletteToPane()
@@ -83,6 +84,7 @@ Rectangle{
         MouseArea{
             anchors.fill: parent
             onClicked: {
+                objectContainerTitle.toggleConnections()
             }
         }
     }
@@ -128,9 +130,28 @@ Rectangle{
     }
 
     Item{
-        id: paletteToPane
+        id: rebuild
         anchors.right: parent.right
         anchors.rightMargin: 100 - (closeObjectItem.visible ? 0 : 18)
+        anchors.verticalCenter: parent.verticalCenter
+        width: 15
+        height: 20
+        Image{
+            anchors.centerIn: parent
+            source: "qrc:/images/palette-integrate.png"
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                objectContainerTitle.rebuild()
+            }
+        }
+    }
+
+    Item{
+        id: paletteToPane
+        anchors.right: parent.right
+        anchors.rightMargin: 120 - (closeObjectItem.visible ? 0 : 18)
         anchors.verticalCenter: parent.verticalCenter
         width: 15
         height: 20

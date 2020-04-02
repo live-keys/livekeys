@@ -33,7 +33,6 @@ using namespace lv;
 int main(int argc, char *argv[]){
 
     ApplicationContext::initialize(Livekeys::startupConfiguration());
-    QtWebEngine::initialize();
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::addLibraryPath(QString::fromStdString(lv::ApplicationContext::instance().librariesPath()));
@@ -41,6 +40,8 @@ int main(int argc, char *argv[]){
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName("Livekeys");
     QGuiApplication::setApplicationVersion(Livekeys::versionString());
+
+    QtWebEngine::initialize();
 
     app.setOrganizationName("Livekeys");
     app.setOrganizationDomain("Livekeys");
