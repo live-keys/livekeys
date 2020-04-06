@@ -82,6 +82,9 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
         uri, 1, 0, "KeyMap", "KeyMap is available through the \'lk.layers.workspace.keymap.\' property.");
     qmlRegisterUncreatableType<lv::ThemeContainer>(
         uri, 1, 0, "ThemeContainer", "ThemeContainer is available through the \'lk.layers.workspace.themes.\' property.");
+    qmlRegisterUncreatableType<lv::StartupModel>(
+        uri, 1, 0, "StartupModel", "StartupModel objects are available through \'lk.layers.workspace.(recents/tutorials/samples)\'.");
+
 }
 
 void EditorPrivatePlugin::initializeEngine(QQmlEngine *, const char *){

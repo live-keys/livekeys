@@ -19,6 +19,7 @@
 #include "workspace.h"
 #include "projectworkspace.h"
 #include "documentation.h"
+#include "startupmodel.h"
 
 #include <QQuickItem>
 #include <QQmlEngine>
@@ -50,6 +51,8 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_project(nullptr)
     , m_extensions(nullptr)
     , m_documentation(nullptr)
+    , m_tutorials(new StartupModel())
+    , m_samples(new StartupModel())
 {
     Settings* settings = lv::ViewContext::instance().settings();
 
@@ -93,6 +96,8 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
 
 WorkspaceLayer::~WorkspaceLayer(){
     delete m_themes;
+    delete m_tutorials;
+    delete m_samples;
 }
 
 void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
@@ -189,6 +194,21 @@ QObject *WorkspaceLayer::nextViewParent(){
 
 QObject *WorkspaceLayer::viewRoot(){
     return m_viewRoot;
+}
+
+StartupModel *WorkspaceLayer::recents() const
+{
+    return m_workspace->recents();
+}
+
+StartupModel *WorkspaceLayer::tutorials() const
+{
+    return m_tutorials;
+}
+
+StartupModel *WorkspaceLayer::samples() const
+{
+    return m_samples;
 }
 
 QJSValue WorkspaceLayer::interceptMenu(QJSValue context){
@@ -454,12 +474,26 @@ void WorkspaceLayer::loadConfigurations(){
             if ( Package::existsIn(packagePath) ){
                 Package::Ptr p = Package::createFromPath(packagePath);
                 if ( p ){
-                    //TODO #426: Store in model
-//                    vlog() << "Package : " << p->name() << " tutorials label : " << p->workspaceTutorialsLabel();
-//                    for ( auto section : p->workspaceTutorialsSections() ){
-//                        vlog() << "Tutorial: " << section.first;
-//                        vlog() << "In path: " << p->path() + "/" + section.second;
-//                    }
+                    m_tutorials->addStartupEntry(
+                        StartupModel::StartupEntry(
+                            true,
+                            QString::fromStdString(p->name()),
+                            QString::fromStdString(p->workspaceTutorialsLabel()),
+                            ""
+                        )
+                    );
+                    for ( auto section : p->workspaceTutorialsSections() ){
+
+                        m_tutorials->addStartupEntry(
+                            StartupModel::StartupEntry(
+                                false,
+                                QString::fromStdString(section.first),
+                                QString::fromStdString(section.first),
+                                QString::fromStdString(p->path() + "/" + section.second)
+                            )
+                        );
+                    }
+
                 }
             }
         }
@@ -474,11 +508,14 @@ void WorkspaceLayer::loadConfigurations(){
             if ( Package::existsIn(packagePath) ){
                 Package::Ptr p = Package::createFromPath(packagePath);
                 if ( p ){
-                    //TODO #426: Store in model
-//                    vlog() << "Package : " << p->name();
-//                    for ( auto sample : p->workspaceSamples() ){
-//                        vlog() << "Sample: " << sample;
-//                    }
+                    QString name = QString::fromStdString(p->name());
+                    m_samples->addStartupEntry(StartupModel::StartupEntry(true, name, name, ""));
+                    for ( auto sample : p->workspaceSamples() ){
+                        QString path = QString::fromStdString(p->path() + "/" + sample);
+                        QFileInfo f(path);
+                        QString name = f.baseName();
+                        m_samples->addStartupEntry(StartupModel::StartupEntry(false, name, name, path));
+                    }
                 }
             }
         }

@@ -13,6 +13,7 @@
 #include "commands.h"
 #include "extensions.h"
 #include "documentation.h"
+#include "startupmodel.h"
 
 class QQuickCloseEvent;
 
@@ -33,6 +34,9 @@ class WorkspaceLayer : public Layer{
     Q_PROPERTY(lv::ThemeContainer* themes       READ themes        CONSTANT)
     Q_PROPERTY(lv::Documentation* documentation READ documentation CONSTANT)
     Q_PROPERTY(QQmlPropertyMap* extensions      READ extensions    CONSTANT)
+    Q_PROPERTY(lv::StartupModel* recents        READ recents       CONSTANT)
+    Q_PROPERTY(lv::StartupModel* tutorials      READ tutorials     CONSTANT)
+    Q_PROPERTY(lv::StartupModel* samples        READ samples       CONSTANT)
 
 public:
     explicit WorkspaceLayer(QObject *parent = nullptr);
@@ -51,7 +55,9 @@ public:
     lv::ThemeContainer* themes() const;
     lv::Documentation* documentation() const;
     Workspace* workspace() const;
-
+    lv::StartupModel* recents() const;
+    lv::StartupModel* tutorials() const;
+    lv::StartupModel* samples() const;
 public slots:
     QJSValue interceptMenu(QJSValue context);
     QJSValue interceptFile(const QString& path, int mode);
@@ -96,6 +102,9 @@ private:
     Extensions*    m_extensions;
     Workspace*     m_workspace;
     Documentation* m_documentation;
+
+    StartupModel*  m_tutorials;
+    StartupModel*  m_samples;
 };
 
 inline QObject *WorkspaceLayer::project() const{

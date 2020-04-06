@@ -32,6 +32,7 @@ HEADERS += \
     $$PWD/projectworkspace.h \
     $$PWD/runnable.h \
     $$PWD/runnablecontainer.h \
+    $$PWD/startupmodel.h \
     $$PWD/syntaxhighlighter.h \
     $$PWD/textdocumentdata.h \
     $$PWD/texteditnodedebugmodel.h \
@@ -73,6 +74,7 @@ SOURCES += \
     $$PWD/projectworkspace.cpp \
     $$PWD/runnable.cpp \
     $$PWD/runnablecontainer.cpp \
+    $$PWD/startupmodel.cpp \
     $$PWD/syntaxhighlighter.cpp \
     $$PWD/textdocumentdata.cpp \
     $$PWD/texteditnodedebugmodel.cpp \
