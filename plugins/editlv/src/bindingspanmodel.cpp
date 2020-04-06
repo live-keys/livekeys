@@ -29,19 +29,19 @@ BindingSpanModel::~BindingSpanModel(){
 }
 
 int BindingSpanModel::rowCount(const QModelIndex &) const{
-    return m_edit->bindingSpan()->outputChannels().size();
+    return m_edit->bindingSpan()->channels().size();
 }
 
 QVariant BindingSpanModel::data(const QModelIndex &index, int role) const{
     BindingSpan* b = m_edit->bindingSpan();
-    if ( index.row() < b->outputChannels().size() ){
+    if ( index.row() < b->channels().size() ){
         if ( role == BindingSpanModel::Path ){
-            QStringList cp = createPath(b->outputChannels().at(index.row())->bindingPath());
+            QStringList cp = createPath(b->channels().at(index.row())->bindingPath());
             return cp;
         } else if ( role == BindingSpanModel::IsConnected ){
-            return b->outputChannels().at(index.row())->isEnabled();
+            return b->channels().at(index.row())->isEnabled();
         } else if ( role == BindingSpanModel::RunnableName ){
-            QString path = b->outputChannels().at(index.row())->runnable()->path();
+            QString path = b->channels().at(index.row())->runnable()->path();
             return path.mid(path.lastIndexOf('/') + 1);
         }
     }
@@ -52,8 +52,8 @@ QVariant BindingSpanModel::data(const QModelIndex &index, int role) const{
 void BindingSpanModel::makePathInput(int index){
     BindingSpan* bspan = m_edit->bindingSpan();
     int currentIndex = inputPathIndex();
-    if ( currentIndex != index && index < bspan->outputChannels().size() ){
-        bspan->setInputChannel(bspan->outputChannels()[index]);
+    if ( currentIndex != index && index < bspan->channels().size() ){
+        bspan->connectChannel(bspan->channels()[index]);
         //TODO: Propagate to all child edits
         emit inputPathIndexChanged(index);
     }
@@ -62,10 +62,10 @@ void BindingSpanModel::makePathInput(int index){
 void BindingSpanModel::setPathConnection(int index, bool connection){
     BindingSpan* bspan = m_edit->bindingSpan();
 
-    if ( index >= bspan->outputChannels().size() )
+    if ( index >= bspan->channels().size() )
         return;
 
-    BindingChannel::Ptr c = bspan->outputChannels().at(index);
+    BindingChannel::Ptr c = bspan->channels().at(index);
     if ( c->isEnabled() != connection ){
         c->setEnabled(connection);
 
@@ -83,8 +83,8 @@ void BindingSpanModel::__scannerBindingPathAdded(){
     BindingChannel::Ptr bc = BindingChannel::create(bp, r);
     BindingSpan* b = m_edit->bindingSpan();
 
-    beginInsertRows(QModelIndex(), b->outputChannels().size(), b->outputChannels().size());
-    b->addOutputChannel(bc);
+    beginInsertRows(QModelIndex(), b->channels().size(), b->channels().size());
+    b->connectChannel(bc);
 
     endInsertRows();
 }
@@ -115,11 +115,11 @@ QStringList BindingSpanModel::createPath(const el::BindingPath::Ptr &bp) const{
 
 int BindingSpanModel::inputPathIndex() const{
     BindingSpan* b = m_edit->bindingSpan();
-    if ( !b->inputChannel() )
+    if ( !b->connectedChannel() )
         return -1;
 
-    for ( int i = 0; i < b->outputChannels().size(); ++i ){
-        if ( b->outputChannels()[i] == b->inputChannel() ){
+    for ( int i = 0; i < b->channels().size(); ++i ){
+        if ( b->channels()[i] == b->connectedChannel() ){
             return i;
         }
     }

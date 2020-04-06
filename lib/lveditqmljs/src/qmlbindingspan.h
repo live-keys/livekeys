@@ -33,17 +33,17 @@ public:
 
     void commit(const QVariant& value);
 
-    void addOutputChannel(QmlBindingChannel::Ptr bc);
-    const QList<QmlBindingChannel::Ptr>& outputChannels() const;
+    void addChannel(QmlBindingChannel::Ptr bc);
+    const QList<QmlBindingChannel::Ptr>& channels() const;
 
-    void setInputChannel(QmlBindingChannel::Ptr bc);
-    const QmlBindingChannel::Ptr& inputChannel() const;
+    void setConnectionChannel(QmlBindingChannel::Ptr bc);
+    const QmlBindingChannel::Ptr& connectionChannel() const;
 
 private:
     QmlEditFragment*              m_fragment;
     QmlBindingPath::Ptr           m_expressionPath;
     QList<QmlBindingChannel::Ptr> m_outputChannels;
-    QmlBindingChannel::Ptr        m_inputChannel;
+    QmlBindingChannel::Ptr        m_connectionChannel;
 };
 
 
@@ -55,12 +55,12 @@ inline QmlBindingPath::Ptr QmlBindingSpan::expressionPath(){
     return m_expressionPath;
 }
 
-inline const QList<QmlBindingChannel::Ptr> &QmlBindingSpan::outputChannels() const{
+inline const QList<QmlBindingChannel::Ptr> &QmlBindingSpan::channels() const{
     return m_outputChannels;
 }
 
-inline const QmlBindingChannel::Ptr &QmlBindingSpan::inputChannel() const{
-    return m_inputChannel;
+inline const QmlBindingChannel::Ptr &QmlBindingSpan::connectionChannel() const{
+    return m_connectionChannel;
 }
 
 }// namespace

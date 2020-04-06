@@ -1,12 +1,13 @@
 PLUGIN_NAME = squareone
 PLUGIN_PATH = squareone
 
-TEMPLATE = subdirs
 
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
 include($$getGlobalFile(plugin.pri))
 
 uri = squareone
+
+TEMPLATE = subdirs
 
 # Deploy the tutorials
 
@@ -23,4 +24,7 @@ OTHER_FILES += \
     qml/live.package.json \
     tutorials/workspace/*.* \
     tutorials/filters/*.*
+
+DISTFILES += \
+    tutorials/workspace/live.project.json
 

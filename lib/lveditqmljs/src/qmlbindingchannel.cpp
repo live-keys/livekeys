@@ -2,7 +2,11 @@
 #include "live/codepalette.h"
 #include "live/qmleditfragment.h"
 #include "live/runnable.h"
+#include "live/hookcontainer.h"
 #include "documentqmlinfo.h"
+#include "qmlbuilder.h"
+
+#include <QQmlContext>
 
 namespace lv{
 
@@ -35,11 +39,34 @@ QmlBindingChannel::QmlBindingChannel(QmlBindingPath::Ptr bindingPath, Runnable *
     , m_runnable(runnable)
     , m_listIndex(-1)
     , m_enabled(false)
+    , m_builder(false)
 {
     connect(runnable, &Runnable::objectReady, this, &QmlBindingChannel::__runableReady);
 }
 
 QmlBindingChannel::~QmlBindingChannel(){
+}
+
+void QmlBindingChannel::rebuild(){
+    HookContainer* hooks = qobject_cast<HookContainer*>(
+        m_runnable->viewContext()->contextProperty("hooks").value<QObject*>()
+    );
+
+    if ( !hooks )
+        return;
+
+    QString file = m_bindingPath->rootFile();
+    QmlBindingPath::ComponentNode* cn = (QmlBindingPath::ComponentNode*)m_bindingPath->root()->child;
+    QString builderId = cn->name;
+
+    QList<QObject*> builders = hooks->entriesFor(file, builderId);
+
+    for ( QObject* ob : builders ){
+        QmlBuilder* builder = qobject_cast<QmlBuilder*>(ob);
+        if ( builder ){
+            builder->rebuild();
+        }
+    }
 }
 
 void QmlBindingChannel::__runableReady(){

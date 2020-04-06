@@ -52,7 +52,7 @@ void QmlComponentMap::process(){
         m_fContexts.append(ctx);
 
         QObject* obj = qobject_cast<QObject*>(m_f->create(ctx));
-        if ( obj == 0 ){
+        if ( obj == nullptr ){
             qCritical("MapArray: Failed to create item: %s", qPrintable(m_f->errorString()));
             return;
         }

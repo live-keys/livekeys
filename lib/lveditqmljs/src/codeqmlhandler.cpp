@@ -47,6 +47,9 @@
 #include "live/palettecontainer.h"
 #include "live/qmlpropertywatcher.h"
 #include "live/runnablecontainer.h"
+#include "live/hookcontainer.h"
+
+#include "qmlsuggestionmodel.h"
 
 #include "qmlsuggestionmodel.h"
 
@@ -1023,15 +1026,43 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
             QmlEditFragment* ef = new QmlEditFragment(declaration);
             bc->setEnabled(true);
             ef->bindingSpan()->setExpressionPath(bp);
-            ef->bindingSpan()->setInputChannel(bc);
-            ef->bindingSpan()->addOutputChannel(bc);
+            ef->bindingSpan()->addChannel(bc);
+            ef->bindingSpan()->setConnectionChannel(bc);
             return ef;
         }
+        QmlEditFragment* ef = new QmlEditFragment(declaration);
 
         QString fileName = declaration->document()->file()->name();
         if ( fileName.length() && fileName.front().isUpper() ){ // if component
-            QmlEditFragment* ef = new QmlEditFragment(declaration);
-            ef->bindingModel(this);
+            RunnableContainer* rc = project->runnables();
+            int totalRunnables = rc->rowCount();
+            for ( int i = 0; i < totalRunnables; ++i ){
+                Runnable* run = rc->runnableAt(i);
+                if ( !run->name().isEmpty() && run->type() == Runnable::QmlFile ){
+                    HookContainer* hooks = qobject_cast<HookContainer*>(
+                        run->viewContext()->contextProperty("hooks").value<QObject*>()
+                    );
+
+                    if ( hooks ){
+                        QString filePath = declaration->document()->file()->path();
+                        QStringList entries = hooks->entriesForFile(filePath);
+                        for ( const QString& entry : entries ){
+                            QmlBindingPath::Ptr builderBp = QmlBindingPath::create();
+                            builderBp->appendFile(filePath);
+                            builderBp->appendComponent(entry, entry);
+                            QmlBindingChannel::Ptr builderC = QmlBindingChannel::create(builderBp, run);
+                            builderC->setIsBuilder(true);
+                            builderC->setEnabled(true);
+                            ef->bindingSpan()->setExpressionPath(bp);
+                            if ( ef->bindingSpan()->channels().size() == 0 )
+                                ef->bindingSpan()->setConnectionChannel(builderC);
+                            ef->bindingSpan()->addChannel(builderC);
+                        }
+                    }
+                }
+            }
+
+
             return ef;
         }
     }
@@ -1399,7 +1430,7 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
         }
     }
 
-    QList<QmlBindingChannel::Ptr> bchannels = edit->bindingSpan()->outputChannels();
+    QList<QmlBindingChannel::Ptr> bchannels = edit->bindingSpan()->channels();
     for ( auto it = bchannels.begin(); it != bchannels.end(); ++it ){
         QmlBindingChannel::Ptr receivingChannel = *it;
         if ( receivingChannel->isEnabled() ){
@@ -1555,7 +1586,7 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
     if ( bp.isNull() )
         return false;
 
-    QList<QmlBindingChannel::Ptr> bchannels = edit->bindingSpan()->outputChannels();
+    QList<QmlBindingChannel::Ptr> bchannels = edit->bindingSpan()->channels();
     for ( auto it = bchannels.begin(); it != bchannels.end(); ++it ){
         QmlBindingChannel::Ptr signalChannel = *it;
         if ( signalChannel->isEnabled() ){
@@ -1701,7 +1732,7 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position, QObject* /*current
         }
     });
 
-    QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->inputChannel();
+    QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->connectionChannel();
     if ( inputChannel && inputChannel->listIndex() == -1 ){
         inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
     }
@@ -1769,7 +1800,7 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
         }
     });
 
-    QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->inputChannel();
+    QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->connectionChannel();
     if ( inputChannel && inputChannel->listIndex() == -1 ){
         inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
     }
@@ -1954,7 +1985,7 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
                 }
             });
 
-            QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->inputChannel();
+            QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->connectionChannel();
             if ( inputChannel && inputChannel->listIndex() == -1 ){
                 inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
             }
@@ -1981,7 +2012,7 @@ void CodeQmlHandler::removeConnection(QmlEditFragment *edit){
 
 void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
     QList<QObject*> toRemove;
-    QList<QmlBindingChannel::Ptr> channels = edit->bindingSpan()->outputChannels();
+    QList<QmlBindingChannel::Ptr> channels = edit->bindingSpan()->channels();
     for ( auto it = channels.begin(); it != channels.end(); ++it ){
         const QmlBindingChannel::Ptr& bc = *it;
         if ( bc->isEnabled() ){
@@ -2961,7 +2992,7 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
         id = spl[1];
     } else type = ctype;
 
-    const QList<QmlBindingChannel::Ptr>& outputChannels = edit->bindingSpan()->outputChannels();
+    const QList<QmlBindingChannel::Ptr>& outputChannels = edit->bindingSpan()->channels();
     for ( auto it = outputChannels.begin(); it != outputChannels.end(); ++it ){
         QmlBindingChannel::Ptr bc = *it;
 

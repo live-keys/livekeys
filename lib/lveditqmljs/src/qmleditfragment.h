@@ -91,6 +91,9 @@ public slots:
     bool isForProperty() const;
     bool isForSlot() const;
 
+    bool isBuilder() const;
+    void rebuild();
+
     int totalPalettes() const;
     lv::QmlEditFragment* parentFragment();
     lv::CodePalette* bindingPalette();

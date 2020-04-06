@@ -11,8 +11,8 @@ Rectangle{
 
     width: 400
     height: connectionList.contentHeight > maxHeight
-        ? maxHeight + loadingAnimation.height
-        : connectionList.contentHeight + 5 + loadingAnimation.height
+        ? maxHeight
+        : connectionList.contentHeight + 5
     color: "#03070a"
     border.width: 1
     border.color: "#333"
@@ -28,8 +28,6 @@ Rectangle{
     property int maxHeight: 160
     property int fontSize: 12
     property int smallFontSize: 9
-
-    property bool isScanning: model ? model.isScanning : false
 
     signal paletteSelected(int index)
     signal cancelled()
@@ -92,7 +90,7 @@ Rectangle{
         id: connectionListScroll
         anchors.top : parent.top
 
-        height : root.height - loadingAnimation.height - 2
+        height : root.height - 2
         width: root.width - 2
         flickableItem.contentWidth: controlledWidth
 
@@ -145,8 +143,7 @@ Rectangle{
                     height : 25
 
                     property var modelPath : model.path
-                    property bool isEnabled: model.isConnected
-                    property bool isInput: connectionList.model.inputPathIndex === index
+                    property bool isEnabled: connectionList.model.inputPathIndex === index
 
                     Component.onCompleted: {
                         if ( width > connectionListScroll.controlledWidth )
@@ -241,12 +238,11 @@ Rectangle{
                                 }
                             }
                         }
-
                     }
 
                     Rectangle{
                         height: parent.height
-                        width: 50
+                        width: 25
                         color: root.color
                         anchors.top: parent.top
                         anchors.topMargin: 1
@@ -254,38 +250,14 @@ Rectangle{
                         anchors.leftMargin: connectionList.width - width + connectionListScroll.flickableItem.contentX
 
                         property bool isEnabled: parent.isEnabled
-                        property bool isInput: parent.isInput
 
                         Rectangle{
                             width: parent.isEnabled ? 7 : 2
                             height: parent.isEnabled ? 7 : 2
                             anchors.verticalCenter: parent.verticalCenter
-                            anchors.left: parent.left
-                            anchors.leftMargin: parent.isEnabled ? 7 : 10
-                            color: "#878e99"
-                        }
-
-                        MouseArea{
-                            width: 20
-                            height: parent.height
-                            anchors.left: parent.left
-                            onClicked: {
-                                if ( parent.isEnabled ){
-                                    connectionList.model.setPathConnection(index, false)
-                                } else {
-                                    connectionList.model.setPathConnection(index, true)
-                                }
-                            }
-                        }
-
-
-                        Rectangle{
-                            width: parent.isInput ? 7 : 2
-                            height: parent.isInput ? 7 : 2
-                            anchors.verticalCenter: parent.verticalCenter
                             anchors.right: parent.right
                             radius: 3
-                            anchors.rightMargin: parent.isInput ? 12 : 15
+                            anchors.rightMargin: parent.isEnabled ? 12 : 15
                             color: "#878e99"
                         }
 
@@ -295,7 +267,7 @@ Rectangle{
                             anchors.right: parent.right
                             anchors.rightMargin: 5
                             onClicked: {
-                                connectionList.model.makePathInput(index)
+                                connectionList.model.connectPathAtIndex(index)
                             }
                         }
                     }
@@ -313,15 +285,6 @@ Rectangle{
                 }
             }
         }
-    }
-
-    LoadingAnimation{
-        id: loadingAnimation
-        visible: root.isScanning
-        height: visible ? 10 : 0
-        width: 40
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
     }
 }
 

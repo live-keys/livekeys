@@ -1,10 +1,10 @@
 PLUGIN_NAME = nodeeditor
 PLUGIN_PATH = workspace/nodeeditor
 
-TEMPLATE = subdirs
-
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
 include($$getGlobalFile(plugin.pri))
+
+TEMPLATE = subdirs
 
 # Deploy the samples
 

@@ -52,6 +52,7 @@ public:
     void setName(const QString& name);
 
     QObject* viewRoot();
+    QQmlContext* viewContext();
     el::Element* elementRoot();
 
     const QSet<QString>& activations() const;
@@ -64,8 +65,8 @@ public:
 
 public slots:
     void engineObjectAcquired(const QUrl& file, QObject* ref);
-    void engineObjectReady(QObject* object, const QUrl& file, QObject* ref);
-    void engineObjectCreationError(QJSValue errors, const QUrl&, QObject* reference);
+    void engineObjectReady(QObject* object, const QUrl& file, QObject* ref, QQmlContext* context);
+    void engineObjectCreationError(QJSValue errors, const QUrl&, QObject* reference, QQmlContext* context);
 
     void run();
 
@@ -88,7 +89,8 @@ signals:
 private:
     void runLv();
 
-    QObject *createObject(const QByteArray& code, const QUrl& file);
+    QObject *createObject(const QByteArray& code, const QUrl& file, QQmlContext* context);
+    QQmlContext* createContext();
     void emptyRunSpace();
 
     QString               m_name;
@@ -97,6 +99,7 @@ private:
     QObject*              m_runSpace;
     ViewEngine*           m_viewEngine;
     QObject*              m_viewRoot;
+    QQmlContext*          m_viewContext;
     Type                  m_type;
     QSet<QString>         m_activations;
     Project*              m_project;
@@ -124,6 +127,10 @@ inline QObject *Runnable::runSpace(){
 
 inline QObject *Runnable::viewRoot(){
     return m_viewRoot;
+}
+
+inline QQmlContext *Runnable::viewContext(){
+    return m_viewContext;
 }
 
 inline const QSet<QString> &Runnable::activations() const{

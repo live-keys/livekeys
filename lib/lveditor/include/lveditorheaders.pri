@@ -3,6 +3,7 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/live/document.h \
     $$PWD/live/documentationloader.h \
+    $$PWD/live/hookcontainer.h \
     $$PWD/live/project.h \
     $$PWD/live/projectentry.h \
     $$PWD/live/projectfile.h \

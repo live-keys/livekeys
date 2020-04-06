@@ -48,7 +48,7 @@ void LvEditFragment::setRelativeBinding(const std::shared_ptr<el::BindingPath> &
     if ( !root )
         return;
 
-    QList<BindingChannel::Ptr> bc = root->bindingSpan()->outputChannels();
+    QList<BindingChannel::Ptr> bc = root->bindingSpan()->channels();
     for ( auto it = bc.begin(); it != bc.end(); ++it ){
         BindingChannel::Ptr& bc = *it;
         if ( bc->isEnabled() ){
@@ -57,7 +57,7 @@ void LvEditFragment::setRelativeBinding(const std::shared_ptr<el::BindingPath> &
             auto newbc = BindingChannel::create(newbp, r);
             newbc->traverseBindingPath();
             newbc->setEnabled(true);
-            bindingSpan()->addOutputChannel(newbc);
+            bindingSpan()->connectChannel(newbc);
         }
     }
 }
@@ -176,7 +176,7 @@ QString LvEditFragment::readValueText() const{
 }
 
 void LvEditFragment::updatePaletteValue(CodePalette *palette){
-    BindingChannel::Ptr inputChannel = bindingSpan()->inputChannel();
+    BindingChannel::Ptr inputChannel = bindingSpan()->connectedChannel();
     if ( !inputChannel )
         return;
 
@@ -242,7 +242,7 @@ QList<QObject *> LvEditFragment::getChildFragments() const{
 }
 
 void LvEditFragment::updateValue(){
-    BindingChannel::Ptr inputPath = bindingSpan()->inputChannel();
+    BindingChannel::Ptr inputPath = bindingSpan()->connectedChannel();
 
     if ( inputPath && inputPath->listIndex() == -1 ){
         for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
@@ -258,7 +258,7 @@ void LvEditFragment::updateValue(){
 }
 
 void LvEditFragment::__inputRunnableObjectReady(){
-    BindingChannel::Ptr inputChannel = bindingSpan()->inputChannel();
+    BindingChannel::Ptr inputChannel = bindingSpan()->connectedChannel();
     if ( inputChannel && inputChannel->listIndex() == -1 ){
 //        inputChannel->property().connectNotifySignal(this, SLOT(updateValue())); // TODO: ELEMENTS analogous
     }

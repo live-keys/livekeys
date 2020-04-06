@@ -204,7 +204,9 @@ Item{
             MouseArea{
                 id: paletteConnectionMouse
                 anchors.fill: parent
-                onClicked: paletteBoxHeader.viewPaletteConnections()
+                onClicked: {
+                    paletteBoxHeader.viewPaletteConnections()
+                }
             }
         }
 
@@ -312,9 +314,5 @@ Item{
 
         property var selectedHandler : function(){}
         property var cancelledHandler : function(index){}
-
-        //TODO
-//        onPaletteSelected: selectedHandler(index)
-//        onCancelled : cancelledHandler()
     }
 }

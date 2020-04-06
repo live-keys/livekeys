@@ -76,5 +76,6 @@
         <file alias="palette-connections.png">images/palette-connections.png</file>
         <file alias="palette-connection-component.png">images/palette-connection-component.png</file>
         <file alias="palette-connection-file.png">images/palette-connection-file.png</file>
+        <file alias="palette-integrate.png">images/palette-integrate.png</file>
     </qresource>
 </RCC>

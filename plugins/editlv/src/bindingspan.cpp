@@ -11,33 +11,29 @@ BindingSpan::BindingSpan(LvEditFragment* fragment)
 }
 
 BindingSpan::~BindingSpan(){
-    if ( m_inputChannel ){
-        QObject::disconnect(m_inputChannel.get(), &BindingChannel::runnableObjectReady, nullptr, nullptr);
+    if ( m_connectedChannel ){
+        QObject::disconnect(m_connectedChannel.get(), &BindingChannel::runnableObjectReady, nullptr, nullptr);
     }
 }
 
-void BindingSpan::setInputChannel(BindingChannel::Ptr bc){
-    if ( m_inputChannel ){
+void BindingSpan::connectChannel(BindingChannel::Ptr bc){
+    if ( m_connectedChannel ){
         QObject::disconnect(
-            m_inputChannel.get(), &BindingChannel::runnableObjectReady,
+            m_connectedChannel.get(), &BindingChannel::runnableObjectReady,
             m_fragment, &LvEditFragment::__inputRunnableObjectReady);
     }
 
-    m_inputChannel = bc;
+    m_connectedChannel = bc;
 
-    if ( m_inputChannel ){
+    if ( m_connectedChannel ){
         QObject::connect(
-            m_inputChannel.get(), &BindingChannel::runnableObjectReady,
+            m_connectedChannel.get(), &BindingChannel::runnableObjectReady,
             m_fragment, &LvEditFragment::__inputRunnableObjectReady);
     }
 }
 
-void BindingSpan::addOutputChannel(BindingChannel::Ptr bc){
-    m_outputChannels.append(bc);
-}
-
-void BindingSpan::commit(const QVariant &value){
-    for ( auto it = m_outputChannels.begin(); it != m_outputChannels.end(); ++it ){
+void BindingSpan::commit(const QVariant &/*value*/){
+    for ( auto it = m_channels.begin(); it != m_channels.end(); ++it ){
         BindingChannel::Ptr& bc = *it;
         if ( bc->canModify() ){
             if ( bc->listIndex() == -1 ){

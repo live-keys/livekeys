@@ -41,6 +41,8 @@ int main(int argc, char *argv[]){
     QGuiApplication::setApplicationName("Livekeys");
     QGuiApplication::setApplicationVersion(Livekeys::versionString());
 
+    QtWebEngine::initialize();
+
     app.setOrganizationName("Livekeys");
     app.setOrganizationDomain("Livekeys");
 

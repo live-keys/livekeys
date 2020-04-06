@@ -43,11 +43,13 @@ public:
     el::Property* property(){ return m_property; }
     bool isEnabled() const{ return m_enabled; }
     bool canModify() const;
+    bool isBuilder() const{ return m_builder; }
 
     el::BindingPath::Ptr expressionPath();
 
     void setEnabled(bool enable);
     BindingChannel::Ptr traverseBindingPath();
+
 public slots:
     void __runnableReady();
 
@@ -60,6 +62,7 @@ private:
     el::Property*           m_property;
     int                     m_listIndex;
     bool                    m_enabled;
+    bool                    m_builder;
 };
 
 inline bool BindingChannel::hasConnection() const{

@@ -16,7 +16,6 @@ class QmlBindingSpanModel : public QAbstractListModel{
 
     Q_OBJECT
     Q_PROPERTY(int inputPathIndex READ inputPathIndex NOTIFY inputPathIndexChanged)
-    Q_PROPERTY(bool isScanning    READ isScanning     NOTIFY isScanningChanged)
 
 public:
     // Model roles
@@ -36,28 +35,17 @@ public:
 
     int inputPathIndex() const;
 
-    bool isScanning() const;
-
-    void initializeScanner(CodeQmlHandler* qmlHandler);
-
 signals:
     void inputPathIndexChanged(int index);
-    void pathConnectionChanged(int index, bool connection);
-    void isScanningChanged();
 
 public slots:
-    void makePathInput(int index);
-    void setPathConnection(int index, bool connection);
-
-    void __scannerBindingPathAdded();
+    void connectPathAtIndex(int index);
 
 private:
     QStringList createPath(const QmlBindingPath::Ptr& bp) const;
 
     QHash<int, QByteArray> m_roles;
     QmlEditFragment*       m_edit;
-    QmlUsageGraphScanner*  m_scanner;
-    bool                   m_isScanning;
 };
 
 inline QHash<int, QByteArray> QmlBindingSpanModel::roleNames() const{

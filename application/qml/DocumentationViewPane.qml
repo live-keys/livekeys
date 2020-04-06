@@ -2,12 +2,29 @@ import QtQuick 2.3
 import editor 1.0
 import base 1.0
 import live 1.0
+import fs 1.0 as Fs
 
 Pane{
     id: root
     objectName : 'documentation'
     paneType: 'documentation'
     paneState : { return {} }
+
+    paneInitialize : function(s){
+        if ( s.document ){
+            if (typeof s.document === 'string' || s.document instanceof String){
+                var path = s.document
+                if (Fs.Path.isRelative(path) )
+                    path = project.path(path)
+
+                if ( !root.page )
+                    root.page = root.viewFactory.createObject()
+
+                root.page.loadDocumentationHtml(path)
+                root.pageTitle = Fs.Path.baseName(path)
+            }
+        }
+    }
 
     property var panes: null
     property Theme currentTheme : lk.layers.workspace ? lk.layers.workspace.themes.current : null
@@ -16,6 +33,10 @@ Pane{
 
     property var page : null
     property string pageTitle : ''
+
+    property var viewFactory : Component{
+        DocumentationView{}
+    }
 
     Rectangle{
         id: paneHeader

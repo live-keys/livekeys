@@ -51,6 +51,9 @@ public:
     QQmlProperty& property(){ return m_property; }
     bool isEnabled() const{ return m_enabled; }
     bool canModify() const;
+    void setIsBuilder(bool isBuilder) { m_builder = isBuilder; }
+    bool isBuilder() const{ return m_builder; }
+    void rebuild();
 
     const QMetaMethod& method() const;
 
@@ -73,6 +76,7 @@ private:
     int                 m_listIndex;
     QMetaMethod         m_method;
     bool                m_enabled;
+    bool                m_builder;
 };
 
 inline bool QmlBindingChannel::hasConnection() const{

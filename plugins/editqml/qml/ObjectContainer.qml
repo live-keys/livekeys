@@ -75,7 +75,7 @@ Item{
 
         property int topSpacing: editingFragment && !editingFragment.isRoot() ? 0 : 10
 
-        width: container.width < 160 ? 200 : container.width + 40
+        width: container.width < 260 ? 300 : container.width + 40
         height: container.height < 10 || compact ? 40 : titleHeight + objectContainerTitleWrap.height + topSpacing
 
         function closeAsPane(){
@@ -174,8 +174,16 @@ Item{
                 onErase: {
                     editor.documentHandler.codeHandler.deleteObject(editingFragment)
                 }
-                onOpenConnections: {
-
+                onToggleConnections: {
+                    if ( paletteConnection.model ){
+                        paletteConnection.model = null
+                    } else {
+                        paletteConnection.forceActiveFocus()
+                        paletteConnection.model = editingFragment.bindingModel(editor.documentHandler.codeHandler)
+                    }
+                }
+                onRebuild : {
+                    editingFragment.rebuild()
                 }
                 onPaletteToPane : {
                     if ( objectContainer.pane === null ){
@@ -287,13 +295,12 @@ Item{
                                 objectContainer.editingFragment, ppos, project.appRoot()
                             )
                             if ( ef ){
-
-                                var propertyContainer = propertyContainerFactory.createObject(container)
+                                var propertyContainer = objectContainer.propertyContainerFactory.createObject(container)
                                 container.sortChildren()
 
                                 propertyContainer.title = data
                                 propertyContainer.documentHandler = objectContainer.editor.documentHandler
-                                propertyContainer.propertyContainerFactory = propertyContainerFactory
+                                propertyContainer.propertyContainerFactory = objectContainer.propertyContainerFactory
 
                                 propertyContainer.editor = objectContainer.editor
                                 propertyContainer.editingFragment = ef
@@ -432,6 +439,24 @@ Item{
             onPaletteSelected: selectedHandler(index)
             onCancelled : cancelledHandler()
         }
+
+
+        PaletteConnection{
+            id: paletteConnection
+            visible: model ? true:false
+            anchors.top: parent.top
+            anchors.topMargin: 24
+            width: parent.width
+            color: "#0a141c"
+            selectionColor: "#0d2639"
+            fontSize: 10
+            fontFamily: "Open Sans, sans-serif"
+            onFocusChanged : if ( !focus ) model = null
+
+            property var selectedHandler : function(){}
+            property var cancelledHandler : function(index){}
+        }
+
 
         Column{
             id: container

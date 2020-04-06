@@ -29,6 +29,7 @@ HEADERS += \
     $$PWD/qmleditfragment.h \
     $$PWD/qmldeclaration.h \
     $$PWD/qmllanguagescanner.h \
+    $$PWD/qmlbuilder.h \
     $$PWD/qmllanguagescanmonitor.h\
     $$PWD/qmlscopesnap_p.h \
     $$PWD/qmlsuggestionmodel.h \
@@ -62,6 +63,7 @@ SOURCES += \
     $$PWD/qmlimportsmodel.cpp \
     $$PWD/qmllanguagescanner.cpp \
     $$PWD/qmllanguagescanmonitor.cpp \
+    $$PWD/qmlbuilder.cpp \
     $$PWD/qmlscopesnap.cpp \
     $$PWD/qmlsuggestionmodel.cpp \
     $$PWD/qmlusagegraphscanner.cpp
