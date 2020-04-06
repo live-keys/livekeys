@@ -51,8 +51,6 @@
 
 #include "qmlsuggestionmodel.h"
 
-#include "qmlsuggestionmodel.h"
-
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QFileInfo>
