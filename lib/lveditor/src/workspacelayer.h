@@ -73,6 +73,7 @@ public slots:
     QString docsPath() const;
 
     bool wasRecentsFileFound() const;
+    QString pluginsPath() const;
 
 signals:
     void projectChanged();

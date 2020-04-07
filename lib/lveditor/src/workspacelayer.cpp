@@ -15,6 +15,7 @@
 #include "live/mlnode.h"
 #include "live/mlnodetoqml.h"
 #include "live/mlnodetojson.h"
+#include "live/applicationcontext.h"
 
 #include "workspace.h"
 #include "projectworkspace.h"
@@ -342,6 +343,11 @@ QString WorkspaceLayer::docsPath() const{
 
 bool WorkspaceLayer::wasRecentsFileFound() const{
     return m_workspace->wasRecentsFileFound();
+}
+
+QString WorkspaceLayer::pluginsPath() const
+{
+    return QString::fromStdString(lv::ApplicationContext::instance().pluginPath());
 }
 
 void WorkspaceLayer::initializePanes(ProjectWorkspace *workspace, QJSValue panes){

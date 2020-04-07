@@ -8,8 +8,8 @@ Rectangle{
     color: "#141517"
     border.color: "#2d2d2e"
 
-    property bool firstTime: !lk.layers.workspace.wasRecentsFileFound()
-
+    property bool firstTime: !lk.layers.workspace.wasRecentsFileFound() && !noThanks
+    property bool noThanks: false
     Item {
         id: closeButton
         x: 1000
@@ -191,7 +191,7 @@ Rectangle{
             id: recentProjectsPane
             width: 280
             height: parent.height
-
+            visible: recentView.model.rowCount() > 0
             Text {
                 text: "Recent Projects"
                 color: "#fff"
@@ -263,6 +263,9 @@ Rectangle{
                             id: recentViewMA
                             anchors.fill: parent
                             hoverEnabled: true
+                            onClicked: {
+                                project.openProject(model.path)
+                            }
                         }
 
                         Text {
@@ -304,7 +307,7 @@ Rectangle{
 
         Rectangle {
             id: learnPane
-            x: 340
+            x: recentProjectsPane.visible ? 340 : 0
             width: 280
             height: parent.height
 
@@ -381,6 +384,10 @@ Rectangle{
                             id: learnViewMA
                             anchors.fill: parent
                             hoverEnabled: true
+                            onClicked: {
+                                if (model.isGroupTitle) return
+                                project.openProject(model.path)
+                            }
                         }
 
                         Text {
@@ -410,7 +417,7 @@ Rectangle{
 
         Rectangle {
             id: samplesPane
-            x: 680
+            x: recentProjectsPane.visible ? 680 : 340
             width: 280
             height: parent.height
 
@@ -488,6 +495,10 @@ Rectangle{
                             id: samplesViewMA
                             anchors.fill: parent
                             hoverEnabled: true
+                            onClicked: {
+                                if (model.isGroupTitle) return
+                                project.openProject(model.path)
+                            }
                         }
 
 
@@ -558,6 +569,9 @@ Rectangle{
                     id : button1MA
                     anchors.fill: parent
                     hoverEnabled: true
+                    onClicked: {
+                        project.openProject(lk.layers.workspace.pluginsPath() + "/squareone/tutorials/workspace")
+                    }
                 }
 
                 color: button1MA.containsMouse ? "#383c44" : "#2a303c"
@@ -584,6 +598,9 @@ Rectangle{
                     id : button2MA
                     anchors.fill: parent
                     hoverEnabled: true
+                    onClicked: {
+                        noThanks = true
+                    }
                 }
 
                 color: button2MA.containsMouse ? "#383c44" : "#2a303c"
