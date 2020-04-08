@@ -151,7 +151,7 @@ void SegmentModel::setItemPosition(qint64 itemPosition, qint64 itemLength, int i
 
     d->items.takeAt(index);
     Segment::setPosition(item, static_cast<unsigned int>(itemNewPosition));
-    int newIndex = insertItem(item);
+    int newIndex = insertItemImpl(item);
 
     QList<Segment*>::iterator itemIt = d->items.begin() + newIndex;
     SegmentModelIterator* modelIt = new SegmentModelIterator(itemIt, itemIt + 1, itemNewPosition + 1);
@@ -197,7 +197,7 @@ void SegmentModel::setItemLength(qint64 itemPosition, qint64 itemLength, int ind
 
         Segment::setLength(item, static_cast<unsigned int>(newLength));
 
-        int newIndex = insertItem(item);
+        int newIndex = insertItemImpl(item);
 
         QList<Segment*>::iterator itemIt = d->items.begin() + newIndex;
         SegmentModelIterator* modelIt = new SegmentModelIterator(itemIt, itemIt + 1, itemPosition + 1);
@@ -221,7 +221,16 @@ QHash<int, QByteArray> SegmentModel::roleNames() const{
     return roles;
 }
 
-int SegmentModel::insertItem(Segment* item){
+void SegmentModel::insertItem(Segment *segment){
+    if ( !segment )
+        return;
+
+    beginDataChange(segment->position(), segment->position() + 1);
+    insertItemImpl(segment);
+    endDataChange();
+}
+
+int SegmentModel::insertItemImpl(Segment* item){
     Q_D(SegmentModel);
     int index = d->searchFirstIndex(item->position());
     while ( index < d->items.size() ){
@@ -276,11 +285,25 @@ Segment *SegmentModel::segmentThatWraps(qint64 position){
     return nullptr;
 }
 
-void SegmentModel::insertItem(qint64 position, qint64 length){
+Segment* SegmentModel::takeSegment(Segment *segment){
     Q_D(SegmentModel);
-    Segment* item = new Segment(position, length);
+    Segment* result = nullptr;
+    int index = d->searchFirstIndex(segment->position());
+    if ( index < d->items.size() ){
+        if ( d->items[index] == segment ){
+            beginDataChange(segment->position(), segment->position() + 1);
+            d->items.removeAt(index);
+            result = segment;
+            endDataChange();
+        }
+    }
+    return result;
+}
+
+void SegmentModel::insertItem(qint64 position, qint64 length){
+    Segment* item = new Segment(static_cast<unsigned int>(position), static_cast<unsigned int>(length));
     beginDataChange(position, position + 1);
-    insertItem(item);
+    insertItemImpl(item);
     endDataChange();
 }
 

@@ -66,7 +66,7 @@ public:
 
     QHash<int, QByteArray> roleNames() const;
 
-    int insertItem(Segment* item);
+    void insertItem(Segment* segment);
 
     int totalSegments() const;
     Segment* segmentAt(int index);
@@ -78,7 +78,11 @@ public slots:
     void insertItem(qint64 position, qint64 length);
     void removeItem(qint64 position, qint64 length, qint64 relativeIndex);
 
+    lv::Segment *takeSegment(lv::Segment* segment);
+
 private:
+    int insertItemImpl(Segment* item);
+
     SegmentModel(const SegmentModel&);
     SegmentModel& operator = (const SegmentModel&);
 

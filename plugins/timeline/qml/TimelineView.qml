@@ -288,9 +288,13 @@ Rectangle{
                 contentWidth: root.timeline.contentLength * root.zoom + 5
                 model: root.timeline.trackList
                 delegate: Rectangle{
+                    objectName: "timelineRowDelegate"
                     height: 25
                     width: timelineRow.width
                     color: root.timelineStyle.borderColor
+
+                    property int currentIndex: index
+                    property ListView parentView: timelineView
 
                     TimelineRow{
                         id: timelineRow

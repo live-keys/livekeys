@@ -83,6 +83,10 @@ void Track::addSegment(Segment *segment){
     m_segmentModel->insertItem(segment);
 }
 
+Segment *Track::takeSegment(Segment *segment){
+    return m_segmentModel->takeSegment(segment);
+}
+
 //TODO: Condition: If m_activeSegment gets removed (connect to the segmentModel)
 void Track::__segmentModelItemsChanged(qint64, qint64){
 

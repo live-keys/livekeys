@@ -13,6 +13,41 @@ Item {
     property color backgroundColor: "transparent"
     property double zoom: 1
 
+    property QtObject timelineRow : null
+
+    onYChanged: {
+        if ( y !== 3 ){
+            if ( Math.abs(y) > root.height ){
+                if ( timelineRow === null ){
+                    timelineRow = root.parent
+                }
+
+                var rowDelegate = timelineRow.parent
+                var timelineView = rowDelegate.parentView
+
+                var newIndex = Math.round(y / rowDelegate.height)
+
+                if ( newIndex * rowDelegate.height < timelineView.contentHeight ){
+                    if ( newIndex >= 0){
+                        y = newIndex * rowDelegate.height + 3
+                        root.parent = timelineView
+                        return
+                    } else {
+                        y = 3
+                        root.parent = timelineView
+                        return
+                    }
+                } else {
+                    y = timelineView.contentHeight - rowDelegate.height + 3
+                    root.parent = timelineView
+                    return
+                }
+            }
+
+            y = 3
+        }
+    }
+
     Keys.onPressed: {
         if (event.key === Qt.Key_Delete || event.key === Qt.Key_Backspace) {
             event.accepted = true
@@ -66,9 +101,10 @@ Item {
             anchors.fill: parent
             cursorShape: Qt.SizeAllCursor
             drag.target: root
-            drag.axis: Drag.XAxis
+            drag.axis: Drag.XAndYAxis
             drag.minimumX: 0
             drag.maximumX: segment.segmentModel().contentWidth - root.width
+
             onPressed: {
                 root.forceActiveFocus()
             }
@@ -76,6 +112,24 @@ Item {
                 root.segmentDoubleClicked(segment)
             }
             onReleased: {
+                if ( root.timelineRow && root.parent !== root.timelineRow ){
+                    var rowDelegate = root.timelineRow.parent
+                    var timelineView = rowDelegate.parentView
+
+                    var index = timelineView.indexAt(1, root.y)
+                    var track = timelineView.model.trackAt(index)
+
+                    if ( track.segmentModel !== segment.segmentModel() ){
+                        var prevSegmentModel = segment.segmentModel()
+                        if ( prevSegmentModel.takeSegment(segment) ){
+                            track.addSegment(segment)
+                        }
+                    } else {
+                        root.parent = timelineRow
+                        root.y = 3
+                    }
+                }
+
                 segment.position = Math.round(root.x / root.zoom)
                 root.x = position * root.zoom
             }
