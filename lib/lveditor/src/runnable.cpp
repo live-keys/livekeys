@@ -120,14 +120,14 @@ void Runnable::run(){
                     ctx->deleteLater();
                 }
 
-                emit objectReady();
+                emit objectReady(obj);
             }
         } else {
             QFile f(m_path);
             if ( !f.open(QFile::ReadOnly) )
                 THROW_EXCEPTION(Exception, "Failed to read file for running:" + m_path.toStdString(), Exception::toCode("~File"));
 
-            QByteArray contentBytes = f.readAll();
+            QByteArray contentBytes = f.readAll();;
 
             if ( m_project->active() == this ){
                 QQmlContext* ctx = createContext();
@@ -160,7 +160,7 @@ void Runnable::run(){
                     ctx->deleteLater();
                 }
 
-                emit objectReady();
+                emit objectReady(obj);
             }
 
         }
@@ -183,7 +183,7 @@ void Runnable::run(){
             appRootItem->setParentItem(runspaceItem);
         }
 
-        emit objectReady();
+        emit objectReady(obj);
     } else if ( m_type == Runnable::LvFile ){
         ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(m_path));
 
@@ -296,9 +296,7 @@ void Runnable::setRunTrigger(int runTrigger){
                     connect(document, &ProjectDocument::saved, this, &Runnable::_documentSaved);
                 }
             }
-
         }
-
     }
 
     m_runTrigger = runTrigger;
@@ -350,7 +348,7 @@ void Runnable::engineObjectReady(QObject *object, const QUrl &, QObject *ref, QQ
     if ( ref == this ){
         m_viewRoot    = object;
         m_viewContext = context;
-        emit objectReady();
+        emit objectReady(object);
     }
 }
 

@@ -441,6 +441,11 @@ const MLNode &Livekeys::startupConfiguration(){
                  }
             }}
          }},
+        {"timeline",{
+             {"loaders", {
+                  {"VideoCapture", "lcvcore/VideoCaptureSegmentCreator.qml"}
+             }}
+        }},
          {"internalPackages",{
               "editor",
               "editqml",

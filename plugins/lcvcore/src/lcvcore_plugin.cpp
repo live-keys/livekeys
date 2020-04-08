@@ -41,6 +41,9 @@
 #include "qgradient.h"
 #include "qvideodecoder.h"
 
+#include "videosegment.h"
+#include "videosurface.h"
+
 #include "live/viewengine.h"
 #include "live/viewcontext.h"
 
@@ -85,6 +88,9 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QItemCapture>(           uri, 1, 0, "ItemCapture");
 
     qmlRegisterType<QVideoDecoder>(          uri, 1, 0, "VideoDecoder");
+
+    qmlRegisterType<lv::VideoSurface>(       uri, 1, 0, "VideoSurface");
+    qmlRegisterType<lv::VideoSegment>(       uri, 1, 0, "VideoSegment");
 
     qmlRegisterSingletonType<QMatOp>(        uri, 1, 0, "MatOp",        &matOpProvider);
     qmlRegisterSingletonType<QMatIO>(        uri, 1, 0, "MatIO",        &matIOProvider);

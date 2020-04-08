@@ -37,6 +37,10 @@ Rectangle {
 
     signal keyPressed(var event)
 
+    function selectAll(){
+        textInput.selectAll()
+    }
+
     TextInput{
         id : textInput
         anchors.fill: parent

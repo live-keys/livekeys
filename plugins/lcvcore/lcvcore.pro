@@ -17,6 +17,7 @@ linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 linkLocalPlugin(live, live)
+linkLocalPlugin(timeline, timeline)
 
 # Source
 
@@ -59,6 +60,7 @@ DISTFILES += \
     palettes/ImageFilePalette.qml \
     qml/EditCvExtension.qml \
     qml/MatViewPane.qml \
+    qml/VideoCaptureSegmentCreator.qml \
     qml/live.package.json \
     qml/live.plugin.json
 

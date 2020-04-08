@@ -152,6 +152,9 @@ namespace qmlhandler_helpers{
         const QString& suffix,
         QList<CodeCompletionSuggestion>& suggestions
     ){
+        if ( !ti )
+            return;
+
         QList<CodeCompletionSuggestion> localSuggestions;
 
         if ( suggestProperties ){

@@ -51,7 +51,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_extensions(nullptr)
     , m_documentation(nullptr)
 {
-    Settings* settings = lv::ViewContext::instance().settings();
+    Settings* settings = ViewContext::instance().settings();
 
     m_keymap = new KeyMap(settings->path());
     settings->addConfigFile("keymap", m_keymap);

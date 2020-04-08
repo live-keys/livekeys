@@ -14,6 +14,7 @@ SUBDIRS += \
     fs \
     workspace \
     squareone \
+    timeline \
     lcvcore \
     lcvimgproc \
     lcvfeatures2d \
