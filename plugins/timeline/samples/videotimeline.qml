@@ -12,6 +12,7 @@ Item{
         id: videoSurface
         width: 500
         height: 400
+        anchors.horizontalCenter: parent.horizontalCenter
     }
     
     TimelineView{
