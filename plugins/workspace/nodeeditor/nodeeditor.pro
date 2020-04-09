@@ -1,5 +1,6 @@
 PLUGIN_NAME = nodeeditor
 PLUGIN_PATH = workspace/nodeeditor
+uri = workspace.nodeeditor
 
 TEMPLATE = subdirs
 
@@ -17,7 +18,6 @@ export(samplescopy.commands)
 export(qmlcopy.commands)
 QMAKE_EXTRA_TARGETS += first qmlcopy samplescopy
 
-uri = workspace.nodeeditor
 
 OTHER_FILES += \
     qml/*.qml \
@@ -28,3 +28,4 @@ OTHER_FILES += \
 DISTFILES += \
     qml/live.plugin.json \
     qml/qmldir
+
