@@ -3,12 +3,13 @@
 
 #include <QObject>
 #include <QColor>
+#include "lvtimelineglobal.h"
 
 namespace lv{
 
 class SegmentModel;
 
-class Segment : public QObject{
+class LV_TIMELINE_EXPORT Segment : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(unsigned int position READ position WRITE setPosition NOTIFY positionChanged)

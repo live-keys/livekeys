@@ -5,6 +5,7 @@ PLUGIN_PATH = timeline
 include($$getGlobalFile(plugin.pri))
 
 DEFINES += LV_TIMELINE_LIB
+DEFINES += Q_GANTT_LIB
 
 uri = timeline
 
