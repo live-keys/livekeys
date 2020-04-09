@@ -16,6 +16,7 @@
 #include "live/visuallogqt.h"
 #include "live/mlnode.h"
 #include "live/mlnodetojson.h"
+#include <QFileInfo>
 
 namespace lv{
 
@@ -35,6 +36,7 @@ Workspace::Workspace(Project *project, WorkspaceLayer *parent)
     : QObject(parent)
     , m_project(project)
     , m_currentProjectWorkspace(nullptr)
+    , m_recentsModel(new StartupModel())
     , m_recentsFileFound(false)
 {
     connect(m_project, &Project::pathChanged, this, &Workspace::whenProjectPathChange);
@@ -54,7 +56,11 @@ Workspace::Workspace(Project *project, WorkspaceLayer *parent)
             MLNode projectsNode = recentsNode["projects"];
 
             for ( auto it = projectsNode.asArray().begin(); it != projectsNode.asArray().end(); ++it ){
-                m_recents.append(QString::fromStdString(it->asString()));
+                QString project = QString::fromStdString(it->asString());
+                if (project.isEmpty()) continue;
+                QFileInfo f(project);
+                QString name = f.baseName();
+                m_recentsModel->addStartupEntry(StartupModel::StartupEntry(false, name, name, project));
             }
 
             recentsFile.close();
@@ -68,6 +74,8 @@ Workspace::Workspace(Project *project, WorkspaceLayer *parent)
 Workspace::~Workspace(){
     delete m_currentProjectWorkspace;
     saveRecents();
+    delete m_recentsModel;
+
 }
 
 void Workspace::whenProjectPathChange(const QString &path){
@@ -84,16 +92,23 @@ void Workspace::whenProjectPathChange(const QString &path){
         m_currentProjectWorkspace = nullptr;
         wl->whenProjectClose();
         delete pwold;
+        int modelSize = m_recentsModel->rowCount(QModelIndex());
+        if (modelSize == 0 || m_recentsModel->entryAt(0).m_path != path){
 
-        if ( m_recents.isEmpty() || m_recents.front() != path ){
-            for ( auto it = m_recents.begin(); it != m_recents.end(); ++it ){
-                if ( *it == path ){
-                    m_recents.erase(it);
+            for ( int i = 0; i < modelSize; ++i ){
+                if ( m_recentsModel->entryAt(i).m_path == path ){
+                    m_recentsModel->removeEntryAt(i);
                     break;
                 }
             }
-            m_recents.prepend(path);
-            m_recentsChanged = true;
+            if (!path.isEmpty())
+            {
+                QFileInfo f(path);
+                QString name = f.baseName();
+                m_recentsModel->addEntryAt(StartupModel::StartupEntry(false, name, name, path), 0);
+                m_recentsChanged = true;
+            }
+
         }
 
         ProjectWorkspace* pw = ProjectWorkspace::create(m_project);
@@ -110,12 +125,11 @@ void Workspace::whenProjectPathChange(const QString &path){
 void Workspace::saveRecents(){
     QString recentsPath = absolutePath("workspaces.json");
     QFile recentsFile(recentsPath);
-    if ( (m_recentsChanged || m_recents.empty()) && recentsFile.open(QIODevice::WriteOnly) ){
+    int modelSize = m_recentsModel->rowCount(QModelIndex());
+    if ( (m_recentsChanged || modelSize == 0) && recentsFile.open(QIODevice::WriteOnly) ){
         MLNode recents(MLNode::Array);
-
-        for ( auto it = m_recents.begin(); it != m_recents.end(); ++it ){
-            recents.append(MLNode(it->toStdString()));
-        }
+        for (int i = 0; i < modelSize; ++i)
+            recents.append(MLNode(m_recentsModel->entryAt(i).m_path.toStdString()));
 
         MLNode n(MLNode::Object);
         n["projects"] = recents;
@@ -156,6 +170,11 @@ Workspace *Workspace::getFromContext(QQmlContext *ctx){
         return nullptr;
 
     return wlayer->workspace();
+}
+
+StartupModel *Workspace::recents()
+{
+    return m_recentsModel;
 }
 
 }// namespace

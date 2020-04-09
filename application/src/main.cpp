@@ -46,6 +46,8 @@ int main(int argc, char *argv[]){
     app.setOrganizationName("Livekeys");
     app.setOrganizationDomain("Livekeys");
 
+    QtWebEngine::initialize();
+
     try{
         Livekeys::Ptr livekeys = Livekeys::create(argc, argv);
         livekeys->loadInternals();
