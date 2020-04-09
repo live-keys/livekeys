@@ -76,7 +76,7 @@ Item{
         property int topSpacing: editingFragment && !editingFragment.isRoot() ? 0 : 10
 
         width: container.width < 260 ? 300 : container.width + 40
-        height: container.height < 10 || compact ? 40 : titleHeight + objectContainerTitleWrap.height + topSpacing
+        height: container.height < 10 || compact ? 40 : objectContainerTitleWrap.height + topSpacing + container.height
 
         function closeAsPane(){
             objectContainerTitle.parent = objectContainerTitleWrap

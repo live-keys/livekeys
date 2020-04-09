@@ -7,6 +7,7 @@
 #include "live/mlnode.h"
 #include "live/project.h"
 #include "live/qmlpropertywatcher.h"
+#include "startupmodel.h"
 
 namespace lv{
 
@@ -60,6 +61,7 @@ public:
     static Workspace* getFromContext(QQmlContext* context);
 
     bool wasRecentsFileFound() const;
+    StartupModel* recents();
 
 signals:
     void projectOpen(const QString& path);
@@ -75,7 +77,7 @@ private:
 
     Project*             m_project;
     ProjectWorkspace*    m_currentProjectWorkspace;
-    QLinkedList<QString> m_recents;
+    StartupModel*        m_recentsModel;
     bool                 m_recentsChanged;
     bool                 m_recentsFileFound;
 };
