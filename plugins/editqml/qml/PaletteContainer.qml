@@ -14,6 +14,7 @@ Item{
     property int normalHeaderHeight: 35
 
     property bool compact: true
+    property bool isBuilder : false
 
     property Item child : null
     property QtObject palette : null
@@ -34,6 +35,17 @@ Item{
 
     property DocumentHandler documentHandler : null
     property var paletteContainerFactory : null
+
+    Component.onCompleted: {
+        var paletteGroup = paletteContainer.parent
+
+        if ( paletteGroup.editingFragment) {
+            paletteContainer.isBuilder = paletteGroup.editingFragment.isBuilder()
+            paletteGroup.editingFragment.connectionChanged.connect(function(){
+                paletteContainer.isBuilder = paletteGroup.editingFragment.isBuilder()
+            })
+        }
+    }
 
     MouseArea{
         anchors.fill: parent
@@ -137,6 +149,14 @@ Item{
             }
         }
 
+        function rebuild(){
+            var editingFragment = paletteContainer.parent.editingFragment
+            if ( !editingFragment )
+                return
+
+            editingFragment.rebuild()
+        }
+
         Item{
             id: paletteSwapButton
             anchors.left: parent.left
@@ -187,6 +207,26 @@ Item{
             color: '#82909b'
         }
 
+
+        Item{
+            id: rebuild
+            anchors.right: parent.right
+            anchors.rightMargin: 60
+            anchors.verticalCenter: parent.verticalCenter
+            width: 15
+            height: 20
+            visible: paletteContainer.isBuilder
+            Image{
+                anchors.centerIn: parent
+                source: "qrc:/images/palette-integrate.png"
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    paletteBoxHeader.rebuild()
+                }
+            }
+        }
 
         Item{
             id: paletteConnectionButton
@@ -302,7 +342,7 @@ Item{
 
     PaletteConnection{
         id: paletteConnection
-        visible: model ? true:false
+        visible: model ? true : false
         anchors.top: parent.top
         anchors.topMargin: 24
         width: parent.width

@@ -140,6 +140,9 @@ Item{
 
         property Connections editingFragmentRemovals: Connections{
             target: editingFragment
+            onConnectionChanged : {
+                objectContainerTitle.isBuilder = root.editingFragment.isBuilder()
+            }
             onAboutToBeRemoved : {
                 var p = root.parent
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
@@ -164,6 +167,7 @@ Item{
                 anchors.fill: parent
                 compact: objectContainer.compact
                 color: objectContainer.pane ? objectContainer.pane.topColor : '#062945'
+                isBuilder: root.editingFragment ? root.editingFragment.isBuilder() : false
 
                 onToggleCompact: {
                     if ( objectContainer.compact )

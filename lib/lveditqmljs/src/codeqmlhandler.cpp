@@ -1013,25 +1013,24 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
     Project* project = d->projectHandler->project();
 
     if ( m_document ){
-        QmlBindingPath::Ptr bp = DocumentQmlInfo::findDeclarationPath(m_document->contentString(), m_document, declaration);
+        d->syncParse(m_document);
+        d->syncObjects(m_document);
+        QmlBindingPath::Ptr bp = DocumentQmlInfo::findDeclarationPath(m_document, d->documentObjects()->root(), declaration);
         if ( !bp )
             return nullptr;
 
-        Runnable* r = project->runnables()->runnableAt(bp->rootFile());
+        QmlEditFragment* ef = new QmlEditFragment(declaration);
 
+        Runnable* r = project->runnables()->runnableAt(bp->rootFile());
         if (r && r->type() != Runnable::LvFile ){
             QmlBindingChannel::Ptr bc = DocumentQmlInfo::traverseBindingPath(bp, r);
-            if ( !bc || !bc->hasConnection() )
-                return nullptr;
-
-            QmlEditFragment* ef = new QmlEditFragment(declaration);
-            bc->setEnabled(true);
-            ef->bindingSpan()->setExpressionPath(bp);
-            ef->bindingSpan()->addChannel(bc);
-            ef->bindingSpan()->setConnectionChannel(bc);
-            return ef;
+            if ( bc && bc->hasConnection() ){
+                bc->setEnabled(true);
+                ef->bindingSpan()->setExpressionPath(bp);
+                ef->bindingSpan()->addChannel(bc);
+                ef->bindingSpan()->setConnectionChannel(bc);
+            }
         }
-        QmlEditFragment* ef = new QmlEditFragment(declaration);
 
         QString fileName = declaration->document()->file()->name();
         if ( fileName.length() && fileName.front().isUpper() ){ // if component
@@ -1061,6 +1060,11 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
                         }
                     }
                 }
+            }
+
+            if ( ef->bindingSpan()->channels().size() == 0 ){
+                delete ef;
+                return nullptr;
             }
 
 
@@ -1322,7 +1326,7 @@ void CodeQmlHandler::suggestionsForProposedExpression(
 }
 
 bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const QString &expression){
-    Q_D(const CodeQmlHandler);
+    Q_D(CodeQmlHandler);
 
     QmlScopeSnap scope = d->snapScope();
 
@@ -1360,9 +1364,11 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
         cursor.setPosition(end);
         QList<QmlDeclaration::Ptr> declarations = getDeclarations(cursor);
 
+        d->syncParse(m_document);
+        d->syncObjects(m_document);
         QmlBindingPath::Ptr newBp = DocumentQmlInfo::findDeclarationPath(
-            m_document->contentString(),
             m_document,
+            d->documentObjects()->root(),
             declarations.first());
 
         bp = newBp;
@@ -1473,7 +1479,7 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
 }
 
 bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, const QString &expression){
-    Q_D(const CodeQmlHandler);
+    Q_D(CodeQmlHandler);
 
     QmlScopeSnap scope = d->snapScope();
 
@@ -1511,9 +1517,11 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
         cursor.setPosition(end);
         QList<QmlDeclaration::Ptr> declarations = getDeclarations(cursor);
 
+        d->syncParse(m_document);
+        d->syncObjects(m_document);
         QmlBindingPath::Ptr newBp = DocumentQmlInfo::findDeclarationPath(
-            m_document->contentString(),
             m_document,
+            d->documentObjects()->root(),
             declarations.first());
 
         bp = newBp;
@@ -3036,7 +3044,6 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
  * \brief Update palette binding channels for a new runtime root.
  */
 void CodeQmlHandler::updateRuntimeBindings(){
-    Q_D(CodeQmlHandler);
     QList<QmlEditFragment*> toRemove;
     for ( auto it = toRemove.begin(); it != toRemove.end(); ++it ){
         removeEditingFragment(*it);

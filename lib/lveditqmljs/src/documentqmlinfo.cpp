@@ -719,6 +719,16 @@ QSharedPointer<QmlBindingChannel> DocumentQmlInfo::traverseBindingPath(QSharedPo
 
 /**
  * \brief Finds the binding path associated with a declaration within a range object
+ *
+ * To call this method, parse the document first, then get the values:
+ *
+ * \code
+ * DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(document->file()->path());
+ * docinfo->parse(source);
+ * DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
+ * DocumentQmlInfo::findDeclarationPath(document, objects->root(), declaration);
+ * \endcode
+ *
  * \returns The found binding path on success, nullptr otherwise
  */
 QmlBindingPath::Ptr DocumentQmlInfo::findDeclarationPath(
@@ -764,22 +774,6 @@ QmlBindingPath::Ptr DocumentQmlInfo::findDeclarationPath(
     path->updatePath(fnode);
 
     return path;
-}
-
-/**
- * \brief Finds the binding path associated with a delcaration within the project \p document
- * \returns The found binding path if it exists, nullptr otherwise
- */
-QSharedPointer<lv::QmlBindingPath> DocumentQmlInfo::findDeclarationPath(
-        const QString &source,
-        ProjectDocument *document,
-        QmlDeclaration::Ptr declaration)
-{
-    DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(document->file()->path());
-    docinfo->parse(source);
-
-    DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
-    return findDeclarationPath(document, objects->root(), declaration);
 }
 
 /**
