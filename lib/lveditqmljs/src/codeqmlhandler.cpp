@@ -50,6 +50,8 @@
 #include "live/hookcontainer.h"
 
 #include "qmlsuggestionmodel.h"
+#include "qmlbuilder.h"
+#include "qmlwatcher.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -903,7 +905,12 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
                         QmlTypeReference qlt = propref.resultType();
                         if ( !qlt.isEmpty() ){
                             properties.append(QmlDeclaration::create(
-                                expression, propref.resultType(), propref.propertyObjectType(), propertyPosition, propertyLength, m_document
+                                expression,
+                                propref.resultType(),
+                                propref.propertyObjectType(),
+                                propertyPosition,
+                                propertyLength,
+                                m_document
                             ));
                         }
                     }
@@ -1045,31 +1052,51 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
 
                     if ( hooks ){
                         QString filePath = declaration->document()->file()->path();
-                        QStringList entries = hooks->entriesForFile(filePath);
-                        for ( const QString& entry : entries ){
-                            QmlBindingPath::Ptr builderBp = QmlBindingPath::create();
-                            builderBp->appendFile(filePath);
-                            builderBp->appendComponent(entry, entry);
-                            QmlBindingChannel::Ptr builderC = QmlBindingChannel::create(builderBp, run);
-                            builderC->setIsBuilder(true);
-                            builderC->setEnabled(true);
-                            ef->bindingSpan()->setExpressionPath(bp);
-                            if ( ef->bindingSpan()->channels().size() == 0 )
-                                ef->bindingSpan()->setConnectionChannel(builderC);
-                            ef->bindingSpan()->addChannel(builderC);
+                        QMap<QString, QList<QObject*> > entries = hooks->entriesForFile(filePath);
+                        for ( auto entryIt = entries.begin(); entryIt != entries.end(); ++entryIt ){
+                            QString objectId = entryIt.key();
+                            QObject* first = entryIt.value().size() ? entryIt.value().first() : nullptr;
+                            if ( qobject_cast<QmlWatcher*>(first) ){
+                                QmlWatcher* w = qobject_cast<QmlWatcher*>(first);
+
+                                QmlBindingPath::Ptr watcherBp = QmlBindingPath::create();
+                                watcherBp->appendWatcher(w->fileReference(), objectId);
+
+                                QmlBindingPath::Ptr fullBp = QmlBindingPath::join(watcherBp, bp, false);
+
+                                QmlBindingChannel::Ptr bpChannel = DocumentQmlInfo::traverseBindingPath(fullBp, run);
+                                if (bpChannel){
+                                    bpChannel->setEnabled(true);
+                                    ef->bindingSpan()->setExpressionPath(bp);
+                                    if ( ef->bindingSpan()->channels().size() == 0 )
+                                        ef->bindingSpan()->setConnectionChannel(bpChannel);
+                                    ef->bindingSpan()->addChannel(bpChannel);
+                                }
+
+                            } else if ( qobject_cast<QmlBuilder*>(first) ){
+                                QmlBindingPath::Ptr builderBp = QmlBindingPath::create();
+                                builderBp->appendFile(filePath);
+                                builderBp->appendComponent(objectId, objectId);
+                                QmlBindingChannel::Ptr builderC = QmlBindingChannel::create(builderBp, run);
+                                builderC->setIsBuilder(true);
+                                builderC->setEnabled(true);
+                                ef->bindingSpan()->setExpressionPath(bp);
+                                if ( ef->bindingSpan()->channels().size() == 0 )
+                                    ef->bindingSpan()->setConnectionChannel(builderC);
+                                ef->bindingSpan()->addChannel(builderC);
+                            }
+
                         }
                     }
                 }
             }
-
-            if ( ef->bindingSpan()->channels().size() == 0 ){
-                delete ef;
-                return nullptr;
-            }
-
-
-            return ef;
         }
+
+        if ( ef->bindingSpan()->channels().size() == 0 ){
+            delete ef;
+            return nullptr;
+        }
+        return ef;
     }
 
     return nullptr;
@@ -1352,6 +1379,8 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
     // when the receiver is deleted and not point to a null location
 
     QmlBindingPath::Ptr bp = nullptr;
+
+
 
     if ( expressionChain.isId ){ // <id>.<property...>
         DocumentQmlInfo::ValueReference documentValue = scope.document->valueForId(expressionPath.first());

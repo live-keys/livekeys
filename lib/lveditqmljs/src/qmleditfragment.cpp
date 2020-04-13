@@ -57,7 +57,7 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *paren
  */
 QmlEditFragment::~QmlEditFragment(){
     ProjectDocumentSection::Ptr section = declaration()->section();
-    ProjectDocument* doc = section->document();
+    ProjectDocument* doc = declaration()->document();
     doc->removeSection(section);
 
     for ( auto it = childFragments().begin(); it != childFragments().end(); ++it ){

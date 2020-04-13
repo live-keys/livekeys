@@ -33,7 +33,6 @@
 #include "qmlstream.h"
 #include "qmlstreamfilter.h"
 #include "qmlclipboard.h"
-#include "qmlwatcher.h"
 #include "live/settings.h"
 #include "live/memory.h"
 #include "live/visuallogmodel.h"
@@ -351,7 +350,6 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::QmlClipboard>(          uri, 1, 0, "Clipboard");
     qmlRegisterType<lv::QmlStream>(             uri, 1, 0, "Stream");
     qmlRegisterType<lv::QmlStreamFilter>(       uri, 1, 0, "StreamFilter");
-    qmlRegisterType<lv::QmlWatcher>(            uri, 1, 0, "Reference");
 
     qmlRegisterUncreatableType<lv::Shared>(     uri, 1, 0, "Shared", "Shared is of abstract type.");
     qmlRegisterUncreatableType<lv::Layer>(      uri, 1, 0, "Layer", "Layer is of abstract type.");

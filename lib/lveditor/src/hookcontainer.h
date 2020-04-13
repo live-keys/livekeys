@@ -26,7 +26,7 @@ public:
     ~HookContainer() override;
 
     void insertKey(const QString& sourceFile, const QString& id, QObject* obj);
-    QStringList entriesForFile(const QString& sourceFile);
+    QMap<QString, QList<QObject*> > entriesForFile(const QString& sourceFile);
     QList<QObject*> entriesFor(const QString& file, const QString& id);
 
 private:

@@ -24,6 +24,7 @@
 #include "live/editorglobalobject.h"
 
 #include "qmlbuilder.h"
+#include "qmlwatcher.h"
 #include "qmljssettings.h"
 #include "qmlcodeconverter.h"
 #include "qmlprojectmonitor_p.h"
@@ -143,6 +144,7 @@ void ProjectQmlExtension::removeCodeQmlHandler(CodeQmlHandler *handler){
 void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterType<lv::ProjectQmlExtension>(uri, 1, 0, "ProjectQmlExtension");
     qmlRegisterType<lv::QmlBuilder>(         uri, 1, 0, "Builder");
+    qmlRegisterType<lv::QmlWatcher>(         uri, 1, 0, "Watcher");
 
     qmlRegisterUncreatableType<lv::QmlEditFragment>(
         uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.documentHandler.codeQmlHandler.");

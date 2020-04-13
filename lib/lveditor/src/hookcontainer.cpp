@@ -28,12 +28,11 @@ void HookContainer::insertKey(const QString &file, const QString &id, QObject *o
     idIt.value().append(obj);
 }
 
-QStringList HookContainer::entriesForFile(const QString &sourceFile){
+QMap<QString, QList<QObject *> > HookContainer::entriesForFile(const QString &sourceFile){
     auto it = m_entries.find(sourceFile);
     if ( it == m_entries.end() )
-        return QStringList();
-
-    return it.value().keys();
+        return QMap<QString, QList<QObject*> >();
+    return it.value();
 }
 
 QList<QObject *> HookContainer::entriesFor(const QString &file, const QString &id){

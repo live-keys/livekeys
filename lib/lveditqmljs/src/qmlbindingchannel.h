@@ -61,8 +61,6 @@ public:
 
     void setEnabled(bool enable);
 
-    void commit(const QVariant& value);
-
 public slots:
     void __runableReady();
 
