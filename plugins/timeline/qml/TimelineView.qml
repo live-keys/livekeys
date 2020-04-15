@@ -23,6 +23,8 @@ Rectangle{
     property var surface : null
     property int zoom : 1
 
+    property SegmentInsertMenu segmentInsertMenu: segmentInsertMenu
+
     property TimelineStyle timelineStyle : TimelineStyle{}
     property Timeline timeline : Timeline{
         fps: 30
@@ -31,6 +33,9 @@ Rectangle{
     }
     onTimelineChanged: {
         root.timeline.headerModel.scale = Qt.binding(function(){return root.zoom })
+        segmentInsertMenu.segmentSelection = root.timeline.config.loaders()
+        segmentInsertMenu.model = Object.keys(segmentInsertMenu.segmentSelection)
+
     }
     property TimelineConfig timelineConfig : TimelineConfig{
     }
@@ -47,6 +52,9 @@ Rectangle{
     property Component trackTitleDelegate : TrackTitle{
         trackIndex: index
         timelineStyle: root.timelineStyle
+        onAddSegment: {
+            segmentInsertMenu.currentTrack = root.timeline.trackList.trackAt(index)
+        }
     }
 
     property Item timelineOptions : Item{
@@ -328,6 +336,35 @@ Rectangle{
                 }
             }
 
+        }
+    }
+
+    SegmentInsertMenu{
+        id: segmentInsertMenu
+        width: 100
+
+        onSegmentSelected : {
+            var objectPath = lk.layers.workspace.pluginsPath() + '/' + segmentInsertMenu.segmentSelection[segmentInsertMenu.model[index]]
+
+            var objectComponent = Qt.createComponent(objectPath);
+            if ( objectComponent.status === Component.Error ){
+                throw linkError(new Error(objectComponent.errorString()), timelineArea)
+            }
+
+            var object = objectComponent.createObject();
+            var overlay = lk.layers.window.dialogs.overlayBox(object)
+
+            object.segmentCreated.connect(function(segment){
+                segment.surface = timelineArea.surface
+                segmentInsertMenu.currentTrack.addSegment(segment)
+                segmentInsertMenu.currentTrack = null
+                overlay.closeBox()
+            })
+
+            object.cancelled.connect(function(){
+                segmentInsertMenu.currentTrack = null
+                overlay.closeBox()
+            })
         }
     }
 }

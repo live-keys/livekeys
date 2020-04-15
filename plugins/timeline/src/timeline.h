@@ -6,6 +6,7 @@
 #include <QQmlListProperty>
 
 #include "tracklistmodel.h"
+#include "timelineconfig.h"
 #include "timelineheadermodel.h"
 
 namespace lv{
@@ -21,6 +22,7 @@ class Timeline : public QObject{
     Q_PROPERTY(bool isRunning                   READ isRunning      NOTIFY isRunningChanged)
     Q_PROPERTY(double fps                       READ fps            WRITE setFps           NOTIFY fpsChanged)
     Q_PROPERTY(bool loop                        READ loop           WRITE setLoop          NOTIFY loopChanged)
+    Q_PROPERTY(lv::TimelineConfig* config       READ config         CONSTANT)
     Q_PROPERTY(lv::TrackListModel* trackList    READ trackList      CONSTANT)
     Q_PROPERTY(TimelineHeaderModel* headerModel READ headerModel    CONSTANT)
     Q_PROPERTY(QQmlListProperty<QObject> tracks READ tracks)
@@ -29,6 +31,7 @@ class Timeline : public QObject{
 public:
     Timeline(QObject* parent = nullptr);
 
+    TimelineConfig* config();
     TrackListModel* trackList();
     TimelineHeaderModel* headerModel();
 
@@ -83,6 +86,7 @@ private:
     bool   m_isRunning;
     bool   m_waitingForTrack;
 
+    TimelineConfig*      m_config;
     TrackListModel*      m_trackList;
     TimelineHeaderModel* m_headerModel;
     QTimer m_timer;

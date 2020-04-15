@@ -34,4 +34,5 @@ OTHER_FILES += \
     $$PWD/qml/live.plugin.json
 
 DISTFILES += \
+    qml/SegmentInsertMenu.qml \
     qml/SegmentView.qml

@@ -11,6 +11,8 @@ Item{
     property TimelineStyle timelineStyle : null
     property int trackIndex : 0
 
+    signal addSegment(int index)
+
     property alias labelColor: editableLabel.textColor
     property alias borderColor: borderBottom.color
     property alias iconColor: menuIcon.color
@@ -63,7 +65,7 @@ Item{
         id: contextMenu
         MenuItem {
             text: qsTr("Add Segment...")
-            onTriggered: console.log("Add segment")
+            onTriggered: root.addSegment(root.trackIndex)
         }
         MenuItem {
             text: qsTr("Insert Track")

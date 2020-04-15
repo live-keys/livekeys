@@ -34,13 +34,6 @@
 
 namespace lv{
 
-//HERE
-
-// TODO: load samples
-// TODO: add live.package.json file to workspace
-// TODO: Remove project::newProject being triggered
-// TODO: Create new default qml template for startup screen.
-
 WorkspaceLayer::WorkspaceLayer(QObject *parent)
     : Layer(parent)
     , m_projectEnvironment(nullptr)

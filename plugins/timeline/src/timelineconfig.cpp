@@ -3,6 +3,8 @@
 #include "live/settings.h"
 #include "live/viewcontext.h"
 
+#include "live/visuallogqt.h"
+
 #include <QQmlEngine>
 
 namespace lv{
@@ -27,9 +29,10 @@ void TimelineConfig::addLoader(const QString &key, const QString &path){
 }
 
 QJSValue TimelineConfig::loaders() const{
-    QQmlEngine* engine = qmlEngine(this);
+    QQmlEngine* engine = qmlEngine(parent());
     if ( !engine )
         return QJSValue();
+
 
     QJSValue result = engine->newObject();
     for ( auto it = m_settings->loaders().begin(); it != m_settings->loaders().end(); ++it ){

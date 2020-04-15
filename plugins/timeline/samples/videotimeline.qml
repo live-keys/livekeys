@@ -33,7 +33,7 @@ Item{
                     position: 50
                     length: 100
                     file : project.dir() + "/../../../samples/_videos/amherst-11_2754_3754.avi"
-                    surface : videoSurface
+                    surface : timelineArea.surface
                 }
             }
             Track{
@@ -43,7 +43,7 @@ Item{
                     position: 75 
                     length: 100
                     file : project.dir() + "/../../../samples/_videos/amherst-11_2754_3754.avi"
-                    surface : videoSurface
+                    surface : timelineArea.surface
                 }
             }
         }

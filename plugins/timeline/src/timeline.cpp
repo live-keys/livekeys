@@ -19,12 +19,17 @@ Timeline::Timeline(QObject *parent)
     , m_loop(false)
     , m_isRunning(false)
     , m_waitingForTrack(false)
+    , m_config(new TimelineConfig(this))
     , m_trackList(new TrackListModel())
     , m_headerModel(new TimelineHeaderModel(this))
 {
     m_timer.setSingleShot(false);
 
     connect(&m_timer, &QTimer::timeout, this, &Timeline::__tick);
+}
+
+TimelineConfig *Timeline::config(){
+    return m_config;
 }
 
 void Timeline::appendTrackToList(QQmlListProperty<QObject> *list, QObject *trackOb){

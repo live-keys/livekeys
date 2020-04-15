@@ -43,6 +43,9 @@ void VideoSegment::cursorEnter(qint64 pos){
 }
 
 void VideoSegment::cursorExit(){
+    if ( !m_surface )
+        return;
+
     m_surface->output()->cvMat()->setTo(cv::Scalar(0));
     m_surface->update();
 
