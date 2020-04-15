@@ -23,7 +23,7 @@ Rectangle{
     property int inPort: 1
     property int outPort: 2
     property int noPort : 0
-    property int inOutPort : 4
+    property int inOutPort : 3
     
     signal userEdgeInserted(QtObject edge)
     signal nodeClicked(QtObject node)
@@ -66,7 +66,9 @@ Rectangle{
     
     function addObjectNode(x, y, label){
         var node = graph.insertNode()
-        
+        node.item.nodeParent = node
+        node.item.removeNode = removeObjectNode
+        node.item.addSubobject = addObjectNodeProperty
         node.item.connectable = Qan.NodeItem.UnConnectable
         node.item.x = x
         node.item.y = y
@@ -76,28 +78,32 @@ Rectangle{
         return node
     }
     
-    function addObjectNodeProperty(node, propertyName, ports){
+    function addObjectNodeProperty(node, propertyName, ports, editingFragment){
         var item = node.item
         var propertyItem = root.propertyDelegate.createObject()
         propertyItem.parent = item.propertyContainer
         propertyItem.propertyName = propertyName
         propertyItem.node = node
+
+        propertyItem.editingFragment = editingFragment
         
         if ( ports === root.inPort || ports === root.inOutPort ){
             var port = graph.insertPort(node, Qan.NodeItem.Left, Qan.Port.In);
             port.label = propertyName + " In"
-            port.y = Qt.binding(function(){ return propertyItem.y + 27 + (propertyItem.height / 2) })
+            port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.height / 2) })
             propertyItem.inPort = port
             port.objectProperty = propertyItem
         }
         if ( ports === root.outPort || ports === root.inOutPort ){
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
             port.label = propertyName + " Out"
-            port.y = Qt.binding(function(){ return propertyItem.y + 27 + (propertyItem.height / 2) })
+            port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.height / 2) })
             propertyItem.outPort = port
             port.objectProperty = propertyItem
         }
         
+        node.item.properties.push(propertyItem)
+
         return propertyItem
     }
     

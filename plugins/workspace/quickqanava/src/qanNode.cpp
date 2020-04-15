@@ -62,12 +62,25 @@ Node::Node(QObject* parent) :
     if (outNodesModel != nullptr)
         connect( outNodesModel, &qcm::ContainerModel::lengthChanged,
                  this,          &qan::Node::outDegreeChanged);
+
+    _fragment = nullptr;
 }
 
 Node::~Node()
 {
     if ( _item )
         _item->deleteLater();
+}
+
+lv::QmlEditFragment *Node::fragment()
+{
+    return _fragment;
+}
+
+void Node::setFragment(lv::QmlEditFragment *fr)
+{
+    _fragment = fr;
+    emit fragmentChanged();
 }
 
 qan::Graph* Node::getGraph() noexcept {

@@ -108,11 +108,15 @@ public:
 
 public slots:
     QList<int> languageFeatures() const;
-
+    void populateNestedObjectsForFragment(lv::QmlEditFragment* ef);
+    void populateObjectInfoForFragment(lv::QmlEditFragment* ef);
+    void populatePropertyInfoForFragment(lv::QmlEditFragment* ef);
+    void testFunction(QVariantList list);
     // Help
 
     QString help(int position);
     lv::QmlEditFragment* findObjectFragmentByPosition(int position);
+    lv::QmlEditFragment* findFragmentByPosition(int position);
 
     // Palette and binding management
 
@@ -178,7 +182,7 @@ public slots:
     void updateScope();
 
     void aboutToDelete();
-
+    QVariantList nestedObjectsInfo(lv::QmlEditFragment* ef);
 signals:
     void numberOfConnectionsChanged();
 

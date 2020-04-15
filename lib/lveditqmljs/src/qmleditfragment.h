@@ -81,7 +81,8 @@ public:
     QmlEditFragment* rootFragment();
 
     void emitRemoval();
-
+    void addNestedObjectInfo(QVariantMap& info);
+    void setObjectInfo(QVariantMap& info);
 public slots:
     int position();
     int valuePosition() const;
@@ -110,12 +111,17 @@ public slots:
     void __inputRunnableObjectReady();
 
     bool isRoot();
+
+    QVariantList nestedObjectsInfo();
+    QVariantMap  objectInfo();
 signals:
     void visualParentChanged();
     void aboutToRemovePalette(lv::CodePalette* palette);
     void aboutToBeRemoved();
     void paletteListEmpty();
 
+    void objectAdded(lv::QmlEditFragment* obj);
+    void propertyAdded(lv::QmlEditFragment* ef);
 private:
     QmlDeclaration::Ptr  m_declaration;
 
@@ -132,6 +138,8 @@ private:
     QObject*             m_visualParent;
 
     QmlBindingSpanModel*    m_bindingSpanModel;
+    QVariantList            m_nestedObjectsInfo;
+    QVariantMap             m_objectInfo;
 };
 
 /// \brief Returns the binding channel associated with this object.

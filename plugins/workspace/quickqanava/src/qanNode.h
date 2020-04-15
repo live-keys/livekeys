@@ -45,6 +45,8 @@
 #include "./qanStyle.h"
 #include "./qanBehaviour.h"
 
+#include "live/qmleditfragment.h"
+
 namespace qan { // ::qan
 
 class NodeBehaviour;
@@ -70,6 +72,15 @@ public:
     explicit Node(QObject* parent=nullptr);
     virtual ~Node();
     Node( const Node& ) = delete;
+
+public:
+    Q_PROPERTY(lv::QmlEditFragment* fragment READ fragment WRITE setFragment NOTIFY fragmentChanged)
+    lv::QmlEditFragment* fragment();
+    void setFragment(lv::QmlEditFragment* fr);
+signals:
+    void fragmentChanged();
+private:
+    lv::QmlEditFragment* _fragment;
 
 public:
     Q_PROPERTY( qan::Graph* graph READ getGraph CONSTANT FINAL )

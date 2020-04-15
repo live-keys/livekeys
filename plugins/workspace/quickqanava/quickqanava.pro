@@ -7,6 +7,8 @@ include($$getGlobalFile(plugin.pri))
 uri = workspace.quickqanava
 
 linkLocalLibrary(lvbase, lvbase)
+linkLocalLibrary(lveditor, lveditor)
+linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 include($$PWD/src/quickqanava.pri)
 

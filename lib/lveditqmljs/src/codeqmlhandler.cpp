@@ -1083,6 +1083,11 @@ void CodeQmlHandler::aboutToDelete()
     }
 }
 
+QVariantList CodeQmlHandler::nestedObjectsInfo(lv::QmlEditFragment* ef)
+{
+    return ef->nestedObjectsInfo();
+}
+
 QJSValue CodeQmlHandler::createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports)
 {
     QJSValue result = m_engine->newObject();
@@ -1236,6 +1241,33 @@ lv::QmlEditFragment *CodeQmlHandler::findObjectFragmentByPosition(int position)
         int lower = edit->declaration()->position();
         int upper = lower + edit->declaration()->length();
         if (edit->declaration()->isForObject() && position >= lower && position <= upper)
+        {
+            q.clear();
+            result = edit;
+            for (auto it = edit->childFragments().begin(); it != edit->childFragments().end(); ++it)
+                q.push_back(*it);
+        }
+
+    }
+    return result;
+}
+
+lv::QmlEditFragment *CodeQmlHandler::findFragmentByPosition(int position)
+{
+    QmlEditFragment* result = nullptr;
+
+    QLinkedList<QmlEditFragment*> q;
+    for (auto it = m_edits.begin(); it != m_edits.end(); ++it)
+    {
+        q.push_back(*it);
+    }
+
+    while (!q.empty())
+    {
+        auto edit = q.front(); q.pop_front();
+        int lower = edit->declaration()->position();
+        int upper = lower + edit->declaration()->length();
+        if (position >= lower && position <= upper) //tbd
         {
             q.clear();
             result = edit;
@@ -1803,6 +1835,11 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
         inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
     }
 
+
+    if (ef->isForObject())
+        populateObjectInfoForFragment(ef);
+    if (ef->isForProperty())
+        populatePropertyInfoForFragment(ef);
     editParent->addChildFragment(ef);
     ef->setParent(editParent);
 
@@ -1878,6 +1915,8 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                     }
                 });
 
+                if (ef->isForObject())
+                    populateObjectInfoForFragment(ef);
                 edit->addChildFragment(ef);
                 ef->setParent(edit);
 
@@ -1988,6 +2027,8 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
                 inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
             }
 
+            if (ef->isForProperty())
+                populatePropertyInfoForFragment(ef);
             edit->addChildFragment(ef);
             ef->setParent(edit);
 
@@ -2066,6 +2107,12 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated){
     QmlDeclaration::Ptr declaration = properties.first();
 
     PaletteList* lpl = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join());
+
+    if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml)
+    {
+        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", lpl);
+    }
+
     if ( declaration->isListDeclaration() ){
         lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", lpl);
     } else {
@@ -3384,6 +3431,290 @@ bool CodeQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
     if (declaration->type().name() == "slot")
         return false;
     return QmlTypeInfo::isObject(declaration->type().name());
+}
+
+void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
+{
+    Q_D(CodeQmlHandler);
+
+    QList<QObject*> fragments;
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+
+    QmlScopeSnap scope = d->snapScope();
+
+    DocumentQmlValueObjects::Ptr objects = d->documentObjects();
+    DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(edit->position());
+
+    if ( currentOb ){
+        for ( int i = 0; i < currentOb->children.size(); ++i ){
+            DocumentQmlValueObjects::RangeObject* object = currentOb->children[i];
+            QString currentObDeclaration = m_document->substring(object->begin, object->identifierEnd - object->begin);
+            int splitter = currentObDeclaration.indexOf('.');
+            QString obName = currentObDeclaration.mid(splitter + 1);
+            QString obNs   = splitter == -1 ? "" : currentObDeclaration.mid(0, splitter);
+
+            QVariantMap objInfo;
+
+            objInfo.insert("name", obName);
+            objInfo.insert("namespace", obNs);
+
+            auto conn = findObjectFragmentByPosition(object->begin);
+            auto cast = qobject_cast<QObject*>(conn);
+            objInfo.insert("connection", QVariant::fromValue(cast));
+
+
+            QVariantList propertiesList;
+            auto properties = object->properties;
+            for (int p = 0; p < properties.length(); ++p)
+            {
+                auto property = properties[p];
+                QVariantMap propMap;
+                propMap.insert("name", property->name());
+
+                QString value = m_document->substring(property->valueBegin, property->end - property->valueBegin);
+
+                if (property->name().size() == 1 && property->name()[0] == "id"){
+                    objInfo.insert("id", value);
+                    continue;
+                }
+
+                QTextCursor cursor(m_document->textDocument());
+                cursor.setPosition(property->end);
+                QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
+                if (ctx->context() & QmlCompletionContext::InRhsofBinding)
+                {
+                    auto expression = ctx->expressionPath();
+                    propMap.insert("value", expression);
+
+                } else {
+                    propMap.insert("value", value);
+                }
+
+                QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
+                    scope.quickObjectDeclarationType(property->object()), property->name(), property->begin
+                );
+
+
+
+                if ( propChain.size() == property->name().size() && propChain.size() > 0 ){
+                    QmlScopeSnap::PropertyReference& propref = propChain.last();
+                    propMap.insert("isWritable", propref.property.isWritable);
+                }
+
+                propertiesList.push_back(propMap);
+
+            }
+
+
+            objInfo.insert("properties", propertiesList);
+
+            QVariantList subobjectsList;
+            for (int so = 0; so < object->children.size(); ++so)
+            {
+                auto subobject = object->children[so];
+                QVariantMap soMap;
+
+
+
+                QString name = m_document->substring(subobject->begin, subobject->identifierEnd - subobject->begin);
+                soMap.insert("name", name);
+
+
+                auto conn = findObjectFragmentByPosition(subobject->begin);
+                auto cast = qobject_cast<QObject*>(conn);
+                soMap.insert("connection", QVariant::fromValue(cast));
+
+                auto soProperties = subobject->properties;
+                for (auto sop = 0; sop < soProperties.size(); ++sop)
+                {
+                    auto soProperty = soProperties[sop];
+
+                    QString sopValue = m_document->substring(soProperty->valueBegin, soProperty->end - soProperty->valueBegin);
+
+                    if (soProperty->name().size() == 1 && soProperty->name()[0] == "id"){
+                        soMap.insert("id", sopValue);
+                        continue;
+                    }
+                }
+
+
+                subobjectsList.push_back(soMap);
+            }
+
+            objInfo.insert("subobjects", subobjectsList);
+
+            edit->addNestedObjectInfo(objInfo);
+        }
+    }
+}
+
+void CodeQmlHandler::populateObjectInfoForFragment(QmlEditFragment *edit)
+{
+    Q_D(CodeQmlHandler);
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+
+    QmlScopeSnap scope = d->snapScope();
+
+    DocumentQmlValueObjects::Ptr objects = d->documentObjects();
+    DocumentQmlValueObjects::RangeObject* object = objects->objectAtPosition(edit->position());
+
+    QString currentObDeclaration = m_document->substring(object->begin, object->identifierEnd - object->begin);
+
+    int splitter = currentObDeclaration.indexOf('.');
+
+    QString obName = currentObDeclaration.mid(splitter + 1);
+
+    QString obNs   = splitter == -1 ? "" : currentObDeclaration.mid(0, splitter);
+
+    QVariantMap objInfo;
+
+
+    objInfo.insert("name", obName);
+    objInfo.insert("namespace", obNs);
+
+    auto cast = qobject_cast<QObject*>(edit);
+    objInfo.insert("connection", QVariant::fromValue(cast));
+
+
+    QVariantList propertiesList;
+    auto properties = object->properties;
+    for (int p = 0; p < properties.length(); ++p)
+    {
+        auto property = properties[p];
+        QVariantMap propMap;
+        propMap.insert("name", property->name());
+
+        QString value = m_document->substring(property->valueBegin, property->end - property->valueBegin);
+
+        if (property->name().size() == 1 && property->name()[0] == "id"){
+            objInfo.insert("id", value);
+            continue;
+        }
+
+        QTextCursor cursor(m_document->textDocument());
+        cursor.setPosition(property->end);
+        QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
+        if (ctx->context() & QmlCompletionContext::InRhsofBinding)
+        {
+            auto expression = ctx->expressionPath();
+            propMap.insert("value", expression);
+
+        } else {
+            propMap.insert("value", value);
+        }
+
+        QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
+            scope.quickObjectDeclarationType(property->object()), property->name(), property->begin
+        );
+
+
+
+        if ( propChain.size() == property->name().size() && propChain.size() > 0 ){
+            QmlScopeSnap::PropertyReference& propref = propChain.last();
+            propMap.insert("isWritable", propref.property.isWritable);
+        }
+
+        propertiesList.push_back(propMap);
+
+    }
+
+
+    objInfo.insert("properties", propertiesList);
+
+
+    QVariantList subobjectsList;
+    for (int so = 0; so < object->children.size(); ++so)
+    {
+        auto subobject = object->children[so];
+        QVariantMap soMap;
+
+
+
+        QString name = m_document->substring(subobject->begin, subobject->identifierEnd - subobject->begin);
+        soMap.insert("name", name);
+
+
+        auto conn = findObjectFragmentByPosition(subobject->begin);
+        auto cast = qobject_cast<QObject*>(conn);
+        soMap.insert("connection", QVariant::fromValue(cast));
+
+        auto soProperties = subobject->properties;
+        for (auto sop = 0; sop < soProperties.size(); ++sop)
+        {
+            auto soProperty = soProperties[sop];
+
+            QString sopValue = m_document->substring(soProperty->valueBegin, soProperty->end - soProperty->valueBegin);
+
+            if (soProperty->name().size() == 1 && soProperty->name()[0] == "id"){
+                soMap.insert("id", sopValue);
+                continue;
+            }
+        }
+
+
+        subobjectsList.push_back(soMap);
+    }
+
+    objInfo.insert("subobjects", subobjectsList);
+
+    edit->setObjectInfo(objInfo);
+}
+
+void CodeQmlHandler::populatePropertyInfoForFragment(QmlEditFragment *edit)
+{
+    Q_D(CodeQmlHandler);
+
+    QVariantMap propMap;
+
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+
+    QmlScopeSnap scope = d->snapScope();
+
+    DocumentQmlValueObjects::Ptr objects = d->documentObjects();
+    auto set = objects->propertiesBetween(edit->declaration()->position(), edit->declaration()->position() + edit->declaration()->length());
+
+    if (set.size() != 1) edit->setObjectInfo(propMap);
+
+    auto property = set[0];
+    propMap.insert("name", property->name());
+
+    QString value = m_document->substring(property->valueBegin, property->end - property->valueBegin);
+
+    QTextCursor cursor(m_document->textDocument());
+    cursor.setPosition(property->end);
+    QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
+    if (ctx->context() & QmlCompletionContext::InRhsofBinding)
+    {
+        auto expression = ctx->expressionPath();
+        propMap.insert("value", expression);
+
+    } else {
+        propMap.insert("value", value);
+    }
+
+    QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
+        scope.quickObjectDeclarationType(property->object()), property->name(), property->begin
+    );
+
+
+
+    if ( propChain.size() == property->name().size() && propChain.size() > 0 ){
+        QmlScopeSnap::PropertyReference& propref = propChain.last();
+        propMap.insert("isWritable", propref.property.isWritable);
+    }
+
+    edit->setObjectInfo(propMap);
+}
+
+void CodeQmlHandler::testFunction(QVariantList list)
+{
+    QVariantMap a = list.first().toMap();
 }
 
 }// namespace
