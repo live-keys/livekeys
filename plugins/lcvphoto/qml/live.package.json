@@ -1,4 +1,15 @@
 {
     "name" : "lcvphoto",
-    "version" : "1.0.0"
+    "version" : "1.0.0",
+    "workspace" : {
+        "samples" : [
+            { "link" : "samples/brightnessandcontrast.qml"},
+            { "link" : "samples/fastnlmeansdenoising.qml" },
+            { "link" : "samples/hdr.qml" },
+            { "link" : "samples/huesaturationlightness.qml" },
+            { "link" : "samples/levels.qml" },
+            { "link" : "samples/levelssliders.qml" },
+            { "link" : "samples/stitcher.qml" }
+        ]
+    }
 }

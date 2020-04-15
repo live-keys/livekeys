@@ -35,11 +35,20 @@ include($$PWD/src/lcvvideo.pri)
 include($$PWD/include/lcvvideoheaders.pri)
 include($$PROJECT_ROOT/project/3rdparty/opencv.pri)
 
+# Deploy samples
+
+samplescopy.commands = $$deployDirCommand($$PWD/samples, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH/samples)
+first.depends = $(first) samplescopy
+export(first.depends)
+export(samplescopy.commands)
+QMAKE_EXTRA_TARGETS += first samplescopy
+
 OTHER_FILES *= \
     qml/*.qml \
     qml/qmldir \
     qml/plugins.qmltypes \
-    doc/*.md
+    doc/*.md \
+    samples/*.qml
 
 DISTFILES += \
     qml/live.package.json \

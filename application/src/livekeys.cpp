@@ -435,10 +435,14 @@ const MLNode &Livekeys::startupConfiguration(){
                  }
             }},
             {"samples", {
-                 {
-                     {"package", "workspace"},
-                     {"enabled", true}
-                 }
+                 {{"package", "lcvcore"}, {"enabled", true}},
+                 {{"package", "live"}, {"enabled", true}},
+                 {{"package", "lcvimgproc"},{"enabled", true}},
+                 {{"package", "lcvvideo"},{"enabled", true}},
+                 {{"package", "lcvphoto"},{"enabled", true}},
+                 {{"package", "lcvfeatures2d"}, {"enabled", true}},
+                 {{"package", "workspace"}, {"enabled", true}},
+                 {{"package", "editor"}, {"enabled", true}}
             }}
          }},
         {"timeline",{

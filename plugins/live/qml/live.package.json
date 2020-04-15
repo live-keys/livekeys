@@ -1,4 +1,18 @@
 {
     "name": "live",
-    "version" : "1.0.0"
+    "version" : "1.0.0",
+    "workspace" : {
+        "samples" : [
+            { "link" : "samples/filereading.qml"},
+            { "link" : "samples/mainscript.qml" },
+            { "link" : "samples/palettesandbinding.qml" },
+            { "link" : "samples/staticfilereading.qml" },
+            { "link" : "samples/staticloader.qml" },
+            { "link" : "samples/stringbasedloader.qml" },
+            { "link" : "samples/subproject.qml" },
+            { "link" : "samples/valuehistory.qml" },
+            { "link" : "samples/loglistener.qml" },
+            { "link" : "samples/visuallogfilter.qml" }
+        ]
+    }
 }
