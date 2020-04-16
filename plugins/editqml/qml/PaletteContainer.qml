@@ -6,7 +6,7 @@ import editor.private 1.0
 
 Item{
     id: paletteContainer
-    width: child ? child.width  + (compact? compactHeaderWidth: 0) : 0
+    width: child ? child.width  + (compact ? compactHeaderWidth: 0) : 0
     height: child ? child.height + (compact? 0 : normalHeaderHeight) : 0
     objectName: "paletteContainer"
 

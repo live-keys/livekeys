@@ -118,19 +118,26 @@ public slots:
 
     QJSValue cursorInfo(int position, int length);
     bool isInImports(int position);
-    lv::QmlEditFragment* openConnection(int position, QObject *currentApp = nullptr);
+    lv::QmlEditFragment* openConnection(int position);
     lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
     QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
     QList<QObject*> openNestedProperties(lv::QmlEditFragment* edit);
     void removeConnection(lv::QmlEditFragment* edit);
     void deleteObject(lv::QmlEditFragment* edit);
 
-    lv::PaletteList *findPalettes(int position, bool unrepeated = false);
-    lv::CodePalette* openPalette(lv::QmlEditFragment* fragment, lv::PaletteList* palette, int index);
+    QString propertyType(lv::QmlEditFragment* edit, const QString& propertyName);
+
+    lv::PaletteList *findPalettes(int position, bool unrepeated = false, bool includeExpandables = false);
+
+    QJSValue openPalette(lv::QmlEditFragment* fragment, lv::PaletteList* palette, int index);
     lv::QmlEditFragment* removePalette(lv::CodePalette* palette);
+
+    QString defaultPalette(lv::QmlEditFragment* fragment);
 
     lv::CodePalette* openBinding(lv::QmlEditFragment* edit, lv::PaletteList* paletteList, int index);
     void closeBinding(int position, int length);
+
+    QJSValue expand(lv::QmlEditFragment* edit, const QJSValue& val);
 
     bool isForAnObject(lv::QmlEditFragment* palette);
 

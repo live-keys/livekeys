@@ -11,6 +11,7 @@
         "palettes/DoubleHistoryPlotPalette.qml": "qml/double",
         "palettes/ColorPalette.qml": "qml/color",
         "palettes/PathPalette.qml": "qml/string",
-        "palettes/ImportsPalette.qml": "qml/import"
+        "palettes/ImportsPalette.qml": "qml/import",
+        "palettes/RectangleSizePalette.json" : "qml/QtQuick#Rectangle"
     }
 }

@@ -111,7 +111,7 @@ void ProjectQmlExtension::componentComplete(){
 /**
  * \brief Hook that get's executed for each engine recompile, notifying all codeHandlers assigned to this object.
  */
-void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *result, void* data){
+void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *, void* data){
     ProjectQmlExtension* that = reinterpret_cast<ProjectQmlExtension*>(data);
 
     for ( auto it = that->m_codeHandlers.begin(); it != that->m_codeHandlers.end(); ++it ){

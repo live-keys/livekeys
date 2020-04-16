@@ -56,6 +56,9 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_formats[QmlJsSettings::QmlRuntimeModifiedValue] = createFormat("#0080a0");
     m_formats[QmlJsSettings::QmlEdit] = createFormat("#fff", "#0b273f");
 
+    m_defaultPalettes["qml/double"] = "DoublePalette";
+    m_defaultPalettes["qml/int"]    = "IntPalette";
+
     MLNode s = parent->readFor("qmljs");
     if ( s.type() == MLNode::Object )
         fromJson(s);
@@ -77,6 +80,16 @@ void QmlJsSettings::fromJson(const MLNode &obj){
             } else {
                 fmt.clearBackground();
                 fmt.setForeground(QBrush(QColor(QString::fromStdString(it.value().asString()))));
+            }
+        }
+    }
+    if ( obj.hasKey("palettes") ){
+        MLNode palettes = obj["palettes"];
+        if( palettes.hasKey("defaults") ){
+            MLNode defaultPalettes = palettes["defaults"];
+            const MLNode::ObjectType& ob = defaultPalettes.asObject();
+            for ( auto it = ob.begin(); it != ob.end(); ++it ){
+                m_defaultPalettes[QString::fromStdString(it->first)] = QString::fromStdString(it->second.asString());
             }
         }
     }
@@ -102,7 +115,25 @@ MLNode QmlJsSettings::toJson() const{
 
     root["style"] = style;
 
+    MLNode palettes(MLNode::Object);
+    MLNode defaultPalettes(MLNode::Object);
+
+    for ( auto it = m_defaultPalettes.begin(); it != m_defaultPalettes.end(); ++it ){
+        defaultPalettes[it.key().toStdString()] = it.value().toStdString();
+    }
+
+    palettes["default"] = defaultPalettes;
+    root["palettes"] = palettes;
+
     return root;
+}
+
+QString QmlJsSettings::defaultPalette(const QString &typeName) const{
+    auto it = m_defaultPalettes.find(typeName);
+    if ( it != m_defaultPalettes.end() ){
+        return it.value();
+    }
+    return "";
 }
 
 void QmlJsSettings::__refresh(){

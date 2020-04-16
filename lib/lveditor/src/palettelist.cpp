@@ -18,7 +18,6 @@ PaletteList::PaletteList(PaletteContainer *container, QObject *parent)
     , m_position(-1)
     , m_paletteContainer(container)
 {
-
 }
 
 /**
@@ -65,7 +64,14 @@ CodePalette* PaletteList::loadAt(int index){
         qmlEngine(this)->setObjectOwnership(lp, QQmlEngine::CppOwnership);
         return lp;
     }
-    return 0;
+    return nullptr;
+}
+
+QJSValue PaletteList::contentAt(int index){
+    if ( index < m_palettes.size() ){
+        return m_paletteContainer->paletteContent(m_palettes[index]);
+    }
+    return QJSValue();
 }
 
 

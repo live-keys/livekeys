@@ -58,6 +58,7 @@ DISTFILES += \
     palettes/IntHistoryPlotPalette.qml \
     palettes/DoubleHistoryPlotPalette.qml \
     palettes/PathPalette.qml \
+    palettes/RectangleSizePalette.json \
     palettes/TriggerPalette.qml \
     qml/DocumentationView.qml \
     qml/EditorPane.qml \

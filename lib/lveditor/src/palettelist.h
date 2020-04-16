@@ -32,6 +32,7 @@ public slots:
     int position() const;
     int size() const;
     lv::CodePalette *loadAt(int index);
+    QJSValue contentAt(int index);
 
 private:
     int                   m_position;
