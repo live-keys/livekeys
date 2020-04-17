@@ -1,8 +1,9 @@
 #include "segmentmodel.h"
 #include "segment.h"
 
+#include "live/visuallogqt.h"
+
 #include <QVariant>
-#include <QtDebug>
 
 namespace lv{
 
@@ -39,7 +40,7 @@ QVariant SegmentModelIterator::data(int role){
 
 class SegmentModelPrivate{
 public:
-    SegmentModelPrivate() : lastChange(nullptr), itemDataFactory(nullptr){}
+    SegmentModelPrivate() : lastChange(nullptr), itemDataFactory(nullptr), snapThreshold(2){}
     ~SegmentModelPrivate();
 
     class SegmentModelChange{
@@ -56,6 +57,8 @@ public:
 
     int searchFirstIndex(qint64 position);
     int searchFirstIndex(qint64 position, qint64 length);
+
+    double snapThreshold;
 };
 
 SegmentModelPrivate::~SegmentModelPrivate(){
@@ -152,9 +155,14 @@ void SegmentModel::setItemPosition(qint64 itemPosition, qint64 itemLength, int i
     d->items.takeAt(index);
     Segment::setPosition(item, static_cast<unsigned int>(itemNewPosition));
     int newIndex = insertItemImpl(item);
+    if ( newIndex == -1 ){
+        Segment::setPosition(item, static_cast<unsigned int>(itemPosition));
+        insertItemImpl(item);
+        return;
+    }
 
     QList<Segment*>::iterator itemIt = d->items.begin() + newIndex;
-    SegmentModelIterator* modelIt = new SegmentModelIterator(itemIt, itemIt + 1, itemNewPosition + 1);
+    SegmentModelIterator* modelIt = new SegmentModelIterator(itemIt, itemIt + 1, item->position() + 1);
     emit itemCoordinatesChanged(itemPosition, itemLength, indexOffset, modelIt, 0);
 }
 
@@ -179,31 +187,24 @@ void SegmentModel::setItemLength(qint64 itemPosition, qint64 itemLength, int ind
     if ( item->position() != itemPosition )
         return;
 
-    while ( positionIndex < d->items.size() ){
-        if ( d->items[positionIndex]->position() == item->position() && d->items[positionIndex]->length() < newLength )
-            ++positionIndex;
-        else
-            break;
+    int nextIndex = index + 1;
+    if ( index + 1 < d->items.size() ){
+        Segment* nextSegm = d->items[nextIndex];
+        if ( item->position() + newLength > nextSegm->position() ){
+            qint64 diff = item->position() + item->length() - nextSegm->position();
+            if ( diff <= d->snapThreshold ){
+                newLength = nextSegm->position() - item->position();
+            } else {
+                return;
+            }
+        }
     }
 
-    if ( index == positionIndex || index == positionIndex + 1 ){
-        Segment::setLength(item, static_cast<unsigned int>(newLength));
+    Segment::setLength(item, static_cast<unsigned int>(newLength));
 
-        QList<Segment*>::iterator itemIt = d->items.begin() + index;
-        SegmentModelIterator* modelIt = new SegmentModelIterator(itemIt, itemIt + 1, itemPosition + 1);
-        emit itemCoordinatesChanged(itemPosition, itemLength, indexOffset, modelIt, indexOffset);
-    } else {
-        d->items.takeAt(index);
-
-        Segment::setLength(item, static_cast<unsigned int>(newLength));
-
-        int newIndex = insertItemImpl(item);
-
-        QList<Segment*>::iterator itemIt = d->items.begin() + newIndex;
-        SegmentModelIterator* modelIt = new SegmentModelIterator(itemIt, itemIt + 1, itemPosition + 1);
-        emit itemCoordinatesChanged(itemPosition, itemLength, indexOffset, modelIt, 0);
-    }
-
+    QList<Segment*>::iterator itemIt = d->items.begin() + index;
+    SegmentModelIterator* modelIt = new SegmentModelIterator(itemIt, itemIt + 1, itemPosition + 1);
+    emit itemCoordinatesChanged(itemPosition, itemLength, indexOffset, modelIt, indexOffset);
 }
 
 void SegmentModel::setItemData(
@@ -233,6 +234,7 @@ void SegmentModel::insertItem(Segment *segment){
 int SegmentModel::insertItemImpl(Segment* item){
     Q_D(SegmentModel);
     int index = d->searchFirstIndex(item->position());
+
     while ( index < d->items.size() ){
         if ( d->items[index]->position() == item->position() && d->items[index]->length() < item->length() )
             ++index;
@@ -240,6 +242,52 @@ int SegmentModel::insertItemImpl(Segment* item){
             break;
         }
     }
+
+    int prevIndex = index - 1;
+    int nextIndex = index;
+    if ( prevIndex >= 0 ){ // check snap before
+        Segment* prevSegm = d->items[prevIndex];
+        if ( prevSegm->position() + prevSegm->length() > item->position() ){
+            qint64 diff = prevSegm->position() + prevSegm->length() - item->position();
+            if ( diff <= d->snapThreshold ){
+                if ( prevSegm->position() + prevSegm->length() + item->length() > contentWidth() ){
+                    return -1;
+                }
+
+                Segment::setPosition(item, prevSegm->position() + prevSegm->length());
+                item->setPosition(prevSegm->position() + prevSegm->length());
+
+                if ( nextIndex < d->items.size() ){
+                    Segment* nextSegm = d->items[nextIndex];
+                    if ( item->position() + item->length() > nextSegm->position() )
+                        return -1;
+                }
+            } else {
+                return -1;
+            }
+        }
+    }
+    if ( nextIndex < d->items.size() ){ // check snap before
+        Segment* nextSegm = d->items[nextIndex];
+        if ( item->position() + item->length() > nextSegm->position() ){
+            qint64 diff = item->position() + item->length() - nextSegm->position();
+            if ( diff <= d->snapThreshold ){
+                if ( nextSegm->position() < item->length() ){
+                    return -1;
+                }
+
+                Segment::setPosition(item, nextSegm->position() - item->length());
+                if ( prevIndex >= 0 ){
+                    Segment* prevSegm = d->items[prevIndex];
+                    if ( prevSegm->position() + prevSegm->length() > item->position() )
+                        return -1;
+                }
+            } else {
+                return -1;
+            }
+        }
+    }
+
     d->items.insert(index, item);
     item->setParent(this);
     return index;
@@ -302,9 +350,7 @@ Segment* SegmentModel::takeSegment(Segment *segment){
 
 void SegmentModel::insertItem(qint64 position, qint64 length){
     Segment* item = new Segment(static_cast<unsigned int>(position), static_cast<unsigned int>(length));
-    beginDataChange(position, position + 1);
-    insertItemImpl(item);
-    endDataChange();
+    insertItem(item);
 }
 
 void SegmentModel::removeItem(qint64 position, qint64 length, qint64 relativeIndex){
@@ -326,6 +372,39 @@ void SegmentModel::removeItem(qint64 position, qint64 length, qint64 relativeInd
         }
         ++index;
     }
+}
+
+qint64 SegmentModel::availableSpace(qint64 position){
+    Q_D(SegmentModel);
+    int index = d->searchFirstIndex(position);
+    if ( index > 0 ){
+        if ( d->items[index - 1]->position() + d->items[index - 1]->length() > position ){
+            return 0;
+        }
+    }
+
+    while ( index < d->items.size() ){
+        if ( d->items[index]->position() > position ){
+            return d->items[index]->position() - position;
+        }
+        ++index;
+    }
+    return contentWidth() - position;
+}
+
+double SegmentModel::snapThreshold() const{
+    Q_D(const SegmentModel);
+    return d->snapThreshold;
+}
+
+
+void SegmentModel::setSnapThreshold(double snapThreshold){
+    Q_D(SegmentModel);
+    if (qFuzzyCompare(d->snapThreshold, snapThreshold))
+        return;
+
+    d->snapThreshold = snapThreshold;
+    emit snapThrehsoldChanged();
 }
 
 

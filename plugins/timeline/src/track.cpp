@@ -87,6 +87,10 @@ Segment *Track::takeSegment(Segment *segment){
     return m_segmentModel->takeSegment(segment);
 }
 
+qint64 Track::availableSpace(qint64 position){
+    return m_segmentModel->availableSpace(position);
+}
+
 //TODO: Condition: If m_activeSegment gets removed (connect to the segmentModel)
 void Track::__segmentModelItemsChanged(qint64, qint64){
 

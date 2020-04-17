@@ -41,6 +41,7 @@ public:
 public slots:
     void addSegment(lv::Segment* segment);
     lv::Segment* takeSegment(lv::Segment* segment);
+    qint64 availableSpace(qint64 position);
 
     void __segmentModelItemsChanged(qint64 startPosition, qint64 endPosition);
 

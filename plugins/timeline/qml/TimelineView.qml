@@ -355,7 +355,22 @@ Rectangle{
             var overlay = lk.layers.window.dialogs.overlayBox(object)
 
             object.segmentCreated.connect(function(segment){
-                segment.surface = timelineArea.surface
+                var availableSpace = segmentInsertMenu.currentTrack.availableSpace(root.timeline.cursorPosition)
+                if ( availableSpace === 0 ){
+                    segment.destroy()
+                    console.warn("Cannot add segment at cursor position. Not enough space.")
+                    overlay.closeBox()
+                    return
+                }
+
+                if ( availableSpace < segment.length ){
+                    segment.length = avialableSpace
+                }
+
+                segment.position = root.timeline.cursorPosition
+
+                if ( segment.surface )
+                    segment.surface = timelineArea.surface
                 segmentInsertMenu.currentTrack.addSegment(segment)
                 segmentInsertMenu.currentTrack = null
                 overlay.closeBox()

@@ -156,8 +156,15 @@ Item {
             onPositionChanged: {
                 if (pressed) {
                     var newWidth = root.width + oldMouseX - mouseX
-                    var newX = root.x + mouseX - oldMouseX
                     var newLength = Math.round(newWidth / root.zoom)
+                    var newX = root.x + mouseX - oldMouseX
+
+                    if ( newLength - segment.length > segment.maxStretchLeft ){
+                        newLength = segment.length + segment.maxStretchLeft
+                        newWidth = Math.round(newLength * root.zoom)
+                        newX = root.x + root.width - newWidth
+                    }
+
                     if (newLength > 0
                             && newX + newWidth < segment.segmentModel().contentWidth) {
                         if (newX > 0) {
@@ -176,8 +183,7 @@ Item {
             }
 
             onReleased: {
-                segment.position = Math.round(root.x / root.zoom)
-                segment.length = Math.round(root.width / root.zoom)
+                segment.stretchLeftTo(Math.round(root.x / root.zoom))
                 root.width = length * root.zoom
                 root.x = position * root.zoom
             }
@@ -202,6 +208,14 @@ Item {
                 if (pressed) {
                     var newWidth = root.width + (mouseX - oldMouseX)
                     var newLength = Math.round(newWidth / root.zoom)
+
+                    var lengthDelta = newLength - segment.length
+
+                    if ( lengthDelta > segment.maxStretchRight ){
+                        newLength = segment.length + segment.maxStretchRight
+                        newWidth = Math.round(newLength * root.zoom)
+                    }
+
                     if (newLength > 0) {
                         if (position + newLength < segment.segmentModel().contentWidth)
                             root.width = newWidth
@@ -212,7 +226,7 @@ Item {
                 }
             }
             onReleased: {
-                segment.length = Math.round(root.width / root.zoom)
+                segment.stretchRightTo(Math.round((root.x + root.width) / root.zoom))
                 root.width = length * root.zoom
             }
         }

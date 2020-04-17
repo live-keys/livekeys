@@ -1,12 +1,12 @@
 #include "segment.h"
 #include "segmentmodel.h"
 #include "track.h"
+#include "live/visuallogqt.h"
 
 #include <QQmlContext>
 #include <QQmlEngine>
-#include <QtDebug>
+#include <limits>
 
-#include "live/visuallogqt.h"
 
 namespace lv{
 
@@ -14,6 +14,8 @@ Segment::Segment(QObject *parent)
     : QObject(parent)
     , m_position(0)
     , m_length(0)
+    , m_maxStretchLeft(std::numeric_limits<unsigned int>::max())
+    , m_maxStretchRight(std::numeric_limits<unsigned int>::max())
 {
 }
 
@@ -21,6 +23,8 @@ Segment::Segment(unsigned int position, unsigned int length, QObject* parent)
     : QObject(parent)
     , m_position(position)
     , m_length(length)
+    , m_maxStretchLeft(std::numeric_limits<unsigned int>::max())
+    , m_maxStretchRight(std::numeric_limits<unsigned int>::max())
 {
 }
 
@@ -65,6 +69,16 @@ void Segment::remove(){
 
 SegmentModel* Segment::segmentModel(){
     return qobject_cast<SegmentModel*>(parent());
+}
+
+void Segment::stretchLeftTo(unsigned int position){
+    unsigned int currentPosition = m_position;
+    setPosition(position);
+    setLength(currentPosition - m_position + m_length);
+}
+
+void Segment::stretchRightTo(unsigned int position){
+    setLength(position - m_position);
 }
 
 void Segment::setIsAsync(bool isAsync){

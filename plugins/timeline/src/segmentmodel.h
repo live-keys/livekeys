@@ -46,6 +46,7 @@ class SegmentModelPrivate;
 class SegmentModel : public QAbstractRangeModel{
 
     Q_OBJECT
+    Q_PROPERTY(double snapThreshold READ snapThreshold WRITE setSnapThreshold NOTIFY snapThrehsoldChanged)
 
 public:
     typedef QVariant (*ItemDataFactoryFunction)();
@@ -74,11 +75,19 @@ public:
 
     Segment* segmentThatWraps(qint64 position);
 
+    double snapThreshold() const;
+
 public slots:
     void insertItem(qint64 position, qint64 length);
     void removeItem(qint64 position, qint64 length, qint64 relativeIndex);
+    qint64 availableSpace(qint64 position);
 
     lv::Segment *takeSegment(lv::Segment* segment);
+
+    void setSnapThreshold(double snapThreshold);
+
+signals:
+    void snapThrehsoldChanged();
 
 private:
     int insertItemImpl(Segment* item);
@@ -88,7 +97,6 @@ private:
 
     SegmentModelPrivate* const d_ptr;
     Q_DECLARE_PRIVATE(SegmentModel)
-
 };
 
 }// namespace
