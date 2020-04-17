@@ -19,7 +19,8 @@ Rectangle{
     
     property Component propertyDelegate : ObjectNodeProperty{}
     property alias nodeDelegate : graph.nodeDelegate
-    
+    property var palette: null
+
     property int inPort: 1
     property int outPort: 2
     property int noPort : 0
@@ -30,6 +31,27 @@ Rectangle{
     signal doubleClicked(var pos)
     signal rightClicked(var pos)
     
+    onUserEdgeInserted: {
+        var item = edge.item
+
+        var srcPort = item.sourceItem
+        var dstPort = item.destinationItem
+
+        var value =
+                srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
+
+        var result = root.palette.extension.bindExpressionForFragment(
+            dstPort.objectProperty.editingFragment,
+            value
+        )
+        if ( result ){
+            root.palette.extension.writeForFragment(
+                dstPort.objectProperty.editingFragment,
+                {'__ref': value}
+            )
+        }
+    }
+
     function bindPorts(src, dst){
         var srcNode = src.objectProperty.node
         var dstNode = dst.objectProperty.node
@@ -61,6 +83,7 @@ Rectangle{
 
 
     function removeObjectNode(node){
+        --palette.numOfObjects
         graph.removeNode(node)
     }
     
@@ -74,6 +97,12 @@ Rectangle{
         node.item.y = y
         node.item.label = label
         node.label = label
+
+        var idx = label.indexOf('#')
+        if (idx !== -1)
+        {
+            node.item.id = label.substr(idx+1)
+        }
         
         return node
     }
@@ -94,7 +123,7 @@ Rectangle{
             propertyItem.inPort = port
             port.objectProperty = propertyItem
         }
-        if ( ports === root.outPort || ports === root.inOutPort ){
+        if ( node.item.id !== "" && (ports === root.outPort || ports === root.inOutPort) ){
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
             port.label = propertyName + " Out"
             port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.height / 2) })

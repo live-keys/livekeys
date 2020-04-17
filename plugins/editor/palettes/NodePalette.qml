@@ -12,6 +12,7 @@ CodePalette{
 
     property var editingFragment: null
     property var objects: ({})
+    property var numOfObjects: 0
     property var edges: []
 
     onEditingFragmentChanged: {
@@ -32,7 +33,9 @@ CodePalette{
             for (var i = 0; i < objectList.length; ++i)
             {
                 var object = objectList[i]
-                var n = objectGraph.addObjectNode(i*250 + 50, 100, (object.name + (object.id ? ("#" + object.id) : "")))
+                var n = objectGraph.addObjectNode(numOfObjects *400 + 50, numOfObjects *200 + 50, (object.name + (object.id ? ("#" + object.id) : "")))
+
+                ++numOfObjects
 
                 if (object.id)
                 {
@@ -45,7 +48,7 @@ CodePalette{
                 for (var j = 0; j < object.properties.length; ++j)
                 {
                     var property = object.properties[j]
-                    var p = objectGraph.addObjectNodeProperty(n, property.name, property.isWritable ? objectGraph.inOutPort : objectGraph.outPort, null)
+                    var p = objectGraph.addObjectNodeProperty(n, property.name, property.isWritable ? objectGraph.inOutPort : objectGraph.outPort, property.connection)
                     n.item.propertyNames.push(property.name)
                     if (property.value.length === 2)
                     {
@@ -86,6 +89,7 @@ CodePalette{
             width: 500
             height: 300
             id: objectGraph
+            palette: palette
         }
     }
 
@@ -96,7 +100,9 @@ CodePalette{
         onObjectAdded: {
             var object = obj.objectInfo()
 
-            var n = objectGraph.addObjectNode(300, 300, (object.name + (object.id ? ("#" + object.id) : "")))
+            var n = objectGraph.addObjectNode(numOfObjects * 400 + 50, numOfObjects * 200 + 50, (object.name + (object.id ? ("#" + object.id) : "")))
+
+            ++numOfObjects
 
             if (object.id)
                 objects[object.id] = n

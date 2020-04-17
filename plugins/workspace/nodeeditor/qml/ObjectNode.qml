@@ -17,6 +17,7 @@ Qan.NodeItem{
     property var editingFragment: null
     property var removeNode: null
     property var addSubobject: null
+    property string id: ""
 
     Rectangle{
         id: wrapper
@@ -41,6 +42,61 @@ Qan.NodeItem{
                 anchors.leftMargin: 15
                 color: 'white'
                 text: root.label
+            }
+
+            Item{
+                id: eraseButton
+                anchors.right: parent.right
+                anchors.rightMargin: 40
+                anchors.verticalCenter: parent.verticalCenter
+                width: 15
+                height: 20
+                Image{
+                    anchors.centerIn: parent
+                    source: "qrc:/images/palette-erase-object.png"
+                }
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                    }
+                }
+            }
+
+            Item{
+                id: composeButton
+                anchors.right: parent.right
+                anchors.rightMargin: 22
+                anchors.verticalCenter: parent.verticalCenter
+                width: 15
+                height: 20
+                Image{
+                    anchors.centerIn: parent
+                    source: "qrc:/images/palette-add-property.png"
+                }
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                    }
+                }
+            }
+
+            Item{
+                id: paletteAddButton
+                anchors.right: parent.right
+                anchors.rightMargin: 4
+                anchors.verticalCenter: parent.verticalCenter
+                width: 15
+                height: 20
+                Image{
+                    anchors.centerIn: parent
+                    source: "qrc:/images/palette-add.png"
+                }
+                MouseArea{
+                    id: paletteAddMouse
+                    anchors.fill: parent
+                    onClicked: {
+                    }
+                }
             }
         }
         
@@ -77,10 +133,10 @@ Qan.NodeItem{
         onPropertyAdded: {
             var prop = ef.objectInfo()
             for (var i=0; i < propertyNames.length; ++i){
-                if (propertyNames[i] === prop.name) return
+                if (!propertyNames[i].toString().localeCompare(prop.name.toString())) return
             }
 
-            addSubobject(nodeParent, prop.name, (prop.isWritable?3:2), null)
+            addSubobject(nodeParent, prop.name, (prop.isWritable?3:2), prop.connection)
         }
 
     }

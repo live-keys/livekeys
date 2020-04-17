@@ -1952,6 +1952,10 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
             QmlDeclaration::Ptr property = nullptr;
             DocumentQmlValueObjects::RangeProperty* rp = currentOb->properties[i];
 
+            auto test = findFragmentByPosition(rp->begin);
+            if (test && test->isForProperty()) // it was already opened
+                continue;
+
             QString propertyType = rp->type();
 
             if (rp->name().size() == 1 && rp->name()[0] == "id") continue;
@@ -3480,6 +3484,15 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
                     continue;
                 }
 
+                auto fragment = findFragmentByPosition(property->begin);
+                if (!fragment || !fragment->isForProperty()) {
+                    fragment = openNestedConnection(conn, property->begin);
+                }
+
+                auto fcast = qobject_cast<QObject*>(fragment);
+                propMap.insert("connection", QVariant::fromValue(fcast));
+
+
                 QTextCursor cursor(m_document->textDocument());
                 cursor.setPosition(property->end);
                 QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
@@ -3683,6 +3696,9 @@ void CodeQmlHandler::populatePropertyInfoForFragment(QmlEditFragment *edit)
 
     auto property = set[0];
     propMap.insert("name", property->name());
+
+    auto cast = qobject_cast<QObject*>(edit);
+    propMap.insert("connection", QVariant::fromValue(cast));
 
     QString value = m_document->substring(property->valueBegin, property->end - property->valueBegin);
 
