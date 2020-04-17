@@ -76,6 +76,6 @@ void QAbstractRangeModel::endDataChange(){
     }
 }
 
-void QAbstractRangeModel::insertItem(qint64, qint64){}
+void QAbstractRangeModel::addSegment(qint64, qint64){}
 
 void QAbstractRangeModel::removeItem(qint64, qint64, qint64){}

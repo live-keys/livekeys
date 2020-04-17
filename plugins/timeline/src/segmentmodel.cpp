@@ -222,13 +222,15 @@ QHash<int, QByteArray> SegmentModel::roleNames() const{
     return roles;
 }
 
-void SegmentModel::insertItem(Segment *segment){
+bool SegmentModel::addSegment(Segment *segment){
     if ( !segment )
-        return;
+        return -1;
 
     beginDataChange(segment->position(), segment->position() + 1);
-    insertItemImpl(segment);
+    int index = insertItemImpl(segment);
     endDataChange();
+
+    return index != -1;
 }
 
 int SegmentModel::insertItemImpl(Segment* item){
@@ -341,6 +343,7 @@ Segment* SegmentModel::takeSegment(Segment *segment){
         if ( d->items[index] == segment ){
             beginDataChange(segment->position(), segment->position() + 1);
             d->items.removeAt(index);
+            segment->setParent(nullptr);
             result = segment;
             endDataChange();
         }
@@ -348,9 +351,9 @@ Segment* SegmentModel::takeSegment(Segment *segment){
     return result;
 }
 
-void SegmentModel::insertItem(qint64 position, qint64 length){
+void SegmentModel::addSegment(qint64 position, qint64 length){
     Segment* item = new Segment(static_cast<unsigned int>(position), static_cast<unsigned int>(length));
-    insertItem(item);
+    addSegment(item);
 }
 
 void SegmentModel::removeItem(qint64 position, qint64 length, qint64 relativeIndex){

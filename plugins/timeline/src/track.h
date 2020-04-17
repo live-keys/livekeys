@@ -39,7 +39,7 @@ public:
     CursorOperation updateCursorPosition(qint64 newPosition);
 
 public slots:
-    void addSegment(lv::Segment* segment);
+    bool addSegment(lv::Segment* segment);
     lv::Segment* takeSegment(lv::Segment* segment);
     qint64 availableSpace(qint64 position);
 

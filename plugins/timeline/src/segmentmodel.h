@@ -67,7 +67,6 @@ public:
 
     QHash<int, QByteArray> roleNames() const;
 
-    void insertItem(Segment* segment);
 
     int totalSegments() const;
     Segment* segmentAt(int index);
@@ -78,10 +77,11 @@ public:
     double snapThreshold() const;
 
 public slots:
-    void insertItem(qint64 position, qint64 length);
+    void addSegment(qint64 position, qint64 length);
     void removeItem(qint64 position, qint64 length, qint64 relativeIndex);
     qint64 availableSpace(qint64 position);
 
+    bool addSegment(lv::Segment* segment);
     lv::Segment *takeSegment(lv::Segment* segment);
 
     void setSnapThreshold(double snapThreshold);

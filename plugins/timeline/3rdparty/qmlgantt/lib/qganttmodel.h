@@ -75,12 +75,12 @@ public:
 
     QHash<int, QByteArray> roleNames() const;
 
-    int insertItem(QGanttModelItem* item);
+    int addSegment(QGanttModelItem* item);
 
     void setItemDataFactoryFunction(ItemDataFactoryFunction fp);
 
 public slots:
-    void insertItem(qint64 position, qint64 length);
+    void addSegment(qint64 position, qint64 length);
     void removeItem(qint64 position, qint64 length, qint64 relativeIndex);
 
 private:

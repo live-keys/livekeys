@@ -79,8 +79,8 @@ Track::CursorOperation Track::updateCursorPosition(qint64 newPosition){
     return CursorOperation::Ready;
 }
 
-void Track::addSegment(Segment *segment){
-    m_segmentModel->insertItem(segment);
+bool Track::addSegment(Segment *segment){
+    return m_segmentModel->addSegment(segment);
 }
 
 Segment *Track::takeSegment(Segment *segment){

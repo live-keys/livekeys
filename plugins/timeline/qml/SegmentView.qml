@@ -113,6 +113,8 @@ Item {
             }
             onReleased: {
                 if ( root.timelineRow && root.parent !== root.timelineRow ){
+                    var prevPosition = segment.position
+
                     var rowDelegate = root.timelineRow.parent
                     var timelineView = rowDelegate.parentView
 
@@ -122,16 +124,23 @@ Item {
                     if ( track.segmentModel !== segment.segmentModel() ){
                         var prevSegmentModel = segment.segmentModel()
                         if ( prevSegmentModel.takeSegment(segment) ){
-                            track.addSegment(segment)
+
+                            segment.position = Math.round(root.x / root.zoom)
+                            if (!track.addSegment(segment) ){
+                                segment.position = prevPosition
+                                prevSegmentModel.addSegment(segment)
+                            }
+
+                            root.x = position * root.zoom
                         }
                     } else {
                         root.parent = timelineRow
                         root.y = 3
                     }
+                } else {
+                    segment.position = Math.round(root.x / root.zoom)
+                    root.x = position * root.zoom
                 }
-
-                segment.position = Math.round(root.x / root.zoom)
-                root.x = position * root.zoom
             }
         }
     }

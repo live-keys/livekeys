@@ -94,7 +94,7 @@ signals:
     void itemsDataChanged(QAbstractRangeModelIterator*, int relativeIndex, QList<int> roles = QList<int>() );
 
 public slots:
-    virtual void insertItem(qint64 position, qint64 length);
+    virtual void addSegment(qint64 position, qint64 length);
     virtual void removeItem(qint64 position, qint64 length, qint64 relativeIndex);
 
 private:

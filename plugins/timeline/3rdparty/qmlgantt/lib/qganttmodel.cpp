@@ -135,7 +135,7 @@ void QGanttModel::setItemPosition(qint64 itemPosition, qint64 itemLength, int in
 
     d->items.takeAt(index);
     item->setPosition(itemNewPosition);
-    int newIndex = insertItem(item);
+    int newIndex = addSegment(item);
 
     QList<QGanttModelItem*>::iterator itemIt = d->items.begin() + newIndex;
     QGanttModelIterator* modelIt = new QGanttModelIterator(itemIt, itemIt + 1, itemNewPosition + 1);
@@ -179,7 +179,7 @@ void QGanttModel::setItemLength(qint64 itemPosition, qint64 itemLength, int inde
     } else {
         d->items.takeAt(index);
         item->setLength(newLength);
-        int newIndex = insertItem(item);
+        int newIndex = addSegment(item);
 
         QList<QGanttModelItem*>::iterator itemIt = d->items.begin() + newIndex;
         QGanttModelIterator* modelIt = new QGanttModelIterator(itemIt, itemIt + 1, itemPosition + 1);
@@ -216,7 +216,7 @@ QHash<int, QByteArray> QGanttModel::roleNames() const{
     return roles;
 }
 
-int QGanttModel::insertItem(QGanttModelItem* item){
+int QGanttModel::addSegment(QGanttModelItem* item){
     Q_D(QGanttModel);
     int index = d->searchFirstIndex(item->position());
     while ( index < d->items.size() ){
@@ -235,14 +235,14 @@ void QGanttModel::setItemDataFactoryFunction(QGanttModel::ItemDataFactoryFunctio
     d->itemDataFactory = fp;
 }
 
-void QGanttModel::insertItem(qint64 position, qint64 length){
+void QGanttModel::addSegment(qint64 position, qint64 length){
     Q_D(QGanttModel);
     QGanttModelItem* item = new QGanttModelItem(position, length);
     if ( d->itemDataFactory )
         item->setData(d->itemDataFactory());
 
     beginDataChange(position, position + 1);
-    insertItem(item);
+    addSegment(item);
     endDataChange();
 }
 
