@@ -268,6 +268,8 @@ Item{
 
                             if (palette.type === "qml/Object")
                             {
+                                palette.documentHandler = editor.documentHandler
+                                palette.editor = editor
                                 editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
                                 palette.editingFragment = editingFragment
                             }

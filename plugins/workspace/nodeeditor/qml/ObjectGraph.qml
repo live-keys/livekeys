@@ -17,9 +17,31 @@ Rectangle{
     border.width: 1
     border.color: "#333"
     
+    property Component resizeConnectionsFactory: Component{
+        Connections {
+            target: null
+            property var node: null
+            ignoreUnknownSignals: true
+            onWidthChanged: {
+                var maxWidth = 340
+                for (var i=0; i < node.propertyContainer.children.length; ++i)
+                {
+                    var child = node.propertyContainer.children[i]
+                    if (child.width > maxWidth) maxWidth = child.width
+                }
+
+                if (maxWidth !== node.width)
+                    node.width = maxWidth + 20
+            }
+        }
+    }
+    property var resizeComponents: []
     property Component propertyDelegate : ObjectNodeProperty{}
     property alias nodeDelegate : graph.nodeDelegate
     property var palette: null
+    property var documentHandler: null
+    property var editor: null
+
 
     property int inPort: 1
     property int outPort: 2
@@ -98,6 +120,10 @@ Rectangle{
         node.item.label = label
         node.label = label
 
+        node.item.documentHandler = documentHandler
+        node.item.editor = editor
+        node.item.editingFragment = node.fragment
+
         var idx = label.indexOf('#')
         if (idx !== -1)
         {
@@ -109,24 +135,33 @@ Rectangle{
     
     function addObjectNodeProperty(node, propertyName, ports, editingFragment){
         var item = node.item
-        var propertyItem = root.propertyDelegate.createObject()
-        propertyItem.parent = item.propertyContainer
+        var propertyItem = root.propertyDelegate.createObject(item.propertyContainer)
+
         propertyItem.propertyName = propertyName
         propertyItem.node = node
 
         propertyItem.editingFragment = editingFragment
-        
+        propertyItem.documentHandler = root.documentHandler
+
+        propertyItem.editor = root.editor
+
+        var conn = resizeConnectionsFactory.createObject()
+        conn.target = propertyItem
+        conn.node = item
+
+        resizeComponents.push(conn)
+
         if ( ports === root.inPort || ports === root.inOutPort ){
             var port = graph.insertPort(node, Qan.NodeItem.Left, Qan.Port.In);
             port.label = propertyName + " In"
-            port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.height / 2) })
+            port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.propertyTitle.height / 2) })
             propertyItem.inPort = port
             port.objectProperty = propertyItem
         }
         if ( node.item.id !== "" && (ports === root.outPort || ports === root.inOutPort) ){
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
             port.label = propertyName + " Out"
-            port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.height / 2) })
+            port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.propertyTitle.height / 2) })
             propertyItem.outPort = port
             port.objectProperty = propertyItem
         }

@@ -11,6 +11,8 @@ CodePalette{
     type: "qml/Object"
 
     property var editingFragment: null
+    property var documentHandler: null
+    property var editor: null
     property var objects: ({})
     property var numOfObjects: 0
     property var edges: []
@@ -50,6 +52,8 @@ CodePalette{
                     var property = object.properties[j]
                     var p = objectGraph.addObjectNodeProperty(n, property.name, property.isWritable ? objectGraph.inOutPort : objectGraph.outPort, property.connection)
                     n.item.propertyNames.push(property.name)
+
+                    p.z = 10000 - j
                     if (property.value.length === 2)
                     {
                         props.push({"port": p.inPort, "value": property.value})
@@ -90,6 +94,8 @@ CodePalette{
             height: 300
             id: objectGraph
             palette: palette
+            documentHandler: palette.documentHandler
+            editor: palette.editor
         }
     }
 
