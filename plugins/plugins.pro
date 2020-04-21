@@ -32,7 +32,7 @@ editqml.subdir          = $$PWD/editqml
 fs.subdir               = $$PWD/fs
 lcvphoto.subdir         = $$PWD/lcvphoto
 lcvvideo.subdir         = $$PWD/lcvvideo
-timelien.subdir         = $$PWD/timeline
+timeline.subdir         = $$PWD/timeline
 
 # --- Dependency configuration ---
 

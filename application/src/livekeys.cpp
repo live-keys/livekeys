@@ -459,7 +459,8 @@ const MLNode &Livekeys::startupConfiguration(){
               "lcvfeatures2d",
               "lcvimgproc",
               "lcvphoto",
-              "lcvvideo"
+              "lcvvideo",
+              "timeline"
           }},
          {"internalQtPackages",{
               "Qt",
