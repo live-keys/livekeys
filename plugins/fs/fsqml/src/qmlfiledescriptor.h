@@ -25,10 +25,12 @@ public slots:
     void setFile(QFile* f) { file = f; }
     void close();
     bool seek(int pos);
+    bool isEof() const;
     qint64 write(QByteArray content);
     qint64 writeString(QString text);
     QByteArray read(qint64 numOfBytes);
     QByteArray readAll() const;
+    QByteArray readLine();
 
 private:
     QFile* file;

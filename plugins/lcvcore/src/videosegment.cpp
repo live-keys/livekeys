@@ -65,6 +65,9 @@ void VideoSegment::cursorNext(qint64 pos){
 }
 
 void VideoSegment::cursorMove(qint64 position){
+    if ( !m_surface )
+        return;
+
     m_capture->set(cv::CAP_PROP_POS_FRAMES, position);
     cv::Mat frame;
     if ( m_capture->grab() ){

@@ -1,4 +1,5 @@
 #include "track.h"
+#include "timeline.h"
 #include "segmentmodel.h"
 #include "segment.h"
 
@@ -89,6 +90,10 @@ Segment *Track::takeSegment(Segment *segment){
 
 qint64 Track::availableSpace(qint64 position){
     return m_segmentModel->availableSpace(position);
+}
+
+Timeline* Track::timeline(){
+    return qobject_cast<Timeline*>(parent());
 }
 
 //TODO: Condition: If m_activeSegment gets removed (connect to the segmentModel)

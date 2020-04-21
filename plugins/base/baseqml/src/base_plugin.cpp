@@ -20,6 +20,7 @@
 #include "live/viewcontext.h"
 #include "live/applicationcontext.h"
 #include "qmlscript.h"
+#include "qmlindexselector.h"
 #include "environment.h"
 
 #include <qqml.h>
@@ -46,6 +47,7 @@ void BasePlugin::registerTypes(const char *uri){
     qmlRegisterSingletonType<lv::QmlScript>(    uri, 1, 0, "Script", &scriptProvider);
     qmlRegisterUncreatableType<lv::Environment>(
         uri, 1, 0, "Environment", "Use 'base.Script.environment' to access the environment property.");
+    qmlRegisterType<lv::QmlIndexSelector>(uri, 1, 0, "IndexSelector");
 }
 
 void BasePlugin::initializeEngine(QQmlEngine *engine, const char *){

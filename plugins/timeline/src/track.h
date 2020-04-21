@@ -6,6 +6,7 @@
 
 namespace lv{
 
+class Timeline;
 class Segment;
 class SegmentModel;
 class Track : public QObject{
@@ -42,6 +43,7 @@ public slots:
     bool addSegment(lv::Segment* segment);
     lv::Segment* takeSegment(lv::Segment* segment);
     qint64 availableSpace(qint64 position);
+    lv::Timeline* timeline();
 
     void __segmentModelItemsChanged(qint64 startPosition, qint64 endPosition);
 

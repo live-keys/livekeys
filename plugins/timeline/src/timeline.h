@@ -25,7 +25,7 @@ class Timeline : public QObject{
     Q_PROPERTY(lv::TimelineConfig* config       READ config         CONSTANT)
     Q_PROPERTY(lv::TrackListModel* trackList    READ trackList      CONSTANT)
     Q_PROPERTY(TimelineHeaderModel* headerModel READ headerModel    CONSTANT)
-    Q_PROPERTY(QQmlListProperty<QObject> tracks READ tracks)
+    Q_PROPERTY(QQmlListProperty<QObject> tracks READ tracks         CONSTANT)
     Q_CLASSINFO("DefaultProperty", "tracks")
 
 public:

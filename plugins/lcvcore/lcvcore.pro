@@ -64,6 +64,7 @@ DISTFILES += \
     qml/EditCvExtension.qml \
     qml/MatViewPane.qml \
     qml/VideoCaptureSegmentCreator.qml \
+    qml/VideoCaptureSegmentFactory.qml \
     qml/live.package.json \
     qml/live.plugin.json
 

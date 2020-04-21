@@ -6,3 +6,4 @@ depends live 1.0
 
 RegionSelection 1.0 RegionSelection.qml
 VideoControls   1.0 VideoControls.qml
+VideoCaptureSegmentFactory 1.0 VideoCaptureSegmentFactory.qml
