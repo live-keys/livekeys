@@ -73,7 +73,7 @@ public:
     static std::map<QString, quint32> keysForStrings;
 
 public:
-    KeyMap(const QString& settingsPath, QObject* parent = 0);
+    KeyMap(const QString& settingsPath, QObject* parent = nullptr);
     ~KeyMap();
 
     QString locateCommand(KeyCode key);

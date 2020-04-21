@@ -44,15 +44,18 @@ include($$PROJECT_ROOT/project/3rdparty/opencv.pri)
 
 OTHER_FILES *= \
     palettes/*.qml \
-    doc/*.md
+    doc/*.md \
+    samples/*.qml
 
-# Deploy the palettes
+# Deploy the palettes and samples
 
 palettecopy.commands = $$deployDirCommand($$PWD/palettes, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_NAME/palettes)
-first.depends = $(first) palettecopy
+samplescopy.commands = $$deployDirCommand($$PWD/samples, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH/samples)
+first.depends = $(first) palettecopy samplescopy
 export(first.depends)
+export(samplescopy.commands)
 export(palettecopy.commands)
-QMAKE_EXTRA_TARGETS += first palettecopy
+QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 # Distfiles
 

@@ -46,7 +46,7 @@ Rectangle{
         }
 
         Text{
-            color: "white"
+            color: "#f1f1f1"
             text: "WELCOME"
             x: 110
             y: 0
@@ -60,8 +60,7 @@ Rectangle{
             y: 5
             visible: !firstTime
             width: 170
-            height: newMArea.containsMouse ? 40 : 35
-            Behavior on height{ NumberAnimation{ duration: 100 } }
+            height: 40
 
             MouseArea{
                 id : newMArea
@@ -91,7 +90,7 @@ Rectangle{
             Rectangle {
                 width: parent.width
                 height: 5
-                color: "#2b2b2b"
+                color: !newMArea.containsMouse ? "#2b2b2b" : "#2b2b8b"
                 anchors.bottom: parent.bottom
             }
         }
@@ -101,8 +100,7 @@ Rectangle{
             y: 5
             visible: !firstTime
             width: 180
-            height : openProjectMArea.containsMouse ? 40 : 35
-            Behavior on height{ NumberAnimation{  duration: 100 } }
+            height : 40
             MouseArea{
                 id : openProjectMArea
                 anchors.fill: parent
@@ -131,7 +129,7 @@ Rectangle{
             Rectangle {
                 width: parent.width
                 height: 5
-                color: "#2b2b2b"
+                color: !openProjectMArea.containsMouse ? "#2b2b2b" : "#2b2b8b"
                 anchors.bottom: parent.bottom
             }
         }
@@ -141,7 +139,7 @@ Rectangle{
             y: 5
             visible: !firstTime
             width: 150
-            height: openMArea.containsMouse ? 40: 35
+            height: 40
 
             Behavior on height{ NumberAnimation{  duration: 100 } }
             MouseArea{
@@ -172,7 +170,7 @@ Rectangle{
             Rectangle {
                 width: parent.width
                 height: 5
-                color: "#2b2b2b"
+                color: !openMArea.containsMouse ? "#2b2b2b" : "#2b2b8b"
                 anchors.bottom: parent.bottom
             }
         }
@@ -212,28 +210,28 @@ Rectangle{
                 style: ScrollViewStyle {
                     transientScrollBars: false
                     handle: Item {
-                        implicitWidth: 15
-                        implicitHeight: 10
+                        implicitWidth: 6
+                        implicitHeight: 6
                         Rectangle {
-                            color: "gray"
+                            color: "#3c3c3d"
                             anchors.fill: parent
                         }
                     }
                     scrollBarBackground: Item{
-                        implicitWidth: 15
-                        implicitHeight: 10
+                        implicitWidth: 6
+                        implicitHeight: 6
                         Rectangle{
                             anchors.left: parent.left
-                            anchors.leftMargin: 7
-                            width: 2
+                            anchors.leftMargin: 3
+                            width: 1
                             height: parent.height
-                            color: "gray"
+                            color: "#3c3c3d"
                         }
                     }
                     decrementControl: null
                     incrementControl: null
                     frame: Item{}
-                    corner: Rectangle{color: "gray"}
+                    corner: Rectangle{color: "#3c3c3d"}
                 }
 
 
@@ -253,11 +251,9 @@ Rectangle{
                     property int delegateHeight: 60
 
                     delegate: Rectangle {
-                        width: 240
+                        width: 260
                         height: recentView.delegateHeight
-                        color: "transparent"
-                        property int moveMargin: recentViewMA.containsMouse ? 3 : 0
-                        Behavior on moveMargin{ NumberAnimation{ duration: 100 } }
+                        color: recentViewMA.containsMouse ? "#2b2d31" : "transparent"
 
                         MouseArea {
                             id: recentViewMA
@@ -272,12 +268,11 @@ Rectangle{
                             height: 25
                             width: parent.width
                             anchors.top: parent.top
-                            anchors.topMargin: moveMargin
                             text: model.label
                             clip: true
                             elide: Text.ElideRight
                             font.family: "Open Sans"
-                            font.pixelSize: 18
+                            font.pixelSize: 16
                             font.weight: Font.Light
                             color: "#00cbfe"
                         }
@@ -286,7 +281,7 @@ Rectangle{
                             height: 22
                             width: parent.width
                             anchors.top: parent.top
-                            anchors.topMargin: 27 + moveMargin
+                            anchors.topMargin: 27
                             text: model.path
                             clip: true
                             elide: Text.ElideRight
@@ -331,28 +326,28 @@ Rectangle{
                 style: ScrollViewStyle {
                     transientScrollBars: false
                     handle: Item {
-                        implicitWidth: 15
-                        implicitHeight: 10
+                        implicitWidth: 6
+                        implicitHeight: 6
                         Rectangle {
-                            color: "gray"
+                            color: "#3c3c3d"
                             anchors.fill: parent
                         }
                     }
                     scrollBarBackground: Item{
-                        implicitWidth: 15
-                        implicitHeight: 10
+                        implicitWidth: 6
+                        implicitHeight: 6
                         Rectangle{
                             anchors.left: parent.left
-                            anchors.leftMargin: 7
-                            width: 2
+                            anchors.leftMargin: 3
+                            width: 1
                             height: parent.height
-                            color: "gray"
+                            color: "#3c3c3d"
                         }
                     }
                     decrementControl: null
                     incrementControl: null
                     frame: Item{}
-                    corner: Rectangle{color: "gray"}
+                    corner: Rectangle{color: "#3c3c3d"}
                 }
 
 
@@ -374,11 +369,7 @@ Rectangle{
                     delegate: Rectangle {
                         width: 240
                         height: learnView.delegateHeight + (model.isGroupTitle ? 15 : 0)
-                        color: "transparent"
-
-                        property int moveMargin: learnViewMA.containsMouse && !model.isGroupTitle ? 3 : 0
-
-                        Behavior on moveMargin{ NumberAnimation{ duration: 100 } }
+                        color: learnViewMA.containsMouse && !model.isGroupTitle ? "#2b2d31" : "transparent"
 
                         MouseArea {
                             id: learnViewMA
@@ -391,10 +382,8 @@ Rectangle{
                         }
 
                         Text {
-                            height: 25
                             width: parent.width - anchors.leftMargin
-                            anchors.top: parent.top
-                            anchors.topMargin: moveMargin + (model.isGroupTitle? 10 : 0)
+                            anchors.verticalCenter: parent.verticalCenter
 
                             anchors.left: parent.left
                             anchors.leftMargin: model.isGroupTitle? 0 : 15
@@ -402,7 +391,7 @@ Rectangle{
                             clip: true
                             elide: Text.ElideRight
                             font.family: "Open Sans"
-                            font.pixelSize: 18
+                            font.pixelSize: 16
                             font.weight: model.isGroupTitle ? Font.Bold : Font.Light
                             color: model.isGroupTitle ? "#cb6000" : "white"
                         }
@@ -441,31 +430,29 @@ Rectangle{
                 style: ScrollViewStyle {
                     transientScrollBars: false
                     handle: Item {
-                        implicitWidth: 15
-                        implicitHeight: 10
+                        implicitWidth: 6
+                        implicitHeight: 6
                         Rectangle {
-                            color: "gray"
+                            color: "#3c3c3d"
                             anchors.fill: parent
                         }
                     }
                     scrollBarBackground: Item{
-                        implicitWidth: 15
-                        implicitHeight: 10
+                        implicitWidth: 6
+                        implicitHeight: 6
                         Rectangle{
                             anchors.left: parent.left
-                            anchors.leftMargin: 7
-                            width: 2
+                            anchors.leftMargin: 3
+                            width: 1
                             height: parent.height
-                            color: "gray"
+                            color: "#3c3c3d"
                         }
                     }
                     decrementControl: null
                     incrementControl: null
                     frame: Item{}
-                    corner: Rectangle{color: "gray"}
+                    corner: Rectangle{color: "#3c3c3d"}
                 }
-
-
 
                 ListView{
                     id: samplesView
@@ -484,36 +471,31 @@ Rectangle{
 
                     delegate: Rectangle {
 
-                        width: 240
+                        width: 260
                         height: samplesView.delegateHeight + (model.isGroupTitle ? 15 : 0)
-                        color: "transparent"
-
-                        property int moveMargin: samplesViewMA.containsMouse && !model.isGroupTitle ? 3 : 0
-                        Behavior on moveMargin{ NumberAnimation{ duration: 100 } }
+                        color: samplesViewMA.containsMouse && !model.isGroupTitle ? "#2b2d31" : "transparent"
 
                         MouseArea {
                             id: samplesViewMA
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: {
-                                if (model.isGroupTitle) return
+                                if (model.isGroupTitle)
+                                    return
                                 project.openProject(model.path)
                             }
                         }
 
-
                         Text {
-                            height: 25
                             width: parent.width - anchors.leftMargin
-                            anchors.top: parent.top
-                            anchors.topMargin: moveMargin + (model.isGroupTitle? 10 : 0)
+                            anchors.verticalCenter: parent.verticalCenter
                             anchors.left: parent.left
                             anchors.leftMargin: model.isGroupTitle? 0 : 15
                             text: model.name
                             clip: true
                             elide: Text.ElideRight
                             font.family: "Open Sans"
-                            font.pixelSize: 18
+                            font.pixelSize: 16
                             font.weight: model.isGroupTitle ? Font.Bold : Font.Light
                             color: model.isGroupTitle ? "#5d59f7" : "white"
                         }

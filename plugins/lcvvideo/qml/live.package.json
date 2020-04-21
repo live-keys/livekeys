@@ -1,4 +1,10 @@
 {
     "name" : "lcvvideo",
-    "version" : "1.0.0"
+    "version" : "1.0.0",
+    "workspace" : {
+        "samples" : [
+            { "link" : "samples/backgroundsubtractormog2.qml"},
+            { "link" : "samples/lktracking.qml" }
+        ]
+    }
 }

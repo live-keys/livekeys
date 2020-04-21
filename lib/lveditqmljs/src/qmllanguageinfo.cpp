@@ -61,9 +61,9 @@ QmlTypeReference QmlTypeReference::split(const QString &id){
     int languageSplit = id.indexOf('/');
     int nameSplit     = id.lastIndexOf('#');
     if ( languageSplit != -1 ){
-        QString langSeg = id.mid(0, languageSplit);
-        QString nameSegment     = id.mid(nameSplit == -1 ? languageSplit + 1 : nameSplit + 1);
-        QString pathSegment     = nameSplit == -1 ? "" : id.mid(languageSplit + 1, nameSplit);
+        QString langSeg     = id.mid(0, languageSplit);
+        QString nameSegment = id.mid(nameSplit == -1 ? languageSplit + 1 : nameSplit + 1);
+        QString pathSegment = nameSplit == -1 ? "" : id.mid(languageSplit + 1, nameSplit - (languageSplit + 1));
 
         QmlTypeReference::Language lang = langSeg == "cpp"
                 ? QmlTypeReference::Cpp

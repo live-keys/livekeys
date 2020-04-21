@@ -1,4 +1,11 @@
 {
     "name" : "editor",
-    "version" : "1.0.0"
+    "version" : "1.0.0",
+    "workspace" : {
+        "samples" : [{
+            "link" : "samples/editor.qml"
+        },{
+            "link" : "samples/fragmenteditor.qml"
+        }]
+    }
 }

@@ -17,7 +17,6 @@ Column{
             if ( p && p.objectName === "paletteContainer" )
                 p.destroy()
         }
-
         onPaletteListEmpty: {
             var box = paletteGroup.parent
             if ( editingFragment.bindingPalette() ){
@@ -29,7 +28,6 @@ Column{
                     codeHandler.removeConnection(editingFragment)
                 }
             }
-
         }
         onAboutToBeRemoved : {
             var p = paletteGroup.parent

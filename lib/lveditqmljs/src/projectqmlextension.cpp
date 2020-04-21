@@ -24,6 +24,7 @@
 #include "live/editorglobalobject.h"
 
 #include "qmlbuilder.h"
+#include "qmlwatcher.h"
 #include "qmljssettings.h"
 #include "qmlcodeconverter.h"
 #include "qmlprojectmonitor_p.h"
@@ -110,7 +111,7 @@ void ProjectQmlExtension::componentComplete(){
 /**
  * \brief Hook that get's executed for each engine recompile, notifying all codeHandlers assigned to this object.
  */
-void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *result, void* data){
+void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *, void* data){
     ProjectQmlExtension* that = reinterpret_cast<ProjectQmlExtension*>(data);
 
     for ( auto it = that->m_codeHandlers.begin(); it != that->m_codeHandlers.end(); ++it ){
@@ -143,6 +144,7 @@ void ProjectQmlExtension::removeCodeQmlHandler(CodeQmlHandler *handler){
 void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterType<lv::ProjectQmlExtension>(uri, 1, 0, "ProjectQmlExtension");
     qmlRegisterType<lv::QmlBuilder>(         uri, 1, 0, "Builder");
+    qmlRegisterType<lv::QmlWatcher>(         uri, 1, 0, "Watcher");
 
     qmlRegisterUncreatableType<lv::QmlEditFragment>(
         uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.documentHandler.codeQmlHandler.");

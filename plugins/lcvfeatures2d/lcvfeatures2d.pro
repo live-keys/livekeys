@@ -25,7 +25,6 @@ unix:!macx{
     QMAKE_LFLAGS += \
 	'-Wl,-rpath,\'\$$ORIGIN/../../link\''
 
-
     createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)
     QMAKE_EXTRA_TARGETS    += createlinkdir
     POST_TARGETDEPS        += createlinkdir
@@ -35,11 +34,20 @@ include($$PWD/src/lcvfeatures2d.pri)
 include($$PWD/include/lcvfeatures2dheaders.pri)
 include($$PROJECT_ROOT/project/3rdparty/opencv.pri)
 
+# Deploy samples
+
+samplescopy.commands = $$deployDirCommand($$PWD/samples, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH/samples)
+first.depends = $(first) samplescopy
+export(first.depends)
+export(samplescopy.commands)
+QMAKE_EXTRA_TARGETS += first samplescopy
+
 OTHER_FILES *= \
     qml/*.qml \
     qml/qmldir \
     qml/plugins.qmltypes \
-    doc/*.md
+    doc/*.md \
+    samples/*.qml
 
 DISTFILES += \
     qml/live.plugin.json \

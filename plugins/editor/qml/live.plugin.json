@@ -12,6 +12,7 @@
         "palettes/ColorPalette.qml": "qml/color",
         "palettes/PathPalette.qml": "qml/string",
         "palettes/ImportsPalette.qml": "qml/import",
-        "palettes/NodePalette.qml": "qml/Object"
+        "palettes/NodePalette.qml": "qml/Object",
+        "palettes/RectangleSizePalette.json" : "qml/QtQuick#Rectangle"
     }
 }

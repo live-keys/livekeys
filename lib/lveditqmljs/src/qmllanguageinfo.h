@@ -142,8 +142,9 @@ class LV_EDITQMLJS_EXPORT QmlDocumentReference{
 public:
     bool isValid() const{ return !path.isEmpty(); }
 
-    QString     path;
-    QStringList dependencies;
+    QMap<QString, QString> watchers;
+    QString                path;
+    QStringList            dependencies;
 };
 
 // QmlTypeInfo

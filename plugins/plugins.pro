@@ -14,6 +14,7 @@ SUBDIRS += \
     fs \
     workspace \
     squareone \
+    timeline \
     lcvcore \
     lcvimgproc \
     lcvfeatures2d \
@@ -31,12 +32,13 @@ editqml.subdir          = $$PWD/editqml
 fs.subdir               = $$PWD/fs
 lcvphoto.subdir         = $$PWD/lcvphoto
 lcvvideo.subdir         = $$PWD/lcvvideo
+timelien.subdir         = $$PWD/timeline
 
 # --- Dependency configuration ---
 
 live.depends          = editor
 editqml.depends       = live
-lcvcore.depends       = live
+lcvcore.depends       = live timeline
 lcvfeatures2d.depends = lcvcore live
 lcvimgproc.depends    = lcvcore live
 lcvphoto.depends      = lcvcore live

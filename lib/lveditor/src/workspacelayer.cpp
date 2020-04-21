@@ -34,13 +34,6 @@
 
 namespace lv{
 
-//HERE
-
-// TODO: load samples
-// TODO: add live.package.json file to workspace
-// TODO: Remove project::newProject being triggered
-// TODO: Create new default qml template for startup screen.
-
 WorkspaceLayer::WorkspaceLayer(QObject *parent)
     : Layer(parent)
     , m_projectEnvironment(nullptr)
@@ -55,7 +48,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_tutorials(new StartupModel())
     , m_samples(new StartupModel())
 {
-    Settings* settings = lv::ViewContext::instance().settings();
+    Settings* settings = ViewContext::instance().settings();
 
     m_keymap = new KeyMap(settings->path());
     settings->addConfigFile("keymap", m_keymap);

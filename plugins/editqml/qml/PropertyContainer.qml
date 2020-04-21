@@ -32,6 +32,37 @@ Item{
     height: container.height > 35 ? container.height + 10 : 45
     z: 3000
 
+    function expandPalette(paletteName){
+        var palette = editor.documentHandler.codeHandler.expand(editingFragment, {
+            "palettes" : [paletteName]
+        })
+
+        var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
+
+        palette.item.x = 5
+        palette.item.y = 7
+
+        newPaletteBox.child = palette.item
+        newPaletteBox.palette = palette
+
+        newPaletteBox.name = palette.name
+        newPaletteBox.type = palette.type
+        newPaletteBox.moveEnabledSet = false
+        newPaletteBox.documentHandler = propertyContainer.editor.documentHandler
+        newPaletteBox.cursorRectangle = propertyContainer.editor.getCursorRectangle()
+        newPaletteBox.editorPosition = propertyContainer.editor.cursorWindowCoords()
+        newPaletteBox.paletteContainerFactory = function(arg){
+            return parent.paletteContainerFactory.createObject(arg)
+        }
+    }
+
+    function expandDefaultPalette(){
+        var defaultPaletteName = editor.documentHandler.codeHandler.defaultPalette(editingFragment)
+        if ( defaultPaletteName.length ){
+            expandPalette(defaultPaletteName)
+        }
+    }
+
     Rectangle{
         id: propertyContainerLabel
         anchors.left: parent.left

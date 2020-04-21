@@ -51,6 +51,10 @@ Item{
         objectContainer.collapse()
     }
 
+    function expandOptions(options){
+        objectContainer.expandOptions(options)
+    }
+
     Item{
         id: objectContainer
 
@@ -122,7 +126,6 @@ Item{
 
 
             if ( codeHandler.isForAnObject(ef) ){
-
                 var childObjectContainer = objectContainerFactory.createObject(container)
 
                 childObjectContainer.editor = objectContainer.editor
@@ -147,6 +150,85 @@ Item{
                 propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
             }
         }
+        function expandOptions(options){
+            var codeHandler = objectContainer.editor.documentHandler.codeHandler
+
+            if ( 'properties' in options){
+                var newProps = options['properties']
+                for ( var i = 0; i < newProps.length; ++i ){
+
+                    var propName = newProps[i][0]
+                    var propType = codeHandler.propertyType(objectContainer.editingFragment, propName)
+
+                    var propPalette = newProps[i].length > 1 ? newProps[i][1] : ''
+
+                    if ( propType !== '' ){
+                        var ppos = codeHandler.addProperty(
+                            objectContainer.editingFragment.valuePosition() + objectContainer.editingFragment.valueLength() - 1,
+                            objectContainer.editingFragment.typeName(),
+                            propType,
+                            propName,
+                            true
+                        )
+
+                        var ef = codeHandler.openNestedConnection(
+                            objectContainer.editingFragment, ppos
+                        )
+
+                        if ( ef ){
+                            var propertyContainer = objectContainer.propertyContainerFactory.createObject(container)
+                            container.sortChildren()
+
+                            propertyContainer.title = propName
+                            propertyContainer.documentHandler = objectContainer.editor.documentHandler
+                            propertyContainer.propertyContainerFactory = objectContainer.propertyContainerFactory
+
+                            propertyContainer.editor = objectContainer.editor
+                            propertyContainer.editingFragment = ef
+
+
+                            if ( codeHandler.isForAnObject(ef) ){
+
+                                var childObjectContainer = objectContainerFactory.createObject(container)
+
+                                childObjectContainer.editor = objectContainer.editor
+                                childObjectContainer.editingFragment = ef
+                                childObjectContainer.title = propType
+
+                                var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
+                                paletteBoxGroup.editingFragment = ef
+                                paletteBoxGroup.codeHandler = codeHandler
+                                ef.visualParent = paletteBoxGroup
+
+                                childObjectContainer.paletteGroup = paletteBoxGroup
+                                paletteBoxGroup.x = 5
+
+                                propertyContainer.valueContainer = childObjectContainer
+                                propertyContainer.paletteAddButtonVisible = false
+
+                            } else {
+                                propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
+                                propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
+                                propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
+                                propertyContainer.expandDefaultPalette()
+
+
+                                /*if ( propPalette.length ){
+                                    propertyContainer.expandPalette(propPalette)
+                                }*/
+                            }
+                            if (compact)
+                                expand()
+                        }
+                        else {
+                            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
+                            console.error("Error: Can't create a palette in a non-compiled program")
+                            return
+                        }
+                    }
+                }
+            }
+        }
 
         function expand(){
             var connections = editor.documentHandler.codeHandler.openNestedObjects(editingFragment)
@@ -168,6 +250,9 @@ Item{
 
         property Connections editingFragmentRemovals: Connections{
             target: editingFragment
+            onConnectionChanged : {
+                objectContainerTitle.isBuilder = root.editingFragment.isBuilder()
+            }
             onAboutToBeRemoved : {
                 var p = root.parent
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
@@ -203,6 +288,7 @@ Item{
                 anchors.fill: parent
                 compact: objectContainer.compact
                 color: objectContainer.pane ? objectContainer.pane.topColor : '#062945'
+                isBuilder: root.editingFragment ? root.editingFragment.isBuilder() : false
 
                 onToggleCompact: {
                     if ( objectContainer.compact )
@@ -252,7 +338,7 @@ Item{
                     if ( !editingFragment )
                         return
 
-                    var palettes = editor.documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
+                    var palettes = editor.documentHandler.codeHandler.findPalettes(editingFragment.position(), true, true)
                     if (palettes.size() ){
                         paletteHeaderList.forceActiveFocus()
                         paletteHeaderList.model = palettes
@@ -274,23 +360,27 @@ Item{
                                 palette.editingFragment = editingFragment
                             }
 
-                            var newPaletteBox = objectContainer.paletteContainerFactory.createObject(paletteGroup)
+                            if ( palette.item ){
+                                var newPaletteBox = objectContainer.paletteContainerFactory.createObject(paletteGroup)
+                                palette.item.x = 5
+                                palette.item.y = 7
 
-                            palette.item.x = 5
-                            palette.item.y = 7
+                                newPaletteBox.child = palette.item
+                                newPaletteBox.palette = palette
 
-                            newPaletteBox.child = palette.item
-                            newPaletteBox.palette = palette
-
-                            newPaletteBox.name = palette.name
-                            newPaletteBox.type = palette.type
-                            newPaletteBox.moveEnabledSet = false
-                            newPaletteBox.documentHandler = editor.documentHandler
-                            newPaletteBox.cursorRectangle = paletteGroup.cursorRectangle
-                            newPaletteBox.editorPosition = paletteGroup.editorPosition
-                            newPaletteBox.paletteContainerFactory = function(arg){
-                                return objectContainer.paletteContainerFactory.createObject(arg)
+                                newPaletteBox.name = palette.name
+                                newPaletteBox.type = palette.type
+                                newPaletteBox.moveEnabledSet = false
+                                newPaletteBox.documentHandler = editor.documentHandler
+                                newPaletteBox.cursorRectangle = paletteGroup.cursorRectangle
+                                newPaletteBox.editorPosition = paletteGroup.editorPosition
+                                newPaletteBox.paletteContainerFactory = function(arg){
+                                    return objectContainer.paletteContainerFactory.createObject(arg)
+                                }
+                            } else {
+                                objectContainer.expandOptions(palette)
                             }
+
                         }
                     }
                 }
@@ -335,11 +425,15 @@ Item{
                     addBoxItem.accept = function(type, data){
                         if ( addBoxItem.activeIndex === 0 ){
                             var ppos = codeHandler.addProperty(
-                                addContainer.propertyModel.addPosition, addContainer.objectType, type, data, true
+                                objectContainer.editingFragment.valuePosition() + objectContainer.editingFragment.valueLength() - 1,
+                                objectContainer.editingFragment.typeName(),
+                                type,
+                                data,
+                                true
                             )
 
                             var ef = codeHandler.openNestedConnection(
-                                objectContainer.editingFragment, ppos, project.appRoot()
+                                objectContainer.editingFragment, ppos
                             )
 
                             if (ef && compact) expand()
@@ -354,7 +448,7 @@ Item{
                             codeHandler.addItemToRuntime(objectContainer.editingFragment, data, project.appRoot())
 
                             var ef = codeHandler.openNestedConnection(
-                                objectContainer.editingFragment, opos, project.appRoot()
+                                objectContainer.editingFragment, opos
                             )
 
                             if (ef && compact) expand()
@@ -365,7 +459,7 @@ Item{
                             )
 
                             var ef = codeHandler.openNestedConnection(
-                                objectContainer.editingFragment, ppos, project.appRoot()
+                                objectContainer.editingFragment, ppos
                             )
                             if ( ef ){
                                 var propertyContainer = propertyContainerFactory.createObject(container)

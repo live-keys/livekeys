@@ -84,7 +84,7 @@ signals:
     void runTriggerChanged();
 
     void runError(QJSValue errors);
-    void objectReady();
+    void objectReady(QObject* object);
 
 private:
     void runLv();

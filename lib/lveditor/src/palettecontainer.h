@@ -22,6 +22,7 @@
 
 #include <QString>
 
+class QJSValue;
 class QQmlEngine;
 class QQmlComponent;
 
@@ -41,13 +42,16 @@ public:
 
     static PaletteContainer* create(QQmlEngine* engine, const QString& path);
 
+    PaletteLoader* findPaletteByName(const QString& name) const;
     PaletteLoader* findPalette(const QString& type) const;
-    PaletteList* findPalettes(const QString& type, PaletteList* list = nullptr);
+    PaletteList* findPalettes(const QString& type, bool includeExpandables = false, PaletteList* list = nullptr);
     int countPalettes(const QString& type) const;
 
     QString paletteName(PaletteLoader* loader);
     static const QString& palettePath(PaletteLoader* loader);
     CodePalette* createPalette(PaletteLoader* loader);
+    QJSValue paletteContent(PaletteLoader* loader);
+    static bool hasItem(PaletteLoader* loader);
 
     int size() const;
 

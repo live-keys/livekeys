@@ -1,4 +1,18 @@
 {
     "name" : "lcvfeatures2d",
-    "version" : "1.0.0"
+    "version" : "1.0.0",
+    "workspace" : {
+        "samples" : [
+            { "link" : "samples/completeobjectdetection.qml"},
+            { "link" : "samples/featureanddescriptorcompare.qml" },
+            { "link" : "samples/featureanddescriptorview.qml" },
+            { "link" : "samples/matchhomography.qml" },
+            { "link" : "samples/matchlist.qml" },
+            { "link" : "samples/simpleblobdetector.qml" },
+            { "link" : "samples/simpledescriptorextraction.qml" },
+            { "link" : "samples/simplefeaturebruteforcematcher.qml" },
+            { "link" : "samples/simplefeaturedetection.qml" },
+            { "link" : "samples/simplefeatureflannmatcher.qml" }
+        ]
+    }
 }

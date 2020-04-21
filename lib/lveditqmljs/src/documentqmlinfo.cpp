@@ -20,6 +20,8 @@
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
 #include "live/visuallogqt.h"
+#include "live/hookcontainer.h"
+#include "qmlwatcher.h"
 #include "qmlbindingchannel.h"
 
 #include "qmljs/qmljsdocument.h"
@@ -27,6 +29,7 @@
 #include "qmlidvisitor_p.h"
 #include "documentqmlranges_p.h"
 
+#include <QQmlContext>
 #include <QQmlProperty>
 #include <QQmlListReference>
 
@@ -699,6 +702,30 @@ QSharedPointer<QmlBindingChannel> DocumentQmlInfo::traverseBindingPath(QSharedPo
         return nullptr;
 
     QmlBindingPath::Node* root = path->root();
+
+    QObject* viewRoot = r->viewRoot();
+
+    if ( root && root->type() == QmlBindingPath::Node::Watcher ){
+        QmlBindingPath::WatcherNode* wnode = static_cast<QmlBindingPath::WatcherNode*>(path->root());
+
+        HookContainer* hooks = qobject_cast<HookContainer*>(
+            r->viewContext()->contextProperty("hooks").value<QObject*>()
+        );
+
+        if ( !hooks )
+            return nullptr;
+
+        QList<QObject*> watchers = hooks->entriesFor(wnode->filePath, wnode->objectId);
+
+        if ( watchers.isEmpty() )
+            return nullptr;
+
+        QmlWatcher* watcher = qobject_cast<QmlWatcher*>(watchers.first());
+        viewRoot = watcher->parent();
+
+        root = root->child;
+    }
+
     while ( root && (root->type() == QmlBindingPath::Node::File || root->type() == QmlBindingPath::Node::Component) ){
         root = root->child;
     }
@@ -706,19 +733,28 @@ QSharedPointer<QmlBindingChannel> DocumentQmlInfo::traverseBindingPath(QSharedPo
     if ( !root )
         return nullptr;
 
-
     if ( root->child == nullptr ){
-        QQmlProperty prop(r->viewRoot()->parent());
+        QQmlProperty prop(viewRoot->parent());
         if( !prop.isValid() )
             return QmlBindingChannel::Ptr();
         return QmlBindingChannel::create(path, r, prop, 0);
     }
 
-    return traversePath(path, r, root->child, r->viewRoot());
+    return traversePath(path, r, root->child, viewRoot);
 }
 
 /**
  * \brief Finds the binding path associated with a declaration within a range object
+ *
+ * To call this method, parse the document first, then get the values:
+ *
+ * \code
+ * DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(document->file()->path());
+ * docinfo->parse(source);
+ * DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
+ * DocumentQmlInfo::findDeclarationPath(document, objects->root(), declaration);
+ * \endcode
+ *
  * \returns The found binding path on success, nullptr otherwise
  */
 QmlBindingPath::Ptr DocumentQmlInfo::findDeclarationPath(
@@ -764,22 +800,6 @@ QmlBindingPath::Ptr DocumentQmlInfo::findDeclarationPath(
     path->updatePath(fnode);
 
     return path;
-}
-
-/**
- * \brief Finds the binding path associated with a delcaration within the project \p document
- * \returns The found binding path if it exists, nullptr otherwise
- */
-QSharedPointer<lv::QmlBindingPath> DocumentQmlInfo::findDeclarationPath(
-        const QString &source,
-        ProjectDocument *document,
-        QmlDeclaration::Ptr declaration)
-{
-    DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(document->file()->path());
-    docinfo->parse(source);
-
-    DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
-    return findDeclarationPath(document, objects->root(), declaration);
 }
 
 /**

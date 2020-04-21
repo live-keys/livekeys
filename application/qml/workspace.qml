@@ -576,9 +576,9 @@ Item{
         }
 
         Connections{
-            target: lk.engine
+            target: project.active
             onObjectReady : { error.text = '' }
-            onObjectCreationError : {
+            onRunError : {
                 var errorMessage = error.wrapMessage(errors)
                 error.text = errorMessage.rich
                 console.error(errorMessage.log)

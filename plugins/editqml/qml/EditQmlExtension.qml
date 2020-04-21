@@ -51,7 +51,7 @@ LiveExtension{
             var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
 
-            var ef = codeHandler.openConnection(editor.textEdit.cursorPosition, project.appRoot())
+            var ef = codeHandler.openConnection(editor.textEdit.cursorPosition)
             var palette = codeHandler.edit(ef)
 
             var editorBox = lk.layers.editor.environment.createEmptyEditorBox()
@@ -92,15 +92,13 @@ LiveExtension{
         var rect = editor.editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
 
-        var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
+        var ef = codeHandler.openConnection(palettes.position())
         var palette = palettes.size() > 0 ? codeHandler.openPalette(ef, palettes, index) : null
-        if (codeHandler.isInImports(palettes.position()))
-        {
+        if (codeHandler.isInImports(palettes.position())){
             palette.item.model = codeHandler.importsModel()
         }
 
-        if (!ef)
-        {
+        if (!ef){
             lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't shape palette of a non-running program"
             console.error("Error: Can't shape palette of a non-running program")
             return
@@ -137,27 +135,32 @@ LiveExtension{
             editorBox.border.width = 1
             editorBox.border.color = "#141c25"
 
-
-            if (forAnObject)
+            if (forAnObject){
                 objectContainer.expand()
+                if ( palette && !palette.item ){
+                    objectContainer.expandOptions(palette)
+                }
+            }
         }
 
         if ( palette || !codeHandler.isForAnObject(ef) ){
-            var paletteBox = root.paletteContainerFactory.createObject(paletteBoxGroup)
 
-            palette.item.x = 5
-            palette.item.y = 7
+            if ( palette.item ){
+                var paletteBox = root.paletteContainerFactory.createObject(paletteBoxGroup)
+                palette.item.x = 5
+                palette.item.y = 7
 
-            paletteBox.child = palette.item
-            paletteBox.palette = palette
+                paletteBox.child = palette.item
+                paletteBox.palette = palette
 
-            paletteBox.name = palette.name
-            paletteBox.type = palette.type
-            paletteBox.moveEnabledSet = false
-            paletteBox.documentHandler = editor.documentHandler
-            paletteBox.cursorRectangle = rect
-            paletteBox.editorPosition = cursorCoords
-            paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
+                paletteBox.name = palette.name
+                paletteBox.type = palette.type
+                paletteBox.moveEnabledSet = false
+                paletteBox.documentHandler = editor.documentHandler
+                paletteBox.cursorRectangle = rect
+                paletteBox.editorPosition = cursorCoords
+                paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
+            }
         }
 
         codeHandler.frameEdit(editorBox, ef)
@@ -169,7 +172,7 @@ LiveExtension{
         var rect = editor.editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
 
-        var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
+        var ef = codeHandler.openConnection(palettes.position())
 
         if (!ef)
         {
@@ -265,7 +268,7 @@ LiveExtension{
             var editor = activePane
             var codeHandler = editor.documentHandler.codeHandler
 
-            var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
+            var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true, true)
             var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
 
@@ -396,7 +399,7 @@ LiveExtension{
             var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
             if ( palettes.size() === 1 ){
-                var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
+                var ef = codeHandler.openConnection(palettes.position())
                 codeHandler.openBinding(ef, palettes, 0)
             } else {
                 var palList      = paletteListFactory.createObject()
@@ -417,7 +420,7 @@ LiveExtension{
                     editor.editor.forceFocus()
                     palListBox.destroy()
 
-                    var ef = codeHandler.openConnection(palettes.position(), project.appRoot())
+                    var ef = codeHandler.openConnection(palettes.position())
                     codeHandler.openBinding(ef, palettes, index)
                 })
             }

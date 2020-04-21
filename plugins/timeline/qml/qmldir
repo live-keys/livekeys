@@ -1,0 +1,12 @@
+module timeline
+plugin timeline
+
+depends QtQuick 2.3
+depends QtQuick.Controls 1.2
+
+TimelineRow       1.0 TimelineRow.qml
+TimelineStyle     1.0 TimelineStyle.qml
+TimelineView      1.0 TimelineView.qml
+TrackTitle        1.0 TrackTitle.qml
+SegmentView       1.0 SegmentView.qml
+SegmentInsertMenu 1.0 SegmentInsertMenu.qml

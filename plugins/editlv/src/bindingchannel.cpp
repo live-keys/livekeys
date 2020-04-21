@@ -31,8 +31,7 @@ BindingChannel::BindingChannel(el::BindingPath::Ptr bindingPath, Runnable *runna
 BindingChannel::~BindingChannel(){
 }
 
-BindingChannel::Ptr BindingChannel::traverseBindingPath()
-{
+BindingChannel::Ptr BindingChannel::traverseBindingPath(){
     return nullptr;
 }
 

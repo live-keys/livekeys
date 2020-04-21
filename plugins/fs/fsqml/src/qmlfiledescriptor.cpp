@@ -58,6 +58,10 @@ bool QmlFileDescriptor::seek(int pos)
     return file->seek(pos);
 }
 
+bool QmlFileDescriptor::isEof() const{
+    return file->atEnd();
+}
+
 qint64 QmlFileDescriptor::write(QByteArray content)
 {
     if ( !file ){
@@ -96,6 +100,16 @@ QByteArray QmlFileDescriptor::readAll() const{
     }
 
     return file->readAll();
+}
+
+QByteArray QmlFileDescriptor::readLine(){
+    if ( !file ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "No file opened.", Exception::toCode("~File"));
+        lv::ViewContext::instance().engine()->throwError(&e);
+        return QByteArray();
+    }
+
+    return file->readLine();
 }
 
 }

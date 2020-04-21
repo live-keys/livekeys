@@ -17,6 +17,7 @@ linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 linkLocalPlugin(live, live)
+linkLocalPlugin(timeline, timeline)
 
 # Source
 
@@ -45,20 +46,25 @@ OTHER_FILES *= \
 
 OTHER_FILES *= \
     palettes/*.qml \
+    samples/*.qml \
     doc/*.md
 
-# Deploy the palettes
+# Deploy the palettes and samples
 
 palettecopy.commands = $$deployDirCommand($$PWD/palettes, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_NAME/palettes)
-first.depends = $(first) palettecopy
+samplescopy.commands = $$deployDirCommand($$PWD/samples, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH/samples)
+first.depends = $(first) palettecopy samplescopy
 export(first.depends)
+export(samplescopy.commands)
 export(palettecopy.commands)
-QMAKE_EXTRA_TARGETS += first palettecopy
+QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 DISTFILES += \
     palettes/ImageFilePalette.qml \
     qml/EditCvExtension.qml \
     qml/MatViewPane.qml \
+    qml/VideoCaptureSegmentCreator.qml \
+    qml/VideoCaptureSegmentFactory.qml \
     qml/live.package.json \
     qml/live.plugin.json
 

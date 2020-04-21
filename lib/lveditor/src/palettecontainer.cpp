@@ -16,11 +16,17 @@
 
 #include "live/palettecontainer.h"
 #include "live/codepalette.h"
+#include "live/project.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
 #include "live/palettelist.h"
 
+#include "live/mlnode.h"
+#include "live/mlnodetojson.h"
+#include "live/mlnodetoqml.h"
+
 #include <QQmlEngine>
+#include <QQmlContext>
 #include <QQmlComponent>
 #include <QDir>
 #include <QDirIterator>
@@ -35,29 +41,44 @@
  */
 namespace lv{
 
+// PaletteLoader
+// ----------------------------------------------------------------------------
+
 /// \private
 class PaletteLoader{
 public:
-    PaletteLoader(const QString& path, const QString& type)
-        : m_factory(nullptr)
-        , m_path(path)
-        , m_type(type)
-    {}
-    ~PaletteLoader(){
-        delete m_factory;
-    }
+    PaletteLoader(const QString& path, const QString& type);
+    ~PaletteLoader();
 
     CodePalette* getItem(QQmlEngine* engine);
+    QJSValue getContent(QQmlEngine* engine);
     const QString& path() const{ return m_path; }
+    const QString& name() const{ return m_name; }
+    bool hasItem() const{ return m_hasItem; }
 
 private:
     void handleError(const QQmlComponent &component) const;
 
     QQmlComponent* m_factory;
 
+    QString m_name;
     QString m_path;
     QString m_type;
+    bool    m_hasItem;
 };
+
+PaletteLoader::PaletteLoader(const QString &path, const QString &type)
+    : m_factory(nullptr)
+    , m_path(path)
+    , m_type(type)
+{
+    m_name = QFileInfo(m_path).baseName();
+    m_hasItem = !m_path.endsWith(".json");
+}
+
+PaletteLoader::~PaletteLoader(){
+    delete m_factory;
+}
 
 CodePalette *PaletteLoader::getItem(QQmlEngine *engine){
     if ( !m_factory ){
@@ -96,6 +117,29 @@ CodePalette *PaletteLoader::getItem(QQmlEngine *engine){
     return palette;
 }
 
+QJSValue PaletteLoader::getContent(QQmlEngine *engine){
+    if ( m_hasItem )
+        return QJSValue();
+
+    QObject* probject = engine->rootContext()->contextProperty("project").value<QObject*>();
+    Project* pr = qobject_cast<lv::Project*>(probject);
+    if ( !pr )
+        return QJSValue();
+
+    std::string content = pr->lockedFileIO()->readFromFile(m_path.toStdString());
+
+    try {
+        MLNode result;
+        QJSValue jsResult;
+        ml::fromJson(content, result);
+        ml::toQml(result, jsResult, engine);
+        return jsResult;
+    } catch (Exception& e) {
+        qWarning("Failed to parse '%s': %s", qPrintable(m_path), e.message().c_str());
+    }
+    return QJSValue();
+}
+
 void PaletteLoader::handleError(const QQmlComponent &component) const{
     foreach ( const QQmlError& error, component.errors() ){
         qWarning(
@@ -109,8 +153,8 @@ void PaletteLoader::handleError(const QQmlComponent &component) const{
 }
 
 
-// QLivePaletteContainerPrivate
-// ----------------------------
+// LivePaletteContainerPrivate
+// ----------------------------------------------------------------------------
 
 /// \private
 class PaletteContainerPrivate{
@@ -122,8 +166,8 @@ public:
 };
 
 
-// QLivePaletteContainer
-// ---------------------
+// LivePaletteContainer
+// ----------------------------------------------------------------------------
 
 PaletteContainer::PaletteContainer(QQmlEngine *engine)
     : d_ptr(new PaletteContainerPrivate)
@@ -184,6 +228,17 @@ PaletteContainer *PaletteContainer::create(QQmlEngine *engine, const QString &pa
     return ct;
 }
 
+PaletteLoader *PaletteContainer::findPaletteByName(const QString &name) const{
+    Q_D(const PaletteContainer);
+
+    for ( auto it = d->items.begin(); it != d->items.end(); ++it ){
+        if ( it.value()->name() == name )
+            return it.value();
+    }
+
+    return nullptr;
+}
+
 /**
  * \brief Finds a palette with a specific type
  */
@@ -201,7 +256,7 @@ PaletteLoader *PaletteContainer::findPalette(const QString &type) const{
  *
  * This list is Javascript-owned!
  */
-PaletteList *PaletteContainer::findPalettes(const QString &type, lv::PaletteList *l){
+PaletteList *PaletteContainer::findPalettes(const QString &type, bool includeExpandables, lv::PaletteList *l){
     Q_D(PaletteContainer);
 
     if ( !l ){
@@ -212,7 +267,9 @@ PaletteList *PaletteContainer::findPalettes(const QString &type, lv::PaletteList
     PaletteContainerPrivate::PaletteHash::Iterator it = d->items.find(type);
 
     while ( it != d->items.end() && it.key() == type ){
-        l->append(it.value());
+        if ( it.value()->hasItem() || includeExpandables ){
+            l->append(it.value());
+        }
         ++it;
     }
 
@@ -264,6 +321,15 @@ CodePalette *PaletteContainer::createPalette(PaletteLoader *loader){
     cp->setPath(loader->path());
     d->engine->setObjectOwnership(cp, QQmlEngine::JavaScriptOwnership);
     return cp;
+}
+
+QJSValue PaletteContainer::paletteContent(PaletteLoader *loader){
+    Q_D(PaletteContainer);
+    return loader->getContent(d->engine);
+}
+
+bool PaletteContainer::hasItem(PaletteLoader *loader){
+    return loader->hasItem();
 }
 
 /**

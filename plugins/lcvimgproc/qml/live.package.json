@@ -1,4 +1,23 @@
 {
     "name" : "lcvimgproc",
-    "version" : "1.0.0"
+    "version" : "1.0.0",
+    "workspace" : {
+        "samples" : [
+            { "link" : "samples/alphamerge.qml"},
+            { "link" : "samples/blur.qml" },
+            { "link" : "samples/canny.qml" },
+            { "link" : "samples/copymakeborder.qml" },
+            { "link" : "samples/drawing.qml" },
+            { "link" : "samples/erodedilate.qml" },
+            { "link" : "samples/filter2D.qml" },
+            { "link" : "samples/gaussianblur.qml" },
+            { "link" : "samples/warpperspective.qml" },
+            { "link" : "samples/threshold.qml" },
+            { "link" : "samples/sobeloperator.qml" },
+            { "link" : "samples/resize.qml" },
+            { "link" : "samples/panandzoom.qml" },
+            { "link" : "samples/houghlinesp.qml" },
+            { "link" : "samples/houghlines.qml" }
+        ]
+    }
 }

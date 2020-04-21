@@ -1,4 +1,20 @@
 {
     "name" : "lcvcore",
-    "version" : "1.0.0"
+    "version" : "1.0.0",
+    "workspace" : {
+        "samples" : [
+            { "link" : "samples/colorhistogram.qml"},
+            { "link" : "samples/histogram.qml" },
+            { "link" : "samples/customfilter.qml" },
+            { "link" : "samples/imwrite.qml" },
+            { "link" : "samples/itemcapture.qml" },
+            { "link" : "samples/matlog.qml" },
+            { "link" : "samples/matop.qml" },
+            { "link" : "samples/camcapture.qml" },
+            { "link" : "samples/videocapture_controls.qml" },
+            { "link" : "samples/videocapture_simple.qml" },
+            { "link" : "samples/videodecoder.qml" },
+            { "link" : "samples/videowriter.qml" }
+        ]
+    }
 }

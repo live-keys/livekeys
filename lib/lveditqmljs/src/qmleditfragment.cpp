@@ -57,7 +57,7 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *paren
  */
 QmlEditFragment::~QmlEditFragment(){
     ProjectDocumentSection::Ptr section = declaration()->section();
-    ProjectDocument* doc = section->document();
+    ProjectDocument* doc = declaration()->document();
     doc->removeSection(section);
 
     for ( auto it = childFragments().begin(); it != childFragments().end(); ++it ){
@@ -299,10 +299,7 @@ void QmlEditFragment::emitRemoval(){
 QmlBindingSpanModel* QmlEditFragment::bindingModel(lv::CodeQmlHandler *){
     if ( !m_bindingSpanModel ){
         m_bindingSpanModel = new QmlBindingSpanModel(this);
-//        QString fileName = declaration()->document()->file()->name();
-//        if ( fileName.length() && fileName.front().isUpper() ){
-//            m_bindingSpanModel->initializeScanner(codeHandler);
-//        }
+        connect(m_bindingSpanModel, &QmlBindingSpanModel::inputPathIndexChanged, this, &QmlEditFragment::connectionChanged);
     }
     return m_bindingSpanModel;
 }

@@ -116,6 +116,7 @@ public slots:
     QVariantMap  objectInfo();
 signals:
     void visualParentChanged();
+    void connectionChanged(int index);
     void aboutToRemovePalette(lv::CodePalette* palette);
     void aboutToBeRemoved();
     void paletteListEmpty();

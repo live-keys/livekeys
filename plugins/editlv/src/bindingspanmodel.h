@@ -57,7 +57,6 @@ private:
 
     QHash<int, QByteArray> m_roles;
     LvEditFragment*        m_edit;
-    // QmlUsageGraphScanner*  m_scanner; // TODO: ELEMENTS LvUsageGraphScanner
     bool                   m_isScanning;
 };
 

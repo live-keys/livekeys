@@ -7,6 +7,7 @@ Rectangle{
     radius: 3
 
     property bool compact : true
+    property bool isBuilder : false
 
     signal toggleCompact()
     signal erase()
@@ -136,6 +137,7 @@ Rectangle{
         anchors.verticalCenter: parent.verticalCenter
         width: 15
         height: 20
+        visible: objectContainerTitle.isBuilder
         Image{
             anchors.centerIn: parent
             source: "qrc:/images/palette-integrate.png"
@@ -151,7 +153,7 @@ Rectangle{
     Item{
         id: paletteToPane
         anchors.right: parent.right
-        anchors.rightMargin: 120 - (closeObjectItem.visible ? 0 : 18)
+        anchors.rightMargin: 120 - (closeObjectItem.visible ? 0 : 18) - (rebuild.visible ? 0 : 20)
         anchors.verticalCenter: parent.verticalCenter
         width: 15
         height: 20

@@ -28,7 +28,7 @@ public:
     };
 
 public:
-    explicit QmlLanguageScanner(LockedFileIOSession::Ptr lio, const QStringList& importPaths, QObject *parent = 0);
+    explicit QmlLanguageScanner(LockedFileIOSession::Ptr lio, const QStringList& importPaths, QObject *parent = nullptr);
     ~QmlLanguageScanner();
 
     void queueLibrary(const QmlLibraryInfo::Ptr& lib);

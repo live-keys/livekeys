@@ -1,0 +1,7 @@
+module workspace
+
+depends QtQuick 2.3
+
+MenuIcon      1.0 MenuIcon.qml
+EditableLabel 1.0 EditableLabel.qml
+PlayPause     1.0 PlayPause.qml

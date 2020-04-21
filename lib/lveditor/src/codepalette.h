@@ -28,18 +28,19 @@ class LV_EDITOR_EXPORT CodePalette : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QQuickItem* item    READ item       WRITE setItem       NOTIFY itemChanged)
-    Q_PROPERTY(QString name        READ name       CONSTANT)
     Q_PROPERTY(QString type        READ type       WRITE setType       NOTIFY typeChanged)
     Q_PROPERTY(QVariant value      READ value      WRITE setValue      NOTIFY valueChanged)
+    Q_PROPERTY(QString name        READ name       CONSTANT)
     Q_PROPERTY(QObject* extension  READ extension  NOTIFY extensionChanged)
 
 public:
-    explicit CodePalette(QObject *parent = 0);
+    explicit CodePalette(QObject *parent = nullptr);
     virtual ~CodePalette();
 
     /** Visual item for this palette */
     QQuickItem* item();
     void setItem(QQuickItem* item);
+    bool hasItem() const;
 
     /** Property value corresponding to this palette */
     const QVariant &value() const;
@@ -78,6 +79,7 @@ signals:
     /** Code changed */
     void codeChanged(const QVariant& value);
 
+
 private:
     Q_DISABLE_COPY(CodePalette)
 
@@ -103,6 +105,13 @@ inline void CodePalette::setItem(QQuickItem *item){
 
     m_item = item;
     emit itemChanged();
+}
+
+/**
+ * \brief Checks wether item is available
+ */
+inline bool CodePalette::hasItem() const{
+    return m_item ? true : false;
 }
 
 inline const QVariant& CodePalette::value() const{

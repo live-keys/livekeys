@@ -26,6 +26,12 @@ QString QmlBindingPath::ComponentNode::toString() const{
     return "Component(" + name + ")" + "[" + uri + "]" + (child ? ( + " -> " + child->toString()) : "");
 }
 
+QString QmlBindingPath::WatcherNode::toString() const{
+    return "Watcher(" + filePath.mid(filePath.indexOf("/") + 1) + ")" + "[" + objectId + "]" + (child ? ( + " -> " + child->toString()) : "");
+}
+
+
+
 QmlBindingPath::QmlBindingPath()
     : m_root(nullptr)
 {
@@ -110,6 +116,20 @@ void QmlBindingPath::appendIndex(int index){
     }
 }
 
+void QmlBindingPath::appendWatcher(const QString &filePath, const QString &objectId){
+    QmlBindingPath::WatcherNode* wnode = new QmlBindingPath::WatcherNode;
+    wnode->filePath = filePath;
+    wnode->objectId = objectId;
+
+    QmlBindingPath::Node* lnode = lastNode();
+    if ( lnode ){
+        lnode->child = wnode;
+        wnode->parent = lnode;
+    } else {
+        m_root = wnode;
+    }
+}
+
 QmlBindingPath::Ptr QmlBindingPath::join(QmlBindingPath::ConstPtr src1, QmlBindingPath::ConstPtr src2, bool firstIndex){
     // firstIndex: avoid first index, since that represents the root of the file
     QmlBindingPath::Ptr result = src1->clone();
@@ -131,6 +151,9 @@ QmlBindingPath::Ptr QmlBindingPath::join(QmlBindingPath::ConstPtr src1, QmlBindi
         } else if ( n->type() == QmlBindingPath::Node::Component ){
             QmlBindingPath::ComponentNode* cnode = static_cast<QmlBindingPath::ComponentNode*>(n);
             result->appendComponent(cnode->name, cnode->uri);
+        } else if ( n->type() == QmlBindingPath::Node::Watcher ){
+            QmlBindingPath::WatcherNode* wnode = static_cast<QmlBindingPath::WatcherNode*>(n);
+            result->appendWatcher(wnode->filePath, wnode->objectId);
         }
         n = n->child;
     }
@@ -188,6 +211,18 @@ QmlBindingPath::Ptr QmlBindingPath::clone() const{
             }
             icpy->name = static_cast<QmlBindingPath::ComponentNode*>(cur)->name;
             icpy->uri  = static_cast<QmlBindingPath::ComponentNode*>(cur)->uri;
+            cpy = icpy;
+        } else if ( cur->type() == QmlBindingPath::Node::Watcher ){
+            // set child, parent, filePath
+            QmlBindingPath::WatcherNode* icpy = new QmlBindingPath::WatcherNode;
+            if ( cpy ){
+                icpy->parent = cpy;
+                cpy->child = icpy;
+            } else {
+                cpyroot = icpy;
+            }
+            icpy->filePath = static_cast<QmlBindingPath::WatcherNode*>(cur)->filePath;
+            icpy->objectId = static_cast<QmlBindingPath::WatcherNode*>(cur)->objectId;
             cpy = icpy;
         }
 

@@ -66,6 +66,8 @@ public:
     static QHash<QString, ColorComponent>::ConstIterator rolesBegin();
     static QHash<QString, ColorComponent>::ConstIterator rolesEnd();
 
+    QString defaultPalette(const QString& typeName) const;
+
 public slots:
     void __refresh();
 
@@ -76,6 +78,7 @@ private:
     static QHash<QString, ColorComponent> createFormatRoles();
     static QHash<QString, ColorComponent> m_formatRoles;
 
+    QMap<QString, QString>                 m_defaultPalettes;
     QHash<ColorComponent, QTextCharFormat> m_formats;
 };
 

@@ -15,7 +15,7 @@ class QmlLanguageScanMonitor : public QObject{
     Q_OBJECT
 
 public:
-    explicit QmlLanguageScanMonitor(QmlLanguageScanner* scanner, QObject *parent = 0);
+    explicit QmlLanguageScanMonitor(QmlLanguageScanner* scanner, QObject *parent = nullptr);
     ~QmlLanguageScanMonitor();
 
     void queueLibrary(const QmlLibraryInfo::Ptr& lib);

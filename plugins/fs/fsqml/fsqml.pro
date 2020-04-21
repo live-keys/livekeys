@@ -35,6 +35,7 @@ OTHER_FILES *= \
     palettes/*.qml
 
 DISTFILES += \
+    qml/FileLineReader.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/plugins.qmltypes

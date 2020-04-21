@@ -21,7 +21,7 @@ public:
     /// \private
     class Node{
     public:
-        enum Type{ Index, Property, File, Component };
+        enum Type{ Index, Property, File, Component, Watcher };
 
     public:
         Node* child;
@@ -72,6 +72,16 @@ public:
         virtual QString toString() const override;
     };
 
+    /// \private
+    class WatcherNode : public Node{
+    public:
+        QString  filePath;
+        QString  objectId;
+
+        virtual Node::Type type() const override{ return Node::Watcher; }
+        virtual QString toString() const override;
+    };
+
 public:
     virtual ~QmlBindingPath();
 
@@ -85,6 +95,7 @@ public:
     void appendComponent(const QString& name, const QString& uri);
     void appendProperty(const QString& name, const QStringList& objectName);
     void appendIndex(int index);
+    void appendWatcher(const QString& filePath, const QString& objectId);
 
     static QmlBindingPath::Ptr join(QmlBindingPath::ConstPtr src1, QmlBindingPath::ConstPtr src2, bool firstIndex = true);
     QmlBindingPath::Ptr clone() const;

@@ -230,10 +230,6 @@ public:
             ProjectDocument* document,
             DocumentQmlValueObjects::RangeObject *object,
             QmlDeclaration::Ptr declaration);
-    static QSharedPointer<QmlBindingPath> findDeclarationPath(
-        const QString& source,
-        ProjectDocument* document,
-        QmlDeclaration::Ptr declaration);
 
     ~DocumentQmlInfo();
 

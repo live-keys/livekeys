@@ -17,9 +17,9 @@
     ],
     {"Plugins": "plugins.md"},
     [
-        {"base" : "plugin-base.md"},
+        {"base" : "../../plugins/base/baseqml/doc/plugin-base.md"},
         [ 
-            "plugin-base.md>>"
+            "../../plugins/base/baseqml/doc/plugin-base.md>>"
         ],
         {"live" : "../../plugins/live/doc/plugin-live.md"},
         [
@@ -93,5 +93,8 @@
             {"lcvfeatures2d" : "../output/md/plugin-lcvfeatures2d-cpp.md"},
             {"lcvvideo" : "../output/md/plugin-lcvvideo-cpp.md"}
         ]
-    ]
+    ],
+    {"__extra": [
+        "../../plugins/squareone/tutorials/workspace/workspacetutorial.md"
+    ]}
 ]

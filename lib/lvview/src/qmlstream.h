@@ -14,7 +14,7 @@ class LV_VIEW_EXPORT QmlStream : public QObject{
     Q_OBJECT
 
 public:
-    explicit QmlStream(QObject *parent = 0);
+    explicit QmlStream(QObject *parent = nullptr);
     ~QmlStream();
 
     void push(QObject* object);
