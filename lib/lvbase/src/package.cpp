@@ -4,6 +4,8 @@
 #include "lockedfileiosession.h"
 #include "live/mlnodetojson.h"
 #include "live/exception.h"
+#include "live/visuallog.h"
+#include "live/library.h"
 
 #include <list>
 #include <map>
@@ -35,6 +37,7 @@ public:
     Version     version;
     std::map<std::string, Package::Reference*> dependencies;
     std::map<std::string, Package::Library*>   libraries;
+    std::vector<std::string> internalLibraries;
 
     std::string workspaceTutorialLabel;
     std::vector<std::pair<std::string, std::string> > workspaceTutorialSections;
@@ -124,6 +127,12 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
             }
         }
     }
+    if ( m.hasKey("internalLibraries") ){
+        MLNode::ArrayType libs = m["internalLibraries"].asArray();
+        for ( auto it = libs.begin(); it != libs.end(); ++it ){
+            pt->m_d->internalLibraries.push_back(it->asString());
+        }
+    }
 
     if ( m.hasKey("documentation" ) ){
         pt->m_d->documentation = m["documentation"].asString();
@@ -188,12 +197,20 @@ const std::map<std::string, Package::Library *>& Package::libraries() const{
     return m_d->libraries;
 }
 
+const std::vector<std::string> Package::internalLibraries() const{
+    return m_d->internalLibraries;
+}
+
 /** \brief Assigns a new context to this package. */
 void Package::assignContext(PackageGraph *graph){
     if ( m_d->context ){
         if ( m_d->context->packageGraph == graph )
             return;
         delete m_d->context;
+    }
+
+    for ( auto it = m_d->internalLibraries.begin(); it != m_d->internalLibraries.end(); ++it ){
+        lv::Library::handleReference(m_d->path + "/" + *it);
     }
 
     m_d->context = new Package::Context;

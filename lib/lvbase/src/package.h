@@ -103,6 +103,7 @@ public:
     /** Returns a map of dependencies with string keys */
     const std::map<std::string, Package::Reference*>& dependencies() const;
     const std::map<std::string, Package::Library*>& libraries() const;
+    const std::vector<std::string> internalLibraries() const;
 
     void assignContext(PackageGraph* graph);
     PackageGraph* contextOwner();
