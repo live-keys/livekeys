@@ -2,6 +2,7 @@
 #define LVTIMELINEHEADERMODEL_H
 
 #include "qabstractrangemodel.h"
+#include <functional>
 
 namespace lv{
 
