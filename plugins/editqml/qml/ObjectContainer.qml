@@ -80,7 +80,7 @@ Item{
         property int topSpacing: editingFragment && !editingFragment.isRoot() ? 0 : 10
 
         width: container.width < 260 ? 300 : container.width + 40
-        height: container.height < 10 || compact ? 40 : objectContainerTitleWrap.height + topSpacing + container.height
+        height: container.height < 10 || compact ? 40 : objectContainerTitleWrap.height + topSpacing + /*(paletteGroup ? paletteGroup.height : 0) +*/ container.height
 
         function closeAsPane(){
             objectContainerTitle.parent = objectContainerTitleWrap
@@ -90,6 +90,66 @@ Item{
             root.placeHolder.parent = null
         }
 
+        function addObjectFragmentToContainer(ef){
+            if (!ef) return
+            var childObjectContainer = objectContainerFactory.createObject(container)
+            container.sortChildren()
+            childObjectContainer.editor = objectContainer.editor
+            childObjectContainer.editingFragment = ef
+            childObjectContainer.title = ef.typeName()
+            childObjectContainer.x = 20
+            childObjectContainer.y = 10
+
+            var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
+            paletteBoxGroup.editingFragment = ef
+            paletteBoxGroup.codeHandler = editor.documentHandler.codeHandler
+            ef.visualParent = paletteBoxGroup
+
+            childObjectContainer.paletteGroup = paletteBoxGroup
+            paletteBoxGroup.x = 5
+            paletteBoxGroup.y = 10
+        }
+
+        function addPropertyFragmentToContainer(ef){
+            if (!ef) return
+            var codeHandler = objectContainer.editor.documentHandler.codeHandler
+
+            var propertyContainer = objectContainer.propertyContainerFactory.createObject(container)
+            container.sortChildren()
+
+            propertyContainer.title = ef.identifier()
+            propertyContainer.documentHandler = objectContainer.editor.documentHandler
+            propertyContainer.propertyContainerFactory = objectContainer.propertyContainerFactory
+
+            propertyContainer.editor = objectContainer.editor
+            propertyContainer.editingFragment = ef
+
+
+            if ( codeHandler.isForAnObject(ef) ){
+                var childObjectContainer = objectContainerFactory.createObject(container)
+
+                childObjectContainer.editor = objectContainer.editor
+                childObjectContainer.editingFragment = ef
+                childObjectContainer.title = ef.typeName()
+
+                var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
+                paletteBoxGroup.editingFragment = ef
+                paletteBoxGroup.codeHandler = codeHandler
+                ef.visualParent = paletteBoxGroup
+
+                childObjectContainer.paletteGroup = paletteBoxGroup
+                paletteBoxGroup.x = 5
+
+                propertyContainer.valueContainer = childObjectContainer
+                propertyContainer.paletteAddButtonVisible = false
+
+            } else {
+
+                propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
+                propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
+                propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
+            }
+        }
         function expandOptions(options){
             var codeHandler = objectContainer.editor.documentHandler.codeHandler
 
@@ -150,10 +210,12 @@ Item{
                                 propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
                                 propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
                                 propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
+                                propertyContainer.expandDefaultPalette()
 
-                                if ( propPalette.length ){
+
+                                /*if ( propPalette.length ){
                                     propertyContainer.expandPalette(propPalette)
-                                }
+                                }*/
                             }
                             if (compact)
                                 expand()
@@ -170,42 +232,8 @@ Item{
 
         function expand(){
             var connections = editor.documentHandler.codeHandler.openNestedObjects(editingFragment)
-            for ( var i = 0; i < connections.length; ++i ){
-                var ef = connections[i]
-                var childObjectContainer = objectContainerFactory.createObject(container)
-
-                childObjectContainer.editor = objectContainer.editor
-                childObjectContainer.editingFragment = ef
-                childObjectContainer.title = ef.typeName()
-                childObjectContainer.x = 20
-
-                var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
-                paletteBoxGroup.editingFragment = ef
-                paletteBoxGroup.codeHandler = editor.documentHandler.codeHandler
-                ef.visualParent = paletteBoxGroup
-
-                childObjectContainer.paletteGroup = paletteBoxGroup
-                paletteBoxGroup.x = 5
-            }
 
             var properties = editor.documentHandler.codeHandler.openNestedProperties(editingFragment)
-            for (var j = 0; j < properties.length; ++j){
-                var efp = properties[j]
-                var propertyContainer = propertyContainerFactory.createObject(container)
-                propertyContainer.z = 3000 + properties.length - j
-                container.sortChildren()
-
-                propertyContainer.title = efp.identifier()
-                propertyContainer.documentHandler = objectContainer.editor.documentHandler
-                propertyContainer.propertyContainerFactory = propertyContainerFactory
-
-                propertyContainer.editor = objectContainer.editor
-                propertyContainer.editingFragment = efp
-
-                propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
-                propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
-                propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
-            }
 
             compact = false
         }
@@ -235,6 +263,17 @@ Item{
                         objectContainer.closeAsPane()
                     root.destroy()
                 }
+            }
+        }
+
+        property Connections addFragmentToContainerConn: Connections{
+            target: editingFragment
+            ignoreUnknownSignals: true
+            onObjectAdded: {
+                objectContainer.addObjectFragmentToContainer(obj)
+            }
+            onPropertyAdded: {
+                objectContainer.addPropertyFragmentToContainer(ef)
             }
         }
 
@@ -313,6 +352,13 @@ Item{
 
                             var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
 
+                            if (palette.type === "qml/Object")
+                            {
+                                palette.documentHandler = editor.documentHandler
+                                palette.editor = editor
+                                editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
+                                palette.editingFragment = editingFragment
+                            }
 
                             if ( palette.item ){
                                 var newPaletteBox = objectContainer.paletteContainerFactory.createObject(paletteGroup)
@@ -389,47 +435,10 @@ Item{
                             var ef = codeHandler.openNestedConnection(
                                 objectContainer.editingFragment, ppos
                             )
-                            if ( ef ){
-                                var propertyContainer = objectContainer.propertyContainerFactory.createObject(container)
-                                container.sortChildren()
 
-                                propertyContainer.title = data
-                                propertyContainer.documentHandler = objectContainer.editor.documentHandler
-                                propertyContainer.propertyContainerFactory = objectContainer.propertyContainerFactory
+                            if (ef && compact) expand()
 
-                                propertyContainer.editor = objectContainer.editor
-                                propertyContainer.editingFragment = ef
-
-
-                                if ( codeHandler.isForAnObject(ef) ){
-
-                                    var childObjectContainer = objectContainerFactory.createObject(container)
-
-                                    childObjectContainer.editor = objectContainer.editor
-                                    childObjectContainer.editingFragment = ef
-                                    childObjectContainer.title = type
-
-                                    var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
-                                    paletteBoxGroup.editingFragment = ef
-                                    paletteBoxGroup.codeHandler = codeHandler
-                                    ef.visualParent = paletteBoxGroup
-
-                                    childObjectContainer.paletteGroup = paletteBoxGroup
-                                    paletteBoxGroup.x = 5
-
-                                    propertyContainer.valueContainer = childObjectContainer
-                                    propertyContainer.paletteAddButtonVisible = false
-
-                                } else {
-                                    propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
-                                    propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
-                                    propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
-                                    propertyContainer.expandDefaultPalette()
-                                }
-                                if (compact)
-                                    expand()
-                            }
-                            else {
+                            if (!ef) {
                                 lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
                                 console.error("Error: Can't create a palette in a non-compiled program")
                                 return
@@ -442,23 +451,8 @@ Item{
                                 objectContainer.editingFragment, opos
                             )
 
-                            if ( ef ){
-                                var childObjectContainer = objectContainerFactory.createObject(container)
-                                container.sortChildren()
-                                childObjectContainer.editor = objectContainer.editor
-                                childObjectContainer.editingFragment = ef
-                                childObjectContainer.title = data
-                                childObjectContainer.x = 40
+                            if (ef && compact) expand()
 
-                                var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
-                                paletteBoxGroup.editingFragment = ef
-                                paletteBoxGroup.codeHandler = codeHandler
-                                ef.visualParent = paletteBoxGroup
-
-                                childObjectContainer.paletteGroup = paletteBoxGroup
-                                paletteBoxGroup.x = 5
-                                if (compact) expand()
-                            }
                         } else if ( addBoxItem.activeIndex === 2 ){
                             var ppos = codeHandler.addEvent(
                                 addContainer.eventModel.addPosition, addContainer.objectType, type, data
@@ -560,7 +554,7 @@ Item{
             anchors.top: parent.top
             anchors.topMargin: objectContainerTitleWrap.height + topSpacing
             visible: !compact
-            spacing: 0
+            spacing: 10
             width: {
                 var maxWidth = 0;
                 if ( children.length > 0 ){

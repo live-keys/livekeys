@@ -169,9 +169,10 @@ void DocumentHandler::componentComplete(){
 
     QObject* workspace = lg->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
 
-    m_extensions = static_cast<Extensions*>(workspace->property("extensions").value<QQmlPropertyMap*>()->parent());
-
-    findCodeHandler();
+    if (workspace){
+        m_extensions = static_cast<Extensions*>(workspace->property("extensions").value<QQmlPropertyMap*>()->parent());
+        findCodeHandler();
+    }
 }
 
 void DocumentHandler::findCodeHandler(){

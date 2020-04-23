@@ -137,6 +137,11 @@ void QmlCodeConverter::write(const QJSValue value){
     m_edit->write(buildCode(value));
 }
 
+void QmlCodeConverter::writeForFragment(QmlEditFragment *edit, const QJSValue value)
+{
+    edit->write(buildCode(value));
+}
+
 QVariant QmlCodeConverter::parse(){
     QString val = m_edit->readValueText();
     if ( val.length() > 1 && (
@@ -182,7 +187,14 @@ void QmlCodeConverter::suggestionsForExpression(const QString &expression, CodeC
 }
 
 bool QmlCodeConverter::bindExpression(const QString &expression){
-    QObject* editParent = m_edit->parent();
+    return QmlCodeConverter::bindExpressionForFragment(m_edit, expression);
+}
+
+bool QmlCodeConverter::bindExpressionForFragment(QmlEditFragment *edit, const QString &expression)
+{
+    if (!edit) return false;
+
+    QObject* editParent = edit->parent();
     CodeQmlHandler* qmlHandler = nullptr;
     while ( editParent ){
         qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
@@ -193,7 +205,7 @@ bool QmlCodeConverter::bindExpression(const QString &expression){
     }
 
     if (qmlHandler){
-        return qmlHandler->findBindingForExpression(m_edit, expression);
+        return qmlHandler->findBindingForExpression(edit, expression);
     }
 
     return false;
