@@ -3,13 +3,19 @@
 
 #include <QObject>
 #include <QQmlListProperty>
+#include "lvtimelineglobal.h"
+
+class QJSValue;
 
 namespace lv{
 
 class Timeline;
 class Segment;
 class SegmentModel;
-class Track : public QObject{
+class ViewEngine;
+class MLNode;
+
+class LV_TIMELINE_EXPORT Track : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QString name                       READ name WRITE setName NOTIFY nameChanged)
@@ -25,6 +31,7 @@ public:
 
 public:
     explicit Track(QObject *parent = nullptr);
+    ~Track();
 
     const QString& name() const;
     void setName(const QString& name);
@@ -38,6 +45,11 @@ public:
     QQmlListProperty<QObject> segments();
 
     CursorOperation updateCursorPosition(qint64 newPosition);
+
+    static void serialize(ViewEngine* engine, const QObject* o, MLNode &node);
+    static void deserialize(Track* track, ViewEngine* engine, const MLNode &node);
+
+    QJSValue timelineProperties() const;
 
 public slots:
     bool addSegment(lv::Segment* segment);

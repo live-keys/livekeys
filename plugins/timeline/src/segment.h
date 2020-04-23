@@ -5,9 +5,13 @@
 #include <QColor>
 #include "lvtimelineglobal.h"
 
+class QQmlEngine;
+
 namespace lv{
 
+class Track;
 class SegmentModel;
+class MLNode;
 
 class LV_TIMELINE_EXPORT Segment : public QObject{
 
@@ -32,10 +36,13 @@ public:
     void setPosition(unsigned int arg);
     void setLength(unsigned int arg);
 
+    virtual void assignTrack(Track* track);
     virtual void cursorEnter(qint64 position);
     virtual void cursorExit();
     virtual void cursorNext(qint64 position);
     virtual void cursorMove(qint64 position);
+    virtual void serialize(QQmlEngine* engine, MLNode& node) const;
+    virtual void deserialize(Track *track, QQmlEngine* engine, const MLNode& data);
 
     bool contains(qint64 position);
 

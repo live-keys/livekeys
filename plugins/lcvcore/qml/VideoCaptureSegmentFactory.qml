@@ -11,7 +11,7 @@ QtObject{
     property Component factory: VideoSegment{
     }
 
-    property Track track: null
+    property var track: null
 
     function create(){
         var segment = factory.createObject()

@@ -105,6 +105,10 @@ Rectangle{
                 text: qsTr("Insert Track")
                 onTriggered: root.timeline.addTrack()
             }
+            MenuItem {
+                text: qsTr("Save")
+                onTriggered: root.timeline.save()
+            }
         }
     }
 

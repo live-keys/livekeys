@@ -2,6 +2,7 @@
 #define LVTIMELINE_H
 
 #include <QObject>
+#include <QQmlParserStatus>
 #include <QTimer>
 #include <QQmlListProperty>
 
@@ -11,17 +12,22 @@
 
 namespace lv{
 
+class ViewEngine;
+class MLNode;
 class Track;
 
 /// \private
-class Timeline : public QObject{
+class Timeline : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
+    Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(qint64 contentLength             READ contentLength  WRITE setContentLength NOTIFY contentLengthChanged)
     Q_PROPERTY(qint64 cursorPosition            READ cursorPosition WRITE setCursor        NOTIFY cursorPositionChanged)
     Q_PROPERTY(bool isRunning                   READ isRunning      NOTIFY isRunningChanged)
     Q_PROPERTY(double fps                       READ fps            WRITE setFps           NOTIFY fpsChanged)
     Q_PROPERTY(bool loop                        READ loop           WRITE setLoop          NOTIFY loopChanged)
+    Q_PROPERTY(QJSValue properties              READ properties     WRITE setProperties    NOTIFY propertiesChanged)
+    Q_PROPERTY(QString file                     READ file           WRITE setFile          NOTIFY fileChanged)
     Q_PROPERTY(lv::TimelineConfig* config       READ config         CONSTANT)
     Q_PROPERTY(lv::TrackListModel* trackList    READ trackList      CONSTANT)
     Q_PROPERTY(TimelineHeaderModel* headerModel READ headerModel    CONSTANT)
@@ -49,11 +55,25 @@ public:
     bool loop() const;
     void setLoop(bool loop);
 
+    QJSValue properties() const;
+    void setProperties(QJSValue properties);
+
     static void appendTrackToList(QQmlListProperty<QObject>*, QObject*);
     static int trackCount(QQmlListProperty<QObject>*);
     static QObject* trackAt(QQmlListProperty<QObject>*, int);
     static void clearTracks(QQmlListProperty<QObject>*);
     QQmlListProperty<QObject> tracks();
+
+    const QString& file() const;
+    void setFile(const QString& file);
+
+    static void serialize(ViewEngine* engine, const QObject* o, MLNode &node);
+    static QObject *deserialize(ViewEngine* engine, const MLNode &node);
+
+    static void deserialize(Timeline* timeline, ViewEngine *engine, const MLNode& node);
+
+    void classBegin() override{}
+    void componentComplete() override;
 
 public slots:
     lv::Track* addTrack();
@@ -67,6 +87,9 @@ public slots:
     void __tick();
     void __trackCursorProcessed(Track* track, qint64 position);
 
+    void load();
+    void save();
+
 signals:
     void contentLengthChanged();
     void fpsChanged();
@@ -74,6 +97,8 @@ signals:
     void cursorPositionProcessed(qint64 position);
     void isRunningChanged();
     void loopChanged();
+    void propertiesChanged();
+    void fileChanged();
 
 private:
     void appendTrack(Track* track);
@@ -85,11 +110,14 @@ private:
     bool   m_loop;
     bool   m_isRunning;
     bool   m_waitingForTrack;
+    bool   m_isComponentComplete;
 
     TimelineConfig*      m_config;
     TrackListModel*      m_trackList;
     TimelineHeaderModel* m_headerModel;
-    QTimer m_timer;
+    QTimer               m_timer;
+    QJSValue             m_properties;
+    QString              m_file;
 };
 
 inline qint64 Timeline::contentLength() const{
@@ -156,6 +184,27 @@ inline void Timeline::setLoop(bool loop){
 
     m_loop = loop;
     emit loopChanged();
+}
+
+inline QJSValue Timeline::properties() const{
+    return m_properties;
+}
+
+inline void Timeline::setProperties(QJSValue properties){
+    m_properties = properties;
+    emit propertiesChanged();
+}
+
+inline void Timeline::setFile(const QString &file){
+    if (m_file == file)
+        return;
+
+    m_file = file;
+    emit fileChanged();
+
+    if ( !m_file.isEmpty() && m_isComponentComplete ){
+        load();
+    }
 }
 
 }// namespace

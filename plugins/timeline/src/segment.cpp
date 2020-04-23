@@ -2,9 +2,11 @@
 #include "segmentmodel.h"
 #include "track.h"
 #include "live/visuallogqt.h"
+#include "live/viewengine.h"
 
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QJSValue>
 #include <limits>
 
 
@@ -50,9 +52,41 @@ void Segment::setLength(unsigned int arg){
     }
 }
 
+void Segment::assignTrack(Track*){}
 void Segment::cursorEnter(qint64){}
 void Segment::cursorNext(qint64){}
 void Segment::cursorMove(qint64){}
+
+void Segment::serialize(QQmlEngine *, MLNode &node) const{
+    node = MLNode(MLNode::Object);
+    node["type"] = "Segment";
+    node["position"] = static_cast<int>(m_position);
+    node["length"] = static_cast<int>(m_length);
+
+    if ( m_maxStretchLeft != std::numeric_limits<unsigned int>::max() )
+        node["maxStretchLeft"] = static_cast<int>(m_maxStretchLeft);
+    if ( m_maxStretchRight != std::numeric_limits<unsigned int>::max() )
+        node["maxStretchRight"] = static_cast<int>(m_maxStretchRight);
+    if ( !m_label.isEmpty() )
+        node["label"] = m_label.toStdString();
+    if ( m_color.isValid() )
+        node["color"] = m_color.name().toStdString();
+}
+
+void Segment::deserialize(Track*, QQmlEngine *, const MLNode &node){
+    setPosition(static_cast<unsigned int>(node["position"].asInt()));
+    setLength(static_cast<unsigned int>(node["length"].asInt()));
+
+    if ( node.hasKey("maxStretchLeft") )
+        setMaxStretchLeft(static_cast<unsigned int>(node["maxStretchLeft"].asInt()));
+    if ( node.hasKey("maxStretchRight") )
+        setMaxStretchRight(static_cast<unsigned int>(node["maxStretchRight"].asInt()));
+    if ( node.hasKey("label") )
+        setLabel(QString::fromStdString(node["label"].asString()));
+    if ( node.hasKey("color") )
+        setColor(QColor(QString::fromStdString(node["color"].asString())));
+}
+
 void Segment::cursorExit(){}
 
 bool Segment::contains(qint64 position){

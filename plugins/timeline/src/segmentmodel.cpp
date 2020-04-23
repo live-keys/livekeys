@@ -3,6 +3,7 @@
 
 #include "live/visuallogqt.h"
 
+#include <QJSValue>
 #include <QVariant>
 
 namespace lv{

@@ -7,6 +7,15 @@
 #include "live/viewcontext.h"
 #include "live/exception.h"
 
+#include "live/mlnode.h"
+#include "live/mlnodetojson.h"
+#include "live/mlnodetoqml.h"
+
+#include <QQmlEngine>
+#include <QFile>
+#include <QJSValue>
+#include <QJSValueIterator>
+
 #include <math.h>
 
 namespace lv{
@@ -19,6 +28,7 @@ Timeline::Timeline(QObject *parent)
     , m_loop(false)
     , m_isRunning(false)
     , m_waitingForTrack(false)
+    , m_isComponentComplete(false)
     , m_config(new TimelineConfig(this))
     , m_trackList(new TrackListModel())
     , m_headerModel(new TimelineHeaderModel(this))
@@ -165,6 +175,106 @@ QQmlListProperty<QObject> lv::Timeline::tracks(){
             &Timeline::trackCount,
             &Timeline::trackAt,
             &Timeline::clearTracks);
+}
+
+const QString &Timeline::file() const{
+    return m_file;
+}
+
+void Timeline::serialize(ViewEngine *engine, const QObject *o, MLNode &node){
+    const Timeline* timeline = qobject_cast<const Timeline*>(o);
+    node = MLNode(MLNode::Object);
+    node["length"] = MLNode(static_cast<int>(timeline->m_contentLength));
+    node["fps"] = MLNode(timeline->m_fps);
+
+    MLNode tracksNode;
+    TrackListModel::serialize(engine, timeline->m_trackList, tracksNode);
+    node["tracks"] = tracksNode;
+}
+
+QObject *Timeline::deserialize(ViewEngine *engine, const MLNode &node){
+    Timeline* timeline = new Timeline;
+    deserialize(timeline, engine, node);
+    return timeline;
+}
+
+void Timeline::deserialize(Timeline *timeline, ViewEngine *engine, const MLNode &node){
+    timeline->m_trackList->clearTracks();
+    timeline->setCursor(0);
+    timeline->m_isRunning = false;
+    emit timeline->isRunningChanged();
+
+    try{
+        timeline->m_contentLength = node["length"].asInt();
+        timeline->m_fps = node["fps"].asFloat();
+
+        const MLNode::ArrayType& tracks = node["tracks"].asArray();
+        for ( auto it = tracks.begin(); it != tracks.end(); ++it ){
+            Track* track = timeline->addTrack();
+            Track::deserialize(track, engine, *it);
+        }
+    } catch ( Exception& e ){
+        engine->throwError(&e, timeline);
+        return;
+    }
+}
+
+void Timeline::componentComplete(){
+    m_isComponentComplete = true;
+
+    if ( !m_file.isEmpty() ){
+        if ( m_trackList->totalTracks() != 0 ){
+            qWarning("Cannot assign a file and directly initialize tracks for the timeline.");
+            return;
+        }
+        load();
+    }
+}
+
+void Timeline::load(){
+    if ( m_file.isEmpty() ){
+        return;
+    }
+
+    QFile file(m_file);
+    if ( !file.exists() )
+        return;
+
+    if ( !file.open(QIODevice::ReadOnly) ){
+        Exception e = CREATE_EXCEPTION(Exception, "Failed to open file for reading: " + m_file.toStdString(), Exception::toCode("~Read"));
+        ViewContext::instance().engine()->throwError(&e, this);
+        return;
+    }
+
+    QByteArray content = file.readAll();
+
+    MLNode contentNode;
+    try {
+        ml::fromJson(content.data(), contentNode);
+    } catch (Exception& e) {
+        ViewContext::instance().engine()->throwError(&e, this);
+        return;
+    }
+
+    deserialize(this, ViewContext::instance().engine(), contentNode);
+}
+
+void Timeline::save(){
+    if ( m_file.isEmpty() ){
+        return;
+    }
+
+    //TODO: Pick lockedio if available
+    QFile file(m_file);
+    if( file.open(QIODevice::WriteOnly) ){
+        MLNode result;
+        serialize(ViewContext::instance().engine(), this, result);
+
+        std::string resultData;
+        ml::toJson(result, resultData);
+        file.write(resultData.c_str());
+        file.close();
+    }
 }
 
 void Timeline::updateCursorPosition(qint64 position){

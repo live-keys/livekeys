@@ -4,9 +4,13 @@
 #include <QAbstractListModel>
 #include "qabstractrangemodel.h"
 
+class QJSValue;
+
 namespace lv{
 
+class MLNode;
 class Track;
+class ViewEngine;
 
 /// \private
 class TrackListModel : public QAbstractListModel{
@@ -28,6 +32,9 @@ public:
 
     void removeTrack(Track* track);
 
+    static void serialize(ViewEngine* engine, const QObject* o, MLNode &node);
+    static QObject *deserialize(ViewEngine* engine, const MLNode &node);
+
 signals:
 
 public slots:
@@ -40,8 +47,8 @@ public slots:
     int totalTracks() const;
 
 private:
-    QHash<int, QByteArray>      m_roles;
-    QList<Track*>               m_tracks;
+    QHash<int, QByteArray> m_roles;
+    QList<Track*>          m_tracks;
 
 };
 

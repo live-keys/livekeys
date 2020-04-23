@@ -3,6 +3,11 @@
 #include "qganttmodel.h"
 
 #include "live/visuallogqt.h"
+#include "live/mlnode.h"
+#include "live/viewengine.h"
+
+#include <QQmlEngine>
+#include <QJSValue>
 
 namespace lv{
 
@@ -54,6 +59,22 @@ void TrackListModel::removeTrack(Track *track){
     if ( index == -1 )
         return;
     removeTrack(index);
+}
+
+void TrackListModel::serialize(ViewEngine *engine, const QObject *o, MLNode &node){
+    const TrackListModel* trackList = qobject_cast<const TrackListModel*>(o);
+
+    node = MLNode(MLNode::Array);
+
+    for ( int i = 0; i < trackList->m_tracks.size(); ++i ){
+        MLNode trackNode;
+        Track::serialize(engine, trackList->trackAt(i), trackNode);
+        node.append(trackNode);
+    }
+}
+
+QObject *TrackListModel::deserialize(ViewEngine *engine, const MLNode &node){
+    return nullptr;
 }
 
 void TrackListModel::removeTrack(int index){
