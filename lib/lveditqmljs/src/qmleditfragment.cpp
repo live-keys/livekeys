@@ -49,6 +49,7 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *paren
     , m_bindingSpan(new QmlBindingSpan(this))
     , m_visualParent(nullptr)
     , m_bindingSpanModel(nullptr)
+    , m_refCount(1)
 {
 }
 
@@ -197,6 +198,14 @@ void QmlEditFragment::setBindingPalette(CodePalette *palette){
 
 void QmlEditFragment::addChildFragment(QmlEditFragment *edit){
     m_childFragments.append(edit);
+
+    if (edit->isForObject()){
+        emit objectAdded(edit);
+    }
+    else if (edit->isForProperty()){
+        emit propertyAdded(edit);
+    }
+
 }
 
 void QmlEditFragment::removeChildFragment(QmlEditFragment *edit){
@@ -344,6 +353,43 @@ void QmlEditFragment::__inputRunnableObjectReady(){
 bool QmlEditFragment::isRoot()
 {
     return parentFragment() != nullptr;
+}
+
+void QmlEditFragment::addNestedObjectInfo(QVariantMap& object)
+{
+    m_nestedObjectsInfo.push_back(object);
+}
+
+void QmlEditFragment::setObjectInfo(QVariantMap &info)
+{
+    m_objectInfo = info;
+}
+
+void QmlEditFragment::incrementRefCount()
+{
+    ++m_refCount;
+    emit refCountChanged();
+}
+
+void QmlEditFragment::decrementRefCount()
+{
+    --m_refCount;
+    emit refCountChanged();
+}
+
+int QmlEditFragment::refCount()
+{
+    return m_refCount;
+}
+
+QVariantList QmlEditFragment::nestedObjectsInfo()
+{
+    return m_nestedObjectsInfo;
+}
+
+QVariantMap QmlEditFragment::objectInfo()
+{
+    return m_objectInfo;
 }
 
 }// namespace

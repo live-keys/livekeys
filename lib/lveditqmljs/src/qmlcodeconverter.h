@@ -38,10 +38,12 @@ public:
 public slots:
     void writeProperties(const QJSValue& properties);
     void write(const QJSValue options);
+    static void writeForFragment(lv::QmlEditFragment* edit, const QJSValue options);
     QVariant parse();
     void updateBindings();
     void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
     bool bindExpression(const QString& expression);
+    static bool bindExpressionForFragment(lv::QmlEditFragment* edit, const QString& expression);
     bool bindFunctionExpression(const QString& expression);
 
     void updateFromPalette();
@@ -50,7 +52,7 @@ signals:
     void whenBindingChanged();
 
 private:
-    QString buildCode(const QJSValue& value);
+    static QString buildCode(const QJSValue& value);
 
     QmlEditFragment* m_edit;
     QJSValue         m_whenBinding;
