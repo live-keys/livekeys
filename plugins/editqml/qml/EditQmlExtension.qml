@@ -106,10 +106,10 @@ LiveExtension{
 
         var editorBox = ef.visualParent ? ef.visualParent.parent : null
         var paletteBoxGroup = editorBox ? editorBox.child : null
+        var forAnObject = codeHandler.isForAnObject(ef)
 
         if ( paletteBoxGroup === null ){
             editorBox = lk.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
-            var forAnObject = codeHandler.isForAnObject(ef)
             var objectContainer = null
 
             if (forAnObject)
@@ -143,12 +143,20 @@ LiveExtension{
             }
         }
 
-        if ( palette || !codeHandler.isForAnObject(ef) ){
+        if ( palette || !forAnObject ){
 
             if ( palette.item ){
                 var paletteBox = root.paletteContainerFactory.createObject(paletteBoxGroup)
                 palette.item.x = 5
                 palette.item.y = 7
+                paletteBox.documentHandler = editor.documentHandler
+
+                if (palette.type === "qml/Object")
+                {
+                    palette.editor = editor
+                    editor.documentHandler.codeHandler.populateNestedObjectsForFragment(ef)
+                    palette.editingFragment = ef
+                }
 
                 paletteBox.child = palette.item
                 paletteBox.palette = palette
@@ -156,7 +164,6 @@ LiveExtension{
                 paletteBox.name = palette.name
                 paletteBox.type = palette.type
                 paletteBox.moveEnabledSet = false
-                paletteBox.documentHandler = editor.documentHandler
                 paletteBox.cursorRectangle = rect
                 paletteBox.editorPosition = cursorCoords
                 paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }

@@ -1764,10 +1764,11 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
 
     QmlDeclaration::Ptr declaration = properties.first();
 
-    for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
-        QmlEditFragment* edit = *it;
-        if ( edit->declaration()->position() == declaration->position() )
-            return edit;
+    auto test = findFragmentByPosition(declaration->position());
+    if (test && test->declaration()->position() == declaration->position()) // it was already opened
+    {
+        test->incrementRefCount();
+        return test;
     }
 
     QmlEditFragment* ef = createInjectionChannel(declaration);
@@ -1833,10 +1834,12 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
         return nullptr;
 
     QmlDeclaration::Ptr declaration = properties.first();
-    for ( auto it = editParent->childFragments().begin(); it != editParent->childFragments().end(); ++it ){
-        QmlEditFragment* edit = *it;
-        if ( edit->declaration()->position() == declaration->position() )
-            return edit;
+
+    auto test = findFragmentByPosition(declaration->position());
+    if (test && test->declaration()->position() == declaration->position()) // it was already opened
+    {
+        test->incrementRefCount();
+        return test;
     }
 
     QmlEditFragment* ef = createInjectionChannel(declaration);
@@ -1994,9 +1997,11 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
             DocumentQmlValueObjects::RangeProperty* rp = currentOb->properties[i];
 
             auto test = findFragmentByPosition(rp->begin);
-            if (test && test->isForProperty()) // it was already opened
+            if (test && test->isForProperty() && test->declaration()->position() == rp->begin) // it was already opened
+            {
+                test->incrementRefCount();
                 continue;
-
+            }
             QString propertyType = rp->type();
 
             if (rp->name().size() == 1 && rp->name()[0] == "id") continue;
@@ -2091,7 +2096,9 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
 }
 
 void CodeQmlHandler::removeConnection(QmlEditFragment *edit){
-    removeEditingFragment(edit);
+    edit->decrementRefCount();
+    if (edit->refCount() == 0)
+        removeEditingFragment(edit);
 }
 
 void CodeQmlHandler::deleteObject(QmlEditFragment *edit){

@@ -122,7 +122,6 @@ Rectangle{
 
         node.item.documentHandler = documentHandler
         node.item.editor = editor
-        node.item.editingFragment = node.fragment
 
         var idx = label.indexOf('#')
         if (idx !== -1)
@@ -157,6 +156,7 @@ Rectangle{
             port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.propertyTitle.height / 2) })
             propertyItem.inPort = port
             port.objectProperty = propertyItem
+            port.multiplicity = Qan.PortItem.Single
         }
         if ( node.item.id !== "" && (ports === root.outPort || ports === root.inOutPort) ){
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);

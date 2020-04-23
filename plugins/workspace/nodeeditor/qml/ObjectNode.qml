@@ -300,14 +300,6 @@ Qan.NodeItem{
     }
 
     Connections {
-        target: nodeParent
-        ignoreUnknownSignals: true
-        onFragmentChanged: {
-            editingFragment = nodeParent.fragment
-        }
-    }
-
-    Connections {
         target: editingFragment
         ignoreUnknownSignals: true
         onAboutToBeRemoved: {

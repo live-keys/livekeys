@@ -36,7 +36,7 @@ class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QObject* visualParent READ visualParent WRITE setVisualParent NOTIFY visualParentChanged)
-
+    Q_PROPERTY(int      refCount     READ refCount     NOTIFY refCountChanged)
 public:
     /** ProjectDocument section type for this QmlEditFragment */
     enum SectionType{
@@ -83,6 +83,10 @@ public:
     void emitRemoval();
     void addNestedObjectInfo(QVariantMap& info);
     void setObjectInfo(QVariantMap& info);
+
+    int refCount();
+    void incrementRefCount();
+    void decrementRefCount();
 public slots:
     int position();
     int valuePosition() const;
@@ -123,6 +127,8 @@ signals:
 
     void objectAdded(lv::QmlEditFragment* obj);
     void propertyAdded(lv::QmlEditFragment* ef);
+
+    void refCountChanged();
 private:
     QmlDeclaration::Ptr  m_declaration;
 
@@ -141,6 +147,7 @@ private:
     QmlBindingSpanModel*    m_bindingSpanModel;
     QVariantList            m_nestedObjectsInfo;
     QVariantMap             m_objectInfo;
+    int                     m_refCount;
 };
 
 /// \brief Returns the binding channel associated with this object.

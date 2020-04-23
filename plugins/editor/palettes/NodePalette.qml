@@ -45,7 +45,7 @@ CodePalette{
                 }
 
                 if (object.connection)
-                    n.fragment = object.connection
+                    n.item.editingFragment = object.connection
 
                 for (var j = 0; j < object.properties.length; ++j)
                 {
