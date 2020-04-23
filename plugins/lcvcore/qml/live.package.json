@@ -1,6 +1,9 @@
 {
     "name" : "lcvcore",
     "version" : "1.0.0",
+    "dependencies" : {
+        "timeline" : "1.0.0"
+    },
     "workspace" : {
         "samples" : [
             { "link" : "samples/colorhistogram.qml"},

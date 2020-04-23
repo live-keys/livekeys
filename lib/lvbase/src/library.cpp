@@ -1,5 +1,6 @@
 #include "library.h"
 #include "live/exception.h"
+#include "live/visuallog.h"
 
 #include <QLibrary>
 
@@ -31,6 +32,13 @@ void *Library::symbol(const std::string &name){
 
 void *Library::symbol(const char *name){
     return reinterpret_cast<void*>(m_d->lib.resolve(name));
+}
+
+void Library::handleReference(const std::string &path){
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+    QLibrary lib(QString::fromStdString(path));
+    lib.load();
+#endif
 }
 
 Library::Library(const std::string &path)

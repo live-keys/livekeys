@@ -24,6 +24,8 @@ public:
     template<typename T> T fn(const std::string& name);
     template<typename T> T fn(const char* name);
 
+    static void handleReference(const std::string& path);
+
 private:
     Library(const std::string& path);
     DISABLE_COPY(Library);
