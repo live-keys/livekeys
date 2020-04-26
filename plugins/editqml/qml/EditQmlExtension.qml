@@ -93,7 +93,9 @@ LiveExtension{
         var cursorCoords = editor.cursorWindowCoords()
 
         var ef = codeHandler.openConnection(palettes.position())
-        var palette = palettes.size() > 0 ? codeHandler.openPalette(ef, palettes, index) : null
+        var forAnObject = codeHandler.isForAnObject(ef)
+
+        var palette = palettes.size() > 0 && !forAnObject ? codeHandler.openPalette(ef, palettes, index) : null
         if (codeHandler.isInImports(palettes.position())){
             palette.item.model = codeHandler.importsModel()
         }
@@ -106,7 +108,6 @@ LiveExtension{
 
         var editorBox = ef.visualParent ? ef.visualParent.parent : null
         var paletteBoxGroup = editorBox ? editorBox.child : null
-        var forAnObject = codeHandler.isForAnObject(ef)
 
         if ( paletteBoxGroup === null ){
             editorBox = lk.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
@@ -153,6 +154,7 @@ LiveExtension{
 
                 if (palette.type === "qml/Object")
                 {
+                    palette.documentHandler = editor.documentHandler
                     palette.editor = editor
                     editor.documentHandler.codeHandler.populateNestedObjectsForFragment(ef)
                     palette.editingFragment = ef

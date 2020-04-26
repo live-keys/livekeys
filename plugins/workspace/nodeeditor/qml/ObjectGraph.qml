@@ -35,6 +35,19 @@ Rectangle{
             }
         }
     }
+    property Component portDestructorsFactory: Component {
+        Connections {
+            target: null
+            property var port: null
+            property var node: null
+            ignoreUnknownSignals: true
+            onPropertyToBeDestroyed: {
+                if (!node ||!port) return
+                graph.removePort(node, port)
+            }
+        }
+    }
+
     property var resizeComponents: []
     property Component propertyDelegate : ObjectNodeProperty{}
     property alias nodeDelegate : graph.nodeDelegate
@@ -157,6 +170,11 @@ Rectangle{
             propertyItem.inPort = port
             port.objectProperty = propertyItem
             port.multiplicity = Qan.PortItem.Single
+
+            var in_pconn = portDestructorsFactory.createObject()
+            in_pconn.target = propertyItem
+            in_pconn.port = port
+            in_pconn.node = node
         }
         if ( node.item.id !== "" && (ports === root.outPort || ports === root.inOutPort) ){
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
@@ -164,6 +182,11 @@ Rectangle{
             port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.propertyTitle.height / 2) })
             propertyItem.outPort = port
             port.objectProperty = propertyItem
+
+            var out_pconn = portDestructorsFactory.createObject()
+            out_pconn.target = propertyItem
+            out_pconn.port = port
+            out_pconn.node = node
         }
         
         node.item.properties.push(propertyItem)

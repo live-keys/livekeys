@@ -112,6 +112,9 @@ CodePalette{
 
             if (object.id)
                 objects[object.id] = n
+
+            if (object.connection)
+                n.item.editingFragment = object.connection
         }
         ignoreUnknownSignals: true
     }

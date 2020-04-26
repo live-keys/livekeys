@@ -80,7 +80,7 @@ Item{
         property int topSpacing: editingFragment && !editingFragment.isRoot() ? 0 : 10
 
         width: container.width < 260 ? 300 : container.width + 40
-        height: container.height < 10 || compact ? 40 : objectContainerTitleWrap.height + topSpacing + /*(paletteGroup ? paletteGroup.height : 0) +*/ container.height
+        height: container.height < 10 || compact ? 40 : objectContainerTitleWrap.height + topSpacing + container.height
 
         function closeAsPane(){
             objectContainerTitle.parent = objectContainerTitleWrap
@@ -461,44 +461,8 @@ Item{
                             var ef = codeHandler.openNestedConnection(
                                 objectContainer.editingFragment, ppos
                             )
-                            if ( ef ){
-                                var propertyContainer = propertyContainerFactory.createObject(container)
-                                container.sortChildren()
 
-                                propertyContainer.title = data
-                                propertyContainer.documentHandler = objectContainer.editor.documentHandler
-                                propertyContainer.propertyContainerFactory = propertyContainerFactory
-
-                                propertyContainer.editor = objectContainer.editor
-                                propertyContainer.editingFragment = ef
-
-
-                                if ( codeHandler.isForAnObject(ef) ){
-
-                                    var childObjectContainer = objectContainerFactory.createObject(container)
-
-                                    childObjectContainer.editor = objectContainer.editor
-                                    childObjectContainer.editingFragment = ef
-                                    childObjectContainer.title = type
-
-                                    var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
-                                    paletteBoxGroup.editingFragment = ef
-                                    paletteBoxGroup.codeHandler = codeHandler
-                                    ef.visualParent = paletteBoxGroup
-
-                                    childObjectContainer.paletteGroup = paletteBoxGroup
-                                    paletteBoxGroup.x = 5
-
-                                    propertyContainer.valueContainer = childObjectContainer
-                                    propertyContainer.paletteAddButtonVisible = false
-
-                                } else {
-                                    propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
-                                    propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
-                                    propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
-                                }
-                            }
-                            if (compact) expand()
+                            if (ef && compact) expand()
                             // TODO: Add event palette too
                         }
                         addBox.destroy()

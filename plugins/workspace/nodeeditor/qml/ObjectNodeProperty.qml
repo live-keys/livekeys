@@ -18,6 +18,7 @@ Item{
     property var isForObject: editingFragment && editingFragment.isForObject()
     property var editor: null
 
+    signal propertyToBeDestroyed()
 
     anchors.left: parent.left
     anchors.leftMargin: isForObject ? 30 : 0
@@ -162,6 +163,7 @@ Item{
     Connections {
         target: editingFragment
         onAboutToBeRemoved: {
+            propertyItem.propertyToBeDestroyed()
             propertyItem.destroy()
         }
         ignoreUnknownSignals: true

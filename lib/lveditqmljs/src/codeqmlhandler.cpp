@@ -1991,9 +1991,7 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
     DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(edit->position());
 
     if ( currentOb ){
-        for ( int i = 0; i < currentOb->properties.size(); ++i ){
-
-            QmlDeclaration::Ptr property = nullptr;
+        for ( int i = 0; i < currentOb->properties.size(); ++i ){            
             DocumentQmlValueObjects::RangeProperty* rp = currentOb->properties[i];
 
             auto test = findFragmentByPosition(rp->begin);
@@ -2002,6 +2000,16 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
                 test->incrementRefCount();
                 continue;
             }
+
+            QTextCursor cursor(m_target);
+            cursor.setPosition(rp->begin);
+
+            QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
+            if ( properties.isEmpty() )
+                continue;
+
+            QmlDeclaration::Ptr property = properties.first();
+
             QString propertyType = rp->type();
 
             if (rp->name().size() == 1 && rp->name()[0] == "id") continue;
@@ -2177,7 +2185,7 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, boo
 
     if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml)
     {
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", lpl);
+        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", includeExpandables, lpl);
     }
     if ( declaration->isListDeclaration() ){
         lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", includeExpandables, lpl);
