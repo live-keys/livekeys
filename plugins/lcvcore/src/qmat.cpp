@@ -67,7 +67,7 @@ QMat::QMat(cv::Mat *mat, QObject *parent)
  */
 QMat::QMat(int width, int height, QMat::Type type, int channels, QObject *parent)
     : lv::Shared(parent)
-    , m_internal(lv::Memory::alloc<QMat, cv::Mat>(width, height, type, channels))
+    , m_internal(lv::Memory::alloc<QMat, cv::Mat>(memorySize(width, height, type, channels), width, height, type, channels))
 {
 }
 
@@ -127,7 +127,7 @@ QMat* QMat::cloneMat() const{
  *\brief QMat::~QMat
  */
 QMat::~QMat(){
-    delete m_internal;
+    lv::Memory::free(this, m_internal);
 }
 
 /**
@@ -137,7 +137,7 @@ const cv::Mat &QMat::data() const{
     return *m_internal;
 }
 
-QMat* QMat::m_nullMat = 0;
+QMat* QMat::m_nullMat = nullptr;
 
 /**
  *\brief Returns a null matrix
@@ -161,12 +161,22 @@ cv::Mat *QMat::memoryAlloc(int width, int height, int type, int channels){
     return new cv::Mat(width, height, CV_MAKETYPE(type, channels));
 }
 
-size_t QMat::memoryIndex(int width, int height, int type, int channels){
-    return (size_t)width << 44 | (size_t)height << 24 | (size_t)channels << 20 | type;
+size_t QMat::memorySize(int width, int height, int type, int channels){
+    size_t typeSize = 1;
+    if ( type == QMat::CV16U || type == QMat::CV16S ){
+        typeSize = sizeof(int16_t);
+    } else if ( type == QMat::CV32S ){
+        typeSize = sizeof(int32_t);
+    } else if ( type == QMat::CV32F ){
+        typeSize = sizeof(float);
+    } else if ( type == QMat::CV64F ){
+        typeSize = sizeof(double);
+    }
+    return static_cast<size_t>(width) * static_cast<size_t>(height) * static_cast<size_t>(channels) * typeSize;
 }
 
-size_t QMat::memoryIndex(const QMat *m){
-    return memoryIndex(m->internal().cols, m->internal().rows, m->internal().type(), m->channels());
+size_t QMat::memorySize(const QMat *m){
+    return memorySize(m->internal().cols, m->internal().rows, m->internal().type(), m->channels());
 }
 
 /**
@@ -204,8 +214,8 @@ cv::Mat &QMat::internal(){
 /**
 *\brief Memory allocation
 */
-void QMat::recycleSize(int size) const{
-    lv::Memory::reserve<QMat, cv::Mat>(this, size);
+void QMat::recycleSize(int){
+    lv::Memory::reserve<QMat, cv::Mat>(this);
 }
 
 /*!

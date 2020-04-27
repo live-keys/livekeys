@@ -29,6 +29,7 @@
 #include <QReadWriteLock>
 #include <QWaitCondition>
 
+#include "live/memory.h"
 
 using namespace cv;
 /// \private
@@ -60,13 +61,11 @@ QVideoDecodeThread::QVideoDecodeThread(const QString &file, QVideoDecoder::Prope
     , m_properties(properties)
     , d_ptr(new QVideoDecodeThreadPrivate)
 {
+
     Q_D(QVideoDecodeThread);
     d->file             = file;
 
-    d->inactiveMat      = new QMat;
-    d->activeMat        = new QMat;
-    lv::Shared::ownCpp(d->inactiveMat);
-    lv::Shared::ownCpp(d->activeMat);
+    d->activeMat = nullptr;
 
     d->inactiveMatReady = false;
     d->seekRequest      = -1;
@@ -76,7 +75,10 @@ QVideoDecodeThread::QVideoDecodeThread(const QString &file, QVideoDecoder::Prope
     if ( d->capture->isOpened() )
         initializeMatSize();
 
-    d->timer            = new QTimer;
+    d->inactiveMat = new QMat(d->captureWidth, d->captureHeight, QMat::CV8U, 3);
+    lv::Memory::reserve<QMat, cv::Mat>(d->inactiveMat);
+
+    d->timer = new QTimer;
     connect(d->timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
@@ -109,6 +111,7 @@ bool QVideoDecodeThread::isCaptureOpened(){
 void QVideoDecodeThread::processNextFrame(){
     Q_D(QVideoDecodeThread);
     d->inactiveMatReady = false;
+    d->inactiveMat = new QMat(d->captureWidth, d->captureHeight, QMat::CV8U, 3);
 }
 
 void QVideoDecodeThread::tick(){
@@ -170,7 +173,7 @@ void QVideoDecodeThread::run(){
             d->inactiveMat  = d->activeMat;
             d->activeMat     = tempSwitch;
             ++p->currentFrame;
-            emit inactiveMatChanged();
+            emit matReady();
         } else {
             if ( p->totalFrames != 0 && p->currentFrame != p->totalFrames ){
                 if ( p->loop ){
@@ -252,4 +255,11 @@ const QString& QVideoDecodeThread::file() const{
 QMat *QVideoDecodeThread::output(){
     Q_D(const QVideoDecodeThread);
     return d->activeMat;
+}
+
+QMat *QVideoDecodeThread::takeMat(){
+    Q_D(QVideoDecodeThread);
+    QMat* r = d->activeMat;
+    d->activeMat = nullptr;
+    return r;
 }

@@ -70,7 +70,7 @@ public:
     qreal runningFps() const;
 
 public slots:
-    void switchMat();
+    void __matReady();
     void seekTo(int frame);
     lv::QmlStream* run(const QString& file);
 

@@ -39,7 +39,7 @@ private:
 
 inline ViewContext &ViewContext::instance(){
     if ( m_instance.isNull() )
-        THROW_EXCEPTION(lv::Exception, "View context is not initialize. Initialize from engine first.", 1);
+        THROW_EXCEPTION(lv::Exception, "View context is not initialized. Initialize from engine first.", 1);
     return *m_instance;
 }
 

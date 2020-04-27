@@ -155,6 +155,7 @@ LiveExtension{
                 {
                     palette.editor = editor
                     editor.documentHandler.codeHandler.populateNestedObjectsForFragment(ef)
+                    palette.documentHandler = editor.documentHandler
                     palette.editingFragment = ef
                 }
 
