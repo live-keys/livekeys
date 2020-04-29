@@ -19,7 +19,7 @@ private:
     class CellBase{
     public:
         CellBase() : prev(nullptr), next(nullptr){}
-        virtual ~CellBase();
+        virtual ~CellBase(){};
 
         virtual void removeFromContainer(){}
         virtual bool isEmpty(){ return true; }
@@ -76,7 +76,7 @@ private:
 
     class ContainerBase{
     public:
-        virtual ~ContainerBase();
+        virtual ~ContainerBase(){};
     };
 
     template<typename T, typename TI>
