@@ -64,7 +64,7 @@ public:
     const cv::Mat& internal() const;
     cv::Mat& internal();
 
-    virtual void recycleSize(int size) const;
+    virtual void recycleSize(int size);
     virtual Shared* transfer(){ return clone(); }
 
 public slots:
@@ -77,9 +77,10 @@ public slots:
 
 private:
     static cv::Mat* memoryAlloc(int width, int height, int type, int channels);
-    static size_t memoryIndex(int width, int height, int type, int channels);
-    static size_t memoryIndex(const QMat* m);
-    static void free(cv::Mat* m);
+    static size_t memorySize(int width, int height, int type, int channels);
+    static size_t memorySize(const QMat* m);
+    static bool memoryValidate(cv::Mat* m, int width, int height, int type, int channels);
+    static void memoryFree(cv::Mat* m);
 
     cv::Mat* m_internal;
 
@@ -91,7 +92,11 @@ inline cv::Mat *QMat::cvMat(){
     return m_internal;
 }
 
-inline void QMat::free(cv::Mat *m){
+inline bool QMat::memoryValidate(cv::Mat *, int, int, int, int){
+    return true;
+}
+
+inline void QMat::memoryFree(cv::Mat *m){
     delete m;
 }
 

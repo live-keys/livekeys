@@ -81,6 +81,8 @@ Livekeys::Livekeys(QObject *parent)
     , m_lastLayer(nullptr)
     , m_layerPlaceholder(nullptr)
 {
+    Memory::setSize(5242880);
+
     solveImportPaths();
     m_log = new VisualLogModel(m_viewEngine->engine());
 
@@ -98,6 +100,8 @@ Livekeys::~Livekeys(){
         Layer* l = qobject_cast<Layer*>(m_layers->value("workspace").value<QObject*>());
         delete l->viewRoot();
     }
+
+    Memory::clear();
 
     delete m_layers;
     delete m_settings;

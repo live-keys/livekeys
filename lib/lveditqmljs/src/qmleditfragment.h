@@ -83,6 +83,9 @@ public:
     void addNestedObjectInfo(QVariantMap& info);
     void setObjectInfo(QVariantMap& info);
 
+    int refCount();
+    void incrementRefCount();
+    void decrementRefCount();
 public slots:
     int position();
     int valuePosition() const;

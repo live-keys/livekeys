@@ -30,6 +30,10 @@ public:
 
     void openFile();
 
+    void serialize(QQmlEngine *engine, MLNode &node) const override;
+    void deserialize(Track *track, QQmlEngine *engine, const MLNode &data) override;
+
+    void assignTrack(Track *track) override;
     void cursorEnter(qint64 position) override;
     void cursorExit() override;
     void cursorNext(qint64 position) override;
@@ -43,6 +47,7 @@ signals:
     void fileChanged();
 
 private:
+    Track*        m_track;
     VideoSurface* m_surface;
     QString       m_file;
     cv::VideoCapture* m_capture;

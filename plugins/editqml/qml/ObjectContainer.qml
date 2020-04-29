@@ -82,7 +82,7 @@ Item{
         property var propertiesOpened: []
 
         width: container.width < 260 ? 300 : container.width + 40
-        height: container.height < 10 || compact ? 40 : objectContainerTitleWrap.height + topSpacing + container.height
+        height: container.height < 10 || compact ? 40 : objectContainerTitleWrap.height + topSpacing + /*(paletteGroup ? paletteGroup.height : 0) +*/ container.height
 
         function closeAsPane(){
             objectContainerTitle.parent = objectContainerTitleWrap

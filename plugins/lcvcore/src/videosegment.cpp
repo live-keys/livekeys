@@ -1,4 +1,10 @@
 #include "videosegment.h"
+#include "live/visuallogqt.h"
+#include "live/track.h"
+
+#include <QMetaObject>
+#include <QJSValue>
+#include <QJSValueIterator>
 
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
@@ -7,6 +13,7 @@ namespace lv{
 
 VideoSegment::VideoSegment(QObject *parent)
     : Segment(parent)
+    , m_track(nullptr)
     , m_surface(nullptr)
     , m_capture(new cv::VideoCapture)
 {
@@ -18,6 +25,50 @@ void VideoSegment::openFile(){
 
     setLabel(m_file.mid(m_file.lastIndexOf('/') + 1));
     m_capture->open(m_file.toStdString());
+}
+
+void VideoSegment::serialize(QQmlEngine *engine, MLNode &node) const{
+    Segment::serialize(engine, node);
+
+    node["file"] = m_file.toStdString();
+    node["type"] = "VideoSegment";
+    node["factory"] = "lcvcore/VideoCaptureSegmentFactory.qml";
+    if ( m_surface && m_track ){
+        QJSValue properties = m_track->timelineProperties();
+
+        QJSValueIterator pit(properties);
+        while ( pit.next() ){
+            QJSValue current = pit.value();
+            if ( current.isQObject() ){
+                QObject* obj = current.toQObject();
+                if ( obj == m_surface ){
+                    node["surface"] = pit.name().toStdString();
+                }
+            }
+        }
+    }
+}
+
+void VideoSegment::deserialize(Track *track, QQmlEngine *engine, const MLNode &node){
+    Segment::deserialize(track, engine, node);
+
+    setFile(QString::fromStdString(node["file"].asString()));
+    if ( node.hasKey("surface") ){
+        QJSValue properties = track->timelineProperties();
+        QJSValue surface = properties.property(QString::fromStdString(node["surface"].asString()));
+        if ( surface.isQObject() ){
+            m_surface = qobject_cast<VideoSurface*>(surface.toQObject());
+        }
+    }
+}
+
+void VideoSegment::assignTrack(Track *track){
+    m_track = track;
+    QJSValue val = track->timelineProperties().property("videoCaptureSurface");
+    VideoSurface* surface = qobject_cast<VideoSurface*>(val.toQObject());
+    if ( surface ){
+        setSurface(surface);
+    }
 }
 
 void VideoSegment::cursorEnter(qint64 pos){

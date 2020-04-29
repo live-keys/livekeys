@@ -64,7 +64,7 @@ void QVideoDecoder::setPaused(bool paused){
         if ( paused ){
             m_worker->timer()->stop();
         } else {
-            m_worker->timer()->start(1000 / runningFps());
+            m_worker->timer()->start(static_cast<int>(1000 / runningFps()));
         }
     }
 
@@ -74,7 +74,7 @@ void QVideoDecoder::setPaused(bool paused){
 
 
 void QVideoDecoder::setFps(qreal fps){
-    if ( m_properties->fps == fps )
+    if ( qFuzzyCompare(m_properties->fps, fps ) )
         return;
 
     m_properties->fps = fps;
@@ -83,7 +83,7 @@ void QVideoDecoder::setFps(qreal fps){
         if ( !m_properties->paused && m_worker->isCaptureOpened() ){
             if ( m_worker->timer()->isActive() )
                 m_worker->timer()->stop();
-            m_worker->timer()->start(1000 / runningFps());
+            m_worker->timer()->start(static_cast<int>(1000 / runningFps()));
         }
     }
 
@@ -102,7 +102,7 @@ qreal QVideoDecoder::runningFps() const{
     if ( !m_worker )
         return 0;
 
-    return m_properties->fps == 0 ? m_worker->captureFps() : m_properties->fps;
+    return qFuzzyCompare(m_properties->fps, 0) ? m_worker->captureFps() : m_properties->fps;
 }
 
 void QVideoDecoder::seekTo(int frame){
@@ -132,20 +132,20 @@ lv::QmlStream* QVideoDecoder::run(const QString &file){
 
     m_worker = new QVideoDecodeThread(file, m_properties, this);
     m_stream = new lv::QmlStream(this);
-    connect(m_worker, SIGNAL(inactiveMatChanged()), this, SLOT(switchMat()));
+    connect(m_worker, &QVideoDecodeThread::matReady, this, &QVideoDecoder::__matReady);
 
     if ( m_worker->isCaptureOpened() ){
 
-        float fps = m_properties->fps == 0 ? m_worker->captureFps() : m_properties->fps;
+        double fps = qFuzzyCompare(m_properties->fps, 0) ? m_worker->captureFps() : m_properties->fps;
 
         if ( !m_properties->paused ){
             if ( m_worker->timer()->isActive() ){
-                if ( m_worker->timer()->interval() != (1000 / fps) ){
+                if ( !qFuzzyCompare(m_worker->timer()->interval(), (1000 / fps) ) ){
                     m_worker->timer()->stop();
-                    m_worker->timer()->start(1000 / fps);
+                    m_worker->timer()->start(static_cast<int>(1000 / fps));
                 }
             } else {
-                m_worker->timer()->start(1000 / fps);
+                m_worker->timer()->start(static_cast<int>(1000 / fps));
             }
         }
         emit totalFramesChanged();
@@ -156,9 +156,11 @@ lv::QmlStream* QVideoDecoder::run(const QString &file){
     return m_stream;
 }
 
-void QVideoDecoder::switchMat(){
+void QVideoDecoder::__matReady(){
     if ( m_worker ){
-        m_stream->push(m_worker->output());
+        QMat* m = m_worker->takeMat();
+        lv::Shared::ownJs(m);
+        m_stream->push(m);
         emit currentFrameChanged();
         m_worker->processNextFrame();
     }

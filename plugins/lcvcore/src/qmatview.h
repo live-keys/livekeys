@@ -61,7 +61,13 @@ inline void QMatView::setMat(QMat *arg){
         setImplicitWidth(matData->cols);
         setImplicitHeight(matData->rows);
     }
+
+    if ( m_mat ){
+        lv::Shared::unref(m_mat);
+    }
+
     m_mat = arg;
+    lv::Shared::ref(m_mat);
 
     emit matChanged(arg);
     update();

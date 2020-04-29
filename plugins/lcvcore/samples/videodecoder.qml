@@ -10,7 +10,7 @@ Grid{
         property VideoDecoder decoder : VideoDecoder{}
 
         onComplete: {
-            decoder.run(project.path("../_videos/amherst-11_2754_3754.avi")).forward([decoderView, 'mat'])
+            decoder.run(project.path("../../../samples/_videos/amherst-11_2754_3754.avi")).forward([decoderView, 'mat'])
         }
     }
 

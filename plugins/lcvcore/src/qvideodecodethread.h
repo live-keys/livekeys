@@ -35,6 +35,7 @@ public:
     ~QVideoDecodeThread();
 
     QMat*   output();
+    QMat* takeMat();
     QTimer* timer() const;
     const QString& file() const;
 
@@ -43,11 +44,10 @@ public:
     double  captureFps() const;
 
     bool    isCaptureOpened();
-
     void    processNextFrame();
 
 signals:
-    void inactiveMatChanged();
+    void matReady();
     void isSeekingChanged();
 
 public slots:

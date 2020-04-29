@@ -76,14 +76,13 @@ public:
 
     double snapThreshold() const;
 
-public slots:
     void addSegment(qint64 position, qint64 length);
     void removeItem(qint64 position, qint64 length, qint64 relativeIndex);
-    qint64 availableSpace(qint64 position);
-
     bool addSegment(lv::Segment* segment);
     lv::Segment *takeSegment(lv::Segment* segment);
 
+public slots:
+    qint64 availableSpace(qint64 position);
     void setSnapThreshold(double snapThreshold);
 
 signals:

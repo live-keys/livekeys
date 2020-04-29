@@ -23,6 +23,7 @@
 #include "visuallogtest.h"
 #include "grouptest.h"
 #include "linecapturetest.h"
+#include "memorytest.h"
 
 int main(int argc, char *argv[]){
 
@@ -30,6 +31,6 @@ int main(int argc, char *argv[]){
     app.setAttribute(Qt::AA_Use96Dpi, true);
 
 
-    return lv::TestRunner::runTest(LineCaptureTest::testIndex, argc, argv);
+    return lv::TestRunner::runTest(MemoryTest::testIndex, argc, argv);
     return lv::TestRunner::runTests(argc, argv);
 }

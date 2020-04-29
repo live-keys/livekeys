@@ -159,7 +159,7 @@ Qan.NodeItem{
                                     editingFragment.signalObjectAdded(ef)
 
                             } else if ( addBoxItem.activeIndex === 2 ){
-				// ADDING EVENTS?
+				                // ADDING EVENTS?
                                 if (compact) expand()
                             }
                             addBox.destroy()

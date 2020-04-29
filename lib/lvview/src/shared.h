@@ -82,7 +82,7 @@ public:
     static void ownCpp(Shared* data);
     static void ownJs(Shared* data);
 
-    virtual void recycleSize(int) const{}
+    virtual void recycleSize(int){}
 
     static QJSValue transfer(const QVariant& v, QJSEngine* engine);
     static QVariant transfer(const QJSValue& v, QList<Shared*>& shared);

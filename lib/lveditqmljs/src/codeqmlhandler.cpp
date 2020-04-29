@@ -2111,7 +2111,9 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
 }
 
 void CodeQmlHandler::removeConnection(QmlEditFragment *edit){
-    removeEditingFragment(edit);
+    edit->decrementRefCount();
+    if (edit->refCount() == 0)
+        removeEditingFragment(edit);
 }
 
 void CodeQmlHandler::deleteObject(QmlEditFragment *edit){

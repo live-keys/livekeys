@@ -15,7 +15,7 @@ Memory::Memory(QObject *parent)
 }
 
 Memory::~Memory(){
-    containerActive() = false;
+    totalSpace() = false;
 }
 
 void Memory::gc(){
@@ -29,6 +29,12 @@ void Memory::reloc(){
 
 void Memory::recycleSize(Shared *o, int size) const{
     o->recycleSize(size);
+}
+
+Memory::ContainerBase::~ContainerBase(){
+}
+
+Memory::CellBase::~CellBase(){
 }
 
 }// namespace

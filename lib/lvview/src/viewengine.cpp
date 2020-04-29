@@ -451,7 +451,7 @@ void ViewEngine::createObjectAsync(
         return;
     }
 
-    if ( incubator.isNull() ){
+    if ( incubator.isNull() || !incubator.object() ){
         setIsLoading(false);
         QQmlError errorObject;
         errorObject.setDescription("Component returned null object.");
