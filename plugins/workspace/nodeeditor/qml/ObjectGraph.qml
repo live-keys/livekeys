@@ -155,6 +155,8 @@ Rectangle{
         propertyItem.editingFragment = editingFragment
         propertyItem.documentHandler = root.documentHandler
 
+        editingFragment.incrementRefCount()
+
         propertyItem.editor = root.editor
 
         var conn = resizeConnectionsFactory.createObject()

@@ -129,7 +129,12 @@ Item{
                 id: paletteCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    documentHandler.codeHandler.removeConnection(editingFragment)
+                    propertyItem.propertyToBeDestroyed()
+
+                    editingFragment.decrementRefCount()
+                    if (editingFragment.refCount === 0)
+                        documentHandler.codeHandler.removeConnection(editingFragment)
+                    propertyItem.destroy()
                 }
             }
         }

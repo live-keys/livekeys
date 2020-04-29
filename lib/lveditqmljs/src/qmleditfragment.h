@@ -64,7 +64,6 @@ public:
     void setBindingPalette(CodePalette* palette);
 
     void addChildFragment(QmlEditFragment* edit);
-    void removeChildFragment(QmlEditFragment* edit);
     QmlEditFragment* findChildFragment(QmlEditFragment* edit);
     const QList<QmlEditFragment*> childFragments();
 
@@ -84,9 +83,6 @@ public:
     void addNestedObjectInfo(QVariantMap& info);
     void setObjectInfo(QVariantMap& info);
 
-    int refCount();
-    void incrementRefCount();
-    void decrementRefCount();
 public slots:
     int position();
     int valuePosition() const;
@@ -118,6 +114,15 @@ public slots:
 
     QVariantList nestedObjectsInfo();
     QVariantMap  objectInfo();
+
+    void signalPropertyAdded(lv::QmlEditFragment* ef);
+    void signalObjectAdded(lv::QmlEditFragment* ef);
+    void incrementRefCount();
+    void decrementRefCount();
+    int refCount();
+
+    void removeChildFragment(QmlEditFragment* edit);
+
 signals:
     void visualParentChanged();
     void connectionChanged(int index);

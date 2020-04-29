@@ -123,6 +123,13 @@ Qan.NodeItem{
                         }
                         addBoxItem.accept = function(type, data){
                             if ( addBoxItem.activeIndex === 0 ){
+                                for (var i = 0; i < propertyNames.length; ++i){
+                                    if (propertyNames[i] === data){
+                                        addBox.destroy()
+                                        return
+                                    }
+                                }
+
                                 var ppos = codeHandler.addProperty(
                                     addContainer.propertyModel.addPosition, addContainer.objectType, type, data, true
                                 )
@@ -130,6 +137,10 @@ Qan.NodeItem{
                                 var ef = codeHandler.openNestedConnection(
                                     editingFragment, ppos, project.appRoot()
                                 )
+
+                                if (ef) {
+                                    editingFragment.signalPropertyAdded(ef)
+                                }
 
                                 if (!ef) {
                                     lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
@@ -144,51 +155,11 @@ Qan.NodeItem{
                                     editingFragment, opos, project.appRoot()
                                 )
 
+                                if (ef)
+                                    editingFragment.signalObjectAdded(ef)
+
                             } else if ( addBoxItem.activeIndex === 2 ){
-//                                var ppos = codeHandler.addEvent(
-//                                    addContainer.eventModel.addPosition, addContainer.objectType, type, data
-//                                )
-
-//                                var ef = codeHandler.openNestedConnection(
-//                                    objectContainer.editingFragment, ppos, project.appRoot()
-//                                )
-//                                if ( ef ){
-//                                    var propertyContainer = propertyContainerFactory.createObject(container)
-//                                    container.sortChildren()
-
-//                                    propertyContainer.title = data
-//                                    propertyContainer.documentHandler = objectContainer.editor.documentHandler
-//                                    propertyContainer.propertyContainerFactory = propertyContainerFactory
-
-//                                    propertyContainer.editor = objectContainer.editor
-//                                    propertyContainer.editingFragment = ef
-
-
-//                                    if ( codeHandler.isForAnObject(ef) ){
-
-//                                        var childObjectContainer = objectContainerFactory.createObject(container)
-
-//                                        childObjectContainer.editor = objectContainer.editor
-//                                        childObjectContainer.editingFragment = ef
-//                                        childObjectContainer.title = type
-
-//                                        var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
-//                                        paletteBoxGroup.editingFragment = ef
-//                                        paletteBoxGroup.codeHandler = codeHandler
-//                                        ef.visualParent = paletteBoxGroup
-
-//                                        childObjectContainer.paletteGroup = paletteBoxGroup
-//                                        paletteBoxGroup.x = 5
-
-//                                        propertyContainer.valueContainer = childObjectContainer
-//                                        propertyContainer.paletteAddButtonVisible = false
-
-//                                    } else {
-//                                        propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
-//                                        propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
-//                                        propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
-//                                    }
-//                                }
+				// ADDING EVENTS?
                                 if (compact) expand()
                             }
                             addBox.destroy()
@@ -307,7 +278,7 @@ Qan.NodeItem{
                 removeNode(nodeParent)
         }
         onObjectAdded: {
-            if (!addSubobject) returns
+            if (!addSubobject) return
             var object = obj.objectInfo()
             addSubobject(nodeParent, object.name + (object.id ? ("#" + object.id) : ""), 0, object.connection)
         }

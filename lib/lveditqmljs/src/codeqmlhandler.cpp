@@ -1706,6 +1706,11 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
     if ( !m_document )
         return nullptr;
 
+    Q_D(CodeQmlHandler);
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+
     QTextCursor cursor(m_target);
     cursor.setPosition(position);
 
@@ -1767,7 +1772,6 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
     auto test = findFragmentByPosition(declaration->position());
     if (test && test->declaration()->position() == declaration->position()) // it was already opened
     {
-        test->incrementRefCount();
         return test;
     }
 
@@ -1825,6 +1829,10 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     //TODO: Fix this with relative binding paths
     if ( !m_document || !editParent )
         return nullptr;
+    Q_D(CodeQmlHandler);
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
 
     QTextCursor cursor(m_target);
     cursor.setPosition(position);
@@ -1838,7 +1846,6 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     auto test = findFragmentByPosition(declaration->position());
     if (test && test->declaration()->position() == declaration->position()) // it was already opened
     {
-        test->incrementRefCount();
         return test;
     }
 
@@ -1997,7 +2004,7 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
             auto test = findFragmentByPosition(rp->begin);
             if (test && test->isForProperty() && test->declaration()->position() == rp->begin) // it was already opened
             {
-                test->incrementRefCount();
+                fragments.push_back(test);
                 continue;
             }
 
@@ -2104,9 +2111,7 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
 }
 
 void CodeQmlHandler::removeConnection(QmlEditFragment *edit){
-    edit->decrementRefCount();
-    if (edit->refCount() == 0)
-        removeEditingFragment(edit);
+    removeEditingFragment(edit);
 }
 
 void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
@@ -2912,6 +2917,11 @@ int CodeQmlHandler::addProperty(
         const QString &name,
         bool assignDefault)
 {
+    Q_D(CodeQmlHandler);
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+
     DocumentQmlValueScanner qvs(m_document, position, 1);
     int blockStart = qvs.getBlockStart(position) + 1;
     int blockEnd = qvs.getBlockEnd(position);
@@ -3743,6 +3753,8 @@ void CodeQmlHandler::populateObjectInfoForFragment(QmlEditFragment *edit)
             continue;
         }
 
+        openNestedConnection(edit, property->begin);
+
         QTextCursor cursor(m_document->textDocument());
         cursor.setPosition(property->end);
         QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
@@ -3786,7 +3798,7 @@ void CodeQmlHandler::populateObjectInfoForFragment(QmlEditFragment *edit)
         soMap.insert("name", name);
 
 
-        auto conn = findObjectFragmentByPosition(subobject->begin);
+        auto conn = openNestedConnection(edit, subobject->begin);
         auto cast = qobject_cast<QObject*>(conn);
         soMap.insert("connection", QVariant::fromValue(cast));
 

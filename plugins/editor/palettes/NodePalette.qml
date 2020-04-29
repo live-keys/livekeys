@@ -44,11 +44,12 @@ CodePalette{
                    objects[object.id] = n
                 }
 
-                if (object.connection)
+                if (object.connection){
                     n.item.editingFragment = object.connection
+                    object.connection.incrementRefCount()
+                }
 
-                for (var j = 0; j < object.properties.length; ++j)
-                {
+                for (var j = 0; j < object.properties.length; ++j){
                     var property = object.properties[j]
                     var p = objectGraph.addObjectNodeProperty(n, property.name, property.isWritable ? objectGraph.inOutPort : objectGraph.outPort, property.connection)
                     n.item.propertyNames.push(property.name)
@@ -70,8 +71,7 @@ CodePalette{
 
             }
 
-            for (var k = 0; k < props.length; ++k)
-            {
+            for (var k = 0; k < props.length; ++k){
                 var id = props[k].value[0]
                 var node = objects[id]
                 if (node)
@@ -113,8 +113,10 @@ CodePalette{
             if (object.id)
                 objects[object.id] = n
 
-            if (object.connection)
+            if (object.connection){
                 n.item.editingFragment = object.connection
+                object.connection.incrementRefCount()
+            }
         }
         ignoreUnknownSignals: true
     }
