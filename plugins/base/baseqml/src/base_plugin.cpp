@@ -22,6 +22,8 @@
 #include "qmlscript.h"
 #include "qmlindexselector.h"
 #include "environment.h"
+#include "qmlexec.h"
+#include "qmlstreamlog.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -48,6 +50,8 @@ void BasePlugin::registerTypes(const char *uri){
     qmlRegisterUncreatableType<lv::Environment>(
         uri, 1, 0, "Environment", "Use 'base.Script.environment' to access the environment property.");
     qmlRegisterType<lv::QmlIndexSelector>(uri, 1, 0, "IndexSelector");
+    qmlRegisterType<lv::QmlExec>(uri,          1, 0, "Exec");
+    qmlRegisterType<lv::QmlStreamLog>(uri,     1, 0, "StreamLog");
 }
 
 void BasePlugin::initializeEngine(QQmlEngine *engine, const char *){

@@ -6,7 +6,7 @@
 
 namespace lv{
 
-class QmlWritableStream : public QObject{
+class LV_VIEW_EXPORT QmlWritableStream : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(lv::QmlStream* stream READ stream CONSTANT)

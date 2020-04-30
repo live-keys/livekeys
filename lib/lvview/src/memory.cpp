@@ -31,4 +31,10 @@ void Memory::recycleSize(Shared *o, int size) const{
     o->recycleSize(size);
 }
 
+Memory::ContainerBase::~ContainerBase(){
+}
+
+Memory::CellBase::~CellBase(){
+}
+
 }// namespace

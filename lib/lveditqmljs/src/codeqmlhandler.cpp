@@ -2173,8 +2173,6 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, boo
     QTextCursor cursor(m_target);
     cursor.setPosition(position);
 
-    vlog() << "INCLUDE EXPANDABLES: " << includeExpandables;
-
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
     bool inImports = isInImports(position);
     if ( properties.isEmpty() && !inImports )

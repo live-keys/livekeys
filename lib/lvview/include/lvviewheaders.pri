@@ -6,6 +6,7 @@ HEADERS += \
     $$PWD/live/metainfo.h \
     $$PWD/live/qmlact.h \
     $$PWD/live/qmlstreamfilter.h \
+    $$PWD/live/qmlwritablestream.h \
     $$PWD/live/settings.h \
     $$PWD/live/visuallogbasemodel.h \
     $$PWD/live/visuallogfilter.h \

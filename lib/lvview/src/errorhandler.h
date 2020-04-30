@@ -32,7 +32,7 @@ class LV_VIEW_EXPORT ErrorHandler : public QObject, public QQmlParserStatus{
     Q_PROPERTY(QObject* target READ target WRITE setTarget NOTIFY targetChanged)
 
 public:
-    explicit ErrorHandler(QObject *parent = 0);
+    explicit ErrorHandler(QObject *parent = nullptr);
     ~ErrorHandler();
 
     void componentComplete();

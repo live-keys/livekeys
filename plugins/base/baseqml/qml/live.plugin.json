@@ -1,5 +1,8 @@
 {
     "name": "base",
     "package" : ".",
-    "libraryModules" : ["lvbase"]
+    "libraryModules" : ["lvbase"],
+    "palettes" : {
+        "palettes/ExecPalette.qml" : "qml/base#Exec"
+    }
 }

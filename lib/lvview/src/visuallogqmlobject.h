@@ -28,7 +28,7 @@ class LV_VIEW_EXPORT VisualLogQmlObject : public QObject{
     Q_OBJECT
 
 public:
-    VisualLogQmlObject(QObject* parent = 0);
+    VisualLogQmlObject(QObject* parent = nullptr);
     ~VisualLogQmlObject();
 
 public slots:
