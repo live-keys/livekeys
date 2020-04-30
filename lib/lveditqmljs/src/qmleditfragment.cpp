@@ -49,7 +49,7 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *paren
     , m_bindingSpan(new QmlBindingSpan(this))
     , m_visualParent(nullptr)
     , m_bindingSpanModel(nullptr)
-    , m_refCount(1)
+    , m_refCount(0)
 {
 }
 
@@ -198,13 +198,6 @@ void QmlEditFragment::setBindingPalette(CodePalette *palette){
 
 void QmlEditFragment::addChildFragment(QmlEditFragment *edit){
     m_childFragments.append(edit);
-
-    if (edit->isForObject()){
-        emit objectAdded(edit);
-    }
-    else if (edit->isForProperty()){
-        emit propertyAdded(edit);
-    }
 
 }
 
@@ -391,5 +384,16 @@ QVariantMap QmlEditFragment::objectInfo()
 {
     return m_objectInfo;
 }
+
+void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef)
+{
+    emit propertyAdded(ef);
+}
+
+void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef)
+{
+    emit objectAdded(ef);
+}
+
 
 }// namespace

@@ -1706,6 +1706,11 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
     if ( !m_document )
         return nullptr;
 
+    Q_D(CodeQmlHandler);
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+
     QTextCursor cursor(m_target);
     cursor.setPosition(position);
 
@@ -1767,7 +1772,6 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
     auto test = findFragmentByPosition(declaration->position());
     if (test && test->declaration()->position() == declaration->position()) // it was already opened
     {
-        test->incrementRefCount();
         return test;
     }
 
@@ -1825,6 +1829,10 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     //TODO: Fix this with relative binding paths
     if ( !m_document || !editParent )
         return nullptr;
+    Q_D(CodeQmlHandler);
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
 
     QTextCursor cursor(m_target);
     cursor.setPosition(position);
@@ -1838,7 +1846,6 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     auto test = findFragmentByPosition(declaration->position());
     if (test && test->declaration()->position() == declaration->position()) // it was already opened
     {
-        test->incrementRefCount();
         return test;
     }
 
@@ -1991,17 +1998,25 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
     DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(edit->position());
 
     if ( currentOb ){
-        for ( int i = 0; i < currentOb->properties.size(); ++i ){
-
-            QmlDeclaration::Ptr property = nullptr;
+        for ( int i = 0; i < currentOb->properties.size(); ++i ){            
             DocumentQmlValueObjects::RangeProperty* rp = currentOb->properties[i];
 
             auto test = findFragmentByPosition(rp->begin);
             if (test && test->isForProperty() && test->declaration()->position() == rp->begin) // it was already opened
             {
-                test->incrementRefCount();
+                fragments.push_back(test);
                 continue;
             }
+
+            QTextCursor cursor(m_target);
+            cursor.setPosition(rp->begin);
+
+            QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
+            if ( properties.isEmpty() )
+                continue;
+
+            QmlDeclaration::Ptr property = properties.first();
+
             QString propertyType = rp->type();
 
             if (rp->name().size() == 1 && rp->name()[0] == "id") continue;
@@ -2177,7 +2192,7 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, boo
 
     if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml)
     {
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", lpl);
+        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", includeExpandables, lpl);
     }
     if ( declaration->isListDeclaration() ){
         lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", includeExpandables, lpl);
@@ -2904,6 +2919,11 @@ int CodeQmlHandler::addProperty(
         const QString &name,
         bool assignDefault)
 {
+    Q_D(CodeQmlHandler);
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+
     DocumentQmlValueScanner qvs(m_document, position, 1);
     int blockStart = qvs.getBlockStart(position) + 1;
     int blockEnd = qvs.getBlockEnd(position);
@@ -3735,6 +3755,8 @@ void CodeQmlHandler::populateObjectInfoForFragment(QmlEditFragment *edit)
             continue;
         }
 
+        openNestedConnection(edit, property->begin);
+
         QTextCursor cursor(m_document->textDocument());
         cursor.setPosition(property->end);
         QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
@@ -3778,7 +3800,7 @@ void CodeQmlHandler::populateObjectInfoForFragment(QmlEditFragment *edit)
         soMap.insert("name", name);
 
 
-        auto conn = findObjectFragmentByPosition(subobject->begin);
+        auto conn = openNestedConnection(edit, subobject->begin);
         auto cast = qobject_cast<QObject*>(conn);
         soMap.insert("connection", QVariant::fromValue(cast));
 

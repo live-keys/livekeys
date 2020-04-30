@@ -101,7 +101,20 @@ Item{
             id: propertyCloseArea
             anchors.fill: parent
             onClicked: {
-                propertyContainer.documentHandler.codeHandler.removeConnection(propertyContainer.editingFragment)
+                var objectContainer = propertyContainer.parent.parent
+
+                propertyContainer.editingFragment.decrementRefCount()
+                if (propertyContainer.editingFragment.refCount === 0)
+                    objectContainer.editingFragment.removeChildFragment(propertyContainer.editingFragment)
+
+                // remove name from objectContainer
+                objectContainer.propertiesOpened =
+                        objectContainer.propertiesOpened.filter(
+                            function(value, index, arr){
+                                return value !== propertyContainer.editingFragment.identifier()
+                            }
+                        )
+                propertyContainer.destroy()
             }
         }
     }

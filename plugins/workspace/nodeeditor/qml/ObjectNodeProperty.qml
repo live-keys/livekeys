@@ -18,6 +18,7 @@ Item{
     property var isForObject: editingFragment && editingFragment.isForObject()
     property var editor: null
 
+    signal propertyToBeDestroyed()
 
     anchors.left: parent.left
     anchors.leftMargin: isForObject ? 30 : 0
@@ -128,7 +129,12 @@ Item{
                 id: paletteCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    documentHandler.codeHandler.removeConnection(editingFragment)
+                    propertyItem.propertyToBeDestroyed()
+
+                    editingFragment.decrementRefCount()
+                    if (editingFragment.refCount === 0)
+                        documentHandler.codeHandler.removeConnection(editingFragment)
+                    propertyItem.destroy()
                 }
             }
         }
@@ -162,6 +168,7 @@ Item{
     Connections {
         target: editingFragment
         onAboutToBeRemoved: {
+            propertyItem.propertyToBeDestroyed()
             propertyItem.destroy()
         }
         ignoreUnknownSignals: true
