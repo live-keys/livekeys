@@ -129,12 +129,25 @@ Pane{
     }
 
     Rectangle{
+        visible: loadingAnimation.visible
         anchors.fill: parent
         anchors.topMargin: 30
         color: "#030609"
         opacity: loadingAnimation.visible ? 0.95 : 0
         Behavior on opacity{ NumberAnimation{ duration: 250} }
         z: 900
+
+        MouseArea{
+            anchors.fill: parent
+            onClicked: mouse.accepted = true;
+            onPressed: mouse.accepted = true;
+            onReleased: mouse.accepted = true;
+            onDoubleClicked: mouse.accepted = true;
+            onPositionChanged: mouse.accepted = true;
+            onPressAndHold: mouse.accepted = true;
+            onWheel: wheel.accepted = true;
+        }
+
     }
 
     function startLoadingMode(){

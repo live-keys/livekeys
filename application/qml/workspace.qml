@@ -271,6 +271,7 @@ Item{
 
         property var removeStartupBox : function(){
             if ( root.startupBox ){
+                root.startupBox.box.destroy()
                 root.startupBox.destroy()
                 root.startupBox = null
             }
