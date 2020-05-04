@@ -49,6 +49,7 @@ public slots:
     void scanDocument(const QString& path, const QString& content, CodeQmlHandler* handler);
 
 signals:
+    void isProcessingChanged(bool isProcessing);
     void documentScanReady(DocumentTransport* transport);
 
 private:

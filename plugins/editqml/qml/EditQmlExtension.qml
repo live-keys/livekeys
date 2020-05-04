@@ -25,6 +25,8 @@ LiveExtension{
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
     property Component paletteListFactory : Component{ PaletteListView{} }
 
+    property int rootPosition: -1
+
     function canBeQml(document){
         if ( endsWith(document.file.path, '.qml') ||
             (document.file.name.length > 2 && document.file.name.substring(0, 2) === "T:" ))
@@ -322,17 +324,40 @@ LiveExtension{
         var codeHandler = editor.documentHandler.codeHandler
 
         var imports = codeHandler.importsModel()
-
         var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
-        var rootPosition = codeHandler.findRootPosition(imports.lastBlock())
-
         var paletteImports = codeHandler.findPalettes(importsPosition, true)
         if (paletteImports) root.shapePalette(editor, paletteImports, 0)
+
+        rootPosition = codeHandler.findRootPosition(imports.lastBlock())
 
         if ( rootPosition >= 0){
             var paletteRoot = codeHandler.findPalettes(rootPosition, true)
             if (paletteRoot)
                 root.shapePalette(editor, paletteRoot, 0)
+            else {
+                editor.startLoadingMode()
+                var shapeTrigger = shapeAllTrigger.createObject()
+                shapeTrigger.target = codeHandler
+                shapeTrigger.editor = editor
+            }
+        }
+    }
+
+    property Component shapeAllTrigger: Component {
+        Connections {
+            target: null
+            property var editor: null
+            ignoreUnknownSignals: true
+            onStoppedProcessing: {
+                if (rootPosition === -1) return
+                var codeHandler = editor.documentHandler.codeHandler
+                var paletteRoot = codeHandler.findPalettes(rootPosition, true)
+                if (paletteRoot){
+                    root.shapePalette(editor, paletteRoot, 0)
+                    editor.stopLoadingMode()
+                    rootPosition = -1
+                }
+            }
         }
     }
 

@@ -107,6 +107,8 @@ public:
     void newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo);
 
 public slots:
+    void processingChanged(bool value);
+
     QList<int> languageFeatures() const;
     void populateNestedObjectsForFragment(lv::QmlEditFragment* ef);
     void populateObjectInfoForFragment(lv::QmlEditFragment* ef);
@@ -192,7 +194,7 @@ public slots:
     QVariantList nestedObjectsInfo(lv::QmlEditFragment* ef);
 signals:
     void numberOfConnectionsChanged();
-
+    void stoppedProcessing();
 private:
     QJSValue createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports = false);
 
