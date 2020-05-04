@@ -120,6 +120,31 @@ Pane{
         return editor.cursorWindowCoords(root)
     }
 
+    LoadingAnimation{
+        id: loadingAnimation
+        visible: false
+        x: parent.width/2 - width/2
+        y: parent.height/2 - height/2
+        z: 1000
+    }
+
+    Rectangle{
+        anchors.fill: parent
+        anchors.topMargin: 30
+        color: "#030609"
+        opacity: loadingAnimation.visible ? 0.95 : 0
+        Behavior on opacity{ NumberAnimation{ duration: 250} }
+        z: 900
+    }
+
+    function startLoadingMode(){
+        loadingAnimation.visible = true
+    }
+
+    function stopLoadingMode(){
+        loadingAnimation.visible = false
+    }
+
     function hasActiveEditor(){
         return root.panes.activePane.objectName === 'editor'
     }

@@ -92,6 +92,10 @@ void QmlProjectMonitor::newProject(const QString &){
     connect(
         m_projectScope->languageScanner(), &QmlLanguageScanner::documentScanReady,
         this, &QmlProjectMonitor::newDocumentScan);
+    connect(
+        m_projectScope->languageScanner(), &QmlLanguageScanner::isProcessingChanged,
+        this, &QmlProjectMonitor::scannerProcessingChanged);
+
 }
 
 void QmlProjectMonitor::directoryChanged(const QString &path){

@@ -53,6 +53,7 @@ QmlLanguageScanner::~QmlLanguageScanner(){
   */
 void QmlLanguageScanner::processQueue(){
     m_isProcessing = true;
+    emit isProcessingChanged(true);
 
     QLinkedList<QmlLibraryInfo::Ptr> queue;
 
@@ -140,6 +141,7 @@ void QmlLanguageScanner::processQueue(){
         m_queueFinished();
 
     m_isProcessing = false;
+    emit isProcessingChanged(false);
 }
 
 void QmlLanguageScanner::scanDocument(const QString &path, const QString &content, CodeQmlHandler *handler){

@@ -307,6 +307,9 @@ CodeQmlHandler::CodeQmlHandler(
     d->projectHandler->addCodeQmlHandler(this);
     d->projectHandler->scanMonitor()->addScopeListener(this);
 
+    connect(d->projectHandler->scanMonitor(), &QmlProjectMonitor::scannerProcessingChanged,
+            this, &CodeQmlHandler::processingChanged);
+
     setDocument(document);
 }
 
@@ -3279,6 +3282,12 @@ void CodeQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
 
     d->assignDocumentFromBackgroundSync(documentInfo);
     m_newScope = true;
+}
+
+void CodeQmlHandler::processingChanged(bool value)
+{
+    if (!value)
+        emit stoppedProcessing();
 }
 
 /**

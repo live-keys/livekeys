@@ -293,6 +293,14 @@ Item{
                 container.sortChildren()
             }
             onPropertyAdded: {
+                for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
+                    if (objectContainer.propertiesOpened[i] === ef.identifier()){
+                        if (compact) expand()
+                        addBox.destroy()
+                        return
+                    }
+                }
+
                 if (compact) expand()
                 else objectContainer.addPropertyFragmentToContainer(ef)
                 container.sortChildren()

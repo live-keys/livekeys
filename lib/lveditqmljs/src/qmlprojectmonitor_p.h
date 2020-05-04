@@ -61,6 +61,7 @@ public:
 
 signals:
     void requestDocumentScan(const QString& path, const QString& content, CodeQmlHandler* handler);
+    void scannerProcessingChanged(bool isProcessing);
 
 public slots:
     void newDocumentScan(QmlLanguageScanner::DocumentTransport* dstransport);
