@@ -8,6 +8,28 @@ import QtQuick.tooling 1.2
 
 Module {
     dependencies: []
+    Component { name: "QAbstractListModel"; prototype: "QAbstractItemModel" }
+    Component {
+        name: "QObject"
+        exports: [
+            "QtQml/QtObject 2.0",
+            "QtQuick/QtObject 2.0",
+            "base/Shared 1.0"
+        ]
+        isCreatable: false
+        exportMetaObjectRevisions: [0, 0, 0]
+        Property { name: "objectName"; type: "QString" }
+        Signal {
+            name: "objectNameChanged"
+            Parameter { name: "objectName"; type: "QString" }
+        }
+        Method { name: "toString" }
+        Method { name: "destroy" }
+        Method {
+            name: "destroy"
+            Parameter { name: "delay"; type: "int" }
+        }
+    }
     Component {
         name: "lv::Environment"
         prototype: "QObject"
@@ -145,12 +167,55 @@ Module {
         }
     }
     Component {
+        name: "lv::QmlExec"
+        prototype: "QObject"
+        exports: ["base/Exec 1.0"]
+        exportMetaObjectRevisions: [0]
+        Enum {
+            name: "ChannelMode"
+            values: {
+                "Silent": 0,
+                "Read": 1,
+                "Write": 2,
+                "ReadWrite": 3
+            }
+        }
+        Property { name: "path"; type: "QString" }
+        Property { name: "args"; type: "QStringList" }
+        Property { name: "mode"; type: "ChannelMode" }
+        Property { name: "input"; type: "lv::QmlStream"; isPointer: true }
+        Property { name: "out"; type: "lv::QmlStream"; isReadonly: true; isPointer: true }
+        Signal { name: "ready" }
+        Signal {
+            name: "finished"
+            Parameter { name: "code"; type: "int" }
+        }
+        Signal { name: "inChanged" }
+        Method { name: "__processRead" }
+        Method {
+            name: "__processFinished"
+            Parameter { name: "exitCode"; type: "int" }
+            Parameter { name: "exitStatus"; type: "QProcess::ExitStatus" }
+        }
+        Method { name: "run" }
+        Method { name: "closeInput" }
+    }
+    Component {
         name: "lv::QmlFollowUp"
         prototype: "lv::QmlAct"
         exports: ["base/FollowUp 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "prev"; type: "QJSValue"; isReadonly: true }
         Method { name: "_whenPrevChanged" }
+    }
+    Component {
+        name: "lv::QmlIndexSelector"
+        prototype: "QObject"
+        exports: ["base/IndexSelector 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "list"; type: "QJSValue" }
+        Property { name: "index"; type: "int" }
+        Property { name: "current"; type: "QJSValue"; isReadonly: true }
     }
     Component {
         name: "lv::QmlObjectList"
@@ -245,6 +310,22 @@ Module {
         Property { name: "result"; type: "lv::QmlStream"; isReadonly: true; isPointer: true }
     }
     Component {
+        name: "lv::QmlStreamIterator"
+        prototype: "QObject"
+        exports: ["base/StreamIterator 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "stream"; type: "lv::QmlStream"; isPointer: true }
+        Property { name: "current"; type: "QJSValue"; isReadonly: true }
+    }
+    Component {
+        name: "lv::QmlStreamLog"
+        prototype: "QObject"
+        exports: ["base/StreamLog 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "prefix"; type: "QString" }
+        Property { name: "stream"; type: "lv::QmlStream"; isPointer: true }
+    }
+    Component {
         name: "lv::QmlVariantList"
         prototype: "QObject"
         exports: ["base/VariantList 1.0"]
@@ -292,6 +373,17 @@ Module {
         Method { name: "size"; type: "int" }
     }
     Component {
+        name: "lv::QmlWritableStream"
+        prototype: "QObject"
+        exports: ["base/WritableStream 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "stream"; type: "lv::QmlStream"; isReadonly: true; isPointer: true }
+        Method {
+            name: "push"
+            Parameter { name: "val"; type: "QJSValue" }
+        }
+    }
+    Component {
         name: "lv::Settings"
         prototype: "QObject"
         exports: ["base/LiveSettings 1.0"]
@@ -334,12 +426,14 @@ Module {
             Parameter { name: "object"; type: "QObject"; isPointer: true }
             Parameter { name: "file"; type: "QUrl" }
             Parameter { name: "reference"; type: "QObject"; isPointer: true }
+            Parameter { name: "context"; type: "QQmlContext"; isPointer: true }
         }
         Signal {
             name: "objectCreationError"
             Parameter { name: "errors"; type: "QJSValue" }
             Parameter { name: "file"; type: "QUrl" }
             Parameter { name: "reference"; type: "QObject"; isPointer: true }
+            Parameter { name: "context"; type: "QQmlContext"; isPointer: true }
         }
         Signal {
             name: "applicationError"
@@ -355,7 +449,16 @@ Module {
             Parameter { name: "parent"; type: "QObject"; isPointer: true }
             Parameter { name: "file"; type: "QUrl" }
             Parameter { name: "reference"; type: "QObject"; isPointer: true }
+            Parameter { name: "context"; type: "QQmlContext"; isPointer: true }
             Parameter { name: "clearCache"; type: "bool" }
+        }
+        Method {
+            name: "createObjectAsync"
+            Parameter { name: "qmlCode"; type: "QString" }
+            Parameter { name: "parent"; type: "QObject"; isPointer: true }
+            Parameter { name: "file"; type: "QUrl" }
+            Parameter { name: "reference"; type: "QObject"; isPointer: true }
+            Parameter { name: "context"; type: "QQmlContext"; isPointer: true }
         }
         Method {
             name: "createObjectAsync"

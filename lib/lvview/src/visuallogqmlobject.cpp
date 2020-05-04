@@ -55,20 +55,24 @@ void logValue(VisualLog& vl, const QJSValue& message){
         }
         vl << "]";
     } else if ( message.isObject() ){
-        vl << "{";
-        bool first = true;
-        QJSValueIterator vi(message);
-        while ( vi.next() ){
-            if ( message.hasOwnProperty(vi.name()) ){
-                if (first)
-                    first = false;
-                else
-                    vl << ",";
-                vl << vi.name() << ":";
-                logValue(vl, vi.value());
+        if ( message.hasProperty("byteLength") ){ // ArrayBuffer
+            vl << message.toString();
+        } else {
+            vl << "{";
+            bool first = true;
+            QJSValueIterator vi(message);
+            while ( vi.next() ){
+                if ( message.hasOwnProperty(vi.name()) ){
+                    if (first)
+                        first = false;
+                    else
+                        vl << ",";
+                    vl << vi.name() << ":";
+                    logValue(vl, vi.value());
+                }
             }
+            vl << "}";
         }
-        vl << "}";
     } else {
         vl << message.toString();
     }

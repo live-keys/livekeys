@@ -16,7 +16,7 @@ class LV_VIEW_EXPORT Memory : public QObject{
     Q_OBJECT
 
 private:
-    class CellBase{
+    class LV_VIEW_EXPORT CellBase{
     public:
         CellBase() : prev(nullptr), next(nullptr){}
         virtual ~CellBase(){};
@@ -74,7 +74,7 @@ private:
         size_t         allocationSize;
     };
 
-    class ContainerBase{
+    class LV_VIEW_EXPORT ContainerBase{
     public:
         virtual ~ContainerBase(){};
     };
