@@ -12,7 +12,7 @@ Row{
     // The generated feature list can then be used to view descriptors
     // in the generated histogram
     
-    property string imagePath : project.dir() + '/../_images/clock-train-small.jpg'
+    property string imagePath : project.dir() + '/../../../samples/_images/clock-train-small.jpg'
      
     Column{
 

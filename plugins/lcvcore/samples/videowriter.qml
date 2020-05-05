@@ -8,8 +8,8 @@ Column{
     // Press the record button to start recording, then press pause and 
     // save to write the video to disk.
     
-    property string videoPath : project.dir() + '/../_videos/amherst-11_2754_3754.avi'
-    property string recordPath : project.dir() + '/../_videos/amherst-11_2754_3754_record.avi'
+    property string videoPath : project.dir() + '/../../../samples/_videos/amherst-11_2754_3754.avi'
+    property string recordPath : project.dir() + '/../../../samples/_videos/amherst-11_2754_3754_record.avi'
     
     VideoCapture{
         id : videoArea

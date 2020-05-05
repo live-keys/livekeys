@@ -16,7 +16,7 @@ Item{
         Repeater{
             id: repeater
             model: ['coast_1.6.jpg', 'coast_6.jpg', 'coast_30.jpg'].map(
-                function(e){ return project.path('../_images/' + e);}).map(
+                function(e){ return project.path('../../../samples/_images/' + e);}).map(
                 function(e){ return Cv.MatIO.read(e); }
             )
             property var times:  [1.6, 6, 30]

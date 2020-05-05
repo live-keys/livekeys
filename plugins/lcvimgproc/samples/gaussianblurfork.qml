@@ -8,7 +8,7 @@ Column{
     
     Cv.ImRead{ 
         id: src
-        file: project.path('../_images/buildings_0246.jpg')
+        file: project.path('../../../samples/_images/buildings_0246.jpg')
     }
     
     RemoteLine{

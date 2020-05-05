@@ -7,7 +7,7 @@ Item{
     
     StaticFileReader{
         id: fileReader
-        onInit: staticLoad(project.path('../_images/clock-data.json'))
+        onInit: staticLoad(project.path('../../../samples/_images/clock-data.json'))
     }
     
     Text{

@@ -7,7 +7,7 @@ Item{
     
     FileReader{
         id: fileReader
-        source: project.path('../_images/clock-data.json')
+        source: project.path('../../../samples/_images/clock-data.json')
     }    
     
     Text{

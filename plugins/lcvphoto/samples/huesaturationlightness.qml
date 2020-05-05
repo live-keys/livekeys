@@ -10,7 +10,7 @@ Grid{
     
     ImRead{
        id : src
-       file : project.dir() + '/../_images/object_101_piano_query.jpg'
+       file : project.dir() + '/../../../samples/_images/object_101_piano_query.jpg'
     }
     
     HueSaturationLightness{

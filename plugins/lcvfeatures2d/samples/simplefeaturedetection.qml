@@ -10,7 +10,7 @@ Row{
     // Check the documentation for the parameters data for each detector
 
     property string imagePath :
-        project.dir() + '/../_images/object_101_piano_train1.jpg'
+        project.dir() + '/../../../samples/_images/object_101_piano_train1.jpg'
 
     ImRead{
         id : inputImage

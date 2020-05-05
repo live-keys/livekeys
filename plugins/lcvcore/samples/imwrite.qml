@@ -10,7 +10,7 @@ Column{
     
     ImRead{
        id : src
-       file : project.dir() + '/../_images/buildings_0246.jpg'
+       file : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
     }
 
     MatRoi{
@@ -30,7 +30,7 @@ Column{
         InputBox{
             id: pathInput
             clip: true
-            text: project.dir() + '/../_images/buildings_0246_roi.jpg'
+            text: project.dir() + '/../../../samples/_images/buildings_0246_roi.jpg'
             anchors.rightMargin: 50
             border.width: 1
             border.color: "#061a29"
