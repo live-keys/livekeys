@@ -1317,6 +1317,46 @@ lv::QmlEditFragment *CodeQmlHandler::findFragmentByPosition(int position)
     return result;
 }
 
+void CodeQmlHandler::toggleComment(int position, int length)
+{
+    if ( !m_document ) return;
+
+    Q_D(CodeQmlHandler);
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+
+    auto td = m_document->textDocument();
+    auto firstBlock = td->findBlock(position);
+    auto lastBlock = td->findBlock(position + length);
+
+    bool found = false;
+    for (auto it = firstBlock; it.isValid() && it != lastBlock.next(); it = it.next()){
+        auto txt = it.text();
+        if (txt.length() > 2 && txt.left(2) != "//")
+        {
+            found = true;
+            break;
+        }
+    }
+
+    for (auto it = firstBlock; it.isValid() && it != lastBlock.next(); it = it.next())
+    {
+        QTextCursor cursor(td);
+        cursor.setPosition(it.position());
+        if (found){
+            cursor.beginEditBlock();
+            cursor.insertText("//");
+            cursor.endEditBlock();
+        } else {
+            cursor.beginEditBlock();
+            cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 2);
+            cursor.removeSelectedText();
+            cursor.endEditBlock();
+        }
+    }
+}
+
 void CodeQmlHandler::suggestionsForProposedExpression(
         QmlDeclaration::Ptr declaration,
         const QString &expression,
