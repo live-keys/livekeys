@@ -26,7 +26,7 @@ Rectangle{
 
     property string fontFamily : "Ubuntu Mono, Courier New, Courier"
     property int fontPixelSize : 14
-
+    property var fontWeight: Font.Normal
     property color textColor : "#fff"
     property color backgroundHoverColor : "#213355"
     property color backgroundColor : "#212a4b"
@@ -41,6 +41,7 @@ Rectangle{
         text : root.text
         font.family: root.fontFamily
         font.pixelSize: root.fontPixelSize
+        font.weight: fontWeight
         anchors.centerIn: parent
     }
 
