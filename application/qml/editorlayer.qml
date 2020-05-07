@@ -18,7 +18,7 @@ EditorLayer{
             'closeFile' : [function(){ if ( hasActiveEditor() ) lk.layers.workspace.panes.activePane.closeDocument() }, "Close File"],
             'assistCompletion' : [function(){ if ( hasActiveEditor() ) lk.layers.workspace.panes.activePane.assistCompletion() }, "Assist Completion"],
             'toggleSize' : [function(){ if ( hasActiveEditor() ) lk.layers.workspace.panes.activePane.toggleSize() }, "Toggle Size"],
-            'toggleComment' : [function(){ if ( hasActiveEditor() ) lk.layers.workspace.panes.activePane.toggleComment() }, "Toggle Comment"],
+            'toggleComment' : [function(){ if ( hasActiveEditor() ) lk.layers.workspace.panes.activePane.toggleComment() }, "Toggle Comment"]
         })
     }
 

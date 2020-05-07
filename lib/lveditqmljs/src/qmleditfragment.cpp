@@ -353,6 +353,11 @@ void QmlEditFragment::addNestedObjectInfo(QVariantMap& object)
     m_nestedObjectsInfo.push_back(object);
 }
 
+void QmlEditFragment::clearNestedObjectsInfo()
+{
+    m_nestedObjectsInfo = QVariantList();
+}
+
 void QmlEditFragment::setObjectInfo(QVariantMap &info)
 {
     m_objectInfo = info;

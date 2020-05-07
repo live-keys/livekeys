@@ -60,6 +60,7 @@ DISTFILES += \
     palettes/NodePalette.qml \
     palettes/PathPalette.qml \
     palettes/RectangleSizePalette.json \
+    palettes/TextPalette.qml \
     palettes/TriggerPalette.qml \
     qml/DocumentationView.qml \
     qml/EditorPane.qml \

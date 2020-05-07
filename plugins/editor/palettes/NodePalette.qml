@@ -13,9 +13,11 @@ CodePalette{
     property var editingFragment: null
     property var documentHandler: null
     property var editor: null
-    property var objects: ({})
+    property var objectsWithId: ({})
     property var numOfObjects: 0
-    property var edges: []
+    property var allObjects: []
+
+
 
     onEditingFragmentChanged: {
         if (!editingFragment) return
@@ -41,8 +43,10 @@ CodePalette{
 
                 if (object.id)
                 {
-                   objects[object.id] = n
+                   objectsWithId[object.id] = n
                 }
+
+                allObjects.push(n)
 
                 if (object.connection){
                     n.item.editingFragment = object.connection
@@ -73,7 +77,7 @@ CodePalette{
 
             for (var k = 0; k < props.length; ++k){
                 var id = props[k].value[0]
-                var node = objects[id]
+                var node = objectsWithId[id]
                 if (node)
                 {
                     var nodeProps = node.item.properties
@@ -87,6 +91,19 @@ CodePalette{
                     }
                 }
             }
+        }
+
+        function clean(){
+            for (var i=0; i< allObjects.length; ++i){
+                var numofProps = allObjects[i].item.propertyContainer.children.length
+                for (var j=0; j < numofProps; ++j)
+                    allObjects[i].item.propertyContainer.children[j].destroy()
+                objectGraph.removeObjectNode(allObjects[i])
+            }
+
+            allObjects = []
+            objectsWithId = []
+            console.log(numOfObjects)
         }
 
         ObjectGraph {
@@ -111,12 +128,17 @@ CodePalette{
             ++numOfObjects
 
             if (object.id)
-                objects[object.id] = n
+                objectsWithId[object.id] = n
+
+            allObjects.push(n)
 
             if (object.connection){
                 n.item.editingFragment = object.connection
                 object.connection.incrementRefCount()
             }
+        }
+        onAboutToRemovePalette: {
+            nodeItem.clean()
         }
         ignoreUnknownSignals: true
     }

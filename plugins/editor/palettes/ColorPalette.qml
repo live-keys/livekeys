@@ -23,7 +23,7 @@ import editor 1.0
 
 CodePalette{
     id: palette
-    type: "qml/QColor"
+    type: "qml/color"
 
     item: Rectangle{
         id: root

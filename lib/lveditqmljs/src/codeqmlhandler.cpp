@@ -3637,6 +3637,8 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
 
     QList<QObject*> fragments;
 
+    edit->clearNestedObjectsInfo();
+
     d->syncParse(m_document);
     d->syncObjects(m_document);
 
