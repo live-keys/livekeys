@@ -107,7 +107,7 @@ CodePalette{
         }
 
         ObjectGraph {
-            width: 500
+            width: 600
             height: 300
             id: objectGraph
             palette: palette

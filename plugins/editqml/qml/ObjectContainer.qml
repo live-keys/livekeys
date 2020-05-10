@@ -150,7 +150,7 @@ Item{
             } else {
 
                 propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
-                propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
+                propertyContainer.valueContainer.editingFragment = ef
                 propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
                 propertyContainer.expandDefaultPalette()
 
@@ -185,6 +185,7 @@ Item{
                         )
 
                         if ( ef ){
+                            ef.incrementRefCount()
                             var propertyContainer = objectContainer.propertyContainerFactory.createObject(container)
                             container.sortChildren()
 

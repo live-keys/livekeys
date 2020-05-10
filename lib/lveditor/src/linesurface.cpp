@@ -161,12 +161,18 @@ void LineSurface::resetViewportDocument()
     m_document->clear();
     QTextCursor cursor(m_document);
     cursor.movePosition(QTextCursor::MoveOperation::End);
+
+    int desiredWidth = numberOfDigits(m_lineNumber) + 2;
+
     for (int i = m_bounds.first+1; i <= m_bounds.second; i++)
     {
         if (i!=m_bounds.first+1) cursor.insertBlock();
         std::string s = std::to_string(i) + "  ";
         if (i < 10) s = " " + s;
-        const QString a(s.c_str());
+        QString a(s.c_str());
+
+        for (int i = 0; i < desiredWidth - a.length(); ++i)
+            a = QString(" ") + a;
 
         cursor.insertText(a);
     }
