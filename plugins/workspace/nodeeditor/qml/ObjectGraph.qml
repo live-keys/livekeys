@@ -55,6 +55,8 @@ Rectangle{
     property var documentHandler: null
     property var editor: null
 
+    property alias zoom: graphView.zoom
+    property alias zoomOrigin: graphView.zoomOrigin
 
     property int inPort: 1
     property int outPort: 2
@@ -155,7 +157,7 @@ Rectangle{
         propertyItem.editingFragment = editingFragment
         propertyItem.documentHandler = root.documentHandler
 
-        editingFragment.incrementRefCount()
+        if (editingFragment) editingFragment.incrementRefCount()
 
         propertyItem.editor = root.editor
 

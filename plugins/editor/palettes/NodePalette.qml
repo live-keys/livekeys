@@ -37,7 +37,7 @@ CodePalette{
             for (var i = 0; i < objectList.length; ++i)
             {
                 var object = objectList[i]
-                var n = objectGraph.addObjectNode(numOfObjects *400 + 50, numOfObjects *200 + 50, (object.name + (object.id ? ("#" + object.id) : "")))
+                var n = objectGraph.addObjectNode(numOfObjects *420 + 50, 50, (object.name + (object.id ? ("#" + object.id) : "")))
 
                 ++numOfObjects
 
@@ -91,6 +91,10 @@ CodePalette{
                     }
                 }
             }
+
+            objectGraph.zoomOrigin = 0
+            objectGraph.zoom = 600.0/(numOfObjects*420.0 + 50)
+            objectGraph.zoomOrigin = 4
         }
 
         function clean(){
@@ -103,7 +107,6 @@ CodePalette{
 
             allObjects = []
             objectsWithId = []
-            console.log(numOfObjects)
         }
 
         ObjectGraph {
