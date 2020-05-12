@@ -202,7 +202,7 @@ You can load the image from the location where your qml file is saved by using t
 
 ```qml
 ImRead{
-    file : project.dir() + '/../_images/caltech_buildings_DSCN0246.JPG'
+    file : project.dir() + '/../../../samples/_images/caltech_buildings_DSCN0246.JPG'
 }
 ```
 

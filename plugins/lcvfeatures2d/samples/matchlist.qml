@@ -8,7 +8,7 @@ Row{
     // In this sample a set of images are trained and matched against a query image.
     // Click on a trained image to view its matches
      
-    property string imagePath   : project.dir() + '/../_images/'
+    property string imagePath   : project.dir() + '/../../../samples/_images/'
     
     property string trainImage  : imagePath + 'cards-train-j.jpg'
     property string trainImage2 : imagePath + 'cards-train-q.jpg'

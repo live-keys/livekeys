@@ -95,6 +95,7 @@ Qan.NodeItem{
                             return
 
                         var addBoxItem = root.addBoxFactory.createObject()
+                        addBoxItem.isForNode = true
                         addBoxItem.addContainer = addContainer
                         addBoxItem.codeQmlHandler = codeHandler
 
@@ -122,7 +123,7 @@ Qan.NodeItem{
                             addBox.destroy()
                         }
                         addBoxItem.accept = function(type, data){
-                            if ( addBoxItem.activeIndex === 0 ){
+                            if ( addBoxItem.activeIndex === 0){
                                 for (var i = 0; i < propertyNames.length; ++i){
                                     if (propertyNames[i] === data){
                                         addBox.destroy()
@@ -159,8 +160,33 @@ Qan.NodeItem{
                                     editingFragment.signalObjectAdded(ef)
 
                             } else if ( addBoxItem.activeIndex === 2 ){
-				                // ADDING EVENTS?
-                                if (compact) expand()
+                                for (var i = 0; i < propertyNames.length; ++i){
+                                    if (propertyNames[i] === data){
+                                        addBox.destroy()
+                                        return
+                                    }
+                                }
+
+                                var ppos = codeHandler.addEvent(
+                                    addContainer.propertyModel.addPosition, addContainer.objectType, type, data, true
+                                )
+
+                                var ef = codeHandler.openNestedConnection(
+                                    editingFragment, ppos, project.appRoot()
+                                )
+
+                                if (ef) {
+                                    editingFragment.signalPropertyAdded(ef)
+                                }
+
+                                if (!ef) {
+                                    lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
+                                    console.error("Error: Can't create a palette in a non-compiled program")
+                                    return
+                                }
+                            } else if ( addBoxItem.activeIndex === 3){
+                                addSubobject(nodeParent, data, nodeParent.item.id ? 1 : 0, null)
+
                             }
                             addBox.destroy()
                         }
@@ -284,11 +310,15 @@ Qan.NodeItem{
         }
         onPropertyAdded: {
             var prop = ef.objectInfo()
+            var name = prop.name.toString()
             for (var i=0; i < propertyNames.length; ++i){
-                if (!propertyNames[i].toString().localeCompare(prop.name.toString())) return
+                if (!propertyNames[i].toString().localeCompare(name)) return
             }
 
-            addSubobject(nodeParent, prop.name, (prop.isWritable?3:2), prop.connection)
+            var portState = 2
+
+            if (prop.isWritable) ++portState
+            addSubobject(nodeParent, prop.name, portState, prop.connection)
         }
 
     }

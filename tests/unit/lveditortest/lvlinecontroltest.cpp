@@ -67,7 +67,7 @@ void LvLineControlTest::addACollapseAfterPalette()
 void LvLineControlTest::resizePalette()
 {
     m_lineControl->sections()[0].palette->setHeight(100);
-    m_lineControl->resizePalette(m_lineControl->sections()[0].palette);
+    m_lineControl->resizePaletteHeight(m_lineControl->sections()[0].palette);
     QCOMPARE(m_lineControl->sections()[0].visibleRange, 8);
     QCOMPARE(m_lineControl->sections()[1].position, 100);
     QCOMPARE(m_lineControl->sections()[1].visiblePosition, 106);

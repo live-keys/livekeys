@@ -100,6 +100,10 @@ Rectangle{
         )
     }
 
+    function toggleComment(){
+        codeHandler.codeHandler.toggleComment(textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart)
+    }
+
     function closeDocument(){
         if ( !root.document )
             return;

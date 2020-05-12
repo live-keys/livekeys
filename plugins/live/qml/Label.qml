@@ -12,7 +12,7 @@ Rectangle{
     property int   mode: 0
     property var   up: undefined
     property var   down: undefined
-
+    property var   fontPixelSize: 11
     Rectangle {
         id: containerRectangle
         height: parent.height
@@ -97,7 +97,7 @@ Rectangle{
             id: labelText
             anchors.centerIn: parent
             font.family: "Open Sans, sans-serif"
-            font.pixelSize: 11
+            font.pixelSize: fontPixelSize
             font.weight: Font.Light
             text: intSlider.minimumValue
             color: '#dbdede'

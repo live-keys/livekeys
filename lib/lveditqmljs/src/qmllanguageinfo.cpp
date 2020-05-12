@@ -440,7 +440,32 @@ QmlPropertyInfo QmlTypeInfoPrivate::fromMetaProperty(const QmlTypeInfo &parent, 
     if ( QmlTypeInfo::isObject(prop.typeName()) ){
         qpi.typeName = QmlTypeReference(QmlTypeReference::Unknown, prop.typeName());
     } else {
-        qpi.typeName = QmlTypeReference(QmlTypeReference::Qml, prop.typeName());
+        auto typeName = prop.typeName();
+        if (typeName == "QString"){
+            typeName = "string";
+        } else if (typeName == "QUrl"){
+            typeName = "url";
+        } else if (typeName == "QColor"){
+            typeName = "color";
+        } else if (typeName == "QFont"){
+            typeName = "font";
+        } else if (typeName == "QDateTime"){
+            typeName = "date";
+        } else if (typeName == "QPoint" || typeName == "QPointF"){
+            typeName = "point";
+        } else if (typeName == "QSize" || typeName == "QSizeF"){
+            typeName = "size";
+        } else if (typeName == "QRect" || typeName == "QRectF"){
+            typeName = "rect";
+        } else if (typeName == "QMatrix4x4"){
+            typeName = "matrix4x4";
+        } else if (typeName == "QQuaternion"){
+            typeName = "quaternion";
+        } else if (typeName == "QVector2D" || typeName == "QVector3D" || typeName == "QVector4D"){
+            typeName = "vector" + typeName[7] + "d";
+        }
+
+        qpi.typeName = QmlTypeReference(QmlTypeReference::Qml, typeName);
     }
     qpi.isList = prop.isList();
     qpi.isPointer = prop.isPointer();

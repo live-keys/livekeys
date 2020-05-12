@@ -329,6 +329,7 @@ public:
     void linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem* palette, int start, int end);
     void linePaletteRemoved(QQuickItem* palette);
     void linePaletteHeightChanged(QQuickItem* palette, int newHeight);
+    void linePaletteWidthChanged(QQuickItem* palette, int newWidth);
 
     QRect viewport() const;
     void setViewport(QRect view);

@@ -85,6 +85,7 @@ LiveExtension{
             paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
 
             editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
+            ef.incrementRefCount()
         }
     }
 
@@ -108,6 +109,7 @@ LiveExtension{
             return
         }
 
+        ef.incrementRefCount()
         var editorBox = ef.visualParent ? ef.visualParent.parent : null
         var paletteBoxGroup = editorBox ? editorBox.child : null
         var forAnObject = codeHandler.isForAnObject(ef)
@@ -192,6 +194,7 @@ LiveExtension{
             console.error("Error: Can't create a palette in a non-compiled program")
             return
         }
+        ef.incrementRefCount()
 
         var palette = codeHandler.openPalette(ef, palettes, index)
 
@@ -226,6 +229,8 @@ LiveExtension{
         paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
 
         editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
+
+        ef.incrementRefCount()
     }
 
     function palette(){
@@ -435,6 +440,7 @@ LiveExtension{
             var cursorCoords = activePane.cursorWindowCoords()
             if ( palettes.size() === 1 ){
                 var ef = codeHandler.openConnection(palettes.position())
+                ef.incrementRefCount()
                 codeHandler.openBinding(ef, palettes, 0)
             } else {
                 var palList      = paletteListFactory.createObject()
@@ -456,6 +462,8 @@ LiveExtension{
                     palListBox.destroy()
 
                     var ef = codeHandler.openConnection(palettes.position())
+                    ef.incrementRefCount()
+
                     codeHandler.openBinding(ef, palettes, index)
                 })
             }

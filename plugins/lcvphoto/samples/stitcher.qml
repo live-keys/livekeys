@@ -17,7 +17,7 @@ Column{
         Repeater{
             id: repeater
             model: ['stitch-left.jpg', 'stitch-mid.jpg', 'stitch-right.jpg'].map(
-                function(e){ return project.path('../_images/' + e);}).map(
+                function(e){ return project.path('../../../samples/_images/' + e);}).map(
                 function(e){ return Cv.MatIO.read(e); }
             )
             

@@ -143,13 +143,17 @@ Item{
                 paletteBoxGroup.x = 5
 
                 propertyContainer.valueContainer = childObjectContainer
+                propertyContainer.expandDefaultPalette()
+
                 propertyContainer.paletteAddButtonVisible = false
 
             } else {
 
                 propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
-                propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
+                propertyContainer.valueContainer.editingFragment = ef
                 propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
+                propertyContainer.expandDefaultPalette()
+
             }
 
             objectContainer.propertiesOpened.push(ef.identifier())
@@ -181,6 +185,7 @@ Item{
                         )
 
                         if ( ef ){
+                            ef.incrementRefCount()
                             var propertyContainer = objectContainer.propertyContainerFactory.createObject(container)
                             container.sortChildren()
 
@@ -209,6 +214,8 @@ Item{
                                 paletteBoxGroup.x = 5
 
                                 propertyContainer.valueContainer = childObjectContainer
+                                propertyContainer.expandDefaultPalette()
+
                                 propertyContainer.paletteAddButtonVisible = false
 
                             } else {

@@ -8,7 +8,7 @@ Row{
 
     ImRead{
        id : src
-       file : project.dir() + '/../_images/buildings_0246.jpg'
+       file : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
     }
 
     CopyMakeBorder{

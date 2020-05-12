@@ -8,7 +8,7 @@ ScrollView{
     anchors.fill : parent
     Row{
 
-        property string videoPath : project.dir() + '/../_videos/amherst-11_2754_3754.avi'
+        property string videoPath : project.dir() + '/../../../samples/_videos/amherst-11_2754_3754.avi'
         
         VideoCapture{
             id : videoArea

@@ -8,7 +8,7 @@ Row{
     // Sample showing how to use 
     // Canny Edge Detector algorithm
     
-    property string imagePath : project.dir() + '/../_images/buildings_0246.jpg'
+    property string imagePath : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
     
     ImRead{
         id : imgSource

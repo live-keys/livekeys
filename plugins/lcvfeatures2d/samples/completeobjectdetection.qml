@@ -16,11 +16,11 @@ Rectangle{
     anchors.fill : parent
     color : "transparent"
             
-    property string trainImage  : project.dir() + '/../_images/cards-train-j.jpg'
-    property string trainImage2 : project.dir() + '/../_images/cards-train-q.jpg'
-    property string trainImage3 : project.dir() + '/../_images/cards-train-k.jpg'
+    property string trainImage  : project.dir() + '/../../../samples/_images/cards-train-j.jpg'
+    property string trainImage2 : project.dir() + '/../../../samples/_images/cards-train-q.jpg'
+    property string trainImage3 : project.dir() + '/../../../samples/_images/cards-train-k.jpg'
     
-    property string queryImage : project.dir() + '/../_images/cards-query.jpg'
+    property string queryImage : project.dir() + '/../../../samples/_images/cards-query.jpg'
     
     ImRead{
         id : imageSource

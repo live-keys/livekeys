@@ -5,7 +5,7 @@ import lcvphoto 1.0
 
 Rectangle{
     id: root
-    width: 200
+    width: 240
     height: 200
     color: 'transparent'
 
@@ -29,12 +29,17 @@ Rectangle{
     TextButton{
         text: "Auto"
         anchors.right: parent.right
-        anchors.rightMargin: 5
+        anchors.rightMargin: 20
         anchors.top: parent.top
         anchors.topMargin: 5
+        textColor: "#c7c7c7"
         height: 30
-        width: 50
+        width: 70
+        radius: 15
+        color: "#1b242c"
         fontPixelSize: 12
+        fontFamily: "Open Sans, sans-serif"
+        fontWeight: Font.Light
         onClicked : {
             autoLevelsHistogram.input = root.input
             autoLevels.histogram = autoLevelsHistogram.output
@@ -183,7 +188,7 @@ Rectangle{
             width: 10
             height: 15
             radius: 5
-            color: '#292b39'
+            color: '#2a2c39'
 
             Drag.active: dragAreaLeft.drag.active
             Drag.hotSpot.x: width / 2
@@ -309,11 +314,15 @@ Rectangle{
         }
     }
 
+    property var fontPixelSize: 12
+    property var labelTextColor: "#c7c7c7"
     Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.left: parent.left
         text: dragBlack.assignedX
+        fontPixelSize: fontPixelSize
+        textColor: labelTextColor
     }
 
     Label{
@@ -321,6 +330,8 @@ Rectangle{
         anchors.bottomMargin: 5
         anchors.horizontalCenter: parent.horizontalCenter
         text: dragGrey.assignedX.toFixed(2)
+        fontPixelSize: fontPixelSize
+        textColor: labelTextColor
     }
 
     Label{
@@ -328,6 +339,9 @@ Rectangle{
         anchors.bottomMargin: 5
         anchors.right: parent.right
         text: dragWhite.assignedX
+        fontPixelSize: fontPixelSize
+        textColor: labelTextColor
+
     }
 
 }

@@ -81,6 +81,7 @@ public:
 
     void emitRemoval();
     void addNestedObjectInfo(QVariantMap& info);
+    void clearNestedObjectsInfo();
     void setObjectInfo(QVariantMap& info);
 public slots:
     int position();

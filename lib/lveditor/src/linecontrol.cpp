@@ -28,6 +28,7 @@ LineControl::LineControl(QObject *parent) :
         , m_prevLineNumber(0)
         , m_lineNumber(0)
         , m_totalOffset(0)
+        , m_maxWidth(0)
 {
     if (!parent) m_textEdit = new TextEdit(nullptr, true);
     else m_textEdit = static_cast<TextEdit*>(parent);
@@ -67,6 +68,7 @@ void LineControl::addPalette(int pos, int span, QQuickItem *p, int startPos, int
     ls.palette = p;
     ls.visibleRange = qCeil((p->height() > 0 ? p->height() + 10 : 0)*1.0/ m_blockHeight);
 
+    ls.width = static_cast<int>(p->width());
     ls.startPos = startPos;
     ls.endPos = endPos;
 
@@ -75,7 +77,7 @@ void LineControl::addPalette(int pos, int span, QQuickItem *p, int startPos, int
     emit refreshAfterPaletteChange(pos+span-1, ls.rangeOffset());
 }
 
-int LineControl::resizePalette(QQuickItem *p)
+int LineControl::resizePaletteHeight(QQuickItem *p)
 {
     auto it = m_sections.begin();
     for (; it != m_sections.end(); ++it)
@@ -98,6 +100,25 @@ int LineControl::resizePalette(QQuickItem *p)
     return it->position;
 }
 
+int LineControl::resizePaletteWidth(QQuickItem *p)
+{
+    auto it = m_sections.begin();
+    for (; it != m_sections.end(); ++it)
+        if (it->type == LineSection::Palette && it->palette == p) break;
+
+    if (it == m_sections.end()) return -1;
+
+    it->width = static_cast<int>(p->width());
+
+    auto max = 0;
+    for (auto it = m_sections.begin(); it != m_sections.end(); ++it)
+    {
+        if (it->width > max) max = it->width;
+    }
+
+    m_maxWidth = max;
+}
+
 int LineControl::removePalette(QQuickItem *p, bool destroy)
 {
     unsigned i = 0;
@@ -113,6 +134,15 @@ int LineControl::removePalette(QQuickItem *p, bool destroy)
 
 
     removeLineSection(m_sections[i], destroy);
+
+    auto max = 0;
+    for (auto it = m_sections.begin(); it != m_sections.end(); ++it)
+    {
+        if (it->width > max) max = it->width;
+    }
+
+    m_maxWidth = max;
+
     emit refreshAfterPaletteChange(pos + range - 1, -delta);
 
     return pos;
@@ -845,6 +875,11 @@ void LineControl::deltaLines(int delta)
     handleLineChange(delta, internal);
 }
 
+int LineControl::maxWidth()
+{
+    return m_maxWidth;
+}
+
 int LineControl::addLineSection(LineControl::LineSection ls)
 {
     auto srch = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compare);
@@ -887,6 +922,8 @@ int LineControl::addLineSection(LineControl::LineSection ls)
         yValue = yValue > 0 ? yValue : 0;
         ls.palette->setProperty("y", yValue);
     }
+
+    if (ls.width > m_maxWidth) m_maxWidth = ls.width;
 
     result += m_sections[elementPos].rangeOffset();
     if (m_sections[elementPos].visibleRange != m_sections[elementPos].range)

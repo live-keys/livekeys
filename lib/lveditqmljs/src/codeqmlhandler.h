@@ -120,6 +120,8 @@ public slots:
     lv::QmlEditFragment* findObjectFragmentByPosition(int position);
     lv::QmlEditFragment* findFragmentByPosition(int position);
 
+    void toggleComment(int position, int length);
+
     // Palette and binding management
 
     QJSValue cursorInfo(int position, int length);

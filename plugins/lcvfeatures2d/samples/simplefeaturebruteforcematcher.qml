@@ -10,8 +10,8 @@ Column{
     // Usage of BruteForceMatcher on Brief descriptors to find matches
     // between two images
     
-    property string trainImage : project.dir() + '/../_images/clock-train-small.jpg'
-    property string queryImage : project.dir() + '/../_images/clock-query-room-small.jpg'
+    property string trainImage : project.dir() + '/../../../samples/_images/clock-train-small.jpg'
+    property string queryImage : project.dir() + '/../../../samples/_images/clock-query-room-small.jpg'
     
     // Train images
     

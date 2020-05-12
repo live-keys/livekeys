@@ -171,6 +171,10 @@ Pane{
             root.width = parent.width / 2
     }
 
+    function toggleComment(){
+        editor.toggleComment()
+    }
+
     Rectangle{
         anchors.left: parent.left
         anchors.top: parent.top

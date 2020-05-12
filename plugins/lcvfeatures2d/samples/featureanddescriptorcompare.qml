@@ -11,8 +11,8 @@ Row{
     // Select/configure feature detectors/extractors from the panels
     // to compare and view descriptors in the generated histogram
     
-    property string imagePath  : project.dir() + '/../_images/clock-train-small.jpg'
-    property string imagePath2 : project.dir() + '/../_images/clock-query-room-small.jpg'
+    property string imagePath  : project.dir() + '/../../../samples/_images/clock-train-small.jpg'
+    property string imagePath2 : project.dir() + '/../../../samples/_images/clock-query-room-small.jpg'
      
     Column{
 
