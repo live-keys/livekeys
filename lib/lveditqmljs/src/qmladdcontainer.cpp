@@ -8,6 +8,7 @@ QmlAddContainer::QmlAddContainer(int addPosition, const QStringList &objectType,
     , m_itemModel(new QmlSuggestionModel(addPosition, this))
     , m_propertyModel(new QmlSuggestionModel(addPosition, this))
     , m_eventModel(new QmlSuggestionModel(addPosition, this))
+    , m_functionModel(new QmlSuggestionModel(addPosition, this))
 {
 }
 
@@ -15,6 +16,7 @@ QmlAddContainer::~QmlAddContainer(){
     delete m_propertyModel;
     delete m_itemModel;
     delete m_eventModel;
+    delete m_functionModel;
 }
 
 } // namespace

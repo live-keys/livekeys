@@ -24,7 +24,7 @@ import editor.private 1.0
 Rectangle{
     id: root
 
-    width: 350
+    width: 380 + (isForNode? 100: 0)
     height: 280
     color: "#03070a"
     opacity: 0.95
@@ -38,6 +38,8 @@ Rectangle{
     property int smallFontSize: 9
     property var codeQmlHandler: null
 
+    property bool isForNode: false
+
     property int activeIndex : 0
     property bool idChecked: true
     onActiveIndexChanged: {
@@ -45,6 +47,7 @@ Rectangle{
         root.addContainer.propertyModel.setFilter('')
         root.addContainer.itemModel.setFilter('')
         root.addContainer.eventModel.setFilter('')
+        root.addContainer.functionModel.setFilter('')
         if (activeIndex === 1) idChecked = true
     }
 
@@ -53,6 +56,7 @@ Rectangle{
             case 0: return propertyList
             case 1: return itemList
             case 2: return eventList
+            case 3: return functionList
         }
     }
 
@@ -121,6 +125,7 @@ Rectangle{
                 case 0: result = "Properties"; break;
                 case 1: result = "Items"; break;
                 case 2: result = "Events"; break;
+                case 2: result = "Functions"; break;
             }
 
             result = result + " for "  + addContainer.objectType
@@ -131,7 +136,7 @@ Rectangle{
         anchors.top: parent.top
         anchors.topMargin: 3
         anchors.right: parent.right
-        anchors.rightMargin: 144
+        anchors.rightMargin: 144+ (isForNode? 71: 0)
         text: 'Property'
         height: 22
         width: 70
@@ -150,7 +155,7 @@ Rectangle{
         anchors.top: parent.top
         anchors.topMargin: 3
         anchors.right: parent.right
-        anchors.rightMargin: 73
+        anchors.rightMargin: 73+ (isForNode? 71: 0)
         text: 'Object'
         height: 22
         width: 70
@@ -170,7 +175,7 @@ Rectangle{
         anchors.top: parent.top
         anchors.topMargin: 3
         anchors.right: parent.right
-        anchors.rightMargin: 2
+        anchors.rightMargin: 2 + (isForNode? 71: 0)
         text: 'Event'
         height: 22
         width: 70
@@ -184,6 +189,27 @@ Rectangle{
             root.activeIndex = 2
         }
     }
+
+    TextButton{
+        anchors.top: parent.top
+        visible: isForNode
+        anchors.topMargin: 3
+        anchors.right: parent.right
+        anchors.rightMargin: 2
+        text: 'Function'
+        height: 22
+        width: 70
+        fontPixelSize: 12
+        backgroundColor: isActive ? "#061a29" : "#111"
+        fontFamily: "Open Sans, sans-serif"
+        radius: 5
+
+        property bool isActive : activeIndex === 3
+        onClicked : {
+            root.activeIndex = 3
+        }
+    }
+
 
     Item {
         id: idInputItem
@@ -350,6 +376,8 @@ Rectangle{
                     root.addContainer.itemModel.setFilter(text)
                 } else if ( root.activeIndex === 2 ) {
                     root.addContainer.eventModel.setFilter(text)
+                } else if (root.activeIndex === 3) {
+                    root.addContainer.functionModel.setFilter(text)
                 }
             }
 
@@ -383,7 +411,8 @@ Rectangle{
                     root.accept(itemList.currentItem.importSpace, result)
                 } else if ( root.activeIndex === 2 ){
                     root.accept(eventList.currentItem.type, eventList.currentItem.code)
-
+                } else if (root.activeIndex === 3){
+                    root.accept(eventList.currentItem.type, propertyList.currentItem.code)
                 }
             }
             Keys.onEscapePressed: {
@@ -566,6 +595,8 @@ Rectangle{
                                     root.accept(itemList.currentItem.importSpace, result)
                                 } else if (root.activeIndex === 2){
                                     root.accept(eventList.currentItem.type, eventList.currentItem.code)
+                                } else if (root.activeIndex === 3){
+                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
                                 }
                             }
                         }
@@ -749,6 +780,8 @@ Rectangle{
                                     root.accept(itemList.currentItem.importSpace, result)
                                 } else if (root.activeIndex === 2){
                                     root.accept(eventList.currentItem.type, eventList.currentItem.code)
+                                } else if (root.activeIndex === 3){
+                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
                                 }
                             }
                         }
@@ -931,6 +964,193 @@ Rectangle{
                                     root.accept(itemList.currentItem.importSpace, result)
                                 }  else if (root.activeIndex === 2){
                                     root.accept(eventList.currentItem.type, eventList.currentItem.code)
+                                } else if (root.activeIndex === 3){
+                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    Item {
+        id: functionsContainer
+        anchors.fill: parent
+        anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
+        visible: root.activeIndex === 3
+
+        ScrollView{
+            anchors.top : parent.top
+            anchors.left: parent.left
+
+            height : root.height - functionsContainer.anchors.topMargin
+            width: root.width / 2
+
+            style: ScrollViewStyle {
+                transientScrollBars: false
+                handle: Item {
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle {
+                        color: "#0b1f2e"
+                        anchors.fill: parent
+                    }
+                }
+                scrollBarBackground: Item{
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle{
+                        anchors.fill: parent
+                        color: root.color
+                    }
+                }
+                decrementControl: null
+                incrementControl: null
+                frame: Rectangle{color: "transparent"}
+                corner: Rectangle{color: root.color}
+            }
+
+            ListView{
+                id : functionsCategoryList
+                anchors.fill: parent
+                anchors.rightMargin: 2
+                anchors.bottomMargin: 5
+                anchors.topMargin: 0
+                visible: true
+                opacity: root.opacity
+
+                model: root.addContainer ? root.addContainer.functionModel.types() : null
+
+                currentIndex: 0
+                onCountChanged: currentIndex = 0
+
+                boundsBehavior : Flickable.StopAtBounds
+                highlightMoveDuration: 100
+
+                delegate: Component{
+
+                    Rectangle{
+                        width : functionsCategoryList.width
+                        height : 25
+                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
+                        Text{
+                            id: label
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            font.family: root.fontFamily
+                            font.pixelSize: root.fontSize
+                            font.weight: Font.Light
+
+                            color: "#fafafa"
+                            text: modelData
+                        }
+
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: {
+                                functionsCategoryList.currentIndex = index
+                                if ( modelData === 'All' )
+                                    root.addContainer.functionModel.setTypeFilter('')
+                                else
+                                    root.addContainer.functionModel.setTypeFilter(modelData)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ScrollView{
+            anchors.top : parent.top
+            anchors.right: parent.right
+
+            height : root.height - functionsContainer.anchors.topMargin
+            width: root.width / 2
+
+            style: ScrollViewStyle {
+                transientScrollBars: false
+                handle: Item {
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle {
+                        color: "#0b1f2e"
+                        anchors.fill: parent
+                    }
+                }
+                scrollBarBackground: Item{
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle{
+                        anchors.fill: parent
+                        color: root.color
+                    }
+                }
+                decrementControl: null
+                incrementControl: null
+                frame: Rectangle{color: "transparent"}
+                corner: Rectangle{color: root.color}
+            }
+
+            ListView{
+                id : functionList
+                anchors.fill: parent
+                anchors.rightMargin: 2
+                anchors.bottomMargin: 5
+                anchors.topMargin: 0
+                visible: true
+                opacity: root.opacity
+                model: root.addContainer ? root.addContainer.functionModel : null
+
+                currentIndex: 0
+                onCountChanged: currentIndex = 0
+
+                boundsBehavior : Flickable.StopAtBounds
+                highlightMoveDuration: 100
+
+                delegate: Component{
+
+                    Rectangle{
+                        property string code: model.code
+
+                        width : functionList.width
+                        height : 25
+                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
+                        Text{
+                            id: label
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            font.family: root.fontFamily
+                            font.pixelSize: root.fontSize
+                            font.weight: Font.Light
+
+                            color: "#fafafa"
+                            text: model.label
+                        }
+
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: {
+                                eventList.currentIndex = index
+                            }
+                            onDoubleClicked: {
+                                if ( root.activeIndex === 0 ){
+                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
+                                } else if (root.activeIndex === 1){
+                                    var result = itemList.currentItem.code
+                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
+                                    root.accept(itemList.currentItem.importSpace, result)
+                                }  else if (root.activeIndex === 2){
+                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
+                                } else if (root.activeIndex === 3){
+                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
                                 }
                             }
                         }

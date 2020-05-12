@@ -2825,6 +2825,18 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                         ti->exportType().join() + "." + name,
                         name
                     ));
+                } else {
+                    auto name = method.name;
+
+                    addContainer->functionModel()->addItem(QmlSuggestionModel::ItemData(
+                        name,
+                        ti->prefereredType().name(),
+                        "method",
+                        "",
+                        ti->exportType().join() + "." + name,
+                        name
+                    ));
+
                 }
             }
 
@@ -2863,6 +2875,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
             }
             addContainer->propertyModel()->updateFilters();
             addContainer->eventModel()->updateFilters();
+            addContainer->functionModel()->updateFilters();
 
         }
     }
