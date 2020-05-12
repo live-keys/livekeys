@@ -30,7 +30,7 @@ public:
     public:
         enum SectionType { Palette, Collapsed, Fragment };
         LineSection(int p, int l, int v, SectionType t):
-            position(p), range(l), visibleRange(v), type(t), palette(nullptr) {}
+            position(p), range(l), visibleRange(v), width(0), type(t), palette(nullptr) {}
         LineSection(): LineSection(0,0,0, Palette) {}
 
         static std::function<bool(LineSection, LineSection)> compare;
@@ -48,6 +48,8 @@ public:
         int startPos;
         int endPos;
 
+        int width;
+
         SectionType type;
         QQuickItem* palette;
 
@@ -60,7 +62,9 @@ public:
     int removeCollapse(int pos);
 
     void addPalette(int pos, int span, QQuickItem* p, int startPos, int endPos);
-    int resizePalette(QQuickItem* p);
+    int resizePaletteHeight(QQuickItem* p);
+    int resizePaletteWidth(QQuickItem* p);
+
     int removePalette(QQuickItem* p, bool destroy = true);
     void setBlockHeight(int bh);
     int blockHeight() { return m_blockHeight; }
@@ -97,6 +101,7 @@ public slots:
     void setDirtyPos(int dirtyPos);
     void lineNumberChange();
     void deltaLines(int delta);
+    int maxWidth();
 private:
     int addLineSection(LineSection ls);
     int removeLineSection(LineSection ls, bool destroy, bool nesting = false);
@@ -116,6 +121,7 @@ private:
     int m_lineNumber;
     TextEdit* m_textEdit;
     int m_totalOffset;
+    int m_maxWidth;
 };
 
 }
