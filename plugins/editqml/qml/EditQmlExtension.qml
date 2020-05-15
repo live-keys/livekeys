@@ -194,6 +194,7 @@ LiveExtension{
             console.error("Error: Can't create a palette in a non-compiled program")
             return
         }
+        ef.incrementRefCount()
 
         var palette = codeHandler.openPalette(ef, palettes, index)
 
