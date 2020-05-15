@@ -305,10 +305,15 @@ Qan.NodeItem{
         }
         onObjectAdded: {
             if (!addSubobject) return
+
+            documentHandler.codeHandler.populateObjectInfoForFragment(obj)
+
             var object = obj.objectInfo()
             addSubobject(nodeParent, object.name + (object.id ? ("#" + object.id) : ""), 0, object.connection)
         }
         onPropertyAdded: {
+            documentHandler.codeHandler.populatePropertyInfoForFragment(ef)
+
             var prop = ef.objectInfo()
             var name = prop.name.toString()
             for (var i=0; i < propertyNames.length; ++i){

@@ -1181,6 +1181,9 @@ void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
 
             if ( itEdit == edit ){
                 m_edits.erase(it);
+
+                for (auto child: edit->childFragments())
+                    removeConnection(child);
                 emit numberOfConnectionsChanged();
 
                 if ( m_editingFragment == edit ){
@@ -1206,7 +1209,7 @@ void CodeQmlHandler::removeAllEditingFragments()
 {
     while (!m_edits.empty())
     {
-        removeEditingFragment(*m_edits.begin());
+        removeConnection(*m_edits.begin());
     }
 }
 
@@ -1309,8 +1312,9 @@ lv::QmlEditFragment *CodeQmlHandler::findFragmentByPosition(int position)
         {
             q.clear();
             result = edit;
-            for (auto it = edit->childFragments().begin(); it != edit->childFragments().end(); ++it)
+            for (auto it = edit->childFragments().begin(); it != edit->childFragments().end(); ++it){
                 q.push_back(*it);
+            }
         }
 
     }
@@ -2030,10 +2034,11 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
     Q_D(CodeQmlHandler);
 
     QList<QObject*> fragments;
-
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
     QmlScopeSnap scope = d->snapScope();
 
-    QString source = m_target->toPlainText();
+    QString source = m_document->contentString();
     DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(m_document->file()->path());
     docinfo->parse(source);
 
@@ -2177,7 +2182,7 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
     int pos = edit->declaration()->valuePosition();
     int len = edit->declaration()->valueLength();
 
-    removeConnection(edit);
+    removeEditingFragment(edit);
 
     m_document->addEditingState(ProjectDocument::Runtime);
     m_document->insert(pos, len, "");
@@ -2240,8 +2245,6 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, boo
     } else {
         lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", includeExpandables, lpl);
     }
-
-    vlog() << lpl->size();
 
     lpl->setPosition(declaration->position());
     if ( unrepeated ){
@@ -3693,10 +3696,7 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
                     continue;
                 }
 
-                auto fragment = findFragmentByPosition(property->begin);
-                if (!fragment || !fragment->isForProperty()) {
-                    fragment = openNestedConnection(conn, property->begin);
-                }
+                auto fragment = openNestedConnection(conn, property->begin);
 
                 auto fcast = qobject_cast<QObject*>(fragment);
                 propMap.insert("connection", QVariant::fromValue(fcast));

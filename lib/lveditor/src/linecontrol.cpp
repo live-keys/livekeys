@@ -917,7 +917,7 @@ int LineControl::addLineSection(LineControl::LineSection ls)
 
     if (ls.type == LineSection::Palette)
     {
-        ls.palette->setProperty("x", 20);
+        ls.palette->setProperty("x", 0);
         int yValue = m_sections[elementPos].visiblePosition * m_blockHeight + (m_sections[elementPos].visibleRange * m_blockHeight - static_cast<int>(ls.palette->height())) / 2;
         yValue = yValue > 0 ? yValue : 0;
         ls.palette->setProperty("y", yValue);
