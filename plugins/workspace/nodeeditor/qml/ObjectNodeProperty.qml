@@ -131,9 +131,7 @@ Item{
                 onClicked: {
                     propertyItem.propertyToBeDestroyed()
 
-                    editingFragment.decrementRefCount()
-                    if (editingFragment.refCount === 0)
-                        documentHandler.codeHandler.removeConnection(editingFragment)
+                    documentHandler.codeHandler.removeConnection(editingFragment)
                     propertyItem.destroy()
                 }
             }

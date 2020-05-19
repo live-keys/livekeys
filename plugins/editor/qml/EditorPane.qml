@@ -261,6 +261,8 @@ Pane{
                 anchors.fill: parent
                 onClicked: {
 
+                    lk.layers.workspace.panes.activePane = root
+
                     if (!codeOnly)
                     {
                         if (documentHandler.codeHandler)

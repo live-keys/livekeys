@@ -164,23 +164,27 @@ void LineSurface::resetViewportDocument()
 
     int desiredWidth = numberOfDigits(m_lineNumber) + 2;
 
-    for (int i = m_bounds.first+1; i <= m_bounds.second; i++)
-    {
-        if (i!=m_bounds.first+1) cursor.insertBlock();
-        std::string s = std::to_string(i) + "  ";
-        if (i < 10) s = " " + s;
-        QString a(s.c_str());
-
-        for (int i = 0; i < desiredWidth - a.length(); ++i)
-            a = QString(" ") + a;
-
-        cursor.insertText(a);
+    if (m_bounds.first == -1){
+        QString a(desiredWidth, ' ');
+        m_document->setPlainText(a);
     }
+    else {
+        for (int i = m_bounds.first+1; i <= m_bounds.second; i++)
+        {
+            if (i!=m_bounds.first+1) cursor.insertBlock();
+            std::string s = std::to_string(i) + "  ";
+            if (i < 10) s = " " + s;
+            QString a(s.c_str());
 
+            for (int i = 0; i < desiredWidth - a.length(); ++i)
+                a = QString(" ") + a;
 
-    updateCollapseSymbols();
+            cursor.insertText(a);
+        }
+
+        updateCollapseSymbols();
+    }
 }
-
 void LineSurface::setViewport(QRect view)
 {
     if (m_viewport.y() == view.y() && m_viewport.height() == view.height() && m_bounds != std::make_pair(-1,-1)) return;

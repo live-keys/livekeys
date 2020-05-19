@@ -25,6 +25,26 @@ CodePalette{
         nodeItem.init()
     }
 
+    function addObject(object){
+        var n = objectGraph.addObjectNode(numOfObjects *420 + 50, 50, (object.name + (object.id ? ("#" + object.id) : "")))
+
+        ++numOfObjects
+
+        if (object.id)
+        {
+           objectsWithId[object.id] = n
+        }
+
+        allObjects.push(n)
+
+        if (object.connection){
+            n.item.editingFragment = object.connection
+            object.connection.incrementRefCount()
+        }
+
+        return n
+    }
+
     item: Item {
         id: nodeItem
 
@@ -37,21 +57,7 @@ CodePalette{
             for (var i = 0; i < objectList.length; ++i)
             {
                 var object = objectList[i]
-                var n = objectGraph.addObjectNode(numOfObjects *420 + 50, 50, (object.name + (object.id ? ("#" + object.id) : "")))
-
-                ++numOfObjects
-
-                if (object.id)
-                {
-                   objectsWithId[object.id] = n
-                }
-
-                allObjects.push(n)
-
-                if (object.connection){
-                    n.item.editingFragment = object.connection
-                    object.connection.incrementRefCount()
-                }
+                var n = addObject(object)
 
                 for (var j = 0; j < object.properties.length; ++j){
                     var property = object.properties[j]
@@ -91,18 +97,23 @@ CodePalette{
                     }
                 }
             }
-
-            objectGraph.zoomOrigin = 0
-            objectGraph.zoom = 600.0/(numOfObjects*420.0 + 50)
-            objectGraph.zoomOrigin = 4
+            if (numOfObjects !== 0){
+                objectGraph.zoomOrigin = 0
+                objectGraph.zoom = 600.0/(numOfObjects*420.0 + 50)
+                objectGraph.zoomOrigin = 4
+            }
         }
 
         function clean(){
             for (var i=0; i< allObjects.length; ++i){
                 var numofProps = allObjects[i].item.propertyContainer.children.length
-                for (var j=0; j < numofProps; ++j)
-                    allObjects[i].item.propertyContainer.children[j].destroy()
-                objectGraph.removeObjectNode(allObjects[i])
+                for (var j=0; j < numofProps; ++j){
+                    var child = allObjects[i].item.propertyContainer.children[j]
+                    if (child.editingFragment)
+                        palette.documentHandler.codeHandler.removeConnection(child.editingFragment)
+                    child.destroy()
+                }
+                palette.documentHandler.codeHandler.removeConnection(allObjects[i].item.editingFragment)
             }
 
             allObjects = []
@@ -124,21 +135,7 @@ CodePalette{
         id: efConnection
         target: editingFragment
         onObjectAdded: {
-            var object = obj.objectInfo()
-
-            var n = objectGraph.addObjectNode(numOfObjects * 400 + 50, numOfObjects * 200 + 50, (object.name + (object.id ? ("#" + object.id) : "")))
-
-            ++numOfObjects
-
-            if (object.id)
-                objectsWithId[object.id] = n
-
-            allObjects.push(n)
-
-            if (object.connection){
-                n.item.editingFragment = object.connection
-                object.connection.incrementRefCount()
-            }
+            addObject(obj.objectInfo())
         }
         onAboutToRemovePalette: {
             nodeItem.clean()

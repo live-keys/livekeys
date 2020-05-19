@@ -261,9 +261,7 @@ Item{
         function collapse(){
             for ( var i = 1; i < container.children.length; ++i ){
                 var edit = container.children[i].editingFragment
-                edit.decrementRefCount()
-                if (edit.refCount === 0)
-                    editor.documentHandler.codeHandler.removeConnection(edit)
+                editor.documentHandler.codeHandler.removeConnection(edit)
             }
 
             for (var i=1; i < container.children.length; ++i)
@@ -307,6 +305,7 @@ Item{
                         return
                     }
                 }
+                editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
 
                 if (compact) expand()
                 else objectContainer.addPropertyFragmentToContainer(ef)
@@ -371,6 +370,7 @@ Item{
                         objectContainer.closeAsPane()
 
                     collapse()
+                    editor.documentHandler.codeHandler.removeConnection(editingFragment)
 
                     var p = root.parent
                     if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
