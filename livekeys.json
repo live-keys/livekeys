@@ -1,776 +1,987 @@
 {
-    "version" : "1.6.1",
+    "version": "1.7.0",
     "name": "livekeys",
     "webpage": "https://livekeys.io",
-    "components" : {
-        "livekeys" : {
-            "version" : "1.6.1",
-            "versionsync" : {
+    "components": {
+        "livekeys": {
+            "version": "1.7.0",
+            "versionsync": {
                 "README.md": "\\s*(?:\\* \\*\\*Version\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*",
-                "application/src/livekeys.h" : [
-                  "(?:\\s*#define LIVEKEYS_VERSION_MAJOR)\\s*([0-9]*)\\s*\n",
-                  "(?:\\s*#define LIVEKEYS_VERSION_MINOR)\\s*([0-9]*)\\s*\n",
-                  "(?:\\s*#define LIVEKEYS_VERSION_PATCH)\\s*([0-9]*)\\s*"
+                "application/src/livekeys.h": [
+                    "(?:\\s*#define LIVEKEYS_VERSION_MAJOR)\\s*([0-9]*)\\s*\n",
+                    "(?:\\s*#define LIVEKEYS_VERSION_MINOR)\\s*([0-9]*)\\s*\n",
+                    "(?:\\s*#define LIVEKEYS_VERSION_PATCH)\\s*([0-9]*)\\s*"
                 ]
             }
         },
-        "live" : {
-            "version" : "1.0"
+        "live": {
+            "version": "1.0"
         },
-        "lcvcore" : {
-            "version" : "1.0"
+        "lcvcore": {
+            "version": "1.0"
         },
-        "lcvimgproc" : {
-            "version" : "1.0"
+        "lcvimgproc": {
+            "version": "1.0"
         },
-        "lcvphoto" : {
-            "version" : "1.0"
+        "lcvphoto": {
+            "version": "1.0"
         },
-        "lcvvideo" : {
-            "version" : "1.0"
+        "lcvvideo": {
+            "version": "1.0"
         }
     },
-    "external" : {
-        "opencv" : {}
+    "external": {
+        "opencv": {}
     },
-    "releases" : {
-        "gcc_64" : {
-            "compiler" : "gcc_64",
-            "environment" : {
-                "OPENCV_DIR" : "opencv_dir",
-                "QTDIR" : "qtdir"
+    "releases": {
+        "gcc_64": {
+            "compiler": "gcc_64",
+            "environment": {
+                "OPENCV_DIR": "opencv_dir",
+                "QTDIR": "qtdir"
             },
-            "build" : [
-                {"qmake" : ["-recursive"]},
-                {"make" : []}
-            ],
-            "deploy" : [
-                { "copy" : {
-                    "{release}/bin" : {
-                        "livekeys" : "-",
-                        "liblvbase.so*" : "-",
-                        "liblvview.so*" : "-",
-                        "liblveditor.so*" : "-",
-                        "liblveditqmljs.so*" : "-",
-                        "plugins" : {
-                            "live": "plugins/live",
-                            "editor": "plugins/editor",
-                            "editqml" : "plugins/editqml",
-                            "fs" : "plugins/fs",
-                            "lcvcore": "plugins/lcvcore",
-                            "lcvimgproc": "plugins/lcvimgproc",
-                            "lcvvideo": "plugins/lcvvideo",
-                            "lcvfeatures2d": "plugins/lcvfeatures2d",
-                            "lcvphoto": "plugins/lcvphoto"
-                        }
-                    },
-                    "{source}/samples" : "-"
-                }
-              },
-          { "run" : ["mkdir", "-m", "775", "link"] },
-              { "run" : ["chmod", "755", "livekeys"] },
-                { "populate" : {
-                        "plugins/editor/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64"
-                        },
-                        "plugins/editqml/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64"
-                        },
-                        "plugins/fs/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64"
-                        },
-                        "plugins/live/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64"
-                        },
-                        "plugins/lcvcore/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64"
-                        },
-                        "plugins/lcvimgproc/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64"
-                        },
-                        "plugins/lcvvideo/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64"
-                        },
-                        "plugins/lcvfeatures2d/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64"
-                        },
-                        "plugins/lcvphoto/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64"
-                        }
-                    }
-                },
-              { "solveincludes": [
-                    {
-                        "from": "{source}/lib/lvbase/include/live",
-                        "source": ["{source}/lib/lvbase/src"],
-                        "to": "dev/lvbase/include/live"
-                    },
-                    {
-                        "from": "{source}/lib/lvview/include/live",
-                        "source": ["{source}/lib/lvview/src"],
-                        "to": "dev/lvview/include/live"
-                    },
-                    {
-                        "from": "{source}/lib/lveditor/include/live",
-                        "source": ["{source}/lib/lveditor/src"],
-                        "to": "dev/lveditor/include/live"
-                    },
-                    {
-                        "from": "{source}/lib/lveditqmljs/include/live",
-                        "source": ["{source}/lib/lveditqmljs/src"],
-                        "to": "dev/lveditqmljs/include/live"
-                    },
-                    {
-                        "from": "{source}/plugins/live/include",
-                        "source": ["{source}/plugins/live/src"],
-                        "to": "dev/plugins/live/include"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvcore/include",
-                        "source": ["{source}/plugins/lcvcore/src"],
-                        "to": "dev/plugins/lcvcore/include"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvfeatures2d/include",
-                        "source": ["{source}/plugins/lcvfeatures2d/src"],
-                        "to": "dev/plugins/lcvfeatures2d/include"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvvideo/include",
-                        "source": ["{source}/plugins/lcvvideo/src"],
-                        "to": "dev/plugins/lcvvideo/include"
-                    }
-                ]
-              }
-            ]
-        },
-        "gcc_64_standalone" : {
-            "compiler" : "gcc_64",
-            "environment" : {
-                "OPENCV_DIR" : "opencv_dir",
-                "QTDIR" : "qtdir"
-            },
-            "build" : [
-                {"qmake" : ["-recursive"]},
-                {"make" : []}
-            ],
-            "deploy" : [
-                { "copy" : {
-                  "{release}/bin" : {
-                      "livekeys" : "-",
-                      "liblvbase.so*" : "-",
-                      "liblvview.so*" : "-",
-                      "liblveditor.so*" : "-",
-                      "liblveditqmljs.so*" : "-",
-                      "plugins" : {
-                          "live": "plugins/live",
-                          "editor" :"plugins/editor",
-                          "editqml" : "plugins/editqml",
-                          "fs" : "plugins/fs",
-                          "lcvcore": "plugins/lcvcore",
-                          "lcvimgproc": "plugins/lcvimgproc",
-                          "lcvvideo": "plugins/lcvvideo",
-                          "lcvfeatures2d": "plugins/lcvfeatures2d",
-                          "lcvphoto": "plugins/lcvphoto"
-                      }
-                  },
-                  "{source}/samples" : "-",
-                  "{qtdir}/lib" : {
-                    "libQt5Core.so*": "lib/-",
-                    "libQt5DBus.so*": "lib/-",
-                    "libQt5Gui.so*": "lib/-",
-                    "libQt5OpenGL.so*": "lib/-",
-                    "libQt5Qml.so*": "lib/-",
-                    "libQt5Quick.so*": "lib/-",
-                    "libQt5Script.so*": "lib/-",
-                    "libQt5Widgets.so*": "lib/-",
-                    "libQt5Network.so*": "lib/-",
-                    "libQt5Xml.so*": "lib/-",
-                    "libQt5XcbQpa.so*": "lib/-",
-                    "libicudata.so*": "lib/-",
-                    "libicui18n.so*": "lib/-",
-                    "libicuio.so*": "lib/-",
-                    "libicule.so*": "lib/-",
-                    "libiculx.so*": "lib/-",
-                    "libicutu.so*": "lib/-",
-                    "libicuuc.so*": "lib/-"
-                  },
-                  "{qtdir}/plugins" : {
-                    "imageformats" : "libraries/imageformats",
-                    "platforminputcontexts" : "libraries/platforminputcontexts",
-                    "platforms" : "libraries/platforms",
-                    "xcbglintegrations" : "libraries/xcbglintegrations"
-                  },
-                  "{qtdir}/qml" : {
-                    "QtQuick" : {
-                      "Controls/libqtquickcontrolsplugin.so": "plugins/QtQuick/Controls/-",
-                      "Controls/qmldir": "plugins/QtQuick/Controls/-",
-                      "Controls/*.qmltypes": "plugins/QtQuick/Controls/-",
-                      "Controls/*.qml": "plugins/QtQuick/Controls/-",
-                      "Controls/Private" : "plugins/QtQuick/Controls/Private",
-                      "Controls/Styles" : "plugins/QtQuick/Controls/Styles",
-                      "Dialogs" : "plugins/QtQuick/Dialogs",
-                      "Layouts": "plugins/QtQuick/Layouts",
-                      "LocalStorage": "plugins/QtQuick/LocalStorage",
-                      "Particles.2": "plugins/QtQuick/Particles.2",
-                      "PrivateWidgets": "plugins/QtQuick/PrivateWidgets",
-                      "Window.2": "plugins/QtQuick/Window.2",
-                      "XmlListModel": "plugins/QtQuick/XmlListModel"
-                    },
-                    "QtQuick.2" : "plugins/QtQuick.2",
-                    "QtQml" : "plugins/QtQml",
-                    "Qt" : "plugins/Qt",
-                    "QtWebSockets" : "plugins/-",
-                    "QtGraphicalEffects" : "plugins/-"
-                  },
-                  "{opencv_dir}" : {
-                    "libopencv_*.so*" : "external/opencv/-"
-                  }
-                }
-              },
-              { "run" : ["mkdir", "-m", "775", "link"] },
-              { "run" : ["chmod", "755", "livekeys"] },
-              { "write" : {
-                  "file": "launcher.sh",
-                  "data": [
-                    "#!/bin/bash\n",
-            "export LD_LIBRARY_PATH=`pwd`/lib:`pwd`:\n",
-                    "export QML_IMPORT_PATH=`pwd`/plugins\n",
-                    "export QML2_IMPORT_PATH=`pwd`/plugins\n",
-                    "export QT_PLUGIN_PATH=`pwd`/libraries\n",
-                    "export QT_QPA_PLATFORM_PLUGIN_PATH=`pwd`/libraries/platforms\n",
-                    "./livekeys"
+            "build": [
+                {
+                    "qmake": [
+                        "-recursive"
                     ]
-                  }
-              },
-              { "run" : ["chmod", "755", "launcher.sh"] },
-                { "populate" : {
-                        "plugins/editor/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64-standalone"
+                },
+                {
+                    "make": []
+                }
+            ],
+            "deploy": [
+                {
+                    "copy": {
+                        "{release}/bin": {
+                            "livekeys": "-",
+                            "liblvbase.so*": "-",
+                            "liblvview.so*": "-",
+                            "liblveditor.so*": "-",
+                            "liblveditqmljs.so*": "-",
+                            "plugins": {
+                                "live": "plugins/live",
+                                "editor": "plugins/editor",
+                                "editqml": "plugins/editqml",
+                                "fs": "plugins/fs",
+                                "lcvcore": "plugins/lcvcore",
+                                "lcvimgproc": "plugins/lcvimgproc",
+                                "lcvvideo": "plugins/lcvvideo",
+                                "lcvfeatures2d": "plugins/lcvfeatures2d",
+                                "lcvphoto": "plugins/lcvphoto"
+                            }
                         },
-                        "plugins/editqml/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64-standalone"
+                        "{source}/samples": "-"
+                    }
+                },
+                {
+                    "run": [
+                        "mkdir",
+                        "-m",
+                        "775",
+                        "link"
+                    ]
+                },
+                {
+                    "run": [
+                        "chmod",
+                        "755",
+                        "livekeys"
+                    ]
+                },
+                {
+                    "populate": {
+                        "plugins/editor/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64"
                         },
-                        "plugins/fs/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64-standalone"
+                        "plugins/editqml/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64"
                         },
-                        "plugins/live/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64-standalone"
+                        "plugins/fs/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64"
                         },
-                        "plugins/lcvcore/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64-standalone"
+                        "plugins/live/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64"
                         },
-                        "plugins/lcvimgproc/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64-standalone"
+                        "plugins/lcvcore/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64"
                         },
-                        "plugins/lcvvideo/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64-standalone"
+                        "plugins/lcvimgproc/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64"
                         },
-                        "plugins/lcvfeatures2d/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64-standalone"
+                        "plugins/lcvvideo/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64"
                         },
-                        "plugins/lcvphoto/live.package.json":{
-                            "release" : "linux",
-                            "build" : "gcc64-standalone"
+                        "plugins/lcvfeatures2d/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64"
+                        },
+                        "plugins/lcvphoto/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64"
                         }
                     }
                 },
-              { "solveincludes": [
-                    {
-                        "from": "{source}/lib/lvbase/include/live",
-                        "source": ["{source}/lib/lvbase/src"],
-                        "to": "dev/lvbase/include/live"
-                    },
-                    {
-                        "from": "{source}/lib/lvview/include/live",
-                        "source": ["{source}/lib/lvview/src"],
-                        "to": "dev/lvview/include/live"
-                    },
-                    {
-                        "from": "{source}/lib/lveditor/include/live",
-                        "source": ["{source}/lib/lveditor/src"],
-                        "to": "dev/lveditor/include/live"
-                    },
-                    {
-                        "from": "{source}/lib/lveditqmljs/include/live",
-                        "source": ["{source}/lib/lveditqmljs/src"],
-                        "to": "dev/lveditqmljs/include/live"
-                    },
-                    {
-                        "from": "{source}/plugins/live/include",
-                        "source": ["{source}/plugins/live/src"],
-                        "to": "dev/plugins/live/include"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvcore/include",
-                        "source": ["{source}/plugins/lcvcore/src"],
-                        "to": "dev/plugins/lcvcore/include"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvfeatures2d/include",
-                        "source": ["{source}/plugins/lcvfeatures2d/src"],
-                        "to": "dev/plugins/lcvfeatures2d/include"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvvideo/include",
-                        "source": ["{source}/plugins/lcvvideo/src"],
-                        "to": "dev/plugins/lcvvideo/include"
-                    }
-                ]
-              }
+                {
+                    "solveincludes": [
+                        {
+                            "from": "{source}/lib/lvbase/include/live",
+                            "source": [
+                                "{source}/lib/lvbase/src"
+                            ],
+                            "to": "dev/lvbase/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lvview/include/live",
+                            "source": [
+                                "{source}/lib/lvview/src"
+                            ],
+                            "to": "dev/lvview/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lveditor/include/live",
+                            "source": [
+                                "{source}/lib/lveditor/src"
+                            ],
+                            "to": "dev/lveditor/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lveditqmljs/include/live",
+                            "source": [
+                                "{source}/lib/lveditqmljs/src"
+                            ],
+                            "to": "dev/lveditqmljs/include/live"
+                        },
+                        {
+                            "from": "{source}/plugins/live/include",
+                            "source": [
+                                "{source}/plugins/live/src"
+                            ],
+                            "to": "dev/plugins/live/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvcore/include",
+                            "source": [
+                                "{source}/plugins/lcvcore/src"
+                            ],
+                            "to": "dev/plugins/lcvcore/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvfeatures2d/include",
+                            "source": [
+                                "{source}/plugins/lcvfeatures2d/src"
+                            ],
+                            "to": "dev/plugins/lcvfeatures2d/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvvideo/include",
+                            "source": [
+                                "{source}/plugins/lcvvideo/src"
+                            ],
+                            "to": "dev/plugins/lcvvideo/include"
+                        }
+                    ]
+                }
             ]
         },
-        "msvc2015_64" : {
-              "compiler" : "msvc2015_64",
-              "environment" : {
-                  "OPENCV_DIR" : "opencv_dir",
-                  "QTDIR" : "qtdir",
-                  "VS140COMNTOOLS": "vs140comntools"
-              },
-              "build" : [
-                  {"qmake" : ["-recursive"]},
-                  {"nmake" : []}
-              ],
-              "deploy" : [
-                  { "copy" : {
-                      "{qtdir}/bin" : {
-                          "d3dcompiler_47.dll": "-",
-                          "icudt*.dll": "-",
-                          "icuin*.dll": "-",
-                          "icuuc*.dll": "-",
-                          "libEGL.dll": "-",
-                          "libGLESv2.dll": "-",
-                          "Qt*Core.dll": "-",
-                          "Qt*Network.dll": "-",
-                          "Qt*Qml.dll": "-",
-                          "Qt*Quick.dll": "-",
-                          "Qt*Script.dll": "-",
-                          "Qt*Gui.dll": "-",
-                          "Qt*Widgets.dll": "-",
-                          "Qt*WinExtras.dll": "-"
-                      },
-                      "{qtdir}/plugins" : {
-                          "platforms/qwindows.dll": "libraries/platforms/qwindows.dll"
-                      },
-                      "{qtdir}/qml" : {
-                          "QtQuick" : {
-                            "Controls": {
-                                "Private": "plugins/QtQuick/Controls/Private",
-                                "Styles": {
-                                    "Base": {
-                                        "ApplicationWindowStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
-                                        "BasicTableViewStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
-                                        "ButtonStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
-                                        "CheckBoxStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
-                                        "FocusFrameStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
-                                        "MenuStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
-                                        "ScrollViewStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
-                                        "TableViewStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
-                                        "TextFieldStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
-                                        "ToolBarStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
-                                        "TreeViewStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-"
-                                    },
-                                    "Flat/qtquickextrasflatplugin.dll" : "plugins/QtQuick/Controls/Styles/Flat/-",
-                                    "Flat/qmldir" : "plugins/QtQuick/Controls/Styles/Flat/-",
-                                    "qmldir" : "plugins/QtQuick/Controls/Styles/-"
-                                },
-                                "ApplicationWindow.qml": "plugins/QtQuick/Controls/-",
-                                "Button.qml": "plugins/QtQuick/Controls/-",
-                                "ComboBox.qml": "plugins/QtQuick/Controls/-",
-                                "Menu.qml": "plugins/QtQuick/Controls/-",
-                                "MenuBar.qml": "plugins/QtQuick/Controls/-",
-                                "ScrollView.qml": "plugins/QtQuick/Controls/-",
-                                "SplitView.qml": "plugins/QtQuick/Controls/-",
-                                "TableView.qml": "plugins/QtQuick/Controls/-",
-                                "TableViewColumn.qml": "plugins/QtQuick/Controls/-",
-                                "TextField.qml": "plugins/QtQuick/Controls/-",
-                                "ToolBar.qml": "plugins/QtQuick/Controls/-",
-                                "ToolButton.qml": "plugins/QtQuick/Controls/-",
-                                "TreeView.qml": "plugins/QtQuick/Controls/-",
-                                "qtquickcontrolsplugin.dll": "plugins/QtQuick/Controls/-",
-                                "qmldir": "plugins/QtQuick/Controls/-",
-                                "*.qmltypes": "plugins/QtQuick/Controls/-"
-                                },
-                            "Dialogs": {
-                                "qml": {
-                                    "DefaultWindowDecoration.qml": "plugins/QtQuick/Dialogs/qml/-",
-                                    "IconButtonStyle.qml": "plugins/QtQuick/Dialogs/qml/-",
-                                    "IconGlyph.qml": "plugins/QtQuick/Dialogs/qml/-",
-                                    "qmldir": "plugins/QtQuick/Dialogs/qml/-"
-                                },
-                                "DefaultFileDialog.qml": "plugins/QtQuick/Dialogs/-",
-                                "dialogplugin.dll" : "plugins/QtQuick/Dialogs/-",
-                                "qmldir": "plugins/QtQuick/Dialogs/-",
-                                "*.qmltypes": "plugins/QtQuick/Dialogs/-",
-                                "Private/dialogsprivateplugin.dll" : "plugins/QtQuick/Dialogs/Private/-",
-                                "Private/qmldir" : "plugins/QtQuick/Dialogs/Private/-",
-                                "Private/*.qmltypes" : "plugins/QtQuick/Dialogs/Private/-"
+        "gcc_64_standalone": {
+            "compiler": "gcc_64",
+            "environment": {
+                "OPENCV_DIR": "opencv_dir",
+                "QTDIR": "qtdir"
+            },
+            "build": [
+                {
+                    "qmake": [
+                        "-recursive"
+                    ]
+                },
+                {
+                    "make": []
+                }
+            ],
+            "deploy": [
+                {
+                    "copy": {
+                        "{release}/bin": {
+                            "livekeys": "-",
+                            "liblvbase.so*": "-",
+                            "liblvview.so*": "-",
+                            "liblveditor.so*": "-",
+                            "liblveditqmljs.so*": "-",
+                            "plugins": {
+                                "live": "plugins/live",
+                                "editor": "plugins/editor",
+                                "editqml": "plugins/editqml",
+                                "fs": "plugins/fs",
+                                "lcvcore": "plugins/lcvcore",
+                                "lcvimgproc": "plugins/lcvimgproc",
+                                "lcvvideo": "plugins/lcvvideo",
+                                "lcvfeatures2d": "plugins/lcvfeatures2d",
+                                "lcvphoto": "plugins/lcvphoto"
+                            }
+                        },
+                        "{source}/samples": "-",
+                        "{qtdir}/lib": {
+                            "libQt5Core.so*": "lib/-",
+                            "libQt5DBus.so*": "lib/-",
+                            "libQt5Gui.so*": "lib/-",
+                            "libQt5OpenGL.so*": "lib/-",
+                            "libQt5Qml.so*": "lib/-",
+                            "libQt5Quick.so*": "lib/-",
+                            "libQt5Script.so*": "lib/-",
+                            "libQt5Widgets.so*": "lib/-",
+                            "libQt5Network.so*": "lib/-",
+                            "libQt5Xml.so*": "lib/-",
+                            "libQt5XcbQpa.so*": "lib/-",
+                            "libicudata.so*": "lib/-",
+                            "libicui18n.so*": "lib/-",
+                            "libicuio.so*": "lib/-",
+                            "libicule.so*": "lib/-",
+                            "libiculx.so*": "lib/-",
+                            "libicutu.so*": "lib/-",
+                            "libicuuc.so*": "lib/-"
+                        },
+                        "{qtdir}/plugins": {
+                            "imageformats": "libraries/imageformats",
+                            "platforminputcontexts": "libraries/platforminputcontexts",
+                            "platforms": "libraries/platforms",
+                            "xcbglintegrations": "libraries/xcbglintegrations"
+                        },
+                        "{qtdir}/qml": {
+                            "QtQuick": {
+                                "Controls/libqtquickcontrolsplugin.so": "plugins/QtQuick/Controls/-",
+                                "Controls/qmldir": "plugins/QtQuick/Controls/-",
+                                "Controls/*.qmltypes": "plugins/QtQuick/Controls/-",
+                                "Controls/*.qml": "plugins/QtQuick/Controls/-",
+                                "Controls/Private": "plugins/QtQuick/Controls/Private",
+                                "Controls/Styles": "plugins/QtQuick/Controls/Styles",
+                                "Dialogs": "plugins/QtQuick/Dialogs",
+                                "Layouts": "plugins/QtQuick/Layouts",
+                                "LocalStorage": "plugins/QtQuick/LocalStorage",
+                                "Particles.2": "plugins/QtQuick/Particles.2",
+                                "PrivateWidgets": "plugins/QtQuick/PrivateWidgets",
+                                "Window.2": "plugins/QtQuick/Window.2",
+                                "XmlListModel": "plugins/QtQuick/XmlListModel"
                             },
-                            "Layouts/qquicklayoutsplugin.dll": "plugins/QtQuick/Layouts/-",
-                            "Layouts/qmldir": "plugins/QtQuick/Layouts/-",
-                            "Layouts/*.qmltypes": "plugins/QtQuick/Layouts/-",
-                            "LocalStorage/qmllocalstorageplugin.dll": "plugins/QtQuick/LocalStorage/-",
-                            "LocalStorage/qmldir": "plugins/QtQuick/LocalStorage/-",
-                            "LocalStorage/*.qmltypes": "plugins/QtQuick/LocalStorage/-",
-                            "Particles.2/particlesplugin.dll": "plugins/QtQuick/Particles.2/-",
-                            "Particles.2/qmldir": "plugins/QtQuick/Particles.2/-",
-                            "Particles.2/*.qmltypes": "plugins/QtQuick/Particles.2/-",
-                            "PrivateWidgets/widgetsplugin.dll": "plugins/QtQuick/PrivateWidgets/-",
-                            "PrivateWidgets/qmldir": "plugins/QtQuick/PrivateWidgets/-",
-                            "PrivateWidgets/*.qmltypes": "plugins/QtQuick/PrivateWidgets/-",
-                            "Window.2/windowplugin.dll": "plugins/QtQuick/Window.2/-",
-                            "Window.2/qmldir": "plugins/QtQuick/Window.2/-",
-                            "Window.2/*.qmltypes": "plugins/QtQuick/Window.2/-",
-                            "XmlListModel/qmlxmllistmodelplugin.dll": "plugins/QtQuick/XmlListModel/-",
-                            "XmlListModel/qmldir": "plugins/QtQuick/XmlListModel/-",
-                            "XmlListModel/*.qmltypes": "plugins/QtQuick/XmlListModel/-"
-                          },
-                        "QtQuick.2" : {
-                            "qtquick2plugin.dll": "plugins/QtQuick.2/-",
-                            "qmldir": "plugins/QtQuick.2/-",
-                            "*.qmltypes": "plugins/QtQuick.2/-"
+                            "QtQuick.2": "plugins/QtQuick.2",
+                            "QtQml": "plugins/QtQml",
+                            "Qt": "plugins/Qt",
+                            "QtWebSockets": "plugins/-",
+                            "QtGraphicalEffects": "plugins/-"
                         },
-                        "QtQml" : {
-                            "Models.2/*modelsplugin.dll" : "plugins/QtQml/Models.2/-",
-                            "Models.2/*qmldir": "plugins/QtQml/Models.2/-",
-                            "Models.2/*.qmltypes": "plugins/QtQml/Models.2/-",
-                            "StateMachine/*qtqmlstatemachine.dll": "plugins/QtQml/StateMachine/-",
-                            "StateMachine/*qmldir": "plugins/QtQml/StateMachine/-",
-                            "StateMachine/*.qmltypes": "plugins/QtQml/StateMachine/-",
-                            "*.qmltypes" : "plugins/QtQml/-",
-                            "*qmldir": "plugins/QtQml/-"
-                        },
-                        "Qt/labs" : {
-                            "folderlistmodel/qmlfolderlistmodelplugin.dll" : "plugins/Qt/labs/folderlistmodel/-",
-                            "folderlistmodel/qmldir" : "plugins/Qt/labs/folderlistmodel/-",
-                            "folderlistmodel/*.qmltypes" : "plugins/Qt/labs/folderlistmodel/-",
-                            "settings/qmlsettingsplugin.dll" : "plugins/Qt/labs/settings/-",
-                            "settings/*.qmltypes" : "plugins/Qt/labs/settings/-",
-                            "settings/qmldir" : "plugins/Qt/labs/settings/-"
+                        "{opencv_dir}": {
+                            "libopencv_*.so*": "external/opencv/-"
                         }
-                      },
-                      "{vs140comntools}/../../VC/redist/x64/Microsoft.VC140.CRT" : {
-                        "vcruntime140.dll": "-",
-                        "vccorlib140.dll": "-",
-                        "msvcp140.dll": "-",
-                        "concrt140.dll": "-"
-                      },
-                      "{release}/bin/livekeys.exe" : "-",
-                      "{release}/bin/lvbase.dll" : "-",
-                      "{release}/bin/lvview.dll" : "-",
-                      "{release}/bin/lveditor.dll" : "-",
-                      "{release}/bin/lveditqmljs.dll" : "-",
-                      "{release}/bin/external/opencv" : "external/opencv",
-                      "{release}/bin/plugins": {
-                            "live" : "plugins/live",
+                    }
+                },
+                {
+                    "run": [
+                        "mkdir",
+                        "-m",
+                        "775",
+                        "link"
+                    ]
+                },
+                {
+                    "run": [
+                        "chmod",
+                        "755",
+                        "livekeys"
+                    ]
+                },
+                {
+                    "write": {
+                        "file": "launcher.sh",
+                        "data": [
+                            "#!/bin/bash\n",
+                            "export LD_LIBRARY_PATH=`pwd`/lib:`pwd`:\n",
+                            "export QML_IMPORT_PATH=`pwd`/plugins\n",
+                            "export QML2_IMPORT_PATH=`pwd`/plugins\n",
+                            "export QT_PLUGIN_PATH=`pwd`/libraries\n",
+                            "export QT_QPA_PLATFORM_PLUGIN_PATH=`pwd`/libraries/platforms\n",
+                            "./livekeys"
+                        ]
+                    }
+                },
+                {
+                    "run": [
+                        "chmod",
+                        "755",
+                        "launcher.sh"
+                    ]
+                },
+                {
+                    "populate": {
+                        "plugins/editor/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64-standalone"
+                        },
+                        "plugins/editqml/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64-standalone"
+                        },
+                        "plugins/fs/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64-standalone"
+                        },
+                        "plugins/live/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64-standalone"
+                        },
+                        "plugins/lcvcore/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64-standalone"
+                        },
+                        "plugins/lcvimgproc/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64-standalone"
+                        },
+                        "plugins/lcvvideo/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64-standalone"
+                        },
+                        "plugins/lcvfeatures2d/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64-standalone"
+                        },
+                        "plugins/lcvphoto/live.package.json": {
+                            "release": "linux",
+                            "build": "gcc64-standalone"
+                        }
+                    }
+                },
+                {
+                    "solveincludes": [
+                        {
+                            "from": "{source}/lib/lvbase/include/live",
+                            "source": [
+                                "{source}/lib/lvbase/src"
+                            ],
+                            "to": "dev/lvbase/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lvview/include/live",
+                            "source": [
+                                "{source}/lib/lvview/src"
+                            ],
+                            "to": "dev/lvview/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lveditor/include/live",
+                            "source": [
+                                "{source}/lib/lveditor/src"
+                            ],
+                            "to": "dev/lveditor/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lveditqmljs/include/live",
+                            "source": [
+                                "{source}/lib/lveditqmljs/src"
+                            ],
+                            "to": "dev/lveditqmljs/include/live"
+                        },
+                        {
+                            "from": "{source}/plugins/live/include",
+                            "source": [
+                                "{source}/plugins/live/src"
+                            ],
+                            "to": "dev/plugins/live/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvcore/include",
+                            "source": [
+                                "{source}/plugins/lcvcore/src"
+                            ],
+                            "to": "dev/plugins/lcvcore/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvfeatures2d/include",
+                            "source": [
+                                "{source}/plugins/lcvfeatures2d/src"
+                            ],
+                            "to": "dev/plugins/lcvfeatures2d/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvvideo/include",
+                            "source": [
+                                "{source}/plugins/lcvvideo/src"
+                            ],
+                            "to": "dev/plugins/lcvvideo/include"
+                        }
+                    ]
+                }
+            ]
+        },
+        "msvc2017_64": {
+            "compiler": "msvc2017_64",
+            "environment": {
+                "OPENCV_DIR": "opencv_dir",
+                "QTDIR": "qtdir",
+                "VS141COMNTOOLS": "vs141comntools"
+            },
+            "build": [
+                {
+                    "qmake": [
+                        "-recursive"
+                    ]
+                },
+                {
+                    "nmake": []
+                }
+            ],
+            "deploy": [
+                {
+                    "copy": {
+                        "{qtdir}/bin": {
+                            "d3dcompiler_47.dll": "-",
+                            "libEGL.dll": "-",
+                            "libGLESv2.dll": "-",
+                            "Qt*Core.dll": "-",
+                            "Qt*Gui.dll": "-",
+                            "Qt*Network.dll": "-",
+                            "Qt*Positioning.dll": "-",
+                            "Qt*Qml.dll": "-",
+                            "Qt*QmlModels.dll": "-",
+                            "Qt*QmlWorkerScript.dll": "-",
+                            "Qt*Quick.dll": "-",
+                            "Qt*WebChannel.dll": "-",
+                            "Qt*WebEngine.dll": "-",
+                            "Qt*WebEngineCore.dll": "-",
+                            "Qt*Widgets.dll": "-",
+                            "QtWebEngineProcess.exe": "-"
+                        },
+                        "{qtdir}/plugins": {
+                            "platforms/qwindows.dll": "libraries/platforms/qwindows.dll"
+                        },
+                        "{qtdir}/qml": {
+                            "QtQuick": {
+                                "Controls": {
+                                    "Private": "plugins/QtQuick/Controls/Private",
+                                    "Styles": {
+                                        "Base": {
+                                            "ApplicationWindowStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
+                                            "BasicTableViewStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
+                                            "ButtonStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
+                                            "CheckBoxStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
+                                            "FocusFrameStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
+                                            "MenuStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
+                                            "ScrollViewStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
+                                            "TableViewStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
+                                            "TextFieldStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
+                                            "ToolBarStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
+                                            "TreeViewStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-"
+                                        },
+                                        "Flat/qtquickextrasflatplugin.dll": "plugins/QtQuick/Controls/Styles/Flat/-",
+                                        "Flat/qmldir": "plugins/QtQuick/Controls/Styles/Flat/-",
+                                        "qmldir": "plugins/QtQuick/Controls/Styles/-"
+                                    },
+                                    "qmldir": "plugins/QtQuick/Controls/-",
+                                    "*.qmltypes": "plugins/QtQuick/Controls/-",
+                                    "ApplicationWindow.qml": "plugins/QtQuick/Controls/-",
+                                    "Button.qml": "plugins/QtQuick/Controls/-",
+                                    "ComboBox.qml": "plugins/QtQuick/Controls/-",
+                                    "Menu.qml": "plugins/QtQuick/Controls/-",
+                                    "MenuBar.qml": "plugins/QtQuick/Controls/-",
+                                    "ScrollView.qml": "plugins/QtQuick/Controls/-",
+                                    "SplitView.qml": "plugins/QtQuick/Controls/-",
+                                    "TableView.qml": "plugins/QtQuick/Controls/-",
+                                    "TableViewColumn.qml": "plugins/QtQuick/Controls/-",
+                                    "TextField.qml": "plugins/QtQuick/Controls/-",
+                                    "ToolBar.qml": "plugins/QtQuick/Controls/-",
+                                    "ToolButton.qml": "plugins/QtQuick/Controls/-",
+                                    "TreeView.qml": "plugins/QtQuick/Controls/-",
+                                    "qtquickcontrolsplugin.dll": "plugins/QtQuick/Controls/-"
+                                },
+                                "Dialogs": {
+                                    "qml": {
+                                        "DefaultWindowDecoration.qml": "plugins/QtQuick/Dialogs/qml/-",
+                                        "IconButtonStyle.qml": "plugins/QtQuick/Dialogs/qml/-",
+                                        "IconGlyph.qml": "plugins/QtQuick/Dialogs/qml/-",
+                                        "qmldir": "plugins/QtQuick/Dialogs/qml/-"
+                                    },
+                                    "DefaultFileDialog.qml": "plugins/QtQuick/Dialogs/-",
+                                    "dialogplugin.dll": "plugins/QtQuick/Dialogs/-",
+                                    "qmldir": "plugins/QtQuick/Dialogs/-",
+                                    "*.qmltypes": "plugins/QtQuick/Dialogs/-",
+                                    "Private/dialogsprivateplugin.dll": "plugins/QtQuick/Dialogs/Private/-",
+                                    "Private/qmldir": "plugins/QtQuick/Dialogs/Private/-",
+                                    "Private/*.qmltypes": "plugins/QtQuick/Dialogs/Private/-"
+                                },
+                                "Layouts/qquicklayoutsplugin.dll": "plugins/QtQuick/Layouts/-",
+                                "Layouts/qmldir": "plugins/QtQuick/Layouts/-",
+                                "Layouts/*.qmltypes": "plugins/QtQuick/Layouts/-",
+                                "LocalStorage/qmllocalstorageplugin.dll": "plugins/QtQuick/LocalStorage/-",
+                                "LocalStorage/qmldir": "plugins/QtQuick/LocalStorage/-",
+                                "LocalStorage/*.qmltypes": "plugins/QtQuick/LocalStorage/-",
+                                "Particles.2/particlesplugin.dll": "plugins/QtQuick/Particles.2/-",
+                                "Particles.2/qmldir": "plugins/QtQuick/Particles.2/-",
+                                "Particles.2/*.qmltypes": "plugins/QtQuick/Particles.2/-",
+                                "PrivateWidgets/widgetsplugin.dll": "plugins/QtQuick/PrivateWidgets/-",
+                                "PrivateWidgets/qmldir": "plugins/QtQuick/PrivateWidgets/-",
+                                "PrivateWidgets/*.qmltypes": "plugins/QtQuick/PrivateWidgets/-",
+                                "Window.2/windowplugin.dll": "plugins/QtQuick/Window.2/-",
+                                "Window.2/qmldir": "plugins/QtQuick/Window.2/-",
+                                "Window.2/*.qmltypes": "plugins/QtQuick/Window.2/-",
+                                "XmlListModel/qmlxmllistmodelplugin.dll": "plugins/QtQuick/XmlListModel/-",
+                                "XmlListModel/qmldir": "plugins/QtQuick/XmlListModel/-",
+                                "XmlListModel/*.qmltypes": "plugins/QtQuick/XmlListModel/-"
+                            },
+                            "QtQuick.2": {
+                                "qtquick2plugin.dll": "plugins/QtQuick.2/-",
+                                "qmldir": "plugins/QtQuick.2/-",
+                                "*.qmltypes": "plugins/QtQuick.2/-"
+                            },
+                            "Qt/labs": {
+                                "folderlistmodel/qmlfolderlistmodelplugin.dll": "plugins/Qt/labs/folderlistmodel/-",
+                                "folderlistmodel/qmldir": "plugins/Qt/labs/folderlistmodel/-",
+                                "folderlistmodel/*.qmltypes": "plugins/Qt/labs/folderlistmodel/-",
+                                "settings/qmlsettingsplugin.dll": "plugins/Qt/labs/settings/-",
+                                "settings/*.qmltypes": "plugins/Qt/labs/settings/-",
+                                "settings/qmldir": "plugins/Qt/labs/settings/-"
+                            },
+                            "QtQml": {
+                                "Models.2/*modelsplugin.dll": "plugins/QtQml/Models.2/-",
+                                "Models.2/*qmldir": "plugins/QtQml/Models.2/-",
+                                "Models.2/*.qmltypes": "plugins/QtQml/Models.2/-",
+                                "StateMachine/*qtqmlstatemachine.dll": "plugins/QtQml/StateMachine/-",
+                                "StateMachine/*qmldir": "plugins/QtQml/StateMachine/-",
+                                "StateMachine/*.qmltypes": "plugins/QtQml/StateMachine/-",
+                                "*.qmltypes": "plugins/QtQml/-",
+                                "*qmldir": "plugins/QtQml/-",
+                                "qmlplugin.dll": "plugins/QtQml/-"
+                            },
+                            "QtWebEngine": {
+                                "qmldir": "plugins/QtWebEngine/-",
+                                "*.qmltypes": "plugins/QtWebEngine/-",
+                                "qtwebengineplugin.dll": "plugins/QtWebEngine/-"
+                            }
+                        },
+                        "{qtdir}/resources": "resources",
+                        "{qtdir}/translations": "translations",
+                        "{vs141comntools}/../../VC/Redist/MSVC/14.16.27012/x64/Microsoft.VC141.CRT": {
+                            "concrt140.dll": "-",
+                            "msvcp140.dll": "-",
+                            "msvcp140_1.dll": "-",
+                            "msvcp140_2.dll": "-",
+                            "vccorlib140.dll": "-",
+                            "vcruntime140.dll": "-"
+                        },
+                        "{release}/bin/livekeys.exe": "-",
+                        "{release}/bin/lvbase.dll": "-",
+                        "{release}/bin/lvview.dll": "-",
+                        "{release}/bin/lveditor.dll": "-",
+                        "{release}/bin/lveditqmljs.dll": "-",
+                        "{release}/bin/external/opencv": "external/opencv",
+                        "{release}/bin/plugins": {
+                            "base": "plugins/base",
                             "editor": "plugins/editor",
                             "editqml": "plugins/editqml",
                             "fs": "plugins/fs",
                             "lcvcore": "plugins/lcvcore",
-                            "lcvimgproc": "plugins/lcvimgproc",
-                            "lcvvideo": "plugins/lcvvideo",
                             "lcvfeatures2d": "plugins/lcvfeatures2d",
-                            "lcvphoto": "plugins/lcvphoto"
-                      },
-                      "{release}/bin/dev/lvbase/lib/lvbase.lib" : "dev/lvbase/lib/-",
-                      "{release}/bin/dev/lvview/lib/lvview.lib" : "dev/lvview/lib/-",
-                      "{release}/bin/dev/lveditor/lib/lveditor.lib" : "dev/lveditor/lib/-",
-                      "{release}/bin/dev/lveditqmljs/lib/lveditqmljs.lib" : "dev/lveditqmljs/lib/-",
-                      "{release}/bin/dev/plugins": {
-                            "live/lib/live.lib" : "dev/plugins/live/lib/-",
+                            "lcvimgproc": "plugins/lcvimgproc",
+                            "lcvphoto": "plugins/lcvphoto",
+                            "lcvvideo": "plugins/lcvvideo",
+                            "live": "plugins/live",
+                            "squareone": "plugins/squareone",
+                            "timeline": "plugins/timeline",
+                            "workspace": "plugins/workspace"
+                        },
+                        "{release}/bin/dev/lvbase/lib/lvbase.lib": "dev/lvbase/lib/-",
+                        "{release}/bin/dev/lvview/lib/lvview.lib": "dev/lvview/lib/-",
+                        "{release}/bin/dev/lveditor/lib/lveditor.lib": "dev/lveditor/lib/-",
+                        "{release}/bin/dev/lveditqmljs/lib/lveditqmljs.lib": "dev/lveditqmljs/lib/-",
+                        "{release}/bin/dev/plugins": {
+                            "base/lib/base.lib": "dev/plugins/base/lib/-",
+                            "editor/lib/editor.lib": "dev/plugins/editor/lib/-",
+                            "editqml/lib/editqml.lib": "dev/plugins/editqml/lib/-",
+                            "fs/lib/fs.lib": "dev/plugins/fs/lib/-",
                             "lcvcore/lib/lcvcore.lib": "dev/plugins/lcvcore/lib/-",
-                            "lcvimgproc/lib/lcvimgproc.lib": "dev/plugins/lcvimgproc/lib/-",
-                            "lcvvideo/lib/lcvvideo.lib": "dev/plugins/lcvvideo/lib/-",
                             "lcvfeatures2d/lib/lcvfeatures2d.lib": "dev/plugins/lcvfeatures2d/lib/-",
-                            "lcvphoto/lib/lcvphoto.lib": "dev/plugins/lcvphoto/lib/-"
-                      },
-                      "{source}/project" : "dev/project",
-                      "{source}/samples" : "-"
+                            "lcvimgproc/lib/lcvimgproc.lib": "dev/plugins/lcvimgproc/lib/-",
+                            "lcvphoto/lib/lcvphoto.lib": "dev/plugins/lcvphoto/lib/-",
+                            "lcvvideo/lib/lcvvideo.lib": "dev/plugins/lcvvideo/lib/-",
+                            "live/lib/live.lib": "dev/plugins/live/lib/-",
+                            "timeline/lib/timeline.lib": "dev/plugins/timeline/lib/-",
+                            "workspace/quickqanava/lib/quickqanava.lib": "dev/plugins/workspace/quickqanava/lib/-"
+                        },
+                        "{source}/project": "dev/project",
+                        "{source}/samples": "-"
                     }
-                  },
-
-                { "populate" : {
-                        "plugins/editor/live.package.json":{
-                            "release" : "win",
-                            "build" : "msvc2015"
+                },
+                {
+                    "write": {
+                        "file": "qt.conf",
+                        "data": [
+                            "[Paths]\n",
+                            "Data=.\n",
+                            "Qml2Imports=plugins\n",
+                            "Binaries=.\n",
+                            "LibraryExecutables=.\n",
+                            "Plugins=libraries"
+                        ]
+                    }
+                },
+                {
+                    "populate": {
+                        "plugins/base/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
                         },
-                        "plugins/editqml/live.package.json":{
-                            "release" : "win",
-                            "build" : "msvc2015"
+                        "plugins/editor/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
                         },
-                        "plugins/fs/live.package.json":{
-                            "release" : "win",
-                            "build" : "msvc2015"
+                        "plugins/editqml/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
                         },
-                        "plugins/live/live.package.json":{
-                            "release" : "win",
-                            "build" : "msvc2015"
+                        "plugins/fs/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
                         },
-                        "plugins/lcvcore/live.package.json":{
-                            "release" : "win",
-                            "build" : "msvc2015"
+                        "plugins/live/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
                         },
-                        "plugins/lcvimgproc/live.package.json":{
-                            "release" : "win",
-                            "build" : "msvc2015"
+                        "plugins/lcvcore/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
                         },
-                        "plugins/lcvvideo/live.package.json":{
-                            "release" : "win",
-                            "build" : "msvc2015"
+                        "plugins/lcvimgproc/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
                         },
-                        "plugins/lcvfeatures2d/live.package.json":{
-                            "release" : "win",
-                            "build" : "msvc2015"
+                        "plugins/lcvvideo/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
                         },
-                        "plugins/lcvphoto/live.package.json":{
-                            "release" : "win",
-                            "build" : "msvc2015"
+                        "plugins/lcvfeatures2d/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
+                        },
+                        "plugins/lcvphoto/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
+                        },
+                        "plugins/live/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
+                        },
+                        "plugins/timeline/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
+                        },
+                        "plugins/workspace/live.package.json": {
+                            "release": "win",
+                            "build": "msvc2017"
                         }
                     }
                 },
-                { "solveincludes": [
-                      {
-                          "from": "{source}/lib/lvbase/include/live",
-                          "source": ["{source}/lib/lvbase/src"],
-                          "to": "dev/lvbase/include/live"
-                      },
-                      {
-                          "from": "{source}/lib/lvview/include/live",
-                          "source": ["{source}/lib/lvview/src"],
-                          "to": "dev/lvview/include/live"
-                      },
-                      {
-                          "from": "{source}/lib/lveditor/include/live",
-                          "source": ["{source}/lib/lveditor/src"],
-                          "to": "dev/lveditor/include/live"
-                      },
-                      {
-                          "from": "{source}/lib/lveditqmljs/include/live",
-                          "source": ["{source}/lib/lveditqmljs/src"],
-                          "to": "dev/lveditqmljs/include/live"
-                      },
-                      {
-                          "from": "{source}/plugins/live/include",
-                          "source": ["{source}/plugins/live/src"],
-                          "to": "dev/plugins/live/include"
-                      },
-                      {
-                          "from": "{source}/plugins/lcvcore/include",
-                          "source": ["{source}/plugins/lcvcore/src"],
-                          "to": "dev/plugins/lcvcore/include"
-                      },
-                      {
-                          "from": "{source}/plugins/lcvfeatures2d/include",
-                          "source": ["{source}/plugins/lcvfeatures2d/src"],
-                          "to": "dev/plugins/lcvfeatures2d/include"
-                      },
-                      {
-                          "from": "{source}/plugins/lcvvideo/include",
-                          "source": ["{source}/plugins/lcvvideo/src"],
-                          "to": "dev/plugins/lcvvideo/include"
-                      }
-                  ]
+                {
+                    "solveincludes": [
+                        {
+                            "from": "{source}/lib/lvbase/include/live",
+                            "source": [
+                                "{source}/lib/lvbase/src"
+                            ],
+                            "to": "dev/lvbase/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lvview/include/live",
+                            "source": [
+                                "{source}/lib/lvview/src"
+                            ],
+                            "to": "dev/lvview/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lveditor/include/live",
+                            "source": [
+                                "{source}/lib/lveditor/src"
+                            ],
+                            "to": "dev/lveditor/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lveditqmljs/include/live",
+                            "source": [
+                                "{source}/lib/lveditqmljs/src"
+                            ],
+                            "to": "dev/lveditqmljs/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lvelements/include/live",
+                            "source": [
+                                "{source}/lib/lvelements/src"
+                            ],
+                            "to": "dev/lvelements/include/live"
+                        },
+                        {
+                            "from": "{source}/plugins/live/include",
+                            "source": [
+                                "{source}/plugins/live/src"
+                            ],
+                            "to": "dev/plugins/live/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvcore/include",
+                            "source": [
+                                "{source}/plugins/lcvcore/src"
+                            ],
+                            "to": "dev/plugins/lcvcore/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvfeatures2d/include",
+                            "source": [
+                                "{source}/plugins/lcvfeatures2d/src"
+                            ],
+                            "to": "dev/plugins/lcvfeatures2d/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvvideo/include",
+                            "source": [
+                                "{source}/plugins/lcvvideo/src"
+                            ],
+                            "to": "dev/plugins/lcvvideo/include"
+                        }
+                    ]
                 }
             ]
         },
-        "macos_clang_64" : {
-            "compiler" : "clang_64",
-            "environment" : {
-                "OPENCV_DIR" : "opencv_dir",
-                "QTDIR" : "qtdir"
+        "macos_clang_64": {
+            "compiler": "clang_64",
+            "environment": {
+                "OPENCV_DIR": "opencv_dir",
+                "QTDIR": "qtdir"
             },
-            "build" : [
-                {"qmake" : ["-recursive"]},
-                {"make" : []}
+            "build": [
+                {
+                    "qmake": [
+                        "-recursive"
+                    ]
+                },
+                {
+                    "make": []
+                }
             ],
-            "deploy" : [
-                { "copy" : {
-                    "{release}/bin/livekeys.app" : "-",
-                    "{source}/samples" : "livekeys.app/Contents/Samples",
-                    "{source}/project" : "livekeys.app/Contents/Project",
-                    "{opencv_dir}/lib/libopencv_*": "livekeys.app/Contents/Frameworks/OpenCV.framework/Libraries/-",
-                    "{qtdir}/qml" : {
-                        "Qt" : "livekeys.app/Contents/PlugIns/Qt",
-                        "QtCanvas3D" : "livekeys.app/Contents/PlugIns/QtCanvas3D",
-                        "QtGraphicalEffects" : "livekeys.app/Contents/PlugIns/QtGraphicalEffects",
-                        "QtMultimedia" : "livekeys.app/Contents/PlugIns/QtMultimedia",
-                        "QtQml" : "livekeys.app/Contents/PlugIns/QtQml",
-                        "QtQuick" : "livekeys.app/Contents/PlugIns/QtQuick",
-                        "QtQuick.2" : "livekeys.app/Contents/PlugIns/QtQuick.2",
-                        "QtWebSockets" : "livekeys.app/Contents/PlugIns/QtWebSockets"
-                    },
-                    "{qtdir}/plugins" : {
-                        "imageformats" : "livekeys.app/Contents/Libraries/imageformats",
-                        "platforms" : "livekeys.app/Contents/Libraries/platforms"
-                    },
-                    "{qtdir}/lib" : {
-                        "Qt3DExtras.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DExtras.framework/Versions/5",
-                        "Qt3DInput.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DInput.framework/Versions/5",
-                        "Qt3DLogic.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DLogic.framework/Versions/5",
-                        "Qt3DQuick.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DQuick.framework/Versions/5",
-                        "Qt3DQuickExtras.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DQuickExtras.framework/Versions/5",
-                        "Qt3DQuickInput.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DQuickInput.framework/Versions/5",
-                        "Qt3DQuickRender.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DQuickRender.framework/Versions/5",
-                        "Qt3DRender.framework/Versions/5" : "livekeys.app/Contents/Frameworks/Qt3DRender.framework/Versions/5",
-                        "QtConcurrent.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtConcurrent.framework/Versions/5",
-                        "QtCore.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtCore.framework/Versions/5",
-                        "QtDBus.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtDBus.framework/Versions/5",
-                        "QtGui.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtGui.framework/Versions/5",
-                        "QtMacExtras.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtMacExtras.framework/Versions/5",
-                        "QtMultimedia.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtMultimedia.framework/Versions/5",
-                        "QtMultimediaQuick.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtMultimediaQuick_p.framework/Versions/5",
-                        "QtMultimediaWidgets.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtMultimediaWidgets.framework/Versions/5",
-                        "QtNetwork.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtNetwork.framework/Versions/5",
-                        "QtNfc.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtNfc.framework/Versions/5",
-                        "QtOpenGL.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtOpenGL.framework/Versions/5",
-                        "QtPositioning.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtPositioning.framework/Versions/5",
-                        "QtPrintSupport.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtPrintSupport.framework/Versions/5",
-                        "QtQml.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQml.framework/Versions/5",
-                        "QtQuick.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQuick.framework/Versions/5",
-                        "QtQuickControls2.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQuickControls2.framework/Versions/5",
-                        "QtQuickParticles.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQuickParticles.framework/Versions/5",
-                        "QtQuickTemplates2.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQuickTemplates2.framework/Versions/5",
-                        "QtQuickWidgets.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtQuickWidgets.framework/Versions/5",
-                        "QtSql.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtSql.framework/Versions/5",
-                        "QtUiPlugin.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtUiPlugin.framework/Versions/5",
-                        "QtWebChannel.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtWebChannel.framework/Versions/5",
-                        "QtWebSockets.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtWebSockets.framework/Versions/5",
-                        "QtWebView.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtWebView.framework/Versions/5",
-                        "QtWidgets.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtWidgets.framework/Versions/5",
-                        "QtXml.framework/Versions/5" : "livekeys.app/Contents/Frameworks/QtXml.framework/Versions/5",
-                        "libQt5Bootstrap.a" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5Bootstrap.la" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5OpenGLExtensions.a" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5OpenGLExtensions.la" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5PacketProtocol.a" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5PacketProtocol.la" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5PlatformCompositorSupport.a" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5PlatformCompositorSupport.la" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5QmlDebug.a" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5QmlDebug.la" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5QmlDevTools.a" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5QmlDevTools.la" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5UiTools.a" : "livekeys.app/Contents/Frameworks/-",
-                        "libQt5UiTools.la" : "livekeys.app/Contents/Frameworks/-",
-                        "libqtfreetype.a" : "livekeys.app/Contents/Frameworks/-",
-                        "libqtlibpng.a" : "livekeys.app/Contents/Frameworks/-"
-                    }
-                }},
-                { "clean" : {
-                    "livekeys.app/Contents/PlugIns" : ["*_debug.dylib.dSYM", "*_debug.dylib"],
-                    "livekeys.app/Contents/Libraries" : ["*_debug.dylib.dSYM", "*_debug.dylib"],
-                    "livekeys.app/Contents/Frameworks" : ["*_debug.dylib.dSYM", "*_debug.dylib", "*Headers", "*_debug", "*.pri"]
-                }},
-                { "populate" : {
-                        "livekeys.app/Contents/PlugIns/editor/live.package.json":{
-                            "release" : "macos"
+            "deploy": [
+                {
+                    "copy": {
+                        "{release}/bin/livekeys.app": "-",
+                        "{source}/samples": "livekeys.app/Contents/Samples",
+                        "{source}/project": "livekeys.app/Contents/Project",
+                        "{opencv_dir}/lib/libopencv_*": "livekeys.app/Contents/Frameworks/OpenCV.framework/Libraries/-",
+                        "{qtdir}/qml": {
+                            "Qt": "livekeys.app/Contents/PlugIns/Qt",
+                            "QtCanvas3D": "livekeys.app/Contents/PlugIns/QtCanvas3D",
+                            "QtGraphicalEffects": "livekeys.app/Contents/PlugIns/QtGraphicalEffects",
+                            "QtMultimedia": "livekeys.app/Contents/PlugIns/QtMultimedia",
+                            "QtQml": "livekeys.app/Contents/PlugIns/QtQml",
+                            "QtQuick": "livekeys.app/Contents/PlugIns/QtQuick",
+                            "QtQuick.2": "livekeys.app/Contents/PlugIns/QtQuick.2",
+                            "QtWebSockets": "livekeys.app/Contents/PlugIns/QtWebSockets"
                         },
-                        "livekeys.app/Contents/PlugIns/editqml/live.package.json":{
-                            "release" : "macos"
+                        "{qtdir}/plugins": {
+                            "imageformats": "livekeys.app/Contents/Libraries/imageformats",
+                            "platforms": "livekeys.app/Contents/Libraries/platforms"
                         },
-                        "livekeys.app/Contents/PlugIns/fs/live.package.json":{
-                            "release" : "macos"
-                        },
-                        "livekeys.app/Contents/PlugIns/live/live.package.json":{
-                            "release" : "macos"
-                        },
-                        "livekeys.app/Contents/PlugIns/lcvcore/live.package.json":{
-                            "release" : "macos"
-                        },
-                        "livekeys.app/Contents/PlugIns/lcvimgproc/live.package.json":{
-                            "release" : "macos"
-                        },
-                        "livekeys.app/Contents/PlugIns/lcvvideo/live.package.json":{
-                            "release" : "macos"
-                        },
-                        "livekeys.app/Contents/PlugIns/lcvfeatures2d/live.package.json":{
-                            "release" : "macos"
-                        },
-                        "livekeys.app/Contents/PlugIns/lcvphoto/live.package.json":{
-                            "release" : "macos"
+                        "{qtdir}/lib": {
+                            "Qt3DExtras.framework/Versions/5": "livekeys.app/Contents/Frameworks/Qt3DExtras.framework/Versions/5",
+                            "Qt3DInput.framework/Versions/5": "livekeys.app/Contents/Frameworks/Qt3DInput.framework/Versions/5",
+                            "Qt3DLogic.framework/Versions/5": "livekeys.app/Contents/Frameworks/Qt3DLogic.framework/Versions/5",
+                            "Qt3DQuick.framework/Versions/5": "livekeys.app/Contents/Frameworks/Qt3DQuick.framework/Versions/5",
+                            "Qt3DQuickExtras.framework/Versions/5": "livekeys.app/Contents/Frameworks/Qt3DQuickExtras.framework/Versions/5",
+                            "Qt3DQuickInput.framework/Versions/5": "livekeys.app/Contents/Frameworks/Qt3DQuickInput.framework/Versions/5",
+                            "Qt3DQuickRender.framework/Versions/5": "livekeys.app/Contents/Frameworks/Qt3DQuickRender.framework/Versions/5",
+                            "Qt3DRender.framework/Versions/5": "livekeys.app/Contents/Frameworks/Qt3DRender.framework/Versions/5",
+                            "QtConcurrent.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtConcurrent.framework/Versions/5",
+                            "QtCore.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtCore.framework/Versions/5",
+                            "QtDBus.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtDBus.framework/Versions/5",
+                            "QtGui.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtGui.framework/Versions/5",
+                            "QtMacExtras.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtMacExtras.framework/Versions/5",
+                            "QtMultimedia.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtMultimedia.framework/Versions/5",
+                            "QtMultimediaQuick.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtMultimediaQuick_p.framework/Versions/5",
+                            "QtMultimediaWidgets.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtMultimediaWidgets.framework/Versions/5",
+                            "QtNetwork.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtNetwork.framework/Versions/5",
+                            "QtNfc.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtNfc.framework/Versions/5",
+                            "QtOpenGL.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtOpenGL.framework/Versions/5",
+                            "QtPositioning.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtPositioning.framework/Versions/5",
+                            "QtPrintSupport.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtPrintSupport.framework/Versions/5",
+                            "QtQml.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQml.framework/Versions/5",
+                            "QtQuick.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuick.framework/Versions/5",
+                            "QtQuickControls2.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickControls2.framework/Versions/5",
+                            "QtQuickParticles.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickParticles.framework/Versions/5",
+                            "QtQuickTemplates2.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickTemplates2.framework/Versions/5",
+                            "QtQuickWidgets.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickWidgets.framework/Versions/5",
+                            "QtSql.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtSql.framework/Versions/5",
+                            "QtUiPlugin.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtUiPlugin.framework/Versions/5",
+                            "QtWebChannel.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtWebChannel.framework/Versions/5",
+                            "QtWebSockets.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtWebSockets.framework/Versions/5",
+                            "QtWebView.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtWebView.framework/Versions/5",
+                            "QtWidgets.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtWidgets.framework/Versions/5",
+                            "QtXml.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtXml.framework/Versions/5",
+                            "libQt5Bootstrap.a": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5Bootstrap.la": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5OpenGLExtensions.a": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5OpenGLExtensions.la": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5PacketProtocol.a": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5PacketProtocol.la": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5PlatformCompositorSupport.a": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5PlatformCompositorSupport.la": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5QmlDebug.a": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5QmlDebug.la": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5QmlDevTools.a": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5QmlDevTools.la": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5UiTools.a": "livekeys.app/Contents/Frameworks/-",
+                            "libQt5UiTools.la": "livekeys.app/Contents/Frameworks/-",
+                            "libqtfreetype.a": "livekeys.app/Contents/Frameworks/-",
+                            "libqtlibpng.a": "livekeys.app/Contents/Frameworks/-"
                         }
                     }
                 },
-                { "dylibrelink" : {
-                    "livekeys.app/Contents/PlugIns/lcvcore/liblcvcore.dylib" : {
-                        "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
-                    },
-                    "livekeys.app/Contents/PlugIns/lcvimgproc/liblcvimgproc.dylib" : {
-                        "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
-                    },
-                    "livekeys.app/Contents/PlugIns/lcvvideo/liblcvvideo.dylib" : {
-                        "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
-                    },
-                    "livekeys.app/Contents/PlugIns/lcvphoto/liblcvphoto.dylib" : {
-                        "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
-                    },
-                    "livekeys.app/Contents/PlugIns/lcvfeatures2d/liblcvfeatures2d.dylib" : {
-                        "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
+                {
+                    "clean": {
+                        "livekeys.app/Contents/PlugIns": [
+                            "*_debug.dylib.dSYM",
+                            "*_debug.dylib"
+                        ],
+                        "livekeys.app/Contents/Libraries": [
+                            "*_debug.dylib.dSYM",
+                            "*_debug.dylib"
+                        ],
+                        "livekeys.app/Contents/Frameworks": [
+                            "*_debug.dylib.dSYM",
+                            "*_debug.dylib",
+                            "*Headers",
+                            "*_debug",
+                            "*.pri"
+                        ]
                     }
-                }},
-                { "dylibaddrpath" : {
-                    "livekeys.app/Contents/Frameworks/OpenCV.framework/Libraries/*.dylib" : ["@loader_path"]
-                }},
-                { "solveincludes": [
-                    {
-                        "from": "{source}/lib/lvbase/include/live",
-                        "source": ["{source}/lib/lvbase/src"],
-                        "to": "livekeys.app/Contents/Dev/lvbase/include/live"
-                    },
-                    {
-                        "from": "{source}/lib/lvview/include/live",
-                        "source": ["{source}/lib/lvview/src"],
-                        "to": "livekeys.app/Contents/Dev/lvview/include/live"
-                    },
-                    {
-                        "from": "{source}/lib/lveditor/include/live",
-                        "source": ["{source}/lib/lveditor/src"],
-                        "to": "livekeys.app/Contents/Dev/lveditor/include/live"
-                    },
-                    {
-                        "from": "{source}/lib/lveditqmljs/include/live",
-                        "source": ["{source}/lib/lveditqmljs/src"],
-                        "to": "livekeys.app/Contents/Dev/lveditqmljs/include/live"
-                    },
-                    {
-                        "from": "{source}/plugins/live/include",
-                        "source": ["{source}/plugins/live/src"],
-                        "to": "livekeys.app/Contents/Dev/plugins/live/include"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvcore/include",
-                        "source": ["{source}/plugins/lcvcore/src"],
-                        "to": "livekeys.app/Contents/Dev/plugins/lcvcore/include"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvfeatures2d/include",
-                        "source": ["{source}/plugins/lcvfeatures2d/src"],
-                        "to": "livekeys.app/Contents/Dev/plugins/lcvfeatures2d/include"
-                    },
-                    {
-                        "from": "{source}/plugins/lcvvideo/include",
-                        "source": ["{source}/plugins/lcvvideo/src"],
-                        "to": "livekeys.app/Contents/Dev/plugins/lcvvideo/include"
+                },
+                {
+                    "populate": {
+                        "livekeys.app/Contents/PlugIns/editor/live.package.json": {
+                            "release": "macos"
+                        },
+                        "livekeys.app/Contents/PlugIns/editqml/live.package.json": {
+                            "release": "macos"
+                        },
+                        "livekeys.app/Contents/PlugIns/fs/live.package.json": {
+                            "release": "macos"
+                        },
+                        "livekeys.app/Contents/PlugIns/live/live.package.json": {
+                            "release": "macos"
+                        },
+                        "livekeys.app/Contents/PlugIns/lcvcore/live.package.json": {
+                            "release": "macos"
+                        },
+                        "livekeys.app/Contents/PlugIns/lcvimgproc/live.package.json": {
+                            "release": "macos"
+                        },
+                        "livekeys.app/Contents/PlugIns/lcvvideo/live.package.json": {
+                            "release": "macos"
+                        },
+                        "livekeys.app/Contents/PlugIns/lcvfeatures2d/live.package.json": {
+                            "release": "macos"
+                        },
+                        "livekeys.app/Contents/PlugIns/lcvphoto/live.package.json": {
+                            "release": "macos"
+                        }
                     }
-                ]
-              }
+                },
+                {
+                    "dylibrelink": {
+                        "livekeys.app/Contents/PlugIns/lcvcore/liblcvcore.dylib": {
+                            "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
+                        },
+                        "livekeys.app/Contents/PlugIns/lcvimgproc/liblcvimgproc.dylib": {
+                            "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
+                        },
+                        "livekeys.app/Contents/PlugIns/lcvvideo/liblcvvideo.dylib": {
+                            "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
+                        },
+                        "livekeys.app/Contents/PlugIns/lcvphoto/liblcvphoto.dylib": {
+                            "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
+                        },
+                        "livekeys.app/Contents/PlugIns/lcvfeatures2d/liblcvfeatures2d.dylib": {
+                            "*/libopencv_*.dylib": "@rpath/OpenCV.framework/Libraries/-"
+                        }
+                    }
+                },
+                {
+                    "dylibaddrpath": {
+                        "livekeys.app/Contents/Frameworks/OpenCV.framework/Libraries/*.dylib": [
+                            "@loader_path"
+                        ]
+                    }
+                },
+                {
+                    "solveincludes": [
+                        {
+                            "from": "{source}/lib/lvbase/include/live",
+                            "source": [
+                                "{source}/lib/lvbase/src"
+                            ],
+                            "to": "livekeys.app/Contents/Dev/lvbase/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lvview/include/live",
+                            "source": [
+                                "{source}/lib/lvview/src"
+                            ],
+                            "to": "livekeys.app/Contents/Dev/lvview/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lveditor/include/live",
+                            "source": [
+                                "{source}/lib/lveditor/src"
+                            ],
+                            "to": "livekeys.app/Contents/Dev/lveditor/include/live"
+                        },
+                        {
+                            "from": "{source}/lib/lveditqmljs/include/live",
+                            "source": [
+                                "{source}/lib/lveditqmljs/src"
+                            ],
+                            "to": "livekeys.app/Contents/Dev/lveditqmljs/include/live"
+                        },
+                        {
+                            "from": "{source}/plugins/live/include",
+                            "source": [
+                                "{source}/plugins/live/src"
+                            ],
+                            "to": "livekeys.app/Contents/Dev/plugins/live/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvcore/include",
+                            "source": [
+                                "{source}/plugins/lcvcore/src"
+                            ],
+                            "to": "livekeys.app/Contents/Dev/plugins/lcvcore/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvfeatures2d/include",
+                            "source": [
+                                "{source}/plugins/lcvfeatures2d/src"
+                            ],
+                            "to": "livekeys.app/Contents/Dev/plugins/lcvfeatures2d/include"
+                        },
+                        {
+                            "from": "{source}/plugins/lcvvideo/include",
+                            "source": [
+                                "{source}/plugins/lcvvideo/src"
+                            ],
+                            "to": "livekeys.app/Contents/Dev/plugins/lcvvideo/include"
+                        }
+                    ]
+                }
             ]
         }
     }

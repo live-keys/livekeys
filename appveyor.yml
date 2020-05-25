@@ -1,5 +1,5 @@
 os: unstable
-image: Visual Studio 2015
+image: Visual Studio 2017
 
 platform:
   - x64
@@ -20,7 +20,7 @@ before_build:
   - SET OPENCV_ROOT_PATH=%CD%\opencv
   - CD %APP_PATH%
   - SET OPENCV_DIR=%OPENCV_ROOT_PATH%\build\%ARCH%\vc14
-  - SET QTDIR=C:\Qt\5.11\msvc2015_64
+  - SET QTDIR=C:\Qt\5.14.0\msvc2017_64
   - dir C:\Qt
   - dir C:\Qt\5.7
   - dir C:\Qt\5.11
@@ -36,8 +36,8 @@ build_script:
   - mv live-pm-master/* .
   - python --version
   - pip install -r requirements.txt
-  - python livepm/main.py build .. msvc2015_64
-  - python livepm/main.py deploy .. msvc2015_64
+  - python livepm/main.py build .. msvc2017_64
+  - python livepm/main.py deploy .. msvc2017_64
   - dir
 
 artifacts:
