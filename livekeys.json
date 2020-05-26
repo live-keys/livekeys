@@ -555,8 +555,7 @@
                                 "StateMachine/*qmldir": "plugins/QtQml/StateMachine/-",
                                 "StateMachine/*.qmltypes": "plugins/QtQml/StateMachine/-",
                                 "*.qmltypes": "plugins/QtQml/-",
-                                "*qmldir": "plugins/QtQml/-",
-                                "qmlplugin.dll": "plugins/QtQml/-"
+                                "*qmldir": "plugins/QtQml/-"
                             },
                             "QtWebEngine": {
                                 "qmldir": "plugins/QtWebEngine/-",
