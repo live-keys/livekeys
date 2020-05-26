@@ -59,3 +59,11 @@ lcvvideo.depends      = lcvcore live
     SUBDIRS += test
     test.subdir = $$PWD/test
 }
+
+# Deploy the samples
+
+samplescopy.commands = $$deployDirCommand($$PWD/../samples, $$DEPLOY_PATH/samples)
+first.depends = $(first) samplescopy
+export(first.depends)
+export(samplescopy.commands)
+QMAKE_EXTRA_TARGETS += first samplescopy

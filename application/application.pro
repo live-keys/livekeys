@@ -47,6 +47,9 @@ include($$PWD/src/main.pri)
 RC_ICONS = $$PWD/icons/livekeys.ico
 macx:ICON = $$PWD/icons/livekeys.icns
 
+
+QTQUICK_COMPILER_SKIPPED_RESOURCES += $$PWD/application.qrc
+QTQUICK_COMPILER_RETAINED_RESOURCES += $$PWD/application.qrc
 RESOURCES += $$PWD/application.qrc
 
 OTHER_FILES += \
