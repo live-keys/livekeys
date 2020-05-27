@@ -55,6 +55,8 @@ Rectangle{
     property var documentHandler: null
     property var editor: null
 
+    property alias zoom: graphView.zoom
+    property alias zoomOrigin: graphView.zoomOrigin
 
     property int inPort: 1
     property int outPort: 2
@@ -72,18 +74,44 @@ Rectangle{
         var srcPort = item.sourceItem
         var dstPort = item.destinationItem
 
-        var value =
-                srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
+        var name = srcPort.objectProperty.propertyName
 
-        var result = root.palette.extension.bindExpressionForFragment(
-            dstPort.objectProperty.editingFragment,
-            value
-        )
-        if ( result ){
-            root.palette.extension.writeForFragment(
-                dstPort.objectProperty.editingFragment,
-                {'__ref': value}
+        if (name.substr(0,2) === "on" && name.substr(name.length-7,7) === "Changed")
+        {
+            // source is event, different direction
+            var nodeId = dstPort.objectProperty.node.item.id
+            if (!nodeId) return
+            if (dstPort.objectProperty.editingFragment) return
+
+            var funcName = dstPort.objectProperty.propertyName
+            var value = nodeId + "." + funcName + "()"
+
+            var result = root.palette.extension.bindExpressionForFragment(
+                srcPort.objectProperty.editingFragment,
+                value
             )
+
+            if ( result ){
+                root.palette.extension.writeForFragment(
+                    srcPort.objectProperty.editingFragment,
+                    {'__ref': value}
+                )
+            }
+
+        } else {
+            var value =
+                    srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
+
+            var result = root.palette.extension.bindExpressionForFragment(
+                dstPort.objectProperty.editingFragment,
+                value
+            )
+            if ( result ){
+                root.palette.extension.writeForFragment(
+                    dstPort.objectProperty.editingFragment,
+                    {'__ref': value}
+                )
+            }
         }
     }
 
@@ -155,7 +183,7 @@ Rectangle{
         propertyItem.editingFragment = editingFragment
         propertyItem.documentHandler = root.documentHandler
 
-        editingFragment.incrementRefCount()
+        if (editingFragment) editingFragment.incrementRefCount()
 
         propertyItem.editor = root.editor
 
@@ -178,7 +206,7 @@ Rectangle{
             in_pconn.port = port
             in_pconn.node = node
         }
-        if ( node.item.id !== "" && (ports === root.outPort || ports === root.inOutPort) ){
+        if (ports === root.outPort || (node.item.id !== "" && ports === root.inOutPort) ){
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
             port.label = propertyName + " Out"
             port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.propertyTitle.height / 2) })

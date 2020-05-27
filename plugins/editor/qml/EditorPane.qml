@@ -172,6 +172,10 @@ Pane{
             root.width = parent.width / 2
     }
 
+    function toggleComment(){
+        editor.toggleComment()
+    }
+
     Rectangle{
         anchors.left: parent.left
         anchors.top: parent.top
@@ -257,6 +261,8 @@ Pane{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
+
+                    lk.layers.workspace.panes.activePane = root
 
                     if (!codeOnly)
                     {

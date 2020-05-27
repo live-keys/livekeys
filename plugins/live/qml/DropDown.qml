@@ -16,14 +16,14 @@
 
 import QtQuick 2.3
 
-Rectangle{
+Item{
     id: root
 
     property variant model: []
 
-    property color backgroundColor: "#061a29"
+    property color backgroundColor: "#1b242c"
     property color highlightColor: "#071825"
-    property color textColor: "#fff"
+    property color textColor: "#c7c7c7"
 
     property int dropBoxHeight: 80
 
@@ -38,6 +38,7 @@ Rectangle{
         id: chosenItem
         width: parent.width
         height: root.height
+        radius: height/2
         color: chosenItemMouse.containsMouse ? root.highlightColor : root.backgroundColor
         Text{
             anchors.left: parent.left
@@ -45,8 +46,20 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             id: chosenItemText
             text: root.model ? root.model[0] : ''
-            font.family: "Ubuntu Mono, Arial, Helvetica, sans-serif"
-            font.pixelSize: 13
+            font.family: "Open Sans, sans-serif"
+            font.weight: Font.Light
+            font.pixelSize: 12
+            color: root.textColor
+        }
+
+        Text{
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            id: dropDownGlyph
+            text: 'v'
+            font.family: "Open Sans"
+            font.pixelSize: 12
             color: root.textColor
         }
 
@@ -59,6 +72,8 @@ Rectangle{
             }
             cursorShape: Qt.PointingHandCursor
         }
+
+        z: 1000
     }
 
     Rectangle {
@@ -66,11 +81,21 @@ Rectangle{
         width: root.width
         height: 0
         clip: true
-        anchors.top: chosenItem.bottom
+        anchors.top: chosenItem.top
+        anchors.topMargin:chosenItem.height/2
         color: root.backgroundColor
+
+        Rectangle {
+            id: flattenRect
+            width: parent.width
+            height:chosenItem.height/2
+            anchors.top: parent.top
+            color:parent.color
+        }
 
         ListView {
             id: listView
+            anchors.top: flattenRect.bottom
             height: root.dropBoxHeight
             model: root.model
             currentIndex: 0
@@ -85,8 +110,9 @@ Rectangle{
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.leftMargin: 10
                     color: root.textColor
-                    font.family: "Ubuntu Mono, Arial, Helvetica, sans-serif"
-                    font.pixelSize: 13
+                    font.family: "Open Sans, sans-serif"
+                    font.weight: Font.Light
+                    font.pixelSize: 12
                 }
                 MouseArea{
                     id: delegateArea
@@ -111,7 +137,7 @@ Rectangle{
         name: "dropDown"
         PropertyChanges {
             target: dropDown
-            height: root.height * root.model.length
+            height: root.height * root.model.length + chosenItem.height/2
         }
     }
 

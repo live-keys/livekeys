@@ -11,7 +11,7 @@ Row{
     spacing : 15
 
     property string imagePath :
-        project.dir() + '/../_images/object_101_piano_train1.jpg'
+        project.dir() + '/../../../samples/_images/object_101_piano_train1.jpg'
 
     ImRead{
         id : inputImage

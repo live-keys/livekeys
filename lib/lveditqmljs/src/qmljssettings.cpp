@@ -58,6 +58,7 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
 
     m_defaultPalettes["qml/double"] = "DoublePalette";
     m_defaultPalettes["qml/int"]    = "IntPalette";
+    m_defaultPalettes["qml/string"] = "TextPalette";
 
     MLNode s = parent->readFor("qmljs");
     if ( s.type() == MLNode::Object )

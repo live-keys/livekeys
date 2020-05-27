@@ -12,10 +12,11 @@ namespace lv{
 class QmlAddContainer : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lv::QmlSuggestionModel*      itemModel     READ itemModel     CONSTANT)
-    Q_PROPERTY(lv::QmlSuggestionModel*      propertyModel READ propertyModel CONSTANT)
-    Q_PROPERTY(lv::QmlSuggestionModel*      eventModel    READ eventModel    CONSTANT)
-    Q_PROPERTY(QString                      objectType    READ objectType    CONSTANT)
+    Q_PROPERTY(lv::QmlSuggestionModel*      itemModel       READ itemModel      CONSTANT)
+    Q_PROPERTY(lv::QmlSuggestionModel*      propertyModel   READ propertyModel  CONSTANT)
+    Q_PROPERTY(lv::QmlSuggestionModel*      eventModel      READ eventModel     CONSTANT)
+    Q_PROPERTY(lv::QmlSuggestionModel*      functionModel   READ functionModel  CONSTANT)
+    Q_PROPERTY(QString                      objectType      READ objectType     CONSTANT)
 
 public:
     explicit QmlAddContainer(int addPosition, const QStringList& objectType, QObject *parent = 0);
@@ -24,6 +25,7 @@ public:
     lv::QmlSuggestionModel* itemModel() const;
     lv::QmlSuggestionModel* propertyModel() const;
     lv::QmlSuggestionModel* eventModel() const;
+    lv::QmlSuggestionModel* functionModel() const;
 
     QString objectType() const;
 
@@ -34,6 +36,7 @@ private:
     lv::QmlSuggestionModel*     m_itemModel;
     lv::QmlSuggestionModel*     m_propertyModel;
     lv::QmlSuggestionModel*     m_eventModel;
+    lv::QmlSuggestionModel*     m_functionModel;
 };
 
 inline QmlSuggestionModel* QmlAddContainer::itemModel() const{
@@ -48,6 +51,9 @@ inline QmlSuggestionModel* QmlAddContainer::eventModel() const{
     return m_eventModel;
 }
 
+inline QmlSuggestionModel* QmlAddContainer::functionModel() const{
+    return m_functionModel;
+}
 
 inline QString QmlAddContainer::objectType() const{
     return m_objectTypePath.join(".");

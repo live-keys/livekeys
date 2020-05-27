@@ -128,8 +128,10 @@ void ProjectDocument::updateSections(int position, int charsRemoved, const QStri
     ProjectDocument::SectionIterator it = m_sections.begin();
     while( it != m_sections.end() ){
         ProjectDocumentSection::Ptr& section = *it;
-        if ( section->position() + section->length() <= position )
-            break;
+        if ( section->position() + section->length() <= position ){
+            ++it;
+            continue;
+        }
 
         int sectionPosition = section->position();
 

@@ -10,8 +10,8 @@ Column{
     // This sample shows the basic components required to detect a trained object
     // within an image
     
-    property string trainImage : project.dir() + '/../_images/clock-train-small.jpg'
-    property string queryImage : project.dir() + '/../_images/clock-query-room-small.jpg'
+    property string trainImage : project.dir() + '/../../../samples/_images/clock-train-small.jpg'
+    property string queryImage : project.dir() + '/../../../samples/_images/clock-query-room-small.jpg'
     
     // Train images
     

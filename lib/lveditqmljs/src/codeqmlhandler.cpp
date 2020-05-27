@@ -1181,6 +1181,9 @@ void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
 
             if ( itEdit == edit ){
                 m_edits.erase(it);
+
+                for (auto child: edit->childFragments())
+                    removeConnection(child);
                 emit numberOfConnectionsChanged();
 
                 if ( m_editingFragment == edit ){
@@ -1206,7 +1209,7 @@ void CodeQmlHandler::removeAllEditingFragments()
 {
     while (!m_edits.empty())
     {
-        removeEditingFragment(*m_edits.begin());
+        removeConnection(*m_edits.begin());
     }
 }
 
@@ -1309,8 +1312,9 @@ lv::QmlEditFragment *CodeQmlHandler::findFragmentByPosition(int position)
         {
             q.clear();
             result = edit;
-            for (auto it = edit->childFragments().begin(); it != edit->childFragments().end(); ++it)
+            for (auto it = edit->childFragments().begin(); it != edit->childFragments().end(); ++it){
                 q.push_back(*it);
+            }
         }
 
     }
@@ -1324,6 +1328,46 @@ QJSValue CodeQmlHandler::editingFragments(){
         result.setProperty(i++, m_engine->newQObject(*it));
     }
     return result;
+}
+
+void CodeQmlHandler::toggleComment(int position, int length)
+{
+    if ( !m_document ) return;
+
+    Q_D(CodeQmlHandler);
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+
+    auto td = m_document->textDocument();
+    auto firstBlock = td->findBlock(position);
+    auto lastBlock = td->findBlock(position + length);
+
+    bool found = false;
+    for (auto it = firstBlock; it.isValid() && it != lastBlock.next(); it = it.next()){
+        auto txt = it.text();
+        if (txt.length() > 2 && txt.left(2) != "//")
+        {
+            found = true;
+            break;
+        }
+    }
+
+    for (auto it = firstBlock; it.isValid() && it != lastBlock.next(); it = it.next())
+    {
+        QTextCursor cursor(td);
+        cursor.setPosition(it.position());
+        if (found){
+            cursor.beginEditBlock();
+            cursor.insertText("//");
+            cursor.endEditBlock();
+        } else {
+            cursor.beginEditBlock();
+            cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 2);
+            cursor.removeSelectedText();
+            cursor.endEditBlock();
+        }
+    }
 }
 
 void CodeQmlHandler::suggestionsForProposedExpression(
@@ -1999,10 +2043,11 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
     Q_D(CodeQmlHandler);
 
     QList<QObject*> fragments;
-
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
     QmlScopeSnap scope = d->snapScope();
 
-    QString source = m_target->toPlainText();
+    QString source = m_document->contentString();
     DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(m_document->file()->path());
     docinfo->parse(source);
 
@@ -2146,7 +2191,7 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
     int pos = edit->declaration()->valuePosition();
     int len = edit->declaration()->valueLength();
 
-    removeConnection(edit);
+    removeEditingFragment(edit);
 
     m_document->addEditingState(ProjectDocument::Runtime);
     m_document->insert(pos, len, "");
@@ -2209,8 +2254,6 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, boo
     } else {
         lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", includeExpandables, lpl);
     }
-
-    vlog() << lpl->size();
 
     lpl->setPosition(declaration->position());
     if ( unrepeated ){
@@ -2794,6 +2837,18 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                         ti->exportType().join() + "." + name,
                         name
                     ));
+                } else {
+                    auto name = method.name;
+
+                    addContainer->functionModel()->addItem(QmlSuggestionModel::ItemData(
+                        name,
+                        ti->prefereredType().name(),
+                        "method",
+                        "",
+                        ti->exportType().join() + "." + name,
+                        name
+                    ));
+
                 }
             }
 
@@ -2832,6 +2887,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
             }
             addContainer->propertyModel()->updateFilters();
             addContainer->eventModel()->updateFilters();
+            addContainer->functionModel()->updateFilters();
 
         }
     }
@@ -3606,6 +3662,8 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
 
     QList<QObject*> fragments;
 
+    edit->clearNestedObjectsInfo();
+
     d->syncParse(m_document);
     d->syncObjects(m_document);
 
@@ -3647,10 +3705,7 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
                     continue;
                 }
 
-                auto fragment = findFragmentByPosition(property->begin);
-                if (!fragment || !fragment->isForProperty()) {
-                    fragment = openNestedConnection(conn, property->begin);
-                }
+                auto fragment = openNestedConnection(conn, property->begin);
 
                 auto fcast = qobject_cast<QObject*>(fragment);
                 propMap.insert("connection", QVariant::fromValue(fcast));

@@ -123,6 +123,8 @@ public slots:
     QJSValue editingFragments();
 
 
+    void toggleComment(int position, int length);
+
     // Palette and binding management
 
     QJSValue cursorInfo(int position, int length);

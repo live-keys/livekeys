@@ -3350,6 +3350,10 @@ void TextEdit::updateSize()
         contentStart = contentStart.next();
     }
 
+    if (d->lineControl->maxWidth() + 20 > width){
+        width = d->lineControl->maxWidth() + 20;
+    }
+
     d->paintedWidth = width;
     // d->paintedHeight = (d->document->blockCount() + d->lineControl->totalOffset())*lineHeight;
 
@@ -4057,6 +4061,10 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QQuickIt
         this->linePaletteHeightChanged(palette, palette->height());
     });
 
+    connect(palette, &QQuickItem::widthChanged, [this, palette](){
+        this->linePaletteWidthChanged(palette, palette->width());
+    });
+
 
     connect(palette, &QQuickItem::destroyed, [this, palette](){
         this->linePaletteRemoved(palette);
@@ -4076,8 +4084,14 @@ void TextEdit::linePaletteHeightChanged(QQuickItem *palette, int newHeight)
 {
     Q_D(TextEdit);
 
-    int result = d->lineControl->resizePalette(palette);
-    if (result == -1) return;
+    d->lineControl->resizePaletteHeight(palette);
+}
+
+void TextEdit::linePaletteWidthChanged(QQuickItem *palette, int newWidth)
+{
+    Q_D(TextEdit);
+
+    d->lineControl->resizePaletteWidth(palette);
 }
 
 QRect TextEdit::viewport() const

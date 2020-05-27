@@ -6,7 +6,7 @@ Row{
     
     // Scan values and set custom pixels
     
-    property string imagePath : project.dir() + '/../_images/buildings_0246.jpg'
+    property string imagePath : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
             
     ImRead{
         id : sc
