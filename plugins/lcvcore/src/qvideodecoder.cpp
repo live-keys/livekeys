@@ -148,6 +148,7 @@ lv::QmlStream* QVideoDecoder::run(const QString &file){
                 m_worker->timer()->start(static_cast<int>(1000 / fps));
             }
         }
+        emit streamChanged();
         emit totalFramesChanged();
 
     } else

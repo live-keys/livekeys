@@ -253,6 +253,11 @@ Item{
                     lk.layers.workspace.removePane(pane)
 
                 split.removeAt(paneIndex)
+                if ( panes.activePane === pane ){
+                    panes.activePane = null
+                    panes.activeItem = null
+                }
+
                 if ( split.panes.length === 0 && split !== mainSplit ){
                     removePane(split)
                 }
@@ -331,6 +336,7 @@ Item{
             }
             return null
         }
+
     }
 
     property QtObject projectEnvironment : ProjectEnvironment{

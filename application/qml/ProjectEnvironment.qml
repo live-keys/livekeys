@@ -313,6 +313,14 @@ Item{
             })
         })
     }
+    function openProjectPath(url){
+        root.checkUnsavedFiles(function(){
+            project.closeProject()
+            project.openProject(url)
+//                lk.openProjectInstance(url)
+        })
+    }
+
     function newProject(){
         closeProject(function(){
             project.newProject()

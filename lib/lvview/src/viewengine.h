@@ -135,6 +135,8 @@ public:
     const PackageGraph* packageGraph() const;
     void setPackageGraph(PackageGraph* pg);
 
+    static void printTrace(QJSEngine* engine);
+
 signals:
     /** Signals before compiling a new object. */
     void aboutToCreateObject(const QUrl& file);

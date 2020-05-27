@@ -21,6 +21,5 @@ Item{
     StreamLog{
         id: streamLog
         stream: wcexec.out
-    }
-    
+    }    
 }

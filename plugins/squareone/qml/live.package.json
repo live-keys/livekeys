@@ -8,8 +8,8 @@
                 "label" : "1. Workspace",
                 "link" : "tutorials/workspace"
             },{
-                "label" : "2. Filters",
-                "link" : "tutorials/filters"
+                "label" : "2. First Application",
+                "link" : "tutorials/firstapplication"
             }]
         }
     }

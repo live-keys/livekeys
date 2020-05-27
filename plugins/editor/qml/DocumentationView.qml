@@ -5,6 +5,8 @@ import fs 1.0 as Fs
 
 WebEngineView{
     id: root
+    width: 100
+    height: 100
     anchors.fill: parent ? parent : undefined
 
     function loadDocumentationHtml(filePath){
@@ -13,8 +15,9 @@ WebEngineView{
     }
 
     property string styleSheet :
+        'body{ background-color: #03090d; } ' +
         '#main{ padding: 0px; } ' +
-        '#wrapper{ padding: 15px;max-width: 100%;flex: 0 0 100%;background-color: #03090d;} ' +
+        '#wrapper{ padding: 15px; max-width: 100%;flex: 0 0 100%;background-color: #03090d;} ' +
         '#indexList{ display: none;} '
 
     property string styleSourceCode :
@@ -24,14 +27,19 @@ WebEngineView{
 
     property string hoverScanCode :
         'var hovers = document.getElementsByClassName("livekeys-hover");' +
-        'var result = {}; ' +
+        'var inits  = document.getElementsByClassName("livekeys-init");' +
+        'var result = { hovers: {}, inits: [] }; ' +
         'for (var i = 0; i < hovers.length; ++i){' +
             'var hover = hovers[i];' +
             'var hoverId = i;' +
-            'result[hoverId] = [hover.getAttribute("enter"), hover.getAttribute("leave")];' +
+            'result.hovers[hoverId] = [hover.getAttribute("enter"), hover.getAttribute("leave")];' +
             'var hoverData = hover.innerHTML;' +
             'hover.innerHTML = "<a href=\\\"livekeys-hover://id/" + hoverId + "\\\">" + hoverData + "</a>";' +
-        '}' +
+        '}\n' +
+        'for (var i = 0; i < inits.length; ++i){' +
+            'var init = inits[i];' +
+            'result.inits.push(init.getAttribute("src"));' +
+        '}\n' +
         'result;'
 
     property string activeHover: ''
@@ -56,14 +64,14 @@ WebEngineView{
             var path = Fs.UrlInfo.path(hoveredUrl)
             path = path.length > 0 ? path.substring(1) : path
             if ( path.length > 0 && root.loadedHovers !== null && root.loadedHovers.hasOwnProperty(path) ){
-                var enterFunction = root.loadedHovers[path][0].run
+                var enterFunction = root.loadedHovers[path][0][0].run
                 activeHover = path
-                enterFunction(lk.layers.workspace, hoverState)
+                enterFunction(lk.layers.workspace, hoverState, root.loadedHovers[path][0][1])
             }
 
         } else if ( hoveredUrl.toString() === '' && activeHover.length && root.loadedHovers && root.loadedHovers.hasOwnProperty(root.activeHover) ){
-            var leaveFunction = root.loadedHovers[activeHover][1].run
-            leaveFunction(lk.layers.workspace, hoverState)
+            var leaveFunction = root.loadedHovers[activeHover][1][0].run
+            leaveFunction(lk.layers.workspace, hoverState, root.loadedHovers[activeHover][1][1])
             activeHover = ''
         }
     }
@@ -79,8 +87,9 @@ WebEngineView{
 
                 root.loadedHovers = {}
 
-                for (var key in result) {
-                    var enterPath = Fs.Path.join(path, Fs.UrlInfo.path(result[key][0]))
+                for (var key in result.hovers) {
+                    var enterPath = Fs.Path.join(path, Fs.UrlInfo.path(result.hovers[key][0]))
+                    var enterPathHash = Fs.UrlInfo.hasFragment(result.hovers[key][0]) ? Fs.UrlInfo.fragment(result.hovers[key][0]) : ''
                     enterPath = "file:///" + enterPath
                     var enterControl = null
 
@@ -98,7 +107,8 @@ WebEngineView{
                         return
                     }
 
-                    var leavePath = Fs.Path.join(path, Fs.UrlInfo.path(result[key][1]))
+                    var leavePath = Fs.Path.join(path, Fs.UrlInfo.path(result.hovers[key][1]))
+                    var leavePathHash = Fs.UrlInfo.hasFragment(result.hovers[key][0]) ? Fs.UrlInfo.fragment(result.hovers[key][0]) : ''
                     leavePath = "file:///" + leavePath
                     var leaveControl = null
 
@@ -116,11 +126,63 @@ WebEngineView{
                         return
                     }
 
-                    root.loadedHovers[key] = [enterControl, leaveControl]
+                    root.loadedHovers[key] = [[enterControl, enterPathHash], [leaveControl, leavePathHash]]
+                }
+
+                for (var index = 0; index < result.inits.length; ++index){
+                    var currentInitializerPath = Fs.Path.join(path, Fs.UrlInfo.path(result.inits[index]))
+                    currentInitializerPath = "file:///" + currentInitializerPath
+
+
+                    var component = Qt.createComponent(currentInitializerPath);
+                    if (component.status === Component.Ready){
+                        var initializerControl = component.createObject(root);
+                        if ( !initializerControl || typeof initializerControl.run !== "function" ){
+                            lk.engine.throwError(new Error("Error creating object from component: " + currentInitializerPath), root)
+                            return
+                        }
+                        initializerControl.run(lk.layers.workspace, project)
+                    } else if (component.status === Component.Error) {
+                        lk.engine.throwError(new Error("Error loading component: " + component.errorString()), root)
+                        return
+                    }
                 }
             });
         }
     }
+    onNewViewRequested: {
+        if ( request.userInitiated && request.destination === WebEngineView.NewViewInTab){
+
+            var scheme = Fs.UrlInfo.scheme(request.requestedUrl)
+            if ( scheme === 'livekeys' ){
+
+                if ( Fs.UrlInfo.host(request.requestedUrl) === "open" ){
+                    var path = Fs.UrlInfo.path(request.requestedUrl)
+                    path = Fs.Path.join(Fs.Path.dir(Fs.UrlInfo.toLocalFile(root.url)), path)
+
+                    path = "file:///" + path
+                    var component = Qt.createComponent(path);
+                    if (component.status === Component.Ready){
+                        var control = component.createObject(root);
+
+                        if (typeof control.run === "function") {
+                            control.run(lk.layers.workspace, project)
+                        }
+
+                        control.destroy()
+                    } else if (component.status === Component.Error) {
+                        lk.engine.throwError(new Error("Error loading component: " + component.errorString()), root)
+                    }
+                } else if ( Fs.UrlInfo.host(request.requestedUrl) === "open-project" ){
+                    var path = Fs.UrlInfo.path(request.requestedUrl)
+                    path = Fs.Path.join(lk.layers.workspace.pluginsPath(), path)
+
+                    lk.layers.workspace.project.openProjectPath(path)
+                }
+            }
+        }
+    }
+
     onNavigationRequested: {
         if ( request.navigationType === WebEngineNavigationRequest.LinkClickedNavigation){
             request.action = WebEngineNavigationRequest.IgnoreRequest

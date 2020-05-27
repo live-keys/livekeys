@@ -156,7 +156,12 @@ void ProjectWorkspace::State::paneAdded(QQuickItem *pane, QQuickWindow *window, 
     int posIndex = pos < 0 ? -pos : pos;
     positionIndex.append(pos);
 
-    paneLookup->asArray().insert(paneLookup->asArray().begin() + posIndex, paneNode);
+    if ( posIndex > paneLookup->size() ){
+        paneLookup->asArray().push_back(paneNode);
+    } else {
+        paneLookup->asArray().insert(paneLookup->asArray().begin() + posIndex, paneNode);
+    }
+
 
     QStringList positionIndexOutput;
     for ( auto item : positionIndex )
@@ -412,7 +417,7 @@ void ProjectWorkspace::save() const{
             layoutFile.write(result.c_str(), static_cast<qint64>(result.size()));
 
         } catch ( Exception& e ){
-            vlog().w() << "Failed to save file \'" << layoutFile.fileName() << "\': " + e.message();
+            vlog("appdata").w() << "Failed to save file \'" << layoutFile.fileName() << "\': " + e.message();
         }
     }
 }
@@ -527,7 +532,7 @@ void ProjectWorkspace::initializeFromId(){
             ml::fromJson(result.constData(), m_state->currentWorkspaceLayout);
 
         } catch ( Exception& e ){
-            vlog().w() << "Failed to parse file \'" << layoutFile.fileName() << "\': " + e.message();
+            vlog("appdata").w() << "Failed to parse file \'" << layoutFile.fileName() << "\': " + e.message();
         }
     } else {
         createLayoutNodes();

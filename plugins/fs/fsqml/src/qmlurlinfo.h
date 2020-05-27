@@ -20,6 +20,8 @@ public slots:
     QString password(const QUrl& url){ return url.password(); }
     QString host(const QUrl& url){ return url.host(); }
     QString toLocalFile(const QUrl& url){ return url.toLocalFile(); }
+    QString fragment(const QUrl& url){ return url.fragment(); }
+    bool hasFragment(const QUrl& url){ return url.hasFragment(); }
     bool isRelative(const QUrl& url) { return url.isRelative(); }
 };
 

@@ -114,11 +114,14 @@ public slots:
     void populateObjectInfoForFragment(lv::QmlEditFragment* ef);
     void populatePropertyInfoForFragment(lv::QmlEditFragment* ef);
     void testFunction(QVariantList list);
+
     // Help
 
     QString help(int position);
     lv::QmlEditFragment* findObjectFragmentByPosition(int position);
     lv::QmlEditFragment* findFragmentByPosition(int position);
+    QJSValue editingFragments();
+
 
     // Palette and binding management
 

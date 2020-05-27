@@ -460,6 +460,7 @@ Item{
                     var addBox = lk.layers.editor.environment.createEditorBox(
                         addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
                     )
+
                     addBox.color = 'transparent'
                     addBoxItem.cancel = function(){
                         addBox.destroy()

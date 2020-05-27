@@ -2,10 +2,11 @@
     "layout" : [
         "v",[
             "h",
-            {"size":[250,250],"type":"projectFileSystem"},
-            {"size":[400,250],"type":"editor"},
-            {"size":[300,250],"type":"documentation", "state" : {"document" : "workspacetutorial.doc.html"}},
-            {"size":[250,250],"type":"viewer"}
+            {"size":[100,100],"type":"documentation", "state" : {
+                "document" : "workspacetutorial.doc.html",
+                "styleSheet" : "#wrapper{max-width: 600px;} h1{ font-size: 50px;}"
+            }},
+            {"size":[100,100],"type":"editor"}
         ]
     ]
 }
