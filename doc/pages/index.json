@@ -95,7 +95,7 @@
         ]
     ],
     {"__extra": [
-        "../../plugins/squareone/tutorials/workspace/workspacetutorial.md",
-        "../../plugins/squareone/tutorials/firstapplication/firstapplication.md"
+        ["../../plugins/squareone/tutorials/workspace/workspacetutorial.md", "squareone/tutorials/workspace"],
+        ["../../plugins/squareone/tutorials/firstapplication/firstapplication.md", "squareone/tutorials/firstapplication"]
     ]}
 ]

@@ -54,7 +54,7 @@ WorkspaceControl{
             highlight = createHighlight(state)
             highlight.boxX = 220 + 35 * 5 - 15
             highlight.boxY = -10
-        } else if ( fragment === 'license-file' ){
+        } else if ( fragment === 'license-view' ){
             highlight = createHighlight(state)
             highlight.boxX = 220 + 35 * 6 - 15
             highlight.boxY = -10

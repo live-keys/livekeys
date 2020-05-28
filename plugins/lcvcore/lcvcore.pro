@@ -61,6 +61,7 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 DISTFILES += \
     palettes/ImageFilePalette.qml \
+    palettes/VideoDecoderViewPalette.json \
     qml/EditCvExtension.qml \
     qml/GrayscaleView.qml \
     qml/MatViewPane.qml \

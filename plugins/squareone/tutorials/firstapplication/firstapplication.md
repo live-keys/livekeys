@@ -3,7 +3,7 @@
 {using:resources}
 {livekeysInit:open/resources/ShapeSwitch.qml}
 
-In comparison to the previous tutorial, here here we have 4 panes open:
+In comparison to the previous tutorial, here we have 4 panes open:
 
  * [the project pane]({livekeys-hover:livekeys://open/resources/FirstApplicationHighlight.qml#project-pane;livekeys://open/resources/FirstApplicationRemoveHighlight.qml#project-pane}), showing the files in the project
 

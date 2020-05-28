@@ -3,8 +3,8 @@
         "v",[
             "h",
             {"size":[250,250],"type":"projectFileSystem"},
+            {"size":[300,250],"type":"documentation", "state" : {"document" : "firstapplication.doc.html"}},
             {"size":[400,250],"type":"editor"},
-            {"size":[300,250],"type":"documentation", "state" : {"document" : "workspacetutorial.doc.html"}},
             {"size":[250,250],"type":"viewer"}
         ]
     ]
