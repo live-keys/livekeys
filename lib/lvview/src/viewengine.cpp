@@ -580,6 +580,10 @@ void ViewEngine::setPackageGraph(PackageGraph *pg){
     m_packageGraph = pg;
 }
 
+void ViewEngine::printTrace(QJSEngine *engine){
+    engine->globalObject().property("console").property("trace").call();
+}
+
 QJSValue ViewEngine::toJSErrors(const QList<QQmlError> &errors) const{
     QJSValue val = m_engine->newArray(static_cast<uint>(errors.length()));
     uint i = 0;

@@ -289,7 +289,7 @@ Rectangle{
                 id : textEdit
 
                 anchors.left: parent.left
-                anchors.leftMargin: 5
+                anchors.leftMargin: 2
                 viewport: Qt.rect(flick.flickableItem.contentX,flick.flickableItem.contentY,flick.width,flick.height)
 
                 fragmentStart: root.fragmentStart

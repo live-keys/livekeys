@@ -4,6 +4,8 @@ plugin lcvcore
 depends QtQuick 2.3
 depends live 1.0
 
-RegionSelection 1.0 RegionSelection.qml
-VideoControls   1.0 VideoControls.qml
+RegionSelection            1.0 RegionSelection.qml
+VideoControls              1.0 VideoControls.qml
+VideoDecoderView           1.0 VideoDecoderView.qml
+GrayscaleView              1.0 GrayscaleView.qml
 VideoCaptureSegmentFactory 1.0 VideoCaptureSegmentFactory.qml

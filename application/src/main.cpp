@@ -36,12 +36,14 @@ int main(int argc, char *argv[]){
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::addLibraryPath(QString::fromStdString(lv::ApplicationContext::instance().librariesPath()));
-    QtWebEngine::initialize();
 
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName("Livekeys");
     QGuiApplication::setApplicationVersion(Livekeys::versionString());
 
+#if (QT_VERSION < QT_VERSION_CHECK(5,12,0))
+        QtWebEngine::initialize();
+#endif
 
     app.setOrganizationName("Livekeys");
     app.setOrganizationDomain("Livekeys");

@@ -88,6 +88,10 @@ ApplicationWindow{
 
     property QtObject handle: QtObject{
 
+        function size(){
+            return Qt.size(root.width, root.height)
+        }
+
         function toggleFullScreen(){
             if (root.visibility !== Window.FullScreen){
                 root.prevVisibility = root.visibility

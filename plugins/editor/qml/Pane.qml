@@ -30,6 +30,15 @@ Rectangle{
         return null
     }
 
+
+    property var mapGlobalPosition: function(){
+        if ( parentSplitter ){
+            var parentPoint = parentSplitter.mapGlobalPosition()
+            return Qt.point(parentPoint.x + x, parentPoint.y + y)
+        }
+        return Qt.point(x, y)
+    }
+
     property string paneType: ''
     property var paneState : { return {} }
     property var paneInitialize : function(s){}

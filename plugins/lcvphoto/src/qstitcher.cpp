@@ -86,10 +86,10 @@ void QStitcher::setParams(const QVariantMap &params){
     if ( params.contains("tryUseGpu") )
         tryUseGpu = params["tryUseGpu"].toBool();
 
-#if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
-    m_stitcher = cv::Stitcher::create(mode, tryUseGpu);
-#elif CV_VERSION_MAJOR >= 4
+#if CV_VERSION_MAJOR >= 4
     m_stitcher = cv::Stitcher::create(mode);
+#elif CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
+    m_stitcher = cv::Stitcher::create(mode, tryUseGpu);
 #else
     m_stitcher = cv::Stitcher::createDefault(tryUseGpu);
 #endif

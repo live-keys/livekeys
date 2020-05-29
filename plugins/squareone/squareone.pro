@@ -24,7 +24,9 @@ OTHER_FILES += \
     qml/qmldir \
     qml/live.package.json \
     tutorials/workspace/*.* \
-    tutorials/filters/*.*
+    tutorials/workspace/resources/*.* \
+    tutorials/firstapplication/*.* \
+    tutorials/firstapplication/resources/*.*
 
 DISTFILES += \
     tutorials/workspace/live.project.json

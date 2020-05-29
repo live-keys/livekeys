@@ -1,0 +1,7 @@
+{
+    "type": "qml/lcvcore#VideoDecoderView",
+    "properties" : [
+        ["file", "PathPalette"]
+    ]
+}
+

@@ -26,7 +26,7 @@ class Q_LCVCORE_EXPORT QMatFilter : public QMatDisplay{
     Q_PROPERTY(QMat* input READ inputMat WRITE setInputMat NOTIFY inputChanged)
 
 public:
-    explicit QMatFilter(QQuickItem *parent = 0);
+    explicit QMatFilter(QQuickItem *parent = nullptr);
     virtual ~QMatFilter();
     
     QMat* inputMat();
@@ -51,7 +51,7 @@ inline QMat *QMatFilter::inputMat(){
 }
 
 inline void QMatFilter::setInputMat(QMat *mat){
-    if ( mat == 0 )
+    if ( mat == nullptr )
         return;
 
     cv::Mat* matData = mat->cvMat();

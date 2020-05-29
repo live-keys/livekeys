@@ -303,6 +303,14 @@ SplitView{
         paneSizes = []
     }
 
+    property var mapGlobalPosition: function(){
+        if ( parentSplitter ){
+            var parentPoint = parentSplitter.mapGlobalPosition()
+            return Qt.point(parentPoint.x + x, parentPoint.y + y)
+        }
+        return Qt.point(x, y)
+    }
+
     function createPositioningModel(currentPosition){
         var position = currentPosition ? currentPosition : {x:0, y:0}
         var pmodel = []

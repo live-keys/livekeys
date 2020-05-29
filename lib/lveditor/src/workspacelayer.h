@@ -58,6 +58,7 @@ public:
     lv::StartupModel* recents() const;
     lv::StartupModel* tutorials() const;
     lv::StartupModel* samples() const;
+
 public slots:
     QJSValue interceptMenu(QJSValue context);
     QJSValue interceptFile(const QString& path, int mode);

@@ -18,10 +18,14 @@ Pane{
                     path = project.path(path)
 
                 if ( !root.page )
-                    root.page = root.viewFactory.createObject()
+                    root.page = root.viewFactory.createObject(viewWrapper)
 
                 root.page.loadDocumentationHtml(path)
                 root.pageTitle = Fs.Path.baseName(path)
+
+                if ( s.styleSheet){
+                    root.page.styleSheet += ' ' + s.styleSheet
+                }
             }
         }
     }
@@ -29,7 +33,7 @@ Pane{
     property var panes: null
     property Theme currentTheme : lk.layers.workspace ? lk.layers.workspace.themes.current : null
     property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
-    property color backgroundColor: currentTheme ? currentTheme.paneTopBackground : 'black'
+    property color backgroundColor: currentTheme ? currentTheme.paneBackground : 'black'
 
     property var page : null
     property string pageTitle : ''
@@ -132,11 +136,12 @@ Pane{
     }
 
     Rectangle{
+        id: viewWrapper
         anchors.topMargin: 30
         anchors.top: parent.top
         anchors.fill: parent
         color: root.backgroundColor
 
-        children: root.page ? [root.page] : null
+//        children: root.page ? [root.page] : null
     }
 }

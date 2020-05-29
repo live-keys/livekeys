@@ -1321,6 +1321,15 @@ lv::QmlEditFragment *CodeQmlHandler::findFragmentByPosition(int position)
     return result;
 }
 
+QJSValue CodeQmlHandler::editingFragments(){
+    QJSValue result = m_engine->newArray(static_cast<quint32>(m_edits.size()));
+    quint32 i = 0;
+    for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
+        result.setProperty(i++, m_engine->newQObject(*it));
+    }
+    return result;
+}
+
 void CodeQmlHandler::toggleComment(int position, int length)
 {
     if ( !m_document ) return;

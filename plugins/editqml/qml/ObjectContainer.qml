@@ -376,6 +376,7 @@ Item{
                         objectContainer.closeAsPane()
                     var codeHandler = editor.documentHandler.codeHandler
                     collapse()
+                    editor.documentHandler.codeHandler.removeConnection(editingFragment)
 
                     var rootPos = codeHandler.findRootPosition()
                     if (rootPos === editingFragment.position())
@@ -481,6 +482,7 @@ Item{
                     var addBox = lk.layers.editor.environment.createEditorBox(
                         addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
                     )
+
                     addBox.color = 'transparent'
                     addBoxItem.cancel = function(){
                         addBox.destroy()

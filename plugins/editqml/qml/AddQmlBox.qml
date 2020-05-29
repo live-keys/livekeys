@@ -28,6 +28,7 @@ Rectangle{
     height: 280
     color: "#03070a"
     opacity: 0.95
+    objectName: "addQmlBox"
 
     property color selectionColor: "#091927"
 
