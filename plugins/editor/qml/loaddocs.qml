@@ -25,7 +25,7 @@ DocumentationLoader{
         }
 
         var filePath = docUrl + '/' + htmlPath
-        var url = "file://" + filePath + htmlHash
+        var url = filePath + htmlHash
 
         docPage.loadDocumentationHtml(url)
 
