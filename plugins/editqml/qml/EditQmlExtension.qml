@@ -338,6 +338,12 @@ LiveExtension{
         var editor = activePane
         var codeHandler = editor.documentHandler.codeHandler
 
+        if (editor.loading){
+            editor.stopLoadingMode()
+            rootPosition = -1
+            return
+        }
+
         var imports = codeHandler.importsModel()
         var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
         var paletteImports = codeHandler.findPalettes(importsPosition, true)

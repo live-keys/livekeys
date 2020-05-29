@@ -308,7 +308,6 @@ Item{
                 for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
                     if (objectContainer.propertiesOpened[i] === ef.identifier()){
                         if (compact) expand()
-                        if (addBox) addBox.destroy()
                         return
                     }
                 }

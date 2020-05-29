@@ -3315,6 +3315,13 @@ void CodeQmlHandler::updateRuntimeBindings(){
     }
 }
 
+QmlEditFragment *CodeQmlHandler::createObject(int position, const QString &type, QmlEditFragment *parent, QObject *currentApp)
+{
+    int opos = addItem(position, "", type);
+    addItemToRuntime(parent, type, currentApp);
+    return openNestedConnection(parent, opos);
+}
+
 QJSValue CodeQmlHandler::getDocumentIds(){
     Q_D(CodeQmlHandler);
     QmlScopeSnap scope = d->snapScope();

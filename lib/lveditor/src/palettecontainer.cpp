@@ -216,6 +216,9 @@ void PaletteContainer::scanPalettes(Plugin::Ptr plugin){
         vlog("editor-codepaletteloader").v() << "Adding palette by type: \'" + palettePath + "\' on \'" + type + "\'";
 
         d->items.insert(type, new PaletteLoader(palettePath, type));
+
+        if (type == "qml/string")
+            d->items.insert("u/string", new PaletteLoader(palettePath, "u/string"));
     }
 }
 
