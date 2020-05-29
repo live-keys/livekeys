@@ -42,11 +42,15 @@ Rectangle{
             property var node: null
             ignoreUnknownSignals: true
             onPropertyToBeDestroyed: {
+                node.item.removePropertyName(name)
+
                 if (!node ||!port) return
                 graph.removePort(node, port)
             }
         }
     }
+
+    property Component addBoxFactory: null
 
     property var resizeComponents: []
     property Component propertyDelegate : ObjectNodeProperty{}
@@ -54,6 +58,7 @@ Rectangle{
     property var palette: null
     property var documentHandler: null
     property var editor: null
+    property var editingFragment: null
 
     property alias zoom: graphView.zoom
     property alias zoomOrigin: graphView.zoomOrigin
@@ -113,6 +118,42 @@ Rectangle{
                 )
             }
         }
+    }
+
+    onDoubleClicked: {
+        var addBoxItem = addBoxFactory.createObject()
+        var position = editingFragment.valuePosition() + editingFragment.valueLength() - 1
+        var addOptions = documentHandler.codeHandler.getAddOptions(position)
+
+        addBoxItem.addContainer = addOptions
+
+        addBoxItem.objectsOnly = true
+        addBoxItem.assignFocus()
+
+        var rect = Qt.rect(pos.x, pos.y, 1, 1)
+        var cursorCoords = Qt.point(pos.x, pos.y + 30)
+        var addBox = lk.layers.editor.environment.createEditorBox(
+            addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
+        )
+
+        addBoxItem.accept = function(type, data){
+            var opos = documentHandler.codeHandler.addItem(
+                addBoxItem.addContainer.itemModel.addPosition, addBoxItem.addContainer.objectType, data
+            )
+            documentHandler.codeHandler.addItemToRuntime(editingFragment, data, project.appRoot())
+            var ef = documentHandler.codeHandler.openNestedConnection(
+                editingFragment, opos
+            )
+            if (ef)
+                editingFragment.signalObjectAdded(ef, cursorCoords)
+
+            addBox.destroy()
+        }
+
+        addBoxItem.cancel = function(){
+            addBox.destroy()
+        }
+
     }
 
     function bindPorts(src, dst){

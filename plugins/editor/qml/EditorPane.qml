@@ -268,6 +268,8 @@ Pane{
                         if (documentHandler.codeHandler)
                         {
                             documentHandler.codeHandler.removeAllEditingFragments()
+                            editor.importsShaped = false
+                            editor.rootShaped = false
                         }
                         // close all fragments
                     } else {

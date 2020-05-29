@@ -110,19 +110,18 @@ public slots:
 
     void __inputRunnableObjectReady();
 
-    bool isRoot();
-
     QVariantList nestedObjectsInfo();
     QVariantMap  objectInfo();
 
     void signalPropertyAdded(lv::QmlEditFragment* ef);
-    void signalObjectAdded(lv::QmlEditFragment* ef);
+    void signalObjectAdded(lv::QmlEditFragment* ef, QPointF p = QPointF());
     void incrementRefCount();
     void decrementRefCount();
     int refCount();
 
     void removeChildFragment(QmlEditFragment* edit);
-
+    void setObjectId(QString id);
+    QString objectId();
 signals:
     void visualParentChanged();
     void connectionChanged(int index);
@@ -130,7 +129,7 @@ signals:
     void aboutToBeRemoved();
     void paletteListEmpty();
 
-    void objectAdded(lv::QmlEditFragment* obj);
+    void objectAdded(lv::QmlEditFragment* obj, QPointF cursorCoords);
     void propertyAdded(lv::QmlEditFragment* ef);
 
     void refCountChanged();
@@ -153,6 +152,7 @@ private:
     QVariantList            m_nestedObjectsInfo;
     QVariantMap             m_objectInfo;
     int                     m_refCount;
+    QString                 m_objectId;
 };
 
 /// \brief Returns the binding channel associated with this object.

@@ -97,10 +97,13 @@ LiveExtension{
 
         var ef = codeHandler.openConnection(palettes.position())
         var forAnObject = codeHandler.isForAnObject(ef)
+        var forImports = false
 
         var palette = palettes.size() > 0 && !forAnObject ? codeHandler.openPalette(ef, palettes, index) : null
         if (codeHandler.isInImports(palettes.position())){
             palette.item.model = codeHandler.importsModel()
+            palette.item.editor = editor.editor
+            forImports = true
         }
 
         if (!ef){
@@ -178,6 +181,13 @@ LiveExtension{
         }
 
         codeHandler.frameEdit(editorBox, ef)
+        if (forImports) editor.editor.importsShaped = true
+
+        if (forAnObject){
+            var rootPos = codeHandler.findRootPosition()
+            if (ef.position() === rootPos)
+                editor.editor.rootShaped = true
+        }
     }
 
     function loadPalette(editor, palettes, index){
@@ -333,12 +343,14 @@ LiveExtension{
         var paletteImports = codeHandler.findPalettes(importsPosition, true)
         if (paletteImports) root.shapePalette(editor, paletteImports, 0)
 
-        rootPosition = codeHandler.findRootPosition(imports.lastBlock())
+        rootPosition = codeHandler.findRootPosition()
 
         if ( rootPosition >= 0){
             var paletteRoot = codeHandler.findPalettes(rootPosition, true)
-            if (paletteRoot)
+            if (paletteRoot){
                 root.shapePalette(editor, paletteRoot, 0)
+                editor.editor.rootShaped = true
+            }
             else {
                 editor.startLoadingMode()
                 var shapeTrigger = shapeAllTrigger.createObject()
@@ -361,6 +373,8 @@ LiveExtension{
                     root.shapePalette(editor, paletteRoot, 0)
                     editor.stopLoadingMode()
                     rootPosition = -1
+
+                    editor.editor.rootShaped = true
                 }
             }
         }
@@ -391,6 +405,7 @@ LiveExtension{
             var rect = activePane.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
             var addBoxItem = addBoxFactory.createObject()
+            addBoxItem.assignFocus()
             addBoxItem.addContainer = addContainer
             addBoxItem.codeQmlHandler = activePane.documentHandler.codeHandler
 

@@ -1958,6 +1958,8 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
     d->syncParse(m_document);
     d->syncObjects(m_document);
 
+    auto docString = m_document->contentString();
+
     QmlScopeSnap scope = d->snapScope();
 
     DocumentQmlValueObjects::Ptr objects = d->documentObjects();
@@ -1972,6 +1974,17 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
             QString obNs   = splitter == -1 ? "" : currentObDeclaration.mid(0, splitter);
 
             QmlInheritanceInfo obPath = scope.getTypePath(obNs, obName);
+
+            QString id;
+            // find id
+            for (int k = 0; k < child->properties.size(); ++k)
+            {
+                auto prop = child->properties[k];
+                if (prop->name().size() == 1 && prop->name()[0] == "id"){
+                    id = docString.mid(prop->valueBegin, prop->end - prop->valueBegin);
+                    break;
+                }
+            }
 
             if ( !obPath.isEmpty() ){
 
@@ -1993,6 +2006,8 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                 ef->declaration()->setSection(m_document->createSection(
                     QmlEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
                 ));
+
+                ef->setObjectId(id);
                 ef->declaration()->section()->setUserData(ef);
                 ef->declaration()->section()->onTextChanged(
                             [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
@@ -2046,7 +2061,7 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
     DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(edit->position());
 
     if ( currentOb ){
-        for ( int i = 0; i < currentOb->properties.size(); ++i ){            
+        for ( int i = 0; i < currentOb->properties.size(); ++i ){
             DocumentQmlValueObjects::RangeProperty* rp = currentOb->properties[i];
 
             auto test = findFragmentByPosition(rp->begin);
@@ -2059,15 +2074,20 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
             QTextCursor cursor(m_target);
             cursor.setPosition(rp->begin);
 
+            QString propertyType = rp->type();
+
+            if (rp->name().size() == 1 && rp->name()[0] == "id"){
+                const QString& document = m_document->contentString();
+                QString id = document.mid(rp->valueBegin, rp->end-rp->valueBegin);
+                edit->setObjectId(id);
+                continue;
+            }
+
             QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
             if ( properties.isEmpty() )
                 continue;
 
             QmlDeclaration::Ptr property = properties.first();
-
-            QString propertyType = rp->type();
-
-            if (rp->name().size() == 1 && rp->name()[0] == "id") continue;
 
             if ( propertyType.isEmpty() ){
 

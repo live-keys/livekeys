@@ -18,6 +18,7 @@ CodePalette{
 
         property alias model: itemList.model
         property bool addImportVisible: true
+        property var editor: null
 
         ListView{
             id : itemList

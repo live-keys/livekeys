@@ -1264,6 +1264,8 @@ void TextEdit::setCursorVisible(bool on)
         if (d->control) d->control->setCursorIsFocusIndicator(true);
     if (d->control) d->control->setCursorVisible(on);
     emit cursorVisibleChanged(d->cursorVisible);
+
+    update();
 }
 
 /*!

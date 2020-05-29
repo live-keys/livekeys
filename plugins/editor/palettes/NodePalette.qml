@@ -5,6 +5,7 @@ import editor 1.0
 import live 1.0
 import lcvcore 1.0
 import workspace.nodeeditor 1.0
+import editqml 1.0
 
 CodePalette{
     id: palette
@@ -17,6 +18,7 @@ CodePalette{
     property var numOfObjects: 0
     property var allObjects: []
 
+    property Component addBoxFactory: Component{ AddQmlBox{} }
 
 
     onEditingFragmentChanged: {
@@ -25,8 +27,14 @@ CodePalette{
         nodeItem.init()
     }
 
-    function addObject(object){
-        var n = objectGraph.addObjectNode(numOfObjects *420 + 50, 50, (object.name + (object.id ? ("#" + object.id) : "")))
+    function addObject(object, cursorCoords){
+
+        var n
+        if (cursorCoords){
+            n = objectGraph.addObjectNode(cursorCoords.x, cursorCoords.y, (object.name + (object.id ? ("#" + object.id) : "")))
+        }
+        else
+            n = objectGraph.addObjectNode(numOfObjects *420 + 50, 50, (object.name + (object.id ? ("#" + object.id) : "")))
 
         ++numOfObjects
 
@@ -63,7 +71,6 @@ CodePalette{
                     var property = object.properties[j]
                     var p = objectGraph.addObjectNodeProperty(n, property.name, property.isWritable ? objectGraph.inOutPort : objectGraph.outPort, property.connection)
                     n.item.propertyNames.push(property.name)
-
                     p.z = 10000 - j
                     if (property.value.length === 2)
                     {
@@ -127,6 +134,8 @@ CodePalette{
             palette: palette
             documentHandler: palette.documentHandler
             editor: palette.editor
+            editingFragment: palette.editingFragment
+            addBoxFactory: palette.addBoxFactory
         }
     }
 
@@ -135,7 +144,7 @@ CodePalette{
         id: efConnection
         target: editingFragment
         onObjectAdded: {
-            addObject(obj.objectInfo())
+            addObject(obj.objectInfo(), cursorCoords)
         }
         onAboutToRemovePalette: {
             nodeItem.clean()
