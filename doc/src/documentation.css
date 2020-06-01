@@ -254,7 +254,7 @@ hr {
   border-bottom: 1px solid grey;
   padding: 0px 24px 2px 5px;
   margin-right: 3px;
-  background-image: url(../images/icon-fragment.png);
+  background-image: url(../images/icon-hover.png);
   background-repeat: no-repeat;
   background-position: center right;
   background-size: 20px;
@@ -270,7 +270,7 @@ hr {
   border-bottom: 1px solid rgb(128, 128, 128);
   padding: 0px 24px 2px 5px;
   margin-right: 3px;
-  background-image: url(../images/icon-fragment.png);
+  background-image: url(../images/icon-click.png);
   background-repeat: no-repeat;
   background-position: center right;
   background-size: 20px;
