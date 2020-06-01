@@ -129,10 +129,26 @@ Item{
                 id: paletteCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    propertyItem.propertyToBeDestroyed(propertyName)
-
                     documentHandler.codeHandler.removeConnection(editingFragment)
-                    propertyItem.destroy()
+                    if (editingFragment.refCount > 0)
+                    {
+                        propertyItem.propertyToBeDestroyed(propertyName)
+                        var graph = node.graph
+                        if (propertyItem.inPort) {
+
+                            if (propertyItem.inPort.inEdge)
+                                graph.removeEdge(propertyItem.inPort.inEdge)
+
+                            graph.removePort(node, propertyItem.inPort)
+                        }
+                        if (propertyItem.outPort) {
+                            for (var i=0; i< propertyItem.outPort.outEdges.length; ++i)
+                                graph.removeEdge(propertyItem.outPort.outEdges[i])
+
+                            graph.removePort(node, propertyItem.outPort)
+                        }
+                        propertyItem.destroy()
+                    }
                 }
             }
         }
@@ -167,6 +183,20 @@ Item{
         target: editingFragment
         onAboutToBeRemoved: {
             propertyItem.propertyToBeDestroyed(propertyName)
+            var graph = node.graph
+            if (propertyItem.inPort) {
+
+                if (propertyItem.inPort.inEdge)
+                    graph.removeEdge(propertyItem.inPort.inEdge)
+
+                graph.removePort(node, propertyItem.inPort)
+            }
+            if (propertyItem.outPort) {
+                for (var i=0; i< propertyItem.outPort.outEdges.length; ++i)
+                    graph.removeEdge(propertyItem.outPort.outEdges[i])
+
+                graph.removePort(node, propertyItem.outPort)
+            }
             propertyItem.destroy()
         }
         ignoreUnknownSignals: true
