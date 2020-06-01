@@ -36,6 +36,7 @@ void QmlImportsModel::commit(QString m, QString v, QString q)
     m_data.push_back(ItemData(m,v,q,lastBlock()+1));
     endInsertRows();
 
+    handler->updateScope();
 
     emit countChanged();
 }
@@ -53,6 +54,8 @@ void QmlImportsModel::erase(int pos)
     beginRemoveRows(QModelIndex(), i, i);
     m_data.erase(m_data.begin() + i);
     endRemoveRows();
+
+    handler->updateScope();
 
     for (int k = i; k<m_data.size();++k)
         --m_data[k].line;

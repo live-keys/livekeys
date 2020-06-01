@@ -8,6 +8,8 @@ Qan.PortItem {
     width: 15
     height: 15
     property Item objectProperty : null
+    property var outEdges: []
+    property var inEdge: null
 
     Rectangle {
         id: contentItem

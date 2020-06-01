@@ -77,7 +77,7 @@ Item{
         property int titleHeight: 30
         property bool compact: true
 
-        property int topSpacing: editingFragment && !editingFragment.isRoot() ? 0 : 10
+        property int topSpacing: editingFragment ? 0 : 10
 
         property var propertiesOpened: []
 
@@ -98,6 +98,8 @@ Item{
             childObjectContainer.editor = objectContainer.editor
             childObjectContainer.editingFragment = ef
             childObjectContainer.title = ef.typeName()
+            if (ef.objectId())
+                childObjectContainer.title = ef.typeName() + "#" + ef.objectId()
             childObjectContainer.x = 20
             childObjectContainer.y = 10
 
@@ -254,6 +256,11 @@ Item{
                 addPropertyFragmentToContainer(properties[i])
             }
 
+            var id = editingFragment.objectId()
+            var check = (objectContainer.title.indexOf('#') === -1)
+            if (id && check)
+                objectContainer.title = objectContainer.title + "#" + id
+
             container.sortChildren()
             compact = false
         }
@@ -301,7 +308,6 @@ Item{
                 for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
                     if (objectContainer.propertiesOpened[i] === ef.identifier()){
                         if (compact) expand()
-                        addBox.destroy()
                         return
                     }
                 }
@@ -368,9 +374,15 @@ Item{
                 onClose : {
                     if ( objectContainer.pane )
                         objectContainer.closeAsPane()
-
+                    var codeHandler = editor.documentHandler.codeHandler
                     collapse()
                     editor.documentHandler.codeHandler.removeConnection(editingFragment)
+
+                    var rootPos = codeHandler.findRootPosition()
+                    if (rootPos === editingFragment.position())
+                        editor.editor.rootShaped = false
+
+                    codeHandler.removeConnection(editingFragment)
 
                     var p = root.parent
                     if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
@@ -426,6 +438,8 @@ Item{
                                 newPaletteBox.paletteContainerFactory = function(arg){
                                     return objectContainer.paletteContainerFactory.createObject(arg)
                                 }
+
+                                if (compact) expand()
                             } else {
                                 objectContainer.expandOptions(palette)
                             }
@@ -448,6 +462,7 @@ Item{
                     addBoxItem.addContainer = addContainer
                     addBoxItem.codeQmlHandler = codeHandler
 
+                    addBoxItem.assignFocus()
                     var oct = objectContainer.parent
 
                     // capture y

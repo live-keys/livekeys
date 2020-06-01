@@ -182,6 +182,8 @@ public slots:
     void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type, QObject* currentApp = nullptr);
     void updateRuntimeBindings();
 
+    lv::QmlEditFragment* createObject(int position, const QString& type, lv::QmlEditFragment* parent, QObject* currentApp = nullptr);
+
     QJSValue getDocumentIds();
 
     void suggestCompletion(int cursorPosition);

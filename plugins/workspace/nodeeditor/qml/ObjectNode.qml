@@ -26,6 +26,15 @@ Qan.NodeItem{
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
     property Component addBoxFactory: Component{ AddQmlBox{} }
 
+    resizable: false
+    selectable: false
+
+    function removePropertyName(name){
+        var idx = propertyNames.find(function(str){ return str === name })
+        if (idx !== -1){
+            propertyNames.splice(idx, 1)
+        }
+    }
 
     Rectangle{
         id: wrapper
@@ -98,6 +107,8 @@ Qan.NodeItem{
                         addBoxItem.isForNode = true
                         addBoxItem.addContainer = addContainer
                         addBoxItem.codeQmlHandler = codeHandler
+
+                        addBoxItem.assignFocus()
 
                         var oct = root.parent
 
@@ -212,7 +223,7 @@ Qan.NodeItem{
                     id: paletteAddMouse
                     anchors.fill: parent
                     onClicked: {
-
+                        root.selected = false
                         var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
                         if (palettes.size() ){
                             paletteHeaderList.forceActiveFocus()

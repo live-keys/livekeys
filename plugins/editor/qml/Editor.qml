@@ -17,6 +17,8 @@ Rectangle{
     property int fragmentStart: 0
     property int fragmentEnd: -1
 
+    property bool importsShaped: false
+    property bool rootShaped: false
     property color lineSurfaceColor: "black"
     color: "#03090d"
 
@@ -331,8 +333,8 @@ Rectangle{
                 height: Math.max(paintedHeight, flick.height)
                 width: Math.max(paintedWidth, flick.width)
 
-                readOnly: root.document === null || root.document.isMonitored
-
+                readOnly: root.document === null || root.document.isMonitored || (importsShaped && rootShaped)
+                cursorVisible: !readOnly
 
 
                 Keys.onPressed: {
