@@ -38,15 +38,15 @@ int main(int argc, char *argv[]){
     QGuiApplication::addLibraryPath(QString::fromStdString(lv::ApplicationContext::instance().librariesPath()));
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,12,0))
-        QtWebEngine::initialize();
+    QtWebEngine::initialize();
 #endif
-
+    
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName("Livekeys");
     QGuiApplication::setApplicationVersion(Livekeys::versionString());
 
 #if (QT_VERSION < QT_VERSION_CHECK(5,12,0))
-        QtWebEngine::initialize();
+    QtWebEngine::initialize();
 #endif
 
     app.setOrganizationName("Livekeys");

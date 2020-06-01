@@ -306,6 +306,9 @@ Item{
                     id: paletteCloseArea
                     anchors.fill: parent
                     onClicked: {
+                        if (paletteContainer.palette.type === "qml/import"){
+                            paletteContainer.palette.item.editor.importsShaped = false
+                        }
                         documentHandler.codeHandler.removePalette(paletteContainer.palette)
                     }
                 }

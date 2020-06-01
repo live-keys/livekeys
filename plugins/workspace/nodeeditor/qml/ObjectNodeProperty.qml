@@ -18,7 +18,7 @@ Item{
     property var isForObject: editingFragment && editingFragment.isForObject()
     property var editor: null
 
-    signal propertyToBeDestroyed()
+    signal propertyToBeDestroyed(var name)
 
     anchors.left: parent.left
     anchors.leftMargin: isForObject ? 30 : 0
@@ -129,10 +129,26 @@ Item{
                 id: paletteCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    propertyItem.propertyToBeDestroyed()
-
                     documentHandler.codeHandler.removeConnection(editingFragment)
-                    propertyItem.destroy()
+                    if (editingFragment.refCount > 0)
+                    {
+                        propertyItem.propertyToBeDestroyed(propertyName)
+                        var graph = node.graph
+                        if (propertyItem.inPort) {
+
+                            if (propertyItem.inPort.inEdge)
+                                graph.removeEdge(propertyItem.inPort.inEdge)
+
+                            graph.removePort(node, propertyItem.inPort)
+                        }
+                        if (propertyItem.outPort) {
+                            for (var i=0; i< propertyItem.outPort.outEdges.length; ++i)
+                                graph.removeEdge(propertyItem.outPort.outEdges[i])
+
+                            graph.removePort(node, propertyItem.outPort)
+                        }
+                        propertyItem.destroy()
+                    }
                 }
             }
         }
@@ -166,7 +182,21 @@ Item{
     Connections {
         target: editingFragment
         onAboutToBeRemoved: {
-            propertyItem.propertyToBeDestroyed()
+            propertyItem.propertyToBeDestroyed(propertyName)
+            var graph = node.graph
+            if (propertyItem.inPort) {
+
+                if (propertyItem.inPort.inEdge)
+                    graph.removeEdge(propertyItem.inPort.inEdge)
+
+                graph.removePort(node, propertyItem.inPort)
+            }
+            if (propertyItem.outPort) {
+                for (var i=0; i< propertyItem.outPort.outEdges.length; ++i)
+                    graph.removeEdge(propertyItem.outPort.outEdges[i])
+
+                graph.removePort(node, propertyItem.outPort)
+            }
             propertyItem.destroy()
         }
         ignoreUnknownSignals: true

@@ -212,6 +212,16 @@ void QmlEditFragment::removeChildFragment(QmlEditFragment *edit){
     }
 }
 
+void QmlEditFragment::setObjectId(QString id)
+{
+    m_objectId = id;
+}
+
+QString QmlEditFragment::objectId()
+{
+    return m_objectId;
+}
+
 /**
  * \brief Writes the \p code to the value part of this fragment
  */
@@ -343,11 +353,6 @@ void QmlEditFragment::__inputRunnableObjectReady(){
     }
 }
 
-bool QmlEditFragment::isRoot()
-{
-    return parentFragment() != nullptr;
-}
-
 void QmlEditFragment::addNestedObjectInfo(QVariantMap& object)
 {
     m_nestedObjectsInfo.push_back(object);
@@ -395,9 +400,9 @@ void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef)
     emit propertyAdded(ef);
 }
 
-void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef)
+void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef, QPointF cursorCoords)
 {
-    emit objectAdded(ef);
+    emit objectAdded(ef, cursorCoords);
 }
 
 

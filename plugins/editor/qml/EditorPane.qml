@@ -42,7 +42,7 @@ Pane{
 
     property alias documentHandler: editor.documentHandler
     property alias textEdit: editor.textEdit
-
+    property alias loading: loadingAnimation.visible
     property var panes: null
 
     property bool codeOnly: !(documentHandler.codeHandler && documentHandler.codeHandler.numberOfConnections !== 0)
@@ -268,7 +268,12 @@ Pane{
                     {
                         if (documentHandler.codeHandler)
                         {
+                            // unfortunate naming, but this actually disables loading
+                            if (loading)
+                                lk.layers.workspace.commands.execute("editqml.shape_all")
                             documentHandler.codeHandler.removeAllEditingFragments()
+                            editor.importsShaped = false
+                            editor.rootShaped = false
                         }
                         // close all fragments
                     } else {

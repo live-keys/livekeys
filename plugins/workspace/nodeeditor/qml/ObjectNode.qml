@@ -28,6 +28,12 @@ Qan.NodeItem{
 
     resizable: false
 
+    function removePropertyName(name){
+        var idx = propertyNames.find(function(str){ return str === name })
+        if (idx !== -1){
+            propertyNames.splice(idx, 1)
+        }
+    }
 
     Rectangle{
         id: wrapper
@@ -100,6 +106,8 @@ Qan.NodeItem{
                         addBoxItem.isForNode = true
                         addBoxItem.addContainer = addContainer
                         addBoxItem.codeQmlHandler = codeHandler
+
+                        addBoxItem.assignFocus()
 
                         var oct = root.parent
 

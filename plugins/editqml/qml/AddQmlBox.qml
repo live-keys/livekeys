@@ -40,6 +40,12 @@ Rectangle{
     property var codeQmlHandler: null
 
     property bool isForNode: false
+    property bool objectsOnly: false
+
+    onObjectsOnlyChanged: {
+        if (objectsOnly)
+            activeIndex = 1
+    }
 
     property int activeIndex : 0
     property bool idChecked: true
@@ -134,10 +140,14 @@ Rectangle{
     }
 
     TextButton{
+        visible: !objectsOnly
         anchors.top: parent.top
         anchors.topMargin: 3
         anchors.right: parent.right
-        anchors.rightMargin: 144+ (isForNode? 71: 0)
+        anchors.rightMargin: {
+            if (objectsOnly) return 0
+            return 144+ (isForNode? 71: 0)
+        }
         text: 'Property'
         height: 22
         width: 70
@@ -156,7 +166,11 @@ Rectangle{
         anchors.top: parent.top
         anchors.topMargin: 3
         anchors.right: parent.right
-        anchors.rightMargin: 73+ (isForNode? 71: 0)
+        anchors.rightMargin: {
+            if (objectsOnly) return 0
+            return 73+ (isForNode? 71: 0)
+        }
+
         text: 'Object'
         height: 22
         width: 70
@@ -173,10 +187,14 @@ Rectangle{
     }
 
     TextButton{
+        visible: !objectsOnly
         anchors.top: parent.top
         anchors.topMargin: 3
         anchors.right: parent.right
-        anchors.rightMargin: 2 + (isForNode? 71: 0)
+        anchors.rightMargin: {
+            if (objectsOnly) return 0
+            return 2+ (isForNode? 71: 0)
+        }
         text: 'Event'
         height: 22
         width: 70
@@ -193,10 +211,13 @@ Rectangle{
 
     TextButton{
         anchors.top: parent.top
-        visible: isForNode
+        visible: isForNode && !objectsOnly
         anchors.topMargin: 3
         anchors.right: parent.right
-        anchors.rightMargin: 2
+        anchors.rightMargin: {
+            if (objectsOnly) return 0
+            return 2
+        }
         text: 'Function'
         height: 22
         width: 70
