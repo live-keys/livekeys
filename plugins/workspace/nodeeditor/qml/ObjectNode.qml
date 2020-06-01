@@ -26,6 +26,8 @@ Qan.NodeItem{
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
     property Component addBoxFactory: Component{ AddQmlBox{} }
 
+    resizable: false
+
 
     Rectangle{
         id: wrapper
@@ -212,7 +214,7 @@ Qan.NodeItem{
                     id: paletteAddMouse
                     anchors.fill: parent
                     onClicked: {
-
+                        root.selected = false
                         var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
                         if (palettes.size() ){
                             paletteHeaderList.forceActiveFocus()

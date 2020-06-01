@@ -9,3 +9,4 @@ ObjectNodeProperty 1.0 ObjectNodeProperty.qml
 Port               1.0 Port.qml
 PortConnector      1.0 PortConnector.qml
 VerticalDock       1.0 VerticalDock.qml
+Selection          1.0 Selection.qml

@@ -774,17 +774,18 @@
                 {
                     "copy": {
                         "{release}/bin/livekeys.app": "-",
-                        "{source}/samples": "livekeys.app/Contents/Samples",
                         "{source}/project": "livekeys.app/Contents/Project",
                         "{opencv_dir}/lib/libopencv_*": "livekeys.app/Contents/Frameworks/OpenCV.framework/Libraries/-",
                         "{qtdir}/qml": {
                             "Qt": "livekeys.app/Contents/PlugIns/Qt",
-                            "QtCanvas3D": "livekeys.app/Contents/PlugIns/QtCanvas3D",
+                            "Qt3D": "livekeys.app/Contents/PlugIns/Qt3D",
                             "QtGraphicalEffects": "livekeys.app/Contents/PlugIns/QtGraphicalEffects",
                             "QtMultimedia": "livekeys.app/Contents/PlugIns/QtMultimedia",
                             "QtQml": "livekeys.app/Contents/PlugIns/QtQml",
                             "QtQuick": "livekeys.app/Contents/PlugIns/QtQuick",
                             "QtQuick.2": "livekeys.app/Contents/PlugIns/QtQuick.2",
+                            "QtQuick3D": "livekeys.app/Contents/PlugIns/QtQuick3D",
+                            "QtWebEngine": "livekeys.app/Contents/PlugIns/QtWebEngine",
                             "QtWebSockets": "livekeys.app/Contents/PlugIns/QtWebSockets"
                         },
                         "{qtdir}/plugins": {
@@ -814,6 +815,8 @@
                             "QtPositioning.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtPositioning.framework/Versions/5",
                             "QtPrintSupport.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtPrintSupport.framework/Versions/5",
                             "QtQml.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQml.framework/Versions/5",
+                            "QtQmlModels.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQmlModels.framework/Versions/5",
+                            "QtQmlWorkerScript.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQmlWorkerScript.framework/Versions/5",
                             "QtQuick.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuick.framework/Versions/5",
                             "QtQuickControls2.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickControls2.framework/Versions/5",
                             "QtQuickParticles.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickParticles.framework/Versions/5",
@@ -823,6 +826,10 @@
                             "QtUiPlugin.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtUiPlugin.framework/Versions/5",
                             "QtWebChannel.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtWebChannel.framework/Versions/5",
                             "QtWebSockets.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtWebSockets.framework/Versions/5",
+                            "QtWebEngine.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtWebEngine.framework/Versions/5",
+                            "QtWebEngineCore.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5",
+                            "QtWebEngineCore.framework/Versions/5/Resources": "livekeys.app/Contents/Frameworks/QtWebEngineCore.framework/Resources",
+                            "QtWebEngineCore.framework/Helpers": "livekeys.app/Contents/Frameworks/QtWebEngineCore.framework/Helpers",
                             "QtWebView.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtWebView.framework/Versions/5",
                             "QtWidgets.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtWidgets.framework/Versions/5",
                             "QtXml.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtXml.framework/Versions/5",
@@ -922,6 +929,13 @@
                     }
                 },
                 {
+                    "dylibaddrpath": {
+                        "livekeys.app/Contents/Frameworks/QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app/Contents/MacOS/QtWebEngineProcess*": [
+                            "@executable_path/../../../../.."
+                        ]
+                    }
+                },
+                {
                     "solveincludes": [
                         {
                             "from": "{source}/lib/lvbase/include/live",
@@ -980,6 +994,11 @@
                             "to": "livekeys.app/Contents/Dev/plugins/lcvvideo/include"
                         }
                     ]
+                },
+                {
+                    "livedoc": {
+                        "path": "livekeys.app/Contents"
+                    }
                 }
             ]
         }
