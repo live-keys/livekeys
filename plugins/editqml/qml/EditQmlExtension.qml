@@ -99,7 +99,7 @@ LiveExtension{
         var forAnObject = codeHandler.isForAnObject(ef)
         var forImports = false
 
-        var palette = palettes.size() > 0 && !forAnObject ? codeHandler.openPalette(ef, palettes, index) : null
+        var palette = palettes.size() > 0 && !(forAnObject && palettes.size() === 1)? codeHandler.openPalette(ef, palettes, index) : null
         if (codeHandler.isInImports(palettes.position())){
             palette.item.model = codeHandler.importsModel()
             palette.item.editor = editor.editor
@@ -145,10 +145,11 @@ LiveExtension{
             editorBox.border.color = "#141c25"
 
             if (forAnObject){
-                objectContainer.expand()
                 if ( palette && !palette.item ){
                     objectContainer.expandOptions(palette)
                 }
+                objectContainer.expand()
+
             }
         }
 
