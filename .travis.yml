@@ -34,6 +34,7 @@ addons:
       - libdc1394-22-dev
       - libgl1-mesa-dev
       - unzip
+      - node-gyp
       - npm
 
 install:
