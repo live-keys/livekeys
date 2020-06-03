@@ -91,10 +91,10 @@ install:
       mv live-pm-master/* .;
       git clone https://github.com/live-keys/live-doc.git;
       export LIVEDOC=$PWD/live-doc/live-doc.js;
-      sudo pip3 install aqtinstall;
+      pip3 install aqtinstall --user;
       echo "Installed aqtinstall";
-      sudo aqt install 5.14.2 --outputdir /opt/qt linux desktop gcc_64 -m qtwebengine qtquick3d;
-      sudo aqt doc 5.14.2 --outputdir /opt/qt linux desktop -m qtwebengine;
+      aqt install 5.14.2 --outputdir /opt/qt linux desktop gcc_64 -m qtwebengine qtquick3d;
+      aqt doc 5.14.2 --outputdir /opt/qt linux desktop -m qtwebengine;
       export QTDIR=/opt/qt/5.14.2/gcc_64;
     fi
 
