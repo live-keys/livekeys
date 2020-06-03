@@ -77,7 +77,7 @@ install:
       export QTDIR=/opt/qt/5.14.2/clang_64;
     fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
-      sudo apt-get install -y libtiff5 libtiff5-dev nodejs-dev npm;
+      sudo apt-get install -y libtiff5 libtiff5-dev libssl-dev nodejs-dev npm;
       git clone --single-branch -b 4.1.1 https://github.com/opencv/opencv.git;
       cd opencv;
       mkdir build;
