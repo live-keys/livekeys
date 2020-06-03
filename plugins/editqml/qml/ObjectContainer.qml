@@ -224,12 +224,11 @@ Item{
                                 propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
                                 propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
                                 propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
-                                propertyContainer.expandDefaultPalette()
-
-
-                                /*if ( propPalette.length ){
+                                if ( propPalette ){
                                     propertyContainer.expandPalette(propPalette)
-                                }*/
+                                } else {
+                                    propertyContainer.expandDefaultPalette()
+                                }
                             }
                             if (compact)
                                 expand()

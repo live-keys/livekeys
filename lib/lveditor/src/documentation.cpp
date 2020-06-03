@@ -19,7 +19,7 @@ Documentation::Documentation(const PackageGraph *pg, QObject *parent)
 Documentation::~Documentation(){
 }
 
-QQuickItem *Documentation::load(const QString &language, const QString &path, const QString &detail){
+QJSValue Documentation::load(const QString &language, const QString &path, const QString &detail){
     Package::ConstPtr package(nullptr);
     if ( !path.isEmpty() ){
         std::string packageNameStr = path.toStdString();
@@ -49,22 +49,23 @@ QQuickItem *Documentation::load(const QString &language, const QString &path, co
         if ( !loadFn.isCallable() ){
             lv::Exception e = CREATE_EXCEPTION(Exception, "Property `load` of DocumentationLoader is not a function.", Exception::toCode("~Function"));
             engine->throwError(&e, this);
-            return nullptr;
+            return QJSValue();
         }
 
         QJSValue loadFnResult = loadFn.call(QJSValueList() << language << path << detail);
         if ( loadFnResult.isError() ){
-            engine->throwWarning(loadFnResult.toString(), this);
+            engine->throwError(loadFnResult, this);
+            return QJSValue();
         }
 
-        return qobject_cast<QQuickItem*>(loadFnResult.toQObject());
+        return loadFnResult;
     }
 
 
-    return nullptr;
+    return QJSValue();
 }
 
-QQuickItem *Documentation::load(const QString &path){
+QJSValue Documentation::load(const QString &path){
     int languageIndex = path.indexOf("/");
     if ( languageIndex < 0 )
         return load(path, "", "");

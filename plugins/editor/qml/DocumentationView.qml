@@ -9,21 +9,24 @@ WebEngineView{
     height: 100
     anchors.fill: parent ? parent : undefined
 
-    function loadDocumentationHtml(filePath){
-        root.url = "file:///" + filePath
+    function loadDocumentationHtml(fileUrl){
+        root.url = fileUrl
         root.loadedHovers = null
     }
 
-    property string styleSheet :
+    property string styleSheet : __defaultStyleSheet
+    property string __defaultStyleSheet:
         'body{ background-color: #03090d; } ' +
         '#main{ padding: 0px; } ' +
         '#wrapper{ padding: 15px; max-width: 100%;flex: 0 0 100%;background-color: #03090d;} ' +
         '#indexList{ display: none;} '
 
     property string styleSourceCode :
-        "var node = document.createElement('style'); " +
+        "\nvar node = document.createElement('style'); " +
         "node.innerHTML = \"" + root.styleSheet + "\";" +
-        "document.body.appendChild(node);"
+        "document.getElementsByTagName('head')[0].appendChild(node); " +
+        "var hash = location.hash.substr(1).trim();" +
+        "if (hash){ document.getElementById(hash).scrollIntoView(); }\n"
 
     property string hoverScanCode :
         'var hovers = document.getElementsByClassName("livekeys-hover");' +
@@ -55,7 +58,11 @@ WebEngineView{
 
     userScripts: [injectStyleScript]
     onJavaScriptConsoleMessage: {
-        console.log("WebEngine: " + message)
+        if ( level === WebEngineView.ErrorMessageLevel ){
+            console.error("WebEngine Error: " + message + ' ' + sourceID)
+        } else {
+            console.log("WebEngine: " + message)
+        }
     }
 
     onLinkHovered: {
@@ -185,13 +192,13 @@ WebEngineView{
 
     onNavigationRequested: {
         if ( request.navigationType === WebEngineNavigationRequest.LinkClickedNavigation){
-            request.action = WebEngineNavigationRequest.IgnoreRequest
-            prevUrl = root.url
 
             var url = request.url
 
             var scheme = Fs.UrlInfo.scheme(request.url)
             if ( scheme === 'livekeys' ){
+                prevUrl = root.url
+                request.action = WebEngineNavigationRequest.IgnoreRequest
                 request.action = WebEngineNavigationRequest.IgnoreRequest
 
                 if ( Fs.UrlInfo.host(url) === "open" ){

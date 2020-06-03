@@ -24,6 +24,7 @@
 #include <QHash>
 #include <QSharedPointer>
 #include <QMutex>
+#include <QTimer>
 
 #include "live/lveditqmljsglobal.h"
 #include "live/qmllanguageinfo.h"

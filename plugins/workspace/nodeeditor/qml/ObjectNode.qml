@@ -27,7 +27,6 @@ Qan.NodeItem{
     property Component addBoxFactory: Component{ AddQmlBox{} }
 
     resizable: false
-    selectable: false
 
     function removePropertyName(name){
         var idx = propertyNames.find(function(str){ return str === name })

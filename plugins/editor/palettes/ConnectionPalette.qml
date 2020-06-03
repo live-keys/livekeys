@@ -45,7 +45,7 @@ CodePalette{
             anchors.left: parent.left
             anchors.leftMargin: 20
             anchors.right: parent.right
-            anchors.rightMargin: 20
+            anchors.rightMargin: 35
             anchors.top: parent.top
             anchors.topMargin: 5
             height: 25
@@ -129,6 +129,38 @@ CodePalette{
 
             Behavior on opacity {
                 NumberAnimation { duration: 150 }
+            }
+        }
+
+        Rectangle{
+            id: connectionsButton
+            anchors.top: parent.top
+            anchors.topMargin: 5
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            width: 25
+            height: 25
+            radius: 5
+
+            property color backgroundHoverColor : "#213355"
+            property color backgroundColor : "#212a4b"
+
+            color: connectionsButtonArea.containsMouse ? backgroundHoverColor : backgroundColor
+            Image{
+                anchors.centerIn: parent
+                source: "qrc:/images/palette-connections.png"
+            }
+            MouseArea{
+                id: connectionsButtonArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    var ef = extension.editingFragment()
+                    var result = extension.bindExpression(input.text)
+                    if ( result ){
+                        extension.write({'__ref': input.text ? input.text : ef.defaultValue()})
+                    }
+                }
             }
         }
     }

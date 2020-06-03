@@ -83,8 +83,8 @@ Pane{
                         root.width = storeWidth
                         docPane.width = storeWidth
                     }
-                    docPane.pageTitle = helpPath
-                    docPane.page = docItem
+
+                    docPane.paneInitialize(docItem)
                 }
             }
 

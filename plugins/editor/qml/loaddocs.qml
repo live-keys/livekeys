@@ -8,7 +8,6 @@ DocumentationLoader{
 
     load: function(type, packageName, path){
         var docUrl = lk.layers.workspace.docsPath()
-        var docPage = pageFactory.createObject()
 
         var hashIndex = path.indexOf('#')
         var htmlPath = ''
@@ -19,17 +18,19 @@ DocumentationLoader{
             var hashUrl = path.substring(hashIndex + 1)
 
             htmlPath = 'plugin_' + fileUrl.replace('.', '_') + '.html'
-            htmlHash = '#' + hashUrl.replace('.', '-')
+            htmlHash = hashUrl.replace('.', '-')
         } else {
             htmlPath = 'plugin_' + path.replace('.', '_') + '.html'
         }
 
         var filePath = docUrl + '/' + htmlPath
-        var url = filePath + htmlHash
 
-        docPage.loadDocumentationHtml(url)
+        var url = Fs.UrlInfo.urlFromLocalFile(filePath, {"fragment" : htmlHash})
 
-        return docPage
+        return {
+            'document' : url,
+            'title' : path
+        }
     }
 
     property var pageFactory : Component{

@@ -33,32 +33,24 @@ DocumentationLoader{
             }
 
             htmlPath = qmlTypeNameSpace.replace('.', '') + '/qml-' +
-                        qmlTypeNameSpace.replace('.', '-') + '-' +
+                        qmlTypeNameSpace.replace('.', '-').toLowerCase() + '-' +
                         qmlType + '.html'
-            htmlHash = qmlTypeProperty.length > 0 ? '#' + qmlTypeProperty + '-prop' : ''
+            htmlHash = qmlTypeProperty.length > 0 ? qmlTypeProperty + '-prop' : ''
         } else {
             htmlPath = path.replace('.', '') + '/' +
                     path.replace('.', '-') + '-qmlmodule.html'
         }
 
         var filePath = docUrl + '/' + htmlPath
-        var url = "file://" + filePath + htmlHash
 
-        var f = Fs.File.open(filePath, Fs.File.ReadOnly)
-        if (f){
-            var contents = f.readAll().toString()
+        var url = Fs.UrlInfo.urlFromLocalFile(filePath, { 'fragment': htmlHash })
 
-            var styledContents = contents.replace('</head>',
-                '<style>\n' +
-                    '#main{padding: 0px;}\n' +
-                    '#wrapper{padding: 15px;max-width: 100%;flex: 0 0 100%;background-color: #03090d;}\n' +
-                    '#indexList{display: none;}\n' +
-                '</style></head>\n')
-
-            docPage.loadHtml(styledContents, url)
+        return {
+            document: url,
+            styleSheet : '#main{padding: 0px;}\n' +
+                '#wrapper{padding: 15px;max-width: 100%;flex: 0 0 100%;background-color: #03090d;}\n' +
+                '#indexList{display: none;}\n'
         }
-
-        return docPage
     }
 
     property string styleSourceCode : ''

@@ -302,10 +302,15 @@ Rectangle{
             edgeDelegate: Edge{}
             verticalDockDelegate : VerticalDock{}
             portDelegate: Port{}
+            selectionDelegate: Selection{}
             connectorItem : PortConnector{}
             onEdgeClicked: root.edgeClicked(edge)
             onNodeClicked : root.nodeClicked(node)
             onConnectorEdgeInserted : root.userEdgeInserted(edge)
+
+            selectionColor: "#fff"
+            selectionWeight: 1
+
             nodeDelegate: ObjectNode{}
             Component.onCompleted : {
                 styleManager.styles.at(1).lineColor = '#666'

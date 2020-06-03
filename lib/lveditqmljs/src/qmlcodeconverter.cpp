@@ -270,7 +270,12 @@ QString QmlCodeConverter::buildCode(const QJSValue &value){
 
     } else if ( value.isObject() ){
         if ( value.hasOwnProperty("__ref") ){
-            return value.property("__ref").toString();
+            QString result = value.property("__ref").toString();
+            if ( result.isEmpty() ){
+                return "null";
+            } else {
+                return result;
+            }
         }
 
         QString result = "{";
