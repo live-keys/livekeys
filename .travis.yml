@@ -67,9 +67,9 @@ install:
       wget https://github.com/livecv/live-pm/archive/master.zip;
       unzip master.zip;
       mv live-pm-master/* .;
-      pip3 install aqtinstall
-      aqt install 5.14.2 --outputdir /opt/qt mac desktop clang_64 -m qtwebengine
-      aqt docs 5.14.2 --outputdir /opt/qt mac desktop -m qtwebengine
+      pip3 install aqtinstall;
+      aqt install 5.14.2 --outputdir /opt/qt mac desktop clang_64 -m qtwebengine;
+      aqt docs 5.14.2 --outputdir /opt/qt mac desktop -m qtwebengine;
       export QTDIR=/opt/qt/5.14.2/clang_64;
     fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
