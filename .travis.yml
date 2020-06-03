@@ -31,7 +31,6 @@ addons:
       - libtbb-dev
       - libjpeg-dev
       - libpng-dev
-      - libjasper-dev
       - libdc1394-22-dev
       - libgl1-mesa-dev
       - unzip
