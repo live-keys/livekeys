@@ -772,6 +772,9 @@
             ],
             "deploy": [
                 {
+                    "qtenvsetup" : {}
+                },
+                {
                     "copy": {
                         "{release}/bin/livekeys.app": "-",
                         "{source}/project": "livekeys.app/Contents/Project",
@@ -849,6 +852,12 @@
                             "libQt5UiTools.la": "livekeys.app/Contents/Frameworks/-",
                             "libqtfreetype.a": "livekeys.app/Contents/Frameworks/-",
                             "libqtlibpng.a": "livekeys.app/Contents/Frameworks/-"
+                        },
+                        "{qtdocsdir}" : {
+                            "qtqml" : "livekeys.app/Contents/Docs/qt/-",
+                            "qtquick" : "livekeys.app/Contents/Docs/qt/-",
+                            "qtquickcontrols" : "livekeys.app/Contents/Docs/qt/-",
+                            "qtquickdialogs" : "livekeys.app/Contents/Docs/qt/-"
                         }
                     }
                 },

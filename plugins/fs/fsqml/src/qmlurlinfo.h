@@ -1,8 +1,9 @@
-#ifndef QMLURLINFO_H
-#define QMLURLINFO_H
+#ifndef LVQMLURLINFO_H
+#define LVQMLURLINFO_H
 
 #include <QObject>
 #include <QUrl>
+#include <QJSValue>
 
 namespace lv{
 
@@ -21,10 +22,11 @@ public slots:
     QString host(const QUrl& url){ return url.host(); }
     QString toLocalFile(const QUrl& url){ return url.toLocalFile(); }
     QString fragment(const QUrl& url){ return url.fragment(); }
+    QUrl urlFromLocalFile(const QString& filePath, const QJSValue& opt = QJSValue());
     bool hasFragment(const QUrl& url){ return url.hasFragment(); }
     bool isRelative(const QUrl& url) { return url.isRelative(); }
 };
 
 }// namespace
 
-#endif // QMLURLINFO_H
+#endif // LVQMLURLINFO_H

@@ -12,20 +12,36 @@ Pane{
 
     paneInitialize : function(s){
         if ( s.document ){
+            var path = ''
+
             if (typeof s.document === 'string' || s.document instanceof String){
-                var path = s.document
+                path = s.document
+
                 if (Fs.Path.isRelative(path) )
                     path = project.path(path)
+            } else { // if url
+                path = s.document.toString()
+            }
 
-                if ( !root.page )
+            if ( path ){
+                if ( !root.page ){
                     root.page = root.viewFactory.createObject(viewWrapper)
-
-                root.page.loadDocumentationHtml(path)
-                root.pageTitle = Fs.Path.baseName(path)
+                }
 
                 if ( s.styleSheet){
-                    root.page.styleSheet += ' ' + s.styleSheet
+                    root.page.styleSheet = root.page.__defaultStyleSheet + ' ' + s.styleSheet
+                } else {
+                    root.page.styleSheet = root.page.__defaultStyleSheet
                 }
+
+                root.page.loadDocumentationHtml(path)
+
+                if ( s.title ){
+                    root.pageTitle = s.title
+                } else {
+                    root.pageTitle = Fs.Path.baseName(path)
+                }
+
             }
         }
     }
@@ -36,6 +52,12 @@ Pane{
     property color backgroundColor: currentTheme ? currentTheme.paneBackground : 'black'
 
     property var page : null
+    onPageChanged: {
+        if ( page.parent !== viewWrapper ){
+            page.parent = viewWrapper
+        }
+    }
+
     property string pageTitle : ''
 
     property var viewFactory : Component{

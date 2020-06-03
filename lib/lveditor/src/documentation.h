@@ -16,10 +16,10 @@ public:
     Documentation(const PackageGraph* pg, QObject* parent = nullptr);
     ~Documentation();
 
-    QQuickItem* load(const QString& language, const QString& path, const QString& detail);
+    QJSValue load(const QString& language, const QString& path, const QString& detail);
 
 public slots:
-    QQuickItem* load(const QString& path);
+    QJSValue load(const QString& path);
 
 private:
     DocumentationLoader* createLoader(ViewEngine *engine, const QString& path);
