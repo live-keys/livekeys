@@ -35,6 +35,7 @@ addons:
       - libdc1394-22-dev
       - libgl1-mesa-dev
       - unzip
+      - npm
 
 install:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
@@ -71,7 +72,7 @@ install:
       export LIVEDOC=$PWD/live-doc/live-doc.js;
       pip3 install aqtinstall;
       aqt install 5.14.2 --outputdir /opt/qt mac desktop clang_64 -m qtwebengine qtquick3d;
-      aqt docs 5.14.2 --outputdir /opt/qt mac desktop -m qtwebengine;
+      aqt doc 5.14.2 --outputdir /opt/qt mac desktop -m qtwebengine;
       export QTDIR=/opt/qt/5.14.2/clang_64;
     fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
@@ -90,9 +91,9 @@ install:
       mv live-pm-master/* .;
       git clone https://github.com/live-keys/live-doc.git;
       export LIVEDOC=$PWD/live-doc/live-doc.js;
-      pip3 install aqtinstall;
-      aqt install 5.14.2 --outputdir /opt/qt linux desktop gcc_64 -m qtwebengine qtquick3d;
-      aqt docs 5.14.2 --outputdir /opt/qt linux desktop -m qtwebengine;
+      sudo pip3 install aqtinstall;
+      sudo aqt install 5.14.2 --outputdir /opt/qt linux desktop gcc_64 -m qtwebengine qtquick3d;
+      sudo aqt doc 5.14.2 --outputdir /opt/qt linux desktop -m qtwebengine;
       export QTDIR=/opt/qt/5.14.2/gcc_64;
     fi
 
