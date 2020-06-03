@@ -144,6 +144,10 @@ void QmlEditFragment::rebuild(){
     m_bindingSpan->connectionChannel()->rebuild();
 }
 
+QString QmlEditFragment::defaultValue() const{
+    return QmlTypeInfo::typeDefaultValue(m_declaration->type().name());
+}
+
 CodePalette *QmlEditFragment::palette(const QString &type){
     for ( auto it = begin(); it != end(); ++it ){
         CodePalette* current = *it;

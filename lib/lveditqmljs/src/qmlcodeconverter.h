@@ -26,7 +26,6 @@ public:
     QJSValue& whenBinding();
     void setWhenBinding(const QJSValue& whenBinding);
 
-    QmlEditFragment* editingFragment();
 
     static QObject* create(
         const DocumentQmlInfo::ConstPtr& info,
@@ -35,15 +34,18 @@ public:
         QObject* parent = nullptr
     );
 
+    static void writeForFragment(lv::QmlEditFragment* edit, const QJSValue options);
+    static bool bindExpressionForFragment(lv::QmlEditFragment* edit, const QString& expression);
+
 public slots:
+    lv::QmlEditFragment* editingFragment();
+
     void writeProperties(const QJSValue& properties);
     void write(const QJSValue options);
-    static void writeForFragment(lv::QmlEditFragment* edit, const QJSValue options);
     QVariant parse();
     void updateBindings();
     void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
     bool bindExpression(const QString& expression);
-    static bool bindExpressionForFragment(lv::QmlEditFragment* edit, const QString& expression);
     bool bindFunctionExpression(const QString& expression);
 
     void updateFromPalette();

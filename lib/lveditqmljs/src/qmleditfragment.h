@@ -83,6 +83,7 @@ public:
     void addNestedObjectInfo(QVariantMap& info);
     void clearNestedObjectsInfo();
     void setObjectInfo(QVariantMap& info);
+
 public slots:
     int position();
     int valuePosition() const;
@@ -94,6 +95,8 @@ public slots:
 
     bool isBuilder() const;
     void rebuild();
+
+    QString defaultValue() const;
 
     int totalPalettes() const;
     lv::QmlEditFragment* parentFragment();
@@ -107,7 +110,6 @@ public slots:
     QList<QObject*> getChildFragments() const;
 
     void updateValue();
-
     void __inputRunnableObjectReady();
 
     QVariantList nestedObjectsInfo();
@@ -122,6 +124,7 @@ public slots:
     void removeChildFragment(QmlEditFragment* edit);
     void setObjectId(QString id);
     QString objectId();
+
 signals:
     void visualParentChanged();
     void connectionChanged(int index);
@@ -133,6 +136,7 @@ signals:
     void propertyAdded(lv::QmlEditFragment* ef);
 
     void refCountChanged();
+
 private:
     QmlDeclaration::Ptr  m_declaration;
 
@@ -144,9 +148,9 @@ private:
     QmlBindingSpan*                m_bindingSpan;
     QSharedPointer<QmlBindingPath> m_relativeBinding;
 
-    bool                 m_bindingUse;
-    bool                 m_paletteUse;
-    QObject*             m_visualParent;
+    bool                    m_bindingUse;
+    bool                    m_paletteUse;
+    QObject*                m_visualParent;
 
     QmlBindingSpanModel*    m_bindingSpanModel;
     QVariantList            m_nestedObjectsInfo;
