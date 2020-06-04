@@ -124,7 +124,6 @@ public slots:
     void removeChildFragment(QmlEditFragment* edit);
     void setObjectId(QString id);
     QString objectId();
-
 signals:
     void visualParentChanged();
     void connectionChanged(int index);

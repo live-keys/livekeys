@@ -55,6 +55,54 @@ Item{
         objectContainer.expandOptions(options)
     }
 
+    function expandDefaultPalette(){
+        var defaultPaletteName = editor.documentHandler.codeHandler.defaultPalette(root.editingFragment)
+        if ( defaultPaletteName.length ){
+            var editingFragment = root.editingFragment
+            if ( !editingFragment )
+                return
+
+            var palette = root.editor.documentHandler.codeHandler.expand(editingFragment, {
+                "palettes" : [defaultPaletteName]
+            })
+            if (palette){
+
+                if (palette.type === "qml/Object")
+                {
+                    palette.documentHandler = editor.documentHandler
+                    palette.editor = editor
+                    editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
+                    palette.editingFragment = editingFragment
+                }
+
+                if ( palette.item ){
+                    var newPaletteBox = root.paletteContainerFactory.createObject(root.paletteGroup)
+                    palette.item.x = 5
+                    palette.item.y = 7
+
+                    newPaletteBox.child = palette.item
+                    newPaletteBox.palette = palette
+
+                    newPaletteBox.name = palette.name
+                    newPaletteBox.type = palette.type
+                    newPaletteBox.moveEnabledSet = false
+                    newPaletteBox.documentHandler = root.editor.documentHandler
+                    newPaletteBox.cursorRectangle = root.paletteGroup.cursorRectangle
+                    newPaletteBox.editorPosition = root.paletteGroup.editorPosition
+                    newPaletteBox.paletteContainerFactory = function(arg){
+                        return root.paletteContainerFactory.createObject(arg)
+                    }
+
+                    if (compact) expand()
+                } else {
+                    root.expandOptions(palette)
+                }
+
+            }
+
+        }
+    }
+
     Item{
         id: objectContainer
 
@@ -113,10 +161,18 @@ Item{
             paletteBoxGroup.y = 10
 
             ef.incrementRefCount()
+
+            childObjectContainer.expandDefaultPalette()
+
+
         }
 
         function addPropertyFragmentToContainer(ef){
             if (!ef) return
+
+            for (var i = 0; i < propertiesOpened.length; ++i)
+                if (propertiesOpened[i] === ef.identifier()) return
+
             var codeHandler = objectContainer.editor.documentHandler.codeHandler
 
             var propertyContainer = objectContainer.propertyContainerFactory.createObject(container)
@@ -173,73 +229,77 @@ Item{
 
                     var propPalette = newProps[i].length > 1 ? newProps[i][1] : ''
 
-                    if ( propType !== '' ){
-                        var ppos = codeHandler.addProperty(
-                            objectContainer.editingFragment.valuePosition() + objectContainer.editingFragment.valueLength() - 1,
-                            objectContainer.editingFragment.typeName(),
-                            propType,
-                            propName,
-                            true
-                        )
+                    if ( propType === '' ) continue
 
-                        var ef = codeHandler.openNestedConnection(
-                            objectContainer.editingFragment, ppos
-                        )
+                    var ppos = codeHandler.addProperty(
+                        objectContainer.editingFragment.valuePosition() + objectContainer.editingFragment.valueLength() - 1,
+                        objectContainer.editingFragment.typeName(),
+                        propType,
+                        propName,
+                        true
+                    )
 
-                        if ( ef ){
-                            ef.incrementRefCount()
-                            var propertyContainer = objectContainer.propertyContainerFactory.createObject(container)
-                            container.sortChildren()
+                    var ef = codeHandler.openNestedConnection(
+                        objectContainer.editingFragment, ppos
+                    )
 
-                            propertyContainer.title = propName
-                            propertyContainer.documentHandler = objectContainer.editor.documentHandler
-                            propertyContainer.propertyContainerFactory = objectContainer.propertyContainerFactory
+                    if ( ef ){
+                        ef.incrementRefCount()
+                        var propertyContainer = objectContainer.propertyContainerFactory.createObject(container)
+                        container.sortChildren()
 
-                            propertyContainer.editor = objectContainer.editor
-                            propertyContainer.editingFragment = ef
+                        propertyContainer.title = propName
+                        propertyContainer.documentHandler = objectContainer.editor.documentHandler
+                        propertyContainer.propertyContainerFactory = objectContainer.propertyContainerFactory
+
+                        propertyContainer.editor = objectContainer.editor
+                        propertyContainer.editingFragment = ef
 
 
-                            if ( codeHandler.isForAnObject(ef) ){
+                        if ( codeHandler.isForAnObject(ef) ){
 
-                                var childObjectContainer = objectContainerFactory.createObject(container)
+                            var childObjectContainer = objectContainerFactory.createObject(container)
 
-                                childObjectContainer.editor = objectContainer.editor
-                                childObjectContainer.editingFragment = ef
-                                childObjectContainer.title = propType
+                            childObjectContainer.editor = objectContainer.editor
+                            childObjectContainer.editingFragment = ef
+                            childObjectContainer.title = propType
 
-                                var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
-                                paletteBoxGroup.editingFragment = ef
-                                paletteBoxGroup.codeHandler = codeHandler
-                                ef.visualParent = paletteBoxGroup
+                            var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
+                            paletteBoxGroup.editingFragment = ef
+                            paletteBoxGroup.codeHandler = codeHandler
+                            ef.visualParent = paletteBoxGroup
 
-                                childObjectContainer.paletteGroup = paletteBoxGroup
-                                paletteBoxGroup.x = 5
+                            childObjectContainer.paletteGroup = paletteBoxGroup
+                            paletteBoxGroup.x = 5
 
-                                propertyContainer.valueContainer = childObjectContainer
-                                propertyContainer.expandDefaultPalette()
+                            propertyContainer.valueContainer = childObjectContainer
+                            propertyContainer.expandDefaultPalette()
 
-                                propertyContainer.paletteAddButtonVisible = false
+                            propertyContainer.paletteAddButtonVisible = false
 
+                        } else {
+                            propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
+                            propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
+                            propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
+                            if ( propPalette ){
+                                propertyContainer.expandPalette(propPalette)
                             } else {
-                                propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
-                                propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
-                                propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
-                                if ( propPalette ){
-                                    propertyContainer.expandPalette(propPalette)
-                                } else {
-                                    propertyContainer.expandDefaultPalette()
-                                }
+                                propertyContainer.expandDefaultPalette()
                             }
-                            if (compact)
-                                expand()
                         }
-                        else {
-                            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-                            console.error("Error: Can't create a palette in a non-compiled program")
-                            return
-                        }
+
+                        propertiesOpened.push(propName)
                     }
+                    else {
+                        lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
+                        console.error("Error: Can't create a palette in a non-compiled program")
+                        return
+                    }
+
                 }
+
+                if (compact)
+                    expand()
             }
         }
 
@@ -274,6 +334,8 @@ Item{
                 container.children[i].destroy()
 
             compact = true
+
+            propertiesOpened = []
         }
 
         property Connections editingFragmentRemovals: Connections{

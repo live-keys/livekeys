@@ -2703,6 +2703,8 @@ QJSValue CodeQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
                 rehighlightSection(edit->position(), edit->valuePosition() + edit->valueLength());
 
                 return m_engine->newQObject(palette);
+            } else {
+                return d->projectHandler->paletteContainer()->paletteContent(paletteLoader);
             }
         }
     }
