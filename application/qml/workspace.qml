@@ -244,6 +244,11 @@ Item{
             lk.layers.workspace.addPane(pane, pane.paneWindow(), pane.splitterHierarchyPositioning())
         }
 
+        property var clearPane : function(pane){
+            removePane(pane)
+            pane.paneCleared()
+        }
+
         property var removePane : function(pane){
             if ( pane.parentSplitter ){
                 var split = pane.parentSplitter
@@ -253,6 +258,7 @@ Item{
                     lk.layers.workspace.removePane(pane)
 
                 split.removeAt(paneIndex)
+
                 if ( panes.activePane === pane ){
                     panes.activePane = null
                     panes.activeItem = null

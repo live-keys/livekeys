@@ -297,6 +297,7 @@ SplitView{
             if ( panes[i].paneType === 'splitview' )
                 panes[i].clearPanes()
             splitRoot.removeItem(panes[i])
+            panes[i].paneCleared()
         }
 
         panes = []

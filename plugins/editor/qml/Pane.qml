@@ -42,6 +42,7 @@ Rectangle{
     property string paneType: ''
     property var paneState : { return {} }
     property var paneInitialize : function(s){}
+    property var paneCleared : function(){}
     property var paneClone : null
     property var paneFocusItem : null
 }
