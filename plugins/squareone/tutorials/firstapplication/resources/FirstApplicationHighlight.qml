@@ -279,7 +279,6 @@ WorkspaceControl{
                 var itemEdit = editingFragments[i]
                 if ( itemEdit.type() === 'qml/QtQuick#Item' ){
                     var childFragments = itemEdit.getChildFragments()
-                    console.log("CHILD FRAG:" + childFragments.length)
                     for ( var j = 0; j < childFragments.length; ++j ){
                         var decoderEdit = childFragments[j]
                         if ( decoderEdit.type() === 'qml/lcvcore#VideoDecoderView' ){
@@ -295,16 +294,18 @@ WorkspaceControl{
                                     for ( var pi = 0; pi < palettes.length; ++pi ){
                                         var palette = palettes[pi]
                                         if ( palette.name === 'PathPalette' ){
+                                            var coords = palette.item.mapToItem(editor, 0, 0)
+                                            var editorCoords = editorPane.mapGlobalPosition()
+
+                                            highlight = createHighlight(state)
+                                            highlight.boxX = coords.x + editorCoords.x + palette.item.width - 35
+                                            highlight.boxY = coords.y + editorCoords.y + 30
+                                            highlight.box.width = 35
+                                            highlight.box.height = 35
+
                                             //INFO: Setting palette value
 //                                            palette.value = 'path_to_video'
-//                                                var objectContainer = itemEdit.visualParent.parent.parent.parent
-//                                                var coords = objectContainer.mapToItem(editor, 0, 0)
-//                                                var editorCoords = editorPane.mapGlobalPosition()
-//                                                highlight = createHighlight(state)
-//                                                highlight.boxX = coords.x + editorCoords.x + objectContainer.width - 38
-//                                                highlight.boxY = coords.y + editorCoords.y + 28
-//                                                highlight.box.width = 35
-//                                                highlight.box.height = 35
+
                                         }
                                     }
 

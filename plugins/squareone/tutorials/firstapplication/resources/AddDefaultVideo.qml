@@ -5,12 +5,42 @@ import editqml 1.0
 WorkspaceControl{
 
     run: function(workspace){
-        lk.layers.window.dialogs.message('This message box was opened by the link in the documentation.',
-        {
-            button2Name : 'Got it',
-            button2Function : function(mbox){
-                mbox.close()
+        var editorPane = lk.layers.workspace.panes.focusPane('editor')
+        if ( !editorPane )
+            return
+
+        var editor = editorPane.editor
+        var codeHandler = editor.documentHandler.codeHandler
+
+        var editingFragments = codeHandler.editingFragments()
+
+        for ( var i = 0; i < editingFragments.length; ++i ){
+            var itemEdit = editingFragments[i]
+            if ( itemEdit.type() === 'qml/QtQuick#Item' ){
+                var childFragments = itemEdit.getChildFragments()
+                for ( var j = 0; j < childFragments.length; ++j ){
+                    var decoderEdit = childFragments[j]
+                    if ( decoderEdit.type() === 'qml/lcvcore#VideoDecoderView' ){
+
+
+                        var decoderChildren = decoderEdit.getChildFragments()
+
+                        for ( var k = 0; k < decoderChildren.length; ++k ){
+                            var fileProperty = decoderChildren[k]
+                            if ( fileProperty.identifier() === 'file' ){
+
+                                var palettes = fileProperty.paletteList()
+                                for ( var pi = 0; pi < palettes.length; ++pi ){
+                                    var palette = palettes[pi]
+                                    if ( palette.name === 'PathPalette' ){
+                                        palette.value = project.path('../../../../samples/_videos/amherst-11_2754_3754.avi')
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-        })
+        }
     }
 }
