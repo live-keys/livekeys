@@ -9,6 +9,9 @@ Pane{
     objectName : 'documentation'
     paneType: 'documentation'
     paneState : { return {} }
+    paneCleared : function(){
+        root.page.destroy()
+    }
 
     paneInitialize : function(s){
         if ( s.document ){
@@ -53,7 +56,7 @@ Pane{
 
     property var page : null
     onPageChanged: {
-        if ( page.parent !== viewWrapper ){
+        if ( page && page.parent !== viewWrapper ){
             page.parent = viewWrapper
         }
     }

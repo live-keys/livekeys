@@ -482,7 +482,7 @@ Pane{
                 hoverEnabled: true
                 onClicked: {
                     editorAddRemoveMenu.visible = false
-                    root.panes.removePane(root)
+                    root.panes.clearPane(root)
                 }
             }
         }

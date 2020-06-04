@@ -62,6 +62,7 @@ public:
 
     Project* project();
 
+    static bool pluginTypesEnabled();
     static QmlLibraryInfo::ScanStatus loadPluginInfoInternal(
         QmlLanguageScanner *scanner,
         QmlLibraryInfo::Ptr lib,

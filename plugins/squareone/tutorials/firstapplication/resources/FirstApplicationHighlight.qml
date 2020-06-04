@@ -232,7 +232,7 @@ WorkspaceControl{
                         var coords = addBox.mapToItem(container, 0, 0)
 
                         highlight = createHighlight(state)
-                        highlight.boxX = coords.x + 205
+                        highlight.boxX = coords.x + addBox.width - 140
                         highlight.boxY = coords.y + 35
                         highlight.box.width = 75
                         highlight.box.height = 30
@@ -266,7 +266,59 @@ WorkspaceControl{
             }
 
         } else if ( fragment === 'video-path' ){
+            var editorPane = lk.layers.workspace.panes.focusPane('editor')
+            if ( !editorPane )
+                return
 
+            var editor = editorPane.editor
+            var codeHandler = editor.documentHandler.codeHandler
+
+            var editingFragments = codeHandler.editingFragments()
+
+            for ( var i = 0; i < editingFragments.length; ++i ){
+                var itemEdit = editingFragments[i]
+                if ( itemEdit.type() === 'qml/QtQuick#Item' ){
+                    var childFragments = itemEdit.getChildFragments()
+                    for ( var j = 0; j < childFragments.length; ++j ){
+                        var decoderEdit = childFragments[j]
+                        if ( decoderEdit.type() === 'qml/lcvcore#VideoDecoderView' ){
+
+
+                            var decoderChildren = decoderEdit.getChildFragments()
+
+                            for ( var k = 0; k < decoderChildren.length; ++k ){
+                                var fileProperty = decoderChildren[k]
+                                if ( fileProperty.identifier() === 'file' ){
+
+                                    var palettes = fileProperty.paletteList()
+                                    for ( var pi = 0; pi < palettes.length; ++pi ){
+                                        var palette = palettes[pi]
+                                        if ( palette.name === 'PathPalette' ){
+                                            var coords = palette.item.mapToItem(editor, 0, 0)
+                                            var editorCoords = editorPane.mapGlobalPosition()
+
+                                            highlight = createHighlight(state)
+                                            highlight.boxX = coords.x + editorCoords.x + palette.item.width - 35
+                                            highlight.boxY = coords.y + editorCoords.y + 30
+                                            highlight.box.width = 35
+                                            highlight.box.height = 35
+
+                                            //INFO: Setting palette value
+//                                            palette.value = 'path_to_video'
+
+                                        }
+                                    }
+
+                                }
+
+                            }
+
+                        }
+                    }
+
+
+                }
+            }
         }
     }
 

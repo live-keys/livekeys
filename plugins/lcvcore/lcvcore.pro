@@ -60,6 +60,7 @@ export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 DISTFILES += \
+    palettes/GrayscaleViewPalette.json \
     palettes/ImageFilePalette.qml \
     palettes/VideoDecoderViewPalette.json \
     qml/EditCvExtension.qml \

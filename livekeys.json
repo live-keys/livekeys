@@ -52,6 +52,9 @@
             ],
             "deploy": [
                 {
+                    "qtenvsetup" : {}
+                },
+                {
                     "copy": {
                         "{release}/bin": {
                             "livekeys": "-",
@@ -59,17 +62,7 @@
                             "liblvview.so*": "-",
                             "liblveditor.so*": "-",
                             "liblveditqmljs.so*": "-",
-                            "plugins": {
-                                "live": "plugins/live",
-                                "editor": "plugins/editor",
-                                "editqml": "plugins/editqml",
-                                "fs": "plugins/fs",
-                                "lcvcore": "plugins/lcvcore",
-                                "lcvimgproc": "plugins/lcvimgproc",
-                                "lcvvideo": "plugins/lcvvideo",
-                                "lcvfeatures2d": "plugins/lcvfeatures2d",
-                                "lcvphoto": "plugins/lcvphoto"
-                            }
+                            "plugins": "-"
                         },
                         "{source}/samples": "-"
                     }
@@ -209,6 +202,9 @@
             ],
             "deploy": [
                 {
+                    "qtenvsetup" : {}
+                },
+                {
                     "copy": {
                         "{release}/bin": {
                             "livekeys": "-",
@@ -216,31 +212,32 @@
                             "liblvview.so*": "-",
                             "liblveditor.so*": "-",
                             "liblveditqmljs.so*": "-",
-                            "plugins": {
-                                "live": "plugins/live",
-                                "editor": "plugins/editor",
-                                "editqml": "plugins/editqml",
-                                "fs": "plugins/fs",
-                                "lcvcore": "plugins/lcvcore",
-                                "lcvimgproc": "plugins/lcvimgproc",
-                                "lcvvideo": "plugins/lcvvideo",
-                                "lcvfeatures2d": "plugins/lcvfeatures2d",
-                                "lcvphoto": "plugins/lcvphoto"
-                            }
+                            "plugins": "-"
                         },
                         "{source}/samples": "-",
+                        "{qtdir}/resources": "-",
+                        "{qtdir}/translations/qtwebengine_locales": "translations/-",
+                        "{qtdir}/libexec/QtWebEngineProcess" : "-",
                         "{qtdir}/lib": {
                             "libQt5Core.so*": "lib/-",
                             "libQt5DBus.so*": "lib/-",
                             "libQt5Gui.so*": "lib/-",
                             "libQt5OpenGL.so*": "lib/-",
+                            "libQt5Positioning.so*": "lib/-",
+                            "libQt5PositioningQuick.so*": "lib/-",
                             "libQt5Qml.so*": "lib/-",
+                            "libQt5QmlWorkerScript.so*": "lib/-",
+                            "libQt5QmlModels.so*": "lib/-",
                             "libQt5Quick.so*": "lib/-",
                             "libQt5Script.so*": "lib/-",
                             "libQt5Widgets.so*": "lib/-",
                             "libQt5Network.so*": "lib/-",
                             "libQt5Xml.so*": "lib/-",
                             "libQt5XcbQpa.so*": "lib/-",
+                            "libQt5WebChannel.so*": "lib/-",
+                            "libQt5WebEngineCore.so*": "lib/-",
+                            "libQt5WebEngine.so*": "lib/-",
+                            "libQt5WebView.so*": "lib/-",
                             "libicudata.so*": "lib/-",
                             "libicui18n.so*": "lib/-",
                             "libicuio.so*": "lib/-",
@@ -274,8 +271,15 @@
                             "QtQuick.2": "plugins/QtQuick.2",
                             "QtQml": "plugins/QtQml",
                             "Qt": "plugins/Qt",
+                            "QtGraphicalEffects": "plugins/-",
                             "QtWebSockets": "plugins/-",
-                            "QtGraphicalEffects": "plugins/-"
+                            "QtWebEngine" : "plugins/-"
+                        },
+                        "{qtdocsdir}" : {
+                            "qtqml" : "docs/qt/-",
+                            "qtquick" : "docs/qt/-",
+                            "qtquickcontrols" : "docs/qt/-",
+                            "qtquickdialogs" : "docs/qt/-"
                         },
                         "{opencv_dir}": {
                             "libopencv_*.so*": "external/opencv/-"
@@ -308,6 +312,19 @@
                             "export QT_PLUGIN_PATH=`pwd`/libraries\n",
                             "export QT_QPA_PLATFORM_PLUGIN_PATH=`pwd`/libraries/platforms\n",
                             "./livekeys"
+                        ]
+                    }
+                },
+                {
+                    "write": {
+                        "file": "qt.conf",
+                        "data": [
+                            "[Paths]\n",
+                            "Data=.\n",
+                            "Qml2Imports=plugins\n",
+                            "Binaries=.\n",
+                            "LibraryExecutables=libraries\n",
+                            "Plugins=libraries"
                         ]
                     }
                 },
@@ -417,6 +434,9 @@
                             "to": "dev/plugins/lcvvideo/include"
                         }
                     ]
+                },
+                {
+                    "livedoc": {}
                 }
             ]
         },
@@ -668,10 +688,6 @@
                             "build": "msvc2017"
                         },
                         "plugins/lcvphoto/live.package.json": {
-                            "release": "win",
-                            "build": "msvc2017"
-                        },
-                        "plugins/live/live.package.json": {
                             "release": "win",
                             "build": "msvc2017"
                         },

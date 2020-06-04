@@ -9,7 +9,7 @@ CodePalette{
     type : "qml/string"
 
     item: Item{
-        width: 280
+        width: 180
         height: 30
         PathInputBox{
             id: inputBox

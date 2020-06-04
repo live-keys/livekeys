@@ -30,8 +30,8 @@
 // ----------
 
 #define LIVEKEYS_VERSION_MAJOR 1
-#define LIVEKEYS_VERSION_MINOR 6
-#define LIVEKEYS_VERSION_PATCH 1
+#define LIVEKEYS_VERSION_MINOR 7
+#define LIVEKEYS_VERSION_PATCH 0
 
 // Forward declarations
 // --------------------

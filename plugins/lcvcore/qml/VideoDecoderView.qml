@@ -5,7 +5,9 @@ import lcvcore 1.0
 ImageView{
     id: root
 
-    property VideoDecoder decoder : VideoDecoder{}
+    property VideoDecoder decoder : VideoDecoder{
+        loop: true
+    }
     property string file: ''
     onFileChanged: {
         if ( file.length > 0 )

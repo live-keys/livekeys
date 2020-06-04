@@ -99,6 +99,7 @@ void ProjectQmlScope::queueLibrary(const QmlLibraryInfo::Ptr &lib){
  */
 ProjectQmlScope::~ProjectQmlScope(){
     m_scanMonitor->requestStop();
+    m_monitorThread->exit();
     if ( !m_monitorThread->wait(100) ){
         m_monitorThread->terminate();
         m_monitorThread->wait();

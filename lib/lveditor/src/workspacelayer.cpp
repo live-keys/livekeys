@@ -283,6 +283,7 @@ void WorkspaceLayer::addWindow(QQuickWindow *window){
 }
 
 void WorkspaceLayer::whenMainWindowClose(){
+    whenProjectClose();
     delete m_workspace;
     m_workspace = nullptr;
 }

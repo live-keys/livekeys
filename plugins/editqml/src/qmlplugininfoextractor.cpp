@@ -42,6 +42,12 @@ void QmlPluginInfoExtractor::setImportUri(const QString &importUri){
     m_importUri = importUri;
     emit importUriChanged();
 
+    if ( !ProjectQmlExtension::pluginTypesEnabled() ){
+        Exception e = CREATE_EXCEPTION(Exception, "QmlPluginInfoExtractor: Plugin types was not enabled.", Exception::toCode("~QmlPluginTypes"));
+        ViewContext::instance().engine()->throwError(&e, this);
+        return;
+    }
+
     QmlLibraryInfo::Ptr lib = ProjectQmlScope::findQmlLibraryInImports(m_engine->importPathList(), importUri, 1, 0);
 
     if ( !lib ){
@@ -52,6 +58,7 @@ void QmlPluginInfoExtractor::setImportUri(const QString &importUri){
 
     m_languageScanner->queueLibrary(lib);
     m_languageScanner->processQueue();
+
 
     QByteArray stream;
 
