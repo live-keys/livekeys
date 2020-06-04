@@ -77,31 +77,25 @@ install:
       aqt doc 5.14.2 --outputdir /opt/qt mac desktop -m qtwebengine;
       export QTDIR=/opt/qt/5.14.2/clang_64;
     fi
-  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
-      sudo apt-get install -y libtiff5 libtiff5-dev python3-setuptools doxygen libssl1.0-dev nodejs-dev npm;
-      git clone --single-branch -b 4.1.1 https://github.com/opencv/opencv.git;
-      cd opencv;
-      mkdir build;
-      cd build;
-      cmake -D CMAKE_BUILD_TYPE=RELEASE -D OPENCV_GENERATE_PKGCONFIG=YES -D BUILD_EXAMPLES=OFF -D BUILD_opencv_apps=OFF -D BUILD_DOCS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_TESTS=OFF ..;
-      make -j8;
-      sudo make -j8 install;
-      export OPENCV_DIR=/usr/local/lib;
-      cd ../../build;
-      wget https://github.com/livecv/live-pm/archive/master.zip;
-      unzip master.zip;
-      mv live-pm-master/* .;
-      git clone https://github.com/live-keys/live-doc.git;
-      cd live-doc;
-      npm install;
-      cd ..;
-      export LIVEDOC=$PWD/live-doc/live-doc.js;
-      pip3 install aqtinstall --user;
-      echo "Installed aqtinstall";
-      aqt install 5.14.2 --outputdir /opt/qt linux desktop gcc_64 -m qtwebengine qtquick3d;
-      aqt doc 5.14.2 --outputdir /opt/qt linux desktop -m qtwebengine;
-      export QTDIR=/opt/qt/5.14.2/gcc_64;
-    fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then sudo apt-get install -y libtiff5 libtiff5-dev python3-setuptools doxygen libssl1.0-dev nodejs-dev npm; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then git clone --single-branch -b 4.1.1 https://github.com/opencv/opencv.git; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then cd opencv; mkdir build; cd build; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then cmake -D CMAKE_BUILD_TYPE=RELEASE -D OPENCV_GENERATE_PKGCONFIG=YES -D BUILD_EXAMPLES=OFF -D BUILD_opencv_apps=OFF -D BUILD_DOCS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_TESTS=OFF ..; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then make -j8; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then sudo make -j8 install; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then export OPENCV_DIR=/usr/local/lib; cd ../../build; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then wget https://github.com/livecv/live-pm/archive/master.zip; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then unzip master.zip; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then mv live-pm-master/* .; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then git clone https://github.com/live-keys/live-doc.git; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then cd live-doc; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then npm install; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then cd ..; export LIVEDOC=$PWD/live-doc/live-doc.js; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then pip3 install aqtinstall --user; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then echo "Installed aqtinstall"; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then aqt install 5.14.2 --outputdir /opt/qt linux desktop gcc_64 -m qtwebengine qtquick3d; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then aqt doc 5.14.2 --outputdir /opt/qt linux desktop -m qtwebengine; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then export QTDIR=/opt/qt/5.14.2/gcc_64; fi
 
 script:
   - ls
