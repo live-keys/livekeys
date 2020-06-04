@@ -62,6 +62,7 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_defaultPalettes["qml/lcvcore#VideoDecoderView"] = "VideoDecoderViewPalette";
     m_defaultPalettes["qml/lcvcore#GrayscaleView"] = "GrayscaleViewPalette";
     m_defaultPalettes["qml/QtQuick#Rectangle"] = "RectangleSizePalette";
+    m_defaultPalettes["qml/lcvcore#Mat"] = "MatPalette";
     MLNode s = parent->readFor("qmljs");
     if ( s.type() == MLNode::Object )
         fromJson(s);
