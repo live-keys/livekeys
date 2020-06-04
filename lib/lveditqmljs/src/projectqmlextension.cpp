@@ -184,6 +184,10 @@ void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEn
     m_paletteContainer = editor->paletteContainer();
 }
 
+bool ProjectQmlExtension::pluginTypesEnabled(){
+    return PluginTypesFacade::pluginTypesEnabled();
+}
+
 QmlLibraryInfo::ScanStatus ProjectQmlExtension::loadPluginInfoInternal(
         QmlLanguageScanner *scanner,
         QmlLibraryInfo::Ptr lib,
