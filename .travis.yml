@@ -99,6 +99,7 @@ install:
 
 script:
   - pip3 install -r requirements.txt --user
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py build .. gcc_64; fi
   - ls
 
 before_deploy:
