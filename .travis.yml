@@ -78,9 +78,9 @@ install:
       export QTDIR=/opt/qt/5.14.2/clang_64;
     fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then sudo apt-get install -y libtiff5 libtiff5-dev python3-setuptools doxygen libssl1.0-dev nodejs-dev npm; fi
-  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then git clone --single-branch -b 4.1.1 https://github.com/opencv/opencv.git;; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then git clone --single-branch -b 4.1.1 https://github.com/opencv/opencv.git; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then cd opencv; mkdir build; cd build; fi
-  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then cmake -D CMAKE_BUILD_TYPE=RELEASE -D OPENCV_GENERATE_PKGCONFIG=YES -D BUILD_EXAMPLES=OFF -D BUILD_opencv_apps=OFF -D BUILD_DOCS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_TESTS=OFF ..;; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then cmake -D CMAKE_BUILD_TYPE=RELEASE -D OPENCV_GENERATE_PKGCONFIG=YES -D BUILD_EXAMPLES=OFF -D BUILD_opencv_apps=OFF -D BUILD_DOCS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_TESTS=OFF ..; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then make -j8; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then sudo make -j8 install; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then export OPENCV_DIR=/usr/local/lib; cd ../../build; fi
