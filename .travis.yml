@@ -98,6 +98,7 @@ install:
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then export QTDIR=/opt/qt/5.14.2/gcc_64; fi
 
 script:
+  - pip3 install -r requirements.txt --user
   - ls
 
 before_deploy:
