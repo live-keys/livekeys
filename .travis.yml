@@ -5,7 +5,7 @@ os:
   - linux
 
 sudo: required
-dist: trusty
+dist: bionic
 
 addons:
   apt:
@@ -31,7 +31,6 @@ addons:
       - libtbb-dev
       - libjpeg-dev
       - libpng-dev
-      - libjasper-dev
       - libdc1394-22-dev
       - libgl1-mesa-dev
       - unzip
@@ -43,6 +42,7 @@ install:
       wget --help;
       brew update;
       brew install python3;
+      brew install doxygen;
       sudo mkdir /opt/qt;
       sudo chmod 777 /opt/qt;
       sudo ln -s /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild /Applications/Xcode.app/Contents/Developer/usr/bin/xcrun;
@@ -67,15 +67,18 @@ install:
       wget https://github.com/livecv/live-pm/archive/master.zip;
       unzip master.zip;
       mv live-pm-master/* .;
-      wget http://download.qt.io/archive/qt/5.11/5.11.1/qt-opensource-mac-x64-5.11.1.dmg;
-      ls;
-      hdiutil attach -mountpoint installqt qt-opensource-mac-x64-5.11.1.dmg;
-      ./installqt/qt-opensource-mac-x64-5.11.1.app/Contents/MacOS/qt-opensource-mac-x64-5.11.1 --script resources/install-qt-macos.qs --verbose --silent -platform minimal;
-      ls /opt/qt/5.11.1/clang_64;
-      export QTDIR=/opt/qt/5.11.1/clang_64;
+      git clone https://github.com/live-keys/live-doc.git;
+      cd live-doc;
+      npm install;
+      cd ..;
+      export LIVEDOC=$PWD/live-doc/live-doc.js;
+      pip3 install aqtinstall;
+      aqt install 5.14.2 --outputdir /opt/qt mac desktop clang_64 -m qtwebengine qtquick3d;
+      aqt doc 5.14.2 --outputdir /opt/qt mac desktop -m qtwebengine;
+      export QTDIR=/opt/qt/5.14.2/clang_64;
     fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
-      sudo apt-get install -y libtiff5 libtiff5-dev;
+      sudo apt-get install -y libtiff5 libtiff5-dev python3-setuptools doxygen libssl1.0-dev nodejs-dev npm;
       git clone --single-branch -b 4.1.1 https://github.com/opencv/opencv.git;
       cd opencv;
       mkdir build;
@@ -88,10 +91,16 @@ install:
       wget https://github.com/livecv/live-pm/archive/master.zip;
       unzip master.zip;
       mv live-pm-master/* .;
-      wget http://download.qt.io/archive/qt/5.11/5.11.1/qt-opensource-linux-x64-5.11.1.run;
-      sudo chmod 777 qt-opensource-linux-x64-5.11.1.run;
-      ./qt-opensource-linux-x64-5.11.1.run --script resources/install-qt.qs --verbose --silent -platform minimal;
-      export QTDIR=/opt/qt/5.11.1/gcc_64;
+      git clone https://github.com/live-keys/live-doc.git;
+      cd live-doc;
+      npm install;
+      cd ..;
+      export LIVEDOC=$PWD/live-doc/live-doc.js;
+      pip3 install aqtinstall --user;
+      echo "Installed aqtinstall";
+      aqt install 5.14.2 --outputdir /opt/qt linux desktop gcc_64 -m qtwebengine qtquick3d;
+      aqt doc 5.14.2 --outputdir /opt/qt linux desktop -m qtwebengine;
+      export QTDIR=/opt/qt/5.14.2/gcc_64;
     fi
 
 script:
