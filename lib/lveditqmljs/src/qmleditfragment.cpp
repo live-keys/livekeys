@@ -327,6 +327,13 @@ QString QmlEditFragment::identifier() const
     return ic[ic.size()-1];
 }
 
+QList<QObject*> QmlEditFragment::paletteList() const{
+    QList<QObject*> result;
+    for (CodePalette* palette : m_palettes)
+        result.append(palette);
+    return result;
+}
+
 QList<QObject *> QmlEditFragment::getChildFragments() const{
     QList<QObject*> result;
     for (QmlEditFragment* edit : m_childFragments)

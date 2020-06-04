@@ -21,6 +21,7 @@
 #include "live/qmldeclaration.h"
 
 #include <QVariant>
+#include <QJSValue>
 #include <QQmlProperty>
 
 namespace lv{
@@ -107,6 +108,7 @@ public slots:
     QString typeName() const;
     QString identifier() const;
 
+    QList<QObject*> paletteList() const;
     QList<QObject*> getChildFragments() const;
 
     void updateValue();
