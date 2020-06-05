@@ -58,46 +58,49 @@ Item{
     function expandDefaultPalette(){
         var defaultPaletteName = editor.documentHandler.codeHandler.defaultPalette(root.editingFragment)
         if ( defaultPaletteName.length ){
-            var editingFragment = root.editingFragment
-            if ( !editingFragment )
-                return
+            expandPalette(defaultPaletteName)
+        }
+    }
 
-            var palette = root.editor.documentHandler.codeHandler.expand(editingFragment, {
-                "palettes" : [defaultPaletteName]
-            })
-            if (palette){
+    function expandPalette(name){
+        var editingFragment = root.editingFragment
+        if ( !editingFragment )
+            return
 
-                if (palette.type === "qml/Object")
-                {
-                    palette.documentHandler = editor.documentHandler
-                    palette.editor = editor
-                    editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
-                    palette.editingFragment = editingFragment
+        var palette = root.editor.documentHandler.codeHandler.expand(editingFragment, {
+            "palettes" : [name]
+        })
+        if (palette){
+
+            if (palette.type === "qml/Object")
+            {
+                palette.documentHandler = editor.documentHandler
+                palette.editor = editor
+                editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
+                palette.editingFragment = editingFragment
+            }
+
+            if ( palette.item ){
+                var newPaletteBox = objectContainer.paletteContainerFactory.createObject(root.paletteGroup)
+                palette.item.x = 5
+                palette.item.y = 7
+
+                newPaletteBox.child = palette.item
+                newPaletteBox.palette = palette
+
+                newPaletteBox.name = palette.name
+                newPaletteBox.type = palette.type
+                newPaletteBox.moveEnabledSet = false
+                newPaletteBox.documentHandler = root.editor.documentHandler
+                newPaletteBox.cursorRectangle = root.paletteGroup.cursorRectangle
+                newPaletteBox.editorPosition = root.paletteGroup.editorPosition
+                newPaletteBox.paletteContainerFactory = function(arg){
+                    return objectContainer.paletteContainerFactory.createObject(arg)
                 }
 
-                if ( palette.item ){
-                    var newPaletteBox = objectContainer.paletteContainerFactory.createObject(root.paletteGroup)
-                    palette.item.x = 5
-                    palette.item.y = 7
-
-                    newPaletteBox.child = palette.item
-                    newPaletteBox.palette = palette
-
-                    newPaletteBox.name = palette.name
-                    newPaletteBox.type = palette.type
-                    newPaletteBox.moveEnabledSet = false
-                    newPaletteBox.documentHandler = root.editor.documentHandler
-                    newPaletteBox.cursorRectangle = root.paletteGroup.cursorRectangle
-                    newPaletteBox.editorPosition = root.paletteGroup.editorPosition
-                    newPaletteBox.paletteContainerFactory = function(arg){
-                        return objectContainer.paletteContainerFactory.createObject(arg)
-                    }
-
-                    if (compact) expand()
-                } else {
-                    root.expandOptions(palette)
-                }
-
+                if (compact) expand()
+            } else {
+                root.expandOptions(palette)
             }
 
         }
@@ -273,8 +276,11 @@ Item{
                             paletteBoxGroup.x = 5
 
                             propertyContainer.valueContainer = childObjectContainer
-                            childObjectContainer.expandDefaultPalette()
-
+                            if ( propPalette ){
+                                childObjectContainer.expandPalette(propPalette)
+                            } else {
+                                childObjectContainer.expandDefaultPalette()
+                            }
                             propertyContainer.paletteAddButtonVisible = false
 
                         } else {
