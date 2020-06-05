@@ -459,6 +459,9 @@
             ],
             "deploy": [
                 {
+                    "qtenvsetup" : {}
+                },
+                {
                     "copy": {
                         "{qtdir}/bin": {
                             "d3dcompiler_47.dll": "-",
@@ -633,6 +636,12 @@
                             "workspace/quickqanava/lib/quickqanava.lib": "dev/plugins/workspace/quickqanava/lib/-"
                         },
                         "{source}/project": "dev/project",
+                        "{qtdocsdir}" : {
+                            "qtqml" : "docs/qt/-",
+                            "qtquick" : "docs/qt/-",
+                            "qtquickcontrols" : "docs/qt/-",
+                            "qtquickdialogs" : "docs/qt/-"
+                        },
                         "{source}/samples": "-"
                     }
                 },
@@ -767,6 +776,9 @@
                             "to": "dev/plugins/lcvvideo/include"
                         }
                     ]
+                },
+                {
+                    "livedoc": {}
                 }
             ]
         },

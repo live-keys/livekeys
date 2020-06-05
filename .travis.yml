@@ -101,16 +101,10 @@ script:
   - ls
   - pip3 install -r requirements.txt --user
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then python3 livepm/main.py build .. macos_clang_64; fi
-  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py build .. gcc_64; fi
-  - find .
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then python3 livepm/main.py deploy .. macos_clang_64; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py build .. gcc_64; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py deploy .. gcc_64; fi
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then python3 livepm/main.py deploy .. gcc_64_standalone; fi
-  - if [ "${TRAVIS_OS_NAME}" == "0" ]; then
-      python3 livepm/main.py makedoc ..;
-      export LIVEKEYS_DOC=$(ls doc*.tar.gz | tail -n +1 | head -1);
-      mv ${LIVEKEYS_DOC} livekeys-doc.tar.gz;
-    fi
   - ls
 
 before_deploy:
