@@ -76,7 +76,7 @@ Item{
                 }
 
                 if ( palette.item ){
-                    var newPaletteBox = root.paletteContainerFactory.createObject(root.paletteGroup)
+                    var newPaletteBox = objectContainer.paletteContainerFactory.createObject(root.paletteGroup)
                     palette.item.x = 5
                     palette.item.y = 7
 
@@ -90,7 +90,7 @@ Item{
                     newPaletteBox.cursorRectangle = root.paletteGroup.cursorRectangle
                     newPaletteBox.editorPosition = root.paletteGroup.editorPosition
                     newPaletteBox.paletteContainerFactory = function(arg){
-                        return root.paletteContainerFactory.createObject(arg)
+                        return objectContainer.paletteContainerFactory.createObject(arg)
                     }
 
                     if (compact) expand()
@@ -125,7 +125,7 @@ Item{
         property int titleHeight: 30
         property bool compact: true
 
-        property int topSpacing: editingFragment ? 0 : 10
+        property int topSpacing: 0
 
         property var propertiesOpened: []
 
@@ -201,7 +201,7 @@ Item{
                 paletteBoxGroup.x = 5
 
                 propertyContainer.valueContainer = childObjectContainer
-                propertyContainer.expandDefaultPalette()
+                childObjectContainer.expandDefaultPalette()
 
                 propertyContainer.paletteAddButtonVisible = false
 
@@ -273,7 +273,7 @@ Item{
                             paletteBoxGroup.x = 5
 
                             propertyContainer.valueContainer = childObjectContainer
-                            propertyContainer.expandDefaultPalette()
+                            childObjectContainer.expandDefaultPalette()
 
                             propertyContainer.paletteAddButtonVisible = false
 
@@ -730,6 +730,7 @@ Item{
                 {
                     if (!children[i]) continue
                     if (children[i].objectName === "objectContainer"){
+                        children[i].topSpacing = 15
                         children[i].z = children.length - childrenCopy.length
                         childrenCopy.push(children[i])
                     }

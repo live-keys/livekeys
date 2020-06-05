@@ -12,7 +12,9 @@ environment:
 
 install:
   - choco install opencv -version 4.1.1
-  
+  - appveyor DownloadFile http://doxygen.nl/files/doxygen-1.8.17.windows.x64.bin.zip
+  - 7z x doxygen-1.8.17.windows.x64.bin.zip -oc:\projects\install\doxygen > nul
+  - set PATH=c:\projects\install\doxygen;%PATH%
 before_build:
   - SET ARCH=x64
   - SET APP_PATH=%CD%
@@ -29,10 +31,17 @@ build_script:
   - ps: $file = "$pwd\deploy.zip"
   - ps: (new-object System.Net.WebClient).Downloadfile("https://github.com/livecv/live-pm/archive/master.zip", $file)
   - ps: 7z x -y $file -o"."
+  - ps: $file2 = "$pwd\deploy2.zip"
+  - ps: (new-object System.Net.WebClient).Downloadfile("https://github.com/livecv/live-doc/archive/master.zip", $file2)
+  - ps: 7z x -y $file2 -o"."
   - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   - mv live-pm-master/* .
   - python --version
   - pip install -r requirements.txt
+  - cd live-doc-master
+  - npm install
+  - SET LIVEDOC=C:\projects\livekeys\build\live-doc-master\live-doc.js
+  - cd ..
   - python livepm/main.py build .. msvc2017_64
   - python livepm/main.py deploy .. msvc2017_64
   - dir

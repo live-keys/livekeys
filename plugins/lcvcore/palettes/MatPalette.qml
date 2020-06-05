@@ -19,19 +19,19 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 import live 1.0
 import editor 1.0
-import lcvcore 1.0
-import lcvimgproc 1.0
+import lcvcore 1.0 as Cv
+import lcvimgproc 1.0 as Img
 
 CodePalette{
     id: palette
 
-    type : "qml/Mat"
+    type : "qml/lcvcore#Mat"
 
     property real lastX
     property real lastY
     property color selectedColor: "#fff"
-
-    item: MatView{
+    property var writable: null
+    item: Cv.MatView{
         id: mView
 
         MouseArea{
@@ -42,23 +42,22 @@ CodePalette{
                 palette.lastY = mouseY
             }
             onPositionChanged: {
-                palette.drawing.lineOn(
-                    mView.mat,
+                Img.Draw.line(
+                    writable,
                     Qt.point(palette.lastX, palette.lastY),
                     Qt.point(mouseX, mouseY),
                     palette.selectedColor
                 );
                 palette.lastX = mouseX
                 palette.lastY = mouseY
-                mView.mat = mView.mat
+                mView.mat = writable.toMat()
                 palette.value = mView.mat
             }
         }
     }
 
-    property MatDraw drawing : MatDraw{}
-
     onInit: {
         mView.mat = value
+        writable = Cv.MatOp.createWritableFromMat(value)
     }
 }
