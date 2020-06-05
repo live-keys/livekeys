@@ -283,9 +283,9 @@ void WorkspaceLayer::addWindow(QQuickWindow *window){
 }
 
 void WorkspaceLayer::whenMainWindowClose(){
-    whenProjectClose();
     delete m_workspace;
     m_workspace = nullptr;
+    whenProjectClose();
 }
 
 void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspace){
@@ -328,7 +328,11 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
 
 void WorkspaceLayer::whenProjectClose(){
     QJSValue v = m_panes->property("__clearPanes").value<QJSValue>();
-    v.call();
+    QJSValue res = v.call();
+    if ( res.isError() ){
+        m_engine->throwError(res, this);
+        return;
+    }
 }
 
 QString WorkspaceLayer::docsPath() const{

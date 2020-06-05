@@ -41,6 +41,7 @@ SplitView{
 
     property var panes : []
     property var paneSizes : []
+    property var paneCleared : function(){}
 
     function __splitPaneForVertical(i, item, positionBefore){
         if ( i === 0 && panes.length === 0 ){
