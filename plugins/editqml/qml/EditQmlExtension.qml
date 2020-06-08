@@ -240,8 +240,6 @@ LiveExtension{
         paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
 
         editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
-
-        ef.incrementRefCount()
     }
 
     function palette(){
