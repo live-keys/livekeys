@@ -82,8 +82,8 @@ Item{
 
             if ( palette.item ){
                 var newPaletteBox = objectContainer.paletteContainerFactory.createObject(root.paletteGroup)
-                palette.item.x = 5
-                palette.item.y = 7
+                palette.item.x = 2
+                palette.item.y = 2
 
                 newPaletteBox.child = palette.item
                 newPaletteBox.palette = palette
@@ -116,7 +116,6 @@ Item{
         property QtObject editingFragment : null
         property Item editor: null
 
-
         property Item pane : null
         property Item wrapper : root
 
@@ -131,6 +130,8 @@ Item{
         property int topSpacing: 0
 
         property var propertiesOpened: []
+
+        property PaletteStyle paletteStyle: lk.layers.workspace.extensions.editqml.paletteStyle
 
         width: container.width < 260 ? 300 : container.width + 40
         height: container.height < 10 || compact ? 40 : objectContainerTitleWrap.height + topSpacing + /*(paletteGroup ? paletteGroup.height : 0) +*/ container.height
@@ -201,7 +202,7 @@ Item{
                 ef.visualParent = paletteBoxGroup
 
                 childObjectContainer.paletteGroup = paletteBoxGroup
-                paletteBoxGroup.x = 5
+                paletteBoxGroup.x = 2
 
                 propertyContainer.valueContainer = childObjectContainer
                 childObjectContainer.expandDefaultPalette()
@@ -273,7 +274,7 @@ Item{
                             ef.visualParent = paletteBoxGroup
 
                             childObjectContainer.paletteGroup = paletteBoxGroup
-                            paletteBoxGroup.x = 5
+                            paletteBoxGroup.x = 2
 
                             propertyContainer.valueContainer = childObjectContainer
                             if ( propPalette ){
@@ -383,7 +384,6 @@ Item{
                 if (compact) expand()
                 else objectContainer.addPropertyFragmentToContainer(ef)
                 container.sortChildren()
-
             }
         }
 
@@ -397,7 +397,7 @@ Item{
                 id: objectContainerTitle
                 anchors.fill: parent
                 compact: objectContainer.compact
-                color: objectContainer.pane ? objectContainer.pane.topColor : '#062945'
+                color: objectContainer.pane ? objectContainer.pane.topColor : objectContainer.paletteStyle.sectionHeaderBackgroundColor//'#062945'
                 isBuilder: root.editingFragment ? root.editingFragment.isBuilder() : false
 
                 onToggleCompact: {
@@ -490,8 +490,8 @@ Item{
 
                             if ( palette.item ){
                                 var newPaletteBox = objectContainer.paletteContainerFactory.createObject(paletteGroup)
-                                palette.item.x = 5
-                                palette.item.y = 7
+                                palette.item.x = 2
+                                palette.item.y = 2
 
                                 newPaletteBox.child = palette.item
                                 newPaletteBox.palette = palette

@@ -644,6 +644,7 @@ Item{
 
         createNewSplitter: function(orientation){
             var ob = paneSplitViewFactory.createObject(null)
+            ob.handleColor = root.paneSplitterColor
             ob.orientation = orientation
             ob.createNewSplitter = mainSplit.createNewSplitter
             ob.currentWindow = mainSplit.currentWindow

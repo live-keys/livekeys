@@ -36,7 +36,9 @@ DISTFILES += \
     qml/AddQmlBox.qml \
     qml/ObjectContainer.qml \
     qml/ObjectContainerTop.qml \
+    qml/PaletteControls.qml \
     qml/PaletteGroup.qml \
+    qml/PaletteStyle.qml \
     qml/PropertyContainer.qml \
     qml/PaletteContainer.qml \
     qml/ShapingOptions.qml \

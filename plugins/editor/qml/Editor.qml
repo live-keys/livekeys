@@ -336,7 +336,6 @@ Rectangle{
                 readOnly: root.document === null || root.document.isMonitored || (importsShaped && rootShaped)
                 cursorVisible: !readOnly
 
-
                 Keys.onPressed: {
                     if ( event.key === Qt.Key_PageUp ){
                         if ( codeHandler.completionModel.isEnabled ){

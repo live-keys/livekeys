@@ -305,12 +305,21 @@ bool QmlTypeInfo::isCreatable() const{
  * \returns true if \p typeString is an object, false otherwise
  */
 bool QmlTypeInfo::isObject(const QString &typeString){
-if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
-     typeString == "int" || typeString == "list" || typeString == "real" ||
-     typeString == "color" || typeString == "QColor" ||
-     typeString == "string" || typeString == "QString" || typeString == "url" || typeString == "var" || typeString == "QUrl" )
+    if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
+         typeString == "int" || typeString == "list" || typeString == "real" ||
+         typeString == "color" || typeString == "QColor" ||
+         typeString == "string" || typeString == "QString" || typeString == "url" || typeString == "var" || typeString == "QUrl" )
+        return false;
+    return true;
+}
+
+bool QmlTypeInfo::isQmlBasicType(const QString &typeString){
+    if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
+         typeString == "int" || typeString == "list" || typeString == "real" ||
+         typeString == "color" || typeString == "string" || typeString == "url" || typeString == "var" ||
+         typeString == "object" || typeString == "Array" )
+        return true;
     return false;
-return true;
 }
 
 QmlTypeReference QmlTypeInfo::toQmlPrimitive(const QmlTypeReference &cppPrimitive){

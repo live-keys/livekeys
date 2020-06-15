@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 Column{
     id: paletteGroup
-    spacing: 20
+    spacing: 10
     objectName: "paletteGroup"
 
     property QtObject editingFragment : null

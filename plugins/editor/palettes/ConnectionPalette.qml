@@ -19,6 +19,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
+import workspace 1.0 as Workspace
 
 CodePalette{
     id: palette
@@ -30,28 +31,28 @@ CodePalette{
         weight: Font.Normal
     })
 
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+
     property CodeCompletionModel codeModel : CodeCompletionModel{}
 
     item: Rectangle{
 
         width: 280
-        height: 40
+        height: 25
         color: 'transparent'
 
         //TODO: ErrorBox when not binding
 
-        InputBox{
+        Workspace.InputBox{
             id: input
             anchors.left: parent.left
-            anchors.leftMargin: 20
             anchors.right: parent.right
             anchors.rightMargin: 35
             anchors.top: parent.top
-            anchors.topMargin: 5
             height: 25
-            border.width: 1
-            border.color: "#031728"
-            text: ''
+
+            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+
             onTextChanged: {
                 if ( !autoTextChange ){
                    extension.suggestionsForExpression(input.text, palette.codeModel, false)
@@ -106,11 +107,6 @@ CodePalette{
                     event.accepted = true
                 }
             }
-
-            color: '#050e15'
-
-            font.family: palette.inputFont.family
-            font.pixelSize: palette.inputFont.pixelSize
         }
 
         SuggestionBox{
@@ -134,13 +130,11 @@ CodePalette{
 
         Rectangle{
             id: connectionsButton
-            anchors.top: parent.top
-            anchors.topMargin: 5
             anchors.right: parent.right
             anchors.rightMargin: 10
             width: 25
             height: 25
-            radius: 5
+            radius: 3
 
             property color backgroundHoverColor : "#213355"
             property color backgroundColor : "#212a4b"
