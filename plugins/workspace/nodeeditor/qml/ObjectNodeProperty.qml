@@ -84,7 +84,7 @@ Item{
                                 var newPaletteBox = paletteContainerFactory.createObject(paletteContainer)
 
                                 palette.item.x = 5
-                                palette.item.y = 7
+                                palette.item.y = 2
 
                                 newPaletteBox.child = palette.item
                                 newPaletteBox.palette = palette

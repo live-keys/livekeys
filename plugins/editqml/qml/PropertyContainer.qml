@@ -8,6 +8,8 @@ Item{
     property string title: "Object"
     objectName: "propertyContainer"
 
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+
     property Item paletteGroup : null
     property alias groupsContainer: container
     property QtObject editingFragment : null
@@ -27,7 +29,7 @@ Item{
             propertyContainer.destroy()
         }
     }
-    property int topMarginParam: 12
+    property int topMarginParam: 0
     width: container.width + 120
     height: container.height > 35 ? container.height + 10 : 45
     z: 3000
@@ -39,8 +41,8 @@ Item{
 
         var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
 
-        palette.item.x = 5
-        palette.item.y = 7
+        palette.item.x = 2
+        palette.item.y = 2
 
         newPaletteBox.child = palette.item
         newPaletteBox.palette = palette
@@ -69,115 +71,119 @@ Item{
         anchors.leftMargin: 25
         anchors.top: parent.top
         anchors.topMargin: 5 + topMarginParam
-        height: 21
+        height: container.height
         width: 110
-        color: "#24282e"
-        radius: 10
+        color: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.background : 'black'
+        radius: 3
+        border.width: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderThickness : 0
+        border.color: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderColor : 'black'
         Text{
             anchors.left: parent.left
             anchors.leftMargin: 25
             anchors.right: parent.right
             anchors.rightMargin: 15
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 6
             text: propertyContainer.title
             clip: true
             color: '#82909b'
         }
-    }
 
-    Item{
-        anchors.left: parent.left
-        anchors.leftMargin: 35
-        anchors.top: parent.top
-        anchors.topMargin: 5 + topMarginParam
-        width: 15
-        height: 20
-        Text{
-            anchors.verticalCenter: parent.verticalCenter
-            text: 'x'
-            color: '#ffffff'
-        }
-        MouseArea{
-            id: propertyCloseArea
-            anchors.fill: parent
-            onClicked: {
-                var objectContainer = propertyContainer.parent.parent
+        Item{
+            id: paletteAddButton
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.top: parent.top
+            anchors.topMargin: 4
 
-                propertyContainer.editingFragment.decrementRefCount()
-                if (propertyContainer.editingFragment.refCount === 0)
-                    objectContainer.editingFragment.removeChildFragment(propertyContainer.editingFragment)
-
-                // remove name from objectContainer
-                objectContainer.propertiesOpened =
-                        objectContainer.propertiesOpened.filter(
-                            function(value, index, arr){
-                                return value !== propertyContainer.editingFragment.identifier()
-                            }
-                        )
-                propertyContainer.destroy()
+            width: 15
+            height: 20
+            Image{
+                anchors.centerIn: parent
+                source: "qrc:/images/palette-add.png"
             }
-        }
-    }
+            MouseArea{
+                id: paletteAddMouse
+                anchors.fill: parent
+                onClicked: {
+                    var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
+                        editingFragment.position(), true)
+                    if (palettes && palettes.size() ){
+                        paletteHeaderList.forceActiveFocus()
+                        paletteHeaderList.model = palettes
+                        paletteHeaderList.cancelledHandler = function(){
+                            paletteHeaderList.focus = false
+                            paletteHeaderList.model = null
+                        }
+                        paletteHeaderList.selectedHandler = function(index){
+                            paletteHeaderList.focus = false
+                            paletteHeaderList.model = null
 
-    Item{
-        id: paletteAddButton
-        anchors.left: parent.left
-        anchors.leftMargin: 115
-        anchors.top: parent.top
-        anchors.topMargin: 7 + topMarginParam
+                            if ( propertyContainer.valueContainer &&
+                                 propertyContainer.valueContainer.objectName === 'paletteGroup' )
+                            {
+                                var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
 
-        width: 15
-        height: 20
-        Image{
-            anchors.centerIn: parent
-            source: "qrc:/images/palette-add.png"
-        }
-        MouseArea{
-            id: paletteAddMouse
-            anchors.fill: parent
-            onClicked: {
-                var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
-                    editingFragment.position(), true)
-                if (palettes.size() ){
-                    paletteHeaderList.forceActiveFocus()
-                    paletteHeaderList.model = palettes
-                    paletteHeaderList.cancelledHandler = function(){
-                        paletteHeaderList.focus = false
-                        paletteHeaderList.model = null
-                    }
-                    paletteHeaderList.selectedHandler = function(index){
-                        paletteHeaderList.focus = false
-                        paletteHeaderList.model = null
+                                var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
 
-                        if ( propertyContainer.valueContainer &&
-                             propertyContainer.valueContainer.objectName === 'paletteGroup' )
-                        {
-                            var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
+                                palette.item.x = 2
+                                palette.item.y = 2
 
-                            var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
+                                newPaletteBox.child = palette.item
+                                newPaletteBox.palette = palette
+                                newPaletteBox.moveEnabledSet = false
 
-                            palette.item.x = 5
-                            palette.item.y = 7
+                                newPaletteBox.name = palette.name
+                                newPaletteBox.type = palette.type
+                                newPaletteBox.documentHandler = documentHandler
+                                newPaletteBox.cursorRectangle = propertyContainer.editor.getCursorRectangle()
+                                newPaletteBox.editorPosition = editor.cursorWindowCoords()
+                                newPaletteBox.paletteContainerFactory = function(arg){
+                                    return propertyContainer.paletteContainerFactory.createObject(arg)
+                                }
 
-                            newPaletteBox.child = palette.item
-                            newPaletteBox.palette = palette
-                            newPaletteBox.moveEnabledSet = false
-
-                            newPaletteBox.name = palette.name
-                            newPaletteBox.type = palette.type
-                            newPaletteBox.documentHandler = documentHandler
-                            newPaletteBox.cursorRectangle = propertyContainer.editor.getCursorRectangle()
-                            newPaletteBox.editorPosition = editor.cursorWindowCoords()
-                            newPaletteBox.paletteContainerFactory = function(arg){
-                                return propertyContainer.paletteContainerFactory.createObject(arg)
                             }
 
                         }
-
                     }
                 }
             }
         }
+
+        Item{
+            anchors.left: parent.left
+            anchors.leftMargin: 8
+            anchors.top: parent.top
+            anchors.topMargin: 2
+            width: 15
+            height: 20
+            Text{
+                anchors.verticalCenter: parent.verticalCenter
+                text: 'x'
+                color: '#ffffff'
+            }
+            MouseArea{
+                id: propertyCloseArea
+                anchors.fill: parent
+                onClicked: {
+                    var objectContainer = propertyContainer.parent.parent
+
+                    propertyContainer.editingFragment.decrementRefCount()
+                    if (propertyContainer.editingFragment.refCount === 0)
+                        objectContainer.editingFragment.removeChildFragment(propertyContainer.editingFragment)
+
+                    // remove name from objectContainer
+                    objectContainer.propertiesOpened =
+                            objectContainer.propertiesOpened.filter(
+                                function(value, index, arr){
+                                    return value !== propertyContainer.editingFragment.identifier()
+                                }
+                            )
+                    propertyContainer.destroy()
+                }
+            }
+        }
+
     }
 
 
@@ -203,13 +209,15 @@ Item{
         onCancelled : cancelledHandler()
     }
 
-    Item{
+    Rectangle{
         id: container
 
         anchors.top: parent.top
-        anchors.topMargin: 10
+        anchors.topMargin: 5 + topMarginParam
         anchors.left: parent.left
         anchors.leftMargin: 140
+
+        color: 'black'
 
         width: propertyContainer.valueContainer ? propertyContainer.valueContainer.width : 0
         height: propertyContainer.valueContainer ? propertyContainer.valueContainer.height : 0

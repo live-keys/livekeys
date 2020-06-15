@@ -58,8 +58,8 @@ The VideoDecoderView already started playing our video. Now we can connect other
 Let's try to add a conversion to grayscale to our video. Within the root item, click the
 ['add']({livekeys-hover:livekeys://open/resources/FirstApplicationHighlight.qml#add-option;livekeys://open/resources/FirstApplicationRemoveHighlight.qml#add-option})
 option, select [Object]({livekeys-hover:livekeys://open/resources/FirstApplicationHighlight.qml#add-option-object;livekeys://open/resources/FirstApplicationRemoveHighlight.qml#add-option-object})
-then search and add the `GrayscaleView` item. Once added, in the input property, type
-'videoDecoderView.image', then hit the return key or click on the update button. You should see the grayscale version of our video playing.
+then search and add the `GrayscaleView` item. Once added, in the [input property]({livekeys-hover:livekeys://open/resources/FirstApplicationHighlight.qml#grayscale-input;livekeys://open/resources/FirstApplicationRemoveHighlight.qml#grayscale-input}), type
+`videoDecoderView.image`, then hit the return key or click on the update button. You should see the grayscale version of our video playing.
 
 ## Looking over the hierarchy
 

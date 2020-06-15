@@ -5,7 +5,27 @@ import editqml 1.0
 LiveExtension{
     id: root
 
-    globals : ProjectQmlExtension{}
+    property WorkspaceTheme currentTheme: lk.layers.workspace.themes.current
+
+    globals : ProjectQmlExtension{
+        property PaletteStyle paletteStyle: PaletteStyle{
+            backgroundColor: currentTheme ? currentTheme.colorScheme.middleground : backgroundColor
+            paletteBackgroundColor: currentTheme ? currentTheme.colorScheme.background : paletteBackgroundColor
+            paletteHeaderColor: currentTheme ? currentTheme.colorScheme.middleground : paletteHeaderColor
+            sectionHeaderBackgroundColor: currentTheme ? currentTheme.colorScheme.middlegroundOverlay : sectionHeaderBackgroundColor
+            labelStyle: currentTheme ? currentTheme.inputLabelStyle : labelStyle
+            monoInputStyle: currentTheme ? currentTheme.monoInputStyle : monoInputStyle
+            inputStyle: currentTheme ? currentTheme.inputStyle : inputStyle
+            buttonStyle: currentTheme ? currentTheme.formButtonStyle : buttonStyle
+            propertyLabelStyle: QtObject{
+                property color background: currentTheme ? currentTheme.colorScheme.middleground : propertyLabelStyle.background
+                property color borderColor: currentTheme ? currentTheme.colorScheme.middlegroundBorder : propertyLabelStyle.borderColor
+                property double borderThickness: currentTheme ? currentTheme.inputBorderWidth : propertyLabelStyle.borderThickness
+            }
+        }
+
+        property PaletteControls paletteControls: PaletteControls{}
+    }
     interceptLanguage : function(document, handler, ext){
         var extLower = ext.toLowerCase()
 
@@ -59,7 +79,7 @@ LiveExtension{
             var editorBox = lk.layers.editor.environment.createEmptyEditorBox()
             var paletteGroup = root.paletteGroupFactory.createObject(lk.layers.editor.environment.content)
             editorBox.setChild(paletteGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
-            paletteGroup.x = 5
+            paletteGroup.x = 2
             paletteGroup.editingFragment = ef
             paletteGroup.codeHandler = codeHandler
             ef.visualParent = paletteGroup
@@ -121,9 +141,8 @@ LiveExtension{
             editorBox = lk.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
             var objectContainer = null
 
-            if (forAnObject)
-            {
-                objectContainer = root.objectContainerFactory.createObject(lk.layers.editor.environment.content)
+            if (forAnObject){
+                objectContainer = root.globals.paletteControls.createObjectContainer(lk.layers.editor.environment.content)
                 objectContainer.editor = editor
                 objectContainer.editingFragment = ef
                 objectContainer.title = ef.typeName()
@@ -140,7 +159,7 @@ LiveExtension{
 
             editorBox.setChild(forAnObject ? objectContainer : paletteBoxGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
 
-            editorBox.color = "black"
+            editorBox.color = globals.paletteStyle.backgroundColor
             editorBox.border.width = 1
             editorBox.border.color = "#141c25"
 
@@ -157,8 +176,8 @@ LiveExtension{
 
             if ( palette.item ){
                 var paletteBox = root.paletteContainerFactory.createObject(paletteBoxGroup)
-                palette.item.x = 5
-                palette.item.y = 7
+                palette.item.x = 2
+                palette.item.y = 2
                 paletteBox.documentHandler = editor.documentHandler
 
                 if (palette.type === "qml/Object")

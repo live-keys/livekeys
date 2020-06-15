@@ -101,8 +101,8 @@ Pane{
     property Theme currentTheme : lk.layers.workspace.themes.current
 
     property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
-    property color lineSurfaceColor: topColor
-    property color lineInfoColor:  currentTheme ? currentTheme.paneTopBackgroundAlternate : 'black'
+    property color lineSurfaceColor: currentTheme ? currentTheme.panebackgroundOverlay : 'black'
+    property color lineInfoColor:  currentTheme ? currentTheme.paneTopbackgroundOverlay : 'black'
     property color optionsColor: currentTheme ? currentTheme.paneTopBackground : 'black'
 
     color : lk.layers.workspace.themes.current.paneBackground

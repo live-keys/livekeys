@@ -6,9 +6,11 @@ import editor.private 1.0
 
 Item{
     id: paletteContainer
-    width: child ? child.width  + (compact ? compactHeaderWidth: 0) : 0
-    height: child ? child.height + (compact? 0 : normalHeaderHeight) : 0
+    width: child ? child.width + child.x  + (compact ? compactHeaderWidth: 0): 0
+    height: child ? child.height + (compact ? 4 : normalHeaderHeight) : 0
     objectName: "paletteContainer"
+
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
     property int compactHeaderWidth: 40
     property int normalHeaderHeight: 35
@@ -61,17 +63,21 @@ Item{
                     ? (paletteContainer.parent ? paletteContainer.parent.width : paletteContainer.width) + 10
                     : compactHeaderWidth
 
+        visible: !compact
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.leftMargin: compact && child ? child.width + 10: 0
         clip: true
-        color: compact? "black":"#141c25"
+        color: (paletteContainer.paletteStyle ? paletteContainer.paletteStyle.paletteHeaderColor : 'black')
 
         MouseArea{
-            enabled: !compact && moveEnabledSet
             id: paletteBoxMoveArea
             anchors.fill: parent
+
+            enabled: !compact && moveEnabledSet
             cursorShape: enabled ? Qt.SizeAllCursor : Qt.ArrowCursor
+
             property point lastMousePos : Qt.point(0, 0)
             onPressed: {
                 paletteContainer.parent.parent.disableMoveBehavior()
@@ -113,8 +119,8 @@ Item{
                     var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
                     var newPaletteBox = paletteContainer.paletteContainerFactory(paletteGroup)
 
-                    palette.item.x = 5
-                    palette.item.y = 7
+                    palette.item.x = 2
+                    palette.item.y = 2
 
                     newPaletteBox.child = palette.item
                     newPaletteBox.palette = palette
@@ -249,68 +255,67 @@ Item{
                 }
             }
         }
+    }
 
 
-        Rectangle {
-            id: rightButtons
-            color: compact? "#131a24" : "transparent"
-            width: 35
-            height: 24
-            radius: compact? 5: 0
+    Rectangle {
+        id: rightButtons
+        color: paletteContainer.paletteStyle ? paletteContainer.paletteStyle.paletteHeaderColor : 'black'
+        width: 35
+        height: 24
+        radius: 2
+
+        anchors.top: parent.top
+        anchors.topMargin: 2
+        anchors.right: parent.right
+        anchors.rightMargin: 2
+
+        Triangle{
+            id: minimizeButton
+            width: 8
+            height: 8
+            color: "#9b9da0"
 
             anchors.top: parent.top
-            anchors.topMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 3
+            anchors.topMargin: 8
+            anchors.left: parent.left
+            anchors.leftMargin: 5
 
-
-            Triangle{
-                id: minimizeButton
-                width: 8
-                height: 8
-                color: "#9b9da0"
-
-                anchors.top: parent.top
-                anchors.topMargin: 8
-                anchors.left: parent.left
-                anchors.leftMargin: 5
-
-                rotation: Triangle.Top
-                MouseArea{
-                    id: switchMinimized
-                    anchors.fill: parent
-                    onClicked: {
-                        if (palette)
-                            compact = !compact
-                            if (compact) minimizeButton.rotation = Triangle.Top
-                            else minimizeButton.rotation = Triangle.Bottom
-                    }
+            rotation: Triangle.Top
+            MouseArea{
+                id: switchMinimized
+                anchors.fill: parent
+                onClicked: {
+                    if (palette)
+                        compact = !compact
+                        if (compact) minimizeButton.rotation = Triangle.Top
+                        else minimizeButton.rotation = Triangle.Bottom
                 }
             }
+        }
 
-            Item{
-                id: closeButton
-                width: 10
-                height: 15
-                anchors.top: parent.top
-                anchors.topMargin: 3
-                anchors.left: parent.left
-                anchors.leftMargin: 20
+        Item{
+            id: closeButton
+            width: 10
+            height: 15
+            anchors.top: parent.top
+            anchors.topMargin: 3
+            anchors.left: parent.left
+            anchors.leftMargin: 20
 
-                Text{
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: 'x'
-                    color: '#ffffff'
-                }
-                MouseArea{
-                    id: paletteCloseArea
-                    anchors.fill: parent
-                    onClicked: {
-                        if (paletteContainer.palette.type === "qml/import"){
-                            paletteContainer.palette.item.editor.importsShaped = false
-                        }
-                        documentHandler.codeHandler.removePalette(paletteContainer.palette)
+            Text{
+                anchors.verticalCenter: parent.verticalCenter
+                text: 'x'
+                color: '#ffffff'
+            }
+            MouseArea{
+                id: paletteCloseArea
+                anchors.fill: parent
+                onClicked: {
+                    if (paletteContainer.palette.type === "qml/import"){
+                        paletteContainer.palette.item.editor.importsShaped = false
                     }
+                    documentHandler.codeHandler.removePalette(paletteContainer.palette)
                 }
             }
         }
@@ -319,7 +324,7 @@ Item{
     Item{
         id: paletteChild
         anchors.top: compact? parent.top : paletteBoxHeader.top
-        anchors.topMargin: compact? 0:paletteBoxHeader.height
+        anchors.topMargin: compact? 0 : paletteBoxHeader.height
         anchors.left: parent.left
         children: parent.child ? [parent.child] : []
     }

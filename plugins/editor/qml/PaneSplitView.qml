@@ -5,10 +5,13 @@ import editor 1.0
 SplitView{
     id: splitRoot
     orientation: Qt.Horizontal
+
+    property color handleColor: '#081019'
+
     handleDelegate: Rectangle{
         implicitWidth: 1
         implicitHeight: 1
-        color: "#081019"
+        color: splitRoot.handleColor
     }
     objectName: "splitview"
 
