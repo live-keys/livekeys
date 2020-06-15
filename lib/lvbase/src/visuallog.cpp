@@ -128,14 +128,14 @@ namespace{
                     case 'W': base += QDate::longDayName(dt.date().dayOfWeek()).toStdString(); break;
                     case 'b': base += QDate::shortMonthName(dt.date().month()).toStdString(); break;
                     case 'B': base += QDate::longMonthName(dt.date().month()).toStdString(); break;
-                    case 'd': base += QString().sprintf("%0*d", 2, dt.date().day() ).toStdString(); break;
-                    case 'e': base += QString().sprintf("%d",      dt.date().day() ).toStdString(); break;
-                    case 'f': base += QString().sprintf("%*d",  2, dt.date().day() ).toStdString(); break;
-                    case 'm': base += QString().sprintf("%0*d", 2, dt.date().month() ).toStdString(); break;
-                    case 'n': base += QString().sprintf("%d",      dt.date().month() ).toStdString(); break;
-                    case 'o': base += QString().sprintf("%*d",  2, dt.date().month() ).toStdString(); break;
-                    case 'y': base += QString().sprintf("%0*d", 2, dt.date().year() % 100 ).toStdString(); break;
-                    case 'Y': base += QString().sprintf("%0*d", 4, dt.date().year() ).toStdString(); break;
+                    case 'd': base += QString::asprintf("%0*d", 2, dt.date().day() ).toStdString(); break;
+                    case 'e': base += QString::asprintf("%d",      dt.date().day() ).toStdString(); break;
+                    case 'f': base += QString::asprintf("%*d",  2, dt.date().day() ).toStdString(); break;
+                    case 'm': base += QString::asprintf("%0*d", 2, dt.date().month() ).toStdString(); break;
+                    case 'n': base += QString::asprintf("%d",      dt.date().month() ).toStdString(); break;
+                    case 'o': base += QString::asprintf("%*d",  2, dt.date().month() ).toStdString(); break;
+                    case 'y': base += QString::asprintf("%0*d", 2, dt.date().year() % 100 ).toStdString(); break;
+                    case 'Y': base += QString::asprintf("%0*d", 4, dt.date().year() ).toStdString(); break;
                     default: base += *it;
                     }
                 }
@@ -223,7 +223,7 @@ VisualLog::Configuration::Configuration(
     , m_output(VisualLog::Console | VisualLog::View | VisualLog::Extensions)
     , m_logObjects(VisualLog::File | VisualLog::Extensions)
     , m_logDaily(dailyFile)
-    , m_logFile(0)
+    , m_logFile(nullptr)
     , m_transports()
 {}
 
@@ -242,10 +242,10 @@ VisualLog::Configuration::Configuration(const std::string &name, const VisualLog
 }
 
 void VisualLog::Configuration::closeFile(){
-    if ( m_logFile != 0 ){
+    if ( m_logFile != nullptr ){
         m_logFile->close();
         delete m_logFile;
-        m_logFile = 0;
+        m_logFile = nullptr;
     }
 }
 
@@ -314,8 +314,8 @@ VisualLog::Configuration *VisualLog::ConfigurationContainer::globalConfiguration
 VisualLog::Configuration *VisualLog::ConfigurationContainer::configurationAt(const std::string &key){
     auto it = m_configurationMap.find(key);
     if ( it == m_configurationMap.end() )
-        return 0;
-    return it->second;;
+        return nullptr;
+    return it->second;
 }
 
 VisualLog::Configuration *VisualLog::ConfigurationContainer::configurationAt(int index){
@@ -326,7 +326,7 @@ VisualLog::Configuration *VisualLog::ConfigurationContainer::configurationAtOrGl
     auto it = m_configurationMap.find(key);
     if ( it == m_configurationMap.end() )
         return globalConfiguration();
-    return it->second;;
+    return it->second;
 }
 
 int VisualLog::ConfigurationContainer::configurationCount() const{
@@ -337,7 +337,7 @@ int VisualLog::ConfigurationContainer::configurationCount() const{
 // ---------------------------------------------------------------------
 
 
-VisualLog::ViewTransport* VisualLog::m_model = 0;
+VisualLog::ViewTransport* VisualLog::m_model = nullptr;
 
 bool VisualLog::m_globalConfigured = false;
 
@@ -476,13 +476,13 @@ void VisualLog::configure(VisualLog::Configuration *configuration, const MLNode 
             if ( it.value().type() == MLNode::String ){
                 configuration->m_applicationLevel = VisualLog::MessageInfo::levelFromString(it.value().asString());
             } else {
-                configuration->m_applicationLevel = (VisualLog::MessageInfo::Level)it.value().asInt();
+                configuration->m_applicationLevel = static_cast<VisualLog::MessageInfo::Level>(it.value().asInt());
             }
         } else if ( it.key() == "defaultLevel" ){
             if ( it.value().type() == MLNode::String ){
                 configuration->m_defaultLevel = VisualLog::MessageInfo::levelFromString(it.value().asString());
             } else {
-                configuration->m_defaultLevel = (VisualLog::MessageInfo::Level)it.value().asInt();
+                configuration->m_defaultLevel = static_cast<VisualLog::MessageInfo::Level>(it.value().asInt());
             }
         } else if ( it.key() == "file" ){
             std::string v = it.value().asString();
@@ -656,7 +656,7 @@ void VisualLog::init(){
 void VisualLog::flushFile(const std::string& data){
     if ( m_configuration->m_logDaily ){
         QDateTime cdt = m_messageInfo.stamp();
-        if ( cdt.date() != m_configuration->m_lastLog || m_configuration->m_logFile == 0 ){
+        if ( cdt.date() != m_configuration->m_lastLog || m_configuration->m_logFile == nullptr ){
             m_configuration->m_logFile = new QFile(QString::fromStdString(visualLogDateFormat(m_configuration->m_filePath, cdt)));
             if ( !m_configuration->m_logFile->open(QIODevice::Append) ){
                 m_configuration->m_output = removeOutputFlag(m_configuration->m_output, VisualLog::File);
@@ -665,7 +665,7 @@ void VisualLog::flushFile(const std::string& data){
                 return;
             }
         }
-    } else if ( m_configuration->m_logFile == 0 ){
+    } else if ( m_configuration->m_logFile == nullptr ){
         m_configuration->m_logFile = new QFile(QString::fromStdString(m_configuration->m_filePath));
         if ( !m_configuration->m_logFile->open(QIODevice::Append) ){
             m_configuration->m_output = removeOutputFlag(m_configuration->m_output, VisualLog::File);
@@ -699,7 +699,7 @@ std::string VisualLog::MessageInfo::expand(const std::string &pattern) const{
 
     std::string::const_iterator it = pattern.begin();
     while ( it != pattern.end() ){
-        if ( *it == '%' ){
+         if ( *it == '%' ){
             ++it;
             if ( it != pattern.end() ){
                 switch(*it){
@@ -709,7 +709,7 @@ std::string VisualLog::MessageInfo::expand(const std::string &pattern) const{
 
                     std::string levelToLower = asciiToLower(levelToString(m_level));
 
-                    base << QString().sprintf(
+                    base << QString::asprintf(
                         "%0*d-%0*d-%0*d %0*d:%0*d:%0*d.%0*d %s %s@%d: ",
                         4, dt.date().year(),
                         2, dt.date().month(),
@@ -735,29 +735,32 @@ std::string VisualLog::MessageInfo::expand(const std::string &pattern) const{
                 case 'W': base << QDate::longDayName(dt.date().dayOfWeek()).toStdString(); break;
                 case 'b': base << QDate::shortMonthName(dt.date().month()).toStdString(); break;
                 case 'B': base << QDate::longMonthName(dt.date().month()).toStdString(); break;
-                case 'd': base << QString().sprintf("%0*d", 2, dt.date().day() ).toStdString(); break;
-                case 'e': base << QString().sprintf("%d",      dt.date().day() ).toStdString(); break;
-                case 'f': base << QString().sprintf("%*d",  2, dt.date().day() ).toStdString(); break;
-                case 'm': base << QString().sprintf("%0*d", 2, dt.date().month() ).toStdString(); break;
-                case 'n': base << QString().sprintf("%d",      dt.date().month() ).toStdString(); break;
-                case 'o': base << QString().sprintf("%*d",  2, dt.date().month() ).toStdString(); break;
-                case 'y': base << QString().sprintf("%0*d", 2, dt.date().year() % 100 ).toStdString(); break;
-                case 'Y': base << QString().sprintf("%0*d", 4, dt.date().year() ).toStdString(); break;
-                case 'H': base << QString().sprintf("%0*d", 2, dt.time().hour() ).toStdString(); break;
+                case 'd': base << QString::asprintf("%0*d", 2, dt.date().day() ).toStdString(); break;
+                case 'e': base << QString::asprintf("%d",      dt.date().day() ).toStdString(); break;
+                case 'f': base << QString::asprintf("%*d",  2, dt.date().day() ).toStdString(); break;
+                case 'm': base << QString::asprintf("%0*d", 2, dt.date().month() ).toStdString(); break;
+                case 'n': base << QString::asprintf("%d",      dt.date().month() ).toStdString(); break;
+                case 'o': base << QString::asprintf("%*d",  2, dt.date().month() ).toStdString(); break;
+                case 'y': base << QString::asprintf("%0*d", 2, dt.date().year() % 100 ).toStdString(); break;
+                case 'Y': base << QString::asprintf("%0*d", 4, dt.date().year() ).toStdString(); break;
+                case 'H': base << QString::asprintf("%0*d", 2, dt.time().hour() ).toStdString(); break;
                 case 'I': {
                     int hour = dt.time().hour();
-                    base << QString().sprintf("%0*d", 2, (hour < 1 ? 12 : (hour > 12 ? hour - 12  : hour))).toStdString();
+                    base << QString::asprintf("%0*d", 2, (hour < 1 ? 12 : (hour > 12 ? hour - 12  : hour))).toStdString();
                     break;
                 }
-                case 'a': base << QString().sprintf(dt.time().hour() < 12  ? "am" : "pm" ).toStdString(); break;
-                case 'A': base << QString().sprintf(dt.time().hour() < 12  ? "AM" : "PM" ).toStdString(); break;
-                case 'M': base << QString().sprintf("%0*d", 2, dt.time().minute()).toStdString(); break;
-                case 'S': base << QString().sprintf("%0*d", 2, dt.time().second() ).toStdString(); break;
-                case 's': base << QString().sprintf("%0*d.%0*d", 2, dt.time().second(), 3, dt.time().msec() ).toStdString(); break;
-                case 'i': base << QString().sprintf("%0*d", 3, dt.time().msec() ).toStdString(); break;
-                case 'c': base << QString().sprintf("%d",      dt.time().msec() / 100 ).toStdString(); break;
+                case 'a': base << QString::asprintf(dt.time().hour() < 12  ? "am" : "pm" ).toStdString(); break;
+                case 'A': base << QString::asprintf(dt.time().hour() < 12  ? "AM" : "PM" ).toStdString(); break;
+                case 'M': base << QString::asprintf("%0*d", 2, dt.time().minute()).toStdString(); break;
+                case 'S': base << QString::asprintf("%0*d", 2, dt.time().second() ).toStdString(); break;
+                case 's': base << QString::asprintf("%0*d.%0*d", 2, dt.time().second(), 3, dt.time().msec() ).toStdString(); break;
+                case 'i': base << QString::asprintf("%0*d", 3, dt.time().msec() ).toStdString(); break;
+                case 'c': base << QString::asprintf("%d",      dt.time().msec() / 100 ).toStdString(); break;
                 default: base << *it;
                 }
+            } else {
+                base << '%';
+                break;
             }
         } else {
             base << *it;
@@ -811,15 +814,15 @@ VisualLog::MessageInfo::~MessageInfo(){
 
 VisualLog::MessageInfo::MessageInfo()
     : m_level(MessageInfo::Info)
-    , m_location(0)
-    , m_stamp(0)
+    , m_location(nullptr)
+    , m_stamp(nullptr)
 {
 }
 
 VisualLog::MessageInfo::MessageInfo(VisualLog::MessageInfo::Level level)
     : m_level(level)
-    , m_location(0)
-    , m_stamp(0)
+    , m_location(nullptr)
+    , m_stamp(nullptr)
 {
 }
 
