@@ -69,5 +69,7 @@ that the generated output of one property becomes the input of the other, like w
 the `GrayScaleView input`. These combinations become a powerful mechanism for automation, as we will see in tutorials to
 come.
 
+Clicking on the logo in the upper-right corner will open the start-up screen, which contains numerous other samples to experiment with.
+
 
 

@@ -32,6 +32,12 @@ Item{
     height: container.height > 35 ? container.height + 10 : 45
     z: 3000
 
+    onWidthChanged: {
+        var objectContainer = propertyContainer.parent.parent.parent
+
+        objectContainer.recalculateContentWidth()
+    }
+
     function expandPalette(paletteName){
         var palette = editor.documentHandler.codeHandler.expand(editingFragment, {
             "palettes" : [paletteName]

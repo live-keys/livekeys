@@ -37,6 +37,14 @@ Column{
         }
     }
 
+    onWidthChanged: {
+
+        if (parent && parent.parent && parent.parent.parent &&
+            parent.parent.parent.objectName === "objectContainer")
+
+        parent.parent.parent.recalculateContentWidth()
+    }
+
     width: {
         var maxWidth = 0;
         if ( children.length > 0 ){

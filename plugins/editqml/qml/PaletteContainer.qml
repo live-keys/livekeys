@@ -55,7 +55,7 @@ Item{
     Rectangle{
         id: paletteBoxHeader
         height: compact && child
-                    ? child.height
+                    ? child.height + 10
                     : normalHeaderHeight
         width: !compact && child
                     ? (paletteContainer.parent ? paletteContainer.parent.width : paletteContainer.width) + 10
@@ -65,7 +65,7 @@ Item{
         anchors.left: parent.left
         anchors.leftMargin: compact && child ? child.width + 10: 0
         clip: true
-        color: compact? "black":"#141c25"
+        color: "#131a24"
 
         MouseArea{
             enabled: !compact && moveEnabledSet
@@ -255,8 +255,8 @@ Item{
             id: rightButtons
             color: compact? "#131a24" : "transparent"
             width: 35
-            height: 24
-            radius: compact? 5: 0
+            height: child ? child.height: 24
+            radius: 0
 
             anchors.top: parent.top
             anchors.topMargin: 5

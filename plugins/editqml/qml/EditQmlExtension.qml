@@ -115,7 +115,6 @@ LiveExtension{
         ef.incrementRefCount()
         var editorBox = ef.visualParent ? ef.visualParent.parent : null
         var paletteBoxGroup = editorBox ? editorBox.child : null
-        var forAnObject = codeHandler.isForAnObject(ef)
 
         if ( paletteBoxGroup === null ){
             editorBox = lk.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
