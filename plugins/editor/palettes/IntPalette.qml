@@ -19,23 +19,36 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
+import workspace 1.0 as Workspace
 
 CodePalette{
     id: palette
     type : "qml/int"
+
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
     item: Rectangle{
         width: 330
         height: 30
         color: 'transparent'
 
+
+        Workspace.InputBox{
+            id: numberInput
+            anchors.left: parent.left
+            width: 70
+            height: 25
+            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            text: intSlider.value
+        }
+
         Slider{
             id: intSlider
             anchors.top: parent.top
-            anchors.topMargin: 1
+            anchors.topMargin: 3
             anchors.left: parent.left
-            anchors.leftMargin: 40
-            width: parent.width - 80
+            anchors.leftMargin: numberInput.width + leftLabel.width + 5
+            width: parent.width - numberInput.width - leftLabel.width - rightLabel.width - 10
             height: 15
             minimumValue: 0
             value: 0
@@ -49,68 +62,104 @@ CodePalette{
 
             style: SliderStyle{
                 groove: Rectangle {
-                    implicitHeight: 8
-                    color: '#15202c'
+                    implicitHeight: 5
+                    color: paletteStyle ? paletteStyle.backgroundColor : '#0b111c'
                 }
                 handle: Rectangle{
-                    width: 8
-                    height: 18
+                    width: 11
+                    height: 11
                     radius: 5
-                    border.width: 1
-                    border.color: '#233569'
-                    color: '#b2b2b2'
+                    color: '#9b9da0'
                 }
             }
         }
 
-        Label{
+        Workspace.NumberLabel{
+            id: leftLabel
+            mode: 1
             anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.leftMargin: numberInput.width + 2
+
+            width: 50
+            height: 25
+
+            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
+
+            up: function(){
+                if (intSlider.minimumValue === 0 && intSlider.maximumValue > 25)
+                    intSlider.minimumValue = 25
+                else if (intSlider.minimumValue === -25 && intSlider.maximumValue > 0)
+                    intSlider.minimumValue = 0
+                else if (intSlider.minimumValue < 0 && intSlider.minimumValue / 2 < intSlider.maximumValue)
+                    intSlider.minimumValue = intSlider.minimumValue / 2
+                else if (intSlider.minimumValue > 0 && 2*intSlider.minimumValue < intSlider.maximumValue)
+                    intSlider.minimumValue = 2*intSlider.minimumValue
+
+                if (intSlider.value < intSlider.minimumValue )
+                    intSlider.value = intSlider.minimumValue
+            }
+            down: function(){
+                if (intSlider.minimumValue === 0)
+                    intSlider.minimumValue = -25
+                else if (intSlider.minimumValue === 25)
+                    intSlider.minimumValue = 0
+                else if (intSlider.minimumValue < 0)
+                    intSlider.minimumValue = 2*intSlider.minimumValue
+                else if (intSlider.minimumValue > 0)
+                    intSlider.minimumValue = intSlider.minimumValue / 2
+
+                if (intSlider.value < intSlider.minimumValue )
+                    intSlider.value = intSlider.minimumValue
+            }
             text: intSlider.minimumValue
         }
-        Label{
+
+
+
+        Workspace.NumberLabel{
+            id: rightLabel
+            mode: 2
             anchors.top: parent.top
             anchors.right: parent.right
+
+            width: 50
+            height: 25
+
+            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
+
+            up: function(){
+                if (intSlider.maximumValue === 0)
+                    intSlider.maximumValue = 25
+                else if (intSlider.maximumValue === -25)
+                    intSlider.maximumValue = 0
+                else if (intSlider.maximumValue > 0)
+                    intSlider.maximumValue = 2*intSlider.maximumValue
+                else if (intSlider.maximumValue < 0)
+                    intSlider.maximumValue = intSlider.maximumValue / 2
+
+                if (intSlider.value > intSlider.maximumValue)
+                    intSlider.value = intSlider.maximumValue
+            }
+            down: function(){
+                if (intSlider.maximumValue === 0 && intSlider.minimumValue < -25)
+                    intSlider.maximumValue = -25
+                else if (intSlider.maximumValue === 25 && intSlider.minimumValue < 0)
+                    intSlider.maximumValue = 0
+                else if (intSlider.maximumValue < 0 && 2*intSlider.maximumValue > intSlider.minimumValue)
+                    intSlider.maximumValue = 2*intSlider.maximumValue
+                else if (intSlider.maximumValue > 0 && intSlider.maximumValue / 2 > intSlider.minimumValue)
+                    intSlider.maximumValue = intSlider.maximumValue / 2
+
+                if (intSlider.value > intSlider.maximumValue)
+                    intSlider.value = intSlider.maximumValue
+            }
+
             text: intSlider.maximumValue
-        }
-
-        Slider{
-            id: zoomSlider
-            width: parent.width
-            height: 15
-            minimumValue: 0
-            value: 0
-            onValueChanged: {
-                var intMaxValue = value * value
-                if ( intMaxValue < intSlider.value ){
-                    var sqrt = Math.ceil(Math.sqrt(Math.floor(intSlider.value)))
-                    zoomSlider.value = 15 > sqrt ? 15 : sqrt
-                } else
-                    intSlider.maximumValue = value * value
-            }
-            stepSize: 1.0
-            maximumValue: 200
-
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 0
-
-            style: SliderStyle{
-                groove: Rectangle {
-                    implicitHeight: 6
-                    color: "transparent"
-                }
-                handle: Rectangle{
-                    width: 40
-                    height: 6
-                    color: '#b2b2b2'
-                }
-            }
         }
     }
 
     onInit: {
-        var sqrt = Math.ceil(Math.sqrt(Math.floor(value))) + 1
-        zoomSlider.value = 15 > sqrt ? 15 : sqrt
-
         intSlider.value = Math.floor(value)
     }
 
