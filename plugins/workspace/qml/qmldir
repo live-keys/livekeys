@@ -15,3 +15,4 @@ InputBox         1.0 InputBox.qml
 PathInputBox     1.0 PathInputBox.qml
 CheckMarkIcon    1.0 CheckMarkIcon.qml
 RectangleButton  1.0 RectangleButton.qml
+NumberLabel      1.0 NumberLabel.qml
