@@ -22,6 +22,7 @@ LiveExtension{
                 property color borderColor: currentTheme ? currentTheme.colorScheme.middlegroundBorder : propertyLabelStyle.borderColor
                 property double borderThickness: currentTheme ? currentTheme.inputBorderWidth : propertyLabelStyle.borderThickness
             }
+            buttons: currentTheme ? currentTheme.buttons : buttons
         }
 
         property PaletteControls paletteControls: PaletteControls{}

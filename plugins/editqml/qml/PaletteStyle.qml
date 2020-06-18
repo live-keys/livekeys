@@ -110,4 +110,7 @@ QtObject{
         property color borderColor: 'black'
     }
 
+    property QtObject buttons : QtObject{
+    }
+
 }
