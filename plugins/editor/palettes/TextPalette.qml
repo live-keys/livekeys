@@ -22,7 +22,7 @@ CodePalette{
         Workspace.InputBox{
             id: pathInput
             anchors.left: parent.left
-            width: parent.width - 40
+            width: parent.width - 30
             height: 25
 
             style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
@@ -38,12 +38,11 @@ CodePalette{
             }
         }
 
-        Workspace.TextButton{
+        Workspace.Button{
             anchors.right: parent.right
-            width: 40
+            width: 30
             height: 25
-            style: paletteStyle ? paletteStyle.buttonStyle : defaultStyle
-            text: 'Apply'
+            content: paletteStyle ? paletteStyle.buttons.apply : null
             onClicked: {
                 palette.value = pathInput.text
                 if ( !palette.isBindingChange() ){

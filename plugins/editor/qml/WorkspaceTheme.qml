@@ -155,4 +155,24 @@ Theme{
         property double borderThickness: 1
         property double radius: 3
     }
+
+    // Buttons
+
+    property QtObject buttons: QtObject{
+
+        property Component apply: RectangleButton{
+            width: parent ? parent.width : 20
+            height: parent ? parent.height: 20
+
+            style: root.formButtonStyle
+
+            content: CheckMarkIcon{
+                anchors.centerIn: parent
+                width: parent.parent.width / 3
+                height: parent.parent.height / 3
+                strokeWidth: 1
+            }
+        }
+
+    }
 }
