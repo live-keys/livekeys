@@ -321,6 +321,8 @@ Item{
         anchors.top: compact? parent.top : paletteBoxHeader.top
         anchors.topMargin: compact? 0:paletteBoxHeader.height
         anchors.left: parent.left
+        width: parent.child ? parent.child.width: 0
+        height: parent.child ? parent.child.height: 0
         children: parent.child ? [parent.child] : []
     }
 
