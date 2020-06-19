@@ -4,6 +4,7 @@ import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
 import editor 1.0
+import workspace 1.0
 
 Pane{
     id: root
@@ -280,24 +281,20 @@ Pane{
         }
     }
 
-    Rectangle{
+    PaneMenu{
         id: logMenu
-        visible: false
         anchors.right: root.right
         anchors.topMargin: 30
         anchors.top: root.top
-        opacity: visible ? 1.0 : 0
-        z: 1000
-        color : "#03070b"
+
+        style: root.currentTheme.paneMenuStyle
 
         width: 180
 
         Behavior on opacity{ NumberAnimation{ duration: 200 } }
 
-        PaneMenuButton{
+        PaneMenuItem{
             id: splitHorizontally
-            anchors.top: parent.top
-            anchors.right: parent.right
             text: qsTr("Split Horizontally")
             onClicked : {
                 logMenu.visible = false
@@ -307,10 +304,8 @@ Pane{
             }
         }
 
-        PaneMenuButton{
+        PaneMenuItem{
             id: splitVertically
-            anchors.top: splitHorizontally.bottom
-            anchors.right: parent.right
             text: qsTr("Split Vertically")
             onClicked : {
                 logMenu.visible = false
@@ -320,10 +315,8 @@ Pane{
             }
         }
 
-        PaneMenuButton{
+        PaneMenuItem{
             id: moveToNewWindow
-            anchors.top: splitVertically.bottom
-            anchors.right: parent.right
             text: qsTr("Move to New Window")
             onClicked : {
                 logMenu.visible = false
@@ -331,10 +324,8 @@ Pane{
             }
         }
 
-        PaneMenuButton{
+        PaneMenuItem{
             id: removeLog
-            anchors.top: moveToNewWindow.bottom
-            anchors.right: parent.right
             text: qsTr("Remove Pane")
             onClicked : {
                 logMenu.visible = false

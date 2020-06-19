@@ -46,6 +46,30 @@ Theme{
 
     // Panes
 
+    property QtObject paneMenuStyle: QtObject{
+        property color backgroundColor: colorScheme.middleground
+        property double radius: 0
+
+        property QtObject itemStyle: TextStyle{
+            color: colorScheme.foregroundFaded
+            font : Qt.font({
+                family: 'Open Sans, sans-serif',
+                weight: Font.Light,
+                italic: false,
+                pixelSize: 11
+            })
+        }
+        property QtObject itemHoverStyle: TextStyle{
+            color: Qt.lighter(colorScheme.foregroundFaded)
+            font : Qt.font({
+                family: 'Open Sans, sans-serif',
+                weight: Font.Light,
+                italic: false,
+                pixelSize: 11
+            })
+        }
+    }
+
     property color paneBackground: colorScheme.background
     property color panebackgroundOverlay: colorScheme.backgroundOverlay
     property color paneTopBackground: colorScheme.middleground

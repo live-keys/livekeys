@@ -16,3 +16,5 @@ PathInputBox     1.0 PathInputBox.qml
 CheckMarkIcon    1.0 CheckMarkIcon.qml
 RectangleButton  1.0 RectangleButton.qml
 NumberLabel      1.0 NumberLabel.qml
+PaneMenu         1.0 PaneMenu.qml
+PaneMenuItem     1.0 PaneMenuItem.qml
