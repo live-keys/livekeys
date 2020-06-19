@@ -4,12 +4,15 @@ import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import editor.private 1.0
 import base 1.0
+import live 1.0
 
 Rectangle{
     id: root
 
     property alias textEdit: textEdit
     property alias documentHandler: textEdit.documentHandler
+
+    property QtObject addRootButton: addRootButton
 
     property var document: null
     onDocumentChanged: documentHandler.setDocument(document)
@@ -103,7 +106,7 @@ Rectangle{
     }
 
     function toggleComment(){
-        codeHandler.codeHandler.toggleComment(textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart)
+        documentHandler.codeHandler.toggleComment(textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart)
     }
 
     function closeDocument(){
@@ -161,7 +164,7 @@ Rectangle{
 
     function getCursorFragment(){
         if (documentHandler.has(documentHandler.LanguageScope ) ){
-            return codeHandler.contextBlockRange(textEdit.cursorPosition)
+            return documentHandler.contextBlockRange(textEdit.cursorPosition)
         }
         return null
     }
@@ -296,7 +299,7 @@ Rectangle{
                 fragmentEnd: root.fragmentEnd
 
                 documentHandler: DocumentHandler {
-                    id: codeHandler
+                    id: documentHandler
                     editorFocus: textEdit.activeFocus
                     onCursorPositionRequest : {
                         textEdit.forceActiveFocus()
@@ -311,7 +314,7 @@ Rectangle{
                     flick.ensureVisible(cursorRectangle)
                     /// disable the model if no text has changed, let the code handler decide otherwise
                     if ( length === lastLength )
-                        codeHandler.completionModel.disable()
+                        documentHandler.completionModel.disable()
                     lastLength = length
                 }
 
@@ -339,7 +342,7 @@ Rectangle{
 
                 Keys.onPressed: {
                     if ( event.key === Qt.Key_PageUp ){
-                        if ( codeHandler.completionModel.isEnabled ){
+                        if ( documentHandler.completionModel.isEnabled ){
                             qmlSuggestionBox.highlightPrevPage()
                         } else {
                             var lines = flick.height / cursorRectangle.height
@@ -356,26 +359,26 @@ Rectangle{
                         event.accepted = true
                     } else if ( event.key === Qt.Key_Tab ){
                         if ( event.modifiers & Qt.ShiftModifier ){
-                            codeHandler.manageIndent(
+                            documentHandler.manageIndent(
                                 textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart, true
                             )
                             event.accepted = true
                         } else if ( selectionStart !== selectionEnd ){
-                            codeHandler.manageIndent(
+                            documentHandler.manageIndent(
                                 textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart, false
                             )
                             event.accepted = true
                         } else {
-                            codeHandler.insertTab(cursorPosition)
+                            documentHandler.insertTab(cursorPosition)
                             event.accepted = true
                         }
                     } else if ( event.key === Qt.Key_Backtab ){
-                        codeHandler.manageIndent(
+                        documentHandler.manageIndent(
                             textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart, true
                         )
                         event.accepted = true
                     } else if ( event.key === Qt.Key_PageDown ){
-                        if ( codeHandler.completionModel.isEnabled ){
+                        if ( documentHandler.completionModel.isEnabled ){
                             qmlSuggestionBox.highlightNextPage()
                         } else {
                             var lines = flick.height / cursorRectangle.height
@@ -387,18 +390,18 @@ Rectangle{
                         }
                         event.accepted = true
                     } else if ( event.key === Qt.Key_Down ){
-                        if ( codeHandler.completionModel.isEnabled ){
+                        if ( documentHandler.completionModel.isEnabled ){
                             event.accepted = true
                             qmlSuggestionBox.highlightNext()
                         }
                     } else if ( event.key === Qt.Key_Up ){
-                        if ( codeHandler.completionModel.isEnabled ){
+                        if ( documentHandler.completionModel.isEnabled ){
                             event.accepted = true
                             qmlSuggestionBox.highlightPrev()
                         }
                     } else if ( event.key === Qt.Key_Escape ){
-                        if ( codeHandler.completionModel.isEnabled ){
-                            codeHandler.completionModel.disable()
+                        if ( documentHandler.completionModel.isEnabled ){
+                            documentHandler.completionModel.disable()
                         }
                     } else {
                         var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
@@ -411,9 +414,9 @@ Rectangle{
 
                 Keys.onReturnPressed: {
                     event.accepted = false
-                    if ( codeHandler.completionModel.isEnabled ){
-                        codeHandler.insertCompletion(
-                            codeHandler.completionModel.completionPosition,
+                    if ( documentHandler.completionModel.isEnabled ){
+                        documentHandler.insertCompletion(
+                            documentHandler.completionModel.completionPosition,
                             cursorPosition,
                             qmlSuggestionBox.getCompletion()
                         )
@@ -490,13 +493,32 @@ Rectangle{
         }
     }
 
+    TextButton {
+        id: addRootButton
+        anchors.left: lineSurfaceBackground.right
+        anchors.leftMargin: 10
+        anchors.top: parent.top
+        anchors.topMargin: textEdit.totalHeight + 10
+        text: "Add root Item"
+        width: 120
+        height: 30
+        visible: false
+        property var callback: null
+        onClicked: {
+            var rootPosition = documentHandler.codeHandler.insertItemAtDocumentEnd()
+            project.run()
+            if (callback) callback(rootPosition)
+            visible = false
+        }
+    }
+
     SuggestionBox{
         id: qmlSuggestionBox
 
         fontFamily: textEdit.font.family
         fontSize: textEdit.font.pixelSize
         smallFontSize: textEdit.font.pixelSize - 2
-        visible: codeHandler.completionModel.isEnabled && suggestionCount > 0
+        visible: documentHandler.completionModel.isEnabled && suggestionCount > 0
         opacity: visible ? 0.95 : 0
 
         y: {
@@ -511,14 +533,14 @@ Rectangle{
         }
         x: {
             var calculatedX =
-                textEdit.positionToRectangle(codeHandler.completionModel.completionPosition).x -
+                textEdit.positionToRectangle(documentHandler.completionModel.completionPosition).x -
                 flick.flickableItem.contentX
 
             if ( calculatedX > flick.width - width)
                 calculatedX = flick.width - width
             return calculatedX;
         }
-        model: codeHandler.completionModel
+        model: documentHandler.completionModel
 
         Behavior on opacity {
             NumberAnimation { duration: 150 }

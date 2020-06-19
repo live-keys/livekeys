@@ -2452,20 +2452,58 @@ lv::QmlImportsModel *CodeQmlHandler::importsModel(){
     Q_D(CodeQmlHandler);
 
     lv::QmlImportsModel* result = new lv::QmlImportsModel(this);
-    d->syncParse(m_document);
+    d->syncObjects(m_document);
+
     DocumentQmlInfo::Ptr docinfo = d->documentInfo();
 
-    auto imports = docinfo->internalBind()->imports();
-    for ( QList<QmlJS::ImportInfo>::iterator it = imports.begin(); it != imports.end(); ++it ){
+    if (docinfo->isParsedCorrectly())
+    {
+        auto imports = docinfo->internalBind()->imports();
+        for ( QList<QmlJS::ImportInfo>::iterator it = imports.begin(); it != imports.end(); ++it ){
 
-        QString module = it->name();
-        QString version = it->version().majorVersion() != -1 ? (QString::number(it->version().majorVersion()) + "." + QString::number(it->version().minorVersion())) : "";
-        QString qual = it->as();
-        int line = it->ast()? static_cast<int>(it->ast()->importToken.startLine-1) : -1;
+            QString module = it->name();
+            QString version = it->version().majorVersion() != -1 ? (QString::number(it->version().majorVersion()) + "." + QString::number(it->version().minorVersion())) : "";
+            QString qual = it->as();
+            int line = it->ast()? static_cast<int>(it->ast()->importToken.startLine-1) : -1;
 
-        result->addItem(module, version, qual, line);
+            result->addItem(module, version, qual, line);
+        }
+    } else {
+        // manual parse
+        QString content = m_document->contentString();
+        auto lines = content.split('\n');
+        QList<std::pair<QStringList, int>> mid;
+
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            if (lines[i].length() == 0) continue;
+            QStringList fragments = lines[i].split(';');
+            for (auto fragment: fragments){
+                auto parts = fragment.split(' ',  QString::SkipEmptyParts);
+                
+                if (parts.size() != 3 && parts.size() != 5)
+                    return result;
+
+                if (parts[0] != "import")
+                    return result;
+
+                if (parts.size() == 5 && parts[3] != "as")
+                    return result;
+
+                auto p = std::make_pair(QStringList(), i);
+
+                p.first.push_back(parts[1]);
+                p.first.push_back(parts[2]);
+                p.first.push_back(parts.size() == 5 ? parts[4] : "");
+
+                mid.push_back(p);
+            }
+        }
+
+        for (auto p: mid){
+            result->addItem(p.first[0], p.first[1], p.first[2], p.second);
+        }
     }
-
     return result;
 }
 
@@ -3262,6 +3300,30 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     }
 
     return cursorPosition - 1 - type.size();
+}
+
+int CodeQmlHandler::insertItemAtDocumentEnd(QObject*)
+{
+    Q_D(CodeQmlHandler);
+    d->syncObjects(m_document);
+
+    int insertionPosition = m_target->characterCount()-1;
+
+    QString insertionText = "\nItem{\n    id: item\n}\n";
+
+    m_document->addEditingState(ProjectDocument::Palette);
+    QTextCursor cs(m_target);
+    cs.setPosition(insertionPosition);
+    cs.beginEditBlock();
+    cs.insertText(insertionText);
+    cs.endEditBlock();
+    m_document->removeEditingState(ProjectDocument::Palette);
+    m_scopeTimer.stop();
+    updateScope();
+
+    d->syncObjects(m_document);
+
+    return insertionPosition + 2;
 }
 
 void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, QObject *currentApp){

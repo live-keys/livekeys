@@ -21,6 +21,9 @@ Item{
 
     property alias paletteAddButtonVisible: paletteAddButton.visible
 
+    property bool isAnObject: false
+    property var childObjectContainer: null
+
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
         onAboutToBeRemoved : {
@@ -33,6 +36,8 @@ Item{
     z: 3000
 
     onWidthChanged: {
+        if (!propertyContainer || !propertyContainer.parent || !propertyContainer.parent.parent ||
+                !propertyContainer.parent.parent.parent) return
         var objectContainer = propertyContainer.parent.parent.parent
 
         objectContainer.recalculateContentWidth()

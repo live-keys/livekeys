@@ -22,6 +22,10 @@ Item{
             if (child.objectName === "objectContainer"){
                 if (child.contentWidth + 20 > max)
                     max = child.contentWidth + 20
+            } else if (child.objectName === "propertyContainer" && child.isAnObject){
+                if (child.childObjectContainer &&
+                    child.childObjectContainer.contentWidth + 140 > max)
+                    max = child.childObjectContainer.contentWidth + 140
             } else {
                 if (child.width + 20 > max)
                     max = child.width + 20
@@ -51,6 +55,7 @@ Item{
     property alias topSpacing: objectContainer.topSpacing
 
     property var parentObjectContainer: null
+    property var isForProperty: false
 
     property alias paletteGroupFactory: objectContainer.paletteGroupFactory
 
@@ -224,8 +229,11 @@ Item{
 
 
             if ( codeHandler.isForAnObject(ef) ){
+                propertyContainer.isAnObject = true
                 var childObjectContainer = objectContainerFactory.createObject(container)
+                propertyContainer.childObjectContainer = childObjectContainer
 
+                childObjectContainer.isForProperty = true
                 childObjectContainer.parentObjectContainer = root
 
                 childObjectContainer.editor = objectContainer.editor
@@ -729,7 +737,7 @@ Item{
             anchors.topMargin: objectContainerTitleWrap.height + topSpacing
             visible: !compact
             spacing: 10
-            width: parentObjectContainer ? parentObjectContainer.width - 20 : contentWidth + 10
+            width: parentObjectContainer ? parentObjectContainer.width - (isForProperty? 140 : 20) : contentWidth + 10
 
             onChildrenChanged: recalculateContentWidth()
 
