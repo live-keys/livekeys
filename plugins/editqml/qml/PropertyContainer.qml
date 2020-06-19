@@ -31,7 +31,7 @@ Item{
     }
     property int topMarginParam: 0
     width: container.width + 120
-    height: container.height > 35 ? container.height + 10 : 45
+    height: container.height > 35 ? container.height : 35
     z: 3000
 
     function expandPalette(paletteName){

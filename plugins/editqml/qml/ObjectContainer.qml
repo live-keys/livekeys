@@ -688,7 +688,7 @@ Item{
             anchors.top: parent.top
             anchors.topMargin: objectContainerTitleWrap.height + topSpacing
             visible: !compact
-            spacing: 10
+            spacing: 5
             width: {
                 var maxWidth = 0;
                 if ( children.length > 0 ){
@@ -736,7 +736,7 @@ Item{
                 {
                     if (!children[i]) continue
                     if (children[i].objectName === "objectContainer"){
-                        children[i].topSpacing = 15
+                        children[i].topSpacing = 5
                         children[i].z = children.length - childrenCopy.length
                         childrenCopy.push(children[i])
                     }
