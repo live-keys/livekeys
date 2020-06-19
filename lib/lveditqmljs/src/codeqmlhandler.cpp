@@ -907,6 +907,7 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
                     if ( propChain.size() == expression.size() && propChain.size() > 0 ){
                         QmlScopeSnap::PropertyReference& propref = propChain.last();
                         QmlTypeReference qlt = propref.resultType();
+
                         if ( !qlt.isEmpty() ){
                             properties.append(QmlDeclaration::create(
                                 expression,

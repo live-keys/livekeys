@@ -4,6 +4,7 @@ import editor 1.0
 import editor.private 1.0
 import editqml 1.0
 
+import workspace 1.0 as Workspace
 import workspace.quickqanava 2.0 as Qan
 
 Qan.NodeItem{
@@ -35,28 +36,42 @@ Qan.NodeItem{
         }
     }
 
+    property QtObject defaultStyle : QtObject{
+        property color background: "#112"
+        property double radius: 15
+        property color borderColor: "#555"
+        property double borderWidth: 1
+
+        property color titleBackground: "#666"
+        property double titleRadius: 5
+        property QtObject titleTextStyle : Workspace.TextStyle{}
+    }
+
+    property QtObject nodeStyle : defaultStyle
+
     Rectangle{
         id: wrapper
         width: parent.width
         height: nodeTitle.height + paletteContainer.height + propertyContainer.height + 40
-        color: "#112"
-        radius: 15
-        border.color: "#555"
-        border.width: 1
+        color: root.nodeStyle.background
+        radius: root.nodeStyle.radius
+        border.color: root.nodeStyle.borderColor
+        border.width: root.nodeStyle.borderWidth
         
         Rectangle{
             id: nodeTitle
             width: parent.width
             height: 30
             anchors.top: parent.top
-            color: '#666'
-            radius: 5
+
+            color: root.nodeStyle.titleBackground
+            radius: root.nodeStyle.titleRadius
             
-            Text{
+            Workspace.Label{
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.leftMargin: 15
-                color: 'white'
+                textStyle: root.nodeStyle.titleTextStyle
                 text: root.label
             }
 
@@ -249,7 +264,7 @@ Qan.NodeItem{
                                 var newPaletteBox = paletteContainerFactory.createObject(paletteContainer)
 
                                 palette.item.x = 5
-                                palette.item.y = 7
+                                palette.item.y = 2
 
                                 newPaletteBox.child = palette.item
                                 newPaletteBox.palette = palette

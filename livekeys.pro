@@ -53,3 +53,4 @@ OTHER_FILES *= livekeys.json
 OTHER_FILES *= project/*.pri
 OTHER_FILES *= doc/src/Doxyfile
 OTHER_FILES *= doc/pages/*.md
+OTHER_FILES *= doc/pages/index.json

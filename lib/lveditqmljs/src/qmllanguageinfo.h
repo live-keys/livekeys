@@ -201,6 +201,7 @@ public:
     bool isCreatable() const;
 
     static bool isObject(const QString& declarationType);
+    static bool isQmlBasicType(const QString& declarationType);
     static QmlTypeReference toQmlPrimitive(const QmlTypeReference &cppPrimitive);
     static QString typeDefaultValue(const QString& typeString);
 

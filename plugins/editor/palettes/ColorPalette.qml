@@ -20,10 +20,13 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
 import live 1.0
 import editor 1.0
+import workspace 1.0 as Workspace
 
 CodePalette{
     id: palette
     type: "qml/color"
+
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
     item: Rectangle{
         id: root
@@ -63,7 +66,7 @@ CodePalette{
         }
 
         width: 280
-        height: 80
+        height: 120
         color: 'transparent'
 
         Rectangle{
@@ -133,15 +136,20 @@ CodePalette{
                 }
             }
 
-            Label{
+            Workspace.LabelOnRectangle{
+                width: 35
+                height: 22
                 anchors.top: parent.top
                 text: hueSlider.minimumValue
+                style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
             }
 
-            Label{
+            Workspace.LabelOnRectangle{
                 anchors.top: parent.top
                 anchors.right: parent.right
+                width: 35
                 text: hueSlider.maximumValue
+                style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
             }
         }
 
@@ -198,15 +206,20 @@ CodePalette{
                 }
             }
 
-            Label{
+            Workspace.LabelOnRectangle{
                 anchors.top: parent.top
+                width: 35
                 text: saturationSlider.minimumValue
+                style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
             }
 
-            Label{
+            Workspace.LabelOnRectangle{
                 anchors.top: parent.top
                 anchors.right: parent.right
+                width: 35
+
                 text: saturationSlider.maximumValue
+                style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
             }
 
         }
@@ -263,17 +276,34 @@ CodePalette{
                 }
             }
 
-            Label{
+            Workspace.LabelOnRectangle{
                 anchors.top: parent.top
                 text: valueSlider.minimumValue
+                width: 35
+
+                style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
             }
 
-            Label{
+            Workspace.LabelOnRectangle{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 text: valueSlider.maximumValue
-            }
+                width: 35
 
+                style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
+            }
+        }
+
+        Workspace.InputBox{
+            anchors.top: parent.top
+            anchors.topMargin: 81
+            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+
+            text: root.selectedColor
+            onKeyPressed: {
+                if ( event.key === Qt.Key_Return )
+                    root.selectedColor = text
+            }
         }
 
     }

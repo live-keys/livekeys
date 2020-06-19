@@ -146,6 +146,7 @@ ApplicationWindow{
         Component.onCompleted: {
             if ( B.Script.environment.os.platform === 'darwin' )
                 folder = '~' // fixes a warning message that the path was constructed with an empty filename
+
             visible = false
             close()
         }

@@ -2,6 +2,21 @@
 
 This file summarises notable changes between Live Keys versions.
 
+## 1.7.0
+
+### Features
+
+   - Added node editor.
+   - Added palettes in node editor.
+   - Added timeline editor.
+   - Added interactive documentation.
+   - Added workspace package. (`import workspace`)
+   - Palettes on imports.
+   - Added shape-all option.
+   - Added pane for palette object containers.
+   - Support for palettes outside main file.
+   - Connection palette
+
 ## 1.6.1
 
 ### Bug Fixes

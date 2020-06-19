@@ -3,59 +3,54 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
+import workspace 1.0 as Workspace
 
 CodePalette{
     id: palette
     type : "qml/string"
 
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+
     item: Item{
+        id: root
         width: 300
-        height: 30
-        Item{
-            id: root
-            height: 30
-            width: 280
+        height: 25
 
-            property alias path: pathInput.text
-            property alias font: pathInput.font
+        property alias path: pathInput.text
+        property alias font: pathInput.font
 
-            InputBox{
-                id: pathInput
-                anchors.left: parent.left
-                width: parent.width - 50
-                radius: 5
-                height: 30
-                font.family: "Open Sans, sans-serif"
-                textColor: '#afafaf'
+        Workspace.InputBox{
+            id: pathInput
+            anchors.left: parent.left
+            width: parent.width - 30
+            height: 25
 
-                onKeyPressed: {
-                    if ( event.key === Qt.Key_Return ){
-                        palette.value = pathInput.text
-                        if ( !palette.isBindingChange() ){
-                            extension.write(palette.value)
-                        }
-                        event.accepted = true
-                    }
-                }
-            }
+            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
 
-            TextButton{
-                anchors.right: parent.right
-                radius: 5
-                width: 40
-                height: 30
-                text: 'Apply'
-                fontFamily: "Open Sans, sans-serif"
-                fontPixelSize: 12
-
-                onClicked: {
+            onKeyPressed: {
+                if ( event.key === Qt.Key_Return ){
                     palette.value = pathInput.text
                     if ( !palette.isBindingChange() ){
                         extension.write(palette.value)
                     }
+                    event.accepted = true
                 }
             }
         }
+
+        Workspace.Button{
+            anchors.right: parent.right
+            width: 30
+            height: 25
+            content: paletteStyle ? paletteStyle.buttons.apply : null
+            onClicked: {
+                palette.value = pathInput.text
+                if ( !palette.isBindingChange() ){
+                    extension.write(palette.value)
+                }
+            }
+        }
+
     }
 
     onInit: {

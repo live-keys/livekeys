@@ -2,7 +2,19 @@ module workspace
 
 depends QtQuick 2.3
 
-MenuIcon      1.0 MenuIcon.qml
-EditableLabel 1.0 EditableLabel.qml
-PlayPause     1.0 PlayPause.qml
-Highlighter   1.0 Highlighter.qml
+MenuIcon         1.0 MenuIcon.qml
+EditableLabel    1.0 EditableLabel.qml
+PlayPause        1.0 PlayPause.qml
+Highlighter      1.0 Highlighter.qml
+Button           1.0 Button.qml
+TextStyle        1.0 TextStyle.qml
+TextButton       1.0 TextButton.qml
+Label            1.0 Label.qml
+LabelOnRectangle 1.0 LabelOnRectangle.qml
+InputBox         1.0 InputBox.qml
+PathInputBox     1.0 PathInputBox.qml
+CheckMarkIcon    1.0 CheckMarkIcon.qml
+RectangleButton  1.0 RectangleButton.qml
+NumberLabel      1.0 NumberLabel.qml
+PaneMenu         1.0 PaneMenu.qml
+PaneMenuItem     1.0 PaneMenuItem.qml

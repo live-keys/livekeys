@@ -89,7 +89,10 @@ public:
             m_object->appendFunction(mf);
             return true;
         }
-        m_object->appendProperty(QmlPropertyInfo(name, QmlTypeReference(QmlTypeReference::Unknown, type)));
+        QmlTypeReference typeReference = (QmlTypeInfo::isQmlBasicType(type))
+                ? QmlTypeReference(QmlTypeReference::Qml, type)
+                : QmlTypeReference(QmlTypeReference::Unknown, type);
+        m_object->appendProperty(QmlPropertyInfo(name, typeReference));
         return true;
     }
     bool processEnumerator(const QString &, const QmlJS::Value *) override

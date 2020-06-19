@@ -20,17 +20,19 @@ import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
 import lcvphoto 1.0
+import workspace 1.0 as Workspace
 
 CodePalette{
     id: palette
 
     type : "qml/BrightnessAndContrast"
 
-    item: Rectangle{
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+
+    item: Item{
         id: adjustmentBox
         width: 280
         height: 68
-        color: 'transparent'
 
         property BrightnessAndContrast bandc: null
 
@@ -40,7 +42,7 @@ CodePalette{
             anchors.topMargin: 1
             anchors.left: parent.left
             anchors.leftMargin: 40
-            width: parent.width - 80
+            width: parent.width - 40
             height: 15
             minimumValue: -200
             value: adjustmentBox.bandc ? adjustmentBox.bandc.brightness : 0
@@ -71,14 +73,12 @@ CodePalette{
             }
         }
 
-        Label{
+        Workspace.LabelOnRectangle{
             anchors.top: parent.top
+            width: 35
+            height: 22
             text: brightnessSlider.minimumValue
-        }
-        Label{
-            anchors.top: parent.top
-            anchors.right: parent.right
-            text: brightnessSlider.maximumValue
+            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
         }
 
         Slider{
@@ -89,7 +89,7 @@ CodePalette{
             anchors.top: parent.top
             anchors.topMargin: 31
 
-            width: parent.width - 80
+            width: parent.width - 40
 
             height: 15
             minimumValue: 0
@@ -121,17 +121,15 @@ CodePalette{
             }
         }
 
-        Label{
+        Workspace.LabelOnRectangle{
             anchors.top: parent.top
             anchors.topMargin: 30
-            text: contrastSlider.minimumValue
+            width: 35
+            height: 22
+            text: contrastSlider.value
+            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
         }
-        Label{
-            anchors.top: parent.top
-            anchors.topMargin: 30
-            anchors.right: parent.right
-            text: contrastSlider.maximumValue
-        }
+
     }
 
     onInit: {
