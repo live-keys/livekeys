@@ -113,4 +113,6 @@ QtObject{
     property QtObject buttons : QtObject{
     }
 
+    property QtObject nodeEditor: QtObject{}
+
 }

@@ -23,6 +23,7 @@ LiveExtension{
                 property double borderThickness: currentTheme ? currentTheme.inputBorderWidth : propertyLabelStyle.borderThickness
             }
             buttons: currentTheme ? currentTheme.buttons : buttons
+            nodeEditor: currentTheme ? currentTheme.nodeEditor : nodeEditor
         }
 
         property PaletteControls paletteControls: PaletteControls{}

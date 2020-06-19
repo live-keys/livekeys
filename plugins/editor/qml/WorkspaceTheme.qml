@@ -174,5 +174,50 @@ Theme{
             }
         }
 
+        property Component connect: RectangleButton{
+            width: parent ? parent.width : 20
+            height: parent ? parent.height: 20
+
+            style: root.formButtonStyle
+
+            content: Image{
+                anchors.centerIn: parent
+                source: "qrc:/images/palette-connections.png"
+            }
+        }
+    }
+
+    // Node Editor
+
+    property QtObject nodeEditor : QtObject{
+        property color backgroundColor: root.colorScheme.background
+        property color backgroundGridColor: root.colorScheme.middleground
+
+        property color borderColor: root.colorScheme.middlegroundOverlayDominant
+        property double borderWidth: 1
+        property double radius: 3
+
+        property color connectorEdgeColor: root.colorScheme.middlegroundOverlayDominant
+        property color connectorColor: root.colorScheme.middlegroundOverlayDominant
+
+        property color selectionColor: root.colorScheme.foreground
+        property double selectionWeight: 1
+
+        property QtObject objectNodeStyle : QtObject{
+            property color background: root.colorScheme.middleground
+            property double radius: 15
+            property color borderColor: root.colorScheme.middlegroundOverlayDominant
+            property double borderWidth: 1
+
+            property color titleBackground: root.colorScheme.middlegroundOverlayDominant
+            property double titleRadius: 3
+            property QtObject titleTextStyle : TextStyle{}
+        }
+
+        property QtObject propertyDelegateStyle : QtObject{
+            property color background: root.colorScheme.middlegroundOverlay
+            property double radius: 5
+            property QtObject textStyle: TextStyle{}
+        }
     }
 }

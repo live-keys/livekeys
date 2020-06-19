@@ -12,7 +12,11 @@ Item {
     states: [
         State {
             name: "left"
-            when: hostNodeItem && dockType === Qan.NodeItem.Left
+            when: {
+                if ( hostNodeItem && (dockType === Qan.NodeItem.Left) )
+                    return true
+                return false
+            }
 
             AnchorChanges {
                 target: root
@@ -29,7 +33,11 @@ Item {
         },
         State {
             name: "right"
-            when: hostNodeItem && dockType === Qan.NodeItem.Right
+            when: {
+                if ( hostNodeItem && (dockType === Qan.NodeItem.Right) )
+                    return true
+                return false
+            }
 
             AnchorChanges {
                 target: root

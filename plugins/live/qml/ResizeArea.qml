@@ -21,6 +21,7 @@ Rectangle{
             target: parent;
             axis: Drag.XAndYAxis
         }
+        cursorShape: Qt.SizeFDiagCursor
         onMouseYChanged: {
             if(drag.active){
                 root.target.height = root.target.height + mouseY

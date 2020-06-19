@@ -20,6 +20,7 @@ CodePalette{
 
     property Component addBoxFactory: Component{ AddQmlBox{} }
 
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
     onEditingFragmentChanged: {
         if (!editingFragment) return
@@ -136,6 +137,7 @@ CodePalette{
             editor: palette.editor
             editingFragment: palette.editingFragment
             addBoxFactory: palette.addBoxFactory
+            style: palette ? palette.paletteStyle.nodeEditor : defaultStyle
         }
     }
 

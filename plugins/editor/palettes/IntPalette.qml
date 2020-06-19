@@ -29,7 +29,7 @@ CodePalette{
 
     item: Rectangle{
         width: 330
-        height: 30
+        height: 25
         color: 'transparent'
 
 
