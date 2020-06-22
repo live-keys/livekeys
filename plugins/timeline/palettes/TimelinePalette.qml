@@ -11,29 +11,13 @@ CodePalette{
 
     type: "qml/timeline#Timeline"
 
-    item: Item {
-        anchors.fill: parent
-
-        width: videoSurface.width
-        height: videoSurface.height + timelineArea.height
-
-        VideoSurface{
-            id: videoSurface
-            width: 500
-            height: 400
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
+    item:
         TimelineView{
             id: timelineArea
-            anchors.top: parent.top
-            anchors.topMargin: 400
-            width : parent.width
+            width : 500
             height: 200
-            surface: videoSurface
-            focus : true            
+            focus : true
         }
-    }
 
     onInit: {
         timelineArea.timeline = value
