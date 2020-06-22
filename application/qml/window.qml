@@ -59,6 +59,7 @@ ApplicationWindow{
             fileOpenDialog.title = title
             fileOpenDialog.nameFilters = filters
             fileOpenDialog.callback = callback
+            fileOpenDialog.folder = ""
 
             fileOpenDialog.open()
         }
@@ -68,6 +69,7 @@ ApplicationWindow{
 
             dirOpenDialog.title = title
             dirOpenDialog.callback = callback
+            fileOpenDialog.folder = ""
 
             dirOpenDialog.open()
         }
@@ -247,6 +249,13 @@ ApplicationWindow{
                 if ( layer.name === 'workspace' ){
                     logo.opacity = 1.0
                 }
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                lk.layers.workspace.panes.initializeStartupBox()
             }
         }
     }
