@@ -137,9 +137,7 @@ void QmlAct::exec(){
 
             QJSValue ob = m_run.property(0);
             QJSValue prop = m_run.property(1);
-
             QJSValue run = ob.property(prop.toString());
-
             QJSValue r = run.call(currentArgs);
             setResult(r);
         }

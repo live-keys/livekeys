@@ -41,7 +41,7 @@ Item{
 
         var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
 
-        palette.item.x = 2
+        palette.item.x = 5
         palette.item.y = 2
 
         newPaletteBox.child = palette.item
@@ -108,7 +108,7 @@ Item{
                 onClicked: {
                     var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
                         editingFragment.position(), true)
-                    if (palettes && palettes.size() ){
+                    if (palettes.size() ){
                         paletteHeaderList.forceActiveFocus()
                         paletteHeaderList.model = palettes
                         paletteHeaderList.cancelledHandler = function(){
@@ -126,7 +126,7 @@ Item{
 
                                 var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
 
-                                palette.item.x = 2
+                                palette.item.x = 5
                                 palette.item.y = 2
 
                                 newPaletteBox.child = palette.item

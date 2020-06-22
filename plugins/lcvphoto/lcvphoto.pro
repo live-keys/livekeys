@@ -60,7 +60,11 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 # Distfiles
 
 DISTFILES += \
+    palettes/HueSaturationLightnessPalette.qml \
+    qml/BrightnessAndContrast.qml \
     qml/FastNlMeansDenoising_.qml \
+    qml/HueSaturationLightness.qml \
+    qml/Levels.qml \
     qml/LevelsSliders.qml \
     qml/HueSaturationLightnessSliders.qml \
     qml/live.package.json \
