@@ -3,10 +3,13 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
+import workspace 1.0 as Workspace
 
 CodePalette{
     id: palette
     type : "qml/import"
+
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
     item: Item{
 
@@ -98,71 +101,49 @@ CodePalette{
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 5
 
-            InputBox{
+            Workspace.InputBox{
                 id: moduleInput
-
                 anchors.left: parent.left
                 anchors.leftMargin: 10
-                margins: 2
-                radius: 3
-                color: 'transparent'
-
-                hintTextColor: "#494949"
-                border.color : "#232427"
-
                 anchors.top: parent.top
                 anchors.topMargin: 5
-
-                font.family: "Open Sans"
-                font.pixelSize: 12
+                margins: 2
 
                 width: 140
                 height: 20
                 textHint: 'Path...'
+
+                style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
             }
 
-
-            InputBox{
+            Workspace.InputBox{
                 id: versionInput
                 anchors.left: parent.left
                 anchors.leftMargin: 152
-                margins: 2
-                radius: 3
-                color: 'transparent'
-
-                hintTextColor: "#494949"
-                border.color : "#232427"
                 anchors.top: parent.top
                 anchors.topMargin: 5
-
-                font.family: "Open Sans"
-                font.pixelSize: 12
+                margins: 2
 
                 width: 40
                 height: 20
                 textHint: '0.0'
+
+                style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
             }
 
-            InputBox{
+            Workspace.InputBox{
                 id: qualifierInput
                 anchors.left: parent.left
                 anchors.leftMargin: 194
-                margins: 2
-                radius: 3
-                color: 'transparent'
-
-                hintTextColor: "#494949"
-
-                border.color : "#232427"
                 anchors.top: parent.top
                 anchors.topMargin: 5
-
-                font.family: "Open Sans"
-                font.pixelSize: 12
+                margins: 2
 
                 width: 40
                 height: 20
                 textHint: 'As...'
+
+                style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
             }
 
             Item{

@@ -1,7 +1,9 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 2.12 as QC2
 import QtGraphicalEffects 1.0
+import workspace 1.0 as Workspace
 
 Rectangle{
     id: root
@@ -12,296 +14,237 @@ Rectangle{
 
     property alias hue: hueSlider.value
     property alias saturation: saturationSlider.value
-    property alias lightness: lightnessSlider.value
+    property alias lightness: valueSlider.value
 
-    Rectangle{
+    property QtObject defaultStyle : QtObject{
+        property QtObject labelStyle: hueLabelLeft ? hueLabelLeft.defaultStyle : null
+    }
+
+    property QtObject style: defaultStyle
+
+    Component.onCompleted: {
+        hueSlider.value = 180
+        saturationSlider.value = 100
+        valueSlider.value = 100
+    }
+
+    Item{
         width: 280
         height: 30
-        color: 'transparent'
-        Slider{
+
+        QC2.Slider{
             id: hueSlider
             anchors.top: parent.top
             anchors.topMargin: 1
             anchors.left: parent.left
             anchors.leftMargin: 40
-            width: parent.width - 80
+            width: parent.width - 70
             height: 15
-            minimumValue: 0
-            value: 180
+            from: 0
             stepSize: 1.0
-            maximumValue: 360
+            to: 360
 
-            style: SliderStyle{
-                groove: Rectangle {
-                    implicitHeight: 15
-                     LinearGradient {
-                        anchors.fill: parent
-                        start: Qt.point(0, 0)
-                        end: Qt.point(parent.width, 0)
-                        gradient: Gradient {
-                            GradientStop {
-                                position: 0.000
-                                color: Qt.rgba(1, 0, 0, 1)
-                            }
-                            GradientStop {
-                                position: 0.167
-                                color: Qt.rgba(1, 1, 0, 1)
-                            }
-                            GradientStop {
-                                position: 0.333
-                                color: Qt.rgba(0, 1, 0, 1)
-                            }
-                            GradientStop {
-                                position: 0.500
-                                color: Qt.rgba(0, 1, 1, 1)
-                            }
-                            GradientStop {
-                                position: 0.667
-                                color: Qt.rgba(0, 0, 1, 1)
-                            }
-                            GradientStop {
-                                position: 0.833
-                                color: Qt.rgba(1, 0, 1, 1)
-                            }
-                            GradientStop {
-                                position: 1.000
-                                color: Qt.rgba(1, 0, 0, 1)
-                            }
+            background: Rectangle {
+                implicitHeight: 5
+                width: hueSlider.availableWidth
+                height: implicitHeight
+                y: hueSlider.topPadding + hueSlider.availableHeight / 2 - height / 2
+                 LinearGradient {
+                    anchors.fill: parent
+                    start: Qt.point(0, 0)
+                    end: Qt.point(parent.width, 0)
+                    gradient: Gradient {
+                        GradientStop {
+                            position: 0.000
+                            color: Qt.rgba(1, 0, 0, 1)
+                        }
+                        GradientStop {
+                            position: 0.167
+                            color: Qt.rgba(1, 1, 0, 1)
+                        }
+                        GradientStop {
+                            position: 0.333
+                            color: Qt.rgba(0, 1, 0, 1)
+                        }
+                        GradientStop {
+                            position: 0.500
+                            color: Qt.rgba(0, 1, 1, 1)
+                        }
+                        GradientStop {
+                            position: 0.667
+                            color: Qt.rgba(0, 0, 1, 1)
+                        }
+                        GradientStop {
+                            position: 0.833
+                            color: Qt.rgba(1, 0, 1, 1)
+                        }
+                        GradientStop {
+                            position: 1.000
+                            color: Qt.rgba(1, 0, 0, 1)
                         }
                     }
                 }
-                handle: Rectangle{
-                    width: 5
-                    height: 18
-                    border.width: 1
-                    border.color: "#093357"
-                    color: "#041f38"
-                }
+            }
+            handle: Rectangle {
+                x: hueSlider.leftPadding + hueSlider.visualPosition * (hueSlider.availableWidth - width)
+                y: hueSlider.topPadding + hueSlider.availableHeight / 2 - height / 2
+                implicitWidth: 11
+                implicitHeight: 11
+                radius: 5
+                color: '#9b9da0'
             }
         }
 
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
+        Workspace.LabelOnRectangle{
+            id: hueLabelLeft
+            width: 35
+            height: 22
             anchors.top: parent.top
-
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 11
-                font.weight: Font.Light
-                text: hueSlider.minimumValue
-                color: '#d2d4db'
-            }
+            text: hueSlider.from
+            style: root.style ? root.style.labelStyle : defaultStyle
         }
 
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
+        Workspace.LabelOnRectangle{
+            anchors.top: parent.top
             anchors.right: parent.right
-            anchors.top: parent.top
-
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 11
-                font.weight: Font.Light
-                text: hueSlider.maximumValue
-                color: '#d2d4db'
-            }
+            width: 35
+            text: hueSlider.to
+            style: root.style ? root.style.labelStyle : defaultStyle
         }
-
     }
 
     Rectangle{
         anchors.top: parent.top
-        anchors.topMargin: 30
+        anchors.topMargin: 26
         width: 280
         height: 40
         color: 'transparent'
 
-        Slider{
+        QC2.Slider{
             id: saturationSlider
             anchors.top: parent.top
             anchors.topMargin: 1
             anchors.left: parent.left
             anchors.leftMargin: 40
-            width: parent.width - 80
+            width: parent.width - 70
             height: 15
-            minimumValue: 0
-            value: 100
+            from: 0
             stepSize: 1.0
-            maximumValue: 200
+            to: 255
 
-            style: SliderStyle{
-                groove: Rectangle {
-                    implicitHeight: 15
-                     LinearGradient {
-                        anchors.fill: parent
-                        start: Qt.point(0, 0)
-                        end: Qt.point(parent.width, 0)
-                        gradient: Gradient {
-                            GradientStop {
-                                position: 0.000
-                                color: Qt.hsva(
-                                    root.hsvHue, 0, 1, 1
-                                )
-                            }
-                            GradientStop {
-                                position: 1.000
-                                color: Qt.hsva(root.hsvHue, 255, 1, 1)
-                            }
+            background: Rectangle{
+                implicitHeight: 5
+                width: parent.availableWidth
+                height: implicitHeight
+                y: saturationSlider.topPadding + saturationSlider.availableHeight / 2 - height / 2
+                LinearGradient {
+                    anchors.fill: parent
+                    start: Qt.point(0, 0)
+                    end: Qt.point(parent.width, 0)
+                    gradient: Gradient {
+                        GradientStop {
+                            position: 0.000
+                            color: "#000"
+                        }
+                        GradientStop {
+                            position: 1.000
+                            color: "#f00"
                         }
                     }
                 }
-                handle: Rectangle{
-                    width: 5
-                    height: 18
-                    border.width: 1
-                    border.color: "#093357"
-                    color: "#041f38"
-                }
+            }
+            handle: Rectangle{
+                x: saturationSlider.leftPadding + saturationSlider.visualPosition * (saturationSlider.availableWidth - width)
+                y: saturationSlider.topPadding + saturationSlider.availableHeight / 2 - height / 2
+                implicitWidth: 11
+                implicitHeight: 11
+                radius: 5
+                color: '#9b9da0'
             }
         }
 
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
+        Workspace.LabelOnRectangle{
             anchors.top: parent.top
-
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 11
-                font.weight: Font.Light
-                text: saturationSlider.minimumValue
-                color: '#d2d4db'
-            }
+            width: 35
+            text: saturationSlider.from
+            style: root.style ? root.style.labelStyle : defaultStyle
         }
 
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
+        Workspace.LabelOnRectangle{
+            anchors.top: parent.top
             anchors.right: parent.right
-            anchors.top: parent.top
+            width: 35
 
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 11
-                font.weight: Font.Light
-                text: saturationSlider.maximumValue
-                color: '#d2d4db'
-            }
+            text: saturationSlider.to
+            style: root.style ? root.style.labelStyle : defaultStyle
         }
 
     }
 
-    Rectangle{
+    Item{
         anchors.top: parent.top
-        anchors.topMargin: 60
+        anchors.topMargin: 51
         width: 280
         height: 40
-        color: 'transparent'
 
-        Slider{
-            id: lightnessSlider
+        QC2.Slider{
+            id: valueSlider
             anchors.top: parent.top
             anchors.topMargin: 1
             anchors.left: parent.left
             anchors.leftMargin: 40
-            width: parent.width - 80
+            width: parent.width - 70
             height: 15
-            minimumValue: 0
-            value: 100
+            from: 0
             stepSize: 1.0
-            maximumValue: 200
+            to: 255
 
-            style: SliderStyle{
-                groove: Rectangle {
-                    implicitHeight: 15
-                     LinearGradient {
-                        anchors.fill: parent
-                        start: Qt.point(0, 0)
-                        end: Qt.point(parent.width, 0)
-                        gradient: Gradient {
-                            GradientStop {
-                                position: 0.000
-                                color: Qt.hsva(
-                                    root.hsvHue, root.hsvSaturation, 0, 1
-                                )
-                            }
-                            GradientStop {
-                                position: 1.000
-                                color: Qt.hsva(root.hsvHue, root.hsvSaturation, 1, 1)
-                            }
+            background: Rectangle{
+                implicitHeight: 5
+                width: parent.availableWidth
+                height: implicitHeight
+                y: valueSlider.topPadding + valueSlider.availableHeight / 2 - height / 2
+                LinearGradient {
+                    anchors.fill: parent
+                    start: Qt.point(0, 0)
+                    end: Qt.point(parent.width, 0)
+                    gradient: Gradient {
+                        GradientStop {
+                            position: 0.000
+                            color: "#000"
+                        }
+                        GradientStop {
+                            position: 1.000
+                            color: "#fff"
                         }
                     }
                 }
-                handle: Rectangle{
-                    width: 5
-                    height: 18
-                    border.width: 1
-                    border.color: "#093357"
-                    color: "#041f38"
-                }
+            }
+            handle: Rectangle{
+                x: valueSlider.leftPadding + valueSlider.visualPosition * (valueSlider.availableWidth - width)
+                y: valueSlider.topPadding + valueSlider.availableHeight / 2 - height / 2
+                implicitWidth: 11
+                implicitHeight: 11
+                radius: 5
+                color: '#9b9da0'
             }
         }
 
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
+        Workspace.LabelOnRectangle{
             anchors.top: parent.top
+            text: valueSlider.from
+            width: 35
 
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 11
-                font.weight: Font.Light
-                text: lightnessSlider.minimumValue
-                color: '#d2d4db'
-            }
+            style: root.style ? root.style.labelStyle : defaultStyle
         }
 
-        Rectangle{
-            width: 40
-            height: 18
-            color: "#071a2d"
+        Workspace.LabelOnRectangle{
+            anchors.top: parent.top
             anchors.right: parent.right
-            anchors.top: parent.top
+            text: valueSlider.to
+            width: 35
 
-            border.width: 1
-            border.color: "#0e263c"
-
-            Text{
-                anchors.centerIn: parent
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 11
-                font.weight: Font.Light
-                text: lightnessSlider.maximumValue
-                color: '#d2d4db'
-            }
+            style: root.style ? root.style.labelStyle : defaultStyle
         }
-
     }
 }

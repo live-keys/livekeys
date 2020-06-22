@@ -158,7 +158,7 @@ void QMat::cleanUp(){
 }
 
 cv::Mat *QMat::memoryAlloc(int width, int height, int type, int channels){
-    return new cv::Mat(width, height, CV_MAKETYPE(type, channels));
+    return new cv::Mat(height, width, CV_MAKETYPE(type, channels));
 }
 
 size_t QMat::memorySize(int width, int height, int type, int channels){

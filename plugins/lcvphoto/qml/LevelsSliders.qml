@@ -1,13 +1,18 @@
 import QtQuick 2.5
 import live 1.0
+import workspace 1.0 as Workspace
 import lcvcore 1.0 as Cv
-import lcvphoto 1.0
+import lcvphoto 1.0 as Photo
 
 Rectangle{
     id: root
     width: 240
     height: 200
     color: 'transparent'
+
+    property QtObject style: QtObject{
+        property QtObject textStyle: Workspace.TextStyle{}
+    }
 
     property alias input: colorHistogram.input
 
@@ -42,8 +47,7 @@ Rectangle{
         fontWeight: Font.Light
         onClicked : {
             autoLevelsHistogram.input = root.input
-            autoLevels.histogram = autoLevelsHistogram.output
-            root.levelByChannel = autoLevels.output
+            root.levelByChannel = Photo.Adjustments.autoLevels(autoLevelsHistogram.output)
             root.updateSliders()
             autoLevelsHistogram.input = Cv.MatOp.nullMat
         }
@@ -53,10 +57,6 @@ Rectangle{
         id: autoLevelsHistogram
         channel: Cv.ColorHistogram.AllChannels
         visible: false
-    }
-
-    AutoLevels{
-        id: autoLevels
     }
 
     function assignSlidersFromValues(black, grey, white){
@@ -190,7 +190,7 @@ Rectangle{
             radius: 5
             color: '#2a2c39'
 
-            Drag.active: dragAreaLeft.drag.active
+//            Drag.active: dragAreaLeft.drag.active
             Drag.hotSpot.x: width / 2
             Drag.hotSpot.y: height / 2
 
@@ -246,7 +246,7 @@ Rectangle{
             radius: 5
             color: '#4e4e64'
 
-            Drag.active: dragArea.drag.active
+//            Drag.active: dragArea.drag.active
             Drag.hotSpot.x: width / 2
             Drag.hotSpot.y: height / 2
 
@@ -267,15 +267,12 @@ Rectangle{
             property double lastX: x
             onXChanged: {
                 lastX = x
-            }
 
-            property int assignedX: {
                 var ax = (x / (parent.width - width)) * 255
                 if ( ax < dragBlack.assignedX + 2 )
                     ax = dragBlack.assignedX + 2
-                return ax
-            }
-            onAssignedXChanged: {
+                assignedX = ax
+
                 if ( colorHistogram.channel === Cv.ColorHistogram.Total ){
                     root.lightness = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                 } else if ( colorHistogram.channel === Cv.ColorHistogram.RedChannel ){
@@ -293,12 +290,14 @@ Rectangle{
                 }
             }
 
+            property int assignedX: 255
+
             width: 10
             height: 15
             radius: 5
             color: '#c1c1c8'
 
-            Drag.active: dragArea.drag.active
+//            Drag.active: dragArea.drag.active
             Drag.hotSpot.x: width / 2
             Drag.hotSpot.y: height / 2
 
@@ -314,34 +313,28 @@ Rectangle{
         }
     }
 
-    property var fontPixelSize: 12
-    property var labelTextColor: "#c7c7c7"
-    Label{
+    Workspace.Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.left: parent.left
         text: dragBlack.assignedX
-        fontPixelSize: fontPixelSize
-        textColor: labelTextColor
+        textStyle: root.style.textStyle
     }
 
-    Label{
+    Workspace.Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.horizontalCenter: parent.horizontalCenter
         text: dragGrey.assignedX.toFixed(2)
-        fontPixelSize: fontPixelSize
-        textColor: labelTextColor
+        textStyle: root.style.textStyle
     }
 
-    Label{
+    Workspace.Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.right: parent.right
         text: dragWhite.assignedX
-        fontPixelSize: fontPixelSize
-        textColor: labelTextColor
-
+        textStyle: root.style.textStyle
     }
 
 }

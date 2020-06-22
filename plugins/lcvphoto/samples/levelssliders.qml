@@ -12,7 +12,7 @@ Grid{
     
     ImRead{
        id : src
-       file : project.dir() + '/../../../samples/_images/object_101_piano_query.jpg'
+       file : project.dir() + '/../../../samples/_images/coast_6.jpg'
     }
     
     LevelsSliders{
@@ -23,9 +23,14 @@ Grid{
     }
     
     Levels{
-        input: src.output
+        id: levels
+        input: src.output.cloneMat()
         lightness: levelsSliders.lightness
         channels: levelsSliders.levelByChannel
+    }
+    
+    ImageView{
+        image: levels.result
     }
 
 }
