@@ -36,3 +36,28 @@ OTHER_FILES += \
 DISTFILES += \
     qml/SegmentInsertMenu.qml \
     qml/SegmentView.qml
+
+# Handling the palette
+
+OTHER_FILES *= \
+    palettes/*.qml
+
+# Deploy The palette
+
+palettecopy.commands = $$deployDirCommand($$PWD/palettes, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_NAME/palettes)
+samplescopy.commands = $$deployDirCommand($$PWD/samples, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH/samples)
+first.depends = $(first) palettecopy samplescopy
+export(first.depends)
+export(samplescopy.commands)
+export(palettecopy.commands)
+QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
+
+DISTFILES += \
+    palettes/TimelinePalette.qml \
+    qml/SegmentInsertMenu.qml \
+    qml/SegmentView.qml \
+    qml/TimelineRow.qml \
+    qml/TimelineStyle.qml \
+    qml/TimelineView.qml \
+    qml/TrackTitle.qml
+

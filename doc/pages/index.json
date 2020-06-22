@@ -63,6 +63,7 @@
             {"Project configuration" : "project-configuration.md"}
         ],
         {"Package Manager" : "package-manager.md"},
+        {"Creating qml type info" : "creating-qml-typeinfo.md"},
         {"Libraries" : "libraries.md"},
         [
             {"lvbase" : "../output/md/lvbase-cpp.md"},

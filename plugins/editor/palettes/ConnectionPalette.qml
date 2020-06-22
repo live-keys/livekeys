@@ -128,32 +128,16 @@ CodePalette{
             }
         }
 
-        Rectangle{
-            id: connectionsButton
+        Workspace.Button{
             anchors.right: parent.right
-            anchors.rightMargin: 10
-            width: 25
+            width: 30
             height: 25
-            radius: 3
-
-            property color backgroundHoverColor : "#213355"
-            property color backgroundColor : "#212a4b"
-
-            color: connectionsButtonArea.containsMouse ? backgroundHoverColor : backgroundColor
-            Image{
-                anchors.centerIn: parent
-                source: "qrc:/images/palette-connections.png"
-            }
-            MouseArea{
-                id: connectionsButtonArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    var ef = extension.editingFragment()
-                    var result = extension.bindExpression(input.text)
-                    if ( result ){
-                        extension.write({'__ref': input.text ? input.text : ef.defaultValue()})
-                    }
+            content: paletteStyle ? paletteStyle.buttons.connect : null
+            onClicked: {
+                var ef = extension.editingFragment()
+                var result = extension.bindExpression(input.text)
+                if ( result ){
+                    extension.write({'__ref': input.text ? input.text : ef.defaultValue()})
                 }
             }
         }

@@ -3,6 +3,8 @@ import editor 1.0
 import editor.private 1.0
 import editqml 1.0
 
+import workspace 1.0 as Workspace
+
 Item{
     id: propertyItem
     property string propertyName : ''
@@ -24,21 +26,28 @@ Item{
     anchors.leftMargin: isForObject ? 30 : 0
     width: Math.max(340 - anchors.leftMargin, paletteContainer.width) + 20
     height: propertyTitle.height + paletteContainer.height
+
+    property QtObject defaultStyle : QtObject{
+        property color background: "#333"
+        property double radius: 5
+        property QtObject textStyle: Workspace.TextStyle{}
+    }
+
+    property QtObject style: defaultStyle
     
     Rectangle {
         id: propertyTitle
-        radius: 5
-        color: "#333"
+        radius: propertyItem.style.radius
+        color: propertyItem.style.background
         width: parent.width
         height: 30
-        Text{
-            color: 'white'
-            font.family: "Open Sans"
-            font.pixelSize: 12
+
+        Workspace.Label{
             anchors.verticalCenter : parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10
             text: propertyItem.propertyName
+            textStyle: propertyItem.style.textStyle
         }
 
         Item{

@@ -19,23 +19,34 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
+import workspace 1.0 as Workspace
 
 CodePalette{
     id: palette
     type : "qml/double"
 
-    item: Rectangle{
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+
+    item: Item{
         width: 330
-        height: 30
-        color: 'transparent'
+        height: 25
+
+        Workspace.InputBox{
+            id: numberInput
+            anchors.left: parent.left
+            width: 70
+            height: 25
+            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            text: intSlider.value + (fractionalSlider.value === 0 ? '' : '.' + fractionalSlider.value)
+        }
 
         Slider{
             id: intSlider
             anchors.top: parent.top
-            anchors.topMargin: 1
+            anchors.topMargin: 3
             anchors.left: parent.left
-            anchors.leftMargin: leftLabel.width + 3
-            width: parent.width - leftLabel.width - rightLabel.width - 10
+            anchors.leftMargin: numberInput.width + leftLabel.width + 5
+            width: parent.width - numberInput.width - leftLabel.width - rightLabel.width - 10
             height: 15
             minimumValue: 0
             value: 0
@@ -50,7 +61,7 @@ CodePalette{
             style: SliderStyle{
                 groove: Rectangle {
                     implicitHeight: 5
-                    color: '#0b111c'
+                    color: paletteStyle ? paletteStyle.backgroundColor : '#0b111c'
                 }
                 handle: Rectangle{
                     width: 11
@@ -65,9 +76,9 @@ CodePalette{
             id: fractionalSlider
 
             anchors.left: parent.left
-            anchors.leftMargin: leftLabel.width + 3
+            anchors.leftMargin: numberInput.width + leftLabel.width + 5
             anchors.top: parent.top
-            anchors.topMargin: 15
+            anchors.topMargin: 17
 
             width: intSlider.width
 
@@ -98,11 +109,18 @@ CodePalette{
             }
         }
 
-        Label{
+        Workspace.NumberLabel{
             id: leftLabel
             mode: 1
             anchors.top: parent.top
             anchors.left: parent.left
+            anchors.leftMargin: numberInput.width + 2
+
+            width: 50
+            height: 25
+
+            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
+
             up: function(){
                 if (intSlider.minimumValue === 0 && intSlider.maximumValue > 25)
                     intSlider.minimumValue = 25
@@ -132,11 +150,18 @@ CodePalette{
             text: intSlider.minimumValue
         }
 
-        Label{
+
+
+        Workspace.NumberLabel{
             id: rightLabel
             mode: 2
             anchors.top: parent.top
             anchors.right: parent.right
+
+            width: 50
+            height: 25
+
+            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
 
             up: function(){
                 if (intSlider.maximumValue === 0)

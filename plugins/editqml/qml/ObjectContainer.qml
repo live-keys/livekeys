@@ -14,6 +14,39 @@ Item{
         return objectContainerFactory.createObject(parent)
     }
 
+    function recalculateContentWidth(){
+        var max = 0
+        for (var i=0; i<groupsContainer.children.length; ++i)
+        {
+            var child = groupsContainer.children[i]
+            if (child.objectName === "objectContainer"){
+                if (child.contentWidth + 20 > max)
+                    max = child.contentWidth + 20
+            } else if (child.objectName === "propertyContainer" && child.isAnObject){
+                if (child.childObjectContainer &&
+                    child.childObjectContainer.contentWidth + 140 > max)
+                    max = child.childObjectContainer.contentWidth + 140
+            } else {
+                if (child.width + 20 > max)
+                    max = child.width + 20
+            }
+        }
+
+        if (max < 300)
+            max = 300
+
+        if (max !== contentWidth){
+            contentWidth = max
+        }
+    }
+
+    onContentWidthChanged: {
+        if (parentObjectContainer){
+            parentObjectContainer.recalculateContentWidth()
+        }
+    }
+
+
     property alias editingFragment : objectContainer.editingFragment
     property alias editor : objectContainer.editor
     property alias title : objectContainer.title
@@ -21,10 +54,15 @@ Item{
     property alias compact: objectContainer.compact
     property alias topSpacing: objectContainer.topSpacing
 
+    property var parentObjectContainer: null
+    property var isForProperty: false
+
     property alias paletteGroupFactory: objectContainer.paletteGroupFactory
 
     width: objectContainer.width
     height: objectContainer.pane ? 30 : objectContainer.height
+
+    property int contentWidth: 0
 
     property Rectangle placeHolder : Rectangle{
         height: 30
@@ -133,7 +171,7 @@ Item{
 
         property PaletteStyle paletteStyle: lk.layers.workspace.extensions.editqml.paletteStyle
 
-        width: container.width < 260 ? 300 : container.width + 40
+        width: container.width < 260 ? 300 : container.width
         height: container.height < 10 || compact ? 40 : objectContainerTitleWrap.height + topSpacing + /*(paletteGroup ? paletteGroup.height : 0) +*/ container.height
 
         function closeAsPane(){
@@ -154,6 +192,8 @@ Item{
                 childObjectContainer.title = ef.typeName() + "#" + ef.objectId()
             childObjectContainer.x = 20
             childObjectContainer.y = 10
+
+            childObjectContainer.parentObjectContainer = root
 
             var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
             paletteBoxGroup.editingFragment = ef
@@ -190,7 +230,12 @@ Item{
 
 
             if ( codeHandler.isForAnObject(ef) ){
+                propertyContainer.isAnObject = true
                 var childObjectContainer = objectContainerFactory.createObject(container)
+                propertyContainer.childObjectContainer = childObjectContainer
+
+                childObjectContainer.isForProperty = true
+                childObjectContainer.parentObjectContainer = root
 
                 childObjectContainer.editor = objectContainer.editor
                 childObjectContainer.editingFragment = ef
@@ -263,6 +308,7 @@ Item{
                         if ( codeHandler.isForAnObject(ef) ){
 
                             var childObjectContainer = objectContainerFactory.createObject(container)
+                            childObjectContainer.parentObjectContainer = root
 
                             childObjectContainer.editor = objectContainer.editor
                             childObjectContainer.editingFragment = ef
@@ -552,6 +598,7 @@ Item{
 
                     addBox.color = 'transparent'
                     addBoxItem.cancel = function(){
+                        addBoxItem.destroy()
                         addBox.destroy()
                     }
                     addBoxItem.accept = function(type, data){
@@ -635,6 +682,7 @@ Item{
                             }
                             // TODO: Add event palette too
                         }
+                        addBoxItem.destroy()
                         addBox.destroy()
                     }
 
@@ -688,17 +736,11 @@ Item{
             anchors.top: parent.top
             anchors.topMargin: objectContainerTitleWrap.height + topSpacing
             visible: !compact
-            spacing: 10
-            width: {
-                var maxWidth = 0;
-                if ( children.length > 0 ){
-                    for ( var i = 0; i < children.length; ++i ){
-                        if ( children[i].width > maxWidth )
-                            maxWidth = children[i].width
-                    }
-                }
-                return maxWidth
-            }
+            spacing: 5
+            width: parentObjectContainer ? parentObjectContainer.width - (isForProperty? 140 : 20) : contentWidth + 10
+
+            onChildrenChanged: recalculateContentWidth()
+
             height: {
                 if (compact) return 0
                 var totalHeight = 0;
@@ -736,7 +778,7 @@ Item{
                 {
                     if (!children[i]) continue
                     if (children[i].objectName === "objectContainer"){
-                        children[i].topSpacing = 15
+                        children[i].topSpacing = 5
                         children[i].z = children.length - childrenCopy.length
                         childrenCopy.push(children[i])
                     }

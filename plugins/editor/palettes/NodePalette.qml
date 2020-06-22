@@ -20,6 +20,7 @@ CodePalette{
 
     property Component addBoxFactory: Component{ AddQmlBox{} }
 
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
     onEditingFragmentChanged: {
         if (!editingFragment) return
@@ -97,9 +98,24 @@ CodePalette{
                     for (var pp = 0; pp < nodeProps.length; ++pp)
                     {
                         var propp = node.item.properties[pp]
+                        var found = false
                         if (propp.propertyName === props[k].value[1]){
                             objectGraph.bindPorts(propp.outPort, props[k].port)
+                            found = true
                             break
+                        }
+
+                    }
+                    if (!found){
+                        node.item.addPropertyToNodeByName(props[k].value[1])
+                        for (var ppx = 0; ppx < nodeProps.length; ++ppx)
+                        {
+                            var proppx = node.item.properties[ppx]
+                            if (proppx.propertyName === props[k].value[1]){
+                                objectGraph.bindPorts(proppx.outPort, props[k].port)
+                                break
+                            }
+
                         }
                     }
                 }
@@ -136,6 +152,7 @@ CodePalette{
             editor: palette.editor
             editingFragment: palette.editingFragment
             addBoxFactory: palette.addBoxFactory
+            style: palette ? palette.paletteStyle.nodeEditor : defaultStyle
         }
     }
 

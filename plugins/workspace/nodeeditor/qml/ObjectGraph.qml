@@ -4,6 +4,7 @@ import QtQuick.Controls.Material 2.1
 import QtQuick.Layouts           1.3
 import live                      1.0
 
+import workspace 1.0 as Workspace
 import workspace.quickqanava 2.0 as Qan
 
 Rectangle{
@@ -11,11 +12,49 @@ Rectangle{
     
     width: 500
     height: 700
-    color: '#000511'
     clip: true
-    radius: 5
-    border.width: 1
-    border.color: "#333"
+
+    color: root.style.backgroundColor
+    radius: root.style.radius
+    border.width: root.style.borderWidth
+    border.color: root.style.borderColor
+
+
+    property QtObject defaultStyle : QtObject{
+        property color backgroundColor: '#000511'
+        property color backgroundGridColor: '#222'
+
+        property color borderColor: '#333'
+        property double borderWidth: 1
+        property double radius: 5
+
+        property color connectorEdgeColor: '#666'
+        property color connectorColor: '#666'
+
+        property color selectionColor: "#fff"
+        property double selectionWeight: 1
+
+        property QtObject objectNodeStyle : QtObject{
+            property color background: "yellow"
+            property double radius: 15
+            property color borderColor: "#555"
+            property double borderWidth: 1
+
+            property color titleBackground: "#666"
+            property double titleRadius: 5
+            property QtObject titleTextStyle : Workspace.TextStyle{}
+        }
+
+        property QtObject propertyDelegateStyle : QtObject{
+            property color background: "#333"
+            property double radius: 5
+            property QtObject textStyle: Workspace.TextStyle{}
+        }
+
+    }
+
+    property QtObject style: defaultStyle
+
     
     property Component resizeConnectionsFactory: Component{
         Connections {
@@ -49,7 +88,9 @@ Rectangle{
     property Component addBoxFactory: null
 
     property var connections: []
-    property Component propertyDelegate : ObjectNodeProperty{}
+    property Component propertyDelegate : ObjectNodeProperty{
+        style: root.style.propertyDelegateStyle
+    }
     property alias nodeDelegate : graph.nodeDelegate
     property var palette: null
     property var documentHandler: null
@@ -124,8 +165,7 @@ Rectangle{
     }
 
     onEdgeClicked: {
-        if (selectedEdge)
-        {
+        if (selectedEdge){
             selectedEdge.item.color = '#6a6a6a'
         }
         selectedEdge = edge
@@ -231,8 +271,7 @@ Rectangle{
         node.item.editor = editor
 
         var idx = label.indexOf('#')
-        if (idx !== -1)
-        {
+        if (idx !== -1){
             node.item.id = label.substr(idx+1)
         }
         
@@ -290,15 +329,15 @@ Rectangle{
         id: graphView
         anchors.fill: parent
         navigable   : true
-        gridThickColor: '#222'
+        gridThickColor: root.style.backgroundGridColor
         onDoubleClicked : root.doubleClicked(pos)
         onRightClicked : root.rightClicked(pos)
     
         graph: Qan.Graph {
             id: graph
             connectorEnabled: true
-            connectorEdgeColor: "#666"
-            connectorColor: "#666"
+            connectorEdgeColor: root.style.connectorEdgeColor
+            connectorColor: root.style.connectorColor
             edgeDelegate: Edge{}
             verticalDockDelegate : VerticalDock{}
             portDelegate: Port{}
@@ -311,9 +350,11 @@ Rectangle{
             selectionColor: "#fff"
             selectionWeight: 1
 
-            nodeDelegate: ObjectNode{}
+            nodeDelegate: ObjectNode{
+                nodeStyle: root.style.objectNodeStyle
+            }
             Component.onCompleted : {
-                styleManager.styles.at(1).lineColor = '#666'
+                styleManager.styles.at(1).lineColor = root.style.connectorColor
             }
         }
     }  // Qan.GraphView
