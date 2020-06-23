@@ -1,34 +1,29 @@
-#ifndef LVVIDEOSEGMENT_H
-#define LVVIDEOSEGMENT_H
+#ifndef LVIMAGESEGMENT_H
+#define LVIMAGESEGMENT_H
 
 #include <QObject>
 #include "live/segment.h"
-
-#include "qvideocapture.h"
 #include "videosurface.h"
-
-namespace cv{
-class VideoCapture;
-}
 
 namespace lv{
 
-/// \private
-class VideoSegment : public Segment{
+class ImageSegment : public Segment{
 
     Q_OBJECT
     Q_PROPERTY(lv::VideoSurface* surface READ surface WRITE setSurface NOTIFY surfaceChanged)
     Q_PROPERTY(QString file              READ file    WRITE setFile    NOTIFY fileChanged)
 
 public:
-    explicit VideoSegment(QObject *parent = nullptr);
-
-    VideoSurface* surface() const;
-    void setSurface(VideoSurface* surface);
-
-    const QString &file() const;
+    explicit ImageSegment(QObject *parent = nullptr);
+    ~ImageSegment() override;
 
     void openFile();
+
+    VideoSurface *surface() const;
+    void setSurface(VideoSurface* surface);
+
+    const QString& file() const;
+    void setFile(const QString &file);
 
     void serialize(QQmlEngine *engine, MLNode &node) const override;
     void deserialize(Track *track, QQmlEngine *engine, const MLNode &data) override;
@@ -39,25 +34,19 @@ public:
     void cursorNext(qint64 position) override;
     void cursorMove(qint64 position) override;
 
-public slots:
-    void setFile(const QString& file);
-
 signals:
     void surfaceChanged();
+    void imageChanged();
     void fileChanged();
 
 private:
-    Track*        m_track;
-    VideoSurface* m_surface;
-    QString       m_file;
-    cv::VideoCapture* m_capture;
+    Track*            m_track;
+    QString           m_file;
+    lv::VideoSurface* m_surface;
+    QMat*             m_image;
 };
 
-inline VideoSurface *VideoSegment::surface() const{
-    return m_surface;
-}
-
-inline void VideoSegment::setSurface(VideoSurface *surface){
+inline void ImageSegment::setSurface(VideoSurface* surface){
     if (m_surface == surface)
         return;
 
@@ -65,11 +54,15 @@ inline void VideoSegment::setSurface(VideoSurface *surface){
     emit surfaceChanged();
 }
 
-inline const QString& VideoSegment::file() const{
+inline VideoSurface* ImageSegment::surface() const{
+    return m_surface;
+}
+
+inline const QString& ImageSegment::file() const{
     return m_file;
 }
 
-inline void VideoSegment::setFile(const QString &file){
+inline void ImageSegment::setFile(const QString& file){
     if (m_file == file)
         return;
 
@@ -77,9 +70,8 @@ inline void VideoSegment::setFile(const QString &file){
     emit fileChanged();
 
     openFile();
-
 }
 
 }// namespace
 
-#endif // LVVIDEOSEGMENT_H
+#endif // IMAGESEGMENT_H

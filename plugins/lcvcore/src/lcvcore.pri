@@ -1,4 +1,5 @@
 HEADERS += \
+    $$PWD/imagesegment.h \
     $$PWD/qabsdiff.h \
     $$PWD/qalphamerge.h \
     $$PWD/qcamcapture.h \
@@ -39,6 +40,7 @@ HEADERS += \
     $$PWD/videosurface.h
 
 SOURCES += \
+    $$PWD/imagesegment.cpp \
     $$PWD/lcvcore_plugin.cpp \
     $$PWD/qabsdiff.cpp \
     $$PWD/qalphamerge.cpp \
