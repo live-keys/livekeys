@@ -36,6 +36,7 @@ OTHER_FILES *= \
 
 DISTFILES += \
     qml/FileLineReader.qml \
+    qml/FileReader.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/plugins.qmltypes

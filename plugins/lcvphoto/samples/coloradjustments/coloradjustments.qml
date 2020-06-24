@@ -22,12 +22,12 @@ Grid{
         saturation: 100
         lightness: 100
     }
-    
+
     BrightnessAndContrast{
         id: brightnessAndContrast
         input: hueSaturationLightness.result
     }
-    
+
     ImageView{
         image: brightnessAndContrast.result
     }

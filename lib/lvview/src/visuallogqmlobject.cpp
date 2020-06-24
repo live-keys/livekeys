@@ -34,7 +34,7 @@ namespace lv{
 
 namespace{
 
-void logValue(VisualLog& vl, const QJSValue& message){
+void logJsValue(VisualLog& vl, const QJSValue& message){
     if ( message.isQObject() ){
         QObject* messageObject = message.toQObject();
         vl << "(" << messageObject->metaObject()->className() << " " <<
@@ -50,7 +50,7 @@ void logValue(VisualLog& vl, const QJSValue& message){
                     first = false;
                 else
                     vl << ",";
-                logValue(vl, vi.value());
+                logJsValue(vl, vi.value());
             }
         }
         vl << "]";
@@ -68,7 +68,7 @@ void logValue(VisualLog& vl, const QJSValue& message){
                     else
                         vl << ",";
                     vl << vi.name() << ":";
-                    logValue(vl, vi.value());
+                    logJsValue(vl, vi.value());
                 }
             }
             vl << "}";
@@ -78,7 +78,20 @@ void logValue(VisualLog& vl, const QJSValue& message){
     }
 }
 
-void logDetail(VisualLog& vl, const QJSValue& message){
+void logHelper(VisualLog::MessageInfo::Level level, const QJSValue& messageOrCategory, const QJSValue& message){
+    if ( message.isUndefined() ){
+        VisualLog vl(level);
+        VisualLogQmlObject::logValue(vl, messageOrCategory);
+    } else {
+        VisualLog vl(messageOrCategory.toString().toStdString(), level);
+        VisualLogQmlObject::logValue(vl, message);
+    }
+}
+
+}// namespace
+
+
+void VisualLogQmlObject::logValue(VisualLog& vl, const QJSValue& message){
     if ( message.isQObject() ){
         QObject* messageObject = message.toQObject();
         MetaInfo::Ptr ti = ViewContext::instance().engine()->typeInfo(messageObject->metaObject());
@@ -90,21 +103,9 @@ void logDetail(VisualLog& vl, const QJSValue& message){
                 messageObject << ")";
         }
     } else {
-        logValue(vl, message);
+        logJsValue(vl, message);
     }
 }
-
-void logHelper(VisualLog::MessageInfo::Level level, const QJSValue& messageOrCategory, const QJSValue& message){
-    if ( message.isUndefined() ){
-        VisualLog vl(level);
-        logDetail(vl, messageOrCategory);
-    } else {
-        VisualLog vl(messageOrCategory.toString().toStdString(), level);
-        logDetail(vl, message);
-    }
-}
-
-}// namespace
 
 /** Default constructor */
 VisualLogQmlObject::VisualLogQmlObject(QObject *parent)

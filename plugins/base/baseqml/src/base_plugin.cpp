@@ -20,6 +20,7 @@
 #include "live/viewcontext.h"
 #include "live/applicationcontext.h"
 #include "qmlscript.h"
+#include "qmlpropertylog.h"
 #include "qmlindexselector.h"
 #include "environment.h"
 #include "qmlexec.h"
@@ -52,6 +53,7 @@ void BasePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlIndexSelector>(uri, 1, 0, "IndexSelector");
     qmlRegisterType<lv::QmlExec>(uri,          1, 0, "Exec");
     qmlRegisterType<lv::QmlStreamLog>(uri,     1, 0, "StreamLog");
+    qmlRegisterType<lv::QmlPropertyLog>(uri,   1, 0, "PropertyLog");
 }
 
 void BasePlugin::initializeEngine(QQmlEngine *engine, const char *){

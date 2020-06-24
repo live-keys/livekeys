@@ -5,6 +5,7 @@ HEADERS += \
     $$PWD/environment.h \
     $$PWD/qmlexec.h \
     $$PWD/qmlindexselector.h \
+    $$PWD/qmlpropertylog.h \
     $$PWD/qmlscript.h \
     $$PWD/qmlstreamlog.h
 
@@ -13,5 +14,6 @@ SOURCES += \
     $$PWD/environment.cpp \
     $$PWD/qmlexec.cpp \
     $$PWD/qmlindexselector.cpp \
+    $$PWD/qmlpropertylog.cpp \
     $$PWD/qmlscript.cpp \
     $$PWD/qmlstreamlog.cpp
