@@ -269,7 +269,23 @@ void QmlEditFragment::updatePaletteValue(CodePalette *palette){
         palette->setValueFromBinding(inputChannel->property().read());
     } else {
         QQmlListReference ppref = qvariant_cast<QQmlListReference>(inputChannel->property().read());
-        palette->setValueFromBinding(QVariant::fromValue(ppref.at(inputChannel->listIndex())));
+        QObject* parent = ppref.object();
+
+        // create correct order for list reference
+        QObjectList ordered;
+
+        for (auto child: parent->children())
+        {
+            bool found = false;
+            for (int i = 0; i < ppref.count(); ++i)
+                if (child == ppref.at(i)){
+                    found = true;
+                    break;
+                }
+            if (found) ordered.push_back(child);
+        }
+
+        palette->setValueFromBinding(QVariant::fromValue(ordered[inputChannel->listIndex()]));
     }
 }
 

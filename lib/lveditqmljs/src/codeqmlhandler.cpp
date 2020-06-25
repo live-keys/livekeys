@@ -2012,7 +2012,17 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                 QmlBindingPath::Ptr bp = QmlBindingPath::create();
                 bp->appendIndex(i);
 
-                QmlEditFragment* ef = new QmlEditFragment(declaration);
+                auto test = findFragmentByPosition(declaration->position());
+                if (test && test->declaration()->position() == declaration->position()) // it was already opened
+                {
+                    fragments.append(test);
+                    continue;
+                }
+
+                QmlEditFragment* ef = createInjectionChannel(declaration);
+                if ( !ef ){
+                    continue;
+                }
                 ef->declaration()->setSection(m_document->createSection(
                     QmlEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
                 ));

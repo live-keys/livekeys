@@ -38,7 +38,7 @@ CodePalette{
                 levelByChannel = levels.channels ? levels.channels : {}
             } else {
                 input = Cv.MatOp.nullMat
-                lightnews = []
+                lightness = []
                 levelByChannel = {}
             }
 
@@ -48,7 +48,7 @@ CodePalette{
         color: 'transparent'
         input: Cv.MatOp.nullMat
         onLightnessChanged: {
-            if ( !isBindingChange() ){
+            if ( !isBindingChange() && levels ){
                 levels.lightness = lightness
                 extension.writeProperties({
                     'lightness' : lightness
@@ -56,7 +56,7 @@ CodePalette{
             }
         }
         onLevelByChannelChanged: {
-            if ( !isBindingChange() ){
+            if ( !isBindingChange() && levels ){
                 levels.channels = levelByChannel
                 extension.writeProperties({
                     'channels' : levelByChannel
