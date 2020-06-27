@@ -296,23 +296,12 @@ Qan.NodeItem{
 
                                 }
 
-                                var newPaletteBox = paletteContainerFactory.createObject(paletteContainer)
-
-                                palette.item.x = 5
-                                palette.item.y = 2
-
-                                newPaletteBox.child = palette.item
-                                newPaletteBox.palette = palette
-
-                                newPaletteBox.name = palette.name
-                                newPaletteBox.type = palette.type
-                                newPaletteBox.moveEnabledSet = false
-                                newPaletteBox.documentHandler = editor.documentHandler
-                                newPaletteBox.cursorRectangle = editor.getCursorRectangle()
-                                newPaletteBox.editorPosition = editor.cursorWindowCoords()
-                                newPaletteBox.paletteContainerFactory = function(arg){
-                                    return objectContainer.paletteContainerFactory.createObject(arg)
-                                }
+                                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                                var paletteBox = paletteControls.addPalette(palette,
+                                                                            editingFragment,
+                                                                            editor,
+                                                                            paletteContainer)
+                                if (paletteBox) paletteBox.moveEnabledSet = false
                             }
                         }
 

@@ -93,56 +93,7 @@ Item{
         objectContainer.expandOptions(options)
     }
 
-    function expandDefaultPalette(){
-        var defaultPaletteName = editor.documentHandler.codeHandler.defaultPalette(root.editingFragment)
-        if ( defaultPaletteName.length ){
-            expandPalette(defaultPaletteName)
-        }
-    }
 
-    function expandPalette(name){
-        var editingFragment = root.editingFragment
-        if ( !editingFragment )
-            return
-
-        var palette = root.editor.documentHandler.codeHandler.expand(editingFragment, {
-            "palettes" : [name]
-        })
-        if (palette){
-
-            if (palette.type === "qml/Object")
-            {
-                palette.documentHandler = editor.documentHandler
-                palette.editor = editor
-                editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
-                palette.editingFragment = editingFragment
-            }
-
-            if ( palette.item ){
-                var newPaletteBox = objectContainer.paletteContainerFactory.createObject(root.paletteGroup)
-                palette.item.x = 2
-                palette.item.y = 2
-
-                newPaletteBox.child = palette.item
-                newPaletteBox.palette = palette
-
-                newPaletteBox.name = palette.name
-                newPaletteBox.type = palette.type
-                newPaletteBox.moveEnabledSet = false
-                newPaletteBox.documentHandler = root.editor.documentHandler
-                newPaletteBox.cursorRectangle = root.paletteGroup.cursorRectangle
-                newPaletteBox.editorPosition = root.paletteGroup.editorPosition
-                newPaletteBox.paletteContainerFactory = function(arg){
-                    return objectContainer.paletteContainerFactory.createObject(arg)
-                }
-
-                if (compact) expand()
-            } else {
-                root.expandOptions(palette)
-            }
-
-        }
-    }
 
     Item{
         id: objectContainer
@@ -206,9 +157,11 @@ Item{
 
             ef.incrementRefCount()
 
-            childObjectContainer.expandDefaultPalette()
-
-
+            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+            paletteControls.expandDefaultPalette(ef,
+                                                 editor,
+                                                 childObjectContainer.paletteGroup,
+                                                 childObjectContainer)
         }
 
         function addPropertyFragmentToContainer(ef){
@@ -250,7 +203,11 @@ Item{
                 paletteBoxGroup.x = 2
 
                 propertyContainer.valueContainer = childObjectContainer
-                childObjectContainer.expandDefaultPalette()
+                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                paletteControls.expandDefaultPalette(ef,
+                                                     editor,
+                                                     childObjectContainer.paletteGroup,
+                                                     childObjectContainer)
 
                 propertyContainer.paletteAddButtonVisible = false
 
@@ -259,7 +216,9 @@ Item{
                 propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
                 propertyContainer.valueContainer.editingFragment = ef
                 propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
-                propertyContainer.expandDefaultPalette()
+                paletteControls.expandDefaultPalette(ef,
+                                                     editor,
+                                                     propertyContainer.valueContainer)
 
             }
 
@@ -268,6 +227,8 @@ Item{
         }
         function expandOptions(options){
             var codeHandler = objectContainer.editor.documentHandler.codeHandler
+
+            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
 
             if ( 'properties' in options){
                 var newProps = options['properties']
@@ -324,9 +285,16 @@ Item{
 
                             propertyContainer.valueContainer = childObjectContainer
                             if ( propPalette ){
-                                childObjectContainer.expandPalette(propPalette)
+                                paletteControls.expandPalette(propPalette,
+                                                              ef,
+                                                              childObjectContainer.editor,
+                                                              paletteBoxGroup,
+                                                              childObjectContainer)
                             } else {
-                                childObjectContainer.expandDefaultPalette()
+                                paletteControls.expandDefaultPalette(ef,
+                                                                     editor,
+                                                                     childObjectContainer.paletteGroup,
+                                                                     childObjectContainer)
                             }
                             propertyContainer.paletteAddButtonVisible = false
 
@@ -335,9 +303,15 @@ Item{
                             propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
                             propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
                             if ( propPalette ){
-                                propertyContainer.expandPalette(propPalette)
+                                paletteControls.expandPalette(propPalette,
+                                                              ef,
+                                                              objectContainer.editor,
+                                                              propertyContainer.valueContainer)
+
                             } else {
-                                propertyContainer.expandDefaultPalette()
+                                paletteControls.expandDefaultPalette(ef,
+                                                                     editor,
+                                                                     propertyContainer.valueContainer)
                             }
                         }
 
@@ -525,38 +499,15 @@ Item{
                             paletteHeaderList.model = null
 
                             var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
+                            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
 
-                            if (palette.type === "qml/Object")
-                            {
-                                palette.documentHandler = editor.documentHandler
-                                palette.editor = editor
-                                editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
-                                palette.editingFragment = editingFragment
-                            }
+                            var paletteBox = paletteControls.addPalette(palette,
+                                                                        editingFragment,
+                                                                        editor,
+                                                                        paletteGroup,
+                                                                        root)
 
-                            if ( palette.item ){
-                                var newPaletteBox = objectContainer.paletteContainerFactory.createObject(paletteGroup)
-                                palette.item.x = 2
-                                palette.item.y = 2
-
-                                newPaletteBox.child = palette.item
-                                newPaletteBox.palette = palette
-
-                                newPaletteBox.name = palette.name
-                                newPaletteBox.type = palette.type
-                                newPaletteBox.moveEnabledSet = false
-                                newPaletteBox.documentHandler = editor.documentHandler
-                                newPaletteBox.cursorRectangle = paletteGroup.cursorRectangle
-                                newPaletteBox.editorPosition = paletteGroup.editorPosition
-                                newPaletteBox.paletteContainerFactory = function(arg){
-                                    return objectContainer.paletteContainerFactory.createObject(arg)
-                                }
-
-                                if (compact) expand()
-                            } else {
-                                objectContainer.expandOptions(palette)
-                            }
-
+                            if (paletteBox) paletteBox.moveEnabledSet = false
                         }
                     }
                 }

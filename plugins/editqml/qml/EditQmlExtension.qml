@@ -89,23 +89,21 @@ LiveExtension{
             editorBox.border.width = 1
             editorBox.border.color = "#141c25"
 
-            var paletteBox = root.paletteContainerFactory.createObject(paletteGroup)
 
+
+            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+            var paletteBox = paletteControls.addPalette(palette,
+                                                        ef,
+                                                        editor,
+                                                        paletteGroup)
             palette.item.x = 5
             palette.item.y = 7
-
-            paletteBox.child = palette.item
-            paletteBox.palette = palette
-
-            paletteBox.title = 'Edit'
-            paletteBox.titleLeftMargin = 10
-            paletteBox.paletteSwapVisible = false
-            paletteBox.paletteAddVisible = false
-            paletteBox.documentHandler = editor.documentHandler
-            paletteBox.cursorRectangle = rect
-            paletteBox.editorPosition = cursorCoords
-            paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
-
+            if (paletteBox){
+                paletteBox.title = 'Edit'
+                paletteBox.titleLeftMargin = 10
+                paletteBox.paletteSwapVisible = false
+                paletteBox.paletteAddVisible = false
+            }
             editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
             ef.incrementRefCount()
         }
@@ -175,30 +173,15 @@ LiveExtension{
 
         if ( palette || !forAnObject ){
 
-            if ( palette.item ){
-                var paletteBox = root.paletteContainerFactory.createObject(paletteBoxGroup)
-                palette.item.x = 2
-                palette.item.y = 2
-                paletteBox.documentHandler = editor.documentHandler
+            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+            var paletteBox = paletteControls.addPalette(palette,
+                                                        ef,
+                                                        editor,
+                                                        paletteBoxGroup)
 
-                if (palette.type === "qml/Object")
-                {
-                    palette.documentHandler = editor.documentHandler
-                    palette.editor = editor
-                    editor.documentHandler.codeHandler.populateNestedObjectsForFragment(ef)
-                    palette.editingFragment = ef
-                }
+            if (paletteBox) paletteBox.moveEnabledSet = false
 
-                paletteBox.child = palette.item
-                paletteBox.palette = palette
 
-                paletteBox.name = palette.name
-                paletteBox.type = palette.type
-                paletteBox.moveEnabledSet = false
-                paletteBox.cursorRectangle = rect
-                paletteBox.editorPosition = cursorCoords
-                paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
-            }
         }
 
         codeHandler.frameEdit(editorBox, ef)
@@ -244,20 +227,15 @@ LiveExtension{
             editorBox.border.color = "#141c25"
         }
 
-        var paletteBox = root.paletteContainerFactory.createObject(paletteBoxGroup)
+        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+        var paletteBox = paletteControls.addPalette(palette,
+                                                    ef,
+                                                    editor,
+                                                    paletteBoxGroup)
+
 
         palette.item.x = 5
         palette.item.y = 7
-
-        paletteBox.child = palette.item
-        paletteBox.palette = palette
-
-        paletteBox.name = palette.name
-        paletteBox.type = palette.type
-        paletteBox.documentHandler = editor.documentHandler
-        paletteBox.cursorRectangle = rect
-        paletteBox.editorPosition = cursorCoords
-        paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
 
         editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
     }

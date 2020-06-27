@@ -45,37 +45,6 @@ Item{
         objectContainer.recalculateContentWidth()
     }
 
-    function expandPalette(paletteName){
-        var palette = editor.documentHandler.codeHandler.expand(editingFragment, {
-            "palettes" : [paletteName]
-        })
-
-        var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
-
-        palette.item.x = 5
-        palette.item.y = 2
-
-        newPaletteBox.child = palette.item
-        newPaletteBox.palette = palette
-
-        newPaletteBox.name = palette.name
-        newPaletteBox.type = palette.type
-        newPaletteBox.moveEnabledSet = false
-        newPaletteBox.documentHandler = propertyContainer.editor.documentHandler
-        newPaletteBox.cursorRectangle = propertyContainer.editor.getCursorRectangle()
-        newPaletteBox.editorPosition = propertyContainer.editor.cursorWindowCoords()
-        newPaletteBox.paletteContainerFactory = function(arg){
-            return parent.paletteContainerFactory.createObject(arg)
-        }
-    }
-
-    function expandDefaultPalette(){
-        var defaultPaletteName = editor.documentHandler.codeHandler.defaultPalette(editingFragment)
-        if ( defaultPaletteName.length ){
-            expandPalette(defaultPaletteName)
-        }
-    }
-
     Rectangle{
         id: propertyContainerLabel
         anchors.left: parent.left
@@ -134,25 +103,8 @@ Item{
                                  propertyContainer.valueContainer.objectName === 'paletteGroup' )
                             {
                                 var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-
-                                var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
-
-                                palette.item.x = 5
-                                palette.item.y = 2
-
-                                newPaletteBox.child = palette.item
-                                newPaletteBox.palette = palette
-                                newPaletteBox.moveEnabledSet = false
-
-                                newPaletteBox.name = palette.name
-                                newPaletteBox.type = palette.type
-                                newPaletteBox.documentHandler = documentHandler
-                                newPaletteBox.cursorRectangle = propertyContainer.editor.getCursorRectangle()
-                                newPaletteBox.editorPosition = editor.cursorWindowCoords()
-                                newPaletteBox.paletteContainerFactory = function(arg){
-                                    return propertyContainer.paletteContainerFactory.createObject(arg)
-                                }
-
+                                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                                paletteControls.addPalette(palette, editingFragment, editor, propertyContainer.valueContainer)
                             }
 
                         }

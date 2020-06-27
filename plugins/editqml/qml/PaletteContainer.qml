@@ -117,21 +117,18 @@ Item{
                     var editorBox = paletteGroup.parent
 
                     var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-                    var newPaletteBox = paletteContainer.paletteContainerFactory(paletteGroup)
 
-                    palette.item.x = 2
-                    palette.item.y = 2
+                    var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
 
-                    newPaletteBox.child = palette.item
-                    newPaletteBox.palette = palette
+                    var ed = documentHandler
+                    while (ed.objectName !== "editorType") ed = ed.parent
 
-                    newPaletteBox.name = palette.name
-                    newPaletteBox.type = palette.type
-                    newPaletteBox.moveEnabled = paletteContainer.moveEnabledGet
-                    newPaletteBox.documentHandler = documentHandler
-                    newPaletteBox.cursorRectangle = paletteContainer.cursorRectangle
-                    newPaletteBox.editorPosition = paletteContainer.editorPosition
-                    newPaletteBox.paletteContainerFactory = paletteContainer.paletteContainerFactory
+                    var paletteBox = paletteControls.addPalette(palette,
+                                                                editingFragment,
+                                                                ed,
+                                                                paletteGroup)
+
+                    if (paletteBox) paletteBox.moveEnabled = paletteContainer.moveEnabledGet
 
                     if (swap){
                         paletteContainer.parent = null

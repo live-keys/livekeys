@@ -90,23 +90,15 @@ Item{
                             {
                                 var palette = documentHandler.codeHandler.openPalette(propertyItem.editingFragment, palettes, index)
 
-                                var newPaletteBox = paletteContainerFactory.createObject(paletteContainer)
+                                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                                var paletteBox = paletteControls.addPalette(palette,
+                                                                            editingFragment,
+                                                                            editor,
+                                                                            paletteContainer)
+                                if (paletteBox){
+                                    paletteBox.moveEnabledSet = false
+                                    paletteBox.width = Qt.binding(function(){ return paletteContainer.width })
 
-                                palette.item.x = 5
-                                palette.item.y = 2
-
-                                newPaletteBox.child = palette.item
-                                newPaletteBox.palette = palette
-                                newPaletteBox.moveEnabledSet = false
-                                newPaletteBox.width = Qt.binding(function(){ return paletteContainer.width })
-
-                                newPaletteBox.name = palette.name
-                                newPaletteBox.type = palette.type
-                                newPaletteBox.documentHandler = documentHandler
-                                newPaletteBox.cursorRectangle = editor.getCursorRectangle()
-                                newPaletteBox.editorPosition = editor.cursorWindowCoords()
-                                newPaletteBox.paletteContainerFactory = function(arg){
-                                    return propertyContainer.paletteContainerFactory.createObject(arg)
                                 }
 
                             }
