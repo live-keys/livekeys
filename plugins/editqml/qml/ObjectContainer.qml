@@ -135,33 +135,15 @@ Item{
 
         function addObjectFragmentToContainer(ef){
             if (!ef) return
-            var childObjectContainer = objectContainerFactory.createObject(container)
-            childObjectContainer.editor = objectContainer.editor
-            childObjectContainer.editingFragment = ef
-            childObjectContainer.title = ef.typeName()
-            if (ef.objectId())
-                childObjectContainer.title = ef.typeName() + "#" + ef.objectId()
+
+            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+            var childObjectContainer =
+                    paletteControls.addChildObjectContainer(root, ef)
+
             childObjectContainer.x = 20
             childObjectContainer.y = 10
 
-            childObjectContainer.parentObjectContainer = root
-
-            var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
-            paletteBoxGroup.editingFragment = ef
-            paletteBoxGroup.codeHandler = editor.documentHandler.codeHandler
-            ef.visualParent = paletteBoxGroup
-
-            childObjectContainer.paletteGroup = paletteBoxGroup
-            paletteBoxGroup.x = 5
-            paletteBoxGroup.y = 10
-
             ef.incrementRefCount()
-
-            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-            paletteControls.expandDefaultPalette(ef,
-                                                 editor,
-                                                 childObjectContainer.paletteGroup,
-                                                 childObjectContainer)
         }
 
         function addPropertyFragmentToContainer(ef){
@@ -183,41 +165,16 @@ Item{
 
 
             if ( codeHandler.isForAnObject(ef) ){
-                propertyContainer.isAnObject = true
-                var childObjectContainer = objectContainerFactory.createObject(container)
-                propertyContainer.childObjectContainer = childObjectContainer
-
-                childObjectContainer.isForProperty = true
-                childObjectContainer.parentObjectContainer = root
-
-                childObjectContainer.editor = objectContainer.editor
-                childObjectContainer.editingFragment = ef
-                childObjectContainer.title = ef.typeName()
-
-                var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
-                paletteBoxGroup.editingFragment = ef
-                paletteBoxGroup.codeHandler = codeHandler
-                ef.visualParent = paletteBoxGroup
-
-                childObjectContainer.paletteGroup = paletteBoxGroup
-                paletteBoxGroup.x = 2
-
-                propertyContainer.valueContainer = childObjectContainer
                 var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-                paletteControls.expandDefaultPalette(ef,
-                                                     editor,
-                                                     childObjectContainer.paletteGroup,
-                                                     childObjectContainer)
-
-                propertyContainer.paletteAddButtonVisible = false
-
+                paletteControls.addChildObjectContainer(root, ef, propertyContainer)
             } else {
+                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
 
                 propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
                 propertyContainer.valueContainer.editingFragment = ef
                 propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
                 paletteControls.expandDefaultPalette(ef,
-                                                     editor,
+                                                     objectContainer.editor,
                                                      propertyContainer.valueContainer)
 
             }
@@ -267,36 +224,7 @@ Item{
 
 
                         if ( codeHandler.isForAnObject(ef) ){
-
-                            var childObjectContainer = objectContainerFactory.createObject(container)
-                            childObjectContainer.parentObjectContainer = root
-
-                            childObjectContainer.editor = objectContainer.editor
-                            childObjectContainer.editingFragment = ef
-                            childObjectContainer.title = propType
-
-                            var paletteBoxGroup = objectContainer.paletteGroupFactory.createObject(childObjectContainer.groupsContainer)
-                            paletteBoxGroup.editingFragment = ef
-                            paletteBoxGroup.codeHandler = codeHandler
-                            ef.visualParent = paletteBoxGroup
-
-                            childObjectContainer.paletteGroup = paletteBoxGroup
-                            paletteBoxGroup.x = 2
-
-                            propertyContainer.valueContainer = childObjectContainer
-                            if ( propPalette ){
-                                paletteControls.expandPalette(propPalette,
-                                                              ef,
-                                                              childObjectContainer.editor,
-                                                              paletteBoxGroup,
-                                                              childObjectContainer)
-                            } else {
-                                paletteControls.expandDefaultPalette(ef,
-                                                                     editor,
-                                                                     childObjectContainer.paletteGroup,
-                                                                     childObjectContainer)
-                            }
-                            propertyContainer.paletteAddButtonVisible = false
+                            paletteControls.addChildObjectContainer(root, ef, propertyContainer, propPalette)
 
                         } else {
                             propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()

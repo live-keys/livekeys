@@ -99,4 +99,49 @@ QtObject{
         if (objectRoot) objectRoot.expandOptions(palette)
     }
 
+    function addChildObjectContainer(parentObjectContainer, ef, propertyContainer, propPalette){
+        if (propertyContainer)
+            propertyContainer.isAnObject = true
+
+        var childObjectContainer = createObjectContainer(parentObjectContainer.groupsContainer)
+
+        if (propertyContainer){
+            propertyContainer.childObjectContainer = childObjectContainer
+            childObjectContainer.isForProperty = true
+        }
+        childObjectContainer.parentObjectContainer = parentObjectContainer
+
+        childObjectContainer.editor = parentObjectContainer.editor
+        childObjectContainer.editingFragment = ef
+        childObjectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
+
+        var paletteBoxGroup = createPaletteGroup(childObjectContainer.groupsContainer)
+        paletteBoxGroup.editingFragment = ef
+        paletteBoxGroup.codeHandler = parentObjectContainer.editor.documentHandler.codeHandler
+        ef.visualParent = paletteBoxGroup
+        childObjectContainer.paletteGroup = paletteBoxGroup
+
+        paletteBoxGroup.x = 5
+        paletteBoxGroup.y = 10
+
+        if (propertyContainer)
+            propertyContainer.valueContainer = childObjectContainer
+        if ( propPalette ){
+            expandPalette(propPalette,
+                          ef,
+                          childObjectContainer.editor,
+                          paletteBoxGroup,
+                          childObjectContainer)
+        } else {
+            expandDefaultPalette(ef,
+                                 childObjectContainer.editor,
+                                 childObjectContainer.paletteGroup,
+                                 childObjectContainer)
+        }
+
+        if (propertyContainer)
+            propertyContainer.paletteAddButtonVisible = false
+
+        return childObjectContainer
+    }
 }
