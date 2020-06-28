@@ -197,7 +197,23 @@ namespace{
                 } else if ( prop.propertyTypeCategory() == QQmlProperty::List ){
                     QQmlListReference ppref = qvariant_cast<QQmlListReference>(prop.read());
                     if ( ppref.canAt() && ppref.canCount() && ppref.count() > in->index ){
-                        return traversePath(path, r, n->child, ppref.at(in->index));
+                        QObject* parent = ppref.object();
+
+                        // create correct order for list reference
+                        QObjectList ordered;
+
+                        for (auto child: parent->children())
+                        {
+                            bool found = false;
+                            for (int i = 0; i < ppref.count(); ++i)
+                                if (child == ppref.at(i)){
+                                    found = true;
+                                    break;
+                                }
+                            if (found) ordered.push_back(child);
+                        }
+
+                        return traversePath(path, r, n->child, ordered[in->index]);
                     } else
                         return QmlBindingChannel::Ptr(nullptr);
                 }
