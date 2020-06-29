@@ -10,7 +10,27 @@ QtObject{
         property Component paletteGroup: Component{ PaletteGroup{} }
         property Component objectContainer: Component{ ObjectContainer{} }
         property Component paletteContainer: Component{ PaletteContainer{} }
-        property Component paletteListView: Component{ PaletteListView{} }
+        property Component paletteListView: Component{
+            PaletteListView{
+                visible: model ? true : false
+                color: "#0a141c"
+                selectionColor: "#0d2639"
+                fontSize: 10
+                fontFamily: "Open Sans, sans-serif"
+                onFocusChanged : if ( !focus ) model = null
+                z: 2000
+
+                property var selectedHandler : function(){}
+                property var cancelledHandler : function(index){}
+
+                onPaletteSelected: selectedHandler(index)
+                onCancelled : cancelledHandler()
+
+                onParentChanged: {
+                    if (parent) anchors.top = parent.top
+                }
+            }
+        }
 
     }
 

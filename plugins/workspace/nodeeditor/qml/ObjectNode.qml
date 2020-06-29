@@ -275,16 +275,21 @@ Qan.NodeItem{
                         root.selected = false
                         var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
                         if (palettes.size() ){
-                            paletteHeaderList.forceActiveFocus()
-                            paletteHeaderList.model = palettes
-                            paletteHeaderList.cancelledHandler = function(){
-                                paletteHeaderList.focus = false
-                                paletteHeaderList.model = null
-                            }
-                            paletteHeaderList.selectedHandler = function(index){
-                                paletteHeaderList.focus = false
-                                paletteHeaderList.model = null
+                            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                            var paletteList = paletteControls.createPaletteListBox(wrapper)
+                            paletteList.forceActiveFocus()
+                            paletteList.model = palettes
 
+                            paletteList.anchors.topMargin = nodeTitle.height
+                            paletteList.width = Qt.binding(function(){ return parent.width })
+                            paletteList.cancelledHandler = function(){
+                                paletteList.focus = false
+                                paletteList.model = null
+                                paletteList.destroy()
+                            }
+                            paletteList.selectedHandler = function(index){
+                                paletteList.focus = false
+                                paletteList.model = null
                                 var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
 
                                 if (palette.type === "qml/Object")
@@ -302,6 +307,9 @@ Qan.NodeItem{
                                                                             editor,
                                                                             paletteContainer)
                                 if (paletteBox) paletteBox.moveEnabledSet = false
+
+
+                                paletteList.destroy()
                             }
                         }
 
@@ -323,25 +331,6 @@ Qan.NodeItem{
             anchors.top: parent.top
             anchors.topMargin: nodeTitle.height
             id: paletteContainer
-        }
-
-        PaletteListView{
-            id: paletteHeaderList
-            visible: model ? true:false
-            anchors.top: parent.top
-            anchors.topMargin: nodeTitle.height
-            width: parent.width
-            color: "#0a141c"
-            selectionColor: "#0d2639"
-            fontSize: 10
-            fontFamily: "Open Sans, sans-serif"
-            onFocusChanged : if ( !focus ) model = null
-
-            property var selectedHandler : function(){}
-            property var cancelledHandler : function(index){}
-
-            onPaletteSelected: selectedHandler(index)
-            onCancelled : cancelledHandler()
         }
     }
 

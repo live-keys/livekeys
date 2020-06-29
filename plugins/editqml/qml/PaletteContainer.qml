@@ -103,15 +103,20 @@ Item{
 
             var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
             if (palettes.size() ){
-                paletteHeaderList.forceActiveFocus()
-                paletteHeaderList.model = palettes
-                paletteHeaderList.cancelledHandler = function(){
-                    paletteHeaderList.focus = false
-                    paletteHeaderList.model = null
+                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                var paletteList = paletteControls.createPaletteListView(paletteContainer)
+                paletteList.forceActiveFocus()
+                paletteList.model = palettes
+                paletteList.anchors.topMargin = 24
+                paletteList.width = Qt.binding(function() { return paletteContainer.width })
+                paletteList.cancelledHandler = function(){
+                    paletteList.focus = false
+                    paletteList.model = null
+                    paletteList.destroy()
                 }
-                paletteHeaderList.selectedHandler = function(index){
-                    paletteHeaderList.focus = false
-                    paletteHeaderList.model = null
+                paletteList.selectedHandler = function(index){
+                    paletteList.focus = false
+                    paletteList.model = null
 
                     var paletteGroup = paletteContainer.parent;
                     var editorBox = paletteGroup.parent
@@ -135,6 +140,8 @@ Item{
                         paletteContainer.documentHandler.codeHandler.removePalette(paletteContainer.palette)
                         paletteContainer.destroy()
                     }
+
+                    paletteList.destroy()
                 }
             }
         }
@@ -328,24 +335,6 @@ Item{
         children: parent.child ? [parent.child] : []
     }
 
-    PaletteListView{
-        id: paletteHeaderList
-        visible: model ? true:false
-        anchors.top: parent.top
-        anchors.topMargin: 24
-        width: parent.width
-        color: "#0a141c"
-        selectionColor: "#0d2639"
-        fontSize: 10
-        fontFamily: "Open Sans, sans-serif"
-        onFocusChanged : if ( !focus ) model = null
-
-        property var selectedHandler : function(){}
-        property var cancelledHandler : function(index){}
-
-        onPaletteSelected: selectedHandler(index)
-        onCancelled : cancelledHandler()
-    }
 
     PaletteConnection{
         id: paletteConnection

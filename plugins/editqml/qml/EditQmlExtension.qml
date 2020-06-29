@@ -45,7 +45,6 @@ LiveExtension{
     property Component paletteGroupFactory: Component{ PaletteGroup{} }
     property Component objectContainerFactory: Component{ ObjectContainer{} }
     property Component paletteContainerFactory: Component{ PaletteContainer{} }
-    property Component paletteListFactory : Component{ PaletteListView{} }
 
     property int rootPosition: -1
 
@@ -257,7 +256,8 @@ LiveExtension{
                 root.loadPalette(editor, palettes, 0)
             } else {
                 //Palette list box
-                var palList      = paletteListFactory.createObject()
+
+                var palList      = globals.paletteControls.createPaletteListView()
                 var palListBox   = lk.layers.editor.environment.createEditorBox(
                     palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
                 )
@@ -303,7 +303,7 @@ LiveExtension{
                 root.shapePalette(editor, palettes, 0)
             } else {
                 //Palette list box
-                var palList      = paletteListFactory.createObject()
+                var palList      = globals.paletteControls.createPaletteListView()
                 var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
                 palListBox.color = 'transparent'
                 palList.model    = palettes
@@ -474,7 +474,7 @@ LiveExtension{
                 ef.incrementRefCount()
                 codeHandler.openBinding(ef, palettes, 0)
             } else {
-                var palList      = paletteListFactory.createObject()
+                var palList      = globals.paletteControls.createPaletteListView()
                 var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
                 palListBox.color = 'transparent'
                 palList.model = palettes

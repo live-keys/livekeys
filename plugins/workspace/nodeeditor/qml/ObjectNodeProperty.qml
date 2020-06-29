@@ -72,16 +72,22 @@ Item{
                         propertyItem.editingFragment.position(), true)
 
                     if (palettes.size() ){
-                        paletteHeaderList.forceActiveFocus()
-                        paletteHeaderList.model = palettes
+                        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                        var paletteList = paletteControls.createPaletteListView(propertyItem)
+                        paletteList.forceActiveFocus()
+                        paletteList.model = palettes
 
-                        paletteHeaderList.cancelledHandler = function(){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
+                        paletteList.anchors.topMargin = propertyTitle.height
+                        paletteList.width = Qt.binding(function(){return propertyItem.width})
+
+                        paletteList.cancelledHandler = function(){
+                            paletteList.focus = false
+                            paletteList.model = null
+                            paletteList.destroy()
                         }
-                        paletteHeaderList.selectedHandler = function(index){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
+                        paletteList.selectedHandler = function(index){
+                            paletteList.focus = false
+                            paletteList.model = null
 
 
 
@@ -102,6 +108,8 @@ Item{
                                 }
 
                             }
+
+                            paletteList.destroy()
 
 
                         }
@@ -159,25 +167,6 @@ Item{
         anchors.top: parent.top
         anchors.topMargin: propertyTitle.height
         id: paletteContainer
-    }
-
-    PaletteListView{
-        id: paletteHeaderList
-        visible: model ? true:false
-        anchors.top: parent.top
-        anchors.topMargin: propertyTitle.height
-        width: parent.width
-        color: "#0a141c"
-        selectionColor: "#0d2639"
-        fontSize: 10
-        fontFamily: "Open Sans, sans-serif"
-        onFocusChanged : if ( !focus ) model = null
-
-        property var selectedHandler : function(){}
-        property var cancelledHandler : function(index){}
-
-        onPaletteSelected: selectedHandler(index)
-        onCancelled : cancelledHandler()
     }
     
     Connections {

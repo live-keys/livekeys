@@ -416,15 +416,20 @@ Item{
 
                     var palettes = editor.documentHandler.codeHandler.findPalettes(editingFragment.position(), true, true)
                     if (palettes.size() ){
-                        paletteHeaderList.forceActiveFocus()
-                        paletteHeaderList.model = palettes
-                        paletteHeaderList.cancelledHandler = function(){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
+                        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                        var paletteList = paletteControls.createPaletteListView(objectContainer)
+                        paletteList.forceActiveFocus()
+                        paletteList.model = palettes
+                        paletteList.width = 250
+                        paletteList.anchors.topMargin = titleHeight + topSpacing
+                        paletteList.cancelledHandler = function(){
+                            paletteList.focus = false
+                            paletteList.model = null
+                            paletteList.destroy()
                         }
-                        paletteHeaderList.selectedHandler = function(index){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
+                        paletteList.selectedHandler = function(index){
+                            paletteList.focus = false
+                            paletteList.model = null
 
                             var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
                             var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
@@ -436,6 +441,8 @@ Item{
                                                                         root)
 
                             if (paletteBox) paletteBox.moveEnabledSet = false
+                            paletteList.destroy()
+
                         }
                     }
                 }
@@ -570,27 +577,6 @@ Item{
                 }
             }
         }
-
-        PaletteListView{
-            id: paletteHeaderList
-            visible: model ? true : false
-            anchors.top: parent.top
-            anchors.topMargin: titleHeight + topSpacing
-            width: 250
-            color: "#0a141c"
-            selectionColor: "#0d2639"
-            fontSize: 10
-            fontFamily: "Open Sans, sans-serif"
-            onFocusChanged : if ( !focus ) model = null
-            z: 2000
-
-            property var selectedHandler : function(){}
-            property var cancelledHandler : function(index){}
-
-            onPaletteSelected: selectedHandler(index)
-            onCancelled : cancelledHandler()
-        }
-
 
         PaletteConnection{
             id: paletteConnection
