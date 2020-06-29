@@ -57,7 +57,7 @@ Item{
     Rectangle{
         id: paletteBoxHeader
         height: compact && child
-                    ? child.height
+                    ? child.height + 10
                     : normalHeaderHeight
         width: !compact && child
                     ? (paletteContainer.parent ? paletteContainer.parent.width : paletteContainer.width) + 10
@@ -262,7 +262,7 @@ Item{
         id: rightButtons
         color: paletteContainer.paletteStyle ? paletteContainer.paletteStyle.paletteHeaderColor : 'black'
         width: 35
-        height: 24
+        height: child ? child.height: 24
         radius: 2
 
         anchors.top: parent.top
@@ -326,6 +326,8 @@ Item{
         anchors.top: compact? parent.top : paletteBoxHeader.top
         anchors.topMargin: compact? 0 : paletteBoxHeader.height
         anchors.left: parent.left
+        width: parent.child ? parent.child.width: 0
+        height: parent.child ? parent.child.height: 0
         children: parent.child ? [parent.child] : []
     }
 

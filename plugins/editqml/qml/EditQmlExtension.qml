@@ -139,7 +139,6 @@ LiveExtension{
         ef.incrementRefCount()
         var editorBox = ef.visualParent ? ef.visualParent.parent : null
         var paletteBoxGroup = editorBox ? editorBox.child : null
-        var forAnObject = codeHandler.isForAnObject(ef)
 
         if ( paletteBoxGroup === null ){
             editorBox = lk.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
@@ -351,6 +350,20 @@ LiveExtension{
         }
     }
 
+    function shapeRootObject(editor, codeHandler){
+        var paletteRoot = codeHandler.findPalettes(rootPosition, true)
+        if (paletteRoot){
+            root.shapePalette(editor, paletteRoot, 0)
+            editor.editor.rootShaped = true
+        }
+        else {
+            editor.startLoadingMode()
+            var shapeTrigger = shapeAllTrigger.createObject()
+            shapeTrigger.target = codeHandler
+            shapeTrigger.editor = editor
+        }
+    }
+
     function shapeAll(){
         var activePane = lk.layers.workspace.panes.activePane
         if ( activePane.objectName !== 'editor' ||
@@ -367,29 +380,27 @@ LiveExtension{
         }
 
         var imports = codeHandler.importsModel()
-        var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
-        var paletteImports = codeHandler.findPalettes(importsPosition, true)
-        if (paletteImports) root.shapePalette(editor, paletteImports, 0)
-
+        if (imports.rowCount() > 0){
+            var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
+            var paletteImports = codeHandler.findPalettes(importsPosition, true)
+            if (paletteImports) root.shapePalette(editor, paletteImports, 0)
+        }
         rootPosition = codeHandler.findRootPosition()
 
         if ( rootPosition >= 0){
-            var paletteRoot = codeHandler.findPalettes(rootPosition, true)
-            if (paletteRoot){
-                root.shapePalette(editor, paletteRoot, 0)
-                editor.editor.rootShaped = true
-            }
-            else {
-                editor.startLoadingMode()
-                var shapeTrigger = shapeAllTrigger.createObject()
-                shapeTrigger.target = codeHandler
-                shapeTrigger.editor = editor
+            shapeRootObject(editor, codeHandler)
+        } else {
+            editor.editor.addRootButton.visible = true
+            editor.editor.addRootButton.callback = function(rootPosition){
+                root.rootPosition = rootPosition
+                shapeRootObject(editor, codeHandler)
             }
         }
     }
 
     property Component shapeAllTrigger: Component {
         Connections {
+            id: shapeTrigger
             target: null
             property var editor: null
             ignoreUnknownSignals: true
@@ -403,6 +414,7 @@ LiveExtension{
                     rootPosition = -1
 
                     editor.editor.rootShaped = true
+                    shapeTrigger.destroy()
                 }
             }
         }

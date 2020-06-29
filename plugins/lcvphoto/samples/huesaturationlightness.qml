@@ -14,7 +14,8 @@ Grid{
     }
     
     HueSaturationLightness{
-        input: src.output
+        id: hueSaturationLightness
+        input: src.output.cloneMat()
         hue: hsls.hue
         saturation: hsls.saturation
         lightness: hsls.lightness
@@ -22,9 +23,10 @@ Grid{
 
     HueSaturationLightnessSliders{
         id: hsls
-        hue: 50
-        saturation: 130
-        lightness: 80
+    }
+    
+    ImageView{
+        image: hueSaturationLightness.result
     }
 
 }

@@ -3,6 +3,7 @@
     "package" : ".",
     "palettes" : {
         "palettes/LevelsPalette.qml" : "qml/lcvphoto#Levels",
-        "palettes/BrightnessAndContrastPalette.qml": "qml/lcvphoto#BrightnessAndContrast"
+        "palettes/BrightnessAndContrastPalette.qml": "qml/lcvphoto#BrightnessAndContrast",
+        "palettes/HueSaturationLightnessPalette.qml": "qml/lcvphoto#HueSaturationLightness"
     }
 }

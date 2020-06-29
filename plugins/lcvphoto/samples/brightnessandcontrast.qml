@@ -14,9 +14,14 @@ Grid{
     }
     
     BrightnessAndContrast{
-        input : src.output
+        id: brightnessAndContrast
+        input : src.output.cloneMat()
         brightness: -19
         contrast: 1.53
+    }
+    
+    ImageView{
+        image: brightnessAndContrast.result
     }
     
 }

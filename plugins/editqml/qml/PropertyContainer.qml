@@ -23,6 +23,9 @@ Item{
 
     property alias paletteAddButtonVisible: paletteAddButton.visible
 
+    property bool isAnObject: false
+    property var childObjectContainer: null
+
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
         onAboutToBeRemoved : {
@@ -34,6 +37,14 @@ Item{
     height: container.height > 35 ? container.height : 35
     z: 3000
 
+    onWidthChanged: {
+        if (!propertyContainer || !propertyContainer.parent || !propertyContainer.parent.parent ||
+                !propertyContainer.parent.parent.parent) return
+        var objectContainer = propertyContainer.parent.parent.parent
+
+        objectContainer.recalculateContentWidth()
+    }
+
     function expandPalette(paletteName){
         var palette = editor.documentHandler.codeHandler.expand(editingFragment, {
             "palettes" : [paletteName]
@@ -41,7 +52,7 @@ Item{
 
         var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
 
-        palette.item.x = 2
+        palette.item.x = 5
         palette.item.y = 2
 
         newPaletteBox.child = palette.item
@@ -108,7 +119,7 @@ Item{
                 onClicked: {
                     var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
                         editingFragment.position(), true)
-                    if (palettes && palettes.size() ){
+                    if (palettes.size() ){
                         paletteHeaderList.forceActiveFocus()
                         paletteHeaderList.model = palettes
                         paletteHeaderList.cancelledHandler = function(){
@@ -126,7 +137,7 @@ Item{
 
                                 var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
 
-                                palette.item.x = 2
+                                palette.item.x = 5
                                 palette.item.y = 2
 
                                 newPaletteBox.child = palette.item

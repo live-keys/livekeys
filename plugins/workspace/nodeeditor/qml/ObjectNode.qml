@@ -36,6 +36,41 @@ Qan.NodeItem{
         }
     }
 
+    function addPropertyToNodeByName(name){
+        for (var i = 0; i < propertyNames.length; ++i){
+            if (propertyNames[i] === name){
+                return
+            }
+        }
+
+        var codeHandler = documentHandler.codeHandler
+
+        var position = editingFragment.valuePosition() +
+                       editingFragment.valueLength() - 1
+
+        var addContainer = codeHandler.getAddOptions(position)
+        if ( !addContainer )
+            return
+
+        addContainer.activeIndex = 0
+        addContainer.propertyModel.setFilter(name)
+        if (addContainer.propertyModel.rowCount() !== 1) return
+
+        var type = addContainer.propertyModel.data(addContainer.propertyModel.index(0, 0), 256 + 3/*QmlSuggestionModel.Type*/)
+
+        var ppos = codeHandler.addProperty(
+            addContainer.propertyModel.addPosition, addContainer.objectType, type, name, true
+        )
+
+        var ef = codeHandler.openNestedConnection(
+            editingFragment, ppos, project.appRoot()
+        )
+
+        if (ef) {
+            editingFragment.signalPropertyAdded(ef)
+        }
+    }
+
     property QtObject defaultStyle : QtObject{
         property color background: "#112"
         property double radius: 15

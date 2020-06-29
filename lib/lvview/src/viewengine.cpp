@@ -93,6 +93,7 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     , m_incubationController(new IncubationController)
     , m_packageGraph(nullptr)
 {
+    m_engine->setProperty("viewEngine", QVariant::fromValue(this));
     m_engine->setIncubationController(m_incubationController);
     m_engine->setOutputWarningsToStandardError(true);
     connect(m_engine, SIGNAL(warnings(QList<QQmlError>)), this, SLOT(engineWarnings(QList<QQmlError>)));
@@ -120,6 +121,7 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
 
 /** Default destructor */
 ViewEngine::~ViewEngine(){
+    m_engine->setProperty("viewEngine", QVariant());
     delete m_engineMutex;
     m_engine->deleteLater();
 }

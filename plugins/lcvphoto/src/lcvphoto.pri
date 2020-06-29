@@ -1,10 +1,7 @@
 HEADERS += \
     $$PWD/lcvphoto_plugin.h \
+    $$PWD/qadjustments.h \
     $$PWD/qdenoisetvl1.h \
-    $$PWD/qbrightnessandcontrast.h \
-    $$PWD/qhuesaturationlightness.h \
-    $$PWD/qlevels.h \
-    $$PWD/qautolevels.h \
     $$PWD/qalignmtb.h \
     $$PWD/qcalibratedebevec.h \
     $$PWD/qcalibraterobertson.h \
@@ -19,11 +16,8 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/lcvphoto_plugin.cpp \
+    $$PWD/qadjustments.cpp \
     $$PWD/qdenoisetvl1.cpp \
-    $$PWD/qbrightnessandcontrast.cpp \
-    $$PWD/qhuesaturationlightness.cpp \
-    $$PWD/qlevels.cpp \
-    $$PWD/qautolevels.cpp \
     $$PWD/qalignmtb.cpp \
     $$PWD/qcalibratedebevec.cpp \
     $$PWD/qcalibraterobertson.cpp \
