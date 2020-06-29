@@ -6,7 +6,7 @@ import workspace 1.0
 Theme{
     id: root
 
-    // Color Palette
+    // Color Scheme
 
     property QtObject colorScheme: QtObject{
 
