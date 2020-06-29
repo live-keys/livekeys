@@ -307,10 +307,6 @@ Qan.NodeItem{
             anchors.top: parent.top
             anchors.topMargin: nodeTitle.height
             width: parent.width
-            color: "#0a141c"
-            selectionColor: "#0d2639"
-            fontSize: 10
-            fontFamily: "Open Sans, sans-serif"
             onFocusChanged : if ( !focus ) model = null
 
             property var selectedHandler : function(){}

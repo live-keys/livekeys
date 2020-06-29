@@ -195,12 +195,10 @@ Item{
         anchors.top: parent.top
         anchors.topMargin: 15 + topMarginParam
         width: 250
-        color: "#0a141c"
-        selectionColor: "#0d2639"
-        fontSize: 10
-        fontFamily: "Open Sans, sans-serif"
         onFocusChanged : if ( !focus ) model = null
         z: 3000
+
+        style: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.selectableListView : defaultStyle
 
         property var selectedHandler : function(){}
         property var cancelledHandler : function(index){}

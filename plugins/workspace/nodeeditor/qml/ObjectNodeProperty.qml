@@ -175,10 +175,6 @@ Item{
         anchors.top: parent.top
         anchors.topMargin: propertyTitle.height
         width: parent.width
-        color: "#0a141c"
-        selectionColor: "#0d2639"
-        fontSize: 10
-        fontFamily: "Open Sans, sans-serif"
         onFocusChanged : if ( !focus ) model = null
 
         property var selectedHandler : function(){}

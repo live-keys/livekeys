@@ -650,15 +650,13 @@ Item{
             anchors.top: parent.top
             anchors.topMargin: titleHeight + topSpacing
             width: 250
-            color: "#0a141c"
-            selectionColor: "#0d2639"
-            fontSize: 10
-            fontFamily: "Open Sans, sans-serif"
             onFocusChanged : if ( !focus ) model = null
             z: 2000
 
             property var selectedHandler : function(){}
             property var cancelledHandler : function(index){}
+
+            style: objectContainer.paletteStyle.selectableListView
 
             onPaletteSelected: selectedHandler(index)
             onCancelled : cancelledHandler()
