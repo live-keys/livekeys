@@ -15,10 +15,11 @@ Item{
     property var editingFragment: null
     property var documentHandler: null
     property alias propertyTitle: propertyTitle
-    property Component paletteContainerFactory: Component{ PaletteContainer{} }
 
     property var isForObject: editingFragment && editingFragment.isForObject()
     property var editor: null
+
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     signal propertyToBeDestroyed(var name)
 
@@ -72,7 +73,6 @@ Item{
                         propertyItem.editingFragment.position(), true)
 
                     if (palettes.size() ){
-                        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
                         var paletteList = paletteControls.createPaletteListView(propertyItem)
                         paletteList.forceActiveFocus()
                         paletteList.model = palettes
@@ -89,14 +89,10 @@ Item{
                             paletteList.focus = false
                             paletteList.model = null
 
-
-
                             if ( paletteContainer &&
                                  paletteContainer.objectName === 'paletteGroup' )
                             {
                                 var palette = documentHandler.codeHandler.openPalette(propertyItem.editingFragment, palettes, index)
-
-                                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
                                 var paletteBox = paletteControls.addPalette(palette,
                                                                             editingFragment,
                                                                             editor,

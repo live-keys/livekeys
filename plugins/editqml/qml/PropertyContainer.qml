@@ -17,14 +17,12 @@ Item{
     property Item editor: null
     property Item valueContainer : null
 
-    property Component paletteGroupFactory : Component{ PaletteGroup{} }
-    property Component paletteContainerFactory: Component{ PaletteContainer{} }
-    property Component propertyContainerFactory: null
-
     property alias paletteAddButtonVisible: paletteAddButton.visible
 
     property bool isAnObject: false
     property var childObjectContainer: null
+
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
@@ -89,7 +87,6 @@ Item{
                     var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
                         editingFragment.position(), true)
                     if (palettes.size() ){
-                        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
                         var paletteList = paletteControls.createPaletteListView(propertyContainer)
                         paletteList.anchors.topMargin = 15 + topMarginParam
                         paletteList.width = 250
@@ -108,7 +105,6 @@ Item{
                                  propertyContainer.valueContainer.objectName === 'paletteGroup' )
                             {
                                 var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-                                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
                                 paletteControls.addPalette(palette, editingFragment, editor, propertyContainer.valueContainer)
                             }
                             paletteList.destroy()

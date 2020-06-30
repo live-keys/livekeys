@@ -10,10 +10,6 @@ Item{
     property alias paletteGroup: objectContainer.paletteGroup
     property alias groupsContainer: container
 
-    function createNewContainer(parent){
-        return objectContainerFactory.createObject(parent)
-    }
-
     function recalculateContentWidth(){
         var max = 0
         for (var i=0; i<groupsContainer.children.length; ++i)
@@ -53,11 +49,11 @@ Item{
     property alias titleHeight : objectContainer.titleHeight
     property alias compact: objectContainer.compact
     property alias topSpacing: objectContainer.topSpacing
+    property alias propertiesOpened: objectContainer.propertiesOpened
 
     property var parentObjectContainer: null
     property var isForProperty: false
-
-    property alias paletteGroupFactory: objectContainer.paletteGroupFactory
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     width: objectContainer.width
     height: objectContainer.pane ? 30 : objectContainer.height
@@ -108,11 +104,6 @@ Item{
         property Item pane : null
         property Item wrapper : root
 
-        property Component addBoxFactory: Component{ AddQmlBox{} }
-        property Component propertyContainerFactory: Component{ PropertyContainer{} }
-        property Component paletteContainerFactory: Component{ PaletteContainer{} }
-        property Component paletteGroupFactory : Component{ PaletteGroup{} }
-
         property int titleHeight: 30
         property bool compact: true
 
@@ -136,7 +127,6 @@ Item{
         function addObjectFragmentToContainer(ef){
             if (!ef) return
 
-            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
             var childObjectContainer =
                     paletteControls.addChildObjectContainer(root, ef)
 
@@ -149,43 +139,10 @@ Item{
         function addPropertyFragmentToContainer(ef){
             if (!ef) return
 
-            for (var i = 0; i < propertiesOpened.length; ++i)
-                if (propertiesOpened[i] === ef.identifier()) return
-
-            var codeHandler = objectContainer.editor.documentHandler.codeHandler
-
-            var propertyContainer = objectContainer.propertyContainerFactory.createObject(container)
-
-            propertyContainer.title = ef.identifier()
-            propertyContainer.documentHandler = objectContainer.editor.documentHandler
-            propertyContainer.propertyContainerFactory = objectContainer.propertyContainerFactory
-
-            propertyContainer.editor = objectContainer.editor
-            propertyContainer.editingFragment = ef
-
-
-            if ( codeHandler.isForAnObject(ef) ){
-                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-                paletteControls.addChildObjectContainer(root, ef, propertyContainer)
-            } else {
-                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-
-                propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
-                propertyContainer.valueContainer.editingFragment = ef
-                propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
-                paletteControls.expandDefaultPalette(ef,
-                                                     objectContainer.editor,
-                                                     propertyContainer.valueContainer)
-
-            }
-
-            objectContainer.propertiesOpened.push(ef.identifier())
-            ef.incrementRefCount()
+            paletteControls.addPropertyContainer(root, ef)
         }
         function expandOptions(options){
             var codeHandler = objectContainer.editor.documentHandler.codeHandler
-
-            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
 
             if ( 'properties' in options){
                 var newProps = options['properties']
@@ -211,46 +168,14 @@ Item{
                     )
 
                     if ( ef ){
-                        ef.incrementRefCount()
-                        var propertyContainer = objectContainer.propertyContainerFactory.createObject(container)
-                        container.sortChildren()
-
-                        propertyContainer.title = propName
-                        propertyContainer.documentHandler = objectContainer.editor.documentHandler
-                        propertyContainer.propertyContainerFactory = objectContainer.propertyContainerFactory
-
-                        propertyContainer.editor = objectContainer.editor
-                        propertyContainer.editingFragment = ef
-
-
-                        if ( codeHandler.isForAnObject(ef) ){
-                            paletteControls.addChildObjectContainer(root, ef, propertyContainer, propPalette)
-
-                        } else {
-                            propertyContainer.valueContainer = objectContainer.paletteGroupFactory.createObject()
-                            propertyContainer.valueContainer.editingFragment = objectContainer.editingFragment
-                            propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
-                            if ( propPalette ){
-                                paletteControls.expandPalette(propPalette,
-                                                              ef,
-                                                              objectContainer.editor,
-                                                              propertyContainer.valueContainer)
-
-                            } else {
-                                paletteControls.expandDefaultPalette(ef,
-                                                                     editor,
-                                                                     propertyContainer.valueContainer)
-                            }
-                        }
-
-                        propertiesOpened.push(propName)
+                        paletteControls.addPropertyContainer(root, ef, propPalette)
                     }
                     else {
                         lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-                        console.error("Error: Can't create a palette in a non-compiled program")
-                        return
+                        console.error("Error: Can't create a palette in a non-compiled program") // better message needed
                     }
 
+                    container.sortChildren()
                 }
 
                 if (compact)
@@ -416,7 +341,6 @@ Item{
 
                     var palettes = editor.documentHandler.codeHandler.findPalettes(editingFragment.position(), true, true)
                     if (palettes.size() ){
-                        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
                         var paletteList = paletteControls.createPaletteListView(objectContainer)
                         paletteList.forceActiveFocus()
                         paletteList.model = palettes
@@ -432,7 +356,6 @@ Item{
                             paletteList.model = null
 
                             var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-                            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
 
                             var paletteBox = paletteControls.addPalette(palette,
                                                                         editingFragment,
@@ -447,133 +370,7 @@ Item{
                     }
                 }
                 onCompose : {
-                    var codeHandler = objectContainer.editor.documentHandler.codeHandler
-
-                    var position =
-                        objectContainer.editingFragment.valuePosition() +
-                        objectContainer.editingFragment.valueLength() - 1
-
-                    var addContainer = codeHandler.getAddOptions(position)
-                    if ( !addContainer )
-                        return
-
-                    var addBoxItem = objectContainer.addBoxFactory.createObject()
-                    addBoxItem.addContainer = addContainer
-                    addBoxItem.codeQmlHandler = codeHandler
-
-                    addBoxItem.assignFocus()
-                    var oct = objectContainer.parent
-
-                    // capture y
-                    var octit = objectContainer
-                    var octY = 0
-                    while ( octit && octit.objectName !== 'editorBox' ){
-                        octY += octit.y
-                        octit = octit.parent
-                    }
-                    if ( octit.objectName === 'editorBox' ){
-                        octY += octit.y
-                    }
-
-                    var rect = Qt.rect(oct.x + 150, octY, oct.width, 25)
-                    var cursorCoords = objectContainer.editor.cursorWindowCoords()
-
-                    var addBox = lk.layers.editor.environment.createEditorBox(
-                        addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
-                    )
-
-                    addBox.color = 'transparent'
-                    addBoxItem.cancel = function(){
-                        addBoxItem.destroy()
-                        addBox.destroy()
-                    }
-                    addBoxItem.accept = function(type, data){
-                        if ( addBoxItem.activeIndex === 0 ){
-                            // ADDING PROPERTIES
-
-                            // check if property is opened already
-                            for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
-                                if (objectContainer.propertiesOpened[i] === data){
-                                    if (compact) expand()
-                                    addBox.destroy()
-                                    return
-                                }
-                            }
-
-                            if (compact) expand()
-
-                            var ppos = codeHandler.addProperty(
-                                objectContainer.editingFragment.valuePosition() + objectContainer.editingFragment.valueLength() - 1,
-                                objectContainer.editingFragment.typeName(),
-                                type,
-                                data,
-                                true
-                            )
-
-                            var ef = codeHandler.openNestedConnection(
-                                objectContainer.editingFragment, ppos
-                            )
-
-                            if (ef) {
-                                objectContainer.editingFragment.signalPropertyAdded(ef)
-                                container.sortChildren()
-
-                            }
-
-                            if (!ef) {
-                                lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-                                console.error("Error: Can't create a palette in a non-compiled program")
-                                return
-                            }
-                        } else if ( addBoxItem.activeIndex === 1 ){
-
-                            // ADDING OBJECT
-                            var opos = codeHandler.addItem(addContainer.itemModel.addPosition, addContainer.objectType, data)
-                            codeHandler.addItemToRuntime(objectContainer.editingFragment, data, project.appRoot())
-
-                            if (compact) expand()
-
-                            var ef = codeHandler.openNestedConnection(
-                                objectContainer.editingFragment, opos
-                            )
-
-                            if (ef) {
-                                objectContainer.editingFragment.signalObjectAdded(ef)
-                                container.sortChildren()
-                            }
-
-                        } else if ( addBoxItem.activeIndex === 2 ){
-
-                            // check if property is opened already
-                            for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
-                                if (objectContainer.propertiesOpened[i] === data){
-                                    if (compact) expand()
-                                    addBox.destroy()
-                                    return
-                                }
-                            }
-
-                            var ppos = codeHandler.addEvent(
-                                addContainer.eventModel.addPosition, addContainer.objectType, type, data
-                            )
-
-                            var ef = codeHandler.openNestedConnection(
-                                objectContainer.editingFragment, ppos
-                            )
-
-                            if (ef) {
-                                objectContainer.editingFragment.signalPropertyAdded(ef)
-                                container.sortChildren()
-
-                            }
-                            // TODO: Add event palette too
-                        }
-                        addBoxItem.destroy()
-                        addBox.destroy()
-                    }
-
-                    addBoxItem.assignFocus()
-                    lk.layers.workspace.panes.setActiveItem(addBox, objectContainer.editor)
+                    paletteControls.compose(objectContainer, false)
                 }
             }
         }

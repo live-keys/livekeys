@@ -36,7 +36,8 @@ Item{
     property double titleRightMargin : 50
 
     property DocumentHandler documentHandler : null
-    property var paletteContainerFactory : null
+
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     Component.onCompleted: {
         var paletteGroup = paletteContainer.parent
@@ -103,7 +104,6 @@ Item{
 
             var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
             if (palettes.size() ){
-                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
                 var paletteList = paletteControls.createPaletteListView(paletteContainer)
                 paletteList.forceActiveFocus()
                 paletteList.model = palettes
@@ -122,8 +122,6 @@ Item{
                     var editorBox = paletteGroup.parent
 
                     var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-
-                    var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
 
                     var ed = documentHandler
                     while (ed.objectName !== "editorType") ed = ed.parent

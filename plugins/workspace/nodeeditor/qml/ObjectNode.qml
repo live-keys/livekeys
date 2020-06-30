@@ -15,7 +15,7 @@ Qan.NodeItem{
     
     property string label: ''
     property var properties: []
-    property var propertyNames: []
+    property var propertiesOpened: []
     property alias propertyContainer: propertyContainer
     property var nodeParent: null
     property var editingFragment: null
@@ -24,21 +24,21 @@ Qan.NodeItem{
     property string id: ""
     property var documentHandler: null
     property var editor: null
-    property Component paletteContainerFactory: Component{ PaletteContainer{} }
-    property Component addBoxFactory: Component{ AddQmlBox{} }
+
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     resizable: false
 
     function removePropertyName(name){
-        var idx = propertyNames.find(function(str){ return str === name })
+        var idx = propertiesOpened.find(function(str){ return str === name })
         if (idx !== -1){
-            propertyNames.splice(idx, 1)
+            propertiesOpened.splice(idx, 1)
         }
     }
 
     function addPropertyToNodeByName(name){
-        for (var i = 0; i < propertyNames.length; ++i){
-            if (propertyNames[i] === name){
+        for (var i = 0; i < propertiesOpened.length; ++i){
+            if (propertiesOpened[i] === name){
                 return
             }
         }
@@ -143,116 +143,7 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        var codeHandler = documentHandler.codeHandler
-
-                        var position = editingFragment.valuePosition() +
-                                       editingFragment.valueLength() - 1
-
-                        var addContainer = codeHandler.getAddOptions(position)
-                        if ( !addContainer )
-                            return
-
-                        var addBoxItem = root.addBoxFactory.createObject()
-                        addBoxItem.isForNode = true
-                        addBoxItem.addContainer = addContainer
-                        addBoxItem.codeQmlHandler = codeHandler
-
-                        addBoxItem.assignFocus()
-
-                        var oct = root.parent
-
-                        // capture y
-                        var octit = root
-                        var octY = 0
-                        while ( octit && octit.objectName !== 'editorBox' ){
-                            octY += octit.y
-                            octit = octit.parent
-                        }
-                        if ( octit.objectName === 'editorBox' ){
-                            octY += octit.y
-                        }
-
-                        var rect = Qt.rect(oct.x + 150, octY, oct.width, 25)
-                        var cursorCoords = editor.cursorWindowCoords()
-
-                        var addBox = lk.layers.editor.environment.createEditorBox(
-                            addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
-                        )
-                        addBox.color = 'transparent'
-                        addBoxItem.cancel = function(){
-                            addBox.destroy()
-                        }
-                        addBoxItem.accept = function(type, data){
-                            if ( addBoxItem.activeIndex === 0){
-                                for (var i = 0; i < propertyNames.length; ++i){
-                                    if (propertyNames[i] === data){
-                                        addBox.destroy()
-                                        return
-                                    }
-                                }
-
-                                var ppos = codeHandler.addProperty(
-                                    addContainer.propertyModel.addPosition, addContainer.objectType, type, data, true
-                                )
-
-                                var ef = codeHandler.openNestedConnection(
-                                    editingFragment, ppos, project.appRoot()
-                                )
-
-                                if (ef) {
-                                    editingFragment.signalPropertyAdded(ef)
-                                }
-
-                                if (!ef) {
-                                    lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-                                    console.error("Error: Can't create a palette in a non-compiled program")
-                                    return
-                                }
-                            } else if ( addBoxItem.activeIndex === 1 ){
-                                var opos = codeHandler.addItem(addContainer.itemModel.addPosition, addContainer.objectType, data)
-                                codeHandler.addItemToRuntime(editingFragment, data, project.appRoot())
-
-                                var ef = codeHandler.openNestedConnection(
-                                    editingFragment, opos, project.appRoot()
-                                )
-
-                                if (ef)
-                                    editingFragment.signalObjectAdded(ef)
-
-                            } else if ( addBoxItem.activeIndex === 2 ){
-                                for (var i = 0; i < propertyNames.length; ++i){
-                                    if (propertyNames[i] === data){
-                                        addBox.destroy()
-                                        return
-                                    }
-                                }
-
-                                var ppos = codeHandler.addEvent(
-                                    addContainer.propertyModel.addPosition, addContainer.objectType, type, data, true
-                                )
-
-                                var ef = codeHandler.openNestedConnection(
-                                    editingFragment, ppos, project.appRoot()
-                                )
-
-                                if (ef) {
-                                    editingFragment.signalPropertyAdded(ef)
-                                }
-
-                                if (!ef) {
-                                    lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-                                    console.error("Error: Can't create a palette in a non-compiled program")
-                                    return
-                                }
-                            } else if ( addBoxItem.activeIndex === 3){
-                                addSubobject(nodeParent, data, nodeParent.item.id ? 1 : 0, null)
-
-                            }
-                            addBox.destroy()
-                        }
-
-                        addBoxItem.assignFocus()
-                        lk.layers.workspace.panes.setActiveItem(addBox, editor)
+                        paletteControls.compose(root, true)
                     }
                 }
             }
@@ -275,13 +166,12 @@ Qan.NodeItem{
                         root.selected = false
                         var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
                         if (palettes.size() ){
-                            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-                            var paletteList = paletteControls.createPaletteListBox(wrapper)
+                            var paletteList = paletteControls.createPaletteListView(wrapper)
                             paletteList.forceActiveFocus()
                             paletteList.model = palettes
 
                             paletteList.anchors.topMargin = nodeTitle.height
-                            paletteList.width = Qt.binding(function(){ return parent.width })
+                            paletteList.width = Qt.binding(function(){ return wrapper.width })
                             paletteList.cancelledHandler = function(){
                                 paletteList.focus = false
                                 paletteList.model = null
@@ -292,16 +182,6 @@ Qan.NodeItem{
                                 paletteList.model = null
                                 var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
 
-                                if (palette.type === "qml/Object")
-                                {
-                                    palette.documentHandler = editor.documentHandler
-                                    palette.editor = editor
-                                    editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
-                                    palette.editingFragment = editingFragment
-
-                                }
-
-                                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
                                 var paletteBox = paletteControls.addPalette(palette,
                                                                             editingFragment,
                                                                             editor,
@@ -354,8 +234,8 @@ Qan.NodeItem{
 
             var prop = ef.objectInfo()
             var name = prop.name.toString()
-            for (var i=0; i < propertyNames.length; ++i){
-                if (!propertyNames[i].toString().localeCompare(name)) return
+            for (var i=0; i < propertiesOpened.length; ++i){
+                if (!propertiesOpened[i].toString().localeCompare(name)) return
             }
 
             var portState = 2
