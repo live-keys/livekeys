@@ -1,4 +1,5 @@
 import QtQuick 2.3
+import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import workspace 1.0
 
@@ -19,7 +20,7 @@ Theme{
         property color middlegroundOverlayDominant: '#3f444d'
 
         property color middlegroundBorder: '#232b30'
-        property color middlegroundHighlight: '#fff'
+        property color middlegroundHighlight: '#062945'
 
         property color middlegroundOverlayDominantBorder: '#575b63'
 
@@ -78,6 +79,36 @@ Theme{
 
     property color projectPaneItemBackground: "transparent"
     property color projectPaneItemEditBackground : "#1b2934"
+
+    // Scroll
+
+    property Component scrollStyle: Component{
+
+        ScrollViewStyle {
+            transientScrollBars: false
+            handle: Item {
+                implicitWidth: 10
+                implicitHeight: 10
+                Rectangle {
+                    color: "#1f2227"
+                    anchors.fill: parent
+                }
+            }
+            scrollBarBackground: Item{
+                implicitWidth: 10
+                implicitHeight: 10
+                Rectangle{
+                    anchors.fill: parent
+                    color: 'transparent'
+                }
+            }
+            decrementControl: null
+            incrementControl: null
+            frame: Item{}
+            corner: Rectangle{color: 'transparent'}
+        }
+
+    }
 
     // Forms
 
@@ -209,6 +240,27 @@ Theme{
                 source: "qrc:/images/palette-connections.png"
             }
         }
+    }
+
+    // Lists
+
+    property QtObject selectableListView: QtObject{
+        property QtObject labelStyle: TextStyle{
+            color: colorScheme.foreground
+            font : Qt.font({
+                family: 'Open Sans, sans-serif',
+                weight: Font.Normal,
+                italic: false,
+                pixelSize: 11
+            })
+        }
+        property color backgroundColor: colorScheme.background
+        property color selectionBackgroundColor: colorScheme.middlegroundOverlayDominant
+        property double radius: 2
+        property color borderColor: colorScheme.middlegroundOverlayDominant
+        property double borderWidth: 1
+        property double opacity: 0.95
+        property Component scrollStyle: root.scrollStyle
     }
 
     // Node Editor

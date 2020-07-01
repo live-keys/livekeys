@@ -1,4 +1,5 @@
-import QtQuick 2.0
+import QtQuick 2.3
+import QtQuick.Controls.Styles 1.2
 import workspace 1.0
 
 QtObject{
@@ -8,6 +9,10 @@ QtObject{
     property color paletteHeaderColor: '#333'
     property color sectionLabelColor: '#686868'
     property color sectionHeaderBackgroundColor: '#777'
+
+    property Component scrollStyle: Component{
+        ScrollViewStyle{}
+    }
 
     property QtObject labelStyle : QtObject{
         property color background: 'black'
@@ -114,5 +119,6 @@ QtObject{
     }
 
     property QtObject nodeEditor: QtObject{}
+    property QtObject selectableListView: QtObject{}
 
 }
