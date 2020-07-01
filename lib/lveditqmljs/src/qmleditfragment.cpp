@@ -51,6 +51,15 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *paren
     , m_bindingSpanModel(nullptr)
     , m_refCount(0)
 {
+    if (m_declaration->isForSlot()){
+        m_location = Slot;
+    } else if (m_declaration->isForImports()){
+        m_location = Imports;
+    } else if (m_declaration->isForObject()){
+        m_location = Object;
+    } else if (m_declaration->isForProperty()){
+        m_location = Property;
+    }
 }
 
 /**
@@ -111,24 +120,6 @@ int QmlEditFragment::valuePosition() const{
  */
 int QmlEditFragment::valueLength() const{
     return m_declaration->valueLength();
-}
-
-/**
- * \brief Returns true if this fragment edits an object
- */
-bool QmlEditFragment::isForObject() const{
-    return m_declaration->isForObject();
-}
-
-/**
- * \brief Returns true if this fragment edits a property
- */
-bool QmlEditFragment::isForProperty() const{
-    return m_declaration->isForProperty();
-}
-
-bool QmlEditFragment::isForSlot() const{
-    return m_declaration->isForSlot();
 }
 
 bool QmlEditFragment::isBuilder() const{

@@ -113,7 +113,8 @@ LiveExtension{
         var forImports = false
 
         var palette = palettes.size() > 0 && !(forAnObject && palettes.size() === 1)? codeHandler.openPalette(ef, palettes, index) : null
-        if (codeHandler.isInImports(palettes.position())){
+
+        if (ef.location === QmlEditFragment.Imports){
             palette.item.model = codeHandler.importsModel()
             palette.item.editor = editor.editor
             forImports = true

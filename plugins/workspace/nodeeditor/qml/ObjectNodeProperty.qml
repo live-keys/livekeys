@@ -16,7 +16,7 @@ Item{
     property var documentHandler: null
     property alias propertyTitle: propertyTitle
 
-    property var isForObject: editingFragment && editingFragment.isForObject()
+    property var isForObject: editingFragment && editingFragment.location === QmlEditFragment.Object
     property var editor: null
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls

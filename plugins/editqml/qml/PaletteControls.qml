@@ -325,7 +325,6 @@ QtObject{
 
         propertyContainer.title = ef.identifier()
         propertyContainer.documentHandler = objectContainer.editor.documentHandler
-        propertyContainer.propertyContainerFactory = factories.propertyContainer
 
         propertyContainer.editor = objectContainer.editor
         propertyContainer.editingFragment = ef
