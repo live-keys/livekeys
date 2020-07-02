@@ -2213,7 +2213,22 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
             if ( bc->property().propertyTypeCategory() == QQmlProperty::List ){
                 QQmlListReference ppref = qvariant_cast<QQmlListReference>(bc->property().read());
                 if (ppref.canAt()){
-                    toRemove.append(ppref.at(bc->listIndex()));
+                    QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+
+                    // create correct order for list reference
+                    QObjectList ordered;
+                    for (auto child: parent->children())
+                    {
+                        bool found = false;
+                        for (int i = 0; i < ppref.count(); ++i)
+                            if (child == ppref.at(i)){
+                                found = true;
+                                break;
+                            }
+                        if (found) ordered.push_back(child);
+                    }
+
+                    toRemove.append(ordered[bc->listIndex()]);
                 }
             }
         }
@@ -3363,7 +3378,23 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
 
             if ( p.propertyTypeCategory() == QQmlProperty::List ){
                 QQmlListReference ppref = qvariant_cast<QQmlListReference>(p.read());
-                QObject* obat = ppref.at(bc->listIndex());
+
+                QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+
+                // create correct order for list reference
+                QObjectList ordered;
+                for (auto child: parent->children())
+                {
+                    bool found = false;
+                    for (int i = 0; i < ppref.count(); ++i)
+                        if (child == ppref.at(i)){
+                            found = true;
+                            break;
+                        }
+                    if (found) ordered.push_back(child);
+                }
+
+                QObject* obat = ordered[bc->listIndex()];
 
                 QQmlProperty assignmentProperty(obat);
                 if ( assignmentProperty.propertyTypeCategory() == QQmlProperty::List ){

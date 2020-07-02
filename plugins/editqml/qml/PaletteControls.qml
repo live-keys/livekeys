@@ -14,10 +14,6 @@ QtObject{
         property Component paletteListView: Component{
             PaletteListView{
                 visible: model ? true : false
-                color: "#0a141c"
-                selectionColor: "#0d2639"
-                fontSize: 10
-                fontFamily: "Open Sans, sans-serif"
                 onFocusChanged : if ( !focus ) model = null
                 z: 2000
 
@@ -51,8 +47,10 @@ QtObject{
         return factories.paletteContainer.createObject(parent)
     }
 
-    function createPaletteListView(parent){
-        return factories.paletteListView.createObject(parent)
+    function createPaletteListView(parent, style){
+        var plv = factories.paletteListView.createObject(parent)
+        if (style) plv.style = style
+        return plv
     }
 
     function createPropertyContainer(parent){
