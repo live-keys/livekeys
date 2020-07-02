@@ -15,10 +15,11 @@ Item{
     property var editingFragment: null
     property var documentHandler: null
     property alias propertyTitle: propertyTitle
-    property Component paletteContainerFactory: Component{ PaletteContainer{} }
 
-    property var isForObject: editingFragment && editingFragment.isForObject()
+    property var isForObject: editingFragment && editingFragment.location === QmlEditFragment.Object
     property var editor: null
+
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     signal propertyToBeDestroyed(var name)
 
@@ -72,44 +73,39 @@ Item{
                         propertyItem.editingFragment.position(), true)
 
                     if (palettes.size() ){
-                        paletteHeaderList.forceActiveFocus()
-                        paletteHeaderList.model = palettes
+                        var paletteList = paletteControls.createPaletteListView(propertyItem)
+                        paletteList.forceActiveFocus()
+                        paletteList.model = palettes
 
-                        paletteHeaderList.cancelledHandler = function(){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
+                        paletteList.anchors.topMargin = propertyTitle.height
+                        paletteList.width = Qt.binding(function(){return propertyItem.width})
+
+                        paletteList.cancelledHandler = function(){
+                            paletteList.focus = false
+                            paletteList.model = null
+                            paletteList.destroy()
                         }
-                        paletteHeaderList.selectedHandler = function(index){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
-
-
+                        paletteList.selectedHandler = function(index){
+                            paletteList.focus = false
+                            paletteList.model = null
 
                             if ( paletteContainer &&
                                  paletteContainer.objectName === 'paletteGroup' )
                             {
                                 var palette = documentHandler.codeHandler.openPalette(propertyItem.editingFragment, palettes, index)
+                                var paletteBox = paletteControls.addPalette(palette,
+                                                                            editingFragment,
+                                                                            editor,
+                                                                            paletteContainer)
+                                if (paletteBox){
+                                    paletteBox.moveEnabledSet = false
+                                    paletteBox.width = Qt.binding(function(){ return paletteContainer.width })
 
-                                var newPaletteBox = paletteContainerFactory.createObject(paletteContainer)
-
-                                palette.item.x = 5
-                                palette.item.y = 2
-
-                                newPaletteBox.child = palette.item
-                                newPaletteBox.palette = palette
-                                newPaletteBox.moveEnabledSet = false
-                                newPaletteBox.width = Qt.binding(function(){ return paletteContainer.width })
-
-                                newPaletteBox.name = palette.name
-                                newPaletteBox.type = palette.type
-                                newPaletteBox.documentHandler = documentHandler
-                                newPaletteBox.cursorRectangle = editor.getCursorRectangle()
-                                newPaletteBox.editorPosition = editor.cursorWindowCoords()
-                                newPaletteBox.paletteContainerFactory = function(arg){
-                                    return propertyContainer.paletteContainerFactory.createObject(arg)
                                 }
 
                             }
+
+                            paletteList.destroy()
 
 
                         }
@@ -167,21 +163,6 @@ Item{
         anchors.top: parent.top
         anchors.topMargin: propertyTitle.height
         id: paletteContainer
-    }
-
-    PaletteListView{
-        id: paletteHeaderList
-        visible: model ? true:false
-        anchors.top: parent.top
-        anchors.topMargin: propertyTitle.height
-        width: parent.width
-        onFocusChanged : if ( !focus ) model = null
-
-        property var selectedHandler : function(){}
-        property var cancelledHandler : function(index){}
-
-        onPaletteSelected: selectedHandler(index)
-        onCancelled : cancelledHandler()
     }
     
     Connections {

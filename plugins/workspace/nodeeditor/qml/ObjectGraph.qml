@@ -19,6 +19,7 @@ Rectangle{
     border.width: root.style.borderWidth
     border.color: root.style.borderColor
 
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     property QtObject defaultStyle : QtObject{
         property color backgroundColor: '#000511'
@@ -84,8 +85,6 @@ Rectangle{
             }
         }
     }
-
-    property Component addBoxFactory: null
 
     property var connections: []
     property Component propertyDelegate : ObjectNodeProperty{
@@ -186,7 +185,7 @@ Rectangle{
     }
 
     onDoubleClicked: {
-        var addBoxItem = addBoxFactory.createObject()
+        var addBoxItem = paletteControls.createAddQmlBox()
         var position = editingFragment.valuePosition() + editingFragment.valueLength() - 1
         var addOptions = documentHandler.codeHandler.getAddOptions(position)
 

@@ -18,8 +18,6 @@ CodePalette{
     property var numOfObjects: 0
     property var allObjects: []
 
-    property Component addBoxFactory: Component{ AddQmlBox{} }
-
     property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
     onEditingFragmentChanged: {
@@ -71,8 +69,8 @@ CodePalette{
                 for (var j = 0; j < object.properties.length; ++j){
                     var property = object.properties[j]
                     var p = objectGraph.addObjectNodeProperty(n, property.name, property.isWritable ? objectGraph.inOutPort : objectGraph.outPort, property.connection)
-                    n.item.propertyNames.push(property.name)
-                    p.z = 10000 - j
+                    n.item.propertiesOpened.push(property.name)
+                    p.z = 1000 - j
                     if (property.value.length === 2)
                     {
                         props.push({"port": p.inPort, "value": property.value})
@@ -151,7 +149,6 @@ CodePalette{
             documentHandler: palette.documentHandler
             editor: palette.editor
             editingFragment: palette.editingFragment
-            addBoxFactory: palette.addBoxFactory
             style: palette ? palette.paletteStyle.nodeEditor : defaultStyle
         }
     }
