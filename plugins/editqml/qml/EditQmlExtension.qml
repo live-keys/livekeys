@@ -9,6 +9,7 @@ LiveExtension{
 
     globals : ProjectQmlExtension{
         property PaletteStyle paletteStyle: PaletteStyle{
+            colorScheme:  currentTheme ? currentTheme.colorScheme : colorScheme
             backgroundColor: currentTheme ? currentTheme.colorScheme.middleground : backgroundColor
             paletteBackgroundColor: currentTheme ? currentTheme.colorScheme.background : paletteBackgroundColor
             paletteHeaderColor: currentTheme ? currentTheme.colorScheme.middleground : paletteHeaderColor

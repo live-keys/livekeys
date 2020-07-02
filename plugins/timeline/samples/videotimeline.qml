@@ -32,14 +32,14 @@ Item{
                 VideoSegment{
                     position: 50
                     length: 100
-                    file : project.dir() + "/../../../samples/_videos/amherst-11_2754_3754.avi"
+                    file : project.dir() + "/../../../../samples/_videos/amherst-11_2754_3754.avi"
                     surface : timelineArea.surface
                 }
                 
                 ImageSegment{
                     position: 250
                     length: 100
-                    file : project.dir() + "/../../../samples/_images/buildings_0246.jpg"
+                    file : project.dir() + "/../../../../samples/_images/buildings_0246.jpg"
                     surface : timelineArea.surface
                 }
             }
@@ -49,7 +49,7 @@ Item{
                 VideoSegment{
                     position: 75 
                     length: 100
-                    file : project.dir() + "/../../../samples/_videos/amherst-11_2754_3754.avi"
+                    file : project.dir() + "/../../../../samples/_videos/amherst-11_2754_3754.avi"
                     surface : timelineArea.surface
                 }
             }

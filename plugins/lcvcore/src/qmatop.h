@@ -45,9 +45,7 @@ public slots:
     void fillWithMask(QMat* m, const QColor& color, QMat* mask);
 
     QMat* reloc(QMat* m);
-
     QMat* crop(QMat* m, const QRect& region);
-
     QMat* flip(QMat* m, int direction);
 
     QMatrix4x4 to4x4Matrix(QMat* m);

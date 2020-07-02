@@ -9,6 +9,7 @@ QtObject{
     property color paletteHeaderColor: '#333'
     property color sectionLabelColor: '#686868'
     property color sectionHeaderBackgroundColor: '#777'
+    property QtObject colorScheme: QtObject{}
 
     property Component scrollStyle: Component{
         ScrollViewStyle{}
@@ -115,9 +116,7 @@ QtObject{
         property color borderColor: 'black'
     }
 
-    property QtObject buttons : QtObject{
-    }
-
+    property QtObject buttons : QtObject{}
     property QtObject nodeEditor: QtObject{}
     property QtObject selectableListView: QtObject{}
 

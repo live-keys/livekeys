@@ -40,6 +40,10 @@ CodePalette{
                 property double colorDisplayBoderWidth: 1
                 property color  colorDisplayBoderColor: paletteStyle ? paletteStyle.inputStyle.borderColor : colorPicker.defaultStyle.colorDisplayBoderColor
                 property double colorDisplayRadius: 2
+                property color adjustmentBackground: 'transparent'
+                property color adjustmentBorderColor: 'transparent'
+                property int adjustmentBorderWidth: 0
+                property real adjustmentRadius: 3
                 property QtObject labelStyle: paletteStyle ? paletteStyle.labelStyle : colorPicker.defaultStyle.labelStyle
             }
 

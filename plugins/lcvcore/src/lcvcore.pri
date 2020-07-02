@@ -14,7 +14,6 @@ HEADERS += \
     $$PWD/qvideocapture.h \
     $$PWD/qvideocapturethread.h \
     $$PWD/qmatview.h \
-    $$PWD/qimwrite.h \
     $$PWD/qvideowriter.h \
     $$PWD/qvideowriterthread.h \
     $$PWD/qmat.h \
@@ -56,7 +55,6 @@ SOURCES += \
     $$PWD/qvideocapture.cpp \
     $$PWD/qvideocapturethread.cpp \
     $$PWD/qmatview.cpp \
-    $$PWD/qimwrite.cpp \
     $$PWD/qvideowriter.cpp \
     $$PWD/qvideowriterthread.cpp \
     $$PWD/qmat.cpp \

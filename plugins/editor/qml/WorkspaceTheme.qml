@@ -1,4 +1,5 @@
 import QtQuick 2.3
+import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import workspace 1.0
@@ -211,6 +212,34 @@ Theme{
         property double radius: 3
     }
 
+
+    property QtObject iconButtonStyle : QtObject{
+        property QtObject textStyle: TextStyle{
+            color: colorScheme.foreground
+            font : Qt.font({
+                family: 'Open Sans, sans-serif',
+                weight: Font.Normal,
+                italic: false,
+                pixelSize: 11
+            })
+        }
+        property QtObject hoverTextStyle: TextStyle{
+            color: colorScheme.foreground
+            font : Qt.font({
+                family: 'Open Sans, sans-serif',
+                weight: Font.Normal,
+                italic: false,
+                pixelSize: 11
+            })
+        }
+        property color backgroundColor: 'transparent'
+        property color backgroundHoverColor: 'transparent'
+        property color borderColor: 'transparent'
+        property color borderHoverColor: root.colorScheme.middlegroundOverlayDominantBorder
+        property double borderThickness: 1
+        property double radius: 3
+    }
+
     // Buttons
 
     property QtObject buttons: QtObject{
@@ -229,6 +258,19 @@ Theme{
             }
         }
 
+        property Component save: RectangleButton{
+            width: parent ? parent.width : 20
+            height: parent ? parent.height: 20
+
+            style: root.iconButtonStyle
+
+            content: Image{
+                anchors.centerIn: parent
+                source: "qrc:/images/top-icon-save.png"
+            }
+            onClicked: parent.clicked()
+        }
+
         property Component connect: RectangleButton{
             width: parent ? parent.width : 20
             height: parent ? parent.height: 20
@@ -239,6 +281,19 @@ Theme{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-connections.png"
             }
+        }
+
+        property Component penSize: RectangleButton{
+            width: parent ? parent.width : 20
+            height: parent ? parent.height: 20
+
+            style: root.iconButtonStyle
+
+            content: PenSizeIcon{
+                width: 25
+                height: 25
+            }
+            onClicked: parent.clicked()
         }
     }
 

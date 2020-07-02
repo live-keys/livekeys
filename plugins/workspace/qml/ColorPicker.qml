@@ -28,6 +28,9 @@ Item{
     width: colorDisplay.width + (inputLoader.visible ? input.width + 2 : 0)
     height: 25 + (hsvPicker.visible ? hsvPicker.height + 2 : 0)
 
+    property double colorDisplayWidth: 40
+    property double colorDisplayHeight: 25
+
     property bool inputBoxVisible: true
 
     property QtObject defaultStyle: QtObject{
@@ -35,6 +38,10 @@ Item{
         property double colorDisplayBoderWidth: 1
         property color  colorDisplayBoderColor: "#323232"
         property double colorDisplayRadius: 2
+        property color adjustmentBackground: 'transparent'
+        property color adjustmentBorderColor: 'transparent'
+        property int adjustmentBorderWidth: 0
+        property real adjustmentRadius: 3
         property QtObject labelStyle: hueLabelLeft.defaultStyle
     }
     property QtObject style: defaultStyle
@@ -49,8 +56,8 @@ Item{
         id: colorDisplay
         anchors.top: parent.top
         anchors.left: parent.left
-        width: 40
-        height: 25
+        width: root.colorDisplayWidth
+        height: root.colorDisplayHeight
         color: 'transparent'
         radius: root.style.colorDisplayRadius
         border.width: root.style.colorDisplayBoderWidth
@@ -92,12 +99,17 @@ Item{
         }
     }
 
-    Item{
+    Rectangle{
         id: hsvPicker
-        width: 280
+        width: 285
         height: 90
         anchors.top: parent.top
         anchors.topMargin: 27
+
+        color: root.style.adjustmentBackground
+        radius: root.style.adjustmentRadius
+        border.color: root.style.adjustmentBorderColor
+        border.width: root.style.adjustmentBorderWidth
 
         visible: false
 
@@ -132,10 +144,14 @@ Item{
             setHsv(root.selectedColor)
         }
 
-        Rectangle{
+        Item{
+            anchors.left: parent.left
+            anchors.leftMargin: 2
+            anchors.top: parent.top
+            anchors.topMargin: 4
             width: 280
-            height: 30
-            color: 'transparent'
+            height: 22
+
             Slider{
                 id: hueSlider
                 anchors.top: parent.top
@@ -212,17 +228,19 @@ Item{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 width: 35
+                height: 22
                 text: hueSlider.maximumValue
                 style: root.style.labelStyle
             }
         }
 
-        Rectangle{
+        Item{
+            anchors.left: parent.left
+            anchors.leftMargin: 2
             anchors.top: parent.top
-            anchors.topMargin: 26
+            anchors.topMargin: 34
             width: 280
-            height: 40
-            color: 'transparent'
+            height: 22
 
             Slider{
                 id: saturationSlider
@@ -273,6 +291,7 @@ Item{
             Workspace.LabelOnRectangle{
                 anchors.top: parent.top
                 width: 35
+                height: 22
                 text: saturationSlider.minimumValue
                 style: root.style.labelStyle
             }
@@ -281,6 +300,7 @@ Item{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 width: 35
+                height: 22
 
                 text: saturationSlider.maximumValue
                 style: root.style.labelStyle
@@ -288,12 +308,13 @@ Item{
 
         }
 
-        Rectangle{
+        Item{
+            anchors.left: parent.left
+            anchors.leftMargin: 2
             anchors.top: parent.top
-            anchors.topMargin: 51
+            anchors.topMargin: 64
             width: 280
-            height: 40
-            color: 'transparent'
+            height: 22
 
             Slider{
                 id: valueSlider
@@ -344,6 +365,7 @@ Item{
                 anchors.top: parent.top
                 text: valueSlider.minimumValue
                 width: 35
+                height: 22
 
                 style: root.style.labelStyle
             }
@@ -353,6 +375,7 @@ Item{
                 anchors.right: parent.right
                 text: valueSlider.maximumValue
                 width: 35
+                height: 22
 
                 style: root.style.labelStyle
             }

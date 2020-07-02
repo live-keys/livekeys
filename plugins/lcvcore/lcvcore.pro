@@ -60,12 +60,18 @@ export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 DISTFILES += \
+    palettes/DrawPalette.qml \
     palettes/GrayscaleViewPalette.json \
     palettes/ImageFilePalette.qml \
     palettes/VideoDecoderViewPalette.json \
+    qml/BlankImage.qml \
+    qml/Crop.qml \
+    qml/Draw.qml \
     qml/EditCvExtension.qml \
     qml/GrayscaleView.qml \
     qml/MatViewPane.qml \
+    qml/NavigableImageView.qml \
+    qml/TransformImage.qml \
     qml/VideoCaptureSegmentCreator.qml \
     qml/VideoCaptureSegmentFactory.qml \
     qml/VideoDecoderView.qml \

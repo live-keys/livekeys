@@ -2,6 +2,9 @@
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
+
+#include "opencv2/imgproc.hpp"
+
 #include <QJSValueIterator>
 
 namespace helpers{

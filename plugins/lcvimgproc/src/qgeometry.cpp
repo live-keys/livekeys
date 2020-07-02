@@ -16,8 +16,16 @@ QMat *QGeometry::resize(QMat *input, QSize size, int interpolation){
 QMat *QGeometry::scale(QMat *input, double fx, double fy, int interpolation){
     if ( !input )
         return nullptr;
+    if ( fx <= 0 || fy <= 0 )
+        return nullptr;
+
     QMat* m = new QMat;
-    cv::resize(input->internal(), m->internal(), cv::Size(), fx, fy, interpolation);
+    try {
+        cv::resize(input->internal(), m->internal(), cv::Size(), fx, fy, interpolation);
+    } catch (cv::Exception& e) {
+        qWarning("%s", e.what());
+    }
+
     return m;
 }
 
@@ -37,6 +45,21 @@ QMat *QGeometry::resizeBy(QMat *input, QJSValue ob, int interpolation){
     }
 
     return nullptr;
+}
+
+QMat *QGeometry::rotate(QMat *m, double degrees){
+    if ( !m )
+        return nullptr;
+
+    QMat* r = new QMat;
+    cv::Point2f ptCp(
+        static_cast<float>(m->internal().cols * 0.5),
+        static_cast<float>(m->internal().rows * 0.5));
+
+    cv::Mat M = cv::getRotationMatrix2D(ptCp, degrees, 1.0);
+    cv::warpAffine(m->internal(), r->internal(), M, m->internal().size(), cv::INTER_CUBIC);
+
+    return r;
 }
 
 /**
