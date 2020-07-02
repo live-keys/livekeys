@@ -43,8 +43,6 @@ CodePalette{
             anchors.fill: parent
             style: palette.style
             onImagePaint: {
-                console.log(palette.value)
-                console.log(palette.value.surface)
                 palette.value.surface = image
             }
         }
