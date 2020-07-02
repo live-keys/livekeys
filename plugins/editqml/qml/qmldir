@@ -10,3 +10,4 @@ ObjectContainerTop 1.0 ObjectContainerTop.qml
 PaletteContainer   1.0 PaletteContainer.qml
 PaletteStyle       1.0 PaletteStyle.qml
 PaletteControls    1.0 PaletteControls.qml
+PropertyContainer  1.0 PropertyContainer.qml

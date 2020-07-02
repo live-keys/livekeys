@@ -90,7 +90,7 @@ public:
     bool isForObject() const;
     bool isForProperty() const;
     bool isForSlot() const;
-
+    bool isForImports() const;
 private:
     QmlDeclaration(
         const QStringList& identifierChain,
