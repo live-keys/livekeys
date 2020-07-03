@@ -32,8 +32,6 @@ void ImageSegment::openFile(){
 
     setLabel(m_file.mid(m_file.lastIndexOf('/') + 1));
     *m_image->cvMat() = cv::imread(m_file.toStdString());
-
-    qDebug() << m_image;
 }
 
 void ImageSegment::serialize(QQmlEngine *engine, MLNode &node) const{
