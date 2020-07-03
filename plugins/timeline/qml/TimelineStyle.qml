@@ -22,29 +22,28 @@ QtObject{
     property color markerColor: "#a0a6b1"
     property color markerLabelColor: "#999"
 
-    property Component scrollStyleHandle : Item{
-        implicitWidth: 10
-        implicitHeight: 10
-        Rectangle {
-            color: root.scrollHandleBackgronud
-            anchors.fill: parent
+    property Component scrollStyle: ScrollViewStyle {
+        transientScrollBars: false
+        handle: Item {
+            implicitWidth: 10
+            implicitHeight: 10
+            Rectangle {
+                color: "#1f2227"
+                anchors.fill: parent
+            }
         }
-    }
-
-    property Component scrollStyleBackground : Item{
-        implicitWidth: 10
-        implicitHeight: 10
-        Rectangle{
-            anchors.fill: parent
-            color: root.scrollBackground
+        scrollBarBackground: Item{
+            implicitWidth: 10
+            implicitHeight: 10
+            Rectangle{
+                anchors.fill: parent
+                color: 'transparent'
+            }
         }
-    }
-
-    property Component scrollStyleFrame : Rectangle{
-        color: root.scrollBackground
-    }
-    property Component scrollStyleCorner : Rectangle{
-        color: root.scrollHandleBackgronud
+        decrementControl: null
+        incrementControl: null
+        frame: Item{}
+        corner: Rectangle{color: 'transparent'}
     }
 
     property color segmentBackground: "#33333a"

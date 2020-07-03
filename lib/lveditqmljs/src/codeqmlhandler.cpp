@@ -1944,9 +1944,9 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     }
 
 
-    if (ef->isForObject())
+    if (ef->location() == QmlEditFragment::Object)
         populateObjectInfoForFragment(ef);
-    if (ef->isForProperty())
+    if (ef->location() == QmlEditFragment::Property)
         populatePropertyInfoForFragment(ef);
     editParent->addChildFragment(ef);
     ef->setParent(editParent);
@@ -2012,7 +2012,17 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                 QmlBindingPath::Ptr bp = QmlBindingPath::create();
                 bp->appendIndex(i);
 
-                QmlEditFragment* ef = new QmlEditFragment(declaration);
+                auto test = findFragmentByPosition(declaration->position());
+                if (test && test->declaration()->position() == declaration->position()) // it was already opened
+                {
+                    fragments.append(test);
+                    continue;
+                }
+
+                QmlEditFragment* ef = createInjectionChannel(declaration);
+                if ( !ef ){
+                    continue;
+                }
                 ef->declaration()->setSection(m_document->createSection(
                     QmlEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
                 ));
@@ -2038,7 +2048,7 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                     }
                 });
 
-                if (ef->isForObject())
+                if (ef->location() == QmlEditFragment::Object)
                     populateObjectInfoForFragment(ef);
                 edit->addChildFragment(ef);
                 ef->setParent(edit);
@@ -2075,7 +2085,7 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
             DocumentQmlValueObjects::RangeProperty* rp = currentOb->properties[i];
 
             auto test = findFragmentByPosition(rp->begin);
-            if (test && test->isForProperty() && test->declaration()->position() == rp->begin) // it was already opened
+            if (test && test->location() == QmlEditFragment::Property && test->declaration()->position() == rp->begin) // it was already opened
             {
                 fragments.push_back(test);
                 continue;
@@ -2170,7 +2180,7 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
                 inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
             }
 
-            if (ef->isForProperty())
+            if (ef->location() == QmlEditFragment::Property)
                 populatePropertyInfoForFragment(ef);
             edit->addChildFragment(ef);
             ef->setParent(edit);
@@ -2367,7 +2377,7 @@ QString CodeQmlHandler::defaultPalette(QmlEditFragment *fragment){
         return nullptr;
 
     QString result;
-    if ( fragment->isForProperty() ){
+    if ( fragment->location() == QmlEditFragment::Property ){
         result = m_settings->defaultPalette(fragment->declaration()->parentType().join() + "." + fragment->identifier());
     }
     if ( result.isEmpty() ){

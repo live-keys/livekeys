@@ -38,7 +38,7 @@ CodePalette{
                 levelByChannel = levels.channels ? levels.channels : {}
             } else {
                 input = Cv.MatOp.nullMat
-                lightnews = []
+                lightness = []
                 levelByChannel = {}
             }
 

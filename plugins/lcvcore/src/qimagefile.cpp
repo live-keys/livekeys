@@ -105,7 +105,14 @@ void QImageFile::loadImage(){
             return;
         }
 
-        temp.copyTo(*output()->cvMat());
+        QMat* loose = output();
+        lv::Shared::ownJs(loose);
+
+        QMat* newOutput = new QMat;
+        *newOutput->cvMat() = temp;
+
+        setOutput(newOutput);
+
         setImplicitWidth(output()->cvMat()->size().width);
         setImplicitHeight(output()->cvMat()->size().height);
         emit outputChanged();

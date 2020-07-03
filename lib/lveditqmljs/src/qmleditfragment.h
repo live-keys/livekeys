@@ -38,6 +38,7 @@ class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
     Q_OBJECT
     Q_PROPERTY(QObject* visualParent READ visualParent WRITE setVisualParent NOTIFY visualParentChanged)
     Q_PROPERTY(int      refCount     READ refCount     NOTIFY refCountChanged)
+    Q_PROPERTY(Location location     READ location     CONSTANT)
 public:
     /** ProjectDocument section type for this QmlEditFragment */
     enum SectionType{
@@ -45,6 +46,13 @@ public:
         Section = 1001
     };
 
+    enum Location {
+        Imports,
+        Object,
+        Property,
+        Slot
+    };
+    Q_ENUM(Location)
 public:
     QmlEditFragment(QmlDeclaration::Ptr declaration, QObject* parent = nullptr);
     virtual ~QmlEditFragment();
@@ -90,10 +98,6 @@ public slots:
     int valuePosition() const;
     int valueLength() const;
 
-    bool isForObject() const;
-    bool isForProperty() const;
-    bool isForSlot() const;
-
     bool isBuilder() const;
     void rebuild();
 
@@ -126,6 +130,8 @@ public slots:
     void removeChildFragment(QmlEditFragment* edit);
     void setObjectId(QString id);
     QString objectId();
+
+    Location location() const;
 signals:
     void visualParentChanged();
     void connectionChanged(int index);
@@ -158,6 +164,7 @@ private:
     QVariantMap             m_objectInfo;
     int                     m_refCount;
     QString                 m_objectId;
+    Location                m_location;
 };
 
 /// \brief Returns the binding channel associated with this object.
@@ -196,6 +203,10 @@ inline QmlDeclaration::Ptr QmlEditFragment::declaration() const{
 
 inline QObject *QmlEditFragment::visualParent() const{
     return m_visualParent;
+}
+
+inline QmlEditFragment::Location QmlEditFragment::location() const{
+    return m_location;
 }
 
 inline int QmlEditFragment::position(){

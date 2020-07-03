@@ -50,11 +50,16 @@ Item{
                     length: 100
                     file : project.dir() + "/../../../samples/_videos/amherst-11_2754_3754.avi"
                 }
+                
+                ImageSegment{
+                    position: 250
+                    length: 100
+                    file : project.dir() + "/../../../samples/_images/buildings_0246.jpg"
+                }
             }
             NumberTrack{
                 id: track2
                 name: "Track.2"
-                
                 
                 NumberAnimationSegment{
                     id: numberAnimationSegment
@@ -75,7 +80,7 @@ Item{
                     to: 0
                     easing.type: Easing.InOutQuad;
                     easing.amplitude: 1.0; 
-                    easing.period: 1.0 
+                    easing.period: 1.0
                 }
             }
         }

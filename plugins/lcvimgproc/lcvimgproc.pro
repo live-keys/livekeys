@@ -49,5 +49,8 @@ OTHER_FILES *= \
     samples/*.qml
 
 DISTFILES += \
+    qml/Resize.qml \
+    qml/Rotate.qml \
+    qml/Scale.qml \
     qml/live.package.json \
     qml/live.plugin.json

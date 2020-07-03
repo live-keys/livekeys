@@ -2,7 +2,8 @@
     "name": "lcvcore",
     "package" : ".",
     "palettes" : {
-        "palettes/MatPalette.qml" : "qml/lcvcore#Mat",
+        "palettes/ImagePalette.qml" : "qml/lcvcore#Mat",
+        "palettes/DrawPalette.qml" : "qml/lcvcore#Draw",
         "palettes/VideoCapturePalette.qml": "qml/lcvcore#VideoCapture",
         "palettes/ImageFilePalette.qml" : "qml/lcvcore#ImageFile",
         "palettes/VideoDecoderViewPalette.json" : "qml/lcvcore#VideoDecoderView",

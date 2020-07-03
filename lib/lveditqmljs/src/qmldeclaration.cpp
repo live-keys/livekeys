@@ -156,4 +156,9 @@ bool QmlDeclaration::isForSlot() const{
     return m_type.language() == QmlTypeReference::Qml && m_type.name() == "slot";
 }
 
+bool QmlDeclaration::isForImports() const
+{
+    return m_type.language() == QmlTypeReference::Qml && m_type.name() == "import";
+}
+
 }// namespace

@@ -36,7 +36,8 @@ Item{
     property double titleRightMargin : 50
 
     property DocumentHandler documentHandler : null
-    property var paletteContainerFactory : null
+
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     Component.onCompleted: {
         var paletteGroup = paletteContainer.parent
@@ -103,41 +104,42 @@ Item{
 
             var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
             if (palettes.size() ){
-                paletteHeaderList.forceActiveFocus()
-                paletteHeaderList.model = palettes
-                paletteHeaderList.cancelledHandler = function(){
-                    paletteHeaderList.focus = false
-                    paletteHeaderList.model = null
+                var paletteList = paletteControls.createPaletteListView(paletteContainer)
+                paletteList.forceActiveFocus()
+                paletteList.model = palettes
+                paletteList.anchors.topMargin = 24
+                paletteList.width = Qt.binding(function() { return paletteContainer.width })
+                paletteList.cancelledHandler = function(){
+                    paletteList.focus = false
+                    paletteList.model = null
+                    paletteList.destroy()
                 }
-                paletteHeaderList.selectedHandler = function(index){
-                    paletteHeaderList.focus = false
-                    paletteHeaderList.model = null
+                paletteList.selectedHandler = function(index){
+                    paletteList.focus = false
+                    paletteList.model = null
 
                     var paletteGroup = paletteContainer.parent;
                     var editorBox = paletteGroup.parent
 
                     var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-                    var newPaletteBox = paletteContainer.paletteContainerFactory(paletteGroup)
 
-                    palette.item.x = 2
-                    palette.item.y = 2
+                    var ed = documentHandler
+                    while (ed.objectName !== "editorType") ed = ed.parent
 
-                    newPaletteBox.child = palette.item
-                    newPaletteBox.palette = palette
+                    var paletteBox = paletteControls.addPalette(palette,
+                                                                editingFragment,
+                                                                ed,
+                                                                paletteGroup)
 
-                    newPaletteBox.name = palette.name
-                    newPaletteBox.type = palette.type
-                    newPaletteBox.moveEnabled = paletteContainer.moveEnabledGet
-                    newPaletteBox.documentHandler = documentHandler
-                    newPaletteBox.cursorRectangle = paletteContainer.cursorRectangle
-                    newPaletteBox.editorPosition = paletteContainer.editorPosition
-                    newPaletteBox.paletteContainerFactory = paletteContainer.paletteContainerFactory
+                    if (paletteBox) paletteBox.moveEnabled = paletteContainer.moveEnabledGet
 
                     if (swap){
                         paletteContainer.parent = null
                         paletteContainer.documentHandler.codeHandler.removePalette(paletteContainer.palette)
                         paletteContainer.destroy()
                     }
+
+                    paletteList.destroy()
                 }
             }
         }
@@ -331,24 +333,6 @@ Item{
         children: parent.child ? [parent.child] : []
     }
 
-    PaletteListView{
-        id: paletteHeaderList
-        visible: model ? true:false
-        anchors.top: parent.top
-        anchors.topMargin: 24
-        width: parent.width
-        color: "#0a141c"
-        selectionColor: "#0d2639"
-        fontSize: 10
-        fontFamily: "Open Sans, sans-serif"
-        onFocusChanged : if ( !focus ) model = null
-
-        property var selectedHandler : function(){}
-        property var cancelledHandler : function(index){}
-
-        onPaletteSelected: selectedHandler(index)
-        onCancelled : cancelledHandler()
-    }
 
     PaletteConnection{
         id: paletteConnection

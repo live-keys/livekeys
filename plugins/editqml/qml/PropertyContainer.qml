@@ -17,14 +17,12 @@ Item{
     property Item editor: null
     property Item valueContainer : null
 
-    property Component paletteGroupFactory : Component{ PaletteGroup{} }
-    property Component paletteContainerFactory: Component{ PaletteContainer{} }
-    property Component propertyContainerFactory: null
-
     property alias paletteAddButtonVisible: paletteAddButton.visible
 
     property bool isAnObject: false
     property var childObjectContainer: null
+
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
@@ -43,37 +41,6 @@ Item{
         var objectContainer = propertyContainer.parent.parent.parent
 
         objectContainer.recalculateContentWidth()
-    }
-
-    function expandPalette(paletteName){
-        var palette = editor.documentHandler.codeHandler.expand(editingFragment, {
-            "palettes" : [paletteName]
-        })
-
-        var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
-
-        palette.item.x = 5
-        palette.item.y = 2
-
-        newPaletteBox.child = palette.item
-        newPaletteBox.palette = palette
-
-        newPaletteBox.name = palette.name
-        newPaletteBox.type = palette.type
-        newPaletteBox.moveEnabledSet = false
-        newPaletteBox.documentHandler = propertyContainer.editor.documentHandler
-        newPaletteBox.cursorRectangle = propertyContainer.editor.getCursorRectangle()
-        newPaletteBox.editorPosition = propertyContainer.editor.cursorWindowCoords()
-        newPaletteBox.paletteContainerFactory = function(arg){
-            return parent.paletteContainerFactory.createObject(arg)
-        }
-    }
-
-    function expandDefaultPalette(){
-        var defaultPaletteName = editor.documentHandler.codeHandler.defaultPalette(editingFragment)
-        if ( defaultPaletteName.length ){
-            expandPalette(defaultPaletteName)
-        }
     }
 
     Rectangle{
@@ -120,40 +87,27 @@ Item{
                     var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
                         editingFragment.position(), true)
                     if (palettes.size() ){
-                        paletteHeaderList.forceActiveFocus()
-                        paletteHeaderList.model = palettes
-                        paletteHeaderList.cancelledHandler = function(){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
+                        var paletteList = paletteControls.createPaletteListView(propertyContainer)
+                        paletteList.anchors.topMargin = 15 + topMarginParam
+                        paletteList.width = 250
+                        paletteList.forceActiveFocus()
+                        paletteList.model = palettes
+                        paletteList.cancelledHandler = function(){
+                            paletteList.focus = false
+                            paletteList.model = null
+                            paletteList.destroy()
                         }
-                        paletteHeaderList.selectedHandler = function(index){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
+                        paletteList.selectedHandler = function(index){
+                            paletteList.focus = false
+                            paletteList.model = null
 
                             if ( propertyContainer.valueContainer &&
                                  propertyContainer.valueContainer.objectName === 'paletteGroup' )
                             {
                                 var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-
-                                var newPaletteBox = paletteContainerFactory.createObject(propertyContainer.valueContainer)
-
-                                palette.item.x = 5
-                                palette.item.y = 2
-
-                                newPaletteBox.child = palette.item
-                                newPaletteBox.palette = palette
-                                newPaletteBox.moveEnabledSet = false
-
-                                newPaletteBox.name = palette.name
-                                newPaletteBox.type = palette.type
-                                newPaletteBox.documentHandler = documentHandler
-                                newPaletteBox.cursorRectangle = propertyContainer.editor.getCursorRectangle()
-                                newPaletteBox.editorPosition = editor.cursorWindowCoords()
-                                newPaletteBox.paletteContainerFactory = function(arg){
-                                    return propertyContainer.paletteContainerFactory.createObject(arg)
-                                }
-
+                                paletteControls.addPalette(palette, editingFragment, editor, propertyContainer.valueContainer)
                             }
+                            paletteList.destroy()
 
                         }
                     }
@@ -195,29 +149,6 @@ Item{
             }
         }
 
-    }
-
-
-
-
-    PaletteListView{
-        id: paletteHeaderList
-        visible: model ? true : false
-        anchors.top: parent.top
-        anchors.topMargin: 15 + topMarginParam
-        width: 250
-        color: "#0a141c"
-        selectionColor: "#0d2639"
-        fontSize: 10
-        fontFamily: "Open Sans, sans-serif"
-        onFocusChanged : if ( !focus ) model = null
-        z: 3000
-
-        property var selectedHandler : function(){}
-        property var cancelledHandler : function(index){}
-
-        onPaletteSelected: selectedHandler(index)
-        onCancelled : cancelledHandler()
     }
 
     Rectangle{

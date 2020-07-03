@@ -4,6 +4,8 @@ plugin lcvimgproc
 depends QtQuick 2.3
 depends lcvcore 1.0
 
-PanAndZoom 1.0 PanAndZoom.qml
-
-
+PanAndZoom     1.0 PanAndZoom.qml
+TransformImage 1.0 TransformImage.qml
+Resize         1.0 Resize.qml
+Scale          1.0 Scale.qml
+Rotate         1.0 Rotate.qml

@@ -10,7 +10,6 @@ HEADERS += \
     $$PWD/qgaussianblur.h \
     $$PWD/qhoughlines.h \
     $$PWD/qhoughlinesp.h \
-    $$PWD/qmatresize.h \
     $$PWD/qshapedescriptors.h \
     $$PWD/qsobel.h \
     $$PWD/qstructuringelement.h \
@@ -36,7 +35,6 @@ SOURCES += \
     $$PWD/qgaussianblur.cpp \
     $$PWD/qhoughlines.cpp \
     $$PWD/qhoughlinesp.cpp \
-    $$PWD/qmatresize.cpp \
     $$PWD/qshapedescriptors.cpp \
     $$PWD/qsobel.cpp \
     $$PWD/qstructuringelement.cpp \

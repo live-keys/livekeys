@@ -22,7 +22,6 @@
 #include "qmatext.h"
 #include "qmatview.h"
 #include "qimread.h"
-#include "qimwrite.h"
 #include "qimageview.h"
 #include "qmatroi.h"
 #include "qmatread.h"
@@ -42,6 +41,7 @@
 #include "qvideodecoder.h"
 
 #include "videosegment.h"
+#include "imagesegment.h"
 #include "videosurface.h"
 #include "videotrack.h"
 
@@ -71,9 +71,7 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QMatView>(               uri, 1, 0, "MatView");
     qmlRegisterType<QImageView>(             uri, 1, 0, "ImageView");
     qmlRegisterType<QImRead>(                uri, 1, 0, "ImRead");
-    qmlRegisterType<QImWrite>(               uri, 1, 0, "ImWrite");
     qmlRegisterType<QMatRoi>(                uri, 1, 0, "MatRoi");
-    qmlRegisterType<QMatRoi>(                uri, 1, 0, "Crop");
     qmlRegisterType<QMatRead>(               uri, 1, 0, "MatRead");
     qmlRegisterType<QCamCapture>(            uri, 1, 0, "CamCapture");
     qmlRegisterType<QVideoCapture>(          uri, 1, 0, "VideoCapture");
@@ -93,6 +91,7 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::VideoSurface>(       uri, 1, 0, "VideoSurface");
     qmlRegisterType<lv::VideoSegment>(       uri, 1, 0, "VideoSegment");
     qmlRegisterType<lv::VideoTrack>(         uri, 1, 0, "VideoTrack");
+    qmlRegisterType<lv::ImageSegment>(       uri, 1, 0, "ImageSegment");
 
     qmlRegisterSingletonType<QMatOp>(        uri, 1, 0, "MatOp",        &matOpProvider);
     qmlRegisterSingletonType<QMatIO>(        uri, 1, 0, "MatIO",        &matIOProvider);

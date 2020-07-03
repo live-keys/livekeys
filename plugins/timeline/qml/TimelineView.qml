@@ -25,7 +25,7 @@ Rectangle{
 
     property SegmentInsertMenu segmentInsertMenu: segmentInsertMenu
 
-    property TimelineStyle timelineStyle : TimelineStyle{}
+    property QtObject timelineStyle : TimelineStyle{}
     property Timeline timeline : Timeline{
         fps: 30
         contentLength: 100 * fps
@@ -276,21 +276,14 @@ Rectangle{
 
         height: parent.height - 35
         width: parent.width - 150
+        color: timelineStyle.rowBackground
         x: 150
 
         ScrollView{
             id: mainScroll
             anchors.fill: parent
 
-            style: ScrollViewStyle {
-                transientScrollBars: false
-                handle: root.timelineStyle.scrollStyleHandle
-                scrollBarBackground: root.timelineStyle.scrollStyleBackground
-                decrementControl: null
-                incrementControl: null
-                frame: root.timelineStyle.scrollStyleFrame
-                corner: root.timelineStyle.scrollStyleCorner
-            }
+            style: root.timelineStyle.scrollStyle
 
             ListView{
                 id: timelineView

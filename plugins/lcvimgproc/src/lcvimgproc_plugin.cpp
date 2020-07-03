@@ -28,7 +28,6 @@
 #include "qthreshold.h"
 #include "qchannelselect.h"
 #include "qstructuringelement.h"
-#include "qmatresize.h"
 #include "qdilate.h"
 #include "qerode.h"
 #include "qcopymakeborder.h"
@@ -65,7 +64,6 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QThreshold>(              uri, 1, 0, "Threshold");
     qmlRegisterType<QChannelSelect>(          uri, 1, 0, "ChannelSelect");
     qmlRegisterType<QStructuringElement>(     uri, 1, 0, "StructuringElement");
-    qmlRegisterType<QMatResize>(              uri, 1, 0, "Resize");
     qmlRegisterType<QFilter2D>(               uri, 1, 0, "Filter2D");
     qmlRegisterType<QDilate>(                 uri, 1, 0, "Dilate");
     qmlRegisterType<QErode>(                  uri, 1, 0, "Erode");

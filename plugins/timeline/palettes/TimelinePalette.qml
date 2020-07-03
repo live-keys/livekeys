@@ -11,13 +11,13 @@ CodePalette{
 
     type: "qml/timeline#Timeline"
 
-    item:
-        TimelineView{
-            id: timelineArea
-            width : 500
-            height: 200
-            focus : true
-        }
+
+    item: TimelineView{
+        id: timelineArea
+        width : 500
+        height: 200
+        focus : true
+    }
 
     onInit: {
         timelineArea.timeline = value
