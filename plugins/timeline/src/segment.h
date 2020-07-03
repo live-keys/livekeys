@@ -38,9 +38,10 @@ public:
 
     virtual void assignTrack(Track* track);
     virtual void cursorEnter(qint64 position);
-    virtual void cursorExit();
+    virtual void cursorExit(qint64 position);
     virtual void cursorNext(qint64 position);
     virtual void cursorMove(qint64 position);
+    virtual void cursorPass(qint64 position);
     virtual void serialize(QQmlEngine* engine, MLNode& node) const;
     virtual void deserialize(Track *track, QQmlEngine* engine, const MLNode& data);
 

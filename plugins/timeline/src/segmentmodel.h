@@ -72,6 +72,7 @@ public:
     Segment* segmentAt(int index);
     void clearSegments();
 
+    QPair<int, int> indexesBetween(qint64 location1, qint64 location2);
     Segment* segmentThatWraps(qint64 position);
 
     double snapThreshold() const;

@@ -15,6 +15,15 @@ Item{
         anchors.horizontalCenter: parent.horizontalCenter
     }
     
+    
+    Rectangle{
+        x: track2.value
+        width: 100
+        height: 100
+        anchors.bottom: parent.bottom
+        color: '#1a3454'
+    }
+    
     TimelineView{
         id: timelineArea
         anchors.top: parent.top
@@ -26,24 +35,47 @@ Item{
         timeline: Timeline{
             fps: 30
             contentLength: 100 * fps
-            Track{
+            VideoTrack{
                 name: "Track.1"
-    
-                VideoSegment{
-                    position: 50
-                    length: 100
-                    file : project.dir() + "/../../../samples/_videos/amherst-11_2754_3754.avi"
-                    surface : timelineArea.surface
-                }
-            }
-            Track{
-                name: "Track.2"
+                surface: videoSurface
                 
                 VideoSegment{
                     position: 75 
                     length: 100
                     file : project.dir() + "/../../../samples/_videos/amherst-11_2754_3754.avi"
-                    surface : timelineArea.surface
+                }
+    
+                VideoSegment{
+                    position: 50
+                    length: 100
+                    file : project.dir() + "/../../../samples/_videos/amherst-11_2754_3754.avi"
+                }
+            }
+            NumberTrack{
+                id: track2
+                name: "Track.2"
+                
+                
+                NumberAnimationSegment{
+                    id: numberAnimationSegment
+                    position: 200
+                    length: 50
+                    from: 0
+                    to: 50
+                    easing.type: Easing.InOutQuad;
+                    easing.amplitude: 1.0; 
+                    easing.period: 1.0 
+                }
+                
+                NumberAnimationSegment{
+                    id: numberAnimationSegment2
+                    position: 300
+                    length: 50
+                    from: 50
+                    to: 0
+                    easing.type: Easing.InOutQuad;
+                    easing.amplitude: 1.0; 
+                    easing.period: 1.0 
                 }
             }
         }

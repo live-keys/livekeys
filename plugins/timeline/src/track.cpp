@@ -61,12 +61,12 @@ void Track::clearSegments(QQmlListProperty<QObject> *list){
 
 QQmlListProperty<QObject> Track::segments(){
     return QQmlListProperty<QObject>(
-            this,
-            this,
-             &Track::appendSegmentToList,
-             &Track::segmentCount,
-             &Track::segmentAt,
-             &Track::clearSegments);
+        this,
+        this,
+        &Track::appendSegmentToList,
+        &Track::segmentCount,
+        &Track::segmentAt,
+        &Track::clearSegments);
 }
 
 Track::CursorOperation Track::updateCursorPosition(qint64 newPosition){
@@ -78,12 +78,25 @@ Track::CursorOperation Track::updateCursorPosition(qint64 newPosition){
                 m_activeSegment->cursorMove(newPosition - m_activeSegment->position());
             }
         } else {
-            m_activeSegment->cursorExit();
+            m_activeSegment->cursorExit(newPosition);
             m_activeSegment = nullptr;
         }
     }
 
     if ( !m_activeSegment ){
+        QPair<int, int> passedIndexes = m_segmentModel->indexesBetween(m_cursorPosition, newPosition);
+        if ( passedIndexes.first != -1 ){
+            if ( m_cursorPosition > newPosition ){ // reverse
+                for ( int i = passedIndexes.second; i >= passedIndexes.first; --i ){
+                    m_segmentModel->segmentAt(i)->cursorPass(newPosition);
+                }
+            } else { // forward
+                for ( int i = passedIndexes.first; i <= passedIndexes.second; ++i ){
+                    m_segmentModel->segmentAt(i)->cursorPass(newPosition);
+                }
+            }
+        }
+
         Segment* segm = m_segmentModel->segmentThatWraps(newPosition);
         if ( segm ){
             segm->cursorEnter(newPosition - segm->position());
@@ -97,14 +110,21 @@ Track::CursorOperation Track::updateCursorPosition(qint64 newPosition){
 
 void Track::serialize(ViewEngine *engine, const QObject *o, MLNode &node){
     const Track* track = qobject_cast<const Track*>(o);
+    track->serialize(engine, node);
+}
 
+void Track::deserialize(Track *track, ViewEngine *engine, const MLNode &node){
+    track->deserialize(engine, node);
+}
+
+void Track::serialize(ViewEngine *engine, MLNode &node) const{
     node = MLNode(MLNode::Object);
 
-    node["name"] = track->m_name.toStdString();
+    node["name"] = m_name.toStdString();
 
     MLNode segmentsNode = MLNode(MLNode::Array);
-    for ( int i = 0; i < track->m_segmentModel->totalSegments(); ++i ){
-        Segment* segm = track->m_segmentModel->segmentAt(i);
+    for ( int i = 0; i < m_segmentModel->totalSegments(); ++i ){
+        Segment* segm = m_segmentModel->segmentAt(i);
         MLNode segmentNode;
         segm->serialize(engine->engine(), segmentNode);
         segmentsNode.append(segmentNode);
@@ -113,17 +133,17 @@ void Track::serialize(ViewEngine *engine, const QObject *o, MLNode &node){
     node["segments"] = segmentsNode;
 }
 
-void Track::deserialize(Track *track, ViewEngine *engine, const MLNode &node){
-    track->segmentModel()->clearSegments();
-    track->setName(QString::fromStdString(node["name"].asString()));
+void Track::deserialize(ViewEngine *engine, const MLNode &node){
+    segmentModel()->clearSegments();
+    setName(QString::fromStdString(node["name"].asString()));
 
     const MLNode::ArrayType& segments = node["segments"].asArray();
     for ( auto it = segments.begin(); it != segments.end(); ++it ){
         const MLNode& segmNode = *it;
         if ( segmNode["type"].asString() == "Segment" ){
             Segment* segment = new Segment;
-            segment->deserialize(track, engine->engine(), segmNode);
-            track->addSegment(segment);
+            segment->deserialize(this, engine->engine(), segmNode);
+            addSegment(segment);
         } else {
             QString componentFile = QString::fromStdString(
                 ApplicationContext::instance().pluginPath() + "/" + segmNode["factory"].asString()
@@ -137,7 +157,7 @@ void Track::deserialize(Track *track, ViewEngine *engine, const MLNode &node){
                     "Failed to read file for running:" + componentFile.toStdString(),
                     Exception::toCode("~File")
                 );
-                engine->throwError(&e, track);
+                engine->throwError(&e, this);
                 return;
             }
             QByteArray contentBytes = f.readAll();
@@ -166,8 +186,8 @@ void Track::deserialize(Track *track, ViewEngine *engine, const MLNode &node){
 
             segment = qobject_cast<Segment*>(result.value<QObject*>());
             if ( segment ){
-                segment->deserialize(track, engine->engine(), segmNode);
-                track->addSegment(segment);
+                segment->deserialize(this, engine->engine(), segmNode);
+                addSegment(segment);
             }
         }
     }

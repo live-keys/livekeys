@@ -36,7 +36,8 @@ HEADERS += \
     $$PWD/qvideodecoder.h \
     $$PWD/qvideodecodethread.h \
     $$PWD/videosegment.h \
-    $$PWD/videosurface.h
+    $$PWD/videosurface.h \
+    $$PWD/videotrack.h
 
 SOURCES += \
     $$PWD/lcvcore_plugin.cpp \
@@ -74,5 +75,6 @@ SOURCES += \
     $$PWD/qvideodecoder.cpp \
     $$PWD/qvideodecodethread.cpp \
     $$PWD/videosegment.cpp \
-    $$PWD/videosurface.cpp
+    $$PWD/videosurface.cpp \
+    $$PWD/videotrack.cpp
 

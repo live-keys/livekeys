@@ -56,6 +56,7 @@ void Segment::assignTrack(Track*){}
 void Segment::cursorEnter(qint64){}
 void Segment::cursorNext(qint64){}
 void Segment::cursorMove(qint64){}
+void Segment::cursorPass(qint64){}
 
 void Segment::serialize(QQmlEngine *, MLNode &node) const{
     node = MLNode(MLNode::Object);
@@ -87,7 +88,7 @@ void Segment::deserialize(Track*, QQmlEngine *, const MLNode &node){
         setColor(QColor(QString::fromStdString(node["color"].asString())));
 }
 
-void Segment::cursorExit(){}
+void Segment::cursorExit(qint64){}
 
 bool Segment::contains(qint64 position){
     return (position >= m_position && position < m_position + m_length);

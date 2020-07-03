@@ -2,6 +2,8 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/lvtimelineglobal.h \
+    $$PWD/numberanimationsegment.h \
+    $$PWD/numbertrack.h \
     $$PWD/timeline_plugin.h \
     $$PWD/timeline.h \
     $$PWD/timelineconfig.h \
@@ -13,6 +15,8 @@ HEADERS += \
     $$PWD/tracklistmodel.h
 
 SOURCES += \
+    $$PWD/numberanimationsegment.cpp \
+    $$PWD/numbertrack.cpp \
     $$PWD/timeline_plugin.cpp \
     $$PWD/timeline.cpp \
     $$PWD/timelineconfig.cpp \
