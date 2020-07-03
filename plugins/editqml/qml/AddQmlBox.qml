@@ -44,26 +44,25 @@ Rectangle{
 
     onObjectsOnlyChanged: {
         if (objectsOnly)
-            activeIndex = 1
+            activeIndex = 2
     }
 
     property int activeIndex : 0
     property bool idChecked: true
     onActiveIndexChanged: {
         searchInput.text = ''
-        root.addContainer.propertyModel.setFilter('')
-        root.addContainer.itemModel.setFilter('')
-        root.addContainer.eventModel.setFilter('')
-        root.addContainer.functionModel.setFilter('')
-        if (activeIndex === 1) idChecked = true
+        root.addContainer.model.setFilter('')
+        if (activeIndex === 2) idChecked = true
+        root.addContainer.model.setCategoryFilter(activeIndex)
     }
 
     property ListView activeList : {
         switch(activeIndex){
-            case 0: return propertyList
-            case 1: return itemList
-            case 2: return eventList
-            case 3: return functionList
+            case 0: return allList
+            case 1: return propertyList
+            case 2: return itemList
+            case 3: return eventList
+            case 4: return functionList
         }
     }
 
@@ -129,13 +128,37 @@ Rectangle{
             if (!addContainer) return ""
             var result;
             switch (activeIndex) {
-                case 0: result = "Properties"; break;
-                case 1: result = "Items"; break;
-                case 2: result = "Events"; break;
-                case 2: result = "Functions"; break;
+                case 0: result = "All"; break;
+                case 1: result = "Properties"; break;
+                case 2: result = "Items"; break;
+                case 3: result = "Events"; break;
+                case 4: result = "Functions"; break;
             }
 
             result = result + " for "  + addContainer.objectType
+        }
+    }
+
+    TextButton{
+        visible: !objectsOnly
+        anchors.top: parent.top
+        anchors.topMargin: 3
+        anchors.right: parent.right
+        anchors.rightMargin: {
+            if (objectsOnly) return 0
+            return 215+ (isForNode? 71: 0)
+        }
+        text: 'All'
+        height: 22
+        width: 70
+        fontPixelSize: 12
+        backgroundColor: isActive ? "#061a29" : "#111"
+        fontFamily: "Open Sans, sans-serif"
+        radius: 5
+
+        property bool isActive : activeIndex === 0
+        onClicked : {
+            root.activeIndex = 0
         }
     }
 
@@ -156,9 +179,9 @@ Rectangle{
         fontFamily: "Open Sans, sans-serif"
         radius: 5
 
-        property bool isActive : activeIndex === 0
+        property bool isActive : activeIndex === 1
         onClicked : {
-            root.activeIndex = 0
+            root.activeIndex = 1
         }
     }
 
@@ -179,10 +202,10 @@ Rectangle{
         radius: 5
 
         backgroundColor: isActive ? "#061a29" : "#111"
-        property bool isActive : activeIndex === 1
+        property bool isActive : activeIndex === 2
 
         onClicked : {
-            root.activeIndex = 1
+            root.activeIndex = 2
         }
     }
 
@@ -203,9 +226,9 @@ Rectangle{
         fontFamily: "Open Sans, sans-serif"
         radius: 5
 
-        property bool isActive : activeIndex === 2
+        property bool isActive : activeIndex === 3
         onClicked : {
-            root.activeIndex = 2
+            root.activeIndex = 3
         }
     }
 
@@ -226,16 +249,16 @@ Rectangle{
         fontFamily: "Open Sans, sans-serif"
         radius: 5
 
-        property bool isActive : activeIndex === 3
+        property bool isActive : activeIndex === 4
         onClicked : {
-            root.activeIndex = 3
+            root.activeIndex = 4
         }
     }
 
 
     Item {
         id: idInputItem
-        visible: activeIndex === 1
+        visible: activeIndex === 2
         height: 30
         width: parent.width
         anchors.top: parent.top
@@ -392,15 +415,7 @@ Rectangle{
 
             text: ""
             onTextChanged: {
-                if ( root.activeIndex === 0 ){
-                    root.addContainer.propertyModel.setFilter(text)
-                } else if ( root.activeIndex === 1 ){
-                    root.addContainer.itemModel.setFilter(text)
-                } else if ( root.activeIndex === 2 ) {
-                    root.addContainer.eventModel.setFilter(text)
-                } else if (root.activeIndex === 3) {
-                    root.addContainer.functionModel.setFilter(text)
-                }
+                root.addContainer.model.setFilter(text)
             }
 
             MouseArea{
@@ -425,20 +440,206 @@ Rectangle{
                 }
             }
             Keys.onReturnPressed: {
-                if ( root.activeIndex === 0 ){
-                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                } else if ( root.activeIndex === 1 ){
-                    var result = itemList.currentItem.code
-                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-                    root.accept(itemList.currentItem.importSpace, result)
-                } else if ( root.activeIndex === 2 ){
-                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
-                } else if (root.activeIndex === 3){
-                    root.accept(eventList.currentItem.type, propertyList.currentItem.code)
-                }
+                acceptSelection()
             }
             Keys.onEscapePressed: {
                 root.cancel()
+            }
+        }
+    }
+
+    function acceptSelection(){
+        var selector = root.activeIndex === 0 ? root.activeList.currentItem.category : root.activeIndex
+        if ( selector === 1 ){
+            root.activeIndex = 1
+            root.accept(root.activeList.currentItem.type, root.activeList.currentItem.code)
+        } else if (selector === 2){
+            root.activeIndex = 2
+            var result = root.activeList.currentItem.code
+            if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
+            root.accept(root.activeList.currentItem.importSpace, result)
+        } else if (selector === 3){
+            root.activeIndex = 3
+            root.accept(root.activeList.currentItem.type, root.activeList.currentItem.code)
+        } else if (selector === 4){
+            root.activeIndex = 4
+            root.accept(root.activeList.currentItem.type, root.activeList.currentItem.code)
+        }
+    }
+
+    Item{
+        id: allContainer
+        anchors.fill: parent
+        anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
+        visible: root.activeIndex === 0
+
+        ScrollView{
+            anchors.top : parent.top
+            anchors.left: parent.left
+
+            height : root.height - allContainer.anchors.topMargin
+            width: root.width / 2
+
+            style: ScrollViewStyle {
+                transientScrollBars: false
+                handle: Item {
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle {
+                        color: "#0b1f2e"
+                        anchors.fill: parent
+                    }
+                }
+                scrollBarBackground: Item{
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle{
+                        anchors.fill: parent
+                        color: root.color
+                    }
+                }
+                decrementControl: null
+                incrementControl: null
+                frame: Rectangle{color: "transparent"}
+                corner: Rectangle{color: root.color}
+            }
+
+            ListView{
+                id : allCategoryList
+                anchors.fill: parent
+                anchors.rightMargin: 2
+                anchors.bottomMargin: 5
+                anchors.topMargin: 0
+                visible: true
+                opacity: root.opacity
+
+                model: root.addContainer ? root.addContainer.model.types() : null
+
+                currentIndex: 0
+                onCountChanged: currentIndex = 0
+
+                boundsBehavior : Flickable.StopAtBounds
+                highlightMoveDuration: 100
+
+                delegate: Component{
+
+                    Rectangle{
+                        width : allCategoryList.width
+                        height : 25
+                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
+                        Text{
+                            id: label
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            font.family: root.fontFamily
+                            font.pixelSize: root.fontSize
+                            font.weight: Font.Light
+
+                            color: "#fafafa"
+                            text: modelData
+                        }
+
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: {
+                                allCategoryList.currentIndex = index
+                                if ( modelData === 'All' )
+                                    root.addContainer.model.setTypeFilter('')
+                                else
+                                    root.addContainer.model.setTypeFilter(modelData)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ScrollView{
+            anchors.top : parent.top
+            anchors.right: parent.right
+
+            height : root.height - allContainer.anchors.topMargin
+            width: root.width / 2
+
+            style: ScrollViewStyle {
+                transientScrollBars: false
+                handle: Item {
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle {
+                        color: "#0b1f2e"
+                        anchors.fill: parent
+                    }
+                }
+                scrollBarBackground: Item{
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle{
+                        anchors.fill: parent
+                        color: root.color
+                    }
+                }
+                decrementControl: null
+                incrementControl: null
+                frame: Rectangle{color: "transparent"}
+                corner: Rectangle{color: root.color}
+            }
+
+            ListView{
+                id : allList
+                anchors.fill: parent
+                anchors.rightMargin: 2
+                anchors.bottomMargin: 5
+                anchors.topMargin: 0
+                visible: true
+                opacity: root.opacity
+                model: root.addContainer ? root.addContainer.model : null
+
+                currentIndex: 0
+                onCountChanged: currentIndex = 0
+
+                boundsBehavior : Flickable.StopAtBounds
+                highlightMoveDuration: 100
+
+                delegate: Component{
+
+                    Rectangle{
+                        property string objectType : model.objectType
+                        property string type : model.type
+                        property string code: model.code
+                        property int category: model.category
+
+                        width : allList.width
+                        height : 25
+                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
+                        Text{
+                            id: label
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            font.family: root.fontFamily
+                            font.pixelSize: root.fontSize
+                            font.weight: Font.Light
+
+                            color: "#fafafa"
+                            text: model.label
+                        }
+
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: {
+                                allList.currentIndex = index
+                            }
+                            onDoubleClicked: {
+                                acceptSelection()
+                            }
+                        }
+                    }
+                }
+
             }
         }
     }
@@ -447,7 +648,7 @@ Rectangle{
         id: propertiesContainer
         anchors.fill: parent
         anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
-        visible: root.activeIndex === 0
+        visible: root.activeIndex === 1
 
         ScrollView{
             anchors.top : parent.top
@@ -489,7 +690,7 @@ Rectangle{
                 visible: true
                 opacity: root.opacity
 
-                model: root.addContainer ? root.addContainer.propertyModel.types() : null
+                model: root.addContainer ? root.addContainer.model.types() : null
 
                 currentIndex: 0
                 onCountChanged: currentIndex = 0
@@ -522,9 +723,9 @@ Rectangle{
                             onClicked: {
                                 propertyCategoryList.currentIndex = index
                                 if ( modelData === 'All' )
-                                    root.addContainer.propertyModel.setTypeFilter('')
+                                    root.addContainer.model.setTypeFilter('')
                                 else
-                                    root.addContainer.propertyModel.setTypeFilter(modelData)
+                                    root.addContainer.model.setTypeFilter(modelData)
                             }
                         }
                     }
@@ -571,7 +772,7 @@ Rectangle{
                 anchors.topMargin: 0
                 visible: true
                 opacity: root.opacity
-                model: root.addContainer ? root.addContainer.propertyModel : null
+                model: root.addContainer ? root.addContainer.model : null
 
                 currentIndex: 0
                 onCountChanged: currentIndex = 0
@@ -609,17 +810,7 @@ Rectangle{
                                 propertyList.currentIndex = index
                             }
                             onDoubleClicked: {
-                                if ( root.activeIndex === 0 ){
-                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                                } else if (root.activeIndex === 1){
-                                    var result = itemList.currentItem.code
-                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-                                    root.accept(itemList.currentItem.importSpace, result)
-                                } else if (root.activeIndex === 2){
-                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
-                                } else if (root.activeIndex === 3){
-                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
-                                }
+                                acceptSelection()
                             }
                         }
                     }
@@ -633,7 +824,7 @@ Rectangle{
         id: itemsContainer
         anchors.fill: parent
         anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
-        visible: root.activeIndex === 1
+        visible: root.activeIndex === 2
 
         ScrollView{
             anchors.top : parent.top
@@ -674,7 +865,7 @@ Rectangle{
                 anchors.topMargin: 0
                 visible: true
                 opacity: root.opacity
-                model: root.addContainer ? root.addContainer.itemModel.importSpaces() : null
+                model: root.addContainer ? root.addContainer.model.importSpaces() : null
 
                 currentIndex: 0
                 onCountChanged: currentIndex = 0
@@ -707,9 +898,9 @@ Rectangle{
                             onClicked: {
                                 itemsCategoryList.currentIndex = index
                                 if ( modelData === 'All' )
-                                    root.addContainer.itemModel.setImportFilter('')
+                                    root.addContainer.model.setImportFilter('')
                                 else
-                                    root.addContainer.itemModel.setImportFilter(modelData)
+                                    root.addContainer.model.setImportFilter(modelData)
                             }
                         }
                     }
@@ -758,7 +949,7 @@ Rectangle{
                 anchors.topMargin: 0
                 visible: true
                 opacity: root.opacity
-                model: root.addContainer ? root.addContainer.itemModel : null
+                model: root.addContainer ? root.addContainer.model : null
 
                 currentIndex: 0
                 onCountChanged: currentIndex = 0
@@ -794,17 +985,7 @@ Rectangle{
                                 itemList.currentIndex = index
                             }
                             onDoubleClicked: {
-                                if ( root.activeIndex === 0 ){
-                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                                } else if (root.activeIndex === 1){
-                                    var result = itemList.currentItem.code
-                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-                                    root.accept(itemList.currentItem.importSpace, result)
-                                } else if (root.activeIndex === 2){
-                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
-                                } else if (root.activeIndex === 3){
-                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
-                                }
+                                acceptSelection()
                             }
                         }
                     }
@@ -818,7 +999,7 @@ Rectangle{
         id: eventsContainer
         anchors.fill: parent
         anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
-        visible: root.activeIndex === 2
+        visible: root.activeIndex === 3
 
         ScrollView{
             anchors.top : parent.top
@@ -860,7 +1041,7 @@ Rectangle{
                 visible: true
                 opacity: root.opacity
 
-                model: root.addContainer ? root.addContainer.eventModel.types() : null
+                model: root.addContainer ? root.addContainer.model.types() : null
 
                 currentIndex: 0
                 onCountChanged: currentIndex = 0
@@ -893,9 +1074,9 @@ Rectangle{
                             onClicked: {
                                 eventsCategoryList.currentIndex = index
                                 if ( modelData === 'All' )
-                                    root.addContainer.eventModel.setTypeFilter('')
+                                    root.addContainer.model.setTypeFilter('')
                                 else
-                                    root.addContainer.eventModel.setTypeFilter(modelData)
+                                    root.addContainer.model.setTypeFilter(modelData)
                             }
                         }
                     }
@@ -942,7 +1123,7 @@ Rectangle{
                 anchors.topMargin: 0
                 visible: true
                 opacity: root.opacity
-                model: root.addContainer ? root.addContainer.eventModel : null
+                model: root.addContainer ? root.addContainer.model : null
 
                 currentIndex: 0
                 onCountChanged: currentIndex = 0
@@ -978,17 +1159,7 @@ Rectangle{
                                 eventList.currentIndex = index
                             }
                             onDoubleClicked: {
-                                if ( root.activeIndex === 0 ){
-                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                                } else if (root.activeIndex === 1){
-                                    var result = itemList.currentItem.code
-                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-                                    root.accept(itemList.currentItem.importSpace, result)
-                                }  else if (root.activeIndex === 2){
-                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
-                                } else if (root.activeIndex === 3){
-                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
-                                }
+                                acceptSelection()
                             }
                         }
                     }
@@ -1003,7 +1174,7 @@ Rectangle{
         id: functionsContainer
         anchors.fill: parent
         anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
-        visible: root.activeIndex === 3
+        visible: root.activeIndex === 4
 
         ScrollView{
             anchors.top : parent.top
@@ -1045,7 +1216,7 @@ Rectangle{
                 visible: true
                 opacity: root.opacity
 
-                model: root.addContainer ? root.addContainer.functionModel.types() : null
+                model: root.addContainer ? root.addContainer.model.types() : null
 
                 currentIndex: 0
                 onCountChanged: currentIndex = 0
@@ -1078,9 +1249,9 @@ Rectangle{
                             onClicked: {
                                 functionsCategoryList.currentIndex = index
                                 if ( modelData === 'All' )
-                                    root.addContainer.functionModel.setTypeFilter('')
+                                    root.addContainer.model.setTypeFilter('')
                                 else
-                                    root.addContainer.functionModel.setTypeFilter(modelData)
+                                    root.addContainer.model.setTypeFilter(modelData)
                             }
                         }
                     }
@@ -1127,7 +1298,7 @@ Rectangle{
                 anchors.topMargin: 0
                 visible: true
                 opacity: root.opacity
-                model: root.addContainer ? root.addContainer.functionModel : null
+                model: root.addContainer ? root.addContainer.model : null
 
                 currentIndex: 0
                 onCountChanged: currentIndex = 0
@@ -1160,20 +1331,10 @@ Rectangle{
                         MouseArea{
                             anchors.fill: parent
                             onClicked: {
-                                eventList.currentIndex = index
+                                functionList.currentIndex = index
                             }
                             onDoubleClicked: {
-                                if ( root.activeIndex === 0 ){
-                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                                } else if (root.activeIndex === 1){
-                                    var result = itemList.currentItem.code
-                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-                                    root.accept(itemList.currentItem.importSpace, result)
-                                }  else if (root.activeIndex === 2){
-                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
-                                } else if (root.activeIndex === 3){
-                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
-                                }
+                                acceptSelection()
                             }
                         }
                     }

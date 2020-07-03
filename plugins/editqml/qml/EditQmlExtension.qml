@@ -392,15 +392,15 @@ LiveExtension{
     }
 
     function addProperty(){
-        add(0)
-    }
-
-    function addObject(){
         add(1)
     }
 
-    function addEvent(){
+    function addObject(){
         add(2)
+    }
+
+    function addEvent(){
+        add(3)
     }
 
     function add(activeIndex){
@@ -430,17 +430,17 @@ LiveExtension{
                 addBox.destroy()
             }
             addBoxItem.accept = function(type, data){
-                if ( addBoxItem.activeIndex === 0 ){
+                if ( addBoxItem.activeIndex === 1 ){
                     activePane.documentHandler.codeHandler.addProperty(
-                        addContainer.propertyModel.addPosition, addContainer.objectType, type, data, true
-                    )
-                } else if ( addBoxItem.activeIndex === 1 ){
-                    activePane.documentHandler.codeHandler.addItem(
-                        addContainer.itemModel.addPosition, addContainer.objectType, data
+                        addContainer.model.addPosition, addContainer.objectType, type, data, true
                     )
                 } else if ( addBoxItem.activeIndex === 2 ){
+                    activePane.documentHandler.codeHandler.addItem(
+                        addContainer.model.addPosition, addContainer.objectType, data
+                    )
+                } else if ( addBoxItem.activeIndex === 3 ){
                     activePane.documentHandler.codeHandler.addEvent(
-                        addContainer.itemModel.addPosition, addContainer.objectType, type, data
+                        addContainer.model.addPosition, addContainer.objectType, type, data
                     )
                 }
                 addBox.destroy()

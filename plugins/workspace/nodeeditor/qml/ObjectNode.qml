@@ -52,14 +52,14 @@ Qan.NodeItem{
         if ( !addContainer )
             return
 
-        addContainer.activeIndex = 0
-        addContainer.propertyModel.setFilter(name)
-        if (addContainer.propertyModel.rowCount() !== 1) return
+        addContainer.activeIndex = 1
+        addContainer.model.setFilter(name)
+        if (addContainer.model.rowCount() !== 1) return
 
-        var type = addContainer.propertyModel.data(addContainer.propertyModel.index(0, 0), 256 + 3/*QmlSuggestionModel.Type*/)
+        var type = addContainer.model.data(addContainer.model.index(0, 0), 256 + 3/*QmlSuggestionModel.Type*/)
 
         var ppos = codeHandler.addProperty(
-            addContainer.propertyModel.addPosition, addContainer.objectType, type, name, true
+            addContainer.model.addPosition, addContainer.objectType, type, name, true
         )
 
         var ef = codeHandler.openNestedConnection(

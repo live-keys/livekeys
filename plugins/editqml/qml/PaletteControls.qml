@@ -210,7 +210,7 @@ QtObject{
         }
 
         addBoxItem.accept = function(type, data){
-            if ( addBoxItem.activeIndex === 0 ){ // property
+            if ( addBoxItem.activeIndex === 1 ){ // property
 
                 // check if property is opened already
                 for (var i = 0; i < container.propertiesOpened.length; ++i){
@@ -225,7 +225,7 @@ QtObject{
                 if (!isForNode && container.compact) container.expand()
 
                 var ppos = codeHandler.addProperty(
-                    addContainer.propertyModel.addPosition,
+                    addContainer.model.addPosition,
                     addContainer.objectType,
                     type,
                     data,
@@ -246,10 +246,10 @@ QtObject{
                 }
 
 
-            } else if ( addBoxItem.activeIndex === 1 ){ // object
+            } else if ( addBoxItem.activeIndex === 2 ){ // object
 
                 var opos = codeHandler.addItem(
-                            addContainer.itemModel.addPosition,
+                            addContainer.model.addPosition,
                             addContainer.objectType,
                             data)
 
@@ -267,7 +267,7 @@ QtObject{
                 }
 
 
-            } else if ( addBoxItem.activeIndex === 2 ){ // event
+            } else if ( addBoxItem.activeIndex === 3 ){ // event
 
                 // check if event is opened already
                 for (var i = 0; i < container.propertiesOpened.length; ++i){
@@ -280,7 +280,7 @@ QtObject{
                 }
 
                 var ppos = codeHandler.addEvent(
-                    addContainer.propertyModel.addPosition,
+                    addContainer.model.addPosition,
                     addContainer.objectType,
                     type,
                     data,
@@ -301,7 +301,7 @@ QtObject{
                     console.error("Error: Can't create a palette in a non-compiled program")
                 }
 
-            } else if (isForNode && addBoxItem.activeIndex === 3 ){
+            } else if (isForNode && addBoxItem.activeIndex === 4 ){
                 addSubobject(container.nodeParent, data, container.nodeParent.item.id ? 1 : 0, null)
             }
 
