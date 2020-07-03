@@ -112,6 +112,8 @@ Item{
         onWheel: {
             if (wheel.modifiers & Qt.ControlModifier){
                 var delta = Math.abs(wheel.angleDelta.y)
+                if ( delta > 1 )
+                    delta = 1
                 var x = wheel.x
                 var y = wheel.y
 

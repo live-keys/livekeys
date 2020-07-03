@@ -53,9 +53,9 @@ Rectangle{
         }
     }
 
-    Cv.ColorHistogram{
+    Cv.ColorHistogramView{
         id: autoLevelsHistogram
-        channel: Cv.ColorHistogram.AllChannels
+        histogram.channel: Cv.ColorHistogram.AllChannels
         visible: false
     }
 
@@ -98,7 +98,7 @@ Rectangle{
         }
     }
 
-    Cv.ColorHistogram{
+    Cv.ColorHistogramView{
         id: colorHistogram
 
         anchors.top: channelSelection.bottom
@@ -108,8 +108,8 @@ Rectangle{
 
         width: root.width - 20
         height: root.height - 90
-        fill: true
-        channel: {
+        histogram.fill: true
+        histogram.channel: {
             if ( channelSelection.selectedItem === 'RGB' || channelSelection.selectedItem === 'Grey')
                 return Cv.ColorHistogram.Total
             else if ( channelSelection.selectedItem === 'Red' )
@@ -120,7 +120,7 @@ Rectangle{
                 return Cv.ColorHistogram.BlueChannel
             return Cv.ColorHistogram.Total
         }
-        onChannelChanged: root.updateSliders()
+        histogram.onChannelChanged: root.updateSliders()
     }
 
     Item{

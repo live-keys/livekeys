@@ -14,3 +14,4 @@ Crop                       1.0 Crop.qml
 ImageDrawView              1.0 ImageDrawView.qml
 BlankImage                 1.0 BlankImage.qml
 Draw                       1.0 Draw.qml
+ColorHistogramView         1.0 ColorHistogramView.qml

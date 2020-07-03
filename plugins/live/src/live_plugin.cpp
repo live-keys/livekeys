@@ -45,6 +45,7 @@
 #include "tcplineconnection.h"
 #include "remotelineresponse.h"
 #include "tcplineserver.h"
+#include "linegrid.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -77,6 +78,7 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::RemoteLine>(          uri, 1, 0, "RemoteLine");
     qmlRegisterType<lv::QmlComponentMap>(     uri, 1, 0, "ComponentMap");
     qmlRegisterType<lv::QmlComponentMapData>( uri, 1, 0, "ComponentMapData");
+    qmlRegisterType<lv::LineGrid>(            uri, 1, 0, "LineGrid");
 
     qmlRegisterUncreatableType<lv::LicenseSettings>(
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");

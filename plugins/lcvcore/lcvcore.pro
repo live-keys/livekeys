@@ -65,6 +65,7 @@ DISTFILES += \
     palettes/ImageFilePalette.qml \
     palettes/VideoDecoderViewPalette.json \
     qml/BlankImage.qml \
+    qml/ColorHistogramView.qml \
     qml/Crop.qml \
     qml/Draw.qml \
     qml/EditCvExtension.qml \
