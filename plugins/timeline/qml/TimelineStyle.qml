@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.1
+import workspace 1.0 as Workspace
 
 QtObject{
     id: root
@@ -17,10 +18,21 @@ QtObject{
     property color scrollHandleBackgronud: "#1f2227"
 
     property color iconColor: "#a0a6b1"
-    property color textColor: "#a0a6b1"
     property color cursorColor: "#a0a6b1"
     property color markerColor: "#a0a6b1"
     property color markerLabelColor: "#999"
+
+    property QtObject inputStyle: QtObject{
+        property QtObject textStyle: Workspace.TextStyle{}
+        property QtObject hintTextStyle: Workspace.TextStyle{}
+        property color backgroundColor: '#070b0f'
+        property color borderColor: '#323232'
+        property double borderThickness: 1
+        property color textSelectionColor: '#3d4856'
+        property double radius: 3
+    }
+
+    property QtObject timeLabelStyle: Workspace.TextStyle{}
 
     property Component scrollStyle: ScrollViewStyle {
         transientScrollBars: false

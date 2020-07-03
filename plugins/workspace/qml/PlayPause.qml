@@ -28,6 +28,7 @@ Item{
         color : root.color
         font.pixelSize: root.height
         font.bold: true
+        font.letterSpacing: -1
         visible: root.isRunning
     }
 

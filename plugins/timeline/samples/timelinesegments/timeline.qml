@@ -14,31 +14,31 @@ Item{
         id: timeline
         fps: 30
         contentLength: 100 * fps
-        Track{
+        VideoTrack{
             name: "Track.1"
+            surface: videoSurface
 
             VideoSegment{
                 position: 50
                 length: 100
                 file : project.dir() + "/../../../../samples/_videos/amherst-11_2754_3754.avi"
-                surface : videoSurface
             }
             
             ImageSegment{
                 position: 250
                 length: 100
                 file : project.dir() + "/../../../../samples/_images/buildings_0246.jpg"
-                surface : videoSurface
             }
         }
-        Track{
+        VideoTrack{
             name: "Track.2"
+            surface: videoSurface
             
             VideoSegment{
+                
                 position: 75 
                 length: 100
                 file : project.dir() + "/../../../../samples/_videos/amherst-11_2754_3754.avi"
-                surface : videoSurface
             }
         }
     }

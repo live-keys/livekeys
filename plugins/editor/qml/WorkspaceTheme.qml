@@ -3,6 +3,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import workspace 1.0
+import timeline 1.0
 
 Theme{
     id: root
@@ -23,6 +24,7 @@ Theme{
         property color middlegroundBorder: '#232b30'
         property color middlegroundHighlight: '#062945'
 
+        property color middlegroundOverlayBorder: '#3f444d'
         property color middlegroundOverlayDominantBorder: '#575b63'
 
         property color foregroundFaded: '#dbdede'
@@ -350,5 +352,28 @@ Theme{
             property double radius: 5
             property QtObject textStyle: TextStyle{}
         }
+    }
+
+    // Timeline
+
+    property QtObject timelineStyle : TimelineStyle{
+        rowBackground: root.colorScheme.background
+        borderColor: root.colorScheme.backgroundBorder
+        topHeaderBackgroundColor: root.colorScheme.middleground
+        headerBorderColor: root.colorScheme.middlegroundBorder
+        headerRowBackground: root.colorScheme.middleground
+
+        inputStyle: root.inputStyle
+
+        timeLabelStyle: TextStyle{
+            color: root.colorScheme.foregroundFaded
+            font.family: "Source Code Pro, Ubuntu Mono"
+            font.pixelSize: 14
+            font.weight: Font.Normal
+        }
+
+        segmentBackground: root.colorScheme.middlegroundOverlay
+        segmentBorder : root.colorScheme.middlegroundOverlayBorder
+        segmentBorderFocus: root.colorScheme.foregroundFaded
     }
 }

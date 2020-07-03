@@ -27,6 +27,7 @@ LiveExtension{
             buttons: currentTheme ? currentTheme.buttons : buttons
             nodeEditor: currentTheme ? currentTheme.nodeEditor : nodeEditor
             selectableListView: currentTheme ? currentTheme.selectableListView : selectableListView
+            timelineStyle: currentTheme ? currentTheme.timelineStyle : timelineStyle
         }
 
         property PaletteControls paletteControls: PaletteControls{}
