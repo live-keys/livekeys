@@ -31,7 +31,7 @@ public:
 
 public:
     explicit Track(QObject *parent = nullptr);
-    ~Track();
+    virtual ~Track();
 
     const QString& name() const;
     void setName(const QString& name);
@@ -48,6 +48,9 @@ public:
 
     static void serialize(ViewEngine* engine, const QObject* o, MLNode &node);
     static void deserialize(Track* track, ViewEngine* engine, const MLNode &node);
+
+    virtual void serialize(ViewEngine* engine, MLNode& node) const;
+    virtual void deserialize(ViewEngine* engine, const MLNode& node);
 
     QJSValue timelineProperties() const;
 

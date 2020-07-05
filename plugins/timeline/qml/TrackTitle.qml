@@ -1,14 +1,14 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.3
 import timeline 1.0
-import workspace 1.0
+import workspace 1.0 as Workspace
 
 Item{
     id: root
     width: parent.width
     height: 25
 
-    property TimelineStyle timelineStyle : null
+    property QtObject timelineStyle : null
     property int trackIndex : 0
 
     signal addSegment(int index)
@@ -32,7 +32,7 @@ Item{
         height: parent.height - 1
         color: 'transparent'
 
-        MenuIcon{
+        Workspace.MenuIcon{
             id: menuIcon
             width: 5
             height: 6
@@ -49,13 +49,13 @@ Item{
         }
     }
 
-    EditableLabel{
+    Workspace.EditableLabel{
         id: editableLabel
         anchors.left: parent.left
         anchors.leftMargin: 20
         height: parent.height
         text: track.name
-        textColor: root.timelineStyle.textColor
+        style: root.timelineStyle.inputStyle
         onTextChanged: {
             track.name = text
         }

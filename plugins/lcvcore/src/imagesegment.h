@@ -4,13 +4,13 @@
 #include <QObject>
 #include "live/segment.h"
 #include "videosurface.h"
+#include "videotrack.h"
 
 namespace lv{
 
 class ImageSegment : public Segment{
 
     Q_OBJECT
-    Q_PROPERTY(lv::VideoSurface* surface READ surface WRITE setSurface NOTIFY surfaceChanged)
     Q_PROPERTY(QString file              READ file    WRITE setFile    NOTIFY fileChanged)
 
 public:
@@ -18,9 +18,6 @@ public:
     ~ImageSegment() override;
 
     void openFile();
-
-    VideoSurface *surface() const;
-    void setSurface(VideoSurface* surface);
 
     const QString& file() const;
     void setFile(const QString &file);
@@ -30,7 +27,7 @@ public:
 
     void assignTrack(Track *track) override;
     void cursorEnter(qint64 position) override;
-    void cursorExit() override;
+    void cursorExit(qint64) override;
     void cursorNext(qint64 position) override;
     void cursorMove(qint64 position) override;
 
@@ -40,23 +37,10 @@ signals:
     void fileChanged();
 
 private:
-    Track*            m_track;
+    VideoTrack*       m_track;
     QString           m_file;
-    lv::VideoSurface* m_surface;
     QMat*             m_image;
 };
-
-inline void ImageSegment::setSurface(VideoSurface* surface){
-    if (m_surface == surface)
-        return;
-
-    m_surface = surface;
-    emit surfaceChanged();
-}
-
-inline VideoSurface* ImageSegment::surface() const{
-    return m_surface;
-}
 
 inline const QString& ImageSegment::file() const{
     return m_file;

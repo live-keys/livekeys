@@ -6,6 +6,7 @@
 
 #include "qvideocapture.h"
 #include "videosurface.h"
+#include "videotrack.h"
 
 namespace cv{
 class VideoCapture;
@@ -17,14 +18,10 @@ namespace lv{
 class VideoSegment : public Segment{
 
     Q_OBJECT
-    Q_PROPERTY(lv::VideoSurface* surface READ surface WRITE setSurface NOTIFY surfaceChanged)
-    Q_PROPERTY(QString file              READ file    WRITE setFile    NOTIFY fileChanged)
+    Q_PROPERTY(QString file  READ file WRITE setFile NOTIFY fileChanged)
 
 public:
     explicit VideoSegment(QObject *parent = nullptr);
-
-    VideoSurface* surface() const;
-    void setSurface(VideoSurface* surface);
 
     const QString &file() const;
 
@@ -35,7 +32,7 @@ public:
 
     void assignTrack(Track *track) override;
     void cursorEnter(qint64 position) override;
-    void cursorExit() override;
+    void cursorExit(qint64) override;
     void cursorNext(qint64 position) override;
     void cursorMove(qint64 position) override;
 
@@ -43,27 +40,13 @@ public slots:
     void setFile(const QString& file);
 
 signals:
-    void surfaceChanged();
     void fileChanged();
 
 private:
-    Track*        m_track;
-    VideoSurface* m_surface;
-    QString       m_file;
+    VideoTrack*       m_track;
+    QString           m_file;
     cv::VideoCapture* m_capture;
 };
-
-inline VideoSurface *VideoSegment::surface() const{
-    return m_surface;
-}
-
-inline void VideoSegment::setSurface(VideoSurface *surface){
-    if (m_surface == surface)
-        return;
-
-    m_surface = surface;
-    emit surfaceChanged();
-}
 
 inline const QString& VideoSegment::file() const{
     return m_file;

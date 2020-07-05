@@ -9,8 +9,6 @@ TextButton              1.0 TextButton.qml
 InputBox                1.0 InputBox.qml
 singleton LivekeysStyle 1.0 LivekeysStyle.qml
 LivekeysScrollStyle     1.0 LivekeysScrollStyle.qml
-JsonFileReader          1.0 JsonFileReader.qml
-StaticJsonFileReader    1.0 StaticJsonFileReader.qml
 VisualLogView           1.0 VisualLogView.qml
 DropDown                1.0 DropDown.qml
 Label                   1.0 Label.qml

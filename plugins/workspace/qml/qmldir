@@ -19,3 +19,6 @@ NumberLabel        1.0 NumberLabel.qml
 PaneMenu           1.0 PaneMenu.qml
 PaneMenuItem       1.0 PaneMenuItem.qml
 SelectableListView 1.0 SelectableListView.qml
+ColorPicker        1.0 ColorPicker.qml
+PenSizeIcon        1.0 PenSizeIcon.qml
+RectangleSelection 1.0 RectangleSelection.qml

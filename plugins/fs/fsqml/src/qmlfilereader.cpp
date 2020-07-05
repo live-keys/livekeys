@@ -27,7 +27,7 @@ namespace lv{
 QmlFileReader::QmlFileReader(QObject *parent)
     : QObject(parent)
     , m_componentComplete(false)
-    , m_watcher(0)
+    , m_watcher(nullptr)
 {
 }
 

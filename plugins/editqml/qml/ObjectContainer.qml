@@ -16,8 +16,7 @@ Item{
         {
             var child = groupsContainer.children[i]
             if (child.objectName === "objectContainer"){
-                if (child.contentWidth + 20 > max)
-                    max = child.contentWidth + 20
+                if (child.contentWidth + 20 > max) max = child.contentWidth + 20
             } else if (child.objectName === "propertyContainer" && child.isAnObject){
                 if (child.childObjectContainer &&
                     child.childObjectContainer.contentWidth + 140 > max)

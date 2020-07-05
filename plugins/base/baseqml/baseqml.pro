@@ -32,7 +32,8 @@ OTHER_FILES += \
 # Handling the palette
 
 OTHER_FILES *= \
-    palettes/*.qml
+    palettes/*.qml \
+    samples/*.qml
 
 # Deploy
 
@@ -46,6 +47,9 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 
 DISTFILES += \
+    qml/JsonDecoder.qml \
+    qml/JsonEncoder.qml \
     qml/live.package.json \
     qml/live.plugin.json \
-    qml/plugins.qmltypes
+    qml/plugins.qmltypes \
+    samples/readjsonfile.qml

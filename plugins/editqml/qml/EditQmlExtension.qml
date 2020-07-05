@@ -9,6 +9,7 @@ LiveExtension{
 
     globals : ProjectQmlExtension{
         property PaletteStyle paletteStyle: PaletteStyle{
+            colorScheme:  currentTheme ? currentTheme.colorScheme : colorScheme
             backgroundColor: currentTheme ? currentTheme.colorScheme.middleground : backgroundColor
             paletteBackgroundColor: currentTheme ? currentTheme.colorScheme.background : paletteBackgroundColor
             paletteHeaderColor: currentTheme ? currentTheme.colorScheme.middleground : paletteHeaderColor
@@ -26,6 +27,7 @@ LiveExtension{
             buttons: currentTheme ? currentTheme.buttons : buttons
             nodeEditor: currentTheme ? currentTheme.nodeEditor : nodeEditor
             selectableListView: currentTheme ? currentTheme.selectableListView : selectableListView
+            timelineStyle: currentTheme ? currentTheme.timelineStyle : timelineStyle
         }
 
         property PaletteControls paletteControls: PaletteControls{}

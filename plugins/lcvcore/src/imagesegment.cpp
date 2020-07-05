@@ -1,6 +1,10 @@
 #include "imagesegment.h"
+
 #include "live/mlnode.h"
 #include "live/track.h"
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
+#include "live/exception.h"
 
 #include <QMetaObject>
 #include <QJSValue>
@@ -35,74 +39,51 @@ void ImageSegment::serialize(QQmlEngine *engine, MLNode &node) const{
 
     node["file"] = m_file.toStdString();
     node["type"] = "ImageSegment";
-    node["factory"] = "lcvcore/VideoCaptureSegmentFactory.qml";
-
-    if ( m_surface && m_track ){
-        QJSValue properties = m_track->timelineProperties();
-
-        QJSValueIterator pit(properties);
-        while ( pit.next() ){
-            QJSValue current = pit.value();
-            if ( current.isQObject() ){
-                QObject* obj = current.toQObject();
-                if ( obj == m_surface ){
-                    node["surface"] = pit.name().toStdString();
-                }
-            }
-        }
-    }
-
+    node["factory"] = "lcvcore/ImageSegmentFactory.qml";
 }
 
 void ImageSegment::deserialize(Track *track, QQmlEngine *engine, const MLNode &node){
     Segment::deserialize(track, engine, node);
-
     setFile(QString::fromStdString(node["file"].asString()));
-    if ( node.hasKey("surface") ){
-        QJSValue properties = track->timelineProperties();
-        QJSValue surface = properties.property(QString::fromStdString(node["surface"].asString()));
-        if ( surface.isQObject() ){
-            m_surface = qobject_cast<VideoSurface*>(surface.toQObject());
-        }
-    }
 }
 
 void ImageSegment::assignTrack(Track *track){
-    m_track = track;
-    QJSValue val = track->timelineProperties().property("videoCaptureSurface");
-    VideoSurface* surface = qobject_cast<VideoSurface*>(val.toQObject());
-    if ( surface ){
-        setSurface(surface);
+    VideoTrack* nt = qobject_cast<VideoTrack*>(track);
+    if ( !nt ){
+        Exception e = CREATE_EXCEPTION(lv::Exception, "NumberAnimationSegment needs NumberTrack at '" + track->name().toStdString() + "'.", Exception::toCode("~Track") );
+        lv::ViewContext::instance().engine()->throwError(&e, this);
+        return;
     }
+    m_track = nt;
 }
 
-void ImageSegment::cursorEnter(qint64 position){
-    if ( !m_surface || !m_image)
+void ImageSegment::cursorEnter(qint64 pos){
+    if ( !m_track || !m_track->surface() || !m_image)
         return;
 
-    m_surface->updateSurface(position, m_image->cloneMat());
+    m_track->surface()->updateSurface(position() + pos, m_image->cloneMat());
 }
 
-void ImageSegment::cursorExit(){
-    if ( !m_surface || !m_image)
+void ImageSegment::cursorExit(qint64){
+    if ( !m_track || !m_track->surface() || !m_image)
         return;
 
-    m_surface->output()->cvMat()->setTo(cv::Scalar(0));
-    m_surface->update();
+    m_track->surface()->output()->cvMat()->setTo(cv::Scalar(0));
+    m_track->surface()->update();
 }
 
-void ImageSegment::cursorNext(qint64 position){
-    if ( !m_surface || !m_image)
+void ImageSegment::cursorNext(qint64 pos){
+    if ( !m_track || !m_track->surface() || !m_image)
         return;
 
-    m_surface->updateSurface(position, m_image->cloneMat());
+    m_track->surface()->updateSurface(position() + pos, m_image->cloneMat());
 }
 
-void ImageSegment::cursorMove(qint64 position){
-    if ( !m_surface || !m_image)
+void ImageSegment::cursorMove(qint64 pos){
+    if ( !m_track || !m_track->surface() || !m_image)
         return;
 
-    m_surface->updateSurface(position, m_image->cloneMat());
+    m_track->surface()->updateSurface(position() + pos, m_image->cloneMat());
 }
 
 }// namespace

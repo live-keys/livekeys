@@ -2,6 +2,7 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/eventrelay.h \
+    $$PWD/linegrid.h \
     $$PWD/live_plugin.h \
     $$PWD/qmlcolor.h \
     $$PWD/stringbasedloader.h \
@@ -33,6 +34,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/eventrelay.cpp \
+    $$PWD/linegrid.cpp \
     $$PWD/live_plugin.cpp \
     $$PWD/qmlcolor.cpp \
     $$PWD/stringbasedloader.cpp \

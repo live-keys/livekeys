@@ -10,14 +10,26 @@ CodePalette{
     id: palette
 
     type: "qml/timeline#Timeline"
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject defaultTimelineStyle: TimelineStyle{}
 
-    item:
+    item: Item{
+        width : 500
+        height: 200
+
         TimelineView{
             id: timelineArea
-            width : 500
-            height: 200
+            anchors.fill: parent
             focus : true
+            timelineStyle: paletteStyle ? paletteStyle.timelineStyle : palette.defaultTimelineStyle
         }
+
+        ResizeArea{
+            minimumHeight: 200
+            minimumWidth: 400
+        }
+
+    }
 
     onInit: {
         timelineArea.timeline = value

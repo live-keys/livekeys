@@ -9,3 +9,9 @@ VideoControls              1.0 VideoControls.qml
 VideoDecoderView           1.0 VideoDecoderView.qml
 GrayscaleView              1.0 GrayscaleView.qml
 VideoCaptureSegmentFactory 1.0 VideoCaptureSegmentFactory.qml
+NavigableImageView         1.0 NavigableImageView.qml
+Crop                       1.0 Crop.qml
+ImageDrawView              1.0 ImageDrawView.qml
+BlankImage                 1.0 BlankImage.qml
+Draw                       1.0 Draw.qml
+ColorHistogramView         1.0 ColorHistogramView.qml

@@ -30,13 +30,16 @@
 #include "timeline.h"
 #include "timelineconfig.h"
 #include "track.h"
+#include "numbertrack.h"
 #include "segment.h"
 #include "segmentmodel.h"
+#include "numberanimationsegment.h"
 
 void TimelinePlugin::registerTypes(const char *uri){
     // @uri timeline
     qmlRegisterType<lv::Timeline>(      uri, 1, 0, "Timeline");
     qmlRegisterType<lv::Track>(         uri, 1, 0, "Track");
+    qmlRegisterType<lv::NumberTrack>(   uri, 1, 0, "NumberTrack");
     qmlRegisterType<lv::Segment>(       uri, 1, 0, "Segment");
     qmlRegisterType<lv::SegmentModel>(  uri, 1, 0, "SegmentModel");
     qmlRegisterType<lv::TimelineConfig>(uri, 1, 0, "TimelineConfig");
@@ -49,6 +52,8 @@ void TimelinePlugin::registerTypes(const char *uri){
     qmlRegisterType<QRangeView>(uri, 1, 0, "RangeView");
     qmlRegisterUncreatableType<QAbstractRangeModel>(
                 uri, 1, 0, "AbstractRangeModel", "AbstractRangeModel is of abstract type.");
+
+    qmlRegisterType<lv::NumberAnimationSegment>(uri, 1, 0, "NumberAnimationSegment");
 }
 
 void TimelinePlugin::initializeEngine(QQmlEngine *, const char *){

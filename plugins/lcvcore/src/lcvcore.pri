@@ -14,7 +14,6 @@ HEADERS += \
     $$PWD/qvideocapture.h \
     $$PWD/qvideocapturethread.h \
     $$PWD/qmatview.h \
-    $$PWD/qimwrite.h \
     $$PWD/qvideowriter.h \
     $$PWD/qvideowriterthread.h \
     $$PWD/qmat.h \
@@ -37,7 +36,8 @@ HEADERS += \
     $$PWD/qvideodecoder.h \
     $$PWD/qvideodecodethread.h \
     $$PWD/videosegment.h \
-    $$PWD/videosurface.h
+    $$PWD/videosurface.h \
+    $$PWD/videotrack.h
 
 SOURCES += \
     $$PWD/imagesegment.cpp \
@@ -56,7 +56,6 @@ SOURCES += \
     $$PWD/qvideocapture.cpp \
     $$PWD/qvideocapturethread.cpp \
     $$PWD/qmatview.cpp \
-    $$PWD/qimwrite.cpp \
     $$PWD/qvideowriter.cpp \
     $$PWD/qvideowriterthread.cpp \
     $$PWD/qmat.cpp \
@@ -76,5 +75,6 @@ SOURCES += \
     $$PWD/qvideodecoder.cpp \
     $$PWD/qvideodecodethread.cpp \
     $$PWD/videosegment.cpp \
-    $$PWD/videosurface.cpp
+    $$PWD/videosurface.cpp \
+    $$PWD/videotrack.cpp
 

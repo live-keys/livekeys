@@ -143,7 +143,7 @@ void QColorHistogramNode::render(
     m_painter->begin(m_paintDevice);
     m_painter->setRenderHints(QPainter::Antialiasing | QPainter::HighQualityAntialiasing);
 
-    static QColor colors[5] = {QColor("#180bbf"), QColor("#0bbf14"), QColor("#bf0b0b"), QColor("#eee"), QColor("#9b0bbf")};
+    static QColor colors[5] = {QColor("#05426e"), QColor("#00803c"), QColor("#6e0516"), QColor("#eee"), QColor("#9b0bbf")};
 
     if ( values.rows == 1 ){
         QColor color = channel < 0 ? QColor("#fff") : colors[(channel > 4 ? 4 : channel)];

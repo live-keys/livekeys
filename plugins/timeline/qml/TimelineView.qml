@@ -3,7 +3,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.2
 import timeline 1.0
-import workspace 1.0
+import workspace 1.0 as Workspace
 
 Rectangle{
     id: root
@@ -25,7 +25,7 @@ Rectangle{
 
     property SegmentInsertMenu segmentInsertMenu: segmentInsertMenu
 
-    property TimelineStyle timelineStyle : TimelineStyle{}
+    property QtObject timelineStyle : TimelineStyle{}
     property Timeline timeline : Timeline{
         fps: 30
         contentLength: 100 * fps
@@ -59,7 +59,7 @@ Rectangle{
 
     property Item timelineOptions : Item{
         anchors.fill: parent
-        MenuIcon{
+        Workspace.MenuIcon{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10
@@ -73,7 +73,7 @@ Rectangle{
                 }
             }
         }
-        PlayPause{
+        Workspace.PlayPause{
             width: 15
             height: 15
             anchors.verticalCenter: parent.verticalCenter
@@ -88,15 +88,13 @@ Rectangle{
                     root.timeline.stop()
             }
         }
-        Text{
+
+        Workspace.Label{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 68
             text: root.timeline.positionToLabel(timelineArea.timeline.cursorPosition, false)
-            color: root.timelineStyle.textColor
-            font.family : "Source Code Pro, Courier New, Courier"
-            font.pixelSize: 14
-            font.weight : Font.Normal
+            textStyle: root.timelineStyle.timeLabelStyle
         }
 
         Menu{
@@ -276,6 +274,7 @@ Rectangle{
 
         height: parent.height - 35
         width: parent.width - 150
+        color: timelineStyle.rowBackground
         x: 150
 
         ScrollView{
@@ -284,14 +283,27 @@ Rectangle{
 
             style: ScrollViewStyle {
                 transientScrollBars: false
-                handle: root.timelineStyle.scrollStyleHandle
-                scrollBarBackground: root.timelineStyle.scrollStyleBackground
+                handle: Item {
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle {
+                        color: "#1f2227"
+                        anchors.fill: parent
+                    }
+                }
+                scrollBarBackground: Item{
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle{
+                        anchors.fill: parent
+                        color: 'transparent'
+                    }
+                }
                 decrementControl: null
                 incrementControl: null
-                frame: root.timelineStyle.scrollStyleFrame
-                corner: root.timelineStyle.scrollStyleCorner
+                frame: Item{}
+                corner: Rectangle{color: 'transparent'}
             }
-
             ListView{
                 id: timelineView
                 boundsBehavior: Flickable.StopAtBounds

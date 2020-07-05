@@ -59,11 +59,13 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_defaultPalettes["qml/double"] = "DoublePalette";
     m_defaultPalettes["qml/int"]    = "IntPalette";
     m_defaultPalettes["qml/string"] = "TextPalette";
+    m_defaultPalettes["qml/color"] = "ColorPalette";
     m_defaultPalettes["qml/lcvcore#VideoDecoderView"] = "VideoDecoderViewPalette";
     m_defaultPalettes["qml/lcvcore#GrayscaleView"] = "GrayscaleViewPalette";
     m_defaultPalettes["qml/QtQuick#Rectangle"] = "RectangleSizePalette";
     m_defaultPalettes["qml/lcvphoto#HueSaturationLightness"] = "HueSaturationLightnessPalette";
     m_defaultPalettes["qml/lcvphoto#Levels"] = "LevelsPalette";
+    m_defaultPalettes["qml/timeline#Timeline"] = "TimelinePalette";
     m_defaultPalettes["qml/lcvphoto#BrightnessAndContrast"] = "BrightnessAndContrastPalette";
     MLNode s = parent->readFor("qmljs");
     if ( s.type() == MLNode::Object )
