@@ -47,10 +47,7 @@ void Timeline::appendTrackToList(QQmlListProperty<QObject> *list, QObject *track
 
     Track* track = qobject_cast<Track*>(trackOb);
     if (!track){
-        Exception e = CREATE_EXCEPTION(
-            Exception, "Timeline: Trying to append a child that's not a track.", Exception::toCode("~Track")
-        );
-        lv::ViewContext::instance().engine()->throwError(&e, that);
+        THROW_QMLERROR(Exception, "Timeline: Trying to append a child that's not a track.", Exception::toCode("~Track"), that);
         return;
     }
 

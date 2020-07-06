@@ -94,6 +94,7 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     , m_incubationController(new IncubationController)
     , m_packageGraph(nullptr)
     , m_errorCounter(0)
+    , m_memory(new Memory(this))
 {
     m_engine->setProperty("viewEngine", QVariant::fromValue(this));
     m_engine->setIncubationController(m_incubationController);
@@ -126,6 +127,7 @@ ViewEngine::~ViewEngine(){
     m_engine->setProperty("viewEngine", QVariant());
     delete m_engineMutex;
     m_engine->deleteLater();
+    delete m_memory;
 }
 
 /** Locks the engine for use until the passed function finishes */
@@ -286,7 +288,7 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterUncreatableType<lv::VisualLogModel>(
         uri, 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "lk.log"));
     qmlRegisterUncreatableType<lv::Memory>(
-        uri, 1, 0, "Memory",          ViewEngine::typeAsPropertyMessage("Memory", "lk.mem"));
+        uri, 1, 0, "Memory",          ViewEngine::typeAsPropertyMessage("Memory", "lk.engine.mem"));
     qmlRegisterUncreatableType<lv::VisualLogQmlObject>(
         uri, 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
     qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
@@ -543,6 +545,69 @@ ViewEngine *ViewEngine::grab(QObject *object){
     return nullptr;
 }
 
+lv::ViewEngine::ComponentResult::Ptr ViewEngine::createPluginObject(const QString &filePath, QObject *parent){
+    return createObject(QString::fromStdString(lv::ApplicationContext::instance().pluginPath()) + "/" + filePath, parent);
+}
+
+ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePath, QObject *parent){
+    QFile f(filePath);
+    if ( !f.open(QFile::ReadOnly) ){
+        ViewEngine::ComponentResult::Ptr result = ViewEngine::ComponentResult::create();
+        result->errors.append(QmlError(
+            this,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Component: Failed to read file:" + f.fileName().toStdString(),
+                Exception::toCode("~File"))
+        ));
+        return result;
+    }
+
+    ViewEngine::ComponentResult::Ptr result = ViewEngine::ComponentResult::create();
+
+    result->component = new QQmlComponent(m_engine, parent);
+
+    QByteArray contentBytes = f.readAll();
+    result->component->setData(contentBytes, QUrl::fromLocalFile(f.fileName()));
+
+    QList<QQmlError> errors = result->component->errors();
+    if ( errors.size() ){
+        for ( const QQmlError& e : errors ){
+            result->errors.append(QmlError(this, e));
+        }
+        return result;
+    }
+
+    if ( !result->component->isReady() ){
+        result->errors.append(QmlError(
+            this,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Component: Component is not ready:" + f.fileName().toStdString(),
+                Exception::toCode("~Component"))
+        ));
+        return result;
+    }
+
+    result->object = result->component->create();
+
+    errors = result->component->errors();
+    if ( errors.size() ){
+        for ( const QQmlError& e : errors ){
+            result->errors.append(QmlError(this, e));
+        }
+    }
+    return result;
+}
+
+ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QUrl &filePath, QObject *parent){
+    if ( filePath.isLocalFile() ){
+        return createObject(filePath.toLocalFile(), parent);
+    }
+
+    return ViewEngine::ComponentResult::create();
+}
+
 QJSValue ViewEngine::unwrapError(QJSValue error) const{
     QmlError e = findError(error);
     return e.isNull() ? error : e.value();
@@ -555,6 +620,21 @@ QJSValue ViewEngine::toJSErrors(const QList<QQmlError> &errors) const{
         val.setProperty(i++, toJSError(error));
     }
     return val;
+}
+
+ViewEngine::ComponentResult::Ptr ViewEngine::ComponentResult::create(QObject *o, QQmlComponent *c){
+    return ViewEngine::ComponentResult::Ptr(new ViewEngine::ComponentResult(o, c));
+}
+
+ViewEngine::ComponentResult::~ComponentResult(){
+    delete component;
+}
+
+void ViewEngine::ComponentResult::jsThrowError(){
+    if ( errors.size() ){
+        QmlError error = QmlError::join(errors);
+        error.jsThrow();
+    }
 }
 
 }// namespace

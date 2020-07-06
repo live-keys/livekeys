@@ -210,7 +210,8 @@ QWritableMat *QMatOp::createWritableFromMat(QMat *mat){
 }
 
 void QMatOp::fill(QMat *m, const QColor &color){
-    m->internal().setTo(toScalar(color));
+    if ( m )
+        m->internal().setTo(toScalar(color));
 }
 
 void QMatOp::fillWithMask(QMat *m, const QColor &color, QMat *mask){

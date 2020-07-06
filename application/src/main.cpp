@@ -52,7 +52,6 @@ int main(int argc, char *argv[]){
     app.setOrganizationName("Livekeys");
     app.setOrganizationDomain("Livekeys");
 
-
     try{
         Livekeys::Ptr livekeys = Livekeys::create(argc, argv);
         livekeys->loadInternals();

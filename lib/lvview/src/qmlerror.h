@@ -21,8 +21,9 @@ public:
         None = 0,
         PrintMessage = 1,
         PrintLocation = 2,
-        PrintStackTrace = 4,
-        PrintCStackTrace = 8
+        PrintExtra = 4,
+        PrintStackTrace = 8,
+        PrintCStackTrace = 16
     };
 
 public:
@@ -42,13 +43,22 @@ public:
 
     bool isNull() const;
 
+    double code() const;
     QString messageWithId() const;
     QString message() const;
     QObject* object() const;
+    bool hasLocation() const;
+    QString fileName() const;
+    int lineNumber() const;
+    QString functionName() const;
+
 
     QString toString(int options = QmlError::PrintMessage | QmlError::PrintLocation) const;
 
     void jsThrow();
+
+    static QString toString(const QList<QmlError>& errors, int options = QmlError::PrintMessage | QmlError::PrintLocation);
+    static QmlError join(const QList<QmlError>& errors);
 
 private:
     void initializeFromException(const lv::Exception& e, QObject* object = nullptr);

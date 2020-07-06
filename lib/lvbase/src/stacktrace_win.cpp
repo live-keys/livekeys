@@ -49,7 +49,7 @@ StackTrace::Ptr StackTrace::capture(int maxFrames){
 
     char* objectName = (char*)malloc(TRACE_MAX_OBJECT_PATH_LENGTH);
 
-    for (int i = SLICE_FRAMES_START; i < numberOfFrames; i++){
+    for (int i = 0; i < numberOfFrames; i++){
 
         DWORD64 address = (DWORD64)(stack[i]);
         SymFromAddr(process, address, NULL, symbol);
@@ -67,15 +67,19 @@ StackTrace::Ptr StackTrace::capture(int maxFrames){
         }
 
         if (SymGetLineFromAddr64(process, address, &displacement, line)){
-            dest->m_frames->push_back(StackFrame(
-                symbol->Name,
-                symbol->Address,
-                objectName,
-                line->FileName,
-                line->LineNumber)
-            );
+            if ( i >= SLICE_FRAMES_START ){
+                dest->m_frames->push_back(StackFrame(
+                    symbol->Name,
+                    symbol->Address,
+                    objectName,
+                    line->FileName,
+                    line->LineNumber)
+                );
+            }
         } else {
-            dest->m_frames->push_back(StackFrame(symbol->Name, symbol->Address, objectName));
+            if ( i >= SLICE_FRAMES_START ){
+                dest->m_frames->push_back(StackFrame(symbol->Name, symbol->Address, objectName));
+            }
         }
     }
 

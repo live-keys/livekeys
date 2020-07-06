@@ -37,6 +37,7 @@ class QMutex;
 
 namespace lv{
 
+class Memory;
 class ErrorHandler;
 class PackageGraph;
 class IncubationController;
@@ -66,9 +67,33 @@ public:
 class LV_VIEW_EXPORT ViewEngine : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
+    Q_PROPERTY(bool isLoading   READ isLoading NOTIFY isLoadingChanged)
+    Q_PROPERTY(lv::Memory* mem  READ memory    CONSTANT)
 
 public:
+    class LV_VIEW_EXPORT ComponentResult{
+
+    public:
+        typedef QSharedPointer<ComponentResult> Ptr;
+
+    public:
+        static Ptr create(QObject* o = nullptr, QQmlComponent* c = nullptr);
+        ~ComponentResult();
+
+        bool hasError() const{ return errors.size(); }
+        void jsThrowError();
+
+        QList<QmlError> errors;
+        QObject*        object;
+        QQmlComponent*  component;
+
+    private:
+        ComponentResult(QObject* o = nullptr, QQmlComponent* c = nullptr) : object(o), component(c){}
+
+        ComponentResult(const ComponentResult&);
+        ComponentResult& operator=(const ComponentResult&);
+    };
+
     /** Callback function type to be run after the engine finishes compiling */
     typedef void(*CompileHook)(const QString&, const QUrl&, QObject*, void*);
 
@@ -93,6 +118,7 @@ public:
 
     QQmlEngine* engine();
     QMutex* engineMutex();
+    Memory*     memory();
 
     QJSValue evaluate(const QString& jsCode, const QString &fileName = QString(), int lineNumber = 1);
     void throwError(const lv::QmlError& error);
@@ -139,6 +165,10 @@ public:
     QmlError findError(const QString& message) const;
     QmlError findError(QJSValue error) const;
     static ViewEngine* grab(QObject* object);
+
+    ComponentResult::Ptr createPluginObject(const QString& filePath, QObject* parent);
+    ComponentResult::Ptr createObject(const QString& filePath, QObject* parent);
+    ComponentResult::Ptr createObject(const QUrl& filePath, QObject* parent);
 
 signals:
     /** Signals before compiling a new object. */
@@ -199,7 +229,8 @@ private:
     QHash<const QMetaObject*, MetaInfo::Ptr> m_types;
     QHash<QString, const QMetaObject*>       m_typeNames;
 
-    bool m_isLoading;
+    lv::Memory* m_memory;
+    bool        m_isLoading;
 };
 
 /**
@@ -242,6 +273,11 @@ inline QQmlEngine*ViewEngine::engine(){
 /** The engine mutex, which is used to lock the engine for use */
 inline QMutex *ViewEngine::engineMutex(){
     return m_engineMutex;
+}
+
+/** Retrieves the memory object */
+inline Memory *ViewEngine::memory(){
+    return m_memory;
 }
 
 /** Returns the package graph of the engine */

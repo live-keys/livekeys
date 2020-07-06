@@ -75,7 +75,6 @@ Livekeys::Livekeys(QObject *parent)
     , m_log(nullptr)
     , m_vlog(new VisualLogQmlObject) // js ownership
     , m_packageGraph(nullptr)
-    , m_memory(new Memory(this))
 
     , m_layers(new QQmlPropertyMap)
     , m_lastLayer(nullptr)
@@ -107,7 +106,6 @@ Livekeys::~Livekeys(){
     delete m_settings;
     delete m_viewEngine;
     delete m_packageGraph;
-    delete m_memory;
 
 #ifdef BUILD_ELEMENTS
     delete m_engine;

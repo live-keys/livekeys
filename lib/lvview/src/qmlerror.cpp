@@ -119,8 +119,28 @@ QString QmlError::message() const{
     return m_error.property("message").toString();
 }
 
+double QmlError::code() const{
+    return m_error.property("code").toNumber();
+}
+
 QObject *QmlError::object() const{
     return m_error.property("object").toQObject();
+}
+
+bool QmlError::hasLocation() const{
+    return !m_error.property("fileName").isUndefined();
+}
+
+QString QmlError::fileName() const{
+    return m_error.property("fileName").toString();
+}
+
+int QmlError::lineNumber() const{
+    return m_error.property("lineNumber").toInt();
+}
+
+QString QmlError::functionName() const{
+    return m_error.property("functionName").toString();
 }
 
 QString QmlError::toString(int options) const{
@@ -130,12 +150,31 @@ QString QmlError::toString(int options) const{
         result = message() + "(code:" + m_error.property("code").toString() + ")";
 
     if ( options & QmlError::PrintLocation ){
-
         if ( m_error.hasOwnProperty("fileName") ){
             result += "\nat " +
                     m_error.property("fileName").toString() + ":" +
                     m_error.property("lineNumber").toString() + "@" +
                     m_error.property("functionName").toString();
+        }
+    }
+
+    if ( options & QmlError::PrintExtra ){
+        if ( m_error.hasOwnProperty("extra") ){
+            result += "\additional: \n";
+            QJSValue extra = m_error.property("extra");
+            int extraSize = extra.property("length").toInt();
+            for ( int i = 0; i < extraSize; ++i ){
+                QJSValue extraIt = extra.property(i);
+
+                result += extraIt.property("message").toString() + "(code:" + extraIt.property("code").toString() + ")";
+
+                if ( extraIt.hasOwnProperty("fileName") ){
+                    result += "\n   at " +
+                            extraIt.property("fileName").toString() + ":" +
+                            extraIt.property("lineNumber").toString() + "@" +
+                            extraIt.property("functionName").toString();
+                }
+            }
         }
     }
 
@@ -160,6 +199,40 @@ QString QmlError::toString(int options) const{
                 stackIt.next();
                 result += "\n" + stackIt.value().toString();
             }
+        }
+    }
+
+    return result;
+}
+
+QString QmlError::toString(const QList<QmlError> &errors, int options){
+    QString message = "";
+    for ( const QmlError& e : errors ){
+        message += e.toString(options) + "\n";
+    }
+    return message;
+}
+
+QmlError QmlError::join(const QList<QmlError> &errors){
+    if ( errors.isEmpty() )
+        return QmlError();
+
+    const QmlError& first = errors.first();
+
+    QmlError result(first.m_engine, first.message(), first.code(), first.object());
+    if ( first.hasLocation() ){
+        result.assignLocation(result.fileName(), result.lineNumber(), result.functionName());
+    }
+
+    result.m_error.setProperty("stack", first.m_error.property("stack"));
+    result.m_error.setProperty("stackTrace", first.m_error.property("stackTrace"));
+    result.m_error.setProperty("cStackTrace", first.m_error.property("cStackTrace"));
+
+    if ( errors.size() > 1 ){
+        QJSValue extra = result.m_engine->engine()->newArray(errors.size() - 1);
+        result.m_error.setProperty("extra", extra);
+        for ( int i = 1; i < errors.size(); ++i ){
+            extra.setProperty(i - 1, errors[i].value());
         }
     }
 
