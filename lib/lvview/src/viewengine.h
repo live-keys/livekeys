@@ -27,6 +27,7 @@
 #include "live/exception.h"
 #include "live/metainfo.h"
 #include "live/mlnode.h"
+#include "live/qmlerror.h"
 
 class QQmlEngine;
 class QQmlError;
@@ -94,10 +95,8 @@ public:
     QMutex* engineMutex();
 
     QJSValue evaluate(const QString& jsCode, const QString &fileName = QString(), int lineNumber = 1);
+    void throwError(const lv::QmlError& error);
     void throwError(const Exception *e, QObject* object = nullptr);
-    void throwError(const QQmlError& error);
-
-    void throwWarning(const QString& message, QObject* object = nullptr, const QString& fileName = QString(), int lineNumber = 0);
 
     bool hasErrorHandler(QObject* object);
     void registerErrorHandler(QObject* object, ErrorHandler* handler);
@@ -137,6 +136,10 @@ public:
 
     static void printTrace(QJSEngine* engine);
 
+    QmlError findError(const QString& message) const;
+    QmlError findError(QJSValue error) const;
+    static ViewEngine* grab(QObject* object);
+
 signals:
     /** Signals before compiling a new object. */
     void aboutToCreateObject(const QUrl& file);
@@ -167,14 +170,18 @@ public slots:
     void engineWarnings(const QList<QQmlError>& warnings);
 
     void throwError(const QJSValue& error, QObject* object = nullptr);
-    void throwWarning(const QJSValue& error, QObject* object = nullptr);
+
+    QJSValue unwrapError(QJSValue error) const;
 
     /// \private
-    QString markErrorObject(QObject* object);
+    QString markErrorObject(QJSValue error, QObject* object);
     /// \private
     QJSValue lastErrorsObject() const;
 
 private:
+    void storeError(const QmlError& error);
+    bool propagateError(const QmlError &error);
+
     QQmlEngine*           m_engine;
     QMutex*               m_engineMutex;
     QQmlIncubator*        m_incubator;
@@ -185,8 +192,9 @@ private:
     QLinkedList<CompileHookEntry> m_compileHooks;
 
     QList<QQmlError>              m_lastErrors;
+    int                           m_errorCounter;
     QMap<QObject*, ErrorHandler*> m_errorHandlers;
-    QMap<QString,  QObject*>      m_errorObjects;
+    QMap<QString,  QmlError>      m_errorObjects;
 
     QHash<const QMetaObject*, MetaInfo::Ptr> m_types;
     QHash<QString, const QMetaObject*>       m_typeNames;

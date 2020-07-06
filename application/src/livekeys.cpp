@@ -495,29 +495,12 @@ QObject *Livekeys::layerPlaceholder() const{
 }
 
 void Livekeys::engineError(QJSValue error){
-    QString message = "Uncaught error: " +
-            error.property("message").toString() +
-            "(code:" + error.property("code").toString() + ")";
+    QmlError e(m_viewEngine, error);
 
-    if ( error.hasOwnProperty("fileName") ){
-        message += "\nat " +
-                error.property("fileName").toString() + ":" +
-                error.property("lineNumber").toString() + "@" +
-                error.property("functionName").toString();
-    }
-
-    if ( error.hasOwnProperty("stackTrace") ){
-        message += "\nStackTrace:";
-        QJSValueIterator stackIt(error.property("stackTrace"));
-        while ( stackIt.hasNext() ){
-            stackIt.next();
-            message += "\n" + stackIt.value().toString();
-        }
-    } else if ( error.hasOwnProperty("stack") ){
-        message += "\nStackTrace:\n" + error.property("stack").toString();
-    }
-
-    vlog().e() << message;
+    vlog().e() <<  "Uncaught error: " + e.toString(
+        QmlError::PrintMessage | QmlError::PrintLocation | QmlError::PrintStackTrace
+    );
+    vlog().v() << e.toString(QmlError::PrintCStackTrace);
 }
 
 void Livekeys::projectChanged(const QString &path){
