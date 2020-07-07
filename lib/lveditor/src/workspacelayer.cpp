@@ -31,6 +31,7 @@
 #include <QFileInfo>
 #include <QFile>
 #include <QUrl>
+#include <QTimer>
 
 namespace lv{
 
@@ -47,7 +48,13 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_documentation(nullptr)
     , m_tutorials(new StartupModel())
     , m_samples(new StartupModel())
+    , m_tooltipTimer(new QTimer)
+    , m_tooltip(nullptr)
 {
+    m_tooltipTimer->setInterval(500);
+    m_tooltipTimer->setSingleShot(true);
+    connect(m_tooltipTimer, &QTimer::timeout, this, &WorkspaceLayer::__tooltipTimeout);
+
     Settings* settings = ViewContext::instance().settings();
 
     m_keymap = new KeyMap(settings->path());
@@ -92,6 +99,7 @@ WorkspaceLayer::~WorkspaceLayer(){
     delete m_themes;
     delete m_tutorials;
     delete m_samples;
+    delete m_tooltipTimer;
 }
 
 void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
@@ -346,6 +354,24 @@ bool WorkspaceLayer::wasRecentsFileFound() const{
 QString WorkspaceLayer::pluginsPath() const
 {
     return QString::fromStdString(lv::ApplicationContext::instance().pluginPath());
+}
+
+void WorkspaceLayer::triggerTooltip(QObject *tooltip){
+    m_tooltip = tooltip;
+    m_tooltipTimer->start();
+}
+
+void WorkspaceLayer::cancelTooltip(QObject *tooltip){
+    if ( m_tooltip == tooltip ){
+        m_tooltipTimer->stop();
+        m_tooltip = nullptr;
+    }
+}
+
+void WorkspaceLayer::__tooltipTimeout(){
+    if ( m_tooltip ){
+        QQmlProperty(m_tooltip, "active").write(true);
+    }
 }
 
 void WorkspaceLayer::initializePanes(ProjectWorkspace *workspace, QJSValue panes){
