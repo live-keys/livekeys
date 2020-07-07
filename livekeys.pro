@@ -24,17 +24,20 @@ SUBDIRS += \
     application \
     lib \
     plugins \
+    doc \
     tests
 
 # --- Subdir configurations ---
 application.subdir  = $$PWD/application
 plugins.subdir      = $$PWD/plugins
 tests.subdir        = $$PWD/tests
+doc.subdir          = $$PWD/doc
 
 # --- Dependency configuration ---
 application.depends = lib
 plugins.depends     = lib
 tests.depends       = lib
+doc.depends         = plugins
 
 # Include the global configuration files since otherwise they would never show
 # up in your project
