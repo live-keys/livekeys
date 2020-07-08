@@ -19,6 +19,7 @@ Item{
             active = false
             if ( contentBox ){
                 contentBox.destroy()
+                contentBox = null
             }
         }
     }
@@ -27,30 +28,27 @@ Item{
     onActiveChanged: {
         if ( active ){
             var theme = lk.layers.workspace.themes.current
+            var windowContent = lk.layers.window.window()
 
-            var contentItem = content.createObject()
-            contentItem.color = theme.tooltip.backgroundColor
-            contentItem.border.color = theme.tooltip.borderColor
-            contentItem.border.width = theme.tooltip.borderWidth
-            contentItem.radius = theme.tooltip.radius
-            contentItem.opacity = theme.tooltip.opacity
-            contentItem.labelStyle = theme.tooltip.labelStyle
-
-            contentBox = lk.layers.window.dialogs.overlayBox(contentItem)
-            contentBox.box.visible = true
-            contentBox.centerBox = false
-            contentBox.backgroundVisible = false
+            contentBox = content.createObject(windowContent)
+            contentBox.color = theme.tooltip.backgroundColor
+            contentBox.border.color = theme.tooltip.borderColor
+            contentBox.border.width = theme.tooltip.borderWidth
+            contentBox.radius = theme.tooltip.radius
+            contentBox.opacity = theme.tooltip.opacity
+            contentBox.labelStyle = theme.tooltip.labelStyle
+            contentBox.z = 20000
 
             var coords = tooltip.getCoords()
-            contentBox.boxX = coords.x
-            contentBox.boxY = coords.y
+            contentBox.x = coords.x
+            contentBox.y = coords.y
         }
     }
 
     property QtObject contentBox: null
     property Component content: Rectangle{
         width: label.width + 10
-        height: 20
+        height: label.height + 10
         color: 'black'
         border.width: 1
         border.color: "white"
@@ -62,8 +60,11 @@ Item{
             id: label
             anchors.left: parent.left
             anchors.leftMargin: 5
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 5
             text: tooltip.text
+            width: implicitWidth > 200 ? 200 : contentWidth
+            wrapMode: Text.WordWrap
         }
     }
 }

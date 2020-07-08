@@ -79,6 +79,7 @@ public slots:
     void triggerTooltip(QObject* tooltip);
     void cancelTooltip(QObject* tooltip);
 
+    void __tooltipDestroyed();
     void __tooltipTimeout();
 
 signals:

@@ -34,6 +34,16 @@ OTHER_FILES += \
 OTHER_FILES *= \
     palettes/*.qml
 
+
+# Deploy
+
+samplescopy.commands = $$deployDirCommand($$PWD/samples, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH/samples)
+first.depends = $(first) samplescopy
+export(first.depends)
+export(samplescopy.commands)
+QMAKE_EXTRA_TARGETS += first samplescopy
+
+
 DISTFILES += \
     qml/FileLineReader.qml \
     qml/FileReader.qml \

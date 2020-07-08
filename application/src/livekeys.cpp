@@ -438,13 +438,15 @@ const MLNode &Livekeys::startupConfiguration(){
             }},
             {"samples", {
                  {{"package", "lcvcore"}, {"enabled", true}},
-                 {{"package", "live"}, {"enabled", true}},
-                 {{"package", "lcvimgproc"},{"enabled", true}},
-                 {{"package", "lcvvideo"},{"enabled", true}},
-                 {{"package", "lcvphoto"},{"enabled", true}},
-                 {{"package", "lcvfeatures2d"}, {"enabled", true}},
-                 {{"package", "workspace"}, {"enabled", true}},
-                 {{"package", "editor"}, {"enabled", true}}
+                 {{"package", "fs"}, {"enabled", true}},
+                 {{"package", "base"}, {"enabled", true}},
+                 {{"package", "live"}, {"enabled", false}},
+                 {{"package", "lcvimgproc"},{"enabled", false}},
+                 {{"package", "lcvvideo"},{"enabled", false}},
+                 {{"package", "lcvphoto"},{"enabled", false}},
+                 {{"package", "lcvfeatures2d"}, {"enabled", false}},
+                 {{"package", "workspace"}, {"enabled", false}},
+                 {{"package", "editor"}, {"enabled", false}}
             }}
          }},
         {"timeline",{
