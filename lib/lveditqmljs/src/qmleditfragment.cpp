@@ -413,9 +413,9 @@ QVariantMap QmlEditFragment::objectInfo()
     return m_objectInfo;
 }
 
-void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef)
+void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef, bool expandDefault)
 {
-    emit propertyAdded(ef);
+    emit propertyAdded(ef, expandDefault);
 }
 
 void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef, QPointF cursorCoords)

@@ -119,7 +119,7 @@ QtObject{
         if (objectRoot) objectRoot.expandOptions(palette)
     }
 
-    function addChildObjectContainer(parentObjectContainer, ef, propertyContainer, propPalette){
+    function addChildObjectContainer(parentObjectContainer, ef, expandDefault, propertyContainer, propPalette){
         if (propertyContainer)
             propertyContainer.isAnObject = true
 
@@ -152,119 +152,7 @@ QtObject{
                           childObjectContainer.editor,
                           paletteBoxGroup,
                           childObjectContainer)
-        } else {
-            expandDefaultPalette(ef,
-                                 childObjectContainer.editor,
-                                 childObjectContainer.paletteGroup,
-                                 childObjectContainer)
-        }
-
-        if (propertyContainer)
-            propertyContainer.paletteAddButtonVisible = false
-
-        return childObjectContainer
-    }
-
-    function createPropertyContainer(parent){
-        return factories.propertyContainer.createObject(parent)
-    }
-
-    function expandDefaultPalette(editingFragment, editor, paletteBoxParent, objectRoot){
-        var defaultPaletteName = editor.documentHandler.codeHandler.defaultPalette(editingFragment)
-        if ( defaultPaletteName.length ){
-            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-            paletteControls.expandPalette(defaultPaletteName,
-                                          editingFragment,
-                                          editor,
-                                          paletteBoxParent,
-                                          objectRoot)
-        }
-    }
-
-    function expandPalette(paletteName, editingFragment, editor, paletteBoxParent, objectRoot){
-
-        if ( !editingFragment ) return
-        var palette = editor.documentHandler.codeHandler.expand(editingFragment, {
-            "palettes" : [paletteName]
-        })
-
-        var paletteBox = addPalette(palette,
-                                    editingFragment,
-                                    editor,
-                                    paletteBoxParent,
-                                    objectRoot)
-        if (paletteBox) paletteBox.moveEnabledSet = false
-
-    }
-
-    function addPalette(palette, editingFragment, editor, paletteBoxParent, objectRoot){
-        if (!palette) return
-
-        if (palette.type === "qml/Object")
-        {
-            palette.documentHandler = editor.documentHandler
-            palette.editor = editor
-            editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
-            palette.editingFragment = editingFragment
-        }
-
-        if ( palette.item ){
-            var newPaletteBox = createPaletteContainer(paletteBoxParent)
-            palette.item.x = 2
-            palette.item.y = 2
-
-            newPaletteBox.child = palette.item
-            newPaletteBox.palette = palette
-
-            newPaletteBox.name = palette.name
-            newPaletteBox.type = palette.type
-
-            newPaletteBox.documentHandler = editor.documentHandler
-            newPaletteBox.cursorRectangle = editor.getCursorRectangle()
-            newPaletteBox.editorPosition = editor.cursorWindowCoords()
-
-            if (objectRoot && objectRoot.compact) objectRoot.expand()
-
-            return newPaletteBox
-        }
-
-        if (objectRoot) objectRoot.expandOptions(palette)
-    }
-
-    function addChildObjectContainer(parentObjectContainer, ef, propertyContainer, propPalette){
-        if (propertyContainer)
-            propertyContainer.isAnObject = true
-
-        var childObjectContainer = createObjectContainer(parentObjectContainer.groupsContainer)
-
-        if (propertyContainer){
-            propertyContainer.childObjectContainer = childObjectContainer
-            childObjectContainer.isForProperty = true
-        }
-        childObjectContainer.parentObjectContainer = parentObjectContainer
-
-        childObjectContainer.editor = parentObjectContainer.editor
-        childObjectContainer.editingFragment = ef
-        childObjectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
-
-        var paletteBoxGroup = createPaletteGroup(childObjectContainer.groupsContainer)
-        paletteBoxGroup.editingFragment = ef
-        paletteBoxGroup.codeHandler = parentObjectContainer.editor.documentHandler.codeHandler
-        ef.visualParent = paletteBoxGroup
-        childObjectContainer.paletteGroup = paletteBoxGroup
-
-        paletteBoxGroup.x = 5
-        paletteBoxGroup.y = 10
-
-        if (propertyContainer)
-            propertyContainer.valueContainer = childObjectContainer
-        if ( propPalette ){
-            expandPalette(propPalette,
-                          ef,
-                          childObjectContainer.editor,
-                          paletteBoxGroup,
-                          childObjectContainer)
-        } else {
+        } else if (expandDefault) {
             expandDefaultPalette(ef,
                                  childObjectContainer.editor,
                                  childObjectContainer.paletteGroup,
@@ -426,7 +314,7 @@ QtObject{
         lk.layers.workspace.panes.setActiveItem(addBox, container.editor)
     }
 
-    function addPropertyContainer(objectContainer, ef, propPalette){
+    function addPropertyContainer(objectContainer, ef, expandDefault, propPalette){
         for (var i = 0; i < objectContainer.propertiesOpened.length; ++i)
             if (objectContainer.propertiesOpened[i] === ef.identifier()) return
 
@@ -440,9 +328,12 @@ QtObject{
         propertyContainer.editingFragment = ef
 
         if ( codeHandler.isForAnObject(ef) ){
-            addChildObjectContainer(objectContainer, ef, propertyContainer, propPalette)
+            addChildObjectContainer(objectContainer, ef, true, propertyContainer, propPalette)
         } else {
             propertyContainer.valueContainer = createPaletteGroup()
+            ef.visualParent = propertyContainer.valueContainer
+            ef.visualParent.owner = propertyContainer
+
             propertyContainer.valueContainer.editingFragment = ef
             propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
 
@@ -452,7 +343,7 @@ QtObject{
                               objectContainer.editor,
                               propertyContainer.valueContainer)
 
-            } else {
+            } else if (expandDefault){
                 expandDefaultPalette(ef,
                                      objectContainer.editor,
                                      propertyContainer.valueContainer)
@@ -461,5 +352,201 @@ QtObject{
 
         objectContainer.propertiesOpened.push(ef.identifier())
         ef.incrementRefCount()
+    }
+
+    function expandAtPosition(editor, position, instructions){
+        var codeHandler = editor.documentHandler.codeHandler
+
+        var rect = editor.editor.getCursorRectangle()
+        var cursorCoords = editor.cursorWindowCoords()
+        var ef = codeHandler.openConnection(position)
+
+        if (!ef) return
+
+        ef.incrementRefCount()
+        var editorBox = lk.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
+
+        // create blank object container for editing fragment
+        var objectContainer = createObjectContainer(lk.layers.editor.environment.content)
+        objectContainer.editor = editor
+        objectContainer.editingFragment = ef
+        objectContainer.title = ef.typeName()
+
+        var paletteBoxGroup = createPaletteGroup(objectContainer.groupsContainer)
+        paletteBoxGroup.editingFragment = ef
+        ef.visualParent = paletteBoxGroup
+
+        paletteBoxGroup.codeHandler = codeHandler
+
+        objectContainer.paletteGroup = paletteBoxGroup;
+
+        editorBox.setChild(objectContainer, rect, cursorCoords, lk.layers.editor.environment.placement.top)
+
+        editorBox.color = globals.paletteStyle.backgroundColor
+        editorBox.border.width = 1
+        editorBox.border.color = "#141c25"
+
+        codeHandler.frameEdit(editorBox, ef)
+        // finished with
+
+        var rootPos = codeHandler.findRootPosition()
+        if (ef.position() === rootPos)
+            editor.editor.rootShaped = true
+
+
+        expand(objectContainer, editor, instructions)
+    }
+
+    function expand(objectContainer, editor, instructions){
+
+        if (instructions['type'] !== objectContainer.editingFragment.typeName()) return
+        objectContainer.compact = false
+
+        var containers = openBlankChildContainers(objectContainer, editor)
+
+        if ('palettes' in instructions){
+            var palettes = instructions['palettes']
+            for (var i = 0; i < palettes.length; ++i){
+                var palette = palettes[i]
+                expandPalette(palettes[i],
+                              objectContainer.editingFragment,
+                              editor,
+                              objectContainer.groupsContainer.children[0],
+                              objectContainer)
+            }
+        }
+
+        if ('children' in instructions){
+            var children = instructions['children']
+            if (children.length === containers.length){
+                for (var i = 0; i < containers.length; ++i)
+                    expand(containers[i], editor, children[i])
+            }
+        }
+
+        if ('properties' in instructions){
+            var properties = instructions['properties']
+            for (var i = 0; i < properties.length; ++i){
+                var property = properties[i]
+                openProperty(objectContainer, property)
+            }
+        }
+
+    }
+
+    function openProperty(objectContainer, property){
+
+        var ef = addPropertyByName(objectContainer, property['name'])
+
+        if (!ef) return
+
+        var propertyContainer = null
+        if (ef.visualParent && ef.visualParent.owner)
+            propertyContainer = ef.visualParent.owner
+        else {
+            var codeHandler = objectContainer.editor.documentHandler.codeHandler
+            propertyContainer = createPropertyContainer(objectContainer.groupsContainer)
+
+            propertyContainer.title = ef.identifier()
+            propertyContainer.documentHandler = objectContainer.editor.documentHandler
+
+            propertyContainer.editor = objectContainer.editor
+            propertyContainer.editingFragment = ef
+        }
+
+        if ('isAnObject' in property && property['isAnObject']){
+            var childObjectContainer = addChildObjectContainer(objectContainer, ef, false, propertyContainer)
+
+            if ('instructions' in property)
+                expand(childObjectContainer, childObjectContainer.editor, instructions)
+        } else {
+            if ('palettes' in property){
+                var palettes = property['palettes']
+                
+                for (var i = 0; i < palettes.length; ++i)
+                {
+                    var palette = palettes[i]
+                    expandPalette(palette,
+                                  ef,
+                                  objectContainer.editor,
+                                  propertyContainer.valueContainer)
+
+                }
+            }
+        }
+
+
+        objectContainer.propertiesOpened.push(ef.identifier())
+        ef.incrementRefCount()
+    }
+
+    function addPropertyByName(objectContainer, name){
+        for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
+            if (objectContainer.propertiesOpened[i] === name){
+                return
+            }
+        }
+
+        var codeHandler = objectContainer.editor.documentHandler.codeHandler
+        var position = objectContainer.editingFragment.valuePosition() +
+                       objectContainer.editingFragment.valueLength() - 1
+
+
+        var addContainer = codeHandler.getAddOptions(position)
+        if ( !addContainer )
+            return
+
+        addContainer.model.setCategoryFilter(1)
+        addContainer.model.setFilter(name)
+
+        if (addContainer.model.rowCount() !== 1) return
+
+        var type = addContainer.model.data(addContainer.model.index(0, 0), 256 + 3/*QmlSuggestionModel.Type*/)
+
+        var ppos = codeHandler.addProperty(
+            addContainer.model.addPosition, addContainer.objectType, type, name, true
+        )
+
+        var ef = codeHandler.openNestedConnection(
+            objectContainer.editingFragment, ppos, project.appRoot()
+        )
+
+        if (ef) {
+            objectContainer.editingFragment.signalPropertyAdded(ef, false)
+        }
+
+        return ef
+    }
+
+    function openBlankChildContainers(objectContainer){
+        var objects = objectContainer.editor.documentHandler.codeHandler.openNestedObjects(objectContainer.editingFragment)
+
+        var containers = []
+        for (var i=0; i < objects.length; ++i){
+
+            var childObjectContainer =
+                addChildObjectContainer(objectContainer, objects[i], false)
+
+            childObjectContainer.x = 20
+            childObjectContainer.y = 10
+
+            containers.push(childObjectContainer)
+            objects[i].incrementRefCount()
+        }
+
+        return containers
+    }
+
+    function openDefaults(objectContainer){
+        expandDefaultPalette(objectContainer.editingFragment,
+                             objectContainer.editor,
+                             objectContainer.paletteGroup,
+                             objectContainer)
+
+        var properties = editor.documentHandler.codeHandler.openNestedProperties(editingFragment)
+
+        for (var i=0; i < properties.length; ++i){
+            objectContainer.addPropertyFragmentToContainer(properties[i])
+        }
     }
 }

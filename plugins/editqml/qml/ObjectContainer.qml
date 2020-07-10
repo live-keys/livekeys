@@ -49,6 +49,7 @@ Item{
     property alias compact: objectContainer.compact
     property alias topSpacing: objectContainer.topSpacing
     property alias propertiesOpened: objectContainer.propertiesOpened
+    property var sortChildren: groupsContainer.sortChildren
 
     property var parentObjectContainer: null
     property var isForProperty: false
@@ -135,10 +136,10 @@ Item{
             ef.incrementRefCount()
         }
 
-        function addPropertyFragmentToContainer(ef){
+        function addPropertyFragmentToContainer(ef, expandDefault){
             if (!ef) return
 
-            paletteControls.addPropertyContainer(root, ef)
+            paletteControls.addPropertyContainer(root, ef, expandDefault)
         }
         function expandOptions(options){
             var codeHandler = objectContainer.editor.documentHandler.codeHandler
@@ -167,7 +168,7 @@ Item{
                     )
 
                     if ( ef ){
-                        paletteControls.addPropertyContainer(root, ef, propPalette)
+                        paletteControls.addPropertyContainer(root, ef, true, propPalette)
                     }
                     else {
                         lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
@@ -191,7 +192,7 @@ Item{
             var properties = editor.documentHandler.codeHandler.openNestedProperties(editingFragment)
 
             for (var i=0; i < properties.length; ++i){
-                addPropertyFragmentToContainer(properties[i])
+                addPropertyFragmentToContainer(properties[i], true)
             }
 
             var id = editingFragment.objectId()
@@ -254,7 +255,7 @@ Item{
                 editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
 
                 if (compact) expand()
-                else objectContainer.addPropertyFragmentToContainer(ef)
+                else objectContainer.addPropertyFragmentToContainer(ef, expandDefault)
                 container.sortChildren()
             }
         }

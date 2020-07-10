@@ -7,6 +7,7 @@ Column{
 
     property QtObject editingFragment : null
     property QtObject codeHandler : null
+    property var owner: null
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
         onAboutToRemovePalette : {
