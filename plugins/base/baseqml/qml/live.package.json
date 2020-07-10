@@ -1,4 +1,15 @@
 {
     "name" : "base",
-    "version" : "1.0.0"
+    "version" : "1.0.0",
+    "workspace" : {
+        "label" : "Core Functionality.",
+        "samples" : [
+            {
+                "label" : "Linking executables.",
+                "link" : "samples/linkingexecutables",
+                "category" : "core-functionality",
+                "description" : "Process pipes through livekeys."
+            }
+        ]
+    }
 }

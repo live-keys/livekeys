@@ -299,6 +299,25 @@ Theme{
         }
     }
 
+    // Tooltip
+
+    property QtObject tooltip: QtObject{
+        property QtObject labelStyle: TextStyle{
+            color: colorScheme.foreground
+            font : Qt.font({
+                family: 'Open Sans, sans-serif',
+                weight: Font.Normal,
+                italic: false,
+                pixelSize: 11
+            })
+        }
+        property color backgroundColor: colorScheme.background
+        property color borderColor: colorScheme.middlegroundOverlayDominant
+        property double borderWidth: 1
+        property double opacity: 0.9
+        property double radius: 5
+    }
+
     // Lists
 
     property QtObject selectableListView: QtObject{

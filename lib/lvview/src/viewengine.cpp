@@ -39,6 +39,7 @@
 #include "live/memory.h"
 #include "live/visuallogmodel.h"
 #include "live/visuallogqmlobject.h"
+#include "live/qmlerror.h"
 
 #include <QQmlComponent>
 #include <QQmlContext>
@@ -92,6 +93,8 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     , m_incubator(new QQmlIncubator(QQmlIncubator::Asynchronous))
     , m_incubationController(new IncubationController)
     , m_packageGraph(nullptr)
+    , m_errorCounter(0)
+    , m_memory(new Memory(this))
 {
     m_engine->setProperty("viewEngine", QVariant::fromValue(this));
     m_engine->setIncubationController(m_incubationController);
@@ -102,7 +105,7 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     QJSValue markErrorConstructor = m_engine->evaluate(
         "(function(engine){"
             "return function(error, object){\n"
-                "error.message += engine.markErrorObject(object);"
+                "error.message = engine.markErrorObject(error, object);"
                 "return error;"
             "}"
         "})"
@@ -124,6 +127,7 @@ ViewEngine::~ViewEngine(){
     m_engine->setProperty("viewEngine", QVariant());
     delete m_engineMutex;
     m_engine->deleteLater();
+    delete m_memory;
 }
 
 /** Locks the engine for use until the passed function finishes */
@@ -140,6 +144,11 @@ const QList<QQmlError> &ViewEngine::lastErrors() const{
 /** Evaluates the piece of code given the filename and line number */
 QJSValue ViewEngine::evaluate(const QString &jsCode, const QString &fileName, int lineNumber){
     return m_engine->evaluate(jsCode, fileName, lineNumber);
+}
+
+void ViewEngine::throwError(const QmlError &error){
+    storeError(error);
+    m_engine->throwError(error.messageWithId());
 }
 
 /**
@@ -160,112 +169,24 @@ QJSValue ViewEngine::evaluate(const QString &jsCode, const QString &fileName, in
  */
 
 void ViewEngine::throwError(const lv::Exception *e, QObject *object){
-    QJSValue jsError = m_errorType.callAsConstructor(QJSValueList() << QString::fromStdString(e->message()));
-    jsError.setProperty("code", static_cast<double>(e->code()));
-
-    if ( e->hasLocation() ){
-        jsError.setProperty("fileName", QString::fromStdString(e->file()));
-        jsError.setProperty("lineNumber", e->line());
-        jsError.setProperty("functionName", QString::fromStdString(e->functionName()));
-    }
-
-    if ( object ){
-        jsError.setProperty("object", m_engine->newQObject(object));
-    }
-
-    if ( e->hasStackTrace() ){
-        StackTrace::Ptr st = e->stackTrace();
-        QJSValue stackTrace = m_engine->newArray(static_cast<quint32>(st->size()));
-        quint32 i = 0;
-        for ( auto it = st->begin(); it != st->end(); ++it ){
-            stackTrace.setProperty(i++, QString::fromStdString(it->functionName()) + "(" + it->fileName().c_str() + ":" + QString::number(it->line()) + ")");
-        }
-        jsError.setProperty("stackTrace", stackTrace);
-    }
-
-    if ( dynamic_cast<const lv::FatalException*>(e) != nullptr ){
-        jsError.setProperty("type", "FatalException");
-    } else if ( dynamic_cast<const lv::InputException*>(e) != nullptr ){
-        jsError.setProperty("type", "ConfigurationException");
-    } else {
-        jsError.setProperty("type", "Exception");
-    }
-
-    throwError(jsError, object);
-}
-
-/** Variant of the same-named function that uses a QQmlError object from which it extracts relevant data */
-void ViewEngine::throwError(const QQmlError &error){
-    QJSValue jsError = m_errorType.callAsConstructor(QJSValueList() << error.description());
-    jsError.setProperty("fileName", error.url().toString());
-    jsError.setProperty("lineNumber", error.line());
-    jsError.setProperty("type", "Error");
-    if ( error.object() ){
-        jsError.setProperty("object", m_engine->newQObject(error.object()));
-    }
-
-    throwError(jsError, error.object());
+    QmlError error(this, *e, object);
+    throwError(error);
 }
 
 /**
  * \brief Variant of the same-named function that uses a QJSValue object along with the calling object
- *
- * This is the actual function that gets called from the two variants above. The relevant data is converted to
- * QJSValue and passed to here.
  */
 void ViewEngine::throwError(const QJSValue &jsError, QObject *object){
-    QJSValueIterator it(jsError);
-    while (it.hasNext()) {
-        it.next();
-    }
-    QObject* errorHandler = object;
-    while ( errorHandler != nullptr ){
-        auto it = m_errorHandlers.find(errorHandler);
-        if ( it != m_errorHandlers.end() ){
-            it.value()->signalError(jsError);
-            return;
-        }
-        errorHandler = errorHandler->parent();
-    }
-
-    emit applicationError(jsError);
-
+    QmlError error(this, jsError);
+    error.assignObject(object);
+    throwError(error);
 }
 
-/** Similar to throwError, but warnings are of lesser importance and can be ignored. Passed to the error handler */
-void ViewEngine::throwWarning(const QString &message, QObject *object, const QString &fileName, int lineNumber){
-    QJSValue jsError = m_errorType.callAsConstructor(QJSValueList() << message);
-
-    jsError.setProperty("fileName", fileName);
-    jsError.setProperty("lineNumber", lineNumber);
-    jsError.setProperty("type", "Warning");
-    if ( object ){
-        jsError.setProperty("object", m_engine->newQObject(object));
-    }
-
-    throwWarning(jsError, object);
-}
-
-/** The function called by the same-named public function. Passes the warning to the error handler(s) */
-void ViewEngine::throwWarning(const QJSValue &jsError, QObject *object){
-    QObject* errorHandler = object;
-    while ( errorHandler != nullptr ){
-        auto it = m_errorHandlers.find(errorHandler);
-        if ( it != m_errorHandlers.end() ){
-            it.value()->signalWarning(jsError);
-            return;
-        }
-        errorHandler = errorHandler->parent();
-    }
-
-    emit applicationWarning(jsError);
-}
-
-QString ViewEngine::markErrorObject(QObject *object){
-    QString key = "0x" + QString::number((quintptr)object, 16);
-    m_errorObjects[key] = object;
-
-    return "(" + key + ")";
+QString ViewEngine::markErrorObject(QJSValue error, QObject *object){
+    QmlError e(this, error);
+    e.assignObject(object);
+    storeError(e);
+    return e.messageWithId();
 }
 
 /** Shows if the given object has an associated error handler */
@@ -367,7 +288,7 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterUncreatableType<lv::VisualLogModel>(
         uri, 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "lk.log"));
     qmlRegisterUncreatableType<lv::Memory>(
-        uri, 1, 0, "Memory",          ViewEngine::typeAsPropertyMessage("Memory", "lk.mem"));
+        uri, 1, 0, "Memory",          ViewEngine::typeAsPropertyMessage("Memory", "lk.engine.mem"));
     qmlRegisterUncreatableType<lv::VisualLogQmlObject>(
         uri, 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
     qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
@@ -491,6 +412,27 @@ QJSValue ViewEngine::lastErrorsObject() const{
     return toJSErrors(lastErrors());
 }
 
+void ViewEngine::storeError(const QmlError &error){
+    if ( m_errorCounter > 9999 )
+        m_errorCounter = 0;
+    int idNumber = m_errorCounter++;
+    error.m_id = QString("%1").arg(idNumber, 5, 10, QChar('0'));
+    m_errorObjects[error.m_id] = error;
+}
+
+bool ViewEngine::propagateError(const QmlError &error){
+    QObject* errorHandler = error.object();
+    while ( errorHandler != nullptr ){
+        auto it = m_errorHandlers.find(errorHandler);
+        if ( it != m_errorHandlers.end() ){
+            it.value()->signalError(error.value());
+            return true;
+        }
+        errorHandler = errorHandler->parent();
+    }
+    return false;
+}
+
 /**
  * \brief Creates an object from the given qmlcode synchronously
  */
@@ -545,24 +487,16 @@ void ViewEngine::engineWarnings(const QList<QQmlError> &warnings){
         const QQmlError& warning = *it;
         if ( warning.object() == nullptr ){
             QString description = warning.description();
-            int errorObjectEnd = description.lastIndexOf(")");
-            if ( errorObjectEnd == description.length() - 1 ){
-                int errorObjectStart = description.lastIndexOf("(0x");
-                if ( errorObjectStart != -1 ){
-                    QString key = description.mid(errorObjectStart + 1, errorObjectEnd - errorObjectStart - 1);
-                    auto it = m_errorObjects.find(key);
-                    if ( it != m_errorObjects.end() ){
-                        QQmlError err = warning;
-                        err.setDescription(description.mid(0, errorObjectStart));
-                        err.setObject(it.value());
-                        throwError(err);
-                        return;
-                    }
+            QmlError error = findError(description);
+            if ( !error.isNull() ){
+                bool propagation = propagateError(error);
+                if ( !propagation ){
+                    emit applicationError(error.value());
+                    continue;
                 }
             }
         }
-
-        throwError(*it);
+        emit applicationError(QmlError(this, *it).value());
     }
     m_errorObjects.clear();
 }
@@ -586,6 +520,99 @@ void ViewEngine::printTrace(QJSEngine *engine){
     engine->globalObject().property("console").property("trace").call();
 }
 
+QmlError ViewEngine::findError(const QString &message) const{
+    int startPos = message.lastIndexOf("(id:");
+    int endPos  =  message.lastIndexOf(")");
+    if ( startPos >= 0 && endPos > 0 ){
+        QString errorId = message.mid(startPos + 4, endPos - startPos - 4);
+        auto it = m_errorObjects.find(errorId);
+        if ( it != m_errorObjects.end() ){
+            return it.value();
+        }
+    }
+
+    return QmlError();
+}
+
+QmlError ViewEngine::findError(QJSValue error) const{
+    return findError(error.property("message").toString());
+}
+
+ViewEngine *ViewEngine::grab(QObject *object){
+    QQmlEngine* engine = qmlEngine(object);
+    if ( engine )
+        return qobject_cast<ViewEngine*>(engine->property("viewEngine").value<QObject*>());
+    return nullptr;
+}
+
+lv::ViewEngine::ComponentResult::Ptr ViewEngine::createPluginObject(const QString &filePath, QObject *parent){
+    return createObject(QString::fromStdString(lv::ApplicationContext::instance().pluginPath()) + "/" + filePath, parent);
+}
+
+ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePath, QObject *parent){
+    QFile f(filePath);
+    if ( !f.open(QFile::ReadOnly) ){
+        ViewEngine::ComponentResult::Ptr result = ViewEngine::ComponentResult::create();
+        result->errors.append(QmlError(
+            this,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Component: Failed to read file:" + f.fileName().toStdString(),
+                Exception::toCode("~File"))
+        ));
+        return result;
+    }
+
+    ViewEngine::ComponentResult::Ptr result = ViewEngine::ComponentResult::create();
+
+    result->component = new QQmlComponent(m_engine, parent);
+
+    QByteArray contentBytes = f.readAll();
+    result->component->setData(contentBytes, QUrl::fromLocalFile(f.fileName()));
+
+    QList<QQmlError> errors = result->component->errors();
+    if ( errors.size() ){
+        for ( const QQmlError& e : errors ){
+            result->errors.append(QmlError(this, e));
+        }
+        return result;
+    }
+
+    if ( !result->component->isReady() ){
+        result->errors.append(QmlError(
+            this,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Component: Component is not ready:" + f.fileName().toStdString(),
+                Exception::toCode("~Component"))
+        ));
+        return result;
+    }
+
+    result->object = result->component->create();
+
+    errors = result->component->errors();
+    if ( errors.size() ){
+        for ( const QQmlError& e : errors ){
+            result->errors.append(QmlError(this, e));
+        }
+    }
+    return result;
+}
+
+ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QUrl &filePath, QObject *parent){
+    if ( filePath.isLocalFile() ){
+        return createObject(filePath.toLocalFile(), parent);
+    }
+
+    return ViewEngine::ComponentResult::create();
+}
+
+QJSValue ViewEngine::unwrapError(QJSValue error) const{
+    QmlError e = findError(error);
+    return e.isNull() ? error : e.value();
+}
+
 QJSValue ViewEngine::toJSErrors(const QList<QQmlError> &errors) const{
     QJSValue val = m_engine->newArray(static_cast<uint>(errors.length()));
     uint i = 0;
@@ -593,6 +620,21 @@ QJSValue ViewEngine::toJSErrors(const QList<QQmlError> &errors) const{
         val.setProperty(i++, toJSError(error));
     }
     return val;
+}
+
+ViewEngine::ComponentResult::Ptr ViewEngine::ComponentResult::create(QObject *o, QQmlComponent *c){
+    return ViewEngine::ComponentResult::Ptr(new ViewEngine::ComponentResult(o, c));
+}
+
+ViewEngine::ComponentResult::~ComponentResult(){
+    delete component;
+}
+
+void ViewEngine::ComponentResult::jsThrowError(){
+    if ( errors.size() ){
+        QmlError error = QmlError::join(errors);
+        error.jsThrow();
+    }
 }
 
 }// namespace

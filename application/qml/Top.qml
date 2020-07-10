@@ -19,6 +19,7 @@ import QtQuick.Controls 1.4
 import editor.private 1.0
 import base 1.0
 import live 1.0
+import workspace 1.0 as Workspace
 
 Rectangle {
     id : container
@@ -96,6 +97,10 @@ Rectangle {
             hoverEnabled: true
             onClicked: lk.layers.workspace.project.newProject()
         }
+        Workspace.Tooltip{
+            mouseOver: newMArea.containsMouse
+            text: "New Project"
+        }
     }
 
     // Save
@@ -129,6 +134,10 @@ Rectangle {
                     fe.saveAs()
             }
         }
+        Workspace.Tooltip{
+            mouseOver: saveMArea.containsMouse
+            text: "Save file as"
+        }
     }
 
     // Open File
@@ -157,6 +166,10 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: lk.layers.workspace.project.openFileDialog()
+        }
+        Workspace.Tooltip{
+            mouseOver: openMArea.containsMouse
+            text: "Open file"
         }
     }
 
@@ -187,6 +200,10 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: lk.layers.workspace.project.openProject()
+        }
+        Workspace.Tooltip{
+            mouseOver: openProjectMArea.containsMouse
+            text: "Open project"
         }
     }
 
@@ -230,6 +247,10 @@ Rectangle {
             hoverEnabled: true
             onClicked: container.toggleLogWindow()
         }
+        Workspace.Tooltip{
+            mouseOver: openLogMArea.containsMouse
+            text: "Toggle log pane"
+        }
     }
 
     // Commands
@@ -258,6 +279,10 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: container.openCommandsMenu()
+        }
+        Workspace.Tooltip{
+            mouseOver: commandMArea.containsMouse
+            text: "View commands"
         }
     }
 
@@ -288,6 +313,10 @@ Rectangle {
             hoverEnabled: true
             onClicked: container.openSettings()
         }
+        Workspace.Tooltip{
+            mouseOver: openSettingsArea.containsMouse
+            text: "Configuration"
+        }
     }
 
     // Open License
@@ -317,6 +346,10 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: container.openLicense()
+        }
+        Workspace.Tooltip{
+            mouseOver: openLicenseArea.containsMouse
+            text: "Package licenses"
         }
     }
 
@@ -396,6 +429,10 @@ Rectangle {
             onPressed: compileButtonShape.state = "Pressed"
             onReleased: compileButtonShape.state = "Released"
             onClicked: { project.run() }
+        }
+        Workspace.Tooltip{
+            mouseOver: compileButton.containsMouse
+            text: "Run active file"
         }
 
         Item{

@@ -31,6 +31,7 @@
 #include <QFileInfo>
 #include <QFile>
 #include <QUrl>
+#include <QTimer>
 
 namespace lv{
 
@@ -47,7 +48,13 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_documentation(nullptr)
     , m_tutorials(new StartupModel())
     , m_samples(new StartupModel())
+    , m_tooltipTimer(new QTimer)
+    , m_tooltip(nullptr)
 {
+    m_tooltipTimer->setInterval(500);
+    m_tooltipTimer->setSingleShot(true);
+    connect(m_tooltipTimer, &QTimer::timeout, this, &WorkspaceLayer::__tooltipTimeout);
+
     Settings* settings = ViewContext::instance().settings();
 
     m_keymap = new KeyMap(settings->path());
@@ -92,6 +99,7 @@ WorkspaceLayer::~WorkspaceLayer(){
     delete m_themes;
     delete m_tutorials;
     delete m_samples;
+    delete m_tooltipTimer;
 }
 
 void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
@@ -348,6 +356,41 @@ QString WorkspaceLayer::pluginsPath() const
     return QString::fromStdString(lv::ApplicationContext::instance().pluginPath());
 }
 
+void WorkspaceLayer::triggerTooltip(QObject *tooltip){
+    if ( m_tooltip ){
+        disconnect(m_tooltip, &QObject::destroyed, this, &WorkspaceLayer::__tooltipDestroyed);
+    }
+
+    m_tooltip = tooltip;
+    m_tooltipTimer->start();
+
+    connect(m_tooltip, &QObject::destroyed, this, &WorkspaceLayer::__tooltipDestroyed);
+
+}
+
+void WorkspaceLayer::cancelTooltip(QObject *tooltip){
+    if ( m_tooltip == tooltip ){
+        m_tooltipTimer->stop();
+        disconnect(m_tooltip, &QObject::destroyed, this, &WorkspaceLayer::__tooltipDestroyed);
+        m_tooltip = nullptr;
+    }
+}
+
+void WorkspaceLayer::__tooltipDestroyed(){
+    if ( m_tooltip ){
+        QObject* contentBox = m_tooltip->property("contentBox").value<QObject*>();
+        if ( contentBox )
+            contentBox->deleteLater();
+    }
+    m_tooltip = nullptr;
+}
+
+void WorkspaceLayer::__tooltipTimeout(){
+    if ( m_tooltip ){
+        QQmlProperty(m_tooltip, "active").write(true);
+    }
+}
+
 void WorkspaceLayer::initializePanes(ProjectWorkspace *workspace, QJSValue panes){
     QJSValueIterator panesIt(panes);
     while ( panesIt.hasNext() ){
@@ -482,7 +525,7 @@ void WorkspaceLayer::loadConfigurations(){
                         StartupModel::StartupEntry(
                             true,
                             QString::fromStdString(p->name()),
-                            QString::fromStdString(p->workspaceTutorialsLabel()),
+                            QString::fromStdString(p->workspaceLabel()),
                             ""
                         )
                     );
@@ -513,12 +556,17 @@ void WorkspaceLayer::loadConfigurations(){
                 Package::Ptr p = Package::createFromPath(packagePath);
                 if ( p ){
                     QString name = QString::fromStdString(p->name());
-                    m_samples->addStartupEntry(StartupModel::StartupEntry(true, name, name, ""));
+
+                    QString label = p->workspaceLabel().empty() ? name : QString::fromStdString(p->workspaceLabel());
+
+                    m_samples->addStartupEntry(StartupModel::StartupEntry(true, name, label, ""));
+
+
                     for ( auto sample : p->workspaceSamples() ){
-                        QString path = QString::fromStdString(p->path() + "/" + sample);
-                        QFileInfo f(path);
-                        QString name = f.baseName();
-                        m_samples->addStartupEntry(StartupModel::StartupEntry(false, name, name, path));
+                        QString path = QString::fromStdString(p->path() + "/" + sample.path().data());
+                        QString name = QString::fromStdString(sample.label().data());
+                        QString description = QString::fromStdString(sample.description().data());
+                        m_samples->addStartupEntry(StartupModel::StartupEntry(false, name, name, path, description));
                     }
                 }
             }

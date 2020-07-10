@@ -8,6 +8,7 @@
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
+#include "live/qmlerror.h"
 
 #include "live/mlnodetoqml.h"
 
@@ -145,49 +146,20 @@ void Track::deserialize(ViewEngine *engine, const MLNode &node){
             segment->deserialize(this, engine->engine(), segmNode);
             addSegment(segment);
         } else {
-            QString componentFile = QString::fromStdString(
-                ApplicationContext::instance().pluginPath() + "/" + segmNode["factory"].asString()
-            );
+            ViewEngine::ComponentResult::Ptr segmentComp = engine->createPluginObject(QString::fromStdString(segmNode["factory"].asString()), nullptr);
+            if ( segmentComp->hasError() ){
+                segmentComp->jsThrowError();
+            } else {
+                Segment* segment = nullptr;
 
-            QFile f(componentFile);
+                QVariant result;
+                QMetaObject::invokeMethod(segmentComp->object, "create", Qt::DirectConnection, Q_RETURN_ARG(QVariant, result));
 
-            if ( !f.open(QFile::ReadOnly) ){
-                Exception e = CREATE_EXCEPTION(
-                    Exception,
-                    "Failed to read file for running:" + componentFile.toStdString(),
-                    Exception::toCode("~File")
-                );
-                engine->throwError(&e, this);
-                return;
-            }
-            QByteArray contentBytes = f.readAll();
-            QQmlComponent component(engine->engine());
-            component.setData(contentBytes, componentFile);
-
-            QList<QQmlError> errors = component.errors();
-            if ( errors.size() ){
-                vlog() << "ERRORS: " << component.errorString();
-        //        emit runError(m_viewEngine->toJSErrors(errors));
-                return;
-            }
-
-            QObject* object = component.create();
-            errors = component.errors();
-            if ( errors.size() ){
-                vlog() << "ERRORS" << component.errorString();
-        //        emit runError(m_viewEngine->toJSErrors(errors));
-                return;
-            }
-
-            Segment* segment = nullptr;
-
-            QVariant result;
-            QMetaObject::invokeMethod(object, "create", Qt::DirectConnection, Q_RETURN_ARG(QVariant, result));
-
-            segment = qobject_cast<Segment*>(result.value<QObject*>());
-            if ( segment ){
-                segment->deserialize(this, engine->engine(), segmNode);
-                addSegment(segment);
+                segment = qobject_cast<Segment*>(result.value<QObject*>());
+                if ( segment ){
+                    segment->deserialize(this, engine->engine(), segmNode);
+                    addSegment(segment);
+                }
             }
         }
     }

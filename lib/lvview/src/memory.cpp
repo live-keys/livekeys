@@ -18,6 +18,10 @@ Memory::~Memory(){
     totalSpace() = false;
 }
 
+Memory *Memory::i(){
+    return ViewContext::instance().engine()->memory();
+}
+
 void Memory::gc(){
     QJSValue gcFn = ViewContext::instance().engine()->engine()->globalObject().property("gc");
     gcFn.call();

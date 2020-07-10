@@ -85,6 +85,31 @@ public:
         std::list<std::string> flags;
     };
 
+    /**
+     * \class lv::Package::Library
+     * \brief A structure representing a project entry within this package
+     * \ingroup lvbase
+     */
+    class LV_BASE_EXPORT ProjectEntry{
+
+    public:
+        ProjectEntry(const Utf8& path, const Utf8& label, const Utf8& category, const Utf8& description = "", const Utf8& icon = "")
+            : m_path(path), m_label(label), m_category(category), m_description(description), m_icon(icon){}
+
+        const Utf8& path() const{ return m_path; }
+        const Utf8& label() const{ return m_label; }
+        const Utf8& category() const{ return m_category; }
+        const Utf8& description() const{ return m_description; }
+        const Utf8& icon() const{ return m_icon; }
+
+    private:
+        Utf8 m_path;
+        Utf8 m_label;
+        Utf8 m_category;
+        Utf8 m_description;
+        Utf8 m_icon;
+    };
+
     /** Default name of the package file */
     static const char* fileName;
 
@@ -110,9 +135,9 @@ public:
     Context* context();
 
     bool hasWorkspace() const;
-    const std::string& workspaceTutorialsLabel() const;
+    const std::string& workspaceLabel() const;
     const std::vector<std::pair<std::string, std::string> >& workspaceTutorialsSections() const;
-    const std::vector<std::string>& workspaceSamples();
+    const std::vector<ProjectEntry>& workspaceSamples();
 
 private:
     Package(const std::string& path, const std::string& filePath, const std::string& name, const Version& version);

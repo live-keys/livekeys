@@ -1,4 +1,21 @@
 {
     "name" : "fs",
-    "version" : "1.0.0"
+    "version" : "1.0.0",
+    "workspace" : {
+        "label" : "File system.",
+        "samples" : [
+            {
+                "label" : "Reading files.",
+                "link" : "samples/readingfiles",
+                "category" : "file-system",
+                "description" : "Reading a file."
+            },
+            {
+                "label" : "File explorer.",
+                "link" : "samples/fileexplorer",
+                "category" : "file-system",
+                "description" : "A file explorer that can be connected to other components for automation."
+            }
+        ]
+    }
 }

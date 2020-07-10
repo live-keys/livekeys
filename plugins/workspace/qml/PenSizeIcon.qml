@@ -45,7 +45,7 @@ Item{
 
 
             startX: root.width - root.width / 4
-            startY: strokeWidth
+            startY: strokeWidth + circle.r
             PathLine {
                 x: circle.r * 2
                 y: root.height - circle.r

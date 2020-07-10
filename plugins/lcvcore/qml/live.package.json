@@ -5,19 +5,50 @@
         "timeline" : "1.0.0"
     },
     "workspace" : {
+        "label" : "Image and Video.",
         "samples" : [
-            { "link" : "samples/colorhistogram.qml"},
-            { "link" : "samples/histogram.qml" },
-            { "link" : "samples/customfilter.qml" },
-            { "link" : "samples/imwrite.qml" },
-            { "link" : "samples/itemcapture.qml" },
-            { "link" : "samples/matlog.qml" },
-            { "link" : "samples/matop.qml" },
-            { "link" : "samples/camcapture.qml" },
-            { "link" : "samples/videocapture_controls.qml" },
-            { "link" : "samples/videocapture_simple.qml" },
-            { "link" : "samples/videodecoder.qml" },
-            { "link" : "samples/videowriter.qml" }
+            {
+                "label" : "Image Transformations",
+                "link" : "samples/imagetransformations",
+                "category" : "image-processing",
+                "description" : "Creating image transformation pipelines."
+            },
+            {
+                "label" : "Drawing pipeline",
+                "link" : "samples/drawing",
+                "category" : "image-processing",
+                "description" : "Creating a pipeline where drawing on an image will propagate changes across multiple components."
+            },
+            {
+                "label" : "Color adjustments",
+                "link" : "samples/coloradjustments",
+                "category" : "image-processing",
+                "description" : "An example showing how to add color adjustments."
+            },
+            {
+                "label" : "Video player",
+                "link" : "samples/videoplayer",
+                "category" : "video-processing",
+                "description" : "A simple video player."
+            },
+            {
+                "label" : "Video color adjustments",
+                "link" : "samples/videocoloradjustments",
+                "category" : "video-processing",
+                "description" : "Color adjustments pipeline applied to a video."
+            },
+            {
+                "label" : "Video Timeline",
+                "link" : "samples/videotimeline",
+                "category" : "video-processing",
+                "description" : "Video timeline."
+            },
+            {
+                "label" : "Webcam view",
+                "link" : "samples/webcamview",
+                "category" : "video-processing",
+                "description" : "Color adjustments pipeline applied to a video."
+            }
         ]
     }
 }

@@ -27,6 +27,7 @@
 #include "live/exception.h"
 #include "live/metainfo.h"
 #include "live/mlnode.h"
+#include "live/qmlerror.h"
 
 class QQmlEngine;
 class QQmlError;
@@ -36,6 +37,7 @@ class QMutex;
 
 namespace lv{
 
+class Memory;
 class ErrorHandler;
 class PackageGraph;
 class IncubationController;
@@ -65,9 +67,33 @@ public:
 class LV_VIEW_EXPORT ViewEngine : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
+    Q_PROPERTY(bool isLoading   READ isLoading NOTIFY isLoadingChanged)
+    Q_PROPERTY(lv::Memory* mem  READ memory    CONSTANT)
 
 public:
+    class LV_VIEW_EXPORT ComponentResult{
+
+    public:
+        typedef QSharedPointer<ComponentResult> Ptr;
+
+    public:
+        static Ptr create(QObject* o = nullptr, QQmlComponent* c = nullptr);
+        ~ComponentResult();
+
+        bool hasError() const{ return errors.size(); }
+        void jsThrowError();
+
+        QList<QmlError> errors;
+        QObject*        object;
+        QQmlComponent*  component;
+
+    private:
+        ComponentResult(QObject* o = nullptr, QQmlComponent* c = nullptr) : object(o), component(c){}
+
+        ComponentResult(const ComponentResult&);
+        ComponentResult& operator=(const ComponentResult&);
+    };
+
     /** Callback function type to be run after the engine finishes compiling */
     typedef void(*CompileHook)(const QString&, const QUrl&, QObject*, void*);
 
@@ -92,12 +118,11 @@ public:
 
     QQmlEngine* engine();
     QMutex* engineMutex();
+    Memory*     memory();
 
     QJSValue evaluate(const QString& jsCode, const QString &fileName = QString(), int lineNumber = 1);
+    void throwError(const lv::QmlError& error);
     void throwError(const Exception *e, QObject* object = nullptr);
-    void throwError(const QQmlError& error);
-
-    void throwWarning(const QString& message, QObject* object = nullptr, const QString& fileName = QString(), int lineNumber = 0);
 
     bool hasErrorHandler(QObject* object);
     void registerErrorHandler(QObject* object, ErrorHandler* handler);
@@ -137,6 +162,14 @@ public:
 
     static void printTrace(QJSEngine* engine);
 
+    QmlError findError(const QString& message) const;
+    QmlError findError(QJSValue error) const;
+    static ViewEngine* grab(QObject* object);
+
+    ComponentResult::Ptr createPluginObject(const QString& filePath, QObject* parent);
+    ComponentResult::Ptr createObject(const QString& filePath, QObject* parent);
+    ComponentResult::Ptr createObject(const QUrl& filePath, QObject* parent);
+
 signals:
     /** Signals before compiling a new object. */
     void aboutToCreateObject(const QUrl& file);
@@ -167,14 +200,18 @@ public slots:
     void engineWarnings(const QList<QQmlError>& warnings);
 
     void throwError(const QJSValue& error, QObject* object = nullptr);
-    void throwWarning(const QJSValue& error, QObject* object = nullptr);
+
+    QJSValue unwrapError(QJSValue error) const;
 
     /// \private
-    QString markErrorObject(QObject* object);
+    QString markErrorObject(QJSValue error, QObject* object);
     /// \private
     QJSValue lastErrorsObject() const;
 
 private:
+    void storeError(const QmlError& error);
+    bool propagateError(const QmlError &error);
+
     QQmlEngine*           m_engine;
     QMutex*               m_engineMutex;
     QQmlIncubator*        m_incubator;
@@ -185,13 +222,15 @@ private:
     QLinkedList<CompileHookEntry> m_compileHooks;
 
     QList<QQmlError>              m_lastErrors;
+    int                           m_errorCounter;
     QMap<QObject*, ErrorHandler*> m_errorHandlers;
-    QMap<QString,  QObject*>      m_errorObjects;
+    QMap<QString,  QmlError>      m_errorObjects;
 
     QHash<const QMetaObject*, MetaInfo::Ptr> m_types;
     QHash<QString, const QMetaObject*>       m_typeNames;
 
-    bool m_isLoading;
+    lv::Memory* m_memory;
+    bool        m_isLoading;
 };
 
 /**
@@ -234,6 +273,11 @@ inline QQmlEngine*ViewEngine::engine(){
 /** The engine mutex, which is used to lock the engine for use */
 inline QMutex *ViewEngine::engineMutex(){
     return m_engineMutex;
+}
+
+/** Retrieves the memory object */
+inline Memory *ViewEngine::memory(){
+    return m_memory;
 }
 
 /** Returns the package graph of the engine */

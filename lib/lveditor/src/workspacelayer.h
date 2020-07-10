@@ -76,6 +76,12 @@ public slots:
     bool wasRecentsFileFound() const;
     QString pluginsPath() const;
 
+    void triggerTooltip(QObject* tooltip);
+    void cancelTooltip(QObject* tooltip);
+
+    void __tooltipDestroyed();
+    void __tooltipTimeout();
+
 signals:
     void projectChanged();
     void panesChanged();
@@ -107,6 +113,9 @@ private:
 
     StartupModel*  m_tutorials;
     StartupModel*  m_samples;
+
+    QTimer*        m_tooltipTimer;
+    QObject*       m_tooltip;
 };
 
 inline QObject *WorkspaceLayer::project() const{

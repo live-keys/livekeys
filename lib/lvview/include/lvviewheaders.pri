@@ -5,6 +5,7 @@ HEADERS += \
     $$PWD/live/incubationcontroller.h \
     $$PWD/live/metainfo.h \
     $$PWD/live/qmlact.h \
+    $$PWD/live/qmlerror.h \
     $$PWD/live/qmlstreamfilter.h \
     $$PWD/live/qmlwritablestream.h \
     $$PWD/live/settings.h \

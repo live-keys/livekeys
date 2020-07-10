@@ -75,7 +75,6 @@ Livekeys::Livekeys(QObject *parent)
     , m_log(nullptr)
     , m_vlog(new VisualLogQmlObject) // js ownership
     , m_packageGraph(nullptr)
-    , m_memory(new Memory(this))
 
     , m_layers(new QQmlPropertyMap)
     , m_lastLayer(nullptr)
@@ -107,7 +106,6 @@ Livekeys::~Livekeys(){
     delete m_settings;
     delete m_viewEngine;
     delete m_packageGraph;
-    delete m_memory;
 
 #ifdef BUILD_ELEMENTS
     delete m_engine;
@@ -440,13 +438,15 @@ const MLNode &Livekeys::startupConfiguration(){
             }},
             {"samples", {
                  {{"package", "lcvcore"}, {"enabled", true}},
-                 {{"package", "live"}, {"enabled", true}},
-                 {{"package", "lcvimgproc"},{"enabled", true}},
-                 {{"package", "lcvvideo"},{"enabled", true}},
-                 {{"package", "lcvphoto"},{"enabled", true}},
-                 {{"package", "lcvfeatures2d"}, {"enabled", true}},
-                 {{"package", "workspace"}, {"enabled", true}},
-                 {{"package", "editor"}, {"enabled", true}}
+                 {{"package", "fs"}, {"enabled", true}},
+                 {{"package", "base"}, {"enabled", true}},
+                 {{"package", "live"}, {"enabled", false}},
+                 {{"package", "lcvimgproc"},{"enabled", false}},
+                 {{"package", "lcvvideo"},{"enabled", false}},
+                 {{"package", "lcvphoto"},{"enabled", false}},
+                 {{"package", "lcvfeatures2d"}, {"enabled", false}},
+                 {{"package", "workspace"}, {"enabled", false}},
+                 {{"package", "editor"}, {"enabled", false}}
             }}
          }},
         {"timeline",{
@@ -495,29 +495,12 @@ QObject *Livekeys::layerPlaceholder() const{
 }
 
 void Livekeys::engineError(QJSValue error){
-    QString message = "Uncaught error: " +
-            error.property("message").toString() +
-            "(code:" + error.property("code").toString() + ")";
+    QmlError e(m_viewEngine, error);
 
-    if ( error.hasOwnProperty("fileName") ){
-        message += "\nat " +
-                error.property("fileName").toString() + ":" +
-                error.property("lineNumber").toString() + "@" +
-                error.property("functionName").toString();
-    }
-
-    if ( error.hasOwnProperty("stackTrace") ){
-        message += "\nStackTrace:";
-        QJSValueIterator stackIt(error.property("stackTrace"));
-        while ( stackIt.hasNext() ){
-            stackIt.next();
-            message += "\n" + stackIt.value().toString();
-        }
-    } else if ( error.hasOwnProperty("stack") ){
-        message += "\nStackTrace:\n" + error.property("stack").toString();
-    }
-
-    vlog().e() << message;
+    vlog().e() <<  "Uncaught error: " + e.toString(
+        QmlError::PrintMessage | QmlError::PrintLocation | QmlError::PrintStackTrace
+    );
+    vlog().v() << e.toString(QmlError::PrintCStackTrace);
 }
 
 void Livekeys::projectChanged(const QString &path){

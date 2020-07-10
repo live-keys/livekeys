@@ -84,11 +84,7 @@ void ErrorHandler::signalWarning(const QJSValue &error){
 /** Skips the error handler and propagates the error further */
 void ErrorHandler::skip(const QJSValue &error){
     if ( m_engine ){
-        if ( error.property("type").toString() == "Warning" ){
-            m_engine->throwWarning(error, m_target ? m_target->parent() : 0);
-        } else {
-            m_engine->throwError(error, m_target ? m_target->parent() : 0);
-        }
+        m_engine->throwError(error, m_target ? m_target->parent() : 0);
     }
 }
 

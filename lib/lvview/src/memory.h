@@ -167,7 +167,7 @@ public:
         }
     }
 
-    static Memory* i(){ return ViewContext::instance().memory(); }
+    static Memory* i();
     static void gc();
     static void enable(size_t size){ setSize(size); }
     static void setSize(size_t size){ totalSpace() = size; }

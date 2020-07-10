@@ -39,12 +39,3 @@ void EngineTestStub::throwJsError(){
     );
     engine->throwError(&exception, this);
 }
-
-void EngineTestStub::throwJsWarning(){
-    QObject* engineObj = qmlContext(this)->contextProperty("engine").value<QObject*>();
-    lv::ViewEngine* engine = qobject_cast<lv::ViewEngine*>(engineObj);
-    if ( !engine )
-        return;
-
-    engine->throwWarning("JSTest", this, "enginetest.cpp", 100);
-}

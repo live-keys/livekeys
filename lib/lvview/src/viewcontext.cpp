@@ -18,7 +18,7 @@ void ViewContext::initFromEngine(QQmlEngine *engine){
 
     ViewEngine* e = qobject_cast<lv::ViewEngine*>(livekeys->property("engine").value<QObject*>());
     Settings* s = qobject_cast<lv::Settings*>(livekeys->property("settings").value<QObject*>());
-    Memory* m = qobject_cast<lv::Memory*>(livekeys->property("mem").value<QObject*>());
+    Memory* m = e->memory();
     if ( !e || !s || !m )
         THROW_EXCEPTION(lv::Exception, "Failed to load properties from context", 2);
 
