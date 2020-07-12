@@ -49,12 +49,12 @@ Item{
         anchors.leftMargin: 25
         anchors.top: parent.top
         anchors.topMargin: 5 + topMarginParam
-        height: container.height
+        height: container.height > 30 ? container.height : 30
         width: 110
         color: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.background : 'black'
         radius: 3
-        border.width: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderThickness : 0
-        border.color: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderColor : 'black'
+        border.width: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderThickness : 1
+        border.color: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderColor : '#232b30'
         Text{
             anchors.left: parent.left
             anchors.leftMargin: 25

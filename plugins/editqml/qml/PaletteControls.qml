@@ -327,12 +327,11 @@ QtObject{
         propertyContainer.editor = objectContainer.editor
         propertyContainer.editingFragment = ef
 
-        if ( codeHandler.isForAnObject(ef) ){
+        if ( codeHandler.isForAnObject(ef) && !expandDefault){
             addChildObjectContainer(objectContainer, ef, true, propertyContainer, propPalette)
         } else {
             propertyContainer.valueContainer = createPaletteGroup()
             ef.visualParent = propertyContainer.valueContainer
-            ef.visualParent.owner = propertyContainer
 
             propertyContainer.valueContainer.editingFragment = ef
             propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
@@ -349,6 +348,7 @@ QtObject{
                                      propertyContainer.valueContainer)
             }
         }
+        ef.visualParent.owner = propertyContainer
 
         objectContainer.propertiesOpened.push(ef.identifier())
         ef.incrementRefCount()
@@ -454,24 +454,26 @@ QtObject{
             propertyContainer.editingFragment = ef
         }
 
-        if ('isAnObject' in property && property['isAnObject']){
-            var childObjectContainer = addChildObjectContainer(objectContainer, ef, false, propertyContainer)
+        var isAnObject = ('isAnObject' in property) && property['isAnObject']
 
+        if (isAnObject){
+
+            var childObjectContainer = ef.visualParent.parent.parent.parent
             if ('instructions' in property)
-                expand(childObjectContainer, childObjectContainer.editor, instructions)
-        } else {
-            if ('palettes' in property){
-                var palettes = property['palettes']
-                
-                for (var i = 0; i < palettes.length; ++i)
-                {
-                    var palette = palettes[i]
-                    expandPalette(palette,
-                                  ef,
-                                  objectContainer.editor,
-                                  propertyContainer.valueContainer)
+                expand(childObjectContainer, childObjectContainer.editor, property['instructions'])
+        }
 
-                }
+        if ('palettes' in property){
+            var palettes = property['palettes']
+
+            for (var i = 0; i < palettes.length; ++i)
+            {
+                var palette = palettes[i]
+                expandPalette(palette,
+                              ef,
+                              objectContainer.editor,
+                              ef.visualParent)
+
             }
         }
 

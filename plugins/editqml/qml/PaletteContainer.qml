@@ -263,9 +263,11 @@ Item{
     Rectangle {
         id: rightButtons
         color: paletteContainer.paletteStyle ? paletteContainer.paletteStyle.paletteHeaderColor : 'black'
-        width: 35
+        width: rightButtons.makeVertical ? 20 : 35
         height: child ? child.height: 24
         radius: 2
+
+        property bool makeVertical: height > 48 && compact
 
         anchors.top: parent.top
         anchors.topMargin: 2
@@ -278,7 +280,7 @@ Item{
             height: 8
             color: "#9b9da0"
 
-            anchors.top: parent.top
+            anchors.top: rightButtons.makeVertical ? closeButton.bottom : parent.top
             anchors.topMargin: 8
             anchors.left: parent.left
             anchors.leftMargin: 5
@@ -303,7 +305,7 @@ Item{
             anchors.top: parent.top
             anchors.topMargin: 3
             anchors.left: parent.left
-            anchors.leftMargin: 20
+            anchors.leftMargin: rightButtons.makeVertical ? 5 : 20
 
             Text{
                 anchors.verticalCenter: parent.verticalCenter
