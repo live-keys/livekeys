@@ -87,7 +87,13 @@ Item{
                     var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
                         editingFragment.position(), true)
                     if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(propertyContainer, paletteStyle.selectableListView)
+                        var paletteList = paletteControls.createPaletteListView(null, paletteStyle.selectableListView)
+                        var coords = propertyContainer.mapToItem(propertyContainer.editor, 0, 0)
+                        var palListBox   = lk.layers.editor.environment.createEditorBox(
+                            paletteList, Qt.rect(coords.x + 113, coords.y - 5, 0, 0), Qt.point(editor.x, editor.y), lk.layers.editor.environment.placement.top
+                        )
+                        palListBox.color = 'transparent'
+
                         paletteList.anchors.topMargin = 15 + topMarginParam
                         paletteList.width = 250
                         paletteList.forceActiveFocus()
@@ -96,6 +102,7 @@ Item{
                             paletteList.focus = false
                             paletteList.model = null
                             paletteList.destroy()
+                            palListBox.destroy()
                         }
                         paletteList.selectedHandler = function(index){
                             paletteList.focus = false
@@ -108,6 +115,7 @@ Item{
                                 paletteControls.openPalette(palette, editingFragment, editor, propertyContainer.valueContainer)
                             }
                             paletteList.destroy()
+                            palListBox.destroy()
 
                         }
                     }

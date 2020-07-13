@@ -113,6 +113,7 @@ QtObject{
             newPaletteBox.documentHandler = editor.documentHandler
             newPaletteBox.cursorRectangle = editor.getCursorRectangle()
             newPaletteBox.editorPosition = editor.cursorWindowCoords()
+            newPaletteBox.editor = editor
 
             if (objectRoot && objectRoot.compact) objectRoot.expand()
 

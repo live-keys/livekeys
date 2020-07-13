@@ -26,6 +26,7 @@ Item{
     property string title : type + ' - ' + name
     property var cursorRectangle : null
     property var editorPosition : null
+    property var editor: null
 
     property alias paletteSwapVisible : paletteSwapButton.visible
     property alias paletteAddVisible : paletteAddButton.visible
@@ -104,7 +105,14 @@ Item{
 
             var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
             if (palettes.size() ){
-                var paletteList = paletteControls.createPaletteListView(paletteContainer, paletteContainer.paletteStyle.selectableListView)
+                var paletteList = paletteControls.createPaletteListView(null, paletteContainer.paletteStyle.selectableListView)
+
+                var coords = paletteContainer.mapToItem(paletteContainer.editor, 0, 0)
+                var palListBox   = lk.layers.editor.environment.createEditorBox(
+                    paletteList, Qt.rect(coords.x + 90, coords.y - 10, 0, 0), Qt.point(editor.x, editor.y), lk.layers.editor.environment.placement.top
+                )
+                palListBox.color = 'transparent'
+
                 paletteList.forceActiveFocus()
                 paletteList.model = palettes
                 paletteList.anchors.topMargin = 24
@@ -113,6 +121,7 @@ Item{
                     paletteList.focus = false
                     paletteList.model = null
                     paletteList.destroy()
+                    palListBox.destroy()
                 }
                 paletteList.selectedHandler = function(index){
                     paletteList.focus = false
@@ -123,13 +132,10 @@ Item{
 
                     var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
 
-                    var ed = documentHandler
-                    while (ed.objectName !== "editorType") ed = ed.parent
-
                     var paletteBox = paletteControls.openPalette(palette,
-                                                                editingFragment,
-                                                                ed,
-                                                                paletteGroup)
+                                                                 editingFragment,
+                                                                 editor,
+                                                                 paletteGroup)
 
                     if (paletteBox) paletteBox.moveEnabled = paletteContainer.moveEnabledGet
 
@@ -140,6 +146,8 @@ Item{
                     }
 
                     paletteList.destroy()
+                    palListBox.destroy()
+
                 }
             }
         }

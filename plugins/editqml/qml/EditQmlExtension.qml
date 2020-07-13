@@ -222,11 +222,13 @@ LiveExtension{
                 palList.cancelled.connect(function(){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
                 })
                 palList.paletteSelected.connect(function(index){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
                     root.loadPalette(editor, palettes, index)
                 })
@@ -266,11 +268,13 @@ LiveExtension{
                 palList.cancelled.connect(function(){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
                 })
                 palList.paletteSelected.connect(function(index){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
                     root.shapePalette(editor, palettes, index)
                 })
@@ -437,11 +441,13 @@ LiveExtension{
                 palList.cancelled.connect(function(){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
                 })
                 palList.paletteSelected.connect(function(index){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
 
                     var ef = codeHandler.openConnection(palettes.position())
