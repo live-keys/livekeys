@@ -13,6 +13,8 @@ Qan.NodeItem{
     width: 370
     height: wrapper.height
     
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+
     property string label: ''
     property var properties: []
     property var propertiesOpened: []
@@ -166,7 +168,7 @@ Qan.NodeItem{
                         root.selected = false
                         var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
                         if (palettes.size() ){
-                            var paletteList = paletteControls.createPaletteListView(wrapper)
+                            var paletteList = paletteControls.createPaletteListView(wrapper, paletteStyle.selectableListView)
                             paletteList.forceActiveFocus()
                             paletteList.model = palettes
 
@@ -182,10 +184,10 @@ Qan.NodeItem{
                                 paletteList.model = null
                                 var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
 
-                                var paletteBox = paletteControls.addPalette(palette,
-                                                                            editingFragment,
-                                                                            editor,
-                                                                            paletteContainer)
+                                var paletteBox = paletteControls.openPalette(palette,
+                                                                             editingFragment,
+                                                                             editor,
+                                                                             paletteContainer)
                                 if (paletteBox) paletteBox.moveEnabledSet = false
 
 

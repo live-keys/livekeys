@@ -15,15 +15,15 @@ Item{
         for (var i=0; i<groupsContainer.children.length; ++i)
         {
             var child = groupsContainer.children[i]
-            if (child.objectName === "objectContainer"){
+            if (child.objectName === "objectContainer"){ // objectContainer
                 if (child.contentWidth + 20 > max) max = child.contentWidth + 20
-            } else if (child.objectName === "propertyContainer" && child.isAnObject){
+            } else if (child.objectName === "propertyContainer" && child.isAnObject){ // propertyContainer
                 if (child.childObjectContainer &&
                     child.childObjectContainer.contentWidth + 140 > max)
                     max = child.childObjectContainer.contentWidth + 140
             } else {
-                if (child.width + 20 > max)
-                    max = child.width + 20
+                if (child.width > max) // paletteGroup
+                    max = child.width
             }
         }
 
@@ -89,7 +89,25 @@ Item{
         objectContainer.expandOptions(options)
     }
 
+    function addObjectFragmentToContainer(ef){
+        if (!ef) return
 
+        var childObjectContainer =
+                paletteControls.addChildObjectContainer(root, ef)
+
+        childObjectContainer.x = 20
+        childObjectContainer.y = 10
+
+        ef.incrementRefCount()
+
+        return childObjectContainer
+    }
+
+    function addPropertyFragmentToContainer(ef, expandDefault){
+        if (!ef) return
+
+        paletteControls.addPropertyContainer(root, ef, expandDefault)
+    }
 
     Item{
         id: objectContainer
@@ -111,10 +129,10 @@ Item{
 
         property var propertiesOpened: []
 
-        property PaletteStyle paletteStyle: lk.layers.workspace.extensions.editqml.paletteStyle
+        property PaletteStyle paletteStyle: lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
         width: container.width < 260 ? 300 : container.width
-        height: container.height < 10 || compact ? 40 : objectContainerTitleWrap.height + topSpacing + /*(paletteGroup ? paletteGroup.height : 0) +*/ container.height
+        height: compact ? 30 : objectContainerTitleWrap.height + topSpacing + container.height
 
         function closeAsPane(){
             objectContainerTitle.parent = objectContainerTitleWrap
@@ -124,23 +142,6 @@ Item{
             root.placeHolder.parent = null
         }
 
-        function addObjectFragmentToContainer(ef){
-            if (!ef) return
-
-            var childObjectContainer =
-                    paletteControls.addChildObjectContainer(root, ef)
-
-            childObjectContainer.x = 20
-            childObjectContainer.y = 10
-
-            ef.incrementRefCount()
-        }
-
-        function addPropertyFragmentToContainer(ef, expandDefault){
-            if (!ef) return
-
-            paletteControls.addPropertyContainer(root, ef, expandDefault)
-        }
         function expandOptions(options){
             var codeHandler = objectContainer.editor.documentHandler.codeHandler
 
@@ -184,16 +185,9 @@ Item{
         }
 
         function expand(){
-            var objects = editor.documentHandler.codeHandler.openNestedObjects(editingFragment)
-            for (var i=0; i < objects.length; ++i){
-                addObjectFragmentToContainer(objects[i])
-            }
 
-            var properties = editor.documentHandler.codeHandler.openNestedProperties(editingFragment)
-
-            for (var i=0; i < properties.length; ++i){
-                addPropertyFragmentToContainer(properties[i], true)
-            }
+            paletteControls.openEmptyNestedObjects(root)
+            paletteControls.openNestedProperties(root, true)
 
             var id = editingFragment.objectId()
             var check = (objectContainer.title.indexOf('#') === -1)
@@ -255,7 +249,7 @@ Item{
                 editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
 
                 if (compact) expand()
-                else objectContainer.addPropertyFragmentToContainer(ef, expandDefault)
+                else addPropertyFragmentToContainer(ef, expandDefault)
                 container.sortChildren()
             }
         }
@@ -341,7 +335,7 @@ Item{
 
                     var palettes = editor.documentHandler.codeHandler.findPalettes(editingFragment.position(), true, true)
                     if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(objectContainer)
+                        var paletteList = paletteControls.createPaletteListView(objectContainer, objectContainer.paletteStyle.selectableListView)
                         paletteList.forceActiveFocus()
                         paletteList.model = palettes
                         paletteList.width = 250
@@ -357,7 +351,7 @@ Item{
 
                             var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
 
-                            var paletteBox = paletteControls.addPalette(palette,
+                            var paletteBox = paletteControls.openPalette(palette,
                                                                         editingFragment,
                                                                         editor,
                                                                         paletteGroup,

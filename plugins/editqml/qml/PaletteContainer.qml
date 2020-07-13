@@ -104,7 +104,7 @@ Item{
 
             var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
             if (palettes.size() ){
-                var paletteList = paletteControls.createPaletteListView(paletteContainer)
+                var paletteList = paletteControls.createPaletteListView(paletteContainer, paletteContainer.paletteStyle.selectableListView)
                 paletteList.forceActiveFocus()
                 paletteList.model = palettes
                 paletteList.anchors.topMargin = 24
@@ -126,7 +126,7 @@ Item{
                     var ed = documentHandler
                     while (ed.objectName !== "editorType") ed = ed.parent
 
-                    var paletteBox = paletteControls.addPalette(palette,
+                    var paletteBox = paletteControls.openPalette(palette,
                                                                 editingFragment,
                                                                 ed,
                                                                 paletteGroup)

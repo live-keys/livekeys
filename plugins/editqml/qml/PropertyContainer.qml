@@ -87,7 +87,7 @@ Item{
                     var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
                         editingFragment.position(), true)
                     if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(propertyContainer)
+                        var paletteList = paletteControls.createPaletteListView(propertyContainer, paletteStyle.selectableListView)
                         paletteList.anchors.topMargin = 15 + topMarginParam
                         paletteList.width = 250
                         paletteList.forceActiveFocus()
@@ -105,7 +105,7 @@ Item{
                                  propertyContainer.valueContainer.objectName === 'paletteGroup' )
                             {
                                 var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-                                paletteControls.addPalette(palette, editingFragment, editor, propertyContainer.valueContainer)
+                                paletteControls.openPalette(palette, editingFragment, editor, propertyContainer.valueContainer)
                             }
                             paletteList.destroy()
 
